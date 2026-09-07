@@ -30,7 +30,11 @@ describe('DungeonPage', () => {
     getDungeons.mockResolvedValue([dungeon({}), dungeon({ chiave: 'madarame', ordine: 2, nome: 'Palazzo di Madarame (Museo)', sovrano: 'Ichiryusai Madarame', arcanaSovrano: 'Emperor', arcanaSovranoNome: 'Imperatore', gestiti: null, date: { sblocco: '16 maggio (Lunedì)', scadenza: '5 giugno', furtoConsigliato: '' } })]);
     render(<MemoryRouter><DungeonPage /></MemoryRouter>);
     const kamoshida = await screen.findByRole('link', { name: 'Palazzo di Kamoshida, Suguru Kamoshida' });
-    expect(kamoshida).toHaveAttribute('href', '/guida/mondo/dungeon/kamoshida');
+    // La carta apre la **scheda** del Palazzo: cliccarla è quello, e il collegamento «Scheda del
+    // Palazzo» che stava sotto — l'unico modo di arrivarci — diceva due volte la stessa cosa e
+    // usciva dal riquadro. La mappa si apre dalla scheda, insieme alle aree e ai punti.
+    expect(kamoshida).toHaveAttribute('href', '/guida/dungeon/kamoshida');
+    expect(screen.queryByRole('link', { name: /Scheda del Palazzo/ })).toBeNull();
     expect(getDungeons).toHaveBeenCalledWith(1);
     // anello di avanzamento: 29 su 58 = 50%
     expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50');
@@ -56,7 +60,7 @@ describe('DungeonPage', () => {
       dungeon({ chiave: 'mementos', tipo: 'mementos', ordine: 10, nome: 'Memento', sovrano: 'Il pubblico', gestiti: null }),
     ]);
     render(<MemoryRouter><DungeonPage /></MemoryRouter>);
-    expect(await screen.findByRole('link', { name: /Dedalo di Iweleth/ })).toHaveAttribute('href', '/guida/mondo/dungeon/iweleth');
+    expect(await screen.findByRole('link', { name: /Dedalo di Iweleth/ })).toHaveAttribute('href', '/guida/dungeon/iweleth');
     expect(screen.queryByRole('link', { name: /^Memento/ })).toBeNull();
     expect(screen.queryByText('Memento')).toBeNull();
     expect(screen.getByRole('list', { name: 'Palazzi' })).toBeInTheDocument();
