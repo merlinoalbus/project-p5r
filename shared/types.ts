@@ -1162,6 +1162,16 @@ export interface LuogoDto {
   verificato: boolean;
   /** Posizione dello spillo sulla mappa del quartiere (percentuali), se fissato. */
   marcatore: { x: number; y: number } | null;
+  /** La regola di **presenza** del luogo, quando ce n'è una scritta in `sblocco-luoghi.json`.
+   *
+   * `sblocco` qui sopra è la prosa della guida — «lettura del libro “Shitamachi rinato”» — e
+   * nessuno la valutava: trentasette luoghi su ottantaquattro portavano una condizione che l'app
+   * non guardava mai, e si vedevano tutti sempre. Questa è la stessa cosa nella forma che il
+   * valutatore capisce. Null dove la guida non pone condizioni, o dove la condizione riguarda
+   * l'**uso** e non l'esistenza (un lavoro che chiede Fascino 2: il posto c'è lo stesso). */
+  condizioni: CondizioneSpilloDto[] | null;
+  /** Se il luogo, al punto in cui è la partita, è già nel mondo. Null senza partita. */
+  disponibilita: DisponibilitaDto | null;
 }
 
 export interface QuartiereDettaglioDto {

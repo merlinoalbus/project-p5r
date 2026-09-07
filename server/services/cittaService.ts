@@ -21,13 +21,39 @@ export const chiaveImmagineQuartiere = (quartiere: string): string => `citta-${q
 interface RigaQuartiere { sblocco_data:string|null; chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string }
 interface RigaLuogo { chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; quando: string | null; giorni: string | null; sblocco: string | null; confidenti_json: string; attivita_json: string; negozio: string | null; piatti_json: string | null; note: string | null; fonte: string; verificato: number }
 
-function luogoDto(r: RigaLuogo, nomiConfidenti: Map<string, string>, marcatori: Map<string, { x: number; y: number }> = new Map()): LuogoDto {
+function luogoDto(r: RigaLuogo, nomiConfidenti: Map<string, string>, marcatori: Map<string, { x: number; y: number }> = new Map(),
+  regole: Map<string, RequisitoSpillo[]> = new Map(), st: StatoDisponibilita | null = null): LuogoDto {
   const confidenti = (JSON.parse(r.confidenti_json) as string[]).map((c) => ({ chiave: c, nome: nomiConfidenti.get(c) ?? c }));
+  // La regola di presenza, dove è scritta: prima c'era solo la prosa, e non la guardava nessuno.
+  const condizioni = regole.get(r.chiave)?.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c) })) ?? null;
   return {
     chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando: r.quando as LuogoDto['quando'], giorni: r.giorni, sblocco: r.sblocco,
     confidenti, attivita: JSON.parse(r.attivita_json) as string[], negozio: r.negozio, piatti: r.piatti_json ? (JSON.parse(r.piatti_json) as LuogoDto['piatti']) : null, note: r.note, fonte: r.fonte, verificato: r.verificato === 1,
     marcatore: marcatori.get(r.chiave) ?? null,
+    condizioni,
+    disponibilita: condizioni && st ? valutaRequisiti(condizioni as RequisitoDisponibilita[], st) : null,
   };
+}
+
+/** Le regole di **presenza** dei luoghi, scritte a mano in `sblocco-luoghi.json`.
+ *
+ * Gemelle di quelle dei quartieri, e nate dallo stesso difetto: nella tabella `luogo` lo sblocco è
+ * prosa — «lettura del libro “Shitamachi rinato”», «Confidente Ann Rango 7» — e nessuno la
+ * valutava. Trentasette luoghi su ottantaquattro ne portano una, e si vedevano tutti dal primo
+ * giorno: di qui il rilievo dell'utente, che aveva finito un libro e non vedeva comparire il posto
+ * che quel libro sblocca.
+ *
+ * Il file contiene **solo le condizioni di presenza**: le altre — un lavoro che chiede Fascino 2,
+ * un negozio che vende certi titoli solo più avanti — dicono «non puoi ancora farci quella cosa»,
+ * non «il posto non c'è», e nascondere il luogo per quelle sarebbe peggio del difetto di prima. */
+function regoleSbloccoLuoghi(): Map<string, RequisitoSpillo[]> {
+  const dati = datiGuida<{ luoghi?: Array<{ chiave: string; condizioni: unknown }> }>('sblocco-luoghi');
+  const out = new Map<string, RequisitoSpillo[]>();
+  for (const l of dati?.luoghi ?? []) {
+    const condizioni = normalizzaCondizioniSpillo(l.condizioni);
+    if (condizioni.length > 0) out.set(l.chiave, condizioni);
+  }
+  return out;
 }
 
 function nomiConfidenti(): Map<string, string> {
@@ -93,12 +119,15 @@ export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
 }
 
 /** Scheda di un quartiere con i luoghi. */
-export function dettaglioQuartiere(chiave: string): QuartiereDettaglioDto {
+export function dettaglioQuartiere(chiave: string, partitaId?: number): QuartiereDettaglioDto {
   const q = prepared('SELECT * FROM quartiere WHERE chiave = ?').get(chiave) as RigaQuartiere | undefined;
   if (!q) throw httpErrors.notFound('quartiere-non-trovato', `Il quartiere '${chiave}' non esiste.`);
   const nomi = nomiConfidenti();
   const marcatori = new Map((prepared('SELECT l.luogo_chiave, l.x, l.y FROM marcatore_luogo l JOIN luogo g ON g.chiave = l.luogo_chiave WHERE g.quartiere_chiave = ?').all(chiave) as Array<{ luogo_chiave: string; x: number; y: number }>).map((r) => [r.luogo_chiave, { x: r.x, y: r.y }]));
-  const luoghi = (prepared('SELECT * FROM luogo WHERE quartiere_chiave = ? ORDER BY ordine').all(chiave) as RigaLuogo[]).map((r) => luogoDto(r, nomi, marcatori));
+  // Con la partita ogni luogo sa se, a quel punto del gioco, esiste già.
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const regole = regoleSbloccoLuoghi();
+  const luoghi = (prepared('SELECT * FROM luogo WHERE quartiere_chiave = ? ORDER BY ordine').all(chiave) as RigaLuogo[]).map((r) => luogoDto(r, nomi, marcatori, regole, st));
   const p = prepared('SELECT * FROM pianta_quartiere WHERE quartiere_chiave = ?').get(chiave) as RigaPiantaQ | undefined;
   const pianta: PiantaAreaDto | null = p ? { url: p.url, pagina: p.pagina, fonte: p.fonte, licenza: p.licenza, larghezza: p.larghezza, altezza: p.altezza, copertura: 'quartiere', note: p.note, alternative: [] } : null;
   const assenti = datiGuida<Record<string, string>>('mappe-citta-assenti') ?? {};

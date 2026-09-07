@@ -129,8 +129,10 @@ router.put('/citta/:chiave/ingresso',validate({params:z.object({chiave:z.string(
 router.get('/citta', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaQuartieri((req.query as unknown as { partita?: number }).partita));
 });
-router.get('/citta/:chiave', validate({ params: z.object({ chiave: z.string().min(1).max(80) }) }), (req, res) => {
-  res.json(dettaglioQuartiere(String(req.params.chiave)));
+router.get('/citta/:chiave', validate({ params: z.object({ chiave: z.string().min(1).max(80) }), query: queryDomande }), (req, res) => {
+  // La partita serve ai **luoghi**, non al quartiere: senza, l'elenco non può dire quali posti a
+  // quel punto della partita non esistono ancora.
+  res.json(dettaglioQuartiere(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
 });
 router.get('/attivita', validate({ query: queryDomande }), (req, res) => {
   res.json(attivitaTutte((req.query as unknown as { partita?: number }).partita));
