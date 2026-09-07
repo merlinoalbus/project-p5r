@@ -13,12 +13,13 @@ import { PageState } from '../components/shared/PageState';
 import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
 import type { DomandaDto, DomandeDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', altro: 'Game show in TV' };
 
 type Filtro = 'tutte' | 'da-fare' | 'fatte' | 'esami';
 
-function RigaDomanda({ d, partitaId, onCambiata, evidenzia }: { d: DomandaDto; partitaId: number | null; onCambiata: (r: DomandeDto) => void; evidenzia?: boolean }) {
+function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: DomandaDto; partitaId: number | null; onCambiata: (r: DomandeDto) => void; onCorretta: () => void; evidenzia?: boolean }) {
   const [occupato, setOccupato] = useState(false);
   const daConoscenza = /Conoscenza \+/.test(d.ricompensa);
   const segna = async (fatta: boolean) => {
@@ -52,6 +53,9 @@ function RigaDomanda({ d, partitaId, onCambiata, evidenzia }: { d: DomandaDto; p
           {d.risposte.map((r, i) => <li key={i} className="text-primary font-semibold">{d.risposte.length > 1 ? `${i + 1}. ` : '→ '}{r.testo}</li>)}
         </ol>
         {d.note && <div className="text-[12px] text-text-muted">{d.note}</div>}
+        {/* La risposta sbagliata si scopre nel modo peggiore — hai risposto come diceva l'app e il
+            gioco ti ha dato torto — e fino a ieri non si poteva correggere. */}
+        {d.chiave && <div className="mt-0.5"><CorreggiElemento tipo="domanda" chiave={d.chiave} onSalvato={onCorretta} /></div>}
       </div>
     </li>
   );
@@ -86,7 +90,7 @@ export function DomandePage() {
             <section className="card flex flex-col gap-1 border-primary">
               <h2 className="m-0 text-[15px] font-semibold">Prossime domande</h2>
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Prossime domande">
-                {d.prossime.map((x) => <RigaDomanda key={x.id} d={x} partitaId={partitaId} onCambiata={dati.imposta} evidenzia />)}
+                {d.prossime.map((x) => <RigaDomanda key={x.id} d={x} partitaId={partitaId} onCambiata={dati.imposta} onCorretta={() => void dati.ricarica()} evidenzia />)}
               </ul>
             </section>
           )}
@@ -119,12 +123,13 @@ export function DomandePage() {
               <button key={k} type="button" className={`chip touch ${filtro === k ? 'chip--attivo' : ''}`} onClick={() => setFiltro(k)} aria-pressed={filtro === k}>{l}</button>
             ))}
             <span className="ml-auto text-[12px] text-text-muted">{visibili.length} domande</span>
+            <AggiungiAlCatalogo tipo="domanda" titolo="Aggiungi una domanda" onSalvato={() => void dati.ricarica()} />
           </div>
           {perMese.map(([mese, lista]) => (
             <section key={mese} className="card flex flex-col gap-1">
               <h2 className="m-0 text-[15px] font-semibold">{mese}</h2>
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label={`Domande di ${mese}`}>
-                {lista.map((x) => <RigaDomanda key={x.id} d={x} partitaId={partitaId} onCambiata={dati.imposta} />)}
+                {lista.map((x) => <RigaDomanda key={x.id} d={x} partitaId={partitaId} onCambiata={dati.imposta} onCorretta={() => void dati.ricarica()} />)}
               </ul>
             </section>
           ))}

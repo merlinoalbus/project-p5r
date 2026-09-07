@@ -14,7 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { initDb, closeDb } from '../server/db/dbService.js';
 import { runMigrations } from '../server/db/migrationRunner.js';
-import { esportaAttivitaSeed, esportaNegoziSeed, riepilogoEsportazioneCatalogo } from '../server/services/seed/esportaSeed.js';
+import { esportaAttivitaSeed, esportaCruciverbaSeed, esportaDomandeSeed, esportaNegoziSeed, riepilogoEsportazioneCatalogo } from '../server/services/seed/esportaSeed.js';
 import { config } from '../server/config.js';
 
 /** I file che il comando sa ricostruire, con la funzione che li produce.
@@ -25,6 +25,8 @@ import { config } from '../server/config.js';
 const FILE = [
   { percorso: path.resolve('data/seed/negozi.json'), produci: esportaNegoziSeed as (p?: never) => unknown },
   { percorso: path.resolve('data/seed/attivita.json'), produci: esportaAttivitaSeed as (p?: never) => unknown },
+  { percorso: path.resolve('data/seed/domande.json'), produci: esportaDomandeSeed as (p?: never) => unknown },
+  { percorso: path.resolve('data/seed/cruciverba.json'), produci: esportaCruciverbaSeed as (p?: never) => unknown },
 ] as const;
 
 /** Il rientro del file com'è oggi: due spazi in `negozi.json`, **uno** in `attivita.json`.
@@ -37,6 +39,15 @@ function rientroDi(testo: string): number {
   const riga = testo.split('\n')[1] ?? '';
   const spazi = /^( +)"/.exec(riga)?.[1].length;
   return spazi && spazi > 0 ? spazi : 2;
+}
+
+/** E l'a-capo finale, che c'è in `negozi.json` e in `attivita.json` e **non** negli altri due.
+ *
+ * Un carattere solo, ma è l'unica differenza che restava fra il file e quello riscritto: una riga
+ * di diff su ogni esportazione, per sempre, che non dice niente. Si prende dal file com'è, come il
+ * rientro; un file nuovo lo prende, perché è la convenzione giusta. */
+function aCapoFinaleDi(testo: string): string {
+  return testo === '' || testo.endsWith('\n') ? '\n' : '';
 }
 
 function main(): void {
@@ -56,7 +67,7 @@ function main(): void {
     // database non conosce (vedi `campiEstranei` in `esportaSeed.ts`).
     const vecchio = fs.existsSync(percorso) ? fs.readFileSync(percorso, 'utf8') : '';
     const precedente = vecchio ? (JSON.parse(vecchio) as never) : undefined;
-    const nuovo = JSON.stringify(produci(precedente), null, rientroDi(vecchio)) + '\n';
+    const nuovo = JSON.stringify(produci(precedente), null, rientroDi(vecchio)) + aCapoFinaleDi(vecchio);
     const nome = path.relative(process.cwd(), percorso);
     if (nuovo === vecchio) {
       console.log(`\n${nome}: già allineato, niente da scrivere.`);

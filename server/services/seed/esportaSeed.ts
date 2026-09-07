@@ -237,3 +237,47 @@ export function riepilogoEsportazioneCatalogo(): { negozi: number; articoli: num
     conCondizioniProprie: conCond,
   };
 }
+
+interface RigaDomandaSeed {
+  chiave: string; ordine: number; data: string; tipo: string; chi: string; domanda: string;
+  risposte_json: string; ricompensa: string; note: string; fonte: string;
+}
+interface RigaCruciverbaSeed {
+  chiave: string; data: string; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string;
+}
+
+/** Le domande in classe e agli esami come stanno adesso, nella forma di `data/seed/domande.json`.
+ *
+ * Il file ha tre parti — `domande`, `esami`, `premi` — e qui si rifà **solo la prima**: le altre
+ * due non passano dal catalogo, quindi si riportano identiche da quel che c'era. Rifarle
+ * dal database sarebbe riscriverle senza motivo, ed è il modo migliore per perdere per strada un
+ * campo che nessuno guardava.
+ *
+ * Le righe nascoste non tornano nel seed, come per tutte le altre famiglie: nasconderle è una
+ * decisione, riportarle le farebbe rispuntare alla prossima installazione. */
+export function esportaDomandeSeed(precedente?: Record<string, unknown>): Record<string, unknown> {
+  const prima = new Map(((precedente?.domande as Array<Record<string, unknown>> | undefined) ?? []).map((d) => [String(d.data), d]));
+  const domande = (prepared('SELECT * FROM domanda WHERE COALESCE(nascosto, 0) = 0 ORDER BY ordine, chiave').all() as RigaDomandaSeed[]).map((d) => {
+    const prodotto = {
+      data: d.data, tipo: d.tipo, chi: d.chi, domanda: d.domanda,
+      risposte: JSON.parse(d.risposte_json) as unknown[],
+      ricompensa: d.ricompensa, note: d.note, fonte: d.fonte,
+    };
+    // Il confronto è per giorno perché è così che il file identifica una domanda: la chiave del
+    // catalogo è la stessa cosa, con un progressivo dove il giorno ne ha due.
+    const p = prima.get(d.data);
+    return conOrdineDi(p, { ...prodotto, ...campiEstranei(p, prodotto) });
+  });
+  return { ...(precedente ?? {}), domande };
+}
+
+/** Il cruciverba come sta adesso, nella forma di `data/seed/cruciverba.json`. */
+export function esportaCruciverbaSeed(precedente?: Record<string, unknown>): Record<string, unknown> {
+  const prima = new Map(((precedente?.cruciverba as Array<Record<string, unknown>> | undefined) ?? []).map((c) => [String(c.data), c]));
+  const cruciverba = (prepared('SELECT * FROM cruciverba WHERE COALESCE(nascosto, 0) = 0 ORDER BY ordine, data').all() as RigaCruciverbaSeed[]).map((c) => {
+    const prodotto = { data: c.data, ordine: c.ordine, indizio: c.indizio, risposta: c.risposta, rispostaEn: c.risposta_en, fonte: c.fonte };
+    const p = prima.get(c.data);
+    return conOrdineDi(p, { ...prodotto, ...campiEstranei(p, prodotto) });
+  });
+  return { ...(precedente ?? {}), cruciverba };
+}

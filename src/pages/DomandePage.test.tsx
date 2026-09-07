@@ -16,7 +16,7 @@ const { getDomande, impostaDomandaFatta } = vi.hoisted(() => ({ getDomande: vi.f
 vi.mock('../services/api', () => ({ getDomande, impostaDomandaFatta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
 
-const dom = (id: number, data: string, domanda: string, extra: Partial<DomandaDto> = {}): DomandaDto => ({ id, data, tipo: 'classe', chi: 'Prof. Inui', domanda, risposte: [{ ordine: 1, testo: 'Risposta ' + id }], ricompensa: 'Conoscenza +1 nota', note: '', fonte: '', fatta: false, ...extra });
+const dom = (id: number, data: string, domanda: string, extra: Partial<DomandaDto> = {}): DomandaDto => ({ id, chiave: data, data, tipo: 'classe', chi: 'Prof. Inui', domanda, risposte: [{ ordine: 1, testo: 'Risposta ' + id }], ricompensa: 'Conoscenza +1 nota', note: '', fonte: '', fatta: false, ...extra });
 const dati: DomandeDto = {
   domande: [dom(1, '04-12', 'Prima domanda'), dom(2, '05-07', 'Seconda domanda'), dom(3, '05-11', 'Esame', { tipo: 'esame-medio', chi: 'Esame', ricompensa: 'Conoscenza (classifica)' })],
   esami: [{ chiave: 'esame-1', nome: 'Esame di metà semestre 1', date: ['05-11'], dataRisultati: '05-20', domande: [{ data: '05-11', ordine: 1, domanda: 'Chi?', risposta: 'Yoshitsune' }], note: '' }],

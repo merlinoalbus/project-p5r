@@ -775,6 +775,8 @@ export interface PianoSalvatoDto {
 
 export interface DomandaDto {
   id: number;
+  /** Chiave del catalogo (il giorno): serve a correggere la riga, `null` finché la migrazione non l'ha assegnata. */
+  chiave: string | null;
   /** Data di gioco «MM-GG». */
   data: string;
   tipo: 'classe' | 'esame-medio' | 'esame-finale' | 'altro';
@@ -1103,6 +1105,8 @@ export interface RicercaArticoliDto {
 export interface CruciverbaDto {
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;
+  /** Chiave del catalogo (giorno e posizione): serve a correggere la riga. */
+  chiave: string | null;
   indizio: string;
   risposta: string;
   rispostaEn: string | null;
@@ -1746,8 +1750,13 @@ export interface EsitoRipristinoDto {
  *
  * Erano due — negozio e articolo — perche' erano le uniche tabelle con le colonne `origine`,
  * `nascosto` e `seed_json`. Dalla migrazione 051 le hanno anche libri, film e attivita', e le
- * pagine nuove possono finalmente offrire l'aggiunta invece di essere di sola lettura. */
-export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita'] as const;
+ * pagine nuove possono finalmente offrire l'aggiunta invece di essere di sola lettura.
+ *
+ * Dalla 055 ci sono anche le **domande in classe** e il **cruciverba**: sono le due cose che si
+ * consultano mentre il gioco aspetta una risposta, e quelle in cui un errore si scopre nel modo
+ * peggiore — hai risposto come diceva l'app e il gioco ti ha dato torto. Fino a ieri quell'errore
+ * non si poteva correggere. */
+export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita', 'domanda', 'cruciverba'] as const;
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */

@@ -8,7 +8,7 @@ import { registraEvento } from './storicoService.js';
 import { aggiornaDote } from './partiteService.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 
-interface RigaDomanda { id: number; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
+interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
 /** Indice SOLO per ordinare/confrontare date di gioco 'MM-GG' nell'anno scolastico (aprile → marzo): mese×31+giorno, non conta i giorni reali. */
 export function indiceGiornoScolastico(data: string): number {
@@ -19,7 +19,7 @@ export function indiceGiornoScolastico(data: string): number {
 }
 
 function domandaDto(r: RigaDomanda, fatte: Set<number>): DomandaDto {
-  return { id: r.id, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id) };
+  return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id) };
 }
 
 function esami(): EsameDto[] {

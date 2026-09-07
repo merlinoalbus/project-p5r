@@ -95,6 +95,44 @@ describe('API catalogo e agenda (Fase 16.1)', () => {
     expect((prepared('SELECT COUNT(*) AS n FROM articolo WHERE chiave = ?').get(a.chiave) as { n: number }).n).toBe(0);
   });
 
+  it('corregge una domanda in classe e una riga del cruciverba: restano dopo un nuovo caricamento del seed', async () => {
+    // È il caso per cui serve: hai risposto come diceva l'app e il gioco ti ha dato torto.
+    const prima = (await request(app).get('/api/catalogo/domanda/04-12')).body.data as ElementoCatalogoDto;
+    expect(prima).toMatchObject({ tipo: 'domanda', origine: 'seed', modificata: false });
+
+    const corretta = await request(app).put('/api/catalogo/domanda/04-12').send({
+      data: '04-12', tipo: 'classe', chi: 'Prof. Ushimaru', domanda: prima.dati.domanda as string,
+      risposte_json: [{ ordine: 1, testo: 'Nemici' }, { ordine: 2, testo: 'Secondo passaggio' }],
+      ricompensa: 'Conoscenza +1 nota', note: '', fonte: '',
+    });
+    expect(corretta.status).toBe(200);
+    expect((corretta.body.data as ElementoCatalogoDto)).toMatchObject({ origine: 'utente', modificata: true });
+
+    const cruci = await request(app).put('/api/catalogo/cruciverba/04-18-0').send({
+      data: '04-18', indizio: 'Gli anni scolastici sono suddivisi in…?', risposta: 'Trimestri', fonte: '',
+    });
+    expect(cruci.status).toBe(200);
+
+    // La pagina le mostra corrette, con la loro chiave per poterle correggere ancora.
+    const domande = (await request(app).get('/api/compendio/domande')).body.data as { domande: Array<{ chiave: string | null; risposte: Array<{ testo: string }> }> };
+    const nostra = domande.domande.find((d) => d.chiave === '04-12')!;
+    expect(nostra.risposte.map((r) => r.testo)).toEqual(['Nemici', 'Secondo passaggio']);
+    const tuttiCruci = (await request(app).get('/api/compendio/cruciverba')).body.data as { cruciverba: Array<{ chiave: string | null; risposta: string }> };
+    expect(tuttiCruci.cruciverba.find((c) => c.chiave === '04-18-0')?.risposta).toBe('Trimestri');
+
+    // Un nuovo caricamento del seed non le riporta indietro: è la garanzia del catalogo.
+    caricaSeed(initDb(), DIR_SEED, true);
+    const dopo = (await request(app).get('/api/catalogo/domanda/04-12')).body.data as ElementoCatalogoDto;
+    expect(dopo).toMatchObject({ origine: 'utente', modificata: true });
+    expect(JSON.parse(String(dopo.dati.risposte_json)) as unknown[]).toHaveLength(2);
+    expect(((await request(app).get('/api/catalogo/cruciverba/04-18-0')).body.data as ElementoCatalogoDto).dati.risposta).toBe('Trimestri');
+
+    // E «Ripristina» rimette quel che diceva la guida.
+    await request(app).delete('/api/catalogo/domanda/04-12');
+    await request(app).delete('/api/catalogo/cruciverba/04-18-0');
+    expect(((await request(app).get('/api/catalogo/domanda/04-12')).body.data as ElementoCatalogoDto).origine).toBe('seed');
+  });
+
   it('agenda: eventi e cose da fare di un giorno, globali o della sola partita, con la spunta', async () => {
     const evento = (await request(app).post('/api/catalogo/agenda/eventi').send({ data: '05-19', tipo: 'promemoria', titolo: 'Quiz televisivo al Leblanc', dettaglio: 'Risposta: Produrre rumori molesti' })).body.data as { id: number; partitaId: number | null };
     expect(evento.partitaId).toBeNull();
