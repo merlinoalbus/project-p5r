@@ -34,7 +34,47 @@ export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string 
   if (titolo) return titolo;
   if (mappa.contesti?.some(c => c.nome === null)) return mappa.genitoreNome ? `${mappa.genitoreNome} — Planimetria` : 'Planimetria';
   const base = alternativeMappa(mappa).map(c => c.nome).join(' / ') || mappa.gruppoImmagini?.nome || mappa.nome;
-  return nomeConVersione(mappa as MappaRiassuntoDto, base);
+  return senzaGergo(nomeConVersione(mappa as MappaRiassuntoDto, base));
+}
+
+/** Il vocabolario dell'estrattore non arriva a chi gioca.
+ *
+ * Quattordici mappe dell'atlante si presentano così: «Palazzo di Madarame — Immagini native che
+ * nessun campo usa — tela quadrata, disegno minuto — la seconda per estensione». Ogni pezzo vuol
+ * dire qualcosa a chi ha estratto i file — nessun campo del gioco fa riferimento a quell'immagine,
+ * il rapporto fra i lati della tela, quanta parte ne occupa il disegno, l'ordine per estensione —
+ * e **niente** a chi sta cercando dove andare. Due di quelle di Kamoshida hanno pure cinque
+ * spilli, quindi non stanno nemmeno in fondo: compaiono fra le aree vere.
+ *
+ * Qui resta il fatto onesto — è una planimetria che l'estrazione non ha saputo attribuire a una
+ * stanza — e sparisce il resto. A distinguerle ci pensano la miniatura, che si vede, e il numero
+ * che `etichetteDistinte` aggiunge quando due finiscono con lo stesso nome. Il nome tecnico resta
+ * nei dati: la ricerca lo trova ancora, e chi cura l'atlante ce l'ha nell'editor. */
+function senzaGergo(nome: string): string {
+  const i = nome.search(/(?:\s*—\s*)?Immagini native che nessun campo usa/i);
+  if (i < 0) return nome;
+  const prefisso = nome.slice(0, i).replace(/\s*—\s*$/, '');
+  return prefisso ? `${prefisso} — Planimetria non attribuita` : 'Planimetria non attribuita';
+}
+
+/** Le etichette di un elenco, con un numero d'ordine dove due mappe si chiamerebbero uguale.
+ *
+ * Togliere il gergo fa comparire il problema che il gergo nascondeva: quattro fogli non attribuiti
+ * dello stesso Palazzo diventano quattro «Planimetria non attribuita». Succede anche senza gergo —
+ * due «Sala d'ingresso» in Palazzi diversi, tre «Banchina della metropolitana» in quartieri
+ * diversi — ma lì il contesto le separa; dentro un elenco solo, no. Il numero si aggiunge **solo**
+ * dove serve, nell'ordine in cui l'elenco le mostra. */
+export function etichetteDistinte(mappe: IdentitaMappa[], trasforma: (nome: string) => string = (n) => n): string[] {
+  const nomi = mappe.map(m => trasforma(nomePresentazioneMappa(m)));
+  const quante = new Map<string, number>();
+  for (const n of nomi) quante.set(n, (quante.get(n) ?? 0) + 1);
+  const visti = new Map<string, number>();
+  return nomi.map(n => {
+    if ((quante.get(n) ?? 0) < 2) return n;
+    const i = (visti.get(n) ?? 0) + 1;
+    visti.set(n, i);
+    return `${n} · ${i}`;
+  });
 }
 export function presentaMappa(mappa: MappaDto, selezione?: string | null): MappaDto {
   const nome = nomePresentazioneMappa(mappa, selezione);
