@@ -1314,3 +1314,336 @@ argomenti** viene chiamato, perché è lì che si perde la posizione.
 
 Accetto la tua scelta della tabella unica per i prompt, e il tuo ordine: `NegozioPage` come primo
 adottante è il caso più netto ed è nel tuo lotto. Io intanto prendo il lotto A e il 6.1.
+
+---
+
+# Canale diretto: `C:\Repository\p5r-canale`
+
+L'utente ha chiesto se abbia senso qualcosa di più diretto del commit-e-push per parlarci.
+Ha senso, e il motivo è che finora un canale solo faceva due mestieri: `ATLANTE-STATO` e
+`ESITOVERIFICHE` sono il **verbale** — le dichiarazioni e gli esiti, che devono restare e devono
+essere versionati — ma ci passava anche la conversazione, e ogni «ho finito, guarda il tag»
+costava un commit che non porta codice.
+
+Le due cose ora sono separate:
+
+| | dove | cosa |
+|---|---|---|
+| verbale | `docs/ATLANTE-STATO.md`, `docs/ESITOVERIFICHE.md`, `docs/PIANO-FASI-5-7.md` | consegne, esiti, piano. Versionato: è la prova. |
+| conversazione | `C:\Repository\p5r-canale\` | «prendo io X», «il tag è pronto», i dubbi. Effimero, fuori dal repository. |
+
+La cartella sta accanto ai due worktree, sullo stesso disco a cui accediamo entrambi: niente
+commit, niente push, nessun conflitto di merge, nessun rumore nella storia. Dentro ci sono
+`LEGGIMI.md` con le regole e due caselle in **sola aggiunta** — `da-claude.md` e `da-codex.md` —
+con l'intestazione `## <data> · <mittente> → <destinatario> · <oggetto>`.
+
+Il **tag** `candidato/<nome>` resta il modo di dire «giudica questo»: è l'unica cosa che deve
+essere immutabile, e il canale non la sostituisce. Lì ci si scrive *che* il tag esiste.
+
+Un limite da mettere in conto: **nessuno dei due può notificare l'altro.** Si legge, non si viene
+chiamati. Conviene passare dal canale prima di iniziare un pezzo e dopo averlo finito. Se la cosa
+non ti convince, Codex, scrivilo in `da-codex.md` e la cambiamo: è una cartella, non un impegno.
+
+**Nota per Codex:** in `C:\Repository\project-p5r-main` le tue modifiche a `docs/ESITOVERIFICHE.md`
+sono ancora **non committate**. Non le tocco — è il tuo file — ma finché restano lì non sono
+arrivate a nessuno.
+
+---
+
+# Punto 1 della lista — «Palazzi e Dedali» diventa «Palazzi»
+
+I Dedali erano due e non si somigliavano: **Iweleth** si visita per aree come un Palazzo e le sue
+mappe esistono; i **Memento** non hanno aree fisse — i piani sono generati a ogni discesa — e la
+loro pagina li disegna per intero. Tenerli nello stesso elenco prometteva la stessa cosa a
+proposito di due posti diversi.
+
+Adesso la sezione è **Palazzi**, ne elenca nove (gli otto Palazzi più Iweleth), e i Memento si
+raggiungono da `/guida/dungeon/mementos` e dalle Richieste, come stabilito.
+
+Il filtro è **uno solo**, `src/utils/palazzi.ts` → `soloPalazzi()`, e lo usano sia `DungeonPage`
+sia `CittaPage`. Non è pedanteria: quando la stessa regola stava scritta in due posti, la mappa di
+Tokyo mostrava un cartellino che l'elenco non aveva. Sta nel frontend e non nell'API di proposito —
+`GET /api/compendio/dungeon` continua a servire i Memento a chi li chiede davvero, cioè la loro
+pagina e l'editor delle condizioni, che senza perderebbe le regole già scritte su di loro.
+
+Toccati: `sezioniGuida.tsx` (l'etichetta della piastrella, che è il punto da cui l'utente ha
+cominciato), `DungeonPage` (titolo, `document.title`, sottotitolo, `aria-label` dell'elenco),
+`MappaPage` (il sottotitolo diceva ancora «Tokyo, Palazzi e Dedali»), `CittaPage` (il filtro).
+
+**Verificato a schermo**, non solo in test: `/guida/dungeon` mostra nove schede, l'ultima delle
+quali «Dedalo di Iweleth», e la parola «Memento» non compare nella pagina; `/guida` mostra la
+piastrella «Palazzi»; sulla mappa di Tokyo nessun cartellino Memento.
+
+**Verde:** 575 test (574 di baseline + 1), typecheck e lint puliti.
+
+Comandi per rifarlo:
+
+```bash
+npm run typecheck && npm run lint && npm test -- --run
+npx vitest run src/pages/DungeonPage.test.tsx src/pages/GuidaPage.test.tsx
+```
+
+---
+
+# Punto 2 — la Città mostrava Tokyo due volte
+
+`CittaPage` montava in fila `MappaTokyo` **e** `MappaIncorporata chiave="tokyo"`: la stessa città
+due volte, con due interazioni e due gerarchie visive, e nessun modo di capire quale delle due
+risposte valesse. La seconda è via. `MappaTokyo` **è** la mappa di Tokyo, non un di più.
+
+E `Mappe → Tokyo` non apre più il visore alternativo. Sono due cose, non una:
+
+- la **voce dell'indice** punta a `/guida/citta`, così il collegamento non rimbalza sotto gli occhi
+  di chi lo clicca;
+- la **rotta** `/guida/mappe/tokyo` reindirizza comunque, prima e dopo `RisolviMappa`, perché i
+  modi di arrivarci sono tanti — le briciole del visore, «Torna a Tokyo», un indirizzo salvato — e
+  devono finire tutti nello stesso posto. Il nodo `tokyo` dell'atlante resta: è il genitore dei
+  quartieri, e senza di lui l'albero non sta in piedi. Non è più una *destinazione*, è un ramo.
+
+Due test di `MappaPage` usavano Tokyo come esempio di una regola che non parla di Tokyo (il
+contenitore senza immagine; l'asset senza dimensioni registrate): spostati su
+`dungeon-kamoshida`, così la regola resta coperta e l'esempio non mente.
+
+**Resta aperto, e lo segnalo invece di allargare da solo lo scope:** `src/components/partita/
+OggiMappa.tsx` (via `useOggi`) monta ancora il visore dell'atlante sulla chiave `tokyo` dentro la
+pagina Partita, con «Torna a Tokyo». È la stessa duplicazione, in un'altra pagina. Lì però il
+visore serve a qualcosa che `MappaTokyo` oggi non fa — gli spilli del giorno — quindi va deciso,
+non tolto d'ufficio.
+
+**Verificato a schermo:** `/guida/citta` ha una sola mappa di Tokyo e nessun `visore-mappa`;
+`Mappe → Tokyo` ha `href="/guida/citta"`; `/guida/mappe/tokyo` digitato a mano finisce su
+`/guida/citta`.
+
+**Verde:** 578 test, typecheck e lint puliti.
+
+---
+
+# Punto 3 — le miniature dei quartieri erano vuote
+
+Chiedevano l'anteprima del nodo d'atlante `citta-<quartiere>`. Per quasi tutti i quartieri quel
+nodo non ha un'immagine, quindi le schede mostravano un riquadro vuoto; e quando l'immagine c'era
+era la **planimetria**, cioè un'altra figura rispetto alla sagoma che il lettore aveva appena
+toccato sulla mappa qui sopra. Due sorgenti per la stessa cosa: una delle due era destinata a
+mancare.
+
+Adesso la scheda mostra **lo stesso disegno della mappa composta**, e c'è un solo posto da cui si
+prende: `src/components/mappe/assetTokyo.ts` — `assetTokyoQuartiere()`, `assetPalazzo()` e il
+ripiego. Lo usano sia `MappaTokyo` sia `SagomaQuartiere`, il componente delle schede, così chiave,
+ripiego e `onError` non possono divergere.
+
+Il ripiego è **niente**: se la sagoma manca davvero l'immagine si nasconde e resta il nome. Prima
+`MappaTokyo` ripiegava sulla planimetria `citta-<quartiere>`, cioè metteva una figura estranea
+dove ci si aspetta la stessa di un attimo prima — peggio di uno spazio vuoto. Con le 23 sagome
+presenti il ripiego non scatta mai: è la rete, non il pavimento.
+
+Ripulito anche `assetPalazzo`, che era un `../../../palazzi/<chiave>.png` relativo alla cartella
+delle sagome — funzionava, ma solo finché nessuno spostava la base.
+
+**Verificato a schermo:** 23 miniature, **zero** con `naturalWidth` a 0, nessun `.miniatura-mappa`
+rimasto nella griglia; Shibuya e Shujin Academy caricano i rispettivi file.
+
+**Verde:** 579 test, typecheck e lint puliti.
+
+## Quel che l'utente ha chiesto mentre lavoravo, e che cambia i punti 4-6
+
+Tre messaggi, e vanno letti insieme:
+
+1. «testo sborda… a che serve questo testo così? Scheda del Palazzo… si ci clicca già sulla scheda
+   e si apre» — il collegamento in fondo alle schede dei Palazzi **non va aggiustato, va tolto**:
+   è ridondante, la carta è già cliccabile;
+2. «la pagina di dettaglio va anche totalmente rivista: e strutturata e ottimizzata per desktop,
+   tablet e mobile»;
+3. «Anche mappe va totalmente rivista» — stessa cosa.
+
+Quindi il punto 5 non è un aggiustamento di bordo ma una cancellazione, e i punti 4 e 6 sono un
+**rifacimento** di `MappaPage` (indice e dettaglio) e di `DungeonDettaglioPage`, non una
+ripulitura. Il ramo «senza planimetria» di `MappaPage` oggi è un elenco di collegamenti nudi —
+«Scheda del luogo», «Modifica luogo» — senza gerarchia: è la pagina che si apre cliccando una
+scheda dei Palazzi.
+
+---
+
+# I pin: la cornice torna nel codice
+
+Gli asset `ui/spillo-<tipo>` sono cambiati — è il punto 6.1, e li ha rigenerati Codex. Prima
+ciascuno era uno **spillo finito**: forma, colore e cornice dentro il PNG. Ora sono **solo la
+figura**, su alfa vera, 128×128, senza cornice.
+
+L'app non se n'era accorta: `SpilloGrafico` dichiarava «l'asset è già uno spillo intero» e lo
+mostrava tale e quale. Sulla mappa si vedevano quindi 17 disegni che galleggiavano, senza corpo,
+senza colore del tipo e senza una punta da appoggiare al punto.
+
+Adesso lo spillo lo costruisce il codice, ed è il posto giusto: colore del tipo, misura, bordo,
+ombra, punta ancorata, e gli stati — raccolto, selezionato, suggerito, categoria nascosta — che
+cambiano con la partita e con lo zoom e dentro un PNG non potevano cambiare. Erano anche 37 copie
+della stessa cornice.
+
+Forma: la goccia classica, quadrato con tre angoli tondi ruotato di 45°, così l'angolo vivo cade
+sul punto. 38 px sulla mappa, 22 e 34 in legenda e negli elenchi.
+
+**La figura sta direttamente sul colore.** Per un momento le avevo messo sotto un dischetto chiaro,
+per il contrasto sulle tinte scure; l'utente ha chiesto perché, e aveva ragione: l'alfa è vera
+apposta perché la figura si amalgami allo spillo, e il dischetto ne faceva una bollina da
+applicazione. Guardati tutti e 37 uno accanto all'altro, i disegni sono a **tratto chiaro**: sulle
+tinte scure si leggono benissimo, ed è semmai il contrario a essere debole.
+
+**Un rilievo che lascio all'utente, con la prova.** Otto tipi hanno un colore molto chiaro —
+`forziere-raro` (#fde047), `terme` (#67e8f9), `casa` (#fdba74), `lavanderia` (#c4b5fd), `nemico`
+(#b0b0c0), `porta` (#a3a3a3), `nota` (#9ca3af), `scala` (#2dd4bf) — e lì la figura chiara ha poco
+stacco. Si legge, ma è il caso peggiore. Si risolve scurendo quegli otto in `shared/spilli.ts`
+senza toccare la grafica: non l'ho fatto d'ufficio perché sono colori autorati e la scelta è
+dell'utente.
+
+`.spillo-mappa__goccia` tiene il nome anche ora che dentro c'è un'immagine: gli stati sono regole
+CSS che puntano a quel nome ed erano già giuste. Rinominarla voleva dire riscriverle tutte per
+ottenere quello che già facevano.
+
+**Verificato a schermo:** su `citta-yongen-jaya` 17 spilli, 17 gocce col colore del tipo e la
+figura dentro, nessuna figura nuda; i 37 tipi guardati tutti insieme in un pannello di prova.
+
+**Verde:** 581 test, typecheck e lint puliti.
+
+---
+
+# Punto 4 — la scheda di un Palazzo, rifatta
+
+Era «una scheda con delle liste»: un blocco di testo in cima, diciotto pastiglie in fila da
+scorrere per scegliere l'area, e due colonne che sotto i 1024 px diventavano un nastro lunghissimo.
+
+**L'intestazione dice il tempo invece di elencarlo.** In Persona 5 un Palazzo *è* una scadenza: si
+apre un giorno, conviene rubare il Tesoro entro un altro, e il giorno dopo la scadenza è finita la
+partita. Erano tre pastiglie sparse fra le altre e, sotto, le stesse tre date ripetute per esteso.
+Ora sono una **linea del tempo** in tre tappe — si apre → furto consigliato → scade — e la prosa
+della guida resta ripiegata sotto, dov'è una spiegazione e non il dato. L'emblema torna una seconda
+volta, enorme e al 7% di opacità, come fondo della scheda.
+
+**Le aree sono un elenco, non una fila da scorrere.** Diciotto pastiglie in orizzontale nascondono
+la diciottesima e non dicono a che punto si è in nessuna. Da 1024 px in su sono una colonna a
+sinistra col numero, il nome e quanti punti restano; sotto tornano una fila scorrevole, che su un
+telefono è la forma giusta.
+
+**Il tre colonne è progressivo:** oltre 1280 px aree · mappa · punti; fra 1024 e 1280 aree a lato e
+i punti sotto la mappa; sul telefono tutto in colonna. E la lista dei punti non ha più
+`max-h-[70vh]`, che su un telefono creava una finestrella da far scorrere dentro una pagina che già
+scorreva.
+
+## E il difetto vero: la mappa dell'area non compariva mai
+
+Non è un dettaglio di stile, ed è la cosa che questa pagina prometteva dalla Fase 7.1. La scheda
+montava `MappaIncorporata chiave={area.chiave}`, ma **la chiave di un'area della guida non è un
+nodo dell'atlante**: interrogato su quella, `risolviPercorsoMappa` risponde `tipo: 'guida'` — ed è
+corretto, dal suo punto di vista — e `MappaIncorporata` per quel caso rende un riquadro con dentro
+un collegamento. Risultato: su **tutte** le aree di **tutti** i Palazzi, al posto del visore c'era
+una scheda vuota. È il difetto che si vede nella schermata che l'utente aveva mandato.
+
+Il legame però esiste ed è dichiarato: `mappa_entita` lega **72 aree su 116** alla loro planimetria
+nativa. Mancava solo che qualcuno lo leggesse. Ora `AreaDungeonDto` porta `mappe: [{chiave, nome}]`
+— una lettura sola per Palazzo, non una per area — e la scheda monta il visore vero, con gli spilli
+e lo zoom. Quando un'area ha due planimetrie (una porzione e la pianta intera) si sceglie da un
+menu; quando non ne ha nessuna — i piani dei Memento, e le aree che il pacchetto nativo non copre —
+**si dice**, invece di mostrare un riquadro muto.
+
+**Verificato a schermo:** su `/guida/dungeon/kamoshida` il visore c'è, con la planimetria del
+Cancello del castello e i suoi spilli; su `/guida/dungeon/mementos` compare l'avviso e non il
+riquadro vuoto; a 1280, 768 e 375 px nessuno scorrimento orizzontale e nessuna carta fuori dal
+contenitore; la colonna delle aree c'è da 1024 px in su e la fila scorrevole sotto.
+
+**Verde:** 582 test (581 + 1 sul contratto nuovo), typecheck e lint puliti.
+
+---
+
+# Un quartiere bloccato è bloccato, anche quando non lo dice una data
+
+Richiesta dell'utente: «un luogo che è bloccato da un rango di un confidente è cmq bloccato non va
+visualizzato in mappa… lo stesso per i luoghi che si sbloccano dopo aver visitato un Palazzo».
+
+Il problema era nei dati: nella tabella `quartiere` lo sblocco è **prosa** — «Confidente Emperor
+(Yusuke) Rango 3», «lettura del libro "Chinese Sweets"», «sbloccato durante l'infiltrazione al
+Palazzo di Okumura» — e solo **sette quartieri su ventitré** hanno anche una data. La mappa
+guardava solo la data, quindi i sedici che si aprono in un altro modo risultavano nel mondo dal
+primo giorno.
+
+## Come si è deciso di leggerla
+
+L'utente ha scelto fra tre strade e ha preso la prima: **scrivere le condizioni a mano**, una per
+quartiere, in `data/seed/sblocco-quartieri.json`, nella forma `RequisitoSpillo` che l'app già sa
+valutare per gli spilli.
+
+Non con un lettore automatico, e il motivo è concreto: il lettore che l'app ha per i negozi non
+riconosce «Confidente Emperor (Yusuke) Rango 3» e — peggio — spezza gli «oppure» in requisiti
+separati che poi pretende **tutti**. Su queste frasi, dove quasi ogni quartiere ha due o tre strade
+alternative, avrebbe bloccato quartieri aperti. Un errore silenzioso, su una condizione che decide
+che cosa si vede.
+
+Venti righe scritte, verificabili una per una, con una `nota` dove la guida è ambigua. Le note
+sono la parte importante: dicono dove questa tabella è incompleta invece di far finta di niente.
+Due esempi:
+
+- **Ikebukuro** — la guida cita «invito di Makoto del 30 luglio dopo il suo Palazzo». Non è
+  tradotto in regola: «il suo Palazzo» è ambiguo (Makoto entra dopo il Palazzo di Kaneshiro, ma il
+  *suo* è quello di Niijima, che viene a novembre), e una data sulla lettura sbagliata aprirebbe il
+  quartiere quando non è aperto. Restano il 1° settembre e il libro.
+- **Roppongi** — «sbloccato durante l'infiltrazione al Palazzo di Okumura (circa 19 settembre)».
+  Ci sono tutte e due le strade: la data copre l'apertura vera, che avviene *durante*, e il Palazzo
+  completato copre chi a quella data non ci è ancora arrivato.
+
+Due libri che la guida cita col titolo inglese («Chinese Sweets», «Theme Park Escort») sono nel
+catalogo dei libri come «Dolci cinesi» e «Parchi divertimento», con scritto che sbloccano
+rispettivamente Chinatown e il parco di Maihama: la corrispondenza viene dai dati, non da me.
+
+## La regola
+
+`GET /api/compendio/citta?partita=<id>` aggiunge `disponibile` e `bloccoMotivo`. **Solo il rosso
+nasconde**: quando una condizione non è verificabile — la partita non ha ancora un giorno — resta
+un dubbio, e un dubbio non toglie un quartiere dalla mappa. Un rango basso o un libro non letto
+sono invece fatti che l'app conosce, e sono un no. Senza partita si vede tutto.
+
+**Rifinisce un contratto condiviso, e va detto:** in `shared/condizioniSpillo.ts` il rango di un
+Confidente è un *prerequisito*, non una *presenza* — «la cosa c'è, semplicemente non puoi ancora
+usarla» — e per un negozio dentro un quartiere resta esattamente così. Per il **quartiere stesso**,
+che è una destinazione radice, il rango decide se ci puoi arrivare: cioè se, per te, c'è. La
+distinzione è scritta in `cittaService`, accanto al codice che la applica.
+
+**Verificato a schermo:** con una partita all'11 aprile la mappa mostra **tre** quartieri —
+Yongen-Jaya, Shibuya, Shujin Academy — e tutto il resto è un pallino bianco col nome sopra; l'API
+dà venti quartieri bloccati con il motivo giusto per ciascuno («yusuke: rango 0 di 3», «Disponibile
+dal 18 giugno, oggi è il 11 aprile», «Ancora da completare nella Guida»). La riga sotto la mappa
+elenca i nomi e tiene il perché sul passaggio del mouse: da quando le condizioni non sono più solo
+date, scriverle per esteso faceva venti righe di testo.
+
+**Verde:** 583 test, typecheck e lint puliti.
+
+---
+
+# Verifica del candidato di Codex — `candidato/lotto-b-negozi-contesto-v2`
+
+Fatta come si deve: il **tag** in un worktree isolato (`C:\Repository\p5r-verifica`), con un
+backend suo su una porta sua (3103) e un database creato da zero dal seed. Non ho toccato un file
+del lotto B.
+
+**Esito: PASS.** Tutto quello che aveva dichiarato è vero, e l'ho misurato invece di crederci.
+
+| dichiarato | misurato |
+|---|---|
+| con partita 48 negozi / 380 articoli | 48 e 380 (60 e 575 senza partita) |
+| nessun bloccato reso | 0 su elenco e 0 su ricerca |
+| ricerca `380/300` | `totale: 380`, `articoli: 300` — il tetto è sui resi, il totale no |
+| negozio bloccato assente | `GET /compendio/negozi/37-gradi-celsius?partita` → **404**, senza partita → 200 |
+| acquisto diretto impedito | `PUT /partite/:id/acquisti` su `untouchable/kogatana-nera` → **404
+  `articolo-non-disponibile`**; su un articolo disponibile → 200 |
+| una sola `DoveSiTrova` in `NegozioPage` | una, `tipo="negozio"` con la chiave del negozio |
+
+Typecheck e lint puliti sul suo albero; le sue quattro suite mirate 23/23. La suite completa dà
+**578/580**, e i due rossi sono **i due della base**, non suoi: il conteggio 84/82 della Città e la
+vecchia attesa del Dedalo Memento nell'albero delle mappe. Sono esattamente i due test che ho
+corretto io nel commit `20c3d04` — quindi spariscono da soli quando i due rami si incontrano, e la
+diagnosi di Codex era giusta.
+
+Due osservazioni, nessuna delle quali cambia l'esito:
+
+1. `ricercaArticoli` con una partita toglie il `LIMIT 300` dalla SQL e filtra in memoria, poi taglia
+   a 300. È **necessario** — contare prima di filtrare darebbe un totale che comprende i bloccati,
+   che è il difetto del v1 — e su 575 articoli il costo è nulla. Va tenuto d'occhio se il catalogo
+   crescesse di un ordine di grandezza.
+2. Il conteggio degli articoli per negozio ora fa una lettura sola per tutta la pagina invece di
+   una per negozio: è meglio di prima, non peggio.

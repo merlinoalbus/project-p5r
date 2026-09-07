@@ -33,6 +33,9 @@ function monta(percorso: string) {
       <Routes>
         <Route path="/guida/mappe" element={<MappaPage />} />
         <Route path="/guida/mappe/:chiave" element={<MappaPage />} />
+        {/* La Città vera monta la mappa disegnata e chiama l'API: qui serve solo sapere che ci
+            si arriva, non rifarla. */}
+        <Route path="/guida/citta" element={<h1>La città</h1>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -52,7 +55,8 @@ beforeEach(() => {
 describe('MappaPage', () => {
   it('l’indice elenca le radici con le mappe figlie e i collegamenti al visore', async () => {
     monta('/guida/mappe');
-    expect(await screen.findByRole('link', { name: 'Tokyo' })).toHaveAttribute('href', '/guida/mappe/tokyo');
+    // Tokyo porta alla mappa canonica della Città, non al visore della sua planimetria.
+    expect(await screen.findByRole('link', { name: 'Tokyo' })).toHaveAttribute('href', '/guida/citta');
     expect(screen.getByRole('link', {name: 'Shibuya'})).not.toBeVisible();
     fireEvent.click(screen.getByLabelText('Mostra le mappe di Tokyo'));
     const tokyo = within(screen.getByRole('list', { name: 'Mappe di Tokyo' }));
@@ -87,11 +91,32 @@ describe('MappaPage', () => {
 
 it('un contenitore senza immagine apre i luoghi figli senza una finta planimetria',async()=>{
   getAlberoMappe.mockResolvedValue(albero);
-  getMappa.mockResolvedValue({...dettaglio,chiave:'tokyo',nome:'Tokyo',immagineUrl:null,asset:null,figli:[albero[1]],spilli:[],percorso:[{chiave:'tokyo',nome:'Tokyo'}]});
-  monta('/guida/mappe/tokyo');
-  expect(await screen.findByRole('heading',{name:'Tokyo'})).toBeInTheDocument();
+  getMappa.mockResolvedValue({...dettaglio,chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida',immagineUrl:null,asset:null,figli:[albero[3]],spilli:[],percorso:[{chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida'}]});
+  monta('/guida/mappe/dungeon-kamoshida');
+  expect(await screen.findByRole('heading',{name:'Palazzo di Kamoshida'})).toBeInTheDocument();
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
-  expect(screen.getByRole('link',{name:'Shibuya'})).toBeInTheDocument();
+  expect(screen.getByRole('link',{name:'Ingresso'})).toBeInTheDocument();
+});
+
+it('la planimetria di Tokyo non è più una destinazione: si finisce sulla mappa della Città',async()=>{
+  // Prima qui si apriva un secondo visore di Tokyo, diverso da quello che il lettore aveva
+  // appena guardato nella Città. Il reindirizzamento sta nella pagina e non solo nei
+  // collegamenti perché i modi di arrivarci sono tanti: le briciole del visore, «Torna a
+  // Tokyo», un indirizzo salvato.
+  getAlberoMappe.mockResolvedValue(albero);
+  monta('/guida/mappe/tokyo');
+  expect(await screen.findByRole('heading',{name:'La città'})).toBeInTheDocument();
+  expect(getMappa).not.toHaveBeenCalled();
+});
+
+it('anche un alias che risolve a Tokyo finisce sulla mappa della Città',async()=>{
+  // `RisolviMappa` traduce le chiavi storiche: se l'alias arriva a `tokyo`, il rimbalzo deve
+  // scattare dopo la risoluzione, non solo prima.
+  getAlberoMappe.mockResolvedValue(albero);
+  risolviMappa.mockResolvedValue({tipo:'mappa',mappa:'tokyo'});
+  monta('/guida/mappe/mappa-globale');
+  expect(await screen.findByRole('heading',{name:'La città'})).toBeInTheDocument();
+  expect(getMappa).not.toHaveBeenCalled();
 });
 
 it('il contesto URL cambia il titolo del visore e il selettore può ripristinare tutte le alternative',async()=>{
@@ -146,10 +171,12 @@ it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del
   expect(guida).toBeVisible();
 });
 
-it('Tokyo con asset originale mappe e dimensioni non registrate mantiene la planimetria',async()=>{
-  useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/tokyo':'/asset/mappe/tokyo.png'}},caricato:true});
-  getMappa.mockResolvedValue({...dettaglio,chiave:'tokyo',nome:'Tokyo',immagineUrl:null,asset:null,assetOriginale:'mappe/tokyo',ruoloImmagine:'illustrazione-editoriale',larghezza:null,altezza:null,spilli:[],percorso:[{chiave:'tokyo',nome:'Tokyo'}]});
-  monta('/guida/mappe/tokyo');
-  expect(await screen.findByRole('img',{name:'Mappa: Tokyo'})).toHaveAttribute('src','/asset/mappe/tokyo.png');
+it('una mappa con asset originale e dimensioni non registrate mantiene la planimetria',async()=>{
+  // L'esempio era Tokyo, che ora rimbalza sulla Città: la regola però non è su Tokyo, è che
+  // l'asset basta anche quando larghezza e altezza non sono in archivio.
+  useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/dungeon-kamoshida':'/asset/mappe/dungeon-kamoshida.png'}},caricato:true});
+  getMappa.mockResolvedValue({...dettaglio,chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida',immagineUrl:null,asset:null,assetOriginale:'mappe/dungeon-kamoshida',ruoloImmagine:'illustrazione-editoriale',larghezza:null,altezza:null,spilli:[],percorso:[{chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida'}]});
+  monta('/guida/mappe/dungeon-kamoshida');
+  expect(await screen.findByRole('img',{name:'Mappa: Palazzo di Kamoshida'})).toHaveAttribute('src','/asset/mappe/dungeon-kamoshida.png');
   expect(screen.getByTestId('visore-mappa')).toBeInTheDocument();
 });

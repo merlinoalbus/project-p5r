@@ -38,7 +38,7 @@ import { importaMappe } from '../mappe/mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'finestre-dungeon.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'finestre-dungeon.json', 'sblocco-quartieri.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -54,6 +54,8 @@ interface SeedCompleto {
   oggettiCrosswalk: string;
   /** La finestra di ciascun Palazzo, trascritta in MM-GG: va in `dati_guida` così com'è. */
   finestreDungeon: string;
+  /** Quando un quartiere entra nel mondo, come regola valutabile: va in `dati_guida` così com'è. */
+  sbloccoQuartieri: string;
   persone: PersonaSeed[];
   skill: SkillSeed[];
   oggetti: OggettoSeed[];
@@ -137,6 +139,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     oggettiGuida: JSON.parse(contenuti['oggetti-guida.json']) as OggettiGuidaSeed,
     oggettiCrosswalk: contenuti['oggetti-crosswalk.json'],
     finestreDungeon: contenuti['finestre-dungeon.json'],
+    sbloccoQuartieri: contenuti['sblocco-quartieri.json'],
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -429,6 +432,13 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     // La finestra di ciascun Palazzo: nel catalogo le date sono prosa, qui sono trascritte in
     // MM-GG perche' il visore possa nascondere un Palazzo che, a quella data, non c'e' ancora.
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('finestre-dungeon', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(seed.finestreDungeon);
+
+    // Lo stesso, per i quartieri: nel catalogo lo sblocco e' prosa («Confidente Emperor (Yusuke)
+    // Rango 3»), qui e' una regola che il valutatore capisce, cosi' la mappa toglie dal mondo un
+    // quartiere dove non si puo' ancora andare. Le venti righe sono scritte a mano dalla prosa:
+    // il lettore automatico dei negozi non riconosce quella forma e spezza gli «oppure» in
+    // requisiti che poi pretende tutti, cioe' bloccherebbe quartieri aperti.
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('sblocco-quartieri', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(seed.sbloccoQuartieri);
 
     // ---- Aiuto in battaglia (Fase 7.3): sezioni della guida e indice delle Ombre (le chiavi dei dungeon devono esistere) ----
     for (const o of seed.battaglia.ombre) if (!chiaviDungeon.has(o.dungeonChiave)) throw new Error(`Seed battaglia: dungeon sconosciuto '${o.dungeonChiave}' per l'Ombra '${o.ombra ?? o.persona ?? ''}'.`);

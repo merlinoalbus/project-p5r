@@ -13,7 +13,7 @@ import { urlMappa } from '../utils/navigazioneMappa';
 import { useMemo } from 'react';
 import type { MappaRiassuntoDto } from '../types';
 import { centroAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { useMappaPartita } from '../hooks/useMappaPartita';
@@ -26,10 +26,22 @@ import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { NOME_TIPO_MAPPA } from '../../shared/spilli';
 
+/** Tokyo non ha un visore proprio: la sua mappa è quella disegnata nella Città.
+ *
+ * Il nodo `tokyo` dell'atlante resta — è il genitore dei quartieri, e senza di lui l'albero non
+ * sta in piedi — ma la sua *planimetria* non è più una destinazione: chi ci arrivava vedeva una
+ * seconda Tokyo, diversa da quella che aveva appena guardato. Il reindirizzamento è qui e non
+ * solo sui collegamenti perché i modi di arrivarci sono tanti (le briciole del visore, «Torna a
+ * Tokyo», un indirizzo salvato) e vanno tutti a finire nello stesso posto. */
+const TOKYO = 'tokyo';
+const CITTA = '/guida/citta';
+
 export function MappaPage() {
   const { chiave } = useParams<{ chiave: string }>();
   const attiva = usePartitaStore((s) => s.attiva);
-  return chiave ? <RisolviMappa chiave={chiave}>{k => <DettaglioMappa chiave={k} partitaId={attiva?.id ?? null} />}</RisolviMappa> : <IndiceMappe />;
+  if (!chiave) return <IndiceMappe />;
+  if (chiave === TOKYO) return <Navigate to={CITTA} replace />;
+  return <RisolviMappa chiave={chiave}>{k => k === TOKYO ? <Navigate to={CITTA} replace /> : <DettaglioMappa chiave={k} partitaId={attiva?.id ?? null} />}</RisolviMappa>;
 }
 
 /** Le radici che sono versioni dello stesso luogo formano una scheda sola, come nell'albero. */
@@ -46,7 +58,7 @@ function radiciRaggruppate(mappe: MappaRiassuntoDto[]): Array<{ chiave: string; 
   return gruppi;
 }
 
-/** Indice: radici (Tokyo, Palazzi, Dedalo) con le mappe figlie. */
+/** Indice: radici (Tokyo, Palazzi) con le mappe figlie. */
 function IndiceMappe() {
   useDocumentTitle('Mappe');
   const albero = useCarica(() => getAlberoMappe(), []);
@@ -72,7 +84,7 @@ function IndiceMappe() {
   }, [mappe]);
   const gruppi = useMemo(() => radiciRaggruppate(mappe), [mappe]);
   return <div className="flex flex-col gap-4">
-    <IntestazionePagina titolo="Mappe" sottotitolo="Luoghi e planimetrie di Tokyo, Palazzi e Dedali." />
+    <IntestazionePagina titolo="Mappe" sottotitolo="Luoghi e planimetrie di Tokyo e dei Palazzi." />
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
       <ul className="m-0 p-0 list-none grid gap-3 grid-cols-1 lg:grid-cols-2 items-start" aria-label="Mappe">
         {gruppi.map(({ chiave, capofila, versioni }) => {
@@ -84,7 +96,10 @@ function IndiceMappe() {
           const conFigli = versioni.some(v => (totali.figliDi.get(v.chiave) ?? []).length > 0);
           return <li key={chiave} className="card min-w-0 flex flex-col gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <Link to={urlMappa(capofila.chiave)} className="font-display text-[20px] no-underline text-text break-words">{nome}</Link>
+              {/* La voce Tokyo porta alla mappa canonica, non al visore: il reindirizzamento
+                  esiste comunque, ma un collegamento che rimbalza si vede, e non c'è ragione di
+                  farglielo fare. */}
+              <Link to={capofila.chiave === TOKYO ? CITTA : urlMappa(capofila.chiave)} className="font-display text-[20px] no-underline text-text break-words">{nome}</Link>
               <span className="chip text-[11px]">{NOME_TIPO_MAPPA[capofila.tipo]}</span>
               <span className="text-[12px] text-text-muted">
                 {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : versioni.length > 1 ? `${versioni.length} versioni` : 'una planimetria'}
