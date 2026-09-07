@@ -4,12 +4,16 @@ import { condizioneSpillo } from './mappe.js';
 // ============================================================
 
 import { z } from 'zod';
+import { TIPI_CATALOGO } from '../../shared/types.js';
 
 const dataGioco = z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.');
 const testo = (max: number) => z.string().trim().max(max);
 const riferimento = z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }).nullable().optional();
 
-export const paramsTipoCatalogo = z.object({ tipo: z.enum(['negozio', 'articolo']) });
+/** I tipi accettati nel percorso. Erano scritti a mano e sono rimasti indietro quando il catalogo
+ *  si e' esteso: un `POST /catalogo/libro` rispondeva «atteso negozio|articolo» pur essendo tutto
+ *  il resto pronto. Adesso l'elenco e' uno solo, `TIPI_CATALOGO`, e non puo' piu' divergere. */
+export const paramsTipoCatalogo = z.object({ tipo: z.enum(TIPI_CATALOGO) });
 export const paramsElementoCatalogo = paramsTipoCatalogo.extend({ chiave: z.string().min(1).max(200) });
 
 /** Campi di un negozio scrivibili dall'utente (le colonne della tabella, in snake_case come nel servizio). */
@@ -44,8 +48,63 @@ export const datiArticolo = z.object({
   fonte: testo(400).default(''),
 });
 
+/** Campi di un libro scrivibili dall'utente. */
+export const datiLibro = z.object({
+  nome: testo(160).min(1),
+  nome_it: testo(160).nullable().optional(),
+  dove: testo(300).default(''),
+  prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
+  disponibile_dal: testo(300).nullable().optional(),
+  dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable().optional(),
+  // «note» qui e' il numero di note musicali della Dote (1-3), non un testo: e' la colonna del
+  // catalogo dei libri e si chiama cosi' da sempre.
+  note: z.number().int().min(0).max(9).nullable().optional(),
+  sblocca: testo(300).nullable().optional(),
+  sessioni: z.number().int().min(1).max(9).nullable().optional(),
+  dettagli: testo(2000).nullable().optional(),
+  fonte: testo(400).default(''),
+});
+
+/** Campi di un film o DVD scrivibili dall'utente. */
+export const datiFilm = z.object({
+  nome: testo(160).min(1),
+  nome_it: testo(160).nullable().optional(),
+  dove: z.enum(['cinema', 'dvd']).default('cinema'),
+  periodo: testo(300).default(''),
+  dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable().optional(),
+  note: z.number().int().min(0).max(9).nullable().optional(),
+  prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
+  sessioni: z.number().int().min(1).max(9).nullable().optional(),
+  dettagli: testo(2000).nullable().optional(),
+  fonte: testo(400).default(''),
+});
+
+/** Campi di un'attivita' (compresi lavori e videogiochi) scrivibili dall'utente. */
+export const datiAttivita = z.object({
+  nome: testo(160).min(1),
+  tipo: testo(60).default('altro'),
+  luogo: testo(300).default(''),
+  luogo_chiave: z.string().min(1).max(200).nullable().optional(),
+  fascia: testo(60).nullable().optional(),
+  costo: z.number().int().min(0).max(9_999_999).nullable().optional(),
+  sblocco: testo(400).nullable().optional(),
+  sessioni: z.number().int().min(1).max(99).nullable().optional(),
+  // Le Doti di un'attivita' sono un elenco: `[{dote, note, condizione}]`. Si accetta gia'
+  // strutturato e si salva come JSON, come fa il seed.
+  doti_json: z.array(z.object({
+    dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable(),
+    note: z.number().int().min(0).max(9).nullable(),
+    condizione: testo(400).nullable(),
+  })).max(10).transform((v) => JSON.stringify(v)).optional(),
+  altri_effetti: testo(2000).nullable().optional(),
+  regole: testo(2000).default(''),
+  premi: testo(2000).nullable().optional(),
+  paga: testo(400).nullable().optional(),
+  fonte: testo(400).default(''),
+});
+
 /** Lo schema dipende dal tipo nel percorso: un'unione lascerebbe passare un articolo come negozio, scartandone i campi. */
-export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo } as const;
+export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, libro: datiLibro, film: datiFilm, attivita: datiAttivita } as const;
 export const bodyNascondi = z.object({ nascosta: z.boolean() });
 
 // ---- Agenda ----

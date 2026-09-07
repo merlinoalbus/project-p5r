@@ -15,6 +15,9 @@ import type { ElementoCatalogoDto, TipoCatalogo } from '../../types';
 const NOME_TIPO: Record<TipoCatalogo, { singolare: string; plurale: string }> = {
   negozio: { singolare: 'negozio', plurale: 'Negozi' },
   articolo: { singolare: 'articolo', plurale: 'Articoli dei negozi' },
+  libro: { singolare: 'libro', plurale: 'Libri' },
+  film: { singolare: 'film', plurale: 'Film e DVD' },
+  attivita: { singolare: 'attività', plurale: 'Attività, lavori e videogiochi' },
 };
 
 export function MieiDati() {

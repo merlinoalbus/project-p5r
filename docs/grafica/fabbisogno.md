@@ -340,3 +340,41 @@ sarebbero rimasti lì a far credere che il lavoro fosse fatto.
 
 **La regola che ne esce**, sorella di quella dei Memento: prima di dichiarare che un asset manca,
 si guarda **con che nome il codice lo cerca**, non con che nome ce lo si aspetta.
+
+## 6. Le figure del rifacimento delle pagine (38) — richieste il 2026-09-07
+
+Rifacendo Palazzi, Mappe, Richieste, Aiuto in battaglia, Libri, Film, Videogiochi e il dettaglio dei
+negozi sono comparsi gesti e sezioni che **non hanno una figura**. La regola dettata dall'utente è
+netta — «pulsanti senza componente grafico non devono essercene… e questo in ogni pagina e
+sottopagina», «ogni elemento grafico provvisorio deve essere appunto provvisorio e sostituito con
+la relativa opportuna grafica generata da Codex» — quindi ogni chiave nuova nasce con due cose:
+una **riserva SVG in codice**, perché l'app non aspetti nessuno, e una **riga in questo
+censimento**, perché la riserva non diventi il traguardo.
+
+| famiglia | chiave nel codice | quante | prompt | stato |
+|---|---|---|---|---|
+| icone delle azioni nuove | `ui/azione-<chiave>` | 6 | §21 | **da consegnare** |
+| icone di categoria | `ui/categoria-<chiave>` | 22 | §22 | **da consegnare** |
+| fregi decorativi delle sezioni | `decori/<chiave>` | 11 | §23 | **da consegnare** |
+
+Le sei azioni sono `piu`, `meno`, `completati`, `dettagli`, `pianta`, `posizione`: sono i gesti che
+prima erano scritte nude — «+», «−», «Mostra i completati», «Dettagli», le due viste di un'area,
+«Mostra posizione».
+
+Le ventidue categorie sono le figure dentro il cartiglio rosso delle schede. Fino a oggi non erano
+nemmeno **cercate** come asset: `IconaCategoria` disegnava l'SVG e basta, quindi nessuna grafica
+avrebbe potuto sostituirle. Ora il componente cerca `ui/categoria-<chiave>` e ripiega sull'SVG,
+com'è sempre stato per le icone d'azione.
+
+Gli undici fregi sono immagini **puramente decorative** per le sezioni di sola prosa: stanno nel
+fondo della carta al 16% di opacità, sfumate verso il testo. Dove il file manca resta una macchia
+del colore del tema, che alleggerisce comunque l'angolo senza fingere di essere un disegno.
+
+### Il font non è un asset grafico, ma il difetto era lo stesso
+
+Nello stesso giro è venuto fuori che i tre font caricati (display, menu, decor) **non hanno le
+lettere accentate**: nel font display esistono nella tabella dei caratteri ma sono glifi vuoti, e il
+browser ripiegava su un'altra famiglia — «LA CITTÀ» usciva con la À sottile in mezzo a lettere
+pesanti, in ogni titolo dell'app. Non è un disegno da commissionare: le lettere si costruiscono dal
+font stesso, ed è quello che fa `scripts/font-italiano.py` (base + accento, più « » — … ’ “ ” ° •).
+I file caricati nell'istanza sono già passati di lì; un font nuovo va passato prima di caricarlo.

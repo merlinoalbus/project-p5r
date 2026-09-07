@@ -1,0 +1,143 @@
+{
+  "_leggimi": [
+    "Quando un LUOGO entra nel mondo, come regola che l'app sa valutare.",
+    "",
+    "Gemello di `sblocco-quartieri.json`, e nato dallo stesso difetto: la tabella `luogo` porta lo",
+    "sblocco come PROSA — «libro \"Vague\" o invito di Mishima (3 agosto)», «Confidente Ann Rango 7» —",
+    "e nessuno la valutava. Trentasette luoghi su ottantaquattro hanno una condizione scritta nella",
+    "guida che l'app non guardava mai: si vedevano tutti, sempre. Da qui il rilievo dell'utente,",
+    "che aveva completato un libro e non vedeva comparire niente.",
+    "",
+    "Scritte a mano una per una, dalla prosa gia' trascritta dalla guida allgamestaff: NON sono",
+    "ricavate da un lettore automatico. Su questa prosa il lettore dei negozi spezza gli «oppure» in",
+    "requisiti separati che poi pretende TUTTI, cioe' bloccherebbe luoghi che sono aperti.",
+    "",
+    "LA DISTINZIONE CHE CONTA. Non tutte le condizioni scritte nella colonna `sblocco` dicono «il",
+    "posto non c'e' ancora»: molte dicono «il posto c'e' ma non puoi ancora farci quella cosa» — un",
+    "lavoro part-time che chiede Fascino 2, un negozio che vende certi titoli solo dopo, un",
+    "Confidente che comincia a una data. Quelle stanno in `_nonSonoPresenza` e il luogo resta",
+    "visibile: nasconderlo sarebbe peggio del difetto che questo file corregge, perche' toglierebbe",
+    "dalla guida un posto dove si puo' andare davvero.",
+    "",
+    "Qui dentro ci sono solo le condizioni che dicono che il LUOGO STESSO non c'e' ancora."
+  ],
+
+  "luoghi": [
+    {
+      "chiave": "harajuku/harajuku-hangout",
+      "condizioni": [{ "tipo": "gruppo", "modo": "almeno-una", "condizioni": [
+        { "tipo": "lettura", "categoria": "libro", "chiave": "vague" },
+        { "tipo": "data", "dal": "08-03" }
+      ]}],
+      "nota": "«libro \"Vague\" o invito di Mishima (3 agosto)». L'invito e' reso come la data, che e' quel che l'app sa verificare."
+    },
+    {
+      "chiave": "ichigaya/laghetto-ichigaya",
+      "condizioni": [{ "tipo": "gruppo", "modo": "almeno-una", "condizioni": [
+        { "tipo": "lettura", "categoria": "libro", "chiave": "vedetta-lacustre" },
+        { "tipo": "data", "dal": "07-06" }
+      ]}]
+    },
+    {
+      "chiave": "ikebukuro/planetario-ikebukuro",
+      "condizioni": [{ "tipo": "gruppo", "modo": "almeno-una", "condizioni": [
+        { "tipo": "lettura", "categoria": "libro", "chiave": "cieli-notturni" },
+        { "tipo": "data", "dal": "09-01" }
+      ]}],
+      "nota": "La guida non conferma il titolo italiano del libro e propone «Cieli notturni»; la data e' quella dell'invito di Makoto secondo la stessa fonte. Se una delle due si rivelasse sbagliata, la condizione resta comunque un OR e non blocca nulla per errore."
+    },
+    {
+      "chiave": "maihama/destinyland",
+      "condizioni": [{ "tipo": "gruppo", "modo": "almeno-una", "condizioni": [
+        { "tipo": "lettura", "categoria": "libro", "chiave": "parchi-divertimento" },
+        { "tipo": "data", "dal": "10-11" }
+      ]}]
+    },
+    {
+      "chiave": "meiji-shrine/meiji-shrine-hangout",
+      "condizioni": [{ "tipo": "gruppo", "modo": "almeno-una", "condizioni": [
+        { "tipo": "lettura", "categoria": "libro", "chiave": "santuari-di-tokyo" },
+        { "tipo": "data", "dal": "08-05" }
+      ]}]
+    },
+    {
+      "chiave": "nakano/nakano-broadway",
+      "condizioni": [{ "tipo": "gruppo", "modo": "almeno-una", "condizioni": [
+        { "tipo": "lettura", "categoria": "libro", "chiave": "esplorando-nakano" },
+        { "tipo": "data", "dal": "10-09" }
+      ]}]
+    },
+    {
+      "chiave": "shinagawa/shinagawa-acquario",
+      "condizioni": [{ "tipo": "gruppo", "modo": "almeno-una", "condizioni": [
+        { "tipo": "lettura", "categoria": "libro", "chiave": "un-acquario-al-giorno" },
+        { "tipo": "data", "dal": "07-28" }
+      ]}]
+    },
+    {
+      "chiave": "yokohama-chinatown/chinatown-hangout",
+      "condizioni": [{ "tipo": "lettura", "categoria": "libro", "chiave": "dolci-cinesi" }],
+      "nota": "La guida cita il libro senza darne il titolo italiano; e' «Dolci cinesi», l'unico che nel catalogo sblocca Chinatown."
+    },
+    {
+      "chiave": "odaiba/odaiba-seaside-park",
+      "condizioni": [{ "tipo": "gruppo", "modo": "almeno-una", "condizioni": [
+        { "tipo": "lettura", "categoria": "libro", "chiave": "luoghi-della-movida" },
+        { "tipo": "data", "dal": "06-01" }
+      ]}],
+      "nota": "La prosa dice «1 giugno / Confidente Ann Rango 10»; il libro «Luoghi della movida» dichiara di sbloccare il Seaside Park, quindi la condizione e' un OR fra i due. Il rango 10 di Ann non e' stato tradotto: arriva molto piu' tardi della data, e metterlo in OR non cambierebbe mai l'esito."
+    },
+    {
+      "chiave": "asakusa/tokyo-skytree",
+      "condizioni": [{ "tipo": "lettura", "categoria": "libro", "chiave": "shitamachi-rinato" }],
+      "nota": "Luogo aggiunto: il libro dichiara di sbloccare «l'area del Tokyo Skytree» e la sua posizione territoriale punta ad Asakusa, ma nel catalogo dei luoghi non c'era niente. Senza il posto, leggere il libro non poteva mostrare nulla."
+    },
+    {
+      "chiave": "harajuku/takenoko-street",
+      "condizioni": [{ "tipo": "lettura", "categoria": "libro", "chiave": "vague" }],
+      "nota": "Stessa cosa: il libro «Vague» dichiara di sbloccare Takenoko Street (Harajuku) e la via compare nelle immagini del quartiere, ma non esisteva come luogo."
+    },
+    {
+      "chiave": "roppongi/okumura-foods-hq",
+      "condizioni": [{ "tipo": "data", "dal": "09-15" }],
+      "nota": "«durante l'infiltrazione al Palazzo di Okumura»: reso con l'apertura della finestra del Palazzo (15 settembre), che e' la data in cui il posto entra nel mondo."
+    },
+    {
+      "chiave": "mementos/ingresso-mementos",
+      "condizioni": [{ "tipo": "data", "dal": "05-09" }],
+      "nota": "«dopo il primo Palazzo (Kamoshida)»: resa con l'apertura dei Memento gia' dichiarata in `finestre-dungeon.json`, che e' lo stesso fatto detto in modo verificabile."
+    }
+  ],
+
+  "_nonSonoPresenza": [
+    "Questi luoghi hanno una condizione scritta nella guida che NON dice «il posto non c'e'», e",
+    "restano quindi sempre visibili. La condizione riguarda cosa ci puoi fare, non se esiste.",
+    "",
+    "shibuya/untouchable            il negozio c'e' dal Palazzo di Kamoshida; il rango serve al Confidente",
+    "shibuya/rafflesia              Fascino 2 e' un requisito del lavoro part-time, non del locale",
+    "shibuya/ore-no-beko            «nessun requisito per il lavoro»: nessuna condizione",
+    "shibuya/triple-seven           «nessun requisito»",
+    "shibuya/scarlet                «una volta raggiunta Shibuya nella storia»: Shibuya e' gia' un quartiere con la sua regola",
+    "shibuya/protein-lovers         ranghi di Confidente per l'acquisto, non per il negozio",
+    "shibuya/stazione-piazza-shibuya  la piazza c'e'; la data riguarda l'incontro con Yoshida",
+    "shinjuku/crossroads            la data e' del Confidente, i ranghi sono del lavoro part-time",
+    "shinjuku/chihaya-stand         le date sono degli incontri con Chihaya, non del banchetto",
+    "shinjuku/hinokuniya            «alcuni titoli richiedono attivita' sbloccate»: riguarda gli articoli",
+    "akihabara/sala-giochi-akihabara  la sala giochi c'e'; la richiesta Memento riguarda il Confidente Shinya",
+    "kanda-jinbocho/chiesa-kanda    la chiesa c'e'; Fascino 3 serve al primo incontro",
+    "kichijoji/jazz-jin             il locale c'e'; il rango di Akechi riguarda l'invito",
+    "kichijoji/mantra-ganda         il rango delle Gemelle riguarda il servizio, non il posto",
+    "kichijoji/kichijoji-galleria-kasumi  «avvio automatico»: nessuna condizione di presenza",
+    "shujin-academy/cancello-shujin       il cancello c'e' dal primo giorno di scuola",
+    "shujin-academy/corridoio-2-piano-shujin  il corridoio c'e'; la data riguarda l'evento narrativo",
+    "yongen-jaya/clinica-takemi     la clinica c'e' dall'inizio; la data riguarda i dialoghi",
+    "yongen-jaya/venditore-patate-dolci  ambulante stagionale: la data e' del banchetto, non del quartiere",
+    "suidobashi/dome-town           la data e' dell'apertura del Confidente",
+    "tsukishima/tsukishima-monjayaki  il rango di Ryuji riguarda l'invito",
+    "ueno/museo-ueno                il rango di Yusuke riguarda l'invito",
+    "ogikubo/ogikubo-ramen          il rango di Ryuji riguarda l'invito",
+    "inokashira-park/inokashira-hangout  il rango di Ann riguarda l'invito",
+    "asakusa/asakusa-hangout        il rango di Ann riguarda l'invito; il quartiere ha gia' la sua regola",
+    "mementos/negozio-jose          «appare casualmente»: non e' una condizione verificabile"
+  ]
+}

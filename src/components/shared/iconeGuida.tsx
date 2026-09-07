@@ -531,3 +531,57 @@ export function IconAdatta(p: IconProps) {
     </svg>
   );
 }
+
+/** Più dentro un cerchio: una sessione, una visione, un round in più. */
+export function IconPiu(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" />
+    </svg>
+  );
+}
+
+/** Meno dentro un cerchio: uno in meno. */
+export function IconMeno(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="9" /><path d="M8 12h8" />
+    </svg>
+  );
+}
+
+/** Elenco spuntato: il gruppo di quelli già finiti. */
+export function IconCompletati(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M4 7l2 2 3-3M4 17l2 2 3-3" /><path d="M13 8h7M13 18h7" />
+    </svg>
+  );
+}
+
+/** Foglio con una lente: i dettagli di una scheda. */
+export function IconDettagli(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M5 4h9l5 5v3" /><path d="M5 4v16h6" /><circle cx="16" cy="16" r="3.2" /><path d="M18.4 18.4L21 21" />
+    </svg>
+  );
+}
+
+/** Pianta con la griglia: la planimetria di un luogo. */
+export function IconPianta(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <rect x="4" y="4" width="16" height="16" rx="1" /><path d="M4 12h7v8M11 4v4h9" />
+    </svg>
+  );
+}
+
+/** Spillo: dove si trova una cosa. */
+export function IconPosizione(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M12 21s6.5-6.2 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 14.8 12 21 12 21z" /><circle cx="12" cy="10.5" r="2.4" />
+    </svg>
+  );
+}

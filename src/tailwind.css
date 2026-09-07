@@ -214,6 +214,25 @@
   .btn-visivo--colonna .btn-visivo__titolo { font-size: 12px; white-space: normal; line-height: 1.05; }
   .btn-visivo--colonna .btn-visivo__dettaglio { white-space: normal; line-height: 1.15; }
   .chip--icona { gap: 6px; }
+
+  /* Le schede della Partita: prima l'immagine, poi la parola.
+     Erano pastiglie di testo con un'iconcina da 16 px accanto e, messe in fila per dieci, si
+     leggevano tutte uguali — si cercava il nome invece di riconoscere il segno. Qui l'icona e'
+     grande e sta sopra, l'etichetta e' piccola e sta sotto: da lontano si riconosce la figura, da
+     vicino si legge il nome. Il bersaglio resta oltre i 44 px richiesti dal tocco. */
+  .piastrella-scheda {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    min-width: 84px; padding: 8px 10px; border-radius: 10px;
+    border: 1px solid var(--color-border); background: var(--color-surface);
+    color: var(--color-text-secondary); font-size: 11px; line-height: 1.15; text-align: center;
+    cursor: pointer; transition: border-color .12s, color .12s, background-color .12s;
+  }
+  .piastrella-scheda > svg { flex-shrink: 0; }
+  .piastrella-scheda:hover { border-color: var(--color-primary); color: var(--color-text); }
+  .piastrella-scheda--attiva {
+    border-color: var(--color-primary); background: color-mix(in oklab, var(--color-primary) 16%, var(--color-surface));
+    color: var(--color-text); font-weight: 600;
+  }
   .chip--icona > svg { flex-shrink: 0; }
 
   /* ---- Modali ---- */
@@ -373,7 +392,19 @@
      di una tela 10:7 — finivano tutte nel posto sbagliato. Meglio la mappa intera piccola, con lo
      zoom a portata: e' quello che fa ogni altra mappa dell'app, e le proporzioni restano quelle
      verificate a ogni larghezza. `transform-origin` al centro perche' lo zoom parta da li'. */
-  .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; touch-action: none; user-select: none; }
+  /* **E un tetto in altezza**, che mancava. Con la sola `aspect-ratio`, su una finestra larga la
+     cornice diventava 1640x1148 dentro 1900x950: la mappa non ci stava, le schede dei quartieri
+     finivano sotto il bordo, e per vedere l'una o le altre bisognava scorrere.
+     Il tetto e' scritto sulla **larghezza**, non con `max-height`: provata prima con `max-height`,
+     la cornice e' collassata a 3x2 px, perche' con `aspect-ratio` il browser ricava l'altezza
+     dalla larghezza e non torna indietro a ridurre la larghezza quando la stringi. Partendo dalla
+     larghezza — al massimo quella che serve per stare in 68vh mantenendo il 10:7 — la catena e'
+     nell'unico verso che il motore percorre, e la tela resta in proporzione a ogni misura, che e'
+     la condizione perche' le collocazioni in percentuale restino giuste. */
+  /* Il tetto sta sul blocco — mappa **e** riga delle fermate chiuse — perché quella riga è lunga
+     e in una colonna libera spingeva tutto fuori dallo schermo. La cornice riempie il blocco. */
+  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; }
+  .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; width: 100%; touch-action: none; user-select: none; }
   /* La mano compare solo quando c'e' davvero qualcosa da spostare: a zoom 1 la tela e' tutta li'. */
   .mappa-tokyo--spostabile { cursor: grab; }
   .mappa-tokyo--spostabile:active { cursor: grabbing; }
@@ -603,6 +634,29 @@
   }
   .card--cliccabile { cursor: pointer; }
   .card--cliccabile:hover { border-color: var(--color-primary); }
+
+  /* ---- Fregio: la figura decorativa di una sezione di solo testo ----
+   *
+   * Sta **dietro** al contenuto e non lo tocca: `pointer-events:none`, opacità bassa e una
+   * sfumatura che la fa sparire verso il testo, così nessuna riga diventa meno leggibile. La
+   * carta che lo ospita va marcata `.card--con-fregio` (posizione e ritaglio); il fregio si
+   * spegne sotto i 640 px, dove lo spazio serve tutto al contenuto. */
+  .card--con-fregio { position: relative; overflow: hidden; }
+  .card--con-fregio > *:not(.fregio-sezione) { position: relative; z-index: 1; }
+  .fregio-sezione { position: absolute; pointer-events: none; z-index: 0; display: none; }
+  @media (min-width: 640px) { .fregio-sezione { display: block; } }
+  .fregio-sezione--angolo { top: -8%; right: -2%; width: min(38%, 260px); aspect-ratio: 1; }
+  .fregio-sezione--banda { bottom: -10%; right: -4%; width: min(52%, 420px); aspect-ratio: 16 / 9; }
+  .fregio-sezione__immagine {
+    width: 100%; height: 100%; object-fit: contain; opacity: 0.16;
+    mask-image: linear-gradient(to left, #000 30%, transparent 100%);
+  }
+  /* Finché l'immagine non c'è: una macchia del colore del tema, che alleggerisce comunque
+   * l'angolo senza fingere di essere un disegno. */
+  .fregio-sezione__riserva {
+    display: block; width: 100%; height: 100%;
+    background: radial-gradient(circle at 70% 30%, color-mix(in oklab, var(--color-primary) 26%, transparent), transparent 62%);
+  }
 
   /* ---- Chip: etichetta a taglio diagonale (stessa tecnica dei pulsanti) ---- */
   .chip {
@@ -929,35 +983,48 @@
    ============================================================ */
 .sr-only { top: 0; left: 0; }
 
-/* Il contenuto decide il formato anche con la sidebar aperta. */
+/* Il contenuto decide il formato anche con la sidebar aperta.
+ *
+ * **Colori del tema, non tinte a mano.** Qui c'erano sette valori esadecimali scritti a mano
+ * (#131419, #3c3d46, #bfc1cc…) vicini ma non uguali ai token: in mezzo alle altre schede
+ * dell'app, la lista dei prodotti di un negozio si vedeva che era di un altro grigio.
+ *
+ * Su desktop e' una **tabella**: quattro colonne allineate — cosa, quanto costa, se si puo'
+ * comprare, e la spunta — con la riga che si accende al passaggio. Prima ogni riga era un
+ * riquadro con quattro riquadri dentro, e duecentodiciotto riquadri in fila si leggono come un
+ * muro. Sotto i 1050 px torna a schede, che su un telefono e' la forma giusta. */
 .catalogo-prodotti { container-type: inline-size; min-width: 0; }
 .catalogo-prodotti > ul { margin:0; padding:0; list-style:none; display:grid; gap:10px; }
-.catalogo-prodotto { background:#131419; border:1px solid #3c3d46; padding:16px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 16px; font-size:14px; line-height:1.5; }
+.catalogo-prodotto { background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:12px 14px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; font-size:14px; line-height:1.45; }
 .catalogo-prodotto__nome { display:flex; flex-direction:column; min-width:0; overflow-wrap:anywhere; }
-.catalogo-prodotto__nome > strong { font-size:16px; color:#fff; }
-.catalogo-prodotto__meta { color:#bfc1cc; }
+.catalogo-prodotto__nome > strong { font-size:15px; color:var(--color-text); }
+.catalogo-prodotto__meta { color:var(--color-text-secondary); font-size:12px; }
 .catalogo-prodotto__prezzo { display:flex; flex-direction:column; align-items:flex-end; white-space:nowrap; font-variant-numeric:tabular-nums; }
-.catalogo-prodotto__etichetta { font-size:11px; color:#bfc1cc; text-transform:uppercase; }
-.catalogo-prodotto__disponibilita { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; overflow-wrap:anywhere; }
+.catalogo-prodotto__prezzo > strong { font-size:15px; }
+.catalogo-prodotto__etichetta { font-size:10px; letter-spacing:.08em; color:var(--color-text-muted); text-transform:uppercase; }
+.catalogo-prodotto__disponibilita { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; overflow-wrap:anywhere; font-size:12px; color:var(--color-text-secondary); }
 .catalogo-prodotto__azioni { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.catalogo-prodotto__dettagli { grid-column:1/-1; border-top:1px solid #34353f; min-width:0; }
-.catalogo-prodotto__dettagli summary { cursor:pointer; align-content:center; color:#d4d5df; }
-.catalogo-prodotto__dettagli dl { margin:0; display:grid; grid-template-columns:1fr; gap:4px; }
-.catalogo-prodotto__dettagli dt { color:#bfc1cc; font-weight:600; }
+.catalogo-prodotto__dettagli { grid-column:1/-1; border-top:1px solid var(--color-border-light); min-width:0; }
+.catalogo-prodotto__dettagli summary { cursor:pointer; align-content:center; color:var(--color-text-secondary); font-size:12px; }
+.catalogo-prodotto__dettagli dl { margin:0; display:grid; grid-template-columns:1fr; gap:4px; font-size:13px; }
+.catalogo-prodotto__dettagli dt { color:var(--color-text-muted); font-weight:600; }
 .catalogo-prodotto__dettagli dd { margin:0 0 8px; overflow-wrap:anywhere; }
-.catalogo-prodotto--acquistato { border-left:3px solid #6ab38c; }
+.catalogo-prodotto--acquistato { border-left:3px solid var(--color-success); }
+.catalogo-prodotto--acquistato .catalogo-prodotto__nome > strong { color:var(--color-text-secondary); }
 .catalogo-risultati-negozi { display:flex; flex-wrap:wrap; gap:8px; }
 .catalogo-risultati-negozi h2 { flex-basis:100%; font-size:16px; margin:0; }
 @container (min-width:620px) {
   .catalogo-prodotti > ul { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 @container (min-width:1050px) {
-  .catalogo-prodotti > ul { grid-template-columns:1fr; gap:0; }
-  .catalogo-prodotto { grid-template-columns:minmax(250px,2fr) minmax(110px,.7fr) minmax(200px,1.5fr) auto; border-bottom:0; }
-  .catalogo-prodotto:last-child { border-bottom:1px solid #3c3d46; }
+  .catalogo-prodotti > ul { grid-template-columns:1fr; gap:0; border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
+  .catalogo-prodotto { grid-template-columns:minmax(250px,2.2fr) minmax(100px,.6fr) minmax(180px,1.2fr) minmax(0,auto); align-items:center; border:0; border-bottom:1px solid var(--color-border-light); border-radius:0; padding:8px 14px; }
+  .catalogo-prodotto:last-child { border-bottom:0; }
+  .catalogo-prodotto:hover { background:color-mix(in oklab, var(--color-primary) 7%, var(--color-surface)); }
+  .catalogo-prodotto--acquistato { border-left:3px solid var(--color-success); }
   .catalogo-prodotto__disponibilita, .catalogo-prodotto__azioni { grid-column:auto; }
   .catalogo-prodotto__azioni { justify-content:flex-end; }
-  .catalogo-prodotto__dettagli dl { grid-template-columns:120px minmax(0,1fr); }
+  .catalogo-prodotto__dettagli dl { grid-template-columns:150px minmax(0,1fr); }
 }
 
 .catalogo-informazioni { background:#131419; border:1px solid #3c3d46; padding:0 12px; font-size:14px; }
