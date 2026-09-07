@@ -27,7 +27,6 @@ export const SEZIONI_GUIDA: SezioneGuida[] = [
   { chiave: 'richieste', to: '/guida/richieste', titolo: 'Richieste dei Mementos', descrizione: '33 Richieste con bersaglio, debolezze, ricompense e stato; fiori e timbri di Jose', icona: <IconBook size={DIM} /> },
   { chiave: 'battaglia', to: '/guida/battaglia', titolo: 'Aiuto in battaglia', descrizione: 'Debolezze delle Ombre per area, negoziazione, danno tecnico, Staffetta, Speciali, Mietitore e Demoni del Tesoro', icona: <IconBolt size={DIM} /> },
   { chiave: 'citta', to: '/guida/citta', titolo: 'La città', descrizione: 'Quartieri e luoghi: negozi, ristoranti, attività, Confidenti, orari e sblocchi', icona: <IconHome size={DIM} /> },
-<<<<<<< HEAD
   { chiave: 'negozi', to: '/guida/negozi', titolo: 'Negozi e inventario', descrizione: '47 negozi e 499 articoli: armi, protezioni, accessori, oggetti, regali e cibo con prezzi, sblocchi e acquisti per partita', icona: <IconBolt size={DIM} /> },
   { chiave: 'libri', to: '/guida/libri', titolo: 'Libri', descrizione: '46 libri con avanzamento per sessioni; bonus e luoghi si sbloccano al completamento', icona: <IconBook size={DIM} /> },
   { chiave: 'attivita', to: '/guida/attivita', titolo: 'Attività e Doti sociali', descrizione: 'Mini-giochi, lavori, studio, libri e film con le note delle Doti; libri letti e film visti per partita', icona: <IconStar size={DIM} /> },
