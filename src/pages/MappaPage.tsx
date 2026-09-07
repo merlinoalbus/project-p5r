@@ -86,57 +86,128 @@ function IndiceMappe() {
   const gruppi = useMemo(() => radiciRaggruppate(mappe), [mappe]);
   const totaleMappe = mappe.length;
   const totaleSpilli = useMemo(() => mappe.reduce((s, m) => s + m.numeroSpilli, 0), [mappe]);
+  // Il luogo aperto nel pannello, e la discesa dentro di lui: `['tokyo','citta-shibuya']` vuol
+  // dire «sto guardando Shibuya, ci sono arrivato da Tokyo». Il percorso è uno stato della
+  // pagina e non dell'indirizzo perché è una sbirciata, non una destinazione: la destinazione è
+  // la mappa, e per quella c'è il pulsante che la apre.
+  const [percorso, setPercorso] = useState<string[]>([]);
+  const gruppoAperto = percorso.length > 0 ? gruppi.find((g) => g.versioni.some((v) => v.chiave === percorso[0])) ?? null : null;
+  const nodoAperto = gruppoAperto ? mappe.find((m) => m.chiave === percorso[percorso.length - 1]) ?? null : null;
+  const nomeDi = (m: MappaRiassuntoDto) => m.gruppoImmagini?.nome ?? nomePresentazioneMappa(m);
   return <div className="flex flex-col gap-4">
     <IntestazionePagina titolo="Mappe"
       sottotitolo={`Tutti i luoghi disegnati della guida: Tokyo, i quartieri e le planimetrie dei Palazzi. ${totaleMappe} mappe con ${totaleSpilli} spilli, raggruppate per il posto a cui appartengono.`} />
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
-      {/* L'indice era un elenco di titoli: undici radici e centinaia di planimetrie, tutte scritte
-          uguali, e per capire cosa fosse una si doveva aprirla. Una mappa però **si riconosce
-          guardandola** — la forma della pianta la distingue in un istante, il nome in tre secondi —
-          quindi ogni voce mostra ora la propria anteprima. Le radici sono poche e grosse: una
-          griglia di carte, non una lista. */}
-      <ul className="m-0 grid list-none grid-cols-1 items-start gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" aria-label="Mappe">
-        {gruppi.map(({ chiave, capofila, versioni }) => {
-          const sotto = versioni.reduce((acc, v) => {
-            const c = totali.conta(v.chiave);
-            return { mappe: acc.mappe + c.mappe, spilli: acc.spilli + c.spilli + v.numeroSpilli };
-          }, { mappe: 0, spilli: 0 });
-          const nome = capofila.gruppoImmagini?.nome ?? nomePresentazioneMappa(capofila);
-          const conFigli = versioni.some(v => (totali.figliDi.get(v.chiave) ?? []).length > 0);
-          // La voce Tokyo porta alla mappa canonica, non al visore: il reindirizzamento esiste
-          // comunque, ma un collegamento che rimbalza si vede, e non c'è ragione di farglielo fare.
-          const destinazione = capofila.chiave === TOKYO ? CITTA : urlMappa(capofila.chiave);
-          return <li key={chiave} className="card flex min-w-0 flex-col gap-2.5">
-            <Link to={destinazione} className="group flex items-start gap-3 no-underline text-text">
-              <AnteprimaMappa mappa={capofila} className="h-[76px] w-[104px]" />
-              <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="font-display text-[19px] leading-tight break-words group-hover:text-primary">{nome}</span>
-                <span className="flex flex-wrap items-center gap-1.5">
-                  <span className="chip text-[11px]">{NOME_TIPO_MAPPA[capofila.tipo]}</span>
-                  <span className="text-[12px] text-text-muted">
-                    {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : versioni.length > 1 ? `${versioni.length} versioni` : 'una planimetria'}
-                  </span>
-                </span>
-              </span>
-            </Link>
-            {/* Versioni e discendenti stanno **dentro la stessa piega**, chiusa. Aperte facevano
-                una colonna alta cinque anteprime dentro una griglia a tre colonne: le carte
-                diventavano di altezze diverse e l'indice, che serve a scorrere undici radici, si
-                allungava per pagine. La piega dice quante ce ne sono, e chi vuole guarda. */}
-            {(conFigli || versioni.length > 1) && <details>
-              <summary className="touch cursor-pointer py-1 text-[12px] text-text-muted" aria-label={`Mostra le mappe di ${nome}`}>
-                Luoghi e planimetrie ({sotto.mappe > 0 ? sotto.mappe : versioni.length})
-              </summary>
-              <div className="flex flex-col gap-2 pt-1">
-                {versioni.length > 1 && <ImmaginiLuogo mappe={versioni} nome={nome} />}
-                {conFigli && versioni.map(v => <AlberoLuoghi key={v.chiave} mappe={mappe} genitore={v.chiave} espandibile />)}
-              </div>
-            </details>}
-          </li>;
-        })}
-      </ul>
+      {/* **Le radici a sinistra, quel che contengono a destra.**
+          Prima ogni radice era una carta con dentro una piega, e aprire i «Luoghi e planimetrie»
+          di Tokyo faceva crescere quella cella di quarantasei righe in mezzo a una griglia a tre
+          colonne: la carta accanto restava alta due dita, sotto si apriva un buco di mille pixel,
+          e l'albero indentato usciva dalla larghezza della colonna. Non era un dettaglio da
+          sistemare: una griglia di carte tutte uguali non è il posto dove far crescere un albero.
+          Ora le radici sono un elenco stretto e sempre della stessa altezza, e il contenuto del
+          luogo scelto sta nel suo pannello, con la sua discesa e il suo scorrimento. */}
+      <div className="grid items-start gap-3 xl:grid-cols-[minmax(240px,300px)_minmax(0,1fr)]">
+        <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 sm:grid-cols-2 xl:grid-cols-1" aria-label="Mappe">
+          {gruppi.map(({ chiave, capofila, versioni }) => {
+            const sotto = versioni.reduce((acc, v) => {
+              const c = totali.conta(v.chiave);
+              return { mappe: acc.mappe + c.mappe, spilli: acc.spilli + c.spilli + v.numeroSpilli };
+            }, { mappe: 0, spilli: 0 });
+            const nome = nomeDi(capofila);
+            const conFigli = versioni.some(v => (totali.figliDi.get(v.chiave) ?? []).length > 0);
+            const apribile = conFigli || versioni.length > 1;
+            const aperto = gruppoAperto?.chiave === chiave;
+            return <li key={chiave} className="flex">
+              {/* La riga è **una scelta**, non un collegamento: apre il pannello. Ad aprire la
+                  mappa ci pensa il pulsante nel pannello, che dice quale mappa apre. Un luogo
+                  senza niente dentro non ha pannello da mostrare, e allora la riga porta
+                  direttamente alla sua planimetria. */}
+              {apribile
+                ? <button type="button" aria-expanded={aperto} onClick={() => setPercorso(aperto ? [] : [capofila.chiave])}
+                    className={`card card--cliccabile touch flex w-full items-center gap-3 text-left ${aperto ? 'border-primary bg-primary-bg' : ''}`}>
+                    <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className={`font-display text-[17px] leading-tight break-words ${aperto ? 'text-primary' : ''}`}>{nome}</span>
+                      <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[capofila.tipo]} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
+                    </span>
+                    <span aria-hidden className="shrink-0 text-text-muted">{aperto ? '▾' : '▸'}</span>
+                  </button>
+                : <Link to={capofila.chiave === TOKYO ? CITTA : urlMappa(capofila.chiave)} className="card card--cliccabile flex w-full items-center gap-3 no-underline text-text">
+                    <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="font-display text-[17px] leading-tight break-words">{nome}</span>
+                      <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[capofila.tipo]} · {sotto.spilli} spilli</span>
+                    </span>
+                  </Link>}
+            </li>;
+          })}
+        </ul>
+        {gruppoAperto && nodoAperto
+          ? <PannelloLuogo mappe={mappe} figliDi={totali.figliDi} gruppo={gruppoAperto} percorso={percorso}
+              nodo={nodoAperto} nome={nomeDi(nodoAperto)} onPercorso={setPercorso} onChiudi={() => setPercorso([])} />
+          : <p className="card m-0 hidden text-[13px] text-text-muted xl:block" role="status">
+              Scegli un luogo a sinistra per vedere che cosa contiene: quartieri, piani, planimetrie. Da qui si apre la mappa vera e propria.
+            </p>}
+      </div>
     </PageState>
   </div>;
+}
+
+/** Il pannello del luogo scelto: dove sono, che cosa c'è dentro, e come ci si entra.
+ *
+ * La discesa avviene **qui dentro**: un quartiere con sette planimetrie si apre nel pannello
+ * invece di cambiare pagina, così tornare indietro non costa un caricamento e le briciole in
+ * cima dicono sempre da dove si è passati. Aprire la mappa resta un gesto distinto, con un
+ * pulsante che dice quale mappa apre: le due cose si confondevano quando erano lo stesso clic. */
+function PannelloLuogo({ mappe, figliDi, gruppo, percorso, nodo, nome, onPercorso, onChiudi }: {
+  mappe: MappaRiassuntoDto[];
+  figliDi: Map<string | null, MappaRiassuntoDto[]>;
+  gruppo: { chiave: string; capofila: MappaRiassuntoDto; versioni: MappaRiassuntoDto[] };
+  percorso: string[];
+  nodo: MappaRiassuntoDto;
+  nome: string;
+  onPercorso: (p: string[]) => void;
+  onChiudi: () => void;
+}) {
+  const alRadice = percorso.length === 1;
+  const contenute = useMemo(
+    () => (figliDi.get(nodo.chiave) ?? []).slice().sort((a, b) => a.ordine - b.ordine || a.chiave.localeCompare(b.chiave)),
+    [figliDi, nodo.chiave],
+  );
+  const briciole = percorso.map((k) => mappe.find((m) => m.chiave === k)).filter((m): m is MappaRiassuntoDto => !!m);
+  const destinazione = nodo.chiave === TOKYO ? CITTA : urlMappa(nodo.chiave);
+  return <section className="card flex min-w-0 flex-col gap-3" aria-label={`Dentro ${nome}`}>
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <nav aria-label="Percorso" className="flex min-w-0 flex-1 flex-wrap items-center gap-1 text-[12px] text-text-muted">
+        {briciole.map((b, i) => <span key={b.chiave} className="flex items-center gap-1">
+          {i > 0 && <span aria-hidden>›</span>}
+          {i === briciole.length - 1
+            ? <span className="font-display text-[16px] uppercase leading-none text-text">{b.gruppoImmagini?.nome ?? nomePresentazioneMappa(b)}</span>
+            : <button type="button" className="touch text-text-secondary underline decoration-dotted underline-offset-2" onClick={() => onPercorso(percorso.slice(0, i + 1))}>{b.gruppoImmagini?.nome ?? nomePresentazioneMappa(b)}</button>}
+        </span>)}
+      </nav>
+      <Link to={destinazione} className="btn btn-primary btn-sm touch">Apri {nodo.chiave === TOKYO ? 'la mappa di Tokyo' : 'questa mappa'}</Link>
+      <button type="button" className="btn btn-ghost btn-sm touch xl:hidden" onClick={onChiudi}>Chiudi</button>
+    </div>
+    {/* Le versioni dello stesso luogo — la porzione occidentale, la planimetria intera — sono
+        varianti di una figura sola: stanno insieme, in cima, e non sparse fra i figli. */}
+    {alRadice && gruppo.versioni.length > 1 && <ImmaginiLuogo mappe={gruppo.versioni} nome={nome} />}
+    {contenute.length > 0
+      ? <div className="max-h-[min(72vh,860px)] overflow-y-auto pr-1">
+          <GriglieDelLuogo contenute={contenute} nome={nome} onScendi={(k) => onPercorso([...percorso, k])} />
+        </div>
+      : <p className="m-0 text-[13px] text-text-muted" role="status">Qui dentro non ci sono altre planimetrie: c’è solo questa.</p>}
+    {/* La discesa a riquadri mostra un piano per volta, ed è il modo giusto per scegliere dove
+        andare. Chi invece **cerca un nome** — «dov'è finita la banchina di Yongen-Jaya?» — ha
+        bisogno di vedere tutto insieme: l'albero completo resta qui sotto, chiuso, con il suo
+        scorrimento. È lo stesso elenco di prima, ma dentro un contenitore che lo contiene. */}
+    {contenute.length > 0 && <details className="border-t border-border-light pt-2">
+      <summary className="touch cursor-pointer text-[12px] text-text-muted">Elenco completo, con tutti i livelli</summary>
+      <div className="max-h-[420px] overflow-auto pt-2">
+        <AlberoLuoghi mappe={mappe} genitore={nodo.chiave} espandibile />
+      </div>
+    </details>}
+  </section>;
 }
 
 /** Un luogo che **contiene** mappe invece di esserne una.
@@ -203,7 +274,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero }: {
  * richiesta. Non si buttano: sono planimetrie vere, servono a chi cura l'atlante, ma non sono la
  * risposta alla domanda «dove devo andare».
  */
-function GriglieDelLuogo({ contenute, nome }: { contenute: MappaRiassuntoDto[]; nome: string }) {
+function GriglieDelLuogo({ contenute, nome, onScendi }: { contenute: MappaRiassuntoDto[]; nome: string; onScendi?: (chiave: string) => void }) {
   const [mostraSenzaSpilli, setMostraSenzaSpilli] = useState(false);
   // I fogli che l'estrazione ha trovato ma che nessun campo del gioco usa portano un nome che e'
   // una descrizione tecnica — «Immagini native che nessun campo usa — tela larga, disegno minuto»
@@ -214,12 +285,12 @@ function GriglieDelLuogo({ contenute, nome }: { contenute: MappaRiassuntoDto[]; 
     .sort((a, b) => Number(senzaNomeVero(a)) - Number(senzaNomeVero(b)));
   const senzaSpilli = contenute.filter((m) => m.numeroSpilli === 0);
   return <div className="flex flex-col gap-4">
-    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} etichetta={`Aree di ${nome}`} />}
+    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} etichetta={`Aree di ${nome}`} onScendi={onScendi} />}
     {senzaSpilli.length > 0 && <section className="flex flex-col gap-2" aria-label="Planimetrie senza spilli">
       <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraSenzaSpilli} onClick={() => setMostraSenzaSpilli((v) => !v)}>
         {mostraSenzaSpilli ? 'Nascondi' : 'Mostra'} le planimetrie senza spilli · {senzaSpilli.length}
       </button>
-      {mostraSenzaSpilli && <Griglia mappe={senzaSpilli} nome={nome} etichetta={`Planimetrie di ${nome} senza spilli`} />}
+      {mostraSenzaSpilli && <Griglia mappe={senzaSpilli} nome={nome} etichetta={`Planimetrie di ${nome} senza spilli`} onScendi={onScendi} />}
     </section>}
   </div>;
 }
@@ -230,10 +301,15 @@ function senzaPrefisso(titolo: string, nome: string): string {
   return titolo.startsWith(p) ? titolo.slice(p.length) : titolo;
 }
 
-function Griglia({ mappe, nome, etichetta }: { mappe: MappaRiassuntoDto[]; nome: string; etichetta: string }) {
+function Griglia({ mappe, nome, etichetta, onScendi }: { mappe: MappaRiassuntoDto[]; nome: string; etichetta: string; onScendi?: (chiave: string) => void }) {
   return <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3 2xl:grid-cols-4" aria-label={etichetta}>
-    {mappe.map((m) => <li key={m.chiave} className="flex">
-      <Link to={urlMappa(m.chiave)} className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text">
+    {mappe.map((m) => {
+      const titolo = senzaPrefisso(nomePresentazioneMappa(m), nome);
+      const dentro = m.numeroFigli > 0;
+      // Dentro il pannello dell'indice, un luogo che ne contiene altri **si apre lì**: cambiare
+      // pagina per poi tornare indietro, quando si sta ancora scegliendo dove andare, fa perdere
+      // il filo. Quelli che non contengono niente sono la fine della discesa e portano al visore.
+      const corpo = <>
         <span className="relative">
           <AnteprimaMappa mappa={m} className="aspect-[4/3] w-full" />
           {/* Il numero degli spilli sta **sull'anteprima**, non sotto il nome: e' il dato che fa
@@ -241,13 +317,19 @@ function Griglia({ mappe, nome, etichetta }: { mappe: MappaRiassuntoDto[]; nome:
           {m.numeroSpilli > 0 && <span aria-hidden className="chip chip--attivo absolute right-1.5 top-1.5 text-[11px]">{m.numeroSpilli}</span>}
         </span>
         <span className="flex flex-col gap-0.5">
-          <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{senzaPrefisso(nomePresentazioneMappa(m), nome)}</span>
+          <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
           <span className="text-[11px] text-text-muted">
-            {m.numeroSpilli > 0 ? `${m.numeroSpilli} spilli` : 'nessuno spillo'}{m.numeroFigli > 0 ? ` · ${m.numeroFigli} dentro` : ''}
+            {m.numeroSpilli > 0 ? `${m.numeroSpilli} spilli` : 'nessuno spillo'}{dentro ? ` · ${m.numeroFigli} dentro` : ''}
           </span>
         </span>
-      </Link>
-    </li>)}
+      </>;
+      const classi = 'card card--cliccabile group flex w-full flex-col gap-2 text-left no-underline text-text';
+      return <li key={m.chiave} className="flex">
+        {onScendi && dentro
+          ? <button type="button" className={`${classi} touch`} onClick={() => onScendi(m.chiave)} aria-label={`Apri ${titolo}: ${m.numeroFigli} mappe dentro`}>{corpo}</button>
+          : <Link to={urlMappa(m.chiave)} className={classi}>{corpo}</Link>}
+      </li>;
+    })}
   </ul>;
 }
 

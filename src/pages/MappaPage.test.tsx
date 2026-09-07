@@ -53,17 +53,24 @@ beforeEach(() => {
   });
 
 describe('MappaPage', () => {
-  it('l’indice elenca le radici con le mappe figlie e i collegamenti al visore', async () => {
+  it('l’indice apre una radice nel pannello e ne mostra le mappe', async () => {
     monta('/guida/mappe');
-    // Tokyo porta alla mappa canonica della Città, non al visore della sua planimetria. Il nome
-    // accessibile della carta comprende ora anche il tipo e i conteggi, quindi si ancora l'inizio.
-    expect(await screen.findByRole('link', { name: /^Tokyo/ })).toHaveAttribute('href', '/guida/citta');
-    expect(screen.getByRole('link', {name: 'Shibuya'})).not.toBeVisible();
-    fireEvent.click(screen.getByLabelText('Mostra le mappe di Tokyo'));
-    const tokyo = within(screen.getByRole('list', { name: 'Mappe di Tokyo' }));
-    expect(tokyo.getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
-    fireEvent.click(screen.getByLabelText('Mostra le mappe di Palazzo di Kamoshida'));
-    expect(within(screen.getByRole('list', { name: 'Mappe di Palazzo di Kamoshida' })).getByRole('link', { name: /Ingresso/ })).toBeInTheDocument();
+    // Le radici sono **scelte**, non collegamenti: aprono il pannello a fianco. Finché non se ne
+    // sceglie una, delle mappe contenute non c'è traccia nella pagina — prima stavano tutte lì,
+    // nascoste dentro una piega dentro la carta, e aprirla faceva crescere una cella della
+    // griglia di quarantasei righe.
+    const tokyo = await screen.findByRole('button', { name: /^Tokyo/ });
+    expect(screen.queryByRole('link', { name: /Shibuya/ })).toBeNull();
+    fireEvent.click(tokyo);
+    const pannello = within(screen.getByRole('region', { name: 'Dentro Tokyo' }));
+    // Aprire la mappa è un gesto distinto dallo sbirciare che cosa contiene, e per Tokyo la mappa
+    // è quella disegnata della Città.
+    expect(pannello.getByRole('link', { name: /Apri la mappa di Tokyo/ })).toHaveAttribute('href', '/guida/citta');
+    expect(within(screen.getByRole('list', { name: 'Aree di Tokyo' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
+    // Una radice per volta: aprendone un'altra, la prima si chiude.
+    fireEvent.click(screen.getByRole('button', { name: /^Palazzo di Kamoshida/ }));
+    expect(screen.queryByRole('region', { name: 'Dentro Tokyo' })).toBeNull();
+    expect(within(screen.getByRole('list', { name: 'Aree di Palazzo di Kamoshida' })).getByRole('link', { name: /Ingresso/ })).toBeInTheDocument();
   });
 
   it('il visore carica la mappa con la partita attiva e segna un collezionabile raccolto tramite l’API', async () => {
