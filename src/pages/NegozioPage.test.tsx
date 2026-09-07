@@ -69,8 +69,11 @@ describe('NegozioPage', () => {
     expect(await screen.findByRole('heading', { name: 'Untouchable' })).toBeInTheDocument();
     expect(screen.getByText('Kukri')).toBeInTheDocument();
     expect(screen.getByText('Non ancora')).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'Kukri acquistato' })).toBeDisabled();
-    expect(screen.getByText('Non ancora acquistabile')).toBeInTheDocument();
+    // Il perché lo dice la pastiglia «Non ancora»: la spunta è disabilitata e lo ripete nel suo
+    // titolo, invece di scrivere la stessa frase due volte sulla stessa riga.
+    const spunta = screen.getByRole('checkbox', { name: 'Kukri acquistato' });
+    expect(spunta).toBeDisabled();
+    expect(spunta.closest('label')).toHaveAttribute('title', 'Non ancora acquistabile: mancano dei requisiti');
     expect(screen.getByText('Veste')).toBeInTheDocument();
     expect(screen.getByText('Da verificare')).toHaveAttribute('title', 'grado Nero (spendere oltre 10.000 yen) — Condizione non verificabile dai dati della partita');
   });

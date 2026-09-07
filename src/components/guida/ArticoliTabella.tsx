@@ -32,13 +32,18 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<
       {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`}>{a.negozioNome}</Link>}
     </div>
     <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Prezzo</span><strong>{a.prezzo !== null ? `${a.prezzo.toLocaleString('it-IT')} ¥` : 'Non indicato'}</strong></div>
-    <div className="catalogo-prodotto__disponibilita"><ChipDisponibilita disponibilita={a.disponibilita} compatto />{!a.condizioni && a.disponibileDal && <span>{a.disponibileDal}</span>}{a.condizioni?.length===0&&<span>Nessun requisito aggiuntivo</span>}{a.condizioni?.length ? <span>{a.condizioni.length} requisiti · apri Dettagli</span>:null}</div>
+    {/* La colonna dice **se si può comprare**, e basta: c'era anche «2 requisiti · apri
+        Dettagli», che è un'istruzione scritta a mano dove serve un comando. Il numero è finito
+        dov'è il suo posto, cioè sulla riga dei Dettagli, che i requisiti li elenca davvero. */}
+    <div className="catalogo-prodotto__disponibilita"><ChipDisponibilita disponibilita={a.disponibilita} compatto />{!a.condizioni && a.disponibileDal && <span>{a.disponibileDal}</span>}{a.condizioni?.length === 0 && <span>Nessun requisito</span>}</div>
     <div className="catalogo-prodotto__azioni">
-      {partitaId && <label className="touch flex items-center gap-2"><input type="checkbox" className="w-5 h-5" checked={a.acquistato} disabled={occupato || acquistoBloccato} onChange={e => void cambia(e.target.checked)} aria-label={`${nome} acquistato`} />{acquistoBloccato ? 'Non ancora acquistabile' : 'Acquistato'}</label>}
-      {onModifica && <button type="button" className="btn btn-ghost touch" onClick={() => onModifica(a)} aria-label={`Correggi ${nome}`}>Modifica</button>}
+      {/* Una cosa sola: la spunta. «Non ancora acquistabile» stava sia qui sia nella pastiglia
+          accanto, e la stessa frase due volte sulla stessa riga sembra due informazioni. */}
+      {partitaId && <label className="touch flex items-center gap-2" title={acquistoBloccato ? 'Non ancora acquistabile: mancano dei requisiti' : undefined}><input type="checkbox" className="w-5 h-5" checked={a.acquistato} disabled={occupato || acquistoBloccato} onChange={e => void cambia(e.target.checked)} aria-label={`${nome} acquistato`} />Acquistato</label>}
+      {onModifica && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => onModifica(a)} aria-label={`Correggi ${nome}`}>Modifica</button>}
     </div>
     <details className="catalogo-prodotto__dettagli">
-      <summary className="touch">Dettagli{!a.verificato ? ' · fonte secondaria' : ''}</summary>
+      <summary className="touch">Dettagli{a.condizioni?.length ? ` · ${a.condizioni.length} ${a.condizioni.length === 1 ? 'requisito' : 'requisiti'}` : ''}{!a.verificato ? ' · fonte secondaria' : ''}</summary>
       <dl>
         {a.nomeIt && a.nomeIt !== a.nome && <><dt>Nome originale</dt><dd>{a.nome}</dd></>}
         <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>

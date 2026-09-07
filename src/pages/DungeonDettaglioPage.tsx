@@ -115,8 +115,12 @@ function VoceArea({ a, scelta, suggerita, onScegli, compatta }: {
     );
   }
   return (
+    // `shrink-0` non è un dettaglio: in una colonna flessibile con un tetto d'altezza, i figli si
+    // **restringono** per stare dentro, e diciotto voci in 70vh venivano schiacciate sotto la loro
+    // altezza naturale — il testo usciva dal riquadro e finiva sopra la voce successiva. Sono i
+    // «box appiccicati»: non mancava spazio fra le voci, si sovrapponevano.
     <button type="button" role="tab" aria-selected={scelta} onClick={onScegli} title={a.descrizione}
-      className={`touch flex w-full items-start gap-2.5 rounded-lg border px-2.5 py-2 text-left transition-colors ${
+      className={`touch flex w-full shrink-0 items-start gap-2.5 rounded-lg border px-2.5 py-2 text-left transition-colors ${
         scelta ? 'border-primary bg-primary-bg text-text' : 'border-border-light bg-white/[0.02] text-text-secondary hover:border-border hover:bg-white/[0.05] hover:text-text'
       } ${classiSuggerito(suggerita)}`}>
       <span className={`mt-[1px] w-6 shrink-0 text-right font-display text-[15px] leading-tight ${scelta ? 'text-primary' : 'text-text-muted'}`}>{a.ordine + 1}</span>
@@ -216,9 +220,9 @@ export function DungeonDettaglioPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && area && (
         <div className="flex flex-col gap-4">
-          <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
-
-          {/* ---- Intestazione: l'emblema grande, il nome, il tempo ---- */}
+          {/* ---- Intestazione: l'emblema grande, il nome, il tempo ----
+               «Indietro» sta **dentro** l'intestazione: da solo occupava una riga di sessanta
+               pixel in cima a una pagina che deve entrare in una schermata. */}
           <header className="card relative overflow-hidden">
             {/* L'emblema una seconda volta, enorme e appena visibile: fa da fondo alla scheda senza
                 aggiungere un'immagine che non c'è. È decorativo, quindi non lo legge nessuno. */}
@@ -227,7 +231,7 @@ export function DungeonDettaglioPage() {
             </span>
             <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
               <div className="flex shrink-0 items-center gap-3 sm:flex-col">
-                <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={96} />
+                <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} />
                 {quota !== null && (
                   <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} etichetta={`Avanzamento in ${d.nome}: ${d.collezionabiliGestiti} da raccogliere presi su ${d.collezionabili}`}>
                     <span className="font-display text-[17px] leading-none tabular-nums">{Math.round(quota * 100)}%</span>
@@ -236,7 +240,10 @@ export function DungeonDettaglioPage() {
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-2.5">
                 <div className="flex flex-col gap-1">
-                  <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button type="button" className="btn btn-ghost btn-sm touch -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
+                    <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
+                  </div>
                   <div className="flex flex-wrap items-center gap-2 text-[13px] text-text-secondary">
                     {d.sovrano && <span className="break-words">{d.sovrano}</span>}
                     {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
@@ -284,7 +291,7 @@ export function DungeonDettaglioPage() {
                 {/* Un dito di aria fra una voce e l'altra: a 2 px di distacco diciotto riquadri
                     bordati si leggono come un unico blocco rigato, ed era esattamente l'effetto
                     che si vedeva quando ogni voce aveva anche il bordo dorato del suggerimento. */}
-                <div className="card hidden max-h-[min(70vh,720px)] flex-col gap-1.5 overflow-y-auto p-2 lg:flex" role="tablist" aria-label="Aree">
+                <div className="card hidden max-h-[min(47vh,560px)] flex-col gap-1.5 overflow-y-auto p-2 lg:flex" role="tablist" aria-label="Aree">
                   {d.aree.map((a) => <VoceArea key={a.chiave} a={a} scelta={a.chiave === area.chiave} suggerita={areaSuggerita(a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
                 </div>
               </nav>
@@ -377,7 +384,7 @@ export function DungeonDettaglioPage() {
                       </select>
                     </label>
                   )}
-                  <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} altezza="max(420px, min(62vh, 720px))" onCambiato={() => void dati.ricarica()} />
+                  <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} altezza="max(300px, min(41vh, 560px))" onCambiato={() => void dati.ricarica()} />
                   <p className="m-0 text-[11px] text-text-muted">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
                 </>}
                 {!mappaScelta && !memento && <p className="m-0 rounded-md bg-white/[0.04] px-3 py-2 text-[12px] text-text-muted" role="status">
@@ -411,7 +418,7 @@ export function DungeonDettaglioPage() {
                     telefono diventava una finestrella da far scorrere dentro una pagina che già
                     scorreva. Da 1280 px in su, dove la colonna sta accanto alla mappa, si limita
                     all'altezza della mappa; sotto, cresce quanto serve. */}
-                <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0 xl:max-h-[calc(62vh+40px)] xl:overflow-y-auto">
+                <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0 xl:max-h-[calc(41vh+40px)] xl:overflow-y-auto">
                   {puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessun punto con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} gestiti nascosti)` : ''}.</li>}
                   {puntiVisibili.map((p) => (
                     <li key={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${p.chiave === selezionato ? 'bg-primary-bg' : ''} ${p.stato ? 'opacity-60' : ''}`}>

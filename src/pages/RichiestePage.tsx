@@ -28,6 +28,7 @@ import { PageState } from '../components/shared/PageState';
 import type { RichiestaDto, StatoRichiesta } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
+import { FregioSezione } from '../components/shared/FregioSezione';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
@@ -205,7 +206,8 @@ export function RichiestePage() {
 
           {foglio === 'jose' && d.jose && (
             <div className="flex flex-col gap-3 text-[13px]">
-              <section className="card flex flex-col gap-2">
+              <section className="card card--con-fregio flex flex-col gap-2">
+                <FregioSezione chiave="jose-fiori" />
                 <h2 className="m-0 font-display text-[17px] uppercase leading-none">Jose: fiori, timbri e scambi</h2>
                 <p className="m-0 text-text-secondary">{d.jose.introduzione}</p>
                 <div className="grid gap-1.5 md:grid-cols-2">
@@ -224,7 +226,8 @@ export function RichiestePage() {
                 </div>
               </section>
               {d.jose.scambi.length > 0 && (
-                <section className="card flex flex-col gap-2" aria-label="Scambi con Jose">
+                <section className="card card--con-fregio flex flex-col gap-2" aria-label="Scambi con Jose">
+                  <FregioSezione chiave="jose-scambi" forma="banda" />
                   <h3 className="m-0 font-display text-[15px] uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
                   <div className="overflow-x-auto">
                     <table className="tabella tabella--adattiva text-[12px]">

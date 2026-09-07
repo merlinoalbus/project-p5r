@@ -19,8 +19,18 @@ export const FAMIGLIA_FONT: Record<RuoloFont, string> = { display: 'P5R Display'
 
 const FORMATO_CSS: Record<FormatoFont, string> = { ttf: 'truetype', otf: 'opentype', woff: 'woff', woff2: 'woff2' };
 const ID_STYLE = 'p5r-font-utente';
-/** Latino di base, punteggiatura, virgolette e simboli comuni: mai le lettere accentate (U+00C0–U+00FF, tranne ×). */
-export const INTERVALLO_FONT_UTENTE = 'U+0020-007E, U+00A0-00BF, U+00D7, U+2010-2027, U+20AC';
+/** Latino di base, **lettere accentate comprese**, punteggiatura e simboli comuni.
+ *
+ * Fino a oggi l'intervallo si fermava a U+00BF: le accentate erano escluse di proposito, perché nei
+ * font della comunità sono «spesso mappate ma vuote», e una lettera vuota è peggio di una lettera
+ * presa da un altro carattere. La conseguenza però si vedeva in ogni titolo — «LA CITTÀ» con la À
+ * di un'altra famiglia, più sottile, in mezzo a lettere pesanti — ed è il rilievo dell'utente.
+ *
+ * La causa si toglie all'origine: `scripts/font-italiano.py` **disegna** nel font le lettere che gli
+ * mancano, prendendo la base dal font stesso e aggiungendoci l'accento. Passato di lì, un font le ha
+ * davvero, e l'intervallo può comprenderle. Un font caricato senza passare dallo script e senza
+ * accentate lascerebbe uno spazio vuoto: è la ragione per cui lo script sta nel repository. */
+export const INTERVALLO_FONT_UTENTE = 'U+0020-007E, U+00A0-00FF, U+2010-2027, U+20AC';
 
 /** Regole @font-face per i ruoli con un file caricato (la data di aggiornamento nel querystring invalida la cache). */
 export function regoleFontFace(elenco: FontDto[]): string {
