@@ -9,7 +9,7 @@ vi.mock('../components/guida/ArticoliTabella', () => ({ ArticoliTabella: () => <
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ titolo }: { titolo: string }) => <div>Mappa {titolo}</div> }));
 
 describe('InventariPage', () => {
-  beforeEach(() => { usePartitaStore.setState({ attiva: null }); getOggettiGuida.mockResolvedValue({ consumabili: [], chiaveEMateriali: [], abiti: { elenco: [] } }); ricercaArticoli.mockResolvedValue({ totale: 2, articoli: [] }); });
+  beforeEach(() => { usePartitaStore.setState({ attiva: null }); getOggettiGuida.mockResolvedValue({ consumabili: [], chiaveEMateriali: [], abiti: { elenco: [] } }); ricercaArticoli.mockImplementation(({ categoria }: { categoria?: string }) => Promise.resolve(categoria === undefined ? { totale: 2, articoli: [{ nome: 'Cartolina', nomeIt: 'Cartolina', fonte: 'test', negozioChiave: 'test', negozioNome: 'Test' }] } : { totale: 0, articoli: [] })); });
   it('espone categorie, ricerca e stato vuoto', async () => {
     render(<MemoryRouter><InventariPage /></MemoryRouter>);
     expect(await screen.findByRole('tab', { name: 'Armi da mischia' })).toBeInTheDocument();
