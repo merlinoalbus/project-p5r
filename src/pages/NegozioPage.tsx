@@ -18,7 +18,7 @@ import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import type { ElementoCatalogoDto } from '../types';
-import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 
 export function NegozioPage() {
   const { chiave = '' } = useParams();
@@ -54,7 +54,6 @@ export function NegozioPage() {
               <span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span>
               {n.confidente && <Link to={`/confidenti/${n.confidente.chiave}`} className="chip chip--attivo no-underline">{n.confidente.nome}</Link>}
               <ChipDisponibilita disponibilita={n.disponibilita} />
-              <CollegamentoMappa tipo="negozio" chiave={n.chiave} compatto />
             </div>
             <details className="catalogo-informazioni"><summary className="touch">Informazioni sul negozio{n.quartiereNome ? ` · ${n.quartiereNome}` : ''}</summary>
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-text-secondary">
@@ -75,6 +74,7 @@ export function NegozioPage() {
             {modulo === 'negozio' && elementoNegozio && <ModuloCatalogo tipo="negozio" elemento={elementoNegozio} onChiudi={() => setModulo(null)} onSalvato={() => { setModulo(null); void dati.ricarica(); }} />}
             <p className="m-0 text-[12px] text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
           </div>
+          <DoveSiTrova tipo="negozio" chiave={n.chiave} altezza={300} />
           {n.articoliElenco.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               {categorie.length > 1 && (
