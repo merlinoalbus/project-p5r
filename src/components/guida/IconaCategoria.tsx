@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react';
 import { IconBolt, IconBook, IconHome, IconMask, IconStar } from '../shared/icons';
 import { IconBussola, IconChiave, IconCuore, IconFilm, IconGioco, IconGoccia, IconNegozio, IconScudo, IconValigetta } from '../shared/iconeGuida';
-import { AssetImg } from '../shared/AssetImg';
+import { useAsset } from '../../stores/assetStore';
 
 const ICONE: Record<string, (size: number) => ReactNode> = {
   // negozi
@@ -32,21 +32,35 @@ interface Props {
   className?: string;
 }
 
-/** Cartiglio rosso a taglio diagonale con l'icona della categoria (stella se sconosciuta).
+/** L'icona di una categoria: **l'illustrazione se c'è, altrimenti il cartiglio rosso col tratto**.
  *
- * **La figura disegnata a mano è la riserva, non il traguardo.** Prima qui c'era solo l'SVG in
- * codice — il libretto bianco sui libri, la pellicola sui film, il pad sui videogiochi — e non
- * c'era nessun modo di sostituirlo con la grafica vera: l'asset non veniva nemmeno cercato.
- * Adesso si cerca `ui/categoria-<chiave>` come per le icone d'azione, e finché Codex non l'ha
- * consegnata resta l'SVG. Le chiavi sono il censimento: aggiungerne una qui vuol dire aggiungere
- * una riga a `docs/grafica/fabbisogno.md`. */
+ * Due grafiche diverse vogliono due contenitori diversi, e infilarle nello stesso è stato un
+ * errore che si vedeva a colpo d'occhio: il cartiglio è un parallelogramma **rosso pieno** nato
+ * per ospitare un segno bianco a un tratto: mettendoci dentro l'illustrazione — che ha già il suo
+ * nero, il suo bianco e la sua ombra rossa — si ottengono due grafiche sovrapposte, il disegno
+ * schiacciato al 60% dentro un rombo e nessuna delle due leggibile.
+ *
+ * Quindi: quando l'asset `ui/categoria-<chiave>` c'è, **è lui l'icona**, mostrata intera e senza
+ * fondo, come le piastrelle della Guida; quando non c'è, resta il cartiglio con l'SVG in codice,
+ * che per un segno a un tratto è il vestito giusto. Le due misure sono uguali, quindi il giorno in
+ * cui una figura arriva non si sposta niente.
+ *
+ * Le chiavi sono il censimento: aggiungerne una qui vuol dire aggiungere una riga a
+ * `docs/grafica/fabbisogno.md`. */
 export function IconaCategoria({ categoria, dimensione = 28, etichetta, className }: Props) {
   const icona = ICONE[categoria] ?? ICONE.altro;
-  const lato = Math.round(dimensione * 0.6);
+  const url = useAsset(`ui/categoria-${categoria}`);
+  const comune = { role: etichetta ? ('img' as const) : undefined, 'aria-label': etichetta, 'aria-hidden': etichetta ? undefined : true };
+  if (url) {
+    return (
+      <span className={`inline-flex shrink-0 items-center justify-center ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} {...comune}>
+        <img src={url} alt="" aria-hidden draggable={false} className="h-full w-full object-contain" />
+      </span>
+    );
+  }
   return (
-    <span className={`icona-categoria ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} role={etichetta ? 'img' : undefined} aria-label={etichetta} aria-hidden={etichetta ? undefined : true}>
-      <AssetImg nome={`ui/categoria-${categoria}`} alt="" decorativa className="object-contain"
-        style={{ width: lato, height: lato }} fallback={icona(lato)} />
+    <span className={`icona-categoria ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} {...comune}>
+      {icona(Math.round(dimensione * 0.6))}
     </span>
   );
 }

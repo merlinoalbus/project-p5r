@@ -37,15 +37,23 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
+import { usePartitaStore } from '../stores/partitaStore';
 
 function Luogo({ l }: { l: LuogoDto }) {
   const sugg = useSuggerimenti();
+  // **Il posto che non c'è ancora resta in elenco, e lo dice.** La guida serve anche a sapere che
+  // cosa arriverà: toglierlo è quel che fa la mappa — un pin dove non c'è niente manda a cercare
+  // a vuoto — ma qui si sta leggendo, non camminando.
+  const nonAncora = l.disponibilita?.stato === 'bloccato';
+  const perche = l.disponibilita?.requisiti.filter((r) => r.stato === 'rosso').map((r) => r.dettaglio || r.testo).join(' · ');
   return (
-    <li className={`card flex flex-col gap-1 text-[13px] ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
+    <li className={`card flex flex-col gap-1 text-[13px] ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
       <div className="flex flex-wrap items-center gap-2">
         <strong className="text-[15px]">{l.nome}</strong>
         <span className="chip">{NOME_TIPO_LUOGO[l.tipo] ?? l.tipo}</span>
         {sugg.evidenziato('luoghi', l.chiave) && <TargaSuggerito motivo={sugg.motivo('luoghi', l.chiave)} compatta />}
+        {nonAncora && <span className="chip chip--attivo text-[11px]" title={perche || undefined}>Non ancora nel mondo</span>}
+        {!nonAncora && l.condizioni && l.disponibilita && <span className="chip text-[11px]" title="La condizione scritta dalla guida risulta soddisfatta in questa partita">sbloccato</span>}
         {l.quando && <span className="chip">{l.quando === 'entrambe' ? 'giorno e sera' : l.quando}</span>}
         {!l.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
       </div>
@@ -78,7 +86,9 @@ function Luogo({ l }: { l: LuogoDto }) {
 export function QuartierePage() {
   const { chiave = '' } = useParams();
   const navigate = useNavigate();
-  const dati = useCarica(() => getQuartiere(chiave), [chiave]);
+  const attiva = usePartitaStore((s) => s.attiva);
+  // La partita serve ai luoghi: senza, non si puo' dire quali a quel punto non ci sono ancora.
+  const dati = useCarica(() => getQuartiere(chiave, attiva?.id), [chiave, attiva?.id]);
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
   const [configuraIngresso,setConfiguraIngresso]=useState(false);
