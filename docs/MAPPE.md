@@ -263,3 +263,70 @@ Stato al 2026-09-04: **13.1 fatto** (migrazione 027, `sincronizzaMappe`, `mappeS
 
 13.1 modello + API + migrazione + esportazione/importazione → 13.2 visore → 13.3 editor → 13.4 integrazione → 13.5/12.4 home «Oggi» →
 13.6 asset (i prompt §18/§19 sono già censiti; l'app funziona con le riserve SVG e con le immagini caricate dall'utente).
+
+---
+
+## La prova delle sovrapposizioni sulla mappa di Tokyo
+
+La collocazione di `collocazioneTokyo.ts` **non è a occhio**: è calcolata, e si riverifica con
+questo script. Serve perché una sovrapposizione non si vede sempre — dipende dalla larghezza della
+finestra e da quali luoghi sono sbloccati nella partita — e «sembra a posto» non è una prova.
+
+Da incollare nella console del browser su `/guida/citta`. Restituisce il numero di sovrapposizioni
+fra figure e targhe, e cosa esce dalla tela.
+
+```js
+window.__misuraTokyo = () => {
+  const box = document.querySelector('[role="img"][aria-label^="Mappa di Tokyo"]');
+  if (!box) return { errore: 'mappa assente' };
+  const b = box.getBoundingClientRect();
+  const pezzi = [];
+  for (const a of box.querySelectorAll(':scope > a')) {
+    const nome = (a.getAttribute('title') || a.textContent).split(' — ')[0];
+    const figli = [...a.children];
+    // la targa esce dal riquadro dell'ancora: si misurano i figli, non l'ancora
+    if (figli.length === 0) { pezzi.push({ nome, tipo: 'targa', r: a.getBoundingClientRect() }); continue; }
+    for (const c of figli) pezzi.push({ nome, tipo: c.tagName === 'IMG' ? 'figura' : 'targa', r: c.getBoundingClientRect() });
+  }
+  const sovr = [];
+  for (let i = 0; i < pezzi.length; i++) for (let j = i + 1; j < pezzi.length; j++) {
+    const A = pezzi[i], B = pezzi[j];
+    if (A.nome === B.nome) continue;
+    const w = Math.min(A.r.right, B.r.right) - Math.max(A.r.left, B.r.left);
+    const h = Math.min(A.r.bottom, B.r.bottom) - Math.max(A.r.top, B.r.top);
+    if (w > 1 && h > 1) sovr.push(`${A.nome}/${A.tipo} × ${B.nome}/${B.tipo} = ${Math.round(w)}×${Math.round(h)}px`);
+  }
+  const fuori = pezzi.filter((p) => p.r.left < b.left - 1 || p.r.right > b.right + 1 || p.r.top < b.top - 1 || p.r.bottom > b.bottom + 1);
+  return { larghezza: Math.round(b.width), pezzi: pezzi.length, sovrapposizioni: sovr.length, elenco: sovr, fuoriDallaTela: fuori.map((p) => `${p.nome}/${p.tipo}`) };
+};
+window.__misuraTokyo();
+```
+
+**Va misurato il caso peggiore**, cioè con tutto visibile: con una partita in corso i Palazzi sono
+quasi sempre uno solo per volta, e una collocazione sbagliata non si manifesta. Per ottenerlo si
+tolgono le date dalle risposte, senza toccare i dati:
+
+```js
+if (!window.__patchMisura) {
+  const orig = window.fetch; window.__patchMisura = true;
+  window.fetch = async (...a) => {
+    const r = await orig(...a);
+    const u = String(typeof a[0] === 'string' ? a[0] : a[0].url || '');
+    if (!/\/api\/compendio\/(citta|dungeon)/.test(u)) return r;
+    const j = await r.clone().json();
+    if (Array.isArray(j.data)) j.data = j.data.map((x) => ({ ...x, sbloccoData: null, finestra: null }));
+    return new Response(JSON.stringify(j), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+}
+```
+
+Poi si ricarica la pagina e si rimisura. **Atteso: `sovrapposizioni: 0` e `fuoriDallaTela: []`** a
+375, 820, 1280 e 1440 px di finestra.
+
+Perché una sola tabella di posizioni basta a tutte le larghezze: il corpo delle targhe è in `cqw`,
+cioè in frazioni della tela, e non in pixel a scaglioni. Con una misura fissa la targa cresceva in
+proporzione quando la tela si stringeva, e a 780 px tornavano dodici sovrapposizioni che a 1020 px
+non c'erano. Sotto i 680 px la tela non si stringe più: si scorre.
+
+Il perché di ogni scelta (nomi corti sulle targhe, targhe che vanno a capo, fermate chiuse ridotte
+al pallino) sta nei commenti di `src/components/mappe/MappaTokyo.tsx`.

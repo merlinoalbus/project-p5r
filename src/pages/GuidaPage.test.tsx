@@ -19,7 +19,11 @@ describe('GuidaPage', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Guida' })).toBeInTheDocument();
     const voci = screen.getAllByRole('listitem');
     expect(voci).toHaveLength(SEZIONI_GUIDA.length);
-    expect(screen.getByRole('link', { name: /Palazzi e Dedali/ })).toHaveAttribute('href', '/guida/dungeon');
+    // «Palazzi», non più «Palazzi e Dedali»: l'unico Dedalo che ci resta è Iweleth, e i Memento
+    // hanno la loro pagina. Si cerca il titolo della piastrella e non il nome accessibile, che
+    // incolla titolo e descrizione senza spazio e renderebbe la prova un indovinello.
+    expect(screen.getByText('Palazzi', { selector: 'span' }).closest('a')).toHaveAttribute('href', '/guida/dungeon');
+    expect(screen.queryByRole('link', { name: /Palazzi e Dedali/ })).toBeNull();
     expect(screen.getByRole('link', { name: /Guida giorno per giorno/ })).toHaveAttribute('href', '/guida/percorso');
     expect(screen.getByText('Confidenti', { selector: 'span' }).closest('a')).toHaveAttribute('href', '/partita?scheda=confidenti');
     // senza asset: riserva vettoriale, nessuna immagine

@@ -9,7 +9,8 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
-import type { MappaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
+import { usePartitaStore } from '../stores/partitaStore';
+import type { MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
 
 const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async () => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), urlImmagine: vi.fn(() => '/api/immagini/mappa/x/file'), getImmagini: vi.fn(() => Promise.resolve([])) }));
 vi.mock('../services/api', () => api);
@@ -18,22 +19,110 @@ const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo:
   spilli: [{ id: 1, mappaChiave: chiave, tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#3b82f6', nome: chiave === 'tokyo' ? 'Shibuya' : 'Untouchable', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '' }] });
 
 describe('CittaPage', () => {
-  it('mostra la mappa di Tokyo incorporata (con «Schermo intero» e «Modifica mappa») e le piastrelle dei quartieri', async () => {
+  it('mostra una sola Tokyo — quella disegnata — e le piastrelle dei quartieri', async () => {
+    // La pagina montava anche `MappaIncorporata chiave="tokyo"`: la stessa città due volte, con
+    // due interazioni e nessun modo di capire quale fosse quella buona. La prova che conta è
+    // che il visore dell'atlante non ci sia più e che di Tokyo ce ne sia **una**.
     api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' }] as QuartiereRiassuntoDto[]);
     api.getMappa.mockResolvedValue(mappa('tokyo', 'Tokyo'));
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    expect(await screen.findByRole('application', { name: 'Mappa: Tokyo' })).toBeInTheDocument();
-    expect(api.getMappa).toHaveBeenCalledWith('tokyo', undefined);
-    expect(screen.getByRole('button', { name: 'Passaggio: Shibuya' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Schermo intero' }));
-    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--intero');
-    fireEvent.click(screen.getByRole('button', { name: 'Torna alla pagina' }));
-    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--incorporato');
-    fireEvent.click(screen.getByRole('button', { name: 'Schermo intero' }));
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--incorporato');
-    expect(screen.getByRole('link', { name: 'Modifica mappa' })).toHaveAttribute('href', '/guida/mappe/tokyo/modifica');
+    expect(await screen.findByRole('img', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
+    expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
+    expect(api.getMappa).not.toHaveBeenCalled();
+    expect(screen.queryByRole('link', { name: 'Modifica mappa' })).toBeNull();
     expect(within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/mondo/quartiere/shibuya');
+  });
+
+  it('sulla mappa disegnata il quartiere porta alla sua mappa, non a un secondo visore di Tokyo', async () => {
+    api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' }] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const tokyo = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    const cartellino = within(tokyo).getByTitle('Shibuya');
+    expect(cartellino).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
+  });
+
+  it('il clic su un quartiere apre l’ingresso configurato, non sempre il nodo d’atlante', async () => {
+    // «devo poter scegliere il punto di apertura del click»: l'ingresso si configura dalla scheda
+    // del quartiere e porta mappa + punto + ingrandimento. Era già salvato, ma questa mappa lo
+    // ignorava: si poteva sceglierlo e non vederlo mai usato.
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '',
+        ingresso: { mappa: 'shibuya-sottopasso', nome: 'Sottopasso di Shibuya', x: 42.5, y: 61, zoom: 3 } },
+      { chiave: 'ueno', nome: 'Ueno', mappaChiave: 'citta-ueno', luoghi: 3, verificati: 3, sblocco: null, descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    expect(within(mappa).getByTitle('Shibuya')).toHaveAttribute('href', '/guida/mappe/shibuya-sottopasso?x=42.5&y=61&zoom=3');
+    // e chi non l'ha configurato continua ad aprire il proprio nodo, com'è giusto
+    expect(within(mappa).getByTitle('Ueno')).toHaveAttribute('href', '/guida/mappe/citta-ueno');
+  });
+
+  it('la scheda del quartiere mostra la stessa sagoma della mappa composta', async () => {
+    // Shujin è il caso che smaschera una tabella di corrispondenza inventata: la chiave del
+    // quartiere è `shujin-academy` ed è anche il nome del file. Se la scheda cercasse
+    // `citta-shujin-academy` — la vecchia anteprima del nodo d'atlante — resterebbe vuota.
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' },
+      { chiave: 'shujin-academy', nome: 'Shujin Academy', mappaChiave: null, luoghi: 4, verificati: 4, sblocco: null, descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const schede = within(await screen.findByRole('list', { name: 'Quartieri' }));
+    expect(schede.getByAltText('Sagoma di Shibuya sulla mappa di Tokyo')).toHaveAttribute('src', '/asset/mappe/lmap/tokyo/shibuya.png');
+    expect(schede.getByAltText('Sagoma di Shujin Academy sulla mappa di Tokyo')).toHaveAttribute('src', '/asset/mappe/lmap/tokyo/shujin-academy.png');
+    // niente più anteprime del nodo d'atlante nella griglia
+    expect(document.querySelector('.miniatura-mappa')).toBeNull();
+  });
+
+  it('mappa e schede sono una selezione sola: si accendono a vicenda', async () => {
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '' },
+      { chiave: 'ueno', nome: 'Ueno', mappaChiave: 'citta-ueno', luoghi: 3, verificati: 3, sblocco: null, descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    const scheda = within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ });
+    const cartellino = within(mappa).getByTitle('Shibuya');
+    const sagomaSulla = (el: HTMLElement) => el.querySelector('img')!.getAttribute('style') ?? '';
+
+    // a riposo: contorno bianco da tutte e due le parti
+    expect(sagomaSulla(cartellino)).toContain('#fff)');
+    fireEvent.mouseEnter(scheda);
+    // dalla scheda si accende il cartellino
+    expect(sagomaSulla(cartellino)).toContain('#ffd23f)');
+    expect(sagomaSulla(scheda)).toContain('#ffd23f)');
+    // e non si accende quello di Ueno: l'oro dice *quale*, e se si accendesse tutto non direbbe niente
+    expect(sagomaSulla(within(mappa).getByTitle('Ueno'))).toContain('#fff)');
+    fireEvent.mouseLeave(scheda);
+    expect(sagomaSulla(cartellino)).toContain('#fff)');
+
+    // e dalla mappa si accende la scheda
+    fireEvent.mouseEnter(cartellino);
+    expect(sagomaSulla(scheda)).toContain('#ffd23f)');
+  });
+
+  it('quel che è chiuso sulla mappa è un pallino col nome, non una figura', async () => {
+    // Due chiusure diverse, e devono comportarsi allo stesso modo: Ikebukuro apre il 1° settembre
+    // e oggi è l'11 aprile; Ginza non è chiusa dal calendario, ma nella guida non ha una scheda,
+    // quindi non si può aprire. Una sagoma con la targa dice «vieni qui»: dirlo dove non si può
+    // entrare è una promessa che la mappa non mantiene.
+    usePartitaStore.setState({ attiva: { id: 3, nome: 'Prova', dataGioco: '04-11' } as PartitaDto });
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, sbloccoData: null, descrizione: '' },
+      { chiave: 'ikebukuro', nome: 'Ikebukuro', mappaChiave: 'citta-ikebukuro', luoghi: 2, verificati: 2, sblocco: '1 settembre', sbloccoData: '09-01', descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    expect(within(mappa).getByTitle('Shibuya')).toBeInTheDocument();
+    expect(within(mappa).queryByTitle('Ikebukuro')).toBeNull();
+    expect(within(mappa).queryByTitle('Ginza')).toBeNull();
+    // il nome resta comunque leggibile, sul pallino
+    const nomiPallini = [...mappa.querySelectorAll('circle > title')].map((t) => t.textContent);
+    expect(nomiPallini).toContain('Ikebukuro — dal 09-01');
+    expect(nomiPallini).toContain('Ginza');
+    // e la scheda del quartiere chiuso lo dice, perché lassù non c'è niente da accendere
+    const scheda = within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Ikebukuro/ });
+    expect(within(scheda).getByText(/Non ancora aperto/)).toBeInTheDocument();
+    usePartitaStore.setState({ attiva: null });
   });
 });
 
