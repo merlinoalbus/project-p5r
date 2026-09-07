@@ -124,8 +124,10 @@ router.get('/cruciverba', validate({ query: queryDomande }), (req, res) => {
 });
 router.delete('/citta/:chiave/ingresso',validate({params:z.object({chiave:z.string().min(1).max(80)})}),(req,res)=>{impostaIngressoQuartiere(String(req.params.chiave),null);res.status(204).end();});
 router.put('/citta/:chiave/ingresso',validate({params:z.object({chiave:z.string().min(1).max(80)}),body:z.object({mappa:z.string().min(1).max(200),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6).default(2.5)}).strict()}),(req,res)=>{res.json(impostaIngressoQuartiere(String(req.params.chiave),req.body));});
-router.get('/citta', (_req, res) => {
-  res.json(elencaQuartieri());
+// Con `?partita` ogni quartiere dice anche se e' gia' nel mondo: le condizioni di sblocco non sono
+// solo date, e senza la partita non si possono valutare.
+router.get('/citta', validate({ query: queryDomande }), (req, res) => {
+  res.json(elencaQuartieri((req.query as unknown as { partita?: number }).partita));
 });
 router.get('/citta/:chiave', validate({ params: z.object({ chiave: z.string().min(1).max(80) }) }), (req, res) => {
   res.json(dettaglioQuartiere(String(req.params.chiave)));

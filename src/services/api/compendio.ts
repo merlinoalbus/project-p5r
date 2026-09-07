@@ -50,8 +50,8 @@ export const getNegozio = (chiave: string, partita?: number): Promise<NegozioDet
 export const ricercaArticoli = (filtro: { q?: string; categoria?: string; per?: string }, partita?: number): Promise<RicercaArticoliDto> => apiGet(`/compendio/articoli${queryString({ ...filtro, partita })}`);
 /** Cruciverba di Leblanc (con risolti della partita se indicata). */
 export const getCruciverba = (partita?: number): Promise<CruciverbaTuttiDto> => apiGet(`/compendio/cruciverba${queryString({ partita })}`);
-/** Quartieri della città con conteggi. */
-export const getQuartieri = (): Promise<QuartiereRiassuntoDto[]> => apiGet('/compendio/citta');
+/** Quartieri della città con conteggi; con la partita, anche se sono già nel mondo. */
+export const getQuartieri = (partita?: number): Promise<QuartiereRiassuntoDto[]> => apiGet(`/compendio/citta${queryString({ partita })}`);
 /** Scheda di un quartiere con i luoghi. */
 export const getQuartiere = (chiave: string): Promise<QuartiereDettaglioDto> => apiGet(`/compendio/citta/${encodeURIComponent(chiave)}`);
 /** Attività, lavori, libri e film (con letture della partita se indicata). */

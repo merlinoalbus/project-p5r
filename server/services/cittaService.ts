@@ -10,6 +10,8 @@ import type { LuogoDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassunto
 import { nowIso } from '../db/dbService.js';
 import { importaImmagineDaUrl } from './immaginiService.js';
 import { datiGuida } from './richiesteService.js';
+import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
+import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | null; fonte: string; licenza: string; larghezza: number | null; altezza: number | null; note: string }
 
@@ -38,12 +40,56 @@ function nomiConfidenti(): Map<string, string> {
  *  dalle richieste dei Memento, che a quella pagina puntano. */
 const NON_UN_QUARTIERE = new Set(['mementos']);
 
-/** Quartieri in ordine con conteggi dei luoghi. */
-export function elencaQuartieri(): QuartiereRiassuntoDto[] {
+/** Le regole di sblocco dei quartieri, scritte a mano in `sblocco-quartieri.json`.
+ *
+ * Nella tabella `quartiere` lo sblocco è prosa — «Confidente Emperor (Yusuke) Rango 3», «lettura
+ * del libro "Dolci cinesi"», «sbloccato durante l'infiltrazione al Palazzo di Okumura» — e solo
+ * sette quartieri su ventitré hanno anche una data. La prosa resta e si continua a mostrarla; qui
+ * c'è la stessa cosa nella forma che il valutatore capisce.
+ *
+ * Perché non si legge la prosa: il lettore che l'app ha per i negozi non riconosce quella forma e,
+ * soprattutto, spezza gli «oppure» in requisiti separati che poi pretende **tutti** — cioè
+ * bloccherebbe quartieri che sono aperti. Un errore silenzioso, su una condizione che decide che
+ * cosa si vede sulla mappa. */
+function regoleSblocco(): Map<string, RequisitoSpillo[]> {
+  const dati = datiGuida<{ quartieri?: Array<{ chiave: string; condizioni: unknown }> }>('sblocco-quartieri');
+  const out = new Map<string, RequisitoSpillo[]>();
+  for (const q of dati?.quartieri ?? []) {
+    const condizioni = normalizzaCondizioniSpillo(q.condizioni);
+    if (condizioni.length > 0) out.set(q.chiave, condizioni);
+  }
+  return out;
+}
+
+/** Se il quartiere, al punto in cui è la partita, esiste già nel mondo.
+ *
+ * Senza partita non c'è niente da decidere: si vede tutto. **Solo il rosso nasconde**: quando una
+ * condizione non è verificabile — la partita non ha ancora un giorno, per esempio — resta un
+ * dubbio, e un dubbio non toglie un quartiere dalla mappa. Un rango di Confidente troppo basso o
+ * un libro non letto sono invece fatti che l'app conosce, e sono un no.
+ *
+ * Nota di contratto, perché tocca una regola condivisa: in `shared/condizioniSpillo.ts` il rango
+ * di un Confidente è un *prerequisito*, non una *presenza* — la cosa c'è, semplicemente non puoi
+ * ancora usarla — e per un negozio dentro un quartiere resta così. Per il **quartiere stesso**,
+ * che è una destinazione radice, il rango decide se ci puoi arrivare: cioè se, per te, c'è.
+ * (Decisione dell'utente, 7 settembre 2026.) */
+function disponibilitaQuartiere(chiave: string, regole: Map<string, RequisitoSpillo[]>, st: StatoDisponibilita | null): { disponibile: boolean; bloccoMotivo: string | null } {
+  const condizioni = regole.get(chiave);
+  if (!st || !condizioni) return { disponibile: true, bloccoMotivo: null };
+  const esito = valutaRequisiti(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c) })) as RequisitoDisponibilita[], st);
+  if (esito.stato !== 'bloccato') return { disponibile: true, bloccoMotivo: null };
+  return { disponibile: false, bloccoMotivo: esito.requisiti.map((r) => r.dettaglio).join(' · ') };
+}
+
+/** Quartieri in ordine con conteggi dei luoghi; con una partita, anche se sono già nel mondo. */
+export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
   const righe = (prepared(`SELECT q.*, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave) AS luoghi, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.verificato = 1) AS verificati
     FROM quartiere q ORDER BY q.ordine`).all() as Array<RigaQuartiere & { luoghi: number; verificati: number }>)
     .filter((q) => !NON_UN_QUARTIERE.has(q.chiave));
-  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData:q.sblocco_data, mappaChiave:chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso:ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati }));
+  const regole = regoleSblocco();
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData:q.sblocco_data, mappaChiave:chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso:ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
+    ...disponibilitaQuartiere(q.chiave, regole, st) }));
 }
 
 /** Scheda di un quartiere con i luoghi. */

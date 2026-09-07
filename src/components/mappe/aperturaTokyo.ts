@@ -20,7 +20,19 @@ export function dentroFinestra(oggi: string, dal: string, al: string | null): bo
   return g >= ordineGioco(dal) && (!al || g <= ordineGioco(al));
 }
 
-/** Il quartiere è nel mondo, al giorno della partita? */
-export function quartiereAperto(sbloccoData: string | null | undefined, dataGioco: string | null | undefined): boolean {
-  return !dataGioco || !sbloccoData || dentroFinestra(dataGioco, sbloccoData, null);
+/** Il quartiere è nel mondo, al punto in cui è la partita?
+ *
+ * `disponibile` viene dall'API e vale **più** della data, perché la data non è tutta la verità:
+ * solo sette quartieri su ventitré ne hanno una, e gli altri si aprono col rango di un Confidente,
+ * con un libro letto o durante un Palazzo. Prima si guardava solo `sbloccoData`, e sedici
+ * quartieri risultavano aperti dal primo giorno perché la loro condizione non era una data.
+ *
+ * Il ripiego sulla data resta per chi chiama senza partita e per i test che costruiscono un
+ * quartiere a mano: non è un doppione della regola, è il caso in cui la regola non c'è. */
+export function quartiereAperto(
+  q: { sbloccoData?: string | null; disponibile?: boolean },
+  dataGioco: string | null | undefined,
+): boolean {
+  if (q.disponibile === false) return false;
+  return !dataGioco || !q.sbloccoData || dentroFinestra(dataGioco, q.sbloccoData, null);
 }
