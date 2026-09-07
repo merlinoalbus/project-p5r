@@ -25,16 +25,19 @@ it('gruppi AND/OR e blocco prioritario mantengono ignoto quando manca lo stato',
   expect((await request(app).get(`/api/condizioni/partite/${altra}`)).body.data[0].valore).toBeNull();
   await request(app).put(`/api/condizioni/partite/${partita}/${f.chiave}`).send({valore:0});expect(valuta([r]).stato).toBe('bloccato');
 });
-it('un negozio bloccato è assente da elenco, scheda, ricerca e acquisto diretto',async()=>{
+it('un negozio bloccato resta consultabile ma non permette acquisti',async()=>{
   const n=(await request(app).post('/api/catalogo/negozio').send({nome:'Negozio test',condizioni_json:[{tipo:'dote',dote:'coraggio',rango:5}]})).body.data;
   const a=(await request(app).post('/api/catalogo/articolo').send({nome:'Prodotto test',negozio_chiave:n.chiave,condizioni_json:[]})).body.data;
   const elenco=(await request(app).get(`/api/compendio/negozi?partita=${partita}`)).body.data;
   const scheda=await request(app).get(`/api/compendio/negozi/${n.chiave}?partita=${partita}`);
   const ricerca=(await request(app).get(`/api/compendio/articoli?q=Prodotto%20test&partita=${partita}`)).body.data;
-  expect(elenco.some((x:{chiave:string})=>x.chiave===n.chiave)).toBe(false);
-  expect(scheda.status).toBe(404);
-  expect(ricerca).toMatchObject({totale:0,articoli:[]});
-  expect((await request(app).put(`/api/partite/${partita}/acquisti`).send({articolo:a.chiave,fatto:true})).status).toBe(404);
+  expect(elenco.find((x:{chiave:string})=>x.chiave===n.chiave)).toMatchObject({disponibilita:{stato:'bloccato'}});
+  expect(scheda.status).toBe(200);
+  expect(scheda.body.data).toMatchObject({chiave:n.chiave,disponibilita:{stato:'bloccato'}});
+  expect(ricerca).toMatchObject({totale:1,articoli:[{chiave:a.chiave,disponibilita:{stato:'bloccato'}}]});
+  const acquisto=await request(app).put(`/api/partite/${partita}/acquisti`).send({articolo:a.chiave,fatto:true});
+  expect(acquisto.status).toBe(409);
+  expect(acquisto.body.error?.code).toBe('articolo-non-disponibile');
   expect((await request(app).put(`/api/catalogo/articolo/${encodeURIComponent(a.chiave)}`).send({condizioni_json:[{tipo:'stato',chiave:'inesistente',confronto:'uguale',valore:1}]})).status).toBe(404);
   expect((await request(app).put(`/api/catalogo/articolo/${encodeURIComponent(a.chiave)}`).send({condizioni_json:[{tipo:'gruppo',modo:'tutte',condizioni:[]}]})).status).toBe(400);
 });

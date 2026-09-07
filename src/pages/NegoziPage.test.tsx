@@ -72,26 +72,23 @@ it('nasconde la posizione precedente quando non appartiene piu ai risultati corr
   expect(screen.queryByRole('region', { name: 'Dove si trova Bottega nuova' })).toBeNull();
 });
 
-it('nasconde una voce bloccata e la rende disponibile soltanto dopo lo sblocco', async () => {
+it('mantiene consultabile una voce bloccata con posizione e semaforo', async () => {
   usePartitaStore.setState({ attiva: { id: 5, nome: 'Prova' } as PartitaDto });
-  const prima = render(<MemoryRouter><NegoziPage /></MemoryRouter>);
-  await screen.findByRole('heading', { name:'Shibuya' });
-  expect(screen.queryByText('Libreria segreta')).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Mostra posizione di Libreria segreta' })).toBeNull();
-  prima.unmount();
-
-  getNegozi.mockResolvedValueOnce([...negoziBase, { ...libreriaBloccata, disponibilita: { stato: 'disponibile' as const, requisiti: [] } }]);
   render(<MemoryRouter><NegoziPage /></MemoryRouter>);
-  expect(await screen.findByText('Libreria segreta')).toBeInTheDocument();
+  await screen.findByRole('heading', { name:'Shibuya' });
+  expect(screen.getByText('Libreria segreta')).toBeInTheDocument();
+  expect(screen.getByText('Non ancora')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Mostra posizione di Libreria segreta' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Mostra posizione di Libreria segreta' }));
+  expect(posizioni.at(-1)).toMatchObject({ tipo: 'negozio', chiave: 'libreria-segreta' });
 });
 
-it('mostra nell’intestazione e nella scheda i conteggi disponibili restituiti dal backend', async () => {
+it('mostra nell’intestazione e nella scheda i conteggi canonici restituiti dal backend', async () => {
   usePartitaStore.setState({ attiva: { id: 8, nome: 'Conteggi' } as PartitaDto });
   getNegozi.mockResolvedValueOnce([{ ...negoziBase[1], articoli: 1, verificati: 1, disponibilita: { stato: 'disponibile' as const, requisiti: [] } }]);
   render(<MemoryRouter><NegoziPage /></MemoryRouter>);
 
-  expect(await screen.findByText(/1 negozio o punto di acquisto con 1 articolo disponibile/)).toBeInTheDocument();
+  expect(await screen.findByText(/1 negozio o punto di acquisto con 1 articolo:/)).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /Officina/ })).toHaveTextContent('1 articolo');
   expect(screen.queryByText(/da fonte secondaria/)).toBeNull();
 });

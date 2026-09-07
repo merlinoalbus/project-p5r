@@ -2438,3 +2438,34 @@ comando «Mostra anche i non ancora disponibili» devono restare consultabili.
 Il validatore non ha modificato file. Il candidato e' approvato per il perimetro dichiarato; il
 prossimo candidato Lotto A dovra' inoltre ripristinare i toggle/deep link informativi rimossi per
 errore su mia precedente richiesta, mantenendo il filtro positivo.
+
+---
+
+## Preparazione candidato Lotto B negozi v3 — catalogo consultabile (7 settembre 2026)
+
+Il precedente `candidato/lotto-b-negozi-contesto-v2` resta immutabile ma e' **semanticamente
+superato**: applicava l'interpretazione errata per cui un negozio o un articolo bloccato doveva
+scomparire anche dal catalogo. La specifica confermata dall'utente distingue invece due piani:
+catalogo e schede restano sempre consultabili; presenza attiva sulla mappa e acquisto dipendono
+dalle condizioni della partita.
+
+Il nuovo candidato previsto e' `candidato/lotto-b-negozi-catalogo-v3`. Prima del commit sono
+state raccolte queste evidenze sull'albero integrato col Lotto A di Opus (`a7db7b1`):
+
+- all'11 aprile l'API restituisce **60 negozi**, totale canonico **575 articoli** e i primi 300
+  risultati della ricerca; il limite riguarda solo le righe restituite, non il totale;
+- la scheda bloccata `37-gradi-celsius` risponde 200 e rende tutti i suoi 10 articoli con stato
+  «Non ancora»;
+- un acquisto forzato di `37-gradi-celsius/anello-del-respiro` restituisce **409** con codice
+  stabile `articolo-non-disponibile`; un articolo disponibile si acquista regolarmente;
+- nel browser la card del negozio bloccato resta nel catalogo, il deep link apre la scheda, la
+  posizione informativa resta visibile e le checkbox dei prodotti bloccati sono disabilitate con
+  etichetta «Non ancora acquistabile»;
+- tre cicli consecutivi di typecheck, lint, build e suite completa: **591/591 PASS** in ciascun
+  ciclo; nessun errore di build o runtime osservato;
+- il backend e' stato riavviato dopo la modifica; nonostante il falso timeout dello script di
+  rilevazione, il controllo indipendente `/api/config` ha risposto 200 e il log ha registrato il
+  nuovo avvio.
+
+Queste sono verifiche dell'implementatore e non costituiscono approvazione del candidato. Dopo il
+tag immutabile la verifica indipendente spetta a Opus e al `galaxy-task-validator`.
