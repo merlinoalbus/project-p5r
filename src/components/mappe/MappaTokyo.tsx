@@ -280,7 +280,11 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
     return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente), nomiFermate: nomi };
   }, [quartieri, dungeon, dataGioco]);
 
-  return <div className={`flex flex-col gap-2 ${className}`}>
+  // Il tetto di larghezza sta **sul blocco**, non sulla sola cornice: sotto la mappa c'è la riga
+  // delle fermate non ancora aperte, che è lunga, e messa in una colonna larga quanto vuole
+  // spingeva l'intera colonna a 1750 px buttando le schede fuori dallo schermo. Con il tetto qui
+  // la riga va a capo dentro la misura della mappa, che è dove deve stare.
+  return <div className={`blocco-mappa-tokyo flex flex-col gap-2 ${className}`}>
     {/* Il riquadro: bordo, fondo e proporzione fissa, come ogni altra mappa dell'app. Dentro, una
         tela che si ingrandisce e si trascina — questa mappa era l'unica a non farlo, e su una tela
         piena di sagome accostate lo zoom non è un lusso: è il modo di leggere le targhe piccole e

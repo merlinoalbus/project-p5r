@@ -140,10 +140,17 @@ export interface PercorsoSeed {
     avvisi: string[]; fonte: string; coperto: boolean }>;
 }
 
-/** Negozi e articoli (guida allgamestaff + fonti secondarie segnalate da `verificato`). */
+/** Negozi e articoli (guida allgamestaff + fonti secondarie segnalate da `verificato`).
+ *
+ * `condizioni` è **facoltativo e si scrive solo quando serve**. Di norma le condizioni si ricavano
+ * dalla prosa — `sblocco`, `disponibileDal`, `condizione` — con `migraTestiCondizioni`, ed è
+ * giusto così: la fonte resta la frase della guida. Ma una condizione scritta a mano nell'editor
+ * può dire cose che nessuna frase esprime (un gruppo «almeno una», un fatto di sistema, una
+ * negazione), e senza questo campo l'esportazione verso il seed le perderebbe al primo reseed: il
+ * caricatore le ricalcolerebbe dalla prosa e otterrebbe altro. Quando c'è, vince sulla prosa. */
 export interface NegoziSeed {
-  negozi: Array<{ chiave: string; ordine: number; nome: string; luogo: string; luogoChiave: string | null; tipo: string; gestore: string | null; confidente: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string;
-    articoli: Array<{ chiave: string; ordine: number; nome: string; nomeIt: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibileDal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: boolean }> }>;
+  negozi: Array<{ chiave: string; ordine: number; nome: string; luogo: string; luogoChiave: string | null; tipo: string; gestore: string | null; confidente: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; condizioni?: unknown[] | null;
+    articoli: Array<{ chiave: string; ordine: number; nome: string; nomeIt: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibileDal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: boolean; condizioni?: unknown[] | null }> }>;
 }
 
 /** Cruciverba di Leblanc (guida allgamestaff). */

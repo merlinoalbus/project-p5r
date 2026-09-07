@@ -1710,7 +1710,13 @@ export interface EsitoRipristinoDto {
 // ---- Catalogo estensibile dall'utente (16.1) ----
 
 /** Tipi di riga del catalogo che l'utente può aggiungere o correggere. */
-export type TipoCatalogo = 'negozio' | 'articolo';
+/** I tipi di riga del catalogo che si possono aggiungere, correggere o nascondere dall'interfaccia.
+ *
+ * Erano due — negozio e articolo — perche' erano le uniche tabelle con le colonne `origine`,
+ * `nascosto` e `seed_json`. Dalla migrazione 051 le hanno anche libri, film e attivita', e le
+ * pagine nuove possono finalmente offrire l'aggiunta invece di essere di sola lettura. */
+export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita'] as const;
+export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */
 export interface ElementoCatalogoDto {
