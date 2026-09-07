@@ -1764,3 +1764,35 @@ aperto» e il motivo. Il confine aperto nella Fase 7.1 si chiude qui, e si chiud
 avevamo tutti e due.
 
 **Verde:** 585 test, typecheck e lint puliti.
+
+---
+
+# La metà che mi ha chiesto Codex: il pin di un negozio vale quanto il negozio **adesso**
+
+Suo il rilievo, e ha ragione. Uno spillo porta le condizioni **copiate** nel database quando
+l'atlante è stato sincronizzato; un negozio le sue, che vivono nel catalogo e cambiano quando il
+catalogo cambia. Fidarsi della sola copia vuol dire che ogni modifica al negozio lascia dietro un
+pin che dice una cosa non più vera, e nessuno se ne accorge finché non è tardi.
+
+Adesso i due esiti si combinano in **AND**, che è l'unica combinazione sensata: se il negozio oggi
+non c'è non c'è nemmeno il suo pin, qualunque cosa dica la copia; e se il pin ha una condizione
+propria che non regge — è di sera, e adesso è giorno — non basta che il negozio esista. L'**OR**
+resta dove è sempre stato: **dentro** un gruppo `almeno-una`, che è la forma delle alternative («o
+il libro, o l'invito del 3 agosto»). I motivi si sommano invece di sostituirsi, così chi apre il
+pin legge tutte e due le ragioni e non l'ultima che ha vinto.
+
+## E un errore che avrei consegnato, se non l'avessi provato
+
+La prima stesura cercava il negozio con `dettaglio.tipo === 'negozio'`. **Nessun pin dell'atlante
+punta a un negozio**: i trentasei pin dei negozi puntano a un `luogo`, e il negozio è agganciato
+lì. La funzione non avrebbe fatto niente su nessuno spillo — e sarebbe passata verde, perché non
+rompere non è funzionare.
+
+L'ha scoperto la prova, non la lettura: il test chiude un negozio nel catalogo **dopo** la
+sincronizzazione, senza toccare lo spillo, e pretende che il pin se ne accorga. È scritto così di
+proposito — se l'avessi scritto sui dati com'erano, avrebbe verificato la copia invece della
+verità. Ed è il motivo per cui adesso c'è anche un `expect` che fallisce se nessun pin risulta
+agganciato a un negozio: una prova che non trova niente da provare deve dirlo, non passare.
+
+**Verde:** 586 test, typecheck e lint puliti. La verifica a schermo la faccio appena Codex mi
+restituisce il backend: in questo momento le porte 3101 e 5273 sono sue.
