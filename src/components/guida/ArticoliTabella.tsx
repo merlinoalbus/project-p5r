@@ -17,6 +17,7 @@ interface Props {
 function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
   const [occupato, setOccupato] = useState(false);
   const nome = a.nomeIt ?? a.nome;
+  const acquistoBloccato = a.disponibilita?.stato === 'bloccato' && !a.acquistato;
   const cambia = async (fatto: boolean) => {
     setOccupato(true);
     try { onCambiato(await impostaAcquisto(partitaId!, a.chiave, fatto)); }
@@ -33,7 +34,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<
     <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Prezzo</span><strong>{a.prezzo !== null ? `${a.prezzo.toLocaleString('it-IT')} ¥` : 'Non indicato'}</strong></div>
     <div className="catalogo-prodotto__disponibilita"><ChipDisponibilita disponibilita={a.disponibilita} compatto />{!a.condizioni && a.disponibileDal && <span>{a.disponibileDal}</span>}{a.condizioni?.length===0&&<span>Nessun requisito aggiuntivo</span>}{a.condizioni?.length ? <span>{a.condizioni.length} requisiti · apri Dettagli</span>:null}</div>
     <div className="catalogo-prodotto__azioni">
-      {partitaId && <label className="touch flex items-center gap-2"><input type="checkbox" className="w-5 h-5" checked={a.acquistato} disabled={occupato} onChange={e => void cambia(e.target.checked)} aria-label={`${nome} acquistato`} />Acquistato</label>}
+      {partitaId && <label className="touch flex items-center gap-2"><input type="checkbox" className="w-5 h-5" checked={a.acquistato} disabled={occupato || acquistoBloccato} onChange={e => void cambia(e.target.checked)} aria-label={`${nome} acquistato`} />{acquistoBloccato ? 'Non ancora acquistabile' : 'Acquistato'}</label>}
       {onModifica && <button type="button" className="btn btn-ghost touch" onClick={() => onModifica(a)} aria-label={`Correggi ${nome}`}>Modifica</button>}
     </div>
     <details className="catalogo-prodotto__dettagli">

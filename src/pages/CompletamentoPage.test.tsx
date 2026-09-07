@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 // ============================================================
-// Test CompletamentoPage — trofei con filtro e spunta per partita, schede finali e Covo
+// Test CompletamentoPage — trofei con filtro e spunta per partita, scheda finali, rimando al Covo
 // ============================================================
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
@@ -44,8 +44,10 @@ describe('CompletamentoPage', () => {
     expect(await screen.findByText(/1 trofei ottenuti/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Finali' }));
     expect(screen.getByText('Maruki rango 9 entro il 17 novembre')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('tab', { name: 'Covo dei Ladri' }));
-    expect(screen.getByText('Stomaco di ferro')).toBeInTheDocument();
-    expect(screen.getByText('Concept art')).toBeInTheDocument();
+    // Il Covo non è più una linguetta di questa pagina: ha la sua, `/guida/covo`. Qui resta solo
+    // il rimando, e la prova serve a garantire che chi lo cercava dov'era non trovi il vuoto.
+    expect(screen.queryByRole('tab', { name: 'Covo dei Ladri' })).toBeNull();
+    expect(screen.queryByText('Stomaco di ferro')).toBeNull();
+    expect(screen.getByRole('link', { name: /Covo dei Ladri/ })).toHaveAttribute('href', '/guida/covo');
   });
 });

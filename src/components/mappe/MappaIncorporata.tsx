@@ -35,6 +35,15 @@ interface Props {
   spilloIniziale?: number | null;
   /** Partita per lo stato degli spilli (predefinita: quella attiva). */
   partitaId?: number | null;
+  /** Mostra «Modifica mappa». Predefinito **sì**, che è giusto nelle pagine dell'atlante.
+   *
+   * Va spento dove il visore è **citato dentro un'altra pagina** per dire dove si trova una cosa:
+   * lì si sta leggendo un libro o un negozio, non curando la mappa, e un pulsante che porta
+   * all'editor invita a modificare l'atlante da un posto dove nessuno lo sta guardando. Trovato
+   * verificando i Libri di Codex: il pannello «Mostra posizione» esibiva «MODIFICA MAPPA», e il
+   * pulsante veniva da qui — cioè da me. In `CittaPage` l'avevo già tolto, ma per un'altra strada
+   * (togliendo il visore), quindi il difetto era rimasto in piedi ovunque si usi `DoveSiTrova`. */
+  conEditor?: boolean;
 }
 
 export function MappaIncorporata(props: Props) {
@@ -47,7 +56,7 @@ export function MappaIncorporata(props: Props) {
   </PageState>;
 }
 
-function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita }: Props) {
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
@@ -91,7 +100,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         etichettaChiudi="Torna alla pagina"
         azioni={<>
           {!intero && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ingrandisci" dimensione={20} />} titolo="Schermo intero" onClick={() => setIntero(true)} />}
-          <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" />
+          {conEditor && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" />}
         </>}
       />
     </div>

@@ -71,11 +71,17 @@ export function DoveSiTrova({ tipo, chiave, altezza = 260, soloCollegamento = fa
       <p className="m-0 text-sm text-text-secondary">
         In {destinazioni.length} posti diversi. Scegli quale aprire.
       </p>
+      {/* A distinguere due posti è **la mappa**, non lo spillo: qui lo spillo si chiama quasi
+          sempre come la cosa che si sta cercando, e Untouchable sta in due punti di Shibuya —
+          venivano fuori due pastiglie identiche, e sceglierne una era tirare a indovinare.
+          Rilievo di Codex, ed era codice mio. Il nome dello spillo resta accanto, ma solo quando
+          aggiunge qualcosa a quello della mappa. */}
       <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
         {destinazioni.map((d) => <li key={`${d.mappa}-${d.spillo ?? 'x'}`}>
           <Link to={urlDestinazioneMondo(d)} className="chip touch inline-flex items-center gap-1 no-underline">
             <IconaAzione chiave="mappa" dimensione={14} />
-            {d.nomeSpillo ?? d.nomeMappa}
+            {d.nomeMappa}
+            {d.nomeSpillo && d.nomeSpillo !== d.nomeMappa && <>{' '}<span className="text-text-muted">· {d.nomeSpillo}</span></>}
           </Link>
         </li>)}
       </ul>
@@ -88,11 +94,16 @@ export function DoveSiTrova({ tipo, chiave, altezza = 260, soloCollegamento = fa
       <h3 className="m-0 text-base">{titolo}</h3>
       <span className="text-sm text-text-secondary">{d.nomeSpillo ? `${d.nomeSpillo} · ${d.nomeMappa}` : d.nomeMappa}</span>
     </div>
+    {/* Senza l'editor: qui il visore è **citato**, non è la pagina. Chi legge dove si compra un
+        libro non sta curando l'atlante, e «Modifica mappa» in mezzo alla scheda di un libro
+        invita a modificarlo da un posto dove nessuno se ne accorgerebbe. Difetto trovato
+        verificando i Libri di Codex — ma il pulsante veniva da `MappaIncorporata`, cioè da me. */}
     {!soloCollegamento && <MappaIncorporata
       chiave={d.mappa}
       spilloIniziale={d.spillo}
       puntoIniziale={d.centro}
       altezza={altezza}
+      conEditor={false}
     />}
     <Link to={urlDestinazioneMondo(d)} className="btn btn-ghost btn-sm touch self-start inline-flex items-center gap-1.5">
       <IconaAzione chiave="mappa" dimensione={16} />Apri sull’atlante

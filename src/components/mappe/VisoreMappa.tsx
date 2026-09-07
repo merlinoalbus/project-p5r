@@ -133,6 +133,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [panEsplicito, setPanEsplicito] = useState<Punto | null>(null);
   const [tipiNascosti, setTipiNascosti] = useState<Set<TipoSpillo>>(new Set());
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
+  // Predefinito **spento**: la mappa attiva mostra il mondo com'è adesso. Si accende per chiedere
+  // «e dove sarà?», che è una domanda legittima a una guida ma non la vista di partenza.
+  const [mostraNonDisponibili, setMostraNonDisponibili] = useState(false);
   const [ricerca, setRicerca] = useState('');
   const [selezionatoUso, setSelezionatoUso] = useState<number | null>(selezioneIniziale ?? null);
   // Incorporato in una pagina lo spazio è poco: il pannello è chiuso finché l'utente non lo apre; a schermo intero è aperto.
@@ -310,19 +313,22 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const filtraBloccati = Boolean(partitaId) && !editor;
   const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter((s) => s.disponibilita?.stato === 'bloccato').length : 0), [mappa.spilli, filtraBloccati]);
   const ricercaNorm = ricerca.trim().toLowerCase();
-  /** Uno spillo bloccato non c'è, e non c'è in nessun modo.
+  /** Uno spillo bloccato non c'è **di regola**, e ricompare solo se lo si chiede.
    *
-   * C'era un comando «Mostra anche i non ancora disponibili» che lo rimetteva sulla tela. La
-   * decisione dell'utente è netta e vale per tutte le superfici di consultazione: quel che è
-   * bloccato non compare — né in elenco, né in ricerca, né come pin — e ricompare da solo quando
-   * si sblocca. Un interruttore che lo riapre è la stessa rivelazione, con un clic in mezzo.
+   * La distinzione è quella che conta, ed è la decisione dell'utente: la mappa attiva mostra il
+   * mondo com'è **adesso**, quindi un posto dove non si può ancora andare non ci sta; ma una guida
+   * deve poter rispondere anche a «dove sarà», e il comando qui sotto lo chiede in modo esplicito.
+   * Quando ricompaiono, i pin bloccati sono **marcati** — grigi, con «non ancora disponibile» nel
+   * nome accessibile — così non si confondono mai con quelli veri.
    *
-   * Resta fuori l'editor (`editor`), che deve vedere tutto per poterlo modificare, e restano
-   * visibili gli `ignoto`: l'assenza di prova non è una prova di blocco. */
+   * Quel che resta tolto è il reveal **da indirizzo**: un `?spillo=` che forzava visibile un pin
+   * bloccato non è una consultazione esplicita, è un URL che fa quello che l'interfaccia non fa.
+   *
+   * Fuori dalla regola l'editor, che deve vedere tutto per poterlo modificare, e gli `ignoto`:
+   * l'assenza di prova non è una prova di blocco. */
   const bloccato = (s: SpilloDto) => filtraBloccati && s.disponibilita?.stato === 'bloccato';
-  const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (mostraRaccolti || !(s.collezionabile && s.raccolto)) && !bloccato(s) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
-  // Nemmeno un indirizzo con `?spillo=` lo riapre: la selezione iniziale vale solo su ciò che c'è.
-  const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && !bloccato(s)) ?? null;
+  const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
+  const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Popup sopra allo spillo; sotto quando nella tela (overflow nascosto) non c'è spazio sopra: il popup più alto misura ~215 px più i 42 px della punta.
   const popupSotto = selezionato !== null && pan.y + (selezionato.y / 100) * nat.h * zoom < 260;
   const collezionabili = mappa.spilli.filter((s) => s.collezionabile);
@@ -450,14 +456,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <IconaAzione chiave="raggiunto" dimensione={14} />Mostra anche i raccolti ({raccoltiNascosti})
               </button>
             )}
-            {/* Si dice **quanti** sono, non si offre di vederli: sapere che il mondo qui non è
-                finito serve, riaprirlo no. Prima c'era un interruttore, ed era una rivelazione
-                con un clic in mezzo. */}
-            {bloccatiNascosti > 0 && (
-              <p className="m-0 flex items-center gap-1.5 self-start text-[11px] text-text-muted">
-                <IconaAzione chiave="bloccato" dimensione={14} />
-                {bloccatiNascosti === 1 ? 'Un punto non è ancora nel mondo' : `${bloccatiNascosti} punti non sono ancora nel mondo`}
-              </p>
+            {/* Si dice quanti sono **e** si offre di vederli, perché sono due domande diverse:
+                «cosa posso fare adesso» — ed è la vista predefinita — e «dove sarà quella cosa»,
+                che a una guida si chiede eccome. Acceso, i pin tornano grigi e marcati. */}
+            {(bloccatiNascosti > 0 || (filtraBloccati && mostraNonDisponibili)) && (
+              <button type="button" className={`chip chip--icona touch text-[11px] self-start ${mostraNonDisponibili ? 'chip--attivo' : ''}`} aria-pressed={mostraNonDisponibili} onClick={() => setMostraNonDisponibili((v) => !v)}>
+                <IconaAzione chiave="bloccato" dimensione={14} />Mostra anche i non ancora disponibili ({bloccatiNascosti})
+              </button>
             )}
             <label className="flex flex-col gap-1 text-[12px]">
               <span className="sr-only">Cerca uno spillo per nome</span>
@@ -516,9 +521,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <button
                   key={s.id}
                   type="button"
-                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${s.raccolto ? 'spillo-mappa--raccolto' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
+                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${s.raccolto ? 'spillo-mappa--raccolto' : ''} ${bloccato(s) ? 'spillo-mappa--bloccato' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)` } as CSSProperties}
-                  aria-label={`${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}`}
+                  aria-label={`${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}`}
                   aria-pressed={attivo}
                   title={s.nome}
                   onPointerDown={(e) => {
@@ -636,10 +641,12 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
   const d = s.dettaglio;
   const negozio = d?.negozio ?? null;
   // Con una partita gli articoli non ancora disponibili (data, Confidente, Dote, Palazzo, meteo…)
-  // non ci sono, e non c'è più un pulsante per vederli: stessa regola dei pin, per la stessa
-  // ragione — un interruttore che li riapre è la rivelazione che si voleva evitare.
+  // sono nascosti, con un comando per vederli: stessa regola dei pin, e per la stessa ragione —
+  // la vista predefinita è quel che si può comprare oggi, ma «e quello quando arriva?» è una
+  // domanda che a una guida si fa. Quando compaiono portano il loro «Non ancora» accanto.
+  const [mostraBloccati, setMostraBloccati] = useState(false);
   const bloccati = negozio ? negozio.articoli.filter((a) => a.disponibilita?.stato === 'bloccato').length : 0;
-  const articoliVisibili = negozio ? negozio.articoli.filter((a) => a.disponibilita?.stato !== 'bloccato') : [];
+  const articoliVisibili = negozio ? (mostraBloccati ? negozio.articoli : negozio.articoli.filter((a) => a.disponibilita?.stato !== 'bloccato')) : [];
   return (
     <section ref={ref} tabIndex={-1} className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Scheda: ${s.nome}`}>
       <div className="flex items-start gap-2">
@@ -675,9 +682,11 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
             <Link to={`/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="text-[12px] text-primary">scheda del negozio</Link>
           </div>
           {bloccati > 0 && (
-            <p className="m-0 self-start text-[11px] text-text-muted">
-              {bloccati === 1 ? 'Un articolo non è ancora in vendita' : `${bloccati} articoli non sono ancora in vendita`}
-            </p>
+            <button type="button" className="visore-mappa__azione-testo self-start" aria-pressed={mostraBloccati} onClick={() => setMostraBloccati((v) => !v)}>
+              {mostraBloccati
+                ? (bloccati === 1 ? 'Nascondi l’articolo non ancora in vendita' : `Nascondi i ${bloccati} articoli non ancora in vendita`)
+                : (bloccati === 1 ? 'Mostra anche l’articolo non ancora in vendita' : `Mostra anche i ${bloccati} articoli non ancora in vendita`)}
+            </button>
           )}
           {articoliVisibili.length > 0 && (
             <div className="overflow-x-auto">

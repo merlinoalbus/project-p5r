@@ -97,9 +97,13 @@ describe('VisoreMappa', () => {
     expect(scheda.queryByText('Fucile a pompa Governor')).not.toBeInTheDocument();
     expect(scheda.getByText('Proiettili perforanti')).toBeInTheDocument();
     expect(scheda.getByText('Da verificare')).toHaveAttribute('title', 'rango cliente Oscuro — Condizione non verificabile dai dati della partita');
-    // Non c'è più un modo di riaprirlo: si dice quanti sono e basta, come per gli spilli.
-    expect(scheda.queryByRole('button', { name: /Mostra anche l’articolo non ancora disponibile/ })).toBeNull();
-    expect(scheda.getByText('Un articolo non è ancora in vendita')).toBeInTheDocument();
+    // Come per gli spilli: nascosto di regola, e un comando per vederlo — con il suo «Non ancora»
+    // accanto, così non si confonde con quel che si può comprare oggi.
+    fireEvent.click(scheda.getByRole('button', { name: 'Mostra anche l’articolo non ancora in vendita' }));
+    expect(scheda.getByText('Fucile a pompa Governor')).toBeInTheDocument();
+    expect(scheda.getByText('Non ancora')).toHaveAttribute('title', 'dal 18 giugno — oggi è il 20 aprile');
+    expect(scheda.getByText(/Untouchable · 3 articoli/)).toBeInTheDocument();
+    fireEvent.click(scheda.getByRole('button', { name: 'Nascondi l’articolo non ancora in vendita' }));
     expect(scheda.queryByText('Fucile a pompa Governor')).not.toBeInTheDocument();
   });
 
@@ -141,30 +145,40 @@ describe('VisoreMappa', () => {
     expect(riduci).toBeDisabled();
   });
 
-  it('con la partita lo spillo bloccato non c’è, e non c’è modo di riaprirlo', () => {
-    // Prima c'era «Mostra anche i non ancora disponibili», che lo rimetteva sulla tela. La
-    // decisione dell'utente è che quel che è bloccato non compaia: né in elenco, né in ricerca,
-    // né come pin. Un interruttore che lo riapre è la stessa rivelazione, con un clic in mezzo.
+  it('lo spillo bloccato non c’è di regola, e quando lo si chiede torna **marcato**', () => {
+    // Sono due domande diverse, e la mappa risponde a una sola per volta: «cosa posso fare
+    // adesso» è la vista predefinita, «dove sarà quella cosa» si chiede col comando. Quando
+    // tornano, i pin bloccati devono essere riconoscibili a colpo d'occhio: se fossero uguali
+    // agli altri, il comando servirebbe a confondere invece che a informare.
     monta();
-    expect(screen.queryByRole('button', { name: 'Attività: Bancarella estiva' })).toBeNull();
-    expect(screen.queryByRole('button', { name: /Mostra anche i non ancora disponibili/ })).toBeNull();
-    // Quanti sono si dice: sapere che il mondo qui non è finito serve, riaprirlo no.
-    expect(screen.getByText('Un punto non è ancora nel mondo')).toBeInTheDocument();
-    // e non lo trova nemmeno la ricerca
-    fireEvent.change(screen.getByRole('searchbox', { name: /Cerca uno spillo/ }), { target: { value: 'Bancarella' } });
-    expect(screen.queryByRole('button', { name: 'Attività: Bancarella estiva' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Attività: Bancarella estiva/ })).toBeNull();
+    const interruttore = screen.getByRole('button', { name: /Mostra anche i non ancora disponibili \(1\)/ });
+    expect(interruttore).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(interruttore);
+    // il nome accessibile lo dichiara, per chi il grigio non lo vede
+    const pin = screen.getByRole('button', { name: 'Attività: Bancarella estiva (non ancora disponibile)' });
+    expect(pin).toHaveClass('spillo-mappa--bloccato');
+    fireEvent.click(pin);
+    const popup = within(screen.getByRole('dialog', { name: 'Bancarella estiva' }));
+    expect(popup.getByText('Non ancora')).toHaveAttribute('title', 'dal 18 giugno — Disponibile dal 18 giugno, oggi è il 20 aprile');
+    const condizioni = within(popup.getByRole('group', { name: 'Condizioni di visibilità' }));
+    expect(condizioni.getByRole('img', { name: 'Condizione non soddisfatta' })).toBeInTheDocument();
+    fireEvent.click(interruttore);
+    expect(screen.queryByRole('button', { name: /Attività: Bancarella estiva/ })).toBeNull();
   });
 
-  it('nemmeno un indirizzo con lo spillo bloccato lo riapre', async () => {
+  it('un indirizzo con lo spillo bloccato non lo rivela: il comando sì, l’URL no', async () => {
     // Era il contrario: la selezione iniziale lo rendeva visibile «per non centrare la mappa sul
-    // vuoto». Ma un deep link non deve poter fare quello che l'interfaccia non fa — sarebbe la
-    // scorciatoia per vedere in anticipo tutto ciò che il gioco non ha ancora dato.
+    // vuoto». Ma un comando lo si preme sapendo cosa si sta chiedendo; un indirizzo arriva da un
+    // collegamento e farebbe alla mappa quello che l'interfaccia non fa.
     const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 800, height: 600, top: 0, left: 0, right: 800, bottom: 600, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
     try {
       monta({ selezioneIniziale: 6 });
       await new Promise((r) => setTimeout(r, 20));
-      expect(screen.queryByRole('button', { name: 'Attività: Bancarella estiva' })).toBeNull();
+      expect(screen.queryByRole('button', { name: /Attività: Bancarella estiva/ })).toBeNull();
       expect(screen.queryByRole('dialog', { name: 'Bancarella estiva' })).toBeNull();
+      // e il comando resta lì, spento: la scelta è di chi guarda, non dell'indirizzo
+      expect(screen.getByRole('button', { name: /Mostra anche i non ancora disponibili/ })).toHaveAttribute('aria-pressed', 'false');
     } finally {
       misura.mockRestore();
     }

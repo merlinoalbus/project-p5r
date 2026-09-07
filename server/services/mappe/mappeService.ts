@@ -21,7 +21,7 @@ import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibili
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { eStrutturale, DEFINIZIONI_SPILLO, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
-import type { CondizioneSpilloDto, DettaglioSpilloDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
+import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 import fs from 'node:fs';
 import { creaZip, type VoceZip } from '../../utils/zip.js';
 
@@ -246,6 +246,34 @@ function identitaSpillo(s: { tipo: string; nome: string; x: number; y: number; r
   return JSON.stringify({ tipo: s.tipo, nome: s.nome, x: s.x, y: s.y, riferimento: s.riferimento ? { tipo: s.riferimento.tipo, chiave: s.riferimento.chiave } : null });
 }
 
+/** Il pin di un negozio vale quanto il negozio, **adesso**.
+ *
+ * Uno spillo porta le sue condizioni, copiate nel database quando l'atlante è stato sincronizzato.
+ * Un negozio le sue, che vivono nel catalogo e cambiano quando il catalogo cambia. Fidarsi della
+ * sola copia vuol dire che ogni modifica al negozio lascia dietro un pin che dice una cosa non più
+ * vera, e nessuno se ne accorge finché non è tardi: è il *drift* che ha segnalato Codex.
+ *
+ * Quindi i due esiti si combinano in **AND**, che è l'unica combinazione sensata: se il negozio
+ * oggi non c'è, non c'è nemmeno il suo pin, qualunque cosa dica la copia; e se il pin ha una
+ * condizione propria che non regge — è di sera, e adesso è giorno — non basta che il negozio
+ * esista. L'OR resta dove è sempre stato, cioè **dentro** un gruppo `almeno-una`, che è la forma
+ * delle alternative («o il libro, o l'invito del 3 agosto»).
+ *
+ * I motivi si sommano invece di sostituirsi: chi apre il pin deve leggere tutte e due le ragioni,
+ * non l'ultima che ha vinto.
+ */
+function conNegozioVivo(esito: DisponibilitaDto | undefined, dettaglio: DettaglioSpilloDto | null): DisponibilitaDto | undefined {
+  // Non si guarda `dettaglio.tipo`, e non è un dettaglio: **nessun pin punta a un negozio**. I
+  // trentasei pin dei negozi puntano a un `luogo`, e il negozio è agganciato lì da
+  // `dettaglioRiferimento`. Cercandolo per tipo, questa funzione non avrebbe fatto niente su
+  // nessuno spillo dell'atlante — e sarebbe passata verde, perché non rompere non è funzionare.
+  const negozio = dettaglio?.negozio?.disponibilita;
+  if (!esito || !negozio) return esito ?? negozio;
+  const peggiore = esito.stato === 'bloccato' || negozio.stato === 'bloccato' ? 'bloccato'
+    : esito.stato === 'ignoto' || negozio.stato === 'ignoto' ? 'ignoto' : 'disponibile';
+  return { stato: peggiore, requisiti: [...esito.requisiti, ...negozio.requisiti.map((r, i) => ({ ...r, indice: esito.requisiti.length + i, testo: `Negozio: ${r.testo}` }))] };
+}
+
 type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione' | 'destinazioneNonDisponibile'>;
 function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo {
   const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx.partitaId);
@@ -257,7 +285,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
   // (il valutatore dei semafori lo usa nel dettaglio e riconosce sia la chiave sia il nome), nel DTO resta la chiave per l'editor.
   const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
-  const esito = ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined;
+  const esito = conNegozioVivo(ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined, dettaglio);
   // Un pin che viene dall'atlante nativo e' un elemento fisso del mondo — una porta, un forziere,
   // una scala, una stanza sicura — e non si nasconde mai, qualunque condizione gli venga
   // attaccata. E' un invariante del runtime, non una convenzione dei dati: passa sopra a

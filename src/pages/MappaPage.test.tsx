@@ -7,7 +7,7 @@ import { useAssetStore } from '../stores/assetStore';
 // Test MappaPage — indice dell'albero e visore con stato «raccolto» della partita attiva (Fase 13.2)
 // ============================================================
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { ContenutiMappaDto } from '../../shared/organizzazioneMappe';
 import { MappaPage } from './MappaPage';
@@ -55,8 +55,9 @@ beforeEach(() => {
 describe('MappaPage', () => {
   it('l’indice elenca le radici con le mappe figlie e i collegamenti al visore', async () => {
     monta('/guida/mappe');
-    // Tokyo porta alla mappa canonica della Città, non al visore della sua planimetria.
-    expect(await screen.findByRole('link', { name: 'Tokyo' })).toHaveAttribute('href', '/guida/citta');
+    // Tokyo porta alla mappa canonica della Città, non al visore della sua planimetria. Il nome
+    // accessibile della carta comprende ora anche il tipo e i conteggi, quindi si ancora l'inizio.
+    expect(await screen.findByRole('link', { name: /^Tokyo/ })).toHaveAttribute('href', '/guida/citta');
     expect(screen.getByRole('link', {name: 'Shibuya'})).not.toBeVisible();
     fireEvent.click(screen.getByLabelText('Mostra le mappe di Tokyo'));
     const tokyo = within(screen.getByRole('list', { name: 'Mappe di Tokyo' }));
@@ -95,7 +96,7 @@ it('un contenitore senza immagine apre i luoghi figli senza una finta planimetri
   monta('/guida/mappe/dungeon-kamoshida');
   expect(await screen.findByRole('heading',{name:'Palazzo di Kamoshida'})).toBeInTheDocument();
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
-  expect(screen.getByRole('link',{name:'Ingresso'})).toBeInTheDocument();
+  expect(screen.getByRole('link',{name:/^Ingresso/})).toBeInTheDocument();
 });
 
 it('la planimetria di Tokyo non è più una destinazione: si finisce sulla mappa della Città',async()=>{
@@ -125,7 +126,12 @@ it('il contesto URL cambia il titolo del visore e il selettore può ripristinare
   monta('/guida/mappe/citta-shibuya?contesto=a');
   const img=await screen.findByRole('img',{name:'Mappa: Museo, 1P'});
   const src=img.getAttribute('src');
-  expect(document.title).toContain('Museo, 1P');
+  // `document.title` lo scrive un effetto, e un effetto non e' ancora corso quando l'immagine e'
+  // gia' resa: l'asserzione immediata leggeva a volte il titolo di prima. Era il rosso
+  // intermittente che Codex aveva documentato e assegnato a me come proprietario del test —
+  // aperto da allora, e ricomparso oggi in una passata sotto carico. `waitFor` aspetta il fatto
+  // invece di sperare nell'ordine: e' la differenza fra una prova e una coincidenza.
+  await waitFor(()=>expect(document.title).toContain('Museo, 1P'));
   fireEvent.change(screen.getByRole('combobox',{name:'Nome secondo il contesto'}),{target:{value:'b'}});
   expect(await screen.findByRole('img',{name:'Mappa: Museo, 2P'})).toHaveAttribute('src',src);
   fireEvent.change(screen.getByRole('combobox',{name:'Nome secondo il contesto'}),{target:{value:''}});
@@ -143,7 +149,7 @@ it('l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessib
   const guida=await screen.findByRole('region',{name:'Contenuti della guida'});
   expect(guida).toBeVisible();
   expect(within(guida).getByText('Contenuto conservato')).toBeVisible();
-  expect(screen.getByRole('link',{name:'Ingresso'})).toBeVisible();
+  expect(screen.getByRole('link',{name:/^Ingresso/})).toBeVisible();
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
   const summary=within(guida).getByText('Biblioteca');
   fireEvent.click(summary);
