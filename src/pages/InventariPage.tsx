@@ -20,7 +20,7 @@ export function InventariPage() {
   const categoria = CATEGORIE.some(([k]) => k === params.get('categoria')) ? params.get('categoria')! : 'arma-mischia';
   const [query, setQuery] = useState('');
   const [negozio, setNegozio] = useState<string | null>(null);
-  const apiCategoria = categoria.startsWith('arma-') ? 'arma' : ['chiave', 'abito'].includes(categoria) ? undefined : categoria;
+  const apiCategoria = categoria.startsWith('arma-') ? 'arma' : ['chiave', 'abito', 'carte'].includes(categoria) ? undefined : categoria;
   const articoli = useCarica(() => ricercaArticoli({ categoria: apiCategoria, q: query.trim() || undefined }, partitaId ?? undefined), [apiCategoria, partitaId, query]);
   const oggetti = useCarica(() => getOggettiGuida(), []);
   const titolo = CATEGORIE.find(([k]) => k === categoria)?.[1] ?? categoria;

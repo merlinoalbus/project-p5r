@@ -18,5 +18,8 @@ describe('InventariPage', () => {
     await screen.findByText('0 articoli trovati.');
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'riso' } });
     expect(await screen.findByDisplayValue('riso')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Carte abilità' }));
+    await screen.findByText(/Nessuna carta abilità/);
+    expect(ricercaArticoli).toHaveBeenLastCalledWith({ categoria: undefined, q: undefined }, undefined);
   });
 });
