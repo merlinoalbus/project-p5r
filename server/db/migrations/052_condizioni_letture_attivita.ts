@@ -35,7 +35,7 @@ const DA_PROSA = {
  * quarantasei libri finivano tutti in `da-configurare`, cioè in un punto interrogativo, quando il
  * dato invece c'era ed era chiarissimo — è il nome della colonna a dire «da». Si aggiunge la
  * preposizione solo quando manca e quando il testo comincia davvero con una data. */
-function conPreposizione(testo: string | null): string | null {
+export function conPreposizione(testo: string | null): string | null {
   if (!testo) return testo;
   const t = testo.trim();
   return /^\d{1,2} [a-zà-ù]+$/i.test(t) || /^primo [a-zà-ù]+$/i.test(t) ? `dal ${t}` : t;
