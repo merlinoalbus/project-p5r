@@ -27,9 +27,12 @@ describe('API città e attività', () => {
     const q = (await request(app).get('/api/compendio/citta')).body.data as QuartiereRiassuntoDto[];
     expect(q.length).toBeGreaterThanOrEqual(20);
     expect(q[0]).toMatchObject({ chiave: 'yongen-jaya', nome: 'Yongen-Jaya' });
-    // 82 e non 84: «Entrata dei Memento» non e' un quartiere e non compare piu' qui. I suoi due
-    // luoghi non sono spariti — si raggiungono dalla pagina dei Memento, che e' il posto giusto.
-    expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(82);
+    // I due luoghi dell'«Entrata dei Memento» non si contano qui: non e' un quartiere e non
+    // compare piu' in questo elenco — si raggiungono dalla pagina dei Memento, che e' il posto
+    // giusto. Il totale e' salito da 82 a 84 con l'area del Tokyo Skytree (Asakusa) e Takenoko
+    // Street (Harajuku): due libri dichiaravano di sbloccarle e nel catalogo non c'erano, quindi
+    // leggere il libro non poteva far comparire niente.
+    expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(84);
     expect(q.some((x) => x.chiave === 'mementos')).toBe(false);
     expect(q.every((x) => x.luoghi > 0 && x.verificati <= x.luoghi)).toBe(true);
     const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;

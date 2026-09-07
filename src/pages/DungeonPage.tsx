@@ -38,7 +38,7 @@ export function DungeonPage() {
           <IntestazionePagina titolo="Palazzi" sottotitolo="I nove Palazzi e il Dedalo di Iweleth: aree e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le piante delle aree si scaricano al primo accesso e portano gli spilli preposizionati." />
           <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Palazzi">
             {dati.dati.map((d) => {
-              const quota = d.gestiti !== null && d.punti > 0 ? d.gestiti / d.punti : null;
+              const quota = d.collezionabiliGestiti !== null && d.collezionabili > 0 ? d.collezionabiliGestiti / d.collezionabili : null;
               return (
                 <li key={d.chiave} className="flex">
                   {/* La carta porta alla **scheda** del Palazzo, non al risolutore della mappa.
@@ -52,7 +52,7 @@ export function DungeonPage() {
                     <div className="flex flex-col items-center gap-2 shrink-0">
                       <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={84} />
                       {quota !== null && (
-                        <AnelloAvanzamento quota={quota} dimensione={56} spessore={4} etichetta={`Avanzamento in ${d.nome}: ${d.gestiti} punti gestiti su ${d.punti}`}>
+                        <AnelloAvanzamento quota={quota} dimensione={56} spessore={4} etichetta={`Avanzamento in ${d.nome}: ${d.collezionabiliGestiti} da raccogliere presi su ${d.collezionabili}`}>
                           <span className="font-display text-[15px] leading-none tabular-nums">{Math.round(quota * 100)}%</span>
                         </AnelloAvanzamento>
                       )}
@@ -69,7 +69,7 @@ export function DungeonPage() {
                         {d.date.scadenza && <span className="chip chip--attivo" title={d.date.scadenza}>Scadenza {dataBreve(d.date.scadenza)}</span>}
                         {d.livelloConsigliato && <span className="chip" title={d.livelloConsigliato}>Livello: {sintesi(d.livelloConsigliato, 36)}</span>}
                       </div>
-                      <span className="text-[12px] text-text-muted">{d.aree} aree · {d.punti} punti · {d.esauribili} esauribili{d.gestiti !== null ? ` · ${d.gestiti} gestiti` : ''}</span>
+                      <span className="text-[12px] text-text-muted">{d.aree} aree · {d.collezionabili} da raccogliere · {d.esauribili} esauribili · {d.punti} punti in tutto{d.gestiti !== null ? ` · ${d.gestiti} segnati` : ''}</span>
                     </div>
                   </Link>
                 </li>

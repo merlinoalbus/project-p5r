@@ -37,7 +37,9 @@ describe('FilmPage', () => {
     await act(async () => prima({ ...base, progresso: 1, iniziato: true }));
     await waitFor(() => expect(impostaProgressoFilm).toHaveBeenCalledTimes(2));
     await act(async () => seconda({ ...base, progresso: 2, iniziato: true, fatto: true }));
-    expect(await screen.findByText('2 di 2 sessioni')).toBeInTheDocument();
+    // Finito, il DVD esce dai «da vedere» e sta nel gruppo dei completati, che è chiuso.
+    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati · 1/ }));
+    expect(screen.getByText('2 di 2 sessioni')).toBeInTheDocument();
   });
 
   it('permette rivisioni illimitate al cinema e filtra per supporto', async () => {

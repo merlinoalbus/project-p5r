@@ -68,8 +68,8 @@ export function CittaPage() {
               mappa piccola e schede strette, cioè il peggio di tutti e due. */}
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
             <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null}
-              evidenziato={acceso} onEvidenzia={setAcceso} className="xl:sticky xl:top-2 xl:shrink-0" />
-            <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:flex-1 xl:min-w-[340px] xl:grid-cols-1 2xl:grid-cols-2 xl:max-h-[calc(68vh+2.5rem)] xl:overflow-y-auto xl:pr-1" aria-label="Quartieri">
+              evidenziato={acceso} onEvidenzia={setAcceso} className="xl:sticky xl:top-2 xl:min-w-0" />
+            <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:flex-1 xl:min-w-[280px] xl:grid-cols-1 2xl:grid-cols-2 xl:max-h-[calc(68vh+2.5rem)] xl:overflow-y-auto xl:pr-1" aria-label="Quartieri">
             {q.map((x) => {
               const aperto = quartiereAperto(x, attiva?.dataGioco ?? null);
               const suggerito = sugg.evidenziato('quartieri', x.chiave);
