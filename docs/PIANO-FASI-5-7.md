@@ -135,13 +135,16 @@ Aggiornato il 7 settembre 2026.
 | lotto B — gli inventari | **in corso** — `candidato/lotto-b-negozio-posizione-v1` e `candidato/lotto-b-negozi-contesto-v2`, il secondo **verificato PASS da Claude** il 7 settembre |
 | 6.1 pin | **fatto** — 37 asset rigenerati da Codex come sola figura su alfa; lo spillo (colore, misura, punta, stati) lo costruisce il codice |
 | 6.2 grafica mancante | **in corso** — `docs/grafica/fabbisogno.md`: voce 1 consegnata (Shujin), 2 e 3 ritirate (i pezzi dei Memento c'erano già), 4 aperta (il Covo dei Ladri) |
+| Covo dei Ladri | **fatto** — pagina propria `/guida/covo` (voce presa dal lotto B previo annuncio nel canale): sfide e catalogo affiancati, ricerca unica, conti onesti. Il bilancio della prima stesura è stato **tolto** perché falso: il perché in `docs/ATLANTE-STATO.md`. Da verificare a Codex |
 | 7.1 revisione incrociata | **in corso** — ciascuno verifica i candidati dell'altro; resta quel che attraversa il confine |
 
 ### Quel che manca, scritto per non doverlo ricostruire a memoria
 
-1. **Lotto B**: 5.2 (gli altri tipi di oggetti delle guide), `AttivitaPage` e le doti, il Covo dei
-   Ladri come pagina propria, e le tre nuove sezioni Libri / Film-DVD / Videogiochi con il
-   progresso per sessioni, che l'utente ha assegnato a Codex.
+1. **Lotto B**: 5.2 (gli altri tipi di oggetti delle guide), `AttivitaPage` e le doti, e le tre
+   nuove sezioni Libri / Film-DVD / Videogiochi con il progresso per sessioni, che l'utente ha
+   assegnato a Codex. Il **Covo dei Ladri come pagina propria** l'ho preso io, dichiarandolo nel
+   canale prima di cominciare: sono file nuovi, non tocca niente di suo, ed è già un cartellino
+   sulla mia mappa di Tokyo. Consegnato come candidato, da verificare come tutti gli altri.
 2. **Grafica**: la sagoma del Covo dei Ladri (voce 4), e la decisione sugli otto colori di spillo
    troppo chiari — che non è grafica ma una riga di `shared/spilli.ts`.
 3. **Un confine da decidere insieme**: se «bloccato = assente» valga anche per le **schede** dei
