@@ -10,6 +10,7 @@
 // qui invece di aprire il visore.
 // ============================================================
 
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getDungeons, getQuartieri } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -17,6 +18,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { MappaTokyo } from '../components/mappe/MappaTokyo';
+import { quartiereAperto } from '../components/mappe/aperturaTokyo';
 import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
@@ -29,6 +31,11 @@ export function CittaPage() {
   useDocumentTitle('La città');
   const dati = useCarica(() => getQuartieri(), []);
   const attiva = usePartitaStore((s) => s.attiva);
+  // Mappa e schede sono **una** selezione vista in due modi, come nei Memento: si passa sopra a
+  // una scheda e si accende la sagoma lassù, si passa sopra a una sagoma e si accende la scheda.
+  // Su una mappa fatta di figure accostate, ritrovare «quale delle due è Ogikubo» è il lavoro che
+  // il lettore stava facendo a mano.
+  const [acceso, setAcceso] = useState<string | null>(null);
   // I Palazzi servono alla mappa disegnata: portano la finestra in cui esistono, ed è quella a
   // decidere se compaiono. Senza partita non decide nulla e si vedono tutti. `soloPalazzi` tiene
   // fuori i Memento: non sono un luogo di Tokyo e non hanno un ingresso sulla mappa di viaggio.
@@ -44,24 +51,38 @@ export function CittaPage() {
               di Tokyo, non una di due: sotto ci stava anche il visore della planimetria con la
               chiave `tokyo`, e la pagina mostrava la stessa città due volte, con due interazioni
               diverse e nessun modo di capire quale delle due fosse quella buona. */}
-          <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null} />
+          <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null}
+            evidenziato={acceso} onEvidenzia={setAcceso} />
           <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Quartieri">
-            {q.map((x) => (
-              <li key={x.chiave}>
-                <Link to={`/guida/mondo/quartiere/${encodeURIComponent(x.chiave)}`} className={`card card--cliccabile piastrella no-underline text-text flex gap-3 h-full ${classiSuggerito(sugg.evidenziato('quartieri', x.chiave))}`}>
+            {q.map((x) => {
+              const aperto = quartiereAperto(x.sbloccoData, attiva?.dataGioco ?? null);
+              const suggerito = sugg.evidenziato('quartieri', x.chiave);
+              return (
+              <li key={x.chiave} className="flex">
+                <Link to={`/guida/mondo/quartiere/${encodeURIComponent(x.chiave)}`}
+                  onMouseEnter={() => setAcceso(x.chiave)} onMouseLeave={() => setAcceso(null)}
+                  onFocus={() => setAcceso(x.chiave)} onBlur={() => setAcceso(null)}
+                  className={`card card--cliccabile piastrella no-underline text-text flex w-full gap-3 ${classiSuggerito(suggerito)} ${
+                    acceso === x.chiave ? 'ring-2 ring-[#ffd23f] ring-offset-0' : ''}`}>
                   {/* La stessa sagoma della mappa qui sopra, non l'anteprima del nodo d'atlante:
                       quella per quasi tutti i quartieri non esiste e lasciava riquadri vuoti. */}
-                  <SagomaQuartiere chiave={x.chiave} nome={x.nome} />
-                  <span className="flex flex-col gap-1 min-w-0">
-                  <span className="font-display uppercase text-[20px] leading-none">{x.nome}</span>
-                  {sugg.evidenziato('quartieri', x.chiave) && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
+                  <SagomaQuartiere chiave={x.chiave} nome={x.nome} acceso={acceso === x.chiave} className={aperto ? '' : 'opacity-40 grayscale'} />
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <span className="font-display uppercase text-[20px] leading-none">{x.nome}</span>
+                    {/* Il quartiere chiuso resta in elenco — la guida serve anche a sapere cosa
+                        arriverà — ma la scheda lo dice, perché lassù non c'è una sagoma da
+                        accendere e il collegamento sembrerebbe rotto. */}
+                    {!aperto && <span className="chip text-[11px]">Non ancora aperto{x.sbloccoData ? ` · dal ${x.sbloccoData}` : ''}</span>}
+                  </span>
+                  {suggerito && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
                   <span className="text-[12px] text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>
-                  {x.sblocco && <span className="text-[12px] text-text-muted">Sblocco: {x.sblocco}</span>}
+                  {x.sblocco && <span className="text-[12px] text-text-muted line-clamp-2">Sblocco: {x.sblocco}</span>}
                   {x.descrizione && <span className="text-[12px] text-text-secondary line-clamp-2">{x.descrizione}</span>}
                   </span>
                 </Link>
               </li>
-            ))}
+            );})}
           </ul>
         </div>
       )}
