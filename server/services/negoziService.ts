@@ -22,7 +22,7 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
   return { condizioni:regole(r.condizioni_json), ...(st ? { disponibilita: valutaRequisiti(regole(r.condizioni_json), st) } : {}), chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore, confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null, orari: r.orari, sblocco: r.sblocco, articoli: r.articoli ?? 0, verificati: r.verificati ?? 0 };
 }
 
-function disponibilitaArticolo(r:RigaArticolo,st:StatoDisponibilita) {
+function disponibilitaArticolo(r:Pick<RigaArticolo, 'condizioni_json' | 'negozio_condizioni'>,st:StatoDisponibilita) {
   const negozio=regole(r.negozio_condizioni??null).map(c=>({...c,testo:'Negozio: '+c.testo}));
   return valutaRequisiti([...negozio,...regole(r.condizioni_json)],st);
 }
@@ -36,10 +36,14 @@ function acquistiPartita(partitaId: number | undefined): Set<string> {
   return new Set((prepared('SELECT articolo_chiave FROM acquisto_partita WHERE partita_id = ?').all(partitaId) as Array<{ articolo_chiave: string }>).map((r) => r.articolo_chiave));
 }
 
-/** Negozi in ordine con conteggi degli articoli. */
+/** Negozi in ordine con conteggi canonici dell'intero catalogo.
+ *
+ * La disponibilita della partita descrive quando il punto e acquistabile/presente nel mondo,
+ * non cancella la sua scheda editoriale. */
 export function elencaNegozi(partitaId?: number): NegozioRiassuntoDto[] {
   const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
-  return (prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 ORDER BY n.ordine`).all() as RigaNegozio[]).map((r) => riassunto(r, st));
+  return (prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 ORDER BY n.ordine`).all() as RigaNegozio[])
+    .map((r) => riassunto(r, st));
 }
 
 /** Scheda di un negozio con gli articoli (acquistati nella partita, se indicata). */
@@ -48,8 +52,10 @@ export function dettaglioNegozio(chiave: string, partitaId?: number): NegozioDet
   if (!n) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);
   const acquistati = acquistiPartita(partitaId);
   const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
+  const riepilogo = riassunto(n, st);
   const articoli = (prepared('SELECT a.*, n.nome AS negozio_nome, n.condizioni_json AS negozio_condizioni FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine').all(chiave) as RigaArticolo[]).map((r) => articoloDto(r, acquistati, st));
-  return { ...riassunto(n, st), note: n.note, fonte: n.fonte, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length };
+  const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
+  return { ...riepilogo, ...conteggi, note: n.note, fonte: n.fonte, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length };
 }
 
 /** Ricerca degli articoli in tutti i negozi per testo, categoria e destinatario (massimo 300 risultati). */
@@ -61,10 +67,11 @@ export function ricercaArticoli(filtro: { q?: string; categoria?: string; per?: 
   if (filtro.categoria) { cond.push('a.categoria = ?'); par.push(filtro.categoria); }
   if (filtro.per) { cond.push("(a.per = ? OR a.per = 'tutti')"); par.push(filtro.per); }
   const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
-  const totale = (prepared(`SELECT COUNT(*) AS n FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave ${where}`).get(...par) as { n: number }).n;
+  const totaleCatalogo = (prepared(`SELECT COUNT(*) AS n FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave ${where}`).get(...par) as { n: number }).n;
   const righe = prepared(`SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS negozio_confidente, n.condizioni_json AS negozio_condizioni FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave ${where} ORDER BY n.ordine, a.ordine LIMIT 300`).all(...par) as RigaArticolo[];
   // «Rango Confidente 3» senza nome è il Confidente del negozio: la ricerca deve valutarlo come la scheda
-  return { articoli: righe.map((r) => articoloDto(r, acquistati, st)), totale };
+  const valutati = righe.map((r) => articoloDto(r, acquistati, st));
+  return { articoli: valutati, totale: totaleCatalogo };
 }
 
 /** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. */
@@ -72,6 +79,8 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const r = prepared('SELECT a.*, n.nome AS negozio_nome, n.condizioni_json AS negozio_condizioni FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?').get(articoloChiave) as RigaArticolo | undefined;
   if (!r) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
+  const st = statoDisponibilitaPartita(partitaId);
+  if (fatto && disponibilitaArticolo(r, st).stato === 'bloccato') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
   const adesso = nowIso();
   getDb().transaction(() => {
     const era = !!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave);
@@ -80,5 +89,5 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
     if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${r.nome_it ?? r.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.prezzo !== null ? ` · ${r.prezzo.toLocaleString('it-IT')} ¥` : ''}${r.per ? ` · per ${r.per}` : ''}.`, { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return articoloDto(r, new Set(fatto ? [articoloChiave] : []), statoDisponibilitaPartita(partitaId));
+  return articoloDto(r, new Set(fatto ? [articoloChiave] : []), st);
 }

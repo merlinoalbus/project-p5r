@@ -1999,6 +1999,131 @@ fantasma quando il layout ricalcola. Non e' ammesso mantenere questo doppio targ
    nessun testo «Palazzi e Dedali», nessuna card Mementos, una sola CTA primaria per card e nessun
    elemento azione fuori dal suo perimetro.
 
+## Lotto B — candidato NegozioPage con posizione contestuale (7 settembre 2026)
+
+**Proprietario implementazione:** Codex. **Verificatori richiesti:** Opus e
+`galaxy-task-validator`, entrambi in sola lettura sul tag candidato.
+
+### Modifica
+
+- `NegozioPage` sostituisce il collegamento compatto nell'intestazione con una sola istanza di
+  `DoveSiTrova`, alimentata da `tipo="negozio"` e dalla chiave della scheda.
+- Il componente condiviso conserva il contratto gia' verificato: mappa incorporata per una
+  destinazione unica, scelta esplicita per destinazioni multiple, messaggio informativo per una
+  voce senza luogo e degradazione silenziosa se il risolutore non risponde.
+- Il test di pagina impedisce regressioni su numero di istanze, tipo, chiave e altezza, oltre a
+  mantenere le prove esistenti su filtri, disponibilita' e acquisti.
+
+### Evidenze dell'implementatore
+
+- tre cicli: `typecheck` PASS, `lint` PASS, build Vite PASS e 8/8 test mirati PASS;
+- controllo runtime reale su desktop 1440x900, tablet 900x900 e mobile 390x844: nessuno sbordo,
+  controlli e prodotti restano leggibili, una sola sezione `Dove si trova`;
+- suite completa ripetuta tre volte: risultato stabile 572/574. I due fallimenti sono esterni al
+  diff e gia' nella base `github/main` (`citta.test.ts`: 84 attesi, 82 reali;
+  `mappe-editor.test.ts`: attesa obsoleta del Dedalo Memento nell'albero). Non vengono sanati nel
+  Lotto B e sono consegnati a Opus come rilievi della base/Lotto A.
+
+### Rilievo di integrazione per Opus
+
+Untouchable risolve oggi due ancore gerarchiche, Shibuya e Central Street, entrambe etichettate
+`Untouchable`. Il ramo `multipla` di `DoveSiTrova` le presenta quindi come due pulsanti omonimi.
+La pagina non inventa quale sia la destinazione corretta; il Lotto A deve distinguere le etichette
+oppure eliminare la duplicazione nel risolutore/dati, mantenendo un solo proprietario dei file.
+
+## Lotto B — candidato NegoziPage con inventario contestuale (7 settembre 2026)
+
+**Proprietario implementazione:** Codex. **Verificatori richiesti:** Opus e
+`galaxy-task-validator`, entrambi in sola lettura sul tag candidato.
+
+### Modifica
+
+- Ogni scheda negozio apre come destinazione primaria la rotta canonica
+  `/guida/negozi/:chiave`; la posizione e' un comando separato, esplicito e richiudibile.
+- La pagina monta al massimo una sola `DoveSiTrova`: scegliendo un altro negozio la sostituisce;
+  cambiando ricerca o filtri la nasconde se la selezione non appartiene piu' ai risultati correnti.
+- Con una partita attiva, negozi e articoli con `disponibilita.stato === 'bloccato'` sono assenti
+  da elenco, ricerca, conteggi e comandi di posizione. Compaiono soltanto quando il motore li
+  restituisce disponibili.
+- Le condizioni alternative restano valutate dal motore come OR tramite `gruppo` con
+  `modo: 'almeno-una'`: una qualunque condizione soddisfatta rende la voce visibile. La suite
+  completa include la prova del valutatore; la pagina consuma esclusivamente lo stato finale.
+- L'azione `Aggiungi un negozio` e' separata dall'intestazione per non comprimere il sottotitolo
+  su mobile; catalogo, filtri, acquisti e suggerimenti restano invariati.
+
+### Evidenze dell'implementatore
+
+- tre cicli mirati: 12/12 test PASS, `typecheck` PASS, `lint` PASS e build Vite PASS;
+- runtime reale con partita al giorno 11 aprile: API 60 negozi, 12 bloccati, UI 48 visibili;
+  la ricerca `37 Gradi` non rende ne' il negozio bloccato ne' una posizione residua;
+- controllo a schermo desktop, tablet 900x900 e mobile 390x844: griglie e controlli leggibili,
+  una sola mappa contestuale, apertura/chiusura corretta e nessuno sbordo osservato;
+- suite completa ripetuta tre volte: risultato stabile 575/577. Restano esclusivamente i due
+  fallimenti gia' riprodotti sulla base (`citta.test.ts`: 84 attesi, 82 reali;
+  `mappe-editor.test.ts`: vecchia attesa del Dedalo Memento nell'albero).
+
+### Vincolo di integrazione e ripartizione aggiornata
+
+Per decisione successiva dell'utente, la gestione progressiva di libri, film/DVD e videogiochi e'
+parte del Lotto B: saranno tre nuove sezioni autonome della Guida, con progresso per parti/sessioni
+e completamento che alimenta gli sblocchi. Opus integra soltanto lo stato risultante nelle pagine
+del mondo di sua proprieta'. Fino al completamento l'entita' collegata deve restare assente anche
+da pin, ricerca e collegamenti indiretti; se lo sblocco ammette alternative, basta una qualsiasi
+condizione vera. I Palazzi compaiono in mappa soltanto nella rispettiva finestra di apertura e
+sono assenti fuori periodo.
+
+### Esito del `galaxy-task-validator` sul tag v1: FAIL
+
+Il tag immutabile `candidato/lotto-b-negozi-contesto-v1` resta respinto. Il client nascondeva le
+righe rosse, ma il backend calcolava `articoli`, `verificati` e `totale` sul catalogo completo:
+intestazione e card dichiaravano quindi come disponibili anche articoli bloccati. La ricerca,
+inoltre, applicava prima `LIMIT 300` e soltanto dopo il filtro client, quindi il totale visibile
+non era dimostrabile per cataloghi oltre 300 righe. Il tag non viene spostato ne' riutilizzato.
+
+### Correzione preparata per il candidato v2
+
+- `elencaNegozi` calcola per ogni negozio `articoli` e `verificati` dopo la valutazione della
+  partita ed elimina i negozi con stato finale `bloccato`;
+- `dettaglioNegozio` risponde 404 per un negozio bloccato ed elimina gli articoli bloccati prima
+  di restituire elenco e conteggi;
+- `ricercaArticoli` valuta l'intero insieme, calcola `totale` sui soli disponibili e applica il
+  limite 300 soltanto alla risposta;
+- l'acquisto diretto di un articolo bloccato risponde 404; la scheda non contiene piu' il vecchio
+  interruttore che permetteva di riaprire gli articoli non ancora disponibili;
+- il frontend usa il totale restituito dal backend e conserva un filtro difensivo contro risposte
+  obsolete, senza offrire comandi di rivelazione.
+
+Prove mirate: 23/23 PASS su servizio, rotte, elenco e dettaglio. Una fixture rende disponibile
+soltanto `untouchable/kogatana-nera` e blocca gli altri 217 articoli, verificando 1/1 in elenco,
+scheda e ricerca. Una seconda fixture rende disponibili tutte le righe e verifica `totale=575`
+con 300 risultati restituiti. Runtime isolato reale sulla porta 3102, database nuovo: il 9 aprile
+48 negozi e 380 articoli visibili, ricerca `totale=380`, 300 restituiti, zero bloccati; la Kogatana
+e' assente e l'acquisto diretto risponde 404, poi compare il 1 agosto. Frontend isolato 5276
+controllato a schermo: il 9 aprile intestazione 48/380, ricerca Kogatana con due risultati e nessun
+Untouchable; il 1 agosto tre risultati incluso Untouchable. La scheda Untouchable passa da 161 a
+162 articoli e non offre alcun comando per rivelare i bloccati. La prova sul 5274 dell'utente
+resta da riallineare dopo la finestra concordata sul backend condiviso 3101.
+
+Le suite complete sequenziali restituiscono 578/580 con i due difetti esterni gia' noti. Una
+tornata ha mostrato anche un fallimento temporaneo sul titolo di `MappaPage`, immediatamente
+passato 8/8 in isolamento e non collegato al diff; viene dichiarato invece di essere occultato.
+
+### Verdetto indipendente `galaxy-task-validator`: PASS
+
+Il validatore ha giudicato in sola lettura il tag remoto annotato
+`candidato/lotto-b-negozi-contesto-v2` (oggetto `c972be7a`, commit `4bacca68`) e non ha modificato
+file. Ha riprodotto 23/23 test mirati, typecheck, lint e build PASS; suite completa 578/580 con i
+soli due difetti della base gia' separati. Ha verificato specificamente:
+
+- conteggi `articoli`/`verificati` sui soli stati finali non bloccati;
+- 404 per dettaglio negozio e acquisto diretto bloccati;
+- totale ricerca calcolato prima di `slice(0, 300)`;
+- fixture 1/218 coerente su elenco, scheda e ricerca e fixture 575/300;
+- catalogo senza partita invariato a 60 negozi e 575 articoli;
+- rimozione del toggle di riapertura e conservazione dell'OR `almeno-una`.
+
+Nessuna richiesta correttiva. Il gate procedurale e' chiuso; resta il verdetto incrociato di Opus
+previsto dalla collaborazione alla pari.
 ### Chiarimento vincolante sul WIP Memento
 
 Il WIP corrente di `cittaService`/`mappeService` rimuove la radice Memento da Citta' e indice
@@ -2272,3 +2397,90 @@ Lotto A con rilievo a Opus. Confermati anche candidato e gate separati per ciasc
 
 La soluzione del Lotto B e' quindi approvata a partire da `NegozioPage`, ma l'implementazione
 resta subordinata alla chiusura verificata dei punti precedenti nell'ordine globale concordato.
+
+---
+
+## Rivalidazione corretta — `candidato/lotto-a-mondo` (7 settembre 2026)
+
+**Verdetto:** **PASS con WARN non bloccanti** sul tag annotato immutabile
+`candidato/lotto-a-mondo` (`f7a8ce0`, oggetto tag `8092ce6`). La precedente ipotesi di FAIL e'
+ritirata: l'utente ha ribadito che quartieri e Palazzi bloccati devono essere assenti come figure
+attive sulla mappa di Tokyo, mentre catalogo informativo, nomi, schede/deep link, selettori e
+comando «Mostra anche i non ancora disponibili» devono restare consultabili.
+
+### Evidenze indipendenti
+
+- il giorno 11 aprile la mappa rende soltanto Yongen-Jaya, Shibuya e Shujin Academy e nessun
+  Palazzo; le schede informative degli altri quartieri restano correttamente presenti;
+- tutte le nove finestre dei Palazzi sono uniche e complete: ciascun Palazzo e' presente agli
+  estremi inclusivi e assente subito prima; Iweleth resta aperto dal 24 dicembre;
+- le condizioni alternative usano `modo: 'almeno-una'` e diventano verdi quando almeno una
+  condizione e' soddisfatta;
+- Mementos e' escluso da Citta', indice Palazzi e indice Mappe, ma conserva correttamente la pagina
+  autonoma e i collegamenti dalle Richieste;
+- Citta' monta una sola `MappaTokyo`; `/guida/mappe/tokyo` reindirizza a `/guida/citta`; card e
+  mappa riusano le sagome originali `asset/mappe/lmap/tokyo/<chiave>.png`;
+- la scheda Palazzo usa layout adattivo, navigatore aree e planimetrie native collegate; l'API
+  restituisce sempre `mappe` come array;
+- checkout temporaneo del tag: 47/47 test mirati, typecheck, lint e build PASS; suite completa
+  **583/583 PASS**.
+
+### WARN non bloccanti
+
+1. Nel tag verificato `soloPalazzi` usa ancora il filtro negativo `tipo !== 'mementos'`: sui dati
+   correnti e' corretto, ma un futuro terzo tipo entrerebbe impropriamente. Il ramo successivo di
+   Opus contiene gia' la forma positiva `tipo === 'palazzo'`.
+2. `MappaTokyo` mostra un futuro Palazzo privo di record finestra (`!f`): sui nove dati correnti
+   non accade. Preferibile fail-closed o un vincolo di completezza del seed.
+3. Il badge del navigatore aree guarda i campi legacy `mappa/pianta` e non `mappe.length`; le
+   planimetrie native si aprono comunque, ma il simbolo puo' non annunciarle.
+
+Il validatore non ha modificato file. Il candidato e' approvato per il perimetro dichiarato; il
+prossimo candidato Lotto A dovra' inoltre ripristinare i toggle/deep link informativi rimossi per
+errore su mia precedente richiesta, mantenendo il filtro positivo.
+
+---
+
+## Preparazione candidato Lotto B negozi v3 — catalogo consultabile (7 settembre 2026)
+
+Il precedente `candidato/lotto-b-negozi-contesto-v2` resta immutabile ma e' **semanticamente
+superato**: applicava l'interpretazione errata per cui un negozio o un articolo bloccato doveva
+scomparire anche dal catalogo. La specifica confermata dall'utente distingue invece due piani:
+catalogo e schede restano sempre consultabili; presenza attiva sulla mappa e acquisto dipendono
+dalle condizioni della partita.
+
+Il nuovo candidato previsto e' `candidato/lotto-b-negozi-catalogo-v3`. Prima del commit sono
+state raccolte queste evidenze sull'albero integrato col Lotto A di Opus (`a7db7b1`):
+
+- all'11 aprile l'API restituisce **60 negozi**, totale canonico **575 articoli** e i primi 300
+  risultati della ricerca; il limite riguarda solo le righe restituite, non il totale;
+- la scheda bloccata `37-gradi-celsius` risponde 200 e rende tutti i suoi 10 articoli con stato
+  «Non ancora»;
+- un acquisto forzato di `37-gradi-celsius/anello-del-respiro` restituisce **409** con codice
+  stabile `articolo-non-disponibile`; un articolo disponibile si acquista regolarmente;
+- nel browser la card del negozio bloccato resta nel catalogo, il deep link apre la scheda, la
+  posizione informativa resta visibile e le checkbox dei prodotti bloccati sono disabilitate con
+  etichetta «Non ancora acquistabile»;
+- tre cicli consecutivi di typecheck, lint, build e suite completa: **591/591 PASS** in ciascun
+  ciclo; nessun errore di build o runtime osservato;
+- il backend e' stato riavviato dopo la modifica; nonostante il falso timeout dello script di
+  rilevazione, il controllo indipendente `/api/config` ha risposto 200 e il log ha registrato il
+  nuovo avvio.
+
+Queste sono verifiche dell'implementatore e non costituiscono approvazione del candidato. Dopo il
+tag immutabile la verifica indipendente spetta a Opus e al `galaxy-task-validator`.
+
+### Gate indipendente del candidato v3
+
+**Verdetto `galaxy-task-validator`: PASS.** Il tag annotato remoto `3245f3fe` e' stato
+dereferenziato al commit atteso `1f304867605dd29aeeebd0c5473d0bab6ef3f430` in un checkout
+pulito. Typecheck, lint, build e suite seriale hanno chiuso con **591/591 test PASS**.
+
+Il validatore ha inoltre riprodotto su database in memoria al 04-11: 60 negozi, somma canonica
+575, ricerca con `totale=575` e 300 righe; deep link 200 al negozio bloccato; articolo bloccato
+presente ma acquisto respinto con 409 `articolo-non-disponibile`; 404 riservato agli inesistenti;
+deselezione 200 di un acquisto gia' registrato anche quando l'articolo e' oggi bloccato. Nel DOM
+ha confermato chip «Non ancora», posizione informativa, checkbox disabilitata e testo «Non ancora
+acquistabile». Nessuna regressione del Lotto A integrato e nessun file modificato dal validatore.
+
+Resta necessaria la verifica paritaria di Opus prima di considerare chiuso il pezzo Lotto B.

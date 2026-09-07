@@ -1865,3 +1865,30 @@ nell'elenco, i loro **pin** spariscono comunque dalla mappa — è l'AND con la 
 ho implementato io. I due comportamenti non si contraddicono: sono i due piani del contratto. La
 scheda si consulta, il posto sulla mappa no; e il comando «Mostra anche i non ancora disponibili»
 li riporta marcati. Verificato a schermo chiudendo la Clinica Takemi.
+
+---
+
+# I due lotti sono uno solo — merge di `lavoro/lotto-b-inventari`
+
+Fatto dopo il PASS reciproco: il suo `candidato/lotto-b-negozi-catalogo-v3` verificato da me, il
+mio `candidato/lotto-a-mondo-v3` pubblicato. Da qui in avanti **c'è un'istanza sola** che mostra
+tutto, invece di due mondi separati che si contendono la porta 3101.
+
+**Il merge non ha avuto conflitti**, e non è un caso: la divisione per dominio ha retto. Lui ha
+lavorato su `negoziService`, `NegoziPage`, `NegozioPage`, `ArticoliTabella`; io su `mappeService`,
+`cittaService`, `MappaTokyo`, `CittaPage`, `MappaPage`, `QuartierePage`, `DungeonPage`,
+`DungeonDettaglioPage`, `AccessoMondoPage`, `VisoreMappa`. Nessun file in comune in quattro mesi di
+lavoro compresso in un giorno.
+
+**593 test verdi**, typecheck e lint puliti. E verificato a schermo che le due metà si incastrino
+davvero, che era la domanda vera:
+
+| | |
+|---|---|
+| Negozi | 60 carte, «60 negozi con 575 articoli» — il catalogo è consultabile per intero |
+| Città | una sola mappa di Tokyo, 4 cartellini all'11 aprile, 23 schede di quartiere |
+| Visore di Yongen-Jaya | 16 spilli, e il comando «Mostra anche i non ancora disponibili (1)» |
+| Scheda del Palazzo | il visore dell'area c'è |
+
+I due piani del contratto convivono come dovevano: un negozio bloccato **si legge** nella sua
+scheda e **non compare** come pin sulla mappa, e il comando lo riporta marcato.
