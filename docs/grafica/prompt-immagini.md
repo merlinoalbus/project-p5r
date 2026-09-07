@@ -364,6 +364,10 @@ provvisorio deve essere sostituito con la relativa grafica generata».
 | `categoria-battaglia.png` | Oggetti da battaglia | saetta spezzata |
 | `categoria-esplorazione.png` | Esplorazione | bussola |
 
+**Consegnate il 2026-09-07** (candidato `grafica-categorie-finali-v1`, verificate: 128×128 RGBA, alfa reale, nessun oro). Le chiavi dei dati che
+dicono la stessa cosa al singolare — `arma`, `protezione`, `accessorio`, `regalo`, `materiale`, `abito`, `libro`, `lavoro`, `mini-gioco`,
+`videogioco` — sono ricondotte a queste figure da `chiaveCategoria()` (`src/utils/categorie.ts`): **non serve un file per ogni sinonimo**.
+
 ## 23. Fregi decorativi delle sezioni (10) — `decori/<chiave>.png` (1024×1024, trasparente) — richiesti il 2026-09-07
 **Immagini decorative e basta**: stanno nel fondo di una carta, sfumate al 16% di opacità e mascherate verso il testo, per alleggerire le sezioni
 che sono per forza di prosa. Non portano informazione, non contengono testo e non devono competere con il contenuto: silhouette larghe, poco
@@ -383,3 +387,26 @@ paragrafi».
 | `battaglia-demoni-tesoro.png` | Demoni del Tesoro | forziere con le gambe che scappa |
 | `jose-fiori.png` | Richieste → foglio di Jose | bambino con l'auto giocattolo e i fiori dei Mementos |
 | `jose-scambi.png` | Richieste → tabella degli scambi | banco di scambio con fiori e timbri, formato a fascia (1536×864) |
+
+## 24. Icone di categoria delle azioni del giorno (11) — `ui/categoria-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-07
+Stesse regole della §22 (128×128 trasparente, bianco/grigio/nero/rosso, nessun oro, nessun testo, silhouette leggibile a 20 px).
+Sono le categorie rimaste fuori dal censimento precedente, e si vedono **nella pagina più usata dell'app**: la Guida del giorno mostra l'icona
+dell'azione a 40 px, e su tredici tipi di azione uno solo — `dvd` — aveva la sua figura. Gli altri dodici restano sul cartiglio rosso di riserva,
+che accanto alle illustrazioni nuove è esattamente la mescolanza di stili che l'utente ha respinto («devi integrarle bene… non lasciare questa
+merda»). Il numero fra parentesi è quante volte quel tipo compare nel percorso di una partita intera: è l'ordine con cui conviene generarle.
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `categoria-confidente.png` | Azione «Confidente» del giorno (272) | due sagome di profilo affiancate, quella davanti con la mascherina |
+| `categoria-dote.png` | Azione «Dote» (140), scheda «Staffetta e Speciali» | stella piena a cinque punte con il bagliore su una punta |
+| `categoria-attivita.png` | Azione «Attività» (95) | sagoma in corsa vista di lato, con la scia |
+| `categoria-trama.png` | Azione «Trama» (87) | biglietto da visita dei Ladri Fantasma, con l'angolo piegato |
+| `categoria-acquisto.png` | Azione «Acquisto» (82) | portafoglio aperto con due monete che escono |
+| `categoria-esame.png` | Azione «Esame» (70) | foglio con la matita di traverso e una spunta grande |
+| `categoria-palazzo.png` | Azione «Palazzo» (58) | castello con due torri e il portone centrale |
+| `categoria-altro.png` | Azione generica (34), negozio «Altro», oggetto «Altro» | rombo pieno con tre punti in fila al centro |
+| `categoria-velluto.png` | Azione «Stanza di Velluto» (18), scheda «Ombre per area» | chiave lunga con l'anello a farfalla |
+| `categoria-richiesta.png` | Azione «Richiesta» (9), intestazione delle Richieste dei Mementos | foglio strappato con il teschio stampato sopra |
+| `categoria-oggetti-chiave.png` | Colonna «Tipo» degli oggetti chiave | chiave tozza con la testa a corona |
+
+Vanno tenute **distinte fra loro e dalle §22**: `velluto` (chiave) non è `oggetti-chiave` (chiave tozza a corona) e nessuna delle due è
+`categoria-armi`; `esame` (foglio + matita + spunta) non è `studio` (quaderno aperto con penna); `palazzo` (castello) non è `protezioni` (scudo).
