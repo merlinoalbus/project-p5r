@@ -373,7 +373,19 @@
      di una tela 10:7 — finivano tutte nel posto sbagliato. Meglio la mappa intera piccola, con lo
      zoom a portata: e' quello che fa ogni altra mappa dell'app, e le proporzioni restano quelle
      verificate a ogni larghezza. `transform-origin` al centro perche' lo zoom parta da li'. */
-  .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; touch-action: none; user-select: none; }
+  /* **E un tetto in altezza**, che mancava. Con la sola `aspect-ratio`, su una finestra larga la
+     cornice diventava 1640x1148 dentro 1900x950: la mappa non ci stava, le schede dei quartieri
+     finivano sotto il bordo, e per vedere l'una o le altre bisognava scorrere.
+     Il tetto e' scritto sulla **larghezza**, non con `max-height`: provata prima con `max-height`,
+     la cornice e' collassata a 3x2 px, perche' con `aspect-ratio` il browser ricava l'altezza
+     dalla larghezza e non torna indietro a ridurre la larghezza quando la stringi. Partendo dalla
+     larghezza — al massimo quella che serve per stare in 68vh mantenendo il 10:7 — la catena e'
+     nell'unico verso che il motore percorre, e la tela resta in proporzione a ogni misura, che e'
+     la condizione perche' le collocazioni in percentuale restino giuste. */
+  /* Il tetto sta sul blocco — mappa **e** riga delle fermate chiuse — perché quella riga è lunga
+     e in una colonna libera spingeva tutto fuori dallo schermo. La cornice riempie il blocco. */
+  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; }
+  .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; width: 100%; touch-action: none; user-select: none; }
   /* La mano compare solo quando c'e' davvero qualcosa da spostare: a zoom 1 la tela e' tutta li'. */
   .mappa-tokyo--spostabile { cursor: grab; }
   .mappa-tokyo--spostabile:active { cursor: grabbing; }

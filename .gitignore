@@ -38,3 +38,4 @@ __pycache__/
 
 # Cartella di lavoro temporanea del verificatore
 .codex-temp/
+vite.config.prova.ts

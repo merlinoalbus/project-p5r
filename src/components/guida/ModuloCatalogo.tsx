@@ -17,6 +17,7 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO } from '../../utils/negozi';
+import { NOME_DOTE } from '../../utils/citta';
 import type { ElementoCatalogoDto, TipoCatalogo } from '../../types';
 
 interface Campo {
@@ -49,6 +50,46 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'nota', etichetta: 'Nota', tipo: 'testolungo' },
     { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
+  libro: [
+    { nome: 'nome', etichetta: 'Titolo del libro', tipo: 'testo' },
+    { nome: 'nome_it', etichetta: 'Titolo italiano', tipo: 'testo', aiuto: 'Solo se diverso dal titolo qui sopra' },
+    { nome: 'dove', etichetta: 'Dove si trova', tipo: 'testo', aiuto: 'Per esempio: Libreria Taiheido (Shibuya)' },
+    { nome: 'prezzo', etichetta: 'Prezzo in yen', tipo: 'numero', aiuto: 'Vuoto o 0 se è gratis' },
+    { nome: 'disponibile_dal', etichetta: 'Disponibile dal', tipo: 'testo', aiuto: 'La data come la scrive la guida: «dal 18 aprile»' },
+    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE },
+    { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero', aiuto: 'Quante ♪ dà: è il numero, non un testo' },
+    { nome: 'sessioni', etichetta: 'Sessioni di lettura', tipo: 'numero', aiuto: 'Quante volte va letto per finirlo' },
+    { nome: 'sblocca', etichetta: 'Che cosa sblocca', tipo: 'testo' },
+    { nome: 'dettagli', etichetta: 'Dettagli', tipo: 'testolungo' },
+    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
+  ],
+  film: [
+    { nome: 'nome', etichetta: 'Titolo del film', tipo: 'testo' },
+    { nome: 'nome_it', etichetta: 'Titolo italiano', tipo: 'testo', aiuto: 'Solo se diverso dal titolo qui sopra' },
+    { nome: 'dove', etichetta: 'Dove si vede', tipo: 'select', opzioni: { cinema: 'Al cinema', dvd: 'In DVD' } },
+    { nome: 'periodo', etichetta: 'Periodo', tipo: 'testo', aiuto: 'Quando è in programmazione: «dal 24 aprile», «Maggio-Giugno»' },
+    { nome: 'prezzo', etichetta: 'Prezzo in yen', tipo: 'numero' },
+    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE },
+    { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero' },
+    { nome: 'sessioni', etichetta: 'Visioni per completarlo', tipo: 'numero', aiuto: 'Un film al cinema 1, un DVD 2' },
+    { nome: 'dettagli', etichetta: 'Dettagli', tipo: 'testolungo' },
+    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
+  ],
+  attivita: [
+    { nome: 'nome', etichetta: 'Nome dell’attività', tipo: 'testo' },
+    { nome: 'tipo', etichetta: 'Tipo', tipo: 'testo', aiuto: 'Per esempio: minigioco, lavoro, videogioco, studio' },
+    { nome: 'luogo_chiave', etichetta: 'Quartiere', tipo: 'select' },
+    { nome: 'luogo', etichetta: 'Dove, per esteso', tipo: 'testo', aiuto: 'Il quartiere si sceglie nel campo sopra' },
+    { nome: 'fascia', etichetta: 'Quando', tipo: 'testo', aiuto: 'Per esempio: giorno, sera, festivi' },
+    { nome: 'costo', etichetta: 'Costo in yen', tipo: 'numero' },
+    { nome: 'paga', etichetta: 'Quanto paga', tipo: 'testo', aiuto: 'Solo per i lavori' },
+    { nome: 'sessioni', etichetta: 'Round o sessioni', tipo: 'numero', aiuto: 'Per i videogiochi: quanti round per finirlo' },
+    { nome: 'sblocco', etichetta: 'Come si sblocca', tipo: 'testo' },
+    { nome: 'regole', etichetta: 'Regole', tipo: 'testolungo' },
+    { nome: 'premi', etichetta: 'Premi', tipo: 'testolungo' },
+    { nome: 'altri_effetti', etichetta: 'Altri effetti', tipo: 'testolungo' },
+    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
+  ],
 };
 
 interface Props {
@@ -62,7 +103,8 @@ interface Props {
 }
 
 export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalvato }: Props) {
-  const quartieri = useCarica(() => tipo === 'negozio' ? getQuartieri() : Promise.resolve([]), [tipo]);
+  // Il selettore dei quartieri serve ai negozi e alle attivita': tutte e due hanno un `luogo_chiave`.
+  const quartieri = useCarica(() => (tipo === 'negozio' || tipo === 'attivita') ? getQuartieri() : Promise.resolve([]), [tipo]);
   const iniziali = () => {
     const v: Record<string, string> = {};
     for (const c of CAMPI[tipo]) {
