@@ -1415,3 +1415,48 @@ non tolto d'ufficio.
 `/guida/citta`.
 
 **Verde:** 578 test, typecheck e lint puliti.
+
+---
+
+# Punto 3 — le miniature dei quartieri erano vuote
+
+Chiedevano l'anteprima del nodo d'atlante `citta-<quartiere>`. Per quasi tutti i quartieri quel
+nodo non ha un'immagine, quindi le schede mostravano un riquadro vuoto; e quando l'immagine c'era
+era la **planimetria**, cioè un'altra figura rispetto alla sagoma che il lettore aveva appena
+toccato sulla mappa qui sopra. Due sorgenti per la stessa cosa: una delle due era destinata a
+mancare.
+
+Adesso la scheda mostra **lo stesso disegno della mappa composta**, e c'è un solo posto da cui si
+prende: `src/components/mappe/assetTokyo.ts` — `assetTokyoQuartiere()`, `assetPalazzo()` e il
+ripiego. Lo usano sia `MappaTokyo` sia `SagomaQuartiere`, il componente delle schede, così chiave,
+ripiego e `onError` non possono divergere.
+
+Il ripiego è **niente**: se la sagoma manca davvero l'immagine si nasconde e resta il nome. Prima
+`MappaTokyo` ripiegava sulla planimetria `citta-<quartiere>`, cioè metteva una figura estranea
+dove ci si aspetta la stessa di un attimo prima — peggio di uno spazio vuoto. Con le 23 sagome
+presenti il ripiego non scatta mai: è la rete, non il pavimento.
+
+Ripulito anche `assetPalazzo`, che era un `../../../palazzi/<chiave>.png` relativo alla cartella
+delle sagome — funzionava, ma solo finché nessuno spostava la base.
+
+**Verificato a schermo:** 23 miniature, **zero** con `naturalWidth` a 0, nessun `.miniatura-mappa`
+rimasto nella griglia; Shibuya e Shujin Academy caricano i rispettivi file.
+
+**Verde:** 579 test, typecheck e lint puliti.
+
+## Quel che l'utente ha chiesto mentre lavoravo, e che cambia i punti 4-6
+
+Tre messaggi, e vanno letti insieme:
+
+1. «testo sborda… a che serve questo testo così? Scheda del Palazzo… si ci clicca già sulla scheda
+   e si apre» — il collegamento in fondo alle schede dei Palazzi **non va aggiustato, va tolto**:
+   è ridondante, la carta è già cliccabile;
+2. «la pagina di dettaglio va anche totalmente rivista: e strutturata e ottimizzata per desktop,
+   tablet e mobile»;
+3. «Anche mappe va totalmente rivista» — stessa cosa.
+
+Quindi il punto 5 non è un aggiustamento di bordo ma una cancellazione, e i punti 4 e 6 sono un
+**rifacimento** di `MappaPage` (indice e dettaglio) e di `DungeonDettaglioPage`, non una
+ripulitura. Il ramo «senza planimetria» di `MappaPage` oggi è un elenco di collegamenti nudi —
+«Scheda del luogo», «Modifica luogo» — senza gerarchia: è la pagina che si apre cliccando una
+scheda dei Palazzi.

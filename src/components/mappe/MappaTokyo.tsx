@@ -32,8 +32,7 @@ import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
 import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
-
-const BASE = '/asset/mappe/lmap/tokyo';
+import { assetPalazzo, assetTokyoQuartiere, nascondiSagomaAssente } from './assetTokyo';
 
 /** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
  *
@@ -64,9 +63,8 @@ function dentro(oggi: string, dal: string, al: string | null): boolean {
 interface Segno {
   chiave: string;
   nome: string;
-  png: string;
-  /** Immagine di ripiego se il disegno originale non esiste per questo luogo. */
-  ripiego: string;
+  /** L'indirizzo del disegno, già risolto: `assetTokyoQuartiere` o `assetPalazzo`. */
+  src: string;
   dove: Collocazione;
   /** Vuoto per le fermate che la guida non ha come scheda: restano cartellini, non collegamenti. */
   href: string;
@@ -78,13 +76,7 @@ interface Segno {
 
 function Cartellino({ s }: { s: Segno }) {
   const contenuto = <>
-    <img src={`${BASE}/${s.png}`} alt="" aria-hidden
-      onError={(e) => {
-        const im = e.currentTarget;
-        if (im.dataset.ripiego || !s.ripiego) { im.style.visibility = 'hidden'; return; }
-        im.dataset.ripiego = '1';
-        im.src = s.ripiego;
-      }}
+    <img src={s.src} alt="" aria-hidden onError={nascondiSagomaAssente}
       className="w-full object-contain transition-transform duration-150 group-hover:scale-[1.18]"
       style={{ filter: CONTORNO }}
       onMouseEnter={(e) => { if (s.href) e.currentTarget.style.filter = CONTORNO_ORO; }}
@@ -148,8 +140,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, className = '' 
       const dove = QUARTIERI_TOKYO[q.chiave];
       if (!dove) continue;
       segni.push({
-        chiave: q.chiave, nome: q.nome, png: `${q.chiave}.png`,
-        ripiego: `/asset/mappe/citta-${q.chiave}.png`, dove, palazzo: false,
+        chiave: q.chiave, nome: q.nome, src: assetTokyoQuartiere(q.chiave), dove, palazzo: false,
         // Si entra **nella mappa** del quartiere, non nella sua scheda: da una mappa si passa a
         // una mappa. Il risolutore resta il ripiego per i pochi che non hanno un nodo proprio.
         href: q.mappaChiave
@@ -167,7 +158,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, className = '' 
         chiave: `dungeon-${d.chiave}`, nome: d.nome,
         // I Palazzi non stanno nel foglio della mappa di viaggio — nel gioco lì non compaiono — e
         // tengono la loro illustrazione, che l'utente ha chiesto di lasciare com'è.
-        png: `../../../palazzi/${d.chiave}.png`, ripiego: '', dove, palazzo: true,
+        src: assetPalazzo(d.chiave), dove, palazzo: true,
         href: `/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`,
         presente: !dataGioco || !f || dentro(dataGioco, f.dal, f.al),
         quando: f ? (f.al ? `dal ${f.dal} al ${f.al}` : `dal ${f.dal}`) : null,
@@ -177,7 +168,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, className = '' 
     for (const [chiave, nome] of Object.entries(SENZA_SCHEDA_TOKYO)) {
       const dove = QUARTIERI_TOKYO[chiave];
       if (!dove || segni.some((s) => s.chiave === chiave)) continue;
-      segni.push({ chiave, nome, png: `${chiave}.png`, ripiego: '', dove, palazzo: false,
+      segni.push({ chiave, nome, src: assetTokyoQuartiere(chiave), dove, palazzo: false,
         href: '', presente: true, quando: null });
     }
     return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente) };
