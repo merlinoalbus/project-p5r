@@ -1,6 +1,21 @@
 // ============================================================
 // RichiestePage — Richieste dei Mementos con bersaglio, ricompense, Confidente e stato per partita; Jose (Fase 7.2)
 // ============================================================
+//
+// **Rifatta come si guarda, non come si legge.** Erano trentatré righe a tutta larghezza, una
+// sotto l'altra, con dentro tre frasi in grassetto — «Bersaglio: …», «Debole a: …», «Resiste a:
+// …» — e i comandi nascosti dentro la riga da aprire. Su un desktop da 1900 px era una colonna di
+// testo lunga cinque schermate con mezza pagina di vuoto a destra; su un telefono, un muro.
+//
+// Una Richiesta però si sceglie **guardando due cose**: dove sta (che Dedalo, che area) e a che
+// cosa è debole il bersaglio. Quelle due sono ora la faccia della carta: le debolezze come
+// pastiglie del colore del loro elemento, come nel Compendio, e la posizione in cima. Il resto —
+// committente, date, note — sta dietro «Dettagli», dove serve una volta sola.
+//
+// I comandi non si nascondono più: «Accettata» e «Completata» sono il gesto della pagina, e
+// stavano dentro la piega. Le completate scendono in fondo e si spengono, invece di restare in
+// mezzo a quelle da fare.
+// ============================================================
 
 import { useMemo, useState } from 'react';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
@@ -13,11 +28,48 @@ import type { RichiestaDto, StatoRichiesta } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
+import { coloreElemento } from '../utils/elementi';
 
 type Filtro = 'tutte' | 'da-fare' | 'accettate' | 'completate';
+
+/** Dal nome italiano dell'elemento, come lo scrive la guida, alla chiave del colore.
+ *
+ * La guida scrive «Tuono», «Psicocinesi (Psio)», «Fuoco (Sig.ra Takase)»: testo libero, non una
+ * chiave. Si riconosce l'inizio, che è la parte che nomina l'elemento; quello che non si riconosce
+ * — «Attacchi elementali (maggior parte)» — resta una pastiglia neutra, che è meglio di una
+ * pastiglia colorata a caso. */
+const ELEMENTO_DA_TESTO: Array<[RegExp, string]> = [
+  [/^fuoco/i, 'fire'],
+  [/^ghiaccio/i, 'ice'],
+  [/^(tuono|elettricit)/i, 'electric'],
+  [/^vento/i, 'wind'],
+  [/^(psicocinesi|psichic|psio)/i, 'psy'],
+  [/^nucleare/i, 'nuclear'],
+  [/^sacro/i, 'bless'],
+  [/^(maledizione|oscurit)/i, 'curse'],
+  [/^(danni fisici|fisic|attacchi fisici)/i, 'phys'],
+  [/^armi da fuoco/i, 'gun'],
+];
+
+function chiaveElemento(testo: string): string | null {
+  return ELEMENTO_DA_TESTO.find(([r]) => r.test(testo.trim()))?.[1] ?? null;
+}
+
+/** Pastiglia di una debolezza o di una resistenza: colorata se l'elemento si riconosce. */
+function Affinita({ testo, tipo }: { testo: string; tipo: 'debole' | 'resiste' }) {
+  const elemento = chiaveElemento(testo);
+  if (!elemento) return <span className="chip text-[11px]" title={tipo === 'debole' ? 'Debolezza del bersaglio' : 'Il bersaglio resiste'}>{testo}</span>;
+  const colore = coloreElemento(elemento);
+  return <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold"
+    style={{ borderColor: colore, color: colore, background: `color-mix(in srgb, ${colore} ${tipo === 'debole' ? 18 : 8}%, transparent)` }}
+    title={tipo === 'debole' ? 'Debolezza del bersaglio' : 'Il bersaglio resiste'}>
+    <span aria-hidden>{tipo === 'debole' ? '▼' : '▲'}</span>{testo}
+  </span>;
+}
 
 function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: number | null; onCambiata: (r: RichiestaDto) => void }) {
   const [aperta, setAperta] = useState(false);
@@ -29,35 +81,58 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
     try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li className={`card flex flex-col gap-1 ${r.stato === 'completata' ? 'opacity-70' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
-      <button type="button" className="text-left flex flex-wrap items-center gap-2 touch" onClick={() => setAperta((a) => !a)} aria-expanded={aperta}>
-        <strong className="text-[15px]">{r.nome}</strong>
-        {r.stato && <span className="chip chip--attivo">{r.stato}</span>}
-        {sugg.evidenziato('richieste', r.chiave) && <TargaSuggerito motivo={sugg.motivo('richieste', r.chiave)} compatta />}
-        <span className="text-[12px] text-text-muted">{r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
-        {r.confidente && <span className="chip">{r.confidente.nome}{r.confidente.rango ? ` rango ${r.confidente.rango}` : ''}</span>}
-      </button>
-      <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-3 gap-y-0.5">
-        <span><strong className="text-text">Bersaglio:</strong> {r.bersaglio.nome}{r.bersaglio.formaDemoniaca ? ` (${r.bersaglio.formaDemoniaca})` : ''}{r.bersaglio.livello ? ` · livello ${r.bersaglio.livello}` : ''}</span>
-        {r.bersaglio.debolezze.length > 0 && <span><strong className="text-text">Debole a:</strong> {r.bersaglio.debolezze.join(', ')}</span>}
-        {r.bersaglio.resistenze.length > 0 && <span><strong className="text-text">Resiste a:</strong> {r.bersaglio.resistenze.join(', ')}</span>}
-        {r.bersaglio.vulnerabileConfusione && <span className="chip text-[11px]">Confusione utile (yen)</span>}
+    <li className={`card flex min-w-0 flex-col gap-2 ${r.stato === 'completata' ? 'border-success/40 opacity-70' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
+      <div className="flex items-start gap-2.5">
+        <IconaCategoria categoria="richieste" dimensione={36} />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <h3 className="m-0 text-[16px] leading-tight">{r.nome}</h3>
+          <span className="text-[12px] text-text-muted">{r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
+        </div>
+        {r.stato && <span className={`chip shrink-0 text-[11px] ${r.stato === 'completata' ? '' : 'chip--attivo'}`}>{r.stato}</span>}
       </div>
-      {aperta && (
-        <div className="flex flex-col gap-1 text-[13px]">
-          <span><strong>Da:</strong> {r.committente || '—'} · <strong>disponibile dal</strong> {r.disponibileDal || '—'}{r.scadenza ? ` · scadenza ${r.scadenza}` : ''}</span>
-          {r.ricompense.length > 0 && <span><strong>Ricompense:</strong> {r.ricompense.join(', ')}</span>}
-          {r.note && <span className="text-text-secondary">{r.note}</span>}
-          <div className="flex flex-wrap gap-1.5 items-center">
-            {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
-            {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
-            {r.fonte && <a href={r.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
-            {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata" disabled={occupato} onClick={() => void cambia('accettata')} />}
-            {partitaId && r.stato !== 'completata' && <button type="button" className="btn btn-primary btn-sm" disabled={occupato} onClick={() => void cambia('completata')}>Completata</button>}
-            {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
+      {sugg.evidenziato('richieste', r.chiave) && <TargaSuggerito motivo={sugg.motivo('richieste', r.chiave)} compatta />}
+
+      {/* Il bersaglio è la ragione per cui si apre questa pagina prima di scendere: chi è, e a
+          che cosa cede. Sta in un riquadro suo perché è il dato, non una frase fra le frasi. */}
+      <div className="flex flex-col gap-1.5 rounded-md bg-white/[0.04] px-2.5 py-2">
+        <span className="text-[13px]">
+          <strong>{r.bersaglio.nome}</strong>
+          {r.bersaglio.formaDemoniaca && <span className="text-text-secondary"> · {r.bersaglio.formaDemoniaca}</span>}
+          {r.bersaglio.livello && <span className="text-text-muted"> · livello {r.bersaglio.livello}</span>}
+        </span>
+        {(r.bersaglio.debolezze.length > 0 || r.bersaglio.resistenze.length > 0 || r.bersaglio.vulnerabileConfusione) && (
+          <div className="flex flex-wrap gap-1">
+            {r.bersaglio.debolezze.map((x, i) => <Affinita key={`d${i}`} testo={x} tipo="debole" />)}
+            {r.bersaglio.resistenze.map((x, i) => <Affinita key={`r${i}`} testo={x} tipo="resiste" />)}
+            {r.bersaglio.vulnerabileConfusione && <span className="chip text-[11px]" title="Confondendolo si ottengono yen">Confusione utile</span>}
           </div>
+        )}
+      </div>
+
+      {r.confidente && <span className="text-[12px] text-text-secondary">Confidente: <strong className="text-text">{r.confidente.nome}</strong>{r.confidente.rango ? ` · rango ${r.confidente.rango}` : ''}</span>}
+      {r.ricompense.length > 0 && <span className="line-clamp-2 text-[12px] text-text-secondary" title={r.ricompense.join(', ')}><span className="text-text-muted">Ricompense:</span> {r.ricompense.join(', ')}</span>}
+
+      {/* Committente, date e note: si leggono una volta, quindi stanno dietro una riga. */}
+      <button type="button" className="touch self-start text-[12px] text-text-muted underline decoration-dotted underline-offset-2" aria-expanded={aperta} onClick={() => setAperta((a) => !a)}>
+        {aperta ? 'Nascondi i dettagli' : 'Dettagli'}
+      </button>
+      {aperta && (
+        <div className="flex flex-col gap-1 text-[12px] text-text-secondary">
+          <span><span className="text-text-muted">Da:</span> {r.committente || '—'}</span>
+          <span><span className="text-text-muted">Disponibile dal</span> {r.disponibileDal || '—'}{r.scadenza ? ` · scadenza ${r.scadenza}` : ''}</span>
+          {r.note && <span>{r.note}</span>}
         </div>
       )}
+
+      {/* I comandi stavano dentro la piega: erano il gesto della pagina, chiuso a chiave. */}
+      <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1">
+        {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata" disabled={occupato} onClick={() => void cambia('accettata')} />}
+        {partitaId && r.stato !== 'completata' && <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato} onClick={() => void cambia('completata')}>Completata</button>}
+        {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
+        {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
+        {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
+        {r.fonte && <a href={r.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>}
+      </div>
     </li>
   );
 }
@@ -71,33 +146,51 @@ export function RichiestePage() {
   const [area, setArea] = useState<string | null>(null);
   const d = dati.dati;
   const aree = useMemo(() => [...new Set((d?.richieste ?? []).map((r) => r.area))], [d]);
-  const visibili = useMemo(() => (d?.richieste ?? []).filter((r) => (area === null || r.area === area) && (filtro === 'tutte' || (filtro === 'da-fare' && !r.stato) || (filtro === 'accettate' && r.stato === 'accettata') || (filtro === 'completate' && r.stato === 'completata'))), [d, filtro, area]);
+  const visibili = useMemo(() => (d?.richieste ?? [])
+    .filter((r) => (area === null || r.area === area) && (filtro === 'tutte' || (filtro === 'da-fare' && !r.stato) || (filtro === 'accettate' && r.stato === 'accettata') || (filtro === 'completate' && r.stato === 'completata')))
+    // Le completate in fondo: restano consultabili, ma non davanti a quelle da fare.
+    .sort((a, b) => Number(a.stato === 'completata') - Number(b.stato === 'completata')), [d, filtro, area]);
+  const accettate = useMemo(() => (d?.richieste ?? []).filter((r) => r.stato === 'accettata').length, [d]);
   const aggiorna = (r: RichiestaDto) => { if (d) dati.imposta({ ...d, richieste: d.richieste.map((x) => (x.chiave === r.chiave ? r : x)), completate: d.richieste.filter((x) => (x.chiave === r.chiave ? r.stato : x.stato) === 'completata').length }); };
 
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="Richieste dei Mementos" sottotitolo={<>{d.totale} Richieste dalla guida allgamestaff: committente, date, Dedalo e area, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.completate} completate.` : ' Attiva una partita per segnare accettate e completate.'}</>} />
+          <IntestazionePagina titolo="Richieste dei Mementos" sottotitolo={<>{d.totale} Richieste dalla guida allgamestaff: committente, date, Dedalo e area, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare accettate e completate.'}</>} />
+
+          {partitaId && <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo delle Richieste">
+            <div className="kpi-tile"><span className="kpi-value">{d.totale}</span><span className="kpi-label">in tutto</span></div>
+            <div className="kpi-tile"><span className="kpi-value">{d.totale - d.completate - accettate}</span><span className="kpi-label">da fare</span></div>
+            <div className="kpi-tile"><span className="kpi-value">{accettate}</span><span className="kpi-label">accettate</span></div>
+            <div className="kpi-tile"><span className="kpi-value">{d.completate}</span><span className="kpi-label">completate</span></div>
+          </section>}
+
           <div className="flex flex-wrap items-center gap-1.5">
             {([['tutte', 'Tutte'], ['da-fare', 'Da fare'], ['accettate', 'Accettate'], ['completate', 'Completate']] as Array<[Filtro, string]>).map(([k, l]) => (
               <button key={k} type="button" className={`chip touch ${filtro === k ? 'chip--attivo' : ''}`} onClick={() => setFiltro(k)} aria-pressed={filtro === k}>{l}</button>
             ))}
-            <select className="form-input w-auto ml-auto" value={area ?? ''} onChange={(e) => setArea(e.target.value || null)} aria-label="Dedalo">
+            <select className="form-input w-auto sm:ml-auto" value={area ?? ''} onChange={(e) => setArea(e.target.value || null)} aria-label="Dedalo">
               <option value="">Tutti i Dedali</option>
               {aree.map((a) => <option key={a} value={a}>{a}</option>)}
             </select>
           </div>
-          <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Richieste">
-            {visibili.length === 0 && <li className="text-[13px] text-text-muted">Nessuna Richiesta con questi filtri.</li>}
+
+          {/* Una griglia, non una colonna: le carte sono corte e su uno schermo largo ne stanno
+              tre per riga, che è la differenza fra scorrere cinque schermate e vederne dodici. */}
+          <ul className="m-0 grid list-none grid-cols-1 items-start gap-3 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Richieste">
+            {visibili.length === 0 && <li className="text-[13px] text-text-muted" role="status">Nessuna Richiesta con questi filtri.</li>}
             {visibili.map((r) => <Richiesta key={r.chiave} r={r} partitaId={partitaId} onCambiata={aggiorna} />)}
           </ul>
+
           {d.jose && (
             <section className="card flex flex-col gap-2 text-[13px]">
-              <h2 className="m-0 text-[15px] font-semibold">Jose: fiori, timbri e scambi</h2>
+              <h2 className="m-0 font-display text-[17px] uppercase leading-none">Jose: fiori, timbri e scambi</h2>
               <p className="m-0 text-text-secondary">{d.jose.introduzione}</p>
-              {d.jose.fiori && <p className="m-0"><strong>Fiori:</strong> {typeof d.jose.fiori === 'string' ? d.jose.fiori : d.jose.fiori.descrizione}</p>}
-              {d.jose.timbri && <p className="m-0"><strong>Timbri:</strong> {typeof d.jose.timbri === 'string' ? d.jose.timbri : d.jose.timbri.descrizione}</p>}
+              <div className="grid gap-1 md:grid-cols-2">
+                {d.jose.fiori && <p className="m-0"><strong>Fiori:</strong> {typeof d.jose.fiori === 'string' ? d.jose.fiori : d.jose.fiori.descrizione}</p>}
+                {d.jose.timbri && <p className="m-0"><strong>Timbri:</strong> {typeof d.jose.timbri === 'string' ? d.jose.timbri : d.jose.timbri.descrizione}</p>}
+              </div>
               {d.jose.bossSegreto && <p className="m-0"><strong>Boss segreto:</strong> {d.jose.bossSegreto.nome} — {d.jose.bossSegreto.condizione}</p>}
               {d.jose.scambi.length > 0 && (
                 <div className="overflow-x-auto">
