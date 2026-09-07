@@ -1937,3 +1937,72 @@ prova e una coincidenza, ed è anche il motivo per cui il rimedio giusto non era
 **Verde:** cinque esecuzioni del file mirato (10/10 ogni volta) e **tre suite complete consecutive
 a 593/593**. Il criterio di chiusura che aveva chiesto Codex — parallela e seriale verdi, ripetute
 — è soddisfatto.
+
+---
+
+# Il Covo dei Ladri diventa una pagina, e il bilancio che ci avevo messo è stato tolto
+
+Il Covo era la **terza linguetta** di «Trofei, finali e Covo dei Ladri»: 52 sfide in un elenco
+puntato e 36 righe di catalogo in fondo, senza una ricerca e senza un numero. Ma non è un capitolo
+dei trofei — è un'area del gioco con una valuta sua — e ora ha `/guida/covo`: due colonne (sfide e
+catalogo) dal tablet in orizzontale in su, una ricerca sola che le attraversa entrambe, e in cima
+i conti.
+
+Ho preso questa voce dal lotto di Codex dichiarandolo nel canale alle 09:46, con l'impegno a
+fermarmi all'istante in caso di obiezione: sono file nuovi, il Covo è già un cartellino sulla mia
+mappa di Tokyo, e Codex era appena passato alla 5.2. Resta un **candidato da verificare**, come
+tutti gli altri.
+
+## L'errore che ho commesso e corretto prima di consegnare
+
+La prima versione della pagina apriva con un **bilancio**: medaglie guadagnabili, medaglie spese
+dal catalogo, differenza. Aritmeticamente esatto, e **falso**. L'ho scoperto interrogando l'API
+invece di fidarmi della mia struttura dati:
+
+```
+sfide 52 · premi 36 · guadagno 0 · senzaValore 52 · spesa 201 · senzaPrezzo 4
+```
+
+Due cose, tutte e due decisive:
+
+1. **Nessuna delle 52 sfide dichiara il proprio valore.** La guida dà solo il totale complessivo
+   (2.420 Medaglie P) e il dato lo dice esplicitamente: `medaglie` è `null` *apposta*, per non
+   riportare cifre non verificate. Il mio riquadro sommava 52 `null` e scriveva «si guadagnano 0».
+2. **Le 36 righe dei premi non sono 36 oggetti**, sono categorie: «Personae della Stanza di
+   Velluto» sono tredici elementi da 5 medaglie l'uno. La somma 201 non è la spesa di nessuno.
+
+Il risultato a schermo sarebbe stato un cartello rosso «**Mancano 201 medaglie — non basta per
+tutto il catalogo**»: una conclusione inventata, con l'aria di un dato, esattamente il tipo di
+errore che passa verde in ogni test perché il test misura la somma, non il senso.
+
+Al suo posto ci sono i conti che i dati reggono: **52 sfide** (con la nota che il valore della
+singola non è dichiarato), **36 voci di catalogo** (32 con prezzo), **prezzi da 3 a 10 medaglie per
+elemento**, e la cautela scritta accanto ai numeri e non in fondo. Il totale delle medaglie
+ottenibili lo dichiara la guida, nel testo che la pagina riporta per intero.
+
+Il bilancio **ricompare da solo** il giorno in cui tutte le sfide avranno un valore: `conti()`
+calcola il totale solo se `sfideConValore === sfide.length`. Un totale parziale sarebbe la stessa
+bugia, più piccola. Una prova fissa tutte e due le direzioni: con i dati veri il totale non deve
+comparire, con valori completi deve comparire e valere 15.
+
+Sparita anche la colonna delle medaglie accanto alle sfide: oggi sarebbe una colonna di 52
+trattini, che è rumore travestito da dato. Il valore compare solo se c'è. E il glifo «⊙» che avevo
+inventato per le medaglie è diventato la parola: `5 medaglie`, che si legge anche ad alta voce.
+
+## Le altre due estremità del collegamento
+
+Chi cercava il Covo dov'era non trova il vuoto: la pagina dei trofei si chiama ora «Trofei e
+finali» e porta in cima un rimando esplicito. Le tre entrate sono verificate nel DOM:
+la piastrella `/guida/covo` nell'indice della Guida (17 piastrelle), il cartellino sulla mappa di
+Tokyo, il rimando dai trofei. Le linguette rimaste sono sei, senza più «Covo dei Ladri».
+
+## Prove
+
+Misure a schermo su `localhost:5273` (DOM, non fotogrammi): 52 sfide e 36 premi resi, ricerca
+`cruciverb` → 1 sfida e 0 premi, `galleria` → 0 sfide e 9 premi. **Nessuno sbordamento e nessuno
+scorrimento orizzontale** a 375, 768, 1024 e 1280; le due colonne si affiancano da 1024 in su
+(374 px l'una accanto alla barra laterale) e si impilano sotto, dove i requisiti sono paragrafi
+lunghi e due colonne strette sarebbero peggio di due elenchi.
+
+**Verde:** tre cicli consecutivi typecheck + lint + suite completa, **597/597** ogni volta, più
+`npm run build`.

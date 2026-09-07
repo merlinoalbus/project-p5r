@@ -316,7 +316,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         <Cartellino
           s={{ chiave: 'covo', nome: 'Covo dei Ladri', targa: 'Covo dei Ladri',
             src: assetCovoLadri(), dove: COVO_TOKYO, palazzo: false,
-            href: '/guida/completamento', presente: true,
+            href: '/guida/covo', presente: true,
             quando: 'la soffitta del Leblanc' }}
           acceso={evidenziato === 'covo'} onEvidenzia={onEvidenzia} />
       </div>

@@ -13,8 +13,14 @@ import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import type { CompletamentoDto, TrofeoDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
-const SCHEDE = [['trofei', 'Trofei'], ['finali', 'Finali'], ['covo', 'Covo dei Ladri'], ['dlc', 'DLC'], ['meteo', 'Meteo'], ['ng', 'Nuova Partita+'], ['tempo', 'Tempo e fasce']] as const;
+// Il Covo dei Ladri non è più una linguetta qui: ha una pagina sua, `/guida/covo`. Non era un
+// capitolo dei trofei — è un'area con una valuta propria, 52 sfide che la guadagnano e 36 premi
+// che la spendono — e schiacciata in una scheda non si poteva né cercare né contare. Qui resta un
+// rimando in cima, così chi la cercava dov'era la trova lo stesso.
+const SCHEDE = [['trofei', 'Trofei'], ['finali', 'Finali'], ['dlc', 'DLC'], ['meteo', 'Meteo'], ['ng', 'Nuova Partita+'], ['tempo', 'Tempo e fasce']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 const NOME_TIPO_TROFEO: Record<TrofeoDto['tipo'], string> = { bronzo: 'Bronzo', argento: 'Argento', oro: 'Oro', platino: 'Platino' };
 
@@ -50,7 +56,7 @@ function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number 
 }
 
 export function CompletamentoPage() {
-  useDocumentTitle('Trofei, finali e Covo dei Ladri');
+  useDocumentTitle('Trofei e finali');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   const dati = useCarica(() => getCompletamento(partitaId ?? undefined), [partitaId]);
@@ -65,7 +71,10 @@ export function CompletamentoPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Trofei, finali e Covo dei Ladri" sottotitolo={<>{d.trofei.length} trofei con come e quando ottenerli, i finali con le condizioni e le date, il Covo dei Ladri con sfide e premi, i DLC, gli effetti del meteo, la Nuova Partita+ e le regole del tempo.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.ottenuti} trofei ottenuti.` : ' Attiva una partita per spuntare i trofei ottenuti.'}</>} />
+          <IntestazionePagina titolo="Trofei e finali" sottotitolo={<>{d.trofei.length} trofei con come e quando ottenerli, i finali con le condizioni e le date, i DLC, gli effetti del meteo, la Nuova Partita+ e le regole del tempo.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.ottenuti} trofei ottenuti.` : ' Attiva una partita per spuntare i trofei ottenuti.'}</>} />
+          {/* Il Covo stava qui come terza linguetta ed è andato in una pagina sua: chi lo cercava
+              dov'era lo trova lo stesso, invece di concludere che è sparito. */}
+          <CollegamentoVisivo to="/guida/covo" tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Covo dei Ladri" dettaglio="sfide, premi e Medaglie P" />
           <FilaScorrevole role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'trofei' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
           </FilaScorrevole>
@@ -94,29 +103,6 @@ export function CompletamentoPage() {
                 </li>
               ))}
             </ul>
-          )}
-          {scheda === 'covo' && (
-            <div className="flex flex-col gap-2 text-[13px]">
-              <section className="card flex flex-col gap-1">
-                <h2 className="m-0 text-[15px] font-semibold">Covo dei Ladri</h2>
-                <p className="m-0">{d.covo.introduzione}</p>
-                <Voce titolo="Medaglie P">{d.covo.medaglie}</Voce>
-                <Fonte url={d.covo.fonte} />
-              </section>
-              <section className="card flex flex-col gap-1">
-                <h2 className="m-0 text-[15px] font-semibold">Sfide ({d.covo.sfide.length})</h2>
-                <ul className="m-0 pl-4">{d.covo.sfide.map((s) => <li key={s.nome}><strong>{s.nome}</strong>: {s.requisito}{s.medaglie !== null ? ` (${s.medaglie} medaglie)` : ''}</li>)}</ul>
-              </section>
-              <section className="card flex flex-col gap-1">
-                <h2 className="m-0 text-[15px] font-semibold">Premi e catalogo ({d.covo.premi.length})</h2>
-                <div className="overflow-x-auto">
-                  <table className="tabella tabella--adattiva text-[12px]">
-                    <thead><tr><th>Premio</th><th>Medaglie</th><th>Sblocco</th><th>Effetto</th></tr></thead>
-                    <tbody>{d.covo.premi.map((p) => <tr key={p.nome}><td data-etichetta="Premio"><strong>{p.nome}</strong></td><td data-etichetta="Medaglie" className="tabular-nums">{p.costo ?? '—'}</td><td data-etichetta="Sblocco">{p.sblocco ?? '—'}</td><td data-etichetta="Effetto">{p.effetto ?? '—'}</td></tr>)}</tbody>
-                  </table>
-                </div>
-              </section>
-            </div>
           )}
           {scheda === 'dlc' && (
             <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[13px]" aria-label="DLC">
