@@ -6,6 +6,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { DungeonPage } from './DungeonPage';
+import { soloPalazzi } from '../utils/palazzi';
 import { useAssetStore } from '../stores/assetStore';
 import type { DungeonRiassuntoDto } from '../types';
 
@@ -63,6 +64,11 @@ describe('DungeonPage', () => {
     expect(await screen.findByRole('link', { name: /Dedalo di Iweleth/ })).toHaveAttribute('href', '/guida/dungeon/iweleth');
     expect(screen.queryByRole('link', { name: /^Memento/ })).toBeNull();
     expect(screen.queryByText('Memento')).toBeNull();
+    // Il filtro è **per inclusione**: passa `tipo === 'palazzo'`, non «tutto tranne i Memento».
+    // Un tipo nuovo e sconosciuto non deve entrare nell'elenco per il solo fatto di non essere
+    // Memento — è il rilievo di Codex, e la prova va scritta così o non prova niente.
+    expect(soloPalazzi([{ tipo: 'palazzo' }, { tipo: 'mementos' }, { tipo: 'ignoto' } as unknown as { tipo: 'palazzo' }]))
+      .toEqual([{ tipo: 'palazzo' }]);
     expect(screen.getByRole('list', { name: 'Palazzi' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Palazzi' })).toBeInTheDocument();
   });
