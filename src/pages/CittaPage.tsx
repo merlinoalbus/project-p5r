@@ -55,9 +55,15 @@ export function CittaPage() {
               di Tokyo, non una di due: sotto ci stava anche il visore della planimetria con la
               chiave `tokyo`, e la pagina mostrava la stessa città due volte, con due interazioni
               diverse e nessun modo di capire quale delle due fosse quella buona. */}
-          <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null}
-            evidenziato={acceso} onEvidenzia={setAcceso} />
-          <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Quartieri">
+          {/* Su schermo largo la mappa e le schede stanno **affiancate**, e non una sopra l'altra.
+              Impilate, a 1900×950 la mappa si prendeva tutta la finestra e le schede finivano
+              tutte sotto la piega: si vedeva l'una o le altre, mai le due cose insieme — ed è
+              proprio guardando la scheda che si vuole vedere accendersi la sagoma. Sotto i 1280
+              px restano impilate, perché due colonne strette non le legge nessuno. */}
+          <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,26rem)]">
+            <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null}
+              evidenziato={acceso} onEvidenzia={setAcceso} className="xl:sticky xl:top-2" />
+            <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-1 xl:max-h-[calc(68vh+2.5rem)] xl:overflow-y-auto xl:pr-1" aria-label="Quartieri">
             {q.map((x) => {
               const aperto = quartiereAperto(x, attiva?.dataGioco ?? null);
               const suggerito = sugg.evidenziato('quartieri', x.chiave);
@@ -87,7 +93,8 @@ export function CittaPage() {
                 </Link>
               </li>
             );})}
-          </ul>
+            </ul>
+          </div>
         </div>
       )}
     </PageState>
