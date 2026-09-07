@@ -30,6 +30,7 @@ import { FilmPage } from './pages/FilmPage';
 import { VideogiochiPage } from './pages/VideogiochiPage';
 import { CruciverbaPage } from './pages/CruciverbaPage';
 import { NegoziPage } from './pages/NegoziPage';
+import { InventariPage } from './pages/InventariPage';
 import { PercorsoPage } from './pages/PercorsoPage';
 import { CompletamentoPage } from './pages/CompletamentoPage';
 import { CovoPage } from './pages/CovoPage';
@@ -83,6 +84,7 @@ export const router = createBrowserRouter([
       { path: 'guida/percorso', element: <PercorsoPage /> },
       { path: 'guida/percorso/:data', element: <PercorsoPage /> },
       { path: 'guida/negozi', element: <NegoziPage /> },
+      { path: 'guida/inventari', element: <InventariPage /> },
       { path: 'guida/negozi/:chiave', element: <NegozioPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
