@@ -136,6 +136,7 @@ Aggiornato il 7 settembre 2026.
 | 6.1 pin | **fatto** — 37 asset rigenerati da Codex come sola figura su alfa; lo spillo (colore, misura, punta, stati) lo costruisce il codice |
 | 6.2 grafica mancante | **in corso** — `docs/grafica/fabbisogno.md`: voce 1 consegnata (Shujin), 2 e 3 ritirate (i pezzi dei Memento c'erano già), 4 aperta (il Covo dei Ladri) |
 | Covo dei Ladri | **fatto** — pagina propria `/guida/covo` (voce presa dal lotto B previo annuncio nel canale): sfide e catalogo affiancati, ricerca unica, conti onesti. Il bilancio della prima stesura è stato **tolto** perché falso: il perché in `docs/ATLANTE-STATO.md`. Da verificare a Codex |
+| confine «bloccato = assente» | **chiuso** — il contratto a tre piani del v3 di Codex (catalogo consultabile · presenza sulla mappa nascosta · azione vietata dal backend) è la stessa regola che il lotto A applica ai quartieri. Da confermare a Codex |
 | 7.1 revisione incrociata | **in corso** — ciascuno verifica i candidati dell'altro; resta quel che attraversa il confine |
 
 ### Quel che manca, scritto per non doverlo ricostruire a memoria
@@ -147,10 +148,17 @@ Aggiornato il 7 settembre 2026.
    sulla mia mappa di Tokyo. Consegnato come candidato, da verificare come tutti gli altri.
 2. **Grafica**: la sagoma del Covo dei Ladri (voce 4), e la decisione sugli otto colori di spillo
    troppo chiari — che non è grafica ma una riga di `shared/spilli.ts`.
-3. **Un confine da decidere insieme**: se «bloccato = assente» valga anche per le **schede** dei
-   quartieri o solo per i loro cartellini sulla mappa. Oggi negozi e articoli spariscono del tutto;
-   i quartieri restano in elenco con scritto «Non ancora aperto». Le due letture sono in
-   `docs/ATLANTE-STATO.md` e nel canale; se non ci si accorda, decide l'utente.
+3. ~~**Un confine da decidere insieme**: se «bloccato = assente» valga anche per le schede dei
+   quartieri o solo per i loro cartellini sulla mappa.~~ **Chiuso, e senza bisogno di decidere
+   niente di nuovo: i due lotti si sono incontrati sulla stessa regola.** Il contratto di Codex
+   nel `candidato/lotto-b-negozi-catalogo-v3` distingue tre piani — (1) catalogo e schede sempre
+   consultabili, (2) presenza attiva sulla mappa nascosta se bloccata, (3) azione vietata, con il
+   backend autoritativo — ed è parola per parola quel che il lotto A fa con i quartieri: restano
+   in elenco con scritto «Non ancora aperto» e spariscono dalla mappa. Il disaccordo era sul
+   comportamento del **v2**, dove negozi e articoli sparivano anche dal catalogo; il v3 l'ha
+   tolto. La regola comune è quindi: **una scheda è documentazione e non si nasconde mai; la mappa
+   dice dove si può andare adesso e nasconde ciò che non si può; l'azione la vieta il backend.**
+   Resta da confermare a Codex che la legga com'io la leggo — chiesto nel canale.
 4. **L'integrazione**: il lotto B verificato può entrare in `lavoro/atlante-mondo`, così c'è
    un'istanza sola che mostra tutto invece di due mondi separati su una porta sola.
 
