@@ -34,19 +34,22 @@ describe('LibriPage', () => {
 
     const vista = render(<MemoryRouter><LibriPage /></MemoryRouter>);
     expect(await screen.findByText('Libro di prova')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una sessione' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una sessione' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una sessione a Libro di prova' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una sessione a Libro di prova' }));
     expect(impostaProgressoLibro).toHaveBeenCalledTimes(1);
 
     await act(async () => risolviPrima({ ...base, progresso: 1 }));
     await waitFor(() => expect(impostaProgressoLibro).toHaveBeenCalledTimes(2));
     await act(async () => risolviSeconda({ ...base, progresso: 2, fatto: true }));
-    expect(await screen.findByText('Completato')).toBeInTheDocument();
+    // Finito, il libro esce dai «da leggere» e va nel gruppo dei completati, che è chiuso.
+    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati · 1/ }));
+    expect(screen.getByText('Completato')).toBeInTheDocument();
     expect(screen.getByText('2 di 2 sessioni')).toBeInTheDocument();
 
     vista.unmount();
     render(<MemoryRouter><LibriPage /></MemoryRouter>);
-    expect(await screen.findByText('2 di 2 sessioni')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati · 1/ }));
+    expect(screen.getByText('2 di 2 sessioni')).toBeInTheDocument();
     expect(persistito).toBe(2);
   });
 
@@ -55,7 +58,7 @@ describe('LibriPage', () => {
     getLibri.mockResolvedValue(dto(base));
     render(<MemoryRouter><LibriPage /></MemoryRouter>);
     expect(await screen.findByText('Libro di prova')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Aggiungi una sessione' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Aggiungi una sessione/ })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Mostra posizione' }));
     expect(await screen.findByText('Dove: negozio/libreria-taiheido')).toBeInTheDocument();
     expect(screen.getAllByText(/Dove:/)).toHaveLength(1);

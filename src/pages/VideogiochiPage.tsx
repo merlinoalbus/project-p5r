@@ -24,6 +24,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { NOME_DOTE } from '../utils/citta';
 import type { VideogiocoDto } from '../types';
 
@@ -36,7 +37,7 @@ function Numero({ valore, etichetta }: { valore: number | string; etichetta: str
   );
 }
 
-function Scheda({ g, partitaId, occupato, onCambia }: { g: VideogiocoDto; partitaId: number | null; occupato: boolean; onCambia: (g: VideogiocoDto, avanzamento: number) => void }) {
+function Scheda({ g, partitaId, occupato, onCambia, onCorretto }: { g: VideogiocoDto; partitaId: number | null; occupato: boolean; onCambia: (g: VideogiocoDto, avanzamento: number) => void; onCorretto: () => void }) {
   const totale = g.totaleRound;
   const percentuale = totale > 0 ? Math.round((g.progresso / totale) * 100) : 0;
   return (
@@ -62,12 +63,13 @@ function Scheda({ g, partitaId, occupato, onCambia }: { g: VideogiocoDto; partit
         </div>
       </div>
 
+      {/* Il gesto è il round: due pulsanti larghi uguali. «Completa» in mezzo, grande il triplo,
+          faceva in un tocco quello che «+» fa comunque, e toglieva spazio al gesto vero. */}
       {partitaId && (
-        <div className="grid grid-cols-[44px_1fr_44px] gap-2" aria-label={`Avanzamento ${g.nome}`}>
-          <button type="button" className="btn btn-ghost touch" disabled={occupato || g.progresso === 0} onClick={() => onCambia(g, g.progresso - 1)} aria-label={`Togli un round a ${g.nome}`}>−</button>
-          <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => onCambia(g, g.fatto ? 0 : totale)} aria-label={`${g.fatto ? 'Azzera' : 'Completa'} ${g.nome}`}>{g.fatto ? 'Azzera' : 'Completa'}</button>
-          <button type="button" className="btn btn-ghost touch" disabled={occupato || g.progresso >= totale} onClick={() => onCambia(g, g.progresso + 1)} aria-label={`Aggiungi un round a ${g.nome}`}>+</button>
-          {occupato && <span className="col-span-3 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
+        <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${g.nome}`}>
+          <button type="button" className="btn btn-secondary touch text-[18px]" disabled={occupato || g.progresso === 0} onClick={() => onCambia(g, g.progresso - 1)} aria-label={`Togli un round a ${g.nome}`}>−</button>
+          <button type="button" className="btn btn-primary touch text-[18px]" disabled={occupato || g.progresso >= totale} onClick={() => onCambia(g, g.progresso + 1)} aria-label={`Aggiungi un round a ${g.nome}`}>+</button>
+          {occupato && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
         </div>
       )}
 
@@ -78,7 +80,10 @@ function Scheda({ g, partitaId, occupato, onCambia }: { g: VideogiocoDto; partit
         {g.sblocco && <><dt className="text-text-muted">Si sblocca</dt><dd className="m-0">{g.sblocco}</dd></>}
       </dl>
       {g.premi && <p className="m-0 text-xs text-text-secondary">{g.premi}</p>}
-      {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
+      <div className="mt-auto flex flex-wrap items-center gap-2">
+        <CorreggiElemento tipo="attivita" chiave={g.chiave} onSalvato={onCorretto} />
+        {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>}
+      </div>
     </li>
   );
 }
@@ -130,17 +135,21 @@ export function VideogiochiPage() {
             <Numero valore={`${roundFatti}/${roundTotali}`} etichetta="Round" />
           </div>
 
-          <label className="flex flex-col gap-1">
-            <span className="sr-only">Cerca fra i videogiochi</span>
-            <input type="search" className="form-input" placeholder="Cerca per nome, luogo o Dote…" value={ricerca} onChange={(e) => setRicerca(e.target.value)} />
-          </label>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="flex min-w-[220px] flex-1 flex-col gap-1">
+              <span className="sr-only">Cerca fra i videogiochi</span>
+              <input type="search" className="form-input" placeholder="Cerca per nome, luogo o Dote…" value={ricerca} onChange={(e) => setRicerca(e.target.value)} />
+            </label>
+            {/* Un videogioco è un'attività, nel catalogo: si aggiunge con lo stesso modulo. */}
+            <AggiungiAlCatalogo tipo="attivita" titolo="Aggiungi un videogioco" onSalvato={() => void dati.ricarica()} />
+          </div>
 
           <section className="flex flex-col gap-2" aria-label="Da giocare">
             <h2 className="m-0 font-display text-[17px] uppercase leading-none">Da giocare · {daFare.length}</h2>
             {daFare.length === 0
               ? <p className="m-0 text-[13px] text-text-muted" role="status">{giochi.length === 0 ? 'Nessun gioco nel catalogo.' : q ? 'Nessun gioco da fare con questo testo.' : 'Finiti tutti.'}</p>
               : <ul className={griglia} aria-label="Videogiochi da giocare">
-                  {daFare.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} onCambia={(x, v) => void cambia(x, v)} />)}
+                  {daFare.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} onCambia={(x, v) => void cambia(x, v)} onCorretto={() => void dati.ricarica()} />)}
                 </ul>}
           </section>
 
@@ -153,7 +162,7 @@ export function VideogiochiPage() {
               </button>
               {mostraFatti && (
                 <ul className={griglia} aria-label="Videogiochi completati">
-                  {fatti.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} onCambia={(x, v) => void cambia(x, v)} />)}
+                  {fatti.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} onCambia={(x, v) => void cambia(x, v)} onCorretto={() => void dati.ricarica()} />)}
                 </ul>
               )}
             </section>

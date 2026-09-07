@@ -18,6 +18,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -27,7 +28,7 @@ function Doti({ doti }: { doti: AttivitaDto['doti'] }) {
   return <span className="flex flex-wrap gap-1">{doti.map((d, i) => <span key={i} className="chip chip--attivo" title={d.condizione ?? undefined}>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}{d.note !== null ? ` ${'♪'.repeat(Math.min(3, d.note))}` : ''}</span>)}</span>;
 }
 
-function Attivita({ a }: { a: AttivitaDto }) {
+function Attivita({ a, onCambiata }: { a: AttivitaDto; onCambiata: () => void }) {
   const [aperta, setAperta] = useState(false);
   const sugg = useSuggerimenti();
   return (
@@ -53,7 +54,12 @@ function Attivita({ a }: { a: AttivitaDto }) {
           {a.altriEffetti && <p className="m-0"><strong>Altri effetti:</strong> {a.altriEffetti}</p>}
           {a.regole && <p className="m-0"><strong>Come funziona:</strong> {a.regole}</p>}
           {a.premi && <p className="m-0"><strong>Premi:</strong> {a.premi}</p>}
-          {a.fonte && <a href={a.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
+          {/* Correggere un'attività mentre si gioca: quello che si cambia resta anche dopo un
+              aggiornamento dei dati della guida. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <CorreggiElemento tipo="attivita" chiave={a.chiave} onSalvato={onCambiata} />
+            {a.fonte && <a href={a.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>}
+          </div>
         </div>
       )}
     </li>
@@ -86,9 +92,10 @@ export function AttivitaPage() {
               <option value="">Tutte le Doti</option>
               {Object.entries(NOME_DOTE).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
             </select>
+            <AggiungiAlCatalogo tipo="attivita" titolo={scheda === 'lavori' ? 'Aggiungi un lavoro' : 'Aggiungi un’attività'} onSalvato={() => void dati.ricarica()} />
           </div>
-          {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} />)}</ul>}
-          {scheda === 'lavori' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Lavori">{lavoriVisibili.map((a) => <Attivita key={a.chiave} a={a} />)}</ul>}
+          {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} />)}</ul>}
+          {scheda === 'lavori' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Lavori">{lavoriVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} />)}</ul>}
         </div>
       )}
     </PageState>
