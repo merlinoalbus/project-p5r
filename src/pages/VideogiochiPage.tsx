@@ -76,8 +76,10 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
           faceva in un tocco quello che «+» fa comunque, e toglieva spazio al gesto vero. */}
       {partitaId && (
         <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${g.nome}`}>
-          <button type="button" className="btn btn-secondary touch text-[18px]" disabled={progresso === 0} onClick={() => onCambia(g, -1)} aria-label={`Togli un round a ${g.nome}`}>−</button>
-          <button type="button" className="btn btn-primary touch text-[18px]" disabled={progresso >= totale} onClick={() => onCambia(g, +1)} aria-label={`Aggiungi un round a ${g.nome}`}>+</button>
+          <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli"
+            disabled={progresso === 0} onClick={() => onCambia(g, -1)} aria-label={`Togli un round a ${g.nome}`} />
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Round"
+            disabled={progresso >= totale} onClick={() => onCambia(g, +1)} aria-label={`Aggiungi un round a ${g.nome}`} />
           {occupato && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
         </div>
       )}
