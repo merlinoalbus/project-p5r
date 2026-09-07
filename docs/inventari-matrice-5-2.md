@@ -14,10 +14,10 @@ Videogiochi hanno cataloghi autonomi e avanzamento per partita.
 | Regali | https://www.allgamestaff.it/persona-5-royal/regali/ | `articolo` / `regalo` | 55 | Inventari → Regali | negozio selezionato | dati del catalogo negozi |
 | Oggetti chiave | https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/ | `oggetti-guida.json` / `chiaveEMateriali` | 82 | Inventari → Oggetti chiave | solo negozio verificato | elenco autonomo; link alla scheda Oggetti |
 | Materiali | https://www.allgamestaff.it/persona-5-royal/tesori/ | `articolo` / `materiale` + `OggettiPage` | 35 | Inventari → Materiali | negozio selezionato | una sola sorgente per ogni riga |
-| Consumabili | guida consumabili | `articolo` / `consumabile` | 101 | Inventari → Consumabili | negozio selezionato | dati del catalogo negozi |
-| Cibo | guida cibo | `articolo` / `cibo` | 37 | Inventari → Cibo | negozio selezionato | dati del catalogo negozi |
+| Consumabili | https://www.allgamestaff.it/persona-5-royal/distributori-automatici/ · https://www.allgamestaff.it/persona-5-royal/oggetti/ · https://www.allgamestaff.it/persona-5-royal/negozi-speciali/ | `articolo` / `consumabile` | 101 | Inventari → Consumabili | negozio selezionato | fonti distribuite; unificazione solo tramite chiave articolo |
+| Cibo | https://www.allgamestaff.it/persona-5-royal/oggetti/ · https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ | `articolo` / `cibo` | 37 | Inventari → Cibo | negozio selezionato | include cucina di Sojiro; non duplicare nella scheda Leblanc |
 | Carte abilità | https://www.allgamestaff.it/persona-5-royal/carte-abilita/ | nessun dataset locale materializzato | — | Inventari → Carte abilità | nessuno | empty state onesto + link alla fonte ufficiale; non classificare cartoline o altri articoli per sottostringa |
-| Libri / DVD / Videogiochi | https://www.allgamestaff.it/persona-5-royal/libri/ · https://www.allgamestaff.it/persona-5-royal/dvd-a-noleggio/ | cataloghi autonomi con avanzamento partita | 46 / 30 / 7 | pagine autonome | pannello contestuale | completamento per parti/sessioni/round, senza duplicare Inventari |
+| Libri / DVD / Videogiochi | https://www.allgamestaff.it/persona-5-royal/libri/ · https://www.allgamestaff.it/persona-5-royal/dvd-a-noleggio/ · https://www.allgamestaff.it/persona-5-royal/videogiochi/ | cataloghi autonomi con avanzamento partita | 46 / 30 / 7 | pagine autonome | pannello contestuale | completamento per parti/sessioni/round, senza duplicare Inventari |
 
 Regola di non duplicazione: la scheda dell'oggetto resta nel catalogo della famiglia; il prezzo,
 la disponibilità temporale e l'acquisto restano nella scheda del negozio. La mappa mostra solo
