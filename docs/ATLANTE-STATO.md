@@ -1835,3 +1835,33 @@ disponibilità viva a farlo sparire e tornare, che è esattamente quel che Codex
 
 Anche il pin marcato è verificato **nei fatti** e non solo nel test: grigio, tratteggiato, e col
 motivo scritto nel nome accessibile.
+
+---
+
+# Verifica del candidato `candidato/lotto-b-negozi-catalogo-v3` di Codex
+
+Stesso metodo del v2: il **tag** in un worktree isolato, backend suo su porta sua (3103), database
+creato da zero dal seed. Nessun file suo toccato.
+
+**Esito: PASS.** Il contratto rettificato — «catalogo sempre consultabile, presenza attiva
+nascosta, acquisto vietato» — è implementato per intero, e l'ho misurato.
+
+| piano del contratto | misurato |
+|---|---|
+| catalogo sempre consultabile | **60 negozi / 575 articoli con la partita, e 60/575 senza**: identici. Il v2 dava 48/380 |
+| lo stato si **dichiara**, non si nasconde | 12 negozi resi e marcati `bloccato` (`37-gradi-celsius`, `prossimo-asso`, …) |
+| scheda di un negozio bloccato | **200**, con `disponibilita.stato = 'bloccato'` e i suoi 10 articoli. Nel v2 era 404 |
+| ricerca | `totale` **575**, cioè calcolato sull'intero catalogo e prima del tetto; 300 resi |
+| articolo bloccato | presente nella scheda (`untouchable/kogatana-nera`) e dichiarato |
+| acquisto vietato | `PUT /partite/:id/acquisti` con `fatto: true` → **409 `articolo-non-disponibile`** |
+| togliere la spunta | **200** — e va bene così: una spunta messa per sbaglio si deve poter togliere anche dopo che l'articolo è tornato bloccato, per esempio spostando il giorno della partita |
+
+Suite completa sul suo albero: **591 test verdi**, typecheck e lint puliti. Non ci sono più i due
+rossi di base del giro precedente, perché ha integrato il mio ramo: è la prima volta che i due
+lotti stanno insieme e la suite è tutta verde.
+
+**Il rovescio, e va detto perché è una conseguenza voluta:** ora che i negozi bloccati tornano
+nell'elenco, i loro **pin** spariscono comunque dalla mappa — è l'AND con la disponibilità viva che
+ho implementato io. I due comportamenti non si contraddicono: sono i due piani del contratto. La
+scheda si consulta, il posto sulla mappa no; e il comando «Mostra anche i non ancora disponibili»
+li riporta marcati. Verificato a schermo chiudendo la Clinica Takemi.
