@@ -5,7 +5,7 @@
 // Test CittaPage e QuartierePage — mappa incorporata di Tokyo/quartiere e schede dei luoghi senza posizionamento (Fase 13.4)
 // ============================================================
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
@@ -18,22 +18,26 @@ const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo:
   spilli: [{ id: 1, mappaChiave: chiave, tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#3b82f6', nome: chiave === 'tokyo' ? 'Shibuya' : 'Untouchable', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '' }] });
 
 describe('CittaPage', () => {
-  it('mostra la mappa di Tokyo incorporata (con «Schermo intero» e «Modifica mappa») e le piastrelle dei quartieri', async () => {
+  it('mostra una sola Tokyo — quella disegnata — e le piastrelle dei quartieri', async () => {
+    // La pagina montava anche `MappaIncorporata chiave="tokyo"`: la stessa città due volte, con
+    // due interazioni e nessun modo di capire quale fosse quella buona. La prova che conta è
+    // che il visore dell'atlante non ci sia più e che di Tokyo ce ne sia **una**.
     api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' }] as QuartiereRiassuntoDto[]);
     api.getMappa.mockResolvedValue(mappa('tokyo', 'Tokyo'));
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    expect(await screen.findByRole('application', { name: 'Mappa: Tokyo' })).toBeInTheDocument();
-    expect(api.getMappa).toHaveBeenCalledWith('tokyo', undefined);
-    expect(screen.getByRole('button', { name: 'Passaggio: Shibuya' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Schermo intero' }));
-    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--intero');
-    fireEvent.click(screen.getByRole('button', { name: 'Torna alla pagina' }));
-    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--incorporato');
-    fireEvent.click(screen.getByRole('button', { name: 'Schermo intero' }));
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--incorporato');
-    expect(screen.getByRole('link', { name: 'Modifica mappa' })).toHaveAttribute('href', '/guida/mappe/tokyo/modifica');
+    expect(await screen.findByRole('img', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
+    expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
+    expect(api.getMappa).not.toHaveBeenCalled();
+    expect(screen.queryByRole('link', { name: 'Modifica mappa' })).toBeNull();
     expect(within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/mondo/quartiere/shibuya');
+  });
+
+  it('sulla mappa disegnata il quartiere porta alla sua mappa, non a un secondo visore di Tokyo', async () => {
+    api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' }] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const tokyo = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    const cartellino = within(tokyo).getByTitle('Shibuya');
+    expect(cartellino).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
   });
 });
 
