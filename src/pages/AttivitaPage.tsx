@@ -18,6 +18,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -49,6 +50,7 @@ function Attivita({ a }: { a: AttivitaDto }) {
       </div>
       {aperta && (
         <div className="flex flex-col gap-1">
+          {a.luogoChiave && <DoveSiTrova tipo="attivita" chiave={a.chiave} titolo={a.nome} altezza={240} />}
           {a.doti.some((d) => d.condizione) && <ul className="m-0 pl-4">{a.doti.filter((d) => d.condizione).map((d, i) => <li key={i}><strong>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}:</strong> {d.condizione}</li>)}</ul>}
           {a.altriEffetti && <p className="m-0"><strong>Altri effetti:</strong> {a.altriEffetti}</p>}
           {a.regole && <p className="m-0"><strong>Come funziona:</strong> {a.regole}</p>}
