@@ -20,19 +20,30 @@ interface Props {
   chiave: string;
   /** Il nome serve al testo alternativo: la sagoma è informativa, non decorativa. */
   nome: string;
+  /** Accesa quando è il quartiere scelto sulla mappa: stesso oro dei cartellini. */
+  acceso?: boolean;
   larghezza?: number;
   altezza?: number;
   className?: string;
 }
 
-/** Le quattro ombre che seguono l'alfa: un contorno, non una cornice rettangolare. */
-const CONTORNO = ['1px 0', '-1px 0', '0 1px', '0 -1px']
-  .map((d) => `drop-shadow(${d} 0 #fff)`).join(' ');
+/** Le quattro ombre che seguono l'alfa: un contorno, non una cornice rettangolare.
+ *
+ * Il fondo del riquadro è **trasparente**: era rosso, per richiamare la tela della mappa, ma su
+ * una scheda scura diventava una macchia che rubava l'occhio al nome. Il contorno bianco basta a
+ * staccare la figura, ed è lo stesso della mappa. */
+function contorno(colore: string, spessore = 1) {
+  return [`${spessore}px 0`, `-${spessore}px 0`, `0 ${spessore}px`, `0 -${spessore}px`]
+    .map((d) => `drop-shadow(${d} 0 ${colore})`).join(' ');
+}
 
-export function SagomaQuartiere({ chiave, nome, larghezza = 112, altezza = 84, className = '' }: Props) {
+const CONTORNO = contorno('#fff');
+const CONTORNO_ORO = `${contorno('#ffd23f', 2)} brightness(1.05)`;
+
+export function SagomaQuartiere({ chiave, nome, acceso = false, larghezza = 112, altezza = 84, className = '' }: Props) {
   return (
     <span
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-[#7d0010] ${className}`}
+      className={`flex shrink-0 items-center justify-center ${className}`}
       style={{ width: larghezza, height: altezza }}
     >
       <img
@@ -40,8 +51,8 @@ export function SagomaQuartiere({ chiave, nome, larghezza = 112, altezza = 84, c
         alt={`Sagoma di ${nome} sulla mappa di Tokyo`}
         onError={nascondiSagomaAssente}
         draggable={false}
-        className="max-h-[82%] max-w-[82%] object-contain"
-        style={{ filter: CONTORNO }}
+        className={`max-h-full max-w-full object-contain transition-transform duration-150 ${acceso ? 'scale-[1.08]' : ''}`}
+        style={{ filter: acceso ? CONTORNO_ORO : CONTORNO }}
       />
     </span>
   );

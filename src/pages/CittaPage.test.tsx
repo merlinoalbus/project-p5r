@@ -5,11 +5,12 @@
 // Test CittaPage e QuartierePage — mappa incorporata di Tokyo/quartiere e schede dei luoghi senza posizionamento (Fase 13.4)
 // ============================================================
 
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
-import type { MappaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
+import { usePartitaStore } from '../stores/partitaStore';
+import type { MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
 
 const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async () => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), urlImmagine: vi.fn(() => '/api/immagini/mappa/x/file'), getImmagini: vi.fn(() => Promise.resolve([])) }));
 vi.mock('../services/api', () => api);
@@ -54,6 +55,58 @@ describe('CittaPage', () => {
     expect(schede.getByAltText('Sagoma di Shujin Academy sulla mappa di Tokyo')).toHaveAttribute('src', '/asset/mappe/lmap/tokyo/shujin-academy.png');
     // niente più anteprime del nodo d'atlante nella griglia
     expect(document.querySelector('.miniatura-mappa')).toBeNull();
+  });
+
+  it('mappa e schede sono una selezione sola: si accendono a vicenda', async () => {
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '' },
+      { chiave: 'ueno', nome: 'Ueno', mappaChiave: 'citta-ueno', luoghi: 3, verificati: 3, sblocco: null, descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    const scheda = within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ });
+    const cartellino = within(mappa).getByTitle('Shibuya');
+    const sagomaSulla = (el: HTMLElement) => el.querySelector('img')!.getAttribute('style') ?? '';
+
+    // a riposo: contorno bianco da tutte e due le parti
+    expect(sagomaSulla(cartellino)).toContain('#fff)');
+    fireEvent.mouseEnter(scheda);
+    // dalla scheda si accende il cartellino
+    expect(sagomaSulla(cartellino)).toContain('#ffd23f)');
+    expect(sagomaSulla(scheda)).toContain('#ffd23f)');
+    // e non si accende quello di Ueno: l'oro dice *quale*, e se si accendesse tutto non direbbe niente
+    expect(sagomaSulla(within(mappa).getByTitle('Ueno'))).toContain('#fff)');
+    fireEvent.mouseLeave(scheda);
+    expect(sagomaSulla(cartellino)).toContain('#fff)');
+
+    // e dalla mappa si accende la scheda
+    fireEvent.mouseEnter(cartellino);
+    expect(sagomaSulla(scheda)).toContain('#ffd23f)');
+  });
+
+  it('quel che è chiuso sulla mappa è un pallino col nome, non una figura', async () => {
+    // Due chiusure diverse, e devono comportarsi allo stesso modo: Ikebukuro apre il 1° settembre
+    // e oggi è l'11 aprile; Ginza non è chiusa dal calendario, ma nella guida non ha una scheda,
+    // quindi non si può aprire. Una sagoma con la targa dice «vieni qui»: dirlo dove non si può
+    // entrare è una promessa che la mappa non mantiene.
+    usePartitaStore.setState({ attiva: { id: 3, nome: 'Prova', dataGioco: '04-11' } as PartitaDto });
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, sbloccoData: null, descrizione: '' },
+      { chiave: 'ikebukuro', nome: 'Ikebukuro', mappaChiave: 'citta-ikebukuro', luoghi: 2, verificati: 2, sblocco: '1 settembre', sbloccoData: '09-01', descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    expect(within(mappa).getByTitle('Shibuya')).toBeInTheDocument();
+    expect(within(mappa).queryByTitle('Ikebukuro')).toBeNull();
+    expect(within(mappa).queryByTitle('Ginza')).toBeNull();
+    // il nome resta comunque leggibile, sul pallino
+    const nomiPallini = [...mappa.querySelectorAll('circle > title')].map((t) => t.textContent);
+    expect(nomiPallini).toContain('Ikebukuro — dal 09-01');
+    expect(nomiPallini).toContain('Ginza');
+    // e la scheda del quartiere chiuso lo dice, perché lassù non c'è niente da accendere
+    const scheda = within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Ikebukuro/ });
+    expect(within(scheda).getByText(/Non ancora aperto/)).toBeInTheDocument();
+    usePartitaStore.setState({ attiva: null });
   });
 });
 
