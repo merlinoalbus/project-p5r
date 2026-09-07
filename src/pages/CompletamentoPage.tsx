@@ -15,6 +15,7 @@ import type { CompletamentoDto, TrofeoDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { IconMedaglia } from '../components/shared/iconeGuida';
 
 // Il Covo dei Ladri non è più una linguetta qui: ha una pagina sua, `/guida/covo`. Non era un
 // capitolo dei trofei — è un'area con una valuta propria, 52 sfide che la guadagnano e 36 premi
@@ -31,26 +32,56 @@ function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
   return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;
 }
 
+/** Il colore del metallo: un trofeo si riconosce dal metallo prima che dal nome. */
+const COLORE_TROFEO: Record<TrofeoDto['tipo'], string> = {
+  bronzo: '#c07a44', argento: '#c9ced8', oro: '#f5c542', platino: '#9fe8ff',
+};
+
+/** La scheda di un trofeo: **la medaglia, il nome, e come si prende**.
+ *
+ * Erano cinquantatré righe a tutta larghezza, tutte uguali e tutte grigie, con «Come:» e
+ * «Quando:» in grassetto dentro il testo: per trovare i quattro d'oro bisognava leggerle una per
+ * una. Ora il metallo è un colore e una medaglia, «mancabile» è un avviso acceso — perché quello
+ * è il dato che, ignorato, costa la partita — e i due testi hanno l'etichetta piccola sopra. */
 function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number | null; onCambiato: (t: TrofeoDto) => void }) {
   const [occupato, setOccupato] = useState(false);
+  const colore = COLORE_TROFEO[t.tipo];
   const cambia = async (ottenuto: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
     try { onCambiato(await impostaTrofeo(partitaId, t.chiave, ottenuto)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li className={`card flex flex-col gap-1 text-[13px] ${t.ottenuto ? 'opacity-70' : ''}`}>
-      <div className="flex flex-wrap items-center gap-2">
-        {partitaId && <input type="checkbox" className="w-5 h-5" checked={t.ottenuto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Trofeo ${t.nome} ottenuto`} />}
-        <strong className={`text-[15px] ${t.ottenuto ? 'line-through' : ''}`}>{t.nome}</strong>
-        {t.nomeEn && <span className="text-text-muted text-[12px]">({t.nomeEn})</span>}
-        <span className={`chip ${t.tipo === 'platino' || t.tipo === 'oro' ? 'chip--attivo' : ''}`}>{NOME_TIPO_TROFEO[t.tipo]}</span>
-        {t.mancabile && <span className="chip text-[11px]">mancabile</span>}
+    <li className={`card flex min-w-0 flex-col gap-2 text-[13px] ${t.ottenuto ? 'opacity-60' : ''}`} style={{ borderLeft: `3px solid ${colore}` }}>
+      <div className="flex items-start gap-2.5">
+        <span aria-hidden className="mt-0.5 shrink-0" style={{ color: colore }}><IconMedaglia size={28} /></span>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <strong className={`text-[15px] leading-tight ${t.ottenuto ? 'line-through' : ''}`}>{t.nome}</strong>
+          {t.nomeEn && t.nomeEn !== t.nome && <span className="text-[11px] text-text-muted">{t.nomeEn}</span>}
+        </div>
+        {partitaId && (
+          <label className="touch flex shrink-0 items-center gap-1.5 text-[12px]" title={`Segna «${t.nome}» come ottenuto`}>
+            <input type="checkbox" className="h-5 w-5" checked={t.ottenuto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Trofeo ${t.nome} ottenuto`} />
+            Ottenuto
+          </label>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="chip text-[11px]" style={{ borderColor: colore, color: colore }}>{NOME_TIPO_TROFEO[t.tipo]}</span>
+        {t.mancabile && <span className="chip chip--attivo text-[11px]" title="Se lo salti, in questa partita non lo prendi più">mancabile</span>}
         {!t.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </div>
       <p className="m-0 text-text-secondary">{t.descrizione}</p>
-      {t.come && <p className="m-0"><strong>Come:</strong> {t.come}</p>}
-      {t.quando && <p className="m-0"><strong>Quando:</strong> {t.quando}</p>}
+      {(t.come || t.quando) && (
+        <div className="grid gap-1.5 sm:grid-cols-2">
+          {t.come && <span className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-1.5">
+            <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Come</span>{t.come}
+          </span>}
+          {t.quando && <span className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-1.5">
+            <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Quando</span>{t.quando}
+          </span>}
+        </div>
+      )}
     </li>
   );
 }
@@ -88,7 +119,22 @@ export function CompletamentoPage() {
                 {partitaId && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={soloDaFare} onChange={(e) => setSoloDaFare(e.target.checked)} /> Solo da ottenere</label>}
                 <span className="text-[12px] text-text-muted ml-auto">{trofeiVisibili.length} trofei</span>
               </div>
-              <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Trofei">{trofeiVisibili.map((t) => <Trofeo key={t.chiave} t={t} partitaId={partitaId} onCambiato={aggiorna} />)}</ul>
+              {/* Quanti ne mancano per metallo: la domanda che si fa chi guarda i trofei, e che
+                  prima si poteva rispondere solo filtrando quattro volte e contando a occhio. */}
+              {partitaId && <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Trofei per metallo">
+                {(Object.keys(NOME_TIPO_TROFEO) as TrofeoDto['tipo'][]).map((k) => {
+                  const dello = d.trofei.filter((t) => t.tipo === k);
+                  if (dello.length === 0) return null;
+                  const presi = dello.filter((t) => t.ottenuto).length;
+                  return <div key={k} className="kpi-tile" style={{ borderLeft: `3px solid ${COLORE_TROFEO[k]}` }}>
+                    <span className="kpi-value">{presi}<span className="text-text-muted">/{dello.length}</span></span>
+                    <span className="kpi-label">{NOME_TIPO_TROFEO[k]}</span>
+                  </div>;
+                })}
+              </section>}
+              {/* Una griglia: le schede sono corte e su uno schermo largo la colonna unica
+                  lasciava due terzi di pagina vuoti per cinquantatré voci. */}
+              <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Trofei">{trofeiVisibili.map((t) => <Trofeo key={t.chiave} t={t} partitaId={partitaId} onCambiato={aggiorna} />)}</ul>
             </div>
           )}
           {scheda === 'finali' && (
