@@ -66,8 +66,10 @@ function chiPuoUsarlo(chi: string): string[] {
   const [inclusi, esclusi = ''] = testo.split(/\btranne\b/);
   const dentro = new Set<string>();
   if (/\btutti\b|\bparty\b|\btutto il gruppo\b/.test(inclusi)) for (const p of SQUADRA) dentro.add(p.chiave);
-  if (/maschil/.test(inclusi)) for (const p of SQUADRA) if (p.genere === 'm') dentro.add(p.chiave);
-  if (/femminil/.test(inclusi)) for (const p of SQUADRA) if (p.genere === 'f') dentro.add(p.chiave);
+  // «maschili» è come parla la guida, «uomini» come parla il vincolo di un equipaggiamento
+  // («Solo uomini», «Uomini e donne»): dicono la stessa cosa e vanno riconosciute entrambe.
+  if (/maschil|uomin/.test(inclusi)) for (const p of SQUADRA) if (p.genere === 'm') dentro.add(p.chiave);
+  if (/femminil|donn/.test(inclusi)) for (const p of SQUADRA) if (p.genere === 'f') dentro.add(p.chiave);
   for (const c of nominati(inclusi)) dentro.add(c);
   for (const c of nominati(esclusi)) dentro.delete(c);
   return SQUADRA.filter((p) => dentro.has(p.chiave)).map((p) => p.chiave);
