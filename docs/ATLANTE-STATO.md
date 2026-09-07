@@ -1460,3 +1460,45 @@ Quindi il punto 5 non è un aggiustamento di bordo ma una cancellazione, e i pun
 ripulitura. Il ramo «senza planimetria» di `MappaPage` oggi è un elenco di collegamenti nudi —
 «Scheda del luogo», «Modifica luogo» — senza gerarchia: è la pagina che si apre cliccando una
 scheda dei Palazzi.
+
+---
+
+# I pin: la cornice torna nel codice
+
+Gli asset `ui/spillo-<tipo>` sono cambiati — è il punto 6.1, e li ha rigenerati Codex. Prima
+ciascuno era uno **spillo finito**: forma, colore e cornice dentro il PNG. Ora sono **solo la
+figura**, su alfa vera, 128×128, senza cornice.
+
+L'app non se n'era accorta: `SpilloGrafico` dichiarava «l'asset è già uno spillo intero» e lo
+mostrava tale e quale. Sulla mappa si vedevano quindi 17 disegni che galleggiavano, senza corpo,
+senza colore del tipo e senza una punta da appoggiare al punto.
+
+Adesso lo spillo lo costruisce il codice, ed è il posto giusto: colore del tipo, misura, bordo,
+ombra, punta ancorata, e gli stati — raccolto, selezionato, suggerito, categoria nascosta — che
+cambiano con la partita e con lo zoom e dentro un PNG non potevano cambiare. Erano anche 37 copie
+della stessa cornice.
+
+Forma: la goccia classica, quadrato con tre angoli tondi ruotato di 45°, così l'angolo vivo cade
+sul punto. 38 px sulla mappa, 22 e 34 in legenda e negli elenchi.
+
+**La figura sta direttamente sul colore.** Per un momento le avevo messo sotto un dischetto chiaro,
+per il contrasto sulle tinte scure; l'utente ha chiesto perché, e aveva ragione: l'alfa è vera
+apposta perché la figura si amalgami allo spillo, e il dischetto ne faceva una bollina da
+applicazione. Guardati tutti e 37 uno accanto all'altro, i disegni sono a **tratto chiaro**: sulle
+tinte scure si leggono benissimo, ed è semmai il contrario a essere debole.
+
+**Un rilievo che lascio all'utente, con la prova.** Otto tipi hanno un colore molto chiaro —
+`forziere-raro` (#fde047), `terme` (#67e8f9), `casa` (#fdba74), `lavanderia` (#c4b5fd), `nemico`
+(#b0b0c0), `porta` (#a3a3a3), `nota` (#9ca3af), `scala` (#2dd4bf) — e lì la figura chiara ha poco
+stacco. Si legge, ma è il caso peggiore. Si risolve scurendo quegli otto in `shared/spilli.ts`
+senza toccare la grafica: non l'ho fatto d'ufficio perché sono colori autorati e la scelta è
+dell'utente.
+
+`.spillo-mappa__goccia` tiene il nome anche ora che dentro c'è un'immagine: gli stati sono regole
+CSS che puntano a quel nome ed erano già giuste. Rinominarla voleva dire riscriverle tutte per
+ottenere quello che già facevano.
+
+**Verificato a schermo:** su `citta-yongen-jaya` 17 spilli, 17 gocce col colore del tipo e la
+figura dentro, nessuna figura nuda; i 37 tipi guardati tutti insieme in un pannello di prova.
+
+**Verde:** 581 test, typecheck e lint puliti.

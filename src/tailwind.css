@@ -360,18 +360,17 @@
   .visore-mappa__senza-immagine { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--color-text-muted); background-image: linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px); background-size: 10% 10%; }
   .spillo-mappa { position: absolute; display: flex; flex-direction: column; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; z-index: 5; transform-origin: 0 0; color: #fff; }
   .spillo-mappa--selezionato { z-index: 8; }
-  .spillo-mappa__goccia { width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--colore-spillo, #888); border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; transition: transform .1s ease; }
+  /* La goccia: quadrato con tre angoli tondi, ruotato di 45 gradi, cosi' l'angolo vivo cade in
+     basso sul punto ancorato (il bottone e' traslato di -100% in verticale). Il colore e' quello
+     del tipo, ed e' quel che si legge da lontano. La misura la passa il componente. */
+  .spillo-mappa__goccia { width: 38px; height: 38px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--colore-spillo, #888); border: 2px solid #fff; box-shadow: 0 3px 7px rgba(0,0,0,.65); display: flex; align-items: center; justify-content: center; transition: transform .1s ease; }
   .spillo-mappa__goccia > * { transform: rotate(45deg); }
   .spillo-mappa:hover .spillo-mappa__goccia, .spillo-mappa--selezionato .spillo-mappa__goccia { transform: rotate(-45deg) scale(1.18); border-color: var(--color-primary); }
   .spillo-mappa--raccolto .spillo-mappa__goccia { opacity: .45; filter: grayscale(.6); }
-  /* Spillo dall'asset consegnato (`ui/spillo-<tipo>`): e gia uno spillo intero, la punta sta sul punto ancorato (il bottone e
-     traslato di -100% in verticale). Gli stati valgono sull'immagine come sulla goccia: con `drop-shadow` perche il PNG e trasparente. */
-  .spillo-mappa__figura { display: block; width: auto; height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.7)); transition: transform .1s ease; transform-origin: 50% 100%; }
-  .spillo-mappa:hover .spillo-mappa__figura, .spillo-mappa--selezionato .spillo-mappa__figura { transform: scale(1.18); filter: drop-shadow(0 0 2px var(--color-primary)) drop-shadow(0 2px 6px rgba(0,0,0,.7)); }
-  .spillo-mappa--raccolto .spillo-mappa__figura { opacity: .45; filter: grayscale(.6); }
-  /* pallino di legenda, elenco, popup e scheda: la stessa immagine in piccolo */
-  .spillo-mappa__punto-figura { width: 22px; height: 22px; object-fit: contain; display: inline-block; flex-shrink: 0; }
-  .spillo-mappa__punto-figura--grande { width: 34px; height: 34px; }
+  /* La figura dentro lo spillo. Gli asset `ui/spillo-<tipo>` hanno l'alfa vera apposta per
+     amalgamarsi al corpo colorato: niente dischetto sotto, solo un'ombra appena accennata che da'
+     rilievo senza staccarli. */
+  .spillo-mappa__disegno { display: block; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
   .spillo-mappa__etichetta { position: absolute; top: 100%; margin-top: 2px; padding: 2px 6px; background: rgba(11,11,14,.92); border: 1px solid var(--color-border); font-size: 11px; white-space: nowrap; color: var(--color-text); opacity: 0; pointer-events: none; transition: opacity .1s; }
   .spillo-mappa:hover .spillo-mappa__etichetta, .spillo-mappa--selezionato .spillo-mappa__etichetta, .spillo-mappa--trovato .spillo-mappa__etichetta { opacity: 1; }
   .spillo-mappa--gruppo { transform-origin: 0 0; }
@@ -388,7 +387,7 @@
   .visore-mappa__categoria { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: 1px solid transparent; padding: 4px 6px; color: var(--color-text); font: inherit; font-size: 12px; cursor: pointer; min-height: 34px; text-align: left; }
   .visore-mappa__categoria:hover { border-color: var(--color-border); background: var(--color-surface); }
   .visore-mappa__categoria--nascosta { opacity: .4; }
-  .visore-mappa__categoria--nascosta .spillo-mappa__punto, .visore-mappa__categoria--nascosta .spillo-mappa__punto-figura { filter: grayscale(1); opacity: .6; }
+  .visore-mappa__categoria--nascosta .spillo-mappa__punto { filter: grayscale(1); opacity: .6; }
   .visore-mappa__progresso { height: 8px; background: var(--color-surface); border: 1px solid var(--color-border); overflow: hidden; }
   .visore-mappa__progresso-barra { display: block; height: 100%; background: var(--color-primary); transition: width .2s ease; }
   .visore-mappa__controlli { position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 4px; align-items: center; z-index: 12; }
@@ -396,11 +395,12 @@
   .visore-mappa__controllo:hover:not(:disabled) { border-color: var(--color-primary); }
   .visore-mappa__controllo:disabled { opacity: .4; cursor: default; }
   .visore-mappa__zoom { font-size: 11px; color: var(--color-text-muted); background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); padding: 2px 6px; border: 1px solid var(--color-border); }
-  /* Spillo coinvolto nei suggerimenti del giorno: alone dorato pulsante sopra al colore del tipo */
+  /* Spillo coinvolto nei suggerimenti del giorno: alone dorato attorno alla goccia, sopra al
+     colore del tipo. Prima c'era anche una regola gemella per l'immagine intera dello spillo,
+     quando il PNG *era* lo spillo: ora la figura sta dentro la goccia e l'alone lo porta lei. */
   .spillo-mappa--suggerito .spillo-mappa__goccia { box-shadow: 0 0 0 3px var(--color-oro), 0 0 16px rgba(245,197,66,.6); }
-  .spillo-mappa--suggerito .spillo-mappa__figura { filter: drop-shadow(0 0 3px var(--color-oro)) drop-shadow(0 0 10px rgba(245,197,66,.8)); }
   /* al passaggio o alla selezione lo spillo suggerito tiene l'alone dorato e aggiunge quello rosso */
-  .spillo-mappa--suggerito:hover .spillo-mappa__figura, .spillo-mappa--suggerito.spillo-mappa--selezionato .spillo-mappa__figura { filter: drop-shadow(0 0 2px var(--color-primary)) drop-shadow(0 0 3px var(--color-oro)) drop-shadow(0 0 10px rgba(245,197,66,.8)); }
+  .spillo-mappa--suggerito:hover .spillo-mappa__goccia, .spillo-mappa--suggerito.spillo-mappa--selezionato .spillo-mappa__goccia { box-shadow: 0 0 0 3px var(--color-oro), 0 0 16px rgba(245,197,66,.6), 0 0 0 6px color-mix(in srgb, var(--color-primary) 70%, transparent); }
   .spillo-mappa--suggerito { z-index: 14; }
   .spillo-popup { position: absolute; z-index: 20; width: 260px; max-width: 70vw; display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; background: rgba(11,11,14,.96); border: 1px solid var(--color-primary); color: var(--color-text); transform-origin: 0 0; box-shadow: 0 6px 18px rgba(0,0,0,.6); cursor: default; }
   .spillo-popup::after { content: ''; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; background: rgba(11,11,14,.96); border-right: 1px solid var(--color-primary); border-bottom: 1px solid var(--color-primary); transform: translateX(-50%) rotate(45deg); }
