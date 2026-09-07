@@ -44,6 +44,7 @@ export function NegoziPage() {
   // Con una partita attiva una voce bloccata non viene anticipata: appare soltanto quando il
   // requisito (data, libro completato, Confidente...) diventa realmente soddisfatto.
   const listaVisibile = useMemo(() => (lista ?? []).filter((n) => !partitaId || n.disponibilita?.stato !== 'bloccato'), [lista, partitaId]);
+  const totaleArticoliVisibili = listaVisibile.reduce((somma, negozio) => somma + negozio.articoli, 0);
   const termineNegozio = q.trim().toLocaleLowerCase('it');
   const negoziTrovati = useMemo(() => termineNegozio.length >= 2
     ? listaVisibile.filter((n) => `${n.nome} ${n.quartiereNome ?? ''} ${n.luogo}`.toLocaleLowerCase('it').includes(termineNegozio))
@@ -70,7 +71,7 @@ export function NegoziPage() {
     <PageState isLoading={negozi.caricamento && !negozi.dati} error={negozi.errore} onRetry={() => void negozi.ricarica()}>
       {negozi.dati && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{listaVisibile.length} negozi e punti di acquisto con {listaVisibile.reduce((s, n) => s + n.articoli, 0)} articoli disponibili: armi, protezioni, accessori, oggetti, regali, cibo e materiali con prezzi, sblocchi e condizioni. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
+          <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{listaVisibile.length} {listaVisibile.length === 1 ? 'negozio o punto di acquisto' : 'negozi e punti di acquisto'} con {totaleArticoliVisibili} {totaleArticoliVisibili === 1 ? 'articolo disponibile' : 'articoli disponibili'}: armi, protezioni, accessori, oggetti, regali, cibo e materiali con prezzi, sblocchi e condizioni. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
           <div className="flex justify-start sm:justify-end sm:-mt-2">
             <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un negozio" dettaglio="resta dopo gli aggiornamenti" onClick={() => setNuovoNegozio(true)} />
           </div>
@@ -99,7 +100,7 @@ export function NegoziPage() {
             <PageState isLoading={risultati.caricamento && !risultati.dati} error={risultati.errore} onRetry={() => void risultati.ricarica()}>
               {risultati.dati && (
                 <div className="flex flex-col gap-1.5">
-                  <p className="m-0 text-[12px] text-text-muted">{partitaId ? `${articoliVisibili.length} articoli disponibili trovati` : `${risultati.dati.totale} articoli trovati${risultati.dati.totale > risultati.dati.articoli.length ? ` (mostrati i primi ${risultati.dati.articoli.length})` : ''}`}.</p>
+                  <p className="m-0 text-[12px] text-text-muted">{partitaId ? `${risultati.dati.totale} articoli disponibili trovati${risultati.dati.totale > articoliVisibili.length ? ` (mostrati i primi ${articoliVisibili.length})` : ''}` : `${risultati.dati.totale} articoli trovati${risultati.dati.totale > risultati.dati.articoli.length ? ` (mostrati i primi ${risultati.dati.articoli.length})` : ''}`}.</p>
                   <ArticoliTabella articoli={articoliVisibili} partitaId={partitaId} mostraNegozio onCambiato={(a) => risultati.imposta(risultati.dati ? { ...risultati.dati, articoli: risultati.dati.articoli.map((x) => (x.chiave === a.chiave ? a : x)) } : null)} />
                 </div>
               )}
