@@ -28,7 +28,7 @@ import { PageState } from '../components/shared/PageState';
 import type { RichiestaDto, StatoRichiesta } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
-import { FregioSezione } from '../components/shared/FregioSezione';
+import { SezioneConFregio } from '../components/shared/FregioSezione';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
@@ -210,8 +210,7 @@ export function RichiestePage() {
 
           {foglio === 'jose' && d.jose && (
             <div className="flex flex-col gap-3 text-[13px]">
-              <section className="card card--con-fregio">
-                <FregioSezione chiave="jose-fiori" />
+              <SezioneConFregio chiave="jose-fiori" disposizione="grande">
                 <h2 className="m-0 font-display text-[17px] uppercase leading-none">Jose: fiori, timbri e scambi</h2>
                 <p className="m-0 text-text-secondary">{d.jose.introduzione}</p>
                 <div className="grid gap-1.5 md:grid-cols-2">
@@ -228,10 +227,9 @@ export function RichiestePage() {
                     <span><strong>{d.jose.bossSegreto.nome}</strong> — {d.jose.bossSegreto.condizione}</span>
                   </div>}
                 </div>
-              </section>
+              </SezioneConFregio>
               {d.jose.scambi.length > 0 && (
-                <section className="card card--con-fregio" aria-label="Scambi con Jose">
-                  <FregioSezione chiave="jose-scambi" forma="banda" />
+                <SezioneConFregio chiave="jose-scambi" forma="banda" disposizione="fascia" aria-label="Scambi con Jose">
                   <h3 className="m-0 font-display text-[15px] uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
                   <div className="overflow-x-auto">
                     <table className="tabella tabella--adattiva text-[12px]">
@@ -239,7 +237,7 @@ export function RichiestePage() {
                       <tbody>{d.jose.scambi.map((s, i) => <tr key={i}><td data-etichetta="Oggetto"><strong>{s.nome}</strong></td><td data-etichetta="Fiori" className="tabular-nums">{s.costo}</td><td data-etichetta="Effetto">{s.effetto}</td><td data-etichetta="Requisito">{s.requisito}</td></tr>)}</tbody>
                     </table>
                   </div>
-                </section>
+                </SezioneConFregio>
               )}
             </div>
           )}

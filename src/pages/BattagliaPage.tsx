@@ -15,7 +15,7 @@ import type { BattagliaDto, OmbraDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
-import { FregioSezione } from '../components/shared/FregioSezione';
+import { SezioneConFregio } from '../components/shared/FregioSezione';
 import { chiaveElementoDaTesto } from '../utils/elementiGuida';
 
 /** Le cinque schede, ognuna con la sua icona.
@@ -134,15 +134,14 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
   const n = d.negoziazione;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-negoziazione" />
+      <SezioneConFregio chiave="battaglia-negoziazione" disposizione="fascia">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Quando e come</h2>
         <p className="m-0">{n.quandoSiPuoNegoziare}</p>
         <Dati colonne={2}>
           <Voce titolo="Personalità dell’Ombra">{n.comeVerificarePersonalita}</Voce>
           {n.opzioniHoldUp.map((o) => <Voce key={o.opzione} titolo={o.opzione}>{o.effetto}</Voce>)}
         </Dati>
-      </section>
+      </SezioneConFregio>
       {/* **Le risposte sono la cosa che si cerca sotto pressione**: una lista di pastiglie verdi
           e rosse si trova con la coda dell'occhio, «Risposte efficaci: a · b · c» no. */}
       <div className="grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">
@@ -165,13 +164,12 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
           </section>
         ))}
       </div>
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-regole" />
+      <SezioneConFregio chiave="battaglia-regole" disposizione="grande">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Regole</h2>
         <ul className="m-0 pl-4">{n.regole.map((r) => <li key={r}>{r}</li>)}</ul>
         {n.incertezze && <p className="m-0 text-text-muted text-[12px]">{n.incertezze}</p>}
         <span>{n.urlFonti.map((u) => <Fonte key={u} url={u} />).reduce<ReactNode[]>((acc, x, i) => (i ? [...acc, ' · ', x] : [x]), [])}</span>
-      </section>
+      </SezioneConFregio>
     </div>
   );
 }
@@ -187,8 +185,7 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
           <tbody>{d.tecnico.stati.map((s) => <tr key={s.stato}><td data-etichetta="Stato"><strong>{s.stato}</strong></td><td data-etichetta="Tecnico con">{s.elementi.join(', ')}</td><td data-etichetta="Effetto" className="text-text-secondary">{effetti.get(s.stato) ?? '—'}</td></tr>)}</tbody>
         </table>
       </div>
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-tecnico" />
+      <SezioneConFregio chiave="battaglia-tecnico" disposizione="fascia">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Esiti del colpo</h2>
         <Dati>
           {Object.entries(d.sistema.esitiColpo).map(([k, v]) => <Voce key={k} titolo={k === 'block' ? 'Block' : k.charAt(0).toUpperCase() + k.slice(1)}>{v}</Voce>)}
@@ -196,7 +193,7 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
         </Dati>
         <p className="m-0 text-text-muted text-[12px]">{d.sistema.notaFineBattaglia}</p>
         <Fonte url={d.tecnico.urlFonte} />
-      </section>
+      </SezioneConFregio>
     </div>
   );
 }
@@ -205,8 +202,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
   const s = d.staffetta; const sp = d.speciali; const a = d.assaltoEHoldUp;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-staffetta" />
+      <SezioneConFregio chiave="battaglia-staffetta" disposizione="lato">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Staffetta</h2>
         <p className="m-0">{s.cosaE}</p>
         <Dati>
@@ -221,9 +217,8 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
           {s.ranghi.map((r) => <span key={r.rango} className="rounded-md border border-border-light bg-white/[0.03] px-2 py-1 text-[12px]"><strong className="font-display">Rango {r.rango}</strong> · {r.bonus}</span>)}
         </div>
         <Fonte url={s.urlFonte} />
-      </section>
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-speciali" />
+      </SezioneConFregio>
+      <SezioneConFregio chiave="battaglia-speciali" disposizione="lato">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Speciali</h2>
         <p className="m-0">{sp.meccanica}</p>
         <Dati colonne={2}>
@@ -237,9 +232,8 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
           </table>
         </div>
         <Fonte url={sp.urlFonte} />
-      </section>
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-assalto" />
+      </SezioneConFregio>
+      <SezioneConFregio chiave="battaglia-assalto" disposizione="grande">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Rapina, Assalto e Parla</h2>
         <Dati>
           <Voce titolo="Rapina">{a.rapina}</Voce>
@@ -249,7 +243,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         </Dati>
         <ul className="m-0 pl-4">{d.sistema.comandi.map((c) => <li key={c}>{c}</li>)}</ul>
         <Fonte url={a.urlFonte} />
-      </section>
+      </SezioneConFregio>
     </div>
   );
 }
@@ -258,8 +252,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
   const o = d.ombreSciagura; const m = d.mietitore; const t = d.demoniTesoro;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-ombre-sciagura" />
+      <SezioneConFregio chiave="battaglia-ombre-sciagura" disposizione="fascia">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Ombre sciagura <span className="text-text-muted text-[12px] normal-case">({o.nomeOriginale})</span></h2>
         <p className="m-0">{o.cosaSono}</p>
         <ul className="m-0 pl-4">{o.caratteristiche.map((c) => <li key={c}>{c}</li>)}</ul>
@@ -277,9 +270,8 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         </Dati>
         <p className="m-0 text-text-muted text-[12px]">{o.incertezze}</p>
         <Fonte url={o.urlFonte} />
-      </section>
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-mietitore" />
+      </SezioneConFregio>
+      <SezioneConFregio chiave="battaglia-mietitore" disposizione="alta">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">{m.categoria}</h2>
         <Dati>
           <Voce titolo="Dove e quando">{m.dove}</Voce>
@@ -293,9 +285,8 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         {/* La strategia è una sequenza: resta numerata, che è la sua forma. */}
         <ol className="m-0 pl-4">{m.strategia.map((s) => <li key={s}>{s}</li>)}</ol>
         <Fonte url={m.urlFonte} />
-      </section>
-      <section className="card card--con-fregio">
-        <FregioSezione chiave="battaglia-demoni-tesoro" />
+      </SezioneConFregio>
+      <SezioneConFregio chiave="battaglia-demoni-tesoro" disposizione="lato">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">{t.categoria}</h2>
         <p className="m-0">{t.cosaSono}</p>
         <Dati>
@@ -312,7 +303,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
           </table>
         </div>
         <Fonte url={t.urlFonte} />
-      </section>
+      </SezioneConFregio>
     </div>
   );
 }
