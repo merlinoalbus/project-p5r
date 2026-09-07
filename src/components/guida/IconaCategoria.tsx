@@ -3,8 +3,8 @@
 // ============================================================
 
 import type { ReactNode } from 'react';
-import { IconBolt, IconBook, IconHome, IconMask, IconStar } from '../shared/icons';
-import { IconBussola, IconChiave, IconCuore, IconFilm, IconGioco, IconGoccia, IconNegozio, IconScudo, IconValigetta } from '../shared/iconeGuida';
+import { IconBolt, IconFusion, IconHome, IconMask, IconStar } from '../shared/icons';
+import { IconAltro, IconAppunti, IconBussola, IconChiave, IconCuore, IconFilm, IconGioca, IconGioco, IconGoccia, IconLibro, IconMaschera, IconMessaggio, IconNegozio, IconPersone, IconScudo, IconStella, IconValigetta } from '../shared/iconeGuida';
 import { useAsset } from '../../stores/assetStore';
 import { chiaveCategoria } from '../../utils/categorie';
 
@@ -12,16 +12,23 @@ const ICONE: Record<string, (size: number) => ReactNode> = {
   // negozi
   armi: (s) => <IconBolt size={s} />, protezioni: (s) => <IconScudo size={s} />, accessori: (s) => <IconStar size={s} />, oggetti: (s) => <IconNegozio size={s} />,
   regali: (s) => <IconCuore size={s} />, abiti: (s) => <IconMask size={s} />, cibo: (s) => <IconCuore size={s} />, online: (s) => <IconBolt size={s} />,
-  distributore: (s) => <IconGoccia size={s} />, materiali: (s) => <IconNegozio size={s} />, misto: (s) => <IconNegozio size={s} />, altro: (s) => <IconStar size={s} />,
+  distributore: (s) => <IconGoccia size={s} />, materiali: (s) => <IconNegozio size={s} />, misto: (s) => <IconNegozio size={s} />, altro: (s) => <IconAltro size={s} />,
   // oggetti
   cura: (s) => <IconCuore size={s} />, sp: (s) => <IconGoccia size={s} />, stato: (s) => <IconScudo size={s} />, battaglia: (s) => <IconBolt size={s} />, esplorazione: (s) => <IconBussola size={s} />,
   'oggetti-chiave': (s) => <IconChiave size={s} />,
   // attività
-  minigiochi: (s) => <IconGioco size={s} />, lavori: (s) => <IconValigetta size={s} />, studio: (s) => <IconBook size={s} />, libri: (s) => <IconBook size={s} />, film: (s) => <IconFilm size={s} />,
-  // azioni del percorso
-  confidente: (s) => <IconMask size={s} />, dote: (s) => <IconStar size={s} />, palazzo: (s) => <IconScudo size={s} />, richiesta: (s) => <IconBook size={s} />, acquisto: (s) => <IconNegozio size={s} />,
-  lavoro: (s) => <IconValigetta size={s} />, libro: (s) => <IconBook size={s} />, dvd: (s) => <IconFilm size={s} />, attivita: (s) => <IconGioco size={s} />, esame: (s) => <IconBook size={s} />,
-  trama: (s) => <IconStar size={s} />, velluto: (s) => <IconMask size={s} />, casa: (s) => <IconHome size={s} />,
+  minigiochi: (s) => <IconGioco size={s} />, lavori: (s) => <IconValigetta size={s} />, studio: (s) => <IconAppunti size={s} />, libri: (s) => <IconLibro size={s} />, film: (s) => <IconFilm size={s} />,
+  // Azioni del percorso. **Riserve distinte**, in attesa delle figure della §24: la Guida del
+  // giorno mostra questa icona a 40 px, e finché non arriva l'illustrazione è questo segno a dire
+  // che tipo di azione è. Prima «richiesta», «esame» e «libro» avevano tutti e tre lo stesso
+  // libretto, e «trama» la stessa stella di «dote»: quattro azioni diverse, due segni.
+  confidente: (s) => <IconPersone size={s} />, dote: (s) => <IconStella size={s} />, palazzo: (s) => <IconScudo size={s} />,
+  // Le richieste dei Mementos arrivano per messaggio da Mishima, ed è il messaggio a dirlo.
+  richiesta: (s) => <IconMessaggio size={s} />, acquisto: (s) => <IconNegozio size={s} />,
+  lavoro: (s) => <IconValigetta size={s} />, libro: (s) => <IconLibro size={s} />, dvd: (s) => <IconFilm size={s} />,
+  attivita: (s) => <IconGioca size={s} />, esame: (s) => <IconAppunti size={s} />,
+  // La maschera è la trama dei Ladri Fantasma; nella Stanza di Velluto si fondono le Persona.
+  trama: (s) => <IconMaschera size={s} />, velluto: (s) => <IconFusion size={s} />, casa: (s) => <IconHome size={s} />,
 };
 
 interface Props {

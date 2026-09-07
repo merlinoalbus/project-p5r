@@ -59,3 +59,21 @@ describe('IconaCategoria', () => {
     expect(container.querySelector('img')?.getAttribute('src')).toBe('/asset/ui/categoria-armi.png');
   });
 });
+
+/* Le riserve dei tipi di azione devono essere **distinte fra loro**.
+ *
+ * La Guida del giorno mostra questa icona a 40 px, ed è il segno che dice che tipo di azione è.
+ * Prima «richiesta», «esame» e «libro» avevano tutti e tre lo stesso libretto e «trama» la stessa
+ * stella di «dote»: quattro azioni diverse, due segni. Finché le figure della §24 non arrivano, a
+ * dire la differenza c'è solo questo. */
+it('ogni tipo di azione del percorso ha il suo segno, anche senza illustrazione', () => {
+  const tipi = ['confidente', 'dote', 'palazzo', 'richiesta', 'acquisto', 'lavoro', 'libro', 'dvd', 'attivita', 'esame', 'trama', 'velluto', 'altro'];
+  const segni = tipi.map((t) => {
+    const { container } = render(<IconaCategoria categoria={t} />);
+    return container.querySelector('.icona-categoria')?.innerHTML ?? '';
+  });
+  expect(segni.every((s) => s.length > 0)).toBe(true);
+  // `lavoro` e `libro` condividono la figura con la loro famiglia (lavori, libri): è voluto, sono
+  // la stessa cosa. Gli altri undici devono essere tutti diversi.
+  expect(new Set(segni).size).toBe(tipi.length);
+});
