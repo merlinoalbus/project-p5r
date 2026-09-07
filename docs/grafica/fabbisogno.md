@@ -353,9 +353,10 @@ censimento**, perché la riserva non diventi il traguardo.
 
 | famiglia | chiave nel codice | quante | prompt | stato |
 |---|---|---|---|---|
-| icone delle azioni nuove | `ui/azione-<chiave>` | 6 | §21 | **da consegnare** |
-| icone di categoria | `ui/categoria-<chiave>` | 22 | §22 | **da consegnare** |
-| fregi decorativi delle sezioni | `decori/<chiave>` | 11 | §23 | **da consegnare** |
+| icone delle azioni nuove | `ui/azione-<chiave>` | 6 | §21 | consegnate il 2026-09-07 (`grafica-azioni-v1`) |
+| icone di categoria | `ui/categoria-<chiave>` | 22 | §22 | consegnate il 2026-09-07 (`grafica-categorie-finali-v1`) |
+| fregi decorativi delle sezioni | `decori/<chiave>` | 11 | §23 | consegnati il 2026-09-07 (`grafica-decori-finali-v1`) |
+| icone di categoria delle azioni del giorno | `ui/categoria-<chiave>` | 11 | §24 | **da consegnare** |
 
 Le sei azioni sono `piu`, `meno`, `completati`, `dettagli`, `pianta`, `posizione`: sono i gesti che
 prima erano scritte nude — «+», «−», «Mostra i completati», «Dettagli», le due viste di un'area,
@@ -365,6 +366,16 @@ Le ventidue categorie sono le figure dentro il cartiglio rosso delle schede. Fin
 nemmeno **cercate** come asset: `IconaCategoria` disegnava l'SVG e basta, quindi nessuna grafica
 avrebbe potuto sostituirle. Ora il componente cerca `ui/categoria-<chiave>` e ripiega sull'SVG,
 com'è sempre stato per le icone d'azione.
+
+Consegnate, si è visto che **non bastavano**, per due ragioni distinte. La prima si correggeva in
+codice: i dati parlano al singolare (`arma`, `protezione`, `accessorio`, `regalo`, `materiale`,
+`abito`) e le figure si chiamano al plurale, quindi le 143 armi e le 62 protezioni del catalogo
+avrebbero continuato a mostrare il cartiglio pur avendo l'illustrazione pronta — ora
+`chiaveCategoria()` traduce le chiavi equivalenti (compresi `libro`, `lavoro`, `mini-gioco`,
+`videogioco`, `lettura`, `ambulante`, `consumabile`) e un solo file serve tutta la famiglia. La
+seconda è il §24: il censimento non comprendeva i **tipi di azione del percorso**, che sono la cosa
+più vista dell'app — la Guida del giorno ne mostra l'icona a 40 px — e di tredici tipi uno solo
+aveva la figura.
 
 Gli undici fregi sono immagini **puramente decorative** per le sezioni di sola prosa: stanno nel
 fondo della carta al 16% di opacità, sfumate verso il testo. Dove il file manca resta una macchia
@@ -378,3 +389,21 @@ browser ripiegava su un'altra famiglia — «LA CITTÀ» usciva con la À sottil
 pesanti, in ogni titolo dell'app. Non è un disegno da commissionare: le lettere si costruiscono dal
 font stesso, ed è quello che fa `scripts/font-italiano.py` (base + accento, più « » — … ’ “ ” ° •).
 I file caricati nell'istanza sono già passati di lì; un font nuovo va passato prima di caricarlo.
+
+---
+
+## Controllo del 7 settembre 2026, sera: nessun pulsante senza la sua figura
+
+La regola dell'utente — «pulsanti senza componente grafico non devono essercene», in ogni pagina e
+sottopagina — è stata verificata contando, non a occhio:
+
+- **57 chiavi d'azione** usate nelle pagine (`IconaAzione chiave="…"`); **74** hanno la riserva SVG
+  dichiarata in `IconaAzione.tsx`. Chiavi usate **senza** riserva: **zero**.
+- Chiavi usate senza un asset consegnato (né su `main` né nella PR #39): **zero** — le cinque che
+  la prima passata segnalava (`confidenti`, `doti`, `obiettivi`, `riepilogo`, `scorta`) sono chiavi
+  di `IconaScheda`, e i loro `ui/scheda-*.png` ci sono.
+- **11 fregi su 11** montati nelle pagine e corrispondenti uno a uno al censimento §23: nessuna
+  chiave censita che nessuno usa, nessuna usata che nessuno ha censito.
+- Le **22 categorie** della §22 sono consegnate (PR #39); restano le **11 della §24**, che finché
+  non arrivano hanno riserve SVG **distinte fra loro** — verificato da un test, perché prima
+  «richiesta», «esame» e «libro» condividevano lo stesso segno.

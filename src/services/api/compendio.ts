@@ -54,7 +54,8 @@ export const getCruciverba = (partita?: number): Promise<CruciverbaTuttiDto> => 
 /** Quartieri della città con conteggi; con la partita, anche se sono già nel mondo. */
 export const getQuartieri = (partita?: number): Promise<QuartiereRiassuntoDto[]> => apiGet(`/compendio/citta${queryString({ partita })}`);
 /** Scheda di un quartiere con i luoghi. */
-export const getQuartiere = (chiave: string): Promise<QuartiereDettaglioDto> => apiGet(`/compendio/citta/${encodeURIComponent(chiave)}`);
+export const getQuartiere = (chiave: string, partita?: number): Promise<QuartiereDettaglioDto> =>
+  apiGet(`/compendio/citta/${encodeURIComponent(chiave)}${partita ? `?partita=${partita}` : ''}`);
 /** Attività, lavori, libri e film (con letture della partita se indicata). */
 export const getAttivita = (partita?: number): Promise<AttivitaTutteDto> => apiGet(`/compendio/attivita${queryString({ partita })}`);
 /** Catalogo dei libri con avanzamento per sessioni nella partita. */

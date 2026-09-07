@@ -50,6 +50,9 @@ export const datiArticolo = z.object({
 
 /** Campi di un libro scrivibili dall'utente. */
 export const datiLibro = z.object({
+  // Le condizioni valgono anche qui. L'editor le mostrava già e finivano nel nulla, perché la
+  // colonna non esisteva (migrazione 052): sono la disponibilità, «dal 18 aprile».
+  condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
   dove: testo(300).default(''),
@@ -67,6 +70,7 @@ export const datiLibro = z.object({
 
 /** Campi di un film o DVD scrivibili dall'utente. */
 export const datiFilm = z.object({
+  condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
   dove: z.enum(['cinema', 'dvd']).default('cinema'),
@@ -81,6 +85,7 @@ export const datiFilm = z.object({
 
 /** Campi di un'attivita' (compresi lavori e videogiochi) scrivibili dall'utente. */
 export const datiAttivita = z.object({
+  condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   tipo: testo(60).default('altro'),
   luogo: testo(300).default(''),
@@ -103,8 +108,35 @@ export const datiAttivita = z.object({
   fonte: testo(400).default(''),
 });
 
+/** Campi di una domanda in classe o d'esame.
+ *
+ * `risposte_json` arriva come **elenco**, non come testo libero: è la risposta giusta — o la
+ * sequenza giusta, per le domande a più passaggi — ed è il dato che l'app usa per dire «rispondi
+ * questo». Un campo libero avrebbe fatto scrivere la stessa risposta in dieci modi diversi senza
+ * renderne utile nessuno: è lo stesso difetto che avevano le Doti prima del loro editor. */
+export const datiDomanda = z.object({
+  data: dataGioco,
+  tipo: z.enum(['classe', 'esame-medio', 'esame-finale', 'altro']).default('classe'),
+  chi: testo(120).default(''),
+  domanda: testo(600).min(1),
+  risposte_json: z.array(z.object({ ordine: z.number().int().min(1).max(20), testo: testo(300).min(1) })).max(20)
+    .transform((v) => JSON.stringify(v)).optional(),
+  ricompensa: testo(200).default(''),
+  note: testo(2000).default(''),
+  fonte: testo(400).default(''),
+});
+
+/** Campi di una riga del cruciverba: l'indizio di quel giorno e la parola che lo risolve. */
+export const datiCruciverba = z.object({
+  data: dataGioco,
+  indizio: testo(400).min(1),
+  risposta: testo(200).min(1),
+  risposta_en: testo(200).nullable().optional(),
+  fonte: testo(400).default(''),
+});
+
 /** Lo schema dipende dal tipo nel percorso: un'unione lascerebbe passare un articolo come negozio, scartandone i campi. */
-export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, libro: datiLibro, film: datiFilm, attivita: datiAttivita } as const;
+export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, libro: datiLibro, film: datiFilm, attivita: datiAttivita, domanda: datiDomanda, cruciverba: datiCruciverba } as const;
 export const bodyNascondi = z.object({ nascosta: z.boolean() });
 
 // ---- Agenda ----

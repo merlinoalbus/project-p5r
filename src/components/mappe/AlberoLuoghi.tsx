@@ -1,4 +1,4 @@
-import { nomePresentazioneMappa } from '../../utils/presentazioneMappa';
+import { etichetteDistinte, nomePresentazioneMappa } from '../../utils/presentazioneMappa';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
 import { Link } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
@@ -22,6 +22,12 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
       </details> : contenuto;
     }
     const padre = mappe.find(m => m.chiave === parent);
+    // Fra fratelli il nome deve bastare a distinguerli: dove due finiscono uguali — i fogli non
+    // attribuiti di uno stesso Palazzo — ci pensa il numero d'ordine. **Solo fra i nodi che
+    // compaiono da soli**: le immagini di una stessa famiglia hanno lo stesso nome per definizione
+    // e stanno sotto un'intestazione unica, che numerarle spezzerebbe.
+    const soli = nodi.filter(m => !gruppo(m));
+    const etichette = new Map(etichetteDistinte(soli).map((t, i) => [soli[i].chiave, t]));
     return <ul className="m-0 pl-4 list-none flex flex-col gap-2" aria-label={parent ? `Mappe di ${padre ? nomePresentazioneMappa(padre) : 'luogo'}` : 'Mappe'}>{nodi.map(m => {
       const id = gruppo(m);
       if (id) {
@@ -33,7 +39,7 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
       return <li key={m.chiave}>
         <Link className="touch flex items-center gap-2 py-1 no-underline text-text" to={m.chiave === 'nativo-archivio-022' ? '/guida/covo' : `/guida/mappe/${encodeURIComponent(m.chiave)}`}>
           {m.chiave === 'nativo-archivio-022' ? <img src="/asset/guida/covo.png" alt="" className="h-8 w-8 object-contain" /> : <IconaAzione chiave="mappa" dimensione={18} />}
-          <span>{nomePresentazioneMappa(m)}</span>
+          <span>{etichette.get(m.chiave) ?? nomePresentazioneMappa(m)}</span>
         </Link>
         {discendenti(m)}
       </li>;

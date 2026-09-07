@@ -14,7 +14,7 @@
 // finiti e i da fare si mescolano, e per sapere quanto manca bisogna contarli a occhio.
 // ============================================================
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getVideogiochi } from '../services/api/compendio';
 import { impostaProgressoVideogioco } from '../services/api/partite';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -24,7 +24,11 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 import { NOME_DOTE } from '../utils/citta';
 import type { VideogiocoDto } from '../types';
 
@@ -37,9 +41,11 @@ function Numero({ valore, etichetta }: { valore: number | string; etichetta: str
   );
 }
 
-function Scheda({ g, partitaId, occupato, onCambia, onCorretto }: { g: VideogiocoDto; partitaId: number | null; occupato: boolean; onCambia: (g: VideogiocoDto, avanzamento: number) => void; onCorretto: () => void }) {
+function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPosizione }: { g: VideogiocoDto; partitaId: number | null; occupato: boolean; progresso: number; onCambia: (g: VideogiocoDto, passo: number) => void; onCorretto: () => void; onPosizione: () => void }) {
   const totale = g.totaleRound;
-  const percentuale = totale > 0 ? Math.round((g.progresso / totale) * 100) : 0;
+  // Il numero mostrato è quello **chiesto**, non l'ultimo confermato: i tocchi rapidi si vedono
+  // subito e la richiesta li insegue (vedi la coda in `VideogiochiPage`).
+  const percentuale = totale > 0 ? Math.round((progresso / totale) * 100) : 0;
   return (
     <li className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${g.fatto ? 'border-success/50' : ''}`}>
       <div className="flex items-start gap-3">
@@ -48,17 +54,20 @@ function Scheda({ g, partitaId, occupato, onCambia, onCorretto }: { g: Videogioc
           <h3 className="m-0 text-lg leading-tight">{g.nome}</h3>
           <p className="m-0 text-xs text-text-secondary">{g.luogo}</p>
         </div>
-        <span className={`chip ${g.fatto ? 'chip--attivo' : ''}`}>{g.fatto ? 'Completato' : g.iniziato ? 'In corso' : 'Da giocare'}</span>
+        <span className="flex flex-col items-end gap-1">
+          <span className={`chip ${g.fatto ? 'chip--attivo' : ''}`}>{g.fatto ? 'Completato' : g.iniziato ? 'In corso' : 'Da giocare'}</span>
+          <ChipDisponibilita disponibilita={g.disponibilita ?? undefined} compatto />
+        </span>
       </div>
 
       <div>
         {/* Il conteggio dei round si scrive per esteso: la pastiglia «0/3» del primo disegno, in
             una colonna stretta, andava a capo fra lo zero e il tre e si leggeva «0/» e «3». */}
         <div className="mb-1 flex justify-between text-xs text-text-secondary">
-          <span>{g.progresso} di {totale} round</span>
+          <span>{progresso} di {totale} round</span>
           <span className="tabular-nums">{percentuale}%</span>
         </div>
-        <div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${g.nome}`} aria-valuemin={0} aria-valuemax={totale} aria-valuenow={g.progresso}>
+        <div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${g.nome}`} aria-valuemin={0} aria-valuemax={totale} aria-valuenow={progresso}>
           <span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} />
         </div>
       </div>
@@ -67,8 +76,8 @@ function Scheda({ g, partitaId, occupato, onCambia, onCorretto }: { g: Videogioc
           faceva in un tocco quello che «+» fa comunque, e toglieva spazio al gesto vero. */}
       {partitaId && (
         <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${g.nome}`}>
-          <button type="button" className="btn btn-secondary touch text-[18px]" disabled={occupato || g.progresso === 0} onClick={() => onCambia(g, g.progresso - 1)} aria-label={`Togli un round a ${g.nome}`}>−</button>
-          <button type="button" className="btn btn-primary touch text-[18px]" disabled={occupato || g.progresso >= totale} onClick={() => onCambia(g, g.progresso + 1)} aria-label={`Aggiungi un round a ${g.nome}`}>+</button>
+          <button type="button" className="btn btn-secondary touch text-[18px]" disabled={progresso === 0} onClick={() => onCambia(g, -1)} aria-label={`Togli un round a ${g.nome}`}>−</button>
+          <button type="button" className="btn btn-primary touch text-[18px]" disabled={progresso >= totale} onClick={() => onCambia(g, +1)} aria-label={`Aggiungi un round a ${g.nome}`}>+</button>
           {occupato && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
         </div>
       )}
@@ -81,6 +90,8 @@ function Scheda({ g, partitaId, occupato, onCambia, onCorretto }: { g: Videogioc
       </dl>
       {g.premi && <p className="m-0 text-xs text-text-secondary">{g.premi}</p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />}
+          titolo="Mostra posizione" onClick={onPosizione} aria-label={`Mostra posizione di ${g.nome}`} />
         <CorreggiElemento tipo="attivita" chiave={g.chiave} onSalvato={onCorretto} />
         {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>}
       </div>
@@ -97,6 +108,7 @@ export function VideogiochiPage() {
   const [giochi, setGiochi] = useState<VideogiocoDto[]>([]);
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
   const [mostraFatti, setMostraFatti] = useState(false);
+  const [selezionato, setSelezionato] = useState<string | null>(null);
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (dati.dati) setGiochi(dati.dati.videogiochi); }, [dati.dati]);
 
@@ -106,18 +118,62 @@ export function VideogiochiPage() {
   const fatti = visibili.filter((g) => g.fatto);
   const roundFatti = giochi.reduce((s, g) => s + g.progresso, 0);
   const roundTotali = giochi.reduce((s, g) => s + g.totaleRound, 0);
+  const scelto = giochi.find((g) => g.chiave === selezionato) ?? null;
 
-  const cambia = async (g: VideogiocoDto, avanzamento: number) => {
-    if (!partitaId) return;
+  /** Le pressioni rapide sul «+» si mettono in coda, non si perdono.
+   *
+   * Il round si segna col tablet in mano mentre si gioca, e cinque tocchi di fila sono la norma:
+   * con una richiesta per volta e i pulsanti disabilitati durante l'attesa, i tocchi che cadono
+   * nel mezzo sparivano — restava l'ultimo valore confermato, non quello che avevi chiesto. Qui il
+   * numero mostrato è **quello che hai chiesto**, e una sola richiesta per volta lo insegue finché
+   * non lo raggiunge. È la stessa soluzione dei DVD, dove il difetto era stato trovato prima.
+   *
+   * L'idea è di Codex (`candidato/lotto-b-v5`), che l'aveva scritta sulla versione precedente
+   * della pagina; qui è portata su quella di adesso.
+   */
+  const desiderati = useRef(new Map<string, number>());
+  const confermati = useRef(new Map<string, number>());
+  const inVolo = useRef(new Set<string>());
+  const [mostrati, setMostrati] = useState<Record<string, number>>({});
+
+  const svuotaCoda = async (g: VideogiocoDto, id: number) => {
+    if (inVolo.current.has(g.chiave)) return;
+    inVolo.current.add(g.chiave);
+    confermati.current.set(g.chiave, g.progresso);
     setOccupati((o) => ({ ...o, [g.chiave]: true }));
     try {
-      const nuovo = await impostaProgressoVideogioco(partitaId, g.chiave, avanzamento);
-      setGiochi((xs) => xs.map((x) => (x.chiave === nuovo.chiave ? nuovo : x)));
+      for (;;) {
+        const confermato = confermati.current.get(g.chiave) ?? g.progresso;
+        const desiderato = desiderati.current.get(g.chiave) ?? confermato;
+        if (desiderato === confermato || partitaId !== id) break;
+        const nuovo = await impostaProgressoVideogioco(id, g.chiave, desiderato);
+        confermati.current.set(g.chiave, nuovo.progresso);
+        setGiochi((xs) => xs.map((x) => (x.chiave === nuovo.chiave ? nuovo : x)));
+      }
     } catch (err) {
+      // Se il salvataggio fallisce, il numero mostrato torna all'ultimo confermato: mostrare un
+      // round che non è stato registrato sarebbe peggio che non mostrarlo.
+      const confermato = confermati.current.get(g.chiave) ?? g.progresso;
+      desiderati.current.set(g.chiave, confermato);
+      setMostrati((m) => ({ ...m, [g.chiave]: confermato }));
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {
+      inVolo.current.delete(g.chiave);
       setOccupati((o) => ({ ...o, [g.chiave]: false }));
     }
+  };
+
+  /** Un round in più o in meno. **Il passo si conta sull'ultimo valore chiesto**, non su quello
+   *  disegnato: due tocchi nello stesso fotogramma leggerebbero lo stesso numero e varrebbero per
+   *  uno solo, che è il difetto che questa coda esiste per togliere. */
+  const cambia = (g: VideogiocoDto, passo: number) => {
+    if (!partitaId) return;
+    const base = desiderati.current.get(g.chiave) ?? g.progresso;
+    const desiderato = Math.min(Math.max(base + passo, 0), g.totaleRound);
+    if (desiderato === base) return;
+    desiderati.current.set(g.chiave, desiderato);
+    setMostrati((m) => ({ ...m, [g.chiave]: desiderato }));
+    void svuotaCoda(g, partitaId);
   };
 
   const griglia = 'm-0 grid list-none grid-cols-1 gap-3 p-0 lg:grid-cols-2 2xl:grid-cols-3';
@@ -144,12 +200,24 @@ export function VideogiochiPage() {
             <AggiungiAlCatalogo tipo="attivita" titolo="Aggiungi un videogioco" onSalvato={() => void dati.ricarica()} />
           </div>
 
+          {/* Un pannello solo, sotto i filtri: la mappa del gioco scelto. Montarne una per scheda
+              vorrebbe dire sette visori in pagina, che è quel che rendeva pesante l'indice. */}
+          {scelto && (
+            <section className="flex flex-col gap-2" aria-label={`Posizione di ${scelto.nome}`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="m-0 font-display text-[17px] uppercase leading-none">Dove si gioca a «{scelto.nome}»</h2>
+                <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button>
+              </div>
+              <DoveSiTrova tipo="attivita" chiave={scelto.chiave} titolo={scelto.nome} altezza={300} />
+            </section>
+          )}
+
           <section className="flex flex-col gap-2" aria-label="Da giocare">
             <h2 className="m-0 font-display text-[17px] uppercase leading-none">Da giocare · {daFare.length}</h2>
             {daFare.length === 0
               ? <p className="m-0 text-[13px] text-text-muted" role="status">{giochi.length === 0 ? 'Nessun gioco nel catalogo.' : q ? 'Nessun gioco da fare con questo testo.' : 'Finiti tutti.'}</p>
               : <ul className={griglia} aria-label="Videogiochi da giocare">
-                  {daFare.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} onCambia={(x, v) => void cambia(x, v)} onCorretto={() => void dati.ricarica()} />)}
+                  {daFare.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} progresso={mostrati[g.chiave] ?? g.progresso} onCambia={cambia} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
                 </ul>}
           </section>
 
@@ -162,7 +230,7 @@ export function VideogiochiPage() {
               </button>
               {mostraFatti && (
                 <ul className={griglia} aria-label="Videogiochi completati">
-                  {fatti.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} onCambia={(x, v) => void cambia(x, v)} onCorretto={() => void dati.ricarica()} />)}
+                  {fatti.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} progresso={mostrati[g.chiave] ?? g.progresso} onCambia={cambia} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
                 </ul>
               )}
             </section>

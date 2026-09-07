@@ -22,6 +22,9 @@ import { runBootBackup } from './db/backupService.js';
 import { runMigrations } from './db/migrationRunner.js';
 import { createApp } from './bootstrap.js';
 import { caricaSeed } from './services/seed/caricaSeed.js';
+import { sincronizzaCondizioniLetture } from './db/migrations/052_condizioni_letture_attivita.js';
+import { traduciNomiSpilli } from './db/migrations/053_nomi_spilli_in_italiano.js';
+import { collegaLuoghiAllePlanimetrie } from './db/migrations/054_luoghi_con_la_loro_planimetria.js';
 
 try {
   initDb();
@@ -42,6 +45,21 @@ try {
 try {
   const esito = caricaSeed(initDb());
   logger.info(esito, esito.caricato ? 'seed del compendio caricato' : 'seed del compendio già aggiornato');
+  // Le condizioni di libri, film e attività si **ricavano** dalla prosa della guida, quindi
+  // dipendono dal lettore e non solo dai dati: quando il lettore migliora — ed è appena successo,
+  // «18 aprile» in `disponibile_dal` prima finiva in «da configurare» — il seed non si ricarica,
+  // perché i dati non sono cambiati, e le regole resterebbero quelle vecchie per sempre. Sono
+  // centosei righe, la riscrittura è idempotente e tocca solo quelle della guida: si rifà a ogni
+  // avvio, e le condizioni scritte da te restano come le hai scritte.
+  sincronizzaCondizioniLetture(initDb());
+  // Stesso motivo, altro dato: gli spilli che l'estrazione non ha saputo identificare portano il
+  // nome giapponese dello sprite, e un reseed dell'atlante lo riporterebbe.
+  const tradotti = traduciNomiSpilli(initDb());
+  if (tradotti > 0) logger.info({ spilli: tradotti }, 'nomi degli spilli non identificati resi in italiano');
+  // E il legame fra un luogo della guida e la planimetria che porta il suo nome: è una regola sui
+  // dati, quindi si rifà quando i dati cambiano, non una volta sola.
+  const collegati = collegaLuoghiAllePlanimetrie(initDb());
+  if (collegati > 0) logger.info({ luoghi: collegati }, 'luoghi collegati alla planimetria che porta il loro nome');
 } catch (err) {
   console.error('[project-p5r] FATALE: caricamento del seed fallito:', err);
   process.exit(1);

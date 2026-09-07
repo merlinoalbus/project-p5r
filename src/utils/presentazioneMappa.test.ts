@@ -1,5 +1,5 @@
 import type { MappaDto, MappaRiassuntoDto } from '../types';
-import { alternativeMappa, nomePresentazioneMappa, titoloContesto, risolviContesto, etichettaPlanimetria, presentaMappa } from './presentazioneMappa';
+import { alternativeMappa, etichetteDistinte, nomePresentazioneMappa, titoloContesto, risolviContesto, etichettaPlanimetria, presentaMappa } from './presentazioneMappa';
 const m = {nome:'Area tecnica',contesti:[{id:'a',nome:'Museo, 1P',campo:'F1',texpack:1},{id:'b',nome:'Museo, 2P',campo:'F2',texpack:2},{id:'c',nome:'Museo, 2P',campo:'F3',texpack:2}]};
 it('senza contesto mantiene tutti i titoli senza sceglierne uno canonico',()=>{
   expect(nomePresentazioneMappa(m)).toBe('Museo, 1P / Museo, 2P');
@@ -52,4 +52,40 @@ it('i contesti completi continuano a mostrare tutte le alternative senza nomi ne
   expect(nomePresentazioneMappa({...m,genitoreNome:'Palazzo di Madarame'})).toBe('Museo, 1P / Museo, 2P');
   expect(nomePresentazioneMappa(m,'b|c')).toBe('Museo, 2P');
   expect(risolviContesto(m,'a|b').stato).toBe('multiplo');
+});
+
+// ---- Il vocabolario dell'estrattore non arriva a chi gioca ----
+const grezza = (nome: string) => ({ nome, contesti: [] } as unknown as MappaRiassuntoDto);
+
+it('toglie il gergo dell’estrazione e tiene il luogo davanti', () => {
+  expect(nomePresentazioneMappa(grezza('Palazzo di Kamoshida — Immagini native che nessun campo usa')))
+    .toBe('Palazzo di Kamoshida — Planimetria non attribuita');
+  expect(nomePresentazioneMappa(grezza('Palazzo di Madarame — Immagini native che nessun campo usa — tela quadrata, disegno minuto — la seconda per estensione')))
+    .toBe('Palazzo di Madarame — Planimetria non attribuita');
+  expect(nomePresentazioneMappa(grezza('Immagini native che nessun campo usa — tela alta, disegno minuto')))
+    .toBe('Planimetria non attribuita');
+  // e un nome vero non si tocca
+  expect(nomePresentazioneMappa(grezza('Cancello del castello — porzione occidentale')))
+    .toBe('Cancello del castello — porzione occidentale');
+});
+
+it('numera solo le etichette che finirebbero uguali, nell’ordine dell’elenco', () => {
+  const elenco = [
+    grezza('Palazzo di Kamoshida — Immagini native che nessun campo usa'),
+    grezza('Cancello del castello'),
+    grezza('Palazzo di Kamoshida — Immagini native che nessun campo usa — tela larga, disegno minuto — la più estesa'),
+    grezza('Vecchio castello 1P'),
+  ];
+  expect(etichetteDistinte(elenco)).toEqual([
+    'Palazzo di Kamoshida — Planimetria non attribuita · 1',
+    'Cancello del castello',
+    'Palazzo di Kamoshida — Planimetria non attribuita · 2',
+    'Vecchio castello 1P',
+  ]);
+});
+
+it('confronta le etichette dopo la trasformazione, non prima', () => {
+  const elenco = [grezza('Palazzo di Shido — Sala d’ingresso'), grezza('Palazzo di Shido — Sala d’ingresso')];
+  const senzaPrefisso = (t: string) => t.replace('Palazzo di Shido — ', '');
+  expect(etichetteDistinte(elenco, senzaPrefisso)).toEqual(['Sala d’ingresso · 1', 'Sala d’ingresso · 2']);
 });

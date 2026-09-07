@@ -18,6 +18,9 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
@@ -28,7 +31,7 @@ function Doti({ doti }: { doti: AttivitaDto['doti'] }) {
   return <span className="flex flex-wrap gap-1">{doti.map((d, i) => <span key={i} className="chip chip--attivo" title={d.condizione ?? undefined}>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}{d.note !== null ? ` ${'♪'.repeat(Math.min(3, d.note))}` : ''}</span>)}</span>;
 }
 
-function Attivita({ a, onCambiata }: { a: AttivitaDto; onCambiata: () => void }) {
+function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onCambiata: () => void; mappaAperta: boolean; onMappa: () => void }) {
   const [aperta, setAperta] = useState(false);
   const sugg = useSuggerimenti();
   return (
@@ -56,7 +59,22 @@ function Attivita({ a, onCambiata }: { a: AttivitaDto; onCambiata: () => void })
           {a.premi && <p className="m-0"><strong>Premi:</strong> {a.premi}</p>}
           {/* Correggere un'attività mentre si gioca: quello che si cambia resta anche dopo un
               aggiornamento dei dati della guida. */}
+          {/* La mappa si apre **una per volta** in tutta la pagina: le schede si aprono a
+              fisarmonica e più di una aperta vorrebbe dire più visori montati insieme, che è
+              quello che appesantiva l'indice delle mappe. */}
+          {mappaAperta
+            ? <div className="flex flex-col gap-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <strong className="text-text">Dove si trova</strong>
+                  <button type="button" className="btn btn-ghost btn-sm touch" onClick={onMappa}>Chiudi la mappa</button>
+                </div>
+                <DoveSiTrova tipo="attivita" chiave={a.chiave} titolo={a.nome} altezza={260} />
+              </div>
+            : null}
           <div className="flex flex-wrap items-center gap-2">
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />}
+              titolo={mappaAperta ? 'Nascondi la posizione' : 'Mostra posizione'} onClick={onMappa}
+              aria-label={`${mappaAperta ? 'Nascondi' : 'Mostra'} posizione di ${a.nome}`} />
             <CorreggiElemento tipo="attivita" chiave={a.chiave} onSalvato={onCambiata} />
             {a.fonte && <a href={a.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>}
           </div>
@@ -74,6 +92,8 @@ export function AttivitaPage() {
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'attivita') as Scheda;
   const [dote, setDote] = useState('');
+  // Una sola mappa aperta in tutta la pagina: la chiave dell'attività che la mostra.
+  const [conMappa, setConMappa] = useState<string | null>(null);
   const d = dati.dati;
   const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
   const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
@@ -94,8 +114,8 @@ export function AttivitaPage() {
             </select>
             <AggiungiAlCatalogo tipo="attivita" titolo={scheda === 'lavori' ? 'Aggiungi un lavoro' : 'Aggiungi un’attività'} onSalvato={() => void dati.ricarica()} />
           </div>
-          {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} />)}</ul>}
-          {scheda === 'lavori' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Lavori">{lavoriVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} />)}</ul>}
+          {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} mappaAperta={conMappa === a.chiave} onMappa={() => setConMappa((x) => (x === a.chiave ? null : a.chiave))} />)}</ul>}
+          {scheda === 'lavori' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Lavori">{lavoriVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} mappaAperta={conMappa === a.chiave} onMappa={() => setConMappa((x) => (x === a.chiave ? null : a.chiave))} />)}</ul>}
         </div>
       )}
     </PageState>

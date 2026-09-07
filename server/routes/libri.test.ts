@@ -83,3 +83,28 @@ describe('API Libri', () => {
     expect((getDb().prepare('SELECT COUNT(*) n FROM progresso_libro_partita WHERE partita_id=?').get(id) as { n: number }).n).toBe(0);
   });
 });
+
+describe('API Libri — disponibilità', () => {
+  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  afterAll(() => closeDb());
+// ============================================================
+// La disponibilità di un libro non è più prosa che nessuno legge (migrazione 052)
+// ============================================================
+//
+// «dal 18 aprile» stava scritto nella scheda e basta: l'elenco mostrava come già acquistabile un
+// volume che esce mesi dopo. Ora la prosa diventa una regola e la partita la valuta. Il caso
+// dell'11 aprile è quello reale della partita di prova dell'utente.
+it('un libro che esce il 18 aprile risulta «non ancora» l’11 aprile e disponibile dopo', async () => {
+  const partita = await request(app).post('/api/partite').send({ nome: 'Prova condizioni', dataGioco: '04-11' }).expect(201);
+  const id = (partita.body.data as { id: number }).id;
+
+  const prima = await request(app).get(`/api/compendio/libri?partita=${id}`).expect(200);
+  const magnifico = (prima.body.data.libri as Array<{ chiave: string; disponibilita: { stato: string } | null }>).find((l) => l.chiave === 'il-magnifico-ladro');
+  expect(magnifico?.disponibilita?.stato, 'l’11 aprile il libro non è ancora in vendita').toBe('bloccato');
+
+  await request(app).put(`/api/partite/${id}`).send({ dataGioco: '05-20' }).expect(200);
+  const dopo = await request(app).get(`/api/compendio/libri?partita=${id}`).expect(200);
+  const stesso = (dopo.body.data.libri as Array<{ chiave: string; disponibilita: { stato: string } | null }>).find((l) => l.chiave === 'il-magnifico-ladro');
+  expect(stesso?.disponibilita?.stato, 'dal 20 maggio invece c’è').toBe('disponibile');
+});
+});

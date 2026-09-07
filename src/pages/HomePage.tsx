@@ -25,15 +25,31 @@ import { slug } from '../../shared/slug';
 import { avanzamentoDote } from '../utils/doti';
 import type { PartitaDto } from '../types';
 
+/** Le cinque scorciatoie, con **la stessa figura della barra di navigazione**.
+ *
+ * Qui c'erano cinque SVG disegnati in codice, e nessuno cercava l'asset: le stesse cinque sezioni
+ * nella colonna a sinistra mostrano la grafica vera (`ui/nav-<chiave>`), e in Home no — due icone
+ * diverse per la stessa cosa, nella stessa schermata. Ora si guarda l'asset e l'SVG resta la
+ * riserva, come dappertutto. */
+const SCORCIATOIE = [
+  { to: '/compendio', asset: 'ui/nav-compendio', titolo: 'Compendio', dettaglio: '232 Persona', riserva: <IconBook size={22} /> },
+  { to: '/skill', asset: 'ui/nav-skill', titolo: 'Skill', dettaglio: '525 skill in italiano', riserva: <IconBolt size={22} /> },
+  { to: '/fusione', asset: 'ui/nav-fusione', titolo: 'Fusione', dettaglio: 'Regole degli Arcani', riserva: <IconFusion size={22} /> },
+  { to: '/partita', asset: 'ui/nav-partita', titolo: 'Partita', dettaglio: 'Doti, Confidenti, scorta', riserva: <IconMask size={22} /> },
+  { to: '/guida', asset: 'ui/nav-guida', titolo: 'Guida', dettaglio: 'Domande in classe, calendario, Confidenti', riserva: <IconStar size={22} /> },
+];
+
 /** Scorciatoie alle sezioni dell'app: colonna stretta a destra su desktop e tablet, griglia su mobile. */
 function AccessiRapidi() {
   return (
     <nav className="accessi-rapidi grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-1.5 content-start" aria-label="Accessi rapidi">
-      <Link to="/compendio" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2"><IconBook size={22} className="text-primary" /><span><strong>Compendio</strong><br /><span className="text-[12px] text-text-secondary">232 Persona</span></span></Link>
-      <Link to="/skill" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2"><IconBolt size={22} className="text-primary" /><span><strong>Skill</strong><br /><span className="text-[12px] text-text-secondary">525 skill in italiano</span></span></Link>
-      <Link to="/fusione" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2"><IconFusion size={22} className="text-primary" /><span><strong>Fusione</strong><br /><span className="text-[12px] text-text-secondary">Regole degli Arcani</span></span></Link>
-      <Link to="/partita" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2"><IconMask size={22} className="text-primary" /><span><strong>Partita</strong><br /><span className="text-[12px] text-text-secondary">Doti, Confidenti, scorta</span></span></Link>
-      <Link to="/guida" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2"><IconStar size={22} className="text-primary" /><span><strong>Guida</strong><br /><span className="text-[12px] text-text-secondary">Domande in classe, calendario, Confidenti</span></span></Link>
+      {SCORCIATOIE.map((s) => (
+        <Link key={s.to} to={s.to} className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2">
+          <AssetImg nome={s.asset} alt="" decorativa className="h-[26px] w-[26px] shrink-0 object-contain"
+            fallback={<span className="text-primary">{s.riserva}</span>} />
+          <span><strong>{s.titolo}</strong><br /><span className="text-[12px] text-text-secondary">{s.dettaglio}</span></span>
+        </Link>
+      ))}
     </nav>
   );
 }

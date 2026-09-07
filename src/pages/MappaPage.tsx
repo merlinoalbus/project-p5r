@@ -1,6 +1,6 @@
 import { ImmaginiLuogo } from '../components/mappe/ImmaginiLuogo';
 import { SelettoreContestoMappa } from '../components/mappe/SelettoreContestoMappa';
-import { nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
+import { etichetteDistinte, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
 import { AlberoLuoghi } from '../components/mappe/AlberoLuoghi';
 import { ContenutiGuidaMappa } from '../components/mappe/ContenutiGuidaMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
@@ -284,13 +284,17 @@ function GriglieDelLuogo({ contenute, nome, onScendi }: { contenute: MappaRiassu
   const conSpilli = contenute.filter((m) => m.numeroSpilli > 0)
     .sort((a, b) => Number(senzaNomeVero(a)) - Number(senzaNomeVero(b)));
   const senzaSpilli = contenute.filter((m) => m.numeroSpilli === 0);
+  // I titoli si numerano **una volta sola per il Palazzo**, non una per griglia: le due griglie
+  // stanno nella stessa pagina, e numerando ciascuna per conto suo comparivano due «Planimetria
+  // non attribuita · 1» a pochi centimetri l'una dall'altra.
+  const titoli = new Map(etichetteDistinte(contenute, (t) => senzaPrefisso(t, nome)).map((t, i) => [contenute[i].chiave, t]));
   return <div className="flex flex-col gap-4">
-    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} etichetta={`Aree di ${nome}`} onScendi={onScendi} />}
+    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} titoli={titoli} etichetta={`Aree di ${nome}`} onScendi={onScendi} />}
     {senzaSpilli.length > 0 && <section className="flex flex-col gap-2" aria-label="Planimetrie senza spilli">
       <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraSenzaSpilli} onClick={() => setMostraSenzaSpilli((v) => !v)}>
         {mostraSenzaSpilli ? 'Nascondi' : 'Mostra'} le planimetrie senza spilli · {senzaSpilli.length}
       </button>
-      {mostraSenzaSpilli && <Griglia mappe={senzaSpilli} nome={nome} etichetta={`Planimetrie di ${nome} senza spilli`} onScendi={onScendi} />}
+      {mostraSenzaSpilli && <Griglia mappe={senzaSpilli} nome={nome} titoli={titoli} etichetta={`Planimetrie di ${nome} senza spilli`} onScendi={onScendi} />}
     </section>}
   </div>;
 }
@@ -301,10 +305,13 @@ function senzaPrefisso(titolo: string, nome: string): string {
   return titolo.startsWith(p) ? titolo.slice(p.length) : titolo;
 }
 
-function Griglia({ mappe, nome, etichetta, onScendi }: { mappe: MappaRiassuntoDto[]; nome: string; etichetta: string; onScendi?: (chiave: string) => void }) {
+function Griglia({ mappe, nome, etichetta, titoli, onScendi }: { mappe: MappaRiassuntoDto[]; nome: string; etichetta: string; titoli?: Map<string, string>; onScendi?: (chiave: string) => void }) {
+  // I titoli arrivano già distinti da chi conosce **tutto** l'elenco (le due griglie di un Palazzo
+  // sono la stessa pagina); dove non arrivano, si calcolano qui sull'elenco che c'è.
+  const propri = titoli ?? new Map(etichetteDistinte(mappe, (t) => senzaPrefisso(t, nome)).map((t, i) => [mappe[i].chiave, t]));
   return <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3 2xl:grid-cols-4" aria-label={etichetta}>
     {mappe.map((m) => {
-      const titolo = senzaPrefisso(nomePresentazioneMappa(m), nome);
+      const titolo = propri.get(m.chiave) ?? senzaPrefisso(nomePresentazioneMappa(m), nome);
       const dentro = m.numeroFigli > 0;
       // Dentro il pannello dell'indice, un luogo che ne contiene altri **si apre lì**: cambiare
       // pagina per poi tornare indietro, quando si sta ancora scegliendo dove andare, fa perdere

@@ -18,6 +18,8 @@ const NOME_TIPO: Record<TipoCatalogo, { singolare: string; plurale: string }> = 
   libro: { singolare: 'libro', plurale: 'Libri' },
   film: { singolare: 'film', plurale: 'Film e DVD' },
   attivita: { singolare: 'attività', plurale: 'Attività, lavori e videogiochi' },
+  domanda: { singolare: 'domanda', plurale: 'Domande in classe e agli esami' },
+  cruciverba: { singolare: 'riga del cruciverba', plurale: 'Cruciverba' },
 };
 
 export function MieiDati() {

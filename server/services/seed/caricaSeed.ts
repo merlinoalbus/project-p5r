@@ -1,5 +1,6 @@
 import { sincronizzaDateQuartieri } from '../../db/migrations/037_sblocco_quartieri.js';
 import { sincronizzaCondizioniCatalogo } from '../../db/migrations/036_condizioni_procedurali.js';
+import { sincronizzaCondizioniLetture } from '../../db/migrations/052_condizioni_letture_attivita.js';
 // ============================================================
 // caricaSeed — carica il compendio Royal da data/seed nel DB (idempotente)
 // ============================================================
@@ -26,6 +27,7 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
+import { chiaveCruciverba, chiaveDomanda } from '../../db/migrations/055_catalogo_domande_cruciverba.js';
 import type {
   AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, FilmPosizioniSeed, LibriPosizioniSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed, DescrizionePersonaSeed, RequisitiRangoSeed,
 } from '../../../shared/seed.js';
@@ -149,6 +151,15 @@ function leggiSeed(seedDir: string): SeedCompleto {
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
+}
+
+/** Le colonne che una tabella ha davvero.
+ *
+ * Il caricatore gira anche su schemi più vecchi del codice — i test lo esercitano fermando le
+ * migrazioni a metà, e un ripristino da backup può portare un database indietro — quindi dove una
+ * colonna nuova cambia il modo di caricare, prima si guarda se c'è. */
+function colonneDi(db: AppDatabase, tabella: string): Set<string> {
+  return new Set((db.prepare(`PRAGMA table_info(${tabella})`).all() as Array<{ name: string }>).map((c) => c.name));
 }
 
 function leggiMeta(db: AppDatabase, chiave: string): string | null {
@@ -354,15 +365,45 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       insDisp.run(d.chiave, JSON.stringify(d.disponibilita.giorni), JSON.stringify(d.disponibilita.fasce), d.disponibilita.luogo, d.disponibilita.sbloccoData, d.disponibilita.sbloccoRequisiti, d.disponibilita.note, d.noteGenerali, JSON.stringify(d.fonti));
     }
 
-    // ---- Domande in classe ed esami (Fase 6.2): id stabili per (data, ordine) tramite upsert, tracking preservato ----
-    const insDom = db.prepare(`INSERT INTO domanda (ordine, data, tipo, chi, domanda, risposte_json, ricompensa, note, fonte) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-    const updDom = db.prepare(`UPDATE domanda SET data = ?, tipo = ?, chi = ?, domanda = ?, risposte_json = ?, ricompensa = ?, note = ?, fonte = ? WHERE ordine = ?`);
-    const esistenti = new Set((db.prepare('SELECT ordine FROM domanda').all() as Array<{ ordine: number }>).map((r) => r.ordine));
+    // ---- Domande in classe ed esami: identità per **giorno**, e le tue correzioni restano ----
+    //
+    // Prima l'identità di una domanda era la sua posizione nel file, e la posizione non è
+    // un'identità: aggiungerne una a maggio faceva scalare di uno tutte le successive, e una
+    // correzione sarebbe finita sulla domanda sbagliata. Ora la chiave è il giorno (con un
+    // progressivo dove un giorno ne ha due), e le righe dell'utente — aggiunte o corrette dal
+    // catalogo — non si toccano e non si cancellano, come per negozi, libri, film e attività.
+    //
+    // Le colonne del catalogo arrivano con la migrazione 055, e il caricatore deve saper lavorare
+    // anche su uno schema più vecchio (i test lo esercitano fermandosi a una migrazione di mezzo):
+    // dove non ci sono, si torna all'identità per posizione, che è come funzionava prima.
+    if (colonneDi(db, 'domanda').has('chiave')) {
+    const insDom = db.prepare(`INSERT INTO domanda (chiave, ordine, data, tipo, chi, domanda, risposte_json, ricompensa, note, fonte, origine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'seed')`);
+    const updDom = db.prepare(`UPDATE domanda SET ordine = ?, data = ?, tipo = ?, chi = ?, domanda = ?, risposte_json = ?, ricompensa = ?, note = ?, fonte = ? WHERE chiave = ? AND origine = 'seed'`);
+    const domandeCiSono = new Set((db.prepare('SELECT chiave FROM domanda WHERE chiave IS NOT NULL').all() as Array<{ chiave: string }>).map((r) => r.chiave));
+    const domandePerGiorno = new Map<string, number>();
+    const chiaviDomande = new Set<string>();
     seed.domande.domande.forEach((d, i) => {
-      if (esistenti.has(i)) updDom.run(d.data, d.tipo, d.chi, d.domanda, JSON.stringify(d.risposte), d.ricompensa, d.note, d.fonte, i);
-      else insDom.run(i, d.data, d.tipo, d.chi, d.domanda, JSON.stringify(d.risposte), d.ricompensa, d.note, d.fonte);
+      const n = domandePerGiorno.get(d.data) ?? 0;
+      domandePerGiorno.set(d.data, n + 1);
+      const chiave = chiaveDomanda(d.data, n);
+      chiaviDomande.add(chiave);
+      if (domandeCiSono.has(chiave)) updDom.run(i, d.data, d.tipo, d.chi, d.domanda, JSON.stringify(d.risposte), d.ricompensa, d.note, d.fonte, chiave);
+      else insDom.run(chiave, i, d.data, d.tipo, d.chi, d.domanda, JSON.stringify(d.risposte), d.ricompensa, d.note, d.fonte);
     });
-    db.prepare('DELETE FROM domanda WHERE ordine >= ?').run(seed.domande.domande.length);
+    const cancellaDomanda = db.prepare('DELETE FROM domanda WHERE chiave = ?');
+    for (const r of db.prepare("SELECT chiave FROM domanda WHERE origine = 'seed' AND chiave IS NOT NULL").all() as Array<{ chiave: string }>) {
+      if (!chiaviDomande.has(r.chiave)) cancellaDomanda.run(r.chiave);
+    }
+    } else {
+      const insDom = db.prepare(`INSERT INTO domanda (ordine, data, tipo, chi, domanda, risposte_json, ricompensa, note, fonte) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      const updDom = db.prepare(`UPDATE domanda SET data = ?, tipo = ?, chi = ?, domanda = ?, risposte_json = ?, ricompensa = ?, note = ?, fonte = ? WHERE ordine = ?`);
+      const esistenti = new Set((db.prepare('SELECT ordine FROM domanda').all() as Array<{ ordine: number }>).map((r) => r.ordine));
+      seed.domande.domande.forEach((d, i) => {
+        if (esistenti.has(i)) updDom.run(d.data, d.tipo, d.chi, d.domanda, JSON.stringify(d.risposte), d.ricompensa, d.note, d.fonte, i);
+        else insDom.run(i, d.data, d.tipo, d.chi, d.domanda, JSON.stringify(d.risposte), d.ricompensa, d.note, d.fonte);
+      });
+      db.prepare('DELETE FROM domanda WHERE ordine >= ?').run(seed.domande.domande.length);
+    }
     db.prepare('DELETE FROM esame').run();
     const insEs = db.prepare('INSERT INTO esame (chiave, ordine, nome, date_json, data_risultati, domande_json, note) VALUES (?, ?, ?, ?, ?, ?, ?)');
     seed.domande.esami.forEach((e, i) => insEs.run(e.chiave, i, e.nome, JSON.stringify(e.date), e.dataRisultati, JSON.stringify(e.domande), e.note));
@@ -533,12 +574,26 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       }
     }
 
-    // ---- Cruciverba (Fase 7.5): upsert per data, rimozione orfani; le spunte per partita restano ----
-    const insC = db.prepare(`INSERT INTO cruciverba (data, ordine, indizio, risposta, risposta_en, fonte) VALUES (@data, @ordine, @indizio, @risposta, @risposta_en, @fonte)
-      ON CONFLICT(data) DO UPDATE SET ordine = excluded.ordine, indizio = excluded.indizio, risposta = excluded.risposta, risposta_en = excluded.risposta_en, fonte = excluded.fonte`);
+    // ---- Cruciverba: upsert per data, e le tue correzioni restano ----
+    // L'aggiornamento tocca solo le righe della guida (`origine = 'seed'`), e la rimozione degli
+    // orfani pure: una riga che hai corretto o aggiunto non sparisce quando i dati si aggiornano.
+    const conCatalogo = colonneDi(db, 'cruciverba').has('chiave');
+    const insC = conCatalogo
+      ? db.prepare(`INSERT INTO cruciverba (chiave, data, ordine, indizio, risposta, risposta_en, fonte, origine) VALUES (@chiave, @data, @ordine, @indizio, @risposta, @risposta_en, @fonte, 'seed')
+          ON CONFLICT(data) DO UPDATE SET ordine = excluded.ordine, indizio = excluded.indizio, risposta = excluded.risposta, risposta_en = excluded.risposta_en, fonte = excluded.fonte
+            WHERE cruciverba.origine = 'seed'`)
+      : db.prepare(`INSERT INTO cruciverba (data, ordine, indizio, risposta, risposta_en, fonte) VALUES (@data, @ordine, @indizio, @risposta, @risposta_en, @fonte)
+          ON CONFLICT(data) DO UPDATE SET ordine = excluded.ordine, indizio = excluded.indizio, risposta = excluded.risposta, risposta_en = excluded.risposta_en, fonte = excluded.fonte`);
     const dateCruciverba = new Set<string>();
-    for (const c of seed.cruciverba.cruciverba) { dateCruciverba.add(c.data); insC.run({ data: c.data, ordine: c.ordine, indizio: c.indizio, risposta: c.risposta, risposta_en: c.rispostaEn, fonte: c.fonte }); }
-    for (const r of db.prepare('SELECT data FROM cruciverba').all() as Array<{ data: string }>) if (!dateCruciverba.has(r.data)) db.prepare('DELETE FROM cruciverba WHERE data = ?').run(r.data);
+    for (const c of seed.cruciverba.cruciverba) {
+      dateCruciverba.add(c.data);
+      const valori = { data: c.data, ordine: c.ordine, indizio: c.indizio, risposta: c.risposta, risposta_en: c.rispostaEn, fonte: c.fonte };
+      insC.run(conCatalogo ? { chiave: chiaveCruciverba(c.data, c.ordine), ...valori } : valori);
+    }
+    const dove = conCatalogo ? " WHERE origine = 'seed'" : '';
+    for (const r of db.prepare(`SELECT data FROM cruciverba${dove}`).all() as Array<{ data: string }>) {
+      if (!dateCruciverba.has(r.data)) db.prepare(`DELETE FROM cruciverba WHERE data = ?${conCatalogo ? " AND origine = 'seed'" : ''}`).run(r.data);
+    }
 
     // ---- Negozi e articoli (Fase 8.2): upsert per chiave stabile, rimozione orfani; gli acquisti per partita restano ----
     const insN = db.prepare(`INSERT INTO negozio (chiave, ordine, nome, luogo, luogo_chiave, tipo, gestore, confidente_chiave, orari, sblocco, note, fonte, origine)
@@ -699,6 +754,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const tm of t.termini ?? []) tr('termine', tm.chiave, tm.nome, { categoria: tm.categoria, definizione: tm.definizione ?? null, fonte: tm.fonte ?? null });
 
     sincronizzaCondizioniCatalogo(db);
+    // Le stesse regole per libri, film e attivita': la loro disponibilita' era prosa e nessuno la
+    // leggeva, e l'editor delle condizioni sulle loro schede scriveva in un campo che non c'era.
+    sincronizzaCondizioniLetture(db);
     // Le condizioni scritte nel seed vincono su quelle ricavate dalla prosa, e si applicano
     // **dopo** la sincronizzazione, che altrimenti le sovrascriverebbe. È il campo che rende
     // fedele l'esportazione: una condizione costruita nell'editor — un gruppo «almeno una», un

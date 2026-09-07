@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { NegoziPage } from './NegoziPage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -91,4 +91,13 @@ it('mostra nell’intestazione e nella scheda i conteggi canonici restituiti dal
   expect(await screen.findByText(/1 negozio o punto di acquisto con 1 articolo:/)).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /Officina/ })).toHaveTextContent('1 articolo');
   expect(screen.queryByText(/da fonte secondaria/)).toBeNull();
+});
+
+/* I filtri stanno nell'indirizzo: `/guida/negozi?categoria=arma` deve aprire l'elenco già
+ * filtrato. È la risposta alla domanda «dove sono tutte le armi comprabili»: la pagina lo sapeva
+ * già fare, ma non c'era modo di **arrivarci** con un collegamento. */
+it('apre l’elenco già filtrato quando la categoria è nell’indirizzo', async () => {
+  render(<MemoryRouter initialEntries={['/guida/negozi?categoria=arma']}><NegoziPage /></MemoryRouter>);
+  await waitFor(() => expect(ricercaArticoli).toHaveBeenCalledWith(expect.objectContaining({ categoria: 'arma' }), undefined));
+  expect((await screen.findByRole('combobox', { name: 'Categoria' })).getAttribute('value') ?? (screen.getByRole('combobox', { name: 'Categoria' }) as HTMLSelectElement).value).toBe('arma');
 });

@@ -87,3 +87,35 @@ it('salva il quartiere scelto, senza dedurlo dalla posizione testuale', async ()
   fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('negozio', expect.objectContaining({ luogo_chiave: 'shibuya' })));
 });
+
+// ============================================================
+// Le Doti di un'attività: il campo che l'app sa usare
+// ============================================================
+//
+// «Premi: Coraggio +3» è una frase e resta una frase. La Dote dichiarata con le sue note (♪) è
+// invece quello che il motore converte in punti quando l'azione viene spuntata nella guida giorno
+// per giorno. Il modulo non lo mostrava per le attività e i videogiochi: si potevano aggiungere
+// senza poter dire che cosa alzano — il rilievo dell'utente («non è pensata per la parte
+// funzionale dell'app»).
+it('dichiara le Doti di un’attività come elenco strutturato, non come testo dei premi', async () => {
+  api.creaElementoCatalogo.mockResolvedValue({ nome: 'Freccette' });
+  render(<ModuloCatalogo tipo="attivita" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
+  fireEvent.change(screen.getByLabelText(/Nome dell’attività/), { target: { value: 'Freccette' } });
+  fireEvent.click(screen.getByRole('button', { name: /Aggiungi una Dote/ }));
+  fireEvent.change(screen.getByLabelText('Dote'), { target: { value: 'coraggio' } });
+  fireEvent.change(screen.getByLabelText('Note'), { target: { value: '3' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
+  await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('attivita', expect.objectContaining({
+    // L'elenco, non la stringa: è l'API a serializzarlo.
+    doti_json: [{ dote: 'coraggio', note: 3, condizione: null }],
+  })));
+});
+
+it('non salva le righe di Dote lasciate vuote', async () => {
+  api.creaElementoCatalogo.mockResolvedValue({ nome: 'Pesca' });
+  render(<ModuloCatalogo tipo="attivita" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
+  fireEvent.change(screen.getByLabelText(/Nome dell’attività/), { target: { value: 'Pesca' } });
+  fireEvent.click(screen.getByRole('button', { name: /Aggiungi una Dote/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
+  await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('attivita', expect.objectContaining({ doti_json: [] })));
+});
