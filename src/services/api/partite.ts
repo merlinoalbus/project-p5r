@@ -5,6 +5,7 @@
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
+import type { VideogiocoDto } from '../../types';
 
 /** Campi modificabili di una partita. */
 export interface DatiPartita {
@@ -75,9 +76,12 @@ export const impostaAcquisto = (id: number, articolo: string, fatto: boolean): P
 export const impostaCruciverba = (id: number, data: string, fatto: boolean): Promise<CruciverbaDto> => apiPut(`/partite/${id}/cruciverba`, { data, fatto });
 
 /** Libro letto / film visto nella partita. */
-export const impostaLettura = (id: number, tipo: TipoLettura, chiave: string, fatto: boolean): Promise<LibroDto | FilmDto> => apiPut(`/partite/${id}/letture`, { tipo, chiave, fatto });
+export const impostaLettura = (id: number, tipo: TipoLettura, chiave: string, fatto: boolean): Promise<LibroDto | FilmDto | VideogiocoDto> => apiPut(`/partite/${id}/letture`, { tipo, chiave, fatto });
+export const impostaProgressoVideogioco = (id: number, chiave: string, avanzamento: number): Promise<VideogiocoDto> => apiPut(`/partite/${id}/letture`, { tipo: 'videogioco', chiave, avanzamento });
 /** Registra quante sessioni di un libro sono state completate. */
 export const impostaProgressoLibro = (id: number, chiave: string, avanzamento: number): Promise<LibroDto> => apiPut(`/partite/${id}/letture`, { tipo: 'libro', chiave, avanzamento });
+/** Registra sessioni DVD o visioni al cinema; queste ultime possono superare uno. */
+export const impostaProgressoFilm = (id: number, chiave: string, avanzamento: number): Promise<FilmDto> => apiPut(`/partite/${id}/letture`, { tipo: 'film', chiave, avanzamento });
 
 /** Stato di una Richiesta dei Mementos nella partita (null = riaperta). */
 export const impostaStatoRichiesta = (id: number, richiesta: string, stato: StatoRichiesta | null): Promise<RichiestaDto> => apiPut(`/partite/${id}/richieste`, { richiesta, stato });
