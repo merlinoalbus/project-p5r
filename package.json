@@ -25,7 +25,8 @@
     "seed:scarica": "tsx scripts/seed/scaricaDataset.ts",
     "seed:normalizza": "tsx scripts/seed/normalizzaDataset.ts",
     "seed:verifica": "tsx scripts/seed/verificaIncrociata.ts",
-    "mappe:ricarica": "tsx --env-file=.env scripts/ricarica-mappe.ts"
+    "mappe:ricarica": "tsx --env-file=.env scripts/ricarica-mappe.ts",
+    "seed:esporta": "tsx --env-file=.env scripts/esporta-seed.ts"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",

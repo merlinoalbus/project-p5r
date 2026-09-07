@@ -683,6 +683,17 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const tm of t.termini ?? []) tr('termine', tm.chiave, tm.nome, { categoria: tm.categoria, definizione: tm.definizione ?? null, fonte: tm.fonte ?? null });
 
     sincronizzaCondizioniCatalogo(db);
+    // Le condizioni scritte nel seed vincono su quelle ricavate dalla prosa, e si applicano
+    // **dopo** la sincronizzazione, che altrimenti le sovrascriverebbe. È il campo che rende
+    // fedele l'esportazione: una condizione costruita nell'editor — un gruppo «almeno una», un
+    // fatto di sistema, una negazione — nessuna frase la esprime, e senza questo passaggio
+    // tornerebbe indietro trasformata al primo reseed.
+    const condN = db.prepare('UPDATE negozio SET condizioni_json = ? WHERE chiave = ?');
+    const condA = db.prepare('UPDATE articolo SET condizioni_json = ? WHERE chiave = ?');
+    for (const n of seed.negozi.negozi) {
+      if (n.condizioni) condN.run(JSON.stringify(n.condizioni), n.chiave);
+      for (const a of n.articoli) if (a.condizioni) condA.run(JSON.stringify(a.condizioni), a.chiave);
+    }
     sincronizzaDateQuartieri(db);
     // ---- Meta ----
     // ---- Requisiti per rango dei Confidenti (Fase 12.3): ricaricati integralmente dal seed ----
