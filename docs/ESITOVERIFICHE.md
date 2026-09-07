@@ -2824,3 +2824,26 @@ candidato — che gira su un albero coerente con sé stesso — sia a chi guarda
 controllo che la vede è `git diff github/main -- <file>` **letto sulle righe tolte**: se spariscono
 righe che l'autore del candidato non ha scritto, non è un rebase, è una sovrascrittura. Regola
 aggiunta al protocollo dei candidati.
+
+### PR #40 — «riallineata preservando» ma cancella: verifica del 7 settembre 2026, 22:30
+
+Codex ha aperto la PR #40 (`lavoro/lotto-b-inventari`) dichiarando il ramo «riallineato a
+`github/main` preservando le correzioni dei due lotti», con merge commit, CI verde e PASS del
+proprio validator. **La verifica dice il contrario.** Conteggi `main` → PR #40 su
+`VideogiochiPage.tsx`: `AggiungiAlCatalogo` 2 → 0, `CorreggiElemento` 2 → 0, `mostraFatti` 4 → 0,
+`IconaCategoria` 2 → 0, pulsante «Completa» 0 → 1; le stesse due righe del catalogo spariscono anche
+da `AttivitaPage.tsx`.
+
+Righe citate dal diff, fra quelle **tolte**: gli import di `AzioniCatalogo` e `IconaCategoria`, la
+sezione «Da giocare», il gruppo «Mostra i completati», il chip di stato, i due pulsanti del
+catalogo. In cambio rientra `{fatto ? 'Azzera' : 'Completa'}`.
+
+L'utente è stato avvisato di non mergiarla. La PR non è stata toccata: non è nostra, e commentarla
+non compete a chi verifica.
+
+**Perché nessun gate l'ha vista, e la regola che ne segue.** Un CI verde e un validator in sola
+lettura sul candidato non possono vedere questa classe di difetto: il candidato è coerente con sé
+stesso, i suoi test passano, la sua base è giusta. La vede solo il confronto con ciò che c'era —
+`git diff github/main -- <file> | grep '^-'` — letto sulle **righe tolte**. Se fra quelle c'è codice
+che l'autore del candidato non ha scritto, non è un rebase riuscito. Questa riga entra nel
+protocollo dei candidati accanto al controllo del merge-base, che da solo non basta più.
