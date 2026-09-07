@@ -444,3 +444,227 @@ categorie), §23 (11 fregi). **Da generare: 24 immagini** — le 11 della §24 e
 per chi gioca: prima `categoria-confidente`, `categoria-dote`, `categoria-attivita`, `categoria-trama`, `categoria-acquisto`,
 `categoria-esame`, `categoria-palazzo` (la Guida del giorno le mostra a 40 px a ogni partita), poi le tredici delle tessere,
 infine `categoria-altro`, `categoria-velluto`, `categoria-richiesta`, `categoria-oggetti-chiave`.
+
+## 26. Illustrazioni delle attività e dei lavori (23) — `attivita/<chiave>.png` (256×256, trasparente) — richieste il 2026-09-07
+Una figura per ogni attività e per ogni lavoro. L'app le mostra **a 56 px nella riga dell'elenco** e più grandi nella scheda
+aperta. Regole comuni: 256×256 trasparente, bianco/grigio/nero/rosso, niente oro, nessun testo dentro l'immagine, un soggetto solo.
+
+**Il prompt di ciascuna è il testo che l'app le mette accanto**, non una scena descritta da noi: richiesta dell'utente —
+«devono essere legati al loro contesto… il prompt deve contenere riferimenti al testo associato all'icona». Qui sotto ogni
+voce riporta **le stesse parole che legge chi gioca** in quella riga — nome, tipo, dove, quando, costo, Doti, come si sblocca,
+regole, effetti — prese dal seed senza parafrasi. L'illustrazione nasce da quelle: se il testo dice «interagendo con la sedia
+tra scrivania e letto», la sedia c'è; quello che il testo non dice non va inventato.
+
+Questo elenco si rigenera dai dati, quindi resta vero anche quando una scheda viene corretta.
+
+### `attivita/allenamento-camera-leblanc.png` — Allenamento in camera (Leblanc)
+- **Tipo:** Allenamento
+- **Dove:** Leblanc, mansarda
+- **Quando:** Di sera
+- **Costo:** gratuito
+- **Come si sblocca:** Dal 18 aprile, interagendo con la sedia tra scrivania e letto (dopo aver pulito la mansarda)
+- **Regole:** Gratuito, disponibile la sera in mansarda.
+- **Altri effetti:** Aumenta permanentemente gli HP massimi del protagonista: visite 1-4 = +5HP; 5-8 = +6HP; 9-12 = +7HP; 13-15 = +8HP; 16+ = +8HP. In Royal i bonus si mantengono in Nuova Partita+.
+
+### `attivita/allenamento-palestra-protein-lovers.png` — Allenamento in palestra (Protein Lovers Gym)
+- **Tipo:** Allenamento
+- **Dove:** Shibuya, Protein Lovers Gym
+- **Quando:** Giorno e sera
+- **Costo:** 2000 ¥
+- **Come si sblocca:** Rango 5 di Ryuji oppure Rango 8 di Ann
+- **Regole:** 2.000 yen a visita.
+- **Altri effetti:** Aumenta HP e SP massimi: visite 1-4 = +3HP/+2SP; 5-8 = +5HP/+3SP; 9-12 = +7HP/+5SP; 13-15 = +9HP/+7SP; 16+ = +9HP/+7SP. Le proteine acquistabili aumentano ulteriormente l'effetto: Frullato proteico 2…
+- **Premi:** Premio 'La leggenda del Drago Nascente' nel Covo dei Ladri.
+
+### `attivita/esperimenti-clinici-takemi.png` — Esperimenti clinici di Tae Takemi
+- **Tipo:** Altro
+- **Dove:** Yongen-Jaya, ambulatorio Takemi
+- **Quando:** Di sera
+- **Costo:** gratuito
+- **Doti:** Coraggio
+- **Come si sblocca:** Legato al Confidente dell'Eremita (Takemi)
+
+### `attivita/jazz-club-kichijoji.png` — Jazz Club di Kichijoji
+- **Tipo:** Altro
+- **Dove:** Kichijoji, jazz club
+- **Quando:** Di sera
+- **Costo:** 3000 ¥
+- **Come si sblocca:** Rango Confidente 4 con Akechi; disponibile dal 26 giugno
+- **Regole:** Ingresso serale a 3.000 yen. Frequentarlo regolarmente sottrae tempo ad altri Confidenti (es. Kawakami).
+- **Altri effetti:** Invitando un compagno: punti Affetto (bonus se si porta una Persona dell'Arcano corrispondente) piu un cocktail settimanale che modifica temporaneamente statistiche/abilita di combattimento: Lunedi '…
+- **Premi:** Nelle serate con cantante si sblocca la versione vocale di 'No More What Ifs' nel Covo dei Ladri.
+
+### `attivita/tempio-vecchio-kichijoji.png` — Tempio Vecchio di Kichijoji (meditazione)
+- **Tipo:** Altro
+- **Dove:** Kichijoji, Tempio Vecchio
+- **Quando:** Di giorno
+- **Costo:** gratuito
+- **Come si sblocca:** Dal 6 giugno
+- **Regole:** Gratuito, disponibile di giorno.
+- **Altri effetti:** Aumenta permanentemente l'SP massimo (non una dote sociale): 3 SP le prime volte, +3 SP extra ogni 3 meditazioni, fino a un massimo di 12 SP per sessione dal 10 utilizzo.
+- **Premi:** Trofeo 'A Serene Experience'.
+
+### `attivita/curry-leblanc.png` — Cucinare il curry a Leblanc
+- **Tipo:** Cibo
+- **Dove:** Leblanc
+- **Quando:** Giorno e sera
+- **Come si sblocca:** Rango 4 del Confidente di Sojiro
+- **Regole:** Si esamina il frigorifero in Leblanc; disponibile domenica, lunedi, mercoledi e venerdi secondo fonti secondarie.
+- **Altri effetti:** Il curry preparato puo essere consumato come oggetto prima delle esplorazioni nei Palazzi/Mementos per bonus in combattimento (dettaglio non verificato su fonte italiana).
+
+### `attivita/caffe-leblanc.png` — Preparazione del caffe a Leblanc
+- **Tipo:** Cibo
+- **Dove:** Leblanc
+- **Quando:** Giorno e sera
+- **Costo:** gratuito
+- **Doti:** Fascino
+- **Regole:** Interagire con il bancone/sifone del caffe a sinistra del locale.
+
+### `attivita/lavoro-crossroads.png` — Bar Crossroads (izakaya, Shinjuku)
+- **Tipo:** Lavoro
+- **Dove:** Shinjuku, quartiere a luci rosse
+- **Quando:** Di sera
+- **Costo:** gratuito
+- **Paga:** 7.200 yen a turno (12.000 yen di domenica)
+- **Doti:** Gentilezza
+- **Come si sblocca:** Confidente di Ichiko Ohya avviato; Gentilezza Rango 3; Perizia Rango 3
+- **Regole:** Solo turni serali.
+- **Altri effetti:** La domenica si puo ottenere un punto bonus in una dote a scelta parlando con i clienti al bancone (Coraggio, Perizia, Fascino; la Conoscenza non risulta tra le opzioni secondo le fonti consultate). G…
+
+### `attivita/lavoro-ore-no-beko.png` — Cameriere al Ore no Beko (ciotole di manzo)
+- **Tipo:** Lavoro
+- **Dove:** Shibuya, Central Street
+- **Quando:** Di sera
+- **Costo:** gratuito
+- **Paga:** 3.600 yen a turno (fino a 8.800 yen con ordini perfetti)
+- **Doti:** Perizia
+- **Regole:** Solo turni serali, nessun requisito. Compagni: Ryuji (giorni dispari), Yoshida (giorni pari).
+- **Altri effetti:** Quiz a memoria sugli ordini dei clienti.
+
+### `attivita/lavoro-triple-seven.png` — Commesso al Triple Seven
+- **Tipo:** Lavoro
+- **Dove:** Shibuya, Central Street
+- **Quando:** Di giorno
+- **Costo:** gratuito
+- **Paga:** 3.500 yen a turno (fino a 7.400 yen con quiz perfetto)
+- **Doti:** Fascino
+- **Regole:** Turni diurni, nessun requisito. Compagni incontrabili al lavoro: Haru, Yoshizawa, Makoto, Mishima, Yusuke, Ann, Ryuji.
+- **Altri effetti:** Quiz a memoria sui codici a barre il 7, 17 e 27 del mese; superarlo perfettamente aumenta la paga.
+
+### `attivita/lavoro-rafflesia.png` — Fioraio Rafflesia
+- **Tipo:** Lavoro
+- **Dove:** Shibuya, centro commerciale sotterraneo
+- **Quando:** Di giorno
+- **Costo:** gratuito
+- **Paga:** 3.200 yen a turno (fino a 7.800 yen con bouquet perfetti)
+- **Doti:** Gentilezza
+- **Come si sblocca:** Fascino Rango 2
+- **Regole:** Solo turni diurni. Compagni: Yusuke (giorni dispari), Haru (giorni pari).
+- **Altri effetti:** Mercoledi e sabato: creazione di bouquet personalizzati in base alle preferenze del cliente (colore, dimensione, significato dei fiori); il libro 'Enciclopedia floreale' aiuta a interpretare il lingu…
+
+### `attivita/lettura-metropolitana.png` — Lettura in metropolitana
+- **Tipo:** Lettura
+- **Dove:** Metropolitana, tragitto casa-scuola
+- **Quando:** Di giorno
+- **Costo:** gratuito
+- **Altri effetti:** Se seduto, leggere durante il tragitto in metropolitana non consuma tempo di gioco: e uno dei modi piu efficienti per avanzare nella lettura dei libri posseduti (una sessione/segnalibro per tragitto).
+
+### `attivita/bagno-pubblico-yongen-jaya.png` — Bagno pubblico (sento) di Yongen-Jaya
+- **Tipo:** Mini-gioco
+- **Dove:** Yongen-Jaya, vicoli
+- **Quando:** Di sera
+- **Doti:** Fascino, Fascino
+- **Regole:** Attivita serale; nessun costo indicato dalle fonti consultate.
+- **Altri effetti:** Nei giorni di pioggia il bagno e quasi vuoto: si puo scegliere di prolungare la permanenza per un possibile punto Fascino extra, con il rischio di svenire e perdere il Fascino guadagnato in cambio di…
+- **Premi:** Trofeo 'Getting the Vapors'.
+
+### `attivita/biliardo.png` — Biliardo
+- **Tipo:** Mini-gioco
+- **Dove:** Kichijoji, Penguin Sniper
+- **Quando:** Di sera
+- **Costo:** 800 ¥
+- **Doti:** Dote variabile
+- **Regole:** Si puo invitare un compagno per guadagnare punti Confidente; i bonus non sono influenzati da Persona dello stesso Arcano ne dai risultati scolastici.
+- **Altri effetti:** Aumenta il Rango Tecnico condiviso dalla squadra: piu danni con attacchi tecnici, maggiore probabilita di atterramento (100% a Rango 4) e piu combinazioni elementali.
+- **Premi:** 1 partita: trofeo 'A Hustler's Journey'; 5 sessioni: premio 'Pool Shark Pup' nel Covo dei Ladri.
+
+### `attivita/freccette.png` — Freccette
+- **Tipo:** Mini-gioco
+- **Dove:** Kichijoji, Penguin Sniper
+- **Quando:** Di sera
+- **Costo:** 800 ¥
+- **Doti:** Perizia ♪
+- **Come si sblocca:** 5 giugno, evento con Ryuji Sakamoto
+- **Regole:** Ogni sessione costa 800 yen e comprende due partite (modalita 301/501/701); la difficolta varia in base al rango Staffetta del compagno scelto.
+- **Altri effetti:** Aumenta il rango Staffetta (baton pass) del compagno invitato: piu danni, recupero HP/SP e bonus offensivi concatenati nei combattimenti; rango massimo 3 per personaggio. Due alleati casuali assiston…
+- **Premi:** 1 partita: trofeo 'Occhio di falco'; 10 partite: premio 'Amante delle freccette' nel Covo dei Ladri.
+
+### `attivita/centro-battute-yongen-jaya.png` — Gabbie di Battuta
+- **Tipo:** Mini-gioco
+- **Dove:** Yongen-Jaya, backstreets
+- **Quando:** Giorno e sera
+- **Costo:** 500 ¥
+- **Doti:** Perizia
+- **Regole:** 5 palle a sessione; premere il tasto al momento giusto per colpire.
+- **Altri effetti:** Tre livelli di difficolta per velocita della palla: Beginner 70km/h (500 yen), Intermediate 90km/h (1.000 yen), Advanced 130km/h (3.000 yen). Il libro 'La scienza del baseball' (Hinokuniya, 2.800 yen…
+- **Premi:** Homerun: Beginner = accessorio Muscle Anklet (Potenza +2); Intermediate = Anger Bandana; Advanced = Holy Cape (evasione Bless triplicata). 5 homerun su qualsia…
+
+### `attivita/pesca-ichigaya.png` — Pesca al laghetto di Ichigaya
+- **Tipo:** Mini-gioco
+- **Dove:** Ichigaya, laghetto
+- **Quando:** Giorno e sera
+- **Costo:** 3000 ¥
+- **Doti:** Perizia
+- **Come si sblocca:** 6 luglio (evento con Ryuji), oppure leggendo il libro 'Vedetta lacustre'
+- **Regole:** Costo 3.000 yen di giorno, 1.000 yen di sera. Prima sessione: 7 Boilie piccole gratis + 3 Boilie medie a fine sessione. Si regola direzione/potenza/distanza del lancio, poi si mantiene l'icona del ga…
+- **Altri effetti:** Numero di tentativi = Rango Perizia + 2. I pesci catturati fruttano da 20 a 5.500 punti (Covo dei Ladri) a seconda di specie/dimensione.
+- **Premi:** Libro 'Lo zen della pesca' aggiunge mirino e Terzo Occhio per identificare pesci speciali.
+
+### `attivita/sala-giochi-gun-about-akihabara.png` — Sala giochi: Gun About (Akihabara)
+- **Tipo:** Mini-gioco
+- **Dove:** Akihabara, sala giochi
+- **Quando:** Di giorno
+- **Doti:** Dote variabile
+- **Come si sblocca:** Legato al Confidente della Torre (Shinya Oda); avviabile dal 4 settembre tramite la richiesta Mementos 'I baro non vincono mai'
+- **Regole:** Shinya e presente all'arcade il lunedi, martedi e giovedi pomeriggio dopo scuola.
+- **Altri effetti:** Il Confidente Torre (Shinya) potenzia l'uso delle armi da fuoco nei combattimenti (limite munizioni, abbattimenti a distanza).
+
+### `attivita/sfida-big-bang-burger.png` — Sfida Big Bang Burger
+- **Tipo:** Sfida
+- **Dove:** Shibuya, Central Street, Big Bang Burger
+- **Quando:** Giorno e sera
+- **Costo:** 1500 ¥
+- **Doti:** Coraggio, Conoscenza, Perizia
+- **Come si sblocca:** Tre sfide progressive: Comet Burger (Coraggio/Conoscenza/Perizia Rango 2), Gravity Burger (Rango 3), Cosmo Town Burger (Rango 4)
+- **Regole:** Ogni tentativo costa circa 1.500 yen; costi/soglie possono variare tra le tre sfide (dato non confermato con precisione).
+- **Altri effetti:** Ricompense: Comet Burger = accessorio '2nd Mate Badge' (+10 HP) + 3 oggetti Big Bang Burger; Cosmo Town Burger = accessorio 'Captain Badge' (+50 HP) + 10 oggetti Big Bang Burger. Anche il solo tentat…
+
+### `attivita/sfida-pesca-guardiano-ichigaya.png` — Sfida: Guardiano e Boss di Ichigaya
+- **Tipo:** Sfida
+- **Dove:** Ichigaya, laghetto
+- **Quando:** Giorno e sera
+- **Costo:** 1200 ¥
+- **Come si sblocca:** Guardiano: Perizia Rango 4; Boss: dopo cattura del Guardiano, Perizia Rango 5
+- **Regole:** Richiede l'esca speciale 'Boilie sospetto' (1.200 punti). Il Guardiano compare al 7 tentativo in condizioni normali, ma gia al 1 tentativo con pioggia o neve di sera.
+
+### `attivita/studio-biblioteca-scuola.png` — Angolo studio della biblioteca scolastica
+- **Tipo:** Studio
+- **Dove:** Scuola Shujin, biblioteca
+- **Quando:** Di giorno
+- **Costo:** gratuito
+- **Doti:** Conoscenza
+- **Come si sblocca:** Disponibile fino al 20 maggio secondo allgamestaff.it (poi sostituito da altre attivita in biblioteca)
+
+### `attivita/studio-diner-shibuya.png` — Studio al Diner di Shibuya
+- **Tipo:** Studio
+- **Dove:** Shibuya, Diner (Central Street)
+- **Quando:** Giorno e sera
+- **Doti:** Conoscenza
+- **Altri effetti:** Ordinando piatti specifici si guadagnano punti anche in altre doti: 'Bistecca nostalgica' -> Gentilezza; 'Caffe bollente' -> Coraggio; 'Frui-te' -> Fascino; 'Sandwich a sorpresa' -> Coraggio (lentame…
+
+### `attivita/studio-leblanc.png` — Studio serale a Leblanc
+- **Tipo:** Studio
+- **Dove:** Leblanc
+- **Quando:** Di sera
+- **Costo:** gratuito
+- **Doti:** Conoscenza

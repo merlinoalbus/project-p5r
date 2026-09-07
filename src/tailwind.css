@@ -635,27 +635,79 @@
   .card--cliccabile { cursor: pointer; }
   .card--cliccabile:hover { border-color: var(--color-primary); }
 
-  /* ---- Fregio: la figura decorativa di una sezione di solo testo ----
+  /* ---- Fregio: l'illustrazione di una sezione, non il suo sfondo ----
    *
-   * Sta **dietro** al contenuto e non lo tocca: `pointer-events:none`, opacità bassa e una
-   * sfumatura che la fa sparire verso il testo, così nessuna riga diventa meno leggibile. La
-   * carta che lo ospita va marcata `.card--con-fregio` (posizione e ritaglio); il fregio si
-   * spegne sotto i 640 px, dove lo spazio serve tutto al contenuto. */
-  .card--con-fregio { position: relative; overflow: hidden; }
-  .card--con-fregio > *:not(.fregio-sezione) { position: relative; z-index: 1; }
-  .fregio-sezione { position: absolute; pointer-events: none; z-index: 0; display: none; }
-  @media (min-width: 640px) { .fregio-sezione { display: block; } }
-  .fregio-sezione--angolo { top: -8%; right: -2%; width: min(38%, 260px); aspect-ratio: 1; }
-  .fregio-sezione--banda { bottom: -10%; right: -4%; width: min(52%, 420px); aspect-ratio: 16 / 9; }
-  .fregio-sezione__immagine {
-    width: 100%; height: 100%; object-fit: contain; opacity: 0.16;
-    mask-image: linear-gradient(to left, #000 30%, transparent 100%);
+   * Prima stava **dietro** al testo, al 16% di opacità e sfumata: nascosta al punto che l'utente
+   * l'ha creduta non consegnata — «non vedo inserite le seguenti…» — mentre le undici immagini
+   * erano lì da ore. La correzione è la sua: «i decori li voglio non come sfondo dietro ma come
+   * immagini che spostano il contenuto di testo con opacità al 100%».
+   *
+   * Quindi il fregio **occupa il suo spazio**: la carta diventa una griglia a due colonne, il
+   * testo sta nella prima e l'illustrazione nella seconda, piena, alta quanto le serve. Sotto i
+   * 900 px le colonne diventano una: la figura sta in cima — è il primo figlio — e il testo sotto,
+   * che è come si legge su un telefono. Niente più `position: absolute`, niente opacità, niente
+   * maschera: era tutto lì per non disturbare il testo, e il testo adesso non c'è sotto. */
+  /* ---- Sezione con illustrazione: quattro tecniche, non una regola sola ----
+   *
+   * Una figura sempre nello stesso posto e sempre della stessa misura non è impaginare: è mettere
+   * una colonna di immagini accanto a una colonna di testo per l'intera pagina. Rilievo
+   * dell'utente, e il secondo dopo un primo tentativo peggiore («non è responsive, non è
+   * ottimizzata, non è moderna»; poi «tutte dallo stesso lato è cmq ko»; poi «sembra spicciativo e
+   * blando»). Quello che serve è **movimento**: la pagina si compone scegliendo, sezione per
+   * sezione, quale delle quattro forme le sta bene.
+   *
+   *   `--fascia`   la figura in cima, larga quanto la carta: apre un capitolo.
+   *   `--lato`     la figura a fianco, circa un quarto: il passo normale, e si alterna di lato.
+   *   `--grande`   la figura larga un terzo e il testo in due colonne: per le sezioni fitte.
+   *   `--alta`     la figura a tutta altezza della carta: per i soggetti verticali.
+   *
+   * Su telefono si incolonnano tutte allo stesso modo — figura sopra, testo sotto — perché sotto i
+   * 768 px l'unica impaginazione onesta è una colonna sola. */
+  .sezione-fregio { display: flex; flex-direction: column; gap: 12px; }
+  .sezione-fregio__testo { display: flex; flex-direction: column; gap: 8px; min-width: 0; flex: 1 1 auto; }
+  .sezione-fregio > .fregio-sezione { order: -1; align-self: center; width: min(100%, 240px); }
+  /* La fascia **chiude** la sezione invece di aprirla: sta in fondo, centrata in orizzontale.
+   * È la sola che non va centrata in verticale — le altre sì, e su questo l'utente è stato
+   * esplicito: «vanno centrati verticalmente nella sezione, ad eccezione di quelli centrati
+   * orizzontalmente in basso». */
+  .sezione-fregio--fascia > .fregio-sezione { order: 1; align-self: center; width: min(100%, 640px); max-height: 190px; }
+  .sezione-fregio--fascia .fregio-sezione__immagine { object-position: center; }
+
+  @media (min-width: 768px) {
+    .sezione-fregio { flex-direction: row; align-items: flex-start; gap: 20px; }
+    /* **Centrata in verticale e un po' più larga.** Appoggiata in alto lasciava sotto di sé una
+     * striscia vuota alta quanto mezzo box — la sezione «Staffetta» è tre righe di riquadri, la
+     * figura ne copriva una — e a 23% restava piccola accanto a tanto testo. Suggerimento
+     * dell'utente, e ha ragione: al centro la figura tiene il peso del blocco invece di
+     * galleggiare in cima. */
+    .sezione-fregio > .fregio-sezione { order: 0; align-self: center; flex: 0 0 clamp(180px, 28%, 300px); width: auto; }
+    /* Il lato si alterna scendendo: l'occhio cambia appoggio a ogni blocco. */
+    .sezione-fregio--lato:nth-of-type(even) { flex-direction: row-reverse; }
+    /* La fascia resta in cima anche da tablet in su: è il taglio che apre la sezione. In colonna
+     * l'`align-items: flex-start` della riga stringerebbe il testo alla sua larghezza naturale —
+     * una tabella larga 892 px dentro una carta da 986, con il vuoto a destra: qui si allarga. */
+    .sezione-fregio--fascia { flex-direction: column; align-items: stretch; }
+    .sezione-fregio--fascia > .fregio-sezione { order: 1; align-self: center; }
+    .sezione-fregio--fascia > .fregio-sezione { flex: 0 0 auto; width: min(100%, 720px); max-height: 200px; aspect-ratio: auto; }
+    .sezione-fregio--grande > .fregio-sezione { flex-basis: clamp(240px, 36%, 420px); }
+    .sezione-fregio--alta { align-items: stretch; }
+    .sezione-fregio--alta > .fregio-sezione { flex: 0 0 clamp(190px, 28%, 300px); align-self: stretch; aspect-ratio: auto; }
+    .sezione-fregio--alta .fregio-sezione__immagine { height: 100%; object-position: center top; }
   }
-  /* Finché l'immagine non c'è: una macchia del colore del tema, che alleggerisce comunque
-   * l'angolo senza fingere di essere un disegno. */
+  /* Il testo in due colonne solo dove c'è davvero spazio: sotto, una colonna sola si legge meglio. */
+  @media (min-width: 1150px) {
+    .sezione-fregio--grande .sezione-fregio__testo > p { columns: 2; column-gap: 24px; }
+  }
+
+  .fregio-sezione { display: block; }
+  .fregio-sezione--angolo { aspect-ratio: 1; }
+  .fregio-sezione--banda { aspect-ratio: 16 / 9; }
+  .fregio-sezione__immagine { width: 100%; height: 100%; object-fit: contain; }
+  /* Finché l'immagine non c'è: una macchia del colore del tema, che tiene lo spazio senza
+   * fingere di essere un disegno. */
   .fregio-sezione__riserva {
     display: block; width: 100%; height: 100%;
-    background: radial-gradient(circle at 70% 30%, color-mix(in oklab, var(--color-primary) 26%, transparent), transparent 62%);
+    background: radial-gradient(circle at 60% 40%, color-mix(in oklab, var(--color-primary) 26%, transparent), transparent 62%);
   }
 
   /* ---- Chip: etichetta a taglio diagonale (stessa tecnica dei pulsanti) ---- */
