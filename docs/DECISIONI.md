@@ -113,3 +113,41 @@ Confermato dall’utente: mappa e punto iniziale per quartiere. La scelta è vis
 
 ### 2026-09-06 — Un solo mondo di mappe e luoghi
 L'utente richiede che Mappe, Palazzi e Dedali, Città, negozi e inventario siano accessi allo stesso atlante. Si introduce una risoluzione comune delle associazioni esatte, preservando identità interne, alias, ingressi configurati e dati personali. I casi multipli restano scelte esplicite; l'assenza di un'associazione non autorizza a inventare un pin. La ricostruzione dai dati originali e la sostituzione verificata delle mappe restano attività aperte.
+
+### 2026-09-07 — «Palazzi», e i Memento fuori dall'atlante
+La sezione «Palazzi e Dedali» diventa **«Palazzi»** e ne elenca nove: gli otto Palazzi più il
+Dedalo di Iweleth, che ci sta perché si visita per aree come loro e le sue mappe esistono. I
+**Memento** ne escono: non hanno aree fisse — i piani si generano a ogni discesa — e la loro pagina
+li disegna per intero. Restano raggiungibili da `/guida/dungeon/mementos` e dalle Richieste; non
+compaiono né nell'elenco dei Palazzi, né come quartiere nella Città, né come radice nell'indice
+delle Mappe. Il filtro è per **inclusione** (`tipo === 'palazzo'`) e non per esclusione: rilievo di
+Codex, perché una lista di ciò che non si vuole invecchia da sola.
+
+### 2026-09-07 — «Bloccato» vuol dire assente dalla mappa attiva, non cancellato
+Tre piani distinti, e vanno tenuti distinti:
+1. il **catalogo si consulta sempre** — un negozio, un articolo o un quartiere bloccato resta nella
+   sua lista con lo stato dichiarato e il motivo. Sapere che Kichijoji apre il 5 giugno è metà del
+   motivo per cui si consulta una guida;
+2. la **presenza attiva sulla mappa** segue la partita: quel che è bloccato non compare come pin,
+   perché la mappa risponde a «cosa posso fare adesso». Un comando esplicito lo riporta, e allora
+   il pin è **marcato** (grigio, tratteggiato, e col motivo nel nome accessibile);
+3. l'**azione è vietata**: acquistare un articolo bloccato risponde 409.
+
+Non fa parte del comando la rivelazione **da indirizzo**: un `?spillo=` non deve mostrare un pin
+bloccato. Un comando lo si preme sapendo che cosa si sta chiedendo; un indirizzo arriva da un
+collegamento.
+
+### 2026-09-07 — Lo sblocco dei quartieri è una regola, non solo una data
+Solo sette quartieri su ventitré hanno una data di sblocco; gli altri si aprono col rango di un
+Confidente, con un libro letto o durante un Palazzo, e restano chiusi lo stesso. Le venti regole
+sono scritte **a mano** in `data/seed/sblocco-quartieri.json`, non ricavate dalla prosa: il lettore
+automatico dei negozi non riconosce «Confidente Emperor (Yusuke) Rango 3» e spezza gli «oppure» in
+requisiti che poi pretende tutti, cioè bloccherebbe quartieri aperti. Dove la guida è ambigua c'è
+una `nota` che dice cosa non è stato tradotto e perché.
+
+### 2026-09-07 — I colori degli spilli restano quelli autorati
+Otto tipi hanno una tinta molto chiara — `forziere-raro`, `terme`, `casa`, `lavanderia`, `nemico`,
+`porta`, `nota`, `scala` — e le figure nuove, che sono a tratto chiaro, ci si leggono con poco
+stacco. **L'utente ha deciso di lasciarli come sono**: si leggono, sono il caso peggiore e non un
+difetto, e la tavolozza resta quella decisa a suo tempo. Annotato qui perché non venga «corretto»
+di iniziativa da qualcuno che rivede gli spilli fra sei mesi.
