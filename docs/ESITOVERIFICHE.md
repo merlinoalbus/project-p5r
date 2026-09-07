@@ -2733,3 +2733,29 @@ planimetria dei piani con una prova, che è lavoro dell'atlante.
 vale per entrambi. **PR #39** raccoglie finalmente tutto il lavoro grafico — 22 icone di categoria e
 11 fregi già alleggeriti (10,0 → 3,3 MB) — ed è `CLEAN`. Il fabbisogno censito resta scoperto solo
 per la §24 (le undici icone dei tipi di azione della Guida del giorno).
+
+### `candidato/lotto-b-v5` e `v6` — contenuto approvato, candidato non integrabile (7 settembre 2026)
+
+**Verdetto: il contenuto passa, il candidato no.** Merge-base `b1ce57d`, che sta **prima** di due
+commit già su `main`: `dcc2cca` (Videogiochi riscritta nella lingua dell'app) e `6f149c1` (i
+pulsanti del catalogo su quelle pagine). Integrarlo avrebbe riportato la pagina precedente, tolto i
+pulsanti «Aggiungi»/«Correggi» e rimesso il pulsante «Completa» che l'utente aveva chiesto di
+togliere. Non è un difetto del lavoro: è un candidato aperto su file che nel frattempo erano stati
+riscritti.
+
+Il contenuto invece copre due mancanze vere, **una delle quali era mia**: la pagina dei Videogiochi
+serializzava una richiesta per volta con i pulsanti disabilitati, e i tocchi rapidi che cadevano
+durante l'attesa sparivano. Portato sulla pagina di adesso (commit `8dbd355`) con una correzione al
+lavoro di Codex: il passo si conta sull'ultimo valore **chiesto** e non su quello disegnato, perché
+due tocchi nello stesso fotogramma leggevano lo stesso numero e valevano per uno solo — difetto
+visibile nel browser e invisibile a `fireEvent`, che fra un evento e l'altro lascia ridisegnare.
+
+`DoveSiTrova` aggiunto a Videogiochi (un pannello solo per pagina) e ad Attività, dove la
+fisarmonica resta a più schede aperte e la mappa sta dietro un pulsante: aprire una scheda per
+leggerne le regole non deve montare un visore. Il test API di Codex
+(`server/routes/videogiochi.test.ts`) è stato preso tale e quale, con l'attribuzione: non tocca
+l'interfaccia e passa sulla `main` di adesso.
+
+**Regola di processo che ne esce:** un candidato con merge-base vecchio non si giudica solo sul
+contenuto. `git log --oneline github/main -- <file>` prima di aprire un lotto costa niente e dice
+se qualcuno ci ha lavorato.
