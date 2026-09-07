@@ -2229,3 +2229,81 @@ possa mostrare:
 `non resi: 0` è la riga che prima valeva 1: era la sagoma che non c'era.
 
 **Verde:** tre cicli typecheck + lint + suite completa, 601/601 ogni volta, più `npm run build`.
+
+---
+
+# Verifica del candidato `candidato/lotto-b-v3` di Codex — PASS con un rilievo
+
+Commit `317d9f8`, verificato in sola lettura nel worktree `C:\Repository\p5r-verifica` con backend
+proprio (3103), frontend proprio (5275) e database separato. Contiene Libri (già verificati), Film
+e DVD, Videogiochi, e i due fatti derivati che aprono gli sblocchi.
+
+**Verdetto: PASS**, con **un rilievo non bloccante** su `VideogiochiPage`.
+
+## Il contratto: passa tutto, e i due punti che contano li ho provati a fondo
+
+| punto | esito |
+|---|---|
+| tre pagine autonome, 46 libri / 30 film e DVD / 7 videogiochi | **passa** |
+| **lo sblocco derivato scatta solo a completamento** | **passa** — misurato al gradino: DVD a 1 di 2 → requisito **rosso**; a 2 di 2 → **verde**; revocato a 1 → **rosso**; un film al cinema (1 sessione) → **verde**; azzerato tutto → **rosso** |
+| lo stesso per i videogiochi (migrazione 050 del v3) | **passa** — «Segreti di gioco» resta rosso a 1 di 3 round, diventa verde a 3 di 3, torna rosso a 0 |
+| **il completamento videogiochi non scrive `lettura_partita`** (correzione `59faac9`) | **passa** — a 3 di 3 il fatto derivato vale 1 e `lettura_partita` resta **vuota** |
+| limiti | **passa** — 4 round su 3 → `avanzamento-non-valido` col messaggio giusto |
+| isolamento per partita | **passa** — completati nella partita 5, la 6 resta a zero |
+| separazione da `AttivitaPage` | **passa** — restano due linguette, Attività e Lavori; Libri e Film sono usciti |
+| typecheck, lint, suite, build | **passa** — tre cicli consecutivi, **631/631** ogni volta |
+| marker di conflitto rimasti | **nessuno** — cercati in tutto `src/`, `server/`, `shared/`, `docs/`, `data/seed` |
+
+Un dato che va dato a lui: la correzione `59faac9` nasce da un vincolo vero — `lettura_partita` ha
+un `CHECK (tipo IN ('libro','film'))` e i videogiochi non ci stanno — e l'ha risolta separando le
+tabelle invece di allargare il vincolo. È la scelta giusta.
+
+## Un errore mio, evitato per un soffio
+
+La prima esecuzione della prova sullo sblocco dava «verde» dove mi aspettavo rosso, e stavo per
+scriverlo come difetto. **Non lo era**: una tornata precedente era fallita nel mio lettore JSON
+*dopo* che le `PUT` erano già andate a segno, quindi la partita aveva già un film completato. Il
+difetto era nella mia prova, non nel suo codice.
+
+L'ho rifatta azzerando prima **tutti** i progressi e stampando lo stato del database accanto a
+quello dell'API a ogni passo. È la differenza fra misurare e guardare: se non avessi stampato le
+righe di `progresso_film_partita` avrei mandato a Codex un rilievo falso, e lui avrebbe perso un
+giro a cercare un difetto che non c'è.
+
+## Il rilievo: `VideogiochiPage` non è scritta come il resto dell'app
+
+Non è un'opinione di gusto, ed è per questo che l'ho misurato invece di dirlo. Nello stesso
+candidato ci sono tre pagine nuove, scritte dalla stessa persona nello stesso giorno:
+
+| pagina | classi di palette cruda (`slate-`, `red-700`…) | classi del sistema (`card`, `chip`, `btn`, `touch`, `text-text-`) | elenco con `aria-label` |
+|---|---|---|---|
+| `FilmPage` | 0 | 25 | sì |
+| `LibriPage` | 0 | 26 | sì |
+| **`VideogiochiPage`** | **10** | **0** | **no** |
+
+È l'unica pagina di tutto il repository che disegna con la tavolozza cruda di Tailwind invece dei
+token CSS-first di `src/tailwind.css`, ed è la sola a rifare da sé l'impaginazione
+(`mx-auto max-w-6xl px-4 py-8`) che dà già `MainLayout`. Il risultato si vede a occhio: le schede
+hanno un fondo bluastro proprio (`oklch(0.208 0.042 265.755)`) al posto di quello della `card`, e
+in mezzo alle altre pagine sembra un'altra applicazione.
+
+Tre conseguenze concrete, non estetiche:
+
+1. **i bersagli tattili sono 38 px**, sotto i 44 richiesti dal progetto — e questa è un'app che si
+   usa col tablet in mano durante la partita;
+2. le schede non sono un elenco (`<article>` in un `div`, nessun `aria-label`), quindi chi legge
+   con uno screen reader perde il conto degli elementi, che nelle altre due pagine c'è;
+3. `<b>7</b><small>giochi</small>` si legge «7giochi», attaccato.
+
+C'è anche un `eslint-disable react-hooks/set-state-in-effect` per copiare i dati caricati in uno
+stato locale: funziona, ma è una regola spenta al posto di uno stato derivato.
+
+**Non blocca il PASS** perché il contratto è rispettato e non c'è un difetto di comportamento: la
+pagina funziona, è adattiva e non sborda a 375, 768 e 1280. Ma la Fase 5.1 chiede esplicitamente
+«un layout molto grafico e moderno» su queste sezioni, e le altre due pagine dello stesso candidato
+dimostrano che l'autore sa benissimo come si fa — quindi è una svista, non una scelta, e si chiude
+in poco.
+
+**Verde:** tre cicli typecheck + lint + suite completa (631/631) e `npm run build`, più le prove
+runtime elencate sopra. Dati di prova ripuliti: due partite create ed eliminate, nessun residuo in
+`progresso_film_partita`, `progresso_videogioco_partita`, `lettura_partita`.
