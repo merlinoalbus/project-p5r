@@ -2528,3 +2528,39 @@ Il `galaxy-task-validator` ha ripetuto le verifiche in sola lettura e ha emesso 
 richieste correttive. Nessun file sorgente e' stato modificato durante la review. Il ramo Lotto B
 e' stato quindi allineato in fast-forward al commit unificato `516d17b`, che contiene entrambi i
 lotti approvati fino a questo punto.
+
+---
+
+## Preparazione candidato Lotto B — Libri e avanzamento lettura (7 settembre 2026)
+
+Primo modulo delle nuove sezioni inventario: `/guida/libri` espone i **46 libri** del catalogo
+Royal separatamente dalla pagina Attivita'. Per ciascun volume mostra provenienza, beneficio,
+prezzo, numero di sessioni e posizione territoriale strutturata; con una partita attiva consente
+di registrare l'avanzamento per sessioni, azzerarlo o completarlo.
+
+Il completamento canonico resta in `lettura_partita`: un avanzamento parziale non attiva bonus o
+sblocchi, mentre il raggiungimento del totale crea il completamento e il relativo evento. Ridurre
+il progresso revoca il completamento; completare nuovamente produce un nuovo evento, mentre una
+richiesta duplicata sullo stato gia' completo resta idempotente. Le richieste rapide dello stesso
+libro sono serializzate e lo stato temporaneo e' isolato per partita.
+
+### Evidenze dell'implementatore
+
+- migrazione fresca e upgrade da schema 46 verificati, incluso backfill dei soli libri gia'
+  completati e cancellazione a cascata con la partita;
+- API: 46 libri, **74 sessioni complessive** derivate dalle 46 righe canoniche, 48 associazioni di
+  posizione; validazione esclusiva fra `fatto` e `avanzamento`, limite massimo e film invariati;
+- la fonte AllGameStaff dichiara 75 slot nel testo introduttivo, ma le sessioni delle 46 righe
+  della tabella sommano a 74 (23x1 + 18x2 + 5x3): l'app non inventa una sessione per colmare la
+  discordanza editoriale;
+- runtime isolato verificato su backend 3102 e frontend 5274: avanzamento 1/2, completamento 2/2,
+  persistenza dopo reload, pannello posizione contestuale e redirect della vecchia URL
+  `/guida/attivita?scheda=libri` verso `/guida/libri`;
+- controllo visuale desktop e compatto senza overflow; nessun errore runtime dell'app. Gli errori
+  registrati da Chrome provenivano esclusivamente da un'estensione `chrome-extension://`;
+- dopo l'ultima modifica sono stati eseguiti tre cicli consecutivi completi: typecheck PASS, lint
+  PASS, build PASS e **604/604 test PASS** in ciascun ciclo. Resta il solo avviso Vite gia' noto
+  sulla dimensione del chunk, non bloccante.
+
+Queste sono verifiche dell'implementatore e non costituiscono approvazione. Dopo il tag immutabile
+la verifica indipendente spetta a Opus e al `galaxy-task-validator`.
