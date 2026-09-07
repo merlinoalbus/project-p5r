@@ -2143,3 +2143,89 @@ parallelo dipende dal fatto che nessuno dei due se ne dimentichi.
 
 **Verde sul mio ramo dopo la correzione:** tre cicli typecheck + lint + suite completa, 601/601
 ogni volta, più `npm run build`.
+
+---
+
+# Il rilievo di Codex sui prompt: aveva ragione, e la voce 4 si chiude senza generare niente
+
+Codex ha sospeso la generazione delle due immagini del Covo e mi ha chiesto una risposta motivata.
+**Il rilievo è fondato e l'ho accolto per intero.** Aveva applicato la regola meglio di me: aveva
+cercato in tutto `data/atlas/extracted`, non solo dentro `P5_MAPDATA.SPD`.
+
+Il Covo dei Ladri è il **Luogo 022** e i suoi originali erano nel repository da giorni: cinque
+piante `RMAP_022_1_*`, la tavola d'insieme, la freccia dell'indicatore, e — cosa che non mi
+aspettavo — `PLC_022_001_00.png`, cioè **la scritta «COVO DEI LADRI» disegnata dal gioco, in
+italiano**.
+
+**Il mio errore ha un nome preciso:** avevo verificato l'assenza del Covo nel foglio della mappa di
+viaggio e ne avevo concluso l'assenza *dal gioco*. Sono due cose diverse. Che il Covo non sia una
+fermata del treno era giusto; che quindi non esistesse un suo disegno era un salto.
+
+È la **terza volta** che la regola «prima si guarda fra gli originali» salva un pezzo di mappa: le
+prime due sono state le voci 2 e 3, i pezzi dei Memento. La prima volta è una lezione, la terza è
+un procedimento — e adesso sta scritto anche dentro `tools/p5r-map-export/covo_sagoma.py`, così la
+prossima persona lo trova dove serve invece che in un verbale.
+
+## La voce 4 non è stata riscritta: è stata sostituita da un ritaglio
+
+`RMAP_022_1_0` è la pianta del Covo **nella stessa lingua grafica delle sagome dei quartieri**:
+nero pieno, dettagli in negativo bianco, alfa reale. Serviva solo portarla al proprio riquadro
+dentro una tela 1024 × 1024 quasi vuota. Lo fa uno script nella catena di estrazione già esistente,
+che **ritaglia e non genera**: riquadro `(203, 157, 542, 540)`, sagoma `339 × 383`, alfa minima 0,
+angolo `(255,255,255,0)`.
+
+Il file è finito esattamente dove `assetCovoLadri()` lo cercava da ieri, quindi **la metà
+applicativa non ha richiesto una riga**: era la scommessa che avevo fatto scrivendo il codice prima
+dell'asset, ed è l'unica cosa di quella voce che ha retto.
+
+**Non si ingrandisce.** Il ritaglio è più piccolo delle sagome dei quartieri e lo script ha un
+tetto, non un bersaglio: ingrandire un originale lo sgrana, e sulla mappa un cartellino è largo il
+5% della tela — Shibuya, che è 726 px, viene resa a 74.
+
+## La domanda che restava l'ho decisa guardando, non ragionando
+
+La pianta è un disegno di un altro genere: i quartieri sono profili di edifici in prospettiva,
+questa è una planimetria dall'alto, per giunta con tre caselle a stella colorate. Poteva stonare, e
+non era una cosa da decidere a parole.
+
+Montate le quattro figure fianco a fianco **alla misura vera** — 30 px, quella della mappa — il
+Covo sta in famiglia: legge come una massa nera compatta con dettagli bianchi, come le altre, e il
+colore delle stelle è un accento di pochi pixel. Ingrandito si vede che è una pianta, ma a quella
+misura nessuno lo guarda.
+
+**Tenuto l'originale.** Fra un originale che si distingue un poco e un disegno che assomiglia
+molto, qui vince l'originale. E c'è una ragione in più: il Covo **non è un posto di Tokyo**, è una
+schermata del menu. Che il suo segno sia di un altro genere non è un difetto, è un'informazione.
+
+## La scritta del gioco: trovata, e non usata
+
+`PLC_022_001_00.png` è la targa «COVO DEI LADRI» del gioco. Non la uso, e va detto perché: sulla
+mappa le targhe sono **tutte** testo reso dall'app, con lo stesso corpo in `cqw` e lo stesso andare
+a capo. Una targa-immagine in mezzo a ventinove di testo si comporterebbe diversamente a ogni
+larghezza e romperebbe la sola cosa che tiene insieme la collocazione. Registrata perché esiste e
+perché la scelta sia una scelta, non una svista.
+
+## La voce 5 resta, ma con un altro soggetto
+
+La piastrella della Guida resta necessaria — le RMAP sono planimetrie, non icone da 40 px con
+contorno spesso e accento rosso — ma Codex ha ragione anche qui: **il soggetto lo detta
+l'originale.** La prima stesura chiedeva una poltrona con una medaglia, inventate di sana pianta.
+Riscritta sui due segni che il Covo ha davvero: il **poligono chiuso quasi circolare** della sala e
+le **caselle a stella**. Niente maschera, che è già il segno dei Palazzi.
+
+## Prova rifatta, con la sagoma vera
+
+La promessa era rifare le sovrapposizioni quando l'asset fosse arrivato. Rifatte nel caso peggiore
+— tutte le date tolte **e** tutti i blocchi aperti, 68 pezzi resi, il massimo che quella mappa
+possa mostrare:
+
+| larghezza | pezzi | non resi | sovrapposizioni | fuori dalla tela |
+|---|---|---|---|---|
+| 375 px | 68 | 0 | **0** | **0** |
+| 820 px | 68 | 0 | **0** | **0** |
+| 1280 px | 68 | 0 | **0** | **0** |
+| 1440 px | 68 | 0 | **0** | **0** |
+
+`non resi: 0` è la riga che prima valeva 1: era la sagoma che non c'era.
+
+**Verde:** tre cicli typecheck + lint + suite completa, 601/601 ogni volta, più `npm run build`.

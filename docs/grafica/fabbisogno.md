@@ -105,73 +105,93 @@ chiedere il disegno.
 
 ---
 
-## 4. Covo dei Ladri — sagoma per la mappa di viaggio
+## 4 — RITIRATA: la sagoma del Covo c'era già, ed è la terza volta
 
-| | |
-|---|---|
-| **file** | `public/asset/mappe/lmap/tokyo/covo-dei-ladri.png` |
-| **misura** | 700 × 620 px |
-| **sfondo** | trasparente, **alfa reale** che segue la sagoma (non un rettangolo opaco) |
-| **stato** | **`da verificare`** — prompt scritto da Claude il 7 settembre 2026, tocca a Codex leggerlo |
-| **serve a** | `src/components/mappe/MappaTokyo.tsx`, `COVO_TOKYO` |
+Avevo scritto un prompt per **far disegnare** la sagoma del Covo dei Ladri per la mappa di viaggio.
+Era sbagliato da chiedere, e me l'ha mostrato **Codex**, che ha applicato la regola meglio di come
+l'avevo applicata io: aveva cercato in tutto `data/atlas/extracted`, non solo dentro
+`P5_MAPDATA.SPD`. Il Covo esiste come **Luogo 022**, e i suoi originali sono lì da giorni:
 
-**Perché serve, e come l'ho scoperto.** Rifacendo la mappa di Tokyo ho spostato il Covo dei Ladri
-nell'angolo libero in basso a sinistra, perché addosso a Yongen-Jaya copriva Chinatown. Spostandolo
-si vede quel che prima passava inosservato: **è l'unico elemento della mappa senza figura.** Ogni
-quartiere ha la sua sagoma, ogni Palazzo la sua illustrazione, e il Covo è una targa nera con
-dentro delle parole. In mezzo a venti disegni, una scritta sola sembra un errore di caricamento.
+- `png/BASE/FIELD/PANEL/ROADMAP/RMAP_022_1_0.png` … `_1_4.png` — la pianta del Covo, in cinque
+  vesti (nera, grigia, e le varianti colorate);
+- `panoramiche/Luogo 022 - tavola 01.jpg` — la tavola d'insieme;
+- `png/IT/FIELD/PANEL/PLACE_PICT/PLC_022_001_00.png` — **la scritta «COVO DEI LADRI» del gioco, in
+  italiano**;
+- `icone-mappa/sprite-022.png` — la freccia dell'indicatore.
 
-**Prima ho cercato fra gli originali**, che è la regola imparata sbagliando con i Memento: i 160
-elementi nominati di `P5_MAPDATA.SPD` sono in `data/atlas/extracted/elementi-mappe-lmap.json`, e
-nessuno è il Covo — né in caratteri latini, né in giapponese (`隠れ家`, `アジト`). È coerente col
-gioco: il Covo dei Ladri è una schermata del menu di Royal, non una fermata della metropolitana,
-quindi sul foglio della mappa di viaggio non c'è e non ci può essere. Come Shujin Academy: il
-disegno va fatto perché nel gioco **non esiste**, non perché non l'abbiamo trovato.
+**Il mio errore, per nome:** avevo verificato l'assenza nel foglio della mappa di viaggio e ne
+avevo concluso l'assenza *dal gioco*. Sono due cose diverse. Nel foglio dei quartieri il Covo non
+c'è perché non è una fermata del treno — quello era giusto — ma il Covo ha un suo luogo, e quel
+luogo ha le sue immagini. È lo stesso errore delle voci 2 e 3, e questa è **la terza volta** che la
+regola «prima si guarda fra gli originali» salva un pezzo di mappa dall'essere disegnato al posto
+di quello vero. La prima volta è stata una lezione; la terza è un procedimento, e ora sta scritto
+anche nello script.
 
-**Il riferimento è già nel repository.** Prima di generare, guardare
-`public/asset/mappe/lmap/tokyo/shibuya.png`, `shinjuku.png`, `asakusa.png` e soprattutto
-`yongen-jaya.png` — il Covo è la soffitta del Leblanc, che sta lì. E `shujin-academy.png`, che è
-l'altra sagoma non originale: la nuova deve stare in mezzo a tutte senza distinguersi.
+### Che cosa è stato fatto al posto della generazione
 
-**Prompt**
+`RMAP_022_1_0` è la pianta del Covo **nello stesso linguaggio grafico delle sagome dei quartieri**:
+nero pieno, dettagli ricavati in negativo bianco, alfa reale. Sul foglio sta in un angolo di una
+tela 1024 × 1024 quasi tutta vuota, quindi l'unica operazione necessaria era portarla al proprio
+riquadro. La fa `tools/p5r-map-export/covo_sagoma.py`, che **ritaglia e non genera**:
 
-> Illustrazione di una piccola caffetteria giapponese a due piani in stile Persona 5 Royal, resa
-> come **sagoma nera piatta** su fondo trasparente: nessun grigio, nessuna sfumatura, nessun
-> contorno esterno — solo nero pieno, con i dettagli ricavati in **negativo bianco** dentro la
-> massa nera (la vetrina, la porta, la finestra della soffitta, le tegole).
->
-> Il soggetto: un edificio stretto e alto due piani, visto **di tre quarti dal basso**, con la
-> vetrina del locale al piano terra, la tenda sopra l'ingresso, e al piano di sopra una finestra
-> illuminata sotto uno spiovente. Sul tetto, una piccola insegna verticale. Accanto all'edificio,
-> appoggiata, una **maschera** da ladro gentiluomo — occhi allungati, profilo spigoloso — larga
-> circa un quarto dell'edificio: è il segno che quella soffitta è il covo, e senza di lei la
-> sagoma è solo un bar.
->
-> Il taglio è **grafico e spigoloso**, da xilografia o da stencil: linee dritte, angoli netti,
-> prospettiva forzata e leggermente instabile, come un edificio disegnato di corsa con un
-> pennarello grosso. Le tacche bianche delle finestre sono irregolari, alcune piene, alcune vuote.
->
-> Nessuna cornice, nessun riquadro, nessuna targa, nessun testo, nessuna scritta giapponese.
-> Nessun colore: solo nero e trasparente. Il bianco intorno all'edificio deve essere
-> **trasparente**, non bianco pieno — l'immagine viene ritagliata sul suo contorno e appoggiata su
-> un fondo rosso.
->
-> La sagoma deve occupare quasi tutta la tela, centrata, con un margine minimo.
+```
+originale   1024x1024
+riquadro    (203, 157, 542, 540)
+sagoma      339x383
+alfa minima 0 (0 = ritaglio reale)
+trasparenti 25.8%
+angolo      (255, 255, 255, 0)
+```
 
-**Come si verifica quando arriva**
+Il file è `public/asset/mappe/lmap/tokyo/covo-dei-ladri.png`, cioè esattamente il percorso che
+`assetCovoLadri()` cercava da ieri: **la metà applicativa era già pronta e non ha richiesto una
+riga di codice.**
 
-1. **alfa reale**: canale alfa 0..255, l'angolo `(0,0)` completamente trasparente, e la quota di
-   pixel trasparenti nella fascia degli originali (44-65%). È la prova che il bianco è vuoto e non
-   dipinto;
-2. **stile**: messa fra `yongen-jaya.png` e `shujin-academy.png` alla stessa altezza, non si
-   distingue per tratto, peso o densità di nero;
-3. **leggibilità alla misura vera**: sulla mappa il Covo è disegnato a **4,6% di larghezza** della
-   tela (`COVO_TOKYO.scala`), cioè circa 47 px a 1020 px di tela. A quella misura l'edificio e la
-   maschera devono restare due cose distinte;
-4. **niente sovrapposizioni**: dopo averla messa, rifare la prova di `docs/MAPPE.md`. Il Covo
-   passerà da una targa larga 13,3% a una figura più stretta con la targa sotto, quindi il riquadro
-   cambia e va rimisurato a 375, 768, 1280 e 1440 px. **Atteso: 0.**
+### Non si ingrandisce, e perché
 
+Il ritaglio esce a 339 × 383, più piccolo delle sagome dei quartieri (600-800 px). Lo script ha un
+**tetto, non un bersaglio**: rimpicciolisce se serve, non ingrandisce mai. Ingrandire un originale
+lo sgrana, e di pixel ce n'è in abbondanza — sulla mappa un cartellino è largo il 5% della tela, e
+Shibuya, che è 726 px, viene resa a 74.
+
+### La domanda che restava, e come l'ho decisa guardando
+
+La pianta è un disegno **di un altro genere**: i quartieri sono profili di edifici in prospettiva,
+questa è una planimetria vista dall'alto, e per giunta con tre caselle a stella colorate. Una
+planimetria in mezzo a venti profili poteva stonare, e non era una cosa da decidere a parole.
+
+Montate le quattro figure fianco a fianco alla misura vera — 30 px, quella della mappa — e poi
+ingrandite, il Covo **sta in famiglia**: alla misura d'uso legge come una massa nera compatta con
+dettagli bianchi, esattamente come le altre, e il colore delle stelle è un accento di pochi pixel.
+Ingrandito si vede che è una pianta, ma a quella misura nessuno lo guarda. **Deciso di tenere
+l'originale**: fra un originale che si distingue un poco e un disegno che assomiglia molto, in
+questo progetto vince l'originale.
+
+E c'è una ragione in più: il Covo **non è un posto di Tokyo**. È una schermata del menu. Che il suo
+segno sia di un altro genere non è un difetto, è un'informazione.
+
+### La scritta del gioco, trovata e non usata
+
+`PLC_022_001_00.png` è la targa «COVO DEI LADRI» disegnata dal gioco, in italiano. Non la uso, e
+va detto perché: sulla mappa le targhe sono **tutte** testo reso dall'app, con lo stesso corpo in
+`cqw` e lo stesso andare a capo. Una targa-immagine in mezzo a ventinove targhe di testo si
+comporterebbe diversamente a ogni larghezza, e romperebbe la sola cosa che tiene insieme la
+collocazione. È registrata qui perché esiste e perché la scelta sia una scelta.
+
+### Prova rifatta con la sagoma vera
+
+La promessa era: quando l'asset arriva, si rifà la prova delle sovrapposizioni di `docs/MAPPE.md`.
+Rifatta, nel caso peggiore (tutte le date tolte **e** tutti i blocchi aperti: 68 pezzi resi, il
+massimo che quella mappa possa mostrare):
+
+| larghezza | pezzi resi | non resi | sovrapposizioni | fuori dalla tela |
+|---|---|---|---|---|
+| 375 px | 68 | 0 | **0** | **0** |
+| 820 px | 68 | 0 | **0** | **0** |
+| 1280 px | 68 | 0 | **0** | **0** |
+| 1440 px | 68 | 0 | **0** | **0** |
+
+`non resi: 0` è la riga che prima valeva 1: era la sagoma che non c'era.
 ---
 
 ## Non serve un disegno, serve un colore — gli otto spilli troppo chiari
@@ -187,33 +207,6 @@ otto senza toccare la grafica: le figure vanno bene, è il fondo che non fa da f
 **Chiuso: l'utente ha deciso di lasciarli come sono**, ed è registrato in `docs/DECISIONI.md` alla
 data del 7 settembre 2026. Resta scritto qui perché non venga «corretto» d'iniziativa da chi
 rivede gli spilli fra sei mesi e li trova chiari: è una scelta, non una dimenticanza.
-
-### La metà dell'app è già pronta, e non aspetta la generazione
-
-Scritta il 7 settembre 2026, **prima** che il file esista: `MappaTokyo` disegna già il Covo come un
-cartellino come tutti gli altri, con `assetCovoLadri()` che punta a
-`public/asset/mappe/lmap/tokyo/covo-dei-ladri.png`. Finché quel file non c'è, l'immagine si toglie
-da sola — `display: none`, non `visibility: hidden`, perché uno spazio riservato a un'immagine che
-non c'è si vede come un buco — e resta la sola targa, che è esattamente quel che c'era prima.
-
-**Quando Codex genera il file, il Covo diventa una figura senza che nessuno tocchi il codice.**
-Nessuna delle due parti aspetta l'altra per finire, che è il punto.
-
-La geometria è già verificata **nei due stati**, simulando l'arrivo della sagoma con una figura
-vera della stessa famiglia:
-
-| stato | 1280 px | 375 px |
-|---|---|---|
-| senza sagoma (oggi) | 0 sovrapposizioni, 0 fuori tela | 0 e 0 |
-| con la sagoma (domani) | 0 sovrapposizioni, 0 fuori tela | 0 e 0 |
-
-Il Covo è stato alzato da `y: 92` a `y: 89.5`: con la sola targa il margine dal fondo era di
-17 px, che una figura più alta avrebbe mangiato. Ora sono 35, e c'è spazio per una sagoma un po'
-più generosa di quella di prova.
-
-**Resta comunque da rifare la prova di `docs/MAPPE.md` quando il file vero arriva**: la simulazione
-usa la sagoma di Yongen-Jaya, e una figura con proporzioni diverse cambia i numeri. Ma se cambiano,
-cambiano di poco, e non si parte da zero.
 
 ---
 
@@ -233,10 +226,17 @@ illustrazioni in `public/asset/guida/` sono **sedici**: manca esattamente questa
 il rifacimento ha creato. Senza il file la piastrella non si rompe — mostra la riserva vettoriale,
 la maschera — ma è l'unica dell'indice a non avere un disegno, e in una griglia si vede subito.
 
-**È una voce diversa dalla 4 e non la sostituisce.** La 4 è la *sagoma* per la mappa di Tokyo:
-nera piatta, ritagliata, appoggiata su fondo rosso. Questa è l'*illustrazione* della piastrella:
-a colori, con il contorno spesso, in mezzo alle altre sedici. Stesso soggetto, due mestieri
-diversi; generarne una sola lascerebbe l'altro posto vuoto.
+**Resta aperta anche dopo il ritiro della voce 4**, e il perché va detto. La 4 si è chiusa con un
+*ritaglio* perché la pianta originale del Covo parla già la lingua delle sagome: nero pieno,
+dettagli in negativo bianco. Qui la lingua è un'altra — contorno spesso, campiture bianche, un
+accento rosso, alla misura di un'icona da 40 px — e **nessuno** degli originali del Luogo 022 è
+quello: le RMAP sono planimetrie, `PLC_022_001_00` è la scritta, `sprite-022` è una freccia. Qui la
+lacuna è reale e un disegno serve davvero.
+
+**Il soggetto però lo detta l'originale, non la mia fantasia.** È il rilievo di Codex, ed è
+fondato: la prima stesura di questo prompt chiedeva una poltrona con una medaglia, inventate di
+sana pianta, mentre le RMAP mostrano il motivo autentico del Covo — **pianta a poligono chiuso,
+quasi circolare, e caselle a stella**. Riscritto su quello.
 
 **Il riferimento è nel repository, e va guardato prima di generare.** È la regola che questo
 progetto ha imparato sbagliando: `public/asset/guida/dungeon.png` (la maschera sulla pietra
@@ -246,33 +246,48 @@ quelle senza distinguersi: **contorno nero spesso e uniforme, campiture bianche,
 rosso, nessuno sfondo, figura centrata con un piccolo margine e un sottile alone bianco esterno,
 come un adesivo ritagliato.**
 
-**Il soggetto.** Il Covo è la sala del menu di Royal dove i Ladri Fantasma tengono i trofei e
-spendono le Medaglie P. Le due cose che lo dicono a colpo d'occhio sono **la poltrona alta** dove
-siede Joker e **la medaglia**. Non la maschera: quella è già la piastrella dei Palazzi, e due
-piastrelle con lo stesso segno si confondono in una griglia — che è precisamente il difetto da
-evitare.
+**Il soggetto: la stella del Covo, dentro la sua pianta.** Guardando `RMAP_022_1_0` — e la sagoma
+appena ritagliata in `public/asset/mappe/lmap/tokyo/covo-dei-ladri.png`, che è più comoda — si
+vedono due segni e solo due: il **poligono chiuso, quasi circolare**, che è la sala, e le **caselle
+a stella a cinque punte** che marcano i posti dei premi. Sono il Covo, e non li ho inventati io.
+
+Niente maschera: quella è già la piastrella dei Palazzi, e due piastrelle con lo stesso segno si
+confondono in una griglia da diciassette — che è precisamente il difetto da evitare in un indice.
 
 **Prompt**
 
 > Illustrazione a icona in stile Persona 5 Royal, **contorno nero spesso e uniforme, campiture
 > bianche, un solo accento rosso**, su fondo completamente trasparente.
 >
-> Il soggetto: una **poltrona alta con lo schienale a ventaglio**, vista di tre quarti da davanti,
-> del tipo che sta in una sala da gioco — braccioli pieni, seduta imbottita, piedini corti. Sullo
-> schienale, in alto, una **medaglia rotonda** con un nastro corto, appoggiata come un fregio.
-> Dietro la poltrona, appena accennata, una **mensola con due o tre coppe e una cornice**, ridotte
-> a sagome semplici: si devono leggere come «trofei», non come oggetti distinti.
+> Il soggetto: una **stella piena a cinque punte**, spigolosa e leggermente storta, al centro; e
+> attorno, come una cornice aperta, il **profilo di una sala poligonale quasi circolare** — un
+> anello spezzato di lati dritti, con qualche rientranza e due o tre varchi, come la pianta di una
+> stanza vista dall'alto. La stella sta dentro l'anello e lo tocca appena.
 >
-> **L'accento rosso è solo sulla medaglia e sul cuscino della seduta.** Tutto il resto è bianco
-> con il contorno nero. Nessun grigio, nessuna sfumatura, nessuna ombreggiatura morbida: le
-> ombre, se servono, sono macchie nere piatte.
+> Dentro l'anello, ai lati della stella, **due caselle quadrate più piccole** viste dall'alto, ognuna
+> con una stellina incisa: sono i posti dei premi. Ridotte a due quadrati e due stelline, niente
+> più.
 >
-> Il taglio è **grafico e spigoloso**, da adesivo: linee dritte, angoli netti, prospettiva forzata,
-> il tratto più spesso sul contorno esterno e più sottile nei dettagli interni.
+> **L'accento rosso è solo sulla stella centrale.** L'anello e le due caselle sono bianchi con il
+> contorno nero. Nessun grigio, nessuna sfumatura, nessuna ombreggiatura morbida: le ombre, se
+> servono, sono macchie nere piatte.
 >
-> Nessuna cornice, nessun riquadro, nessun testo, nessuna scritta, nessuna maschera da ladro,
-> nessun personaggio. La figura occupa quasi tutta la tela, centrata, con un margine di poche
-> decine di pixel e un sottile alone bianco che la stacca dal fondo.
+> Il taglio è **grafico e spigoloso**, da adesivo: linee dritte, angoli netti, il tratto più spesso
+> sul contorno esterno e più sottile nei dettagli interni.
+>
+> Nessuna cornice esterna, nessun riquadro, nessun testo, nessuna scritta, nessuna maschera da
+> ladro, nessun personaggio, nessuna poltrona, nessuna coppa. La figura occupa quasi tutta la tela,
+> centrata, con un margine di poche decine di pixel e un sottile alone bianco che la stacca dal
+> fondo.
+
+**Come si verifica quando arriva**
+
+1. l'alfa è reale e l'angolo è `(0,0,0,0)`, come nelle altre sedici;
+2. messa in griglia con `guida/dungeon.png` e `guida/completamento.png` alla stessa misura, non si
+   distingue per spessore del contorno né per quantità di rosso;
+3. **a 40 px** — la misura vera della piastrella — la stella si riconosce e non si confonde con la
+   maschera dei Palazzi né con la coppa dei trofei. È lì che un soggetto affollato smette di dire
+   qualcosa.
 
 ### La metà dell'app è già pronta
 
@@ -303,9 +318,10 @@ in tutte e due le direzioni: nessuna chiave senza file e nessun file orfano.
 | sfondi di sezione e identità | `sfondi/…`, `identita/…` | 7 | 7 | — |
 | sagome dei quartieri | `mappe/lmap/tokyo/<chiave>` | 29 | 29 | — |
 | illustrazioni dei Palazzi e Memento | `palazzi/<chiave>` | 10 | 10 | — |
-| Covo sulla mappa | `mappe/lmap/tokyo/covo-dei-ladri` | 1 | 0 | **voce 4** |
+| Covo sulla mappa | `mappe/lmap/tokyo/covo-dei-ladri` | 1 | 1 | — (ritagliato dall’originale, voce 4 ritirata) |
 
-Restano aperte **solo le voci 4 e 5**, tutte e due il Covo dei Ladri.
+Resta aperta **solo la voce 5**, la piastrella del Covo: la 4 si è chiusa senza generare niente,
+ritagliando l’originale del Luogo 022 che Codex ha trovato.
 
 ### Un conteggio sbagliato, e come si è visto che lo era
 
