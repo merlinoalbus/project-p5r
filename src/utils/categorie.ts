@@ -18,6 +18,11 @@ const ALIAS: Record<string, string> = {
   arma: 'armi', protezione: 'protezioni', accessorio: 'accessori', regalo: 'regali', materiale: 'materiali', abito: 'abiti',
   libro: 'libri', lettura: 'libri', lavoro: 'lavori', 'mini-gioco': 'minigiochi', videogioco: 'minigiochi',
   ambulante: 'misto', consumabile: 'oggetti',
+  // Le categorie dell'archivio degli equipaggiamenti sono le chiavi inglesi del dataset (`Weapon`,
+  // `Gun`, `Protector`, `Accessory`), come per le skill: il nome italiano lo dà la tabella
+  // `traduzione`, e qui si dà loro la figura. Un'arma da fuoco e una da mischia condividono la
+  // stessa (il pugnale): sono la stessa famiglia nel negozio di Iwai.
+  weapon: 'armi', gun: 'armi', protector: 'protezioni', accessory: 'accessori',
 };
 
 /** La chiave dell'illustrazione (e della riserva SVG) per una categoria come la scrivono i dati. */
