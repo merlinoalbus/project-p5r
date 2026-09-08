@@ -17,8 +17,9 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO } from '../../utils/negozi';
+import { getOggettiSelezionabili } from '../../services/api/catalogo';
 import { NOME_DOTE } from '../../utils/citta';
-import type { ElementoCatalogoDto, TipoCatalogo } from '../../types';
+import type { ElementoCatalogoDto, OggettoSelezionabileDto, TipoCatalogo } from '../../types';
 
 interface Campo {
   nome: string;
@@ -109,6 +110,52 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
 };
+
+/** Scegliere un oggetto che l'app già conosce, invece di ribatterlo a mano.
+ *
+ * Mettere in vendita una cosa già censita voleva dire riscriverne nome, effetto e statistiche — e
+ * poi le due copie non si parlavano: il ponte fra gli oggetti della guida e gli articoli dei negozi
+ * li abbina **per nome**, e su 355 oggetti e 575 articoli ne aggancia 121. Qui l'aggancio lo fai tu
+ * mentre compili, che è l'unico momento in cui si sa davvero che sono la stessa cosa.
+ *
+ * L'elenco dipende dalla categoria scelta sopra: armi, protezioni e accessori vengono dai 223
+ * equipaggiamenti, i consumabili e gli oggetti chiave dalla guida, libri, film e videogiochi dalle
+ * loro tabelle. **Non è un cancello**: dove l'app non sa niente — regali, materiali, cibo, altro —
+ * il selettore lo dice e i campi restano quelli liberi di prima, che è come si aggiunge una cosa
+ * che nessuno ha mai censito. */
+function SceltaOggettoCensito({ categoria, onScegli }: { categoria: string; onScegli: (o: OggettoSelezionabileDto) => void }) {
+  const elenco = useCarica(() => getOggettiSelezionabili(categoria), [categoria]);
+  const voci = elenco.dati ?? [];
+  const etichetta = (o: OggettoSelezionabileDto) => o.nomeIt && o.nomeIt !== o.nome ? `${o.nomeIt} (${o.nome})` : o.nome;
+  return (
+    <fieldset className="regole-editor flex flex-col gap-2">
+      <legend>Prendilo da quello che l’app già conosce</legend>
+      {elenco.caricamento && <p className="m-0 text-[12px] text-text-muted" role="status">Cerco…</p>}
+      {elenco.errore && <p className="m-0 text-[12px]" role="alert">Non riesco a leggere l’elenco. <button type="button" className="btn touch" onClick={() => void elenco.ricarica()}>Riprova</button></p>}
+      {!elenco.caricamento && !elenco.errore && voci.length === 0 && (
+        <p className="m-0 text-[12px] text-text-muted" role="status">
+          Di questa categoria l’app non ha un archivio: scrivi l’articolo nei campi qui sopra: nasce come oggetto di questo negozio.
+        </p>
+      )}
+      {voci.length > 0 && (
+        <label className="editor-mappa__campo">
+          <span className="sr-only">Oggetto già censito</span>
+          <select className="form-input" defaultValue="" onChange={(e) => {
+            const scelto = voci[Number(e.target.value)];
+            if (scelto) onScegli(scelto);
+            e.target.value = '';
+          }}>
+            <option value="">Scegli fra {voci.length} già censiti…</option>
+            {voci.map((o, i) => <option key={`${o.nome}-${i}`} value={i}>{etichetta(o)}</option>)}
+          </select>
+          <span className="text-[11px] text-text-muted">
+            Sceglierne uno riempie nome, effetto, statistiche e «per chi». Puoi correggerli dopo: il prezzo che hai già scritto non viene toccato.
+          </span>
+        </label>
+      )}
+    </fieldset>
+  );
+}
 
 /** Come si chiama una riga di ogni tipo, nei titoli e nei messaggi. */
 const NOME_TIPO: Record<TipoCatalogo, { nuovo: string; singolare: string }> = {
@@ -375,6 +422,17 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
             </label>
           ))}
         </div>
+        {tipo === 'articolo' && <SceltaOggettoCensito categoria={valori.categoria ?? 'altro'} onScegli={(o) => setValori({
+          ...valori,
+          nome: o.nome,
+          nome_it: o.nomeIt ?? '',
+          effetto: o.effetto ?? '',
+          statistiche: o.statistiche ?? '',
+          per: o.per ?? '',
+          // Il prezzo suggerito non sovrascrive quello che hai già scritto: lo stesso libro costa
+          // diverso in due librerie, e chi l'ha battuto a mano l'ha battuto apposta.
+          prezzo: valori.prezzo?.trim() ? valori.prezzo : (o.prezzo !== null ? String(o.prezzo) : ''),
+        })} />}
         {/* **Le Doti sono il campo che l'app sa usare davvero.** Un premio scritto «Coraggio +3»
             resta una frase che nessuno legge; dichiarata qui, la Dote con le sue note (♪) diventa
             punti veri con la regola del gioco — `puntiDaNote`, scalini 2/3/5, più uno scalino con

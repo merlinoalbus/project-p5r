@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { aggiornaElemento, creaElemento, elencaCatalogo, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo } from '../services/catalogoService.js';
+import { oggettiSelezionabili } from '../services/oggettiSelezionabili.js';
 import { aggiornaAzione, aggiornaEvento, agendaDelGiorno, creaAzione, creaEvento, eliminaAzione, eliminaEvento, giorniConAgenda, impostaAzioneFatta } from '../services/agendaService.js';
 import {
   SCHEMI_CATALOGO, bodyAggiornaAzione, bodyAggiornaEvento, bodyAzione, bodyAzioneFatta, bodyEvento, bodyNascondi,
@@ -70,6 +71,15 @@ router.put('/agenda/azioni/:id/fatta', validate({ params: paramsAgendaVoce, body
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
 router.get('/', (_req, res) => {
   res.json(riepilogoCatalogo());
+});
+
+/** Quello che l'app già sa di una categoria, pronto da agganciare a un negozio invece di riscriverlo.
+ *
+ * **Sta prima di `/:tipo`, e non è un dettaglio di stile**: `/:tipo` accetta qualunque parola,
+ * quindi registrata dopo questa rotta non verrebbe mai raggiunta — `oggetti-di` finirebbe dentro
+ * `tipo` e la validazione risponderebbe «tipo di catalogo sconosciuto». */
+router.get('/oggetti-di/:categoria', (req, res) => {
+  res.json(oggettiSelezionabili(req.params.categoria));
 });
 
 router.get('/:tipo', validate({ params: paramsTipoCatalogo }), (req, res) => {

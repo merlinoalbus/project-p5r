@@ -1763,6 +1763,23 @@ export interface EsitoRipristinoDto {
 export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita', 'domanda', 'cruciverba'] as const;
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
+/** Un oggetto che l'app già conosce, offerto a chi mette un articolo in vendita.
+ *
+ * Serve a non ribattere a mano quel che l'archivio ha già, e soprattutto a **dire** che l'articolo
+ * del negozio e l'oggetto della guida sono la stessa cosa: finora quel legame lo indovinava un
+ * ponte per nome, che su 355 oggetti e 575 articoli ne aggancia 121. */
+export interface OggettoSelezionabileDto {
+  nome: string;
+  nomeIt: string | null;
+  effetto: string | null;
+  statistiche: string | null;
+  /** Vincolo di equipaggiamento, che nel modulo è «Per chi». */
+  per: string | null;
+  prezzo: number | null;
+  /** L'archivio da cui viene, mostrato a chi sceglie. */
+  fonte: 'equipaggiamento' | 'guida' | 'libri' | 'film' | 'videogiochi';
+}
+
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */
 export interface ElementoCatalogoDto {
   tipo: TipoCatalogo;
