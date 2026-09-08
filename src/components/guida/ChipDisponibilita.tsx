@@ -7,9 +7,27 @@
 // Disponibile: nessun chip, per non sporcare l'elenco. Il titolo riporta ogni requisito con il suo dettaglio.
 // ============================================================
 
+import { Link } from 'react-router-dom';
 import type { DisponibilitaDto } from '../../types';
 import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 import { motiviDisponibilita } from '../../utils/disponibilita';
+
+/** Dove si va per segnare quel che manca: la scheda della Partita che tiene quel dato.
+ *
+ * Non e' una pagina sola perche' non e' un dato solo — un Ladro in squadra si segna in «Denaro e
+ * squadra», un rango di Confidente altrove — e mandare tutti nello stesso posto vorrebbe dire far
+ * cercare a mano proprio quello che il cartellino prometteva di risparmiare. */
+function destinazione(grigi: DisponibilitaDto['requisiti']): string {
+  const tipo = grigi[0]?.tipo;
+  switch (tipo) {
+    case 'squadra': return '/partita?scheda=squadra';
+    case 'confidente': return '/partita?scheda=confidenti';
+    case 'dote': return '/partita?scheda=doti';
+    case 'persona-arcano': case 'persona-abilita': return '/partita?scheda=scorta';
+    case 'richiesta': return '/guida/richieste';
+    default: return '/partita?scheda=oggi';
+  }
+}
 
 export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilita: DisponibilitaDto | undefined; compatto?: boolean }) {
   if (!d || d.stato === 'disponibile') return null;
@@ -31,14 +49,25 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   // che manca non e' una verifica, e' il **dato** — nella partita quel Ladro non e' ancora stato
   // segnato. Dire «da verificare» mandava a controllare cosa, e come? Qui si dice invece che cosa
   // fare, e il titolo porta il dettaglio con la pagina dove si segna.
-  const nonLeggibili = (d.requisiti ?? []).some((r) => r.stato === 'grigio' && (r.tipo === 'manuale'));
+  // **Il cartellino parla di questa riga, non di quella sopra.** Un articolo eredita le condizioni
+  // del negozio — a bottega chiusa non si compra niente — ma se l'unica cosa in sospeso e' del
+  // negozio, l'avviso e' gia' scritto sul negozio, tre righe piu' su. Ripeterlo su ogni articolo
+  // riempiva il pannello di cartellini identici, e un elenco dove tutto e' segnalato non segnala
+  // piu' niente: sembrava che i tre articoli avessero un problema ciascuno, e non ne avevano.
+  const proprie = (d.requisiti ?? []).filter((r) => !r.daNegozio);
+  const grigiProprie = proprie.filter((r) => r.stato === 'grigio');
+  if (grigiProprie.length === 0 && proprie.every((r) => r.stato !== 'rosso')) return null;
+  const nonLeggibili = grigiProprie.some((r) => r.tipo === 'manuale');
   return nonLeggibili ? (
     <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Da verificare: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da verificare
     </span>
   ) : (
-    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Da segnare nella partita: ${motivi}`}>
+    // **Un avviso che dice «segna» e non porta dove si segna e' mezzo avviso.** Il dettaglio
+    // nominava la pagina — «Partita → Denaro e squadra» — ma restava testo in un `title`: bisognava
+    // leggerlo, ricordarselo e cercarsela a mano. Qui il cartellino e' il collegamento.
+    <Link to={destinazione(grigiProprie)} className={`chip chip--icona no-underline ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Da segnare nella partita: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da segnare
-    </span>
+    </Link>
   );
 }

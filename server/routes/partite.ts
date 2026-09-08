@@ -79,7 +79,7 @@ router.patch('/:id/squadra/yen', validate({ params: paramsPartita, body: bodyYen
   res.json(impostaYen(Number(req.params.id), req.body as { yen?: number; delta?: number }));
 });
 router.patch('/:id/squadra/:chiave', validate({ params: paramsPartitaChiave, body: bodyMembroSquadra }), (req, res) => {
-  res.json(impostaMembro(Number(req.params.id), String(req.params.chiave), req.body as { livello?: number; esperienza?: number; deltaLivello?: number }));
+  res.json(impostaMembro(Number(req.params.id), String(req.params.chiave), req.body as { livello?: number; esperienza?: number; deltaLivello?: number; inSquadra?: boolean }));
 });
 
 // ---- Confidenti ----

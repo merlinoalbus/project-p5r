@@ -698,7 +698,10 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                 <tbody>
                   {articoliVisibili.map((a) => (
                     <tr key={a.chiave} className={a.comprato ? 'opacity-60' : ''}>
-                      <td>{acquistabile
+                      {/* L'etichetta serve **soprattutto** qui. Nella tabella la colonna ha
+                          l'intestazione in cima; impilata, senza etichetta resta una casella nuda
+                          in mezzo alla riga e non si capisce che cosa spunti. */}
+                      <td data-etichetta={acquistabile ? 'Comprato' : 'Stato'}>{acquistabile
                         ? <input type="checkbox" className="w-5 h-5" checked={a.comprato} disabled={occupato} onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} />
                         : <span aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}</td>
                       <td data-etichetta="Articolo" className={a.comprato ? 'line-through' : ''}>{a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span></td>

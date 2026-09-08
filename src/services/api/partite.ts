@@ -161,5 +161,5 @@ export const getSquadra = (id: number): Promise<SquadraPartitaDto> => apiGet(`/p
 export const impostaYen = (id: number, mod: { yen?: number; delta?: number }): Promise<SquadraPartitaDto> =>
   apiPatch(`/partite/${id}/squadra/yen`, mod);
 
-export const impostaMembroSquadra = (id: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number }): Promise<SquadraPartitaDto> =>
+export const impostaMembroSquadra = (id: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number; inSquadra?: boolean }): Promise<SquadraPartitaDto> =>
   apiPatch(`/partite/${id}/squadra/${encodeURIComponent(chiave)}`, mod);

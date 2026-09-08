@@ -439,6 +439,9 @@ export interface MembroSquadraDto {
   livello: number;
   esperienza: number;
   segnato: boolean;
+  /** Se e' nel gruppo. Si dice con un interruttore: non e' piu' l'effetto collaterale di aver
+   *  segnato un livello, ed e' l'unica cosa che la condizione «Ladro in squadra» guarda. */
+  inSquadra: boolean;
   updatedAt: string | null;
 }
 
@@ -488,6 +491,9 @@ export interface SemaforoRequisitoDto {
   tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'squadra' | 'data' | 'meteo' | 'manuale' | 'giorno-settimana' | 'stagione' | 'fascia';
   testo: string;
   stato: 'verde' | 'rosso' | 'grigio';
+  /** Viene dal **negozio**, non dall'articolo: l'articolo la eredita perche' a bottega chiusa non
+   *  si compra niente, ma non e' un problema suo e il suo cartellino non deve dirlo. */
+  daNegozio?: boolean;
   /** Spiegazione breve dello stato (es. «Coraggio rango 2 di 3»). */
   dettaglio: string;
   /** Richiede la conferma manuale dell'utente. */

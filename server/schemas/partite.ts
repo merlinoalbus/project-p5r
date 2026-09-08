@@ -201,4 +201,6 @@ export const bodyMembroSquadra = z.object({
   livello: z.number().int().min(1).max(99).optional(),
   esperienza: z.number().int().min(0).max(99_999_999).optional(),
   deltaLivello: z.number().int().min(-98).max(98).optional(),
-}).refine((b) => b.livello !== undefined || b.esperienza !== undefined || b.deltaLivello !== undefined, { message: 'Indica almeno «livello», «esperienza» o «deltaLivello».' });
+  /** Se e' nel gruppo: e' un gesto a se', non l'effetto collaterale di aver toccato il livello. */
+  inSquadra: z.boolean().optional(),
+}).refine((b) => b.livello !== undefined || b.esperienza !== undefined || b.deltaLivello !== undefined || b.inSquadra !== undefined, { message: 'Indica almeno «livello», «esperienza», «deltaLivello» o «inSquadra».' });

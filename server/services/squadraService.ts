@@ -40,7 +40,7 @@ export function giocabili(): RigaPersonaggio[] {
 export function squadraPartita(partitaId: number): SquadraPartitaDto {
   partitaEsiste(partitaId);
   const p = prepared('SELECT yen, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { yen: number; livello_protagonista: number };
-  const righe = new Map((prepared('SELECT personaggio_chiave, livello, esperienza, updated_at FROM membro_squadra_partita WHERE partita_id = ?').all(partitaId) as Array<{ personaggio_chiave: string; livello: number; esperienza: number; updated_at: string }>).map((r) => [r.personaggio_chiave, r]));
+  const righe = new Map((prepared('SELECT personaggio_chiave, livello, esperienza, in_squadra, updated_at FROM membro_squadra_partita WHERE partita_id = ?').all(partitaId) as Array<{ personaggio_chiave: string; livello: number; esperienza: number; in_squadra: number; updated_at: string }>).map((r) => [r.personaggio_chiave, r]));
   const membri: MembroSquadraDto[] = giocabili().map((g) => {
     const r = righe.get(g.chiave);
     return {
@@ -48,6 +48,9 @@ export function squadraPartita(partitaId: number): SquadraPartitaDto {
       livello: r ? r.livello : (g.chiave === 'joker' ? p.livello_protagonista : 1),
       esperienza: r?.esperienza ?? 0,
       segnato: r !== undefined,
+      // Chi non ha riga non e' «fuori dal gruppo»: e' uno di cui non hai ancora detto niente, e la
+      // condizione lo tiene grigio invece che rosso. Chi ce l'ha, vale quel che dice la colonna.
+      inSquadra: g.chiave === 'joker' ? true : (r ? r.in_squadra === 1 : false),
       updatedAt: r?.updated_at ?? null,
     };
   });
@@ -71,19 +74,24 @@ export function impostaYen(partitaId: number, mod: { yen?: number; delta?: numbe
 }
 
 /** Livello ed esperienza di un Ladro. La riga nasce alla prima scrittura: prima non era «zero», era «non segnato». */
-export function impostaMembro(partitaId: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number }): SquadraPartitaDto {
+export function impostaMembro(partitaId: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number; inSquadra?: boolean }): SquadraPartitaDto {
   partitaEsiste(partitaId);
   const g = giocabili().find((x) => x.chiave === chiave);
   if (!g) throw httpErrors.notFound('membro-non-trovato', `'${chiave}' non è un membro giocabile della squadra.`);
-  const r = prepared('SELECT livello, esperienza FROM membro_squadra_partita WHERE partita_id = ? AND personaggio_chiave = ?').get(partitaId, chiave) as { livello: number; esperienza: number } | undefined;
+  const r = prepared('SELECT livello, esperienza, in_squadra FROM membro_squadra_partita WHERE partita_id = ? AND personaggio_chiave = ?').get(partitaId, chiave) as { livello: number; esperienza: number; in_squadra: number } | undefined;
   const partenza = r?.livello ?? (chiave === 'joker' ? (prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { livello_protagonista: number }).livello_protagonista : 1);
   const livello = Math.min(99, Math.max(1, mod.livello ?? partenza + (mod.deltaLivello ?? 0)));
   const esperienza = Math.max(0, mod.esperienza ?? r?.esperienza ?? 0);
   const adesso = nowIso();
   getDb().transaction(() => {
-    prepared(`INSERT INTO membro_squadra_partita (partita_id, personaggio_chiave, livello, esperienza, updated_at) VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT(partita_id, personaggio_chiave) DO UPDATE SET livello = excluded.livello, esperienza = excluded.esperienza, updated_at = excluded.updated_at`)
-      .run(partitaId, chiave, livello, esperienza, adesso);
+    // Toccare il livello non cambia piu' l'appartenenza al gruppo, e viceversa: sono due gesti.
+    const inSquadra = mod.inSquadra === undefined ? (r?.in_squadra ?? 1) : (mod.inSquadra ? 1 : 0);
+    prepared(`INSERT INTO membro_squadra_partita (partita_id, personaggio_chiave, livello, esperienza, in_squadra, updated_at) VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(partita_id, personaggio_chiave) DO UPDATE SET livello = excluded.livello, esperienza = excluded.esperienza, in_squadra = excluded.in_squadra, updated_at = excluded.updated_at`)
+      .run(partitaId, chiave, livello, esperienza, inSquadra, adesso);
+    if (mod.inSquadra !== undefined && (r?.in_squadra ?? 1) !== inSquadra) {
+      registraEvento(partitaId, 'squadra', `${g.nome}: ${inSquadra ? 'entra nel gruppo' : 'esce dal gruppo'}`, '', { membro: chiave, inSquadra: inSquadra === 1 });
+    }
     // Joker ha due case dove sta lo stesso numero: qui e `partita.livello_protagonista`, che la
     // fusione legge da sempre per sapere quali Persona si possono evocare. Tenerle allineate qui è
     // l'unico modo perché non divergano: chi legge l'una o l'altra vede lo stesso livello.
