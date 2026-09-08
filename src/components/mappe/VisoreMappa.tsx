@@ -690,7 +690,10 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
           )}
           {articoliVisibili.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="visore-mappa__articoli" aria-label={`Articoli di ${negozio.nome}`}>
+              {/* `tabella--adattiva`: nel pannello, largo 280 px, quattro colonne fisse spezzavano
+                  l'intestazione lettera per lettera. La regola guarda la larghezza del contenitore,
+                  non quella della finestra, quindi qui scatta anche su un monitor largo. */}
+              <table className="visore-mappa__articoli tabella--adattiva" aria-label={`Articoli di ${negozio.nome}`}>
                 <thead><tr><th>{acquistabile ? 'Comprato' : ''}</th><th>Articolo</th><th>Prezzo</th><th>Disponibile</th></tr></thead>
                 <tbody>
                   {articoliVisibili.map((a) => (
@@ -698,9 +701,9 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                       <td>{acquistabile
                         ? <input type="checkbox" className="w-5 h-5" checked={a.comprato} disabled={occupato} onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} />
                         : <span aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}</td>
-                      <td className={a.comprato ? 'line-through' : ''}>{a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span></td>
-                      <td className="tabular-nums whitespace-nowrap">{a.prezzo !== null ? formattaYen(a.prezzo) : '—'}</td>
-                      <td>{disponibilita(a)}{a.disponibilita && a.disponibilita.stato !== 'disponibile' && <> <ChipDisponibilita disponibilita={a.disponibilita} compatto /></>}</td>
+                      <td data-etichetta="Articolo" className={a.comprato ? 'line-through' : ''}>{a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span></td>
+                      <td data-etichetta="Prezzo" className="tabular-nums whitespace-nowrap">{a.prezzo !== null ? formattaYen(a.prezzo) : '—'}</td>
+                      <td data-etichetta="Disponibile">{disponibilita(a)}{a.disponibilita && a.disponibilita.stato !== 'disponibile' && <> <ChipDisponibilita disponibilita={a.disponibilita} compatto /></>}</td>
                     </tr>
                   ))}
                 </tbody>

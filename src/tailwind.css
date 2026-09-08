@@ -435,7 +435,7 @@
   .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: 17px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
   .spillo-mappa__punto { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; border: 1px solid rgba(255,255,255,.7); }
   .spillo-mappa__punto--grande { width: 34px; height: 34px; }
-  .visore-mappa__pannello { display: flex; flex-direction: column; gap: 12px; padding: 10px; overflow-y: auto; border-right: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); min-height: 0; }
+  .visore-mappa__pannello { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; padding: 10px; overflow-y: auto; border-right: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); min-height: 0; }
   .visore-mappa__azione-testo { background: none; border: 1px solid var(--color-border); color: var(--color-text-secondary); font: inherit; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 4px 8px; cursor: pointer; min-height: 30px; }
   .visore-mappa__azione-testo:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-text); }
   /* con `.touch` il bersaglio resta di 44 px anche se la regola qui sopra ne fissa 30 (stesso layer, dichiarata dopo `.touch`) */
@@ -550,6 +550,10 @@
   /* Larghezze fisse: nel pannello (≤340 px) il layout automatico, con `overflow-wrap: anywhere` ereditato da body, riduceva «Articolo» a un
      carattere (min-content) e lasciava 700+ px alla «Disponibile» senza a capo. Le parole lunghe si spezzano solo quando non stanno nella cella. */
   .visore-mappa__articoli { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; overflow-wrap: break-word; }
+  @container (max-width: 420px) {
+    .visore-mappa__articoli { table-layout: auto; }
+    .visore-mappa__articoli th { width: auto; }
+  }
   .visore-mappa__articoli th:nth-child(1) { width: 34px; }
   .visore-mappa__articoli th:nth-child(3) { width: 68px; }
   .visore-mappa__articoli th:nth-child(4) { width: 30%; }
@@ -604,13 +608,43 @@
     .tabella { font-size: 13px; }
     .tabella th, .tabella td { padding: 6px 6px; }
   }
-  /* tabella adattiva: sotto i 640px ogni riga diventa un blocco «etichetta: valore» (etichetta da data-etichetta) */
-  @media (max-width: 640px) {
+  /* ---- Tabella adattiva: sotto una certa larghezza ogni riga diventa «etichetta: valore» ----
+   *
+   * **La larghezza che conta è quella del contenitore, non quella della finestra.** Questa regola
+   * guardava il viewport, e su un monitor largo non scattava mai: dentro il pannello del visore
+   * delle mappe, che è largo 280 px, la tabella degli articoli restava una tabella a quattro
+   * colonne con `table-layout: fixed`. Il risultato si vedeva a occhio — l'intestazione
+   * «Comprato» in una colonna da 34 px andava a capo lettera per lettera, «CO MP RAT O», e il
+   * nome dell'articolo si spezzava su quattro righe.
+   *
+   * Con `@container` la decisione la prende lo spazio che la tabella ha davvero. Vale per tutte
+   * le tabelle adattive dell'app, in qualunque pannello finiscano: è il punto: non serve
+   * ricordarsi caso per caso quali stanno strette.
+   *
+   * `cq` sul contenitore più vicino che si dichiara tale — `.card`, il pannello del visore, la
+   * pagina — quindi una tabella in una scheda stretta si impagina da sola. */
+  /* Il contenitore è **chi contiene la tabella**, non la tabella: un elemento non può interrogare
+     la propria larghezza, e messo su di lei il `@container` non sarebbe mai scattato. `:has()`
+     lo dichiara sul genitore diretto, così non serve cambiare il markup in nessuna delle pagine
+     che la usano già. */
+  :has(> .tabella--adattiva) { container-type: inline-size; }
+  @container (max-width: 640px) {
     .tabella--adattiva thead { display: none; }
     .tabella--adattiva tbody tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
     .tabella--adattiva tbody tr:hover { background: transparent; }
     .tabella--adattiva td { display: flex; gap: 8px; padding: 2px 0; border-bottom: 0; }
     .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+    /* Una cella senza etichetta non lascia il buco del 34%: è il caso della casella «comprato». */
+    .tabella--adattiva td:not([data-etichetta])::before { display: none; }
+  }
+  /* La finestra stretta resta un caso valido: un telefono ha poco spazio anche se il contenitore
+     dice altro, e le due condizioni non si escludono. */
+  @media (max-width: 640px) {
+    .tabella--adattiva thead { display: none; }
+    .tabella--adattiva tbody tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+    .tabella--adattiva td { display: flex; gap: 8px; padding: 2px 0; border-bottom: 0; }
+    .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+    .tabella--adattiva td:not([data-etichetta])::before { display: none; }
   }
   .tabella tbody tr:hover { background: var(--color-bg-secondary); }
   .tabella tbody tr.riga-cliccabile { cursor: pointer; }
