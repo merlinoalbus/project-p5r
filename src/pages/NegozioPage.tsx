@@ -12,6 +12,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft } from '../components/shared/icons';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO } from '../utils/negozi';
+import { getCatalogo, nascondiElementoCatalogo } from '../services/api';
 import { ArticoliTabella } from '../components/guida/ArticoliTabella';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
@@ -29,6 +30,15 @@ export function NegozioPage() {
   const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}`;
   const dati = useCarica(() => getNegozio(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
   const n = dati.dati;
+  /** **Le righe nascoste erano una porta a senso unico.**
+   *
+   * «Nascondi dagli elenchi» toglie la riga da ogni elenco ma la lascia nel database, e il comando
+   * per rimetterla sta nel modulo di modifica *di quella riga*: per aprirlo bisogna cliccarla, e
+   * la riga non c'e' piu'. L'unico posto che sapeva quante fossero era un conteggio in
+   * Impostazioni. Qui si riprendono, dalla stessa pagina da cui sono sparite. */
+  const nascosti = useCarica(() => getCatalogo('articolo'), [chiave]);
+  const articoliNascosti = (nascosti.dati ?? []).filter((e) => e.nascosta && String(e.dati.negozio_chiave ?? '') === chiave);
+  const [mostraNascosti, setMostraNascosti] = useState(false);
   useDocumentTitle(n?.nome ?? 'Negozio');
   const [categoria, setCategoria] = useState('');
   const [per, setPer] = useState('');
@@ -102,6 +112,22 @@ export function NegozioPage() {
               {partitaId && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={nascondiAcquistati} onChange={(e) => setNascondiAcquistati(e.target.checked)} /> Nascondi acquistati</label>}
             </div>
           )}
+            {articoliNascosti.length > 0 && (
+              <details className="catalogo-informazioni" open={mostraNascosti} onToggle={(e) => setMostraNascosti((e.currentTarget as HTMLDetailsElement).open)}>
+                <summary className="touch">{articoliNascosti.length} {articoliNascosti.length === 1 ? 'articolo nascosto' : 'articoli nascosti'} dagli elenchi</summary>
+                <ul className="m-0 flex list-none flex-col gap-1 p-0">
+                  {articoliNascosti.map((e) => (
+                    <li key={e.chiave} className="flex flex-wrap items-center gap-2 text-[13px]">
+                      <span className="min-w-0 flex-1">{e.nome}</span>
+                      <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rimetti negli elenchi"
+                        onClick={() => { void nascondiElementoCatalogo('articolo', e.chiave, false)
+                          .then(() => { notifica('success', `«${e.nome}» e' di nuovo negli elenchi.`); void dati.ricarica(); void nascosti.ricarica(); })
+                          .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Ripristino fallito.')); }} />
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
           {n.articoliElenco.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
             : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => { void getElementoCatalogo('articolo', a.chiave).then((e) => { setElementoArticolo(e); setModulo('articolo'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.')); }} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta({ ...n, articoliElenco: n.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: n.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length })} /></div>}
             </div>
