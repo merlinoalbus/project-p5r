@@ -16,7 +16,9 @@ export function Topbar() {
 
   return (
     <header className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 h-[60px] lg:h-[68px] bg-bg-secondary border-b border-border shrink-0">
-      <Link to="/home" className="flex items-center gap-2 no-underline text-text shrink-0" aria-label={`${APP_NAME} — Home`}>
+      {/* `touch`: il logo e' il collegamento alla Home ed e' su ogni pagina, ma misurava 104x36 —
+          quattro pixel sotto il minimo che il progetto si e' dato per i bersagli tattili. */}
+      <Link to="/home" className="touch flex items-center gap-2 no-underline text-text shrink-0" aria-label={`${APP_NAME} — Home`}>
         <AssetImg
           nome="identita/logo-orizzontale"
           alt={APP_NAME}

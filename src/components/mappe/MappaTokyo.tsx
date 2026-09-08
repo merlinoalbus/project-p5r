@@ -113,7 +113,7 @@ function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: bool
   return <Link
     to={s.href}
     onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0 && onApri(s.href)) e.preventDefault(); } : undefined}
-    className={`group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30 ${acceso ? 'z-30' : 'z-10'}`}
+    className={`spillo-tokyo group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30 ${acceso ? 'z-30' : 'z-10'}`}
     style={{ left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` }}
     title={s.quando ? `${s.nome} — ${s.quando}` : s.nome}
     onMouseEnter={() => onEvidenzia?.(s.chiave)}

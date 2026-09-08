@@ -70,7 +70,9 @@ describe('API catalogo e agenda (Fase 16.1)', () => {
     const nascosto = (await request(app).put('/api/catalogo/negozio/untouchable/nascosta').send({ nascosta: true })).body.data as ElementoCatalogoDto;
     expect(nascosto.nascosta).toBe(true);
 
-    const esito = (await request(app).delete('/api/catalogo/negozio/untouchable')).body.data as { esito: string; elemento: ElementoCatalogoDto };
+    const risposta = await request(app).delete('/api/catalogo/negozio/untouchable');
+    if (!risposta.body.data) throw new Error(`ripristino fallito: ${risposta.status} ${JSON.stringify(risposta.body)}`);
+    const esito = risposta.body.data as { esito: string; elemento: ElementoCatalogoDto };
     expect(esito.esito).toBe('ripristinata');
     expect(esito.elemento).toMatchObject({ origine: 'seed', modificata: false, nascosta: false });
     expect(esito.elemento.dati.nome).toBe(nomeSeed);

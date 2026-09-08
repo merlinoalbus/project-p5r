@@ -21,10 +21,10 @@ import type { ElementoCatalogoDto, RiepilogoCatalogoDto, TipoCatalogo } from '..
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   negozio: ['condizioni_json', 'nome', 'luogo', 'luogo_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari', 'sblocco', 'note', 'fonte'],
-  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'effetto_json', 'effetto', 'statistiche', 'disponibile_dal', 'condizione', 'nota', 'fonte'],
-  libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte'],
-  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'note_successive', 'prezzo', 'sessioni', 'dettagli', 'fonte'],
-  attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte'],
+  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'effetto_json', 'effetto', 'statistiche', 'disponibile_dal', 'condizione', 'nota', 'fonte', 'verificato'],
+  libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte', 'verificato'],
+  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'note_successive', 'prezzo', 'sessioni', 'dettagli', 'fonte', 'verificato'],
+  attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte', 'verificato'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
   cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],
 };
@@ -156,15 +156,27 @@ export function creaElemento(tipo: TipoCatalogo, dati: Record<string, unknown>):
   // creazione falliva con un errore di vincolo che l'utente si vedeva come «errore interno».
   const valori: Record<string, unknown> = { chiave, ordine: ordineSuccessivo(tipo, dati), origine: 'utente', nascosto: 0, updated_at: adesso };
   const compilate = CAMPI[tipo].filter((c) => dati[c] !== undefined);
-  for (const c of compilate) valori[c] = dati[c] ?? null;
+  // SQLite non ha booleani: `verificato` viaggia come `true`/`false` e in tabella e' 1/0.
+  for (const c of compilate) valori[c] = c === 'verificato' ? (dati[c] === true ? 1 : 0) : (dati[c] ?? null);
   const colonne = ['chiave', 'ordine', ...compilate, 'origine', 'nascosto', 'updated_at'];
   const daProsa = PROFILO[tipo].condizioniDa;
   if (daProsa && valori.condizioni_json === undefined) {
     valori.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsa(dati), dati.confidente_chiave as string | null));
     colonne.push('condizioni_json');
   }
-  // Una riga che aggiungi tu non viene dalla guida: parte «non verificata», e la scheda lo dice.
-  if (PROFILO[tipo].haVerificato) valori.verificato = 0;
+  // **Quel che aggiungi tu e' verificato: la fonte sei tu.**
+  //
+  // Nasceva a `verificato = 0`, e la scheda lo mostrava come «da fonte secondaria» — un marchio che
+  // si poteva solo mettere, perche' il campo non era ne' nel modulo ne' accettato dall'API: ogni
+  // riga inserita restava «da verificare» per sempre, senza che esistesse un modo di verificarla.
+  // Ma il problema non era il modo mancante: era il significato. `verificato` distingue il dato
+  // confermato da quello preso da una fonte secondaria della guida, e una riga che scrive chi gioca
+  // guardando il gioco e' confermata quanto le altre.
+  //
+  // Quel che davvero la distingue e' **da dove viene**, e per quello c'e' gia' `origine = 'utente'`:
+  // e' l'informazione utile — questa riga e' tua e va ancora recepita nel seed canonico — ed e'
+  // quella che la scheda mostra.
+  if (PROFILO[tipo].haVerificato) valori.verificato = dati.verificato === false ? 0 : 1;
   const extra = PROFILO[tipo].haVerificato ? ', verificato' : '';
   const extraVal = PROFILO[tipo].haVerificato ? ', @verificato' : '';
   prepared(`INSERT INTO ${TABELLA[tipo]} (${colonne.join(', ')}${extra}) VALUES (${colonne.map((c) => `@${c}`).join(', ')}${extraVal})`).run(valori);
@@ -180,7 +192,7 @@ export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, dati: Recor
   const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(CAMPI[tipo].map((c) => [c, r[c] ?? null]))) : null);
   const set = CAMPI[tipo].filter((c) => c in dati).map((c) => `${c} = @${c}`);
   const valori: Record<string, unknown> = { chiave, origine: 'utente', seed_json: seedJson, updated_at: adesso };
-  for (const c of CAMPI[tipo]) if (c in dati) valori[c] = dati[c] ?? null;
+  for (const c of CAMPI[tipo]) if (c in dati) valori[c] = c === 'verificato' ? (dati[c] === true ? 1 : 0) : (dati[c] ?? null);
   prepared(`UPDATE ${TABELLA[tipo]} SET ${[...set, "origine = 'utente'", 'seed_json = @seed_json', 'updated_at = @updated_at'].join(', ')} WHERE chiave = @chiave`).run(valori);
   return dto(tipo, riga(tipo, chiave));
 }
@@ -211,7 +223,15 @@ export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'e
   const daProsaRip = PROFILO[tipo].condizioniDa;
   if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsaRip(originale), originale.confidente_chiave as string | null));
   const set = CAMPI[tipo].map((c) => `${c} = @${c}`);
-  const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(CAMPI[tipo].map((c) => [c, originale[c] ?? null])) };
+  // **Un'istantanea vecchia non conosce i campi aggiunti dopo.** `seed_json` conserva la riga com'era
+  // il giorno in cui l'hai corretta: se da allora la tabella ha guadagnato una colonna — `verificato`
+  // e' entrata fra i campi salvati con la stellina delle righe tue — quel campo nell'istantanea non
+  // c'e', e riscriverlo come `null` fa fallire il vincolo `NOT NULL` con un errore che l'utente
+  // vede come «errore interno» mentre stava solo annullando una modifica.
+  //
+  // Il valore giusto e' quello che la riga aveva prima di essere adottata: una riga della guida e'
+  // verificata, ed e' l'unico caso in cui si arriva qui.
+  const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(CAMPI[tipo].map((c) => [c, originale[c] ?? (c === 'verificato' ? 1 : null)])) };
   prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
   return { esito: 'ripristinata', elemento: dto(tipo, riga(tipo, chiave)) };
 }

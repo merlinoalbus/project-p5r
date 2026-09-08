@@ -108,7 +108,7 @@ export function CalendarioPage() {
                   </ul>
                 </div>
               )}
-              <Link to="/guida/domande" className="text-[12px] text-primary self-start">Domande in classe della data →</Link>
+              <Link to="/guida/domande" className="touch inline-flex items-center text-[12px] text-primary self-start">Domande in classe della data →</Link>
             </section>
           )}
 
