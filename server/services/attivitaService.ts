@@ -11,7 +11,7 @@ import { aggiornaDote, puntiDaNote } from './partiteService.js';
 import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null; fonte: string; verificato: number; condizioni_json: string | null }
-interface RigaLibro { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaLibro { effetto_json?: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaFilm { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
 /** La disponibilità di una riga, dalle condizioni strutturate (migrazione 052).
@@ -53,6 +53,21 @@ interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>
 const CHIAVE_LETTURA_RAPIDA = 'lettura-rapida';
 const haLetturaRapida = (stato: StatoLetture) => stato.fatti.has(`libro/${CHIAVE_LETTURA_RAPIDA}`);
 const totaleLibro = (r: RigaLibro) => Math.max(r.sessioni ?? 1, 1);
+
+/** Il quartiere che un libro apre, letto dall'effetto dichiarato.
+ *
+ * Il nome lo risolve qui il server invece di farlo cercare al frontend: la scheda di un libro non
+ * ha nessun altro motivo per conoscere l'elenco dei quartieri, e chiederglielo per una riga sola
+ * vorrebbe dire una chiamata in piu' su ogni pagina che mostra libri. */
+function luogoSbloccato(effettoJson: string | null | undefined): { sbloccaLuogo: string | null; sbloccaLuogoNome: string | null } {
+  if (!effettoJson) return { sbloccaLuogo: null, sbloccaLuogoNome: null };
+  try {
+    const e = JSON.parse(effettoJson) as { famiglia?: string; luogo?: string };
+    if (e.famiglia !== 'sblocca-luogo' || !e.luogo) return { sbloccaLuogo: null, sbloccaLuogoNome: null };
+    const q = prepared('SELECT nome FROM quartiere WHERE chiave = ?').get(e.luogo) as { nome: string } | undefined;
+    return { sbloccaLuogo: e.luogo, sbloccaLuogoNome: q?.nome ?? null };
+  } catch { return { sbloccaLuogo: null, sbloccaLuogoNome: null }; }
+}
 const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, st: StatoDisponibilita | null = null): LibroDto => {
   const totaleSessioni = totaleLibro(r);
   const grezzo = stato.progressiLibri.get(r.chiave) ?? 0;
@@ -64,7 +79,7 @@ const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, Libr
   // dentro `impostaLettura`, e scrive davvero le letture che il dimezzamento ha completato.
   const fatto = stato.fatti.has(`libro/${r.chiave}`);
   return {
-    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, sessioni: r.sessioni, dettagli: r.dettagli, fonte: r.fonte, verificato: r.verificato === 1,
+    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, ...luogoSbloccato(r.effetto_json), sessioni: r.sessioni, dettagli: r.dettagli, fonte: r.fonte, verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
     ...conDisponibilita(r.condizioni_json, st),
   };

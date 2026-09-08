@@ -2,6 +2,7 @@
 // LibriPage — catalogo Royal e avanzamento per sessioni
 // ============================================================
 
+import { Link } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getLibri, impostaProgressoLibro } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -158,7 +159,10 @@ export function LibriPage() {
           disabled={progresso >= libro.totaleSessioni} onClick={() => accoda(libro, Math.min(progresso + passo, libro.totaleSessioni))} aria-label={`Aggiungi una sessione a ${titolo}`} />
         {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
       </div>}
-      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm"><dt className="text-text-muted">Dove</dt><dd className="m-0">{libro.dove}</dd><dt className="text-text-muted">Effetto</dt><dd className="m-0">{libro.sblocca ?? (libro.dote ? `${NOME_DOTE[libro.dote]}${libro.note ? ` ${'♪'.repeat(Math.min(4, libro.note))}` : ''}` : 'Bonus speciale')}</dd>{libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : `${libro.prezzo.toLocaleString('it-IT')} ¥`}</dd></>}</dl>
+      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm"><dt className="text-text-muted">Dove</dt><dd className="m-0">{libro.dove}</dd><dt className="text-text-muted">Effetto</dt><dd className="m-0">{libro.sblocca ?? (libro.dote ? `${NOME_DOTE[libro.dote]}${libro.note ? ` ${'♪'.repeat(Math.min(4, libro.note))}` : ''}` : 'Bonus speciale')}</dd>
+        {/* **Il luogo sbloccato e' un riferimento, quindi ci si va.** Prima era una frase dentro
+            «Effetto» — «Sblocca scorciatoie a Yongen-Jaya» — che diceva dove andare senza portarti. */}
+        {libro.sbloccaLuogo && <><dt className="text-text-muted">Apre</dt><dd className="m-0"><Link to={`/guida/citta/${libro.sbloccaLuogo}`}>{libro.sbloccaLuogoNome ?? libro.sbloccaLuogo}</Link></dd></>}{libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : `${libro.prezzo.toLocaleString('it-IT')} ¥`}</dd></>}</dl>
       {libro.dettagli && <p className="m-0 text-xs text-text-secondary">{libro.dettagli}</p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"
