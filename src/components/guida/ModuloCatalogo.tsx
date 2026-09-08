@@ -393,7 +393,8 @@ interface Props {
 
 export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalvato }: Props) {
   // Il selettore dei quartieri serve ai negozi e alle attivita': tutte e due hanno un `luogo_chiave`.
-  const quartieri = useCarica(() => (tipo === 'negozio' || tipo === 'attivita') ? getQuartieri() : Promise.resolve([]), [tipo]);
+  const quartieri = useCarica(() => (tipo === 'negozio' || tipo === 'attivita' || tipo === 'libro') ? getQuartieri() : Promise.resolve([]), [tipo]);
+
   const iniziali = () => {
     const v: Record<string, string> = {};
     for (const c of CAMPI[tipo]) {
@@ -452,11 +453,17 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
       if (tipo === 'articolo') {
         dati.oggetto_fonte = collegato?.fonte ?? null;
         dati.oggetto_chiave = collegato?.chiave ?? null;
-        // Si salva la **dichiarazione**, e accanto la frase che ne discende: cosi' chi legge il
-        // database senza passare dall'app vede comunque che cosa fa l'oggetto, e la ricerca per
-        // testo continua a funzionare come prima.
+      }
+      // Si salva la **dichiarazione**, e accanto la frase che ne discende: cosi' chi legge il
+      // database senza passare dall'app vede comunque che cosa fa, e la ricerca per testo continua
+      // a funzionare come prima. Per il libro la frase va in `sblocca`, che e' la colonna dove quel
+      // testo e' sempre stato.
+      if (tipo === 'articolo') {
         dati.effetto_json = effetto;
         dati.effetto = effetto ? descriviEffetto(effetto) : null;
+      } else if (tipo === 'libro') {
+        dati.effetto_json = effetto;
+        dati.sblocca = effetto ? descriviEffetto(effetto) : null;
       }
       if (tipo === 'articolo' && nuovo) dati.negozio_chiave = negozioChiave;
       if (nuovo) {
@@ -541,7 +548,11 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
             onAMano={() => setAMano(true)}
           />
         )}
-        {tipo === 'articolo' && aMano && <EditorEffetto valore={effetto} onCambia={setEffetto} />}
+        {/* **Vale per i libri quanto per gli articoli.** «Esplorando Yoncha 4» non da' una Dote:
+            apre le scorciatoie di Yongen-Jaya, e prima non c'era modo di dirlo dall'interfaccia —
+            avevo tolto il campo di testo sostenendo che bastassero le condizioni, che pero' dicono
+            **quando il libro e' disponibile**, non che cosa apre leggendolo: il verso opposto. */}
+        {(tipo === 'articolo' ? aMano : tipo === 'libro') && <EditorEffetto valore={effetto} onCambia={setEffetto} />}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {/* Nome e categoria compaiono **solo** quando l'oggetto si inserisce a mano. Con un oggetto
               collegato vengono da lui, e mostrarli come campi vorrebbe dire invitare a correggere qui

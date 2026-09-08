@@ -1262,6 +1262,10 @@ export interface LibroDto {
   dote: DoteChiave | null;
   note: number | null;
   sblocca: string | null;
+  /** La **chiave del quartiere** che si apre finendolo, quando il libro ne apre uno: e' un
+   *  riferimento, quindi la scheda ci puo' portare invece di limitarsi a nominarlo. */
+  sbloccaLuogo: string | null;
+  sbloccaLuogoNome: string | null;
   sessioni: number | null;
   dettagli: string | null;
   fonte: string;

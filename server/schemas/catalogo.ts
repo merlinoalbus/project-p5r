@@ -78,6 +78,13 @@ export const datiArticolo = z.object({
 
 /** Campi di un libro scrivibili dall'utente. */
 export const datiLibro = z.object({
+  /** **Che cosa apre leggerlo**, dichiarato invece che raccontato.
+   *
+   * Da non confondere con `condizioni_json`, che e' il verso opposto: quelle dicono quando il
+   * libro e' disponibile, questa che cosa il libro sblocca. Per `sblocca-luogo` il luogo e' la
+   * chiave di un quartiere, cosi' l'app ci puo' portare. */
+  effetto_json: z.object({ famiglia: z.string().min(1).max(40) }).passthrough().nullable().optional()
+    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   // Le condizioni valgono anche qui. L'editor le mostrava già e finivano nel nulla, perché la
   // colonna non esisteva (migrazione 052): sono la disponibilità, «dal 18 aprile».
   verificato: z.boolean().optional(),

@@ -22,7 +22,7 @@ import type { ElementoCatalogoDto, RiepilogoCatalogoDto, TipoCatalogo } from '..
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   negozio: ['condizioni_json', 'nome', 'luogo', 'luogo_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari', 'sblocco', 'note', 'fonte'],
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'effetto_json', 'effetto', 'statistiche', 'disponibile_dal', 'condizione', 'nota', 'fonte', 'verificato'],
-  libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte', 'verificato'],
+  libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'effetto_json', 'sessioni', 'dettagli', 'fonte', 'verificato'],
   film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'note_successive', 'prezzo', 'sessioni', 'dettagli', 'fonte', 'verificato'],
   attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte', 'verificato'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
