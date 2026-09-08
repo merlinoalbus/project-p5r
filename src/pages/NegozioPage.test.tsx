@@ -5,18 +5,23 @@
 // Test NegozioPage — scheda, filtri per categoria e destinatario, spunta «acquistato» per partita
 // ============================================================
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { NegozioPage } from './NegozioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { ArticoloDto, NegozioDettaglioDto, PartitaDto } from '../types';
 
-const { getNegozio, impostaAcquisto, posizioni } = vi.hoisted(() => ({
+const { getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo, posizioni } = vi.hoisted(() => ({
   getNegozio: vi.fn(),
   impostaAcquisto: vi.fn(),
+  // Il blocco degli articoli nascosti interroga il catalogo: qui non ce n'e' nessuno.
+  getCatalogo: vi.fn().mockResolvedValue([]),
+  nascondiElementoCatalogo: vi.fn(),
+  getElementoCatalogo: vi.fn(),
   posizioni: [] as Array<Record<string, unknown>>,
 }));
-vi.mock('../services/api', () => ({ getNegozio, impostaAcquisto }));
+// `getCatalogo` serve al blocco degli articoli nascosti; senza partita e senza nascosti torna vuoto.
+vi.mock('../services/api', () => ({ getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
 vi.mock('../components/mappe/DoveSiTrova', () => ({
   DoveSiTrova: (props: Record<string, unknown>) => {
@@ -90,4 +95,25 @@ describe('NegozioPage', () => {
     expect(screen.queryByRole('checkbox', { name: /Solo disponibili ora/ })).toBeNull();
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
+});
+
+/** **La porta a senso unico.** «Nascondi dagli elenchi» toglieva la riga da ogni elenco e il
+ *  comando per rimetterla stava nel modulo di modifica *di quella riga*: per aprirlo bisognava
+ *  cliccarla, e la riga non c'era piu'. Qui si sorveglia che il blocco compaia e che il ripristino
+ *  chieda davvero la cosa giusta. */
+it('un articolo nascosto compare in un blocco a parte e si rimette negli elenchi', async () => {
+  getNegozio.mockResolvedValue(negozio);
+  getCatalogo.mockResolvedValue([
+    { tipo: 'articolo', chiave: 'untouchable/u-tolto', nome: 'Kogatana nera', origine: 'seed', modificata: false, nascosta: true, dati: { negozio_chiave: 'untouchable' } },
+    // di un altro negozio: non deve comparire qui
+    { tipo: 'articolo', chiave: 'leblanc/altro', nome: 'Caffe', origine: 'seed', modificata: false, nascosta: true, dati: { negozio_chiave: 'leblanc' } },
+  ]);
+  nascondiElementoCatalogo.mockResolvedValue({});
+  render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
+  const blocco = await screen.findByText(/1 articolo nascosto/);
+  expect(blocco).toBeInTheDocument();
+  expect(screen.queryByText('Caffe')).toBeNull();
+  fireEvent.click(blocco);
+  fireEvent.click(await screen.findByRole('button', { name: /Rimetti negli elenchi/ }));
+  await waitFor(() => expect(nascondiElementoCatalogo).toHaveBeenCalledWith('articolo', 'untouchable/u-tolto', false));
 });
