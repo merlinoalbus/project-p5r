@@ -428,6 +428,26 @@ export interface PartitaDto {
   updatedAt: string;
 }
 
+/** Un Ladro Fantasma nella partita: a che livello è, quanta esperienza ha, e se l'hai segnato.
+ *
+ * `segnato` separa il **non compilato** dallo zero, che sono due cose diverse: un membro senza riga
+ * è uno di cui non hai ancora scritto niente, e la scheda lo dice invece di mostrare un livello 1
+ * che non hai mai confermato. */
+export interface MembroSquadraDto {
+  chiave: string;
+  nome: string;
+  livello: number;
+  esperienza: number;
+  segnato: boolean;
+  updatedAt: string | null;
+}
+
+/** Il denaro del gruppo e lo stato dei Ladri. I yen sono uno solo perché nel gioco sono del gruppo. */
+export interface SquadraPartitaDto {
+  yen: number;
+  membri: MembroSquadraDto[];
+}
+
 export interface RangoDoteDto {
   rango: number;
   nome: string;

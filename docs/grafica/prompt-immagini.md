@@ -717,3 +717,17 @@ tessere dell'app a mostrare ancora la riserva.
 
 Ognuno di questi nasce con la sua riserva SVG in codice: se l'immagine non arriva, il segno c'è
 lo stesso e la tessera non resta vuota.
+
+## 28. La tessera della scheda «Denaro e squadra» (1) — `ui/scheda-squadra.png` (256×256, trasparente) — richiesta il 2026-09-08
+La Partita ha una scheda nuova — i yen del gruppo e livello ed esperienza dei dieci Ladri — e la sua
+tessera è l'unica delle trentadue a mostrare ancora la riserva SVG (tre sagome di persone). Stesse
+regole delle tredici della §25: 256×256 trasparente, bianco/grigio/nero/rosso, niente oro, nessun
+testo, un soggetto solo, leggibile a 40 px.
+
+| File | Scheda | Soggetto |
+|---|---|---|
+| `scheda-squadra.png` | Partita → «Denaro e squadra» | tre maschere dei Ladri affiancate sopra una borsa di monete, la maschera centrale un poco più avanti |
+
+Va distinta dalle due tessere vicine: `scheda-confidenti` (due figure che si stringono la mano) e
+`scheda-doti` (la stella). Qui il soggetto è **il gruppo con la sua cassa**, non il legame fra due
+persone: le maschere dicono chi sono, la borsa dice che la scheda parla anche di soldi.

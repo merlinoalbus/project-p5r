@@ -20,7 +20,10 @@ export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'letture' | 'scorta'
   // tessere vuote. Riserva SVG qui sotto, riga nel censimento §25 perché Codex generi l'immagine.
   | 'trofei' | 'finali' | 'dlc' | 'meteo' | 'nuova-partita' | 'tempo'
   | 'sfide-battaglia' | 'boss' | 'magnate' | 'tratti'
-  | 'jose' | 'personalizzazione' | 'scambi';
+  | 'jose' | 'personalizzazione' | 'scambi'
+  // «Denaro e squadra»: i yen del gruppo e i livelli dei dieci Ladri. Riserva SVG qui sotto, riga
+  // nel censimento (§28) perché Codex ne generi la figura.
+  | 'squadra';
 
 /** I segni dei **dati**: non un gesto da fare né una scheda da aprire, ma il numero che si legge.
  *
@@ -124,6 +127,8 @@ const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = 
   jose: (d) => <IconGioca size={d} />,
   personalizzazione: (d) => <IconMatita size={d} />,
   scambi: (d) => <IconCiclo size={d} />,
+  // Le persone: la scheda parla dei dieci Ladri prima che dei loro yen.
+  squadra: (d) => <IconPersone size={d} />,
 };
 
 const RISERVA_SEGNO: Record<ChiaveSegno, (dimensione: number) => ReactNode> = {

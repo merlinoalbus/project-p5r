@@ -9,7 +9,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra } from '../schemas/partite.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
 import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
@@ -18,6 +18,7 @@ import { impostaDomandaFatta } from '../services/domandeService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
 import { impostaStatoRichiesta } from '../services/richiesteService.js';
 import { impostaLettura } from '../services/attivitaService.js';
+import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraService.js';
 import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { impostaAcquisto } from '../services/negoziService.js';
 import { confermaRequisito } from '../services/semaforiService.js';
@@ -66,6 +67,19 @@ router.get('/:id/doti', validate({ params: paramsPartita }), (req, res) => {
 });
 router.patch('/:id/doti/:chiave', validate({ params: paramsPartitaChiave, body: bodyDote }), (req, res) => {
   res.json(aggiornaDote(Number(req.params.id), String(req.params.chiave), req.body));
+});
+
+// ---- Denaro del gruppo e livelli dei Ladri ----
+router.get('/:id/squadra', validate({ params: paramsPartita }), (req, res) => {
+  res.json(squadraPartita(Number(req.params.id)));
+});
+/** Sta **prima** di `/:id/squadra/:chiave`: «yen» non è la chiave di un membro, e registrata dopo
+ *  finirebbe in quella rotta rispondendo «non è un membro giocabile della squadra». */
+router.patch('/:id/squadra/yen', validate({ params: paramsPartita, body: bodyYen }), (req, res) => {
+  res.json(impostaYen(Number(req.params.id), req.body as { yen?: number; delta?: number }));
+});
+router.patch('/:id/squadra/:chiave', validate({ params: paramsPartitaChiave, body: bodyMembroSquadra }), (req, res) => {
+  res.json(impostaMembro(Number(req.params.id), String(req.params.chiave), req.body as { livello?: number; esperienza?: number; deltaLivello?: number }));
 });
 
 // ---- Confidenti ----

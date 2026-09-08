@@ -36,6 +36,8 @@ export const TIPI_EVENTO = [
   'acquisto',
   'percorso',
   'trofeo',
+  'denaro',
+  'squadra',
 ] as const;
 
 export type TipoEvento = (typeof TIPI_EVENTO)[number];
@@ -70,6 +72,8 @@ export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; grupp
   acquisto: { nome: 'Articolo acquistato', gruppo: 'partita' },
   percorso: { nome: 'Azione del percorso fatta', gruppo: 'partita' },
   trofeo: { nome: 'Trofeo ottenuto', gruppo: 'partita' },
+  denaro: { nome: 'Denaro del gruppo', gruppo: 'partita' },
+  squadra: { nome: 'Livello di un Ladro', gruppo: 'partita' },
   lettura: { nome: 'Libro letto o film visto', gruppo: 'doti' },
 };
 
