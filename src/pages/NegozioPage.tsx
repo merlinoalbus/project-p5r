@@ -44,7 +44,7 @@ export function NegozioPage() {
   return (
     <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {n && (
-        <div className="flex flex-col gap-3">
+        <div className="negozio-pagina flex flex-col gap-3">
           <button type="button" className="btn btn-ghost btn-sm self-start touch" onClick={() => navigate('/guida/negozi')}><IconChevronLeft size={16} /> Negozi</button>
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -80,7 +80,9 @@ export function NegozioPage() {
               Sotto i 1024 px torna una colonna sola, che li' e' la forma giusta. */}
           <div className="negozio-corpo">
             <div className="negozio-mappa">
-              <DoveSiTrova tipo="negozio" chiave={n.chiave} altezza={300} />
+              {/* L'altezza la decide il CSS, non un numero fisso: su desktop la mappa deve arrivare in fondo
+                  come l'elenco accanto, altrimenti resta un francobollo con mezzo schermo vuoto sotto. */}
+              <DoveSiTrova tipo="negozio" chiave={n.chiave} altezza="var(--altezza-tela-negozio)" />
             </div>
             <div className="negozio-merce">
           {n.articoliElenco.length > 0 && (
