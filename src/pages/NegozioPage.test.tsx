@@ -42,7 +42,10 @@ describe('NegozioPage', () => {
     expect(getNegozio).toHaveBeenCalledWith('untouchable', 9);
     expect(screen.getByRole('link', { name: 'Munehisa Iwai' })).toHaveAttribute('href', '/confidenti/iwai');
     expect(screen.getAllByRole('region', { name: 'Dove si trova' })).toHaveLength(1);
-    expect(posizioni).toEqual([{ tipo: 'negozio', chiave: 'untouchable', altezza: 300 }]);
+    // L'altezza non e' piu' un numero: su desktop la mappa deve arrivare in fondo come l'elenco
+    // accanto, e quanto sia «in fondo» dipende da quanto e' alta l'intestazione — che cambia col
+    // nome del negozio e con la larghezza. Un numero scritto qui sbordava di 84 px.
+    expect(posizioni).toEqual([{ tipo: 'negozio', chiave: 'untouchable', altezza: 'var(--altezza-tela-negozio)' }]);
     expect(screen.getByText('Kogatana nera')).toBeInTheDocument();
     fireEvent.change(screen.getByRole('combobox', { name: 'Categoria' }), { target: { value: 'protezione' } });
     expect(screen.queryByText('Kogatana nera')).toBeNull();

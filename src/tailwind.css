@@ -670,7 +670,9 @@
      - **desktop (da 1024 px, dove compare anche la barra laterale)**: due colonne davvero, e lo
        scorrimento **solo sulla merce**. La mappa non si muove, l'elenco scorre accanto.
      ============================================================ */
-  .negozio-corpo { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  /* L'altezza della mappa e quella dell'elenco escono dalla stessa misura: se divergono, su
+     desktop una delle due colonne finisce prima e lascia un buco. */
+  .negozio-corpo { --altezza-tela-negozio: 240px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
   .negozio-merce { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .negozio-mappa { min-width: 0; }
 
@@ -678,17 +680,34 @@
     /* `top` scavalca l'intestazione della pagina; `z-index` la tiene sopra le righe che le passano
        sotto. Senza `align-self: start` in un contenitore flex l'elemento si stira e `sticky` non
        ha niente su cui attaccarsi. */
+    .negozio-corpo { --altezza-tela-negozio: 300px; }
     .negozio-mappa { position: sticky; top: 0; z-index: 5; align-self: start; background: var(--color-bg); padding-bottom: 8px; }
   }
 
   @media (min-width: 1024px) {
-    .negozio-corpo { flex-direction: row; align-items: flex-start; gap: 16px; }
+    /* **L'altezza si da' alla colonna, non alla tela.** Darla alla tela e' l'errore che avevo
+       fatto: il blocco «Dove si trova» ci somma intestazione, comandi e il collegamento
+       all'atlante — 146 px misurati — quindi una tela da 670 diventava un blocco da 816 su una
+       finestra di 900, e sbordava. Qui la colonna ha l'altezza giusta e la tela prende quel che
+       resta, cosi' qualunque cosa ci sia intorno il totale non cambia. */
+    /* **Niente numeri indovinati.** `calc(100dvh - 230px)` presupponeva che le colonne cominciassero
+       a 230 px dall'alto: cominciano a 314, e la mappa sbordava di 84. Il numero giusto non si puo'
+       scrivere, perche' dipende da quanto e' alta l'intestazione — che cambia col nome del negozio,
+       coi chip, con la larghezza. Lo si fa calcolare al layout: la pagina riempie l'area che le da'
+       `main`, il corpo si prende quel che resta, e le colonne quel che resta a loro. */
+    .negozio-pagina { flex: 1 1 auto; min-height: 0; }
+    .negozio-corpo { flex: 1 1 auto; min-height: 320px; flex-direction: row; align-items: stretch; gap: 16px; }
+    .negozio-mappa { display: flex; flex-direction: column; min-height: 0; }
+    .negozio-mappa > section { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+    /* La tela e' l'unica parte elastica: si mangia lo spazio che intestazione e comandi lasciano. */
+    .negozio-mappa > section > div:has(.visore-mappa) { flex: 1 1 auto; min-height: 0; height: auto; }
     .negozio-mappa { position: sticky; top: 0; flex: 1 1 46%; max-width: 46%; }
     .negozio-merce { flex: 1 1 54%; min-width: 0; }
     /* Scorre **solo** la merce: e' la richiesta, ed e' anche l'unico modo perche' la mappa resti
        ferma mentre si guarda l'elenco. `dvh` invece di `vh` perche' su tablet e telefono la barra
        del browser entra e esce e `vh` non se ne accorge. */
-    .negozio-elenco { overflow-y: auto; max-height: calc(100dvh - 230px); min-height: 320px; padding-right: 4px; }
+    .negozio-merce { min-height: 0; }
+    .negozio-elenco { flex: 1 1 auto; overflow-y: auto; min-height: 0; padding-right: 4px; }
   }
 
   @media (min-width: 1440px) {
