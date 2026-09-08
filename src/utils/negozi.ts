@@ -26,6 +26,21 @@ export const NOME_CATEGORIA_ARTICOLO: Record<string, string> = {
   regalo: 'Regalo',
   materiale: 'Materiale',
   cibo: 'Cibo',
+  // I nove tipi di prima erano tutto quel che si poteva mettere in vendita, e non bastavano: un
+  // negozio che vende libri, DVD o videogiochi doveva chiamarli «Altro», e i quattro modi in cui
+  // l'app distingue i consumabili dappertutto — cura, SP, battaglia, stato — sparivano dentro
+  // «Consumabile». Ognuno di questi ha già la sua figura fra le 33 di `ui/categoria-*`: il nome
+  // singolare che si scrive qui lo traduce `chiaveCategoria` nel plurale del file.
+  cura: 'Consumabile · cura',
+  sp: 'Consumabile · SP',
+  battaglia: 'Consumabile · battaglia',
+  stato: 'Consumabile · stato',
+  esplorazione: 'Consumabile · esplorazione',
+  'oggetto-chiave': 'Oggetto chiave',
+  libro: 'Libro',
+  film: 'Film',
+  dvd: 'DVD',
+  videogioco: 'Videogioco',
   altro: 'Altro',
 };
 

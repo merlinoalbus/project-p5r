@@ -428,6 +428,26 @@ export interface PartitaDto {
   updatedAt: string;
 }
 
+/** Un Ladro Fantasma nella partita: a che livello è, quanta esperienza ha, e se l'hai segnato.
+ *
+ * `segnato` separa il **non compilato** dallo zero, che sono due cose diverse: un membro senza riga
+ * è uno di cui non hai ancora scritto niente, e la scheda lo dice invece di mostrare un livello 1
+ * che non hai mai confermato. */
+export interface MembroSquadraDto {
+  chiave: string;
+  nome: string;
+  livello: number;
+  esperienza: number;
+  segnato: boolean;
+  updatedAt: string | null;
+}
+
+/** Il denaro del gruppo e lo stato dei Ladri. I yen sono uno solo perché nel gioco sono del gruppo. */
+export interface SquadraPartitaDto {
+  yen: number;
+  membri: MembroSquadraDto[];
+}
+
 export interface RangoDoteDto {
   rango: number;
   nome: string;
@@ -1255,6 +1275,10 @@ export interface LibriDto {
   completati: number;
   sessioniFatte: number;
   sessioniTotali: number;
+  /** «Lettura rapida» è già stato letto in questa partita, quindi ogni altro libro chiede metà
+   *  sessioni (arrotondate per eccesso). Va detto a chi legge: senza, i totali calerebbero da soli
+   *  fra una visita e l'altra e sembrerebbe un errore dell'app. */
+  letturaRapida: boolean;
 }
 
 export interface FilmDto {
@@ -1265,6 +1289,8 @@ export interface FilmDto {
   periodo: string;
   dote: DoteChiave | null;
   note: number | null;
+  /** Quanto vale rivederlo: al cinema la guida lo dichiara riga per riga. Vuoto = niente. */
+  noteSuccessive: number | null;
   prezzo: number | null;
   dettagli: string | null;
   fonte: string;
@@ -1758,6 +1784,23 @@ export interface EsitoRipristinoDto {
  * non si poteva correggere. */
 export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita', 'domanda', 'cruciverba'] as const;
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
+
+/** Un oggetto che l'app già conosce, offerto a chi mette un articolo in vendita.
+ *
+ * Serve a non ribattere a mano quel che l'archivio ha già, e soprattutto a **dire** che l'articolo
+ * del negozio e l'oggetto della guida sono la stessa cosa: finora quel legame lo indovinava un
+ * ponte per nome, che su 355 oggetti e 575 articoli ne aggancia 121. */
+export interface OggettoSelezionabileDto {
+  nome: string;
+  nomeIt: string | null;
+  effetto: string | null;
+  statistiche: string | null;
+  /** Vincolo di equipaggiamento, che nel modulo è «Per chi». */
+  per: string | null;
+  prezzo: number | null;
+  /** L'archivio da cui viene, mostrato a chi sceglie. */
+  fonte: 'equipaggiamento' | 'guida' | 'libri' | 'film' | 'videogiochi';
+}
 
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */
 export interface ElementoCatalogoDto {

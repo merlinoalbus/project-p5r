@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto } from '../../types';
+  CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 import type { VideogiocoDto } from '../../types';
 
@@ -152,3 +152,14 @@ export const getStorico = (id: number, opz: { limite?: number; prima?: number; t
 export const eliminaEvento = (id: number, eventoId: number): Promise<void> => apiDelete(`/partite/${id}/storico/${eventoId}`);
 /** Elimina più voci dello storico in una volta. */
 export const eliminaEventi = (id: number, ids: number[]): Promise<{ eliminati: number }> => apiPost(`/partite/${id}/storico/elimina`, { ids });
+
+// ---- Denaro del gruppo e livelli dei Ladri ----
+
+export const getSquadra = (id: number): Promise<SquadraPartitaDto> => apiGet(`/partite/${id}/squadra`);
+
+/** I yen: valore assoluto (`yen`) o differenza (`delta`), che è il gesto vero — «ho speso 12.000». */
+export const impostaYen = (id: number, mod: { yen?: number; delta?: number }): Promise<SquadraPartitaDto> =>
+  apiPatch(`/partite/${id}/squadra/yen`, mod);
+
+export const impostaMembroSquadra = (id: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number }): Promise<SquadraPartitaDto> =>
+  apiPatch(`/partite/${id}/squadra/${encodeURIComponent(chiave)}`, mod);

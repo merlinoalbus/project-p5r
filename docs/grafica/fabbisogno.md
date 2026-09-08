@@ -360,6 +360,7 @@ censimento**, perché la riserva non diventi il traguardo.
 | figure delle schede a tessera | `ui/scheda-<chiave>` | 13 | §25 | consegnate il 2026-09-08 (`grafica-tessere-v2`) |
 | illustrazioni delle attività e dei lavori | `attivita/<chiave>` | 23 | §26 | **da consegnare** |
 | segni per gli elementi rimasti spogli | `ui/segno-<chiave>` | 12 + 1 | §27 | consegnati il 2026-09-08 (`grafica-extra-segni-v1`), compresa `scheda-letture` |
+| tessera della scheda «Denaro e squadra» | `ui/scheda-squadra` | 1 | §28 | **da consegnare** |
 
 Le sei azioni sono `piu`, `meno`, `completati`, `dettagli`, `pianta`, `posizione`: sono i gesti che
 prima erano scritte nude — «+», «−», «Mostra i completati», «Dettagli», le due viste di un'area,

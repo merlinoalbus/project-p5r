@@ -23,6 +23,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
@@ -192,6 +193,8 @@ export function VideogiochiPage() {
             <Numero valore={giochi.filter((g) => g.fatto).length} etichetta="Completati" segno="completati" />
             <Numero valore={`${roundFatti}/${roundTotali}`} etichetta="Round" segno="round" />
           </div>
+
+          {partitaId && <NotaPuntiDote cosa="quali giochi hai finito e a che round sei" />}
 
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex min-w-[220px] flex-1 flex-col gap-1">

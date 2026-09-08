@@ -10,6 +10,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
@@ -176,6 +177,9 @@ export function FilmPage() {
         <div className="kpi-tile"><span className="kpi-value">{d.sessioniCompletamentoFatte}/{d.sessioniObiettivo}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni obiettivo</span></div>
         <div className="kpi-tile"><span className="kpi-value">{d.visioniRegistrate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="visioni" />visioni registrate</span></div>
       </section>
+
+      {partitaId && <NotaPuntiDote cosa="quali titoli hai visto e quante volte"
+        dettaglio="Per molti film la prima visione vale più delle successive, e quella differenza sta solo nei dettagli del titolo: l’app non la calcola." />}
 
       <section className="pannello-filtri grid gap-2 md:grid-cols-[minmax(220px,1fr)_auto_auto_auto]" aria-label="Filtri film e DVD">
         <input className="form-input" type="search" value={ricerca} onChange={(e) => setRicerca(e.target.value)} placeholder="Cerca titolo, periodo o luogo…" aria-label="Cerca film e DVD" />

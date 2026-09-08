@@ -262,3 +262,53 @@ divisione del lavoro con Codex stanno in `docs/ATLANTE-STATO.md`, sezione «Ampl
   immagini le genera Codex, i prompt li scrive e li verifica Claude.
 - **Fase 7 — revisione incrociata.** Passata sui difetti sfuggiti, con la regola che chi implementa
   non verifica e viceversa.
+
+## Punti aperti al 8 settembre 2026 (emersi usando l'app, non dal piano)
+
+Le 115 voci qui sopra sono chiuse e validate, e la collaborazione con Codex sulla grafica è
+conclusa: §24, §25, §26 e §27 sono consegnate, integrate e verificate — 54 icone di azione, 32
+tessere, 33 categorie, 23 illustrazioni di attività, 39 spilli, 12 segni, 11 fregi, nessuna chiave
+del codice senza figura e nessuna figura orfana. Quel che resta è nato **usando** l'app, e sta qui
+perché non si perda.
+
+### 1. I punti delle Doti hanno due sorgenti che non si parlano — decisione aperta
+
+Segnalato dall'utente: cinque visioni registrate di un film che dà «Coraggio ♪♪♪» hanno lasciato
+Coraggio a zero. Cercando ogni riga che tocca i punti, i posti sono tre e nessuno è il «+» delle
+pagine di tracciamento: i pulsanti della scheda Doti, la risposta giusta a una domanda in classe, e
+la spunta di un'azione nella guida del giorno (`percorsoService.applicaEffetti`). `impostaLettura`
+scrive l'avanzamento e un evento nello storico, e nient'altro — vale per film, libri, videogiochi e
+attività, non è un difetto di una pagina sola.
+
+E il rovescio: spuntare l'azione nella guida dà i punti ma **non** fa avanzare le visioni del film.
+Non c'è doppio conteggio solo perché ciascuno dei due fa metà lavoro.
+
+**Fatto intanto** (nessuna decisione richiesta): le tre pagine dichiarano che il «+» segna
+l'avanzamento e non i punti, e dicono dove prenderli — `NotaPuntiDote`. Lasciar credere il
+contrario era la parte inequivocabilmente sbagliata.
+
+**Da decidere**: unire le due sorgenti. La strada consigliata è che il tracciamento diventi
+l'**unica** sorgente e la guida del giorno smetta di applicare gli effetti per le azioni che
+puntano a un elemento tracciato — così il doppio conteggio è impossibile per costruzione e non per
+attenzione. Applicare i punti anche dal «+» senza toglierli di là li conterebbe due volte in una
+partita vera, ed è un errore che si scopre settimane dopo, quando non si sa più quali punti fossero
+veri.
+
+### 2. «Prima visione» e «visioni successive» non sono rappresentabili
+
+La riga di un film ha **un** campo `dote` e **un** campo `note`. «Prima visione +3, successive +1»
+esiste solo come prosa dentro `dettagli`, quindi l'app non potrebbe applicarla nemmeno volendo.
+Serve modellare i due valori e ricompilare i titoli leggendo la guida: è lavoro sui dati prima che
+sul codice, e va fatto una volta bene. Dipende dal punto 1, e va fatto prima.
+
+### 3. Pulizia del repository — quasi chiusa
+
+`data/atlas` e `tools` vivono in [project-p5r-atlante](https://github.com/merlinoalbus/project-p5r-atlante)
+(privato) e non esistono più in nessun commit di questo: main passa da 7283 a 1955 file, tolti
+esattamente i 5328 attesi, nessun altro file toccato. Il pacchetto scende da 717 a 527 MB — meno
+dei 300 stimati, perché l'atlante è quasi tutto JSON e git lo comprimeva già 4:1; i 513 MB che
+restano sono `public/asset`, dove il taglio vero è l'ottimizzazione delle immagini (arcani e
+confidenti pesano un mega l'uno per essere mostrati a 24-56 px).
+
+Restano da cancellare 10 rami locali già interamente contenuti in main, e il `gc` che libera lo
+spazio. Il backup completo pre-riscrittura è in `_backup-project-p5r-20260908.git`.

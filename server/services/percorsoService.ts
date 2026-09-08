@@ -7,6 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, EffettiAzioneDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto, StatoAzioneDto } from '../../shared/types.js';
 import { aggiornaConfidente, aggiornaDote, confidenti, leggiPartita, puntiDaNote } from './partiteService.js';
+import { impostaLettura } from './attivitaService.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; azioni_json: string; avvisi_json: string; fonte: string; coperto: number }
 type AzioneSeed = Omit<AzionePercorsoDto, 'indice' | 'fatta'>;
@@ -172,8 +173,41 @@ function haAnimaDaCineasta(partitaId: number): boolean {
   return !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = 'anima-da-cineasta'").get(partitaId);
 }
 
+/** L'elemento tracciato a cui punta un'azione, se ce n'è uno.
+ *
+ * **Qui si apriva un doppio conteggio**, nel momento in cui finire un libro o vedere un film ha
+ * cominciato ad alzare le Doti da sé: 23 azioni di libri e 13 di film portano nelle note un
+ * «Coraggio +3» che *questa* funzione applicava, e chi segnava anche la visione sulla pagina Film
+ * prendeva i punti due volte. È il difetto peggiore da avere in una guida: non si vede subito e non
+ * si recupera — te ne accorgi settimane dopo, con un rango in più e nessun modo di sapere quali
+ * punti fossero veri.
+ *
+ * La sorgente ora è **una sola**, il tracciamento. Spuntare l'azione qui non applica le note: segna
+ * l'elemento come conseguito, e i punti li dà lui — una volta, da qualunque parte tu lo faccia. */
+function elementoTracciato(a: AzioneSeed): { tipo: 'libro' | 'film'; chiave: string } | null {
+  const t = a.riferimento?.tipo;
+  return (t === 'libro' || t === 'film') && a.riferimento?.chiave ? { tipo: t, chiave: a.riferimento.chiave } : null;
+}
+
 function applicaEffetti(partitaId: number, a: AzioneSeed, opz: OpzioniSpunta): EffettiAzioneDto | null {
   const doti: EffettiAzioneDto['doti'] = [];
+  const tracciato = elementoTracciato(a);
+  if (tracciato) {
+    // Solo se non è già conseguito, e questo **non** è un dettaglio: un film al cinema si rivede, e
+    // `fatto: true` lo riporterebbe a una visione sola — togliendo quelle in più e restituendo i
+    // loro punti. Chi ha già visto un film tre volte e spunta l'azione del giorno non deve
+    // ritrovarsi con una visione e meno punti di prima.
+    //
+    // Togliere la spunta, invece, **non** disfa la lettura: la spunta dice «l'ho fatto quel
+    // giorno», il tracciamento dice «l'ho letto». Chi vuole disfare la lettura lo fa dalla pagina
+    // dei Libri, che è dove quel dato vive; cancellarla da qui rischierebbe di buttare via un
+    // avanzamento segnato altrove, e fra un'asimmetria e una perdita di dati scelgo l'asimmetria.
+    const gia = prepared('SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').get(partitaId, tracciato.tipo, tracciato.chiave);
+    if (!gia) {
+      try { impostaLettura(partitaId, tracciato.tipo, tracciato.chiave, { fatto: true }); } catch { /* non è nel catalogo: la spunta resta senza effetti */ }
+    }
+    return null;
+  }
   const cinema = (a.tipo === 'dvd' || a.riferimento?.tipo === 'film') && haAnimaDaCineasta(partitaId);
   for (const d of dotiDalleNote(a.note)) {
     // Le note della guida diventano punti (2/3/5), con lo scalino in più di «Anima da cineasta» su film e DVD.

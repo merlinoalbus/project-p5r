@@ -72,6 +72,69 @@ describe('API Libri', () => {
     expect(libro.fatto).toBe(true);
   });
 
+  /* «Lettura rapida» raddoppia la velocità di lettura, e l'app lo dichiarava senza applicarlo.
+   *
+   * Il come è la parte che conta, e la prima stesura l'aveva sbagliata dimezzando il requisito di
+   * ogni libro: **l'effetto non è retroattivo**. Con quel modello, finire «Lettura rapida» avrebbe
+   * completato da solo i libri lasciati a metà — due sessioni su tre diventano due su due — e nel
+   * gioco non succede: quelle due sessioni le hai lette alla velocità di prima, e restano due.
+   *
+   * Quel che raddoppia è quanto rende un pomeriggio **da qui in avanti**. Il requisito del libro
+   * non si muove, e non si muove nemmeno quel che hai già letto; a muoversi è il passo. */
+  describe('«Lettura rapida»', () => {
+    const libri = async (id: number) => (await request(app).get(`/api/compendio/libri?partita=${id}`)).body.data as LibriDto;
+    const trova = (d: LibriDto, chiave: string) => d.libri.find((l) => l.chiave === chiave)!;
+    const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
+    const leggi = (id: number, chiave: string, avanzamento: number) =>
+      request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave, avanzamento });
+
+    it('viene dichiarato appena il libro è letto, e non prima', async () => {
+      const id = await nuovaPartita('Lettura rapida');
+      expect((await libri(id)).letturaRapida).toBe(false);
+      await leggi(id, 'lettura-rapida', 1);
+      expect((await libri(id)).letturaRapida).toBe(true);
+      // Toglierlo lo riporta indietro: è uno stato della partita, non un interruttore a senso unico.
+      await leggi(id, 'lettura-rapida', 0);
+      expect((await libri(id)).letturaRapida).toBe(false);
+    });
+
+    it('non tocca i requisiti né quello che hai già letto', async () => {
+      const id = await nuovaPartita('Lettura rapida non retroattiva');
+      const prima = await libri(id);
+      const daTre = prima.libri.find((l) => l.sessioni === 3)!;
+      await leggi(id, daTre.chiave, 2);
+
+      await leggi(id, 'lettura-rapida', 1);
+
+      const dopo = await libri(id);
+      // Il libro chiede ancora tre sessioni, e le due già lette valgono ancora due: né il requisito
+      // cala, né il libro si completa da solo. Se lo facesse, l'app regalerebbe una lettura.
+      expect(trova(dopo, daTre.chiave)).toMatchObject({ progresso: 2, totaleSessioni: 3, fatto: false });
+      // E il totale complessivo resta quello che era, meno nulla.
+      expect(dopo.sessioniTotali).toBe(prima.sessioniTotali);
+    });
+
+    it('l’ultimo pomeriggio chiude il libro perché ne vale due', async () => {
+      const id = await nuovaPartita('Lettura rapida passo doppio');
+      const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3)!;
+      await leggi(id, daTre.chiave, 1);
+      await leggi(id, 'lettura-rapida', 1);
+      // Una sessione sola, che ne vale due: da 1 si arriva a 3, cioè al totale. Il passo lo mette
+      // la pagina; qui si sorveglia che il server accetti il salto e registri la lettura.
+      const esito = await leggi(id, daTre.chiave, 3);
+      expect(esito.status).toBe(200);
+      expect(trova(await libri(id), daTre.chiave)).toMatchObject({ progresso: 3, totaleSessioni: 3, fatto: true });
+    });
+
+    it('il tetto resta il requisito del libro, prima e dopo', async () => {
+      const id = await nuovaPartita('Lettura rapida tetto');
+      const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3)!;
+      await leggi(id, 'lettura-rapida', 1);
+      expect((await leggi(id, daTre.chiave, 4)).status).toBe(400);
+      expect((await leggi(id, daTre.chiave, 3)).status).toBe(200);
+    });
+  });
+
   it('mantiene progresso e posizioni al reseed e cancella il progresso insieme alla partita', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Persistenza libri' })).body.data as { id: number }).id;
     await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'il-magnifico-ladro', avanzamento: 1 });

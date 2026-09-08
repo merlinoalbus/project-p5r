@@ -2,7 +2,7 @@
 // API catalogo e agenda — righe aggiunte o corrette dall'utente, eventi e cose da fare del giorno (Fase 16.1)
 // ============================================================
 
-import type { AgendaGiornoDto, AzioneUtenteDto, ElementoCatalogoDto, EventoUtenteDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
+import type { AgendaGiornoDto, AzioneUtenteDto, ElementoCatalogoDto, EventoUtenteDto, OggettoSelezionabileDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
@@ -14,6 +14,13 @@ export const getCatalogo = (tipo: TipoCatalogo): Promise<ElementoCatalogoDto[]> 
 /** Una riga qualunque (anche del seed), per il modulo di modifica. */
 export const getElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise<ElementoCatalogoDto> =>
   apiGet(`/catalogo/${tipo}/${encodeURIComponent(chiave)}`);
+
+/** Gli oggetti che l'app già conosce di una categoria, da agganciare a un negozio.
+ *
+ * Un elenco vuoto è una risposta valida — di regali, materiali, cibo e «altro» non c'è archivio —
+ * e il modulo la sa leggere: lì si scrive a mano, come si è sempre fatto. */
+export const getOggettiSelezionabili = (categoria: string): Promise<OggettoSelezionabileDto[]> =>
+  apiGet(`/catalogo/oggetti-di/${encodeURIComponent(categoria)}`);
 
 export const creaElementoCatalogo = (tipo: TipoCatalogo, dati: Record<string, unknown>): Promise<ElementoCatalogoDto> =>
   apiPost(`/catalogo/${tipo}`, dati);

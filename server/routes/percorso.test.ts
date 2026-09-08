@@ -140,28 +140,42 @@ describe('API percorso giorno per giorno', () => {
     getDb().prepare("UPDATE libro SET sessioni=2 WHERE chiave='anima-da-cineasta'").run();
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', avanzamento: 1 })).status).toBe(200);
     // cerco il primo DVD della guida che dà una Dote
-    let trovato: { giorno: string; indice: number; note: number; dote: string } | null = null;
+    let trovato: { giorno: string; indice: number; note: number; dote: string; chiave: string | null } | null = null;
     const indice = (await request(app).get('/api/compendio/percorso')).body.data as { giorni: Array<{ giorno: string }> };
     for (const g of indice.giorni) {
       const giorno = (await request(app).get(`/api/compendio/percorso/${g.giorno}?partita=${id}`)).body.data as PercorsoGiornoDto;
       const dvd = giorno.azioni.find((x) => x.tipo === 'dvd' && /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.test(x.note ?? ''));
-      if (dvd) { const m = /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.exec(dvd.note ?? '')!; trovato = { giorno: g.giorno, indice: dvd.indice, note: Number(m[2]), dote: m[1].toLowerCase() }; break; }
+      if (dvd) { const m = /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.exec(dvd.note ?? '')!; trovato = { giorno: g.giorno, indice: dvd.indice, note: Number(m[2]), dote: m[1].toLowerCase(), chiave: dvd.riferimento?.tipo === 'film' ? dvd.riferimento.chiave : null }; break; }
     }
     expect(trovato).not.toBeNull();
-    const { giorno, indice: idx, dote } = trovato!;
-    // un DVD dà sempre due note (3 punti), anche se la guida lo segna «+3» contando il libro
+    const { giorno, indice: idx, dote, chiave } = trovato!;
+    // I punti non li applica più il percorso: li dà il **conseguimento** del DVD, e spuntare
+    // l'azione lo segna come visto. La sorgente dev'essere una sola, altrimenti chi spunta qui e
+    // segna anche la visione sulla pagina Film prende i punti due volte — un errore che non si vede
+    // subito e che settimane dopo lascia un rango in più senza sapere quali punti fossero veri.
+    // Quindi si guarda la Dote, non gli effetti dell'azione, che per un elemento tracciato sono
+    // vuoti apposta.
+    const puntiDi = async () => ((await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>).find((d) => d.chiave === dote)!.punti;
     const senza = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: true })).body.data as AzionePercorsoDto;
-    expect(senza.effetti?.doti[0]).toMatchObject({ chiave: dote, delta: 3, note: 2, cinema: false });
+    expect(senza.effetti).toBeNull();
+    // un DVD dà due note: 3 punti senza il libro
+    expect(await puntiDi()).toBe(3);
+
+    // Togliere la spunta **non** disfa la visione: la spunta dice «l'ho fatto quel giorno», il
+    // tracciamento dice «l'ho visto». Disfarla da qui butterebbe via un avanzamento che potrebbe
+    // essere stato segnato sulla pagina Film, e fra un'asimmetria e una perdita di dati si sceglie
+    // l'asimmetria.
     await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: false });
-    // col libro letto: uno scalino in più (3 → 5)
+    expect(await puntiDi()).toBe(3);
+
+    // Col libro letto lo scalino sale, e vale per le visioni **da lì in avanti**: si disfa la
+    // visione dalla sua pagina — che è dove quel dato vive — e la si rifà.
+    expect(chiave).not.toBeNull();
+    await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'film', chiave, avanzamento: 0 });
+    expect(await puntiDi()).toBe(0);
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', fatto: true })).status).toBe(200);
-    const con = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: true })).body.data as AzionePercorsoDto;
-    expect(con.effetti?.doti[0]).toMatchObject({ chiave: dote, delta: 5, note: 2, cinema: true });
-    const doti = (await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>;
-    expect(doti.find((d) => d.chiave === dote)!.punti).toBe(5);
-    // togliendo la spunta si annullano esattamente i punti applicati
-    await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: false });
-    expect(((await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>).find((d) => d.chiave === dote)!.punti).toBe(0);
+    await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: true });
+    expect(await puntiDi()).toBe(5);
   });
 
   it('un film al cinema della guida riceve lo scalino di «Anima da cineasta»: 5 punti senza il libro, 7 col libro', async () => {
@@ -170,11 +184,16 @@ describe('API percorso giorno per giorno', () => {
     const film = g.azioni.find((x) => x.riferimento?.tipo === 'film' && /Gentilezza \+3/.test(x.note ?? ''))!;
     expect(film).toBeDefined();
     expect(film.riferimento).toEqual({ tipo: 'film', chiave: 'cinema-the-cake-knight-rises' });
-    const senza = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: true })).body.data as AzionePercorsoDto;
-    expect(senza.effetti?.doti[0]).toMatchObject({ chiave: 'gentilezza', delta: 5, note: 3, cinema: false });
+    // Anche qui i punti li dà il conseguimento, non la spunta: tre note al cinema sono 5 punti, 7
+    // col libro. Che la regola dello scalino continui a valere è il senso di questa prova.
+    const gentilezza = async () => ((await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>).find((d) => d.chiave === 'gentilezza')!.punti;
+    await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: true });
+    expect(await gentilezza()).toBe(5);
+
+    await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'film', chiave: 'cinema-the-cake-knight-rises', avanzamento: 0 });
     await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: false });
     await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', fatto: true });
-    const con = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: true })).body.data as AzionePercorsoDto;
-    expect(con.effetti?.doti[0]).toMatchObject({ chiave: 'gentilezza', delta: 7, note: 3, cinema: true });
+    await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: true });
+    expect(await gentilezza()).toBe(7);
   });
 });

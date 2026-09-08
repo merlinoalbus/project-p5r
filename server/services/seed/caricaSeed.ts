@@ -545,7 +545,15 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     // storici in cui `origine` non c'è ancora.
     for (const r of db.prepare(`SELECT chiave FROM libro${soloSeed('libro')}`).all() as Array<{ chiave: string }>) if (!chiaviLibri.has(r.chiave)) db.prepare('DELETE FROM libro WHERE chiave = ?').run(r.chiave);
     const haSessioniFilm = (db.prepare("SELECT COUNT(*) n FROM pragma_table_info('film') WHERE name='sessioni'").get() as { n: number }).n === 1;
-    const insFilm = haSessioniFilm
+    // `note_successive` è arrivata con la migrazione 056, e il seed deve caricarsi anche su un
+    // database più vecchio — come già fa per `sessioni`. Senza questa guardia, ricaricare i dati su
+    // un'istanza non migrata fallirebbe con «no such column» invece di caricare quel che può.
+    const haNoteSuccessive = (db.prepare("SELECT COUNT(*) n FROM pragma_table_info('film') WHERE name='note_successive'").get() as { n: number }).n === 1;
+    const insFilm = haSessioniFilm && haNoteSuccessive
+      ? db.prepare(`INSERT INTO film (chiave, ordine, nome, nome_it, dove, periodo, dote, note, note_successive, prezzo, sessioni, dettagli, fonte, verificato)
+          VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @note_successive, @prezzo, @sessioni, @dettagli, @fonte, @verificato)
+          ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, note_successive = excluded.note_successive, prezzo = excluded.prezzo, sessioni = excluded.sessioni, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato${soloSeedConflitto('film')}`)
+      : haSessioniFilm
       ? db.prepare(`INSERT INTO film (chiave, ordine, nome, nome_it, dove, periodo, dote, note, prezzo, sessioni, dettagli, fonte, verificato)
           VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @prezzo, @sessioni, @dettagli, @fonte, @verificato)
           ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, sessioni = excluded.sessioni, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato${soloSeedConflitto('film')}`)
@@ -553,7 +561,7 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
           VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @prezzo, @dettagli, @fonte, @verificato)
           ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato${soloSeedConflitto('film')}`);
     const chiaviFilm = new Set<string>();
-    for (const f of seed.attivita.film) { chiaviFilm.add(f.chiave); insFilm.run({ chiave: f.chiave, ordine: f.ordine, nome: f.nome, nome_it: f.nomeIt, dove: f.dove, periodo: f.periodo, dote: f.dote, note: f.note, prezzo: f.prezzo, sessioni: f.sessioni, dettagli: f.dettagli, fonte: f.fonte, verificato: f.verificato ? 1 : 0 }); }
+    for (const f of seed.attivita.film) { chiaviFilm.add(f.chiave); insFilm.run({ chiave: f.chiave, ordine: f.ordine, nome: f.nome, nome_it: f.nomeIt, dove: f.dove, periodo: f.periodo, dote: f.dote, note: f.note, note_successive: (f as { noteSuccessive?: number | null }).noteSuccessive ?? null, prezzo: f.prezzo, sessioni: f.sessioni, dettagli: f.dettagli, fonte: f.fonte, verificato: f.verificato ? 1 : 0 }); }
     for (const r of db.prepare(`SELECT chiave FROM film${soloSeed('film')}`).all() as Array<{ chiave: string }>) if (!chiaviFilm.has(r.chiave)) db.prepare('DELETE FROM film WHERE chiave = ?').run(r.chiave);
     if (haSessioniFilm) {
       const chiaviMappate = new Set(Object.keys(seed.filmPosizioni.film));

@@ -22,7 +22,7 @@ const dati: AttivitaTutteDto = {
   attivita: [att('freccette', 'Freccette', 'mini-gioco', 'perizia'), att('bagno', 'Bagno pubblico', 'altro', 'fascino')],
   lavori: [att('triple-seven', 'Commesso al Triple Seven', 'lavoro', 'fascino')],
   libri: [libro('il-magnifico-ladro', 'Il magnifico ladro', 'conoscenza'), libro('zorro', 'Zorro il vendicatore', 'coraggio')],
-  film: [{ chiave: 'cinema-le-sedici-domande', nome: 'Le sedici domande', nomeIt: 'Le sedici domande', dove: 'cinema', periodo: 'dal 24 aprile', dote: 'coraggio', note: 3, prezzo: 1500, dettagli: null, fonte: 'https://www.allgamestaff.it/f', verificato: true, posizioni: [], totaleSessioni: 1, progresso: 0, iniziato: false, fatto: false, condizioni: null, disponibilita: null }],
+  film: [{ chiave: 'cinema-le-sedici-domande', nome: 'Le sedici domande', nomeIt: 'Le sedici domande', dove: 'cinema', periodo: 'dal 24 aprile', dote: 'coraggio', note: 3, noteSuccessive: null, prezzo: 1500, dettagli: null, fonte: 'https://www.allgamestaff.it/f', verificato: true, posizioni: [], totaleSessioni: 1, progresso: 0, iniziato: false, fatto: false, condizioni: null, disponibilita: null }],
   libriLetti: 0, filmVisti: 0,
 };
 

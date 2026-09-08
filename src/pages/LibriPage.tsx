@@ -12,6 +12,7 @@ import { PageState } from '../components/shared/PageState';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
@@ -122,6 +123,9 @@ export function LibriPage() {
   const scheda = (libro: LibroDto) => {
     const coda = partitaId ? chiaveCoda(partitaId, libro.chiave) : libro.chiave;
     const progresso = partitaId ? desiderati[coda] ?? libro.progresso : libro.progresso;
+    // «Lettura rapida» non tocca il libro stesso: è il pomeriggio che rende il doppio, e quel
+    // pomeriggio lo si spende sugli altri.
+    const passo = d?.letturaRapida && libro.chiave !== 'lettura-rapida' ? 2 : 1;
     const percentuale = Math.round((progresso / libro.totaleSessioni) * 100);
     const titolo = libro.nomeIt ?? libro.nome;
     return <li key={libro.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${libro.fatto ? 'border-success/50' : ''}`}>
@@ -144,10 +148,14 @@ export function LibriPage() {
           lettura per farne uno che si fa una volta e che «+» fa comunque in due tocchi. Con
           quattro sessioni al massimo, non serviva. */}
       {partitaId && <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${titolo}`}>
+        {/* Il passo è quanto rende **un pomeriggio**, e da quando «Lettura rapida» è letto un
+            pomeriggio rende il doppio. Il requisito del libro non si muove: quel che cambia è che
+            ci arrivi in metà delle volte. Il tetto resta il totale, così l'ultimo tocco su un
+            libro da tre fermo a due lo chiude senza sforare. */}
         <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli"
-          disabled={progresso === 0} onClick={() => accoda(libro, progresso - 1)} aria-label={`Togli una sessione a ${titolo}`} />
+          disabled={progresso === 0} onClick={() => accoda(libro, Math.max(progresso - passo, 0))} aria-label={`Togli una sessione a ${titolo}`} />
         <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Sessione"
-          disabled={progresso >= libro.totaleSessioni} onClick={() => accoda(libro, progresso + 1)} aria-label={`Aggiungi una sessione a ${titolo}`} />
+          disabled={progresso >= libro.totaleSessioni} onClick={() => accoda(libro, Math.min(progresso + passo, libro.totaleSessioni))} aria-label={`Aggiungi una sessione a ${titolo}`} />
         {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
       </div>}
       <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm"><dt className="text-text-muted">Dove</dt><dd className="m-0">{libro.dove}</dd><dt className="text-text-muted">Effetto</dt><dd className="m-0">{libro.sblocca ?? (libro.dote ? `${NOME_DOTE[libro.dote]}${libro.note ? ` ${'♪'.repeat(Math.min(4, libro.note))}` : ''}` : 'Bonus speciale')}</dd>{libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : `${libro.prezzo.toLocaleString('it-IT')} ¥`}</dd></>}</dl>
@@ -173,6 +181,20 @@ export function LibriPage() {
         <div className="kpi-tile"><span className="kpi-value">{d.sessioniFatte}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni fatte</span></div>
         <div className="kpi-tile"><span className="kpi-value">{d.sessioniTotali}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni totali</span></div>
       </section>
+
+      {partitaId && <NotaPuntiDote cosa="quali libri hai letto e a che punto sei" />}
+
+      {/* Senza questa riga i numeri calerebbero da soli fra una visita e l'altra — un libro da tre
+          sessioni che all'improvviso ne chiede due — e sembrerebbe un errore dell'app invece che
+          l'effetto di un libro che hai letto tu. */}
+      {d.letturaRapida && (
+        <p className="m-0 flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-[13px] text-text-secondary" role="status">
+          <IconaAzione chiave="libro" dimensione={18} />
+          <span>Hai letto <strong>Lettura rapida</strong>: da qui in avanti una sessione di lettura vale doppia, quindi
+          ogni altro libro si finisce in metà pomeriggi. Le sessioni già fatte restano quelle che erano —
+          l’effetto non è retroattivo — e «+» avanza di due per volta.</span>
+        </p>
+      )}
 
       <section className="pannello-filtri grid gap-2 md:grid-cols-[minmax(220px,1fr)_auto_auto]" aria-label="Filtri libri">
         <input className="form-input" type="search" value={ricerca} onChange={(e) => setRicerca(e.target.value)} placeholder="Cerca titolo, luogo o beneficio…" aria-label="Cerca libri" />

@@ -186,3 +186,19 @@ export const bodyRegalo = z.object({ regalo: z.string().min(1).max(120), fatto: 
 export const paramsPartitaEvento = z.object({ id: z.coerce.number().int().positive(), eventoId: z.coerce.number().int().positive() });
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);
+
+// ---- Denaro del gruppo e livelli dei Ladri ----
+
+/** I yen si impostano al valore assoluto oppure per differenza — «ho speso 12.000» è il gesto vero,
+ *  e chiedere di ricalcolare il totale a mano ogni volta sarebbe un modo per sbagliarlo. */
+export const bodyYen = z.object({
+  yen: z.number().int().min(0).max(9_999_999).optional(),
+  delta: z.number().int().min(-9_999_999).max(9_999_999).optional(),
+}).refine((b) => b.yen !== undefined || b.delta !== undefined, { message: 'Indica «yen» (valore) oppure «delta» (differenza).' });
+
+/** Livello ed esperienza di un Ladro: assoluti, o un livello in più con `deltaLivello`. */
+export const bodyMembroSquadra = z.object({
+  livello: z.number().int().min(1).max(99).optional(),
+  esperienza: z.number().int().min(0).max(99_999_999).optional(),
+  deltaLivello: z.number().int().min(-98).max(98).optional(),
+}).refine((b) => b.livello !== undefined || b.esperienza !== undefined || b.deltaLivello !== undefined, { message: 'Indica almeno «livello», «esperienza» o «deltaLivello».' });

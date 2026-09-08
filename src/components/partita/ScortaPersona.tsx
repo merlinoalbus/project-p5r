@@ -43,6 +43,28 @@ export function ScortaPersona({ partitaId }: Props) {
     }
   };
 
+  /** Sale di un livello: è il gesto che si fa più spesso, e finora chiedeva di aprire la modale,
+   *  cambiare un numero e salvare.
+   *
+   *  Le statistiche mostrate restano una **stima** finché non registri i valori letti nel gioco: la
+   *  regola dell'app — tre punti per livello ripartiti in proporzione alla base — non è la curva di
+   *  crescita del gioco, ed è il motivo per cui su Arsene dà un +1 a Forza, Magia e Agilità dove il
+   *  gioco dà altro. Quel che registri con «Modifica» è legato al **livello** a cui l'hai letto; il
+   *  bonus di potenziamento resta un valore a parte e si somma dopo. */
+  const [salita, setSalita] = useState<number | null>(null);
+  const saliDiLivello = async (p: PersonaPossedutaDto) => {
+    if (!dati || p.livello >= 99) return;
+    setSalita(p.id);
+    try {
+      const agg = await aggiornaPosseduta(partitaId, p.id, { livello: p.livello + 1 });
+      imposta(dati.map((x) => (x.id === p.id ? agg : x)));
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Salita di livello fallita.');
+    } finally {
+      setSalita(null);
+    }
+  };
+
   const rimuovi = async (p: PersonaPossedutaDto) => {
     if (!dati || !window.confirm(`Rimuovere ${p.nomeIt} dalla scorta? Resta registrata nel compendio.`)) return;
     try {
@@ -68,7 +90,13 @@ export function ScortaPersona({ partitaId }: Props) {
             <li key={p.id} className="card flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} />
-                <span className="w-11 h-11 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary" title="Livello">{p.livello}</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-11 h-11 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary" title="Livello">{p.livello}</span>
+                  <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Livello"
+                    disabled={salita === p.id || p.livello >= 99} onClick={() => void saliDiLivello(p)}
+                    aria-label={`Sali di livello: ${p.nomeIt} al livello ${p.livello + 1}`}
+                    title={`Porta ${p.nomeIt} al livello ${p.livello + 1}. Le statistiche restano una stima: registra con «Modifica» quelle lette nel gioco`} />
+                </span>
                 <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[15px] no-underline text-text hover:text-primary">{p.nomeIt}</Link>
                 {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}
                 <span className="chip">{p.arcanaNome}</span>

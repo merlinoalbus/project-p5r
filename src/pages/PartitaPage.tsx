@@ -11,6 +11,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
 import { NuovaPartitaModal } from '../components/partita/NuovaPartitaModal';
 import { RiepilogoPartita } from '../components/partita/RiepilogoPartita';
+import { SquadraPartita } from '../components/partita/SquadraPartita';
 import { DotiSociali } from '../components/partita/DotiSociali';
 import { ConfidentiPartita } from '../components/partita/ConfidentiPartita';
 import { ScortaPersona } from '../components/partita/ScortaPersona';
@@ -24,11 +25,12 @@ import { OggiPartita } from '../components/partita/OggiPartita';
 import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
-type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'confidenti' | 'letture' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
+type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'squadra' | 'confidenti' | 'letture' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
 const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'oggi', l: 'Oggi' },
   { k: 'doti', l: 'Doti sociali' },
+  { k: 'squadra', l: 'Denaro e squadra' },
   { k: 'confidenti', l: 'Confidenti' },
   { k: 'letture', l: 'Letture e giochi' },
   { k: 'scorta', l: 'Scorta' },
@@ -83,6 +85,7 @@ export function PartitaPage() {
           {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>}
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
           {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}
+          {scheda === 'squadra' && <SquadraPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
                     {scheda === 'letture' && <LettureEGiochi key={attiva.id} partitaId={attiva.id} />}
 {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
