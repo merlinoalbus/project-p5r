@@ -220,6 +220,10 @@ function EditorEffetto({ valore, onCambia, quartieri, attivita }: {
       case 'descrittivo': return onCambia({ famiglia: 'descrittivo', testo: '' });
     }
   };
+  const nomiEffetto = {
+    luoghi: Object.fromEntries((quartieri ?? []).map((q) => [q.chiave, q.nome])),
+    attivita: Object.fromEntries((attivita ?? []).map((a) => [a.chiave, a.nome])),
+  };
   const campo = (etichetta: string, dentro: ReactNode) => <label className="editor-mappa__campo">{etichetta}{dentro}</label>;
   const scelta = <C extends string>(v: C, opzioni: readonly C[], nomi: Record<C, string>, set: (x: C) => void) => (
     <select className="form-input" value={v} onChange={(e) => set(e.target.value as C)}>
@@ -288,7 +292,10 @@ function EditorEffetto({ valore, onCambia, quartieri, attivita }: {
         campo('Dove si guadagna di più', scelta(valore.dove, GUADAGNI, NOME_GUADAGNO, (dove) => onCambia({ ...valore, dove })))}
       {valore?.famiglia === 'descrittivo' &&
         campo('Descrizione', <textarea className="form-input" rows={2} maxLength={600} value={valore.testo} onChange={(e) => onCambia({ ...valore, testo: e.target.value })} />)}
-      {valore && <p className="m-0 text-[12px] text-text-muted" role="status">Verrà mostrato così: <strong>{descriviEffetto(valore)}</strong></p>}
+      {/* L'anteprima mostrava la chiave grezza — «Sblocca yongen-jaya» — perche' `descriviEffetto`
+          sta in `shared/` e non puo' leggere il database. I nomi glieli diamo noi, che li abbiamo
+          gia' caricati per i selettori qui sopra. */}
+      {valore && <p className="m-0 text-[12px] text-text-muted" role="status">Verrà mostrato così: <strong>{descriviEffetto(valore, nomiEffetto)}</strong></p>}
     </fieldset>
   );
 }
