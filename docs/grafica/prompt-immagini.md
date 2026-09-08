@@ -278,6 +278,30 @@ Prompt pronti (anteporre il blocco di stile del §0):
 
 Verifica di consegna (come per gli spilli precedenti): 128×128 esatti, alfa nativo, punta della goccia al centro del bordo inferiore, leggibilità a 20 px su fondo chiaro e scuro, nome del file identico alla chiave del tipo (`ui/spillo-<tipo>.png`).
 
+### 18.2 I due varchi — `spillo-velluto`, `spillo-mementos` (consegnati il 2026-09-08)
+
+**Questa riga arriva in ritardo, ed è il ritardo a renderla necessaria.** L'utente aveva chiesto il
+pin della Stanza di Velluto; io non l'ho mai censito. Le due immagini sono state generate lo stesso
+e sono entrate su `main` dentro un commit intitolato «rende inequivocabile l'icona acquisto», cioè
+senza una riga, da nessuna parte, che dicesse che cosa fossero. Il risultato prevedibile: sono
+rimaste **immagini orfane** — presenti in `public/asset`, mai chieste dal codice — e non se n'è
+accorto nessuno, perché non c'era niente con cui confrontarle. La regola «una chiave nasce con la
+sua riserva SVG e la sua riga di censimento» serve a questo, e qui l'ho saltata io.
+
+| File | Tipo | Colore | Soggetto |
+|---|---|---|---|
+| `spillo-velluto.png` | `velluto` — «Stanza di Velluto» | indaco `#3730a3` | porta della cella con le sbarre, socchiusa |
+| `spillo-mementos.png` | `mementos` — «Ingresso ai Memento» | bordeaux `#7f1d1d` | tornello della metropolitana visto di fronte |
+
+Sono i due **varchi**, e hanno un gruppo loro nella tavolozza invece di stare fra gli spostamenti:
+un `passaggio` porta da una stanza all'altra, questi due da un mondo all'altro.
+
+**Quel che manca non è più l'immagine, è il dato.** I tipi sono dichiarati in `shared/spilli.ts` e
+disponibili nell'editor, ma nel seed non esiste nessun luogo «Stanza di Velluto» da marcare: in P5R
+ci si entra dalle Safe Room, e l'unico riferimento sorgato è un marcatore nel Palazzo di Shido
+descritto come «esaminando la porta principale… si attiva la Stanza di Velluto». Finché quel dato
+non c'è, il pin esiste e non si vede.
+
 ## 19. Mappe di base della città (25) — `mappe/<chiave>.png` (2048×1536, opache) — richieste il 2026-09-04 (Fase 13)
 Piante ILLUSTRATE originali in stile guida strategica (vista dall'alto leggermente prospettica, sagome nere degli edifici, strade chiare,
 accenti rossi), NON ricalcate da mappe ufficiali né da screenshot: sono le immagini di base su cui l'editor delle mappe posiziona gli spilli,
@@ -731,3 +755,15 @@ testo, un soggetto solo, leggibile a 40 px.
 Va distinta dalle due tessere vicine: `scheda-confidenti` (due figure che si stringono la mano) e
 `scheda-doti` (la stella). Qui il soggetto è **il gruppo con la sua cassa**, non il legame fra due
 persone: le maschere dicono chi sono, la borsa dice che la scheda parla anche di soldi.
+
+**Consegnata il 2026-09-08, e il file su `main` non è il disegno.** Il render mostrato era giusto —
+tre maschere, la borsa, le monete, contorni neri — ma il PNG committato ha i toni collassati su un
+colore solo: **100% dei pixel opachi rossi**, nessun bianco, nessun nero, contro il 13–21% di rosso
+delle altre trentuno (`scheda-doti` 21%, `scheda-confidenti` 15%). Si riconosce ancora il contorno
+del disegno, quindi non è un soggetto diverso: è lo stesso, appiattito dopo la generazione.
+
+Scandendo tutti i 257 file di `ui/`, `attivita/` e `decori/` il difetto risulta **isolato a questo
+file**: gli altri sette che superano il 90% di rosso sono i `nav-*-attiva`, che sono silhouette
+rosse per progetto (`nav-home` 0%, `nav-home-attiva` 100%: la coppia funziona così).
+
+Portata a 128×128 come le altre tessere: era l'unica a 256, e a parità di resa il file pesa meno.
