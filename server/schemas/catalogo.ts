@@ -54,6 +54,10 @@ export const datiArticolo = z.object({
   oggetto_chiave: testo(200).nullable().optional(),
   // Restano per l'articolo **generico**, quello che nessun archivio conosce e che nasce dentro il
   // negozio. Per un articolo collegato non si scrivono: la lettura li prende dall'oggetto.
+  // La dichiarazione strutturata (shared/effettiOggetto). `effetto` resta la frase che ne discende:
+  // la ricerca per testo ci passa sopra, e chi legge il database senza l'app deve capire lo stesso.
+  effetto_json: z.object({ famiglia: z.string().min(1).max(40) }).passthrough().nullable().optional()
+    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   effetto: testo(600).nullable().optional(),
   statistiche: testo(400).nullable().optional(),
   disponibile_dal: testo(300).nullable().optional(),

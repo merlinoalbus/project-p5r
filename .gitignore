@@ -39,3 +39,10 @@ __pycache__/
 # Cartella di lavoro temporanea del verificatore
 .codex-temp/
 vite.config.prova.ts
+
+# Cartelle di lavoro degli altri agenti e worktree smontati. Restano su disco quando Windows
+# rifiuta di cancellarli, e da smontati git li conta come file nuovi: 11502 in una volta sola.
+worktrees/
+.codex-temp/
+.codex-temp*
+.codex-assets*/

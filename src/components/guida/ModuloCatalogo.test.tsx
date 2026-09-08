@@ -42,6 +42,34 @@ describe('ModuloCatalogo', () => {
    * scritto per fare, cioe' copiare campi vuoti.
    *
    * Ora la riga porta `oggetto_fonte` e `oggetto_chiave`, e i dati dell'oggetto si leggono da li'. */
+  /** **L'effetto di un articolo generico si dichiara, non si scrive.**
+   *
+   * E' l'ultimo punto dove restava un campo di testo: un articolo che nessun archivio conosce ha
+   * comunque un effetto, e finche' era una frase libera i dati sono diventati 276 forme diverse su
+   * 575 righe. Qui si sceglie la famiglia e i suoi parametri, e la frase la compone l'app - cosi'
+   * due articoli che fanno la stessa cosa la mostrano identica. */
+  it('l’effetto di un articolo inserito a mano si dichiara con i parametri, e la frase la scrive l’app', async () => {
+    api.creaElementoCatalogo.mockResolvedValue({ ...negozioSeed, tipo: 'articolo', chiave: 'x/y', nome: 'Bibita', origine: 'utente' });
+    render(<ModuloCatalogo tipo="articolo" negozioChiave="untouchable" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Non c’è: lo inserisco' }));
+    fireEvent.change(screen.getByLabelText(/Nome dell'articolo/), { target: { value: 'Bibita' } });
+
+    fireEvent.change(screen.getByLabelText('Effetto'), { target: { value: 'ripristina' } });
+    fireEvent.change(screen.getByLabelText('Che cosa ripristina'), { target: { value: 'sp' } });
+    fireEvent.change(screen.getByLabelText('Quantità'), { target: { value: '100' } });
+    fireEvent.change(screen.getByLabelText('A chi'), { target: { value: 'un-alleato' } });
+    // La frase si vede mentre la si costruisce, e sara' quella salvata.
+    expect(screen.getByText('Ripristina 100 SP di un alleato')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
+    await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenCalled());
+    const [, dati] = api.creaElementoCatalogo.mock.calls[0];
+    expect(dati).toMatchObject({
+      effetto: 'Ripristina 100 SP di un alleato',
+      effetto_json: { famiglia: 'ripristina', risorsa: 'sp', misura: 'assoluta', valore: 100, bersaglio: 'un-alleato' },
+    });
+  });
+
   it('collega l’articolo a un oggetto di qualunque tipo, e salva il legame invece dei campi copiati', async () => {
     api.creaElementoCatalogo.mockResolvedValue({ ...negozioSeed, tipo: 'articolo', chiave: 'biblioteca/il-magnifico-ladro', nome: 'Il magnifico ladro', origine: 'utente' });
     render(<ModuloCatalogo tipo="articolo" negozioChiave="biblioteca" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
