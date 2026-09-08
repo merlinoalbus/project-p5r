@@ -27,6 +27,8 @@ interface Campo {
   etichetta: string;
   tipo: 'testo' | 'testolungo' | 'numero' | 'select' | 'booleano';
   opzioni?: Record<string, string>;
+  /** L'etichetta della scelta vuota, dove il vuoto e' una risposta valida. */
+  vuoto?: string;
   aiuto?: string;
 }
 
@@ -54,7 +56,7 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'dove', etichetta: 'Dove si trova', tipo: 'testo', aiuto: 'Per esempio: Libreria Taiheido (Shibuya)' },
     { nome: 'prezzo', etichetta: 'Prezzo in yen', tipo: 'numero', aiuto: 'Vuoto o 0 se è gratis' },
     { nome: 'disponibile_dal', etichetta: 'Disponibile dal', tipo: 'testo', aiuto: 'La data come la scrive la guida: «dal 18 aprile»' },
-    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE, aiuto: 'Campo che l’app usa: diventa punti veri quando spunti la lettura nella guida giorno per giorno' },
+    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE, vuoto: 'Nessuna Dote', aiuto: 'Campo che l’app usa: diventa punti veri quando spunti la lettura nella guida giorno per giorno. Lascia «Nessuna Dote» per i libri che non ne alzano' },
     { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero', aiuto: 'Quante ♪ dà: è il numero, non un testo. Con la Dote qui sopra fa i punti (♪ = 2, ♪♪ = 3, ♪♪♪ = 5, e 7 per un libro)' },
     { nome: 'sessioni', etichetta: 'Sessioni di lettura', tipo: 'numero', aiuto: 'Quante volte va letto per finirlo' },
     { nome: 'dettagli', etichetta: 'Dettagli', tipo: 'testolungo' },
@@ -65,7 +67,7 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'dove', etichetta: 'Dove si vede', tipo: 'select', opzioni: { cinema: 'Al cinema', dvd: 'In DVD' } },
     { nome: 'periodo', etichetta: 'Periodo', tipo: 'testo', aiuto: 'Quando è in programmazione: «dal 24 aprile», «Maggio-Giugno»' },
     { nome: 'prezzo', etichetta: 'Prezzo in yen', tipo: 'numero' },
-    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE, aiuto: 'Campo che l’app usa: diventa punti veri quando spunti la visione nella guida giorno per giorno' },
+    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE, vuoto: 'Nessuna Dote', aiuto: 'Campo che l’app usa: diventa punti veri quando spunti la visione nella guida giorno per giorno' },
     { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero', aiuto: 'Quante ♪ dà la PRIMA volta. Con «Anima da cineasta» letto, film e DVD salgono di uno scalino' },
     { nome: 'note_successive', etichetta: 'Note delle volte dopo', tipo: 'numero', aiuto: 'Quanto vale rivederlo: al cinema la guida lo dichiara («visioni successive: +1»). Vuoto = rivederlo non dà niente' },
     { nome: 'sessioni', etichetta: 'Visioni per completarlo', tipo: 'numero', aiuto: 'Un film al cinema 1, un DVD 2' },
@@ -435,7 +437,12 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
     const v: Record<string, string> = {};
     for (const c of CAMPI[tipo]) {
       const valore = elemento?.dati[c.nome];
-      v[c.nome] = valore === null || valore === undefined ? (c.tipo === 'select' && c.nome !== 'luogo_chiave' ? 'altro' : '') : String(valore);
+      // **`altro` solo dove `altro` e' una scelta vera.** Un libro senza Dote riceveva `altro`, che
+      // per quel campo non esiste: il salvataggio moriva con «Opzione non valida: atteso uno tra
+      // conoscenza|fascino|coraggio|gentilezza|perizia». Il vuoto e' una risposta legittima —
+      // ci sono libri che non alzano nessuna Dote — e ora resta vuoto.
+      const haAltro = c.tipo === 'select' && !!c.opzioni && 'altro' in c.opzioni;
+      v[c.nome] = valore === null || valore === undefined ? (haAltro ? 'altro' : '') : String(valore);
     }
     return v;
   };
@@ -599,6 +606,9 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
               {c.tipo === 'select' ? (
                 <select className="form-input" value={valori[c.nome] ?? ''} onChange={(e) => setValori({ ...valori, [c.nome]: e.target.value })}>
                   {c.nome === 'luogo_chiave' && <option value="">Nessun quartiere (online, ambulante o da assegnare)</option>}
+                  {/* Chi non ha `altro` fra le scelte ha bisogno di un modo per dire «nessuna»:
+                      senza, il campo obbliga a dichiarare qualcosa che non e' vero. */}
+                  {c.tipo === 'select' && c.nome !== 'luogo_chiave' && !(c.opzioni && 'altro' in c.opzioni) && <option value="">{c.vuoto ?? 'Nessuna'}</option>}
                   {c.nome === 'luogo_chiave' && valori.luogo_chiave && !quartieri.dati?.some(q => q.chiave === valori.luogo_chiave) && <option value={valori.luogo_chiave}>{valori.luogo_chiave}</option>}
                   {Object.entries(c.nome === 'luogo_chiave' ? Object.fromEntries((quartieri.dati ?? []).map(q => [q.chiave, q.nome])) : c.opzioni ?? {}).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
                 </select>
