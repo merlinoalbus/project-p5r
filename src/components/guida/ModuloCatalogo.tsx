@@ -10,7 +10,7 @@ import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared
 
 import { useCarica } from '../../hooks/useCarica';
 import { getQuartieri } from '../../services/api/compendio';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, nascondiElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
@@ -19,6 +19,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO } from '../../utils/negozi';
 import { getTuttiGliOggetti } from '../../services/api/catalogo';
 import { NOME_DOTE } from '../../utils/citta';
+import { BERSAGLI, FAMIGLIE_EFFETTO, MISURE, NOME_BERSAGLIO, NOME_RISORSA, NOME_STATISTICA, NOME_STATO, PROBABILITA, RISORSE, STATISTICHE_OGGETTO, STATI_ALTERATI, descriviEffetto, type EffettoOggetto, type StatoAlterato } from '../../../shared/effettiOggetto';
 import type { ElementoCatalogoDto, OggettoSelezionabileDto, TipoCatalogo } from '../../types';
 
 interface Campo {
@@ -184,6 +185,90 @@ function SceltaOggetto({ collegato, onCollega, onScollega, aMano, onAMano }: {
   );
 }
 
+/** **L'effetto di un articolo generico, dichiarato invece che descritto.**
+ *
+ * Serve solo qui: l'articolo collegato l'effetto lo prende dall'oggetto. Ma un articolo che nessun
+ * archivio conosce un effetto ce l'ha lo stesso, e finche' era un campo di testo il risultato nei
+ * dati e' stato 276 forme diverse su 575 righe — con dentro tre tipi di dato che non c'entrano fra
+ * loro. Qui si sceglie la famiglia e si compilano i suoi parametri: la frase la scrive l'app, cosi'
+ * due articoli che fanno la stessa cosa la mostrano identica.
+ *
+ * `descrittivo` c'e' e non e' una scappatoia: nei dati sette casi non formano una famiglia
+ * («Abilita il Terzo Occhio nella pesca»). Dichiararli tali e' diverso dal lasciare il campo libero
+ * a tutti — si vede quanti sono, e non si confondono con quelli che l'app sa leggere. */
+function EditorEffetto({ valore, onCambia }: { valore: EffettoOggetto | null; onCambia: (e: EffettoOggetto | null) => void }) {
+  const famiglia = valore?.famiglia ?? '';
+  const cambiaFamiglia = (f: string) => {
+    if (!f) return onCambia(null);
+    switch (f as EffettoOggetto['famiglia']) {
+      case 'ripristina': return onCambia({ famiglia: 'ripristina', risorsa: 'hp', misura: 'assoluta', valore: 10, bersaglio: 'chi-lo-usa' });
+      case 'rianima': return onCambia({ famiglia: 'rianima', percentuale: 50, bersaglio: 'un-alleato' });
+      case 'cura-stato': return onCambia({ famiglia: 'cura-stato', stato: 'sonno', bersaglio: 'un-alleato' });
+      case 'infliggi-stato': return onCambia({ famiglia: 'infliggi-stato', stato: 'sonno', probabilita: 'media', bersaglio: 'un-nemico' });
+      case 'resiste-stato': return onCambia({ famiglia: 'resiste-stato', stato: 'sonno' });
+      case 'previene-stato': return onCambia({ famiglia: 'previene-stato', stato: 'sonno' });
+      case 'statistica': return onCambia({ famiglia: 'statistica', statistica: 'forza', valore: 1 });
+      case 'dote': return onCambia({ famiglia: 'dote', dote: 'Conoscenza', note: 1 });
+      case 'regalo': return onCambia({ famiglia: 'regalo', graditoA: [] });
+      case 'sblocca-luogo': return onCambia({ famiglia: 'sblocca-luogo', luogo: '' });
+      case 'descrittivo': return onCambia({ famiglia: 'descrittivo', testo: '' });
+    }
+  };
+  const campo = (etichetta: string, dentro: ReactNode) => <label className="editor-mappa__campo">{etichetta}{dentro}</label>;
+  const scelta = <C extends string>(v: C, opzioni: readonly C[], nomi: Record<C, string>, set: (x: C) => void) => (
+    <select className="form-input" value={v} onChange={(e) => set(e.target.value as C)}>
+      {opzioni.map((o) => <option key={o} value={o}>{nomi[o]}</option>)}
+    </select>
+  );
+  const numero = (v: number | null, set: (n: number) => void) => (
+    <input className="form-input" type="number" min={0} max={9999} value={v ?? 0} onChange={(e) => set(Number(e.target.value))} />
+  );
+  return (
+    <fieldset className="regole-editor flex flex-col gap-2">
+      <legend>Che cosa fa</legend>
+      <label className="editor-mappa__campo">
+        Effetto
+        <select className="form-input" value={famiglia} onChange={(e) => cambiaFamiglia(e.target.value)}>
+          <option value="">Nessun effetto dichiarato</option>
+          {FAMIGLIE_EFFETTO.map((f) => <option key={f.chiave} value={f.chiave}>{f.nome}</option>)}
+        </select>
+      </label>
+      {valore?.famiglia === 'ripristina' && <>
+        {campo('Che cosa ripristina', scelta(valore.risorsa, RISORSE, NOME_RISORSA, (risorsa) => onCambia({ ...valore, risorsa })))}
+        {campo('Quanto', scelta(valore.misura, MISURE, { assoluta: 'Una quantità', percentuale: 'Una percentuale', tutto: 'Tutto' }, (misura) => onCambia({ ...valore, misura })))}
+        {valore.misura !== 'tutto' && campo(valore.misura === 'percentuale' ? 'Percentuale' : 'Quantità', numero(valore.valore, (v) => onCambia({ ...valore, valore: v })))}
+        {campo('A chi', scelta(valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio })))}
+      </>}
+      {valore?.famiglia === 'rianima' && <>
+        {campo('Con quanti HP (%)', numero(valore.percentuale, (v) => onCambia({ ...valore, percentuale: v })))}
+        {campo('A chi', scelta(valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio })))}
+      </>}
+      {valore?.famiglia === 'cura-stato' && <>
+        {campo('Quale stato', scelta(valore.stato as StatoAlterato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato })))}
+        {campo('A chi', scelta(valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio })))}
+      </>}
+      {valore?.famiglia === 'infliggi-stato' && <>
+        {campo('Quale stato', scelta(valore.stato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato })))}
+        {campo('Quanto è probabile', scelta(valore.probabilita, PROBABILITA, { alta: 'Alta', media: 'Media', bassa: 'Bassa', 'non-detta': 'Non dichiarata' }, (probabilita) => onCambia({ ...valore, probabilita })))}
+        {campo('A chi', scelta(valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio })))}
+      </>}
+      {(valore?.famiglia === 'resiste-stato' || valore?.famiglia === 'previene-stato') &&
+        campo('Quale stato', scelta(valore.stato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato })))}
+      {valore?.famiglia === 'statistica' && <>
+        {campo('Quale statistica', scelta(valore.statistica, STATISTICHE_OGGETTO, NOME_STATISTICA, (statistica) => onCambia({ ...valore, statistica })))}
+        {campo('Di quanto', numero(valore.valore, (v) => onCambia({ ...valore, valore: v })))}
+      </>}
+      {valore?.famiglia === 'dote' && <>
+        {campo('Quale Dote', scelta(valore.dote, Object.keys(NOME_DOTE) as string[], NOME_DOTE, (dote) => onCambia({ ...valore, dote })))}
+        {campo('Quante note (♪)', numero(valore.note, (v) => onCambia({ ...valore, note: v })))}
+      </>}
+      {valore?.famiglia === 'descrittivo' &&
+        campo('Descrizione', <textarea className="form-input" rows={2} maxLength={600} value={valore.testo} onChange={(e) => onCambia({ ...valore, testo: e.target.value })} />)}
+      {valore && <p className="m-0 text-[12px] text-text-muted" role="status">Verrà mostrato così: <strong>{descriviEffetto(valore)}</strong></p>}
+    </fieldset>
+  );
+}
+
 /** Come si chiama una riga di ogni tipo, nei titoli e nei messaggi. */
 const NOME_TIPO: Record<TipoCatalogo, { nuovo: string; singolare: string }> = {
   negozio: { nuovo: 'Nuovo negozio', singolare: 'Negozio' },
@@ -321,6 +406,10 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
   // Il collegamento all'oggetto, e la via secondaria per quando quell'oggetto non esiste.
   const [collegato, setCollegato] = useState<OggettoSelezionabileDto | null>(null);
   const [aMano, setAMano] = useState(false);
+  // L'effetto dichiarato di un articolo generico. Nasce da `effetto_json` se la riga ce l'ha gia'.
+  const [effetto, setEffetto] = useState<EffettoOggetto | null>(() => {
+    try { const g = elemento?.dati.effetto_json; return g ? (JSON.parse(String(g)) as EffettoOggetto) : null; } catch { return null; }
+  });
   const [condizioni,setCondizioni]=useState<RequisitoSpillo[]>(()=>JSON.parse(String(elemento?.dati.condizioni_json ?? '[]')));
   // Le Doti di un'attività stanno in `doti_json`, che è già una colonna e già un campo accettato
   // dall'API: mancava solo il modo di scriverlo.
@@ -359,7 +448,15 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
         if (c.tipo === 'numero') dati[c.nome] = grezzo === '' ? null : Number(grezzo);
         else dati[c.nome] = grezzo === '' ? (['nome', 'luogo', 'fonte'].includes(c.nome) ? '' : null) : grezzo;
       }
-      if (tipo === 'articolo') { dati.oggetto_fonte = collegato?.fonte ?? null; dati.oggetto_chiave = collegato?.chiave ?? null; }
+      if (tipo === 'articolo') {
+        dati.oggetto_fonte = collegato?.fonte ?? null;
+        dati.oggetto_chiave = collegato?.chiave ?? null;
+        // Si salva la **dichiarazione**, e accanto la frase che ne discende: cosi' chi legge il
+        // database senza passare dall'app vede comunque che cosa fa l'oggetto, e la ricerca per
+        // testo continua a funzionare come prima.
+        dati.effetto_json = effetto;
+        dati.effetto = effetto ? descriviEffetto(effetto) : null;
+      }
       if (tipo === 'articolo' && nuovo) dati.negozio_chiave = negozioChiave;
       if (nuovo) {
         const e = await creaElementoCatalogo(tipo, dati);
@@ -443,6 +540,7 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
             onAMano={() => setAMano(true)}
           />
         )}
+        {tipo === 'articolo' && aMano && <EditorEffetto valore={effetto} onCambia={setEffetto} />}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {/* Nome e categoria compaiono **solo** quando l'oggetto si inserisce a mano. Con un oggetto
               collegato vengono da lui, e mostrarli come campi vorrebbe dire invitare a correggere qui
