@@ -188,12 +188,16 @@
   .btn-ghost:hover:not(:disabled) { color: var(--color-text); --btn-sfondo: rgba(255, 255, 255, 0.05); }
   .btn-danger { color: var(--color-error); --btn-bordo: rgba(239, 68, 68, 0.45); }
   .btn-danger:hover:not(:disabled) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
+  /* L'altezza c'era gia'; mancava la larghezza. Un pulsante con dentro un solo carattere — la
+     freccia che inverte l'ordinamento — misurava 35 px, e col dito un bersaglio e' quadrato:
+     44 di alto e 35 di largo e' comunque un bersaglio da 35. */
   .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 6px; }
+  @media (pointer: coarse), (max-width: 1023px) { .btn-sm { min-width: 44px; } }
   /* Pulsanti d'incremento compatti (note delle Doti): piccoli col mouse, sempre 44px sui dispositivi a tocco */
   /* Le tendine prendono la larghezza dell'opzione piu lunga e non si restringono: entro il contenitore, sempre (telefono) */
   select.form-input { max-width: 100%; min-width: 0; }
   .btn-nota { font-size: 12px; padding: 3px 8px; min-height: 30px; --btn-taglio: 5px; gap: 5px; }
-  @media (pointer: coarse) { .btn-nota { min-height: 44px; padding: 6px 12px; font-size: 13px; } }
+  @media (pointer: coarse), (max-width: 1023px) { .btn-nota { min-height: 44px; padding: 6px 12px; font-size: 13px; } }
 
   /* ---- Pulsanti visivi: immagine prevalente (icona 40 px, 32 px compatta, 48 px a colonna) + titolo «display» piccolo + dettaglio
      (mai solo testo grigio). La dimensione dell'icona la decide il pulsante con --btn-visivo-icona, non chi la passa: le <img> di
@@ -306,7 +310,14 @@
     transition: border-color 0.15s;
   }
   .form-input:focus { border-color: var(--color-primary); }
+  /* Compatto vuol dire stretto, non basso: col dito 34 px non bastano, e questi selettori sono
+     comandi veri — l'ordinamento del Compendio, la lunghezza di un ciclo di fusione. La larghezza
+     resta `auto`, che e' il motivo per cui esiste la variante; l'altezza torna al minimo di casa
+     dove il puntatore e' un dito. */
   .form-input--compatto { width: auto; min-height: 34px; padding: 4px 8px; font-size: 13px; }
+  @media (pointer: coarse), (max-width: 1023px) {
+    .form-input--compatto { min-height: 44px; }
+  }
 
   /* ---- Griglia delle affinità: 5 per riga (2 righe), 10 per riga solo se il contenitore è largo; nomi mai spezzati ---- */
   .griglia-affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); container-type: inline-size; }
@@ -721,6 +732,35 @@
     /* Piu' spazio: la mappa non ha bisogno di crescere oltre, la merce si'. */
     .negozio-mappa { flex-basis: 40%; max-width: 40%; }
     .negozio-merce { flex-basis: 60%; }
+  }
+
+
+  /* ---- Spilli della mappa di Tokyo: il dito ha bisogno di 44 px, l'occhio no ----
+   *
+   * La sagoma di un quartiere e' larga una frazione della tela, quindi su un telefono da 375 px
+   * misura 15-25 px: misurato, Covo dei Ladri 15x31, Shujin Academy 18x29. Sono i bersagli piu'
+   * importanti di quelle pagine — su un tablet in mano durante la partita si tocca proprio li' —
+   * e sono meta' del minimo che il progetto si e' dato.
+   *
+   * Ingrandire la sagoma no: la mappa e' un disegno, e spilli piu' grandi si sovrappongono e
+   * coprono le strade. Si allarga **l'area sensibile**, che e' invisibile: uno pseudo-elemento
+   * centrato sullo spillo, 44x44, che riceve il tocco al posto suo.
+   *
+   * Solo dove il puntatore e' «grosso», cioe' col dito. Col mouse la precisione c'e' gia', e
+   * riquadri invisibili da 44 px su spilli vicini si ruberebbero i clic a vicenda. */
+  @media (pointer: coarse), (max-width: 1023px) {
+    .spillo-tokyo { position: absolute; }
+    .spillo-tokyo::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 44px;
+      height: 44px;
+      transform: translate(-50%, -50%);
+      /* Dietro alla sagoma, cosi' non copre il disegno ne' intercetta il passaggio del mouse. */
+      z-index: -1;
+    }
   }
 
   /* ---- Crediti alle fonti: discreti, grigi e piccoli ---- */

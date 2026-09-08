@@ -124,7 +124,7 @@ export function NegoziPage() {
           ) : (
             gruppi.map(([k, g]) => (
               <section key={k} className="flex flex-col gap-1.5">
-                <h2 className="m-0 text-[15px] font-semibold">{k.startsWith('__') ? g.nome : <Link to={`/guida/citta/${k}`} className="no-underline text-text">{g.nome}</Link>}</h2>
+                <h2 className="m-0 text-[15px] font-semibold">{k.startsWith('__') ? g.nome : <Link to={`/guida/citta/${k}`} className="touch inline-flex items-center no-underline text-text">{g.nome}</Link>}</h2>
                 <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label={`Negozi: ${g.nome}`}>
                   {g.negozi.map((n) => (
                     <li key={n.chiave}>

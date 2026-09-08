@@ -18,6 +18,11 @@ export const paramsElementoCatalogo = paramsTipoCatalogo.extend({ chiave: z.stri
 
 /** Campi di un negozio scrivibili dall'utente (le colonne della tabella, in snake_case come nel servizio). */
 export const datiNegozio = z.object({
+  /** **Confermato da te.** Una riga che aggiungi nasce non verificata, ed e' giusto: non viene
+   *  dalla guida. Ma finora quel marchio si poteva solo mettere, mai togliere - il campo non era
+   *  nel modulo e l'API non lo accettava - quindi ogni cosa inserita restava «da verificare» per
+   *  sempre, senza che esistesse un modo di verificarla. */
+  
   condizioni_json: z.array(condizioneSpillo).max(20).transform(v=>JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   luogo: testo(200).default(''),
@@ -33,6 +38,11 @@ export const datiNegozio = z.object({
 
 /** Campi di un articolo scrivibili dall'utente. */
 export const datiArticolo = z.object({
+  /** **Confermato da te.** Una riga che aggiungi nasce non verificata, ed e' giusto: non viene
+   *  dalla guida. Ma finora quel marchio si poteva solo mettere, mai togliere - il campo non era
+   *  nel modulo e l'API non lo accettava - quindi ogni cosa inserita restava «da verificare» per
+   *  sempre, senza che esistesse un modo di verificarla. */
+  verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform(v=>JSON.stringify(v)).optional(),
   negozio_chiave: z.string().min(1).max(200),
   nome: testo(160).min(1),
@@ -70,6 +80,7 @@ export const datiArticolo = z.object({
 export const datiLibro = z.object({
   // Le condizioni valgono anche qui. L'editor le mostrava già e finivano nel nulla, perché la
   // colonna non esisteva (migrazione 052): sono la disponibilità, «dal 18 aprile».
+  verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
@@ -88,6 +99,7 @@ export const datiLibro = z.object({
 
 /** Campi di un film o DVD scrivibili dall'utente. */
 export const datiFilm = z.object({
+  verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
@@ -107,6 +119,7 @@ export const datiFilm = z.object({
 
 /** Campi di un'attivita' (compresi lavori e videogiochi) scrivibili dall'utente. */
 export const datiAttivita = z.object({
+  verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   tipo: testo(60).default('altro'),

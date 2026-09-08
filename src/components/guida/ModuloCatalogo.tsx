@@ -25,7 +25,7 @@ import type { ElementoCatalogoDto, OggettoSelezionabileDto, TipoCatalogo } from 
 interface Campo {
   nome: string;
   etichetta: string;
-  tipo: 'testo' | 'testolungo' | 'numero' | 'select';
+  tipo: 'testo' | 'testolungo' | 'numero' | 'select' | 'booleano';
   opzioni?: Record<string, string>;
   aiuto?: string;
 }
@@ -445,7 +445,8 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
       }
       for (const c of CAMPI[tipo]) {
         const grezzo = valori[c.nome]?.trim() ?? '';
-        if (c.tipo === 'numero') dati[c.nome] = grezzo === '' ? null : Number(grezzo);
+        if (c.tipo === 'booleano') dati[c.nome] = grezzo === '1';
+        else if (c.tipo === 'numero') dati[c.nome] = grezzo === '' ? null : Number(grezzo);
         else dati[c.nome] = grezzo === '' ? (['nome', 'luogo', 'fonte'].includes(c.nome) ? '' : null) : grezzo;
       }
       if (tipo === 'articolo') {
@@ -554,6 +555,9 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
                   {c.nome === 'luogo_chiave' && valori.luogo_chiave && !quartieri.dati?.some(q => q.chiave === valori.luogo_chiave) && <option value={valori.luogo_chiave}>{valori.luogo_chiave}</option>}
                   {Object.entries(c.nome === 'luogo_chiave' ? Object.fromEntries((quartieri.dati ?? []).map(q => [q.chiave, q.nome])) : c.opzioni ?? {}).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
                 </select>
+              ) : c.tipo === 'booleano' ? (
+                <input type="checkbox" className="w-5 h-5" checked={valori[c.nome] === '1'}
+                  onChange={(e) => setValori({ ...valori, [c.nome]: e.target.checked ? '1' : '' })} />
               ) : c.tipo === 'testolungo' ? (
                 <textarea className="form-input" rows={2} value={valori[c.nome] ?? ''} onChange={(e) => setValori({ ...valori, [c.nome]: e.target.value })} maxLength={2000} />
               ) : (
