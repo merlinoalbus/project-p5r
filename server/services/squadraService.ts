@@ -28,7 +28,7 @@ function partitaEsiste(partitaId: number): void {
 }
 
 /** I Ladri giocabili, nell'ordine del seed: è il seed a dire chi sono, non un elenco scritto qui. */
-function giocabili(): RigaPersonaggio[] {
+export function giocabili(): RigaPersonaggio[] {
   const r = prepared("SELECT json FROM dati_guida WHERE chiave = 'personaggi'").get() as { json: string } | undefined;
   if (!r) return [];
   const dati = JSON.parse(r.json) as { personaggi: Array<{ chiave: string; nome: string; ordine: number; giocabile?: boolean }> };

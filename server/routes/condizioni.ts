@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prepared, nowIso } from '../db/dbService.js';
 import { validate } from '../middleware/validate.js';
+import { giocabili } from '../services/squadraService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
 const router=Router();
@@ -15,6 +16,9 @@ router.get('/elenchi',(_req,res)=>{
     arcani:prepared('SELECT DISTINCT arcana AS chiave,arcana AS nome FROM persona ORDER BY arcana').all(),
     persone:prepared('SELECT nome AS chiave,nome FROM persona ORDER BY nome').all(),
     abilita:prepared('SELECT nome AS chiave,nome FROM skill ORDER BY nome').all(),
+    // I Ladri Fantasma per la condizione «in squadra». Chi sia la squadra lo dice il seed con
+    // `giocabile`, non un elenco scritto qui: se domani ne arriva un altro, compare da se'.
+    squadra:giocabili().map((p)=>({chiave:p.chiave,nome:p.nome})),
   });
 });
 router.post('/stati',validate({body:z.object({nome:z.string().trim().min(1).max(160),categoria:z.enum(['evento','attivita','oggetto','grado','contatore','quartiere']),unita:z.string().trim().max(40).default('')})}),(req,res)=>{

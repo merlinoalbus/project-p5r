@@ -29,19 +29,20 @@ import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../util
 
 function AggiungiRequisito({onAggiungi,elenchi,extra,esistenti}:{esistenti:RequisitoSpillo[];onAggiungi:(r:RequisitoSpillo)=>void;elenchi:ElenchiCondizioni;extra:ElenchiRegole}) {
   const [tipo,setTipo]=useState('calendario'),[chiave,setChiave]=useState(''),[abilita,setAbilita]=useState('');
-  const opzioni=tipo==='stato'?extra.stati:tipo==='articolo'?extra.articoli.map(a=>({...a,nome:a.gruppo+' › '+a.nome})):tipo==='libro'||tipo==='film'?extra.letture.filter(l=>l.categoria===tipo):tipo==='persona-arcano'?extra.arcani:extra.persone;
+  const opzioni=tipo==='squadra'?extra.squadra:tipo==='stato'?extra.stati:tipo==='articolo'?extra.articoli.map(a=>({...a,nome:a.gruppo+' › '+a.nome})):tipo==='libro'||tipo==='film'?extra.letture.filter(l=>l.categoria===tipo):tipo==='persona-arcano'?extra.arcani:extra.persone;
   const scelta=opzioni.some(o=>o.chiave===chiave)?chiave:opzioni[0]?.chiave??'';
   const skill=extra.abilita.some(o=>o.chiave===abilita)?abilita:extra.abilita[0]?.chiave??'';
   const aggiungi=()=>{
     if(!scelta)return;
-    if(tipo==='articolo')onAggiungi({tipo:'articolo',articolo:scelta});
+    if(tipo==='squadra')onAggiungi({tipo:'squadra',membro:scelta});
+    else if(tipo==='articolo')onAggiungi({tipo:'articolo',articolo:scelta});
     else if(tipo==='libro'||tipo==='film')onAggiungi({tipo:'lettura',categoria:tipo,chiave:scelta});
     else if(tipo==='persona-arcano')onAggiungi({tipo:'persona-arcano',arcano:scelta});
     else if(tipo==='persona-abilita'&&skill)onAggiungi({tipo:'persona-abilita',persona:scelta,abilita:skill});
   };
   return <details className="regole-aggiunta"><summary className="touch">Aggiungi una condizione</summary>
     <label className="editor-mappa__campo">Famiglia della condizione<select className="form-input" value={tipo} onChange={e=>setTipo(e.target.value)}>
-      <option value="calendario">Calendario, meteo, Doti, Confidenti, Palazzi e richieste</option><option value="articolo">Articolo acquistato / ottenuto</option><option value="libro">Libro letto</option><option value="film">Film visto</option><option value="persona-arcano">Persona di un Arcano in scorta</option><option value="persona-abilita">Persona con una precisa abilità in scorta</option>
+      <option value="calendario">Calendario, meteo, Doti, Confidenti, Palazzi e richieste</option><option value="articolo">Articolo acquistato / ottenuto</option><option value="libro">Libro letto</option><option value="film">Film visto</option><option value="persona-arcano">Persona di un Arcano in scorta</option><option value="persona-abilita">Persona con una precisa abilità in scorta</option><option value="squadra">Ladro Fantasma in squadra</option>
     </select></label>
     {tipo==='calendario'?<CondizioniSpilloEditor soloAggiunta condizioni={esistenti} onCambia={r=>{const c=r.at(-1);if(c)onAggiungi(c);}} elenchi={elenchi}/>:<>
       <label className="editor-mappa__campo">Elemento richiesto<select className="form-input" value={scelta} onChange={e=>setChiave(e.target.value)}>{opzioni.map(o=><option key={o.chiave} value={o.chiave}>{o.nome}</option>)}</select></label>
