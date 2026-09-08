@@ -28,8 +28,10 @@ export interface StatoPartitaSemafori {
   bossGestiti: Set<string>;
   richiesteCompletate: Set<string>;
   ranghiConfidenti: Map<string, number>;
-  /** I Ladri di cui la partita ha gia' segnato qualcosa: per la condizione «in squadra». */
+  /** I Ladri che hai detto di avere nel gruppo. */
   membriSquadra: Set<string>;
+  /** Quelli che hai detto di **non** avere: e' una risposta, e vale rosso invece che grigio. */
+  membriFuoriSquadra: Set<string>;
   dataGioco: string | null;
   /** Momento della giornata corrente della partita (scheda «Oggi»): «giorno» o «sera». */
   fasciaGioco: 'giorno' | 'sera' | null;
@@ -52,8 +54,11 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const conferme = new Set((prepared('SELECT confidente_chiave, rango, indice FROM requisito_partita WHERE partita_id = ? AND confermato = 1').all(partitaId) as Array<{ confidente_chiave: string; rango: number; indice: number }>).map((r) => `${r.confidente_chiave}/${r.rango}/${r.indice}`));
   // Chi e' in squadra: i Ladri di cui la partita ha una riga. La riga nasce quando ne segni il
   // livello, quindi «ha una riga» vuol dire «l'ho gia' con me», che e' la domanda della condizione.
-  const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ?').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, dataGioco, fasciaGioco, meteoOggi: meteo, conferme };
+  // **L'interruttore, non la presenza della riga.** Prima bastava avere segnato un livello perche'
+  // il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
+  const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
+  const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOggi: meteo, conferme };
 }
 
 function confrontaDate(a: string, b: string): number {
@@ -99,7 +104,13 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
     }
     case 'squadra': {
       const chiave = String(dati.membro);
-      const dentro = st.membriSquadra.has(chiave);
+      // Il protagonista nel gruppo c'e' sempre: non dipende da quel che e' stato segnato.
+      const dentro = chiave === 'joker' || st.membriSquadra.has(chiave);
+      // **Tre risposte, non due.** «Non l'ho detto» e «ho detto di no» sono cose diverse: la prima
+      // lascia il beneficio del dubbio e si conferma a mano, la seconda e' una risposta e blocca.
+      if (chiave !== 'joker' && st.membriFuoriSquadra.has(chiave)) {
+        return { ...base, stato: 'rosso', dettaglio: `${t('confidente', chiave)} non e' nel gruppo`, manuale: false };
+      }
       // Grigio e non rosso quando manca: «non l'ho ancora segnato» non e' «non ce l'ho», e la
       // differenza conta — la riga si conferma a mano come le altre di questo genere.
       return dentro

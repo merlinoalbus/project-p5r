@@ -22,6 +22,7 @@ import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
+import { usePartitaStore } from '../../stores/partitaStore';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import type { MembroSquadraDto, SquadraPartitaDto } from '../../types';
 
@@ -44,15 +45,37 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
     void conEsito('yen', async () => { const s = await impostaYen(partitaId, { delta: segno * n }); setMovimento(''); return s; });
   };
 
+  /** Il livello di Joker vive in due case — qui e `partita.livello_protagonista`, che la fusione
+   *  legge — e il server le tiene allineate. Ma l'elenco delle partite sta in uno store caricato
+   *  all'avvio: cambiato il livello, il database era giusto e **lo schermo no**, con la barra in
+   *  alto e le impostazioni ferme al numero di prima. Qui glielo si dice. */
+  const riallineaPartite = (chiave: string) => { if (chiave === 'joker') void usePartitaStore.getState().carica(); };
+
   const riga = (m: MembroSquadraDto) => (
     <li key={m.chiave} className="card flex flex-wrap items-center gap-2">
-      <ImmagineEntita ambito="confidente" chiave={m.chiave} etichetta={m.nome} dimensione={44} />
+      {/* Il protagonista **non e' un Confidente**, e il suo ritratto non sta fra i Confidenti: si
+          chiama `personaggi/joker`. Chiedendolo come Confidente non lo trovava e restava il vuoto. */}
+      <ImmagineEntita ambito={m.chiave === 'joker' ? 'personaggio' : 'confidente'} chiave={m.chiave} etichetta={m.nome} dimensione={44} />
       <span className="min-w-0 flex-1">
         <span className="block font-semibold text-[15px] leading-tight">{m.nome}</span>
         <span className="block text-[12px] text-text-muted">
           {m.segnato ? `${m.esperienza.toLocaleString('it-IT')} punti esperienza` : 'Non ancora segnato'}
         </span>
       </span>
+      {/* **L'interruttore che mancava.** «Ladro in squadra» e' una condizione che i negozi usano, e
+          fino a ieri diventava vera **di rimbalzo** — bastava toccare un livello — e non si poteva
+          piu' rendere falsa, perche' l'interfaccia non offriva modo di togliere quella riga.
+          L'avviso «Da segnare» mandava qui, e qui il gesto non c'era. */}
+      {/* Per Joker l'interruttore non esiste: il protagonista nel gruppo c'e' sempre, e offrire un
+          comando per toglierlo vorrebbe dire offrire uno stato che il gioco non ha. */}
+      {m.chiave === 'joker'
+        ? <span className="text-[12px] text-text-muted" title="Il protagonista e' sempre nel gruppo">Sempre nel gruppo</span>
+        : <label className="flex items-center gap-1.5 text-[12px] touch" title={`Segna se ${m.nome} e' nel gruppo`}>
+            <input type="checkbox" className="w-5 h-5" checked={m.inSquadra} disabled={occupato === m.chiave}
+              aria-label={`${m.nome} nel gruppo`}
+              onChange={(e) => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { inSquadra: e.target.checked }))} />
+            Nel gruppo
+          </label>}
       <label className="editor-mappa__campo w-[104px]">
         <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Esperienza</span>
         <input className="form-input" type="number" min={0} inputMode="numeric" defaultValue={m.esperienza}
@@ -63,10 +86,10 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
         title={m.segnato ? `Livello ${m.livello}` : 'Livello non ancora segnato'}>{m.livello}</span>
       <PulsanteVisivo compatto icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Livello"
         disabled={occupato === m.chiave || m.livello <= 1} aria-label={`Togli un livello a ${m.nome}`}
-        onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: -1 }))} />
+        onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: -1 })).then(() => riallineaPartite(m.chiave))} />
       <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Livello"
         disabled={occupato === m.chiave || m.livello >= 99} aria-label={`Sali di livello: ${m.nome} al livello ${m.livello + 1}`}
-        onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: 1 }))} />
+        onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: 1 })).then(() => riallineaPartite(m.chiave))} />
     </li>
   );
 

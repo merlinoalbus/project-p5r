@@ -634,8 +634,10 @@
     .tabella--adattiva tbody tr:hover { background: transparent; }
     .tabella--adattiva td { display: flex; gap: 8px; padding: 2px 0; border-bottom: 0; }
     .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
-    /* Una cella senza etichetta non lascia il buco del 34%: è il caso della casella «comprato». */
+    /* Una cella davvero senza etichetta non lascia il buco del 34%. */
     .tabella--adattiva td:not([data-etichetta])::before { display: none; }
+    /* La casella e la sua etichetta sulla stessa riga: il bersaglio resta di 44 px come altrove. */
+    .tabella--adattiva td input[type="checkbox"] { align-self: center; }
   }
   /* La finestra stretta resta un caso valido: un telefono ha poco spazio anche se il contenitore
      dice altro, e le due condizioni non si escludono. */

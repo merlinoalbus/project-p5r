@@ -23,9 +23,17 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
   return { condizioni:regole(r.condizioni_json), ...(st ? { disponibilita: valutaRequisiti(regole(r.condizioni_json), st) } : {}), chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore, confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null, orari: r.orari, sblocco: r.sblocco, articoli: r.articoli ?? 0, verificati: r.verificati ?? 0 };
 }
 
+/** La disponibilita' di un articolo tiene conto anche di quella del negozio — a bottega chiusa non
+ *  si compra niente — ma le due cose restano **distinguibili**.
+ *
+ *  Senza distinguerle succedeva questo: un negozio con una condizione che l'app non sa leggere
+ *  faceva comparire lo stesso avviso su **ognuno** dei suoi articoli, identico, mentre lo stesso
+ *  avviso stava gia' scritto sopra sul negozio. Tre righe con lo stesso cartellino non dicono
+ *  quale articolo abbia un problema: dicono solo che ce n'e' uno, e lo dicono tre volte. */
 function disponibilitaArticolo(r:Pick<RigaArticolo, 'condizioni_json' | 'negozio_condizioni'>,st:StatoDisponibilita) {
   const negozio=regole(r.negozio_condizioni??null).map(c=>({...c,testo:'Negozio: '+c.testo}));
-  return valutaRequisiti([...negozio,...regole(r.condizioni_json)],st);
+  const esito=valutaRequisiti([...negozio,...regole(r.condizioni_json)],st);
+  return { ...esito, requisiti: esito.requisiti.map((q,i)=>(i<negozio.length?{...q,daNegozio:true}:q)) };
 }
 /** La riga del negozio, con quel che descrive l'oggetto **letto dall'oggetto**, non copiato.
  *

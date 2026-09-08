@@ -17,7 +17,7 @@ function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilit
   return {
     doti: new Map([['fascino', 1], ['coraggio', 1], ['conoscenza', 1], ['perizia', 1], ['gentilezza', 1]]),
     arcaniInScorta: new Set(), personeConAbilita: new Set(), bossGestiti: new Set(), richiesteCompletate: new Set(),
-    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(), giornoSettimana: 'mercoledi',
+    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), membriFuoriSquadra: new Set<string>(['akechi']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(), giornoSettimana: 'mercoledi',
     sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara', dal: '08-31' }], ['shinjuku', { nome: 'Shinjuku', dal: '06-18' }], ['kichijoji', { nome: 'Kichijoji', dal: null }]]),
     ...sovrascrivi,
   };
