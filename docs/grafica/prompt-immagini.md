@@ -756,7 +756,7 @@ Va distinta dalle due tessere vicine: `scheda-confidenti` (due figure che si str
 `scheda-doti` (la stella). Qui il soggetto è **il gruppo con la sua cassa**, non il legame fra due
 persone: le maschere dicono chi sono, la borsa dice che la scheda parla anche di soldi.
 
-**Consegnata il 2026-09-08, e il file su `main` non è il disegno.** Il render mostrato era giusto —
+**Risolta il 2026-09-08. Il primo file su `main` non era il disegno.** Il render mostrato era giusto —
 tre maschere, la borsa, le monete, contorni neri — ma il PNG committato ha i toni collassati su un
 colore solo: **100% dei pixel opachi rossi**, nessun bianco, nessun nero, contro il 13–21% di rosso
 delle altre trentuno (`scheda-doti` 21%, `scheda-confidenti` 15%). Si riconosce ancora il contorno
@@ -766,4 +766,6 @@ Scandendo tutti i 257 file di `ui/`, `attivita/` e `decori/` il difetto risulta 
 file**: gli altri sette che superano il 90% di rosso sono i `nav-*-attiva`, che sono silhouette
 rosse per progetto (`nav-home` 0%, `nav-home-attiva` 100%: la coppia funziona così).
 
-Portata a 128×128 come le altre tessere: era l'unica a 256, e a parità di resa il file pesa meno.
+La riesportazione corretta stava **non committata** nel worktree del generatore, e senza guardarci
+dentro prima di chiuderlo sarebbe andata persa: 128×128 come le sorelle, 23% rosso / 19% chiaro /
+48% scuro, cioè in famiglia con `scheda-letture` (20/21/51). È quella che sta su `main` adesso.
