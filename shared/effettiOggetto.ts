@@ -123,7 +123,14 @@ const conValore = (misura: Misura, valore: number | null) =>
  * È il punto dell'esercizio. Finché la frase la scriveva una persona, la stessa cosa aveva tre
  * forme e la ricerca ne trovava una; scritta da qui, due oggetti che fanno la stessa cosa la
  * mostrano identica. */
-export function descriviEffetto(e: EffettoOggetto): string {
+/** I nomi con cui rendere leggibili i riferimenti: chiave del quartiere, chiave dell'attivita'.
+ *
+ * Stesso metodo di `descriviRequisitoSpillo`: la funzione sta in `shared/` e non puo' leggere il
+ * database, quindi i nomi glieli passa chi li ha. Senza, ripiega sulla chiave — che e' brutto ma
+ * onesto, e succede solo dove nessuno ha fornito l'elenco. */
+export interface NomiEffetto { luoghi?: Record<string, string>; attivita?: Record<string, string> }
+
+export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): string {
   switch (e.famiglia) {
     case 'ripristina': {
       const quanto = conValore(e.misura, e.valore);
@@ -144,8 +151,8 @@ export function descriviEffetto(e: EffettoOggetto): string {
     case 'statistica': return `${NOME_STATISTICA[e.statistica]} ${e.valore >= 0 ? '+' : ''}${e.valore}`;
     case 'dote': return `${e.dote} ${'♪'.repeat(Math.max(1, Math.min(4, e.note)))}`;
     case 'regalo': return e.graditoA.length ? `Regalo, gradito a ${e.graditoA.join(', ')}` : 'Regalo';
-    case 'sblocca-luogo': return `Sblocca ${e.luogo}`;
-    case 'sblocca-funzione': return `Sblocca ${NOME_FUNZIONE[e.funzione]}${e.dove ? ` in ${e.dove}` : ''}`;
+    case 'sblocca-luogo': return `Sblocca ${nomi.luoghi?.[e.luogo] ?? e.luogo}`;
+    case 'sblocca-funzione': return `Sblocca ${NOME_FUNZIONE[e.funzione]}${e.dove ? ` in ${nomi.attivita?.[e.dove] ?? e.dove}` : ''}`;
     case 'moltiplica': return `Moltiplica per ${e.fattore} ${NOME_RESA[e.cosa]}`;
     case 'aumenta-punti': return `Aumenta i punti Dote ottenuti ${NOME_GUADAGNO[e.dove]}`;
     case 'descrittivo': return e.testo;
