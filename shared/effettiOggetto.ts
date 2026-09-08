@@ -65,6 +65,26 @@ export const NOME_STATISTICA: Record<StatisticaOggetto, string> = {
   'evasione-fisica': 'Evasione fisica', 'evasione-magica': 'Evasione magica', tutte: 'Tutte le statistiche',
 };
 
+/** Le capacita' che un libro apre dentro un'attivita', ricavate dai dodici testi che restavano
+ *  prosa: il Terzo Occhio in tre minigiochi, due tiri a biliardo, i trucchi, il linguaggio dei
+ *  fiori e gli attacchi tecnici. Non un elenco immaginato: sono quelle che i dati nominano. */
+export const FUNZIONI = ['terzo-occhio', 'tiri-speciali', 'tiro-masse', 'trucchi', 'linguaggio-fiori', 'attacchi-tecnici'] as const;
+export type Funzione = (typeof FUNZIONI)[number];
+
+export const NOME_FUNZIONE: Record<Funzione, string> = {
+  'terzo-occhio': 'il Terzo Occhio', 'tiri-speciali': 'i tiri speciali', 'tiro-masse': 'il tiro masse',
+  trucchi: 'i trucchi', 'linguaggio-fiori': 'il linguaggio dei fiori', 'attacchi-tecnici': 'le combinazioni di attacchi tecnici',
+};
+
+/** Che cosa si moltiplica, e dove si guadagna di piu'. Anche questi vengono dai testi reali. */
+export const RESE = ['lettura', 'fabbricazione'] as const;
+export type Resa = (typeof RESE)[number];
+export const NOME_RESA: Record<Resa, string> = { lettura: 'la velocità di lettura', fabbricazione: 'gli strumenti creati per sessione' };
+
+export const GUADAGNI = ['film', 'studio'] as const;
+export type Guadagno = (typeof GUADAGNI)[number];
+export const NOME_GUADAGNO: Record<Guadagno, string> = { film: 'guardando film e DVD', studio: 'studiando' };
+
 /** Quanto è probabile che l'effetto scatti: la guida dice «alta», «media» o non lo dice. */
 export const PROBABILITA = ['alta', 'media', 'bassa', 'non-detta'] as const;
 export type Probabilita = (typeof PROBABILITA)[number];
@@ -85,6 +105,14 @@ export type EffettoOggetto =
   | { famiglia: 'dote'; dote: string; note: number }
   | { famiglia: 'regalo'; graditoA: string[] }
   | { famiglia: 'sblocca-luogo'; luogo: string }
+  /** Apre una capacita' dentro un'attivita': il Terzo Occhio alla pesca, i tiri speciali a
+   *  biliardo, i trucchi dei videogiochi retro. `dove` e' la chiave dell'attivita', cosi' l'app ci
+   *  puo' portare; `null` per quelle che non stanno in un'attivita' sola, come gli attacchi tecnici. */
+  | { famiglia: 'sblocca-funzione'; funzione: Funzione; dove: string | null }
+  /** Raddoppia una resa: la velocita' di lettura, gli strumenti creati per sessione. */
+  | { famiglia: 'moltiplica'; cosa: Resa; fattore: number }
+  /** Fa guadagnare di piu' da qualcosa che gia' si faceva: i punti Dote dai film, quelli da studio. */
+  | { famiglia: 'aumenta-punti'; dove: Guadagno }
   | { famiglia: 'descrittivo'; testo: string };
 
 const conValore = (misura: Misura, valore: number | null) =>
@@ -117,6 +145,9 @@ export function descriviEffetto(e: EffettoOggetto): string {
     case 'dote': return `${e.dote} ${'♪'.repeat(Math.max(1, Math.min(4, e.note)))}`;
     case 'regalo': return e.graditoA.length ? `Regalo, gradito a ${e.graditoA.join(', ')}` : 'Regalo';
     case 'sblocca-luogo': return `Sblocca ${e.luogo}`;
+    case 'sblocca-funzione': return `Sblocca ${NOME_FUNZIONE[e.funzione]}${e.dove ? ` in ${e.dove}` : ''}`;
+    case 'moltiplica': return `Moltiplica per ${e.fattore} ${NOME_RESA[e.cosa]}`;
+    case 'aumenta-punti': return `Aumenta i punti Dote ottenuti ${NOME_GUADAGNO[e.dove]}`;
     case 'descrittivo': return e.testo;
   }
 }
@@ -133,5 +164,8 @@ export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia'
   { chiave: 'dote', nome: 'Alza una Dote sociale' },
   { chiave: 'regalo', nome: 'Regalo per un Confidente' },
   { chiave: 'sblocca-luogo', nome: 'Sblocca un luogo' },
+  { chiave: 'sblocca-funzione', nome: 'Sblocca una capacità in un’attività' },
+  { chiave: 'moltiplica', nome: 'Moltiplica una resa' },
+  { chiave: 'aumenta-punti', nome: 'Fa guadagnare più punti Dote' },
   { chiave: 'descrittivo', nome: 'Altro (descritto a parole)' },
 ];
