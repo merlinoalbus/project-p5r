@@ -9,7 +9,7 @@ import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared
 // ============================================================
 
 import { useCarica } from '../../hooks/useCarica';
-import { getQuartieri } from '../../services/api/compendio';
+import { getAttivita, getQuartieri } from '../../services/api/compendio';
 import { useState, type ReactNode } from 'react';
 import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, nascondiElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -19,7 +19,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO } from '../../utils/negozi';
 import { getTuttiGliOggetti } from '../../services/api/catalogo';
 import { NOME_DOTE } from '../../utils/citta';
-import { BERSAGLI, FAMIGLIE_EFFETTO, MISURE, NOME_BERSAGLIO, NOME_RISORSA, NOME_STATISTICA, NOME_STATO, PROBABILITA, RISORSE, STATISTICHE_OGGETTO, STATI_ALTERATI, descriviEffetto, type EffettoOggetto, type StatoAlterato } from '../../../shared/effettiOggetto';
+import { BERSAGLI, FAMIGLIE_EFFETTO, FUNZIONI, GUADAGNI, MISURE, NOME_FUNZIONE, NOME_GUADAGNO, NOME_RESA, RESE, NOME_BERSAGLIO, NOME_RISORSA, NOME_STATISTICA, NOME_STATO, PROBABILITA, RISORSE, STATISTICHE_OGGETTO, STATI_ALTERATI, descriviEffetto, type EffettoOggetto, type StatoAlterato } from '../../../shared/effettiOggetto';
 import type { ElementoCatalogoDto, OggettoSelezionabileDto, TipoCatalogo } from '../../types';
 
 interface Campo {
@@ -196,7 +196,10 @@ function SceltaOggetto({ collegato, onCollega, onScollega, aMano, onAMano }: {
  * `descrittivo` c'e' e non e' una scappatoia: nei dati sette casi non formano una famiglia
  * («Abilita il Terzo Occhio nella pesca»). Dichiararli tali e' diverso dal lasciare il campo libero
  * a tutti — si vede quanti sono, e non si confondono con quelli che l'app sa leggere. */
-function EditorEffetto({ valore, onCambia }: { valore: EffettoOggetto | null; onCambia: (e: EffettoOggetto | null) => void }) {
+function EditorEffetto({ valore, onCambia, quartieri, attivita }: {
+  valore: EffettoOggetto | null; onCambia: (e: EffettoOggetto | null) => void;
+  quartieri?: Array<{ chiave: string; nome: string }>; attivita?: Array<{ chiave: string; nome: string }>;
+}) {
   const famiglia = valore?.famiglia ?? '';
   const cambiaFamiglia = (f: string) => {
     if (!f) return onCambia(null);
@@ -211,6 +214,9 @@ function EditorEffetto({ valore, onCambia }: { valore: EffettoOggetto | null; on
       case 'dote': return onCambia({ famiglia: 'dote', dote: 'Conoscenza', note: 1 });
       case 'regalo': return onCambia({ famiglia: 'regalo', graditoA: [] });
       case 'sblocca-luogo': return onCambia({ famiglia: 'sblocca-luogo', luogo: '' });
+      case 'sblocca-funzione': return onCambia({ famiglia: 'sblocca-funzione', funzione: 'terzo-occhio', dove: null });
+      case 'moltiplica': return onCambia({ famiglia: 'moltiplica', cosa: 'lettura', fattore: 2 });
+      case 'aumenta-punti': return onCambia({ famiglia: 'aumenta-punti', dove: 'film' });
       case 'descrittivo': return onCambia({ famiglia: 'descrittivo', testo: '' });
     }
   };
@@ -262,6 +268,24 @@ function EditorEffetto({ valore, onCambia }: { valore: EffettoOggetto | null; on
         {campo('Quale Dote', scelta(valore.dote, Object.keys(NOME_DOTE) as string[], NOME_DOTE, (dote) => onCambia({ ...valore, dote })))}
         {campo('Quante note (♪)', numero(valore.note, (v) => onCambia({ ...valore, note: v })))}
       </>}
+      {valore?.famiglia === 'sblocca-luogo' &&
+        campo('Quale luogo', <select className="form-input" value={valore.luogo} onChange={(e) => onCambia({ ...valore, luogo: e.target.value })}>
+          <option value="">Scegli il quartiere…</option>
+          {(quartieri ?? []).map((q) => <option key={q.chiave} value={q.chiave}>{q.nome}</option>)}
+        </select>)}
+      {valore?.famiglia === 'sblocca-funzione' && <>
+        {campo('Che cosa apre', scelta(valore.funzione, FUNZIONI, NOME_FUNZIONE, (funzione) => onCambia({ ...valore, funzione })))}
+        {campo('In quale attività', <select className="form-input" value={valore.dove ?? ''} onChange={(e) => onCambia({ ...valore, dove: e.target.value || null })}>
+          <option value="">Non è legata a una sola attività</option>
+          {(attivita ?? []).map((a) => <option key={a.chiave} value={a.chiave}>{a.nome}</option>)}
+        </select>)}
+      </>}
+      {valore?.famiglia === 'moltiplica' && <>
+        {campo('Che cosa moltiplica', scelta(valore.cosa, RESE, NOME_RESA, (cosa) => onCambia({ ...valore, cosa })))}
+        {campo('Per quanto', numero(valore.fattore, (v) => onCambia({ ...valore, fattore: Math.max(1, v) })))}
+      </>}
+      {valore?.famiglia === 'aumenta-punti' &&
+        campo('Dove si guadagna di più', scelta(valore.dove, GUADAGNI, NOME_GUADAGNO, (dove) => onCambia({ ...valore, dove })))}
       {valore?.famiglia === 'descrittivo' &&
         campo('Descrizione', <textarea className="form-input" rows={2} maxLength={600} value={valore.testo} onChange={(e) => onCambia({ ...valore, testo: e.target.value })} />)}
       {valore && <p className="m-0 text-[12px] text-text-muted" role="status">Verrà mostrato così: <strong>{descriviEffetto(valore)}</strong></p>}
@@ -394,6 +418,11 @@ interface Props {
 export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalvato }: Props) {
   // Il selettore dei quartieri serve ai negozi e alle attivita': tutte e due hanno un `luogo_chiave`.
   const quartieri = useCarica(() => (tipo === 'negozio' || tipo === 'attivita' || tipo === 'libro') ? getQuartieri() : Promise.resolve([]), [tipo]);
+  // Le attivita' servono a «sblocca una capacita'»: il Terzo Occhio *alla pesca*, i tiri *a
+  // biliardo*. Anche li' il posto e' un riferimento, non una parola scritta a mano.
+  const attivitaElenco = useCarica(async () => (tipo === 'libro' || tipo === 'articolo')
+    ? (await getAttivita()).attivita.map((a) => ({ chiave: a.chiave, nome: a.nome }))
+    : [], [tipo]);
 
   const iniziali = () => {
     const v: Record<string, string> = {};
@@ -552,7 +581,7 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
             apre le scorciatoie di Yongen-Jaya, e prima non c'era modo di dirlo dall'interfaccia —
             avevo tolto il campo di testo sostenendo che bastassero le condizioni, che pero' dicono
             **quando il libro e' disponibile**, non che cosa apre leggendolo: il verso opposto. */}
-        {(tipo === 'articolo' ? aMano : tipo === 'libro') && <EditorEffetto valore={effetto} onCambia={setEffetto} />}
+        {(tipo === 'articolo' ? aMano : tipo === 'libro') && <EditorEffetto valore={effetto} onCambia={setEffetto} quartieri={quartieri.dati ?? []} attivita={attivitaElenco.dati ?? []} />}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {/* Nome e categoria compaiono **solo** quando l'oggetto si inserisce a mano. Con un oggetto
               collegato vengono da lui, e mostrarli come campi vorrebbe dire invitare a correggere qui
