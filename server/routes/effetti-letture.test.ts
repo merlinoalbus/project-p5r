@@ -107,3 +107,29 @@ describe('API — le Doti salgono al conseguimento', () => {
     expect(dati).toBeGreaterThan(0);
   });
 });
+
+/* Il cruciverba di Leblanc aveva lo stesso difetto, e in forma più netta: l'evento nello storico
+ * diceva «Conoscenza +1 nota» e i punti restavano dov'erano. Scrivere una promessa senza mantenerla
+ * è peggio che non scriverla, perché chi legge lo storico ci conta. */
+describe('API — il cruciverba dà la sua nota di Conoscenza', () => {
+  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  afterAll(() => closeDb());
+
+  it('risolverne uno alza Conoscenza, e toglierlo la riporta indietro', async () => {
+    const id = await nuovaPartita('Cruciverba');
+    const tutti = (await request(app).get('/api/compendio/cruciverba')).body.data as { cruciverba: Array<{ giorno: string }> };
+    const g = tutti.cruciverba[0].giorno;
+    expect(await punti(id, 'conoscenza')).toBe(0);
+
+    await request(app).put(`/api/partite/${id}/cruciverba`).send({ data: g, fatto: true });
+    // Una nota è il primo scalino: 2 punti.
+    expect(await punti(id, 'conoscenza')).toBe(2);
+
+    // Rispuntarlo non raddoppia: è già risolto.
+    await request(app).put(`/api/partite/${id}/cruciverba`).send({ data: g, fatto: true });
+    expect(await punti(id, 'conoscenza')).toBe(2);
+
+    await request(app).put(`/api/partite/${id}/cruciverba`).send({ data: g, fatto: false });
+    expect(await punti(id, 'conoscenza')).toBe(0);
+  });
+});
