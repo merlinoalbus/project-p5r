@@ -12,6 +12,7 @@ import { PageState } from '../components/shared/PageState';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
@@ -180,6 +181,8 @@ export function LibriPage() {
         <div className="kpi-tile"><span className="kpi-value">{d.sessioniFatte}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni fatte</span></div>
         <div className="kpi-tile"><span className="kpi-value">{d.sessioniTotali}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni totali</span></div>
       </section>
+
+      {partitaId && <NotaPuntiDote cosa="quali libri hai letto e a che punto sei" />}
 
       {/* Senza questa riga i numeri calerebbero da soli fra una visita e l'altra — un libro da tre
           sessioni che all'improvviso ne chiede due — e sembrerebbe un errore dell'app invece che
