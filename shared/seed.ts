@@ -43,6 +43,8 @@ export type RequisitoSeed =
   | { tipo: 'palazzo'; dungeon: string; testo: string }
   | { tipo: 'richiesta'; richiesta: string; testo: string }
   | { tipo: 'confidente'; confidente: string; rango: number; testo: string }
+  /** Un Ladro Fantasma gia' in squadra: il dato sta in `membro_squadra_partita` (migrazione 057). */
+  | { tipo: 'squadra'; membro: string; testo: string }
   | { tipo: 'data'; dal: string; testo: string }
   | { tipo: 'meteo'; condizione: 'non-piove'; testo: string }
   | { tipo: 'manuale'; testo: string };

@@ -7,7 +7,7 @@ import { closeDb, initDb } from '../db/dbService.js';
 import { runMigrations } from '../db/migrationRunner.js';
 import { caricaSeed } from './seed/caricaSeed.js';
 import { invalidaCacheTraduzioni } from './traduzioniService.js';
-import { dataSbloccoQuartiere, requisitiDaTesto, valutaDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
+import { dataSbloccoQuartiere, requisitiDaTesto, valutaDisponibilita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
 
 // il valutatore dei semafori traduce i nomi (Confidenti, arcani) leggendo il glossario dal DB
 beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, path.resolve(import.meta.dirname, '../../data/seed')); invalidaCacheTraduzioni(); });
@@ -17,7 +17,7 @@ function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilit
   return {
     doti: new Map([['fascino', 1], ['coraggio', 1], ['conoscenza', 1], ['perizia', 1], ['gentilezza', 1]]),
     arcaniInScorta: new Set(), personeConAbilita: new Set(), bossGestiti: new Set(), richiesteCompletate: new Set(),
-    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(), giornoSettimana: 'mercoledi',
+    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(), giornoSettimana: 'mercoledi',
     sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara', dal: '08-31' }], ['shinjuku', { nome: 'Shinjuku', dal: '06-18' }], ['kichijoji', { nome: 'Kichijoji', dal: null }]]),
     ...sovrascrivi,
   };
@@ -103,6 +103,24 @@ describe('requisitiDaTesto', () => {
 });
 
 describe('valutaDisponibilita', () => {
+  /** **«Ladro Fantasma in squadra»**: la condizione che l'utente aveva chiesto e che non c'era.
+   *
+   * Senza di lei l'unico modo per esprimerla era inventarsi uno «stato» col nome scritto a mano —
+   * cioe' una stringa che nessuna partita registra e che quindi non diventa mai vera. Ora il dato
+   * e' quello vero: `membro_squadra_partita`, la tabella della migrazione 057.
+   *
+   * Grigio e non rosso quando il membro non risulta: «non l'ho ancora segnato» non e' «non ce
+   * l'ho», e confondere le due cose farebbe sparire dalla mappa roba che il giocatore ha. */
+  it('un Ladro in squadra rende vera la condizione; se non risulta resta da confermare, non negata', () => {
+    const req = [{ tipo: 'squadra' as const, membro: 'ryuji', testo: 'Ryuji in squadra' }];
+    // Nella fixture la squadra contiene Ryuji e non Ann.
+    expect(valutaRequisiti(req, stato()).stato).toBe('disponibile');
+    const senza = valutaRequisiti([{ tipo: 'squadra' as const, membro: 'ann', testo: 'Ann in squadra' }], stato());
+    expect(senza.stato).not.toBe('bloccato');
+    expect(senza.requisiti[0].stato).toBe('grigio');
+  });
+
+
   it('data: bloccato prima, disponibile dal giorno indicato; senza giorno corrente è ignoto', () => {
     expect(valutaDisponibilita(['dal 18 aprile'], stato({ dataGioco: '04-16' })).stato).toBe('bloccato');
     expect(valutaDisponibilita(['dal 18 aprile'], stato({ dataGioco: '04-18' })).stato).toBe('disponibile');

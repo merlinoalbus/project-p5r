@@ -45,6 +45,10 @@ export type RequisitoSpillo =
   | { tipo: 'palazzo'; dungeon: string }
   | { tipo: 'dote'; dote: string; rango: number }
   | { tipo: 'confidente'; confidente: string; rango: number }
+  /** Un Ladro Fantasma è entrato in squadra. Chiesta dall'utente, e mancava: senza di lei l'unico
+   *  modo di esprimerla era inventarsi uno «stato» a mano — cioè una stringa che nessuno valuta.
+   *  Il dato c'è dalla migrazione 057, che tiene livello ed esperienza di ognuno dei dieci. */
+  | { tipo: 'squadra'; membro: string }
   | { tipo: 'richiesta'; richiesta: string }
   | { tipo: 'piove' }
   | { tipo: 'meteo'; condizione: 'non-piove' }
@@ -210,6 +214,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'palazzo': return `dopo il ${nomi.dungeon?.[r.dungeon] ?? PALAZZI_CONDIZIONE.find((p) => p.chiave === r.dungeon)?.nome ?? r.dungeon}`;
     case 'dote': return `${DOTI_CONDIZIONE.find((d) => d.chiave === r.dote)?.nome ?? r.dote} Rango ${r.rango}`;
     case 'confidente': return `Rango Confidente ${nomi.confidenti?.[r.confidente] ?? r.confidente} ${r.rango}`;
+    case 'squadra': return `${nomi.confidenti?.[r.membro] ?? r.membro} in squadra`;
     case 'richiesta': return `richiesta «${nomi.richieste?.[r.richiesta] ?? r.richiesta}» completata`;
     case 'piove': return 'solo nei giorni di pioggia';
     case 'meteo': return 'non disponibile in caso di pioggia';
@@ -255,6 +260,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'palazzo': { const dungeon = testoPulito(o.dungeon, 60); return dungeon && /^[a-z0-9-]+$/.test(dungeon) ? { tipo: 'palazzo', dungeon } : null; }
     case 'dote': { const dote = testoPulito(o.dote, 20); const rango = intero(o.rango, 1, 5); return dote && DOTI_CONDIZIONE.some((d) => d.chiave === dote) && rango ? { tipo: 'dote', dote, rango } : null; }
     case 'confidente': { const confidente = testoPulito(o.confidente, 60); const rango = intero(o.rango, 1, 10); return confidente && /^[a-z0-9-]+$/.test(confidente) && rango ? { tipo: 'confidente', confidente, rango } : null; }
+    case 'squadra': { const membro = testoPulito(o.membro, 60); return membro && /^[a-z0-9-]+$/.test(membro) ? { tipo: 'squadra', membro } : null; }
     case 'richiesta': { const richiesta = testoPulito(o.richiesta, 200); return richiesta ? { tipo: 'richiesta', richiesta } : null; }
     case 'piove': return { tipo: 'piove' };
     case 'meteo': return o.condizione === 'non-piove' ? { tipo: 'meteo', condizione: 'non-piove' } : null;

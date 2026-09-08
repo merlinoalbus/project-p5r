@@ -28,6 +28,8 @@ export interface StatoPartitaSemafori {
   bossGestiti: Set<string>;
   richiesteCompletate: Set<string>;
   ranghiConfidenti: Map<string, number>;
+  /** I Ladri di cui la partita ha gia' segnato qualcosa: per la condizione «in squadra». */
+  membriSquadra: Set<string>;
   dataGioco: string | null;
   /** Momento della giornata corrente della partita (scheda «Oggi»): «giorno» o «sera». */
   fasciaGioco: 'giorno' | 'sera' | null;
@@ -48,7 +50,10 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
   const meteo = dataGioco ? (prepared('SELECT meteo FROM giorno_calendario WHERE data = ?').get(dataGioco) as { meteo: string | null } | undefined)?.meteo ?? null : null;
   const conferme = new Set((prepared('SELECT confidente_chiave, rango, indice FROM requisito_partita WHERE partita_id = ? AND confermato = 1').all(partitaId) as Array<{ confidente_chiave: string; rango: number; indice: number }>).map((r) => `${r.confidente_chiave}/${r.rango}/${r.indice}`));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, dataGioco, fasciaGioco, meteoOggi: meteo, conferme };
+  // Chi e' in squadra: i Ladri di cui la partita ha una riga. La riga nasce quando ne segni il
+  // livello, quindi «ha una riga» vuol dire «l'ho gia' con me», che e' la domanda della condizione.
+  const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ?').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, dataGioco, fasciaGioco, meteoOggi: meteo, conferme };
 }
 
 function confrontaDate(a: string, b: string): number {
@@ -91,6 +96,15 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
       const nome = String(dati.richiesta);
       const ok = st.richiesteCompletate.has(nome) || st.richiesteCompletate.has(nome.toLowerCase());
       return ok ? { ...base, stato: 'verde', dettaglio: `Richiesta «${nome}» completata`, manuale: false } : grigio(`Richiesta «${nome}» non risulta completata (Guida → Richieste) — oppure conferma qui`);
+    }
+    case 'squadra': {
+      const chiave = String(dati.membro);
+      const dentro = st.membriSquadra.has(chiave);
+      // Grigio e non rosso quando manca: «non l'ho ancora segnato» non e' «non ce l'ho», e la
+      // differenza conta — la riga si conferma a mano come le altre di questo genere.
+      return dentro
+        ? { ...base, stato: 'verde', dettaglio: `${t('confidente', chiave)} e' in squadra`, manuale: false }
+        : grigio(`${t('confidente', chiave)} non risulta ancora in squadra (Partita → Denaro e squadra) — oppure conferma qui`);
     }
     case 'confidente': {
       const attuale = st.ranghiConfidenti.get(String(dati.confidente)) ?? 0;
