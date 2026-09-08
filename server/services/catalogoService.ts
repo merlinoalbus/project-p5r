@@ -23,7 +23,7 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   negozio: ['condizioni_json', 'nome', 'luogo', 'luogo_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari', 'sblocco', 'note', 'fonte'],
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'effetto', 'statistiche', 'disponibile_dal', 'condizione', 'nota', 'fonte'],
   libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte'],
-  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'prezzo', 'sessioni', 'dettagli', 'fonte'],
+  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'note_successive', 'prezzo', 'sessioni', 'dettagli', 'fonte'],
   attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
   cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],

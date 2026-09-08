@@ -7,11 +7,12 @@ import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
 import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, TipoLettura, VideogiocoDto, VideogiochiDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
+import { aggiornaDote, puntiDaNote } from './partiteService.js';
 import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaLibro { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
-interface RigaFilm { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaFilm { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
 /** La disponibilità di una riga, dalle condizioni strutturate (migrazione 052).
  *
@@ -74,7 +75,7 @@ const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDt
   const progresso = r.dove === 'dvd' ? Math.min(grezzo, totaleSessioni) : grezzo;
   const iniziato = progresso > 0;
   return {
-    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, periodo: r.periodo, dote: r.dote as FilmDto['dote'], note: r.note, prezzo: r.prezzo, dettagli: r.dettagli, fonte: r.fonte, verificato: r.verificato === 1,
+    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, periodo: r.periodo, dote: r.dote as FilmDto['dote'], note: r.note, noteSuccessive: r.note_successive, prezzo: r.prezzo, dettagli: r.dettagli, fonte: r.fonte, verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso, iniziato, fatto: r.dove === 'cinema' ? iniziato : progresso >= totaleSessioni,
     ...conDisponibilita(r.condizioni_json, st),
   };
@@ -170,6 +171,65 @@ export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
  * Registra una lettura/visione. `lettura_partita` contiene soltanto fruizioni completate:
  * libri, film e DVD entrano quando l'avanzamento raggiunge il rispettivo totale.
  */
+/** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. */
+function haAnimaDaCineasta(partitaId: number): boolean {
+  return !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = 'anima-da-cineasta'").get(partitaId);
+}
+
+/** Le note che un conseguimento dà, e a quale Dote.
+ *
+ * `successiva` è vero dalla seconda volta in poi, e riguarda solo i film al cinema: là la guida
+ * dichiara riga per riga quanto vale rivedere un titolo, e dove non lo dichiara (`note_successive`
+ * vuoto) rivederlo non dà niente — che è quel che l'app faceva finora, quindi nessuna partita
+ * cambia da sola. */
+function noteDelConseguimento(riga: RigaLibro | RigaFilm | RigaAttivita, tipo: TipoLettura, successiva: boolean): { dote: string; note: 1 | 2 | 3 } | null {
+  if (tipo === 'videogioco') {
+    const doti = JSON.parse((riga as RigaAttivita).doti_json) as Array<{ dote: string | null; note: number | null }>;
+    const d = doti.find((x) => x.dote && x.note);
+    return d ? { dote: d.dote!, note: Math.min(3, Math.max(1, d.note!)) as 1 | 2 | 3 } : null;
+  }
+  const r = riga as RigaLibro | RigaFilm;
+  if (!r.dote) return null;
+  const grezze = successiva ? (riga as RigaFilm).note_successive : r.note;
+  if (!grezze || grezze < 1) return null;
+  return { dote: r.dote, note: Math.min(3, Math.max(1, grezze)) as 1 | 2 | 3 };
+}
+
+/** Applica le note di un conseguimento e **scrive che cosa ha dato**, per poterlo togliere identico.
+ *
+ * Il bonus del libro è la regola che l'utente ha ricordato: tre note lette in un libro valgono il
+ * quarto scalino (7 punti invece di 5), e la stessa `puntiDaNote` lo sa già fare — bastava passarle
+ * che si tratta di un libro, cosa che nessuno faceva perché nessuno chiamava da qui. */
+function applicaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: string, riga: RigaLibro | RigaFilm | RigaAttivita, successiva: boolean, adesso: string): void {
+  const n = noteDelConseguimento(riga, tipo, successiva);
+  if (!n) return;
+  const ordine = ((prepared('SELECT MAX(ordine) AS m FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').get(partitaId, tipo, chiave) as { m: number | null }).m ?? 0) + 1;
+  const cinema = tipo === 'film' && haAnimaDaCineasta(partitaId);
+  const punti = puntiDaNote(n.note, tipo === 'libro', false, cinema);
+  aggiornaDote(partitaId, n.dote, { delta: punti });
+  prepared('INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+    .run(partitaId, tipo, chiave, ordine, n.dote, punti, n.note, adesso);
+}
+
+/** Toglie l'**ultimo** conseguimento registrato: al cinema la prima visione vale più delle altre,
+ *  e restituire la prima quando si disfa la terza sarebbe un regalo. */
+function annullaUltimoEffettoLettura(partitaId: number, tipo: TipoLettura, chiave: string): void {
+  const ultimo = prepared('SELECT ordine FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? ORDER BY ordine DESC LIMIT 1').get(partitaId, tipo, chiave) as { ordine: number } | undefined;
+  if (!ultimo) return;
+  for (const e of prepared('SELECT dote_chiave, punti FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? AND ordine = ?').all(partitaId, tipo, chiave, ultimo.ordine) as Array<{ dote_chiave: string; punti: number }>) {
+    aggiornaDote(partitaId, e.dote_chiave, { delta: -e.punti });
+  }
+  prepared('DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? AND ordine = ?').run(partitaId, tipo, chiave, ultimo.ordine);
+}
+
+/** Toglie tutto quello che un elemento ha dato: si usa quando si disfa un completamento. */
+function annullaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: string): void {
+  for (const e of prepared('SELECT dote_chiave, punti FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').all(partitaId, tipo, chiave) as Array<{ dote_chiave: string; punti: number }>) {
+    aggiornaDote(partitaId, e.dote_chiave, { delta: -e.punti });
+  }
+  prepared('DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').run(partitaId, tipo, chiave);
+}
+
 export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: string, modifica: { fatto: boolean } | { avanzamento: number }): LibroDto | FilmDto | VideogiocoDto {
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const riga = (tipo === 'libro' ? prepared('SELECT * FROM libro WHERE chiave = ?').get(chiave) : tipo === 'film' ? prepared('SELECT * FROM film WHERE chiave = ?').get(chiave) : prepared("SELECT * FROM attivita WHERE chiave = ? AND tipo='videogioco'").get(chiave)) as RigaLibro | RigaFilm | RigaAttivita | undefined;
@@ -182,6 +242,11 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     throw httpErrors.badRequest('avanzamento-non-valido', senzaMassimo ? "L'avanzamento deve essere un intero non negativo." : `L'avanzamento deve essere un intero fra 0 e ${totale}.`);
   }
   getDb().transaction(() => {
+    // Quante visioni/sessioni c'erano **prima** di questa scrittura: al cinema serve a sapere
+    // quante se ne aggiungono o se ne tolgono, perché ognuna è un conseguimento a sé.
+    const confermatoPrima = tipo === 'film'
+      ? ((prepared('SELECT avanzamento FROM progresso_film_partita WHERE partita_id = ? AND film_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0)
+      : 0;
     const era = tipo === 'videogioco'
       ? !!prepared('SELECT 1 FROM progresso_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ? AND avanzamento >= ?').get(partitaId, chiave, totale)
       : !!prepared('SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').get(partitaId, tipo, chiave);
@@ -208,6 +273,25 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
       const dove = tipo === 'libro' ? (riga as RigaLibro).dove : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
       registraEvento(partitaId, 'lettura', `${etichetta}: ${titolo}`, `${dove}${dote}.`, { tipo, chiave });
+    }
+    // ---- Il conseguimento alza le Doti ----
+    //
+    // È qui il trigger, non nel pulsante: un libro **finito**, un film **visto**, un gioco
+    // **completato**. Prima non lo faceva nessuno — la scheda diceva «Coraggio ♪♪♪» e i punti non
+    // arrivavano — e i punti li davano solo la guida del giorno, le domande in classe e i pulsanti
+    // a mano.
+    //
+    // Un film al cinema si rivede, e ogni visione conta: la prima con le sue note, quelle dopo con
+    // `note_successive`, che dove la guida non dichiara niente resta vuoto e vale zero. Libri, DVD e
+    // videogiochi si conseguono una volta sola, e il loro effetto scatta al completamento.
+    if (tipo !== 'film' || (riga as RigaFilm).dove !== 'cinema') {
+      if (registrato && !era) applicaEffettiLettura(partitaId, tipo, chiave, riga, false, adesso);
+      else if (!registrato && era) annullaEffettiLettura(partitaId, tipo, chiave);
+    } else {
+      // Al cinema il progresso non ha tetto: conta quante visioni si aggiungono o si tolgono.
+      const prima = confermatoPrima;
+      for (let i = prima; i < richiesto; i++) applicaEffettiLettura(partitaId, tipo, chiave, riga, i > 0, adesso);
+      for (let i = prima; i > richiesto; i--) annullaUltimoEffettoLettura(partitaId, tipo, chiave);
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();

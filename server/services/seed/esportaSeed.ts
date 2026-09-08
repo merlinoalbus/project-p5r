@@ -153,7 +153,7 @@ interface RigaLibroSeed {
 }
 interface RigaFilmSeed {
   chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string;
-  dote: string | null; note: number | null; prezzo: number | null; sessioni: number; dettagli: string | null;
+  dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null;
   fonte: string; verificato: number; condizioni_json: string | null;
 }
 
@@ -212,7 +212,7 @@ export function esportaAttivitaSeed(precedente?: AttivitaSeed): AttivitaSeed {
     const cond = condizioniDaScrivere(f.condizioni_json, [conPreposizione(f.periodo)], null);
     const prodotto = {
       chiave: f.chiave, ordine: f.ordine, nome: f.nome, nomeIt: f.nome_it, dove: f.dove, periodo: f.periodo,
-      dote: f.dote, note: f.note, prezzo: f.prezzo, sessioni: f.sessioni, dettagli: f.dettagli, fonte: f.fonte,
+      dote: f.dote, note: f.note, ...(f.note_successive !== null && f.note_successive !== undefined ? { noteSuccessive: f.note_successive } : {}), prezzo: f.prezzo, sessioni: f.sessioni, dettagli: f.dettagli, fonte: f.fonte,
       verificato: f.verificato === 1,
       ...(cond ? { condizioni: cond } : {}),
     };

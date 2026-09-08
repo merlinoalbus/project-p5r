@@ -1269,6 +1269,8 @@ export interface FilmDto {
   periodo: string;
   dote: DoteChiave | null;
   note: number | null;
+  /** Quanto vale rivederlo: al cinema la guida lo dichiara riga per riga. Vuoto = niente. */
+  noteSuccessive: number | null;
   prezzo: number | null;
   dettagli: string | null;
   fonte: string;

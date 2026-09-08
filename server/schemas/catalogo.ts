@@ -82,6 +82,10 @@ export const datiFilm = z.object({
   periodo: testo(300).default(''),
   dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable().optional(),
   note: z.number().int().min(0).max(9).nullable().optional(),
+  // Quanto vale **rivedere** un titolo: al cinema la guida lo dichiara riga per riga («prima
+  // visione: +3; visioni successive: +1»), e senza questo campo quella distinzione viveva solo
+  // nella prosa dei dettagli, dove l'app non poteva applicarla. Vuoto = rivederlo non da' niente.
+  note_successive: z.number().int().min(0).max(9).nullable().optional(),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   sessioni: z.number().int().min(1).max(9).nullable().optional(),
   dettagli: testo(2000).nullable().optional(),

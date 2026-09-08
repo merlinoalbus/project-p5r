@@ -1442,6 +1442,7 @@
  "film": [
   {
    "chiave": "cinema-le-sedici-domande",
+   "noteSuccessive": 1,
    "ordine": 0,
    "nome": "Le sedici domande",
    "nomeIt": "Le sedici domande",
@@ -1457,6 +1458,7 @@
   },
   {
    "chiave": "cinema-l-amore-chissa",
+   "noteSuccessive": 1,
    "ordine": 1,
    "nome": "L'amore chissà",
    "nomeIt": "L'amore chissà",
@@ -1547,6 +1549,7 @@
   },
   {
    "chiave": "cinema-like-a-dragon",
+   "noteSuccessive": 1,
    "ordine": 7,
    "nome": "Like a Dragon",
    "nomeIt": null,
@@ -1562,6 +1565,7 @@
   },
   {
    "chiave": "cinema-soraemon",
+   "noteSuccessive": 1,
    "ordine": 8,
    "nome": "Soraemon",
    "nomeIt": null,
@@ -1577,6 +1581,7 @@
   },
   {
    "chiave": "cinema-duhvengers",
+   "noteSuccessive": 1,
    "ordine": 9,
    "nome": "Duhvengers",
    "nomeIt": null,
@@ -1592,6 +1597,7 @@
   },
   {
    "chiave": "cinema-pach-saw",
+   "noteSuccessive": 1,
    "ordine": 10,
    "nome": "Pach Saw",
    "nomeIt": null,
@@ -1607,6 +1613,7 @@
   },
   {
    "chiave": "cinema-fight-kebab",
+   "noteSuccessive": 1,
    "ordine": 11,
    "nome": "Fight Kebab",
    "nomeIt": null,
@@ -1622,6 +1629,7 @@
   },
   {
    "chiave": "cinema-like-a-showtime-tiger",
+   "noteSuccessive": 1,
    "ordine": 12,
    "nome": "Like a Showtime Tiger",
    "nomeIt": null,
@@ -1637,6 +1645,7 @@
   },
   {
    "chiave": "cinema-back-to-the-ninja",
+   "noteSuccessive": 1,
    "ordine": 13,
    "nome": "Back to the Ninja",
    "nomeIt": null,
@@ -1652,6 +1661,7 @@
   },
   {
    "chiave": "cinema-popos-nest",
+   "noteSuccessive": 1,
    "ordine": 14,
    "nome": "Popo's Nest",
    "nomeIt": null,
@@ -1667,6 +1677,7 @@
   },
   {
    "chiave": "cinema-merry-christmess",
+   "noteSuccessive": 1,
    "ordine": 15,
    "nome": "Merry Christmess",
    "nomeIt": null,
@@ -1682,6 +1693,7 @@
   },
   {
    "chiave": "cinema-march-of-the-sheeple",
+   "noteSuccessive": 1,
    "ordine": 16,
    "nome": "March of the Sheeple",
    "nomeIt": null,
@@ -1697,6 +1709,7 @@
   },
   {
    "chiave": "cinema-the-good-father",
+   "noteSuccessive": 1,
    "ordine": 17,
    "nome": "The Good Father",
    "nomeIt": null,
