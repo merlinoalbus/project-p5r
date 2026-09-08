@@ -693,24 +693,37 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
               {/* `tabella--adattiva`: nel pannello, largo 280 px, quattro colonne fisse spezzavano
                   l'intestazione lettera per lettera. La regola guarda la larghezza del contenitore,
                   non quella della finestra, quindi qui scatta anche su un monitor largo. */}
-              <table className="visore-mappa__articoli tabella--adattiva" aria-label={`Articoli di ${negozio.nome}`}>
-                <thead><tr><th>{acquistabile ? 'Comprato' : ''}</th><th>Articolo</th><th>Prezzo</th><th>Disponibile</th></tr></thead>
-                <tbody>
-                  {articoliVisibili.map((a) => (
-                    <tr key={a.chiave} className={a.comprato ? 'opacity-60' : ''}>
-                      {/* L'etichetta serve **soprattutto** qui. Nella tabella la colonna ha
-                          l'intestazione in cima; impilata, senza etichetta resta una casella nuda
-                          in mezzo alla riga e non si capisce che cosa spunti. */}
-                      <td data-etichetta={acquistabile ? 'Comprato' : 'Stato'}>{acquistabile
-                        ? <input type="checkbox" className="w-5 h-5" checked={a.comprato} disabled={occupato} onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} />
-                        : <span aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}</td>
-                      <td data-etichetta="Articolo" className={a.comprato ? 'line-through' : ''}>{a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span></td>
-                      <td data-etichetta="Prezzo" className="tabular-nums whitespace-nowrap">{a.prezzo !== null ? formattaYen(a.prezzo) : '—'}</td>
-                      <td data-etichetta="Disponibile">{disponibilita(a)}{a.disponibilita && a.disponibilita.stato !== 'disponibile' && <> <ChipDisponibilita disponibilita={a.disponibilita} compatto /></>}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* **Una riga per articolo, non una tabella impilata.**
+                  La tabella adattiva va bene dove le colonne sono tante e la larghezza c'e'; qui il
+                  pannello e' 280 px e impilarla dava quattro etichette maiuscole per ogni articolo —
+                  dodici in tre righe — che mangiavano un terzo della larghezza e mandavano a capo
+                  «Yaki-Imo leggendario», con la categoria orfana sotto. Le etichette ripetute non
+                  dicevano niente che il valore non dicesse gia' da se': un prezzo si riconosce, e
+                  una casella accanto al nome si capisce.
+                  Qui ogni articolo e' una riga: nome e categoria in alto, prezzo e stato sotto. */}
+              <ul className="visore-mappa__merce m-0 list-none p-0" aria-label={`Articoli di ${negozio.nome}`}>
+                {articoliVisibili.map((a) => (
+                  <li key={a.chiave} className={`visore-mappa__merce-riga ${a.comprato ? 'opacity-60' : ''}`}>
+                    {acquistabile
+                      ? <input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato}
+                          onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} />
+                      : <span className="w-5 shrink-0 text-center" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
+                    <span className="min-w-0 flex-1">
+                      <span className={`block text-[13px] leading-tight ${a.comprato ? 'line-through' : ''}`}>
+                        {a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>
+                      </span>
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-text-secondary">
+                        <span className="tabular-nums">{a.prezzo !== null ? formattaYen(a.prezzo) : 'prezzo non indicato'}</span>
+                        {/* «sempre» si dice solo quando e' vero: accanto a un cartellino che avvisa
+                            del contrario era una contraddizione scritta due volte sulla stessa riga. */}
+                        {a.disponibilita && a.disponibilita.stato !== 'disponibile'
+                          ? <ChipDisponibilita disponibilita={a.disponibilita} compatto />
+                          : <span>{disponibilita(a)}</span>}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>

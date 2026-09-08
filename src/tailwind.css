@@ -549,6 +549,11 @@
   .visore-mappa__scheda { border: 1px solid var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary)); padding: 10px; }
   /* Larghezze fisse: nel pannello (≤340 px) il layout automatico, con `overflow-wrap: anywhere` ereditato da body, riduceva «Articolo» a un
      carattere (min-content) e lasciava 700+ px alla «Disponibile» senza a capo. Le parole lunghe si spezzano solo quando non stanno nella cella. */
+  /* Gli articoli di un negozio nel pannello: una riga ciascuno, non una tabella. */
+  .visore-mappa__merce { display: flex; flex-direction: column; }
+  .visore-mappa__merce-riga { display: flex; align-items: flex-start; gap: 8px; padding: 7px 2px; border-bottom: 1px solid var(--color-border); }
+  .visore-mappa__merce-riga:last-child { border-bottom: 0; }
+
   .visore-mappa__articoli { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; overflow-wrap: break-word; }
   @container (max-width: 420px) {
     .visore-mappa__articoli { table-layout: auto; }

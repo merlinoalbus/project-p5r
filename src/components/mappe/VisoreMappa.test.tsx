@@ -88,7 +88,10 @@ describe('VisoreMappa', () => {
     expect(onRaccolto).toHaveBeenCalledWith(expect.objectContaining({ id: 4 }), true);
     fireEvent.click(screen.getByRole('button', { name: 'Negozio: Untouchable' }));
     const scheda = within(await screen.findByRole('region', { name: 'Scheda: Untouchable' }));
-    expect(scheda.getByRole('table', { name: 'Articoli di Untouchable' })).toBeInTheDocument();
+    // Non piu' una tabella: nel pannello da 280 px impilarla dava quattro etichette maiuscole per
+    // articolo che mangiavano un terzo della larghezza. Ogni articolo e' una riga di un elenco.
+    expect(scheda.getByRole('list', { name: 'Articoli di Untouchable' })).toBeInTheDocument();
+    expect(scheda.getAllByRole('listitem').length).toBeGreaterThan(0);
     expect(scheda.getByText('Pistola modello Tkachev')).toBeInTheDocument();
     expect(scheda.getByText('12.000 ¥')).toBeInTheDocument();
     expect(scheda.getByRole('link', { name: 'scheda del negozio' })).toHaveAttribute('href', '/guida/negozi/untouchable');
