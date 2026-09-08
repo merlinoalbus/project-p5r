@@ -72,16 +72,15 @@ describe('API Libri', () => {
     expect(libro.fatto).toBe(true);
   });
 
-  /* «Lettura rapida» raddoppia la velocità di lettura, e l'app lo scriveva senza farlo.
+  /* «Lettura rapida» raddoppia la velocità di lettura, e l'app lo dichiarava senza applicarlo.
    *
-   * Il libro dichiara nei suoi stessi dati «Raddoppia la velocita di lettura di tutti i libri», ma
-   * il totale di ogni libro veniva dalla sola riga del libro: chi seguiva l'app pianificava
-   * pomeriggi di lettura che nel gioco non servivano più. Raddoppiare la velocità è dimezzare le
-   * sessioni, **per eccesso**: tre diventano due, due diventano una, una resta una.
+   * Il come è la parte che conta, e la prima stesura l'aveva sbagliata dimezzando il requisito di
+   * ogni libro: **l'effetto non è retroattivo**. Con quel modello, finire «Lettura rapida» avrebbe
+   * completato da solo i libri lasciati a metà — due sessioni su tre diventano due su due — e nel
+   * gioco non succede: quelle due sessioni le hai lette alla velocità di prima, e restano due.
    *
-   * La parte che si sbaglia facilmente è l'ultima: i libri già letti a metà quando la velocità
-   * raddoppia possono aver già fatto quanto basta, e vanno registrati come letti sul momento —
-   * altrimenti il riepilogo e lo storico restano indietro rispetto a quello che la pagina mostra. */
+   * Quel che raddoppia è quanto rende un pomeriggio **da qui in avanti**. Il requisito del libro
+   * non si muove, e non si muove nemmeno quel che hai già letto; a muoversi è il passo. */
   describe('«Lettura rapida»', () => {
     const libri = async (id: number) => (await request(app).get(`/api/compendio/libri?partita=${id}`)).body.data as LibriDto;
     const trova = (d: LibriDto, chiave: string) => d.libri.find((l) => l.chiave === chiave)!;
@@ -89,59 +88,50 @@ describe('API Libri', () => {
     const leggi = (id: number, chiave: string, avanzamento: number) =>
       request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave, avanzamento });
 
-    it('dimezza per eccesso le sessioni di tutti gli altri libri, e lo dichiara', async () => {
+    it('viene dichiarato appena il libro è letto, e non prima', async () => {
       const id = await nuovaPartita('Lettura rapida');
+      expect((await libri(id)).letturaRapida).toBe(false);
+      await leggi(id, 'lettura-rapida', 1);
+      expect((await libri(id)).letturaRapida).toBe(true);
+      // Toglierlo lo riporta indietro: è uno stato della partita, non un interruttore a senso unico.
+      await leggi(id, 'lettura-rapida', 0);
+      expect((await libri(id)).letturaRapida).toBe(false);
+    });
+
+    it('non tocca i requisiti né quello che hai già letto', async () => {
+      const id = await nuovaPartita('Lettura rapida non retroattiva');
       const prima = await libri(id);
-      expect(prima.letturaRapida).toBe(false);
       const daTre = prima.libri.find((l) => l.sessioni === 3)!;
-      const daDue = prima.libri.find((l) => l.sessioni === 2)!;
-      const daUna = prima.libri.find((l) => l.sessioni === 1 && l.chiave !== 'lettura-rapida')!;
-      expect([daTre.totaleSessioni, daDue.totaleSessioni, daUna.totaleSessioni]).toEqual([3, 2, 1]);
-
-      await leggi(id, 'lettura-rapida', 1);
-
-      const dopo = await libri(id);
-      expect(dopo.letturaRapida).toBe(true);
-      expect(trova(dopo, daTre.chiave).totaleSessioni).toBe(2);
-      expect(trova(dopo, daDue.chiave).totaleSessioni).toBe(1);
-      expect(trova(dopo, daUna.chiave).totaleSessioni).toBe(1);
-      // Il totale complessivo cala davvero: non è un numero cosmetico su una scheda sola.
-      expect(dopo.sessioniTotali).toBeLessThan(prima.sessioniTotali);
-    });
-
-    it('registra come letti i libri che il dimezzamento ha già completato', async () => {
-      const id = await nuovaPartita('Lettura rapida retroattiva');
-      const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3)!;
       await leggi(id, daTre.chiave, 2);
-      expect(trova(await libri(id), daTre.chiave)).toMatchObject({ progresso: 2, totaleSessioni: 3, fatto: false });
 
       await leggi(id, 'lettura-rapida', 1);
 
       const dopo = await libri(id);
-      // Due sessioni su tre erano «a metà»; con la velocità doppia sono esattamente quel che serve.
-      expect(trova(dopo, daTre.chiave)).toMatchObject({ progresso: 2, totaleSessioni: 2, fatto: true });
-      // E il riepilogo lo sa: se restasse indietro, la scheda direbbe «letto» e il conteggio no.
-      expect(dopo.completati).toBe(2);
+      // Il libro chiede ancora tre sessioni, e le due già lette valgono ancora due: né il requisito
+      // cala, né il libro si completa da solo. Se lo facesse, l'app regalerebbe una lettura.
+      expect(trova(dopo, daTre.chiave)).toMatchObject({ progresso: 2, totaleSessioni: 3, fatto: false });
+      // E il totale complessivo resta quello che era, meno nulla.
+      expect(dopo.sessioniTotali).toBe(prima.sessioniTotali);
     });
 
-    it('non promuove chi non è arrivato alla soglia dimezzata', async () => {
-      const id = await nuovaPartita('Lettura rapida parziale');
+    it('l’ultimo pomeriggio chiude il libro perché ne vale due', async () => {
+      const id = await nuovaPartita('Lettura rapida passo doppio');
       const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3)!;
       await leggi(id, daTre.chiave, 1);
       await leggi(id, 'lettura-rapida', 1);
-      expect(trova(await libri(id), daTre.chiave)).toMatchObject({ progresso: 1, totaleSessioni: 2, fatto: false });
+      // Una sessione sola, che ne vale due: da 1 si arriva a 3, cioè al totale. Il passo lo mette
+      // la pagina; qui si sorveglia che il server accetti il salto e registri la lettura.
+      const esito = await leggi(id, daTre.chiave, 3);
+      expect(esito.status).toBe(200);
+      expect(trova(await libri(id), daTre.chiave)).toMatchObject({ progresso: 3, totaleSessioni: 3, fatto: true });
     });
 
-    it('il tetto dell’avanzamento scende insieme al requisito', async () => {
+    it('il tetto resta il requisito del libro, prima e dopo', async () => {
       const id = await nuovaPartita('Lettura rapida tetto');
       const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3)!;
-      expect((await leggi(id, daTre.chiave, 3)).status).toBe(200);
-      await leggi(id, daTre.chiave, 0);
       await leggi(id, 'lettura-rapida', 1);
-      // Tre sessioni su un libro che ora ne chiede due non è un avanzamento valido: è un errore di
-      // chi chiama, e va detto, non accorciato in silenzio.
-      expect((await leggi(id, daTre.chiave, 3)).status).toBe(400);
-      expect((await leggi(id, daTre.chiave, 2)).status).toBe(200);
+      expect((await leggi(id, daTre.chiave, 4)).status).toBe(400);
+      expect((await leggi(id, daTre.chiave, 3)).status).toBe(200);
     });
   });
 

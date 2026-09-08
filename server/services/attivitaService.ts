@@ -35,25 +35,25 @@ const attivitaDto = (r: RigaAttivita, st: StatoDisponibilita | null = null): Att
   ...conDisponibilita(r.condizioni_json, st),
 });
 interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>; progressiFilm: Map<string, number>; progressiVideogiochi: Map<string, number> }
-/** Il libro che cambia le regole di tutti gli altri.
+/** Il libro che cambia le regole di tutti gli altri, **da lì in avanti**.
  *
  * «Lettura rapida» — biblioteca della Shujin, gratis — dichiara nei suoi stessi dati:
- * *«Raddoppia la velocita di lettura di tutti i libri»*. L'app lo mostrava da sempre e non lo
- * applicava: `totaleLibro` guardava solo la riga del libro, quindi dopo averlo finito i 18 libri
- * da due sessioni continuavano a chiederne due e i 5 da tre continuavano a chiederne tre. Chi
- * seguiva l'app pianificava pomeriggi di lettura che nel gioco non servivano più.
+ * *«Raddoppia la velocita di lettura di tutti i libri»*, e l'app lo mostrava senza applicarlo.
  *
- * Raddoppiare la velocità vuol dire dimezzare le sessioni, **arrotondando per eccesso**: tre
- * diventano due, due diventano una, una resta una — mezza sessione non esiste, il pomeriggio si
- * spende intero. */
+ * Come si applica è la parte che conta, e la prima stesura l'aveva sbagliata: **non è
+ * retroattivo**. Dimezzare il totale di ogni libro avrebbe voluto dire che finire «Lettura rapida»
+ * completa da solo i libri lasciati a metà — due sessioni su tre diventano due su due — e nel gioco
+ * non succede: quelle due sessioni le hai lette alla velocità di prima, e restano due.
+ *
+ * Quel che raddoppia è **quanto rende un pomeriggio da qui in poi**. Il requisito del libro non si
+ * muove; a muoversi è il passo: da quando «Lettura rapida» è letto, una sessione vale due. Un libro
+ * da tre fermo a due si chiude con **una** sessione sola, e uno cominciato da zero si chiude con
+ * due — non con una e mezza, perché il pomeriggio si spende intero. */
 const CHIAVE_LETTURA_RAPIDA = 'lettura-rapida';
 const haLetturaRapida = (stato: StatoLetture) => stato.fatti.has(`libro/${CHIAVE_LETTURA_RAPIDA}`);
-const totaleLibro = (r: RigaLibro, rapida = false) => {
-  const piene = Math.max(r.sessioni ?? 1, 1);
-  return rapida ? Math.ceil(piene / 2) : piene;
-};
+const totaleLibro = (r: RigaLibro) => Math.max(r.sessioni ?? 1, 1);
 const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, st: StatoDisponibilita | null = null): LibroDto => {
-  const totaleSessioni = totaleLibro(r, haLetturaRapida(stato));
+  const totaleSessioni = totaleLibro(r);
   const grezzo = stato.progressiLibri.get(r.chiave) ?? 0;
   // «Finito» resta un fatto registrato, non dedotto dal conteggio. La differenza si vede quando i
   // dati cambiano sotto i piedi: se una correzione del seed abbassa le sessioni di un libro, il
@@ -175,7 +175,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const riga = (tipo === 'libro' ? prepared('SELECT * FROM libro WHERE chiave = ?').get(chiave) : tipo === 'film' ? prepared('SELECT * FROM film WHERE chiave = ?').get(chiave) : prepared("SELECT * FROM attivita WHERE chiave = ? AND tipo='videogioco'").get(chiave)) as RigaLibro | RigaFilm | RigaAttivita | undefined;
   if (!riga) throw httpErrors.notFound('lettura-non-trovata', `${tipo === 'libro' ? 'Il libro' : 'Il film'} '${chiave}' non esiste.`);
   const adesso = nowIso();
-  const totale = tipo === 'libro' ? totaleLibro(riga as RigaLibro, haLetturaRapida(letturePartita(partitaId))) : Math.max((riga as RigaFilm | RigaAttivita).sessioni ?? 1, 1);
+  const totale = tipo === 'libro' ? totaleLibro(riga as RigaLibro) : Math.max((riga as RigaFilm | RigaAttivita).sessioni ?? 1, 1);
   const richiesto = 'avanzamento' in modifica ? modifica.avanzamento : modifica.fatto ? totale : 0;
   const senzaMassimo = tipo === 'film' && (riga as RigaFilm).dove === 'cinema';
   if (!Number.isInteger(richiesto) || richiesto < 0 || (!senzaMassimo && richiesto > totale)) {
@@ -208,19 +208,6 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
       const dove = tipo === 'libro' ? (riga as RigaLibro).dove : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
       registraEvento(partitaId, 'lettura', `${etichetta}: ${titolo}`, `${dove}${dote}.`, { tipo, chiave });
-    }
-    // Finire «Lettura rapida» cambia il requisito di tutti gli altri libri, quindi qualcuno può
-    // averlo già soddisfatto senza toccare niente: due sessioni su un libro che ne chiedeva tre
-    // adesso bastano. Va scritto adesso, non lasciato al calcolo di lettura: `completati`,
-    // l'archivio delle letture e lo storico leggono la tabella, e resterebbero indietro.
-    if (tipo === 'libro' && chiave === CHIAVE_LETTURA_RAPIDA && richiesto >= totale) {
-      for (const l of prepared('SELECT * FROM libro').all() as RigaLibro[]) {
-        if (l.chiave === CHIAVE_LETTURA_RAPIDA) continue;
-        const avanzamento = (prepared('SELECT avanzamento FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').get(partitaId, l.chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0;
-        if (avanzamento > 0 && avanzamento >= totaleLibro(l, true)) {
-          prepared("INSERT INTO lettura_partita (partita_id, tipo, chiave, updated_at) VALUES (?, 'libro', ?, ?) ON CONFLICT(partita_id, tipo, chiave) DO NOTHING").run(partitaId, l.chiave, adesso);
-        }
-      }
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
