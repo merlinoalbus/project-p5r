@@ -16,6 +16,13 @@ vi.mock('../../services/api', () => api);
 vi.mock('../../services/api/compendio', () => ({ getQuartieri: vi.fn().mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya' }, { chiave: 'shinjuku', nome: 'Shinjuku' }]) }));
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
 vi.mock('../../stores/notificationStore', () => ({ notifica }));
+// L'archivio unico da cui si sceglie l'oggetto: un libro e un'arma, di due fonti diverse.
+// `vi.hoisted` perche' la fabbrica di `vi.mock` viene issata in cima al file.
+const { oggetti } = vi.hoisted(() => ({ oggetti: [
+  { chiave: 'magnifico-ladro', fonte: 'libri', categoria: 'libro', nome: 'Il magnifico ladro', nomeIt: 'Il magnifico ladro', effetto: 'Alza Conoscenza', statistiche: 'Conoscenza ♪♪ · 3 sessioni', per: null, prezzo: 1200 },
+  { chiave: '7', fonte: 'equipaggiamento', categoria: 'arma', nome: 'Paradise Lost', nomeIt: 'Paradiso perduto', effetto: 'Attacco altissimo', statistiche: null, per: 'Solo Joker', prezzo: null },
+] }));
+vi.mock('../../services/api/catalogo', () => ({ getTuttiGliOggetti: vi.fn().mockResolvedValue(oggetti) }));
 
 const negozioSeed: ElementoCatalogoDto = {
   tipo: 'negozio', chiave: 'untouchable', nome: 'Untouchable', origine: 'seed', modificata: false, nascosta: false, aggiornata: null,
@@ -28,18 +35,47 @@ describe('ModuloCatalogo', () => {
     notifica.mockReset();
   });
 
+  /* **Collega, non copia.** Il difetto che questa prova sorveglia era invisibile: il selettore c'era,
+   * l'elenco si apriva, si sceglieva una voce — e non succedeva niente. Riempiva `nome` con lo
+   * stesso nome gia' digitato e metteva stringhe vuote in effetto e statistiche, perche' per i libri
+   * la sorgente li dava tutti `null`. Sembrava rotto ed era peggio: faceva quel che era stato
+   * scritto per fare, cioe' copiare campi vuoti.
+   *
+   * Ora la riga porta `oggetto_fonte` e `oggetto_chiave`, e i dati dell'oggetto si leggono da li'. */
+  it('collega l’articolo a un oggetto di qualunque tipo, e salva il legame invece dei campi copiati', async () => {
+    api.creaElementoCatalogo.mockResolvedValue({ ...negozioSeed, tipo: 'articolo', chiave: 'biblioteca/il-magnifico-ladro', nome: 'Il magnifico ladro', origine: 'utente' });
+    render(<ModuloCatalogo tipo="articolo" negozioChiave="biblioteca" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
+    // Si cerca per nome, senza aver scelto prima nessuna categoria: l'archivio e' uno solo.
+    fireEvent.change(await screen.findByLabelText('Cerca l’oggetto'), { target: { value: 'magnifico' } });
+    fireEvent.click(await screen.findByRole('button', { name: /Il magnifico ladro/ }));
+
+    // I dati dell'oggetto si vedono, e non sono digitabili.
+    expect(await screen.findByText('Oggetto collegato')).toBeInTheDocument();
+    expect(screen.getByText('Conoscenza ♪♪ · 3 sessioni')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Nome dell'articolo/)).toBeNull();
+
+    fireEvent.change(screen.getByLabelText('Prezzo in yen'), { target: { value: '900' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
+    await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenCalled());
+    const [, dati] = api.creaElementoCatalogo.mock.calls[0];
+    expect(dati).toMatchObject({ oggetto_fonte: 'libri', oggetto_chiave: 'magnifico-ladro', categoria: 'libro', prezzo: 900 });
+  });
+
   it('crea un articolo agganciato al negozio da cui è stato aperto', async () => {
     api.creaElementoCatalogo.mockResolvedValue({ ...negozioSeed, tipo: 'articolo', chiave: 'untouchable/u-coltello', nome: 'Coltello', origine: 'utente' });
     const onSalvato = vi.fn();
     render(<ModuloCatalogo tipo="articolo" negozioChiave="untouchable" onChiudi={vi.fn()} onSalvato={onSalvato} />);
     expect(screen.getByText('Nuovo articolo')).toBeInTheDocument();
+    // Il nome non si digita finche' non si e' detto che l'oggetto non esiste: prima si sceglie.
+    expect(screen.queryByLabelText(/Nome dell'articolo/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Non c’è: lo inserisco' }));
     fireEvent.change(screen.getByLabelText(/Nome dell'articolo/), { target: { value: 'Coltello da combattimento' } });
     fireEvent.change(screen.getByLabelText('Prezzo in yen'), { target: { value: '3000' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
     await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenCalled());
     const [tipo, dati] = api.creaElementoCatalogo.mock.calls[0];
     expect(tipo).toBe('articolo');
-    expect(dati).toMatchObject({ nome: 'Coltello da combattimento', prezzo: 3000, negozio_chiave: 'untouchable', effetto: null, categoria: 'altro', fonte: '' });
+    expect(dati).toMatchObject({ nome: 'Coltello da combattimento', prezzo: 3000, negozio_chiave: 'untouchable', categoria: 'altro', oggetto_fonte: null, oggetto_chiave: null });
     expect(onSalvato).toHaveBeenCalled();
     expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('aggiunto'));
   });

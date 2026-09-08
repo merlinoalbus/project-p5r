@@ -3,7 +3,6 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { useCarica } from '../../hooks/useCarica';
 import { getStatiPartita,salvaStatoPartita,type FattoGioco } from '../../services/api/condizioni';
-import { NuovoStato } from '../guida/CondizioniEditor';
 import { notifica } from '../../stores/notificationStore';
 function Valore({f,id,onSalvato}:{f:FattoGioco;id:number;onSalvato:()=>void}){
   const [valore,setValore]=useState(f.valore?.toString()??''),[occupato,setOccupato]=useState(false);
@@ -11,5 +10,5 @@ function Valore({f,id,onSalvato}:{f:FattoGioco;id:number;onSalvato:()=>void}){
 }
 export function StatiPartita(){
   const id=usePartitaStore(s=>s.attiva?.id);const dati=useCarica(()=>id?getStatiPartita(id):Promise.resolve([]),[id]);
-  return <section className="card"><h2>Stati della partita</h2><p>Registra eventi, attività, quantità e gradi usati dalle condizioni. Ogni partita mantiene i propri valori.</p>{!id?<p>Seleziona una partita per registrarne lo stato.</p>:dati.errore?<p role="alert">{dati.errore}</p>:dati.dati?.map(f=><Valore key={`${id}/${f.chiave}/${f.valore}`} id={id} f={f} onSalvato={()=>void dati.ricarica()}/>)}<NuovoStato onCreato={()=>void dati.ricarica()}/></section>;
+  return <section className="card"><h2>Stati della partita</h2><p>Registra eventi, attività, quantità e gradi usati dalle condizioni. Ogni partita mantiene i propri valori.</p>{!id?<p>Seleziona una partita per registrarne lo stato.</p>:dati.errore?<p role="alert">{dati.errore}</p>:dati.dati?.map(f=><Valore key={`${id}/${f.chiave}/${f.valore}`} id={id} f={f} onSalvato={()=>void dati.ricarica()}/>)}</section>;
 }
