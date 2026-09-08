@@ -25,7 +25,7 @@ vi.mock('../components/mappe/DoveSiTrova', () => ({
   },
 }));
 
-const art = (chiave: string, nome: string, categoria: ArticoloDto['categoria'], per: string | null, prezzo: number | null): ArticoloDto => ({ chiave, negozioChiave: 'untouchable', negozioNome: 'Untouchable', nome, nomeIt: null, categoria, per, prezzo, effetto: 'Effetto', statistiche: 'Attacco 50', disponibileDal: 'dal 6 giugno', condizione: null, nota: null, fonte: 'https://www.allgamestaff.it/x', verificato: true, acquistato: false });
+const art = (chiave: string, nome: string, categoria: ArticoloDto['categoria'], per: string | null, prezzo: number | null): ArticoloDto => ({ chiave, negozioChiave: 'untouchable', negozioNome: 'Untouchable', nome, nomeIt: null, categoria, per, prezzo, effetto: 'Effetto', statistiche: 'Attacco 50', quantita: null, oggettoFonte: null, oggettoChiave: null, disponibileDal: 'dal 6 giugno', condizione: null, nota: null, fonte: 'https://www.allgamestaff.it/x', verificato: true, acquistato: false });
 const negozio: NegozioDettaglioDto = { chiave: 'untouchable', nome: 'Untouchable', luogo: 'Shibuya, Central Street', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', tipo: 'misto', gestore: 'Munehisa Iwai', confidente: { chiave: 'iwai', nome: 'Munehisa Iwai' }, orari: 'Sera', sblocco: 'Da subito', note: null, fonte: 'https://www.allgamestaff.it/n', articoli: 3, verificati: 3, articoliElenco: [art('untouchable/kogatana-nera', 'Kogatana nera', 'arma', 'Joker', 1000), art('untouchable/frusta', 'Frusta', 'arma', 'Ann', 1200), art('untouchable/giubbotto', 'Giubbotto', 'protezione', 'tutti', 3000)], acquistati: 0 };
 
 describe('NegozioPage', () => {

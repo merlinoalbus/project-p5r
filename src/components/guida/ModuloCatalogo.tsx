@@ -17,7 +17,7 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO } from '../../utils/negozi';
-import { getOggettiSelezionabili } from '../../services/api/catalogo';
+import { getTuttiGliOggetti } from '../../services/api/catalogo';
 import { NOME_DOTE } from '../../utils/citta';
 import type { ElementoCatalogoDto, OggettoSelezionabileDto, TipoCatalogo } from '../../types';
 
@@ -39,17 +39,13 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'gestore', etichetta: 'Chi lo gestisce', tipo: 'testo' },
     { nome: 'orari', etichetta: 'Orari', tipo: 'testo' },
     { nome: 'note', etichetta: 'Note', tipo: 'testolungo' },
-    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo', aiuto: 'Indirizzo della pagina da cui hai preso i dati' },
   ],
   articolo: [
     { nome: 'nome', etichetta: 'Nome dell\'articolo', tipo: 'testo' },
     { nome: 'categoria', etichetta: 'Categoria', tipo: 'select', opzioni: NOME_CATEGORIA_ARTICOLO },
     { nome: 'prezzo', etichetta: 'Prezzo in yen', tipo: 'numero' },
-    { nome: 'per', etichetta: 'Per chi', tipo: 'testo', aiuto: 'Nome del personaggio, «tutti» o «party»' },
-    { nome: 'effetto', etichetta: 'Effetto', tipo: 'testo' },
-    { nome: 'statistiche', etichetta: 'Statistiche', tipo: 'testo' },
+    { nome: 'quantita', etichetta: 'Quante se ne possono comprare', tipo: 'numero', aiuto: 'Vuoto = nessun limite dichiarato' },
     { nome: 'nota', etichetta: 'Nota', tipo: 'testolungo' },
-    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
   libro: [
     { nome: 'nome', etichetta: 'Titolo del libro', tipo: 'testo' },
@@ -60,9 +56,7 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE, aiuto: 'Campo che l’app usa: diventa punti veri quando spunti la lettura nella guida giorno per giorno' },
     { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero', aiuto: 'Quante ♪ dà: è il numero, non un testo. Con la Dote qui sopra fa i punti (♪ = 2, ♪♪ = 3, ♪♪♪ = 5, e 7 per un libro)' },
     { nome: 'sessioni', etichetta: 'Sessioni di lettura', tipo: 'numero', aiuto: 'Quante volte va letto per finirlo' },
-    { nome: 'sblocca', etichetta: 'Che cosa sblocca', tipo: 'testo', aiuto: 'Testo per te. Perché l’app lo sappia davvero, scrivi la regola in «Condizioni» qui sotto' },
     { nome: 'dettagli', etichetta: 'Dettagli', tipo: 'testolungo' },
-    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
   film: [
     { nome: 'nome', etichetta: 'Titolo del film', tipo: 'testo' },
@@ -75,84 +69,116 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'note_successive', etichetta: 'Note delle volte dopo', tipo: 'numero', aiuto: 'Quanto vale rivederlo: al cinema la guida lo dichiara («visioni successive: +1»). Vuoto = rivederlo non dà niente' },
     { nome: 'sessioni', etichetta: 'Visioni per completarlo', tipo: 'numero', aiuto: 'Un film al cinema 1, un DVD 2' },
     { nome: 'dettagli', etichetta: 'Dettagli', tipo: 'testolungo' },
-    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
   attivita: [
     { nome: 'nome', etichetta: 'Nome dell’attività', tipo: 'testo' },
-    { nome: 'tipo', etichetta: 'Tipo', tipo: 'testo', aiuto: 'Per esempio: minigioco, lavoro, videogioco, studio' },
+    { nome: 'tipo', etichetta: 'Tipo', tipo: 'select', opzioni: { 'mini-gioco': 'Minigioco', lavoro: 'Lavoro part-time', videogioco: 'Videogioco', studio: 'Studio', lettura: 'Lettura', allenamento: 'Allenamento', cibo: 'Cibo', sfida: 'Sfida', altro: 'Altro' } },
     { nome: 'luogo_chiave', etichetta: 'Quartiere', tipo: 'select' },
     { nome: 'luogo', etichetta: 'Dove, per esteso', tipo: 'testo', aiuto: 'Il quartiere si sceglie nel campo sopra' },
-    { nome: 'fascia', etichetta: 'Quando', tipo: 'testo', aiuto: 'Per esempio: giorno, sera, festivi' },
+    { nome: 'fascia', etichetta: 'Quando', tipo: 'select', opzioni: { giorno: 'Di giorno', sera: 'Di sera', entrambe: 'Giorno e sera' } },
     { nome: 'costo', etichetta: 'Costo in yen', tipo: 'numero' },
     { nome: 'paga', etichetta: 'Quanto paga', tipo: 'testo', aiuto: 'Solo per i lavori' },
     { nome: 'sessioni', etichetta: 'Round o sessioni', tipo: 'numero', aiuto: 'Per i videogiochi: quanti round per finirlo' },
-    { nome: 'sblocco', etichetta: 'Come si sblocca', tipo: 'testo', aiuto: 'Testo per te. Perché l’app lo valuti davvero, scrivi la regola in «Condizioni» qui sotto' },
     { nome: 'regole', etichetta: 'Regole', tipo: 'testolungo' },
     { nome: 'premi', etichetta: 'Premi', tipo: 'testolungo', aiuto: 'Nota per te: qui «Coraggio +3» resta una frase. Quello che alza una Dote va dichiarato in «Doti alzate»' },
     { nome: 'altri_effetti', etichetta: 'Altri effetti', tipo: 'testolungo' },
-    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
   // La risposta non è qui: sta in «Risposte giuste», l'editor a righe qui sotto, perché è il dato
   // che l'app usa per dirti che cosa rispondere e un campo di testo l'avrebbe reso illeggibile.
   domanda: [
     { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-12»' },
     { nome: 'tipo', etichetta: 'Quando', tipo: 'select', opzioni: { classe: 'Domanda in classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame finale', altro: 'Altro' } },
-    { nome: 'chi', etichetta: 'Chi la fa', tipo: 'testo', aiuto: 'Per esempio: Prof. Ushimaru' },
+    { nome: 'chi', etichetta: 'Chi la fa', tipo: 'select', opzioni: { 'Prof. Ushimaru': 'Prof. Ushimaru', 'Prof. Kawakami': 'Prof. Kawakami', 'Prof. Hiruta': 'Prof. Hiruta', 'Prof. Inui': 'Prof. Inui', 'Prof. Chuono': 'Prof. Chuono', 'Prof. Maruki': 'Prof. Maruki', 'Prof. Usami': 'Prof. Usami', 'Game show in TV': 'Game show in TV' } },
     { nome: 'domanda', etichetta: 'Domanda', tipo: 'testolungo' },
     { nome: 'ricompensa', etichetta: 'Che cosa dà', tipo: 'testo', aiuto: 'Per esempio: Conoscenza +1 nota' },
     { nome: 'note', etichetta: 'Note', tipo: 'testolungo' },
-    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
   cruciverba: [
     { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-18»' },
     { nome: 'indizio', etichetta: 'Indizio', tipo: 'testolungo' },
     { nome: 'risposta', etichetta: 'Risposta', tipo: 'testo' },
     { nome: 'risposta_en', etichetta: 'Risposta in inglese', tipo: 'testo', aiuto: 'Solo se ti serve: è la parola con cui la risolve chi gioca in inglese' },
-    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
 };
 
-/** Scegliere un oggetto che l'app già conosce, invece di ribatterlo a mano.
+const etichettaOggetto = (o: OggettoSelezionabileDto) => o.nomeIt && o.nomeIt !== o.nome ? `${o.nomeIt} (${o.nome})` : o.nome;
+
+const NOME_ARCHIVIO: Record<OggettoSelezionabileDto['fonte'], string> = {
+  equipaggiamento: 'Equipaggiamento', guida: 'Guida', libri: 'Libri', film: 'Film e DVD', videogiochi: 'Videogiochi',
+};
+
+/** **Prima si sceglie la cosa. Se non c'è, la si inserisce.**
  *
- * Mettere in vendita una cosa già censita voleva dire riscriverne nome, effetto e statistiche — e
- * poi le due copie non si parlavano: il ponte fra gli oggetti della guida e gli articoli dei negozi
- * li abbina **per nome**, e su 355 oggetti e 575 articoli ne aggancia 121. Qui l'aggancio lo fai tu
- * mentre compili, che è l'unico momento in cui si sa davvero che sono la stessa cosa.
+ * Il modulo era al contrario: nome e categoria in cima, l'archivio in fondo, e l'archivio filtrato
+ * per la categoria scelta sopra — cioè bisognava indovinare «Libro» prima di poter cercare «Il
+ * magnifico ladro». La via normale era digitare, e la scelta un ripensamento. È così che 454
+ * articoli su 575 sono rimasti scollegati da quello che l'app già sapeva.
  *
- * L'elenco dipende dalla categoria scelta sopra: armi, protezioni e accessori vengono dai 223
- * equipaggiamenti, i consumabili e gli oggetti chiave dalla guida, libri, film e videogiochi dalle
- * loro tabelle. **Non è un cancello**: dove l'app non sa niente — regali, materiali, cibo, altro —
- * il selettore lo dice e i campi restano quelli liberi di prima, che è come si aggiunge una cosa
- * che nessuno ha mai censito. */
-function SceltaOggettoCensito({ categoria, onScegli }: { categoria: string; onScegli: (o: OggettoSelezionabileDto) => void }) {
-  const elenco = useCarica(() => getOggettiSelezionabili(categoria), [categoria]);
+ * Qui l'elenco è **uno solo su tutti i tipi** — equipaggiamenti, consumabili, oggetti chiave,
+ * abiti, libri, film, videogiochi — si cerca per nome, e la categoria arriva con l'oggetto scelto.
+ *
+ * E soprattutto **collega, non copia**: sulla riga restano `oggetto_fonte` e `oggetto_chiave`, e
+ * nome, effetto, statistiche e «per chi» si leggono dall'oggetto a ogni lettura. Correggere
+ * l'effetto di un libro aggiorna da solo i negozi che lo vendono, invece di lasciare in giro copie
+ * che dicono cose diverse. */
+function SceltaOggetto({ collegato, onCollega, onScollega, aMano, onAMano }: {
+  collegato: OggettoSelezionabileDto | null;
+  onCollega: (o: OggettoSelezionabileDto) => void;
+  onScollega: () => void;
+  aMano: boolean;
+  onAMano: () => void;
+}) {
+  const elenco = useCarica(() => getTuttiGliOggetti(), []);
+  const [ricerca, setRicerca] = useState('');
   const voci = elenco.dati ?? [];
-  const etichetta = (o: OggettoSelezionabileDto) => o.nomeIt && o.nomeIt !== o.nome ? `${o.nomeIt} (${o.nome})` : o.nome;
+  const q = ricerca.trim().toLocaleLowerCase('it');
+  const trovati = q ? voci.filter((o) => `${o.nome} ${o.nomeIt ?? ''}`.toLocaleLowerCase('it').includes(q)).slice(0, 40) : [];
+
+  if (collegato) {
+    return (
+      <fieldset className="regole-editor flex flex-col gap-2">
+        <legend>Oggetto collegato</legend>
+        <div className="flex flex-wrap items-baseline gap-2">
+          <strong className="text-[15px]">{etichettaOggetto(collegato)}</strong>
+          <span className="chip text-[11px]">{NOME_ARCHIVIO[collegato.fonte]}</span>
+        </div>
+        {/* In sola lettura, e viene dall'oggetto: qui non si digita niente. */}
+        <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[13px]">
+          {collegato.effetto && <><dt className="text-text-muted">Effetto</dt><dd className="m-0">{collegato.effetto}</dd></>}
+          {collegato.statistiche && <><dt className="text-text-muted">Statistiche</dt><dd className="m-0">{collegato.statistiche}</dd></>}
+          {collegato.per && <><dt className="text-text-muted">Per chi</dt><dd className="m-0">{collegato.per}</dd></>}
+        </dl>
+        <button type="button" className="btn btn-ghost touch self-start" onClick={onScollega}>Scollega e scegli un altro oggetto</button>
+      </fieldset>
+    );
+  }
+
   return (
     <fieldset className="regole-editor flex flex-col gap-2">
-      <legend>Prendilo da quello che l’app già conosce</legend>
-      {elenco.caricamento && <p className="m-0 text-[12px] text-text-muted" role="status">Cerco…</p>}
-      {elenco.errore && <p className="m-0 text-[12px]" role="alert">Non riesco a leggere l’elenco. <button type="button" className="btn touch" onClick={() => void elenco.ricarica()}>Riprova</button></p>}
-      {!elenco.caricamento && !elenco.errore && voci.length === 0 && (
-        <p className="m-0 text-[12px] text-text-muted" role="status">
-          Di questa categoria l’app non ha un archivio: scrivi l’articolo nei campi qui sopra: nasce come oggetto di questo negozio.
-        </p>
+      <legend>Che cosa vende</legend>
+      {elenco.errore && <p className="m-0 text-[12px]" role="alert">Non riesco a leggere l’archivio. <button type="button" className="btn touch" onClick={() => void elenco.ricarica()}>Riprova</button></p>}
+      <label className="editor-mappa__campo">
+        Cerca l’oggetto
+        <input type="search" className="form-input" value={ricerca} onChange={(e) => setRicerca(e.target.value)}
+          placeholder={elenco.caricamento ? 'Carico l’archivio…' : `Cerca fra ${voci.length} oggetti di ogni tipo…`} />
+      </label>
+      {q && trovati.length > 0 && (
+        <ul className="m-0 flex max-h-64 list-none flex-col gap-1 overflow-y-auto p-0">
+          {trovati.map((o) => (
+            <li key={`${o.fonte}/${o.chiave}`}>
+              <button type="button" className="btn btn-ghost touch w-full justify-between text-left" onClick={() => onCollega(o)}>
+                <span>{etichettaOggetto(o)}</span>
+                <span className="chip text-[11px]">{NOME_ARCHIVIO[o.fonte]}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
-      {voci.length > 0 && (
-        <label className="editor-mappa__campo">
-          <span className="sr-only">Oggetto già censito</span>
-          <select className="form-input" defaultValue="" onChange={(e) => {
-            const scelto = voci[Number(e.target.value)];
-            if (scelto) onScegli(scelto);
-            e.target.value = '';
-          }}>
-            <option value="">Scegli fra {voci.length} già censiti…</option>
-            {voci.map((o, i) => <option key={`${o.nome}-${i}`} value={i}>{etichetta(o)}</option>)}
-          </select>
-          <span className="text-[11px] text-text-muted">
-            Sceglierne uno riempie nome, effetto, statistiche e «per chi». Puoi correggerli dopo: il prezzo che hai già scritto non viene toccato.
-          </span>
-        </label>
+      {q && trovati.length === 0 && !elenco.caricamento && (
+        <p className="m-0 text-[12px] text-text-muted" role="status">Nessun oggetto con questo nome.</p>
+      )}
+      {!aMano && (
+        <button type="button" className="btn touch self-start" onClick={onAMano}>Non c’è: lo inserisco</button>
       )}
     </fieldset>
   );
@@ -292,6 +318,9 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
     return v;
   };
   const [valori, setValori] = useState<Record<string, string>>(iniziali);
+  // Il collegamento all'oggetto, e la via secondaria per quando quell'oggetto non esiste.
+  const [collegato, setCollegato] = useState<OggettoSelezionabileDto | null>(null);
+  const [aMano, setAMano] = useState(false);
   const [condizioni,setCondizioni]=useState<RequisitoSpillo[]>(()=>JSON.parse(String(elemento?.dati.condizioni_json ?? '[]')));
   // Le Doti di un'attività stanno in `doti_json`, che è già una colonna e già un campo accettato
   // dall'API: mancava solo il modo di scriverlo.
@@ -330,6 +359,7 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
         if (c.tipo === 'numero') dati[c.nome] = grezzo === '' ? null : Number(grezzo);
         else dati[c.nome] = grezzo === '' ? (['nome', 'luogo', 'fonte'].includes(c.nome) ? '' : null) : grezzo;
       }
+      if (tipo === 'articolo') { dati.oggetto_fonte = collegato?.fonte ?? null; dati.oggetto_chiave = collegato?.chiave ?? null; }
       if (tipo === 'articolo' && nuovo) dati.negozio_chiave = negozioChiave;
       if (nuovo) {
         const e = await creaElementoCatalogo(tipo, dati);
@@ -404,8 +434,20 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
           </p>
         )}
         {tipo === 'negozio' && quartieri.errore && <p role="alert">Impossibile caricare i quartieri. <button type="button" className="btn touch" onClick={() => void quartieri.ricarica()}>Riprova</button></p>}
+        {tipo === 'articolo' && (
+          <SceltaOggetto
+            collegato={collegato}
+            onCollega={(o) => { setCollegato(o); setAMano(false); setValori({ ...valori, nome: o.nome, categoria: o.categoria, prezzo: valori.prezzo?.trim() ? valori.prezzo : (o.prezzo !== null ? String(o.prezzo) : '') }); }}
+            onScollega={() => setCollegato(null)}
+            aMano={aMano}
+            onAMano={() => setAMano(true)}
+          />
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {CAMPI[tipo].map((c) => (
+          {/* Nome e categoria compaiono **solo** quando l'oggetto si inserisce a mano. Con un oggetto
+              collegato vengono da lui, e mostrarli come campi vorrebbe dire invitare a correggere qui
+              una cosa che qui non vive: e' la copia che questo lavoro toglie di mezzo. */}
+          {CAMPI[tipo].filter((c) => tipo !== 'articolo' || aMano || !['nome', 'categoria'].includes(c.nome)).map((c) => (
             <label key={c.nome} className={`editor-mappa__campo ${c.tipo === 'testolungo' ? 'sm:col-span-2' : ''}`}>
               {c.etichetta}
               {c.tipo === 'select' ? (
@@ -423,17 +465,6 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
             </label>
           ))}
         </div>
-        {tipo === 'articolo' && <SceltaOggettoCensito categoria={valori.categoria ?? 'altro'} onScegli={(o) => setValori({
-          ...valori,
-          nome: o.nome,
-          nome_it: o.nomeIt ?? '',
-          effetto: o.effetto ?? '',
-          statistiche: o.statistiche ?? '',
-          per: o.per ?? '',
-          // Il prezzo suggerito non sovrascrive quello che hai già scritto: lo stesso libro costa
-          // diverso in due librerie, e chi l'ha battuto a mano l'ha battuto apposta.
-          prezzo: valori.prezzo?.trim() ? valori.prezzo : (o.prezzo !== null ? String(o.prezzo) : ''),
-        })} />}
         {/* **Le Doti sono il campo che l'app sa usare davvero.** Un premio scritto «Coraggio +3»
             resta una frase che nessuno legge; dichiarata qui, la Dote con le sue note (♪) diventa
             punti veri con la regola del gioco — `puntiDaNote`, scalini 2/3/5, più uno scalino con

@@ -45,6 +45,15 @@ export const datiArticolo = z.object({
     'cura', 'sp', 'battaglia', 'stato', 'esplorazione', 'oggetto-chiave', 'libro', 'film', 'dvd', 'videogioco', 'altro']).default('altro'),
   per: testo(80).nullable().optional(),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
+  // Quante se ne possono comprare. `null` non e' zero: zero direbbe «nessuna», null dice «limite
+  // non dichiarato», ed e' quel che sappiamo delle 575 righe che c'erano prima di questo campo.
+  quantita: z.number().int().min(0).max(9_999).nullable().optional(),
+  // Il collegamento all'oggetto: l'archivio e la sua chiave. Da qui l'articolo legge nome, effetto,
+  // statistiche e «per chi» invece di tenerne una copia propria.
+  oggetto_fonte: z.enum(['equipaggiamento', 'guida', 'libri', 'film', 'videogiochi']).nullable().optional(),
+  oggetto_chiave: testo(200).nullable().optional(),
+  // Restano per l'articolo **generico**, quello che nessun archivio conosce e che nasce dentro il
+  // negozio. Per un articolo collegato non si scrivono: la lettura li prende dall'oggetto.
   effetto: testo(600).nullable().optional(),
   statistiche: testo(400).nullable().optional(),
   disponibile_dal: testo(300).nullable().optional(),

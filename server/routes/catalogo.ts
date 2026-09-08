@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { aggiornaElemento, creaElemento, elencaCatalogo, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo } from '../services/catalogoService.js';
-import { oggettiSelezionabili } from '../services/oggettiSelezionabili.js';
+import { oggettiSelezionabili, tuttiGliOggettiSelezionabili } from '../services/oggettiSelezionabili.js';
 import { aggiornaAzione, aggiornaEvento, agendaDelGiorno, creaAzione, creaEvento, eliminaAzione, eliminaEvento, giorniConAgenda, impostaAzioneFatta } from '../services/agendaService.js';
 import {
   SCHEMI_CATALOGO, bodyAggiornaAzione, bodyAggiornaEvento, bodyAzione, bodyAzioneFatta, bodyEvento, bodyNascondi,
@@ -80,6 +80,14 @@ router.get('/', (_req, res) => {
  * `tipo` e la validazione risponderebbe «tipo di catalogo sconosciuto». */
 router.get('/oggetti-di/:categoria', (req, res) => {
   res.json(oggettiSelezionabili(req.params.categoria));
+});
+
+/** **Tutto** quello che l'app conosce, senza filtro di categoria.
+ *
+ * Un negozio non vende una categoria, vende una cosa: chi compila cerca «Il magnifico ladro», non
+ * «libro». La categoria arriva con l'oggetto scelto, invece di doverla indovinare prima. */
+router.get('/oggetti', (_req, res) => {
+  res.json(tuttiGliOggettiSelezionabili());
 });
 
 router.get('/:tipo', validate({ params: paramsTipoCatalogo }), (req, res) => {

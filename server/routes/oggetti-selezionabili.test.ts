@@ -63,8 +63,26 @@ describe('API oggetti selezionabili', () => {
       expect(v.every((o) => o.fonte === 'guida'), `categoria ${c}`).toBe(true);
       expect(v.every((o) => o.effetto !== null), `categoria ${c}`).toBe(true);
     }
-    // «consumabile» le raccoglie tutte: è la scelta di chi non vuole distinguere.
-    expect((await per('consumabile')).length).toBeGreaterThan((await per('cura')).length);
+    // **«consumabile» non e' piu' un raccoglitore.** Lo era finche' l'elenco si filtrava per la
+    // categoria scelta a mano: chi non voleva distinguere prendeva quella e vedeva tutto. Ora la
+    // categoria non si sceglie, **arriva con l'oggetto**, e un oggetto che cura e' `cura`: in
+    // `consumabile` restano solo le voci che la guida stessa non classifica.
+    expect((await per('consumabile')).every((o) => o.fonte === 'guida')).toBe(true);
+  });
+
+  /** L'archivio unico: tutti gli oggetti di ogni tipo, con la chiave che li collega.
+   *
+   * E' il punto della richiesta — «nel negozio scelgo un oggetto di qualsiasi tipo» — e la prova
+   * che serve e' che l'elenco unico non perda per strada nessuna delle sorgenti. */
+  it('l’archivio unico raccoglie ogni tipo, e ogni voce porta la chiave con cui si collega', async () => {
+    const tutti = (await request(app).get('/api/catalogo/oggetti')).body.data as Array<{ chiave: string; fonte: string; categoria: string; nome: string }>;
+    expect(tutti.length).toBeGreaterThan(300);
+    // Nessuna voce senza le due meta' del collegamento, o il legame non si potrebbe salvare.
+    expect(tutti.every((o) => !!o.chiave && !!o.fonte && !!o.categoria)).toBe(true);
+    // La coppia fonte+chiave e' unica: due voci con la stessa coppia sarebbero indistinguibili.
+    expect(new Set(tutti.map((o) => `${o.fonte}/${o.chiave}`)).size).toBe(tutti.length);
+    // Tutte e cinque le sorgenti sono rappresentate.
+    expect(new Set(tutti.map((o) => o.fonte))).toEqual(new Set(['equipaggiamento', 'guida', 'libri', 'film', 'videogiochi']));
   });
 
   it('libri, film, DVD e videogiochi sono merce da negozio quanto il resto', async () => {

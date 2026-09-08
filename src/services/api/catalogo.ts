@@ -22,6 +22,12 @@ export const getElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise
 export const getOggettiSelezionabili = (categoria: string): Promise<OggettoSelezionabileDto[]> =>
   apiGet(`/catalogo/oggetti-di/${encodeURIComponent(categoria)}`);
 
+/** **Tutti** gli oggetti che l'app conosce, di qualunque tipo, in un elenco solo.
+ *
+ * Chi mette qualcosa in vendita cerca «Il magnifico ladro», non «libro»: la categoria arriva con
+ * l'oggetto scelto invece di doverla indovinare prima. */
+export const getTuttiGliOggetti = (): Promise<OggettoSelezionabileDto[]> => apiGet('/catalogo/oggetti');
+
 export const creaElementoCatalogo = (tipo: TipoCatalogo, dati: Record<string, unknown>): Promise<ElementoCatalogoDto> =>
   apiPost(`/catalogo/${tipo}`, dati);
 

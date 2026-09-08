@@ -7,10 +7,11 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
 import { registraEvento } from './storicoService.js';
+import { risolviOggettoCollegato } from './oggettiSelezionabili.js';
 import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
 
 interface RigaNegozio { condizioni_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
-interface RigaArticolo { condizioni_json: string | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_condizioni?: string|null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
+interface RigaArticolo { condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_condizioni?: string|null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
 
 const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome,
   (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.nascosto = 0) AS articoli, (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.verificato = 1 AND a.nascosto = 0) AS verificati
@@ -26,8 +27,24 @@ function disponibilitaArticolo(r:Pick<RigaArticolo, 'condizioni_json' | 'negozio
   const negozio=regole(r.negozio_condizioni??null).map(c=>({...c,testo:'Negozio: '+c.testo}));
   return valutaRequisiti([...negozio,...regole(r.condizioni_json)],st);
 }
+/** La riga del negozio, con quel che descrive l'oggetto **letto dall'oggetto**, non copiato.
+ *
+ * Un articolo collegato non ha una descrizione propria: nome, effetto, statistiche e «per chi»
+ * vengono dall'oggetto a ogni lettura. Correggere l'effetto di un libro aggiorna da solo i negozi
+ * che lo vendono, invece di lasciare in giro copie che dicono cose diverse — che e' quel che
+ * succedeva quando il modulo copiava i campi al momento della scelta.
+ *
+ * Se il collegamento punta a qualcosa che non c'e' piu' — un seed rigenerato puo' togliere una
+ * voce — si torna a quel che la riga ha di suo, invece di mostrare una scheda vuota. */
 function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponibilita): ArticoloDto {
-  return { condizioni:regole(r.condizioni_json), chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', nome: r.nome, nomeIt: r.nome_it, categoria: r.categoria as ArticoloDto['categoria'], per: r.per, prezzo: r.prezzo, effetto: r.effetto, statistiche: r.statistiche, disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, fonte: r.fonte, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave), ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
+  const collegato = risolviOggettoCollegato(r.oggetto_fonte, r.oggetto_chiave);
+  return { condizioni:regole(r.condizioni_json), chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '',
+    nome: collegato?.nome ?? r.nome, nomeIt: collegato?.nomeIt ?? r.nome_it,
+    categoria: (collegato?.categoria ?? r.categoria) as ArticoloDto['categoria'],
+    per: collegato?.per ?? r.per, prezzo: r.prezzo,
+    effetto: collegato?.effetto ?? r.effetto, statistiche: collegato?.statistiche ?? r.statistiche,
+    quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
+    disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, fonte: r.fonte, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave), ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
 }
 
 function acquistiPartita(partitaId: number | undefined): Set<string> {

@@ -1097,6 +1097,11 @@ export interface ArticoloDto {
   prezzo: number | null;
   effetto: string | null;
   statistiche: string | null;
+  /** Quante se ne possono comprare; `null` = nessun limite dichiarato (diverso da zero). */
+  quantita: number | null;
+  /** L'archivio dell'oggetto collegato, e la sua chiave: insieme sono il collegamento. */
+  oggettoFonte: string | null;
+  oggettoChiave: string | null;
   disponibileDal: string | null;
   condizione: string | null;
   nota: string | null;
@@ -1791,6 +1796,10 @@ export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
  * del negozio e l'oggetto della guida sono la stessa cosa: finora quel legame lo indovinava un
  * ponte per nome, che su 355 oggetti e 575 articoli ne aggancia 121. */
 export interface OggettoSelezionabileDto {
+  /** Identificatore stabile dentro la sua `fonte`: con `fonte` forma il collegamento. */
+  chiave: string;
+  /** La categoria d'articolo che compete all'oggetto: sceglierlo la imposta da sé. */
+  categoria: string;
   nome: string;
   nomeIt: string | null;
   effetto: string | null;
