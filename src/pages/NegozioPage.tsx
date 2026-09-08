@@ -72,7 +72,17 @@ export function NegozioPage() {
             {modulo === 'negozio' && elementoNegozio && <ModuloCatalogo tipo="negozio" elemento={elementoNegozio} onChiudi={() => setModulo(null)} onSalvato={() => { setModulo(null); void dati.ricarica(); }} />}
             <p className="m-0 text-[12px] text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
           </div>
-          <DoveSiTrova tipo="negozio" chiave={n.chiave} altezza={300} />
+          {/* **Due colonne su schermo largo: la mappa da una parte, la merce dall'altra.**
+              La pagina era impaginata per il telefono e basta — una colonna sola, la mappa alta 300
+              px in mezzo, e l'elenco degli articoli che spingeva tutto sotto la piega. Su desktop
+              e tablet lo spazio c'e' e va usato: si guarda dove sta il negozio *mentre* si scorre
+              quel che vende, invece di far scorrere l'intera pagina avanti e indietro.
+              Sotto i 1024 px torna una colonna sola, che li' e' la forma giusta. */}
+          <div className="negozio-corpo">
+            <div className="negozio-mappa">
+              <DoveSiTrova tipo="negozio" chiave={n.chiave} altezza={300} />
+            </div>
+            <div className="negozio-merce">
           {n.articoliElenco.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               {categorie.length > 1 && (
@@ -91,7 +101,9 @@ export function NegozioPage() {
             </div>
           )}
           {n.articoliElenco.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
-            : <ArticoliTabella onModifica={(a) => { void getElementoCatalogo('articolo', a.chiave).then((e) => { setElementoArticolo(e); setModulo('articolo'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.')); }} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta({ ...n, articoliElenco: n.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: n.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length })} />}
+            : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => { void getElementoCatalogo('articolo', a.chiave).then((e) => { setElementoArticolo(e); setModulo('articolo'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.')); }} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta({ ...n, articoliElenco: n.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: n.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length })} /></div>}
+            </div>
+          </div>
         </div>
       )}
     </PageState>

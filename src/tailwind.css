@@ -649,6 +649,54 @@
   .tabella tbody tr:hover { background: var(--color-bg-secondary); }
   .tabella tbody tr.riga-cliccabile { cursor: pointer; }
 
+
+  /* ============================================================
+     Scheda di un negozio — tre forme, non una con l'interruttore
+     ============================================================
+
+     La pagina era impaginata per il telefono e lasciata cosi' anche altrove: una colonna sola, la
+     mappa alta 300 px in mezzo, e l'elenco della merce spinto sotto la piega. Su un monitor da
+     1700 px restavano due terzi di larghezza vuoti a destra dei prezzi.
+
+     Le tre forme rispondono a tre vincoli diversi, e per questo non sono la stessa con un
+     `min-width` in mezzo:
+
+     - **telefono**: una colonna e **nessuno scorrimento interno**. Un riquadro che scorre dentro
+       una pagina che scorre e' ostile col dito: si prende quello sbagliato. La mappa e' piu' bassa,
+       perche' li' lo spazio verticale e' la risorsa scarsa.
+     - **tablet**: ancora una colonna — due da 370 px per una tabella con prezzi e disponibilita'
+       sarebbero strette — ma la mappa diventa **appiccicata in alto**, cosi' resta sott'occhio
+       mentre si scorre la merce, che e' la cosa che si voleva guardando le due insieme.
+     - **desktop (da 1024 px, dove compare anche la barra laterale)**: due colonne davvero, e lo
+       scorrimento **solo sulla merce**. La mappa non si muove, l'elenco scorre accanto.
+     ============================================================ */
+  .negozio-corpo { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .negozio-merce { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .negozio-mappa { min-width: 0; }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* `top` scavalca l'intestazione della pagina; `z-index` la tiene sopra le righe che le passano
+       sotto. Senza `align-self: start` in un contenitore flex l'elemento si stira e `sticky` non
+       ha niente su cui attaccarsi. */
+    .negozio-mappa { position: sticky; top: 0; z-index: 5; align-self: start; background: var(--color-bg); padding-bottom: 8px; }
+  }
+
+  @media (min-width: 1024px) {
+    .negozio-corpo { flex-direction: row; align-items: flex-start; gap: 16px; }
+    .negozio-mappa { position: sticky; top: 0; flex: 1 1 46%; max-width: 46%; }
+    .negozio-merce { flex: 1 1 54%; min-width: 0; }
+    /* Scorre **solo** la merce: e' la richiesta, ed e' anche l'unico modo perche' la mappa resti
+       ferma mentre si guarda l'elenco. `dvh` invece di `vh` perche' su tablet e telefono la barra
+       del browser entra e esce e `vh` non se ne accorge. */
+    .negozio-elenco { overflow-y: auto; max-height: calc(100dvh - 230px); min-height: 320px; padding-right: 4px; }
+  }
+
+  @media (min-width: 1440px) {
+    /* Piu' spazio: la mappa non ha bisogno di crescere oltre, la merce si'. */
+    .negozio-mappa { flex-basis: 40%; max-width: 40%; }
+    .negozio-merce { flex-basis: 60%; }
+  }
+
   /* ---- Crediti alle fonti: discreti, grigi e piccoli ---- */
   .credito {
     font-size: 11px;
