@@ -1,195 +1,223 @@
 // ============================================================
-// Test disponibilitaService — dai testi della guida ai requisiti dei semafori, e valutazione alla data corrente
+// Test disponibilitaService — dalla prosa della guida agli stati (una volta), e valutazione sulla partita
 // ============================================================
 
 import path from 'node:path';
-import { closeDb, initDb } from '../db/dbService.js';
+import { closeDb, getDb, initDb } from '../db/dbService.js';
 import { runMigrations } from '../db/migrationRunner.js';
 import { caricaSeed } from './seed/caricaSeed.js';
 import { invalidaCacheTraduzioni } from './traduzioniService.js';
-import { dataSbloccoQuartiere, requisitiDaTesto, valutaDisponibilita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
+import { arcoAllaData, dataSbloccoQuartiere, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
+import { convertiProsa, migraTestiCondizioni, type ContestoConversione } from '../../shared/migraCondizioni.js';
+import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
 
+let ctx: ContestoConversione;
 // il valutatore dei semafori traduce i nomi (Confidenti, arcani) leggendo il glossario dal DB
-beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, path.resolve(import.meta.dirname, '../../data/seed')); invalidaCacheTraduzioni(); });
+beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, path.resolve(import.meta.dirname, '../../data/seed')); invalidaCacheTraduzioni(); ctx = contestoConversione(getDb()); });
 afterAll(() => closeDb());
+
+const FINESTRE = new Map([['kamoshida', { dal: '04-12', al: '05-02' }], ['madarame', { dal: '05-16', al: '06-05' }], ['kaneshiro', { dal: '06-19', al: '07-09' }], ['niijima', { dal: '10-29', al: '11-20' }]]);
 
 function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilita {
   return {
     doti: new Map([['fascino', 1], ['coraggio', 1], ['conoscenza', 1], ['perizia', 1], ['gentilezza', 1]]),
     arcaniInScorta: new Set(), personeConAbilita: new Set(), bossGestiti: new Set(), richiesteCompletate: new Set(),
-    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), membriFuoriSquadra: new Set<string>(['akechi']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(), giornoSettimana: 'mercoledi',
+    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), membriFuoriSquadra: new Set<string>(['akechi']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(),
+    giornoSettimana: 'mercoledi',
     sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara', dal: '08-31' }], ['shinjuku', { nome: 'Shinjuku', dal: '06-18' }], ['kichijoji', { nome: 'Kichijoji', dal: null }]]),
+    articoliOttenuti: new Set(), letture: new Set(), contatori: new Map(), attivitaSvolte: new Map(), spesaPerNegozio: new Map(), puntiNegozio: new Map(), eventi: new Set(),
+    arcoCorrente: arcoAllaData('04-20', FINESTRE),
     ...sovrascrivi,
   };
 }
+const conTesto = (c: RequisitoSpillo[]): RequisitoDisponibilita[] => c.map((x) => ({ ...x, testo: descriviRequisitoSpillo(x) }));
+/** La stessa strada dei dati: prosa → stati (una volta) → valutazione. */
+const daProsa = (testi: string[], st: StatoDisponibilita, extra: Partial<ContestoConversione> = {}) => valutaRequisiti(conTesto(migraTestiCondizioni(testi, { ...ctx, ...extra })), st);
 
-describe('requisitiDaTesto', () => {
-  it('riconosce date, Palazzi, Doti, Confidenti, richieste, pioggia, giorno della settimana, stagione e intervalli', () => {
-    expect(requisitiDaTesto('dal 18 aprile')).toEqual([{ tipo: 'data', dal: '04-18', testo: 'dal 18 aprile' }]);
-    expect(requisitiDaTesto('dal primo settembre')).toEqual([{ tipo: 'data', dal: '09-01', testo: 'dal primo settembre' }]);
-    // «domenica 8 maggio» da solo (televendite) vale solo quel giorno
-    expect(requisitiDaTesto('domenica 8 maggio')).toEqual([{ tipo: 'intervallo', dal: '05-08', al: '05-08', testo: 'domenica 8 maggio' }]);
-    expect(requisitiDaTesto('Disponibile dalla domenica 5 giugno, quando si sblocca Kichijoji')[0]).toMatchObject({ tipo: 'data', dal: '06-05' });
-    expect(requisitiDaTesto('dopo Palazzo di Kaneshiro')).toEqual([{ tipo: 'palazzo', dungeon: 'kaneshiro', testo: 'dopo Palazzo di Kaneshiro' }]);
-    expect(requisitiDaTesto('dopo il primo Palazzo (Kamoshida)')[0]).toMatchObject({ tipo: 'palazzo', dungeon: 'kamoshida' });
-    expect(requisitiDaTesto('richiede Fascino Rango 3')).toEqual([{ tipo: 'dote', dote: 'fascino', rango: 3, testo: 'richiede Fascino Rango 3' }]);
-    expect(requisitiDaTesto('richiede le tre statistiche almeno al livello 3; fonte non italiana').map((r) => r.tipo === 'dote' ? r.dote : r.tipo)).toEqual(['conoscenza', 'coraggio', 'perizia']);
-    expect(requisitiDaTesto('Rango Confidente Sojiro 6')).toEqual([{ tipo: 'confidente', confidente: 'sojiro', rango: 6, testo: 'Rango Confidente Sojiro 6' }]);
-    // senza nome: è il Confidente del negozio
-    expect(requisitiDaTesto('Rango Confidente 3', { confidenteNegozio: 'iwai' })).toEqual([{ tipo: 'confidente', confidente: 'iwai', rango: 3, testo: 'Rango Confidente 3' }]);
-    expect(requisitiDaTesto('richiede rango massimo del Confidente Haru, Imperatrice')[0]).toMatchObject({ tipo: 'confidente', confidente: 'haru', rango: 10 });
-    expect(requisitiDaTesto('Rango Confidente Sojiro 9, richiede il completamento della richiesta Lo zio ingordo')).toEqual([
-      { tipo: 'confidente', confidente: 'sojiro', rango: 9, testo: 'Rango Confidente Sojiro 9, richiede il completamento della richiesta Lo zio ingordo' },
-      { tipo: 'richiesta', richiesta: 'Lo zio ingordo', testo: 'Rango Confidente Sojiro 9, richiede il completamento della richiesta Lo zio ingordo' },
-    ]);
-    expect(requisitiDaTesto('solo nei giorni di pioggia')).toEqual([{ tipo: 'piove', testo: 'solo nei giorni di pioggia' }]);
-    // la fascia della giornata si legge insieme al resto della frase
-    expect(requisitiDaTesto('solo la domenica sera')).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'solo la domenica sera' }, { tipo: 'giorno-settimana', giorni: ['domenica'], testo: 'solo la domenica sera' }]);
-    expect(requisitiDaTesto('solo di sera')).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }]);
-    expect(requisitiDaTesto('Aperto solo di giorno')).toEqual([{ tipo: 'fascia', fascia: 'giorno', testo: 'Aperto solo di giorno' }]);
-    expect(requisitiDaTesto('esclusivamente di sera')).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'esclusivamente di sera' }]);
-    // «al giorno» è una quantità, non una fascia
-    expect(requisitiDaTesto('un succo al giorno')).toEqual([]);
-    expect(requisitiDaTesto('solo in inverno')).toEqual([{ tipo: 'stagione', stagione: 'inverno', testo: 'solo in inverno' }]);
-    expect(requisitiDaTesto('scambio disponibile dal 26 al 30 luglio')).toEqual([{ tipo: 'intervallo', dal: '07-26', al: '07-30', testo: 'scambio disponibile dal 26 al 30 luglio' }]);
-    expect(requisitiDaTesto('scambio disponibile dal 22 gennaio al 2 febbraio')[0]).toMatchObject({ tipo: 'intervallo', dal: '01-22', al: '02-02' });
+describe('convertiProsa — le frasi della guida diventano stati, o niente', () => {
+  it('date, periodi, giorni singoli, mesi', () => {
+    expect(migraTestiCondizioni(['dal 18 aprile'])).toEqual([{ tipo: 'data', dal: '04-18' }]);
+    expect(migraTestiCondizioni(['dal primo settembre'])).toEqual([{ tipo: 'data', dal: '09-01' }]);
+    expect(migraTestiCondizioni(['domenica 8 maggio'])).toEqual([{ tipo: 'intervallo', dal: '05-08', al: '05-08' }]);
+    expect(migraTestiCondizioni(['scambio disponibile dal 26 al 30 luglio'])).toEqual([{ tipo: 'intervallo', dal: '07-26', al: '07-30' }]);
+    expect(migraTestiCondizioni(['dal 22 gennaio al 2 febbraio'])).toEqual([{ tipo: 'intervallo', dal: '01-22', al: '02-02' }]);
+    expect(migraTestiCondizioni(['gennaio'])).toEqual([{ tipo: 'intervallo', dal: '01-01', al: '01-31' }]);
+    expect(migraTestiCondizioni(['agosto-settembre'])).toEqual([{ tipo: 'intervallo', dal: '08-01', al: '09-30' }]);
+    expect(migraTestiCondizioni(['disponibile fino al 20 maggio secondo allgamestaff.it (poi sostituito)'])).toEqual([{ tipo: 'intervallo', dal: '04-09', al: '05-20' }]);
   });
 
-  it('arco di un Palazzo, sblocco di un quartiere, più Doti in una frase, intervallo di giorni della settimana', () => {
-    // l'arco di Madarame comincia quando Kamoshida è stato completato; quello di Kamoshida dall'inizio del gioco
-    expect(requisitiDaTesto("a partire dall'arco del Palazzo di Madarame")).toEqual([{ tipo: 'palazzo', dungeon: 'kamoshida', testo: "a partire dall'arco del Palazzo di Madarame" }]);
-    expect(requisitiDaTesto('a partire dall’arco del Palazzo di Shido')[0]).toMatchObject({ tipo: 'palazzo', dungeon: 'niijima' });
-    expect(requisitiDaTesto("Durante l'arco del Palazzo di Niijima (Casinò)")[0]).toMatchObject({ tipo: 'palazzo', dungeon: 'okumura' });
-    expect(requisitiDaTesto("a partire dall'arco del Palazzo di Kamoshida")).toEqual([]);
-    expect(requisitiDaTesto('Disponibile da quando si sblocca Akihabara')).toEqual([{ tipo: 'quartiere', quartiere: 'akihabara', testo: 'Disponibile da quando si sblocca Akihabara' }]);
-    expect(requisitiDaTesto("dopo aver scoperto l'area di Kichijoji")[0]).toMatchObject({ tipo: 'quartiere', quartiere: 'kichijoji' });
-    // con la data esplicita vale la data, non il quartiere
-    expect(requisitiDaTesto('Disponibile dal 5 giugno, quando si sblocca Kichijoji')).toEqual([{ tipo: 'data', dal: '06-05', testo: 'Disponibile dal 5 giugno, quando si sblocca Kichijoji' }]);
-    expect(requisitiDaTesto('richiede Coraggio Rango 2, Conoscenza Rango 2 e Perizia Rango 2').map((r) => r.tipo === 'dote' ? `${r.dote}${r.rango}` : r.tipo)).toEqual(['coraggio2', 'conoscenza2', 'perizia2']);
-    expect(requisitiDaTesto('Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia')).toEqual([
-      { tipo: 'fascia', fascia: 'sera', testo: 'Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia' },
-      { tipo: 'giorno-settimana', giorni: ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi'], testo: 'Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia' },
-      { tipo: 'meteo', condizione: 'non-piove', testo: 'Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia' },
-    ]);
-    // «Rango Confidente Gemelle 3»: il Confidente delle Gemelle Custodi
-    expect(requisitiDaTesto("Richiede il Rango Confidente Gemelle 3 (sblocco dell'Isolamento)")).toEqual([{ tipo: 'confidente', confidente: 'gemelle', rango: 3, testo: "Richiede il Rango Confidente Gemelle 3 (sblocco dell'Isolamento)" }]);
-    // testi reali del seed: la coda «rango massimo» è descrittiva, l'inciso tra parentesi non produce requisiti, il grado di partenza non è una condizione
-    expect(requisitiDaTesto('Rango Confidente Sojiro 10, rango massimo')).toEqual([{ tipo: 'confidente', confidente: 'sojiro', rango: 10, testo: 'Rango Confidente Sojiro 10, rango massimo' }]);
-    expect(requisitiDaTesto('solo se la mansarda del Leblanc non viene pulita (altrimenti si ottiene dopo aver pulito la mansarda del Leblanc, dal 18 aprile)').map((r) => r.tipo)).toEqual(['ignoto']);
-    expect(requisitiDaTesto('rango cliente Iniziale')).toEqual([]);
-    expect(requisitiDaTesto('dopo il primo Palazzo (Kamoshida)')[0]).toMatchObject({ tipo: 'palazzo', dungeon: 'kamoshida' });
-    // modalità di acquisto e orari non sono condizioni
-    expect(requisitiDaTesto('scambio con Proteine d’importazione')).toEqual([]);
-    expect(requisitiDaTesto('Disponibile fin dai primi giorni a Shibuya')).toEqual([]);
-    expect(requisitiDaTesto('Disponibile dal primo ottobre: richiede il Laptop rotto (Yumenoshima, in vendita dal primo settembre) riparato con il Set di strumenti da PC (Akiba, Akihabara)')).toEqual([{ tipo: 'data', dal: '10-01', testo: 'Disponibile dal primo ottobre: richiede il Laptop rotto (Yumenoshima, in vendita dal primo settembre) riparato con il Set di strumenti da PC (Akiba, Akihabara)' }]);
+  it('archi della storia: «a partire dall\'arco» è un arco, «durante l\'arco» è il periodo del Palazzo', () => {
+    expect(migraTestiCondizioni(["a partire dall'arco del Palazzo di Madarame"])).toEqual([{ tipo: 'arco', dungeon: 'madarame' }]);
+    expect(migraTestiCondizioni(['a partire dall’arco del Palazzo di Shido'])).toEqual([{ tipo: 'arco', dungeon: 'shido' }]);
+    expect(migraTestiCondizioni(["Durante l'arco del Palazzo di Niijima (Casinò)"], { finestraArco: (d) => FINESTRE.get(d) ?? null })).toEqual([{ tipo: 'intervallo', dal: '10-29', al: '11-20' }]);
+    expect(migraTestiCondizioni(['dopo Palazzo di Kaneshiro'])).toEqual([{ tipo: 'palazzo', dungeon: 'kaneshiro' }]);
+    expect(migraTestiCondizioni(['dopo il primo Palazzo (Kamoshida)'])).toEqual([{ tipo: 'palazzo', dungeon: 'kamoshida' }]);
   });
 
-  it('la data di sblocco di un quartiere si legge solo se il testo della Guida comincia con una data', () => {
-    expect(dataSbloccoQuartiere('18 giugno (evento di trama)')).toBe('06-18');
-    expect(dataSbloccoQuartiere('31 agosto (evento di trama)')).toBe('08-31');
-    expect(dataSbloccoQuartiere('Confidente Emperor (Yusuke) Rango 3')).toBeNull();
-    expect(dataSbloccoQuartiere(null)).toBeNull();
+  it('Doti, Confidenti (con alias e col gestore del negozio), richieste con alias di titolo', () => {
+    expect(migraTestiCondizioni(['richiede Fascino Rango 3'])).toEqual([{ tipo: 'dote', dote: 'fascino', rango: 3 }]);
+    expect(migraTestiCondizioni(['richiede Coraggio Rango 2, Conoscenza Rango 2 e Perizia Rango 2']).map((r) => (r.tipo === 'dote' ? `${r.dote}${r.rango}` : r.tipo))).toEqual(['coraggio2', 'conoscenza2', 'perizia2']);
+    expect(migraTestiCondizioni(['Rango Confidente Sojiro 6'])).toEqual([{ tipo: 'confidente', confidente: 'sojiro', rango: 6 }]);
+    expect(migraTestiCondizioni(['Rango Confidente 3'], { confidenteNegozio: 'iwai' })).toEqual([{ tipo: 'confidente', confidente: 'iwai', rango: 3 }]);
+    expect(migraTestiCondizioni(['richiede rango massimo del Confidente Haru, Imperatrice'])).toEqual([{ tipo: 'confidente', confidente: 'haru', rango: 10 }]);
+    expect(migraTestiCondizioni(["Richiede il Rango Confidente Gemelle 3 (sblocco dell'Isolamento)"])).toEqual([{ tipo: 'confidente', confidente: 'gemelle', rango: 3 }]);
+    expect(migraTestiCondizioni(['legato al confidente della torre (shinya oda)'])).toEqual([{ tipo: 'confidente', confidente: 'shinya', rango: 1 }]);
+    expect(migraTestiCondizioni(['Rango Confidente Sojiro 9, richiede il completamento della richiesta Lo zio ingordo'], ctx)).toEqual([{ tipo: 'confidente', confidente: 'sojiro', rango: 9 }, { tipo: 'richiesta', richiesta: 'lo-zio-ingordo' }]);
+    expect(migraTestiCondizioni(["avviabile dal 4 settembre tramite la richiesta mementos 'i baro non vincono mai'"], ctx)).toEqual([{ tipo: 'data', dal: '09-04' }, { tipo: 'richiesta', richiesta: 'i-vincenti-non-imbrogliano' }]);
   });
 
-  it('scarta il rumore (posizione, prezzo, rifornimenti) e marca «ignoto» ciò che non sa leggere', () => {
-    expect(requisitiDaTesto('sempre disponibile')).toEqual([]);
-    expect(requisitiDaTesto('rifornimento il primo del mese')).toEqual([]);
-    expect(requisitiDaTesto('Sottopasso di Shibuya, Shujin Academy')).toEqual([]);
-    expect(requisitiDaTesto('30 punti negozio')).toEqual([]);
-    expect(requisitiDaTesto('dopo aver pescato una volta')).toEqual([{ tipo: 'ignoto', testo: 'dopo aver pescato una volta' }]);
-    expect(requisitiDaTesto('rango cliente Oscuro')).toEqual([{ tipo: 'ignoto', testo: 'rango cliente Oscuro' }]);
-    expect(requisitiDaTesto('dal 18 aprile, oppure gratis pulendo la mansarda del Leblanc').map((r) => r.tipo)).toEqual(['data', 'ignoto']);
+  it('calendario, meteo, fascia, stagione, quartieri', () => {
+    expect(migraTestiCondizioni(['solo nei giorni di pioggia'])).toEqual([{ tipo: 'piove' }]);
+    expect(migraTestiCondizioni(['solo la domenica sera'])).toEqual([{ tipo: 'giorno-settimana', giorni: ['domenica'] }, { tipo: 'fascia', fascia: 'sera' }]);
+    expect(migraTestiCondizioni(['Aperto solo di giorno'])).toEqual([{ tipo: 'fascia', fascia: 'giorno' }]);
+    expect(migraTestiCondizioni(['Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia'])).toEqual([{ tipo: 'giorno-settimana', giorni: ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi'] }, { tipo: 'fascia', fascia: 'sera' }, { tipo: 'meteo', condizione: 'non-piove' }]);
+    expect(migraTestiCondizioni(['solo in inverno'])).toEqual([{ tipo: 'stagione', stagione: 'inverno' }]);
+    expect(migraTestiCondizioni(['Disponibile da quando si sblocca Akihabara'], ctx)).toEqual([{ tipo: 'quartiere', quartiere: 'akihabara' }]);
+    // un quartiere senza data nella Guida non è valutabile: si tiene la data esplicita se c'è
+    expect(migraTestiCondizioni(['Disponibile dal 5 giugno, quando si sblocca Kichijoji'], { quartiereDatato: () => false })).toEqual([{ tipo: 'data', dal: '06-05' }]);
+  });
+
+  it('attività, eventi, letture, grado cliente, punti negozio, contatori', () => {
+    expect(migraTestiCondizioni(['dopo aver giocato a biliardo almeno una volta'])).toEqual([{ tipo: 'attivita', attivita: 'biliardo', volte: 1 }]);
+    expect(migraTestiCondizioni(['dopo essere andati a pescare a Ichigaya almeno una volta'])).toEqual([{ tipo: 'attivita', attivita: 'pesca-ichigaya', volte: 1 }]);
+    expect(migraTestiCondizioni(['dopo la prima esperienza al lavoro dal fioraio Rafflesia'])).toEqual([{ tipo: 'attivita', attivita: 'lavoro-rafflesia', volte: 1 }]);
+    expect(migraTestiCondizioni(["dopo l'evento con Makoto"])).toEqual([{ tipo: 'evento', evento: 'evento-makoto' }]);
+    expect(migraTestiCondizioni(['dopo la prima creazione di uno strumento'])).toEqual([{ tipo: 'evento', evento: 'primo-strumento-creato' }]);
+    expect(migraTestiCondizioni(["dopo aver letto 'Spadaccino provetto'"], ctx)).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'spadaccino-provetto' }]);
+    expect(migraTestiCondizioni(['rango cliente Oscuro'], { negozio: 'tanaka-affari-loschi' })).toEqual([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'oscuro' }]);
+    expect(migraTestiCondizioni(['grado Nero (spendere oltre 10.000 yen)'], { negozio: 'tanaka-affari-loschi' })).toEqual([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'nero' }]);
+    expect(migraTestiCondizioni(['rango cliente Iniziale'], { negozio: 'tanaka-affari-loschi' })).toEqual([]);
+    expect(migraTestiCondizioni(['150 punti negozio'], { negozio: 'vestiti-usati-kichijoji' })).toEqual([{ tipo: 'punti-negozio', negozio: 'vestiti-usati-kichijoji', punti: 150 }]);
+    expect(migraTestiCondizioni(['dopo essere andati al cinema o aver visto un DVD almeno una volta'])).toEqual([{ tipo: 'contatore', cosa: 'film-completati', almeno: 1 }]);
+    expect(migraTestiCondizioni(['dopo il completamento di un videogioco'])).toEqual([{ tipo: 'contatore', cosa: 'videogiochi-completati', almeno: 1 }]);
+  });
+
+  it('alternative e gruppi: «oppure» diventa ALMENO UNA; la mansarda è NON dentro un ALMENO UNA', () => {
+    expect(migraTestiCondizioni(['rango 5 di ryuji oppure rango 8 di ann'])).toEqual([{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'confidente', confidente: 'ryuji', rango: 5 }, { tipo: 'confidente', confidente: 'ann', rango: 8 }] }]);
+    expect(migraTestiCondizioni(['solo se la mansarda del Leblanc non viene pulita (altrimenti si ottiene dopo aver pulito la mansarda del Leblanc, dal 18 aprile)'])).toEqual([{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [
+      { tipo: 'non', condizione: { tipo: 'evento', evento: 'mansarda-pulita' } },
+      { tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'evento', evento: 'mansarda-pulita' }, { tipo: 'data', dal: '04-18' }] },
+    ] }]);
+    expect(migraTestiCondizioni(['dopo aver letto tutti gli altri libri di Jinbocho'], { libriJinbocho: () => ['a', 'b', 'c'], chiaveCorrente: 'b' })).toEqual([{ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'lettura', categoria: 'libro', chiave: 'a' }, { tipo: 'lettura', categoria: 'libro', chiave: 'c' }] }]);
+  });
+
+  it('il rumore non produce condizioni; ciò che non si converte finisce fra le scartate, mai nei dati', () => {
+    for (const t of ['sempre disponibile', 'rifornimento il primo del mese', 'scambio con Proteine d’importazione', 'in vendita anche da Jose nei Mementos', 'Disponibile fin dai primi giorni a Shibuya']) expect(convertiProsa([t])).toEqual({ condizioni: [], scartate: [] });
+    const e = convertiProsa(['dopo aver fatto una cosa che nessuno registra']);
+    expect(e.condizioni).toEqual([]);
+    expect(e.scartate).toEqual(['dopo aver fatto una cosa che nessuno registra']);
+    // una parte scartata non trascina via le altre
+    expect(convertiProsa(['dal 18 aprile; dopo aver fatto una cosa che nessuno registra'])).toEqual({ condizioni: [{ tipo: 'data', dal: '04-18' }], scartate: ['dopo aver fatto una cosa che nessuno registra'] });
+  });
+
+  it('tutta la prosa del seed si converte senza scarti', () => {
+    const db = getDb();
+    const scartate: string[] = [];
+    const campi: Record<string, (r: Record<string, unknown>) => Array<string | null>> = {
+      negozio: (r) => [r.sblocco as string | null], articolo: (r) => [r.disponibile_dal as string | null, r.condizione as string | null],
+      libro: (r) => [r.disponibile_dal as string | null], film: (r) => [r.periodo as string | null], attivita: (r) => [r.sblocco as string | null],
+    };
+    for (const [t, f] of Object.entries(campi)) for (const r of db.prepare(`SELECT * FROM ${t}`).all() as Array<Record<string, unknown>>) {
+      const testi = f(r).map((x) => (x && /^\d{1,2} [a-zà-ù]+$/i.test(x.trim()) ? `dal ${x.trim()}` : x)).filter(Boolean);
+      if (testi.length) scartate.push(...convertiProsa(testi, contestoRiga(db, ctx, { tabella: t, chiave: String(r.chiave), negozio_chiave: r.negozio_chiave, confidente_chiave: r.confidente_chiave })).scartate);
+    }
+    expect(scartate).toEqual([]);
+    // e nessuna riga del catalogo porta più una frase
+    for (const t of Object.keys(campi)) expect((db.prepare(`SELECT COUNT(*) AS n FROM ${t} WHERE condizioni_json LIKE '%da-configurare%' OR condizioni_json LIKE '%"tipo":"stato"%'`).get() as { n: number }).n).toBe(0);
   });
 });
 
-describe('valutaDisponibilita', () => {
-  /** **«Ladro Fantasma in squadra»**: la condizione che l'utente aveva chiesto e che non c'era.
-   *
-   * Senza di lei l'unico modo per esprimerla era inventarsi uno «stato» col nome scritto a mano —
-   * cioe' una stringa che nessuna partita registra e che quindi non diventa mai vera. Ora il dato
-   * e' quello vero: `membro_squadra_partita`, la tabella della migrazione 057.
-   *
-   * Grigio e non rosso quando il membro non risulta: «non l'ho ancora segnato» non e' «non ce
-   * l'ho», e confondere le due cose farebbe sparire dalla mappa roba che il giocatore ha. */
-  it('un Ladro in squadra rende vera la condizione; se non risulta resta da confermare, non negata', () => {
-    const req = [{ tipo: 'squadra' as const, membro: 'ryuji', testo: 'Ryuji in squadra' }];
-    // Nella fixture la squadra contiene Ryuji e non Ann.
-    expect(valutaRequisiti(req, stato()).stato).toBe('disponibile');
-    const senza = valutaRequisiti([{ tipo: 'squadra' as const, membro: 'ann', testo: 'Ann in squadra' }], stato());
-    expect(senza.stato).not.toBe('bloccato');
-    expect(senza.requisiti[0].stato).toBe('grigio');
+describe('valutaRequisiti — ogni stato sulla partita', () => {
+  it('data, periodo, quartiere: bloccato prima, disponibile dal giorno; senza giorno corrente è ignoto', () => {
+    expect(daProsa(['dal 18 aprile'], stato({ dataGioco: '04-16' })).stato).toBe('bloccato');
+    expect(daProsa(['dal 18 aprile'], stato({ dataGioco: '04-18' })).stato).toBe('disponibile');
+    expect(daProsa(['dal 9 gennaio'], stato({ dataGioco: '12-22' })).stato).toBe('bloccato');
+    expect(daProsa(['dal 9 gennaio'], stato({ dataGioco: '01-10' })).stato).toBe('disponibile');
+    expect(daProsa(['dal 18 aprile'], stato({ dataGioco: null })).stato).toBe('ignoto');
+    expect(daProsa(['domenica 24 aprile'], stato({ dataGioco: '04-24' })).stato).toBe('disponibile');
+    expect(daProsa(['domenica 24 aprile'], stato({ dataGioco: '04-25' })).stato).toBe('bloccato');
+    expect(daProsa(['Disponibile da quando si sblocca Akihabara'], stato({ dataGioco: '08-30' })).stato).toBe('bloccato');
+    expect(daProsa(['Disponibile da quando si sblocca Akihabara'], stato({ dataGioco: '08-31' })).stato).toBe('disponibile');
+    // il dato materializzato vince sul testo della Guida
+    expect(dataSbloccoQuartiere('18 giugno (evento di trama)')).toBe('06-18');
   });
 
-
-  it('data: bloccato prima, disponibile dal giorno indicato; senza giorno corrente è ignoto', () => {
-    expect(valutaDisponibilita(['dal 18 aprile'], stato({ dataGioco: '04-16' })).stato).toBe('bloccato');
-    expect(valutaDisponibilita(['dal 18 aprile'], stato({ dataGioco: '04-18' })).stato).toBe('disponibile');
-    // calendario di gioco: gennaio viene dopo dicembre
-    expect(valutaDisponibilita(['dal 9 gennaio'], stato({ dataGioco: '12-22' })).stato).toBe('bloccato');
-    expect(valutaDisponibilita(['dal 9 gennaio'], stato({ dataGioco: '01-10' })).stato).toBe('disponibile');
-    expect(valutaDisponibilita(['dal 18 aprile'], stato({ dataGioco: null })).stato).toBe('ignoto');
+  it('arco della storia: lo dice la data di gioco e le finestre dei Palazzi; il primo arco vale dall\'inizio', () => {
+    expect(arcoAllaData('04-09', FINESTRE)).toBe('kamoshida');
+    expect(arcoAllaData('05-16', FINESTRE)).toBe('madarame');
+    expect(arcoAllaData('06-10', FINESTRE)).toBe('madarame');
+    expect(arcoAllaData('11-01', FINESTRE)).toBe('niijima');
+    expect(arcoAllaData(null, FINESTRE)).toBeNull();
+    expect(daProsa(["a partire dall'arco del Palazzo di Madarame"], stato({ arcoCorrente: 'kamoshida' })).stato).toBe('bloccato');
+    expect(daProsa(["a partire dall'arco del Palazzo di Madarame"], stato({ arcoCorrente: 'madarame' })).stato).toBe('disponibile');
+    expect(daProsa(["a partire dall'arco del Palazzo di Madarame"], stato({ arcoCorrente: 'niijima' })).stato).toBe('disponibile');
+    expect(daProsa(["a partire dall'arco del Palazzo di Kamoshida"], stato({ arcoCorrente: 'kamoshida' })).stato).toBe('disponibile');
+    expect(daProsa(["a partire dall'arco del Palazzo di Madarame"], stato({ arcoCorrente: null })).stato).toBe('ignoto');
   });
 
-  it('Palazzo, Dote, Confidente e richiesta usano lo stesso valutatore dei semafori', () => {
-    expect(valutaDisponibilita(['dopo Palazzo di Kamoshida'], stato()).stato).toBe('bloccato');
-    expect(valutaDisponibilita(['dopo Palazzo di Kamoshida'], stato({ bossGestiti: new Set(['kamoshida']) })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'richiede Fascino Rango 3'], stato()).stato).toBe('bloccato');
-    expect(valutaDisponibilita([null, 'richiede Fascino Rango 3'], stato({ doti: new Map([['fascino', 3]]) })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'Rango Confidente Sojiro 6'], stato()).stato).toBe('bloccato');
-    expect(valutaDisponibilita([null, 'Rango Confidente Sojiro 6'], stato({ ranghiConfidenti: new Map([['sojiro', 6]]) })).stato).toBe('disponibile');
-    const richiesta = valutaDisponibilita([null, 'richiede il completamento della richiesta Lo zio ingordo'], stato());
+  it('Doti, Confidenti, richieste, Palazzi, squadra', () => {
+    expect(daProsa(['richiede Fascino Rango 3'], stato()).stato).toBe('bloccato');
+    expect(daProsa(['richiede Fascino Rango 3'], stato({ doti: new Map([['fascino', 3]]) })).stato).toBe('disponibile');
+    expect(daProsa(['Rango Confidente Sojiro 6'], stato({ ranghiConfidenti: new Map([['sojiro', 6]]) })).stato).toBe('disponibile');
+    expect(daProsa(['dopo Palazzo di Kamoshida'], stato()).stato).toBe('bloccato');
+    expect(daProsa(['dopo Palazzo di Kamoshida'], stato({ bossGestiti: new Set(['kamoshida']) })).stato).toBe('disponibile');
+    const richiesta = daProsa(['richiede il completamento della richiesta Lo zio ingordo'], stato());
     expect(richiesta.stato).toBe('bloccato');
-    expect(richiesta.requisiti[0]).toMatchObject({ tipo: 'richiesta', stato: 'rosso', manuale: false });
-    // il dettaglio non invita a «confermare qui»: nella scheda degli articoli non c'è alcuna conferma
     expect(richiesta.requisiti[0].dettaglio).not.toMatch(/conferma qui/);
-    expect(valutaDisponibilita(['dopo Palazzo di Kamoshida'], stato()).requisiti[0].dettaglio).toBe('Palazzo di Kamoshida: segna il boss come sconfitto nella Guida');
-    expect(valutaDisponibilita([null, 'richiede il completamento della richiesta Lo zio ingordo'], stato({ richiesteCompletate: new Set(['lo zio ingordo']) })).stato).toBe('disponibile');
+    // squadra: chi c'è è verde, chi hai detto di non avere è rosso, chi non hai segnato resta grigio
+    expect(valutaRequisiti(conTesto([{ tipo: 'squadra', membro: 'ryuji' }]), stato()).stato).toBe('disponibile');
+    expect(valutaRequisiti(conTesto([{ tipo: 'squadra', membro: 'akechi' }]), stato()).stato).toBe('bloccato');
+    expect(valutaRequisiti(conTesto([{ tipo: 'squadra', membro: 'ann' }]), stato()).requisiti[0].stato).toBe('grigio');
   });
 
-  it('fascia della giornata: «solo di sera» è bloccato di giorno, disponibile di sera; senza fascia resta «ignoto»', () => {
-    expect(valutaDisponibilita([null, 'solo di sera'], stato()).stato).toBe('bloccato');
-    expect(valutaDisponibilita([null, 'solo di sera'], stato()).requisiti[0]).toMatchObject({ tipo: 'fascia', stato: 'rosso', dettaglio: 'Solo di sera: ora è giorno' });
-    expect(valutaDisponibilita([null, 'solo di sera'], stato({ fasciaGioco: 'sera' })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'aperto solo di giorno'], stato({ fasciaGioco: 'sera' })).stato).toBe('bloccato');
-    expect(valutaDisponibilita([null, 'solo di sera'], stato({ fasciaGioco: null })).stato).toBe('ignoto');
-    // «solo la domenica sera»: entrambe le condizioni devono valere
-    expect(valutaDisponibilita([null, 'solo la domenica sera'], stato({ fasciaGioco: 'sera', giornoSettimana: 'domenica' })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'solo la domenica sera'], stato({ fasciaGioco: 'giorno', giornoSettimana: 'domenica' })).stato).toBe('bloccato');
+  it('fascia, meteo, giorno della settimana, stagione', () => {
+    expect(daProsa(['solo di sera'], stato()).stato).toBe('bloccato');
+    expect(daProsa(['solo di sera'], stato({ fasciaGioco: 'sera' })).stato).toBe('disponibile');
+    expect(daProsa(['solo di sera'], stato({ fasciaGioco: null })).stato).toBe('ignoto');
+    expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOggi: 'Sereno' })).stato).toBe('bloccato');
+    expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOggi: 'Pioggia' })).stato).toBe('disponibile');
+    expect(daProsa(['solo la domenica'], stato({ giornoSettimana: 'mercoledi' })).stato).toBe('bloccato');
+    expect(daProsa(['solo la domenica'], stato({ giornoSettimana: 'domenica' })).stato).toBe('disponibile');
+    expect(daProsa(['solo in inverno'], stato({ dataGioco: '04-20' })).stato).toBe('bloccato');
+    expect(daProsa(['solo in inverno'], stato({ dataGioco: '12-25' })).stato).toBe('disponibile');
   });
 
-  it('pioggia, giorno della settimana, stagione e intervallo', () => {
-    expect(valutaDisponibilita([null, 'solo nei giorni di pioggia'], stato({ meteoOggi: 'Sereno' })).stato).toBe('bloccato');
-    expect(valutaDisponibilita([null, 'solo nei giorni di pioggia'], stato({ meteoOggi: 'Pioggia' })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'solo la domenica'], stato({ giornoSettimana: 'mercoledi' })).stato).toBe('bloccato');
-    expect(valutaDisponibilita([null, 'solo la domenica'], stato({ giornoSettimana: 'domenica' })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'solo in inverno'], stato({ dataGioco: '04-20' })).stato).toBe('bloccato');
-    expect(valutaDisponibilita([null, 'solo in inverno'], stato({ dataGioco: '12-25' })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'scambio disponibile dal 26 al 30 luglio'], stato({ dataGioco: '07-28' })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'scambio disponibile dal 26 al 30 luglio'], stato({ dataGioco: '08-02' })).stato).toBe('bloccato');
+  it('attività svolte, eventi, contatori, grado cliente dalla spesa, punti negozio, letture, articoli', () => {
+    const biliardo = conTesto([{ tipo: 'attivita', attivita: 'biliardo', volte: 2 }]);
+    expect(valutaRequisiti(biliardo, stato({ attivitaSvolte: new Map([['biliardo', 1]]) })).stato).toBe('bloccato');
+    expect(valutaRequisiti(biliardo, stato({ attivitaSvolte: new Map([['biliardo', 2]]) })).stato).toBe('disponibile');
+    const mansarda = conTesto([{ tipo: 'evento', evento: 'mansarda-pulita' }]);
+    expect(valutaRequisiti(mansarda, stato()).stato).toBe('bloccato');
+    expect(valutaRequisiti(mansarda, stato({ eventi: new Set(['mansarda-pulita']) })).stato).toBe('disponibile');
+    expect(valutaRequisiti(conTesto([{ tipo: 'contatore', cosa: 'film-completati', almeno: 1 }]), stato({ contatori: new Map([['film-completati', 1]]) })).stato).toBe('disponibile');
+    const oscuro = conTesto([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'oscuro' }]);
+    expect(valutaRequisiti(oscuro, stato({ spesaPerNegozio: new Map([['tanaka-affari-loschi', 49999]]) })).stato).toBe('bloccato');
+    const esito = valutaRequisiti(oscuro, stato({ spesaPerNegozio: new Map([['tanaka-affari-loschi', 50000]]) }));
+    expect(esito.stato).toBe('disponibile');
+    expect(esito.requisiti[0].dettaglio).toMatch(/grado Oscuro/);
+    expect(valutaRequisiti(conTesto([{ tipo: 'punti-negozio', negozio: 'vestiti-usati-kichijoji', punti: 150 }]), stato({ puntiNegozio: new Map([['vestiti-usati-kichijoji', 150]]) })).stato).toBe('disponibile');
+    expect(valutaRequisiti(conTesto([{ tipo: 'lettura', categoria: 'libro', chiave: 'x' }]), stato({ letture: new Set(['libro/x']) })).stato).toBe('disponibile');
+    expect(valutaRequisiti(conTesto([{ tipo: 'articolo', articolo: 'a' }]), stato({ articoliOttenuti: new Set(['a']) })).stato).toBe('disponibile');
   });
 
-  it('quartiere: bloccato prima della data della Guida, disponibile dopo; senza data resta «ignoto»', () => {
-    expect(valutaDisponibilita(['Disponibile da quando si sblocca Akihabara'], stato({ dataGioco: '06-20' })).stato).toBe('bloccato');
-    const dopo = valutaDisponibilita(['Disponibile da quando si sblocca Akihabara'], stato({ dataGioco: '09-02' }));
-    expect(dopo.stato).toBe('disponibile');
-    expect(dopo.requisiti[0]).toMatchObject({ tipo: 'data', stato: 'verde' });
-    expect(dopo.requisiti[0].dettaglio.startsWith('Akihabara: ')).toBe(true);
-    const senzaData = valutaDisponibilita(["dopo aver scoperto l'area di Kichijoji"], stato());
-    expect(senzaData.stato).toBe('ignoto');
-    expect(senzaData.requisiti[0].dettaglio).toBe('Kichijoji: la Guida non indica una data di sblocco');
-    // arco del Palazzo: disponibile quando il Palazzo precedente è completato
-    expect(valutaDisponibilita(["a partire dall'arco del Palazzo di Madarame"], stato()).stato).toBe('bloccato');
-    expect(valutaDisponibilita(["a partire dall'arco del Palazzo di Madarame"], stato({ bossGestiti: new Set(['kamoshida']) })).stato).toBe('disponibile');
-    expect(valutaDisponibilita(["a partire dall'arco del Palazzo di Kamoshida"], stato()).stato).toBe('disponibile');
-    // televendita: solo quel giorno
-    expect(valutaDisponibilita([null, 'domenica 24 aprile'], stato({ dataGioco: '04-24' })).stato).toBe('disponibile');
-    expect(valutaDisponibilita([null, 'domenica 24 aprile'], stato({ dataGioco: '04-25' })).stato).toBe('bloccato');
+  it('gruppi E / O / NON annidati a qualsiasi profondità', () => {
+    const c: RequisitoSpillo = { tipo: 'gruppo', modo: 'almeno-una', condizioni: [
+      { tipo: 'non', condizione: { tipo: 'evento', evento: 'mansarda-pulita' } },
+      { tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'evento', evento: 'mansarda-pulita' }, { tipo: 'non', condizione: { tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'piove' }] } }] },
+    ] };
+    expect(valutaRequisiti(conTesto([c]), stato()).stato).toBe('disponibile');
+    expect(valutaRequisiti(conTesto([c]), stato({ eventi: new Set(['mansarda-pulita']), meteoOggi: 'Sereno' })).stato).toBe('disponibile');
+    expect(valutaRequisiti(conTesto([c]), stato({ eventi: new Set(['mansarda-pulita']), meteoOggi: 'Pioggia' })).stato).toBe('bloccato');
   });
 
-  it('senza condizioni è disponibile; una condizione non leggibile lascia «ignoto» senza nascondere', () => {
-    expect(valutaDisponibilita([null, null], stato())).toEqual({ stato: 'disponibile', requisiti: [] });
-    const r = valutaDisponibilita([null, 'dopo aver pescato una volta'], stato());
-    expect(r.stato).toBe('ignoto');
-    expect(r.requisiti[0]).toMatchObject({ tipo: 'manuale', stato: 'grigio' });
+  it('per uno spillo solo la presenza nasconde: un prerequisito rosso lascia il pin, un arco non raggiunto lo toglie', () => {
+    expect(valutaRequisitiSpillo(conTesto([{ tipo: 'dote', dote: 'coraggio', rango: 5 }]), stato()).stato).toBe('ignoto');
+    expect(valutaRequisitiSpillo(conTesto([{ tipo: 'arco', dungeon: 'niijima' }]), stato({ arcoCorrente: 'kamoshida' })).stato).toBe('bloccato');
+    expect(valutaRequisitiSpillo(conTesto([{ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'fascia', fascia: 'sera' }, { tipo: 'dote', dote: 'coraggio', rango: 3 }] }]), stato({ fasciaGioco: 'giorno' })).stato).toBe('bloccato');
+  });
+
+  it('senza condizioni è disponibile', () => {
+    expect(valutaRequisiti([], stato())).toEqual({ stato: 'disponibile', requisiti: [] });
   });
 });

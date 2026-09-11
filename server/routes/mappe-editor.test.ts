@@ -431,7 +431,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     (pacchetto.mappe[0].spilli[0].condizioni as unknown[]).push({ tipo: 'manuale', testo: 'scartata' });
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true })).status).toBe(200);
     const copia = (await request(app).get('/api/mappe/prova-condizioni-copia')).body.data as MappaDto;
-    expect(copia.spilli[0].condizioni).toEqual([expect.objectContaining({tipo:'stagione'}),expect.objectContaining({tipo:'da-configurare'})]);
+    // la voce non calcolabile sparisce: non diventa una condizione «da configurare»
+    expect(copia.spilli[0].condizioni).toEqual([expect.objectContaining({ tipo: 'stagione' })]);
     expect((await request(app).delete('/api/mappe/prova-condizioni-copia')).status).toBe(204);
     expect((await request(app).delete('/api/mappe/prova-condizioni')).status).toBe(204);
   });
@@ -493,10 +494,9 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(esito.spilli).toBe(1);
     expect(esito.condizioniScartate).toBe(3);
     const mappa = (await request(app).get(`/api/mappe/prova-import-condizioni?partita=${partitaId}`)).body.data as MappaDto;
-    // resta solo la condizione valida (il periodo invertito è scartato dalla normalizzazione; Confidente sconosciuto e quartiere senza data dal controllo sulla Guida)
-    expect(mappa.spilli[0].condizioni.filter(c=>c.tipo==='da-configurare')).toHaveLength(3);
-    expect(mappa.spilli[0].condizioni).toContainEqual({ tipo: 'palazzo', dungeon: 'kamoshida', testo: 'dopo il Palazzo di Kamoshida' });
-    expect(mappa.spilli[0].disponibilita?.requisiti).toHaveLength(4);
+    // resta solo la condizione valida (il periodo invertito è scartato dalla normalizzazione; Confidente sconosciuto e quartiere senza data dal controllo sulla Guida): le altre spariscono, non diventano testo
+    expect(mappa.spilli[0].condizioni).toEqual([{ tipo: 'palazzo', dungeon: 'kamoshida', testo: 'dopo il Palazzo di Kamoshida' }]);
+    expect(mappa.spilli[0].disponibilita?.requisiti).toHaveLength(1);
     expect((await request(app).delete('/api/mappe/prova-import-condizioni')).status).toBe(204);
   });
 

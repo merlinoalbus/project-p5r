@@ -448,7 +448,7 @@ function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina,
 
         <label className="flex items-center gap-2 text-[12px]"><input type="checkbox" checked={soloPosizione} onChange={e => setSoloPosizione(e.target.checked)} /> Posizione del luogo (non indica un’attività disponibile)</label>
         <DestinazioneSpilloEditor valore={destinazione} invalidata={s.destinazioneNonDisponibile??false} disabilitato={occupato} onCambia={setDestinazione} onPronto={setArrivoPronto}/>
-        <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} />
+        <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo />
 
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato || !arrivoPronto} />

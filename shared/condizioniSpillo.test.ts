@@ -2,7 +2,7 @@
 // Test condizioni di visibilità degli spilli — descrizione in italiano e normalizzazione (Fase 15.22)
 // ============================================================
 
-import { dataLeggibile, dataSbloccoQuartiere, dataValida, descriviRequisitoSpillo, normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, ordineGioco } from './condizioniSpillo';
+import { dataLeggibile, dataSbloccoQuartiere, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, ordineGioco } from './condizioniSpillo';
 
 describe('descriviRequisitoSpillo', () => {
   it('usa lo stesso stile dei requisiti della guida e i nomi quando li ha', () => {
@@ -75,5 +75,37 @@ describe('normalizzaRequisitoSpillo', () => {
     expect(lista).toEqual([{ tipo: 'piove' }, { tipo: 'stagione', stagione: 'estate' }]);
     expect(normalizzaCondizioniSpillo('niente')).toEqual([]);
     expect(normalizzaCondizioniSpillo(Array.from({ length: 30 }, (_, i) => ({ tipo: 'data', dal: `04-${String((i % 28) + 1).padStart(2, '0')}` })), 3)).toHaveLength(3);
+  });
+
+  it('gli stati nuovi: arco, attività, grado cliente, punti negozio, evento, contatore — solo da cataloghi chiusi', () => {
+    expect(normalizzaRequisitoSpillo({ tipo: 'arco', dungeon: 'madarame' })).toEqual({ tipo: 'arco', dungeon: 'madarame' });
+    expect(normalizzaRequisitoSpillo({ tipo: 'arco', dungeon: 'mementos' })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'attivita', attivita: 'biliardo', volte: 1 })).toEqual({ tipo: 'attivita', attivita: 'biliardo', volte: 1 });
+    expect(normalizzaRequisitoSpillo({ tipo: 'attivita', attivita: 'biliardo', volte: 0 })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'oscuro' })).toEqual({ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'oscuro' });
+    expect(normalizzaRequisitoSpillo({ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'platino' })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'punti-negozio', negozio: 'x', punti: 50 })).toEqual({ tipo: 'punti-negozio', negozio: 'x', punti: 50 });
+    expect(normalizzaRequisitoSpillo({ tipo: 'evento', evento: 'mansarda-pulita' })).toEqual({ tipo: 'evento', evento: 'mansarda-pulita' });
+    expect(normalizzaRequisitoSpillo({ tipo: 'evento', evento: 'evento-inventato' })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'contatore', cosa: 'film-completati', almeno: 1 })).toEqual({ tipo: 'contatore', cosa: 'film-completati', almeno: 1 });
+    expect(normalizzaRequisitoSpillo({ tipo: 'contatore', cosa: 'quello-che-voglio', almeno: 1 })).toBeNull();
+    // le condizioni testuali non esistono più
+    expect(normalizzaRequisitoSpillo({ tipo: 'da-configurare', nota: 'dopo aver pescato' })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'stato', chiave: 'pesca', confronto: 'almeno', valore: 1 })).toBeNull();
+    // NON a qualsiasi profondità, fino a cinque livelli
+    expect(normalizzaRequisitoSpillo({ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'non', condizione: { tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'non', condizione: { tipo: 'piove' } }] } }] })).not.toBeNull();
+    let profondo: unknown = { tipo: 'piove' };
+    for (let i = 0; i < 7; i++) profondo = { tipo: 'non', condizione: profondo };
+    expect(normalizzaRequisitoSpillo(profondo)).toBeNull();
+    expect(descriviRequisitoSpillo({ tipo: 'arco', dungeon: 'madarame' })).toBe("dall'arco del Palazzo di Madarame");
+    expect(descriviRequisitoSpillo({ tipo: 'attivita', attivita: 'biliardo', volte: 1 }, { attivita: { biliardo: 'Biliardo' } })).toBe('Biliardo: svolta almeno una volta');
+    expect(descriviRequisitoSpillo({ tipo: 'rango-cliente', negozio: 't', rango: 'caos' }, { negozi: { t: 'Tanaka' } })).toBe('grado cliente Caos da Tanaka');
+    expect(descriviRequisitoSpillo({ tipo: 'non', condizione: { tipo: 'evento', evento: 'mansarda-pulita' } })).toBe('Non: Mansarda del Leblanc pulita');
+  });
+
+  it('un JSON salvato danneggiato non diventa una condizione', () => {
+    expect(leggiCondizioniSalvate('{rotto')).toEqual([]);
+    expect(leggiCondizioniSalvate('[{"tipo":"da-configurare","nota":"x"},{"tipo":"piove"}]')).toEqual([{ tipo: 'piove' }]);
+    expect(leggiCondizioniSalvate(null)).toEqual([]);
   });
 });

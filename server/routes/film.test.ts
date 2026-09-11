@@ -48,14 +48,15 @@ describe('API Film e DVD', () => {
   });
 
   it('sblocca il requisito aggregato soltanto al completamento, senza esporre un fatto falsificabile', async () => {
-    const requisito = { tipo: 'stato', chiave: 'visione-film-dvd-completata', confronto: 'almeno', valore: 1 } as const;
+    const requisito = { tipo: 'contatore', cosa: 'film-completati', almeno: 1 } as const;
     expect(migraTestiCondizioni(['dopo essere andati al cinema o aver visto un DVD almeno una volta'])).toEqual([requisito]);
     expect(JSON.parse((getDb().prepare("SELECT condizioni_json FROM articolo WHERE chiave='hinokuniya/anima-da-cineasta'").get() as { condizioni_json: string }).condizioni_json)).toEqual([requisito]);
 
     const id = ((await request(app).post('/api/partite').send({ nome: 'Prima visione' })).body.data as { id: number }).id;
     const valuta = () => valutaRequisiti([{ ...requisito, testo: 'Prima visione Film/DVD' }], statoDisponibilitaPartita(id)).stato;
     expect(valuta()).toBe('bloccato');
-    expect((await request(app).put(`/api/condizioni/partite/${id}/visione-film-dvd-completata`).send({ valore: 1 })).status).toBe(404);
+    // il contatore non si imposta a mano: si calcola dai progressi, e non esiste un endpoint per scriverlo
+    expect((await request(app).put(`/api/condizioni/partite/${id}/eventi/film-completati`).send({ avvenuto: true })).status).toBe(404);
 
     const url = `/api/partite/${id}/letture`;
     await request(app).put(url).send({ tipo: 'film', chiave: 'dvd-wraith', avanzamento: 1 });

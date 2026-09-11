@@ -488,7 +488,8 @@ export interface ModificaDote {
 /** Semaforo di un requisito per un rango (Fase 12.3): verde soddisfatto, rosso non soddisfatto, grigio non verificabile (conferma manuale). */
 export interface SemaforoRequisitoDto {
   indice: number;
-  tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'squadra' | 'data' | 'meteo' | 'manuale' | 'giorno-settimana' | 'stagione' | 'fascia';
+  /** Il tipo della condizione valutata (`RequisitoSpillo['tipo']`), o «manuale» per i requisiti dei Confidenti che si confermano a mano. */
+  tipo: string;
   testo: string;
   stato: 'verde' | 'rosso' | 'grigio';
   /** Viene dal **negozio**, non dall'articolo: l'articolo la eredita perche' a bottega chiusa non
@@ -1743,7 +1744,6 @@ export interface MappaDto extends MappaRiassuntoDto {
 /** Pacchetto di esportazione/importazione (versione 1); il seed `mappe-editor.json` usa lo stesso formato senza `immagini`. */
 export interface EsportazioneMappeDto {
   ingressi?:Array<{quartiere:string;mappa:string;x:number;y:number;zoom:number}>;
-  stati?: Array<{chiave:string;nome:string;categoria:string;unita:string}>;
   versione: 1;
   esportato?: string;
   mappe: Array<{

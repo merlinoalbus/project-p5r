@@ -1,5 +1,6 @@
 import { verificaCondizioni } from './mappe/mappeService.js';
 import { migraTestiCondizioni } from '../../shared/migraCondizioni.js';
+import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
 // ============================================================
 // catalogoService — negozi e articoli aggiunti o corretti dall'utente (Fase 16.1)
 // ============================================================
@@ -161,7 +162,7 @@ export function creaElemento(tipo: TipoCatalogo, dati: Record<string, unknown>):
   const colonne = ['chiave', 'ordine', ...compilate, 'origine', 'nascosto', 'updated_at'];
   const daProsa = PROFILO[tipo].condizioniDa;
   if (daProsa && valori.condizioni_json === undefined) {
-    valori.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsa(dati), dati.confidente_chiave as string | null));
+    valori.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsa(dati), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave, negozio_chiave: dati.negozio_chiave, confidente_chiave: dati.confidente_chiave })));
     colonne.push('condizioni_json');
   }
   // **Quel che aggiungi tu e' verificato: la fonte sei tu.**
@@ -221,7 +222,7 @@ export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'e
   const originale = r.seed_json ? (JSON.parse(r.seed_json) as Record<string, unknown>) : null;
   if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
   const daProsaRip = PROFILO[tipo].condizioniDa;
-  if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsaRip(originale), originale.confidente_chiave as string | null));
+  if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsaRip(originale), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave: String(r.chiave), negozio_chiave: originale.negozio_chiave, confidente_chiave: originale.confidente_chiave })));
   const set = CAMPI[tipo].map((c) => `${c} = @${c}`);
   // **Un'istantanea vecchia non conosce i campi aggiunti dopo.** `seed_json` conserva la riga com'era
   // il giorno in cui l'hai corretta: se da allora la tabella ha guadagnato una colonna — `verificato`

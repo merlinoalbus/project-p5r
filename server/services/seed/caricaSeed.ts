@@ -761,6 +761,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const [k, v] of Object.entries(t.oggetti ?? {})) tr('oggetto', k, v);
     for (const tm of t.termini ?? []) tr('termine', tm.chiave, tm.nome, { categoria: tm.categoria, definizione: tm.definizione ?? null, fonte: tm.fonte ?? null });
 
+    // Le date di sblocco dei quartieri **prima** delle condizioni: «da quando si sblocca Akihabara»
+    // diventa una condizione solo se Akihabara ha una data, e la data si materializza qui.
+    sincronizzaDateQuartieri(db);
     sincronizzaCondizioniCatalogo(db);
     // Le stesse regole per libri, film e attivita': la loro disponibilita' era prosa e nessuno la
     // leggeva, e l'editor delle condizioni sulle loro schede scriveva in un campo che non c'era.
@@ -776,7 +779,6 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       if (n.condizioni) condN.run(JSON.stringify(n.condizioni), n.chiave);
       for (const a of n.articoli) if (a.condizioni) condA.run(JSON.stringify(a.condizioni), a.chiave);
     }
-    sincronizzaDateQuartieri(db);
     // ---- Meta ----
     // ---- Requisiti per rango dei Confidenti (Fase 12.3): ricaricati integralmente dal seed ----
     db.prepare('DELETE FROM confidente_requisito').run();

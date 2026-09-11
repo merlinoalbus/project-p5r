@@ -38,11 +38,10 @@ describe('API Videogiochi', () => {
     const url = `/api/partite/${id}/letture`;
     let g = (await request(app).put(url).send({ tipo: 'videogioco', chiave: gioco.chiave, avanzamento: 1 })).body.data as VideogiocoDto;
     expect(g).toMatchObject({ progresso: 1, fatto: gioco.totaleRound === 1 });
-    const requisito = statoDisponibilitaPartita(id).fatti?.get('videogioco-completato');
-    expect(requisito?.valore ?? 0).toBe(0);
+    expect(statoDisponibilitaPartita(id).contatori.get('videogiochi-completati') ?? 0).toBe(0);
     g = (await request(app).put(url).send({ tipo: 'videogioco', chiave: gioco.chiave, avanzamento: gioco.totaleRound })).body.data as VideogiocoDto;
     expect(g).toMatchObject({ progresso: gioco.totaleRound, fatto: true });
-    expect(statoDisponibilitaPartita(id).fatti?.get('videogioco-completato')?.valore).toBeGreaterThanOrEqual(1);
+    expect(statoDisponibilitaPartita(id).contatori.get('videogiochi-completati')).toBeGreaterThanOrEqual(1);
   });
 
   it('isola le partite, valida i limiti e conserva il progresso al reseed', async () => {

@@ -12,7 +12,7 @@ const api = vi.hoisted(() => ({
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
 vi.mock('../../services/api', () => api);
-vi.mock('../../services/api/condizioni', () => ({getElenchiRegole:vi.fn(async()=>({stati:[],articoli:[],letture:[],arcani:[],persone:[],abilita:[]})),creaStato:vi.fn()}));
+vi.mock('../../services/api/condizioni', () => ({getElenchiRegole:vi.fn(async()=>({articoli:[],letture:[],arcani:[],persone:[],abilita:[],squadra:[],attivita:[],negozi:[],eventi:[],contatori:[]}))}));
 
 const ID = 427;
 let descrizione: string;

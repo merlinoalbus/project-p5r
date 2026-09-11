@@ -151,3 +151,31 @@ Otto tipi hanno una tinta molto chiara — `forziere-raro`, `terme`, `casa`, `la
 stacco. **L'utente ha deciso di lasciarli come sono**: si leggono, sono il caso peggiore e non un
 difetto, e la tavolozza resta quella decisa a suo tempo. Annotato qui perché non venga «corretto»
 di iniziativa da qualcuno che rivede gli spilli fra sei mesi.
+
+### 2026-09-11 — Le condizioni sono stati della partita, mai frasi
+Richiesta dell'utente, testuale: «le condizioni sono stati del sistema che definiscono il
+comportamento degli elementi e del resto delle sezioni nella partita. Questo deve valere per ogni
+elemento in questa app. Non voglio più vedere condizioni espresse come frasi testuali». E, sui
+gruppi: «devo poter impostare uno stato e una o più condizioni in OR o in AND o mescolate tra loro».
+
+Al momento della richiesta 324 righe del catalogo (13 attività, 22 libri, 21 film, 23 negozi, 245
+articoli) portavano una condizione «da configurare» — la frase della guida che il convertitore non
+sapeva leggere — e tre righe uno «stato» con nome libero. Decisioni:
+
+1. **Una condizione è `stato × operatore × valore`, da cataloghi chiusi** (`shared/statiPartita.ts`).
+   Il tipo `da-configurare` e lo `stato` a nome libero non esistono più; `fatto_gioco` e
+   `fatto_partita` sono tolte (migrazione 064). Le frasi che non si sanno convertire **non diventano
+   niente** e finiscono nel rapporto di conversione, mai nei dati.
+2. **Gli stati che mancavano** e che la guida usa davvero: arco della storia (159 righe, «a partire
+   dall'arco del Palazzo di X», derivato dalla data di gioco e dalle finestre dei Palazzi), attività
+   svolta n volte, evento di storia (mansarda pulita, ingressi in squadra), grado cliente di un
+   negozio (calcolato dalla spesa: Tanaka), punti negozio, contatori (film/videogiochi/libri
+   completati). I primi tre si segnano in **Partita → Progressi**; gli altri si calcolano.
+3. **La conversione dalla prosa avviene una volta**, all'ingresso dei dati (seed, migrazione,
+   esportazione), con regole che coprono tutte le 128 frasi distinte censite e le 516 righe di prosa
+   del seed senza scarti; non si rifà più a ogni avvio.
+4. **Un editor solo per tutta l'app**: righe `[NON] [Stato ▾] [operatore] [valori]`, blocchi TUTTE /
+   ALMENO UNA annidabili con NON a qualsiasi profondità, numeri a passi, elenchi con ricerca
+   scrivendo (`SelettoreRicerca`). Nessun campo di testo libero.
+5. Effetto voluto e accettato: condizioni che prima erano ignorate ora **bloccano** (la clinica di
+   Takemi apre il 15 aprile col Confidente avviato; gli articoli di Tanaka chiedono il grado).

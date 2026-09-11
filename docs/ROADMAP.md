@@ -312,3 +312,16 @@ confidenti pesano un mega l'uno per essere mostrati a 24-56 px).
 
 Restano da cancellare 10 rami locali già interamente contenuti in main, e il `gc` che libera lo
 spazio. Il backup completo pre-riscrittura è in `_backup-project-p5r-20260908.git`.
+
+## Stati e condizioni (11 settembre 2026) — fatto
+
+Lotto 1 del rifacimento di mappe, negozi, oggetti, effetti e stati
+(`docs/analisi/2026-09-11-modello-mappe-negozi-oggetti.md`). Catalogo chiuso degli stati
+(`shared/statiPartita.ts`), convertitore prosa→stati completo (`shared/migraCondizioni.ts`,
+0 scarti su 516 righe), valutatore unico senza lettura di prosa (`disponibilitaService`),
+migrazione 064 (324 righe convertite, via `fatto_gioco`), editor unico E/O/NON con ricerca negli
+elenchi, scheda **Partita → Progressi** per eventi, attività svolte e punti negozio.
+
+Lotti successivi, nell'ordine concordato: (2) categorie di spillo — spostamento, città,
+consumabile, informativo — e «Ingresso al Palazzo»; (3) scheda spillo con destinazione mappa +
+spillo; (4) visore e popup (negozio/attività nel riquadro); (5) layout sui tre formati.

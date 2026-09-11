@@ -14,7 +14,7 @@ export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 
   // nuovo porta qui la sua chiave, con la riserva SVG qui sotto e la riga nel censimento
   // (`docs/grafica/fabbisogno.md`, voce 7) perché Codex ne generi l'immagine.
   | 'piu' | 'meno' | 'completati' | 'dettagli' | 'pianta' | 'posizione';
-export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'letture' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico' | 'riepilogo' | 'fusione-speciali' | 'fusione-forca' | 'fusione-cicli' | 'fusione-skill' | 'fusione-piani' | 'fusione-con' | 'fusione-ricette' | 'fusione-calcolatore'
+export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico' | 'riepilogo' | 'fusione-speciali' | 'fusione-forca' | 'fusione-cicli' | 'fusione-skill' | 'fusione-piani' | 'fusione-con' | 'fusione-ricette' | 'fusione-calcolatore'
   // Le schede di Trofei e finali, Sfide, Oggetti e Richieste: erano barre di sole parole, e con
   // l'immagine sopra l'etichetta (la forma che l'utente ha indicato) senza figura resterebbero
   // tessere vuote. Riserva SVG qui sotto, riga nel censimento §25 perché Codex generi l'immagine.
@@ -99,6 +99,8 @@ const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = 
   scorta: (d) => <IconCarte size={d} />,
   // «Letture e giochi»: il libro e' il segno piu' riconoscibile dei tre insiemi.
   letture: (d) => <IconLibro size={d} />,
+  // «Progressi»: eventi di storia, attività svolte, punti negozio — la medaglia dice «raggiunto».
+  progressi: (d) => <IconMedaglia size={d} />,
   compendio: (d) => <IconLibro size={d} />,
   obiettivi: (d) => <IconBersaglio size={d} />,
   piani: (d) => <IconAppunti size={d} />,

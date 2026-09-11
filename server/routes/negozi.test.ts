@@ -69,6 +69,10 @@ describe('API negozi e inventario', () => {
     expect(a.acquistato).toBe(false);
     expect((await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: 'x/y', fatto: true })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: 'untouchable/kogatana-nera' })).status).toBe(400);
+    // La clinica apre «dal 15 aprile, con l'avvio del Confidente di Takemi»: ora è una condizione vera
+    // (Confidente Takemi almeno rango 1), non più una frase ignorata, quindi il Confidente va avviato.
+    getDb().prepare("UPDATE confidente_partita SET sbloccato = 1, rango = 1 WHERE partita_id = ? AND confidente_chiave = 'takemi'").run(id);
+    await request(app).put(`/api/partite/${id}/giorno`).send({ data: '04-15' });
     const schedaTakemiPrima = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
     const medicinaDisponibile = schedaTakemiPrima.articoliElenco[0];
     await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: medicinaDisponibile.chiave, fatto: true });

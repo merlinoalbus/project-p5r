@@ -17,6 +17,8 @@ import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
 import { dettaglioNegozio } from '../negoziService.js';
+import { giocabili } from '../squadraService.js';
+import { nomiCondizioni } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
@@ -216,14 +218,6 @@ function immaginiDiSpillo(spilloId: number): ImmagineSpilloDto[] {
 interface ContestoSpilli { partitaId?: number; raccolti?: Set<number>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni }
 
 /** Nomi (Confidenti, quartieri, richieste, Palazzi) per descrivere le condizioni: letti una volta per risposta. */
-function nomiCondizioni(): NomiCondizioni {
-  const mappa = (sql: string) => Object.fromEntries((prepared(sql).all() as Array<{ chiave: string; nome: string }>).map((r) => [r.chiave, r.nome]));
-  return {
-    stati: mappa('SELECT chiave, nome FROM fatto_gioco'), articoli: mappa('SELECT chiave, nome FROM articolo'), letture: mappa('SELECT chiave, nome FROM libro UNION ALL SELECT chiave, nome FROM film'),
-    confidenti: mappa('SELECT chiave, nome FROM confidente'), quartieri: mappa('SELECT chiave, nome FROM quartiere'),
-    richieste: mappa('SELECT chiave, nome FROM richiesta'), dungeon: mappa('SELECT chiave, nome FROM dungeon'),
-  };
-}
 
 function contestoSpilli(partitaId?: number): ContestoSpilli {
   if (partitaId && !prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
@@ -490,18 +484,21 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
   const valide: RequisitoSpillo[] = [];
   const scartate: Array<{ cosa: string; chiave: string }> = [];
   const sorgente = condizioni == null ? [] : Array.isArray(condizioni) ? condizioni : [null];
-  if(sorgente.length>20)return {valide:[{tipo:'da-configurare',nota:'Il pacchetto supera il limite di 20 condizioni: ricontrollare tutti i vincoli prima di salvare.'}],scartate:[{cosa:'Condizioni',chiave:'limite superato'}]};
+  // Una condizione che cita una chiave assente non diventa testo: sparisce, e l'importazione lo riferisce.
+  if(sorgente.length>20)return {valide:[],scartate:[{cosa:'Condizioni',chiave:'limite superato'}]};
   for (const originale of sorgente) {
     const c = normalizzaRequisitoSpillo(originale);
-    if (!c) { scartate.push({cosa:'Condizione',chiave:'non valida'}); valide.push({tipo:'da-configurare',nota:'Condizione importata non valida: ricontrollare il pacchetto originale.'}); continue; }
+    if (!c) { scartate.push({cosa:'Condizione',chiave:'non valida'}); continue; }
     if (c.tipo === 'gruppo' || c.tipo === 'non') {
       const figli=condizioniConChiaviEsistenti(c.tipo === 'gruppo' ? c.condizioni : [c.condizione]);
-      if (figli.scartate.length) { scartate.push(...figli.scartate); valide.push({tipo:'da-configurare',nota:'Gruppo con riferimenti mancanti: '+figli.scartate.map(f=>f.chiave).join(', ')}); } else valide.push(c);
+      if (figli.scartate.length) scartate.push(...figli.scartate); else valide.push(c);
       continue;
     }
     let ok = true; let cosa = ''; let chiave = '';
-    if(c.tipo==='stato'){cosa='Stato';chiave=c.chiave;ok=!!prepared('SELECT 1 FROM fatto_gioco WHERE chiave=?').get(chiave);}
-    else if(c.tipo==='articolo'){cosa='Articolo';chiave=c.articolo;ok=!!prepared('SELECT 1 FROM articolo WHERE chiave=?').get(chiave);}
+    if(c.tipo==='articolo'){cosa='Articolo';chiave=c.articolo;ok=!!prepared('SELECT 1 FROM articolo WHERE chiave=?').get(chiave);}
+    else if(c.tipo==='attivita'){cosa='Attività';chiave=c.attivita;ok=!!prepared('SELECT 1 FROM attivita WHERE chiave=?').get(chiave);}
+    else if(c.tipo==='rango-cliente'||c.tipo==='punti-negozio'){cosa='Negozio';chiave=c.negozio;ok=!!prepared('SELECT 1 FROM negozio WHERE chiave=?').get(chiave);}
+    else if(c.tipo==='squadra'){cosa='Ladro Fantasma';chiave=c.membro;ok=giocabili().some((p)=>p.chiave===chiave);}
     else if(c.tipo==='lettura'){cosa=c.categoria;chiave=c.chiave;ok=!!prepared('SELECT 1 FROM '+c.categoria+' WHERE chiave=?').get(chiave);}
     else if(c.tipo==='persona-arcano'){cosa='Arcano';chiave=c.arcano;ok=!!prepared('SELECT 1 FROM persona WHERE arcana=?').get(chiave);}
     else if(c.tipo==='persona-abilita'){cosa='Persona o abilità';chiave=c.persona;ok=!!prepared('SELECT 1 FROM persona WHERE nome=?').get(c.persona)&&!!prepared('SELECT 1 FROM skill WHERE nome=?').get(c.abilita);}
@@ -513,7 +510,7 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
       const q = prepared('SELECT sblocco_data FROM quartiere WHERE chiave = ?').get(c.quartiere) as { sblocco_data: string | null } | undefined;
       ok = !!q && q.sblocco_data !== null;
     }
-    if (ok) valide.push(c); else { scartate.push({ cosa, chiave }); valide.push({tipo:'da-configurare',nota:cosa+' non trovato: '+chiave}); }
+    if (ok) valide.push(c); else scartate.push({ cosa, chiave });
   }
   return { valide, scartate };
 }
@@ -521,7 +518,10 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
 /** Editor (API): una chiave sconosciuta è un errore 404, non uno scarto silenzioso. */
 export function verificaCondizioni(condizioni: RequisitoSpillo[] | null | undefined): void {
   const { scartate } = condizioniConChiaviEsistenti(condizioni);
-  if (scartate.length > 0) throw httpErrors.notFound('condizione-non-trovata', `${scartate[0].cosa} '${scartate[0].chiave}' non trovato nella Guida.`);
+  if (scartate.length > 0) {
+    if (scartate[0].cosa === 'Condizione' || scartate[0].cosa === 'Condizioni') throw httpErrors.badRequest('condizione-non-valida', 'Una condizione non è valida (troppo annidata o malformata): ricontrollala nell’editor.');
+    throw httpErrors.notFound('condizione-non-trovata', `${scartate[0].cosa} '${scartate[0].chiave}' non trovato nella Guida.`);
+  }
 }
 
 function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined): void {
@@ -728,13 +728,9 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
       // immagine registrata ma file assente: esportata senza immagine
     }
   }
-  const usati=new Set<string>();
-  const visita=(r:RequisitoSpillo):void=>{if(r.tipo==='stato')usati.add(r.chiave);else if(r.tipo==='gruppo')r.condizioni.forEach(visita);else if(r.tipo==='non')visita(r.condizione);};
-  mappe.forEach(m=>m.spilli.forEach(s=>s.condizioni?.forEach(visita)));
-  const stati=(prepared('SELECT chiave,nome,categoria,unita FROM fatto_gioco').all() as NonNullable<EsportazioneMappeDto['stati']>).filter(f=>usati.has(f.chiave));
   for(const m of mappe){m.chiave=chiaveMappa(m.chiave);if(m.genitore)m.genitore=chiaveMappa(m.genitore);m.asset=assetPredefinitoMappa(m.chiave);for(const s of m.spilli)if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=chiaveMappa(s.riferimento.chiave);}
   const ingressi=(prepared('SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom FROM quartiere_ingresso').all() as NonNullable<EsportazioneMappeDto['ingressi']>).filter(i=>!ammesse||ammesse.has(i.mappa)).map(i=>({...i,mappa:chiaveMappa(i.mappa)}));
-  return { versione: 1, esportato: nowIso(), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(stati.length?{stati}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
+  return { versione: 1, esportato: nowIso(), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
 
 /** Un reseed identico conserva ID, raccolte, schermate e destinazioni del pin. */
@@ -808,14 +804,6 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     }
     const arrivi: Array<{id:number; valore:DestinazioneSpillo|null|undefined; invalidata:boolean}> = [];
     const adesso = nowIso();
-    const statiSchema=z.array(z.object({chiave:z.string().regex(/^[a-z0-9-]{1,120}$/),nome:z.string().min(1).max(160),categoria:z.enum(['evento','attivita','oggetto','grado','contatore','quartiere']),unita:z.string().max(40)})).max(10000);
-    const letti=statiSchema.safeParse(pacchetto.stati??[]);
-    if(!letti.success)throw httpErrors.badRequest('stati-non-validi','Definizioni degli stati non valide nel pacchetto.');
-    for(const f of letti.data){
-      const attuale=prepared('SELECT nome,categoria,unita FROM fatto_gioco WHERE chiave=?').get(f.chiave) as {nome:string;categoria:string;unita:string}|undefined;
-      if(attuale&&(attuale.nome!==f.nome||attuale.categoria!==f.categoria||attuale.unita!==f.unita))throw httpErrors.conflict('stato-in-conflitto','Lo stato '+f.chiave+' ha una definizione diversa: importazione annullata.');
-      if(!attuale)prepared('INSERT INTO fatto_gioco VALUES(?,?,?,?,?)').run(f.chiave,f.nome,f.categoria,f.unita,adesso);
-    }
     // prima le mappe (in ordine di dipendenza: i genitori possono arrivare dopo → secondo passaggio per i genitori)
     for (const m of pacchetto.mappe) {
       if (!chiaveValida(m.chiave) || !(TIPI_MAPPA as readonly string[]).includes(m.tipo)) { esito.saltate.push(m.chiave); continue; }
