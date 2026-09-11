@@ -1,7 +1,7 @@
 import { etichettaPlanimetria, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
 import { destinazioneMappaSpillo } from '../utils/navigazioneMappa';
-import { DestinazioneSpilloEditor } from '../components/mappe/DestinazioneSpilloEditor';
+import { SelettoreRicerca } from '../components/condizioni/SelettoreRicerca';
 import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 // ============================================================
@@ -16,7 +16,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, esportaPacchettoRepository, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere, type RiferimentoTrovatoApi } from '../services/api';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, esportaPacchettoRepository, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { useAsset } from '../stores/assetStore';
 import { PageState } from '../components/shared/PageState';
@@ -28,16 +28,15 @@ import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 
 import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
-import { DEFINIZIONI_SPILLO, GRUPPI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
+import { CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
-const NOME_RIFERIMENTO: Record<TipoRiferimento, string> = { mappa: 'Altra mappa', negozio: 'Negozio', punto: 'Punto di un Palazzo', luogo: 'Luogo della città', confidente: 'Confidente', richiesta: 'Richiesta dei Mementos', attivita: 'Attività' };
 
 function messaggio(err: unknown, predefinito: string): string { return err instanceof Error ? err.message : predefinito; }
 
 /** Spillo copiato negli appunti dell'editor: tutti i campi tranne la posizione; sopravvive al cambio di mappa e alla ricarica della pagina. */
-export interface AppuntiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo: TipoSpillo; nome: string; descrizione: string; collezionabile: boolean; riferimento: { tipo: TipoRiferimento; chiave: string } | null; condizioni: RequisitoSpillo[] }
+export interface AppuntiSpillo { destinazione?: DestinazioneSpillo | null; tipo: TipoSpillo; nome: string; descrizione: string; riferimento: { tipo: TipoRiferimento; chiave: string } | null; condizioni: RequisitoSpillo[] }
 /** Le condizioni dello spillo senza il testo descrittivo del server (è il server a ricalcolarlo). */
 function condizioniNude(s: SpilloDto): RequisitoSpillo[] {
   return s.condizioni.map((c) => { const copia: Record<string, unknown> = { ...c }; delete copia.testo; return copia as unknown as RequisitoSpillo; });
@@ -261,11 +260,11 @@ function PannelloEditor(p: PropsPannello) {
         </div>
         {strumento === 'aggiungi' && (
           <div className="flex flex-col gap-1.5" role="group" aria-label="Tipo del nuovo spillo">
-            {GRUPPI_SPILLO.map((g) => (
-              <div key={g.nome} className="flex flex-col gap-0.5">
-                <span className="editor-mappa__gruppo">{g.nome}</span>
+            {CATEGORIE_SPILLO.map((c) => (
+              <div key={c} className="flex flex-col gap-0.5">
+                <span className="editor-mappa__gruppo" title={DEFINIZIONI_CATEGORIA[c].descrizione}>{DEFINIZIONI_CATEGORIA[c].nome}</span>
                 <div className="editor-mappa__palette">
-                  {g.tipi.map((t) => (
+                  {tipiDellaCategoria(c).map((t) => (
                     <button key={t} type="button" className={`editor-mappa__tipo ${t === tipoNuovo ? 'editor-mappa__tipo--attivo' : ''}`} aria-pressed={t === tipoNuovo} onClick={() => p.onTipoNuovo(t)}>
                       <PuntoSpillo tipo={t} colore={DEFINIZIONI_SPILLO[t].colore} />
                       <span className="truncate">{DEFINIZIONI_SPILLO[t].nome}</span>
@@ -280,7 +279,7 @@ function PannelloEditor(p: PropsPannello) {
       </section>
 
       {selezionato && (
-        <FormSpillo key={selezionato.id} spillo={selezionato} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} />
+        <FormSpillo key={selezionato.id} spillo={selezionato} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} />
       )}
 
       {!selezionato && strumento === 'seleziona' && <p className="editor-mappa__aiuto">Seleziona un punto sulla mappa per modificarne nome, collegamento e condizioni, oppure scegli Aggiungi.</p>}
@@ -357,106 +356,118 @@ function PannelloEditor(p: PropsPannello) {
   );
 }
 
-interface PropsFormSpillo { spillo: SpilloDto; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void> }
+interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void> }
 
-/** Proprietà dello spillo selezionato con la ricerca dell'entità da collegare. */
-function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine }: PropsFormSpillo) {
+const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'attivita', nome: 'Attività' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
+
+/** «Porta a»: la mappa d'arrivo e, se si vuole, uno spillo di quella mappa. Elenchi con ricerca, mai un punto da cliccare a mano. */
+function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, onCambia }: { valore: DestinazioneSpillo | null; mappaCorrente: string; albero: MappaRiassuntoDto[]; disabilitato: boolean; onCambia: (d: DestinazioneSpillo | null) => void }) {
+  const mappe = useMemo(() => albero.filter((m) => m.chiave !== mappaCorrente).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), gruppo: NOME_TIPO_MAPPA[m.tipo] })), [albero, mappaCorrente]);
+  const arrivo = useCarica(() => (valore?.mappa ? getMappa(valore.mappa) : Promise.resolve(null)), [valore?.mappa]);
+  const spilli = useMemo(() => [{ chiave: '', nome: 'Nessuno: solo la mappa, adattata alla finestra' }, ...(arrivo.dati?.spilli ?? []).map((s) => ({ chiave: String(s.id), nome: s.nome, dettaglio: s.tipoNome }))], [arrivo.dati]);
+  return (
+    <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" disabled={disabilitato}>
+      <legend className="text-[12px] text-text-secondary">Porta a</legend>
+      <SelettoreRicerca etichetta="Mappa di arrivo" valore={valore?.mappa ?? ''} opzioni={mappe} segnaposto="Scegli la mappa…" onCambia={(k) => onCambia(k ? { mappa: k, spillo: null } : null)} />
+      {valore && (arrivo.errore
+        ? <p role="alert" className="m-0 text-[12px]">{arrivo.errore} <button type="button" className="visore-mappa__azione-testo" onClick={() => void arrivo.ricarica()}>Riprova</button></p>
+        : <SelettoreRicerca etichetta="Spillo di arrivo (facoltativo)" valore={valore.spillo ? String(valore.spillo) : ''} opzioni={spilli} onCambia={(k) => onCambia({ mappa: valore.mappa, spillo: k ? Number(k) : null })} disabilitato={arrivo.caricamento} />)}
+      {valore && <div className="flex gap-2"><button type="button" className="visore-mappa__azione-testo" onClick={() => onCambia(null)}>Togli la destinazione</button></div>}
+    </fieldset>
+  );
+}
+
+/** «Collegato a»: un negozio, un'attività, un luogo o un Confidente, scelto da un elenco con ricerca. */
+function CollegamentoCitta({ valore, disabilitato, onCambia }: { valore: { tipo: TipoRiferimento; chiave: string } | null; disabilitato: boolean; onCambia: (r: { tipo: TipoRiferimento; chiave: string } | null) => void }) {
+  const [tipo, setTipo] = useState<TipoRiferimento>(valore?.tipo ?? 'negozio');
+  const voci = useCarica(() => cercaRiferimenti(tipo, '', 100), [tipo]);
+  const opzioni = useMemo(() => (voci.dati ?? []).map((r) => ({ chiave: r.chiave, nome: r.nome, dettaglio: r.dettaglio || undefined })), [voci.dati]);
+  const etichetta = COLLEGAMENTI_CITTA.find((c) => c.tipo === tipo)?.nome ?? 'Collegamento';
+  return (
+    <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" disabled={disabilitato}>
+      <legend className="text-[12px] text-text-secondary">Collegato a</legend>
+      <div className="flex flex-wrap gap-1" role="group" aria-label="Che cosa collegare">
+        {COLLEGAMENTI_CITTA.map((c) => <button key={c.tipo} type="button" className={`chip chip--icona touch ${tipo === c.tipo ? 'chip--attivo' : ''}`} aria-pressed={tipo === c.tipo} onClick={() => { setTipo(c.tipo); if (valore && valore.tipo !== c.tipo) onCambia(null); }}>{c.nome}</button>)}
+      </div>
+      {voci.errore
+        ? <p role="alert" className="m-0 text-[12px]">{voci.errore} <button type="button" className="visore-mappa__azione-testo" onClick={() => void voci.ricarica()}>Riprova</button></p>
+        : <SelettoreRicerca etichetta={`Elenco: ${etichetta}`} valore={valore?.tipo === tipo ? valore.chiave : ''} opzioni={opzioni} segnaposto="Scegli…" onCambia={(k) => onCambia(k ? { tipo, chiave: k } : null)} disabilitato={voci.caricamento} />}
+      {valore && <button type="button" className="visore-mappa__azione-testo self-start" onClick={() => onCambia(null)}>Togli il collegamento</button>}
+    </fieldset>
+  );
+}
+
+/** Proprietà dello spillo selezionato: nome, tipo e descrizione, poi quel che la categoria del tipo richiede. */
+function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine }: PropsFormSpillo) {
   const inputSchermata = useRef<HTMLInputElement | null>(null);
   const [didascaliaNuova, setDidascaliaNuova] = useState('');
   const [nome, setNome] = useState(s.nome);
   const [tipo, setTipo] = useState<TipoSpillo>(s.tipo);
   const [descrizione, setDescrizione] = useState(s.descrizione);
-  const [soloPosizione, setSoloPosizione] = useState(s.soloPosizione ?? false);
-  const [collezionabile, setCollezionabile] = useState(s.collezionabile);
-  const [riferimento, setRiferimento] = useState<{ tipo: TipoRiferimento; chiave: string; nome?: string } | null>(s.riferimento);
+  const [riferimento, setRiferimento] = useState<{ tipo: TipoRiferimento; chiave: string } | null>(s.riferimento);
   const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => condizioniNude(s));
-  const [destinazione, setDestinazione] = useState<DestinazioneSpillo|null|undefined>(s.destinazione ?? undefined);
-  const [arrivoPronto, setArrivoPronto] = useState(true);
-  const [tipoRicerca, setTipoRicerca] = useState<TipoRiferimento>(s.riferimento?.tipo ?? DEFINIZIONI_SPILLO[s.tipo].riferimento ?? 'mappa');
-  const [testoRicerca, setTestoRicerca] = useState('');
-  const [risultati, setRisultati] = useState<RiferimentoTrovatoApi[] | null>(null);
-  const [cercando, setCercando] = useState(false);
-  const modificato = soloPosizione !== (s.soloPosizione ?? false) || JSON.stringify(destinazione) !== JSON.stringify(s.destinazione ?? undefined) || nome !== s.nome || tipo !== s.tipo || descrizione !== s.descrizione || collezionabile !== s.collezionabile || (riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null) || JSON.stringify(condizioni) !== JSON.stringify(condizioniNude(s));
-  const nomeRiferimento = useMemo(() => {
-    if (!riferimento) return null;
-    if (riferimento.nome) return riferimento.nome;
-    const d = s.dettaglio;
-    return d?.mappa?.nome ?? d?.negozio?.nome ?? d?.punto?.nome ?? d?.luogo?.nome ?? d?.confidente?.nome ?? d?.richiesta?.nome ?? riferimento.chiave;
-  }, [riferimento, s.dettaglio]);
-
-  const cerca = async (e: FormEvent) => {
-    e.preventDefault();
-    setCercando(true);
-    try { setRisultati(await cercaRiferimenti(tipoRicerca, testoRicerca)); } catch (err) { notifica('error', messaggio(err, 'Ricerca fallita.')); } finally { setCercando(false); }
+  // gli spostamenti di prima avevano solo il riferimento alla mappa: qui è la stessa cosa di una destinazione senza spillo
+  const destinazioneIniziale: DestinazioneSpillo | null = s.destinazione ?? (s.riferimento?.tipo === 'mappa' ? { mappa: s.riferimento.chiave, spillo: null } : null);
+  const [destinazione, setDestinazione] = useState<DestinazioneSpillo | null>(destinazioneIniziale);
+  const categoria = categoriaSpillo(tipo);
+  // Cambiando categoria si tolgono le cose che quella categoria non ha: un collegamento estraneo non si salva.
+  const cambiaTipo = (t: TipoSpillo) => {
+    setTipo(t);
+    const c = categoriaSpillo(t);
+    if (riferimento && !RIFERIMENTI_PER_CATEGORIA[c].includes(riferimento.tipo)) setRiferimento(null);
+    if (c !== 'spostamento') setDestinazione(null);
+    if (c === 'citta') setCondizioni([]);
   };
+  // Uno spostamento che **è** un luogo o un punto della Guida (stazione, scorciatoia) tiene quel riferimento: è la sua identità
+  // per il seed e per lo stato condiviso con la scheda del Palazzo; la destinazione vive a parte. Il riferimento «mappa» si
+  // scrive solo per chi non ha un'identità propria (i passaggi vecchi lo usano come ripiego).
+  const riferimentoEffettivo = categoria === 'spostamento'
+    ? (riferimento && riferimento.tipo !== 'mappa' ? riferimento : (destinazione ? { tipo: 'mappa' as const, chiave: destinazione.mappa } : null))
+    : riferimento;
+  const dati = { nome: nome.trim() || s.nome, tipo, descrizione, riferimento: riferimentoEffettivo, condizioni: categoria === 'citta' ? [] : condizioni, destinazione: categoria === 'spostamento' ? destinazione : null };
+  const modificato = dati.nome !== s.nome || tipo !== s.tipo || descrizione !== s.descrizione
+    || (dati.riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (dati.riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null)
+    || JSON.stringify(dati.condizioni) !== JSON.stringify(condizioniNude(s)) || JSON.stringify(dati.destinazione) !== JSON.stringify(categoria === 'spostamento' ? destinazioneIniziale : null);
   const salva = (e: FormEvent) => {
     e.preventDefault();
-    if (!arrivoPronto) { notifica('error', 'Scegli il punto di arrivo prima di salvare.'); return; }
-    if (!condizioni.every(c=>normalizzaRequisitoSpillo(c)!==null)) { notifica('error','Completa o rimuovi i gruppi vuoti prima di salvare.'); return; }
-    void onSalva({ nome: nome.trim() || s.nome, tipo, descrizione, collezionabile, soloPosizione, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni, destinazione });
+    if (!condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null)) { notifica('error', 'Completa o rimuovi i gruppi vuoti prima di salvare.'); return; }
+    void onSalva(dati);
   };
+  const puntoGuida = s.dettaglio?.tipo === 'punto' ? s.dettaglio.punto ?? null : null;
   return (
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
       <div className="flex items-start gap-2">
         <PuntoSpillo tipo={tipo} colore={DEFINIZIONI_SPILLO[tipo].colore} grande />
         <div className="flex-1 min-w-0">
           <h3 className="m-0 font-display text-[19px] leading-tight break-words">{s.nome}</h3>
-          <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">x {s.x}% · y {s.y}% · {s.origine}</p>
+          <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].nome} · x {s.x}% · y {s.y}% · {s.origine}</p>
         </div>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi le proprietà">×</button>
       </div>
       <form className="flex flex-col gap-2" onSubmit={salva}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={160} /></label>
         <label className="editor-mappa__campo">Tipo
-          <select className="form-input" value={tipo} onChange={(e) => { const t = e.target.value as TipoSpillo; setTipo(t); setCollezionabile(DEFINIZIONI_SPILLO[t].collezionabile); }}>
-            {TIPI_SPILLO.map((t) => <option key={t} value={t}>{DEFINIZIONI_SPILLO[t].nome}</option>)}
+          <select className="form-input" value={tipo} onChange={(e) => cambiaTipo(e.target.value as TipoSpillo)}>
+            {CATEGORIE_SPILLO.map((c) => <optgroup key={c} label={DEFINIZIONI_CATEGORIA[c].nome}>{tipiDellaCategoria(c).map((t) => <option key={t} value={t}>{DEFINIZIONI_SPILLO[t].nome}</option>)}</optgroup>)}
           </select>
         </label>
+        <p className="m-0 text-[12px] text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
         <label className="editor-mappa__campo">Descrizione<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={2000} /></label>
-        <label className="flex items-center gap-2 text-[12px]"><input type="checkbox" checked={collezionabile} onChange={(e) => setCollezionabile(e.target.checked)} /> Collezionabile (sparisce una volta raccolto)</label>
 
-        <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5">
-          <legend className="text-[12px] text-text-secondary">Riferimento</legend>
-          {riferimento ? (
-            <div className="flex items-center gap-2 text-[12px]">
-              <span className="chip chip--attivo">{NOME_RIFERIMENTO[riferimento.tipo]}: {nomeRiferimento}</span>
-              <button type="button" className="visore-mappa__azione-testo" onClick={() => setRiferimento(null)}>Togli</button>
-              {riferimento.tipo === 'mappa' && <button type="button" className="visore-mappa__azione-testo" onClick={() => onVai(riferimento.chiave)}>Apri</button>}
-            </div>
-          ) : <span className="text-[12px] text-text-muted">Nessuna entità collegata.</span>}
-          <div className="editor-mappa__ricerca">
-            <select className="form-input" value={tipoRicerca} onChange={(e) => setTipoRicerca(e.target.value as TipoRiferimento)} aria-label="Tipo di entità da cercare">
-              {TIPI_RIFERIMENTO.map((t) => <option key={t} value={t}>{NOME_RIFERIMENTO[t]}</option>)}
-            </select>
-            <input className="form-input" value={testoRicerca} onChange={(e) => setTestoRicerca(e.target.value)} placeholder="Nome, area o quartiere…" aria-label="Testo da cercare" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void cerca(e); } }} />
-            <button type="button" className="visore-mappa__azione-testo" onClick={(e) => void cerca(e)} disabled={cercando}>Cerca</button>
-          </div>
-          {risultati && (
-            <ul className="m-0 p-0 list-none editor-mappa__risultati" aria-label="Risultati della ricerca">
-              {risultati.length === 0 && <li className="p-2 text-[12px] text-text-muted">Nessun risultato.</li>}
-              {risultati.map((r) => (
-                <li key={`${r.tipo}:${r.chiave}`}>
-                  <button type="button" className="editor-mappa__risultato" onClick={() => { setRiferimento({ tipo: r.tipo, chiave: r.chiave, nome: r.nome }); setRisultati(null); if (r.tipo === 'mappa' && tipo === 'nota') setTipo('passaggio'); }}>
-                    <span className="flex-1 min-w-0 break-words">{r.nome}</span>
-                    <span className="text-text-muted">{r.dettaglio}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </fieldset>
-
-        <label className="flex items-center gap-2 text-[12px]"><input type="checkbox" checked={soloPosizione} onChange={e => setSoloPosizione(e.target.checked)} /> Posizione del luogo (non indica un’attività disponibile)</label>
-        <DestinazioneSpilloEditor valore={destinazione} invalidata={s.destinazioneNonDisponibile??false} disabilitato={occupato} onCambia={setDestinazione} onPronto={setArrivoPronto}/>
-        <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo />
+        {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
+        {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
+        {categoria !== 'citta' && puntoGuida && <p className="m-0 text-[12px] text-text-secondary">Punto della Guida: <strong>{puntoGuida.nome}</strong> — lo stato «ottenuto / esaurito» si condivide con la scheda del Palazzo.</p>}
+        {categoria === 'consumabile' && <p className="m-0 text-[12px] text-text-muted">Si segna come fatto nella partita; non porta da nessuna parte.</p>}
+        {categoria !== 'citta' && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo />}
 
         <div className="flex flex-wrap gap-1.5">
-          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato || !arrivoPronto} />
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato || !arrivoPronto || (s.destinazioneNonDisponibile && destinazione === undefined)} onClick={() => onCopia({ tipo, nome: nome.trim() || s.nome, descrizione, collezionabile, soloPosizione, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni, destinazione })} />
-          {!riferimento && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
+          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: dati.nome, descrizione, riferimento: dati.riferimento, condizioni: dati.condizioni, destinazione: dati.destinazione })} />
+          {categoria === 'spostamento' && destinazione && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri l’arrivo" onClick={() => onVai(destinazione.mappa)} />}
+          {categoria === 'spostamento' && !destinazione && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
         </div>
-        {modificato && !riferimento && <span className="editor-mappa__avviso">Salva le modifiche prima di creare la mappa collegata.</span>}
+        {modificato && categoria === 'spostamento' && !destinazione && <span className="editor-mappa__avviso">Salva le modifiche prima di creare la mappa collegata.</span>}
       </form>
       <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" aria-label="Schermate di riferimento">
         <legend className="text-[12px] text-text-secondary">Schermate di riferimento ({s.immagini.length})</legend>

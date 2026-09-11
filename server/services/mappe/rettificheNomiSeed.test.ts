@@ -13,7 +13,7 @@ describe('rettifiche circoscritte dei nomi base',()=>{
   const db=setup();const prima=db.prepare('SELECT * FROM spillo ORDER BY id').all() as Array<Record<string,unknown>>;
   const id=prima[0].id;const partita=db.prepare("INSERT INTO partita(nome,created_at,updated_at) VALUES('P','t','t')").run().lastInsertRowid;
   db.prepare("INSERT INTO spillo_partita VALUES(?,?,1,'t')").run(partita,id);
-  db.prepare("INSERT INTO spillo_destinazione VALUES(?,'destinazione',10,20,1)").run(id);
+  db.prepare("INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,'destinazione',10,20,1)").run(id);
   const dip=()=>['spillo_partita','spillo_destinazione','spillo_immagine'].map(t=>db.prepare('SELECT * FROM '+t+' ORDER BY 1').all());
   const originali=dip();const nuovo=pacchetto('dopo');
   for(let i=0;i<2;i++){

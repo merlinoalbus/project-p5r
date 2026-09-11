@@ -1,6 +1,7 @@
 import { riconciliaAreeGuida } from './organizzazioneMappe.js';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { fasciaDaTesto, finestraDaDate, giorniDaTesto, soloPresenza, unisci } from './presenzaEntita.js';
+import { categoriaSpillo } from '../../../shared/spilli.js';
+import { finestraDaDate, unisci } from './presenzaEntita.js';
 import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 // ============================================================
 // sincronizzaMappe — crea l'albero delle mappe dalle entità della guida e gli spilli dai marcatori esistenti (Fase 13.1)
@@ -16,7 +17,7 @@ import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 
 import { nowIso } from '../../db/dbService.js';
 import type { AppDatabase } from '../../db/dbService.js';
-import { DEFINIZIONI_SPILLO, spilloPerLuogo, spilloPerPunto } from '../../../shared/spilli.js';
+import { spilloPerLuogo, spilloPerPunto } from '../../../shared/spilli.js';
 
 function adesso(): string { return new Date().toISOString(); }
 
@@ -129,7 +130,8 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       const guida = tabelle.has('guida_mappa') && db.prepare('SELECT 1 FROM guida_mappa WHERE area_chiave=?').get(r.area_chiave);
       if (!mappaEsiste.get(r.area_chiave) && !guida) continue;
       const tipo = spilloPerPunto(r.tipo);
-      const collezionabile = r.esauribile === 1 || DEFINIZIONI_SPILLO[tipo].collezionabile ? 1 : 0;
+      // collezionabile lo dice la categoria (consumabile), non il punto: le stesse regole dell'API (2026-09-12)
+      const collezionabile = categoriaSpillo(tipo) === 'consumabile' ? 1 : 0;
       if (guida && !mappaEsiste.get(r.area_chiave)) {
         db.prepare(`INSERT INTO spillo(mappa_chiave,area_guida_chiave,ruolo_guida,tipo,nome,descrizione,x,y,riferimento_tipo,riferimento_chiave,collezionabile,ordine,origine,updated_at) VALUES(NULL,?,'punto',?,?,?,?,?,'punto',?,?,?,?,?)`).run(r.area_chiave,tipo,r.nome,r.descrizione,r.x,r.y,r.punto_chiave,collezionabile,r.ordine,r.origine === 'seed'?'seed':'utente',t);
       } else insSpillo.run(r.area_chiave, tipo, r.nome, r.descrizione, r.x, r.y, 'punto', r.punto_chiave, collezionabile, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
@@ -142,54 +144,21 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND origine = 'seed' AND (tipo <> ? OR collezionabile <> ?)`);
     for (const r of righe) {
       const tipo = spilloPerPunto(r.tipo);
-      const collezionabile = r.esauribile === 1 || DEFINIZIONI_SPILLO[tipo].collezionabile ? 1 : 0;
+      // collezionabile lo dice la categoria (consumabile), non il punto: le stesse regole dell'API (2026-09-12)
+      const collezionabile = categoriaSpillo(tipo) === 'consumabile' ? 1 : 0;
       riclassificati += aggSpillo.run(tipo, collezionabile, t, r.punto_chiave, tipo, collezionabile).changes;
     }
   }
   if (tabelle.has('marcatore_luogo') && tabelle.has('luogo')) {
-    const colonneLuogo = (db.prepare("SELECT name FROM pragma_table_info('luogo')").all() as Array<{ name: string }>).map((c) => c.name);
-    const quando = colonneLuogo.includes('quando') ? 'l.quando' : "'' AS quando";
-    const giorni = colonneLuogo.includes('giorni') ? 'l.giorni' : "'' AS giorni";
-    // Le condizioni gia' strutturate dei negozi, per luogo: sono la fonte migliore che abbiamo,
-    // perche' qualcuno le ha gia' tradotte una volta invece di lasciarle come frase.
-    // Il legame fra un negozio e il luogo dove sta e' `luogo.negozio`, non `negozio.luogo_chiave`:
-    // quest'ultimo contiene il **quartiere** («shibuya»), mentre le chiavi dei luoghi sono
-    // `<quartiere>/<luogo>`. Averli confusi rendeva la giunzione vuota — zero corrispondenze su 57
-    // negozi — e la condizione non arrivava a nessun pin senza che niente segnalasse il difetto.
-    const condizioniNegozio = new Map<string, string>();
-    if (tabelle.has('negozio')) {
-      const colonneNegozio = (db.prepare("SELECT name FROM pragma_table_info('negozio')").all() as Array<{ name: string }>).map((c) => c.name);
-      const colonneLuoghi = (db.prepare("SELECT name FROM pragma_table_info('luogo')").all() as Array<{ name: string }>).map((c) => c.name);
-      if (colonneNegozio.includes('condizioni_json') && colonneLuoghi.includes('negozio')) {
-        for (const n of db.prepare(`SELECT l.chiave AS luogo, n.condizioni_json
-          FROM luogo l JOIN negozio n ON n.chiave = l.negozio
-          WHERE n.condizioni_json IS NOT NULL`).all() as Array<{ luogo: string; condizioni_json: string }>) {
-          condizioniNegozio.set(n.luogo, n.condizioni_json);
-        }
-      }
-    }
-    const righe = db.prepare(`SELECT m.luogo_chiave, m.x, m.y, m.origine, l.quartiere_chiave, l.tipo, l.nome, l.cosa_offre, l.ordine, ${quando}, ${giorni}
-      FROM marcatore_luogo m JOIN luogo l ON l.chiave = m.luogo_chiave`).all() as Array<{ luogo_chiave: string; x: number; y: number; origine: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; ordine: number; quando: string | null; giorni: string | null }>;
+    const righe = db.prepare(`SELECT m.luogo_chiave, m.x, m.y, m.origine, l.quartiere_chiave, l.tipo, l.nome, l.cosa_offre, l.ordine
+      FROM marcatore_luogo m JOIN luogo l ON l.chiave = m.luogo_chiave`).all() as Array<{ luogo_chiave: string; x: number; y: number; origine: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; ordine: number }>;
     for (const r of righe) {
       const mappa = `citta-${r.quartiere_chiave}`;
       if (esiste.get('luogo', r.luogo_chiave) || !mappaEsiste.get(mappa)) continue;
-      const info = insSpillo.run(mappa, spilloPerLuogo(r.tipo), r.nome, r.cosa_offre, r.x, r.y, 'luogo', r.luogo_chiave, 0, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
-      // Un quartiere che si sblocca a giugno non esiste, in aprile: e i suoi luoghi nemmeno. Il
-      // pin deve sparire dal visore finché la partita non ha raggiunto quella data, altrimenti la
-      // guida manda il giocatore in un posto che non c'è ancora. È la sola specie di condizione
-      // che nasconde qualcosa — la presenza — e qui la porta il quartiere.
-      // Il pin eredita la presenza da tutto cio' che lo riguarda: il quartiere che si sblocca
-      // piu' avanti, la fascia oraria e i giorni del luogo, e le condizioni gia' strutturate del
-      // negozio che ci sta dentro. Tutte insieme, senza ripetizioni.
-      const presenza = unisci(
-        quartieriConSblocco.has(r.quartiere_chiave) ? [{ tipo: 'quartiere' as const, quartiere: r.quartiere_chiave }] : [],
-        fasciaDaTesto(r.quando), giorniDaTesto(r.giorni),
-        soloPresenza(condizioniNegozio.get(r.luogo_chiave)));
-      if (presenza.length) {
-        db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
-          .run(JSON.stringify(presenza), Number(info.lastInsertRowid));
-        conSblocco++;
-      }
+      // Uno spillo di città **non è condizionato** (richiesta dell'utente, 2026-09-11): la
+      // disponibilità è del negozio o dell'attività che mostra, non del segnalino. Il quartiere
+      // che si sblocca più avanti nasconde il **passaggio** che ci porta (sotto), non i suoi luoghi.
+      insSpillo.run(mappa, spilloPerLuogo(r.tipo), r.nome, r.cosa_offre, r.x, r.y, 'luogo', r.luogo_chiave, 0, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
       spilli++;
     }
   }

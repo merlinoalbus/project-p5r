@@ -20,9 +20,59 @@ export const TIPI_SPILLO = [
   // dei Dedali era indistinguibile da una banchina della metropolitana. La **Stanza di Velluto**
   // non aveva niente del tutto, pur avendo la sua figura consegnata da tempo.
   'velluto', 'mementos',
+  // L'ingresso a un Palazzo dal mondo reale: mancava (richiesta dell'utente, 2026-09-11).
+  'ingresso-palazzo',
   'nota',
 ] as const;
 export type TipoSpillo = (typeof TIPI_SPILLO)[number];
+
+// ============================================================
+// Le quattro categorie di spillo (richiesta dell'utente, 2026-09-11)
+// ============================================================
+//
+// Uno spillo chiede sempre nome, tipo e descrizione; **il resto lo decide la categoria** del tipo:
+//
+// - **spostamento** — porta a un'altra mappa e, se indicato, a uno spillo di quella mappa. Non è
+//   consumabile. È condizionato (visibile solo in certi momenti).
+// - **città** — un negozio o un punto chiave della città. Non è consumabile e non porta altrove:
+//   toccato, mostra quello che il negozio (o l'attività) offre in quel momento. Non è condizionato:
+//   la disponibilità è del negozio, non del segnalino.
+// - **consumabile** — si segna come fatto (dialogo, forziere, boss…). Non collega a niente.
+//   Condizionato.
+// - **informativo** — tutto il resto: né consumabile, né collegabile. Condizionato.
+export const CATEGORIE_SPILLO = ['spostamento', 'citta', 'consumabile', 'informativo'] as const;
+export type CategoriaSpillo = (typeof CATEGORIE_SPILLO)[number];
+export const DEFINIZIONI_CATEGORIA: Record<CategoriaSpillo, { nome: string; descrizione: string }> = {
+  spostamento: { nome: 'Spostamento', descrizione: 'Porta a un’altra mappa, e se vuoi a uno spillo preciso di quella mappa.' },
+  citta: { nome: 'Città', descrizione: 'Un negozio o un punto della città: toccato mostra che cosa offre adesso.' },
+  consumabile: { nome: 'Consumabile', descrizione: 'Si segna come fatto una volta preso, sconfitto o parlato.' },
+  informativo: { nome: 'Informativo', descrizione: 'Un segno sulla mappa con nome e descrizione, e basta.' },
+};
+const CATEGORIA_PER_TIPO: Record<TipoSpillo, CategoriaSpillo> = {
+  passaggio: 'spostamento', scala: 'spostamento', uscita: 'spostamento', treno: 'spostamento', velluto: 'spostamento', mementos: 'spostamento', 'ingresso-palazzo': 'spostamento', scorciatoia: 'spostamento', rampino: 'spostamento',
+  negozio: 'citta', ristorante: 'citta', distributore: 'citta', sigarette: 'citta', cercalavoro: 'citta', lavoro: 'citta', terme: 'citta', lavanderia: 'citta', cinema: 'citta', biblioteca: 'citta', culto: 'citta', 'sala-giochi': 'citta', casa: 'citta', attivita: 'citta', confidente: 'citta',
+  dialogo: 'consumabile', forziere: 'consumabile', 'forziere-raro': 'consumabile', tesoro: 'consumabile', 'tesoro-palazzo': 'consumabile', 'seme-bramosia': 'consumabile', 'oggetto-chiave': 'consumabile', timbro: 'consumabile', boss: 'consumabile', miniboss: 'consumabile', nemico: 'consumabile',
+  'punto-sensibile': 'informativo', meccanismo: 'informativo', porta: 'informativo', sicura: 'informativo', nota: 'informativo',
+};
+export function categoriaSpillo(tipo: string): CategoriaSpillo {
+  return CATEGORIA_PER_TIPO[tipo as TipoSpillo] ?? 'informativo';
+}
+/** I tipi di ogni categoria, nell'ordine di `TIPI_SPILLO`. */
+export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
+  return TIPI_SPILLO.filter((t) => CATEGORIA_PER_TIPO[t] === categoria);
+}
+/** A che cosa può collegarsi uno spillo di quella categoria (`null` è sempre ammesso).
+ *
+ * Uno spostamento **porta** a una mappa (la destinazione), ma può anche **essere** un luogo o un
+ * punto della Guida — la stazione è un luogo di tipo `trasporto`, la scorciatoia un punto — ed è
+ * con quel riferimento che il seed lo riconosce al ricaricamento. Toglierlo vorrebbe dire
+ * reinserirlo in copia a ogni reseed. */
+export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRiferimento[]> = {
+  spostamento: ['mappa', 'luogo', 'punto'],
+  citta: ['negozio', 'attivita', 'luogo', 'confidente'],
+  consumabile: ['punto'],
+  informativo: ['punto'],
+};
 
 /** Gli elementi fissi del mondo: ci sono sempre, e nessuna condizione li fa sparire.
  *
@@ -48,17 +98,6 @@ export function eStrutturale(tipo: string): boolean {
   return (TIPI_STRUTTURALI as readonly string[]).includes(tipo);
 }
 
-/** Gruppi della palette dell'editor, nello stesso ordine di `TIPI_SPILLO`: ogni tipo sta in un solo gruppo. */
-export const GRUPPI_SPILLO: ReadonlyArray<{ nome: string; tipi: readonly TipoSpillo[] }> = [
-  { nome: 'Spostamenti', tipi: ['passaggio', 'scala', 'uscita', 'treno'] },
-  { nome: 'Città', tipi: ['negozio', 'ristorante', 'distributore', 'sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'attivita'] },
-  { nome: 'Persone', tipi: ['confidente', 'dialogo'] },
-  { nome: 'Palazzi e Mementos', tipi: ['forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia'] },
-  // Un gruppo loro: la porta del Velluto e la soglia dei Dedali sono due varchi verso un altrove,
-  // e in «Città» sembrerebbero due esercizi commerciali fra il fioraio e la sala giochi.
-  { nome: 'Varchi', tipi: ['velluto', 'mementos'] },
-  { nome: 'Altro', tipi: ['nota'] },
-];
 
 export const TIPI_RIFERIMENTO = ['mappa', 'negozio', 'punto', 'luogo', 'confidente', 'richiesta', 'attivita'] as const;
 export type TipoRiferimento = (typeof TIPI_RIFERIMENTO)[number];
@@ -120,7 +159,7 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   timbro: { nome: 'Timbro dei Mementos', colore: '#f0abfc', collezionabile: true, riferimento: null },
   boss: { nome: 'Boss', colore: '#e5352b', collezionabile: true, riferimento: 'punto' },
   miniboss: { nome: 'Miniboss', colore: '#f97316', collezionabile: true, riferimento: 'punto' },
-  nemico: { nome: 'Nemico', colore: '#b0b0c0', collezionabile: false, riferimento: 'punto' },
+  nemico: { nome: 'Nemico', colore: '#b0b0c0', collezionabile: true, riferimento: 'punto' },
   'punto-sensibile': { nome: 'Punto sensibile', colore: '#7fd8c8', collezionabile: false, riferimento: 'punto' },
   /** Leva, interruttore, pannello o quadro di controllo da azionare. */
   meccanismo: { nome: 'Meccanismo', colore: '#64748b', collezionabile: false, riferimento: 'punto' },
@@ -136,7 +175,9 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
    *  a mano, come per un dialogo o un punto del rampino. */
   velluto: { nome: 'Stanza di Velluto', colore: '#3730a3', collezionabile: false, riferimento: null },
   /** L'ingresso ai Memento, nella stazione di Shibuya. Non è una banchina: è la soglia dei Dedali. */
-  mementos: { nome: 'Ingresso ai Memento', colore: '#7f1d1d', collezionabile: false, riferimento: 'luogo' },
+  mementos: { nome: 'Ingresso ai Memento', colore: '#7f1d1d', collezionabile: false, riferimento: 'mappa' },
+  /** L'ingresso a un Palazzo dal mondo reale (Shujin per Kamoshida, l'atelier per Madarame…): porta alla mappa del Palazzo. */
+  'ingresso-palazzo': { nome: 'Ingresso al Palazzo', colore: '#dc2626', collezionabile: false, riferimento: 'mappa' },
   // ---- Altro ----
   nota: { nome: 'Nota', colore: '#ececf1', collezionabile: false, riferimento: null },
 };

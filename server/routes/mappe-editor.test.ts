@@ -161,8 +161,9 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const passaggio = (await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Torna a Shibuya', x: 50, y: 95, riferimento: { tipo: 'mappa', chiave: 'citta-shibuya' } })).body.data as SpilloDto;
     expect(passaggio.dettaglio).toMatchObject({ tipo: 'mappa', mappa: { chiave: 'shibuya' } });
     expect(passaggio.collezionabile).toBe(false);
+    // un forziere è un consumabile: collezionabile per definizione, il campo inviato non conta (regole di categoria, 2026-09-11)
     const spostato = (await request(app).put(`/api/mappe/spilli/${s.id}`).send({ x: 20, y: 70, nome: 'Forziere spostato', collezionabile: false })).body.data as SpilloDto;
-    expect(spostato).toMatchObject({ x: 20, y: 70, nome: 'Forziere spostato', collezionabile: false });
+    expect(spostato).toMatchObject({ x: 20, y: 70, nome: 'Forziere spostato', collezionabile: true });
     expect((await request(app).get('/api/mappe/prova-negozio')).body.data.spilli).toHaveLength(2);
     expect((await request(app).delete(`/api/mappe/spilli/${passaggio.id}`)).status).toBe(204);
     expect((await request(app).delete(`/api/mappe/spilli/${passaggio.id}`)).status).toBe(404);
@@ -463,7 +464,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
 
   it('condizione «solo di sera»: segue il momento della giornata della partita, che torna a «giorno» quando cambia il giorno corrente', async () => {
     expect((await request(app).post('/api/mappe').send({ chiave: 'prova-fascia', nome: 'Prova fascia', tipo: 'luogo', genitore: 'citta-shibuya' })).status).toBe(201);
-    const s = (await request(app).post('/api/mappe/prova-fascia/spilli').send({ tipo: 'attivita', nome: 'Bancarella serale', x: 5, y: 5, condizioni: [{ tipo: 'fascia', fascia: 'sera' }] })).body.data as SpilloDto;
+    // un informativo, non uno spillo di città: quelli non sono condizionati (regole di categoria, 2026-09-11)
+    const s = (await request(app).post('/api/mappe/prova-fascia/spilli').send({ tipo: 'nota', nome: 'Bancarella serale', x: 5, y: 5, condizioni: [{ tipo: 'fascia', fascia: 'sera' }] })).body.data as SpilloDto;
     expect(s.condizioni).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }]);
     expect((await request(app).post('/api/mappe/prova-fascia/spilli').send({ tipo: 'nota', nome: 'x', x: 1, y: 1, condizioni: [{ tipo: 'fascia', fascia: 'notte' }] })).status).toBe(400);
     // una partita nuova è di giorno: lo spillo serale è bloccato

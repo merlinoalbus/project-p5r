@@ -179,3 +179,39 @@ sapeva leggere — e tre righe uno «stato» con nome libero. Decisioni:
    scrivendo (`SelettoreRicerca`). Nessun campo di testo libero.
 5. Effetto voluto e accettato: condizioni che prima erano ignorate ora **bloccano** (la clinica di
    Takemi apre il 15 aprile col Confidente avviato; gli articoli di Tanaka chiedono il grado).
+
+### 2026-09-12 — Quattro categorie di spillo, e la destinazione è «mappa + spillo»
+Richiesta dell'utente (11-12 settembre), testuale: «Uno Spillo deve richiedere solo Nome, Tipo,
+Descrizione. Ed in base alla tipologia le informazioni necessarie»; «gli spilli che identificano
+passaggi o spostamenti possono collegare la mappa corrente a qualsiasi altra mappa e (se viene
+selezionato uno spillo di quella mappa) devono puntare a quello specifico spillo mettendo lo
+spillo al centro già selezionato ma la mappa sempre adattata alla finestra»; gli spilli di città
+«non sono condizionati e permettono solo di scegliere il Negozio o l'Attività… quando lo spillo
+viene cliccato deve visualizzare i prodotti disponibili in quel negozio in un dato momento»; i
+consumabili «tracciano cosa è stato già fatto»; «tutti gli spilli non identificati nelle categorie
+sopra devono essere trattati come spilli informativi». Decisioni:
+
+1. **Quattro categorie, per tipo** (`shared/spilli.ts`: `categoriaSpillo`, `RIFERIMENTI_PER_CATEGORIA`):
+   spostamento (passaggio, scala, uscita, stazione, Velluto, Memento, **Ingresso al Palazzo** — nuovo,
+   scorciatoia, rampino), città (negozi, servizi, casa, attività, lavoro, **Confidente**), consumabile
+   (dialogo, forzieri, tesori, seme, oggetto chiave, timbro, boss, miniboss, nemico), informativo (il resto).
+   **Il server applica le regole**, chiunque scriva (API, pacchetti, seed): consumabile ⇒ collezionabile,
+   gli altri no; città ⇒ nessuna condizione; riferimento solo dei tipi ammessi dalla categoria (altrimenti
+   400); destinazione solo per gli spostamenti. Migrazione 065.
+2. **Destinazione = mappa + spillo** (`spillo_destinazione.spillo_arrivo_id`). Il punto in percentuale
+   con lo zoom e la checkbox «Posizione del luogo» spariscono dall'interfaccia. All'arrivo la mappa si
+   adatta alla finestra e lo spillo è già selezionato. Nei pacchetti lo spillo d'arrivo viaggia per nome e
+   posizione (gli id non valgono fra installazioni); i pacchetti vecchi con `x`, `y`, `zoom` diventano lo
+   spillo più vicino entro l'8% dell'immagine (24 delle 40 destinazioni esistenti), altrimenti la sola mappa.
+3. **Gli spilli di città non sono condizionati** — neanche dal seed: `sincronizzaMappe` non scrive più
+   orari e sblocchi del quartiere sui pin dei luoghi; lo sblocco del quartiere resta sul **passaggio**
+   che ci porta. La disponibilità di un negozio la dice il negozio, nel popup.
+4. **Il popup lo decide la categoria**: spostamento → «Vai: mappa (allo spillo «…»)»; città → la merce
+   del negozio disponibile adesso (con la casella «comprato» in partita), o il Confidente, o il luogo;
+   consumabile → «Raccolto / Riapri»; informativo → nome e descrizione. Il popup resta dentro la tela
+   (scorre di lato, la freccia resta sullo spillo); sotto i 768 px è un foglio dal basso, fuori dal
+   livello trasformato della mappa (portale), con la merce che scorre dentro.
+5. **La scheda dello spillo nell'editor chiede una cosa sola per categoria**: «Porta a» (mappa con
+   ricerca + spillo di quella mappa) per gli spostamenti; «Collegato a» (negozio / attività / luogo /
+   Confidente, elenco con ricerca) per la città; niente per consumabili e informativi. Le condizioni
+   compaiono dove la categoria le ammette. La palette di «Aggiungi» è divisa nelle quattro categorie.

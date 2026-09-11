@@ -1652,7 +1652,11 @@ export interface DettaglioSpilloDto {
 /** Condizione di visibilità con il testo in italiano pronto per la scheda. */
 export type CondizioneSpilloDto = RequisitoSpillo & { testo: string };
 
-export interface DestinazioneSpillo { mappa: string; x: number; y: number; zoom: number }
+/** Dove porta uno spillo di spostamento: una mappa e, se indicato, uno spillo di quella mappa (selezionato all'arrivo; la mappa si adatta alla finestra). */
+export interface DestinazioneSpillo { mappa: string; spillo: number | null }
+/** La destinazione in un pacchetto: gli id degli spilli non valgono fra installazioni, quindi lo spillo di arrivo si descrive per nome e posizione
+ *  (e i pacchetti vecchi portano ancora `x`, `y`, `zoom`: all'importazione diventano lo spillo più vicino). */
+export interface DestinazionePacchetto { mappa: string; spillo?: { nome: string; x: number; y: number } | null; x?: number; y?: number; zoom?: number }
 
 /** Le prove native di uno spillo importato dai dati del gioco.
  *
@@ -1687,6 +1691,8 @@ export interface SpilloDto {
   destinazione?: DestinazioneSpillo | null;
   /** A previous explicit destination was deleted; never fall back to the entity link. */
   destinazioneNonDisponibile?: boolean;
+  /** I nomi di mappa e spillo d'arrivo, per il pulsante «Vai: …». */
+  destinazioneNomi?: { mappa: string; spillo: string | null };
   id: number;
   mappaChiave: string;
   tipo: TipoSpillo;
@@ -1753,7 +1759,7 @@ export interface EsportazioneMappeDto {
     assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
-    spilli: Array<{ soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazioneSpillo | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
+    spilli: Array<{ soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */

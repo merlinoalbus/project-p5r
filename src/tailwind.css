@@ -475,7 +475,8 @@
   .spillo-mappa--suggerito:hover .spillo-mappa__goccia, .spillo-mappa--suggerito.spillo-mappa--selezionato .spillo-mappa__goccia { box-shadow: 0 0 0 3px var(--color-oro), 0 0 16px rgba(245,197,66,.6), 0 0 0 6px color-mix(in srgb, var(--color-primary) 70%, transparent); }
   .spillo-mappa--suggerito { z-index: 14; }
   .spillo-popup { position: absolute; z-index: 20; width: 260px; max-width: 70vw; display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; background: rgba(11,11,14,.96); border: 1px solid var(--color-primary); color: var(--color-text); transform-origin: 0 0; box-shadow: 0 6px 18px rgba(0,0,0,.6); cursor: default; }
-  .spillo-popup::after { content: ''; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; background: rgba(11,11,14,.96); border-right: 1px solid var(--color-primary); border-bottom: 1px solid var(--color-primary); transform: translateX(-50%) rotate(45deg); }
+  /* La freccia sta sullo spillo anche quando il popup è scorso di lato per restare nella tela (`--spillo-popup-freccia`). */
+  .spillo-popup::after { content: ''; position: absolute; left: var(--spillo-popup-freccia, 50%); bottom: -7px; width: 12px; height: 12px; background: rgba(11,11,14,.96); border-right: 1px solid var(--color-primary); border-bottom: 1px solid var(--color-primary); transform: translateX(-50%) rotate(45deg); }
   /* popup sotto lo spillo (fascia alta della mappa): la punta guarda in su */
   .spillo-popup--sotto::after { bottom: auto; top: -7px; border-right: 0; border-bottom: 0; border-left: 1px solid var(--color-primary); border-top: 1px solid var(--color-primary); }
   .spillo-popup__testo { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
@@ -484,6 +485,16 @@
   /* Popup dello spillo (260 px, riga azioni 238 px): icona 28 px e titolo 12 px, così due azioni («Ottenuto» + «Esaurito», «Apri…» + «Dettagli») restano su una riga */
   .spillo-popup .btn-visivo { --btn-visivo-icona: 28px; padding: 3px 8px 3px 6px; }
   .spillo-popup .btn-visivo__titolo { font-size: 12px; }
+  /* La merce del negozio dentro il popup: poche righe, il resto scorre. */
+  .spillo-popup__merce { max-height: 30vh; overflow-y: auto; }
+  /* Sotto i 768 px il popup non sta più sulla mappa: diventa un foglio dal basso, largo quanto lo
+     schermo, con la merce che scorre dentro — un riquadro da 260 px agganciato allo spillo su un
+     telefono copriva la mappa e usciva dai bordi (richiesta dell'utente: layout per i tre formati). */
+  @media (max-width: 767px) {
+    .spillo-popup, .spillo-popup--sotto { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom)); top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; z-index: 40; }
+    .spillo-popup::after, .spillo-popup--sotto::after { display: none; }
+    .spillo-popup__merce { max-height: none; overflow: visible; }
+  }
   /* ---- Home in una schermata (desktop): il contenuto riempie l'altezza disponibile e scorre solo la guida del giorno ---- */
   /* La pagina riempie l'area di lettura (main è flex-col con overflow proprio): niente 100vh, niente taglio del contenuto. */
   @media (min-width: 768px) {
