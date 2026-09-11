@@ -21,6 +21,7 @@
 import type { Migration } from '../migrationRunner.js';
 import type Database from 'better-sqlite3';
 import { migraTestiCondizioni } from '../../../shared/migraCondizioni.js';
+import { contestoConversione, contestoRiga } from '../../services/condizioni/contestoConversione.js';
 
 /** Le famiglie toccate e i campi in prosa da cui si ricava la disponibilità. */
 const DA_PROSA = {
@@ -43,6 +44,7 @@ export function conPreposizione(testo: string | null): string | null {
 
 /** Riscrive `condizioni_json` per le righe della guida (le tue restano come le hai scritte). */
 export function sincronizzaCondizioniLetture(db: Database.Database): void {
+  const base = contestoConversione(db);
   for (const [tabella, campi] of Object.entries(DA_PROSA)) {
     const colonne = (db.prepare(`PRAGMA table_info(${tabella})`).all() as Array<{ name: string }>).map((c) => c.name);
     if (!colonne.includes('condizioni_json')) continue;
@@ -50,7 +52,7 @@ export function sincronizzaCondizioniLetture(db: Database.Database): void {
     const righe = db.prepare(`SELECT * FROM ${tabella}${conOrigine ? " WHERE origine = 'seed' OR condizioni_json IS NULL" : ''}`).all() as Array<Record<string, unknown>>;
     for (const r of righe) {
       const testi = campi.map((c) => conPreposizione((r[c] ?? null) as string | null));
-      const condizioni = migraTestiCondizioni(testi, null);
+      const condizioni = migraTestiCondizioni(testi, contestoRiga(db, base, { tabella, chiave: String(r.chiave) }));
       db.prepare(`UPDATE ${tabella} SET condizioni_json = ? WHERE chiave = ?`).run(JSON.stringify(condizioni), r.chiave);
     }
   }

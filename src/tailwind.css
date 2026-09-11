@@ -207,7 +207,10 @@
   .btn-visivo__icona { display: inline-flex; align-items: center; justify-content: center; width: var(--btn-visivo-icona); height: var(--btn-visivo-icona); flex-shrink: 0; }
   .btn-visivo__icona > img, .btn-visivo__icona > svg { width: 100% !important; height: 100% !important; max-width: none; max-height: none; object-fit: contain; }
   .btn-visivo__testo { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; line-height: 1; min-width: 0; }
-  .btn-visivo__titolo { font-family: var(--font-display); text-transform: uppercase; font-size: 14px; letter-spacing: .03em; white-space: nowrap; }
+  /* Il titolo va a capo dentro il pulsante, mai fuori: «Apri: Banchina della metropolitana di Yongen-Jaya»
+     in un popup da 260 px sbordava dal riquadro (segnalazione dell'utente, 2026-09-11). */
+  .btn-visivo { max-width: 100%; min-width: 0; }
+  .btn-visivo__titolo { font-family: var(--font-display); text-transform: uppercase; font-size: 14px; letter-spacing: .03em; white-space: normal; overflow-wrap: anywhere; line-height: 1.05; }
   .btn-visivo__dettaglio { font-family: var(--font-sans); font-size: 11px; opacity: .82; letter-spacing: 0; text-transform: none; white-space: nowrap; }
   .btn-visivo--compatto { --btn-visivo-icona: 32px; padding: 3px 10px 3px 6px; min-height: 44px; gap: 6px; }
   .btn-visivo--compatto .btn-visivo__titolo { font-size: 13px; }
@@ -543,8 +546,6 @@
   .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--color-text-secondary); }
   .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: 13px; }
   .editor-mappa__risultati { max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border); }
-  .editor-mappa__condizione { border: 1px dashed var(--color-border); padding: 6px; }
-  .editor-mappa__condizione .form-input { min-height: 36px; padding: 4px 8px; font-size: 13px; }
   .editor-mappa__risultato { display: flex; gap: 6px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--color-border); padding: 6px 8px; color: var(--color-text); font: inherit; font-size: 12px; cursor: pointer; min-height: 36px; }
   .editor-mappa__risultato:hover { background: var(--color-surface); }
   .editor-mappa__avviso { font-size: 12px; color: var(--color-warning, #f5c542); }
@@ -1235,14 +1236,79 @@
 .catalogo-informazioni summary { cursor:pointer; align-content:center; }
 .catalogo-informazioni[open] { padding-bottom:12px; }
 
+/* Fieldset del modulo del catalogo (oggetto collegato, effetto, statistiche). */
 .regole-editor { border:1px solid #3c3d46; padding:12px; min-width:0; background:#131419; }
 .regole-editor legend { font-weight:600; }
-.regole-gruppo { display:flex; flex-direction:column; gap:8px; min-width:0; }
-.regole-riga { border-left:2px solid #777987; padding:8px; min-width:0; overflow-wrap:anywhere; }
-.regole-riga p { margin:0; }
-.regole-aggiunta { background:#202127; padding:0 8px 8px; }
-.regole-aggiunta summary { cursor:pointer; align-content:center; }
 .regole-editor .form-input { max-width:100%; min-width:0; }
+
+/* ------------------------------------------------------------
+   Condizioni: stato → operatore → valori, in blocchi E / O / NON.
+   Il colore del bordo dice il tipo di blocco (E = primario, O = oro, NON = rosso);
+   il rientro dice la profondità. Le righe vanno a capo da sole sotto i 640 px.
+   ------------------------------------------------------------ */
+.condizioni-editor { border:1px solid #3c3d46; padding:0 12px 12px; min-width:0; background:#131419; margin:0; }
+.condizioni-editor__titolo { padding:0; }
+.condizioni-editor__titolo button { display:flex; align-items:center; gap:10px; min-height:44px; padding:0 6px; border:0; background:transparent; color:var(--color-text); font:inherit; font-weight:600; font-size:14px; cursor:pointer; }
+.condizioni-editor__conteggio { font-weight:400; font-size:12px; color:var(--color-text-muted); }
+.condizioni-editor .form-input { max-width:100%; min-width:0; }
+
+.condizioni-blocco { --bordo-blocco: var(--color-primary); display:flex; flex-direction:column; gap:8px; min-width:0; border-left:3px solid var(--bordo-blocco); padding:6px 0 6px 10px; background:color-mix(in srgb, var(--bordo-blocco) 6%, transparent); }
+.condizioni-blocco--almeno-una { --bordo-blocco: #f5c542; }
+.condizioni-blocco--negato { --bordo-blocco: var(--color-error); }
+.condizioni-blocco--radice { border-left:0; padding-left:0; background:transparent; }
+.condizioni-blocco__testa { position:relative; display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0; padding-right:48px; }
+.condizioni-blocco__modo { display:inline-flex; align-items:baseline; gap:8px; min-height:44px; padding:0 10px; border:1px solid var(--bordo-blocco); background:color-mix(in srgb, var(--bordo-blocco) 18%, var(--color-bg-secondary)); color:var(--color-text); font:inherit; font-weight:700; font-size:12px; letter-spacing:0.06em; cursor:pointer; }
+.condizioni-blocco__modo--fisso { cursor:default; border-style:dashed; }
+.condizioni-blocco__spiega { font-weight:400; letter-spacing:0; font-size:12px; color:var(--color-text-muted); }
+.condizioni-blocco__corpo { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.condizioni-blocco__azioni { display:flex; flex-wrap:wrap; gap:6px; }
+.condizioni-blocco__azioni .btn { display:inline-flex; align-items:center; gap:4px; }
+
+.condizione-riga { position:relative; display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; padding:4px 48px 4px 6px; border:1px solid var(--color-border); background:var(--color-bg-secondary); }
+.condizione-riga--negata { border-color:var(--color-error); }
+.condizione-non { min-height:44px; min-width:44px; padding:0 8px; border:1px solid var(--color-border); background:transparent; color:var(--color-text-muted); font:inherit; font-size:11px; font-weight:700; letter-spacing:0.08em; cursor:pointer; }
+.condizione-non--attivo { border-color:var(--color-error); background:color-mix(in srgb, var(--color-error) 22%, var(--color-bg-secondary)); color:var(--color-error); }
+.condizione-stato { flex:1 1 180px; min-width:160px; }
+.condizione-operatore { min-height:36px; font-size:13px; }
+.condizione-operatore--fisso { display:inline-flex; align-items:center; padding:0 6px; color:var(--color-text-secondary); font-style:italic; }
+.condizione-data { display:inline-flex; gap:4px; }
+.condizione-data .form-input { min-height:36px; padding:4px 6px; font-size:13px; }
+.condizione-giorni { display:inline-flex; flex-wrap:wrap; gap:4px; }
+.condizione-numero { display:inline-flex; align-items:center; border:1px solid var(--color-border); background:var(--color-bg-tertiary); }
+.condizione-numero button { width:44px; min-height:44px; border:0; background:transparent; color:var(--color-text); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+.condizione-numero button:disabled { opacity:0.4; cursor:default; }
+.condizione-numero__valore { min-width:36px; text-align:center; font-weight:600; font-variant-numeric:tabular-nums; }
+.condizione-presenza { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); border:1px dashed var(--color-text-muted); padding:1px 5px; }
+.condizione-origine { display:none; font-size:10px; color:var(--color-text-muted); margin-left:auto; }
+@media (min-width: 1280px) { .condizione-origine { display:inline; } }
+.condizione-togli { position:absolute; top:2px; right:2px; width:44px; min-height:44px; border:0; background:transparent; color:var(--color-text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+.condizione-togli:hover { color:var(--color-error); }
+
+/* Selettore con ricerca: pulsante con etichetta e valore; tendina con campo e voci da 44 px. */
+.selettore-ricerca { position:relative; min-width:0; }
+.selettore-ricerca__scelta { display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
+.selettore-ricerca__scelta:disabled { opacity:0.6; cursor:default; }
+.selettore-ricerca__etichetta { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }
+.selettore-ricerca__valore { font-size:13px; line-height:1.2; overflow-wrap:anywhere; }
+.selettore-ricerca__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
+.selettore-ricerca__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
+.selettore-ricerca__campo { width:100%; min-height:40px; margin-bottom:4px; }
+.selettore-ricerca__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; }
+.selettore-ricerca__gruppo { display:block; padding:6px 8px 2px; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
+.selettore-ricerca__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:13px; text-align:left; cursor:pointer; }
+.selettore-ricerca__voce--evidenziata .selettore-ricerca__pulsante { background:color-mix(in srgb, var(--color-primary) 18%, transparent); }
+.selettore-ricerca__voce--scelta .selettore-ricerca__pulsante { font-weight:600; }
+.selettore-ricerca__vuoto { padding:8px; font-size:12px; color:var(--color-text-muted); }
+
+/* Progressi della partita: righe da 44 px, contatori a destra. */
+.progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
+.progressi-partita__riga { display:flex; align-items:center; gap:10px; min-height:44px; padding:2px 6px; border-bottom:1px solid var(--color-border); font-size:13px; }
+
+@media (max-width: 639px) {
+  .condizione-riga { padding:6px; }
+  .condizione-stato { flex-basis:100%; }
+  .selettore-ricerca__tendina { position:fixed; left:8px; right:8px; top:auto; bottom:8px; width:auto; max-width:none; }
+}
 
 /* Editor: una sezione alla volta, campi conservati al cambio pannello. */
 .editor-mappa__sezioni { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; position:sticky; top:-10px; z-index:5; background:#131419; padding:8px 0; }

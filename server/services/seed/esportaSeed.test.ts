@@ -92,7 +92,7 @@ describe('esportaNegoziSeed', () => {
     const db = initDb(':memory:');
     runMigrations(db);
     caricaSeed(db, DIR_SEED);
-    const gruppo = [{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'data', dal: '04-18' }, { tipo: 'stato', chiave: 'videogioco-completato', confronto: 'almeno', valore: 1 }] }];
+    const gruppo = [{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'data', dal: '04-18' }, { tipo: 'contatore', cosa: 'videogiochi-completati', almeno: 1 }] }];
     const bersaglio = db.prepare("SELECT chiave FROM articolo WHERE origine = 'seed' ORDER BY chiave LIMIT 1").get() as { chiave: string };
     db.prepare("UPDATE articolo SET condizioni_json = ?, origine = 'utente' WHERE chiave = ?").run(JSON.stringify(gruppo), bersaglio.chiave);
 

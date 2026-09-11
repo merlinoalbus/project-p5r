@@ -16,7 +16,7 @@ const api = vi.hoisted(() => ({
   esportaPacchettoRepository: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
-vi.mock('../services/api/condizioni', () => ({ getElenchiRegole: vi.fn().mockResolvedValue({stati:[],articoli:[],letture:[],arcani:[],persone:[],abilita:[]}),creaStato:vi.fn() }));
+vi.mock('../services/api/condizioni', () => ({ getElenchiRegole: vi.fn().mockResolvedValue({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] }) }));
 vi.mock('../services/api', () => api);
 
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
@@ -116,58 +116,59 @@ describe('EditorMappaPage', () => {
     expect(incolla).toHaveTextContent('«Scrigno»');
   });
 
-  it('le condizioni di visibilità si aggiungono da selettori (solo tipi calcolabili), si tolgono e si salvano con lo spillo', async () => {
+  it('le condizioni sono stati: una riga nasce già valida, si cambia sul posto con elenchi chiusi, si toglie e si salva con lo spillo', async () => {
     api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
     api.aggiornaSpillo.mockResolvedValue(nota);
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
-    expect(await form.findByText('Nessuna condizione: sempre disponibile.')).toBeInTheDocument();
-    fireEvent.click(form.getByText('Aggiungi una condizione'));
-    const scelta = form.getByLabelText('Nuova condizione') as HTMLSelectElement;
-    expect([...scelta.options].map((o) => o.value)).toEqual(['data', 'intervallo', 'palazzo', 'dote', 'confidente', 'richiesta', 'piove', 'non-piove', 'fascia-giorno', 'fascia-sera', 'giorno-settimana', 'stagione', 'quartiere']);
-    // Palazzo scelto dall'elenco della Guida
-    fireEvent.change(scelta, { target: { value: 'palazzo' } });
-    fireEvent.change(await form.findByLabelText('Palazzo'), { target: { value: 'madarame' } });
-    fireEvent.click(form.getByRole('button', { name: /Aggiungi condizione/ }));
-    const elenco = () => form;
-    expect(elenco().getByText('dopo il Palazzo di Madarame', { selector: 'p' })).toBeInTheDocument();
-    // Confidente con rango, nomi dall'elenco
-    fireEvent.change(scelta, { target: { value: 'confidente' } });
-    fireEvent.change(form.getByLabelText('Confidente'), { target: { value: 'sojiro' } });
-    fireEvent.change(form.getByLabelText('Rango del Confidente'), { target: { value: '4' } });
-    fireEvent.click(form.getByRole('button', { name: /Aggiungi condizione/ }));
-    expect(elenco().getByText('Rango Confidente Sojiro Sakura 4', { selector: 'p' })).toBeInTheDocument();
-    // quartieri: solo quelli con una data di sblocco nella Guida (Ueno dipende da un Confidente: non calcolabile, non offerto)
-    fireEvent.change(scelta, { target: { value: 'quartiere' } });
-    expect([...(await form.findByLabelText('Quartiere') as HTMLSelectElement).options].map((o) => o.value)).toEqual(['akihabara']);
-    fireEvent.change(scelta, { target: { value: 'confidente' } });
-    // la stessa condizione non si aggiunge due volte
-    expect(form.getByText('Condizione già presente.')).toBeInTheDocument();
-    expect(form.getByRole('button', { name: /Aggiungi condizione/ })).toBeDisabled();
-    fireEvent.click(form.getByRole('button', { name: 'Togli la condizione: dopo il Palazzo di Madarame' }));
-    expect(elenco().queryByText('dopo il Palazzo di Madarame', { selector: 'p' })).toBeNull();
+    expect(await form.findByText('nessuna: sempre disponibile')).toBeInTheDocument();
+    fireEvent.click(form.getByRole('button', { name: /^Condizioni/ }));
+    fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
+    // la riga nuova è «Data di gioco dal 18 aprile»: valida da subito
+    expect(form.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
+    // lo stato si sceglie da un elenco con ricerca: scrivere filtra, il valore è sempre una voce
+    fireEvent.click(form.getByRole('button', { name: 'Stato' }));
+    fireEvent.change(form.getByLabelText('Cerca Stato'), { target: { value: 'palaz' } });
+    fireEvent.click(form.getByRole('option', { name: 'Palazzo' }).querySelector('button')!);
+    expect(form.getByRole('group', { name: 'Condizione: dopo il Palazzo di Kamoshida' })).toBeInTheDocument();
+    // il Palazzo viene dall'elenco della Guida
+    fireEvent.click(form.getByRole('button', { name: 'Palazzo' }));
+    fireEvent.click(form.getByRole('option', { name: 'Palazzo di Madarame' }).querySelector('button')!);
+    expect(form.getByRole('group', { name: 'Condizione: dopo il Palazzo di Madarame' })).toBeInTheDocument();
+    // NON nega la riga; un gruppo ALMENO UNA si annida con una riga già dentro
+    fireEvent.click(form.getByRole('button', { name: 'NON' }));
+    expect(form.getByRole('group', { name: 'Condizione: non dopo il Palazzo di Madarame' })).toBeInTheDocument();
+    fireEvent.click(form.getByRole('button', { name: 'gruppo ALMENO UNA' }));
+    const gruppo = within(form.getByRole('group', { name: 'Gruppo ALMENO UNA' }));
+    expect(gruppo.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
+    // i quartieri offerti sono solo quelli con una data di sblocco nella Guida (Ueno dipende da un Confidente)
+    fireEvent.click(gruppo.getByRole('button', { name: 'Stato' }));
+    fireEvent.click(gruppo.getByRole('option', { name: 'Quartiere' }).querySelector('button')!);
+    fireEvent.click(gruppo.getByRole('button', { name: 'Quartiere' }));
+    expect(gruppo.getAllByRole('option').map((o) => o.textContent)).toEqual(['Akihabaradal 31 agosto']);
+    fireEvent.click(gruppo.getByRole('option', { name: /Akihabara/ }).querySelector('button')!);
+    fireEvent.click(form.getByRole('button', { name: 'Togli il gruppo' }));
+    expect(form.queryByRole('group', { name: 'Gruppo ALMENO UNA' })).toBeNull();
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
-    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Nota', tipo: 'nota', descrizione: '', collezionabile: false, soloPosizione: false, riferimento: null, condizioni: [{ tipo: 'confidente', confidente: 'sojiro', rango: 4 }] }));
+    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Nota', tipo: 'nota', descrizione: '', collezionabile: false, soloPosizione: false, riferimento: null, condizioni: [{ tipo: 'non', condizione: { tipo: 'palazzo', dungeon: 'madarame' } }], destinazione: undefined }));
   });
 
-  it('il costruttore rifiuta un periodo con la fine prima dell’inizio e offre solo i giorni del mese scelto', async () => {
-    api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
+  it('un periodo resta sempre valido: la fine segue l’inizio, e i giorni offerti sono quelli del mese', async () => {
+    api.getMappa.mockResolvedValue({ ...base, spilli: [{ ...nota, condizioni: [{ tipo: 'intervallo', dal: '04-18', al: '04-18', testo: 'solo il 18 aprile' }] }] });
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
-    fireEvent.click(await form.findByText('Aggiungi una condizione'));
-    fireEvent.change(await form.findByLabelText('Nuova condizione'), { target: { value: 'intervallo' } });
-    fireEvent.change(await form.findByLabelText('Dal: mese'), { target: { value: '08' } });
-    fireEvent.change(form.getByLabelText('Al: mese'), { target: { value: '06' } });
-    expect(form.getByText(/La data di fine precede quella di inizio/)).toBeInTheDocument();
-    expect(form.getByRole('button', { name: /Aggiungi condizione/ })).toBeDisabled();
-    // aprile ha 30 giorni: il selettore non offre il 31
+    expect(await form.findByRole('group', { name: 'Condizione: solo il 18 aprile' })).toBeInTheDocument();
+    fireEvent.change(form.getByLabelText('Operatore'), { target: { value: 'tra' } });
+    fireEvent.change(form.getByLabelText('Dal: mese'), { target: { value: '08' } });
+    // la fine (18 aprile) precederebbe l'inizio (18 agosto): si allinea, e un periodo di un giorno si legge «solo il»
+    expect(form.getByRole('group', { name: 'Condizione: solo il 18 agosto' })).toBeInTheDocument();
+    expect(form.getByLabelText('Al: mese')).toHaveValue('08');
     fireEvent.change(form.getByLabelText('Al: mese'), { target: { value: '04' } });
+    expect(form.getByRole('group', { name: 'Condizione: solo il 18 aprile' })).toBeInTheDocument();
+    // aprile ha 30 giorni: il selettore non offre il 31
     expect([...(form.getByLabelText('Al: giorno') as HTMLSelectElement).options]).toHaveLength(30);
-    fireEvent.change(form.getByLabelText('Dal: mese'), { target: { value: '04' } });
-    expect(form.queryByText(/La data di fine precede quella di inizio/)).toBeNull();
-    expect(form.getByRole('button', { name: /Aggiungi condizione/ })).not.toBeDisabled();
   });
 
   it('le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa', async () => {

@@ -27,8 +27,9 @@
 // stragrande maggioranza — il file resta identico a com'è sempre stato.
 // ============================================================
 
-import { prepared } from '../../db/dbService.js';
-import { migraTestiCondizioni } from '../../../shared/migraCondizioni.js';
+import { getDb, prepared } from '../../db/dbService.js';
+import { migraTestiCondizioni, type ContestoConversione } from '../../../shared/migraCondizioni.js';
+import { contestoConversione, contestoRiga } from '../condizioni/contestoConversione.js';
 import type { AttivitaSeed, NegoziSeed } from '../../../shared/seed.js';
 import { conPreposizione } from '../../db/migrations/052_condizioni_letture_attivita.js';
 
@@ -49,11 +50,11 @@ interface RigaArticolo {
  * Il confronto è sul JSON normalizzato, non sull'oggetto: due condizioni uguali scritte con le
  * chiavi in ordine diverso sono la stessa condizione, e non vale la pena sporcare il file per
  * quello. */
-function condizioniDaScrivere(condizioniJson: string | null, testi: Array<string | null>, confidente: string | null): unknown[] | undefined {
+function condizioniDaScrivere(condizioniJson: string | null, testi: Array<string | null>, ctx: ContestoConversione): unknown[] | undefined {
   if (!condizioniJson) return undefined;
   let attuali: unknown[];
   try { attuali = JSON.parse(condizioniJson) as unknown[]; } catch { return undefined; }
-  const dallaProsa = migraTestiCondizioni(testi, confidente);
+  const dallaProsa = migraTestiCondizioni(testi, ctx);
   return JSON.stringify(attuali) === JSON.stringify(dallaProsa) ? undefined : attuali;
 }
 
@@ -105,6 +106,7 @@ export function esportaNegoziSeed(precedente?: NegoziSeed): NegoziSeed {
   // `nascosto = 0`: una riga nascosta è una riga che l'utente ha deciso di non vedere, e riportarla
   // nel seed la farebbe tornare da sola alla prossima installazione.
   const negozi = prepared('SELECT * FROM negozio WHERE nascosto = 0 ORDER BY ordine, chiave').all() as RigaNegozio[];
+  const ctxBase = contestoConversione(getDb());
   const articoli = prepared('SELECT * FROM articolo WHERE nascosto = 0 ORDER BY ordine, chiave').all() as RigaArticolo[];
   const perNegozio = new Map<string, RigaArticolo[]>();
   for (const a of articoli) {
@@ -113,7 +115,7 @@ export function esportaNegoziSeed(precedente?: NegoziSeed): NegoziSeed {
   }
   return {
     negozi: negozi.map((n) => {
-      const cond = condizioniDaScrivere(n.condizioni_json, [n.sblocco], n.confidente_chiave);
+      const cond = condizioniDaScrivere(n.condizioni_json, [n.sblocco], contestoRiga(getDb(), ctxBase, { tabella: 'negozio', chiave: n.chiave, confidente_chiave: n.confidente_chiave }));
       const prodotto = {
         chiave: n.chiave, ordine: n.ordine, nome: n.nome, luogo: n.luogo, luogoChiave: n.luogo_chiave,
         tipo: n.tipo, gestore: n.gestore, confidente: n.confidente_chiave, orari: n.orari,
@@ -124,7 +126,7 @@ export function esportaNegoziSeed(precedente?: NegoziSeed): NegoziSeed {
       return {
         ...conOrdineDi(prima, { ...prodotto, ...campiEstranei(prima, prodotto) }),
         articoli: (perNegozio.get(n.chiave) ?? []).map((a) => {
-          const condA = condizioniDaScrivere(a.condizioni_json, [a.disponibile_dal, a.condizione], n.confidente_chiave);
+          const condA = condizioniDaScrivere(a.condizioni_json, [a.disponibile_dal, a.condizione], contestoRiga(getDb(), ctxBase, { tabella: 'articolo', chiave: a.chiave, negozio_chiave: a.negozio_chiave, confidente_chiave: n.confidente_chiave }));
           const prodottoA = {
             chiave: a.chiave, ordine: a.ordine, nome: a.nome, nomeIt: a.nome_it, categoria: a.categoria,
             per: a.per, prezzo: a.prezzo, effetto: a.effetto, statistiche: a.statistiche,
@@ -179,7 +181,7 @@ export function esportaAttivitaSeed(precedente?: AttivitaSeed): AttivitaSeed {
     // sempre — la regola nel database viene da «dal 18 aprile», la prosa nel file dice «18
     // aprile» — e il file si riempirebbe di blocchi `condizioni` identici a quel che il
     // caricatore ricava da solo: rumore in ogni riga, e la correzione vera introvabile nel diff.
-    const cond = condizioniDaScrivere(a.condizioni_json, [conPreposizione(a.sblocco)], null);
+    const cond = condizioniDaScrivere(a.condizioni_json, [conPreposizione(a.sblocco)], contestoRiga(getDb(), contestoConversione(getDb()), { tabella: 'attivita', chiave: a.chiave }));
     const prodotto = {
       chiave: a.chiave, ordine: a.ordine, nome: a.nome, tipo: a.tipo, luogo: a.luogo, luogoChiave: a.luogo_chiave,
       fascia: a.fascia, costo: a.costo, sblocco: a.sblocco,
@@ -197,7 +199,7 @@ export function esportaAttivitaSeed(precedente?: AttivitaSeed): AttivitaSeed {
   });
 
   const libri = (prepared('SELECT * FROM libro WHERE COALESCE(nascosto, 0) = 0 ORDER BY ordine, chiave').all() as RigaLibroSeed[]).map((l) => {
-    const cond = condizioniDaScrivere(l.condizioni_json, [conPreposizione(l.disponibile_dal)], null);
+    const cond = condizioniDaScrivere(l.condizioni_json, [conPreposizione(l.disponibile_dal)], contestoRiga(getDb(), contestoConversione(getDb()), { tabella: 'libro', chiave: l.chiave }));
     const prodotto = {
       chiave: l.chiave, ordine: l.ordine, nome: l.nome, nomeIt: l.nome_it, dove: l.dove, prezzo: l.prezzo,
       disponibileDal: l.disponibile_dal, dote: l.dote, note: l.note, sblocca: l.sblocca, sessioni: l.sessioni,
@@ -209,7 +211,7 @@ export function esportaAttivitaSeed(precedente?: AttivitaSeed): AttivitaSeed {
   });
 
   const film = (prepared('SELECT * FROM film WHERE COALESCE(nascosto, 0) = 0 ORDER BY ordine, chiave').all() as RigaFilmSeed[]).map((f) => {
-    const cond = condizioniDaScrivere(f.condizioni_json, [conPreposizione(f.periodo)], null);
+    const cond = condizioniDaScrivere(f.condizioni_json, [conPreposizione(f.periodo)], contestoRiga(getDb(), contestoConversione(getDb()), { tabella: 'film', chiave: f.chiave }));
     const prodotto = {
       chiave: f.chiave, ordine: f.ordine, nome: f.nome, nomeIt: f.nome_it, dove: f.dove, periodo: f.periodo,
       dote: f.dote, note: f.note, ...(f.note_successive !== null && f.note_successive !== undefined ? { noteSuccessive: f.note_successive } : {}), prezzo: f.prezzo, sessioni: f.sessioni, dettagli: f.dettagli, fonte: f.fonte,

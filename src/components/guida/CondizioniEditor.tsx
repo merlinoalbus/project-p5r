@@ -1,78 +1,254 @@
-import { useState } from 'react';
-import { CondizioniSpilloEditor } from '../mappe/CondizioniSpillo';
-import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
+// ============================================================
+// CondizioniEditor — stati della partita, combinati in E / O / NON, per ogni elemento dell'app
+// ============================================================
+//
+// Una riga è una condizione: **stato → operatore → valori**, tre scelte da elenchi chiusi
+// (`shared/statiPartita.ts`). Un blocco è un gruppo: **TUTTE** (E) o **ALMENO UNA** (O), con
+// dentro righe e altri blocchi, a qualsiasi profondità; la levetta **NON** nega una riga o un
+// blocco. L'elenco di primo livello è un TUTTE implicito.
+//
+// Non c'è nulla da scrivere: i nomi vengono dalla Guida (con la ricerca dentro l'elenco), i numeri
+// si muovono con più e meno. Una riga nuova nasce già valida — «Data di gioco dal 18 aprile» — e
+// si cambia sul posto; così non esiste mai una condizione «incompleta» salvata a metà.
+//
+// Lo stesso componente serve a spilli, articoli, negozi, attività, libri e film: la richiesta
+// dell'utente (2026-09-11) è che le condizioni siano una cosa sola in tutta l'app.
+// ============================================================
+
+import { useMemo, useState } from 'react';
+import { ARCHI_STORIA, CONTATORI, DOTI_CONDIZIONE, EVENTI_STORIA, GIORNI_NEL_MESE, GIORNI_SETTIMANA, MESI_GIOCO, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataLeggibile, descriviRequisitoSpillo, nascondeIlPin, nomePalazzo, ordineGioco, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
+import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizione, valorePredefinito, type CampoCondizione, type SceltaCondizione, type TipoCampo, type ValoriCondizione } from '../../../shared/statiPartita';
 import { useCarica } from '../../hooks/useCarica';
 import { getConfidenti, getDungeons, getQuartieri, getRichieste } from '../../services/api/compendio';
 import { getElenchiRegole, type ElenchiRegole } from '../../services/api/condizioni';
 import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
+import { SelettoreRicerca, type OpzioneRicerca } from '../condizioni/SelettoreRicerca';
+import { IconaAzione } from '../shared/IconaAzione';
 
-// ============================================================
-// Niente campi liberi in una condizione. Nessuno, e nemmeno di lato.
-// ============================================================
-//
-// Qui c'era «Definisci un nuovo stato da registrare»: nome libero, categoria e unità di misura
-// libera. Serviva a inventarsi al volo il fatto da controllare — «Pesca effettuata», «Punti
-// cliente» — perché il catalogo delle condizioni non copriva tutto e quello era il modo di girarci
-// intorno.
-//
-// È il difetto peggiore che potesse avere, e per due motivi. Il primo è che una condizione scritta
-// a mano **non la sa leggere nessuno**: il nome non viene interpretato, quindi due persone che
-// scrivono «Pesca fatta» e «Pesca effettuata» hanno creato due stati diversi che l'app tratta come
-// estranei, e nessuno dei due si collega a quello che la partita registra davvero. Il secondo è che
-// nascondeva la mancanza invece di mostrarla: finché si poteva inventare uno stato, nessuno si
-// accorgeva che mancava «personaggio in squadra».
-//
-// Quindi il pannello sparisce. Quel che si può chiedere a una condizione è **solo** quel che sta
-// nel catalogo, e se al catalogo manca qualcosa la si aggiunge lì — dove diventa una voce che tutti
-// scelgono allo stesso modo e che l'app sa valutare — invece che qui, dove diventava testo.
-// ============================================================
+/** La condizione con cui nasce una riga nuova: valida, e la più comune. */
+const NUOVA: RequisitoSpillo = { tipo: 'data', dal: '04-18' };
+const MODO_NOME = { tutte: 'TUTTE', 'almeno-una': 'ALMENO UNA' } as const;
+const MODO_SPIEGA = { tutte: 'devono valere tutte', 'almeno-una': 'basta che ne valga una' } as const;
 
-function AggiungiRequisito({onAggiungi,elenchi,extra,esistenti}:{esistenti:RequisitoSpillo[];onAggiungi:(r:RequisitoSpillo)=>void;elenchi:ElenchiCondizioni;extra:ElenchiRegole}) {
-  const [tipo,setTipo]=useState('calendario'),[chiave,setChiave]=useState(''),[abilita,setAbilita]=useState('');
-  const opzioni=tipo==='squadra'?extra.squadra:tipo==='stato'?extra.stati:tipo==='articolo'?extra.articoli.map(a=>({...a,nome:a.gruppo+' › '+a.nome})):tipo==='libro'||tipo==='film'?extra.letture.filter(l=>l.categoria===tipo):tipo==='persona-arcano'?extra.arcani:extra.persone;
-  const scelta=opzioni.some(o=>o.chiave===chiave)?chiave:opzioni[0]?.chiave??'';
-  const skill=extra.abilita.some(o=>o.chiave===abilita)?abilita:extra.abilita[0]?.chiave??'';
-  const aggiungi=()=>{
-    if(!scelta)return;
-    if(tipo==='squadra')onAggiungi({tipo:'squadra',membro:scelta});
-    else if(tipo==='articolo')onAggiungi({tipo:'articolo',articolo:scelta});
-    else if(tipo==='libro'||tipo==='film')onAggiungi({tipo:'lettura',categoria:tipo,chiave:scelta});
-    else if(tipo==='persona-arcano')onAggiungi({tipo:'persona-arcano',arcano:scelta});
-    else if(tipo==='persona-abilita'&&skill)onAggiungi({tipo:'persona-abilita',persona:scelta,abilita:skill});
+interface Elenchi { base: ElenchiCondizioni; extra: ElenchiRegole }
+
+/** Le voci offerte per ogni tipo di campo: dalla Guida quando dipendono dai dati, fisse altrimenti. */
+function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
+  switch (tipo) {
+    case 'fascia': return [{ chiave: 'giorno', nome: 'giorno' }, { chiave: 'sera', nome: 'sera' }];
+    case 'stagione': return STAGIONI.map((s) => ({ chiave: s.chiave, nome: s.nome }));
+    case 'quartiere': return e.base.quartieri.filter((q) => q.sbloccoData != null).map((q) => ({ chiave: q.chiave, nome: q.nome, dettaglio: `dal ${dataLeggibile(q.sbloccoData!)}` }));
+    case 'arco': return ARCHI_STORIA.map((d) => ({ chiave: d, nome: nomePalazzo(d) }));
+    case 'palazzo': { const p = e.base.dungeon.filter((d) => d.tipo === 'palazzo'); return (p.length ? p : PALAZZI_CONDIZIONE).map((d) => ({ chiave: d.chiave, nome: d.nome })); }
+    case 'dote': return DOTI_CONDIZIONE.map((d) => ({ chiave: d.chiave, nome: d.nome }));
+    case 'confidente': return e.base.confidenti.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcana }));
+    case 'membro': return e.extra.squadra;
+    case 'richiesta': return e.base.richieste.map((r) => ({ chiave: r.chiave, nome: r.nome }));
+    case 'libro': return e.extra.letture.filter((l) => l.categoria === 'libro');
+    case 'film': return e.extra.letture.filter((l) => l.categoria === 'film');
+    case 'articolo': return e.extra.articoli.map((a) => ({ chiave: a.chiave, nome: a.nome, gruppo: a.gruppo }));
+    case 'attivita': return e.extra.attivita;
+    case 'negozio-con-gradi': case 'negozio-con-punti': return e.extra.negozi;
+    case 'rango-cliente': return RANGHI_CLIENTE.map((r) => ({ chiave: r.chiave, nome: r.nome, dettaglio: r.spesa ? `da ¥${r.spesa.toLocaleString('it-IT')}` : undefined }));
+    case 'evento': return e.extra.eventi.length ? e.extra.eventi : EVENTI_STORIA.map((x) => ({ chiave: x.chiave, nome: x.nome }));
+    case 'contatore': return e.extra.contatori.length ? e.extra.contatori : CONTATORI.map((x) => ({ chiave: x.chiave, nome: x.nome }));
+    case 'arcano': return e.extra.arcani;
+    case 'persona': return e.extra.persone;
+    case 'abilita': return e.extra.abilita;
+    default: return [];
+  }
+}
+
+/** I valori di partenza di uno stato: primo elemento dell'elenco per le chiavi, predefiniti per il resto. */
+function valoriIniziali(campi: CampoCondizione[], e: Elenchi): ValoriCondizione {
+  const v: ValoriCondizione = {};
+  for (const c of campi) {
+    const fisso = valorePredefinito(c.tipo);
+    v[c.nome] = fisso === '' ? (opzioniPer(c.tipo, e)[0]?.chiave ?? '') : fisso;
+  }
+  return v;
+}
+
+/** Giorno e mese del calendario di gioco; i giorni offerti sono quelli del mese scelto (niente 31 aprile). */
+function SelettoreData({ etichetta, valore, onCambia, disabilitato }: { etichetta: string; valore: string; onCambia: (v: string) => void; disabilitato?: boolean }) {
+  const [mese, giorno] = valore.split('-');
+  const giorni = Array.from({ length: GIORNI_NEL_MESE[mese] ?? 31 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const cambiaMese = (nuovoMese: string) => {
+    const massimo = GIORNI_NEL_MESE[nuovoMese] ?? 31;
+    onCambia(`${nuovoMese}-${String(Math.min(Number(giorno), massimo)).padStart(2, '0')}`);
   };
-  return <details className="regole-aggiunta"><summary className="touch">Aggiungi una condizione</summary>
-    <label className="editor-mappa__campo">Famiglia della condizione<select className="form-input" value={tipo} onChange={e=>setTipo(e.target.value)}>
-      <option value="calendario">Calendario, meteo, Doti, Confidenti, Palazzi e richieste</option><option value="articolo">Articolo acquistato / ottenuto</option><option value="libro">Libro letto</option><option value="film">Film visto</option><option value="persona-arcano">Persona di un Arcano in scorta</option><option value="persona-abilita">Persona con una precisa abilità in scorta</option><option value="squadra">Ladro Fantasma in squadra</option>
-    </select></label>
-    {tipo==='calendario'?<CondizioniSpilloEditor soloAggiunta condizioni={esistenti} onCambia={r=>{const c=r.at(-1);if(c)onAggiungi(c);}} elenchi={elenchi}/>:<>
-      <label className="editor-mappa__campo">Elemento richiesto<select className="form-input" value={scelta} onChange={e=>setChiave(e.target.value)}>{opzioni.map(o=><option key={o.chiave} value={o.chiave}>{o.nome}</option>)}</select></label>
-      {!scelta&&<p className="text-sm">Di questa famiglia non c’è ancora nessuna voce nel catalogo.</p>}
-      {tipo==='persona-abilita'&&<label className="editor-mappa__campo">Abilità richiesta<select className="form-input" value={skill} onChange={e=>setAbilita(e.target.value)}>{extra.abilita.map(a=><option key={a.chiave} value={a.chiave}>{a.nome}</option>)}</select></label>}
-      <button className="btn touch" type="button" disabled={!scelta} onClick={aggiungi}>Aggiungi requisito</button>
-    </>}
-  </details>;
+  return (
+    <span className="condizione-data" role="group" aria-label={etichetta}>
+      <select className="form-input touch" value={giorno} disabled={disabilitato} onChange={(e) => onCambia(`${mese}-${e.target.value}`)} aria-label={`${etichetta}: giorno`}>
+        {giorni.map((g) => <option key={g} value={g}>{Number(g)}</option>)}
+      </select>
+      <select className="form-input touch" value={mese} disabled={disabilitato} onChange={(e) => cambiaMese(e.target.value)} aria-label={`${etichetta}: mese`}>
+        {MESI_GIOCO.map((m) => <option key={m.numero} value={m.numero}>{m.nome}</option>)}
+      </select>
+    </span>
+  );
 }
 
-function GruppoEditor({condizioni,onCambia,elenchi,extra,profondita=0}:{condizioni:RequisitoSpillo[];onCambia:(r:RequisitoSpillo[])=>void;elenchi:ElenchiCondizioni;extra:ElenchiRegole;profondita?:number}) {
-  const nomi={...nomiDaElenchi(elenchi),stati:Object.fromEntries(extra.stati.map(s=>[s.chiave,s.nome])),articoli:Object.fromEntries(extra.articoli.map(s=>[s.chiave,s.nome])),letture:Object.fromEntries(extra.letture.map(s=>[s.chiave,s.nome]))};
-  return <div className="regole-gruppo">
-    {condizioni.map((c,i)=>{
-      const aggiorna=(nuova:RequisitoSpillo)=>onCambia(condizioni.map((v,j)=>j===i?nuova:v));
-      const gruppo=c.tipo==='gruppo'?c:c.tipo==='non'&&c.condizione.tipo==='gruppo'?c.condizione:null;
-      return <div className="regole-riga" key={i}>
-        {gruppo?<><label className="editor-mappa__campo">{c.tipo==='non'?'Blocca quando':'Sblocca quando'}<select className="form-input" value={gruppo.modo} onChange={e=>{const g={...gruppo,modo:e.target.value as 'tutte'|'almeno-una'};aggiorna(c.tipo==='non'?{tipo:'non',condizione:g}:g);}}><option value="tutte">Tutte le condizioni del gruppo sono vere</option><option value="almeno-una">Almeno una condizione del gruppo è vera</option></select></label><GruppoEditor condizioni={gruppo.condizioni} onCambia={v=>aggiorna(c.tipo==='non'?{tipo:'non',condizione:{...gruppo,condizioni:v}}:{...gruppo,condizioni:v})} elenchi={elenchi} extra={extra} profondita={profondita+1}/></>:<p className={c.tipo==='da-configurare'?'text-warning':''}>{descriviRequisitoSpillo(c,nomi)}</p>}
-        <button className="btn btn-ghost touch" type="button" onClick={()=>onCambia(condizioni.filter((_,j)=>j!==i))} aria-label={gruppo?'Rimuovi gruppo':`Togli la condizione: ${descriviRequisitoSpillo(c,nomi)}`}>Rimuovi {gruppo?'gruppo':'condizione'}</button>
-      </div>;
-    })}
-    {condizioni.length===0&&<p className="text-sm">{profondita?'Gruppo vuoto: aggiungi una condizione o rimuovi il gruppo.':'Nessuna condizione: sempre disponibile.'}</p>}
-    {condizioni.length<20&&<AggiungiRequisito esistenti={condizioni} elenchi={elenchi} extra={extra} onAggiungi={c=>{if(!condizioni.some(v=>JSON.stringify(v)===JSON.stringify(c)))onCambia([...condizioni,c]);}}/>}
-    {profondita<2&&condizioni.length<20&&<div className="flex flex-wrap gap-2"><button type="button" className="btn touch" onClick={()=>onCambia([...condizioni,{tipo:'gruppo',modo:'tutte',condizioni:[]}])}>Aggiungi gruppo di sblocco</button>{profondita===0&&<button type="button" className="btn touch" onClick={()=>onCambia([...condizioni,{tipo:'non',condizione:{tipo:'gruppo',modo:'almeno-una',condizioni:[]}}])}>Aggiungi gruppo di blocco</button>}</div>}
-  </div>;
+/** Un numero che si muove con più e meno: niente da digitare. */
+function Contatore({ etichetta, valore, min, max, passo = 1, onCambia, disabilitato }: { etichetta: string; valore: number; min: number; max: number; passo?: number; onCambia: (v: number) => void; disabilitato?: boolean }) {
+  return (
+    <span className="condizione-numero" role="group" aria-label={etichetta}>
+      <button type="button" className="touch" aria-label={`${etichetta}: meno`} disabled={disabilitato || valore - passo < min} onClick={() => onCambia(Math.max(min, valore - passo))}><IconaAzione chiave="meno" dimensione={16} /></button>
+      <span className="condizione-numero__valore" aria-live="polite">{valore}</span>
+      <button type="button" className="touch" aria-label={`${etichetta}: più`} disabled={disabilitato || valore + passo > max} onClick={() => onCambia(Math.min(max, valore + passo))}><IconaAzione chiave="piu" dimensione={16} /></button>
+    </span>
+  );
 }
 
-export function CondizioniEditor({condizioni,onCambia,elenchi,disabilitato}:{condizioni:RequisitoSpillo[];onCambia:(r:RequisitoSpillo[])=>void;elenchi?:ElenchiCondizioni;disabilitato?:boolean}) {
-  const dati=useCarica(async()=>{const [extra,base]=await Promise.all([getElenchiRegole(),elenchi?Promise.resolve(elenchi):Promise.all([getConfidenti(),getQuartieri(),getRichieste(),getDungeons()]).then(([confidenti,quartieri,richieste,dungeon])=>({confidenti,quartieri,richieste:richieste.richieste,dungeon}))]);return {extra,base};},[]);
-  return <fieldset disabled={disabilitato} className="regole-editor"><legend>Disponibilità e condizioni</legend><p className="text-sm">I requisiti esterni ai gruppi devono essere tutti soddisfatti. Un blocco attivo prevale sugli sblocchi. I dati mancanti restano “da verificare”.</p>
-    {dati.errore?<p role="alert">{dati.errore} <button type="button" onClick={()=>void dati.ricarica()}>Riprova</button></p>:dati.dati?<><GruppoEditor condizioni={condizioni} onCambia={onCambia} elenchi={dati.dati.base??ELENCHI_VUOTI} extra={dati.dati.extra}/></>:<p>Caricamento delle condizioni…</p>}
-  </fieldset>;
+function Campo({ campo, valori, onCambia, elenchi, disabilitato }: { campo: CampoCondizione; valori: ValoriCondizione; onCambia: (nome: string, v: string | number | string[]) => void; elenchi: Elenchi; disabilitato?: boolean }) {
+  const v = valori[campo.nome];
+  switch (campo.tipo) {
+    case 'data': return <SelettoreData etichetta={campo.etichetta} valore={typeof v === 'string' ? v : '04-18'} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    case 'giorni': {
+      const scelti = Array.isArray(v) ? v : [];
+      return (
+        <span className="condizione-giorni" role="group" aria-label={campo.etichetta}>
+          {GIORNI_SETTIMANA.map((g) => (
+            <label key={g.chiave} className={`chip chip--icona touch ${scelti.includes(g.chiave) ? 'chip--attivo' : ''}`}>
+              <input type="checkbox" className="sr-only" disabled={disabilitato} checked={scelti.includes(g.chiave)} onChange={(e) => onCambia(campo.nome, e.target.checked ? [...scelti, g.chiave] : scelti.filter((x) => x !== g.chiave))} />
+              {g.nome.slice(0, 3)}
+            </label>
+          ))}
+        </span>
+      );
+    }
+    case 'rango5': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={5} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    case 'rango10': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={10} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    case 'volte': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    case 'almeno': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={9999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    case 'punti': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 50} min={10} max={999990} passo={10} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    default: return <SelettoreRicerca etichetta={campo.etichetta} valore={typeof v === 'string' ? v : ''} opzioni={opzioniPer(campo.tipo, elenchi)} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+  }
+}
+
+const OPZIONI_STATO: OpzioneRicerca[] = STATI_PARTITA.map((s) => ({ chiave: s.chiave, nome: s.nome, gruppo: s.gruppo }));
+
+/** Una condizione semplice: stato, operatore, valori. Ogni cambio produce subito la condizione nuova. */
+function Riga({ condizione, negata, onCambia, onRimuovi, elenchi, nomi, disabilitato, perSpillo }: { condizione: RequisitoSpillo; negata: boolean; onCambia: (c: RequisitoSpillo) => void; onRimuovi: () => void; elenchi: Elenchi; nomi: NomiCondizioni; disabilitato?: boolean; perSpillo?: boolean }) {
+  const salvata = scomponiCondizione(condizione) ?? { stato: 'data-gioco', operatore: 'dal', valori: { dal: '04-18' } };
+  const def = definizioneStato(salvata.stato) ?? STATI_PARTITA[0];
+  // L'operatore scelto vive anche qui: «tra il 18 aprile e il 18 aprile» e «solo il 18 aprile» sono
+  // la stessa condizione salvata, ma chi ha appena scelto «tra» deve vedere i due campi.
+  const [opScelto, setOpScelto] = useState<string | null>(null);
+  const operatore = def.operatori.find((o) => o.chiave === (opScelto ?? salvata.operatore)) ?? def.operatori[0];
+  // I campi dell'operatore in uso che la condizione salvata non ha (l'«al» di un «tra» appena scelto) partono dal valore che c'è.
+  const valoriBase = valoriIniziali(operatore.campi, elenchi);
+  if (operatore.chiave === 'tra' && typeof salvata.valori.dal === 'string' && salvata.valori.al === undefined) valoriBase.al = salvata.valori.dal;
+  const scelta: SceltaCondizione = { stato: salvata.stato, operatore: operatore.chiave, valori: { ...valoriBase, ...salvata.valori } };
+  const avvolgi = (c: RequisitoSpillo): RequisitoSpillo => (negata ? { tipo: 'non', condizione: c } : c);
+  const applica = (s: SceltaCondizione) => { const c = costruisciCondizione(s); if (c) onCambia(avvolgi(c)); };
+  const cambiaStato = (chiave: string) => {
+    const d = definizioneStato(chiave); if (!d) return;
+    const op = d.operatori[0];
+    setOpScelto(null);
+    applica({ stato: d.chiave, operatore: op.chiave, valori: valoriIniziali(op.campi, elenchi) });
+  };
+  const cambiaOperatore = (chiave: string) => {
+    const op = def.operatori.find((o) => o.chiave === chiave); if (!op) return;
+    setOpScelto(op.chiave);
+    // i valori già scelti restano se il nuovo operatore ha gli stessi campi (dal → tra tiene «dal»)
+    applica({ stato: def.chiave, operatore: op.chiave, valori: { ...valoriIniziali(op.campi, elenchi), ...Object.fromEntries(Object.entries(scelta.valori).filter(([k]) => op.campi.some((c) => c.nome === k))) } });
+  };
+  const cambiaValore = (nome: string, v: string | number | string[]) => {
+    const valori = { ...scelta.valori, [nome]: v };
+    // Un periodo resta sempre valido: se l'inizio supera la fine, la fine lo segue (e viceversa).
+    if (def.chiave === 'data-gioco' && operatore.chiave === 'tra' && typeof valori.dal === 'string' && typeof valori.al === 'string' && ordineGioco(valori.dal) > ordineGioco(valori.al)) {
+      if (nome === 'dal') valori.al = valori.dal; else valori.dal = valori.al;
+    }
+    applica({ ...scelta, valori });
+  };
+  const testo = descriviRequisitoSpillo(condizione, nomi);
+  return (
+    <div className={`condizione-riga ${negata ? 'condizione-riga--negata' : ''}`} role="group" aria-label={`Condizione: ${negata ? 'non ' : ''}${testo}`}>
+      <button type="button" className={`condizione-non touch ${negata ? 'condizione-non--attivo' : ''}`} aria-pressed={negata} disabled={disabilitato} title={negata ? 'Negata: vale quando NON è così' : 'Nega questa condizione'} onClick={() => onCambia(negata ? condizione : { tipo: 'non', condizione })}>NON</button>
+      <SelettoreRicerca etichetta="Stato" valore={def.chiave} opzioni={OPZIONI_STATO} onCambia={cambiaStato} disabilitato={disabilitato} className="condizione-stato" />
+      {def.operatori.length > 1
+        ? <select className="form-input touch condizione-operatore" value={operatore.chiave} disabled={disabilitato} aria-label="Operatore" onChange={(e) => cambiaOperatore(e.target.value)}>{def.operatori.map((o) => <option key={o.chiave} value={o.chiave}>{o.nome}</option>)}</select>
+        : <span className="condizione-operatore condizione-operatore--fisso">{operatore.nome}</span>}
+      {operatore.campi.map((c) => <Campo key={c.nome} campo={c} valori={scelta.valori} onCambia={cambiaValore} elenchi={elenchi} disabilitato={disabilitato} />)}
+      {perSpillo && nascondeIlPin(condizione.tipo) && <span className="condizione-presenza" title="Se non vale, lo spillo sparisce dalla mappa" aria-label="Condizione di presenza: se non vale, lo spillo sparisce dalla mappa">presenza</span>}
+      <span className="condizione-origine" title={`Si legge da: ${def.origine}`}>{def.origine}</span>
+      <button type="button" className="condizione-togli touch" aria-label={`Togli la condizione: ${testo}`} title="Togli" disabled={disabilitato} onClick={onRimuovi}><IconaAzione chiave="chiudi" dimensione={16} /></button>
+    </div>
+  );
+}
+
+interface PropsBlocco { condizioni: RequisitoSpillo[]; modo: 'tutte' | 'almeno-una'; onCambia: (c: RequisitoSpillo[]) => void; onCambiaModo?: (m: 'tutte' | 'almeno-una') => void; negato?: boolean; onNega?: () => void; onRimuovi?: () => void; profondita: number; elenchi: Elenchi; nomi: NomiCondizioni; disabilitato?: boolean; perSpillo?: boolean }
+
+/** Un gruppo E/O con le sue righe e i suoi sottogruppi. Al primo livello è il TUTTE implicito. */
+function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRimuovi, profondita, elenchi, nomi, disabilitato, perSpillo }: PropsBlocco) {
+  const sostituisci = (i: number, c: RequisitoSpillo) => onCambia(condizioni.map((v, j) => (j === i ? c : v)));
+  const rimuovi = (i: number) => onCambia(condizioni.filter((_, j) => j !== i));
+  const aggiungi = (c: RequisitoSpillo) => onCambia([...condizioni, c]);
+  const radice = profondita === 0;
+  const pieno = condizioni.length >= 20;
+  return (
+    <div className={`condizioni-blocco condizioni-blocco--${modo} ${negato ? 'condizioni-blocco--negato' : ''} ${radice ? 'condizioni-blocco--radice' : ''}`} role="group" aria-label={radice ? 'Elenco delle condizioni' : `Gruppo ${negato ? 'NON ' : ''}${MODO_NOME[modo]}`}>
+      <div className="condizioni-blocco__testa">
+        {!radice && onNega && <button type="button" className={`condizione-non touch ${negato ? 'condizione-non--attivo' : ''}`} aria-pressed={negato} disabled={disabilitato} title={negato ? 'Gruppo negato' : 'Nega il gruppo'} onClick={onNega}>NON</button>}
+        {onCambiaModo
+          ? <button type="button" className="condizioni-blocco__modo touch" disabled={disabilitato} title={`Cambia in ${MODO_NOME[modo === 'tutte' ? 'almeno-una' : 'tutte']}`} onClick={() => onCambiaModo(modo === 'tutte' ? 'almeno-una' : 'tutte')}>{MODO_NOME[modo]}<span className="condizioni-blocco__spiega">{MODO_SPIEGA[modo]}</span></button>
+          : <span className="condizioni-blocco__modo condizioni-blocco__modo--fisso">{MODO_NOME[modo]}<span className="condizioni-blocco__spiega">{condizioni.length === 0 ? 'nessuna condizione: sempre disponibile' : MODO_SPIEGA[modo]}</span></span>}
+        {onRimuovi && <button type="button" className="condizione-togli touch" aria-label="Togli il gruppo" disabled={disabilitato} onClick={onRimuovi}><IconaAzione chiave="chiudi" dimensione={16} /></button>}
+      </div>
+      <div className="condizioni-blocco__corpo">
+        {condizioni.map((c, i) => {
+          const negata = c.tipo === 'non';
+          const dentro = negata ? c.condizione : c;
+          if (dentro.tipo === 'gruppo') {
+            const g = dentro;
+            const scrivi = (nuovo: RequisitoSpillo) => sostituisci(i, negata ? { tipo: 'non', condizione: nuovo } : nuovo);
+            return <Blocco key={`${i}:gruppo`} condizioni={g.condizioni} modo={g.modo} onCambia={(cs) => (cs.length ? scrivi({ ...g, condizioni: cs }) : rimuovi(i))} onCambiaModo={(m) => scrivi({ ...g, modo: m })} negato={negata} onNega={() => sostituisci(i, negata ? g : { tipo: 'non', condizione: g })} onRimuovi={() => rimuovi(i)} profondita={profondita + 1} elenchi={elenchi} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />;
+          }
+          return <Riga key={i} condizione={dentro} negata={negata} onCambia={(nuova) => sostituisci(i, nuova)} onRimuovi={() => rimuovi(i)} elenchi={elenchi} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />;
+        })}
+      </div>
+      <div className="condizioni-blocco__azioni">
+        <button type="button" className="btn btn-sm touch" disabled={disabilitato || pieno} onClick={() => aggiungi(NUOVA)}><IconaAzione chiave="piu" dimensione={14} /> condizione</button>
+        {profondita < 4 && <>
+          <button type="button" className="btn btn-sm touch" disabled={disabilitato || pieno} onClick={() => aggiungi({ tipo: 'gruppo', modo: 'tutte', condizioni: [NUOVA] })}><IconaAzione chiave="piu" dimensione={14} /> gruppo TUTTE</button>
+          <button type="button" className="btn btn-sm touch" disabled={disabilitato || pieno} onClick={() => aggiungi({ tipo: 'gruppo', modo: 'almeno-una', condizioni: [NUOVA] })}><IconaAzione chiave="piu" dimensione={14} /> gruppo ALMENO UNA</button>
+        </>}
+      </div>
+    </div>
+  );
+}
+
+interface Props { condizioni: RequisitoSpillo[]; onCambia: (r: RequisitoSpillo[]) => void; elenchi?: ElenchiCondizioni; disabilitato?: boolean; /** Nell'editor delle mappe: segna le condizioni di presenza, che nascondono il pin. */ perSpillo?: boolean }
+
+export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo }: Props) {
+  const dati = useCarica(async () => {
+    const [extra, base] = await Promise.all([
+      getElenchiRegole(),
+      elenchi ? Promise.resolve(elenchi) : Promise.all([getConfidenti(), getQuartieri(), getRichieste(), getDungeons()]).then(([confidenti, quartieri, richieste, dungeon]) => ({ confidenti, quartieri, richieste: richieste.richieste, dungeon })),
+    ]);
+    return { extra, base } as Elenchi;
+  }, []);
+  const [aperto, setAperto] = useState(condizioni.length > 0);
+  const nomi = useMemo<NomiCondizioni>(() => {
+    if (!dati.dati) return {};
+    const e = dati.dati;
+    const mappa = (o: Array<{ chiave: string; nome: string }>) => Object.fromEntries(o.map((x) => [x.chiave, x.nome]));
+    return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra) };
+  }, [dati.dati]);
+  return (
+    <fieldset disabled={disabilitato} className="condizioni-editor">
+      <legend className="condizioni-editor__titolo">
+        <button type="button" className="touch" aria-expanded={aperto || condizioni.length > 0} onClick={() => setAperto((v) => !v)}>
+          Condizioni
+          <span className="condizioni-editor__conteggio">{condizioni.length === 0 ? 'nessuna: sempre disponibile' : `${condizioni.length} di primo livello`}</span>
+        </button>
+      </legend>
+      {(aperto || condizioni.length > 0) && (dati.errore
+        ? <p role="alert" className="m-0 text-[13px]">{dati.errore} <button type="button" className="btn btn-sm touch" onClick={() => void dati.ricarica()}>Riprova</button></p>
+        : dati.dati
+          ? <Blocco condizioni={condizioni} modo="tutte" onCambia={onCambia} profondita={0} elenchi={dati.dati} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />
+          : <p className="m-0 text-[13px] text-text-muted">Caricamento degli elenchi…</p>)}
+    </fieldset>
+  );
 }

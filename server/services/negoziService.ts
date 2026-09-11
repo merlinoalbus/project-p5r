@@ -8,6 +8,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
 import { registraEvento } from './storicoService.js';
 import { risolviOggettoCollegato } from './oggettiSelezionabili.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
 
 interface RigaNegozio { condizioni_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
@@ -17,7 +18,8 @@ const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_
   (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.nascosto = 0) AS articoli, (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.verificato = 1 AND a.nascosto = 0) AS verificati
   FROM negozio n LEFT JOIN confidente c ON c.chiave = n.confidente_chiave LEFT JOIN quartiere q ON q.chiave = n.luogo_chiave`;
 
-function regole(json:string|null) { return leggiCondizioniSalvate(json).map(c=>({...c,testo:descriviRequisitoSpillo(c)})); }
+// Il testo di una condizione si genera con i nomi della Guida, non con le chiavi: «Articolo ottenuto: Laptop rotto», non «yumenoshima/laptop-rotto».
+function regole(json:string|null) { const nomi = nomiCondizioniMemo(); return leggiCondizioniSalvate(json).map(c=>({...c,testo:descriviRequisitoSpillo(c, nomi)})); }
 
 function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto {
   return { condizioni:regole(r.condizioni_json), ...(st ? { disponibilita: valutaRequisiti(regole(r.condizioni_json), st) } : {}), chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore, confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null, orari: r.orari, sblocco: r.sblocco, articoli: r.articoli ?? 0, verificati: r.verificati ?? 0 };

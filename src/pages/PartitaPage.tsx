@@ -21,11 +21,12 @@ import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
 import { PianiSalvati } from '../components/partita/PianiSalvati';
 import { CicliSalvati } from '../components/partita/CicliSalvati';
 import { LettureEGiochi } from '../components/partita/LettureEGiochi';
+import { ProgressiPartita } from '../components/partita/ProgressiPartita';
 import { OggiPartita } from '../components/partita/OggiPartita';
 import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
-type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'squadra' | 'confidenti' | 'letture' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
+type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'squadra' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
 const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'oggi', l: 'Oggi' },
@@ -33,6 +34,7 @@ const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'squadra', l: 'Denaro e squadra' },
   { k: 'confidenti', l: 'Confidenti' },
   { k: 'letture', l: 'Letture e giochi' },
+  { k: 'progressi', l: 'Progressi' },
   { k: 'scorta', l: 'Scorta' },
   { k: 'compendio', l: 'Compendio personale' },
   { k: 'obiettivi', l: 'Obiettivi' },
@@ -87,7 +89,8 @@ export function PartitaPage() {
           {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}
           {scheda === 'squadra' && <SquadraPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
-                    {scheda === 'letture' && <LettureEGiochi key={attiva.id} partitaId={attiva.id} />}
+          {scheda === 'letture' && <LettureEGiochi key={attiva.id} partitaId={attiva.id} />}
+          {scheda === 'progressi' && <ProgressiPartita key={attiva.id} partitaId={attiva.id} />}
 {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
           {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}
           {scheda === 'obiettivi' && <ObiettiviPartita key={attiva.id} partitaId={attiva.id} />}
