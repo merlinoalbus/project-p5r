@@ -2,21 +2,27 @@
 // Test registro dei tipi di spillo — conteggio, completezza delle definizioni, colori distinti, gruppi della palette, tipi «dialogo» e della città
 // ============================================================
 
-import { DEFINIZIONI_SPILLO, GRUPPI_SPILLO, TIPI_SPILLO, spilloPerLuogo, spilloPerPunto } from './spilli.js';
+import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, spilloPerLuogo, spilloPerPunto, tipiDellaCategoria } from './spilli.js';
 
 describe('registro dei tipi di spillo', () => {
-  it('conta 39 tipi distinti, ognuno con nome, colore esadecimale e riserva nel registro', () => {
-    expect(TIPI_SPILLO).toHaveLength(39);
-    expect(new Set(TIPI_SPILLO).size).toBe(39);
+  it('conta 40 tipi distinti, ognuno con nome, colore esadecimale e riserva nel registro', () => {
+    expect(TIPI_SPILLO).toHaveLength(40);
+    expect(new Set(TIPI_SPILLO).size).toBe(40);
     for (const t of TIPI_SPILLO) expect(DEFINIZIONI_SPILLO[t]).toMatchObject({ nome: expect.any(String), colore: expect.stringMatching(/^#[0-9a-f]{6}$/) });
-    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].colore)).size).toBe(39);
-    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].nome)).size).toBe(39);
+    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].colore)).size).toBe(40);
+    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].nome)).size).toBe(40);
   });
 
-  it('i gruppi della palette coprono ogni tipo una sola volta, nello stesso ordine del registro', () => {
-    const inGruppi = GRUPPI_SPILLO.flatMap((g) => g.tipi);
-    expect(inGruppi).toEqual([...TIPI_SPILLO]);
-    expect(GRUPPI_SPILLO.map((g) => g.nome)).toEqual(['Spostamenti', 'Città', 'Persone', 'Palazzi e Mementos', 'Varchi', 'Altro']);
+  it('le quattro categorie coprono ogni tipo una sola volta, e i riferimenti tipici stanno nella categoria', () => {
+    const perCategoria = CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c));
+    expect([...perCategoria].sort()).toEqual([...TIPI_SPILLO].sort());
+    expect(tipiDellaCategoria('spostamento')).toEqual(['passaggio', 'scala', 'uscita', 'treno', 'rampino', 'scorciatoia', 'velluto', 'mementos', 'ingresso-palazzo']);
+    expect(tipiDellaCategoria('consumabile')).toEqual(['dialogo', 'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico']);
+    for (const t of TIPI_SPILLO) {
+      const rif = DEFINIZIONI_SPILLO[t].riferimento;
+      if (rif) expect(RIFERIMENTI_PER_CATEGORIA[categoriaSpillo(t)], t).toContain(rif);
+      expect(DEFINIZIONI_SPILLO[t].collezionabile, t).toBe(categoriaSpillo(t) === 'consumabile');
+    }
   });
 
   it('«dialogo» è collezionabile, senza riferimento tipico e non nasce da alcuna corrispondenza automatica', () => {

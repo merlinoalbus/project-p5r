@@ -13,9 +13,10 @@ import type { NavigaMappa } from '../../utils/navigazioneMappa';
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { MappaDto, SpilloDto } from '../../types';
-import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
+import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, categoriaSpillo, type TipoSpillo } from '../../../shared/spilli';
 import { useAsset } from '../../stores/assetStore';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
@@ -87,6 +88,27 @@ interface Punto { x: number; y: number }
 type Gruppo = { chiave: string; x: number; y: number; spilli: SpilloDto[] };
 
 const limita = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
+/** Larghezza del popup dello spillo sul desktop (`.spillo-popup`): serve a tenerlo dentro la tela. */
+const LARGHEZZA_POPUP = 260;
+const SCHERMO_STRETTO = '(max-width: 767px)';
+
+/** Sotto i 768 px il popup è un foglio dal basso, fisso sullo schermo: deve stare **fuori** dal livello
+ *  della mappa, che è trasformato (scala e traslazione) e renderebbe `position: fixed` relativo a sé. */
+function useSchermoStretto(): boolean {
+  const [stretto, setStretto] = useState(() => (typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia(SCHERMO_STRETTO).matches : false));
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mq = window.matchMedia(SCHERMO_STRETTO);
+    const aggiorna = () => setStretto(mq.matches);
+    // anche su `resize`: l'emulazione del viewport negli strumenti di sviluppo non sempre emette `change`
+    mq.addEventListener('change', aggiorna);
+    window.addEventListener('resize', aggiorna);
+    return () => { mq.removeEventListener('change', aggiorna); window.removeEventListener('resize', aggiorna); };
+  }, []);
+  return stretto;
+}
+const inPortale = (fuori: boolean, nodo: ReactNode): ReactNode => (fuori ? createPortal(nodo, document.body) : nodo);
 
 /** Immagine dell'entità collegata (istanza → asset del repository); niente se l'entità non ha immagini nell'app. */
 export function ImmagineRiferimento({ immagine, nome, dimensione = 56 }: { immagine: { url: string | null; asset: string | null } | null | undefined; nome: string; dimensione?: number }) {
@@ -218,10 +240,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     const id = setTimeout(() => {
       // uno spillo nascosto perché già raccolto va reso visibile: altrimenti la mappa si centra sul vuoto
       if (s.collezionabile && s.raccolto) setMostraRaccolti(true);
-      const z = Math.max(stato.current.zoomMin * 2.5, stato.current.zoomMin);
+      // Arrivando da uno spostamento la mappa resta **adattata alla finestra** e lo spillo è già
+      // selezionato (richiesta dell'utente, 2026-09-11): tutta la mappa si vede, e il popup dice dove sei.
       setSelezionatoUso(s.id);
-      setZoomEsplicito(z);
-      setPanEsplicito({ x: dim.w / 2 - (s.x / 100) * nat.w * z, y: dim.h / 2 - (s.y / 100) * nat.h * z });
+      setZoomEsplicito(null);
+      setPanEsplicito(null);
     }, 0);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -255,6 +278,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const gesto = useRef<{ tipo: 'trascina'; x: number; y: number; px: number; py: number; mosso: boolean } | { tipo: 'pinch'; d0: number; z0: number; cx: number; cy: number; px: number; py: number } | { tipo: 'spillo'; id: number; mosso: boolean; x: number; y: number } | null>(null);
   const [trascinato, setTrascinato] = useState<{ id: number; x: number; y: number } | null>(null);
   const [trascinando, setTrascinando] = useState(false);
+  const schermoStretto = useSchermoStretto();
 
   const suPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     puntatori.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -330,7 +354,15 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Popup sopra allo spillo; sotto quando nella tela (overflow nascosto) non c'è spazio sopra: il popup più alto misura ~215 px più i 42 px della punta.
-  const popupSotto = selezionato !== null && pan.y + (selezionato.y / 100) * nat.h * zoom < 260;
+  // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio (con la merce di un negozio è più alto), e
+  // scorre in orizzontale quanto basta per restare dentro la tela: la freccia resta sullo spillo.
+  const altezzaPopup = selezionato && categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio ? 480 : 260;
+  const popupSotto = selezionato !== null && pan.y + (selezionato.y / 100) * nat.h * zoom < altezzaPopup;
+  const popupDx = (() => {
+    if (!selezionato || dim.w === 0) return 0;
+    const px = pan.x + (selezionato.x / 100) * nat.w * zoom;
+    return limita(px, LARGHEZZA_POPUP / 2 + 8, Math.max(LARGHEZZA_POPUP / 2 + 8, dim.w - LARGHEZZA_POPUP / 2 - 8)) - px;
+  })();
   const collezionabili = mappa.spilli.filter((s) => s.collezionabile);
   const raccolti = collezionabili.filter((s) => s.raccolto).length;
   const percentualeRaccolti = collezionabili.length > 0 ? Math.round((raccolti / collezionabili.length) * 100) : 0;
@@ -541,8 +573,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 </button>
               );
             })}
-            {selezionato && !editor && singoli.some((s) => s.id === selezionato.id) && (
-              <div className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={selezionato.nome} style={{ left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(-50%, ${popupSotto ? '14px' : 'calc(-100% - 42px)'})` }} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+            {selezionato && !editor && singoli.some((s) => s.id === selezionato.id) && inPortale(schermoStretto, (
+              <div className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={selezionato.nome} style={schermoStretto ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx * zoom}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx * zoom}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
@@ -560,18 +592,33 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                     <GalleriaSpillo immagini={selezionato.immagini} nome={selezionato.nome} compatta />
                   </div>
                 )}
+                {/* Quel che il popup offre lo decide la **categoria** dello spillo (richiesta dell'utente,
+                    2026-09-11): uno spostamento porta altrove; uno spillo di città mostra la merce del
+                    negozio disponibile adesso (o l'attività, o il Confidente); un consumabile si segna
+                    fatto; un informativo dice e basta. */}
+                {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && <MerceNelPopup negozio={selezionato.dettaglio.negozio} spillo={selezionato} partitaId={partitaId} occupato={occupato} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} />}
                 <div className="flex flex-wrap gap-1">
-                  <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga}/>
-                  {partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
-                  {selezionato.dettaglio?.negozio && (
-                    <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="primario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Negozio" dettaglio={`${selezionato.dettaglio.negozio.articoli.filter((a) => a.disponibilita?.stato !== 'bloccato').length} articoli`} />
+                  {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
+                  {categoriaSpillo(selezionato.tipo) === 'consumabile' && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
+                  {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && (
+                    <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Scheda del negozio" />
                   )}
-                  {(selezionato.dettaglio?.negozio || selezionato.dettaglio?.tipo === 'punto' || selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'confidente' || selezionato.dettaglio?.tipo === 'richiesta') && (
-                    <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Dettagli" onClick={apriScheda} />
+                  {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.tipo === 'confidente' && selezionato.dettaglio.confidente && (
+                    <CollegamentoVisivo to={`/confidenti/${encodeURIComponent(selezionato.dettaglio.confidente.chiave)}`} tono="primario" compatto icona={<IconaSpillo tipo="confidente" dimensione={20} />} titolo={selezionato.dettaglio.confidente.nome} dettaglio="scheda del Confidente" />
+                  )}
+                  {/* uno spillo «Confidente» rimanda ai Confidenti anche se non è ancora collegato a uno preciso (richiesta dell'utente) */}
+                  {selezionato.tipo === 'confidente' && selezionato.dettaglio?.tipo !== 'confidente' && (
+                    <CollegamentoVisivo to="/confidenti" tono="primario" compatto icona={<IconaSpillo tipo="confidente" dimensione={20} />} titolo="Confidenti" dettaglio="la pagina dei Confidenti" />
+                  )}
+                  {categoriaSpillo(selezionato.tipo) === 'citta' && (selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'attivita') && selezionato.dettaglio.luogo && !selezionato.dettaglio.negozio && (
+                    <CollegamentoVisivo to={`/guida/citta/${encodeURIComponent(selezionato.dettaglio.luogo.quartiere)}`} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={selezionato.dettaglio.luogo.nome} dettaglio={selezionato.dettaglio.luogo.quando ?? selezionato.dettaglio.luogo.cosaOffre ?? 'scheda del quartiere'} />
+                  )}
+                  {(selezionato.dettaglio?.negozio || selezionato.dettaglio?.tipo === 'punto' || selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'confidente' || selezionato.dettaglio?.tipo === 'richiesta' || selezionato.immagini.length > 0) && (
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Dettagli" onClick={apriScheda} />
                   )}
                 </div>
               </div>
-            )}
+            ))}
             {gruppi.map((g) => (
               <button
                 key={g.chiave}
@@ -596,6 +643,38 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
         </div>
 
       </div>
+    </div>
+  );
+}
+
+type NegozioNelPopup = NonNullable<NonNullable<SpilloDto['dettaglio']>['negozio']>;
+
+/** La merce del negozio **disponibile adesso**, dentro il popup dello spillo di città: nome, prezzo e la casella «comprato» con la partita. */
+function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto }: { negozio: NegozioNelPopup; spillo: SpilloDto; partitaId: number | null; occupato: boolean; onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void> }) {
+  const disponibili = negozio.articoli.filter((a) => a.disponibilita?.stato !== 'bloccato');
+  const bloccati = negozio.articoli.length - disponibili.length;
+  return (
+    <div className="flex flex-col gap-1" role="group" aria-label={`Merce di ${negozio.nome}`}>
+      <div className="flex items-center justify-between gap-2 text-[11px] text-text-muted uppercase tracking-wide">
+        <span>{negozio.nome} · {disponibili.length === 1 ? '1 articolo' : `${disponibili.length} articoli`}{partitaId ? ' adesso' : ''}</span>
+        {negozio.disponibilita && negozio.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={negozio.disponibilita} compatto />}
+      </div>
+      {disponibili.length === 0
+        ? <p className="m-0 text-[12px] text-text-secondary">{bloccati > 0 ? 'Niente in vendita in questo momento della partita.' : 'Nessun articolo registrato.'}</p>
+        : (
+          <ul className="spillo-popup__merce m-0 p-0 list-none flex flex-col">
+            {disponibili.map((a) => (
+              <li key={a.chiave} className={`flex items-center gap-2 py-1 border-b border-border text-[12px] ${a.comprato ? 'opacity-60' : ''}`}>
+                {partitaId && onAcquisto
+                  ? <input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato} aria-label={`${a.nome} comprato`} onChange={(e) => void onAcquisto(spillo, a.chiave, e.target.checked)} />
+                  : <span className="w-5 shrink-0 text-center">{a.comprato ? '✓' : ''}</span>}
+                <span className={`min-w-0 flex-1 truncate ${a.comprato ? 'line-through' : ''}`} title={`${a.nome} · ${a.categoria}`}>{a.nome}</span>
+                <span className="tabular-nums shrink-0 text-text-secondary">{a.prezzo !== null ? formattaYen(a.prezzo) : '—'}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      {bloccati > 0 && <span className="text-[11px] text-text-muted">{bloccati === 1 ? '1 articolo non ancora in vendita' : `${bloccati} articoli non ancora in vendita`}: nella scheda del negozio.</span>}
     </div>
   );
 }
@@ -664,7 +743,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
       <CondizioniSpilloElenco condizioni={s.condizioni} disponibilita={s.disponibilita} />
       <GalleriaSpillo immagini={s.immagini} nome={s.nome} />
 
-      {!nonSpaziale && onNaviga && "mappaChiave" in s && <NavigazioneSpillo spillo={s} partitaId={partitaId} onNaviga={onNaviga}/>}
+      {!nonSpaziale && onNaviga && "mappaChiave" in s && <NavigazioneSpillo spillo={s} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={s.destinazioneNomi?.mappa} nomeSpillo={s.destinazioneNomi?.spillo ?? undefined} />}
       {d?.tipo === 'punto' && d.punto && (
         <p className="m-0 text-[12px] text-text-secondary">
           {d.punto.esauribile ? 'Esauribile · ' : ''}{d.punto.stato ? `Nella Guida: ${d.punto.stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(d.punto.dungeon)}`} className="text-primary">scheda del Palazzo</Link>

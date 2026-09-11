@@ -61,6 +61,8 @@ const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
   //      soglia dei Dedali (l'arco della metropolitana con i binari che ci spariscono dentro) ----
   velluto: (d) => <svg {...base(d)}><rect x="6" y="3" width="12" height="18" rx="1" /><path d="M9 3v18" /><circle cx="14.5" cy="12" r="1" /><path d="M12 6h3M12 18h3" /></svg>,
   mementos: (d) => <svg {...base(d)}><path d="M4 20V11a8 8 0 0 1 16 0v9" /><path d="M9 20v-6a3 3 0 0 1 6 0v6" /><path d="M2 20h20" /><path d="M12 8v3" /></svg>,
+  // L'ingresso al Palazzo: un portale con l'occhio del Meta-Nav sopra.
+  'ingresso-palazzo': (d) => <svg {...base(d)}><path d="M5 21V9l7-5 7 5v12" /><path d="M9 21v-7h6v7" /><path d="M2 21h20" /><circle cx="12" cy="8" r="1.5" /></svg>,
   // ---- Città (15.24): sigaretta col fumo, rivista con lente, valigetta, vasca con vapori, lavatrice, ciak, libri, torii, joypad, casa ----
   sigarette: (d) => <svg {...base(d)}><rect x="3" y="13" width="15" height="4" rx="1" /><path d="M18 15h3" /><path d="M6 10c0-1.5 1.2-2 1.2-3.5M10 10c0-1.5 1.2-2 1.2-3.5" /><path d="M14 13v4" /></svg>,
   cercalavoro: (d) => <svg {...base(d)}><path d="M4 4h11v16H4z" /><path d="M7 8h5M7 11h5M7 14h3" /><circle cx="17" cy="16" r="3" /><path d="M19.2 18.2L22 21" /></svg>,

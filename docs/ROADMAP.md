@@ -325,3 +325,12 @@ elenchi, scheda **Partita → Progressi** per eventi, attività svolte e punti n
 Lotti successivi, nell'ordine concordato: (2) categorie di spillo — spostamento, città,
 consumabile, informativo — e «Ingresso al Palazzo»; (3) scheda spillo con destinazione mappa +
 spillo; (4) visore e popup (negozio/attività nel riquadro); (5) layout sui tre formati.
+
+## Categorie di spillo, scheda, visore e layout (12 settembre 2026) — fatto
+
+Consegna unica dei lotti 2-5 dell'analisi: quattro categorie di spillo applicate dal server
+(migrazione 065, «Ingresso al Palazzo» nuovo), destinazione «mappa + spillo» (arrivo con la mappa
+adattata e lo spillo selezionato), scheda dello spillo per categoria («Porta a» / «Collegato a»
+con ricerca), popup del visore per categoria (merce del negozio disponibile adesso, «Vai», «Raccolto»),
+popup dentro la tela e foglio dal basso sotto i 768 px. Restano da rivedere, con l'utente, i layout
+delle altre pagine sui tre formati man mano che emergono difetti.

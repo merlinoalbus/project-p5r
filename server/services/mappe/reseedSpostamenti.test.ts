@@ -14,7 +14,7 @@ describe('reseed di spilli trasferiti',()=>{
   const t='2026-09-06';const partita=db.prepare('INSERT INTO partita(nome,created_at,updated_at) VALUES(?,?,?)').run('Prova',t,t).lastInsertRowid;
   db.prepare('INSERT INTO spillo_partita VALUES(?,?,1,?)').run(partita,id,t);
   db.prepare('INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,?,?,?)').run(id,'personale','Nota',t);
-  db.prepare('INSERT INTO spillo_destinazione VALUES(?,?,?,?,?)').run(id,'sorgente',10,20,1);
+  db.prepare('INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,?,?,?,?)').run(id,'sorgente',10,20,1);
   const snapshot=()=>['spillo','spillo_partita','spillo_immagine','spillo_destinazione'].map(tabella=>db.prepare('SELECT * FROM '+tabella).all());
   const prima=snapshot();
   importaMappe(p,{origine:'seed',pacchettiSeed:[p]});expect(snapshot()).toEqual(prima);

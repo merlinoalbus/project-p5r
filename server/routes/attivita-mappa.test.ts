@@ -22,9 +22,10 @@ it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizion
     expect(s.dettaglio).toMatchObject({tipo,luogo:{chiave:luogo.chiave,quartiere:luogo.quartiere_chiave,cosaOffre:luogo.cosa_offre,quando:luogo.quando}});
   }
   const spilli=async()=>((await request(app).get(`/api/mappe/attivita-narrative?partita=${partita}`)).body.data as MappaDto).spilli;
-  expect((await spilli()).every(s=>s.disponibilita?.stato==='bloccato')).toBe(true);
+  // uno spillo di città non è condizionato (2026-09-11): la condizione «solo di sera» inviata non si salva e il pin non è mai bloccato
+  expect((await spilli()).every(s=>s.condizioni.length===0 && s.disponibilita?.stato!=='bloccato')).toBe(true);
   await request(app).put(`/api/partite/${partita}`).send({fasciaGioco:'sera'}).expect(200);
-  expect((await spilli()).every(s=>s.disponibilita?.stato==='disponibile')).toBe(true);
+  expect((await spilli()).every(s=>s.disponibilita?.stato!=='bloccato')).toBe(true);
   const pacchetto=(await request(app).get('/api/mappe/esporta?radice=attivita-narrative')).body.data;
   expect(pacchetto.mappe[0].spilli.map((s:SpilloDto)=>s.riferimento?.tipo)).toEqual(['attivita','luogo']);
   await request(app).delete('/api/mappe/attivita-narrative').expect(204);

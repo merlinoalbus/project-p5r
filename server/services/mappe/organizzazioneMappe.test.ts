@@ -17,18 +17,20 @@ describe('organizzazione geografica e contenuti guida',()=>{
   const db=initDb(':memory:');runMigrations(db,migrations.filter(m=>m.id<42));caricaSeed(db,seed);
   const area=db.prepare("SELECT chiave FROM mappa WHERE entita_tipo='area' LIMIT 1").get() as {chiave:string};
   const s=db.prepare('SELECT id FROM spillo WHERE mappa_chiave=? LIMIT 1').get(area.chiave) as {id:number};
+  // la destinazione si prova su uno spostamento creato apposta: solo gli spostamenti ne hanno una (regole di categoria, 2026-09-11)
+  const d=db.prepare("INSERT INTO spillo (mappa_chiave,tipo,nome,descrizione,x,y,collezionabile,ordine,origine,updated_at) VALUES (?,'passaggio','Passaggio di prova','',5,5,0,0,'utente','2026-09-06T00:00:00Z')").run(area.chiave).lastInsertRowid;
   const t='2026-09-06T00:00:00Z';
   const partita=db.prepare('INSERT INTO partita(nome,created_at,updated_at) VALUES(?,?,?)').run('Fixture',t,t).lastInsertRowid;
   db.prepare('INSERT INTO spillo_partita VALUES(?,?,1,?)').run(partita,s.id,t);
   db.prepare('INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,?,?,?)').run(s.id,'fixture','Immagine',t);
-  db.prepare('INSERT INTO spillo_destinazione VALUES(?,?,?,?,?)').run(s.id,'tokyo',12,34,2);
+  db.prepare('INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,?,?,?,?)').run(d,'tokyo',12,34,2);
   db.prepare('UPDATE mappa SET nome=?,note=? WHERE chiave=?').run('Nome personale','Note personali',area.chiave);
   const ids=db.prepare('SELECT id FROM spillo ORDER BY id').all();
-  const stati=db.prepare('SELECT * FROM spillo_partita').all(),immagini=db.prepare('SELECT * FROM spillo_immagine').all(),dest=db.prepare('SELECT * FROM spillo_destinazione').all();
+  const stati=db.prepare('SELECT * FROM spillo_partita').all(),immagini=db.prepare('SELECT * FROM spillo_immagine').all(),dest=db.prepare('SELECT spillo_id,mappa_chiave FROM spillo_destinazione').all();
   runMigrations(db);
   expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
   expect(db.prepare('SELECT id FROM spillo ORDER BY id').all()).toEqual(ids);
-  expect(db.prepare('SELECT * FROM spillo_partita').all()).toEqual(stati);expect(db.prepare('SELECT * FROM spillo_immagine').all()).toEqual(immagini);expect(db.prepare('SELECT * FROM spillo_destinazione').all()).toEqual(dest);
+  expect(db.prepare('SELECT * FROM spillo_partita').all()).toEqual(stati);expect(db.prepare('SELECT * FROM spillo_immagine').all()).toEqual(immagini);expect(db.prepare('SELECT spillo_id,mappa_chiave FROM spillo_destinazione').all()).toEqual(dest);
   expect(db.pragma('foreign_key_check')).toEqual([]);
   const r=risolviPercorsoMappa(area.chiave);expect(r.tipo).toBe('guida');
   if(r.tipo!=='guida')throw new Error('Guida non risolta');
@@ -45,8 +47,8 @@ describe('organizzazione geografica e contenuti guida',()=>{
   const db=initDb(':memory:');runMigrations(db,migrations.filter(m=>m.id<42));caricaSeed(db,seed);
   const aree=db.prepare("SELECT chiave FROM mappa WHERE entita_tipo='area' LIMIT 2").all() as Array<{chiave:string}>;
   db.prepare('UPDATE mappa SET asset=? WHERE chiave=?').run('pianta-personale',aree[0].chiave);
-  const s=db.prepare('SELECT id FROM spillo LIMIT 1').get() as {id:number};
-  db.prepare('INSERT INTO spillo_destinazione VALUES(?,?,?,?,?)').run(s.id,aree[1].chiave,20,40,2);
+  const s=db.prepare("SELECT id FROM spillo WHERE tipo='passaggio' LIMIT 1").get() as {id:number};
+  db.prepare('INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,?,?,?,?)').run(s.id,aree[1].chiave,20,40,2);
   runMigrations(db);
   for(const a of aree)expect(db.prepare('SELECT 1 FROM mappa WHERE chiave=?').get(a.chiave)).toBeTruthy();
   expect(db.prepare('SELECT mappa_chiave FROM spillo_destinazione WHERE spillo_id=?').get(s.id)).toEqual({mappa_chiave:aree[1].chiave});
@@ -70,7 +72,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   const partita=db.prepare('INSERT INTO partita(nome,created_at,updated_at) VALUES(?,?,?)').run('Reseed',t,t).lastInsertRowid;
   db.prepare('INSERT INTO spillo_partita VALUES(?,?,1,?)').run(partita,id,t);
   db.prepare('INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,?,?,?)').run(id,'mia-schermata','Personale',t);
-  db.prepare('INSERT INTO spillo_destinazione VALUES(?,?,?,?,?)').run(id,'tokyo',1,2,3);
+  db.prepare('INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,?,?,?,?)').run(id,'tokyo',1,2,3);
   const prima={s:db.prepare('SELECT * FROM spillo WHERE id=?').get(id),stato:db.prepare('SELECT * FROM spillo_partita').all(),immagini:db.prepare('SELECT * FROM spillo_immagine').all(),dest:db.prepare('SELECT * FROM spillo_destinazione').all()};
   importaMappe(pacchetto,{origine:'seed'});
   expect(db.prepare('SELECT * FROM spillo WHERE id=?').get(id)).toEqual(prima.s);

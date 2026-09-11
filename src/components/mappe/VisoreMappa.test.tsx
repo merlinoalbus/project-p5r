@@ -75,8 +75,8 @@ describe('VisoreMappa', () => {
     expect(within(popup.getByRole('list', { name: 'Schermate di Verso il centro' })).getAllByRole('button')).toHaveLength(2);
     fireEvent.click(popup.getByRole('button', { name: 'Ingrandisci: La scala' }));
     expect(screen.getByRole('dialog', { name: 'La scala' })).toBeInTheDocument();
-    fireEvent.click(popup.getByRole('button', { name: 'Apri: Shibuya centro' }));
-    expect(onNaviga).toHaveBeenCalledWith('shibuya-centro');
+    fireEvent.click(popup.getByRole('button', { name: 'Vai: Shibuya centro' }));
+    expect(onNaviga).toHaveBeenCalledWith('shibuya-centro', undefined);
   });
 
   it('il popup di un collezionabile permette di segnarlo raccolto; la scheda del negozio elenca gli articoli con prezzo', async () => {
