@@ -1858,6 +1858,10 @@ export interface StatoIstanzaDto {
   caratteri: { file: number; byte: number };
   partite: number;
   copieDiSicurezza: number;
+  /** Nessun dato di gioco (tabella `persona` vuota): l'istanza è nata senza pacchetto e aspetta l'importazione. */
+  vuota: boolean;
+  /** Il pacchetto completo è stato importato: almeno un'immagine con contenuto (l'iniziale del primo avvio non ne ha). */
+  completo: boolean;
 }
 
 /** Esito di un ripristino da file: che cosa è stato sostituito e dove sta la copia di sicurezza. */
@@ -1870,6 +1874,58 @@ export interface EsitoRipristinoDto {
   immagini: number;
   caratteri: number;
   copiaDiSicurezza: string;
+  stato: StatoIstanzaDto;
+}
+
+// ---- Pacchetto di gioco: esportazione, anteprima, importazione (voce 10) ----
+//
+// Il pacchetto è un solo file, `gioco.db`, con dentro anche le immagini (migrazione 079): non c'è
+// manifesto, la versione è `PRAGMA user_version` e i conteggi si leggono dal file stesso.
+
+/** Un riferimento delle partite che non trova più la sua riga nei dati di gioco. */
+export interface OrfanoPartiteDto {
+  /** Tabella delle partite e colonna che referenzia (es. `spillo_partita.spillo_uid`). */
+  tabella: string;
+  colonna: string;
+  /** Che cosa referenzia, in parole (articolo, libro, spillo…). */
+  entita: string;
+  righe: number;
+  partite: number;
+  /** Fino a cinque valori orfani, per riconoscerli. */
+  esempi: string[];
+  /** Quando l'intera tabella di destinazione manca nel pacchetto. */
+  nota: string | null;
+}
+
+/** Che cosa cambierebbe importando il pacchetto: si mostra prima di sostituire. */
+export interface AnteprimaPacchettoDto {
+  /** `PRAGMA user_version` del file caricato. */
+  versioneSchema: number;
+  /** Versione dello schema che il codice sa leggere (ultima migrazione dei dati di gioco). */
+  versioneSchemaCodice: number;
+  versioneSchemaIstanza: number;
+  databaseByte: number;
+  /** Falso quando il pacchetto è più nuovo del codice: non si importa. */
+  importabile: boolean;
+  motivo: string | null;
+  /** Le sole tabelle con conteggi diversi fra istanza e pacchetto. */
+  differenze: Array<{ tabella: string; istanza: number; pacchetto: number }>;
+  /** Tabelle dell'istanza assenti nel pacchetto (le migrazioni le ricreano vuote). */
+  tabelleAssenti: string[];
+  /** Immagini con contenuto, dentro l'uno e l'altro file. */
+  immagini: { istanza: number; pacchetto: number };
+  orfani: OrfanoPartiteDto[];
+}
+
+/** Esito dell'importazione: che cosa è cambiato e quali riferimenti delle partite sono rimasti orfani. */
+export interface EsitoImportazionePacchettoDto {
+  copiaDiSicurezza: string;
+  versioneSchemaPacchetto: number;
+  versioneSchema: number;
+  migrazioniApplicate: number;
+  /** Immagini con contenuto nei dati di gioco dopo l'importazione. */
+  immagini: number;
+  orfani: OrfanoPartiteDto[];
   stato: StatoIstanzaDto;
 }
 

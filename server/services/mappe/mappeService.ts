@@ -24,7 +24,6 @@ import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
-import fs from 'node:fs';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
@@ -725,7 +724,7 @@ function base64Immagine(ambito: string, chiave: string): { mime: string; base64:
   if (!leggiImmagine(ambito, chiave)) return null;
   try {
     const f = fileImmagine(ambito, chiave);
-    return { mime: f.mime, base64: fs.readFileSync(f.percorso).toString('base64') };
+    return { mime: f.mime, base64: f.contenuto.toString('base64') };
   } catch {
     return null;
   }
@@ -770,7 +769,7 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
     m.immagine = chiaveImg;
     try {
       const f = fileImmagine('mappa', chiaveImg);
-      immagini[chiaveImg] = { mime: f.mime, base64: fs.readFileSync(f.percorso).toString('base64') };
+      immagini[chiaveImg] = { mime: f.mime, base64: f.contenuto.toString('base64') };
     } catch {
       // immagine registrata ma file assente: esportata senza immagine
     }

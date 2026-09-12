@@ -7,7 +7,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { BackupIstanza } from './BackupIstanza';
 import type { StatoIstanzaDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaDatabase: vi.fn(), scaricaIstanza: vi.fn(), ripristinaIstanza: vi.fn() }));
+const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaIstanza: vi.fn(), ripristinaIstanza: vi.fn() }));
 vi.mock('../../services/api', () => api);
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
 vi.mock('../../stores/notificationStore', () => ({ notifica }));
@@ -18,7 +18,7 @@ const stato: StatoIstanzaDto = {
   versioneSchema: 34, versioneApp: '0.1.0',
   seed: { versione: '1', hash: '1:abc', caricatoIl: '2026-09-05T10:00:00.000Z' },
   database: { nome: 'gioco.db', byte: 3_900_000, inMemoria: false }, databasePartite: { nome: 'partite.db', byte: 120_000 }, versioneSchemaPartite: 1,
-  immagini: { file: 12, byte: 2_048_000 }, caratteri: { file: 1, byte: 40_000 }, partite: 2, copieDiSicurezza: 7,
+  immagini: { file: 12, byte: 2_048_000 }, caratteri: { file: 1, byte: 40_000 }, partite: 2, copieDiSicurezza: 7, vuota: false, completo: true,
 };
 
 describe('BackupIstanza', () => {
@@ -46,12 +46,11 @@ describe('BackupIstanza', () => {
     expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('Istanza completa'));
   });
 
-  it('scarica il solo database', async () => {
-    api.scaricaDatabase.mockResolvedValue({ nome: 'project-p5r.db', blob: new Blob(['x']) });
+  it('non offre più il solo database: quello è il pacchetto di gioco', async () => {
     render(<BackupIstanza />);
-    fireEvent.click(await screen.findByRole('button', { name: /Scarica solo il database/ }));
-    await waitFor(() => expect(api.scaricaDatabase).toHaveBeenCalled());
-    expect(api.scaricaIstanza).not.toHaveBeenCalled();
+    await screen.findByText(/gioco\.db/);
+    expect(screen.queryByRole('button', { name: /Scarica solo il database/ })).toBeNull();
+    expect(screen.getByText(/card «Pacchetto di gioco»/)).toBeInTheDocument();
   });
 
   it('il ripristino chiede conferma, invia il file e ricarica le partite', async () => {

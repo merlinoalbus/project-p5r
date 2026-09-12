@@ -9,7 +9,8 @@
 #      /data pre-creata e chown-ata (il named volume eredita
 #      l'ownership del mountpoint alla prima creazione)
 #
-# Il pacchetto di gioco (pacchetto/gioco.db + pacchetto/immagini/) viaggia
+# Il pacchetto di gioco iniziale (pacchetto/gioco.db, senza immagini; il completo,
+# pacchetto/completo/, e' fuori da git e dall'immagine: si importa dall'app) viaggia
 # NELL'IMMAGINE con il file NOTICE delle attribuzioni: al primo boot il backend
 # lo copia sul volume /data (gioco.db), crea partite.db accanto e applica le
 # migrazioni. Non esiste più un seed JSON.

@@ -7,7 +7,11 @@ import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPost, queryString } from './_helpers';
 
-export type AmbitoImmagine = 'arcana' | 'confidente' | 'personaggio' | 'persona' | 'skill' | 'mappa' | 'spillo' | 'altro';
+import type { AmbitoImmagine } from '../../../shared/immagini';
+export type { AmbitoImmagine };
+
+/** La grafica predefinita che vive nel database (mappe, Confidenti, sfondi…), nella forma del manifest degli asset. */
+export const getManifestoImmagini = (): Promise<{ generato: string; totale: number; file: Record<string, string> }> => apiGet('/immagini/manifest');
 
 export const getImmagini = (ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
 

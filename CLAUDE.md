@@ -23,14 +23,14 @@ italiana tramite la tabella `traduzione`.
 - `NOTICE` — attribuzioni delle fonti dati (Apache-2.0) (dallo step 0.2)
 
 ## Convenzioni tecniche (ereditate da project-jira, stesso autore)
-- Backend: `server/index.ts` → `assicuraPacchettoIniziale` (al primo avvio copia `pacchetto/gioco.db`) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `runBootBackup` → `runMigrations` (due sequenze: `db/migrations/` per i dati di gioco, `db/migrazioniUtente/` per le partite) → `regoleAllAvvio` → `listen`. Non esiste più un seed JSON: i dati di gioco vivono in `gioco.db` e si aggiornano con import/export del pacchetto.
+- Backend: `server/index.ts` → `assicuraPacchettoIniziale` (al primo avvio copia `pacchetto/gioco.db`, in git, senza immagini: l'interfaccia si apre; il pacchetto COMPLETO — stesso nome, `pacchetto/completo/gioco.db`, ~311 MB con le immagini, fuori da git — si carica SEMPRE dall'app, Impostazioni → Pacchetto di gioco → Importa, e sostituisce il file dell'istanza; vedi `pacchetto/README.md`) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `runBootBackup` → `runMigrations` (due sequenze: `db/migrations/` per i dati di gioco, `db/migrazioniUtente/` per le partite) → `regoleAllAvvio` → `listen`. Non esiste più un seed JSON: i dati di gioco vivono in `gioco.db` e si aggiornano con import/export del pacchetto.
   Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/` (cartelle create dallo step 0.4),
   migrazioni append-only in `server/db/migrations/` registrate in `index.ts`.
 - Risposte API: successo `{ data }`, errore `{ error: { code, message, details? }, requestId }`; 404 JSON su `/api/*`.
 - Frontend: pagine in `src/pages/`, componenti in `src/components/<area>/`, stato in `src/stores/` (zustand),
   chiamate in `src/services/api/` (barrel `index.ts`), tema in `src/tailwind.css` (token CSS-first, mai classi interpolate).
 - Layout adattivo: sidebar da 1024px in su, barra inferiore sotto; bersagli touch ≥ 44px (classe `.touch`).
-- Dati di gioco (`gioco.db`, dal pacchetto del repository) e dati utente (`partite.db`, tabelle per `partita_id`) vivono in DUE FILE separati sulla stessa connessione: sostituire il DB di gioco non tocca l'avanzamento.
+- Dati di gioco (`gioco.db`, dal pacchetto: con dentro anche tutte le immagini che non sono del compendio né di `ui/`) e dati utente (`partite.db`, tabelle per `partita_id`) vivono in DUE FILE separati sulla stessa connessione: sostituire il DB di gioco non tocca l'avanzamento.
 - Test con Vitest accanto ai sorgenti (`*.test.ts[x]`); typecheck `tsc -b tsconfig.full.json`; lint ESLint 9.
 
 ## Procedura di lavoro obbligatoria
@@ -51,6 +51,7 @@ si integrano su `main` tramite merge del branch di produzione asset.
 ## Avvio rapido
 ```bash
 npm install && cp .env.example .env
+# pacchetto/gioco.db (iniziale, in git) serve al primo avvio e ai test; il completo (pacchetto/completo/gioco.db, immagini dentro) si importa dall'app
 bash scripts/start-all.sh      # BE 3101 + FE 5273 (log in BE.log / FE.log)
 bash scripts/restart-be.sh     # dopo ogni modifica in server/ (non c'è hot reload lato BE)
 npm run typecheck && npm run lint && npm test

@@ -15,3 +15,6 @@ coverage
 .env.*
 docs
 .claude
+
+# il pacchetto completo (311 MB) non entra nell'immagine: si importa dall'app
+pacchetto/completo/

@@ -19,8 +19,10 @@
 # container tra quelli monitorati per l'auto-update da GHCR (:latest).
 #
 # Il DB SQLite viene creato dal backend sul volume `project_p5r_data`
-# al primo avvio dal pacchetto di gioco incluso nell'immagine
-# (gioco.db + immagini) e migrato; le partite stanno in partite.db;
+# al primo avvio dal pacchetto iniziale (pacchetto/gioco.db, senza immagini) e
+# migrato; il completo (stesso file con le immagini, fuori da git) si importa da
+# Impostazioni → Pacchetto di gioco e sostituisce il file sul volume;
+# le partite stanno in partite.db;
 # entrambi sopravvivono agli aggiornamenti d'immagine.
 
 services:

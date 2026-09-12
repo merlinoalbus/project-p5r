@@ -3,7 +3,8 @@
 // ============================================================
 //
 // Sequenza di boot:
-//   0. assicuraPacchettoIniziale() — senza gioco.db, lo copia dal pacchetto del repository
+//   0. assicuraPacchettoIniziale() — senza gioco.db, lo copia da pacchetto/gioco.db (iniziale, senza immagini: l'interfaccia si apre;
+//      il completo, stesso nome in pacchetto/completo/ fuori da git, si importa da Impostazioni e sostituisce il file); senza iniziale, istanza vuota
 //   1. initDb()        — apertura di gioco.db + partite.db, FATALE su errore
 //   2. runBootBackup() — snapshot rotante pre-migrazioni, warn-only
 //   3. runMigrations() — schema versionato, FATALE su errore
@@ -26,7 +27,8 @@ import { assicuraPacchettoIniziale, regoleAllAvvio } from './services/pacchetto/
 
 try {
   const iniziale = assicuraPacchettoIniziale();
-  if (iniziale.database) logger.info(iniziale, 'prima installazione: dati di gioco copiati dal pacchetto');
+  if (iniziale.database) logger.info(iniziale, 'prima installazione: dati iniziali copiati dal pacchetto. Importa il pacchetto completo (gioco.db) da Impostazioni → Pacchetto di gioco.');
+  else if (iniziale.pacchettoAssente) logger.warn('prima installazione senza pacchetto iniziale: l\'istanza nasce vuota. Importa gioco.db da Impostazioni → Pacchetto di gioco.');
   initDb();
 } catch (err) {
   console.error('[project-p5r] FATALE: inizializzazione SQLite fallita:', err);
@@ -44,7 +46,8 @@ try {
 
 try {
   // Il seed JSON non esiste più (decisione dell'utente, 2026-09-12): i dati di gioco vivono in
-  // gioco.db, arrivano dal pacchetto al primo avvio e si aggiornano con import/export.
+  // gioco.db: l'iniziale arriva dal pacchetto al primo avvio, il completo (con le immagini) e ogni
+  // aggiornamento passano dall'importazione in Impostazioni, che sostituisce il file.
   // Restano le regole sui dati che si rifanno a ogni avvio. Gli spilli che l'estrazione non ha
   // saputo identificare portano il nome giapponese dello sprite, e un pacchetto lo riporterebbe.
   const regole = regoleAllAvvio(initDb());

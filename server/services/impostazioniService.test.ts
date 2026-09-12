@@ -16,17 +16,16 @@ import { leggiZip } from '../utils/zip.js';
 
 let dataDir = '';
 
-/** Prepara un'istanza reale su disco: database migrato e con seed, più un'immagine e un carattere finti. */
+/** Prepara un'istanza reale su disco: database migrato e con seed, un'immagine nel database e un carattere finto su disco. */
 function apriIstanza(): void {
   const db = initDb();
   caricaPacchetto(db);
+  prepared("INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at, contenuto) VALUES ('mappa', 'prova', 'prova.png', 'image/png', 14, 'x', ?)").run(Buffer.from('finta immagine'));
 }
 
 beforeAll(() => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-backup-'));
   (config as { dataDir: string }).dataDir = dataDir;
-  fs.mkdirSync(path.join(dataDir, 'immagini', 'mappa'), { recursive: true });
-  fs.writeFileSync(path.join(dataDir, 'immagini', 'mappa', 'prova.png'), Buffer.from('finta immagine'));
   fs.mkdirSync(path.join(dataDir, 'font'), { recursive: true });
   fs.writeFileSync(path.join(dataDir, 'font', 'display.woff2'), Buffer.from('finto carattere'));
   apriIstanza();
@@ -47,13 +46,13 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     expect(s.versioneSchemaPartite).toBeGreaterThanOrEqual(1);
     expect(s.database.byte).toBeGreaterThan(0);
     expect(s.versioneSchema).toBeGreaterThan(0);
-    expect(s.immagini).toEqual({ file: 1, byte: 'finta immagine'.length });
+    expect(s.immagini).toEqual({ file: 1, byte: 14 });
     expect(s.caratteri).toEqual({ file: 1, byte: 'finto carattere'.length });
     expect(s.partite).toBe(1);
     expect(s.seed.hash).toMatch(/^\d+:[0-9a-f]{64}$/);
   });
 
-  it('esporta il database come file SQLite valido e l’istanza completa come ZIP con database, immagini, caratteri e manifesto', async () => {
+  it('esporta il database come file SQLite valido e l’istanza completa come ZIP con i due database, i caratteri e il manifesto', async () => {
     const copia = await copiaDatabase();
     const contenuto = fs.readFileSync(copia.percorso);
     expect(contenuto.toString('utf-8', 0, 15)).toBe('SQLite format 3');
@@ -70,7 +69,7 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     const nomi = voci.map((v) => v.nome);
     expect(nomi).toContain('database/gioco.db');
     expect(nomi).toContain('database/partite.db');
-    expect(nomi).toContain('immagini/mappa/prova.png');
+    expect(nomi.some((n) => n.startsWith('immagini/'))).toBe(false); // le immagini viaggiano dentro database/gioco.db
     expect(nomi).toContain('font/display.woff2');
     expect(nomi).toContain('manifest.json');
     expect(nomi).toContain('LEGGIMI.txt');
@@ -111,15 +110,14 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     expect(fs.existsSync(`${resolveDbPath()}-wal`)).toBe(true); // WAL ricreato dalla nuova connessione
   });
 
-  it('ripristina da uno ZIP dell’istanza: tornano anche immagini e caratteri, e la cartella viene sostituita in blocco', async () => {
+  it('ripristina da uno ZIP dell’istanza: tornano anche le immagini (dentro il database di gioco) e i caratteri', async () => {
     const zip = await copiaIstanza();
-    // l'istanza corrente perde l'immagine: il ripristino la rimette
-    fs.rmSync(path.join(dataDir, 'immagini', 'mappa', 'prova.png'), { force: true });
-    fs.writeFileSync(path.join(dataDir, 'immagini', 'mappa', 'di-troppo.png'), Buffer.from('sostituita dal ripristino'));
+    // l'istanza corrente perde l'immagine e il carattere: il ripristino li rimette
+    prepared("DELETE FROM immagine WHERE ambito = 'mappa' AND chiave = 'prova'").run();
+    fs.rmSync(path.join(dataDir, 'font', 'display.woff2'), { force: true });
     const esito = await ripristinaIstanza(zip.contenuto);
-    expect(esito).toMatchObject({ formato: 'istanza', immagini: 1, caratteri: 1 });
-    expect(fs.readFileSync(path.join(dataDir, 'immagini', 'mappa', 'prova.png')).toString()).toBe('finta immagine');
-    expect(fs.existsSync(path.join(dataDir, 'immagini', 'mappa', 'di-troppo.png'))).toBe(false);
+    expect(esito).toMatchObject({ formato: 'istanza', immagini: 0, caratteri: 1 });
+    expect((prepared("SELECT contenuto FROM immagine WHERE ambito = 'mappa' AND chiave = 'prova'").get() as { contenuto: Buffer }).contenuto.toString()).toBe('finta immagine');
     expect(fs.readFileSync(path.join(dataDir, 'font', 'display.woff2')).toString()).toBe('finto carattere');
   });
 
@@ -137,10 +135,11 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
       { nome: 'immagini/mappa/prova.png', contenuto: Buffer.from('finta immagine') },
     ]);
     const esito = await ripristinaIstanza(zip);
-    // solo l'immagine legittima è stata scritta
+    // solo l'immagine legittima è stata scritta; poi, alla riapertura, la cartella dei backup di prima della 079 è stata assorbita e messa da parte
     expect(esito.immagini).toBe(1);
     expect(fs.existsSync(fuori)).toBe(false);
-    expect(fs.existsSync(path.join(dataDir, 'immagini', 'mappa', 'prova.png'))).toBe(true);
+    expect(fs.existsSync(path.join(dataDir, 'immagini'))).toBe(false);
+    expect(fs.readdirSync(path.join(dataDir, 'backups')).some((n) => n.startsWith('immagini-su-disco-'))).toBe(true);
   });
 
   it('se il ripristino fallisce a metà, l’istanza torna com’era e il database resta utilizzabile', async () => {

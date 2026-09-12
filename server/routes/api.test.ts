@@ -355,10 +355,27 @@ describe('API', () => {
       const totali = ((await request(app).get('/api/immagini')).body.data as unknown[]).length;
       expect((await request(app).delete('/api/immagini')).body.data).toEqual({ eliminate: totali });
       expect((await request(app).get('/api/immagini')).body.data).toHaveLength(0);
-      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'persona'))).toHaveLength(0);
+      expect((await request(app).get('/api/immagini/persona/Pixie/file')).status).toBe(404);
+      // la grafica predefinita (famiglie della 079) vive nella stessa tabella ma non entra negli elenchi né nelle rimozioni in blocco
+      expect((await request(app).put('/api/immagini/mappe/tokyo').set('Content-Type', 'image/png').send(png)).status).toBe(201);
+      expect((await request(app).put('/api/immagini/mappe/lmap%2Ftokyo%2Fakasaka').set('Content-Type', 'image/png').send(png)).status).toBe(201);
+      const manifesto = (await request(app).get('/api/immagini/manifest')).body.data as { totale: number; file: Record<string, string> };
+      expect(manifesto.totale).toBe(2);
+      expect(manifesto.file['mappe/tokyo']).toMatch(/^\/api\/immagini\/mappe\/tokyo\/file\?v=/);
+      expect(manifesto.file['mappe/lmap/tokyo/akasaka']).toMatch(/^\/api\/immagini\/mappe\/lmap%2Ftokyo%2Fakasaka\/file\?v=/);
+      expect((await request(app).get('/api/immagini/mappe/lmap%2Ftokyo%2Fakasaka/file')).status).toBe(200);
+      expect((await request(app).get('/api/immagini')).body.data).toHaveLength(0);
+      expect((await request(app).get('/api/immagini?ambito=mappe')).status).toBe(400);
+      expect((await request(app).delete('/api/immagini')).body.data).toEqual({ eliminate: 0 });
+      expect((await request(app).get('/api/immagini/manifest')).body.data.totale).toBe(2);
+      // ETag: la stessa riga risponde 304 alla rivalidazione, una sostituzione cambia l'ETag
+      const primo = await request(app).get('/api/immagini/mappe/tokyo/file');
+      expect(primo.headers.etag).toBeTruthy();
+      expect((await request(app).get('/api/immagini/mappe/tokyo/file').set('If-None-Match', primo.headers.etag)).status).toBe(304);
+      expect((await request(app).delete('/api/immagini/mappe/tokyo')).status).toBe(204);
       const sost = await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'image/webp').send(Buffer.from('RIFF'));
       expect(sost.body.data.mime).toBe('image/webp');
-      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'arcana'))).toHaveLength(1);
+      expect(Buffer.from((await request(app).get('/api/immagini/arcana/Fool/file')).body).toString()).toBe('RIFF');
       expect((await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'text/plain').send('ciao')).status).toBe(400);
       const grande = await request(app).put('/api/immagini/arcana/Grande').set('Content-Type', 'image/png').send(Buffer.alloc(9 * 1024 * 1024, 1));
       expect(grande.status).toBe(413);
@@ -367,7 +384,7 @@ describe('API', () => {
       expect((await request(app).put('/api/immagini/pippo/Fool').set('Content-Type', 'image/png').send(png)).status).toBe(400);
       expect((await request(app).delete('/api/immagini/arcana/Fool')).status).toBe(204);
       expect((await request(app).get('/api/immagini/arcana/Fool')).status).toBe(404);
-      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'arcana'))).toHaveLength(0);
+      expect((await request(app).get('/api/immagini/arcana/Fool/file')).status).toBe(404);
     } finally {
       (config as { dataDir: string }).dataDir = originale;
       fs.rmSync(dataDir, { recursive: true, force: true });
@@ -392,11 +409,11 @@ describe('API', () => {
       const ok = await request(app).post('/api/immagini/confidente/ryuji/da-url').send({ url: `${base}/carta.png` });
       expect(ok.status).toBe(201);
       expect(ok.body.data).toMatchObject({ ambito: 'confidente', chiave: 'ryuji', mime: 'image/png', byte: png.length });
-      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'confidente'))).toHaveLength(1);
-      // i redirect vengono seguiti e il file precedente sostituito (un solo file su disco)
+      expect((await request(app).get('/api/immagini?ambito=confidente')).body.data).toHaveLength(1);
+      // i redirect vengono seguiti e l'immagine precedente sostituita (una sola riga)
       const redir = await request(app).post('/api/immagini/confidente/ryuji/da-url').send({ url: `${base}/redirect` });
       expect(redir.status).toBe(201);
-      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'confidente'))).toHaveLength(1);
+      expect((await request(app).get('/api/immagini?ambito=confidente')).body.data).toHaveLength(1);
       const html = await request(app).post('/api/immagini/confidente/ann/da-url').send({ url: `${base}/pagina.html` });
       expect(html.status).toBe(400);
       expect(html.body.error.code).toBe('formato-non-ammesso');
@@ -408,8 +425,8 @@ describe('API', () => {
       expect(ftp.status).toBe(400);
       expect(ftp.body.error.code).toBe('url-non-valido');
       expect((await request(app).post('/api/immagini/confidente/ann/da-url').send({ url: 'non-un-url' })).status).toBe(400);
-      // nessun file orfano per i tentativi falliti
-      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'confidente'))).toHaveLength(1);
+      // nessuna riga in più per i tentativi falliti
+      expect((await request(app).get('/api/immagini?ambito=confidente')).body.data).toHaveLength(1);
     } finally {
       await new Promise<void>((ok) => server.close(() => ok()));
       (config as { dataDir: string }).dataDir = originale;
