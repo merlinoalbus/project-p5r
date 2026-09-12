@@ -2,16 +2,13 @@
 // Test API storico — eventi registrati dalle modifiche di tracking; filtri, paginazione, eliminazione
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { PersonaRiassuntoDto, SkillRiassuntoDto, StoricoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 async function idDi(nome: string): Promise<number> {
@@ -24,8 +21,7 @@ async function idDi(nome: string): Promise<number> {
 describe('API storico', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());

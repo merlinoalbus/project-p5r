@@ -12,7 +12,7 @@ import { impostaMarcatore, scaricaPianta } from '../services/dungeonService.js';
 import { impostaMarcatoreLuogo, scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPacchettoRepository, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
 import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
@@ -64,14 +64,6 @@ router.get('/esporta', validate({ query: queryEsporta }), (req, res) => {
   res.json(esportaMappe(q.radice));
 });
 
-/** ZIP per il repository: seed della mappa (e discendenti) + asset delle immagini. */
-router.get('/esporta.zip', validate({ query: queryEsporta.required({ radice: true }) }), (req, res) => {
-  const q = req.query as unknown as { radice: string };
-  const z = creaPacchettoRepository(q.radice);
-  res.setHeader('Content-Type', 'application/zip');
-  res.setHeader('Content-Disposition', `attachment; filename="${z.nomeFile}"`);
-  res.send(z.contenuto);
-});
 
 /** Importa un pacchetto (stesso formato dell'esportazione). */
 router.post('/importa', validate({ body: bodyImporta }), (req, res) => {

@@ -8,20 +8,17 @@
 // round: che si registrino, che il completamento sblocchi il requisito, e che una partita non
 // veda l'avanzamento dell'altra.
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { createApp } from '../bootstrap.js';
 import type { VideogiocoDto, VideogiochiDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API Videogiochi', () => {
-  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
   afterAll(() => closeDb());
 
   it('espone il catalogo e round coerenti con il seed', async () => {
@@ -53,7 +50,7 @@ describe('API Videogiochi', () => {
     expect(((await request(app).get(`/api/compendio/videogiochi?partita=${id2}`)).body.data as VideogiochiDto).completati).toBe(0);
     expect((await request(app).put(url).send({ tipo: 'videogioco', chiave: gioco.chiave, avanzamento: gioco.totaleRound + 1 })).status).toBe(400);
     expect((await request(app).put(url).send({ tipo: 'videogioco', chiave: gioco.chiave, avanzamento: -1 })).status).toBe(400);
-    caricaSeed(getDb(), DIR_SEED, true);
+    ricaricaPacchetto(getDb());
     expect(((await request(app).get(`/api/compendio/videogiochi?partita=${id1}`)).body.data as VideogiochiDto).videogiochi.find((g) => g.chiave === gioco.chiave)?.fatto).toBe(true);
   });
 });

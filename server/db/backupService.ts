@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
-import { getDb, resolveDbPath } from './dbService.js';
+import { copiaSchema, getDb, resolveDbPath, resolvePartitePath } from './dbService.js';
 
 const KEEP_LAST = 7;
 const PREFIX = 'project-p5r-';
@@ -33,16 +33,20 @@ export async function runBootBackup(): Promise<void> {
     fs.mkdirSync(backupsDir, { recursive: true });
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     const target = path.join(backupsDir, `${PREFIX}${stamp}.db`);
-    await getDb().backup(target);
-    logger.info({ target }, 'backup di avvio completato');
+    await copiaSchema(getDb(), target, 'main');
+    // il file delle partite accanto, con lo stesso timbro: le due copie vanno insieme
+    const targetPartite = path.join(backupsDir, `${PREFIX}${stamp}.partite.db`);
+    if (fs.existsSync(resolvePartitePath())) await copiaSchema(getDb(), targetPartite, 'utente');
+    logger.info({ target, targetPartite }, 'backup di avvio completato');
 
     const entries = fs
       .readdirSync(backupsDir)
-      .filter((f) => f.startsWith(PREFIX) && f.endsWith('.db'))
+      .filter((f) => f.startsWith(PREFIX) && f.endsWith('.db') && !f.endsWith('.partite.db'))
       .sort()
       .reverse();
     for (const stale of entries.slice(KEEP_LAST)) {
       fs.unlinkSync(path.join(backupsDir, stale));
+      fs.rmSync(path.join(backupsDir, stale.replace(/\.db$/, '.partite.db')), { force: true });
     }
   } catch (err) {
     logger.warn({ err }, 'backup di avvio fallito — si prosegue');

@@ -2,15 +2,12 @@
 // Test motoreFusione — regole di fusione sul dataset reale (DB in memoria)
 // ============================================================
 
-import path from 'node:path';
 import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
-import { caricaSeed } from '../seed/caricaSeed.js';
+import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
 import {
   arcanaRisultato, costoFusione, creaContesto, fondi, fusioniCon, invalidaMotoreFusione, livelloFusione, ricettePer, type Contesto, type PersonaFusione,
 } from './motoreFusione.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
 
 function perNome(ctx: Contesto, nome: string): PersonaFusione {
   const p = ctx.ammesse.find((x) => x.nome === nome);
@@ -22,8 +19,7 @@ describe('motoreFusione', () => {
   let ctx: Contesto;
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaMotoreFusione();
     ctx = creaContesto([]);
   });

@@ -2,24 +2,20 @@
 // Test API calendario (Fase 6.3) — seed, mesi, settimana della guida, oggi nella partita e prossime scadenze
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import { indiceGiornoScolastico } from '../services/domandeService.js';
 import type { CalendarioDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API calendario', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());

@@ -3,10 +3,11 @@
 // ============================================================
 //
 // Sequenza di boot:
-//   1. initDb()        — apertura DB, FATALE su errore
+//   0. assicuraPacchettoIniziale() — senza gioco.db, lo copia dal pacchetto del repository
+//   1. initDb()        — apertura di gioco.db + partite.db, FATALE su errore
 //   2. runBootBackup() — snapshot rotante pre-migrazioni, warn-only
 //   3. runMigrations() — schema versionato, FATALE su errore
-//   4. caricaSeed()    — compendio Royal da data/seed (idempotente), FATALE su errore
+//   4. regole sui dati — nomi degli spilli, luoghi e planimetrie, spilli dei luoghi (rieseguite a ogni avvio)
 //   5. createApp() + listen(porta)
 //
 // Arresto: su SIGINT/SIGTERM (Ctrl-C, docker stop) si chiude il server
@@ -21,12 +22,11 @@ import { closeDb, initDb } from './db/dbService.js';
 import { runBootBackup } from './db/backupService.js';
 import { runMigrations } from './db/migrationRunner.js';
 import { createApp } from './bootstrap.js';
-import { caricaSeed } from './services/seed/caricaSeed.js';
-import { traduciNomiSpilli } from './db/migrations/053_nomi_spilli_in_italiano.js';
-import { collegaLuoghiAllePlanimetrie } from './db/migrations/054_luoghi_con_la_loro_planimetria.js';
-import { riallineaSpilliLuoghi } from './services/mappe/sincronizzaMappe.js';
+import { assicuraPacchettoIniziale, regoleAllAvvio } from './services/pacchetto/pacchettoGioco.js';
 
 try {
+  const iniziale = assicuraPacchettoIniziale();
+  if (iniziale.database) logger.info(iniziale, 'prima installazione: dati di gioco copiati dal pacchetto');
   initDb();
 } catch (err) {
   console.error('[project-p5r] FATALE: inizializzazione SQLite fallita:', err);
@@ -43,23 +43,14 @@ try {
 }
 
 try {
-  const esito = caricaSeed(initDb());
-  logger.info(esito, esito.caricato ? 'seed del compendio caricato' : 'seed del compendio già aggiornato');
-  // Le condizioni della guida si convertono dalla prosa **una volta**, al caricamento del seed e
-  // nelle migrazioni (064): non si rifanno a ogni avvio, così una condizione corretta resta quella.
-  // Gli spilli che l'estrazione non ha saputo identificare portano il
-  // nome giapponese dello sprite, e un reseed dell'atlante lo riporterebbe.
-  const tradotti = traduciNomiSpilli(initDb());
-  if (tradotti > 0) logger.info({ spilli: tradotti }, 'nomi degli spilli non identificati resi in italiano');
-  // E il legame fra un luogo della guida e la planimetria che porta il suo nome: è una regola sui
-  // dati, quindi si rifà quando i dati cambiano, non una volta sola.
-  const collegati = collegaLuoghiAllePlanimetrie(initDb());
-  if (collegati > 0) logger.info({ luoghi: collegati }, 'luoghi collegati alla planimetria che porta il loro nome');
-  // Lo spillo di un luogo segue il catalogo dei tipi di luogo: anche questa è una regola sui dati.
-  const riallineati = riallineaSpilliLuoghi(initDb());
-  if (riallineati > 0) logger.info({ spilli: riallineati }, 'spilli dei luoghi riallineati al catalogo dei tipi');
+  // Il seed JSON non esiste più (decisione dell'utente, 2026-09-12): i dati di gioco vivono in
+  // gioco.db, arrivano dal pacchetto al primo avvio e si aggiornano con import/export.
+  // Restano le regole sui dati che si rifanno a ogni avvio. Gli spilli che l'estrazione non ha
+  // saputo identificare portano il nome giapponese dello sprite, e un pacchetto lo riporterebbe.
+  const regole = regoleAllAvvio(initDb());
+  if (Object.values(regole).some((n) => n > 0)) logger.info(regole, 'regole sui dati applicate all\'avvio');
 } catch (err) {
-  console.error('[project-p5r] FATALE: caricamento del seed fallito:', err);
+  console.error('[project-p5r] FATALE: regole sui dati all\'avvio fallite:', err);
   process.exit(1);
 }
 

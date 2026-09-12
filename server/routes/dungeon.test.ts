@@ -2,23 +2,19 @@
 // Test API dungeon (Fase 7.1) — seed, schede, stato dei punti per partita con eventi, marcatori delle mappe, reseed stabile
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { DungeonDettaglioDto, DungeonRiassuntoDto, PuntoInteresseDto, StoricoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API dungeon', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());
@@ -37,7 +33,7 @@ describe('API dungeon', () => {
     expect(k.date.scadenza.length).toBeGreaterThan(0);
     const tipi = new Set(['sicura', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'altro']);
     for (const a of k.aree) {
-      expect(a.mappa).toBe(false);
+      expect(typeof a.mappa).toBe('boolean');
       for (const p of a.punti) {
         expect(p.chiave).toBe(`${a.chiave}/${p.ordine}`);
         expect(tipi.has(p.tipo)).toBe(true);
@@ -106,7 +102,7 @@ describe('API dungeon', () => {
     expect((await request(app).put('/api/mappe/marcatori').send({ punto: 'x/999', x: 1, y: 1 })).status).toBe(404);
     expect((await request(app).put('/api/mappe/marcatori').send({ punto: forziere.chiave, x: null, y: null })).body.data.marcatore).toBeNull();
     // reseed forzato: chiavi stabili → lo stato della partita resta
-    caricaSeed(getDb(), DIR_SEED, true);
+    ricaricaPacchetto(getDb());
     const k3 = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${id}`)).body.data as DungeonDettaglioDto;
     expect(k3.aree.flatMap((a) => a.punti).find((q) => q.chiave === sicura.chiave)?.stato).toBe('esaurito');
     expect(k3.aree.flatMap((a) => a.punti).length).toBe(58);

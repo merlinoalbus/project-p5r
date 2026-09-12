@@ -21,15 +21,12 @@
 //     non ne dà, e questo è esattamente ciò che l'app faceva prima: nessuna partita esistente
 //     cambia da sola.
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import type { DoteSocialePartitaDto, LibriDto, FilmDvdDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
@@ -39,7 +36,7 @@ const segna = (id: number, tipo: string, chiave: string, avanzamento: number) =>
   request(app).put(`/api/partite/${id}/letture`).send({ tipo, chiave, avanzamento });
 
 describe('API — le Doti salgono al conseguimento', () => {
-  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
   afterAll(() => closeDb());
 
   it('un libro finito dà i suoi punti, col bonus del libro sulle tre note', async () => {
@@ -112,7 +109,7 @@ describe('API — le Doti salgono al conseguimento', () => {
  * diceva «Conoscenza +1 nota» e i punti restavano dov'erano. Scrivere una promessa senza mantenerla
  * è peggio che non scriverla, perché chi legge lo storico ci conta. */
 describe('API — il cruciverba dà la sua nota di Conoscenza', () => {
-  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
   afterAll(() => closeDb());
 
   it('risolverne uno alza Conoscenza, e toglierlo la riporta indietro', async () => {

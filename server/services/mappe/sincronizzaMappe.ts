@@ -7,8 +7,8 @@ import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 // sincronizzaMappe — crea l'albero delle mappe dalle entità della guida e gli spilli dai marcatori esistenti (Fase 13.1)
 // ============================================================
 //
-// Idempotente: aggiunge solo ciò che manca (mai sovrascrive modifiche dell'utente). Usata dalla migrazione 027 (istanze
-// esistenti) e alla fine di `caricaSeed` (istanze nuove e reseed).
+// Idempotente: aggiunge solo ciò che manca (mai sovrascrive modifiche dell'utente). Usata dalla migrazione 027 e dai
+// test; dal 2026-09-12 nessun avvio la chiama (il pacchetto di gioco è la fotografia dell'istanza di produzione).
 //   - `tokyo` (città) → `citta-<quartiere>` (quartiere, entità quartiere, asset `mappe/citta-<q>`, immagine dell'istanza se già scaricata)
 //   - `dungeon-<chiave>` (palazzo | dedalo, asset `palazzi/<chiave>`) → `<area>` (area, entità area, immagine dell'istanza se presente)
 //   - spilli: uno per marcatore dei punti (riferimento `punto`) e dei luoghi (riferimento `luogo`), stessa origine del marcatore;
@@ -19,6 +19,7 @@ import { nowIso } from '../../db/dbService.js';
 import type { AppDatabase } from '../../db/dbService.js';
 import { spilloPerPunto } from '../../../shared/spilli.js';
 import { spilloPerLuogo } from '../../../shared/tipiLuogo.js';
+import { assegnaUidMancanti } from './identitaSpillo.js';
 
 function adesso(): string { return new Date().toISOString(); }
 
@@ -163,7 +164,7 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     }
     // ---- Riclassificazione degli spilli di seed già esistenti: quando la corrispondenza `spilloPerPunto` cambia (per esempio con
     // i tipi nemico, oggetto-chiave, punto-sensibile, tesoro-palazzo, seme-bramosia) tipo e collezionabilità seguono il registro.
-    // Non tocca gli spilli creati dall'utente né gli stati per partita (`spillo_partita` è legata all'id, che non cambia). ----
+    // Non tocca gli spilli creati dall'utente né gli stati per partita (`spillo_partita` è legata all'uid, che non cambia). ----
     const aggSpillo = db.prepare(`UPDATE spillo SET tipo = ?, collezionabile = ?, updated_at = ?
       WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND origine = 'seed' AND (tipo <> ? OR collezionabile <> ?)`);
     for (const r of righe) {
@@ -219,6 +220,8 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   }
   riconciliaAreeGuida(db);
   sincronizzaPercorsiMappe(db);
+  // ogni spillo inserito qui riceve l'uid della sua identità (se la colonna c'è già: la 027 gira prima della 067)
+  assegnaUidMancanti(db);
   return { mappe, spilli, riclassificati, conSblocco };
 }
 
@@ -273,5 +276,6 @@ export function collegaPalazziAiLuoghi(db: AppDatabase): number {
     }
     creati += 1;
   }
+  assegnaUidMancanti(db);
   return creati;
 }

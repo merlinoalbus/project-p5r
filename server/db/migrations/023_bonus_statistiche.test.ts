@@ -2,20 +2,16 @@
 // Test migrazione 023 — conversione dei valori assoluti in bonus e riempimento delle istantanee del compendio
 // ============================================================
 
-import path from 'node:path';
 import { closeDb, getDb, initDb, prepared } from '../dbService.js';
-import { runMigrations } from '../migrationRunner.js';
-import { caricaSeed } from '../../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { statistichePerLivello } from '../../../shared/statistiche.js';
 import { convertiAssoluteInBonus, riempiIstantaneeDallaScorta } from './023_bonus_statistiche.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
 
 describe('migrazione 023 — bonus statistiche', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
   });
   afterAll(() => closeDb());
 

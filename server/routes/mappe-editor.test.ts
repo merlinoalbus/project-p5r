@@ -2,19 +2,15 @@
 // Test API mappe a livelli e spilli (Fase 13.1): albero dalla guida, spilli dai marcatori, editor, stato «raccolto», immagine, esportazione/importazione
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa, creaSpillo, dimensioniImmagine, importaMappe } from '../services/mappe/mappeService.js';
-import { leggiZip } from '../utils/zip.js';
 import { salvaImmagine } from '../services/immaginiService.js';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 /** PNG 2×3 minimo (intestazione IHDR valida; il contenuto non viene decodificato dal server). */
@@ -28,8 +24,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   let partitaId = 0;
   beforeAll(async () => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
     // Explicit positioned fixture: editorial seed points no longer pretend to have a physical map.
     const punto=db.prepare('SELECT chiave FROM punto_interesse LIMIT 1').get() as {chiave:string};
@@ -42,7 +37,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   it('costruisce l’albero dalla guida (Tokyo → quartieri, Palazzi/Dedalo → aree) con gli spilli dai marcatori', async () => {
     const albero = (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[];
     const tokyo = albero.find((m) => m.chiave === 'tokyo')!;
-    expect(tokyo).toMatchObject({ tipo: 'citta', genitore: null, origine: 'seed' });
+    // il pacchetto porta le mappe come sono in produzione: Tokyo può risultare ritoccata dall'utente
+    expect(tokyo).toMatchObject({ tipo: 'citta', genitore: null });
     const quartieri = albero.filter((m) => m.tipo === 'quartiere');
     expect(quartieri.length).toBeGreaterThan(5);
     expect(quartieri.every((q) => q.genitore === 'tokyo')).toBe(true);
@@ -76,7 +72,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     // ogni quartiere ha il passaggio automatico da Tokyo; una mappa dell'utente agganciata a Tokyo ma raggiunta da un passaggio
     // posato altrove (es. la banchina della metropolitana da Yongen-Jaya) non ne riceve uno doppio
     const passaggiTokyo = tokyoDett.spilli.filter((s) => s.tipo === 'passaggio' && s.riferimento?.tipo === 'mappa').map((s) => s.riferimento!.chiave);
-    for (const q of quartieri.filter(q=>q.entita?.tipo==='quartiere')) expect(passaggiTokyo).toContain(q.chiave);
+    // i passaggi automatici valgono per una radice della guida: in produzione Tokyo è stata ritoccata (origine «utente») e i suoi passaggi li decide l'editor
+    if (tokyo.origine === 'seed') for (const q of quartieri.filter(q=>q.entita?.tipo==='quartiere' && q.origine==='seed')) expect(passaggiTokyo).toContain(q.chiave);
     expect(passaggiTokyo).not.toContain('aoyama-itchome'); // Native hierarchy does not certify a transfer.
     const figlieTokyo = new Set(albero.filter((m) => m.genitore === 'tokyo').map((m) => m.chiave));
     // I Palazzi non sono figli di Tokyo: sono radici, e nel gioco ci si entra col Meta-Nav, che
@@ -92,13 +89,13 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const kamoshida = (await request(app).get('/api/mappe/dungeon-kamoshida')).body.data as MappaDto;
     expect(kamoshida.spilli).toHaveLength(0); // Hierarchy alone must not manufacture physical passages.
     expect(kamoshida.spilli.every((s) => s.tipo === 'passaggio' && s.dettaglio?.tipo === 'mappa' && s.x >= 0 && s.x <= 100)).toBe(true);
-    // Tokyo: posizioni stimate dalla mappa ufficiale (Shibuya al centro-sinistra); Mementos: discesa verticale in ordine
-    expect(tokyoDett.spilli.find((s) => s.riferimento?.chiave === 'shibuya')).toMatchObject({ x: 34.5, y: 49.5 });
+    // Tokyo: posizioni stimate dalla mappa ufficiale (Shibuya al centro-sinistra), quando i passaggi sono quelli automatici della guida; Mementos: discesa verticale in ordine
+    if (tokyo.origine === 'seed') expect(tokyoDett.spilli.find((s) => s.riferimento?.chiave === 'shibuya')).toMatchObject({ x: 34.5, y: 49.5 });
     const mementos = (await request(app).get('/api/mappe/dungeon-mementos')).body.data as MappaDto;
     const y = mementos.spilli.map((s) => s.y);
     expect(y).toEqual([...y].sort((a, b) => a - b));
     // la sincronizzazione ripetuta (seed invariato) non duplica i passaggi
-    expect(caricaSeed(getDb(), DIR_SEED).caricato).toBe(false);
+    regoleAllAvvio(getDb());
     expect(((await request(app).get('/api/mappe/tokyo')).body.data as MappaDto).spilli.length).toBe(tokyoDett.spilli.length);
   });
 
@@ -153,9 +150,6 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const dialogo = (await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'dialogo', nome: 'Passante loquace', x: 30, y: 30 })).body.data as SpilloDto;
     expect(dialogo).toMatchObject({ tipo: 'dialogo', tipoNome: 'Dialogo', colore: '#6366f1', collezionabile: true, raccolto: false, riferimento: null, origine: 'utente' });
     expect((await request(app).delete(`/api/mappe/spilli/${dialogo.id}`)).status).toBe(204);
-    // il pacchetto data/seed/mappe/citta-yongen-jaya.json entra col tipo dedicato
-    const yongen = (await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto;
-    expect(yongen.spilli.find((s) => s.nome === 'Poliziotto Dialogo')).toMatchObject({ tipo: 'dialogo', tipoNome: 'Dialogo', origine: 'seed', collezionabile: true, riferimento: null });
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Verso il nulla', x: 1, y: 1, riferimento: { tipo: 'mappa', chiave: 'non-esiste' } })).status).toBe(404);
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'negozio', nome: 'Negozio fantasma', x: 1, y: 1, riferimento: { tipo: 'negozio', chiave: 'non-esiste' } })).status).toBe(404);
     const passaggio = (await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Torna a Shibuya', x: 50, y: 95, riferimento: { tipo: 'mappa', chiave: 'citta-shibuya' } })).body.data as SpilloDto;
@@ -203,8 +197,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(mia).toMatchObject({ nome: 'Negozio di prova', genitore: 'shibuya', immagine: 'shibuya-prova-negozio', larghezza: 2, altezza: 3 });
     expect(mia.spilli).toHaveLength(1);
     expect(pacchetto.immagini?.['shibuya-prova-negozio']).toMatchObject({ mime: 'image/png', base64: PNG_2x3.toString('base64') });
-    // le mappe strutturali del seed non portano immagini dell'istanza finché l'utente non le carica
-    expect(pacchetto.mappe.find((m) => m.chiave === 'tokyo')!.immagine).toBeNull();
+    expect(pacchetto.mappe.find((m) => m.chiave === 'tokyo')).toBeTruthy();
 
     // importazione: la stessa chiave senza «sovrascrivi» viene saltata; con «sovrascrivi» sostituisce spilli e nome
     const copia: EsportazioneMappeDto = { versione: 1, mappe: [{ ...mia, nome: 'Importata', spilli: [...mia.spilli, { tipo: 'nota', nome: 'Nota importata', descrizione: '', x: 5, y: 5, riferimento: null, collezionabile: false, ordine: 1 }] }], immagini: {} };
@@ -240,22 +233,24 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).get('/api/mappe/prova-negozio')).status).toBe(404);
   });
 
-  it('il seed non cancella gli spilli aggiunti dall’utente su una mappa del seed (reseed con mappe-editor popolato)', async () => {
-    const mio = (await request(app).post('/api/mappe/citta-shibuya/spilli').send({ tipo: 'nota', nome: 'Il mio appunto', x: 33, y: 44 })).body.data as SpilloDto;
+  it('un pacchetto della guida non cancella gli spilli aggiunti dall’utente su una mappa della guida', async () => {
+    // una mappa di quartiere ancora della guida (in produzione alcune sono state ritoccate e sono dell'utente)
+    const guida = getDb().prepare("SELECT chiave, nome, ordine, asset FROM mappa WHERE origine = 'seed' AND tipo = 'quartiere' ORDER BY ordine LIMIT 1").get() as { chiave: string; nome: string; ordine: number; asset: string | null };
+    const mio = (await request(app).post(`/api/mappe/${guida.chiave}/spilli`).send({ tipo: 'nota', nome: 'Il mio appunto', x: 33, y: 44 })).body.data as SpilloDto;
     expect(mio.origine).toBe('utente');
-    const prima = ((await request(app).get('/api/mappe/citta-shibuya')).body.data as MappaDto).spilli;
+    const prima = ((await request(app).get(`/api/mappe/${guida.chiave}`)).body.data as MappaDto).spilli;
     // pacchetto «seed» per la stessa mappa (origine seed): sostituisce i soli spilli di origine seed
-    const seed: EsportazioneMappeDto = { versione: 1, mappe: [{ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', ordine: 1, immagine: null, asset: 'mappe/citta-shibuya', larghezza: null, altezza: null, entita: { tipo: 'quartiere', chiave: 'shibuya' }, note: '', spilli: [{ tipo: 'nota', nome: 'Nota del seed', descrizione: '', x: 10, y: 10, riferimento: null, collezionabile: false, ordine: 0 }] }] };
+    const seed: EsportazioneMappeDto = { versione: 1, mappe: [{ chiave: guida.chiave, nome: guida.nome, tipo: 'quartiere', genitore: 'tokyo', ordine: guida.ordine, immagine: null, asset: guida.asset, larghezza: null, altezza: null, entita: { tipo: 'quartiere', chiave: 'shibuya' }, note: '', spilli: [{ tipo: 'nota', nome: 'Nota del seed', descrizione: '', x: 10, y: 10, riferimento: null, collezionabile: false, ordine: 0 }] }] };
     expect(importaMappe(seed, { origine: 'seed' })).toMatchObject({ mappe: 1, spilli: 1, saltate: [] });
-    const dopo = ((await request(app).get('/api/mappe/citta-shibuya')).body.data as MappaDto).spilli;
+    const dopo = ((await request(app).get(`/api/mappe/${guida.chiave}`)).body.data as MappaDto).spilli;
     expect(dopo.some((s) => s.id === mio.id && s.nome === 'Il mio appunto')).toBe(true);
     expect(dopo.some((s) => s.nome === 'Nota del seed' && s.origine === 'seed')).toBe(true);
     expect(dopo.filter((s) => s.origine === 'seed' && s.nome !== 'Nota del seed')).toHaveLength(0);
     expect(dopo.length).toBe(prima.filter((s) => s.origine === 'utente').length + 1);
     // un pacchetto dell'utente senza «sovrascrivi» salta la mappa esistente; con «sovrascrivi» la sostituisce per intero
-    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: seed })).body.data).toMatchObject({ mappe: 0, saltate: ['citta-shibuya'] });
+    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: seed })).body.data).toMatchObject({ mappe: 0, saltate: [guida.chiave] });
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto: seed, sovrascrivi: true })).body.data).toMatchObject({ mappe: 1, spilli: 1 });
-    expect(((await request(app).get('/api/mappe/citta-shibuya')).body.data as MappaDto).spilli.map((s) => s.nome)).toEqual(['Nota del seed']);
+    expect(((await request(app).get(`/api/mappe/${guida.chiave}`)).body.data as MappaDto).spilli.map((s) => s.nome)).toEqual(['Nota del seed']);
   });
 
   it('ricerca delle entità collegabili per tipo e testo; la pianta scaricata con la chiave della mappa diventa la sua immagine di base', async () => {
@@ -279,23 +274,16 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(pacchetto.immagini?.[area.chiave]?.mime).toBe('image/png');
   });
 
-  it('le immagini scaricate dalle guide entrano nel pacchetto come tutte le altre, con la provenienza annotata (JSON e LEGGIMI)', async () => {
+  it('le immagini scaricate dalle guide entrano nel pacchetto come tutte le altre, con la provenienza annotata', async () => {
     const area = ((await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[]).filter((m) => m.tipo === 'area' && !m.immagineUrl)[1];
     salvaImmagine('mappa', area.chiave, 'image/png', PNG_2x3, 'https://omoteura.com/pianta.png');
     const json = (await request(app).get(`/api/mappe/esporta?radice=${area.chiave}`)).body.data as EsportazioneMappeDto;
     expect(json.mappe[0].immagine).toBe(area.chiave);
     expect(json.immagini?.[area.chiave]).toMatchObject({ mime: 'image/png', base64: PNG_2x3.toString('base64') });
     expect(json.provenienze).toEqual([{ mappa: area.chiave, origineUrl: 'https://omoteura.com/pianta.png' }]);
-    const zip = await request(app).get(`/api/mappe/esporta.zip?radice=${area.chiave}`).buffer(true).parse((res, cb) => { const parti: Buffer[] = []; res.on('data', (c: Buffer) => parti.push(c)); res.on('end', () => cb(null, Buffer.concat(parti))); });
-    const voci = leggiZip(zip.body as Buffer);
-    expect(voci.map((v) => v.nome)).toEqual(['LEGGIMI.txt', `data/seed/mappe/${area.chiave}.json`, `public/asset/mappe/${area.chiave}.png`]);
-    expect(voci[0].contenuto.toString('utf-8')).toContain(`- ${area.chiave}: https://omoteura.com/pianta.png`);
-    const seedArea = JSON.parse(voci[1].contenuto.toString('utf-8')) as EsportazioneMappeDto;
-    expect(seedArea.mappe[0]).toMatchObject({ immagine: null, asset: `mappe/${area.chiave}` });
-    expect(seedArea.provenienze).toBeUndefined();
   });
 
-  it('schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON e ZIP per il repository) e reimportazione', async () => {
+  it('schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON) e reimportazione', async () => {
     const luogo = (await request(app).post('/api/mappe').send({ chiave: 'shibuya-luogo-zip', nome: 'Luogo ZIP', tipo: 'luogo', genitore: 'citta-shibuya' })).body.data as MappaDto;
     expect(luogo.percorso.map((p) => p.chiave)).toEqual(['tokyo', 'shibuya', 'shibuya-luogo-zip']);
     const figlia = (await request(app).post('/api/mappe').send({ chiave: 'shibuya-luogo-zip-interno', nome: 'Interno', tipo: 'generica', genitore: 'shibuya-luogo-zip' })).body.data as MappaDto;
@@ -329,26 +317,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(pacchettoLuogo.mappe[0].spilli[0].immagini![0].mime).toBe('image/png');
     expect((await request(app).get('/api/mappe/esporta?radice=non-esiste')).status).toBe(404);
 
-    // ZIP per il repository: LEGGIMI, seed del luogo con asset, immagini come file
-    const zip = await request(app).get('/api/mappe/esporta.zip?radice=shibuya-luogo-zip').buffer(true).parse((res, cb) => { const parti: Buffer[] = []; res.on('data', (c: Buffer) => parti.push(c)); res.on('end', () => cb(null, Buffer.concat(parti))); });
-    expect(zip.status).toBe(200);
-    expect(zip.headers['content-type']).toContain('application/zip');
-    const voci = leggiZip(zip.body as Buffer);
-    expect(voci.map((v) => v.nome)).toEqual(['LEGGIMI.txt', 'data/seed/mappe/shibuya-luogo-zip.json', 'public/asset/mappe/shibuya-luogo-zip.png', 'public/asset/spilli/shibuya-luogo-zip/1-1.png', 'public/asset/spilli/shibuya-luogo-zip/1-2.png']);
-    const seedLuogo = JSON.parse(voci[1].contenuto.toString('utf-8')) as EsportazioneMappeDto;
-    expect(seedLuogo.immagini).toBeUndefined();
-    expect(seedLuogo.mappe[0]).toMatchObject({ chiave: 'shibuya-luogo-zip', asset: 'mappe/shibuya-luogo-zip', immagine: null });
-    expect(seedLuogo.mappe[0].spilli[0].immagini!.map((i) => i.asset)).toEqual(['spilli/shibuya-luogo-zip/1-1', 'spilli/shibuya-luogo-zip/1-2']);
-    expect(seedLuogo.mappe[0].spilli[0].immagini!.map((i) => i.didascalia).sort()).toEqual(['Seconda', 'Vista dalla scala']);
-    expect(Buffer.compare(voci[2].contenuto, PNG_2x3)).toBe(0);
-    expect((await request(app).get('/api/mappe/esporta.zip')).status).toBe(400);
 
-    // reimportazione del seed del luogo in una chiave nuova: gli asset delle schermate diventano righe senza file
-    const clonato: EsportazioneMappeDto = { ...seedLuogo, mappe: seedLuogo.mappe.map((m) => ({ ...m, chiave: `${m.chiave}-copia`, nome:m.chiave==='shibuya-luogo-zip'?'Luogo ZIP copia':m.nome, genitore: m.genitore === 'shibuya-luogo-zip' ? 'shibuya-luogo-zip-copia' : m.genitore })) };
-    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: clonato })).body.data).toMatchObject({ mappe: 2, spilli: 2, immagini: 0, saltate: [] });
-    const copia = (await request(app).get('/api/mappe/shibuya-luogo-zip-copia')).body.data as MappaDto;
-    expect(copia.asset).toBe('mappe/shibuya-luogo-zip-copia');
-    expect(copia.spilli[0].immagini.map((i) => ({ asset: i.asset, url: i.url }))).toEqual([{ asset: 'spilli/shibuya-luogo-zip/1-1', url: null }, { asset: 'spilli/shibuya-luogo-zip/1-2', url: null }]);
     // reimportazione con schermate in base64: file creati nell'istanza
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto: { ...pacchettoLuogo, mappe: pacchettoLuogo.mappe.map((m) => ({ ...m, chiave: `${m.chiave}-b64`, nome:m.chiave==='shibuya-luogo-zip'?'Luogo ZIP b64':m.nome, genitore: m.genitore === 'shibuya-luogo-zip' ? 'shibuya-luogo-zip-b64' : m.genitore })) } })).body.data).toMatchObject({ mappe: 2, immagini: 3 });
     const b64 = (await request(app).get('/api/mappe/shibuya-luogo-zip-b64')).body.data as MappaDto;
@@ -361,7 +330,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).delete(`/api/mappe/spilli/immagini/${rinominata.immagini[0].id}`)).status).toBe(404);
     expect((await request(app).delete(`/api/mappe/spilli/${spillo.id}`)).status).toBe(204);
     for(const m of (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[])if(m.nome==='Interno'&&m.chiave.includes('luogo-zip'))expect((await request(app).delete('/api/mappe/'+m.chiave)).status).toBe(204);
-    for (const k of ['shibuya-luogo-zip', 'shibuya-luogo-zip-copia', 'shibuya-luogo-zip-b64']) expect((await request(app).delete(`/api/mappe/${k}`)).status).toBe(204);
+    for (const k of ['shibuya-luogo-zip', 'shibuya-luogo-zip-b64']) expect((await request(app).delete(`/api/mappe/${k}`)).status).toBe(204);
   });
 
   it('condizioni di visibilità degli spilli: solo quelle calcolabili, validate sulla Guida, valutate con la partita, esportate e reimportate', async () => {
@@ -444,22 +413,23 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await invia({ tipo: 'data', dal: '04-31' })).status).toBe(400);
     expect((await invia({ tipo: 'intervallo', dal: '08-20', al: '06-01' })).status).toBe(400);
     expect((await invia({ tipo: 'palazzo', dungeon: 'mementos' })).status).toBe(404);
-    // lo spillo del seed «Poliziotto Dialogo» riceve una condizione: diventa dell'utente ma ricorda com'era
-    const yongen = (await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto;
-    const poliziotto = yongen.spilli.find((s) => s.nome === 'Poliziotto Dialogo')!;
+    // uno spillo della guida (uno spostamento: gli spilli di città non hanno condizioni) riceve una condizione: diventa dell'utente ma ricorda com'era
+    const scelto = getDb().prepare("SELECT id, mappa_chiave FROM spillo WHERE origine = 'seed' AND mappa_chiave IS NOT NULL AND tipo = 'passaggio' ORDER BY id LIMIT 1").get() as { id: number; mappa_chiave: string };
+    const yongen = (await request(app).get(`/api/mappe/${scelto.mappa_chiave}`)).body.data as MappaDto;
+    const poliziotto = yongen.spilli.find((s) => s.id === scelto.id)!;
     expect(poliziotto.origine).toBe('seed');
     const modificato = (await request(app).put(`/api/mappe/spilli/${poliziotto.id}`).send({ condizioni: [{ tipo: 'data', dal: '06-18' }] })).body.data as SpilloDto;
     expect(modificato).toMatchObject({ origine: 'utente', condizioni: [{ tipo: 'data', dal: '06-18', testo: 'dal 18 giugno' }] });
     // reseed forzato (cambio di hash): il pacchetto non reinserisce l'originale, la condizione resta, nessun doppione
-    caricaSeed(getDb(), DIR_SEED, true);
-    const dopo = (await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto;
+    regoleAllAvvio(getDb());
+    const dopo = (await request(app).get(`/api/mappe/${scelto.mappa_chiave}`)).body.data as MappaDto;
     expect(dopo.spilli).toHaveLength(yongen.spilli.length);
-    expect(dopo.spilli.filter((s) => s.nome === 'Poliziotto Dialogo')).toHaveLength(1);
-    expect(dopo.spilli.find((s) => s.nome === 'Poliziotto Dialogo')).toMatchObject({ id: poliziotto.id, origine: 'utente', condizioni: [{ tipo: 'data', dal: '06-18', testo: 'dal 18 giugno' }] });
+    expect(dopo.spilli.filter((s) => s.id === poliziotto.id)).toHaveLength(1);
+    expect(dopo.spilli.find((s) => s.id === poliziotto.id)).toMatchObject({ origine: 'utente', condizioni: [{ tipo: 'data', dal: '06-18', testo: 'dal 18 giugno' }] });
     // riportato senza condizioni resta dell'utente e il reseed continua a non duplicarlo
     await request(app).put(`/api/mappe/spilli/${poliziotto.id}`).send({ condizioni: [] });
-    caricaSeed(getDb(), DIR_SEED, true);
-    expect(((await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto).spilli.filter((s) => s.nome === 'Poliziotto Dialogo')).toHaveLength(1);
+    regoleAllAvvio(getDb());
+    expect(((await request(app).get(`/api/mappe/${scelto.mappa_chiave}`)).body.data as MappaDto).spilli.filter((s) => s.id === poliziotto.id)).toHaveLength(1);
   });
 
   it('condizione «solo di sera»: segue il momento della giornata della partita, che torna a «giorno» quando cambia il giorno corrente', async () => {

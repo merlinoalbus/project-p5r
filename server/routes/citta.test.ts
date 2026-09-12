@@ -2,23 +2,19 @@
 // Test API città e attività (Fase 8.1) — quartieri, luoghi, attività/lavori/libri/film, letture per partita con evento, reseed stabile
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { AttivitaTutteDto, LibroDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, StoricoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API città e attività', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());
@@ -120,7 +116,7 @@ describe('API città e attività', () => {
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'nessuno', fatto: true })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'rivista', chiave: libro.chiave, fatto: true })).status).toBe(400);
     // reseed forzato: le letture restano
-    caricaSeed(getDb(), DIR_SEED, true);
+    ricaricaPacchetto(getDb());
     const dopo = (await request(app).get(`/api/compendio/attivita?partita=${id}`)).body.data as AttivitaTutteDto;
     expect(dopo.filmVisti).toBe(1);
     expect(dopo.libri).toHaveLength(46);

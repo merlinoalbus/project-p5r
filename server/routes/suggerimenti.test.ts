@@ -2,24 +2,20 @@
 // Test API suggerimenti del giorno — chiavi da evidenziare in oro, entità indirette comprese (12.4)
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { PercorsoGiornoDto, SuggerimentiOggiDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API suggerimenti del giorno', () => {
   let id = 0;
   beforeAll(async () => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
     id = ((await request(app).post('/api/partite').send({ nome: 'Suggerimenti' })).body.data as { id: number }).id;
   });

@@ -2,24 +2,20 @@
 // Test API catalogo e agenda (Fase 16.1): righe aggiunte o corrette dall'utente che sopravvivono al reseed, eventi e cose da fare del giorno
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { AgendaGiornoDto, ElementoCatalogoDto, NegozioDettaglioDto, NegozioRiassuntoDto, RiepilogoCatalogoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API catalogo e agenda (Fase 16.1)', () => {
   let partitaId = 0;
   beforeAll(async () => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
     partitaId = ((await request(app).post('/api/partite').send({ nome: 'Catalogo' })).body.data as { id: number }).id;
   });
@@ -49,7 +45,7 @@ describe('API catalogo e agenda (Fase 16.1)', () => {
     expect(scheda.articoliElenco.map((a) => a.nome)).toEqual(['Featherman Seeker']);
 
     // reseed forzato: le righe dell'utente restano, quelle del seed vengono comunque aggiornate
-    caricaSeed(initDb(), DIR_SEED, true);
+    ricaricaPacchetto(initDb());
     expect((prepared('SELECT COUNT(*) AS n FROM negozio WHERE chiave = ?').get(negozio.chiave) as { n: number }).n).toBe(1);
     expect((prepared('SELECT COUNT(*) AS n FROM articolo WHERE chiave = ?').get(articolo.chiave) as { n: number }).n).toBe(1);
     expect((prepared("SELECT COUNT(*) AS n FROM negozio WHERE origine = 'seed'").get() as { n: number }).n).toBeGreaterThan(40);
@@ -64,7 +60,7 @@ describe('API catalogo e agenda (Fase 16.1)', () => {
     expect(corretto).toMatchObject({ origine: 'utente', modificata: true });
     expect(corretto.dati.nome).toBe('Untouchable (armeria di Iwai)');
     // il reseed non riporta indietro la correzione
-    caricaSeed(initDb(), DIR_SEED, true);
+    ricaricaPacchetto(initDb());
     expect((prepared('SELECT nome FROM negozio WHERE chiave = ?').get('untouchable') as { nome: string }).nome).toBe('Untouchable (armeria di Iwai)');
 
     const nascosto = (await request(app).put('/api/catalogo/negozio/untouchable/nascosta').send({ nascosta: true })).body.data as ElementoCatalogoDto;
@@ -123,7 +119,7 @@ describe('API catalogo e agenda (Fase 16.1)', () => {
     expect(tuttiCruci.cruciverba.find((c) => c.chiave === '04-18-0')?.risposta).toBe('Trimestri');
 
     // Un nuovo caricamento del seed non le riporta indietro: è la garanzia del catalogo.
-    caricaSeed(initDb(), DIR_SEED, true);
+    ricaricaPacchetto(initDb());
     const dopo = (await request(app).get('/api/catalogo/domanda/04-12')).body.data as ElementoCatalogoDto;
     expect(dopo).toMatchObject({ origine: 'utente', modificata: true });
     expect(JSON.parse(String(dopo.dati.risposte_json)) as unknown[]).toHaveLength(2);

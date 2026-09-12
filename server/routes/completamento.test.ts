@@ -2,23 +2,19 @@
 // Test API completamento (Fase 9.1) — trofei con stato per partita ed evento, finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { CompletamentoDto, StoricoDto, TrofeoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API completamento', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());
@@ -59,7 +55,7 @@ describe('API completamento', () => {
     expect((await request(app).put(`/api/partite/${id}/trofei`).send({ trofeo: 'inesistente', ottenuto: true })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${id}/trofei`).send({ trofeo: 'assedio-al-castello-della-lussuria' })).status).toBe(400);
     await request(app).put(`/api/partite/${id}/trofei`).send({ trofeo: con.trofei[1].chiave, ottenuto: true });
-    caricaSeed(getDb(), DIR_SEED, true);
+    ricaricaPacchetto(getDb());
     const dopo = (await request(app).get(`/api/compendio/completamento?partita=${id}`)).body.data as CompletamentoDto;
     expect(dopo.ottenuti).toBe(1);
     expect(dopo.trofei).toHaveLength(53);

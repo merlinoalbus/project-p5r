@@ -2,16 +2,13 @@
 // Test API obiettivi — creazione, avanzamento sulla scorta, chiusura automatica, stati, validazione, eventi
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { ObiettivoDto, PersonaRiassuntoDto, SkillRiassuntoDto, StoricoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 async function idDi(nome: string): Promise<number> {
@@ -30,8 +27,7 @@ async function skillId(nome: string): Promise<number> {
 describe('API obiettivi', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());

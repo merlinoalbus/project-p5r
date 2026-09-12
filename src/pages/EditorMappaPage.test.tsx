@@ -14,7 +14,7 @@ import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 const api = vi.hoisted(() => ({
   risolviMappa: vi.fn(), getMappa: vi.fn(), getAlberoMappe: vi.fn(), creaSpillo: vi.fn(), aggiornaSpillo: vi.fn(), eliminaSpillo: vi.fn(), cercaRiferimenti: vi.fn(),
   aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPianta: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
-  esportaPacchettoRepository: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
+aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
 vi.mock('../services/api/condizioni', () => ({ getElenchiRegole: vi.fn().mockResolvedValue({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] }) }));
@@ -200,10 +200,11 @@ describe('EditorMappaPage', () => {
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Shibuya centro' } });
     fireEvent.click(form.getByRole('button', { name: 'Salva mappa' }));
     await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', { nome: 'Shibuya centro', tipo: 'quartiere', genitore: 'tokyo', ordine: 0, note: '' }));
-    // quartiere collegato alla guida: è offerto «Scarica dalla guida»; l'esportazione del luogo produce lo ZIP per il repository
+    // quartiere collegato alla guida: è offerto «Scarica dalla guida»; la sezione File esporta e importa il JSON delle mappe
     expect(await screen.findByRole('button', { name: 'Scarica dalla guida' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button',{name:'File'}));
-    expect(screen.getByRole('button', { name: /Esporta questo luogo/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Esporta/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Esporta questo luogo/ })).toBeNull();
   });
 
   it('albero (15.24): le figlie senza spillo che le raggiunge e il genitore senza ritorno hanno «Crea passaggio», che chiama l’API e seleziona lo spillo creato', async () => {

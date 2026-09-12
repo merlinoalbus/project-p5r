@@ -2,15 +2,12 @@
 // Test alberoFusione — piani ricorsivi: foglie, consumo della scorta, profondità, livello, coerenza col motore
 // ============================================================
 
-import path from 'node:path';
 import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
-import { caricaSeed } from '../seed/caricaSeed.js';
+import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
 import { creaContesto, fondi, invalidaMotoreFusione, ricettePer, type Contesto, type PersonaFusione } from './motoreFusione.js';
 import { pianiFusione, pianoCoerente, prezzoEvocazione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
 import { elementoEreditabile, invalidaEredita, skillAlLivello, skillPerId, tipoEredita } from './eredita.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
 
 function perNome(ctx: Contesto, nome: string): PersonaFusione {
   const p = ctx.ammesse.find((x) => x.nome === nome);
@@ -26,8 +23,7 @@ describe('alberoFusione', () => {
   let ctx: Contesto;
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaMotoreFusione();
     invalidaEredita();
     ctx = creaContesto([]);

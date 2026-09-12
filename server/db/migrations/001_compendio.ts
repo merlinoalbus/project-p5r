@@ -2,8 +2,8 @@
 // Migrazione 001 — dati di gioco (compendio Royal) + traduzioni + meta seed
 // ============================================================
 //
-// Tutte le tabelle di questa migrazione sono RIGENERABILI dal seed
-// (data/seed/*.json) tramite server/services/seed/caricaSeed.ts.
+// Le tabelle di questa migrazione sono dati di gioco: arrivano con il pacchetto
+// (pacchetto/gioco.db, dal 2026-09-12; prima da un seed JSON, dismesso).
 // Convenzioni:
 //   - chiavi identificative canoniche (inglese Royal) in colonne `nome`/`chiave`;
 //     la resa italiana vive in `traduzione`;

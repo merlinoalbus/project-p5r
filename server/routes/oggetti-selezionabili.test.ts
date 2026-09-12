@@ -15,21 +15,18 @@
 //  3. una categoria senza archivio deve dare un **elenco vuoto**, non un errore: lì si scrive a
 //     mano, ed è un modo normale di lavorare, non un guasto.
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import type { OggettoSelezionabileDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 const per = async (categoria: string) =>
   (await request(app).get(`/api/catalogo/oggetti-di/${categoria}`)).body.data as OggettoSelezionabileDto[];
 
 describe('API oggetti selezionabili', () => {
-  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
   afterAll(() => closeDb());
 
   it('non viene ingoiata da /catalogo/:tipo', async () => {

@@ -2,19 +2,15 @@
 // Test sincronizzaMappe — gli spilli di seed già esistenti seguono il registro quando cambia la corrispondenza dei tipi
 // ============================================================
 
-import path from 'node:path';
 import { closeDb, initDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
-import { caricaSeed } from '../seed/caricaSeed.js';
+import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
 import { riallineaSpilliLuoghi, sincronizzaMappe } from './sincronizzaMappe.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
 
 describe('sincronizzaMappe: riclassificazione degli spilli di seed', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
   });
   afterAll(() => closeDb());
 
@@ -56,8 +52,7 @@ describe('sincronizzaMappe: riclassificazione degli spilli di seed', () => {
 describe('riallineaSpilliLuoghi: gli spilli dei luoghi seguono il catalogo dei tipi di luogo', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
   });
   afterAll(() => closeDb());
 

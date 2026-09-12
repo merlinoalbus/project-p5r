@@ -81,7 +81,8 @@ export function BackupIstanza() {
       </p>
       {s && (
         <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 text-[13px]">
-          <li><strong>Database</strong> <span className="text-text-muted">{s.database.inMemoria ? 'in memoria (nessun file)' : `${s.database.nome} · ${byteTesto(s.database.byte)}`}</span></li>
+          <li><strong>Dati di gioco</strong> <span className="text-text-muted">{s.database.inMemoria ? 'in memoria (nessun file)' : `${s.database.nome} · ${byteTesto(s.database.byte)} · schema ${s.versioneSchema}`}</span></li>
+          <li><strong>File delle partite</strong> <span className="text-text-muted">{s.database.inMemoria ? 'in memoria (nessun file)' : `${s.databasePartite.nome} · ${byteTesto(s.databasePartite.byte)} · schema ${s.versioneSchemaPartite}`}</span></li>
           <li><strong>Partite</strong> <span className="text-text-muted">{s.partite}</span></li>
           <li><strong>Immagini caricate</strong> <span className="text-text-muted">{s.immagini.file} · {byteTesto(s.immagini.byte)}</span></li>
           <li><strong>Caratteri</strong> <span className="text-text-muted">{s.caratteri.file} · {byteTesto(s.caratteri.byte)}</span></li>
