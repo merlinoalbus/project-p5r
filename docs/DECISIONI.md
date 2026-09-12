@@ -351,3 +351,17 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   passa alla via «a mano»; i regali dichiarano «gradito a» con i Confidenti come interruttori;
   `ICONA_FAMIGLIA_EFFETTO` sta in `shared/effettiOggetto.ts` come da piano; nella pagina «Rimossi»
   un articolo mostra il nome del negozio, non la chiave.
+
+### 2026-09-12 — UI delle letture e delle attività (voce 7)
+- **Il «+» di una riga non ancora disponibile resta spento** e il motivo (il dettaglio del requisito
+  rosso: «Disponibile dal 18 aprile, oggi è l'11») sta scritto sotto i pulsanti: il server rifiuterebbe
+  comunque (409), ma l'interfaccia non deve invitare a un gesto che non passa. Una riga già iniziata
+  si può sempre correggere (togliere o completare).
+- **Il periodo dei film in prosa non si mostra più**: «quando» sono le condizioni della riga, che
+  l'app valuta. `periodo` resta nel DTO finché la voce 11 non lo toglie.
+- **«Dove» di un libro sono i negozi collegati**, con il prezzo dell'articolo; il testo `dove` della
+  guida compare solo se non c'è né un negozio né una posizione (premi, eventi).
+- **La fonte non si mostra** nelle pagine di libri, film, videogiochi e attività (principio 4 del
+  piano): resta colonna interna.
+- **Le Doti negli effetti si scrivono col nome** («Conoscenza ♪♪♪»): la frase la compone
+  `descriviEffetto` in `shared`, che ora conosce i cinque nomi.

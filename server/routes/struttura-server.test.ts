@@ -148,10 +148,10 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     expect(vague.effettiTesto[0]).toBe('Sblocca Harajuku');
     expect(vague.negozi).toEqual([{ articolo: 'libreria-taiheido/vague', negozio: 'libreria-taiheido', negozioNome: 'Libreria Taiheido', prezzo: 1800 }]);
     const ladro = libri.libri.find((l) => l.chiave === 'il-magnifico-ladro')!;
-    expect(ladro.effettiTesto).toEqual(['conoscenza ♪♪♪']);
+    expect(ladro.effettiTesto).toEqual(['Conoscenza ♪♪♪']);
     const a = (await request(app).get('/api/compendio/attivita')).body.data as AttivitaTutteDto;
     expect(a.lavori.find((x) => x.chiave === 'lavoro-crossroads')).toMatchObject({ pagaYen: 7200, pagaMassima: 12000, tracciamento: 'svolta', sedeChiave: 'shinjuku/crossroads', sedeNome: 'Bar Crossroads' });
-    expect(a.attivita.find((x) => x.chiave === 'studio-leblanc')?.effetti.map((e) => e.testo)).toEqual(['conoscenza ♪♪ (non disponibile in caso di pioggia)', 'conoscenza ♪♪♪ (solo nei giorni di pioggia)']);
+    expect(a.attivita.find((x) => x.chiave === 'studio-leblanc')?.effetti.map((e) => e.testo)).toEqual(['Conoscenza ♪♪ (non disponibile in caso di pioggia)', 'Conoscenza ♪♪♪ (solo nei giorni di pioggia)']);
     const vg = (await request(app).get('/api/compendio/videogiochi')).body.data as VideogiochiDto;
     expect(vg.videogiochi.find((v) => v.chiave === 'videogioco-punch-ouch')?.negozi).toEqual([{ articolo: 'super-baron/punch-ouch', negozio: 'super-baron', negozioNome: expect.any(String), prezzo: 5300 }]);
     expect(vg.videogiochi.every((v) => v.tracciamento === 'sessioni')).toBe(true);
