@@ -34,7 +34,7 @@ import type {
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
-import { collegaPalazziAiLuoghi, sincronizzaMappe } from '../mappe/sincronizzaMappe.js';
+import { collegaPalazziAiLuoghi, riallineaSpilliLuoghi, sincronizzaMappe } from '../mappe/sincronizzaMappe.js';
 import { applicaPresenzaAiLuoghi } from '../mappe/presenzaEntita.js';
 import { importaMappe } from '../mappe/mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
@@ -798,6 +798,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     // primo avvio, dove questa e' l'unica strada, il difetto non si vedeva affatto.
     collegaPalazziAiLuoghi(db);
     applicaPresenzaAiLuoghi(db);
+    // I pacchetti portano i pin dei luoghi con il tipo che avevano quando sono stati esportati: qui
+    // seguono il catalogo dei tipi di luogo (solo chi è rimasto alla vecchia corrispondenza).
+    riallineaSpilliLuoghi(db);
 
     const insMeta = db.prepare('INSERT INTO seed_meta (chiave, valore) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore');
     insMeta.run('hash', seed.hash);

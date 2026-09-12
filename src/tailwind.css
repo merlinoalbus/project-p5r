@@ -1315,7 +1315,9 @@
 .selettore--compatto { display:inline-block; width:auto; }
 .selettore--compatto .selettore__scelta { flex-direction:row; align-items:center; min-height:40px; padding:4px 22px 4px 8px; width:auto; max-width:100%; }
 .selettore--compatto .selettore__valore { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.selettore--compatto .selettore__tendina { width:max(100%, 220px); }
+.selettore--compatto .selettore__tendina { width:max(100%, 260px); }
+/* Senza spazio a destra la tendina si appende al bordo destro del pulsante: mai fuori dalla finestra. */
+.selettore__tendina--destra { left:auto; right:0; }
 .editor-mappa__campo .selettore__scelta { min-height:40px; }
 /* Col dito 40 px non bastano: sul telefono e sul tablet i selettori compatti e quelli dell'editor tornano a 44 px. */
 @media (pointer: coarse), (max-width: 1023px) { .selettore--compatto .selettore__scelta, .editor-mappa__campo .selettore__scelta { min-height:44px; } }
@@ -1351,5 +1353,9 @@
 
 .ingresso-quartiere__immagine { position:relative; width:min(100%,720px); align-self:center; cursor:crosshair; overflow:hidden; line-height:0; }
 .ingresso-quartiere__immagine img { width:100%; height:auto; display:block; }
+.ingresso-quartiere__immagine--occupata { cursor:progress; opacity:0.7; }
 .ingresso-quartiere__immagine:focus-visible {outline:3px solid var(--color-primary);}
 .ingresso-quartiere__punto { position:absolute; transform:translate(-50%,-50%); width:32px; height:32px; border:2px solid white; background:#e52325; border-radius:50%; color:white; font:700 24px/28px sans-serif; text-align:center; box-shadow:0 0 0 2px #000; pointer-events:none; }
+
+/* Tipo di luogo: la pastiglia porta il colore dello spillo del tipo (shared/tipiLuogo) come bordo sinistro e l'icona dello spillo. */
+.luogo-tipo { display:inline-flex; align-items:center; gap:4px; border-left:3px solid var(--luogo-tipo-colore, var(--color-border)); }

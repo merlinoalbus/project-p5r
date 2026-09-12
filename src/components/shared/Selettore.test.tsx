@@ -130,6 +130,22 @@ describe('Selettore', () => {
     expect(valoreSelettore('Categoria')).toBe('Tutte');
   });
 
+  it('quando a destra non c’è spazio la tendina si appende al bordo destro del pulsante', () => {
+    render(<Selettore compatto etichetta="Partita attiva" valore="" opzioni={poche} onCambia={() => {}} />);
+    const pulsante = screen.getByRole('combobox', { name: 'Partita attiva' });
+    const larghezzaOriginale = window.innerWidth;
+    Object.defineProperty(window, 'innerWidth', { value: 1000, configurable: true });
+    const rettangolo = (left: number): DOMRect => ({ left, top: 0, width: 80, height: 44, right: left + 80, bottom: 44, x: left, y: 0, toJSON: () => ({}) }) as DOMRect;
+    pulsante.getBoundingClientRect = () => rettangolo(900);
+    fireEvent.click(pulsante);
+    expect(document.querySelector('.selettore__tendina')).toHaveClass('selettore__tendina--destra');
+    fireEvent.click(pulsante);
+    pulsante.getBoundingClientRect = () => rettangolo(10);
+    fireEvent.click(pulsante);
+    expect(document.querySelector('.selettore__tendina')).not.toHaveClass('selettore__tendina--destra');
+    Object.defineProperty(window, 'innerWidth', { value: larghezzaOriginale, configurable: true });
+  });
+
   it('disabilitato non si apre', () => {
     render(<Selettore etichetta="Scelta" valore="" opzioni={poche} onCambia={() => {}} disabilitato />);
     const pulsante = screen.getByRole('combobox', { name: 'Scelta' });

@@ -13,7 +13,7 @@
 // ============================================================
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { SOGLIA_RICERCA, TETTO_VOCI } from '../../utils/selettore';
+import { LARGHEZZA_TENDINA, SOGLIA_RICERCA, TETTO_VOCI } from '../../utils/selettore';
 
 export interface OpzioneSelettore { chiave: string; nome: string; dettaglio?: string; gruppo?: string }
 
@@ -42,6 +42,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   const [aperto, setAperto] = useState(false);
   const [testo, setTesto] = useState('');
   const [evidenziata, setEvidenziata] = useState(0);
+  const [aDestra, setADestra] = useState(false);
   const id = useId();
   const radice = useRef<HTMLDivElement | null>(null);
   const pulsante = useRef<HTMLButtonElement | null>(null);
@@ -56,7 +57,15 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
     return { filtrate: base.slice(0, TETTO_VOCI), tagliate: base.length > TETTO_VOCI };
   }, [tutte, testo, conRicerca]);
 
-  const apri = () => { setTesto(''); setEvidenziata(Math.max(0, tutte.findIndex((o) => o.chiave === valore))); setAperto(true); };
+  const apri = () => {
+    setTesto('');
+    setEvidenziata(Math.max(0, tutte.findIndex((o) => o.chiave === valore)));
+    // La tendina è larga almeno LARGHEZZA_TENDINA: se da qui al bordo destro non ci sta, si
+    // appende al bordo destro del pulsante invece di sfondare la finestra e far scorrere la pagina.
+    const r = pulsante.current?.getBoundingClientRect();
+    setADestra(!!r && typeof window !== 'undefined' && r.left + Math.max(r.width, LARGHEZZA_TENDINA) > window.innerWidth - 8);
+    setAperto(true);
+  };
   useEffect(() => {
     if (!aperto) return;
     const fuori = (e: PointerEvent) => { if (radice.current && !radice.current.contains(e.target as Node)) setAperto(false); };
@@ -89,7 +98,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
         <span className="selettore__freccia" aria-hidden="true">▾</span>
       </button>
       {aperto && (
-        <div className="selettore__tendina" onKeyDown={conRicerca ? tastiera : undefined}>
+        <div className={`selettore__tendina ${aDestra ? 'selettore__tendina--destra' : ''}`} onKeyDown={conRicerca ? tastiera : undefined}>
           {conRicerca && <input className="form-input selettore__campo" type="search" value={testo} onChange={(e) => { setTesto(e.target.value); setEvidenziata(0); }} placeholder={`Cerca ${etichetta.toLowerCase()}…`} aria-label={`Cerca ${etichetta}`} aria-controls={id} autoComplete="off" autoFocus />}
           <ul ref={elenco} id={id} role="listbox" aria-label={etichetta} className="selettore__elenco">
             {filtrate.length === 0 && <li className="selettore__vuoto">Nessuna voce corrisponde.</li>}

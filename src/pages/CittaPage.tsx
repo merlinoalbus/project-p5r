@@ -49,7 +49,7 @@ export function CittaPage() {
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {q && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="La città" sottotitolo="La mappa di Tokyo con i quartieri come passaggi: tocca un quartiere per aprirne la mappa con negozi, ristoranti, attività e Confidenti. Sotto, le schede dei quartieri con luoghi, orari e sblocchi." />
+          <IntestazionePagina titolo="La città" sottotitolo="La mappa di Tokyo con i quartieri come passaggi: tocca un quartiere sulla mappa per aprirne la planimetria nel mappamondo. Le schede a fianco portano invece alla pagina del quartiere, con i suoi luoghi, orari e sblocchi." />
           {/* Tokyo disegnata con gli elementi originali del gioco, viva col calendario: i
               quartieri compaiono quando si sbloccano, i Palazzi quando esistono. È **la** mappa
               di Tokyo, non una di due: sotto ci stava anche il visore della planimetria con la
@@ -75,7 +75,7 @@ export function CittaPage() {
               const suggerito = sugg.evidenziato('quartieri', x.chiave);
               return (
               <li key={x.chiave} className="flex">
-                <Link to={`/guida/mondo/quartiere/${encodeURIComponent(x.chiave)}`}
+                <Link to={`/guida/citta/${encodeURIComponent(x.chiave)}`}
                   onMouseEnter={() => setAcceso(x.chiave)} onMouseLeave={() => setAcceso(null)}
                   onFocus={() => setAcceso(x.chiave)} onBlur={() => setAcceso(null)}
                   className={`card card--cliccabile piastrella no-underline text-text flex w-full gap-3 ${classiSuggerito(suggerito)} ${

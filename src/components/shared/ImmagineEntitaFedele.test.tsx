@@ -50,3 +50,22 @@ describe('ImmagineEntita — Confidenti fedele/stilizzata', () => {
     expect(within(screen.getByRole('dialog', { name: 'Sae Niijima' })).queryByRole('button', { name: 'Versione stilizzata' })).not.toBeInTheDocument();
   });
 });
+
+describe('ImmagineEntita — personaggi senza Confidente', () => {
+  beforeEach(() => {
+    getImmagini.mockResolvedValue([]);
+    useAssetStore.setState({ manifest: { generato: '', totale: 2, file: { 'personaggi/joker-fedele': '/asset/personaggi/joker-fedele.png', 'personaggi/joker': '/asset/personaggi/joker.png' } }, caricato: true, mancanti: {} });
+  });
+
+  it('Joker, Caroline, Justine, Lavenza e Jose hanno le stesse due immagini dei Confidenti: fedele di default, stilizzata in alternativa', async () => {
+    render(<ImmagineEntita ambito="personaggio" chiave="joker" etichetta="Joker" />);
+    const img = await screen.findByRole('img', { name: 'Joker' });
+    expect(img).toHaveAttribute('src', '/asset/personaggi/joker-fedele.png');
+    const riquadro = screen.getByRole('button', { name: /Immagine di Joker/ });
+    fireEvent.mouseEnter(riquadro);
+    expect(screen.getByRole('img', { name: 'Joker' })).toHaveAttribute('src', '/asset/personaggi/joker.png');
+    await act(async () => { riquadro.click(); });
+    const finestra = screen.getByRole('dialog', { name: 'Joker' });
+    expect(within(finestra).getByRole('button', { name: 'Versione stilizzata' })).toBeInTheDocument();
+  });
+});

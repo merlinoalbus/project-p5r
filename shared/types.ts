@@ -1,4 +1,5 @@
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
+import type { TipoLuogo } from './tipiLuogo.js';
 import type { RequisitoSpillo } from './condizioniSpillo.js';
 // ============================================================
 // Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
@@ -1182,7 +1183,7 @@ export interface QuartiereRiassuntoDto {
 export interface LuogoDto {
   chiave: string;
   ordine: number;
-  tipo: 'negozio' | 'ristorante' | 'attivita' | 'confidente' | 'servizio' | 'distributore' | 'punto-interesse' | 'scuola' | 'trasporto' | 'altro';
+  tipo: TipoLuogo;
   nome: string;
   cosaOffre: string;
   quando: 'giorno' | 'sera' | 'entrambe' | null;

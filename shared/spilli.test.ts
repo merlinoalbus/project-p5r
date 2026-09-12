@@ -2,7 +2,7 @@
 // Test registro dei tipi di spillo — conteggio, completezza delle definizioni, colori distinti, gruppi della palette, tipi «dialogo» e della città
 // ============================================================
 
-import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, spilloPerLuogo, spilloPerPunto, tipiDellaCategoria } from './spilli.js';
+import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, spilloPerPunto, tipiDellaCategoria } from './spilli.js';
 
 describe('registro dei tipi di spillo', () => {
   it('conta 40 tipi distinti, ognuno con nome, colore esadecimale e riserva nel registro', () => {
@@ -28,12 +28,10 @@ describe('registro dei tipi di spillo', () => {
   it('«dialogo» è collezionabile, senza riferimento tipico e non nasce da alcuna corrispondenza automatica', () => {
     expect(DEFINIZIONI_SPILLO.dialogo).toEqual({ nome: 'Dialogo', colore: '#6366f1', collezionabile: true, riferimento: null });
     expect(spilloPerPunto('persona')).toBe('nota');
-    expect(spilloPerLuogo('altro')).toBe('nota');
   });
 
   it('i punti di interesse della città usano le etichette della mappa del gioco («Bevande», «Sigarette», «Cercalavoro») e restano luoghi', () => {
     expect(DEFINIZIONI_SPILLO.distributore.nome).toBe('Bevande');
-    expect(spilloPerLuogo('distributore')).toBe('distributore');
     for (const t of ['sigarette', 'cercalavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa'] as const) {
       expect(DEFINIZIONI_SPILLO[t]).toMatchObject({ collezionabile: false, riferimento: 'luogo' });
     }

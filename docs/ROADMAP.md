@@ -346,3 +346,19 @@ repository. Prossimi lotti, nell'ordine del piano: Personaggi + Città (navigazi
 ingresso), architettura dei dati (DB di gioco separato dalle partite, pacchetto con le immagini),
 modello del catalogo (orari, condizioni sugli articoli, sedi, effetti dichiarati, attività
 strutturate), server e UI delle pagine, Progressi calcolati, export/import.
+
+## Personaggi e Città: navigazione, tipi di luogo, ingresso (12 settembre 2026) — fatto
+
+Voce 2 del piano «struttura, non frasi». Il Protagonista, Caroline, Justine, Lavenza e Jose hanno
+le stesse due immagini dei Confidenti (ritratto fedele di default, stilizzato in alternativa).
+Nella Città il cartellino sulla mappa apre la planimetria nel mappamondo, la scheda a fianco apre
+la pagina del quartiere. I tipi di luogo sono un catalogo condiviso (`shared/tipiLuogo.ts`: chiave,
+nome, colore, icona) che ordina i filtri della scheda del quartiere e vale anche per i luoghi che
+l'utente aggiungerà (lotto del modello dati). «Fonte» tolta dalla scheda del quartiere e dei luoghi
+(resta il credito di licenza della pianta scaricata). L'ingresso del quartiere si imposta con due
+gesti: mappa da un elenco con ricerca e tocco sull'immagine, che salva subito; ingrandimento a tre
+pastiglie; coordinate esatte sotto «Avanzate». Lo spillo del luogo sulla pianta e il colore della
+pastiglia vengono dallo stesso catalogo: la corrispondenza luogo → spillo vive in `shared/tipiLuogo.ts`
+(«scuola» è ora una biblioteca, prima era «attività»; «servizio» resta sull'icona generica) e gli spilli di
+seed rimasti al tipo vecchio si riallineano all'avvio (`riallineaSpilliLuoghi`), senza toccare i tipi
+più fini assegnati dai pacchetti (terme, cinema…). Verificato a 1280, 768 e 375 px.

@@ -225,3 +225,24 @@ in su, sempre sugli elenchi della Guida (mappe, spilli, negozi, luoghi, articoli
 giorno e mese delle date. Il valore è sempre una voce dell'elenco, mai il testo digitato. La regola
 è verificata da ESLint (`no-restricted-syntax` sul JSX `select`) e da un test che scandisce i
 sorgenti, perché il lint del frontend non era un cancello obbligatorio.
+
+### 2026-09-12 — Città: la mappa apre il mappamondo, la scheda apre il quartiere; i luoghi si classificano da un catalogo
+Richiesta dell'utente: «se clicco sulla mappa interattiva deve aprire il mappamondo. Ma se clicco
+sulle voci a destra deve aprirmi le relative schede del luogo»; «definire come [vengono classificati]
+e integrare così da poter classificare anche eventuali luoghi aggiuntivi»; «Rimuovere fonte»;
+«Migliorare la selezione del punto di apertura del quartiere che ad oggi richiede tre input».
+Decisioni: la voce a destra porta a `/guida/citta/<quartiere>` (prima entrambi i clic finivano nel
+visore); i tipi di luogo vivono in `shared/tipiLuogo.ts` (dieci tipi con colore e icona dello
+spillo corrispondente), da cui derivano etichette e colori del frontend e che sarà l'enum del
+catalogo dei luoghi; «fonte» non si mostra più (il credito dell'immagine scaricata resta perché è
+attribuzione di licenza, non provenienza del dato); l'ingresso del quartiere salva al tocco
+sull'immagine, con l'ingrandimento a pastiglie e le coordinate numeriche solo sotto «Avanzate».
+I personaggi senza Confidente usano la coppia `personaggi/<chiave>-fedele` + `personaggi/<chiave>`.
+Dai giri di validazione: (a) il catalogo dei tipi di luogo è l'unica sorgente anche dello spillo
+generato sulla pianta (`spilloPerLuogo` vive in `tipiLuogo.ts`) e il colore della pastiglia è quello
+dello spillo, così scheda e mappa dicono la stessa cosa; (b) «servizio» resta sull'icona generica
+«attività» perché con un'icona specifica (lavanderia) il Leblanc e la palestra risultavano lavanderie;
+«scuola» diventa «biblioteca» e gli spilli di seed rimasti alla vecchia corrispondenza si riallineano
+all'avvio, senza toccare i tipi più fini assegnati dai pacchetti (terme, cinema…); (c) la tendina del
+Selettore, quando a destra non c'è spazio, si appende al bordo destro del pulsante: la tendina della
+partita nella barra in alto usciva dalla finestra e faceva scorrere la pagina (rilievo dell'utente).

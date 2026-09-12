@@ -30,7 +30,7 @@ describe('CittaPage', () => {
     expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
     expect(api.getMappa).not.toHaveBeenCalled();
     expect(screen.queryByRole('link', { name: 'Modifica mappa' })).toBeNull();
-    expect(within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/mondo/quartiere/shibuya');
+    expect(within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/citta/shibuya');
   });
 
   it('sulla mappa disegnata il quartiere porta alla sua mappa, non a un secondo visore di Tokyo', async () => {

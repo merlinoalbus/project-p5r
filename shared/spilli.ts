@@ -199,21 +199,6 @@ export function spilloPerPunto(tipoPunto: string): TipoSpillo {
   }
 }
 
-/** Tipo di spillo per un luogo della città (tipi di `LuogoDto`). */
-export function spilloPerLuogo(tipoLuogo: string): TipoSpillo {
-  switch (tipoLuogo) {
-    case 'negozio': return 'negozio';
-    case 'ristorante': return 'ristorante';
-    case 'confidente': return 'confidente';
-    case 'distributore': return 'distributore';
-    case 'trasporto': return 'treno';
-    case 'velluto': return 'velluto';
-    case 'mementos': return 'mementos';
-    case 'attivita': case 'servizio': case 'scuola': return 'attivita';
-    default: return 'nota';
-  }
-}
-
 export const TIPI_MAPPA = ['citta', 'quartiere', 'luogo', 'palazzo', 'area', 'dedalo', 'generica'] as const;
 export type TipoMappa = (typeof TIPI_MAPPA)[number];
 export const NOME_TIPO_MAPPA: Record<TipoMappa, string> = { citta: 'Città', quartiere: 'Quartiere', luogo: 'Luogo', palazzo: 'Palazzo', area: 'Area', dedalo: 'Dedalo', generica: 'Mappa' };

@@ -29,7 +29,9 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft } from '../components/shared/icons';
-import { NOME_TIPO_LUOGO } from '../utils/citta';
+import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO } from '../utils/citta';
+import { definizioneTipoLuogo, ordinaTipiLuogo } from '../../shared/tipiLuogo';
+import { IconaSpillo } from '../components/mappe/IconaSpillo';
 import type { LuogoDto } from '../types';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
@@ -50,7 +52,7 @@ function Luogo({ l }: { l: LuogoDto }) {
     <li className={`card flex flex-col gap-1 text-[13px] ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
       <div className="flex flex-wrap items-center gap-2">
         <strong className="text-[15px]">{l.nome}</strong>
-        <span className="chip">{NOME_TIPO_LUOGO[l.tipo] ?? l.tipo}</span>
+        <span className="chip luogo-tipo" style={{ '--luogo-tipo-colore': COLORE_TIPO_LUOGO[l.tipo] ?? COLORE_TIPO_LUOGO.altro } as React.CSSProperties}><IconaSpillo tipo={definizioneTipoLuogo(l.tipo).icona} dimensione={14} /> {NOME_TIPO_LUOGO[l.tipo] ?? l.tipo}</span>
         {sugg.evidenziato('luoghi', l.chiave) && <TargaSuggerito motivo={sugg.motivo('luoghi', l.chiave)} compatta />}
         {nonAncora && <span className="chip chip--attivo text-[11px]" title={perche || undefined}>Non ancora nel mondo</span>}
         {!nonAncora && l.condizioni && l.disponibilita && <span className="chip text-[11px]" title="La condizione scritta dalla guida risulta soddisfatta in questa partita">sbloccato</span>}
@@ -78,7 +80,6 @@ function Luogo({ l }: { l: LuogoDto }) {
       )}
       {l.negozio && <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Articoli in vendita" to={`/guida/negozi/${l.negozio}`} />}
       {l.note && <p className="m-0 text-[12px] text-text-muted">{l.note}</p>}
-      {l.fonte && <a href={l.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
     </li>
   );
 }
@@ -96,7 +97,8 @@ export function QuartierePage() {
   // Mappa pubblicata ma non ancora nell'istanza: scaricata appena il quartiere è aperto, poi il visore la usa come immagine di base
   const download = useCarica(() => (q && !q.ingresso && !q.mappa && q.pianta ? scaricaPiantaQuartiere(q.chiave) : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url, q?.ingresso]);
   const scaricata = !!q && !!download.dati && download.dati.quartiere === q.chiave;
-  const tipi = useMemo(() => [...new Set((q?.luoghi ?? []).map((l) => l.tipo))], [q]);
+  // I tipi presenti, nell'ordine del catalogo (shared/tipiLuogo), non in quello in cui capitano.
+  const tipi = useMemo(() => ordinaTipiLuogo((q?.luoghi ?? []).map((l) => l.tipo)), [q]);
   const visibili = useMemo(() => (q?.luoghi ?? []).filter((l) => !tipo || l.tipo === tipo), [q, tipo]);
   return (
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
@@ -115,7 +117,6 @@ export function QuartierePage() {
               </div>
               {q.sblocco && <p className="m-0 text-[13px]"><strong className="text-text-secondary">Si apre:</strong> {q.sblocco}</p>}
               {q.descrizione && <p className="m-0 text-[13px] text-text-secondary">{q.descrizione}</p>}
-              {q.fonte && <a href={q.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
             </div>
           </header>
 
@@ -149,8 +150,8 @@ export function QuartierePage() {
               {tipi.length > 1 && (
                 <div className="flex flex-wrap gap-1.5">
                   <button type="button" className={`chip touch ${tipo === '' ? 'chip--attivo' : ''}`} onClick={() => setTipo('')} aria-pressed={tipo === ''}>Tutti ({q.luoghi.length})</button>
-                  {tipi.map((t) => <button key={t} type="button" className={`chip touch ${tipo === t ? 'chip--attivo' : ''}`} onClick={() => setTipo(t)} aria-pressed={tipo === t}>
-                    {NOME_TIPO_LUOGO[t] ?? t} ({q.luoghi.filter((l) => l.tipo === t).length})
+                  {tipi.map((t) => <button key={t} type="button" className={`chip touch luogo-tipo ${tipo === t ? 'chip--attivo' : ''}`} style={{ '--luogo-tipo-colore': COLORE_TIPO_LUOGO[t] } as React.CSSProperties} onClick={() => setTipo(t)} aria-pressed={tipo === t}>
+                    <IconaSpillo tipo={definizioneTipoLuogo(t).icona} dimensione={16} /> {NOME_TIPO_LUOGO[t] ?? t} ({q.luoghi.filter((l) => l.tipo === t).length})
                   </button>)}
                 </div>
               )}
