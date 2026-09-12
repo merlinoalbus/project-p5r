@@ -30,6 +30,7 @@
 
 import { getDb, prepared } from '../db/dbService.js';
 import { elencaOggetti } from './compendioService.js';
+import { descriviVoceEffetto, leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { OggettiGuidaDto } from '../../shared/types.js';
 
 /** Una voce dell'archivio: quel che serve a **collegarla**, e da dove viene.
@@ -76,9 +77,8 @@ const CATEGORIE_CONSUMABILE = new Set(['cura', 'sp', 'battaglia', 'stato', 'espl
  * È il campo «Statistiche», che fino a ieri era `null` in ogni ramo — un campo del modulo che
  * nessuna sorgente riempiva mai. Per un libro la risposta alla domanda «che cosa mi porta» è
  * questa, ed è la stessa che la pagina dei Libri già mostra. */
-function descrizioneLettura(dote: string | null, note: number | null, sessioni: number | null): string | null {
-  const pezzi: string[] = [];
-  if (dote) pezzi.push(note && note > 0 ? `${dote} ${'♪'.repeat(Math.min(4, note))}` : dote);
+function descrizioneLettura(effettiJson: string | null, sessioni: number | null): string | null {
+  const pezzi: string[] = leggiVociEffetto(effettiJson).map((v) => descriviVoceEffetto(v));
   if (sessioni && sessioni > 1) pezzi.push(`${sessioni} sessioni`);
   return pezzi.length ? pezzi.join(' · ') : null;
 }
@@ -123,32 +123,32 @@ function daLibri(): OggettoSelezionabileDto[] {
   // Di un libro l'app sa **che cosa alza e quanto ci vuole**: la Dote con le sue note e le sessioni
   // di lettura. Prima da qui usciva solo `sblocca`, vuoto per quasi tutti i titoli — ed è il motivo
   // per cui sceglierne uno sembrava non fare niente.
-  return (getDb().prepare('SELECT chiave, nome, nome_it, prezzo, sblocca, dote, note, sessioni, dettagli FROM libro ORDER BY ordine').all() as Array<{ chiave: string; nome: string; nome_it: string | null; prezzo: number | null; sblocca: string | null; dote: string | null; note: number | null; sessioni: number | null; dettagli: string | null }>)
+  return (getDb().prepare('SELECT chiave, nome, nome_it, prezzo, sblocca, effetti_json, sessioni, dettagli FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ chiave: string; nome: string; nome_it: string | null; prezzo: number | null; sblocca: string | null; effetti_json: string | null; sessioni: number | null; dettagli: string | null }>)
     .map((l) => ({
       chiave: l.chiave, fonte: 'libri' as const, categoria: 'libro',
       nome: l.nome, nomeIt: vuoto(l.nome_it),
       effetto: vuoto(l.dettagli) ?? vuoto(l.sblocca),
-      statistiche: descrizioneLettura(l.dote, l.note, l.sessioni),
+      statistiche: descrizioneLettura(l.effetti_json, l.sessioni),
       per: null, prezzo: l.prezzo,
     }));
 }
 
 function daFilm(): OggettoSelezionabileDto[] {
-  return (getDb().prepare('SELECT chiave, nome, nome_it, dove, prezzo, dettagli, dote, note, sessioni FROM film ORDER BY ordine').all() as Array<{ chiave: string; nome: string; nome_it: string | null; dove: string; prezzo: number | null; dettagli: string | null; dote: string | null; note: number | null; sessioni: number | null }>)
+  return (getDb().prepare('SELECT chiave, nome, nome_it, dove, prezzo, dettagli, effetti_json, sessioni FROM film WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ chiave: string; nome: string; nome_it: string | null; dove: string; prezzo: number | null; dettagli: string | null; effetti_json: string | null; sessioni: number | null }>)
     .map((f) => ({
       chiave: f.chiave, fonte: 'film' as const, categoria: f.dove === 'dvd' ? 'dvd' : 'film',
       nome: f.nome, nomeIt: vuoto(f.nome_it),
       effetto: vuoto(f.dettagli),
-      statistiche: descrizioneLettura(f.dote, f.note, f.sessioni),
+      statistiche: descrizioneLettura(f.effetti_json, f.sessioni),
       per: null, prezzo: f.prezzo,
     }));
 }
 
 function daVideogiochi(): OggettoSelezionabileDto[] {
-  return (getDb().prepare("SELECT chiave, nome, costo, premi FROM attivita WHERE tipo = 'videogioco' ORDER BY ordine").all() as Array<{ chiave: string; nome: string; costo: number | null; premi: string | null }>)
+  return (getDb().prepare("SELECT chiave, nome, costo, premi, dettagli, effetti_json, sessioni FROM attivita WHERE tipo = 'videogioco' AND nascosto = 0 ORDER BY ordine").all() as Array<{ chiave: string; nome: string; costo: number | null; premi: string | null; dettagli: string | null; effetti_json: string | null; sessioni: number | null }>)
     .map((v) => ({
       chiave: v.chiave, fonte: 'videogiochi' as const, categoria: 'videogioco',
-      nome: v.nome, nomeIt: null, effetto: vuoto(v.premi), statistiche: null, per: null, prezzo: v.costo,
+      nome: v.nome, nomeIt: null, effetto: vuoto(v.dettagli) ?? vuoto(v.premi), statistiche: descrizioneLettura(v.effetti_json, v.sessioni), per: null, prezzo: v.costo,
     }));
 }
 

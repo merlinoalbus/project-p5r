@@ -202,7 +202,7 @@ export function DungeonDettaglioPage() {
   // della Bramosia. Prima era «punti gestiti su punti totali», e fra i punti totali ci sono le
   // sicure, le scorciatoie, gli enigmi e il boss: per arrivare al 100% bisognava spuntare anche
   // «Cancello del Castello». Vedi `shared/puntiDungeon.ts`.
-  const quota = d && d.collezionabiliGestiti !== null && d.collezionabili > 0 ? d.collezionabiliGestiti / d.collezionabili : null;
+  const quota = d && d.raccolta.presi !== null && d.raccolta.totale > 0 ? d.raccolta.presi / d.raccolta.totale : null;
   const memento = d?.tipo === 'mementos';
   // L'alone dorato distingue: quando il suggerimento del giorno è «esplora questo Palazzo», il
   // motore suggerisce **tutte** le sue aree, e diciotto voci tutte d'oro non distinguono niente —
@@ -236,7 +236,7 @@ export function DungeonDettaglioPage() {
               <div className="flex shrink-0 items-center gap-3 sm:flex-col">
                 <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} />
                 {quota !== null && (
-                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} etichetta={`Avanzamento in ${d.nome}: ${d.collezionabiliGestiti} da raccogliere presi su ${d.collezionabili}`}>
+                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} da raccogliere presi su ${d.raccolta.totale}`}>
                     <span className="font-display text-[17px] leading-none tabular-nums">{Math.round(quota * 100)}%</span>
                   </AnelloAvanzamento>
                 )}
@@ -259,7 +259,7 @@ export function DungeonDettaglioPage() {
                   {/* Prima di ogni altro conto: quanto c'è da raccogliere qui dentro, che è la
                       cifra su cui è calcolata la percentuale dell'anello. Il totale dei punti
                       resta, ma detto per quello che è — tutto compreso, sicure e boss. */}
-                  <span className="chip" title="Forzieri, forzieri chiusi, oggetti a terra e Semi della Bramosia: sono questi a fare la percentuale.">{d.collezionabili} da raccogliere</span>
+                  <span className="chip" title={memento ? 'Timbri dichiarati dalla guida e richieste dei dedali: sono questi a fare la percentuale.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} da raccogliere</span>
                   <span className="chip">{d.esauribili} esauribili</span>
                   <span className="chip" title="Comprese sicure, scorciatoie, enigmi, incontri e boss.">{d.punti} punti in tutto</span>
                   {d.gestiti !== null && <span className="chip">{d.gestiti} segnati</span>}

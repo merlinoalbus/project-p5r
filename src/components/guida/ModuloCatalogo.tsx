@@ -23,6 +23,7 @@ import { getTuttiGliOggetti } from '../../services/api/catalogo';
 import { NOME_DOTE } from '../../utils/citta';
 import { BERSAGLI, FAMIGLIE_EFFETTO, FUNZIONI, GUADAGNI, MISURE, NOME_FUNZIONE, NOME_GUADAGNO, NOME_RESA, RESE, NOME_BERSAGLIO, NOME_RISORSA, NOME_STATISTICA, NOME_STATO, PROBABILITA, RISORSE, STATISTICHE_OGGETTO, STATI_ALTERATI, descriviEffetto, type EffettoOggetto, type StatoAlterato } from '../../../shared/effettiOggetto';
 import type { ElementoCatalogoDto, OggettoSelezionabileDto, TipoCatalogo } from '../../types';
+import { TIPI_LUOGO } from '../../../shared/tipiLuogo';
 
 interface Campo {
   nome: string;
@@ -87,6 +88,15 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'regole', etichetta: 'Regole', tipo: 'testolungo' },
     { nome: 'premi', etichetta: 'Premi', tipo: 'testolungo', aiuto: 'Nota per te: qui «Coraggio +3» resta una frase. Quello che alza una Dote va dichiarato in «Doti alzate»' },
     { nome: 'altri_effetti', etichetta: 'Altri effetti', tipo: 'testolungo' },
+  ],
+  luogo: [
+    { nome: 'nome', etichetta: 'Nome del luogo', tipo: 'testo' },
+    { nome: 'tipo', etichetta: 'Tipo', tipo: 'select', opzioni: Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.nome])) },
+    { nome: 'quartiere_chiave', etichetta: 'Quartiere', tipo: 'select' },
+    { nome: 'cosa_offre', etichetta: 'Che cosa offre', tipo: 'testolungo' },
+    { nome: 'quando', etichetta: 'Quando', tipo: 'select', opzioni: { giorno: 'Di giorno', sera: 'Di sera', entrambe: 'Giorno e sera' }, vuoto: 'Non indicato' },
+    { nome: 'giorni', etichetta: 'Giorni', tipo: 'testo', aiuto: 'Per esempio: domenica' },
+    { nome: 'note', etichetta: 'Note', tipo: 'testolungo' },
   ],
   // La risposta non è qui: sta in «Risposte giuste», l'editor a righe qui sotto, perché è il dato
   // che l'app usa per dirti che cosa rispondere e un campo di testo l'avrebbe reso illeggibile.
@@ -306,12 +316,14 @@ const NOME_TIPO: Record<TipoCatalogo, { nuovo: string; singolare: string }> = {
   libro: { nuovo: 'Nuovo libro', singolare: 'Libro' },
   film: { nuovo: 'Nuovo film o DVD', singolare: 'Film' },
   attivita: { nuovo: 'Nuova attività', singolare: 'Attività' },
+  luogo: { nuovo: 'Nuovo luogo', singolare: 'Luogo' },
   domanda: { nuovo: 'Nuova domanda', singolare: 'Domanda' },
   cruciverba: { nuovo: 'Nuova riga del cruciverba', singolare: 'Riga del cruciverba' },
 };
 
-/** I tipi che hanno davvero la colonna `condizioni_json`: agli altri l'editor non va mostrato. */
-const CON_CONDIZIONI = new Set<TipoCatalogo>(['negozio', 'articolo', 'libro', 'film', 'attivita']);
+/** I tipi che scrivono davvero `condizioni_json`: agli altri l'editor non va mostrato. Il negozio
+ *  non c'è più (voce 5): la sua presenza sono gli orari, e lo sblocco sta sugli articoli. */
+const CON_CONDIZIONI = new Set<TipoCatalogo>(['articolo', 'libro', 'film', 'attivita', 'luogo']);
 
 /** Una Dote alzata da un'attività: quale, quante note, e l'eventuale condizione della guida. */
 interface DoteAttivita {
@@ -413,7 +425,7 @@ interface Props {
 
 export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalvato }: Props) {
   // Il selettore dei quartieri serve ai negozi e alle attivita': tutte e due hanno un `luogo_chiave`.
-  const quartieri = useCarica(() => (tipo === 'negozio' || tipo === 'attivita' || tipo === 'libro') ? getQuartieri() : Promise.resolve([]), [tipo]);
+  const quartieri = useCarica(() => (tipo === 'negozio' || tipo === 'attivita' || tipo === 'libro' || tipo === 'luogo') ? getQuartieri() : Promise.resolve([]), [tipo]);
   // Le attivita' servono a «sblocca una capacita'»: il Terzo Occhio *alla pesca*, i tiri *a
   // biliardo*. Anche li' il posto e' un riferimento, non una parola scritta a mano.
   const attivitaElenco = useCarica(async () => (tipo === 'libro' || tipo === 'articolo')
@@ -458,7 +470,7 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
   const salva = async () => {
     setOccupato(true);
     try {
-      const dati: Record<string, unknown> = { condizioni_json: condizioni };
+      const dati: Record<string, unknown> = CON_CONDIZIONI.has(tipo) ? { condizioni_json: condizioni } : {};
       // Solo dove la tabella ce l'ha: le righe vuote non si salvano, e una Dote «variabile» senza
       // note non è una dichiarazione, è un buco.
       // L'API vuole l'**elenco**, non la stringa: è lei a serializzarlo (`doti_json` nello schema
@@ -596,8 +608,8 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
                   valore={valori[c.nome] ?? ''}
                   // Chi non ha `altro` fra le scelte ha bisogno di un modo per dire «nessuna»:
                   // senza, il campo obbliga a dichiarare qualcosa che non e' vero.
-                  vuoto={c.nome === 'luogo_chiave' ? 'Nessun quartiere (online, ambulante o da assegnare)' : !(c.opzioni && 'altro' in c.opzioni) ? (c.vuoto ?? 'Nessuna') : undefined}
-                  opzioni={c.nome === 'luogo_chiave'
+                  vuoto={c.nome === 'luogo_chiave' ? 'Nessun quartiere (online, ambulante o da assegnare)' : c.nome === 'quartiere_chiave' ? 'Scegli il quartiere…' : !(c.opzioni && 'altro' in c.opzioni) ? (c.vuoto ?? 'Nessuna') : undefined}
+                  opzioni={c.nome === 'luogo_chiave' || c.nome === 'quartiere_chiave'
                     ? [...(valori.luogo_chiave && !quartieri.dati?.some(q => q.chiave === valori.luogo_chiave) ? [{ chiave: valori.luogo_chiave, nome: valori.luogo_chiave }] : []), ...(quartieri.dati ?? []).map(q => ({ chiave: q.chiave, nome: q.nome }))]
                     : opzioniDaNomi(c.opzioni ?? {})}
                   onCambia={(k) => setValori({ ...valori, [c.nome]: k })}

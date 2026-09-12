@@ -1,6 +1,8 @@
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
 import type { TipoLuogo } from './tipiLuogo.js';
 import type { RequisitoSpillo } from './condizioniSpillo.js';
+import type { OrariNegozio } from './orariNegozio.js';
+import type { VoceEffetto } from './effettiCatalogo.js';
 // ============================================================
 // Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
 // ============================================================
@@ -834,7 +836,7 @@ export interface DomandeDto {
   esami: EsameDto[];
   premi: { fascinoPerPiazzamento?: Record<string, string>; moltiplicatoreConfidenti?: string; requisitoConoscenza?: Record<string, string>; trofeo?: string; fonte?: string; noteGenerali?: string } | null;
   dataGioco: string | null;
-  /** Prossime domande non fatte a partire dalla data di gioco della partita (massimo 5). */
+  /** Le domande non fatte della **prima** data da quella di gioco in poi (una o due): il prossimo appuntamento, non un elenco. */
   prossime: DomandaDto[];
   fatte: number;
   totale: number;
@@ -1079,11 +1081,21 @@ export interface NegozioRiassuntoDto {
   tipo: 'armi' | 'protezioni' | 'accessori' | 'oggetti' | 'regali' | 'abiti' | 'cibo' | 'online' | 'ambulante' | 'distributore' | 'materiali' | 'misto' | 'altro';
   gestore: string | null;
   confidente: { chiave: string; nome: string } | null;
+  /** La frase della guida com'era (colonna `orari`); l'app legge `orariStrutturati`. */
   orari: string | null;
+  /** Gli orari come valori (migrazione 069): sono l'unica disponibilità del negozio e del suo pin. */
+  orariStrutturati: OrariNegozio;
+  /** La frase generata dagli orari strutturati: una sola per ogni valore uguale. */
+  orariTesto: string;
   sblocco: string | null;
+  /** Il luogo della città dove sta il negozio (migrazione 072); null per chi non ha una sede (online, TV, dentro un Palazzo). */
+  sedeChiave: string | null;
+  sedeNome: string | null;
+  /** Il programma punti dichiarato (migrazione 076), se il negozio ne ha uno. */
+  programmaPunti: { nome: string; unita: string; calcolo: 'manuale' | 'rango-cliente' } | null;
   articoli: number;
   verificati: number;
-  /** Solo con `partita`: valutazione dello sblocco del negozio alla data corrente. */
+  /** Solo con `partita`: la presenza del negozio alla data corrente, dagli orari. */
   disponibilita?: DisponibilitaDto;
 }
 
@@ -1100,7 +1112,7 @@ export interface ArticoloDto {
   negozioNome: string;
   nome: string;
   nomeIt: string | null;
-  categoria: 'arma' | 'protezione' | 'accessorio' | 'abito' | 'consumabile' | 'regalo' | 'materiale' | 'cibo' | 'altro';
+  categoria: 'arma' | 'protezione' | 'accessorio' | 'abito' | 'consumabile' | 'regalo' | 'materiale' | 'cibo' | 'cura' | 'sp' | 'battaglia' | 'stato' | 'esplorazione' | 'oggetto-chiave' | 'libro' | 'film' | 'dvd' | 'videogioco' | 'altro';
   /** Personaggio destinatario, «tutti», «party» o null se non indicato. */
   per: string | null;
   prezzo: number | null;
@@ -1151,6 +1163,9 @@ export interface CruciverbaDto {
 
 export interface CruciverbaTuttiDto {
   cruciverba: CruciverbaDto[];
+  /** Giorno corrente della partita e il primo cruciverba non risolto da quel giorno in poi (null senza partita). */
+  dataGioco: string | null;
+  prossimo: CruciverbaDto | null;
   risolti: number;
   totale: number;
 }
@@ -1191,8 +1206,14 @@ export interface LuogoDto {
   giorni: string | null;
   sblocco: string | null;
   confidenti: Array<{ chiave: string; nome: string }>;
-  attivita: string[];
+  /** Le attività della guida che si svolgono qui (`attivita.sede_chiave`, migrazione 072). */
+  attivita: Array<{ chiave: string; nome: string }>;
+  /** I negozi che hanno qui la loro sede (`negozio.sede_chiave`). */
+  negozi: Array<{ chiave: string; nome: string }>;
+  /** Il primo negozio della sede, per i collegamenti che ne vogliono uno solo; null se nessuno. */
   negozio: string | null;
+  /** Riga della guida o dell'utente (migrazione 071). */
+  origine: 'seed' | 'utente';
   piatti: Array<{ nome: string; prezzo: number | null; effetto: string }> | null;
   note: string | null;
   fonte: string;
@@ -1246,6 +1267,19 @@ export interface AttivitaDto {
   regole: string;
   premi: string | null;
   paga: string | null;
+  /** Paga in yen a turno e massimo dichiarato (migrazione 075); solo per i lavori. */
+  pagaYen: number | null;
+  pagaMassima: number | null;
+  /** Come funziona, premi, altri effetti e note sulle Doti, in un testo solo (migrazione 075). */
+  dettagli: string | null;
+  /** Gli effetti dichiarati (migrazione 074) e le loro frasi. */
+  effetti: VoceEffettoDto[];
+  effettiTesto: string[];
+  /** Come la partita conta l'attività: per niente, per volte svolte o per sessioni. */
+  tracciamento: 'nessuno' | 'svolta' | 'sessioni';
+  /** Il luogo della città dove si svolge (migrazione 072). */
+  sedeChiave: string | null;
+  sedeNome: string | null;
   fonte: string;
   verificato: boolean;
   /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
@@ -1271,6 +1305,11 @@ export interface LibroDto {
   sbloccaLuogoNome: string | null;
   sessioni: number | null;
   dettagli: string | null;
+  /** Gli effetti dichiarati (migrazione 074) e le loro frasi: la Dote che alza, che cosa apre. */
+  effetti: VoceEffettoDto[];
+  effettiTesto: string[];
+  /** Dove si compra: gli articoli collegati al libro (migrazione 073), con il negozio e il prezzo. */
+  negozi: Array<{ articolo: string; negozio: string; negozioNome: string; prezzo: number | null }>;
   fonte: string;
   verificato: boolean;
   /** Provenienze mappabili verificate; può essere vuoto quando il premio non ha un luogo fisico. */
@@ -1311,6 +1350,9 @@ export interface FilmDto {
   noteSuccessive: number | null;
   prezzo: number | null;
   dettagli: string | null;
+  /** Gli effetti dichiarati (migrazione 074): la prima visione e, con `ripetuto`, quelle successive. */
+  effetti: VoceEffettoDto[];
+  effettiTesto: string[];
   fonte: string;
   verificato: boolean;
   posizioni: Array<{ tipo: 'quartiere' | 'luogo' | 'negozio' | 'attivita'; chiave: string; etichetta: string; ruolo: 'cinema' | 'noleggio' | 'visione' }>;
@@ -1342,6 +1384,8 @@ export interface FilmDvdDto {
 
 export interface VideogiocoDto extends AttivitaDto {
   tipo: 'videogioco';
+  /** Dove si compra: gli articoli collegati (migrazione 073). */
+  negozi: Array<{ articolo: string; negozio: string; negozioNome: string; prezzo: number | null }>;
   totaleRound: number;
   progresso: number;
   iniziato: boolean;
@@ -1417,6 +1461,9 @@ export interface RichiestaDto {
   bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean };
   ricompense: string[];
   confidente: { chiave: string; nome: string; rango: number | null } | null;
+  /** Il dedalo dei Memento (`dungeon_area`) in cui si svolge, e la sua posizione nel percorso. */
+  areaNome: string | null;
+  areaOrdine: number | null;
   note: string;
   fonte: string;
   stato: StatoRichiesta | null;
@@ -1433,6 +1480,8 @@ export interface JoseDto {
 export interface RichiesteDto {
   richieste: RichiestaDto[];
   jose: JoseDto | null;
+  /** I dedali che hanno richieste, nell'ordine di percorrenza, con i conteggi. */
+  dedali: Array<{ chiave: string; nome: string; ordine: number; totale: number; completate: number }>;
   completate: number;
   totale: number;
 }
@@ -1477,8 +1526,29 @@ export interface AreaDungeonDto {
    * al posto del visore compariva un riquadro vuoto con dentro un collegamento. Il legame però
    * c'è ed è dichiarato: 72 aree su 116 hanno una planimetria nativa. Qui viene esposto, così la
    * scheda la monta. Vuoto per le aree che non ne hanno (i piani dei Memento, per esempio). */
-  mappe: Array<{ chiave: string; nome: string }>;
+  mappe: Array<{ chiave: string; nome: string; /** Quanti collezionabili ha la mappa e quanti sono raccolti (null senza partita). */ n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
   punti: PuntoInteresseDto[];
+  /** Solo per i dedali dei Memento: gli obiettivi misurabili (timbri e richieste); null se la guida non ne dichiara. */
+  dedalo: DedaloDto | null;
+}
+
+/** Un collezionabile di una planimetria (forziere, seme, tesoro…) con il suo stato nella partita. */
+export interface SpilloRaccoltaDto {
+  id: number;
+  uid: string;
+  tipo: string;
+  nome: string;
+  colore: string;
+  /** null senza partita. */
+  raccolto: boolean | null;
+}
+
+/** Gli obiettivi di un dedalo dei Memento: timbri da raccogliere e richieste da completare. */
+export interface DedaloDto {
+  timbri: { totale: number | null; raccolti: number | null };
+  richieste: Array<{ chiave: string; nome: string; stato: StatoRichiesta | null }>;
+  /** totale = timbri dichiarati + richieste; fatti = timbri raccolti + richieste completate (null senza partita). */
+  obiettivi: { totale: number; fatti: number | null };
 }
 
 export interface DungeonRiassuntoDto {
@@ -1502,13 +1572,10 @@ export interface DungeonRiassuntoDto {
   esauribili: number;
   /** Punti con uno stato nella partita (null senza partita). */
   gestiti: number | null;
-  /** I punti che si raccolgono davvero — forzieri, forzieri chiusi, oggetti, Semi della Bramosia —
-   *  secondo `shared/puntiDungeon.ts`. È il denominatore della percentuale: sicure, scorciatoie,
-   *  enigmi, boss e incontri si attraversano, non si prendono, e contarli faceva rispondere alla
-   *  percentuale una domanda diversa da quella per cui la si guarda. */
-  collezionabili: number;
-  /** Collezionabili già segnati nella partita (null senza partita). */
-  collezionabiliGestiti: number | null;
+  /** La raccolta sulle planimetrie: i collezionabili (`spillo.collezionabile`) di tutte le mappe del
+   *  Palazzo e quanti ne ha presi la partita. Per i Memento i totali sono gli obiettivi dei dedali
+   *  (timbri dichiarati + richieste). `presi` e `mappeComplete` sono null senza partita. */
+  raccolta: { totale: number; presi: number | null; mappe: number; mappeComplete: number | null };
 }
 
 /** Pianta dell'area pubblicata da una guida: solo collegamento e credito; l'immagine si scarica nell'istanza al primo uso. */
@@ -1529,6 +1596,10 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   note: string;
   fonti: string[];
   aree: AreaDungeonDto[];
+  /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`) che hanno collezionabili, con
+   *  quanti sono e quali: la maggior parte non è legata a un'area della guida, quindi non compare in
+   *  `aree[].mappe`. Vuoto per i Memento, che contano gli obiettivi dei dedali. */
+  planimetrie: Array<{ chiave: string; nome: string; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
 }
 
 // ---- Calendario di gioco (Fase 6.3) ----
@@ -1653,6 +1724,8 @@ export interface DettaglioSpilloDto {
 
 /** Condizione di visibilità con il testo in italiano pronto per la scheda. */
 export type CondizioneSpilloDto = RequisitoSpillo & { testo: string };
+/** Una voce di effetto di un libro, film o attività, con la sua frase (shared/effettiCatalogo). */
+export type VoceEffettoDto = VoceEffetto & { testo: string };
 
 /** Dove porta uno spillo di spostamento: una mappa e, se indicato, uno spillo di quella mappa (selezionato all'arrivo; la mappa si adatta alla finestra). */
 export interface DestinazioneSpillo { mappa: string; spillo: number | null }
@@ -1813,7 +1886,13 @@ export interface EsitoRipristinoDto {
  * consultano mentre il gioco aspetta una risposta, e quelle in cui un errore si scopre nel modo
  * peggiore — hai risposto come diceva l'app e il gioco ti ha dato torto. Fino a ieri quell'errore
  * non si poteva correggere. */
-export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita', 'domanda', 'cruciverba'] as const;
+export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita', 'luogo', 'domanda', 'cruciverba'] as const;
+
+/** Un luogo della città come voce da scegliere (sede di un negozio o di un'attività). */
+export interface LuogoOpzioneDto { chiave: string; nome: string; tipo: string; quartiere: string; quartiereNome: string }
+
+/** I timbri raccolti in un dedalo dei Memento, per partita. */
+export interface TimbriDedaloDto { area: string; raccolti: number; totale: number | null; completato: boolean }
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
 /** Un oggetto che l'app già conosce, offerto a chi mette un articolo in vendita.

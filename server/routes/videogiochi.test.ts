@@ -31,7 +31,7 @@ describe('API Videogiochi', () => {
 
   it('registra round parziali e completa sbloccando il requisito', async () => {
     const gioco = ((await request(app).get('/api/compendio/videogiochi')).body.data as VideogiochiDto).videogiochi[0];
-    const id = ((await request(app).post('/api/partite').send({ nome: 'Round videogiochi' })).body.data as { id: number }).id;
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Round videogiochi', dataGioco: '12-15' })).body.data as { id: number }).id;
     const url = `/api/partite/${id}/letture`;
     let g = (await request(app).put(url).send({ tipo: 'videogioco', chiave: gioco.chiave, avanzamento: 1 })).body.data as VideogiocoDto;
     expect(g).toMatchObject({ progresso: 1, fatto: gioco.totaleRound === 1 });
@@ -43,8 +43,8 @@ describe('API Videogiochi', () => {
 
   it('isola le partite, valida i limiti e conserva il progresso al reseed', async () => {
     const gioco = ((await request(app).get('/api/compendio/videogiochi')).body.data as VideogiochiDto).videogiochi[0];
-    const id1 = ((await request(app).post('/api/partite').send({ nome: 'Uno videogiochi' })).body.data as { id: number }).id;
-    const id2 = ((await request(app).post('/api/partite').send({ nome: 'Due videogiochi' })).body.data as { id: number }).id;
+    const id1 = ((await request(app).post('/api/partite').send({ nome: 'Uno videogiochi', dataGioco: '12-15' })).body.data as { id: number }).id;
+    const id2 = ((await request(app).post('/api/partite').send({ nome: 'Due videogiochi', dataGioco: '12-15' })).body.data as { id: number }).id;
     const url = `/api/partite/${id1}/letture`;
     await request(app).put(url).send({ tipo: 'videogioco', chiave: gioco.chiave, avanzamento: gioco.totaleRound });
     expect(((await request(app).get(`/api/compendio/videogiochi?partita=${id2}`)).body.data as VideogiochiDto).completati).toBe(0);

@@ -13,7 +13,7 @@ vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave
 
 const base: FilmDto = {
   chiave: 'dvd-prova', nome: 'DVD di prova', nomeIt: null, dove: 'dvd', periodo: 'Iniziale', dote: 'coraggio', note: 2, noteSuccessive: null, prezzo: null,
-  dettagli: 'Due sessioni.', fonte: 'https://www.allgamestaff.it/persona-5-royal/dvd-a-noleggio/', verificato: true,
+  dettagli: 'Due sessioni.', effetti: [], effettiTesto: [], fonte: 'https://www.allgamestaff.it/persona-5-royal/dvd-a-noleggio/', verificato: true,
   posizioni: [{ tipo: 'luogo', chiave: 'shibuya/scarlet', etichetta: 'Scarlet', ruolo: 'noleggio' }, { tipo: 'luogo', chiave: 'yongen-jaya/leblanc', etichetta: 'Leblanc', ruolo: 'visione' }],
   totaleSessioni: 2, progresso: 0, iniziato: false, fatto: false, condizioni: null, disponibilita: null,
 };

@@ -1,21 +1,27 @@
 // ============================================================
 // richiesteService — Richieste dei Mementos con stato per partita e dati di Jose (Fase 7.2)
 // ============================================================
+//
+// Dalla voce 5 del piano (2026-09-12) le richieste sono ordinate per **dedalo** (l'area dei
+// Memento in cui si svolgono, `dungeon_area`) e poi per ordine della guida, e l'elenco porta i
+// dedali con i loro conteggi: è il filtro della pagina, nell'ordine di percorrenza.
+// ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
 import type { JoseDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
 
-interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; disponibile_dal: string; scadenza: string; area: string; area_chiave: string | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null }
+interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; disponibile_dal: string; scadenza: string; area: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null }
 
-const SQL = 'SELECT r.*, c.nome AS confidente_nome FROM richiesta r LEFT JOIN confidente c ON c.chiave = r.confidente_chiave';
+const SQL = 'SELECT r.*, c.nome AS confidente_nome, a.nome AS area_nome, a.ordine AS area_ordine FROM richiesta r LEFT JOIN confidente c ON c.chiave = r.confidente_chiave LEFT JOIN dungeon_area a ON a.chiave = r.area_chiave';
 
 function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>): RichiestaDto {
   return {
     chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
     bersaglio: JSON.parse(r.bersaglio_json) as RichiestaDto['bersaglio'], ricompense: JSON.parse(r.ricompense_json) as string[],
     confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave, rango: r.confidente_rango } : null,
+    areaNome: r.area_nome, areaOrdine: r.area_ordine,
     note: r.note, fonte: r.fonte, stato: stati.get(r.chiave) ?? null,
   };
 }
@@ -34,8 +40,17 @@ export function datiGuida<T>(chiave: string): T | null {
 
 export function richieste(partitaId?: number): RichiesteDto {
   const stati = statiPartita(partitaId);
-  const lista = (prepared(`${SQL} ORDER BY r.ordine`).all() as RigaRichiesta[]).map((r) => dto(r, stati));
-  return { richieste: lista, jose: datiGuida<JoseDto>('jose'), completate: lista.filter((r) => r.stato === 'completata').length, totale: lista.length };
+  // prima per dedalo (le richieste senza dedalo in coda), poi per ordine della guida
+  const lista = (prepared(`${SQL} ORDER BY (a.ordine IS NULL), a.ordine, r.ordine`).all() as RigaRichiesta[]).map((r) => dto(r, stati));
+  const dedali: RichiesteDto['dedali'] = [];
+  for (const r of lista) {
+    if (!r.areaChiave || !r.areaNome || r.areaOrdine === null) continue;
+    let d = dedali.find((x) => x.chiave === r.areaChiave);
+    if (!d) { d = { chiave: r.areaChiave, nome: r.areaNome, ordine: r.areaOrdine, totale: 0, completate: 0 }; dedali.push(d); }
+    d.totale += 1;
+    if (r.stato === 'completata') d.completate += 1;
+  }
+  return { richieste: lista, jose: datiGuida<JoseDto>('jose'), dedali, completate: lista.filter((r) => r.stato === 'completata').length, totale: lista.length };
 }
 
 /** Stato di una Richiesta nella partita ('accettata', 'completata' o null per azzerare); evento al completamento. */

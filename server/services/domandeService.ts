@@ -41,7 +41,9 @@ export function domande(partitaId?: number): DomandeDto {
   const righe = (prepared('SELECT * FROM domanda ORDER BY ordine').all() as RigaDomanda[]).sort((x, y) => indiceGiornoScolastico(x.data) - indiceGiornoScolastico(y.data) || x.ordine - y.ordine);
   const tutte = righe.map((r) => domandaDto(r, fatte));
   const oggi = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
-  const prossime = oggi === null ? [] : tutte.filter((d) => !d.fatta && indiceGiornoScolastico(d.data) >= oggi).slice(0, 5);
+  // le domande non fatte della **prima** data da oggi in poi (una o due): il prossimo appuntamento
+  const daFare = oggi === null ? [] : tutte.filter((d) => !d.fatta && indiceGiornoScolastico(d.data) >= oggi);
+  const prossime = daFare.length ? daFare.filter((d) => d.data === daFare[0].data) : [];
   const premi = prepared("SELECT json FROM esame_premi WHERE chiave = 'premi'").get() as { json: string } | undefined;
   return { domande: tutte, esami: esami(), premi: premi ? (JSON.parse(premi.json) as DomandeDto['premi']) : null, dataGioco, prossime, fatte: fatte.size, totale: tutte.length };
 }

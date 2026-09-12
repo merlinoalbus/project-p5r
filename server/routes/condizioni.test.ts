@@ -60,8 +60,9 @@ it('il grado cliente si calcola dalla spesa segnata nel negozio', () => {
   expect(valuta([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'caos' }]).stato).toBe('bloccato');
 });
 
-it('un negozio bloccato resta consultabile ma non permette acquisti', async () => {
-  const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Negozio test', condizioni_json: [{ tipo: 'dote', dote: 'coraggio', rango: 5 }] })).body.data;
+it('un negozio chiuso adesso (orari) resta consultabile ma non permette acquisti', async () => {
+  // la partita è di giorno: un negozio aperto solo di sera è bloccato, e con lui i suoi articoli
+  const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Negozio test', orari_json: { fasce: ['sera'] } })).body.data;
   const a = (await request(app).post('/api/catalogo/articolo').send({ nome: 'Prodotto test', negozio_chiave: n.chiave, condizioni_json: [] })).body.data;
   const elenco = (await request(app).get(`/api/compendio/negozi?partita=${partita}`)).body.data;
   const scheda = await request(app).get(`/api/compendio/negozi/${n.chiave}?partita=${partita}`);

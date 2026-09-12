@@ -29,7 +29,8 @@ import type { DoteSocialePartitaDto, LibriDto, FilmDvdDto } from '../../shared/t
 
 const app = createApp();
 
-const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
+// a metà maggio libri e film usati qui sono disponibili: una lettura bloccata dalla guida non si registra (409)
+const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome, dataGioco: '05-15' })).body.data as { id: number }).id;
 const punti = async (id: number, dote: string) =>
   ((await request(app).get(`/api/partite/${id}/doti`)).body.data as DoteSocialePartitaDto[]).find((d) => d.chiave === dote)!.punti;
 const segna = (id: number, tipo: string, chiave: string, avanzamento: number) =>

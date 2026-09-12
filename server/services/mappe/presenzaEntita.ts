@@ -21,7 +21,7 @@
 // | quartiere  | `sblocco_data`                              | `quartiere`                    |
 // | Palazzo    | finestra dal/al (trascritta, era prosa)     | `intervallo` o `data`          |
 // | luogo      | `quando` (giorno/sera), `giorni`            | `fascia`, `giorno-settimana`   |
-// | negozio    | `condizioni_json` già strutturate           | le sole voci di presenza       |
+// | negozio    | `orari_json` (migrazione 069)               | `fascia`, `giorno-settimana`, `meteo` |
 // | attività   | `fascia`                                    | `fascia`                       |
 //
 // Quel che resta prosa — `luogo.sblocco`, `negozio.sblocco`, `attivita.sblocco` — non viene
@@ -30,6 +30,7 @@
 // ============================================================
 
 import { nascondeIlPin, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { leggiOrari, orariComeCondizioni } from '../../../shared/orariNegozio.js';
 import { eStrutturale } from '../../../shared/spilli.js';
 import type { AppDatabase } from '../../db/dbService.js';
 
@@ -116,13 +117,16 @@ export function applicaPresenzaAiLuoghi(db: AppDatabase): number {
   const colonne = (db.prepare("SELECT name FROM pragma_table_info('luogo')").all() as Array<{ name: string }>).map((c) => c.name);
   const quando = colonne.includes('quando') ? 'l.quando' : "'' AS quando";
   const giorni = colonne.includes('giorni') ? 'l.giorni' : "'' AS giorni";
-  const negozio = colonne.includes('negozio') && tabelle.has('negozio')
-    ? '(SELECT n.condizioni_json FROM negozio n WHERE n.chiave = l.negozio)' : 'NULL';
+  // il negozio che ha qui la sua sede (072): la sua presenza sono gli orari (069)
+  const colonneNegozio = tabelle.has('negozio') ? (db.prepare("SELECT name FROM pragma_table_info('negozio')").all() as Array<{ name: string }>).map((c) => c.name) : [];
+  const negozio = colonneNegozio.includes('sede_chiave') && colonneNegozio.includes('orari_json')
+    ? '(SELECT n.orari_json FROM negozio n WHERE n.sede_chiave = l.chiave AND n.nascosto = 0 ORDER BY n.ordine LIMIT 1)' : 'NULL';
   const quartieri = new Set(colonne.length && tabelle.has('quartiere')
     ? (db.prepare("SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL AND sblocco_data <> ''").all() as Array<{ chiave: string }>).map((q) => q.chiave)
     : []);
   const righe = db.prepare(`SELECT l.chiave, l.quartiere_chiave, ${quando}, ${giorni}, ${negozio} AS condizioni_negozio FROM luogo l`)
     .all() as Array<{ chiave: string; quartiere_chiave: string; quando: string | null; giorni: string | null; condizioni_negozio: string | null }>;
+  // (`condizioni_negozio` porta ora gli orari del negozio in JSON: si traducono in condizioni di presenza)
   const aggiorna = db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?');
   // Solo gli spilli del seed: quelli che l'utente ha modificato portano le sue scelte, e
   // riscriverle a ogni avvio sarebbe peggio che non applicare la presenza.
@@ -131,7 +135,7 @@ export function applicaPresenzaAiLuoghi(db: AppDatabase): number {
   for (const l of righe) {
     const presenza = unisci(
       quartieri.has(l.quartiere_chiave) ? [{ tipo: 'quartiere' as const, quartiere: l.quartiere_chiave }] : [],
-      fasciaDaTesto(l.quando), giorniDaTesto(l.giorni), soloPresenza(l.condizioni_negozio));
+      fasciaDaTesto(l.quando), giorniDaTesto(l.giorni), l.condizioni_negozio ? orariComeCondizioni(leggiOrari(l.condizioni_negozio)) : []);
     if (!presenza.length) continue;
     for (const s of spilliDi.all(l.chiave) as Array<{ id: number; tipo: string }>) {
       if (eStrutturale(s.tipo)) continue;

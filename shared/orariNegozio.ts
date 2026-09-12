@@ -12,6 +12,7 @@
 import { GIORNI_SETTIMANA, type RequisitoSpillo } from './condizioniSpillo.js';
 
 export type GiornoChiave = (typeof GIORNI_SETTIMANA)[number]['chiave'];
+export const GIORNI_SETTIMANA_CHIAVI = GIORNI_SETTIMANA.map((g) => g.chiave) as [GiornoChiave, ...GiornoChiave[]];
 export const FASCE_ORARIO = [{ chiave: 'giorno', nome: 'di giorno' }, { chiave: 'sera', nome: 'di sera' }] as const;
 export type FasciaOrario = (typeof FASCE_ORARIO)[number]['chiave'];
 

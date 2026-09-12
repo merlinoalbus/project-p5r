@@ -16,6 +16,7 @@ vi.mock('../services/api', () => ({ getCruciverba, impostaCruciverba }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
 
 const dati: CruciverbaTuttiDto = {
+  dataGioco: null, prossimo: null,
   cruciverba: [
     { giorno: '04-18', chiave: '04-18-0', indizio: 'Gli anni scolastici sono suddivisi in…?', risposta: 'Semestri', rispostaEn: 'Semesters', fonte: 'https://www.allgamestaff.it/persona-5-royal/cruciverba/', fatto: false },
     { giorno: '04-27', chiave: '04-27-1', indizio: 'Un dolce tradizionale', risposta: 'Mochi', rispostaEn: 'Mochi', fonte: 'https://www.allgamestaff.it/persona-5-royal/cruciverba/', fatto: false },

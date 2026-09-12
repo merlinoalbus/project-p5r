@@ -101,7 +101,7 @@ describe('API città e attività', () => {
     expect(a).toMatchObject({ libriLetti: 0, filmVisti: 0 });
     expect((await request(app).get('/api/compendio/attivita?partita=99999')).status).toBe(404);
 
-    const id = ((await request(app).post('/api/partite').send({ nome: 'Letture' })).body.data as { id: number }).id;
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Letture', dataGioco: '12-15' })).body.data as { id: number }).id;
     const libro = a.libri.find((l) => l.dote !== null)!;
     let r = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: libro.chiave, fatto: true })).body.data as LibroDto;
     expect(r.fatto).toBe(true);

@@ -92,7 +92,7 @@ export function mappaAzione(a: AzioneSeed): { chiave: string; spilloId: number |
   if (r?.tipo === 'richiesta' || a.tipo === 'richiesta') return mappaEsiste('dungeon-mementos') ? { chiave: 'dungeon-mementos', spilloId: null } : null;
   if (r?.tipo === 'negozio') {
     const s = prepared(`SELECT id, mappa_chiave FROM spillo WHERE (riferimento_tipo = 'negozio' AND riferimento_chiave = ?)
-      OR (riferimento_tipo = 'luogo' AND riferimento_chiave IN (SELECT chiave FROM luogo WHERE negozio = ?)) ORDER BY id LIMIT 1`).get(r.chiave, r.chiave) as { id: number; mappa_chiave: string } | undefined;
+      OR (riferimento_tipo = 'luogo' AND riferimento_chiave IN (SELECT sede_chiave FROM negozio WHERE chiave = ? AND sede_chiave IS NOT NULL)) ORDER BY id LIMIT 1`).get(r.chiave, r.chiave) as { id: number; mappa_chiave: string } | undefined;
     return s ? { chiave: s.mappa_chiave, spilloId: s.id } : null;
   }
   if (r?.tipo === 'confidente') {

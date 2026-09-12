@@ -26,7 +26,7 @@ describe('API Libri', () => {
   });
 
   it('registra 0, parziale, totale e riduzione senza sbloccare prima del completamento', async () => {
-    const id = ((await request(app).post('/api/partite').send({ nome: 'Progresso libri' })).body.data as { id: number }).id;
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Progresso libri', dataGioco: '12-15' })).body.data as { id: number }).id;
     const chiave = 'il-magnifico-ladro';
     let r = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave, avanzamento: 1 })).body.data as LibroDto;
     expect(r).toMatchObject({ progresso: 1, totaleSessioni: 2, fatto: false });
@@ -67,6 +67,8 @@ describe('API Libri', () => {
     expect(libro).toMatchObject({ progresso: 1, totaleSessioni: 1, fatto: false });
     libro = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'spadaccino-provetto', avanzamento: 1 })).body.data as LibroDto;
     expect(libro.fatto).toBe(true);
+    // il libro torna com'era: le prove seguenti contano su un libro da tre sessioni senza condizioni
+    getDb().prepare("UPDATE libro SET sessioni=3 WHERE chiave='spadaccino-provetto'").run();
   });
 
   /* «Lettura rapida» raddoppia la velocità di lettura, e l'app lo dichiarava senza applicarlo.
@@ -81,7 +83,8 @@ describe('API Libri', () => {
   describe('«Lettura rapida»', () => {
     const libri = async (id: number) => (await request(app).get(`/api/compendio/libri?partita=${id}`)).body.data as LibriDto;
     const trova = (d: LibriDto, chiave: string) => d.libri.find((l) => l.chiave === chiave)!;
-    const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
+    // «Lettura rapida» esce il 1º luglio: la partita sta oltre, e un libro da tre sessioni ancora bloccato (un prerequisito) non si può leggere
+    const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome, dataGioco: '12-15' })).body.data as { id: number }).id;
     const leggi = (id: number, chiave: string, avanzamento: number) =>
       request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave, avanzamento });
 
@@ -98,7 +101,7 @@ describe('API Libri', () => {
     it('non tocca i requisiti né quello che hai già letto', async () => {
       const id = await nuovaPartita('Lettura rapida non retroattiva');
       const prima = await libri(id);
-      const daTre = prima.libri.find((l) => l.sessioni === 3)!;
+      const daTre = prima.libri.find((l) => l.sessioni === 3 && l.disponibilita?.stato !== 'bloccato')!;
       await leggi(id, daTre.chiave, 2);
 
       await leggi(id, 'lettura-rapida', 1);
@@ -113,7 +116,7 @@ describe('API Libri', () => {
 
     it('l’ultimo pomeriggio chiude il libro perché ne vale due', async () => {
       const id = await nuovaPartita('Lettura rapida passo doppio');
-      const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3)!;
+      const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3 && l.disponibilita?.stato !== 'bloccato')!;
       await leggi(id, daTre.chiave, 1);
       await leggi(id, 'lettura-rapida', 1);
       // Una sessione sola, che ne vale due: da 1 si arriva a 3, cioè al totale. Il passo lo mette
@@ -125,7 +128,7 @@ describe('API Libri', () => {
 
     it('il tetto resta il requisito del libro, prima e dopo', async () => {
       const id = await nuovaPartita('Lettura rapida tetto');
-      const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3)!;
+      const daTre = (await libri(id)).libri.find((l) => l.sessioni === 3 && l.disponibilita?.stato !== 'bloccato')!;
       await leggi(id, 'lettura-rapida', 1);
       expect((await leggi(id, daTre.chiave, 4)).status).toBe(400);
       expect((await leggi(id, daTre.chiave, 3)).status).toBe(200);
@@ -133,7 +136,7 @@ describe('API Libri', () => {
   });
 
   it('mantiene progresso e posizioni al reseed e cancella il progresso insieme alla partita', async () => {
-    const id = ((await request(app).post('/api/partite').send({ nome: 'Persistenza libri' })).body.data as { id: number }).id;
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Persistenza libri', dataGioco: '12-15' })).body.data as { id: number }).id;
     await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'il-magnifico-ladro', avanzamento: 1 });
     ricaricaPacchetto(getDb());
     const d = (await request(app).get(`/api/compendio/libri?partita=${id}`)).body.data as LibriDto;

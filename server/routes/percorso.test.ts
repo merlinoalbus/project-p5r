@@ -130,10 +130,11 @@ describe('API percorso giorno per giorno', () => {
   });
 
   it('«Anima da cineasta» alza di uno scalino i punti di film e DVD alla spunta, solo se il libro risulta letto', async () => {
-    const id = ((await request(app).post('/api/partite').send({ nome: 'Cineasta' })).body.data as { id: number }).id;
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Cineasta', dataGioco: '12-15' })).body.data as { id: number }).id;
     // Una sessione parziale non deve attivare il bonus: il percorso legge soltanto il
     // completamento canonico in `lettura_partita`.
-    getDb().prepare("UPDATE libro SET sessioni=2 WHERE chiave='anima-da-cineasta'").run();
+    // il libro chiede di aver già visto un film: qui si prova il bonus, non la disponibilità
+    getDb().prepare("UPDATE libro SET sessioni=2, condizioni_json='[]' WHERE chiave='anima-da-cineasta'").run();
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', avanzamento: 1 })).status).toBe(200);
     // cerco il primo DVD della guida che dà una Dote
     let trovato: { giorno: string; indice: number; note: number; dote: string; chiave: string | null } | null = null;
@@ -175,7 +176,7 @@ describe('API percorso giorno per giorno', () => {
   });
 
   it('un film al cinema della guida riceve lo scalino di «Anima da cineasta»: 5 punti senza il libro, 7 col libro', async () => {
-    const id = ((await request(app).post('/api/partite').send({ nome: 'Cinema' })).body.data as { id: number }).id;
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Cinema', dataGioco: '05-01' })).body.data as { id: number }).id;
     const g = (await request(app).get(`/api/compendio/percorso/05-01?partita=${id}`)).body.data as PercorsoGiornoDto;
     const film = g.azioni.find((x) => x.riferimento?.tipo === 'film' && /Gentilezza \+3/.test(x.note ?? ''))!;
     expect(film).toBeDefined();

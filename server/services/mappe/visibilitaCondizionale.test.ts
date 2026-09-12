@@ -237,9 +237,9 @@ describe('visibilità condizionale dei pin', () => {
     // È l'errore che avevo fatto io scrivendo la funzione, e la prova serve anche a questo.
     // Serve poi un pin che al 20 aprile **non** sia già bloccato dalle sue condizioni: se
     // partisse bloccato, il test non distinguerebbe la copia dalla verità.
-    const candidati = db.prepare(`SELECT s.id, s.mappa_chiave, l.negozio AS riferimento_chiave FROM spillo s
-      JOIN luogo l ON l.chiave = s.riferimento_chiave
-      WHERE s.riferimento_tipo = 'luogo' AND l.negozio IS NOT NULL`).all() as Array<{ id: number; mappa_chiave: string; riferimento_chiave: string }>;
+    const candidati = db.prepare(`SELECT s.id, s.mappa_chiave, n.chiave AS riferimento_chiave FROM spillo s
+      JOIN negozio n ON n.sede_chiave = s.riferimento_chiave
+      WHERE s.riferimento_tipo = 'luogo' AND n.nascosto = 0`).all() as Array<{ id: number; mappa_chiave: string; riferimento_chiave: string }>;
     expect(candidati.length, 'nessun pin agganciato a un negozio: la prova non proverebbe niente').toBeGreaterThan(0);
     const statoDi = (p: { id: number; mappa_chiave: string }) => dettaglioMappa(p.mappa_chiave, partita.id).spilli.find((s) => s.id === p.id)?.disponibilita?.stato;
     const pin = candidati.find((p) => statoDi(p) !== 'bloccato');
@@ -248,14 +248,14 @@ describe('visibilità condizionale dei pin', () => {
     const statoDelPin = () => statoDi(pin!);
     expect(statoDelPin()).not.toBe('bloccato');
 
-    // ora si chiude il negozio nel catalogo, e **basta**: lo spillo non viene toccato
-    const prima = db.prepare('SELECT condizioni_json FROM negozio WHERE chiave = ?').get(pin!.riferimento_chiave) as { condizioni_json: string | null };
-    db.prepare('UPDATE negozio SET condizioni_json = ? WHERE chiave = ?')
-      .run(JSON.stringify([{ tipo: 'data', dal: '12-01' }]), pin!.riferimento_chiave);
+    // ora si chiude il negozio nel catalogo (gli orari: solo di sera, e la partita è di giorno), e **basta**: lo spillo non viene toccato
+    const prima = db.prepare('SELECT orari_json FROM negozio WHERE chiave = ?').get(pin!.riferimento_chiave) as { orari_json: string | null };
+    db.prepare('UPDATE negozio SET orari_json = ? WHERE chiave = ?')
+      .run(JSON.stringify({ giorni: [], fasce: ['sera'], chiusoConPioggia: false, nota: null }), pin!.riferimento_chiave);
     try {
       expect(statoDelPin()).toBe('bloccato');
     } finally {
-      db.prepare('UPDATE negozio SET condizioni_json = ? WHERE chiave = ?').run(prima.condizioni_json, pin!.riferimento_chiave);
+      db.prepare('UPDATE negozio SET orari_json = ? WHERE chiave = ?').run(prima.orari_json, pin!.riferimento_chiave);
       db.prepare('DELETE FROM partita WHERE id = ?').run(partita.id);
     }
   });

@@ -50,7 +50,7 @@ describe('API negozi e inventario', () => {
     expect(r.articoli.every((a) => a.per === 'Ann' || a.per === 'tutti')).toBe(true);
     expect((await request(app).get('/api/compendio/articoli?categoria=astronave')).status).toBe(400);
 
-    const id = ((await request(app).post('/api/partite').send({ nome: 'Acquisti' })).body.data as { id: number }).id;
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Acquisti', dataGioco: '12-15', fasciaGioco: 'sera' })).body.data as { id: number }).id;
     const acquistabile = ((await request(app).get(`/api/compendio/negozi/untouchable?partita=${id}`)).body.data as NegozioDettaglioDto).articoliElenco.find((x) => x.disponibilita?.stato !== 'bloccato')!;
     expect(acquistabile).toBeDefined();
     let a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: true })).body.data as ArticoloDto;
@@ -88,7 +88,7 @@ describe('API negozi e inventario', () => {
       db.prepare("UPDATE articolo SET condizioni_json = ? WHERE negozio_chiave = 'untouchable'").run(futura);
       db.prepare("UPDATE articolo SET condizioni_json = '[]' WHERE chiave = 'untouchable/kogatana-nera'").run();
 
-      const id = ((await request(app).post('/api/partite').send({ nome: 'Visibilità inventario' })).body.data as { id: number }).id;
+      const id = ((await request(app).post('/api/partite').send({ nome: 'Visibilità inventario', dataGioco: '12-15', fasciaGioco: 'sera' })).body.data as { id: number }).id;
       const elenco = (await request(app).get(`/api/compendio/negozi?partita=${id}`)).body.data as NegozioRiassuntoDto[];
       const untouchable = elenco.find((n) => n.chiave === 'untouchable');
       expect(untouchable).toMatchObject({ articoli: 218, verificati: 212, disponibilita: { stato: 'disponibile' } });
@@ -119,9 +119,10 @@ describe('API negozi e inventario', () => {
   it('calcola il totale disponibile prima di applicare il limite di 300 risultati', async () => {
     const db = getDb();
     db.exec(`CREATE TEMP TABLE backup_tutte_condizioni_articoli_negozi_test AS SELECT chiave, condizioni_json FROM articolo;
-      CREATE TEMP TABLE backup_tutte_condizioni_negozi_test AS SELECT chiave, condizioni_json FROM negozio`);
+      CREATE TEMP TABLE backup_tutte_condizioni_negozi_test AS SELECT chiave, condizioni_json, orari_json FROM negozio`);
     try {
-      db.exec("UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET condizioni_json = '[]'");
+      // niente condizioni e negozi sempre aperti: la presenza del negozio sono gli orari (069)
+      db.exec("UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET condizioni_json = '[]', orari_json = NULL");
       const id = ((await request(app).post('/api/partite').send({ nome: 'Catalogo completo' })).body.data as { id: number }).id;
       const ricerca = (await request(app).get(`/api/compendio/articoli?partita=${id}`)).body.data as RicercaArticoliDto;
       expect(ricerca.totale).toBe(576);
@@ -134,6 +135,8 @@ describe('API negozi e inventario', () => {
       );
       UPDATE negozio SET condizioni_json = (
         SELECT b.condizioni_json FROM backup_tutte_condizioni_negozi_test b WHERE b.chiave = negozio.chiave
+      ), orari_json = (
+        SELECT b.orari_json FROM backup_tutte_condizioni_negozi_test b WHERE b.chiave = negozio.chiave
       );
       DROP TABLE backup_tutte_condizioni_articoli_negozi_test;
       DROP TABLE backup_tutte_condizioni_negozi_test`);
@@ -141,7 +144,7 @@ describe('API negozi e inventario', () => {
   });
 
   it('disponibilità con la partita: i requisiti del Confidente marcano ma non nascondono gli articoli', async () => {
-    const id = ((await request(app).post('/api/partite').send({ nome: 'Disponibilità' })).body.data as { id: number }).id;
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Disponibilità', dataGioco: '12-15', fasciaGioco: 'sera' })).body.data as { id: number }).id;
     const scheda = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
     const catalogo = ((await request(app).get('/api/compendio/negozi/clinica-takemi')).body.data as NegozioDettaglioDto).articoliElenco;
     const conRango = catalogo.filter((a) => /^Rango Confidente \d+$/.test(a.condizione ?? ''));
