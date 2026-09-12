@@ -3,6 +3,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
+import { opzioniDaNomi } from '../utils/selettore';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { getAttivita } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -120,10 +122,7 @@ export function AttivitaPage() {
             <FilaScorrevole role="tablist" aria-label="Sezioni">
               {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={28} /><span>{l}</span></button>)}
             </FilaScorrevole>
-            <select className="form-input w-auto ml-auto" value={dote} onChange={(e) => setDote(e.target.value)} aria-label="Dote">
-              <option value="">Tutte le Doti</option>
-              {Object.entries(NOME_DOTE).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-            </select>
+            <Selettore compatto className="ml-auto" etichetta="Dote" valore={dote} vuoto="Tutte le Doti" opzioni={opzioniDaNomi(NOME_DOTE)} onCambia={setDote} />
             <AggiungiAlCatalogo tipo="attivita" titolo={scheda === 'lavori' ? 'Aggiungi un lavoro' : 'Aggiungi un’attività'} onSalvato={() => void dati.ricarica()} />
           </div>
           {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} mappaAperta={conMappa === a.chiave} onMappa={() => setConMappa((x) => (x === a.chiave ? null : a.chiave))} />)}</ul>}

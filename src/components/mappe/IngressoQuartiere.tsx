@@ -1,5 +1,6 @@
 import { etichettaPlanimetria } from '../../utils/presentazioneMappa';
 import { useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { getAlberoMappe, getMappa, salvaIngressoQuartiere } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { useAsset } from '../../stores/assetStore';
@@ -22,10 +23,7 @@ export function IngressoQuartiere({quartiere:q,onSalvato,onChiudi}:{quartiere:Qu
   <h2 className="m-0 text-lg">Ingresso da Città</h2>
   <p className="m-0 text-sm text-text-secondary">Scegli la mappa e tocca l’immagine nel punto da centrare all’apertura del quartiere.</p>
   <label className="editor-mappa__campo">Cerca una mappa<input className="form-input" value={ricerca} onChange={e=>setRicerca(e.target.value)} placeholder="Nome, area o quartiere" /></label>
-  <label className="editor-mappa__campo">Mappa iniziale<select className="form-input" value={mappa} disabled={occupato||albero.caricamento} onChange={e=>{setMappa(e.target.value);setX(50);setY(50);}}>
-   {!opzioni.some(v=>v.chiave===mappa)&&<option value={mappa}>{q.ingresso?.nome??q.nome}</option>}
-   {opzioni.map(m=><option key={m.chiave} value={m.chiave}>{etichettaPlanimetria(m)}</option>)}
-  </select></label>
+  <Selettore etichetta="Mappa iniziale" valore={mappa} disabilitato={occupato||albero.caricamento} opzioni={[...(!opzioni.some(v=>v.chiave===mappa)&&mappa?[{chiave:mappa,nome:q.ingresso?.nome??q.nome}]:[]),...opzioni.map(m=>({chiave:m.chiave,nome:etichettaPlanimetria(m)}))]} onCambia={k=>{setMappa(k);setX(50);setY(50);}} />
   {(albero.errore||dati.errore)&&<p role="alert">{albero.errore??dati.errore} <button type="button" className="btn btn-secondary" onClick={()=>{void albero.ricarica();void dati.ricarica();}}>Riprova</button></p>}
   {dati.caricamento?<p role="status">Caricamento della mappa…</p>:src?<div className="ingresso-quartiere__immagine" role="application" aria-label="Punto iniziale: tocca l’immagine o usa le frecce" tabIndex={0}
    onKeyDown={e=>{const delta=e.shiftKey?5:1;if(e.key==='ArrowLeft'){e.preventDefault();setX(v=>Math.max(0,v-delta));}if(e.key==='ArrowRight'){e.preventDefault();setX(v=>Math.min(100,v+delta));}if(e.key==='ArrowUp'){e.preventDefault();setY(v=>Math.max(0,v-delta));}if(e.key==='ArrowDown'){e.preventDefault();setY(v=>Math.min(100,v+delta));}}}
@@ -36,7 +34,7 @@ export function IngressoQuartiere({quartiere:q,onSalvato,onChiudi}:{quartiere:Qu
   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
    <label className="editor-mappa__campo">Orizzontale (%)<input className="form-input" type="number" min={0} max={100} step={0.01} value={x} onChange={e=>setX(e.target.valueAsNumber)} /></label>
    <label className="editor-mappa__campo">Verticale (%)<input className="form-input" type="number" min={0} max={100} step={0.01} value={y} onChange={e=>setY(e.target.valueAsNumber)} /></label>
-   <label className="editor-mappa__campo">Ingrandimento<select className="form-input" value={zoom} onChange={e=>setZoom(Number(e.target.value))}>{[1,1.5,2,2.5,3,4,5,6].map(z=><option key={z} value={z}>{z}×</option>)}</select></label>
+   <Selettore etichetta="Ingrandimento" valore={String(zoom)} opzioni={[1,1.5,2,2.5,3,4,5,6].map(z=>({chiave:String(z),nome:`${z}×`}))} onCambia={k=>setZoom(Number(k))} />
   </div>
   <p className="m-0 text-sm" role="status">Punto iniziale: {Number.isFinite(x)?x:'—'}% da sinistra, {Number.isFinite(y)?y:'—'}% dall’alto.</p>
   <div className="flex flex-wrap gap-2">

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { valoreSelettore } from '../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { NegoziPage } from './NegoziPage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -99,5 +100,6 @@ it('mostra nell’intestazione e nella scheda i conteggi canonici restituiti dal
 it('apre l’elenco già filtrato quando la categoria è nell’indirizzo', async () => {
   render(<MemoryRouter initialEntries={['/guida/negozi?categoria=arma']}><NegoziPage /></MemoryRouter>);
   await waitFor(() => expect(ricercaArticoli).toHaveBeenCalledWith(expect.objectContaining({ categoria: 'arma' }), undefined));
-  expect((await screen.findByRole('combobox', { name: 'Categoria' })).getAttribute('value') ?? (screen.getByRole('combobox', { name: 'Categoria' }) as HTMLSelectElement).value).toBe('arma');
+  await screen.findByRole('combobox', { name: 'Categoria' });
+  expect(valoreSelettore('Categoria')).toBe('Arma');
 });

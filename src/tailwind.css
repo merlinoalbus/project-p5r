@@ -1296,20 +1296,29 @@
 .condizione-togli:hover { color:var(--color-error); }
 
 /* Selettore con ricerca: pulsante con etichetta e valore; tendina con campo e voci da 44 px. */
-.selettore-ricerca { position:relative; min-width:0; }
-.selettore-ricerca__scelta { display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
-.selettore-ricerca__scelta:disabled { opacity:0.6; cursor:default; }
-.selettore-ricerca__etichetta { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }
-.selettore-ricerca__valore { font-size:13px; line-height:1.2; overflow-wrap:anywhere; }
-.selettore-ricerca__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
-.selettore-ricerca__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
-.selettore-ricerca__campo { width:100%; min-height:40px; margin-bottom:4px; }
-.selettore-ricerca__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; }
-.selettore-ricerca__gruppo { display:block; padding:6px 8px 2px; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
-.selettore-ricerca__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:13px; text-align:left; cursor:pointer; }
-.selettore-ricerca__voce--evidenziata .selettore-ricerca__pulsante { background:color-mix(in srgb, var(--color-primary) 18%, transparent); }
-.selettore-ricerca__voce--scelta .selettore-ricerca__pulsante { font-weight:600; }
-.selettore-ricerca__vuoto { padding:8px; font-size:12px; color:var(--color-text-muted); }
+.selettore { position:relative; min-width:0; }
+.selettore__scelta { position:relative; display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 22px 3px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
+.selettore__scelta:disabled { opacity:0.6; cursor:default; }
+.selettore__etichetta { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }
+.selettore__valore { font-size:13px; line-height:1.2; overflow-wrap:anywhere; }
+.selettore__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
+.selettore__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
+.selettore__campo { width:100%; min-height:40px; margin-bottom:4px; }
+.selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; }
+.selettore__gruppo { display:block; padding:6px 8px 2px; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
+.selettore__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:13px; text-align:left; cursor:pointer; }
+.selettore__voce--evidenziata .selettore__pulsante { background:color-mix(in srgb, var(--color-primary) 18%, transparent); }
+.selettore__voce--scelta .selettore__pulsante { font-weight:600; }
+.selettore__vuoto { padding:8px; font-size:12px; color:var(--color-text-muted); }
+.selettore__freccia { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--color-text-muted); pointer-events:none; }
+/* Compatto = stretto quanto serve, senza l'etichetta sopra: i filtri in linea delle pagine. */
+.selettore--compatto { display:inline-block; width:auto; }
+.selettore--compatto .selettore__scelta { flex-direction:row; align-items:center; min-height:40px; padding:4px 22px 4px 8px; width:auto; max-width:100%; }
+.selettore--compatto .selettore__valore { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.selettore--compatto .selettore__tendina { width:max(100%, 220px); }
+.editor-mappa__campo .selettore__scelta { min-height:40px; }
+/* Col dito 40 px non bastano: sul telefono e sul tablet i selettori compatti e quelli dell'editor tornano a 44 px. */
+@media (pointer: coarse), (max-width: 1023px) { .selettore--compatto .selettore__scelta, .editor-mappa__campo .selettore__scelta { min-height:44px; } }
 
 /* Progressi della partita: righe da 44 px, contatori a destra. */
 .progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
@@ -1318,7 +1327,11 @@
 @media (max-width: 639px) {
   .condizione-riga { padding:6px; }
   .condizione-stato { flex-basis:100%; }
-  .selettore-ricerca__tendina { position:fixed; left:8px; right:8px; top:auto; bottom:8px; width:auto; max-width:none; }
+  /* Sul telefono la tendina è un foglio dal basso, anche per la variante compatta; i selettori compatti
+     riempiono la riga dei filtri invece di lasciare mezzo schermo vuoto. */
+  .selettore .selettore__tendina, .selettore--compatto .selettore__tendina { position:fixed; left:8px; right:8px; top:auto; bottom:calc(4rem + 8px); width:auto; max-width:none; z-index:110; }
+  .selettore--compatto { flex:1 1 auto; }
+  .selettore--compatto .selettore__scelta { width:100%; }
 }
 
 /* Editor: una sezione alla volta, campi conservati al cambio pannello. */
@@ -1330,7 +1343,7 @@
 .editor-mappa__contenuto[hidden] { display:none; }
 .editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:14px; line-height:1.5; color:var(--color-text-secondary); }
 .editor-mappa__ricerca { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; }
-.editor-mappa__ricerca select { grid-column:1/-1; }
+.editor-mappa__ricerca .selettore { grid-column:1/-1; }
 .editor-mappa__ricerca input { min-width:0; }
 .visore-mappa--editor .editor-mappa__campo .form-input, .visore-mappa--editor .editor-mappa__risultato { min-height:44px; font-size:14px; }
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; }

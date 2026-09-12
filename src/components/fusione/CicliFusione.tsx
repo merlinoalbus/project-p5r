@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { Link } from 'react-router-dom';
 import { getCicliFusione, salvaCiclo } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
@@ -103,20 +104,14 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
           <div className="flex flex-wrap items-center gap-2 text-[13px]">
             <span className="flex items-center gap-1.5" role="group" aria-label="Numero di anelli">
               Anelli da
-              <select className="form-input form-input--compatto" value={Math.min(lunghezzaMin, lunghezza)} onChange={(e) => setLunghezzaMin(Number(e.target.value))} aria-label="Numero minimo di anelli">
-                {LUNGHEZZE.filter((n) => n <= lunghezza).map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
+              <Selettore compatto etichetta="Numero minimo di anelli" valore={String(Math.min(lunghezzaMin, lunghezza))} opzioni={LUNGHEZZE.filter((n) => n <= lunghezza).map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => setLunghezzaMin(Number(k))} />
               a
-              <select className="form-input form-input--compatto" value={lunghezza} onChange={(e) => { const v = Number(e.target.value); setLunghezza(v); if (lunghezzaMin > v) setLunghezzaMin(v); }} aria-label="Numero massimo di anelli">
-                {LUNGHEZZE.map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
+              <Selettore compatto etichetta="Numero massimo di anelli" valore={String(lunghezza)} opzioni={LUNGHEZZE.map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => { const v = Number(k); setLunghezza(v); if (lunghezzaMin > v) setLunghezzaMin(v); }} />
             </span>
             <button type="button" className={`chip touch ${partnerDistinti ? 'chip--attivo' : ''}`} onClick={() => setPartnerDistinti((v) => !v)} aria-pressed={partnerDistinti} title="Ogni partner compare una sola volta nella catena: a ogni giro servono Persona diverse fra loro">Partner distinti</button>
-            <label className="flex items-center gap-1.5 touch">Alternative
-              <select className="form-input w-auto" value={alternative} onChange={(e) => setAlternative(Number(e.target.value))} aria-label="Numero di alternative">
-                {[3, 5, 8, 12].map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
-            </label>
+            <span className="flex items-center gap-1.5 touch">Alternative
+              <Selettore compatto etichetta="Numero di alternative" valore={String(alternative)} opzioni={[3, 5, 8, 12].map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => setAlternative(Number(k))} />
+            </span>
             <button type="button" className={`chip touch ${catture ? 'chip--attivo' : ''}`} onClick={() => setCatture((v) => !v)} aria-pressed={catture} title="Ammetti partner da catturare in battaglia (costo zero, ma vanno ripresi a ogni giro)">Ammetti catture</button>
             <button type="button" className={`chip touch ${limitaLivello ? 'chip--attivo' : ''}`} disabled={livelloProtagonista === null} onClick={() => setLimitaLivello((v) => !v)} aria-pressed={limitaLivello && livelloProtagonista !== null}>Fino al livello {livelloProtagonista ?? '—'}</button>
           </div>

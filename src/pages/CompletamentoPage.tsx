@@ -3,6 +3,8 @@
 // ============================================================
 
 import { useMemo, useState, type ReactNode } from 'react';
+import { Selettore } from '../components/shared/Selettore';
+import { opzioniDaNomi } from '../utils/selettore';
 import { useSearchParams } from 'react-router-dom';
 import { getCompletamento, impostaTrofeo } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -122,10 +124,7 @@ export function CompletamentoPage() {
           {scheda === 'trofei' && (
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
-                <select className="form-input w-auto" value={tipo} onChange={(e) => setTipo(e.target.value)} aria-label="Tipo di trofeo">
-                  <option value="">Tutti i tipi</option>
-                  {Object.entries(NOME_TIPO_TROFEO).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-                </select>
+                <Selettore compatto etichetta="Tipo di trofeo" valore={tipo} vuoto="Tutti i tipi" opzioni={opzioniDaNomi(NOME_TIPO_TROFEO)} onCambia={setTipo} />
                 {partitaId && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={soloDaFare} onChange={(e) => setSoloDaFare(e.target.checked)} /> Solo da ottenere</label>}
                 <span className="text-[12px] text-text-muted ml-auto">{trofeiVisibili.length} trofei</span>
               </div>

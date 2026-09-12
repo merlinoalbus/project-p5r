@@ -334,3 +334,15 @@ adattata e lo spillo selezionato), scheda dello spillo per categoria («Porta a�
 con ricerca), popup del visore per categoria (merce del negozio disponibile adesso, «Vai», «Raccolto»),
 popup dentro la tela e foglio dal basso sotto i 768 px. Restano da rivedere, con l'utente, i layout
 delle altre pagine sui tre formati man mano che emergono difetti.
+
+## Selettore unificato (12 settembre 2026) — fatto
+
+Primo lotto della consegna «struttura, non frasi» (piano del 12 settembre): un solo elenco chiuso in
+tutta l'app, `src/components/shared/Selettore.tsx`, al posto delle 62 tendine native. Ricerca
+scrivendo da dieci voci in su (o sempre, sugli elenchi della Guida), voce «nessuna scelta» in testa,
+gruppi, tastiera, 44 px sul touch anche nella variante compatta dei filtri e nei campi dell'editor. Una regola ESLint e il test
+`src/selettoriUnificati.test.ts` vietano ogni `<select>` nel frontend; `lint:ci` copre tutto il
+repository. Prossimi lotti, nell'ordine del piano: Personaggi + Città (navigazione, tipi di luogo,
+ingresso), architettura dei dati (DB di gioco separato dalle partite, pacchetto con le immagini),
+modello del catalogo (orari, condizioni sugli articoli, sedi, effetti dichiarati, attività
+strutturate), server e UI delle pagine, Progressi calcolati, export/import.

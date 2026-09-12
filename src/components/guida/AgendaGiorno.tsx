@@ -9,6 +9,8 @@
 
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { useState } from 'react';
+import { Selettore } from '../shared/Selettore';
+import { opzioniDaNomi } from '../../utils/selettore';
 import {
   aggiornaAzioneAgenda, creaAzioneAgenda, creaEventoAgenda, eliminaAzioneAgenda, eliminaEventoAgenda,
   getAgenda, impostaAzioneAgendaFatta,
@@ -97,14 +99,9 @@ export function AgendaGiorno({ giorno, partitaId, compatto, onAggiorna }: Props)
           </label>
           <div className="flex flex-wrap items-center gap-1.5">
             {nuovo === 'evento' ? (
-              <select className="form-input w-auto" value={tipoEvento} onChange={(e) => setTipoEvento(e.target.value as EventoUtenteDto['tipo'])} aria-label="Tipo di evento">
-                {(Object.keys(NOME_TIPO_EVENTO) as EventoUtenteDto['tipo'][]).map((t) => <option key={t} value={t}>{NOME_TIPO_EVENTO[t]}</option>)}
-              </select>
+              <Selettore compatto etichetta="Tipo di evento" valore={tipoEvento} opzioni={opzioniDaNomi(NOME_TIPO_EVENTO)} onCambia={(k) => setTipoEvento(k as EventoUtenteDto['tipo'])} />
             ) : (
-              <select className="form-input w-auto" value={fascia} onChange={(e) => setFascia(e.target.value as 'giorno' | 'sera')} aria-label="Momento della giornata">
-                <option value="giorno">Di giorno</option>
-                <option value="sera">Di sera</option>
-              </select>
+              <Selettore compatto etichetta="Momento della giornata" valore={fascia} opzioni={[{ chiave: 'giorno', nome: 'Di giorno' }, { chiave: 'sera', nome: 'Di sera' }]} onCambia={(k) => setFascia(k as 'giorno' | 'sera')} />
             )}
             {partitaId && (
               <label className="flex items-center gap-1.5 text-[13px] touch">

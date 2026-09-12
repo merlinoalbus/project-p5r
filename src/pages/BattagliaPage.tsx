@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState, type ReactNode } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getBattaglia } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -84,18 +85,9 @@ function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
       <p className="m-0 text-[13px] text-text-secondary">Ricerca rapida delle Ombre di Palazzi e Dedali: scrivi il nome dell'Ombra o della Persona, oppure filtra per dungeon, debolezza e personalità (per la negoziazione).</p>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Ombra, Persona o area…" />
       <div className="flex flex-wrap gap-1.5">
-        <select className="form-input w-auto" value={dungeon} onChange={(e) => setDungeon(e.target.value)} aria-label="Dungeon">
-          <option value="">Tutti i dungeon</option>
-          {dungeons.map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-        </select>
-        <select className="form-input w-auto" value={elemento} onChange={(e) => setElemento(e.target.value)} aria-label="Debole a">
-          <option value="">Qualsiasi debolezza</option>
-          {elementi.map((e) => <option key={e} value={e}>Debole a {e}</option>)}
-        </select>
-        <select className="form-input w-auto" value={personalita} onChange={(e) => setPersonalita(e.target.value)} aria-label="Personalità">
-          <option value="">Qualsiasi personalità</option>
-          {personalitaTutte.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
+        <Selettore compatto etichetta="Dungeon" valore={dungeon} vuoto="Tutti i dungeon" opzioni={dungeons.map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setDungeon} />
+        <Selettore compatto etichetta="Debole a" valore={elemento} vuoto="Qualsiasi debolezza" opzioni={elementi.map((e) => ({ chiave: e, nome: `Debole a ${e}` }))} onCambia={setElemento} />
+        <Selettore compatto etichetta="Personalità" valore={personalita} vuoto="Qualsiasi personalità" opzioni={personalitaTutte.map((p) => ({ chiave: p, nome: p }))} onCambia={setPersonalita} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">{visibili.length} Ombre su {ombre.length}.</p>
       {/* Una griglia e non una colonna: le schede sono corte e su uno schermo largo la colonna

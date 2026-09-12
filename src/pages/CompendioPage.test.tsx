@@ -4,6 +4,7 @@
 // ============================================================
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { CompendioPage } from './CompendioPage';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
@@ -88,15 +89,15 @@ describe('CompendioPage', () => {
     render(<MemoryRouter><CompendioPage /></MemoryRouter>);
     await screen.findByRole('link', { name: 'Arsène, Matto, livello 1' });
     fireEvent.click(screen.getByRole('button', { name: 'Filtri' }));
-    fireEvent.change(screen.getByLabelText("Elemento dell'affinità"), { target: { value: 'fire' } });
+    scegliVoce("Elemento dell'affinità", 'Fuoco');
     expect(nomiTessere()).toEqual(['Arsène', 'Pixie']);
-    fireEvent.change(screen.getByLabelText('Tipo di affinità'), { target: { value: 'wk' } });
+    scegliVoce('Tipo di affinità', 'Debole');
     expect(nomiTessere()).toEqual(['Arsène']);
-    fireEvent.change(screen.getByLabelText("Elemento dell'affinità"), { target: { value: '' } });
+    scegliVoce("Elemento dell'affinità", 'Elemento');
 
-    fireEvent.change(screen.getByLabelText('Immagine personalizzata'), { target: { value: 'con' } });
+    scegliVoce('Immagine personalizzata', 'Presente');
     await waitFor(() => expect(nomiTessere()).toEqual(['Pixie']));
-    fireEvent.change(screen.getByLabelText('Immagine personalizzata'), { target: { value: 'senza' } });
+    scegliVoce('Immagine personalizzata', 'Assente');
     expect(nomiTessere()).toEqual(['Arsène', 'Regent']);
     fireEvent.click(screen.getByRole('button', { name: 'Azzera' }));
     expect(nomiTessere()).toEqual(['Arsène', 'Pixie', 'Regent']);

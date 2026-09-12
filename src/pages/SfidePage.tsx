@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState, type ReactNode } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getSfide } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -110,10 +111,7 @@ function SchedaTratti({ d }: { d: SfideDto }) {
       {t.introduzione && <p className="m-0 text-text-secondary">{t.introduzione}</p>}
       <div className="flex flex-wrap gap-1.5 items-center">
         <div className="flex-1 min-w-[200px]"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un tratto o un effetto…" /></div>
-        <select className="form-input w-auto" value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Categoria">
-          <option value="">Tutte le categorie</option>
-          {categorie.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={categorie.map((c) => ({ chiave: c, nome: c }))} onCambia={setCategoria} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">{visibili.length} tratti su {t.elenco.length}.</p>
       <div className="overflow-x-auto">

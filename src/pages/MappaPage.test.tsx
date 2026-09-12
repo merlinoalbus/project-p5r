@@ -8,6 +8,7 @@ import { useAssetStore } from '../stores/assetStore';
 // ============================================================
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { ContenutiMappaDto } from '../../shared/organizzazioneMappe';
 import { MappaPage } from './MappaPage';
@@ -139,9 +140,9 @@ it('il contesto URL cambia il titolo del visore e il selettore può ripristinare
   // aperto da allora, e ricomparso oggi in una passata sotto carico. `waitFor` aspetta il fatto
   // invece di sperare nell'ordine: e' la differenza fra una prova e una coincidenza.
   await waitFor(()=>expect(document.title).toContain('Museo, 1P'));
-  fireEvent.change(screen.getByRole('combobox',{name:'Nome secondo il contesto'}),{target:{value:'b'}});
+  scegliVoce('Nome secondo il contesto','Museo, 2P');
   expect(await screen.findByRole('img',{name:'Mappa: Museo, 2P'})).toHaveAttribute('src',src);
-  fireEvent.change(screen.getByRole('combobox',{name:'Nome secondo il contesto'}),{target:{value:''}});
+  scegliVoce('Nome secondo il contesto','Mostra tutti i nomi');
   expect(await screen.findByRole('img',{name:'Mappa: Museo, 1P / Museo, 2P'})).toHaveAttribute('src',src);
   expect(screen.getByRole('list',{name:'Nomi nei contesti del gioco'})).toBeInTheDocument();
 });
@@ -175,7 +176,7 @@ it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del
   const pannello=within(visore).getByRole('complementary',{name:'Pannello della mappa'});
   expect(pannello).toContainElement(guida);
   expect(within(pannello).getByText('Contenuto conservato')).toBeVisible();
-  fireEvent.change(within(pannello).getByRole('combobox',{name:'Nome secondo il contesto'}),{target:{value:'b'}});
+  scegliVoce('Nome secondo il contesto','Museo, 2P',pannello);
   expect(await within(visore).findByRole('img',{name:'Mappa: Museo, 2P'})).toBeInTheDocument();
   expect(within(pannello).getByRole('navigation',{name:'Planimetrie del luogo'})).toBeVisible();
   fireEvent.click(within(visore).getByRole('button',{name:'Nascondi pannello'}));

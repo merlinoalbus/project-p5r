@@ -11,6 +11,7 @@ import { haPlanimetria } from '../utils/haPlanimetria';
 
 import { urlMappa } from '../utils/navigazioneMappa';
 import { useMemo, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
 import { centroAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
@@ -356,9 +357,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
         {!haPlanimetria(mappa) ? <LuogoSenzaPlanimetria mappa={mappa} nome={presentata!.nome} albero={albero} />
          : <><VisoreMappa
           key={`${mappa.chiave}-${spilloIniziale ?? ''}-${params.get('x') ?? ''}-${params.get('y') ?? ''}-${params.get('zoom') ?? ''}`}
-          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.gruppoImmagini ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.gruppoImmagini?.id === mappa.gruppoImmagini!.id)} attuale={mappa.chiave} /> : <nav aria-label="Planimetrie del luogo"><label>Planimetrie <select className="form-input" value={mappa.chiave} onChange={e => navigate(urlMappa(e.target.value))}>
-          {(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && !!(m.immagineUrl || m.assetOriginale))).map(m => <option key={m.chiave} value={m.chiave}>{nomePresentazioneMappa(m)}</option>)}
-        </select></label></nav>}<ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} /></>}
+          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.gruppoImmagini ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.gruppoImmagini?.id === mappa.gruppoImmagini!.id)} attuale={mappa.chiave} /> : <nav aria-label="Planimetrie del luogo"><Selettore etichetta="Planimetrie" valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && !!(m.immagineUrl || m.assetOriginale))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}<ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} /></>}
           mappa={presentata!}
           partitaId={partitaId}
           selezioneIniziale={spilloIniziale} puntoIniziale={puntoIniziale}

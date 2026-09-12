@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { eseguiFusioneScorta, getAnteprimaFusione } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -73,11 +74,9 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
                 {a.puntiAllarme > 0 && ` Con l'Allarme il gioco aggiunge +${a.puntiAllarme} punti statistica casuali: registrali dopo nella scheda della Persona.`}
               </span>
             </label>
-            <label className="form-label">Tratto
-              <select className="form-input mt-1" value={trattoScelto ?? ''} onChange={(e) => setTratto(e.target.value ? Number(e.target.value) : null)} aria-label="Tratto">
-                {a.tratti.map((t) => <option key={t.id} value={t.id}>{t.nomeIt}{t.da === null ? ' (proprio del risultato)' : ''}</option>)}
-              </select>
-            </label>
+            <div className="form-label">
+              <Selettore etichetta="Tratto" valore={trattoScelto === null ? '' : String(trattoScelto)} opzioni={a.tratti.map((t) => ({ chiave: String(t.id), nome: t.nomeIt, dettaglio: t.da === null ? 'proprio del risultato' : undefined }))} onCambia={(k) => setTratto(k ? Number(k) : null)} />
+            </div>
           </div>
           <div>
             <div className="form-label">Skill da ereditare ({skill.length}/{a.slotScelti}{a.allarme ? ', tutti gli slot con l\'Allarme' : ', una la assegna il gioco'})</div>

@@ -1,7 +1,7 @@
 import { etichettaPlanimetria, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
 import { destinazioneMappaSpillo } from '../utils/navigazioneMappa';
-import { SelettoreRicerca } from '../components/condizioni/SelettoreRicerca';
+import { Selettore } from '../components/shared/Selettore';
 import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 // ============================================================
@@ -368,10 +368,10 @@ function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, 
   return (
     <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" disabled={disabilitato}>
       <legend className="text-[12px] text-text-secondary">Porta a</legend>
-      <SelettoreRicerca etichetta="Mappa di arrivo" valore={valore?.mappa ?? ''} opzioni={mappe} segnaposto="Scegli la mappa…" onCambia={(k) => onCambia(k ? { mappa: k, spillo: null } : null)} />
+      <Selettore ricerca="sempre" etichetta="Mappa di arrivo" valore={valore?.mappa ?? ''} opzioni={mappe} segnaposto="Scegli la mappa…" onCambia={(k) => onCambia(k ? { mappa: k, spillo: null } : null)} />
       {valore && (arrivo.errore
         ? <p role="alert" className="m-0 text-[12px]">{arrivo.errore} <button type="button" className="visore-mappa__azione-testo" onClick={() => void arrivo.ricarica()}>Riprova</button></p>
-        : <SelettoreRicerca etichetta="Spillo di arrivo (facoltativo)" valore={valore.spillo ? String(valore.spillo) : ''} opzioni={spilli} onCambia={(k) => onCambia({ mappa: valore.mappa, spillo: k ? Number(k) : null })} disabilitato={arrivo.caricamento} />)}
+        : <Selettore ricerca="sempre" etichetta="Spillo di arrivo (facoltativo)" valore={valore.spillo ? String(valore.spillo) : ''} opzioni={spilli} onCambia={(k) => onCambia({ mappa: valore.mappa, spillo: k ? Number(k) : null })} disabilitato={arrivo.caricamento} />)}
       {valore && <div className="flex gap-2"><button type="button" className="visore-mappa__azione-testo" onClick={() => onCambia(null)}>Togli la destinazione</button></div>}
     </fieldset>
   );
@@ -391,7 +391,7 @@ function CollegamentoCitta({ valore, disabilitato, onCambia }: { valore: { tipo:
       </div>
       {voci.errore
         ? <p role="alert" className="m-0 text-[12px]">{voci.errore} <button type="button" className="visore-mappa__azione-testo" onClick={() => void voci.ricarica()}>Riprova</button></p>
-        : <SelettoreRicerca etichetta={`Elenco: ${etichetta}`} valore={valore?.tipo === tipo ? valore.chiave : ''} opzioni={opzioni} segnaposto="Scegli…" onCambia={(k) => onCambia(k ? { tipo, chiave: k } : null)} disabilitato={voci.caricamento} />}
+        : <Selettore ricerca="sempre" etichetta={`Elenco: ${etichetta}`} valore={valore?.tipo === tipo ? valore.chiave : ''} opzioni={opzioni} segnaposto="Scegli…" onCambia={(k) => onCambia(k ? { tipo, chiave: k } : null)} disabilitato={voci.caricamento} />}
       {valore && <button type="button" className="visore-mappa__azione-testo self-start" onClick={() => onCambia(null)}>Togli il collegamento</button>}
     </fieldset>
   );
@@ -446,11 +446,9 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
       </div>
       <form className="flex flex-col gap-2" onSubmit={salva}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={160} /></label>
-        <label className="editor-mappa__campo">Tipo
-          <select className="form-input" value={tipo} onChange={(e) => cambiaTipo(e.target.value as TipoSpillo)}>
-            {CATEGORIE_SPILLO.map((c) => <optgroup key={c} label={DEFINIZIONI_CATEGORIA[c].nome}>{tipiDellaCategoria(c).map((t) => <option key={t} value={t}>{DEFINIZIONI_SPILLO[t].nome}</option>)}</optgroup>)}
-          </select>
-        </label>
+        <div className="editor-mappa__campo">
+          <Selettore etichetta="Tipo" valore={tipo} opzioni={CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c).map((t) => ({ chiave: t, nome: DEFINIZIONI_SPILLO[t].nome, gruppo: DEFINIZIONI_CATEGORIA[c].nome })))} onCambia={(k) => cambiaTipo(k as TipoSpillo)} />
+        </div>
         <p className="m-0 text-[12px] text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
         <label className="editor-mappa__campo">Descrizione<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={2000} /></label>
 
@@ -516,17 +514,14 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
       <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, tipo, genitore: genitore || null, ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={120} /></label>
         <div className="grid grid-cols-2 gap-2">
-          <label className="editor-mappa__campo">Tipo
-            <select className="form-input" value={tipo} onChange={(e) => setTipo(e.target.value as TipoMappa)}>{TIPI_MAPPA.map((t) => <option key={t} value={t}>{NOME_TIPO_MAPPA[t]}</option>)}</select>
-          </label>
+          <div className="editor-mappa__campo">
+            <Selettore etichetta="Tipo di mappa" valore={tipo} opzioni={TIPI_MAPPA.map((t) => ({ chiave: t, nome: NOME_TIPO_MAPPA[t] }))} onCambia={(k) => setTipo(k as TipoMappa)} />
+          </div>
           <label className="editor-mappa__campo">Ordine<input className="form-input" type="number" min={0} value={ordine} onChange={(e) => setOrdine(e.target.value)} /></label>
         </div>
-        <label className="editor-mappa__campo">Mappa genitore
-          <select className="form-input" value={genitore} onChange={(e) => setGenitore(e.target.value)}>
-            <option value="">— nessuna (radice) —</option>
-            {albero.filter((m) => !discendenti.has(m.chiave)).map((m) => <option key={m.chiave} value={m.chiave}>{etichettaPlanimetria(m)} ({NOME_TIPO_MAPPA[m.tipo]})</option>)}
-          </select>
-        </label>
+        <div className="editor-mappa__campo">
+          <Selettore etichetta="Mappa genitore" valore={genitore} vuoto="— nessuna (radice) —" opzioni={albero.filter((m) => !discendenti.has(m.chiave)).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), dettaglio: NOME_TIPO_MAPPA[m.tipo] }))} onCambia={setGenitore} />
+        </div>
         <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} /></label>
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" disabled={occupato || !modificata} />
@@ -557,9 +552,9 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
       </>}>
       <div className="flex flex-col gap-2">
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={120} autoFocus /></label>
-        <label className="editor-mappa__campo">Tipo
-          <select className="form-input" value={tipo} onChange={(e) => setTipo(e.target.value as TipoMappa)}>{TIPI_MAPPA.map((t) => <option key={t} value={t}>{NOME_TIPO_MAPPA[t]}</option>)}</select>
-        </label>
+        <div className="editor-mappa__campo">
+          <Selettore etichetta="Tipo di mappa" valore={tipo} opzioni={TIPI_MAPPA.map((t) => ({ chiave: t, nome: NOME_TIPO_MAPPA[t] }))} onCambia={(k) => setTipo(k as TipoMappa)} />
+        </div>
         <p className="m-0 text-[12px] text-text-muted">Genitore: {genitore.nome}. {esiste ? <span className="editor-mappa__avviso">Esiste già una mappa con questa chiave.</span> : 'Nomi e file seguiranno automaticamente questo percorso.'}</p>
         <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={passaggio} onChange={(e) => setPassaggio(e.target.checked)} /> <span>Crea il passaggio su «{genitore.nome}» verso la nuova mappa <span className="text-text-muted">(al centro, in un punto libero: poi lo trascini dove sta l'ingresso)</span></span></label>
         <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={ritorno} onChange={(e) => setRitorno(e.target.checked)} /> <span>Crea anche il passaggio di ritorno verso «{genitore.nome}» nella nuova mappa <span className="text-text-muted">(in basso al centro)</span></span></label>

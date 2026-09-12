@@ -6,6 +6,7 @@
 // ============================================================
 
 import { fireEvent, render, screen } from '@testing-library/react';
+import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AttivitaPage } from './AttivitaPage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -35,10 +36,10 @@ describe('AttivitaPage', () => {
     expect(await screen.findByText('Freccette')).toBeInTheDocument();
     expect(getAttivita).toHaveBeenCalledWith(5);
     expect(screen.getAllByRole('link', { name: 'Kichijoji, Penguin Sniper' })[0]).toHaveAttribute('href', '/guida/citta/kichijoji');
-    fireEvent.change(screen.getByRole('combobox', { name: 'Dote' }), { target: { value: 'fascino' } });
+    scegliVoce('Dote', 'Fascino');
     expect(screen.queryByText('Freccette')).toBeNull();
     expect(screen.getByText('Bagno pubblico')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Dote' }), { target: { value: '' } });
+    scegliVoce('Dote', 'Tutte le Doti');
     fireEvent.click(screen.getByRole('tab', { name: 'Lavori' }));
     expect(screen.getByText('Commesso al Triple Seven')).toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: 'Libri' })).toBeNull();

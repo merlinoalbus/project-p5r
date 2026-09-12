@@ -11,6 +11,8 @@ import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared
 import { useCarica } from '../../hooks/useCarica';
 import { getAttivita, getQuartieri } from '../../services/api/compendio';
 import { useState, type ReactNode } from 'react';
+import { Selettore } from '../shared/Selettore';
+import { opzioniDaNomi } from '../../utils/selettore';
 import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, nascondiElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
@@ -103,6 +105,13 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'risposta_en', etichetta: 'Risposta in inglese', tipo: 'testo', aiuto: 'Solo se ti serve: è la parola con cui la risolve chi gioca in inglese' },
   ],
 };
+
+/** Un campo del modulo: una `<label>` se dentro c'è un controllo nativo, un `<div>` se c'è il Selettore
+ *  (che porta da sé la propria etichetta, e sotto una label un tocco sulle parti inerti della tendina
+ *  verrebbe inoltrato al pulsante, richiudendola). */
+function Contenitore({ selettore, className, children }: { selettore: boolean; className: string; children: ReactNode }) {
+  return selettore ? <div className={className}>{children}</div> : <label className={className}>{children}</label>;
+}
 
 const etichettaOggetto = (o: OggettoSelezionabileDto) => o.nomeIt && o.nomeIt !== o.nome ? `${o.nomeIt} (${o.nome})` : o.nome;
 
@@ -227,10 +236,8 @@ function EditorEffetto({ valore, onCambia, quartieri, attivita }: {
     attivita: Object.fromEntries((attivita ?? []).map((a) => [a.chiave, a.nome])),
   };
   const campo = (etichetta: string, dentro: ReactNode) => <label className="editor-mappa__campo">{etichetta}{dentro}</label>;
-  const scelta = <C extends string>(v: C, opzioni: readonly C[], nomi: Record<C, string>, set: (x: C) => void) => (
-    <select className="form-input" value={v} onChange={(e) => set(e.target.value as C)}>
-      {opzioni.map((o) => <option key={o} value={o}>{nomi[o]}</option>)}
-    </select>
+  const scelta = <C extends string>(etichetta: string, v: C, opzioni: readonly C[], nomi: Record<C, string>, set: (x: C) => void) => (
+    <Selettore etichetta={etichetta} valore={v} opzioni={opzioni.map((o) => ({ chiave: o, nome: nomi[o] }))} onCambia={(k) => set(k as C)} />
   );
   const numero = (v: number | null, set: (n: number) => void) => (
     <input className="form-input" type="number" min={0} max={9999} value={v ?? 0} onChange={(e) => set(Number(e.target.value))} />
@@ -238,60 +245,50 @@ function EditorEffetto({ valore, onCambia, quartieri, attivita }: {
   return (
     <fieldset className="regole-editor flex flex-col gap-2">
       <legend>Che cosa fa</legend>
-      <label className="editor-mappa__campo">
-        Effetto
-        <select className="form-input" value={famiglia} onChange={(e) => cambiaFamiglia(e.target.value)}>
-          <option value="">Nessun effetto dichiarato</option>
-          {FAMIGLIE_EFFETTO.map((f) => <option key={f.chiave} value={f.chiave}>{f.nome}</option>)}
-        </select>
-      </label>
+      <div className="editor-mappa__campo">
+        <Selettore etichetta="Effetto" valore={famiglia} vuoto="Nessun effetto dichiarato" opzioni={FAMIGLIE_EFFETTO.map((f) => ({ chiave: f.chiave, nome: f.nome }))} onCambia={cambiaFamiglia} />
+      </div>
       {valore?.famiglia === 'ripristina' && <>
-        {campo('Che cosa ripristina', scelta(valore.risorsa, RISORSE, NOME_RISORSA, (risorsa) => onCambia({ ...valore, risorsa })))}
-        {campo('Quanto', scelta(valore.misura, MISURE, { assoluta: 'Una quantità', percentuale: 'Una percentuale', tutto: 'Tutto' }, (misura) => onCambia({ ...valore, misura })))}
+        {scelta('Che cosa ripristina', valore.risorsa, RISORSE, NOME_RISORSA, (risorsa) => onCambia({ ...valore, risorsa }))}
+        {scelta('Quanto', valore.misura, MISURE, { assoluta: 'Una quantità', percentuale: 'Una percentuale', tutto: 'Tutto' }, (misura) => onCambia({ ...valore, misura }))}
         {valore.misura !== 'tutto' && campo(valore.misura === 'percentuale' ? 'Percentuale' : 'Quantità', numero(valore.valore, (v) => onCambia({ ...valore, valore: v })))}
-        {campo('A chi', scelta(valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio })))}
+        {scelta('A chi', valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio }))}
       </>}
       {valore?.famiglia === 'rianima' && <>
         {campo('Con quanti HP (%)', numero(valore.percentuale, (v) => onCambia({ ...valore, percentuale: v })))}
-        {campo('A chi', scelta(valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio })))}
+        {scelta('A chi', valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio }))}
       </>}
       {valore?.famiglia === 'cura-stato' && <>
-        {campo('Quale stato', scelta(valore.stato as StatoAlterato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato })))}
-        {campo('A chi', scelta(valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio })))}
+        {scelta('Quale stato', valore.stato as StatoAlterato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato }))}
+        {scelta('A chi', valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio }))}
       </>}
       {valore?.famiglia === 'infliggi-stato' && <>
-        {campo('Quale stato', scelta(valore.stato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato })))}
-        {campo('Quanto è probabile', scelta(valore.probabilita, PROBABILITA, { alta: 'Alta', media: 'Media', bassa: 'Bassa', 'non-detta': 'Non dichiarata' }, (probabilita) => onCambia({ ...valore, probabilita })))}
-        {campo('A chi', scelta(valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio })))}
+        {scelta('Quale stato', valore.stato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato }))}
+        {scelta('Quanto è probabile', valore.probabilita, PROBABILITA, { alta: 'Alta', media: 'Media', bassa: 'Bassa', 'non-detta': 'Non dichiarata' }, (probabilita) => onCambia({ ...valore, probabilita }))}
+        {scelta('A chi', valore.bersaglio, BERSAGLI, NOME_BERSAGLIO, (bersaglio) => onCambia({ ...valore, bersaglio }))}
       </>}
       {(valore?.famiglia === 'resiste-stato' || valore?.famiglia === 'previene-stato') &&
-        campo('Quale stato', scelta(valore.stato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato })))}
+        scelta('Quale stato', valore.stato, STATI_ALTERATI, NOME_STATO, (stato) => onCambia({ ...valore, stato }))}
       {valore?.famiglia === 'statistica' && <>
-        {campo('Quale statistica', scelta(valore.statistica, STATISTICHE_OGGETTO, NOME_STATISTICA, (statistica) => onCambia({ ...valore, statistica })))}
+        {scelta('Quale statistica', valore.statistica, STATISTICHE_OGGETTO, NOME_STATISTICA, (statistica) => onCambia({ ...valore, statistica }))}
         {campo('Di quanto', numero(valore.valore, (v) => onCambia({ ...valore, valore: v })))}
       </>}
       {valore?.famiglia === 'dote' && <>
-        {campo('Quale Dote', scelta(valore.dote, Object.keys(NOME_DOTE) as string[], NOME_DOTE, (dote) => onCambia({ ...valore, dote })))}
+        {scelta('Quale Dote', valore.dote, Object.keys(NOME_DOTE) as string[], NOME_DOTE, (dote) => onCambia({ ...valore, dote }))}
         {campo('Quante note (♪)', numero(valore.note, (v) => onCambia({ ...valore, note: v })))}
       </>}
       {valore?.famiglia === 'sblocca-luogo' &&
-        campo('Quale luogo', <select className="form-input" value={valore.luogo} onChange={(e) => onCambia({ ...valore, luogo: e.target.value })}>
-          <option value="">Scegli il quartiere…</option>
-          {(quartieri ?? []).map((q) => <option key={q.chiave} value={q.chiave}>{q.nome}</option>)}
-        </select>)}
+        <Selettore etichetta="Quale luogo" valore={valore.luogo} vuoto="Scegli il quartiere…" opzioni={(quartieri ?? []).map((q) => ({ chiave: q.chiave, nome: q.nome }))} onCambia={(luogo) => onCambia({ ...valore, luogo })} />}
       {valore?.famiglia === 'sblocca-funzione' && <>
-        {campo('Che cosa apre', scelta(valore.funzione, FUNZIONI, NOME_FUNZIONE, (funzione) => onCambia({ ...valore, funzione })))}
-        {campo('In quale attività', <select className="form-input" value={valore.dove ?? ''} onChange={(e) => onCambia({ ...valore, dove: e.target.value || null })}>
-          <option value="">Non è legata a una sola attività</option>
-          {(attivita ?? []).map((a) => <option key={a.chiave} value={a.chiave}>{a.nome}</option>)}
-        </select>)}
+        {scelta('Che cosa apre', valore.funzione, FUNZIONI, NOME_FUNZIONE, (funzione) => onCambia({ ...valore, funzione }))}
+        <Selettore etichetta="In quale attività" valore={valore.dove ?? ''} vuoto="Non è legata a una sola attività" opzioni={(attivita ?? []).map((a) => ({ chiave: a.chiave, nome: a.nome }))} onCambia={(k) => onCambia({ ...valore, dove: k || null })} />
       </>}
       {valore?.famiglia === 'moltiplica' && <>
-        {campo('Che cosa moltiplica', scelta(valore.cosa, RESE, NOME_RESA, (cosa) => onCambia({ ...valore, cosa })))}
+        {scelta('Che cosa moltiplica', valore.cosa, RESE, NOME_RESA, (cosa) => onCambia({ ...valore, cosa }))}
         {campo('Per quanto', numero(valore.fattore, (v) => onCambia({ ...valore, fattore: Math.max(1, v) })))}
       </>}
       {valore?.famiglia === 'aumenta-punti' &&
-        campo('Dove si guadagna di più', scelta(valore.dove, GUADAGNI, NOME_GUADAGNO, (dove) => onCambia({ ...valore, dove })))}
+        scelta('Dove si guadagna di più', valore.dove, GUADAGNI, NOME_GUADAGNO, (dove) => onCambia({ ...valore, dove }))}
       {valore?.famiglia === 'descrittivo' &&
         campo('Descrizione', <textarea className="form-input" rows={2} maxLength={600} value={valore.testo} onChange={(e) => onCambia({ ...valore, testo: e.target.value })} />)}
       {/* L'anteprima mostrava la chiave grezza — «Sblocca yongen-jaya» — perche' `descriviEffetto`
@@ -343,22 +340,12 @@ function EditorDoti({ doti, onCambia, disabilitato }: { doti: DoteAttivita[]; on
       {doti.length === 0 && <p className="m-0 text-[12px] text-text-muted" role="status">Nessuna Dote dichiarata.</p>}
       {doti.map((d, i) => (
         <div key={i} className="flex flex-wrap items-end gap-2">
-          <label className="editor-mappa__campo min-w-[160px] flex-1">
-            Dote
-            <select className="form-input" value={d.dote ?? ''} disabled={disabilitato} onChange={(e) => cambia(i, 'dote', e.target.value)}>
-              <option value="">Dote variabile</option>
-              {Object.entries(NOME_DOTE).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-            </select>
-          </label>
-          <label className="editor-mappa__campo w-[130px]">
-            Note
-            <select className="form-input" value={d.note ?? ''} disabled={disabilitato} onChange={(e) => cambia(i, 'note', e.target.value)}>
-              <option value="">Non indicate</option>
-              <option value="1">♪ (1)</option>
-              <option value="2">♪♪ (2)</option>
-              <option value="3">♪♪♪ (3)</option>
-            </select>
-          </label>
+          <div className="editor-mappa__campo min-w-[160px] flex-1">
+            <Selettore etichetta="Dote" valore={d.dote ?? ''} disabilitato={disabilitato} vuoto="Dote variabile" opzioni={opzioniDaNomi(NOME_DOTE)} onCambia={(k) => cambia(i, 'dote', k)} />
+          </div>
+          <div className="editor-mappa__campo w-[130px]">
+            <Selettore etichetta="Note" valore={d.note === null || d.note === undefined ? '' : String(d.note)} disabilitato={disabilitato} vuoto="Non indicate" opzioni={[{ chiave: '1', nome: '♪ (1)' }, { chiave: '2', nome: '♪♪ (2)' }, { chiave: '3', nome: '♪♪♪ (3)' }]} onCambia={(k) => cambia(i, 'note', k)} />
+          </div>
           <label className="editor-mappa__campo min-w-[200px] flex-[2]">
             Quando (facoltativo)
             <input className="form-input" type="text" maxLength={400} value={d.condizione ?? ''} disabled={disabilitato}
@@ -601,17 +588,20 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
               collegato vengono da lui, e mostrarli come campi vorrebbe dire invitare a correggere qui
               una cosa che qui non vive: e' la copia che questo lavoro toglie di mezzo. */}
           {CAMPI[tipo].filter((c) => tipo !== 'articolo' || aMano || !['nome', 'categoria'].includes(c.nome)).map((c) => (
-            <label key={c.nome} className={`editor-mappa__campo ${c.tipo === 'testolungo' ? 'sm:col-span-2' : ''}`}>
-              {c.etichetta}
+            <Contenitore key={c.nome} selettore={c.tipo === 'select'} className={`editor-mappa__campo ${c.tipo === 'testolungo' ? 'sm:col-span-2' : ''}`}>
+              {c.tipo !== 'select' && c.etichetta}
               {c.tipo === 'select' ? (
-                <select className="form-input" value={valori[c.nome] ?? ''} onChange={(e) => setValori({ ...valori, [c.nome]: e.target.value })}>
-                  {c.nome === 'luogo_chiave' && <option value="">Nessun quartiere (online, ambulante o da assegnare)</option>}
-                  {/* Chi non ha `altro` fra le scelte ha bisogno di un modo per dire «nessuna»:
-                      senza, il campo obbliga a dichiarare qualcosa che non e' vero. */}
-                  {c.tipo === 'select' && c.nome !== 'luogo_chiave' && !(c.opzioni && 'altro' in c.opzioni) && <option value="">{c.vuoto ?? 'Nessuna'}</option>}
-                  {c.nome === 'luogo_chiave' && valori.luogo_chiave && !quartieri.dati?.some(q => q.chiave === valori.luogo_chiave) && <option value={valori.luogo_chiave}>{valori.luogo_chiave}</option>}
-                  {Object.entries(c.nome === 'luogo_chiave' ? Object.fromEntries((quartieri.dati ?? []).map(q => [q.chiave, q.nome])) : c.opzioni ?? {}).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-                </select>
+                <Selettore
+                  etichetta={c.etichetta}
+                  valore={valori[c.nome] ?? ''}
+                  // Chi non ha `altro` fra le scelte ha bisogno di un modo per dire «nessuna»:
+                  // senza, il campo obbliga a dichiarare qualcosa che non e' vero.
+                  vuoto={c.nome === 'luogo_chiave' ? 'Nessun quartiere (online, ambulante o da assegnare)' : !(c.opzioni && 'altro' in c.opzioni) ? (c.vuoto ?? 'Nessuna') : undefined}
+                  opzioni={c.nome === 'luogo_chiave'
+                    ? [...(valori.luogo_chiave && !quartieri.dati?.some(q => q.chiave === valori.luogo_chiave) ? [{ chiave: valori.luogo_chiave, nome: valori.luogo_chiave }] : []), ...(quartieri.dati ?? []).map(q => ({ chiave: q.chiave, nome: q.nome }))]
+                    : opzioniDaNomi(c.opzioni ?? {})}
+                  onCambia={(k) => setValori({ ...valori, [c.nome]: k })}
+                />
               ) : c.tipo === 'booleano' ? (
                 <input type="checkbox" className="w-5 h-5" checked={valori[c.nome] === '1'}
                   onChange={(e) => setValori({ ...valori, [c.nome]: e.target.checked ? '1' : '' })} />
@@ -621,7 +611,7 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
                 <input className="form-input" type={c.tipo === 'numero' ? 'number' : 'text'} min={c.tipo === 'numero' ? 0 : undefined} value={valori[c.nome] ?? ''} onChange={(e) => setValori({ ...valori, [c.nome]: e.target.value })} maxLength={400} />
               )}
               {c.aiuto && <span className="text-[11px] text-text-muted">{c.aiuto}</span>}
-            </label>
+            </Contenitore>
           ))}
         </div>
         {/* **Le Doti sono il campo che l'app sa usare davvero.** Un premio scritto «Coraggio +3»

@@ -18,6 +18,7 @@
  *    posizione non c'è, e toglierlo lascerebbe l'utente senza risposta invece che con una.
  */
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { OggettiPage } from './OggettiPage';
 import type { OggettiGuidaDto } from '../types';
@@ -140,12 +141,12 @@ describe('scheda Equipaggiamento', () => {
 
   it('filtra per tipo e per chi lo può equipaggiare', async () => {
     await apri();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Tipo' }), { target: { value: 'Accessory' } });
+    scegliVoce('Tipo', 'Accessorio');
     expect(screen.queryByText('Paradiso perduto')).toBeNull();
     expect(screen.getByText('Portaf. del supporto')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByRole('combobox', { name: 'Tipo' }), { target: { value: '' } });
-    fireEvent.change(screen.getByRole('combobox', { name: 'Per chi' }), { target: { value: 'Women' } });
+    scegliVoce('Tipo', 'Tutti i tipi');
+    scegliVoce('Per chi', 'Solo donne');
     expect(screen.getByText('Reggiseno arcangelo')).toBeInTheDocument();
     expect(screen.queryByText('Portaf. del supporto')).toBeNull();
     expect(screen.getByText('1 pezzi su 3.')).toBeInTheDocument();

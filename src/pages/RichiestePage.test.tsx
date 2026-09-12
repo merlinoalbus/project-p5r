@@ -6,6 +6,7 @@
 // ============================================================
 
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { RichiestePage } from './RichiestePage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -36,9 +37,9 @@ describe('RichiestePage', () => {
     expect(screen.queryByText('Un ex piuttosto appiccicoso')).toBeNull();
     fireEvent.click(screen.getByRole('tab', { name: 'Le Richieste' }));
     expect(screen.getByText('Un ex piuttosto appiccicoso')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Dedalo' }), { target: { value: 'Dedalo di Aiyatsbus' } });
+    scegliVoce('Dedalo', 'Dedalo di Aiyatsbus');
     expect(screen.queryByText('Un ex piuttosto appiccicoso')).toBeNull();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Dedalo' }), { target: { value: '' } });
+    scegliVoce('Dedalo', 'Tutti i Dedali');
     // I comandi e il collegamento al Dedalo stanno sulla carta, non dentro una piega da aprire.
     const carta = within(screen.getByText('Un ex piuttosto appiccicoso').closest('li')!);
     expect(carta.getByRole('link', { name: 'Apri il Dedalo' })).toHaveAttribute('href', '/guida/dungeon/mementos?area=mementos-01-qimranut');

@@ -23,6 +23,14 @@ export default defineConfig([
       ecmaVersion: 2023,
       globals: globals.browser,
     },
+    rules: {
+      // Un solo elenco chiuso in tutta l'app: il Selettore (ricerca da dieci voci in su, 44 px,
+      // tastiera). La tendina nativa non si cerca e sul telefono è minuscola: vietata.
+      'no-restricted-syntax': ['error', {
+        selector: "JSXOpeningElement[name.name='select']",
+        message: 'Nessuna <select> nativa: usa <Selettore> (src/components/shared/Selettore.tsx).',
+      }],
+    },
   },
 
   // Backend, shared e script (runtime Node, niente React)

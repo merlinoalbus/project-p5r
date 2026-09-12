@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useNavigate } from 'react-router-dom';
+import { Selettore } from '../shared/Selettore';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 
@@ -27,17 +28,14 @@ export function PartitaSelettore() {
   };
 
   return (
-    <select
-      className="form-input w-auto min-w-0 shrink max-w-[150px] sm:max-w-[240px] min-h-[40px] py-1 text-[13px] truncate"
-      value={attiva?.id ?? ''}
-      onChange={(e) => void cambia(e.target.value)}
-      aria-label="Partita attiva"
-    >
-      {partite.length === 0 && <option value="">Nessuna partita</option>}
-      {partite.map((p) => (
-        <option key={p.id} value={p.id}>{p.nome} · Liv. {p.livelloProtagonista}</option>
-      ))}
-      <option value="__nuova">Nuova partita…</option>
-    </select>
+    <Selettore
+      compatto
+      className="min-w-0 shrink max-w-[150px] sm:max-w-[240px]"
+      etichetta="Partita attiva"
+      valore={attiva ? String(attiva.id) : ''}
+      segnaposto="Nessuna partita"
+      opzioni={[...partite.map((p) => ({ chiave: String(p.id), nome: p.nome, dettaglio: `Liv. ${p.livelloProtagonista}` })), { chiave: '__nuova', nome: 'Nuova partita…' }]}
+      onCambia={(k) => void cambia(k)}
+    />
   );
 }

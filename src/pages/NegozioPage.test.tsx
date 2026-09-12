@@ -6,6 +6,7 @@
 // ============================================================
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { NegozioPage } from './NegozioPage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -52,15 +53,15 @@ describe('NegozioPage', () => {
     // nome del negozio e con la larghezza. Un numero scritto qui sbordava di 84 px.
     expect(posizioni).toEqual([{ tipo: 'negozio', chiave: 'untouchable', altezza: 'var(--altezza-tela-negozio)' }]);
     expect(screen.getByText('Kogatana nera')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Categoria' }), { target: { value: 'protezione' } });
+    scegliVoce('Categoria', 'Protezione');
     expect(screen.queryByText('Kogatana nera')).toBeNull();
     expect(screen.getByText('Giubbotto')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Categoria' }), { target: { value: '' } });
-    fireEvent.change(screen.getByRole('combobox', { name: 'Per chi' }), { target: { value: 'Ann' } });
+    scegliVoce('Categoria', 'Tutte le categorie');
+    scegliVoce('Per chi', 'Ann');
     expect(screen.queryByText('Kogatana nera')).toBeNull();
     expect(screen.getByText('Frusta')).toBeInTheDocument();
     expect(screen.getByText('Giubbotto')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Per chi' }), { target: { value: '' } });
+    scegliVoce('Per chi', 'Per chiunque');
     await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Kogatana nera acquistato' })); });
     expect(impostaAcquisto).toHaveBeenCalledWith(9, 'untouchable/kogatana-nera', true);
     expect(await screen.findByText(/1 acquistati/)).toBeInTheDocument();

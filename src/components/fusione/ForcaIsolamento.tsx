@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { eseguiIsolamento, getPossedute, getSuggerimentoIsolamento } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { EseguiForcaModal } from './EseguiForcaModal';
@@ -125,11 +126,9 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
       {rangoGemelle < 3 && <p className="m-0 text-[12px] text-warning">Gemelle al rango {rangoGemelle}: l'Isolamento non è ancora sbloccato nella partita attiva.</p>}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="sm:col-span-3"><SelettorePosseduta etichetta="Persona da isolare" persone={scorta} sceltaId={possedutaId} onScegli={setPossedutaId} /></div>
-        <label className="form-label">Incenso
-          <select className="form-input mt-1" value={incensoChiave} onChange={(e) => setIncensoChiave(e.target.value)} aria-label="Incenso">
-            {INCENSI.map((i) => <option key={i.chiave} value={i.chiave}>{i.nome}{i.prezzo ? ` · ${i.prezzo.toLocaleString('it-IT')} ¥` : ' · fiori'}</option>)}
-          </select>
-        </label>
+        <div className="form-label">
+          <Selettore etichetta="Incenso" valore={incensoChiave} opzioni={INCENSI.map((i) => ({ chiave: i.chiave, nome: i.nome, dettaglio: i.prezzo ? `${i.prezzo.toLocaleString('it-IT')} ¥` : 'fiori' }))} onCambia={setIncensoChiave} />
+        </div>
         <label className="form-label">Giorni
           <input type="number" min={1} max={ISOLAMENTO_AVVISO.giornoPerdita - 1} className="form-input mt-1" value={giorni} onChange={(e) => setGiorni(Math.min(ISOLAMENTO_AVVISO.giornoPerdita - 1, Math.max(1, Number(e.target.value) || 1)))} aria-label="Giorni di isolamento" />
         </label>

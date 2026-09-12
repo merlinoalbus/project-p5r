@@ -4,6 +4,7 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -161,14 +162,10 @@ export function CompendioPage() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-2 items-center">
           <CampoRicerca valore={q} onCambia={(v) => imposta('q', v, '')} segnaposto="Cerca Persona o arcano…" />
-          <label className="flex items-center gap-1.5 text-[12px] text-text-secondary">
+          <span className="flex items-center gap-1.5 text-[12px] text-text-secondary">
             Ordina
-            <select className="form-input form-input--compatto" value={ordine} onChange={(e) => imposta('ordine', e.target.value, 'livello')} aria-label="Ordinamento">
-              <option value="livello">Livello</option>
-              <option value="nome">Nome</option>
-              <option value="arcana">Arcano</option>
-            </select>
-          </label>
+            <Selettore compatto etichetta="Ordinamento" valore={ordine} opzioni={[{ chiave: 'livello', nome: 'Livello' }, { chiave: 'nome', nome: 'Nome' }, { chiave: 'arcana', nome: 'Arcano' }]} onCambia={(k) => imposta('ordine', k, 'livello')} />
+          </span>
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => imposta('dir', decrescente ? 'asc' : 'desc', 'asc')} aria-label={decrescente ? 'Ordine decrescente: passa a crescente' : 'Ordine crescente: passa a decrescente'} title={decrescente ? 'Decrescente' : 'Crescente'}>
             {decrescente ? '↓' : '↑'}
           </button>
@@ -188,12 +185,7 @@ export function CompendioPage() {
           <div id="pannello-filtri-compendio" className="card pannello-filtri" role="group" aria-label="Filtri del compendio">
             <div className="pannello-filtri__gruppo">
               <span className="pannello-filtri__etichetta">Arcano</span>
-              <select className="form-input form-input--compatto" value={arcana} onChange={(e) => imposta('arcana', e.target.value, '')} aria-label="Arcano">
-                <option value="">Tutti</option>
-                {glossario?.arcani.map((a) => (
-                  <option key={a.chiave} value={a.chiave}>{a.nome}</option>
-                ))}
-              </select>
+              <Selettore compatto etichetta="Arcano" valore={arcana} vuoto="Tutti" opzioni={(glossario?.arcani ?? []).map((a) => ({ chiave: a.chiave, nome: a.nome }))} onCambia={(k) => imposta('arcana', k, '')} />
             </div>
             <div className="pannello-filtri__gruppo" role="group" aria-label="Intervallo di livello">
               <span className="pannello-filtri__etichetta">Livello</span>
@@ -206,23 +198,13 @@ export function CompendioPage() {
             <div className="pannello-filtri__gruppo" role="group" aria-label="Affinità">
               <span className="pannello-filtri__etichetta">Affinità</span>
               <span className="flex items-center gap-1">
-                <select className="form-input form-input--compatto" value={elemento} onChange={(e) => imposta('el', e.target.value, '')} aria-label="Elemento dell'affinità">
-                  <option value="">Elemento</option>
-                  {elementi.map((el) => <option key={el.chiave} value={el.chiave}>{el.nome}</option>)}
-                </select>
-                <select className="form-input form-input--compatto" value={codice} onChange={(e) => imposta('aff', e.target.value, '')} aria-label="Tipo di affinità" disabled={!elemento}>
-                  <option value="">Qualsiasi</option>
-                  {codici.map((c) => <option key={c.chiave} value={c.chiave}>{c.nome}</option>)}
-                </select>
+                <Selettore compatto etichetta="Elemento dell'affinità" valore={elemento} vuoto="Elemento" opzioni={elementi.map((el) => ({ chiave: el.chiave, nome: el.nome }))} onCambia={(k) => imposta('el', k, '')} />
+                <Selettore compatto etichetta="Tipo di affinità" valore={codice} vuoto="Qualsiasi" disabilitato={!elemento} opzioni={codici.map((c) => ({ chiave: c.chiave, nome: c.nome }))} onCambia={(k) => imposta('aff', k, '')} />
               </span>
             </div>
             <div className="pannello-filtri__gruppo">
               <span className="pannello-filtri__etichetta">Immagine mia</span>
-              <select className="form-input form-input--compatto" value={immagine} onChange={(e) => imposta('img', e.target.value, '')} aria-label="Immagine personalizzata">
-                <option value="">Tutte</option>
-                <option value="con">Presente</option>
-                <option value="senza">Assente</option>
-              </select>
+              <Selettore compatto etichetta="Immagine personalizzata" valore={immagine} vuoto="Tutte" opzioni={[{ chiave: 'con', nome: 'Presente' }, { chiave: 'senza', nome: 'Assente' }]} onCambia={(k) => imposta('img', k, '')} />
             </div>
             <div className="pannello-filtri__gruppo" role="group" aria-label="Inclusioni">
               <span className="pannello-filtri__etichetta">Inclusioni</span>

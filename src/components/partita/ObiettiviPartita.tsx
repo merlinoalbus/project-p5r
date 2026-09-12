@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { Link } from 'react-router-dom';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getObiettivi, getPersone, getSkills, isApiError } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
@@ -210,11 +211,9 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
           <label className="form-label">Livello minimo (facoltativo)
             <input type="number" min={1} max={99} className="form-input mt-1" value={livelloMin} onChange={(e) => setLivelloMin(e.target.value === '' ? '' : Math.min(99, Math.max(1, Number(e.target.value))))} aria-label="Livello minimo" />
           </label>
-          <label className="form-label">Priorità
-            <select className="form-input mt-1" value={priorita} onChange={(e) => setPriorita(Number(e.target.value))} aria-label="Priorità">
-              {PRIORITA.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}
-            </select>
-          </label>
+          <div className="form-label">
+            <Selettore etichetta="Priorità" valore={String(priorita)} opzioni={PRIORITA.map((p) => ({ chiave: String(p.v), nome: p.l }))} onCambia={(k) => setPriorita(Number(k))} />
+          </div>
         </div>
         <label className="form-label">Note
           <textarea className="form-input mt-1 min-h-[70px]" value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} />

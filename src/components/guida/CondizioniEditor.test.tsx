@@ -35,7 +35,7 @@ function Prova({ iniziali = [], onCambia }: { iniziali?: RequisitoSpillo[]; onCa
   return <CondizioniEditor condizioni={c} onCambia={(n) => { setC(n); onCambia?.(n); }} />;
 }
 const scegli = (ambito: ReturnType<typeof within>, etichetta: string, voce: string | RegExp) => {
-  fireEvent.click(ambito.getByRole('button', { name: etichetta }));
+  fireEvent.click(ambito.getByRole('combobox', { name: etichetta }));
   fireEvent.click(ambito.getByRole('option', { name: voce }).querySelector('button')!);
 };
 
@@ -49,7 +49,7 @@ describe('CondizioniEditor', () => {
     expect(onCambia).toHaveBeenLastCalledWith([{ tipo: 'data', dal: '04-18' }]);
     const riga = within(screen.getByRole('group', { name: 'Condizione: dal 18 aprile' }));
     // l'operatore cambia il tipo: «solo il» è un periodo di un giorno
-    fireEvent.change(riga.getByLabelText('Operatore'), { target: { value: 'il' } });
+    scegli(riga, 'Operatore', 'solo il');
     expect(onCambia).toHaveBeenLastCalledWith([{ tipo: 'intervallo', dal: '04-18', al: '04-18' }]);
   });
 
@@ -57,7 +57,7 @@ describe('CondizioniEditor', () => {
     const onCambia = vi.fn();
     render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }]} onCambia={onCambia} />);
     const riga = within(await screen.findByRole('group', { name: 'Condizione: dal 18 aprile' }));
-    fireEvent.click(riga.getByRole('button', { name: 'Stato' }));
+    fireEvent.click(riga.getByRole('combobox', { name: 'Stato' }));
     fireEvent.change(riga.getByLabelText('Cerca Stato'), { target: { value: 'confid' } });
     expect(within(riga.getByRole('listbox')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Confidente']);
     fireEvent.click(riga.getByRole('option', { name: 'Confidente' }).querySelector('button')!);

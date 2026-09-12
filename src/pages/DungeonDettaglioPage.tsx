@@ -28,6 +28,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getDungeon, impostaStatoPunto, scaricaPianta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -379,12 +380,7 @@ export function DungeonDettaglioPage() {
                     nativo non copre) si dice, invece di mostrare un riquadro che non spiega. */}
                 {mappaScelta && !vistaGuida && <>
                   {area.mappe.length > 1 && (
-                    <label className="flex flex-wrap items-center gap-2 text-[12px] text-text-secondary">
-                      Planimetria
-                      <select className="form-input max-w-full" value={mappaScelta} onChange={(e) => setPianta(e.target.value)}>
-                        {area.mappe.map((m) => <option key={m.chiave} value={m.chiave}>{m.nome}</option>)}
-                      </select>
-                    </label>
+                    <Selettore etichetta="Planimetria" valore={mappaScelta} opzioni={area.mappe.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={setPianta} />
                   )}
                   <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} altezza="max(300px, min(41vh, 560px))" onCambiato={() => void dati.ricarica()} />
                   <p className="m-0 text-[11px] text-text-muted">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>

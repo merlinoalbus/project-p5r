@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState, type ReactNode } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getOggetti, getOggettiGuida } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -68,10 +69,7 @@ function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
     <div className="flex flex-col gap-2 text-[13px]">
       <div className="flex flex-wrap gap-1.5 items-center">
         <div className="flex-1 min-w-[200px]"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un oggetto, un effetto o dove si trova…" /></div>
-        <select className="form-input w-auto" value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Categoria">
-          <option value="">Tutte le categorie</option>
-          {Object.entries(NOME_CATEGORIA).filter(([k]) => d.consumabili.some((x) => x.categoria === k)).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-        </select>
+        <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={Object.entries(NOME_CATEGORIA).filter(([k]) => d.consumabili.some((x) => x.categoria === k)).map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setCategoria} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">{visibili.length} oggetti su {d.consumabili.length}.</p>
       <div className="overflow-x-auto">
@@ -93,11 +91,7 @@ function SchedaChiave({ d }: { d: OggettiGuidaDto }) {
     <div className="flex flex-col gap-2 text-[13px]">
       <div className="flex flex-wrap gap-1.5 items-center">
         <div className="flex-1 min-w-[200px]"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un oggetto chiave o un materiale…" /></div>
-        <select className="form-input w-auto" value={tipo} onChange={(e) => setTipo(e.target.value)} aria-label="Tipo">
-          <option value="">Chiave e materiali</option>
-          <option value="chiave">Oggetti chiave</option>
-          <option value="materiale">Materiali</option>
-        </select>
+        <Selettore compatto etichetta="Tipo" valore={tipo} vuoto="Chiave e materiali" opzioni={[{ chiave: 'chiave', nome: 'Oggetti chiave' }, { chiave: 'materiale', nome: 'Materiali' }]} onCambia={setTipo} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">{visibili.length} voci su {d.chiaveEMateriali.length}.</p>
       <div className="overflow-x-auto">
@@ -229,15 +223,8 @@ function SchedaEquipaggiamento() {
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
           <div className="min-w-[200px] flex-1"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un'arma, un effetto…" /></div>
-          <select className="form-input w-auto" value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Tipo">
-            <option value="">Tutti i tipi</option>
-            {categorie.map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-          </select>
-          <select className="form-input w-auto" value={per} onChange={(e) => setPer(e.target.value)} aria-label="Per chi">
-            <option value="">Per chiunque</option>
-            <option value="nessuno">Senza vincolo</option>
-            {vincoli.map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-          </select>
+          <Selettore compatto etichetta="Tipo" valore={categoria} vuoto="Tutti i tipi" opzioni={categorie.map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setCategoria} />
+          <Selettore compatto etichetta="Per chi" valore={per} vuoto="Per chiunque" opzioni={[{ chiave: 'nessuno', nome: 'Senza vincolo' }, ...vincoli.map(([k, n]) => ({ chiave: k, nome: n }))]} onCambia={setPer} />
         </div>
         <p className="m-0 text-[12px] text-text-muted" role="status">{visibili.length} pezzi su {tutti.length}.</p>
         <div className="overflow-x-auto">
