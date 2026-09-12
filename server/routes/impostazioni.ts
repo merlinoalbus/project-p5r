@@ -7,26 +7,23 @@
 // ============================================================
 //
 // L'esportazione risponde con un file binario (`res.download` / `res.send`), quindi NON passa dall'envelope `{ data }`
-// del middleware, che tocca solo `res.json`. Il ripristino riceve il file come corpo grezzo.
+// del middleware, che tocca solo `res.json`.
+//
+// **Nessun file viaggia più nel corpo di una richiesta.** Un pacchetto da centinaia di MB non attraversa
+// il proxy di un'istanza pubblicata (nginx lo taglia, il tunnel pure) e il browser vede solo un errore
+// immediato: importazione e ripristino leggono dalla cartella d'appoggio, dove ogni scaricamento lascia
+// comunque una copia.
 // ============================================================
 
-import express, { Router } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import fs from 'node:fs';
-import { MAX_BYTE_RIPRISTINO, copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanza, ripristinaIstanzaDaDeposito, statoIstanza } from '../services/impostazioniService.js';
+import { copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanzaDaDeposito, statoIstanza } from '../services/impostazioniService.js';
 import { depositaContenuto, depositaCopia } from '../services/depositoService.js';
-import { anteprimaPacchetto, anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchetto, importaPacchettoDaDeposito, statoImportazione } from '../services/pacchettoGiocoService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchettoDaDeposito, statoImportazione } from '../services/pacchettoGiocoService.js';
 
 const router = Router();
-
-/** Il corpo grezzo di un file caricato (ZIP o database), entro il limite del ripristino. */
-const corpoFile = express.raw({ type: ['application/octet-stream', 'application/zip', 'application/vnd.sqlite3', 'application/x-sqlite3'], limit: MAX_BYTE_RIPRISTINO });
-function fileCaricato(req: express.Request, cosa: string): Buffer {
-  if (!Buffer.isBuffer(req.body) || req.body.length === 0) throw httpErrors.badRequest('file-mancante', `Invia ${cosa} come corpo grezzo (Content-Type application/octet-stream).`);
-  return req.body;
-}
 
 /** Stato dell'istanza: versioni, dimensioni, conteggi. */
 router.get('/istanza', (_req, res) => {
@@ -66,41 +63,10 @@ router.get('/istanza/completa.zip', (_req, res, next) => {
   })();
 });
 
-/** Sostituisce l'istanza con il file caricato (database .db o ZIP dell'istanza). */
-router.put('/istanza', corpoFile, (req, res, next) => {
-  void (async () => {
-    try {
-      res.json(await ripristinaIstanza(fileCaricato(req, 'il file di backup')));
-    } catch (err) {
-      next(err);
-    }
-  })();
-});
-
 // ---- Pacchetto di gioco (voce 10): il solo gioco.db, immagini comprese, senza le partite ----
 // Il download è `GET /istanza/database` (lo stesso file). Qui l'anteprima e l'importazione, in due forme:
 // con il file nel corpo (istanza locale) oppure con un indirizzo da cui il server se lo prende (istanza
 // pubblicata: il proxy davanti rifiuterebbe un corpo da centinaia di MB).
-
-/** Anteprima dell'importazione: legge il file e dice che cosa cambierebbe, senza sostituire nulla. */
-router.post('/istanza/gioco/anteprima', corpoFile, (req, res, next) => {
-  try {
-    res.json(anteprimaPacchetto(fileCaricato(req, 'il pacchetto di gioco')));
-  } catch (err) {
-    next(err);
-  }
-});
-
-/** Sostituisce i dati di gioco con il pacchetto; le partite restano. */
-router.put('/istanza/gioco', corpoFile, (req, res, next) => {
-  void (async () => {
-    try {
-      res.json(await importaPacchetto(fileCaricato(req, 'il pacchetto di gioco')));
-    } catch (err) {
-      next(err);
-    }
-  })();
-});
 
 // ---- Cartella d'appoggio (il NAS montato): la strada normale per un'istanza pubblicata ----
 

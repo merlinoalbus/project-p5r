@@ -9,17 +9,14 @@
 // l'esito resta a video con gli orfani finché l'utente non ricarica l'app: le cache di pagina
 // (glossario, mappe, catalogo, grafica) sono da rifare.
 //
-// **Tre strade per far arrivare il pacchetto**, in ordine di comodità:
-// 1. la **cartella d'appoggio** (il NAS montato sul server): ci si deposita il file, qui si sceglie quale
-//    importare e il lavoro lo fa il backend leggendo dal mount. È la strada normale per un'istanza
-//    pubblicata, perché il browser non trasporta niente e i limiti del proxy non contano;
-// 2. il **file dal dispositivo** (istanza locale): il corpo della richiesta sono centinaia di MB e la barra
-//    dice a che punto è;
-// 3. un **indirizzo** da cui se lo prende il server, per chi non ha una cartella d'appoggio.
+// **Il pacchetto passa dalla cartella d'appoggio**, il NAS montato sul server: ci si deposita il file — e
+// ce ne finisce uno a ogni scaricamento — qui si sceglie quale importare, e il lavoro lo fa il backend
+// leggendo dal mount. Dal browser non parte nessun file: centinaia di MB nel corpo di una richiesta non
+// attraversano il proxy di un'istanza pubblicata.
 // ============================================================
 
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { anteprimaPacchettoDaDeposito, anteprimaPacchettoGioco, anteprimaPacchettoGiocoDaUrl, getDepositoPacchetti, getStatoIstanza, importaPacchettoDaDeposito, importaPacchettoGioco, importaPacchettoGiocoDaUrl, scaricaPacchettoGioco, statoImportazionePacchetto } from '../../services/api';
+import { useEffect, useRef, useState } from 'react';
+import { anteprimaPacchettoDaDeposito, getDepositoPacchetti, getStatoIstanza, importaPacchettoDaDeposito, scaricaPacchettoGioco, statoImportazionePacchetto } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -27,9 +24,8 @@ import { byteTesto } from '../../utils/byte';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import type { AnteprimaPacchettoDto, DepositoPacchettiDto, EsitoImportazionePacchettoDto, OrfanoPartiteDto } from '../../types';
+import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, OrfanoPartiteDto } from '../../types';
 import { Selettore } from '../shared/Selettore';
-import type { AvanzamentoInvio } from '../../services/api';
 import { BarraInvio } from './BarraInvio';
 
 function salvaFile(nome: string, blob: Blob): void {
@@ -128,16 +124,13 @@ export function PacchettoGioco() {
   const stato = useCarica(() => getStatoIstanza(), []);
   const [occupato, setOccupato] = useState(false);
   // l'anteprima viene da un file del dispositivo o da un indirizzo: la conferma deve ripartire dalla stessa origine
-  const [origine, setOrigine] = useState<{ tipo: 'file'; file: File } | { tipo: 'url'; url: string } | { tipo: 'deposito'; nome: string } | null>(null);
-  const [url, setUrl] = useState('');
-  const [deposito, setDeposito] = useState<DepositoPacchettiDto | null>(null);
+  const [origine, setOrigine] = useState<{ tipo: 'deposito'; nome: string } | null>(null);
+  const [deposito, setDeposito] = useState<DepositoFileDto | null>(null);
   const [fileScelto, setFileScelto] = useState('');
   const [anteprima, setAnteprima] = useState<AnteprimaPacchettoDto | null>(null);
   const [esito, setEsito] = useState<EsitoImportazionePacchettoDto | null>(null);
-  const [avanzamento, setAvanzamento] = useState<AvanzamentoInvio | null>(null);
   // la fase che il server sta eseguendo quando il lavoro è suo (scarico da indirizzo, oppure risposta non arrivata)
   const [lavoroSulServer, setLavoroSulServer] = useState<string | null>(null);
-  const input = useRef<HTMLInputElement | null>(null);
   // l'attesa dell'esito sul server si interrompe se l'utente lo chiede o se la card sparisce
   const smetti = useRef(false);
   useEffect(() => () => { smetti.current = true; }, []);
@@ -146,27 +139,13 @@ export function PacchettoGioco() {
   const esporta = async () => {
     setOccupato(true);
     try {
-      const { nome, blob } = await scaricaPacchettoGioco();
+      const { nome, blob, depositato } = await scaricaPacchettoGioco();
       salvaFile(nome, blob);
-      notifica('success', `Pacchetto di gioco scaricato: ${nome} (${byteTesto(blob.size)}).`);
+      notifica('success', `Pacchetto di gioco scaricato: ${nome} (${byteTesto(blob.size)})${depositato ? `, e depositato come «${depositato}» nella cartella d'appoggio` : ''}.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Esportazione fallita.');
     } finally {
       setOccupato(false);
-    }
-  };
-
-  const scegli = async (f: File) => {
-    setOccupato(true);
-    setAvanzamento({ byteInviati: 0, byteTotali: f.size, percentuale: 0, inviato: false });
-    try {
-      setAnteprima(await anteprimaPacchettoGioco(f, setAvanzamento));
-      setOrigine({ tipo: 'file', file: f });
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Anteprima fallita.');
-    } finally {
-      setOccupato(false);
-      setAvanzamento(null);
     }
   };
 
@@ -193,22 +172,6 @@ export function PacchettoGioco() {
     try {
       setAnteprima(await anteprimaPacchettoDaDeposito(fileScelto));
       setOrigine({ tipo: 'deposito', nome: fileScelto });
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Anteprima fallita.');
-    } finally {
-      setOccupato(false);
-      setLavoroSulServer(null);
-    }
-  };
-
-  const scegliUrl = async () => {
-    const indirizzo = url.trim();
-    if (!indirizzo) return;
-    setOccupato(true);
-    setLavoroSulServer('scarico');
-    try {
-      setAnteprima(await anteprimaPacchettoGiocoDaUrl(indirizzo));
-      setOrigine({ tipo: 'url', url: indirizzo });
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Anteprima fallita.');
     } finally {
@@ -256,12 +219,10 @@ export function PacchettoGioco() {
     smetti.current = false;
     // qual era l'ultima importazione PRIMA di questo tentativo: serve a non scambiare il suo esito per il nostro
     const operazionePrecedente = await statoImportazionePacchetto().then((x) => x.ultima?.operazione ?? null).catch(() => undefined);
-    if (origine.tipo === 'file') setAvanzamento({ byteInviati: 0, byteTotali: origine.file.size, percentuale: 0, inviato: false });
-    else setLavoroSulServer(origine.tipo === 'deposito' ? 'lettura' : 'scarico');
+    setLavoroSulServer('lettura');
     const concludi = async (e: EsitoImportazionePacchettoDto) => {
       setAnteprima(null);
       setOrigine(null);
-      setUrl('');
       setFileScelto('');
       setDeposito(null);
       setEsito(e);
@@ -271,11 +232,7 @@ export function PacchettoGioco() {
       notifica('success', `Dati di gioco sostituiti (schema ${e.versioneSchema}${e.migrazioniApplicate ? `, ${e.migrazioniApplicate} migrazioni applicate` : ''}). Copia di sicurezza: ${e.copiaDiSicurezza}.`);
     };
     try {
-      await concludi(
-        origine.tipo === 'file' ? await importaPacchettoGioco(origine.file, setAvanzamento)
-          : origine.tipo === 'deposito' ? await importaPacchettoDaDeposito(origine.nome)
-            : await importaPacchettoGiocoDaUrl(origine.url),
-      );
+      await concludi(await importaPacchettoDaDeposito(origine.nome));
     } catch (err) {
       // la connessione può cadere mentre il server lavora: prima di dire «fallita», glielo si chiede
       const esitoVero = await seguiSulServer(operazionePrecedente);
@@ -283,7 +240,6 @@ export function PacchettoGioco() {
       else notifica('error', err instanceof Error ? err.message : 'Importazione fallita.');
     } finally {
       setOccupato(false);
-      setAvanzamento(null);
       setLavoroSulServer(null);
     }
   };
@@ -295,7 +251,7 @@ export function PacchettoGioco() {
       <h2 className="m-0 text-[15px] font-semibold">Pacchetto di gioco</h2>
       <p className="m-0 text-[13px] text-text-secondary">
         Un solo file, <code>gioco.db</code>: i <strong>dati di gioco</strong> senza le partite, con dentro compendio, guida, catalogo, mappe, luoghi e le immagini.
-        Un'istanza nuova parte con i soli dati iniziali: il pacchetto completo si carica da qui e sostituisce il file dell'istanza; è anche il modo in cui le correzioni fatte nell'app passano a un'altra istanza. L'importazione mostra prima un'anteprima e non tocca l'avanzamento delle partite.
+        Un'istanza nuova parte con i soli dati iniziali: il pacchetto completo arriva dalla cartella d'appoggio, dove ogni scaricamento ne lascia una copia. L'importazione mostra prima un'anteprima e non tocca l'avanzamento delle partite.
       </p>
       {s && (
         <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 text-[13px]">
@@ -303,10 +259,9 @@ export function PacchettoGioco() {
           <li><strong>Immagini nel database</strong> <span className="text-text-muted">{numero(s.immagini.file)} · {byteTesto(s.immagini.byte)}</span></li>
         </ul>
       )}
-      {s?.vuota && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza non ha dati di gioco: importa il pacchetto completo <code>gioco.db</code> con «Importa un pacchetto».</p>}
-      {s && !s.vuota && !s.completo && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza ha solo i dati iniziali (nessuna immagine): importa il pacchetto completo <code>gioco.db</code> con «Importa un pacchetto» per avere mappe e grafica di gioco.</p>}
+      {s?.vuota && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza non ha dati di gioco: importa il pacchetto completo dalla cartella d'appoggio.</p>}
+      {s && !s.vuota && !s.completo && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza ha solo i dati iniziali (nessuna immagine): importa il pacchetto completo dalla cartella d'appoggio per avere mappe e grafica di gioco.</p>}
       {stato.errore && <p className="m-0 text-[13px] text-error">{stato.errore}</p>}
-      {anteprima === null && <BarraInvio avanzamento={avanzamento} etichetta="Invio del pacchetto" elaborazione="Il server sta leggendo il pacchetto" />}
       {anteprima === null && lavoroSulServer && (
         <div className="flex flex-col gap-1.5">
           <BarraInvio avanzamento={{ byteInviati: 0, byteTotali: 0, percentuale: 100, inviato: true }} etichetta="Lavoro sul server" elaborazione={NOME_FASE[lavoroSulServer] ?? 'Il server sta lavorando'} />
@@ -314,9 +269,6 @@ export function PacchettoGioco() {
       )}
       <div className="flex flex-wrap gap-1.5 items-center">
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica il pacchetto di gioco" dettaglio="file gioco.db, immagini comprese" disabled={occupato} onClick={() => void esporta()} />
-        <input ref={input} type="file" accept=".db,application/vnd.sqlite3,application/x-sqlite3,application/octet-stream" className="sr-only" aria-label="Pacchetto di gioco da importare"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void scegli(f); e.target.value = ''; }} />
-        <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Importa un pacchetto" dettaglio="anteprima, poi sostituisce i dati di gioco" disabled={occupato} onClick={() => input.current?.click()} />
       </div>
       <section className="flex flex-col gap-1.5" aria-label="Cartella d'appoggio">
         <h3 className="m-0 text-[14px]">Dalla cartella d'appoggio</h3>
@@ -342,17 +294,6 @@ export function PacchettoGioco() {
           </div>
         )}
       </section>
-      <details className="text-[13px]">
-        <summary className="touch cursor-pointer">Importa da un indirizzo</summary>
-        <form className="flex flex-col gap-1.5 pt-1.5" onSubmit={(e) => { e.preventDefault(); void scegliUrl(); }}>
-          <label className="form-label" htmlFor="pacchetto-da-url">Indirizzo del pacchetto (lo scarica il server)</label>
-          <p className="m-0 text-[12px] text-text-muted">Per chi non ha una cartella d'appoggio: indica un http/https che questo server riesce a raggiungere.</p>
-          <div className="flex flex-wrap gap-1.5 items-center">
-            <input id="pacchetto-da-url" className="form-input flex-1 min-w-[220px] touch" type="url" inputMode="url" placeholder="https://…/api/impostazioni/istanza/database" value={url} disabled={occupato} onChange={(e) => setUrl(e.target.value)} />
-            <PulsanteVisivo tono="pericolo" compatto type="submit" icona={<IconaAzione chiave="url" dimensione={20} />} titolo="Importa da indirizzo" dettaglio="anteprima, poi sostituisce" disabled={occupato || url.trim().length === 0} />
-          </div>
-        </form>
-      </details>
       <Modal
         titolo="Importare il pacchetto di gioco?"
         aperta={anteprima !== null}
@@ -365,8 +306,7 @@ export function PacchettoGioco() {
           </>
         }
       >
-        {anteprima && <Anteprima a={anteprima} origine={origine?.tipo === 'file' ? origine.file.name : origine?.tipo === 'deposito' ? origine.nome : origine?.url ?? ''} />}
-        <BarraInvio avanzamento={avanzamento} etichetta="Invio del pacchetto" elaborazione="Sostituzione dei dati di gioco in corso" />
+        {anteprima && <Anteprima a={anteprima} origine={origine?.nome ?? ''} />}
         {lavoroSulServer && (
           <div className="flex flex-col gap-1.5">
             <BarraInvio avanzamento={{ byteInviati: 0, byteTotali: 0, percentuale: 100, inviato: true }} etichetta="Lavoro sul server" elaborazione={NOME_FASE[lavoroSulServer] ?? 'Il server sta lavorando'} />

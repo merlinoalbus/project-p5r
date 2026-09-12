@@ -7,7 +7,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { PacchettoGioco } from './PacchettoGioco';
 import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, StatoIstanzaDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), anteprimaPacchettoGioco: vi.fn(), importaPacchettoGioco: vi.fn(), anteprimaPacchettoGiocoDaUrl: vi.fn(), importaPacchettoGiocoDaUrl: vi.fn(), statoImportazionePacchetto: vi.fn(), getDepositoPacchetti: vi.fn(), anteprimaPacchettoDaDeposito: vi.fn(), importaPacchettoDaDeposito: vi.fn() }));
+const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), anteprimaPacchettoGioco: vi.fn(), importaPacchettoGioco: vi.fn(), statoImportazionePacchetto: vi.fn(), getDepositoPacchetti: vi.fn(), anteprimaPacchettoDaDeposito: vi.fn(), importaPacchettoDaDeposito: vi.fn() }));
 vi.mock('../../services/api', () => api);
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
 vi.mock('../../stores/notificationStore', () => ({ notifica }));
@@ -118,30 +118,6 @@ describe('PacchettoGioco', () => {
     api.getStatoIstanza.mockResolvedValue({ ...stato, vuota: false, completo: false, immagini: { file: 0, byte: 0 } });
     render(<PacchettoGioco />);
     expect(await screen.findByRole('status')).toHaveTextContent(/solo i dati iniziali/);
-  });
-
-  it('importa da un indirizzo: il file non passa dal browser e la conferma riparte dallo stesso indirizzo', async () => {
-    const INDIRIZZO = 'https://desktop.esempio.ts.net/api/impostazioni/istanza/database';
-    api.anteprimaPacchettoGiocoDaUrl.mockResolvedValue(anteprima);
-    api.importaPacchettoGiocoDaUrl.mockResolvedValue(esito);
-    render(<PacchettoGioco />);
-    await screen.findByText(/schema 79/);
-    fireEvent.change(screen.getByLabelText(/Indirizzo del pacchetto/i), { target: { value: INDIRIZZO } });
-    fireEvent.click(screen.getByRole('button', { name: /Importa da indirizzo/ }));
-    const finestra = await screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
-    expect(api.anteprimaPacchettoGiocoDaUrl).toHaveBeenCalledWith(INDIRIZZO);
-    expect(api.anteprimaPacchettoGioco).not.toHaveBeenCalled();
-    expect(within(finestra).getByText(new RegExp(`Il pacchetto «${INDIRIZZO}»`))).toBeInTheDocument();
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
-    await waitFor(() => expect(api.importaPacchettoGiocoDaUrl).toHaveBeenCalledWith(INDIRIZZO));
-    expect(api.importaPacchettoGioco).not.toHaveBeenCalled();
-    expect(await screen.findByRole('dialog', { name: 'Pacchetto importato' })).toBeInTheDocument();
-  });
-
-  it('senza indirizzo il pulsante «Importa da indirizzo» resta spento', async () => {
-    render(<PacchettoGioco />);
-    await screen.findByText(/schema 79/);
-    expect(screen.getByRole('button', { name: /Importa da indirizzo/ })).toBeDisabled();
   });
 
   /** Porta l'interfaccia fino alla finestra di conferma con un file scelto. */

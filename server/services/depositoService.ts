@@ -22,8 +22,11 @@ import type { DepositoFileDto, FileDepositoDto } from '../../shared/types.js';
 
 /** Estensioni dei file che l'app riconosce come pacchetto di gioco. */
 export const ESTENSIONI_PACCHETTO = ['.db', '.sqlite', '.sqlite3'];
-/** Estensioni dei file che l'app riconosce come backup dell'istanza (lo ZIP completo o il solo database). */
-export const ESTENSIONI_BACKUP = ['.zip', ...ESTENSIONI_PACCHETTO];
+/** Estensioni dei file che l'app riconosce come backup dell'istanza: solo lo ZIP completo.
+ *
+ * Un `.db` è un pacchetto di gioco e si importa dall'altra card: se comparisse anche qui, le due
+ * funzioni si mescolerebbero e si rischierebbe di «ripristinare l'istanza» con i soli dati di gioco. */
+export const ESTENSIONI_BACKUP = ['.zip'];
 
 /** La cartella d'appoggio configurata (vuota = funzione disattivata). */
 export function cartellaDeposito(): string {
@@ -82,6 +85,35 @@ export function leggiDalDeposito(nome: string): Buffer {
   }
 }
 
+/** Quante copie generate dall'app si conservano nel deposito, per famiglia di nome (scelta dell'utente). */
+const COPIE_CONSERVATE = 5;
+
+/**
+ * Tiene le ultime copie generate dall'app e cancella le più vecchie.
+ *
+ * Ogni scaricamento lascia qui un file da centinaia di MB: senza una regola il NAS si riempirebbe in
+ * silenzio. Si toccano **solo** i file che l'app ha scritto, riconosciuti dal prefisso con il timbro
+ * (`project-p5r-gioco-…`, `project-p5r-istanza-…`) e dalla stessa estensione: quello che ci hai messo
+ * tu, con un nome tuo, resta dov'è.
+ */
+function ruotaCopie(cartella: string, nome: string): void {
+  const estensione = path.extname(nome);
+  const prefisso = /^(project-p5r-[a-z]+)-/.exec(nome)?.[1];
+  if (!prefisso) return;
+  try {
+    const nostre = fs.readdirSync(cartella)
+      .filter((f) => f.startsWith(`${prefisso}-`) && path.extname(f) === estensione)
+      .sort()
+      .reverse();
+    for (const vecchia of nostre.slice(COPIE_CONSERVATE)) {
+      fs.rmSync(path.join(cartella, vecchia), { force: true });
+      logger.info({ file: vecchia }, 'copia vecchia rimossa dalla cartella d\'appoggio');
+    }
+  } catch (err) {
+    logger.warn({ err, cartella }, 'rotazione delle copie nella cartella d\'appoggio non riuscita');
+  }
+}
+
 /**
  * Lascia nel deposito una copia di un file appena prodotto (l'esportazione). Non è un'operazione
  * critica: se la cartella manca o il NAS non risponde, lo scaricamento deve riuscire lo stesso, quindi
@@ -94,6 +126,7 @@ export function depositaCopia(sorgente: string, nome: string): string | null {
     const destinazione = path.join(cartella, path.basename(nome));
     fs.copyFileSync(sorgente, destinazione);
     logger.info({ destinazione, byte: fs.statSync(destinazione).size }, 'copia depositata nella cartella d\'appoggio');
+    ruotaCopie(cartella, path.basename(nome));
     return path.basename(nome);
   } catch (err) {
     logger.warn({ err, cartella, nome }, 'copia nella cartella d\'appoggio non riuscita: lo scaricamento prosegue');
@@ -109,6 +142,7 @@ export function depositaContenuto(contenuto: Buffer, nome: string): string | nul
     const destinazione = path.join(cartella, path.basename(nome));
     fs.writeFileSync(destinazione, contenuto);
     logger.info({ destinazione, byte: contenuto.length }, 'copia depositata nella cartella d\'appoggio');
+    ruotaCopie(cartella, path.basename(nome));
     return path.basename(nome);
   } catch (err) {
     logger.warn({ err, cartella, nome }, 'copia nella cartella d\'appoggio non riuscita: lo scaricamento prosegue');
