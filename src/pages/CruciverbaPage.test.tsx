@@ -18,8 +18,8 @@ vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
 const dati: CruciverbaTuttiDto = {
   dataGioco: '04-11',
   cruciverba: [
-    { giorno: '04-18', chiave: '04-18-0', indizio: 'Gli anni scolastici sono suddivisi in…?', risposta: 'Semestri', rispostaEn: 'Semesters', fonte: 'https://www.allgamestaff.it/persona-5-royal/cruciverba/', fatto: false },
-    { giorno: '05-02', chiave: '05-02-1', indizio: 'Un dolce tradizionale', risposta: 'Mochi', rispostaEn: 'Mochi', fonte: 'https://www.allgamestaff.it/persona-5-royal/cruciverba/', fatto: false },
+    { giorno: '04-18', chiave: '04-18-0', indizio: 'Gli anni scolastici sono suddivisi in…?', risposta: 'Semestri', rispostaEn: 'Semesters', fatto: false },
+    { giorno: '05-02', chiave: '05-02-1', indizio: 'Un dolce tradizionale', risposta: 'Mochi', rispostaEn: 'Mochi', fatto: false },
   ],
   prossimo: null, risolti: 0, totale: 2,
 };

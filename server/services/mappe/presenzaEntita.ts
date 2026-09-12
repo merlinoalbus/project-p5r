@@ -20,7 +20,7 @@
 // |------------|---------------------------------------------|--------------------------------|
 // | quartiere  | `sblocco_data`                              | `quartiere`                    |
 // | Palazzo    | finestra dal/al (trascritta, era prosa)     | `intervallo` o `data`          |
-// | luogo      | `quando` (giorno/sera), `giorni`            | `fascia`, `giorno-settimana`   |
+// | luogo      | `quando` (giorno/sera), `giorni_json`       | `fascia`, `giorno-settimana`   |
 // | negozio    | `orari_json` (migrazione 069)               | `fascia`, `giorno-settimana`, `meteo` |
 // | attività   | `fascia`                                    | `fascia`                       |
 //
@@ -49,22 +49,16 @@ export function fasciaDaTesto(quando: string | null | undefined): RequisitoSpill
   return v === 'giorno' || v === 'sera' ? [{ tipo: 'fascia', fascia: v }] : [];
 }
 
-/** I giorni della settimana, ma solo quando l'elenco è pulito.
- *
- * Il campo del catalogo è spesso prosa con una precisazione fra parentesi — «giovedì, sabato,
- * domenica (per il Confidente Iwai)» parla del Confidente, non dell'apertura, e «domenica
- * (regolare) e festività» aggiunge un caso che il calendario dell'app non ha. Prenderli per buoni
- * nasconderebbe pin nei giorni sbagliati, che è esattamente il danno che si vuole evitare: qui si
- * accetta solo un elenco di nomi di giorni e nient'altro, e se copre la settimana intera non è
- * una condizione.
- */
-export function giorniDaTesto(giorni: string | null | undefined): RequisitoSpillo[] {
-  const grezzo = senzaAccenti(giorni ?? '');
-  if (!grezzo || /[()]|festivit|confident|escluso|tranne|salvo/.test(grezzo)) return [];
-  const pezzi = grezzo.split(/\s*(?:,|\se\s)\s*/).filter(Boolean);
-  if (pezzi.length === 0 || pezzi.some((p) => !GIORNI[p])) return [];
-  const scelti = [...new Set(pezzi.map((p) => GIORNI[p]))];
-  return scelti.length >= 7 ? [] : [{ tipo: 'giorno-settimana', giorni: scelti }];
+/** I giorni della settimana del luogo (`giorni_json`, migrazione 080): chiavi già pulite; la settimana intera non è una condizione. */
+export function giorniDaJson(json: string | null | undefined): RequisitoSpillo[] {
+  let scelti: string[] = [];
+  try {
+    const v = JSON.parse(json || '[]') as unknown;
+    scelti = Array.isArray(v) ? [...new Set(v.map(String).filter((g) => GIORNI[g]))] : [];
+  } catch {
+    scelti = [];
+  }
+  return scelti.length === 0 || scelti.length >= 7 ? [] : [{ tipo: 'giorno-settimana', giorni: scelti }];
 }
 
 /** La finestra di un Palazzo: fra le due date esiste, fuori no. */
@@ -116,7 +110,7 @@ export function applicaPresenzaAiLuoghi(db: AppDatabase): number {
   if (!tabelle.has('luogo') || !tabelle.has('spillo')) return 0;
   const colonne = (db.prepare("SELECT name FROM pragma_table_info('luogo')").all() as Array<{ name: string }>).map((c) => c.name);
   const quando = colonne.includes('quando') ? 'l.quando' : "'' AS quando";
-  const giorni = colonne.includes('giorni') ? 'l.giorni' : "'' AS giorni";
+  const giorni = colonne.includes('giorni_json') ? 'l.giorni_json' : "'[]' AS giorni_json";
   // il negozio che ha qui la sua sede (072): la sua presenza sono gli orari (069)
   const colonneNegozio = tabelle.has('negozio') ? (db.prepare("SELECT name FROM pragma_table_info('negozio')").all() as Array<{ name: string }>).map((c) => c.name) : [];
   const negozio = colonneNegozio.includes('sede_chiave') && colonneNegozio.includes('orari_json')
@@ -125,7 +119,7 @@ export function applicaPresenzaAiLuoghi(db: AppDatabase): number {
     ? (db.prepare("SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL AND sblocco_data <> ''").all() as Array<{ chiave: string }>).map((q) => q.chiave)
     : []);
   const righe = db.prepare(`SELECT l.chiave, l.quartiere_chiave, ${quando}, ${giorni}, ${negozio} AS condizioni_negozio FROM luogo l`)
-    .all() as Array<{ chiave: string; quartiere_chiave: string; quando: string | null; giorni: string | null; condizioni_negozio: string | null }>;
+    .all() as Array<{ chiave: string; quartiere_chiave: string; quando: string | null; giorni_json: string; condizioni_negozio: string | null }>;
   // (`condizioni_negozio` porta ora gli orari del negozio in JSON: si traducono in condizioni di presenza)
   const aggiorna = db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?');
   // Solo gli spilli del seed: quelli che l'utente ha modificato portano le sue scelte, e
@@ -135,7 +129,7 @@ export function applicaPresenzaAiLuoghi(db: AppDatabase): number {
   for (const l of righe) {
     const presenza = unisci(
       quartieri.has(l.quartiere_chiave) ? [{ tipo: 'quartiere' as const, quartiere: l.quartiere_chiave }] : [],
-      fasciaDaTesto(l.quando), giorniDaTesto(l.giorni), l.condizioni_negozio ? orariComeCondizioni(leggiOrari(l.condizioni_negozio)) : []);
+      fasciaDaTesto(l.quando), giorniDaJson(l.giorni_json), l.condizioni_negozio ? orariComeCondizioni(leggiOrari(l.condizioni_negozio)) : []);
     if (!presenza.length) continue;
     for (const s of spilliDi.all(l.chiave) as Array<{ id: number; tipo: string }>) {
       if (eStrutturale(s.tipo)) continue;

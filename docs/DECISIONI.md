@@ -358,7 +358,7 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   comunque (409), ma l'interfaccia non deve invitare a un gesto che non passa. Una riga già iniziata
   si può sempre correggere (togliere o completare).
 - **Il periodo dei film in prosa non si mostra più**: «quando» sono le condizioni della riga, che
-  l'app valuta. `periodo` resta nel DTO finché la voce 11 non lo toglie.
+  l'app valuta. `periodo` è stato tolto dal DTO nella voce 11.
 - **«Dove» di un libro sono i negozi collegati**, con il prezzo dell'articolo; il testo `dove` della
   guida compare solo se non c'è né un negozio né una posizione (premi, eventi).
 - **La fonte non si mostra** nelle pagine di libri, film, videogiochi e attività (principio 4 del
@@ -422,3 +422,9 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   `pacchetto/gioco.db` iniziale (stessi dati, senza il contenuto delle immagini) che il primo avvio copia in
   `DATA_DIR/gioco.db`; la card «Pacchetto di gioco» avvisa finché il completo non è importato (`StatoIstanzaDto.completo`).
   Senza iniziale l'istanza nasce vuota (`vuota`) e non è un errore fatale.
+
+### 2026-09-12 — Pulizia (voce 11)
+- **I giorni di un luogo sono chiavi, non una frase** (`giorni_json`, migrazione 080). Ciò che nella frase non era un
+  giorno («per il Confidente Iwai», «e festività») non si interpreta: resta nelle note del luogo, com'era scritto.
+- **Dai DTO escono i campi di prosa che nessuna pagina legge**: `periodo` dei film, `orari` e `sblocco` del negozio,
+  `fonte` di catalogo e cruciverba. Le colonne restano nel database come credito della guida.

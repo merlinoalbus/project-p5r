@@ -16,7 +16,7 @@ const base: LibroDto = {
   disponibileDal: '18 aprile', dote: 'conoscenza', note: 3, sblocca: null, sbloccaLuogo: null, sbloccaLuogoNome: null, sessioni: 2,
   dettagli: null, effetti: [{ effetto: { famiglia: 'dote', dote: 'conoscenza', note: 3 }, testo: 'Conoscenza ♪♪♪' }], effettiTesto: ['Conoscenza ♪♪♪'],
   negozi: [{ articolo: 'libreria-taiheido/prova', negozio: 'libreria-taiheido', negozioNome: 'Libreria Taiheido', prezzo: 700 }],
-  fonte: 'https://www.allgamestaff.it/persona-5-royal/libri/', verificato: true,
+  verificato: true,
   posizioni: [{ tipo: 'negozio', chiave: 'libreria-taiheido', etichetta: 'Libreria Taiheido' }],
   totaleSessioni: 2, progresso: 0, fatto: false, condizioni: null, disponibilita: null,
 };

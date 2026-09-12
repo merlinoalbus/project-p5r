@@ -48,7 +48,7 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
     condizioni, ...(st ? { disponibilita: valutaRequisiti(condizioni, st) } : {}),
     chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore,
     confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null,
-    orari: r.orari, orariStrutturati: orari, orariTesto: descriviOrari(orari), sblocco: r.sblocco,
+    orariStrutturati: orari, orariTesto: descriviOrari(orari),
     sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (r.sede_nome ?? null) : null, programmaPunti: leggiProgrammaPunti(r.programma_punti_json),
     articoli: r.articoli ?? 0, verificati: r.verificati ?? 0,
   };
@@ -75,7 +75,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     per: collegato?.per ?? r.per, prezzo: r.prezzo,
     effetto: collegato?.effetto ?? r.effetto, statistiche: collegato?.statistiche ?? r.statistiche,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
-    disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, fonte: r.fonte, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave), ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
+    disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave), ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
 }
 
 function acquistiPartita(partitaId: number | undefined): Set<string> {
@@ -100,7 +100,7 @@ export function dettaglioNegozio(chiave: string, partitaId?: number): NegozioDet
   const riepilogo = riassunto(n, st);
   const articoli = (prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(chiave) as RigaArticolo[]).map((r) => articoloDto(r, acquistati, st));
   const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
-  return { ...riepilogo, ...conteggi, note: n.note, fonte: n.fonte, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length };
+  return { ...riepilogo, ...conteggi, note: n.note, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length };
 }
 
 export interface FiltroArticoli {

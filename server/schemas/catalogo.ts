@@ -54,8 +54,6 @@ export const datiNegozio = z.object({
   confidente_chiave: z.string().max(80).nullable().optional(),
   /** La sede: un luogo della città (migrazione 072). */
   sede_chiave: z.string().max(200).nullable().optional(),
-  /** La frase com'era; l'app legge `orari_json`. Resta finché il modulo non passa ai valori. */
-  orari: testo(200).nullable().optional(),
   orari_json: orariNegozio.transform((v) => JSON.stringify(v)).optional(),
   programma_punti_json: z.object({ nome: testo(80).min(1), unita: testo(40).min(1), calcolo: z.enum(['manuale', 'rango-cliente']) }).nullable().optional()
     .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
@@ -144,7 +142,6 @@ const datiFilmBase = z.object({
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
   dove: z.enum(['cinema', 'dvd']).default('cinema'),
-  periodo: testo(300).default(''),
   dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable().optional(),
   note: z.number().int().min(0).max(9).nullable().optional(),
   // Quanto vale **rivedere** un titolo: al cinema la guida lo dichiara riga per riga («prima
@@ -202,7 +199,8 @@ export const datiLuogo = z.object({
   nome: testo(160).min(1),
   cosa_offre: testo(600).default(''),
   quando: z.enum(['giorno', 'sera', 'entrambe']).nullable().optional(),
-  giorni: testo(200).nullable().optional(),
+  /** Le chiavi dei giorni (migrazione 080); vuoto = nessuna limitazione. */
+  giorni_json: z.array(z.enum(GIORNI_SETTIMANA_CHIAVI)).max(7).transform((v) => JSON.stringify(GIORNI_SETTIMANA_CHIAVI.filter((g) => v.includes(g)))).optional(),
   note: testo(2000).nullable().optional(),
 });
 

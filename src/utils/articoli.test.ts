@@ -7,7 +7,7 @@ import type { ArticoloDto } from '../types';
 
 const art = (chiave: string, nome: string, categoria: ArticoloDto['categoria'], per: string | null, extra: Partial<ArticoloDto> = {}): ArticoloDto => ({
   chiave, negozioChiave: 'u', negozioNome: 'Untouchable', nome, nomeIt: null, categoria, per, prezzo: 100, effetto: null, statistiche: null, quantita: null,
-  oggettoFonte: null, oggettoChiave: null, disponibileDal: null, condizione: null, nota: null, fonte: '', verificato: true, acquistato: false, ...extra,
+  oggettoFonte: null, oggettoChiave: null, disponibileDal: null, condizione: null, nota: null, verificato: true, acquistato: false, ...extra,
 });
 const articoli = [
   art('a', 'Kogatana nera', 'arma', 'Joker', { acquistato: true, disponibilita: { stato: 'disponibile', requisiti: [] } }),

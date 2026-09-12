@@ -32,7 +32,7 @@ describe('API negozi e inventario', () => {
     const d = (await request(app).get('/api/compendio/negozi/untouchable')).body.data as NegozioDettaglioDto;
     expect(d.articoliElenco).toHaveLength(218);
     expect(d.articoliElenco[0]).toMatchObject({ chiave: 'untouchable/kogatana-nera', nome: 'Kogatana nera', categoria: 'arma', per: 'Joker', prezzo: 1000, acquistato: false, verificato: true });
-    expect(d.articoliElenco.every((a) => a.fonte.startsWith('http') && a.chiave.startsWith('untouchable/'))).toBe(true);
+    expect(d.articoliElenco.every((a) => a.chiave.startsWith('untouchable/'))).toBe(true);
     expect(new Set(d.articoliElenco.map((a) => a.chiave)).size).toBe(218);
     expect((await request(app).get('/api/compendio/negozi/emporio-fantasma')).status).toBe(404);
     expect((await request(app).get('/api/compendio/negozi/untouchable?partita=99999')).status).toBe(404);

@@ -13,7 +13,7 @@ import { FASCE_ORARIO, descriviOrari, type FasciaOrario, type GiornoChiave, type
 
 interface Props { valore: OrariNegozio; onCambia: (o: OrariNegozio) => void; disabilitato?: boolean }
 
-function Interruttori<T extends string>({ etichetta, scelte, opzioni, onCambia, disabilitato }: { etichetta: string; scelte: T[]; opzioni: ReadonlyArray<{ chiave: T; nome: string }>; onCambia: (v: T[]) => void; disabilitato?: boolean }) {
+export function Interruttori<T extends string>({ etichetta, scelte, opzioni, onCambia, disabilitato }: { etichetta: string; scelte: T[]; opzioni: ReadonlyArray<{ chiave: T; nome: string }>; onCambia: (v: T[]) => void; disabilitato?: boolean }) {
   const attive = new Set(scelte);
   return (
     <div role="group" aria-label={etichetta} className="orari-editor__gruppo">

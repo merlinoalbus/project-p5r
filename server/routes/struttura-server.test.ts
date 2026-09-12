@@ -9,7 +9,7 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
+import { closeDb, initDb, getDb } from '../db/dbService.js';
 import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
@@ -77,8 +77,23 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     expect(untouchable.origine).toBe('seed');
     expect(shibuya.luoghi.find((l) => l.chiave === 'shibuya/diner')?.attivita).toEqual([{ chiave: 'studio-diner-shibuya', nome: expect.any(String) }]);
     // un luogo nuovo dell'utente, nascosto e riportato in elenco dei rimossi
-    const creato = (await request(app).post('/api/catalogo/luogo').send({ nome: 'Chiosco di prova', tipo: 'ristorante', quartiere_chiave: 'shibuya', cosa_offre: 'Ramen' })).body.data as ElementoCatalogoDto;
+    const creato = (await request(app).post('/api/catalogo/luogo').send({ nome: 'Chiosco di prova', tipo: 'ristorante', quartiere_chiave: 'shibuya', cosa_offre: 'Ramen', giorni_json: ['sabato', 'giovedi', 'giovedi'] })).body.data as ElementoCatalogoDto;
     expect(creato.chiave).toBe('shibuya/u-chiosco-di-prova');
+    // i giorni (migrazione 080) viaggiano come elenco di chiavi e stanno in tabella come JSON, senza doppioni e nell'ordine della settimana
+    expect(getDb().prepare('SELECT giorni_json FROM luogo WHERE chiave = ?').pluck().get(creato.chiave)).toBe('["giovedi","sabato"]');
+    expect(creato.dati.giorni_json).toBe('["giovedi","sabato"]');
+    expect((await request(app).post('/api/catalogo/luogo').send({ nome: 'Giorno finto', tipo: 'negozio', quartiere_chiave: 'shibuya', giorni_json: ['lunedi', 'ferragosto'] })).status).toBe(400);
+    const modificato = (await request(app).put(`/api/catalogo/luogo/${encodeURIComponent('shibuya/untouchable')}`).send({ giorni_json: ['lunedi'] })).body.data as ElementoCatalogoDto;
+    expect(modificato.origine).toBe('utente');
+    const dopo = ((await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto).luoghi.find((l) => l.chiave === 'shibuya/untouchable')!;
+    expect(dopo.giorni).toEqual(['lunedi']);
+    expect(dopo.giorniTesto).toBe('solo il lunedì');
+    // il ripristino legge un'istantanea di PRIMA della 080 (con la frase `giorni`, senza `giorni_json`) e ricava le chiavi
+    getDb().prepare('UPDATE luogo SET seed_json = ? WHERE chiave = ?').run(JSON.stringify({ ...JSON.parse(getDb().prepare('SELECT seed_json FROM luogo WHERE chiave = ?').pluck().get('shibuya/untouchable') as string), giorni_json: undefined, giorni: 'giovedì, sabato, domenica (per il Confidente Iwai)' }), 'shibuya/untouchable');
+    expect((await request(app).delete(`/api/catalogo/luogo/${encodeURIComponent('shibuya/untouchable')}`)).body.data.esito).toBe('ripristinata');
+    const ripristinato = ((await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto).luoghi.find((l) => l.chiave === 'shibuya/untouchable')!;
+    expect(ripristinato.origine).toBe('seed');
+    expect(ripristinato.giorni).toEqual(['giovedi', 'sabato', 'domenica']);
     expect(((await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto).luoghi.some((l) => l.chiave === creato.chiave && l.origine === 'utente')).toBe(true);
     expect((await request(app).post('/api/catalogo/luogo').send({ nome: 'Altrove', tipo: 'negozio', quartiere_chiave: 'atlantide' })).status).toBe(400);
     await request(app).put(`/api/catalogo/luogo/${encodeURIComponent('shibuya/diner')}/nascosta`).send({ nascosta: true });

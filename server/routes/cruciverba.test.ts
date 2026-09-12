@@ -23,7 +23,7 @@ describe('API cruciverba', () => {
     const d = (await request(app).get('/api/compendio/cruciverba')).body.data as CruciverbaTuttiDto;
     expect(d.totale).toBe(38);
     expect(d.cruciverba[0]).toMatchObject({ giorno: '04-18', risposta: 'Semestri', rispostaEn: 'Semesters', fatto: false });
-    expect(d.cruciverba.every((c) => c.indizio.length > 0 && c.risposta.length > 0 && c.fonte.startsWith('https://www.allgamestaff.it/'))).toBe(true);
+    expect(d.cruciverba.every((c) => c.indizio.length > 0 && c.risposta.length > 0)).toBe(true);
     const mesi = d.cruciverba.map((c) => Number(c.giorno.slice(0, 2)));
     const scolastico = mesi.map((m) => (m >= 4 ? m : m + 12));
     expect([...scolastico].sort((a, b) => a - b)).toEqual(scolastico);

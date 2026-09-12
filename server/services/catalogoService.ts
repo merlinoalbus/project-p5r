@@ -1,4 +1,5 @@
 import { verificaCondizioni } from './mappe/mappeService.js';
+import { giorniDallaFrase } from '../db/migrations/080_giorni_luogo_strutturati.js';
 import { migraTestiCondizioni } from '../../shared/migraCondizioni.js';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
 // ============================================================
@@ -27,12 +28,12 @@ import { tracciamentoPerTipo } from '../../shared/attivita.js';
 // non hanno `disponibile_dal`/`condizione`/`fonte` (prosa: si scrivono le condizioni), libri, film
 // e attività portano `effetti_json`; `fonte` resta colonna ma non si scrive più da qui.
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
-  negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari', 'orari_json', 'programma_punti_json', 'note'],
+  negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'programma_punti_json', 'note'],
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
   libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
-  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
+  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'verificato'],
-  luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'quando', 'giorni', 'note', 'verificato'],
+  luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'quando', 'giorni_json', 'note', 'verificato'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
   cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],
 };
@@ -68,6 +69,8 @@ const PROFILO: Record<TipoCatalogo, {
   negozio: { haVerificato: false, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il negozio' },
   articolo: { haVerificato: true, padre: { campo: 'negozio_chiave', tabella: 'negozio', codice: 'negozio-sconosciuto', nome: 'Il negozio' }, raggruppaOrdinePer: 'negozio_chiave', campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: "L'articolo" },
   libro: { haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il libro' },
+  // `periodo` non è più nello schema (voce 11): resta qui solo per `eliminaElemento`, che ripristina istantanee
+  // (`seed_json`) di prima, dove la frase c'era ancora e va convertita in condizioni come allora.
   film: { condizioniDa: (d) => [d.periodo as string | null], haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il film' },
   attivita: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: true, padre: { campo: 'luogo_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' }, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: "L'attività" },
   luogo: { haVerificato: true, padre: { campo: 'quartiere_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' }, raggruppaOrdinePer: 'quartiere_chiave', campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il luogo' },
@@ -308,7 +311,11 @@ export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'e
   //
   // Il valore giusto e' quello che la riga aveva prima di essere adottata: una riga della guida e'
   // verificata, ed e' l'unico caso in cui si arriva qui.
-  const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(CAMPI[tipo].map((c) => [c, originale[c] ?? (c === 'verificato' ? 1 : null)])) };
+  //
+  // Stessa cosa per `giorni_json` (migrazione 080): un'istantanea di prima porta la frase `giorni`, e da quella si
+  // ricavano le chiavi, come ha fatto la migrazione; senza nemmeno la frase, nessuna limitazione.
+  const predefinito = (c: string): unknown => c === 'verificato' ? 1 : c === 'giorni_json' ? JSON.stringify(giorniDallaFrase(typeof originale.giorni === 'string' ? originale.giorni : null).giorni) : null;
+  const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(CAMPI[tipo].map((c) => [c, originale[c] ?? predefinito(c)])) };
   prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
   return { esito: 'ripristinata', elemento: dto(tipo, riga(tipo, chiave)) };
 }
