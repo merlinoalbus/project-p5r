@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto } from '../../types';
+  CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 import type { VideogiocoDto } from '../../types';
 
@@ -85,6 +85,9 @@ export const impostaProgressoFilm = (id: number, chiave: string, avanzamento: nu
 
 /** Stato di una Richiesta dei Mementos nella partita (null = riaperta). */
 export const impostaStatoRichiesta = (id: number, richiesta: string, stato: StatoRichiesta | null): Promise<RichiestaDto> => apiPut(`/partite/${id}/richieste`, { richiesta, stato });
+
+/** I timbri raccolti in un dedalo dei Memento (0 = azzera); 400 se la guida non ne dichiara il totale. */
+export const impostaTimbri = (id: number, area: string, raccolti: number): Promise<TimbriDedaloDto> => apiPut(`/partite/${id}/timbri`, { area, raccolti });
 
 /** Stato di un punto di interesse nella partita (null = riaperto). */
 export const impostaStatoPunto = (id: number, punto: string, stato: StatoPunto | null): Promise<PuntoInteresseDto> => apiPut(`/partite/${id}/punti`, { punto, stato });

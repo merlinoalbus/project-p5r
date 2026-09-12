@@ -602,3 +602,14 @@ usato dai filtri (stato, supporto, acquisto, disponibilità). Le pagine leggono 
 `negozi`, `sedeChiave`/`sedeNome`, `pagaYen`/`pagaMassima`, `dettagli`, `condizioni`, `disponibilita`
 dei DTO della voce 5; le colonne in prosa (`dove`, `periodo`, `regole`, `premi`, `altri_effetti`, `paga`,
 `sblocco`, `doti_json`) non sono più lette dal frontend.
+
+## Scheda del Palazzo, Richieste, domande e cruciverba (2026-09-12)
+`src/components/guida/RaccoltaPlanimetrie.tsx` elenca planimetrie con collezionabili (`{chiave, nome, n,
+presi, spilli[]}`) e segna «Raccolto» con `impostaSpilloRaccolto` (`src/services/api/mappe.ts`); la pagina
+aggiorna `planimetrie`, `aree[].mappe` e `raccolta` in locale (`segnaRaccolto`) e bumpa la versione del
+visore. `src/components/guida/ObiettiviDedalo.tsx` mostra `DedaloDto` (timbri, richieste, obiettivi) e
+scrive con `impostaTimbri` (`src/services/api/partite.ts`, `PUT /api/partite/:id/timbri`) e
+`impostaStatoRichiesta`; la pagina ricalcola `obiettivi.fatti` e `raccolta.presi`. `RichiestePage`,
+`DomandePage` e `CruciverbaPage` usano `CampoRicerca` + `Segmenti`; il dedalo delle Richieste vive in
+`?dedalo=`; le righe «prossime» hanno un'ancora (`#domande-<data>`, `#cruciverba-<giorno>`) a cui il
+rimando in cima scorre dopo aver azzerato i filtri.

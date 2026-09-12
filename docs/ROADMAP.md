@@ -416,9 +416,8 @@ tipo/fascia/tracciamento, sede con l'invariante del quartiere, film al cinema in
 paga solo ai lavori), `GET /api/catalogo/:tipo?nascosti=1&negozio=`. Il frontend è adattato al
 minimo (Palazzi, quartiere, negozio, tipo «luogo» nel modulo): le interfacce sono le voci 6–8.
 
-Resta per le voci 7–8: `luogo.giorni` resta testo (letto da `giorniDaTesto`); nella scheda del Palazzo
-l'anello conta la raccolta sulle planimetrie mentre l'elenco laterale conta ancora i punti della guida
-(voce 8). Le note su `disponibile_dal`, `orari` come frase e la nota semplice di una Dote con voci
+Resta per la voce 11: `luogo.giorni` resta testo (letto da `giorniDaTesto`). La scheda del Palazzo
+è stata allineata dalla voce 8 (anello ed elenco contano la stessa raccolta). Le note su `disponibile_dal`, `orari` come frase e la nota semplice di una Dote con voci
 condizionate sono chiuse dalla voce 6: il modulo scrive solo valori (`orari_json`, `effetti_json`,
 condizioni).
 
@@ -474,3 +473,31 @@ disponibili con il motivo; Tanaka e i lavori con paga e sede). Validatore: un bl
 negozi e videogiochi erano sotto i 44 px: aggiunta la classe `touch`, rimisurate a 375/768/1280) e i non
 bloccanti chiusi (campo `dove` morto in `LettureEGiochi`, riga «Sessioni» irraggiungibile, prop `className`
 speculativa dei `Segmenti`, commento sulla paga, `NOME_DOTE` riesportato da `shared`).
+
+## UI di Palazzi, Memento, Richieste, domande e cruciverba (12 settembre 2026) — fatto
+
+Voce 8 del piano «struttura, non frasi» (sezioni G–J). `DungeonDettaglioPage`: la colonna di destra
+è **quel che fa la percentuale** — nei Palazzi i collezionabili delle planimetrie (`RaccoltaPlanimetrie`:
+quelli dell'area scelta e, ripiegate, tutte le planimetrie del Palazzo, con «Raccolto» in un tocco via
+`PUT /api/partite/:id/spilli/:spilloId` e l'anello aggiornato senza ricaricare), nei Memento gli
+obiettivi del dedalo (`ObiettiviDedalo`: timbri con −/+ da 44 px «su N» via `PUT /api/partite/:id/timbri`,
+«non dichiarati dalla guida» dove il totale manca, richieste con Accettata/Completata/Riapri); i punti
+della guida (sicure, enigmi, boss) stanno in una piega «Dalla guida» con Ottenuto/Esaurito e non contano;
+l'elenco delle aree dice quanto resta con la stessa misura dell'anello; per i Memento la «Pianta della
+guida» non c'è più (i piani si generano). `RichiestePage`: ricerca (nome, bersaglio, forma demoniaca,
+Confidente, dedalo, committente), segmenti indipendenti Accettazione × Completamento, dedalo dal
+`Selettore` sui `dedali` in ordine di percorrenza con i conteggi, tenuto in `?dedalo=` (dalla scheda del
+dedalo si arriva già filtrati); niente fonte. `DomandePage`: una rappresentazione sola (righe per data
+con il quesito accanto a ogni risposta degli esami; la sezione «Esami» dice date, risultati e premi
+senza ripetere le domande), il prossimo appuntamento evidenziato nel suo mese con il rimando in cima,
+ricerca (domanda, risposte, chi, data), segmenti Tipo [Tutte | In classe | Esami | Quiz TV] × Stato.
+`CruciverbaPage`: mesi, prossimo cruciverba evidenziato con il rimando, ricerca (data, indizio,
+risposta), segmenti di stato. API FE: `impostaTimbri`. Verifica a 1280/768/375 senza overflow e con bersagli
+≥44 px (link compresi); giro nel browser sulla partita (forziere raccolto e riaperto con l'anello che segue e
+il server allineato; timbro +1/−1 e richiesta accettata/riaperta nel Dedalo di Aiyatsbus, tutto riportato a
+zero). Validatore: tre bloccanti corretti — la colonna del Palazzo mostra subito tutta la raccolta quando
+l'area non ha planimetrie legate (132 collezionabili su 185 non stanno in nessuna area) e la voce dell'area
+dice «nessuna planimetria legata»; la Dote di Conoscenza si accredita solo alle domande in classe
+(«Conoscenza +…»), non agli esami; i link delle planimetrie e delle richieste sono bersagli da 44 px — e i
+non bloccanti chiusi (testo dei Memento, conteggi dei dedali nel selettore delle Richieste, rilettura della
+raccolta dopo Ottenuto/Esaurito, numerazione fra gli omonimi, pulsanti occupati per riga).
