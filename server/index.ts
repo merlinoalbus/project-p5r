@@ -24,6 +24,7 @@ import { createApp } from './bootstrap.js';
 import { caricaSeed } from './services/seed/caricaSeed.js';
 import { traduciNomiSpilli } from './db/migrations/053_nomi_spilli_in_italiano.js';
 import { collegaLuoghiAllePlanimetrie } from './db/migrations/054_luoghi_con_la_loro_planimetria.js';
+import { riallineaSpilliLuoghi } from './services/mappe/sincronizzaMappe.js';
 
 try {
   initDb();
@@ -54,6 +55,9 @@ try {
   // dati, quindi si rifà quando i dati cambiano, non una volta sola.
   const collegati = collegaLuoghiAllePlanimetrie(initDb());
   if (collegati > 0) logger.info({ luoghi: collegati }, 'luoghi collegati alla planimetria che porta il loro nome');
+  // Lo spillo di un luogo segue il catalogo dei tipi di luogo: anche questa è una regola sui dati.
+  const riallineati = riallineaSpilliLuoghi(initDb());
+  if (riallineati > 0) logger.info({ spilli: riallineati }, 'spilli dei luoghi riallineati al catalogo dei tipi');
 } catch (err) {
   console.error('[project-p5r] FATALE: caricamento del seed fallito:', err);
   process.exit(1);

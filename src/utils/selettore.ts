@@ -6,6 +6,9 @@ export const SOGLIA_RICERCA = 10;
 /** Quante voci al massimo mostra la tendina: oltre, si chiede di scrivere qualche lettera in più. */
 export const TETTO_VOCI = 200;
 
+/** Larghezza minima della tendina in px (la stessa del CSS): serve a decidere da che lato aprirla. */
+export const LARGHEZZA_TENDINA = 260;
+
 /** Da un dizionario chiave → nome alle voci del selettore, nell'ordine del dizionario. */
 export function opzioniDaNomi(nomi: Record<string, string>): OpzioneSelettore[] {
   return Object.entries(nomi).map(([chiave, nome]) => ({ chiave, nome }));

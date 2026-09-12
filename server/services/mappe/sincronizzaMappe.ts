@@ -17,7 +17,8 @@ import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 
 import { nowIso } from '../../db/dbService.js';
 import type { AppDatabase } from '../../db/dbService.js';
-import { spilloPerLuogo, spilloPerPunto } from '../../../shared/spilli.js';
+import { spilloPerPunto } from '../../../shared/spilli.js';
+import { spilloPerLuogo } from '../../../shared/tipiLuogo.js';
 
 function adesso(): string { return new Date().toISOString(); }
 
@@ -37,6 +38,29 @@ function posizionePassaggio(radice: string, figlia: string, i: number, n: number
   const colonne = Math.max(1, Math.ceil(Math.sqrt(n)));
   const righe = Math.max(1, Math.ceil(n / colonne));
   return [10 + (80 * (i % colonne)) / Math.max(1, colonne - 1), 10 + (80 * Math.floor(i / colonne)) / Math.max(1, righe - 1)];
+}
+
+/** Un tipo di luogo che oggi ha uno spillo proprio, e quello con cui il pin nasceva prima (2026-09-12):
+ *  la scuola era «attività» (il «servizio» resta sull'icona generica dell'attività: il Leblanc e la palestra non sono lavanderie). */
+const VECCHIA_CORRISPONDENZA: Record<string, string> = { scuola: 'attivita' };
+
+/** Gli spilli di seed dei luoghi seguono il catalogo dei tipi di luogo (shared/tipiLuogo) quando la
+ *  corrispondenza cambia. Regola **mirata**: si tocca solo lo spillo rimasto al tipo della vecchia
+ *  corrispondenza; i pacchetti possono assegnare tipi più fini (il bagno pubblico è «terme», non
+ *  «lavanderia») e quelli restano. Non tocca gli spilli dell'utente. Si rifà a ogni avvio come le
+ *  altre regole sui dati. */
+export function riallineaSpilliLuoghi(db: AppDatabase): number {
+  const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((r) => r.name));
+  if (!tabelle.has('spillo') || !tabelle.has('luogo')) return 0;
+  const agg = db.prepare(`UPDATE spillo SET tipo = ?, updated_at = ? WHERE origine = 'seed' AND riferimento_tipo = 'luogo' AND tipo = ?
+    AND riferimento_chiave IN (SELECT chiave FROM luogo WHERE tipo = ?)`);
+  const t = nowIso();
+  let n = 0;
+  for (const [tipoLuogo, vecchio] of Object.entries(VECCHIA_CORRISPONDENZA)) {
+    const nuovo = spilloPerLuogo(tipoLuogo);
+    if (nuovo !== vecchio) n += agg.run(nuovo, t, vecchio, tipoLuogo).changes;
+  }
+  return n;
 }
 
 export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: number; riclassificati: number; conSblocco: number } {
@@ -161,6 +185,7 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       insSpillo.run(mappa, spilloPerLuogo(r.tipo), r.nome, r.cosa_offre, r.x, r.y, 'luogo', r.luogo_chiave, 0, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
       spilli++;
     }
+    riclassificati += riallineaSpilliLuoghi(db);
   }
   // ---- Passaggi automatici verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree): posizioni predefinite (Tokyo dalla mappa ufficiale, Mementos in verticale) o griglia, da trascinare nell'editor ----
   const figlieDi = db.prepare("SELECT chiave, nome FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, chiave");

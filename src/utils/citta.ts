@@ -2,18 +2,10 @@
 // citta — etichette dei tipi di luogo, attività e Doti (Fase 8.1)
 // ============================================================
 
-export const NOME_TIPO_LUOGO: Record<string, string> = {
-  negozio: 'Negozio',
-  ristorante: 'Ristorante',
-  attivita: 'Attività',
-  confidente: 'Confidente',
-  servizio: 'Servizio',
-  distributore: 'Distributore',
-  'punto-interesse': 'Punto di interesse',
-  scuola: 'Scuola',
-  trasporto: 'Trasporto',
-  altro: 'Altro',
-};
+import { TIPI_LUOGO } from '../../shared/tipiLuogo';
+
+/** Etichette dei tipi di luogo: derivate dal catalogo condiviso (shared/tipiLuogo). */
+export const NOME_TIPO_LUOGO: Record<string, string> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.nome]));
 
 export const NOME_TIPO_ATTIVITA: Record<string, string> = {
   'mini-gioco': 'Mini-gioco',
@@ -37,18 +29,7 @@ export const NOME_DOTE: Record<string, string> = {
   perizia: 'Perizia',
 };
 
-/** Colori degli spilli dei luoghi sulla mappa del quartiere. */
-export const COLORE_TIPO_LUOGO: Record<string, string> = {
-  negozio: '#e11d48',
-  ristorante: '#f97316',
-  attivita: '#a855f7',
-  confidente: '#facc15',
-  servizio: '#22c55e',
-  distributore: '#06b6d4',
-  'punto-interesse': '#3b82f6',
-  scuola: '#14b8a6',
-  trasporto: '#94a3b8',
-  altro: '#888888',
-};
+/** Colori degli spilli dei luoghi sulla mappa del quartiere: dal catalogo condiviso. */
+export const COLORE_TIPO_LUOGO: Record<string, string> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.colore]));
 
 export const NOME_FASCIA: Record<string, string> = { giorno: 'giorno', sera: 'sera', entrambe: 'giorno e sera' };

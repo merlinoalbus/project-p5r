@@ -29,8 +29,9 @@ export function chiaviAssetPredefinito(ambito: AmbitoImmagine, chiave: string, f
     // Carta intera per la forma "carta" o i riquadri grandi; icona piccola altrimenti (con l'altra come riserva).
     case 'arcana': return forma === 'carta' || dimensione >= 96 ? [`arcani/${s}`, `arcani/icona/${s}`] : [`arcani/icona/${s}`, `arcani/${s}`];
     case 'confidente': return [`confidenti/${s}-fedele`, `confidenti/${s}`];
-    // personaggi senza Confidente (Protagonista, Stanza di Velluto, Jose): ritratto `personaggi/<chiave>` (prompt §14)
-    case 'personaggio': return [`personaggi/${s}`, null];
+    // personaggi senza Confidente (Protagonista, Stanza di Velluto, Jose): la stessa coppia dei
+    // Confidenti, ritratto fedele di default e stilizzato come alternativa (prompt §14)
+    case 'personaggio': return [`personaggi/${s}-fedele`, `personaggi/${s}`];
     default: return [null, null];
   }
 }

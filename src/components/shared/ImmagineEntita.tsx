@@ -4,8 +4,8 @@
 //
 // Catena: immagine caricata dall'utente per (ambito, chiave) → asset grafico predefinito
 // (public/asset, se presente e se la preferenza è attiva) → riquadro con le iniziali.
-// Confidenti: di default il ritratto «fedele» (`confidenti/<chiave>-fedele`); al passaggio del mouse (o con il
-// pulsante nella finestra, per il tocco) si vede la versione stilizzata (`confidenti/<chiave>`), se presente.
+// Confidenti e personaggi: di default il ritratto «fedele» (`<ambito>/<chiave>-fedele`); al passaggio del mouse
+// (o con il pulsante nella finestra, per il tocco) si vede la versione stilizzata (`<ambito>/<chiave>`), se presente.
 // L'immagine non viene mai ritagliata (object-contain) e un tocco la apre a tutto schermo; in modalità
 // modificabile i comandi (scegli file, importa da URL, rimuovi) stanno nella finestra, non nella card.
 // ============================================================
@@ -52,9 +52,9 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const urlRiserva = useAsset(riserva);
   const urlPredefinito = urlPrimario ?? urlRiserva;
   const nomePredefinito = urlPrimario ? primaria : urlRiserva ? riserva : null;
-  // Versione alternativa (stilizzata) dei Confidenti: l'asset `confidenti/<chiave>`, mostrato al passaggio del mouse
-  // sia sopra il ritratto fedele sia sopra l'immagine caricata dall'utente
-  const urlAlternativa = ambito === 'confidente' && urlRiserva && (urlPrimario || presente) ? urlRiserva : null;
+  // Versione alternativa (stilizzata) di Confidenti e personaggi: l'asset senza `-fedele`, mostrato al
+  // passaggio del mouse sia sopra il ritratto fedele sia sopra l'immagine caricata dall'utente
+  const urlAlternativa = (ambito === 'confidente' || ambito === 'personaggio') && urlRiserva && (urlPrimario || presente) ? urlRiserva : null;
   const segnaMancante = useAssetStore((s) => s.segnaMancante);
 
   useEffect(() => {

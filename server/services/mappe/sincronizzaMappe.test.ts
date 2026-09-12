@@ -6,7 +6,7 @@ import path from 'node:path';
 import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { caricaSeed } from '../seed/caricaSeed.js';
-import { sincronizzaMappe } from './sincronizzaMappe.js';
+import { riallineaSpilliLuoghi, sincronizzaMappe } from './sincronizzaMappe.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
 
@@ -50,5 +50,38 @@ describe('sincronizzaMappe: riclassificazione degli spilli di seed', () => {
     expect(tipi.has('nemico')).toBe(true);
     // nessun enigma resta «nota»
     expect((db.prepare(`SELECT COUNT(*) AS n FROM spillo s JOIN punto_interesse p ON p.chiave = s.riferimento_chiave WHERE s.riferimento_tipo = 'punto' AND p.tipo = 'puzzle' AND s.tipo = 'nota' AND s.origine = 'seed'`).get() as { n: number }).n).toBe(0);
+  });
+});
+
+describe('riallineaSpilliLuoghi: gli spilli dei luoghi seguono il catalogo dei tipi di luogo', () => {
+  beforeAll(() => {
+    const db = initDb(':memory:');
+    runMigrations(db);
+    caricaSeed(db, DIR_SEED);
+  });
+  afterAll(() => closeDb());
+
+  it('un luogo «scuola» rimasto con lo spillo «attività» passa a «biblioteca»; un tipo più fine e gli spilli dell’utente restano', () => {
+    const db = initDb(':memory:');
+    // dopo il seed non deve restare alcuno spillo di seed di scuola al tipo vecchio
+    const vecchi = () => (db.prepare(`SELECT COUNT(*) AS n FROM spillo s JOIN luogo l ON l.chiave = s.riferimento_chiave
+      WHERE s.riferimento_tipo = 'luogo' AND s.origine = 'seed' AND s.tipo = 'attivita' AND l.tipo = 'scuola'`).get() as { n: number }).n;
+    expect(vecchi()).toBe(0);
+    const scuola = db.prepare(`SELECT s.id FROM spillo s JOIN luogo l ON l.chiave = s.riferimento_chiave
+      WHERE s.riferimento_tipo = 'luogo' AND s.origine = 'seed' AND l.tipo = 'scuola' AND s.tipo = 'biblioteca' LIMIT 1`).get() as { id: number };
+    expect(scuola).toBeTruthy();
+    // simulo il dato lasciato dalla vecchia corrispondenza, e un tipo più fine assegnato da un pacchetto
+    db.prepare("UPDATE spillo SET tipo = 'attivita' WHERE id = ?").run(scuola.id);
+    const terme = db.prepare(`SELECT s.id FROM spillo s JOIN luogo l ON l.chiave = s.riferimento_chiave
+      WHERE s.riferimento_tipo = 'luogo' AND s.origine = 'seed' AND l.tipo = 'servizio' LIMIT 1`).get() as { id: number };
+    db.prepare("UPDATE spillo SET tipo = 'terme' WHERE id = ?").run(terme.id);
+    const utente = db.prepare(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at)
+      SELECT mappa_chiave, 'attivita', 'Mio', '', 5, 5, 'luogo', riferimento_chiave, 0, 99, 'utente', '2026-01-01T00:00:00.000Z' FROM spillo WHERE id = ?`).run(scuola.id);
+
+    expect(riallineaSpilliLuoghi(db)).toBe(1);
+    expect((db.prepare('SELECT tipo FROM spillo WHERE id = ?').get(scuola.id) as { tipo: string }).tipo).toBe('biblioteca');
+    expect((db.prepare('SELECT tipo FROM spillo WHERE id = ?').get(terme.id) as { tipo: string }).tipo).toBe('terme');
+    expect((db.prepare('SELECT tipo FROM spillo WHERE id = ?').get(Number(utente.lastInsertRowid)) as { tipo: string }).tipo).toBe('attivita');
+    expect(riallineaSpilliLuoghi(db)).toBe(0);
   });
 });
