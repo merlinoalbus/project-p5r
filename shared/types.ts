@@ -1891,6 +1891,19 @@ export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita'
 /** Un luogo della città come voce da scegliere (sede di un negozio o di un'attività). */
 export interface LuogoOpzioneDto { chiave: string; nome: string; tipo: string; quartiere: string; quartiereNome: string }
 
+/** Gli stati di una partita per le condizioni: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
+export interface ProgressiPartitaDto {
+  /** `calcolato`: dalla squadra (tre stati: sì, no, non segnato); `manuale`: la spunta. */
+  eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string }>;
+  /** Le sole attività che si contano per volte svolte. */
+  attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number }>;
+  /** I negozi con programma punti manuale. */
+  puntiNegozio: Array<{ negozio: string; nome: string; programma: string; unita: string; punti: number }>;
+  /** I negozi con il grado cliente: dalla spesa segnata, con la prossima soglia. */
+  rangoCliente: Array<{ negozio: string; nome: string; programma: string; spesa: number; rango: { chiave: string; nome: string }; prossimo: { chiave: string; nome: string; spesa: number } | null }>;
+  contatori: Array<{ chiave: string; nome: string; valore: number }>;
+}
+
 /** I timbri raccolti in un dedalo dei Memento, per partita. */
 export interface TimbriDedaloDto { area: string; raccolti: number; totale: number | null; completato: boolean }
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];

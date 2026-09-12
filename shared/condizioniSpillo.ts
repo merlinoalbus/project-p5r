@@ -49,17 +49,23 @@ export const CONTATORI = [
   { chiave: 'film-completati', nome: 'Film o DVD completati' }, { chiave: 'videogiochi-completati', nome: 'Videogiochi completati' }, { chiave: 'libri-letti', nome: 'Libri letti' },
 ] as const;
 export type ContatoreChiave = (typeof CONTATORI)[number]['chiave'];
-/** Gli eventi di storia che la guida usa come cardine e che l'app non può dedurre: si segnano in Partita → Progressi. */
+/** Gli eventi di storia. Quelli con `membro` sono «entra in squadra»: **si calcolano** dalla squadra della
+ *  partita (`membro_squadra_partita.in_squadra`) e non si segnano a mano; niente date canoniche. */
 export const EVENTI_STORIA = [
   { chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita' },
-  { chiave: 'evento-makoto', nome: 'Evento con Makoto (entra in squadra)' },
-  { chiave: 'evento-futaba', nome: 'Evento con Futaba (entra in squadra)' },
-  { chiave: 'evento-haru', nome: 'Evento con Haru (entra in squadra)' },
-  { chiave: 'evento-akechi', nome: 'Evento con Akechi (entra in squadra)' },
+  { chiave: 'evento-makoto', nome: 'Evento con Makoto (entra in squadra)', membro: 'makoto' },
+  { chiave: 'evento-futaba', nome: 'Evento con Futaba (entra in squadra)', membro: 'futaba' },
+  { chiave: 'evento-haru', nome: 'Evento con Haru (entra in squadra)', membro: 'haru' },
+  { chiave: 'evento-akechi', nome: 'Evento con Akechi (entra in squadra)', membro: 'akechi' },
   { chiave: 'primo-strumento-creato', nome: 'Primo strumento di infiltrazione creato' },
   { chiave: 'biliardo-rango-tecnico-3', nome: 'Biliardo: rango tecnico 3 raggiunto' },
 ] as const;
 export type EventoStoria = (typeof EVENTI_STORIA)[number]['chiave'];
+/** Il Ladro che fa avvenire l'evento, o null se l'evento si segna a mano. */
+export function membroDellEvento(chiave: string): string | null {
+  const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
+  return e && 'membro' in e ? e.membro : null;
+}
 
 /** Una condizione: uno stato della partita e il valore richiesto. Le date sono «MM-GG» del calendario di gioco. */
 export type RequisitoSpillo =

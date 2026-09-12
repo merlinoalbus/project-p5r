@@ -388,3 +388,15 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   raccogliere sulla sua planimetria» (34 aree hanno una planimetria senza collezionabili), e la nota sopra la
   raccolta del Palazzo dice il motivo giusto; l'etichetta della colonna e il messaggio di vuoto seguono ciò che si
   sta guardando (area o Palazzo).
+
+### 2026-09-12 — Progressi calcolati (voce 9)
+- **Gli eventi «entra in squadra» non si segnano più**: valgono quel che dice la squadra della partita
+  (`in_squadra`), a tre stati come i semafori dei Confidenti; niente date canoniche, perché la data in cui
+  un Ladro entra dipende dalla partita. Le righe manuali esistenti dei quattro eventi vengono cancellate
+  (migrazione utente 004): non le leggerebbe più nessuno.
+- **Si conta solo ciò che ha un tracciamento**: le condizioni «svolta almeno n volte» e i progressi vedono le
+  sole attività con `tracciamento = 'svolta'`; i videogiochi si contano per round in Letture e giochi;
+  studio, allenamento, cibo e lettura non si contano.
+- **I punti negozio si segnano solo dove il programma è manuale** (Vestiti usati di Kichijoji: i punti
+  vengono dalle vendite, non dalla spesa); il grado cliente (Tanaka) si calcola dalla spesa e non si segna.
+  L'editor delle condizioni offre l'uno o l'altro secondo il programma del negozio.
