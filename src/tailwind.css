@@ -1398,9 +1398,10 @@
 .rimossi-elenco__titolo { margin:0; font-size:14px; font-weight:600; }
 .rimossi-elenco__riga { display:flex; align-items:center; gap:8px; min-height:44px; border-bottom:1px solid var(--color-border-light, var(--color-border)); }
 .rimossi-elenco__riga:last-child { border-bottom:0; }
-.barra-invio { width:100%; height:8px; appearance:none; border:1px solid var(--color-border); background:var(--color-bg-tertiary); }
-.barra-invio::-webkit-progress-bar { background:var(--color-bg-tertiary); }
-.barra-invio::-webkit-progress-value { background:var(--color-primary); transition:width .2s linear; }
-.barra-invio::-moz-progress-bar { background:var(--color-primary); }
-.barra-invio:indeterminate { background:linear-gradient(90deg, var(--color-bg-tertiary) 35%, var(--color-primary) 50%, var(--color-bg-tertiary) 65%); background-size:200% 100%; animation:barra-invio-scorre 1.2s linear infinite; }
-@keyframes barra-invio-scorre { from { background-position:200% 0; } to { background-position:-200% 0; } }
+/* Barra di un lavoro in corso sul server: non c'è una percentuale da mostrare, quindi scorre.
+   Non si usa <progress>: con `appearance:none` il fondo lo disegna `::-webkit-progress-bar`, che
+   copre l'animazione messa sull'elemento — in Chrome la barra restava ferma e sembrava bloccata. */
+.barra-invio { position:relative; width:100%; height:8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); overflow:hidden; }
+.barra-invio::after { content:""; position:absolute; inset:0 auto 0 0; width:40%; background:var(--color-primary); animation:barra-invio-scorre 1.3s ease-in-out infinite; }
+@keyframes barra-invio-scorre { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
+@media (prefers-reduced-motion: reduce) { .barra-invio::after { animation-duration:3s; } }

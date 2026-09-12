@@ -1,26 +1,29 @@
 // @vitest-environment jsdom
 // ============================================================
-// Test BarraInvio — quanto è partito, e quando la palla passa al server
+// Test BarraInvio — dice che il server sta lavorando, senza promettere un avanzamento che non c'è
 // ============================================================
 
 import { render, screen } from '@testing-library/react';
 import { BarraInvio } from './BarraInvio';
 
-it('senza invio in corso non occupa spazio', () => {
+it('senza lavoro in corso non occupa spazio', () => {
   const { container } = render(<BarraInvio avanzamento={null} etichetta="Invio del pacchetto" elaborazione="Il server elabora" />);
   expect(container).toBeEmptyDOMElement();
 });
 
-it('durante l’invio mostra percentuale e MB, con la barra al punto giusto', () => {
-  render(<BarraInvio avanzamento={{ byteInviati: 104_857_600, byteTotali: 326_778_880, percentuale: 32, inviato: false }} etichetta="Invio del pacchetto" elaborazione="Il server elabora" />);
-  expect(screen.getByRole('status')).toHaveTextContent('Invio del pacchetto… 32% · 100 MB di 311,6 MB');
-  const barra = screen.getByLabelText('Invio del pacchetto');
-  expect(barra).toHaveValue(32);
+it('mentre lavora il server lo dice e segnala l’attesa alle tecnologie assistive', () => {
+  render(<BarraInvio avanzamento={{ byteInviati: 0, byteTotali: 0, percentuale: 100, inviato: true }} etichetta="Lavoro sul server" elaborazione="Il server sta leggendo il file dalla cartella d’appoggio" />);
+  const stato = screen.getByRole('status');
+  expect(stato).toHaveTextContent('Il server sta leggendo il file dalla cartella d’appoggio…');
+  expect(stato).toHaveAttribute('aria-busy', 'true');
+  // la barra scorre: non c'è una percentuale da dichiarare, quindi nessun valore
+  const barra = screen.getByRole('progressbar', { name: 'Il server sta leggendo il file dalla cartella d’appoggio' });
+  expect(barra).not.toHaveAttribute('value');
+  expect(barra).toHaveClass('barra-invio');
 });
 
-it('a corpo inviato la barra diventa indeterminata e parla del server', () => {
-  render(<BarraInvio avanzamento={{ byteInviati: 10, byteTotali: 10, percentuale: 100, inviato: true }} etichetta="Invio del pacchetto" elaborazione="Sostituzione dei dati di gioco in corso" />);
-  expect(screen.getByRole('status')).toHaveTextContent('Sostituzione dei dati di gioco in corso…');
-  const barra = screen.getByLabelText('Sostituzione dei dati di gioco in corso');
-  expect(barra).not.toHaveAttribute('value');
+it('quando una percentuale c’è, la dice', () => {
+  render(<BarraInvio avanzamento={{ byteInviati: 50, byteTotali: 100, percentuale: 50, inviato: false }} etichetta="Invio del pacchetto" elaborazione="Il server elabora" />);
+  expect(screen.getByRole('status')).toHaveTextContent('Invio del pacchetto… 50%');
+  expect(screen.getByRole('progressbar', { name: 'Invio del pacchetto' })).toBeInTheDocument();
 });

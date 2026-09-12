@@ -1,35 +1,29 @@
 // ============================================================
-// BarraInvio — l'avanzamento dell'invio di un file al server (pacchetto di gioco, ripristino)
+// BarraInvio — un lavoro lungo è in corso sul server
 // ============================================================
 //
-// Un file da centinaia di MB su una linea lenta impiega minuti: senza niente a schermo l'utente non
-// sa se sta andando avanti o se è tutto fermo, e chiude la finestra. Qui si vede la percentuale con i
-// MB già partiti; quando il corpo è tutto inviato la barra diventa indeterminata, perché da quel
-// momento il tempo lo consuma il server (lettura del pacchetto, copia di sicurezza, migrazioni) e
-// nessuno può più dire «a che punto è».
+// Leggere un pacchetto da centinaia di MB, salvare la copia di sicurezza, applicare le migrazioni: sono
+// minuti in cui l'utente non deve chiedersi se si è bloccato tutto. Non c'è una percentuale da mostrare —
+// il lavoro è del backend e non riferisce quanto manca — quindi la barra scorre invece di riempirsi, e
+// il testo dice che cosa sta facendo.
 // ============================================================
 
-import { byteTesto } from '../../utils/byte';
 import type { AvanzamentoInvio } from '../../services/api';
 
 export function BarraInvio({ avanzamento, etichetta, elaborazione }: {
   avanzamento: AvanzamentoInvio | null;
-  /** Che cosa si sta mandando: «Invio del pacchetto». */
+  /** Che cosa si sta mandando (resta per i casi con percentuale). */
   etichetta: string;
-  /** Che cosa fa il server dopo: «Lettura del pacchetto in corso». */
+  /** Che cosa fa il server: «Il server sta leggendo il file dalla cartella d'appoggio». */
   elaborazione: string;
 }) {
   if (!avanzamento) return null;
-  const { percentuale, byteInviati, byteTotali, inviato } = avanzamento;
-  const testo = inviato ? `${elaborazione}…` : `${etichetta}… ${percentuale}% · ${byteTesto(byteInviati)} di ${byteTesto(byteTotali)}`;
+  const { percentuale, inviato } = avanzamento;
+  const testo = inviato ? `${elaborazione}…` : `${etichetta}… ${percentuale}%`;
   return (
-    <div className="flex flex-col gap-1" role="status" aria-live="polite">
+    <div className="flex flex-col gap-1" role="status" aria-live="polite" aria-busy="true">
       <span className="text-[13px] text-text-secondary">{testo}</span>
-      <progress
-        className="barra-invio"
-        aria-label={inviato ? elaborazione : etichetta}
-        {...(inviato ? {} : { value: percentuale, max: 100 })}
-      />
+      <div className="barra-invio" role="progressbar" aria-label={inviato ? elaborazione : etichetta} />
     </div>
   );
 }

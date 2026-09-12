@@ -32,7 +32,7 @@ import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
 import { cartellaTemporanea, copiaDatabase, copiaDiSicurezza, riapriIstanza, scriviDatabase, statoIstanza, timbro, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
-import { ESTENSIONI_PACCHETTO, elencaDeposito as elencaCartella, leggiDalDeposito } from './depositoService.js';
+import { ESTENSIONI_PACCHETTO, elencaDeposito as elencaCartella, leggiDalDeposito, percorsoNelDeposito } from './depositoService.js';
 
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
@@ -144,9 +144,33 @@ export function elencaDeposito(): DepositoFileDto {
   return elencaCartella(ESTENSIONI_PACCHETTO);
 }
 
-/** Che cosa cambierebbe importando un pacchetto depositato sul NAS. */
+/**
+ * Che cosa cambierebbe importando un pacchetto depositato sul NAS.
+ *
+ * Il file **non** viene letto tutto: SQLite lo apre dov'è, in sola lettura, e tocca solo le pagine che
+ * servono ai conteggi. Leggere 300 MB da una condivisione di rete per poi riscriverli in un temporaneo
+ * costerebbe minuti, e sono minuti in cui l'utente guarda una barra che non può avanzare.
+ */
 export function anteprimaPacchettoDaDeposito(nome: string): AnteprimaPacchettoDto {
-  return anteprimaPacchetto(leggiDalDeposito(nome));
+  const percorso = percorsoNelDeposito(nome);
+  const byte = fs.statSync(percorso).size;
+  if (byte < 100) throw httpErrors.badRequest('pacchetto-non-valido', `«${nome}» è troppo piccolo per essere un pacchetto di gioco.`);
+  // la firma sta nei primi sedici byte: si legge solo quella, non tutto il file
+  const firma = Buffer.alloc(16);
+  const f = fs.openSync(percorso, 'r');
+  try {
+    fs.readSync(f, firma, 0, 16, 0);
+  } finally {
+    fs.closeSync(f);
+  }
+  if (firma.toString('utf-8') !== FIRMA_SQLITE) throw httpErrors.badRequest('pacchetto-non-valido', `«${nome}» non è un database SQLite: nella cartella d'appoggio serve il file gioco.db scaricato dall'app.`);
+  const db = new Database(percorso, { readonly: true });
+  try {
+    db.prepare('ATTACH DATABASE ? AS utente').run(resolvePartitePath());
+    return anteprimaDalDatabase(db, byte, nome);
+  } finally {
+    db.close();
+  }
 }
 
 /** Sostituisce i dati di gioco con un pacchetto depositato sul NAS. */
@@ -199,28 +223,34 @@ function conDatabaseDelPacchetto<T>(gioco: Buffer, fn: (db: Database.Database) =
 /** Che cosa cambierebbe importando il pacchetto. Legge il file e non sostituisce nulla. */
 export function anteprimaPacchetto(contenuto: Buffer): AnteprimaPacchettoDto {
   verificaPacchetto(contenuto);
-  return conDatabaseDelPacchetto(contenuto, (db) => {
-    const versioneSchema = db.pragma('main.user_version', { simple: true }) as number;
-    const codice = versioneSchemaCodice();
-    const istanza = getDb();
-    const attuali = conteggiTabelle(istanza, 'main');
-    const nelPacchetto = conteggiTabelle(db, 'main');
-    const differenze = Object.keys(nelPacchetto).filter((t) => t in attuali && attuali[t] !== nelPacchetto[t]).map((t) => ({ tabella: t, istanza: attuali[t], pacchetto: nelPacchetto[t] }));
-    const tabelleAssenti = Object.keys(attuali).filter((t) => !(t in nelPacchetto));
-    const importabile = versioneSchema <= codice;
-    return {
-      versioneSchema,
-      versioneSchemaCodice: codice,
-      versioneSchemaIstanza: istanza.pragma('main.user_version', { simple: true }) as number,
-      databaseByte: contenuto.length,
-      importabile,
-      motivo: importabile ? null : `Il pacchetto ha lo schema ${versioneSchema}, più nuovo di quello che questa versione dell'app sa leggere (${codice}): aggiorna l'app prima di importarlo.`,
-      differenze,
-      tabelleAssenti,
-      immagini: { istanza: immaginiPiene(istanza, 'main'), pacchetto: immaginiPiene(db, 'main') },
-      orfani: orfaniPartite(db, 'main', 'utente'),
-    };
-  });
+  return conDatabaseDelPacchetto(contenuto, (db) => anteprimaDalDatabase(db, contenuto.length));
+}
+
+/** Il confronto vero e proprio, su un pacchetto già aperto (in un temporaneo o dov'è depositato). */
+function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string): AnteprimaPacchettoDto {
+  const tabelle = new Set((db.prepare("SELECT name FROM main.sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
+  if (!tabelle.has('persona')) throw httpErrors.badRequest('pacchetto-non-valido', `${nome ? `«${nome}»` : 'Il file'} non è un pacchetto di gioco: mancano le tabelle di base.`);
+  if (tabelle.has('partita')) throw httpErrors.badRequest('pacchetto-con-partite', `${nome ? `«${nome}»` : 'Il file'} contiene anche le partite: un pacchetto di gioco porta solo i dati di gioco.`);
+  const versioneSchema = db.pragma('main.user_version', { simple: true }) as number;
+  const codice = versioneSchemaCodice();
+  const istanza = getDb();
+  const attuali = conteggiTabelle(istanza, 'main');
+  const nelPacchetto = conteggiTabelle(db, 'main');
+  const differenze = Object.keys(nelPacchetto).filter((t) => t in attuali && attuali[t] !== nelPacchetto[t]).map((t) => ({ tabella: t, istanza: attuali[t], pacchetto: nelPacchetto[t] }));
+  const tabelleAssenti = Object.keys(attuali).filter((t) => !(t in nelPacchetto));
+  const importabile = versioneSchema <= codice;
+  return {
+    versioneSchema,
+    versioneSchemaCodice: codice,
+    versioneSchemaIstanza: istanza.pragma('main.user_version', { simple: true }) as number,
+    databaseByte: byte,
+    importabile,
+    motivo: importabile ? null : `Il pacchetto ha lo schema ${versioneSchema}, più nuovo di quello che questa versione dell'app sa leggere (${codice}): aggiorna l'app prima di importarlo.`,
+    differenze,
+    tabelleAssenti,
+    immagini: { istanza: immaginiPiene(istanza, 'main'), pacchetto: immaginiPiene(db, 'main') },
+    orfani: orfaniPartite(db, 'main', 'utente'),
+  };
 }
 
 // ---- Una importazione alla volta, e osservabile ----
