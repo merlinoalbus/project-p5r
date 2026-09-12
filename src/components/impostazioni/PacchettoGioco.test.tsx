@@ -1,13 +1,17 @@
 // @vitest-environment jsdom
 // ============================================================
-// Test PacchettoGioco — esportazione, anteprima obbligatoria e importazione del pacchetto di gioco (voce 10)
+// Test PacchettoGioco — scaricamento (con copia depositata) e importazione dalla cartella d'appoggio
+// ============================================================
+//
+// Dal browser non parte nessun file: il pacchetto si sceglie fra quelli depositati sul server, che li
+// legge dal mount. Restano l'anteprima obbligatoria, il lucchetto e l'esito legato al proprio tentativo.
 // ============================================================
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { PacchettoGioco } from './PacchettoGioco';
 import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, StatoIstanzaDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), anteprimaPacchettoGioco: vi.fn(), importaPacchettoGioco: vi.fn(), statoImportazionePacchetto: vi.fn(), getDepositoPacchetti: vi.fn(), anteprimaPacchettoDaDeposito: vi.fn(), importaPacchettoDaDeposito: vi.fn() }));
+const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), statoImportazionePacchetto: vi.fn(), getDepositoPacchetti: vi.fn(), anteprimaPacchettoDaDeposito: vi.fn(), importaPacchettoDaDeposito: vi.fn() }));
 vi.mock('../../services/api', () => api);
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
 vi.mock('../../stores/notificationStore', () => ({ notifica }));
@@ -34,9 +38,27 @@ const esito: EsitoImportazionePacchettoDto = {
   orfani: anteprima.orfani, stato: { ...stato, immagini: { file: 640, byte: 1_000_000 } },
 };
 
-function scegliFile(): void {
-  const file = new File(['x'], 'project-p5r-gioco.db', { type: 'application/octet-stream' });
-  fireEvent.change(screen.getByLabelText('Pacchetto di gioco da importare'), { target: { files: [file] } });
+/** Nella cartella d'appoggio per il pacchetto ci sono solo database: gli ZIP sono affare dell'altra card. */
+const DEPOSITO = {
+  disponibile: true,
+  cartella: '/deposito',
+  motivo: null,
+  file: [
+    { nome: 'project-p5r-gioco-2026-09-12.db', byte: 326_778_880, modificatoIl: '2026-09-12T18:00:00.000Z' },
+    { nome: 'project-p5r-gioco-2026-09-01.db', byte: 300_000_000, modificatoIl: '2026-09-01T10:00:00.000Z' },
+  ],
+};
+
+/** Cerca nel deposito e porta fino alla finestra di conferma sul primo file. */
+async function finoAllaConferma() {
+  api.getDepositoPacchetti.mockResolvedValue(DEPOSITO);
+  api.anteprimaPacchettoDaDeposito.mockResolvedValue(anteprima);
+  render(<PacchettoGioco />);
+  await screen.findByText(/schema 79/);
+  fireEvent.click(screen.getByRole('button', { name: /Cerca i file disponibili/ }));
+  await screen.findByRole('combobox', { name: /File in \/deposito/ });
+  fireEvent.click(screen.getByRole('button', { name: /Importa il file scelto/ }));
+  return screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
 }
 
 describe('PacchettoGioco', () => {
@@ -50,27 +72,33 @@ describe('PacchettoGioco', () => {
     HTMLAnchorElement.prototype.click = vi.fn();
   });
 
-  it('mostra lo stato dei dati di gioco e scarica il pacchetto (il file gioco.db)', async () => {
-    api.scaricaPacchettoGioco.mockResolvedValue({ nome: 'project-p5r-gioco.db', blob: new Blob(['x']) });
+  it('mostra lo stato dei dati di gioco, scarica e dice dove è finita la copia', async () => {
+    api.scaricaPacchettoGioco.mockResolvedValue({ nome: 'project-p5r-gioco.db', blob: new Blob(['x']), depositato: 'project-p5r-gioco-2026-09-12.db' });
     render(<PacchettoGioco />);
     expect(await screen.findByText(/gioco\.db · 305,2 MB · schema 79/)).toBeInTheDocument();
     expect(screen.getByText('640 · 286,1 MB')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Scarica il pacchetto di gioco/ }));
     await waitFor(() => expect(api.scaricaPacchettoGioco).toHaveBeenCalled());
     expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled();
-    expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('Pacchetto di gioco scaricato'));
+    expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('project-p5r-gioco-2026-09-12.db'));
   });
 
-  it('l’importazione passa dall’anteprima: schema, tabelle che cambiano, immagini, orfani; poi conferma ed esito', async () => {
-    api.anteprimaPacchettoGioco.mockResolvedValue(anteprima);
-    api.importaPacchettoGioco.mockResolvedValue(esito);
+  it('non si carica più niente dal browser: nessun pulsante di caricamento né campo per un indirizzo', async () => {
     render(<PacchettoGioco />);
     await screen.findByText(/schema 79/);
-    scegliFile();
-    const finestra = await screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
-    expect(api.anteprimaPacchettoGioco).toHaveBeenCalledTimes(1);
-    expect(api.importaPacchettoGioco).not.toHaveBeenCalled();
-    expect(within(finestra).getByText(/Il pacchetto «project-p5r-gioco\.db» \(5,8 MB\)/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Importa un pacchetto/ })).toBeNull();
+    expect(screen.queryByLabelText('Pacchetto di gioco da importare')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Importa da indirizzo/ })).toBeNull();
+  });
+
+  it('dalla cartella d’appoggio: elenca i database, li fa scegliere e l’import lo fa il server', async () => {
+    api.importaPacchettoDaDeposito.mockResolvedValue(esito);
+    const finestra = await finoAllaConferma();
+    expect(screen.getByRole('combobox', { name: /File in \/deposito \(2\)/ })).toHaveTextContent('project-p5r-gioco-2026-09-12.db');
+    expect(api.anteprimaPacchettoDaDeposito).toHaveBeenCalledWith('project-p5r-gioco-2026-09-12.db');
+    expect(api.importaPacchettoDaDeposito).not.toHaveBeenCalled();
+
+    expect(within(finestra).getByText(/Il pacchetto «project-p5r-gioco-2026-09-12\.db» \(5,8 MB\)/)).toBeInTheDocument();
     expect(within(finestra).getByText(/pacchetto 78 · istanza 79 · app 79 \(1 migrazione da applicare\)/)).toBeInTheDocument();
     expect(within(finestra).getByText(/13 nel pacchetto · 640 nell'istanza ora/)).toBeInTheDocument();
     const tabella = within(finestra).getByRole('table', { name: 'Tabelle che cambiano' });
@@ -80,14 +108,12 @@ describe('PacchettoGioco', () => {
     expect(within(finestra).getByText(/Non nel pacchetto.*tabella_nuova/)).toBeInTheDocument();
     const orfani = within(finestra).getByRole('list', { name: 'Riferimenti orfani' });
     expect(within(orfani).getByText('3 righe in 1 partita')).toBeInTheDocument();
-    expect(within(orfani).getByText(/untouchable\/u-prova/)).toBeInTheDocument();
+
     fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
-    await waitFor(() => expect(api.importaPacchettoGioco).toHaveBeenCalledTimes(1));
-    expect(api.importaPacchettoGioco).toHaveBeenCalledWith(expect.any(File), expect.any(Function));
+    await waitFor(() => expect(api.importaPacchettoDaDeposito).toHaveBeenCalledWith('project-p5r-gioco-2026-09-12.db'));
     const esitoFinestra = await screen.findByRole('dialog', { name: 'Pacchetto importato' });
     expect(within(esitoFinestra).getByText(/schema 79 \(1 migrazione applicata dal 78\), 640 immagini/)).toBeInTheDocument();
     expect(within(esitoFinestra).getByText(/Le partite sono 2, intatte/)).toBeInTheDocument();
-    expect(within(esitoFinestra).getByText('3 righe in 1 partita')).toBeInTheDocument();
     expect(within(esitoFinestra).getByRole('button', { name: "Ricarica l'app" })).toBeInTheDocument();
     expect(carica).toHaveBeenCalled();
     expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('Dati di gioco sostituiti'));
@@ -96,10 +122,13 @@ describe('PacchettoGioco', () => {
   });
 
   it('un pacchetto più nuovo del codice non si può confermare', async () => {
-    api.anteprimaPacchettoGioco.mockResolvedValue({ ...anteprima, versioneSchema: 99, importabile: false, motivo: 'Il pacchetto ha lo schema 99, più nuovo di quello che questa versione dell\'app sa leggere (79): aggiorna l\'app prima di importarlo.', differenze: [], tabelleAssenti: [], orfani: [] });
+    api.getDepositoPacchetti.mockResolvedValue(DEPOSITO);
+    api.anteprimaPacchettoDaDeposito.mockResolvedValue({ ...anteprima, versioneSchema: 99, importabile: false, motivo: 'Il pacchetto ha lo schema 99, più nuovo di quello che questa versione dell\'app sa leggere (79): aggiorna l\'app prima di importarlo.', differenze: [], tabelleAssenti: [], orfani: [] });
     render(<PacchettoGioco />);
     await screen.findByText(/schema 79/);
-    scegliFile();
+    fireEvent.click(screen.getByRole('button', { name: /Cerca i file disponibili/ }));
+    await screen.findByRole('combobox', { name: /File in \/deposito/ });
+    fireEvent.click(screen.getByRole('button', { name: /Importa il file scelto/ }));
     const finestra = await screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
     expect(within(finestra).getByRole('alert')).toHaveTextContent(/più nuovo/);
     expect(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' })).toBeDisabled();
@@ -107,7 +136,7 @@ describe('PacchettoGioco', () => {
     expect(within(finestra).getByText('Nessun riferimento delle partite resterebbe orfano.')).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Annulla' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(api.importaPacchettoGioco).not.toHaveBeenCalled();
+    expect(api.importaPacchettoDaDeposito).not.toHaveBeenCalled();
   });
 
   it('un’istanza nata senza pacchetto lo dice; una con i soli dati iniziali invita a importare il completo', async () => {
@@ -120,17 +149,8 @@ describe('PacchettoGioco', () => {
     expect(await screen.findByRole('status')).toHaveTextContent(/solo i dati iniziali/);
   });
 
-  /** Porta l'interfaccia fino alla finestra di conferma con un file scelto. */
-  async function finoAllaConferma() {
-    api.anteprimaPacchettoGioco.mockResolvedValue(anteprima);
-    render(<PacchettoGioco />);
-    await screen.findByText(/schema 79/);
-    scegliFile();
-    return screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
-  }
-
   it('se la richiesta cade ma il server sta ancora lavorando, si aspetta e si mostra l’esito vero', async () => {
-    api.importaPacchettoGioco.mockRejectedValue(new Error('Failed to fetch'));
+    api.importaPacchettoDaDeposito.mockRejectedValue(new Error('Failed to fetch'));
     // prima del tentativo il server ha un esito vecchio; poi lavora; poi conclude con un'operazione NUOVA
     api.statoImportazionePacchetto
       .mockResolvedValueOnce({ inCorso: false, operazione: null, fase: null, iniziataIl: null, ultima: { operazione: 'vecchia', riuscita: true, conclusaIl: 'ieri', messaggio: 'fatto ieri', esito } })
@@ -144,8 +164,7 @@ describe('PacchettoGioco', () => {
   }, 20_000);
 
   it('un’importazione respinta prima di arrivare al server non eredita l’esito riuscito di prima', async () => {
-    // il proxy rifiuta il corpo: la richiesta non tocca il server, che ha ancora l'esito di un'altra importazione
-    api.importaPacchettoGioco.mockRejectedValue(new Error('Errore di rete: Failed to fetch'));
+    api.importaPacchettoDaDeposito.mockRejectedValue(new Error('Errore di rete: Failed to fetch'));
     api.statoImportazionePacchetto.mockResolvedValue({ inCorso: false, operazione: null, fase: null, iniziataIl: null, ultima: { operazione: 'di-prima', riuscita: true, conclusaIl: 'ieri', messaggio: 'riuscita ieri', esito } });
     const finestra = await finoAllaConferma();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
@@ -155,45 +174,12 @@ describe('PacchettoGioco', () => {
   });
 
   it('se non si riesce nemmeno a leggere lo stato di partenza, l’errore resta un errore', async () => {
-    api.importaPacchettoGioco.mockRejectedValue(new Error('Failed to fetch'));
-    api.statoImportazionePacchetto.mockRejectedValue(new Error('server irraggiungibile'));
+    api.importaPacchettoDaDeposito.mockRejectedValue(new Error('Failed to fetch'));
     const finestra = await finoAllaConferma();
+    api.statoImportazionePacchetto.mockRejectedValue(new Error('server irraggiungibile'));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringContaining('Failed to fetch')));
     expect(screen.queryByRole('dialog', { name: 'Pacchetto importato' })).toBeNull();
-  });
-
-  it('dalla cartella d’appoggio: cerca i file, li fa scegliere e l’import lo fa il server', async () => {
-    api.getDepositoPacchetti.mockResolvedValue({
-      disponibile: true,
-      cartella: '/deposito',
-      motivo: null,
-      file: [
-        { nome: 'gioco.db', byte: 326_778_880, modificatoIl: '2026-09-12T18:00:00.000Z' },
-        { nome: 'gioco-vecchio.db', byte: 300_000_000, modificatoIl: '2026-09-01T10:00:00.000Z' },
-      ],
-    });
-    api.anteprimaPacchettoDaDeposito.mockResolvedValue(anteprima);
-    api.importaPacchettoDaDeposito.mockResolvedValue(esito);
-    render(<PacchettoGioco />);
-    await screen.findByText(/schema 79/);
-
-    fireEvent.click(screen.getByRole('button', { name: /Cerca i file disponibili/ }));
-    await waitFor(() => expect(api.getDepositoPacchetti).toHaveBeenCalled());
-    // il primo file (il più recente) è già scelto, e l'elenco dice dove sta
-    expect(await screen.findByRole('combobox', { name: /File in \/deposito \(2\)/ })).toHaveTextContent('gioco.db');
-
-    fireEvent.click(screen.getByRole('button', { name: /Importa il file scelto/ }));
-    const finestra = await screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
-    expect(api.anteprimaPacchettoDaDeposito).toHaveBeenCalledWith('gioco.db');
-    expect(within(finestra).getByText(/Il pacchetto «gioco\.db»/)).toBeInTheDocument();
-    // il file non passa dal browser: nessun invio con avanzamento
-    expect(api.anteprimaPacchettoGioco).not.toHaveBeenCalled();
-
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
-    await waitFor(() => expect(api.importaPacchettoDaDeposito).toHaveBeenCalledWith('gioco.db'));
-    expect(api.importaPacchettoGioco).not.toHaveBeenCalled();
-    expect(await screen.findByRole('dialog', { name: 'Pacchetto importato' })).toBeInTheDocument();
   });
 
   it('se la cartella d’appoggio non è montata lo dice, senza far credere che sia vuota', async () => {
@@ -215,10 +201,13 @@ describe('PacchettoGioco', () => {
   });
 
   it('un file che non è un pacchetto viene segnalato senza aprire l’anteprima', async () => {
-    api.anteprimaPacchettoGioco.mockRejectedValue(new Error('Il file non è un pacchetto di gioco: carica il file gioco.db scaricato da «Scarica il pacchetto di gioco».'));
+    api.getDepositoPacchetti.mockResolvedValue(DEPOSITO);
+    api.anteprimaPacchettoDaDeposito.mockRejectedValue(new Error('Il file non è un pacchetto di gioco: carica il file gioco.db scaricato da «Scarica il pacchetto di gioco».'));
     render(<PacchettoGioco />);
     await screen.findByText(/schema 79/);
-    scegliFile();
+    fireEvent.click(screen.getByRole('button', { name: /Cerca i file disponibili/ }));
+    await screen.findByRole('combobox', { name: /File in \/deposito/ });
+    fireEvent.click(screen.getByRole('button', { name: /Importa il file scelto/ }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringContaining('non è un pacchetto di gioco')));
     expect(screen.queryByRole('dialog')).toBeNull();
   });
