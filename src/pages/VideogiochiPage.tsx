@@ -95,7 +95,7 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />}
           titolo="Mostra posizione" onClick={onPosizione} aria-label={`Mostra posizione di ${g.nome}`} />
-        <CorreggiElemento tipo="attivita" chiave={g.chiave} onSalvato={onCorretto} />
+        <CorreggiElemento tipo="videogioco" chiave={g.chiave} onSalvato={onCorretto} />
         {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>}
       </div>
     </li>
@@ -202,7 +202,7 @@ export function VideogiochiPage() {
               <input type="search" className="form-input" placeholder="Cerca per nome, luogo o Dote…" value={ricerca} onChange={(e) => setRicerca(e.target.value)} />
             </label>
             {/* Un videogioco è un'attività, nel catalogo: si aggiunge con lo stesso modulo. */}
-            <AggiungiAlCatalogo tipo="attivita" titolo="Aggiungi un videogioco" onSalvato={() => void dati.ricarica()} />
+            <AggiungiAlCatalogo tipo="videogioco" titolo="Aggiungi un videogioco" onSalvato={() => void dati.ricarica()} />
           </div>
 
           {/* Un pannello solo, sotto i filtri: la mappa del gioco scelto. Montarne una per scheda

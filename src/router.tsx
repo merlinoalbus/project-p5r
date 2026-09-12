@@ -37,6 +37,7 @@ import { SfidePage } from './pages/SfidePage';
 import { PersonaggiPage } from './pages/PersonaggiPage';
 import { OggettiPage } from './pages/OggettiPage';
 import { NegozioPage } from './pages/NegozioPage';
+import { RimossiPage } from './pages/RimossiPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -84,6 +85,7 @@ export const router = createBrowserRouter([
       { path: 'guida/percorso/:data', element: <PercorsoPage /> },
       { path: 'guida/negozi', element: <NegoziPage /> },
       { path: 'guida/negozi/:chiave', element: <NegozioPage /> },
+      { path: 'guida/rimossi', element: <RimossiPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

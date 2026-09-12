@@ -5,7 +5,7 @@
 // Test NegozioPage — scheda, filtri per categoria e destinatario, spunta «acquistato» per partita
 // ============================================================
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { NegozioPage } from './NegozioPage';
@@ -15,14 +15,14 @@ import type { ArticoloDto, NegozioDettaglioDto, PartitaDto } from '../types';
 const { getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo, posizioni } = vi.hoisted(() => ({
   getNegozio: vi.fn(),
   impostaAcquisto: vi.fn(),
-  // Il blocco degli articoli nascosti interroga il catalogo: qui non ce n'e' nessuno.
+  // Il blocco «Rimossi» del negozio interroga il catalogo: qui non ce n'e' nessuno.
   getCatalogo: vi.fn().mockResolvedValue([]),
   nascondiElementoCatalogo: vi.fn(),
   getElementoCatalogo: vi.fn(),
   posizioni: [] as Array<Record<string, unknown>>,
 }));
 // `getCatalogo` serve al blocco degli articoli nascosti; senza partita e senza nascosti torna vuoto.
-vi.mock('../services/api', () => ({ getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo }));
+vi.mock('../services/api', () => ({ getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo, getNegozi: vi.fn().mockResolvedValue([]) }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
 vi.mock('../components/mappe/DoveSiTrova', () => ({
   DoveSiTrova: (props: Record<string, unknown>) => {
@@ -53,10 +53,12 @@ describe('NegozioPage', () => {
     // nome del negozio e con la larghezza. Un numero scritto qui sbordava di 84 px.
     expect(posizioni).toEqual([{ tipo: 'negozio', chiave: 'untouchable', altezza: 'var(--altezza-tela-negozio)' }]);
     expect(screen.getByText('Kogatana nera')).toBeInTheDocument();
-    scegliVoce('Categoria', 'Protezione');
+    // Le categorie sono tessere con il conteggio, a scelta multipla: un secondo tocco le spegne.
+    const categorie = screen.getByRole('group', { name: 'Categorie' });
+    fireEvent.click(within(categorie).getByRole('button', { name: 'Protezione 1' }));
     expect(screen.queryByText('Kogatana nera')).toBeNull();
     expect(screen.getByText('Giubbotto')).toBeInTheDocument();
-    scegliVoce('Categoria', 'Tutte le categorie');
+    fireEvent.click(within(categorie).getByRole('button', { name: 'Protezione 1' }));
     scegliVoce('Per chi', 'Ann');
     expect(screen.queryByText('Kogatana nera')).toBeNull();
     expect(screen.getByText('Frusta')).toBeInTheDocument();
@@ -65,8 +67,11 @@ describe('NegozioPage', () => {
     await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Kogatana nera acquistato' })); });
     expect(impostaAcquisto).toHaveBeenCalledWith(9, 'untouchable/kogatana-nera', true);
     expect(await screen.findByText(/1 acquistati/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Nascondi acquistati' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Da acquistare' }));
     expect(screen.queryByText('Kogatana nera')).toBeNull();
+    fireEvent.click(screen.getByRole('radio', { name: 'Acquistati' }));
+    expect(screen.getByText('Kogatana nera')).toBeInTheDocument();
+    expect(screen.queryByText('Giubbotto')).toBeNull();
   });
 
   it('con la partita gli articoli bloccati restano consultabili ma non acquistabili', async () => {
@@ -93,28 +98,45 @@ describe('NegozioPage', () => {
     render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
     expect(await screen.findByRole('heading', { name: 'Untouchable' })).toBeInTheDocument();
     expect(getNegozio).toHaveBeenCalledWith('untouchable', undefined);
-    expect(screen.queryByRole('checkbox', { name: /Solo disponibili ora/ })).toBeNull();
+    // senza partita niente segmenti di stato e disponibilità
+    expect(screen.queryByRole('radiogroup', { name: "Stato d'acquisto" })).toBeNull();
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    // la scheda dice la sede, gli orari e non la fonte
+    // la sede apre la pagina del quartiere con il luogo evidenziato
+    expect(screen.getByRole('link', { name: /^Untouchable$/ })).toHaveAttribute('href', '/guida/citta/shibuya#luogo-shibuya-untouchable');
+    expect(screen.getByText('Solo di sera')).toBeInTheDocument();
+    expect(screen.queryByText('fonte')).toBeNull();
+    expect(screen.queryByText(/Sblocco:/)).toBeNull();
   });
 });
 
 /** **La porta a senso unico.** «Nascondi dagli elenchi» toglieva la riga da ogni elenco e il
  *  comando per rimetterla stava nel modulo di modifica *di quella riga*: per aprirlo bisognava
- *  cliccarla, e la riga non c'era piu'. Qui si sorveglia che il blocco compaia e che il ripristino
- *  chieda davvero la cosa giusta. */
-it('un articolo nascosto compare in un blocco a parte e si rimette negli elenchi', async () => {
+ *  cliccarla, e la riga non c'era piu'. Qui il blocco «Rimossi» del negozio chiede al server le
+ *  sole righe nascoste di questo negozio e le rimette in un tocco. */
+it('un articolo nascosto compare nel blocco «Rimossi» del negozio e si rimette negli elenchi', async () => {
   getNegozio.mockResolvedValue(negozio);
-  getCatalogo.mockResolvedValue([
+  getCatalogo.mockImplementation((_tipo: string, f?: { negozio?: string }) => Promise.resolve([
     { tipo: 'articolo', chiave: 'untouchable/u-tolto', nome: 'Kogatana nera', origine: 'seed', modificata: false, nascosta: true, dati: { negozio_chiave: 'untouchable' } },
-    // di un altro negozio: non deve comparire qui
     { tipo: 'articolo', chiave: 'leblanc/altro', nome: 'Caffe', origine: 'seed', modificata: false, nascosta: true, dati: { negozio_chiave: 'leblanc' } },
-  ]);
+  ].filter((e) => e.dati.negozio_chiave === f?.negozio)));
   nascondiElementoCatalogo.mockResolvedValue({});
   render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
-  const blocco = await screen.findByText(/1 articolo nascosto/);
-  expect(blocco).toBeInTheDocument();
+  const blocco = await screen.findByRole('region', { name: 'Articoli dei negozi rimossi' });
+  expect(getCatalogo).toHaveBeenCalledWith('articolo', { nascosti: true, negozio: 'untouchable' });
+  expect(within(blocco).getByText('Kogatana nera')).toBeInTheDocument();
   expect(screen.queryByText('Caffe')).toBeNull();
-  fireEvent.click(blocco);
-  fireEvent.click(await screen.findByRole('button', { name: /Rimetti negli elenchi/ }));
+  fireEvent.click(within(blocco).getByRole('button', { name: /Rimetti negli elenchi/ }));
   await waitFor(() => expect(nascondiElementoCatalogo).toHaveBeenCalledWith('articolo', 'untouchable/u-tolto', false));
+  // dopo il ripristino la scheda si ricarica
+  await waitFor(() => expect(getNegozio.mock.calls.length).toBeGreaterThan(1));
+});
+
+/** Un negozio senza sede né quartiere (online, TV, dentro un Palazzo) dice comunque dove si compra. */
+it('senza sede né quartiere mostra l’indicazione testuale di dove si compra', async () => {
+  usePartitaStore.setState({ attiva: null });
+  getNegozio.mockResolvedValue({ ...negozio, chiave: 'tanaka', nome: 'Tanaka', luogoChiave: null, quartiereNome: null, sedeChiave: null, sedeNome: null, luogo: 'Online, dal laptop di Leblanc', articoliElenco: [] });
+  render(<MemoryRouter initialEntries={['/guida/negozi/tanaka']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
+  expect(await screen.findByRole('heading', { name: 'Tanaka' })).toBeInTheDocument();
+  expect(screen.getByText(/Online, dal laptop di Leblanc/)).toBeInTheDocument();
 });

@@ -21,15 +21,15 @@ import { IngressoQuartiere } from '../components/mappe/IngressoQuartiere';
 // cliccando il quartiere sulla mappa di Tokyo, e centrata su quale punto.
 // ============================================================
 
-import { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getQuartiere, scaricaPiantaQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft } from '../components/shared/icons';
-import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO } from '../utils/citta';
+import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraLuogo } from '../utils/citta';
 import { definizioneTipoLuogo, ordinaTipiLuogo } from '../../shared/tipiLuogo';
 import { IconaSpillo } from '../components/mappe/IconaSpillo';
 import type { LuogoDto } from '../types';
@@ -49,7 +49,7 @@ function Luogo({ l }: { l: LuogoDto }) {
   const nonAncora = l.disponibilita?.stato === 'bloccato';
   const perche = l.disponibilita?.requisiti.filter((r) => r.stato === 'rosso').map((r) => r.dettaglio || r.testo).join(' · ');
   return (
-    <li className={`card flex flex-col gap-1 text-[13px] ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
+    <li id={ancoraLuogo(l.chiave)} className={`card flex flex-col gap-1 text-[13px] scroll-mt-20 ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
       <div className="flex flex-wrap items-center gap-2">
         <strong className="text-[15px]">{l.nome}</strong>
         <span className="chip luogo-tipo" style={{ '--luogo-tipo-colore': COLORE_TIPO_LUOGO[l.tipo] ?? COLORE_TIPO_LUOGO.altro } as React.CSSProperties}><IconaSpillo tipo={definizioneTipoLuogo(l.tipo).icona} dimensione={14} /> {NOME_TIPO_LUOGO[l.tipo] ?? l.tipo}</span>
@@ -100,6 +100,12 @@ export function QuartierePage() {
   // I tipi presenti, nell'ordine del catalogo (shared/tipiLuogo), non in quello in cui capitano.
   const tipi = useMemo(() => ordinaTipiLuogo((q?.luoghi ?? []).map((l) => l.tipo)), [q]);
   const visibili = useMemo(() => (q?.luoghi ?? []).filter((l) => !tipo || l.tipo === tipo), [q, tipo]);
+  // Dalla scheda di un negozio si arriva con `#luogo-…`: il luogo c'è solo dopo il caricamento, quindi si scorre qui.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!q || !hash) return;
+    document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' });
+  }, [q, hash]);
   return (
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {q && (

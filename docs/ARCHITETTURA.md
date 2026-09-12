@@ -564,3 +564,31 @@ Il servizio accessoMondoService risolve entità della guida verso mappe e pin re
 Gli accessi principali di Città, Palazzi e Dedali e Negozi e inventario usano /guida/mondo/:tipo/:chiave: destinazione unica → stesso VisoreMappa, alternative → scelta esplicita. Le schede restano approfondimenti e sono sempre raggiungibili anche in caso di associazione assente o errore. Il visore riceve spillo oppure terna valida x/y/zoom, mantenendo priorità al pin.
 
 L’importatore JSON accetta fino a 64 MB tramite un parser montato in bootstrap sulla sola POST /api/mappe/importa prima del parser globale da 5 MB. Gli altri endpoint e metodi mantengono il limite globale. Verificati payload valido oltre 5 MB, JSON malformato e rifiuto oltre 64 MB senza inserimenti.
+
+## Modulo del catalogo a moduli e filtri degli articoli (2026-09-12)
+`src/components/guida/ModuloCatalogo.tsx` è il guscio: tiene lo stato (`Dati`, un oggetto con i
+nomi delle colonne), le condizioni, la spunta «Confermato», e chiama `creaElementoCatalogo`/
+`aggiornaElementoCatalogo`. `src/components/guida/moduli/` contiene `base.ts` (contratto
+`DefinizioneModulo`: `iniziali(elemento, negozioChiave)`, `valido(dati)`, `prepara(dati)`, flag
+`conCondizioni`/`conVerificato`), `definizioni.ts` (le definizioni di tutti i tipi, funzioni pure con
+i propri test), `campi.tsx` (Campo/Griglia/Blocco), `nomiPerEffetti.ts` e un componente per tipo
+(`ModuloNegozio`, `ModuloArticolo`, `ModuloLibro`, `ModuloFilm`, `ModuloAttivita` anche per i
+videogiochi, `ModuloLuogo`, `ModuloGenerico` per domande e cruciverba); `index.ts` unisce
+definizione e componente in `MODULI[tipo]`. I valori temporanei del modulo (l'oggetto collegato,
+la via «a mano», il tipo fissato) stanno sotto chiavi `_…` e `prepara` li toglie. Editor condivisi:
+`EditorEffetto` (famiglia a tessere + parametri, costanti in `src/utils/effetti.ts`), `EditorEffetti`
+(elenco di voci con `ripetuto` e condizioni), `OrariEditor`, `SceltaOggetto` (archivio unico sul
+`Selettore` con ricerca sempre aperta, nomi in `src/utils/oggetti.ts`), `SceltaLuogo`
+(`GET /api/compendio/luoghi`, raggruppato per quartiere, voce «solo il quartiere»),
+`SelettoreIcone` (`src/components/shared/`). `AggiungiAlCatalogo`/`CorreggiElemento` accettano
+`TipoModulo` (i tipi del catalogo più `videogioco`, `src/utils/catalogo.ts`).
+
+Filtri degli articoli: `src/utils/articoli.ts` definisce `FiltroArticoli` (`q`, `categorie[]`,
+`per`, `stato`, `disponibilita`), `filtraArticoli` (pura, sull'elenco di un negozio) e la lettura/
+scrittura dell'indirizzo (`filtroDaParametri`/`parametriDaFiltro`, con il vecchio `categoria=`
+accettato); `FiltriArticoli` è il pannello (ricerca, tessere delle categorie con conteggio, «Per chi»,
+segmenti con la partita). `NegoziPage` manda il filtro al server (`ricercaArticoli` con `categorie`,
+`stato`, `disponibilita`); `NegozioPage` lo applica in locale. Rimossi: `ElementiRimossi` (per tipo,
+opzionalmente per negozio, `GET /api/catalogo/:tipo?nascosti=1&negozio=`) e la pagina
+`/guida/rimossi` (`RimossiPage`). CSS: `.selettore-icone*`, `.filtri-articoli*`, `.segmenti*`,
+`.orari-editor*`, `.editor-effetti__voce`, `.rimossi-*` in `src/tailwind.css`.

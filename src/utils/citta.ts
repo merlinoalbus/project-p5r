@@ -33,3 +33,8 @@ export const NOME_DOTE: Record<string, string> = {
 export const COLORE_TIPO_LUOGO: Record<string, string> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.colore]));
 
 export const NOME_FASCIA: Record<string, string> = { giorno: 'giorno', sera: 'sera', entrambe: 'giorno e sera' };
+
+/** L'ancora di un luogo nella pagina del quartiere (`#luogo-shibuya-untouchable`): la scheda del negozio ci arriva dalla sede. */
+export function ancoraLuogo(chiave: string): string {
+  return `luogo-${chiave.replace(/[^a-zA-Z0-9]+/g, '-')}`;
+}

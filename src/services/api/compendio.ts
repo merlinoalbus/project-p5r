@@ -3,8 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
-} from '../../types';
+  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiGet, queryString } from './_helpers';
 import type { VideogiochiDto } from '../../types';
 
@@ -48,7 +47,8 @@ export const getNegozi = (partita?: number): Promise<NegozioRiassuntoDto[]> => a
 /** Scheda di un negozio con gli articoli (acquisti della partita se indicata). */
 export const getNegozio = (chiave: string, partita?: number): Promise<NegozioDettaglioDto> => apiGet(`/compendio/negozi/${encodeURIComponent(chiave)}${queryString({ partita })}`);
 /** Ricerca degli articoli in tutti i negozi. */
-export const ricercaArticoli = (filtro: { q?: string; categoria?: string; per?: string }, partita?: number): Promise<RicercaArticoliDto> => apiGet(`/compendio/articoli${queryString({ ...filtro, partita })}`);
+export const ricercaArticoli = (filtro: { q?: string; categorie?: string[]; per?: string; stato?: 'acquistati' | 'da-acquistare'; disponibilita?: 'disponibili' | 'bloccati' }, partita?: number): Promise<RicercaArticoliDto> =>
+  apiGet(`/compendio/articoli${queryString({ ...filtro, categorie: filtro.categorie?.length ? filtro.categorie.join(',') : undefined, partita })}`);
 /** Cruciverba di Leblanc (con risolti della partita se indicata). */
 export const getCruciverba = (partita?: number): Promise<CruciverbaTuttiDto> => apiGet(`/compendio/cruciverba${queryString({ partita })}`);
 /** Quartieri della città con conteggi; con la partita, anche se sono già nel mondo. */
@@ -76,5 +76,7 @@ export const getCalendario = (partita?: number, mese?: string): Promise<Calendar
 export const getDomande = (partita?: number): Promise<DomandeDto> => apiGet(`/compendio/domande${queryString({ partita })}`);
 export const getConfidenteDettaglio = (chiave: string): Promise<ConfidenteDettaglioDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}`);
 export const getConfidenti = (): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
+/** Tutti i luoghi della città, come voci da scegliere (la sede di un negozio o di un'attività). */
+export const getLuoghi = (): Promise<LuogoOpzioneDto[]> => apiGet('/compendio/luoghi');
 
 export const salvaIngressoQuartiere=(chiave:string,dati:{mappa:string;x:number;y:number;zoom:number}|null):Promise<import('../../../shared/types').IngressoQuartiereDto|null>=>dati===null?apiDelete('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso').then(()=>null):apiPut('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso',dati);
