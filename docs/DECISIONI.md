@@ -300,3 +300,6 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   Iweleth restano nulli perché la guida non li dichiara — un dato che manca, non uno zero.
 - **Domande**: il quiz in TV è `tipo='tv'` (tabella ricostruita con l'`id` conservato); le righe
   degli esami portano il quesito accanto alla risposta, da `esame.domande_json`.
+- **Filtro «Esami» della pagina Domande**: con il tipo «tv» il filtro mostra solo gli esami
+  (`esame-medio`, `esame-finale`); prima vi finivano anche le domande del quiz in TV, perché
+  «esami» era «tutto ciò che non è in classe». Il filtro dedicato al quiz arriva con la voce 8.
