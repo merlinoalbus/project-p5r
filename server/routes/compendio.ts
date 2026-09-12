@@ -9,7 +9,7 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { dettaglioQuartiere, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
+import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
@@ -25,7 +25,17 @@ import {
 } from '../services/compendioService.js';
 
 const queryDomande = z.object({ partita: z.coerce.number().int().positive().optional() });
-const queryArticoli = z.object({ q: z.string().min(1).max(80).optional(), categoria: z.enum(['arma', 'protezione', 'accessorio', 'abito', 'consumabile', 'regalo', 'materiale', 'cibo', 'altro']).optional(), per: z.string().min(1).max(40).optional(), partita: z.coerce.number().int().positive().optional() });
+const CATEGORIE_ARTICOLO = ['arma', 'protezione', 'accessorio', 'abito', 'consumabile', 'regalo', 'materiale', 'cibo', 'cura', 'sp', 'battaglia', 'stato', 'esplorazione', 'oggetto-chiave', 'libro', 'film', 'dvd', 'videogioco', 'altro'] as const;
+const queryArticoli = z.object({
+  q: z.string().min(1).max(80).optional(),
+  categoria: z.enum(CATEGORIE_ARTICOLO).optional(),
+  /** Più categorie insieme, separate da virgola. */
+  categorie: z.string().max(400).optional().transform((v) => v ? v.split(',').map((c) => c.trim()).filter((c) => (CATEGORIE_ARTICOLO as readonly string[]).includes(c)) : undefined),
+  per: z.string().min(1).max(40).optional(),
+  stato: z.enum(['acquistati', 'da-acquistare']).optional(),
+  disponibilita: z.enum(['disponibili', 'bloccati']).optional(),
+  partita: z.coerce.number().int().positive().optional(),
+});
 const queryCalendario = z.object({ partita: z.coerce.number().int().positive().optional(), mese: z.string().regex(/^(0[1-9]|1[0-2])$/).optional() });
 const router = Router();
 
@@ -116,8 +126,12 @@ router.get('/negozi/:chiave', validate({ params: z.object({ chiave: z.string().m
   res.json(dettaglioNegozio(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
 });
 router.get('/articoli', validate({ query: queryArticoli }), (req, res) => {
-  const q = req.query as unknown as { q?: string; categoria?: string; per?: string; partita?: number };
-  res.json(ricercaArticoli({ q: q.q, categoria: q.categoria, per: q.per }, q.partita));
+  const q = req.query as unknown as { q?: string; categoria?: string; categorie?: string[]; per?: string; stato?: 'acquistati' | 'da-acquistare'; disponibilita?: 'disponibili' | 'bloccati'; partita?: number };
+  res.json(ricercaArticoli({ q: q.q, categoria: q.categoria, categorie: q.categorie, per: q.per, stato: q.stato, disponibilita: q.disponibilita }, q.partita));
+});
+/** Tutti i luoghi della città come voci da scegliere (la sede di un negozio o di un'attività). */
+router.get('/luoghi', (_req, res) => {
+  res.json(elencaLuoghi());
 });
 router.get('/cruciverba', validate({ query: queryDomande }), (req, res) => {
   res.json(cruciverba((req.query as unknown as { partita?: number }).partita));

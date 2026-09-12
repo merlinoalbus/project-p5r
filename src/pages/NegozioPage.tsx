@@ -68,7 +68,7 @@ export function NegozioPage() {
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-text-secondary">
               {n.luogo && <span><strong className="text-text">Dove:</strong> {n.luogoChiave ? <Link to={`/guida/citta/${n.luogoChiave}`}>{n.luogo}</Link> : n.luogo}</span>}
               {n.gestore && <span><strong className="text-text">Gestore:</strong> {n.gestore}</span>}
-              {n.orari && <span><strong className="text-text">Orari:</strong> {n.orari}</span>}
+              <span><strong className="text-text">Orari:</strong> {n.orariTesto}</span>
               {!n.condizioni && n.sblocco && <span><strong className="text-text">Sblocco:</strong> {n.sblocco}</span>}
             </div>
             {n.condizioni && n.condizioni.length>0&&<ul>{n.condizioni.map((r,i)=><li key={i}>{r.testo}{n.disponibilita?.requisiti[i]&&` — ${n.disponibilita.requisiti[i].dettaglio}`}</li>)}</ul>}

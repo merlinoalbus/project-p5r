@@ -67,7 +67,7 @@ function Luogo({ l }: { l: LuogoDto }) {
       {(l.confidenti.length > 0 || l.attivita.length > 0) && (
         <div className="flex flex-wrap gap-1.5 items-center">
           {l.confidenti.map((c) => <Link key={c.chiave} to={`/confidenti/${c.chiave}`} className="chip chip--attivo no-underline">{c.nome}</Link>)}
-          {l.attivita.map((a) => <span key={a} className="chip">{a}</span>)}
+          {l.attivita.map((a) => <Link key={a.chiave} to="/guida/attivita" className="chip no-underline">{a.nome}</Link>)}
         </div>
       )}
       {l.piatti && l.piatti.length > 0 && (

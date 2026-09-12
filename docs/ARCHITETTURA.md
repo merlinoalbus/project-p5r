@@ -46,6 +46,9 @@ server/
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/pacchetto/ pacchettoGioco.ts: primo avvio dal pacchetto (`assicuraPacchettoIniziale`), `caricaPacchetto`/`ricaricaPacchetto` (test), `regoleAllAvvio`
+  services/timbriService.ts  i timbri raccolti nei dedali dei Memento per partita (tetto della guida, evento al completamento; rifiutati dove la guida non dichiara il totale)
+                      Nota: quando una sede ospita più negozi (i distributori di Akihabara e della Shujin), il pin del luogo e la presenza
+                      del luogo seguono il **primo negozio per ordine** (`presenzaEntita.ts`, `mappeService.dettaglioRiferimento`): oggi hanno tutti gli stessi orari.
   services/mappe/identitaSpillo.ts  uid degli spilli = impronta dell'identità (stesso spillo, stesso uid in ogni file)
   services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService,
                       fusione/motoreFusione.ts (motore puro su snapshot in memoria), fusione/alberoFusione.ts (piani

@@ -4,12 +4,12 @@
 
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { aggiornaElemento, creaElemento, elencaCatalogo, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo } from '../services/catalogoService.js';
+import { aggiornaElemento, creaElemento, elencaCatalogo, elencaNascosti, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo } from '../services/catalogoService.js';
 import { oggettiSelezionabili, tuttiGliOggettiSelezionabili } from '../services/oggettiSelezionabili.js';
 import { aggiornaAzione, aggiornaEvento, agendaDelGiorno, creaAzione, creaEvento, eliminaAzione, eliminaEvento, giorniConAgenda, impostaAzioneFatta } from '../services/agendaService.js';
 import {
-  SCHEMI_CATALOGO, bodyAggiornaAzione, bodyAggiornaEvento, bodyAzione, bodyAzioneFatta, bodyEvento, bodyNascondi,
-  paramsAgendaGiorno, paramsAgendaVoce, paramsElementoCatalogo, paramsTipoCatalogo, queryAgenda,
+  SCHEMI_CATALOGO, SCHEMI_CATALOGO_PARZIALI, bodyAggiornaAzione, bodyAggiornaEvento, bodyAzione, bodyAzioneFatta, bodyEvento, bodyNascondi,
+  paramsAgendaGiorno, paramsAgendaVoce, paramsElementoCatalogo, paramsTipoCatalogo, queryAgenda, queryNascosti,
 } from '../schemas/catalogo.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { TipoCatalogo } from '../../shared/types.js';
@@ -18,7 +18,7 @@ const router = Router();
 
 /** Valida il corpo con lo schema del tipo indicato nel percorso (parziale per la modifica). */
 function corpoPerTipo(tipo: TipoCatalogo, corpo: unknown, parziale: boolean): Record<string, unknown> {
-  const schema = parziale ? SCHEMI_CATALOGO[tipo].partial() : SCHEMI_CATALOGO[tipo];
+  const schema = parziale ? SCHEMI_CATALOGO_PARZIALI[tipo] : SCHEMI_CATALOGO[tipo];
   const esito = schema.safeParse(corpo);
   if (!esito.success) {
     throw httpErrors.badRequest('dati-non-validi', `Dati del ${tipo} non validi: ${esito.error.issues.map((i) => `${i.path.join('.') || 'corpo'} — ${i.message}`).join('; ')}`, { issues: esito.error.issues });
@@ -90,8 +90,10 @@ router.get('/oggetti', (_req, res) => {
   res.json(tuttiGliOggettiSelezionabili());
 });
 
-router.get('/:tipo', validate({ params: paramsTipoCatalogo }), (req, res) => {
-  res.json(elencaCatalogo(req.params.tipo as TipoCatalogo));
+/** Le righe toccate dall'utente; con `?nascosti=1` le sole nascoste (pagina «Rimossi»), anche di un solo negozio. */
+router.get('/:tipo', validate({ params: paramsTipoCatalogo, query: queryNascosti }), (req, res) => {
+  const q = req.query as unknown as { nascosti?: string; negozio?: string };
+  res.json(q.nascosti ? elencaNascosti(req.params.tipo as TipoCatalogo, { negozio: q.negozio }) : elencaCatalogo(req.params.tipo as TipoCatalogo));
 });
 router.post('/:tipo', validate({ params: paramsTipoCatalogo }), (req, res) => {
   const tipo = req.params.tipo as TipoCatalogo;

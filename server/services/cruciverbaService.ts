@@ -7,6 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
 import { aggiornaDote, puntiDaNote } from './partiteService.js';
 import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
+import { indiceGiornoScolastico } from './domandeService.js';
 
 interface Riga { data: string; chiave: string | null; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
 
@@ -22,7 +23,11 @@ function fattiPartita(partitaId: number | undefined): Set<string> {
 export function cruciverba(partitaId?: number): CruciverbaTuttiDto {
   const fatti = fattiPartita(partitaId);
   const lista = (prepared('SELECT * FROM cruciverba ORDER BY ordine').all() as Riga[]).map((r) => dto(r, fatti));
-  return { cruciverba: lista, risolti: lista.filter((c) => c.fatto).length, totale: lista.length };
+  const dataGioco = partitaId === undefined ? null : ((prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco ?? null);
+  const oggi = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
+  // il primo cruciverba non risolto dal giorno della partita in poi: è quello da segnare
+  const prossimo = oggi === null ? null : ([...lista].sort((a, b) => indiceGiornoScolastico(a.giorno) - indiceGiornoScolastico(b.giorno)).find((c) => !c.fatto && indiceGiornoScolastico(c.giorno) >= oggi) ?? null);
+  return { cruciverba: lista, dataGioco, prossimo, risolti: lista.filter((c) => c.fatto).length, totale: lista.length };
 }
 
 /** Segna (o toglie) un cruciverba risolto nella partita; evento alla prima spunta. */

@@ -393,3 +393,34 @@ quesiti degli esami sulle righe (078). La 068 ripassa i residui «da configurare
 pacchetto). Ogni migrazione ha il suo test (riga sintetica + dati del pacchetto); pacchetto
 rigenerato alla 78. Le colonne vecchie (`orari`, `paga`, `dote`/`note`, `doti_json`) restano
 finché il server (voce 5) e le interfacce (voci 6–8) non leggono i valori nuovi.
+
+## Server del catalogo, della città, dei Palazzi e dei Memento (12 settembre 2026) — fatto
+
+Voce 5 del piano «struttura, non frasi»: il server legge i valori delle migrazioni 068–078 e non
+più le frasi. Negozi: la disponibilità è solo gli orari (`orariStrutturati`, `orariTesto`,
+condizioni `giorno-settimana`/`fascia`/`meteo`), gli articoli ereditano gli orari (`daNegozio`) e
+portano lo sblocco che era del negozio; `sedeChiave`/`sedeNome` e `programmaPunti` nel DTO; la
+ricerca degli articoli filtra per più categorie, stato d'acquisto e disponibilità. Luoghi: righe
+del catalogo (tipo `luogo`, chiave `<quartiere>/u-…`, nascondibili), negozi e attività dalle sedi,
+condizioni dalla riga; `GET /api/compendio/luoghi` per la scelta della sede; il visore aggancia il
+negozio al luogo tramite la sede. Letture: `effetti`/`effettiTesto` su libri, film e attività, i
+punti Dote da `dotiDaEffetti` con le condizioni della voce valutate sulla partita, «sblocca un
+quartiere» dagli effetti, `negozi` (dove si compra) su libri e videogiochi, `sede`/`tracciamento`/
+`pagaYen` sulle attività, righe nascoste escluse, lettura non disponibile rifiutata (409). Palazzi:
+`raccolta` (collezionabili dell'albero `dungeon-<chiave>`, presi per uid o punto gestito),
+`planimetrie` con gli spilli e `aree[].mappe[].spilli`; Memento: `dedalo` per area (timbri
+dichiarati + richieste, obiettivi), `PUT /api/partite/:id/timbri` (`timbriService`), evento
+`timbri-dedalo`. Richieste ordinate per dedalo con `dedali`; domande: `prossime` = il prossimo
+appuntamento; cruciverba: `dataGioco` e `prossimo`. Catalogo: schemi per valori (orari, effetti,
+tipo/fascia/tracciamento, sede con l'invariante del quartiere, film al cinema in una visione,
+paga solo ai lavori), `GET /api/catalogo/:tipo?nascosti=1&negozio=`. Il frontend è adattato al
+minimo (Palazzi, quartiere, negozio, tipo «luogo» nel modulo): le interfacce sono le voci 6–8.
+
+Resta per le voci 6–8 (dichiarato qui perché fino ad allora il modulo attuale lo mostra): il campo
+`disponibile_dal` del libro nel modulo non viene più salvato (le condizioni sono la disponibilità);
+`orari` del negozio si salva come frase ma la presenza la dà `orari_json` (OrariEditor nella voce 6);
+`luogo.giorni` resta testo (letto da `giorniDaTesto`); nella scheda del Palazzo l'anello conta la
+raccolta sulle planimetrie mentre l'elenco laterale conta ancora i punti della guida (voce 8).
+Per la voce 7 (editor degli effetti): se il modulo vecchio compila una nota per una Dote che ha già voci
+condizionate (lo studio con la pioggia), la voce semplice si aggiunge invece di sostituirle: l'editor degli
+effetti rende esplicita la scelta e chiude il caso.

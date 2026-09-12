@@ -303,3 +303,18 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Filtro «Esami» della pagina Domande**: con il tipo «tv» il filtro mostra solo gli esami
   (`esame-medio`, `esame-finale`); prima vi finivano anche le domande del quiz in TV, perché
   «esami» era «tutto ciò che non è in classe». Il filtro dedicato al quiz arriva con la voce 8.
+
+### 2026-09-12 — Server del catalogo (voce 5): tre regole che cambiano il comportamento
+- **Una lettura non disponibile non si registra (409 `lettura-non-disponibile`)**: un libro che
+  esce il 18 aprile non si può segnare l'11; azzerare è sempre permesso. Le partite nascono il
+  9 aprile: chi registra una lettura deve avere il giorno della partita aggiornato. I test
+  creano le partite a una data in cui le righe usate sono disponibili.
+- **La presenza di un negozio sono i suoi orari**, non più le condizioni: Untouchable (giovedì,
+  sabato e domenica sera) di giorno è «bloccato» e con lui i suoi articoli (`daNegozio`); lo
+  sblocco che era del negozio sta sugli articoli e dice «non ancora» senza nascondere il pin.
+- **Le domande «prossime» sono il prossimo appuntamento** (le domande non fatte della prima data
+  da oggi in poi, una o due), non un elenco di cinque.
+- Il modulo del catalogo continua a scrivere `dote`/`note`/`doti_json` finché le voci 6–7 non
+  lo rifanno: il server deriva `effetti_json` da lì (`normalizzaScrittura`), così i punti della
+  partita, che leggono gli effetti, non restano indietro. `orari` (frase) resta accettato accanto
+  a `orari_json` per lo stesso motivo.

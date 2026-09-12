@@ -17,6 +17,7 @@ import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } fr
 import { impostaDomandaFatta } from '../services/domandeService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
 import { impostaStatoRichiesta } from '../services/richiesteService.js';
+import { impostaTimbri } from '../services/timbriService.js';
 import { impostaLettura } from '../services/attivitaService.js';
 import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraService.js';
 import { impostaCruciverba } from '../services/cruciverbaService.js';
@@ -131,6 +132,11 @@ router.put('/:id/letture', validate({ params: paramsPartita, body: bodyLettura }
 router.put('/:id/richieste', validate({ params: paramsPartita, body: bodyStatoRichiesta }), (req, res) => {
   const b = req.body as { richiesta: string; stato: 'accettata' | 'completata' | null };
   res.json(impostaStatoRichiesta(Number(req.params.id), b.richiesta, b.stato));
+});
+/** I timbri raccolti in un dedalo dei Memento (0 = azzera). */
+router.put('/:id/timbri', validate({ params: paramsPartita, body: z.object({ area: z.string().min(1).max(200), raccolti: z.number().int().min(0).max(999) }) }), (req, res) => {
+  const b = req.body as { area: string; raccolti: number };
+  res.json(impostaTimbri(Number(req.params.id), b.area, b.raccolti));
 });
 router.put('/:id/punti', validate({ params: paramsPartita, body: bodyStatoPunto }), (req, res) => {
   const b = req.body as { punto: string; stato: 'ottenuto' | 'esaurito' | null };

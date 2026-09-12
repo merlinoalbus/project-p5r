@@ -5,6 +5,28 @@ import { condizioneSpillo } from './mappe.js';
 
 import { z } from 'zod';
 import { TIPI_CATALOGO } from '../../shared/types.js';
+import { FASCE_ORARIO, GIORNI_SETTIMANA_CHIAVI } from '../../shared/orariNegozio.js';
+import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shared/attivita.js';
+import { FAMIGLIE_EFFETTO } from '../../shared/effettiOggetto.js';
+import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
+
+const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
+
+/** Gli orari di un negozio come valori (shared/orariNegozio). */
+export const orariNegozio = z.object({
+  giorni: z.array(z.enum(GIORNI_SETTIMANA_CHIAVI)).max(7).default([]),
+  fasce: z.array(z.enum(chiaviDi(FASCE_ORARIO))).max(2).default([]),
+  chiusoConPioggia: z.boolean().default(false),
+  nota: z.string().trim().max(300).nullable().default(null),
+});
+
+/** Una voce di effetto (shared/effettiCatalogo): l'effetto dichiarato, se vale alle volte successive, le sue condizioni. */
+export const voceEffetto = z.object({
+  effetto: z.object({ famiglia: z.enum(chiaviDi(FAMIGLIE_EFFETTO)) }).passthrough(),
+  ripetuto: z.boolean().optional(),
+  condizioni: z.array(condizioneSpillo).max(20).optional(),
+});
+const effettiJson = z.array(voceEffetto).max(20).transform((v) => JSON.stringify(v)).optional();
 
 const dataGioco = z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.');
 const testo = (max: number) => z.string().trim().max(max);
@@ -30,10 +52,14 @@ export const datiNegozio = z.object({
   tipo: z.enum(['armi', 'protezioni', 'accessori', 'oggetti', 'regali', 'abiti', 'cibo', 'online', 'ambulante', 'distributore', 'materiali', 'misto', 'altro']).default('altro'),
   gestore: testo(160).nullable().optional(),
   confidente_chiave: z.string().max(80).nullable().optional(),
+  /** La sede: un luogo della città (migrazione 072). */
+  sede_chiave: z.string().max(200).nullable().optional(),
+  /** La frase com'era; l'app legge `orari_json`. Resta finché il modulo non passa ai valori. */
   orari: testo(200).nullable().optional(),
-  sblocco: testo(400).nullable().optional(),
+  orari_json: orariNegozio.transform((v) => JSON.stringify(v)).optional(),
+  programma_punti_json: z.object({ nome: testo(80).min(1), unita: testo(40).min(1), calcolo: z.enum(['manuale', 'rango-cliente']) }).nullable().optional()
+    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   note: testo(2000).nullable().optional(),
-  fonte: testo(400).default(''),
 });
 
 /** Campi di un articolo scrivibili dall'utente. */
@@ -70,10 +96,7 @@ export const datiArticolo = z.object({
     .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   effetto: testo(600).nullable().optional(),
   statistiche: testo(400).nullable().optional(),
-  disponibile_dal: testo(300).nullable().optional(),
-  condizione: testo(300).nullable().optional(),
   nota: testo(600).nullable().optional(),
-  fonte: testo(400).default(''),
 });
 
 /** Campi di un libro scrivibili dall'utente. */
@@ -93,19 +116,29 @@ export const datiLibro = z.object({
   nome_it: testo(160).nullable().optional(),
   dove: testo(300).default(''),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
-  disponibile_dal: testo(300).nullable().optional(),
   dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable().optional(),
   // «note» qui e' il numero di note musicali della Dote (1-3), non un testo: e' la colonna del
   // catalogo dei libri e si chiama cosi' da sempre.
   note: z.number().int().min(0).max(9).nullable().optional(),
   sblocca: testo(300).nullable().optional(),
+  /** Gli effetti dichiarati (migrazione 074): la Dote che alza, che cosa apre. Senza, si derivano da dote/note. */
+  effetti_json: effettiJson,
   sessioni: z.number().int().min(1).max(9).nullable().optional(),
   dettagli: testo(2000).nullable().optional(),
-  fonte: testo(400).default(''),
 });
 
+/** Le regole che valgono anche quando si corregge un solo campo: al cinema una visione basta, «ripetuto» ha senso solo lì. */
+const rifinisciFilm = (d: { dove?: string; sessioni?: number | null; effetti_json?: string }, ctx: z.RefinementCtx) => {
+  if (d.dove === 'cinema' && d.sessioni != null && d.sessioni !== 1) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['sessioni'], message: 'Un film al cinema si completa in una visione.' });
+  if (d.dove === 'dvd' && typeof d.effetti_json === 'string' && d.effetti_json.includes('"ripetuto":true')) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['effetti_json'], message: 'Le visioni successive valgono solo al cinema.' });
+};
+/** La paga in yen è dei lavori. */
+const rifinisciAttivita = (d: { tipo?: string; paga_yen?: number | null; paga_massima?: number | null }, ctx: z.RefinementCtx) => {
+  if (d.tipo !== undefined && d.tipo !== 'lavoro' && (d.paga_yen != null || d.paga_massima != null)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['paga_yen'], message: 'La paga vale solo per un lavoro.' });
+};
+
 /** Campi di un film o DVD scrivibili dall'utente. */
-export const datiFilm = z.object({
+const datiFilmBase = z.object({
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
@@ -118,24 +151,33 @@ export const datiFilm = z.object({
   // visione: +3; visioni successive: +1»), e senza questo campo quella distinzione viveva solo
   // nella prosa dei dettagli, dove l'app non poteva applicarla. Vuoto = rivederlo non da' niente.
   note_successive: z.number().int().min(0).max(9).nullable().optional(),
+  effetti_json: effettiJson,
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   sessioni: z.number().int().min(1).max(9).nullable().optional(),
   dettagli: testo(2000).nullable().optional(),
-  fonte: testo(400).default(''),
 });
+export const datiFilm = datiFilmBase.superRefine(rifinisciFilm);
+export const datiFilmParziale = datiFilmBase.partial().superRefine(rifinisciFilm);
 
 /** Campi di un'attivita' (compresi lavori e videogiochi) scrivibili dall'utente. */
-export const datiAttivita = z.object({
+const datiAttivitaBase = z.object({
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
-  tipo: testo(60).default('altro'),
+  tipo: z.enum(chiaviDi(TIPI_ATTIVITA)).default('altro'),
   luogo: testo(300).default(''),
   luogo_chiave: z.string().min(1).max(200).nullable().optional(),
-  fascia: testo(60).nullable().optional(),
+  /** La sede: un luogo della città (migrazione 072). */
+  sede_chiave: z.string().max(200).nullable().optional(),
+  fascia: z.enum(chiaviDi(FASCE_ATTIVITA)).nullable().optional(),
   costo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   sblocco: testo(400).nullable().optional(),
   sessioni: z.number().int().min(1).max(99).nullable().optional(),
+  paga_yen: z.number().int().min(0).max(9_999_999).nullable().optional(),
+  paga_massima: z.number().int().min(0).max(9_999_999).nullable().optional(),
+  dettagli: testo(4000).nullable().optional(),
+  effetti_json: effettiJson,
+  tracciamento: z.enum(chiaviDi(TRACCIAMENTI_ATTIVITA)).optional(),
   // Le Doti di un'attivita' sono un elenco: `[{dote, note, condizione}]`. Si accetta gia'
   // strutturato e si salva come JSON, come fa il seed.
   doti_json: z.array(z.object({
@@ -147,7 +189,21 @@ export const datiAttivita = z.object({
   regole: testo(2000).default(''),
   premi: testo(2000).nullable().optional(),
   paga: testo(400).nullable().optional(),
-  fonte: testo(400).default(''),
+});
+export const datiAttivita = datiAttivitaBase.superRefine(rifinisciAttivita);
+export const datiAttivitaParziale = datiAttivitaBase.partial().superRefine(rifinisciAttivita);
+
+/** Campi di un luogo della città scrivibili dall'utente (migrazione 071). */
+export const datiLuogo = z.object({
+  verificato: z.boolean().optional(),
+  condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
+  quartiere_chiave: z.string().min(1).max(80),
+  tipo: z.enum(chiaviDi(TIPI_LUOGO)).default('altro'),
+  nome: testo(160).min(1),
+  cosa_offre: testo(600).default(''),
+  quando: z.enum(['giorno', 'sera', 'entrambe']).nullable().optional(),
+  giorni: testo(200).nullable().optional(),
+  note: testo(2000).nullable().optional(),
 });
 
 /** Campi di una domanda in classe o d'esame.
@@ -161,7 +217,7 @@ export const datiDomanda = z.object({
   tipo: z.enum(['classe', 'esame-medio', 'esame-finale', 'tv', 'altro']).default('classe'),
   chi: testo(120).default(''),
   domanda: testo(600).min(1),
-  risposte_json: z.array(z.object({ ordine: z.number().int().min(1).max(20), testo: testo(300).min(1) })).max(20)
+  risposte_json: z.array(z.object({ ordine: z.number().int().min(1).max(20), testo: testo(300).min(1), domanda: testo(600).optional() })).max(20)
     .transform((v) => JSON.stringify(v)).optional(),
   ricompensa: testo(200).default(''),
   note: testo(2000).default(''),
@@ -178,7 +234,10 @@ export const datiCruciverba = z.object({
 });
 
 /** Lo schema dipende dal tipo nel percorso: un'unione lascerebbe passare un articolo come negozio, scartandone i campi. */
-export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, libro: datiLibro, film: datiFilm, attivita: datiAttivita, domanda: datiDomanda, cruciverba: datiCruciverba } as const;
+export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, libro: datiLibro, film: datiFilm, attivita: datiAttivita, luogo: datiLuogo, domanda: datiDomanda, cruciverba: datiCruciverba } as const;
+/** Gli stessi, per la correzione di alcuni campi soltanto: film e attività portano la rifinitura sulla forma parziale. */
+export const SCHEMI_CATALOGO_PARZIALI = { negozio: datiNegozio.partial(), articolo: datiArticolo.partial(), libro: datiLibro.partial(), film: datiFilmParziale, attivita: datiAttivitaParziale, luogo: datiLuogo.partial(), domanda: datiDomanda.partial(), cruciverba: datiCruciverba.partial() } as const;
+export const queryNascosti = z.object({ nascosti: z.enum(['1', 'true']).optional(), negozio: z.string().min(1).max(200).optional() });
 export const bodyNascondi = z.object({ nascosta: z.boolean() });
 
 // ---- Agenda ----

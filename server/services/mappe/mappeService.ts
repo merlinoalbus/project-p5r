@@ -155,9 +155,11 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
     }
     case 'attivita':
     case 'luogo': {
-      const l = prepared('SELECT chiave, quartiere_chiave, tipo, nome, cosa_offre, quando, negozio FROM luogo WHERE chiave = ?').get(chiave) as { chiave: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; quando: string | null; negozio: string | null } | undefined;
+      const l = prepared('SELECT chiave, quartiere_chiave, tipo, nome, cosa_offre, quando FROM luogo WHERE chiave = ?').get(chiave) as { chiave: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; quando: string | null } | undefined;
       if (!l) return null;
-      const negozio = l.negozio ? negozioDettaglio(l.negozio, partitaId) : null;
+      // il negozio che ha qui la sua sede (migrazione 072): il primo, se più d'uno
+      const sede = prepared('SELECT chiave FROM negozio WHERE sede_chiave = ? AND nascosto = 0 ORDER BY ordine LIMIT 1').get(l.chiave) as { chiave: string } | undefined;
+      const negozio = sede ? negozioDettaglio(sede.chiave, partitaId) : null;
       return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando }, negozio };
     }
     case 'negozio': {

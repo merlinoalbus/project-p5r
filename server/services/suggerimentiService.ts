@@ -71,12 +71,12 @@ function nuovaRaccolta(): Raccolta {
 
 /** Aggiunge un luogo della città con il suo quartiere, il negozio collegato e lo spillo sulla mappa del quartiere. */
 function aggiungiLuogo(r: Raccolta, chiaveLuogo: string): void {
-  const l = prepared('SELECT chiave, quartiere_chiave, negozio FROM luogo WHERE chiave = ?').get(chiaveLuogo) as { chiave: string; quartiere_chiave: string; negozio: string | null } | undefined;
+  const l = prepared('SELECT chiave, quartiere_chiave FROM luogo WHERE chiave = ?').get(chiaveLuogo) as { chiave: string; quartiere_chiave: string } | undefined;
   if (!l) return;
   r.luoghi.add(l.chiave);
   r.quartieri.add(l.quartiere_chiave);
   r.mappe.add(`citta-${l.quartiere_chiave}`);
-  if (l.negozio) r.negozi.add(l.negozio);
+  for (const n of prepared('SELECT chiave FROM negozio WHERE sede_chiave = ? AND nascosto = 0').all(l.chiave) as Array<{ chiave: string }>) r.negozi.add(n.chiave);
   const s = prepared("SELECT id FROM spillo WHERE riferimento_tipo = 'luogo' AND riferimento_chiave = ? ORDER BY id LIMIT 1").get(l.chiave) as { id: number } | undefined;
   if (s) r.spilli.add(s.id);
 }
@@ -84,10 +84,10 @@ function aggiungiLuogo(r: Raccolta, chiaveLuogo: string): void {
 /** Aggiunge un negozio con il suo quartiere, i luoghi che lo ospitano e lo spillo sulla mappa. */
 function aggiungiNegozio(r: Raccolta, chiaveNegozio: string): void {
   r.negozi.add(chiaveNegozio);
-  // `negozio.luogo_chiave` è il quartiere; il luogo puntuale si trova da `luogo.negozio`
-  const n = prepared('SELECT luogo_chiave FROM negozio WHERE chiave = ?').get(chiaveNegozio) as { luogo_chiave: string | null } | undefined;
+  // `negozio.luogo_chiave` è il quartiere; il luogo puntuale è la sede (072)
+  const n = prepared('SELECT luogo_chiave, sede_chiave FROM negozio WHERE chiave = ?').get(chiaveNegozio) as { luogo_chiave: string | null; sede_chiave: string | null } | undefined;
   if (n?.luogo_chiave) { r.quartieri.add(n.luogo_chiave); r.mappe.add(`citta-${n.luogo_chiave}`); }
-  for (const l of prepared('SELECT chiave FROM luogo WHERE negozio = ?').all(chiaveNegozio) as Array<{ chiave: string }>) aggiungiLuogo(r, l.chiave);
+  if (n?.sede_chiave) aggiungiLuogo(r, n.sede_chiave);
   const sp = prepared("SELECT id FROM spillo WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ? ORDER BY id LIMIT 1").get(chiaveNegozio) as { id: number } | undefined;
   if (sp) r.spilli.add(sp.id);
 }

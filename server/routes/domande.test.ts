@@ -49,7 +49,9 @@ describe('API domande', () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Scuola', dataGioco: '05-10' })).body.data as { id: number }).id;
     let d = (await request(app).get(`/api/compendio/domande?partita=${id}`)).body.data as DomandeDto;
     expect(d.dataGioco).toBe('05-10');
-    expect(d.prossime.length).toBe(5);
+    expect(d.prossime.length).toBeGreaterThanOrEqual(1);
+    expect(d.prossime.length).toBeLessThanOrEqual(2);
+    expect(new Set(d.prossime.map((x) => x.data)).size).toBe(1);
     expect(d.prossime.every((x) => indiceGiornoScolastico(x.data) >= indiceGiornoScolastico('05-10') && !x.fatta)).toBe(true);
     const prima = d.prossime[0];
     const dotiPrima = (await request(app).get(`/api/partite/${id}/doti`)).body.data as DoteSocialePartitaDto[];

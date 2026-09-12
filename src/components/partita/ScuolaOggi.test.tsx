@@ -43,6 +43,7 @@ const DOMANDE: DomandeDto = {
 };
 
 const CRUCIVERBA: CruciverbaTuttiDto = {
+  dataGioco: '05-11', prossimo: null,
   cruciverba: [
     { giorno: '05-11', chiave: '05-11-0', indizio: 'Indizio di oggi', risposta: 'PARLARE', rispostaEn: 'TALK', fonte: '', fatto: false },
     { giorno: '05-18', chiave: '05-18-1', indizio: 'Indizio dopo', risposta: 'ALTRO', rispostaEn: null, fonte: '', fatto: false },
