@@ -2,21 +2,18 @@
 // API Film e DVD — catalogo, sessioni, rivisioni e isolamento partita
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { statoDisponibilitaPartita, valutaRequisiti } from '../services/disponibilitaService.js';
 import { createApp } from '../bootstrap.js';
 import type { AttivitaTutteDto, FilmDto, FilmDvdDto, StoricoDto } from '../../shared/types.js';
 import { migraTestiCondizioni } from '../../shared/migraCondizioni.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API Film e DVD', () => {
-  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
   afterAll(() => closeDb());
 
   it('espone 18 film cinema e 12 DVD, 42 sessioni obiettivo e posizioni strutturate', async () => {
@@ -112,7 +109,7 @@ describe('API Film e DVD', () => {
     let storico = (await request(app).get(`/api/partite/${id1}/storico?tipi=lettura`)).body.data as StoricoDto;
     expect(storico.totale).toBe(1);
     expect(((await request(app).get(`/api/compendio/film?partita=${id2}`)).body.data as FilmDvdDto).iniziati).toBe(0);
-    caricaSeed(getDb(), DIR_SEED, true);
+    ricaricaPacchetto(getDb());
     expect(((await request(app).get(`/api/compendio/film?partita=${id1}`)).body.data as FilmDvdDto).film.find((f) => f.chiave === 'dvd-wraith')?.progresso).toBe(2);
     await request(app).put(`/api/partite/${id1}/letture`).send({ ...payload, avanzamento: 0 });
     storico = (await request(app).get(`/api/partite/${id1}/storico?tipi=lettura`)).body.data as StoricoDto;

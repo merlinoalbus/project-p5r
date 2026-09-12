@@ -1760,7 +1760,7 @@ export interface EsportazioneMappeDto {
     assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
-    spilli: Array<{ soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
+    spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */
@@ -1772,9 +1772,14 @@ export interface EsportazioneMappeDto {
 /** Stato dell'istanza locale: versioni, dimensioni su disco, conteggi. */
 export interface StatoIstanzaDto {
   versioneSchema: number;
+  /** Versione dello schema del file delle partite (partite.db, migrazioni «utente»). */
+  versioneSchemaPartite: number;
   versioneApp: string;
   seed: { versione: string | null; hash: string | null; caricatoIl: string | null };
+  /** Il file dei dati di gioco (gioco.db). */
   database: { nome: string; byte: number; inMemoria: boolean };
+  /** Il file delle partite (partite.db), attaccato alla stessa connessione. */
+  databasePartite: { nome: string; byte: number };
   immagini: { file: number; byte: number };
   caratteri: { file: number; byte: number };
   partite: number;
@@ -1784,7 +1789,10 @@ export interface StatoIstanzaDto {
 /** Esito di un ripristino da file: che cosa è stato sostituito e dove sta la copia di sicurezza. */
 export interface EsitoRipristinoDto {
   formato: 'database' | 'istanza';
+  /** Il file dei dati di gioco è stato sostituito. */
   database: boolean;
+  /** Il file delle partite è stato sostituito. */
+  partite: boolean;
   immagini: number;
   caratteri: number;
   copiaDiSicurezza: string;

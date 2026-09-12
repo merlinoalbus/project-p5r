@@ -20,12 +20,15 @@
 // ============================================================
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import path from 'node:path';
 import { closeDb, initDb, getDb } from '../../db/dbService.js';
-import { runMigrations } from '../../db/migrationRunner.js';
-import { caricaSeed } from '../seed/caricaSeed.js';
+import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { traduciNomiSpilli } from '../../db/migrations/053_nomi_spilli_in_italiano.js';
+import { collegaLuoghiAllePlanimetrie } from '../../db/migrations/054_luoghi_con_la_loro_planimetria.js';
+import { riallineaSpilliLuoghi } from './sincronizzaMappe.js';
 
-const DIR_SEED = path.join('data', 'seed');
+/** Quel che l'avvio ordinario fa su un database già formato: le regole sui dati di server/index.ts, e nient'altro (il seed non c'è più). */
+function avvioOrdinario(): void { const db = getDb(); traduciNomiSpilli(db); collegaLuoghiAllePlanimetrie(db); riallineaSpilliLuoghi(db); }
+
 
 /** Le tabelle del livello mappe più il posto dove il giocatore lascia i suoi segni. */
 const TABELLE = [
@@ -71,29 +74,27 @@ describe('l’avvio ordinario su un database già formato', () => {
 
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     // Un segno del giocatore, come ce ne sono su una partita vera: se il secondo avvio lo tocca,
     // il test deve dirlo prima che lo faccia su un database dell'utente.
     const partita = db.prepare(`INSERT INTO partita (nome, data_gioco, created_at, updated_at)
       VALUES ('prova', '04-11', datetime('now'), datetime('now'))`).run();
-    const spillo = db.prepare('SELECT id FROM spillo ORDER BY id LIMIT 1').get() as { id: number };
-    db.prepare(`INSERT INTO spillo_partita (partita_id, spillo_id, raccolto, updated_at)
-      VALUES (?, ?, 1, datetime('now'))`).run(Number(partita.lastInsertRowid), spillo.id);
+    const spillo = db.prepare('SELECT uid FROM spillo ORDER BY id LIMIT 1').get() as { uid: string };
+    db.prepare(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at)
+      VALUES (?, ?, 1, datetime('now'))`).run(Number(partita.lastInsertRowid), spillo.uid);
     prima = impronta();
   });
   afterAll(() => closeDb());
 
   it('non cambia una sola riga del livello mappe, né i segni della partita', () => {
-    // stesso hash del seed: è esattamente il ramo che percorre ogni riavvio del backend
-    const esito = caricaSeed(getDb(), DIR_SEED);
-    expect(esito.caricato).toBe(false);
+    // è esattamente il ramo che percorre ogni riavvio del backend
+    avvioOrdinario();
     expect(cambiate(prima, impronta())).toEqual([]);
   });
 
   it('e nemmeno al terzo', () => {
-    caricaSeed(getDb(), DIR_SEED);
-    caricaSeed(getDb(), DIR_SEED);
+    avvioOrdinario();
+    avvioOrdinario();
     expect(cambiate(prima, impronta())).toEqual([]);
   });
 });

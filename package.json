@@ -20,13 +20,7 @@
     "test:coverage": "vitest run --coverage",
     "preview": "vite preview",
     "accesso:copertura": "tsx --env-file=.env scripts/copertura-accesso.ts",
-    "oggetti:crosswalk": "tsx --env-file=.env scripts/genera-crosswalk-oggetti.ts",
-    "negozi:integra": "tsx scripts/integra-articoli-negozi.ts",
-    "seed:scarica": "tsx scripts/seed/scaricaDataset.ts",
-    "seed:normalizza": "tsx scripts/seed/normalizzaDataset.ts",
-    "seed:verifica": "tsx scripts/seed/verificaIncrociata.ts",
-    "mappe:ricarica": "tsx --env-file=.env scripts/ricarica-mappe.ts",
-    "seed:esporta": "tsx --env-file=.env scripts/esporta-seed.ts"
+    "pacchetto": "tsx --env-file=.env scripts/genera-pacchetto.ts"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",

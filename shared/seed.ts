@@ -1,9 +1,9 @@
 // ============================================================
-// Tipi del seed (data/seed/*.json) — condivisi fra scripts/seed e server
+// Tipi residui del vecchio seed JSON (dismesso il 2026-09-12): RequisitoSeed, TraduzioniSeed,
+// PercorsoSeed restano perché valutatore, traduzioni e percorso li usano come forma dei dati
 // ============================================================
 //
-// Solo tipi: nessun import di runtime. Prodotti da scripts/seed/normalizzaDataset.ts,
-// consumati da server/services/seed/caricaSeed.ts e dal frontend.
+// Solo tipi: nessun import di runtime.
 // ============================================================
 
 /** Persona del compendio Royal. */

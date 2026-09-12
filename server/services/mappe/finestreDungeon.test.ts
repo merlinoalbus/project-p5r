@@ -3,12 +3,13 @@
 // ============================================================
 //
 // Tre cose che erano state affermate senza prova, e che qui diventano un test.
-//
-// **La prima**: che gli ingressi nascano dall'avvio normale. Per un pezzo esistevano soltanto
-// dopo aver chiamato a mano `collegaPalazziAiLuoghi`, e il solo percorso che li creava era il
-// reset distruttivo — che su una partita vera non si esegue. Qui il database e' nuovo e riceve
-// `runMigrations` + `caricaSeed` e nient'altro: se i dieci ingressi non ci sono, il percorso
-// ordinario non li fa.
+import { caricaPacchetto, percorsoPacchettoDb } from '../pacchetto/pacchettoGioco.js';
+import Database from 'better-sqlite3';
+// **La prima**: che `collegaPalazziAiLuoghi` crei un ingresso per ogni Palazzo dichiarato, sulla
+// mappa del luogo dichiarato. Dal 2026-09-12 il pacchetto di gioco e' la fotografia dell'istanza di
+// produzione (che questi ingressi non li ha: quello che l'utente ha tolto resta tolto) e nessun
+// avvio sincronizza le mappe con la guida; la funzione resta lo strumento che li crea quando lo si
+// chiede, ed e' quello che qui si prova.
 //
 // **La seconda**: che la finestra valga *tutto l'anno*, non nei tre giorni che si sceglierebbero
 // per dimostrarla. Il controllo passa su ognuna delle date del calendario di gioco e pretende che
@@ -27,16 +28,13 @@
 // ============================================================
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import fs from 'node:fs';
-import path from 'node:path';
 import { closeDb, initDb, getDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { migrations } from '../../db/migrations/index.js';
-import { caricaSeed } from '../seed/caricaSeed.js';
 import { ordineGioco, valutaRequisitiSpillo } from '../disponibilitaService.js';
 import { dettaglioMappa } from './mappeService.js';
+import { collegaPalazziAiLuoghi } from './sincronizzaMappe.js';
 
-const DIR_SEED = path.join('data', 'seed');
 
 interface Finestra {
   dungeon: string;
@@ -49,9 +47,13 @@ interface Finestra {
  *  con una pagina sua — quindi non hanno un pin d'ingresso. Le finestre attese sono le altre. */
 const SENZA_INGRESSO = new Set(['mementos']);
 
-const finestre: Finestra[] = (JSON.parse(
-  fs.readFileSync(path.join(DIR_SEED, 'finestre-dungeon.json'), 'utf8'),
-) as { finestre: Finestra[] }).finestre.filter((f) => !SENZA_INGRESSO.has(f.dungeon));
+const finestre: Finestra[] = (() => {
+  const db = new Database(percorsoPacchettoDb(), { readonly: true });
+  try {
+    const r = db.prepare("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string };
+    return (JSON.parse(r.json) as { finestre: Finestra[] }).finestre.filter((f) => !SENZA_INGRESSO.has(f.dungeon));
+  } finally { db.close(); }
+})();
 
 const GIORNI_DEL_MESE: Record<number, number> = {
   4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31, 1: 31, 2: 28, 3: 31,
@@ -88,17 +90,17 @@ function ingressi(): Ingresso[] {
     WHERE riferimento_tipo = 'mappa' AND riferimento_chiave LIKE 'dungeon-%'`).all() as Ingresso[];
 }
 
-describe('le finestre dei Palazzi, dal percorso di avvio ordinario', () => {
+describe('le finestre dei Palazzi, dagli ingressi che collegaPalazziAiLuoghi crea', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
     runMigrations(db);
-    // Nient'altro: niente `sincronizzaMappe` a mano, niente `collegaPalazziAiLuoghi`, niente
-    // reset. Questo e' esattamente cio' che fa `server/index.ts` all'avvio.
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
+    // il pacchetto e' la fotografia della produzione, senza ingressi: li crea la funzione, a richiesta
+    collegaPalazziAiLuoghi(db);
   });
   afterAll(() => closeDb());
 
-  it('l’avvio ordinario crea un ingresso per ciascuno dei Palazzi dichiarati', () => {
+  it('nasce un ingresso per ciascuno dei Palazzi dichiarati', () => {
     const trovati = ingressi();
     expect(trovati).toHaveLength(finestre.length);
     // e nessun ingresso ai Memento: quelli si raggiungono dalla loro pagina

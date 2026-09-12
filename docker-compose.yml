@@ -19,8 +19,9 @@
 # container tra quelli monitorati per l'auto-update da GHCR (:latest).
 #
 # Il DB SQLite viene creato dal backend sul volume `project_p5r_data`
-# al primo avvio (migrazioni + seed del compendio Royal inclusi
-# nell'immagine); sopravvive agli aggiornamenti d'immagine.
+# al primo avvio dal pacchetto di gioco incluso nell'immagine
+# (gioco.db + immagini) e migrato; le partite stanno in partite.db;
+# entrambi sopravvivono agli aggiornamenti d'immagine.
 
 services:
   project_p5r_be:
@@ -32,7 +33,7 @@ services:
     environment:
       - PORT=3101
       - DATA_DIR=/data
-      - SEED_DIR=/app/data/seed
+      - PACCHETTO_DIR=/app/pacchetto
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       # DB SQLite + WAL + backups/ sopravvivono agli update di immagine.

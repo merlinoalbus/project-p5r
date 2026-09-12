@@ -1,16 +1,14 @@
 import request from 'supertest';
-import path from 'node:path';
 import {createApp} from '../bootstrap.js';
 import {initDb,closeDb,getDb} from '../db/dbService.js';
-import {runMigrations} from '../db/migrationRunner.js';
-import {caricaSeed} from '../services/seed/caricaSeed.js';
-const app=createApp(),seed=path.resolve(import.meta.dirname,'../../data/seed');
-beforeEach(()=>{const db=initDb(':memory:');runMigrations(db);caricaSeed(db,seed);});afterEach(()=>closeDb());
+import { caricaPacchetto, regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
+const app=createApp();
+beforeEach(()=>{const db=initDb(':memory:');caricaPacchetto(db);});afterEach(()=>closeDb());
 const url='/api/compendio/citta/shibuya/ingresso';
 it('salva ingresso con coordinate anche agli estremi e mantiene destinazione dopo rinomina e reseed',async()=>{
  expect((await request(app).put(url).send({mappa:'shibuya',x:0,y:100,zoom:3})).status).toBe(200);
  await request(app).put('/api/mappe/shibuya').send({nome:'Shibuya Centro'});
- caricaSeed(getDb(),seed);
+ regoleAllAvvio(getDb());
  const q=(await request(app).get('/api/compendio/citta/shibuya')).body.data;
  expect(q.ingresso).toEqual({mappa:'shibuya-centro',nome:'Shibuya Centro',x:0,y:100,zoom:3});expect(q.mappaChiave).toBe('shibuya-centro');
  expect((await request(app).get('/api/compendio/citta')).body.data.find((v:{chiave:string})=>v.chiave==='shibuya').ingresso).toEqual(q.ingresso);

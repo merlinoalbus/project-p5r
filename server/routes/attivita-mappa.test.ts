@@ -1,13 +1,11 @@
 import request from 'supertest';
-import path from 'node:path';
 import {createApp} from '../bootstrap.js';
 import {initDb,closeDb,getDb} from '../db/dbService.js';
-import {runMigrations} from '../db/migrationRunner.js';
-import {caricaSeed} from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import type {MappaDto,SpilloDto} from '../../shared/types.js';
 
 const app=createApp();
-beforeAll(()=>{const db=initDb(':memory:');runMigrations(db);caricaSeed(db,path.resolve(import.meta.dirname,'../../data/seed'));});
+beforeAll(()=>{const db=initDb(':memory:');caricaPacchetto(db);});
 afterAll(()=>{closeDb();});
 
 it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizioni e pacchetti',async()=>{

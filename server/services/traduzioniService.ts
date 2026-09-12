@@ -9,12 +9,11 @@
 // ============================================================
 
 import fs from 'node:fs';
-import path from 'node:path';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { config } from '../config.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { TraduzioneDto } from '../../shared/types.js';
-import type { TraduzioniSeed } from '../../shared/seed.js';
+import Database from 'better-sqlite3';
+import { percorsoPacchettoDb } from './pacchetto/pacchettoGioco.js';
 
 interface RigaTraduzione {
   ambito: string;
@@ -110,45 +109,25 @@ export function aggiornaTraduzione(ambito: string, chiave: string, testo: string
   return versoDto(prepared('SELECT ambito, chiave, testo, extra_json, fonte, updated_at FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaTraduzione);
 }
 
-/** Ripristina la resa del seed (fonte torna 'seed'). */
-export function ripristinaTraduzione(ambito: string, chiave: string, seedDir: string = config.seedDir): TraduzioneDto {
+/** Ripristina la resa della guida, letta dal pacchetto di gioco del repository (fonte torna 'seed'). */
+export function ripristinaTraduzione(ambito: string, chiave: string, pacchetto: string = percorsoPacchettoDb()): TraduzioneDto {
   const esiste = prepared('SELECT 1 FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave);
   if (!esiste) throw httpErrors.notFound('traduzione-non-trovata', `Nessuna voce per ${ambito}/${chiave}.`);
-  const testoSeed = testoDalSeed(ambito, chiave, seedDir);
-  if (testoSeed === null) throw httpErrors.notFound('traduzione-seed-assente', `Il seed non contiene ${ambito}/${chiave}: nulla da ripristinare.`);
+  const testoSeed = testoDalPacchetto(ambito, chiave, pacchetto);
+  if (testoSeed === null) throw httpErrors.notFound('traduzione-seed-assente', `Il pacchetto di gioco non contiene ${ambito}/${chiave}: nulla da ripristinare.`);
   prepared("UPDATE traduzione SET testo = ?, fonte = 'seed', updated_at = ? WHERE ambito = ? AND chiave = ?").run(testoSeed, nowIso(), ambito, chiave);
   invalidaCacheTraduzioni();
   return versoDto(prepared('SELECT ambito, chiave, testo, extra_json, fonte, updated_at FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaTraduzione);
 }
 
-/** Cerca la resa originale nel file traduzioni.json del seed. */
-function testoDalSeed(ambito: string, chiave: string, seedDir: string): string | null {
-  const file = path.join(seedDir, 'traduzioni.json');
-  if (!fs.existsSync(file)) return null;
-  const tr = JSON.parse(fs.readFileSync(file, 'utf-8')) as TraduzioniSeed;
-  switch (ambito) {
-    case 'arcana': return tr.arcani.find((a) => a.chiave === chiave)?.nome ?? null;
-    case 'elementoSkill': return tr.elementiSkill[chiave] ?? null;
-    case 'elementoAffinita': return tr.elementiAffinita.find((e) => e.chiave === chiave)?.nome ?? null;
-    case 'affinita': return tr.affinita[chiave]?.nome ?? null;
-    case 'tipoEredita': return tr.tipiEredita[chiave] ?? null;
-    case 'colonnaEredita': return tr.colonneEredita.find((c) => c.chiave === chiave)?.nome ?? null;
-    case 'statistica': return tr.statistiche.find((s) => s.chiave === chiave)?.nome ?? null;
-    case 'tipoOggetto': return tr.tipiOggetto[chiave] ?? null;
-    case 'vincoloOggetto': return tr.vincoliOggetto[chiave] ?? null;
-    case 'areaMementos': return tr.areeMementos[chiave] ?? null;
-    case 'doteSociale': return tr.dotiSociali.find((d) => d.chiave === chiave)?.nome ?? null;
-    case 'notaPersona': return tr.notePersona[chiave] ?? null;
-    case 'fonteEsclusiva': return tr.fontiEsclusive[chiave] ?? null;
-    case 'effettoSkill': return tr.effettiSkill[chiave] ?? null;
-    case 'descrizioneOggetto': return tr.descrizioniOggetti[chiave] ?? null;
-    case 'negoziazione': return tr.negoziazioni[chiave] ?? null;
-    case 'fonteCarta': return tr.fontiCarta[chiave] ?? null;
-    // Localizzazione italiana dalla guida (step 0.11)
-    case 'skill': return tr.skill?.[chiave] ?? null;
-    case 'persona': return tr.persone?.[chiave] ?? null;
-    case 'oggetto': return tr.oggetti?.[chiave] ?? null;
-    case 'termine': return tr.termini?.find((t) => t.chiave === chiave)?.nome ?? null;
-    default: return null;
+/** La resa originale nel pacchetto di gioco (tabella `traduzione`, letta in sola lettura). */
+function testoDalPacchetto(ambito: string, chiave: string, pacchetto: string): string | null {
+  if (!fs.existsSync(pacchetto)) return null;
+  const db = new Database(pacchetto, { readonly: true });
+  try {
+    const r = db.prepare('SELECT testo FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as { testo: string } | undefined;
+    return r?.testo ?? null;
+  } finally {
+    db.close();
   }
 }

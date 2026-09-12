@@ -15,7 +15,7 @@ originali (nomi propri); i nomi delle skill restano nella forma canonica del dat
 italiana tramite la tabella `traduzione`.
 
 ## Documenti di bordo (tenerli aggiornati a ogni step)
-- `docs/ARCHITETTURA.md` — com'è fatto il sistema (stack, cartelle, flussi, DB, seed, deploy)
+- `docs/ARCHITETTURA.md` — com'è fatto il sistema (stack, cartelle, flussi, DB, pacchetto di gioco, deploy)
 - `docs/ROADMAP.md` — fasi/step con stato (fatto / in corso / da fare) e criteri di completamento
 - `docs/DECISIONI.md` — registro delle decisioni prese con l'utente (data + motivazione)
 - `docs/riferimenti/` — conoscenza di dominio (meccaniche di gioco, mappa dei moduli della guida)
@@ -23,14 +23,14 @@ italiana tramite la tabella `traduzione`.
 - `NOTICE` — attribuzioni delle fonti dati (Apache-2.0) (dallo step 0.2)
 
 ## Convenzioni tecniche (ereditate da project-jira, stesso autore)
-- Backend: `server/index.ts` → `initDb` → `runBootBackup` → `runMigrations` → `caricaSeed` (dallo step 0.3) → `listen`.
+- Backend: `server/index.ts` → `assicuraPacchettoIniziale` (al primo avvio copia `pacchetto/gioco.db`) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `runBootBackup` → `runMigrations` (due sequenze: `db/migrations/` per i dati di gioco, `db/migrazioniUtente/` per le partite) → `regoleAllAvvio` → `listen`. Non esiste più un seed JSON: i dati di gioco vivono in `gioco.db` e si aggiornano con import/export del pacchetto.
   Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/` (cartelle create dallo step 0.4),
   migrazioni append-only in `server/db/migrations/` registrate in `index.ts`.
 - Risposte API: successo `{ data }`, errore `{ error: { code, message, details? }, requestId }`; 404 JSON su `/api/*`.
 - Frontend: pagine in `src/pages/`, componenti in `src/components/<area>/`, stato in `src/stores/` (zustand),
   chiamate in `src/services/api/` (barrel `index.ts`), tema in `src/tailwind.css` (token CSS-first, mai classi interpolate).
 - Layout adattivo: sidebar da 1024px in su, barra inferiore sotto; bersagli touch ≥ 44px (classe `.touch`).
-- Dati di gioco (rigenerabili dal seed) e dati utente (per `partita_id`) vivono in tabelle SEPARATE.
+- Dati di gioco (`gioco.db`, dal pacchetto del repository) e dati utente (`partite.db`, tabelle per `partita_id`) vivono in DUE FILE separati sulla stessa connessione: sostituire il DB di gioco non tocca l'avanzamento.
 - Test con Vitest accanto ai sorgenti (`*.test.ts[x]`); typecheck `tsc -b tsconfig.full.json`; lint ESLint 9.
 
 ## Procedura di lavoro obbligatoria

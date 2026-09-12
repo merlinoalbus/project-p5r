@@ -54,16 +54,6 @@ export const cercaRiferimenti = (tipo: TipoRiferimento, q: string, limite = 30):
 /** Pacchetto JSON con mappe, spilli e immagini dell'istanza (base64); con `radice` solo quella mappa e le discendenti. */
 export const esportaMappe = (radice?: string): Promise<EsportazioneMappeDto> => apiGet(`/mappe/esporta${queryString({ radice })}`, { timeoutMs: 120_000 });
 
-/** ZIP per il repository (seed del luogo + asset): restituisce il file e il nome suggerito. */
-export async function esportaPacchettoRepository(radice: string): Promise<{ nome: string; blob: Blob }> {
-  const res = await httpFetch(`${API_BASE_URL}/mappe/esporta.zip${queryString({ radice })}`, { method: 'GET' }, { maxRetries: 0, timeoutMs: 120_000 });
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new ApiError(res.status, body?.error?.code ?? 'http-error', body?.error?.message ?? `Esportazione fallita (${res.status})`, body?.error?.details, body?.requestId);
-  }
-  return { nome: `mappa-${radice}.zip`, blob: await res.blob() };
-}
-
 /** Schermata di riferimento di uno spillo (file dell'utente, resta nell'istanza). */
 export async function aggiungiImmagineSpillo(spilloId: number, file: File, didascalia = ''): Promise<SpilloDto> {
   const res = await httpFetch(`${API_BASE_URL}/mappe/spilli/${spilloId}/immagini${queryString({ didascalia: didascalia || undefined })}`, { method: 'POST', body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } }, { maxRetries: 0, timeoutMs: 120_000 });

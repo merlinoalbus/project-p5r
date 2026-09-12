@@ -1,12 +1,9 @@
 import request from 'supertest';
-import path from 'node:path';
 import {createApp} from '../bootstrap.js';
 import {initDb,closeDb,prepared,getDb} from '../db/dbService.js';
-import {runMigrations} from '../db/migrationRunner.js';
-import {caricaSeed} from '../services/seed/caricaSeed.js';
-import {leggiZip} from '../utils/zip.js';
-const app=createApp();const seed=path.resolve(import.meta.dirname,'../../data/seed');
-beforeEach(()=>{const db=initDb(':memory:');runMigrations(db);caricaSeed(db,seed);});afterEach(()=>closeDb());
+import { caricaPacchetto, regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
+const app=createApp();
+beforeEach(()=>{const db=initDb(':memory:');caricaPacchetto(db);});afterEach(()=>closeDb());
 const crea=async(nome:string,genitore:string)=>{const r=await request(app).post('/api/mappe').send({nome,tipo:'area',genitore});expect(r.status).toBe(201);return r.body.data;};
 it('deriva chiave e asset da tutta la gerarchia, preservando i nomi naturali',async()=>{
   const castello=await crea('Castello Imperiale','shibuya');const piano=await crea('Piano 0',castello.chiave);
@@ -30,7 +27,7 @@ it('rinomina e sposta un sottoalbero mantenendo pin, progressi e vecchie URL',as
   expect(aggiornato.status).toBe(200);expect(aggiornato.body.data.riferimento.chiave).toBe(dopo.chiave);
   expect(dopo.chiave).toBe('shinjuku-palazzo-imperiale-piano-0');expect(dopo.spilli.find((x:{id:number})=>x.id===s.id)).toMatchObject({id:s.id,raccolto:true});
   expect((await request(app).get('/api/mappe/shibuya')).body.data.spilli).toContainEqual(expect.objectContaining({riferimento:{tipo:'mappa',chiave:dopo.chiave}}));
-  caricaSeed(getDb(),seed);expect((await request(app).get('/api/mappe/'+dopo.chiave)).body.data.nome).toBe('Piano 0');
+  regoleAllAvvio(getDb());expect((await request(app).get('/api/mappe/'+dopo.chiave)).body.data.nome).toBe('Piano 0');
 });
 it('rifiuta collisioni e cicli senza modifiche parziali',async()=>{
   const a=await crea('Stanza','shibuya'),b=await crea('Sala','shibuya');
@@ -38,13 +35,4 @@ it('rifiuta collisioni e cicli senza modifiche parziali',async()=>{
   expect((await request(app).get('/api/mappe/'+b.chiave)).body.data.nome).toBe('Sala');
   expect((await request(app).put('/api/mappe/shibuya').send({genitore:a.chiave})).status).toBe(400);
   expect(prepared('PRAGMA foreign_key_check').all()).toEqual([]);
-});
-it('esporta le immagini del repository con il percorso attuale anche dopo una rinomina',async()=>{
-  await request(app).put('/api/mappe/shibuya').send({nome:'Shibuya Centro'});
-  const r=await request(app).get('/api/mappe/esporta.zip?radice=shibuya-centro').buffer(true).parse((res,cb)=>{const v:Buffer[]=[];res.on('data',(b:Buffer)=>v.push(b));res.on('end',()=>cb(null,Buffer.concat(v)));});
-  expect(r.status).toBe(200);const zip=leggiZip(r.body as Buffer);
-  expect(zip.map(v=>v.nome)).toContain('public/asset/mappe/shibuya-centro.png');
-  const json=JSON.parse(zip.find(v=>v.nome==='data/seed/mappe/shibuya-centro.json')!.contenuto.toString());
-  expect(json.mappe.find((m: {chiave:string})=>m.chiave==='shibuya-centro').asset).toBe('mappe/shibuya-centro');
-  expect(zip.find(v=>v.nome==='public/asset/mappe/shibuya-centro.png')!.contenuto.length).toBeGreaterThan(1000);
 });

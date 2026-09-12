@@ -16,22 +16,19 @@
 //     fusione legge: se divergono, l'app propone Persona che non puoi evocare — o te ne nasconde di
 //     evocabili — e nessuno dei due errori si vede finché non serve.
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import type { PartitaDto, SquadraPartitaDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
 const squadra = async (id: number) => (await request(app).get(`/api/partite/${id}/squadra`)).body.data as SquadraPartitaDto;
 const membro = (s: SquadraPartitaDto, chiave: string) => s.membri.find((m) => m.chiave === chiave)!;
 
 describe('API squadra — denaro ed esperienza', () => {
-  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
   afterAll(() => closeDb());
 
   it('la squadra sono i giocabili del seed, e all’inizio nessuno è segnato', async () => {

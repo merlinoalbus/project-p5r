@@ -17,7 +17,7 @@ vi.mock('../../stores/partitaStore', () => ({ usePartitaStore: { getState: () =>
 const stato: StatoIstanzaDto = {
   versioneSchema: 34, versioneApp: '0.1.0',
   seed: { versione: '1', hash: '1:abc', caricatoIl: '2026-09-05T10:00:00.000Z' },
-  database: { nome: 'project-p5r.db', byte: 3_900_000, inMemoria: false },
+  database: { nome: 'gioco.db', byte: 3_900_000, inMemoria: false }, databasePartite: { nome: 'partite.db', byte: 120_000 }, versioneSchemaPartite: 1,
   immagini: { file: 12, byte: 2_048_000 }, caratteri: { file: 1, byte: 40_000 }, partite: 2, copieDiSicurezza: 7,
 };
 
@@ -35,7 +35,8 @@ describe('BackupIstanza', () => {
   it('mostra lo stato dell’istanza e scarica l’istanza completa', async () => {
     api.scaricaIstanza.mockResolvedValue({ nome: 'project-p5r-istanza.zip', blob: new Blob(['x']) });
     render(<BackupIstanza />);
-    expect(await screen.findByText('project-p5r.db · 3,7 MB')).toBeInTheDocument();
+    expect(await screen.findByText(/gioco\.db · 3,7 MB/)).toBeInTheDocument();
+    expect(screen.getByText(/partite\.db · /)).toBeInTheDocument();
     expect(screen.getByText('12 · 2 MB')).toBeInTheDocument();
     expect(screen.getByText('versione 34 · app 0.1.0')).toBeInTheDocument();
     expect(screen.getByText('7 in data/backups')).toBeInTheDocument();

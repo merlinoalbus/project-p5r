@@ -2,23 +2,19 @@
 // Test API negozi e inventario (Fase 8.2) — seed, schede, ricerca articoli, acquisti per partita con evento, reseed stabile
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto, StoricoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API negozi e inventario', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());
@@ -76,7 +72,7 @@ describe('API negozi e inventario', () => {
     const schedaTakemiPrima = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
     const medicinaDisponibile = schedaTakemiPrima.articoliElenco[0];
     await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: medicinaDisponibile.chiave, fatto: true });
-    caricaSeed(getDb(), DIR_SEED, true);
+    ricaricaPacchetto(getDb());
     const dopo = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
     expect(dopo.acquistati).toBe(1);
     expect(dopo.articoliElenco).toHaveLength(schedaTakemiPrima.articoliElenco.length);

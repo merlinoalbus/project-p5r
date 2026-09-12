@@ -10,19 +10,16 @@ import os from 'node:os';
 import path from 'node:path';
 import { config } from '../config.js';
 import { closeDb, initDb, prepared, resolveDbPath } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from './seed/caricaSeed.js';
+import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
 import { copiaDatabase, copiaIstanza, ripristinaIstanza, statoIstanza, verificaDatabase } from './impostazioniService.js';
 import { leggiZip } from '../utils/zip.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 let dataDir = '';
 
 /** Prepara un'istanza reale su disco: database migrato e con seed, più un'immagine e un carattere finti. */
 function apriIstanza(): void {
   const db = initDb();
-  runMigrations(db);
-  caricaSeed(db, DIR_SEED);
+  caricaPacchetto(db);
 }
 
 beforeAll(() => {
@@ -44,7 +41,10 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
   it('lo stato dell’istanza riporta versioni, dimensioni e conteggi reali', () => {
     prepared("INSERT INTO partita (nome, attiva, livello_protagonista, created_at, updated_at) VALUES ('Backup', 1, 1, 'x', 'x')").run();
     const s = statoIstanza();
-    expect(s.database).toMatchObject({ nome: 'project-p5r.db', inMemoria: false });
+    expect(s.database).toMatchObject({ nome: 'gioco.db', inMemoria: false });
+    expect(s.databasePartite.nome).toBe('partite.db');
+    expect(s.databasePartite.byte).toBeGreaterThan(0);
+    expect(s.versioneSchemaPartite).toBeGreaterThanOrEqual(1);
     expect(s.database.byte).toBeGreaterThan(0);
     expect(s.versioneSchema).toBeGreaterThan(0);
     expect(s.immagini).toEqual({ file: 1, byte: 'finta immagine'.length });
@@ -57,15 +57,19 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     const copia = await copiaDatabase();
     const contenuto = fs.readFileSync(copia.percorso);
     expect(contenuto.toString('utf-8', 0, 15)).toBe('SQLite format 3');
-    expect(copia.nome).toMatch(/^project-p5r-.*\.db$/);
-    expect(() => verificaDatabase(contenuto)).not.toThrow();
+    expect(copia.nome).toMatch(/^project-p5r-gioco-.*\.db$/);
+    expect(verificaDatabase(contenuto)).toBe('gioco');
+    const partite = await copiaDatabase('partite');
+    expect(verificaDatabase(fs.readFileSync(partite.percorso))).toBe('partite');
+    fs.rmSync(partite.percorso, { force: true });
     fs.rmSync(copia.percorso, { force: true });
 
     const zip = await copiaIstanza();
     expect(zip.nome).toMatch(/^project-p5r-istanza-.*\.zip$/);
     const voci = leggiZip(zip.contenuto);
     const nomi = voci.map((v) => v.nome);
-    expect(nomi).toContain('database/project-p5r.db');
+    expect(nomi).toContain('database/gioco.db');
+    expect(nomi).toContain('database/partite.db');
     expect(nomi).toContain('immagini/mappa/prova.png');
     expect(nomi).toContain('font/display.woff2');
     expect(nomi).toContain('manifest.json');
@@ -88,17 +92,18 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
   });
 
   it('ripristina da un database esportato: i dati tornano quelli del file e resta una copia di sicurezza', async () => {
-    // istantanea con una sola partita, poi si aggiunge una seconda partita che il ripristino deve far sparire
-    const copia = await copiaDatabase();
+    // istantanea del file delle partite con una sola partita, poi si aggiunge una seconda partita che il ripristino deve far sparire
+    const copia = await copiaDatabase('partite');
     const istantanea = fs.readFileSync(copia.percorso);
     fs.rmSync(copia.percorso, { force: true });
     prepared("INSERT INTO partita (nome, attiva, livello_protagonista, created_at, updated_at) VALUES ('Dopo la copia', 0, 1, 'x', 'x')").run();
     expect(statoIstanza().partite).toBe(2);
 
     const esito = await ripristinaIstanza(istantanea);
-    expect(esito).toMatchObject({ formato: 'database', database: true, immagini: 0, caratteri: 0 });
+    expect(esito).toMatchObject({ formato: 'database', database: false, partite: true, immagini: 0, caratteri: 0 });
     expect(esito.copiaDiSicurezza).toMatch(/^prima-del-ripristino-/);
-    expect(fs.existsSync(path.join(dataDir, 'backups', esito.copiaDiSicurezza, 'project-p5r.db'))).toBe(true);
+    expect(fs.existsSync(path.join(dataDir, 'backups', esito.copiaDiSicurezza, 'gioco.db'))).toBe(true);
+    expect(fs.existsSync(path.join(dataDir, 'backups', esito.copiaDiSicurezza, 'partite.db'))).toBe(true);
     expect(esito.stato.partite).toBe(1);
     // l'app è di nuovo utilizzabile: la connessione è aperta, migrazioni e seed applicati
     expect((prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n).toBe(1);
@@ -148,7 +153,9 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     const percorsoRotto = path.join(dataDir, 'rotto.db');
     fs.writeFileSync(percorsoRotto, rotto);
     const db = new Database(percorsoRotto);
-    db.exec('DROP TABLE traduzione'); // il seed non potrà più scrivere: il ripristino deve tornare indietro
+    // un file di gioco fermo alla 66 e senza la tabella spillo: la 067 non può applicarsi, il ripristino deve tornare indietro
+    db.exec('DROP TABLE spillo_immagine; DROP TABLE spillo_destinazione; DROP TABLE spillo');
+    db.pragma('user_version = 66');
     db.close();
     await expect(ripristinaIstanza(fs.readFileSync(percorsoRotto))).rejects.toThrowError(/Ripristino non riuscito/);
     // l'app è viva e i dati sono quelli di prima
@@ -159,7 +166,8 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
   it('uno ZIP senza database viene rifiutato senza toccare l’istanza', async () => {
     const { creaZip } = await import('../utils/zip.js');
     const zip = creaZip([{ nome: 'immagini/mappa/altra.png', contenuto: Buffer.from('x') }]);
+    const prima = (prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n;
     await expect(ripristinaIstanza(zip)).rejects.toThrowError(/non contiene il database/);
-    expect((prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n).toBe(1);
+    expect((prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n).toBe(prima);
   });
 });

@@ -9,21 +9,18 @@ import path from 'node:path';
 import type { AddressInfo } from 'node:net';
 import request from 'supertest';
 import { closeDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { config } from '../config.js';
 import { createApp } from '../bootstrap.js';
 import type { PersonaDettaglioDto, PersonaPossedutaDto, PersonaRiassuntoDto, SkillDettaglioDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());
@@ -354,7 +351,9 @@ describe('API', () => {
       expect((await request(app).delete('/api/immagini?ambito=arcana')).body.data).toEqual({ eliminate: 1 });
       expect((await request(app).get('/api/immagini?ambito=arcana')).body.data).toHaveLength(0);
       expect((await request(app).get('/api/immagini?ambito=persona')).body.data).toHaveLength(1);
-      expect((await request(app).delete('/api/immagini')).body.data).toEqual({ eliminate: 1 });
+      // la rimozione globale toglie anche le immagini che il pacchetto porta con sé (le piante scaricate)
+      const totali = ((await request(app).get('/api/immagini')).body.data as unknown[]).length;
+      expect((await request(app).delete('/api/immagini')).body.data).toEqual({ eliminate: totali });
       expect((await request(app).get('/api/immagini')).body.data).toHaveLength(0);
       expect(fs.readdirSync(path.join(dataDir, 'immagini', 'persona'))).toHaveLength(0);
       const sost = await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'image/webp').send(Buffer.from('RIFF'));

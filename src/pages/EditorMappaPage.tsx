@@ -16,7 +16,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, esportaPacchettoRepository, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { useAsset } from '../stores/assetStore';
 import { PageState } from '../components/shared/PageState';
@@ -139,13 +139,6 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onAggiungiImmagine={(id, file, didascalia) => esegui(() => aggiungiImmagineSpillo(id, file, didascalia), 'Schermata aggiunta allo spillo (resta nella tua istanza).')}
               onDidascalia={(id, didascalia) => esegui(() => aggiornaImmagineSpillo(id, { didascalia }), 'Didascalia salvata.')}
               onEliminaImmagine={(id) => esegui(() => eliminaImmagineSpillo(id), 'Schermata eliminata.')}
-              onEsportaLuogo={() => void esegui(async () => {
-                const { nome, blob } = await esportaPacchettoRepository(chiave);
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = nome; a.click();
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-              }, `Pacchetto «${chiave}» pronto: estrailo nella radice del repository (data/seed/mappe/ e public/asset/).`)}
               onCreaMappaCollegata={(s) => esegui(async () => {
                 const nuova=await creaMappa({ nome:s.nome, tipo:dati.tipo==='palazzo'||dati.tipo==='dedalo'||dati.tipo==='area'?'area':'luogo', genitore:dati.chiave, ordine:dati.figli.length });
                 await aggiornaSpillo(s.id,{tipo:'passaggio',riferimento:{tipo:'mappa',chiave:nuova.chiave}});
@@ -170,7 +163,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                 const a = document.createElement('a');
                 a.href = url; a.download = 'mappe-editor.json'; a.click();
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
-              }, 'Pacchetto esportato: mettilo in data/seed/mappe-editor.json per il repository (le immagini in base64 vanno tolte, salvo asset propri).')}
+              }, 'Mappe esportate in JSON: per condividerle con un\'altra istanza usa «Importa», oppure il pacchetto di gioco in Impostazioni.')}
               onImporta={(file, sovrascrivi) => esegui(async () => {
                 const pacchetto = JSON.parse(await file.text()) as EsportazioneMappeDto;
                 const esito = await importaMappe(pacchetto, sovrascrivi);
@@ -217,7 +210,6 @@ interface PropsPannello {
   onAggiungiImmagine: (id: number, file: File, didascalia: string) => Promise<void>;
   onDidascalia: (immagineId: number, didascalia: string) => Promise<void>;
   onEliminaImmagine: (immagineId: number) => Promise<void>;
-  onEsportaLuogo: () => void;
   onCreaMappaCollegata: (s: SpilloDto) => Promise<void>;
   onSalvaMappa: (dati: Parameters<typeof aggiornaMappa>[1]) => Promise<void>;
   onImmagine: (file: File) => Promise<void>;
@@ -338,12 +330,8 @@ function PannelloEditor(p: PropsPannello) {
       </div>
       <div hidden={sezione !== 'file'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Esportazione e importazione">
-        <h3 className="visore-mappa__intestazione">Repository</h3>
-        <p className="m-0 text-[12px] text-text-muted">«Esporta questo luogo» produce uno ZIP completo (questa mappa con le discendenti, gli spilli, le immagini di base e le schermate degli spilli, puntate come asset) da consegnare per il repository: estratto nella radice diventa dato preimpostato dell'app (`data/seed/mappe/{mappa.chiave}.json` + `public/asset/`).</p>
-        <div className="flex flex-wrap gap-1.5 items-center">
-          <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Esporta questo luogo" dettaglio="ZIP completo per il repository" disabled={occupato} onClick={p.onEsportaLuogo} />
-        </div>
-        <p className="m-0 text-[12px] text-text-muted">«Esporta» salva invece tutte le mappe in un JSON (con le immagini dell'istanza in base64) per copie e trasferimenti; «Importa» legge lo stesso formato.</p>
+        <h3 className="visore-mappa__intestazione">Scambio</h3>
+        <p className="m-0 text-[12px] text-text-muted">Le mappe fanno parte dei dati di gioco: per portarle in un'altra istanza, o farne il dato predefinito dell'app, si usa il pacchetto di gioco (Impostazioni → Dati di gioco). «Esporta» salva tutte le mappe in un JSON (con le immagini dell'istanza in base64) per copie e trasferimenti; «Importa» legge lo stesso formato.</p>
         <input ref={inputImporta} type="file" accept="application/json,.json" className="sr-only" aria-label="File del pacchetto da importare" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImporta(f, sovrascrivi); e.target.value = ''; }} />
         <div className="flex flex-wrap gap-1.5 items-center">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Esporta" dettaglio="tutte le mappe, JSON" disabled={occupato} onClick={p.onEsporta} />

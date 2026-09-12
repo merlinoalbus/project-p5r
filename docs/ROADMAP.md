@@ -362,3 +362,17 @@ pastiglia vengono dallo stesso catalogo: la corrispondenza luogo → spillo vive
 («scuola» è ora una biblioteca, prima era «attività»; «servizio» resta sull'icona generica) e gli spilli di
 seed rimasti al tipo vecchio si riallineano all'avvio (`riallineaSpilliLuoghi`), senza toccare i tipi
 più fini assegnati dai pacchetti (terme, cinema…). Verificato a 1280, 768 e 375 px.
+
+## Architettura dei dati: due file, pacchetto di gioco, seed dismesso (12 settembre 2026) — fatto
+
+Voce 3 del piano «struttura, non frasi». `gioco.db` (dati di gioco) e `partite.db` (partite, schema
+«utente» attaccato alla stessa connessione) al posto del file unico: sostituire il DB di gioco non
+tocca l'avanzamento. Migrazione 066 di split (dal vecchio `project-p5r.db`, rinominato al primo
+avvio), 067 con l'`uid` degli spilli e `spillo_partita` per uid (migrazione «utente» 002), due
+sequenze di migrazioni con il proprio `user_version`. Il seed JSON, il suo caricatore, l'esportatore
+e la pipeline sono stati dismessi: la sorgente è `pacchetto/gioco.db` (+ `pacchetto/immagini/`),
+generato dal salvataggio della produzione con `npm run pacchetto -- --da-istanza`, copiato in
+`DATA_DIR` al primo avvio. I test caricano il pacchetto in memoria (`caricaPacchetto`). Backup ed
+esportazione dell'istanza portano entrambi i file; il ripristino accetta anche il vecchio file unico.
+Tolti il pacchetto «per il repository» dell'editor mappe e gli script del seed. L'export/import del
+pacchetto di gioco dall'app è la voce 10.

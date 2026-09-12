@@ -2,23 +2,19 @@
 // Test API percorso giorno per giorno (Fase 7.5b) — seed, indice, scheda del giorno con riferimenti, azioni fatte per partita con evento, giorno corrente
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { AzionePercorsoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto, StoricoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API percorso giorno per giorno', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
     invalidaCacheTraduzioni();
   });
   afterAll(() => closeDb());
@@ -66,7 +62,7 @@ describe('API percorso giorno per giorno', () => {
     expect(i.dataCorrente).toBe('05-19');
     expect((await request(app).put(`/api/partite/${id}/giorno`).send({ data: '13-40' })).status).toBe(404);
     await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-19', indice: 0, fatta: true });
-    caricaSeed(getDb(), DIR_SEED, true);
+    ricaricaPacchetto(getDb());
     const dopo = (await request(app).get(`/api/compendio/percorso/05-19?partita=${id}`)).body.data as PercorsoGiornoDto;
     expect(dopo.azioni[0].fatta).toBe(true);
     expect(dopo.dataCorrente).toBe('05-19');

@@ -2,20 +2,17 @@
 // Test API Libri — avanzamento, completamento canonico e fonti territoriali
 // ============================================================
 
-import path from 'node:path';
 import request from 'supertest';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { createApp } from '../bootstrap.js';
 import type { LibriDto, LibroDto, StoricoDto } from '../../shared/types.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
 
 describe('API Libri', () => {
-  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
   afterAll(() => closeDb());
 
   it('espone il catalogo completo senza inventare uno stato di partita e valida tutte le posizioni', async () => {
@@ -138,7 +135,7 @@ describe('API Libri', () => {
   it('mantiene progresso e posizioni al reseed e cancella il progresso insieme alla partita', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Persistenza libri' })).body.data as { id: number }).id;
     await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'il-magnifico-ladro', avanzamento: 1 });
-    caricaSeed(getDb(), DIR_SEED, true);
+    ricaricaPacchetto(getDb());
     const d = (await request(app).get(`/api/compendio/libri?partita=${id}`)).body.data as LibriDto;
     expect(d.libri.find((l) => l.chiave === 'il-magnifico-ladro')?.progresso).toBe(1);
     expect((getDb().prepare('SELECT COUNT(*) n FROM libro_posizione').get() as { n: number }).n).toBe(48);
@@ -148,7 +145,7 @@ describe('API Libri', () => {
 });
 
 describe('API Libri — disponibilità', () => {
-  beforeAll(() => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); });
+  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
   afterAll(() => closeDb());
 // ============================================================
 // La disponibilità di un libro non è più prosa che nessuno legge (migrazione 052)

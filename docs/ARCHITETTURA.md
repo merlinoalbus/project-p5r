@@ -36,22 +36,24 @@ realizzeranno secondo `docs/ROADMAP.md`.
 ## 3. Struttura del repository
 ```
 server/
-  index.ts            boot: initDb → runBootBackup → runMigrations → caricaSeed → listen; SIGINT/SIGTERM → server.close + closeDb
+  index.ts            boot: assicuraPacchettoIniziale → initDb (gioco.db + partite.db attaccato come «utente») → runBootBackup → runMigrations (due sequenze) → regoleAllAvvio → listen; SIGINT/SIGTERM → server.close + closeDb
   bootstrap.ts        factory Express: middleware in ordine, router, health/config, 404, errorHandler
-  config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, LOG_LEVEL, SEED_DIR)
+  config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, PACCHETTO_DIR, LOG_LEVEL)
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
-  db/                 dbService (connessione + pragma + cache statement), migrationRunner (user_version), backupService (7 copie)
-  db/migrations/      001_compendio (dati di gioco + traduzioni + seed_meta), 002_partita (dati utente, immagini); registro in index.ts
+  db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 32 tabelle delle partite)
+  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file) … 067 (uid degli spilli); registro in index.ts
+  db/migrazioniUtente/ partite: 001 schema, 002 spillo_partita per uid; registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
-  services/seed/      caricaSeed.ts: carica data/seed nel DB al boot (hash in seed_meta, upsert per nome, traduzioni utente intoccabili)
+  services/pacchetto/ pacchettoGioco.ts: primo avvio dal pacchetto (`assicuraPacchettoIniziale`), `caricaPacchetto`/`ricaricaPacchetto` (test), `regoleAllAvvio`
+  services/mappe/identitaSpillo.ts  uid degli spilli = impronta dell'identità (stesso spillo, stesso uid in ogni file)
   services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService,
                       fusione/motoreFusione.ts (motore puro su snapshot in memoria), fusione/alberoFusione.ts (piani
                       ricorsivi) e fusione/fusioneService.ts (DTO)
   schemas/            zod: comuni (id, booleani da query, livello), compendio, traduzioni, partite, immagini
   utils/              logger, httpError
 shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node)
-shared/seed.ts        tipi dei JSON del seed (prodotti dagli script, letti dal backend e dal frontend)
+shared/seed.ts        tipi residui (RequisitoSeed, TraduzioniSeed, PercorsoSeed) usati da valutatore, traduzioni e percorso
 src/
   main.tsx            boot bloccante su GET /api/config → schermata d'errore HTML se il BE non risponde
   router.tsx          react-router (createBrowserRouter)
@@ -78,10 +80,10 @@ vite/                 assetPredefiniti.ts — plugin: manifest degli asset in pu
 public/asset/         asset grafici predefiniti (vedi README.md e docs/grafica/prompt-immagini.md); vuoto nel repo finché non consegnati
   services/api/       _httpClient (timeout+retry), _helpers (envelope, ApiError, queryString), sistema, compendio, traduzioni, partite, immagini
   hooks/, utils/      useDocumentTitle, useCarica (stato di caricamento derivato, senza setState negli effetti), constants, elementi (colori)
-data/seed/            dataset Royal normalizzato in JSON (persona, skill, oggetti, fusione, traduzioni, versione), versionato,
-                      incluso nell'immagine Docker; sorgenti/ = file grezzi delle fonti (fuori dall'immagine)
-scripts/seed/         pipeline dataset: fonti (commit fissati) → scarica (manifest sha256) → normalizza (sandbox vm,
-                      correzioni Royal documentate, gate traduzioni 100%) → verifica incrociata (report); gestione server in scripts/*.sh
+pacchetto/            il pacchetto di gioco spedito con il repository: gioco.db (schema alla versione corrente, ~5 MB) + immagini/<ambito>/<file>
+                      (le immagini d'istanza registrate in `immagine`); copiato in DATA_DIR al primo avvio; rigenerato con `npm run pacchetto`
+                      (`--da-istanza` per farne il dato predefinito dell'app dall'istanza locale). Il seed JSON e la sua pipeline sono stati
+                      dismessi il 2026-09-12; gestione server in scripts/*.sh
 docs/                 documentazione di bordo e riferimenti di dominio
 ```
 
@@ -95,9 +97,11 @@ docs/                 documentazione di bordo e riferimenti di dominio
 6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; errori 4xx di Express/body-parser (JSON malformato 400, corpo oltre il limite 413, percorso non decodificabile 400) → envelope in italiano; altro → 500 con stack nel log.
 
 ## 5. Persistenza
-- Connessione unica better-sqlite3, pragma `journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
-- Migrazioni versionate su `PRAGMA user_version`, ogni migrazione in una transazione, `foreign_key_check` dopo ogni applicazione.
-- Backup online (`db.backup`) prima delle migrazioni a ogni boot, rotazione a 7 copie in `data/backups/`.
+- **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, indice immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le 32 tabelle delle partite, DDL in `server/db/schemaUtente.ts`). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
+- Connessione better-sqlite3, pragma `journal_mode=WAL` (su entrambi i file), `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
+- Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, `foreign_key_check` dopo ogni applicazione.
+- Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
+- Il seed JSON non esiste più: `seed_meta` resta come memoria dell'ultimo caricamento; i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto, lotto successivo).
 - Schema in due famiglie (migrazioni 001–004; `user_version` = 4):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
     `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,

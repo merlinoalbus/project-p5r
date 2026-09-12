@@ -2,19 +2,15 @@
 // Test migrazione 033 — riallineamento delle spunte dell'11 aprile dopo la rimozione dell'azione «esame» dal seed
 // ============================================================
 
-import path from 'node:path';
 import { closeDb, getDb, initDb, prepared } from '../dbService.js';
-import { runMigrations } from '../migrationRunner.js';
-import { caricaSeed } from '../../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { DATA_11_APRILE, rimappaAzioniUndiciAprile } from './033_percorso_11_aprile.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
 
 describe('migrazione 033 — percorso dell’11 aprile', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
   });
   afterAll(() => closeDb());
 

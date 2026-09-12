@@ -1,14 +1,12 @@
 import request from 'supertest';
-import path from 'node:path';
 import { createApp } from '../bootstrap.js';
 import { initDb, closeDb, getDb } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { caricaSeed } from '../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { urlDestinazioneMondo } from '../../shared/accessoMondo.js';
 
 const app = createApp();
 beforeEach(() => {
-  const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, path.resolve(import.meta.dirname, '../../data/seed'));
+  const db = initDb(':memory:'); caricaPacchetto(db);
   // Isola i casi della fixture dai pin preesistenti di questo solo negozio.
   db.prepare("DELETE FROM spillo WHERE (riferimento_tipo='negozio' AND riferimento_chiave='untouchable') OR (riferimento_tipo='luogo' AND riferimento_chiave IN (SELECT chiave FROM luogo WHERE negozio='untouchable'))").run();
 });

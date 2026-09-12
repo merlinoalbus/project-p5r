@@ -2,19 +2,15 @@
 // Test migrazione 034 — spunta del Matto spostata dall'11 al 12 aprile
 // ============================================================
 
-import path from 'node:path';
 import { closeDb, getDb, initDb, prepared } from '../dbService.js';
-import { runMigrations } from '../migrationRunner.js';
-import { caricaSeed } from '../../services/seed/caricaSeed.js';
+import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { spostaSpuntaMatto } from './034_matto_12_aprile.js';
 
-const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
 
 describe('migrazione 034 — Il Matto il 12 aprile', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
-    runMigrations(db);
-    caricaSeed(db, DIR_SEED);
+    caricaPacchetto(db);
   });
   afterAll(() => closeDb());
 

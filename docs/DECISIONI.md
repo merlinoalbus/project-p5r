@@ -246,3 +246,25 @@ dello spillo, così scheda e mappa dicono la stessa cosa; (b) «servizio» resta
 all'avvio, senza toccare i tipi più fini assegnati dai pacchetti (terme, cinema…); (c) la tendina del
 Selettore, quando a destra non c'è spazio, si appende al bordo destro del pulsante: la tendina della
 partita nella barra in alto usciva dalla finestra e faceva scorrere la pagina (rilievo dell'utente).
+
+### 2026-09-12 — Il seed è dismesso: il DB di gioco è la sorgente, le partite stanno in un altro file
+Decisione dell'utente: «il file del DB viene manutenuto con import ed export. I dati utente delle
+partite vanno gestiti separatamente (non devono essere influenzati dal DB così che se io devo fare
+replace del DB non perdo l'avanzamento)»; «non ci sono dati personali… quello che è attualmente è
+dato completo da mettere su db (unica esclusione i dati della partita in corso)»; il salvataggio
+della produzione è la sorgente del pacchetto. Conseguenze: `pacchetto/gioco.db` versionato in git
+(~5 MB, cambia a ogni aggiornamento dei dati); `data/seed`, `caricaSeed`, `esportaSeed` e gli
+script della pipeline rimossi; i test che partivano da uno schema precedente alla 42 con i dati del
+seed non sono più riproducibili e sono stati tolti; le asserzioni sui conteggi della guida pura sono
+diventate relative ai dati (la produzione ha piante già scaricate, Tokyo e Yongen-Jaya ritoccate).
+I vincoli fra i due file non esistono per SQLite: «raccolto» segue l'`uid` dello spillo, che è
+l'impronta della sua identità (mappa, tipo, nome, posizione, riferimento: stesso spillo, stesso uid
+in ogni file disceso dagli stessi dati) e che i pacchetti mappe conservano; `persona_id`/`skill_id` nelle partite restano id numerici (stabili
+finché il pacchetto discende dallo stesso compendio) e la verifica degli orfani è a carico
+dell'import del pacchetto (voce 10). Le regole sui dati che il seed applicava a ogni ricarica
+(nomi degli spilli, luoghi↔planimetrie, spilli dei luoghi, uid mancanti) restano all'avvio
+(`regoleAllAvvio`); la formazione del livello mappe dalla guida (spilli dai marcatori, ingressi
+dei Palazzi, presenza dei luoghi) non avviene più da nessuna parte: il pacchetto è la fotografia
+dell'istanza di produzione («ha cancellato quello che andava cancellato e aggiunto quello che
+andava aggiunto… contiene la fotografia corrente»), e i test che non sono più riproducibili dal
+seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).

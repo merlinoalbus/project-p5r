@@ -1,50 +1,20 @@
 import request from 'supertest';
 import { createApp } from '../../bootstrap.js';
-import path from 'node:path';
 import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { migrations } from '../../db/migrations/index.js';
-import { caricaSeed } from '../seed/caricaSeed.js';
+import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
 import { contenutiMappa, risolviPercorsoMappa } from './contenutiGuidaService.js';
-import { riconciliaAreeGuida } from './organizzazioneMappe.js';
 import { importaMappe, dettaglioMappa, esportaMappe, mappaPerEntita } from './mappeService.js';
 import { risolviAccessoMondo } from './accessoMondoService.js';
-const seed=path.resolve(import.meta.dirname,'../../../data/seed');
 
 describe('organizzazione geografica e contenuti guida',()=>{
  afterEach(()=>closeDb());
- it('converte senza perdere ID, stato, schermate, destinazioni e personalizzazioni; non ricrea le aree al reseed',()=>{
-  const db=initDb(':memory:');runMigrations(db,migrations.filter(m=>m.id<42));caricaSeed(db,seed);
-  const area=db.prepare("SELECT chiave FROM mappa WHERE entita_tipo='area' LIMIT 1").get() as {chiave:string};
-  const s=db.prepare('SELECT id FROM spillo WHERE mappa_chiave=? LIMIT 1').get(area.chiave) as {id:number};
-  // la destinazione si prova su uno spostamento creato apposta: solo gli spostamenti ne hanno una (regole di categoria, 2026-09-11)
-  const d=db.prepare("INSERT INTO spillo (mappa_chiave,tipo,nome,descrizione,x,y,collezionabile,ordine,origine,updated_at) VALUES (?,'passaggio','Passaggio di prova','',5,5,0,0,'utente','2026-09-06T00:00:00Z')").run(area.chiave).lastInsertRowid;
-  const t='2026-09-06T00:00:00Z';
-  const partita=db.prepare('INSERT INTO partita(nome,created_at,updated_at) VALUES(?,?,?)').run('Fixture',t,t).lastInsertRowid;
-  db.prepare('INSERT INTO spillo_partita VALUES(?,?,1,?)').run(partita,s.id,t);
-  db.prepare('INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,?,?,?)').run(s.id,'fixture','Immagine',t);
-  db.prepare('INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,?,?,?,?)').run(d,'tokyo',12,34,2);
-  db.prepare('UPDATE mappa SET nome=?,note=? WHERE chiave=?').run('Nome personale','Note personali',area.chiave);
-  const ids=db.prepare('SELECT id FROM spillo ORDER BY id').all();
-  const stati=db.prepare('SELECT * FROM spillo_partita').all(),immagini=db.prepare('SELECT * FROM spillo_immagine').all(),dest=db.prepare('SELECT spillo_id,mappa_chiave FROM spillo_destinazione').all();
-  runMigrations(db);
-  expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
-  expect(db.prepare('SELECT id FROM spillo ORDER BY id').all()).toEqual(ids);
-  expect(db.prepare('SELECT * FROM spillo_partita').all()).toEqual(stati);expect(db.prepare('SELECT * FROM spillo_immagine').all()).toEqual(immagini);expect(db.prepare('SELECT spillo_id,mappa_chiave FROM spillo_destinazione').all()).toEqual(dest);
-  expect(db.pragma('foreign_key_check')).toEqual([]);
-  const r=risolviPercorsoMappa(area.chiave);expect(r.tipo).toBe('guida');
-  if(r.tipo!=='guida')throw new Error('Guida non risolta');
-  const contenuti=contenutiMappa(r.mappaPalazzo);const a=contenuti.aree.find(a=>a.chiave===area.chiave)!;
-  expect(a.nome).toBe('Nome personale');expect(a.note).toBe('Note personali');expect(a.punti.some(p=>p.id===s.id)).toBe(true);expect(a.punti.every(p=>!('x' in p)&&!('y' in p))).toBe(true);
-  expect(risolviAccessoMondo('area',area.chiave).guide?.[0].area).toBe(area.chiave);
-  caricaSeed(db,seed);
-  expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
-  expect(db.prepare('SELECT * FROM spillo_partita').all()).toEqual(stati);
-  expect(contenutiMappa(r.mappaPalazzo).aree.find(a=>a.chiave===area.chiave)?.nome).toBe('Nome personale');
-  expect(riconciliaAreeGuida(db).convertite).toEqual([]);
- });
+ // Le prove «converte senza perdere ID…» e «mantiene consultabili… vecchi collegamenti editoriali» partivano da uno
+ // schema precedente alla 42 con i dati del seed: senza il seed (dismesso il 2026-09-12) quel punto di partenza non
+ // esiste più, e il pacchetto porta dati già convertiti. Restano le prove sullo stato corrente.
  it('rifiuta conversioni che perderebbero una vera immagine o un arrivo configurato',()=>{
-  const db=initDb(':memory:');runMigrations(db,migrations.filter(m=>m.id<42));caricaSeed(db,seed);
+  const db=initDb(':memory:');runMigrations(db,migrations.filter(m=>m.id<42));caricaPacchetto(db);
   const aree=db.prepare("SELECT chiave FROM mappa WHERE entita_tipo='area' LIMIT 2").all() as Array<{chiave:string}>;
   db.prepare('UPDATE mappa SET asset=? WHERE chiave=?').run('pianta-personale',aree[0].chiave);
   const s=db.prepare("SELECT id FROM spillo WHERE tipo='passaggio' LIMIT 1").get() as {id:number};
@@ -55,7 +25,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(db.pragma('foreign_key_check')).toEqual([]);
  });
  it('una nuova installazione conserva le sezioni senza creare false planimetrie',()=>{
-  const db=initDb(':memory:');runMigrations(db);caricaSeed(db,seed);
+  const db=initDb(':memory:');caricaPacchetto(db);
   const n=db.prepare('SELECT count(*) n FROM dungeon_area').get();
   expect(db.prepare('SELECT count(*) n FROM guida_mappa').get()).toEqual(n);
   expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
@@ -64,7 +34,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(d.reduce((n,d)=>n+contenutiMappa('dungeon-'+d.chiave).aree.reduce((n,a)=>n+a.punti.length,0),0)).toBe(688);
  });
  it('ricaricare il pacchetto base invariato dopo nuove mappe conserva ID e dipendenti dei vecchi pacchetti',()=>{
-  const db=initDb(':memory:');runMigrations(db);caricaSeed(db,seed);
+  const db=initDb(':memory:');caricaPacchetto(db);
   const t='2026-09-06T00:00:00Z';
   const pacchetto={versione:1 as const,mappe:[{chiave:'fixture-reseed',nome:'Fixture reseed',tipo:'generica' as const,genitore:null,ordine:0,immagine:null,asset:null,larghezza:null,altezza:null,entita:null,note:'',spilli:[{tipo:'nota' as const,nome:'Nota del seed',descrizione:'',x:20,y:30,riferimento:null,collezionabile:false,ordine:0}]}]};
   importaMappe(pacchetto,{origine:'seed'});
@@ -81,7 +51,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
  });
 
  it('conserva contesti nominali e gruppi immagini senza scegliere un contesto, e non sceglie la prima associazione multipla',()=>{
-  const db=initDb(':memory:');runMigrations(db);caricaSeed(db,seed);
+  const db=initDb(':memory:');caricaPacchetto(db);
   const nodo={chiave:'contesti-fixture',nome:'Contesti fixture',tipo:'generica' as const,genitore:null,ordine:0,immagine:null,asset:null,larghezza:null,altezza:null,entita:null,note:'',spilli:[],contesti:[{id:'campo-a',nome:'Nome A',campo:'F001_001_00',texpack:1},{id:'campo-b',nome:'Nome B',campo:'F001_002_00',texpack:2}],gruppoImmagini:{id:'gruppo-fixture',nome:'Gruppo fixture',ordine:0}};
   importaMappe({versione:1,mappe:[nodo]});
   expect(dettaglioMappa(nodo.chiave)).toMatchObject({nome:nodo.nome,contesti:nodo.contesti,gruppoImmagini:nodo.gruppoImmagini});
@@ -98,7 +68,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
  });
 
  it('API guida mantiene immagini, condizioni e stato modificabili sullo stesso ID senza esporre coordinate',async()=>{
-  const db=initDb(':memory:');runMigrations(db);caricaSeed(db,seed);const app=createApp();
+  const db=initDb(':memory:');caricaPacchetto(db);const app=createApp();
   const old=db.prepare("SELECT s.* FROM spillo s WHERE area_guida_chiave IS NOT NULL AND ruolo_guida='punto' LIMIT 1").get() as {id:number;area_guida_chiave:string;x:number;y:number};
   const t='2026-09-06T00:00:00Z';const partita=Number(db.prepare("INSERT INTO partita(nome,data_gioco,created_at,updated_at) VALUES('Guida','04-09',?,?)").run(t,t).lastInsertRowid);
   const image=Number(db.prepare("INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,'fixture-immagine','Prima',?)").run(old.id,t).lastInsertRowid);
@@ -120,15 +90,5 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(contenutiMappa(dest.mappaPalazzo).aree.find(a=>a.chiave===old.area_guida_chiave)!.punti.find(p=>p.id===old.id)!.scheda!.raccolto).toBe(false);
  });
 
- it('mantiene consultabili e modificabili anche i dettagli personalizzati dei vecchi collegamenti editoriali',()=>{
-  const db=initDb(':memory:');runMigrations(db,migrations.filter(m=>m.id<42));caricaSeed(db,seed);
-  const link=db.prepare("SELECT s.id,s.riferimento_chiave area FROM spillo s JOIN dungeon_area a ON a.chiave=s.riferimento_chiave WHERE s.riferimento_tipo='mappa' LIMIT 1").get() as {id:number;area:string};
-  db.prepare("UPDATE spillo SET nome='Il mio riepilogo',descrizione='Nota del collegamento',origine='utente' WHERE id=?").run(link.id);
-  db.prepare("INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,'link-personale','Appunto','fixture')").run(link.id);
-  runMigrations(db);const d=risolviPercorsoMappa(link.area);if(d.tipo!=='guida')throw new Error('Guida assente');
-  const elemento=contenutiMappa(d.mappaPalazzo).aree.find(a=>a.chiave===link.area)!.collegamenti!.find(s=>s.id===link.id)!;
-  expect(elemento).toMatchObject({id:link.id,nome:'Il mio riepilogo',descrizione:'Nota del collegamento',areaGuida:link.area});expect(elemento.immagini[0].asset).toBe('link-personale');
-  for(const k of ['x','y','mappaChiave','destinazione'])expect(elemento).not.toHaveProperty(k);
- });
 
 });
