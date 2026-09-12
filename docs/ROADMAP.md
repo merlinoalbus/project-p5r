@@ -501,3 +501,25 @@ dice «nessuna planimetria legata»; la Dote di Conoscenza si accredita solo all
 («Conoscenza +…»), non agli esami; i link delle planimetrie e delle richieste sono bersagli da 44 px — e i
 non bloccanti chiusi (testo dei Memento, conteggi dei dedali nel selettore delle Richieste, rilettura della
 raccolta dopo Ottenuto/Esaurito, numerazione fra gli omonimi, pulsanti occupati per riga).
+
+## Progressi calcolati (12 settembre 2026) — fatto
+
+Voce 9 del piano «struttura, non frasi» (sezione K). **Gli eventi «entra in squadra» si calcolano** solo da
+`membro_squadra_partita.in_squadra`: `EVENTI_STORIA` porta il legame statico evento → Ladro (`membro`,
+`membroDellEvento`), il valutatore (`disponibilitaService`, caso `evento`) risponde con tre stati — verde in
+squadra, rosso dichiarato fuori, grigio non segnato — senza date canoniche; `PUT /api/condizioni/partite/:id/
+eventi/<calcolato>` risponde 400 `evento-calcolato`; la migrazione utente 004 cancella le righe manuali dei
+quattro eventi. **Attività conteggiabili**: `/api/condizioni/elenchi.attivita` e i progressi elencano solo
+`tracciamento = 'svolta'` (12 righe: 6 mini-giochi, 4 lavori, 2 sfide); il PUT su un'attività non
+conteggiabile risponde 400 `attivita-non-conteggiabile`. **Negozi con programma punti**: `/elenchi.negozi`
+porta `programma` (`manuale` | `rango-cliente` | null); l'editor delle condizioni offre «punti negozio»
+solo ai programmi manuali e «grado cliente» solo a chi ha il rango; il PUT dei punti su un negozio senza
+programma manuale risponde 400 `negozio-senza-punti`. **`ProgressiPartitaDto`** (`GET /api/condizioni/
+partite/:id/progressi`) in due parti: calcolati (eventi con `origine: 'calcolato'` e `avvenuto` a tre
+stati, `rangoCliente` con spesa, grado e prossima soglia, `contatori`) e da segnare (eventi manuali,
+attività per volte, punti dei negozi manuali con nome e unità del programma). **UI** `ProgressiPartita`:
+«Calcolati dalla partita» (sola lettura: pallini a tre stati con il rimando a Denaro e squadra, grado cliente
+di Tanaka con spesa e prossima soglia, contatori) e «Da segnare» (3 eventi manuali, 12 attività, il negozio a
+punti manuali). Verifica a 1280/768/375 senza overflow e con bersagli ≥44 px; test server (tre stati dalla
+squadra via `PATCH /api/partite/:id/squadra/:chiave`, rifiuti 400, elenchi filtrati), test della migrazione
+utente 004 e del componente.

@@ -130,3 +130,49 @@ it('un pacchetto oltre 20 condizioni viene scartato per intero, senza lasciare t
   expect(s.condizioni).toEqual([]);
   expect(s.disponibilita).toEqual({ stato: 'disponibile', requisiti: [] });
 });
+
+// ============================================================
+// Voce 9 — progressi calcolati: gli eventi «entra in squadra» dalla squadra, attività conteggiabili, negozi con programma
+// ============================================================
+
+it('gli eventi «entra in squadra» si calcolano dalla squadra (tre stati) e non si segnano a mano', async () => {
+  const makoto: RequisitoSpillo = { tipo: 'evento', evento: 'evento-makoto' };
+  // nessuna riga per Makoto: grigio, non rosso
+  const senzaRiga = valuta([makoto]);
+  expect(senzaRiga.stato).toBe('ignoto');
+  expect(senzaRiga.requisiti[0].stato).toBe('grigio');
+  // dichiarata fuori squadra: rosso
+  await request(app).patch(`/api/partite/${partita}/squadra/makoto`).send({ inSquadra: false });
+  expect(valuta([makoto]).requisiti[0].stato).toBe('rosso');
+  // in squadra: verde, senza date canoniche e senza righe di evento
+  await request(app).patch(`/api/partite/${partita}/squadra/makoto`).send({ inSquadra: true });
+  expect(valuta([makoto]).stato).toBe('disponibile');
+  expect((prepared('SELECT COUNT(*) AS n FROM evento_storia_partita WHERE partita_id = ?').get(partita) as { n: number }).n).toBe(0);
+  // i progressi lo dicono come calcolato, e il PUT manuale è rifiutato
+  const p = (await request(app).get(`/api/condizioni/partite/${partita}/progressi`)).body.data;
+  expect(p.eventi.find((e: { chiave: string }) => e.chiave === 'evento-makoto')).toMatchObject({ origine: 'calcolato', avvenuto: true, membro: 'makoto' });
+  expect(p.eventi.find((e: { chiave: string }) => e.chiave === 'evento-haru')).toMatchObject({ origine: 'calcolato', avvenuto: null });
+  expect(p.eventi.find((e: { chiave: string }) => e.chiave === 'mansarda-pulita')).toMatchObject({ origine: 'manuale', avvenuto: false });
+  const rifiuto = await request(app).put(`/api/condizioni/partite/${partita}/eventi/evento-makoto`).send({ avvenuto: true });
+  expect(rifiuto.status).toBe(400);
+  expect(rifiuto.body.error?.code).toBe('evento-calcolato');
+  expect((await request(app).get('/api/condizioni/elenchi')).body.data.eventi.find((e: { chiave: string }) => e.chiave === 'evento-makoto').calcolato).toBe(true);
+});
+
+it('solo le attività conteggiabili e i negozi con programma entrano negli elenchi e nei progressi', async () => {
+  const e = (await request(app).get('/api/condizioni/elenchi')).body.data;
+  expect(e.attivita.some((a: { chiave: string }) => a.chiave === 'biliardo')).toBe(true);
+  expect(e.attivita.some((a: { chiave: string }) => a.chiave === 'studio-leblanc')).toBe(false);
+  expect(e.negozi.find((n: { chiave: string }) => n.chiave === 'tanaka-affari-loschi').programma).toBe('rango-cliente');
+  expect(e.negozi.find((n: { chiave: string }) => n.chiave === 'vestiti-usati-kichijoji').programma).toBe('manuale');
+  expect(e.negozi.find((n: { chiave: string }) => n.chiave === 'untouchable').programma).toBeNull();
+  const p = (await request(app).get(`/api/condizioni/partite/${partita}/progressi`)).body.data;
+  expect(p.attivita.every((a: { chiave: string }) => a.chiave !== 'studio-leblanc' && !a.chiave.startsWith('videogioco-'))).toBe(true);
+  expect(p.puntiNegozio.map((n: { negozio: string }) => n.negozio)).toEqual(['vestiti-usati-kichijoji']);
+  expect(p.rangoCliente).toEqual([expect.objectContaining({ negozio: 'tanaka-affari-loschi', spesa: 0, rango: { chiave: 'iniziale', nome: expect.any(String) }, prossimo: expect.objectContaining({ spesa: expect.any(Number) }) })]);
+  expect(p.contatori.map((c: { chiave: string }) => c.chiave)).toEqual(['film-completati', 'videogiochi-completati', 'libri-letti']);
+  // segnare a mano una cosa che non si conta o che non ha programma è rifiutato
+  expect((await request(app).put(`/api/condizioni/partite/${partita}/attivita/studio-leblanc`).send({ volte: 1 })).body.error?.code).toBe('attivita-non-conteggiabile');
+  expect((await request(app).put(`/api/condizioni/partite/${partita}/punti-negozio/untouchable`).send({ punti: 10 })).body.error?.code).toBe('negozio-senza-punti');
+  expect((await request(app).put(`/api/condizioni/partite/${partita}/punti-negozio/tanaka-affari-loschi`).send({ punti: 10 })).status).toBe(400);
+});

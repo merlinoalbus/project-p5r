@@ -17,8 +17,8 @@ vi.mock('../../services/api/condizioni', () => ({
     arcani: [{ chiave: 'Fool', nome: 'Fool' }], persone: [{ chiave: 'Pixie', nome: 'Pixie' }], abilita: [{ chiave: 'Dia', nome: 'Dia' }],
     squadra: [{ chiave: 'ann', nome: 'Ann Takamaki' }, { chiave: 'ryuji', nome: 'Ryuji Sakamoto' }],
     attivita: [{ chiave: 'biliardo', nome: 'Biliardo' }, { chiave: 'freccette', nome: 'Freccette' }],
-    negozi: [{ chiave: 'tanaka-affari-loschi', nome: 'Tanaka' }],
-    eventi: [{ chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita' }],
+    negozi: [{ chiave: 'tanaka-affari-loschi', nome: 'Tanaka', programma: 'rango-cliente' }, { chiave: 'vestiti-usati-kichijoji', nome: 'Vestiti usati', programma: 'manuale' }, { chiave: 'untouchable', nome: 'Untouchable', programma: null }],
+    eventi: [{ chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita', calcolato: false }],
     contatori: [{ chiave: 'film-completati', nome: 'Film o DVD completati' }],
   })),
 }));
@@ -112,5 +112,24 @@ describe('CondizioniEditor', () => {
     expect(onCambia).toHaveBeenLastCalledWith([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'caos' }]);
     scegli(riga(), 'Stato', 'Persona con abilità');
     expect(onCambia).toHaveBeenLastCalledWith([{ tipo: 'persona-abilita', persona: 'Pixie', abilita: 'Dia' }]);
+  });
+
+  /** «Grado cliente» si offre solo ai negozi con il rango, «Punti negozio» solo ai programmi manuali (voce 9). */
+  it('i negozi si offrono secondo il loro programma punti', async () => {
+    const onCambia = vi.fn();
+    render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }]} onCambia={onCambia} />);
+    const riga = () => within(screen.getAllByRole('group', { name: /^Condizione:/ })[0]);
+    await screen.findByRole('group', { name: 'Condizione: dal 18 aprile' });
+    scegli(riga(), 'Stato', 'Grado cliente');
+    fireEvent.click(riga().getByRole('combobox', { name: 'Negozio' }));
+    expect(riga().getByRole('option', { name: /Tanaka/ })).toBeInTheDocument();
+    expect(riga().queryByRole('option', { name: /Vestiti usati/ })).toBeNull();
+    expect(riga().queryByRole('option', { name: /Untouchable/ })).toBeNull();
+    fireEvent.click(riga().getByRole('combobox', { name: 'Negozio' }));
+    scegli(riga(), 'Stato', 'Punti negozio');
+    expect(onCambia).toHaveBeenLastCalledWith([expect.objectContaining({ tipo: 'punti-negozio', negozio: 'vestiti-usati-kichijoji' })]);
+    fireEvent.click(riga().getByRole('combobox', { name: 'Negozio' }));
+    expect(riga().getByRole('option', { name: /Vestiti usati/ })).toBeInTheDocument();
+    expect(riga().queryByRole('option', { name: /Tanaka/ })).toBeNull();
   });
 });

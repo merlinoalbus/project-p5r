@@ -613,3 +613,15 @@ scrive con `impostaTimbri` (`src/services/api/partite.ts`, `PUT /api/partite/:id
 `DomandePage` e `CruciverbaPage` usano `CampoRicerca` + `Segmenti`; il dedalo delle Richieste vive in
 `?dedalo=`; le righe «prossime» hanno un'ancora (`#domande-<data>`, `#cruciverba-<giorno>`) a cui il
 rimando in cima scorre dopo aver azzerato i filtri.
+
+## Progressi calcolati (2026-09-12)
+`shared/condizioniSpillo.ts`: `EVENTI_STORIA[].membro` e `membroDellEvento(chiave)`. `server/services/
+disponibilitaService.ts` (caso `evento`): per gli eventi con `membro` legge `membriSquadra`/
+`membriFuoriSquadra` dello stato dei semafori (verde / rosso / grigio), per gli altri `evento_storia_partita`.
+`server/routes/condizioni.ts`: `/elenchi` (attività con `tracciamento = 'svolta'`, negozi con `programma`,
+eventi con `calcolato`), `progressi()` costruito da `statoDisponibilitaPartita` (squadra, spesa per negozio,
+contatori) → `ProgressiPartitaDto` (`shared/types.ts`); i PUT rifiutano eventi calcolati, attività non
+conteggiabili e negozi senza programma manuale. `server/services/negoziService.leggiProgrammaPunti` è
+esportata. `server/db/migrazioniUtente/004_eventi_calcolati.ts`. FE: `src/services/api/condizioni.ts`
+(`ElenchiRegole.negozi[].programma`, `eventi[].calcolato`), `CondizioniEditor` filtra i negozi per
+programma, `src/components/partita/ProgressiPartita.tsx` in due sezioni.

@@ -10,5 +10,6 @@ import type { Migration } from '../migrationRunner.js';
 import { utente001 } from './001_schema_partite.js';
 import { utente002 } from './002_spilli_raccolti_per_uid.js';
 import { utente003 } from './003_timbri_dedalo.js';
+import { utente004 } from './004_eventi_calcolati.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004];

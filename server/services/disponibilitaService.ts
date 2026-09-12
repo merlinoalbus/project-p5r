@@ -20,7 +20,7 @@
 import { prepared } from '../db/dbService.js';
 import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
@@ -155,8 +155,15 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return esito('attivita', v >= r.volte ? 'verde' : 'rosso', `${nomeAttivita(r.attivita)}: svolta ${v} ${v === 1 ? 'volta' : 'volte'} di ${r.volte} (Partita → Progressi)`);
     }
     case 'evento': {
-      const ok = st.eventi.has(r.evento);
       const nome = EVENTI_STORIA.find((e) => e.chiave === r.evento)?.nome ?? r.evento;
+      const membro = membroDellEvento(r.evento);
+      if (membro) {
+        // «Entra in squadra» si legge dalla squadra: verde se c'è, rosso se dichiarato fuori, grigio se non segnato.
+        if (st.membriSquadra.has(membro)) return esito('evento', 'verde', `${nome}: in squadra`);
+        if (st.membriFuoriSquadra.has(membro)) return esito('evento', 'rosso', `${nome}: non in squadra (Partita → Denaro e squadra)`);
+        return esito('evento', 'grigio', `${nome}: non ancora segnato in squadra (Partita → Denaro e squadra)`);
+      }
+      const ok = st.eventi.has(r.evento);
       return esito('evento', ok ? 'verde' : 'rosso', ok ? `${nome}: avvenuto` : `${nome}: non ancora segnato (Partita → Progressi)`);
     }
     case 'rango-cliente': {

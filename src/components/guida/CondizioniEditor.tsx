@@ -48,7 +48,8 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'film': return e.extra.letture.filter((l) => l.categoria === 'film');
     case 'articolo': return e.extra.articoli.map((a) => ({ chiave: a.chiave, nome: a.nome, gruppo: a.gruppo }));
     case 'attivita': return e.extra.attivita;
-    case 'negozio-con-gradi': case 'negozio-con-punti': return e.extra.negozi;
+    case 'negozio-con-gradi': return e.extra.negozi.filter((n) => n.programma === 'rango-cliente');
+    case 'negozio-con-punti': return e.extra.negozi.filter((n) => n.programma === 'manuale');
     case 'rango-cliente': return RANGHI_CLIENTE.map((r) => ({ chiave: r.chiave, nome: r.nome, dettaglio: r.spesa ? `da ¥${r.spesa.toLocaleString('it-IT')}` : undefined }));
     case 'evento': return e.extra.eventi.length ? e.extra.eventi : EVENTI_STORIA.map((x) => ({ chiave: x.chiave, nome: x.nome }));
     case 'contatore': return e.extra.contatori.length ? e.extra.contatori : CONTATORI.map((x) => ({ chiave: x.chiave, nome: x.nome }));

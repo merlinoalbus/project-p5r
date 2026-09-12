@@ -31,7 +31,8 @@ function regole(json: string | null) { const nomi = nomiCondizioniMemo(); return
 /** La presenza del negozio: i suoi orari, come condizioni che il valutatore sa leggere. */
 function regoleOrari(orari: OrariNegozio) { return orariComeCondizioni(orari).map((c: RequisitoSpillo) => ({ ...c, testo: descriviRequisitoSpillo(c) })); }
 
-function programmaPunti(json: string | null): NegozioRiassuntoDto['programmaPunti'] {
+/** Il programma punti di un negozio, dal JSON della riga (migrazione 076); null se assente o malformato. */
+export function leggiProgrammaPunti(json: string | null): NegozioRiassuntoDto['programmaPunti'] {
   if (!json) return null;
   try {
     const p = JSON.parse(json) as { nome?: unknown; unita?: unknown; calcolo?: unknown };
@@ -48,7 +49,7 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
     chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore,
     confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null,
     orari: r.orari, orariStrutturati: orari, orariTesto: descriviOrari(orari), sblocco: r.sblocco,
-    sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (r.sede_nome ?? null) : null, programmaPunti: programmaPunti(r.programma_punti_json),
+    sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (r.sede_nome ?? null) : null, programmaPunti: leggiProgrammaPunti(r.programma_punti_json),
     articoli: r.articoli ?? 0, verificati: r.verificati ?? 0,
   };
 }
