@@ -16,9 +16,7 @@ import { migrations } from '../db/migrations/index.js';
 import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
 import { creaPartita } from './partiteService.js';
 import { copiaIstanza } from './impostazioniService.js';
-import { anteprimaPacchetto, esportaPacchetto, importaPacchetto, importaPacchettoDaUrl, orfaniPartite, statoImportazione, versioneSchemaCodice } from './pacchettoGiocoService.js';
-import http from 'node:http';
-import type { AddressInfo } from 'node:net';
+import { anteprimaPacchetto, esportaPacchetto, importaPacchetto, orfaniPartite, statoImportazione, versioneSchemaCodice } from './pacchettoGiocoService.js';
 
 let dataDir = '';
 let partitaId = 0;
@@ -75,30 +73,21 @@ afterAll(() => {
 
 describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
   it('una importazione per volta, con la fase interrogabile e l’esito che resta', async () => {
-    // un'origine che prende tempo: mentre la prima importazione scarica, la seconda deve essere respinta
-    const server = http.createServer((_req, res) => {
-      setTimeout(() => { res.writeHead(200, { 'Content-Type': 'application/vnd.sqlite3' }); res.end('non sono un database'); }, 400);
-    });
-    await new Promise<void>((ok) => server.listen(0, '127.0.0.1', () => ok()));
-    const indirizzo = `http://127.0.0.1:${(server.address() as AddressInfo).port}/gioco.db`;
-    const prima = importaPacchettoDaUrl(indirizzo);
-    try {
-      // il lucchetto si prende subito, già per lo scarico
-      expect(statoImportazione()).toMatchObject({ inCorso: true, fase: 'scarico' });
-      const operazione = statoImportazione().operazione;
-      expect(operazione).toBeTruthy();
-      await expect(importaPacchetto(Buffer.from('altro'))).rejects.toMatchObject({ code: 'importazione-in-corso' });
-      // il file scaricato non è un pacchetto: fallisce, ma lo stato lo racconta e il lucchetto si libera
-      await expect(prima).rejects.toMatchObject({ code: 'pacchetto-non-valido' });
-      const dopo = statoImportazione();
-      expect(dopo).toMatchObject({ inCorso: false, fase: null });
-      expect(dopo.ultima).toMatchObject({ riuscita: false, esito: null, operazione });
-      expect(dopo.ultima?.messaggio).toContain('non è un pacchetto di gioco');
-      await expect(importaPacchetto(Buffer.from('ancora altro'))).rejects.toMatchObject({ code: 'pacchetto-non-valido' });
-    } finally {
-      await prima.catch(() => undefined);
-      await new Promise<void>((ok) => server.close(() => ok()));
-    }
+    // la seconda parte nello stesso giro sincrono della prima, quando il lucchetto è appena stato preso
+    expect(statoImportazione().inCorso).toBe(false);
+    const prima = importaPacchetto(Buffer.from('non sono un database'));
+    const seconda = importaPacchetto(Buffer.from('nemmeno io'));
+    expect(statoImportazione()).toMatchObject({ inCorso: true, fase: 'verifica' });
+    const operazione = statoImportazione().operazione;
+    expect(operazione).toBeTruthy();
+    await expect(seconda).rejects.toMatchObject({ code: 'importazione-in-corso' });
+    await expect(prima).rejects.toMatchObject({ code: 'pacchetto-non-valido' });
+    const dopo = statoImportazione();
+    expect(dopo).toMatchObject({ inCorso: false, fase: null });
+    expect(dopo.ultima).toMatchObject({ riuscita: false, esito: null, operazione });
+    expect(dopo.ultima?.messaggio).toContain('non è un pacchetto di gioco');
+    // il lucchetto è tornato libero
+    await expect(importaPacchetto(Buffer.from('ancora altro'))).rejects.toMatchObject({ code: 'pacchetto-non-valido' });
   });
 
   it('la versione dello schema che il codice sa leggere è l’ultima migrazione', () => {

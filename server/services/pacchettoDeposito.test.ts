@@ -11,7 +11,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { config } from '../config.js';
-import { anteprimaPacchettoDaDeposito, elencaDeposito, percorsoNelDeposito } from './pacchettoGiocoService.js';
+import { anteprimaPacchettoDaDeposito, elencaDeposito } from './pacchettoGiocoService.js';
+import { percorsoNelDeposito } from './depositoService.js';
 
 let deposito = '';
 const originale = config.depositoDir;
