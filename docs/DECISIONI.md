@@ -428,3 +428,17 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   giorno («per il Confidente Iwai», «e festività») non si interpreta: resta nelle note del luogo, com'era scritto.
 - **Dai DTO escono i campi di prosa che nessuna pagina legge**: `periodo` dei film, `orari` e `sblocco` del negozio,
   `fonte` di catalogo e cruciverba. Le colonne restano nel database come credito della guida.
+
+### 2026-09-12 — Il pacchetto su un'istanza pubblicata
+- **Per le istanze dietro un proxy il file non passa dal browser**: si indica un indirizzo e lo scarica il server. È
+  l'unica strada che sopravvive ai limiti di corpo di nginx e dei tunnel, e riusa il pattern già in uso per le
+  immagini da URL. L'indirizzo può essere privato (il PC di casa in Tailscale): è il caso d'uso previsto, quindi non
+  si filtrano le destinazioni.
+- **I tempi lunghi non sono errori**: un invio che dura mezz'ora è normale con centinaia di MB. Si interrompe solo per
+  inattività (client e server), mai per durata complessiva.
+- **Un'importazione alla volta, e sempre interrogabile**: se la connessione cade mentre il server sostituisce i dati,
+  l'app chiede lo stato invece di dichiarare il fallimento, e un secondo tentativo viene rifiutato con 409 finché il
+  primo non ha finito.
+- **Un esito vale solo per il tentativo che lo ha chiesto**: l'importazione porta un identificativo e il frontend
+  confronta quello dell'ultima operazione vista prima di partire. Dire «riuscita» per un lavoro mai iniziato sarebbe
+  peggio di qualunque errore: l'utente crederebbe di avere dati che non ha.

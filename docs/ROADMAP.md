@@ -578,3 +578,19 @@ le istantanee `seed_json` dei luoghi ricevono `giorni_json` (e la nota) dalla lo
 istantanea la riacquistano; `eliminaElemento` ha comunque il ripiego dalla frase. Nello schema i giorni sono salvati nell'ordine
 della settimana e `datiNegozio` non accetta più `orari` in prosa. Pacchetti rigenerati alla 081.
 Test: migrazione 080 (frasi, idempotenza, pacchetto), fixture allineate; typecheck, lint e suite verdi.
+
+## Caricamento del pacchetto su un'istanza pubblicata (12 settembre 2026) — fatto
+
+Correzione nata da un caso reale: sull'istanza pubblicata l'importazione del pacchetto (311 MB) falliva subito con
+«Failed to fetch», e in locale l'invio non mostrava alcun avanzamento. Causa: `client_max_body_size 10M` sulle rotte
+`/api/` di `nginx.conf` (il backend non riceveva nulla), più il tunnel Cloudflare che si ferma a 100 MB di corpo.
+Fatto: **importazione da indirizzo** (il server scarica il pacchetto, dal browser parte solo l'URL:
+`POST /istanza/gioco/anteprima-da-url`, `PUT /istanza/gioco/da-url`, `server/utils/scaricaDaUrl.ts` condiviso con le
+immagini); **barra di avanzamento** dell'invio (XMLHttpRequest, `BarraInvio`, percentuale e MB) anche nel ripristino
+dell'istanza; **niente più timeout complessivi** che uccidevano gli invii lenti (client: inattività di 10 minuti;
+Node: `requestTimeout` a 30 minuti; nginx: 1800s e 1 GB sulle sole rotte delle impostazioni); **importazione unica e
+osservabile** (lucchetto con 409, fasi, esito conservato, `GET /istanza/gioco/importazione`), così la chiusura della
+connessione da parte del tunnel non viene più scambiata per un fallimento. Test nuovi: `scaricaDaUrl` (intestazioni
+contro inattività, tetto senza `Content-Length`, corpo lento che deve arrivare), invio con XHR finto, `BarraInvio`,
+lucchetto e stato dell'importazione. Validatore: primo giro rigettato con quattro bloccanti (timeout dello scarico
+legato anche al corpo, `requestTimeout` di Node, 524 del tunnel scambiato per errore, documenti), tutti corretti qui.

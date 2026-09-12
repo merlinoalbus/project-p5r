@@ -18,6 +18,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
 import type { ImmagineDto } from '../../shared/types.js';
 import { idMappa } from './mappe/percorsiMappe.js';
+import { scaricaDaUrl } from '../utils/scaricaDaUrl.js';
 
 export { AMBITI_CARICAMENTO, AMBITI_IMMAGINE, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
 
@@ -98,28 +99,18 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
   return leggiImmagine(ambito, chiave)!;
 }
 
-/** Scarica un'immagine da un URL indicato dall'utente e la salva. */
+/** Scarica un'immagine da un URL indicato dall'utente e la salva. Lo scarico è quello condiviso
+ *  (`scaricaDaUrl`): tetto applicato mentre arriva, attesa della risposta distinta dall'inattività. */
 export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: string, url: string): Promise<ImmagineDto> {
-  let u: URL;
-  try {
-    u = new URL(url);
-  } catch {
-    throw httpErrors.badRequest('url-non-valido', 'L\'URL indicato non è valido.');
-  }
-  if (u.protocol !== 'http:' && u.protocol !== 'https:') throw httpErrors.badRequest('url-non-valido', 'Sono ammessi solo URL http/https.');
-  let res: Response;
-  try {
-    res = await fetch(u, {
-      signal: AbortSignal.timeout(20_000),
-      redirect: 'follow',
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ProjectP5R/1.0; +https://github.com/merlinoalbus/project-p5r)', Accept: 'image/*,*/*;q=0.8' },
-    });
-  } catch (err) {
-    throw httpErrors.badRequest('download-fallito', `Impossibile scaricare l'immagine: ${err instanceof Error ? err.message : String(err)}`);
-  }
-  if (!res.ok) throw httpErrors.badRequest('download-fallito', `Il server remoto ha risposto ${res.status}.`);
-  const mime = (res.headers.get('content-type') ?? '').split(';')[0].trim();
-  const contenuto = Buffer.from(await res.arrayBuffer());
+  const { contenuto, mime, url: u } = await scaricaDaUrl(url, {
+    maxByte: MAX_BYTE_IMMAGINE,
+    cosa: 'l\'immagine',
+    codiceScaricoFallito: 'download-fallito',
+    codiceTroppoGrande: 'immagine-troppo-grande',
+    accept: 'image/*,*/*;q=0.8',
+    attesaRispostaMs: 20_000,
+    intestazioni: { 'User-Agent': 'Mozilla/5.0 (compatible; ProjectP5R/1.0; +https://github.com/merlinoalbus/project-p5r)' },
+  });
   return salvaImmagine(ambito, chiave, mime, contenuto, u.toString());
 }
 

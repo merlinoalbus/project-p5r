@@ -64,7 +64,7 @@ describe('BackupIstanza', () => {
     expect(finestra.getByText(/copia di sicurezza/)).toBeInTheDocument();
     expect(api.ripristinaIstanza).not.toHaveBeenCalled();
     fireEvent.click(finestra.getByRole('button', { name: "Sostituisci l'istanza" }));
-    await waitFor(() => expect(api.ripristinaIstanza).toHaveBeenCalledWith(file));
+    await waitFor(() => expect(api.ripristinaIstanza).toHaveBeenCalledWith(file, expect.any(Function)));
     await waitFor(() => expect(carica).toHaveBeenCalled());
     expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('Istanza ripristinata'));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

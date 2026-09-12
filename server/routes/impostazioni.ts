@@ -7,9 +7,11 @@
 // ============================================================
 
 import express, { Router } from 'express';
+import { z } from 'zod';
+import { validate } from '../middleware/validate.js';
 import fs from 'node:fs';
 import { MAX_BYTE_RIPRISTINO, copiaDatabase, copiaIstanza, ripristinaIstanza, statoIstanza } from '../services/impostazioniService.js';
-import { anteprimaPacchetto, importaPacchetto } from '../services/pacchettoGiocoService.js';
+import { anteprimaPacchetto, importaPacchetto, importaPacchettoDaUrl, scaricaPacchettoDaUrl, statoImportazione } from '../services/pacchettoGiocoService.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const router = Router();
@@ -65,7 +67,12 @@ router.put('/istanza', corpoFile, (req, res, next) => {
 });
 
 // ---- Pacchetto di gioco (voce 10): il solo gioco.db, immagini comprese, senza le partite ----
-// Il download è `GET /istanza/database` (lo stesso file). Qui l'anteprima e l'importazione.
+// Il download è `GET /istanza/database` (lo stesso file). Qui l'anteprima e l'importazione, in due forme:
+// con il file nel corpo (istanza locale) oppure con un indirizzo da cui il server se lo prende (istanza
+// pubblicata: il proxy davanti rifiuterebbe un corpo da centinaia di MB).
+
+/** L'indirizzo da cui scaricare il pacchetto, per le due rotte «da indirizzo». */
+const corpoUrl = z.object({ url: z.string().url().max(2000) });
 
 /** Anteprima dell'importazione: legge il file e dice che cosa cambierebbe, senza sostituire nulla. */
 router.post('/istanza/gioco/anteprima', corpoFile, (req, res, next) => {
@@ -85,6 +92,33 @@ router.put('/istanza/gioco', corpoFile, (req, res, next) => {
       next(err);
     }
   })();
+});
+
+/** Anteprima del pacchetto che sta a un indirizzo: lo scarica il server. */
+router.post('/istanza/gioco/anteprima-da-url', validate({ body: corpoUrl }), (req, res, next) => {
+  void (async () => {
+    try {
+      res.json(anteprimaPacchetto(await scaricaPacchettoDaUrl((req.body as { url: string }).url)));
+    } catch (err) {
+      next(err);
+    }
+  })();
+});
+
+/** Sostituisce i dati di gioco con il pacchetto che sta a un indirizzo: lo scarica il server. */
+router.put('/istanza/gioco/da-url', validate({ body: corpoUrl }), (req, res, next) => {
+  void (async () => {
+    try {
+      res.json(await importaPacchettoDaUrl((req.body as { url: string }).url));
+    } catch (err) {
+      next(err);
+    }
+  })();
+});
+
+/** A che punto è l'importazione: si interroga quando la risposta non arriva (un proxy può chiudere prima). */
+router.get('/istanza/gioco/importazione', (_req, res) => {
+  res.json(statoImportazione());
 });
 
 export default router;

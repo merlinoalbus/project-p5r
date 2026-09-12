@@ -23,7 +23,14 @@ import { closeDb, initDb } from './db/dbService.js';
 import { runBootBackup } from './db/backupService.js';
 import { runMigrations } from './db/migrationRunner.js';
 import { createApp } from './bootstrap.js';
+
 import { assicuraPacchettoIniziale, regoleAllAvvio } from './services/pacchetto/pacchettoGioco.js';
+/** Quanto può durare la RICEZIONE di una richiesta, corpo compreso.
+ *
+ * Node ne concede 300 secondi (`requestTimeout`): il caricamento di un pacchetto di gioco da centinaia
+ * di MB su una linea normale li supera, e il server tronca la richiesta a metà mentre il browser sta
+ * ancora mandando. Trenta minuti, come il proxy davanti (`nginx.conf`, `location ^~ /api/impostazioni/`). */
+const RICEZIONE_MAX_MS = 30 * 60 * 1000;
 
 try {
   const iniziale = assicuraPacchettoIniziale();
@@ -65,6 +72,7 @@ const server = app.listen(config.port, () => {
     `Backend in ascolto su http://localhost:${config.port}`,
   );
 });
+server.requestTimeout = RICEZIONE_MAX_MS;
 
 let inArresto = false;
 
