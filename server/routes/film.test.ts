@@ -47,7 +47,8 @@ describe('API Film e DVD', () => {
   it('sblocca il requisito aggregato soltanto al completamento, senza esporre un fatto falsificabile', async () => {
     const requisito = { tipo: 'contatore', cosa: 'film-completati', almeno: 1 } as const;
     expect(migraTestiCondizioni(['dopo essere andati al cinema o aver visto un DVD almeno una volta'])).toEqual([requisito]);
-    expect(JSON.parse((getDb().prepare("SELECT condizioni_json FROM articolo WHERE chiave='hinokuniya/anima-da-cineasta'").get() as { condizioni_json: string }).condizioni_json)).toEqual([requisito]);
+    // l'articolo porta anche lo sblocco del negozio (Hinokuniya sta a Shinjuku, che apre più avanti): migrazione 070
+    expect(JSON.parse((getDb().prepare("SELECT condizioni_json FROM articolo WHERE chiave='hinokuniya/anima-da-cineasta'").get() as { condizioni_json: string }).condizioni_json)).toEqual([{ tipo: 'quartiere', quartiere: 'shinjuku' }, requisito]);
 
     const id = ((await request(app).post('/api/partite').send({ nome: 'Prima visione' })).body.data as { id: number }).id;
     const valuta = () => valutaRequisiti([{ ...requisito, testo: 'Prima visione Film/DVD' }], statoDisponibilitaPartita(id)).stato;

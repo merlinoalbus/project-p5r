@@ -27,12 +27,14 @@ describe('API città e attività', () => {
     // compare piu' in questo elenco — si raggiungono dalla pagina dei Memento, che e' il posto
     // giusto. Il totale e' salito da 82 a 84 con l'area del Tokyo Skytree (Asakusa) e Takenoko
     // Street (Harajuku): due libri dichiaravano di sbloccarle e nel catalogo non c'erano, quindi
-    // leggere il libro non poteva far comparire niente.
-    expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(84);
+    // leggere il libro non poteva far comparire niente. Da 84 a 91 con i sette posti che la
+    // migrazione 072 ha aggiunto come sedi di negozi e distributori che non ne avevano una.
+    expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(91);
     expect(q.some((x) => x.chiave === 'mementos')).toBe(false);
     expect(q.every((x) => x.luoghi > 0 && x.verificati <= x.luoghi)).toBe(true);
     const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
-    expect(s.luoghi).toHaveLength(22);
+    // 22 della guida + Taisho Store, il venditore ambulante e il distributore del sottopasso (072)
+    expect(s.luoghi).toHaveLength(25);
     const u = s.luoghi.find((l) => l.nome === 'Untouchable')!;
     expect(u).toMatchObject({ chiave: 'shibuya/untouchable', tipo: 'negozio', quando: 'sera', verificato: true });
     expect(u.confidenti).toEqual([{ chiave: 'iwai', nome: expect.stringContaining('Iwai') }]);

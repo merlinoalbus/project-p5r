@@ -57,6 +57,13 @@ const NOMI: ReadonlyArray<readonly [RegExp, string]> = [
   [/ichigaya/i, 'ichigaya'],
 ];
 
+/** Il quartiere che una frase «Sblocca …» nomina in modo inequivocabile, se esiste; altrimenti null (la frase resta prosa). */
+export function quartiereSbloccato(sblocca: string | null | undefined, quartieri: ReadonlySet<string>): string | null {
+  if (!sblocca || !/^sblocca/i.test(sblocca.trim())) return null;
+  const trovato = NOMI.find(([rx]) => rx.test(sblocca));
+  return trovato && quartieri.has(trovato[1]) ? trovato[1] : null;
+}
+
 export const migration061: Migration = {
   id: 61,
   name: 'libro_sblocca_un_luogo',
@@ -70,10 +77,9 @@ export const migration061: Migration = {
     for (const r of righe) {
       // Solo quando il testo dice «sblocca»: «Aumenta i punti dote guardando film» nomina nessun
       // luogo, e «Raddoppia la velocita di lettura» nemmeno — non vanno interpretati.
-      if (!/^sblocca/i.test(r.sblocca.trim())) continue;
-      const trovato = NOMI.find(([rx]) => rx.test(r.sblocca));
-      if (!trovato || !quartieri.has(trovato[1])) continue;
-      scrivi.run(JSON.stringify({ famiglia: 'sblocca-luogo', luogo: trovato[1] }), r.chiave);
+      const luogo = quartiereSbloccato(r.sblocca, quartieri);
+      if (!luogo) continue;
+      scrivi.run(JSON.stringify({ famiglia: 'sblocca-luogo', luogo }), r.chiave);
     }
   },
 };

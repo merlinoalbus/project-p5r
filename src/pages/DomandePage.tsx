@@ -15,7 +15,7 @@ import type { DomandaDto, DomandeDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
-const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', altro: 'Game show in TV' };
+const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 
 type Filtro = 'tutte' | 'da-fare' | 'fatte' | 'esami';
 
@@ -68,7 +68,7 @@ export function DomandePage() {
   const dati = useCarica(() => getDomande(partitaId ?? undefined), [partitaId]);
   const [filtro, setFiltro] = useState<Filtro>('tutte');
   const d = dati.dati;
-  const visibili = useMemo(() => (d?.domande ?? []).filter((x) => filtro === 'tutte' || (filtro === 'da-fare' && !x.fatta) || (filtro === 'fatte' && x.fatta) || (filtro === 'esami' && x.tipo !== 'classe')), [d, filtro]);
+  const visibili = useMemo(() => (d?.domande ?? []).filter((x) => filtro === 'tutte' || (filtro === 'da-fare' && !x.fatta) || (filtro === 'fatte' && x.fatta) || (filtro === 'esami' && (x.tipo === 'esame-medio' || x.tipo === 'esame-finale'))), [d, filtro]);
   const perMese = useMemo(() => {
     const m = new Map<string, DomandaDto[]>();
     for (const x of visibili) {

@@ -268,3 +268,35 @@ dei Palazzi, presenza dei luoghi) non avviene più da nessuna parte: il pacchett
 dell'istanza di produzione («ha cancellato quello che andava cancellato e aggiunto quello che
 andava aggiunto… contiene la fotografia corrente»), e i test che non sono più riproducibili dal
 seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
+
+### 2026-09-12 — Modello dati del catalogo (voce 4): scelte prese sui dati, riga per riga
+- **«rango cliente Iniziale» non è una condizione**: è il grado di partenza, che il convertitore
+  della 064 rende già come «nessuna condizione»; la 070 segue quella regola invece di scrivere un
+  `rango-cliente: iniziale` sempre vero.
+- **Orari**: le cinque frasi che non descrivono un orario valutabile (Palazzo di Niijima, il
+  venditore «una settimana sì e una no», le date del calendario, l'apertura come negozio di
+  equipaggiamento, la nota sul curry) restano nella `nota` con gli orari a «sempre»; «giorni di
+  scuola» diventa lunedì–sabato con la nota, perché la scuola giapponese del gioco ha il sabato.
+- **Sedi**: dove `luogo` non aveva il posto (Taisho Store, venditore ambulante, negozio scolastico,
+  gachapon, mercante Sakai, due distributori) la 072 crea la riga della guida; i quattordici
+  distributori puntano ai luoghi «distributori» del quartiere; `distributori-automatici`, negozio
+  mai esistito, sparisce da `luogo.negozio`. Tanaka, la TV e il negozio del Palazzo di Niijima non
+  hanno una sede; la lettura in metropolitana nemmeno.
+- **Videogiochi**: sei avevano già l'articolo (Super Baron come «regalo», Gambla Goemon da
+  Yumenoshima come «altro»): si collegano, non si duplicano; Star Forneus nasce da Yumenoshima a
+  prezzo zero, «incluso nel Set per retrogaming».
+- **Effetti dei libri**: i dodici «Sblocca <quartiere>» tornano `sblocca-luogo` (in produzione il
+  ricaricamento del seed aveva azzerato l'esito della 061); gli altri dodici `sblocca` («Raddoppia
+  la velocità di lettura»…) sono voci «descrittivo», dichiarate come tali; le spiegazioni delle
+  Doti delle attività che non sono valutabili («la fonte non specifica le note») vanno nei
+  `dettagli`, non negli effetti. Lo studio al Leblanc e al Diner porta due voci esclusive
+  («non piove» → 2 note, «piove» → 3): chi somma le voci non ne conta mai più di una.
+- **I luoghi creati dalla 072** hanno `cosa_offre` vuoto: il negozio collegato dice già che cosa
+  vende, e una frase scritta qui non sarebbe un dato della guida.
+- **Doppione da decidere**: `hinokuniya/abc-dell-artigianato` è una copia senza apostrofo di
+  `hinokuniya/l-abc-dell-artigianato` (quello collegato al libro); la migrazione non lo tocca —
+  è una scelta sui dati dell'utente (nasconderlo dalla pagina «Rimossi» della voce 6, o tenerlo).
+- **Timbri**: si leggono dalla descrizione della guida («20 Timbri totali»); Qimranut, Chemdah e
+  Iweleth restano nulli perché la guida non li dichiara — un dato che manca, non uno zero.
+- **Domande**: il quiz in TV è `tipo='tv'` (tabella ricostruita con l'`id` conservato); le righe
+  degli esami portano il quesito accanto alla risposta, da `esame.domande_json`.
