@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { aggiornaTraduzione, getAmbitiTraduzioni, getTraduzioni, ripristinaTraduzione } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { useGlossarioStore } from '../../stores/glossarioStore';
@@ -51,11 +52,7 @@ export function TraduzioniEditor() {
       <h2 className="m-0 text-[15px] font-semibold">Traduzioni</h2>
       <p className="m-0 text-[13px] text-text-secondary">Le rese italiane dei termini di gioco. Le voci modificate da te non vengono mai sovrascritte dagli aggiornamenti del dataset; "Ripristina" riporta il testo del seed.</p>
       <div className="flex flex-wrap gap-2 items-center">
-        <select className="form-input w-auto min-w-[220px]" value={ambito} onChange={(e) => setAmbito(e.target.value)} aria-label="Ambito">
-          {(ambiti.dati ?? []).map((a) => (
-            <option key={a.ambito} value={a.ambito}>{NOMI_AMBITO[a.ambito] ?? a.ambito} ({a.voci}{a.modificate ? `, ${a.modificate} mod.` : ''})</option>
-          ))}
-        </select>
+        <Selettore compatto className="min-w-[220px]" etichetta="Ambito" valore={ambito} opzioni={(ambiti.dati ?? []).map((a) => ({ chiave: a.ambito, nome: NOMI_AMBITO[a.ambito] ?? a.ambito, dettaglio: `${a.voci}${a.modificate ? `, ${a.modificate} mod.` : ''}` }))} onCambia={setAmbito} />
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca chiave o testo…" />
         <button type="button" className={`chip touch ${soloUtente ? 'chip--attivo' : ''}`} onClick={() => setSoloUtente((v) => !v)} aria-pressed={soloUtente}>Solo modificate</button>
       </div>

@@ -6,6 +6,7 @@
 // ============================================================
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { CompletamentoPage } from './CompletamentoPage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -35,10 +36,10 @@ describe('CompletamentoPage', () => {
     render(<MemoryRouter><CompletamentoPage /></MemoryRouter>);
     expect(await screen.findByText('Assedio al castello della lussuria')).toBeInTheDocument();
     expect(getCompletamento).toHaveBeenCalledWith(2);
-    fireEvent.change(screen.getByRole('combobox', { name: 'Tipo di trofeo' }), { target: { value: 'platino' } });
+    scegliVoce('Tipo di trofeo', 'Platino');
     expect(screen.queryByText('Assedio al castello della lussuria')).toBeNull();
     expect(screen.getByText('Il ladro fantasma definitivo')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Tipo di trofeo' }), { target: { value: '' } });
+    scegliVoce('Tipo di trofeo', 'Tutti i tipi');
     await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Trofeo Assedio al castello della lussuria ottenuto' })); });
     expect(impostaTrofeo).toHaveBeenCalledWith(2, 'assedio', true);
     expect(await screen.findByText(/1 trofei ottenuti/)).toBeInTheDocument();

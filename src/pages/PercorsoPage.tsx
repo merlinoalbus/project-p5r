@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getPercorsoGiorno, getPercorsoIndice, impostaGiornoCorrente } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -54,12 +55,8 @@ export function PercorsoPage() {
           <IntestazionePagina titolo="Guida giorno per giorno" sottotitolo={<>Percorso al 100% dalla soluzione allgamestaff: trama del giorno, cosa fare di giorno e di sera, con chi e dove, avvisi sulle scadenze. {indice.dati.giorniCoperti} giorni con azioni su {indice.dati.totaleGiorni}.{partitaId ? (indice.dati.dataCorrente ? ` Giorno corrente della partita «${attiva?.nome}»: ${dataGiocoTesto(indice.dati.dataCorrente)}.` : ' Imposta il giorno corrente per ritrovare subito il punto in cui sei.') : ' Attiva una partita per spuntare le azioni e fissare il giorno corrente.'}</>} />
           <div className="flex flex-wrap items-center gap-1.5">
             <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.precedente} onClick={() => vai(g.precedente)} aria-label="Giorno precedente"><IconChevronLeft size={16} /></button>
-            <select className="form-input w-auto" value={g.giorno.slice(0, 2)} onChange={(e) => { const primo = indice.dati?.giorni.find((x) => x.giorno.slice(0, 2) === e.target.value); vai(primo?.giorno ?? null); }} aria-label="Mese">
-              {mesi.map((m) => <option key={m} value={m}>{meseGioco(`${m}-01`)}</option>)}
-            </select>
-            <select className="form-input w-auto" value={g.giorno} onChange={(e) => vai(e.target.value)} aria-label="Giorno">
-              {giorniDelMese.map((x) => <option key={x.giorno} value={x.giorno}>{dataGiocoTesto(x.giorno)} ({x.giornoSettimana}){x.azioni ? ` · ${x.fatte}/${x.azioni}` : ''}</option>)}
-            </select>
+            <Selettore compatto ricerca="mai" etichetta="Mese" valore={g.giorno.slice(0, 2)} opzioni={mesi.map((m) => ({ chiave: m, nome: meseGioco(`${m}-01`) }))} onCambia={(k) => { const primo = indice.dati?.giorni.find((x) => x.giorno.slice(0, 2) === k); vai(primo?.giorno ?? null); }} />
+            <Selettore compatto etichetta="Giorno" valore={g.giorno} opzioni={giorniDelMese.map((x) => ({ chiave: x.giorno, nome: `${dataGiocoTesto(x.giorno)} (${x.giornoSettimana})`, dettaglio: x.azioni ? `${x.fatte}/${x.azioni}` : undefined }))} onCambia={(k) => vai(k)} />
             <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.successivo} onClick={() => vai(g.successivo)} aria-label="Giorno successivo"><IconChevronRight size={16} /></button>
             {indice.dati.dataCorrente && indice.dati.dataCorrente !== g.giorno && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Vai a oggi" onClick={() => vai(indice.dati?.dataCorrente ?? null)} />}
             {partitaId && g.dataCorrente !== g.giorno && <button type="button" className="btn btn-primary btn-sm touch ml-auto" disabled={occupatoGiorno} onClick={() => void segnaCorrente()}>Segna come giorno corrente</button>}

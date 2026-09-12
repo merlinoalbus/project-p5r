@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { Link } from 'react-router-dom';
 import { StoricoPartita } from './StoricoPartita';
 import { aggiornaPartita } from '../../services/api';
@@ -72,11 +73,9 @@ export function RiepilogoPartita({ partita }: Props) {
           <label className="form-label">Data di gioco (MM-GG)
             <input className="form-input mt-1" value={dataGioco} onChange={(e) => setDataGioco(e.target.value)} placeholder="es. 04-11" pattern="\d{2}-\d{2}" />
           </label>
-          <label className="form-label">Difficoltà
-            <select className="form-input mt-1" value={difficolta} onChange={(e) => setDifficolta(e.target.value as Difficolta)}>
-              {DIFFICOLTA.map((d) => <option key={d.v} value={d.v}>{d.l}</option>)}
-            </select>
-          </label>
+          <div className="form-label">
+            <Selettore etichetta="Difficoltà" valore={difficolta} opzioni={DIFFICOLTA.map((d) => ({ chiave: d.v, nome: d.l }))} onCambia={(k) => setDifficolta(k as Difficolta)} />
+          </div>
         </div>
         <label className="flex items-center gap-2 text-[13px] touch">
           <input type="checkbox" checked={ngPlus} onChange={(e) => setNgPlus(e.target.checked)} /> Nuova Partita +

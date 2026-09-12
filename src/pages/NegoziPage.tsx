@@ -3,6 +3,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
+import { opzioniDaNomi } from '../utils/selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getNegozi, ricercaArticoli } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -95,14 +97,8 @@ export function NegoziPage() {
           <div className="flex flex-col gap-1.5">
             <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />
             <div className="flex flex-wrap gap-1.5">
-              <select className="form-input w-auto" value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Categoria">
-                <option value="">Tutte le categorie</option>
-                {Object.entries(NOME_CATEGORIA_ARTICOLO).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
-              </select>
-              <select className="form-input w-auto" value={per} onChange={(e) => setPer(e.target.value)} aria-label="Per chi">
-                <option value="">Per chiunque</option>
-                {PERSONAGGI.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={opzioniDaNomi(NOME_CATEGORIA_ARTICOLO)} onCambia={setCategoria} />
+              <Selettore compatto etichetta="Per chi" valore={per} vuoto="Per chiunque" opzioni={PERSONAGGI.map((p) => ({ chiave: p, nome: p }))} onCambia={setPer} />
             </div>
           </div>
           {selezioneVisibile && <DoveSiTrova

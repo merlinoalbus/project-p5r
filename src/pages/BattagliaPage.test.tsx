@@ -6,6 +6,7 @@
 // ============================================================
 
 import { fireEvent, render, screen } from '@testing-library/react';
+import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { BattagliaPage } from './BattagliaPage';
 import type { BattagliaDto, OmbraDto } from '../types';
@@ -39,11 +40,11 @@ describe('BattagliaPage', () => {
     expect(await screen.findByText('Bestia bicorne sporca')).toBeInTheDocument();
     expect(screen.getByText('3 Ombre su 3.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Bicorno' })).toHaveAttribute('href', '/compendio/persona/3');
-    fireEvent.change(screen.getByRole('combobox', { name: 'Debole a' }), { target: { value: 'Nucleare' } });
+    scegliVoce('Debole a', 'Debole a Nucleare');
     expect(screen.getByText('1 Ombre su 3.')).toBeInTheDocument();
     expect(screen.getByText('Arahabaki')).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Debole a' }), { target: { value: '' } });
-    fireEvent.change(screen.getByRole('combobox', { name: 'Personalità' }), { target: { value: 'Cupa' } });
+    scegliVoce('Debole a', 'Qualsiasi debolezza');
+    scegliVoce('Personalità', 'Cupa');
     expect(screen.getByText('2 Ombre su 3.')).toBeInTheDocument();
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'piromane' } });
     expect(screen.getByText('1 Ombre su 3.')).toBeInTheDocument();

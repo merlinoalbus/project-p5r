@@ -6,6 +6,7 @@
 // ============================================================
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { scegliVoce, valoreSelettore, vociSelettore } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { EditorMappaPage } from './EditorMappaPage';
 import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
@@ -72,12 +73,12 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Armeria' } });
-    fireEvent.change(form.getByLabelText('Tipo'), { target: { value: 'negozio' } });
+    scegliVoce('Tipo', 'Negozio');
     // categoria «città»: si sceglie che cosa collegare e la voce da un elenco chiuso con ricerca; niente condizioni
     expect(form.getByRole('button', { name: 'Negozio', pressed: true })).toBeInTheDocument();
     await waitFor(() => expect(api.cercaRiferimenti).toHaveBeenCalledWith('negozio', '', 100));
     expect(form.queryByRole('button', { name: /^Condizioni/ })).toBeNull();
-    fireEvent.click(await form.findByRole('button', { name: 'Elenco: Negozio' }));
+    fireEvent.click(await form.findByRole('combobox', { name: 'Elenco: Negozio' }));
     fireEvent.change(form.getByLabelText('Cerca Elenco: Negozio'), { target: { value: 'untou' } });
     expect(within(form.getByRole('listbox')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Untouchablearmi']);
     fireEvent.click(form.getByRole('option', { name: /Untouchable/ }).querySelector('button')!);
@@ -133,12 +134,12 @@ describe('EditorMappaPage', () => {
     // la riga nuova è «Data di gioco dal 18 aprile»: valida da subito
     expect(form.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
     // lo stato si sceglie da un elenco con ricerca: scrivere filtra, il valore è sempre una voce
-    fireEvent.click(form.getByRole('button', { name: 'Stato' }));
+    fireEvent.click(form.getByRole('combobox', { name: 'Stato' }));
     fireEvent.change(form.getByLabelText('Cerca Stato'), { target: { value: 'palaz' } });
     fireEvent.click(form.getByRole('option', { name: 'Palazzo' }).querySelector('button')!);
     expect(form.getByRole('group', { name: 'Condizione: dopo il Palazzo di Kamoshida' })).toBeInTheDocument();
     // il Palazzo viene dall'elenco della Guida
-    fireEvent.click(form.getByRole('button', { name: 'Palazzo' }));
+    fireEvent.click(form.getByRole('combobox', { name: 'Palazzo' }));
     fireEvent.click(form.getByRole('option', { name: 'Palazzo di Madarame' }).querySelector('button')!);
     expect(form.getByRole('group', { name: 'Condizione: dopo il Palazzo di Madarame' })).toBeInTheDocument();
     // NON nega la riga; un gruppo ALMENO UNA si annida con una riga già dentro
@@ -148,9 +149,9 @@ describe('EditorMappaPage', () => {
     const gruppo = within(form.getByRole('group', { name: 'Gruppo ALMENO UNA' }));
     expect(gruppo.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
     // i quartieri offerti sono solo quelli con una data di sblocco nella Guida (Ueno dipende da un Confidente)
-    fireEvent.click(gruppo.getByRole('button', { name: 'Stato' }));
+    fireEvent.click(gruppo.getByRole('combobox', { name: 'Stato' }));
     fireEvent.click(gruppo.getByRole('option', { name: 'Quartiere' }).querySelector('button')!);
-    fireEvent.click(gruppo.getByRole('button', { name: 'Quartiere' }));
+    fireEvent.click(gruppo.getByRole('combobox', { name: 'Quartiere' }));
     expect(gruppo.getAllByRole('option').map((o) => o.textContent)).toEqual(['Akihabaradal 31 agosto']);
     fireEvent.click(gruppo.getByRole('option', { name: /Akihabara/ }).querySelector('button')!);
     fireEvent.click(form.getByRole('button', { name: 'Togli il gruppo' }));
@@ -165,15 +166,15 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
     expect(await form.findByRole('group', { name: 'Condizione: solo il 18 aprile' })).toBeInTheDocument();
-    fireEvent.change(form.getByLabelText('Operatore'), { target: { value: 'tra' } });
-    fireEvent.change(form.getByLabelText('Dal: mese'), { target: { value: '08' } });
+    scegliVoce('Operatore', 'tra');
+    scegliVoce('Dal: mese', 'agosto');
     // la fine (18 aprile) precederebbe l'inizio (18 agosto): si allinea, e un periodo di un giorno si legge «solo il»
     expect(form.getByRole('group', { name: 'Condizione: solo il 18 agosto' })).toBeInTheDocument();
-    expect(form.getByLabelText('Al: mese')).toHaveValue('08');
-    fireEvent.change(form.getByLabelText('Al: mese'), { target: { value: '04' } });
+    expect(valoreSelettore('Al: mese')).toBe('agosto');
+    scegliVoce('Al: mese', 'aprile');
     expect(form.getByRole('group', { name: 'Condizione: solo il 18 aprile' })).toBeInTheDocument();
     // aprile ha 30 giorni: il selettore non offre il 31
-    expect([...(form.getByLabelText('Al: giorno') as HTMLSelectElement).options]).toHaveLength(30);
+    expect(vociSelettore('Al: giorno')).toHaveLength(30);
   });
 
   it('uno spostamento che è un punto della Guida tiene quel riferimento: la scheda non risulta modificata e il salvataggio non lo cancella', async () => {
@@ -195,8 +196,7 @@ describe('EditorMappaPage', () => {
     monta();
     fireEvent.click(await screen.findByRole('button', {name:'Mappa'}));
     const form = within(await screen.findByRole('region', { name: 'Proprietà della mappa' }));
-    const genitore = form.getByLabelText('Mappa genitore') as HTMLSelectElement;
-    expect([...genitore.options].map((o) => o.value)).toEqual(['', 'tokyo']);
+    expect(vociSelettore('Mappa genitore')).toEqual(['— nessuna (radice) —', 'Tokyo']);
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Shibuya centro' } });
     fireEvent.click(form.getByRole('button', { name: 'Salva mappa' }));
     await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', { nome: 'Shibuya centro', tipo: 'quartiere', genitore: 'tokyo', ordine: 0, note: '' }));

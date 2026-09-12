@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getElementoCatalogo, getNegozio } from '../services/api';
 import { notifica } from '../stores/notificationStore';
@@ -98,16 +99,10 @@ export function NegozioPage() {
           {n.articoliElenco.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               {categorie.length > 1 && (
-                <select className="form-input w-auto" value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Categoria">
-                  <option value="">Tutte le categorie</option>
-                  {categorie.map((c) => <option key={c} value={c}>{NOME_CATEGORIA_ARTICOLO[c] ?? c}</option>)}
-                </select>
+                <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={categorie.map((c) => ({ chiave: c, nome: NOME_CATEGORIA_ARTICOLO[c] ?? c }))} onCambia={setCategoria} />
               )}
               {destinatari.length > 1 && (
-                <select className="form-input w-auto" value={per} onChange={(e) => setPer(e.target.value)} aria-label="Per chi">
-                  <option value="">Per chiunque</option>
-                  {destinatari.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <Selettore compatto etichetta="Per chi" valore={per} vuoto="Per chiunque" opzioni={destinatari.map((p) => ({ chiave: p, nome: p }))} onCambia={setPer} />
               )}
               {partitaId && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={nascondiAcquistati} onChange={(e) => setNascondiAcquistati(e.target.checked)} /> Nascondi acquistati</label>}
             </div>

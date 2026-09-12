@@ -3,6 +3,8 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
+import { opzioniDaNomi } from '../utils/selettore';
 import { getFilm, impostaProgressoFilm } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -183,9 +185,9 @@ export function FilmPage() {
 
       <section className="pannello-filtri grid gap-2 md:grid-cols-[minmax(220px,1fr)_auto_auto_auto]" aria-label="Filtri film e DVD">
         <input className="form-input" type="search" value={ricerca} onChange={(e) => setRicerca(e.target.value)} placeholder="Cerca titolo, periodo o luogo…" aria-label="Cerca film e DVD" />
-        <select className="form-input" value={supporto} onChange={(e) => setSupporto(e.target.value as SupportoFiltro)} aria-label="Supporto"><option value="tutti">Cinema e DVD</option><option value="cinema">Solo cinema</option><option value="dvd">Solo DVD</option></select>
-        <select className="form-input" value={stato} onChange={(e) => setStato(e.target.value as StatoFiltro)} aria-label="Stato visione"><option value="tutti">Tutti gli stati</option><option value="da-iniziare">Da iniziare</option><option value="in-corso">In corso</option><option value="completati">Completati</option></select>
-        <select className="form-input" value={dote} onChange={(e) => setDote(e.target.value)} aria-label="Dote"><option value="">Tutte le Doti</option>{Object.entries(NOME_DOTE).map(([k, nome]) => <option key={k} value={k}>{nome}</option>)}</select>
+        <Selettore etichetta="Supporto" valore={supporto} opzioni={[{ chiave: 'tutti', nome: 'Cinema e DVD' }, { chiave: 'cinema', nome: 'Solo cinema' }, { chiave: 'dvd', nome: 'Solo DVD' }]} onCambia={(k) => setSupporto(k as SupportoFiltro)} />
+        <Selettore etichetta="Stato visione" valore={stato} opzioni={[{ chiave: 'tutti', nome: 'Tutti gli stati' }, { chiave: 'da-iniziare', nome: 'Da iniziare' }, { chiave: 'in-corso', nome: 'In corso' }, { chiave: 'completati', nome: 'Completati' }]} onCambia={(k) => setStato(k as StatoFiltro)} />
+        <Selettore etichetta="Dote" valore={dote} vuoto="Tutte le Doti" opzioni={opzioniDaNomi(NOME_DOTE)} onCambia={setDote} />
       </section>
 
       {filmSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${nomeFilm(filmSelezionato)}`}>

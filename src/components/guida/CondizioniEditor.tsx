@@ -22,7 +22,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { getConfidenti, getDungeons, getQuartieri, getRichieste } from '../../services/api/compendio';
 import { getElenchiRegole, type ElenchiRegole } from '../../services/api/condizioni';
 import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
-import { SelettoreRicerca, type OpzioneRicerca } from '../condizioni/SelettoreRicerca';
+import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Selettore';
 import { IconaAzione } from '../shared/IconaAzione';
 
 /** La condizione con cui nasce una riga nuova: valida, e la più comune. */
@@ -79,12 +79,8 @@ function SelettoreData({ etichetta, valore, onCambia, disabilitato }: { etichett
   };
   return (
     <span className="condizione-data" role="group" aria-label={etichetta}>
-      <select className="form-input touch" value={giorno} disabled={disabilitato} onChange={(e) => onCambia(`${mese}-${e.target.value}`)} aria-label={`${etichetta}: giorno`}>
-        {giorni.map((g) => <option key={g} value={g}>{Number(g)}</option>)}
-      </select>
-      <select className="form-input touch" value={mese} disabled={disabilitato} onChange={(e) => cambiaMese(e.target.value)} aria-label={`${etichetta}: mese`}>
-        {MESI_GIOCO.map((m) => <option key={m.numero} value={m.numero}>{m.nome}</option>)}
-      </select>
+      <Selettore compatto ricerca="mai" etichetta={`${etichetta}: giorno`} valore={giorno} disabilitato={disabilitato} opzioni={giorni.map((g) => ({ chiave: g, nome: String(Number(g)) }))} onCambia={(g) => onCambia(`${mese}-${g}`)} />
+      <Selettore compatto ricerca="mai" etichetta={`${etichetta}: mese`} valore={mese} disabilitato={disabilitato} opzioni={MESI_GIOCO.map((m) => ({ chiave: m.numero, nome: m.nome }))} onCambia={cambiaMese} />
     </span>
   );
 }
@@ -122,7 +118,7 @@ function Campo({ campo, valori, onCambia, elenchi, disabilitato }: { campo: Camp
     case 'volte': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'almeno': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={9999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'punti': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 50} min={10} max={999990} passo={10} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
-    default: return <SelettoreRicerca etichetta={campo.etichetta} valore={typeof v === 'string' ? v : ''} opzioni={opzioniPer(campo.tipo, elenchi)} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    default: return <Selettore ricerca="sempre" etichetta={campo.etichetta} valore={typeof v === 'string' ? v : ''} opzioni={opzioniPer(campo.tipo, elenchi)} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
   }
 }
 
@@ -166,9 +162,9 @@ function Riga({ condizione, negata, onCambia, onRimuovi, elenchi, nomi, disabili
   return (
     <div className={`condizione-riga ${negata ? 'condizione-riga--negata' : ''}`} role="group" aria-label={`Condizione: ${negata ? 'non ' : ''}${testo}`}>
       <button type="button" className={`condizione-non touch ${negata ? 'condizione-non--attivo' : ''}`} aria-pressed={negata} disabled={disabilitato} title={negata ? 'Negata: vale quando NON è così' : 'Nega questa condizione'} onClick={() => onCambia(negata ? condizione : { tipo: 'non', condizione })}>NON</button>
-      <SelettoreRicerca etichetta="Stato" valore={def.chiave} opzioni={OPZIONI_STATO} onCambia={cambiaStato} disabilitato={disabilitato} className="condizione-stato" />
+      <Selettore etichetta="Stato" valore={def.chiave} opzioni={OPZIONI_STATO} onCambia={cambiaStato} disabilitato={disabilitato} className="condizione-stato" />
       {def.operatori.length > 1
-        ? <select className="form-input touch condizione-operatore" value={operatore.chiave} disabled={disabilitato} aria-label="Operatore" onChange={(e) => cambiaOperatore(e.target.value)}>{def.operatori.map((o) => <option key={o.chiave} value={o.chiave}>{o.nome}</option>)}</select>
+        ? <Selettore compatto className="condizione-operatore" etichetta="Operatore" valore={operatore.chiave} disabilitato={disabilitato} opzioni={def.operatori.map((o) => ({ chiave: o.chiave, nome: o.nome }))} onCambia={cambiaOperatore} />
         : <span className="condizione-operatore condizione-operatore--fisso">{operatore.nome}</span>}
       {operatore.campi.map((c) => <Campo key={c.nome} campo={c} valori={scelta.valori} onCambia={cambiaValore} elenchi={elenchi} disabilitato={disabilitato} />)}
       {perSpillo && nascondeIlPin(condizione.tipo) && <span className="condizione-presenza" title="Se non vale, lo spillo sparisce dalla mappa" aria-label="Condizione di presenza: se non vale, lo spillo sparisce dalla mappa">presenza</span>}

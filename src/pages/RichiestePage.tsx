@@ -18,6 +18,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { useSearchParams } from 'react-router-dom';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -194,10 +195,7 @@ export function RichiestePage() {
             {([['tutte', 'Tutte'], ['da-fare', 'Da fare'], ['accettate', 'Accettate'], ['completate', 'Completate']] as Array<[Filtro, string]>).map(([k, l]) => (
               <button key={k} type="button" className={`chip touch ${filtro === k ? 'chip--attivo' : ''}`} onClick={() => setFiltro(k)} aria-pressed={filtro === k}>{l}</button>
             ))}
-            <select className="form-input w-auto sm:ml-auto" value={area ?? ''} onChange={(e) => setArea(e.target.value || null)} aria-label="Dedalo">
-              <option value="">Tutti i Dedali</option>
-              {aree.map((a) => <option key={a} value={a}>{a}</option>)}
-            </select>
+            <Selettore compatto className="sm:ml-auto" etichetta="Dedalo" valore={area ?? ''} vuoto="Tutti i Dedali" opzioni={aree.map((a) => ({ chiave: a, nome: a }))} onCambia={(k) => setArea(k || null)} />
           </div>
 
           {/* Una griglia, non una colonna: le carte sono corte e su uno schermo largo ne stanno

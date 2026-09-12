@@ -4,6 +4,7 @@
 // ============================================================
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { scegliVoce, vociSelettore } from '../../../test/selettore';
 import { ModuloCatalogo } from './ModuloCatalogo';
 import type { ElementoCatalogoDto } from '../../types';
 
@@ -54,10 +55,10 @@ describe('ModuloCatalogo', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Non c’è: lo inserisco' }));
     fireEvent.change(screen.getByLabelText(/Nome dell'articolo/), { target: { value: 'Bibita' } });
 
-    fireEvent.change(screen.getByLabelText('Effetto'), { target: { value: 'ripristina' } });
-    fireEvent.change(screen.getByLabelText('Che cosa ripristina'), { target: { value: 'sp' } });
+    scegliVoce('Effetto', 'Ripristina HP o SP');
+    scegliVoce('Che cosa ripristina', 'SP');
     fireEvent.change(screen.getByLabelText('Quantità'), { target: { value: '100' } });
-    fireEvent.change(screen.getByLabelText('A chi'), { target: { value: 'un-alleato' } });
+    scegliVoce('A chi', 'un alleato');
     // La frase si vede mentre la si costruisce, e sara' quella salvata.
     expect(screen.getByText('Ripristina 100 SP di un alleato')).toBeInTheDocument();
 
@@ -145,9 +146,9 @@ describe('ModuloCatalogo', () => {
 it('salva il quartiere scelto, senza dedurlo dalla posizione testuale', async () => {
   api.creaElementoCatalogo.mockResolvedValue({ nome: 'Chiosco' });
   render(<ModuloCatalogo tipo="negozio" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
-  await screen.findByRole('option', { name: 'Shibuya' });
+  await waitFor(() => expect(vociSelettore('Quartiere')).toContain('Shibuya'));
   fireEvent.change(screen.getByLabelText('Nome del negozio'), { target: { value: 'Chiosco' } });
-  fireEvent.change(screen.getByLabelText('Quartiere'), { target: { value: 'shibuya' } });
+  scegliVoce('Quartiere', 'Shibuya');
   fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('negozio', expect.objectContaining({ luogo_chiave: 'shibuya' })));
 });
@@ -166,8 +167,8 @@ it('dichiara le Doti di un’attività come elenco strutturato, non come testo d
   render(<ModuloCatalogo tipo="attivita" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
   fireEvent.change(screen.getByLabelText(/Nome dell’attività/), { target: { value: 'Freccette' } });
   fireEvent.click(screen.getByRole('button', { name: /Aggiungi una Dote/ }));
-  fireEvent.change(screen.getByLabelText('Dote'), { target: { value: 'coraggio' } });
-  fireEvent.change(screen.getByLabelText('Note'), { target: { value: '3' } });
+  scegliVoce('Dote', 'Coraggio');
+  scegliVoce('Note', '♪♪♪ (3)');
   fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('attivita', expect.objectContaining({
     // L'elenco, non la stringa: è l'API a serializzarlo.

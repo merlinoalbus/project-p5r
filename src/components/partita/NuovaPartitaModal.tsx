@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
@@ -51,15 +52,9 @@ export function NuovaPartitaModal({ aperta, onChiudi }: Props) {
       <label className="form-label">Nome
         <input className="form-input mt-1" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="es. Prima partita" autoFocus maxLength={80} />
       </label>
-      <label className="form-label">Difficoltà
-        <select className="form-input mt-1" value={difficolta} onChange={(e) => setDifficolta(e.target.value as Difficolta)}>
-          <option value="sicura">Sicura</option>
-          <option value="facile">Facile</option>
-          <option value="normale">Normale</option>
-          <option value="difficile">Difficile</option>
-          <option value="spietata">Spietata</option>
-        </select>
-      </label>
+      <div className="form-label">
+        <Selettore etichetta="Difficoltà" valore={difficolta} opzioni={[{ chiave: 'sicura', nome: 'Sicura' }, { chiave: 'facile', nome: 'Facile' }, { chiave: 'normale', nome: 'Normale' }, { chiave: 'difficile', nome: 'Difficile' }, { chiave: 'spietata', nome: 'Spietata' }]} onCambia={(k) => setDifficolta(k as Difficolta)} />
+      </div>
       <label className="flex items-center gap-2 text-[13px] touch">
         <input type="checkbox" checked={ngPlus} onChange={(e) => setNgPlus(e.target.checked)} /> Nuova Partita +
       </label>

@@ -215,3 +215,13 @@ sopra devono essere trattati come spilli informativi». Decisioni:
    ricerca + spillo di quella mappa) per gli spostamenti; «Collegato a» (negozio / attività / luogo /
    Confidente, elenco con ricerca) per la città; niente per consumabili e informativi. Le condizioni
    compaiono dove la categoria le ammette. La palette di «Aggiungi» è divisa nelle quattro categorie.
+
+### 2026-09-12 — Un solo selettore in tutta l'app, con la ricerca da dieci voci
+Richiesta dell'utente: «Aggiungi la ricerca nel selettore Tipo e in tutti i selettori con più di
+10 voci» e «quanto indicato sui selettori con più di 10 voci va esteso a tutti i selettori
+nell'app». Decisione: nessuna tendina nativa nel frontend. Il `Selettore` (pulsante `combobox` +
+`listbox`, 44 px, tastiera) sostituisce ogni `<select>`; il campo di ricerca compare da dieci voci
+in su, sempre sugli elenchi della Guida (mappe, spilli, negozi, luoghi, articoli, letture) e mai su
+giorno e mese delle date. Il valore è sempre una voce dell'elenco, mai il testo digitato. La regola
+è verificata da ESLint (`no-restricted-syntax` sul JSX `select`) e da un test che scandisce i
+sorgenti, perché il lint del frontend non era un cancello obbligatorio.

@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { Selettore } from '../components/shared/Selettore';
 import { useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -122,15 +123,9 @@ export function FusionePage() {
         {dati && vista === 'coppia' && (
           <div className="card flex flex-col gap-3">
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-2 items-center">
-              <select className="form-input" value={a} onChange={(e) => setA(e.target.value)} aria-label="Primo arcano">
-                <option value="">Primo arcano…</option>
-                {dati.arcani.map((k) => <option key={k} value={k}>{nome(k)}</option>)}
-              </select>
+              <Selettore etichetta="Primo arcano" valore={a} vuoto="Primo arcano…" opzioni={dati.arcani.map((k) => ({ chiave: k, nome: nome(k) }))} onCambia={setA} />
               <span className="text-center text-text-muted text-xl">+</span>
-              <select className="form-input" value={b} onChange={(e) => setB(e.target.value)} aria-label="Secondo arcano">
-                <option value="">Secondo arcano…</option>
-                {dati.arcani.map((k) => <option key={k} value={k}>{nome(k)}</option>)}
-              </select>
+              <Selettore etichetta="Secondo arcano" valore={b} vuoto="Secondo arcano…" opzioni={dati.arcani.map((k) => ({ chiave: k, nome: nome(k) }))} onCambia={setB} />
             </div>
             {a && b && (
               <div className="text-center py-4">

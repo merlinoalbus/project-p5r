@@ -4,6 +4,7 @@
 // ============================================================
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { scegliVoce } from '../../../test/selettore';
 import { AgendaGiorno } from './AgendaGiorno';
 import type { AgendaGiornoDto } from '../../types';
 
@@ -49,7 +50,7 @@ describe('AgendaGiorno', () => {
     render(<AgendaGiorno giorno="06-06" partitaId={3} />);
     fireEvent.click(await screen.findByRole('button', { name: /Aggiungi cosa da fare/ }));
     fireEvent.change(screen.getByLabelText('Che cosa devi fare'), { target: { value: 'Passare dal Bagno pubblico' } });
-    fireEvent.change(screen.getByLabelText('Momento della giornata'), { target: { value: 'sera' } });
+    scegliVoce('Momento della giornata', 'Di sera');
     fireEvent.click(screen.getByRole('button', { name: /^Aggiungi$/ }));
     await waitFor(() => expect(api.creaAzioneAgenda).toHaveBeenCalledWith({ data: '06-06', fascia: 'sera', azione: 'Passare dal Bagno pubblico', partitaId: 3 }));
     await waitFor(() => expect(api.getAgenda).toHaveBeenCalledTimes(2));

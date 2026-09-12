@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Selettore } from '../shared/Selettore';
 import { getPianiFusione, getSkills, salvaPiano } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { AlberoPiano } from './AlberoPiano';
@@ -87,16 +88,12 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
         <>
           {tutteSkill.dati && <SelettoreSkill skill={tutteSkill.dati} scelte={skillScelte} onCambia={setSkillScelte} etichetta="Skill da portare sul bersaglio" />}
           <div className="flex flex-wrap items-center gap-2 text-[13px]">
-            <label className="flex items-center gap-1.5 touch">Profondità
-              <select className="form-input w-auto" value={profondita} onChange={(e) => setProfondita(Number(e.target.value))} aria-label="Profondità massima">
-                {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
-            </label>
-            <label className="flex items-center gap-1.5 touch">Alternative
-              <select className="form-input w-auto" value={alternative} onChange={(e) => setAlternative(Number(e.target.value))} aria-label="Numero di alternative">
-                {[1, 3, 5, 8].map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
-            </label>
+            <span className="flex items-center gap-1.5 touch">Profondità
+              <Selettore compatto etichetta="Profondità massima" valore={String(profondita)} opzioni={[1, 2, 3, 4].map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => setProfondita(Number(k))} />
+            </span>
+            <span className="flex items-center gap-1.5 touch">Alternative
+              <Selettore compatto etichetta="Numero di alternative" valore={String(alternative)} opzioni={[1, 3, 5, 8].map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => setAlternative(Number(k))} />
+            </span>
             <button type="button" className={`chip touch ${catture ? 'chip--attivo' : ''}`} onClick={() => setCatture((v) => !v)} aria-pressed={catture} title="Ammetti Persona da catturare in battaglia come foglie del piano">Ammetti catture</button>
             <button type="button" className={`chip touch ${limitaLivello ? 'chip--attivo' : ''}`} disabled={livelloProtagonista === null} onClick={() => setLimitaLivello((v) => !v)} aria-pressed={limitaLivello && livelloProtagonista !== null} title={livelloProtagonista !== null ? `Nessuna fusione sopra il livello ${livelloProtagonista} del protagonista` : 'Serve una partita attiva'}>
               Fino al livello {livelloProtagonista ?? '—'}
