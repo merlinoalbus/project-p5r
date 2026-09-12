@@ -592,3 +592,13 @@ segmenti con la partita). `NegoziPage` manda il filtro al server (`ricercaArtico
 opzionalmente per negozio, `GET /api/catalogo/:tipo?nascosti=1&negozio=`) e la pagina
 `/guida/rimossi` (`RimossiPage`). CSS: `.selettore-icone*`, `.filtri-articoli*`, `.segmenti*`,
 `.orari-editor*`, `.editor-effetti__voce`, `.rimossi-*` in `src/tailwind.css`.
+
+## Pagine delle letture e delle attività (2026-09-12)
+`src/utils/letture.ts` è il punto comune di `LibriPage`, `FilmPage`, `VideogiochiPage`, `AttivitaPage` e
+`LettureEGiochi`: filtro Dote dagli effetti (`haDote`), blocco e motivo (`bloccata`, `motivoBlocco` dal
+dettaglio del requisito rosso), yen (`formattaYen`, `prezzoChip`), paga dei lavori (`pagaTesto`), stati di
+lettura (`STATI_LETTURA`, `passaStato`). `src/components/shared/Segmenti.tsx` è il radiogroup a pulsanti
+usato dai filtri (stato, supporto, acquisto, disponibilità). Le pagine leggono `effetti`/`effettiTesto`,
+`negozi`, `sedeChiave`/`sedeNome`, `pagaYen`/`pagaMassima`, `dettagli`, `condizioni`, `disponibilita`
+dei DTO della voce 5; le colonne in prosa (`dove`, `periodo`, `regole`, `premi`, `altri_effetti`, `paga`,
+`sblocco`, `doti_json`) non sono più lette dal frontend.

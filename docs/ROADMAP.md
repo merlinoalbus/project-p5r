@@ -448,3 +448,29 @@ con effetto dichiarato → salvato → corretto → eliminato; articolo della gu
 campi vuoti della domanda come stringhe) e sette non bloccanti chiusi (elenco unico dei personaggi, CSS
 morto, nome del negozio nei rimossi, valori fuori elenco conservati, «gradito a» per i regali, legame
 perso segnalato e conservato, figura delle famiglie in `shared`).
+
+## UI di libri, film, videogiochi e attività (12 settembre 2026) — fatto
+
+Voce 7 del piano «struttura, non frasi»: le quattro pagine leggono i valori delle voci 4–5 e non più le
+frasi. `LibriPage`: titolo unico, «Dove» = i negozi collegati come collegamenti con il prezzo
+(`negozi`) più i luoghi che non sono negozi, «Che cosa fa» = `effettiTesto`, «Apre» = il quartiere
+sbloccato, «+ Sessione» spento con il libro non ancora disponibile e il motivo scritto sotto
+(`motivoBlocco`), filtro Dote dagli effetti, stato con i `Segmenti`. `FilmPage`: la figura dice
+cinema o DVD, «quando» sono le condizioni (non più `periodo`), gli effetti dichiarati con «anche
+alle volte successive», «Visioni per completarlo» solo ai DVD, al cinema senza tetto, supporto e
+stato con i `Segmenti`, nota sui punti aggiornata (l'app applica gli effetti delle visioni successive).
+`VideogiochiPage`: sede, «Che cosa fa», «In vendita da» (articoli collegati con il prezzo, «Gratis» a
+0 ¥), «+ Round» spento se bloccato, dettagli; griglia come le pagine sorelle. `AttivitaPage`: tipo e
+fascia da `shared/attivita`, sede linkata alla pagina del quartiere con l'ancora del luogo, paga in yen
+(`pagaTesto`), effetti come chip con la condizione, `dettagli` come testo unico; via regole/premi/altri
+effetti/Doti alzate/sblocco in prosa e la fonte da tutte e quattro. `LettureEGiochi` (Partita): al cinema
+il «+» resta attivo a titolo finito, con la riga bloccata resta spento con il motivo. `Segmenti` è un
+componente condiviso (`src/components/shared/`), `src/utils/letture.ts` raccoglie ciò che le pagine
+hanno in comune (`haDote`, `bloccata`, `motivoBlocco`, `formattaYen`, `prezzoChip`, `pagaTesto`,
+`STATI_LETTURA`/`passaStato`). Negli effetti la Dote si scrive col nome («Conoscenza ♪♪♪»,
+`NOME_DOTE_EFFETTO` in `shared/effettiOggetto.ts`). Verifica a 1280/768/375 senza overflow e con
+bersagli ≥44 px; controllo nel browser con la partita all'11 aprile (libri, film e giochi non ancora
+disponibili con il motivo; Tanaka e i lavori con paga e sede). Validatore: un bloccante corretto (le chip-link di
+negozi e videogiochi erano sotto i 44 px: aggiunta la classe `touch`, rimisurate a 375/768/1280) e i non
+bloccanti chiusi (campo `dove` morto in `LettureEGiochi`, riga «Sessioni» irraggiungibile, prop `className`
+speculativa dei `Segmenti`, commento sulla paga, `NOME_DOTE` riesportato da `shared`).

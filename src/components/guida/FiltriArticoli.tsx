@@ -12,6 +12,7 @@
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { Selettore } from '../shared/Selettore';
 import { SelettoreIcone } from '../shared/SelettoreIcone';
+import { Segmenti } from '../shared/Segmenti';
 import { NOME_CATEGORIA_ARTICOLO, PERSONAGGI } from '../../utils/negozi';
 import { FILTRI_DISPONIBILITA, STATI_ACQUISTO, type FiltroArticoli as Filtro, filtroAttivo, FILTRO_VUOTO } from '../../utils/articoli';
 
@@ -25,17 +26,6 @@ interface Props {
   /** Con una partita si filtra anche per stato d'acquisto e disponibilità. */
   conPartita: boolean;
   segnaposto?: string;
-}
-
-/** Un gruppo di segmenti: una scelta sola, bersagli da 44 px, `radiogroup`. */
-function Segmenti<T extends string>({ etichetta, valore, opzioni, onCambia }: { etichetta: string; valore: T; opzioni: ReadonlyArray<{ chiave: T; nome: string }>; onCambia: (v: T) => void }) {
-  return (
-    <div role="radiogroup" aria-label={etichetta} className="segmenti">
-      {opzioni.map((o) => (
-        <button key={o.chiave} type="button" role="radio" aria-checked={valore === o.chiave} className={`segmenti__voce touch ${valore === o.chiave ? 'segmenti__voce--attiva' : ''}`} onClick={() => onCambia(o.chiave)}>{o.nome}</button>
-      ))}
-    </div>
-  );
 }
 
 export function FiltriArticoli({ filtro, onCambia, categorie, destinatari, conPartita, segnaposto = 'Cerca un articolo (nome, effetto)…' }: Props) {

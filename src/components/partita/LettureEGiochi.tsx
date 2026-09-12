@@ -24,6 +24,7 @@ import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { IconaCategoria } from '../guida/IconaCategoria';
 import type { FilmDto, LibroDto, VideogiocoDto } from '../../types';
+import { bloccata, motivoBlocco } from '../../utils/letture';
 
 type Gruppo = 'libri' | 'film' | 'videogiochi';
 
@@ -34,7 +35,11 @@ interface Voce {
   progresso: number;
   totale: number;
   fatto: boolean;
-  dove: string;
+  /** Al cinema le visioni non hanno un tetto: rivedere conta. */
+  senzaTetto: boolean;
+  /** Non ancora disponibile nella partita: il «+» resta spento e il motivo sta nel titolo. */
+  bloccata: boolean;
+  motivo: string;
 }
 
 const ETICHETTA: Record<Gruppo, { titolo: string; categoria: 'libri' | 'film' | 'minigiochi'; unita: string; percorso: string }> = {
@@ -53,12 +58,13 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
           <span className="visore-mappa__progresso h-1.5 flex-1" role="progressbar" aria-label={`Progresso ${v.nome}`} aria-valuemin={0} aria-valuemax={v.totale} aria-valuenow={v.progresso}>
             <span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} />
           </span>
-          <span className="shrink-0 text-[11px] tabular-nums text-text-muted">{v.progresso}/{v.totale} {unita}</span>
+          <span className="shrink-0 text-[11px] tabular-nums text-text-muted">{v.senzaTetto ? `${v.progresso} ${unita}` : `${v.progresso}/${v.totale} ${unita}`}</span>
+          {v.bloccata && v.progresso === 0 && <span className="chip chip--bloccata shrink-0 text-[10px]" title={v.motivo}>Non ancora</span>}
         </span>
       </span>
       <span className="flex shrink-0 gap-1">
         <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || v.progresso === 0} onClick={() => onCambia(v, v.progresso - 1)} aria-label={`Togli a ${v.nome}`}>−</button>
-        <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || v.progresso >= v.totale} onClick={() => onCambia(v, v.progresso + 1)} aria-label={`Aggiungi a ${v.nome}`}>+</button>
+        <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || (!v.senzaTetto && v.progresso >= v.totale) || (v.bloccata && v.progresso === 0)} title={v.bloccata && v.progresso === 0 ? `Non ancora: ${v.motivo}` : undefined} onClick={() => onCambia(v, v.progresso + 1)} aria-label={`Aggiungi a ${v.nome}`}>+</button>
       </span>
     </li>
   );
@@ -109,9 +115,9 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const [toccate, setToccate] = useState<Record<string, Voce>>({});
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
 
-  const daLibro = (l: LibroDto): Voce => ({ chiave: l.chiave, nome: l.nomeIt ?? l.nome, progresso: l.progresso, totale: l.totaleSessioni, fatto: l.fatto, dove: l.dove });
-  const daFilm = (f: FilmDto): Voce => ({ chiave: f.chiave, nome: f.nomeIt ?? f.nome, progresso: f.progresso, totale: f.totaleSessioni, fatto: f.fatto, dove: f.dove });
-  const daGioco = (g: VideogiocoDto): Voce => ({ chiave: g.chiave, nome: g.nome, progresso: g.progresso, totale: g.totaleRound, fatto: g.fatto, dove: g.luogo });
+  const daLibro = (l: LibroDto): Voce => ({ chiave: l.chiave, nome: l.nomeIt ?? l.nome, progresso: l.progresso, totale: l.totaleSessioni, fatto: l.fatto, senzaTetto: false, bloccata: bloccata(l.disponibilita), motivo: motivoBlocco(l.disponibilita) });
+  const daFilm = (f: FilmDto): Voce => ({ chiave: f.chiave, nome: f.nomeIt ?? f.nome, progresso: f.progresso, totale: f.totaleSessioni, fatto: f.fatto, senzaTetto: f.dove === 'cinema', bloccata: bloccata(f.disponibilita), motivo: motivoBlocco(f.disponibilita) });
+  const daGioco = (g: VideogiocoDto): Voce => ({ chiave: g.chiave, nome: g.nome, progresso: g.progresso, totale: g.totaleRound, fatto: g.fatto, senzaTetto: false, bloccata: bloccata(g.disponibilita), motivo: motivoBlocco(g.disponibilita) });
 
   const conToppa = (v: Voce): Voce => toccate[v.chiave] ?? v;
   const locali: Record<Gruppo, Voce[]> = {
@@ -144,7 +150,7 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
     <PageState isLoading={caricamento} error={errore} onRetry={() => { void libri.ricarica(); void film.ricarica(); void giochi.ricarica(); }}>
       <div className="flex flex-col gap-3">
         <p className="m-0 text-[12px] text-text-secondary">
-          Segna qui le sessioni senza uscire dalla partita: {totali.fatti} completati su {totali.tutti}. Le schede complete, con luoghi e fonti, restano nella Guida.
+          Segna qui le sessioni senza uscire dalla partita: {totali.fatti} completati su {totali.tutti}. Le schede complete, con luoghi ed effetti, restano nella Guida.
         </p>
         <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-3">
           <Sezione gruppo="libri" voci={locali.libri} occupati={occupati} onCambia={(g, v, n) => void cambia(g, v, n)} />

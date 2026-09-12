@@ -3,36 +3,17 @@
 // ============================================================
 
 import { TIPI_LUOGO } from '../../shared/tipiLuogo';
+import { NOME_DOTE_EFFETTO } from '../../shared/effettiOggetto';
 
 /** Etichette dei tipi di luogo: derivate dal catalogo condiviso (shared/tipiLuogo). */
 export const NOME_TIPO_LUOGO: Record<string, string> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.nome]));
 
-export const NOME_TIPO_ATTIVITA: Record<string, string> = {
-  'mini-gioco': 'Mini-gioco',
-  lavoro: 'Lavoro',
-  studio: 'Studio',
-  lettura: 'Lettura',
-  film: 'Film',
-  dvd: 'DVD',
-  videogioco: 'Videogioco',
-  allenamento: 'Allenamento',
-  cibo: 'Cibo',
-  sfida: 'Sfida',
-  altro: 'Altro',
-};
-
-export const NOME_DOTE: Record<string, string> = {
-  conoscenza: 'Conoscenza',
-  fascino: 'Fascino',
-  coraggio: 'Coraggio',
-  gentilezza: 'Gentilezza',
-  perizia: 'Perizia',
-};
+/** I nomi delle Doti: lo stesso catalogo che scrive le frasi degli effetti (shared). */
+export const NOME_DOTE: Record<string, string> = NOME_DOTE_EFFETTO;
 
 /** Colori degli spilli dei luoghi sulla mappa del quartiere: dal catalogo condiviso. */
 export const COLORE_TIPO_LUOGO: Record<string, string> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.colore]));
 
-export const NOME_FASCIA: Record<string, string> = { giorno: 'giorno', sera: 'sera', entrambe: 'giorno e sera' };
 
 /** L'ancora di un luogo nella pagina del quartiere (`#luogo-shibuya-untouchable`): la scheda del negozio ci arriva dalla sede. */
 export function ancoraLuogo(chiave: string): string {

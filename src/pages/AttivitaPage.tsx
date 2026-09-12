@@ -1,5 +1,10 @@
 // ============================================================
-// AttivitaPage — attività del tempo libero, lavori, libri e film con effetti sulle Doti e spunta per partita (Fase 8.1)
+// AttivitaPage — attività del tempo libero e lavori: che cosa alzano, dove, quando, quanto pagano
+// ============================================================
+//
+// La scheda legge i valori (tipo e fascia dal catalogo di `shared/attivita`, la sede come luogo
+// della città, la paga in yen, gli effetti dichiarati con le loro condizioni) e i dettagli come
+// un testo solo. Niente più regole/premi/altri effetti/sblocco in prosa, niente fonte.
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -12,10 +17,12 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
-import { NOME_DOTE, NOME_FASCIA, NOME_TIPO_ATTIVITA } from '../utils/citta';
+import { NOME_DOTE, ancoraLuogo } from '../utils/citta';
+import { NOME_FASCIA_ATTIVITA, NOME_TIPO_ATTIVITA } from '../../shared/attivita';
 import type { AttivitaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
@@ -25,54 +32,49 @@ import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { formattaYen, haDote, pagaTesto } from '../utils/letture';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 
-function Doti({ doti }: { doti: AttivitaDto['doti'] }) {
-  if (doti.length === 0) return null;
-  return <span className="flex flex-wrap gap-1">{doti.map((d, i) => <span key={i} className="chip chip--attivo" title={d.condizione ?? undefined}>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}{d.note !== null ? ` ${'♪'.repeat(Math.min(3, d.note))}` : ''}</span>)}</span>;
+/** Gli effetti dichiarati come chip: la Dote con le note e, fra parentesi, la condizione. */
+function Effetti({ testi }: { testi: string[] }) {
+  if (testi.length === 0) return null;
+  return <span className="flex flex-wrap gap-1">{testi.map((t, i) => <span key={i} className="chip chip--attivo">{t}</span>)}</span>;
 }
 
 function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onCambiata: () => void; mappaAperta: boolean; onMappa: () => void }) {
   const [aperta, setAperta] = useState(false);
   const sugg = useSuggerimenti();
+  const paga = pagaTesto(a.pagaYen, a.pagaMassima);
   return (
     <li className={`card flex gap-3 text-[13px] ${classiSuggerito(sugg.evidenziato('attivita', a.chiave))}`}>
-      {/* **La figura dell'attività**, che dice di che posto si tratta prima ancora del nome: le
-          freccette del Penguin Sniper, la mansarda di Leblanc, il laghetto di Ichigaya. Finché
-          l'illustrazione non c'è resta l'icona del tipo, che almeno distingue un lavoro da un
-          mini-gioco — è una riserva, e la riga nel censimento §26 dice che non è il traguardo. */}
+      {/* La figura dell'attività; finché l'illustrazione non c'è resta l'icona del tipo. */}
       <AssetImg nome={`attivita/${a.chiave}`} alt="" decorativa className="shrink-0 rounded-md object-contain"
         style={{ width: 56, height: 56 }}
         fallback={<span className="shrink-0"><IconaCategoria categoria={a.tipo} dimensione={56} /></span>} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
       <button type="button" className="text-left flex flex-wrap items-center gap-2 touch" onClick={() => setAperta((x) => !x)} aria-expanded={aperta}>
         <strong className="text-[15px]">{a.nome}</strong>
-        <span className="chip">{NOME_TIPO_ATTIVITA[a.tipo] ?? a.tipo}</span>
+        <span className="chip">{(NOME_TIPO_ATTIVITA as Record<string, string>)[a.tipo] ?? a.tipo}</span>
         {sugg.evidenziato('attivita', a.chiave) && <TargaSuggerito motivo={sugg.motivo('attivita', a.chiave)} compatta />}
-        {a.fascia && <span className="chip">{NOME_FASCIA[a.fascia] ?? a.fascia}</span>}
-        <Doti doti={a.doti} />
+        {a.fascia && <span className="chip">{NOME_FASCIA_ATTIVITA[a.fascia] ?? a.fascia}</span>}
+        <Effetti testi={a.effettiTesto} />
+        <ChipDisponibilita disponibilita={a.disponibilita ?? undefined} compatto />
         {!a.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </button>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
-        {a.luogo && <span><strong className="text-text">Dove:</strong> {a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}`}>{a.luogo}</Link> : a.luogo}</span>}
+        {/* La sede apre la pagina del quartiere con il luogo evidenziato; senza sede resta il quartiere o il testo. */}
+        {(a.sedeChiave || a.luogoChiave || a.luogo) && <span><strong className="text-text">Dove:</strong> {a.sedeChiave && a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}#${ancoraLuogo(a.sedeChiave)}`}>{a.sedeNome ?? a.sedeChiave}</Link> : a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}`}>{a.luogo || a.luogoChiave}</Link> : a.luogo}</span>}
         <CollegamentoMappa tipo="attivita" chiave={a.chiave} compatto />
-        {a.costo !== null && <span><strong className="text-text">Costo:</strong> {a.costo.toLocaleString('it-IT')} ¥</span>}
-        {a.paga && <span><strong className="text-text">Paga:</strong> {a.paga}</span>}
-        {a.sblocco && <span><strong className="text-text">Sblocco:</strong> {a.sblocco}</span>}
+        {a.costo !== null && a.costo > 0 && <span><strong className="text-text">Costo:</strong> {formattaYen(a.costo)}</span>}
+        {paga && <span><strong className="text-text">Paga:</strong> {paga}</span>}
       </div>
       {aperta && (
         <div className="flex flex-col gap-1">
-          {a.doti.some((d) => d.condizione) && <ul className="m-0 pl-4">{a.doti.filter((d) => d.condizione).map((d, i) => <li key={i}><strong>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}:</strong> {d.condizione}</li>)}</ul>}
-          {a.altriEffetti && <p className="m-0"><strong>Altri effetti:</strong> {a.altriEffetti}</p>}
-          {a.regole && <p className="m-0"><strong>Come funziona:</strong> {a.regole}</p>}
-          {a.premi && <p className="m-0"><strong>Premi:</strong> {a.premi}</p>}
-          {/* Correggere un'attività mentre si gioca: quello che si cambia resta anche dopo un
-              aggiornamento dei dati della guida. */}
-          {/* La mappa si apre **una per volta** in tutta la pagina: le schede si aprono a
-              fisarmonica e più di una aperta vorrebbe dire più visori montati insieme, che è
-              quello che appesantiva l'indice delle mappe. */}
+          {a.dettagli && <p className="m-0 whitespace-pre-line">{a.dettagli}</p>}
+          {a.effettiTesto.length === 0 && <p className="m-0 text-text-muted">Nessun effetto dichiarato.</p>}
+          {/* La mappa si apre una per volta in tutta la pagina. */}
           {mappaAperta
             ? <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -87,7 +89,6 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
               titolo={mappaAperta ? 'Nascondi la posizione' : 'Mostra posizione'} onClick={onMappa}
               aria-label={`${mappaAperta ? 'Nascondi' : 'Mostra'} posizione di ${a.nome}`} />
             <CorreggiElemento tipo="attivita" chiave={a.chiave} onSalvato={onCambiata} />
-            {a.fonte && <a href={a.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>}
           </div>
         </div>
       )}
@@ -107,10 +108,9 @@ export function AttivitaPage() {
   // Una sola mappa aperta in tutta la pagina: la chiave dell'attività che la mostra.
   const [conMappa, setConMappa] = useState<string | null>(null);
   const d = dati.dati;
-  // I videogiochi hanno la loro pagina, con i round e i contenuti che sbloccano: ripeterli qui
-  // era la stessa cosa in due posti, e prima o poi due volte diversa. Rilievo dell'utente.
-  const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => a.tipo !== 'videogioco' && (!dote || a.doti.some((x) => x.dote === dote))), [d, dote]);
-  const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
+  // I videogiochi hanno la loro pagina, con i round e i contenuti che sbloccano.
+  const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => a.tipo !== 'videogioco' && (!dote || haDote(a.effetti, dote))), [d, dote]);
+  const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || haDote(a.effetti, dote)), [d, dote]);
   if (params.get('scheda') === 'libri') return <Navigate to="/guida/libri" replace />;
   if (params.get('scheda') === 'film') return <Navigate to="/guida/film" replace />;
   return (
