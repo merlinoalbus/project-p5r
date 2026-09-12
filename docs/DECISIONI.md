@@ -365,3 +365,26 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   piano): resta colonna interna.
 - **Le Doti negli effetti si scrivono col nome** («Conoscenza ♪♪♪»): la frase la compone
   `descriviEffetto` in `shared`, che ora conosce i cinque nomi.
+
+### 2026-09-12 — UI di Palazzi, Memento, Richieste, domande e cruciverba (voce 8)
+- **La colonna della scheda del Palazzo mostra quel che fa la percentuale**: i collezionabili delle
+  planimetrie con «Raccolto», non i punti della guida. La maggior parte delle planimetrie non è
+  legata a un'area della guida, quindi oltre a quelle dell'area scelta c'è una piega con tutte le
+  planimetrie del Palazzo. I punti della guida restano consultabili e segnabili in «Dalla guida».
+- **Nei Memento la colonna sono gli obiettivi del dedalo** (timbri + richieste); dove la guida non
+  dichiara i timbri lo si dice e non c'è contatore. La «Pianta della guida» dei Memento non si mostra:
+  i piani si generano a ogni discesa.
+- **Il prossimo appuntamento non è un secondo elenco**: domande e cruciverba evidenziano la riga nel
+  suo mese e in cima c'è il rimando «Vai a…». Gli esami hanno una rappresentazione sola: le righe per
+  data con il quesito accanto a ogni risposta; la sezione «Esami» tiene date, risultati e premi.
+- **Il dedalo delle Richieste sta nell'indirizzo** (`?dedalo=`), così dalla scheda del dedalo si
+  arriva già filtrati; accettazione e completamento sono due segmenti indipendenti.
+- **Dopo il validatore (voce 8)**: quando l'area scelta non ha planimetrie legate, la colonna mostra la
+  raccolta di tutto il Palazzo aperta (non una piega chiusa), con la nota che spiega perché; la Conoscenza
+  delle domande si accredita solo dove la guida scrive «Conoscenza +…» (le domande in classe), non agli
+  esami né ai quiz TV; dopo Ottenuto/Esaurito su un punto della guida la raccolta si rilegge dal server,
+  perché un punto può essere agganciato a uno spillo collezionabile.
+- **Dopo il secondo giro (voce 8)**: la voce dell'area distingue «nessuna planimetria legata» da «niente da
+  raccogliere sulla sua planimetria» (34 aree hanno una planimetria senza collezionabili), e la nota sopra la
+  raccolta del Palazzo dice il motivo giusto; l'etichetta della colonna e il messaggio di vuoto seguono ciò che si
+  sta guardando (area o Palazzo).

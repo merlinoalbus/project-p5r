@@ -2,23 +2,20 @@
 // RichiestePage — Richieste dei Mementos con bersaglio, ricompense, Confidente e stato per partita; Jose (Fase 7.2)
 // ============================================================
 //
-// **Rifatta come si guarda, non come si legge.** Erano trentatré righe a tutta larghezza, una
-// sotto l'altra, con dentro tre frasi in grassetto — «Bersaglio: …», «Debole a: …», «Resiste a:
-// …» — e i comandi nascosti dentro la riga da aprire. Su un desktop da 1900 px era una colonna di
-// testo lunga cinque schermate con mezza pagina di vuoto a destra; su un telefono, un muro.
+// Una Richiesta si sceglie guardando due cose: dove sta (che dedalo) e a che cosa è debole il
+// bersaglio. Quelle due sono la faccia della carta: le debolezze come pastiglie del colore del
+// loro elemento e la posizione in cima. Il resto — committente, date, note — sta dietro «Dettagli».
 //
-// Una Richiesta però si sceglie **guardando due cose**: dove sta (che Dedalo, che area) e a che
-// cosa è debole il bersaglio. Quelle due sono ora la faccia della carta: le debolezze come
-// pastiglie del colore del loro elemento, come nel Compendio, e la posizione in cima. Il resto —
-// committente, date, note — sta dietro «Dettagli», dove serve una volta sola.
-//
-// I comandi non si nascondono più: «Accettata» e «Completata» sono il gesto della pagina, e
-// stavano dentro la piega. Le completate scendono in fondo e si spengono, invece di restare in
-// mezzo a quelle da fare.
+// I filtri sono valori: la ricerca (nome, bersaglio, forma demoniaca, Confidente, dedalo,
+// committente), due segmenti indipendenti — accettazione e completamento — e il dedalo scelto
+// fra quelli che hanno richieste, nell'ordine di percorrenza, tenuto nell'indirizzo (`?dedalo=`)
+// così dalla scheda del dedalo si arriva già filtrati.
 // ============================================================
 
 import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
+import { Segmenti } from '../components/shared/Segmenti';
+import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { useSearchParams } from 'react-router-dom';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -39,16 +36,14 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { coloreElemento } from '../utils/elementi';
 
-type Filtro = 'tutte' | 'da-fare' | 'accettate' | 'completate';
+type Accettazione = 'tutte' | 'accettate' | 'non-accettate';
+type Completamento = 'tutte' | 'completate' | 'da-completare';
+const ACCETTAZIONE: ReadonlyArray<{ chiave: Accettazione; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'accettate', nome: 'Accettate' }, { chiave: 'non-accettate', nome: 'Non accettate' }];
+const COMPLETAMENTO: ReadonlyArray<{ chiave: Completamento; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'completate', nome: 'Completate' }, { chiave: 'da-completare', nome: 'Da completare' }];
 /** I due fogli della pagina: le Richieste, e la bottega di Jose. */
 type Foglio = 'richieste' | 'jose';
 
-/** Dal nome italiano dell'elemento, come lo scrive la guida, alla chiave del colore.
- *
- * La guida scrive «Tuono», «Psicocinesi (Psio)», «Fuoco (Sig.ra Takase)»: testo libero, non una
- * chiave. Si riconosce l'inizio, che è la parte che nomina l'elemento; quello che non si riconosce
- * — «Attacchi elementali (maggior parte)» — resta una pastiglia neutra, che è meglio di una
- * pastiglia colorata a caso. */
+/** Dal nome italiano dell'elemento, come lo scrive la guida, alla chiave del colore. */
 const ELEMENTO_DA_TESTO: Array<[RegExp, string]> = [
   [/^fuoco/i, 'fire'],
   [/^ghiaccio/i, 'ice'],
@@ -93,14 +88,14 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
         <IconaCategoria categoria="richiesta" dimensione={36} />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <h3 className="m-0 text-[16px] leading-tight">{r.nome}</h3>
-          <span className="text-[12px] text-text-muted">{r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
+          <span className="text-[12px] text-text-muted">{r.areaNome ?? r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
         </div>
         {r.stato && <span className={`chip shrink-0 text-[11px] ${r.stato === 'completata' ? '' : 'chip--attivo'}`}>{r.stato}</span>}
       </div>
       {sugg.evidenziato('richieste', r.chiave) && <TargaSuggerito motivo={sugg.motivo('richieste', r.chiave)} compatta />}
 
       {/* Il bersaglio è la ragione per cui si apre questa pagina prima di scendere: chi è, e a
-          che cosa cede. Sta in un riquadro suo perché è il dato, non una frase fra le frasi. */}
+          che cosa cede. */}
       <div className="flex flex-col gap-1.5 rounded-md bg-white/[0.04] px-2.5 py-2">
         <span className="text-[13px]">
           <strong>{r.bersaglio.nome}</strong>
@@ -119,7 +114,6 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
       {r.confidente && <span className="text-[12px] text-text-secondary">Confidente: <strong className="text-text">{r.confidente.nome}</strong>{r.confidente.rango ? ` · rango ${r.confidente.rango}` : ''}</span>}
       {r.ricompense.length > 0 && <span className="line-clamp-2 text-[12px] text-text-secondary" title={r.ricompense.join(', ')}><span className="text-text-muted">Ricompense:</span> {r.ricompense.join(', ')}</span>}
 
-      {/* Committente, date e note: si leggono una volta, quindi stanno dietro una riga. */}
       <button type="button" className="touch self-start text-[12px] text-text-muted underline decoration-dotted underline-offset-2" aria-expanded={aperta} onClick={() => setAperta((a) => !a)}>
         {aperta ? 'Nascondi i dettagli' : 'Dettagli'}
       </button>
@@ -131,52 +125,66 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
         </div>
       )}
 
-      {/* I comandi stavano dentro la piega: erano il gesto della pagina, chiuso a chiave. */}
       <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1">
         {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata" disabled={occupato} onClick={() => void cambia('accettata')} />}
         {partitaId && r.stato !== 'completata' && <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato} onClick={() => void cambia('completata')}>Completata</button>}
         {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
         {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
         {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
-        {r.fonte && <a href={r.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>}
       </div>
     </li>
   );
 }
+
+const piatto = (s: string | null | undefined) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
 
 export function RichiestePage() {
   useDocumentTitle('Richieste dei Mementos');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   const dati = useCarica(() => getRichieste(partitaId ?? undefined), [partitaId]);
-  const [filtro, setFiltro] = useState<Filtro>('tutte');
-  const [area, setArea] = useState<string | null>(null);
-  // Il foglio sta nell'indirizzo: così un collegamento a Jose porta a Jose.
+  const [ricerca, setRicerca] = useState('');
+  const [accettazione, setAccettazione] = useState<Accettazione>('tutte');
+  const [completamento, setCompletamento] = useState<Completamento>('tutte');
+  // Il foglio e il dedalo stanno nell'indirizzo: un collegamento a Jose porta a Jose, uno dal dedalo arriva già filtrato.
   const [params, setParams] = useSearchParams();
   const foglio: Foglio = params.get('foglio') === 'jose' ? 'jose' : 'richieste';
+  const dedalo = params.get('dedalo') ?? '';
+  const impostaDedalo = (k: string) => setParams((p) => { const n = new URLSearchParams(p); if (k) n.set('dedalo', k); else n.delete('dedalo'); return n; }, { replace: true });
   const d = dati.dati;
-  const aree = useMemo(() => [...new Set((d?.richieste ?? []).map((r) => r.area))], [d]);
+  const q = piatto(ricerca.trim());
   const visibili = useMemo(() => (d?.richieste ?? [])
-    .filter((r) => (area === null || r.area === area) && (filtro === 'tutte' || (filtro === 'da-fare' && !r.stato) || (filtro === 'accettate' && r.stato === 'accettata') || (filtro === 'completate' && r.stato === 'completata')))
+    .filter((r) => {
+      if (dedalo && r.areaChiave !== dedalo) return false;
+      if (accettazione === 'accettate' && r.stato !== 'accettata') return false;
+      if (accettazione === 'non-accettate' && r.stato !== null) return false;
+      if (completamento === 'completate' && r.stato !== 'completata') return false;
+      if (completamento === 'da-completare' && r.stato === 'completata') return false;
+      if (q && !piatto(`${r.nome} ${r.bersaglio.nome} ${r.bersaglio.formaDemoniaca} ${r.confidente?.nome ?? ''} ${r.areaNome ?? r.area} ${r.committente}`).includes(q)) return false;
+      return true;
+    })
     // Le completate in fondo: restano consultabili, ma non davanti a quelle da fare.
-    .sort((a, b) => Number(a.stato === 'completata') - Number(b.stato === 'completata')), [d, filtro, area]);
+    .sort((a, b) => Number(a.stato === 'completata') - Number(b.stato === 'completata')), [d, dedalo, accettazione, completamento, q]);
   const accettate = useMemo(() => (d?.richieste ?? []).filter((r) => r.stato === 'accettata').length, [d]);
-  const aggiorna = (r: RichiestaDto) => { if (d) dati.imposta({ ...d, richieste: d.richieste.map((x) => (x.chiave === r.chiave ? r : x)), completate: d.richieste.filter((x) => (x.chiave === r.chiave ? r.stato : x.stato) === 'completata').length }); };
+  const aggiorna = (r: RichiestaDto) => {
+    if (!d) return;
+    const richieste = d.richieste.map((x) => (x.chiave === r.chiave ? r : x));
+    dati.imposta({ ...d, richieste, completate: richieste.filter((x) => x.stato === 'completata').length, dedali: d.dedali.map((x) => ({ ...x, completate: richieste.filter((y) => y.areaChiave === x.chiave && y.stato === 'completata').length })) });
+  };
+  const filtriAttivi = !!q || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte';
 
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="Richieste dei Mementos" sottotitolo={<>{d.totale} Richieste dalla guida allgamestaff: committente, date, Dedalo e area, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare accettate e completate.'}</>} />
+          <IntestazionePagina titolo="Richieste dei Mementos" sottotitolo={<>{d.totale} Richieste: committente, date, dedalo, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare accettate e completate.'}</>} />
 
-          {/* **Jose è un foglio a parte**, non una coda in fondo alle Richieste: i suoi fiori, i
-              timbri e la tabella degli scambi sono un'altra faccenda, e messi sotto trentatré
-              carte si trovavano solo scorrendo fino in fondo. Richiesta dell'utente. */}
+          {/* Jose è un foglio a parte: i suoi fiori, i timbri e la tabella degli scambi sono un'altra faccenda. */}
           {d.jose && <FilaScorrevole role="tablist" aria-label="Fogli">
             {([['richieste', 'Le Richieste', 'richiesta'], ['jose', 'Jose: fiori e scambi', 'jose']] as Array<[Foglio, string, string]>).map(([k, l, icona]) => (
               <button key={k} type="button" role="tab" aria-selected={foglio === k} title={l}
                 className={`piastrella-scheda touch ${foglio === k ? 'piastrella-scheda--attiva' : ''}`}
-                onClick={() => setParams(k === 'richieste' ? {} : { foglio: k }, { replace: true })}>
+                onClick={() => setParams((p) => { const n = new URLSearchParams(p); if (k === 'richieste') n.delete('foglio'); else n.set('foglio', k); return n; }, { replace: true })}>
                 {k === 'richieste' ? <IconaCategoria categoria={icona} dimensione={28} /> : <IconaScheda chiave="jose" dimensione={28} />}
                 <span>{l}</span>
               </button>
@@ -191,16 +199,21 @@ export function RichiestePage() {
             <div className="kpi-tile"><span className="kpi-value">{d.completate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />completate</span></div>
           </section>}
 
-          <div className="flex flex-wrap items-center gap-1.5">
-            {([['tutte', 'Tutte'], ['da-fare', 'Da fare'], ['accettate', 'Accettate'], ['completate', 'Completate']] as Array<[Filtro, string]>).map(([k, l]) => (
-              <button key={k} type="button" className={`chip touch ${filtro === k ? 'chip--attivo' : ''}`} onClick={() => setFiltro(k)} aria-pressed={filtro === k}>{l}</button>
-            ))}
-            <Selettore compatto className="sm:ml-auto" etichetta="Dedalo" valore={area ?? ''} vuoto="Tutti i Dedali" opzioni={aree.map((a) => ({ chiave: a, nome: a }))} onCambia={(k) => setArea(k || null)} />
-          </div>
+          <section className="filtri-articoli" role="search" aria-label="Filtri delle Richieste">
+            <div className="filtri-articoli__riga">
+              <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca richiesta, bersaglio, Confidente, dedalo…" />
+              {/* I dedali nell'ordine in cui si percorrono, con quante richieste hanno. */}
+              <Selettore compatto etichetta="Dedalo" valore={dedalo} vuoto="Tutti i Dedali" opzioni={d.dedali.map((x) => ({ chiave: x.chiave, nome: x.nome, dettaglio: partitaId ? `${x.completate} completate su ${x.totale}` : `${x.totale} richieste` }))} onCambia={impostaDedalo} />
+              {filtriAttivi && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => { setRicerca(''); setAccettazione('tutte'); setCompletamento('tutte'); impostaDedalo(''); }}>Azzera i filtri</button>}
+            </div>
+            {partitaId && <div className="filtri-articoli__riga">
+              <Segmenti etichetta="Accettazione" valore={accettazione} opzioni={ACCETTAZIONE} onCambia={setAccettazione} />
+              <Segmenti etichetta="Completamento" valore={completamento} opzioni={COMPLETAMENTO} onCambia={setCompletamento} />
+            </div>}
+          </section>
 
-          {/* Una griglia, non una colonna: le carte sono corte e su uno schermo largo ne stanno
-              tre per riga, che è la differenza fra scorrere cinque schermate e vederne dodici. */}
-          <ul className="m-0 grid list-none grid-cols-1 items-start gap-3 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Richieste">
+          <p className="m-0 text-[12px] text-text-muted">{visibili.length} {visibili.length === 1 ? 'richiesta' : 'richieste'}{dedalo ? ` in ${d.dedali.find((x) => x.chiave === dedalo)?.nome ?? dedalo}` : ''}</p>
+          <ul className="m-0 grid list-none grid-cols-1 items-start gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Richieste">
             {visibili.length === 0 && <li className="text-[13px] text-text-muted" role="status">Nessuna Richiesta con questi filtri.</li>}
             {visibili.map((r) => <Richiesta key={r.chiave} r={r} partitaId={partitaId} onCambiata={aggiorna} />)}
           </ul>
