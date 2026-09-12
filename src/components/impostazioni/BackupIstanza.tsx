@@ -17,6 +17,8 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
 import { byteTesto } from '../../utils/byte';
+import { BarraInvio } from './BarraInvio';
+import type { AvanzamentoInvio } from '../../services/api';
 
 function salvaFile(nome: string, blob: Blob): void {
   const url = URL.createObjectURL(blob);
@@ -31,6 +33,7 @@ export function BackupIstanza() {
   const stato = useCarica(() => getStatoIstanza(), []);
   const [occupato, setOccupato] = useState(false);
   const [daRipristinare, setDaRipristinare] = useState<File | null>(null);
+  const [avanzamento, setAvanzamento] = useState<AvanzamentoInvio | null>(null);
   const input = useRef<HTMLInputElement | null>(null);
   const s = stato.dati;
 
@@ -50,8 +53,9 @@ export function BackupIstanza() {
   const ripristina = async () => {
     if (!daRipristinare) return;
     setOccupato(true);
+    setAvanzamento({ byteInviati: 0, byteTotali: daRipristinare.size, percentuale: 0, inviato: false });
     try {
-      const esito = await ripristinaIstanza(daRipristinare);
+      const esito = await ripristinaIstanza(daRipristinare, setAvanzamento);
       setDaRipristinare(null);
       stato.imposta(esito.stato);
       // il database è cambiato sotto i piedi dell'app: partite e cache locali vanno rilette
@@ -63,6 +67,7 @@ export function BackupIstanza() {
       notifica('error', err instanceof Error ? err.message : 'Ripristino fallito.');
     } finally {
       setOccupato(false);
+      setAvanzamento(null);
     }
   };
 
@@ -106,6 +111,7 @@ export function BackupIstanza() {
           Il file «{daRipristinare?.name}» ({byteTesto(daRipristinare?.size ?? 0)}) sostituirà partite, tracking e dati di questa istanza.
           Prima della sostituzione il server salva una copia di sicurezza di ciò che c'è ora in <code>data/backups</code>; se il ripristino non riesce, l'istanza torna com'era.
         </p>
+        <BarraInvio avanzamento={avanzamento} etichetta="Invio del file" elaborazione="Ripristino in corso" />
       </Modal>
     </section>
   );

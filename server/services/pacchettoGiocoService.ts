@@ -14,6 +14,12 @@
 // (orfani). Poi, alla conferma: copia di sicurezza, chiusura della connessione, sostituzione di
 // gioco.db, riapertura con migrazioni e regole dell'avvio, orfani ricalcolati sui dati nuovi. Se
 // qualcosa fallisce a connessione chiusa, si torna alla copia di sicurezza.
+//
+// **Il pacchetto può anche NON passare dal browser.** Un'istanza pubblicata sta dietro un proxy (nginx,
+// un tunnel) che rifiuta i corpi grandi: 311 MB non attraversano quella strada, e il browser vede solo
+// «Failed to fetch». Con `scaricaPacchettoDaUrl` è il server a prendersi il file da un indirizzo che
+// raggiunge lui (la stessa rete privata, un file server interno): dal browser parte solo l'indirizzo,
+// poche decine di byte, e il limite del proxy non c'entra più.
 // ============================================================
 
 import fs from 'node:fs';
@@ -24,8 +30,9 @@ import { httpErrors } from '../utils/httpError.js';
 import { closeDb, getDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
-import { cartellaTemporanea, copiaDatabase, copiaDiSicurezza, riapriIstanza, scriviDatabase, statoIstanza, timbro, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
-import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, OrfanoPartiteDto } from '../../shared/types.js';
+import { MAX_BYTE_RIPRISTINO, cartellaTemporanea, copiaDatabase, copiaDiSicurezza, riapriIstanza, scriviDatabase, statoIstanza, timbro, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
+import { scaricaDaUrl } from '../utils/scaricaDaUrl.js';
+import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
 
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
@@ -126,6 +133,23 @@ export function orfaniPartite(db: Database.Database, schemaGioco = 'main', schem
   return out;
 }
 
+/**
+ * Scarica il pacchetto dall'indirizzo indicato: solo http/https, tetto del ripristino applicato mentre
+ * arriva, attesa della risposta separata dall'inattività (`scaricaDaUrl`). Il contenuto lo verifica poi
+ * chi lo importa. È la strada per le istanze pubblicate, dove un corpo così grande non passa dal proxy.
+ */
+export async function scaricaPacchettoDaUrl(indirizzo: string): Promise<Buffer> {
+  const { contenuto, url } = await scaricaDaUrl(indirizzo, {
+    maxByte: MAX_BYTE_RIPRISTINO,
+    cosa: 'il pacchetto di gioco',
+    codiceScaricoFallito: 'scarico-fallito',
+    codiceTroppoGrande: 'pacchetto-troppo-grande',
+    accept: 'application/vnd.sqlite3,application/octet-stream,*/*;q=0.8',
+  });
+  logger.info({ host: url.host, byte: contenuto.length }, 'pacchetto di gioco scaricato dall\'indirizzo indicato');
+  return contenuto;
+}
+
 /** Il pacchetto di gioco dell'istanza: la copia consistente di gioco.db (immagini comprese), da leggere e poi cancellare. */
 export function esportaPacchetto(): Promise<{ percorso: string; nome: string }> {
   return copiaDatabase('gioco');
@@ -185,26 +209,94 @@ export function anteprimaPacchetto(contenuto: Buffer): AnteprimaPacchettoDto {
   });
 }
 
-/**
- * Sostituisce i dati di gioco dell'istanza con il pacchetto: copia di sicurezza, chiusura, scrittura di
- * gioco.db, riapertura con migrazioni e regole dell'avvio. Le partite restano.
- */
+// ---- Una importazione alla volta, e osservabile ----
+//
+// Sostituire i dati di gioco dura: scarico, copia di sicurezza, scrittura di centinaia di MB, migrazioni.
+// Chi sta davanti può stancarsi prima (un proxy chiude a cento secondi) e l'utente vedrebbe un errore
+// mentre il lavoro procede: se ritentasse, partirebbe una seconda sostituzione sopra la prima. Qui una
+// richiesta per volta (409 alle altre), la fase corrente è interrogabile e l'esito resta a disposizione
+// anche quando la connessione che l'aveva chiesta non c'è più.
+
+/** Identificativo di un'importazione: l'avvio del processo più un contatore, così non si ripete nemmeno fra riavvii. */
+const AVVIO = Math.random().toString(36).slice(2, 8);
+let contatore = 0;
+let inCorso: { operazione: string; iniziataIl: string; fase: FaseImportazionePacchetto } | null = null;
+let ultima: StatoImportazionePacchettoDto['ultima'] = null;
+
+/** Prende il lucchetto; rifiuta se un'altra importazione è già in corso. */
+function impegna(fase: FaseImportazionePacchetto): string {
+  if (inCorso) throw httpErrors.conflict('importazione-in-corso', `Un'importazione è già in corso da ${inCorso.iniziataIl} (fase: ${inCorso.fase}): attendi che finisca.`);
+  contatore += 1;
+  inCorso = { operazione: `${AVVIO}-${contatore}`, iniziataIl: new Date().toISOString(), fase };
+  return inCorso.operazione;
+}
+
+function avanza(fase: FaseImportazionePacchetto): void {
+  if (inCorso) inCorso.fase = fase;
+}
+
+function libera(operazione: string, riuscita: boolean, messaggio: string, esito: EsitoImportazionePacchettoDto | null): void {
+  inCorso = null;
+  ultima = { operazione, riuscita, conclusaIl: new Date().toISOString(), messaggio, esito };
+}
+
+/** A che punto è l'importazione, e com'è finita l'ultima. */
+export function statoImportazione(): StatoImportazionePacchettoDto {
+  return { inCorso: inCorso !== null, operazione: inCorso?.operazione ?? null, fase: inCorso?.fase ?? null, iniziataIl: inCorso?.iniziataIl ?? null, ultima };
+}
+
+/** Sostituisce i dati di gioco con il pacchetto già in mano (corpo della richiesta). */
 export async function importaPacchetto(contenuto: Buffer): Promise<EsitoImportazionePacchettoDto> {
+  const operazione = impegna('verifica');
+  try {
+    const esito = await sostituisciDatiDiGioco(contenuto);
+    libera(operazione, true, `Dati di gioco sostituiti (schema ${esito.versioneSchema}).`, esito);
+    return esito;
+  } catch (err) {
+    libera(operazione, false, err instanceof Error ? err.message : String(err), null);
+    throw err;
+  }
+}
+
+/** Sostituisce i dati di gioco con il pacchetto che sta a un indirizzo: lo scarico è parte dell'operazione. */
+export async function importaPacchettoDaUrl(indirizzo: string): Promise<EsitoImportazionePacchettoDto> {
+  const operazione = impegna('scarico');
+  try {
+    const contenuto = await scaricaPacchettoDaUrl(indirizzo);
+    avanza('verifica');
+    const esito = await sostituisciDatiDiGioco(contenuto);
+    libera(operazione, true, `Dati di gioco sostituiti (schema ${esito.versioneSchema}).`, esito);
+    return esito;
+  } catch (err) {
+    libera(operazione, false, err instanceof Error ? err.message : String(err), null);
+    throw err;
+  }
+}
+
+/**
+ * Il lavoro vero: copia di sicurezza, chiusura, scrittura di gioco.db, riapertura con migrazioni e regole
+ * dell'avvio. Le partite restano. Chiamata solo con il lucchetto in mano.
+ */
+async function sostituisciDatiDiGioco(contenuto: Buffer): Promise<EsitoImportazionePacchettoDto> {
   if (!fs.existsSync(resolveDbPath())) throw httpErrors.badRequest('istanza-in-memoria', 'Questa istanza tiene il database in memoria: l\'importazione del pacchetto non è disponibile.');
   // l'anteprima si rifà qui (il file arriva di nuovo dal browser: quella mostrata all'utente non è vincolante), quindi il file
   // passa due volte dalla cartella temporanea; in locale è il costo di qualche secondo su ~300 MB
   const anteprima = anteprimaPacchetto(contenuto);
   if (!anteprima.importabile) throw httpErrors.badRequest('pacchetto-troppo-nuovo', anteprima.motivo ?? 'Il pacchetto non è importabile.');
+  avanza('copia-di-sicurezza');
   const salvataggio = await copiaDiSicurezza();
   closeDb();
   try {
+    avanza('sostituzione');
     scriviDatabase(contenuto, resolveDbPath());
+    avanza('riapertura');
     riapriIstanza();
     // le stesse regole dell'avvio sui dati nuovi (l'assorbimento delle immagini su disco, già fatto da riapriIstanza, qui non trova nulla)
     regoleAllAvvio(getDb());
   } catch (err) {
     tornaAllaCopiaDiSicurezza(salvataggio, err, 'importazione-fallita', 'Importazione del pacchetto');
   }
+  avanza('controllo');
   const db = getDb();
   const versioneSchema = db.pragma('main.user_version', { simple: true }) as number;
   const orfani = orfaniPartite(db, 'main', 'utente');

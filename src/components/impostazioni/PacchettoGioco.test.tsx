@@ -7,7 +7,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { PacchettoGioco } from './PacchettoGioco';
 import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, StatoIstanzaDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), anteprimaPacchettoGioco: vi.fn(), importaPacchettoGioco: vi.fn() }));
+const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), anteprimaPacchettoGioco: vi.fn(), importaPacchettoGioco: vi.fn(), anteprimaPacchettoGiocoDaUrl: vi.fn(), importaPacchettoGiocoDaUrl: vi.fn(), statoImportazionePacchetto: vi.fn() }));
 vi.mock('../../services/api', () => api);
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
 vi.mock('../../stores/notificationStore', () => ({ notifica }));
@@ -44,6 +44,7 @@ describe('PacchettoGioco', () => {
     for (const f of Object.values(api)) f.mockReset();
     notifica.mockReset(); carica.mockReset();
     api.getStatoIstanza.mockResolvedValue(stato);
+    api.statoImportazionePacchetto.mockResolvedValue({ inCorso: false, operazione: null, fase: null, iniziataIl: null, ultima: null });
     URL.createObjectURL = vi.fn(() => 'blob:finto');
     URL.revokeObjectURL = vi.fn();
     HTMLAnchorElement.prototype.click = vi.fn();
@@ -69,6 +70,7 @@ describe('PacchettoGioco', () => {
     const finestra = await screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
     expect(api.anteprimaPacchettoGioco).toHaveBeenCalledTimes(1);
     expect(api.importaPacchettoGioco).not.toHaveBeenCalled();
+    expect(within(finestra).getByText(/Il pacchetto «project-p5r-gioco\.db» \(5,8 MB\)/)).toBeInTheDocument();
     expect(within(finestra).getByText(/pacchetto 78 · istanza 79 · app 79 \(1 migrazione da applicare\)/)).toBeInTheDocument();
     expect(within(finestra).getByText(/13 nel pacchetto · 640 nell'istanza ora/)).toBeInTheDocument();
     const tabella = within(finestra).getByRole('table', { name: 'Tabelle che cambiano' });
@@ -81,6 +83,7 @@ describe('PacchettoGioco', () => {
     expect(within(orfani).getByText(/untouchable\/u-prova/)).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
     await waitFor(() => expect(api.importaPacchettoGioco).toHaveBeenCalledTimes(1));
+    expect(api.importaPacchettoGioco).toHaveBeenCalledWith(expect.any(File), expect.any(Function));
     const esitoFinestra = await screen.findByRole('dialog', { name: 'Pacchetto importato' });
     expect(within(esitoFinestra).getByText(/schema 79 \(1 migrazione applicata dal 78\), 640 immagini/)).toBeInTheDocument();
     expect(within(esitoFinestra).getByText(/Le partite sono 2, intatte/)).toBeInTheDocument();
@@ -115,6 +118,73 @@ describe('PacchettoGioco', () => {
     api.getStatoIstanza.mockResolvedValue({ ...stato, vuota: false, completo: false, immagini: { file: 0, byte: 0 } });
     render(<PacchettoGioco />);
     expect(await screen.findByRole('status')).toHaveTextContent(/solo i dati iniziali/);
+  });
+
+  it('importa da un indirizzo: il file non passa dal browser e la conferma riparte dallo stesso indirizzo', async () => {
+    const INDIRIZZO = 'https://desktop.esempio.ts.net/api/impostazioni/istanza/database';
+    api.anteprimaPacchettoGiocoDaUrl.mockResolvedValue(anteprima);
+    api.importaPacchettoGiocoDaUrl.mockResolvedValue(esito);
+    render(<PacchettoGioco />);
+    await screen.findByText(/schema 79/);
+    fireEvent.change(screen.getByLabelText(/importa da un indirizzo/i), { target: { value: INDIRIZZO } });
+    fireEvent.click(screen.getByRole('button', { name: /Importa da indirizzo/ }));
+    const finestra = await screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
+    expect(api.anteprimaPacchettoGiocoDaUrl).toHaveBeenCalledWith(INDIRIZZO);
+    expect(api.anteprimaPacchettoGioco).not.toHaveBeenCalled();
+    expect(within(finestra).getByText(new RegExp(`Il pacchetto «${INDIRIZZO}»`))).toBeInTheDocument();
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
+    await waitFor(() => expect(api.importaPacchettoGiocoDaUrl).toHaveBeenCalledWith(INDIRIZZO));
+    expect(api.importaPacchettoGioco).not.toHaveBeenCalled();
+    expect(await screen.findByRole('dialog', { name: 'Pacchetto importato' })).toBeInTheDocument();
+  });
+
+  it('senza indirizzo il pulsante «Importa da indirizzo» resta spento', async () => {
+    render(<PacchettoGioco />);
+    await screen.findByText(/schema 79/);
+    expect(screen.getByRole('button', { name: /Importa da indirizzo/ })).toBeDisabled();
+  });
+
+  /** Porta l'interfaccia fino alla finestra di conferma con un file scelto. */
+  async function finoAllaConferma() {
+    api.anteprimaPacchettoGioco.mockResolvedValue(anteprima);
+    render(<PacchettoGioco />);
+    await screen.findByText(/schema 79/);
+    scegliFile();
+    return screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
+  }
+
+  it('se la richiesta cade ma il server sta ancora lavorando, si aspetta e si mostra l’esito vero', async () => {
+    api.importaPacchettoGioco.mockRejectedValue(new Error('Failed to fetch'));
+    // prima del tentativo il server ha un esito vecchio; poi lavora; poi conclude con un'operazione NUOVA
+    api.statoImportazionePacchetto
+      .mockResolvedValueOnce({ inCorso: false, operazione: null, fase: null, iniziataIl: null, ultima: { operazione: 'vecchia', riuscita: true, conclusaIl: 'ieri', messaggio: 'fatto ieri', esito } })
+      .mockResolvedValueOnce({ inCorso: true, operazione: 'nuova', fase: 'sostituzione', iniziataIl: 'ora', ultima: null })
+      .mockResolvedValue({ inCorso: false, operazione: null, fase: null, iniziataIl: null, ultima: { operazione: 'nuova', riuscita: true, conclusaIl: 'ora', messaggio: 'fatto', esito } });
+    const finestra = await finoAllaConferma();
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
+    expect(await screen.findByText(/Il server sta sostituendo i dati di gioco/)).toBeInTheDocument();
+    expect(await screen.findByRole('dialog', { name: 'Pacchetto importato' }, { timeout: 10_000 })).toBeInTheDocument();
+    expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('Dati di gioco sostituiti'));
+  }, 20_000);
+
+  it('un’importazione respinta prima di arrivare al server non eredita l’esito riuscito di prima', async () => {
+    // il proxy rifiuta il corpo: la richiesta non tocca il server, che ha ancora l'esito di un'altra importazione
+    api.importaPacchettoGioco.mockRejectedValue(new Error('Errore di rete: Failed to fetch'));
+    api.statoImportazionePacchetto.mockResolvedValue({ inCorso: false, operazione: null, fase: null, iniziataIl: null, ultima: { operazione: 'di-prima', riuscita: true, conclusaIl: 'ieri', messaggio: 'riuscita ieri', esito } });
+    const finestra = await finoAllaConferma();
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringContaining('Failed to fetch')));
+    expect(screen.queryByRole('dialog', { name: 'Pacchetto importato' })).toBeNull();
+    expect(notifica).not.toHaveBeenCalledWith('success', expect.anything());
+  });
+
+  it('se non si riesce nemmeno a leggere lo stato di partenza, l’errore resta un errore', async () => {
+    api.importaPacchettoGioco.mockRejectedValue(new Error('Failed to fetch'));
+    api.statoImportazionePacchetto.mockRejectedValue(new Error('server irraggiungibile'));
+    const finestra = await finoAllaConferma();
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringContaining('Failed to fetch')));
+    expect(screen.queryByRole('dialog', { name: 'Pacchetto importato' })).toBeNull();
   });
 
   it('un file che non è un pacchetto viene segnalato senza aprire l’anteprima', async () => {

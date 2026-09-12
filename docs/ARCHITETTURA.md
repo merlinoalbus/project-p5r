@@ -536,7 +536,7 @@ che supera la precedente esclusione.
 - **Migrazione 079** (`assorbiImmagini`): riempie `contenuto` dai file delle righe (`DATA_DIR/immagini`, `pacchetto/immagini`), dalle famiglie di `config.assetDir` (`public/asset`, `webp` > `png` a parità di chiave) e da `pacchetto/gioco.db` (connessione a parte in sola lettura, solo se ha già la colonna); idempotente; con un database in memoria le due sorgenti pesanti si saltano. `regoleAllAvvio` → `assorbiImmaginiSuDisco`: assorbe ciò che un backup di prima della 079 ha rimesso su disco e sposta `DATA_DIR/immagini` in `DATA_DIR/backups/immagini-su-disco-<istante>`. `caricaPacchetto` copia le righe di `immagine` senza i byte salvo `{ conImmagini: true }`.
 - **Server**: `immaginiService` legge e scrive solo nel database (`nome_file` resta come nome leggibile); `GET /api/immagini/:ambito/:chiave/file` risponde dal BLOB con `ETag` (id, byte, data) e 304; `GET /api/immagini/manifest` = famiglie predefinite con contenuto, chiave → URL versionato; elenco (`GET /api/immagini`) e rimozione in blocco (`DELETE /api/immagini`) toccano solo gli ambiti di caricamento (`queryImmagini`), mentre lettura/PUT/DELETE singoli accettano ogni ambito. `backupService` fa lo snapshot di avvio solo se c'è una migrazione da applicare. `copiaIstanza` non porta più la cartella `immagini/` (i backup vecchi con quella cartella si ripristinano ancora: i file vengono assorbiti alla riapertura). `MAX_BYTE_RIPRISTINO` = 1 GiB.
 - **Frontend**: `assetStore.carica` unisce `/asset/manifest.json` e `getManifestoImmagini()` (`/api/immagini/manifest`, che vince a parità di chiave): `useAsset`/`AssetImg` invariati. `assetTokyo.ts`, `stratiMemento.ts` (`urlElementoMemento`), `AlberoLuoghi` usano `urlImmagine(famiglia, chiave)` (chiave con `/` codificata: `lmap%2Ftokyo%2Fshibuya`).
-- **Pacchetto di gioco = `gioco.db`** (il completo è fuori da git; il primo avvio copia l'iniziale senza immagini e la card avvisa finché il completo non è importato, `StatoIstanzaDto.completo`): `server/services/pacchettoGiocoService.ts` — `esportaPacchetto` (copia consistente di `main`), `anteprimaPacchetto` (firma SQLite + `verificaDatabase` = 'gioco', versione ≤ ultima migrazione, conteggi per tabella, tabelle assenti, immagini con contenuto, `orfaniPartite` con `RIFERIMENTI_PARTITE`: 30 riferimenti utente→gioco valutati attaccando `partite.db` al file caricato; una tabella di gioco assente rende orfane tutte le righe che la referenziano, con nota), `importaPacchetto` (copia di sicurezza → `closeDb` → `scriviDatabase` → `riapriIstanza` + `regoleAllAvvio` → orfani ricalcolati; errore → `tornaAllaCopiaDiSicurezza`, 400 `importazione-fallita`). Rotte in `routes/impostazioni.ts`: `POST /istanza/gioco/anteprima`, `PUT /istanza/gioco` (corpo grezzo); il download è `GET /istanza/database`. DTO: `AnteprimaPacchettoDto`, `EsitoImportazionePacchettoDto`, `OrfanoPartiteDto`. UI: `src/components/impostazioni/PacchettoGioco.tsx` (anteprima obbligatoria, esito con orfani e «Ricarica l'app»).
+- **Pacchetto di gioco = `gioco.db`** (il completo è fuori da git; il primo avvio copia l'iniziale senza immagini e la card avvisa finché il completo non è importato, `StatoIstanzaDto.completo`): `server/services/pacchettoGiocoService.ts` — `esportaPacchetto` (copia consistente di `main`), `anteprimaPacchetto` (firma SQLite + `verificaDatabase` = 'gioco', versione ≤ ultima migrazione, conteggi per tabella, tabelle assenti, immagini con contenuto, `orfaniPartite` con `RIFERIMENTI_PARTITE`: 30 riferimenti utente→gioco valutati attaccando `partite.db` al file caricato; una tabella di gioco assente rende orfane tutte le righe che la referenziano, con nota), `importaPacchetto` (copia di sicurezza → `closeDb` → `scriviDatabase` → `riapriIstanza` + `regoleAllAvvio` → orfani ricalcolati; errore → `tornaAllaCopiaDiSicurezza`, 400 `importazione-fallita`). Rotte in `routes/impostazioni.ts`: `POST /istanza/gioco/anteprima`, `PUT /istanza/gioco` (corpo grezzo), `POST /istanza/gioco/anteprima-da-url` e `PUT /istanza/gioco/da-url` (il server scarica dall'indirizzo), `GET /istanza/gioco/importazione` (stato); il download è `GET /istanza/database`. DTO: `AnteprimaPacchettoDto`, `EsitoImportazionePacchettoDto`, `OrfanoPartiteDto`. UI: `src/components/impostazioni/PacchettoGioco.tsx` (anteprima obbligatoria, esito con orfani e «Ricarica l'app»).
 
 ## 8. Build, test, deploy
 - Test (Vitest, 104 file / 359 casi al 2026-09-05): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
@@ -640,3 +640,32 @@ programma, `src/components/partita/ProgressiPartita.tsx` in due sezioni.
 - `server/db/migrations/081_istantanee_luogo_giorni.ts` (`aggiornaIstantanea`): le istantanee `seed_json` dei luoghi con `giorni_json` e nota come la 080; le righe della guida senza istantanea vengono fotografate come nella 071. `eliminaElemento` (catalogoService) ricava `giorni_json` dalla frase se l'istantanea non lo ha; `datiLuogo.giorni_json` è salvato nell'ordine della settimana; `datiNegozio` non accetta più `orari` in prosa.
 - `src/components/condizioni/SelettoreRicerca.tsx` rimosso (tutti i selettori usano `Selettore`).
 - Il modulo del luogo, che nessuna pagina apriva, è raggiungibile da `QuartierePage`: «Aggiungi un luogo» (`AggiungiAlCatalogo tipo="luogo"`) nella sezione «Luoghi del quartiere» e «Correggi» (`CorreggiElemento`) in ogni card, con ricarica dopo il salvataggio; `eliminaElemento` ripristina anche le istantanee di prima della 080 ricavando `giorni_json` dalla frase `giorni`.
+
+## Caricamento del pacchetto: due strade e tempi lunghi (12 settembre 2026)
+
+Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB non ci passa, e il browser vede
+«Failed to fetch» senza che il backend riceva nulla. Da qui:
+
+- **Il file nel corpo** (istanza locale). `src/services/api/impostazioni.ts` invia con **XMLHttpRequest**, non con
+  `fetch`, perché solo XHR dice quanti byte sono partiti (`upload.onprogress` → `AvanzamentoInvio` → `BarraInvio`,
+  percentuale e MB, poi barra indeterminata mentre lavora il server). Il timeout complessivo è sparito: resta quello
+  di **inattività** (dieci minuti che ripartono a ogni evento), perché un invio lento non è un invio morto.
+  `nginx.conf` ha una `location ^~ /api/impostazioni/` con `client_max_body_size 1024m` e timeout 1800s (il resto
+  delle API resta a 10M/120s), e `server/index.ts` alza `server.requestTimeout` a 30 minuti: i 300 secondi
+  predefiniti di Node troncavano la ricezione di un pacchetto grande a metà.
+- **L'indirizzo** (istanza pubblicata). `POST /istanza/gioco/anteprima-da-url` e `PUT /istanza/gioco/da-url`
+  ricevono solo l'URL: il file se lo prende il server con `server/utils/scaricaDaUrl.ts`, che distingue l'attesa
+  delle **intestazioni** (30s) dall'**inattività** del corpo (120s che ripartono a ogni blocco) e applica il tetto
+  *mentre* scarica, così un'origine senza `Content-Length` non può far crescere la memoria. Lo usa anche
+  `importaImmagineDaUrl`. La scelta consapevole: l'indirizzo lo decide chi usa l'app e può puntare alla rete privata
+  (è il caso d'uso: il PC di casa in Tailscale), quindi nessuna lista di blocco.
+- **L'importazione è una alla volta e osservabile**: `pacchettoGiocoService` tiene un lucchetto (409
+  `importazione-in-corso`), aggiorna la fase (`scarico`, `verifica`, `copia-di-sicurezza`, `sostituzione`,
+  `riapertura`, `controllo`) e conserva l'esito dell'ultima. `GET /istanza/gioco/importazione` lo espone
+  (`StatoImportazionePacchettoDto`). Serve perché un tunnel chiude la connessione dopo ~100 secondi mentre il server
+  sta ancora sostituendo i dati: il frontend, invece di dire «fallita», interroga lo stato, segue le fasi e mostra
+  l'esito vero quando arriva. **Ogni importazione porta un identificativo** (`operazione`): il frontend fotografa
+  quello dell'ultima PRIMA di partire e accetta un esito solo se è diverso, altrimenti un tentativo respinto dal
+  proxy — che al server non arriva nemmeno — erediterebbe l'esito riuscito di ore prima e si direbbe riuscito. Se lo
+  stato di partenza non si riesce a leggere, l'errore resta un errore. L'attesa si interrompe con «Smetti di
+  attendere» e quando la card viene smontata.

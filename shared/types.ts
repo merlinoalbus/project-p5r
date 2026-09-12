@@ -1910,6 +1910,29 @@ export interface AnteprimaPacchettoDto {
   orfani: OrfanoPartiteDto[];
 }
 
+/** A che punto è l'importazione del pacchetto, mentre la si aspetta.
+ *
+ * Serve perché l'attesa può superare quella di chi sta davanti: un proxy (Cloudflare si ferma a cento
+ * secondi) chiude la connessione mentre il server sta ancora sostituendo i dati, e il browser lo
+ * leggerebbe come un fallimento. Chiedendo lo stato si sa se sta ancora lavorando, e com'è finita.
+ */
+export type FaseImportazionePacchetto = 'scarico' | 'verifica' | 'copia-di-sicurezza' | 'sostituzione' | 'riapertura' | 'controllo';
+
+export interface StatoImportazionePacchettoDto {
+  inCorso: boolean;
+  /** Identificativo dell'importazione in corso: cambia a ogni tentativo, così un esito non si confonde con un altro. */
+  operazione: string | null;
+  fase: FaseImportazionePacchetto | null;
+  iniziataIl: string | null;
+  /** Com'è finita l'ultima importazione di questo avvio; `esito` c'è solo se è riuscita.
+   *
+   * `operazione` serve a chi non ha ricevuto la risposta: confrontandola con quella vista PRIMA di
+   * chiedere l'importazione si sa se questo esito è del proprio tentativo o di uno di prima. Senza
+   * quel confronto, un tentativo respinto dal proxy (che al server non arriva nemmeno) leggerebbe
+   * l'esito riuscito di ore prima e si direbbe riuscito. */
+  ultima: { operazione: string; riuscita: boolean; conclusaIl: string; messaggio: string; esito: EsitoImportazionePacchettoDto | null } | null;
+}
+
 /** Esito dell'importazione: che cosa è cambiato e quali riferimenti delle partite sono rimasti orfani. */
 export interface EsitoImportazionePacchettoDto {
   copiaDiSicurezza: string;
