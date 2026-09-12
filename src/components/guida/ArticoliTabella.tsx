@@ -35,7 +35,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<
     {/* La colonna dice **se si può comprare**, e basta: c'era anche «2 requisiti · apri
         Dettagli», che è un'istruzione scritta a mano dove serve un comando. Il numero è finito
         dov'è il suo posto, cioè sulla riga dei Dettagli, che i requisiti li elenca davvero. */}
-    <div className="catalogo-prodotto__disponibilita"><ChipDisponibilita disponibilita={a.disponibilita} compatto />{!a.condizioni && a.disponibileDal && <span>{a.disponibileDal}</span>}{a.condizioni?.length === 0 && <span>Nessun requisito</span>}</div>
+    <div className="catalogo-prodotto__disponibilita"><ChipDisponibilita disponibilita={a.disponibilita} compatto />{a.condizioni?.length === 0 && <span>Nessun requisito</span>}</div>
     <div className="catalogo-prodotto__azioni">
       {/* Una cosa sola: la spunta. «Non ancora acquistabile» stava sia qui sia nella pastiglia
           accanto, e la stessa frase due volte sulla stessa riga sembra due informazioni. */}
@@ -48,9 +48,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<
         {a.nomeIt && a.nomeIt !== a.nome && <><dt>Nome originale</dt><dd>{a.nome}</dd></>}
         <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>
         <dt>Effetto</dt><dd>{a.effetto || 'Non indicato'}</dd>
-        {a.condizione && <><dt>Nota originale della guida</dt><dd>{a.condizione}</dd></>}
         {a.nota && <><dt>Nota</dt><dd>{a.nota}</dd></>}
-        {a.fonte && <><dt>Fonte</dt><dd>{/^https?:\/\//i.test(a.fonte) ? <a href={a.fonte} target="_blank" rel="noreferrer">Consulta la fonte</a> : a.fonte}</dd></>}
       </dl>
     </details>
   </li>;

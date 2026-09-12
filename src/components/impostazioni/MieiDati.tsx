@@ -7,21 +7,12 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getCatalogo, getRiepilogoCatalogo } from '../../services/api';
+import { NOME_TIPO_CATALOGO } from '../../utils/catalogo';
 import { useCarica } from '../../hooks/useCarica';
 import { ModuloCatalogo } from '../guida/ModuloCatalogo';
 import type { ElementoCatalogoDto, TipoCatalogo } from '../../types';
-
-const NOME_TIPO: Record<TipoCatalogo, { singolare: string; plurale: string }> = {
-  negozio: { singolare: 'negozio', plurale: 'Negozi' },
-  articolo: { singolare: 'articolo', plurale: 'Articoli dei negozi' },
-  libro: { singolare: 'libro', plurale: 'Libri' },
-  film: { singolare: 'film', plurale: 'Film e DVD' },
-  attivita: { singolare: 'attività', plurale: 'Attività, lavori e videogiochi' },
-  luogo: { singolare: 'luogo', plurale: 'Luoghi della città' },
-  domanda: { singolare: 'domanda', plurale: 'Domande in classe e agli esami' },
-  cruciverba: { singolare: 'riga del cruciverba', plurale: 'Cruciverba' },
-};
 
 export function MieiDati() {
   const riepilogo = useCarica(() => getRiepilogoCatalogo(), []);
@@ -39,6 +30,7 @@ export function MieiDati() {
       <p className="m-0 text-[13px] text-text-secondary">
         Le righe che hai aggiunto o corretto tu sopra i dati della guida. Restano anche quando i dati vengono ricaricati:
         «Ripristina dalla guida» rimette l'originale, e le righe che hai aggiunto tu si eliminano dallo stesso pulsante.
+        Le righe nascoste dagli elenchi stanno in <Link to="/guida/rimossi">Rimossi</Link>, con il ripristino in un tocco.
       </p>
       {riepilogo.errore && <p className="m-0 text-[13px] text-error">{riepilogo.errore}</p>}
       {totale === 0 && !riepilogo.caricamento && (
@@ -49,7 +41,7 @@ export function MieiDati() {
           <li key={t.tipo} className="flex flex-col gap-1 border-b border-border-light last:border-0 pb-1">
             <button type="button" className="flex items-center justify-between gap-2 text-left touch bg-transparent border-0 p-0 text-[14px]"
               onClick={() => setAperto(aperto === t.tipo ? null : t.tipo)} aria-expanded={aperto === t.tipo}>
-              <strong>{NOME_TIPO[t.tipo]?.plurale ?? t.tipo}</strong>
+              <strong>{NOME_TIPO_CATALOGO[t.tipo]?.plurale ?? t.tipo}</strong>
               <span className="text-[12px] text-text-secondary">
                 {[t.creati && `${t.creati} aggiunti`, t.modificati && `${t.modificati} corretti`, t.nascosti && `${t.nascosti} nascosti`].filter(Boolean).join(' · ')}
               </span>

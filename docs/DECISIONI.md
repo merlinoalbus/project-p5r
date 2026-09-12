@@ -318,3 +318,36 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   lo rifanno: il server deriva `effetti_json` da lì (`normalizzaScrittura`), così i punti della
   partita, che leggono gli effetti, non restano indietro. `orari` (frase) resta accettato accanto
   a `orari_json` per lo stesso motivo.
+
+### 2026-09-12 — UI di negozi e articoli (voce 6): che cosa scrive il modulo e che cosa non c'è più
+- **Il modulo scrive solo valori.** Negozio: `orari_json` (chip), `sede_chiave` + `luogo_chiave`
+  (la sede porta il quartiere; «solo il quartiere» lascia la sede vuota), `confidente_chiave`,
+  `programma_punti_json`; non manda più `orari` (frase), `sblocco`, `condizioni_json`, `fonte`.
+  Libro/film/attività: `effetti_json` (voci con `ripetuto` e condizioni) al posto di
+  `dote`/`note`/`note_successive`/`doti_json`/`effetto_json`; film senza `periodo`, libro senza
+  `dove`/`disponibile_dal`/`nome_it` (identico al titolo per tutti i 46), attività senza
+  `regole`/`premi`/`altri_effetti`/`paga` (testo): tutto in `dettagli`. Le colonne restano nel
+  DB per le righe della guida; il server le legge finché ci sono.
+- **«Come trovarlo» resta**: la colonna `negozio.luogo` («vicino alla stazione») è un'indicazione,
+  non un riferimento, e si mostra solo quando la sede manca. Non è un dato che l'app interpreta.
+- **«Confermato»** (`verificato`) è una spunta del guscio per articoli, libri, film, attività e
+  luoghi: prima si poteva solo perdere. Una riga nuova nasce non confermata.
+- **Videogioco = attività col tipo fissato**: `ModuloCatalogo` accetta `tipo='videogioco'` (stesso
+  componente delle attività senza la scelta del tipo, conteggio per round); l'API resta `attivita`.
+- **Le tessere (`SelettoreIcone`) sostituiscono le tendine dove la figura aiuta a scegliere**: tipo
+  di negozio, categoria dell'articolo, famiglia dell'effetto, tipo e fascia dell'attività, dove si
+  vede un film, tipo di luogo. Dove le voci sono molte o senza figura (Confidente, sede, Dote)
+  resta il `Selettore`.
+- **Il blocco «Rimossi» del negozio si ricarica con la scheda** (`versione` che cambia a ogni
+  salvataggio): nascondere dal modulo lo fa comparire subito, senza ricaricare la pagina — difetto
+  trovato nel giro di prova e corretto prima del PR.
+- **Dopo il primo giro del validatore (voce 6)**: la sede del negozio apre la pagina del quartiere con
+  il luogo evidenziato (`/guida/citta/<quartiere>#luogo-…`, `ancoraLuogo` in `src/utils/citta.ts`,
+  ancora e scorrimento in `QuartierePage`), perché `/guida/citta/<chiave-del-luogo>` non esiste;
+  «Dove» resta anche per i negozi senza quartiere né sede (Tanaka, TV, Palazzo di Niijima) con
+  l'indicazione testuale; una domanda salva `ricompensa`/`note` vuoti come `''` (lo schema non
+  ammette `null`); un valore di «Chi la fa» fuori dall'elenco resta visibile e scelto; un legame
+  a un oggetto che l'archivio non ha più si segnala e si conserva finché non si sceglie altro o si
+  passa alla via «a mano»; i regali dichiarano «gradito a» con i Confidenti come interruttori;
+  `ICONA_FAMIGLIA_EFFETTO` sta in `shared/effettiOggetto.ts` come da piano; nella pagina «Rimossi»
+  un articolo mostra il nome del negozio, non la chiave.

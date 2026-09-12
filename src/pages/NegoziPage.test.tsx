@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { valoreSelettore } from '../../test/selettore';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { NegoziPage } from './NegoziPage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -94,12 +93,24 @@ it('mostra nell’intestazione e nella scheda i conteggi canonici restituiti dal
   expect(screen.queryByText(/da fonte secondaria/)).toBeNull();
 });
 
-/* I filtri stanno nell'indirizzo: `/guida/negozi?categoria=arma` deve aprire l'elenco già
- * filtrato. È la risposta alla domanda «dove sono tutte le armi comprabili»: la pagina lo sapeva
- * già fare, ma non c'era modo di **arrivarci** con un collegamento. */
-it('apre l’elenco già filtrato quando la categoria è nell’indirizzo', async () => {
+/* I filtri stanno nell'indirizzo: `/guida/negozi?categorie=arma` (e il vecchio `categoria=`)
+ * deve aprire l'elenco già filtrato, con la tessera accesa; toccarne un'altra riscrive l'indirizzo
+ * e chiede al server tutte e due le categorie. */
+it('apre l’elenco già filtrato quando la categoria è nell’indirizzo, e le tessere lo riscrivono', async () => {
   render(<MemoryRouter initialEntries={['/guida/negozi?categoria=arma']}><NegoziPage /></MemoryRouter>);
-  await waitFor(() => expect(ricercaArticoli).toHaveBeenCalledWith(expect.objectContaining({ categoria: 'arma' }), undefined));
-  await screen.findByRole('combobox', { name: 'Categoria' });
-  expect(valoreSelettore('Categoria')).toBe('Arma');
+  await waitFor(() => expect(ricercaArticoli).toHaveBeenCalledWith(expect.objectContaining({ categorie: ['arma'] }), undefined));
+  const categorie = await screen.findByRole('group', { name: 'Categorie' });
+  expect(within(categorie).getByRole('button', { name: 'Arma' })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(within(categorie).getByRole('button', { name: 'Libro' }));
+  await waitFor(() => expect(ricercaArticoli).toHaveBeenLastCalledWith(expect.objectContaining({ categorie: ['arma', 'libro'] }), undefined));
+  // senza partita lo stato d'acquisto non si chiede
+  expect(screen.queryByRole('radiogroup', { name: "Stato d'acquisto" })).toBeNull();
+});
+
+it('con la partita i segmenti di stato e disponibilità arrivano al server', async () => {
+  usePartitaStore.setState({ attiva: { id: 5, nome: 'Prova' } as PartitaDto });
+  render(<MemoryRouter initialEntries={['/guida/negozi?stato=da-acquistare']}><NegoziPage /></MemoryRouter>);
+  await waitFor(() => expect(ricercaArticoli).toHaveBeenCalledWith(expect.objectContaining({ stato: 'da-acquistare' }), 5));
+  fireEvent.click(await screen.findByRole('radio', { name: 'Bloccati' }));
+  await waitFor(() => expect(ricercaArticoli).toHaveBeenLastCalledWith(expect.objectContaining({ stato: 'da-acquistare', disponibilita: 'bloccati' }), 5));
 });

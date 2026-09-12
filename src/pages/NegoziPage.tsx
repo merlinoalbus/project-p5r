@@ -1,19 +1,18 @@
 // ============================================================
-// NegoziPage — negozi per quartiere e ricerca degli articoli in tutti i negozi (Fase 8.2)
+// NegoziPage — negozi per quartiere e ricerca degli articoli in tutti i negozi, con i filtri nell'indirizzo
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Selettore } from '../components/shared/Selettore';
-import { opzioniDaNomi } from '../utils/selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getNegozi, ricercaArticoli } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
-import { CampoRicerca } from '../components/shared/CampoRicerca';
-import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO, PERSONAGGI } from '../utils/negozi';
+import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { ArticoliTabella } from '../components/guida/ArticoliTabella';
+import { FiltriArticoli } from '../components/guida/FiltriArticoli';
+import { filtroAttivo, filtroDaParametri, parametriDaFiltro, type FiltroArticoli as Filtro } from '../utils/articoli';
 import type { NegozioRiassuntoDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
@@ -34,38 +33,30 @@ export function NegoziPage() {
   // giorno corrente e fascia della giornata decidono la disponibilità: al cambio si ricarica
   const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}`;
   const negozi = useCarica(() => getNegozi(partitaId ?? undefined), [partitaId, momento]);
-  // **I filtri stanno nell'indirizzo.** «Armi» qui dentro è già l'elenco di tutte le armi comprabili
-  // con prezzo e negozio — la stessa API e la stessa tabella che userebbe una pagina a parte — ma
-  // finché la scelta viveva solo nello stato non c'era modo di **arrivarci** con un collegamento:
-  // né dalla matrice degli inventari, né da un'altra pagina, né da un indirizzo salvato. Ora
-  // `/guida/negozi?categoria=arma` apre l'elenco già filtrato, e chi torna indietro lo ritrova.
+  // **I filtri stanno nell'indirizzo.** `/guida/negozi?categorie=arma,libro&stato=da-acquistare`
+  // apre l'elenco già filtrato, e chi torna indietro lo ritrova: un filtro è un valore
+  // (`utils/articoli.ts`), letto dai parametri e riscritto lì a ogni cambio.
   const [params, setParams] = useSearchParams();
-  const q = params.get('q') ?? '';
-  const categoria = params.get('categoria') ?? '';
-  const per = params.get('per') ?? '';
-  const impostaFiltro = (campo: 'q' | 'categoria' | 'per', valore: string) => {
-    setParams((precedenti) => {
-      const nuovi = new URLSearchParams(precedenti);
-      if (valore) nuovi.set(campo, valore); else nuovi.delete(campo);
-      return nuovi;
-    }, { replace: true });
-  };
-  const setQ = (v: string) => impostaFiltro('q', v);
-  const setCategoria = (v: string) => impostaFiltro('categoria', v);
-  const setPer = (v: string) => impostaFiltro('per', v);
+  const filtro = useMemo(() => filtroDaParametri(params), [params]);
+  const cambiaFiltro = (f: Filtro) => setParams((precedenti) => parametriDaFiltro(f, precedenti), { replace: true });
   const [negozioSelezionato, setNegozioSelezionato] = useState<NegozioRiassuntoDto | null>(null);
   // negozio aggiunto dall'utente: resta anche quando i dati della guida vengono aggiornati (16.1)
   const [nuovoNegozio, setNuovoNegozio] = useState(false);
-  const cerca = q.trim().length >= 2 || categoria !== '' || per !== '';
-  const risultati = useCarica(() => (cerca ? ricercaArticoli({ q: q.trim() || undefined, categoria: categoria || undefined, per: per || undefined }, partitaId ?? undefined) : Promise.resolve(null)), [q, categoria, per, partitaId, cerca, momento]);
+  const termine = filtro.q.trim();
+  // La ricerca parte con due lettere, o con qualunque altro filtro; con la sola prima lettera si aspetta.
+  const cerca = termine.length >= 2 || filtroAttivo({ ...filtro, q: '' });
+  const chiaveFiltro = parametriDaFiltro(filtro).toString();
+  const risultati = useCarica(() => (cerca
+    ? ricercaArticoli({ q: termine.length >= 2 ? termine : undefined, categorie: filtro.categorie.length ? filtro.categorie : undefined, per: filtro.per || undefined, stato: partitaId && filtro.stato !== 'tutti' ? filtro.stato : undefined, disponibilita: partitaId && filtro.disponibilita !== 'tutti' ? filtro.disponibilita : undefined }, partitaId ?? undefined)
+    : Promise.resolve(null)), [chiaveFiltro, partitaId, cerca, momento]);
   const lista = negozi.dati;
   // Il catalogo resta consultabile anche prima dello sblocco; il semaforo distingue la scheda
   // informativa dalla presenza attiva sulla mappa e dalla possibilita di acquistare.
   const listaVisibile = useMemo(() => lista ?? [], [lista]);
   const totaleArticoliVisibili = listaVisibile.reduce((somma, negozio) => somma + negozio.articoli, 0);
-  const termineNegozio = q.trim().toLocaleLowerCase('it');
+  const termineNegozio = termine.toLocaleLowerCase('it');
   const negoziTrovati = useMemo(() => termineNegozio.length >= 2
-    ? listaVisibile.filter((n) => `${n.nome} ${n.quartiereNome ?? ''} ${n.luogo}`.toLocaleLowerCase('it').includes(termineNegozio))
+    ? listaVisibile.filter((n) => `${n.nome} ${n.quartiereNome ?? ''} ${n.sedeNome ?? ''} ${n.luogo}`.toLocaleLowerCase('it').includes(termineNegozio))
     : [], [listaVisibile, termineNegozio]);
   const gruppi = useMemo(() => {
     const m = new Map<string, { nome: string; negozi: NegozioRiassuntoDto[] }>();
@@ -89,18 +80,13 @@ export function NegoziPage() {
     <PageState isLoading={negozi.caricamento && !negozi.dati} error={negozi.errore} onRetry={() => void negozi.ricarica()}>
       {negozi.dati && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{listaVisibile.length} {listaVisibile.length === 1 ? 'negozio o punto di acquisto' : 'negozi e punti di acquisto'} con {totaleArticoliVisibili} {totaleArticoliVisibili === 1 ? 'articolo' : 'articoli'}: armi, protezioni, accessori, oggetti, regali, cibo e materiali con prezzi, sblocchi e condizioni. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
-          <div className="flex justify-start sm:justify-end sm:-mt-2">
+          <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{listaVisibile.length} {listaVisibile.length === 1 ? 'negozio o punto di acquisto' : 'negozi e punti di acquisto'} con {totaleArticoliVisibili} {totaleArticoliVisibili === 1 ? 'articolo' : 'articoli'}: armi, protezioni, accessori, oggetti, regali, cibo, libri, film e videogiochi con prezzi e requisiti. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
+          <div className="flex flex-wrap justify-start gap-1.5 sm:justify-end sm:-mt-2">
             <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un negozio" dettaglio="resta dopo gli aggiornamenti" onClick={() => setNuovoNegozio(true)} />
+            <Link to="/guida/rimossi" className="btn btn-ghost btn-sm touch no-underline">Rimossi</Link>
           </div>
           {nuovoNegozio && <ModuloCatalogo tipo="negozio" onChiudi={() => setNuovoNegozio(false)} onSalvato={() => { setNuovoNegozio(false); void negozi.ricarica(); }} />}
-          <div className="flex flex-col gap-1.5">
-            <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />
-            <div className="flex flex-wrap gap-1.5">
-              <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={opzioniDaNomi(NOME_CATEGORIA_ARTICOLO)} onCambia={setCategoria} />
-              <Selettore compatto etichetta="Per chi" valore={per} vuoto="Per chiunque" opzioni={PERSONAGGI.map((p) => ({ chiave: p, nome: p }))} onCambia={setPer} />
-            </div>
-          </div>
+          <FiltriArticoli filtro={filtro} onCambia={cambiaFiltro} conPartita={partitaId !== null} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />
           {selezioneVisibile && <DoveSiTrova
             tipo="negozio"
             chiave={selezioneVisibile.chiave}
@@ -128,7 +114,7 @@ export function NegoziPage() {
                         <Link to={`/guida/negozi/${encodeURIComponent(n.chiave)}`} className="no-underline text-text flex flex-1 flex-col gap-1 touch">
                           <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase text-[18px] leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span><ChipDisponibilita disponibilita={n.disponibilita} compatto />{sugg.evidenziato('negozi', n.chiave) && <TargaSuggerito motivo={sugg.motivo('negozi', n.chiave)} compatta />}</span>
                           <span className="text-[12px] text-text-secondary">{n.articoli} {n.articoli === 1 ? 'articolo' : 'articoli'}{n.verificati < n.articoli ? ` · ${n.articoli - n.verificati} da fonte secondaria` : ''}{n.gestore ? ` · ${n.gestore}` : ''}</span>
-                          {n.luogo && <span className="text-[12px] text-text-muted">{n.luogo}</span>}
+                          <span className="text-[12px] text-text-muted">{[n.sedeNome ?? n.luogo, n.orariTesto].filter(Boolean).join(' · ')}</span>
                         </Link>
                         <button type="button" className={`btn btn-sm touch self-start ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={`Mostra posizione di ${n.nome}`} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> Posizione</button>
                       </div>

@@ -1359,3 +1359,42 @@
 
 /* Tipo di luogo: la pastiglia porta il colore dello spillo del tipo (shared/tipiLuogo) come bordo sinistro e l'icona dello spillo. */
 .luogo-tipo { display:inline-flex; align-items:center; gap:4px; border-left:3px solid var(--luogo-tipo-colore, var(--color-border)); }
+
+/* Selettore a tessere (SelettoreIcone): figura sopra, nome sotto, 44 px minimi; le tessere si dividono la riga e vanno a capo. */
+.selettore-icone { display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
+.selettore-icone__tessera { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-width:96px; min-height:64px; padding:6px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:12px; line-height:1.2; cursor:pointer; flex:1 1 96px; max-width:170px; }
+.selettore-icone--compatto .selettore-icone__tessera { min-height:56px; min-width:88px; flex-basis:88px; font-size:11px; }
+.selettore-icone__tessera:hover { border-color:var(--color-text-secondary); }
+.selettore-icone__tessera:disabled { opacity:0.6; cursor:default; }
+.selettore-icone__tessera--attiva { background:var(--color-primary); color:var(--color-text-on-primary); border-color:var(--color-primary); }
+.selettore-icone__tessera:focus-visible { outline:2px solid white; outline-offset:2px; }
+.selettore-icone__icona { display:inline-flex; line-height:0; }
+.selettore-icone__nome { text-align:center; overflow-wrap:normal; word-break:normal; hyphens:auto; }
+@media (max-width:767px) { .selettore-icone__tessera, .selettore-icone--compatto .selettore-icone__tessera { max-width:none; min-width:0; flex:0 1 calc(33.333% - 4px); } }
+
+/* Filtri degli articoli: una riga con ricerca, «Per chi» e azzera; sotto le categorie a tessere e i segmenti. */
+.filtri-articoli { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.filtri-articoli__riga { display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; }
+.filtri-articoli__riga > .relative { flex:1 1 240px; min-width:0; }
+.segmenti { display:inline-flex; flex-wrap:wrap; border:1px solid var(--color-border); }
+.segmenti__voce { min-height:44px; padding:0 12px; border:0; background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:13px; cursor:pointer; }
+.segmenti__voce + .segmenti__voce { border-left:1px solid var(--color-border); }
+.segmenti__voce--attiva { background:var(--color-primary); color:var(--color-text-on-primary); }
+.segmenti__voce:focus-visible { outline:2px solid white; outline-offset:-2px; }
+@media (max-width:767px) { .segmenti { display:flex; width:100%; } .segmenti__voce { flex:1 1 0; padding:0 6px; } }
+
+/* Editor degli orari: chip per i giorni e le fasce, levetta per la pioggia, nota, anteprima. */
+.orari-editor { display:flex; flex-direction:column; gap:8px; }
+.orari-editor__gruppo { display:flex; flex-wrap:wrap; gap:6px; }
+.orari-editor__chip { min-height:44px; padding:0 12px; cursor:pointer; font:inherit; font-size:13px; }
+.orari-editor__chip:disabled { opacity:0.6; cursor:default; }
+
+/* Effetti dichiarati: una voce per riga, con bordo. */
+.editor-effetti__voce { display:flex; flex-direction:column; gap:8px; padding:10px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); }
+
+/* Rimossi: un blocco per tipo, in griglia su desktop. */
+.rimossi-griglia { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:12px; }
+.rimossi-elenco { display:flex; flex-direction:column; gap:6px; padding:12px; border:1px solid var(--color-border); background:var(--color-surface); min-width:0; }
+.rimossi-elenco__titolo { margin:0; font-size:14px; font-weight:600; }
+.rimossi-elenco__riga { display:flex; align-items:center; gap:8px; min-height:44px; border-bottom:1px solid var(--color-border-light, var(--color-border)); }
+.rimossi-elenco__riga:last-child { border-bottom:0; }

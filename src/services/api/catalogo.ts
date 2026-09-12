@@ -8,8 +8,9 @@ import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
 export const getRiepilogoCatalogo = (): Promise<RiepilogoCatalogoDto> => apiGet('/catalogo');
 
-/** Righe del catalogo toccate dall'utente per un tipo. */
-export const getCatalogo = (tipo: TipoCatalogo): Promise<ElementoCatalogoDto[]> => apiGet(`/catalogo/${tipo}`);
+/** Righe del catalogo toccate dall'utente per un tipo; con `nascosti` le sole nascoste (pagina «Rimossi»), anche di un solo negozio. */
+export const getCatalogo = (tipo: TipoCatalogo, filtro: { nascosti?: boolean; negozio?: string } = {}): Promise<ElementoCatalogoDto[]> =>
+  apiGet(`/catalogo/${tipo}${queryString({ nascosti: filtro.nascosti ? '1' : undefined, negozio: filtro.negozio })}`);
 
 /** Una riga qualunque (anche del seed), per il modulo di modifica. */
 export const getElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise<ElementoCatalogoDto> =>

@@ -160,6 +160,12 @@ export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): stri
 }
 
 /** Le famiglie offerte nel modulo, con l'etichetta e quante frasi coprivano nei dati di partenza. */
+/** La figura di ogni famiglia: le illustrazioni delle categorie (`ui/categoria-<chiave>`) che le somigliano. */
+export const ICONA_FAMIGLIA_EFFETTO: Record<EffettoOggetto['famiglia'], string> = {
+  ripristina: 'cura', rianima: 'cura', 'cura-stato': 'stato', 'infliggi-stato': 'battaglia', 'resiste-stato': 'stato', 'previene-stato': 'stato',
+  statistica: 'battaglia', dote: 'dote', regalo: 'regali', 'sblocca-luogo': 'esplorazione', 'sblocca-funzione': 'attivita', moltiplica: 'libri', 'aumenta-punti': 'dote', descrittivo: 'altro',
+};
+
 export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia']; nome: string }> = [
   { chiave: 'ripristina', nome: 'Ripristina HP o SP' },
   { chiave: 'rianima', nome: 'Rianima un alleato caduto' },

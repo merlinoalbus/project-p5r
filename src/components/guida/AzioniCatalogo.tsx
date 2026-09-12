@@ -22,11 +22,12 @@ import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { ModuloCatalogo } from './ModuloCatalogo';
-import type { ElementoCatalogoDto, TipoCatalogo } from '../../types';
+import { tipoCatalogoDi, type TipoModulo } from '../../utils/catalogo';
+import type { ElementoCatalogoDto } from '../../types';
 
 /** Il pulsante «aggiungi» di una pagina di catalogo, col suo modulo. */
 export function AggiungiAlCatalogo({ tipo, titolo, dettaglio = 'resta dopo gli aggiornamenti', onSalvato, className = '' }: {
-  tipo: TipoCatalogo;
+  tipo: TipoModulo;
   titolo: string;
   dettaglio?: string;
   onSalvato: () => void;
@@ -49,7 +50,7 @@ export function AggiungiAlCatalogo({ tipo, titolo, dettaglio = 'resta dopo gli a
  * condizioni), e chiederli per ogni riga di un elenco di quarantasei sarebbe quarantasei
  * richieste per un modulo che forse non si apre. */
 export function CorreggiElemento({ tipo, chiave, titolo = 'Correggi', compatto = true, onSalvato }: {
-  tipo: TipoCatalogo;
+  tipo: TipoModulo;
   chiave: string;
   titolo?: string;
   compatto?: boolean;
@@ -59,7 +60,7 @@ export function CorreggiElemento({ tipo, chiave, titolo = 'Correggi', compatto =
   const [occupato, setOccupato] = useState(false);
   const apri = () => {
     setOccupato(true);
-    void getElementoCatalogo(tipo, chiave)
+    void getElementoCatalogo(tipoCatalogoDi(tipo), chiave)
       .then(setElemento)
       .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.'))
       .finally(() => setOccupato(false));

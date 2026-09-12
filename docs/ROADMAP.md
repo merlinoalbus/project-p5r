@@ -416,11 +416,35 @@ tipo/fascia/tracciamento, sede con l'invariante del quartiere, film al cinema in
 paga solo ai lavori), `GET /api/catalogo/:tipo?nascosti=1&negozio=`. Il frontend è adattato al
 minimo (Palazzi, quartiere, negozio, tipo «luogo» nel modulo): le interfacce sono le voci 6–8.
 
-Resta per le voci 6–8 (dichiarato qui perché fino ad allora il modulo attuale lo mostra): il campo
-`disponibile_dal` del libro nel modulo non viene più salvato (le condizioni sono la disponibilità);
-`orari` del negozio si salva come frase ma la presenza la dà `orari_json` (OrariEditor nella voce 6);
-`luogo.giorni` resta testo (letto da `giorniDaTesto`); nella scheda del Palazzo l'anello conta la
-raccolta sulle planimetrie mentre l'elenco laterale conta ancora i punti della guida (voce 8).
-Per la voce 7 (editor degli effetti): se il modulo vecchio compila una nota per una Dote che ha già voci
-condizionate (lo studio con la pioggia), la voce semplice si aggiunge invece di sostituirle: l'editor degli
-effetti rende esplicita la scelta e chiude il caso.
+Resta per le voci 7–8: `luogo.giorni` resta testo (letto da `giorniDaTesto`); nella scheda del Palazzo
+l'anello conta la raccolta sulle planimetrie mentre l'elenco laterale conta ancora i punti della guida
+(voce 8). Le note su `disponibile_dal`, `orari` come frase e la nota semplice di una Dote con voci
+condizionate sono chiuse dalla voce 6: il modulo scrive solo valori (`orari_json`, `effetti_json`,
+condizioni).
+
+## UI di negozi, articoli e rimossi (12 settembre 2026) — fatto
+
+Voce 6 del piano «struttura, non frasi»: il modulo del catalogo scrive solo valori. `ModuloCatalogo` è
+un guscio (finestra, Salva, Ripristina/Elimina, Nascondi, spunta «Confermato», editor delle
+condizioni) e ogni tipo ha il suo modulo in `src/components/guida/moduli/` con una definizione pura
+(`iniziali`/`valido`/`prepara` in `definizioni.ts`, provate senza interfaccia) e un componente:
+negozio (tipo a tessere, sede con `SceltaLuogo`, Confidente dall'elenco, `OrariEditor`, programma
+punti), articolo (`SceltaOggetto` sul selettore con ricerca sempre aperta, poi categoria a tessere ed
+effetto dichiarato con `EditorEffetto`), libro, film (dove a tessere, una visione al cinema, «vale
+anche alle volte successive» solo lì), attività e videogioco (tipo e fascia a tessere, paga solo ai
+lavori, conteggio, `EditorEffetti` con condizioni per voce), luogo, domanda e cruciverba. Componenti
+condivisi: `SelettoreIcone` (tessere ≥44 px, radiogroup o interruttori), `FiltriArticoli` con il
+filtro come valore (`src/utils/articoli.ts`: ricerca, categorie multiple con conteggio, «Per chi»,
+segmenti Acquistati/Da acquistare e Disponibili/Bloccati, letto e scritto nell'indirizzo). Pagine:
+`NegoziPage` (filtri nell'indirizzo, ricerca sul server con `categorie`/`stato`/`disponibilita`,
+sede e orari sulle schede), `NegozioPage` (sede linkata, orari, programma punti, filtri sull'elenco,
+blocco «Rimossi» del negozio; via sblocco, condizioni in prosa, fonte, «nota originale»),
+`RimossiPage` (`/guida/rimossi`, un blocco per tipo con il ripristino in un tocco; link da
+Negozi e da «I miei dati»). Verifica a 1280/768/375: nessun overflow, bersagli ≥44 px su tablet e
+telefono, tessere a tre per riga sul telefono; giro completo nel browser (articolo creato a mano
+con effetto dichiarato → salvato → corretto → eliminato; articolo della guida nascosto → nel blocco
+«Rimossi» senza ricaricare → rimesso negli elenchi). Validatore: tre rilievi bloccanti corretti
+(link della sede alla pagina del quartiere con l'ancora del luogo, «Dove» per i negozi senza quartiere,
+campi vuoti della domanda come stringhe) e sette non bloccanti chiusi (elenco unico dei personaggi, CSS
+morto, nome del negozio nei rimossi, valori fuori elenco conservati, «gradito a» per i regali, legame
+perso segnalato e conservato, figura delle famiglie in `shared`).
