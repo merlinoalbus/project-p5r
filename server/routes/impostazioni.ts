@@ -1,5 +1,9 @@
 // ============================================================
 // Route /api/impostazioni — stato dell'istanza, backup e ripristino (Fase 15.29), pacchetto di gioco (voce 10)
+//
+// I file grossi passano dalla CARTELLA D'APPOGGIO condivisa (il NAS montato, `DEPOSITO_DIR`): ogni
+// scaricamento ne lascia lì una copia, e da lì si sceglie che cosa reimportare o ripristinare. Il
+// browser non trasporta più centinaia di MB, quindi i limiti di corpo di nginx e dei tunnel non contano.
 // ============================================================
 //
 // L'esportazione risponde con un file binario (`res.download` / `res.send`), quindi NON passa dall'envelope `{ data }`
@@ -10,8 +14,9 @@ import express, { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import fs from 'node:fs';
-import { MAX_BYTE_RIPRISTINO, copiaDatabase, copiaIstanza, ripristinaIstanza, statoIstanza } from '../services/impostazioniService.js';
-import { anteprimaPacchetto, anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchetto, importaPacchettoDaDeposito, importaPacchettoDaUrl, scaricaPacchettoDaUrl, statoImportazione } from '../services/pacchettoGiocoService.js';
+import { MAX_BYTE_RIPRISTINO, copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanza, ripristinaIstanzaDaDeposito, statoIstanza } from '../services/impostazioniService.js';
+import { depositaContenuto, depositaCopia } from '../services/depositoService.js';
+import { anteprimaPacchetto, anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchetto, importaPacchettoDaDeposito, statoImportazione } from '../services/pacchettoGiocoService.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const router = Router();
@@ -33,7 +38,10 @@ router.get('/istanza/database', (_req, res, next) => {
   void (async () => {
     try {
       const { percorso, nome } = await copiaDatabase();
+      // una copia resta nella cartella d'appoggio: il file è insieme salvato e già pronto per il reimport
+      const depositato = depositaCopia(percorso, nome);
       res.setHeader('Content-Type', 'application/vnd.sqlite3');
+      if (depositato) res.setHeader('X-Deposito-File', depositato);
       res.download(percorso, nome, () => fs.rmSync(percorso, { force: true }));
     } catch (err) {
       next(err);
@@ -46,8 +54,11 @@ router.get('/istanza/completa.zip', (_req, res, next) => {
   void (async () => {
     try {
       const { contenuto, nome } = await copiaIstanza();
+      // come per il pacchetto: una copia resta nella cartella d'appoggio, pronta per un ripristino
+      const depositato = depositaContenuto(contenuto, nome);
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', `attachment; filename="${nome}"`);
+      if (depositato) res.setHeader('X-Deposito-File', depositato);
       res.send(contenuto);
     } catch (err) {
       next(err);
@@ -71,9 +82,6 @@ router.put('/istanza', corpoFile, (req, res, next) => {
 // con il file nel corpo (istanza locale) oppure con un indirizzo da cui il server se lo prende (istanza
 // pubblicata: il proxy davanti rifiuterebbe un corpo da centinaia di MB).
 
-/** L'indirizzo da cui scaricare il pacchetto, per le due rotte «da indirizzo». */
-const corpoUrl = z.object({ url: z.string().url().max(2000) });
-
 /** Anteprima dell'importazione: legge il file e dice che cosa cambierebbe, senza sostituire nulla. */
 router.post('/istanza/gioco/anteprima', corpoFile, (req, res, next) => {
   try {
@@ -88,28 +96,6 @@ router.put('/istanza/gioco', corpoFile, (req, res, next) => {
   void (async () => {
     try {
       res.json(await importaPacchetto(fileCaricato(req, 'il pacchetto di gioco')));
-    } catch (err) {
-      next(err);
-    }
-  })();
-});
-
-/** Anteprima del pacchetto che sta a un indirizzo: lo scarica il server. */
-router.post('/istanza/gioco/anteprima-da-url', validate({ body: corpoUrl }), (req, res, next) => {
-  void (async () => {
-    try {
-      res.json(anteprimaPacchetto(await scaricaPacchettoDaUrl((req.body as { url: string }).url)));
-    } catch (err) {
-      next(err);
-    }
-  })();
-});
-
-/** Sostituisce i dati di gioco con il pacchetto che sta a un indirizzo: lo scarica il server. */
-router.put('/istanza/gioco/da-url', validate({ body: corpoUrl }), (req, res, next) => {
-  void (async () => {
-    try {
-      res.json(await importaPacchettoDaUrl((req.body as { url: string }).url));
     } catch (err) {
       next(err);
     }
@@ -136,6 +122,22 @@ router.put('/istanza/gioco/deposito', validate({ body: corpoFileDeposito }), (re
   void (async () => {
     try {
       res.json(await importaPacchettoDaDeposito((req.body as { nome: string }).nome));
+    } catch (err) {
+      next(err);
+    }
+  })();
+});
+
+/** Che cosa c'è nella cartella d'appoggio per il ripristino dell'istanza (ZIP o database). */
+router.get('/istanza/deposito', (_req, res) => {
+  res.json(elencaDepositoBackup());
+});
+
+/** Ripristina l'istanza da un file depositato: lo legge il server. */
+router.put('/istanza/deposito', validate({ body: corpoFileDeposito }), (req, res, next) => {
+  void (async () => {
+    try {
+      res.json(await ripristinaIstanzaDaDeposito((req.body as { nome: string }).nome));
     } catch (err) {
       next(err);
     }
