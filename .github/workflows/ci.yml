@@ -1,15 +1,14 @@
 # ============================================================
 # CI — gate di verifica (typecheck + lint + test + audit)
 # ============================================================
-# Ogni PR e ogni push su main passano dal gate; la pubblicazione delle
-# immagini è demandata a docker-publish.yml.
+# Il gate gira sulle PULL REQUEST. Non anche sul push su main: con il merge di una PR appena
+# verificata sarebbe la stessa verifica due volte, sullo stesso codice, a pochi secondi di distanza.
+# La pubblicazione delle immagini è demandata a docker-publish.yml, che al merge parte comunque.
 
 name: CI
 
 on:
   pull_request:
-  push:
-    branches: [main]
 
 jobs:
   verify:
