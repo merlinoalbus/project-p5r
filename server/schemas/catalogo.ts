@@ -158,7 +158,7 @@ export const datiAttivita = z.object({
  * renderne utile nessuno: è lo stesso difetto che avevano le Doti prima del loro editor. */
 export const datiDomanda = z.object({
   data: dataGioco,
-  tipo: z.enum(['classe', 'esame-medio', 'esame-finale', 'altro']).default('classe'),
+  tipo: z.enum(['classe', 'esame-medio', 'esame-finale', 'tv', 'altro']).default('classe'),
   chi: testo(120).default(''),
   domanda: testo(600).min(1),
   risposte_json: z.array(z.object({ ordine: z.number().int().min(1).max(20), testo: testo(300).min(1) })).max(20)

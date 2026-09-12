@@ -22,7 +22,8 @@ describe('API negozi e inventario', () => {
   it('60 negozi con conteggi, quartiere e Confidente; scheda Untouchable con 218 articoli e fonti', async () => {
     const n = (await request(app).get('/api/compendio/negozi')).body.data as NegozioRiassuntoDto[];
     expect(n).toHaveLength(60);
-    expect(n.reduce((s, x) => s + x.articoli, 0)).toBe(575);
+    // 575 della guida + l'articolo di Star Forneus, che la migrazione 073 ha creato da Yumenoshima
+    expect(n.reduce((s, x) => s + x.articoli, 0)).toBe(576);
     const u = n.find((x) => x.chiave === 'untouchable')!;
     expect(u).toMatchObject({ nome: 'Untouchable', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', articoli: 218 });
     expect(u.confidente).toEqual({ chiave: 'iwai', nome: expect.stringContaining('Iwai') });
@@ -123,7 +124,7 @@ describe('API negozi e inventario', () => {
       db.exec("UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET condizioni_json = '[]'");
       const id = ((await request(app).post('/api/partite').send({ nome: 'Catalogo completo' })).body.data as { id: number }).id;
       const ricerca = (await request(app).get(`/api/compendio/articoli?partita=${id}`)).body.data as RicercaArticoliDto;
-      expect(ricerca.totale).toBe(575);
+      expect(ricerca.totale).toBe(576);
       expect(ricerca.totale).toBeGreaterThan(300);
       expect(ricerca.articoli).toHaveLength(300);
       expect(ricerca.articoli.every((a) => a.disponibilita?.stato === 'disponibile')).toBe(true);

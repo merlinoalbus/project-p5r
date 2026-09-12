@@ -40,9 +40,9 @@ server/
   bootstrap.ts        factory Express: middleware in ordine, router, health/config, 404, errorHandler
   config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, PACCHETTO_DIR, LOG_LEVEL)
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
-  db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 32 tabelle delle partite)
-  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file) … 067 (uid degli spilli); registro in index.ts
-  db/migrazioniUtente/ partite: 001 schema, 002 spillo_partita per uid; registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
+  db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
+  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»); registro in index.ts
+  db/migrazioniUtente/ partite: 001 schema, 002 spillo_partita per uid, 003 timbri_dedalo_partita; registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/pacchetto/ pacchettoGioco.ts: primo avvio dal pacchetto (`assicuraPacchettoIniziale`), `caricaPacchetto`/`ricaricaPacchetto` (test), `regoleAllAvvio`
@@ -54,6 +54,9 @@ server/
   utils/              logger, httpError
 shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node)
 shared/seed.ts        tipi residui (RequisitoSeed, TraduzioniSeed, PercorsoSeed) usati da valutatore, traduzioni e percorso
+shared/orariNegozio.ts  OrariNegozio (giorni, fasce, chiusura con la pioggia, nota): normalizza, leggi, orariComeCondizioni, descriviOrari
+shared/effettiCatalogo.ts VoceEffetto (effetto dichiarato + ripetuto + condizioni) di libri, film e attività: normalizza, leggi, dotiDaEffetti, descriviVoceEffetto
+shared/attivita.ts    cataloghi delle attività: TIPI_ATTIVITA, FASCE_ATTIVITA, TRACCIAMENTI_ATTIVITA (nessuno | svolta | sessioni)
 src/
   main.tsx            boot bloccante su GET /api/config → schermata d'errore HTML se il BE non risponde
   router.tsx          react-router (createBrowserRouter)

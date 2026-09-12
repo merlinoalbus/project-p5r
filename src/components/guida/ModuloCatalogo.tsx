@@ -92,7 +92,7 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
   // che l'app usa per dirti che cosa rispondere e un campo di testo l'avrebbe reso illeggibile.
   domanda: [
     { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-12»' },
-    { nome: 'tipo', etichetta: 'Quando', tipo: 'select', opzioni: { classe: 'Domanda in classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame finale', altro: 'Altro' } },
+    { nome: 'tipo', etichetta: 'Quando', tipo: 'select', opzioni: { classe: 'Domanda in classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame finale', tv: 'Quiz in TV', altro: 'Altro' } },
     { nome: 'chi', etichetta: 'Chi la fa', tipo: 'select', opzioni: { 'Prof. Ushimaru': 'Prof. Ushimaru', 'Prof. Kawakami': 'Prof. Kawakami', 'Prof. Hiruta': 'Prof. Hiruta', 'Prof. Inui': 'Prof. Inui', 'Prof. Chuono': 'Prof. Chuono', 'Prof. Maruki': 'Prof. Maruki', 'Prof. Usami': 'Prof. Usami', 'Game show in TV': 'Game show in TV' } },
     { nome: 'domanda', etichetta: 'Domanda', tipo: 'testolungo' },
     { nome: 'ricompensa', etichetta: 'Che cosa dà', tipo: 'testo', aiuto: 'Per esempio: Conoscenza +1 nota' },

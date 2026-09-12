@@ -77,5 +77,16 @@ import { migration064 } from './064_stati_al_posto_delle_frasi.js';
 import { migration065 } from './065_categorie_spillo_e_arrivo.js';
 import { migration066 } from './066_partite_in_un_file_a_parte.js';
 import { migration067 } from './067_identita_stabile_degli_spilli.js';
+import { migration068 } from './068_residui_da_configurare.js';
+import { migration069 } from './069_orari_strutturati.js';
+import { migration070 } from './070_condizioni_del_negozio_agli_articoli.js';
+import { migration071 } from './071_luogo_catalogabile.js';
+import { migration072 } from './072_sedi_negozi_attivita.js';
+import { migration073 } from './073_collegamenti_libri_videogiochi.js';
+import { migration074 } from './074_effetti_dichiarati_letture.js';
+import { migration075 } from './075_attivita_strutturate.js';
+import { migration076 } from './076_programma_punti.js';
+import { migration077 } from './077_timbri_dedalo.js';
+import { migration078 } from './078_domanda_tipo_tv.js';
 
-export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020, migration021, migration022, migration023, migration024, migration025, migration026, migration027, migration028, migration029, migration030, migration031, migration032, migration033, migration034, migration035, migration036, migration037, migration038, migration039, migration040, migration041, migration042, migration043, migration044, migration045, migration046, migration047, migration048, migration049, migration050, migration051, migration052, migration053, migration054, migration055, migration056, migration057, migration058, migration059, migration060, migration061, migration062, migration063, migration064, migration065, migration066, migration067];
+export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020, migration021, migration022, migration023, migration024, migration025, migration026, migration027, migration028, migration029, migration030, migration031, migration032, migration033, migration034, migration035, migration036, migration037, migration038, migration039, migration040, migration041, migration042, migration043, migration044, migration045, migration046, migration047, migration048, migration049, migration050, migration051, migration052, migration053, migration054, migration055, migration056, migration057, migration058, migration059, migration060, migration061, migration062, migration063, migration064, migration065, migration066, migration067, migration068, migration069, migration070, migration071, migration072, migration073, migration074, migration075, migration076, migration077, migration078];

@@ -376,3 +376,20 @@ generato dal salvataggio della produzione con `npm run pacchetto -- --da-istanza
 esportazione dell'istanza portano entrambi i file; il ripristino accetta anche il vecchio file unico.
 Tolti il pacchetto «per il repository» dell'editor mappe e gli script del seed. L'export/import del
 pacchetto di gioco dall'app è la voce 10.
+
+## Modello dati del catalogo: migrazioni 068–078 e utente 003 (12 settembre 2026) — fatto
+
+Voce 4 del piano «struttura, non frasi». Tutto ciò che era una frase interpretabile diventa un
+valore: `negozio.orari_json` (069, dizionario esatto sulle 21 frasi dei dati), le condizioni di
+sblocco dei negozi sugli articoli (070: il negozio non «sparisce», l'articolo dice «non ancora»),
+`luogo` catalogabile con origine/nascosto/seed_json/condizioni_json (071, regole da
+`sblocco-luoghi`), `sede_chiave` di negozi e attività verso `luogo` (072: 57/60 e 29/30, sette
+luoghi nuovi, tre negozi e un'attività dichiaratamente senza sede), articoli delle librerie
+collegati ai libri e articolo per ogni videogioco (073), `effetti_json` su libri, film e attività
+(074: dote, visioni successive, «sblocca un quartiere», pioggia per lo studio), `paga_yen`/
+`paga_massima`/`dettagli`/`tracciamento` delle attività (075), `programma_punti_json` (076),
+`dungeon_area.timbri_totale` + `timbri_dedalo_partita` (077 e utente 003), `domanda.tipo='tv'` e
+quesiti degli esami sulle righe (078). La 068 ripassa i residui «da configurare» (nessuno nel
+pacchetto). Ogni migrazione ha il suo test (riga sintetica + dati del pacchetto); pacchetto
+rigenerato alla 78. Le colonne vecchie (`orari`, `paga`, `dote`/`note`, `doti_json`) restano
+finché il server (voce 5) e le interfacce (voci 6–8) non leggono i valori nuovi.

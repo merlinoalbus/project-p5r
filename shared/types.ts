@@ -807,11 +807,12 @@ export interface DomandaDto {
   chiave: string | null;
   /** Data di gioco «MM-GG». */
   data: string;
-  tipo: 'classe' | 'esame-medio' | 'esame-finale' | 'altro';
+  tipo: 'classe' | 'esame-medio' | 'esame-finale' | 'tv' | 'altro';
   chi: string;
   domanda: string;
   /** Risposte corrette in ordine (più passi per le domande a catena). */
-  risposte: Array<{ ordine: number | null; testo: string }>;
+  /** `domanda` = il quesito, quando la riga ne raccoglie più d'uno (gli esami, migrazione 078). */
+  risposte: Array<{ ordine: number | null; testo: string; domanda?: string }>;
   ricompensa: string;
   note: string;
   fonte: string;
