@@ -51,3 +51,6 @@ worktrees/
 # dell'utente, 2026-09-12) e vive qui in locale in pacchetto/completo/ (vedi pacchetto/README.md): si carica dall'app con
 # «Importa un pacchetto» e sostituisce il file dell'istanza. In git c'è pacchetto/gioco.db iniziale (senza immagini).
 pacchetto/completo/
+
+# Cartella d'appoggio di prova in locale (i file pesano centinaia di MB)
+.deposito-prova/

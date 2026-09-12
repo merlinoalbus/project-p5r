@@ -22,6 +22,8 @@ import { invalidaCacheTraduzioni } from './traduzioniService.js';
 import { invalidaMotoreFusione } from './fusione/motoreFusione.js';
 import { invalidaEredita } from './fusione/eredita.js';
 import { assorbiImmaginiSuDisco } from './pacchetto/pacchettoGioco.js';
+import { ESTENSIONI_BACKUP, elencaDeposito as elencaCartella, leggiDalDeposito } from './depositoService.js';
+import type { DepositoFileDto } from '../../shared/types.js';
 import { creaZip, leggiZip, type VoceZip } from '../utils/zip.js';
 import type { EsitoRipristinoDto, StatoIstanzaDto } from '../../shared/types.js';
 
@@ -144,6 +146,16 @@ export async function copiaIstanza(): Promise<{ contenuto: Buffer; nome: string 
     fs.rmSync(copia.percorso, { force: true });
     fs.rmSync(copiaPartite.percorso, { force: true });
   }
+}
+
+/** I backup depositati nella cartella d'appoggio (lo ZIP dell'istanza o un database). */
+export function elencaDepositoBackup(): DepositoFileDto {
+  return elencaCartella(ESTENSIONI_BACKUP);
+}
+
+/** Ripristina l'istanza da un file depositato sul NAS: lo legge il server, il browser non trasporta niente. */
+export function ripristinaIstanzaDaDeposito(nome: string): Promise<EsitoRipristinoDto> {
+  return ripristinaIstanza(leggiDalDeposito(nome));
 }
 
 /** Il file è un database SQLite riconoscibile? Solo controlli sul contenuto, nessun effetto. Esportata per i test.

@@ -7,7 +7,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { PacchettoGioco } from './PacchettoGioco';
 import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, StatoIstanzaDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), anteprimaPacchettoGioco: vi.fn(), importaPacchettoGioco: vi.fn(), anteprimaPacchettoGiocoDaUrl: vi.fn(), importaPacchettoGiocoDaUrl: vi.fn(), statoImportazionePacchetto: vi.fn() }));
+const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), anteprimaPacchettoGioco: vi.fn(), importaPacchettoGioco: vi.fn(), statoImportazionePacchetto: vi.fn(), getDepositoPacchetti: vi.fn(), anteprimaPacchettoDaDeposito: vi.fn(), importaPacchettoDaDeposito: vi.fn() }));
 vi.mock('../../services/api', () => api);
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
 vi.mock('../../stores/notificationStore', () => ({ notifica }));
@@ -120,30 +120,6 @@ describe('PacchettoGioco', () => {
     expect(await screen.findByRole('status')).toHaveTextContent(/solo i dati iniziali/);
   });
 
-  it('importa da un indirizzo: il file non passa dal browser e la conferma riparte dallo stesso indirizzo', async () => {
-    const INDIRIZZO = 'https://desktop.esempio.ts.net/api/impostazioni/istanza/database';
-    api.anteprimaPacchettoGiocoDaUrl.mockResolvedValue(anteprima);
-    api.importaPacchettoGiocoDaUrl.mockResolvedValue(esito);
-    render(<PacchettoGioco />);
-    await screen.findByText(/schema 79/);
-    fireEvent.change(screen.getByLabelText(/importa da un indirizzo/i), { target: { value: INDIRIZZO } });
-    fireEvent.click(screen.getByRole('button', { name: /Importa da indirizzo/ }));
-    const finestra = await screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
-    expect(api.anteprimaPacchettoGiocoDaUrl).toHaveBeenCalledWith(INDIRIZZO);
-    expect(api.anteprimaPacchettoGioco).not.toHaveBeenCalled();
-    expect(within(finestra).getByText(new RegExp(`Il pacchetto «${INDIRIZZO}»`))).toBeInTheDocument();
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
-    await waitFor(() => expect(api.importaPacchettoGiocoDaUrl).toHaveBeenCalledWith(INDIRIZZO));
-    expect(api.importaPacchettoGioco).not.toHaveBeenCalled();
-    expect(await screen.findByRole('dialog', { name: 'Pacchetto importato' })).toBeInTheDocument();
-  });
-
-  it('senza indirizzo il pulsante «Importa da indirizzo» resta spento', async () => {
-    render(<PacchettoGioco />);
-    await screen.findByText(/schema 79/);
-    expect(screen.getByRole('button', { name: /Importa da indirizzo/ })).toBeDisabled();
-  });
-
   /** Porta l'interfaccia fino alla finestra di conferma con un file scelto. */
   async function finoAllaConferma() {
     api.anteprimaPacchettoGioco.mockResolvedValue(anteprima);
@@ -185,6 +161,57 @@ describe('PacchettoGioco', () => {
     fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringContaining('Failed to fetch')));
     expect(screen.queryByRole('dialog', { name: 'Pacchetto importato' })).toBeNull();
+  });
+
+  it('dalla cartella d’appoggio: cerca i file, li fa scegliere e l’import lo fa il server', async () => {
+    api.getDepositoPacchetti.mockResolvedValue({
+      disponibile: true,
+      cartella: '/deposito',
+      motivo: null,
+      file: [
+        { nome: 'gioco.db', byte: 326_778_880, modificatoIl: '2026-09-12T18:00:00.000Z' },
+        { nome: 'gioco-vecchio.db', byte: 300_000_000, modificatoIl: '2026-09-01T10:00:00.000Z' },
+      ],
+    });
+    api.anteprimaPacchettoDaDeposito.mockResolvedValue(anteprima);
+    api.importaPacchettoDaDeposito.mockResolvedValue(esito);
+    render(<PacchettoGioco />);
+    await screen.findByText(/schema 79/);
+
+    fireEvent.click(screen.getByRole('button', { name: /Cerca i file disponibili/ }));
+    await waitFor(() => expect(api.getDepositoPacchetti).toHaveBeenCalled());
+    // il primo file (il più recente) è già scelto, e l'elenco dice dove sta
+    expect(await screen.findByRole('combobox', { name: /File in \/deposito \(2\)/ })).toHaveTextContent('gioco.db');
+
+    fireEvent.click(screen.getByRole('button', { name: /Importa il file scelto/ }));
+    const finestra = await screen.findByRole('dialog', { name: 'Importare il pacchetto di gioco?' });
+    expect(api.anteprimaPacchettoDaDeposito).toHaveBeenCalledWith('gioco.db');
+    expect(within(finestra).getByText(/Il pacchetto «gioco\.db»/)).toBeInTheDocument();
+    // il file non passa dal browser: nessun invio con avanzamento
+    expect(api.anteprimaPacchettoGioco).not.toHaveBeenCalled();
+
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Sostituisci i dati di gioco' }));
+    await waitFor(() => expect(api.importaPacchettoDaDeposito).toHaveBeenCalledWith('gioco.db'));
+    expect(api.importaPacchettoGioco).not.toHaveBeenCalled();
+    expect(await screen.findByRole('dialog', { name: 'Pacchetto importato' })).toBeInTheDocument();
+  });
+
+  it('se la cartella d’appoggio non è montata lo dice, senza far credere che sia vuota', async () => {
+    api.getDepositoPacchetti.mockResolvedValue({ disponibile: false, cartella: '/deposito', motivo: 'La cartella d’appoggio non è leggibile: ENOENT', file: [] });
+    render(<PacchettoGioco />);
+    await screen.findByText(/schema 79/);
+    fireEvent.click(screen.getByRole('button', { name: /Cerca i file disponibili/ }));
+    expect(await screen.findByText(/non è leggibile/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Importa il file scelto/ })).toBeNull();
+  });
+
+  it('una cartella d’appoggio vuota lo dice e non offre l’importazione', async () => {
+    api.getDepositoPacchetti.mockResolvedValue({ disponibile: true, cartella: '/deposito', motivo: null, file: [] });
+    render(<PacchettoGioco />);
+    await screen.findByText(/schema 79/);
+    fireEvent.click(screen.getByRole('button', { name: /Cerca i file disponibili/ }));
+    expect(await screen.findByText(/Nessun pacchetto in/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Importa il file scelto/ })).toBeNull();
   });
 
   it('un file che non è un pacchetto viene segnalato senza aprire l’anteprima', async () => {

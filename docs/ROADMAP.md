@@ -594,3 +594,19 @@ connessione da parte del tunnel non viene più scambiata per un fallimento. Test
 contro inattività, tetto senza `Content-Length`, corpo lento che deve arrivare), invio con XHR finto, `BarraInvio`,
 lucchetto e stato dell'importazione. Validatore: primo giro rigettato con quattro bloccanti (timeout dello scarico
 legato anche al corpo, `requestTimeout` di Node, 524 del tunnel scambiato per errore, documenti), tutti corretti qui.
+
+## Import del pacchetto dalla cartella d'appoggio sul NAS (12 settembre 2026) — fatto
+
+Scelta dell'utente dopo la prova sul campo: niente tunnel né indirizzi, il file si deposita su una condivisione del
+NAS montata sul server e l'app importa da lì. `docker-compose.yml` monta la condivisione NFS come volume
+`project_p5r_deposito` su `/deposito` (indirizzo e percorso parametrici con `NAS_ADDR`/`NAS_PATH`), con
+`DEPOSITO_DIR=/deposito` nel backend; il database vivo **resta sul volume persistente**, perché SQLite in WAL non
+regge NFS. Server: `elencaDeposito`, `percorsoNelDeposito` (nessuna risalita), `anteprimaPacchettoDaDeposito`,
+`importaPacchettoDaDeposito` (stesso lucchetto e stesse fasi dell'importazione, con la fase nuova `lettura`), rotte
+`GET /istanza/gioco/deposito`, `POST /istanza/gioco/deposito/anteprima`, `PUT /istanza/gioco/deposito`. Interfaccia:
+nella card «Pacchetto di gioco» il pulsante «Cerca i file disponibili» interroga la cartella, il `Selettore` mostra
+nome, dimensione e data di ogni file e «Importa il file scelto» apre l'anteprima; l'importazione da indirizzo resta
+come alternativa dentro un pannello richiudibile. Verificato dal vivo con una cartella di prova (elenco, anteprima di
+un pacchetto da 311 MB, rifiuto di un file non valido e di tre tentativi di risalita) e a 1280/768/375 senza overflow
+con bersagli da 44 px. Test: `server/services/pacchettoDeposito.test.ts` (cartella assente, non leggibile, elenco
+ordinato, risalite) e tre casi nella card.

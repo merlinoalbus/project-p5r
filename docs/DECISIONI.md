@@ -442,3 +442,12 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Un esito vale solo per il tentativo che lo ha chiesto**: l'importazione porta un identificativo e il frontend
   confronta quello dell'ultima operazione vista prima di partire. Dire «riuscita» per un lavoro mai iniziato sarebbe
   peggio di qualunque errore: l'utente crederebbe di avere dati che non ha.
+
+### 2026-09-12 — Il pacchetto arriva dalla cartella d'appoggio sul NAS
+- **Il file non passa più dal browser né da internet**: si deposita su una condivisione del NAS montata sul server e
+  l'app lo importa da lì. Sostituisce l'idea del tunnel verso il PC, che l'utente ha respinto.
+- **Il NAS non ospita il database vivo**: SQLite qui gira in WAL, che ha bisogno di memoria condivisa fra i processi e
+  non funziona su un filesystem di rete. Sul NAS sta solo il file di scambio; `/data` resta un volume locale.
+- **L'elenco dei file dice sempre la verità**: cartella non configurata, non montata o vuota sono tre messaggi
+  diversi, perché «nessun file» quando in realtà il mount è caduto manderebbe a cercare il problema dalla parte
+  sbagliata.

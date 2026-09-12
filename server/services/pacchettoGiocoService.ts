@@ -30,9 +30,9 @@ import { httpErrors } from '../utils/httpError.js';
 import { closeDb, getDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
-import { MAX_BYTE_RIPRISTINO, cartellaTemporanea, copiaDatabase, copiaDiSicurezza, riapriIstanza, scriviDatabase, statoIstanza, timbro, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
-import { scaricaDaUrl } from '../utils/scaricaDaUrl.js';
-import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
+import { cartellaTemporanea, copiaDatabase, copiaDiSicurezza, riapriIstanza, scriviDatabase, statoIstanza, timbro, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
+import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
+import { ESTENSIONI_PACCHETTO, elencaDeposito as elencaCartella, leggiDalDeposito } from './depositoService.js';
 
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
@@ -133,21 +133,35 @@ export function orfaniPartite(db: Database.Database, schemaGioco = 'main', schem
   return out;
 }
 
-/**
- * Scarica il pacchetto dall'indirizzo indicato: solo http/https, tetto del ripristino applicato mentre
- * arriva, attesa della risposta separata dall'inattività (`scaricaDaUrl`). Il contenuto lo verifica poi
- * chi lo importa. È la strada per le istanze pubblicate, dove un corpo così grande non passa dal proxy.
- */
-export async function scaricaPacchettoDaUrl(indirizzo: string): Promise<Buffer> {
-  const { contenuto, url } = await scaricaDaUrl(indirizzo, {
-    maxByte: MAX_BYTE_RIPRISTINO,
-    cosa: 'il pacchetto di gioco',
-    codiceScaricoFallito: 'scarico-fallito',
-    codiceTroppoGrande: 'pacchetto-troppo-grande',
-    accept: 'application/vnd.sqlite3,application/octet-stream,*/*;q=0.8',
-  });
-  logger.info({ host: url.host, byte: contenuto.length }, 'pacchetto di gioco scaricato dall\'indirizzo indicato');
-  return contenuto;
+// ---- La cartella d'appoggio (il NAS montato in `/deposito`) ----
+//
+// È la strada normale per un'istanza pubblicata: il file lo si mette sul NAS, il server lo legge dal
+// mount. Nessun corpo grande attraversa il proxy e nessun servizio esterno entra in mezzo. Il database
+// vivo resta sul volume locale: qui si legge solo il file di scambio.
+
+/** I pacchetti depositati nella cartella d'appoggio. */
+export function elencaDeposito(): DepositoFileDto {
+  return elencaCartella(ESTENSIONI_PACCHETTO);
+}
+
+/** Che cosa cambierebbe importando un pacchetto depositato sul NAS. */
+export function anteprimaPacchettoDaDeposito(nome: string): AnteprimaPacchettoDto {
+  return anteprimaPacchetto(leggiDalDeposito(nome));
+}
+
+/** Sostituisce i dati di gioco con un pacchetto depositato sul NAS. */
+export async function importaPacchettoDaDeposito(nome: string): Promise<EsitoImportazionePacchettoDto> {
+  const operazione = impegna('lettura');
+  try {
+    const contenuto = leggiDalDeposito(nome);
+    avanza('verifica');
+    const esito = await sostituisciDatiDiGioco(contenuto);
+    libera(operazione, true, `Dati di gioco sostituiti da «${nome}» (schema ${esito.versioneSchema}).`, esito);
+    return esito;
+  } catch (err) {
+    libera(operazione, false, err instanceof Error ? err.message : String(err), null);
+    throw err;
+  }
 }
 
 /** Il pacchetto di gioco dell'istanza: la copia consistente di gioco.db (immagini comprese), da leggere e poi cancellare. */
@@ -249,21 +263,6 @@ export function statoImportazione(): StatoImportazionePacchettoDto {
 export async function importaPacchetto(contenuto: Buffer): Promise<EsitoImportazionePacchettoDto> {
   const operazione = impegna('verifica');
   try {
-    const esito = await sostituisciDatiDiGioco(contenuto);
-    libera(operazione, true, `Dati di gioco sostituiti (schema ${esito.versioneSchema}).`, esito);
-    return esito;
-  } catch (err) {
-    libera(operazione, false, err instanceof Error ? err.message : String(err), null);
-    throw err;
-  }
-}
-
-/** Sostituisce i dati di gioco con il pacchetto che sta a un indirizzo: lo scarico è parte dell'operazione. */
-export async function importaPacchettoDaUrl(indirizzo: string): Promise<EsitoImportazionePacchettoDto> {
-  const operazione = impegna('scarico');
-  try {
-    const contenuto = await scaricaPacchettoDaUrl(indirizzo);
-    avanza('verifica');
     const esito = await sostituisciDatiDiGioco(contenuto);
     libera(operazione, true, `Dati di gioco sostituiti (schema ${esito.versioneSchema}).`, esito);
     return esito;

@@ -27,6 +27,8 @@ export const config = {
   pacchettoDir: path.resolve(process.env.PACCHETTO_DIR || './pacchetto'),
   /** Gli asset grafici del repository (`public/asset`): compendio e interfaccia; la migrazione 079 ne assorbe le famiglie di gioco. */
   assetDir: path.resolve(process.env.ASSET_DIR || './public/asset'),
+  /** Cartella d'appoggio da cui importare i pacchetti (il NAS montato in `/deposito`); vuota = nessun deposito. */
+  depositoDir: process.env.DEPOSITO_DIR ? path.resolve(process.env.DEPOSITO_DIR) : '',
 
   appVersion: '0.1.0',
 } as const;
