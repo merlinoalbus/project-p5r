@@ -159,8 +159,8 @@ describe('CittaPage', () => {
 describe('QuartierePage', () => {
   it('mostra la mappa del quartiere incorporata e i luoghi senza i pulsanti di posizionamento (ora nell’editor)', async () => {
     // `mappaChiave` la dà il backend (cittaService), non la costruisce la pagina: il mock deve dirla
-    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, descrizione: '', fonte: '', mappa: true, pianta: null, piantaAssente: null,
-      luoghi: [{ chiave: 'shibuya/untouchable', ordine: 0, tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi', quando: 'entrambe', giorni: null, sblocco: null, confidenti: [{ chiave: 'iwai', nome: 'Munehisa Iwai' }], attivita: [], negozi: [{ chiave: 'untouchable', nome: 'Untouchable' }], negozio: 'untouchable', origine: 'seed', piatti: null, note: null, fonte: '', verificato: true, marcatore: null, condizioni: null, disponibilita: null } as QuartiereDettaglioDto['luoghi'][number]] };
+    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, pianta: null, piantaAssente: null,
+      luoghi: [{ chiave: 'shibuya/untouchable', ordine: 0, tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi', quando: 'entrambe', giorni: [], giorniTesto: '', sblocco: null, confidenti: [{ chiave: 'iwai', nome: 'Munehisa Iwai' }], attivita: [], negozi: [{ chiave: 'untouchable', nome: 'Untouchable' }], negozio: 'untouchable', origine: 'seed', piatti: null, note: null, verificato: true, marcatore: null, condizioni: null, disponibilita: null } as QuartiereDettaglioDto['luoghi'][number]] };
     api.getQuartiere.mockResolvedValue(q);
     api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));
     render(<MemoryRouter initialEntries={['/guida/citta/shibuya']}><Routes><Route path="/guida/citta/:chiave" element={<QuartierePage />} /></Routes></MemoryRouter>);
@@ -169,6 +169,9 @@ describe('QuartierePage', () => {
     const luoghi = within(screen.getByRole('list', { name: 'Luoghi' }));
     expect(luoghi.getByText('Untouchable')).toBeInTheDocument();
     expect(luoghi.queryByRole('button', { name: /Posiziona/ })).not.toBeInTheDocument();
+    // il modulo del luogo si apre da qui: «Aggiungi un luogo» nella sezione e «Correggi» in ogni card (voce 11)
+    expect(within(screen.getByRole('region', { name: 'Luoghi del quartiere' })).getByRole('button', { name: /Aggiungi un luogo/ })).toBeInTheDocument();
+    expect(luoghi.getByRole('button', { name: /Correggi/ })).toBeInTheDocument();
     expect(luoghi.getByRole('link', { name: 'Articoli in vendita' })).toHaveAttribute('href', '/guida/negozi/untouchable');
     expect(api.scaricaPiantaQuartiere).not.toHaveBeenCalled();
   });

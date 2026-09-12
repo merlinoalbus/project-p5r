@@ -20,7 +20,7 @@ vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ chiave }: { 
 const att = (chiave: string, nome: string, tipo: AttivitaDto['tipo'], dote: 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia', extra: Partial<AttivitaDto> = {}): AttivitaDto => ({
   chiave, nome, tipo, luogo: 'Kichijoji, Penguin Sniper', luogoChiave: 'kichijoji', fascia: 'sera', costo: 800, sblocco: '5 giugno', sessioni: null, doti: [], altriEffetti: null, regole: 'Regole.', premi: null,
   pagaYen: null, pagaMassima: null, dettagli: 'Come funziona: tre freccette a turno.', effetti: [{ effetto: { famiglia: 'dote', dote, note: 1 }, testo: `${dote[0].toUpperCase()}${dote.slice(1)} ♪` }], effettiTesto: [`${dote[0].toUpperCase()}${dote.slice(1)} ♪`],
-  tracciamento: 'nessuno', sedeChiave: 'kichijoji/penguin-sniper', sedeNome: 'Penguin Sniper', paga: null, fonte: 'https://www.allgamestaff.it/x', verificato: true, condizioni: null, disponibilita: null, ...extra,
+  tracciamento: 'nessuno', sedeChiave: 'kichijoji/penguin-sniper', sedeNome: 'Penguin Sniper', paga: null, verificato: true, condizioni: null, disponibilita: null, ...extra,
 });
 const dati: AttivitaTutteDto = {
   attivita: [att('freccette', 'Freccette', 'mini-gioco', 'perizia'), att('bagno', 'Bagno pubblico', 'altro', 'fascino', { sedeChiave: null, sedeNome: null })],

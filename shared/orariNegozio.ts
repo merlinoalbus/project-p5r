@@ -62,7 +62,8 @@ export function orariComeCondizioni(o: OrariNegozio): RequisitoSpillo[] {
 const NOME_GIORNO: Record<string, string> = Object.fromEntries(GIORNI_SETTIMANA.map((g) => [g.chiave, g.nome]));
 
 /** «dal lunedì al venerdì» quando i giorni sono consecutivi, altrimenti l'elenco. */
-function descriviGiorni(giorni: GiornoChiave[]): string {
+/** «lunedì, mercoledì e sabato»; vuoto = nessuna limitazione (stringa vuota). */
+export function descriviGiorni(giorni: GiornoChiave[]): string {
   const indici = giorni.map((g) => GIORNI.indexOf(g)).sort((a, b) => a - b);
   const consecutivi = indici.length >= 3 && indici.every((v, i) => i === 0 || v === indici[i - 1] + 1);
   if (consecutivi) return `dal ${NOME_GIORNO[GIORNI[indici[0]]]} al ${NOME_GIORNO[GIORNI[indici[indici.length - 1]]]}`;

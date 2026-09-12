@@ -1,5 +1,5 @@
 // ============================================================
-// ModuloLuogo — un luogo della città: nome, tipo a tessere (l'icona dello spillo), quartiere, che cosa offre, quando, giorni, note
+// ModuloLuogo — un luogo della città: nome, tipo a tessere (l'icona dello spillo), quartiere, che cosa offre, quando, giorni a chip (migrazione 080), note
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
@@ -9,6 +9,9 @@ import { IconaSpillo } from '../../mappe/IconaSpillo';
 import { SelettoreIcone, type OpzioneIcone } from '../../shared/SelettoreIcone';
 import { TIPI_LUOGO } from '../../../../shared/tipiLuogo';
 import { testoDi, type PropsModulo } from './base';
+import { Interruttori } from '../OrariEditor';
+import { type GiornoChiave } from '../../../../shared/orariNegozio';
+import { GIORNI_SETTIMANA } from '../../../../shared/condizioniSpillo';
 import { Blocco, Campo, Griglia } from './campi';
 
 const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
@@ -32,7 +35,9 @@ export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
         <Selettore etichetta="Quando" valore={testoDi(dati.quando)} vuoto="Non indicato" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_QUANDO} onCambia={(k) => imposta({ quando: k || null })} />
       </Blocco>
       <Campo nome="cosa_offre" etichetta="Che cosa offre" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} />
-      <Campo nome="giorni" etichetta="Giorni" dati={dati} imposta={imposta} disabilitato={disabilitato} max={200} aiuto="Per esempio: domenica" />
+      <Blocco largo>
+        <Interruttori<GiornoChiave> etichetta="Giorni (nessuno = tutti)" scelte={Array.isArray(dati.giorni_json) ? (dati.giorni_json as GiornoChiave[]) : []} opzioni={GIORNI_SETTIMANA} disabilitato={disabilitato} onCambia={(giorni_json) => imposta({ giorni_json })} />
+      </Blocco>
       <Campo nome="note" etichetta="Note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
     </Griglia>
   );

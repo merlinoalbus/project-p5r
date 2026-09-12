@@ -1,4 +1,5 @@
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
+import type { GiornoChiave } from './orariNegozio.js';
 import type { TipoLuogo } from './tipiLuogo.js';
 import type { RequisitoSpillo } from './condizioniSpillo.js';
 import type { OrariNegozio } from './orariNegozio.js';
@@ -1081,13 +1082,10 @@ export interface NegozioRiassuntoDto {
   tipo: 'armi' | 'protezioni' | 'accessori' | 'oggetti' | 'regali' | 'abiti' | 'cibo' | 'online' | 'ambulante' | 'distributore' | 'materiali' | 'misto' | 'altro';
   gestore: string | null;
   confidente: { chiave: string; nome: string } | null;
-  /** La frase della guida com'era (colonna `orari`); l'app legge `orariStrutturati`. */
-  orari: string | null;
   /** Gli orari come valori (migrazione 069): sono l'unica disponibilità del negozio e del suo pin. */
   orariStrutturati: OrariNegozio;
   /** La frase generata dagli orari strutturati: una sola per ogni valore uguale. */
   orariTesto: string;
-  sblocco: string | null;
   /** Il luogo della città dove sta il negozio (migrazione 072); null per chi non ha una sede (online, TV, dentro un Palazzo). */
   sedeChiave: string | null;
   sedeNome: string | null;
@@ -1126,7 +1124,6 @@ export interface ArticoloDto {
   disponibileDal: string | null;
   condizione: string | null;
   nota: string | null;
-  fonte: string;
   verificato: boolean;
   /** Solo con `partita`: valutazione di `disponibileDal` e `condizione` alla data corrente (stessi requisiti dei semafori). */
   disponibilita?: DisponibilitaDto;
@@ -1136,7 +1133,6 @@ export interface ArticoloDto {
 
 export interface NegozioDettaglioDto extends NegozioRiassuntoDto {
   note: string | null;
-  fonte: string;
   articoliElenco: ArticoloDto[];
   acquistati: number;
 }
@@ -1156,7 +1152,6 @@ export interface CruciverbaDto {
   indizio: string;
   risposta: string;
   rispostaEn: string | null;
-  fonte: string;
   /** Risolto nella partita. */
   fatto: boolean;
 }
@@ -1203,7 +1198,10 @@ export interface LuogoDto {
   nome: string;
   cosaOffre: string;
   quando: 'giorno' | 'sera' | 'entrambe' | null;
-  giorni: string | null;
+  /** I giorni della settimana in cui il luogo è attivo (migrazione 080, `giorni_json`); vuoto = nessuna limitazione. */
+  giorni: GiornoChiave[];
+  /** La frase generata dai giorni («giovedì, sabato e domenica»); vuota quando non c'è limitazione. */
+  giorniTesto: string;
   sblocco: string | null;
   confidenti: Array<{ chiave: string; nome: string }>;
   /** Le attività della guida che si svolgono qui (`attivita.sede_chiave`, migrazione 072). */
@@ -1216,7 +1214,6 @@ export interface LuogoDto {
   origine: 'seed' | 'utente';
   piatti: Array<{ nome: string; prezzo: number | null; effetto: string }> | null;
   note: string | null;
-  fonte: string;
   /** false = dato da fonte secondaria, non confermato sulla guida italiana. */
   verificato: boolean;
   /** Posizione dello spillo sulla mappa del quartiere (percentuali), se fissato. */
@@ -1280,7 +1277,6 @@ export interface AttivitaDto {
   /** Il luogo della città dove si svolge (migrazione 072). */
   sedeChiave: string | null;
   sedeNome: string | null;
-  fonte: string;
   verificato: boolean;
   /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
    *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
@@ -1310,7 +1306,6 @@ export interface LibroDto {
   effettiTesto: string[];
   /** Dove si compra: gli articoli collegati al libro (migrazione 073), con il negozio e il prezzo. */
   negozi: Array<{ articolo: string; negozio: string; negozioNome: string; prezzo: number | null }>;
-  fonte: string;
   verificato: boolean;
   /** Provenienze mappabili verificate; può essere vuoto quando il premio non ha un luogo fisico. */
   posizioni: Array<{ tipo: 'quartiere' | 'luogo' | 'negozio' | 'attivita'; chiave: string; etichetta: string }>;
@@ -1343,7 +1338,6 @@ export interface FilmDto {
   nome: string;
   nomeIt: string | null;
   dove: 'cinema' | 'dvd';
-  periodo: string;
   dote: DoteChiave | null;
   note: number | null;
   /** Quanto vale rivederlo: al cinema la guida lo dichiara riga per riga. Vuoto = niente. */
@@ -1353,7 +1347,6 @@ export interface FilmDto {
   /** Gli effetti dichiarati (migrazione 074): la prima visione e, con `ripetuto`, quelle successive. */
   effetti: VoceEffettoDto[];
   effettiTesto: string[];
-  fonte: string;
   verificato: boolean;
   posizioni: Array<{ tipo: 'quartiere' | 'luogo' | 'negozio' | 'attivita'; chiave: string; etichetta: string; ruolo: 'cinema' | 'noleggio' | 'visione' }>;
   /** Prima visione al cinema o sessioni necessarie a completare un DVD. */

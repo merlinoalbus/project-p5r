@@ -40,8 +40,9 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
 import { usePartitaStore } from '../stores/partitaStore';
+import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
-function Luogo({ l }: { l: LuogoDto }) {
+function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
   const sugg = useSuggerimenti();
   // **Il posto che non c'è ancora resta in elenco, e lo dice.** La guida serve anche a sapere che
   // cosa arriverà: toglierlo è quel che fa la mappa — un pin dove non c'è niente manda a cercare
@@ -61,9 +62,10 @@ function Luogo({ l }: { l: LuogoDto }) {
       </div>
       <p className="m-0">{l.cosaOffre}</p>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
-        {l.giorni && <span><strong className="text-text">Giorni:</strong> {l.giorni}</span>}
+        {l.giorniTesto && <span><strong className="text-text">Giorni:</strong> {l.giorniTesto}</span>}
         {l.sblocco && <span><strong className="text-text">Sblocco:</strong> {l.sblocco}</span>}
       </div>
+      <div className="flex flex-wrap items-center gap-1.5"><CorreggiElemento tipo="luogo" chiave={l.chiave} onSalvato={onSalvato} /></div>
       {(l.confidenti.length > 0 || l.attivita.length > 0) && (
         <div className="flex flex-wrap gap-1.5 items-center">
           {l.confidenti.map((c) => <Link key={c.chiave} to={`/confidenti/${c.chiave}`} className="chip chip--attivo no-underline">{c.nome}</Link>)}
@@ -153,6 +155,7 @@ export function QuartierePage() {
             </section>
 
             <section className="flex flex-col gap-2" aria-label="Luoghi del quartiere">
+              <div className="flex flex-wrap items-center gap-1.5"><AggiungiAlCatalogo tipo="luogo" titolo="Aggiungi un luogo" onSalvato={() => void dati.ricarica()} /></div>
               {tipi.length > 1 && (
                 <div className="flex flex-wrap gap-1.5">
                   <button type="button" className={`chip touch ${tipo === '' ? 'chip--attivo' : ''}`} onClick={() => setTipo('')} aria-pressed={tipo === ''}>Tutti ({q.luoghi.length})</button>
@@ -162,7 +165,7 @@ export function QuartierePage() {
                 </div>
               )}
               <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 md:grid-cols-2 xl:grid-cols-1" aria-label="Luoghi">
-                {visibili.map((l) => <Luogo key={l.chiave} l={l} />)}
+                {visibili.map((l) => <Luogo key={l.chiave} l={l} onSalvato={() => void dati.ricarica()} />)}
               </ul>
               {visibili.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun luogo di questo tipo in {q.nome}.</p>}
             </section>

@@ -127,11 +127,11 @@ export const luogo: DefinizioneModulo = {
   conVerificato: true,
   iniziali: (e) => ({
     nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro', quartiere_chiave: testoDi(e?.dati.quartiere_chiave),
-    cosa_offre: testoDi(e?.dati.cosa_offre), quando: (e?.dati.quando as string | null) ?? null, giorni: testoDi(e?.dati.giorni), note: testoDi(e?.dati.note),
+    cosa_offre: testoDi(e?.dati.cosa_offre), quando: (e?.dati.quando as string | null) ?? null, giorni_json: (jsonDi<unknown>(e?.dati.giorni_json, []) as unknown[]).filter((g): g is string => typeof g === 'string'), note: testoDi(e?.dati.note),
     verificato: verificatoDi(e),
   }),
   valido: (d) => testoDi(d.nome).trim().length > 0 && testoDi(d.quartiere_chiave).length > 0,
-  prepara: (d) => ({ ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), cosa_offre: testoDi(d.cosa_offre).trim(), giorni: testoOnull(d.giorni), note: testoOnull(d.note) }),
+  prepara: (d) => ({ ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), cosa_offre: testoDi(d.cosa_offre).trim(), giorni_json: Array.isArray(d.giorni_json) ? d.giorni_json : [], note: testoOnull(d.note) }),
 };
 
 /** `nullable`: vuoto = null (lo schema lo ammette); altrimenti vuoto = '' (lo schema vuole una stringa, come `ricompensa` e `note` della domanda). */

@@ -69,7 +69,7 @@ const attivitaDto = (r: RigaAttivita, sedi: Map<string, string>, st: StatoDispon
   pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(r.effetti_json),
   tracciamento: eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo),
   sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.get(r.sede_chiave) ?? null) : null,
-  fonte: r.fonte, verificato: r.verificato === 1,
+  verificato: r.verificato === 1,
   ...conDisponibilita(r.condizioni_json, st),
 });
 interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>; progressiFilm: Map<string, number>; progressiVideogiochi: Map<string, number> }
@@ -100,7 +100,7 @@ const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, Libr
   return {
     chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, ...luogoSbloccato(r.effetti_json, r.effetto_json), sessioni: r.sessioni, dettagli: r.dettagli,
     ...effettiDto(r.effetti_json), negozi: negozi.get(r.chiave) ?? [],
-    fonte: r.fonte, verificato: r.verificato === 1,
+    verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
     ...conDisponibilita(r.condizioni_json, st),
   };
@@ -111,8 +111,8 @@ const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDt
   const progresso = r.dove === 'dvd' ? Math.min(grezzo, totaleSessioni) : grezzo;
   const iniziato = progresso > 0;
   return {
-    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, periodo: r.periodo, dote: r.dote as FilmDto['dote'], note: r.note, noteSuccessive: r.note_successive, prezzo: r.prezzo, dettagli: r.dettagli,
-    ...effettiDto(r.effetti_json), fonte: r.fonte, verificato: r.verificato === 1,
+    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, dote: r.dote as FilmDto['dote'], note: r.note, noteSuccessive: r.note_successive, prezzo: r.prezzo, dettagli: r.dettagli,
+    ...effettiDto(r.effetti_json), verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso, iniziato, fatto: r.dove === 'cinema' ? iniziato : progresso >= totaleSessioni,
     ...conDisponibilita(r.condizioni_json, st),
   };

@@ -38,7 +38,6 @@ describe('API città e attività', () => {
     const u = s.luoghi.find((l) => l.nome === 'Untouchable')!;
     expect(u).toMatchObject({ chiave: 'shibuya/untouchable', tipo: 'negozio', quando: 'sera', verificato: true });
     expect(u.confidenti).toEqual([{ chiave: 'iwai', nome: expect.stringContaining('Iwai') }]);
-    expect(u.fonte.startsWith('https://www.allgamestaff.it/')).toBe(true);
     const y = (await request(app).get('/api/compendio/citta/yongen-jaya')).body.data as QuartiereDettaglioDto;
     expect(y.luoghi.some((l) => l.piatti !== null && l.piatti.length > 0)).toBe(true);
     expect((await request(app).get('/api/compendio/citta/atlantide')).status).toBe(404);
@@ -95,7 +94,7 @@ describe('API città e attività', () => {
     expect(a.attivita.find((x) => x.chiave === 'freccette')).toMatchObject({ luogoChiave: 'kichijoji', fascia: 'sera', costo: 800, doti: [{ dote: 'perizia', note: 1, condizione: expect.any(String) }], verificato: true });
     expect(a.lavori.every((x) => x.tipo === 'lavoro' && x.doti.length > 0)).toBe(true);
     expect(a.libri.filter((l) => l.dote !== null).length).toBeGreaterThanOrEqual(20);
-    expect(a.libri.every((l) => l.fonte.startsWith('http') && !l.fatto)).toBe(true);
+    expect(a.libri.every((l) => !l.fatto)).toBe(true);
     expect(a.film.filter((f) => f.dove === 'dvd')).toHaveLength(12);
     expect(a.film.filter((f) => f.dove === 'cinema')).toHaveLength(18);
     expect(a).toMatchObject({ libriLetti: 0, filmVisti: 0 });

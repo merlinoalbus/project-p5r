@@ -96,3 +96,12 @@ describe('domanda e cruciverba', () => {
     expect(def.cruciverba.valido({ ...def.cruciverba.iniziali(null), data: '04-18', indizio: 'I', risposta: 'R' })).toBe(true);
   });
 });
+
+describe('luogo', () => {
+  it('legge i giorni salvati come JSON (solo chiavi) e li riscrive come elenco', () => {
+    expect(def.luogo.iniziali(null)).toMatchObject({ tipo: 'altro', giorni_json: [] });
+    const d = def.luogo.iniziali(riga('luogo', { nome: 'X', quartiere_chiave: 'shibuya', giorni_json: '["domenica","giovedi",7]' }));
+    expect(d.giorni_json).toEqual(['domenica', 'giovedi']);
+    expect(def.luogo.prepara({ ...d, nome: ' X ' })).toMatchObject({ nome: 'X', giorni_json: ['domenica', 'giovedi'] });
+  });
+});

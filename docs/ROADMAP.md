@@ -416,7 +416,7 @@ tipo/fascia/tracciamento, sede con l'invariante del quartiere, film al cinema in
 paga solo ai lavori), `GET /api/catalogo/:tipo?nascosti=1&negozio=`. Il frontend è adattato al
 minimo (Palazzi, quartiere, negozio, tipo «luogo» nel modulo): le interfacce sono le voci 6–8.
 
-Resta per la voce 11: `luogo.giorni` resta testo (letto da `giorniDaTesto`). La scheda del Palazzo
+La voce 11 ha poi strutturato `luogo.giorni` (`giorni_json`, migrazione 080). La scheda del Palazzo
 è stata allineata dalla voce 8 (anello ed elenco contano la stessa raccolta). Le note su `disponibile_dal`, `orari` come frase e la nota semplice di una Dote con voci
 condizionate sono chiuse dalla voce 6: il modulo scrive solo valori (`orari_json`, `effetti_json`,
 condizioni).
@@ -560,3 +560,21 @@ GitHub di 100 MB, niente LFS per ora): in git `pacchetto/gioco.db` iniziale, sen
 per aprire l'interfaccia; il completo vive in locale in `pacchetto/completo/gioco.db` (ignorato, `pacchetto/README.md`)
 e **il caricamento iniziale completo avviene sempre con l'importazione dall'app**, che sostituisce il file dell'istanza;
 la card avvisa finché non è importato (`StatoIstanzaDto.completo`; `vuota` se manca anche l'iniziale).
+
+## Pulizia e documentazione (12 settembre 2026) — fatto
+
+Voce 11, l'ultima del piano «struttura, non frasi». **Migrazione 080 `giorni_luogo_strutturati`**: `luogo.giorni_json`
+(chiavi dei giorni della settimana, vuoto = nessuna limitazione) al posto della frase `giorni`; la conversione legge solo
+l'elenco che precede la parentesi e mette la precisazione, com'era scritta, nelle `note` («Giorni (dalla guida): domenica
+(regolare) e festività»); 8 luoghi convertiti, 2 con nota. `presenzaEntita.giorniDaJson` sostituisce `giorniDaTesto`;
+`LuogoDto.giorni: GiornoChiave[]` + `giorniTesto` (`descriviGiorni`, ora esportata da `shared/orariNegozio`); lo schema
+`datiLuogo` accetta `giorni_json` come elenco di chiavi e il modulo del luogo li sceglie a chip (`Interruttori` di
+`OrariEditor`). **Campi di prosa tolti dai DTO** perché nessuna pagina li leggeva più: `FilmDto.periodo`,
+`NegozioRiassuntoDto.orari` (la frase; resta `orariStrutturati`/`orariTesto`; anche lo schema `datiNegozio` non accetta più `orari`) e `sblocco`, `fonte` di articolo, negozio,
+libro, film, attività, luogo e cruciverba (le colonne restano nel database per il credito, non si scrivono più dal
+modulo). `SelettoreRicerca.tsx`, alias di `Selettore` senza più importazioni, è cancellato. Il modulo del luogo, che nessuna pagina apriva,
+si apre ora dalla scheda del quartiere («Aggiungi un luogo», «Correggi» su ogni card). **Migrazione 081 `istantanee_luogo_giorni`**:
+le istantanee `seed_json` dei luoghi ricevono `giorni_json` (e la nota) dalla loro frase, e le righe della guida rimaste senza
+istantanea la riacquistano; `eliminaElemento` ha comunque il ripiego dalla frase. Nello schema i giorni sono salvati nell'ordine
+della settimana e `datiNegozio` non accetta più `orari` in prosa. Pacchetti rigenerati alla 081.
+Test: migrazione 080 (frasi, idempotenza, pacchetto), fixture allineate; typecheck, lint e suite verdi.
