@@ -2,9 +2,9 @@
 // impostazioniService — backup e ripristino dell'istanza (Fase 15.29)
 // ============================================================
 //
-// Esportazione: il file SQLite completo (`getDb().backup()`, l'unica API consistente con il WAL attivo, la stessa del backup di avvio)
-// oppure l'ISTANZA COMPLETA in uno ZIP (database + immagini caricate + caratteri), perché immagini e caratteri vivono su disco in
-// DATA_DIR e non dentro il database: un backup del solo database lascerebbe righe `immagine` senza file.
+// Esportazione: il file SQLite dei dati di gioco (`getDb().backup()`, l'unica API consistente con il WAL attivo, la stessa del backup
+// di avvio; dalla 079 con dentro anche le immagini) oppure l'ISTANZA COMPLETA in uno ZIP (i due database + i caratteri), perché i
+// caratteri vivono su disco in DATA_DIR e le partite in un file a parte.
 // Reimportazione: il file caricato SOSTITUISCE l'istanza. Prima si valida (intestazione SQLite, integrity_check, schema riconoscibile),
 // poi si salva una copia di sicurezza di ciò che c'è ora, si chiude la connessione, si scrivono i file, si riapre e si rieseguono
 // migrazioni e seed. Se qualcosa fallisce dopo la chiusura, la copia di sicurezza viene ripristinata e l'app resta utilizzabile.
@@ -21,11 +21,12 @@ import { runMigrations } from '../db/migrationRunner.js';
 import { invalidaCacheTraduzioni } from './traduzioniService.js';
 import { invalidaMotoreFusione } from './fusione/motoreFusione.js';
 import { invalidaEredita } from './fusione/eredita.js';
+import { assorbiImmaginiSuDisco } from './pacchetto/pacchettoGioco.js';
 import { creaZip, leggiZip, type VoceZip } from '../utils/zip.js';
 import type { EsitoRipristinoDto, StatoIstanzaDto } from '../../shared/types.js';
 
-/** Limite del file accettato in ripristino (database + immagini di una istanza reale stanno ampiamente sotto). */
-export const MAX_BYTE_RIPRISTINO = 512 * 1024 * 1024;
+/** Limite del file accettato in ripristino e importazione (il file di gioco con le immagini dentro sta nell'ordine dei 300 MB). */
+export const MAX_BYTE_RIPRISTINO = 1024 * 1024 * 1024;
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
 /** I due file dell'istanza dentro lo ZIP; il terzo è il vecchio file unico, che si accetta ancora in ripristino. */
@@ -36,7 +37,7 @@ const NOME_DB_LEGACY_NELLO_ZIP = 'database/project-p5r.db';
 /** Che cosa contiene un file SQLite dell'app: solo dati di gioco, solo partite, o il vecchio file unico. */
 export type ContenutoDatabase = 'gioco' | 'partite' | 'unico';
 
-function cartella(nome: 'immagini' | 'font' | 'backups'): string {
+export function cartella(nome: 'immagini' | 'font' | 'backups'): string {
   return path.join(config.dataDir, nome);
 }
 
@@ -66,7 +67,10 @@ export function statoIstanza(): StatoIstanzaDto {
   const dbPath = resolveDbPath();
   const partitePath = resolvePartitePath();
   const inMemoria = !fs.existsSync(dbPath);
-  const immagini = fileDellaCartella(cartella('immagini'));
+  // le immagini stanno nel database (079): si contano le righe con contenuto
+  const immagini = (() => {
+    try { return getDb().prepare('SELECT COUNT(*) AS file, COALESCE(SUM(byte), 0) AS byte FROM immagine WHERE contenuto IS NOT NULL').get() as { file: number; byte: number }; } catch { return { file: 0, byte: 0 }; }
+  })();
   const caratteri = fileDellaCartella(cartella('font'));
   const partite = (() => {
     try { return (getDb().prepare('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n; } catch { return 0; }
@@ -80,20 +84,22 @@ export function statoIstanza(): StatoIstanzaDto {
     seed: { versione: meta('versione'), hash: meta('hash'), caricatoIl: meta('caricatoIl') },
     database: { nome: config.dbFileName, byte: inMemoria ? 0 : fs.statSync(dbPath).size, inMemoria },
     databasePartite: { nome: config.partiteFileName, byte: inMemoria || !fs.existsSync(partitePath) ? 0 : fs.statSync(partitePath).size },
-    immagini: { file: immagini.length, byte: immagini.reduce((s, f) => s + f.byte, 0) },
+    immagini: { file: immagini.file, byte: immagini.byte },
     caratteri: { file: caratteri.length, byte: caratteri.reduce((s, f) => s + f.byte, 0) },
     partite,
     copieDiSicurezza: copie,
+    vuota: (() => { try { return (getDb().prepare('SELECT COUNT(*) AS n FROM persona').get() as { n: number }).n === 0; } catch { return true; } })(),
+    completo: immagini.file > 0,
   };
 }
 
-function cartellaTemporanea(): string {
+export function cartellaTemporanea(): string {
   const dir = path.join(config.dataDir, 'tmp');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
 
-const timbro = (): string => new Date().toISOString().replace(/[:.]/g, '-');
+export const timbro = (): string => new Date().toISOString().replace(/[:.]/g, '-');
 
 /**
  * Copia consistente del database in un file temporaneo: chi chiama deve leggerlo e poi cancellarlo.
@@ -105,7 +111,7 @@ export async function copiaDatabase(quale: 'gioco' | 'partite' = 'gioco'): Promi
   return { percorso, nome: `project-p5r-${quale}-${timbro()}.db` };
 }
 
-/** Istanza completa in uno ZIP: database, immagini caricate, caratteri e un manifesto leggibile. */
+/** Istanza completa in uno ZIP: i due database (le immagini stanno dentro quello di gioco), i caratteri e un manifesto leggibile. */
 export async function copiaIstanza(): Promise<{ contenuto: Buffer; nome: string }> {
   const copia = await copiaDatabase('gioco');
   const copiaPartite = await copiaDatabase('partite');
@@ -116,7 +122,6 @@ export async function copiaIstanza(): Promise<{ contenuto: Buffer; nome: string 
       { nome: NOME_DB_NELLO_ZIP, contenuto: fs.readFileSync(copia.percorso), data: adesso },
       { nome: NOME_PARTITE_NELLO_ZIP, contenuto: fs.readFileSync(copiaPartite.percorso), data: adesso },
     ];
-    for (const f of fileDellaCartella(cartella('immagini'))) voci.push({ nome: `immagini/${f.relativo}`, contenuto: fs.readFileSync(f.assoluto), data: adesso });
     for (const f of fileDellaCartella(cartella('font'))) voci.push({ nome: `font/${f.relativo}`, contenuto: fs.readFileSync(f.assoluto), data: adesso });
     voci.push({ nome: 'manifest.json', contenuto: Buffer.from(JSON.stringify({ esportatoIl: adesso.toISOString(), ...stato }, null, 1), 'utf-8'), data: adesso });
     voci.push({ nome: 'LEGGIMI.txt', contenuto: Buffer.from([
@@ -125,9 +130,8 @@ export async function copiaIstanza(): Promise<{ contenuto: Buffer; nome: string 
       `Esportata il ${adesso.toISOString()} — app ${stato.versioneApp}, schema ${stato.versioneSchema}.`,
       '',
       'Contenuto:',
-      `- ${NOME_DB_NELLO_ZIP}: il database SQLite dei dati di gioco (compendio, guida, catalogo, mappe)`,
+      `- ${NOME_DB_NELLO_ZIP}: il database SQLite dei dati di gioco (compendio, guida, catalogo, mappe, immagini)`,
       `- ${NOME_PARTITE_NELLO_ZIP}: il database SQLite delle partite (avanzamento, tracking)`,
-      '- immagini/: le immagini caricate nell\'istanza (mappe, Confidenti, Persona, spilli…)',
       '- font/: i caratteri caricati',
       '- manifest.json: versioni e conteggi al momento dell\'esportazione',
       '',
@@ -173,11 +177,11 @@ export function verificaDatabase(contenuto: Buffer): ContenutoDatabase {
 }
 
 /** Il file caricato è uno ZIP (firma «PK\x03\x04»)? */
-function eZip(contenuto: Buffer): boolean {
+export function eZip(contenuto: Buffer): boolean {
   return contenuto.length > 4 && contenuto.readUInt32LE(0) === 0x04034b50;
 }
 
-function svuotaCartella(dir: string): void {
+export function svuotaCartella(dir: string): void {
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
 }
 
@@ -185,7 +189,7 @@ function svuotaCartella(dir: string): void {
 const COPIE_DI_RIPRISTINO = 3;
 
 /** Copia di sicurezza dell'istanza attuale prima di sostituirla (database + immagini + caratteri); tiene solo le ultime copie. */
-async function copiaDiSicurezza(): Promise<string> {
+export async function copiaDiSicurezza(): Promise<string> {
   const dir = path.join(cartella('backups'), `prima-del-ripristino-${timbro()}`);
   fs.mkdirSync(dir, { recursive: true });
   await copiaSchema(getDb(), path.join(dir, config.dbFileName), 'main');
@@ -214,7 +218,7 @@ function ripristinaCopiaDiSicurezza(dir: string): void {
 }
 
 /** Scrive un file di database sostituendo quello dell'istanza; i giornali WAL della vecchia connessione vanno rimossi. */
-function scriviDatabase(contenuto: Buffer, dbPath: string): void {
+export function scriviDatabase(contenuto: Buffer, dbPath: string): void {
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   fs.writeFileSync(dbPath, contenuto);
   for (const coda of ['-wal', '-shm']) fs.rmSync(`${dbPath}${coda}`, { force: true });
@@ -225,10 +229,11 @@ function rimuoviDatabase(dbPath: string): void {
   for (const coda of ['', '-wal', '-shm']) fs.rmSync(`${dbPath}${coda}`, { force: true });
 }
 
-/** Riapre la connessione e riporta l'app in servizio: migrazioni e cache in memoria. */
-function riapriIstanza(): void {
+/** Riapre la connessione e riporta l'app in servizio: migrazioni, immagini rimaste su disco (backup di prima della 079), cache in memoria. */
+export function riapriIstanza(): void {
   const db = initDb();
   runMigrations(db);
+  assorbiImmaginiSuDisco(db);
   invalidaCacheTraduzioni();
   invalidaMotoreFusione();
   invalidaEredita();
@@ -238,12 +243,36 @@ function riapriIstanza(): void {
  * Destinazione di una voce dello ZIP dentro la cartella dati, oppure null se il nome porta fuori.
  * Il controllo è sul percorso RISOLTO, non sul nome: su Windows anche «\» separa, quindi «immagini/..\..\fuori» uscirebbe.
  */
-function destinazioneSicura(prefisso: 'immagini' | 'font', nome: string): string | null {
+export function destinazioneSicura(prefisso: 'immagini' | 'font', nome: string): string | null {
   const base = cartella(prefisso);
   const risolto = path.resolve(config.dataDir, nome.replace(/\\/g, '/'));
   const relativo = path.relative(base, risolto);
   if (!relativo || relativo.startsWith('..') || path.isAbsolute(relativo)) return null;
   return risolto;
+}
+
+/**
+ * Dopo una sostituzione fallita a connessione chiusa: rimette in servizio il database (senza connessione l'app
+ * sarebbe morta fino al riavvio), poi i file, e rilancia come 400 con il dettaglio. Usata dal ripristino dell'istanza
+ * e dall'importazione del pacchetto di gioco.
+ */
+export function tornaAllaCopiaDiSicurezza(salvataggio: string, err: unknown, codice: string, azione: string): never {
+  logger.error({ err, salvataggio }, `${azione.toLowerCase()} fallito: si torna alla copia di sicurezza`);
+  let ripristinoFile: unknown = null;
+  try {
+    closeDb();
+  } catch {
+    // connessione già chiusa o in errore: la riapertura qui sotto la ricrea comunque
+  }
+  try {
+    ripristinaCopiaDiSicurezza(salvataggio);
+  } catch (err2) {
+    ripristinoFile = err2;
+    logger.error({ err: err2, salvataggio }, 'ripristino dei file della copia di sicurezza fallito: la copia resta su disco');
+  }
+  riapriIstanza();
+  const dettaglio = ripristinoFile ? ` I file non sono tornati tutti al loro posto: la copia è in data/backups/${path.basename(salvataggio)}.` : ' L\'istanza precedente è stata rimessa com\'era.';
+  throw httpErrors.badRequest(codice, `${azione} non riuscito (${err instanceof Error ? err.message : 'errore sconosciuto'}).${dettaglio}`);
 }
 
 /**
@@ -295,7 +324,8 @@ export async function ripristinaIstanza(contenuto: Buffer): Promise<EsitoRiprist
       if (gioco) scriviDatabase(gioco, resolveDbPath());
       if (partite) scriviDatabase(partite, resolvePartitePath());
     }
-    // lo ZIP è una copia completa dell'istanza: immagini e caratteri vengono sostituiti in blocco, anche quando il backup non ne aveva
+    // lo ZIP è una copia completa dell'istanza: caratteri (e immagini, nei backup di prima della 079: alla riapertura entrano nel database)
+    // vengono sostituiti in blocco, anche quando il backup non ne aveva
     if (zip) {
       for (const [prefisso, voci] of [['immagini', immagini], ['font', caratteri]] as const) {
         svuotaCartella(cartella(prefisso));
@@ -309,23 +339,7 @@ export async function ripristinaIstanza(contenuto: Buffer): Promise<EsitoRiprist
     }
     riapriIstanza();
   } catch (err) {
-    logger.error({ err, salvataggio }, 'ripristino fallito: si torna alla copia di sicurezza');
-    // prima si rimette in servizio il database (senza connessione l'app sarebbe morta fino al riavvio), poi i file
-    let ripristinoFile: unknown = null;
-    try {
-      closeDb();
-    } catch {
-      // connessione già chiusa o in errore: la riapertura qui sotto la ricrea comunque
-    }
-    try {
-      ripristinaCopiaDiSicurezza(salvataggio);
-    } catch (err2) {
-      ripristinoFile = err2;
-      logger.error({ err: err2, salvataggio }, 'ripristino dei file della copia di sicurezza fallito: la copia resta su disco');
-    }
-    riapriIstanza();
-    const dettaglio = ripristinoFile ? ` I file non sono tornati tutti al loro posto: la copia è in data/backups/${path.basename(salvataggio)}.` : ' L\'istanza precedente è stata rimessa com\'era.';
-    throw httpErrors.badRequest('ripristino-fallito', `Ripristino non riuscito (${err instanceof Error ? err.message : 'errore sconosciuto'}).${dettaglio}`);
+    tornaAllaCopiaDiSicurezza(salvataggio, err, 'ripristino-fallito', 'Ripristino');
   }
   logger.info({ formato: zip ? 'istanza' : 'database', gioco: !!(gioco || unico), partite: !!(partite || unico), salvataggio }, 'istanza ripristinata da file');
   return {

@@ -19,7 +19,7 @@
 
 import { useMemo } from 'react';
 import type { AreaDungeonDto } from '../../types';
-import { BASE_MEMENTO as BASE, STRATI_MEMENTO } from './stratiMemento';
+import { STRATI_MEMENTO, urlElementoMemento } from './stratiMemento';
 
 interface Props {
   aree: AreaDungeonDto[];
@@ -81,17 +81,17 @@ export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, classN
       })}
     </svg>
 
-    <img src={`${BASE}/vena-lunga-elemento.png`} alt="" aria-hidden
+    <img src={urlElementoMemento('vena-lunga')} alt="" aria-hidden
       className="pointer-events-none absolute left-[26%] top-0 h-full w-auto opacity-60" />
-    <img src={`${BASE}/vena-lunga-riflessa-elemento.png`} alt="" aria-hidden
+    <img src={urlElementoMemento('vena-lunga-riflessa')} alt="" aria-hidden
       className="pointer-events-none absolute right-[25%] top-0 h-full w-auto opacity-60" />
-    <img src={`${BASE}/vena-basso-destra-elemento.png`} alt="" aria-hidden
+    <img src={urlElementoMemento('vena-basso-destra')} alt="" aria-hidden
       className="pointer-events-none absolute bottom-[6%] right-[2%] w-[34%] opacity-45" />
-    <img src={`${BASE}/catena-elemento.png`} alt="" aria-hidden
+    <img src={urlElementoMemento('catena')} alt="" aria-hidden
       className="pointer-events-none absolute -left-[6%] top-[10%] h-[95%] w-auto origin-top-left rotate-[62deg] opacity-80" />
-    <img src={`${BASE}/catena-elemento.png`} alt="" aria-hidden
+    <img src={urlElementoMemento('catena')} alt="" aria-hidden
       className="pointer-events-none absolute -right-[6%] top-[12%] h-[95%] w-auto origin-top-right -rotate-[62deg] opacity-80" />
-    <img src={`${BASE}/citta-sopra-elemento.png`} alt="" aria-hidden
+    <img src={urlElementoMemento('citta-sopra')} alt="" aria-hidden
       className="pointer-events-none absolute inset-x-0 -top-[1%] w-full" />
 
     {/* Gli strati. Si sovrappongono di proposito, quindi quello scelto deve passare davanti:
@@ -107,7 +107,7 @@ export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, classN
         style={{ left: `${t.posa.x}%`, top: `${t.posa.y}%`, width: `${t.posa.larghezza}%` }}
         title={t.area.nome}
       >
-        <img src={`${BASE}/${t.strato}-elemento.png`} alt={t.area.nome}
+        <img src={urlElementoMemento(t.strato)} alt={t.area.nome}
           className={`w-full transition-transform duration-150 ${
             scelto
               ? 'scale-[1.12] drop-shadow-[0_0_12px_rgba(255,210,63,0.95)]'

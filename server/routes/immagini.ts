@@ -1,17 +1,19 @@
 // ============================================================
-// Route /api/immagini — caricamento, importazione da URL, lettura, rimozione
+// Route /api/immagini — manifesto della grafica predefinita, caricamento, importazione da URL, lettura, rimozione
 // ============================================================
 //
 // Caricamento: PUT /api/immagini/:ambito/:chiave con il file come corpo
 // grezzo (Content-Type image/*), fino a 8 MB. Il frontend usa
 // `fetch(url, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })`.
+// Le immagini vivono nel database (migrazione 079): il file si risponde dal contenuto della riga,
+// con un ETag stabile finché la riga non cambia.
 // ============================================================
 
 import express, { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { bodyDaUrl, paramsImmagine, queryImmagini } from '../schemas/immagini.js';
 import {
-  MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, salvaImmagine, type AmbitoImmagine,
+  MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, manifestoPredefinite, salvaImmagine, type AmbitoImmagine,
 } from '../services/immaginiService.js';
 import { httpErrors } from '../utils/httpError.js';
 
@@ -21,7 +23,13 @@ router.get('/', validate({ query: queryImmagini }), (req, res) => {
   res.json(elencaImmagini((req.query as { ambito?: string }).ambito));
 });
 
-// Rimozione multipla: tutte le immagini di un ambito (query `ambito`) o di tutta l'istanza.
+/** La grafica predefinita nel database, nella forma del manifest degli asset (chiave → URL versionato). */
+router.get('/manifest', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(manifestoPredefinite());
+});
+
+// Rimozione multipla: tutte le immagini caricate di un ambito (query `ambito`) o di tutti gli ambiti di caricamento.
 router.delete('/', validate({ query: queryImmagini }), (req, res) => {
   res.json({ eliminate: eliminaImmaginiAmbito((req.query as { ambito?: string }).ambito) });
 });
@@ -33,13 +41,16 @@ router.get('/:ambito/:chiave', validate({ params: paramsImmagine }), (req, res) 
 });
 
 router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine }), (req, res) => {
-  const { percorso, mime } = fileImmagine(String(req.params.ambito), String(req.params.chiave));
-  res.type(mime);
-  // URL versionato (`?v=`): il file può restare in cache per un anno perché ogni sostituzione cambia l'URL; senza versione,
-  // rivalidazione a ogni richiesta (ETag/Last-Modified di sendFile) così una sostituzione è visibile subito.
+  const f = fileImmagine(String(req.params.ambito), String(req.params.chiave));
+  // URL versionato (`?v=`): il contenuto può restare in cache per un anno perché ogni sostituzione cambia l'URL; senza versione,
+  // rivalidazione a ogni richiesta con l'ETag (id + byte + data), così una sostituzione è visibile subito.
   const versionato = typeof req.query.v === 'string' && req.query.v.length > 0;
+  const etag = `"${f.id}-${f.byte}-${f.createdAt}"`;
+  res.setHeader('ETag', etag);
   res.setHeader('Cache-Control', versionato ? 'private, max-age=31536000, immutable' : 'private, no-cache');
-  res.sendFile(percorso);
+  if (req.headers['if-none-match'] === etag) { res.status(304).end(); return; }
+  res.type(f.mime);
+  res.send(f.contenuto);
 });
 
 router.put(

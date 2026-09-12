@@ -12,7 +12,7 @@ import { QuartierePage } from './QuartierePage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { DungeonRiassuntoDto, MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
 
-const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), urlImmagine: vi.fn(() => '/api/immagini/mappa/x/file'), getImmagini: vi.fn(() => Promise.resolve([])) }));
+const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), urlImmagine: vi.fn((ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file`), getImmagini: vi.fn(() => Promise.resolve([])) }));
 vi.mock('../services/api', () => api);
 
 const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: chiave === 'tokyo' ? null : 'Tokyo', percorso: chiave === 'tokyo' ? [{ chiave: 'tokyo', nome: 'Tokyo' }] : [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave, nome }], figli: [],
@@ -84,7 +84,7 @@ describe('CittaPage', () => {
     mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
     const memento = await within(mappa).findByTitle(/^Memento/);
     expect(memento).toHaveAttribute('href', '/guida/mondo/dungeon/mementos');
-    expect(memento.querySelector('img')).toHaveAttribute('src', '/asset/palazzi/mementos.png');
+    expect(memento.querySelector('img')).toHaveAttribute('src', '/api/immagini/palazzi/mementos/file');
   });
 
   it('la scheda del quartiere mostra la stessa sagoma della mappa composta', async () => {
@@ -97,8 +97,8 @@ describe('CittaPage', () => {
     ] as QuartiereRiassuntoDto[]);
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
     const schede = within(await screen.findByRole('list', { name: 'Quartieri' }));
-    expect(schede.getByAltText('Sagoma di Shibuya sulla mappa di Tokyo')).toHaveAttribute('src', '/asset/mappe/lmap/tokyo/shibuya.png');
-    expect(schede.getByAltText('Sagoma di Shujin Academy sulla mappa di Tokyo')).toHaveAttribute('src', '/asset/mappe/lmap/tokyo/shujin-academy.png');
+    expect(schede.getByAltText('Sagoma di Shibuya sulla mappa di Tokyo')).toHaveAttribute('src', '/api/immagini/mappe/lmap%2Ftokyo%2Fshibuya/file');
+    expect(schede.getByAltText('Sagoma di Shujin Academy sulla mappa di Tokyo')).toHaveAttribute('src', '/api/immagini/mappe/lmap%2Ftokyo%2Fshujin-academy/file');
     // niente più anteprime del nodo d'atlante nella griglia
     expect(document.querySelector('.miniatura-mappa')).toBeNull();
   });

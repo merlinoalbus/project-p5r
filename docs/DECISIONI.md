@@ -400,3 +400,25 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **I punti negozio si segnano solo dove il programma è manuale** (Vestiti usati di Kichijoji: i punti
   vengono dalle vendite, non dalla spesa); il grado cliente (Tanaka) si calcola dalla spesa e non si segna.
   L'editor delle condizioni offre l'uno o l'altro secondo il programma del negozio.
+
+### 2026-09-12 — Immagini dentro il database di gioco (voce 10)
+- **Correzione di una decisione registrata male.** Il piano riportava fra le decisioni dell'utente «gli asset di gioco
+  sono png esterni al DB»: l'utente non l'ha mai chiesto né motivato, e ha ristabilito la regola vera: **in
+  `public/asset/` restano solo le grafiche del compendio (persona, arcani, skill) e dell'interfaccia (`ui/`); tutto il
+  resto va dentro il database**. Le 16 famiglie di grafica di gioco (mappe, spilli, Confidenti, personaggi, sfondi,
+  identità, illustrazioni, gruppi di Persona, palazzi, doti, elementi, affinità, meteo, attività, decori, guida) e ogni
+  immagine caricata vivono in `immagine.contenuto` (migrazione 079).
+- **Il pacchetto di gioco è un solo file** (`gioco.db`, ~310 MB con le immagini): niente ZIP, niente manifesto; la
+  versione è `user_version`, i conteggi si leggono dal file. Lo ZIP resta solo per il backup dell'istanza completa
+  (i due database e i caratteri). `pacchetto/immagini/` e le cartelle spostate di `public/asset/` escono dal repository.
+- **L'importazione passa sempre dall'anteprima**: schema (un pacchetto più nuovo del codice non si importa), tabelle che
+  cambiano, immagini e i riferimenti delle partite che resterebbero orfani; si sostituisce solo alla conferma, con copia
+  di sicurezza e rollback. Le partite non vengono toccate.
+- **Il backup di avvio si fa solo con una migrazione in arrivo**: sette copie da 310 MB a ogni avvio non avrebbero senso.
+- **Un solo file, `gioco.db`, in due stati.** Il completo (con le immagini, 311 MB > limite GitHub di 100 MB) resta fuori
+  da git — niente LFS per ora, si rivaluta con il database definitivo — e vive in locale in `pacchetto/completo/gioco.db`,
+  ignorato ed evidenziato in `pacchetto/README.md`. **Il caricamento iniziale completo avviene sempre con l'importazione
+  dall'app**, che sostituisce il file dell'istanza sul volume. Perché l'interfaccia si apra subito, in git c'è
+  `pacchetto/gioco.db` iniziale (stessi dati, senza il contenuto delle immagini) che il primo avvio copia in
+  `DATA_DIR/gioco.db`; la card «Pacchetto di gioco» avvisa finché il completo non è importato (`StatoIstanzaDto.completo`).
+  Senza iniziale l'istanza nasce vuota (`vuota`) e non è un errore fatale.

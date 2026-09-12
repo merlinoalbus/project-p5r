@@ -523,3 +523,40 @@ di Tanaka con spesa e prossima soglia, contatori) e «Da segnare» (3 eventi man
 punti manuali). Verifica a 1280/768/375 senza overflow e con bersagli ≥44 px; test server (tre stati dalla
 squadra via `PATCH /api/partite/:id/squadra/:chiave`, rifiuti 400, elenchi filtrati), test della migrazione
 utente 004 e del componente.
+
+## Immagini nel database e pacchetto di gioco (12 settembre 2026) — fatto
+
+Voce 10 del piano «struttura, non frasi» (sezioni L/M), con la **correzione di una decisione registrata male**: il
+piano diceva «asset di gioco png esterni al DB», ma l'utente non l'ha mai chiesto; la regola giusta è «in
+`public/asset/` restano solo compendio (persona, arcani, skill) e interfaccia (`ui/`), tutto il resto va dentro il
+database». **Migrazione 079 `immagini_nel_database`**: colonna `immagine.contenuto BLOB`; assorbe (1) i file delle
+righe esistenti da `DATA_DIR/immagini` e `pacchetto/immagini`, (2) le 16 famiglie della grafica di gioco di
+`public/asset/` (affinita, attivita, confidenti, decori, doti, elementi, guida, identita, illustrazioni, mappe, meteo,
+palazzi, persona-gruppo, personaggi, sfondi, spilli: una riga per file, chiave del manifesto, `webp` preferito a
+`png`), (3) il `pacchetto/gioco.db` del repository quando ha già le immagini dentro (così un'istanza aggiornata dopo
+la rimozione delle cartelle le prende da lì); idempotente, in memoria salta le sorgenti pesanti. `shared/immagini.ts`
+distingue gli ambiti di **caricamento** (8, quelli di prima) dalle famiglie **predefinite** (16); `immaginiService` legge
+e scrive solo nel database (`GET /api/immagini/:ambito/:chiave/file` risponde dal BLOB con ETag e 304; `GET
+/api/immagini/manifest` è la grafica di gioco nella forma del manifest degli asset); elenco e rimozione in blocco
+toccano solo gli ambiti di caricamento. **Frontend**: `assetStore` unisce `/asset/manifest.json` (compendio e ui) e
+`/api/immagini/manifest` (database; vince a parità di chiave), quindi `useAsset('mappe/tokyo')` non cambia; gli URL
+statici delle sagome di Tokyo, degli strati dei Mementos, dei Palazzi e del Covo passano da `urlImmagine`.
+`regoleAllAvvio` assorbe le immagini rimaste su disco e mette da parte `DATA_DIR/immagini` in `backups/`; il backup di
+avvio si fa solo quando c'è una migrazione da applicare (il file di gioco pesa ~310 MB). **Il pacchetto di gioco è un
+solo file `gioco.db`** (761 immagini dentro, 305 MB): `pacchetto/immagini/` e le 16 cartelle di `public/asset/` sono
+tolte dal repository; `npm run pacchetto` non copia più file. `pacchettoGiocoService`: `esportaPacchetto` (= la copia
+di gioco.db), `anteprimaPacchetto` (versione dello schema contro l'ultima migrazione — un pacchetto più nuovo non si
+importa —, conteggi per tabella a confronto, tabelle assenti, immagini, **orfani** delle partite calcolati su 30
+riferimenti utente→gioco attaccando `partite.db` al file caricato), `importaPacchetto` (copia di sicurezza, chiusura,
+sostituzione di gioco.db, riapertura con migrazioni e regole dell'avvio, orfani ricalcolati; rollback con
+`tornaAllaCopiaDiSicurezza`, fattorizzata dal ripristino dell'istanza). Rotte: `POST /api/impostazioni/istanza/gioco/
+anteprima`, `PUT /api/impostazioni/istanza/gioco`; il download è `GET /istanza/database`. **UI**: card «Pacchetto di
+gioco» in Impostazioni (stato, «Scarica il pacchetto di gioco», «Importa un pacchetto» con anteprima obbligatoria —
+schema, tabelle che cambiano, immagini, orfani — e finestra d'esito con gli orfani e «Ricarica l'app»); la card
+«Backup e ripristino» non offre più il solo database. Test: migrazione 079, API immagini (manifesto, famiglie protette,
+ETag), `impostazioniService` e `pacchettoGiocoService` su istanza reale, `assetStore`, `PacchettoGioco`,
+`BackupIstanza`, pagina Città. **Un solo file `gioco.db` in due stati** (decisione dell'utente: il completo pesa 311 MB contro il limite
+GitHub di 100 MB, niente LFS per ora): in git `pacchetto/gioco.db` iniziale, senza immagini, che il primo avvio copia
+per aprire l'interfaccia; il completo vive in locale in `pacchetto/completo/gioco.db` (ignorato, `pacchetto/README.md`)
+e **il caricamento iniziale completo avviene sempre con l'importazione dall'app**, che sostituisce il file dell'istanza;
+la card avvisa finché non è importato (`StatoIstanzaDto.completo`; `vuota` se manca anche l'iniziale).

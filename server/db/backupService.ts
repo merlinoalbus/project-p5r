@@ -6,6 +6,9 @@
 // da uno snapshot. Usa l'API online-backup di better-sqlite3, l'unica
 // sicura con WAL attivo. Rotazione: ultime 7 copie.
 // Fallimento = warn e il boot continua.
+// Dalla 079 il file di gioco porta dentro le immagini (centinaia di MB): lo
+// snapshot si fa solo quando c'è davvero una migrazione da applicare, non a
+// ogni avvio, altrimenti sette copie riempirebbero il disco per nulla.
 // ============================================================
 
 import fs from 'node:fs';
@@ -13,6 +16,8 @@ import path from 'node:path';
 import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 import { copiaSchema, getDb, resolveDbPath, resolvePartitePath } from './dbService.js';
+import { migrations } from './migrations/index.js';
+import { migrazioniUtente } from './migrazioniUtente/index.js';
 
 const KEEP_LAST = 7;
 const PREFIX = 'project-p5r-';
@@ -25,6 +30,13 @@ export async function runBootBackup(): Promise<void> {
   }
   // DB appena creato da initDb (nessuna migrazione applicata): nulla da salvare.
   if ((getDb().pragma('user_version', { simple: true }) as number) === 0) {
+    return;
+  }
+  // nessuna migrazione in arrivo su nessuno dei due file: lo snapshot non serve
+  const versioneGioco = getDb().pragma('main.user_version', { simple: true }) as number;
+  const versionePartite = getDb().pragma('utente.user_version', { simple: true }) as number;
+  if (!migrations.some((m) => m.id > versioneGioco) && !migrazioniUtente.some((m) => m.id > versionePartite)) {
+    logger.debug({ versioneGioco, versionePartite }, 'backup di avvio saltato: nessuna migrazione da applicare');
     return;
   }
 

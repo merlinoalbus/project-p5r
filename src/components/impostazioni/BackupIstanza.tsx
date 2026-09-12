@@ -2,13 +2,13 @@
 // BackupIstanza — esportazione e ripristino dell'istanza dalle Impostazioni (Fase 15.29)
 // ============================================================
 //
-// «Scarica» produce un file che resta sul dispositivo: il solo database oppure l'istanza completa (database, immagini
-// caricate, caratteri). «Ripristina da file» SOSTITUISCE l'istanza corrente: chiede conferma, e il server salva comunque
-// una copia di sicurezza di ciò che c'era prima.
+// «Scarica» produce un file che resta sul dispositivo: l'istanza completa (dati di gioco con le immagini, partite, caratteri).
+// «Ripristina da file» SOSTITUISCE l'istanza corrente: chiede conferma, e il server salva comunque una copia di sicurezza di ciò
+// che c'era prima. Il solo file dei dati di gioco si scarica e si importa dalla card «Pacchetto di gioco».
 // ============================================================
 
 import { useRef, useState, type ChangeEvent } from 'react';
-import { getStatoIstanza, ripristinaIstanza, scaricaDatabase, scaricaIstanza } from '../../services/api';
+import { getStatoIstanza, ripristinaIstanza, scaricaIstanza } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -16,13 +16,7 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
-/** Dimensione leggibile (l'istanza sta nell'ordine dei MB). */
-function byteTesto(byte: number): string {
-  if (byte <= 0) return '—';
-  if (byte < 1024) return `${byte} byte`;
-  if (byte < 1024 * 1024) return `${(byte / 1024).toLocaleString('it-IT', { maximumFractionDigits: 0 })} kB`;
-  return `${(byte / (1024 * 1024)).toLocaleString('it-IT', { maximumFractionDigits: 1 })} MB`;
-}
+import { byteTesto } from '../../utils/byte';
 
 function salvaFile(nome: string, blob: Blob): void {
   const url = URL.createObjectURL(blob);
@@ -40,12 +34,12 @@ export function BackupIstanza() {
   const input = useRef<HTMLInputElement | null>(null);
   const s = stato.dati;
 
-  const esporta = async (tutta: boolean) => {
+  const esporta = async () => {
     setOccupato(true);
     try {
-      const { nome, blob } = tutta ? await scaricaIstanza() : await scaricaDatabase();
+      const { nome, blob } = await scaricaIstanza();
       salvaFile(nome, blob);
-      notifica('success', `${tutta ? 'Istanza completa' : 'Database'} scaricato: ${nome} (${byteTesto(blob.size)}).`);
+      notifica('success', `Istanza completa scaricata: ${nome} (${byteTesto(blob.size)}).`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Esportazione fallita.');
     } finally {
@@ -76,15 +70,15 @@ export function BackupIstanza() {
     <section className="card flex flex-col gap-3" aria-label="Backup e ripristino">
       <h2 className="m-0 text-[15px] font-semibold">Backup e ripristino</h2>
       <p className="m-0 text-[13px] text-text-secondary">
-        Scarica una copia dei tuoi dati e rimettila quando vuoi, anche su un altro dispositivo. Il <strong>database</strong> contiene partite, tracking e catalogo;
-        l'<strong>istanza completa</strong> aggiunge le immagini e i caratteri che hai caricato, che vivono come file e non dentro il database.
+        Scarica una copia di tutto e rimettila quando vuoi, anche su un altro dispositivo. L'<strong>istanza completa</strong> contiene i dati di gioco con le
+        immagini, le partite con il loro tracking e i caratteri che hai caricato. Per i soli dati di gioco c'è la card «Pacchetto di gioco».
       </p>
       {s && (
         <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 text-[13px]">
           <li><strong>Dati di gioco</strong> <span className="text-text-muted">{s.database.inMemoria ? 'in memoria (nessun file)' : `${s.database.nome} · ${byteTesto(s.database.byte)} · schema ${s.versioneSchema}`}</span></li>
           <li><strong>File delle partite</strong> <span className="text-text-muted">{s.database.inMemoria ? 'in memoria (nessun file)' : `${s.databasePartite.nome} · ${byteTesto(s.databasePartite.byte)} · schema ${s.versioneSchemaPartite}`}</span></li>
           <li><strong>Partite</strong> <span className="text-text-muted">{s.partite}</span></li>
-          <li><strong>Immagini caricate</strong> <span className="text-text-muted">{s.immagini.file} · {byteTesto(s.immagini.byte)}</span></li>
+          <li><strong>Immagini nel database</strong> <span className="text-text-muted">{s.immagini.file} · {byteTesto(s.immagini.byte)}</span></li>
           <li><strong>Caratteri</strong> <span className="text-text-muted">{s.caratteri.file} · {byteTesto(s.caratteri.byte)}</span></li>
           <li><strong>Schema</strong> <span className="text-text-muted">versione {s.versioneSchema} · app {s.versioneApp}</span></li>
           <li><strong>Copie di sicurezza</strong> <span className="text-text-muted">{s.copieDiSicurezza} in data/backups</span></li>
@@ -92,8 +86,7 @@ export function BackupIstanza() {
       )}
       {stato.errore && <p className="m-0 text-[13px] text-error">{stato.errore}</p>}
       <div className="flex flex-wrap gap-1.5 items-center">
-        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica l'istanza completa" dettaglio="ZIP con database, immagini e caratteri" disabled={occupato} onClick={() => void esporta(true)} />
-        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica solo il database" dettaglio="file .db" disabled={occupato} onClick={() => void esporta(false)} />
+        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica l'istanza completa" dettaglio="ZIP con dati di gioco, partite e caratteri" disabled={occupato} onClick={() => void esporta()} />
         <input ref={input} type="file" accept=".db,.zip,application/zip,application/octet-stream" className="sr-only" aria-label="File di backup da ripristinare"
           onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) setDaRipristinare(f); e.target.value = ''; }} />
         <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Ripristina da file" dettaglio="sostituisce l'istanza" disabled={occupato} onClick={() => input.current?.click()} />

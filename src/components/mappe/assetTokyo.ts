@@ -2,8 +2,8 @@
 // Le sagome di Tokyo: un solo posto da cui si prendono
 // ============================================================
 //
-// Sono gli sprite `_lm` di `P5_MAPDATA.SPD`, ritagliati con l'alfa vera ed estratti in
-// `public/asset/mappe/lmap/tokyo/`: il 105 di Shibuya, il Kabukichō di Shinjuku, la ruota di
+// Sono gli sprite `_lm` di `P5_MAPDATA.SPD`, ritagliati con l'alfa vera, nel database di gioco
+// (famiglia `mappe`, chiavi `lmap/tokyo/<quartiere>`; erano in `public/asset/mappe/lmap/tokyo/`): il 105 di Shibuya, il Kabukichō di Shinjuku, la ruota di
 // Odaiba, il Kaminarimon di Asakusa. La chiave del file **è** la chiave del quartiere nel seed
 // (`shujin-academy` compresa), quindi non serve una tabella di corrispondenza: serve che a
 // chiederli sia una funzione sola.
@@ -19,18 +19,17 @@
 // ============================================================
 
 import type { SyntheticEvent } from 'react';
-
-const BASE_TOKYO = '/asset/mappe/lmap/tokyo';
+import { urlImmagine } from '../../services/api';
 
 /** La sagoma originale di un quartiere sulla mappa di viaggio. */
 export function assetTokyoQuartiere(chiave: string): string {
-  return `${BASE_TOKYO}/${encodeURIComponent(chiave)}.png`;
+  return urlImmagine('mappe', `lmap/tokyo/${chiave}`);
 }
 
 /** L'illustrazione di un Palazzo: i Palazzi non stanno nel foglio della mappa di viaggio — nel
  *  gioco lì non compaiono — e tengono la loro, che l'utente ha chiesto di lasciare com'è. */
 export function assetPalazzo(chiave: string): string {
-  return `/asset/palazzi/${encodeURIComponent(chiave)}.png`;
+  return urlImmagine('palazzi', chiave);
 }
 
 /** Il Covo dei Ladri, la soffitta del Leblanc.
@@ -42,7 +41,7 @@ export function assetPalazzo(chiave: string): string {
  * questo indirizzo punta a un file che non esiste: l'immagine si toglie da sola e resta la targa,
  * che è quel che c'era prima. */
 export function assetCovoLadri(): string {
-  return `${BASE_TOKYO}/covo-dei-ladri.png`;
+  return urlImmagine('mappe', 'lmap/tokyo/covo-dei-ladri');
 }
 
 /** Ripiego neutro: l'immagine sparisce **dal flusso**, non ne compare un'altra.

@@ -1,25 +1,25 @@
-import { idMappa } from './mappe/percorsiMappe.js';
 // ============================================================
-// immaginiService — immagini caricate dall'utente (arcani, Confidenti, Persona…)
+// immaginiService — le immagini dell'istanza, dentro il database (tabella `immagine`)
 // ============================================================
 //
-// I file vivono in DATA_DIR/immagini/<ambito>/<nome-file>; il DB tiene i
-// metadati (tabella `immagine`, UNIQUE per ambito+chiave: una sola immagine
-// per entità, il caricamento successivo sostituisce). Formati ammessi:
-// PNG, JPEG, WEBP, GIF, SVG; dimensione massima 8 MB.
+// Decisione dell'utente (2026-09-12, migrazione 079): il contenuto delle immagini sta nella colonna
+// `contenuto` di `immagine`, non su disco. Due gruppi di ambiti (`shared/immagini.ts`):
+// - caricamento (arcana, confidente, personaggio, persona, skill, mappa, spillo, altro): una sola
+//   immagine per (ambito, chiave), il caricamento successivo sostituisce; precedenza sulla grafica
+//   predefinita; è ciò che «Immagini caricate» elenca e rimuove;
+// - predefiniti (mappe, confidenti, sfondi, illustrazioni…): la grafica di gioco che stava in
+//   `public/asset/`, servita al frontend come manifesto (`manifestoPredefinite`) e per file.
+// Formati ammessi: PNG, JPEG, WEBP, GIF, SVG; dimensione massima 8 MB.
 // ============================================================
 
-import fs from 'node:fs';
-import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { config } from '../config.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
 import type { ImmagineDto } from '../../shared/types.js';
+import { idMappa } from './mappe/percorsiMappe.js';
 
-/** Ambiti ammessi per le immagini. */
-export const AMBITI_IMMAGINE = ['arcana', 'confidente', 'personaggio', 'persona', 'skill', 'mappa', 'spillo', 'altro'] as const;
-export type AmbitoImmagine = (typeof AMBITI_IMMAGINE)[number];
+export { AMBITI_CARICAMENTO, AMBITI_IMMAGINE, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
 
 const ESTENSIONE_PER_MIME: Record<string, string> = {
   'image/png': 'png',
@@ -32,68 +32,69 @@ const ESTENSIONE_PER_MIME: Record<string, string> = {
 /** Dimensione massima accettata (byte). */
 export const MAX_BYTE_IMMAGINE = 8 * 1024 * 1024;
 
-interface RigaImmagine { id: number; ambito: string; chiave: string; nome_file: string; mime: string; byte: number; created_at: string; origine_url: string | null }
+interface RigaImmagine { id: number; ambito: string; chiave: string; nome_file: string; mime: string; byte: number; created_at: string; origine_url: string | null; presente: number }
+/** Le colonne senza il contenuto: gli elenchi non trasportano i byte. */
+const COLONNE = 'id, ambito, chiave, nome_file, mime, byte, created_at, origine_url, (contenuto IS NOT NULL) AS presente';
+const segnapostoCaricamento = AMBITI_CARICAMENTO.map(() => '?').join(', ');
+const segnapostoPredefiniti = AMBITI_PREDEFINITI.map(() => '?').join(', ');
 
-function dirImmagini(ambito: string): string {
-  return path.join(config.dataDir, 'immagini', ambito);
+/** Chiave normalizzata: per le mappe l'identità della mappa (alias e chiavi native). */
+function chiaveDi(ambito: string, chiave: string): string {
+  return ambito === 'mappa' ? idMappa(chiave) : chiave;
+}
+
+export function urlFileImmagine(ambito: string, chiave: string): string {
+  return `/api/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/file`;
 }
 
 function dto(r: RigaImmagine): ImmagineDto {
-  return { id: r.id, ambito: r.ambito, chiave: r.chiave, mime: r.mime, byte: r.byte, url: `/api/immagini/${encodeURIComponent(r.ambito)}/${encodeURIComponent(r.chiave)}/file`, createdAt: r.created_at, origineUrl: r.origine_url ?? null };
+  return { id: r.id, ambito: r.ambito, chiave: r.chiave, mime: r.mime, byte: r.byte, url: urlFileImmagine(r.ambito, r.chiave), createdAt: r.created_at, origineUrl: r.origine_url ?? null };
 }
 
-/** Elenco delle immagini, opzionalmente per ambito. */
+/** Elenco delle immagini: di un ambito, oppure (senza ambito) di tutti gli ambiti di caricamento. */
 export function elencaImmagini(ambito?: string): ImmagineDto[] {
   const righe = ambito
-    ? (prepared('SELECT * FROM immagine WHERE ambito = ? ORDER BY chiave').all(ambito) as RigaImmagine[])
-    : (prepared('SELECT * FROM immagine ORDER BY ambito, chiave').all() as RigaImmagine[]);
+    ? (prepared(`SELECT ${COLONNE} FROM immagine WHERE ambito = ? ORDER BY chiave`).all(ambito) as RigaImmagine[])
+    : (prepared(`SELECT ${COLONNE} FROM immagine WHERE ambito IN (${segnapostoCaricamento}) ORDER BY ambito, chiave`).all(...AMBITI_CARICAMENTO) as RigaImmagine[]);
   return righe.map(dto);
+}
+
+/** Il manifesto della grafica predefinita nel database: chiave del manifesto → URL del file versionato. */
+export function manifestoPredefinite(): { generato: string; totale: number; file: Record<string, string> } {
+  const righe = prepared(`SELECT ambito, chiave, created_at FROM immagine WHERE contenuto IS NOT NULL AND ambito IN (${segnapostoPredefiniti}) ORDER BY ambito, chiave`).all(...AMBITI_PREDEFINITI) as Array<{ ambito: string; chiave: string; created_at: string }>;
+  const file: Record<string, string> = {};
+  for (const r of righe) file[`${r.ambito}/${r.chiave}`] = `${urlFileImmagine(r.ambito, r.chiave)}?v=${encodeURIComponent(r.created_at)}`;
+  return { generato: nowIso(), totale: righe.length, file };
 }
 
 /** Metadati di una immagine, o null. */
 export function leggiImmagine(ambito: string, chiave: string): ImmagineDto | null {
-  if(ambito==='mappa')chiave=idMappa(chiave);
-  const r = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
+  const r = prepared(`SELECT ${COLONNE} FROM immagine WHERE ambito = ? AND chiave = ?`).get(ambito, chiaveDi(ambito, chiave)) as RigaImmagine | undefined;
   return r ? dto(r) : null;
 }
 
-/** Percorso su disco e mime del file di una immagine (per l'invio). */
-export function fileImmagine(ambito: string, chiave: string): { percorso: string; mime: string } {
-  if(ambito==='mappa')chiave=idMappa(chiave);
-  const r = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
+/** Contenuto e mime di una immagine (per l'invio); 404 se la riga manca o non ha contenuto. */
+export function fileImmagine(ambito: string, chiave: string): { id: number; contenuto: Buffer; mime: string; byte: number; createdAt: string } {
+  const r = prepared('SELECT id, mime, byte, created_at, contenuto FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiaveDi(ambito, chiave)) as { id: number; mime: string; byte: number; created_at: string; contenuto: Buffer | null } | undefined;
   if (!r) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
-  const percorso = path.join(dirImmagini(r.ambito), r.nome_file);
-  if (!fs.existsSync(percorso)) throw httpErrors.notFound('immagine-file-mancante', `Il file dell'immagine ${ambito}/${chiave} non è più sul disco.`);
-  return { percorso, mime: r.mime };
+  if (!r.contenuto) throw httpErrors.notFound('immagine-file-mancante', `L'immagine ${ambito}/${chiave} è registrata ma non ha contenuto.`);
+  return { id: r.id, contenuto: r.contenuto, mime: r.mime, byte: r.byte, createdAt: r.created_at };
 }
 
 /** Salva (o sostituisce) l'immagine di un'entità; `origineUrl` è l'indirizzo da cui è stata scaricata (null per i file caricati). */
 export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: string, contenuto: Buffer, origineUrl: string | null = null): ImmagineDto {
-  if(ambito==='mappa')chiave=idMappa(chiave);
+  chiave = chiaveDi(ambito, chiave);
   const estensione = ESTENSIONE_PER_MIME[mime];
   if (!estensione) throw httpErrors.badRequest('formato-non-ammesso', `Formato '${mime}' non ammesso: usa PNG, JPEG, WEBP, GIF o SVG.`);
   if (contenuto.length === 0) throw httpErrors.badRequest('immagine-vuota', 'Il contenuto dell\'immagine è vuoto.');
   if (contenuto.length > MAX_BYTE_IMMAGINE) throw httpErrors.badRequest('immagine-troppo-grande', `L'immagine supera ${MAX_BYTE_IMMAGINE / 1024 / 1024} MB.`);
-  const dir = dirImmagini(ambito);
-  fs.mkdirSync(dir, { recursive: true });
+  // `nome_file` resta per lo schema (NOT NULL) e come nome leggibile: un nome nuovo a ogni sostituzione
   const nomeFile = `${randomUUID()}.${estensione}`;
-  const percorsoNuovo = path.join(dir, nomeFile);
-  fs.writeFileSync(percorsoNuovo, contenuto);
-  const precedente = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
-  try {
-    getDb().transaction(() => {
-      prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at, origine_url) VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at, origine_url = excluded.origine_url`)
-        .run(ambito, chiave, nomeFile, mime, contenuto.length, nowIso(), origineUrl);
-    })();
-  } catch (err) {
-    // Il DB ha rifiutato la riga: nessun file orfano sul disco.
-    fs.rmSync(percorsoNuovo, { force: true });
-    throw err;
-  }
-  if (precedente && precedente.nome_file !== nomeFile) {
-    fs.rmSync(path.join(dirImmagini(precedente.ambito), precedente.nome_file), { force: true });
-  }
+  getDb().transaction(() => {
+    prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at, origine_url, contenuto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at, origine_url = excluded.origine_url, contenuto = excluded.contenuto`)
+      .run(ambito, chiave, nomeFile, mime, contenuto.length, nowIso(), origineUrl, contenuto);
+  })();
   return leggiImmagine(ambito, chiave)!;
 }
 
@@ -122,22 +123,15 @@ export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: strin
   return salvaImmagine(ambito, chiave, mime, contenuto, u.toString());
 }
 
-/** Rimuove tutte le immagini caricate di un ambito (o di tutta l'istanza): file e righe; restituisce quante erano. */
+/** Rimuove le immagini caricate di un ambito, oppure (senza ambito) di tutti gli ambiti di caricamento: la grafica predefinita non si tocca. */
 export function eliminaImmaginiAmbito(ambito?: string): number {
-  const righe = (ambito
-    ? prepared('SELECT * FROM immagine WHERE ambito = ?').all(ambito)
-    : prepared('SELECT * FROM immagine').all()) as RigaImmagine[];
-  getDb().transaction(() => {
-    for (const r of righe) prepared('DELETE FROM immagine WHERE id = ?').run(r.id);
-  })();
-  for (const r of righe) fs.rmSync(path.join(dirImmagini(r.ambito), r.nome_file), { force: true });
-  return righe.length;
+  const esito = ambito
+    ? prepared('DELETE FROM immagine WHERE ambito = ?').run(ambito)
+    : prepared(`DELETE FROM immagine WHERE ambito IN (${segnapostoCaricamento})`).run(...AMBITI_CARICAMENTO);
+  return esito.changes;
 }
 
 export function eliminaImmagine(ambito: string, chiave: string): void {
-  if(ambito==='mappa')chiave=idMappa(chiave);
-  const r = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
-  if (!r) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
-  prepared('DELETE FROM immagine WHERE id = ?').run(r.id);
-  fs.rmSync(path.join(dirImmagini(r.ambito), r.nome_file), { force: true });
+  const esito = prepared('DELETE FROM immagine WHERE ambito = ? AND chiave = ?').run(ambito, chiaveDi(ambito, chiave));
+  if (esito.changes === 0) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
 }

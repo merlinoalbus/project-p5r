@@ -11,7 +11,14 @@
 // diverso: si usa il pezzo più grande di quella serie.
 // ============================================================
 
-export const BASE_MEMENTO = '/asset/mappe/lmap/memento';
+import { urlImmagine } from '../../services/api';
+
+/** L'URL di un elemento grafico dei Mementos (`<nome>-elemento.png` di `lmap/memento`, nel database di gioco). */
+export function urlElementoMemento(nome: string): string {
+  return urlImmagine('mappe', `lmap/memento/${nome}-elemento`);
+}
+
+/** Gli strati dei Mementos stanno nel database di gioco (famiglia `mappe`, chiavi `lmap/memento/<strato>-elemento`). */
 
 export const STRATI_MEMENTO = ['strato-1', 'strato-2', 'strato-3', 'strato-4', 'strato-5',
   'strato-6', 'strato-7', 'strato-8', 'terzo-semestre-10'];
@@ -25,5 +32,5 @@ export const STRATI_MEMENTO = ['strato-1', 'strato-2', 'strato-3', 'strato-4', '
  */
 export function urlStratoDedalo(ordine: number): string {
   const i = Math.min(Math.max(ordine, 0), STRATI_MEMENTO.length - 1);
-  return `${BASE_MEMENTO}/${STRATI_MEMENTO[i]}-elemento.png`;
+  return urlElementoMemento(STRATI_MEMENTO[i]);
 }
