@@ -1859,6 +1859,8 @@ export interface StatoIstanzaDto {
 
 /** Esito di un ripristino da file: che cosa è stato sostituito e dove sta la copia di sicurezza. */
 export interface EsitoRipristinoDto {
+  /** Nome della copia lasciata nella cartella d'appoggio dallo scaricamento; null se non c'è deposito. */
+  depositato?: string | null;
   formato: 'database' | 'istanza';
   /** Il file dei dati di gioco è stato sostituito. */
   database: boolean;
@@ -1910,13 +1912,34 @@ export interface AnteprimaPacchettoDto {
   orfani: OrfanoPartiteDto[];
 }
 
+/** Un file depositato nella cartella d'appoggio, candidato all'importazione. */
+export interface FileDepositoDto {
+  nome: string;
+  byte: number;
+  modificatoIl: string;
+}
+
+/** La cartella d'appoggio (il NAS montato) e che cosa contiene: la usano il pacchetto di gioco e il backup. */
+export interface DepositoFileDto {
+  /** Falso quando nessuna cartella è configurata o non è raggiungibile: l'interfaccia lo dice invece di mostrare un elenco vuoto. */
+  disponibile: boolean;
+  /** Dove guarda il server, per poterlo scrivere nell'interfaccia. */
+  cartella: string;
+  /** Perché non è disponibile (cartella non configurata, non montata, non leggibile). */
+  motivo: string | null;
+  file: FileDepositoDto[];
+}
+
+/** Nome storico, mantenuto come sinonimo per chi legge i pacchetti. */
+export type DepositoPacchettiDto = DepositoFileDto;
+
 /** A che punto è l'importazione del pacchetto, mentre la si aspetta.
  *
  * Serve perché l'attesa può superare quella di chi sta davanti: un proxy (Cloudflare si ferma a cento
  * secondi) chiude la connessione mentre il server sta ancora sostituendo i dati, e il browser lo
  * leggerebbe come un fallimento. Chiedendo lo stato si sa se sta ancora lavorando, e com'è finita.
  */
-export type FaseImportazionePacchetto = 'scarico' | 'verifica' | 'copia-di-sicurezza' | 'sostituzione' | 'riapertura' | 'controllo';
+export type FaseImportazionePacchetto = 'lettura' | 'scarico' | 'verifica' | 'copia-di-sicurezza' | 'sostituzione' | 'riapertura' | 'controllo';
 
 export interface StatoImportazionePacchettoDto {
   inCorso: boolean;

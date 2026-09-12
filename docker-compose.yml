@@ -12,6 +12,8 @@
 # Variabili di stack (tutte opzionali):
 #   PROXY_NETWORK  nome della rete esterna del tunnel (default: proxy)
 #   LOG_LEVEL      livello di log del backend (default: info)
+#   NAS_ADDR       indirizzo del NAS che ospita la cartella d'appoggio (default: 100.125.101.31)
+#   NAS_PATH       percorso esportato via NFS (default: la cartella del pacchetto di gioco)
 #
 # Watchtower: sull'host è attiva un'istanza GLOBALE esterna — qui NON
 # si aggiunge alcun servizio watchtower: la label
@@ -20,10 +22,19 @@
 #
 # Il DB SQLite viene creato dal backend sul volume `project_p5r_data`
 # al primo avvio dal pacchetto iniziale (pacchetto/gioco.db, senza immagini) e
-# migrato; il completo (stesso file con le immagini, fuori da git) si importa da
-# Impostazioni → Pacchetto di gioco e sostituisce il file sul volume;
-# le partite stanno in partite.db;
-# entrambi sopravvivono agli aggiornamenti d'immagine.
+# migrato; le partite stanno in partite.db; entrambi sopravvivono agli
+# aggiornamenti d'immagine.
+#
+# Il pacchetto COMPLETO (con le immagini, ~311 MB) arriva dalla CARTELLA D'APPOGGIO
+# sul NAS, montata via NFS su /deposito: ci si deposita il file e da
+# Impostazioni → Pacchetto di gioco si sceglie quale importare. Il browser non
+# trasporta più nulla, quindi i limiti di corpo di nginx e del tunnel non contano.
+#
+# **Il NAS NON ospita /data, e non è una svista.** SQLite qui gira in modalità WAL,
+# che ha bisogno di memoria condivisa fra i processi: i filesystem di rete non la
+# forniscono e il database si corromperebbe o non si aprirebbe (è scritto anche
+# nella documentazione di SQLite). Sul NAS sta solo il file di scambio; il database
+# vivo resta sul volume locale.
 
 services:
   project_p5r_be:
@@ -36,10 +47,13 @@ services:
       - PORT=3101
       - DATA_DIR=/data
       - PACCHETTO_DIR=/app/pacchetto
+      - DEPOSITO_DIR=/deposito
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       # DB SQLite + WAL + backups/ sopravvivono agli update di immagine.
       - project_p5r_data:/data
+      # cartella d'appoggio sul NAS: qui si deposita il pacchetto da importare (e qui l'app lo può esportare)
+      - project_p5r_deposito:/deposito
     networks:
       - project_p5r_network
     labels:
@@ -68,3 +82,13 @@ networks:
 
 volumes:
   project_p5r_data:
+  # Cartella d'appoggio sul NAS (NFS 4.1). `hard` + `timeo`/`retrans` fanno attendere invece di dare
+  # errore quando il NAS è lento; `nconnect=8` e le finestre da 128 kB servono a un file da centinaia
+  # di MB; `local_lock=all` perché il lock lo gestisce il client (qui il file si legge e si riscrive
+  # per intero, non è un database aperto).
+  project_p5r_deposito:
+    driver: local
+    driver_opts:
+      type: nfs
+      device: ":${NAS_PATH:-/Volume1/public/homes_roberto/mediaserver/dbapp/persona5royal/}"
+      o: "addr=${NAS_ADDR:-100.125.101.31},rw,nfsvers=4.1,hard,timeo=600,retrans=2,noatime,nodiratime,nconnect=8,rsize=131072,wsize=131072,actimeo=60,lookupcache=all,local_lock=all"

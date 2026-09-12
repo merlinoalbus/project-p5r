@@ -641,10 +641,19 @@ programma, `src/components/partita/ProgressiPartita.tsx` in due sezioni.
 - `src/components/condizioni/SelettoreRicerca.tsx` rimosso (tutti i selettori usano `Selettore`).
 - Il modulo del luogo, che nessuna pagina apriva, è raggiungibile da `QuartierePage`: «Aggiungi un luogo» (`AggiungiAlCatalogo tipo="luogo"`) nella sezione «Luoghi del quartiere» e «Correggi» (`CorreggiElemento`) in ogni card, con ricarica dopo il salvataggio; `eliminaElemento` ripristina anche le istantanee di prima della 080 ricavando `giorni_json` dalla frase `giorni`.
 
-## Caricamento del pacchetto: due strade e tempi lunghi (12 settembre 2026)
+## Caricamento del pacchetto: tre strade e tempi lunghi (12 settembre 2026)
 
 Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB non ci passa, e il browser vede
 «Failed to fetch» senza che il backend riceva nulla. Da qui:
+
+- **La cartella d'appoggio** (strada normale per un'istanza pubblicata). Una condivisione del NAS è montata sul
+  server (`DEPOSITO_DIR`, in Docker `/deposito` via NFS: vedi `docker-compose.yml`, volume `project_p5r_deposito`).
+  Ci si deposita il file del pacchetto; `GET /istanza/gioco/deposito` elenca i candidati (`.db`, `.sqlite`,
+  `.sqlite3`) dal più recente, `POST /istanza/gioco/deposito/anteprima` e `PUT /istanza/gioco/deposito` lavorano su
+  un nome scelto in quell'elenco. Il nome non può contenere separatori né risalite e il percorso risolto deve restare
+  dentro la cartella (`percorsoNelDeposito`). Se la cartella non è configurata o non è montata, l'elenco lo **dice**
+  (`disponibile: false` con il motivo) invece di sembrare vuoto. **Il NAS non ospita `/data`**: SQLite gira in WAL,
+  che richiede memoria condivisa e non funziona su filesystem di rete; sul NAS sta solo il file di scambio.
 
 - **Il file nel corpo** (istanza locale). `src/services/api/impostazioni.ts` invia con **XMLHttpRequest**, non con
   `fetch`, perché solo XHR dice quanti byte sono partiti (`upload.onprogress` → `AvanzamentoInvio` → `BarraInvio`,

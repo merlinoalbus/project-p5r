@@ -13,7 +13,7 @@
 // non succede più nulla, che è il caso vero da interrompere (connessione caduta).
 // ============================================================
 
-import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto } from '../../types';
+import type { AnteprimaPacchettoDto, DepositoPacchettiDto, EsitoImportazionePacchettoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto } from '../../types';
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiGet, apiPost, apiPut } from './_helpers';
@@ -120,6 +120,19 @@ export const anteprimaPacchettoGiocoDaUrl = (url: string): Promise<AnteprimaPacc
 
 export const importaPacchettoGiocoDaUrl = (url: string): Promise<EsitoImportazionePacchettoDto> =>
   apiPut('/impostazioni/istanza/gioco/da-url', { url }, { maxRetries: 0, timeoutMs: 1_800_000 });
+
+// ---- Cartella d'appoggio sul NAS: il file lo legge il server, il browser non trasporta niente ----
+
+/** Che cosa c'è nella cartella d'appoggio del server. */
+export const getDepositoPacchetti = (): Promise<DepositoPacchettiDto> => apiGet('/impostazioni/istanza/gioco/deposito');
+
+/** Anteprima di un pacchetto depositato. */
+export const anteprimaPacchettoDaDeposito = (nome: string): Promise<AnteprimaPacchettoDto> =>
+  apiPost('/impostazioni/istanza/gioco/deposito/anteprima', { nome }, { maxRetries: 0, timeoutMs: 1_800_000 });
+
+/** Sostituisce i dati di gioco con un pacchetto depositato. */
+export const importaPacchettoDaDeposito = (nome: string): Promise<EsitoImportazionePacchettoDto> =>
+  apiPut('/impostazioni/istanza/gioco/deposito', { nome }, { maxRetries: 0, timeoutMs: 1_800_000 });
 
 /** A che punto è l'importazione sul server: da chiedere quando la risposta non arriva (un proxy può chiudere prima). */
 export const statoImportazionePacchetto = (): Promise<StatoImportazionePacchettoDto> =>

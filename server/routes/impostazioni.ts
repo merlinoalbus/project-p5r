@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import fs from 'node:fs';
 import { MAX_BYTE_RIPRISTINO, copiaDatabase, copiaIstanza, ripristinaIstanza, statoIstanza } from '../services/impostazioniService.js';
-import { anteprimaPacchetto, importaPacchetto, importaPacchettoDaUrl, scaricaPacchettoDaUrl, statoImportazione } from '../services/pacchettoGiocoService.js';
+import { anteprimaPacchetto, anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchetto, importaPacchettoDaDeposito, importaPacchettoDaUrl, scaricaPacchettoDaUrl, statoImportazione } from '../services/pacchettoGiocoService.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const router = Router();
@@ -110,6 +110,32 @@ router.put('/istanza/gioco/da-url', validate({ body: corpoUrl }), (req, res, nex
   void (async () => {
     try {
       res.json(await importaPacchettoDaUrl((req.body as { url: string }).url));
+    } catch (err) {
+      next(err);
+    }
+  })();
+});
+
+// ---- Cartella d'appoggio (il NAS montato): la strada normale per un'istanza pubblicata ----
+
+/** Il nome del file depositato da leggere. */
+const corpoFileDeposito = z.object({ nome: z.string().min(1).max(255) });
+
+/** Che cosa c'è nella cartella d'appoggio. */
+router.get('/istanza/gioco/deposito', (_req, res) => {
+  res.json(elencaDeposito());
+});
+
+/** Anteprima di un pacchetto depositato: lo legge il server dal mount. */
+router.post('/istanza/gioco/deposito/anteprima', validate({ body: corpoFileDeposito }), (req, res) => {
+  res.json(anteprimaPacchettoDaDeposito((req.body as { nome: string }).nome));
+});
+
+/** Sostituisce i dati di gioco con un pacchetto depositato. */
+router.put('/istanza/gioco/deposito', validate({ body: corpoFileDeposito }), (req, res, next) => {
+  void (async () => {
+    try {
+      res.json(await importaPacchettoDaDeposito((req.body as { nome: string }).nome));
     } catch (err) {
       next(err);
     }
