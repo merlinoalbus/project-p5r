@@ -25,14 +25,24 @@ it('la colonna esiste, parte a 0 per tutte le righe ed è idempotente', () => {
   expect(rivisto(db)).toBe(0);
 });
 
-it('cambiare il nome lo accende; cambiare altro non lo tocca', () => {
+it('salvare dall’editor dichiara il nome, anche quando il testo non cambia', () => {
   const db = conMappa();
+  // il caso di chi il nome l'aveva già corretto prima della 082: non c'è più niente da cambiare,
+  // e senza questo il titolo sarebbe rimasto per sempre quello dedotto dall'estrazione
   aggiornaMappa('nativa', { nome: 'Area 4 — RMAP 153', tipo: 'area', genitore: null, ordine: 0, note: 'solo una nota' });
-  expect(rivisto(db)).toBe(0); // stesso nome: non è una revisione
-  aggiornaMappa('nativa', { nome: 'Ripostiglio del seminterrato', tipo: 'area', genitore: null, ordine: 0, note: '' });
   expect(rivisto(db)).toBe(1);
   aggiornaMappa('nativa', { nome: 'Ripostiglio del seminterrato', tipo: 'area', genitore: null, ordine: 1, note: '' });
-  expect(rivisto(db)).toBe(1); // una volta rivisto, resta rivisto
+  expect(rivisto(db)).toBe(1);
+  expect(db.prepare('SELECT nome FROM mappa WHERE chiave = ?').pluck().get('nativa')).toBe('Ripostiglio del seminterrato');
+});
+
+it('un salvataggio che non porta il nome non cambia quel che era dichiarato', () => {
+  const db = conMappa();
+  aggiornaMappa('nativa', { tipo: 'area', genitore: null, ordine: 3, note: 'nota' });
+  expect(rivisto(db)).toBe(0);
+  aggiornaMappa('nativa', { nome: 'Ripostiglio', tipo: 'area', genitore: null, ordine: 3, note: '' });
+  aggiornaMappa('nativa', { tipo: 'area', genitore: null, ordine: 4, note: '' });
+  expect(rivisto(db)).toBe(1);
 });
 
 it('importare un pacchetto lo spegne: quel nome torna a essere quello dichiarato dal pacchetto', () => {
