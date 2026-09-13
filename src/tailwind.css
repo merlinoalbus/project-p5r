@@ -1323,6 +1323,10 @@
 .editor-mappa__campo .selettore__scelta { min-height:40px; }
 /* Col dito 40 px non bastano: sul telefono e sul tablet i selettori compatti e quelli dell'editor tornano a 44 px. */
 @media (pointer: coarse), (max-width: 1023px) { .selettore--compatto .selettore__scelta, .editor-mappa__campo .selettore__scelta { min-height:44px; } }
+/* Stessa ragione per i campi di testo: i 36 px sono nati per il pannello fitto dell'editor su
+   monitor, ma la classe la usano anche schede che si compilano col tablet in mano (Denaro e
+   squadra), dove un campo alto 36 px si manca e si sbaglia riga. */
+@media (pointer: coarse), (max-width: 1023px) { .editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:15px; } }
 
 /* Progressi della partita: righe da 44 px, contatori a destra. */
 .progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
