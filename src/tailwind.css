@@ -418,12 +418,23 @@
      la condizione perche' le collocazioni in percentuale restino giuste. */
   /* Il tetto sta sul blocco — mappa **e** riga delle fermate chiuse — perché quella riga è lunga
      e in una colonna libera spingeva tutto fuori dallo schermo. La cornice riempie il blocco. */
-  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; }
+  /* Contenitore di misura per targhe e legenda: decidono in base a quanto è larga *la mappa*, non
+     la finestra — la stessa mappa sta in una card piena sul telefono e in una colonna stretta
+     accanto alla guida sul monitor. */
+  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; container-type: inline-size; }
   .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; width: 100%; touch-action: none; user-select: none; }
   /* La mano compare solo quando c'e' davvero qualcosa da spostare: a zoom 1 la tela e' tutta li'. */
   .mappa-tokyo--spostabile { cursor: grab; }
   .mappa-tokyo--spostabile:active { cursor: grabbing; }
   .mappa-tokyo__tela { position: absolute; inset: 0; background: #e2001a; transform-origin: 50% 50%; container-type: inline-size; }
+  /* Le targhe sulla mappa valgono finché c'è tela per scriverle: sotto i 480 px si leggerebbero a
+     5 px, e a una misura leggibile si sovrappongono. Lì la mappa resta senza scritte e i nomi
+     stanno nella legenda sotto, che sul telefono è anche più facile da toccare. */
+  .mappa-tokyo__legenda { display: none; flex-wrap: wrap; gap: 6px; }
+  /* La soglia è la tela, non la finestra: la stessa mappa sta in una card larga sul telefono e in
+     una colonna stretta accanto alla guida sul monitor, e a decidere è quanto spazio ha lei. */
+  @container (max-width: 520px) { .mappa-tokyo__targa { display: none; } }
+  @container (max-width: 520px) { .mappa-tokyo__legenda { display: flex; } }
 
   .spillo-mappa { position: absolute; display: flex; flex-direction: column; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; z-index: 5; transform-origin: 0 0; color: #fff; }
   .spillo-mappa--selezionato { z-index: 8; }
@@ -529,7 +540,9 @@
   /* Specificita maggiore di `.kpi-tile` (definita piu avanti con min-width e padding da cruscotto): nella griglia le tessere
      devono stare nella loro colonna, altrimenti si sovrappongono */
   .kpi-griglia > .kpi-tile, .kpi-tile--compatto { padding: 7px 10px; min-width: 0; width: auto; border-radius: var(--radius-md); }
-  .kpi-tile--compatto .kpi-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  /* L'etichetta dice che cos'è il numero: tagliata con le ellissi («Conoscen…») non lo dice più.
+     Va a capo invece di sparire — la tessera cresce di una riga, il dato resta leggibile. */
+  .kpi-tile--compatto .kpi-label { white-space: normal; overflow-wrap: break-word; hyphens: auto; max-width: 100%; }
   .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
   .kpi-tile--compatto .kpi-value { font-size: 20px; line-height: 1.05; }
 
@@ -1322,7 +1335,9 @@
 .selettore__freccia { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--color-text-muted); pointer-events:none; }
 /* Compatto = stretto quanto serve, senza l'etichetta sopra: i filtri in linea delle pagine. */
 .selettore--compatto { display:inline-block; width:auto; }
-.selettore--compatto .selettore__scelta { flex-direction:row; align-items:center; min-height:40px; padding:4px 22px 4px 8px; width:auto; max-width:100%; }
+/* 44 px anche col mouse: il selettore compatto è il comando che sceglie la partita e filtra le
+   pagine, non un ornamento, e i 40 px lo rendevano il solo bersaglio sotto soglia di tutta l'app. */
+.selettore--compatto .selettore__scelta { flex-direction:row; align-items:center; min-height:44px; padding:4px 22px 4px 8px; width:auto; max-width:100%; }
 .selettore--compatto .selettore__valore { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .selettore--compatto .selettore__tendina { width:max(100%, 260px); }
 /* Senza spazio a destra la tendina si appende al bordo destro del pulsante: mai fuori dalla finestra. */
@@ -1337,10 +1352,10 @@
 
 /* Un chip che **si tocca** è un comando, non un'etichetta: «Sulla mappa» negli Oggetti, «Dove si
    trova» in Attività e Confidenti erano alti 23 px, e con il dito si manca o si apre quello sotto.
-   Sui chip di sola lettura (categorie, stati, note) non si tocca niente: restano come sono. */
-@media (pointer: coarse), (max-width: 1023px) {
-  a.chip, button.chip, .chip[role="button"] { min-height:44px; padding-top:8px; padding-bottom:8px; }
-}
+   Vale a ogni larghezza, mouse compreso: un comando alto 23 px è piccolo anche col puntatore, e
+   due misure diverse per lo stesso elemento sono due difetti invece di uno. Sui chip di sola
+   lettura (categorie, stati, note) non si tocca niente: restano come sono. */
+a.chip, button.chip, .chip[role="button"] { min-height:44px; padding-top:8px; padding-bottom:8px; }
 
 /* Progressi della partita: righe da 44 px, contatori a destra. */
 .progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
@@ -1426,14 +1441,18 @@
 @keyframes barra-invio-scorre { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
 @media (prefers-reduced-motion: reduce) { .barra-invio::after { animation-duration:3s; } }
 
-/* ---- Bersagli del tocco nel visore delle mappe (2026-09-13) ----
+/* ---- Bersagli del visore delle mappe (2026-09-13) ----
    Stanno in coda perché le regole base che li fissano a 32/40 px vengono più sopra nel foglio, e a
-   parità di specificità vince l'ultima. Le briciole sono la via di ritorno, le voci l'elenco delle
-   mappe figlie, i controlli lo zoom: col dito servono 44 px, sul monitor bastano quelli di prima. */
-@media (pointer: coarse), (max-width: 1023px) {
-  .visore-mappa__briciola { min-height: 44px; }
-  .visore-mappa__figlia, .visore-mappa__voce { min-height: 44px; }
-  .visore-mappa__controllo { min-width: 44px; min-height: 44px; }
-  .visore-mappa__azione-testo { min-height: 44px; }
-  .visore-mappa__categoria { min-height: 44px; }
-}
+   parità di specificità vince l'ultima. Briciole (la via di ritorno), voci dell'elenco delle mappe
+   figlie, azioni testuali, categorie e zoom sono i comandi con cui ci si sposta fra le mappe: 44 px
+   a ogni larghezza, mouse compreso — due misure diverse per lo stesso comando sono due difetti. */
+.visore-mappa__controllo { min-width: 44px; min-height: 44px; }
+.visore-mappa__briciola { min-height: 44px; }
+.visore-mappa__figlia, .visore-mappa__voce { min-height: 44px; }
+.visore-mappa__azione-testo { min-height: 44px; }
+.visore-mappa__categoria { min-height: 44px; }
+
+/* La miniatura di un'entità apre l'ingrandimento: nelle righe sta a 40 px e ingrandirla sposterebbe
+   la riga, quindi si allarga solo l'area che riceve il tocco, senza toccare il riquadro. */
+.immagine-entita { position: relative; }
+.immagine-entita::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }

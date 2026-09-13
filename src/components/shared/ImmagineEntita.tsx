@@ -165,7 +165,9 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     <>
       <button
         type="button"
-        className={`bg-bg-tertiary border border-border overflow-hidden flex items-center justify-center shrink-0 p-0 cursor-zoom-in hover:border-primary transition-colors ${className ?? ''}`}
+        // `immagine-entita` porta l'area del tocco a 44 px quando la miniatura è più piccola (nelle righe
+        // sta a 40 px e la misura la decide chi la usa): il riquadro resta quello, il bersaglio no.
+        className={`immagine-entita bg-bg-tertiary border border-border overflow-hidden flex items-center justify-center shrink-0 p-0 cursor-zoom-in hover:border-primary transition-colors ${className ?? ''}`}
         style={{ width: dimensione, height: altezza, borderRadius: raggio }}
         aria-label={`Immagine di ${etichetta}${modificabile ? ' (tocca per ingrandire o cambiare)' : ' (tocca per ingrandire)'}`}
         onClick={() => setAperta(true)}

@@ -51,7 +51,7 @@ export function PersonaDelPersonaggio({ personaggio, persone, idCompendio }: Pro
           <ImmaginePersona nome={nome} alt={`${nome}, Persona di ${personaggio}`} classe="w-[120px] h-[120px] rounded-lg shrink-0" />
         </button>
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="font-display uppercase text-[20px] leading-none truncate">{nome}</span>
+          <span className="font-display uppercase text-[20px] leading-[1.05] break-words">{nome}</span>
           <span className="text-[12px] text-text-muted">{FASI[scelta] ?? `evoluzione ${scelta + 1}`} · {scelta + 1} di {persone.length}</span>
           {id !== undefined && <Link to={`/compendio/persona/${id}`} className="text-[12px] text-primary">Scheda nel compendio</Link>}
         </div>

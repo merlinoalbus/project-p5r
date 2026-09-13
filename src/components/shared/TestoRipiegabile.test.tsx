@@ -23,13 +23,14 @@ describe('sintesi', () => {
 });
 
 describe('TestoRipiegabile', () => {
-  it('mostra la versione breve con «altro» e si espande al tocco', () => {
+  // Il comando sta su una riga propria, non appeso in coda al testo: lì era un bersaglio di 26×18 px.
+  it('mostra la versione breve con «Mostra tutto» e si espande al tocco', () => {
     const testo = 'Prima frase abbastanza lunga da superare il limite. Seconda frase con il resto del dettaglio che compare solo a richiesta.';
     render(<TestoRipiegabile testo={testo} massimo={60} />);
     expect(screen.getByText(/Prima frase abbastanza lunga/)).not.toHaveTextContent('Seconda frase');
-    fireEvent.click(screen.getByRole('button', { name: 'altro' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Mostra tutto' }));
     expect(screen.getByText(/Seconda frase con il resto/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'meno' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Mostra meno' })).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('senza bisogno di ripiegare non mostra il pulsante', () => {
