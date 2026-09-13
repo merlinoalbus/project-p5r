@@ -1,8 +1,8 @@
 # Verifica e ottimizzazione dei tre formati — tutta l'app, 2026-09-13
 
-Passata su **65 schermate** — tutte le rotte del router **e tutte le viste interne** (le 13 schede
-della Partita, le 11 viste della Fusione, gli elenchi filtrati, la pagina non trovata) — a **375,
-768 e 1280 px**: **195 verifiche**. Per ciascuna si misurano scorrimento orizzontale, bersagli del
+Passata su **67 schermate** — tutte le rotte del router **e tutte le viste interne** (le 13 schede
+della Partita, le 11 viste della Fusione, gli elenchi filtrati, le radici di un Palazzo e di un
+Dedalo nell'atlante, la pagina non trovata) — a **375, 768 e 1280 px**: **201 verifiche**. Per ciascuna si misurano scorrimento orizzontale, bersagli del
 tocco sotto i 44 px, testo che sborda dal contenitore, testo incolonnato lettera per riga, testo
 sotto i 9 px e **spazio usato** rispetto a quello disponibile.
 
@@ -59,6 +59,8 @@ contenuto, per scelta.
 | `/guida/battaglia` | ok 91% | ok 96% | ok 96% |
 | `/guida/mappe` | ok 91% | ok 96% | ok 96% |
 | `/guida/mappe/citta-shibuya` | ok (visore a schermo intero) | ok | ok |
+| `/guida/mappe/palazzo-di-kamoshida` | ok (col pannello «Contenuti della guida» aperto) | ok | ok |
+| `/guida/mappe/dedalo-di-iweleth` | ok (idem) | ok | ok |
 | `/guida/mappe/citta-shibuya/modifica` | ok | ok | ok |
 | `/guida/citta` | ok 91% | ok 96% | ok 96% |
 | `/guida/citta/akihabara` | ok 91% | ok 96% | ok 96% |
@@ -106,6 +108,7 @@ contenuto, per scelta.
 | Personaggi | il credito della fonte, l'unico degli otto rimasto indietro | 27×17 px | 44×44 |
 | Visore delle mappe | briciole, voci, azioni e categorie con etichetta corta | 41 px di larghezza | `min-width: 44px` oltre all'altezza |
 | Palazzi e quartieri su telefono | il pannello del visore, aperto, era una fessura di 21 px con 417 px di contenuto | comandi alti 44 px ma toccabili per 21 | il visore incorporato smette di essere alto quanto gli è stato detto **quando il pannello è aperto** |
+| Atlante, radici di Palazzo e Dedalo | i comandi del pannello «Contenuti della guida»: planimetrie, elementi, «Dettagli della sezione», «Apri la scheda» | 19–22 px | 44 px. Sono l'unico contenuto della loro riga, non parole dentro una frase |
 
 ## Il criterio dei bersagli, scritto per intero
 
@@ -171,3 +174,9 @@ Tre cose che sembravano difetti e non lo erano, e una che lo era e non si vedeva
 - La misura va fatta **con i pannelli aperti** e sondando il lato che manca (a sinistra se
   l'elemento è stretto, sopra se è basso): metà dei difetti di questa passata erano invisibili
   altrimenti — e metà dei falsi allarmi venivano da tendine che il metodo stesso apriva.
+- «Bersaglio in linea dentro una frase» vuol dire che sulla **sua riga** c'è dell'altro testo. Un
+  collegamento che è l'unico contenuto del suo `li`, del suo `strong` o del suo `dd` è un comando a
+  sé e vale 44 px: confondere le due cose ha prodotto tre falsi «ok» nel pannello dei contenuti
+  della guida.
+- Una rotta con parametro va campionata con **più di un valore**: `/guida/mappe/:chiave` misurata
+  su un quartiere non mostra nemmeno il pannello che sulle radici dei Palazzi portava i difetti.

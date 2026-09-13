@@ -266,6 +266,9 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
     fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
     const riaperta = within(await screen.findByRole('dialog'));
+    // il campo compare quando la finestra ha finito di montarsi: senza attenderlo il test falliva
+    // una volta su alcune decine, ed è il tipo di verde che non vale niente
+    await waitFor(() => expect(riaperta.getByLabelText('Nome')).toBeInTheDocument());
     expect((riaperta.getByLabelText('Nome') as HTMLInputElement).value).toBe('');
     expect(riaperta.queryByLabelText('Asset del repository')).toBeNull();
     expect((riaperta.getByRole('checkbox', { name: /passaggio di ritorno/ }) as HTMLInputElement).checked).toBe(false);
