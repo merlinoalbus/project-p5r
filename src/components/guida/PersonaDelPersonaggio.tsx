@@ -53,7 +53,7 @@ export function PersonaDelPersonaggio({ personaggio, persone, idCompendio }: Pro
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="font-display uppercase text-[20px] leading-[1.05] break-words">{nome}</span>
           <span className="text-[12px] text-text-muted">{FASI[scelta] ?? `evoluzione ${scelta + 1}`} · {scelta + 1} di {persone.length}</span>
-          {id !== undefined && <Link to={`/compendio/persona/${id}`} className="text-[12px] text-primary">Scheda nel compendio</Link>}
+          {id !== undefined && <Link to={`/compendio/persona/${id}`} className="touch inline-flex items-center text-[12px] text-primary">Scheda nel compendio</Link>}
         </div>
       </div>
       <Modal titolo={`${nome} · Persona di ${personaggio}`} aperta={ingrandita} onChiudi={() => setIngrandita(false)} larga>

@@ -196,8 +196,9 @@
   /* Pulsanti d'incremento compatti (note delle Doti): piccoli col mouse, sempre 44px sui dispositivi a tocco */
   /* Le tendine prendono la larghezza dell'opzione piu lunga e non si restringono: entro il contenitore, sempre (telefono) */
   select.form-input { max-width: 100%; min-width: 0; }
-  .btn-nota { font-size: 12px; padding: 3px 8px; min-height: 30px; --btn-taglio: 5px; gap: 5px; }
-  @media (pointer: coarse), (max-width: 1023px) { .btn-nota { min-height: 44px; padding: 6px 12px; font-size: 13px; } }
+  /* Le note delle Doti si premono decine di volte per partita: 44 px a ogni larghezza, come ogni
+     altro comando. I 30 px valevano solo col mouse, ed erano l'ultima misura doppia rimasta. */
+  .btn-nota { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 5px; gap: 5px; }
 
   /* ---- Pulsanti visivi: immagine prevalente (icona 40 px, 32 px compatta, 48 px a colonna) + titolo «display» piccolo + dettaglio
      (mai solo testo grigio). La dimensione dell'icona la decide il pulsante con --btn-visivo-icona, non chi la passa: le <img> di
@@ -421,7 +422,7 @@
   /* Contenitore di misura per targhe e legenda: decidono in base a quanto è larga *la mappa*, non
      la finestra — la stessa mappa sta in una card piena sul telefono e in una colonna stretta
      accanto alla guida sul monitor. */
-  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; container-type: inline-size; }
+  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; container: mappaTokyo / inline-size; }
   .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; width: 100%; touch-action: none; user-select: none; }
   /* La mano compare solo quando c'e' davvero qualcosa da spostare: a zoom 1 la tela e' tutta li'. */
   .mappa-tokyo--spostabile { cursor: grab; }
@@ -431,10 +432,14 @@
      5 px, e a una misura leggibile si sovrappongono. Lì la mappa resta senza scritte e i nomi
      stanno nella legenda sotto, che sul telefono è anche più facile da toccare. */
   .mappa-tokyo__legenda { display: none; flex-wrap: wrap; gap: 6px; }
-  /* La soglia è la tela, non la finestra: la stessa mappa sta in una card larga sul telefono e in
-     una colonna stretta accanto alla guida sul monitor, e a decidere è quanto spazio ha lei. */
-  @container (max-width: 520px) { .mappa-tokyo__targa { display: none; } }
-  @container (max-width: 520px) { .mappa-tokyo__legenda { display: flex; } }
+  /* Le due regole interrogano **lo stesso contenitore, per nome**. Interrogando quello più vicino
+     ciascuna leggeva una misura diversa — la tela è 2 px più stretta del blocco per via dei bordi —
+     e fra 521 e 522 px la mappa restava senza targhe *e* senza legenda: nessun nome da nessuna
+     parte (rilievo del validatore, 2026-09-13). */
+  @container mappaTokyo (max-width: 520px) {
+    .mappa-tokyo__targa { display: none; }
+    .mappa-tokyo__legenda { display: flex; }
+  }
 
   .spillo-mappa { position: absolute; display: flex; flex-direction: column; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; z-index: 5; transform-origin: 0 0; color: #fff; }
   .spillo-mappa--selezionato { z-index: 8; }
@@ -1347,15 +1352,19 @@
 @media (pointer: coarse), (max-width: 1023px) { .selettore--compatto .selettore__scelta, .editor-mappa__campo .selettore__scelta { min-height:44px; } }
 /* Stessa ragione per i campi di testo: i 36 px sono nati per il pannello fitto dell'editor su
    monitor, ma la classe la usano anche schede che si compilano col tablet in mano (Denaro e
-   squadra), dove un campo alto 36 px si manca e si sbaglia riga. */
-@media (pointer: coarse), (max-width: 1023px) { .editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:15px; } }
+   squadra), dove un campo alto 36 px si manca e si sbaglia riga. A ogni larghezza, perché un campo
+   basso lo è anche col mouse. */
+.editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:15px; }
 
 /* Un chip che **si tocca** è un comando, non un'etichetta: «Sulla mappa» negli Oggetti, «Dove si
    trova» in Attività e Confidenti erano alti 23 px, e con il dito si manca o si apre quello sotto.
    Vale a ogni larghezza, mouse compreso: un comando alto 23 px è piccolo anche col puntatore, e
    due misure diverse per lo stesso elemento sono due difetti invece di uno. Sui chip di sola
    lettura (categorie, stati, note) non si tocca niente: restano come sono. */
-a.chip, button.chip, .chip[role="button"] { min-height:44px; padding-top:8px; padding-bottom:8px; }
+/* `align-self:start` perché un chip dentro una cella flex veniva stirato in altezza fino a 108 px
+   (l'allineamento predefinito è `stretch`), e `width:max-content` perché l'etichetta della cella
+   lo comprimeva a 53 px mandando «Sulla mappa» su quattro righe. */
+a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-self:start; padding-top:8px; padding-bottom:8px; flex-shrink:0; width:max-content; max-width:100%; }
 
 /* Progressi della partita: righe da 44 px, contatori a destra. */
 .progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
@@ -1453,6 +1462,27 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; padding-top:8px; pa
 .visore-mappa__categoria { min-height: 44px; }
 
 /* La miniatura di un'entità apre l'ingrandimento: nelle righe sta a 40 px e ingrandirla sposterebbe
-   la riga, quindi si allarga solo l'area che riceve il tocco, senza toccare il riquadro. */
-.immagine-entita { position: relative; }
+   la riga, quindi si allarga solo l'area che riceve il tocco, senza toccare il riquadro.
+   `overflow: visible` sul bottone è indispensabile: con `overflow: hidden` — che serve a ritagliare
+   l'immagine — il rettangolo del tocco veniva ritagliato con lei e restava 40×40 (rilievo del
+   validatore). Il ritaglio dell'immagine lo fa ora il contenitore interno. */
+.immagine-entita { position: relative; overflow: visible; }
+.immagine-entita > * { overflow: hidden; border-radius: inherit; }
 .immagine-entita::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+
+/* I collegamenti **dentro una frase** — il credito della fonte, «la loro pagina», il nome di un
+   negozio in mezzo al testo — non possono diventare alti 44 px senza allargare l'interlinea di
+   tutto il paragrafo. Il padding verticale su un elemento in linea non sposta le righe e allarga
+   l'area che riceve il tocco: il testo resta dov'è, il bersaglio arriva a 44. */
+main a[href]:not([class*="chip"]):not([class*="btn"]):not([class*="piastrella"]):not([class*="visore-mappa__"]):not([class*="touch"]):not([class*="card"]):not([class*="spillo"]) {
+  /* 15 px per parte: con il testo più piccolo dell'app (12 px per i crediti) l'area arriva
+     comunque a 44, e sui testi più grandi qualche pixel in più non sposta niente. */
+  padding-block: 15px;
+}
+
+/* Le sagome della mappa di Tokyo sono cartellini da 15-25 px, i dedali dei Memento rettangoli da
+   36-41: il disegno non può crescere senza coprire la mappa, quindi cresce solo l'area che riceve
+   il tocco. Verificato con l'hit-testing del browser, non con la misura del riquadro: un rettangolo
+   invisibile dentro un contenitore che ritaglia non riceve niente. */
+.spillo-tokyo, .spillo-esteso { position: absolute; }
+.spillo-tokyo::after, .spillo-esteso::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }

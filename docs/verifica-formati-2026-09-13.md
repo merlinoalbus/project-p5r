@@ -1,72 +1,129 @@
 # Verifica e ottimizzazione dei tre formati — tutta l'app, 2026-09-13
 
-Passata su **tutte le 36 schermate** dell'applicazione (ogni rotta del router, con le chiavi reali
-del database) a **375, 768 e 1280 px**: 108 verifiche. Per ciascuna si misurano scorrimento
-orizzontale, bersagli del tocco sotto i 44 px, testo che sborda dal contenitore, testo incolonnato
-lettera per riga, testo troppo piccolo per leggerlo e **spazio usato** rispetto a quello
-disponibile.
+Passata su **65 schermate** — tutte le rotte del router **e tutte le viste interne** (le 13 schede
+della Partita, le 11 viste della Fusione, gli elenchi filtrati, la pagina non trovata) — a **375,
+768 e 1280 px**: **195 verifiche**. Per ciascuna si misurano scorrimento orizzontale, bersagli del
+tocco sotto i 44 px, testo che sborda dal contenitore, testo incolonnato lettera per riga, testo
+sotto i 9 px e **spazio usato** rispetto a quello disponibile.
 
-La verifica dei lotti precedenti aveva coperto solo le schermate toccate da ciascun lotto. Questo
-documento è il censimento completo che mancava, con le correzioni che ne sono seguite.
+## Esito per schermata
 
-## Esito finale
+`ok NN%` = nessun difetto; NN è la quota di larghezza occupata dal contenuto (il resto sono i
+margini di pagina). Le schermate a `0%` sono i visori a schermo intero: il contenitore di pagina è
+vuoto perché il visore occupa la finestra (a 1280×900: tela 940 + pannello 340), quindi usano
+tutto. L'editor della mappa supera il 100% perché il pannello laterale esce dalla colonna di
+contenuto, per scelta.
 
-| Larghezza | Schermate | Scorrimento orizzontale | Bersagli < 44 px | Testo spezzato o che sborda | Spazio usato |
-|---|---|---|---|---|---|
-| 375 px (telefono) | 36 | 0 | 0 | 0 | 91% (margini di 16 px) |
-| 768 px (tablet) | 36 | 0 | 0 | 0 | 96% |
-| 1280 px (monitor) | 36 | 0 | 0 | 0 | 96% |
-
-Nessuna eccezione dichiarata: i tre casi che nella prima stesura avevo lasciato aperti sono stati
-corretti (in fondo, «I residui della prima stesura»). Le pagine del visore a schermo intero
-risultano «0%» sul contenitore di pagina perché il visore occupa la finestra intera (1280×900:
-tela 940 + pannello 340): usano tutto lo spazio, non poco.
-
-## Metodo
-
-Misura eseguita nel browser sulle pagine vere: per ogni rotta si scorre in cima, si attende il
-caricamento e si misurano gli elementi resi. Tre precisazioni hanno cambiato i numeri, ed erano
-errori del mio metodo di misura, non difetti dell'app:
-
-- il bersaglio di una **casella di spunta** è l'etichetta che la avvolge, non il quadratino: una
-  casella di 20 px dentro una `<label>` alta 44 px è già a norma (da sola contava 78 falsi difetti
-  nelle Domande);
-- gli elementi **nascosti** (sr-only, `clip-path`, larghezza 1 px) hanno un riquadro che sembra
-  sbordare e un testo che sembra incolonnato: non si vedono. Ci ricadevano le etichette dei
-  pulsanti del visore, che la barra stretta nasconde di proposito;
-- i **`<title>` degli SVG** sono tooltip, non testo visibile.
-
-## Difetti trovati e corretti
-
-| Schermate | Difetto | Prima | Correzione |
+| Schermata | 375 px | 768 px | 1280 px |
 |---|---|---|---|
-| Denaro e squadra | riga con sei elementi in `flex-wrap`: nome spezzato lettera per riga, «Livello» ripetuto due volte, casella 20 px, campi 36 px | scheda alta 400 px | scheda rifatta in due fasce, comandi «−1»/«+1», interruttore da 44 px |
-| Oggetti (95), Attività (19), Confidenti | chip-link toccabili | 23 px | 44 px **a ogni larghezza**, mouse compreso |
-| Cruciverba (38), Home, Partita, Percorso | caselle di spunta senza etichetta avvolgente | 20×20 px | etichetta toccabile attorno, aspetto invariato |
-| Confidenti (ogni riga di rango), Storico | «Rango 1» e «0 scelte» incolonnati lettera per riga | 16×135 px | `shrink-0` sui lati, `min-w-0 flex-1` sulla parte elastica |
-| Ogni pagina con mappa | briciole, elenco delle figlie, zoom, «Mostra tutti», categorie | 30–40 px | 44 px a ogni larghezza |
-| Ogni pagina con mappa | spilli sulla mappa | 38×38 px | area del tocco estesa a 44 px: il disegno resta 38 e non copre la mappa |
-| Tutta l'app | selettore compatto (sceglie la partita, filtra le pagine) | 40 px | 44 px |
-| Tutta l'app | campi `editor-mappa__campo` | 36 px | 44 px sotto i 1024 px e su puntatore grosso |
-| Home, Partita (mappa di Tokyo) | targhe dei luoghi illeggibili sul telefono | **5,46 px**, e portate a una misura leggibile si sovrapponevano | sotto i 520 px di tela le targhe spariscono e i nomi diventano una legenda toccabile da 44 px sotto la mappa |
+| `/home` | ok 91% | ok 96% | ok 96% |
+| `/compendio` | ok 91% | ok 96% | ok 96% |
+| `/compendio?arcana=matto` | ok 91% | ok 96% | ok 96% |
+| `/compendio/persona/1` | ok 91% | ok 96% | ok 96% |
+| `/compendio/glossario` | ok 91% | ok 96% | ok 96% |
+| `/skill` | ok 91% | ok 96% | ok 96% |
+| `/skill?elemento=fuoco` | ok 91% | ok 96% | ok 96% |
+| `/skill/1` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=calcolatore` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=ricette` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=piani` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=skill` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=cicli` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=forca` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=con` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=coppia` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=matrice` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=speciali` | ok 91% | ok 96% | ok 96% |
+| `/fusione?vista=tesori` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=oggi` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=riepilogo` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=doti` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=squadra` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=confidenti` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=letture` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=progressi` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=scorta` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=compendio` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=obiettivi` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=piani` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=cicli` | ok 91% | ok 96% | ok 96% |
+| `/partita?scheda=storico` | ok 91% | ok 96% | ok 96% |
+| `/confidenti/akechi` | ok 91% | ok 96% | ok 96% |
+| `/guida` | ok 91% | ok 96% | ok 96% |
+| `/guida/domande` | ok 91% | ok 96% | ok 96% |
+| `/guida/calendario` | ok 91% | ok 96% | ok 96% |
+| `/guida/dungeon` | ok 91% | ok 96% | ok 96% |
+| `/guida/dungeon/kamoshida` | ok 91% | ok 96% | ok 96% |
+| `/guida/dungeon/mementos` | ok 91% | ok 96% | ok 96% |
+| `/guida/richieste` | ok 91% | ok 96% | ok 96% |
+| `/guida/battaglia` | ok 91% | ok 96% | ok 96% |
+| `/guida/mappe` | ok 91% | ok 96% | ok 96% |
+| `/guida/mappe/citta-shibuya` | ok (visore a schermo intero) | ok | ok |
+| `/guida/mappe/citta-shibuya/modifica` | ok | ok | ok |
+| `/guida/citta` | ok 91% | ok 96% | ok 96% |
+| `/guida/citta/akihabara` | ok 91% | ok 96% | ok 96% |
+| `/guida/mondo/quartiere/shibuya` | ok (visore a schermo intero) | ok | ok |
+| `/guida/attivita` | ok 91% | ok 96% | ok 96% |
+| `/guida/libri` | ok 91% | ok 96% | ok 96% |
+| `/guida/film` | ok 91% | ok 96% | ok 96% |
+| `/guida/videogiochi` | ok 91% | ok 96% | ok 96% |
+| `/guida/cruciverba` | ok 91% | ok 96% | ok 96% |
+| `/guida/completamento` | ok 91% | ok 96% | ok 96% |
+| `/guida/covo` | ok 91% | ok 96% | ok 96% |
+| `/guida/sfide` | ok 91% | ok 96% | ok 96% |
+| `/guida/personaggi` | ok 91% | ok 96% | ok 96% |
+| `/guida/oggetti` | ok 91% | ok 96% | ok 96% |
+| `/guida/percorso` | ok 91% | ok 96% | ok 96% |
+| `/guida/percorso/04-15` | ok 91% | ok 96% | ok 96% |
+| `/guida/negozi` | ok 91% | ok 96% | ok 96% |
+| `/guida/negozi?categoria=armi` | ok 91% | ok 96% | ok 96% |
+| `/guida/negozi/37-gradi-celsius` | ok 91% | ok 96% | ok 96% |
+| `/guida/rimossi` | ok 91% | ok 96% | ok 96% |
+| `/impostazioni` | ok 91% | ok 96% | ok 96% |
+| `/pagina-che-non-esiste` | ok 91% | ok 96% | ok 96% |
 
-## I residui della prima stesura, ora chiusi
+## Che cosa è stato corretto
 
-1. **Il link «altro»** del testo ripiegabile (Palazzi, Covo) era 26×18 px perché appeso in coda al
-   paragrafo. Ora è un comando su una riga propria, «Mostra tutto» / «Mostra meno», alto 44 px.
-2. **La miniatura di un'entità** (40×40 px in Home e Partita) apre l'ingrandimento: il riquadro
-   resta 40 px — ingrandirlo sposterebbe la riga — ma l'area che riceve il tocco è 44 px.
-3. **Le etichette troncate con le ellissi**: i nomi delle Persona nel Compendio e in Personaggi e
-   le etichette delle tessere compatte («Conoscen…») ora vanno a capo invece di sparire. Una
-   tessera cresce di una riga; il dato resta leggibile.
+| Dove | Difetto | Prima | Correzione |
+|---|---|---|---|
+| Denaro e squadra | riga con sei elementi in `flex-wrap`: nome spezzato lettera per riga, «Livello» ripetuto, casella 20 px | scheda alta 400 px | rifatta in due fasce, comandi «−1»/«+1», interruttore da 44 px |
+| Oggetti (95), Attività, Confidenti | chip-link: bassi, compressi a 53 px dall'etichetta della cella e stirati fino a 108 px dall'allineamento `stretch` | 23–108 px | 44 px d'altezza, `width: max-content`, `align-self: start` |
+| Compendio personale (210 voci), Personaggi, scheda Persona | nomi cliccabili in elenco | 18–23 px | voci da 44 px |
+| Ovunque: crediti, «la loro pagina», nomi di luoghi dentro le frasi | collegamenti dentro il testo | 16–17 px | `padding-block` di 15 px: l'area arriva a 44 senza allargare l'interlinea |
+| Cruciverba, Storico, azioni del giorno (Home, Partita, Percorso) | caselle di spunta senza etichetta avvolgente | 20×20 px | etichetta toccabile attorno |
+| Confidenti (righe dei ranghi), Storico | «Rango 1» e «0 scelte» incolonnati lettera per riga | 16×135 px | `shrink-0` sui lati, `min-w-0` sulla parte elastica |
+| Ogni pagina con mappa | briciole, elenco figlie, zoom, azioni, categorie | 30–40 px | 44 px |
+| Doti sociali | pulsanti delle note, premuti decine di volte per partita | 30 px col mouse | 44 px a ogni larghezza |
+| Tutta l'app | selettore della partita, campi `editor-mappa__campo` | 36–40 px | 44 px a ogni larghezza |
+| Home, Partita (mappa di Tokyo) | targhe dei luoghi | **5,46 px**, illeggibili; a misura leggibile si sovrapponevano | sotto i 520 px di tela le targhe lasciano il posto a una legenda toccabile |
+| Mappa di Tokyo, Memento, spilli, miniature | disegni che non possono crescere senza coprire la mappa | 15×17–40×40 px | area del tocco estesa a 44 px, verificata con l'hit-testing del browser |
+| Compendio, Personaggi, tessere compatte | nomi ed etichette troncate con le ellissi | «Conoscen…» | vanno a capo |
+| Palazzi, Covo | il comando che apre il testo ripiegato | 26×18 px in coda al paragrafo | «Mostra tutto» su una riga propria, 44 px |
+
+## Errori del metodo di misura, corretti strada facendo
+
+Tre cose che sembravano difetti e non lo erano, e una che lo era e non si vedeva:
+
+- il bersaglio di una **casella di spunta** è l'etichetta che la avvolge, non il quadratino (da sola
+  contava 78 falsi difetti nelle Domande);
+- gli elementi **nascosti** (sr-only, `clip-path`, larghezza 1 px) e i **`<title>` degli SVG**
+  sembrano sbordare o incolonnarsi: non si vedono;
+- un elemento con **area del tocco estesa** ha il riquadro piccolo e il bersaglio grande: va
+  verificato con `elementFromPoint`, non con la misura del riquadro. È così che si è scoperto che
+  il primo tentativo sulle miniature era inerte, perché `overflow: hidden` ritagliava anche l'area
+  del tocco;
+- il **testo troppo piccolo** non era fra le misure iniziali: aggiungendolo sono saltate fuori le
+  targhe da 5,46 px della mappa di Tokyo.
 
 ## Regole che restano valide per il lavoro futuro
 
 - 44 px è il bersaglio minimo **a ogni larghezza**, non solo sul tocco: due misure diverse per lo
   stesso comando sono due difetti invece di uno.
 - Quando un elemento non può crescere (uno spillo su una mappa, una miniatura in una riga), si
-  allarga l'area che riceve il tocco, non il disegno.
+  allarga l'area che riceve il tocco — e la si verifica col tocco, non col righello.
 - In un `flex`, gli elementi laterali portano `shrink-0` e la parte elastica `min-w-0`: è la causa
   di ogni testo incolonnato lettera per riga trovato in questa passata.
 - Un testo che scala con il contenitore ha bisogno di un minimo leggibile; se al minimo non ci sta
   più, cambia forma (la legenda al posto delle targhe), non dimensione.
+- Due regole che decidono la stessa cosa devono interrogare **lo stesso contenitore, per nome**:
+  targhe e legenda ne leggevano due diversi, e fra 521 e 522 px la mappa restava senza nomi.

@@ -128,7 +128,8 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
         <ol className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Eventi della partita">
           {eventi.map((e) => (
             <li key={e.id} className={`py-2 flex items-start gap-3 text-[13px] ${selezionati[e.id] ? 'bg-primary-bg' : ''}`}>
-              {!compatto && <input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={!!selezionati[e.id]} onChange={(ev) => setSelezionati((m) => { const n = { ...m }; if (ev.target.checked) n[e.id] = true; else delete n[e.id]; return n; })} aria-label={`Seleziona la voce ${e.titolo}`} />}
+              {/* la casella da sola è 20 px: l'etichetta attorno la rende toccabile per 44 */}
+              {!compatto && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={!!selezionati[e.id]} onChange={(ev) => setSelezionati((m) => { const n = { ...m }; if (ev.target.checked) n[e.id] = true; else delete n[e.id]; return n; })} aria-label={`Seleziona la voce ${e.titolo}`} /></label>}
               <time dateTime={e.createdAt} className="shrink-0 w-[92px] text-[12px] text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
               {e.personaNome && <ImmagineEntita ambito="persona" chiave={e.personaNome} etichetta={e.personaNomeIt ?? e.personaNome} dimensione={40} adatta="copri" />}
               <div className="flex-1 min-w-0">
