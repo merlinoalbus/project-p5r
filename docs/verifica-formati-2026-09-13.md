@@ -58,12 +58,13 @@ contenuto, per scelta.
 | `/guida/richieste` | ok 91% | ok 96% | ok 96% |
 | `/guida/battaglia` | ok 91% | ok 96% | ok 96% |
 | `/guida/mappe` | ok 91% | ok 96% | ok 96% |
-| `/guida/mappe/citta-shibuya` | ok (visore a schermo intero) | ok | ok |
-| `/guida/mappe/palazzo-di-kamoshida` | ok (col pannello «Contenuti della guida» aperto) | ok | ok |
+| `/guida/mappe/citta-shibuya` | **rimisurata**: visore a schermo intero, nessun traboccamento, nessun bersaglio sotto i 44, distanza minima fra i centri degli spilli 574 px | rimisurata: ok | rimisurata: ok |
+| `/guida/mappe/palazzo-di-kamoshida` | **rimisurata** (col pannello «Contenuti della guida» aperto): uso 93%, nessun bersaglio sotto i 44 | rimisurata: uso 97% | rimisurata: uso 97% |
+| `/guida/mappe/palazzo-di-futaba-corridoio-principale` | **nuova riga**: è la mappa con tre gruppi di spilli **coincidenti**. Il gruppo si apre a elenco e nomina i suoi tre spilli, si sceglie e il popup si apre; distanza minima fra i centri 108 px | ok | ok |
 | `/guida/mappe/dedalo-di-iweleth` | ok (idem) | ok | ok |
 | `/guida/mappe/citta-shibuya/modifica` | ok | ok | ok |
-| `/guida/citta` | ok 91% | ok 96% | ok 96% |
-| `/guida/citta/akihabara` | ok 91% | ok 96% | ok 96% |
+| `/guida/citta` | **rimisurata**: uso 93%, nessun traboccamento; i cartellini di Tokyo, alti 15–23 px di disegno, ricevono 45×45, 45×45, 44×45 all'hit-testing | rimisurata: uso 97% | rimisurata: uso 97% |
+| `/guida/citta/akihabara` | **rimisurata** dopo il raggruppamento per distanza: uso 93%, nessun traboccamento orizzontale, 4 spilli e 1 gruppo, distanza minima fra i centri 74 px; l'unico bersaglio sotto i 44 è il credito della fonte, che è un link **dentro la frase** «Mappa da …, scaricata nella tua istanza» — escluso dal criterio | rimisurata: uso 97%, idem | rimisurata: uso 97%, idem |
 | `/guida/mondo/quartiere/shibuya` | ok (visore a schermo intero) | ok | ok |
 | `/guida/attivita` | ok 91% | ok 96% | ok 96% |
 | `/guida/libri` | ok 91% | ok 96% | ok 96% |
@@ -99,7 +100,9 @@ contenuto, per scelta.
 | Tutta l'app | selettore della partita, campi `editor-mappa__campo` | 36–40 px | 44 px a ogni larghezza |
 | Home, Partita (mappa di Tokyo) | targhe dei luoghi | **5,46 px**, illeggibili; a misura leggibile si sovrapponevano | sotto i 545 px di tela — il punto in cui il corpo scenderebbe sotto i 9 px — le targhe lasciano il posto a una legenda toccabile |
 | Mappa di Tokyo, Memento, spilli, miniature | disegni che non possono crescere senza coprire la mappa | 15×17–40×40 px | area del tocco estesa a 44 px, verificata con l'hit-testing del browser. Sulla torre dei Mementos, dove i dedali si toccano fra loro, l'area utile di ciascuno resta minore: a coprirla è la sagoma del dedalo accanto, cioè un altro bersaglio, non un disegno |
-| Visore delle mappe, spilli e gruppi «+n» (quartieri, palazzi, mappe incorporate) | due spilli più vicini di un bersaglio si toglievano pixel a vicenda: il gruppo si fermava a 40, e sulle mappe di città capitava che a fermare il sondaggio fosse un *altro* spillo. Il raggruppamento era una griglia di celle da 30 px — più piccole del bersaglio, e senza alcuna garanzia di distanza: due spilli a due pixel restavano separati se cadevano a cavallo del bordo — e per giunta attiva solo sotto zoomMin × 1,6, così appena si ingrandiva un po' due pin potevano stare a venti pixel l'uno dall'altro | gruppo 34+6 = **40 px**; singoli fino a **38 px** dove un vicino li tagliava | raggruppamento **per distanza**, a ogni ingrandimento: si fondono finché due centri distano meno di 46 px, confrontando i centri dei bersagli e non i punti ancorati (la goccia ha la punta sul punto, la pastiglia del gruppo è centrata; confrontare i punti lasciava 44,3 px). Ingrandendo, le distanze crescono e i gruppi si sciolgono da soli. Misurato su `/guida/citta/shibuya` (19 spilli, 5 gruppi), `/guida/citta/akihabara`, `/guida/mappe/citta-shibuya` e la mappa della Shujin a 375/768/1280: distanza minima fra centri 49 / 74 / 574 / 51 px, e l'hit-testing dei bersagli visibili dà 44×49, 44×50, 45×45 — **nessuno sotto 44**. Nell'editor no: lì il gesto è spostare *quel* pin, e a separarli è l'ingrandimento |
+| Visore delle mappe, spilli e gruppi «+n» (quartieri, palazzi, mappe incorporate) | due spilli più vicini di un bersaglio si toglievano pixel a vicenda: il gruppo si fermava a 40, e sulle mappe di città capitava che a fermare il sondaggio fosse un *altro* spillo. Il raggruppamento era una griglia di celle da 30 px — più piccole del bersaglio, e senza alcuna garanzia di distanza: due spilli a due pixel restavano separati se cadevano a cavallo del bordo — e per giunta attiva solo sotto zoomMin × 1,6, così appena si ingrandiva un po' due pin potevano stare a venti pixel l'uno dall'altro | gruppo 34+6 = **40 px**; singoli fino a **38 px** dove un vicino li tagliava | raggruppamento **per distanza**, a ogni ingrandimento: si fondono finché due centri distano meno di 46 px, confrontando i centri dei bersagli e non i punti ancorati (la goccia ha la punta sul punto, la pastiglia del gruppo è centrata; confrontare i punti lasciava 44,3 px). Ingrandendo, le distanze crescono e i gruppi si sciolgono da soli (misurato: da 5 gruppi a 0 in quattro scatti di zoom, con il minimo sempre sopra i 46). Misurato su `/guida/citta/shibuya` (19 spilli, 5 gruppi), `/guida/citta/akihabara`, `/guida/mappe/citta-shibuya`, la mappa della Shujin e `/guida/mappe/palazzo-di-futaba-corridoio-principale` a 375/768/1280: distanza minima fra centri 49 / 74 / 574 / 51 / 108 px, e l'hit-testing dei bersagli **non tagliati dal bordo della tela** dà 44×49, 44×50, 45×45. **Le misure sono prese col pannello del browser nascosto**, dove il `ResizeObserver` non consegna mai e il visore resta a `scale(1)` invece dell'inquadratura adattata: la geometria resa è coerente e l'hit-testing è valido, ma il ritaglio della tela non è quello che vede un dispositivo vero. Ciò che vale a ogni zoom è la garanzia per costruzione, non queste cifre |
+| Visore delle mappe, gruppo «+n» | il gruppo non si apriva: la sua unica azione era ingrandire di 2,2×, e nel pacchetto **228 coppie di spilli su 74 mappe hanno le stesse coordinate** — distanza zero, che resta zero a qualunque ingrandimento. Su `/guida/mappe/palazzo-di-futaba-corridoio-principale` restavano tre gruppi anche a 800% e il tocco non faceva niente | un bersaglio da 45 px inerte | il tocco apre l'elenco degli spilli del gruppo, che non dipende dallo zoom: si sceglie il nome e si apre il suo popup. «Ingrandisci qui» resta nell'elenco, ma solo quando lo zoom non è già al massimo. E la nube **non si scorpora più** quando uno dei suoi spilli è aperto: prima i compagni tornavano gocce singole alla distanza appena dichiarata inammissibile — su spilli coincidenti, tre gocce sovrapposte, due senza un pixel di bersaglio |
+| Ogni mappa, pin sul bordo | l'inquadratura «adatta» lasciava 24 px di margine, e nessuno quando l'alfa dell'immagine non era leggibile: il bersaglio di un pin sul bordo veniva tagliato dal ritaglio della tela | 27×50 px | il fit lascia il posto al **bersaglio**, non al punto: 22 px ai lati, 41 sopra (la goccia è ancorata alla punta) e 3 sotto, sempre, con i margini ridotti in proporzione su tele minuscole. Verificato con un test che prova pin sui quattro spigoli a tre larghezze di tela, con e senza area alfa |
 | Compendio, Personaggi, tessere compatte | nomi ed etichette troncate con le ellissi | «Conoscen…» | vanno a capo |
 | Palazzi, Covo | il comando che apre il testo ripiegato | 26×18 px in coda al paragrafo | «Mostra tutto» su una riga propria, 44 px |
 | Videogiochi (14 etichette), e le altre sei liste etichetta/valore | «C h e   c o s a   f a» incolonnato: il chip dentro il valore imponeva alla colonna elastica una larghezza minima enorme e schiacciava quella dell'etichetta | 32×100 px | `dt { white-space: nowrap }` e `dd { min-width: 0 }` sulla classe `dl-scheda`: la stessa regola dei flex, scritta per la griglia |
@@ -171,7 +174,17 @@ Tre cose che sembravano difetti e non lo erano, e una che lo era e non si vedeva
   il primo tentativo sulle miniature era inerte, perché `overflow: hidden` ritagliava anche l'area
   del tocco;
 - il **testo troppo piccolo** non era fra le misure iniziali: aggiungendolo sono saltate fuori le
-  targhe da 5,46 px della mappa di Tokyo.
+  targhe da 5,46 px della mappa di Tokyo;
+- col **pannello del browser nascosto** il visore delle mappe non riceve mai la misura della tela
+  (il `ResizeObserver` notifica tramite rAF, che a pannello nascosto non gira) e resta a `scale(1)`
+  invece dell'inquadratura adattata: cambiando la larghezza da 375 a 768 la tela passa da 331 a
+  724 px e il `transform` non si muove di un pixel. La geometria resa è coerente — l'hit-testing su
+  di essa vale — ma il **ritaglio** della tela non è quello di un dispositivo vero, e le distanze
+  non cambiano con la larghezza. Le misure prese così vanno dichiarate tali: per gli spilli la
+  garanzia che regge a ogni zoom è quella per costruzione (nessuna coppia di bersagli più vicina di
+  46 px), non le cifre di una singola inquadratura;
+- un bersaglio **tagliato dal bordo** della tela non è un bersaglio piccolo: lì la correzione non
+  sta nel disegno ma nell'inquadratura, che deve lasciare posto al bersaglio e non al punto.
 
 ## Regole che restano valide per il lavoro futuro
 

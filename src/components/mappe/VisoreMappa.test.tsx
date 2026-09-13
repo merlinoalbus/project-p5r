@@ -203,7 +203,19 @@ it('centra il punto iniziale con lo zoom configurato senza selezionare un pin',a
  const misura=vi.spyOn(HTMLElement.prototype,'getBoundingClientRect').mockReturnValue({width:1000,height:500,left:0,top:0,right:1000,bottom:500,x:0,y:0,toJSON:()=>({})});
  try {
   monta({puntoIniziale:{x:20,y:80,zoom:2.5}});
-  await waitFor(()=>expect(document.querySelector('.visore-mappa__livello')).toHaveStyle({transform:'translate(0px, -750px) scale(2.5)'}));
+  // Lo zoom configurato è un moltiplicatore del fit, e il fit ora lascia il margine che serve al
+  // bersaglio dei pin (24 px ai lati e sotto, 44 sopra: la goccia è ancorata alla punta e si alza).
+  // Su una tela 1000×500 con un'immagine 1000×500 il fit vale min(952/1000, 432/500) = 0,864.
+  const atteso = 0.864 * 2.5;
+  await waitFor(()=>{
+   const t=(document.querySelector('.visore-mappa__livello') as HTMLElement).style.transform;
+   const m=/translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec(t);
+   expect(m).not.toBeNull();
+   const [x,y,z]=m!.slice(1).map(Number);
+   expect(z).toBeCloseTo(atteso, 3);
+   expect(x+200*z).toBeCloseTo(500);   // il punto chiesto (20%) finisce al centro della tela
+   expect(y+400*z).toBeCloseTo(250);   // e così l'80% in verticale
+  });
   expect(screen.queryByRole('dialog')).toBeNull();
  }finally{misura.mockRestore();}
 });
@@ -256,5 +268,30 @@ describe('raggruppamento degli spilli vicini', () => {
     const { container } = render(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} editor={{ strumento: 'seleziona', selezionatoId: null, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
     expect(sullaTela(container)).toHaveLength(2);
     expect(sullaTela(container).join(' ')).not.toContain('spilli vicini');
+  });
+});
+
+// Il gruppo deve **aprirsi**, non ingrandire: nel pacchetto ci sono spilli con le stesse coordinate,
+// e la loro distanza sullo schermo resta zero a qualunque ingrandimento. Un bersaglio da 45 px che
+// non fa niente è peggio di un bersaglio piccolo (rilievo del validatore, 2026-09-13).
+describe('apertura del gruppo di spilli', () => {
+  const coincidenti: MappaDto = {
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 21, nome: 'Stanza sicura', tipo: 'sicura', tipoNome: 'Stanza sicura', x: 40, y: 40 }),
+      spillo({ id: 22, nome: 'Punto di spostamento', tipo: 'passaggio', tipoNome: 'Passaggio', x: 40, y: 40 }),
+    ],
+  };
+
+  it('il tocco apre l’elenco e da lì si sceglie lo spillo, che resta raggruppato', async () => {
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={coincidenti} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    const gruppo = screen.getByRole('button', { name: '2 spilli vicini: Stanza sicura, Punto di spostamento' });
+    expect(gruppo).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(gruppo);
+    const elenco = screen.getByRole('dialog', { name: '2 spilli vicini' });
+    fireEvent.click(within(elenco).getByRole('button', { name: /Punto di spostamento/ }));
+    // il popup dello spillo scelto si apre...
+    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Punto di spostamento' })).toBeInTheDocument());
+    // ...e la nube non si scorpora: restano due gocce sovrapposte, senza bersaglio, se lo facesse
+    expect([...container.querySelectorAll('.visore-mappa__livello .spillo-mappa')]).toHaveLength(1);
   });
 });

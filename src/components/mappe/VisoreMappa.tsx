@@ -169,6 +169,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [mostraNonDisponibili, setMostraNonDisponibili] = useState(false);
   const [ricerca, setRicerca] = useState('');
   const [selezionatoUso, setSelezionatoUso] = useState<number | null>(selezioneIniziale ?? null);
+  /** Il gruppo «+n» aperto, per chiave: l'elenco dice chi c'è dentro e permette di scegliere. */
+  const [gruppoAperto, setGruppoAperto] = useState<string | null>(null);
   // Incorporato in una pagina lo spazio è poco: il pannello è chiuso finché l'utente non lo apre; a schermo intero è aperto.
   // Stato derivato (nessun effetto che sincronizza): `null` = comportamento predefinito del contesto.
   const [pannelloScelto, setPannelloScelto] = useState<boolean | null>(null);
@@ -432,14 +434,19 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     const singoli: SpilloDto[] = [];
     const gruppi: Gruppo[] = [];
     for (const nube of nubi) {
-      // La nube che contiene lo spillo aperto si apre con lei: il popup è di uno spillo preciso, e
-      // finché resta aperto quello è il bersaglio che conta.
-      if (nube.spilli.length === 1 || nube.spilli.some((s) => s.id === selezionatoId)) { singoli.push(...nube.spilli); continue; }
+      // Una nube resta una nube anche quando uno dei suoi spilli è aperto. Prima si scorporava, e i
+      // compagni tornavano gocce singole alla distanza che il raggruppamento aveva appena dichiarato
+      // inammissibile: su spilli con le stesse coordinate — nel pacchetto ce ne sono a centinaia —
+      // erano tre gocce sovrapposte, due delle quali senza un pixel di bersaglio (rilievo del
+      // validatore, 2026-09-13). Il popup dello spillo aperto si mostra lo stesso, ancorato lì.
+      if (nube.spilli.length === 1) { singoli.push(...nube.spilli); continue; }
       const chiave = nube.spilli.map((s) => s.id).sort((a, b) => a - b).join('-');
       gruppi.push({ chiave, x: nube.spilli.reduce((a, s) => a + s.x, 0) / nube.spilli.length, y: nube.spilli.reduce((a, s) => a + s.y, 0) / nube.spilli.length, spilli: nube.spilli });
     }
     return { singoli, gruppi };
   })();
+  /** Se ingrandendo il gruppo si è sciolto, l'elenco sparisce da sé: nessun effetto da sincronizzare. */
+  const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
 
   const cambiaRaccolto = async (s: SpilloDto, raccolto: boolean) => {
     if (!onRaccolto) return;
@@ -628,7 +635,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 </button>
               );
             })}
-            {selezionato && !editor && singoli.some((s) => s.id === selezionato.id) && inPortale(schermoStretto, (
+            {selezionato && !editor && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(schermoStretto, (
               <div className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={selezionato.nome} style={schermoStretto ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx * zoom}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx * zoom}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
@@ -674,19 +681,57 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 </div>
               </div>
             ))}
-            {gruppi.map((g) => (
-              <button
-                key={g.chiave}
-                type="button"
-                className="spillo-mappa spillo-mappa--gruppo"
-                style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(-50%, -50%)` }}
-                aria-label={`${g.spilli.length} spilli vicini: ${g.spilli.map((s) => s.nome).join(', ')}`}
-                title={g.spilli.map((s) => s.nome).join(', ')}
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => { e.stopPropagation(); applicaZoom(zoom * 2.2, pan.x + (g.x / 100) * nat.w * zoom, pan.y + (g.y / 100) * nat.h * zoom); }}
-              >
-                <span className="spillo-mappa__gruppo">+{g.spilli.length}</span>
-              </button>
+            {/* Il gruppo si apre e dice chi c'è dentro. Prima l'unica sua azione era ingrandire di
+                2,2×, e su spilli con le **stesse** coordinate — nel pacchetto ce ne sono 228 coppie su
+                74 mappe — la distanza sullo schermo resta zero a qualunque ingrandimento: il gruppo non
+                si scioglieva mai e il tocco non faceva niente (rilievo del validatore, 2026-09-13).
+                Ora il tocco apre l'elenco, che non dipende dallo zoom; ingrandire resta un comando
+                dell'elenco, utile quando gli spilli sono vicini ma non coincidenti. */}
+            {gruppi.map((g) => {
+              const aperto = gruppoAperto === g.chiave;
+              const dentro = g.spilli.some((s) => s.id === selezionatoId);
+              return (
+                <button
+                  key={g.chiave}
+                  type="button"
+                  className={`spillo-mappa spillo-mappa--gruppo ${aperto || dentro ? 'spillo-mappa--selezionato' : ''}`}
+                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(-50%, -50%)` }}
+                  aria-label={`${g.spilli.length} spilli vicini: ${g.spilli.map((s) => s.nome).join(', ')}`}
+                  aria-expanded={aperto}
+                  title={g.spilli.map((s) => s.nome).join(', ')}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); seleziona(null); setGruppoAperto(aperto ? null : g.chiave); }}
+                >
+                  <span className="spillo-mappa__gruppo">+{g.spilli.length}</span>
+                </button>
+              );
+            })}
+            {gruppoScelto && !editor && inPortale(schermoStretto, (
+              <div className="spillo-popup" role="dialog" aria-label={`${gruppoScelto.spilli.length} spilli vicini`}
+                style={schermoStretto ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(-50%, calc(-100% - 26px))` } as CSSProperties}
+                onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+                <div className="flex items-start gap-2">
+                  <strong className="flex-1 text-[13px] leading-tight">{gruppoScelto.spilli.length} spilli qui</strong>
+                  <button type="button" className="spillo-popup__chiudi" onClick={() => setGruppoAperto(null)} aria-label="Chiudi l’elenco">×</button>
+                </div>
+                <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
+                  {gruppoScelto.spilli.map((s) => (
+                    <li key={s.id}>
+                      <button type="button" className="visore-mappa__voce" onClick={() => { setGruppoAperto(null); seleziona(s.id); }}>
+                        <PuntoSpillo tipo={s.tipo} colore={s.colore} />
+                        <span className="flex-1 min-w-0 break-words text-left">{s.nome}</span>
+                        <span className="text-[11px] text-text-muted shrink-0">{s.tipoNome}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {/* Serve solo quando gli spilli sono vicini ma distinti: se hanno le stesse
+                    coordinate non si separano nemmeno a 800%, e prometterlo sarebbe una bugia. */}
+                {zoom < zoomMax - 1e-6 && (
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ingrandisci" dimensione={20} />} titolo="Ingrandisci qui"
+                    onClick={() => { setGruppoAperto(null); applicaZoom(zoom * 2.2, pan.x + (gruppoScelto.x / 100) * nat.w * zoom, pan.y + (gruppoScelto.y / 100) * nat.h * zoom); }} />
+                )}
+              </div>
             ))}
           </div>
           <div className="visore-mappa__controlli" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
