@@ -1,10 +1,24 @@
 # Verifica e ottimizzazione dei tre formati — tutta l'app, 2026-09-13
 
-Passata su **67 schermate** — tutte le rotte del router **e tutte le viste interne** (le 13 schede
-della Partita, le 11 viste della Fusione, gli elenchi filtrati, le radici di un Palazzo e di un
-Dedalo nell'atlante, la pagina non trovata) — a **375, 768 e 1280 px**: **201 verifiche**. Per ciascuna si misurano scorrimento orizzontale, bersagli del
+Passata su **68 schermate** (una riga per schermata nella tabella qui sotto) — tutte le rotte del
+router **e le viste interne**: le 13 schede della Partita, le 11 viste della Fusione, gli elenchi
+filtrati, le radici di un Palazzo e di un Dedalo nell'atlante, la pagina non trovata — a **375, 768
+e 1280 px**: **204 verifiche**. Per ciascuna si misurano scorrimento orizzontale, bersagli del
 tocco sotto i 44 px, testo che sborda dal contenitore, testo incolonnato lettera per riga, testo
 sotto i 9 px e **spazio usato** rispetto a quello disponibile.
+
+**Oltre alla tabella** — e a colmare ciò che la tabella non copriva (rilievo del validatore,
+2026-09-13) — sono state misurate ai tre formati anche:
+- le **finestre modali**, che si aprono con un gesto e nessuna passata sulle rotte può incontrare:
+  nuova partita, immagine di un'entità, scelta della Persona per un obiettivo, risposta di un
+  Confidente, modulo del catalogo (libri e negozi). Tutte dentro lo schermo, nessun bersaglio sotto
+  i 44 px, nessun testo sotto i 9. **Attenzione al metodo**: col pannello del browser nascosto
+  l'animazione d'apertura resta ferma al primo fotogramma (`scale-in`, 0,95), quindi ogni misura va
+  divisa per quella scala — senza, ogni bersaglio sembra 42 px e si dichiarano venti difetti che non
+  esistono;
+- le **rotte parametriche con più di un valore**: tre Persona, due skill, due Confidenti, due
+  quartieri, una data del percorso, e **tutti e dieci** i tipi di `/guida/mondo/:tipo/:chiave`
+  (mappa, quartiere, dungeon, area, luogo, negozio, punto, confidente, articolo, attività).
 
 ## Esito per schermata
 
@@ -24,6 +38,14 @@ Gli elementi che escono dalla colonna sono tutti dentro `.fila-scorrevole`, cio�
 che scorrono apposta. Restano fuori da questa misura, e vanno viste col pannello del browser
 **visibile**: gli spilli delle mappe incorporate, il cui bersaglio qui risulta ritagliato perché il
 visore non riceve mai le dimensioni della tela (vedi «Errori del metodo di misura»).
+
+Per quelli, però, la prova non è più a campione: la regola che decide chi si vede sulla mappa e dove
+sta è una funzione a sé (`src/utils/raggruppaSpilli.ts`) e il suo invariante — **due bersagli non
+distano mai meno di 46 px** — è verificato da un test sulle **mappe vere del pacchetto**
+(`raggruppaSpilli.pacchetto.test.ts`): 302 mappe con dimensioni, tre larghezze, quattro
+ingrandimenti, e nell'editor ogni spillo a turno come pin trascinato. È lì perché quella regola è
+stata rifatta sei volte, e ogni volta il difetto è emerso da una misura fatta a mano sul pacchetto:
+rifarla a mano a ogni giro è il modo per sbagliarla.
 
 Due difetti che questa passata **non** avrebbe trovato, e che sono emersi cercando nel codice:
 un campo con l'altezza forzata a 36 px (`h-9`, la rinomina di un piano) e l'unica casella dell'app
@@ -148,10 +170,19 @@ con i dati attuali, quindi la misura non c'è e non viene dichiarata:
   contenuti della guida» e l'elenco delle mappe figlie. Tutte le mappe che le pagine incorporano
   hanno una planimetria, quindi quel ramo non si vede;
 - `SchedaContenutoGuida.tsx`, «Rimuovi immagine»: serve un contenuto della guida che abbia già
-  un'immagine caricata.
+  un'immagine caricata;
+- `PianiSalvati.tsx`, il campo per rinominare un piano (aveva `h-9`, cioè 36 px forzati): con i dati
+  dell'istanza la scheda dice «Nessun piano salvato», quindi il campo non compare mai;
+- `VisoreMappa.tsx`, la casella «comprato» della merce nel popup del negozio (era l'unica dell'app
+  senza etichetta avvolgente, quindi 20×20): i negozi dell'istanza mostrano «0 articoli adesso», e
+  senza merce la riga non esiste. **Da guardare quando comparirà**: l'etichetta da 44 px sta in una
+  riga con `align-items: flex-start`, e la casella si centra a metà dei 44 mentre il nome
+  dell'articolo parte in alto — una decina di pixel di disallineamento verticale.
 
 Sono corretti per coerenza — è la stessa forma di comando, nello stesso pannello — e andranno
-misurati la prima volta che quei rami compaiono.
+misurati la prima volta che quei rami compaiono. Gli ultimi due non li avrebbe trovati **nessuna**
+passata a campione, per lo stesso motivo per cui non si possono misurare: non sono in pagina. Sono
+emersi cercando nel codice, ed è la ragione per cui la ricerca statica resta parte del metodo.
 
 ## Il criterio dei bersagli, scritto per intero
 

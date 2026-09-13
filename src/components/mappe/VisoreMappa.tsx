@@ -1,5 +1,6 @@
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
+import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 // ============================================================
@@ -83,23 +84,12 @@ interface Props {
 
 const FATTORE_ZOOM_MASSIMO = 8;
 const PASSO_ROTELLA = 1.15;
-/** Quanto devono distare, sullo schermo, i centri di due spilli perché restino due bersagli
- *  distinti: la goccia del gruppo misura 34 px e l'area del tocco (`.spillo-mappa--gruppo::after`)
- *  la porta a 45; un pixel in più evita che l'arrotondamento sub-pixel ne mangi mezzo. Sotto questa
- *  distanza i due si toglierebbero spazio a vicenda, quindi diventano un gruppo solo. */
-const DISTANZA_MINIMA_SPILLI = 46;
 /** «2 spilli vicini», ma «1 spillo vicino»: la pastiglia può restare a uno solo quando nell'editor
  *  il pin selezionato esce dalla nube per essere trascinato. */
 const nomeGruppo = (n: number) => (n === 1 ? '1 spillo vicino' : `${n} spilli vicini`);
-/** L'altezza della goccia di uno spillo singolo (`.spillo-mappa__goccia`), che è ancorata alla punta. */
-const ALTEZZA_GOCCIA = 38;
 const DIMENSIONE_RISERVA = 1000;
 
 interface Dimensioni { w: number; h: number }
-interface Punto { x: number; y: number }
-/** `scostato`: la pastiglia si sposta perché sul punto c'è il pin che si sta trascinando;
- *  `scosto` è di quanto, in pixel di schermo, calcolato a partire da dov'è quel pin. */
-type Gruppo = { chiave: string; x: number; y: number; spilli: SpilloDto[]; scostato?: boolean; scosto?: Punto };
 
 const limita = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
@@ -406,138 +396,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const mostraTutti = () => setTipiNascosti(new Set());
   const nascondiTutti = () => setTipiNascosti(new Set(tipiPresenti));
 
-  // Raggruppamento per distanza: due spilli diventano un gruppo «+n» quando i loro centri, sullo
-  // schermo, distano meno di un bersaglio.
-  //
-  // Prima era una griglia di celle da 30 px attiva solo vicino allo zoom minimo, e sbagliava in due
-  // modi. La cella era più piccola del bersaglio (34 px di goccia che l'area del tocco porta a 45):
-  // due gruppi in celle contigue si toglievano pixel a vicenda e nessuno dei due arrivava a 44.
-  // E una griglia non garantisce alcuna distanza: due spilli a due pixel l'uno dall'altro restavano
-  // separati se cadevano a cavallo del bordo, mentre due spilli a 29 px si fondevano.
-  // La soglia, poi, spegneva tutto appena si ingrandiva un po': sopra zoomMin × 1,6 due pin potevano
-  // trovarsi a venti pixel e restare due bersagli distinti, entrambi sotto i 44.
-  //
-  // Ora la regola è una sola e vale a ogni ingrandimento: si fondono le nubi finché due centri
-  // distano meno di DISTANZA_MINIMA_SPILLI. Ingrandendo, le distanze sullo schermo crescono e i
-  // gruppi si sciolgono da soli, senza bisogno di una soglia. È quadratico a ogni passo di fusione,
-  // e va benissimo: gli spilli di una mappa sono decine, e la correttezza del bersaglio viene prima.
-  const { singoli, gruppi } = (() => {
-    const perSchermo = (s: SpilloDto) => ({ x: pan.x + (s.x / 100) * nat.w * zoom, y: pan.y + (s.y / 100) * nat.h * zoom });
-    type Nube = { spilli: SpilloDto[] };
-    // Dove cade davvero il bersaglio, che non è il punto ancorato: la goccia di un singolo ha la
-    // punta *sul* punto (il bottone è traslato di -100% in verticale), quindi il suo centro sta
-    // mezza goccia più in alto; la pastiglia del gruppo, invece, è centrata sul punto. Confrontando
-    // i punti anziché i centri restavano due bersagli a 44,3 px pur avendone chiesti 46.
-    const centro = (n: Nube) => {
-      const p = n.spilli.map(perSchermo);
-      const x = p.reduce((a, q) => a + q.x, 0) / p.length;
-      const y = p.reduce((a, q) => a + q.y, 0) / p.length;
-      return { x, y: p.length === 1 ? y - ALTEZZA_GOCCIA / 2 : y };
-    };
-    const nubi: Nube[] = visibili.map((s) => ({ spilli: [s] }));
-    for (let fuso = true; fuso; ) {
-      fuso = false;
-      for (let i = 0; i < nubi.length && !fuso; i++) {
-        for (let j = i + 1; j < nubi.length && !fuso; j++) {
-          const a = centro(nubi[i]), b = centro(nubi[j]);
-          if ((a.x - b.x) ** 2 + (a.y - b.y) ** 2 >= DISTANZA_MINIMA_SPILLI ** 2) continue;
-          nubi[i] = { spilli: [...nubi[i].spilli, ...nubi[j].spilli] };
-          nubi.splice(j, 1);
-          fuso = true;
-        }
-      }
-    }
-    const singoli: SpilloDto[] = [];
-    const gruppi: Gruppo[] = [];
-    for (const nube of nubi) {
-      // Una nube resta una nube anche quando uno dei suoi spilli è aperto. Prima si scorporava, e i
-      // compagni tornavano gocce singole alla distanza che il raggruppamento aveva appena dichiarato
-      // inammissibile: su spilli con le stesse coordinate — nel pacchetto ce ne sono a centinaia —
-      // erano tre gocce sovrapposte, due delle quali senza un pixel di bersaglio (rilievo del
-      // validatore, 2026-09-13). Il popup dello spillo aperto si mostra lo stesso, ancorato lì.
-      //
-      // **Nell'editor** una sola eccezione, e voluta (scelta dell'utente, 2026-09-13): il pin
-      // *selezionato* esce dalla nube e si mostra da solo, perché lì il gesto è trascinare quel pin
-      // e un gruppo lo renderebbe impossibile. I compagni restano raggruppati — non tornano gocce
-      // sovrapposte — e lo si sceglie dall'elenco del gruppo, come nel visore.
-      let membri = nube.spilli;
-      let scorporato = false;
-      if (editor && selezionatoId !== null && membri.length > 1 && membri.some((s) => s.id === selezionatoId)) {
-        singoli.push(membri.find((s) => s.id === selezionatoId)!);
-        membri = membri.filter((s) => s.id !== selezionatoId);
-        scorporato = true;
-      }
-      // Il residuo resta una pastiglia anche quando è uno solo: se tornasse goccia si troverebbe a
-      // meno di 46 px dal pin selezionato — e per le nove coppie a coordinate identiche del
-      // pacchetto, esattamente sotto, senza un pixel raggiungibile e senza più il «+n» da cui
-      // riaprirla (rilievo del validatore, 2026-09-13).
-      if (membri.length === 1 && !scorporato) { singoli.push(...membri); continue; }
-      const chiave = membri.map((s) => s.id).sort((a, b) => a - b).join('-');
-      gruppi.push({ chiave, x: membri.reduce((a, s) => a + s.x, 0) / membri.length, y: membri.reduce((a, s) => a + s.y, 0) / membri.length, spilli: membri, scostato: scorporato });
-    }
-
-    // **Dove va la pastiglia del residuo.** Sul punto ora c'è il pin selezionato, e se la pastiglia
-    // gli restasse addosso i due bersagli si toglierebbero spazio a vicenda (misurati 38×38 e 38×34,
-    // coi centri a 19 px). Il primo rimedio la spostava di 46 px a destra: funzionava solo quando il
-    // pin coincide col residuo — l'unico caso che avevo provato — e nel 23-31% degli altri la
-    // spingeva *verso* il pin, fino a 13 px (rilievo del validatore, 2026-09-13, misurato su tutto
-    // il pacchetto). Lo scostamento va quindi preso **dal pin**: si allontana nella direzione
-    // opposta, quanto basta, e fra otto direzioni si sceglie quella che resta più lontana anche
-    // dalle altre nubi e dentro la tela.
-    const daScostare = gruppi.find((g) => g.scostato);
-    const selScorporato = daScostare ? singoli.find((s) => s.id === selezionatoId) : undefined;
-    if (daScostare && selScorporato) {
-      const pin = perSchermo(selScorporato);
-      const centroPin = { x: pin.x, y: pin.y - ALTEZZA_GOCCIA / 2 };
-      const base = perSchermo({ ...selScorporato, x: daScostare.x, y: daScostare.y });
-      const altri = gruppi.filter((g) => g !== daScostare).map((g) => perSchermo({ ...selScorporato, x: g.x, y: g.y }))
-        .concat(singoli.filter((s) => s.id !== selezionatoId).map((s) => { const p = perSchermo(s); return { x: p.x, y: p.y - ALTEZZA_GOCCIA / 2 }; }));
-      const dist = (a: Punto, b: Punto) => Math.hypot(a.x - b.x, a.y - b.y);
-      const dentroTela = (p: Punto) => dim.w === 0 || (p.x >= 22 && p.x <= dim.w - 22 && p.y >= 22 && p.y <= dim.h - 22);
-      // Stare lontani dagli **altri** bersagli è un vincolo, non un voto. Prima lo era: il raggio si
-      // fermava al primo valore che liberava il pin e i vicini contavano solo nel punteggio, così in
-      // 79 casi su 7.036 del pacchetto la pastiglia finiva addosso a un'altra nube — 56 volte sotto
-      // i 44 px, cioè lo stesso difetto spostato di un passo (rilievo del validatore, 2026-09-13).
-      // Cercando anche sul raggio una posizione buona c'è sempre.
-      const libera = (p: Punto) => dist(p, centroPin) >= DISTANZA_MINIMA_SPILLI && altri.every((a) => dist(p, a) >= DISTANZA_MINIMA_SPILLI) && dentroTela(p);
-      const lungo = (ang: number, ammessa: (p: Punto) => boolean) => {
-        const u = { x: Math.cos(ang), y: Math.sin(ang) };
-        for (let d = 0; d <= 96; d += 1) {
-          const p = { x: base.x + u.x * d, y: base.y + u.y * d };
-          if (ammessa(p)) return { d, p };
-        }
-        return null;
-      };
-      // **La direzione è continua, non a otto scatti.** Si parte dalla semiretta che va dal pin al
-      // residuo — quella naturale, che si allontana — e si ruota solo quanto serve a trovare posto.
-      // Sceglierla ogni volta col punteggio più alto fra otto direzioni faceva sfarfallare la
-      // pastiglia da un lato all'altro a ogni pixel di trascinamento: nel caso peggiore 180° ↔ −135°
-      // per 37 passi di fila, con salti fino a 96 px (rilievo del validatore, 2026-09-13). Muovendo
-      // il pin di poco, l'angolo di partenza cambia di poco e la posizione lo segue.
-      const verso = { x: base.x - centroPin.x, y: base.y - centroPin.y };
-      const ang0 = Math.hypot(verso.x, verso.y) > 0.01 ? Math.atan2(verso.y, verso.x) : 0;
-      let scelta: Punto | null = null;
-      for (let giro = 0; giro <= 12 && !scelta; giro++) {
-        for (const segno of giro === 0 ? [1] : [1, -1]) {
-          const r = lungo(ang0 + (segno * giro * Math.PI) / 12, libera);
-          if (r) { scelta = r.p; break; }
-        }
-      }
-      // Se nessuna direzione libera tutti — non capita sul pacchetto, ma le mappe si modificano —
-      // si tiene almeno il pin e ci si allontana il più possibile dagli altri.
-      if (!scelta) {
-        let voto = -Infinity;
-        for (let giro = -12; giro <= 12; giro++) {
-          const r = lungo(ang0 + (giro * Math.PI) / 12, (p) => dist(p, centroPin) >= DISTANZA_MINIMA_SPILLI);
-          if (!r) continue;
-          const punteggio = (altri.length ? Math.min(...altri.map((a) => dist(r.p, a))) : 999) - (dentroTela(r.p) ? 0 : 1000) - Math.abs(giro) / 100;
-          if (punteggio > voto) { voto = punteggio; scelta = r.p; }
-        }
-      }
-      daScostare.scosto = scelta ? { x: scelta.x - base.x, y: scelta.y - base.y } : { x: 0, y: 0 };
-    }
-    return { singoli, gruppi };
-  })();
+  // Chi si vede sulla mappa e dove: la regola sta in `raggruppaSpilli`, che è pura e si prova sui
+  // dati veri del pacchetto invece che a mano (vedi `src/utils/raggruppaSpilli.ts`).
+  const { singoli, gruppi } = raggruppaSpilli(visibili, { pan, zoom, nat, dim }, { selezionatoId, editor: editor !== undefined });
   /** Se ingrandendo il gruppo si è sciolto, l'elenco sparisce da sé: nessun effetto da sincronizzare. */
   const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
   // **Quanto è alto l'elenco, e da che parte sta.** Non basta stimarne l'altezza e ribaltarlo: un

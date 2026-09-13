@@ -556,29 +556,28 @@ describe('la pastiglia scostata guarda anche i vicini, e non sfarfalla', () => {
     });
   });
 
-  it('durante il trascinamento non salta da un lato all’altro', () => {
-    const pastiglia = (container: HTMLElement) => centri(container).find((p) => p.gruppo)!;
+  // Il pin, uscito dalla nube, può trovarsi a ridosso di una nube **diversa**: il raggruppamento
+  // garantisce 46 px fra i centri delle nubi, non fra un singolo membro e la nube accanto. Erano 381
+  // casi su 2.439 del pacchetto, fino a 1,6 px (rilievo del validatore, 2026-09-13). E se a stargli
+  // addosso è un altro pin, quello non si può spostare: diventa una pastiglia, come il residuo.
+  it('anche chi sta addosso al pin si fa da parte, altro pin compreso', () => {
+    const m: MappaDto = {
+      ...mappa, numeroSpilli: 3, spilli: [
+        spillo({ id: 91, nome: 'Scelto', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+        spillo({ id: 92, nome: 'Compagno di nube', tipo: 'nota', tipoNome: 'Nota', x: 55, y: 50 }),
+        // lontano dal centro della nube (che sta a 52,5%) ma a ~39 px dal pin: resterebbe singolo
+        spillo({ id: 93, nome: 'Addosso al pin', tipo: 'nota', tipoNome: 'Nota', x: 45.5, y: 50 }),
+      ],
+    };
     conTela(() => {
-      const fai = (x: number) => ({
-        ...mappa, numeroSpilli: 3, spilli: [
-          spillo({ id: 81, nome: 'Trascinato', tipo: 'nota', tipoNome: 'Nota', x, y: 50 }),
-          spillo({ id: 82, nome: 'Fermo', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
-          spillo({ id: 83, nome: 'Terzo', tipo: 'nota', tipoNome: 'Nota', x: 53, y: 51 }),
-        ],
-      } as MappaDto);
-      const ed = { strumento: 'seleziona' as const, selezionatoId: 81, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() };
-      const { container, rerender } = render(<MemoryRouter><VisoreMappa mappa={fai(49.6)} partitaId={null} onNaviga={vi.fn()} editor={ed} /></MemoryRouter>);
-      let prima = pastiglia(container);
-      let massimo = 0;
-      // quaranta passi da un pixel: il trascinamento vero, non un accenno
-      for (let i = 1; i <= 40; i++) {
-        rerender(<MemoryRouter><VisoreMappa mappa={fai(49.6 + i * 0.1)} partitaId={null} onNaviga={vi.fn()} editor={ed} /></MemoryRouter>);
-        const ora = pastiglia(container);
-        massimo = Math.max(massimo, Math.hypot(ora.x - prima.x, ora.y - prima.y));
-        prima = ora;
+      const { container } = render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()}
+        editor={{ strumento: 'seleziona', selezionatoId: 91, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
+      // il vicino non è più una goccia: è diventato una pastiglia, che si può scostare
+      expect(screen.getByRole('button', { name: '1 spillo vicino: Addosso al pin' })).toBeInTheDocument();
+      const c = centri(container);
+      for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) {
+        expect(Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y)).toBeGreaterThanOrEqual(45.999);
       }
-      // il pin si muove di ~1 px per passo: la pastiglia può seguirlo, non saltare di lato
-      expect(massimo).toBeLessThan(10);
     });
   });
 });
