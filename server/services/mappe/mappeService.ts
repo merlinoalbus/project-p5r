@@ -450,9 +450,13 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     if (percorsoDi(g).some((p) => p.chiave === chiave)) throw httpErrors.badRequest('genitore-non-valido', 'Il genitore scelto è un discendente di questa mappa.');
   }
   if (dati.tipo && !(TIPI_MAPPA as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di mappa non ammesso.');
-  // Il nome rivisto lo dichiara solo questo salvataggio, e solo se il nome cambia davvero: da qui
-  // in poi è quello a presentare la mappa, al posto del nome dedotto da contesti e gruppo (082).
-  const rivisto = conNomeRivisto() ? (dati.nome !== undefined && dati.nome !== r.nome ? 1 : r.nome_rivisto ?? 0) : 0;
+  // Il nome rivisto lo dichiara questo salvataggio, che è il modulo dell'editor e porta sempre il
+  // campo «Nome»: premere Salva **è** dire «la mappa si chiama così», anche quando il testo non
+  // cambia. Legarlo al cambiamento del testo lasciava senza rimedio chi il nome l'aveva già
+  // corretto prima della 082: con il nome giusto già scritto non c'era più niente da cambiare, e
+  // il titolo restava quello dedotto dall'estrazione. Lo spegne solo l'importazione di un
+  // pacchetto, che quel nome lo sovrascrive.
+  const rivisto = conNomeRivisto() ? (dati.nome !== undefined ? 1 : r.nome_rivisto ?? 0) : 0;
   getDb().transaction(()=>{
   if (conNomeRivisto()) prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(rivisto, chiave);
   prepared(`UPDATE mappa SET nome = ?, tipo = ?, genitore_chiave = ?, ordine = ?, asset = ?, larghezza = ?, altezza = ?, entita_tipo = ?, entita_chiave = ?, note = ?, origine = 'utente', updated_at = ? WHERE chiave = ?`).run(

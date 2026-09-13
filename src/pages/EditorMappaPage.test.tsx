@@ -346,3 +346,31 @@ it('«Apri l’arrivo» sta in cima al pannello dello spillo, prima dei campi', 
   fireEvent.click(apri);
   await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina'));
 });
+
+// ---- Confermare il nome di una mappa mai rivista (2026-09-13) ----
+//
+// Chi il nome l'aveva già corretto prima della 082 non aveva più niente da cambiare: il testo era
+// già giusto, «Salva» restava spento e in alto continuava a leggersi il nome dell'estrazione.
+const nonRivista: MappaDto = { ...base, nome: 'Sottopasso', nomeRivisto: false, gruppoImmagini: { id: 'g', nome: 'Sottopasso', ordine: 1, etichetta: 'planimetria completa' } };
+
+it('una mappa mai rivista dice quale nome si legge in alto e lascia «Salva» attivo per confermarlo', async () => {
+  api.getMappa.mockResolvedValue(nonRivista);
+  api.aggiornaMappa.mockResolvedValue({ ...nonRivista, nomeRivisto: true });
+  monta();
+  fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+  const scheda = within(screen.getByRole('region', { name: 'Proprietà della mappa' }));
+  expect(scheda.getByRole('status')).toHaveTextContent('In alto si legge «Sottopasso — planimetria completa»');
+  const salva = scheda.getByRole('button', { name: /Salva mappa/ });
+  expect(salva).toBeEnabled();
+  fireEvent.click(salva);
+  await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', expect.objectContaining({ nome: 'Sottopasso' })));
+});
+
+it('una mappa già rivista non mostra l’avviso e torna a «Salva» solo dopo una modifica', async () => {
+  api.getMappa.mockResolvedValue({ ...nonRivista, nomeRivisto: true });
+  monta();
+  fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+  const scheda = within(screen.getByRole('region', { name: 'Proprietà della mappa' }));
+  expect(scheda.queryByRole('status')).toBeNull();
+  expect(scheda.getByRole('button', { name: /Salva mappa/ })).toBeDisabled();
+});

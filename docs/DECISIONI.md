@@ -469,6 +469,10 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   posteriori, e così i titoli mostrati finora non cambiano.
 - **Resta davanti il titolo del contesto selezionato**: quella è la vista in corso — quale zona della planimetria si
   sta guardando — non il nome della mappa.
+- **Salvare dall'editor dichiara il nome, anche se il testo non cambia** (correzione del 2026-09-13): legarlo al
+  cambiamento del testo lasciava senza rimedio chi il nome l'aveva già corretto prima della 082 — con il nome giusto
+  già scritto non c'era più niente da cambiare, e uno spazio in più veniva tolto dal `trim()`. Finché il nome non è
+  dichiarato, il modulo dice quale dei due nomi si sta leggendo in alto e «Salva» resta attivo per confermarlo.
 - **Un solo posto decide il nome**: albero, indice, briciole e striscia delle miniature leggevano per conto loro
   `gruppoImmagini.nome`, e una mappa rivista si sarebbe chiamata in un modo nell'editor e in un altro altrove. Ora
   passano tutti da `titoloGruppoImmagini` in `src/utils/presentazioneMappa.ts`.
