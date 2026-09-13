@@ -108,7 +108,24 @@ contenuto, per scelta.
 | Personaggi | il credito della fonte, l'unico degli otto rimasto indietro | 27×17 px | 44×44 |
 | Visore delle mappe | briciole, voci, azioni e categorie con etichetta corta | 41 px di larghezza | `min-width: 44px` oltre all'altezza |
 | Palazzi e quartieri su telefono | il pannello del visore, aperto, era una fessura di 21 px con 417 px di contenuto | comandi alti 44 px ma toccabili per 21 | il visore incorporato smette di essere alto quanto gli è stato detto **quando il pannello è aperto** |
-| Atlante, radici di Palazzo e Dedalo | i comandi del pannello «Contenuti della guida»: planimetrie, elementi, «Dettagli della sezione», «Apri la scheda» | 19–22 px | 44 px. Sono l'unico contenuto della loro riga, non parole dentro una frase |
+| Atlante, radici di Palazzo e Dedalo | i comandi del pannello «Contenuti della guida»: planimetrie, nomi degli elementi, «Apri la scheda del palazzo o dedalo» | 19–22 px, misurati | 44 px. Sono l'unico contenuto della loro riga, non parole dentro una frase |
+| Scheda di un contenuto della guida → «Modifica contenuto» | casella «Collezionabile» (etichetta 22 px), campo «Aggiungi immagine», «Rimuovi immagine» senza forma di pulsante | 22 px, misurati | 44 px |
+
+## Corretti senza poterli misurare
+
+Tre comandi hanno ricevuto la stessa correzione degli altri, ma **non sono comparsi sullo schermo**
+con i dati attuali, quindi la misura non c'è e non viene dichiarata:
+
+- `ContenutiGuidaMappa.tsx`, «Dettagli della sezione» e il pulsante del collegamento: si rendono
+  solo quando un'area della guida ha `collegamenti`, che nel pacchetto di oggi è sempre vuoto;
+- `MappaIncorporata.tsx`, il riquadro per una mappa **senza planimetria**: «Apri il luogo e i
+  contenuti della guida» e l'elenco delle mappe figlie. Tutte le mappe che le pagine incorporano
+  hanno una planimetria, quindi quel ramo non si vede;
+- `SchedaContenutoGuida.tsx`, «Rimuovi immagine»: serve un contenuto della guida che abbia già
+  un'immagine caricata.
+
+Sono corretti per coerenza — è la stessa forma di comando, nello stesso pannello — e andranno
+misurati la prima volta che quei rami compaiono.
 
 ## Il criterio dei bersagli, scritto per intero
 

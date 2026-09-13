@@ -51,7 +51,7 @@ export function MappaIncorporata(props: Props) {
   return <PageState isLoading={esito.caricamento} error={esito.errore} onRetry={esito.ricarica}>
     {esito.dati?.tipo === 'guida' ? <div className="card flex flex-col gap-2">
       <h3 className="m-0 text-base">{esito.dati.nome}</h3>
-      <Link to={`/guida/mappe/${encodeURIComponent(esito.dati.mappaPalazzo)}?area=${encodeURIComponent(esito.dati.area)}`}>Apri il luogo e i contenuti della guida</Link>
+      <Link className="touch inline-flex items-center self-start" to={`/guida/mappe/${encodeURIComponent(esito.dati.mappaPalazzo)}?area=${encodeURIComponent(esito.dati.area)}`}>Apri il luogo e i contenuti della guida</Link>
     </div> : esito.dati?.tipo === 'mappa' ? <MappaIncorporataRisolta {...props} chiave={esito.dati.mappa} /> : null}
   </PageState>;
 }
@@ -80,8 +80,8 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
   }
   if (!haPlanimetria(mappa)) return <section className={`card ${className ?? ''}`}>
     <h3>{mappa.nome}</h3>
-    <Link to={urlMappa(mappa.chiave)}>Apri il luogo e i contenuti della guida</Link>
-    {!!mappa.figli.length && <ul>{mappa.figli.map(f => <li key={f.chiave}><Link to={urlMappa(f.chiave)}>{f.nome}</Link></li>)}</ul>}
+    <Link className="touch inline-flex items-center self-start" to={urlMappa(mappa.chiave)}>Apri il luogo e i contenuti della guida</Link>
+    {!!mappa.figli.length && <ul>{mappa.figli.map(f => <li key={f.chiave}><Link className="touch inline-flex items-center" to={urlMappa(f.chiave)}>{f.nome}</Link></li>)}</ul>}
   </section>;
   return (
     <div className={className} style={altezza !== undefined ? { height: altezza } : className ? undefined : { height: 560 }}>

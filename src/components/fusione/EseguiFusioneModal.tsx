@@ -92,7 +92,7 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
             </ul>
             {nonEreditabili.length > 0 && (
               <details className="mt-1">
-                <summary className="text-text-muted cursor-pointer">{nonEreditabili.length} non ereditabili</summary>
+                <summary className="text-text-muted cursor-pointer touch">{nonEreditabili.length} non ereditabili</summary>
                 <ul className="m-0 p-0 list-none flex flex-col gap-0.5 mt-1">
                   {nonEreditabili.map((c) => <li key={c.id} className="flex items-center gap-2"><ElementoChip elemento={c.elemento} nome={c.nomeIt} piccolo /> <span className="text-text-muted">{c.motivo}</span></li>)}
                 </ul>
