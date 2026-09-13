@@ -39,6 +39,9 @@ export function inquadraturaMappa(nat: { w: number; h: number }, viewport: { w: 
   // era leggibile — un pin sul bordo restava tagliato dal ritaglio della tela e riceveva 27 px
   // invece di 44 (rilievo del validatore, 2026-09-13). I margini sono asimmetrici perché lo è la
   // goccia: sopra serve più spazio che sotto.
+  //
+  // Quel che serve è 22 ai lati, 41 sopra e 3 sotto; quel che si applica è **24, 44 e 24**, cioè
+  // il requisito arrotondato in eccesso (il margine dei 24 c'era già e vale anche senza pin).
   // Con un viewport ancora da misurare (0×0) non c'è margine che abbia senso: si resta neutri. E su
   // una tela molto piccola i margini si riducono in proporzione, altrimenti mangerebbero la mappa.
   const degenere = !(viewport.w > 0 && viewport.h > 0);

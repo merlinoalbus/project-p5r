@@ -171,6 +171,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [selezionatoUso, setSelezionatoUso] = useState<number | null>(selezioneIniziale ?? null);
   /** Il gruppo «+n» aperto, per chiave: l'elenco dice chi c'è dentro e permette di scegliere. */
   const [gruppoAperto, setGruppoAperto] = useState<string | null>(null);
+  // Esc chiude l'elenco del gruppo, come ci si aspetta da un riquadro che si apre sopra la mappa.
+  useEffect(() => {
+    if (!gruppoAperto) return;
+    const suTasto = (e: KeyboardEvent) => { if (e.key === 'Escape') setGruppoAperto(null); };
+    window.addEventListener('keydown', suTasto);
+    return () => window.removeEventListener('keydown', suTasto);
+  }, [gruppoAperto]);
   // Incorporato in una pagina lo spazio è poco: il pannello è chiuso finché l'utente non lo apre; a schermo intero è aperto.
   // Stato derivato (nessun effetto che sincronizza): `null` = comportamento predefinito del contesto.
   const [pannelloScelto, setPannelloScelto] = useState<boolean | null>(null);
@@ -337,7 +344,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     }
     if (!g.mosso) {
       if (editor && editor.strumento !== 'seleziona') { const p = percentuali(e.clientX, e.clientY); if (p) editor.onClickMappa(p.x, p.y); }
-      else seleziona(null);
+      // Un tocco sulla mappa chiude quel che è aperto: il popup dello spillo **e** l'elenco del
+      // gruppo, che prima restava lì (rilievo del validatore, 2026-09-13) — e se il suo tasto di
+      // chiusura finiva fuori dal ritaglio non c'era più un modo ovvio di levarlo.
+      else { seleziona(null); setGruppoAperto(null); }
     }
   };
   const annullaGesto = () => { puntatori.current.clear(); gesto.current = null; setTrascinato(null); setTrascinando(false); };
@@ -376,11 +386,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // scorre in orizzontale quanto basta per restare dentro la tela: la freccia resta sullo spillo.
   const altezzaPopup = selezionato && categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio ? 480 : 260;
   const popupSotto = selezionato !== null && pan.y + (selezionato.y / 100) * nat.h * zoom < altezzaPopup;
-  const popupDx = (() => {
-    if (!selezionato || dim.w === 0) return 0;
-    const px = pan.x + (selezionato.x / 100) * nat.w * zoom;
+  /** Di quanto far scorrere un riquadro ancorato a `x` (in percentuale) per tenerlo dentro la tela. */
+  const scostamento = useCallback((x: number) => {
+    if (dim.w === 0) return 0;
+    const px = pan.x + (x / 100) * nat.w * zoom;
     return limita(px, LARGHEZZA_POPUP / 2 + 8, Math.max(LARGHEZZA_POPUP / 2 + 8, dim.w - LARGHEZZA_POPUP / 2 - 8)) - px;
-  })();
+  }, [dim.w, pan.x, nat.w, zoom]);
+  const popupDx = selezionato ? scostamento(selezionato.x) : 0;
   const collezionabili = mappa.spilli.filter((s) => s.collezionabile);
   const raccolti = collezionabili.filter((s) => s.raccolto).length;
   const percentualeRaccolti = collezionabili.length > 0 ? Math.round((raccolti / collezionabili.length) * 100) : 0;
@@ -403,9 +415,6 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // gruppi si sciolgono da soli, senza bisogno di una soglia. È quadratico a ogni passo di fusione,
   // e va benissimo: gli spilli di una mappa sono decine, e la correttezza del bersaglio viene prima.
   const { singoli, gruppi } = (() => {
-    // Nell'editor no: lì il gesto è spostare *quel* pin, e un gruppo lo renderebbe impossibile.
-    // Lo strumento per separarli, lì, è l'ingrandimento.
-    if (editor) return { singoli: visibili, gruppi: [] as Gruppo[] };
     const perSchermo = (s: SpilloDto) => ({ x: pan.x + (s.x / 100) * nat.w * zoom, y: pan.y + (s.y / 100) * nat.h * zoom });
     type Nube = { spilli: SpilloDto[] };
     // Dove cade davvero il bersaglio, che non è il punto ancorato: la goccia di un singolo ha la
@@ -439,14 +448,28 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       // inammissibile: su spilli con le stesse coordinate — nel pacchetto ce ne sono a centinaia —
       // erano tre gocce sovrapposte, due delle quali senza un pixel di bersaglio (rilievo del
       // validatore, 2026-09-13). Il popup dello spillo aperto si mostra lo stesso, ancorato lì.
-      if (nube.spilli.length === 1) { singoli.push(...nube.spilli); continue; }
-      const chiave = nube.spilli.map((s) => s.id).sort((a, b) => a - b).join('-');
-      gruppi.push({ chiave, x: nube.spilli.reduce((a, s) => a + s.x, 0) / nube.spilli.length, y: nube.spilli.reduce((a, s) => a + s.y, 0) / nube.spilli.length, spilli: nube.spilli });
+      //
+      // **Nell'editor** una sola eccezione, e voluta (scelta dell'utente, 2026-09-13): il pin
+      // *selezionato* esce dalla nube e si mostra da solo, perché lì il gesto è trascinare quel pin
+      // e un gruppo lo renderebbe impossibile. I compagni restano raggruppati — non tornano gocce
+      // sovrapposte — e lo si sceglie dall'elenco del gruppo, come nel visore.
+      let membri = nube.spilli;
+      if (editor && selezionatoId !== null && membri.length > 1 && membri.some((s) => s.id === selezionatoId)) {
+        singoli.push(membri.find((s) => s.id === selezionatoId)!);
+        membri = membri.filter((s) => s.id !== selezionatoId);
+      }
+      if (membri.length === 1) { singoli.push(...membri); continue; }
+      const chiave = membri.map((s) => s.id).sort((a, b) => a - b).join('-');
+      gruppi.push({ chiave, x: membri.reduce((a, s) => a + s.x, 0) / membri.length, y: membri.reduce((a, s) => a + s.y, 0) / membri.length, spilli: membri });
     }
     return { singoli, gruppi };
   })();
   /** Se ingrandendo il gruppo si è sciolto, l'elenco sparisce da sé: nessun effetto da sincronizzare. */
   const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
+  // Quanto è alto l'elenco: 48 px d'intestazione, 44 per voce, 44 per «Ingrandisci qui», più i margini.
+  const altezzaElenco = gruppoScelto ? 110 + 44 * gruppoScelto.spilli.length : 0;
+  const elencoSotto = gruppoScelto !== null && pan.y + (gruppoScelto.y / 100) * nat.h * zoom < altezzaElenco;
+  const elencoDx = gruppoScelto ? scostamento(gruppoScelto.x) : 0;
 
   const cambiaRaccolto = async (s: SpilloDto, raccolto: boolean) => {
     if (!onRaccolto) return;
@@ -695,7 +718,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   key={g.chiave}
                   type="button"
                   className={`spillo-mappa spillo-mappa--gruppo ${aperto || dentro ? 'spillo-mappa--selezionato' : ''}`}
-                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(-50%, -50%)` }}
+                  // Con «Aggiungi» o «Incolla» in mano il gruppo si fa da parte: il tocco serve a
+                  // posare un pin in quel punto, non ad aprire un elenco.
+                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(-50%, -50%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined }}
                   aria-label={`${g.spilli.length} spilli vicini: ${g.spilli.map((s) => s.nome).join(', ')}`}
                   aria-expanded={aperto}
                   title={g.spilli.map((s) => s.nome).join(', ')}
@@ -706,13 +731,18 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 </button>
               );
             })}
-            {gruppoScelto && !editor && inPortale(schermoStretto, (
-              <div className="spillo-popup" role="dialog" aria-label={`${gruppoScelto.spilli.length} spilli vicini`}
-                style={schermoStretto ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(-50%, calc(-100% - 26px))` } as CSSProperties}
+            {/* L'elenco sta dentro la tela, che ritaglia: come il popup dello spillo scorre in
+                orizzontale quanto basta e si ribalta sotto il gruppo quando sopra non c'è posto.
+                Senza, a 768 e 1280 l'intestazione e il tasto di chiusura finivano fuori dal
+                ritaglio (rilievo del validatore, 2026-09-13). L'altezza cresce con gli spilli:
+                48 px d'intestazione, 44 per voce, 44 per «Ingrandisci qui», più i margini. */}
+            {gruppoScelto && inPortale(schermoStretto, (
+              <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={`${gruppoScelto.spilli.length} spilli vicini`}
+                style={schermoStretto ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx * zoom}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx * zoom}px)` } as CSSProperties}
                 onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <strong className="flex-1 text-[13px] leading-tight">{gruppoScelto.spilli.length} spilli qui</strong>
-                  <button type="button" className="spillo-popup__chiudi" onClick={() => setGruppoAperto(null)} aria-label="Chiudi l’elenco">×</button>
+                  <button type="button" className="spillo-popup__chiudi touch" onClick={() => setGruppoAperto(null)} aria-label="Chiudi l’elenco">×</button>
                 </div>
                 <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
                   {gruppoScelto.spilli.map((s) => (

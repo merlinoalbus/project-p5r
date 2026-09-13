@@ -5,7 +5,7 @@
 // Test VisoreMappa — spilli con icona, raccolti nascosti, categorie, popup ancorato, scheda del negozio, navigazione (Fase 13.2)
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { VisoreMappa } from './VisoreMappa';
 import * as inquadratura from '../../utils/inquadraturaMappa';
@@ -264,10 +264,19 @@ describe('raggruppamento degli spilli vicini', () => {
     expect(sullaTela(container)).toEqual(['2 spilli vicini: Chiosco, Distributore']);
   });
 
-  it('nell’editor no: lì il gesto è spostare quel pin, e i due restano separati', () => {
-    const { container } = render(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} editor={{ strumento: 'seleziona', selezionatoId: null, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
-    expect(sullaTela(container)).toHaveLength(2);
-    expect(sullaTela(container).join(' ')).not.toContain('spilli vicini');
+  // Nell'editor vale la stessa regola (scelta dell'utente, 2026-09-13): i pin vicini diventano un
+  // gruppo e dall'elenco si sceglie quale modificare. La sola differenza è che il pin **selezionato**
+  // esce dalla nube e si mostra da solo, perché lì il gesto è trascinare proprio quel pin.
+  it('nell’editor il gruppo c’è lo stesso, e il pin selezionato esce e si mostra da solo', () => {
+    const editor = { strumento: 'seleziona' as const, selezionatoId: null, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() };
+    const { container, rerender } = render(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} editor={editor} /></MemoryRouter>);
+    expect(sullaTela(container)).toEqual(['2 spilli vicini: Chiosco, Distributore']);
+    fireEvent.click(screen.getByRole('button', { name: '2 spilli vicini: Chiosco, Distributore' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: '2 spilli vicini' })).getByRole('button', { name: /Chiosco/ }));
+    expect(editor.onSeleziona).toHaveBeenCalledWith(11);
+    rerender(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} editor={{ ...editor, selezionatoId: 11 }} /></MemoryRouter>);
+    // il pin scelto è a sé (trascinabile), l'altro resta dov'era: niente gocce sovrapposte
+    expect(sullaTela(container)).toEqual(['Attività: Chiosco', 'Negozio: Distributore']);
   });
 });
 
@@ -293,5 +302,80 @@ describe('apertura del gruppo di spilli', () => {
     await waitFor(() => expect(screen.getByRole('dialog', { name: 'Punto di spostamento' })).toBeInTheDocument());
     // ...e la nube non si scorpora: restano due gocce sovrapposte, senza bersaglio, se lo facesse
     expect([...container.querySelectorAll('.visore-mappa__livello .spillo-mappa')]).toHaveLength(1);
+  });
+});
+
+// L'elenco del gruppo vive dentro la tela, che ritaglia (`overflow: hidden`): deve scorrere in
+// orizzontale e ribaltarsi sotto il gruppo quando sopra non c'è posto, come già fa il popup dello
+// spillo. Senza, a 768 e 1280 l'intestazione e il tasto di chiusura finivano fuori dal ritaglio
+// (rilievo del validatore, 2026-09-13).
+describe('l’elenco del gruppo resta dentro la tela', () => {
+  const conGruppoIn = (x: number, y: number): MappaDto => ({
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 31, nome: 'Uno', tipo: 'nota', tipoNome: 'Nota', x, y }),
+      spillo({ id: 32, nome: 'Due', tipo: 'nota', tipoNome: 'Nota', x: x + 0.2, y }),
+    ],
+  });
+  const conTela = async (m: MappaDto) => {
+    cleanup();
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 1000, height: 500, left: 0, top: 0, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    try {
+      const { container } = render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+      // la tela si misura con un rAF: finché non è misurata il fit è quello neutro
+      await waitFor(() => expect((container.querySelector('.visore-mappa__livello') as HTMLElement).style.transform).toContain('scale(0.864)'));
+      const gruppo = await screen.findByRole('button', { name: /spilli vicini/ });
+      fireEvent.click(gruppo);
+      const elenco = await screen.findByRole('dialog', { name: '2 spilli vicini' });
+      return { classe: elenco.className, transform: elenco.style.transform };
+    } finally { misura.mockRestore(); }
+  };
+
+  it('si ribalta sotto il gruppo quando in alto non c’è spazio', async () => {
+    const alto = await conTela(conGruppoIn(50, 2));
+    expect(alto.classe).toContain('spillo-popup--sotto');
+    const basso = await conTela(conGruppoIn(50, 90));
+    expect(basso.classe).not.toContain('spillo-popup--sotto');
+  });
+
+  it('scorre in orizzontale quanto basta a restare nella tela', async () => {
+    const sinistra = await conTela(conGruppoIn(1, 50));
+    const scostamento = /translate\(calc\(-50% \+ ([-.\d]+)px\)/.exec(sinistra.transform);
+    expect(scostamento).not.toBeNull();
+    expect(Number(scostamento![1])).toBeGreaterThan(0);   // spinto verso destra, dentro la tela
+    const destra = await conTela(conGruppoIn(98, 50));
+    const s2 = /translate\(calc\(-50% \+ ([-.\d]+)px\)/.exec(destra.transform);
+    expect(Number(s2![1])).toBeLessThan(0);
+  });
+});
+
+// L'elenco si chiude come si chiude il popup: toccando la mappa, o con Esc. Prima restava aperto
+// (rilievo del validatore, 2026-09-13), e quando il suo «×» finiva fuori dal ritaglio non c'era
+// più un modo ovvio di levarlo.
+describe('chiusura dell’elenco del gruppo', () => {
+  const vicinissimi: MappaDto = {
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 41, nome: 'Alfa', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+      spillo({ id: 42, nome: 'Beta', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+    ],
+  };
+  const apri = () => {
+    render(<MemoryRouter><VisoreMappa mappa={vicinissimi} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /spilli vicini/ }));
+    expect(screen.getByRole('dialog', { name: '2 spilli vicini' })).toBeInTheDocument();
+  };
+
+  it('un tocco sulla mappa lo chiude', () => {
+    apri();
+    const tela = screen.getByRole('application');
+    fireEvent.pointerDown(tela, { pointerId: 1, clientX: 10, clientY: 10 });
+    fireEvent.pointerUp(tela, { pointerId: 1, clientX: 10, clientY: 10 });
+    expect(screen.queryByRole('dialog', { name: '2 spilli vicini' })).toBeNull();
+    expect(screen.getByRole('button', { name: /spilli vicini/ })).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('Esc lo chiude', () => {
+    apri();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: '2 spilli vicini' })).toBeNull();
   });
 });
