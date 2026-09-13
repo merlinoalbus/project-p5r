@@ -96,7 +96,7 @@ export function RiepilogoPartita({ partita }: Props) {
         <div className="card flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="form-label m-0">Ultimi eventi</span>
-            <Link to="/partita?scheda=storico" className="text-[12px] text-primary">Tutto lo storico</Link>
+            <Link to="/partita?scheda=storico" className="touch inline-flex items-center text-[12px] text-primary">Tutto lo storico</Link>
           </div>
           <StoricoPartita key={partita.updatedAt} partitaId={partita.id} perPagina={5} compatto />
         </div>

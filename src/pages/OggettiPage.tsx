@@ -37,7 +37,7 @@ type Scheda = (typeof SCHEDE)[number][0];
 const NOME_CATEGORIA: Record<string, string> = { cura: 'Cura HP', sp: 'Recupero SP', stato: 'Stati alterati', battaglia: 'Battaglia', esplorazione: 'Esplorazione', altro: 'Altro' };
 
 function Fonte({ url }: { url: string | null | undefined }) {
-  return url ? <a href={url.split(' ;')[0]} target="_blank" rel="noreferrer" className="credito self-start">fonte</a> : null;
+  return url ? <a href={url.split(' ;')[0]} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a> : null;
 }
 function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
   return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;

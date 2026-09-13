@@ -134,7 +134,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onAgendaAggiornata, onSu
         {g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
         {g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
         {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
-        {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
+        {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
       </section>
       {azioniGiorno.length > 0 && (
         <section className={classeSezione('giorno')} aria-current={fasciaCorrente === 'giorno' ? 'true' : undefined}>

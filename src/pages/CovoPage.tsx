@@ -111,7 +111,7 @@ export function CovoPage() {
               in una spesa complessiva; il totale delle medaglie ottenibili lo dichiara la guida, qui sotto.
             </p>
             <TestoRipiegabile testo={covo.medaglie} massimo={180} className="text-[13px] text-text-secondary" />
-            {covo.fonte && <a href={covo.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
+            {covo.fonte && <a href={covo.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
           </section>
 
           {/* Una ricerca sola per tutte e due le colonne: quel che si cerca è «dove salta fuori

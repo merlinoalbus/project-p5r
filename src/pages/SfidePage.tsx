@@ -24,7 +24,7 @@ const SCHEDE = [
 type Scheda = (typeof SCHEDE)[number][0];
 
 function Fonte({ url }: { url: string | null | undefined }) {
-  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito self-start">fonte</a> : null;
+  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a> : null;
 }
 function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
   return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;

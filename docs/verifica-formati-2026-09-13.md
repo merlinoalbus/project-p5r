@@ -88,17 +88,42 @@ contenuto, per scelta.
 |---|---|---|---|
 | Denaro e squadra | riga con sei elementi in `flex-wrap`: nome spezzato lettera per riga, «Livello» ripetuto, casella 20 px | scheda alta 400 px | rifatta in due fasce, comandi «−1»/«+1», interruttore da 44 px |
 | Oggetti (95), Attività, Confidenti | chip-link: bassi, compressi a 53 px dall'etichetta della cella e stirati fino a 108 px dall'allineamento `stretch` | 23–108 px | 44 px d'altezza, `width: max-content`, `align-self: start` |
-| Compendio personale (210 voci), Personaggi, scheda Persona | nomi cliccabili in elenco | 18–23 px | voci da 44 px |
-| Ovunque: crediti, «la loro pagina», nomi di luoghi dentro le frasi | collegamenti dentro il testo | 16–17 px | `padding-block` di 15 px: l'area arriva a 44 senza allargare l'interlinea |
+| Compendio personale (210), Battaglia (228), Negozi (300), Personaggi, scheda Persona | nomi cliccabili in elenco | 18–23 px | voci da 44 px |
+| Crediti «fonte»/«guida», «Tutto lo storico», «scheda Persona», «Tutte le ricette →» | collegamenti che sono comandi a sé, non parole in una frase | 17–23 px | 44 px (classe `touch`) |
 | Cruciverba, Storico, azioni del giorno (Home, Partita, Percorso) | caselle di spunta senza etichetta avvolgente | 20×20 px | etichetta toccabile attorno |
 | Confidenti (righe dei ranghi), Storico | «Rango 1» e «0 scelte» incolonnati lettera per riga | 16×135 px | `shrink-0` sui lati, `min-w-0` sulla parte elastica |
 | Ogni pagina con mappa | briciole, elenco figlie, zoom, azioni, categorie | 30–40 px | 44 px |
 | Doti sociali | pulsanti delle note, premuti decine di volte per partita | 30 px col mouse | 44 px a ogni larghezza |
 | Tutta l'app | selettore della partita, campi `editor-mappa__campo` | 36–40 px | 44 px a ogni larghezza |
-| Home, Partita (mappa di Tokyo) | targhe dei luoghi | **5,46 px**, illeggibili; a misura leggibile si sovrapponevano | sotto i 520 px di tela le targhe lasciano il posto a una legenda toccabile |
+| Home, Partita (mappa di Tokyo) | targhe dei luoghi | **5,46 px**, illeggibili; a misura leggibile si sovrapponevano | sotto i 545 px di tela — il punto in cui il corpo scenderebbe sotto i 9 px — le targhe lasciano il posto a una legenda toccabile |
 | Mappa di Tokyo, Memento, spilli, miniature | disegni che non possono crescere senza coprire la mappa | 15×17–40×40 px | area del tocco estesa a 44 px, verificata con l'hit-testing del browser |
 | Compendio, Personaggi, tessere compatte | nomi ed etichette troncate con le ellissi | «Conoscen…» | vanno a capo |
 | Palazzi, Covo | il comando che apre il testo ripiegato | 26×18 px in coda al paragrafo | «Mostra tutto» su una riga propria, 44 px |
+
+## Il criterio dei bersagli, scritto per intero
+
+**44 px a ogni larghezza**, mouse compreso, per ogni comando: pulsanti, chip, voci di elenco,
+caselle di spunta (misurate sull'etichetta che le avvolge, che è ciò che si tocca), campi, selettori,
+comandi del visore. Nessuna misura doppia fra tocco e puntatore: un comando basso lo è anche col
+mouse.
+
+**Due sole forme di comando non misurano 44 px nel loro riquadro, e per ciascuna c'è una ragione
+verificabile, non una deroga:**
+
+1. **I collegamenti dentro una frase** — il nome di una Persona in mezzo a un testo, «la loro
+   pagina», le fonti separate da virgole. Sono alti quanto la riga di testo in cui vivono, e il
+   criterio 2.5.8 li esclude proprio per questo: *«inline targets… the target is in a sentence, or
+   its size is otherwise constrained by the line-height of non-target text»*. Allargarli vorrebbe
+   dire allargare l'interlinea del paragrafo. Il primo tentativo — `padding-block` su tutti i link
+   della pagina — è stato tolto perché sui link **a blocco** i 30 px erano veri e le tessere delle
+   Doti passavano da 42 a 72 px. I collegamenti che invece sono comandi a sé (il credito della
+   fonte, «Tutto lo storico», «scheda Persona», il nome del negozio in elenco) portano la classe
+   `touch` e valgono 44 px come gli altri.
+2. **I disegni ancorati a un punto della mappa** — spilli, sagome di Tokyo, dedali dei Memento,
+   miniature nelle righe. Crescere vorrebbe dire coprire la mappa o spostare la riga: cresce l'area
+   che riceve il tocco, fino a 44 px, e si verifica **col tocco** (`elementFromPoint`) invece che
+   col righello. È così che si è scoperto che il primo tentativo sulle miniature era inerte, perché
+   `overflow: hidden` ritagliava anche l'area del tocco.
 
 ## Errori del metodo di misura, corretti strada facendo
 
