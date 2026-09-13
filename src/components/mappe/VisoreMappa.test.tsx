@@ -275,8 +275,10 @@ describe('raggruppamento degli spilli vicini', () => {
     fireEvent.click(within(screen.getByRole('dialog', { name: '2 spilli vicini' })).getByRole('button', { name: /Chiosco/ }));
     expect(editor.onSeleziona).toHaveBeenCalledWith(11);
     rerender(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} editor={{ ...editor, selezionatoId: 11 }} /></MemoryRouter>);
-    // il pin scelto è a sé (trascinabile), l'altro resta dov'era: niente gocce sovrapposte
-    expect(sullaTela(container)).toEqual(['Attività: Chiosco', 'Negozio: Distributore']);
+    // Il pin scelto è a sé (trascinabile); il compagno **resta una pastiglia** anche se è rimasto
+    // solo. Se tornasse goccia si troverebbe a meno di 46 px dal selezionato — e su spilli con le
+    // stesse coordinate, esattamente sotto, irraggiungibile e senza più il «+n» da cui riaprirlo.
+    expect(sullaTela(container)).toEqual(['Attività: Chiosco', '1 spillo vicino: Distributore']);
   });
 });
 
@@ -378,4 +380,29 @@ describe('chiusura dell’elenco del gruppo', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('dialog', { name: '2 spilli vicini' })).toBeNull();
   });
+});
+
+// Un gruppo può avere molte voci — sul Corridoio del Crepuscolo, alla vista d'insieme, arriva a 17 —
+// e allora l'elenco non ci sta né sopra né sotto: se non è legato alla tela, le ultime voci e
+// «Ingrandisci qui» finiscono fuori dal ritaglio, irraggiungibili (rilievo del validatore,
+// 2026-09-13). L'altezza delle voci va limitata allo spazio del lato scelto, e il resto scorre.
+it('con molte voci l’elenco si limita allo spazio della tela e le voci scorrono', async () => {
+  const molti: MappaDto = {
+    ...mappa, numeroSpilli: 17,
+    spilli: Array.from({ length: 17 }, (_, i) => spillo({ id: 100 + i, nome: `Spillo ${i + 1}`, tipo: 'nota', tipoNome: 'Nota', x: 50 + i * 0.05, y: 50 })),
+  };
+  const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 1000, height: 500, left: 0, top: 0, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+  try {
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={molti} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    await waitFor(() => expect((container.querySelector('.visore-mappa__livello') as HTMLElement).style.transform).toContain('scale(0.864)'));
+    fireEvent.click(screen.getByRole('button', { name: /17 spilli vicini/ }));
+    const elenco = screen.getByRole('dialog', { name: '17 spilli vicini' });
+    const voci = elenco.querySelector('ul') as HTMLElement;
+    expect(voci.style.overflowY).toBe('auto');
+    const tetto = Number(voci.style.maxHeight.replace('px', ''));
+    expect(tetto).toBeGreaterThan(0);
+    expect(tetto).toBeLessThan(500);          // sta dentro la tela, non nei 858 px che chiederebbe
+    // e «Ingrandisci qui» resta fuori dall'area che scorre, sempre raggiungibile
+    expect(within(elenco).getByRole('button', { name: /Ingrandisci qui/ })).toBeInTheDocument();
+  } finally { misura.mockRestore(); }
 });

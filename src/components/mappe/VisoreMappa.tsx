@@ -88,6 +88,9 @@ const PASSO_ROTELLA = 1.15;
  *  la porta a 45; un pixel in più evita che l'arrotondamento sub-pixel ne mangi mezzo. Sotto questa
  *  distanza i due si toglierebbero spazio a vicenda, quindi diventano un gruppo solo. */
 const DISTANZA_MINIMA_SPILLI = 46;
+/** «2 spilli vicini», ma «1 spillo vicino»: la pastiglia può restare a uno solo quando nell'editor
+ *  il pin selezionato esce dalla nube per essere trascinato. */
+const nomeGruppo = (n: number) => (n === 1 ? '1 spillo vicino' : `${n} spilli vicini`);
 /** L'altezza della goccia di uno spillo singolo (`.spillo-mappa__goccia`), che è ancorata alla punta. */
 const ALTEZZA_GOCCIA = 38;
 const DIMENSIONE_RISERVA = 1000;
@@ -343,11 +346,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       return;
     }
     if (!g.mosso) {
-      if (editor && editor.strumento !== 'seleziona') { const p = percentuali(e.clientX, e.clientY); if (p) editor.onClickMappa(p.x, p.y); }
       // Un tocco sulla mappa chiude quel che è aperto: il popup dello spillo **e** l'elenco del
       // gruppo, che prima restava lì (rilievo del validatore, 2026-09-13) — e se il suo tasto di
-      // chiusura finiva fuori dal ritaglio non c'era più un modo ovvio di levarlo.
-      else { seleziona(null); setGruppoAperto(null); }
+      // chiusura finiva fuori dal ritaglio non c'era più un modo ovvio di levarlo. Vale anche con
+      // «Aggiungi» o «Incolla» in mano, dove prima la chiusura non veniva mai eseguita.
+      setGruppoAperto(null);
+      if (editor && editor.strumento !== 'seleziona') { const p = percentuali(e.clientX, e.clientY); if (p) editor.onClickMappa(p.x, p.y); }
+      else seleziona(null);
     }
   };
   const annullaGesto = () => { puntatori.current.clear(); gesto.current = null; setTrascinato(null); setTrascinando(false); };
@@ -454,11 +459,17 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       // e un gruppo lo renderebbe impossibile. I compagni restano raggruppati — non tornano gocce
       // sovrapposte — e lo si sceglie dall'elenco del gruppo, come nel visore.
       let membri = nube.spilli;
+      let scorporato = false;
       if (editor && selezionatoId !== null && membri.length > 1 && membri.some((s) => s.id === selezionatoId)) {
         singoli.push(membri.find((s) => s.id === selezionatoId)!);
         membri = membri.filter((s) => s.id !== selezionatoId);
+        scorporato = true;
       }
-      if (membri.length === 1) { singoli.push(...membri); continue; }
+      // Il residuo resta una pastiglia anche quando è uno solo: se tornasse goccia si troverebbe a
+      // meno di 46 px dal pin selezionato — e per le nove coppie a coordinate identiche del
+      // pacchetto, esattamente sotto, senza un pixel raggiungibile e senza più il «+n» da cui
+      // riaprirla (rilievo del validatore, 2026-09-13).
+      if (membri.length === 1 && !scorporato) { singoli.push(...membri); continue; }
       const chiave = membri.map((s) => s.id).sort((a, b) => a - b).join('-');
       gruppi.push({ chiave, x: membri.reduce((a, s) => a + s.x, 0) / membri.length, y: membri.reduce((a, s) => a + s.y, 0) / membri.length, spilli: membri });
     }
@@ -466,10 +477,31 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   })();
   /** Se ingrandendo il gruppo si è sciolto, l'elenco sparisce da sé: nessun effetto da sincronizzare. */
   const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
-  // Quanto è alto l'elenco: 48 px d'intestazione, 44 per voce, 44 per «Ingrandisci qui», più i margini.
-  const altezzaElenco = gruppoScelto ? 110 + 44 * gruppoScelto.spilli.length : 0;
-  const elencoSotto = gruppoScelto !== null && pan.y + (gruppoScelto.y / 100) * nat.h * zoom < altezzaElenco;
-  const elencoDx = gruppoScelto ? scostamento(gruppoScelto.x) : 0;
+  // **Quanto è alto l'elenco, e da che parte sta.** Non basta stimarne l'altezza e ribaltarlo: un
+  // gruppo può avere molte voci — sul Corridoio del Crepuscolo, alla vista d'insieme, arriva a 17 —
+  // e allora non ci sta né sopra né sotto, e la tela lo taglia (rilievo del validatore, 2026-09-13;
+  // «Ingrandisci qui» e le ultime voci diventavano irraggiungibili). L'altezza va **legata alla
+  // tela**: si sceglie il lato che ha più spazio, e le voci scorrono dentro quello che c'è.
+  // La stima delle voci serve solo a preferire il lato consueto — sopra — quando l'elenco ci sta
+  // tutto; il resto lo fa `maxHeight`, che non stima niente.
+  const elenco = (() => {
+    if (!gruppoScelto) return { sotto: false, dx: 0, altezzaVoci: undefined as number | undefined };
+    const y = pan.y + (gruppoScelto.y / 100) * nat.h * zoom;
+    const sopra = y, sotto = Math.max(0, dim.h - y);
+    // 26 px di stacco dalla pastiglia, 8 di respiro dal bordo; 48 d'intestazione e 44 per «Ingrandisci qui».
+    const naturale = 110 + 44 * gruppoScelto.spilli.length;
+    const stai = (spazio: number) => spazio >= naturale + 34;
+    const verso = stai(sopra) ? false : stai(sotto) ? true : sotto > sopra;
+    const disponibile = (verso ? sotto : sopra) - 34;
+    return {
+      sotto: verso,
+      dx: scostamento(gruppoScelto.x),
+      // Con la tela ancora da misurare non si limita niente: meglio un elenco intero che uno alto zero.
+      altezzaVoci: dim.h === 0 ? undefined : Math.max(88, disponibile - 92),
+    };
+  })();
+  const elencoSotto = elenco.sotto;
+  const elencoDx = elenco.dx;
 
   const cambiaRaccolto = async (s: SpilloDto, raccolto: boolean) => {
     if (!onRaccolto) return;
@@ -638,7 +670,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   key={s.id}
                   type="button"
                   className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${s.raccolto ? 'spillo-mappa--raccolto' : ''} ${bloccato(s) ? 'spillo-mappa--bloccato' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
-                  style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)` } as CSSProperties}
+                  // Con «Aggiungi» o «Incolla» in mano il pin si fa da parte come il gruppo: il tocco
+                  // serve a posare uno spillo in quel punto, e prima su un pin esistente non
+                  // succedeva nulla, senza nemmeno un segnale (rilievo del validatore, 2026-09-13).
+                  style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
                   aria-label={`${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={attivo}
                   title={s.nome}
@@ -721,7 +756,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   // Con «Aggiungi» o «Incolla» in mano il gruppo si fa da parte: il tocco serve a
                   // posare un pin in quel punto, non ad aprire un elenco.
                   style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(-50%, -50%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined }}
-                  aria-label={`${g.spilli.length} spilli vicini: ${g.spilli.map((s) => s.nome).join(', ')}`}
+                  aria-label={`${nomeGruppo(g.spilli.length)}: ${g.spilli.map((s) => s.nome).join(", ")}`}
                   aria-expanded={aperto}
                   title={g.spilli.map((s) => s.nome).join(', ')}
                   onPointerDown={(e) => e.stopPropagation()}
@@ -737,14 +772,14 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 ritaglio (rilievo del validatore, 2026-09-13). L'altezza cresce con gli spilli:
                 48 px d'intestazione, 44 per voce, 44 per «Ingrandisci qui», più i margini. */}
             {gruppoScelto && inPortale(schermoStretto, (
-              <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={`${gruppoScelto.spilli.length} spilli vicini`}
+              <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={nomeGruppo(gruppoScelto.spilli.length)}
                 style={schermoStretto ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx * zoom}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx * zoom}px)` } as CSSProperties}
                 onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
-                  <strong className="flex-1 text-[13px] leading-tight">{gruppoScelto.spilli.length} spilli qui</strong>
+                  <strong className="flex-1 text-[13px] leading-tight">{gruppoScelto.spilli.length === 1 ? 'Un altro spillo qui' : `${gruppoScelto.spilli.length} spilli qui`}</strong>
                   <button type="button" className="spillo-popup__chiudi touch" onClick={() => setGruppoAperto(null)} aria-label="Chiudi l’elenco">×</button>
                 </div>
-                <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
+                <ul className="m-0 p-0 list-none flex flex-col gap-0.5" style={{ maxHeight: elenco.altezzaVoci, overflowY: 'auto' }}>
                   {gruppoScelto.spilli.map((s) => (
                     <li key={s.id}>
                       <button type="button" className="visore-mappa__voce" onClick={() => { setGruppoAperto(null); seleziona(s.id); }}>
