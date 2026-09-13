@@ -41,7 +41,7 @@ it('albero ed editor usano il genitore esplicito senza ricavarlo da nomeCompleto
   expect(etichettaPlanimetria(parziale)).toBe('Palazzo di Madarame — Planimetria');
   expect(etichettaPlanimetria({...parziale,genitoreNome:null})).toBe('Planimetria');
   expect(nomePresentazioneMappa({...parziale,genitoreNome:undefined})).toBe('Planimetria');
-  const dto: MappaDto={...parziale,genitoreNome:parziale.genitoreNome ?? null,larghezza:1536,altezza:1536,note:'',percorso:[{chiave:'palazzo-verificato',nome:'Palazzo di Madarame'},{chiave:parziale.chiave,nome:parziale.nome}],figli:[],spilli:[]};
+  const dto: MappaDto={...parziale,genitoreNome:parziale.genitoreNome ?? null,larghezza:1536,altezza:1536,note:'',percorso:[{chiave:'palazzo-verificato',nome:'Palazzo di Madarame'},{chiave:parziale.chiave,nome:parziale.nome}],figli:[],spilli:[],arrivi:[]};
   const vista=presentaMappa(dto,'safe');
   expect(vista.nome).toBe('Palazzo di Madarame — Planimetria');
   expect(vista.percorso[0]).toEqual(dto.percorso[0]);
@@ -83,7 +83,7 @@ it('albero, miniature e briciole chiamano la mappa rivista come l’editor',()=>
   expect(titoloGruppoImmagini({nome:'Area tecnica',nomeRivisto:false,contesti:[]})).toBe('Area tecnica');
   // dopo il salvataggio il server ricalcola anche `nomeCompleto`: il selettore tiene la gerarchia
   expect(etichettaPlanimetria({...parziale,nome:'Ripostiglio del seminterrato',nomeRivisto:true,nomeCompleto:'Altro genitore › Ripostiglio del seminterrato'})).toBe('Altro genitore › Ripostiglio del seminterrato');
-  const dto: MappaDto={...parziale,nome:'Ripostiglio del seminterrato',nomeRivisto:true,genitoreNome:parziale.genitoreNome ?? null,larghezza:null,altezza:null,note:'',percorso:[{chiave:'palazzo-verificato',nome:'Palazzo di Madarame'},{chiave:parziale.chiave,nome:'Ripostiglio del seminterrato'}],figli:[{...sottopasso,...parziale,chiave:'figlia',nome:'Sottopasso di Shibuya',nomeRivisto:true}],spilli:[]};
+  const dto: MappaDto={...parziale,nome:'Ripostiglio del seminterrato',nomeRivisto:true,genitoreNome:parziale.genitoreNome ?? null,larghezza:null,altezza:null,note:'',percorso:[{chiave:'palazzo-verificato',nome:'Palazzo di Madarame'},{chiave:parziale.chiave,nome:'Ripostiglio del seminterrato'}],figli:[{...sottopasso,...parziale,chiave:'figlia',nome:'Sottopasso di Shibuya',nomeRivisto:true}],spilli:[],arrivi:[]};
   expect(presentaMappa(dto).nome).toBe('Ripostiglio del seminterrato');
   expect(presentaMappa(dto).figli[0].nome).toBe('Sottopasso di Shibuya');
 });

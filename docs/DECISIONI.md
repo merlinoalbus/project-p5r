@@ -472,3 +472,21 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Un solo posto decide il nome**: albero, indice, briciole e striscia delle miniature leggevano per conto loro
   `gruppoImmagini.nome`, e una mappa rivista si sarebbe chiamata in un modo nell'editor e in un altro altrove. Ora
   passano tutti da `titoloGruppoImmagini` in `src/utils/presentazioneMappa.ts`.
+
+### 2026-09-13 — I collegamenti fra mappe sono un grafo, non un albero
+- **La scheda «Collegamenti» dell'editor mostra anche i passaggi, nei due versi.** Mostrava solo
+  l'albero — genitore e figlie — ma in città ci si sposta di lato (dal Sottopasso alla Banchina, due
+  luoghi di Shibuya allo stesso livello) e i treni collegano quartieri diversi: sedici spilli su
+  ventiquattro non puntavano a una figlia e non comparivano da nessuna parte. L'albero resta:
+  dice chi contiene chi, che è un'altra informazione e serve lo stesso.
+- **Anche il verso opposto**: `MappaDto.arrivi` porta gli spilli di altre mappe che arrivano qui.
+  Una mappa conosce da sé solo le proprie uscite, quindi un collegamento a senso unico non era
+  visibile da nessuna parte. Gli arrivi si leggono sia da `spillo_destinazione` sia dal riferimento
+  `mappa` dei passaggi più vecchi, senza contare due volte lo stesso spillo.
+- **Il ritorno si crea dalla mappa che lo deve portare**: lo spillo sta su quella, non su questa.
+  Perciò l'avviso in uscita dice dove andare, e il pulsante «Crea il passaggio» sta nell'elenco
+  degli arrivi, dove l'azione è davvero possibile.
+- **Nell'editor si naviga senza uscire dalla modifica** (richiesta dell'utente): doppio tocco su
+  uno spillo di spostamento, voci dell'elenco dei passaggi, e «Apri l'arrivo» spostato in cima al
+  pannello dello spillo. Nel visore basta un clic, ma nell'editor il clic seleziona per modificare:
+  la via d'uscita va data a parte, altrimenti l'unico modo era un pulsante in fondo al pannello.

@@ -1816,6 +1816,10 @@ export interface MappaDto extends MappaRiassuntoDto {
   percorso: Array<{ chiave: string; nome: string }>;
   figli: MappaRiassuntoDto[];
   spilli: SpilloDto[];
+  /** Gli spilli di **altre** mappe che portano qui. Una mappa conosce da sé solo le vie d'uscita
+   * (i propri spilli): senza questo elenco un collegamento a senso unico — si entra e non si torna
+   * indietro — non si vede da nessuna parte, e chi cura l'atlante non sa nemmeno chi lo cita. */
+  arrivi: Array<{ spilloId: number; tipo: TipoSpillo; nome: string; mappa: string; mappaNome: string }>;
 }
 
 /** Pacchetto di esportazione/importazione (versione 1); il seed `mappe-editor.json` usa lo stesso formato senza `immagini`. */

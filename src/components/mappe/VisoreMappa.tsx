@@ -1,7 +1,7 @@
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
-import type { NavigaMappa } from '../../utils/navigazioneMappa';
+import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 // ============================================================
 // VisoreMappa — visore a schermo intero (o incorporato) di una mappa a livelli (Fase 13.2)
 // ============================================================
@@ -44,6 +44,10 @@ export interface StrumentiEditor {
   onClickMappa: (x: number, y: number) => void;
   /** Fine del trascinamento di uno spillo (strumento «seleziona»). */
   onSposta: (id: number, x: number, y: number) => void;
+  /** Doppio clic su uno spillo di spostamento: apre la mappa d'arrivo, sempre in modifica. Nel
+   * visore basta un clic, ma qui il clic seleziona per modificare: senza questo, per visitare il
+   * passaggio appena messo bisognava cercare un pulsante in fondo al pannello. */
+  onVisita?: (mappa: string) => void;
 }
 
 interface Props {
@@ -549,13 +553,15 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
             {singoli.map((s) => {
               const pos = trascinato?.id === s.id ? trascinato : s;
               const attivo = s.id === selezionatoId;
+              // solo nell'editor, e solo se lo spillo porta davvero da qualche parte
+              const visitabile = editor?.onVisita ? arrivoSpillo(s) : null;
               return (
                 <button
                   key={s.id}
                   type="button"
                   className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${s.raccolto ? 'spillo-mappa--raccolto' : ''} ${bloccato(s) ? 'spillo-mappa--bloccato' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)` } as CSSProperties}
-                  aria-label={`${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}`}
+                  aria-label={`${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={attivo}
                   title={s.nome}
                   onPointerDown={(e) => {
@@ -567,6 +573,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                     }
                   }}
                   onClick={(e) => { e.stopPropagation(); if (editor && editor.strumento !== 'seleziona') return; seleziona(attivo ? null : s.id); }}
+                  onDoubleClick={(e) => { if (!visitabile) return; e.stopPropagation(); e.preventDefault(); editor!.onVisita!(visitabile.mappa); }}
                 >
                   <SpilloGrafico tipo={s.tipo} colore={s.colore} />
                   <span className="spillo-mappa__etichetta">{s.nome}</span>
