@@ -129,7 +129,9 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   // Stato e disponibilità si filtrano dopo la valutazione: sono fatti della partita, non colonne.
   let valutati = righe.map((r) => articoloDto(r, acquistati, st));
   if (partitaId !== undefined && filtro.stato) valutati = valutati.filter((a) => (filtro.stato === 'acquistati' ? a.acquistato : !a.acquistato));
-  if (partitaId !== undefined && filtro.disponibilita) valutati = valutati.filter((a) => (filtro.disponibilita === 'bloccati' ? a.disponibilita?.stato === 'bloccato' : a.disponibilita?.stato !== 'bloccato'));
+  // «Disponibili» = tutte le condizioni vere. Un «ignoto» — una condizione che la partita non sa
+  // verificare — sta con i bloccati: in una guida che dice «questo c'è adesso» un forse vale un no.
+  if (partitaId !== undefined && filtro.disponibilita) valutati = valutati.filter((a) => (filtro.disponibilita === 'bloccati' ? a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile' : a.disponibilita === undefined || a.disponibilita.stato === 'disponibile'));
   return { articoli: valutati.slice(0, 300), totale: valutati.length };
 }
 
@@ -139,7 +141,7 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
   const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloChiave) as RigaArticolo | undefined;
   if (!r) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
   const st = statoDisponibilitaPartita(partitaId);
-  if (fatto && disponibilitaArticolo(r, st).stato === 'bloccato') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
+  if (fatto && disponibilitaArticolo(r, st).stato !== 'disponibile') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
   const adesso = nowIso();
   getDb().transaction(() => {
     const era = !!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave);

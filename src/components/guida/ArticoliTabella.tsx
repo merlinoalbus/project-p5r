@@ -17,7 +17,7 @@ interface Props {
 function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
   const [occupato, setOccupato] = useState(false);
   const nome = a.nomeIt ?? a.nome;
-  const acquistoBloccato = a.disponibilita?.stato === 'bloccato' && !a.acquistato;
+  const acquistoBloccato = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile' && !a.acquistato;
   const cambia = async (fatto: boolean) => {
     setOccupato(true);
     try { onCambiato(await impostaAcquisto(partitaId!, a.chiave, fatto)); }

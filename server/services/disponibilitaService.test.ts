@@ -127,12 +127,13 @@ describe('convertiProsa — le frasi della guida diventano stati, o niente', () 
 });
 
 describe('valutaRequisiti — ogni stato sulla partita', () => {
-  it('data, periodo, quartiere: bloccato prima, disponibile dal giorno; senza giorno corrente è ignoto', () => {
+  it('data, periodo, quartiere: bloccato prima, disponibile dal giorno; senza giorno corrente è bloccato', () => {
     expect(daProsa(['dal 18 aprile'], stato({ dataGioco: '04-16' })).stato).toBe('bloccato');
     expect(daProsa(['dal 18 aprile'], stato({ dataGioco: '04-18' })).stato).toBe('disponibile');
     expect(daProsa(['dal 9 gennaio'], stato({ dataGioco: '12-22' })).stato).toBe('bloccato');
     expect(daProsa(['dal 9 gennaio'], stato({ dataGioco: '01-10' })).stato).toBe('disponibile');
-    expect(daProsa(['dal 18 aprile'], stato({ dataGioco: null })).stato).toBe('ignoto');
+    // senza il giorno corrente la condizione non risulta soddisfatta: gli stati dell'app sono veri o falsi
+    expect(daProsa(['dal 18 aprile'], stato({ dataGioco: null })).stato).toBe('bloccato');
     expect(daProsa(['domenica 24 aprile'], stato({ dataGioco: '04-24' })).stato).toBe('disponibile');
     expect(daProsa(['domenica 24 aprile'], stato({ dataGioco: '04-25' })).stato).toBe('bloccato');
     expect(daProsa(['Disponibile da quando si sblocca Akihabara'], stato({ dataGioco: '08-30' })).stato).toBe('bloccato');
@@ -151,7 +152,7 @@ describe('valutaRequisiti — ogni stato sulla partita', () => {
     expect(daProsa(["a partire dall'arco del Palazzo di Madarame"], stato({ arcoCorrente: 'madarame' })).stato).toBe('disponibile');
     expect(daProsa(["a partire dall'arco del Palazzo di Madarame"], stato({ arcoCorrente: 'niijima' })).stato).toBe('disponibile');
     expect(daProsa(["a partire dall'arco del Palazzo di Kamoshida"], stato({ arcoCorrente: 'kamoshida' })).stato).toBe('disponibile');
-    expect(daProsa(["a partire dall'arco del Palazzo di Madarame"], stato({ arcoCorrente: null })).stato).toBe('ignoto');
+    expect(daProsa(["a partire dall'arco del Palazzo di Madarame"], stato({ arcoCorrente: null })).stato).toBe('bloccato');
   });
 
   it('Doti, Confidenti, richieste, Palazzi, squadra', () => {
@@ -163,16 +164,17 @@ describe('valutaRequisiti — ogni stato sulla partita', () => {
     const richiesta = daProsa(['richiede il completamento della richiesta Lo zio ingordo'], stato());
     expect(richiesta.stato).toBe('bloccato');
     expect(richiesta.requisiti[0].dettaglio).not.toMatch(/conferma qui/);
-    // squadra: chi c'è è verde, chi hai detto di non avere è rosso, chi non hai segnato resta grigio
+    // squadra: variabile booleana — chi c'è è verde, chiunque altro è rosso, compreso chi non hai
+    // ancora segnato: «non risulta in squadra» e «non è in squadra» sono la stessa cosa
     expect(valutaRequisiti(conTesto([{ tipo: 'squadra', membro: 'ryuji' }]), stato()).stato).toBe('disponibile');
     expect(valutaRequisiti(conTesto([{ tipo: 'squadra', membro: 'akechi' }]), stato()).stato).toBe('bloccato');
-    expect(valutaRequisiti(conTesto([{ tipo: 'squadra', membro: 'ann' }]), stato()).requisiti[0].stato).toBe('grigio');
+    expect(valutaRequisiti(conTesto([{ tipo: 'squadra', membro: 'ann' }]), stato()).requisiti[0].stato).toBe('rosso');
   });
 
   it('fascia, meteo, giorno della settimana, stagione', () => {
     expect(daProsa(['solo di sera'], stato()).stato).toBe('bloccato');
     expect(daProsa(['solo di sera'], stato({ fasciaGioco: 'sera' })).stato).toBe('disponibile');
-    expect(daProsa(['solo di sera'], stato({ fasciaGioco: null })).stato).toBe('ignoto');
+    expect(daProsa(['solo di sera'], stato({ fasciaGioco: null })).stato).toBe('bloccato');
     expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOggi: 'Sereno' })).stato).toBe('bloccato');
     expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOggi: 'Pioggia' })).stato).toBe('disponibile');
     expect(daProsa(['solo la domenica'], stato({ giornoSettimana: 'mercoledi' })).stato).toBe('bloccato');

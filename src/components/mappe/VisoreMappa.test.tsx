@@ -95,18 +95,21 @@ describe('VisoreMappa', () => {
     expect(scheda.getByText('Pistola modello Tkachev')).toBeInTheDocument();
     expect(scheda.getByText('12.000 ¥')).toBeInTheDocument();
     expect(scheda.getByRole('link', { name: 'scheda del negozio' })).toHaveAttribute('href', '/guida/negozi/untouchable');
-    // l'articolo non ancora disponibile alla data corrente è nascosto e conteggiato; quello «da verificare» resta con il chip
-    expect(scheda.getByText(/Untouchable · 2 articoli/)).toBeInTheDocument();
+    // Si vede solo ciò che soddisfa **tutte** le condizioni (decisione dell'utente, 2026-09-13):
+    // l'articolo bloccato dalla data e quello con una condizione che la partita non sa verificare
+    // sono tutti e due nascosti e conteggiati. In una guida che dice «questo c'è adesso» un forse
+    // vale come un no; il chip «Da verificare» si legge chiedendo di vedere i non disponibili.
+    expect(scheda.getByText(/Untouchable · 1 articolo/)).toBeInTheDocument();
     expect(scheda.queryByText('Fucile a pompa Governor')).not.toBeInTheDocument();
-    expect(scheda.getByText('Proiettili perforanti')).toBeInTheDocument();
-    expect(scheda.getByText('Da verificare')).toHaveAttribute('title', 'rango cliente Oscuro — Condizione non verificabile dai dati della partita');
+    expect(scheda.queryByText('Proiettili perforanti')).not.toBeInTheDocument();
     // Come per gli spilli: nascosto di regola, e un comando per vederlo — con il suo «Non ancora»
     // accanto, così non si confonde con quel che si può comprare oggi.
-    fireEvent.click(scheda.getByRole('button', { name: 'Mostra anche l’articolo non ancora in vendita' }));
+    fireEvent.click(scheda.getByRole('button', { name: 'Mostra anche i 2 articoli non ancora in vendita' }));
     expect(scheda.getByText('Fucile a pompa Governor')).toBeInTheDocument();
     expect(scheda.getByText('Non ancora')).toHaveAttribute('title', 'dal 18 giugno — oggi è il 20 aprile');
+    expect(scheda.getByText('Da verificare')).toHaveAttribute('title', 'rango cliente Oscuro — Condizione non verificabile dai dati della partita');
     expect(scheda.getByText(/Untouchable · 3 articoli/)).toBeInTheDocument();
-    fireEvent.click(scheda.getByRole('button', { name: 'Nascondi l’articolo non ancora in vendita' }));
+    fireEvent.click(scheda.getByRole('button', { name: 'Nascondi i 2 articoli non ancora in vendita' }));
     expect(scheda.queryByText('Fucile a pompa Governor')).not.toBeInTheDocument();
   });
 

@@ -8,7 +8,7 @@ export function NavigazioneSpillo({ spillo: s, partitaId, onNaviga, nomeMappa, n
   if (s.destinazioneNonDisponibile) return <p role="status" className="text-[12px] text-text-muted">La mappa di arrivo non è più disponibile. Aggiorna il collegamento nell’editor.</p>;
   const arrivo = arrivoSpillo(s);
   if (!arrivo) return null;
-  const bloccato = partitaId !== null && s.disponibilita?.stato === 'bloccato';
+  const bloccato = partitaId !== null && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
   const mappa = nomeMappa ?? (s.dettaglio?.tipo === 'mappa' && s.dettaglio.mappa?.chiave === arrivo.mappa ? s.dettaglio.mappa.nome : arrivo.mappa);
   return <PulsanteVisivo tono="primario" compatto icona={<IconaSpillo tipo={s.tipo} dimensione={20} />}
     titolo={`Vai: ${mappa}`}

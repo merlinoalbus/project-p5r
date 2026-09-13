@@ -240,7 +240,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     const s = mappa.spilli.find((x) => x.id === selezioneIniziale);
     // Uno spillo bloccato non si apre nemmeno da un indirizzo: era il modo per rivelarlo
     // aggirando il filtro, e un deep link non deve poter fare quello che l'interfaccia non fa.
-    if (!s || (partitaId && !editor && s.disponibilita?.stato === 'bloccato')) return;
+    if (!s || (partitaId && !editor && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile')) return;
     const id = setTimeout(() => {
       // uno spillo nascosto perché già raccolto va reso visibile: altrimenti la mappa si centra sul vuoto
       if (s.collezionabile && s.raccolto) setMostraRaccolti(true);
@@ -339,9 +339,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const tipiPresenti = useMemo(() => TIPI_SPILLO.filter((t) => mappa.spilli.some((s) => s.tipo === t)), [mappa.spilli]);
   const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto).length, [mappa.spilli]);
   const filtraBloccati = Boolean(partitaId) && !editor;
-  const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter((s) => s.disponibilita?.stato === 'bloccato').length : 0), [mappa.spilli, filtraBloccati]);
+  const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter((s) => s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile').length : 0), [mappa.spilli, filtraBloccati]);
   const ricercaNorm = ricerca.trim().toLowerCase();
-  /** Uno spillo bloccato non c'è **di regola**, e ricompare solo se lo si chiede.
+  /** Uno spillo che non soddisfa le sue condizioni non c'è **di regola**, e ricompare solo se lo si chiede.
    *
    * La distinzione è quella che conta, ed è la decisione dell'utente: la mappa attiva mostra il
    * mondo com'è **adesso**, quindi un posto dove non si può ancora andare non ci sta; ma una guida
@@ -352,9 +352,16 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    * Quel che resta tolto è il reveal **da indirizzo**: un `?spillo=` che forzava visibile un pin
    * bloccato non è una consultazione esplicita, è un URL che fa quello che l'interfaccia non fa.
    *
-   * Fuori dalla regola l'editor, che deve vedere tutto per poterlo modificare, e gli `ignoto`:
-   * l'assenza di prova non è una prova di blocco. */
-  const bloccato = (s: SpilloDto) => filtraBloccati && s.disponibilita?.stato === 'bloccato';
+   * Fuori dalla regola solo l'editor, che deve vedere tutto per poterlo modificare.
+   *
+   * **Anche il grigio nasconde** (decisione dell'utente, 2026-09-13): «un oggetto deve essere
+   * visibile solo se tutte le condizioni danno esito true». Prima il grigio — una condizione che la
+   * partita non sa verificare, un Ladro mai segnato in squadra — lasciava la cosa visibile, con
+   * l'idea che l'assenza di prova non fosse una prova di blocco; ma in una guida che dice «questo
+   * c'è adesso» un forse vale come un no, e il pin di qualcosa che forse non c'è manda a cercarlo
+   * lo stesso. Il cartellino «Da segnare» resta, sotto «mostra anche i non disponibili», e porta
+   * al punto dove si segna lo stato che manca. */
+  const bloccato = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
   const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Popup sopra allo spillo; sotto quando nella tela (overflow nascosto) non c'è spazio sopra: il popup più alto misura ~215 px più i 42 px della punta.
@@ -658,7 +665,7 @@ type NegozioNelPopup = NonNullable<NonNullable<SpilloDto['dettaglio']>['negozio'
 
 /** La merce del negozio **disponibile adesso**, dentro il popup dello spillo di città: nome, prezzo e la casella «comprato» con la partita. */
 function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto }: { negozio: NegozioNelPopup; spillo: SpilloDto; partitaId: number | null; occupato: boolean; onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void> }) {
-  const disponibili = negozio.articoli.filter((a) => a.disponibilita?.stato !== 'bloccato');
+  const disponibili = negozio.articoli.filter((a) => a.disponibilita === undefined || a.disponibilita.stato === 'disponibile');
   const bloccati = negozio.articoli.length - disponibili.length;
   return (
     <div className="flex flex-col gap-1" role="group" aria-label={`Merce di ${negozio.nome}`}>
@@ -731,8 +738,8 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
   // la vista predefinita è quel che si può comprare oggi, ma «e quello quando arriva?» è una
   // domanda che a una guida si fa. Quando compaiono portano il loro «Non ancora» accanto.
   const [mostraBloccati, setMostraBloccati] = useState(false);
-  const bloccati = negozio ? negozio.articoli.filter((a) => a.disponibilita?.stato === 'bloccato').length : 0;
-  const articoliVisibili = negozio ? (mostraBloccati ? negozio.articoli : negozio.articoli.filter((a) => a.disponibilita?.stato !== 'bloccato')) : [];
+  const bloccati = negozio ? negozio.articoli.filter((a) => a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile').length : 0;
+  const articoliVisibili = negozio ? (mostraBloccati ? negozio.articoli : negozio.articoli.filter((a) => a.disponibilita === undefined || a.disponibilita.stato === 'disponibile')) : [];
   return (
     <section ref={ref} tabIndex={-1} className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Scheda: ${s.nome}`}>
       <div className="flex items-start gap-2">

@@ -158,10 +158,13 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       const nome = EVENTI_STORIA.find((e) => e.chiave === r.evento)?.nome ?? r.evento;
       const membro = membroDellEvento(r.evento);
       if (membro) {
-        // «Entra in squadra» si legge dalla squadra: verde se c'è, rosso se dichiarato fuori, grigio se non segnato.
-        if (st.membriSquadra.has(membro)) return esito('evento', 'verde', `${nome}: in squadra`);
-        if (st.membriFuoriSquadra.has(membro)) return esito('evento', 'rosso', `${nome}: non in squadra (Partita → Denaro e squadra)`);
-        return esito('evento', 'grigio', `${nome}: non ancora segnato in squadra (Partita → Denaro e squadra)`);
+        // «In squadra» è una variabile booleana: o il Ladro è nel gruppo o non c'è. Non esiste un
+        // terzo stato (decisione dell'utente, 2026-09-13): prima un Ladro mai segnato dava grigio,
+        // e un grigio lasciava visibile l'oggetto che dipendeva da lui — i libri della biblioteca
+        // della Shujin comparivano con Makoto e Futaba non ancora in squadra. Chi non è segnato
+        // **non è in squadra**, punto; il rimando alla scheda dove segnarlo resta nel dettaglio.
+        const dentro = st.membriSquadra.has(membro);
+        return esito('evento', dentro ? 'verde' : 'rosso', dentro ? `${nome}: in squadra` : `${nome}: non in squadra (Partita → Denaro e squadra)`);
       }
       const ok = st.eventi.has(r.evento);
       return esito('evento', ok ? 'verde' : 'rosso', ok ? `${nome}: avvenuto` : `${nome}: non ancora segnato (Partita → Progressi)`);
@@ -178,33 +181,33 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return esito('punti-negozio', v >= r.punti ? 'verde' : 'rosso', `${nomeNegozio(r.negozio)}: ${v} punti di ${r.punti} (Partita → Progressi)`);
     }
     case 'arco': {
-      if (!st.arcoCorrente) return esito('arco', 'grigio', 'Imposta il giorno corrente della partita');
+      if (!st.arcoCorrente) return esito('arco', 'rosso', 'Il giorno corrente della partita non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');
       const ok = ARCHI_STORIA.indexOf(st.arcoCorrente as typeof ARCHI_STORIA[number]) >= ARCHI_STORIA.indexOf(r.dungeon as typeof ARCHI_STORIA[number]);
       return esito('arco', ok ? 'verde' : 'rosso', ok ? `Siamo nell'arco del ${nomePalazzo(st.arcoCorrente)}` : `Dall'arco del ${nomePalazzo(r.dungeon)}: siamo ancora in quello del ${nomePalazzo(st.arcoCorrente)}`);
     }
     case 'intervallo': {
-      if (!st.dataGioco) return esito('data', 'grigio', 'Imposta il giorno corrente della partita');
+      if (!st.dataGioco) return esito('data', 'rosso', 'Il giorno corrente della partita non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');
       const oggi = ordineGioco(st.dataGioco);
       const dentro = oggi >= ordineGioco(r.dal) && oggi <= ordineGioco(r.al);
       return esito('data', dentro ? 'verde' : 'rosso', r.dal === r.al ? (dentro ? `Solo il ${dataLeggibile(r.dal)}: è oggi` : `Solo il ${dataLeggibile(r.dal)}, oggi è il ${dataLeggibile(st.dataGioco)}`) : dentro ? `Nel periodo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)} (oggi ${dataLeggibile(st.dataGioco)})` : `Solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}, oggi è il ${dataLeggibile(st.dataGioco)}`);
     }
     case 'piove': {
-      if (!st.meteoOggi) return esito('meteo', 'grigio', 'Meteo del giorno corrente non noto');
+      if (!st.meteoOggi) return esito('meteo', 'rosso', 'Il meteo del giorno corrente non risulta: la condizione non è soddisfatta (Partita → Oggi)');
       const piove = /piogg|tempor/i.test(st.meteoOggi);
       return esito('meteo', piove ? 'verde' : 'rosso', piove ? `Oggi ${st.meteoOggi}` : `Solo con la pioggia: oggi ${st.meteoOggi}`);
     }
     case 'giorno-settimana': {
-      if (!st.giornoSettimana) return esito('giorno-settimana', 'grigio', 'Imposta il giorno corrente della partita');
+      if (!st.giornoSettimana) return esito('giorno-settimana', 'rosso', 'Il giorno corrente della partita non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');
       const ok = r.giorni.includes(st.giornoSettimana);
       return esito('giorno-settimana', ok ? 'verde' : 'rosso', ok ? `Oggi è ${st.giornoSettimana}` : `Solo ${r.giorni.join(', ')}: oggi è ${st.giornoSettimana}`);
     }
     case 'fascia': {
-      if (!st.fasciaGioco) return esito('fascia', 'grigio', 'Imposta il momento della giornata nella scheda Oggi');
+      if (!st.fasciaGioco) return esito('fascia', 'rosso', 'Il momento della giornata non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');
       const ok = st.fasciaGioco === r.fascia;
       return esito('fascia', ok ? 'verde' : 'rosso', ok ? `Ora è ${st.fasciaGioco}` : `Solo di ${r.fascia}: ora è ${st.fasciaGioco}`);
     }
     case 'stagione': {
-      if (!st.dataGioco) return esito('stagione', 'grigio', 'Imposta il giorno corrente della partita');
+      if (!st.dataGioco) return esito('stagione', 'rosso', 'Il giorno corrente della partita non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');
       const attuale = STAGIONE_PER_MESE[Number(st.dataGioco.slice(0, 2))] ?? '';
       const ok = attuale === r.stagione;
       return esito('stagione', ok ? 'verde' : 'rosso', ok ? `Siamo in ${attuale}` : `Solo in ${r.stagione}: siamo in ${attuale}`);
@@ -212,7 +215,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
     case 'quartiere': {
       const q = st.sbloccoQuartieri.get(r.quartiere);
       const nome = q?.nome ?? r.quartiere;
-      if (!q?.dal) return esito('data', 'grigio', `${nome}: la Guida non indica una data di sblocco`);
+      if (!q?.dal) return esito('data', 'rosso', `${nome}: la Guida non indica una data di sblocco, quindi lo sblocco non risulta`);
       // stessa valutazione (e stesso testo) di una data della guida
       const esitoData = valutaRequisito({ tipo: 'data', dal: q.dal, testo: r.testo }, indice, st);
       return { ...esitoData, dettaglio: `${nome}: ${esitoData.dettaglio}` };

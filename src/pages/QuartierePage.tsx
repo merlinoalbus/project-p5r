@@ -47,7 +47,7 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
   // **Il posto che non c'è ancora resta in elenco, e lo dice.** La guida serve anche a sapere che
   // cosa arriverà: toglierlo è quel che fa la mappa — un pin dove non c'è niente manda a cercare
   // a vuoto — ma qui si sta leggendo, non camminando.
-  const nonAncora = l.disponibilita?.stato === 'bloccato';
+  const nonAncora = l.disponibilita != null && l.disponibilita.stato !== 'disponibile';
   const perche = l.disponibilita?.requisiti.filter((r) => r.stato === 'rosso').map((r) => r.dettaglio || r.testo).join(' · ');
   return (
     <li id={ancoraLuogo(l.chiave)} className={`card flex flex-col gap-1 text-[13px] scroll-mt-20 ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
