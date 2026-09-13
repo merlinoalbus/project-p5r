@@ -191,8 +191,7 @@
   /* L'altezza c'era gia'; mancava la larghezza. Un pulsante con dentro un solo carattere — la
      freccia che inverte l'ordinamento — misurava 35 px, e col dito un bersaglio e' quadrato:
      44 di alto e 35 di largo e' comunque un bersaglio da 35. */
-  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 6px; }
-  @media (pointer: coarse), (max-width: 1023px) { .btn-sm { min-width: 44px; } }
+  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; min-width: 44px; --btn-taglio: 6px; }
   /* Pulsanti d'incremento compatti (note delle Doti): piccoli col mouse, sempre 44px sui dispositivi a tocco */
   /* Le tendine prendono la larghezza dell'opzione piu lunga e non si restringono: entro il contenitore, sempre (telefono) */
   select.form-input { max-width: 100%; min-width: 0; }
@@ -314,14 +313,11 @@
     transition: border-color 0.15s;
   }
   .form-input:focus { border-color: var(--color-primary); }
-  /* Compatto vuol dire stretto, non basso: col dito 34 px non bastano, e questi selettori sono
-     comandi veri — l'ordinamento del Compendio, la lunghezza di un ciclo di fusione. La larghezza
-     resta `auto`, che e' il motivo per cui esiste la variante; l'altezza torna al minimo di casa
-     dove il puntatore e' un dito. */
-  .form-input--compatto { width: auto; min-height: 34px; padding: 4px 8px; font-size: 13px; }
-  @media (pointer: coarse), (max-width: 1023px) {
-    .form-input--compatto { min-height: 44px; }
-  }
+  /* Compatto vuol dire **stretto**, non basso: la larghezza resta `auto`, che è il motivo per cui la
+     variante esiste; l'altezza no. Sono comandi veri — l'ordinamento del Compendio, i livelli
+     minimo e massimo dei filtri, la lunghezza di un ciclo di fusione — e restano 44 px a ogni
+     larghezza: 34 px col mouse e 44 col dito erano due misure per lo stesso campo. */
+  .form-input--compatto { width: auto; min-height: 44px; padding: 6px 8px; font-size: 13px; }
 
   /* ---- Griglia delle affinità: 5 per riga (2 righe), 10 per riga solo se il contenitore è largo; nomi mai spezzati ---- */
   .griglia-affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); container-type: inline-size; }
@@ -788,21 +784,20 @@
    * coprono le strade. Si allarga **l'area sensibile**, che e' invisibile: uno pseudo-elemento
    * centrato sullo spillo, 44x44, che riceve il tocco al posto suo.
    *
-   * Solo dove il puntatore e' «grosso», cioe' col dito. Col mouse la precisione c'e' gia', e
-   * riquadri invisibili da 44 px su spilli vicini si ruberebbero i clic a vicenda. */
-  @media (pointer: coarse), (max-width: 1023px) {
-    .spillo-tokyo { position: absolute; }
-    .spillo-tokyo::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 44px;
-      height: 44px;
-      transform: translate(-50%, -50%);
-      /* Dietro alla sagoma, cosi' non copre il disegno ne' intercetta il passaggio del mouse. */
-      z-index: -1;
-    }
+   * A ogni larghezza, mouse compreso: la misura di un comando non dipende da come lo si punta. Il
+   * rischio dei riquadri che si rubano i clic fra spilli vicini è governato dallo `z-index` — chi
+   * sta sopra riceve — e sulla mappa di Tokyo le sagome sono distanti fra loro. */
+  .spillo-tokyo { position: absolute; }
+  .spillo-tokyo::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    /* Dietro alla sagoma, cosi' non copre il disegno ne' intercetta il passaggio del mouse. */
+    z-index: -1;
   }
 
   /* ---- Crediti alle fonti: discreti, grigi e piccoli ---- */
@@ -1350,8 +1345,6 @@
 .selettore--compatto .selettore__tendina { width:max(100%, 260px); }
 /* Senza spazio a destra la tendina si appende al bordo destro del pulsante: mai fuori dalla finestra. */
 .selettore__tendina--destra { left:auto; right:0; }
-.editor-mappa__campo .selettore__scelta { min-height:40px; }
-/* Col dito 40 px non bastano: sul telefono e sul tablet i selettori compatti e quelli dell'editor tornano a 44 px. */
 /* Il selettore dell'editor sta accanto a campi da 44 px: due comandi affiancati con due misure
    erano l'ultima misura doppia rimasta. */
 .editor-mappa__campo .selettore__scelta { min-height:44px; }

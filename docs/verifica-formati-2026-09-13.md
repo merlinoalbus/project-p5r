@@ -99,6 +99,10 @@ contenuto, per scelta.
 | Mappa di Tokyo, Memento, spilli, miniature | disegni che non possono crescere senza coprire la mappa | 15×17–40×40 px | area del tocco estesa a 44 px, verificata con l'hit-testing del browser |
 | Compendio, Personaggi, tessere compatte | nomi ed etichette troncate con le ellissi | «Conoscen…» | vanno a capo |
 | Palazzi, Covo | il comando che apre il testo ripiegato | 26×18 px in coda al paragrafo | «Mostra tutto» su una riga propria, 44 px |
+| Compendio | freccia che inverte l'ordinamento | 35 px di larghezza col mouse, 44 col dito | 44 px a ogni larghezza (`.btn-sm`) |
+| Compendio (filtri), cicli di fusione | campi «compatti» — livello minimo e massimo | 34 px col mouse, 44 col dito | 44 px a ogni larghezza: compatto vuol dire stretto, non basso |
+| Libri | il luogo che il libro apre, unico contenuto della sua riga | 17 px | 44 px: è un comando a sé, non una parola in una frase |
+| Mappa di Tokyo | area del tocco delle sagome | 44 px solo col dito | 44 px a ogni larghezza |
 
 ## Il criterio dei bersagli, scritto per intero
 
@@ -106,6 +110,9 @@ contenuto, per scelta.
 caselle di spunta (misurate sull'etichetta che le avvolge, che è ciò che si tocca), campi, selettori,
 comandi del visore. Nessuna misura doppia fra tocco e puntatore: un comando basso lo è anche col
 mouse.
+
+La misura vale **anche dentro i pannelli che si aprono** (i filtri del Compendio, i livelli minimo e
+massimo): fanno parte della schermata, e la passata li apre prima di misurare.
 
 **Due sole forme di comando non misurano 44 px nel loro riquadro, e per ciascuna c'è una ragione
 verificabile, non una deroga:**
