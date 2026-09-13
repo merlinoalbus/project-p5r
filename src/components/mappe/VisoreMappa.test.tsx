@@ -231,3 +231,30 @@ it('applica l’arrivo dopo il fit definitivo senza alterare le percentuali orig
     await waitFor(() => expect((container.querySelector('.visore-mappa__livello') as HTMLElement).style.transform).toContain('scale(0.88)'));
   } finally { area.mockRestore(); misura.mockRestore(); }
 });
+
+// Due spilli più vicini di un bersaglio diventano un gruppo: se restassero due gocce distinte,
+// nessuna delle due riceverebbe i 44 px di area del tocco, perché se li toglierebbero a vicenda.
+// Non è una regola dello zoom minimo — vale a ogni ingrandimento, e si scioglie da sola quando
+// ingrandendo la distanza sullo schermo supera il bersaglio.
+describe('raggruppamento degli spilli vicini', () => {
+  const vicini: MappaDto = {
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 11, nome: 'Chiosco', tipo: 'attivita', tipoNome: 'Attività', x: 50, y: 50 }),
+      spillo({ id: 12, nome: 'Distributore', tipo: 'negozio', tipoNome: 'Negozio', x: 50.2, y: 50.1 }),
+    ],
+  };
+
+  /** Sulla tela, non nella legenda: lì i due spilli restano due voci d'elenco e va bene così. */
+  const sullaTela = (container: HTMLElement) => [...container.querySelectorAll('.visore-mappa__livello .spillo-mappa')].map((e) => e.getAttribute('aria-label'));
+
+  it('fonde i due spilli in un gruppo che li nomina entrambi', () => {
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    expect(sullaTela(container)).toEqual(['2 spilli vicini: Chiosco, Distributore']);
+  });
+
+  it('nell’editor no: lì il gesto è spostare quel pin, e i due restano separati', () => {
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} editor={{ strumento: 'seleziona', selezionatoId: null, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
+    expect(sullaTela(container)).toHaveLength(2);
+    expect(sullaTela(container).join(' ')).not.toContain('spilli vicini');
+  });
+});

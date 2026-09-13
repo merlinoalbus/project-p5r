@@ -7,7 +7,7 @@ import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 // ============================================================
 //
 // Zoom con minimo «adatta» (rotellina attorno al cursore, pulsanti, pinch), trascinamento, doppio click per adattare; spilli con icona per
-// tipo a dimensione costante (scala inversa allo zoom) e raggruppamento «+n» vicino allo zoom minimo; legenda con filtri e conteggi, ricerca,
+// tipo a dimensione costante (scala inversa allo zoom) e raggruppamento «+n» degli spilli più vicini di un bersaglio; legenda con filtri e conteggi, ricerca,
 // scheda dello spillo con le azioni dell'entità collegata; navigazione fra i livelli (percorso, mappe figlie, passaggi). In uso normale nessun
 // click sulla mappa modifica i dati: l'editor (13.3) passa i propri strumenti tramite `editor`.
 // ============================================================
@@ -83,8 +83,13 @@ interface Props {
 
 const FATTORE_ZOOM_MASSIMO = 8;
 const PASSO_ROTELLA = 1.15;
-const CELLA_RAGGRUPPAMENTO = 30;
-const SOGLIA_RAGGRUPPAMENTO = 1.6;
+/** Quanto devono distare, sullo schermo, i centri di due spilli perché restino due bersagli
+ *  distinti: la goccia del gruppo misura 34 px e l'area del tocco (`.spillo-mappa--gruppo::after`)
+ *  la porta a 45; un pixel in più evita che l'arrotondamento sub-pixel ne mangi mezzo. Sotto questa
+ *  distanza i due si toglierebbero spazio a vicenda, quindi diventano un gruppo solo. */
+const DISTANZA_MINIMA_SPILLI = 46;
+/** L'altezza della goccia di uno spillo singolo (`.spillo-mappa__goccia`), che è ancorata alla punta. */
+const ALTEZZA_GOCCIA = 38;
 const DIMENSIONE_RISERVA = 1000;
 
 interface Dimensioni { w: number; h: number }
@@ -380,22 +385,58 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const mostraTutti = () => setTipiNascosti(new Set());
   const nascondiTutti = () => setTipiNascosti(new Set(tipiPresenti));
 
-  // Raggruppamento vicino allo zoom minimo: gli spilli che cadono nella stessa cella dello schermo diventano un gruppo «+n».
-  const raggruppa = zoom <= zoomMin * SOGLIA_RAGGRUPPAMENTO && !editor;
+  // Raggruppamento per distanza: due spilli diventano un gruppo «+n» quando i loro centri, sullo
+  // schermo, distano meno di un bersaglio.
+  //
+  // Prima era una griglia di celle da 30 px attiva solo vicino allo zoom minimo, e sbagliava in due
+  // modi. La cella era più piccola del bersaglio (34 px di goccia che l'area del tocco porta a 45):
+  // due gruppi in celle contigue si toglievano pixel a vicenda e nessuno dei due arrivava a 44.
+  // E una griglia non garantisce alcuna distanza: due spilli a due pixel l'uno dall'altro restavano
+  // separati se cadevano a cavallo del bordo, mentre due spilli a 29 px si fondevano.
+  // La soglia, poi, spegneva tutto appena si ingrandiva un po': sopra zoomMin × 1,6 due pin potevano
+  // trovarsi a venti pixel e restare due bersagli distinti, entrambi sotto i 44.
+  //
+  // Ora la regola è una sola e vale a ogni ingrandimento: si fondono le nubi finché due centri
+  // distano meno di DISTANZA_MINIMA_SPILLI. Ingrandendo, le distanze sullo schermo crescono e i
+  // gruppi si sciolgono da soli, senza bisogno di una soglia. È quadratico a ogni passo di fusione,
+  // e va benissimo: gli spilli di una mappa sono decine, e la correttezza del bersaglio viene prima.
   const { singoli, gruppi } = (() => {
-    if (!raggruppa) return { singoli: visibili, gruppi: [] as Gruppo[] };
-    const celle = new Map<string, SpilloDto[]>();
-    for (const s of visibili) {
-      const sx = pan.x + (s.x / 100) * nat.w * zoom;
-      const sy = pan.y + (s.y / 100) * nat.h * zoom;
-      const chiave = `${Math.floor(sx / CELLA_RAGGRUPPAMENTO)}:${Math.floor(sy / CELLA_RAGGRUPPAMENTO)}`;
-      celle.set(chiave, [...(celle.get(chiave) ?? []), s]);
+    // Nell'editor no: lì il gesto è spostare *quel* pin, e un gruppo lo renderebbe impossibile.
+    // Lo strumento per separarli, lì, è l'ingrandimento.
+    if (editor) return { singoli: visibili, gruppi: [] as Gruppo[] };
+    const perSchermo = (s: SpilloDto) => ({ x: pan.x + (s.x / 100) * nat.w * zoom, y: pan.y + (s.y / 100) * nat.h * zoom });
+    type Nube = { spilli: SpilloDto[] };
+    // Dove cade davvero il bersaglio, che non è il punto ancorato: la goccia di un singolo ha la
+    // punta *sul* punto (il bottone è traslato di -100% in verticale), quindi il suo centro sta
+    // mezza goccia più in alto; la pastiglia del gruppo, invece, è centrata sul punto. Confrontando
+    // i punti anziché i centri restavano due bersagli a 44,3 px pur avendone chiesti 46.
+    const centro = (n: Nube) => {
+      const p = n.spilli.map(perSchermo);
+      const x = p.reduce((a, q) => a + q.x, 0) / p.length;
+      const y = p.reduce((a, q) => a + q.y, 0) / p.length;
+      return { x, y: p.length === 1 ? y - ALTEZZA_GOCCIA / 2 : y };
+    };
+    const nubi: Nube[] = visibili.map((s) => ({ spilli: [s] }));
+    for (let fuso = true; fuso; ) {
+      fuso = false;
+      for (let i = 0; i < nubi.length && !fuso; i++) {
+        for (let j = i + 1; j < nubi.length && !fuso; j++) {
+          const a = centro(nubi[i]), b = centro(nubi[j]);
+          if ((a.x - b.x) ** 2 + (a.y - b.y) ** 2 >= DISTANZA_MINIMA_SPILLI ** 2) continue;
+          nubi[i] = { spilli: [...nubi[i].spilli, ...nubi[j].spilli] };
+          nubi.splice(j, 1);
+          fuso = true;
+        }
+      }
     }
     const singoli: SpilloDto[] = [];
     const gruppi: Gruppo[] = [];
-    for (const [chiave, lista] of celle) {
-      if (lista.length === 1 || lista.some((s) => s.id === selezionatoId)) singoli.push(...lista);
-      else gruppi.push({ chiave, x: lista.reduce((a, s) => a + s.x, 0) / lista.length, y: lista.reduce((a, s) => a + s.y, 0) / lista.length, spilli: lista });
+    for (const nube of nubi) {
+      // La nube che contiene lo spillo aperto si apre con lei: il popup è di uno spillo preciso, e
+      // finché resta aperto quello è il bersaglio che conta.
+      if (nube.spilli.length === 1 || nube.spilli.some((s) => s.id === selezionatoId)) { singoli.push(...nube.spilli); continue; }
+      const chiave = nube.spilli.map((s) => s.id).sort((a, b) => a - b).join('-');
+      gruppi.push({ chiave, x: nube.spilli.reduce((a, s) => a + s.x, 0) / nube.spilli.length, y: nube.spilli.reduce((a, s) => a + s.y, 0) / nube.spilli.length, spilli: nube.spilli });
     }
     return { singoli, gruppi };
   })();

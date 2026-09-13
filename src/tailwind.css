@@ -470,6 +470,10 @@
   .spillo-mappa__etichetta { position: absolute; top: 100%; margin-top: 2px; padding: 2px 6px; background: rgba(11,11,14,.92); border: 1px solid var(--color-border); font-size: 11px; white-space: nowrap; color: var(--color-text); opacity: 0; pointer-events: none; transition: opacity .1s; }
   .spillo-mappa:hover .spillo-mappa__etichetta, .spillo-mappa--selezionato .spillo-mappa__etichetta, .spillo-mappa--trovato .spillo-mappa__etichetta { opacity: 1; }
   .spillo-mappa--gruppo { transform-origin: 0 0; }
+  /* Il gruppo («2 spilli vicini») è 34 px, sei meno della goccia: i 3 px d'estensione che bastano a
+     una goccia da 38 qui fermavano il bersaglio a 40. Ne servono 5 per parte (rilievo del
+     validatore, 2026-09-13, misurato con l'hit-testing e non col righello). */
+  .spillo-mappa--gruppo::after { inset: -5px; }
   .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: 17px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
   .spillo-mappa__punto { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; border: 1px solid rgba(255,255,255,.7); }
   .spillo-mappa__punto--grande { width: 34px; height: 34px; }
