@@ -14,6 +14,22 @@ vuoto perché il visore occupa la finestra (a 1280×900: tela 940 + pannello 340
 tutto. L'editor della mappa supera il 100% perché il pannello laterale esce dalla colonna di
 contenuto, per scelta.
 
+**Ripassata completa del 13 settembre, a valle di tutte le correzioni** (1280×900, 768×1024,
+375×812; 54 rotte per larghezza, misurate con l'hit-testing di `elementFromPoint` e non col
+rettangolo, escludendo i falsi positivi accertati: il bersaglio di una casella è l'etichetta che la
+avvolge, un collegamento dentro una frase non è un comando a sé, e gli elementi sotto la piega non
+si misurano). Esito: **nessun traboccamento orizzontale**, **nessun bersaglio sotto i 44 px**,
+**nessun testo sotto i 9 px**, uso della larghezza 93% su telefono e 97-98% su tablet e monitor.
+Gli elementi che escono dalla colonna sono tutti dentro `.fila-scorrevole`, cioè strisce di filtri
+che scorrono apposta. Restano fuori da questa misura, e vanno viste col pannello del browser
+**visibile**: gli spilli delle mappe incorporate, il cui bersaglio qui risulta ritagliato perché il
+visore non riceve mai le dimensioni della tela (vedi «Errori del metodo di misura»).
+
+Due difetti che questa passata **non** avrebbe trovato, e che sono emersi cercando nel codice:
+un campo con l'altezza forzata a 36 px (`h-9`, la rinomina di un piano) e l'unica casella dell'app
+senza etichetta avvolgente (la merce nel popup del negozio, 20×20). La misura a campione vede
+quel che è in pagina; il codice dice anche quel che manca.
+
 | Schermata | 375 px | 768 px | 1280 px |
 |---|---|---|---|
 | `/home` | ok 91% | ok 96% | ok 96% |
