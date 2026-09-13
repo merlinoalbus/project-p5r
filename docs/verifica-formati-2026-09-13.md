@@ -25,8 +25,11 @@ sotto i 9 px e **spazio usato** rispetto a quello disponibile.
   di Impostazioni (copia di sicurezza, immagini caricate, pacchetto di gioco), che si aprono solo
   dopo aver scelto un file. Per queste è stata fatta una **verifica statica**: i loro comandi usano
   le classi già a norma (`btn`, `chip`, `form-input`, `selettore`, `label.touch`). Quella verifica ha
-  trovato l'unica eccezione vera — l'etichetta «Sovrascrivi le mappe esistenti» nel pannello File
-  dell'editor, senza `touch`: **19 px**, misurati, ora 45;
+  trovato due eccezioni: l'etichetta «Sovrascrivi le mappe esistenti» nel pannello File dell'editor,
+  senza `touch` — **19 px** misurati, ora **44** — e la voce dei suggerimenti di skill nella seconda
+  modale di `ScortaPersona`, un bottone con il solo `py-2`: **42 px**, ora 44. La prima passata
+  statica guardava le caselle di spunta e non *tutti* i comandi, e aveva dichiarato «unica
+  eccezione» la prima: era una parola di troppo (rilievo del validatore, 2026-09-13);
 - le **rotte parametriche con più di un valore**: tre Persona, due skill, due Confidenti, due
   quartieri, una data del percorso, e **tutti e dieci** i tipi di `/guida/mondo/:tipo/:chiave`
   (mappa, quartiere, dungeon, area, luogo, negozio, punto, confidente, articolo, attività).
@@ -50,9 +53,18 @@ che scorrono apposta. Restano fuori da questa misura, e vanno viste col pannello
 **visibile**: gli spilli delle mappe incorporate, il cui bersaglio qui risulta ritagliato perché il
 visore non riceve mai le dimensioni della tela (vedi «Errori del metodo di misura»).
 
-Per quelli, però, la prova non è più a campione: la regola che decide chi si vede sulla mappa e dove
-sta è una funzione a sé (`src/utils/raggruppaSpilli.ts`) e il suo invariante — **due bersagli non
-distano mai meno di 46 px** — è verificato da un test sulle **mappe vere del pacchetto**
+Una trappola che è costata un giro, e che vale per tutto ciò che sta dentro la mappa: **il calcolo
+può essere giusto e il reso no**. Lo scostamento della pastiglia veniva scritto moltiplicato per lo
+zoom, e dentro `scale(1/zoom) translate(t)` — con il livello che scala di zoom — quel che arriva
+sullo schermo è esattamente `t`: a zoom 2,74 uno scostamento di 27 px veniva reso 74. Lo stesso
+fattore c'era sul popup dello spillo e sull'elenco del gruppo, cioè sui due riquadri che devono
+restare dentro la tela. Nessun test se n'era accorto perché provavano **la funzione**, non il DOM:
+ora il fattore non c'è più, e la verifica è stata fatta misurando la posizione resa a zoom 8
+(scritto 27,0 → reso 26,9 → distanza dal pin 46,0).
+
+Per gli spilli, però, la prova non è più a campione: la regola che decide chi si vede sulla mappa e
+dove sta è una funzione a sé (`src/utils/raggruppaSpilli.ts`) e il suo invariante — **due bersagli
+non distano mai meno di 46 px** — è verificato da un test sulle **mappe vere del pacchetto**
 (`raggruppaSpilli.pacchetto.test.ts`): 302 mappe con dimensioni, tre larghezze, quattro
 ingrandimenti, e nell'editor ogni spillo a turno come pin trascinato. È lì perché quella regola è
 stata rifatta sei volte, e ogni volta il difetto è emerso da una misura fatta a mano sul pacchetto:

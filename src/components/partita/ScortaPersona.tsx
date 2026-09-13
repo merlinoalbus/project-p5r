@@ -334,7 +334,9 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
                 <ul className="m-0 p-0 list-none absolute z-10 left-0 right-0 mt-1 card p-1 max-h-[220px] overflow-y-auto shadow-lg">
                   {candidate.map((s) => (
                     <li key={s.id}>
-                      <button type="button" className="w-full text-left flex items-center gap-2 px-2 py-2 rounded-md hover:bg-bg-tertiary bg-transparent border-none text-text cursor-pointer" onClick={() => { setSkillIds([...skillIds, s.id]); setRicerca(''); }}>
+                      {/* `touch`: con il solo `py-2` la voce restava a 42 px — sfuggita alla prima
+                          passata statica, che guardava le caselle di spunta e non tutti i comandi. */}
+                      <button type="button" className="touch w-full text-left flex items-center gap-2 px-2 py-2 rounded-md hover:bg-bg-tertiary bg-transparent border-none text-text cursor-pointer" onClick={() => { setSkillIds([...skillIds, s.id]); setRicerca(''); }}>
                         <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
                         <span className="text-[12px] text-text-secondary truncate">{s.effettoNome}</span>
                       </button>

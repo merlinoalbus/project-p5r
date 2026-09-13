@@ -489,7 +489,8 @@ function distanzaDalPin(container: HTMLElement): number {
   const cg = schermo(perc(pastiglia));
   // i numeri possono uscire in notazione esponenziale (1.77e-15): il pattern deve accettarla
   const sc = /calc\(-50% \+ ([-+.\deE]+)px\), calc\(-50% \+ ([-+.\deE]+)px\)/.exec(pastiglia.style.transform);
-  const dx = sc ? Number(sc[1]) / zoom : 0, dy = sc ? Number(sc[2]) / zoom : 0;
+  // il numero scritto nel translate È lo spostamento sullo schermo: non si divide per lo zoom
+  const dx = sc ? Number(sc[1]) : 0, dy = sc ? Number(sc[2]) : 0;
   return Math.hypot(cg.x + dx - cp.x, cg.y + dy - (cp.y - 19));
 }
 
@@ -525,7 +526,8 @@ describe('la pastiglia scostata guarda anche i vicini, e non sfarfalla', () => {
       const gruppo = e.className.includes('gruppo');
       const x = Number(e.style.left.replace('%', '')), y = Number(e.style.top.replace('%', ''));
       const sc = /calc\(-50% \+ ([-+.\deE]+)px\), calc\(-50% \+ ([-+.\deE]+)px\)/.exec(e.style.transform);
-      const dx = sc ? Number(sc[1]) / zoom : 0, dy = sc ? Number(sc[2]) / zoom : 0;
+      // il numero scritto nel translate È lo spostamento sullo schermo: non si divide per lo zoom
+  const dx = sc ? Number(sc[1]) : 0, dy = sc ? Number(sc[2]) : 0;
       return { gruppo, x: Number(panX) + (x / 100) * 1000 * zoom + dx, y: Number(panY) + (y / 100) * 500 * zoom + dy - (gruppo ? 0 : 19) };
     });
   };

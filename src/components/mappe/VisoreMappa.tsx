@@ -627,7 +627,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               );
             })}
             {selezionato && !editor && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(schermoStretto, (
-              <div className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={selezionato.nome} style={schermoStretto ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx * zoom}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx * zoom}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+              <div className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={selezionato.nome} style={schermoStretto ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
@@ -688,7 +688,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   className={`spillo-mappa spillo-mappa--gruppo ${aperto || dentro ? 'spillo-mappa--selezionato' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il gruppo si fa da parte: il tocco serve a
                   // posare un pin in quel punto, non ad aprire un elenco.
-                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${(g.scosto?.x ?? 0) * zoom}px), calc(-50% + ${(g.scosto?.y ?? 0) * zoom}px))`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined }}
+                  // Lo scostamento si scrive **così com'è**, senza moltiplicarlo per lo zoom: dentro
+                  // `scale(1/zoom) translate(t)`, con il livello che scala di zoom, quel che arriva
+                  // sullo schermo è esattamente `t`. Il fattore che c'era prima amplificava lo
+                  // spostamento — misurato: scosto 27 px reso 74 a zoom 2,74 — e nessuno se n'era
+                  // accorto perché il calcolo era provato dai test e il **reso** no (rilievo del
+                  // validatore, 2026-09-13). Lo stesso valeva per il popup e per l'elenco.
+                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${g.scosto?.x ?? 0}px), calc(-50% + ${g.scosto?.y ?? 0}px))`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined }}
                   aria-label={`${nomeGruppo(g.spilli.length)}: ${g.spilli.map((s) => s.nome).join(", ")}`}
                   aria-expanded={aperto}
                   title={g.spilli.map((s) => s.nome).join(', ')}
@@ -706,7 +712,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 lo decide `elenco`, qui sopra, contando il contorno invece di stimarlo. */}
             {gruppoScelto && inPortale(elenco.foglio, (
               <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''} ${elenco.foglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={nomeGruppo(gruppoScelto.spilli.length)}
-                style={elenco.foglio ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx * zoom}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx * zoom}px)` } as CSSProperties}
+                style={elenco.foglio ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx}px)` } as CSSProperties}
                 onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <strong className="flex-1 text-[13px] leading-tight">{gruppoScelto.spilli.length === 1 ? 'Un altro spillo qui' : `${gruppoScelto.spilli.length} spilli qui`}</strong>
