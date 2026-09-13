@@ -33,7 +33,7 @@ const SCHEDE = [
 type Scheda = (typeof SCHEDE)[number][0];
 
 function Fonte({ url }: { url: string | null | undefined }) {
-  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito">fonte: allgamestaff</a> : null;
+  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte: allgamestaff</a> : null;
 }
 
 /** Un dato con la sua etichetta: **l'etichetta sopra, piccola**, non un grassetto dentro la frase.
@@ -99,7 +99,7 @@ function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
               <strong>{o.ombra ?? o.persona}</strong>
               {o.persona && o.ombra && <span className="text-[12px] text-text-secondary">maschera {o.personaCollegata ? <Link to={`/compendio/persona/${o.personaCollegata.id}`}>{o.personaCollegata.nomeIt}</Link> : o.persona}</span>}
-              {o.persona && !o.ombra && o.personaCollegata && <Link to={`/compendio/persona/${o.personaCollegata.id}`} className="text-[12px]">scheda Persona</Link>}
+              {o.persona && !o.ombra && o.personaCollegata && <Link to={`/compendio/persona/${o.personaCollegata.id}`} className="touch inline-flex items-center text-[12px]">scheda Persona</Link>}
               {o.livello !== null && <span className="chip text-[11px]">livello {o.livello}</span>}
               {o.personalita && <span className="chip text-[11px]">{o.personalita}</span>}
             </div>
@@ -114,7 +114,7 @@ function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
               <span className="text-[11px] uppercase tracking-[0.06em] text-text-muted">resiste</span>
               {o.resistenze.map((r) => <ChipElementoGuida key={r} testo={r} />)}
             </div>}
-            <Link to={o.areaChiave ? `/guida/dungeon/${o.dungeonChiave}?area=${o.areaChiave}` : `/guida/dungeon/${o.dungeonChiave}`} className="mt-auto text-[12px] text-text-muted">{o.area ?? o.dungeon}</Link>
+            <Link to={o.areaChiave ? `/guida/dungeon/${o.dungeonChiave}?area=${o.areaChiave}` : `/guida/dungeon/${o.dungeonChiave}`} className="mt-auto touch inline-flex items-center text-[12px] text-text-muted">{o.area ?? o.dungeon}</Link>
           </li>
         ))}
       </ul>

@@ -340,7 +340,9 @@ function PannelloEditor(p: PropsPannello) {
         <div className="flex flex-wrap gap-1.5 items-center">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Esporta" dettaglio="tutte le mappe, JSON" disabled={occupato} onClick={p.onEsporta} />
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Importa" disabled={occupato} onClick={() => inputImporta.current?.click()} />
-          <label className="flex items-center gap-1 text-[12px]"><input type="checkbox" checked={sovrascrivi} onChange={(e) => setSovrascrivi(e.target.checked)} /> Sovrascrivi le mappe esistenti</label>
+          {/* `touch` sull'etichetta: senza, il bersaglio era alto 19 px — l'unica casella dell'app
+              rimasta senza, insieme a quella della merce (misurato, non dedotto). */}
+          <label className="touch flex items-center gap-2 text-[12px]"><input type="checkbox" className="w-5 h-5" checked={sovrascrivi} onChange={(e) => setSovrascrivi(e.target.checked)} /> Sovrascrivi le mappe esistenti</label>
         </div>
       </section>
       </div>

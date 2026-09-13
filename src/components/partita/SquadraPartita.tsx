@@ -73,7 +73,7 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
               chiama `personaggi/joker`. Chiedendolo come Confidente non lo trovava e restava il vuoto. */}
           <ImmagineEntita ambito={m.chiave === 'joker' ? 'personaggio' : 'confidente'} chiave={m.chiave} etichetta={m.nome} dimensione={44} />
           <span className="min-w-0 flex-1">
-            <span className="block truncate font-semibold text-[15px] leading-tight" title={m.nome}>{m.nome}</span>
+            <span className="block break-words font-semibold text-[15px] leading-tight" title={m.nome}>{m.nome}</span>
             <span className="block text-[12px] text-text-muted">
               {m.segnato ? `Livello ${m.livello} · ${m.esperienza.toLocaleString('it-IT')} punti esperienza` : 'Non ancora segnato'}
             </span>

@@ -95,27 +95,26 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
     case 'palazzo': {
       const nome = NOMI_DUNGEON[String(dati.dungeon)] ?? String(dati.dungeon);
       if (st.bossGestiti.has(String(dati.dungeon))) return { ...base, stato: 'verde', dettaglio: `${nome}: boss segnato nella Guida`, manuale: false };
-      return grigio(`${nome}: segna il boss come sconfitto nella Guida o conferma qui`);
+      // Il boss sconfitto è uno stato che l'app registra: o risulta o non risulta, e finché non
+      // risulta la condizione è falsa (decisione dell'utente, 2026-09-13).
+      return { ...base, stato: 'rosso', dettaglio: `${nome}: boss non ancora segnato come sconfitto (Guida → Palazzi)`, manuale: false };
     }
     case 'richiesta': {
       const nome = String(dati.richiesta);
       const ok = st.richiesteCompletate.has(nome) || st.richiesteCompletate.has(nome.toLowerCase());
-      return ok ? { ...base, stato: 'verde', dettaglio: `Richiesta «${nome}» completata`, manuale: false } : grigio(`Richiesta «${nome}» non risulta completata (Guida → Richieste) — oppure conferma qui`);
+      return ok ? { ...base, stato: 'verde', dettaglio: `Richiesta «${nome}» completata`, manuale: false } : { ...base, stato: 'rosso', dettaglio: `Richiesta «${nome}» non risulta completata (Guida → Richieste)`, manuale: false };
     }
     case 'squadra': {
       const chiave = String(dati.membro);
       // Il protagonista nel gruppo c'e' sempre: non dipende da quel che e' stato segnato.
+      // **Due risposte, non tre** (decisione dell'utente, 2026-09-13): «in squadra» e' una variabile
+      // booleana, e un Ladro che non risulta nel gruppo non e' nel gruppo. Il terzo stato — «non
+      // l'ho ancora segnato», grigio, col beneficio del dubbio — faceva comparire cose che nella
+      // partita non ci sono ancora, ed e' proprio quello che una guida non deve fare.
       const dentro = chiave === 'joker' || st.membriSquadra.has(chiave);
-      // **Tre risposte, non due.** «Non l'ho detto» e «ho detto di no» sono cose diverse: la prima
-      // lascia il beneficio del dubbio e si conferma a mano, la seconda e' una risposta e blocca.
-      if (chiave !== 'joker' && st.membriFuoriSquadra.has(chiave)) {
-        return { ...base, stato: 'rosso', dettaglio: `${t('confidente', chiave)} non e' nel gruppo`, manuale: false };
-      }
-      // Grigio e non rosso quando manca: «non l'ho ancora segnato» non e' «non ce l'ho», e la
-      // differenza conta — la riga si conferma a mano come le altre di questo genere.
       return dentro
         ? { ...base, stato: 'verde', dettaglio: `${t('confidente', chiave)} e' in squadra`, manuale: false }
-        : grigio(`${t('confidente', chiave)} non risulta ancora in squadra (Partita → Denaro e squadra) — oppure conferma qui`);
+        : { ...base, stato: 'rosso', dettaglio: `${t('confidente', chiave)} non e' in squadra (Partita → Denaro e squadra)`, manuale: false };
     }
     case 'confidente': {
       const attuale = st.ranghiConfidenti.get(String(dati.confidente)) ?? 0;
@@ -123,12 +122,12 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
       return { ...base, stato: attuale >= richiesto ? 'verde' : 'rosso', dettaglio: `${t('confidente', String(dati.confidente))}: rango ${attuale} di ${richiesto}`, manuale: false };
     }
     case 'data': {
-      if (!st.dataGioco) return grigio(`Disponibile dal ${dataLeggibile(String(dati.dal))}: imposta il giorno corrente della partita`);
+      if (!st.dataGioco) return { ...base, stato: 'rosso', dettaglio: `Disponibile dal ${dataLeggibile(String(dati.dal))}: il giorno corrente della partita non è impostato (Partita → Oggi)`, manuale: false };
       const ok = confrontaDate(st.dataGioco, String(dati.dal)) >= 0;
       return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Disponibile dal ${dataLeggibile(String(dati.dal))} (oggi ${dataLeggibile(st.dataGioco)})` : `Disponibile dal ${dataLeggibile(String(dati.dal))}, oggi è il ${dataLeggibile(st.dataGioco)}`, manuale: false };
     }
     case 'meteo': {
-      if (!st.meteoOggi) return grigio('Evento all\'aperto: meteo del giorno corrente non noto');
+      if (!st.meteoOggi) return { ...base, stato: 'rosso', dettaglio: "Evento all'aperto: il meteo del giorno corrente non risulta (Partita → Oggi)", manuale: false };
       const piove = /piogg|tempor|nev/i.test(st.meteoOggi);
       return { ...base, stato: piove ? 'rosso' : 'verde', dettaglio: piove ? `Oggi ${st.meteoOggi}: evento non disponibile` : `Oggi ${st.meteoOggi}`, manuale: false };
     }

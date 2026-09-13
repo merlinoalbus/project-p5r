@@ -5,7 +5,7 @@
 // Test VisoreMappa — spilli con icona, raccolti nascosti, categorie, popup ancorato, scheda del negozio, navigazione (Fase 13.2)
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { VisoreMappa } from './VisoreMappa';
 import * as inquadratura from '../../utils/inquadraturaMappa';
@@ -95,18 +95,21 @@ describe('VisoreMappa', () => {
     expect(scheda.getByText('Pistola modello Tkachev')).toBeInTheDocument();
     expect(scheda.getByText('12.000 ¥')).toBeInTheDocument();
     expect(scheda.getByRole('link', { name: 'scheda del negozio' })).toHaveAttribute('href', '/guida/negozi/untouchable');
-    // l'articolo non ancora disponibile alla data corrente è nascosto e conteggiato; quello «da verificare» resta con il chip
-    expect(scheda.getByText(/Untouchable · 2 articoli/)).toBeInTheDocument();
+    // Si vede solo ciò che soddisfa **tutte** le condizioni (decisione dell'utente, 2026-09-13):
+    // l'articolo bloccato dalla data e quello con una condizione che la partita non sa verificare
+    // sono tutti e due nascosti e conteggiati. In una guida che dice «questo c'è adesso» un forse
+    // vale come un no; il chip «Da verificare» si legge chiedendo di vedere i non disponibili.
+    expect(scheda.getByText(/Untouchable · 1 articolo/)).toBeInTheDocument();
     expect(scheda.queryByText('Fucile a pompa Governor')).not.toBeInTheDocument();
-    expect(scheda.getByText('Proiettili perforanti')).toBeInTheDocument();
-    expect(scheda.getByText('Da verificare')).toHaveAttribute('title', 'rango cliente Oscuro — Condizione non verificabile dai dati della partita');
+    expect(scheda.queryByText('Proiettili perforanti')).not.toBeInTheDocument();
     // Come per gli spilli: nascosto di regola, e un comando per vederlo — con il suo «Non ancora»
     // accanto, così non si confonde con quel che si può comprare oggi.
-    fireEvent.click(scheda.getByRole('button', { name: 'Mostra anche l’articolo non ancora in vendita' }));
+    fireEvent.click(scheda.getByRole('button', { name: 'Mostra anche i 2 articoli non ancora in vendita' }));
     expect(scheda.getByText('Fucile a pompa Governor')).toBeInTheDocument();
     expect(scheda.getByText('Non ancora')).toHaveAttribute('title', 'dal 18 giugno — oggi è il 20 aprile');
+    expect(scheda.getByText('Da verificare')).toHaveAttribute('title', 'rango cliente Oscuro — Condizione non verificabile dai dati della partita');
     expect(scheda.getByText(/Untouchable · 3 articoli/)).toBeInTheDocument();
-    fireEvent.click(scheda.getByRole('button', { name: 'Nascondi l’articolo non ancora in vendita' }));
+    fireEvent.click(scheda.getByRole('button', { name: 'Nascondi i 2 articoli non ancora in vendita' }));
     expect(scheda.queryByText('Fucile a pompa Governor')).not.toBeInTheDocument();
   });
 
@@ -200,7 +203,19 @@ it('centra il punto iniziale con lo zoom configurato senza selezionare un pin',a
  const misura=vi.spyOn(HTMLElement.prototype,'getBoundingClientRect').mockReturnValue({width:1000,height:500,left:0,top:0,right:1000,bottom:500,x:0,y:0,toJSON:()=>({})});
  try {
   monta({puntoIniziale:{x:20,y:80,zoom:2.5}});
-  await waitFor(()=>expect(document.querySelector('.visore-mappa__livello')).toHaveStyle({transform:'translate(0px, -750px) scale(2.5)'}));
+  // Lo zoom configurato è un moltiplicatore del fit, e il fit ora lascia il margine che serve al
+  // bersaglio dei pin (24 px ai lati e sotto, 44 sopra: la goccia è ancorata alla punta e si alza).
+  // Su una tela 1000×500 con un'immagine 1000×500 il fit vale min(952/1000, 432/500) = 0,864.
+  const atteso = 0.864 * 2.5;
+  await waitFor(()=>{
+   const t=(document.querySelector('.visore-mappa__livello') as HTMLElement).style.transform;
+   const m=/translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec(t);
+   expect(m).not.toBeNull();
+   const [x,y,z]=m!.slice(1).map(Number);
+   expect(z).toBeCloseTo(atteso, 3);
+   expect(x+200*z).toBeCloseTo(500);   // il punto chiesto (20%) finisce al centro della tela
+   expect(y+400*z).toBeCloseTo(250);   // e così l'80% in verticale
+  });
   expect(screen.queryByRole('dialog')).toBeNull();
  }finally{misura.mockRestore();}
 });
@@ -227,4 +242,363 @@ it('applica l’arrivo dopo il fit definitivo senza alterare le percentuali orig
     fireEvent.click(screen.getByRole('button', { name: 'Adatta alla finestra' }));
     await waitFor(() => expect((container.querySelector('.visore-mappa__livello') as HTMLElement).style.transform).toContain('scale(0.88)'));
   } finally { area.mockRestore(); misura.mockRestore(); }
+});
+
+// Due spilli più vicini di un bersaglio diventano un gruppo: se restassero due gocce distinte,
+// nessuna delle due riceverebbe i 44 px di area del tocco, perché se li toglierebbero a vicenda.
+// Non è una regola dello zoom minimo — vale a ogni ingrandimento, e si scioglie da sola quando
+// ingrandendo la distanza sullo schermo supera il bersaglio.
+describe('raggruppamento degli spilli vicini', () => {
+  const vicini: MappaDto = {
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 11, nome: 'Chiosco', tipo: 'attivita', tipoNome: 'Attività', x: 50, y: 50 }),
+      spillo({ id: 12, nome: 'Distributore', tipo: 'negozio', tipoNome: 'Negozio', x: 50.2, y: 50.1 }),
+    ],
+  };
+
+  /** Sulla tela, non nella legenda: lì i due spilli restano due voci d'elenco e va bene così. */
+  const sullaTela = (container: HTMLElement) => [...container.querySelectorAll('.visore-mappa__livello .spillo-mappa')].map((e) => e.getAttribute('aria-label'));
+
+  it('fonde i due spilli in un gruppo che li nomina entrambi', () => {
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    expect(sullaTela(container)).toEqual(['2 spilli vicini: Chiosco, Distributore']);
+  });
+
+  // Nell'editor vale la stessa regola (scelta dell'utente, 2026-09-13): i pin vicini diventano un
+  // gruppo e dall'elenco si sceglie quale modificare. La sola differenza è che il pin **selezionato**
+  // esce dalla nube e si mostra da solo, perché lì il gesto è trascinare proprio quel pin.
+  it('nell’editor il gruppo c’è lo stesso, e il pin selezionato esce e si mostra da solo', () => {
+    const editor = { strumento: 'seleziona' as const, selezionatoId: null, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() };
+    const { container, rerender } = render(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} editor={editor} /></MemoryRouter>);
+    expect(sullaTela(container)).toEqual(['2 spilli vicini: Chiosco, Distributore']);
+    fireEvent.click(screen.getByRole('button', { name: '2 spilli vicini: Chiosco, Distributore' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: '2 spilli vicini' })).getByRole('button', { name: /Chiosco/ }));
+    expect(editor.onSeleziona).toHaveBeenCalledWith(11);
+    rerender(<MemoryRouter><VisoreMappa mappa={vicini} partitaId={null} onNaviga={vi.fn()} editor={{ ...editor, selezionatoId: 11 }} /></MemoryRouter>);
+    // Il pin scelto è a sé (trascinabile); il compagno **resta una pastiglia** anche se è rimasto
+    // solo. Se tornasse goccia si troverebbe a meno di 46 px dal selezionato — e su spilli con le
+    // stesse coordinate, esattamente sotto, irraggiungibile e senza più il «+n» da cui riaprirlo.
+    expect(sullaTela(container)).toEqual(['Attività: Chiosco', '1 spillo vicino: Distributore']);
+  });
+});
+
+// Il gruppo deve **aprirsi**, non ingrandire: nel pacchetto ci sono spilli con le stesse coordinate,
+// e la loro distanza sullo schermo resta zero a qualunque ingrandimento. Un bersaglio da 45 px che
+// non fa niente è peggio di un bersaglio piccolo (rilievo del validatore, 2026-09-13).
+describe('apertura del gruppo di spilli', () => {
+  const coincidenti: MappaDto = {
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 21, nome: 'Stanza sicura', tipo: 'sicura', tipoNome: 'Stanza sicura', x: 40, y: 40 }),
+      spillo({ id: 22, nome: 'Punto di spostamento', tipo: 'passaggio', tipoNome: 'Passaggio', x: 40, y: 40 }),
+    ],
+  };
+
+  it('il tocco apre l’elenco e da lì si sceglie lo spillo, che resta raggruppato', async () => {
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={coincidenti} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    const gruppo = screen.getByRole('button', { name: '2 spilli vicini: Stanza sicura, Punto di spostamento' });
+    expect(gruppo).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(gruppo);
+    const elenco = screen.getByRole('dialog', { name: '2 spilli vicini' });
+    fireEvent.click(within(elenco).getByRole('button', { name: /Punto di spostamento/ }));
+    // il popup dello spillo scelto si apre...
+    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Punto di spostamento' })).toBeInTheDocument());
+    // ...e la nube non si scorpora: restano due gocce sovrapposte, senza bersaglio, se lo facesse
+    expect([...container.querySelectorAll('.visore-mappa__livello .spillo-mappa')]).toHaveLength(1);
+  });
+});
+
+// L'elenco del gruppo vive dentro la tela, che ritaglia (`overflow: hidden`): deve scorrere in
+// orizzontale e ribaltarsi sotto il gruppo quando sopra non c'è posto, come già fa il popup dello
+// spillo. Senza, a 768 e 1280 l'intestazione e il tasto di chiusura finivano fuori dal ritaglio
+// (rilievo del validatore, 2026-09-13).
+describe('l’elenco del gruppo resta dentro la tela', () => {
+  const conGruppoIn = (x: number, y: number): MappaDto => ({
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 31, nome: 'Uno', tipo: 'nota', tipoNome: 'Nota', x, y }),
+      spillo({ id: 32, nome: 'Due', tipo: 'nota', tipoNome: 'Nota', x: x + 0.2, y }),
+    ],
+  });
+  const conTela = async (m: MappaDto) => {
+    cleanup();
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 1000, height: 500, left: 0, top: 0, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    try {
+      const { container } = render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+      // la tela si misura con un rAF: finché non è misurata il fit è quello neutro
+      await waitFor(() => expect((container.querySelector('.visore-mappa__livello') as HTMLElement).style.transform).toContain('scale(0.864)'));
+      const gruppo = await screen.findByRole('button', { name: /spilli vicini/ });
+      fireEvent.click(gruppo);
+      const elenco = await screen.findByRole('dialog', { name: '2 spilli vicini' });
+      return { classe: elenco.className, transform: elenco.style.transform };
+    } finally { misura.mockRestore(); }
+  };
+
+  it('si ribalta sotto il gruppo quando in alto non c’è spazio', async () => {
+    const alto = await conTela(conGruppoIn(50, 2));
+    expect(alto.classe).toContain('spillo-popup--sotto');
+    const basso = await conTela(conGruppoIn(50, 90));
+    expect(basso.classe).not.toContain('spillo-popup--sotto');
+  });
+
+  it('scorre in orizzontale quanto basta a restare nella tela', async () => {
+    const sinistra = await conTela(conGruppoIn(1, 50));
+    const scostamento = /translate\(calc\(-50% \+ ([-.\d]+)px\)/.exec(sinistra.transform);
+    expect(scostamento).not.toBeNull();
+    expect(Number(scostamento![1])).toBeGreaterThan(0);   // spinto verso destra, dentro la tela
+    const destra = await conTela(conGruppoIn(98, 50));
+    const s2 = /translate\(calc\(-50% \+ ([-.\d]+)px\)/.exec(destra.transform);
+    expect(Number(s2![1])).toBeLessThan(0);
+  });
+});
+
+// L'elenco si chiude come si chiude il popup: toccando la mappa, o con Esc. Prima restava aperto
+// (rilievo del validatore, 2026-09-13), e quando il suo «×» finiva fuori dal ritaglio non c'era
+// più un modo ovvio di levarlo.
+describe('chiusura dell’elenco del gruppo', () => {
+  const vicinissimi: MappaDto = {
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 41, nome: 'Alfa', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+      spillo({ id: 42, nome: 'Beta', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+    ],
+  };
+  const apri = () => {
+    render(<MemoryRouter><VisoreMappa mappa={vicinissimi} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /spilli vicini/ }));
+    expect(screen.getByRole('dialog', { name: '2 spilli vicini' })).toBeInTheDocument();
+  };
+
+  it('un tocco sulla mappa lo chiude', () => {
+    apri();
+    const tela = screen.getByRole('application');
+    fireEvent.pointerDown(tela, { pointerId: 1, clientX: 10, clientY: 10 });
+    fireEvent.pointerUp(tela, { pointerId: 1, clientX: 10, clientY: 10 });
+    expect(screen.queryByRole('dialog', { name: '2 spilli vicini' })).toBeNull();
+    expect(screen.getByRole('button', { name: /spilli vicini/ })).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('Esc lo chiude', () => {
+    apri();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: '2 spilli vicini' })).toBeNull();
+  });
+});
+
+// Un gruppo può avere molte voci — sul Corridoio del Crepuscolo, alla vista d'insieme, arriva a 17 —
+// e allora l'elenco non ci sta né sopra né sotto: se non è legato alla tela, le ultime voci e
+// «Ingrandisci qui» finiscono fuori dal ritaglio, irraggiungibili (rilievo del validatore,
+// 2026-09-13). L'altezza delle voci va limitata allo spazio del lato scelto, e il resto scorre.
+it('con molte voci l’elenco si limita allo spazio della tela e le voci scorrono', async () => {
+  const molti: MappaDto = {
+    ...mappa, numeroSpilli: 17,
+    spilli: Array.from({ length: 17 }, (_, i) => spillo({ id: 100 + i, nome: `Spillo ${i + 1}`, tipo: 'nota', tipoNome: 'Nota', x: 50 + i * 0.05, y: 50 })),
+  };
+  const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 1000, height: 500, left: 0, top: 0, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+  try {
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={molti} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    await waitFor(() => expect((container.querySelector('.visore-mappa__livello') as HTMLElement).style.transform).toContain('scale(0.864)'));
+    fireEvent.click(screen.getByRole('button', { name: /17 spilli vicini/ }));
+    const elenco = screen.getByRole('dialog', { name: '17 spilli vicini' });
+    const voci = elenco.querySelector('ul') as HTMLElement;
+    expect(voci.style.overflowY).toBe('auto');
+    const tetto = Number(voci.style.maxHeight.replace('px', ''));
+    expect(tetto).toBeGreaterThan(0);
+    expect(tetto).toBeLessThan(500);          // sta dentro la tela, non nei 858 px che chiederebbe
+    // e «Ingrandisci qui» resta fuori dall'area che scorre, sempre raggiungibile
+    expect(within(elenco).getByRole('button', { name: /Ingrandisci qui/ })).toBeInTheDocument();
+  } finally { misura.mockRestore(); }
+});
+
+// Tre casi che il tetto dell'elenco deve rispettare, e che sfuggivano al primo tentativo.
+describe('l’elenco del gruppo e lo spazio che ha davvero', () => {
+  const molti = (n: number): MappaDto => ({
+    ...mappa, numeroSpilli: n,
+    spilli: Array.from({ length: n }, (_, i) => spillo({ id: 200 + i, nome: `Spillo ${i + 1}`, tipo: 'nota', tipoNome: 'Nota', x: 50 + i * 0.05, y: 50 })),
+  });
+  const apri = async (m: MappaDto, tela: { w: number; h: number }, stretto = false) => {
+    cleanup();
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: tela.w, height: tela.h, left: 0, top: 0, right: tela.w, bottom: tela.h, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    // jsdom non ha `matchMedia`: lo si mette e lo si toglie (il componente ci legge lo schermo stretto)
+    const prima = window.matchMedia;
+    window.matchMedia = ((q: string) => ({ matches: stretto, media: q, onchange: null, addEventListener: () => {}, removeEventListener: () => {}, addListener: () => {}, removeListener: () => {}, dispatchEvent: () => false })) as typeof window.matchMedia;
+    try {
+      render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+      await waitFor(() => expect(screen.getByRole('button', { name: /spilli vicini/ })).toBeInTheDocument());
+      fireEvent.click(screen.getByRole('button', { name: /spilli vicini/ }));
+      const elenco = await screen.findByRole('dialog', { name: /spilli vicini/ });
+      return { elenco, voci: elenco.querySelector('ul') as HTMLElement };
+    } finally { misura.mockRestore(); window.matchMedia = prima; }
+  };
+
+  it('su schermo stretto non mette tetti in linea: il foglio ha già il suo', async () => {
+    const { elenco, voci } = await apri(molti(17), { w: 375, h: 600 }, true);
+    expect(elenco.className).toContain('spillo-popup--foglio');
+    expect(voci.style.maxHeight).toBe('');
+  });
+
+  it('su una tela bassa, dove non ci sta da nessun lato, diventa un foglio invece di farsi tagliare', async () => {
+    const { elenco } = await apri(molti(17), { w: 900, h: 150 });
+    expect(elenco.className).toContain('spillo-popup--foglio');
+  });
+
+  it('quando ci sta, il riquadro intero — contorno compreso — resta dentro il lato scelto', async () => {
+    const { elenco, voci } = await apri(molti(17), { w: 1000, h: 900 });
+    expect(elenco.className).not.toContain('spillo-popup--foglio');
+    const tetto = Number(voci.style.maxHeight.replace('px', ''));
+    // Lo spazio sopra il gruppo non è metà tela: dipende dal fit. Lo si ricava dov'è finito il
+    // livello, così il test misura la regola e non un numero indovinato.
+    const t = /translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec((document.querySelector('.visore-mappa__livello') as HTMLElement).style.transform)!;
+    const [, , panY, z] = t;
+    const sopra = Number(panY) + 250 * Number(z);   // il gruppo sta al 50% di un'immagine alta 500
+    expect(tetto + 152).toBeLessThanOrEqual(sopra + 0.001);   // 152 = contorno (118) + stacco e respiro (34)
+    expect(tetto).toBeGreaterThanOrEqual(44);
+  });
+});
+
+// Sul punto, dopo lo scorporo, ci sono due bersagli: il pin che si trascina e la pastiglia di chi
+// resta. Se la pastiglia non si sposta se li tolgono a vicenda — misurati 38×38 e 38×34, coi centri
+// a 19 px (rilievo del validatore, 2026-09-13).
+it('nell’editor la pastiglia del residuo si scosta dal pin selezionato', () => {
+  const coincidenti: MappaDto = {
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 51, nome: 'Sopra', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+      spillo({ id: 52, nome: 'Sotto', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+    ],
+  };
+  const editor = { strumento: 'seleziona' as const, selezionatoId: 51, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() };
+  const { container } = render(<MemoryRouter><VisoreMappa mappa={coincidenti} partitaId={null} onNaviga={vi.fn()} editor={editor} /></MemoryRouter>);
+  const pastiglia = container.querySelector('.spillo-mappa--gruppo') as HTMLElement;
+  expect(distanzaDalPin(container)).toBeGreaterThanOrEqual(46);
+  expect(pastiglia.style.transform).not.toContain('+ 0px), calc(-50% + 0px)');
+  // e senza scorporo la pastiglia resta sul punto
+  cleanup();
+  const { container: c2 } = render(<MemoryRouter><VisoreMappa mappa={coincidenti} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+  expect((c2.querySelector('.spillo-mappa--gruppo') as HTMLElement).style.transform).toContain('calc(-50% + 0px), calc(-50% + 0px)');
+});
+
+/** Distanza fra il centro del bersaglio del pin selezionato e quello della pastiglia scostata,
+ *  letta dagli stili resi (in jsdom i rettangoli sono tutti a zero, le percentuali no). */
+function distanzaDalPin(container: HTMLElement): number {
+  const liv = container.querySelector('.visore-mappa__livello') as HTMLElement;
+  const t = /translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec(liv.style.transform)!;
+  const [, panX, panY, z] = t.slice(0).map(String);
+  const zoom = Number(z);
+  const perc = (el: HTMLElement) => ({ x: Number(el.style.left.replace('%', '')), y: Number(el.style.top.replace('%', '')) });
+  const schermo = (p: { x: number; y: number }) => ({ x: Number(panX) + (p.x / 100) * 1000 * zoom, y: Number(panY) + (p.y / 100) * 500 * zoom });
+  const pin = container.querySelector('.spillo-mappa--selezionato:not(.spillo-mappa--gruppo)') as HTMLElement;
+  const pastiglia = container.querySelector('.spillo-mappa--gruppo') as HTMLElement;
+  const cp = schermo(perc(pin));
+  const cg = schermo(perc(pastiglia));
+  // i numeri possono uscire in notazione esponenziale (1.77e-15): il pattern deve accettarla
+  const sc = /calc\(-50% \+ ([-+.\deE]+)px\), calc\(-50% \+ ([-+.\deE]+)px\)/.exec(pastiglia.style.transform);
+  // il numero scritto nel translate È lo spostamento sullo schermo: non si divide per lo zoom
+  const dx = sc ? Number(sc[1]) : 0, dy = sc ? Number(sc[2]) : 0;
+  return Math.hypot(cg.x + dx - cp.x, cg.y + dy - (cp.y - 19));
+}
+
+// Il caso che mancava: pin e residuo **non** coincidenti. Lo scostamento fisso a destra funzionava
+// solo quando coincidono — l'unico provato — e negli altri spingeva la pastiglia *verso* il pin,
+// fino a 13 px (rilievo del validatore, 2026-09-13, misurato su tutto il pacchetto).
+it('nell’editor lo scostamento è preso dal pin, non da un lato fisso', () => {
+  for (const [dx, dy] of [[0.6, 0], [-0.6, 0], [0, 0.9], [0, -0.9], [0.4, 0.6], [-0.4, -0.6]]) {
+    cleanup();
+    const m: MappaDto = {
+      ...mappa, numeroSpilli: 2, spilli: [
+        spillo({ id: 61, nome: 'Scelto', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+        spillo({ id: 62, nome: 'Resta', tipo: 'nota', tipoNome: 'Nota', x: 50 + dx, y: 50 + dy }),
+      ],
+    };
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()}
+      editor={{ strumento: 'seleziona', selezionatoId: 61, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
+    expect(container.querySelector('.spillo-mappa--gruppo')).not.toBeNull();
+    expect(distanzaDalPin(container)).toBeGreaterThanOrEqual(45.999);
+  }
+});
+
+// I due casi che il test precedente non toccava: con due soli spilli `altri` è vuoto e il ramo che
+// guarda i vicini non viene mai percorso (rilievo del validatore, 2026-09-13).
+describe('la pastiglia scostata guarda anche i vicini, e non sfarfalla', () => {
+  /** Centro del bersaglio di ogni spillo reso, in pixel di schermo, letto dagli stili. */
+  const centri = (container: HTMLElement) => {
+    const liv = container.querySelector('.visore-mappa__livello') as HTMLElement;
+    const [, panX, panY, z] = /translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec(liv.style.transform)!;
+    const zoom = Number(z);
+    return [...container.querySelectorAll('.visore-mappa__livello .spillo-mappa')].map((el) => {
+      const e = el as HTMLElement;
+      const gruppo = e.className.includes('gruppo');
+      const x = Number(e.style.left.replace('%', '')), y = Number(e.style.top.replace('%', ''));
+      const sc = /calc\(-50% \+ ([-+.\deE]+)px\), calc\(-50% \+ ([-+.\deE]+)px\)/.exec(e.style.transform);
+      // il numero scritto nel translate È lo spostamento sullo schermo: non si divide per lo zoom
+      const dx = sc ? Number(sc[1]) : 0, dy = sc ? Number(sc[2]) : 0;
+      return { gruppo, x: Number(panX) + (x / 100) * 1000 * zoom + dx, y: Number(panY) + (y / 100) * 500 * zoom + dy - (gruppo ? 0 : 19) };
+    });
+  };
+  const conTela = <T,>(f: () => T): T => {
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 900, height: 700, left: 0, top: 0, right: 900, bottom: 700, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    try { return f(); } finally { misura.mockRestore(); }
+  };
+
+  it('resta a 46 px anche dalle altre nubi, non solo dal pin', () => {
+    // due nubi vicine: quella di destra si scorpora, e la sua pastiglia non deve finire sull'altra
+    const m: MappaDto = {
+      ...mappa, numeroSpilli: 5, spilli: [
+        spillo({ id: 71, nome: 'Scelto', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+        spillo({ id: 72, nome: 'Compagno', tipo: 'nota', tipoNome: 'Nota', x: 50.3, y: 50 }),
+        spillo({ id: 73, nome: 'Vicino A', tipo: 'nota', tipoNome: 'Nota', x: 55, y: 50 }),
+        spillo({ id: 74, nome: 'Vicino B', tipo: 'nota', tipoNome: 'Nota', x: 55.3, y: 50 }),
+        spillo({ id: 75, nome: 'Vicino C', tipo: 'nota', tipoNome: 'Nota', x: 45, y: 52 }),
+      ],
+    };
+    conTela(() => {
+      const { container } = render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()}
+        editor={{ strumento: 'seleziona', selezionatoId: 71, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
+      const c = centri(container);
+      expect(c.length).toBeGreaterThanOrEqual(3);
+      for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) {
+        expect(Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y)).toBeGreaterThanOrEqual(45.999);
+      }
+    });
+  });
+
+  // Il pin, uscito dalla nube, può trovarsi a ridosso di una nube **diversa**: il raggruppamento
+  // garantisce 46 px fra i centri delle nubi, non fra un singolo membro e la nube accanto. Erano 381
+  // casi su 2.439 del pacchetto, fino a 1,6 px (rilievo del validatore, 2026-09-13). E se a stargli
+  // addosso è un altro pin, quello non si può spostare: diventa una pastiglia, come il residuo.
+  it('anche chi sta addosso al pin si fa da parte, altro pin compreso', () => {
+    const m: MappaDto = {
+      ...mappa, numeroSpilli: 3, spilli: [
+        spillo({ id: 91, nome: 'Scelto', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+        spillo({ id: 92, nome: 'Compagno di nube', tipo: 'nota', tipoNome: 'Nota', x: 55, y: 50 }),
+        // lontano dal centro della nube (che sta a 52,5%) ma a ~39 px dal pin: resterebbe singolo
+        spillo({ id: 93, nome: 'Addosso al pin', tipo: 'nota', tipoNome: 'Nota', x: 45.5, y: 50 }),
+      ],
+    };
+    conTela(() => {
+      const { container } = render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()}
+        editor={{ strumento: 'seleziona', selezionatoId: 91, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
+      // il vicino non è più una goccia: è diventato una pastiglia, che si può scostare
+      expect(screen.getByRole('button', { name: '1 spillo vicino: Addosso al pin' })).toBeInTheDocument();
+      const c = centri(container);
+      for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) {
+        expect(Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y)).toBeGreaterThanOrEqual(45.999);
+      }
+    });
+  });
+});
+
+// Lo scostamento e i due ancoraggi si scrivono in pixel di schermo, **senza moltiplicarli per lo
+// zoom**: dentro `scale(1/zoom) translate(t)`, col livello che scala di zoom, quel che arriva sullo
+// schermo è esattamente `t`. Il fattore c'era, e a zoom 2,74 rendeva 74 px uno scostamento di 27
+// (rilievo del validatore, 2026-09-13): i test non lo videro perché provavano il calcolo e non il
+// reso, e in jsdom lo zoom vale 1, dove il fattore è invisibile. Qui si guarda il **sorgente**, che
+// è l'unico posto dove la moltiplicazione si vede a occhio.
+it('nel sorgente non ricompare il fattore zoom sugli spostamenti in pixel di schermo', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { resolve } = await import('node:path');
+  const sorgente = readFileSync(resolve(process.cwd(), 'src/components/mappe/VisoreMappa.tsx'), 'utf8');
+  for (const sbagliato of ['popupDx * zoom', 'elencoDx * zoom', 'scosto?.x ?? 0) * zoom', 'scosto?.y ?? 0) * zoom']) {
+    expect(sorgente).not.toContain(sbagliato);
+  }
+  // e i tre punti ci sono ancora, scritti senza fattore
+  expect(sorgente).toContain('${popupDx}px');
+  expect(sorgente).toContain('${elencoDx}px');
+  expect(sorgente).toContain('${g.scosto?.x ?? 0}px');
 });

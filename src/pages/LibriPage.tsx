@@ -159,7 +159,7 @@ export function LibriPage() {
         {nonAncora && progresso === 0 && <p className="col-span-2 m-0 text-xs text-text-secondary" role="note">Non ancora leggibile: {motivoBlocco(libro.disponibilita)}</p>}
         {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
       </div>}
-      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
+      <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Dove</dt>
         <dd className="m-0 flex flex-wrap gap-1">
           {libro.negozi.map((n) => <Link key={n.articolo} to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="chip chip--attivo touch no-underline">{n.negozioNome}{prezzoChip(n.prezzo)}</Link>)}
@@ -169,7 +169,7 @@ export function LibriPage() {
         <dt className="text-text-muted">Che cosa fa</dt>
         <dd className="m-0">{libro.effettiTesto.length ? libro.effettiTesto.join(' · ') : 'Nessun effetto dichiarato'}</dd>
         {/* Il luogo sbloccato è un riferimento, quindi ci si va. */}
-        {libro.sbloccaLuogo && <><dt className="text-text-muted">Apre</dt><dd className="m-0"><Link to={`/guida/citta/${libro.sbloccaLuogo}`}>{libro.sbloccaLuogoNome ?? libro.sbloccaLuogo}</Link></dd></>}
+        {libro.sbloccaLuogo && <><dt className="text-text-muted">Apre</dt><dd className="m-0"><Link className="touch inline-flex items-center" to={`/guida/citta/${libro.sbloccaLuogo}`}>{libro.sbloccaLuogoNome ?? libro.sbloccaLuogo}</Link></dd></>}
         {libro.negozi.length === 0 && libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : formattaYen(libro.prezzo)}</dd></>}
       </dl>
       {libro.dettagli && <p className="m-0 text-xs text-text-secondary">{libro.dettagli}</p>}

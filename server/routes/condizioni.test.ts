@@ -135,13 +135,14 @@ it('un pacchetto oltre 20 condizioni viene scartato per intero, senza lasciare t
 // Voce 9 — progressi calcolati: gli eventi «entra in squadra» dalla squadra, attività conteggiabili, negozi con programma
 // ============================================================
 
-it('gli eventi «entra in squadra» si calcolano dalla squadra (tre stati) e non si segnano a mano', async () => {
+it('gli eventi «entra in squadra» si calcolano dalla squadra (due stati) e non si segnano a mano', async () => {
   const makoto: RequisitoSpillo = { tipo: 'evento', evento: 'evento-makoto' };
-  // nessuna riga per Makoto: grigio, non rosso
+  // «in squadra» è una variabile booleana: chi non risulta nel gruppo non è nel gruppo, e la cosa
+  // che dipende da lui resta bloccata invece di comparire col beneficio del dubbio
   const senzaRiga = valuta([makoto]);
-  expect(senzaRiga.stato).toBe('ignoto');
-  expect(senzaRiga.requisiti[0].stato).toBe('grigio');
-  // dichiarata fuori squadra: rosso
+  expect(senzaRiga.stato).toBe('bloccato');
+  expect(senzaRiga.requisiti[0].stato).toBe('rosso');
+  // dichiarata fuori squadra: rosso, come prima
   await request(app).patch(`/api/partite/${partita}/squadra/makoto`).send({ inSquadra: false });
   expect(valuta([makoto]).requisiti[0].stato).toBe('rosso');
   // in squadra: verde, senza date canoniche e senza righe di evento

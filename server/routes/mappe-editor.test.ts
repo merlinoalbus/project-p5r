@@ -380,7 +380,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const conSpillo = con.spilli.find((x) => x.id === s.id)!;
     expect(conSpillo.disponibilita?.stato).toBe('bloccato');
     expect(conSpillo.disponibilita?.requisiti).toHaveLength(4);
-    expect(conSpillo.disponibilita?.requisiti[1]).toMatchObject({ tipo: 'palazzo', stato: 'rosso', testo: 'dopo il Palazzo di Kamoshida', dettaglio: 'Palazzo di Kamoshida: segna il boss come sconfitto nella Guida', manuale: false });
+    expect(conSpillo.disponibilita?.requisiti[1]).toMatchObject({ tipo: 'palazzo', stato: 'rosso', testo: 'dopo il Palazzo di Kamoshida', dettaglio: 'Palazzo di Kamoshida: boss non ancora segnato come sconfitto (Guida → Palazzi)', manuale: false });
     expect(conSpillo.disponibilita?.requisiti[2]).toMatchObject({ tipo: 'confidente', stato: 'rosso' });
     // aggiornamento: solo la pioggia → una condizione meteo; senza condizioni → disponibile
     const pioggia = (await request(app).put(`/api/mappe/spilli/${s.id}`).send({ condizioni: [{ tipo: 'piove' }] })).body.data as SpilloDto;

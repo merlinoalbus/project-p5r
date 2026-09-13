@@ -39,7 +39,13 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
   return (
     <li id={evidenzia ? ancoraGiorno(c.giorno) : undefined} className={`card flex flex-col gap-1 text-[13px] scroll-mt-20 ${c.fatto ? 'opacity-70' : ''} ${evidenzia ? 'border-primary' : ''}`}>
       <div className="flex flex-wrap items-center gap-2">
-        {partitaId && <input type="checkbox" className="w-5 h-5" checked={c.fatto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Cruciverba del ${formattaDataGioco(c.giorno)} risolto`} />}
+        {/* La casella da sola è un bersaglio di 20 px: col dito si manca, e qui è il gesto della
+            pagina. L'etichetta attorno la rende toccabile per 44 px senza cambiarne l'aspetto. */}
+        {partitaId && (
+          <label className="touch flex items-center justify-center -my-1 pr-1 cursor-pointer">
+            <input type="checkbox" className="w-5 h-5" checked={c.fatto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Cruciverba del ${formattaDataGioco(c.giorno)} risolto`} />
+          </label>
+        )}
         <strong className="text-[15px]">{formattaDataGioco(c.giorno)}</strong>
         {evidenzia && <span className="chip chip--attivo text-[11px]">Prossimo</span>}
         <span className="text-text-secondary">{c.indizio}</span>

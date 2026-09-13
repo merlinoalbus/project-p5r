@@ -32,8 +32,28 @@ export function inquadraturaMappa(nat: { w: number; h: number }, viewport: { w: 
     x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
   }
   // Margine in pixel dello schermo, indipendente dallo zoom e dal canvas DDS.
-  const margin = area ? 24 : 0;
-  const zoom = viewport.w > 0 && viewport.h > 0
-    ? Math.min(Math.max(1, viewport.w - margin * 2) / Math.max(1, x1 - x0), Math.max(1, viewport.h - margin * 2) / Math.max(1, y1 - y0)) : 1;
-  return { zoom, pan: { x: viewport.w / 2 - (x0 + x1) * zoom / 2, y: viewport.h / 2 - (y0 + y1) * zoom / 2 } };
+  //
+  // Quando ci sono pin il margine non serve all'estetica ma al **bersaglio**: la goccia è ancorata
+  // alla punta e si alza di 41 px sopra il punto (38 di disegno più i 3 dell'area del tocco), e si
+  // allarga di 22 per lato. Con i soli 24 px di prima — e con zero, quando l'alfa dell'immagine non
+  // era leggibile — un pin sul bordo restava tagliato dal ritaglio della tela e riceveva 27 px
+  // invece di 44 (rilievo del validatore, 2026-09-13). I margini sono asimmetrici perché lo è la
+  // goccia: sopra serve più spazio che sotto.
+  //
+  // Quel che serve è 22 ai lati, 41 sopra e 3 sotto; quel che si applica è **24, 44 e 24**, cioè
+  // il requisito arrotondato in eccesso (il margine dei 24 c'era già e vale anche senza pin).
+  // Con un viewport ancora da misurare (0×0) non c'è margine che abbia senso: si resta neutri. E su
+  // una tela molto piccola i margini si riducono in proporzione, altrimenti mangerebbero la mappa.
+  const degenere = !(viewport.w > 0 && viewport.h > 0);
+  const conPin = pin.length > 0;
+  const base = degenere ? 0 : conPin || area ? 24 : 0;
+  const sopraBase = degenere ? 0 : conPin ? 44 : base;
+  const scala = degenere ? 1 : Math.min(1, base > 0 ? (viewport.w * 0.4) / (base * 2) : 1, sopraBase + base > 0 ? (viewport.h * 0.4) / (sopraBase + base) : 1);
+  const mx = base * scala;
+  const mSopra = sopraBase * scala;
+  const mSotto = base * scala;
+  const larghezza = viewport.w - mx * 2;
+  const altezza = viewport.h - mSopra - mSotto;
+  const zoom = degenere ? 1 : Math.min(Math.max(1, larghezza) / Math.max(1, x1 - x0), Math.max(1, altezza) / Math.max(1, y1 - y0));
+  return { zoom, pan: { x: mx + larghezza / 2 - (x0 + x1) * zoom / 2, y: mSopra + altezza / 2 - (y0 + y1) * zoom / 2 } };
 }

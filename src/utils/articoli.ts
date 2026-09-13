@@ -53,8 +53,10 @@ export function filtraArticoli(articoli: ArticoloDto[], f: FiltroArticoli, conPa
     if (f.per && a.per !== f.per && a.per !== 'tutti') return false;
     if (conPartita && f.stato !== 'tutti' && (f.stato === 'acquistati') !== a.acquistato) return false;
     if (conPartita && f.disponibilita !== 'tutti') {
-      const bloccato = a.disponibilita?.stato === 'bloccato';
-      if ((f.disponibilita === 'bloccati') !== bloccato) return false;
+      // «Disponibili» vuol dire che **tutte** le condizioni sono vere: un forse — una condizione
+      // che la partita non sa verificare — sta con i bloccati, non con i disponibili.
+      const nonDisponibile = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile';
+      if ((f.disponibilita === 'bloccati') !== nonDisponibile) return false;
     }
     return true;
   });

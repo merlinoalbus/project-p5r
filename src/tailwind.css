@@ -191,13 +191,13 @@
   /* L'altezza c'era gia'; mancava la larghezza. Un pulsante con dentro un solo carattere — la
      freccia che inverte l'ordinamento — misurava 35 px, e col dito un bersaglio e' quadrato:
      44 di alto e 35 di largo e' comunque un bersaglio da 35. */
-  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 6px; }
-  @media (pointer: coarse), (max-width: 1023px) { .btn-sm { min-width: 44px; } }
+  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; min-width: 44px; --btn-taglio: 6px; }
   /* Pulsanti d'incremento compatti (note delle Doti): piccoli col mouse, sempre 44px sui dispositivi a tocco */
   /* Le tendine prendono la larghezza dell'opzione piu lunga e non si restringono: entro il contenitore, sempre (telefono) */
   select.form-input { max-width: 100%; min-width: 0; }
-  .btn-nota { font-size: 12px; padding: 3px 8px; min-height: 30px; --btn-taglio: 5px; gap: 5px; }
-  @media (pointer: coarse), (max-width: 1023px) { .btn-nota { min-height: 44px; padding: 6px 12px; font-size: 13px; } }
+  /* Le note delle Doti si premono decine di volte per partita: 44 px a ogni larghezza, come ogni
+     altro comando. I 30 px valevano solo col mouse, ed erano l'ultima misura doppia rimasta. */
+  .btn-nota { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 5px; gap: 5px; }
 
   /* ---- Pulsanti visivi: immagine prevalente (icona 40 px, 32 px compatta, 48 px a colonna) + titolo «display» piccolo + dettaglio
      (mai solo testo grigio). La dimensione dell'icona la decide il pulsante con --btn-visivo-icona, non chi la passa: le <img> di
@@ -313,14 +313,13 @@
     transition: border-color 0.15s;
   }
   .form-input:focus { border-color: var(--color-primary); }
-  /* Compatto vuol dire stretto, non basso: col dito 34 px non bastano, e questi selettori sono
-     comandi veri — l'ordinamento del Compendio, la lunghezza di un ciclo di fusione. La larghezza
-     resta `auto`, che e' il motivo per cui esiste la variante; l'altezza torna al minimo di casa
-     dove il puntatore e' un dito. */
-  .form-input--compatto { width: auto; min-height: 34px; padding: 4px 8px; font-size: 13px; }
-  @media (pointer: coarse), (max-width: 1023px) {
-    .form-input--compatto { min-height: 44px; }
-  }
+  /* Compatto vuol dire **stretto**, non basso: la larghezza resta `auto`, che è il motivo per cui la
+     variante esiste; l'altezza no. La usano i livelli minimo e massimo dei filtri del Compendio e
+     le statistiche della scorta in Partita — comandi veri — e restano 44 px a ogni larghezza:
+     34 px col mouse e 44 col dito erano due misure per lo stesso campo. (L'ordinamento del
+     Compendio e la lunghezza di un ciclo di fusione sono invece `Selettore compatto`, un'altra
+     classe con la sua regola.) */
+  .form-input--compatto { width: auto; min-height: 44px; padding: 6px 8px; font-size: 13px; }
 
   /* ---- Griglia delle affinità: 5 per riga (2 righe), 10 per riga solo se il contenitore è largo; nomi mai spezzati ---- */
   .griglia-affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); container-type: inline-size; }
@@ -375,6 +374,7 @@
   .visore-mappa__percorso { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: 13px; }
   .visore-mappa__briciola { background: none; border: 0; padding: 4px 2px; color: var(--color-text-secondary); cursor: pointer; font: inherit; text-decoration: underline dotted; text-underline-offset: 3px; min-height: 32px; }
   .visore-mappa__briciola:hover { color: var(--color-primary); }
+
   .visore-mappa__titolo { font-family: var(--font-display); font-size: 19px; text-transform: uppercase; letter-spacing: .02em; }
   .visore-mappa__strumenti { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   /* Colonna stretta (mappa incorporata accanto alla guida): barra a sole icone, il testo resta nel nome accessibile */
@@ -417,15 +417,39 @@
      la condizione perche' le collocazioni in percentuale restino giuste. */
   /* Il tetto sta sul blocco — mappa **e** riga delle fermate chiuse — perché quella riga è lunga
      e in una colonna libera spingeva tutto fuori dallo schermo. La cornice riempie il blocco. */
-  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; }
+  /* Contenitore di misura per targhe e legenda: decidono in base a quanto è larga *la mappa*, non
+     la finestra — la stessa mappa sta in una card piena sul telefono e in una colonna stretta
+     accanto alla guida sul monitor. */
+  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; container: mappaTokyo / inline-size; }
   .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; width: 100%; touch-action: none; user-select: none; }
   /* La mano compare solo quando c'e' davvero qualcosa da spostare: a zoom 1 la tela e' tutta li'. */
   .mappa-tokyo--spostabile { cursor: grab; }
   .mappa-tokyo--spostabile:active { cursor: grabbing; }
   .mappa-tokyo__tela { position: absolute; inset: 0; background: #e2001a; transform-origin: 50% 50%; container-type: inline-size; }
+  /* Le targhe sulla mappa valgono finché c'è tela per scriverle: sotto i 480 px si leggerebbero a
+     5 px, e a una misura leggibile si sovrappongono. Lì la mappa resta senza scritte e i nomi
+     stanno nella legenda sotto, che sul telefono è anche più facile da toccare. */
+  .mappa-tokyo__legenda { display: none; flex-wrap: wrap; gap: 6px; }
+  /* Le due regole interrogano **lo stesso contenitore, per nome**. Interrogando quello più vicino
+     ciascuna leggeva una misura diversa — la tela è 2 px più stretta del blocco per via dei bordi —
+     e fra 521 e 522 px la mappa restava senza targhe *e* senza legenda: nessun nome da nessuna
+     parte (rilievo del validatore, 2026-09-13). */
+  /* La soglia è **545 px**, cioè il punto in cui `1,65cqw` scende sotto i 9 px: sopra, le targhe si
+     leggono; sotto, ci sono i nomi nella legenda. Con la soglia a 520 px restava una banda —
+     misurata a 531 px di blocco — in cui le targhe si vedevano a 8,7 px e la legenda non c'era
+     ancora: il pavimento del corpo e la soglia della legenda devono incontrarsi nello stesso punto. */
+  @container mappaTokyo (max-width: 545px) {
+    .mappa-tokyo__targa { display: none; }
+    .mappa-tokyo__legenda { display: flex; }
+  }
 
   .spillo-mappa { position: absolute; display: flex; flex-direction: column; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; z-index: 5; transform-origin: 0 0; color: #fff; }
   .spillo-mappa--selezionato { z-index: 8; }
+  /* Col dito la goccia è 38 px, sotto i 44 richiesti; ingrandirla coprirebbe la mappa, che è il
+     contenuto. Si allarga quindi la sola area che riceve il tocco, con un rettangolo invisibile
+     attorno al disegno: il pin resta quello, il bersaglio arriva a 44. */
+  /* A ogni larghezza, mouse compreso: la goccia è 38 px e il bersaglio dev'essere 44 sempre. */
+  .spillo-mappa::after { content: ""; position: absolute; inset: -3px; }
   /* La goccia: quadrato con tre angoli tondi, ruotato di 45 gradi, cosi' l'angolo vivo cade in
      basso sul punto ancorato (il bottone e' traslato di -100% in verticale). Il colore e' quello
      del tipo, ed e' quel che si legge da lontano. La misura la passa il componente. */
@@ -446,6 +470,10 @@
   .spillo-mappa__etichetta { position: absolute; top: 100%; margin-top: 2px; padding: 2px 6px; background: rgba(11,11,14,.92); border: 1px solid var(--color-border); font-size: 11px; white-space: nowrap; color: var(--color-text); opacity: 0; pointer-events: none; transition: opacity .1s; }
   .spillo-mappa:hover .spillo-mappa__etichetta, .spillo-mappa--selezionato .spillo-mappa__etichetta, .spillo-mappa--trovato .spillo-mappa__etichetta { opacity: 1; }
   .spillo-mappa--gruppo { transform-origin: 0 0; }
+  /* Il gruppo («2 spilli vicini») è 34 px, sei meno della goccia: i 3 px d'estensione che bastano a
+     una goccia da 38 qui fermavano il bersaglio a 40. Ne servono 5 per parte (rilievo del
+     validatore, 2026-09-13, misurato con l'hit-testing e non col righello). */
+  .spillo-mappa--gruppo::after { inset: -5px; }
   .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: 17px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
   .spillo-mappa__punto { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; border: 1px solid rgba(255,255,255,.7); }
   .spillo-mappa__punto--grande { width: 34px; height: 34px; }
@@ -480,7 +508,10 @@
   /* popup sotto lo spillo (fascia alta della mappa): la punta guarda in su */
   .spillo-popup--sotto::after { bottom: auto; top: -7px; border-right: 0; border-bottom: 0; border-left: 1px solid var(--color-primary); border-top: 1px solid var(--color-primary); }
   .spillo-popup__testo { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-  .spillo-popup__chiudi { background: none; border: 0; color: var(--color-text-muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px; min-width: 28px; min-height: 28px; }
+  /* Chiude il riquadro, e sul telefono è l'unica uscita del foglio: 44 px come ogni altro comando.
+     Erano 28 anche all'hit-testing (rilievo del validatore, 2026-09-13); il segno resta piccolo,
+     cresce l'area — la stessa regola di tutti gli altri bersagli di questa pagina. */
+  .spillo-popup__chiudi { background: none; border: 0; color: var(--color-text-muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
   .spillo-popup__chiudi:hover { color: var(--color-text); }
   /* Popup dello spillo (260 px, riga azioni 238 px): icona 28 px e titolo 12 px, così due azioni («Ottenuto» + «Esaurito», «Apri…» + «Dettagli») restano su una riga */
   .spillo-popup .btn-visivo { --btn-visivo-icona: 28px; padding: 3px 8px 3px 6px; }
@@ -494,6 +525,17 @@
     .spillo-popup, .spillo-popup--sotto { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom)); top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; z-index: 40; }
     .spillo-popup::after, .spillo-popup--sotto::after { display: none; }
     .spillo-popup__merce { max-height: none; overflow: visible; }
+  }
+  /* Lo stesso foglio, a qualunque larghezza, quando il riquadro non sta né sopra né sotto il punto:
+     su una tela bassa (il visore incorporato ne ha 240 di minimo) un elenco di molte voci non ci
+     entra da nessun lato, e ancorarlo al punto vorrebbe dire tagliarlo comunque. Meglio il foglio,
+     che scorre e si vede tutto — è il gesto che sul telefono si conosce già. */
+  /* I 64 px di stacco servono a scavalcare la barra inferiore, che c'è solo sotto i 1024: da lì in
+     su il foglio starebbe a galleggiare su un vuoto preso da un altro contesto. */
+  .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; z-index: 40; }
+  .spillo-popup--foglio::after { display: none; }
+  @media (max-width: 1023px) {
+    .spillo-popup--foglio { bottom: calc(64px + env(safe-area-inset-bottom)); }
   }
   /* ---- Home in una schermata (desktop): il contenuto riempie l'altezza disponibile e scorre solo la guida del giorno ---- */
   /* La pagina riempie l'area di lettura (main è flex-col con overflow proprio): niente 100vh, niente taglio del contenuto. */
@@ -522,7 +564,9 @@
   /* Specificita maggiore di `.kpi-tile` (definita piu avanti con min-width e padding da cruscotto): nella griglia le tessere
      devono stare nella loro colonna, altrimenti si sovrappongono */
   .kpi-griglia > .kpi-tile, .kpi-tile--compatto { padding: 7px 10px; min-width: 0; width: auto; border-radius: var(--radius-md); }
-  .kpi-tile--compatto .kpi-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  /* L'etichetta dice che cos'è il numero: tagliata con le ellissi («Conoscen…») non lo dice più.
+     Va a capo invece di sparire — la tessera cresce di una riga, il dato resta leggibile. */
+  .kpi-tile--compatto .kpi-label { white-space: normal; overflow-wrap: break-word; hyphens: auto; max-width: 100%; }
   .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
   .kpi-tile--compatto .kpi-value { font-size: 20px; line-height: 1.05; }
 
@@ -557,8 +601,6 @@
   .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--color-text-secondary); }
   .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: 13px; }
   .editor-mappa__risultati { max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border); }
-  .editor-mappa__risultato { display: flex; gap: 6px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--color-border); padding: 6px 8px; color: var(--color-text); font: inherit; font-size: 12px; cursor: pointer; min-height: 36px; }
-  .editor-mappa__risultato:hover { background: var(--color-surface); }
   .editor-mappa__avviso { font-size: 12px; color: var(--color-warning, #f5c542); }
   /* palette dei tipi a gruppi (15.24) e righe «senza passaggio» dell'albero: testo + pulsante «Crea passaggio» (44 px al tocco) */
   .editor-mappa__gruppo { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); padding: 2px 0 0; }
@@ -590,8 +632,21 @@
   .visore-mappa__articoli th, .visore-mappa__articoli td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
   .visore-mappa__articoli th { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--color-text-muted); }
   @media (max-width: 860px) {
-    .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(240px, 1fr) minmax(0, 42%); }
-    .visore-mappa__pannello { border-right: 0; border-top: 1px solid var(--color-border); max-height: none; min-height: 0; order: 2; }
+    /* Su schermo stretto il pannello va **sotto** la mappa, e ha bisogno di spazio suo: il 42% di un
+       corpo alto 150 px — quello che una mappa incorporata in una pagina riceve — faceva una riga
+       di 21 px con 417 px di contenuto dentro, con i comandi alti 44 px ma toccabili per 21
+       (rilievo del validatore, 2026-09-13). Con `auto` la riga prende quel che le serve, e perché
+       possa farlo il visore incorporato smette di essere alto quanto gli è stato detto **quando il
+       pannello è aperto**: l'altezza fissa serve a non far ballare la pagina mentre si guarda la
+       mappa, non a schiacciare un pannello che si è chiesto di vedere. */
+    .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(240px, 1fr) auto; }
+    .visore-mappa__pannello { border-right: 0; border-top: 1px solid var(--color-border); max-height: 60vh; min-height: 0; order: 2; }
+    .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso) { height: auto; }
+    .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso) .visore-mappa__corpo { min-height: 240px; }
+    /* L'altezza fissa la mette chi ospita la mappa, con uno stile in linea: finché il pannello è
+       chiuso va bene — la pagina non balla — ma da aperto il visore crescerebbe **dentro** un box
+       che resta alto quanto prima, e finirebbe sopra quel che viene dopo. */
+    div:has(> .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso)) { height: auto !important; }
     .visore-mappa__tela { min-height: 240px; }
     .visore-mappa__categorie { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
@@ -760,21 +815,22 @@
    * coprono le strade. Si allarga **l'area sensibile**, che e' invisibile: uno pseudo-elemento
    * centrato sullo spillo, 44x44, che riceve il tocco al posto suo.
    *
-   * Solo dove il puntatore e' «grosso», cioe' col dito. Col mouse la precisione c'e' gia', e
-   * riquadri invisibili da 44 px su spilli vicini si ruberebbero i clic a vicenda. */
-  @media (pointer: coarse), (max-width: 1023px) {
-    .spillo-tokyo { position: absolute; }
-    .spillo-tokyo::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 44px;
-      height: 44px;
-      transform: translate(-50%, -50%);
-      /* Dietro alla sagoma, cosi' non copre il disegno ne' intercetta il passaggio del mouse. */
-      z-index: -1;
-    }
+   * A ogni larghezza, mouse compreso: la misura di un comando non dipende da come lo si punta. Il
+   * rischio dei riquadri che si rubano i clic fra spilli vicini è governato dallo `z-index` — chi
+   * sta sopra riceve — e sulla mappa di Tokyo le sagome sono distanti fra loro. */
+  .spillo-tokyo { position: absolute; }
+  .spillo-tokyo::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    /* Davanti, non dietro: con `z-index: -1` il rettangolo finiva sotto l'SVG della rete
+       ferroviaria disegnata sopra la mappa, e non riceveva niente — misurato sulla Città, dove il
+       tocco a due pixel dalla sagoma cadeva sulle rotaie. È trasparente, quindi non copre nulla di
+       ciò che si vede; intercetta il passaggio del mouse, che su un cartellino è quel che si vuole. */
   }
 
   /* ---- Crediti alle fonti: discreti, grigi e piccoli ---- */
@@ -1282,10 +1338,14 @@
 .condizione-non { min-height:44px; min-width:44px; padding:0 8px; border:1px solid var(--color-border); background:transparent; color:var(--color-text-muted); font:inherit; font-size:11px; font-weight:700; letter-spacing:0.08em; cursor:pointer; }
 .condizione-non--attivo { border-color:var(--color-error); background:color-mix(in srgb, var(--color-error) 22%, var(--color-bg-secondary)); color:var(--color-error); }
 .condizione-stato { flex:1 1 180px; min-width:160px; }
-.condizione-operatore { min-height:36px; font-size:13px; }
+/* I comandi delle condizioni: 36 px erano nati per il pannello fitto dell'editor delle mappe, ma
+   `CondizioniEditor` lo usano anche il modulo del catalogo e la scheda dei contenuti della guida,
+   che si compilano col tablet in mano — e lì l'innalzamento a 44 px, scritto solo dentro
+   `.visore-mappa--editor`, non arrivava (rilievo del validatore, 2026-09-13). 44 a ogni larghezza. */
+.condizione-operatore { min-height:44px; font-size:13px; }
 .condizione-operatore--fisso { display:inline-flex; align-items:center; padding:0 6px; color:var(--color-text-secondary); font-style:italic; }
 .condizione-data { display:inline-flex; gap:4px; }
-.condizione-data .form-input { min-height:36px; padding:4px 6px; font-size:13px; }
+.condizione-data .form-input { min-height:44px; padding:6px 8px; font-size:13px; }
 .condizione-giorni { display:inline-flex; flex-wrap:wrap; gap:4px; }
 .condizione-numero { display:inline-flex; align-items:center; border:1px solid var(--color-border); background:var(--color-bg-tertiary); }
 .condizione-numero button { width:44px; min-height:44px; border:0; background:transparent; color:var(--color-text); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
@@ -1305,7 +1365,7 @@
 .selettore__valore { font-size:13px; line-height:1.2; overflow-wrap:anywhere; }
 .selettore__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
 .selettore__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
-.selettore__campo { width:100%; min-height:40px; margin-bottom:4px; }
+.selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }
 .selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; }
 .selettore__gruppo { display:block; padding:6px 8px 2px; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
 .selettore__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:13px; text-align:left; cursor:pointer; }
@@ -1315,18 +1375,31 @@
 .selettore__freccia { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--color-text-muted); pointer-events:none; }
 /* Compatto = stretto quanto serve, senza l'etichetta sopra: i filtri in linea delle pagine. */
 .selettore--compatto { display:inline-block; width:auto; }
-.selettore--compatto .selettore__scelta { flex-direction:row; align-items:center; min-height:40px; padding:4px 22px 4px 8px; width:auto; max-width:100%; }
+/* 44 px anche col mouse: il selettore compatto è il comando che sceglie la partita e filtra le
+   pagine, non un ornamento, e i 40 px lo rendevano il solo bersaglio sotto soglia di tutta l'app. */
+.selettore--compatto .selettore__scelta { flex-direction:row; align-items:center; min-height:44px; padding:4px 22px 4px 8px; width:auto; max-width:100%; }
 .selettore--compatto .selettore__valore { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .selettore--compatto .selettore__tendina { width:max(100%, 260px); }
 /* Senza spazio a destra la tendina si appende al bordo destro del pulsante: mai fuori dalla finestra. */
 .selettore__tendina--destra { left:auto; right:0; }
-.editor-mappa__campo .selettore__scelta { min-height:40px; }
-/* Col dito 40 px non bastano: sul telefono e sul tablet i selettori compatti e quelli dell'editor tornano a 44 px. */
-@media (pointer: coarse), (max-width: 1023px) { .selettore--compatto .selettore__scelta, .editor-mappa__campo .selettore__scelta { min-height:44px; } }
+/* Il selettore dell'editor sta accanto a campi da 44 px: due comandi affiancati con due misure
+   erano l'ultima misura doppia rimasta. */
+.editor-mappa__campo .selettore__scelta { min-height:44px; }
 /* Stessa ragione per i campi di testo: i 36 px sono nati per il pannello fitto dell'editor su
    monitor, ma la classe la usano anche schede che si compilano col tablet in mano (Denaro e
-   squadra), dove un campo alto 36 px si manca e si sbaglia riga. */
-@media (pointer: coarse), (max-width: 1023px) { .editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:15px; } }
+   squadra), dove un campo alto 36 px si manca e si sbaglia riga. A ogni larghezza, perché un campo
+   basso lo è anche col mouse. */
+.editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:15px; }
+
+/* Un chip che **si tocca** è un comando, non un'etichetta: «Sulla mappa» negli Oggetti, «Dove si
+   trova» in Attività e Confidenti erano alti 23 px, e con il dito si manca o si apre quello sotto.
+   Vale a ogni larghezza, mouse compreso: un comando alto 23 px è piccolo anche col puntatore, e
+   due misure diverse per lo stesso elemento sono due difetti invece di uno. Sui chip di sola
+   lettura (categorie, stati, note) non si tocca niente: restano come sono. */
+/* `align-self:start` perché un chip dentro una cella flex veniva stirato in altezza fino a 108 px
+   (l'allineamento predefinito è `stretch`), e `width:max-content` perché l'etichetta della cella
+   lo comprimeva a 53 px mandando «Sulla mappa» su quattro righe. */
+a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-self:start; padding-top:8px; padding-bottom:8px; flex-shrink:0; width:max-content; max-width:100%; }
 
 /* Progressi della partita: righe da 44 px, contatori a destra. */
 .progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
@@ -1353,7 +1426,7 @@
 .editor-mappa__ricerca { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; }
 .editor-mappa__ricerca .selettore { grid-column:1/-1; }
 .editor-mappa__ricerca input { min-width:0; }
-.visore-mappa--editor .editor-mappa__campo .form-input, .visore-mappa--editor .editor-mappa__risultato { min-height:44px; font-size:14px; }
+.visore-mappa--editor .editor-mappa__campo .form-input { min-height:44px; font-size:14px; }
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; }
 @media (max-width:860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:12px; padding:4px 2px; } }
 
@@ -1411,3 +1484,52 @@
 .barra-invio::after { content:""; position:absolute; inset:0 auto 0 0; width:40%; background:var(--color-primary); animation:barra-invio-scorre 1.3s ease-in-out infinite; }
 @keyframes barra-invio-scorre { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
 @media (prefers-reduced-motion: reduce) { .barra-invio::after { animation-duration:3s; } }
+
+/* Le liste etichetta/valore a due colonne (`dl` con `grid-cols-[auto_1fr]`): l'etichetta non va
+   sotto la propria larghezza, il valore sì.
+   Senza queste due righe un valore che porta dentro un chip — «In vendita da: Negozio articoli
+   usati Yumenoshima · Gratis», con la sua `min-width: 44px` — imponeva alla colonna elastica una
+   larghezza minima enorme, e la colonna `auto` dell'etichetta veniva schiacciata sotto un
+   carattere: «C h e   c o s a   f a» in colonna, 32 px di larghezza per 100 di altezza, sui
+   Videogiochi a 375 px (rilievo del validatore, 2026-09-13). È la stessa regola dei flex —
+   chi non deve stringersi non si stringe, chi è elastico porta `min-width: 0` — scritta per la
+   griglia. */
+.dl-scheda > dt { white-space: nowrap; }
+.dl-scheda > dd { min-width: 0; }
+
+/* ---- Bersagli del visore delle mappe (2026-09-13) ----
+   Stanno in coda perché le regole base che li fissano a 32/40 px vengono più sopra nel foglio, e a
+   parità di specificità vince l'ultima. Briciole (la via di ritorno), voci dell'elenco delle mappe
+   figlie, azioni testuali, categorie e zoom sono i comandi con cui ci si sposta fra le mappe: 44 px
+   a ogni larghezza, mouse compreso — due misure diverse per lo stesso comando sono due difetti. */
+.visore-mappa__controllo { min-width: 44px; min-height: 44px; }
+/* Altezza **e** larghezza: con un'etichetta corta — la briciola «Tokyo», una voce «Su» — 44 px di
+   alto e 41 di largo restano un bersaglio da 41. */
+.visore-mappa__briciola { min-height: 44px; min-width: 44px; }
+.visore-mappa__figlia, .visore-mappa__voce { min-height: 44px; min-width: 44px; }
+.visore-mappa__azione-testo { min-height: 44px; min-width: 44px; }
+.visore-mappa__categoria { min-height: 44px; min-width: 44px; }
+
+/* La miniatura di un'entità apre l'ingrandimento: nelle righe sta a 40 px e ingrandirla sposterebbe
+   la riga, quindi si allarga solo l'area che riceve il tocco, senza toccare il riquadro.
+   `overflow: visible` sul bottone è indispensabile: con `overflow: hidden` — che serve a ritagliare
+   l'immagine — il rettangolo del tocco veniva ritagliato con lei e restava 40×40 (rilievo del
+   validatore). Il ritaglio dell'immagine lo fa ora il contenitore interno. */
+.immagine-entita { position: relative; overflow: visible; }
+.immagine-entita > * { overflow: hidden; border-radius: inherit; }
+.immagine-entita::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+
+/* Un collegamento **dentro una frase** resta alto quanto la riga di testo in cui vive: allargarlo
+   vorrebbe dire allargare l'interlinea del paragrafo, e il criterio 2.5.8 lo esclude proprio per
+   questo («inline targets… constrained by the line-height of non-target text»). Il primo tentativo
+   — `padding-block` su tutti i link di `main` — era peggio del male: sui link **a blocco** (le
+   tessere delle Doti nella Home, il credito della fonte) i 30 px erano veri, e la tessera passava
+   da 42 a 72 px a ogni larghezza. I collegamenti che invece sono comandi a sé — «Tutto lo storico»,
+   «Scheda nel compendio», il credito — portano la classe `touch` e valgono 44 px come gli altri. */
+
+/* Le sagome della mappa di Tokyo sono cartellini da 15-25 px, i dedali dei Memento rettangoli da
+   36-41: il disegno non può crescere senza coprire la mappa, quindi cresce solo l'area che riceve
+   il tocco. Verificato con l'hit-testing del browser, non con la misura del riquadro: un rettangolo
+   invisibile dentro un contenitore che ritaglia non riceve niente. */
+.spillo-tokyo, .spillo-esteso { position: absolute; }
+.spillo-tokyo::after, .spillo-esteso::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }

@@ -69,8 +69,8 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
             <span className="text-[13px] text-text-secondary">Come ottenerla: <strong className="text-text">{per.dati.totale}</strong> ricette{per.dati.totale > 0 ? ' (le più economiche)' : ''}</span>
             <span className="flex gap-3">
-              {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="text-[13px] text-primary">Tutte le ricette →</Link>}
-              <Link to={`/fusione?vista=piani&piani=${personaId}`} className="text-[13px] text-primary">Piano di fusione →</Link>
+              {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Tutte le ricette →</Link>}
+              <Link to={`/fusione?vista=piani&piani=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Piano di fusione →</Link>
             </span>
           </div>
           {per.dati.ricette.length > 0 && (
@@ -84,7 +84,7 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
         <div>
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
             <span className="text-[13px] text-text-secondary">Come ingrediente: <strong className="text-text">{con.dati.totale}</strong> fusioni possibili</span>
-            {con.dati.totale > 5 && <Link to={`/fusione?vista=con&con=${personaId}`} className="text-[13px] text-primary">Tutte le fusioni →</Link>}
+            {con.dati.totale > 5 && <Link to={`/fusione?vista=con&con=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Tutte le fusioni →</Link>}
           </div>
           <ul className="m-0 p-0 list-none divide-y divide-border-light">
             {con.dati.ricette.map((r) => <RicettaRiga key={r.ingredienti.map((i) => i.id).join('-') + r.risultato.id} ricetta={r} inScorta={inScorta} />)}
@@ -248,7 +248,7 @@ export function PersonaDettaglioPage() {
                   <span className={`w-14 shrink-0 text-[12px] font-bold ${s.livello === 0 ? 'text-primary' : 'text-text-secondary'}`}>{s.livello === 0 ? 'Innata' : `Liv. ${s.livello}`}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Link to={`/skill/${s.id}`} className="font-semibold no-underline text-text hover:text-primary">{s.nomeIt}</Link>
+                      <Link to={`/skill/${s.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary">{s.nomeIt}</Link>
                       {s.nomeIt !== s.nome && <span className="text-[12px] text-text-muted">{s.nome}</span>}
                       <ElementoChip elemento={s.elemento} nome={s.elementoNome} />
                       <span className="text-[12px] text-text-muted">{s.costo.testo}</span>
@@ -266,7 +266,7 @@ export function PersonaDettaglioPage() {
             <section className="card">
               <h2 className="m-0 mb-2 text-[15px] font-semibold">Tratto</h2>
               <div className="flex items-center gap-2 flex-wrap">
-                <Link to={`/skill/${p.trattoDettaglio.id}`} className="font-semibold no-underline text-text hover:text-primary">{p.trattoDettaglio.nomeIt}</Link>
+                <Link to={`/skill/${p.trattoDettaglio.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary">{p.trattoDettaglio.nomeIt}</Link>
                 {p.trattoDettaglio.nomeIt !== p.trattoDettaglio.nome && <span className="text-[12px] text-text-muted">{p.trattoDettaglio.nome}</span>}
               </div>
               <div className="text-[13px] text-text-secondary">{p.trattoDettaglio.effettoNome}</div>
@@ -295,7 +295,7 @@ export function PersonaDettaglioPage() {
 
           <section className="card">
             <h2 className="m-0 mb-2 text-[15px] font-semibold">Esecuzione (Stanza di Velluto)</h2>
-            <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
+            <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
               <dt className="text-text-muted">Normale</dt>
               <dd className="m-0"><strong>{p.oggettoNomeIt ?? p.oggetto}</strong>{p.oggettoNomeIt && p.oggettoNomeIt !== p.oggetto && <span className="text-text-muted"> ({p.oggetto})</span>}{p.oggettoDescrizione && <span className="text-text-secondary"> — {p.oggettoDescrizione}</span>}</dd>
               <dt className="text-text-muted">Con Allarme</dt>

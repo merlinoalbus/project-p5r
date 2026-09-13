@@ -33,7 +33,7 @@ export function SkillDettaglioPage() {
               <span className="chip">{s.costo.testo}</span>
             </div>
             <p className="m-0 text-[15px]">{s.effettoNome}</p>
-            <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
+            <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
               {s.fonteCartaNome && (<><dt className="text-text-muted">Carta abilità</dt><dd className="m-0">{s.fonteCartaNome}</dd></>)}
               {s.negoziazioneNome && (<><dt className="text-text-muted">Negoziazione</dt><dd className="m-0">{s.negoziazioneNome}</dd></>)}
               {s.unicaNome && (<><dt className="text-text-muted">Esclusiva</dt><dd className="m-0">{s.unicaNome}</dd></>)}

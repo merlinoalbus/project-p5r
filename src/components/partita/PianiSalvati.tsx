@@ -37,7 +37,9 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
         <span className="text-[12px] text-text-muted">{piano.arcanaNome} · livello {piano.livello}</span>
         {modificaTitolo ? (
           <form className="flex items-center gap-1" onSubmit={(e) => { e.preventDefault(); onCambiaTitolo(titolo); setModificaTitolo(false); }}>
-            <input className="form-input h-9 w-[180px]" value={titolo} onChange={(e) => setTitolo(e.target.value)} maxLength={80} aria-label="Titolo del piano" />
+            {/* `h-9` forzava 36 px e vinceva sul minimo della classe: un campo che si compila col
+                tablet in mano dev'essere alto 44 come tutti gli altri. */}
+            <input className="form-input w-[180px]" value={titolo} onChange={(e) => setTitolo(e.target.value)} maxLength={80} aria-label="Titolo del piano" />
             <button type="submit" className="btn btn-primary btn-sm">Ok</button>
           </form>
         ) : (

@@ -143,7 +143,8 @@ export function AgendaGiorno({ giorno, partitaId, compatto, onAggiorna }: Props)
             <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label={`Cose da fare: ${f === 'giorno' ? 'di giorno' : 'di sera'}`}>
               {azioni.map((a) => (
                 <li key={a.id} className={`flex items-start gap-2 text-[13px] py-1 border-b border-border-light last:border-0 ${a.fatta ? 'opacity-60' : ''}`}>
-                  {partitaId && <input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={a.fatta} disabled={occupato} onChange={(e) => spunta(a, e.target.checked)} aria-label={`Fatto: ${a.azione}`} />}
+                  {/* la casella da sola è 20 px: l'etichetta attorno la rende toccabile per 44 senza cambiarne l'aspetto */}
+                  {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato} onChange={(e) => spunta(a, e.target.checked)} aria-label={`Fatto: ${a.azione}`} /></label>}
                   <span className={`flex-1 min-w-0 ${a.fatta ? 'line-through' : ''}`}>
                     {a.azione}
                     {a.note && <span className="block text-[12px] text-text-secondary">{a.note}</span>}

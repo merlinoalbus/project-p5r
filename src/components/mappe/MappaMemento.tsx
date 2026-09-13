@@ -103,7 +103,7 @@ export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, classN
         type="button"
         aria-pressed={scelto}
         onClick={() => onSeleziona?.(t.area.chiave)}
-        className={`group absolute -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 ${scelto ? 'z-30' : 'z-10 hover:z-20'}`}
+        className={`spillo-esteso group absolute -translate-x-1/2 -translate-y-1/2 border-0 bg-transparent p-0 ${scelto ? 'z-30' : 'z-10 hover:z-20'}`}
         style={{ left: `${t.posa.x}%`, top: `${t.posa.y}%`, width: `${t.posa.larghezza}%` }}
         title={t.area.nome}
       >

@@ -35,8 +35,10 @@ export function PiastrellaPersona({ persona: p, evidenziata, onApri }: Props) {
           {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute right-0 bottom-0 w-12 h-12 object-contain drop-shadow" fallback={null} />}
         </div>
         <div className="min-w-0">
-          <div className="font-display uppercase text-[19px] leading-none truncate" title={p.nomeIt}>{p.nomeIt}</div>
-          {p.nomeIt !== p.nome && <div className="text-[11px] text-text-muted truncate">{p.nome}</div>}
+          {/* il nome è l'identità della piastrella: va a capo invece di finire in «…» (i nomi lunghi —
+              Magatsu-Izanagi Picaro, Amuleto dell'Imperatore — sbordavano di 60 px su telefono) */}
+          <div className="font-display uppercase text-[19px] leading-[1.05] break-words" title={p.nomeIt}>{p.nomeIt}</div>
+          {p.nomeIt !== p.nome && <div className="text-[11px] text-text-muted break-words">{p.nome}</div>}
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="chip">{p.arcanaNome}</span>

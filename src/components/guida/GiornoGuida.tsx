@@ -58,7 +58,8 @@ export function Azione({ a, data, partitaId, onCambiata, onSullaMappa, evidenzia
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
     <li className={`azione flex items-start gap-2 py-1.5 ${a.fatta ? 'opacity-60' : ''} ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''}`} aria-current={evidenziata ? 'true' : undefined}>
-      {partitaId && <input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={a.fatta} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} />}
+      {/* idem: il bersaglio è l'etichetta, non il quadratino */}
+      {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
       {a.riferimento?.tipo === 'confidente' ? (
         <ImmagineEntita ambito="confidente" chiave={a.riferimento.chiave} etichetta={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} adatta="copri" />
       ) : a.riferimento?.tipo === 'dungeon' ? (
@@ -133,7 +134,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onAgendaAggiornata, onSu
         {g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
         {g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
         {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
-        {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
+        {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
       </section>
       {azioniGiorno.length > 0 && (
         <section className={classeSezione('giorno')} aria-current={fasciaCorrente === 'giorno' ? 'true' : undefined}>

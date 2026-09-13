@@ -17,7 +17,7 @@ interface Props {
 function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
   const [occupato, setOccupato] = useState(false);
   const nome = a.nomeIt ?? a.nome;
-  const acquistoBloccato = a.disponibilita?.stato === 'bloccato' && !a.acquistato;
+  const acquistoBloccato = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile' && !a.acquistato;
   const cambia = async (fatto: boolean) => {
     setOccupato(true);
     try { onCambiato(await impostaAcquisto(partitaId!, a.chiave, fatto)); }
@@ -29,7 +29,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<
       <strong className={a.acquistato ? 'line-through' : ''}>{nome}</strong>
       <span className="catalogo-prodotto__meta">{NOME_CATEGORIA_ARTICOLO[a.categoria] ?? a.categoria}{a.per && <> · <span>{a.per}</span></>}</span>
       {a.statistiche && <span className="text-text-secondary">{a.statistiche}</span>}
-      {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`}>{a.negozioNome}</Link>}
+      {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`} className="touch inline-flex items-center">{a.negozioNome}</Link>}
     </div>
     <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Prezzo</span><strong>{a.prezzo !== null ? `${a.prezzo.toLocaleString('it-IT')} ¥` : 'Non indicato'}</strong></div>
     {/* La colonna dice **se si può comprare**, e basta: c'era anche «2 requisiti · apri
