@@ -406,3 +406,69 @@ it('con molte voci l’elenco si limita allo spazio della tela e le voci scorron
     expect(within(elenco).getByRole('button', { name: /Ingrandisci qui/ })).toBeInTheDocument();
   } finally { misura.mockRestore(); }
 });
+
+// Tre casi che il tetto dell'elenco deve rispettare, e che sfuggivano al primo tentativo.
+describe('l’elenco del gruppo e lo spazio che ha davvero', () => {
+  const molti = (n: number): MappaDto => ({
+    ...mappa, numeroSpilli: n,
+    spilli: Array.from({ length: n }, (_, i) => spillo({ id: 200 + i, nome: `Spillo ${i + 1}`, tipo: 'nota', tipoNome: 'Nota', x: 50 + i * 0.05, y: 50 })),
+  });
+  const apri = async (m: MappaDto, tela: { w: number; h: number }, stretto = false) => {
+    cleanup();
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: tela.w, height: tela.h, left: 0, top: 0, right: tela.w, bottom: tela.h, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    // jsdom non ha `matchMedia`: lo si mette e lo si toglie (il componente ci legge lo schermo stretto)
+    const prima = window.matchMedia;
+    window.matchMedia = ((q: string) => ({ matches: stretto, media: q, onchange: null, addEventListener: () => {}, removeEventListener: () => {}, addListener: () => {}, removeListener: () => {}, dispatchEvent: () => false })) as typeof window.matchMedia;
+    try {
+      render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+      await waitFor(() => expect(screen.getByRole('button', { name: /spilli vicini/ })).toBeInTheDocument());
+      fireEvent.click(screen.getByRole('button', { name: /spilli vicini/ }));
+      const elenco = await screen.findByRole('dialog', { name: /spilli vicini/ });
+      return { elenco, voci: elenco.querySelector('ul') as HTMLElement };
+    } finally { misura.mockRestore(); window.matchMedia = prima; }
+  };
+
+  it('su schermo stretto non mette tetti in linea: il foglio ha già il suo', async () => {
+    const { elenco, voci } = await apri(molti(17), { w: 375, h: 600 }, true);
+    expect(elenco.className).toContain('spillo-popup--foglio');
+    expect(voci.style.maxHeight).toBe('');
+  });
+
+  it('su una tela bassa, dove non ci sta da nessun lato, diventa un foglio invece di farsi tagliare', async () => {
+    const { elenco } = await apri(molti(17), { w: 900, h: 150 });
+    expect(elenco.className).toContain('spillo-popup--foglio');
+  });
+
+  it('quando ci sta, il riquadro intero — contorno compreso — resta dentro il lato scelto', async () => {
+    const { elenco, voci } = await apri(molti(17), { w: 1000, h: 900 });
+    expect(elenco.className).not.toContain('spillo-popup--foglio');
+    const tetto = Number(voci.style.maxHeight.replace('px', ''));
+    // Lo spazio sopra il gruppo non è metà tela: dipende dal fit. Lo si ricava dov'è finito il
+    // livello, così il test misura la regola e non un numero indovinato.
+    const t = /translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec((document.querySelector('.visore-mappa__livello') as HTMLElement).style.transform)!;
+    const [, , panY, z] = t;
+    const sopra = Number(panY) + 250 * Number(z);   // il gruppo sta al 50% di un'immagine alta 500
+    expect(tetto + 152).toBeLessThanOrEqual(sopra + 0.001);   // 152 = contorno (118) + stacco e respiro (34)
+    expect(tetto).toBeGreaterThanOrEqual(44);
+  });
+});
+
+// Sul punto, dopo lo scorporo, ci sono due bersagli: il pin che si trascina e la pastiglia di chi
+// resta. Se la pastiglia non si sposta se li tolgono a vicenda — misurati 38×38 e 38×34, coi centri
+// a 19 px (rilievo del validatore, 2026-09-13).
+it('nell’editor la pastiglia del residuo si scosta dal pin selezionato', () => {
+  const coincidenti: MappaDto = {
+    ...mappa, numeroSpilli: 2, spilli: [
+      spillo({ id: 51, nome: 'Sopra', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+      spillo({ id: 52, nome: 'Sotto', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+    ],
+  };
+  const editor = { strumento: 'seleziona' as const, selezionatoId: 51, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() };
+  const { container } = render(<MemoryRouter><VisoreMappa mappa={coincidenti} partitaId={null} onNaviga={vi.fn()} editor={editor} /></MemoryRouter>);
+  const pastiglia = container.querySelector('.spillo-mappa--gruppo') as HTMLElement;
+  expect(pastiglia.style.transform).toContain('calc(-50% + 46px)');
+  // e senza scorporo la pastiglia resta sul punto
+  cleanup();
+  const { container: c2 } = render(<MemoryRouter><VisoreMappa mappa={coincidenti} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+  expect((c2.querySelector('.spillo-mappa--gruppo') as HTMLElement).style.transform).toContain('calc(-50% + 0px)');
+});

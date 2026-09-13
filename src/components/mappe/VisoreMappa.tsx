@@ -93,11 +93,16 @@ const DISTANZA_MINIMA_SPILLI = 46;
 const nomeGruppo = (n: number) => (n === 1 ? '1 spillo vicino' : `${n} spilli vicini`);
 /** L'altezza della goccia di uno spillo singolo (`.spillo-mappa__goccia`), che è ancorata alla punta. */
 const ALTEZZA_GOCCIA = 38;
+/** Di quanto si sposta di lato la pastiglia quando sul punto c'è il pin selezionato: il centro del
+ *  bersaglio del pin sta mezza goccia più in alto, quindi 46 px in orizzontale portano la distanza
+ *  fra i due centri a √(46² + 19²) ≈ 50, sopra il minimo. */
+const SCOSTO_PASTIGLIA = 46;
 const DIMENSIONE_RISERVA = 1000;
 
 interface Dimensioni { w: number; h: number }
 interface Punto { x: number; y: number }
-type Gruppo = { chiave: string; x: number; y: number; spilli: SpilloDto[] };
+/** `scostato`: la pastiglia si sposta di lato perché sul punto c'è il pin che si sta trascinando. */
+type Gruppo = { chiave: string; x: number; y: number; spilli: SpilloDto[]; scostato?: boolean };
 
 const limita = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
@@ -471,7 +476,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       // riaprirla (rilievo del validatore, 2026-09-13).
       if (membri.length === 1 && !scorporato) { singoli.push(...membri); continue; }
       const chiave = membri.map((s) => s.id).sort((a, b) => a - b).join('-');
-      gruppi.push({ chiave, x: membri.reduce((a, s) => a + s.x, 0) / membri.length, y: membri.reduce((a, s) => a + s.y, 0) / membri.length, spilli: membri });
+      // Scostata: sul punto ora c'è il pin selezionato, e se la pastiglia gli restasse addosso i due
+      // bersagli si toglierebbero spazio a vicenda — misurati 38×38 e 38×34, coi centri a 19 px
+      // (rilievo del validatore, 2026-09-13). Spostandola di SCOSTO_PASTIGLIA la distanza fra i
+      // centri torna sopra i 46 px e tutti e due ricevono il loro bersaglio.
+      gruppi.push({ chiave, x: membri.reduce((a, s) => a + s.x, 0) / membri.length, y: membri.reduce((a, s) => a + s.y, 0) / membri.length, spilli: membri, scostato: scorporato });
     }
     return { singoli, gruppi };
   })();
@@ -485,19 +494,28 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // La stima delle voci serve solo a preferire il lato consueto — sopra — quando l'elenco ci sta
   // tutto; il resto lo fa `maxHeight`, che non stima niente.
   const elenco = (() => {
-    if (!gruppoScelto) return { sotto: false, dx: 0, altezzaVoci: undefined as number | undefined };
+    if (!gruppoScelto) return { sotto: false, dx: 0, altezzaVoci: undefined as number | undefined, foglio: schermoStretto };
+    // Il contorno attorno alle voci, contato e non stimato: 26 px di stacco dalla pastiglia, 8 di
+    // respiro dal bordo, 2 di bordo e 16 di padding del riquadro, 44 d'intestazione (il tasto di
+    // chiusura è alto 44), 44 di «Ingrandisci qui» e i due stacchi da 6 fra le tre parti.
+    const CONTORNO = 26 + 8 + 2 + 16 + 44 + 6 + 6 + 44;
+    const VOCE = 44;
     const y = pan.y + (gruppoScelto.y / 100) * nat.h * zoom;
     const sopra = y, sotto = Math.max(0, dim.h - y);
-    // 26 px di stacco dalla pastiglia, 8 di respiro dal bordo; 48 d'intestazione e 44 per «Ingrandisci qui».
-    const naturale = 110 + 44 * gruppoScelto.spilli.length;
-    const stai = (spazio: number) => spazio >= naturale + 34;
-    const verso = stai(sopra) ? false : stai(sotto) ? true : sotto > sopra;
-    const disponibile = (verso ? sotto : sopra) - 34;
+    const naturale = CONTORNO + VOCE * gruppoScelto.spilli.length;
+    const capiente = Math.max(sopra, sotto);
+    // Sul telefono è già un foglio dal basso, e lì il punto sulla mappa non c'entra: il tetto lo dà
+    // il foglio (60dvh), non la tela. A schermo largo si passa al foglio solo quando nemmeno una
+    // voce ci starebbe dal lato migliore — ancorarlo al punto vorrebbe dire tagliarlo comunque.
+    const foglio = schermoStretto || dim.h === 0 ? schermoStretto : capiente < CONTORNO + VOCE;
+    const verso = sopra >= naturale ? false : sotto >= naturale ? true : sotto > sopra;
     return {
       sotto: verso,
       dx: scostamento(gruppoScelto.x),
-      // Con la tela ancora da misurare non si limita niente: meglio un elenco intero che uno alto zero.
-      altezzaVoci: dim.h === 0 ? undefined : Math.max(88, disponibile - 92),
+      foglio,
+      // Con la tela ancora da misurare, o col foglio, non si limita niente in linea: il foglio ha
+      // già il suo tetto e il suo scorrimento, e un numero preso dalla tela lo strozzerebbe.
+      altezzaVoci: dim.h === 0 || foglio || schermoStretto ? undefined : Math.max(VOCE, (verso ? sotto : sopra) - CONTORNO),
     };
   })();
   const elencoSotto = elenco.sotto;
@@ -755,7 +773,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   className={`spillo-mappa spillo-mappa--gruppo ${aperto || dentro ? 'spillo-mappa--selezionato' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il gruppo si fa da parte: il tocco serve a
                   // posare un pin in quel punto, non ad aprire un elenco.
-                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(-50%, -50%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined }}
+                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${g.scostato ? SCOSTO_PASTIGLIA : 0}px), -50%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined }}
                   aria-label={`${nomeGruppo(g.spilli.length)}: ${g.spilli.map((s) => s.nome).join(", ")}`}
                   aria-expanded={aperto}
                   title={g.spilli.map((s) => s.nome).join(', ')}
@@ -771,15 +789,15 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 Senza, a 768 e 1280 l'intestazione e il tasto di chiusura finivano fuori dal
                 ritaglio (rilievo del validatore, 2026-09-13). L'altezza cresce con gli spilli:
                 48 px d'intestazione, 44 per voce, 44 per «Ingrandisci qui», più i margini. */}
-            {gruppoScelto && inPortale(schermoStretto, (
-              <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={nomeGruppo(gruppoScelto.spilli.length)}
-                style={schermoStretto ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx * zoom}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx * zoom}px)` } as CSSProperties}
+            {gruppoScelto && inPortale(elenco.foglio, (
+              <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''} ${elenco.foglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={nomeGruppo(gruppoScelto.spilli.length)}
+                style={elenco.foglio ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx * zoom}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx * zoom}px)` } as CSSProperties}
                 onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <strong className="flex-1 text-[13px] leading-tight">{gruppoScelto.spilli.length === 1 ? 'Un altro spillo qui' : `${gruppoScelto.spilli.length} spilli qui`}</strong>
                   <button type="button" className="spillo-popup__chiudi touch" onClick={() => setGruppoAperto(null)} aria-label="Chiudi l’elenco">×</button>
                 </div>
-                <ul className="m-0 p-0 list-none flex flex-col gap-0.5" style={{ maxHeight: elenco.altezzaVoci, overflowY: 'auto' }}>
+                <ul className="m-0 p-0 list-none flex flex-col gap-0.5" style={elenco.altezzaVoci === undefined ? undefined : { maxHeight: elenco.altezzaVoci, overflowY: 'auto' }}>
                   {gruppoScelto.spilli.map((s) => (
                     <li key={s.id}>
                       <button type="button" className="visore-mappa__voce" onClick={() => { setGruppoAperto(null); seleziona(s.id); }}>

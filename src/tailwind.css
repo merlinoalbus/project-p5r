@@ -526,6 +526,12 @@
     .spillo-popup::after, .spillo-popup--sotto::after { display: none; }
     .spillo-popup__merce { max-height: none; overflow: visible; }
   }
+  /* Lo stesso foglio, a qualunque larghezza, quando il riquadro non sta né sopra né sotto il punto:
+     su una tela bassa (il visore incorporato ne ha 240 di minimo) un elenco di molte voci non ci
+     entra da nessun lato, e ancorarlo al punto vorrebbe dire tagliarlo comunque. Meglio il foglio,
+     che scorre e si vede tutto — è il gesto che sul telefono si conosce già. */
+  .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom)); top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; z-index: 40; }
+  .spillo-popup--foglio::after { display: none; }
   /* ---- Home in una schermata (desktop): il contenuto riempie l'altezza disponibile e scorre solo la guida del giorno ---- */
   /* La pagina riempie l'area di lettura (main è flex-col con overflow proprio): niente 100vh, niente taglio del contenuto. */
   @media (min-width: 768px) {
