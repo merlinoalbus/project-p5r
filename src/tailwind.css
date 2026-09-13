@@ -530,8 +530,13 @@
      su una tela bassa (il visore incorporato ne ha 240 di minimo) un elenco di molte voci non ci
      entra da nessun lato, e ancorarlo al punto vorrebbe dire tagliarlo comunque. Meglio il foglio,
      che scorre e si vede tutto — è il gesto che sul telefono si conosce già. */
-  .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom)); top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; z-index: 40; }
+  /* I 64 px di stacco servono a scavalcare la barra inferiore, che c'è solo sotto i 1024: da lì in
+     su il foglio starebbe a galleggiare su un vuoto preso da un altro contesto. */
+  .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; z-index: 40; }
   .spillo-popup--foglio::after { display: none; }
+  @media (max-width: 1023px) {
+    .spillo-popup--foglio { bottom: calc(64px + env(safe-area-inset-bottom)); }
+  }
   /* ---- Home in una schermata (desktop): il contenuto riempie l'altezza disponibile e scorre solo la guida del giorno ---- */
   /* La pagina riempie l'area di lettura (main è flex-col con overflow proprio): niente 100vh, niente taglio del contenuto. */
   @media (min-width: 768px) {
@@ -596,8 +601,6 @@
   .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--color-text-secondary); }
   .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: 13px; }
   .editor-mappa__risultati { max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border); }
-  .editor-mappa__risultato { display: flex; gap: 6px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--color-border); padding: 6px 8px; color: var(--color-text); font: inherit; font-size: 12px; cursor: pointer; min-height: 36px; }
-  .editor-mappa__risultato:hover { background: var(--color-surface); }
   .editor-mappa__avviso { font-size: 12px; color: var(--color-warning, #f5c542); }
   /* palette dei tipi a gruppi (15.24) e righe «senza passaggio» dell'albero: testo + pulsante «Crea passaggio» (44 px al tocco) */
   .editor-mappa__gruppo { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); padding: 2px 0 0; }
@@ -1423,7 +1426,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .editor-mappa__ricerca { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; }
 .editor-mappa__ricerca .selettore { grid-column:1/-1; }
 .editor-mappa__ricerca input { min-width:0; }
-.visore-mappa--editor .editor-mappa__campo .form-input, .visore-mappa--editor .editor-mappa__risultato { min-height:44px; font-size:14px; }
+.visore-mappa--editor .editor-mappa__campo .form-input { min-height:44px; font-size:14px; }
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; }
 @media (max-width:860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:12px; padding:4px 2px; } }
 

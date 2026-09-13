@@ -466,9 +466,48 @@ it('nell’editor la pastiglia del residuo si scosta dal pin selezionato', () =>
   const editor = { strumento: 'seleziona' as const, selezionatoId: 51, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() };
   const { container } = render(<MemoryRouter><VisoreMappa mappa={coincidenti} partitaId={null} onNaviga={vi.fn()} editor={editor} /></MemoryRouter>);
   const pastiglia = container.querySelector('.spillo-mappa--gruppo') as HTMLElement;
-  expect(pastiglia.style.transform).toContain('calc(-50% + 46px)');
+  expect(distanzaDalPin(container)).toBeGreaterThanOrEqual(46);
+  expect(pastiglia.style.transform).not.toContain('+ 0px), calc(-50% + 0px)');
   // e senza scorporo la pastiglia resta sul punto
   cleanup();
   const { container: c2 } = render(<MemoryRouter><VisoreMappa mappa={coincidenti} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
-  expect((c2.querySelector('.spillo-mappa--gruppo') as HTMLElement).style.transform).toContain('calc(-50% + 0px)');
+  expect((c2.querySelector('.spillo-mappa--gruppo') as HTMLElement).style.transform).toContain('calc(-50% + 0px), calc(-50% + 0px)');
+});
+
+/** Distanza fra il centro del bersaglio del pin selezionato e quello della pastiglia scostata,
+ *  letta dagli stili resi (in jsdom i rettangoli sono tutti a zero, le percentuali no). */
+function distanzaDalPin(container: HTMLElement): number {
+  const liv = container.querySelector('.visore-mappa__livello') as HTMLElement;
+  const t = /translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec(liv.style.transform)!;
+  const [, panX, panY, z] = t.slice(0).map(String);
+  const zoom = Number(z);
+  const perc = (el: HTMLElement) => ({ x: Number(el.style.left.replace('%', '')), y: Number(el.style.top.replace('%', '')) });
+  const schermo = (p: { x: number; y: number }) => ({ x: Number(panX) + (p.x / 100) * 1000 * zoom, y: Number(panY) + (p.y / 100) * 500 * zoom });
+  const pin = container.querySelector('.spillo-mappa--selezionato:not(.spillo-mappa--gruppo)') as HTMLElement;
+  const pastiglia = container.querySelector('.spillo-mappa--gruppo') as HTMLElement;
+  const cp = schermo(perc(pin));
+  const cg = schermo(perc(pastiglia));
+  // i numeri possono uscire in notazione esponenziale (1.77e-15): il pattern deve accettarla
+  const sc = /calc\(-50% \+ ([-+.\deE]+)px\), calc\(-50% \+ ([-+.\deE]+)px\)/.exec(pastiglia.style.transform);
+  const dx = sc ? Number(sc[1]) / zoom : 0, dy = sc ? Number(sc[2]) / zoom : 0;
+  return Math.hypot(cg.x + dx - cp.x, cg.y + dy - (cp.y - 19));
+}
+
+// Il caso che mancava: pin e residuo **non** coincidenti. Lo scostamento fisso a destra funzionava
+// solo quando coincidono — l'unico provato — e negli altri spingeva la pastiglia *verso* il pin,
+// fino a 13 px (rilievo del validatore, 2026-09-13, misurato su tutto il pacchetto).
+it('nell’editor lo scostamento è preso dal pin, non da un lato fisso', () => {
+  for (const [dx, dy] of [[0.6, 0], [-0.6, 0], [0, 0.9], [0, -0.9], [0.4, 0.6], [-0.4, -0.6]]) {
+    cleanup();
+    const m: MappaDto = {
+      ...mappa, numeroSpilli: 2, spilli: [
+        spillo({ id: 61, nome: 'Scelto', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+        spillo({ id: 62, nome: 'Resta', tipo: 'nota', tipoNome: 'Nota', x: 50 + dx, y: 50 + dy }),
+      ],
+    };
+    const { container } = render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()}
+      editor={{ strumento: 'seleziona', selezionatoId: 61, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
+    expect(container.querySelector('.spillo-mappa--gruppo')).not.toBeNull();
+    expect(distanzaDalPin(container)).toBeGreaterThanOrEqual(45.999);
+  }
 });

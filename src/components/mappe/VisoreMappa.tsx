@@ -93,16 +93,13 @@ const DISTANZA_MINIMA_SPILLI = 46;
 const nomeGruppo = (n: number) => (n === 1 ? '1 spillo vicino' : `${n} spilli vicini`);
 /** L'altezza della goccia di uno spillo singolo (`.spillo-mappa__goccia`), che è ancorata alla punta. */
 const ALTEZZA_GOCCIA = 38;
-/** Di quanto si sposta di lato la pastiglia quando sul punto c'è il pin selezionato: il centro del
- *  bersaglio del pin sta mezza goccia più in alto, quindi 46 px in orizzontale portano la distanza
- *  fra i due centri a √(46² + 19²) ≈ 50, sopra il minimo. */
-const SCOSTO_PASTIGLIA = 46;
 const DIMENSIONE_RISERVA = 1000;
 
 interface Dimensioni { w: number; h: number }
 interface Punto { x: number; y: number }
-/** `scostato`: la pastiglia si sposta di lato perché sul punto c'è il pin che si sta trascinando. */
-type Gruppo = { chiave: string; x: number; y: number; spilli: SpilloDto[]; scostato?: boolean };
+/** `scostato`: la pastiglia si sposta perché sul punto c'è il pin che si sta trascinando;
+ *  `scosto` è di quanto, in pixel di schermo, calcolato a partire da dov'è quel pin. */
+type Gruppo = { chiave: string; x: number; y: number; spilli: SpilloDto[]; scostato?: boolean; scosto?: Punto };
 
 const limita = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
@@ -476,11 +473,41 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       // riaprirla (rilievo del validatore, 2026-09-13).
       if (membri.length === 1 && !scorporato) { singoli.push(...membri); continue; }
       const chiave = membri.map((s) => s.id).sort((a, b) => a - b).join('-');
-      // Scostata: sul punto ora c'è il pin selezionato, e se la pastiglia gli restasse addosso i due
-      // bersagli si toglierebbero spazio a vicenda — misurati 38×38 e 38×34, coi centri a 19 px
-      // (rilievo del validatore, 2026-09-13). Spostandola di SCOSTO_PASTIGLIA la distanza fra i
-      // centri torna sopra i 46 px e tutti e due ricevono il loro bersaglio.
       gruppi.push({ chiave, x: membri.reduce((a, s) => a + s.x, 0) / membri.length, y: membri.reduce((a, s) => a + s.y, 0) / membri.length, spilli: membri, scostato: scorporato });
+    }
+
+    // **Dove va la pastiglia del residuo.** Sul punto ora c'è il pin selezionato, e se la pastiglia
+    // gli restasse addosso i due bersagli si toglierebbero spazio a vicenda (misurati 38×38 e 38×34,
+    // coi centri a 19 px). Il primo rimedio la spostava di 46 px a destra: funzionava solo quando il
+    // pin coincide col residuo — l'unico caso che avevo provato — e nel 23-31% degli altri la
+    // spingeva *verso* il pin, fino a 13 px (rilievo del validatore, 2026-09-13, misurato su tutto
+    // il pacchetto). Lo scostamento va quindi preso **dal pin**: si allontana nella direzione
+    // opposta, quanto basta, e fra otto direzioni si sceglie quella che resta più lontana anche
+    // dalle altre nubi e dentro la tela.
+    const daScostare = gruppi.find((g) => g.scostato);
+    const selScorporato = daScostare ? singoli.find((s) => s.id === selezionatoId) : undefined;
+    if (daScostare && selScorporato) {
+      const pin = perSchermo(selScorporato);
+      const centroPin = { x: pin.x, y: pin.y - ALTEZZA_GOCCIA / 2 };
+      const base = perSchermo({ ...selScorporato, x: daScostare.x, y: daScostare.y });
+      const altri = gruppi.filter((g) => g !== daScostare).map((g) => perSchermo({ ...selScorporato, x: g.x, y: g.y }))
+        .concat(singoli.filter((s) => s.id !== selezionatoId).map((s) => { const p = perSchermo(s); return { x: p.x, y: p.y - ALTEZZA_GOCCIA / 2 }; }));
+      const dist = (a: Punto, b: Punto) => Math.hypot(a.x - b.x, a.y - b.y);
+      let scelto = { x: 0, y: 0 }, voto = -Infinity;
+      for (let k = 0; k < 8; k++) {
+        const ang = (k * Math.PI) / 4;
+        const u = { x: Math.cos(ang), y: Math.sin(ang) };
+        // quanto serve in questa direzione perché il centro disti DISTANZA_MINIMA_SPILLI dal pin
+        let d = 0;
+        while (d <= 96 && dist({ x: base.x + u.x * d, y: base.y + u.y * d }, centroPin) < DISTANZA_MINIMA_SPILLI) d += 2;
+        if (d > 96) continue;
+        const pos = { x: base.x + u.x * d, y: base.y + u.y * d };
+        const fuori = dim.w > 0 && (pos.x < 22 || pos.x > dim.w - 22 || pos.y < 22 || pos.y > dim.h - 22);
+        const minAltri = altri.length ? Math.min(...altri.map((a) => dist(pos, a))) : 999;
+        const punteggio = Math.min(minAltri, 999) - d / 8 - (fuori ? 1000 : 0);
+        if (punteggio > voto) { voto = punteggio; scelto = { x: pos.x - base.x, y: pos.y - base.y }; }
+      }
+      daScostare.scosto = scelto;
     }
     return { singoli, gruppi };
   })();
@@ -773,7 +800,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   className={`spillo-mappa spillo-mappa--gruppo ${aperto || dentro ? 'spillo-mappa--selezionato' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il gruppo si fa da parte: il tocco serve a
                   // posare un pin in quel punto, non ad aprire un elenco.
-                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${g.scostato ? SCOSTO_PASTIGLIA : 0}px), -50%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined }}
+                  style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${(g.scosto?.x ?? 0) * zoom}px), calc(-50% + ${(g.scosto?.y ?? 0) * zoom}px))`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined }}
                   aria-label={`${nomeGruppo(g.spilli.length)}: ${g.spilli.map((s) => s.nome).join(", ")}`}
                   aria-expanded={aperto}
                   title={g.spilli.map((s) => s.nome).join(', ')}
@@ -787,8 +814,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
             {/* L'elenco sta dentro la tela, che ritaglia: come il popup dello spillo scorre in
                 orizzontale quanto basta e si ribalta sotto il gruppo quando sopra non c'è posto.
                 Senza, a 768 e 1280 l'intestazione e il tasto di chiusura finivano fuori dal
-                ritaglio (rilievo del validatore, 2026-09-13). L'altezza cresce con gli spilli:
-                48 px d'intestazione, 44 per voce, 44 per «Ingrandisci qui», più i margini. */}
+                ritaglio (rilievo del validatore, 2026-09-13). Quanto sia alto e da che parte stia
+                lo decide `elenco`, qui sopra, contando il contorno invece di stimarlo. */}
             {gruppoScelto && inPortale(elenco.foglio, (
               <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''} ${elenco.foglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={nomeGruppo(gruppoScelto.spilli.length)}
                 style={elenco.foglio ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx * zoom}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx * zoom}px)` } as CSSProperties}
