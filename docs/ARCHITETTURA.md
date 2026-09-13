@@ -443,7 +443,12 @@ Guida (`impostaStatoPunto`, stessi stati della scheda del Palazzo) e acquisto de
 
 ### Editor delle mappe (Fase 13.3)
 `src/pages/EditorMappaPage.tsx` riusa `VisoreMappa` con `editor` (strumento seleziona/sposta o aggiungi, spillo selezionato, click sulla
-mappa, fine trascinamento) e con `pannello`/`intestazione` propri. Ogni modifica è salvata subito via API e la mappa viene ricaricata
+mappa, fine trascinamento, `onVisita` per il doppio tocco) e con `pannello`/`intestazione` propri.
+**Collegamenti** (2026-09-13): l'albero dice chi contiene chi, `PassaggiMappa` dice dove si va e da dove si arriva. Le uscite sono gli
+spilli di spostamento della mappa (`arrivoSpillo`), gli arrivi stanno in `MappaDto.arrivi` — gli spilli di altre mappe che puntano qui,
+letti sia da `spillo_destinazione` sia dal riferimento `mappa` dei passaggi vecchi. Servono perché in città i collegamenti sono laterali
+(sorelle, treni fra quartieri) e l'albero non li rappresenta. Nell'editor si naviga senza uscire dalla modifica: doppio tocco sul pin,
+voci dell'elenco, «Apri l'arrivo» in cima al pannello dello spillo. Ogni modifica è salvata subito via API e la mappa viene ricaricata
 senza smontare il visore (`isLoading` solo senza dati: zoom e posizione restano). Riferimenti cercati con `GET /api/mappe/riferimenti`
 (`cercaRiferimenti`: LIKE su nome/chiave per tipo). Schermate degli spilli: migrazione 028 `spillo_immagine` (immagine dell'istanza
 nell'ambito «spillo» oppure `asset` del repository, didascalia, ordine), rotte `POST /api/mappe/spilli/:id/immagini` (corpo `image/*`),

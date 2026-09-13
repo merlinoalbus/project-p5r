@@ -23,7 +23,7 @@ vi.mock('../services/api', () => api);
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 const albero: MappaRiassuntoDto[] = [riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta' }), riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo' })];
 const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '' };
-const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [] };
+const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [] };
 
 function monta() {
   render(
@@ -299,4 +299,50 @@ it('conserva i campi non salvati cambiando sezione e riapre Spilli quando si sel
  expect(screen.queryByRole('region',{name:'Proprietà dello spillo: Nota'})).toBeNull();
  fireEvent.click(screen.getByRole('button',{name:'Spilli'}));
  expect(form.getByLabelText('Nome')).toHaveValue('Bozza conservata');
+});
+
+// ---- Visitare l'arrivo senza uscire dalla modifica (2026-09-13) ----
+//
+// Nell'editor il clic su uno spillo seleziona per modificare, quindi la via d'uscita va data a
+// parte: doppio tocco sul pin, elenco dei passaggi, pulsante in cima al pannello.
+const passaggio: SpilloDto = { ...nota, id: 11, tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Banchina Metro', destinazione: { mappa: 'shibuya-banchina', spillo: null }, destinazioneNomi: { mappa: 'Banchina della metropolitana', spillo: null } };
+
+it('il doppio tocco su uno spillo di spostamento apre la mappa d’arrivo, restando in modifica', async () => {
+  api.getMappa.mockResolvedValue({ ...base, spilli: [passaggio] });
+  monta();
+  const pin = await screen.findByRole('button', { name: /Passaggio: Banchina Metro/ });
+  expect(pin).toHaveAccessibleName(/doppio tocco per aprire l’arrivo/);
+  fireEvent.doubleClick(pin);
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina'));
+});
+
+async function apriCollegamenti() {
+  api.getMappa.mockResolvedValue({ ...base, spilli: [passaggio], arrivi: [{ spilloId: 21, tipo: 'treno', nome: 'Shibuya', mappa: 'yongen-banchina', mappaNome: 'Banchina di Yongen-Jaya' }] });
+  monta();
+  fireEvent.click(await screen.findByRole('button', { name: 'Collegamenti' }));
+  return within(screen.getByRole('region', { name: 'Passaggi da e verso questa mappa' }));
+}
+
+it('la scheda Collegamenti porta alla mappa dove va un passaggio in uscita', async () => {
+  const passaggi = await apriCollegamenti();
+  fireEvent.click(passaggi.getByRole('button', { name: /Apri Banchina della metropolitana, dove porta/ }));
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina'));
+});
+
+it('la scheda Collegamenti porta anche alla mappa da cui si arriva qui', async () => {
+  const passaggi = await apriCollegamenti();
+  fireEvent.click(passaggi.getByRole('button', { name: /Apri Banchina di Yongen-Jaya, da cui porta/ }));
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('yongen-banchina'));
+});
+
+it('«Apri l’arrivo» sta in cima al pannello dello spillo, prima dei campi', async () => {
+  api.getMappa.mockResolvedValue({ ...base, spilli: [passaggio] });
+  monta();
+  fireEvent.click(await screen.findByRole('button', { name: /Passaggio: Banchina Metro/ }));
+  const scheda = screen.getByRole('region', { name: 'Proprietà dello spillo: Banchina Metro' });
+  const apri = within(scheda).getByRole('button', { name: /Apri l’arrivo/ });
+  const nome = within(scheda).getByLabelText('Nome');
+  expect(apri.compareDocumentPosition(nome) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  fireEvent.click(apri);
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina'));
 });

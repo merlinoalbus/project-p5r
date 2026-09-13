@@ -567,6 +567,8 @@
   .visore-mappa__intestazione { margin: 0; font-family: var(--font-display); font-size: 17px; text-transform: uppercase; letter-spacing: .03em; color: var(--color-text-secondary); }
   .visore-mappa__figlia, .visore-mappa__voce { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 1px solid transparent; padding: 6px 8px; color: var(--color-text); font: inherit; font-size: 13px; cursor: pointer; min-height: 40px; }
   .visore-mappa__figlia:hover, .visore-mappa__voce:hover { border-color: var(--color-border); background: var(--color-surface); }
+  /* Dove la voce è essa stessa il bersaglio da toccare (elenco dei passaggi), i 40px di riga non bastano. */
+  .visore-mappa__figlia.touch, .visore-mappa__voce.touch { min-height: 44px; }
   .visore-mappa__voce--attiva { border-color: var(--color-primary); background: var(--color-primary-bg); }
   .visore-mappa__elenco { max-height: 40vh; overflow-y: auto; }
   .visore-mappa__scheda { border: 1px solid var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary)); padding: 10px; }

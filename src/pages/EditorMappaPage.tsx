@@ -25,6 +25,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { VisoreMappa, GalleriaSpillo, type StrumentiEditor, type StrumentoEditor } from '../components/mappe/VisoreMappa';
 import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
+import { PassaggiMappa } from '../components/mappe/PassaggiMappa';
 
 import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
@@ -109,6 +110,8 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
       }, `Spillo «${DEFINIZIONI_SPILLO[tipoNuovo].nome}» aggiunto: completa nome e riferimento nel pannello.`);
     },
     onSposta: (id, x, y) => void esegui(() => aggiornaSpillo(id, { x, y })),
+    // doppio tocco su uno spostamento: si visita l'arrivo senza uscire dalla modifica
+    onVisita: vai,
   };
 
   const selezionato = dati?.spilli.find((s) => s.id === selezionatoId) ?? null;
@@ -326,6 +329,7 @@ function PannelloEditor(p: PropsPannello) {
         )}
         <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Nuova mappa" dettaglio={`figlia di ${nomePresentazioneMappa(mappa)}`} disabled={occupato} onClick={p.onNuovaMappa} />
       </section>
+      <PassaggiMappa mappa={mappa} albero={p.albero} occupato={occupato} onVai={p.onVai} onCreaPassaggio={(k) => void p.onCreaPassaggio(k)} />
 
       </div>
       <div hidden={sezione !== 'file'} className="editor-mappa__contenuto">
@@ -432,6 +436,10 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         </div>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi le proprietà">×</button>
       </div>
+      {/* Visitare l'arrivo è il gesto più frequente su uno spostamento: sta qui, non in fondo alle azioni. */}
+      {categoria === 'spostamento' && destinazione && (
+        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri l’arrivo" dettaglio={s.destinazioneNomi?.mappa ?? undefined} onClick={() => onVai(destinazione.mappa)} />
+      )}
       <form className="flex flex-col gap-2" onSubmit={salva}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={160} /></label>
         <div className="editor-mappa__campo">
@@ -449,7 +457,6 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: dati.nome, descrizione, riferimento: dati.riferimento, condizioni: dati.condizioni, destinazione: dati.destinazione })} />
-          {categoria === 'spostamento' && destinazione && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri l’arrivo" onClick={() => onVai(destinazione.mappa)} />}
           {categoria === 'spostamento' && !destinazione && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
         </div>

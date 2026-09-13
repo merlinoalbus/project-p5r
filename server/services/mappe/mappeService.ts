@@ -330,6 +330,23 @@ export function schedeContenutiGuida(partitaId?:number):Map<number,SchedaContenu
   return new Map(righe.map(r=>[r.id,{...dettagliSpillo(r,ctx),areaGuida:r.area_guida_chiave!}]));
 }
 
+/**
+ * Gli spilli di altre mappe che portano su questa.
+ *
+ * Il collegamento è scritto in due posti, e vanno letti tutti e due: la destinazione vera
+ * (`spillo_destinazione`, che può puntare anche a uno spillo preciso) e il riferimento `mappa`,
+ * che i passaggi più vecchi usano come ripiego. Uno spillo che ha entrambi conta una volta sola.
+ */
+function arriviVerso(chiave: string): MappaDto['arrivi'] {
+  const righe = prepared(`SELECT s.id, s.tipo, s.nome, s.mappa_chiave, m.nome AS mappa_nome
+    FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave
+    WHERE s.mappa_chiave <> ?
+      AND (( s.riferimento_tipo = 'mappa' AND s.riferimento_chiave = ? )
+        OR s.id IN (SELECT spillo_id FROM spillo_destinazione WHERE mappa_chiave = ?))
+    ORDER BY m.nome, s.ordine, s.id`).all(chiave, chiave, chiave) as Array<{ id: number; tipo: TipoSpillo; nome: string; mappa_chiave: string; mappa_nome: string }>;
+  return righe.map((r) => ({ spilloId: r.id, tipo: r.tipo, nome: r.nome, mappa: chiaveMappa(r.mappa_chiave), mappaNome: r.mappa_nome }));
+}
+
 /** Mappa con percorso, figli, spilli (con stato della partita e dettagli delle entità collegate). */
 export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   const r = rigaMappa(chiave);
@@ -342,7 +359,7 @@ export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   return {
     ...riassunto(r,collezioni), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
     immagineUrl: immagine ? `/api/immagini/mappa/${encodeURIComponent(immagine.chiave)}/file?v=${encodeURIComponent(immagine.createdAt)}` : null,
-    percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli,
+    percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
     genitoreNome: r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as { nome: string } | undefined)?.nome ?? null : null,
   };
 }
