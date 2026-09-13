@@ -107,7 +107,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
           {GRUPPI_EVENTO.map((g) => (
             <button key={g.chiave} type="button" className={`chip chip--icona touch ${gruppo === g.chiave ? 'chip--attivo' : ''}`} onClick={() => setGruppo(g.chiave)} aria-pressed={gruppo === g.chiave}>{ICONE_GRUPPO[g.chiave] ?? <IconaAzione chiave="tutti" dimensione={14} />}{g.nome}</button>
           ))}
-          {eventi && <span className="ml-auto text-[12px] text-text-muted">{totale} {totale === 1 ? 'evento' : 'eventi'}</span>}
+          {eventi && <span className="ml-auto shrink-0 whitespace-nowrap text-[12px] text-text-muted">{totale} {totale === 1 ? 'evento' : 'eventi'}</span>}
         </div>
       )}
       {prima.errore && <div className="text-[13px] text-error">{prima.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void prima.ricarica()} /></div>}

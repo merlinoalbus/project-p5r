@@ -23,10 +23,13 @@ export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto;
   const max = Math.max(0, ...d.scelte.map((s) => s.punti ?? 0));
   return (
     <li className="border border-border-light rounded-lg">
-      <button type="button" className="w-full text-left px-3 py-2 flex items-center gap-2 touch" onClick={onToggle} aria-expanded={aperto}>
-        <span className="font-semibold">Rango {d.etichetta}</span>
-        <span className="text-[12px] text-text-muted">{d.note}</span>
-        <span className="ml-auto text-[12px] text-text-muted">{d.scelte.length} {d.scelte.length === 1 ? 'scelta' : 'scelte'}</span>
+      {/* Il rango e il conteggio non si spezzano e non si comprimono: senza `shrink-0` la nota in
+          mezzo si prendeva tutta la riga e loro finivano incolonnati lettera per lettera — «R a n g
+          o 1» alto 135 px sul telefono. La nota, che è la parte elastica, va a capo per prima. */}
+      <button type="button" className="w-full text-left px-3 py-2 flex flex-wrap items-center gap-x-2 gap-y-1 touch" onClick={onToggle} aria-expanded={aperto}>
+        <span className="font-semibold shrink-0 whitespace-nowrap">Rango {d.etichetta}</span>
+        <span className="min-w-0 flex-1 text-[12px] text-text-muted">{d.note}</span>
+        <span className="shrink-0 whitespace-nowrap text-[12px] text-text-muted">{d.scelte.length} {d.scelte.length === 1 ? 'scelta' : 'scelte'}</span>
       </button>
       {aperto && (
         <ol className="m-0 px-3 pb-3 list-none flex flex-col gap-1 text-[13px]" aria-label={`Scelte del rango ${d.etichetta}`}>

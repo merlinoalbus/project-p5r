@@ -375,6 +375,7 @@
   .visore-mappa__percorso { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: 13px; }
   .visore-mappa__briciola { background: none; border: 0; padding: 4px 2px; color: var(--color-text-secondary); cursor: pointer; font: inherit; text-decoration: underline dotted; text-underline-offset: 3px; min-height: 32px; }
   .visore-mappa__briciola:hover { color: var(--color-primary); }
+
   .visore-mappa__titolo { font-family: var(--font-display); font-size: 19px; text-transform: uppercase; letter-spacing: .02em; }
   .visore-mappa__strumenti { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   /* Colonna stretta (mappa incorporata accanto alla guida): barra a sole icone, il testo resta nel nome accessibile */
@@ -426,6 +427,12 @@
 
   .spillo-mappa { position: absolute; display: flex; flex-direction: column; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; z-index: 5; transform-origin: 0 0; color: #fff; }
   .spillo-mappa--selezionato { z-index: 8; }
+  /* Col dito la goccia è 38 px, sotto i 44 richiesti; ingrandirla coprirebbe la mappa, che è il
+     contenuto. Si allarga quindi la sola area che riceve il tocco, con un rettangolo invisibile
+     attorno al disegno: il pin resta quello, il bersaglio arriva a 44. */
+  @media (pointer: coarse), (max-width: 1023px) {
+    .spillo-mappa::after { content: ""; position: absolute; inset: -3px; }
+  }
   /* La goccia: quadrato con tre angoli tondi, ruotato di 45 gradi, cosi' l'angolo vivo cade in
      basso sul punto ancorato (il bottone e' traslato di -100% in verticale). Il colore e' quello
      del tipo, ed e' quel che si legge da lontano. La misura la passa il componente. */
@@ -1328,6 +1335,13 @@
    squadra), dove un campo alto 36 px si manca e si sbaglia riga. */
 @media (pointer: coarse), (max-width: 1023px) { .editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:15px; } }
 
+/* Un chip che **si tocca** è un comando, non un'etichetta: «Sulla mappa» negli Oggetti, «Dove si
+   trova» in Attività e Confidenti erano alti 23 px, e con il dito si manca o si apre quello sotto.
+   Sui chip di sola lettura (categorie, stati, note) non si tocca niente: restano come sono. */
+@media (pointer: coarse), (max-width: 1023px) {
+  a.chip, button.chip, .chip[role="button"] { min-height:44px; padding-top:8px; padding-bottom:8px; }
+}
+
 /* Progressi della partita: righe da 44 px, contatori a destra. */
 .progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
 .progressi-partita__riga { display:flex; align-items:center; gap:10px; min-height:44px; padding:2px 6px; border-bottom:1px solid var(--color-border); font-size:13px; }
@@ -1411,3 +1425,15 @@
 .barra-invio::after { content:""; position:absolute; inset:0 auto 0 0; width:40%; background:var(--color-primary); animation:barra-invio-scorre 1.3s ease-in-out infinite; }
 @keyframes barra-invio-scorre { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
 @media (prefers-reduced-motion: reduce) { .barra-invio::after { animation-duration:3s; } }
+
+/* ---- Bersagli del tocco nel visore delle mappe (2026-09-13) ----
+   Stanno in coda perché le regole base che li fissano a 32/40 px vengono più sopra nel foglio, e a
+   parità di specificità vince l'ultima. Le briciole sono la via di ritorno, le voci l'elenco delle
+   mappe figlie, i controlli lo zoom: col dito servono 44 px, sul monitor bastano quelli di prima. */
+@media (pointer: coarse), (max-width: 1023px) {
+  .visore-mappa__briciola { min-height: 44px; }
+  .visore-mappa__figlia, .visore-mappa__voce { min-height: 44px; }
+  .visore-mappa__controllo { min-width: 44px; min-height: 44px; }
+  .visore-mappa__azione-testo { min-height: 44px; }
+  .visore-mappa__categoria { min-height: 44px; }
+}
