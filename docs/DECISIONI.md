@@ -451,3 +451,24 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **L'elenco dei file dice sempre la verità**: cartella non configurata, non montata o vuota sono tre messaggi
   diversi, perché «nessun file» quando in realtà il mount è caduto manderebbe a cercare il problema dalla parte
   sbagliata.
+
+### 2026-09-13 — Il nome con cui si presenta una mappa
+- **Il nome rivisto a mano vince su ogni nome dedotto, e si mostra così com'è scritto.** Le planimetrie estratte dal
+  gioco hanno nella colonna `nome` delle sigle («Area 4 — RMAP 153», «livello grafico 4») e il nome leggibile sta nei
+  contesti e nel gruppo di immagini di `mappa_presentazione`, che l'importazione del pacchetto scrive una volta e
+  nessuna schermata modifica. Finché quel nome dedotto aveva la precedenza, chi correggeva il campo «Nome»
+  nell'editor salvava e continuava a vedere in alto il vecchio titolo — suffisso della versione compreso — senza
+  nessun posto dove intervenire. Fra le alternative valutate con l'utente (rendere modificabile il gruppo dall'editor;
+  rinominare in blocco tutte le versioni del gruppo) è stata scelta questa, che non tocca l'istantanea
+  dell'estrazione e lascia l'ultima parola a chi cura l'atlante.
+- **Lo dichiara una colonna sua, `mappa.nome_rivisto` (migrazione 082), non `origine = 'utente'`**: quella la
+  assegnano anche il caricamento di un'immagine e l'importazione di un pacchetto di mappe dalla rotta pubblica, che
+  riscrive pure i contesti — bastava una importazione per far parlare tutto l'atlante col nome grezzo delle righe.
+  Il flag lo accende solo il salvataggio dell'editor quando il nome cambia davvero, e lo spegne l'importazione di un
+  pacchetto, che quel nome lo sovrascrive. Le righe esistenti partono spente: nessuna revisione è dimostrabile a
+  posteriori, e così i titoli mostrati finora non cambiano.
+- **Resta davanti il titolo del contesto selezionato**: quella è la vista in corso — quale zona della planimetria si
+  sta guardando — non il nome della mappa.
+- **Un solo posto decide il nome**: albero, indice, briciole e striscia delle miniature leggevano per conto loro
+  `gruppoImmagini.nome`, e una mappa rivista si sarebbe chiamata in un modo nell'editor e in un altro altrove. Ora
+  passano tutti da `titoloGruppoImmagini` in `src/utils/presentazioneMappa.ts`.

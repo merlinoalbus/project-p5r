@@ -1684,6 +1684,9 @@ export interface MappaRiassuntoDto {
   immagineCollezione?: {indice:number;totale:number;ambito:string};
   contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
   gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string};
+  /** `nome` l'ha scritto una persona nell'editor, non l'estrazione: vince su contesti e gruppo
+   * (082). Solo il salvataggio del nome lo accende; l'importazione di un pacchetto lo spegne. */
+  nomeRivisto: boolean;
   nomeCompleto?: string;
   genitoreNome?: string|null;
   assetOriginale?: string|null;

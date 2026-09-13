@@ -1,4 +1,4 @@
-import { etichetteDistinte, nomePresentazioneMappa } from '../../utils/presentazioneMappa';
+import { etichetteDistinte, nomePresentazioneMappa, titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import { urlImmagine } from '../../services/api';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
 import { Link } from 'react-router-dom';
@@ -34,7 +34,7 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
       if (id) {
         const membri = gruppi.get(id)!;
         if (membri[0].chiave !== m.chiave) return null;
-        const titolo = m.gruppoImmagini?.nome ?? nomePresentazioneMappa(m);
+        const titolo = titoloGruppoImmagini(m);
         return <li key={id}>{!m.gruppoImmagini && <h3 className="m-0 py-1 text-sm font-semibold">{titolo}</h3>}<ImmaginiLuogo mappe={membri} nome={titolo} discendenti={discendenti} /></li>;
       }
       return <li key={m.chiave}>

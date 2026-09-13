@@ -5,7 +5,7 @@ import { AlberoLuoghi } from './AlberoLuoghi';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
 import type { MappaRiassuntoDto } from '../../types';
 function m(chiave:string, genitore:string|null, nome:string, indice?:number, totale=3, ambito='museo'): MappaRiassuntoDto {
-  return {chiave,genitore,nome,tipo:'area',ordine:0,immagineUrl:`/${chiave}.png`,asset:null,entita:null,origine:'seed',numeroSpilli:0,numeroFigli:0,updatedAt:'',...(indice?{immagineCollezione:{indice,totale,ambito}}:{})};
+  return {chiave,genitore,nome,nomeRivisto:false,tipo:'area',ordine:0,immagineUrl:`/${chiave}.png`,asset:null,entita:null,origine:'seed',numeroSpilli:0,numeroFigli:0,updatedAt:'',...(indice?{immagineCollezione:{indice,totale,ambito}}:{})};
 }
 it('una famiglia ha una intestazione e tutte le immagini indipendenti con anteprima',()=>{
   render(<MemoryRouter><AlberoLuoghi mappe={[m('palazzo',null,'Palazzo di Madarame'),m('b','palazzo','Museo, 2P',2),m('a','palazzo','Museo, 2P',1),m('c','palazzo','Museo, 2P',3)]}/></MemoryRouter>);
