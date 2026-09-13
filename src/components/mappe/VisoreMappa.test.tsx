@@ -511,3 +511,74 @@ it('nell’editor lo scostamento è preso dal pin, non da un lato fisso', () => 
     expect(distanzaDalPin(container)).toBeGreaterThanOrEqual(45.999);
   }
 });
+
+// I due casi che il test precedente non toccava: con due soli spilli `altri` è vuoto e il ramo che
+// guarda i vicini non viene mai percorso (rilievo del validatore, 2026-09-13).
+describe('la pastiglia scostata guarda anche i vicini, e non sfarfalla', () => {
+  /** Centro del bersaglio di ogni spillo reso, in pixel di schermo, letto dagli stili. */
+  const centri = (container: HTMLElement) => {
+    const liv = container.querySelector('.visore-mappa__livello') as HTMLElement;
+    const [, panX, panY, z] = /translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec(liv.style.transform)!;
+    const zoom = Number(z);
+    return [...container.querySelectorAll('.visore-mappa__livello .spillo-mappa')].map((el) => {
+      const e = el as HTMLElement;
+      const gruppo = e.className.includes('gruppo');
+      const x = Number(e.style.left.replace('%', '')), y = Number(e.style.top.replace('%', ''));
+      const sc = /calc\(-50% \+ ([-+.\deE]+)px\), calc\(-50% \+ ([-+.\deE]+)px\)/.exec(e.style.transform);
+      const dx = sc ? Number(sc[1]) / zoom : 0, dy = sc ? Number(sc[2]) / zoom : 0;
+      return { gruppo, x: Number(panX) + (x / 100) * 1000 * zoom + dx, y: Number(panY) + (y / 100) * 500 * zoom + dy - (gruppo ? 0 : 19) };
+    });
+  };
+  const conTela = <T,>(f: () => T): T => {
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 900, height: 700, left: 0, top: 0, right: 900, bottom: 700, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    try { return f(); } finally { misura.mockRestore(); }
+  };
+
+  it('resta a 46 px anche dalle altre nubi, non solo dal pin', () => {
+    // due nubi vicine: quella di destra si scorpora, e la sua pastiglia non deve finire sull'altra
+    const m: MappaDto = {
+      ...mappa, numeroSpilli: 5, spilli: [
+        spillo({ id: 71, nome: 'Scelto', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+        spillo({ id: 72, nome: 'Compagno', tipo: 'nota', tipoNome: 'Nota', x: 50.3, y: 50 }),
+        spillo({ id: 73, nome: 'Vicino A', tipo: 'nota', tipoNome: 'Nota', x: 55, y: 50 }),
+        spillo({ id: 74, nome: 'Vicino B', tipo: 'nota', tipoNome: 'Nota', x: 55.3, y: 50 }),
+        spillo({ id: 75, nome: 'Vicino C', tipo: 'nota', tipoNome: 'Nota', x: 45, y: 52 }),
+      ],
+    };
+    conTela(() => {
+      const { container } = render(<MemoryRouter><VisoreMappa mappa={m} partitaId={null} onNaviga={vi.fn()}
+        editor={{ strumento: 'seleziona', selezionatoId: 71, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }} /></MemoryRouter>);
+      const c = centri(container);
+      expect(c.length).toBeGreaterThanOrEqual(3);
+      for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) {
+        expect(Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y)).toBeGreaterThanOrEqual(45.999);
+      }
+    });
+  });
+
+  it('durante il trascinamento non salta da un lato all’altro', () => {
+    const pastiglia = (container: HTMLElement) => centri(container).find((p) => p.gruppo)!;
+    conTela(() => {
+      const fai = (x: number) => ({
+        ...mappa, numeroSpilli: 3, spilli: [
+          spillo({ id: 81, nome: 'Trascinato', tipo: 'nota', tipoNome: 'Nota', x, y: 50 }),
+          spillo({ id: 82, nome: 'Fermo', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
+          spillo({ id: 83, nome: 'Terzo', tipo: 'nota', tipoNome: 'Nota', x: 53, y: 51 }),
+        ],
+      } as MappaDto);
+      const ed = { strumento: 'seleziona' as const, selezionatoId: 81, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() };
+      const { container, rerender } = render(<MemoryRouter><VisoreMappa mappa={fai(49.6)} partitaId={null} onNaviga={vi.fn()} editor={ed} /></MemoryRouter>);
+      let prima = pastiglia(container);
+      let massimo = 0;
+      // quaranta passi da un pixel: il trascinamento vero, non un accenno
+      for (let i = 1; i <= 40; i++) {
+        rerender(<MemoryRouter><VisoreMappa mappa={fai(49.6 + i * 0.1)} partitaId={null} onNaviga={vi.fn()} editor={ed} /></MemoryRouter>);
+        const ora = pastiglia(container);
+        massimo = Math.max(massimo, Math.hypot(ora.x - prima.x, ora.y - prima.y));
+        prima = ora;
+      }
+      // il pin si muove di ~1 px per passo: la pastiglia può seguirlo, non saltare di lato
+      expect(massimo).toBeLessThan(10);
+    });
+  });
+});

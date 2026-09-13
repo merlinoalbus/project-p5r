@@ -493,21 +493,48 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       const altri = gruppi.filter((g) => g !== daScostare).map((g) => perSchermo({ ...selScorporato, x: g.x, y: g.y }))
         .concat(singoli.filter((s) => s.id !== selezionatoId).map((s) => { const p = perSchermo(s); return { x: p.x, y: p.y - ALTEZZA_GOCCIA / 2 }; }));
       const dist = (a: Punto, b: Punto) => Math.hypot(a.x - b.x, a.y - b.y);
-      let scelto = { x: 0, y: 0 }, voto = -Infinity;
-      for (let k = 0; k < 8; k++) {
-        const ang = (k * Math.PI) / 4;
+      const dentroTela = (p: Punto) => dim.w === 0 || (p.x >= 22 && p.x <= dim.w - 22 && p.y >= 22 && p.y <= dim.h - 22);
+      // Stare lontani dagli **altri** bersagli è un vincolo, non un voto. Prima lo era: il raggio si
+      // fermava al primo valore che liberava il pin e i vicini contavano solo nel punteggio, così in
+      // 79 casi su 7.036 del pacchetto la pastiglia finiva addosso a un'altra nube — 56 volte sotto
+      // i 44 px, cioè lo stesso difetto spostato di un passo (rilievo del validatore, 2026-09-13).
+      // Cercando anche sul raggio una posizione buona c'è sempre.
+      const libera = (p: Punto) => dist(p, centroPin) >= DISTANZA_MINIMA_SPILLI && altri.every((a) => dist(p, a) >= DISTANZA_MINIMA_SPILLI) && dentroTela(p);
+      const lungo = (ang: number, ammessa: (p: Punto) => boolean) => {
         const u = { x: Math.cos(ang), y: Math.sin(ang) };
-        // quanto serve in questa direzione perché il centro disti DISTANZA_MINIMA_SPILLI dal pin
-        let d = 0;
-        while (d <= 96 && dist({ x: base.x + u.x * d, y: base.y + u.y * d }, centroPin) < DISTANZA_MINIMA_SPILLI) d += 2;
-        if (d > 96) continue;
-        const pos = { x: base.x + u.x * d, y: base.y + u.y * d };
-        const fuori = dim.w > 0 && (pos.x < 22 || pos.x > dim.w - 22 || pos.y < 22 || pos.y > dim.h - 22);
-        const minAltri = altri.length ? Math.min(...altri.map((a) => dist(pos, a))) : 999;
-        const punteggio = Math.min(minAltri, 999) - d / 8 - (fuori ? 1000 : 0);
-        if (punteggio > voto) { voto = punteggio; scelto = { x: pos.x - base.x, y: pos.y - base.y }; }
+        for (let d = 0; d <= 96; d += 1) {
+          const p = { x: base.x + u.x * d, y: base.y + u.y * d };
+          if (ammessa(p)) return { d, p };
+        }
+        return null;
+      };
+      // **La direzione è continua, non a otto scatti.** Si parte dalla semiretta che va dal pin al
+      // residuo — quella naturale, che si allontana — e si ruota solo quanto serve a trovare posto.
+      // Sceglierla ogni volta col punteggio più alto fra otto direzioni faceva sfarfallare la
+      // pastiglia da un lato all'altro a ogni pixel di trascinamento: nel caso peggiore 180° ↔ −135°
+      // per 37 passi di fila, con salti fino a 96 px (rilievo del validatore, 2026-09-13). Muovendo
+      // il pin di poco, l'angolo di partenza cambia di poco e la posizione lo segue.
+      const verso = { x: base.x - centroPin.x, y: base.y - centroPin.y };
+      const ang0 = Math.hypot(verso.x, verso.y) > 0.01 ? Math.atan2(verso.y, verso.x) : 0;
+      let scelta: Punto | null = null;
+      for (let giro = 0; giro <= 12 && !scelta; giro++) {
+        for (const segno of giro === 0 ? [1] : [1, -1]) {
+          const r = lungo(ang0 + (segno * giro * Math.PI) / 12, libera);
+          if (r) { scelta = r.p; break; }
+        }
       }
-      daScostare.scosto = scelto;
+      // Se nessuna direzione libera tutti — non capita sul pacchetto, ma le mappe si modificano —
+      // si tiene almeno il pin e ci si allontana il più possibile dagli altri.
+      if (!scelta) {
+        let voto = -Infinity;
+        for (let giro = -12; giro <= 12; giro++) {
+          const r = lungo(ang0 + (giro * Math.PI) / 12, (p) => dist(p, centroPin) >= DISTANZA_MINIMA_SPILLI);
+          if (!r) continue;
+          const punteggio = (altri.length ? Math.min(...altri.map((a) => dist(r.p, a))) : 999) - (dentroTela(r.p) ? 0 : 1000) - Math.abs(giro) / 100;
+          if (punteggio > voto) { voto = punteggio; scelta = r.p; }
+        }
+      }
+      daScostare.scosto = scelta ? { x: scelta.x - base.x, y: scelta.y - base.y } : { x: 0, y: 0 };
     }
     return { singoli, gruppi };
   })();
@@ -875,8 +902,11 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto }: { n
           <ul className="spillo-popup__merce m-0 p-0 list-none flex flex-col">
             {disponibili.map((a) => (
               <li key={a.chiave} className={`flex items-center gap-2 py-1 border-b border-border text-[12px] ${a.comprato ? 'opacity-60' : ''}`}>
+                {/* L'etichetta attorno alla casella è il bersaglio: era l'unica casella dell'app a
+                    non averla, e restava un quadratino di 20 px (trovata cercando nel codice, non
+                    nelle misure: il criterio dice di misurare l'etichetta, e qui non c'era). */}
                 {partitaId && onAcquisto
-                  ? <input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato} aria-label={`${a.nome} comprato`} onChange={(e) => void onAcquisto(spillo, a.chiave, e.target.checked)} />
+                  ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato} aria-label={`${a.nome} comprato`} onChange={(e) => void onAcquisto(spillo, a.chiave, e.target.checked)} /></label>
                   : <span className="w-5 shrink-0 text-center">{a.comprato ? '✓' : ''}</span>}
                 <span className={`min-w-0 flex-1 truncate ${a.comprato ? 'line-through' : ''}`} title={`${a.nome} · ${a.categoria}`}>{a.nome}</span>
                 <span className="tabular-nums shrink-0 text-text-secondary">{a.prezzo !== null ? formattaYen(a.prezzo) : '—'}</span>
@@ -994,8 +1024,8 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                 {articoliVisibili.map((a) => (
                   <li key={a.chiave} className={`visore-mappa__merce-riga ${a.comprato ? 'opacity-60' : ''}`}>
                     {acquistabile
-                      ? <input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato}
-                          onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} />
+                      ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato}
+                          onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} /></label>
                       : <span className="w-5 shrink-0 text-center" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
                     <span className="min-w-0 flex-1">
                       <span className={`block text-[13px] leading-tight ${a.comprato ? 'line-through' : ''}`}>
