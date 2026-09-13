@@ -527,7 +527,7 @@ describe('la pastiglia scostata guarda anche i vicini, e non sfarfalla', () => {
       const x = Number(e.style.left.replace('%', '')), y = Number(e.style.top.replace('%', ''));
       const sc = /calc\(-50% \+ ([-+.\deE]+)px\), calc\(-50% \+ ([-+.\deE]+)px\)/.exec(e.style.transform);
       // il numero scritto nel translate È lo spostamento sullo schermo: non si divide per lo zoom
-  const dx = sc ? Number(sc[1]) : 0, dy = sc ? Number(sc[2]) : 0;
+      const dx = sc ? Number(sc[1]) : 0, dy = sc ? Number(sc[2]) : 0;
       return { gruppo, x: Number(panX) + (x / 100) * 1000 * zoom + dx, y: Number(panY) + (y / 100) * 500 * zoom + dy - (gruppo ? 0 : 19) };
     });
   };
@@ -582,4 +582,23 @@ describe('la pastiglia scostata guarda anche i vicini, e non sfarfalla', () => {
       }
     });
   });
+});
+
+// Lo scostamento e i due ancoraggi si scrivono in pixel di schermo, **senza moltiplicarli per lo
+// zoom**: dentro `scale(1/zoom) translate(t)`, col livello che scala di zoom, quel che arriva sullo
+// schermo è esattamente `t`. Il fattore c'era, e a zoom 2,74 rendeva 74 px uno scostamento di 27
+// (rilievo del validatore, 2026-09-13): i test non lo videro perché provavano il calcolo e non il
+// reso, e in jsdom lo zoom vale 1, dove il fattore è invisibile. Qui si guarda il **sorgente**, che
+// è l'unico posto dove la moltiplicazione si vede a occhio.
+it('nel sorgente non ricompare il fattore zoom sugli spostamenti in pixel di schermo', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { resolve } = await import('node:path');
+  const sorgente = readFileSync(resolve(process.cwd(), 'src/components/mappe/VisoreMappa.tsx'), 'utf8');
+  for (const sbagliato of ['popupDx * zoom', 'elencoDx * zoom', 'scosto?.x ?? 0) * zoom', 'scosto?.y ?? 0) * zoom']) {
+    expect(sorgente).not.toContain(sbagliato);
+  }
+  // e i tre punti ci sono ancora, scritti senza fattore
+  expect(sorgente).toContain('${popupDx}px');
+  expect(sorgente).toContain('${elencoDx}px');
+  expect(sorgente).toContain('${g.scosto?.x ?? 0}px');
 });

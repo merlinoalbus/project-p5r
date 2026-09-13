@@ -32,7 +32,13 @@ sotto i 9 px e **spazio usato** rispetto a quello disponibile.
   eccezione» la prima: era una parola di troppo (rilievo del validatore, 2026-09-13);
 - le **rotte parametriche con più di un valore**: tre Persona, due skill, due Confidenti, due
   quartieri, una data del percorso, e **tutti e dieci** i tipi di `/guida/mondo/:tipo/:chiave`
-  (mappa, quartiere, dungeon, area, luogo, negozio, punto, confidente, articolo, attività).
+  (mappa, quartiere, dungeon, area, luogo, negozio, punto, confidente, articolo, attività);
+- gli **stati** delle pagine, che una passata sulle rotte non incontra perché servono condizioni
+  particolari: elenco **vuoto** (Piani salvati, Cicli salvati, pagina non trovata) e **errore**,
+  provocato intercettando le chiamate all'API invece di spegnere il backend — «Riprova» misura
+  112×44 a tutte e tre le larghezze, niente traboccamento, nessun bersaglio basso. Lo stato di
+  caricamento non ha comandi. I comandi degli stati vuoti sono `.btn` o `PulsanteVisivo`, cioè le
+  classi già a norma, verificato anche nel codice.
 
 ## Esito per schermata
 
