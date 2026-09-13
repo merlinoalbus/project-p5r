@@ -98,9 +98,11 @@ contenuto, per scelta.
 | Doti sociali | pulsanti delle note, premuti decine di volte per partita | 30 px col mouse | 44 px a ogni larghezza |
 | Tutta l'app | selettore della partita, campi `editor-mappa__campo` | 36–40 px | 44 px a ogni larghezza |
 | Home, Partita (mappa di Tokyo) | targhe dei luoghi | **5,46 px**, illeggibili; a misura leggibile si sovrapponevano | sotto i 545 px di tela — il punto in cui il corpo scenderebbe sotto i 9 px — le targhe lasciano il posto a una legenda toccabile |
-| Mappa di Tokyo, Memento, spilli, miniature | disegni che non possono crescere senza coprire la mappa | 15×17–40×40 px | area del tocco estesa a 44 px, verificata con l'hit-testing del browser |
+| Mappa di Tokyo, Memento, spilli, miniature | disegni che non possono crescere senza coprire la mappa | 15×17–40×40 px | area del tocco estesa a 44 px, verificata con l'hit-testing del browser. Sulla torre dei Mementos, dove i dedali si toccano fra loro, l'area utile di ciascuno resta minore: a coprirla è la sagoma del dedalo accanto, cioè un altro bersaglio, non un disegno |
 | Compendio, Personaggi, tessere compatte | nomi ed etichette troncate con le ellissi | «Conoscen…» | vanno a capo |
 | Palazzi, Covo | il comando che apre il testo ripiegato | 26×18 px in coda al paragrafo | «Mostra tutto» su una riga propria, 44 px |
+| Videogiochi (14 etichette), e le altre sei liste etichetta/valore | «C h e   c o s a   f a» incolonnato: il chip dentro il valore imponeva alla colonna elastica una larghezza minima enorme e schiacciava quella dell'etichetta | 32×100 px | `dt { white-space: nowrap }` e `dd { min-width: 0 }` sulla classe `dl-scheda`: la stessa regola dei flex, scritta per la griglia |
+| Confidenti | un rango senza scelte, aperto, era una striscia di 12 px di solo padding | — | lo dice: «Nessuna scelta da fare in questo rango» |
 | Compendio | freccia che inverte l'ordinamento | 35 px di larghezza col mouse, 44 col dito | 44 px a ogni larghezza (`.btn-sm`) |
 | Compendio (filtri), Partita → Scorta | campi «compatti» — livello minimo e massimo, statistiche | 34 px col mouse, 44 col dito | 44 px a ogni larghezza: compatto vuol dire stretto, non basso |
 | Libri | il luogo che il libro apre, unico contenuto della sua riga | 17 px | 44 px: è un comando a sé, non una parola in una frase |
@@ -197,3 +199,10 @@ Tre cose che sembravano difetti e non lo erano, e una che lo era e non si vedeva
   della guida.
 - Una rotta con parametro va campionata con **più di un valore**: `/guida/mappe/:chiave` misurata
   su un quartiere non mostra nemmeno il pannello che sulle radici dei Palazzi portava i difetti.
+- La regola «chi non deve stringersi non si stringe, chi è elastico porta `min-width: 0`» vale anche
+  per le **griglie**, non solo per i flex: in un `dl` a due colonne il valore lungo schiaccia
+  l'etichetta esattamente come farebbe in una riga flex.
+- **Misurare a pannello nascosto falsa i risultati.** Se il pannello del browser non è visibile,
+  `requestAnimationFrame` e `ResizeObserver` non vengono consegnati: ogni visore di mappa resta a
+  0×0, la planimetria finisce fuori dalla tela e tutti gli spilli risultano irraggiungibili. Come
+  per `innerWidth === 0`, in quello stato le misure sulle mappe non valgono.

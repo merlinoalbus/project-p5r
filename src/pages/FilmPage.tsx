@@ -165,7 +165,7 @@ export function FilmPage() {
         {nonAncora && progresso === 0 && <p className="col-span-2 m-0 text-xs text-text-secondary" role="note">Non ancora {cinema ? 'in programmazione' : 'disponibile'}: {motivoBlocco(film.disponibilita)}</p>}
         {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
       </div>}
-      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
+      <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Che cosa fa</dt>
         <dd className="m-0">{film.effettiTesto.length ? <ul className="m-0 list-none p-0">{film.effettiTesto.map((t, i) => <li key={i}>{t}</li>)}</ul> : 'Nessun effetto dichiarato'}</dd>
         {!cinema && <><dt className="text-text-muted">Visioni</dt><dd className="m-0">{film.totaleSessioni} per completarlo</dd></>}

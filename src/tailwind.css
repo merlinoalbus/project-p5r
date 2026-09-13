@@ -1465,6 +1465,18 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 @keyframes barra-invio-scorre { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
 @media (prefers-reduced-motion: reduce) { .barra-invio::after { animation-duration:3s; } }
 
+/* Le liste etichetta/valore a due colonne (`dl` con `grid-cols-[auto_1fr]`): l'etichetta non va
+   sotto la propria larghezza, il valore sì.
+   Senza queste due righe un valore che porta dentro un chip — «In vendita da: Negozio articoli
+   usati Yumenoshima · Gratis», con la sua `min-width: 44px` — imponeva alla colonna elastica una
+   larghezza minima enorme, e la colonna `auto` dell'etichetta veniva schiacciata sotto un
+   carattere: «C h e   c o s a   f a» in colonna, 32 px di larghezza per 100 di altezza, sui
+   Videogiochi a 375 px (rilievo del validatore, 2026-09-13). È la stessa regola dei flex —
+   chi non deve stringersi non si stringe, chi è elastico porta `min-width: 0` — scritta per la
+   griglia. */
+.dl-scheda > dt { white-space: nowrap; }
+.dl-scheda > dd { min-width: 0; }
+
 /* ---- Bersagli del visore delle mappe (2026-09-13) ----
    Stanno in coda perché le regole base che li fissano a 32/40 px vengono più sopra nel foglio, e a
    parità di specificità vince l'ultima. Briciole (la via di ritorno), voci dell'elenco delle mappe

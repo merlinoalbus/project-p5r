@@ -79,7 +79,7 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
         </div>
       )}
 
-      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
+      <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Che cosa fa</dt>
         <dd className="m-0">{g.effettiTesto.length ? g.effettiTesto.join(' · ') : 'Nessun effetto dichiarato'}</dd>
         {g.negozi.length > 0 && <><dt className="text-text-muted">In vendita da</dt><dd className="m-0 flex flex-wrap gap-1">{g.negozi.map((n) => <Link key={n.articolo} to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="chip chip--attivo touch no-underline">{n.negozioNome}{prezzoChip(n.prezzo)}</Link>)}</dd></>}

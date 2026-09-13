@@ -31,7 +31,13 @@ export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto;
         <span className="min-w-0 flex-1 text-[12px] text-text-muted">{d.note}</span>
         <span className="shrink-0 whitespace-nowrap text-[12px] text-text-muted">{d.scelte.length} {d.scelte.length === 1 ? 'scelta' : 'scelte'}</span>
       </button>
-      {aperto && (
+      {/* Un rango senza scelte da fare esiste — il primo e l'ultimo di molti Confidenti — e aprendolo
+          restava una striscia di dodici pixel di solo padding: il vuoto non dice che non c'è niente,
+          lo fa solo sembrare rotto (rilievo del validatore, 2026-09-13). */}
+      {aperto && d.scelte.length === 0 && (
+        <p className="m-0 px-3 pb-3 text-[13px] text-text-muted">Nessuna scelta da fare in questo rango.</p>
+      )}
+      {aperto && d.scelte.length > 0 && (
         <ol className="m-0 px-3 pb-3 list-none flex flex-col gap-1 text-[13px]" aria-label={`Scelte del rango ${d.etichetta}`}>
           {d.scelte.map((s) => (
             <li key={s.ordine} className={`flex flex-wrap items-center gap-2 rounded-md px-2 py-1 ${s.punti !== null && s.punti === max && max > 0 ? 'bg-primary-bg' : ''}`}>
