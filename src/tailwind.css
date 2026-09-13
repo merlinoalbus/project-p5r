@@ -314,9 +314,11 @@
   }
   .form-input:focus { border-color: var(--color-primary); }
   /* Compatto vuol dire **stretto**, non basso: la larghezza resta `auto`, che è il motivo per cui la
-     variante esiste; l'altezza no. Sono comandi veri — l'ordinamento del Compendio, i livelli
-     minimo e massimo dei filtri, la lunghezza di un ciclo di fusione — e restano 44 px a ogni
-     larghezza: 34 px col mouse e 44 col dito erano due misure per lo stesso campo. */
+     variante esiste; l'altezza no. La usano i livelli minimo e massimo dei filtri del Compendio e
+     le statistiche della scorta in Partita — comandi veri — e restano 44 px a ogni larghezza:
+     34 px col mouse e 44 col dito erano due misure per lo stesso campo. (L'ordinamento del
+     Compendio e la lunghezza di un ciclo di fusione sono invece `Selettore compatto`, un'altra
+     classe con la sua regola.) */
   .form-input--compatto { width: auto; min-height: 44px; padding: 6px 8px; font-size: 13px; }
 
   /* ---- Griglia delle affinità: 5 per riga (2 righe), 10 per riga solo se il contenitore è largo; nomi mai spezzati ---- */
@@ -614,8 +616,21 @@
   .visore-mappa__articoli th, .visore-mappa__articoli td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
   .visore-mappa__articoli th { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--color-text-muted); }
   @media (max-width: 860px) {
-    .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(240px, 1fr) minmax(0, 42%); }
-    .visore-mappa__pannello { border-right: 0; border-top: 1px solid var(--color-border); max-height: none; min-height: 0; order: 2; }
+    /* Su schermo stretto il pannello va **sotto** la mappa, e ha bisogno di spazio suo: il 42% di un
+       corpo alto 150 px — quello che una mappa incorporata in una pagina riceve — faceva una riga
+       di 21 px con 417 px di contenuto dentro, con i comandi alti 44 px ma toccabili per 21
+       (rilievo del validatore, 2026-09-13). Con `auto` la riga prende quel che le serve, e perché
+       possa farlo il visore incorporato smette di essere alto quanto gli è stato detto **quando il
+       pannello è aperto**: l'altezza fissa serve a non far ballare la pagina mentre si guarda la
+       mappa, non a schiacciare un pannello che si è chiesto di vedere. */
+    .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(240px, 1fr) auto; }
+    .visore-mappa__pannello { border-right: 0; border-top: 1px solid var(--color-border); max-height: 60vh; min-height: 0; order: 2; }
+    .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso) { height: auto; }
+    .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso) .visore-mappa__corpo { min-height: 240px; }
+    /* L'altezza fissa la mette chi ospita la mappa, con uno stile in linea: finché il pannello è
+       chiuso va bene — la pagina non balla — ma da aperto il visore crescerebbe **dentro** un box
+       che resta alto quanto prima, e finirebbe sopra quel che viene dopo. */
+    div:has(> .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso)) { height: auto !important; }
     .visore-mappa__tela { min-height: 240px; }
     .visore-mappa__categorie { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
@@ -796,8 +811,10 @@
     width: 44px;
     height: 44px;
     transform: translate(-50%, -50%);
-    /* Dietro alla sagoma, cosi' non copre il disegno ne' intercetta il passaggio del mouse. */
-    z-index: -1;
+    /* Davanti, non dietro: con `z-index: -1` il rettangolo finiva sotto l'SVG della rete
+       ferroviaria disegnata sopra la mappa, e non riceveva niente — misurato sulla Città, dove il
+       tocco a due pixel dalla sagoma cadeva sulle rotaie. È trasparente, quindi non copre nulla di
+       ciò che si vede; intercetta il passaggio del mouse, che su un cartellino è quel che si vuole. */
   }
 
   /* ---- Crediti alle fonti: discreti, grigi e piccoli ---- */
@@ -1454,10 +1471,12 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    figlie, azioni testuali, categorie e zoom sono i comandi con cui ci si sposta fra le mappe: 44 px
    a ogni larghezza, mouse compreso — due misure diverse per lo stesso comando sono due difetti. */
 .visore-mappa__controllo { min-width: 44px; min-height: 44px; }
-.visore-mappa__briciola { min-height: 44px; }
-.visore-mappa__figlia, .visore-mappa__voce { min-height: 44px; }
-.visore-mappa__azione-testo { min-height: 44px; }
-.visore-mappa__categoria { min-height: 44px; }
+/* Altezza **e** larghezza: con un'etichetta corta — la briciola «Tokyo», una voce «Su» — 44 px di
+   alto e 41 di largo restano un bersaglio da 41. */
+.visore-mappa__briciola { min-height: 44px; min-width: 44px; }
+.visore-mappa__figlia, .visore-mappa__voce { min-height: 44px; min-width: 44px; }
+.visore-mappa__azione-testo { min-height: 44px; min-width: 44px; }
+.visore-mappa__categoria { min-height: 44px; min-width: 44px; }
 
 /* La miniatura di un'entità apre l'ingrandimento: nelle righe sta a 40 px e ingrandirla sposterebbe
    la riga, quindi si allarga solo l'area che riceve il tocco, senza toccare il riquadro.

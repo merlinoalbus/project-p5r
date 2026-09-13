@@ -100,9 +100,12 @@ contenuto, per scelta.
 | Compendio, Personaggi, tessere compatte | nomi ed etichette troncate con le ellissi | «Conoscen…» | vanno a capo |
 | Palazzi, Covo | il comando che apre il testo ripiegato | 26×18 px in coda al paragrafo | «Mostra tutto» su una riga propria, 44 px |
 | Compendio | freccia che inverte l'ordinamento | 35 px di larghezza col mouse, 44 col dito | 44 px a ogni larghezza (`.btn-sm`) |
-| Compendio (filtri), cicli di fusione | campi «compatti» — livello minimo e massimo | 34 px col mouse, 44 col dito | 44 px a ogni larghezza: compatto vuol dire stretto, non basso |
+| Compendio (filtri), Partita → Scorta | campi «compatti» — livello minimo e massimo, statistiche | 34 px col mouse, 44 col dito | 44 px a ogni larghezza: compatto vuol dire stretto, non basso |
 | Libri | il luogo che il libro apre, unico contenuto della sua riga | 17 px | 44 px: è un comando a sé, non una parola in una frase |
-| Mappa di Tokyo | area del tocco delle sagome | 44 px solo col dito | 44 px a ogni larghezza |
+| Mappa di Tokyo | area del tocco delle sagome | 44 px solo col dito, e **dietro** la rete ferroviaria disegnata sopra: non riceveva niente | 44 px a ogni larghezza, davanti alla rete (trasparente: non copre nulla) |
+| Personaggi | il credito della fonte, l'unico degli otto rimasto indietro | 27×17 px | 44×44 |
+| Visore delle mappe | briciole, voci, azioni e categorie con etichetta corta | 41 px di larghezza | `min-width: 44px` oltre all'altezza |
+| Palazzi e quartieri su telefono | il pannello del visore, aperto, era una fessura di 21 px con 417 px di contenuto | comandi alti 44 px ma toccabili per 21 | il visore incorporato smette di essere alto quanto gli è stato detto **quando il pannello è aperto** |
 
 ## Il criterio dei bersagli, scritto per intero
 
@@ -159,3 +162,12 @@ Tre cose che sembravano difetti e non lo erano, e una che lo era e non si vedeva
   più, cambia forma (la legenda al posto delle targhe), non dimensione.
 - Due regole che decidono la stessa cosa devono interrogare **lo stesso contenitore, per nome**:
   targhe e legenda ne leggevano due diversi, e fra 521 e 522 px la mappa restava senza nomi.
+- Un bersaglio è **quadrato**: 44 px di alto e 41 di largo resta un bersaglio da 41. Vale per ogni
+  regola che fissa solo `min-height`.
+- Un'area del tocco estesa va messa **davanti**, non dietro: dietro finisce sotto il primo disegno
+  sovrapposto e non riceve niente. È trasparente, quindi non copre nulla di ciò che si vede.
+- Una percentuale in una griglia (`minmax(0, 42%)`) è una percentuale **del contenitore**: in un
+  riquadro basso vale zero. Dove la riga deve contenere qualcosa, `auto`.
+- La misura va fatta **con i pannelli aperti** e sondando il lato che manca (a sinistra se
+  l'elemento è stretto, sopra se è basso): metà dei difetti di questa passata erano invisibili
+  altrimenti — e metà dei falsi allarmi venivano da tendine che il metodo stesso apriva.

@@ -50,7 +50,7 @@ function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<s
             {(p.doppiatori.jp || p.doppiatori.en) && <p className="m-0"><strong>Doppiatori:</strong> {[p.doppiatori.jp ? `JP ${p.doppiatori.jp}` : null, p.doppiatori.en ? `EN ${p.doppiatori.en}` : null].filter(Boolean).join(' · ')}{nota('doppiatori')}</p>}
             <div className="flex flex-wrap gap-2 items-center">
               {p.confidente && <CollegamentoVisivo tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda Confidente" to={`/confidenti/${p.confidente}`} />}
-              {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
+              {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
             </div>
           </div>
         )}
