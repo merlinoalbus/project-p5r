@@ -123,9 +123,11 @@ export function raggruppaSpilli(visibili: SpilloDto[], inq: Inquadratura, opzion
       const altri = [...fissi, ...gruppi.filter((x) => x !== g).map((x) => posizione.get(x.chiave)!)];
       const libera = (p: Punto) => altri.every((a) => dist(p, a) >= DISTANZA_MINIMA_SPILLI) && dentroTela(p);
       if (libera(base)) continue;
+      // Il raggio arriva a 220 px e non a 96: su una tela stretta, ingrandendo, lo spazio vicino si
+      // satura e novantasei pixel non bastavano — ed era proprio lì che si finiva nel ripiego.
       const lungo = (ang: number, ammessa: (p: Punto) => boolean) => {
         const u = { x: Math.cos(ang), y: Math.sin(ang) };
-        for (let d = 0; d <= 96; d += 1) {
+        for (let d = 0; d <= 220; d += 1) {
           const p = { x: base.x + u.x * d, y: base.y + u.y * d };
           if (ammessa(p)) return p;
         }
@@ -150,15 +152,30 @@ export function raggruppaSpilli(visibili: SpilloDto[], inq: Inquadratura, opzion
           if (p) { scelta = p; break; }
         }
       }
-      // Se non c'è posto per tutti — non capita sul pacchetto, ma le mappe si modificano — si
-      // tiene almeno il pin libero e ci si allontana il più possibile dagli altri.
+      // Quando dentro la tela non c'è posto, si **esce dalla tela** prima di rinunciare alla
+      // distanza: un bersaglio che sborda si raggiunge scorrendo la mappa, due bersagli sovrapposti
+      // non si raggiungono affatto. Il primo ripiego faceva il contrario — teneva duro solo il
+      // vincolo verso il pin e rimetteva gli altri a voto — ed è così che a zoom alto su tela
+      // stretta tornavano fuori bersagli a 37 px (rilievo del validatore, 2026-09-13).
+      if (!scelta) {
+        for (let giro = 0; giro <= 12 && !scelta; giro++) {
+          for (const segno of giro === 0 ? [1] : [1, -1]) {
+            const p = lungo(ang0 + (segno * giro * Math.PI) / 12, (q) => altri.every((a) => dist(q, a) >= DISTANZA_MINIMA_SPILLI));
+            if (p) { scelta = p; break; }
+          }
+        }
+      }
+      // E se davvero non c'è posto da nessuna parte — non capita sul pacchetto, ma le mappe si
+      // modificano — si prende il male minore, guardando tutti allo stesso modo.
       if (!scelta) {
         let voto = -Infinity;
         for (let giro = -12; giro <= 12; giro++) {
-          const p = lungo(ang0 + (giro * Math.PI) / 12, (q) => dist(q, centroPin) >= DISTANZA_MINIMA_SPILLI);
-          if (!p) continue;
-          const punteggio = Math.min(...altri.map((a) => dist(p, a))) - (dentroTela(p) ? 0 : 1000) - Math.abs(giro) / 100;
-          if (punteggio > voto) { voto = punteggio; scelta = p; }
+          for (let d = 0; d <= 220; d += 4) {
+            const u = { x: Math.cos(ang0 + (giro * Math.PI) / 12), y: Math.sin(ang0 + (giro * Math.PI) / 12) };
+            const p = { x: base.x + u.x * d, y: base.y + u.y * d };
+            const punteggio = Math.min(...altri.map((a) => dist(p, a))) - (dentroTela(p) ? 0 : 20) - d / 100;
+            if (punteggio > voto) { voto = punteggio; scelta = p; }
+          }
         }
       }
       if (!scelta) continue;

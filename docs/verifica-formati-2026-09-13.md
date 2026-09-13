@@ -9,13 +9,24 @@ sotto i 9 px e **spazio usato** rispetto a quello disponibile.
 
 **Oltre alla tabella** — e a colmare ciò che la tabella non copriva (rilievo del validatore,
 2026-09-13) — sono state misurate ai tre formati anche:
-- le **finestre modali**, che si aprono con un gesto e nessuna passata sulle rotte può incontrare:
-  nuova partita, immagine di un'entità, scelta della Persona per un obiettivo, risposta di un
-  Confidente, modulo del catalogo (libri e negozi). Tutte dentro lo schermo, nessun bersaglio sotto
-  i 44 px, nessun testo sotto i 9. **Attenzione al metodo**: col pannello del browser nascosto
-  l'animazione d'apertura resta ferma al primo fotogramma (`scale-in`, 0,95), quindi ogni misura va
-  divisa per quella scala — senza, ogni bersaglio sembra 42 px e si dichiarano venti difetti che non
-  esistono;
+- le **finestre modali**, che si aprono con un gesto e nessuna passata sulle rotte può incontrare.
+  Misurate: nuova partita, immagine di un'entità, scelta della Persona per un obiettivo, risposta di
+  un Confidente, modulo del catalogo (libri e negozi), «Aggiungi Persona» alla scorta, «Eliminare la
+  mappa?». Tutte dentro lo schermo, nessun bersaglio sotto i 44 px, nessun testo sotto i 9.
+  **Attenzione al metodo**: col pannello del browser nascosto l'animazione d'apertura resta ferma al
+  primo fotogramma (`scale-in`, 0,95), quindi ogni misura va divisa per quella scala — senza, ogni
+  bersaglio sembra 42 px e si dichiarano venti difetti che non esistono.
+
+  **Restano non misurate**, e vanno guardate quando saranno raggiungibili, perché chiedono dati o
+  sequenze che l'istanza non ha: le tre di `ScuolaOggi` (domanda in classe, esame, cruciverba del
+  giorno), `EseguiFusioneModal` e `EseguiForcaModal` (servono due Persona scelte), la seconda di
+  `ScortaPersona`, `PersonaDelPersonaggio`, l'ingrandimento delle statistiche in
+  `PersonaDettaglioPage`, l'immagine di uno spillo nel visore, «Nuova mappa» nell'editor, e le tre
+  di Impostazioni (copia di sicurezza, immagini caricate, pacchetto di gioco), che si aprono solo
+  dopo aver scelto un file. Per queste è stata fatta una **verifica statica**: i loro comandi usano
+  le classi già a norma (`btn`, `chip`, `form-input`, `selettore`, `label.touch`). Quella verifica ha
+  trovato l'unica eccezione vera — l'etichetta «Sovrascrivi le mappe esistenti» nel pannello File
+  dell'editor, senza `touch`: **19 px**, misurati, ora 45;
 - le **rotte parametriche con più di un valore**: tre Persona, due skill, due Confidenti, due
   quartieri, una data del percorso, e **tutti e dieci** i tipi di `/guida/mondo/:tipo/:chiave`
   (mappa, quartiere, dungeon, area, luogo, negozio, punto, confidente, articolo, attività).

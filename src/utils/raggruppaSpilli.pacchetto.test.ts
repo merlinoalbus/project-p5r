@@ -81,7 +81,7 @@ describe.skipIf(!existsSync(PACCHETTO))('i bersagli delle mappe del pacchetto', 
       }
     }
     expect(guasti.slice(0, 10)).toEqual([]);
-  });
+  }, 120_000);
 
   it('non ci sono mai due bersagli più vicini di un bersaglio — nell’editor, con un pin selezionato', () => {
     const guasti: string[] = [];
@@ -91,18 +91,25 @@ describe.skipIf(!existsSync(PACCHETTO))('i bersagli delle mappe del pacchetto', 
       const nat = { w: m.larghezza, h: m.altezza };
       for (const f of FORMATI) {
         const fit = inquadraturaMappa(nat, { w: f.w, h: f.h }, null, spilli);
-        const inq = { pan: fit.pan, zoom: fit.zoom, nat, dim: { w: f.w, h: f.h } };
-        // ogni spillo, a turno, è quello che si sta trascinando
-        for (const sel of spilli) {
-          const { singoli, gruppi } = raggruppaSpilli(spilli, inq, { selezionatoId: sel.id, editor: true });
-          const c = centriResi(singoli, gruppi, inq);
-          for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) {
-            const d = Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y);
-            if (d < DISTANZA_MINIMA_SPILLI - 0.001) guasti.push(`${m.chiave} ${f.nome} sel=${sel.id}: ${c[i].chi} ↔ ${c[j].chi} = ${d.toFixed(1)}`);
+        // **Anche ingrandendo.** Il ciclo degli zoom qui mancava, e l'editor risultava provato al
+        // solo fit: proprio a zoom alto su tela stretta lo spazio si satura e l'invariante saltava
+        // (rilievo del validatore, 2026-09-13 — il test diceva più di quel che provava).
+        for (const k of INGRANDIMENTI) {
+          const zoom = fit.zoom * k;
+          const pan = k === 1 ? fit.pan : { x: f.w / 2 - (nat.w / 2) * zoom, y: f.h / 2 - (nat.h / 2) * zoom };
+          const inq = { pan, zoom, nat, dim: { w: f.w, h: f.h } };
+          // ogni spillo, a turno, è quello che si sta trascinando
+          for (const sel of spilli) {
+            const { singoli, gruppi } = raggruppaSpilli(spilli, inq, { selezionatoId: sel.id, editor: true });
+            const c = centriResi(singoli, gruppi, inq);
+            for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) {
+              const d = Math.hypot(c[i].x - c[j].x, c[i].y - c[j].y);
+              if (d < DISTANZA_MINIMA_SPILLI - 0.001) guasti.push(`${m.chiave} ${f.nome} ×${k} sel=${sel.id}: ${c[i].chi} ↔ ${c[j].chi} = ${d.toFixed(1)}`);
+            }
           }
         }
       }
     }
     expect(guasti.slice(0, 10)).toEqual([]);
-  });
+  }, 120_000);
 });
