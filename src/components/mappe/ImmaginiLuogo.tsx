@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
 import { useAsset } from '../../stores/assetStore';
 import { etichettaVersione } from '../../utils/etichettaVersione';
+import { titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 
 interface Props {
   mappe: MappaRiassuntoDto[];
@@ -13,7 +14,7 @@ interface Props {
 /** Le posizioni della collezione arrivano dall’intero catalogo, mai dal filtro visualizzato. */
 export function ImmaginiLuogo({ mappe, attuale, nome, discendenti }: Props) {
   const immagini = [...mappe].sort((a, b) => (a.immagineCollezione?.indice ?? a.gruppoImmagini?.ordine ?? a.ordine) - (b.immagineCollezione?.indice ?? b.gruppoImmagini?.ordine ?? b.ordine) || a.chiave.localeCompare(b.chiave));
-  const titolo = nome ?? immagini[0]?.gruppoImmagini?.nome ?? 'questo luogo';
+  const titolo = nome ?? (immagini[0] ? titoloGruppoImmagini(immagini[0]) : 'questo luogo');
   return <ul className="m-0 p-0 list-none flex flex-wrap gap-3" aria-label={`Immagini di ${titolo}`}>{immagini.map((m, i) => <Miniatura key={m.chiave} mappa={m} indice={m.immagineCollezione?.indice ?? i + 1} totale={m.immagineCollezione?.totale ?? immagini.length} attuale={attuale}>{discendenti?.(m)}</Miniatura>)}</ul>;
 }
 function Miniatura({ mappa, indice, totale, attuale, children }: { mappa: MappaRiassuntoDto; indice: number; totale: number; attuale?: string; children?: ReactNode }) {

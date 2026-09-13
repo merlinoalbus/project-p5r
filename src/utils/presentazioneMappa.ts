@@ -1,6 +1,6 @@
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { nomeConVersione } from './etichettaVersione';
-type IdentitaMappa = Pick<MappaRiassuntoDto, 'nome' | 'contesti' | 'gruppoImmagini' | 'genitoreNome'>;
+type IdentitaMappa = Pick<MappaRiassuntoDto, 'nome' | 'contesti' | 'gruppoImmagini' | 'genitoreNome' | 'nomeRivisto'>;
 type RisoluzioneContesto = { stato: 'assente' | 'non-valido' | 'senza-titolo' | 'multiplo'; titolo: null; ids: string[] } | { stato: 'nominato'; titolo: string; ids: string[] };
 
 /** Raggruppa i titoli noti uguali; i contesti privi di titolo restano distinti. */
@@ -32,9 +32,28 @@ export function titoloContesto(mappa: IdentitaMappa, selezione?: string | null):
 export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string | null): string {
   const titolo = titoloContesto(mappa, selezione);
   if (titolo) return titolo;
+  // Il nome rivisto a mano vince su ogni nome dedotto, e da solo: contesti, gruppo di immagini ed
+  // etichetta della versione sono un'istantanea dell'estrazione, scritta una volta dal pacchetto e
+  // che nessuna schermata modifica. Finché avevano la precedenza, chi correggeva il «Nome»
+  // nell'editor salvava e vedeva in alto ancora il vecchio titolo — suffisso della versione
+  // compreso — senza nessun posto dove intervenire. Chi cura l'atlante scrive il titolo che vuole,
+  // e negli elenchi `etichetteDistinte` numera le omonime. Resta invece davanti il titolo del
+  // contesto selezionato qui sopra: quella è la vista in corso, non il nome della mappa.
+  if (mappa.nomeRivisto) return mappa.nome;
   if (mappa.contesti?.some(c => c.nome === null)) return mappa.genitoreNome ? `${mappa.genitoreNome} — Planimetria` : 'Planimetria';
   const base = alternativeMappa(mappa).map(c => c.nome).join(' / ') || mappa.gruppoImmagini?.nome || mappa.nome;
   return senzaGergo(nomeConVersione(mappa as MappaRiassuntoDto, base));
+}
+
+/** Il nome del contenitore quando più versioni della stessa immagine stanno insieme — la testata
+ * dell'albero, la briciola dell'indice, la striscia delle miniature — dove l'etichetta della
+ * singola versione la porta già la miniatura sotto e ripeterla nel titolo non aggiunge nulla.
+ *
+ * Esiste perché quei tre punti leggevano `gruppoImmagini.nome` per conto loro, e una mappa rivista
+ * a mano finiva per chiamarsi in un modo nell'editor e in un altro nell'albero. */
+export function titoloGruppoImmagini(mappa: IdentitaMappa): string {
+  if (mappa.nomeRivisto) return mappa.nome;
+  return mappa.gruppoImmagini?.nome ?? nomePresentazioneMappa(mappa);
 }
 
 /** Il vocabolario dell'estrattore non arriva a chi gioca.
@@ -83,7 +102,8 @@ export function presentaMappa(mappa: MappaDto, selezione?: string | null): Mappa
 /** Etichetta del selettore con la gerarchia verificata, mai un piano inventato. La parte che
  * descrive la versione viene da `etichettaVersione`, la stessa che usano indice e albero. */
 export function etichettaPlanimetria(mappa: MappaRiassuntoDto): string {
-  if (mappa.contesti?.some(c => c.nome === null)) return nomePresentazioneMappa(mappa);
+  // «Genitore — Planimetria» porta già il genitore dentro di sé; un nome rivisto a mano no.
+  if (!mappa.nomeRivisto && mappa.contesti?.some(c => c.nome === null)) return nomePresentazioneMappa(mappa);
   const nome = nomePresentazioneMappa(mappa);
   return mappa.nomeCompleto?.endsWith(mappa.nome) ? mappa.nomeCompleto.slice(0, -mappa.nome.length) + nome : nome;
 }

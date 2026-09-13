@@ -408,6 +408,12 @@ richiesta|attivita, `collezionabile`), `spillo_partita` (raccolto per partita). 
 crea `tokyo` → `citta-<quartiere>` e `dungeon-<chiave>` → `<area>` dalle tabelle della guida e trasforma `marcatore_mappa`/`marcatore_luogo` in
 spilli (riferimento `punto`/`luogo`, stessa origine); gira nella migrazione (istanze esistenti) e alla fine di `caricaSeed`, seguita
 dall'importazione del seed `data/seed/mappe-editor.json` (origine «seed», mai sopra le mappe modificate dall'utente).
+**Il nome con cui una mappa si presenta** (2026-09-13) lo calcola `src/utils/presentazioneMappa.ts`, e ci passano tutte le schermate:
+titolo del visore e dell'editor, briciole, albero, indice, selettori, miniature (`titoloGruppoImmagini` per la testata di un gruppo di
+versioni). L'ordine è: titolo del contesto selezionato → `nome` se `mappa.nome_rivisto` (migrazione 082: lo accende solo il salvataggio
+dell'editor quando il nome cambia, lo spegne l'importazione di un pacchetto di mappe) → nomi dei contesti → nome del gruppo di immagini di
+`mappa_presentazione` con l'etichetta della versione (`nomeConVersione`) → `nome` grezzo. Contesti e gruppo sono l'istantanea
+dell'estrazione, scritta solo da `importaMappe`: senza il flag, correggere il «Nome» nell'editor non cambiava il titolo mostrato.
 `server/services/mappe/mappeService.ts`: albero, dettaglio (percorso, figli, spilli con `dettaglio` dell'entità: articoli del negozio con
 `comprato`, stato del punto, Confidente, richiesta) e stato «raccolto» (uno spillo di un punto già ottenuto/esaurito nella Guida conta come
 raccolto; `impostaRaccolto` aggiorna anche `punto_partita`), editor (CRUD con validazione dei riferimenti e dei cicli genitore), immagine di

@@ -1,6 +1,6 @@
 import { ImmaginiLuogo } from '../components/mappe/ImmaginiLuogo';
 import { SelettoreContestoMappa } from '../components/mappe/SelettoreContestoMappa';
-import { etichetteDistinte, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
+import { etichetteDistinte, nomePresentazioneMappa, presentaMappa, titoloGruppoImmagini } from '../utils/presentazioneMappa';
 import { AlberoLuoghi } from '../components/mappe/AlberoLuoghi';
 import { ContenutiGuidaMappa } from '../components/mappe/ContenutiGuidaMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
@@ -94,7 +94,7 @@ function IndiceMappe() {
   const [percorso, setPercorso] = useState<string[]>([]);
   const gruppoAperto = percorso.length > 0 ? gruppi.find((g) => g.versioni.some((v) => v.chiave === percorso[0])) ?? null : null;
   const nodoAperto = gruppoAperto ? mappe.find((m) => m.chiave === percorso[percorso.length - 1]) ?? null : null;
-  const nomeDi = (m: MappaRiassuntoDto) => m.gruppoImmagini?.nome ?? nomePresentazioneMappa(m);
+  const nomeDi = (m: MappaRiassuntoDto) => titoloGruppoImmagini(m);
   return <div className="flex flex-col gap-4">
     <IntestazionePagina titolo="Mappe"
       sottotitolo={`Tutti i luoghi disegnati della guida: Tokyo, i quartieri e le planimetrie dei Palazzi. ${totaleMappe} mappe con ${totaleSpilli} spilli, raggruppate per il posto a cui appartengono.`} />
@@ -183,8 +183,8 @@ function PannelloLuogo({ mappe, figliDi, gruppo, percorso, nodo, nome, onPercors
         {briciole.map((b, i) => <span key={b.chiave} className="flex items-center gap-1">
           {i > 0 && <span aria-hidden>›</span>}
           {i === briciole.length - 1
-            ? <span className="font-display text-[16px] uppercase leading-none text-text">{b.gruppoImmagini?.nome ?? nomePresentazioneMappa(b)}</span>
-            : <button type="button" className="touch text-text-secondary underline decoration-dotted underline-offset-2" onClick={() => onPercorso(percorso.slice(0, i + 1))}>{b.gruppoImmagini?.nome ?? nomePresentazioneMappa(b)}</button>}
+            ? <span className="font-display text-[16px] uppercase leading-none text-text">{titoloGruppoImmagini(b)}</span>
+            : <button type="button" className="touch text-text-secondary underline decoration-dotted underline-offset-2" onClick={() => onPercorso(percorso.slice(0, i + 1))}>{titoloGruppoImmagini(b)}</button>}
         </span>)}
       </nav>
       <Link to={destinazione} className="btn btn-primary btn-sm touch">Apri {nodo.chiave === TOKYO ? 'la mappa di Tokyo' : 'questa mappa'}</Link>
