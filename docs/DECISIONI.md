@@ -559,3 +559,6 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Una correzione che tocca l'atlante rilegge l'atlante**: nome della stanza ed etichetta della
   versione non stanno nella scheda del Palazzo, e ricaricare solo quella lasciava a schermo il testo
   vecchio benché salvato.
+- **Un tetto si scrive una volta sola** (2026-09-18): schema del server e `maxLength` del campo
+  leggono `shared/limitiGuida.ts`, perché due copie dello stesso numero divergono al primo ritocco e
+  il sintomo — un 400 che non dice quale campo — arriva a chi sta scrivendo.

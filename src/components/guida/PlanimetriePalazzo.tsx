@@ -28,6 +28,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { chiaviInOrdine, nomeSenzaPalazzo, raggruppaPlanimetrie, spostaGruppo, spostaVersione, type GruppoPlanimetrie, type Planimetria } from '../../utils/gruppiPlanimetrie';
 import type { MappaRiassuntoDto } from '../../types';
+import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 
 export type { Planimetria };
 
@@ -137,7 +138,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
         <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
           onSubmit={(e) => { e.preventDefault(); const nome = nomeNuova.trim(); if (!nome) return; void esegui(async () => { await creaMappa({ nome, tipo: 'area', genitore: `dungeon-${dungeonChiave}`, ordine: planimetrie.length }); setNuovaAperta(false); }, `Planimetria «${nome}» aggiunta in fondo: caricane l’immagine dall’editor.`); }}>
           <label className="flex min-w-[200px] flex-1 flex-col gap-1 text-[12px]">Nome della planimetria
-            <input className="form-input" value={nomeNuova} onChange={(e) => setNomeNuova(e.target.value)} maxLength={120} autoFocus placeholder="Es. Torre: Livello superiore" />
+            <input className="form-input" value={nomeNuova} onChange={(e) => setNomeNuova(e.target.value)} maxLength={LIMITI_GUIDA.mappa.nome} autoFocus placeholder="Es. Torre: Livello superiore" />
           </label>
           <div className="flex gap-1.5">
             <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !nomeNuova.trim()} />
@@ -178,7 +179,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                   <CorrezioneGuida key={g.id} cosa={`la stanza «${g.nome}»`} compatto
                     iniziale={() => ({ nome: g.nome })}
                     onSalva={async (b) => { await aggiornaPresentazioneMappa(g.versioni[0].planimetria.chiave, { gruppoNome: b.nome }); await onCambiato(); }}>
-                    {(b, cambia) => <CampoCorrezione etichetta="Nome della stanza" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />}
+                    {(b, cambia) => <CampoCorrezione etichetta="Nome della stanza" valore={b.nome} massimo={LIMITI_GUIDA.mappa.gruppoNome} onCambia={(v) => cambia({ nome: v })} />}
                   </CorrezioneGuida>
                   <span aria-hidden className="px-1 text-text-muted">{apertaQui ? '▾' : '▸'}</span>
                 </div>
@@ -212,8 +213,8 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                               iniziale={() => ({ nome: nomeSenzaPalazzo(p.nome), etichetta: v.mappa?.gruppoImmagini?.etichetta ?? '' })}
                               onSalva={async (b) => { await aggiornaMappa(p.chiave, { nome: b.nome }); await aggiornaPresentazioneMappa(p.chiave, { etichetta: b.etichetta || null }); await onCambiato(); }}>
                               {(b, cambia) => <>
-                                <CampoCorrezione etichetta="Nome della planimetria" valore={b.nome} onCambia={(x) => cambia({ nome: x })} />
-                                <CampoCorrezione etichetta="Che cosa mostra (etichetta)" valore={b.etichetta} onCambia={(x) => cambia({ etichetta: x })} />
+                                <CampoCorrezione etichetta="Nome della planimetria" valore={b.nome} massimo={LIMITI_GUIDA.mappa.nome} onCambia={(x) => cambia({ nome: x })} />
+                                <CampoCorrezione etichetta="Che cosa mostra (etichetta)" valore={b.etichetta} massimo={LIMITI_GUIDA.mappa.etichetta} onCambia={(x) => cambia({ etichetta: x })} />
                               </>}
                             </CorrezioneGuida>
                             <Link to={`/guida/mappe/${encodeURIComponent(p.chiave)}/modifica`} className="touch px-1 text-[11px]" title="Modifica immagine e spilli">Editor</Link>

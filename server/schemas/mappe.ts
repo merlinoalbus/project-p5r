@@ -3,6 +3,7 @@
 // ============================================================
 
 import { z } from 'zod';
+import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { schemaDestinazioneSpillo } from '../services/mappe/destinazioniSpillo.js';
 import { TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO } from '../../shared/spilli.js';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
@@ -22,7 +23,7 @@ export const queryDidascalia = z.object({ didascalia: z.string().max(300).option
 export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).optional(), ordine: z.number().int().min(0).max(999).optional() });
 export const queryMappa = z.object({ partita: z.coerce.number().int().positive().optional() });
 export const bodyCreaMappa = z.object({
-  chiave: chiaveMappa.optional(), nome: z.string().min(1).max(300), tipo: z.enum(TIPI_MAPPA), genitore: chiaveMappa.nullable().optional(), ordine: z.number().int().min(0).max(9999).optional(),
+  chiave: chiaveMappa.optional(), nome: z.string().min(1).max(LIMITI_GUIDA.mappa.nome), tipo: z.enum(TIPI_MAPPA), genitore: chiaveMappa.nullable().optional(), ordine: z.number().int().min(0).max(9999).optional(),
   asset: z.string().max(200).nullable().optional(), larghezza: z.number().int().positive().nullable().optional(), altezza: z.number().int().positive().nullable().optional(), entita: entita.optional(), note: z.string().max(2000).optional(),
   // 15.24: con un genitore, `passaggio` crea anche lo spillo «passaggio» nella mappa genitore e `ritorno` quello verso il genitore nella nuova mappa
   passaggio: z.boolean().optional(), ritorno: z.boolean().optional(),
@@ -30,7 +31,7 @@ export const bodyCreaMappa = z.object({
 export const bodyAggiornaMappa = bodyCreaMappa.omit({ chiave: true, passaggio: true, ritorno: true }).partial();
 /** Raggruppamento di una planimetria: la stanza a cui appartiene e che cosa mostra la sua versione. */
 export const bodyPresentazioneMappa = z.object({
-  gruppoId: z.string().max(200).nullable().optional(), gruppoNome: z.string().max(200).optional(), etichetta: z.string().max(200).nullable().optional(),
+  gruppoId: z.string().max(200).nullable().optional(), gruppoNome: z.string().max(LIMITI_GUIDA.mappa.gruppoNome).optional(), etichetta: z.string().max(LIMITI_GUIDA.mappa.etichetta).nullable().optional(),
 });
 /** Riordino in blocco delle mappe figlie di un genitore (`null` = radici): l'elenco è il nuovo ordine. */
 export const bodyRiordinaMappe = z.object({ genitore: chiaveMappa.nullable(), chiavi: z.array(chiaveMappa).max(500) });

@@ -13,18 +13,19 @@
 // così com'è per accorgersi subito se un dato nuovo li supera.
 
 import { z } from 'zod';
+import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 
 export const TIPI_PUNTO = ['sicura', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'altro'] as const;
 
 export const paramsChiaveGuida = z.object({ chiave: z.string().min(1).max(200) });
 export const bodyDungeon = z.object({
-  nome: z.string().trim().min(1).max(200).optional(), sovrano: z.string().max(400).optional(),
-  dataSblocco: z.string().max(1000).optional(), dataScadenza: z.string().max(1000).optional(), furtoConsigliato: z.string().max(1000).optional(),
-  livelloConsigliato: z.string().max(1000).optional(), note: z.string().max(8000).optional(),
+  nome: z.string().trim().min(1).max(LIMITI_GUIDA.dungeon.nome).optional(), sovrano: z.string().max(LIMITI_GUIDA.dungeon.sovrano).optional(),
+  dataSblocco: z.string().max(LIMITI_GUIDA.dungeon.data).optional(), dataScadenza: z.string().max(LIMITI_GUIDA.dungeon.data).optional(), furtoConsigliato: z.string().max(LIMITI_GUIDA.dungeon.data).optional(),
+  livelloConsigliato: z.string().max(LIMITI_GUIDA.dungeon.livello).optional(), note: z.string().max(LIMITI_GUIDA.dungeon.note).optional(),
 });
-export const bodyArea = z.object({ nome: z.string().trim().min(1).max(300).optional(), descrizione: z.string().max(8000).optional() });
+export const bodyArea = z.object({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional() });
 export const bodyPunto = z.object({
-  nome: z.string().trim().min(1).max(300).optional(), descrizione: z.string().max(8000).optional(),
+  nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.punto.descrizione).optional(),
   tipo: z.enum(TIPI_PUNTO).optional(), esauribile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(),
 });
-export const bodyNuovoPunto = bodyPunto.extend({ nome: z.string().trim().min(1).max(300), tipo: z.enum(TIPI_PUNTO) });
+export const bodyNuovoPunto = bodyPunto.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
