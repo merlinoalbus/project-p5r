@@ -92,7 +92,8 @@ it('quando l’area non ha planimetrie legate la colonna mostra subito tutto il 
   expect(within(colonna).getByText(/Quest’area non ha planimetrie legate/)).toBeInTheDocument();
   expect(within(colonna).queryByText(/Tutte le planimetrie del Palazzo/)).toBeNull();
   expect(within(colonna).getAllByRole('checkbox')).toHaveLength(3);
-  expect(screen.getByText('nessuna planimetria legata')).toBeInTheDocument();
+  // nell'elenco unico un'area senza planimetria è una riga in coda, da collegare
+  expect(screen.getAllByText('area della guida · nessuna planimetria').length).toBeGreaterThan(0);
 });
 
 it('un’area con la planimetria legata ma senza collezionabili lo dice così, e la colonna mostra il Palazzo', async () => {
@@ -103,8 +104,7 @@ it('un’area con la planimetria legata ma senza collezionabili lo dice così, e
   const colonna = screen.getByRole('complementary', { name: 'Da raccogliere nel Palazzo di Kamoshida' });
   expect(within(colonna).getByText(/La planimetria di quest’area non ha collezionabili/)).toBeInTheDocument();
   expect(within(colonna).queryByText(/non ha planimetrie legate/)).toBeNull();
-  expect(screen.getByText('niente da raccogliere sulla sua planimetria')).toBeInTheDocument();
-  expect(screen.getByText('nessuna planimetria legata')).toBeInTheDocument();
+  expect(screen.getAllByText('area della guida · nessuna planimetria').length).toBeGreaterThan(0);
 });
 
 it('senza partita non ci sono spunte, e l’elenco resta consultabile', async () => {
@@ -140,22 +140,27 @@ it('nei Memento la colonna sono gli obiettivi del dedalo: timbri con −/+ e ric
   expect(screen.queryByRole('button', { name: 'Aggiungi un timbro' })).toBeNull();
 });
 
-// ---- Il pannello delle planimetrie (ordine logico, legame con l'area, planimetria libera) ----
+// ---- L'elenco del Palazzo (ordine logico, legame con l'area, planimetria libera) ----
+//
+// Non si apre più niente: **l'elenco è la colonna di atterraggio** (scelta dell'utente,
+// 2026-09-19). Prima stava dietro un pulsante, e chi non sapeva di doverlo premere non vedeva
+// nessun modo di sistemare le planimetrie del Palazzo.
 
-/** Apre il pannello dal pulsante dell'intestazione. */
 async function apriPlanimetrie() {
   getDungeon.mockResolvedValue(palazzo(true));
   getAlberoMappe.mockResolvedValue([]);
   monta('kamoshida');
-  fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   return within(screen.getByLabelText('Planimetrie del Palazzo'));
 }
 
 it('il pannello elenca le stanze in ordine, con quanto resta e l’area a cui sono legate', async () => {
   const pannello = await apriPlanimetrie();
   expect(pannello.getAllByText(/1\. Cancello/).length).toBeGreaterThan(0);
-  expect(pannello.getByText(/una planimetria · 1 da prendere su 2 · Cancello/)).toBeInTheDocument();
-  expect(pannello.getByText(/una planimetria · 2 da prendere su 2 · nessuna area/)).toBeInTheDocument();
+  expect(pannello.getByText(/una planimetria · 1 da prendere su 2/)).toBeInTheDocument();
+  expect(pannello.getByText(/una planimetria · 2 da prendere su 2/)).toBeInTheDocument();
+  // l'area a cui la stanza è legata sta sulla riga sotto, per esteso
+  expect(pannello.getAllByText('nessuna area').length).toBeGreaterThan(0);
 });
 
 it('«Giù» salva il nuovo ordine di tutto il Palazzo', async () => {
@@ -170,7 +175,8 @@ it('«Giù» salva il nuovo ordine di tutto il Palazzo', async () => {
 it('aperta la stanza, scegliere la sua planimetria apre il visore e la colonna dei suoi soli collezionabili', async () => {
   const pannello = await apriPlanimetrie();
   // la stanza si apre, e dentro c'è la sua planimetria con la propria etichetta
-  fireEvent.click(pannello.getByRole('button', { name: /2\. Torre/ }));
+  // la riga della stanza, non l'omonima opzione del selettore «Area della guida»
+  fireEvent.click(pannello.getAllByRole('button', { name: /2\. Torre/ }).find((b) => b.getAttribute('aria-expanded') !== null)!);
   const stanza = within(pannello.getByRole('list', { name: /Planimetrie di Torre/ }));
   fireEvent.click(stanza.getAllByRole('button', { name: /Immagine 1/ }).find((b) => b.getAttribute('aria-pressed') !== null)!);
   expect(await screen.findByText('Visore: m-torre')).toBeInTheDocument();
@@ -182,12 +188,42 @@ it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui 
   let arriva: (v: unknown) => void = () => {};
   getAlberoMappe.mockReturnValue(new Promise((r) => { arriva = r; }));
   monta('kamoshida');
-  fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
   expect(pannello.getByRole('status')).toHaveTextContent(/l’ordine si sblocca appena arriva/);
   expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).toBeDisabled();
   await act(async () => { arriva([]); });
   expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).not.toBeDisabled();
+});
+
+it('l’elenco del Palazzo è la colonna di atterraggio: niente da aprire per sistemare le planimetrie', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  getAlberoMappe.mockResolvedValue([]);
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  // nessun pulsante che apra un pannello: l'elenco c'è già, con i suoi comandi
+  expect(screen.queryByRole('button', { name: /Gestisci le planimetrie/i })).toBeNull();
+  const elenco = within(screen.getByLabelText('Planimetrie del Palazzo'));
+  expect(elenco.getAllByRole('button', { name: /^Trascina «/ }).length).toBeGreaterThan(0);
+  expect(elenco.getAllByRole('button', { name: /^Correggi la stanza/ }).length).toBeGreaterThan(0);
+});
+
+it('un’area senza planimetria si collega dalla sua riga in coda all’elenco', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  getAlberoMappe.mockResolvedValue([]);
+  aggiornaMappa.mockResolvedValue({});
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  const elenco = within(screen.getByLabelText('Planimetrie del Palazzo'));
+  // «Torre» è un'area che la guida racconta ma di cui nessuna tavola dice di essere la pianta
+  expect(elenco.getAllByText('area della guida · nessuna planimetria').length).toBe(1);
+  const selettore = elenco.getAllByLabelText('Collega una planimetria')[0];
+  fireEvent.click(selettore);
+  // la prima è «— scegli —»: la tavola vera è quella dopo, col suo nome di presentazione
+  const opzioni = await screen.findAllByRole('option');
+  expect(opzioni[1]).toHaveTextContent('Torre');
+  fireEvent.click(opzioni[1].querySelector('button')!);
+  await waitFor(() => expect(aggiornaMappa).toHaveBeenCalledWith('m-torre', { entita: { tipo: 'area', chiave: 'k-02' } }));
 });
 
 // ---- Le correzioni della guida (rilievi della revisione, 2026-09-18) ----
@@ -230,7 +266,7 @@ it('correggendo una stanza si rilegge anche l’atlante: lì stanno il nome dell
   getAlberoMappe.mockResolvedValue([]);
   aggiornaPresentazioneMappa.mockResolvedValue({});
   monta('kamoshida');
-  fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   await waitFor(() => expect(getAlberoMappe).toHaveBeenCalled());
   getAlberoMappe.mockClear();
 

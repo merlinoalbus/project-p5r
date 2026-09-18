@@ -16,6 +16,13 @@
 // guida: il legame è uno solo per area, e sceglierne un'altra stacca la precedente (lo fa il
 // server). I nomi vengono da `presentazioneMappa`, l'unico posto che decide come si chiama una
 // mappa: qui non si compone niente, altrimenti la stessa stanza si chiamerebbe in due modi.
+//
+// **Questo è l'unico elenco del Palazzo** (scelta dell'utente, 2026-09-19). Prima ce n'erano due:
+// la colonna delle aree della guida, dove per Kamoshida quattordici voci su diciotto dicevano
+// «nessuna planimetria legata», e questo pannello, che bisognava sapere di poter aprire. Due liste
+// dello stesso Palazzo, con due ordini diversi e nessuna delle due completa. Ora la lista è una e
+// sta dove si atterra: le stanze in ordine di percorso, e in coda le aree della guida che non
+// hanno ancora una planimetria — righe da collegare, non voci perse.
 // ============================================================
 
 import { useMemo, useRef, useState } from 'react';
@@ -27,6 +34,8 @@ import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { chiaviInOrdine, nomeSenzaPalazzo, raggruppaPlanimetrie, spostaGruppo, spostaVersione, type GruppoPlanimetrie, type Planimetria } from '../../utils/gruppiPlanimetrie';
+import { etichettaVersione } from '../../utils/etichettaVersione';
+import { titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import type { MappaRiassuntoDto } from '../../types';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 
@@ -43,6 +52,13 @@ interface Props {
   alberoErrore: string | null;
   onRiprovaAlbero: () => void;
   aree: Array<{ chiave: string; nome: string; ordine: number }>;
+  /** Le aree della guida senza planimetria: in coda all'elenco, da collegare. */
+  areeOrfane: Array<{ chiave: string; nome: string; ordine: number; descrizione: string }>;
+  /** Le tavole del Palazzo non ancora legate a un'area: le scelte possibili per un'area orfana. */
+  tavoleLibere: Planimetria[];
+  /** L'area aperta nella scheda: evidenzia la sua riga anche quando la stanza non è scelta. */
+  areaScelta: string | null;
+  onScegliArea: (chiave: string) => void;
   /** La planimetria che si sta guardando nel visore, evidenziata nell'elenco. */
   sceltaChiave: string | null;
   onScegli: (chiave: string) => void;
@@ -50,7 +66,7 @@ interface Props {
   onCambiato: () => Promise<void> | void;
 }
 
-export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, sceltaChiave, onScegli, onCambiato }: Props) {
+export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, areeOrfane, tavoleLibere, areaScelta, onScegliArea, sceltaChiave, onScegli, onCambiato }: Props) {
   // L'ordine mostrato è locale finché il server non risponde: il trascinamento deve vedersi subito.
   // Vale solo per le planimetrie che ci sono adesso; quelle appena aggiunte si accodano nell'ordine
   // del server e quelle eliminate cadono, altrimenti una creazione riuscita sembrerebbe fallita.
@@ -106,6 +122,20 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
     esegui(() => aggiornaMappa(p.chiave, { entita: area ? { tipo: 'area', chiave: area } : null }),
       area ? `«${nomeSenzaPalazzo(p.nome)}» legata all’area scelta.` : `«${nomeSenzaPalazzo(p.nome)}» non è più legata a un’area.`);
 
+  /**
+   * Come si presenta una tavola libera fra le scelte di un'area. **Non il nome grezzo**: trentadue
+   * tavole di Kamoshida si chiamano tutte «Palazzo di Kamoshida — Immagini native che nessun campo
+   * usa», e un elenco di trentadue voci identiche non è una scelta. Qui valgono i nomi
+   * dell'atlante, gli stessi dell'elenco: stanza più che cosa mostra quella versione.
+   */
+  const nomeTavola = (t: Planimetria): { nome: string; dettaglio?: string } => {
+    const m = albero.find((x) => x.chiave === t.chiave);
+    if (!m) return { nome: nomeSenzaPalazzo(t.nome), dettaglio: t.n > 0 ? `${t.n} da raccogliere` : undefined };
+    const versione = etichettaVersione(m);
+    const pezzi = [versione, t.n > 0 ? `${t.n} da raccogliere` : null].filter(Boolean).join(' · ');
+    return { nome: titoloGruppoImmagini(m), dettaglio: pezzi || undefined };
+  };
+
   const totale = planimetrie.reduce((s, p) => s + p.n, 0);
   const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
   const senzaArea = gruppi.filter((g) => g.aree.length === 0).length;
@@ -113,10 +143,10 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
   return (
     <div className="flex flex-col gap-2.5" aria-label="Planimetrie del Palazzo">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="m-0 font-display text-[15px] uppercase leading-none">Stanze · {gruppi.length}</h3>
+        <h3 className="m-0 font-display text-[15px] uppercase leading-none">Il Palazzo · {gruppi.length + areeOrfane.length}</h3>
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="chip text-[11px]" title="Le tavole dell’atlante: più di una per stanza quando l’estrazione ne ha trovate diverse inquadrature.">{planimetrie.length} planimetrie</span>
-          {senzaArea > 0 && <span className="chip text-[11px]" title="Una stanza senza area della guida non compare nell’elenco delle aree del Palazzo.">{senzaArea} senza area</span>}
+          {senzaArea > 0 && <span className="chip text-[11px]" title="Stanze che la guida non lega ad alcuna area: si collegano aprendo la stanza.">{senzaArea} senza area</span>}
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => { setNomeNuova(''); setNuovaAperta(true); }} />
         </div>
       </div>
@@ -155,7 +185,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
           return (
             <li key={g.id} ref={(el) => { if (el) righe.current.set(g.id, el); else righe.current.delete(g.id); }}
               className={`flex flex-col gap-1 rounded-md border px-2 py-1.5 transition-colors ${dentro ? 'border-primary bg-primary-bg' : 'border-border-light bg-white/[0.02]'} ${trascinato === g.id ? 'opacity-50' : ''} ${sopra === i && trascinato && trascinato !== g.id ? 'border-primary' : ''}`}>
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
                 <span role="button" tabIndex={-1} aria-label={`Trascina «${g.nome}» per riordinare`} aria-disabled={bloccato || undefined}
                   title={bloccato ? 'Ordine bloccato: l’atlante non è ancora caricato' : 'Trascina per riordinare'}
                   className={`touch shrink-0 select-none px-1 text-text-muted touch-none ${bloccato ? 'cursor-default opacity-40' : 'cursor-grab'}`}
@@ -163,17 +193,19 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                   onPointerMove={(e) => { if (trascinato !== g.id) return; setSopra(indiceSotto(e.clientY)); }}
                   onPointerUp={() => { if (trascinato === g.id && sopra !== null && sopra !== i) salvaOrdine(spostaGruppo(gruppi, g.id, sopra), 'Ordine delle stanze salvato.'); setTrascinato(null); setSopra(null); }}
                   onPointerCancel={() => { setTrascinato(null); setSopra(null); }}>⠿</span>
-                <button type="button" className="touch min-w-0 flex-1 text-left" aria-expanded={apertaQui}
+                <button type="button" className="touch min-w-0 flex-1 basis-[60%] text-left" aria-expanded={apertaQui}
                   onClick={() => setAperta(apertaQui ? `chiusa:${g.id}` : g.id)}>
-                  <span className="block truncate text-[13px] font-semibold">{i + 1}. {g.nome}</span>
-                  <span className="block text-[11px] text-text-muted">
+                  <span className="block text-[13px] font-semibold leading-tight">{i + 1}. {g.nome}</span>
+                  <span className="block text-[11px] leading-tight text-text-muted">
                     {g.versioni.length === 1 ? 'una planimetria' : `${g.versioni.length} planimetrie`}
                     {' · '}
                     {g.totale === 0 ? 'niente da raccogliere' : g.presi === null ? `${g.totale} da raccogliere` : restano > 0 ? `${restano} da prendere su ${g.totale}` : `${g.totale} raccolti · completa`}
-                    {g.aree.length > 0 ? ` · ${g.aree.map((a) => a.nome).join(', ')}` : ' · nessuna area'}
+                  </span>
+                  <span className="block text-[11px] leading-tight text-text-muted">
+                    {g.aree.length > 0 ? g.aree.map((a) => a.nome).join(', ') : 'nessuna area'}
                   </span>
                 </button>
-                <div className="flex shrink-0 items-center gap-0.5">
+                <div className="ml-auto flex shrink-0 items-center gap-0.5">
                   <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || i === 0} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i - 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» su`}>▲</button>
                   <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || i === gruppi.length - 1} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i + 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» giù`}>▼</button>
                   <CorrezioneGuida key={g.id} cosa={`la stanza «${g.nome}»`} compatto
@@ -199,14 +231,14 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                     const restanoQui = p.presi === null ? p.n : p.n - p.presi;
                     return (
                       <li key={p.chiave} className={`flex flex-col gap-1 rounded border-l-2 px-2 py-1 ${scelta ? 'border-primary bg-primary-bg' : 'border-border-light'}`}>
-                        <div className="flex items-center gap-1.5">
-                          <button type="button" className="touch min-w-0 flex-1 text-left" onClick={() => onScegli(p.chiave)} aria-pressed={scelta}>
-                            <span className="block truncate text-[12px]">{v.etichetta}{p.area ? ' · legata all’area' : ''}</span>
-                            <span className="block text-[11px] text-text-muted">
+                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                          <button type="button" className="touch min-w-0 flex-1 basis-full text-left" onClick={() => onScegli(p.chiave)} aria-pressed={scelta}>
+                            <span className="block text-[12px] leading-tight">{v.etichetta}{p.area ? ' · legata all’area' : ''}</span>
+                            <span className="block text-[11px] leading-tight text-text-muted">
                               {p.n === 0 ? 'niente da raccogliere' : p.presi === null ? `${p.n} da raccogliere` : restanoQui > 0 ? `${restanoQui} da prendere su ${p.n}` : `${p.n} raccolti · completa`}
                             </span>
                           </button>
-                          <div className="flex shrink-0 items-center gap-0.5">
+                          <div className="ml-auto flex shrink-0 items-center gap-0.5">
                             <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || j === 0} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, -1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» su`}>▲</button>
                             <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || j === g.versioni.length - 1} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, 1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» giù`}>▼</button>
                             <CorrezioneGuida key={p.chiave} cosa={`la planimetria «${v.etichetta}»`} compatto
@@ -233,6 +265,27 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
           );
         })}
         {gruppi.length === 0 && <li className="text-[12px] text-text-muted" role="status">Questo Palazzo non ha ancora planimetrie: aggiungine una.</li>}
+
+        {/* Le aree che la guida racconta ma di cui non si sa ancora quale tavola siano. Non sono
+            voci di serie B: è qui che si dice a quale planimetria corrispondono, e da quel momento
+            risalgono nell'elenco al posto che il percorso gli dà. */}
+        {areeOrfane.map((a) => (
+          <li key={a.chiave} className={`flex flex-col gap-1 rounded-md border border-dashed px-2 py-1.5 ${areaScelta === a.chiave ? 'border-primary bg-primary-bg' : 'border-border-light'}`}>
+            <div className="flex items-center gap-1.5">
+              <span aria-hidden className="shrink-0 px-1 text-text-muted opacity-40">·</span>
+              <button type="button" className="touch min-w-0 flex-1 text-left" aria-pressed={areaScelta === a.chiave} title={a.descrizione}
+                onClick={() => onScegliArea(a.chiave)}>
+                <span className="block truncate text-[13px] font-semibold">{a.ordine + 1}. {a.nome}</span>
+                <span className="block text-[11px] text-text-muted">area della guida · nessuna planimetria</span>
+              </button>
+            </div>
+            {tavoleLibere.length > 0
+              ? <Selettore etichetta="Collega una planimetria" valore="" vuoto="— scegli —"
+                  opzioni={tavoleLibere.map((t) => ({ chiave: t.chiave, ...nomeTavola(t) }))}
+                  onCambia={(k) => { if (k) void esegui(() => aggiornaMappa(k, { entita: { tipo: 'area', chiave: a.chiave } }), `Planimetria collegata a «${a.nome}».`); }} />
+              : <span className="text-[11px] text-text-muted">Nessuna tavola libera: aggiungine una con «Aggiungi».</span>}
+          </li>
+        ))}
       </ul>
 
       {daEliminare && (

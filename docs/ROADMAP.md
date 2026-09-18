@@ -753,3 +753,34 @@ campo fosse di troppo. Ora `shared/limitiGuida.ts` è l'unica fonte, letta dagli
 moduli. Il nome di una mappa vale 180 e non 300: entra nella chiave leggibile del percorso, che il
 server tiene sotto quella soglia — oltre, risponde «percorso-troppo-lungo» e dice di abbreviare.
 Test: ogni rotta accetta esattamente il massimo dichiarato e rifiuta il carattere in più.
+
+## Un elenco solo nella scheda del Palazzo (19 settembre 2026) — fatto
+
+Riscontro dell'utente, provando l'interfaccia: «continuo a non vedere su FE come sostieni che io
+possa sistemare le planimetrie dei palazzi». Aveva ragione, e il difetto non era la mancanza della
+funzione: il pannello per ordinare, legare e correggere le planimetrie **c'era ed era completo**,
+ma si apriva solo da un chip grigio («34 planimetrie · gestisci») messo in fila con le targhette
+informative «18 aree» e «44 da raccogliere». Niente lo distingueva da un'etichetta.
+
+**Diagnosi, sui dati veri di Kamoshida**: due elenchi dello stesso Palazzo. La colonna di
+atterraggio elencava le 18 aree della guida, di cui 15 senza planimetria legata; il pannello
+elencava 17 stanze / 34 planimetrie, di cui 14 senza area. Due ordini diversi, nessuno completo.
+
+**Fatto** (scelta dell'utente fra le alternative proposte): un elenco solo, nella colonna di
+atterraggio, in ordine di percorso trascinabile.
+- `PlanimetriePalazzo` è ora l'elenco del Palazzo e sta nella colonna (allargata a 360 px), con i
+  comandi sulle righe: maniglia e ▲▼ per l'ordine, ✎ per stanza e versione, cestino, «Editor»,
+  selettore dell'area, «Aggiungi».
+- In coda, le aree della guida senza planimetria: righe tratteggiate con il selettore «Collega una
+  planimetria». Non spariscono, si collegano.
+- Il pannello separato, il pulsante che lo apriva e il caricamento pigro dell'atlante non ci sono
+  più: l'atlante serve subito, perché l'elenco è la prima cosa che si vede (nei Memento no: i
+  dedali non hanno planimetrie e tengono il pozzo).
+- Le tavole libere nel selettore portano il nome di presentazione dell'atlante: prima erano 32 voci
+  chiamate tutte «Palazzo di Kamoshida — Immagini native che nessun campo usa».
+
+Test: due nuovi in `DungeonDettaglioPage.test.tsx` (l'elenco è già a schermo senza aprire nulla; e
+un'area senza planimetria si collega dalla sua riga in coda), più i sette adattati all'interfaccia
+nuova. Verifica dal vivo su Kamoshida, Madarame e Memento: navigazione dalla riga al visore,
+collegamento di un'area orfana provato davvero e poi ripristinato, nessun errore in pagina.
+
