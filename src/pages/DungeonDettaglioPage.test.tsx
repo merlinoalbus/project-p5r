@@ -3,7 +3,7 @@
 // Test DungeonDettaglioPage — la raccolta sulle planimetrie con «Raccolto», gli obiettivi dei dedali, i punti della guida ripiegati
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -145,6 +145,7 @@ it('nei Memento la colonna sono gli obiettivi del dedalo: timbri con −/+ e ric
 /** Apre il pannello dal pulsante dell'intestazione. */
 async function apriPlanimetrie() {
   getDungeon.mockResolvedValue(palazzo(true));
+  getAlberoMappe.mockResolvedValue([]);
   monta('kamoshida');
   fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
   return within(screen.getByLabelText('Planimetrie del Palazzo'));
@@ -160,6 +161,8 @@ it('il pannello elenca le stanze in ordine, con quanto resta e l’area a cui so
 it('«Giù» salva il nuovo ordine di tutto il Palazzo', async () => {
   const pannello = await apriPlanimetrie();
   riordinaMappe.mockResolvedValue([]);
+  // l'ordine si sblocca quando l'atlante è arrivato: prima di allora il tasto è spento
+  await waitFor(() => expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).not.toBeDisabled());
   fireEvent.click(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ }));
   await waitFor(() => expect(riordinaMappe).toHaveBeenCalledWith('dungeon-kamoshida', ['m-torre', 'm-cancello']));
 });
@@ -172,4 +175,17 @@ it('aperta la stanza, scegliere la sua planimetria apre il visore e la colonna d
   fireEvent.click(stanza.getAllByRole('button', { name: /Immagine 1/ }).find((b) => b.getAttribute('aria-pressed') !== null)!);
   expect(await screen.findByText('Visore: m-torre')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: /Su questa planimetria/ })).toBeInTheDocument();
+});
+
+it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui non si sa quali tavole sono la stessa stanza', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  let arriva: (v: unknown) => void = () => {};
+  getAlberoMappe.mockReturnValue(new Promise((r) => { arriva = r; }));
+  monta('kamoshida');
+  fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
+  const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
+  expect(pannello.getByRole('status')).toHaveTextContent(/l’ordine si sblocca appena arriva/);
+  expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).toBeDisabled();
+  await act(async () => { arriva([]); });
+  expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).not.toBeDisabled();
 });

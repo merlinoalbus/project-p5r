@@ -36,6 +36,10 @@ interface Props {
   planimetrie: Planimetria[];
   /** L'atlante: serve per il nome di presentazione e per sapere quali versioni sono la stessa stanza. */
   albero: MappaRiassuntoDto[];
+  /** Finché l'atlante non c'è, le stanze non si sanno: l'ordine resta bloccato (vedi sotto). */
+  alberoPronto: boolean;
+  alberoErrore: string | null;
+  onRiprovaAlbero: () => void;
   aree: Array<{ chiave: string; nome: string; ordine: number }>;
   /** La planimetria che si sta guardando nel visore, evidenziata nell'elenco. */
   sceltaChiave: string | null;
@@ -44,12 +48,17 @@ interface Props {
   onCambiato: () => Promise<void> | void;
 }
 
-export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, aree, sceltaChiave, onScegli, onCambiato }: Props) {
+export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, sceltaChiave, onScegli, onCambiato }: Props) {
   // L'ordine mostrato è locale finché il server non risponde: il trascinamento deve vedersi subito.
   // Vale solo per le planimetrie che ci sono adesso; quelle appena aggiunte si accodano nell'ordine
   // del server e quelle eliminate cadono, altrimenti una creazione riuscita sembrerebbe fallita.
   const [ordine, setOrdine] = useState<string[] | null>(null);
   const [occupato, setOccupato] = useState(false);
+  // **Senza l'atlante non si riordina.** È l'atlante a dire quali tavole sono la stessa stanza:
+  // finché non è arrivato, ogni planimetria sembrerebbe una stanza a sé e trascinare salverebbe lo
+  // spostamento della singola tavola invece di quello della stanza — il contrario di quel che la
+  // riga promette (rilievo della revisione, 2026-09-18).
+  const bloccato = occupato || !alberoPronto;
   const [aperta, setAperta] = useState<string | null>(null);
   const [daEliminare, setDaEliminare] = useState<Planimetria | null>(null);
   const [nuovaAperta, setNuovaAperta] = useState(false);
@@ -114,6 +123,15 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, aree, s
         {totale > 0 ? ` ${presi}/${totale} raccolti in tutto.` : ' Nessun collezionabile su queste planimetrie.'}
       </p>
 
+      {!alberoPronto && (
+        <p className="m-0 flex flex-wrap items-center gap-2 rounded-md bg-white/[0.04] px-3 py-2 text-[12px] text-text-muted" role="status">
+          {alberoErrore
+            ? <>L’atlante non si è caricato ({alberoErrore}): le planimetrie si vedono, ma finché manca non si sa quali sono la stessa stanza e l’ordine resta bloccato.</>
+            : <>Carico l’atlante per raggruppare le planimetrie per stanza: l’ordine si sblocca appena arriva.</>}
+          {alberoErrore && <button type="button" className="chip touch text-[11px]" onClick={onRiprovaAlbero}>Riprova</button>}
+        </p>
+      )}
+
       {nuovaAperta && (
         <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
           onSubmit={(e) => { e.preventDefault(); const nome = nomeNuova.trim(); if (!nome) return; void esegui(async () => { await creaMappa({ nome, tipo: 'area', genitore: `dungeon-${dungeonChiave}`, ordine: planimetrie.length }); setNuovaAperta(false); }, `Planimetria «${nome}» aggiunta in fondo: caricane l’immagine dall’editor.`); }}>
@@ -136,9 +154,10 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, aree, s
             <li key={g.id} ref={(el) => { if (el) righe.current.set(g.id, el); else righe.current.delete(g.id); }}
               className={`flex flex-col gap-1 rounded-md border px-2 py-1.5 transition-colors ${dentro ? 'border-primary bg-primary-bg' : 'border-border-light bg-white/[0.02]'} ${trascinato === g.id ? 'opacity-50' : ''} ${sopra === i && trascinato && trascinato !== g.id ? 'border-primary' : ''}`}>
               <div className="flex items-center gap-1.5">
-                <span role="button" tabIndex={-1} aria-label={`Trascina «${g.nome}» per riordinare`} title="Trascina per riordinare"
-                  className="touch shrink-0 cursor-grab select-none px-1 text-text-muted touch-none"
-                  onPointerDown={(e) => { if (occupato) return; e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); setTrascinato(g.id); setSopra(i); }}
+                <span role="button" tabIndex={-1} aria-label={`Trascina «${g.nome}» per riordinare`} aria-disabled={bloccato || undefined}
+                  title={bloccato ? 'Ordine bloccato: l’atlante non è ancora caricato' : 'Trascina per riordinare'}
+                  className={`touch shrink-0 select-none px-1 text-text-muted touch-none ${bloccato ? 'cursor-default opacity-40' : 'cursor-grab'}`}
+                  onPointerDown={(e) => { if (bloccato) return; e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); setTrascinato(g.id); setSopra(i); }}
                   onPointerMove={(e) => { if (trascinato !== g.id) return; setSopra(indiceSotto(e.clientY)); }}
                   onPointerUp={() => { if (trascinato === g.id && sopra !== null && sopra !== i) salvaOrdine(spostaGruppo(gruppi, g.id, sopra), 'Ordine delle stanze salvato.'); setTrascinato(null); setSopra(null); }}
                   onPointerCancel={() => { setTrascinato(null); setSopra(null); }}>⠿</span>
@@ -153,8 +172,8 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, aree, s
                   </span>
                 </button>
                 <div className="flex shrink-0 items-center gap-0.5">
-                  <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={occupato || i === 0} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i - 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» su`}>▲</button>
-                  <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={occupato || i === gruppi.length - 1} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i + 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» giù`}>▼</button>
+                  <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || i === 0} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i - 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» su`}>▲</button>
+                  <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || i === gruppi.length - 1} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i + 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» giù`}>▼</button>
                   <span aria-hidden className="px-1 text-text-muted">{apertaQui ? '▾' : '▸'}</span>
                 </div>
               </div>
@@ -181,8 +200,8 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, aree, s
                             </span>
                           </button>
                           <div className="flex shrink-0 items-center gap-0.5">
-                            <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={occupato || j === 0} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, -1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» su`}>▲</button>
-                            <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={occupato || j === g.versioni.length - 1} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, 1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» giù`}>▼</button>
+                            <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || j === 0} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, -1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» su`}>▲</button>
+                            <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || j === g.versioni.length - 1} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, 1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» giù`}>▼</button>
                             <Link to={`/guida/mappe/${encodeURIComponent(p.chiave)}/modifica`} className="touch px-1 text-[11px]" title="Modifica immagine e spilli">Editor</Link>
                             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={18} />} titolo="" aria-label={`Elimina «${v.etichetta}» di ${g.nome}`} disabled={occupato} onClick={() => setDaEliminare(p)} />
                           </div>

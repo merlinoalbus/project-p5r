@@ -301,6 +301,7 @@ export function DungeonDettaglioPage() {
           {!memento && pannelloPlanimetrie && (
             <section className="card">
               <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
+                alberoPronto={!!albero.dati} alberoErrore={albero.errore} onRiprovaAlbero={() => void albero.ricarica()}
                 aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
                 sceltaChiave={mappaScelta} onScegli={scegliPlanimetria} onCambiato={() => dati.ricarica()} />
             </section>
