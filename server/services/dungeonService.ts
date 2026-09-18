@@ -314,12 +314,21 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
   return aggiornaPunto(chiave, {});
 }
 
-/** Toglie un punto della guida e quel che le partite ne avevano segnato. */
+/**
+ * Toglie un punto della guida e quel che le partite ne avevano segnato.
+ *
+ * Lo spillo che lo rappresentava sulla mappa **resta** — è un posto sulla planimetria, e cancellarlo
+ * porterebbe via anche il disegno — ma perde il riferimento. Con lui se ne va il suo «raccolto» per
+ * partita (rilievo della revisione, 2026-09-18): lasciarlo avrebbe tenuto un collezionabile orfano
+ * segnato preso, che continuava a contare nella percentuale del Palazzo mentre la conferma diceva
+ * che le segnature sparivano.
+ */
 export function eliminaPunto(puntoChiave: string): void {
   if (!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(puntoChiave)) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   getDb().transaction(() => {
     prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
     prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
+    prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND uid IS NOT NULL)").run(puntoChiave);
     prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
     prepared('DELETE FROM punto_interesse WHERE chiave = ?').run(puntoChiave);
   })();

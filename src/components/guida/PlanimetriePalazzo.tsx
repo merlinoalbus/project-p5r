@@ -64,10 +64,6 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
   const [daEliminare, setDaEliminare] = useState<Planimetria | null>(null);
   const [nuovaAperta, setNuovaAperta] = useState(false);
   const [nomeNuova, setNomeNuova] = useState('');
-  // Le bozze dei due nomi che si leggono nella scheda: quello della stanza (vale per tutte le sue
-  // tavole) e quello della versione, che dice che cosa mostra questa tavola in particolare.
-  const [bozzaStanza, setBozzaStanza] = useState<string | null>(null);
-  const [bozzaVersione, setBozzaVersione] = useState<{ nome: string; etichetta: string } | null>(null);
 
   const gruppi = useMemo(() => {
     const inOrdine = ordine
@@ -179,9 +175,10 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                 <div className="flex shrink-0 items-center gap-0.5">
                   <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || i === 0} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i - 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» su`}>▲</button>
                   <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || i === gruppi.length - 1} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i + 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» giù`}>▼</button>
-                  <CorrezioneGuida cosa={`la stanza «${g.nome}»`} compatto modificato={bozzaStanza !== null && bozzaStanza !== g.nome}
-                    onSalva={async () => { await aggiornaPresentazioneMappa(g.versioni[0].planimetria.chiave, { gruppoNome: bozzaStanza! }); setBozzaStanza(null); await onCambiato(); }}>
-                    {() => <CampoCorrezione etichetta="Nome della stanza" valore={bozzaStanza ?? g.nome} onCambia={setBozzaStanza} />}
+                  <CorrezioneGuida key={g.id} cosa={`la stanza «${g.nome}»`} compatto
+                    iniziale={() => ({ nome: g.nome })}
+                    onSalva={async (b) => { await aggiornaPresentazioneMappa(g.versioni[0].planimetria.chiave, { gruppoNome: b.nome }); await onCambiato(); }}>
+                    {(b, cambia) => <CampoCorrezione etichetta="Nome della stanza" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />}
                   </CorrezioneGuida>
                   <span aria-hidden className="px-1 text-text-muted">{apertaQui ? '▾' : '▸'}</span>
                 </div>
@@ -211,13 +208,13 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                           <div className="flex shrink-0 items-center gap-0.5">
                             <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || j === 0} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, -1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» su`}>▲</button>
                             <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || j === g.versioni.length - 1} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, 1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» giù`}>▼</button>
-                            <CorrezioneGuida cosa={`la planimetria «${v.etichetta}»`} compatto modificato={!!bozzaVersione}
-                              onSalva={async () => { const b = bozzaVersione!; await aggiornaMappa(p.chiave, { nome: b.nome }); await aggiornaPresentazioneMappa(p.chiave, { etichetta: b.etichetta || null }); setBozzaVersione(null); await onCambiato(); }}>
-                              {() => { const b = bozzaVersione ?? { nome: nomeSenzaPalazzo(p.nome), etichetta: v.mappa?.gruppoImmagini?.etichetta ?? '' };
-                                return <>
-                                  <CampoCorrezione etichetta="Nome della planimetria" valore={b.nome} onCambia={(x) => setBozzaVersione({ ...b, nome: x })} />
-                                  <CampoCorrezione etichetta="Che cosa mostra (etichetta)" valore={b.etichetta} onCambia={(x) => setBozzaVersione({ ...b, etichetta: x })} />
-                                </>; }}
+                            <CorrezioneGuida key={p.chiave} cosa={`la planimetria «${v.etichetta}»`} compatto
+                              iniziale={() => ({ nome: nomeSenzaPalazzo(p.nome), etichetta: v.mappa?.gruppoImmagini?.etichetta ?? '' })}
+                              onSalva={async (b) => { await aggiornaMappa(p.chiave, { nome: b.nome }); await aggiornaPresentazioneMappa(p.chiave, { etichetta: b.etichetta || null }); await onCambiato(); }}>
+                              {(b, cambia) => <>
+                                <CampoCorrezione etichetta="Nome della planimetria" valore={b.nome} onCambia={(x) => cambia({ nome: x })} />
+                                <CampoCorrezione etichetta="Che cosa mostra (etichetta)" valore={b.etichetta} onCambia={(x) => cambia({ etichetta: x })} />
+                              </>}
                             </CorrezioneGuida>
                             <Link to={`/guida/mappe/${encodeURIComponent(p.chiave)}/modifica`} className="touch px-1 text-[11px]" title="Modifica immagine e spilli">Editor</Link>
                             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={18} />} titolo="" aria-label={`Elimina «${v.etichetta}» di ${g.nome}`} disabled={occupato} onClick={() => setDaEliminare(p)} />

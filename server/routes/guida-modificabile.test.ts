@@ -51,6 +51,20 @@ describe('correzione dei testi della guida', () => {
     expect(dettaglioDungeon('kamoshida').aree[0].punti.some((p) => p.chiave === creato.chiave)).toBe(false);
   });
 
+  it('eliminando un punto se ne va anche il «raccolto» del suo spillo', async () => {
+    const partita = (await request(app).post('/api/partite').send({ nome: 'Correzioni' })).body.data as { id: number };
+    // un punto della guida agganciato a uno spillo collezionabile, segnato raccolto dalla partita
+    const spillo = prepared("SELECT id, uid, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND uid IS NOT NULL AND collezionabile = 1 LIMIT 1").get() as { id: number; uid: string; riferimento_chiave: string } | undefined;
+    expect(spillo, 'il pacchetto deve avere almeno uno spillo collegato a un punto').toBeTruthy();
+    await request(app).put(`/api/partite/${partita.id}/spilli/${spillo!.id}`).send({ raccolto: true }).expect(200);
+    expect(prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').get(partita.id, spillo!.uid)).toBeTruthy();
+
+    await request(app).delete(`/api/compendio/punti/${encodeURIComponent(spillo!.riferimento_chiave)}`).expect(204);
+    // lo spillo resta sulla mappa senza riferimento, ma il suo «raccolto» non conta più niente
+    expect(prepared('SELECT riferimento_tipo FROM spillo WHERE id = ?').get(spillo!.id)).toMatchObject({ riferimento_tipo: null });
+    expect(prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').get(partita.id, spillo!.uid)).toBeUndefined();
+  });
+
   it('un punto inesistente non si corregge', async () => {
     await request(app).put('/api/compendio/punti/mai-esistito').send({ nome: 'X' }).expect(404);
   });

@@ -199,11 +199,6 @@ export function DungeonDettaglioPage() {
   // è legata a nessuna area: è il modo di guardare (e segnare) una tavola che la guida non aggancia.
   const [planimetriaLibera, setPlanimetriaLibera] = useState<string | null>(null);
   const [pannelloPlanimetrie, setPannelloPlanimetrie] = useState(false);
-  // Bozze dei moduli di correzione: una per pezzo, così il testo che stai scrivendo non si perde
-  // se nel frattempo la scheda si ricarica per un'altra azione.
-  const [bozzaDungeon, setBozzaDungeon] = useState<Record<string, string> | null>(null);
-  const [bozzaArea, setBozzaArea] = useState<Record<string, string> | null>(null);
-  const [bozzaPunto, setBozzaPunto] = useState<Record<string, string> | null>(null);
   const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo'] } | null>(null);
   // L'atlante serve al pannello delle planimetrie: da lì vengono il nome di presentazione e il
   // gruppo che dice quali tavole sono la stessa stanza. Si carica solo quando il pannello si apre.
@@ -262,10 +257,10 @@ export function DungeonDettaglioPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button type="button" className="btn btn-ghost btn-sm touch -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
                     <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
-                    <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`} modificato={!!bozzaDungeon}
-                      onSalva={async () => { const b = bozzaDungeon!; dati.imposta(await aggiornaDungeon(d.chiave, { nome: b.nome, sovrano: b.sovrano, dataSblocco: b.dataSblocco, dataScadenza: b.dataScadenza, furtoConsigliato: b.furtoConsigliato, livelloConsigliato: b.livelloConsigliato, note: b.note })); setBozzaDungeon(null); }}>
-                      {() => { const b = bozzaDungeon ?? { nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note };
-                        const campo = (k: string, etichetta: string, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k] ?? ''} multilinea={multilinea} massimo={multilinea ? 4000 : 400} onCambia={(v) => setBozzaDungeon({ ...b, [k]: v })} />;
+                    <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`}
+                      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
+                      onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
+                      {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={multilinea ? 4000 : 400} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
                         return <>
                           {campo('nome', 'Nome')}{campo('sovrano', 'Sovrano')}
                           {campo('dataSblocco', 'Si apre')}{campo('furtoConsigliato', 'Furto consigliato')}{campo('dataScadenza', 'Scade')}
@@ -341,13 +336,15 @@ export function DungeonDettaglioPage() {
               <section className="card flex flex-col gap-2.5">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>
-                  {!memento && <CorrezioneGuida cosa={`l’area «${area.nome}»`} modificato={!!bozzaArea}
-                    onSalva={async () => { await aggiornaArea(area.chiave, { nome: bozzaArea!.nome, descrizione: bozzaArea!.descrizione }); setBozzaArea(null); await dati.ricarica(); }}>
-                    {() => { const b = bozzaArea ?? { nome: area.nome, descrizione: area.descrizione };
-                      return <>
-                        <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} onCambia={(v) => setBozzaArea({ ...b, nome: v })} />
-                        <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={4000} onCambia={(v) => setBozzaArea({ ...b, descrizione: v })} />
-                      </>; }}
+                  {/* `key`: cambiando area il modulo si rimonta, altrimenti resterebbe aperto con il
+                      testo dell'area di prima e lo salverebbe su quella nuova (rilievo della revisione). */}
+                  {!memento && <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`}
+                    iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
+                    onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}>
+                    {(b, cambia) => <>
+                      <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />
+                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={4000} onCambia={(v) => cambia({ descrizione: v })} />
+                    </>}
                   </CorrezioneGuida>}
                   <span className="text-[12px] text-text-muted">{memento ? 'dedalo' : 'area'} {area.ordine + 1} di {d.aree.length}</span>
                   <span className="flex-1" />
@@ -444,20 +441,20 @@ export function DungeonDettaglioPage() {
                                   {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
                                   {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
                                   {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
-                                  <CorrezioneGuida cosa={`il punto «${p.nome}»`} compatto modificato={!!bozzaPunto}
-                                    onSalva={async () => { const b = bozzaPunto!; await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì' }); setBozzaPunto(null); await dati.ricarica(); }}
-                                    elimina={{ avviso: 'Se ne va dalla guida, con quel che le partite ne avevano segnato.', onElimina: async () => { await eliminaPunto(p.chiave); setBozzaPunto(null); await dati.ricarica(); } }}>
-                                    {() => { const b = bozzaPunto ?? { nome: p.nome, descrizione: p.descrizione, tipo: p.tipo, esauribile: p.esauribile ? 'sì' : 'no' };
-                                      return <>
-                                        <CampoCorrezione etichetta="Nome" valore={b.nome} onCambia={(v) => setBozzaPunto({ ...b, nome: v })} />
-                                        <span className="min-w-[150px]">
-                                          <Selettore etichetta="Tipo" valore={b.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setBozzaPunto({ ...b, tipo: v })} />
-                                        </span>
-                                        <label className="touch flex items-center gap-1.5 text-[12px]">
-                                          <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => setBozzaPunto({ ...b, esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
-                                        </label>
-                                        <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={4000} onCambia={(v) => setBozzaPunto({ ...b, descrizione: v })} />
-                                      </>; }}
+                                  <CorrezioneGuida key={p.chiave} cosa={`il punto «${p.nome}»`} compatto
+                                    iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no' })}
+                                    onSalva={async (b) => { await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì' }); await dati.ricarica(); }}
+                                    elimina={{ avviso: 'Se ne va dalla guida, con quel che le partite ne avevano segnato.', onElimina: async () => { await eliminaPunto(p.chiave); await dati.ricarica(); } }}>
+                                    {(b, cambia) => <>
+                                      <CampoCorrezione etichetta="Nome" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />
+                                      <span className="min-w-[150px]">
+                                        <Selettore etichetta="Tipo" valore={b.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
+                                      </span>
+                                      <label className="touch flex items-center gap-1.5 text-[12px]">
+                                        <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
+                                      </label>
+                                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={4000} onCambia={(v) => cambia({ descrizione: v })} />
+                                    </>}
                                   </CorrezioneGuida>
                                 </div>
                               </div>
