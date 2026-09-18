@@ -1589,10 +1589,12 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   note: string;
   fonti: string[];
   aree: AreaDungeonDto[];
-  /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`) che hanno collezionabili, con
-   *  quanti sono e quali: la maggior parte non è legata a un'area della guida, quindi non compare in
-   *  `aree[].mappe`. Vuoto per i Memento, che contano gli obiettivi dei dedali. */
-  planimetrie: Array<{ chiave: string; nome: string; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
+  /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`, radice esclusa) nel loro
+   *  ordine logico, con i collezionabili di ognuna e l'area della guida a cui è legata (`mappa_entita`,
+   *  al più una: un'area ha una sola planimetria). Le planimetrie senza collezionabili ci sono lo
+   *  stesso, perché è da qui che si ordinano, si legano e si cancellano. Vuoto per i Memento, che
+   *  contano gli obiettivi dei dedali. */
+  planimetrie: Array<{ chiave: string; nome: string; ordine: number; area: { chiave: string; nome: string } | null; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
 }
 
 // ---- Calendario di gioco (Fase 6.3) ----

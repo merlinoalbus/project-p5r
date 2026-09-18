@@ -494,3 +494,25 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   uno spillo di spostamento, voci dell'elenco dei passaggi, e «Apri l'arrivo» spostato in cima al
   pannello dello spillo. Nel visore basta un clic, ma nell'editor il clic seleziona per modificare:
   la via d'uscita va data a parte, altrimenti l'unico modo era un pulsante in fondo al pannello.
+
+
+### 2026-09-18 — Le planimetrie di un Palazzo sono una cosa sola, ordinata
+- **Un'area della guida ha una sola planimetria** (decisione dell'utente): legarne una seconda
+  stacca la prima. Con più planimetrie per area «completa» non misurava niente, e la stessa stanza
+  compariva due volte nell'elenco del Palazzo.
+- **Il legame si scrive in un posto solo dal punto di vista di chi lo usa**: `mappa_entita` è la
+  tabella che leggono scheda del Palazzo e contenuti della guida, e ora la scrive anche l'editor,
+  nella stessa transazione delle colonne `entita_*`. Prima il salvataggio dell'editor sembrava
+  riuscito e non cambiava nulla.
+- **La scheda elenca tutte le planimetrie, anche quelle vuote**: l'elenco serve a ordinarle,
+  legarle e toglierle, e le planimetrie da togliere sono proprio quelle senza niente da raccogliere
+  (i ritagli che nessun campo usa, le inquadrature alternative della stessa stanza).
+- **L'ordine si cambia trascinando, ma non con l'HTML5 drag-and-drop**: col dito non parte, e questa
+  scheda si consulta dal tablet mentre si gioca. Trascinamento a puntatore, più Su/Giù per la
+  precisione e per la tastiera.
+- **Le duplicazioni restano una scelta di chi gioca** (risposta dell'utente): niente fusione né
+  cancellazione automatica delle varianti; l'app dà gli strumenti (ordine, legame, eliminazione) e
+  la decisione su quale tavola tenere si prende planimetria per planimetria.
+- **L'editor può guardare il giorno corrente, ma non lo fa da solo**: di regola vede tutto, perché
+  deve poter modificare anche quel che nel mondo non c'è ancora; l'interruttore serve a controllare
+  il lavoro con gli occhi di chi consulta la guida oggi, senza uscire dalla modifica.

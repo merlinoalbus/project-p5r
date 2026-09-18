@@ -192,11 +192,13 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     expect(kamoshida.raccolta).toMatchObject({ presi: 0, mappeComplete: 0 });
     expect(kamoshida.raccolta.mappe).toBeGreaterThan(0);
     const scheda = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${id}`)).body.data as DungeonDettaglioDto;
-    // le planimetrie con collezionabili sono l'albero del Palazzo: la somma è la raccolta
-    expect(scheda.planimetrie.length).toBe(scheda.raccolta.mappe);
+    // le planimetrie sono **tutto** l'albero del Palazzo — da lì si ordinano e si cancellano, anche
+    // quelle vuote — e quelle con collezionabili sono la raccolta: la somma dei loro spilli è il totale
+    expect(scheda.planimetrie.length).toBeGreaterThan(scheda.raccolta.mappe);
+    expect(scheda.planimetrie.filter((m) => m.n > 0)).toHaveLength(scheda.raccolta.mappe);
     expect(scheda.planimetrie.reduce((s, m) => s + m.n, 0)).toBe(scheda.raccolta.totale);
     expect(scheda.planimetrie.every((m) => m.n === m.spilli.length && m.presi === 0)).toBe(true);
-    const conSpilli = scheda.planimetrie[0];
+    const conSpilli = scheda.planimetrie.find((m) => m.n > 0)!;
     expect(conSpilli.spilli[0]).toMatchObject({ raccolto: false, colore: expect.stringMatching(/^#/) });
     // le planimetrie legate alle aree portano gli stessi conteggi
     for (const m of scheda.aree.flatMap((a) => a.mappe)) expect(m.n).toBe(m.spilli.length);

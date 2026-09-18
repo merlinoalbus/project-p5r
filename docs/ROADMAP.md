@@ -610,3 +610,40 @@ come alternativa dentro un pannello richiudibile. Verificato dal vivo con una ca
 un pacchetto da 311 MB, rifiuto di un file non valido e di tre tentativi di risalita) e a 1280/768/375 senza overflow
 con bersagli da 44 px. Test: `server/services/pacchettoDeposito.test.ts` (cartella assente, non leggibile, elenco
 ordinato, risalite) e tre casi nella card.
+
+
+## Le planimetrie del Palazzo: ordine, legame con le aree, giorno corrente nell'editor (18 settembre 2026) — fatto
+
+Richiesta dell'utente dalla scheda di Kamoshida: «devo poter vedere le planimetrie e gestirne
+l'avanzamento; ordinarle, aggiungerle e cancellarle; evidenziare i raccolti della mappa specifica».
+**Diagnosi**: la guida e l'atlante sono due mondi (18 aree contro 34 planimetrie per Kamoshida) e il
+legame `mappa_entita` copriva 3 aree su 18 — 72 legami su tutti i Palazzi. Peggio: **il salvataggio
+dell'editor non scriveva mai `mappa_entita`** (solo le colonne `entita_*` della mappa), e la scheda
+legge la tabella: legare una planimetria a un'area non si vedeva da nessuna parte. L'ordine esisteva
+solo come campo numerico nel modulo dell'editor.
+
+**Server**: `sincronizzaLegameEntita` scrive i due posti insieme dentro la stessa transazione di
+`creaMappa`/`aggiornaMappa` e impone **un'area = una planimetria** (legarne una seconda stacca la
+prima); `riordinaMappe(genitore, chiavi)` riscrive l'ordine 0..n-1 lasciando in coda, come stavano,
+le figlie non elencate (`PUT /api/mappe/ordine`, schema `bodyRiordinaMappe`); `dettaglioDungeon`
+porta ora **tutte** le planimetrie dell'albero (radice esclusa) con `ordine` e l'`area` legata, non
+più solo quelle con collezionabili — sono proprio le vuote quelle da riordinare o togliere.
+
+**Interfaccia**: pannello «Planimetrie» nella scheda del Palazzo (`PlanimetriePalazzo`), aperto dal
+contatore dell'intestazione: elenco ordinabile **a trascinamento di puntatore** (funziona col dito:
+la scheda si usa sul tablet) con i tasti Su/Giù per la precisione e la tastiera, avanzamento per
+riga, `Selettore` dell'area della guida, «Aggiungi» e «Elimina» con conferma che dice che cosa si
+porta via. Scegliere una planimetria apre il suo visore e **la colonna mostra i soli collezionabili
+di quella mappa**; se è legata a un'area si apre anche quell'area.
+
+**Editor**: interruttore «Giorno corrente» acceso/spento (`VisoreMappa.vistaGiornoCorrente`):
+spento l'editor vede tutto, com'è giusto per modificare anche quel che nel mondo non c'è ancora;
+acceso la mappa si rilegge con la partita attiva e nasconde quel che le condizioni escludono oggi.
+Senza partita attiva resta spento e disabilitato.
+
+Test: `server/routes/planimetrie-palazzo.test.ts` (legame che arriva nella tabella letta dalla
+scheda, 1:1, distacco, elenco completo e ordinato, riordino con la coda, riordino fuori dal
+genitore), tre casi nella scheda del Palazzo e due sull'interruttore dell'editor; contratto delle
+planimetrie aggiornato in `struttura-server.test.ts`. Verifica dal vivo su Kamoshida (legame,
+riordino e scheda dalle API; pannello a 1280 e 375 px senza scorrimento orizzontale né errori in
+console).

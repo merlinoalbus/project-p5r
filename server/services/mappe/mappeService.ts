@@ -377,6 +377,87 @@ export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string 
 
 const chiaveValida = (chiave: string): boolean => /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiave);
 
+/**
+ * Il legame fra una mappa e l'entità della guida vive in due posti: le colonne `entita_tipo` /
+ * `entita_chiave` della mappa e la tabella `mappa_entita`, che è quella che leggono la scheda del
+ * Palazzo (`dungeonService`) e i contenuti della guida. L'editor scriveva solo le colonne: legare
+ * una planimetria a un'area non si vedeva da nessuna parte. Qui i due posti si scrivono insieme.
+ *
+ * **Un'area ha una sola planimetria** (decisione dell'utente, 2026-09-18): legare un'area che ne
+ * ha già un'altra stacca la precedente invece di affiancarla, così «completa» resta una misura
+ * vera e l'elenco del Palazzo non mostra la stessa stanza due volte.
+ */
+function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave: string } | null, precedente: { tipo: string | null; chiave: string | null } | null = null): void {
+  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) return;
+  // Si tocca **solo il legame dichiarato dalle colonne**: quello che c'era prima e quello nuovo.
+  // Una mappa può essere legata anche ad altro — un luogo della città, per esempio (migrazione 054) —
+  // e cancellare tutte le righe della mappa portava via legami che nessuno aveva chiesto di togliere.
+  // `precedente` arriva da chi chiama, perché l'aggiornamento della riga è già avvenuto: riletto
+  // dal database direbbe il legame nuovo, e quello vecchio non verrebbe tolto da nessuno.
+  for (const t of new Set([precedente?.tipo, entita?.tipo].filter((x): x is string => !!x))) {
+    prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = ?').run(chiave, t);
+  }
+  if (!entita) return;
+  if (entita.tipo === 'area') {
+    // Un'area ha una sola planimetria: si stacca **quel** legame dalla mappa che ce l'aveva, e le
+    // sue colonne si azzerano solo se dichiaravano proprio quell'area — gli altri suoi legami restano.
+    for (const altra of prepared("SELECT mappa_chiave FROM mappa_entita WHERE entita_tipo = 'area' AND entita_chiave = ? AND mappa_chiave <> ?").all(entita.chiave, chiave) as Array<{ mappa_chiave: string }>) {
+      prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(altra.mappa_chiave, entita.chiave);
+      prepared("UPDATE mappa SET entita_tipo = NULL, entita_chiave = NULL WHERE chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(altra.mappa_chiave, entita.chiave);
+    }
+  }
+  prepared('INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, ?, ?, ?)')
+    .run(chiave, entita.tipo, entita.chiave, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
+}
+
+/**
+ * L'ordine logico delle mappe di un sottoalbero, riscritto tutto insieme: è il riordino per
+ * trascinamento della scheda del Palazzo.
+ *
+ * L'elenco che arriva è **piatto** — la scheda mostra tutte le planimetrie del Palazzo, anche le
+ * nipoti — mentre l'ordine è un fatto fra sorelle: ogni mappa vale rispetto alle figlie dello
+ * stesso genitore. Perciò le chiavi si raggruppano per il genitore che hanno davvero e ogni gruppo
+ * si riscrive da 0; le sorelle non elencate restano in coda nell'ordine che avevano. Si accetta
+ * qualunque discendente di `genitore` (e `genitore` stesso conta come radice del sottoalbero).
+ */
+export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaRiassuntoDto[] {
+  const radice = genitore === null ? null : rigaMappa(genitore).chiave;
+  const nelSottoalbero = (chiave: string): boolean => {
+    if (radice === null) return true;
+    let corrente: string | null = chiave;
+    const visti = new Set<string>();
+    while (corrente && !visti.has(corrente)) {
+      visti.add(corrente);
+      corrente = (prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').get(corrente) as { genitore_chiave: string | null } | undefined)?.genitore_chiave ?? null;
+      if (corrente === radice) return true;
+    }
+    return false;
+  };
+  // per genitore effettivo: le chiavi scelte, nell'ordine in cui sono arrivate
+  const perGenitore = new Map<string | null, string[]>();
+  for (const k of chiavi) {
+    const riga = rigaMappa(k);
+    if (!nelSottoalbero(riga.chiave)) throw httpErrors.badRequest('mappa-fuori-dal-genitore', `La mappa '${k}' non sta sotto ${radice ?? 'nessuna mappa'}.`);
+    const scelte = perGenitore.get(riga.genitore_chiave) ?? [];
+    if (!scelte.includes(riga.chiave)) scelte.push(riga.chiave);
+    perGenitore.set(riga.genitore_chiave, scelte);
+  }
+  const toccate: string[] = [];
+  const adesso = nowIso();
+  getDb().transaction(() => {
+    for (const [padre, scelte] of perGenitore) {
+      const sorelle = (padre === null
+        ? prepared('SELECT chiave FROM mappa WHERE genitore_chiave IS NULL ORDER BY ordine, nome').all()
+        : prepared('SELECT chiave FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, nome').all(padre)) as Array<{ chiave: string }>;
+      const finale = [...scelte, ...sorelle.map((f) => f.chiave).filter((c) => !scelte.includes(c))];
+      finale.forEach((c, i) => prepared('UPDATE mappa SET ordine = ?, updated_at = ? WHERE chiave = ?').run(i, adesso, c));
+      toccate.push(...finale);
+    }
+  })();
+  const collezioni = collezioniImmagini();
+  return toccate.map((c) => riassunto(rigaMappa(c), collezioni));
+}
+
 export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: string; tipo: TipoMappa }): MappaDto {
   if(dati.genitore)dati={...dati,genitore:rigaMappa(dati.genitore).chiave};
   const richiesta=chiave;
@@ -395,6 +476,7 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
     prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at)
       VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(chiave, dati.nome, dati.tipo, dati.genitore ?? null, dati.ordine ?? 0, asset, dati.larghezza ?? null, dati.altezza ?? null, dati.entita?.tipo ?? null, dati.entita?.chiave ?? null, dati.note ?? '', adesso);
     sincronizzaPercorsiMappe(getDb());
+    sincronizzaLegameEntita(chiave, dati.entita ?? null);
     if(richiesta&&richiesta!==chiave&&!getDb().prepare('SELECT 1 FROM mappa_alias WHERE chiave=?').get(richiesta))prepared('INSERT INTO mappa_alias VALUES(?,?)').run(richiesta,chiave);
     // 15.24: la nuova mappa nasce già raggiungibile dal genitore (e, se richiesto, con la via del ritorno); una chiave riusata dopo una
     // cancellazione può avere ancora un vecchio passaggio verso di sé: in quel caso non se ne crea un secondo.
@@ -463,6 +545,7 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     dati.nome ?? r.nome, dati.tipo ?? r.tipo, dati.genitore === undefined ? r.genitore_chiave : dati.genitore, dati.ordine ?? r.ordine, dati.asset === undefined ? r.asset : dati.asset,
     dati.larghezza === undefined ? r.larghezza : dati.larghezza, dati.altezza === undefined ? r.altezza : dati.altezza,
     dati.entita === undefined ? r.entita_tipo : dati.entita?.tipo ?? null, dati.entita === undefined ? r.entita_chiave : dati.entita?.chiave ?? null, dati.note ?? r.note, nowIso(), chiave);
+  if (dati.entita !== undefined) sincronizzaLegameEntita(chiave, dati.entita, { tipo: r.entita_tipo, chiave: r.entita_chiave });
   sincronizzaPercorsiMappe(getDb());
   })();
   return dettaglioMappa(chiave);

@@ -12,8 +12,8 @@ import { impostaMarcatore, scaricaPianta } from '../services/dungeonService.js';
 import { impostaMarcatoreLuogo, scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyRiordinaMappe, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
@@ -82,6 +82,12 @@ router.get('/entita/:tipo/:chiave', validate({ params: z.object({ tipo: z.string
   const m = mappaPerEntita(String(req.params.tipo), String(req.params.chiave));
   if (!m) throw httpErrors.notFound('mappa-non-trovata', 'Nessuna mappa collegata a questa entità.');
   res.json(m);
+});
+
+/** Ordine logico delle planimetrie di un Palazzo (o dei figli di una qualsiasi mappa): l'elenco è l'ordine. */
+router.put('/ordine', validate({ body: bodyRiordinaMappe }), (req, res) => {
+  const { genitore, chiavi } = req.body as { genitore: string | null; chiavi: string[] };
+  res.json(riordinaMappe(genitore, chiavi));
 });
 
 router.post('/', validate({ body: bodyCreaMappa }), (req, res) => {

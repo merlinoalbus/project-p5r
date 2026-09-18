@@ -9,7 +9,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { EditorMappaPage } from './EditorMappaPage';
-import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
+import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../types';
+import { usePartitaStore } from '../stores/partitaStore';
 
 const api = vi.hoisted(() => ({
   risolviMappa: vi.fn(), getMappa: vi.fn(), getAlberoMappe: vi.fn(), creaSpillo: vi.fn(), aggiornaSpillo: vi.fn(), eliminaSpillo: vi.fn(), cercaRiferimenti: vi.fn(),
@@ -316,7 +317,7 @@ it('il doppio tocco su uno spillo di spostamento apre la mappa d’arrivo, resta
   const pin = await screen.findByRole('button', { name: /Passaggio: Banchina Metro/ });
   expect(pin).toHaveAccessibleName(/doppio tocco per aprire l’arrivo/);
   fireEvent.doubleClick(pin);
-  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina'));
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina', undefined));
 });
 
 async function apriCollegamenti() {
@@ -329,13 +330,13 @@ async function apriCollegamenti() {
 it('la scheda Collegamenti porta alla mappa dove va un passaggio in uscita', async () => {
   const passaggi = await apriCollegamenti();
   fireEvent.click(passaggi.getByRole('button', { name: /Apri Banchina della metropolitana, dove porta/ }));
-  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina'));
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina', undefined));
 });
 
 it('la scheda Collegamenti porta anche alla mappa da cui si arriva qui', async () => {
   const passaggi = await apriCollegamenti();
   fireEvent.click(passaggi.getByRole('button', { name: /Apri Banchina di Yongen-Jaya, da cui porta/ }));
-  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('yongen-banchina'));
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('yongen-banchina', undefined));
 });
 
 it('«Apri l’arrivo» sta in cima al pannello dello spillo, prima dei campi', async () => {
@@ -347,7 +348,7 @@ it('«Apri l’arrivo» sta in cima al pannello dello spillo, prima dei campi', 
   const nome = within(scheda).getByLabelText('Nome');
   expect(apri.compareDocumentPosition(nome) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   fireEvent.click(apri);
-  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina'));
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina', undefined));
 });
 
 // ---- Confermare il nome di una mappa mai rivista (2026-09-13) ----
@@ -376,4 +377,27 @@ it('una mappa già rivista non mostra l’avviso e torna a «Salva» solo dopo u
   const scheda = within(screen.getByRole('region', { name: 'Proprietà della mappa' }));
   expect(scheda.queryByRole('status')).toBeNull();
   expect(scheda.getByRole('button', { name: /Salva mappa/ })).toBeDisabled();
+});
+
+// ---- La vista del giorno corrente (interruttore acceso/spento) ----
+
+it('l’interruttore del giorno corrente è spento e senza partita non si può accendere', async () => {
+  usePartitaStore.setState({ attiva: null });
+  api.getMappa.mockResolvedValue(base);
+  monta();
+  const interruttore = await screen.findByRole('button', { name: /Giorno corrente/ });
+  expect(interruttore).toBeDisabled();
+  expect(interruttore).toHaveAttribute('aria-pressed', 'false');
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('citta-shibuya', undefined));
+});
+
+it('acceso, la mappa si rilegge con la partita attiva: è così che si nasconde quel che oggi non c’è', async () => {
+  usePartitaStore.setState({ attiva: { id: 7, nome: 'Royal' } as PartitaDto });
+  api.getMappa.mockResolvedValue(base);
+  monta();
+  const interruttore = await screen.findByRole('button', { name: /Giorno corrente/ });
+  expect(interruttore).not.toBeDisabled();
+  fireEvent.click(interruttore);
+  await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('citta-shibuya', 7));
+  expect(screen.getByRole('button', { name: /Giorno corrente/ })).toHaveAttribute('aria-pressed', 'true');
 });
