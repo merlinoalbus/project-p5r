@@ -184,5 +184,16 @@ describe('i tetti dei campi valgono davvero, e sono quelli condivisi', () => {
       expect(troppo.body.error.message).toMatch(/Abbrevia/);
     }
     await request(app).put(`/api/mappe/${mappa.chiave}/presentazione`).send({ etichetta: lungo(LIMITI_GUIDA.mappa.etichetta) }).expect(200);
+    await request(app).put(`/api/mappe/${mappa.chiave}`).send({ note: lungo(LIMITI_GUIDA.mappa.note) }).expect(200);
+    await request(app).put(`/api/mappe/${mappa.chiave}`).send({ note: lungo(LIMITI_GUIDA.mappa.note + 1) }).expect(400);
+  });
+
+  it('anche gli spilli dell’editor hanno i tetti del modulo condiviso', async () => {
+    const mappa = creaMappa(undefined, { nome: 'Tetti degli spilli', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    const corpo = (extra: Record<string, unknown>) => ({ tipo: 'forziere', nome: 'Spillo', x: 10, y: 10, ...extra });
+    await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ nome: lungo(LIMITI_GUIDA.spillo.nome) })).expect(201);
+    await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ nome: lungo(LIMITI_GUIDA.spillo.nome + 1) })).expect(400);
+    await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ descrizione: lungo(LIMITI_GUIDA.spillo.descrizione) })).expect(201);
+    await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ descrizione: lungo(LIMITI_GUIDA.spillo.descrizione + 1) })).expect(400);
   });
 });

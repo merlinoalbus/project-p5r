@@ -24,7 +24,7 @@ export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).opt
 export const queryMappa = z.object({ partita: z.coerce.number().int().positive().optional() });
 export const bodyCreaMappa = z.object({
   chiave: chiaveMappa.optional(), nome: z.string().min(1).max(LIMITI_GUIDA.mappa.nome), tipo: z.enum(TIPI_MAPPA), genitore: chiaveMappa.nullable().optional(), ordine: z.number().int().min(0).max(9999).optional(),
-  asset: z.string().max(200).nullable().optional(), larghezza: z.number().int().positive().nullable().optional(), altezza: z.number().int().positive().nullable().optional(), entita: entita.optional(), note: z.string().max(2000).optional(),
+  asset: z.string().max(200).nullable().optional(), larghezza: z.number().int().positive().nullable().optional(), altezza: z.number().int().positive().nullable().optional(), entita: entita.optional(), note: z.string().max(LIMITI_GUIDA.mappa.note).optional(),
   // 15.24: con un genitore, `passaggio` crea anche lo spillo «passaggio» nella mappa genitore e `ritorno` quello verso il genitore nella nuova mappa
   passaggio: z.boolean().optional(), ritorno: z.boolean().optional(),
 });
@@ -40,7 +40,7 @@ export const bodyCreaPassaggio = z.object({ destinazione: chiaveMappa });
 export const bodyCreaSpillo = z.object({
   soloPosizione: z.boolean().optional(),
   destinazione: schemaDestinazioneSpillo.nullable().optional(),
-  tipo: z.enum(TIPI_SPILLO), nome: z.string().min(1).max(160), descrizione: z.string().max(2000).optional(), x: z.number().min(0).max(100), y: z.number().min(0).max(100),
+  tipo: z.enum(TIPI_SPILLO), nome: z.string().min(1).max(LIMITI_GUIDA.spillo.nome), descrizione: z.string().max(LIMITI_GUIDA.spillo.descrizione).optional(), x: z.number().min(0).max(100), y: z.number().min(0).max(100),
   riferimento: riferimento.optional(), collezionabile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(), condizioni,
 });
 export const bodyAggiornaSpillo = bodyCreaSpillo.partial().extend({ mappa: chiaveMappa.optional() });

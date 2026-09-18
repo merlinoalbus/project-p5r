@@ -24,4 +24,7 @@ export const LIMITI_GUIDA = {
   // «percorso-troppo-lungo» e dice di abbreviare. Qui sta il massimo teorico; quello pratico
   // dipende da dove sta la mappa, e lo dice il server con un messaggio che si capisce.
   mappa: { nome: 180, note: 2000, gruppoNome: 200, etichetta: 200 },
+  // Gli spilli non sono testi della guida, ma hanno gli stessi due posti dove scrivere un tetto —
+  // lo schema della rotta e il campo dell'editor — e la stessa deriva: stanno qui per non ripeterla.
+  spillo: { nome: 160, descrizione: 2000 },
 } as const;
