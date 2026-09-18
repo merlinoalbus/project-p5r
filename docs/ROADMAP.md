@@ -722,3 +722,26 @@ Test: `server/routes/guida-modificabile.test.ts` (testi del Palazzo, dell'area, 
 un punto, nome vuoto rifiutato, raggruppamento con rinomina che si propaga e uscita dal gruppo).
 Verifica dal vivo: correzione del nome di un'area salvata e riletta, nessuna traccia della vista
 «Pianta della guida», collegamento offerto sulle aree scoperte.
+
+
+## Correzioni: quel che era salvato ma non si vedeva, e i tetti presi a occhio (18 settembre 2026)
+
+Due difetti trovati **provando l'interfaccia percorso per percorso**, non dai test: il giro
+precedente li aveva verificati solo lato server, ed è un errore di metodo — un endpoint che risponde
+200 non dice che la schermata funzioni.
+
+- **L'etichetta della planimetria e il nome della stanza si salvavano senza comparire.** Vengono
+  dall'atlante (`getAlberoMappe`), e dopo una correzione la scheda rileggeva solo il Palazzo: il
+  testo restava quello vecchio finché non si ricaricava la pagina. Ora `onCambiato` rilegge
+  entrambi.
+- **I tetti dei campi erano scelti a occhio**: 200 caratteri sul livello consigliato, dove la guida
+  ne scrive 352 per Kamoshida. Siccome il modulo rimanda indietro anche i campi non toccati,
+  **la scheda di un Palazzo non si poteva salvare affatto** (400 dal server). I tetti ora sono
+  misurati sui dati veri con ampio margine (la prosa più lunga è una nota da 3938 caratteri), e il
+  nome di una mappa passa da 120 a 300 perché nell'atlante ce n'è uno da 118.
+
+Test nuovi: la rilettura dell'atlante dopo una correzione di stanza, e il giro completo che
+**risalva ogni Palazzo, ogni area e ogni punto così come sono** — se un dato nuovo supera un tetto
+si rompe la suite, non la scheda in mano a chi gioca. Verifica dal vivo dei sette percorsi di
+modifica (Palazzo, area, punto, aggiunta di un punto, stanza, etichetta, nome della planimetria):
+tutti salvano e si aggiornano a schermo.

@@ -224,3 +224,23 @@ it('salvata l’intestazione, la scheda si rilegge con la partita attiva', async
   // la risposta del PUT non porta lo stato della partita: la scheda si rilegge con l'id
   await waitFor(() => expect(getDungeon).toHaveBeenCalledWith('kamoshida', 4));
 });
+
+it('correggendo una stanza si rilegge anche l’atlante: lì stanno il nome della stanza e l’etichetta', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  getAlberoMappe.mockResolvedValue([]);
+  aggiornaPresentazioneMappa.mockResolvedValue({});
+  monta('kamoshida');
+  fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
+  await waitFor(() => expect(getAlberoMappe).toHaveBeenCalled());
+  getAlberoMappe.mockClear();
+
+  const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
+  fireEvent.click(pannello.getAllByRole('button', { name: /Correggi la stanza/ })[0]);
+  const modulo = screen.getByRole('form', { name: /Correggi la stanza/ });
+  fireEvent.change(within(modulo).getByLabelText('Nome della stanza'), { target: { value: 'Ingresso' } });
+  fireEvent.click(within(modulo).getByRole('button', { name: 'Salva' }));
+
+  await waitFor(() => expect(aggiornaPresentazioneMappa).toHaveBeenCalledWith('m-cancello', { gruppoNome: 'Ingresso' }));
+  // senza questa rilettura il nome salvato restava invisibile fino al ricaricamento della pagina
+  await waitFor(() => expect(getAlberoMappe).toHaveBeenCalled());
+});

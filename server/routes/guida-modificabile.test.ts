@@ -12,6 +12,7 @@ import { closeDb, initDb, prepared } from '../db/dbService.js';
 import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
+import { bodyAggiornaMappa } from '../schemas/mappe.js';
 import { creaMappa, aggiornaPresentazioneMappa } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
@@ -99,5 +100,44 @@ describe('raggruppamento delle planimetrie', () => {
     expect(gruppoDi(sola.chiave)).not.toBeNull();
     await request(app).put(`/api/mappe/${sola.chiave}/presentazione`).send({ gruppoId: null }).expect(200);
     expect(gruppoDi(sola.chiave)).toBeNull();
+  });
+});
+
+// ---- Il caso che era rotto: aprire la matita e salvare senza cambiare niente ----
+//
+// Il primo giro aveva tetti scelti a occhio (200 caratteri sul livello consigliato, dove la guida
+// ne scrive 352): siccome il modulo rimanda indietro anche i campi non toccati, la scheda di un
+// Palazzo non si poteva salvare affatto. Questo test risalva ogni Palazzo così com'è: se un dato
+// nuovo supera un tetto, si rompe qui e non in mano a chi gioca.
+
+describe('i testi della guida si possono risalvare così come sono', () => {
+  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  afterAll(() => closeDb());
+
+  it('ogni Palazzo, con le sue aree e i suoi punti, passa la validazione senza modifiche', async () => {
+    const dungeon = prepared('SELECT chiave FROM dungeon').all() as Array<{ chiave: string }>;
+    expect(dungeon.length).toBeGreaterThan(0);
+    for (const { chiave } of dungeon) {
+      const d = dettaglioDungeon(chiave);
+      await request(app).put(`/api/compendio/dungeon/${chiave}`).send({
+        nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza,
+        furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note,
+      }).expect(200);
+      for (const a of d.aree) {
+        await request(app).put(`/api/compendio/aree/${encodeURIComponent(a.chiave)}`).send({ nome: a.nome, descrizione: a.descrizione }).expect(200);
+        for (const p of a.punti) {
+          await request(app).put(`/api/compendio/punti/${encodeURIComponent(p.chiave)}`)
+            .send({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo, esauribile: p.esauribile }).expect(200);
+        }
+      }
+    }
+  });
+
+  it('anche il nome di ogni mappa dell’atlante sta dentro il tetto dello schema', () => {
+    // qui basta lo schema: sono 333 mappe, e la rotta la provano già gli altri test
+    const nomi = (prepared('SELECT nome FROM mappa').all() as Array<{ nome: string }>).map((m) => m.nome);
+    expect(nomi.length).toBeGreaterThan(100);
+    const fuori = nomi.filter((nome) => !bodyAggiornaMappa.safeParse({ nome }).success);
+    expect(fuori).toEqual([]);
   });
 });
