@@ -3,17 +3,17 @@
 // Test DungeonDettaglioPage — la raccolta sulle planimetrie con «Raccolto», gli obiettivi dei dedali, i punti della guida ripiegati
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, scaricaPianta, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa } = vi.hoisted(() => ({
+const { getDungeon, impostaStatoPunto, scaricaPianta, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), scaricaPianta: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
-  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, scaricaPianta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
+vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, scaricaPianta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
 vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
 vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
@@ -52,7 +52,7 @@ const mementos = (): DungeonDettaglioDto => ({
 
 const monta = (chiave: string) => render(<MemoryRouter initialEntries={[`/guida/dungeon/${chiave}`]}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
 
-beforeEach(() => { vi.clearAllMocks(); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
+beforeEach(() => { vi.clearAllMocks(); getAlberoMappe.mockResolvedValue([]); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
 
 it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi senza ricaricare', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
@@ -145,28 +145,47 @@ it('nei Memento la colonna sono gli obiettivi del dedalo: timbri con −/+ e ric
 /** Apre il pannello dal pulsante dell'intestazione. */
 async function apriPlanimetrie() {
   getDungeon.mockResolvedValue(palazzo(true));
+  getAlberoMappe.mockResolvedValue([]);
   monta('kamoshida');
   fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
   return within(screen.getByLabelText('Planimetrie del Palazzo'));
 }
 
-it('il pannello elenca tutte le planimetrie in ordine, con quanto resta e l’area a cui sono legate', async () => {
+it('il pannello elenca le stanze in ordine, con quanto resta e l’area a cui sono legate', async () => {
   const pannello = await apriPlanimetrie();
   expect(pannello.getAllByText(/1\. Cancello/).length).toBeGreaterThan(0);
-  expect(pannello.getByText(/1 da prendere su 2 · Cancello/)).toBeInTheDocument();
-  expect(pannello.getByText(/2 da prendere su 2 · nessuna area/)).toBeInTheDocument();
+  expect(pannello.getByText(/una planimetria · 1 da prendere su 2 · Cancello/)).toBeInTheDocument();
+  expect(pannello.getByText(/una planimetria · 2 da prendere su 2 · nessuna area/)).toBeInTheDocument();
 });
 
 it('«Giù» salva il nuovo ordine di tutto il Palazzo', async () => {
   const pannello = await apriPlanimetrie();
   riordinaMappe.mockResolvedValue([]);
+  // l'ordine si sblocca quando l'atlante è arrivato: prima di allora il tasto è spento
+  await waitFor(() => expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).not.toBeDisabled());
   fireEvent.click(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ }));
   await waitFor(() => expect(riordinaMappe).toHaveBeenCalledWith('dungeon-kamoshida', ['m-torre', 'm-cancello']));
 });
 
-it('scegliere una planimetria senza area apre il suo visore e la colonna dei suoi soli collezionabili', async () => {
+it('aperta la stanza, scegliere la sua planimetria apre il visore e la colonna dei suoi soli collezionabili', async () => {
   const pannello = await apriPlanimetrie();
-  fireEvent.click(pannello.getByRole('button', { name: /2 da prendere su 2 · nessuna area/ }));
+  // la stanza si apre, e dentro c'è la sua planimetria con la propria etichetta
+  fireEvent.click(pannello.getByRole('button', { name: /2\. Torre/ }));
+  const stanza = within(pannello.getByRole('list', { name: /Planimetrie di Torre/ }));
+  fireEvent.click(stanza.getAllByRole('button', { name: /Immagine 1/ }).find((b) => b.getAttribute('aria-pressed') !== null)!);
   expect(await screen.findByText('Visore: m-torre')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: /Su questa planimetria/ })).toBeInTheDocument();
+});
+
+it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui non si sa quali tavole sono la stessa stanza', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  let arriva: (v: unknown) => void = () => {};
+  getAlberoMappe.mockReturnValue(new Promise((r) => { arriva = r; }));
+  monta('kamoshida');
+  fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
+  const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
+  expect(pannello.getByRole('status')).toHaveTextContent(/l’ordine si sblocca appena arriva/);
+  expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).toBeDisabled();
+  await act(async () => { arriva([]); });
+  expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).not.toBeDisabled();
 });
