@@ -639,7 +639,17 @@ pastiglie di esito per risposta.
 `src/components/guida/RaccoltaPlanimetrie.tsx` elenca planimetrie con collezionabili (`{chiave, nome, n,
 presi, spilli[]}`) e segna «Raccolto» con `impostaSpilloRaccolto` (`src/services/api/mappe.ts`); la pagina
 aggiorna `planimetrie`, `aree[].mappe` e `raccolta` in locale (`segnaRaccolto`) e bumpa la versione del
-visore. `src/components/guida/PlanimetriePalazzo.tsx` è il pannello «Planimetrie» della scheda (aperto dal
+visore. `src/components/guida/CorrezioneGuida.tsx` è la matita accanto al testo: apre i campi di quel pezzo
+e salva con `aggiornaDungeon` / `aggiornaArea` / `creaPunto` / `aggiornaPunto` / `eliminaPunto`
+(`src/services/api/compendio.ts` → `PUT /api/compendio/dungeon/:chiave`, `PUT /api/compendio/aree/:chiave`,
+`POST /api/compendio/aree/:chiave/punti`, `PUT` e `DELETE /api/compendio/punti/:chiave`, schemi in
+`server/schemas/guidaDungeon.ts`, servizi in `dungeonService`). I raggruppamenti si correggono con
+`aggiornaPresentazioneMappa` (`PUT /api/mappe/:chiave/presentazione`): il nome della stanza si
+propaga a tutte le sue tavole, l'etichetta resta della singola versione. **La pianta pubblicata
+dalla guida non esiste più** per le aree dei Palazzi (resta per i quartieri): dove manca la
+planimetria la scheda offre il selettore delle tavole libere e scrive il legame con `aggiornaMappa`.
+
+`src/components/guida/PlanimetriePalazzo.tsx` è il pannello «Planimetrie» della scheda (aperto dal
 contatore dell'intestazione): elenca **tutte** le planimetrie dell'albero `dungeon-<chiave>` che
 `DungeonDettaglioDto.planimetrie` porta con `ordine` e `area`, le riordina con `riordinaMappe`
 (`PUT /api/mappe/ordine`, trascinamento a puntatore + Su/Giù), lega l'area con `aggiornaMappa`

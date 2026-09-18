@@ -536,3 +536,20 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   trattativa, e una guida che consiglia e sconsiglia la stessa cosa è peggio di una che tace.
 - **Una domanda, una scheda**: le domande trascritte due volte si fondono (risposte per testo,
   verdetti per carattere) invece di comparire come due righe gemelle che si spartiscono i verdetti.
+
+
+### 2026-09-18 — La guida si corregge dove si legge, e la pianta scaricata esce di scena
+- **La sezione dei Palazzi non è più in sola lettura** (richiesta dell'utente): erano trascrizioni
+  fatte a mano e non c'era nessun posto per correggerle. La correzione sta accanto al testo, non in
+  una schermata a parte: altrimenti bisogna ricordarsi che cosa non andava.
+- **Le correzioni sono dati di gioco, non avanzamento**: stanno in `gioco.db`, valgono per tutte le
+  partite ed entrano nel pacchetto alla rigenerazione.
+- **Una stanza ha un nome solo**: rinominarla da una delle sue tavole la rinomina su tutte, perché
+  altrimenti due versioni della stessa stanza finirebbero sotto due titoli diversi.
+- **La pianta scaricata dalla guida è stata rimossa** (decisione dell'utente): seconda immagine
+  della stessa stanza, con uno scaricamento da indirizzi esterni e un sistema di marcatori tutto
+  suo, usata 11 volte su 107 aree. Dove manca la planimetria la scheda ora **offre di collegarla**,
+  che è il rimedio vero: le tavole ci sono, mancava il legame.
+- **Nessun accostamento automatico per nome**: provato sui dati, 0 proposte su 35 aree, perché la
+  guida e l'estrazione chiamano le stanze in modo diverso. Un automatismo che indovina avrebbe
+  lasciato legami sbagliati da disfare a mano.

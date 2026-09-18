@@ -9,6 +9,8 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
+import { aggiornaArea, aggiornaDungeon, aggiornaPunto, creaPunto, eliminaPunto } from '../services/dungeonService.js';
+import { bodyArea, bodyDungeon, bodyNuovoPunto, bodyPunto, paramsChiaveGuida } from '../schemas/guidaDungeon.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
@@ -172,6 +174,24 @@ router.get('/dungeon', validate({ query: queryDomande }), (req, res) => {
 router.get('/dungeon/:chiave', validate({ query: queryDomande }), (req, res) => {
   res.json(dettaglioDungeon(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
 });
+/* ---- Correzione dei testi della guida: la sezione dei Palazzi non è più in sola lettura ---- */
+router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyDungeon }), (req, res) => {
+  res.json(aggiornaDungeon(String(req.params.chiave), req.body as Parameters<typeof aggiornaDungeon>[1]));
+});
+router.put('/aree/:chiave', validate({ params: paramsChiaveGuida, body: bodyArea }), (req, res) => {
+  res.json(aggiornaArea(String(req.params.chiave), req.body as Parameters<typeof aggiornaArea>[1]));
+});
+router.post('/aree/:chiave/punti', validate({ params: paramsChiaveGuida, body: bodyNuovoPunto }), (req, res) => {
+  res.status(201).json(creaPunto(String(req.params.chiave), req.body as Parameters<typeof creaPunto>[1]));
+});
+router.put('/punti/:chiave', validate({ params: paramsChiaveGuida, body: bodyPunto }), (req, res) => {
+  res.json(aggiornaPunto(String(req.params.chiave), req.body as Parameters<typeof aggiornaPunto>[1]));
+});
+router.delete('/punti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
+  eliminaPunto(String(req.params.chiave));
+  res.status(204).end();
+});
+
 router.get('/calendario', validate({ query: queryCalendario }), (req, res) => {
   const q = req.query as unknown as { partita?: number; mese?: string };
   res.json(calendario(q.partita, q.mese));

@@ -20,9 +20,10 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { aggiornaMappa, creaMappa, eliminaMappa, riordinaMappe } from '../../services/api';
+import { aggiornaMappa, aggiornaPresentazioneMappa, creaMappa, eliminaMappa, riordinaMappe } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Selettore } from '../shared/Selettore';
+import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { chiaviInOrdine, nomeSenzaPalazzo, raggruppaPlanimetrie, spostaGruppo, spostaVersione, type GruppoPlanimetrie, type Planimetria } from '../../utils/gruppiPlanimetrie';
@@ -174,6 +175,11 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                 <div className="flex shrink-0 items-center gap-0.5">
                   <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || i === 0} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i - 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» su`}>▲</button>
                   <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || i === gruppi.length - 1} onClick={() => salvaOrdine(spostaGruppo(gruppi, g.id, i + 1), 'Ordine delle stanze salvato.')} aria-label={`Sposta «${g.nome}» giù`}>▼</button>
+                  <CorrezioneGuida key={g.id} cosa={`la stanza «${g.nome}»`} compatto
+                    iniziale={() => ({ nome: g.nome })}
+                    onSalva={async (b) => { await aggiornaPresentazioneMappa(g.versioni[0].planimetria.chiave, { gruppoNome: b.nome }); await onCambiato(); }}>
+                    {(b, cambia) => <CampoCorrezione etichetta="Nome della stanza" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />}
+                  </CorrezioneGuida>
                   <span aria-hidden className="px-1 text-text-muted">{apertaQui ? '▾' : '▸'}</span>
                 </div>
               </div>
@@ -202,6 +208,14 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                           <div className="flex shrink-0 items-center gap-0.5">
                             <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || j === 0} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, -1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» su`}>▲</button>
                             <button type="button" className="touch px-1 text-text-muted disabled:opacity-30" disabled={bloccato || j === g.versioni.length - 1} onClick={() => salvaOrdine(spostaVersione(gruppi, g.id, p.chiave, 1), 'Ordine delle planimetrie salvato.')} aria-label={`Sposta «${v.etichetta}» giù`}>▼</button>
+                            <CorrezioneGuida key={p.chiave} cosa={`la planimetria «${v.etichetta}»`} compatto
+                              iniziale={() => ({ nome: nomeSenzaPalazzo(p.nome), etichetta: v.mappa?.gruppoImmagini?.etichetta ?? '' })}
+                              onSalva={async (b) => { await aggiornaMappa(p.chiave, { nome: b.nome }); await aggiornaPresentazioneMappa(p.chiave, { etichetta: b.etichetta || null }); await onCambiato(); }}>
+                              {(b, cambia) => <>
+                                <CampoCorrezione etichetta="Nome della planimetria" valore={b.nome} onCambia={(x) => cambia({ nome: x })} />
+                                <CampoCorrezione etichetta="Che cosa mostra (etichetta)" valore={b.etichetta} onCambia={(x) => cambia({ etichetta: x })} />
+                              </>}
+                            </CorrezioneGuida>
                             <Link to={`/guida/mappe/${encodeURIComponent(p.chiave)}/modifica`} className="touch px-1 text-[11px]" title="Modifica immagine e spilli">Editor</Link>
                             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={18} />} titolo="" aria-label={`Elimina «${v.etichetta}» di ${g.nome}`} disabled={occupato} onClick={() => setDaEliminare(p)} />
                           </div>

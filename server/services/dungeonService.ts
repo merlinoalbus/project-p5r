@@ -13,11 +13,11 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
-import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PiantaAreaDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
-import { importaImmagineDaUrl } from './immaginiService.js';
+import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
 import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
+import { slug } from '../../shared/slug.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
@@ -123,40 +123,8 @@ function raccoltaMementos(dungeonChiave: string, partitaId?: number): DungeonRia
   return { totale, presi: partitaId === undefined ? null : fatti, mappe: dedali, mappeComplete: partitaId === undefined ? null : complete };
 }
 
-interface RigaPianta { area_chiave: string; url: string; pagina: string | null; fonte: string; licenza: string; larghezza: number | null; altezza: number | null; copertura: string; copre_aree_json: string | null; note: string; alternative_json: string }
-
-function pianteAree(): Map<string, RigaPianta> {
-  return new Map((prepared('SELECT * FROM pianta_area').all() as RigaPianta[]).map((r) => [r.area_chiave, r]));
-}
-
-function piantaDto(r: RigaPianta | undefined): PiantaAreaDto | null {
-  if (!r) return null;
-  const alternative = (JSON.parse(r.alternative_json) as Array<{ url: string; pagina: string | null; fonte: string }>).map((a) => ({ url: a.url, pagina: a.pagina ?? null, fonte: a.fonte }));
-  return { url: r.url, pagina: r.pagina, fonte: r.fonte, licenza: r.licenza, larghezza: r.larghezza, altezza: r.altezza, copertura: r.copertura, note: r.note, alternative };
-}
-
-/** Motivi noti dell'assenza di una pianta (campo note delle aree senza url, in `dati_guida`). */
-function motiviAssenza(): Map<string, string> {
-  const m = new Map<string, string>();
-  for (const r of prepared("SELECT chiave, json FROM dati_guida WHERE chiave = 'mappe-assenti'").all() as Array<{ chiave: string; json: string }>) {
-    for (const [k, v] of Object.entries(JSON.parse(r.json) as Record<string, string>)) m.set(k, v);
-  }
-  return m;
-}
-
 function mappePresenti(): Map<string, string | null> {
   return new Map((prepared("SELECT chiave, origine_url FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; origine_url: string | null }>).map((r) => [r.chiave, r.origine_url ?? null]));
-}
-
-/** Fonte effettiva della pianta presente: la principale, un'alternativa o l'indirizzo grezzo se non riconosciuto. */
-function piantaScaricata(origine: string | null | undefined, pianta: PiantaAreaDto | null): AreaDungeonDto['piantaScaricata'] {
-  if (!origine) return null;
-  if (pianta && pianta.url === origine) return { url: origine, fonte: pianta.fonte, pagina: pianta.pagina };
-  const alt = pianta?.alternative.find((a) => a.url === origine);
-  if (alt) return { url: origine, fonte: alt.fonte, pagina: alt.pagina };
-  let host = origine;
-  try { host = new URL(origine).hostname.replace(/^www\./, ''); } catch { /* indirizzo non URL: si mostra com'è */ }
-  return { url: origine, fonte: host, pagina: null };
 }
 
 /** Le finestre trascritte in `finestre-dungeon`, lette una volta sola: dicono alla mappa di Tokyo quando un Palazzo c'è. */
@@ -237,14 +205,12 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const stati = statiPartita(partitaId);
   const marc = marcatori();
   const mappe = mappePresenti();
-  const piante = pianteAree();
-  const assenti = motiviAssenza();
   const native = mappeDelleAree(chiave);
   const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId);
   const richieste = r.tipo === 'mementos' ? richiestePerArea(chiave, partitaId) : null;
   const timbri = r.tipo === 'mementos' && partitaId !== undefined ? timbriPartita(partitaId) : null;
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
-    chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave), pianta: piantaDto(piante.get(a.chiave)), piantaScaricata: mappe.has(a.chiave) ? piantaScaricata(mappe.get(a.chiave), piantaDto(piante.get(a.chiave))) : null, piantaAssente: piante.has(a.chiave) ? null : (assenti.get(a.chiave) ?? null),
+    chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave),
     mappe: (native.get(a.chiave) ?? []).map((m) => {
       const rm = raccolta?.perMappa.get(m.chiave);
       return { chiave: chiaveMappa(m.chiave), nome: m.nome, n: rm?.n ?? 0, presi: partitaId === undefined ? null : (rm?.presi ?? 0), spilli: rm?.spilli ?? [] };
@@ -291,19 +257,79 @@ export function impostaMarcatore(puntoChiave: string, posizione: { x: number; y:
   return { x, y };
 }
 
-/** Scarica nell'istanza la pianta dell'area dall'URL della guida (poi dalle alternative, se il primo fallisce). */
-export async function scaricaPianta(areaChiave: string): Promise<{ area: string; mime: string; byte: number; fonte: string; url: string }> {
-  const r = prepared('SELECT * FROM pianta_area WHERE area_chiave = ?').get(areaChiave) as RigaPianta | undefined;
-  if (!r) throw httpErrors.notFound('pianta-non-disponibile', `Nessuna pianta collegata per l'area '${areaChiave}'.`);
-  const candidati = [{ url: r.url, fonte: r.fonte }, ...(JSON.parse(r.alternative_json) as Array<{ url: string; fonte: string }>).map((a) => ({ url: a.url, fonte: a.fonte }))];
-  let ultimo: unknown = null;
-  for (const c of candidati) {
-    try {
-      const img = await importaImmagineDaUrl('mappa', areaChiave, c.url);
-      return { area: areaChiave, mime: img.mime, byte: img.byte, fonte: c.fonte, url: c.url };
-    } catch (err) {
-      ultimo = err;
-    }
-  }
-  throw httpErrors.badRequest('download-fallito', `Impossibile scaricare la pianta di '${areaChiave}' da nessuna delle fonti collegate${ultimo instanceof Error ? `: ${ultimo.message}` : ''}.`);
+// ---- Correzione dei testi della guida (fase «tutto modificabile») ----
+//
+// La sezione dei Palazzi era l'unica parte della guida in sola lettura: negozi, luoghi, libri,
+// film e attività hanno il loro modulo da un pezzo, mentre dungeon, aree e punti si potevano solo
+// guardare. Una trascrizione fatta a mano da un sito ha refusi, frasi tagliate e nomi discutibili,
+// e chi gioca deve poterli correggere dove li legge, senza aprire il database.
+//
+// Le correzioni sono **dati di gioco** (stanno in `gioco.db`), quindi entrano nel pacchetto quando
+// lo si rigenera, e valgono per ogni partita: non sono avanzamento.
+
+export interface DatiDungeon { nome?: string; sovrano?: string; dataSblocco?: string; dataScadenza?: string; furtoConsigliato?: string; livelloConsigliato?: string; note?: string }
+
+/** Testi della scheda di un Palazzo (o dei Memento). */
+export function aggiornaDungeon(chiave: string, dati: DatiDungeon): DungeonDettaglioDto {
+  const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
+  if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
+  prepared(`UPDATE dungeon SET nome = ?, sovrano = ?, data_sblocco = ?, data_scadenza = ?, furto_consigliato = ?, livello_consigliato = ?, note = ? WHERE chiave = ?`).run(
+    dati.nome?.trim() || r.nome, dati.sovrano ?? r.sovrano, dati.dataSblocco ?? r.data_sblocco, dati.dataScadenza ?? r.data_scadenza,
+    dati.furtoConsigliato ?? r.furto_consigliato, dati.livelloConsigliato ?? r.livello_consigliato, dati.note ?? r.note, chiave);
+  return dettaglioDungeon(chiave);
+}
+
+export interface DatiArea { nome?: string; descrizione?: string }
+
+/** Nome e descrizione di un'area della guida. */
+export function aggiornaArea(chiaveArea: string, dati: DatiArea): AreaDungeonDto {
+  const a = prepared('SELECT * FROM dungeon_area WHERE chiave = ?').get(chiaveArea) as RigaArea | undefined;
+  if (!a) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  prepared('UPDATE dungeon_area SET nome = ?, descrizione = ? WHERE chiave = ?').run(dati.nome?.trim() || a.nome, dati.descrizione ?? a.descrizione, chiaveArea);
+  const scheda = dettaglioDungeon(a.dungeon_chiave);
+  return scheda.aree.find((x) => x.chiave === chiaveArea)!;
+}
+
+export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number }
+
+/** Un punto della guida (sicura, enigma, boss…): testo, tipo, esauribilità, posto nell'elenco. */
+export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoInteresseDto {
+  const p = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
+  if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
+  prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ? WHERE chiave = ?').run(
+    dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), dati.ordine ?? p.ordine, puntoChiave);
+  const r = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto;
+  return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli: JSON.parse(r.dettagli_json) as Record<string, unknown>, fonte: r.fonte, stato: null, marcatore: marcatori().get(puntoChiave) ?? null };
+}
+
+/** Un punto in più, dove la guida non l'aveva trascritto: nasce in fondo all'area. */
+export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; tipo: PuntoInteresseDto['tipo'] }): PuntoInteresseDto {
+  if (!prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiaveArea)) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  const base = `${chiaveArea}-${slug(dati.nome)}`;
+  let chiave = base;
+  for (let i = 2; prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
+  const ordine = dati.ordine ?? ((prepared('SELECT COALESCE(MAX(ordine), -1) AS n FROM punto_interesse WHERE area_chiave = ?').get(chiaveArea) as { n: number }).n + 1);
+  prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte) VALUES (?, ?, ?, ?, ?, ?, ?, '{}', 'utente')")
+    .run(chiave, chiaveArea, ordine, dati.tipo, dati.nome.trim(), dati.descrizione ?? '', dati.esauribile ? 1 : 0);
+  return aggiornaPunto(chiave, {});
+}
+
+/**
+ * Toglie un punto della guida e quel che le partite ne avevano segnato.
+ *
+ * Lo spillo che lo rappresentava sulla mappa **resta** — è un posto sulla planimetria, e cancellarlo
+ * porterebbe via anche il disegno — ma perde il riferimento. Con lui se ne va il suo «raccolto» per
+ * partita (rilievo della revisione, 2026-09-18): lasciarlo avrebbe tenuto un collezionabile orfano
+ * segnato preso, che continuava a contare nella percentuale del Palazzo mentre la conferma diceva
+ * che le segnature sparivano.
+ */
+export function eliminaPunto(puntoChiave: string): void {
+  if (!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(puntoChiave)) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
+  getDb().transaction(() => {
+    prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
+    prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
+    prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND uid IS NOT NULL)").run(puntoChiave);
+    prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
+    prepared('DELETE FROM punto_interesse WHERE chiave = ?').run(puntoChiave);
+  })();
 }

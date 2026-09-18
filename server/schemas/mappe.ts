@@ -28,6 +28,10 @@ export const bodyCreaMappa = z.object({
   passaggio: z.boolean().optional(), ritorno: z.boolean().optional(),
 });
 export const bodyAggiornaMappa = bodyCreaMappa.omit({ chiave: true, passaggio: true, ritorno: true }).partial();
+/** Raggruppamento di una planimetria: la stanza a cui appartiene e che cosa mostra la sua versione. */
+export const bodyPresentazioneMappa = z.object({
+  gruppoId: z.string().max(200).nullable().optional(), gruppoNome: z.string().max(200).optional(), etichetta: z.string().max(200).nullable().optional(),
+});
 /** Riordino in blocco delle mappe figlie di un genitore (`null` = radici): l'elenco è il nuovo ordine. */
 export const bodyRiordinaMappe = z.object({ genitore: chiaveMappa.nullable(), chiavi: z.array(chiaveMappa).max(500) });
 /** Passaggio verso un'altra mappa creato dall'albero dell'editor (15.24): il server sceglie un punto libero. */

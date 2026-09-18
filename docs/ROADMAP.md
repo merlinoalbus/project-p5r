@@ -681,3 +681,44 @@ un solo verdetto per carattere, il peggiore nel dubbio, fusione delle domande ri
 cinque casi sul componente (ricerca, riduzione dell'elenco, verdetti per carattere, ordinamento,
 stato vuoto). Verificato dal vivo: 230 domande servite dall'API e la scheda nel browser a 1280 e
 375 px senza scorrimento orizzontale né errori in console.
+
+
+## La sezione dei Palazzi diventa correggibile, e la pianta della guida esce di scena (18 settembre 2026)
+
+Tre richieste dell'utente in fila: «devo poter sistemare e correggere tutte le parti di questa
+sezione — descrizioni, raggruppamenti, testi, guide», «tenetele separate ma tutto ordinato e
+gestibile», «la pianta della guida si può rimuovere».
+
+**Era l'unica parte della guida in sola lettura.** Negozi, articoli, libri, film, attività, luoghi,
+domande e cruciverba hanno il loro modulo da un pezzo; dungeon, aree e i 688 punti di interesse si
+potevano solo guardare, benché siano trascrizioni fatte a mano da un sito, con refusi e frasi
+tagliate. Ora si correggono **dove si leggono**: `PUT /api/compendio/dungeon/:chiave` (nome,
+sovrano, le tre date, livello, note), `PUT /api/compendio/aree/:chiave` (nome, descrizione),
+`POST /api/compendio/aree/:chiave/punti`, `PUT` e `DELETE /api/compendio/punti/:chiave`
+(nome, descrizione, tipo, esauribile). Sono dati di gioco: valgono per ogni partita ed entrano nel
+pacchetto quando lo si rigenera. Interfaccia: `CorrezioneGuida` — la matita accanto al testo, che
+apre i campi di quel pezzo e basta — su intestazione del Palazzo, area e singolo punto, più
+«Aggiungi un punto» in fondo all'elenco della guida.
+
+**I raggruppamenti si correggono** (`PUT /api/mappe/:chiave/presentazione`): il nome della stanza
+vale per tutte le sue tavole e rinominarlo da una le rinomina tutte; l'etichetta dice che cosa
+mostra la singola versione; `gruppoId: null` fa uscire una tavola dal raggruppamento. Dal pannello
+si correggono la stanza e, dentro, nome ed etichetta di ogni planimetria.
+
+**La pianta della guida non c'è più.** Era una seconda immagine della stessa stanza, scaricata da
+indirizzi esterni con fallback e crediti, e su 107 aree ne erano state scaricate 11. Via la vista
+«Pianta della guida» dalla scheda, la rotta `POST /api/mappe/piante/:area/scarica`, il servizio
+`scaricaPianta`, i campi `pianta`/`piantaScaricata`/`piantaAssente` del DTO e il test che li
+copriva (resta intatta la pianta dei **quartieri**, che è un'altra cosa). Al suo posto, dove il
+legame manca, la scheda **offre di collegare**: un selettore delle tavole del Palazzo non ancora
+assegnate, perché le 221 tavole libere dicono che quasi sempre l'immagine c'è e manca il legame.
+
+**Provato e scartato**: l'accostamento automatico area ↔ planimetria per nome. Sui dati veri dà
+**0 proposte su 35 aree**, perché la guida e l'estrazione chiamano le stanze in modo diverso
+(«Edificio Ovest 1P» contro «Vecchio castello 1P»): un automatismo che indovina avrebbe prodotto
+legami sbagliati da disfare a mano, quindi il collegamento resta una scelta, resa comoda.
+
+Test: `server/routes/guida-modificabile.test.ts` (testi del Palazzo, dell'area, ciclo completo di
+un punto, nome vuoto rifiutato, raggruppamento con rinomina che si propaga e uscita dal gruppo).
+Verifica dal vivo: correzione del nome di un'area salvata e riletta, nessuna traccia della vista
+«Pianta della guida», collegamento offerto sulle aree scoperte.

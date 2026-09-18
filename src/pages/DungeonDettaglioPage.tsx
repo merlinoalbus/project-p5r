@@ -20,15 +20,13 @@
 import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { getAlberoMappe, getDungeon, impostaStatoPunto, scaricaPianta } from '../services/api';
+import { aggiornaArea, aggiornaDungeon, aggiornaMappa, aggiornaPunto as salvaPunto, creaPunto, eliminaPunto, getAlberoMappe, getDungeon, impostaStatoPunto } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
-import { ImmagineEntita } from '../components/shared/ImmagineEntita';
-import { segnaImmaginePresente } from '../components/shared/immaginiCache';
 import { IconChevronLeft } from '../components/shared/icons';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
@@ -36,6 +34,8 @@ import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { RaccoltaPlanimetrie } from '../components/guida/RaccoltaPlanimetrie';
 import { PlanimetriePalazzo } from '../components/guida/PlanimetriePalazzo';
+import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
+import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
 import { ObiettiviDedalo } from '../components/guida/ObiettiviDedalo';
 import { dataBreve } from '../utils/testoBreve';
 import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
@@ -118,7 +118,6 @@ function VoceArea({ a, memento, scelta, suggerita, onScegli, compatta }: {
         <span className="text-[13px] font-semibold leading-tight">{a.nome}</span>
         <span className="text-[11px] text-text-muted">
           {conto.totale === 0 ? (memento ? 'nessun obiettivo dichiarato' : a.mappe.length === 0 ? 'nessuna planimetria legata' : 'niente da raccogliere sulla sua planimetria') : conto.fatti === null ? `${conto.totale} ${memento ? 'obiettivi' : 'da raccogliere'}` : restano > 0 ? `${restano} ${memento ? 'obiettivi' : 'da prendere'} su ${conto.totale}` : `${conto.totale} ${memento ? 'obiettivi fatti' : 'raccolti'} · completa`}
-          {a.mappa || a.pianta ? ' · pianta' : ''}
         </span>
       </span>
     </button>
@@ -140,17 +139,10 @@ export function DungeonDettaglioPage() {
   const [filtro, setFiltro] = useState<Set<PuntoInteresseDto['tipo']>>(new Set());
   const [mostraGestiti, setMostraGestiti] = useState(false);
   const [selezionato, setSelezionato] = useState<string | null>(null);
-  const [mappaVersione, setMappaVersione] = useState(0);
+  const [mappaVersione] = useState(0);
   // ogni cambio di stato dalla colonna ricarica il visore (e viceversa il visore ricarica la pagina)
   const [versioneStati, setVersioneStati] = useState(0);
   const memento = d?.tipo === 'mementos';
-  // Pianta pubblicata dalla guida ma non ancora nell'istanza: viene scaricata appena l'area è aperta (solo per i Palazzi)
-  const download = useCarica(() => (area && !memento && !area.mappa && area.pianta ? scaricaPianta(area.chiave).then((r) => { segnaImmaginePresente('mappa', r.area); return r; }) : Promise.resolve(null)), [area?.chiave, area?.mappa, area?.pianta?.url, memento]);
-  const scaricata = !!area && !!download.dati && download.dati.area === area.chiave;
-  // Credito della fonte davvero usata: quella registrata nell'immagine, oppure quella appena scaricata
-  const fonteUsata = area?.piantaScaricata ?? (scaricata && download.dati && area?.pianta
-    ? { url: download.dati.url, fonte: download.dati.fonte, pagina: download.dati.url === area.pianta.url ? area.pianta.pagina : (area.pianta.alternative.find((x) => x.url === download.dati?.url)?.pagina ?? null) }
-    : null);
 
   const puntiVisibili = useMemo(() => (area?.punti ?? []).filter((p) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato)), [area, filtro, mostraGestiti]);
   const gestitiArea = (area?.punti ?? []).filter((p) => p.stato).length;
@@ -207,20 +199,17 @@ export function DungeonDettaglioPage() {
   // è legata a nessuna area: è il modo di guardare (e segnare) una tavola che la guida non aggancia.
   const [planimetriaLibera, setPlanimetriaLibera] = useState<string | null>(null);
   const [pannelloPlanimetrie, setPannelloPlanimetrie] = useState(false);
+  const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo'] } | null>(null);
   // L'atlante serve al pannello delle planimetrie: da lì vengono il nome di presentazione e il
   // gruppo che dice quali tavole sono la stessa stanza. Si carica solo quando il pannello si apre.
   const albero = useCarica(() => (pannelloPlanimetrie ? getAlberoMappe() : Promise.resolve([])), [pannelloPlanimetrie]);
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
-  // Le due viste di un'area del Palazzo: la planimetria del gioco e la pianta della guida. Nei
-  // Memento c'è solo il pezzo con cui il gioco disegna il dedalo: i piani si generano.
-  const [vista, setVista] = useState<'gioco' | 'guida'>('gioco');
-  const vistaGuida = !memento && (!mappaScelta || vista === 'guida');
-  const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setPlanimetriaLibera(null); setVista('gioco'); };
+  const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setPlanimetriaLibera(null); };
   /** Una planimetria scelta dal pannello: se è legata a un'area si apre quell'area, altrimenti resta «libera». */
   const scegliPlanimetria = (k: string) => {
     const p = (d?.planimetrie ?? []).find((x) => x.chiave === k);
-    setVista('gioco'); setSelezionato(null);
+    setSelezionato(null);
     if (p?.area) { setParams({ area: p.area.chiave }); setPianta(k); setPlanimetriaLibera(null); }
     else setPlanimetriaLibera(k);
   };
@@ -241,6 +230,8 @@ export function DungeonDettaglioPage() {
   // Perché la colonna mostra tutto il Palazzo: l'area non ha una planimetria legata, oppure ce l'ha ma senza collezionabili.
   const notaPalazzo = mappeArea.length === 0 ? 'Quest’area non ha planimetrie legate: qui c’è tutto il Palazzo.' : 'La planimetria di quest’area non ha collezionabili: qui c’è tutto il Palazzo.';
   const altrePlanimetrie = (d?.planimetrie ?? []).filter((p) => !mappeArea.some((m) => m.chiave === p.chiave));
+  // Le tavole del Palazzo che nessuna area si è ancora presa: sono quelle da collegare.
+  const tavoleLibere = (d?.planimetrie ?? []).filter((p) => !p.area);
   const restanoAltre = altrePlanimetrie.reduce((s, p) => s + p.n - (p.presi ?? 0), 0);
 
   return (
@@ -266,6 +257,16 @@ export function DungeonDettaglioPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button type="button" className="btn btn-ghost btn-sm touch -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
                     <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
+                    <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`}
+                      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
+                      onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
+                      {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={multilinea ? 4000 : 400} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
+                        return <>
+                          {campo('nome', 'Nome')}{campo('sovrano', 'Sovrano')}
+                          {campo('dataSblocco', 'Si apre')}{campo('furtoConsigliato', 'Furto consigliato')}{campo('dataScadenza', 'Scade')}
+                          {campo('livelloConsigliato', 'Livello consigliato')}{campo('note', 'Note della guida', true)}
+                        </>; }}
+                    </CorrezioneGuida>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-[13px] text-text-secondary">
                     {d.sovrano && <span className="break-words">{d.sovrano}</span>}
@@ -335,56 +336,49 @@ export function DungeonDettaglioPage() {
               <section className="card flex flex-col gap-2.5">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>
+                  {/* `key`: cambiando area il modulo si rimonta, altrimenti resterebbe aperto con il
+                      testo dell'area di prima e lo salverebbe su quella nuova (rilievo della revisione). */}
+                  {!memento && <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`}
+                    iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
+                    onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}>
+                    {(b, cambia) => <>
+                      <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />
+                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={4000} onCambia={(v) => cambia({ descrizione: v })} />
+                    </>}
+                  </CorrezioneGuida>}
                   <span className="text-[12px] text-text-muted">{memento ? 'dedalo' : 'area'} {area.ordine + 1} di {d.aree.length}</span>
                   <span className="flex-1" />
-                  {/* Due disegni della stessa stanza: la planimetria del gioco e la pianta della guida. Si sceglie quale guardare. */}
-                  {!memento && mappaScelta && (
-                    <div className="flex gap-1" role="tablist" aria-label="Come guardare l’area">
-                      <button type="button" role="tab" aria-selected={!vistaGuida} onClick={() => setVista('gioco')}
-                        className={`chip touch text-[11px] ${!vistaGuida ? 'chip--attivo' : ''}`}>Planimetria del gioco</button>
-                      <button type="button" role="tab" aria-selected={vistaGuida} onClick={() => setVista('guida')}
-                        className={`chip touch text-[11px] ${vistaGuida ? 'chip--attivo' : ''}`}>Pianta della guida</button>
-                    </div>
-                  )}
                 </div>
                 {area.descrizione && <p className="m-0 text-[13px] text-text-secondary">{area.descrizione}</p>}
                 {/* Il pezzo con cui il gioco disegna il dedalo nel pozzo: non una pianta, i piani si generano. */}
                 {memento && <span className="flex h-[min(46vh,420px)] w-full items-center justify-center overflow-hidden rounded bg-[#8d0012]">
                   <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`} className="max-h-full max-w-full object-contain" />
                 </span>}
-                {!memento && <div className={`flex flex-wrap items-center gap-2 ${vistaGuida ? '' : 'hidden'}`}>
-                  <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={420} forma="orizzontale" modificabile className="mx-auto" />
-                  <span className="min-w-[200px] flex-1 text-[11px] text-text-muted">
-                    {fonteUsata ? (
-                      <>
-                        Pianta scaricata da <a href={fonteUsata.pagina ?? fonteUsata.url} target="_blank" rel="noreferrer" className="credito">{fonteUsata.fonte}</a>{area.pianta && fonteUsata.url === area.pianta.url && area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}{area.pianta && fonteUsata.url !== area.pianta.url ? ' (fonte alternativa: la principale non era raggiungibile)' : ''}, nella tua istanza. Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
-                      </>
-                    ) : area.mappa && !area.pianta ? (
-                      <>Immagine della pianta importata da te. Gli spilli si spostano in modalità «posiziona».</>
-                    ) : area.mappa ? (
-                      <>Immagine della pianta importata da te (la guida <a href={area.pianta!.pagina ?? area.pianta!.url} target="_blank" rel="noreferrer" className="credito">{area.pianta!.fonte}</a> ne pubblica una). Gli spilli si spostano in modalità «posiziona».</>
-                    ) : area.pianta ? (
-                      <>
-                        Pianta dalla guida <a href={area.pianta.pagina ?? area.pianta.url} target="_blank" rel="noreferrer" className="credito">{area.pianta.fonte}</a>{area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}{download.errore ? '. Scaricamento non riuscito: riprova o importa un’immagine tua.' : '.'} Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
-                      </>
-                    ) : (
-                      <>Nessuna pianta pubblicata per quest’area{area.piantaAssente ? `: ${area.piantaAssente}` : ''}. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
-                    )}
-                  </span>
-                  {download.errore && area.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
-                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricarica mappa" onClick={() => setMappaVersione((v) => v + 1)} />
-                </div>}
                 {/* La planimetria dell'atlante legata all'area, se c'è. */}
-                {!memento && mappaScelta && !vistaGuida && <>
+                {!memento && mappaScelta && <>
                   {area.mappe.length > 1 && (
                     <Selettore etichetta="Planimetria" valore={mappaScelta} opzioni={area.mappe.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={setPianta} />
                   )}
                   <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} altezza="max(300px, min(41vh, 560px))" onCambiato={() => void dati.ricarica()} />
                   <p className="m-0 text-[11px] text-text-muted">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
                 </>}
-                {!mappaScelta && !memento && <p className="m-0 rounded-md bg-white/[0.04] px-3 py-2 text-[12px] text-text-muted" role="status">
-                  Per quest’area l’atlante non ha una planimetria navigabile: la pianta della guida è qui sopra, e quel che c’è da raccogliere nel Palazzo sta nella colonna accanto.
-                </p>}
+                {/* **Dove manca il legame si collega, non si mostra un'altra immagine.** Prima qui
+                    c'era la pianta scaricata dalla guida: una seconda figura della stessa stanza,
+                    presa da un sito, che copriva il fatto che nessuno avesse ancora detto quale
+                    tavola dell'atlante è quest'area. Le tavole ci sono quasi sempre: manca il
+                    legame, e questo è il posto per farlo — la scelta vale per tutte le partite. */}
+                {!mappaScelta && !memento && (
+                  <div className="flex flex-col gap-2 rounded-md bg-white/[0.04] px-3 py-2 text-[12px]" role="status">
+                    <p className="m-0 text-text-muted">Quest’area non ha ancora una planimetria: sceglila fra le tavole del Palazzo non ancora assegnate. Quel che c’è da raccogliere sta nella colonna accanto.</p>
+                    {tavoleLibere.length > 0
+                      ? <Selettore etichetta="Collega una planimetria" valore="" vuoto="— scegli —"
+                          opzioni={tavoleLibere.map((t) => ({ chiave: t.chiave, nome: nomeSenzaPalazzo(t.nome), dettaglio: t.n > 0 ? `${t.n} da raccogliere` : undefined }))}
+                          onCambia={(k) => { if (!k) return; void aggiornaMappa(k, { entita: { tipo: 'area', chiave: area.chiave } })
+                            .then(async () => { await dati.ricarica(); notifica('success', `Planimetria collegata a «${area.nome}».`); })
+                            .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Collegamento non riuscito.')); }} />
+                      : <span className="text-text-muted">Nel Palazzo non restano tavole libere: aggiungine una dal pannello «Planimetrie».</span>}
+                  </div>
+                )}
               </section>
 
               {/* ---- La colonna degli obiettivi: quel che fa la percentuale, e sotto i punti della guida ---- */}
@@ -447,12 +441,41 @@ export function DungeonDettaglioPage() {
                                   {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
                                   {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
                                   {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
+                                  <CorrezioneGuida key={p.chiave} cosa={`il punto «${p.nome}»`} compatto
+                                    iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no' })}
+                                    onSalva={async (b) => { await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì' }); await dati.ricarica(); }}
+                                    elimina={{ avviso: 'Se ne va dalla guida, con quel che le partite ne avevano segnato.', onElimina: async () => { await eliminaPunto(p.chiave); await dati.ricarica(); } }}>
+                                    {(b, cambia) => <>
+                                      <CampoCorrezione etichetta="Nome" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />
+                                      <span className="min-w-[150px]">
+                                        <Selettore etichetta="Tipo" valore={b.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
+                                      </span>
+                                      <label className="touch flex items-center gap-1.5 text-[12px]">
+                                        <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
+                                      </label>
+                                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={4000} onCambia={(v) => cambia({ descrizione: v })} />
+                                    </>}
+                                  </CorrezioneGuida>
                                 </div>
                               </div>
                             )}
                           </li>
                         ))}
                       </ul>
+                      {/* La guida non ha trascritto tutto: quel che manca si aggiunge qui, dove lo si è cercato. */}
+                      {nuovoPunto
+                        ? <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
+                            onSubmit={(e) => { e.preventDefault(); const n = nuovoPunto.nome.trim(); if (!n) return; void creaPunto(area.chiave, { nome: n, tipo: nuovoPunto.tipo }).then(async () => { setNuovoPunto(null); await dati.ricarica(); notifica('success', `Punto «${n}» aggiunto a ${area.nome}.`); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Punto non aggiunto.')); }}>
+                            <CampoCorrezione etichetta="Nuovo punto" valore={nuovoPunto.nome} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, nome: v })} />
+                            <span className="min-w-[150px]">
+                              <Selettore etichetta="Tipo" valore={nuovoPunto.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, tipo: v as PuntoInteresseDto['tipo'] })} />
+                            </span>
+                            <div className="flex gap-1.5">
+                              <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Aggiungi" disabled={!nuovoPunto.nome.trim()} />
+                              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setNuovoPunto(null)} />
+                            </div>
+                          </form>
+                        : <button type="button" className="chip touch self-start text-[11px]" onClick={() => setNuovoPunto({ nome: '', tipo: 'altro' })}>+ Aggiungi un punto</button>}
                     </div>
                   </details>
                 )}

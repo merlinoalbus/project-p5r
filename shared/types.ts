@@ -1524,14 +1524,13 @@ export interface AreaDungeonDto {
   ordine: number;
   nome: string;
   descrizione: string;
-  /** Immagine della pianta presente nell'istanza (ambito «mappa»). */
+  /** Immagine caricata per quest'area nell'istanza (ambito «mappa»), se qualcuno ce l'ha messa.
+   *
+   * La **pianta pubblicata dalla guida non c'è più** (2026-09-18): era una seconda immagine della
+   * stessa stanza, con un suo scaricamento da indirizzi esterni e un suo sistema di marcatori, e
+   * su centosette aree se ne erano scaricate undici. La stanza si guarda sulla planimetria
+   * dell'atlante; dove manca il legame, la scheda dà da collegarla invece di un'altra immagine. */
   mappa: boolean;
-  /** Fonte da cui la pianta presente è stata davvero scaricata (principale o alternativa); null se caricata dall'utente o assente. */
-  piantaScaricata: { url: string; fonte: string; pagina: string | null } | null;
-  /** Collegamento alla pianta pubblicata (null se nessuna guida la offre). */
-  pianta: PiantaAreaDto | null;
-  /** Motivo dell'assenza della pianta, se noto (es. piani generati proceduralmente). */
-  piantaAssente: string | null;
   /** Le planimetrie native dell'atlante legate a quest'area (`mappa_entita`), in ordine.
    *
    * Servono alla scheda del Palazzo per **mostrare la mappa invece di un rimando**. L'area della

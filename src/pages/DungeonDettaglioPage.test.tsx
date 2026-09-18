@@ -9,11 +9,11 @@ import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, scaricaPianta, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe } = vi.hoisted(() => ({
-  getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), scaricaPianta: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
-  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(),
+const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa } = vi.hoisted(() => ({
+  getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, scaricaPianta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
+vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
 vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
 vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
@@ -26,7 +26,7 @@ vi.mock('../components/guida/EmblemaDungeon', () => ({ EmblemaDungeon: () => nul
 
 const spillo = (id: number, raccolto: boolean | null) => ({ id, uid: `u${id}`, tipo: 'forziere', nome: 'Forziere', colore: '#eab308', raccolto });
 const area = (extra: Partial<AreaDungeonDto>): AreaDungeonDto => ({
-  chiave: 'k-01', ordine: 0, nome: 'Cancello', descrizione: '', mappa: false, piantaScaricata: null, pianta: null, piantaAssente: null, mappe: [], punti: [], dedalo: null, ...extra,
+  chiave: 'k-01', ordine: 0, nome: 'Cancello', descrizione: '', mappa: false, mappe: [], punti: [], dedalo: null, ...extra,
 });
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
@@ -188,4 +188,39 @@ it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui 
   expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).toBeDisabled();
   await act(async () => { arriva([]); });
   expect(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ })).not.toBeDisabled();
+});
+
+// ---- Le correzioni della guida (rilievi della revisione, 2026-09-18) ----
+
+it('la bozza di correzione appartiene al pezzo che stai correggendo, non alla schermata', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  aggiornaArea.mockResolvedValue({});
+  monta('kamoshida');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+
+  // scrivo nel modulo dell'area, poi cambio area senza salvare
+  fireEvent.click(screen.getByRole('button', { name: /Correggi l’area/ }));
+  const modulo = screen.getByRole('form', { name: /Correggi l’area/ });
+  fireEvent.change(within(modulo).getByLabelText('Nome dell’area'), { target: { value: 'Scritto per sbaglio' } });
+  fireEvent.click(screen.getAllByRole('tab', { name: /Torre/ })[0]);
+
+  // il modulo si è chiuso con la sua bozza: riaprendolo sull'altra area c'è il nome dell'altra area
+  fireEvent.click(screen.getByRole('button', { name: /Correggi l’area/ }));
+  expect(within(screen.getByRole('form', { name: /Correggi l’area/ })).getByLabelText('Nome dell’area')).toHaveValue('Torre');
+  expect(aggiornaArea).not.toHaveBeenCalled();
+});
+
+it('salvata l’intestazione, la scheda si rilegge con la partita attiva', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  aggiornaDungeon.mockResolvedValue(palazzo(false));
+  monta('kamoshida');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+  getDungeon.mockClear();
+  fireEvent.click(screen.getByRole('button', { name: /Correggi il Palazzo/ }));
+  const modulo = screen.getByRole('form', { name: /Correggi il Palazzo/ });
+  fireEvent.change(within(modulo).getByLabelText('Nome'), { target: { value: 'Castello' } });
+  fireEvent.click(within(modulo).getByRole('button', { name: 'Salva' }));
+  await waitFor(() => expect(aggiornaDungeon).toHaveBeenCalledWith('kamoshida', expect.objectContaining({ nome: 'Castello' })));
+  // la risposta del PUT non porta lo stato della partita: la scheda si rilegge con l'id
+  await waitFor(() => expect(getDungeon).toHaveBeenCalledWith('kamoshida', 4));
 });
