@@ -516,3 +516,17 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **L'editor può guardare il giorno corrente, ma non lo fa da solo**: di regola vede tutto, perché
   deve poter modificare anche quel che nel mondo non c'è ancora; l'interruttore serve a controllare
   il lavoro con gli occhi di chi consulta la guida oggi, senza uscire dalla modifica.
+
+
+### 2026-09-18 — Nella negoziazione si cerca la domanda, e il carattere è un colore
+- **La domanda è l'unica cosa che si legge sullo schermo** mentre l'Ombra parla: la ricerca parte da
+  lì (e prende anche il testo delle risposte, perché a volte è quello che si riconosce prima).
+- **Solo italiano** (scelta dell'utente): la fonte è inglese e la resa è nostra; il gioco in
+  italiano può usare parole diverse, e questo va detto nella scheda invece di lasciarlo scoprire.
+- **Un carattere che non compare non è indifferente: non è stato verificato.** Inventare un verdetto
+  costerebbe la trattativa, quindi la riga lo dice; le voci che nemmeno la fonte conferma sono
+  marcate «incerto».
+- **Il carattere è un colore fisso** in tutta l'app: durante la trattativa si riconosce con la coda
+  dell'occhio, senza rileggere i nomi.
+- **Il dato sta nella guida alla battaglia, non in tabelle nuove**: è testo della guida, si serve in
+  un colpo solo e la ricerca avviene nel browser, che su tablet è istantanea.

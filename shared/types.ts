@@ -1424,6 +1424,18 @@ export interface OmbraDto {
   personaCollegata: { id: number; nome: string; nomeIt: string } | null;
 }
 
+export type TrattoOmbra = 'giocosa' | 'timida' | 'irritabile' | 'cupa';
+export type EsitoRisposta = 'buona' | 'passabile' | 'cattiva';
+
+export interface NegoziazioneDomandaDto {
+  domanda: string;
+  risposte: Array<{
+    testo: string;
+    /** `incerto`: nemmeno la fonte l'ha verificato. */
+    verdetti: Array<{ esito: EsitoRisposta; tratto: TrattoOmbra; incerto?: boolean }>;
+  }>;
+}
+
 export interface BattagliaDto {
   fonti: { principale: string; note: string };
   sistema: { urlFonte: string; avvioScontro: string; comandi: string[]; esitiColpo: { debole: string; critico: string; tecnico: string; block: string; resiste: string }; unoMore: string; statiAlterati: Array<{ stato: string; effetto: string }>; notaFineBattaglia: string };
@@ -1431,7 +1443,16 @@ export interface BattagliaDto {
   tecnico: { urlFonte: string; stati: Array<{ stato: string; elementi: string[] }> };
   staffetta: { urlFonte: string; cosaE: string; disponibilita: string; effetto: string; livelli: string; indicatoriVisivi: string; ranghi: Array<{ rango: number; bonus: string }>; moltiplicatori: string; effettoSpeciale: string };
   speciali: { urlFonte: string; meccanica: string; attivazione: string; proprietaDanno: string; elenco: Array<{ nome: string; personaggi: string[]; sblocco: string }> };
-  negoziazione: { urlFonti: string[]; quandoSiPuoNegoziare: string; opzioniHoldUp: Array<{ opzione: string; effetto: string }>; comeVerificarePersonalita: string; personalita: Array<{ nome: string; descrizione: string; risposteEfficaci: string[]; risposteDaEvitare: string[] }>; regole: string[]; incertezze: string };
+  negoziazione: {
+    urlFonti: string[]; quandoSiPuoNegoziare: string; opzioniHoldUp: Array<{ opzione: string; effetto: string }>; comeVerificarePersonalita: string;
+    personalita: Array<{ nome: string; descrizione: string; risposteEfficaci: string[]; risposteDaEvitare: string[] }>; regole: string[]; incertezze: string;
+    /** Da dove vengono le domande e come sono state rese in italiano (migrazione 083). */
+    fonteDomande?: { titolo: string; autori: string[]; url: string; urlOriginale: string; nota: string };
+    /** Le domande dell'Ombra con, per ogni risposta, il verdetto di ciascuna personalità: una
+     *  risposta può essere buona per un carattere e cattiva per un altro. Una personalità che non
+     *  compare fra i verdetti non è indifferente: non è stata verificata. */
+    domande?: NegoziazioneDomandaDto[];
+  };
   ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string; elenco: string[] | null; incertezze: string };
   mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };
   demoniTesoro: { categoria: string; urlFonte: string; cosaSono: string; comeCompaiono: string; primaComparsa: string; comportamento: string; resistenzeGenerali: string; tecnicheConsigliate: string[]; elenco: Array<{ nome: string; livello: number; arcano: string; dove: string }> };
