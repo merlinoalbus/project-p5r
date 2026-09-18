@@ -647,3 +647,37 @@ genitore), tre casi nella scheda del Palazzo e due sull'interruttore dell'editor
 planimetrie aggiornato in `struttura-server.test.ts`. Verifica dal vivo su Kamoshida (legame,
 riordino e scheda dalle API; pannello a 1280 e 375 px senza scorrimento orizzontale né errori in
 console).
+
+
+## Negoziazione: tutte le domande, con il verdetto di ogni carattere (18 settembre 2026) — fatto
+
+La scheda «Negoziazione» dava la regola (quattro personalità, due risposte d'esempio l'una) ma non
+serviva davanti all'Ombra: quel che si legge sullo schermo è **la domanda**, e da lì deve partire la
+ricerca. **Migrazione 083 `negoziazione_domande`**: 230 domande trascritte (225 dopo la fusione delle
+ripetute), 680 risposte e i loro verdetti entrano nella riga `dati_guida` «battaglia» (`negoziazione.domande`, `negoziazione.fonteDomande`) dal file di
+repository `server/db/dati/negoziazione-domande.json`; il pacchetto è rigenerato alla 083. Per ogni
+risposta si dice quali caratteri la prendono bene (`buona`), così così (`passabile`) o male
+(`cattiva`); un carattere che non compare **non è indifferente, non è stato verificato**, e le voci
+che nemmeno la fonte conferma restano marcate `incerto`. Esiti e tratti sono in italiano nel dato
+(`buona|passabile|cattiva`, `giocosa|timida|irritabile|cupa`, tipi `EsitoRisposta` e `TrattoOmbra`).
+
+**Interfaccia**: `RisposteNegoziazione` in cima alla scheda — barra di ricerca che cerca fra domande
+e risposte (tutte le parole scritte, accenti e punteggiatura ignorati), i quattro caratteri come
+interruttori con il loro colore fisso (`src/utils/negoziazione.ts`: giocosa oro, timida azzurra,
+irritabile rossa, cupa viola) e, per ogni risposta, una pastiglia per carattere con l'esito. Scelto
+il carattere, la risposta buona per lui sale in cima e la riga si colora; le altre carte della regola
+restano sotto. Fonte e resa italiana dichiarate nella scheda e nel `NOTICE`.
+
+**Migrazione 084 `negoziazione_senza_contraddizioni`** (dalla revisione): la fonte a volte si
+contraddice — ventiquattro risposte risultavano buone **e** cattive per lo stesso carattere, e cinque
+domande comparivano due volte con verdetti diversi — e la scheda arrivava a consigliare e sconsigliare
+la stessa risposta. `normalizzaDomande` impone due regole: un solo verdetto per carattere, **il
+peggiore**, marcato incerto quando la fonte non è d'accordo con sé stessa; e una domanda, una scheda,
+con risposte e verdetti fusi. Il pacchetto è rigenerato alla 084: 225 domande, 680 risposte, nessun
+conflitto, 30 verdetti marcati incerti.
+
+Test: migrazione 083 (file presente, contratto dei valori, nessun residuo inglese, idempotenza,
+un solo verdetto per carattere, il peggiore nel dubbio, fusione delle domande ripetute) e
+cinque casi sul componente (ricerca, riduzione dell'elenco, verdetti per carattere, ordinamento,
+stato vuoto). Verificato dal vivo: 230 domande servite dall'API e la scheda nel browser a 1280 e
+375 px senza scorrimento orizzontale né errori in console.

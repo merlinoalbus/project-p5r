@@ -622,6 +622,19 @@ usato dai filtri (stato, supporto, acquisto, disponibilità). Le pagine leggono 
 dei DTO della voce 5; le colonne in prosa (`dove`, `periodo`, `regole`, `premi`, `altri_effetti`, `paga`,
 `sblocco`, `doti_json`) non sono più lette dal frontend.
 
+## Negoziazione con le Ombre (2026-09-18)
+Le domande stanno nella riga `dati_guida` «battaglia» (`negoziazione.domande`, `negoziazione.fonteDomande`),
+portate dalla migrazione 083 dal file `server/db/dati/negoziazione-domande.json` — trascrizione fedele
+alla fonte — e normalizzate da `normalizzaDomande` (un solo verdetto per carattere, il peggiore e
+marcato incerto quando la fonte si contraddice; domande ripetute fuse), che la 084 riapplica alle
+istanze già migrate. Servite con il resto
+di `GET /api/compendio/battaglia`: la ricerca avviene nel browser. `shared/types.ts` definisce
+`TrattoOmbra` (`giocosa|timida|irritabile|cupa`), `EsitoRisposta` (`buona|passabile|cattiva`) e
+`NegoziazioneDomandaDto`; `src/utils/negoziazione.ts` tiene colori, segni, ordine degli esiti e
+`cercaDomande` (tutte le parole, su domanda e risposte, via `normalizzaTesto`);
+`src/components/guida/RisposteNegoziazione.tsx` è la scheda con ricerca, interruttori dei caratteri e
+pastiglie di esito per risposta.
+
 ## Scheda del Palazzo, Richieste, domande e cruciverba (2026-09-12)
 `src/components/guida/RaccoltaPlanimetrie.tsx` elenca planimetrie con collezionabili (`{chiave, nome, n,
 presi, spilli[]}`) e segna «Raccolto» con `impostaSpilloRaccolto` (`src/services/api/mappe.ts`); la pagina

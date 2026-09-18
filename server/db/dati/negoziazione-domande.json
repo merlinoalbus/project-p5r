@@ -1,0 +1,7587 @@
+{
+ "fonte": {
+  "titolo": "The Ultimate/Most Complete Guide To Negotiations In Persona 5",
+  "autori": [
+   "joyce-chen",
+   "GooberSD/Chompobar"
+  ],
+  "url": "https://docs.google.com/document/d/1sPsQ2SPXJdsrhYBj3mMyj5va-hmJ10TycIqJto4k2z4/edit",
+  "urlOriginale": "https://github.com/joyce-chen/persona5-negotiation/blob/master/index.md",
+  "nota": "Domande e risposte trascritte dalla raccolta e rese in italiano per questa app: il gioco in italiano può usare parole diverse. Le voci marcate «incerto» non sono verificate nemmeno dalla fonte."
+ },
+ "domande": [
+  {
+   "domanda": "...Hai capito dove voglio arrivare, no? Non è che mi lasci andare dalla mia ragazza?",
+   "risposte": [
+    {
+     "testo": "No.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Probabilmente se n'è andata.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che tipo di ragazza è?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi, ragazzino, se c'è qualcosa che ti rode, io sto qui ad ascoltarti.",
+   "risposte": [
+    {
+     "testo": "Le mie relazioni...",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Il mio futuro… (Puzzi di sudore.)",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho preoccupazioni.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Hai preso un appuntamento, ho?",
+   "risposte": [
+    {
+     "testo": "Sì, l'ho preso.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non è per quello.",
+     "verdetti": []
+    },
+    {
+     "testo": "Dimmi solo quello che sai.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Mi piacerebbe proprio vedere che genitori ti hanno cresciuto, per scorrazzare così a far danni.",
+   "risposte": [
+    {
+     "testo": "Adesso non posso mostrarteli.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non te li mostro.",
+     "verdetti": []
+    },
+    {
+     "testo": "Lascia stare i miei genitori.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi, se hai delle medicine passamene un po'. Fanno miracoli, no...?",
+   "risposte": [
+    {
+     "testo": "Tutto bene?",
+     "verdetti": []
+    },
+    {
+     "testo": "Che genere di medicine?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Tanto non cambierebbe niente.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Quello che stai facendo non ti pesa sulla coscienza?",
+   "risposte": [
+    {
+     "testo": "Ora che lo dici…",
+     "verdetti": []
+    },
+    {
+     "testo": "No.",
+     "verdetti": []
+    },
+    {
+     "testo": "Che cos'è la coscienza?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "…Molto bene. In nome del Padre, ascolterò le tue lamentele.",
+   "risposte": [
+    {
+     "testo": "Perché non finiscono le guerre?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho lamentele.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non riesco a trovare una ragazza.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Per rispetto verso il Padre, concediamoci un attimo di tregua…",
+   "risposte": [
+    {
+     "testo": "Se è questo che vuoi.",
+     "verdetti": []
+    },
+    {
+     "testo": "Che cosa mi stai dicendo?",
+     "verdetti": []
+    },
+    {
+     "testo": "Sono minorenne.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "...E tu chi diavolo credi di essere?",
+   "risposte": [
+    {
+     "testo": "Mi dispiace per questo.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Io sono IO!",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ti devo risposte.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Forse dovrei provare qualcosa di nuovo! Non voglio cadere nella mediocrità, ho...",
+   "risposte": [
+    {
+     "testo": "Vai benissimo così.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Il tuo numero è un po' stantio...",
+     "verdetti": []
+    },
+    {
+     "testo": "È ora di cambiare look.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi, se hai delle medicine passamene un po'. Un antidolorifico, magari…",
+   "risposte": [
+    {
+     "testo": "Stai bene?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ho degli antiacidi.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Tanto non cambierebbe niente.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Senti, ho ragazze di ogni tipo in fila, se ti interessa.",
+   "risposte": [
+    {
+     "testo": "Davvero?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ti stai sforzando troppo.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": true
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi interessa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che ne dici di un'intervista? Hai vinto tu, in fondo. Ascolto tutto quello che hai da dire.",
+   "risposte": [
+    {
+     "testo": "Mi sento benissimo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Voglio puntare più in alto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Combattere non serve a niente.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi. Che cosa ti viene in mente quando pensi al futuro?",
+   "risposte": [
+    {
+     "testo": "Una felicità nella media.",
+     "verdetti": []
+    },
+    {
+     "testo": "Vivi in fretta, muori giovane.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Voglio solo godermi l'adesso.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Porti una pistola perché pensi che ti renda popolare con le ragazze?",
+   "risposte": [
+    {
+     "testo": "Esatto.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non è così?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È per migliorare me stesso.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non è divertente tornare a casa quando ci sono solo mamma e papà a rompere.",
+   "risposte": [
+    {
+     "testo": "I genitori sono una rottura.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Dovresti voler bene ai tuoi.",
+     "verdetti": []
+    },
+    {
+     "testo": "Torna a casa, mi raccomando.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Me non capire in che cosa tu superiore a me...",
+   "risposte": [
+    {
+     "testo": "Sono più giovane di te./La giovinezza.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sono più carino di te./La dolcezza.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "So chiacchierare meglio./La fortuna.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Tu tornare fra braccia di mamma. Tu avere bisogno di pisolino ora.",
+   "risposte": [
+    {
+     "testo": "Non sono così piccolo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non ho ancora sonno.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "La mamma aspetterà./Dopo che ho finito qui.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Oggi non si sa nemmeno chi abita nella porta accanto. Non dovremmo conoscere meglio i vicini?",
+   "risposte": [
+    {
+     "testo": "È una cosa triste.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ci penso granché.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "La privacy conta.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Esigo che ti consegni alle autorità.",
+   "risposte": [
+    {
+     "testo": "C'è un malinteso.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho tempo./Chiedo scusa.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ti sei fatto un'idea sbagliata.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ma è giusto verso gli altri se trovo questa felicità e li lascio tutti indietro?",
+   "risposte": [
+    {
+     "testo": "Per me va bene così.",
+     "verdetti": []
+    },
+    {
+     "testo": "Che c'è di male?",
+     "verdetti": []
+    },
+    {
+     "testo": "Ti fai troppi problemi.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ogni tanto voglio viziarmi come premio per il duro lavoro. Tu come faresti?",
+   "risposte": [
+    {
+     "testo": "Mi rilasserei a casa.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Farei spese folli.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non essere così egoista.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Perché sei così disperato?",
+   "risposte": [
+    {
+     "testo": "Non voglio morire.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "C'è una cosa che devo fare.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non sono disperato./Voglio piacere alle ragazze.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sei fuori di testa. Forse dovresti farti vedere da qualcuno.",
+   "risposte": [
+    {
+     "testo": "Probabilmente sì.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sto benissimo così.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sei solo un cattivo perdente.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ti va di spiegarti? Spero proprio che tu abbia una buona ragione per questo trattamento villano.",
+   "risposte": [
+    {
+     "testo": "Ci vorrebbe un po' a spiegarlo./Sarebbe lunga.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non c'è niente da spiegare.",
+     "verdetti": []
+    },
+    {
+     "testo": "Stai zitto./Stai zitto...",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Perché hai deciso di parlare di più con me?",
+   "risposte": [
+    {
+     "testo": "Per il tuo aspetto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Mi sembravi utile.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Nessun motivo particolare.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "...Allora? Che ne sarà di me adesso?",
+   "risposte": [
+    {
+     "testo": "Verrai ucciso.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Tu che cosa vorresti?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È un segreto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "C'è un piatto che ti riesce bene?",
+   "risposte": [
+    {
+     "testo": "Il riso saltato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Gli spaghetti alla carbonara./Carne misteriosa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ma che stai dicendo?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Che cosa mi succederà?",
+   "risposte": [
+    {
+     "testo": "Ti farò a pezzetti.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sarò gentile.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sarò la tua padrona.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Volevo andare in vacanza anch'io, prima di tutto questo...",
+   "risposte": [
+    {
+     "testo": "Che peccato.",
+     "verdetti": []
+    },
+    {
+     "testo": "Dove vuoi arrivare?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Hai un fidanzato?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "...Non sarò tenero con te dopo una cosa del genere, sai...",
+   "risposte": [
+    {
+     "testo": "Mi dispiace.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Preparati al peggio.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Quanto vuoi?",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Lo capisci che sono qui perché esiste gente come te, vero? (Lo capisci che siamo qui per colpa di gente come te, vero?)",
+   "risposte": [
+    {
+     "testo": "Non ci avevo mai pensato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Bah, non importa./Ho capito.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che vuoi dire?",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ma questo modo di vivere è l'unico che io abbia mai conosciuto.",
+   "risposte": [
+    {
+     "testo": "Non è privo di significato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ci sono altri modi di vivere.",
+     "verdetti": []
+    },
+    {
+     "testo": "Hai avuto la tua bella corsa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Confessa i tuoi peccati.",
+   "risposte": [
+    {
+     "testo": "Chiedo scusa.",
+     "verdetti": []
+    },
+    {
+     "testo": "Credo… di aver sbagliato.",
+     "verdetti": []
+    },
+    {
+     "testo": "Scordatelo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Tu che vivi nel mondo dell'onnipotente, che cos'è che ti tormenta tanto?",
+   "risposte": [
+    {
+     "testo": "Il mondo sarebbe onnipotente?",
+     "verdetti": []
+    },
+    {
+     "testo": "Non sono tormentato.",
+     "verdetti": []
+    },
+    {
+     "testo": "Il mio «papà» non è onnipotente.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Dai, che ci fai con quella maschera? Un po' imbarazzante, non trovi?",
+   "risposte": [
+    {
+     "testo": "Eh, sì.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Stai zitto…",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "In realtà sono un ragazzino.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Significa accorgersi dello sguardo del Padre, che veglia su di te con amorevole grazia.",
+   "risposte": [
+    {
+     "testo": "Ma di che stai parlando?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sento il suo sguardo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non credo proprio.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sapresti sacrificarti per dimostrare la tua adorazione verso il Padre?",
+   "risposte": [
+    {
+     "testo": "Sì, saprei.",
+     "verdetti": []
+    },
+    {
+     "testo": "No, non saprei.",
+     "verdetti": []
+    },
+    {
+     "testo": "Io non lo adoro.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Chissà se parlare così adesso vuol dire che siamo in qualche modo legati...",
+   "risposte": [
+    {
+     "testo": "Eh, può darsi./Può darsi.",
+     "verdetti": []
+    },
+    {
+     "testo": "No, non credo./Ma figurati.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": true
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È quello che si chiama destino./È il destino.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "A che cosa tu pensare adesso?",
+   "risposte": [
+    {
+     "testo": "Ho i compiti stasera.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Mi serve un telefono nuovo.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Voglio piacere alle ragazze.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Me indovinare che tu avere potere che me non avere. Ma quale...?",
+   "risposte": [
+    {
+     "testo": "La mia intelligenza./Lo studio.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "I soldi./L'empatia.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Il fascino femminile.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Gli umani vogliono sempre o un autografo o un self-hee, ho. Quale dei due, ho?",
+   "risposte": [
+    {
+     "testo": "Voglio un autografo.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Voglio una foto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": true
+      }
+     ]
+    },
+    {
+     "testo": "Dammi la tua carta di credito.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "L'unica scelta che mi resta... è ritirarmi, ho.",
+   "risposte": [
+    {
+     "testo": "Non esagerare.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che programmi hai?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Hai avuto la tua bella corsa...",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Dimmi, che cosa vuol dire per te «stare alla pari»?",
+   "risposte": [
+    {
+     "testo": "Non parlare dall'alto in basso.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Dividersi le faccende di casa.",
+     "verdetti": []
+    },
+    {
+     "testo": "Dividere tutte le spese.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "...Devo chiedertelo. Come ti alleni?",
+   "risposte": [
+    {
+     "testo": "Non mi alleno granché.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ho solo il physique du rôle.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "La fortuna sta dalla mia parte.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Alla fine, uccidermi è solo tempo ed energia sprecati. Mi capisci, vero?",
+   "risposte": [
+    {
+     "testo": "Messa così...",
+     "verdetti": []
+    },
+    {
+     "testo": "Non è tempo sprecato.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "I nemici vanno eliminati.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "E allora perché non smetti con questo sforzo inutile? Non ha senso...",
+   "risposte": [
+    {
+     "testo": "Non hai tutti i torti...",
+     "verdetti": []
+    },
+    {
+     "testo": "Non posso smettere.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Un senso glielo troverò.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi, signore, se fossi cresciuta, come sarebbe stata la me del futuro?",
+   "risposte": [
+    {
+     "testo": "Una signora elegante.",
+     "verdetti": []
+    },
+    {
+     "testo": "Una casalinga ricca.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Una che vive nell'ombra.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Esco con te solo per oggi, se non ci sono secondi fini.",
+   "risposte": [
+    {
+     "testo": "Se ti fa piacere.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Nessun secondo fine?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ho già i miei problemi...",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non potresti almeno offrirmi una tazza di tè? Sarebbe la cosa educata da fare.",
+   "risposte": [
+    {
+     "testo": "Non ne ho./Mi dispiace.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Fattelo da solo.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non sono ospitale./Non sono famoso per l'educazione.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "...E tu, ragazzino? Che tipo di viaggio vorresti fare?",
+   "risposte": [
+    {
+     "testo": "Una crociera di lusso.",
+     "verdetti": []
+    },
+    {
+     "testo": "Un'avventura in autostop.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Un viaggio all'inferno.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Allora... ti diverte prendere in giro le donne mature?",
+   "risposte": [
+    {
+     "testo": "Non era mia intenzione.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sì, in effetti è divertente.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Dico sul serio.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "C'è un motivo per cui proprio non riesco a batterti?",
+   "risposte": [
+    {
+     "testo": "Sono più giovane, tutto qui.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ho il fascino femminile dalla mia.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Scoprilo da sola.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ecco come mi sento. E non è penoso negare a sé stessi i propri sentimenti?",
+   "risposte": [
+    {
+     "testo": "È un discorso difficile.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ma il risultato è chiaro.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ammettere la sconfitta è da adulti.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ti stavo mandando segnali chiarissimi del tipo «non rivolgermi la parola»./Ti stavo mandando un'aura del tipo «non rivolgermi la parola».",
+   "risposte": [
+    {
+     "testo": "L'avevo notato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho visto nessun «segnale»./Non ho sentito nessuna «aura».",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ma forse non ci rivedremo mai...",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sai come si dice: «Rispetta gli anziani». Nessuno te l'ha mai insegnato?",
+   "risposte": [
+    {
+     "testo": "Qualcuno una volta sì.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non me ne importa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Io non voglio invecchiare.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "C'è davvero un vantaggio per me se mi unisco a te?",
+   "risposte": [
+    {
+     "testo": "Credo di sì.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non posso prometterlo.",
+     "verdetti": []
+    },
+    {
+     "testo": "È una questione di sentimento.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Perché tu venire fin qui?",
+   "risposte": [
+    {
+     "testo": "Sono qui per il cibo./Per una caccia al tesoro.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sono qui per le donne./Per le ragazze.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sono qui per ritrovare me stesso./Mi andava.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Me volere chiedere consigli, così me almeno immaginare.",
+   "risposte": [
+    {
+     "testo": "Pane inzuppato nel caffè.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Gelato leccato dal coperchio.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "La fame è il miglior condimento.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Se è vero, allora non vedo che senso abbia uccidermi...",
+   "risposte": [
+    {
+     "testo": "Un senso ce l'ha, invece.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non dire sciocchezze.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "E allora chi è il vero nemico?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Da piccolo, che cosa volevi fare da grande?",
+   "risposte": [
+    {
+     "testo": "L'atleta professionista.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Il personaggio famoso./Non avevo sogni.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Il vincente nella società.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Forse una volta i bambini le prendevano, ma adesso non si fa più, giusto?",
+   "risposte": [
+    {
+     "testo": "Non lo sapevo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Tu le meriteresti eccome.",
+     "verdetti": []
+    },
+    {
+     "testo": "Certe cose non cambiano mai.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Pensi che lo dicano davvero sul serio, ogni volta?",
+   "risposte": [
+    {
+     "testo": "Sì.",
+     "verdetti": []
+    },
+    {
+     "testo": "No, ma lo dicono lo stesso.",
+     "verdetti": []
+    },
+    {
+     "testo": "Io sono più carino della media.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che ne pensi degli umani che mostrano agli altri le foto dei loro bambini?",
+   "risposte": [
+    {
+     "testo": "È una cosa tenera.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi interessa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ma di che stai parlando?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Anch'io sto per diventarne vittima. Ma questo Paese ce l'ha un futuro?",
+   "risposte": [
+    {
+     "testo": "Ce l'ha.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non farci conto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Gli anziani sono maleducati.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non capisci la gravità di quello che hai fatto?",
+   "risposte": [
+    {
+     "testo": "Peccato...?",
+     "verdetti": []
+    },
+    {
+     "testo": "Vai al punto.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non ho fatto niente di male.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che cosa speri di ottenere ferendomi ancora...?",
+   "risposte": [
+    {
+     "testo": "Dormire di più.",
+     "verdetti": []
+    },
+    {
+     "testo": "Un po' di popolarità.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Se comincio non mi fermo più.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Indovina che cosa voglio farmi leggere prima della nanna!",
+   "risposte": [
+    {
+     "testo": "Non sono tuo padre.",
+     "verdetti": []
+    },
+    {
+     "testo": "Chiedilo a qualcun altro.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ti farò dormire per sempre.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Quando mangi il curry, signore, che cosa ci aggiungi?",
+   "risposte": [
+    {
+     "testo": "Salsa di soia.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Salsa Worcestershire.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ci aggiungo niente.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ho perso. Eccomi qui, ai tuoi piedi, alla tua mercé. Che cosa vuoi da me?",
+   "risposte": [
+    {
+     "testo": "Dammi qualcosa.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Striscia davanti a me.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non lo so.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ma sinceramente, non sono una ragazza migliore di quelle idol?",
+   "risposte": [
+    {
+     "testo": "Sei più originale.",
+     "verdetti": []
+    },
+    {
+     "testo": "Le idol sono il massimo!",
+     "verdetti": []
+    },
+    {
+     "testo": "Chi se ne importa delle idol?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "I ragazzi di oggi fanno tutti cose del genere?",
+   "risposte": [
+    {
+     "testo": "Sì, proprio così.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No, l'ho inventata io.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ti va di unirti?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non prenderla male, ma… che bello dev'essere essere un ragazzino spensierato.",
+   "risposte": [
+    {
+     "testo": "Vorrei restare ragazzino per sempre.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Preferisco essere adulto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Vorrei essere ancora un neonato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Tu non temere guai se quei gruppi sapere che cosa tu fare a me?",
+   "risposte": [
+    {
+     "testo": "Hai ragione.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi importa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Tu non sei un animale.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che cosa ti ha portato in un posto come questo? Che cosa cerchi?",
+   "risposte": [
+    {
+     "testo": "Un'avventura.",
+     "verdetti": []
+    },
+    {
+     "testo": "Niente, davvero.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Una carneficina.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Tu pensato bene, e se tu andare in posto dove puoi morire in ogni momento?",
+   "risposte": [
+    {
+     "testo": "Ci ho pensato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non voglio figli.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "La cosa non mi convince.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Se il piano è questo, allora assicurati che io sia soddisfatta.",
+   "risposte": [
+    {
+     "testo": "Non giocare con me.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non capisco.",
+     "verdetti": []
+    },
+    {
+     "testo": "Che cosa vorresti?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "È tutta una cosa da televisione, hee-ho! Dov'è la telecamera?",
+   "risposte": [
+    {
+     "testo": "Wow, mi hai beccato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ma che stai dicendo?",
+     "verdetti": []
+    },
+    {
+     "testo": "Questo è tutto vero.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Me volere proprio mangiare qualcosa.",
+   "risposte": [
+    {
+     "testo": "Non scherzare./Non prendermi in giro.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Resisti./Vale anche per me.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ordiniamo qualcosa?/Vuoi che ordini qualcosa?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "...È vero, non è così?",
+   "risposte": [
+    {
+     "testo": "Non è affatto così.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sembri giovane.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Le donne mature vanno di moda.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Allora perché me in questa situazione adesso? Perché me alla tua mercé?",
+   "risposte": [
+    {
+     "testo": "I tempi sono cambiati.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Gli umani sono potenti.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È un discorso difficile...",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Se mi catturi, che cosa tu fare di me?",
+   "risposte": [
+    {
+     "testo": "Ti mangio in umido./Vado fiero di averti preso.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ti porto dall'imbalsamatore./Ti uso come decorazione.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Diventerai il mio cappotto./Niente.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Perché tu continuare a calpestare qui? Che cosa pensare voi umani?",
+   "risposte": [
+    {
+     "testo": "Scusami./Mi dispiace.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ci ho pensato./Devo togliermi le scarpe?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Uff, parli troppo forte./Stai zitto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Me non maledire te, ma maledire tuo comandante! Me maledire chi ti dare ordini...!",
+   "risposte": [
+    {
+     "testo": "È stata una mia scelta.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Combattere con me porta sfortuna.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Prova pure a scappare.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Per quanto ti riguarda, che tipo di persona sono stato per te?",
+   "risposte": [
+    {
+     "testo": "Il mio rivale.",
+     "verdetti": []
+    },
+    {
+     "testo": "Nessuno, davvero.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ha importanza.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "C'è qualcosa che tu volere dire a me, vero?",
+   "risposte": [
+    {
+     "testo": "Non graffiare i mobili./Ti voglio.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ti educherò io./Non proprio.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Fammi toccare le zampe.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Beh, dovrei proprio tornarmene a casa...",
+   "risposte": [
+    {
+     "testo": "E allora vai.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che cosa vuoi dire?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mentirmi.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ti trasformerò in zuppa.",
+   "risposte": [
+    {
+     "testo": "Ok, allora ti faccio in zuppa io.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Va bene, ti metto alla griglia.",
+     "verdetti": []
+    },
+    {
+     "testo": "D'accordo, ti trito.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Il modo in cui mi tratti, però, mi manda segnali contrastanti. Che cosa provi davvero per me?",
+   "risposte": [
+    {
+     "testo": "Sei bellissima.",
+     "verdetti": []
+    },
+    {
+     "testo": "Fai paura.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Niente di particolare.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ma davvero, cosplay in un posto come questo? Ti annoi così tanto?",
+   "risposte": [
+    {
+     "testo": "Sì, parecchio.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "In realtà ho molto da fare.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Stai zitto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ho... perso?",
+   "risposte": [
+    {
+     "testo": "Direi di sì./Già.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che cosa non ti è chiaro?/Non ancora.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ma no, hai stravinto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non hai idea di quale mossa finale stessi per usare.",
+   "risposte": [
+    {
+     "testo": "Sul serio!?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Questo mi preoccupa...",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "...Provaci.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "È piuttosto scortese, sai.",
+   "risposte": [
+    {
+     "testo": "No./No, non lo è.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Fa parte della mia faccia.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Prova a strapparmela./Chiedo scusa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Fa paura la puntura? Ti fa piangere, signore?",
+   "risposte": [
+    {
+     "testo": "Piango come un bambino.",
+     "verdetti": []
+    },
+    {
+     "testo": "Stringo i denti.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Mi piacciono le punture.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Oh, sono così sicuri che avranno successo in futuro. Sei anche tu così, ragazzo?",
+   "risposte": [
+    {
+     "testo": "Proprio così.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non è vero.",
+     "verdetti": []
+    },
+    {
+     "testo": "Che c'è di male?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Posso arrabbiarmi adesso?",
+   "risposte": [
+    {
+     "testo": "Fai pure.",
+     "verdetti": []
+    },
+    {
+     "testo": "Per favore, no.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sei troppo carina.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Com'è baciarsi con qualcuno?",
+   "risposte": [
+    {
+     "testo": "È incredibile…",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non dovrei dirtelo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Chiedilo ai tuoi.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi, facciamo così: se non mi spari, ti do un bacio. Non è un cattivo affare, no?",
+   "risposte": [
+    {
+     "testo": "Non è una cattiva idea.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non voglio baci.",
+     "verdetti": []
+    },
+    {
+     "testo": "Un po' di dignità.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "È perché non mi comporto da adulta? Ma che cosa rende adulti, poi?",
+   "risposte": [
+    {
+     "testo": "L'età per bere./Quando sei maggiorenne.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Pagarsi l'affitto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Chiedersi che cosa sia la maturità.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "A pensare alle gerarchie, dovresti portarmi un po' più di rispetto, non credi?",
+   "risposte": [
+    {
+     "testo": "Hai ragione, senpai.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": true
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ci avevo pensato.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Preferisco il rispetto reciproco.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Potevo diventare una star...",
+   "risposte": [
+    {
+     "testo": "Una star?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non succederà mai.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ti stai arrendendo?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che tipo di gente ti manda in bestia?",
+   "risposte": [
+    {
+     "testo": "Chi cammina piano./I permalosi.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Chi parla a voce alta.../Chi non capisce le battute.",
+     "verdetti": []
+    },
+    {
+     "testo": "Nessuno./Non mi arrabbio mai.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Aveva detto «te lo compro tornando a casa», e poi non me l'ha comprato! Non è ingiusto?",
+   "risposte": [
+    {
+     "testo": "È ingiusto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Colpa tua che ci sei cascato.",
+     "verdetti": []
+    },
+    {
+     "testo": "Devi insistere di più.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Perché sei venuto in un posto così pericoloso? Non è più sicuro il mondo reale?",
+   "risposte": [
+    {
+     "testo": "Ho degli affari qui.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sono qui per il bottino.",
+     "verdetti": []
+    },
+    {
+     "testo": "Così, senza motivo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ma ne ho viste tante, e lo so: c'è qualcos'altro che vuoi da me, vero?",
+   "risposte": [
+    {
+     "testo": "Agisco d'istinto.",
+     "verdetti": []
+    },
+    {
+     "testo": "Adoro gli anziani.",
+     "verdetti": []
+    },
+    {
+     "testo": "Voglio solo che tu muoia felice.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Vorrei che lasciassero in pace noi vecchi. Tanto non ci resta molto tempo.",
+   "risposte": [
+    {
+     "testo": "Sono d'accordo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Parla per te.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "C'è un boom di anziani...",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Immagino sia per questo che sono così confuso, ragazzo. Perché mi trattano così?",
+   "risposte": [
+    {
+     "testo": "Perché hai opposto resistenza.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ci si può fare niente.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Le feste non contano.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "D'inverno girano con le maniche corte, vero? Che ne pensi, tesoro?",
+   "risposte": [
+    {
+     "testo": "Mi piace.",
+     "verdetti": []
+    },
+    {
+     "testo": "Si perdono le stagioni.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi importa.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Non è come quando una donna umana si sposa e va a vivere dal marito?",
+   "risposte": [
+    {
+     "testo": "Proprio così.",
+     "verdetti": []
+    },
+    {
+     "testo": "No.",
+     "verdetti": []
+    },
+    {
+     "testo": "Io amo un'altra persona.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non ti sentivi così anche tu da bambino?",
+   "risposte": [
+    {
+     "testo": "Da bambini è facile./Non è poi così male.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Da bambini è dura.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non me lo ricordo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non trovi triste che i modi di dire invecchino e passino di moda?",
+   "risposte": [
+    {
+     "testo": "Sì, è triste.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non credo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Questo dimostra solo che sei vecchio.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Perciò non posso essere distrutto. Desisti da questa inutilità.",
+   "risposte": [
+    {
+     "testo": "Ma di che stai parlando?",
+     "verdetti": []
+    },
+    {
+     "testo": "È assurdo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Stai mentendo.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Fammi sentire parole di pentimento.",
+   "risposte": [
+    {
+     "testo": "Scusa.",
+     "verdetti": []
+    },
+    {
+     "testo": "«Parole di pentimento».",
+     "verdetti": []
+    },
+    {
+     "testo": "Non sono pentito.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Pensaci bene. Non sono io quello che dovresti detestare.",
+   "risposte": [
+    {
+     "testo": "Hai ragione…",
+     "verdetti": []
+    },
+    {
+     "testo": "È assurdo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Lo decido io.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "La cattiva fama corre. Se fossi in te, smetterei con queste sciocchezze. Che senso ha?",
+   "risposte": [
+    {
+     "testo": "Hai ragione.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi importa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non conosco altro modo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Da dove arrivano i bambini?",
+   "risposte": [
+    {
+     "testo": "Li porta la cicogna.",
+     "verdetti": []
+    },
+    {
+     "testo": "Chiedilo ai tuoi.",
+     "verdetti": []
+    },
+    {
+     "testo": "Dall'amore fra due persone.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi, giochiamo! Indovina che cosa voglio mangiare!",
+   "risposte": [
+    {
+     "testo": "Hamburger.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Curry./Umani.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Stai zitto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "È perché non sono stato un «bravo bambino»?",
+   "risposte": [
+    {
+     "testo": "Sì.",
+     "verdetti": []
+    },
+    {
+     "testo": "No.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non c'entra niente.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi, signore, mi dai uno spuntino buono?",
+   "risposte": [
+    {
+     "testo": "Più tardi.",
+     "verdetti": []
+    },
+    {
+     "testo": "Neanche per sogno.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che cosa vorresti?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Combatti per aiutare o proteggere il mondo, o roba del genere?",
+   "risposte": [
+    {
+     "testo": "Proprio così.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non te lo dico.",
+     "verdetti": []
+    },
+    {
+     "testo": "Mi pagano per questo.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Alla tua età non si dovrebbe uscire con le ragazze? Non riesci a rimediare un appuntamento?",
+   "risposte": [
+    {
+     "testo": "Subito dopo di te, ragazzino.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che bambino maleducato...",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Gli appuntamenti non contano.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Dimmi, che effetto fa puntare la pistola contro un nemico che ha perso ogni voglia di combattere?",
+   "risposte": [
+    {
+     "testo": "Non male.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "...Potrei farci l'abitudine.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Mi si stringe il cuore...",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che cos'è che ti irrita tanto?",
+   "risposte": [
+    {
+     "testo": "I cassieri lenti.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Le donne egocentriche.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non sono irritato.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Immagino che questo «mondo reale» da cui vieni sia piuttosto noioso.",
+   "risposte": [
+    {
+     "testo": "È noiosissimo./Hai ragione.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Lì ho sempre da fare./Mi tiene occupato.",
+     "verdetti": []
+    },
+    {
+     "testo": "È meglio di qui.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sarei propenso a rifiutare, ma se vuoi parlare, forse ci penserò.",
+   "risposte": [
+    {
+     "testo": "Non hai niente che io voglia.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ti annoi?/Hai tempo da perdere?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che presupposto orribile./Non rifiutare.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Qualunque sia il reato, gli umani lo prendono più alla leggera se chi lo commette è minorenne, non è vero?",
+   "risposte": [
+    {
+     "testo": "Non è vero.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "L'età non c'entra.",
+     "verdetti": []
+    },
+    {
+     "testo": "Questo non è un estremo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Forse sono la stessa cosa.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ah, quindi immagino che tu commetta atti così estremi perché sai che non sarai punito duramente...",
+   "risposte": [
+    {
+     "testo": "Non è vero.",
+     "verdetti": []
+    },
+    {
+     "testo": "L'età non c'entra.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Questo non è un estremo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Mi hai buttato a terra e adesso il mio orologio è rotto!",
+   "risposte": [
+    {
+     "testo": "Scusa.../Chiedo scusa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non è un mio problema./Come se mi importasse.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mentire./Misura le parole.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Perché non mi lasci in pace?",
+   "risposte": [
+    {
+     "testo": "Hai da fare?",
+     "verdetti": []
+    },
+    {
+     "testo": "Non ci riesco proprio.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È psicologia inversa?",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Anch'io ho persone care a cui mancherei. Cogli quello che intendo, vero?",
+   "risposte": [
+    {
+     "testo": "Ci ho pensato solo adesso.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non sono affari tuoi.",
+     "verdetti": []
+    },
+    {
+     "testo": "Io sono sempre solo.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "E chi vorresti impressionare con quella maschera?",
+   "risposte": [
+    {
+     "testo": "Nessuno.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Zitto...",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "In realtà sono ancora giovane...",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "E tu? Ti vorresti sposare, un giorno?",
+   "risposte": [
+    {
+     "testo": "Sì.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È impossibile.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Stai violando la legge sulle armi, o come si chiama.",
+   "risposte": [
+    {
+     "testo": "Non lo sapevo.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non se non lo scopre nessuno./È per legittima difesa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Bella, eh?",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sarei propenso a rifiutare, ma se desideri ancora parlare, forse ci penserò.",
+   "risposte": [
+    {
+     "testo": "Non hai niente che io voglia.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ti annoi?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che presupposto orribile.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Senti, se ti preparassi qualcosa, che cosa vorresti?",
+   "risposte": [
+    {
+     "testo": "Carne e patate.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi serve roba fatta in casa.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ma sai davvero cucinare?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Se la tua ragazza ti chiedesse di cenare con le sue «amiche», che cosa risponderesti?",
+   "risposte": [
+    {
+     "testo": "Certo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Volentieri.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ho da fare.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ma di che stai parlando?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ti annoi?",
+   "risposte": [
+    {
+     "testo": "Sì, mi annoio.",
+     "verdetti": []
+    },
+    {
+     "testo": "In realtà ho molto da fare.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non ci avevo mai pensato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "È quella cosa della «violenza domenicale», vero?",
+   "risposte": [
+    {
+     "testo": "Si dice «violenza domestica».",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Cosa? No, ti sbagli...",
+     "verdetti": []
+    },
+    {
+     "testo": "Ehm, a casa va tutto bene?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che cosa facciamo, eh?",
+   "risposte": [
+    {
+     "testo": "Giochiamo a rincorrerci.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Giochiamo ai videogiochi.",
+     "verdetti": []
+    },
+    {
+     "testo": "Andiamo a rimorchiare.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che cos'ha che non va il mio aspetto, eh?",
+   "risposte": [
+    {
+     "testo": "Sei una tentazione.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sei brutta.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non ha niente che non va.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Con i bambini si va piano! Sei stupido? A scuola vai male?",
+   "risposte": [
+    {
+     "testo": "Sono sveglio./Vado benissimo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "I miei voti sono nella media./Sono bravo in ginnastica.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Stai zitto./Almeno sono popolare.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Il modo in cui mi tratti è «troppo confidenziale». Credo...",
+   "risposte": [
+    {
+     "testo": "Siamo amici.",
+     "verdetti": []
+    },
+    {
+     "testo": "Che c'è di male?",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È perché sei carina.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sei un bullo! Non è una cosa «immatura»?",
+   "risposte": [
+    {
+     "testo": "Ora che lo dici...",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No, non credo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Tanto non sono maturo.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sono stufo di essere un bambino. Non ti sentivi così anche tu da piccolo?",
+   "risposte": [
+    {
+     "testo": "Eccome.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non proprio.",
+     "verdetti": []
+    },
+    {
+     "testo": "Vorrei restare bambino per sempre.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non trovi irragionevole pretendere che la tua vittima sia ben disposta verso le tue parole?",
+   "risposte": [
+    {
+     "testo": "Sì, lo trovo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non mi pare ingiusto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non prendertela.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "E se ti squarciassi il corpo? ...Di che colore uscirebbe il sangue?",
+   "risposte": [
+    {
+     "testo": "Rosso.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Verde.",
+     "verdetti": []
+    },
+    {
+     "testo": "Io non sanguino e non piango.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Qual è stata la causa della mia sconfitta...?",
+   "risposte": [
+    {
+     "testo": "La tua mancanza di risolutezza.",
+     "verdetti": []
+    },
+    {
+     "testo": "Il mio talento naturale.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non te lo dico.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che cos'era, poi, quella roba?",
+   "risposte": [
+    {
+     "testo": "Una lettera d'amore.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Una lettera di minacce.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Un buono sconto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ho bisogno di riprendermi, ho. Non ti senti così anche tu?",
+   "risposte": [
+    {
+     "testo": "Sì, a volte.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È la battaglia che mi calma.",
+     "verdetti": []
+    },
+    {
+     "testo": "Smettila di lamentarti.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sai, la vita da mascotte non è hee-facile. Sicuro di reggere tutte le avversità, ho?",
+   "risposte": [
+    {
+     "testo": "Sono pronto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che genere di avversità?",
+     "verdetti": []
+    },
+    {
+     "testo": "Tu saresti una mascotte?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Me adesso proprio in brodo di giuggiole guai. Fai come vuoi. Me pronto se tu volere grigliare me, quindi...",
+   "risposte": [
+    {
+     "testo": "Ok, ti faccio in zuppa.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Va bene, ti metto alla griglia./Non voglio mangiarti.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "D'accordo, ti trito!/Ti trito.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che genere di «ospitalità» mi offrirai alla fine della mia vita?",
+   "risposte": [
+    {
+     "testo": "Una cena fatta in casa.",
+     "verdetti": []
+    },
+    {
+     "testo": "Un buono per un massaggio mio.",
+     "verdetti": []
+    },
+    {
+     "testo": "Starò in silenzio al tuo fianco.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Di solito che cosa mangi?",
+   "risposte": [
+    {
+     "testo": "Curry.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Verdure.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Proteine.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ooh, e se mi restasse una cicatrice per sempre?",
+   "risposte": [
+    {
+     "testo": "Scusa...",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Fatti fare un ritocchino.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Me ne assumo la responsabilità.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Hai molti amici? Ti capita di trovare fastidiose le cose che fanno?",
+   "risposte": [
+    {
+     "testo": "Ogni tanto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non ho amici.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Cerchi una gara amichevole con un caro vicino? O sei venuto a distruggere un nemico odiato?",
+   "risposte": [
+    {
+     "testo": "Sei un caro vicino.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sei un nemico odioso.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Fai il predicatore.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Hai messo a soqquadro questo posto. Che diresti se facessi lo stesso al tuo mondo?",
+   "risposte": [
+    {
+     "testo": "Non lo permetterei.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ci avevo pensato.",
+     "verdetti": []
+    },
+    {
+     "testo": "Occhio per occhio.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ti è successo qualcosa di brutto nella vita, ragazzino?",
+   "risposte": [
+    {
+     "testo": "Non è così.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Solo disgrazie.../Ho sfortuna.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Mi stai dando sui nervi!/Stai zitto.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Senti, se devo essere ucciso, preferirei che lo facesse una donna bella ed elegante.",
+   "risposte": [
+    {
+     "testo": "Mi dispiace.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non puoi fare il difficile.",
+     "verdetti": []
+    },
+    {
+     "testo": "Cambia poco.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Se è così, non puoi chiudere un occhio? Facciamo un patto...",
+   "risposte": [
+    {
+     "testo": "Va bene.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Un patto con il nemico?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi fido di te.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi. Perché non sei a scuola?",
+   "risposte": [
+    {
+     "testo": "Le lezioni sono finite.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho voglia di andarci.",
+     "verdetti": []
+    },
+    {
+     "testo": "Veramente ho già finito la scuola.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "È banale, ma potremmo parlare della vita… chiederci che tipo di ragazze ci piacciono…",
+   "risposte": [
+    {
+     "testo": "Mi piacciono le donne mature.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho preferenze.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Mi piacciono gli uomini.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ehi. Perché non sei a scuola?",
+   "risposte": [
+    {
+     "testo": "Oggi la scuola è chiusa. (Le lezioni sono finite.)",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho voglia di andarci.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Veramente ho già finito la scuola.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "La tua ragazza non sarebbe gelosa se ci vedesse?",
+   "risposte": [
+    {
+     "testo": "Non c'è da preoccuparsi.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": true
+      }
+     ]
+    },
+    {
+     "testo": "È un male solo se mi scoprono.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho una ragazza.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sono sicuro che mi capiterà un miracolo, vero?",
+   "risposte": [
+    {
+     "testo": "I miracoli non esistono.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sarei geloso se capitasse.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sto aspettando anch'io.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "...Scusa, ma posso prima sistemarmi la frangia?",
+   "risposte": [
+    {
+     "testo": "Smettila di scherzare.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Stai bene così.",
+     "verdetti": []
+    },
+    {
+     "testo": "È inutile.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Di sicuro al mondo c'è gente che ti irrita più di me. Tipo...",
+   "risposte": [
+    {
+     "testo": "Gli anziani che si fingono giovani.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi dà fastidio nessuno.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Odio tutti.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Dicono che l'amore possa sbocciare ovunque, perfino su un campo di battaglia. Non credi sia possibile?",
+   "risposte": [
+    {
+     "testo": "Può succedere?",
+     "verdetti": []
+    },
+    {
+     "testo": "Assolutamente no.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ma che stai dicendo?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Il modo in cui mi tratti, però, mi manda segnali contrastanti. Che cosa provi davvero per me?",
+   "risposte": [
+    {
+     "testo": "Sei bellissima.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Fai paura.",
+     "verdetti": []
+    },
+    {
+     "testo": "Niente di particolare.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Stai cercando di ottenere qualcosa da me?",
+   "risposte": [
+    {
+     "testo": "Sì.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No... Proprio niente...",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ti fai troppi problemi./Balla per me!",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sono io o c'è puzza?",
+   "risposte": [
+    {
+     "testo": "Sei solo tu.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Viene da te.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sento puzza di bugia.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sarebbe proprio un peccato se il festeggiato non si presentasse alla sua festa, quindi...",
+   "risposte": [
+    {
+     "testo": "Buon compleanno.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ne avevo idea.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sarà anche il giorno della tua morte.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Perché tu combattere con maschera, poi?",
+   "risposte": [
+    {
+     "testo": "Ci tengo all'aspetto.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Tiene lontano il sangue dei nemici.",
+     "verdetti": []
+    },
+    {
+     "testo": "È quello che vorrei sapere io.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Allora me perseguitare te per tutta la vita. Me sempre dietro di te...",
+   "risposte": [
+    {
+     "testo": "Sarebbe una seccatura.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Reggerei quel peso.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non mi piacerebbe.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Tu avere desideri che non puoi lasciare andare, nemmeno dopo morto?",
+   "risposte": [
+    {
+     "testo": "Sì, voglio la pace nel mondo./La felicità di tutti.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Voglio un funerale in grande./Un funerale in grande.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho intenzione di morire./Non morirò.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "...Ma pri-hee-ma di tutto questo, godiamoci due chiacchiere, ho!",
+   "risposte": [
+    {
+     "testo": "Va bene, immagino.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ce n'è bisogno.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Tu avere avuto qualcosa che hai perso, e non sapere quanto importante fino a dopo, vero?",
+   "risposte": [
+    {
+     "testo": "L'amico che ha cambiato scuola.",
+     "verdetti": []
+    },
+    {
+     "testo": "La mia ex...",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Zitto, ti sto uccidendo.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ah, che peccato. Se avessi fatto sul serio dall'inizio, non sarei ridotto così.",
+   "risposte": [
+    {
+     "testo": "Allora fai sul serio adesso.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Cerchi scuse?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ci stavo provando neanch'io.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sono un uomo dal passato complicato. Le persone che conosco, beh...",
+   "risposte": [
+    {
+     "testo": "Vorrei conoscerle.",
+     "verdetti": []
+    },
+    {
+     "testo": "Complicato...?",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Bugiardo.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "La verità è che… sei una brava persona, vero?",
+   "risposte": [
+    {
+     "testo": "Me lo dicono spesso.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "In realtà… sono cattivo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Mi stai prendendo in giro?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ti rendi conto che è inutile agitare quell'affare a vanvera.",
+   "risposte": [
+    {
+     "testo": "Lo so.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non fare il duro.",
+     "verdetti": []
+    },
+    {
+     "testo": "Meno inutile di te.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "E se fossi un «umano»? Allora quello che stai facendo… beh, sarebbe un reato!",
+   "risposte": [
+    {
+     "testo": "È vero.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non può essere vero.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non c'entra./È irrilevante.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Faresti a chiunque quello che stai facendo a me adesso?",
+   "risposte": [
+    {
+     "testo": "Certo che sì.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No, non lo farei.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Questa è un'eccezione.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ho visto la tua mano tremare? Stai bene?",
+   "risposte": [
+    {
+     "testo": "Ho un po' freddo, ma...",
+     "verdetti": []
+    },
+    {
+     "testo": "Ho un po' paura...",
+     "verdetti": []
+    },
+    {
+     "testo": "Stai zitto!",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che cosa ho fatto per meritarmi questo?",
+   "risposte": [
+    {
+     "testo": "Sei piuttosto malvagio.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non fare l'eroe tragico.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sei nato.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "...Va bene. Fai come ti pare.",
+   "risposte": [
+    {
+     "testo": "Dammi tutto quello che hai./Mi serve il tuo aiuto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Lecca le mie scarpe./Lecca i miei stivali.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sicuro che vada bene?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Se i tuoi genitori ti vedessero ora, sono certo che si spezzerebbero il cuore...",
+   "risposte": [
+    {
+     "testo": "Forse hai ragione...",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Loro non c'entrano.",
+     "verdetti": []
+    },
+    {
+     "testo": "In realtà sarebbero contenti.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Eri così sicuro di te, e adesso ti vergogni ad ammettere che sei in difficoltà. Vero?",
+   "risposte": [
+    {
+     "testo": "Proprio così.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non prendermi in giro.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Quella storia del miele sul cetriolo per far finta di mangiare un melone pregiato?",
+   "risposte": [
+    {
+     "testo": "Seguo quei trucchetti.",
+     "verdetti": []
+    },
+    {
+     "testo": "È deprimente.",
+     "verdetti": []
+    },
+    {
+     "testo": "Mai sentita.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non hai sbagliato strada né ti sei perso?",
+   "risposte": [
+    {
+     "testo": "Ho scaricato un'app.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ho preso il treno./Beh, mi sono perso un po'.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sono con i miei amici!/Non me lo ricordo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Perché a loro piace «pomiciare»?",
+   "risposte": [
+    {
+     "testo": "E che ne so.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non posso dirtelo.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Chiedilo ai tuoi.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Detto questo, mi vuoi ancora?",
+   "risposte": [
+    {
+     "testo": "[...]",
+     "verdetti": []
+    },
+    {
+     "testo": "Non ci avevo pensato così a fondo.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "I sentimenti verranno.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sarei propenso a rifiutare, ma se desideri ancora parlare, forse ci penserò.",
+   "risposte": [
+    {
+     "testo": "Non hai niente che io voglia.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ti annoi?/Hai tempo da perdere?",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che presupposto orribile./Non rifiutare.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Tu, però, stai parlando con me proprio qui. Saresti l'eccezione alla regola?",
+   "risposte": [
+    {
+     "testo": "Non sono speciale.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Proprio così.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ho secondi fini.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Forse è perché anche la mia vita è priva di senso. Non ho conosciuto altro che la vita qui.",
+   "risposte": [
+    {
+     "testo": "Non è priva di senso.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Ci sono altri modi di vivere.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Hai avuto la tua bella corsa.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Goditi la vittoria e ubriacati finché puoi. Non durare a lungo.",
+   "risposte": [
+    {
+     "testo": "Continuerò a vincere.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sei solo un cattivo perdente.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non posso bere, sono minorenne.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sembrare che tu avere me in pugno... Ma come me sapere che non è trucco? Come me sapere che tu vincere davvero?",
+   "risposte": [
+    {
+     "testo": "Non cambia i fatti.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Io non dico bugie.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non scappare dalla realtà.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Perché tu combattere e metterti in pericolo?",
+   "risposte": [
+    {
+     "testo": "Voglio diventare più forte.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Perché vedo un nemico.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "In realtà non lo so.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non è possibile che tutta questa storia fra me e te si spieghi proprio così?",
+   "risposte": [
+    {
+     "testo": "Può starci.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È sbagliato.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ma di che stai parlando?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Ai maschi danno sempre il katsudon! Hai qualcosa del genere anche per me!?",
+   "risposte": [
+    {
+     "testo": "Katsudon in arrivo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che ne dici del sushi...?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ho niente per te.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sotto la maschera è difficile dirlo, ma… sei un bel ragazzo, vero?",
+   "risposte": [
+    {
+     "testo": "Come hai fatto a capirlo?",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No, per niente.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Diciamo che me la cavo.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Diciamo che hai vinto tu. Possiamo smetterla?",
+   "risposte": [
+    {
+     "testo": "Mi dispiace.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non sono d'accordo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Vincono tutti.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "È solo per uomini? Dove l'hai preso?",
+   "risposte": [
+    {
+     "testo": "Lo vuoi?",
+     "verdetti": []
+    },
+    {
+     "testo": "Comprato su internet.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non è in vendita.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Perché tu non coccolare me così? Perché tu trattare me in questo modo?",
+   "risposte": [
+    {
+     "testo": "Fai paura.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non posso giocare con te.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Tu non sei un animale.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Mi accorgo quando sudo. Sto luccicando, vero?",
+   "risposte": [
+    {
+     "testo": "Come una palla da discoteca.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Per niente.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "cattiva",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Che importanza ha?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Se lo chiedi a me, è molto più divertente correre dietro alle ragazze giovani, però...",
+   "risposte": [
+    {
+     "testo": "È vero.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non è così divertente.",
+     "verdetti": []
+    },
+    {
+     "testo": "Vecchio sporcaccione.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "...Devo chiedertelo. Come ti alleni?",
+   "risposte": [
+    {
+     "testo": "Non mi alleno granché.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ho solo il physique du rôle.",
+     "verdetti": []
+    },
+    {
+     "testo": "In una palestra infernale.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Che tipo di «destino» credi ci sia in questo incontro fra me e te?",
+   "risposte": [
+    {
+     "testo": "Il destino ci ha fatti incontrare.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non esiste niente del genere.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Voglio chiudere questo destino.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Non vuoi lasciarmi in pace?",
+   "risposte": [
+    {
+     "testo": "Hai da fare?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non ci riesco proprio.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      },
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "È psicologia inversa?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Se devi uccidermi, fammi un favore: falla breve.",
+   "risposte": [
+    {
+     "testo": "Non hai paura?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Prima mi diverto un po'.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Smettila di fare il figo./Non ti farò soffrire.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "...Vieni da un'altra compagnia per scritturar-hee-mi. Non c'è dubbio, ho!",
+   "risposte": [
+    {
+     "testo": "Mi hai smascherato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "C'è un malinteso.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sono venuto a farti fuori.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Però ho un tormentone per cui sono famoso.",
+   "risposte": [
+    {
+     "testo": "Hee-ho!",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Hee-haw!",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Personaaa!",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Scusa, ma adesso voglio che tu torni a hee-casa. Mi sento già stanco e sfinito, ho...",
+   "risposte": [
+    {
+     "testo": "Va bene./Scusa.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "No.",
+     "verdetti": []
+    },
+    {
+     "testo": "Torna a casa tu.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Come hai sentito parlare di me, ho?",
+   "risposte": [
+    {
+     "testo": "Da certi volantini.",
+     "verdetti": []
+    },
+    {
+     "testo": "Da un sito specializzato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Per passaparola.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Scoppierai in lacrime quando vedrai la mia faccia arrabbiata. Sono un vero mostro, ho!",
+   "risposte": [
+    {
+     "testo": "Che paura...",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non piangerei mai.",
+     "verdetti": []
+    },
+    {
+     "testo": "Voglio vedere la tua furia.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Non sono io quello a cui dovresti sparare...",
+   "risposte": [
+    {
+     "testo": "Non hai tutti i torti...",
+     "verdetti": []
+    },
+    {
+     "testo": "È assurdo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Uno vale l'altro.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Da giovane bastava un'occhiataccia per far indietreggiare chiunque avesse un po' di cervello.",
+   "risposte": [
+    {
+     "testo": "Le risse sono questione di fortuna.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sono semplicemente più bravo.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sei invecchiato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Come puoi fare cose così terribili a un tenero hee-ho come me!?",
+   "risposte": [
+    {
+     "testo": "Mi dispiace.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ora che lo dici...",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "giocosa",
+       "incerto": false
+      },
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "...Tenero?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sono un'Ombra popolarissima, sai. I miei fan non staranno a guardare, ho./Ho da fare, ho. È dura essere così popolari.",
+   "risposte": [
+    {
+     "testo": "Perdonami, ti prego./In effetti sembri occupato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Fan?/La tua popolarità non durerà.",
+     "verdetti": []
+    },
+    {
+     "testo": "E allora?/Chi se ne importa?",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Non avrei mai accettato questo incarico se avessi saputo che comportava una simile sofferenza.",
+   "risposte": [
+    {
+     "testo": "Che peccato...",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Scegliere senza informarsi è un male.",
+     "verdetti": []
+    },
+    {
+     "testo": "Lamentarsi non serve.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Alla fin fine, che diavolo stai cercando di dirmi?",
+   "risposte": [
+    {
+     "testo": "Ti sto dicendo di morire./Stai per morire.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Perché combattiamo?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non lo so nemmeno io...",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Se avessi saputo che finiva così, avrei trovato il coraggio di invitare fuori quella ragazza...",
+   "risposte": [
+    {
+     "testo": "Troppo tardi per i rimpianti./Non è troppo tardi.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non avevi speranze.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "La renderò felice io./Mi assicurerò che sia felice.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Me volere da te belle «parole di conforto» — da rivale — mentre me passare a miglior vita…!",
+   "risposte": [
+    {
+     "testo": "Riposa in pace.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Perché dovrei avere pietà del nemico?",
+     "verdetti": []
+    },
+    {
+     "testo": "…Non mi viene niente.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Sei fuori di testa. Forse dovresti farti vedere da qualcuno.",
+   "risposte": [
+    {
+     "testo": "Probabilmente sì.",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Sto benissimo così.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sei solo un cattivo perdente.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Senti, se sei disposto a lasciar perdere… ti ricompenserò come si deve.",
+   "risposte": [
+    {
+     "testo": "Come si deve…?",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "giocosa",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Neanche per sogno.",
+     "verdetti": []
+    },
+    {
+     "testo": "Sono già impegnato.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Tanto la vita è solo dolore. Fai quello che ti pare.",
+   "risposte": [
+    {
+     "testo": "Saresti dovuto restare a casa.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non morirai facilmente.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "timida",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Non farti prendere dallo sconforto.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Ti aspetta un futuro grigio, se passi il tempo a correre in giro fingendoti un ladro fantasma.",
+   "risposte": [
+    {
+     "testo": "Grazie.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non preoccuparti.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ne vale la pena.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "cupa",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "Sei comparso per mettere alla prova la mia adorazione verso il Padre. Sì, tu sei… il Tentatore!",
+   "risposte": [
+    {
+     "testo": "Mi hai smascherato.",
+     "verdetti": []
+    },
+    {
+     "testo": "Ti sbagli.",
+     "verdetti": []
+    },
+    {
+     "testo": "Tutto bene?",
+     "verdetti": [
+      {
+       "esito": "cattiva",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "domanda": "…Il minimo che posso fare è concederti questa piccola grazia. Nomina una calamità che puoi sopportare.",
+   "risposte": [
+    {
+     "testo": "Fa' che ci sia folla dove faccio la spesa.",
+     "verdetti": [
+      {
+       "esito": "passabile",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    },
+    {
+     "testo": "Dammi la violenza.",
+     "verdetti": []
+    },
+    {
+     "testo": "Nessuna calamità, grazie.",
+     "verdetti": []
+    }
+   ]
+  },
+  {
+   "domanda": "Giura che userai quel potere nel nome del Padre.",
+   "risposte": [
+    {
+     "testo": "Ci penserò.",
+     "verdetti": []
+    },
+    {
+     "testo": "Non c'è bisogno di tanta enfasi.",
+     "verdetti": []
+    },
+    {
+     "testo": "Rifiuto.",
+     "verdetti": [
+      {
+       "esito": "buona",
+       "tratto": "irritabile",
+       "incerto": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
