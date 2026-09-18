@@ -784,3 +784,28 @@ un'area senza planimetria si collega dalla sua riga in coda), più i sette adatt
 nuova. Verifica dal vivo su Kamoshida, Madarame e Memento: navigazione dalla riga al visore,
 collegamento di un'area orfana provato davvero e poi ripristinato, nessun errore in pagina.
 
+## Il formato piccolo: il doppio elenco era tornato (19 settembre 2026) — fatto
+
+Riscontro dell'utente: «FE non ottimizzato, si vede male anche in formato desktop». Guardato a sei
+larghezze (1920, 1440, 1280, 1024, 820, 768, 390) con misura dello scorrimento orizzontale e degli
+elementi che sforano.
+
+Nessun overflow reale — ma tre difetti veri:
+
+1. **Sotto i 1024 px la doppia lista era tornata**: la fila di chip con tutte le aree (per Kamoshida
+   diciotto, che a 768 px non scorrono ma vanno a capo per otto righe) sopra l'elenco del Palazzo che
+   le contiene già. L'elenco cominciava a ~700 px dall'alto. Tolta la fila: ora comincia a 389 px.
+   Resta nei Memento, dove serve a navigare i dedali del pozzo.
+2. **Le date si spezzavano male sul telefono**: andando a capo, la freccia «→» finiva a inizio riga
+   davanti alla tappa, dove non collega più niente. Le frecce compaiono da `sm` in su.
+3. **Il comando di correzione del Palazzo restava solo su una riga vuota**: un glifo isolato sembra
+   un refuso. Ora porta l'etichetta «Correggi la scheda» (nuova prop `etichetta` di
+   `CorrezioneGuida`), e l'emblema sul telefono scende da 80 a 52 px.
+
+Un tentativo di tenere titolo e matita sulla stessa riga con `flex-1` è stato **annullato**: a 390 px
+schiacciava il titolo a larghezza zero e lo impilava una lettera per riga. Visto nello screenshot e
+tolto.
+
+Verifica: 6 larghezze × 4 pagine (Palazzo, Memento, Home, Compendio) senza scorrimento orizzontale e
+senza errori in pagina; suite completa 994 test verdi.
+

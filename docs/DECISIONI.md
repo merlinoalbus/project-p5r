@@ -572,3 +572,7 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Un elenco di scelte fatto di nomi uguali non è una scelta** (2026-09-19): le tavole libere di
   Kamoshida si presentavano tutte come «Palazzo di Kamoshida — Immagini native che nessun campo
   usa», 32 voci identiche. Anche il selettore passa dai nomi dell'atlante, gli stessi dell'elenco.
+- **L'elenco unico vale a tutte le larghezze** (2026-09-19): sotto i 1024 px restava la fila di chip
+  di tutte le aree sopra l'elenco che le contiene già — per Kamoshida diciotto chip in otto righe,
+  circa 320 px di muro prima del contenuto, cioè la doppia lista rimessa in piedi sul formato dove
+  fa più male. La fila resta solo nei Memento, dove i dedali non hanno planimetrie.

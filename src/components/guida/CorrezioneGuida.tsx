@@ -54,9 +54,12 @@ interface Props<T extends Record<string, string>> {
   /** Se c'è, compare «Elimina» con conferma; il testo è quello che si legge prima di cancellare. */
   elimina?: { avviso: string; onElimina: () => Promise<unknown> };
   compatto?: boolean;
+  /** Testo accanto alla matita. Serve dove il comando finisce da solo su una riga: un glifo
+      isolato sembra un refuso, due parole dicono che cosa fa. */
+  etichetta?: string;
 }
 
-export function CorrezioneGuida<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto }: Props<T>) {
+export function CorrezioneGuida<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto, etichetta }: Props<T>) {
   const [bozza, setBozza] = useState<{ partenza: T; corrente: T } | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [conferma, setConferma] = useState(false);
@@ -75,7 +78,7 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
       <button type="button" className={`touch shrink-0 rounded px-1.5 text-text-muted hover:text-text ${compatto ? 'text-[11px]' : 'text-[12px]'}`}
         aria-label={`Correggi ${cosa}`} title={`Correggi ${cosa}`}
         onClick={() => { const v = iniziale(); setBozza({ partenza: v, corrente: v }); }}>
-        ✎
+        ✎{etichetta ? <span className="ml-1">{etichetta}</span> : null}
       </button>
     );
   }
