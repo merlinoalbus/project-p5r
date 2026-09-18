@@ -84,7 +84,37 @@ describe('planimetrie di un Palazzo', () => {
     expect(restanti).toEqual(prima.filter((k) => !capovolte.includes(k)));
   });
 
-  it('non si riordina una mappa che non è figlia di quel genitore', () => {
-    expect(() => riordinaMappe('dungeon-madarame', [una.chiave])).toThrow(/non è figlia/);
+  // ---- I rilievi della revisione (2026-09-18) ----
+
+  it('legare un’area non porta via gli altri legami della mappa (un luogo, per esempio)', async () => {
+    const luogo = (prepared('SELECT chiave FROM luogo LIMIT 1').get() as { chiave: string }).chiave;
+    prepared("INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, 'luogo', ?, '{}')").run(una.chiave, luogo);
+    const area = (prepared("SELECT chiave FROM dungeon_area WHERE dungeon_chiave = 'kamoshida' ORDER BY ordine").all() as Array<{ chiave: string }>)[7].chiave;
+    await request(app).put(`/api/mappe/${una.chiave}`).send({ entita: { tipo: 'area', chiave: area } }).expect(200);
+    expect(prepared("SELECT 1 FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'luogo'").get(una.chiave)).toBeTruthy();
+    expect(areaLegata(una.chiave)).toBe(area);
+  });
+
+  it('stacciare un’area dalla mappa che ce l’aveva non tocca i suoi altri legami', async () => {
+    const area = areaLegata(una.chiave)!;
+    const luogo = (prepared('SELECT chiave FROM luogo LIMIT 1').get() as { chiave: string }).chiave;
+    await request(app).put(`/api/mappe/${altra.chiave}`).send({ entita: { tipo: 'area', chiave: area } }).expect(200);
+    expect(areaLegata(una.chiave)).toBeNull();
+    expect((prepared("SELECT entita_chiave FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'luogo'").get(una.chiave) as { entita_chiave: string }).entita_chiave).toBe(luogo);
+  });
+
+  it('l’elenco piatto della scheda si riordina anche quando contiene una nipote', () => {
+    const nipote = creaMappa(undefined, { nome: 'Sala interna alla planimetria', tipo: 'area', genitore: altra.chiave });
+    const sorella = creaMappa(undefined, { nome: 'Sala interna sorella', tipo: 'area', genitore: altra.chiave });
+    // come manda la scheda: tutto l'albero in un elenco solo, con la radice del Palazzo per genitore
+    const piatto = dettaglioDungeon('kamoshida').planimetrie.map((p) => p.chiave);
+    expect(piatto).toContain(nipote.chiave);
+    expect(() => riordinaMappe('dungeon-kamoshida', [sorella.chiave, nipote.chiave, piatto[0]])).not.toThrow();
+    const figlie = prepared('SELECT chiave, ordine FROM mappa WHERE genitore_chiave = ? ORDER BY ordine').all(altra.chiave) as Array<{ chiave: string; ordine: number }>;
+    expect(figlie.map((f) => f.chiave)).toEqual([sorella.chiave, nipote.chiave]);
+  });
+
+  it('una mappa fuori dal sottoalbero resta rifiutata', () => {
+    expect(() => riordinaMappe('dungeon-madarame', [una.chiave])).toThrow(/non sta sotto/);
   });
 });

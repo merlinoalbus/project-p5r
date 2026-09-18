@@ -46,8 +46,15 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, aree, sceltaChi
   const [ordine, setOrdine] = useState<string[] | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [trascinata, setTrascinata] = useState<string | null>(null);
+  // L'ordine locale vale solo per le planimetrie che ci sono **adesso**: quelle appena aggiunte (o
+  // rimaste fuori) si accodano nell'ordine del server, quelle eliminate cadono. Senza questa
+  // riconciliazione una creazione riuscita dopo un riordino sembrava non fare niente, perché la
+  // riga nuova non stava nell'elenco fissato dal trascinamento.
   const elenco = ordine
-    ? ordine.map((k) => planimetrie.find((p) => p.chiave === k)).filter((p): p is Planimetria => !!p)
+    ? [
+        ...ordine.map((k) => planimetrie.find((p) => p.chiave === k)).filter((p): p is Planimetria => !!p),
+        ...planimetrie.filter((p) => !ordine.includes(p.chiave)),
+      ]
     : planimetrie;
 
   // Il trascinamento è a puntatore e non `draggable`: l'HTML5 drag-and-drop col dito non parte,
