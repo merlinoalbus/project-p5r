@@ -18,6 +18,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
+import { usePartitaStore } from '../stores/partitaStore';
 import { useAsset } from '../stores/assetStore';
 import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
@@ -57,7 +58,16 @@ export function EditorMappaPage() {
 
 function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const navigate = useNavigate();
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave), [chiave]);
+  // **Vista del giorno corrente** (richiesta dell'utente, 2026-09-18): l'editor di regola mostra
+  // tutto, perché deve poter modificare anche quel che nel mondo non c'è ancora. Con l'interruttore
+  // acceso la mappa si legge invece come la legge chi consulta la guida oggi — nascondendo quel che
+  // le condizioni di visibilità escludono nel giorno e nella fascia della partita attiva — così si
+  // controlla il lavoro senza uscire dalla modifica. Senza partita attiva non c'è un «oggi»: resta spento.
+  const attiva = usePartitaStore((s) => s.attiva);
+  const momento = usePartitaStore((s) => `${s.attiva?.dataGioco ?? ''}|${s.attiva?.fasciaGioco ?? ''}`);
+  const [giornoCorrente, setGiornoCorrente] = useState(false);
+  const conGiorno = giornoCorrente && !!attiva;
+  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, conGiorno ? attiva.id : undefined), [chiave, conGiorno, attiva?.id, momento]);
   const albero = useCarica(() => getAlberoMappe(), [chiave]);
   // elenchi per le condizioni di visibilità (Confidenti, quartieri, richieste, Palazzi): una volta per pagina
   const elenchi = useCarica<ElenchiCondizioni>(async () => {
@@ -126,13 +136,20 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
         <VisoreMappa
           key={dati.chiave}
           mappa={presentaMappa(dati)}
-          partitaId={null}
+          partitaId={conGiorno ? attiva.id : null}
+          vistaGiornoCorrente={conGiorno}
           onNaviga={vai}
           onChiudi={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)}
           editor={editor}
           className="visore-mappa--editor"
           intestazione={<span className="editor-mappa__targhetta">Modifica</span>}
-          azioni={<PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)} />}
+          azioni={<>
+            <PulsanteVisivo tono={conGiorno ? 'primario' : 'fantasma'} compatto attivo={conGiorno}
+              icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Giorno corrente"
+              dettaglio={attiva ? (conGiorno ? 'acceso: vedi solo quel che c’è oggi' : 'spento: vedi tutto') : 'serve una partita attiva'}
+              disabled={!attiva} onClick={() => setGiornoCorrente((v) => !v)} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)} />
+          </>}
           pannello={
             <PannelloEditor
               mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti} elenchi={elenchi.dati ?? ELENCHI_VUOTI}

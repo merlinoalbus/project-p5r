@@ -377,6 +377,56 @@ export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string 
 
 const chiaveValida = (chiave: string): boolean => /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiave);
 
+/**
+ * Il legame fra una mappa e l'entità della guida vive in due posti: le colonne `entita_tipo` /
+ * `entita_chiave` della mappa e la tabella `mappa_entita`, che è quella che leggono la scheda del
+ * Palazzo (`dungeonService`) e i contenuti della guida. L'editor scriveva solo le colonne: legare
+ * una planimetria a un'area non si vedeva da nessuna parte. Qui i due posti si scrivono insieme.
+ *
+ * **Un'area ha una sola planimetria** (decisione dell'utente, 2026-09-18): legare un'area che ne
+ * ha già un'altra stacca la precedente invece di affiancarla, così «completa» resta una misura
+ * vera e l'elenco del Palazzo non mostra la stessa stanza due volte.
+ */
+function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave: string } | null): void {
+  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) return;
+  prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ?').run(chiave);
+  if (!entita) return;
+  if (entita.tipo === 'area') {
+    for (const r of prepared("SELECT mappa_chiave FROM mappa_entita WHERE entita_tipo = 'area' AND entita_chiave = ? AND mappa_chiave <> ?").all(entita.chiave, chiave) as Array<{ mappa_chiave: string }>) {
+      prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ?').run(r.mappa_chiave);
+      prepared('UPDATE mappa SET entita_tipo = NULL, entita_chiave = NULL WHERE chiave = ?').run(r.mappa_chiave);
+    }
+  }
+  prepared('INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, ?, ?, ?)')
+    .run(chiave, entita.tipo, entita.chiave, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
+}
+
+/**
+ * L'ordine logico delle mappe figlie di un genitore, riscritto tutto insieme (0..n-1): è il
+ * riordino per trascinamento della scheda del Palazzo. Le chiavi non elencate restano in coda
+ * nell'ordine che avevano, così un elenco parziale non sparpaglia il resto.
+ */
+export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaRiassuntoDto[] {
+  const radice = genitore === null ? null : rigaMappa(genitore).chiave;
+  const figlie = (radice === null
+    ? prepared('SELECT chiave FROM mappa WHERE genitore_chiave IS NULL ORDER BY ordine, nome').all()
+    : prepared('SELECT chiave FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, nome').all(radice)) as Array<{ chiave: string }>;
+  const dentro = new Set(figlie.map((f) => f.chiave));
+  const scelte: string[] = [];
+  for (const k of chiavi) {
+    const c = rigaMappa(k).chiave;
+    if (!dentro.has(c)) throw httpErrors.badRequest('mappa-fuori-dal-genitore', `La mappa '${k}' non è figlia di ${radice ?? 'nessuna mappa'}.`);
+    if (!scelte.includes(c)) scelte.push(c);
+  }
+  const finale = [...scelte, ...figlie.map((f) => f.chiave).filter((c) => !scelte.includes(c))];
+  const adesso = nowIso();
+  getDb().transaction(() => {
+    finale.forEach((c, i) => prepared('UPDATE mappa SET ordine = ?, updated_at = ? WHERE chiave = ?').run(i, adesso, c));
+  })();
+  const collezioni = collezioniImmagini();
+  return finale.map((c) => riassunto(rigaMappa(c), collezioni));
+}
+
 export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: string; tipo: TipoMappa }): MappaDto {
   if(dati.genitore)dati={...dati,genitore:rigaMappa(dati.genitore).chiave};
   const richiesta=chiave;
@@ -395,6 +445,7 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
     prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at)
       VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(chiave, dati.nome, dati.tipo, dati.genitore ?? null, dati.ordine ?? 0, asset, dati.larghezza ?? null, dati.altezza ?? null, dati.entita?.tipo ?? null, dati.entita?.chiave ?? null, dati.note ?? '', adesso);
     sincronizzaPercorsiMappe(getDb());
+    sincronizzaLegameEntita(chiave, dati.entita ?? null);
     if(richiesta&&richiesta!==chiave&&!getDb().prepare('SELECT 1 FROM mappa_alias WHERE chiave=?').get(richiesta))prepared('INSERT INTO mappa_alias VALUES(?,?)').run(richiesta,chiave);
     // 15.24: la nuova mappa nasce già raggiungibile dal genitore (e, se richiesto, con la via del ritorno); una chiave riusata dopo una
     // cancellazione può avere ancora un vecchio passaggio verso di sé: in quel caso non se ne crea un secondo.
@@ -463,6 +514,7 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     dati.nome ?? r.nome, dati.tipo ?? r.tipo, dati.genitore === undefined ? r.genitore_chiave : dati.genitore, dati.ordine ?? r.ordine, dati.asset === undefined ? r.asset : dati.asset,
     dati.larghezza === undefined ? r.larghezza : dati.larghezza, dati.altezza === undefined ? r.altezza : dati.altezza,
     dati.entita === undefined ? r.entita_tipo : dati.entita?.tipo ?? null, dati.entita === undefined ? r.entita_chiave : dati.entita?.chiave ?? null, dati.note ?? r.note, nowIso(), chiave);
+  if (dati.entita !== undefined) sincronizzaLegameEntita(chiave, dati.entita);
   sincronizzaPercorsiMappe(getDb());
   })();
   return dettaglioMappa(chiave);

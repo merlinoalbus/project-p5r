@@ -200,6 +200,37 @@ export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
   return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId));
 }
 
+/**
+ * Le planimetrie del Palazzo come si gestiscono: **tutte** quelle dell'albero (radice esclusa, che è
+ * la mappa del Palazzo e non una stanza), nel loro ordine logico — quello che si cambia trascinando
+ * — con i collezionabili di ognuna e l'area della guida a cui è legata.
+ *
+ * Prima qui arrivavano solo le mappe che avevano qualcosa da raccogliere, perché servivano solo a
+ * fare la percentuale: le altre — le inquadrature alternative, le stanze vuote, i ritagli che nessun
+ * campo usa — non comparivano da nessuna parte, e non c'era modo di ordinarle né di toglierle.
+ */
+function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon, partitaId?: number): DungeonDettaglioDto['planimetrie'] {
+  const righe = prepared(`WITH RECURSIVE albero(chiave) AS (
+      SELECT chiave FROM mappa WHERE chiave = ?
+      UNION ALL
+      SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
+    )
+    SELECT m.chiave, m.ordine, e.entita_chiave AS area, a.nome AS area_nome
+    FROM mappa m JOIN albero t ON t.chiave = m.chiave
+    LEFT JOIN mappa_entita e ON e.mappa_chiave = m.chiave AND e.entita_tipo = 'area'
+    LEFT JOIN dungeon_area a ON a.chiave = e.entita_chiave
+    WHERE m.chiave <> ?
+    ORDER BY m.ordine, m.chiave`).all(`dungeon-${dungeonChiave}`, `dungeon-${dungeonChiave}`) as Array<{ chiave: string; ordine: number; area: string | null; area_nome: string | null }>;
+  return righe.map((r) => {
+    const m = raccolta.perMappa.get(r.chiave);
+    return {
+      chiave: chiaveMappa(r.chiave), nome: nomePercorso(r.chiave), ordine: r.ordine,
+      area: r.area && r.area_nome ? { chiave: r.area, nome: r.area_nome } : null,
+      n: m?.n ?? 0, presi: partitaId === undefined ? null : (m?.presi ?? 0), spilli: m?.spilli ?? [],
+    };
+  });
+}
+
 export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDettaglioDto {
   const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
   if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
@@ -224,7 +255,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
     })),
     dedalo: richieste ? dedaloDto(a, richieste.get(a.chiave) ?? [], timbri) : null,
   }));
-  const planimetrie = raccolta ? [...raccolta.perMappa.entries()].map(([chiave, m]) => ({ chiave: chiaveMappa(chiave), nome: nomePercorso(chiave), n: m.n, presi: m.presi, spilli: m.spilli })) : [];
+  const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
   return { ...riassunto(r, stati, partitaId), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
 }
 

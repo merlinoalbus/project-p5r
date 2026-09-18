@@ -25,6 +25,8 @@ export const getMappaPerEntita = (tipo: string, chiave: string): Promise<MappaRi
 export const creaMappa = (dati: DatiMappaApi & { chiave?: string; nome: string; tipo: TipoMappa }): Promise<MappaDto> => apiPost('/mappe', dati);
 export const aggiornaMappa = (chiave: string, dati: DatiMappaApi): Promise<MappaDto> => apiPut(`/mappe/${encodeURIComponent(chiave)}`, dati);
 export const eliminaMappa = (chiave: string): Promise<void> => apiDelete(`/mappe/${encodeURIComponent(chiave)}`);
+/** Ordine logico delle mappe figlie di un genitore: l'elenco è il nuovo ordine (riordino per trascinamento). */
+export const riordinaMappe = (genitore: string | null, chiavi: string[]): Promise<MappaRiassuntoDto[]> => apiPut('/mappe/ordine', { genitore, chiavi });
 
 /** Carica l'immagine di base della mappa (file dell'utente, mai nel repository): corpo grezzo `image/*`. */
 export async function caricaImmagineMappa(chiave: string, file: File): Promise<MappaDto> {

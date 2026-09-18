@@ -9,10 +9,11 @@ import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, scaricaPianta, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta } = vi.hoisted(() => ({
+const { getDungeon, impostaStatoPunto, scaricaPianta, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), scaricaPianta: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, scaricaPianta, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
+vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, scaricaPianta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
 vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
 vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
@@ -37,8 +38,8 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
     area({ chiave: 'k-03', ordine: 2, nome: 'Cortile', mappe: [{ chiave: 'm-cortile', nome: 'Palazzo di Kamoshida › Cortile', n: 0, presi: partita ? 0 : null, spilli: [] }] }),
   ],
   planimetrie: [
-    { chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] },
-    { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', n: 2, presi: partita ? 0 : null, spilli: [spillo(3, partita ? false : null), spillo(4, partita ? false : null)] },
+    { chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', ordine: 0, area: { chiave: 'k-01', nome: 'Cancello' }, n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] },
+    { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', ordine: 1, area: null, n: 2, presi: partita ? 0 : null, spilli: [spillo(3, partita ? false : null), spillo(4, partita ? false : null)] },
   ],
 });
 const mementos = (): DungeonDettaglioDto => ({
@@ -137,4 +138,35 @@ it('nei Memento la colonna sono gli obiettivi del dedalo: timbri con −/+ e ric
   fireEvent.click(screen.getByRole('tab', { name: /2\. Dedalo di Qimranut/ }));
   expect(await screen.findByText('non dichiarati dalla guida')).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Aggiungi un timbro' })).toBeNull();
+});
+
+// ---- Il pannello delle planimetrie (ordine logico, legame con l'area, planimetria libera) ----
+
+/** Apre il pannello dal pulsante dell'intestazione. */
+async function apriPlanimetrie() {
+  getDungeon.mockResolvedValue(palazzo(true));
+  monta('kamoshida');
+  fireEvent.click(await screen.findByRole('button', { name: /planimetrie/i }));
+  return within(screen.getByLabelText('Planimetrie del Palazzo'));
+}
+
+it('il pannello elenca tutte le planimetrie in ordine, con quanto resta e l’area a cui sono legate', async () => {
+  const pannello = await apriPlanimetrie();
+  expect(pannello.getAllByText(/1\. Cancello/).length).toBeGreaterThan(0);
+  expect(pannello.getByText(/1 da prendere su 2 · Cancello/)).toBeInTheDocument();
+  expect(pannello.getByText(/2 da prendere su 2 · nessuna area/)).toBeInTheDocument();
+});
+
+it('«Giù» salva il nuovo ordine di tutto il Palazzo', async () => {
+  const pannello = await apriPlanimetrie();
+  riordinaMappe.mockResolvedValue([]);
+  fireEvent.click(pannello.getByRole('button', { name: /Sposta «Cancello» giù/ }));
+  await waitFor(() => expect(riordinaMappe).toHaveBeenCalledWith('dungeon-kamoshida', ['m-torre', 'm-cancello']));
+});
+
+it('scegliere una planimetria senza area apre il suo visore e la colonna dei suoi soli collezionabili', async () => {
+  const pannello = await apriPlanimetrie();
+  fireEvent.click(pannello.getByRole('button', { name: /2 da prendere su 2 · nessuna area/ }));
+  expect(await screen.findByText('Visore: m-torre')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /Su questa planimetria/ })).toBeInTheDocument();
 });

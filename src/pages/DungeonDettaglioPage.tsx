@@ -35,6 +35,7 @@ import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { RaccoltaPlanimetrie } from '../components/guida/RaccoltaPlanimetrie';
+import { PlanimetriePalazzo } from '../components/guida/PlanimetriePalazzo';
 import { ObiettiviDedalo } from '../components/guida/ObiettiviDedalo';
 import { dataBreve } from '../utils/testoBreve';
 import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
@@ -202,12 +203,24 @@ export function DungeonDettaglioPage() {
   };
   // Quale planimetria dell'area si sta guardando: quasi sempre una sola; la scelta si azzera cambiando area.
   const [piantaScelta, setPianta] = useState<string | null>(null);
-  const mappaScelta = area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null;
+  // Una planimetria scelta dal pannello «Planimetrie» vale **su tutto il Palazzo**, anche quando non
+  // è legata a nessuna area: è il modo di guardare (e segnare) una tavola che la guida non aggancia.
+  const [planimetriaLibera, setPlanimetriaLibera] = useState<string | null>(null);
+  const [pannelloPlanimetrie, setPannelloPlanimetrie] = useState(false);
+  const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
+  const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
   // Le due viste di un'area del Palazzo: la planimetria del gioco e la pianta della guida. Nei
   // Memento c'è solo il pezzo con cui il gioco disegna il dedalo: i piani si generano.
   const [vista, setVista] = useState<'gioco' | 'guida'>('gioco');
   const vistaGuida = !memento && (!mappaScelta || vista === 'guida');
-  const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setVista('gioco'); };
+  const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setPlanimetriaLibera(null); setVista('gioco'); };
+  /** Una planimetria scelta dal pannello: se è legata a un'area si apre quell'area, altrimenti resta «libera». */
+  const scegliPlanimetria = (k: string) => {
+    const p = (d?.planimetrie ?? []).find((x) => x.chiave === k);
+    setVista('gioco'); setSelezionato(null);
+    if (p?.area) { setParams({ area: p.area.chiave }); setPianta(k); setPlanimetriaLibera(null); }
+    else setPlanimetriaLibera(k);
+  };
   // L'anello conta quel che si raccoglie: collezionabili delle planimetrie (Palazzi) o obiettivi dei dedali (Memento).
   const quota = d && d.raccolta.presi !== null && d.raccolta.totale > 0 ? d.raccolta.presi / d.raccolta.totale : null;
   const areeSuggerite = (d?.aree ?? []).filter((a) => sugg.evidenziato('aree', a.chiave)).length;
@@ -261,7 +274,11 @@ export function DungeonDettaglioPage() {
                   <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa del Palazzo" />
                   <span className="chip">{d.aree.length} {memento ? 'dedali' : 'aree'}</span>
                   <span className="chip" title={memento ? 'Timbri dichiarati dalla guida e richieste dei dedali: sono questi a fare la percentuale.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'obiettivi' : 'da raccogliere'}</span>
-                  {!memento && <span className="chip" title="Le planimetrie del Palazzo con qualcosa da raccogliere.">{d.raccolta.mappe} planimetrie{d.raccolta.mappeComplete !== null ? ` · ${d.raccolta.mappeComplete} complete` : ''}</span>}
+                  {!memento && <button type="button" className={`chip touch ${pannelloPlanimetrie ? 'chip--attivo' : ''}`} aria-pressed={pannelloPlanimetrie} aria-expanded={pannelloPlanimetrie}
+                    title="Le planimetrie del Palazzo: ordine, legame con le aree, avanzamento. Quelle con qualcosa da raccogliere sono contate come «complete» quando è tutto preso."
+                    onClick={() => setPannelloPlanimetrie((v) => !v)}>
+                    {d.planimetrie.length} planimetrie{d.raccolta.mappeComplete !== null ? ` · ${d.raccolta.mappeComplete} complete` : ''} · gestisci
+                  </button>}
                   <span className="chip" title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
                   {suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                 </div>
@@ -276,6 +293,15 @@ export function DungeonDettaglioPage() {
               </div>
             </div>
           </header>
+
+          {/* ---- Le planimetrie del Palazzo: ordine logico, legame con le aree, avanzamento ---- */}
+          {!memento && pannelloPlanimetrie && (
+            <section className="card">
+              <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie}
+                aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
+                sceltaChiave={mappaScelta} onScegli={scegliPlanimetria} onCambiato={() => dati.ricarica()} />
+            </section>
+          )}
 
           <div className={`grid grid-cols-1 items-start gap-4 ${memento ? 'xl:grid-cols-[minmax(300px,400px)_minmax(0,1fr)]' : 'lg:grid-cols-[248px_minmax(0,1fr)]'}`}>
             {/* ---- Le aree: colonna da 1024 px in su, fila scorrevole sotto ---- */}
@@ -359,7 +385,11 @@ export function DungeonDettaglioPage() {
 
               {/* ---- La colonna degli obiettivi: quel che fa la percentuale, e sotto i punti della guida ---- */}
               <aside className="card flex flex-col gap-3" aria-label={memento ? `Obiettivi di ${area.nome}` : areaConRaccolta ? `Da raccogliere in ${area.nome}` : `Da raccogliere nel ${d.nome}`}>
-                {memento
+                {!memento && planimetriaAperta
+                  ? <RaccoltaPlanimetrie planimetrie={[planimetriaAperta]} partitaId={partitaId} onRaccolto={segnaRaccolto}
+                      etichetta="Su questa planimetria" nota="Planimetria scelta dal pannello: qui c’è solo quel che si raccoglie su di lei."
+                      vuoto="Su questa planimetria non c’è niente da raccogliere." />
+                  : memento
                   ? (area.dedalo
                     ? <ObiettiviDedalo areaChiave={area.chiave} areaNome={area.nome} dedalo={area.dedalo} partitaId={partitaId} onTimbri={(n) => aggiornaTimbri(area.chiave, n)} onRichiesta={(k, s) => aggiornaRichiesta(area.chiave, k, s)} />
                     : <p className="m-0 text-[12px] text-text-muted" role="status">La guida non dichiara obiettivi per questo dedalo.</p>)

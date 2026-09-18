@@ -70,6 +70,11 @@ interface Props {
   /** Azioni aggiuntive nella barra superiore (es. «Modifica mappa»). */
   azioni?: ReactNode;
   editor?: StrumentiEditor;
+  /** Nell'editor: applica lo stesso filtro del visore, cioè mostra solo quel che c'è **nel giorno
+   *  corrente** della partita attiva. L'editor di regola vede tutto, perché deve poter modificare
+   *  anche ciò che nel mondo non c'è ancora; con questo acceso si controlla, senza uscire dalla
+   *  modifica, come apparirà la mappa a chi la consulta oggi. Serve una partita attiva. */
+  vistaGiornoCorrente?: boolean;
   /** Spillo da selezionare e centrare all'apertura (es. dall'azione della guida). */
   selezioneIniziale?: number | null;
   puntoIniziale?: {x:number;y:number;zoom:number}|null;
@@ -150,7 +155,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
   return a.disponibileDal?.trim() || 'sempre';
 }
 
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -352,7 +357,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Spilli visibili: filtri per tipo, raccolti nascosti, ricerca.
   const tipiPresenti = useMemo(() => TIPI_SPILLO.filter((t) => mappa.spilli.some((s) => s.tipo === t)), [mappa.spilli]);
   const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto).length, [mappa.spilli]);
-  const filtraBloccati = Boolean(partitaId) && !editor;
+  const filtraBloccati = Boolean(partitaId) && (!editor || vistaGiornoCorrente === true);
   const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter((s) => s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile').length : 0), [mappa.spilli, filtraBloccati]);
   const ricercaNorm = ricerca.trim().toLowerCase();
   /** Uno spillo che non soddisfa le sue condizioni non c'è **di regola**, e ricompare solo se lo si chiede.

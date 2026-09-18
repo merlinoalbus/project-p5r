@@ -626,7 +626,16 @@ dei DTO della voce 5; le colonne in prosa (`dove`, `periodo`, `regole`, `premi`,
 `src/components/guida/RaccoltaPlanimetrie.tsx` elenca planimetrie con collezionabili (`{chiave, nome, n,
 presi, spilli[]}`) e segna «Raccolto» con `impostaSpilloRaccolto` (`src/services/api/mappe.ts`); la pagina
 aggiorna `planimetrie`, `aree[].mappe` e `raccolta` in locale (`segnaRaccolto`) e bumpa la versione del
-visore. `src/components/guida/ObiettiviDedalo.tsx` mostra `DedaloDto` (timbri, richieste, obiettivi) e
+visore. `src/components/guida/PlanimetriePalazzo.tsx` è il pannello «Planimetrie» della scheda (aperto dal
+contatore dell'intestazione): elenca **tutte** le planimetrie dell'albero `dungeon-<chiave>` che
+`DungeonDettaglioDto.planimetrie` porta con `ordine` e `area`, le riordina con `riordinaMappe`
+(`PUT /api/mappe/ordine`, trascinamento a puntatore + Su/Giù), lega l'area con `aggiornaMappa`
+(`entita`, un'area = una planimetria, imposto dal server in `sincronizzaLegameEntita`, che scrive
+insieme le colonne `entita_*` e la tabella `mappa_entita` letta dalla scheda), aggiunge con
+`creaMappa` ed elimina con `eliminaMappa`. Scegliere una riga porta il visore su quella planimetria
+e la colonna sui suoi soli collezionabili. Nell'editor `VisoreMappa.vistaGiornoCorrente` accende il
+filtro del giorno corrente della partita attiva (di regola l'editor vede tutto).
+`src/components/guida/ObiettiviDedalo.tsx` mostra `DedaloDto` (timbri, richieste, obiettivi) e
 scrive con `impostaTimbri` (`src/services/api/partite.ts`, `PUT /api/partite/:id/timbri`) e
 `impostaStatoRichiesta`; la pagina ricalcola `obiettivi.fatti` e `raccolta.presi`. `RichiestePage`,
 `DomandePage` e `CruciverbaPage` usano `CampoRicerca` + `Segmenti`; il dedalo delle Richieste vive in

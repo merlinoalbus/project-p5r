@@ -28,6 +28,8 @@ export const bodyCreaMappa = z.object({
   passaggio: z.boolean().optional(), ritorno: z.boolean().optional(),
 });
 export const bodyAggiornaMappa = bodyCreaMappa.omit({ chiave: true, passaggio: true, ritorno: true }).partial();
+/** Riordino in blocco delle mappe figlie di un genitore (`null` = radici): l'elenco è il nuovo ordine. */
+export const bodyRiordinaMappe = z.object({ genitore: chiaveMappa.nullable(), chiavi: z.array(chiaveMappa).max(500) });
 /** Passaggio verso un'altra mappa creato dall'albero dell'editor (15.24): il server sceglie un punto libero. */
 export const bodyCreaPassaggio = z.object({ destinazione: chiaveMappa });
 export const bodyCreaSpillo = z.object({
