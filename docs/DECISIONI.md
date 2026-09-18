@@ -530,3 +530,9 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   dell'occhio, senza rileggere i nomi.
 - **Il dato sta nella guida alla battaglia, non in tabelle nuove**: è testo della guida, si serve in
   un colpo solo e la ricerca avviene nel browser, che su tablet è istantanea.
+- **Nel dubbio vale il verdetto peggiore** (rilievo della revisione, 2026-09-18): quando la fonte dà
+  alla stessa risposta due esiti per lo stesso carattere, la scheda mostra il peggiore e lo marca
+  incerto. Consigliare come buona una risposta che qualcuno ha segnato cattiva fa fallire la
+  trattativa, e una guida che consiglia e sconsiglia la stessa cosa è peggio di una che tace.
+- **Una domanda, una scheda**: le domande trascritte due volte si fondono (risposte per testo,
+  verdetti per carattere) invece di comparire come due righe gemelle che si spartiscono i verdetti.

@@ -653,8 +653,8 @@ console).
 
 La scheda «Negoziazione» dava la regola (quattro personalità, due risposte d'esempio l'una) ma non
 serviva davanti all'Ombra: quel che si legge sullo schermo è **la domanda**, e da lì deve partire la
-ricerca. **Migrazione 083 `negoziazione_domande`**: 230 domande, 691 risposte e 642 verdetti entrano
-nella riga `dati_guida` «battaglia» (`negoziazione.domande`, `negoziazione.fonteDomande`) dal file di
+ricerca. **Migrazione 083 `negoziazione_domande`**: 230 domande trascritte (225 dopo la fusione delle
+ripetute), 680 risposte e i loro verdetti entrano nella riga `dati_guida` «battaglia» (`negoziazione.domande`, `negoziazione.fonteDomande`) dal file di
 repository `server/db/dati/negoziazione-domande.json`; il pacchetto è rigenerato alla 083. Per ogni
 risposta si dice quali caratteri la prendono bene (`buona`), così così (`passabile`) o male
 (`cattiva`); un carattere che non compare **non è indifferente, non è stato verificato**, e le voci
@@ -668,7 +668,16 @@ irritabile rossa, cupa viola) e, per ogni risposta, una pastiglia per carattere 
 il carattere, la risposta buona per lui sale in cima e la riga si colora; le altre carte della regola
 restano sotto. Fonte e resa italiana dichiarate nella scheda e nel `NOTICE`.
 
-Test: migrazione 083 (file presente, contratto dei valori, nessun residuo inglese, idempotenza) e
+**Migrazione 084 `negoziazione_senza_contraddizioni`** (dalla revisione): la fonte a volte si
+contraddice — ventiquattro risposte risultavano buone **e** cattive per lo stesso carattere, e cinque
+domande comparivano due volte con verdetti diversi — e la scheda arrivava a consigliare e sconsigliare
+la stessa risposta. `normalizzaDomande` impone due regole: un solo verdetto per carattere, **il
+peggiore**, marcato incerto quando la fonte non è d'accordo con sé stessa; e una domanda, una scheda,
+con risposte e verdetti fusi. Il pacchetto è rigenerato alla 084: 225 domande, 680 risposte, nessun
+conflitto, 30 verdetti marcati incerti.
+
+Test: migrazione 083 (file presente, contratto dei valori, nessun residuo inglese, idempotenza,
+un solo verdetto per carattere, il peggiore nel dubbio, fusione delle domande ripetute) e
 cinque casi sul componente (ricerca, riduzione dell'elenco, verdetti per carattere, ordinamento,
 stato vuoto). Verificato dal vivo: 230 domande servite dall'API e la scheda nel browser a 1280 e
 375 px senza scorrimento orizzontale né errori in console.

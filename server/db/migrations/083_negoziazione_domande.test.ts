@@ -6,7 +6,7 @@ import { closeDb, initDb, prepared } from '../dbService.js';
 import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { battaglia } from '../../services/battagliaService.js';
 import { invalidaCacheTraduzioni } from '../../services/traduzioniService.js';
-import { percorsoDatiNegoziazione } from './083_negoziazione_domande.js';
+import { normalizzaDomande, percorsoDatiNegoziazione } from './083_negoziazione_domande.js';
 
 describe('migrazione 083 — domande della negoziazione', () => {
   beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
@@ -43,5 +43,43 @@ describe('migrazione 083 — domande della negoziazione', () => {
     const prima = battaglia().negoziazione.domande?.length;
     const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'battaglia'").get() as { json: string };
     expect(JSON.parse(riga.json).negoziazione.domande.length).toBe(prima);
+  });
+
+  // ---- I rilievi della revisione (2026-09-18): la fonte a volte si contraddice ----
+
+  it('un carattere ha un solo verdetto per risposta: la scheda non può consigliare e sconsigliare la stessa cosa', () => {
+    for (const d of battaglia().negoziazione.domande ?? []) {
+      for (const r of d.risposte) {
+        const tratti = r.verdetti.map((v) => v.tratto);
+        expect(new Set(tratti).size, `${d.domanda} → ${r.testo}`).toBe(tratti.length);
+      }
+    }
+  });
+
+  it('nel dubbio vale il verdetto peggiore, ed è marcato incerto', () => {
+    const [d] = normalizzaDomande([
+      { domanda: 'D', risposte: [{ testo: 'R', verdetti: [{ esito: 'buona', tratto: 'irritabile' }, { esito: 'cattiva', tratto: 'irritabile' }] }] },
+    ]);
+    expect(d.risposte[0].verdetti).toEqual([{ esito: 'cattiva', tratto: 'irritabile', incerto: true }]);
+    // due volte lo stesso verdetto non è un dubbio: resta com'è
+    const [uguale] = normalizzaDomande([
+      { domanda: 'D', risposte: [{ testo: 'R', verdetti: [{ esito: 'buona', tratto: 'cupa' }, { esito: 'buona', tratto: 'cupa' }] }] },
+    ]);
+    expect(uguale.risposte[0].verdetti).toEqual([{ esito: 'buona', tratto: 'cupa' }]);
+  });
+
+  it('una domanda, una scheda: le ripetute si fondono con le loro risposte e i loro verdetti', () => {
+    const fuse = normalizzaDomande([
+      { domanda: 'D', risposte: [{ testo: 'R1', verdetti: [{ esito: 'buona', tratto: 'timida' }] }] },
+      { domanda: 'D', risposte: [{ testo: 'R1', verdetti: [{ esito: 'passabile', tratto: 'cupa' }] }, { testo: 'R2', verdetti: [] }] },
+    ]);
+    expect(fuse).toHaveLength(1);
+    expect(fuse[0].risposte.map((r) => r.testo)).toEqual(['R1', 'R2']);
+    expect(fuse[0].risposte[0].verdetti).toEqual([{ esito: 'buona', tratto: 'timida' }, { esito: 'passabile', tratto: 'cupa' }]);
+  });
+
+  it('nel dato servito nessuna domanda compare due volte', () => {
+    const domande = (battaglia().negoziazione.domande ?? []).map((d) => d.domanda);
+    expect(new Set(domande).size).toBe(domande.length);
   });
 });

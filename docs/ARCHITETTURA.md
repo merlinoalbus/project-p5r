@@ -624,7 +624,10 @@ dei DTO della voce 5; le colonne in prosa (`dove`, `periodo`, `regole`, `premi`,
 
 ## Negoziazione con le Ombre (2026-09-18)
 Le domande stanno nella riga `dati_guida` «battaglia» (`negoziazione.domande`, `negoziazione.fonteDomande`),
-portate dalla migrazione 083 dal file `server/db/dati/negoziazione-domande.json` e servite con il resto
+portate dalla migrazione 083 dal file `server/db/dati/negoziazione-domande.json` — trascrizione fedele
+alla fonte — e normalizzate da `normalizzaDomande` (un solo verdetto per carattere, il peggiore e
+marcato incerto quando la fonte si contraddice; domande ripetute fuse), che la 084 riapplica alle
+istanze già migrate. Servite con il resto
 di `GET /api/compendio/battaglia`: la ricerca avviene nel browser. `shared/types.ts` definisce
 `TrattoOmbra` (`giocosa|timida|irritabile|cupa`), `EsitoRisposta` (`buona|passabile|cattiva`) e
 `NegoziazioneDomandaDto`; `src/utils/negoziazione.ts` tiene colori, segni, ordine degli esiti e

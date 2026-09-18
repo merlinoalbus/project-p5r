@@ -23,6 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
+import type { EsitoRisposta, NegoziazioneDomandaDto, TrattoOmbra } from '../../../shared/types.js';
 
 const QUI = path.dirname(fileURLToPath(import.meta.url));
 
@@ -37,6 +38,51 @@ export function percorsoDatiNegoziazione(): string | null {
   return null;
 }
 
+/** Dal peggiore al migliore: davanti all'Ombra conta prima quello che fa fallire la trattativa. */
+const PEGGIORE: EsitoRisposta[] = ['cattiva', 'passabile', 'buona'];
+
+/**
+ * La trascrizione è fedele alla fonte, e la fonte a volte si contraddice: la stessa risposta
+ * risulta **buona e cattiva per lo stesso carattere** (24 casi), e cinque domande compaiono due
+ * volte con verdetti diversi perché sono state annotate in momenti diversi.
+ *
+ * Qui si mette ordine, con due regole che stanno dalla parte di chi gioca:
+ *
+ * 1. **Un carattere, un verdetto per risposta, e nel dubbio il peggiore.** Se una fonte dice
+ *    «buona» e «cattiva» per lo stesso carattere, consigliarla come buona farebbe fallire la
+ *    trattativa: vale la peggiore, marcata `incerto` perché la fonte non è d'accordo con sé stessa.
+ * 2. **Una domanda, una scheda.** Le domande ripetute si fondono — risposte per testo, verdetti
+ *    per carattere con la stessa regola — invece di comparire come due righe gemelle che si
+ *    spartiscono l'informazione.
+ */
+export function normalizzaDomande(domande: NegoziazioneDomandaDto[]): NegoziazioneDomandaDto[] {
+  const perDomanda = new Map<string, Map<string, NegoziazioneDomandaDto['risposte'][number]['verdetti']>>();
+  const ordine: string[] = [];
+  for (const d of domande) {
+    let risposte = perDomanda.get(d.domanda);
+    if (!risposte) { risposte = new Map(); perDomanda.set(d.domanda, risposte); ordine.push(d.domanda); }
+    for (const r of d.risposte) risposte.set(r.testo, [...(risposte.get(r.testo) ?? []), ...r.verdetti]);
+  }
+  return ordine.map((domanda) => ({
+    domanda,
+    risposte: [...perDomanda.get(domanda)!.entries()].map(([testo, verdetti]) => ({ testo, verdetti: unicoPerTratto(verdetti) })),
+  }));
+}
+
+/** Un solo verdetto per carattere: il peggiore fra quelli raccolti, incerto se non erano d'accordo. */
+function unicoPerTratto(verdetti: NegoziazioneDomandaDto['risposte'][number]['verdetti']): NegoziazioneDomandaDto['risposte'][number]['verdetti'] {
+  const per = new Map<TrattoOmbra, { esito: EsitoRisposta; tratto: TrattoOmbra; incerto?: boolean }>();
+  for (const v of verdetti) {
+    const avuto = per.get(v.tratto);
+    if (!avuto) { per.set(v.tratto, { ...v }); continue; }
+    const discordi = avuto.esito !== v.esito;
+    const esito = PEGGIORE[Math.min(PEGGIORE.indexOf(avuto.esito), PEGGIORE.indexOf(v.esito))];
+    const incerto = avuto.incerto || v.incerto || discordi;
+    per.set(v.tratto, incerto ? { tratto: v.tratto, esito, incerto: true } : { tratto: v.tratto, esito });
+  }
+  return [...per.values()];
+}
+
 export const migration083: Migration = {
   id: 83,
   name: 'negoziazione_domande',
@@ -45,12 +91,13 @@ export const migration083: Migration = {
     if (!riga) { logger.warn('migrazione 083: la guida alla battaglia non è caricata, domande della negoziazione non inserite'); return; }
     const file = percorsoDatiNegoziazione();
     if (!file) { logger.warn('migrazione 083: file delle domande della negoziazione non trovato'); return; }
-    const dati = JSON.parse(fs.readFileSync(file, 'utf8')) as { fonte: unknown; domande: unknown[] };
+    const dati = JSON.parse(fs.readFileSync(file, 'utf8')) as { fonte: unknown; domande: NegoziazioneDomandaDto[] };
+    const domande = normalizzaDomande(dati.domande);
     const battaglia = JSON.parse(riga.json) as { negoziazione?: Record<string, unknown> };
     if (!battaglia.negoziazione) { logger.warn('migrazione 083: sezione «negoziazione» assente, domande non inserite'); return; }
     battaglia.negoziazione.fonteDomande = dati.fonte;
-    battaglia.negoziazione.domande = dati.domande;
+    battaglia.negoziazione.domande = domande;
     db.prepare("UPDATE dati_guida SET json = ? WHERE chiave = 'battaglia'").run(JSON.stringify(battaglia));
-    logger.info({ domande: dati.domande.length }, 'migrazione 083: domande della negoziazione');
+    logger.info({ domande: domande.length, trascritte: dati.domande.length }, 'migrazione 083: domande della negoziazione');
   },
 };
