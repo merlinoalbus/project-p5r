@@ -199,14 +199,14 @@ export function DungeonDettaglioPage() {
   // Una planimetria scelta dal pannello «Planimetrie» vale **su tutto il Palazzo**, anche quando non
   // è legata a nessuna area: è il modo di guardare (e segnare) una tavola che la guida non aggancia.
   const [planimetriaLibera, setPlanimetriaLibera] = useState<string | null>(null);
-  const [pannelloPlanimetrie, setPannelloPlanimetrie] = useState(false);
   const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo'] } | null>(null);
-  // L'atlante serve al pannello delle planimetrie: da lì vengono il nome di presentazione, il
+  // L'atlante serve all'elenco del Palazzo: da lì vengono il nome di presentazione, il
   // gruppo che dice quali tavole sono la stessa stanza e l'etichetta di ogni versione. Si carica
-  // quando il pannello si apre, e **si rilegge dopo ogni modifica**: correggere il nome di una
-  // stanza o l'etichetta di una planimetria cambia l'atlante, non la scheda del Palazzo, e
-  // ricaricare solo quest'ultima lasciava a schermo il testo vecchio benché salvato.
-  const albero = useCarica(() => (pannelloPlanimetrie ? getAlberoMappe() : Promise.resolve([])), [pannelloPlanimetrie]);
+  // subito, perché l'elenco è la colonna di atterraggio, e **si rilegge dopo ogni modifica**:
+  // correggere il nome di una stanza o l'etichetta di una planimetria cambia l'atlante, non la
+  // scheda del Palazzo, e ricaricare solo quest'ultima lasciava a schermo il testo vecchio benché
+  // salvato. Nei Memento non serve: i dedali non hanno planimetrie.
+  const albero = useCarica(() => (memento ? Promise.resolve([]) : getAlberoMappe()), [memento]);
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
   const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setPlanimetriaLibera(null); };
@@ -282,11 +282,9 @@ export function DungeonDettaglioPage() {
                   <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa del Palazzo" />
                   <span className="chip">{d.aree.length} {memento ? 'dedali' : 'aree'}</span>
                   <span className="chip" title={memento ? 'Timbri dichiarati dalla guida e richieste dei dedali: sono questi a fare la percentuale.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'obiettivi' : 'da raccogliere'}</span>
-                  {!memento && <button type="button" className={`chip touch ${pannelloPlanimetrie ? 'chip--attivo' : ''}`} aria-pressed={pannelloPlanimetrie} aria-expanded={pannelloPlanimetrie}
-                    title="Le planimetrie del Palazzo: ordine, legame con le aree, avanzamento. Quelle con qualcosa da raccogliere sono contate come «complete» quando è tutto preso."
-                    onClick={() => setPannelloPlanimetrie((v) => !v)}>
-                    {d.planimetrie.length} planimetrie{d.raccolta.mappeComplete !== null ? ` · ${d.raccolta.mappeComplete} complete` : ''} · gestisci
-                  </button>}
+                  {!memento && <span className="chip" title="Le tavole dell’atlante del Palazzo. Si ordinano e si correggono nell’elenco qui sotto.">
+                    {d.planimetrie.length} planimetrie{d.raccolta.mappeComplete !== null ? ` · ${d.raccolta.mappeComplete} complete` : ''}
+                  </span>}
                   <span className="chip" title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
                   {suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                 </div>
@@ -302,26 +300,26 @@ export function DungeonDettaglioPage() {
             </div>
           </header>
 
-          {/* ---- Le planimetrie del Palazzo: ordine logico, legame con le aree, avanzamento ---- */}
-          {!memento && pannelloPlanimetrie && (
-            <section className="card">
-              <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
-                alberoPronto={!!albero.dati} alberoErrore={albero.errore} onRiprovaAlbero={() => void albero.ricarica()}
-                aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
-                sceltaChiave={mappaScelta} onScegli={scegliPlanimetria}
-                onCambiato={async () => { await Promise.all([dati.ricarica(), albero.ricarica()]); }} />
-            </section>
-          )}
-
-          <div className={`grid grid-cols-1 items-start gap-4 ${memento ? 'xl:grid-cols-[minmax(300px,400px)_minmax(0,1fr)]' : 'lg:grid-cols-[248px_minmax(0,1fr)]'}`}>
+          <div className={`grid grid-cols-1 items-start gap-4 ${memento ? 'xl:grid-cols-[minmax(300px,400px)_minmax(0,1fr)]' : 'lg:grid-cols-[360px_minmax(0,1fr)]'}`}>
             {/* ---- Le aree: colonna da 1024 px in su, fila scorrevole sotto ---- */}
+            {/* **Un elenco solo.** Le stanze in ordine di percorso con i loro comandi, e in coda le
+                aree della guida ancora da collegare: è la lista di atterraggio e insieme il posto
+                dove si sistema il Palazzo, senza un secondo pannello da scoprire. Sotto i 1024 px
+                la fila di chip resta come salto rapido fra le aree. */}
             {!memento && (
-              <nav className="contents lg:block" aria-label="Aree del Palazzo">
+              <nav className="contents lg:block" aria-label="Il Palazzo">
                 <FilaScorrevole className="items-center lg:hidden" role="tablist" aria-label="Aree">
                   {d.aree.map((a) => <VoceArea key={a.chiave} a={a} memento={false} compatta scelta={a.chiave === area.chiave} suggerita={areaSuggerita(a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
                 </FilaScorrevole>
-                <div className="card hidden max-h-[min(47vh,560px)] flex-col gap-1.5 overflow-y-auto p-2 lg:flex" role="tablist" aria-label="Aree">
-                  {d.aree.map((a) => <VoceArea key={a.chiave} a={a} memento={false} scelta={a.chiave === area.chiave} suggerita={areaSuggerita(a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
+                <div className="card max-h-[min(62vh,760px)] overflow-y-auto p-2">
+                  <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
+                    alberoPronto={!!albero.dati} alberoErrore={albero.errore} onRiprovaAlbero={() => void albero.ricarica()}
+                    aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
+                    areeOrfane={d.aree.filter((a) => a.mappe.length === 0).map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine, descrizione: a.descrizione }))}
+                    tavoleLibere={tavoleLibere}
+                    areaScelta={area.chiave} onScegliArea={scegliArea}
+                    sceltaChiave={mappaScelta} onScegli={scegliPlanimetria}
+                    onCambiato={async () => { await Promise.all([dati.ricarica(), albero.ricarica()]); }} />
                 </div>
               </nav>
             )}

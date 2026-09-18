@@ -562,3 +562,13 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Un tetto si scrive una volta sola** (2026-09-18): schema del server e `maxLength` del campo
   leggono `shared/limitiGuida.ts`, perché due copie dello stesso numero divergono al primo ritocco e
   il sintomo — un 400 che non dice quale campo — arriva a chi sta scrivendo.
+- **Un elenco solo per il Palazzo, ed è la colonna di atterraggio** (2026-09-19): la scheda aveva
+  due liste dello stesso Palazzo — le aree della guida a sinistra, dove per Kamoshida 15 voci su 18
+  dicevano «nessuna planimetria legata», e il pannello delle stanze, che bisognava sapere di poter
+  aprire da un chip indistinguibile dalle targhette accanto. Nessuna delle due era completa e
+  l'ordine non coincideva. Ora la lista è una: le stanze in ordine di percorso, con i comandi sulle
+  righe, e in coda le aree della guida ancora da collegare. Comanda l'ordine del percorso, quello
+  che si trascina, non la numerazione della guida.
+- **Un elenco di scelte fatto di nomi uguali non è una scelta** (2026-09-19): le tavole libere di
+  Kamoshida si presentavano tutte come «Palazzo di Kamoshida — Immagini native che nessun campo
+  usa», 32 voci identiche. Anche il selettore passa dai nomi dell'atlante, gli stessi dell'elenco.
