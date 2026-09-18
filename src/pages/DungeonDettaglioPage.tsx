@@ -310,11 +310,16 @@ export function DungeonDettaglioPage() {
                 dove si sistema il Palazzo, senza un secondo pannello da scoprire. Sotto i 1024 px
                 la fila di chip resta come salto rapido fra le aree. */}
             {!memento && (
-              <nav aria-label="Il Palazzo">
+              <nav aria-label="Il Palazzo" className="order-2 lg:order-none">
                 {/* **Niente fila di chip sotto i 1024 px.** C'era, e rimetteva in piedi la doppia
                     lista appena tolta: diciotto aree in otto righe di chip sopra l'elenco che le
-                    contiene già. L'elenco vale a tutte le larghezze. */}
-                <div className="card overflow-y-auto p-2 lg:max-h-[calc(100vh-11rem)] lg:sticky lg:top-4">
+                    contiene già. L'elenco vale a tutte le larghezze.
+
+                    Ma in colonna unica **va dopo il contenuto che serve a scegliere**, e con il suo
+                    tetto d'altezza: srotolato, per Kamoshida è alto 4053 px, e l'area aperta finiva
+                    a 4682 px dall'alto — la navigazione seppelliva ciò che seleziona (rilievo della
+                    revisione). Sopra i 1024 px è la colonna di sinistra e resta al suo posto. */}
+                <div className="card max-h-[70vh] overflow-y-auto p-2 lg:sticky lg:top-4 lg:max-h-[calc(100vh-11rem)]">
                   <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
                     alberoPronto={!!albero.dati} alberoErrore={albero.errore} onRiprovaAlbero={() => void albero.ricarica()}
                     aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
@@ -338,7 +343,7 @@ export function DungeonDettaglioPage() {
             )}
 
             {/* ---- L'area scelta: mappa e obiettivi ---- */}
-            <div className={`grid grid-cols-1 items-start gap-4 ${memento ? '2xl:grid-cols-[minmax(0,1fr)_340px]' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
+            <div className={`order-1 grid grid-cols-1 items-start gap-4 lg:order-none ${memento ? '2xl:grid-cols-[minmax(0,1fr)_340px]' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
               <section className="card flex flex-col gap-2.5">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>

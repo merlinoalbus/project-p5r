@@ -809,3 +809,10 @@ tolto.
 Verifica: 6 larghezze × 4 pagine (Palazzo, Memento, Home, Compendio) senza scorrimento orizzontale e
 senza errori in pagina; suite completa 994 test verdi.
 
+**Rilievo della revisione (stesso giorno)**: tolta la fila di chip, in colonna unica l'elenco
+srotolato precedeva il contenuto — per Kamoshida 4053 px di righe, con l'area aperta a 4682 px
+dall'alto: la navigazione seppelliva ciò che seleziona, molto peggio dei 320 px di chip. Corretto
+mettendo il contenuto dell'area **prima** dell'elenco sotto i 1024 px (`order`) e rimettendo il
+tetto d'altezza anche sul piccolo (`max-h-[70vh]`). Misurato: l'area scelta comincia a 614 px su
+390 px e 415 px su 768 px; sopra i 1024 px nulla cambia (396 px).
+
