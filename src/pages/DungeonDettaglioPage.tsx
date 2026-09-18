@@ -20,7 +20,7 @@
 import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { getDungeon, impostaStatoPunto, scaricaPianta } from '../services/api';
+import { getAlberoMappe, getDungeon, impostaStatoPunto, scaricaPianta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -207,6 +207,9 @@ export function DungeonDettaglioPage() {
   // è legata a nessuna area: è il modo di guardare (e segnare) una tavola che la guida non aggancia.
   const [planimetriaLibera, setPlanimetriaLibera] = useState<string | null>(null);
   const [pannelloPlanimetrie, setPannelloPlanimetrie] = useState(false);
+  // L'atlante serve al pannello delle planimetrie: da lì vengono il nome di presentazione e il
+  // gruppo che dice quali tavole sono la stessa stanza. Si carica solo quando il pannello si apre.
+  const albero = useCarica(() => (pannelloPlanimetrie ? getAlberoMappe() : Promise.resolve([])), [pannelloPlanimetrie]);
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
   // Le due viste di un'area del Palazzo: la planimetria del gioco e la pianta della guida. Nei
@@ -297,7 +300,7 @@ export function DungeonDettaglioPage() {
           {/* ---- Le planimetrie del Palazzo: ordine logico, legame con le aree, avanzamento ---- */}
           {!memento && pannelloPlanimetrie && (
             <section className="card">
-              <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie}
+              <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
                 aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
                 sceltaChiave={mappaScelta} onScegli={scegliPlanimetria} onCambiato={() => dati.ricarica()} />
             </section>

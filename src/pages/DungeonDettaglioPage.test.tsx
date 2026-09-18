@@ -9,11 +9,11 @@ import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, scaricaPianta, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa } = vi.hoisted(() => ({
+const { getDungeon, impostaStatoPunto, scaricaPianta, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), scaricaPianta: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
-  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, scaricaPianta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
+vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, scaricaPianta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
 vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
 vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
@@ -52,7 +52,7 @@ const mementos = (): DungeonDettaglioDto => ({
 
 const monta = (chiave: string) => render(<MemoryRouter initialEntries={[`/guida/dungeon/${chiave}`]}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
 
-beforeEach(() => { vi.clearAllMocks(); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
+beforeEach(() => { vi.clearAllMocks(); getAlberoMappe.mockResolvedValue([]); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
 
 it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi senza ricaricare', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
@@ -150,11 +150,11 @@ async function apriPlanimetrie() {
   return within(screen.getByLabelText('Planimetrie del Palazzo'));
 }
 
-it('il pannello elenca tutte le planimetrie in ordine, con quanto resta e l’area a cui sono legate', async () => {
+it('il pannello elenca le stanze in ordine, con quanto resta e l’area a cui sono legate', async () => {
   const pannello = await apriPlanimetrie();
   expect(pannello.getAllByText(/1\. Cancello/).length).toBeGreaterThan(0);
-  expect(pannello.getByText(/1 da prendere su 2 · Cancello/)).toBeInTheDocument();
-  expect(pannello.getByText(/2 da prendere su 2 · nessuna area/)).toBeInTheDocument();
+  expect(pannello.getByText(/una planimetria · 1 da prendere su 2 · Cancello/)).toBeInTheDocument();
+  expect(pannello.getByText(/una planimetria · 2 da prendere su 2 · nessuna area/)).toBeInTheDocument();
 });
 
 it('«Giù» salva il nuovo ordine di tutto il Palazzo', async () => {
@@ -164,9 +164,12 @@ it('«Giù» salva il nuovo ordine di tutto il Palazzo', async () => {
   await waitFor(() => expect(riordinaMappe).toHaveBeenCalledWith('dungeon-kamoshida', ['m-torre', 'm-cancello']));
 });
 
-it('scegliere una planimetria senza area apre il suo visore e la colonna dei suoi soli collezionabili', async () => {
+it('aperta la stanza, scegliere la sua planimetria apre il visore e la colonna dei suoi soli collezionabili', async () => {
   const pannello = await apriPlanimetrie();
-  fireEvent.click(pannello.getByRole('button', { name: /2 da prendere su 2 · nessuna area/ }));
+  // la stanza si apre, e dentro c'è la sua planimetria con la propria etichetta
+  fireEvent.click(pannello.getByRole('button', { name: /2\. Torre/ }));
+  const stanza = within(pannello.getByRole('list', { name: /Planimetrie di Torre/ }));
+  fireEvent.click(stanza.getAllByRole('button', { name: /Immagine 1/ }).find((b) => b.getAttribute('aria-pressed') !== null)!);
   expect(await screen.findByText('Visore: m-torre')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: /Su questa planimetria/ })).toBeInTheDocument();
 });
