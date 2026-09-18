@@ -200,8 +200,11 @@ export function DungeonDettaglioPage() {
   const [planimetriaLibera, setPlanimetriaLibera] = useState<string | null>(null);
   const [pannelloPlanimetrie, setPannelloPlanimetrie] = useState(false);
   const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo'] } | null>(null);
-  // L'atlante serve al pannello delle planimetrie: da lì vengono il nome di presentazione e il
-  // gruppo che dice quali tavole sono la stessa stanza. Si carica solo quando il pannello si apre.
+  // L'atlante serve al pannello delle planimetrie: da lì vengono il nome di presentazione, il
+  // gruppo che dice quali tavole sono la stessa stanza e l'etichetta di ogni versione. Si carica
+  // quando il pannello si apre, e **si rilegge dopo ogni modifica**: correggere il nome di una
+  // stanza o l'etichetta di una planimetria cambia l'atlante, non la scheda del Palazzo, e
+  // ricaricare solo quest'ultima lasciava a schermo il testo vecchio benché salvato.
   const albero = useCarica(() => (pannelloPlanimetrie ? getAlberoMappe() : Promise.resolve([])), [pannelloPlanimetrie]);
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
@@ -260,7 +263,7 @@ export function DungeonDettaglioPage() {
                     <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`}
                       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
                       onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
-                      {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={multilinea ? 4000 : 400} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
+                      {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={multilinea ? 8000 : 1000} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
                         return <>
                           {campo('nome', 'Nome')}{campo('sovrano', 'Sovrano')}
                           {campo('dataSblocco', 'Si apre')}{campo('furtoConsigliato', 'Furto consigliato')}{campo('dataScadenza', 'Scade')}
@@ -304,7 +307,8 @@ export function DungeonDettaglioPage() {
               <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
                 alberoPronto={!!albero.dati} alberoErrore={albero.errore} onRiprovaAlbero={() => void albero.ricarica()}
                 aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
-                sceltaChiave={mappaScelta} onScegli={scegliPlanimetria} onCambiato={() => dati.ricarica()} />
+                sceltaChiave={mappaScelta} onScegli={scegliPlanimetria}
+                onCambiato={async () => { await Promise.all([dati.ricarica(), albero.ricarica()]); }} />
             </section>
           )}
 
@@ -343,7 +347,7 @@ export function DungeonDettaglioPage() {
                     onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}>
                     {(b, cambia) => <>
                       <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />
-                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={4000} onCambia={(v) => cambia({ descrizione: v })} />
+                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={8000} onCambia={(v) => cambia({ descrizione: v })} />
                     </>}
                   </CorrezioneGuida>}
                   <span className="text-[12px] text-text-muted">{memento ? 'dedalo' : 'area'} {area.ordine + 1} di {d.aree.length}</span>
@@ -453,7 +457,7 @@ export function DungeonDettaglioPage() {
                                       <label className="touch flex items-center gap-1.5 text-[12px]">
                                         <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
                                       </label>
-                                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={4000} onCambia={(v) => cambia({ descrizione: v })} />
+                                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={8000} onCambia={(v) => cambia({ descrizione: v })} />
                                     </>}
                                   </CorrezioneGuida>
                                 </div>

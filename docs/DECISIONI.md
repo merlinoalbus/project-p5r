@@ -553,3 +553,9 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Nessun accostamento automatico per nome**: provato sui dati, 0 proposte su 35 aree, perché la
   guida e l'estrazione chiamano le stanze in modo diverso. Un automatismo che indovina avrebbe
   lasciato legami sbagliati da disfare a mano.
+- **I tetti dei campi si misurano sui dati, non si scelgono** (2026-09-18): un modulo che rimanda
+  indietro anche i campi non toccati trasforma un limite troppo stretto su un solo campo nel blocco
+  dell'intero salvataggio. Un test risalva ogni Palazzo, area e punto così com'è per accorgersene.
+- **Una correzione che tocca l'atlante rilegge l'atlante**: nome della stanza ed etichetta della
+  versione non stanno nella scheda del Palazzo, e ricaricare solo quella lasciava a schermo il testo
+  vecchio benché salvato.
