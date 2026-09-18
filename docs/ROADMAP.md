@@ -734,7 +734,7 @@ precedente li aveva verificati solo lato server, ed è un errore di metodo — u
   dall'atlante (`getAlberoMappe`), e dopo una correzione la scheda rileggeva solo il Palazzo: il
   testo restava quello vecchio finché non si ricaricava la pagina. Ora `onCambiato` rilegge
   entrambi.
-- **I tetti dei campi erano scelti a occhio**: 200 caratteri sul livello consigliato, dove la guida
+- **I tetti dei campi erano scelti a occhio**, e per giunta scritti due volte: 200 caratteri sul livello consigliato, dove la guida
   ne scrive 352 per Kamoshida. Siccome il modulo rimanda indietro anche i campi non toccati,
   **la scheda di un Palazzo non si poteva salvare affatto** (400 dal server). I tetti ora sono
   misurati sui dati veri con ampio margine (la prosa più lunga è una nota da 3938 caratteri), e il
@@ -745,3 +745,11 @@ Test nuovi: la rilettura dell'atlante dopo una correzione di stanza, e il giro c
 si rompe la suite, non la scheda in mano a chi gioca. Verifica dal vivo dei sette percorsi di
 modifica (Palazzo, area, punto, aggiunta di un punto, stanza, etichetta, nome della planimetria):
 tutti salvano e si aggiornano a schermo.
+
+**Un tetto solo, condiviso** (dalla revisione): i limiti stavano nello schema del server *e* nel
+`maxLength` del campo, e si sono subito disallineati — il campo lasciava scrivere mille caratteri
+dove la rotta ne accettava duecento, e il salvataggio tornava indietro con un 400 senza dire quale
+campo fosse di troppo. Ora `shared/limitiGuida.ts` è l'unica fonte, letta dagli schemi zod e dai
+moduli. Il nome di una mappa vale 180 e non 300: entra nella chiave leggibile del percorso, che il
+server tiene sotto quella soglia — oltre, risponde «percorso-troppo-lungo» e dice di abbreviare.
+Test: ogni rotta accetta esattamente il massimo dichiarato e rifiuta il carattere in più.

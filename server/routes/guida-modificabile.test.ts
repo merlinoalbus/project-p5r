@@ -13,6 +13,7 @@ import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import { bodyAggiornaMappa } from '../schemas/mappe.js';
+import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { creaMappa, aggiornaPresentazioneMappa } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
@@ -139,5 +140,60 @@ describe('i testi della guida si possono risalvare così come sono', () => {
     expect(nomi.length).toBeGreaterThan(100);
     const fuori = nomi.filter((nome) => !bodyAggiornaMappa.safeParse({ nome }).success);
     expect(fuori).toEqual([]);
+  });
+});
+
+// ---- Un tetto solo, condiviso fra il modulo e la rotta ----
+//
+// I tetti erano scritti due volte — nello schema e nel `maxLength` del campo — e si sono subito
+// disallineati: il campo lasciava scrivere mille caratteri dove la rotta ne accettava duecento, e
+// il salvataggio tornava indietro con un 400 (rilievo della revisione, 2026-09-18). Ora `LIMITI_GUIDA`
+// è l'unica fonte, e qui si prova che ogni rotta accetta esattamente quella lunghezza e rifiuta il
+// carattere in più.
+
+describe('i tetti dei campi valgono davvero, e sono quelli condivisi', () => {
+  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  afterAll(() => closeDb());
+
+  const lungo = (n: number) => 'x'.repeat(n);
+
+  it('il Palazzo accetta il massimo dichiarato e rifiuta un carattere in più', async () => {
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ nome: lungo(LIMITI_GUIDA.dungeon.nome) }).expect(200);
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ nome: lungo(LIMITI_GUIDA.dungeon.nome + 1) }).expect(400);
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ sovrano: lungo(LIMITI_GUIDA.dungeon.sovrano) }).expect(200);
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ sovrano: lungo(LIMITI_GUIDA.dungeon.sovrano + 1) }).expect(400);
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ livelloConsigliato: lungo(LIMITI_GUIDA.dungeon.livello) }).expect(200);
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ note: lungo(LIMITI_GUIDA.dungeon.note) }).expect(200);
+  });
+
+  it('area, punto e mappa seguono gli stessi tetti', async () => {
+    const area = dettaglioDungeon('kamoshida').aree[0];
+    await request(app).put(`/api/compendio/aree/${encodeURIComponent(area.chiave)}`).send({ nome: lungo(LIMITI_GUIDA.area.nome) }).expect(200);
+    await request(app).put(`/api/compendio/aree/${encodeURIComponent(area.chiave)}`).send({ nome: lungo(LIMITI_GUIDA.area.nome + 1) }).expect(400);
+    const punto = dettaglioDungeon('kamoshida').aree[0].punti[0];
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(punto.chiave)}`).send({ descrizione: lungo(LIMITI_GUIDA.punto.descrizione) }).expect(200);
+    const mappa = creaMappa(undefined, { nome: 'Tetti', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    // il nome di una mappa entra nella chiave del percorso: il tetto dello schema è il massimo
+    // teorico, ma dentro un Palazzo c'è già il prefisso, e quel che non ci sta lo dice il server
+    await request(app).put(`/api/mappe/${mappa.chiave}`).send({ nome: lungo(120) }).expect(200);
+    await request(app).put(`/api/mappe/${mappa.chiave}`).send({ nome: lungo(LIMITI_GUIDA.mappa.nome + 1) }).expect(400);
+    const troppo = await request(app).put(`/api/mappe/${mappa.chiave}`).send({ nome: lungo(LIMITI_GUIDA.mappa.nome) });
+    if (troppo.status !== 200) {
+      // non un errore qualsiasi: dice che cosa fare
+      expect(troppo.body.error.code).toBe('percorso-troppo-lungo');
+      expect(troppo.body.error.message).toMatch(/Abbrevia/);
+    }
+    await request(app).put(`/api/mappe/${mappa.chiave}/presentazione`).send({ etichetta: lungo(LIMITI_GUIDA.mappa.etichetta) }).expect(200);
+    await request(app).put(`/api/mappe/${mappa.chiave}`).send({ note: lungo(LIMITI_GUIDA.mappa.note) }).expect(200);
+    await request(app).put(`/api/mappe/${mappa.chiave}`).send({ note: lungo(LIMITI_GUIDA.mappa.note + 1) }).expect(400);
+  });
+
+  it('anche gli spilli dell’editor hanno i tetti del modulo condiviso', async () => {
+    const mappa = creaMappa(undefined, { nome: 'Tetti degli spilli', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    const corpo = (extra: Record<string, unknown>) => ({ tipo: 'forziere', nome: 'Spillo', x: 10, y: 10, ...extra });
+    await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ nome: lungo(LIMITI_GUIDA.spillo.nome) })).expect(201);
+    await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ nome: lungo(LIMITI_GUIDA.spillo.nome + 1) })).expect(400);
+    await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ descrizione: lungo(LIMITI_GUIDA.spillo.descrizione) })).expect(201);
+    await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ descrizione: lungo(LIMITI_GUIDA.spillo.descrizione + 1) })).expect(400);
   });
 });

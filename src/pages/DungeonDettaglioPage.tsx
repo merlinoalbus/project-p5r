@@ -35,6 +35,7 @@ import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { RaccoltaPlanimetrie } from '../components/guida/RaccoltaPlanimetrie';
 import { PlanimetriePalazzo } from '../components/guida/PlanimetriePalazzo';
 import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
+import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
 import { ObiettiviDedalo } from '../components/guida/ObiettiviDedalo';
 import { dataBreve } from '../utils/testoBreve';
@@ -263,11 +264,11 @@ export function DungeonDettaglioPage() {
                     <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`}
                       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
                       onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
-                      {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={multilinea ? 8000 : 1000} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
+                      {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
                         return <>
-                          {campo('nome', 'Nome')}{campo('sovrano', 'Sovrano')}
-                          {campo('dataSblocco', 'Si apre')}{campo('furtoConsigliato', 'Furto consigliato')}{campo('dataScadenza', 'Scade')}
-                          {campo('livelloConsigliato', 'Livello consigliato')}{campo('note', 'Note della guida', true)}
+                          {campo('nome', 'Nome', LIMITI_GUIDA.dungeon.nome)}{campo('sovrano', 'Sovrano', LIMITI_GUIDA.dungeon.sovrano)}
+                          {campo('dataSblocco', 'Si apre', LIMITI_GUIDA.dungeon.data)}{campo('furtoConsigliato', 'Furto consigliato', LIMITI_GUIDA.dungeon.data)}{campo('dataScadenza', 'Scade', LIMITI_GUIDA.dungeon.data)}
+                          {campo('livelloConsigliato', 'Livello consigliato', LIMITI_GUIDA.dungeon.livello)}{campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
                         </>; }}
                     </CorrezioneGuida>
                   </div>
@@ -346,8 +347,8 @@ export function DungeonDettaglioPage() {
                     iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
                     onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}>
                     {(b, cambia) => <>
-                      <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />
-                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={8000} onCambia={(v) => cambia({ descrizione: v })} />
+                      <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
+                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
                     </>}
                   </CorrezioneGuida>}
                   <span className="text-[12px] text-text-muted">{memento ? 'dedalo' : 'area'} {area.ordine + 1} di {d.aree.length}</span>
@@ -450,14 +451,14 @@ export function DungeonDettaglioPage() {
                                     onSalva={async (b) => { await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì' }); await dati.ricarica(); }}
                                     elimina={{ avviso: 'Se ne va dalla guida, con quel che le partite ne avevano segnato.', onElimina: async () => { await eliminaPunto(p.chiave); await dati.ricarica(); } }}>
                                     {(b, cambia) => <>
-                                      <CampoCorrezione etichetta="Nome" valore={b.nome} onCambia={(v) => cambia({ nome: v })} />
+                                      <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => cambia({ nome: v })} />
                                       <span className="min-w-[150px]">
                                         <Selettore etichetta="Tipo" valore={b.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
                                       </span>
                                       <label className="touch flex items-center gap-1.5 text-[12px]">
                                         <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
                                       </label>
-                                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={8000} onCambia={(v) => cambia({ descrizione: v })} />
+                                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.punto.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
                                     </>}
                                   </CorrezioneGuida>
                                 </div>
@@ -470,7 +471,7 @@ export function DungeonDettaglioPage() {
                       {nuovoPunto
                         ? <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
                             onSubmit={(e) => { e.preventDefault(); const n = nuovoPunto.nome.trim(); if (!n) return; void creaPunto(area.chiave, { nome: n, tipo: nuovoPunto.tipo }).then(async () => { setNuovoPunto(null); await dati.ricarica(); notifica('success', `Punto «${n}» aggiunto a ${area.nome}.`); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Punto non aggiunto.')); }}>
-                            <CampoCorrezione etichetta="Nuovo punto" valore={nuovoPunto.nome} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, nome: v })} />
+                            <CampoCorrezione etichetta="Nuovo punto" valore={nuovoPunto.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, nome: v })} />
                             <span className="min-w-[150px]">
                               <Selettore etichetta="Tipo" valore={nuovoPunto.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, tipo: v as PuntoInteresseDto['tipo'] })} />
                             </span>
