@@ -26,6 +26,9 @@ export const creaMappa = (dati: DatiMappaApi & { chiave?: string; nome: string; 
 export const aggiornaMappa = (chiave: string, dati: DatiMappaApi): Promise<MappaDto> => apiPut(`/mappe/${encodeURIComponent(chiave)}`, dati);
 export const eliminaMappa = (chiave: string): Promise<void> => apiDelete(`/mappe/${encodeURIComponent(chiave)}`);
 /** Ordine logico delle mappe figlie di un genitore: l'elenco è il nuovo ordine (riordino per trascinamento). */
+/** Raggruppamento di una planimetria: la stanza a cui appartiene e che cosa mostra la sua versione. */
+export const aggiornaPresentazioneMappa = (chiave: string, dati: { gruppoId?: string | null; gruppoNome?: string; etichetta?: string | null }): Promise<MappaDto> =>
+  apiPut(`/mappe/${encodeURIComponent(chiave)}/presentazione`, dati);
 export const riordinaMappe = (genitore: string | null, chiavi: string[]): Promise<MappaRiassuntoDto[]> => apiPut('/mappe/ordine', { genitore, chiavi });
 
 /** Carica l'immagine di base della mappa (file dell'utente, mai nel repository): corpo grezzo `image/*`. */

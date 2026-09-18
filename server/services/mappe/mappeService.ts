@@ -420,6 +420,61 @@ function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave:
  * si riscrive da 0; le sorelle non elencate restano in coda nell'ordine che avevano. Si accetta
  * qualunque discendente di `genitore` (e `genitore` stesso conta come radice del sottoalbero).
  */
+/**
+ * Il **raggruppamento** di una planimetria: a quale stanza appartiene e che cosa mostra la sua
+ * versione. Sono i due nomi che si leggono nella scheda del Palazzo, e finora erano intoccabili
+ * perché arrivavano dall'istantanea dell'estrazione: chi cura l'atlante deve poter dire «queste
+ * due tavole sono la stessa stanza» e «questa è la porzione occidentale», senza toccare il file.
+ *
+ * `gruppo` sposta la mappa in un'altra stanza (l'id di un gruppo esistente, o un nome nuovo che ne
+ * crea uno); `etichetta` è quel che distingue la versione dentro la stanza. Il nome della mappa
+ * resta cosa sua, e si cambia con `aggiornaMappa`.
+ */
+export function aggiornaPresentazioneMappa(chiave: string, dati: { gruppoId?: string | null; gruppoNome?: string; etichetta?: string | null }): MappaDto {
+  const r = rigaMappa(chiave);
+  chiave = r.chiave;
+  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) throw httpErrors.badRequest('presentazione-non-disponibile', 'Questa istanza non ha la tabella delle presentazioni.');
+  const riga = prepared('SELECT contesti_json, gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(chiave) as { contesti_json: string; gruppo_immagini_json: string | null } | undefined;
+  const attuale = riga?.gruppo_immagini_json ? JSON.parse(riga.gruppo_immagini_json) as { id: string; nome: string; ordine: number; etichetta?: string } : null;
+  // niente gruppo e nessun nome nuovo: la mappa esce dal raggruppamento e torna a stare da sola
+  const esce = dati.gruppoId === null && !dati.gruppoNome;
+  let gruppo: { id: string; nome: string; ordine: number; etichetta?: string } | null = null;
+  if (!esce) {
+    const id = dati.gruppoId ?? attuale?.id ?? `utente:${chiave}`;
+    // il nome della stanza vale per tutte le mappe del gruppo: si scrive su tutte, o due tavole
+    // della stessa stanza finirebbero sotto due titoli diversi
+    const nome = dati.gruppoNome?.trim() || nomeDelGruppo(id) || attuale?.nome || r.nome;
+    const ordine = attuale?.ordine ?? 0;
+    const etichetta = dati.etichetta === undefined ? attuale?.etichetta : (dati.etichetta?.trim() || undefined);
+    gruppo = { id, nome, ordine, ...(etichetta ? { etichetta } : {}) };
+  }
+  getDb().transaction(() => {
+    prepared('INSERT INTO mappa_presentazione (mappa_chiave, contesti_json, gruppo_immagini_json) VALUES (?, ?, ?) ON CONFLICT(mappa_chiave) DO UPDATE SET gruppo_immagini_json = excluded.gruppo_immagini_json')
+      .run(chiave, riga?.contesti_json ?? '[]', gruppo ? JSON.stringify(gruppo) : null);
+    if (gruppo && dati.gruppoNome) rinominaGruppo(gruppo.id, gruppo.nome);
+    prepared("UPDATE mappa SET origine = 'utente', updated_at = ? WHERE chiave = ?").run(nowIso(), chiave);
+  })();
+  return dettaglioMappa(chiave);
+}
+
+/** Il nome già in uso per quel gruppo, se qualche mappa ce l'ha. */
+function nomeDelGruppo(id: string): string | null {
+  for (const r of prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ gruppo_immagini_json: string }>) {
+    const g = JSON.parse(r.gruppo_immagini_json) as { id: string; nome: string };
+    if (g.id === id) return g.nome;
+  }
+  return null;
+}
+
+/** Una stanza ha un nome solo: rinominarla lo scrive su tutte le sue tavole. */
+function rinominaGruppo(id: string, nome: string): void {
+  for (const r of prepared('SELECT mappa_chiave, gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ mappa_chiave: string; gruppo_immagini_json: string }>) {
+    const g = JSON.parse(r.gruppo_immagini_json) as { id: string; nome: string };
+    if (g.id !== id || g.nome === nome) continue;
+    prepared('UPDATE mappa_presentazione SET gruppo_immagini_json = ? WHERE mappa_chiave = ?').run(JSON.stringify({ ...g, nome }), r.mappa_chiave);
+  }
+}
+
 export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaRiassuntoDto[] {
   const radice = genitore === null ? null : rigaMappa(genitore).chiave;
   const nelSottoalbero = (chiave: string): boolean => {

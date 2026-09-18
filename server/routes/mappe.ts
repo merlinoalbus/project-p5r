@@ -8,12 +8,12 @@ import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../../shared/accessoM
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
-import { impostaMarcatore, scaricaPianta } from '../services/dungeonService.js';
+import { impostaMarcatore } from '../services/dungeonService.js';
 import { impostaMarcatoreLuogo, scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyRiordinaMappe, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
@@ -35,9 +35,6 @@ router.put('/marcatori', validate({ body: bodyMarcatore }), (req, res) => {
 });
 
 /** Scarica nell'istanza la pianta dell'area dalla guida collegata nel seed (immagine mai nel repository). */
-router.post('/piante/:area/scarica', validate({ params: z.object({ area: z.string().min(1).max(120) }) }), async (req, res) => {
-  res.status(201).json(await scaricaPianta(String(req.params.area)));
-});
 
 /** Fissa o rimuove lo spillo di un luogo sulla mappa del quartiere. */
 router.put('/marcatori-luoghi', validate({ body: bodyMarcatoreLuogo }), (req, res) => {
@@ -106,6 +103,10 @@ router.delete('/:chiave', validate({ params: paramsMappa }), (req, res) => {
   res.status(204).end();
 });
 /** Immagine di base (corpo grezzo `image/*`): salvata nell'istanza nell'ambito «mappa» con la chiave della mappa. */
+router.put('/:chiave/presentazione', validate({ params: paramsMappa, body: bodyPresentazioneMappa }), (req, res) => {
+  res.json(aggiornaPresentazioneMappa(String(req.params.chiave), req.body as Parameters<typeof aggiornaPresentazioneMappa>[1]));
+});
+
 router.put('/:chiave/immagine', validate({ params: paramsMappa }), express.raw({ type: 'image/*', limit: MAX_BYTE_IMMAGINE }), (req, res) => {
   const mime = String(req.headers['content-type'] ?? '').split(';')[0].trim();
   if (!Buffer.isBuffer(req.body) || req.body.length === 0) throw httpErrors.badRequest('immagine-vuota', 'Invia il file dell\'immagine come corpo grezzo con Content-Type image/*.');
