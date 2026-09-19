@@ -79,8 +79,8 @@ it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Racco
   await waitFor(() => expect(impostaStatoPunto).toHaveBeenCalledWith(4, 'p1', 'ottenuto'));
   // un punto della guida può contare sulle planimetrie: la raccolta si rilegge dal server
   await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(2));
-  // l'area dell'elenco dice quanto resta con la stessa misura dell'anello
-  expect(screen.getAllByRole('tab', { name: /1\. Cancello/ }).length).toBeGreaterThan(0);
+  // la stanza compare nell'elenco del Palazzo, con l'area a cui è legata
+  expect(within(screen.getByLabelText('Planimetrie del Palazzo')).getAllByText(/Cancello/).length).toBeGreaterThan(0);
 });
 
 it('quando l’area non ha planimetrie legate la colonna mostra subito tutto il Palazzo, non una piega chiusa', async () => {
@@ -238,7 +238,9 @@ it('la bozza di correzione appartiene al pezzo che stai correggendo, non alla sc
   fireEvent.click(screen.getByRole('button', { name: /Correggi l’area/ }));
   const modulo = screen.getByRole('form', { name: /Correggi l’area/ });
   fireEvent.change(within(modulo).getByLabelText('Nome dell’area'), { target: { value: 'Scritto per sbaglio' } });
-  fireEvent.click(screen.getAllByRole('tab', { name: /Torre/ })[0]);
+  // si cambia area dall'elenco: «Torre» è un'area senza planimetria, in coda
+  // la riga dell'area, non l'omonima opzione del selettore «Area della guida»
+  fireEvent.click(within(screen.getByLabelText('Planimetrie del Palazzo')).getAllByRole('button', { name: /2\. Torre/ }).find((b) => b.getAttribute('aria-pressed') !== null)!);
 
   // il modulo si è chiuso con la sua bozza: riaprendolo sull'altra area c'è il nome dell'altra area
   fireEvent.click(screen.getByRole('button', { name: /Correggi l’area/ }));

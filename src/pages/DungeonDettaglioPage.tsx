@@ -75,7 +75,9 @@ function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
     <ol className="m-0 flex list-none flex-wrap items-stretch gap-1.5 p-0" aria-label="Finestra del Palazzo">
       {tappe.map((t, i) => (
         <li key={t.chiave} className="flex items-stretch gap-1.5">
-          {i > 0 && <span aria-hidden className="self-center text-text-muted">→</span>}
+          {/* Le tappe vanno a capo sugli schermi stretti, e una freccia a inizio riga non collega
+              più niente: da lì in giù l'ordine lo dicono già le etichette. */}
+          {i > 0 && <span aria-hidden className="hidden self-center text-text-muted sm:inline">→</span>}
           <span className={`flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 ${t.tono}`} title={t.valore!}>
             <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] opacity-80"><IconaSegno chiave={t.segno} dimensione={14} />{t.etichetta}</span>
             <span className="font-display text-[17px] leading-none">{dataBreve(t.valore!)}</span>
@@ -249,7 +251,8 @@ export function DungeonDettaglioPage() {
             </span>
             <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
               <div className="flex shrink-0 items-center gap-3 sm:flex-col">
-                <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} />
+                <span className="sm:hidden"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={52} /></span>
+                <span className="hidden sm:block"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} /></span>
                 {quota !== null && (
                   <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} ${memento ? 'obiettivi fatti' : 'da raccogliere presi'} su ${d.raccolta.totale}`}>
                     <span className="font-display text-[17px] leading-none tabular-nums">{Math.round(quota * 100)}%</span>
@@ -261,7 +264,7 @@ export function DungeonDettaglioPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button type="button" className="btn btn-ghost btn-sm touch -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
                     <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
-                    <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`}
+                    <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
                       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
                       onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
                       {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
@@ -307,11 +310,16 @@ export function DungeonDettaglioPage() {
                 dove si sistema il Palazzo, senza un secondo pannello da scoprire. Sotto i 1024 px
                 la fila di chip resta come salto rapido fra le aree. */}
             {!memento && (
-              <nav className="contents lg:block" aria-label="Il Palazzo">
-                <FilaScorrevole className="items-center lg:hidden" role="tablist" aria-label="Aree">
-                  {d.aree.map((a) => <VoceArea key={a.chiave} a={a} memento={false} compatta scelta={a.chiave === area.chiave} suggerita={areaSuggerita(a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
-                </FilaScorrevole>
-                <div className="card max-h-[min(62vh,760px)] overflow-y-auto p-2">
+              <nav aria-label="Il Palazzo" className="order-2 lg:order-none">
+                {/* **Niente fila di chip sotto i 1024 px.** C'era, e rimetteva in piedi la doppia
+                    lista appena tolta: diciotto aree in otto righe di chip sopra l'elenco che le
+                    contiene già. L'elenco vale a tutte le larghezze.
+
+                    Ma in colonna unica **va dopo il contenuto che serve a scegliere**, e con il suo
+                    tetto d'altezza: srotolato, per Kamoshida è alto 4053 px, e l'area aperta finiva
+                    a 4682 px dall'alto — la navigazione seppelliva ciò che seleziona (rilievo della
+                    revisione). Sopra i 1024 px è la colonna di sinistra e resta al suo posto. */}
+                <div className="card max-h-[70vh] overflow-y-auto p-2 lg:sticky lg:top-4 lg:max-h-[calc(100vh-11rem)]">
                   <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
                     alberoPronto={!!albero.dati} alberoErrore={albero.errore} onRiprovaAlbero={() => void albero.ricarica()}
                     aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
@@ -335,7 +343,7 @@ export function DungeonDettaglioPage() {
             )}
 
             {/* ---- L'area scelta: mappa e obiettivi ---- */}
-            <div className={`grid grid-cols-1 items-start gap-4 ${memento ? '2xl:grid-cols-[minmax(0,1fr)_340px]' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
+            <div className={`order-1 grid grid-cols-1 items-start gap-4 lg:order-none ${memento ? '2xl:grid-cols-[minmax(0,1fr)_340px]' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
               <section className="card flex flex-col gap-2.5">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>
