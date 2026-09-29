@@ -472,7 +472,7 @@ limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «sto
 ### Integrazione delle mappe nelle pagine (Fase 13.4)
 `src/hooks/useMappaPartita.ts` (mappa con la partita attiva, azioni raccolto/punto/acquisto con aggiornamento locale, `versione` per ricaricare,
 `onCambiato` per avvisare la pagina ospite) è condiviso da `MappaPage` e da `src/components/mappe/MappaIncorporata.tsx` (visore `incorporato`
-ad altezza fissa con «Schermo intero» e «Modifica mappa»). «La città» mostra la mappa `tokyo` sopra le piastrelle (`MiniaturaMappa`: immagine
+ad altezza fissa — `altezza`, 560 px se non indicata — o data dalle classi di `classeVisore`, con «Schermo intero» e «Modifica mappa»). «La città» mostra la mappa `tokyo` sopra le piastrelle (`MiniaturaMappa`: immagine
 dell'istanza → asset `mappe/<chiave>` → icona); la scheda del quartiere mostra `citta-<q>`; la scheda del Palazzo mostra la mappa dell'area
 corrente e tiene allineati elenco dei punti e visore (l'elenco ricarica il visore con `versione`, il visore ricarica la scheda con `onCambiato`).
 Il vecchio `MappaInterattiva` e le funzioni client dei marcatori sono rimossi: il posizionamento vive solo nell'editor; le rotte server dei
