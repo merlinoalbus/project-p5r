@@ -18,6 +18,8 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
+import { usePartitaStore } from '../stores/partitaStore';
+import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { useAsset } from '../stores/assetStore';
 import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
@@ -57,7 +59,16 @@ export function EditorMappaPage() {
 
 function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const navigate = useNavigate();
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave), [chiave]);
+  // **Vista del giorno corrente** (richiesta dell'utente, 2026-09-18): l'editor di regola mostra
+  // tutto, perché deve poter modificare anche quel che nel mondo non c'è ancora. Con l'interruttore
+  // acceso la mappa si legge invece come la legge chi consulta la guida oggi — nascondendo quel che
+  // le condizioni di visibilità escludono nel giorno e nella fascia della partita attiva — così si
+  // controlla il lavoro senza uscire dalla modifica. Senza partita attiva non c'è un «oggi»: resta spento.
+  const attiva = usePartitaStore((s) => s.attiva);
+  const momento = usePartitaStore((s) => `${s.attiva?.dataGioco ?? ''}|${s.attiva?.fasciaGioco ?? ''}`);
+  const [giornoCorrente, setGiornoCorrente] = useState(false);
+  const conGiorno = giornoCorrente && !!attiva;
+  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, conGiorno ? attiva.id : undefined), [chiave, conGiorno, attiva?.id, momento]);
   const albero = useCarica(() => getAlberoMappe(), [chiave]);
   // elenchi per le condizioni di visibilità (Confidenti, quartieri, richieste, Palazzi): una volta per pagina
   const elenchi = useCarica<ElenchiCondizioni>(async () => {
@@ -126,13 +137,20 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
         <VisoreMappa
           key={dati.chiave}
           mappa={presentaMappa(dati)}
-          partitaId={null}
+          partitaId={conGiorno ? attiva.id : null}
+          vistaGiornoCorrente={conGiorno}
           onNaviga={vai}
           onChiudi={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)}
           editor={editor}
           className="visore-mappa--editor"
           intestazione={<span className="editor-mappa__targhetta">Modifica</span>}
-          azioni={<PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)} />}
+          azioni={<>
+            <PulsanteVisivo tono={conGiorno ? 'primario' : 'fantasma'} compatto attivo={conGiorno}
+              icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Giorno corrente"
+              dettaglio={attiva ? (conGiorno ? 'acceso: vedi solo quel che c’è oggi' : 'spento: vedi tutto') : 'serve una partita attiva'}
+              disabled={!attiva} onClick={() => setGiornoCorrente((v) => !v)} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)} />
+          </>}
           pannello={
             <PannelloEditor
               mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti} elenchi={elenchi.dati ?? ELENCHI_VUOTI}
@@ -443,12 +461,12 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri l’arrivo" dettaglio={s.destinazioneNomi?.mappa ?? undefined} onClick={() => onVai(destinazione.mappa)} />
       )}
       <form className="flex flex-col gap-2" onSubmit={salva}>
-        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={160} /></label>
+        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.spillo.nome} /></label>
         <div className="editor-mappa__campo">
           <Selettore etichetta="Tipo" valore={tipo} opzioni={CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c).map((t) => ({ chiave: t, nome: DEFINIZIONI_SPILLO[t].nome, gruppo: DEFINIZIONI_CATEGORIA[c].nome })))} onCambia={(k) => cambiaTipo(k as TipoSpillo)} />
         </div>
         <p className="m-0 text-[12px] text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
-        <label className="editor-mappa__campo">Descrizione<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={2000} /></label>
+        <label className="editor-mappa__campo">Descrizione<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={LIMITI_GUIDA.spillo.descrizione} /></label>
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
         {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
@@ -514,7 +532,7 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
     <section className="visore-mappa__sezione" aria-label="Proprietà della mappa">
       <h3 className="visore-mappa__intestazione">Mappa</h3>
       <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, tipo, genitore: genitore || null, ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
-        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={120} /></label>
+        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.mappa.nome} /></label>
         {nomeDaConfermare && <p className="editor-mappa__avviso" role="status">In alto si legge «{titoloMostrato}»: è il nome ricavato dai dati dell’estrazione. Salva per usare «{mappa.nome}» dappertutto.</p>}
         <div className="grid grid-cols-2 gap-2">
           <div className="editor-mappa__campo">
@@ -525,7 +543,7 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
         <div className="editor-mappa__campo">
           <Selettore etichetta="Mappa genitore" valore={genitore} vuoto="— nessuna (radice) —" opzioni={albero.filter((m) => !discendenti.has(m.chiave)).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), dettaglio: NOME_TIPO_MAPPA[m.tipo] }))} onCambia={setGenitore} />
         </div>
-        <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} /></label>
+        <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={LIMITI_GUIDA.mappa.note} /></label>
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" dettaglio={!modificata && nomeDaConfermare ? 'conferma il nome' : undefined} disabled={occupato || (!modificata && !nomeDaConfermare)} />
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina mappa" disabled={occupato} onClick={onElimina} />
@@ -554,7 +572,7 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !valida} onClick={() => void onCrea({ nome: nome.trim(), tipo, genitore: genitore.chiave, ordine: genitore.figli.length, passaggio, ritorno })} />
       </>}>
       <div className="flex flex-col gap-2">
-        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={120} autoFocus /></label>
+        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={LIMITI_GUIDA.mappa.nome} autoFocus /></label>
         <div className="editor-mappa__campo">
           <Selettore etichetta="Tipo di mappa" valore={tipo} opzioni={TIPI_MAPPA.map((t) => ({ chiave: t, nome: NOME_TIPO_MAPPA[t] }))} onCambia={(k) => setTipo(k as TipoMappa)} />
         </div>

@@ -16,6 +16,7 @@ import type { BattagliaDto, OmbraDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { RisposteNegoziazione } from '../components/guida/RisposteNegoziazione';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
 import { chiaveElementoDaTesto } from '../utils/elementiGuida';
 
@@ -134,6 +135,9 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
           {n.opzioniHoldUp.map((o) => <Voce key={o.opzione} titolo={o.opzione}>{o.effetto}</Voce>)}
         </Dati>
       </SezioneConFregio>
+      {/* La ricerca sulla domanda viene prima di tutto: è l'unica cosa che si legge sullo schermo
+          mentre l'Ombra parla. Le quattro carte della regola restano sotto, che spiegano il perché. */}
+      {n.domande && n.domande.length > 0 && <RisposteNegoziazione domande={n.domande} fonte={n.fonteDomande} />}
       {/* **Le risposte sono la cosa che si cerca sotto pressione**: una lista di pastiglie verdi
           e rosse si trova con la coda dell'occhio, «Risposte efficaci: a · b · c» no. */}
       <div className="grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">

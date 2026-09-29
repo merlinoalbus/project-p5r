@@ -611,6 +611,211 @@ un pacchetto da 311 MB, rifiuto di un file non valido e di tre tentativi di risa
 con bersagli da 44 px. Test: `server/services/pacchettoDeposito.test.ts` (cartella assente, non leggibile, elenco
 ordinato, risalite) e tre casi nella card.
 
+## Le planimetrie del Palazzo: ordine, legame con le aree, giorno corrente nell'editor (18 settembre 2026) — fatto
+
+Richiesta dell'utente dalla scheda di Kamoshida: «devo poter vedere le planimetrie e gestirne
+l'avanzamento; ordinarle, aggiungerle e cancellarle; evidenziare i raccolti della mappa specifica».
+**Diagnosi**: la guida e l'atlante sono due mondi (18 aree contro 34 planimetrie per Kamoshida) e il
+legame `mappa_entita` copriva 3 aree su 18 — 72 legami su tutti i Palazzi. Peggio: **il salvataggio
+dell'editor non scriveva mai `mappa_entita`** (solo le colonne `entita_*` della mappa), e la scheda
+legge la tabella: legare una planimetria a un'area non si vedeva da nessuna parte. L'ordine esisteva
+solo come campo numerico nel modulo dell'editor.
+
+**Server**: `sincronizzaLegameEntita` scrive i due posti insieme dentro la stessa transazione di
+`creaMappa`/`aggiornaMappa` e impone **un'area = una planimetria** (legarne una seconda stacca la
+prima); `riordinaMappe(genitore, chiavi)` riscrive l'ordine 0..n-1 lasciando in coda, come stavano,
+le figlie non elencate (`PUT /api/mappe/ordine`, schema `bodyRiordinaMappe`); `dettaglioDungeon`
+porta ora **tutte** le planimetrie dell'albero (radice esclusa) con `ordine` e l'`area` legata, non
+più solo quelle con collezionabili — sono proprio le vuote quelle da riordinare o togliere.
+
+**Interfaccia**: pannello «Planimetrie» nella scheda del Palazzo (`PlanimetriePalazzo`), aperto dal
+contatore dell'intestazione: elenco ordinabile **a trascinamento di puntatore** (funziona col dito:
+la scheda si usa sul tablet) con i tasti Su/Giù per la precisione e la tastiera, avanzamento per
+riga, `Selettore` dell'area della guida, «Aggiungi» e «Elimina» con conferma che dice che cosa si
+porta via. Scegliere una planimetria apre il suo visore e **la colonna mostra i soli collezionabili
+di quella mappa**; se è legata a un'area si apre anche quell'area.
+
+**Editor**: interruttore «Giorno corrente» acceso/spento (`VisoreMappa.vistaGiornoCorrente`):
+spento l'editor vede tutto, com'è giusto per modificare anche quel che nel mondo non c'è ancora;
+acceso la mappa si rilegge con la partita attiva e nasconde quel che le condizioni escludono oggi.
+Senza partita attiva resta spento e disabilitato.
+
+Test: `server/routes/planimetrie-palazzo.test.ts` (legame che arriva nella tabella letta dalla
+scheda, 1:1, distacco, elenco completo e ordinato, riordino con la coda, riordino fuori dal
+genitore), tre casi nella scheda del Palazzo e due sull'interruttore dell'editor; contratto delle
+planimetrie aggiornato in `struttura-server.test.ts`. Verifica dal vivo su Kamoshida (legame,
+riordino e scheda dalle API; pannello a 1280 e 375 px senza scorrimento orizzontale né errori in
+console).
+
+
+## Negoziazione: tutte le domande, con il verdetto di ogni carattere (18 settembre 2026) — fatto
+
+La scheda «Negoziazione» dava la regola (quattro personalità, due risposte d'esempio l'una) ma non
+serviva davanti all'Ombra: quel che si legge sullo schermo è **la domanda**, e da lì deve partire la
+ricerca. **Migrazione 083 `negoziazione_domande`**: 230 domande trascritte (225 dopo la fusione delle
+ripetute), 680 risposte e i loro verdetti entrano nella riga `dati_guida` «battaglia» (`negoziazione.domande`, `negoziazione.fonteDomande`) dal file di
+repository `server/db/dati/negoziazione-domande.json`; il pacchetto è rigenerato alla 083. Per ogni
+risposta si dice quali caratteri la prendono bene (`buona`), così così (`passabile`) o male
+(`cattiva`); un carattere che non compare **non è indifferente, non è stato verificato**, e le voci
+che nemmeno la fonte conferma restano marcate `incerto`. Esiti e tratti sono in italiano nel dato
+(`buona|passabile|cattiva`, `giocosa|timida|irritabile|cupa`, tipi `EsitoRisposta` e `TrattoOmbra`).
+
+**Interfaccia**: `RisposteNegoziazione` in cima alla scheda — barra di ricerca che cerca fra domande
+e risposte (tutte le parole scritte, accenti e punteggiatura ignorati), i quattro caratteri come
+interruttori con il loro colore fisso (`src/utils/negoziazione.ts`: giocosa oro, timida azzurra,
+irritabile rossa, cupa viola) e, per ogni risposta, una pastiglia per carattere con l'esito. Scelto
+il carattere, la risposta buona per lui sale in cima e la riga si colora; le altre carte della regola
+restano sotto. Fonte e resa italiana dichiarate nella scheda e nel `NOTICE`.
+
+**Migrazione 084 `negoziazione_senza_contraddizioni`** (dalla revisione): la fonte a volte si
+contraddice — ventiquattro risposte risultavano buone **e** cattive per lo stesso carattere, e cinque
+domande comparivano due volte con verdetti diversi — e la scheda arrivava a consigliare e sconsigliare
+la stessa risposta. `normalizzaDomande` impone due regole: un solo verdetto per carattere, **il
+peggiore**, marcato incerto quando la fonte non è d'accordo con sé stessa; e una domanda, una scheda,
+con risposte e verdetti fusi. Il pacchetto è rigenerato alla 084: 225 domande, 680 risposte, nessun
+conflitto, 30 verdetti marcati incerti.
+
+Test: migrazione 083 (file presente, contratto dei valori, nessun residuo inglese, idempotenza,
+un solo verdetto per carattere, il peggiore nel dubbio, fusione delle domande ripetute) e
+cinque casi sul componente (ricerca, riduzione dell'elenco, verdetti per carattere, ordinamento,
+stato vuoto). Verificato dal vivo: 230 domande servite dall'API e la scheda nel browser a 1280 e
+375 px senza scorrimento orizzontale né errori in console.
+
+
+## La sezione dei Palazzi diventa correggibile, e la pianta della guida esce di scena (18 settembre 2026)
+
+Tre richieste dell'utente in fila: «devo poter sistemare e correggere tutte le parti di questa
+sezione — descrizioni, raggruppamenti, testi, guide», «tenetele separate ma tutto ordinato e
+gestibile», «la pianta della guida si può rimuovere».
+
+**Era l'unica parte della guida in sola lettura.** Negozi, articoli, libri, film, attività, luoghi,
+domande e cruciverba hanno il loro modulo da un pezzo; dungeon, aree e i 688 punti di interesse si
+potevano solo guardare, benché siano trascrizioni fatte a mano da un sito, con refusi e frasi
+tagliate. Ora si correggono **dove si leggono**: `PUT /api/compendio/dungeon/:chiave` (nome,
+sovrano, le tre date, livello, note), `PUT /api/compendio/aree/:chiave` (nome, descrizione),
+`POST /api/compendio/aree/:chiave/punti`, `PUT` e `DELETE /api/compendio/punti/:chiave`
+(nome, descrizione, tipo, esauribile). Sono dati di gioco: valgono per ogni partita ed entrano nel
+pacchetto quando lo si rigenera. Interfaccia: `CorrezioneGuida` — la matita accanto al testo, che
+apre i campi di quel pezzo e basta — su intestazione del Palazzo, area e singolo punto, più
+«Aggiungi un punto» in fondo all'elenco della guida.
+
+**I raggruppamenti si correggono** (`PUT /api/mappe/:chiave/presentazione`): il nome della stanza
+vale per tutte le sue tavole e rinominarlo da una le rinomina tutte; l'etichetta dice che cosa
+mostra la singola versione; `gruppoId: null` fa uscire una tavola dal raggruppamento. Dal pannello
+si correggono la stanza e, dentro, nome ed etichetta di ogni planimetria.
+
+**La pianta della guida non c'è più.** Era una seconda immagine della stessa stanza, scaricata da
+indirizzi esterni con fallback e crediti, e su 107 aree ne erano state scaricate 11. Via la vista
+«Pianta della guida» dalla scheda, la rotta `POST /api/mappe/piante/:area/scarica`, il servizio
+`scaricaPianta`, i campi `pianta`/`piantaScaricata`/`piantaAssente` del DTO e il test che li
+copriva (resta intatta la pianta dei **quartieri**, che è un'altra cosa). Al suo posto, dove il
+legame manca, la scheda **offre di collegare**: un selettore delle tavole del Palazzo non ancora
+assegnate, perché le 221 tavole libere dicono che quasi sempre l'immagine c'è e manca il legame.
+
+**Provato e scartato**: l'accostamento automatico area ↔ planimetria per nome. Sui dati veri dà
+**0 proposte su 35 aree**, perché la guida e l'estrazione chiamano le stanze in modo diverso
+(«Edificio Ovest 1P» contro «Vecchio castello 1P»): un automatismo che indovina avrebbe prodotto
+legami sbagliati da disfare a mano, quindi il collegamento resta una scelta, resa comoda.
+
+Test: `server/routes/guida-modificabile.test.ts` (testi del Palazzo, dell'area, ciclo completo di
+un punto, nome vuoto rifiutato, raggruppamento con rinomina che si propaga e uscita dal gruppo).
+Verifica dal vivo: correzione del nome di un'area salvata e riletta, nessuna traccia della vista
+«Pianta della guida», collegamento offerto sulle aree scoperte.
+
+
+## Correzioni: quel che era salvato ma non si vedeva, e i tetti presi a occhio (18 settembre 2026)
+
+Due difetti trovati **provando l'interfaccia percorso per percorso**, non dai test: il giro
+precedente li aveva verificati solo lato server, ed è un errore di metodo — un endpoint che risponde
+200 non dice che la schermata funzioni.
+
+- **L'etichetta della planimetria e il nome della stanza si salvavano senza comparire.** Vengono
+  dall'atlante (`getAlberoMappe`), e dopo una correzione la scheda rileggeva solo il Palazzo: il
+  testo restava quello vecchio finché non si ricaricava la pagina. Ora `onCambiato` rilegge
+  entrambi.
+- **I tetti dei campi erano scelti a occhio**, e per giunta scritti due volte: 200 caratteri sul livello consigliato, dove la guida
+  ne scrive 352 per Kamoshida. Siccome il modulo rimanda indietro anche i campi non toccati,
+  **la scheda di un Palazzo non si poteva salvare affatto** (400 dal server). I tetti ora sono
+  misurati sui dati veri con ampio margine (la prosa più lunga è una nota da 3938 caratteri), e il
+  nome di una mappa passa da 120 a 300 perché nell'atlante ce n'è uno da 118.
+
+Test nuovi: la rilettura dell'atlante dopo una correzione di stanza, e il giro completo che
+**risalva ogni Palazzo, ogni area e ogni punto così come sono** — se un dato nuovo supera un tetto
+si rompe la suite, non la scheda in mano a chi gioca. Verifica dal vivo dei sette percorsi di
+modifica (Palazzo, area, punto, aggiunta di un punto, stanza, etichetta, nome della planimetria):
+tutti salvano e si aggiornano a schermo.
+
+**Un tetto solo, condiviso** (dalla revisione): i limiti stavano nello schema del server *e* nel
+`maxLength` del campo, e si sono subito disallineati — il campo lasciava scrivere mille caratteri
+dove la rotta ne accettava duecento, e il salvataggio tornava indietro con un 400 senza dire quale
+campo fosse di troppo. Ora `shared/limitiGuida.ts` è l'unica fonte, letta dagli schemi zod e dai
+moduli. Il nome di una mappa vale 180 e non 300: entra nella chiave leggibile del percorso, che il
+server tiene sotto quella soglia — oltre, risponde «percorso-troppo-lungo» e dice di abbreviare.
+Test: ogni rotta accetta esattamente il massimo dichiarato e rifiuta il carattere in più.
+
+## Un elenco solo nella scheda del Palazzo (19 settembre 2026) — fatto
+
+Riscontro dell'utente, provando l'interfaccia: «continuo a non vedere su FE come sostieni che io
+possa sistemare le planimetrie dei palazzi». Aveva ragione, e il difetto non era la mancanza della
+funzione: il pannello per ordinare, legare e correggere le planimetrie **c'era ed era completo**,
+ma si apriva solo da un chip grigio («34 planimetrie · gestisci») messo in fila con le targhette
+informative «18 aree» e «44 da raccogliere». Niente lo distingueva da un'etichetta.
+
+**Diagnosi, sui dati veri di Kamoshida**: due elenchi dello stesso Palazzo. La colonna di
+atterraggio elencava le 18 aree della guida, di cui 15 senza planimetria legata; il pannello
+elencava 17 stanze / 34 planimetrie, di cui 14 senza area. Due ordini diversi, nessuno completo.
+
+**Fatto** (scelta dell'utente fra le alternative proposte): un elenco solo, nella colonna di
+atterraggio, in ordine di percorso trascinabile.
+- `PlanimetriePalazzo` è ora l'elenco del Palazzo e sta nella colonna (allargata a 360 px), con i
+  comandi sulle righe: maniglia e ▲▼ per l'ordine, ✎ per stanza e versione, cestino, «Editor»,
+  selettore dell'area, «Aggiungi».
+- In coda, le aree della guida senza planimetria: righe tratteggiate con il selettore «Collega una
+  planimetria». Non spariscono, si collegano.
+- Il pannello separato, il pulsante che lo apriva e il caricamento pigro dell'atlante non ci sono
+  più: l'atlante serve subito, perché l'elenco è la prima cosa che si vede (nei Memento no: i
+  dedali non hanno planimetrie e tengono il pozzo).
+- Le tavole libere nel selettore portano il nome di presentazione dell'atlante: prima erano 32 voci
+  chiamate tutte «Palazzo di Kamoshida — Immagini native che nessun campo usa».
+
+Test: due nuovi in `DungeonDettaglioPage.test.tsx` (l'elenco è già a schermo senza aprire nulla; e
+un'area senza planimetria si collega dalla sua riga in coda), più i sette adattati all'interfaccia
+nuova. Verifica dal vivo su Kamoshida, Madarame e Memento: navigazione dalla riga al visore,
+collegamento di un'area orfana provato davvero e poi ripristinato, nessun errore in pagina.
+
+## Il formato piccolo: il doppio elenco era tornato (19 settembre 2026) — fatto
+
+Riscontro dell'utente: «FE non ottimizzato, si vede male anche in formato desktop». Guardato a sei
+larghezze (1920, 1440, 1280, 1024, 820, 768, 390) con misura dello scorrimento orizzontale e degli
+elementi che sforano.
+
+Nessun overflow reale — ma tre difetti veri:
+
+1. **Sotto i 1024 px la doppia lista era tornata**: la fila di chip con tutte le aree (per Kamoshida
+   diciotto, che a 768 px non scorrono ma vanno a capo per otto righe) sopra l'elenco del Palazzo che
+   le contiene già. L'elenco cominciava a ~700 px dall'alto. Tolta la fila: ora comincia a 389 px.
+   Resta nei Memento, dove serve a navigare i dedali del pozzo.
+2. **Le date si spezzavano male sul telefono**: andando a capo, la freccia «→» finiva a inizio riga
+   davanti alla tappa, dove non collega più niente. Le frecce compaiono da `sm` in su.
+3. **Il comando di correzione del Palazzo restava solo su una riga vuota**: un glifo isolato sembra
+   un refuso. Ora porta l'etichetta «Correggi la scheda» (nuova prop `etichetta` di
+   `CorrezioneGuida`), e l'emblema sul telefono scende da 80 a 52 px.
+
+Un tentativo di tenere titolo e matita sulla stessa riga con `flex-1` è stato **annullato**: a 390 px
+schiacciava il titolo a larghezza zero e lo impilava una lettera per riga. Visto nello screenshot e
+tolto.
+
+Verifica: 6 larghezze × 4 pagine (Palazzo, Memento, Home, Compendio) senza scorrimento orizzontale e
+senza errori in pagina; suite completa 994 test verdi.
+
+**Rilievo della revisione (stesso giorno)**: tolta la fila di chip, in colonna unica l'elenco
+srotolato precedeva il contenuto — per Kamoshida 4053 px di righe, con l'area aperta a 4682 px
+dall'alto: la navigazione seppelliva ciò che seleziona, molto peggio dei 320 px di chip. Corretto
+mettendo il contenuto dell'area **prima** dell'elenco sotto i 1024 px (`order`) e rimettendo il
+tetto d'altezza anche sul piccolo (`max-h-[70vh]`). Misurato: l'area scelta comincia a 614 px su
+390 px e 415 px su 768 px; sopra i 1024 px nulla cambia (396 px).
+
+
 ## Giornata della guida modificabile e aree che scorrono (29 settembre 2026) — fatto
 
 Richiesta dell'utente: le attività «Di giorno» / «Di sera» non si potevano modificare, aggiungere né rimuovere, e un
@@ -626,3 +831,5 @@ evento aggiunto restava sotto, nel riquadro «Le mie note». Lavoro direttamente
 Aperto, da decidere con l'utente: con il vincolo «Home in una schermata» la finestra della guida resta piccola sugli
 schermi bassi (Home: 48 px a 1366×768 per la stella che cresce con l'altezza da 1360 px, 141 px a 1024×768, 168 px a
 1280×720, 189 px a 768×1024).
+
+

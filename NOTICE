@@ -18,6 +18,13 @@ Il dataset del compendio Royal (data/seed/) è derivato dalle seguenti opere ope
    Fonte di verifica incrociata: src/app/p5/data/roy-*.json, skill-data.json, comp-config.json.
    Rilasciato nel pubblico dominio (The Unlicense, copia in data/seed/sorgenti/aqiu384/LICENSE.md).
 
+Le domande e le risposte della negoziazione con le Ombre (server/db/dati/negoziazione-domande.json)
+sono trascritte da «The Ultimate/Most Complete Guide To Negotiations In Persona 5» di joyce-chen e
+GooberSD/Chompobar — https://docs.google.com/document/d/1sPsQ2SPXJdsrhYBj3mMyj5va-hmJ10TycIqJto4k2z4
+— raccolta a sua volta basata su https://github.com/joyce-chen/persona5-negotiation e sulla Megami
+Tensei Fandom Wiki. La resa italiana è di questo progetto: il gioco in italiano può usare parole
+diverse, e le voci marcate «incerto» non sono verificate nemmeno dalla fonte.
+
 I riferimenti visivi citati nei prompt di generazione (docs/grafica/) rimandano a immagini
 ospitate da terzi (wiki, store ufficiali) usate esclusivamente come ispirazione: nessuna di esse
 è copiata in questo repository.

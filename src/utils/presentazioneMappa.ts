@@ -53,7 +53,11 @@ export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string 
  * a mano finiva per chiamarsi in un modo nell'editor e in un altro nell'albero. */
 export function titoloGruppoImmagini(mappa: IdentitaMappa): string {
   if (mappa.nomeRivisto) return mappa.nome;
-  return mappa.gruppoImmagini?.nome ?? nomePresentazioneMappa(mappa);
+  // Anche il nome del gruppo passa dal filtro del gergo: è un'istantanea dell'estrazione come il
+  // resto, e quattro fogli non attribuiti di un Palazzo si presentavano ancora come «Palazzo di
+  // Kamoshida — Immagini native che nessun campo usa». Il filtro stava solo sulla via del nome
+  // della singola mappa, e il titolo del gruppo gli girava intorno (rilievo della revisione).
+  return mappa.gruppoImmagini ? senzaGergo(mappa.gruppoImmagini.nome) : nomePresentazioneMappa(mappa);
 }
 
 /** Il vocabolario dell'estrattore non arriva a chi gioca.

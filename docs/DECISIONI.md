@@ -495,6 +495,87 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   pannello dello spillo. Nel visore basta un clic, ma nell'editor il clic seleziona per modificare:
   la via d'uscita va data a parte, altrimenti l'unico modo era un pulsante in fondo al pannello.
 
+### 2026-09-18 — Le planimetrie di un Palazzo sono una cosa sola, ordinata
+- **Un'area della guida ha una sola planimetria** (decisione dell'utente): legarne una seconda
+  stacca la prima. Con più planimetrie per area «completa» non misurava niente, e la stessa stanza
+  compariva due volte nell'elenco del Palazzo.
+- **Il legame si scrive in un posto solo dal punto di vista di chi lo usa**: `mappa_entita` è la
+  tabella che leggono scheda del Palazzo e contenuti della guida, e ora la scrive anche l'editor,
+  nella stessa transazione delle colonne `entita_*`. Prima il salvataggio dell'editor sembrava
+  riuscito e non cambiava nulla.
+- **La scheda elenca tutte le planimetrie, anche quelle vuote**: l'elenco serve a ordinarle,
+  legarle e toglierle, e le planimetrie da togliere sono proprio quelle senza niente da raccogliere
+  (i ritagli che nessun campo usa, le inquadrature alternative della stessa stanza).
+- **L'ordine si cambia trascinando, ma non con l'HTML5 drag-and-drop**: col dito non parte, e questa
+  scheda si consulta dal tablet mentre si gioca. Trascinamento a puntatore, più Su/Giù per la
+  precisione e per la tastiera.
+- **Le duplicazioni restano una scelta di chi gioca** (risposta dell'utente): niente fusione né
+  cancellazione automatica delle varianti; l'app dà gli strumenti (ordine, legame, eliminazione) e
+  la decisione su quale tavola tenere si prende planimetria per planimetria.
+- **L'editor può guardare il giorno corrente, ma non lo fa da solo**: di regola vede tutto, perché
+  deve poter modificare anche quel che nel mondo non c'è ancora; l'interruttore serve a controllare
+  il lavoro con gli occhi di chi consulta la guida oggi, senza uscire dalla modifica.
+
+
+### 2026-09-18 — Nella negoziazione si cerca la domanda, e il carattere è un colore
+- **La domanda è l'unica cosa che si legge sullo schermo** mentre l'Ombra parla: la ricerca parte da
+  lì (e prende anche il testo delle risposte, perché a volte è quello che si riconosce prima).
+- **Solo italiano** (scelta dell'utente): la fonte è inglese e la resa è nostra; il gioco in
+  italiano può usare parole diverse, e questo va detto nella scheda invece di lasciarlo scoprire.
+- **Un carattere che non compare non è indifferente: non è stato verificato.** Inventare un verdetto
+  costerebbe la trattativa, quindi la riga lo dice; le voci che nemmeno la fonte conferma sono
+  marcate «incerto».
+- **Il carattere è un colore fisso** in tutta l'app: durante la trattativa si riconosce con la coda
+  dell'occhio, senza rileggere i nomi.
+- **Il dato sta nella guida alla battaglia, non in tabelle nuove**: è testo della guida, si serve in
+  un colpo solo e la ricerca avviene nel browser, che su tablet è istantanea.
+- **Nel dubbio vale il verdetto peggiore** (rilievo della revisione, 2026-09-18): quando la fonte dà
+  alla stessa risposta due esiti per lo stesso carattere, la scheda mostra il peggiore e lo marca
+  incerto. Consigliare come buona una risposta che qualcuno ha segnato cattiva fa fallire la
+  trattativa, e una guida che consiglia e sconsiglia la stessa cosa è peggio di una che tace.
+- **Una domanda, una scheda**: le domande trascritte due volte si fondono (risposte per testo,
+  verdetti per carattere) invece di comparire come due righe gemelle che si spartiscono i verdetti.
+
+
+### 2026-09-18 — La guida si corregge dove si legge, e la pianta scaricata esce di scena
+- **La sezione dei Palazzi non è più in sola lettura** (richiesta dell'utente): erano trascrizioni
+  fatte a mano e non c'era nessun posto per correggerle. La correzione sta accanto al testo, non in
+  una schermata a parte: altrimenti bisogna ricordarsi che cosa non andava.
+- **Le correzioni sono dati di gioco, non avanzamento**: stanno in `gioco.db`, valgono per tutte le
+  partite ed entrano nel pacchetto alla rigenerazione.
+- **Una stanza ha un nome solo**: rinominarla da una delle sue tavole la rinomina su tutte, perché
+  altrimenti due versioni della stessa stanza finirebbero sotto due titoli diversi.
+- **La pianta scaricata dalla guida è stata rimossa** (decisione dell'utente): seconda immagine
+  della stessa stanza, con uno scaricamento da indirizzi esterni e un sistema di marcatori tutto
+  suo, usata 11 volte su 107 aree. Dove manca la planimetria la scheda ora **offre di collegarla**,
+  che è il rimedio vero: le tavole ci sono, mancava il legame.
+- **Nessun accostamento automatico per nome**: provato sui dati, 0 proposte su 35 aree, perché la
+  guida e l'estrazione chiamano le stanze in modo diverso. Un automatismo che indovina avrebbe
+  lasciato legami sbagliati da disfare a mano.
+- **I tetti dei campi si misurano sui dati, non si scelgono** (2026-09-18): un modulo che rimanda
+  indietro anche i campi non toccati trasforma un limite troppo stretto su un solo campo nel blocco
+  dell'intero salvataggio. Un test risalva ogni Palazzo, area e punto così com'è per accorgersene.
+- **Una correzione che tocca l'atlante rilegge l'atlante**: nome della stanza ed etichetta della
+  versione non stanno nella scheda del Palazzo, e ricaricare solo quella lasciava a schermo il testo
+  vecchio benché salvato.
+- **Un tetto si scrive una volta sola** (2026-09-18): schema del server e `maxLength` del campo
+  leggono `shared/limitiGuida.ts`, perché due copie dello stesso numero divergono al primo ritocco e
+  il sintomo — un 400 che non dice quale campo — arriva a chi sta scrivendo.
+- **Un elenco solo per il Palazzo, ed è la colonna di atterraggio** (2026-09-19): la scheda aveva
+  due liste dello stesso Palazzo — le aree della guida a sinistra, dove per Kamoshida 15 voci su 18
+  dicevano «nessuna planimetria legata», e il pannello delle stanze, che bisognava sapere di poter
+  aprire da un chip indistinguibile dalle targhette accanto. Nessuna delle due era completa e
+  l'ordine non coincideva. Ora la lista è una: le stanze in ordine di percorso, con i comandi sulle
+  righe, e in coda le aree della guida ancora da collegare. Comanda l'ordine del percorso, quello
+  che si trascina, non la numerazione della guida.
+- **Un elenco di scelte fatto di nomi uguali non è una scelta** (2026-09-19): le tavole libere di
+  Kamoshida si presentavano tutte come «Palazzo di Kamoshida — Immagini native che nessun campo
+  usa», 32 voci identiche. Anche il selettore passa dai nomi dell'atlante, gli stessi dell'elenco.
+- **L'elenco unico vale a tutte le larghezze** (2026-09-19): sotto i 1024 px restava la fila di chip
+  di tutte le aree sopra l'elenco che le contiene già — per Kamoshida diciotto chip in otto righe,
+  circa 320 px di muro prima del contenuto, cioè la doppia lista rimessa in piedi sul formato dove
+  fa più male. La fila resta solo nei Memento, dove i dedali non hanno planimetrie.
+
 ### 2026-09-29 — La giornata della guida si modifica, e ciò che scorre dentro la pagina si vede
 - **Le correzioni alle azioni della guida valgono sempre per tutte le partite** (scelta dell'utente fra «per partita»,
   «a scelta» e «tutte»). Vivono nel file delle partite (`correzione_azione_guida`), non nella guida: il pacchetto la
@@ -510,3 +591,5 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   passare a una seconda barra. Regola unica nelle utility `area-scorrevole` / `area-scorrevole-x` e un test che vieta
   gli scorrimenti fatti a mano. Nelle schermate «senza scorrimento» (Home, scheda «Oggi») la pagina scorreva comunque
   di 50-70 px per la mappa di Tokyo: ora la mappa si adatta alla colonna e scorre solo la guida.
+
+

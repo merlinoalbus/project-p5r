@@ -1460,6 +1460,18 @@ export interface OmbraDto {
   personaCollegata: { id: number; nome: string; nomeIt: string } | null;
 }
 
+export type TrattoOmbra = 'giocosa' | 'timida' | 'irritabile' | 'cupa';
+export type EsitoRisposta = 'buona' | 'passabile' | 'cattiva';
+
+export interface NegoziazioneDomandaDto {
+  domanda: string;
+  risposte: Array<{
+    testo: string;
+    /** `incerto`: nemmeno la fonte l'ha verificato. */
+    verdetti: Array<{ esito: EsitoRisposta; tratto: TrattoOmbra; incerto?: boolean }>;
+  }>;
+}
+
 export interface BattagliaDto {
   fonti: { principale: string; note: string };
   sistema: { urlFonte: string; avvioScontro: string; comandi: string[]; esitiColpo: { debole: string; critico: string; tecnico: string; block: string; resiste: string }; unoMore: string; statiAlterati: Array<{ stato: string; effetto: string }>; notaFineBattaglia: string };
@@ -1467,7 +1479,16 @@ export interface BattagliaDto {
   tecnico: { urlFonte: string; stati: Array<{ stato: string; elementi: string[] }> };
   staffetta: { urlFonte: string; cosaE: string; disponibilita: string; effetto: string; livelli: string; indicatoriVisivi: string; ranghi: Array<{ rango: number; bonus: string }>; moltiplicatori: string; effettoSpeciale: string };
   speciali: { urlFonte: string; meccanica: string; attivazione: string; proprietaDanno: string; elenco: Array<{ nome: string; personaggi: string[]; sblocco: string }> };
-  negoziazione: { urlFonti: string[]; quandoSiPuoNegoziare: string; opzioniHoldUp: Array<{ opzione: string; effetto: string }>; comeVerificarePersonalita: string; personalita: Array<{ nome: string; descrizione: string; risposteEfficaci: string[]; risposteDaEvitare: string[] }>; regole: string[]; incertezze: string };
+  negoziazione: {
+    urlFonti: string[]; quandoSiPuoNegoziare: string; opzioniHoldUp: Array<{ opzione: string; effetto: string }>; comeVerificarePersonalita: string;
+    personalita: Array<{ nome: string; descrizione: string; risposteEfficaci: string[]; risposteDaEvitare: string[] }>; regole: string[]; incertezze: string;
+    /** Da dove vengono le domande e come sono state rese in italiano (migrazione 083). */
+    fonteDomande?: { titolo: string; autori: string[]; url: string; urlOriginale: string; nota: string };
+    /** Le domande dell'Ombra con, per ogni risposta, il verdetto di ciascuna personalità: una
+     *  risposta può essere buona per un carattere e cattiva per un altro. Una personalità che non
+     *  compare fra i verdetti non è indifferente: non è stata verificata. */
+    domande?: NegoziazioneDomandaDto[];
+  };
   ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string; elenco: string[] | null; incertezze: string };
   mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };
   demoniTesoro: { categoria: string; urlFonte: string; cosaSono: string; comeCompaiono: string; primaComparsa: string; comportamento: string; resistenzeGenerali: string; tecnicheConsigliate: string[]; elenco: Array<{ nome: string; livello: number; arcano: string; dove: string }> };
@@ -1539,14 +1560,13 @@ export interface AreaDungeonDto {
   ordine: number;
   nome: string;
   descrizione: string;
-  /** Immagine della pianta presente nell'istanza (ambito «mappa»). */
+  /** Immagine caricata per quest'area nell'istanza (ambito «mappa»), se qualcuno ce l'ha messa.
+   *
+   * La **pianta pubblicata dalla guida non c'è più** (2026-09-18): era una seconda immagine della
+   * stessa stanza, con un suo scaricamento da indirizzi esterni e un suo sistema di marcatori, e
+   * su centosette aree se ne erano scaricate undici. La stanza si guarda sulla planimetria
+   * dell'atlante; dove manca il legame, la scheda dà da collegarla invece di un'altra immagine. */
   mappa: boolean;
-  /** Fonte da cui la pianta presente è stata davvero scaricata (principale o alternativa); null se caricata dall'utente o assente. */
-  piantaScaricata: { url: string; fonte: string; pagina: string | null } | null;
-  /** Collegamento alla pianta pubblicata (null se nessuna guida la offre). */
-  pianta: PiantaAreaDto | null;
-  /** Motivo dell'assenza della pianta, se noto (es. piani generati proceduralmente). */
-  piantaAssente: string | null;
   /** Le planimetrie native dell'atlante legate a quest'area (`mappa_entita`), in ordine.
    *
    * Servono alla scheda del Palazzo per **mostrare la mappa invece di un rimando**. L'area della
@@ -1625,10 +1645,12 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   note: string;
   fonti: string[];
   aree: AreaDungeonDto[];
-  /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`) che hanno collezionabili, con
-   *  quanti sono e quali: la maggior parte non è legata a un'area della guida, quindi non compare in
-   *  `aree[].mappe`. Vuoto per i Memento, che contano gli obiettivi dei dedali. */
-  planimetrie: Array<{ chiave: string; nome: string; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
+  /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`, radice esclusa) nel loro
+   *  ordine logico, con i collezionabili di ognuna e l'area della guida a cui è legata (`mappa_entita`,
+   *  al più una: un'area ha una sola planimetria). Le planimetrie senza collezionabili ci sono lo
+   *  stesso, perché è da qui che si ordinano, si legano e si cancellano. Vuoto per i Memento, che
+   *  contano gli obiettivi dei dedali. */
+  planimetrie: Array<{ chiave: string; nome: string; ordine: number; area: { chiave: string; nome: string } | null; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
 }
 
 // ---- Calendario di gioco (Fase 6.3) ----

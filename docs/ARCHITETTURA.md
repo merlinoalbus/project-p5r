@@ -622,11 +622,43 @@ usato dai filtri (stato, supporto, acquisto, disponibilità). Le pagine leggono 
 dei DTO della voce 5; le colonne in prosa (`dove`, `periodo`, `regole`, `premi`, `altri_effetti`, `paga`,
 `sblocco`, `doti_json`) non sono più lette dal frontend.
 
+## Negoziazione con le Ombre (2026-09-18)
+Le domande stanno nella riga `dati_guida` «battaglia» (`negoziazione.domande`, `negoziazione.fonteDomande`),
+portate dalla migrazione 083 dal file `server/db/dati/negoziazione-domande.json` — trascrizione fedele
+alla fonte — e normalizzate da `normalizzaDomande` (un solo verdetto per carattere, il peggiore e
+marcato incerto quando la fonte si contraddice; domande ripetute fuse), che la 084 riapplica alle
+istanze già migrate. Servite con il resto
+di `GET /api/compendio/battaglia`: la ricerca avviene nel browser. `shared/types.ts` definisce
+`TrattoOmbra` (`giocosa|timida|irritabile|cupa`), `EsitoRisposta` (`buona|passabile|cattiva`) e
+`NegoziazioneDomandaDto`; `src/utils/negoziazione.ts` tiene colori, segni, ordine degli esiti e
+`cercaDomande` (tutte le parole, su domanda e risposte, via `normalizzaTesto`);
+`src/components/guida/RisposteNegoziazione.tsx` è la scheda con ricerca, interruttori dei caratteri e
+pastiglie di esito per risposta.
+
 ## Scheda del Palazzo, Richieste, domande e cruciverba (2026-09-12)
 `src/components/guida/RaccoltaPlanimetrie.tsx` elenca planimetrie con collezionabili (`{chiave, nome, n,
 presi, spilli[]}`) e segna «Raccolto» con `impostaSpilloRaccolto` (`src/services/api/mappe.ts`); la pagina
 aggiorna `planimetrie`, `aree[].mappe` e `raccolta` in locale (`segnaRaccolto`) e bumpa la versione del
-visore. `src/components/guida/ObiettiviDedalo.tsx` mostra `DedaloDto` (timbri, richieste, obiettivi) e
+visore. `src/components/guida/CorrezioneGuida.tsx` è la matita accanto al testo: apre i campi di quel pezzo
+e salva con `aggiornaDungeon` / `aggiornaArea` / `creaPunto` / `aggiornaPunto` / `eliminaPunto`
+(`src/services/api/compendio.ts` → `PUT /api/compendio/dungeon/:chiave`, `PUT /api/compendio/aree/:chiave`,
+`POST /api/compendio/aree/:chiave/punti`, `PUT` e `DELETE /api/compendio/punti/:chiave`, schemi in
+`server/schemas/guidaDungeon.ts`, servizi in `dungeonService`). I raggruppamenti si correggono con
+`aggiornaPresentazioneMappa` (`PUT /api/mappe/:chiave/presentazione`): il nome della stanza si
+propaga a tutte le sue tavole, l'etichetta resta della singola versione. **La pianta pubblicata
+dalla guida non esiste più** per le aree dei Palazzi (resta per i quartieri): dove manca la
+planimetria la scheda offre il selettore delle tavole libere e scrive il legame con `aggiornaMappa`.
+
+`src/components/guida/PlanimetriePalazzo.tsx` è il pannello «Planimetrie» della scheda (aperto dal
+contatore dell'intestazione): elenca **tutte** le planimetrie dell'albero `dungeon-<chiave>` che
+`DungeonDettaglioDto.planimetrie` porta con `ordine` e `area`, le riordina con `riordinaMappe`
+(`PUT /api/mappe/ordine`, trascinamento a puntatore + Su/Giù), lega l'area con `aggiornaMappa`
+(`entita`, un'area = una planimetria, imposto dal server in `sincronizzaLegameEntita`, che scrive
+insieme le colonne `entita_*` e la tabella `mappa_entita` letta dalla scheda), aggiunge con
+`creaMappa` ed elimina con `eliminaMappa`. Scegliere una riga porta il visore su quella planimetria
+e la colonna sui suoi soli collezionabili. Nell'editor `VisoreMappa.vistaGiornoCorrente` accende il
+filtro del giorno corrente della partita attiva (di regola l'editor vede tutto).
+`src/components/guida/ObiettiviDedalo.tsx` mostra `DedaloDto` (timbri, richieste, obiettivi) e
 scrive con `impostaTimbri` (`src/services/api/partite.ts`, `PUT /api/partite/:id/timbri`) e
 `impostaStatoRichiesta`; la pagina ricalcola `obiettivi.fatti` e `raccolta.presi`. `RichiestePage`,
 `DomandePage` e `CruciverbaPage` usano `CampoRicerca` + `Segmenti`; il dedalo delle Richieste vive in
