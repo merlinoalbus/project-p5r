@@ -56,7 +56,9 @@ export const DEFINIZIONI_CATEGORIA: Record<CategoriaSpillo, { nome: string; desc
 const CATEGORIA_PER_TIPO: Record<TipoSpillo, CategoriaSpillo> = {
   passaggio: 'spostamento', scala: 'spostamento', uscita: 'spostamento', treno: 'spostamento', velluto: 'spostamento', mementos: 'spostamento', 'ingresso-palazzo': 'spostamento', infiltrazione: 'spostamento', scorciatoia: 'spostamento', rampino: 'spostamento',
   negozio: 'citta', ristorante: 'citta', distributore: 'citta', sigarette: 'citta', cercalavoro: 'citta', lavoro: 'citta', terme: 'citta', lavanderia: 'citta', cinema: 'citta', biblioteca: 'citta', culto: 'citta', 'sala-giochi': 'citta', casa: 'citta', attivita: 'citta', confidente: 'citta',
-  dialogo: 'consumabile', forziere: 'consumabile', 'forziere-raro': 'consumabile', tesoro: 'consumabile', 'tesoro-palazzo': 'consumabile', 'seme-bramosia': 'consumabile', oggetto: 'consumabile', 'oggetto-chiave': 'consumabile', timbro: 'consumabile', boss: 'consumabile', miniboss: 'consumabile', nemico: 'consumabile',
+  dialogo: 'consumabile', forziere: 'consumabile', 'forziere-raro': 'consumabile', tesoro: 'consumabile', 'tesoro-palazzo': 'consumabile', 'seme-bramosia': 'consumabile', oggetto: 'consumabile', 'oggetto-chiave': 'consumabile', timbro: 'consumabile', boss: 'consumabile', miniboss: 'consumabile',
+  // I nemici si rigenerano: non si «raccolgono» e non contano per completare la mappa (richiesta dell'utente, 2026-09-30).
+  nemico: 'informativo',
   'punto-sensibile': 'informativo', meccanismo: 'informativo', porta: 'informativo', sicura: 'informativo', nota: 'informativo',
 };
 export function categoriaSpillo(tipo: string): CategoriaSpillo {
@@ -166,7 +168,8 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   timbro: { nome: 'Timbro dei Mementos', colore: '#f0abfc', collezionabile: true, riferimento: null },
   boss: { nome: 'Boss', colore: '#e5352b', collezionabile: true, riferimento: 'punto' },
   miniboss: { nome: 'Miniboss', colore: '#f97316', collezionabile: true, riferimento: 'punto' },
-  nemico: { nome: 'Nemico', colore: '#b0b0c0', collezionabile: true, riferimento: 'punto' },
+  /** Si rigenera: resta un segno sulla mappa, ma non si segna né conta nel completamento (2026-09-30). */
+  nemico: { nome: 'Nemico', colore: '#b0b0c0', collezionabile: false, riferimento: 'punto' },
   'punto-sensibile': { nome: 'Punto sensibile', colore: '#7fd8c8', collezionabile: false, riferimento: 'punto' },
   /** Leva, interruttore, pannello o quadro di controllo da azionare. */
   meccanismo: { nome: 'Meccanismo', colore: '#64748b', collezionabile: false, riferimento: 'punto' },

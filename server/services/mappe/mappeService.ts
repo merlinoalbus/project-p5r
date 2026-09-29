@@ -474,6 +474,23 @@ export function areeDellaMappa(mappa: string): Array<{ chiave: string; nome: str
     WHERE e.mappa_chiave = ? AND e.entita_tipo = 'area' ORDER BY a.ordine, a.chiave`).all(mappa) as Array<{ chiave: string; nome: string; ordine: number }>;
 }
 
+/**
+ * Un'area della guida che viene eliminata (2026-09-30) si stacca da ogni planimetria: le righe di
+ * `mappa_entita` e le colonne che la dichiaravano. Le mappe tengono le loro altre aree, e le colonne
+ * passano alla prima rimasta. Va chiamata dentro la transazione di chi elimina.
+ */
+export function staccaAreaDaOgniMappa(area: string): void {
+  const mappe = new Set((prepared("SELECT chiave FROM mappa WHERE entita_tipo = 'area' AND entita_chiave = ?").all(area) as Array<{ chiave: string }>).map((r) => r.chiave));
+  const conLegami = !!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get();
+  if (conLegami) {
+    for (const r of prepared("SELECT mappa_chiave FROM mappa_entita WHERE entita_tipo = 'area' AND entita_chiave = ?").all(area) as Array<{ mappa_chiave: string }>) mappe.add(r.mappa_chiave);
+    prepared("DELETE FROM mappa_entita WHERE entita_tipo = 'area' AND entita_chiave = ?").run(area);
+  }
+  prepared("UPDATE mappa SET entita_tipo = NULL, entita_chiave = NULL WHERE entita_tipo = 'area' AND entita_chiave = ?").run(area);
+  // senza la tabella dei legami (schema indietro) le colonne azzerate sono già il risultato
+  if (conLegami) for (const m of mappe) allineaColonneArea(m);
+}
+
 /** Per il pacchetto delle mappe: le aree contenute (chiavi, in ordine di guida), solo se ce ne sono. */
 function areePerPacchetto(mappa: string): { aree?: string[] } {
   if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) return {};
@@ -909,6 +926,10 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${spilloId} non esiste.`);
+  // Un nemico si rigenera: non si segna raccolto (2026-09-30). Solo lui: «raccolto» su uno spillo collegato a un
+  // punto della guida è anche il modo di segnare quel punto, qualunque sia il tipo. Togliere un «raccolto»
+  // resta sempre possibile, così un segno rimasto da prima si può ripulire.
+  if (raccolto && r.tipo === 'nemico') throw httpErrors.badRequest('spillo-non-raccoglibile', `«${r.nome}» è un nemico: si rigenera, non si raccoglie.`);
 
   const adesso = nowIso();
   getDb().transaction(() => {

@@ -864,3 +864,15 @@ senza barra di pagina, con le colonne che finiscono alla stessa altezza; poi lo 
 Da fare dall'utente: nel database di sviluppo la mappa `nativo-rmap-151-16-0` è rimasta `origine='utente'` dopo la prova
 (prima `seed`, `updated_at` 2026-09-09T19:47:16.182Z): il ripristino diretto è stato negato dai permessi.
 
+## Colonna del Palazzo ristrutturata, nemici non raccoglibili, aree eliminabili (30 settembre 2026) — fatto
+
+Richieste dell'utente: la colonna di sinistra del Palazzo «fatta molto molto male… ristrutturala» (la matita sforava, il
+cestino «non funzionava» perché la conferma finiva fuori vista), riordinare, associare le aree, cambiare «Che cosa
+mostra», eliminare aree e planimetrie; i nemici non devono essere raccoglibili né evidenziati. Su `main`.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Server: `nemico` categoria informativa + migrazione 085, 400 sul «raccolto» di un nemico, ombre sciagura non collezionabili nei contenuti della guida; `DELETE /api/compendio/aree/:chiave` (`eliminaArea`: punti e segnature, spilli della guida, timbri, legami con le mappe, riferimenti JSON, ordine ricompattato) | ✅ validata |
+| 2 | Interfaccia: colonna «elenco + scheda» (`PlanimetriePalazzo` con `useRiordino`: trascinamento della maniglia con scorrimento automatico e frecce, focus mantenuto; `SchedaPlanimetria`, `SchedaAreaGuida`, «Nuova planimetria» in finestra; conferme nel piè); «Elimina» nel modulo dell'area; verificata dal vivo senza salvare (richieste intercettate) a 1440×789, 1366×657, 1024×690, 768, 375 | ✅ validata |
+| 3 | Documenti, commit su `main` | ✅ |
+

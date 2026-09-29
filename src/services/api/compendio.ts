@@ -92,6 +92,8 @@ export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDun
 export const creaPunto = (area: string, dati: DatiPuntoApi & { nome: string; tipo: PuntoInteresseDto['tipo'] }): Promise<PuntoInteresseDto> => apiPost(`/compendio/aree/${encodeURIComponent(area)}/punti`, dati);
 export const aggiornaPunto = (chiave: string, dati: DatiPuntoApi): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}`, dati);
 export const eliminaPunto = (chiave: string): Promise<void> => apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}`);
+/** Elimina un'area della guida per tutte le partite, con i suoi punti e i suoi legami. */
+export const eliminaArea = (chiave: string): Promise<void> => apiDelete(`/compendio/aree/${encodeURIComponent(chiave)}`);
 /** Calendario di gioco (con oggi e scadenze se c'è la partita). */
 export const getCalendario = (partita?: number, mese?: string): Promise<CalendarioDto> => apiGet(`/compendio/calendario${queryString({ partita, mese })}`);
 /** Domande in classe ed esami (con stato «fatta» e prossime se c'è la partita). */

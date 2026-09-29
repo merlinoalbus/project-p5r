@@ -649,14 +649,12 @@ propaga a tutte le sue tavole, l'etichetta resta della singola versione. **La pi
 dalla guida non esiste più** per le aree dei Palazzi (resta per i quartieri): dove manca la
 planimetria la scheda offre il selettore di tutte le tavole e aggiunge l'area con `impostaAreeMappa` (2026-09-30).
 
-`src/components/guida/PlanimetriePalazzo.tsx` è il pannello «Planimetrie» della scheda (aperto dal
-contatore dell'intestazione): elenca **tutte** le planimetrie dell'albero `dungeon-<chiave>` che
-`DungeonDettaglioDto.planimetrie` porta con `ordine` e `aree` (in ordine di guida), le riordina con `riordinaMappe`
-(`PUT /api/mappe/ordine`, trascinamento a puntatore + Su/Giù), sceglie le aree di ogni versione nella finestra
-`SceltaAreePlanimetria` e le salva con `impostaAreeMappa` (`PUT /api/mappe/:chiave/aree`; una planimetria più aree,
-un'area una planimetria — vedi «Più aree per planimetria» in fondo), aggiunge con
-`creaMappa` ed elimina con `eliminaMappa`. Scegliere una riga porta il visore su quella planimetria
-e la colonna sui suoi soli collezionabili. Nell'editor `VisoreMappa.vistaGiornoCorrente` accende il
+`src/components/guida/PlanimetriePalazzo.tsx` è la colonna «Il Palazzo» della scheda: elenca **tutte** le planimetrie
+dell'albero `dungeon-<chiave>` che `DungeonDettaglioDto.planimetrie` porta con `ordine` e `aree` (in ordine di guida),
+raggruppate per stanza, e in coda le aree della guida senza planimetria. **L'elenco serve a scegliere, la scheda a
+sistemare** (ristrutturazione del 2026-09-30, vedi in fondo): si riordina trascinando la maniglia (`useRiordino`,
+`riordinaMappe` → `PUT /api/mappe/ordine`), e «Gestisci» apre `SchedaPlanimetria` o `SchedaAreaGuida`. Scegliere una
+riga porta il visore su quella planimetria e la colonna sui suoi soli collezionabili. Nell'editor `VisoreMappa.vistaGiornoCorrente` accende il
 filtro del giorno corrente della partita attiva (di regola l'editor vede tutto).
 `src/components/guida/ObiettiviDedalo.tsx` mostra `DedaloDto` (timbri, richieste, obiettivi) e
 scrive con `impostaTimbri` (`src/services/api/partite.ts`, `PUT /api/partite/:id/timbri`) e
@@ -773,7 +771,7 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
 - **Pacchetto delle mappe**: `EsportazioneMappeDto.mappe[].aree` (chiavi in ordine di guida); all'importazione le aree
   si verificano e si legano dopo il passaggio che scrive i genitori; un pacchetto senza `aree` usa `entita`.
   `dungeonService.planimetrieDelPalazzo` e `contenutiGuidaService.contenutiMappa` leggono tutte le aree in ordine.
-- **Interfaccia**: `src/components/guida/SceltaAreePlanimetria.tsx` (finestra `Modal`); `gruppiPlanimetrie` unisce le
+- **Interfaccia**: `src/components/guida/SceltaAreePlanimetria.tsx` (dal 2026-09-30 un fieldset dentro `SchedaPlanimetria`); `gruppiPlanimetrie` unisce le
   aree delle versioni con `perOrdineDiGuida`; `DungeonDettaglioPage` mostra «Su questa planimetria» quando la
   planimetria a schermo ha più aree.
 - **Una schermata da 1024 px** (`DungeonDettaglioPage`, Palazzi e Memento): radice `lg:flex-1 lg:min-h-0` dentro il
@@ -784,3 +782,27 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   `flex-1` da 1280 px); la scheda di una mappa senza planimetria resta alta quanto il suo contenuto.
 - Limite: `riconciliaAreeGuida` (`organizzazioneMappe.ts`) legge le colonne, quindi solo la prima area di una mappa
   senza geometria (vedi DECISIONI, 2026-09-30).
+
+## Colonna del Palazzo ristrutturata; nemici; aree eliminabili (2026-09-30)
+
+- **Colonna** (`PlanimetriePalazzo`): righe senza comandi di modifica. Ogni stanza con una sola planimetria è una riga
+  (nome, «che cosa mostra · quanto resta», aree) con «Gestisci»; con più planimetrie si apre in `VersioniStanza`.
+  `useRiordino(ids, blocco, onSposta)` fa il riordino: maniglia `<button>` a puntatore (cattura, indice da
+  `getBoundingClientRect`, riga bersaglio con `ring-2`, scorrimento automatico del contenitore `.area-scorrevole`
+  vicino ai bordi, `pointercancel`/`lostpointercapture`, solo tasto principale) e frecce su/giù, con il focus
+  rimesso sulla maniglia dopo lo spostamento; `blocco` è il perché (atlante mancante o salvataggio in corso).
+- **Schede in finestra** (`Modal`, conferme nel piè sempre in vista):
+  - `SchedaPlanimetria`: nome della stanza (`gruppoNome`, vale per tutte le versioni), «Che cosa mostra» (`etichetta`;
+    vuota = numero nella stanza), nome, aree (`SceltaAreePlanimetria`), editor, eliminazione (`eliminaMappa`). Salva
+    solo ciò che cambia: `aggiornaPresentazioneMappa`, `aggiornaMappa`, `impostaAreeMappa`.
+  - `SchedaAreaGuida`: collega l'area a una planimetria (elenco nella finestra con ricerca, l'area si aggiunge) o la
+    elimina. Il modulo «Correggi l'area» sopra la mappa ha anch'esso «Elimina».
+- **Eliminare un'area** (`DELETE /api/compendio/aree/:chiave` → `dungeonService.eliminaArea`, in transazione): punti e
+  loro stati per partita, `marcatore_mappa`, spilli della guida senza mappa (vincolo RESTRICT) col loro «raccolto»,
+  `timbri_dedalo_partita`, legami con le mappe (`mappeService.staccaAreaDaOgniMappa`), riferimenti nei JSON
+  (`pianta_area.copre_aree_json`, `dati_guida` «battaglia» `ombre[].areaChiave` → null, «mappe-assenti»); piante,
+  `guida_mappa`, `guida_alias` in cascata, `richiesta.area_chiave` a NULL; l'ordine delle aree si ricompatta.
+  I dati di gioco stanno in `gioco.db`: un pacchetto importato dopo rimette l'area.
+- **Nemici**: `nemico` è di categoria `informativo` (`shared/spilli.ts`, `collezionabile: false`), migrazione 085 per
+  gli spilli esistenti; `impostaRaccolto` risponde 400 `spillo-non-raccoglibile` a `raccolto=true` su un nemico;
+  i punti della guida «ombra-sciagura» non risultano collezionabili in `contenutiMappa`.

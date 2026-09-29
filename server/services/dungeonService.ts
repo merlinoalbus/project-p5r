@@ -18,6 +18,7 @@ import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
+import { staccaAreaDaOgniMappa } from './mappe/mappeService.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
@@ -295,6 +296,81 @@ export function aggiornaArea(chiaveArea: string, dati: DatiArea): AreaDungeonDto
   prepared('UPDATE dungeon_area SET nome = ?, descrizione = ? WHERE chiave = ?').run(dati.nome?.trim() || a.nome, dati.descrizione ?? a.descrizione, chiaveArea);
   const scheda = dettaglioDungeon(a.dungeon_chiave);
   return scheda.aree.find((x) => x.chiave === chiaveArea)!;
+}
+
+/**
+ * Elimina un'area della guida, per tutte le partite (richiesta dell'utente, 2026-09-30: «eliminarla davvero»).
+ *
+ * Se ne vanno con lei: i suoi punti della guida con quel che le partite ne avevano segnato (come
+ * `eliminaPunto`), gli spilli della guida senza mappa che le appartenevano col loro «raccolto», i timbri
+ * dei dedali, i legami con le planimetrie (che tengono le altre aree), la pianta e gli alias (in cascata).
+ * Le richieste restano, senza area. Le aree che la seguivano salgono di un posto: l'ordine resta senza buchi.
+ * I dati di gioco vivono in `gioco.db`: un pacchetto importato dopo la rimette, come ogni correzione della guida.
+ */
+export function eliminaArea(chiaveArea: string): void {
+  const a = prepared('SELECT * FROM dungeon_area WHERE chiave = ?').get(chiaveArea) as RigaArea | undefined;
+  if (!a) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  getDb().transaction(() => {
+    for (const { chiave } of prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ?').all(chiaveArea) as Array<{ chiave: string }>) {
+      prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(chiave);
+      prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(chiave);
+      prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND uid IS NOT NULL)").run(chiave);
+      prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(chiave);
+    }
+    prepared('DELETE FROM punto_interesse WHERE area_chiave = ?').run(chiaveArea);
+    // gli spilli della guida (senza mappa) vincolano l'area con RESTRICT: vanno via prima di lei
+    if (colonnaSpilloGuida()) {
+      prepared('DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE area_guida_chiave = ? AND uid IS NOT NULL)').run(chiaveArea);
+      prepared('DELETE FROM spillo WHERE area_guida_chiave = ?').run(chiaveArea);
+    }
+    if (tabellaUtente('timbri_dedalo_partita')) prepared('DELETE FROM timbri_dedalo_partita WHERE area_chiave = ?').run(chiaveArea);
+    staccaAreaDaOgniMappa(chiaveArea);
+    ripulisciRiferimentiTestuali(chiaveArea);
+    prepared('DELETE FROM dungeon_area WHERE chiave = ?').run(chiaveArea);
+    prepared('UPDATE dungeon_area SET ordine = ordine - 1 WHERE dungeon_chiave = ? AND ordine > ?').run(a.dungeon_chiave, a.ordine);
+  })();
+}
+
+/**
+ * I riferimenti all'area che vivono dentro testi JSON, dove nessun vincolo li segue (rilievo della revisione):
+ * le piante delle altre aree che dicevano di coprirla, le Ombre della Battaglia che ci costruiscono il
+ * collegamento «?area=» (con l'area sparita la scheda aprirebbe in silenzio la prima), e la spiegazione
+ * delle mappe assenti. Il nome dell'area sulle Ombre resta: è quel che dice la guida.
+ */
+function ripulisciRiferimentiTestuali(chiaveArea: string): void {
+  if (tabellaGioco('pianta_area')) {
+    for (const r of prepared("SELECT area_chiave, copre_aree_json FROM pianta_area WHERE copre_aree_json LIKE ?").all(`%"${chiaveArea}"%`) as Array<{ area_chiave: string; copre_aree_json: string }>) {
+      const copre = (JSON.parse(r.copre_aree_json) as string[]).filter((k) => k !== chiaveArea);
+      prepared('UPDATE pianta_area SET copre_aree_json = ? WHERE area_chiave = ?').run(JSON.stringify(copre), r.area_chiave);
+    }
+  }
+  if (!tabellaGioco('dati_guida')) return;
+  const battaglia = prepared("SELECT json FROM dati_guida WHERE chiave = 'battaglia'").get() as { json: string } | undefined;
+  if (battaglia) {
+    const dati = JSON.parse(battaglia.json) as { ombre?: Array<{ areaChiave?: string | null }> };
+    const toccate = (dati.ombre ?? []).filter((o) => o.areaChiave === chiaveArea);
+    for (const o of toccate) o.areaChiave = null;
+    if (toccate.length) prepared("UPDATE dati_guida SET json = ? WHERE chiave = 'battaglia'").run(JSON.stringify(dati));
+  }
+  const assenti = prepared("SELECT json FROM dati_guida WHERE chiave = 'mappe-assenti'").get() as { json: string } | undefined;
+  if (assenti) {
+    const dati = JSON.parse(assenti.json) as Record<string, unknown>;
+    if (chiaveArea in dati) {
+      delete dati[chiaveArea];
+      prepared("UPDATE dati_guida SET json = ? WHERE chiave = 'mappe-assenti'").run(JSON.stringify(dati));
+    }
+  }
+}
+function tabellaGioco(nome: string): boolean {
+  return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
+}
+
+/** La colonna `spillo.area_guida_chiave` (042): nei test lo schema può essere indietro. */
+function colonnaSpilloGuida(): boolean {
+  return (prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).some((c) => c.name === 'area_guida_chiave');
+}
+function tabellaUtente(nome: string): boolean {
+  return !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 }
 
 export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number }

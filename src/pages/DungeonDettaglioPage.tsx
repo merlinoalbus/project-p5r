@@ -20,7 +20,7 @@
 import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { aggiornaArea, aggiornaDungeon, aggiornaPunto as salvaPunto, creaPunto, eliminaPunto, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
+import { aggiornaArea, aggiornaDungeon, aggiornaPunto as salvaPunto, creaPunto, eliminaArea, eliminaPunto, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -212,6 +212,8 @@ export function DungeonDettaglioPage() {
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
   const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setPlanimetriaLibera(null); };
+  /** Un'area eliminata dalla guida: se era quella aperta, la scheda torna alla prima (senza parametro). */
+  const areaEliminata = (k: string) => { if (area?.chiave === k) { setParams({}); setSelezionato(null); setPianta(null); } };
   /**
    * Una planimetria scelta dal pannello: se contiene aree della guida si apre la sua prima in ordine di
    * guida — o resta quella aperta, se la planimetria contiene anche lei —, altrimenti resta «libera».
@@ -345,10 +347,11 @@ export function DungeonDettaglioPage() {
                   <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
                     alberoPronto={!!albero.dati} alberoErrore={albero.errore} onRiprovaAlbero={() => void albero.ricarica()}
                     aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
-                    areeOrfane={d.aree.filter((a) => a.mappe.length === 0).map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine, descrizione: a.descrizione }))}
+                    areeOrfane={d.aree.filter((a) => a.mappe.length === 0).map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine, descrizione: a.descrizione, punti: a.punti.length }))}
                     areaScelta={area.chiave} onScegliArea={scegliArea}
                     sceltaChiave={mappaScelta} onScegli={scegliPlanimetria}
-                    onCambiato={async () => { await Promise.all([dati.ricarica(), albero.ricarica()]); }} />
+                    onCambiato={async () => { await Promise.all([dati.ricarica(), albero.ricarica()]); }}
+                    onAreaEliminata={areaEliminata} />
                 </div>
               </nav>
             )}
@@ -375,7 +378,12 @@ export function DungeonDettaglioPage() {
                       testo dell'area di prima e lo salverebbe su quella nuova (rilievo della revisione). */}
                   {!memento && <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`}
                     iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
-                    onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}>
+                    onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
+                    // «Devo poter rimuovere un'area» (2026-09-30): l'eliminazione vera, per tutte le partite
+                    elimina={{
+                      avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le planimetrie restano, con le loro altre aree.`,
+                      onElimina: async () => { const k = area.chiave; await eliminaArea(k); areaEliminata(k); await Promise.all([dati.ricarica(), albero.ricarica()]); },
+                    }}>
                     {(b, cambia) => <>
                       <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
                       <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => cambia({ descrizione: v })} />

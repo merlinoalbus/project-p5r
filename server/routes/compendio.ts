@@ -9,7 +9,7 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { aggiornaArea, aggiornaDungeon, aggiornaPunto, creaPunto, eliminaPunto } from '../services/dungeonService.js';
+import { aggiornaArea, aggiornaDungeon, aggiornaPunto, creaPunto, eliminaArea, eliminaPunto } from '../services/dungeonService.js';
 import { bodyArea, bodyDungeon, bodyNuovoPunto, bodyPunto, paramsChiaveGuida } from '../schemas/guidaDungeon.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
@@ -197,6 +197,11 @@ router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyD
 });
 router.put('/aree/:chiave', validate({ params: paramsChiaveGuida, body: bodyArea }), (req, res) => {
   res.json(aggiornaArea(String(req.params.chiave), req.body as Parameters<typeof aggiornaArea>[1]));
+});
+/** Elimina l'area della guida per tutte le partite, con i suoi punti e i suoi legami (2026-09-30). */
+router.delete('/aree/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
+  eliminaArea(String(req.params.chiave));
+  res.status(204).end();
 });
 router.post('/aree/:chiave/punti', validate({ params: paramsChiaveGuida, body: bodyNuovoPunto }), (req, res) => {
   res.status(201).json(creaPunto(String(req.params.chiave), req.body as Parameters<typeof creaPunto>[1]));

@@ -17,7 +17,10 @@ describe('registro dei tipi di spillo', () => {
     const perCategoria = CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c));
     expect([...perCategoria].sort()).toEqual([...TIPI_SPILLO].sort());
     expect(tipiDellaCategoria('spostamento')).toEqual(['passaggio', 'scala', 'uscita', 'treno', 'rampino', 'scorciatoia', 'velluto', 'mementos', 'ingresso-palazzo', 'infiltrazione']);
-    expect(tipiDellaCategoria('consumabile')).toEqual(['dialogo', 'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico']);
+    expect(tipiDellaCategoria('consumabile')).toEqual(['dialogo', 'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave', 'timbro', 'boss', 'miniboss']);
+    // i nemici si rigenerano: informativi, non consumabili (2026-09-30)
+    expect(categoriaSpillo('nemico')).toBe('informativo');
+    expect(DEFINIZIONI_SPILLO.nemico.collezionabile).toBe(false);
     for (const t of TIPI_SPILLO) {
       const rif = DEFINIZIONI_SPILLO[t].riferimento;
       if (rif) expect(RIFERIMENTI_PER_CATEGORIA[categoriaSpillo(t)], t).toContain(rif);

@@ -617,6 +617,15 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   che finiscono alla stessa altezza; «sì, anche i Memento»). Scelte dell'utente: **intestazione compatta su due
   righe** da 1024 px; **mappa con minimo 240 px** — sotto quel minimo scorre la sola colonna della mappa, mai la
   pagina. Sotto i 1024 px resta la colonna unica con lo scorrimento di pagina.
+- **Colonna del Palazzo ristrutturata** (richiesta dell'utente: «è fatta molto molto male ed è poco usabile…
+  ristrutturala»; scelta «Elenco + scheda in finestra», con il trascinamento come modo di riordinare): l'elenco serve
+  a scegliere, «Gestisci» apre la scheda con nome della stanza, «Che cosa mostra», nome, aree, editor ed
+  eliminazione. Niente più matite, frecce o cestini nelle righe; le conferme stanno nel piè delle finestre.
+- **Un'area della guida si elimina davvero** (scelta dell'utente, invece di nasconderla), per tutte le partite, con i
+  suoi punti e quel che le partite ne avevano segnato; un pacchetto importato dopo la rimette.
+- **I nemici non si raccolgono** («si rigenerano»): categoria informativa, fuori dal completamento e dai «da
+  raccogliere». Boss e miniboss restano consumabili. Il conteggio «esauribili» della pagina dei Palazzi riguarda i punti
+  della guida (comprese le ombre sciagura esauribili), non il completamento delle mappe: resta com'è.
 - Limite noto: `riconciliaAreeGuida` (migrazione 042 e sincronizzazione delle mappe) converte una mappa **senza
   geometria** in «area della guida» leggendo le colonne, cioè la sola prima area; una planimetria senza immagine
   legata a più aree non viene gestita per le altre. Oggi tutte le planimetrie dei Palazzi hanno l'immagine.

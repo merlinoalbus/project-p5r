@@ -131,7 +131,7 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Palazzi e Mementos | oggetto-chiave | Oggetto chiave | spillo-oggetto-chiave | ambra | sì | punto |
 | Palazzi e Mementos | timbro | Timbro dei Mementos (postazione fissa per piano) | spillo-timbro | rosa lilla | sì (timbrato) | — |
 | Palazzi e Mementos | boss / miniboss | Boss / Miniboss | spillo-boss / spillo-miniboss | rosso / arancio | sì (sconfitto) | punto |
-| Palazzi e Mementos | nemico | Nemico | spillo-nemico | grigio-azzurro | no (sì se il punto è esauribile) | punto (Ombra della Sciagura) |
+| Palazzi e Mementos | nemico | Nemico (categoria informativa dal 2026-09-30: si rigenera, non si raccoglie né conta nel completamento; migrazione 085) | spillo-nemico | grigio-azzurro | no | punto (Ombra della Sciagura) |
 | Palazzi e Mementos | punto-sensibile | Punto sensibile | spillo-punto-sensibile | verde acqua | no | punto (enigma) |
 | Palazzi e Mementos | meccanismo | Meccanismo (leva, interruttore, pannello) | spillo-meccanismo | ardesia | no | punto |
 | Palazzi e Mementos | rampino | Punto del rampino (Royal) | spillo-rampino | magenta scuro | no | — |
