@@ -9,11 +9,11 @@ import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa } = vi.hoisted(() => ({
+const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
-  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
+vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
 vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
 vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
@@ -38,8 +38,8 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
     area({ chiave: 'k-03', ordine: 2, nome: 'Cortile', mappe: [{ chiave: 'm-cortile', nome: 'Palazzo di Kamoshida › Cortile', n: 0, presi: partita ? 0 : null, spilli: [] }] }),
   ],
   planimetrie: [
-    { chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', ordine: 0, area: { chiave: 'k-01', nome: 'Cancello' }, n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] },
-    { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', ordine: 1, area: null, n: 2, presi: partita ? 0 : null, spilli: [spillo(3, partita ? false : null), spillo(4, partita ? false : null)] },
+    { chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', ordine: 0, aree: [{ chiave: 'k-01', nome: 'Cancello', ordine: 0 }], n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] },
+    { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', ordine: 1, aree: [], n: 2, presi: partita ? 0 : null, spilli: [spillo(3, partita ? false : null), spillo(4, partita ? false : null)] },
   ],
 });
 const mementos = (): DungeonDettaglioDto => ({
@@ -211,19 +211,97 @@ it('l’elenco del Palazzo è la colonna di atterraggio: niente da aprire per si
 it('un’area senza planimetria si collega dalla sua riga in coda all’elenco', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   getAlberoMappe.mockResolvedValue([]);
-  aggiornaMappa.mockResolvedValue({});
+  impostaAreeMappa.mockResolvedValue({ aree: [] });
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   const elenco = within(screen.getByLabelText('Planimetrie del Palazzo'));
   // «Torre» è un'area che la guida racconta ma di cui nessuna tavola dice di essere la pianta
   expect(elenco.getAllByText('area della guida · nessuna planimetria').length).toBe(1);
-  const selettore = elenco.getAllByLabelText('Collega una planimetria')[0];
-  fireEvent.click(selettore);
-  // la prima è «— scegli —»: la tavola vera è quella dopo, col suo nome di presentazione
+  fireEvent.click(elenco.getAllByLabelText('Collega una planimetria')[0]);
+  // la prima è «— scegli —»; poi **tutte** le tavole, anche quella che contiene già un'area, e lo dicono
   const opzioni = await screen.findAllByRole('option');
-  expect(opzioni[1]).toHaveTextContent('Torre');
+  expect(opzioni).toHaveLength(3);
+  expect(opzioni[1]).toHaveTextContent(/Cancello.*contiene Cancello/);
+  expect(opzioni[2]).toHaveTextContent(/Torre.*nessuna area/);
+  fireEvent.click(opzioni[2].querySelector('button')!);
+  await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-torre', ['k-02']));
+  expect(aggiornaMappa).not.toHaveBeenCalled();
+});
+
+it('collegare un’area a una tavola che ne contiene già altre la aggiunge, non le sostituisce', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  getAlberoMappe.mockResolvedValue([]);
+  impostaAreeMappa.mockResolvedValue({ aree: [] });
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  fireEvent.click(within(screen.getByLabelText('Planimetrie del Palazzo')).getAllByLabelText('Collega una planimetria')[0]);
+  const opzioni = await screen.findAllByRole('option');
   fireEvent.click(opzioni[1].querySelector('button')!);
-  await waitFor(() => expect(aggiornaMappa).toHaveBeenCalledWith('m-torre', { entita: { tipo: 'area', chiave: 'k-02' } }));
+  await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-cancello', ['k-01', 'k-02']));
+});
+
+// ---- Più aree della guida nella stessa planimetria (richiesta dell'utente, 2026-09-29) ----
+
+/** Il Palazzo di prova con «Cancello» che contiene anche «Cortile», e «Torre» legata a una tavola sua. */
+const palazzoConPiuAree = (): DungeonDettaglioDto => {
+  const p = palazzo(true);
+  const cancello = { ...p.planimetrie[0], aree: [{ chiave: 'k-03', nome: 'Cortile', ordine: 2 }, { chiave: 'k-01', nome: 'Cancello', ordine: 0 }] };
+  const torre = { ...p.planimetrie[1], aree: [{ chiave: 'k-02', nome: 'Torre', ordine: 1 }] };
+  return {
+    ...p,
+    planimetrie: [cancello, torre],
+    aree: [
+      { ...p.aree[0], mappe: [{ chiave: 'm-cancello', nome: cancello.nome, n: cancello.n, presi: cancello.presi, spilli: cancello.spilli }] },
+      { ...p.aree[1], mappe: [{ chiave: 'm-torre', nome: torre.nome, n: torre.n, presi: torre.presi, spilli: torre.spilli }] },
+      { ...p.aree[2], mappe: [{ chiave: 'm-cancello', nome: cancello.nome, n: cancello.n, presi: cancello.presi, spilli: cancello.spilli }] },
+    ],
+  };
+};
+
+it('una planimetria con più aree le mostra in ordine di guida: nell’elenco del Palazzo e sopra la mappa', async () => {
+  getDungeon.mockResolvedValue(palazzoConPiuAree());
+  getAlberoMappe.mockResolvedValue([]);
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  // la riga della stanza: le aree nell'ordine della guida, non in quello in cui arrivano
+  const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
+  expect(pannello.getByText('1. Cancello · 3. Cortile')).toBeInTheDocument();
+  // sopra la mappa, le aree della planimetria a schermo: toccarne una apre quell'area sulla stessa mappa
+  const sullaPianta = within(screen.getByRole('list', { name: 'Aree della guida su questa planimetria' }));
+  const voci = sullaPianta.getAllByRole('button');
+  expect(voci.map((b) => b.textContent)).toEqual(['1. Cancello', '3. Cortile']);
+  expect(voci[0]).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(voci[1]);
+  expect(await screen.findByRole('heading', { name: 'Cortile' })).toBeInTheDocument();
+  expect(screen.getByText('Visore: m-cancello')).toBeInTheDocument();
+});
+
+it('le aree di una planimetria si scelgono insieme: la finestra le elenca in ordine, dice dove stanno le altre e salva l’insieme', async () => {
+  getDungeon.mockResolvedValue(palazzoConPiuAree());
+  getAlberoMappe.mockResolvedValue([]);
+  impostaAreeMappa.mockResolvedValue({ aree: [] });
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
+  // la stanza aperta è quella della planimetria a schermo: le sue aree stanno nella riga della versione
+  expect(within(pannello.getByRole('list', { name: 'Aree della guida di «Immagine 1»' })).getAllByRole('listitem').map((l) => l.textContent)).toEqual(['1. Cancello', '3. Cortile']);
+  fireEvent.click(pannello.getByRole('button', { name: /Scegli le aree della guida di «Immagine 1» di Cancello/ }));
+  const finestra = within(screen.getByRole('dialog', { name: /Aree della guida/ }));
+  const caselle = finestra.getAllByRole('checkbox');
+  // tutte le aree del Palazzo, in ordine di guida, con spuntate quelle della planimetria
+  expect(caselle.map((c) => c.closest('label')!.textContent)).toEqual(['1. Cancello', '2. Torreora su «Torre»', '3. Cortile']);
+  expect(caselle.map((c) => (c as HTMLInputElement).checked)).toEqual([true, false, true]);
+  // senza cambiamenti non si salva niente
+  expect(finestra.getByRole('button', { name: 'Salva' })).toBeDisabled();
+  fireEvent.click(caselle[1]);
+  // spuntare un'area che sta altrove lo dice prima di salvare
+  expect(finestra.getByText(/si sposta qui da «Torre»/)).toBeInTheDocument();
+  expect(finestra.getByRole('status')).toHaveTextContent('Un’area lascia la planimetria dove stava: Torre.');
+  fireEvent.click(caselle[0]);
+  fireEvent.click(finestra.getByRole('button', { name: 'Salva' }));
+  await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-cancello', ['k-02', 'k-03']));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(aggiornaMappa).not.toHaveBeenCalled();
 });
 
 // ---- Le correzioni della guida (rilievi della revisione, 2026-09-18) ----

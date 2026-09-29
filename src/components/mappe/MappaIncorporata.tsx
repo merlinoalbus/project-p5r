@@ -31,6 +31,9 @@ interface Props {
   /** Altezza del riquadro (numero in px o espressione CSS, es. `calc(100vh - 220px)`); predefinita 560 px. */
   altezza?: number | string;
   className?: string;
+  /** Classi del solo riquadro del visore, per un'altezza che cambia con lo schermo (in alternativa ad `altezza`).
+   *  Non valgono per la scheda di una mappa senza planimetria, che resta alta quanto il suo contenuto. */
+  classeVisore?: string;
   /** Spillo da selezionare e centrare all'apertura. */
   spilloIniziale?: number | null;
   /** Partita per lo stato degli spilli (predefinita: quella attiva). */
@@ -56,7 +59,7 @@ export function MappaIncorporata(props: Props) {
   </PageState>;
 }
 
-function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true }: Props) {
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
@@ -84,7 +87,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
     {!!mappa.figli.length && <ul>{mappa.figli.map(f => <li key={f.chiave}><Link className="touch inline-flex items-center" to={urlMappa(f.chiave)}>{f.nome}</Link></li>)}</ul>}
   </section>;
   return (
-    <div className={className} style={altezza !== undefined ? { height: altezza } : className ? undefined : { height: 560 }}>
+    <div className={[className, classeVisore].filter(Boolean).join(' ') || undefined} style={altezza !== undefined ? { height: altezza } : className || classeVisore ? undefined : { height: 560 }}>
       <VisoreMappa
         key={`${mappa.chiave}-${spilloIniziale ?? ''}-${puntoIniziale?.x ?? ''}-${puntoIniziale?.y ?? ''}-${puntoIniziale?.zoom ?? ''}`}
         puntoIniziale={puntoIniziale}

@@ -12,8 +12,8 @@ import { impostaMarcatore } from '../services/dungeonService.js';
 import { impostaMarcatoreLuogo, scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
@@ -97,6 +97,10 @@ router.get('/:chiave', validate({ params: paramsMappa, query: queryMappa }), (re
 });
 router.put('/:chiave', validate({ params: paramsMappa, body: bodyAggiornaMappa }), (req, res) => {
   res.json(aggiornaMappa(String(req.params.chiave), req.body as DatiMappa));
+});
+/** Le aree della guida contenute nella planimetria: si passa l'insieme, risponde con le aree in ordine di guida. */
+router.put('/:chiave/aree', validate({ params: paramsMappa, body: bodyAreeMappa }), (req, res) => {
+  res.json({ aree: impostaAreeMappa(String(req.params.chiave), (req.body as { aree: string[] }).aree) });
 });
 router.delete('/:chiave', validate({ params: paramsMappa }), (req, res) => {
   eliminaMappa(String(req.params.chiave));

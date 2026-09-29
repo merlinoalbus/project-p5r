@@ -183,17 +183,24 @@ function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon,
       UNION ALL
       SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
     )
-    SELECT m.chiave, m.ordine, e.entita_chiave AS area, a.nome AS area_nome
+    SELECT m.chiave, m.ordine
     FROM mappa m JOIN albero t ON t.chiave = m.chiave
-    LEFT JOIN mappa_entita e ON e.mappa_chiave = m.chiave AND e.entita_tipo = 'area'
-    LEFT JOIN dungeon_area a ON a.chiave = e.entita_chiave
     WHERE m.chiave <> ?
-    ORDER BY m.ordine, m.chiave`).all(`dungeon-${dungeonChiave}`, `dungeon-${dungeonChiave}`) as Array<{ chiave: string; ordine: number; area: string | null; area_nome: string | null }>;
+    ORDER BY m.ordine, m.chiave`).all(`dungeon-${dungeonChiave}`, `dungeon-${dungeonChiave}`) as Array<{ chiave: string; ordine: number }>;
+  // Una planimetria può contenere più aree della guida (2026-09-29): si leggono a parte, in ordine di
+  // guida. Con il LEFT JOIN di prima una mappa con due aree sarebbe comparsa due volte nell'elenco.
+  const areePerMappa = new Map<string, Array<{ chiave: string; nome: string; ordine: number }>>();
+  for (const a of prepared(`SELECT e.mappa_chiave, a.chiave, a.nome, a.ordine FROM mappa_entita e JOIN dungeon_area a ON a.chiave = e.entita_chiave
+      WHERE e.entita_tipo = 'area' AND a.dungeon_chiave = ? ORDER BY a.ordine, a.chiave`).all(dungeonChiave) as Array<{ mappa_chiave: string; chiave: string; nome: string; ordine: number }>) {
+    const elenco = areePerMappa.get(a.mappa_chiave) ?? [];
+    elenco.push({ chiave: a.chiave, nome: a.nome, ordine: a.ordine });
+    areePerMappa.set(a.mappa_chiave, elenco);
+  }
   return righe.map((r) => {
     const m = raccolta.perMappa.get(r.chiave);
     return {
       chiave: chiaveMappa(r.chiave), nome: nomePercorso(r.chiave), ordine: r.ordine,
-      area: r.area && r.area_nome ? { chiave: r.area, nome: r.area_nome } : null,
+      aree: areePerMappa.get(r.chiave) ?? [],
       n: m?.n ?? 0, presi: partitaId === undefined ? null : (m?.presi ?? 0), spilli: m?.spilli ?? [],
     };
   });

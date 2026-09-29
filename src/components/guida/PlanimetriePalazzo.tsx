@@ -12,9 +12,9 @@
 // — le sue versioni la seguono — e dentro la stanza si mettono in fila le versioni, con «Su»/«Giù»
 // che sul tablet sono più precisi del trascinamento e funzionano anche da tastiera.
 //
-// Ogni versione dice quanto resta da raccogliere su di lei e se è **quella legata all'area** della
-// guida: il legame è uno solo per area, e sceglierne un'altra stacca la precedente (lo fa il
-// server). I nomi vengono da `presentazioneMappa`, l'unico posto che decide come si chiama una
+// Ogni versione dice quanto resta da raccogliere su di lei e **quali aree della guida contiene**, in
+// ordine di guida: possono essere più d'una (2026-09-29), ma un'area ha una sola planimetria, e
+// spuntarla su un'altra la sposta (lo fa il server). I nomi vengono da `presentazioneMappa`, l'unico posto che decide come si chiama una
 // mappa: qui non si compone niente, altrimenti la stessa stanza si chiamerebbe in due modi.
 //
 // **Questo è l'unico elenco del Palazzo** (scelta dell'utente, 2026-09-19). Prima ce n'erano due:
@@ -27,13 +27,14 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { aggiornaMappa, aggiornaPresentazioneMappa, creaMappa, eliminaMappa, riordinaMappe } from '../../services/api';
+import { aggiornaMappa, aggiornaPresentazioneMappa, creaMappa, eliminaMappa, impostaAreeMappa, riordinaMappe } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Selettore } from '../shared/Selettore';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
+import { SceltaAreePlanimetria } from './SceltaAreePlanimetria';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { chiaviInOrdine, nomeSenzaPalazzo, raggruppaPlanimetrie, spostaGruppo, spostaVersione, type GruppoPlanimetrie, type Planimetria } from '../../utils/gruppiPlanimetrie';
+import { chiaviInOrdine, nomeSenzaPalazzo, perOrdineDiGuida, raggruppaPlanimetrie, spostaGruppo, spostaVersione, type GruppoPlanimetrie, type Planimetria } from '../../utils/gruppiPlanimetrie';
 import { etichettaVersione } from '../../utils/etichettaVersione';
 import { titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import type { MappaRiassuntoDto } from '../../types';
@@ -51,11 +52,10 @@ interface Props {
   alberoPronto: boolean;
   alberoErrore: string | null;
   onRiprovaAlbero: () => void;
+  /** Tutte le aree del Palazzo, in ordine di guida: le scelte per le aree di una planimetria. */
   aree: Array<{ chiave: string; nome: string; ordine: number }>;
-  /** Le aree della guida senza planimetria: in coda all'elenco, da collegare. */
+  /** Le aree della guida senza planimetria: in coda all'elenco, da collegare a una qualsiasi delle planimetrie. */
   areeOrfane: Array<{ chiave: string; nome: string; ordine: number; descrizione: string }>;
-  /** Le tavole del Palazzo non ancora legate a un'area: le scelte possibili per un'area orfana. */
-  tavoleLibere: Planimetria[];
   /** L'area aperta nella scheda: evidenzia la sua riga anche quando la stanza non è scelta. */
   areaScelta: string | null;
   onScegliArea: (chiave: string) => void;
@@ -66,7 +66,7 @@ interface Props {
   onCambiato: () => Promise<void> | void;
 }
 
-export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, areeOrfane, tavoleLibere, areaScelta, onScegliArea, sceltaChiave, onScegli, onCambiato }: Props) {
+export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, areeOrfane, areaScelta, onScegliArea, sceltaChiave, onScegli, onCambiato }: Props) {
   // L'ordine mostrato è locale finché il server non risponde: il trascinamento deve vedersi subito.
   // Vale solo per le planimetrie che ci sono adesso; quelle appena aggiunte si accodano nell'ordine
   // del server e quelle eliminate cadono, altrimenti una creazione riuscita sembrerebbe fallita.
@@ -118,9 +118,18 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
     void esegui(() => riordinaMappe(`dungeon-${dungeonChiave}`, chiavi), messaggio);
   };
 
-  const legaArea = (p: Planimetria, area: string) =>
-    esegui(() => aggiornaMappa(p.chiave, { entita: area ? { tipo: 'area', chiave: area } : null }),
-      area ? `«${nomeSenzaPalazzo(p.nome)}» legata all’area scelta.` : `«${nomeSenzaPalazzo(p.nome)}» non è più legata a un’area.`);
+  // La planimetria di cui si stanno scegliendo le aree (finestra aperta), con il nome che la finestra mostra.
+  const [sceltaAree, setSceltaAree] = useState<{ planimetria: Planimetria; nome: string } | null>(null);
+  /** L'insieme delle aree della planimetria: il server stacca le tolte e sposta qui le spuntate. */
+  const salvaAree = (p: Planimetria, nome: string, nuove: string[]) =>
+    esegui(async () => { await impostaAreeMappa(p.chiave, nuove); setSceltaAree(null); },
+      nuove.length === 0 ? `«${nome}» non contiene più aree della guida.` : `«${nome}»: ${nuove.length === 1 ? 'un’area' : `${nuove.length} aree`} della guida.`);
+  /** Dove sta ciascuna area legata a una planimetria diversa da `tranne`: la finestra lo scrive accanto al nome. */
+  const areeAltrove = (tranne: string): Map<string, string> => {
+    const dove = new Map<string, string>();
+    for (const t of planimetrie) if (t.chiave !== tranne) for (const a of t.aree) dove.set(a.chiave, etichettaTavola(t));
+    return dove;
+  };
 
   /**
    * Come si presenta una tavola libera fra le scelte di un'area. **Non il nome grezzo**: trentadue
@@ -128,12 +137,18 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
    * usa», e un elenco di trentadue voci identiche non è una scelta. Qui valgono i nomi
    * dell'atlante, gli stessi dell'elenco: stanza più che cosa mostra quella versione.
    */
+  // Ogni tavola dice anche le aree che contiene già: collegarne un'altra la aggiunge, non le sostituisce.
   const nomeTavola = (t: Planimetria): { nome: string; dettaglio?: string } => {
     const m = albero.find((x) => x.chiave === t.chiave);
-    if (!m) return { nome: nomeSenzaPalazzo(t.nome), dettaglio: t.n > 0 ? `${t.n} da raccogliere` : undefined };
+    const contiene = t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna area';
+    if (!m) return { nome: nomeSenzaPalazzo(t.nome), dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, contiene].filter(Boolean).join(' · ') };
     const versione = etichettaVersione(m);
-    const pezzi = [versione, t.n > 0 ? `${t.n} da raccogliere` : null].filter(Boolean).join(' · ');
-    return { nome: titoloGruppoImmagini(m), dettaglio: pezzi || undefined };
+    return { nome: titoloGruppoImmagini(m), dettaglio: [versione, t.n > 0 ? `${t.n} da raccogliere` : null, contiene].filter(Boolean).join(' · ') };
+  };
+  /** Il nome di una tavola in una riga sola: stanza e, se c'è, la versione. */
+  const etichettaTavola = (t: Planimetria): string => {
+    const m = albero.find((x) => x.chiave === t.chiave);
+    return m ? [titoloGruppoImmagini(m), etichettaVersione(m)].filter(Boolean).join(' · ') : nomeSenzaPalazzo(t.nome);
   };
 
   const totale = planimetrie.reduce((s, p) => s + p.n, 0);
@@ -151,7 +166,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
         </div>
       </div>
       <p className="m-0 text-[11px] text-text-muted">
-        Trascina la maniglia di una stanza (o usa Su/Giù) per l’ordine in cui percorri il Palazzo: le sue planimetrie la seguono. Aprila per metterle in fila e per legarle a un’area.
+        Trascina la maniglia di una stanza (o usa Su/Giù) per l’ordine in cui percorri il Palazzo: le sue planimetrie la seguono. Aprila per metterle in fila e per scegliere le aree della guida che contengono.
         {totale > 0 ? ` ${presi}/${totale} raccolti in tutto.` : ' Nessun collezionabile su queste planimetrie.'}
       </p>
 
@@ -202,7 +217,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                     {g.totale === 0 ? 'niente da raccogliere' : g.presi === null ? `${g.totale} da raccogliere` : restano > 0 ? `${restano} da prendere su ${g.totale}` : `${g.totale} raccolti · completa`}
                   </span>
                   <span className="block text-[11px] leading-tight text-text-muted">
-                    {g.aree.length > 0 ? g.aree.map((a) => a.nome).join(', ') : 'nessuna area'}
+                    {g.aree.length > 0 ? g.aree.map((a) => `${a.ordine + 1}. ${a.nome}`).join(' · ') : 'nessuna area'}
                   </span>
                 </button>
                 <div className="ml-auto flex shrink-0 items-center gap-0.5">
@@ -233,7 +248,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                       <li key={p.chiave} className={`flex flex-col gap-1 rounded border-l-2 px-2 py-1 ${scelta ? 'border-primary bg-primary-bg' : 'border-border-light'}`}>
                         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
                           <button type="button" className="touch min-w-0 flex-1 basis-full text-left" onClick={() => onScegli(p.chiave)} aria-pressed={scelta}>
-                            <span className="block text-[12px] leading-tight">{v.etichetta}{p.area ? ' · legata all’area' : ''}</span>
+                            <span className="block text-[12px] leading-tight">{v.etichetta}</span>
                             <span className="block text-[11px] leading-tight text-text-muted">
                               {p.n === 0 ? 'niente da raccogliere' : p.presi === null ? `${p.n} da raccogliere` : restanoQui > 0 ? `${restanoQui} da prendere su ${p.n}` : `${p.n} raccolti · completa`}
                             </span>
@@ -253,9 +268,20 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={18} />} titolo="" aria-label={`Elimina «${v.etichetta}» di ${g.nome}`} disabled={occupato} onClick={() => setDaEliminare(p)} />
                           </div>
                         </div>
-                        <Selettore etichetta="Area della guida" valore={p.area?.chiave ?? ''} vuoto="— nessuna —"
-                          opzioni={aree.map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}` }))}
-                          onCambia={(k) => void legaArea(p, k)} />
+                        {/* Le aree della guida che la planimetria contiene, in ordine di guida: si scelgono insieme nella finestra. */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-[11px] uppercase tracking-wide text-text-muted">Aree della guida</span>
+                          {p.aree.length > 0
+                            ? <ol className="m-0 flex list-none flex-wrap gap-1 p-0" aria-label={`Aree della guida di «${v.etichetta}»`}>
+                                {[...p.aree].sort(perOrdineDiGuida).map((a) => <li key={a.chiave} className="chip text-[11px]">{a.ordine + 1}. {a.nome}</li>)}
+                              </ol>
+                            : <span className="text-[11px] text-text-muted">nessuna</span>}
+                          <button type="button" className="chip touch text-[11px]" disabled={occupato}
+                            aria-label={`Scegli le aree della guida di «${v.etichetta}» di ${g.nome}`}
+                            onClick={() => setSceltaAree({ planimetria: p, nome: `${g.nome} · ${v.etichetta}` })}>
+                            {p.aree.length > 0 ? 'Cambia' : 'Scegli'}
+                          </button>
+                        </div>
                       </li>
                     );
                   })}
@@ -279,14 +305,26 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                 <span className="block text-[11px] text-text-muted">area della guida · nessuna planimetria</span>
               </button>
             </div>
-            {tavoleLibere.length > 0
+            {/* Tutte le tavole, non solo quelle senza aree: una planimetria ne contiene anche più d'una, e
+                l'area si aggiunge a quelle che la tavola ha già. */}
+            {planimetrie.length > 0
               ? <Selettore etichetta="Collega una planimetria" valore="" vuoto="— scegli —"
-                  opzioni={tavoleLibere.map((t) => ({ chiave: t.chiave, ...nomeTavola(t) }))}
-                  onCambia={(k) => { if (k) void esegui(() => aggiornaMappa(k, { entita: { tipo: 'area', chiave: a.chiave } }), `Planimetria collegata a «${a.nome}».`); }} />
-              : <span className="text-[11px] text-text-muted">Nessuna tavola libera: aggiungine una con «Aggiungi».</span>}
+                  opzioni={planimetrie.map((t) => ({ chiave: t.chiave, ...nomeTavola(t) }))}
+                  onCambia={(k) => {
+                    const t = planimetrie.find((x) => x.chiave === k);
+                    if (t) void esegui(() => impostaAreeMappa(t.chiave, [...t.aree.map((x) => x.chiave), a.chiave]), `«${a.nome}» collegata a «${etichettaTavola(t)}».`);
+                  }} />
+              : <span className="text-[11px] text-text-muted">Il Palazzo non ha ancora planimetrie: aggiungine una con «Aggiungi».</span>}
           </li>
         ))}
       </ul>
+
+      {sceltaAree && (
+        <SceltaAreePlanimetria nome={sceltaAree.nome} aree={aree} scelte={sceltaAree.planimetria.aree.map((a) => a.chiave)}
+          altrove={areeAltrove(sceltaAree.planimetria.chiave)} occupato={occupato}
+          onSalva={(nuove) => void salvaAree(sceltaAree.planimetria, sceltaAree.nome, nuove)}
+          onChiudi={() => setSceltaAree(null)} />
+      )}
 
       {daEliminare && (
         <div className="flex flex-col gap-2 rounded-md border border-primary bg-primary-bg px-2 py-2 text-[12px]" role="alertdialog" aria-label="Conferma eliminazione">

@@ -394,20 +394,119 @@ function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave:
   // e cancellare tutte le righe della mappa portava via legami che nessuno aveva chiesto di togliere.
   // `precedente` arriva da chi chiama, perché l'aggiornamento della riga è già avvenuto: riletto
   // dal database direbbe il legame nuovo, e quello vecchio non verrebbe tolto da nessuno.
-  for (const t of new Set([precedente?.tipo, entita?.tipo].filter((x): x is string => !!x))) {
+  // Le aree sono più d'una per mappa (2026-09-29): del tipo `area` si toglie **solo l'area che le colonne
+  // dichiaravano**, non tutte — le altre aree della planimetria restano. Gli altri tipi restano uno per mappa.
+  // Vale anche passando da un'area a un legame di altro tipo (un quartiere, un luogo): le colonne dichiarano
+  // il legame nuovo e le altre aree restano in `mappa_entita`; le aree si tolgono con `impostaAreeMappa`.
+  for (const t of new Set([precedente?.tipo, entita?.tipo].filter((x): x is string => !!x && x !== 'area'))) {
     prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = ?').run(chiave, t);
   }
-  if (!entita) return;
-  if (entita.tipo === 'area') {
-    // Un'area ha una sola planimetria: si stacca **quel** legame dalla mappa che ce l'aveva, e le
-    // sue colonne si azzerano solo se dichiaravano proprio quell'area — gli altri suoi legami restano.
-    for (const altra of prepared("SELECT mappa_chiave FROM mappa_entita WHERE entita_tipo = 'area' AND entita_chiave = ? AND mappa_chiave <> ?").all(entita.chiave, chiave) as Array<{ mappa_chiave: string }>) {
-      prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(altra.mappa_chiave, entita.chiave);
-      prepared("UPDATE mappa SET entita_tipo = NULL, entita_chiave = NULL WHERE chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(altra.mappa_chiave, entita.chiave);
-    }
+  if (precedente?.tipo === 'area' && precedente.chiave && !(entita?.tipo === 'area' && entita.chiave === precedente.chiave)) {
+    prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(chiave, precedente.chiave);
   }
-  prepared('INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, ?, ?, ?)')
-    .run(chiave, entita.tipo, entita.chiave, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
+  if (entita) {
+    // Un'area ha una sola planimetria: si stacca **quel** legame dalla mappa che ce l'aveva, che tiene le sue altre aree.
+    if (entita.tipo === 'area') staccaAreaDalleAltre(entita.chiave, chiave);
+    prepared('INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, ?, ?, ?)')
+      .run(chiave, entita.tipo, entita.chiave, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
+  }
+  // le colonne dichiarano la prima area in ordine di guida, fra tutte quelle della planimetria
+  allineaColonneArea(chiave);
+}
+
+/**
+ * Il Palazzo a cui appartiene una planimetria, risalendo dal suo genitore fino alla radice `dungeon-<k>`
+ * (la mappa che dichiara `entita_tipo = 'dungeon'`). Null se la catena non arriva a un Palazzo.
+ */
+function palazzoDaGenitore(genitore: string | null): string | null {
+  let cur = genitore;
+  for (let passo = 0; cur && passo < 64; passo++) {
+    const r = prepared('SELECT chiave, genitore_chiave, entita_tipo, entita_chiave FROM mappa WHERE chiave = ?').get(cur) as { chiave: string; genitore_chiave: string | null; entita_tipo: string | null; entita_chiave: string | null } | undefined;
+    if (!r) return null;
+    if (r.entita_tipo === 'dungeon' && r.entita_chiave) return r.entita_chiave;
+    if (r.chiave.startsWith('dungeon-') && !r.genitore_chiave) return r.chiave.slice('dungeon-'.length);
+    cur = r.genitore_chiave;
+  }
+  return null;
+}
+
+/**
+ * Un'area si lega solo a una planimetria **del suo Palazzo**: una planimetria di Kamoshida con un'area di
+ * Madarame comparirebbe in un Palazzo senza quell'area e nell'altro sotto un'area che non la contiene.
+ * La radice del Palazzo non è una planimetria (non compare nell'elenco): non si lega.
+ */
+function verificaAreePalazzo(genitore: string | null, aree: string[]): void {
+  if (!aree.length) return;
+  const palazzo = palazzoDaGenitore(genitore);
+  if (!palazzo) throw httpErrors.badRequest('mappa-fuori-palazzo', 'Le aree della guida si legano solo alle planimetrie di un Palazzo.');
+  const segnaposti = aree.map(() => '?').join(',');
+  const trovate = prepared(`SELECT chiave, dungeon_chiave FROM dungeon_area WHERE chiave IN (${segnaposti})`).all(...aree) as Array<{ chiave: string; dungeon_chiave: string }>;
+  const mancanti = aree.filter((a) => !trovate.some((t) => t.chiave === a));
+  if (mancanti.length) throw httpErrors.badRequest('area-inesistente', `Area della guida inesistente: ${mancanti.join(', ')}.`);
+  const altrove = trovate.filter((t) => t.dungeon_chiave !== palazzo);
+  if (altrove.length) throw httpErrors.badRequest('area-di-altro-palazzo', `Area di un altro Palazzo: ${altrove.map((t) => t.chiave).join(', ')}.`);
+}
+
+/** Un'area ha una sola planimetria: la si stacca dalle mappe che l'avevano, che tengono le loro altre aree. */
+function staccaAreaDalleAltre(area: string, tranne: string): void {
+  for (const altra of prepared("SELECT mappa_chiave FROM mappa_entita WHERE entita_tipo = 'area' AND entita_chiave = ? AND mappa_chiave <> ?").all(area, tranne) as Array<{ mappa_chiave: string }>) {
+    prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(altra.mappa_chiave, area);
+    allineaColonneArea(altra.mappa_chiave);
+  }
+}
+
+/**
+ * Le colonne `entita_*` della mappa sono un legame solo, e le leggono ancora il riassunto, la scheda
+ * del luogo e il pacchetto: quando la mappa è legata ad aree, dichiarano **la prima in ordine di
+ * guida** (o nessuna, se non ne restano). Un legame di altro tipo (quartiere, Palazzo, luogo) non si tocca.
+ */
+function allineaColonneArea(mappa: string): void {
+  const r = prepared('SELECT entita_tipo FROM mappa WHERE chiave = ?').get(mappa) as { entita_tipo: string | null } | undefined;
+  if (!r || (r.entita_tipo !== null && r.entita_tipo !== 'area')) return;
+  const prima = prepared(`SELECT e.entita_chiave AS chiave FROM mappa_entita e LEFT JOIN dungeon_area a ON a.chiave = e.entita_chiave
+    WHERE e.mappa_chiave = ? AND e.entita_tipo = 'area' ORDER BY a.ordine, e.entita_chiave LIMIT 1`).get(mappa) as { chiave: string } | undefined;
+  prepared('UPDATE mappa SET entita_tipo = ?, entita_chiave = ? WHERE chiave = ?').run(prima ? 'area' : null, prima?.chiave ?? null, mappa);
+}
+
+/** Le aree della guida legate a una mappa, in ordine di guida. */
+export function areeDellaMappa(mappa: string): Array<{ chiave: string; nome: string; ordine: number }> {
+  return prepared(`SELECT a.chiave, a.nome, a.ordine FROM mappa_entita e JOIN dungeon_area a ON a.chiave = e.entita_chiave
+    WHERE e.mappa_chiave = ? AND e.entita_tipo = 'area' ORDER BY a.ordine, a.chiave`).all(mappa) as Array<{ chiave: string; nome: string; ordine: number }>;
+}
+
+/** Per il pacchetto delle mappe: le aree contenute (chiavi, in ordine di guida), solo se ce ne sono. */
+function areePerPacchetto(mappa: string): { aree?: string[] } {
+  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) return {};
+  const aree = areeDellaMappa(mappa).map((a) => a.chiave);
+  return aree.length ? { aree } : {};
+}
+
+/**
+ * Le aree della guida contenute in una planimetria (richiesta dell'utente, 2026-09-29: una mappa può
+ * contenerne più d'una). Si passa **l'insieme**: le aree tolte si staccano, quelle nuove si aggiungono e
+ * si staccano dalla planimetria che le aveva (un'area ha comunque una sola planimetria, decisione del
+ * 2026-09-18); gli altri legami della mappa (luogo, quartiere) restano.
+ */
+export function impostaAreeMappa(chiavePubblica: string, aree: string[]): Array<{ chiave: string; nome: string; ordine: number }> {
+  // la chiave che usa l'interfaccia è quella di percorso: la riga si trova come in tutte le altre operazioni
+  const r = rigaMappa(chiavePubblica);
+  const chiave = r.chiave;
+  const uniche = [...new Set(aree)];
+  if (uniche.length && chiave.startsWith('dungeon-') && !r.genitore_chiave) throw httpErrors.badRequest('mappa-fuori-palazzo', 'La mappa d\'insieme del Palazzo non è una planimetria: le aree si legano alle sue planimetrie.');
+  verificaAreePalazzo(r.genitore_chiave, uniche);
+  getDb().transaction(() => {
+    const segnaposti = uniche.map(() => '?').join(',');
+    prepared(`DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area'${uniche.length ? ` AND entita_chiave NOT IN (${segnaposti})` : ''}`).run(chiave, ...uniche);
+    for (const area of uniche) {
+      staccaAreaDalleAltre(area, chiave);
+      prepared("INSERT OR IGNORE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, 'area', ?, ?)")
+        .run(chiave, area, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
+    }
+    allineaColonneArea(chiave);
+    // come ogni modifica dall'app: la riga è dell'utente, e un pacchetto seed senza sovrascrittura non la tocca
+    prepared("UPDATE mappa SET origine = 'utente', updated_at = ? WHERE chiave = ?").run(nowIso(), chiave);
+  })();
+  return areeDellaMappa(chiave);
 }
 
 /**
@@ -522,6 +621,7 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
   if (prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(chiave)) throw httpErrors.conflict('mappa-esistente', `Esiste già una mappa con chiave '${chiave}'.`);
   if (!(TIPI_MAPPA as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di mappa non ammesso.');
   if (dati.genitore) rigaMappa(dati.genitore);
+  if (dati.entita?.tipo === 'area') verificaAreePalazzo(dati.genitore ?? null, [dati.entita.chiave]);
   const adesso = nowIso();
   // 15.25: senza indicazione l'asset del repository è `mappe/<chiave>`, lo stesso percorso che «Esporta questo luogo» dà all'immagine di base:
   // quando il file verrà consegnato in public/asset la mappa lo userà da sola; finché manca, si usa l'immagine dell'istanza o la griglia.
@@ -594,6 +694,19 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
   // il titolo restava quello dedotto dall'estrazione. Lo spegne solo l'importazione di un
   // pacchetto, che quel nome lo sovrascrive.
   const rivisto = conNomeRivisto() ? (dati.nome !== undefined ? 1 : r.nome_rivisto ?? 0) : 0;
+  // un'area si lega solo a una planimetria del suo Palazzo (controllo prima di scrivere: niente modifiche a metà)
+  const genitoreDopo = dati.genitore === undefined ? r.genitore_chiave : dati.genitore;
+  if (genitoreDopo !== r.genitore_chiave && prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) {
+    // Spostata sotto un altro genitore, la planimetria porta con sé **tutte** le sue aree: devono restare
+    // del Palazzo in cui arriva (rilievo della revisione). Quella che questo salvataggio sostituisce non conta.
+    // Con lei si spostano le discendenti: anche le loro aree devono restare del Palazzo di arrivo.
+    const sottoalbero = [chiave];
+    for (let i = 0; i < sottoalbero.length; i++) for (const f of prepared('SELECT chiave FROM mappa WHERE genitore_chiave = ?').all(sottoalbero[i]) as Array<{ chiave: string }>) if (!sottoalbero.includes(f.chiave)) sottoalbero.push(f.chiave);
+    const areeDopo = new Set(sottoalbero.flatMap((k) => areeDellaMappa(k).map((a) => a.chiave)));
+    if (dati.entita !== undefined && r.entita_tipo === 'area' && r.entita_chiave) areeDopo.delete(r.entita_chiave);
+    if (dati.entita?.tipo === 'area') areeDopo.add(dati.entita.chiave);
+    verificaAreePalazzo(genitoreDopo, [...areeDopo]);
+  } else if (dati.entita?.tipo === 'area') verificaAreePalazzo(genitoreDopo, [dati.entita.chiave]);
   getDb().transaction(()=>{
   if (conNomeRivisto()) prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(rivisto, chiave);
   prepared(`UPDATE mappa SET nome = ?, tipo = ?, genitore_chiave = ?, ordine = ?, asset = ?, larghezza = ?, altezza = ?, entita_tipo = ?, entita_chiave = ?, note = ?, origine = 'utente', updated_at = ? WHERE chiave = ?`).run(
@@ -909,6 +1022,8 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
     chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, assetOriginale:m.asset, larghezza: m.larghezza, altezza: m.altezza,
     ruoloImmagine: m.ruolo_immagine,
     entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
+    // tutte le aree della guida contenute (2026-09-29): `entita` ne dichiara una sola, la prima
+    ...areePerPacchetto(m.chiave),
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
       ...destinazionePerPacchetto(s.id),
       uid: s.uid,
@@ -1029,6 +1144,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       for (const [identita,n] of conteggioEredi) if (n===1&&occorrenze.get(identita)===1) identitaSpostate.add(identita);
     }
     const arrivi: Array<{id:number; valore:DestinazioneDaSalvare|null|undefined; invalidata:boolean}> = [];
+    const areeDaLegare: Array<{ mappa: string; aree: string[]; fonte: string }> = [];
     const adesso = nowIso();
     // prima le mappe (in ordine di dipendenza: i genitori possono arrivare dopo → secondo passaggio per i genitori)
     for (const m of pacchetto.mappe) {
@@ -1052,9 +1168,21 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       // L'entità dichiarata dalla mappa vale anche come associazione consultabile: è così che la
       // scheda dell'area della guida mostra la sua planimetria e che le altre sezioni la trovano.
       if (prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) {
-        prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ?').run(m.chiave);
-        if (m.entita?.tipo && m.entita.chiave) prepared('INSERT OR REPLACE INTO mappa_entita VALUES(?,?,?,?)')
-          .run(m.chiave, m.entita.tipo, m.entita.chiave, JSON.stringify({ origine, dichiarata: 'pacchetto' }));
+        // Si sostituiscono solo i legami che il pacchetto dichiara — le aree della guida e il tipo di
+        // `entita` —, non tutti: un luogo legato dalla migrazione 054 non viaggia nel pacchetto e
+        // cancellarlo lo perdeva. Le aree sono l'elenco `aree` (2026-09-29, più d'una per planimetria);
+        // un pacchetto di prima porta solo `entita`.
+        prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area'").run(m.chiave);
+        if (m.entita?.tipo && m.entita.tipo !== 'area') prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = ?').run(m.chiave, m.entita.tipo);
+        const fonte = JSON.stringify({ origine, dichiarata: 'pacchetto' });
+        const dichiarate = m.aree !== undefined ? z.array(z.string().trim().min(1).max(160)).max(200).safeParse(m.aree) : null;
+        if (dichiarate && !dichiarate.success) throw httpErrors.badRequest('aree-non-valide', `Aree della guida non valide nella mappa '${m.chiave}'.`);
+        const aree = [...new Set(dichiarate ? dichiarate.data : m.entita?.tipo === 'area' && m.entita.chiave ? [m.entita.chiave] : [])];
+        if (m.entita?.tipo && m.entita.chiave && m.entita.tipo !== 'area') prepared('INSERT OR REPLACE INTO mappa_entita VALUES(?,?,?,?)').run(m.chiave, m.entita.tipo, m.entita.chiave, fonte);
+        // Le aree si verificano e si legano **dopo** il passaggio dei genitori: il Palazzo della planimetria
+        // si trova risalendo la catena nel database, e a questo punto le mappe nuove del pacchetto (e quelle
+        // che il pacchetto dichiara dopo la figlia) non hanno ancora un genitore (rilievo della revisione).
+        areeDaLegare.push({ mappa: m.chiave, aree, fonte });
       }
       if ((m.contesti !== undefined || m.gruppoImmagini !== undefined) && prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
         const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative(),etichetta:z.string().min(1).max(160).optional()}).nullable()});
@@ -1126,6 +1254,17 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     }
     for (const m of pacchetto.mappe) {
       if (m.genitore && !esito.saltate.includes(m.chiave) && prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(m.genitore)) prepared('UPDATE mappa SET genitore_chiave = ? WHERE chiave = ?').run(m.genitore, m.chiave);
+    }
+    // a genitori scritti: le stesse regole dell'app (aree esistenti e dello stesso Palazzo della planimetria)
+    for (const { mappa, aree, fonte } of areeDaLegare) {
+      verificaAreePalazzo((prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').get(mappa) as { genitore_chiave: string | null }).genitore_chiave, aree);
+      for (const area of aree) {
+        // un'area ha una sola planimetria anche quando arriva da un pacchetto
+        staccaAreaDalleAltre(area, mappa);
+        prepared("INSERT OR REPLACE INTO mappa_entita VALUES(?,'area',?,?)").run(mappa, area, fonte);
+      }
+      // anche con l'elenco vuoto: le colonne non devono dichiarare un'area che non c'è più
+      allineaColonneArea(mappa);
     }
     // già verificate prima degli inserimenti; lo spillo d'arrivo descritto per nome e posizione si risolve adesso, a mappe complete
     for (const arrivo of arrivi) salvaDestinazioneSpillo(arrivo.id, arrivo.valore, arrivo.invalidata);

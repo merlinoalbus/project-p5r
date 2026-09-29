@@ -1646,11 +1646,11 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   fonti: string[];
   aree: AreaDungeonDto[];
   /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`, radice esclusa) nel loro
-   *  ordine logico, con i collezionabili di ognuna e l'area della guida a cui è legata (`mappa_entita`,
-   *  al più una: un'area ha una sola planimetria). Le planimetrie senza collezionabili ci sono lo
-   *  stesso, perché è da qui che si ordinano, si legano e si cancellano. Vuoto per i Memento, che
-   *  contano gli obiettivi dei dedali. */
-  planimetrie: Array<{ chiave: string; nome: string; ordine: number; area: { chiave: string; nome: string } | null; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
+   *  ordine logico, con i collezionabili di ognuna e le aree della guida che contiene (`mappa_entita`,
+   *  in ordine di guida: una planimetria può contenerne più d'una, 2026-09-29; un'area resta su una sola
+   *  planimetria). Le planimetrie senza collezionabili ci sono lo stesso, perché è da qui che si
+   *  ordinano, si legano e si cancellano. Vuoto per i Memento, che contano gli obiettivi dei dedali. */
+  planimetrie: Array<{ chiave: string; nome: string; ordine: number; aree: Array<{ chiave: string; nome: string; ordine: number }>; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
 }
 
 // ---- Calendario di gioco (Fase 6.3) ----
@@ -1892,6 +1892,9 @@ export interface EsportazioneMappeDto {
     assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
+    /** Tutte le aree della guida contenute nella planimetria, in ordine di guida (2026-09-29). `entita` ne
+     *  dichiara una sola, la prima; un pacchetto di prima non ha questo campo. */
+    aree?: string[];
     spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;

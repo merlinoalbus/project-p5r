@@ -647,14 +647,14 @@ e salva con `aggiornaDungeon` / `aggiornaArea` / `creaPunto` / `aggiornaPunto` /
 `aggiornaPresentazioneMappa` (`PUT /api/mappe/:chiave/presentazione`): il nome della stanza si
 propaga a tutte le sue tavole, l'etichetta resta della singola versione. **La pianta pubblicata
 dalla guida non esiste più** per le aree dei Palazzi (resta per i quartieri): dove manca la
-planimetria la scheda offre il selettore delle tavole libere e scrive il legame con `aggiornaMappa`.
+planimetria la scheda offre il selettore di tutte le tavole e aggiunge l'area con `impostaAreeMappa` (2026-09-30).
 
 `src/components/guida/PlanimetriePalazzo.tsx` è il pannello «Planimetrie» della scheda (aperto dal
 contatore dell'intestazione): elenca **tutte** le planimetrie dell'albero `dungeon-<chiave>` che
-`DungeonDettaglioDto.planimetrie` porta con `ordine` e `area`, le riordina con `riordinaMappe`
-(`PUT /api/mappe/ordine`, trascinamento a puntatore + Su/Giù), lega l'area con `aggiornaMappa`
-(`entita`, un'area = una planimetria, imposto dal server in `sincronizzaLegameEntita`, che scrive
-insieme le colonne `entita_*` e la tabella `mappa_entita` letta dalla scheda), aggiunge con
+`DungeonDettaglioDto.planimetrie` porta con `ordine` e `aree` (in ordine di guida), le riordina con `riordinaMappe`
+(`PUT /api/mappe/ordine`, trascinamento a puntatore + Su/Giù), sceglie le aree di ogni versione nella finestra
+`SceltaAreePlanimetria` e le salva con `impostaAreeMappa` (`PUT /api/mappe/:chiave/aree`; una planimetria più aree,
+un'area una planimetria — vedi «Più aree per planimetria» in fondo), aggiunge con
 `creaMappa` ed elimina con `eliminaMappa`. Scegliere una riga porta il visore su quella planimetria
 e la colonna sui suoi soli collezionabili. Nell'editor `VisoreMappa.vistaGiornoCorrente` accende il
 filtro del giorno corrente della partita attiva (di regola l'editor vede tutto).
@@ -758,3 +758,29 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
 - **Illustrazioni dei videogiochi**: `VideogiochiPage` mostra `attivita/<chiave>` (database) con riserva l'icona dei
   videogiochi; le attività di tipo «sfida» usano la figura `categoria-obiettivo` (alias in `src/utils/categorie.ts`),
   «allenamento» la sua `categoria-allenamento`.
+
+## Più aree per planimetria; Palazzi e Memento in una schermata (2026-09-30)
+
+- **Legame mappa ↔ aree**: vive in `mappa_entita` (righe `entita_tipo='area'`, più d'una per mappa, al più una mappa
+  per area). Le colonne `mappa.entita_tipo/entita_chiave` dichiarano la prima area in ordine di guida
+  (`allineaColonneArea`) oppure un legame di altro tipo, che non si tocca. In `mappeService`:
+  - `impostaAreeMappa(chiave, aree)` (rotta `PUT /api/mappe/:chiave/aree`, schema `bodyAreeMappa`) sostituisce
+    l'insieme, stacca ogni area dalla mappa che l'aveva (`staccaAreaDalleAltre`) e risponde con `areeDellaMappa`;
+  - `sincronizzaLegameEntita` (il legame singolo `entita` di creazione e modifica) toglie solo l'area che le colonne
+    dichiaravano;
+  - `verificaAreePalazzo` / `palazzoDaGenitore` rifiutano (400) aree inesistenti, di un altro Palazzo o sulla radice
+    `dungeon-<k>`. `aggiornaMappa` le applica a tutto il sottoalbero quando cambia il genitore.
+- **Pacchetto delle mappe**: `EsportazioneMappeDto.mappe[].aree` (chiavi in ordine di guida); all'importazione le aree
+  si verificano e si legano dopo il passaggio che scrive i genitori; un pacchetto senza `aree` usa `entita`.
+  `dungeonService.planimetrieDelPalazzo` e `contenutiGuidaService.contenutiMappa` leggono tutte le aree in ordine.
+- **Interfaccia**: `src/components/guida/SceltaAreePlanimetria.tsx` (finestra `Modal`); `gruppiPlanimetrie` unisce le
+  aree delle versioni con `perOrdineDiGuida`; `DungeonDettaglioPage` mostra «Su questa planimetria» quando la
+  planimetria a schermo ha più aree.
+- **Una schermata da 1024 px** (`DungeonDettaglioPage`, Palazzi e Memento): radice `lg:flex-1 lg:min-h-0` dentro il
+  `main` flessibile di `MainLayout`, intestazione `shrink-0` compatta (emblema 48 px, anello `lg:size-12!`, chip in
+  `lg:contents`), griglia `lg:flex-1 lg:min-h-[280px] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch`. Da 1024 a
+  1279 px la colonna destra è un'unica `lg:max-xl:area-scorrevole`; da 1280 px sezione e aside sono colonne con
+  `xl:area-scorrevole`. `MappaIncorporata.classeVisore` dà l'altezza al solo riquadro del visore (minimo 240 px e
+  `flex-1` da 1280 px); la scheda di una mappa senza planimetria resta alta quanto il suo contenuto.
+- Limite: `riconciliaAreeGuida` (`organizzazioneMappe.ts`) legge le colonne, quindi solo la prima area di una mappa
+  senza geometria (vedi DECISIONI, 2026-09-30).

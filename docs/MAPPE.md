@@ -49,7 +49,8 @@ mappa
                                      non è nel manifest degli asset il puntatore è innocuo: si usa l'immagine dell'istanza o la griglia
   larghezza, altezza INTEGER NULL    dimensioni dell'immagine di base (per l'adattamento dello zoom)
   entita_tipo      TEXT NULL         'quartiere' | 'luogo' | 'dungeon' | 'area'   collegamento all'entità esistente
-  entita_chiave    TEXT NULL
+  entita_chiave    TEXT NULL         (aree: la prima in ordine di guida; tutte le aree della planimetria stanno in
+                                     `mappa_entita`, più d'una per mappa e al più una mappa per area — 2026-09-30)
   origine          TEXT NOT NULL     'seed' | 'utente'
   note             TEXT NOT NULL DEFAULT ''
   updated_at       TEXT NOT NULL

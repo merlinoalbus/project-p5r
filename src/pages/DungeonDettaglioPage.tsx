@@ -20,7 +20,7 @@
 import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { aggiornaArea, aggiornaDungeon, aggiornaMappa, aggiornaPunto as salvaPunto, creaPunto, eliminaPunto, getAlberoMappe, getDungeon, impostaStatoPunto } from '../services/api';
+import { aggiornaArea, aggiornaDungeon, aggiornaPunto as salvaPunto, creaPunto, eliminaPunto, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -34,7 +34,7 @@ import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { RaccoltaPlanimetrie } from '../components/guida/RaccoltaPlanimetrie';
 import { PlanimetriePalazzo } from '../components/guida/PlanimetriePalazzo';
-import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
+import { nomeSenzaPalazzo, perOrdineDiGuida } from '../utils/gruppiPlanimetrie';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
 import { ObiettiviDedalo } from '../components/guida/ObiettiviDedalo';
@@ -212,11 +212,15 @@ export function DungeonDettaglioPage() {
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
   const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setPlanimetriaLibera(null); };
-  /** Una planimetria scelta dal pannello: se è legata a un'area si apre quell'area, altrimenti resta «libera». */
+  /**
+   * Una planimetria scelta dal pannello: se contiene aree della guida si apre la sua prima in ordine di
+   * guida — o resta quella aperta, se la planimetria contiene anche lei —, altrimenti resta «libera».
+   */
   const scegliPlanimetria = (k: string) => {
     const p = (d?.planimetrie ?? []).find((x) => x.chiave === k);
     setSelezionato(null);
-    if (p?.area) { setParams({ area: p.area.chiave }); setPianta(k); setPlanimetriaLibera(null); }
+    const prima = p ? [...p.aree].sort(perOrdineDiGuida)[0] : undefined;
+    if (p && prima) { setParams({ area: area && p.aree.some((a) => a.chiave === area.chiave) ? area.chiave : prima.chiave }); setPianta(k); setPlanimetriaLibera(null); }
     else setPlanimetriaLibera(k);
   };
   // L'anello conta quel che si raccoglie: collezionabili delle planimetrie (Palazzi) o obiettivi dei dedali (Memento).
@@ -236,31 +240,42 @@ export function DungeonDettaglioPage() {
   // Perché la colonna mostra tutto il Palazzo: l'area non ha una planimetria legata, oppure ce l'ha ma senza collezionabili.
   const notaPalazzo = mappeArea.length === 0 ? 'Quest’area non ha planimetrie legate: qui c’è tutto il Palazzo.' : 'La planimetria di quest’area non ha collezionabili: qui c’è tutto il Palazzo.';
   const altrePlanimetrie = (d?.planimetrie ?? []).filter((p) => !mappeArea.some((m) => m.chiave === p.chiave));
-  // Le tavole del Palazzo che nessuna area si è ancora presa: sono quelle da collegare.
-  const tavoleLibere = (d?.planimetrie ?? []).filter((p) => !p.area);
+  // La planimetria a schermo e le aree della guida che contiene, in ordine di guida (possono essere più d'una).
+  const areeDellaPianta = [...((d?.planimetrie ?? []).find((p) => p.chiave === mappaScelta)?.aree ?? [])].sort(perOrdineDiGuida);
   const restanoAltre = altrePlanimetrie.reduce((s, p) => s + p.n - (p.presi ?? 0), 0);
 
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && area && (
-        <div className="flex flex-col gap-4">
-          {/* ---- Intestazione: l'emblema grande, il nome, il tempo ---- */}
-          <header className="card relative overflow-hidden">
+        // **Da 1024 px il Palazzo sta in una schermata** (richiesta dell'utente, 2026-09-29): «componenti che
+        // sforano la pagina… aggiungendo una scrollbar di pagina che non è accettabile… tutti i componenti devono
+        // finire con la stessa altezza». La pagina prende l'altezza dell'area di lettura, l'intestazione la sua, e
+        // le colonne il resto: finiscono tutte allo stesso punto e ognuna scorre per conto suo (area-scorrevole).
+        // Sotto i 1024 px le colonne sono una sola e scorre la pagina, l'unico scorrimento. Vale per i Palazzi e
+        // per i Memento (2026-09-30).
+        <div className="flex flex-col gap-4 lg:min-h-0 lg:flex-1">
+          {/* ---- Intestazione: l'emblema, il nome, il tempo ----
+              Da 1024 px è **compatta su due righe** (scelta dell'utente, 2026-09-30): alta 266 px, con il browser
+              sul portatile lasciava alle colonne meno di metà dello schermo. Prima riga emblema e anello piccoli,
+              nome, sovrano e arcana; seconda riga la finestra del Palazzo, i conteggi e «Dettagli dalla guida». */}
+          <header className="card relative shrink-0 overflow-hidden lg:py-2.5">
             <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block">
               <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={280} />
             </span>
-            <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
-              <div className="flex shrink-0 items-center gap-3 sm:flex-col">
+            <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3">
+              <div className="flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2">
                 <span className="sm:hidden"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={52} /></span>
-                <span className="hidden sm:block"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} /></span>
+                <span className="hidden sm:block lg:hidden"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} /></span>
+                <span className="hidden lg:block"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={48} /></span>
                 {quota !== null && (
-                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} ${memento ? 'obiettivi fatti' : 'da raccogliere presi'} su ${d.raccolta.totale}`}>
-                    <span className="font-display text-[17px] leading-none tabular-nums">{Math.round(quota * 100)}%</span>
+                  // un anello solo (è la barra di avanzamento della pagina): da 1024 px si rimpicciolisce, non si duplica
+                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} className="lg:size-12!" etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} ${memento ? 'obiettivi fatti' : 'da raccogliere presi'} su ${d.raccolta.totale}`}>
+                    <span className="font-display text-[17px] leading-none tabular-nums lg:text-[13px]">{Math.round(quota * 100)}%</span>
                   </AnelloAvanzamento>
                 )}
               </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-2.5">
-                <div className="flex flex-col gap-1">
+              <div className="flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1.5">
+                <div className="flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <button type="button" className="btn btn-ghost btn-sm touch -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
                     <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
@@ -280,8 +295,11 @@ export function DungeonDettaglioPage() {
                     {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
                   </div>
                 </div>
+                {/* Da 1024 px finestra, conteggi e dettagli stanno su una riga; i dettagli aperti vanno a capo, sotto. */}
+                <div className="flex flex-col gap-2.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">
                 <LineaDelTempo date={d.date} />
-                <div className="flex flex-wrap items-center gap-2">
+                {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno. */}
+                <div className="flex flex-wrap items-center gap-2 lg:contents">
                   <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa del Palazzo" />
                   <span className="chip">{d.aree.length} {memento ? 'dedali' : 'aree'}</span>
                   <span className="chip" title={memento ? 'Timbri dichiarati dalla guida e richieste dei dedali: sono questi a fare la percentuale.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'obiettivi' : 'da raccogliere'}</span>
@@ -291,7 +309,7 @@ export function DungeonDettaglioPage() {
                   <span className="chip" title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
                   {suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                 </div>
-                {(d.livelloConsigliato || d.note || tempoInProsa.length > 0) && <details className="text-[12px]">
+                {(d.livelloConsigliato || d.note || tempoInProsa.length > 0) && <details className="text-[12px] lg:open:basis-full">
                   <summary className="touch cursor-pointer text-text-muted">Dettagli dalla guida</summary>
                   <div className="flex flex-col gap-1 pt-1.5">
                     {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="text-[13px] text-text-secondary" />}
@@ -299,18 +317,22 @@ export function DungeonDettaglioPage() {
                     {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="text-[12px] text-text-muted whitespace-pre-wrap" />}
                   </div>
                 </details>}
+                </div>
               </div>
             </div>
           </header>
 
-          <div className={`grid grid-cols-1 items-start gap-4 ${memento ? 'xl:grid-cols-[minmax(300px,400px)_minmax(0,1fr)]' : 'lg:grid-cols-[360px_minmax(0,1fr)]'}`}>
+          {/* Da 1024 px una riga sola, alta quanto resta (`minmax(0,1fr)`): le colonne si stirano fino in fondo. Il
+              minimo evita colonne schiacciate su uno schermo più basso di un portatile con il browser aperto: lì, e
+              solo lì, torna a scorrere la pagina. */}
+          <div className={`grid grid-cols-1 items-start gap-4 lg:min-h-[280px] lg:flex-1 lg:grid-rows-[minmax(0,1fr)] lg:items-stretch ${memento ? 'lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] 2xl:grid-cols-[minmax(300px,400px)_minmax(0,1fr)]' : 'lg:grid-cols-[360px_minmax(0,1fr)]'}`}>
             {/* ---- Le aree: colonna da 1024 px in su, fila scorrevole sotto ---- */}
             {/* **Un elenco solo.** Le stanze in ordine di percorso con i loro comandi, e in coda le
                 aree della guida ancora da collegare: è la lista di atterraggio e insieme il posto
                 dove si sistema il Palazzo, senza un secondo pannello da scoprire. Sotto i 1024 px
                 la fila di chip resta come salto rapido fra le aree. */}
             {!memento && (
-              <nav aria-label="Il Palazzo" className="order-2 lg:order-none">
+              <nav aria-label="Il Palazzo" className="order-2 lg:order-none lg:min-h-0">
                 {/* **Niente fila di chip sotto i 1024 px.** C'era, e rimetteva in piedi la doppia
                     lista appena tolta: diciotto aree in otto righe di chip sopra l'elenco che le
                     contiene già. L'elenco vale a tutte le larghezze.
@@ -318,24 +340,24 @@ export function DungeonDettaglioPage() {
                     Ma in colonna unica **va dopo il contenuto che serve a scegliere**, e con il suo
                     tetto d'altezza: srotolato, per Kamoshida è alto 4053 px, e l'area aperta finiva
                     a 4682 px dall'alto — la navigazione seppelliva ciò che seleziona (rilievo della
-                    revisione). Sopra i 1024 px è la colonna di sinistra e resta al suo posto. */}
-                <div className="card max-h-[70vh] area-scorrevole p-2 lg:sticky lg:top-4 lg:max-h-[calc(100vh-11rem)]">
+                    revisione). Sopra i 1024 px è la colonna di sinistra, alta quanto le altre. */}
+                <div className="card max-h-[70vh] area-scorrevole p-2 lg:h-full lg:max-h-none">
                   <PlanimetriePalazzo dungeonChiave={d.chiave} planimetrie={d.planimetrie} albero={albero.dati ?? []}
                     alberoPronto={!!albero.dati} alberoErrore={albero.errore} onRiprovaAlbero={() => void albero.ricarica()}
                     aree={d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }))}
                     areeOrfane={d.aree.filter((a) => a.mappe.length === 0).map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine, descrizione: a.descrizione }))}
-                    tavoleLibere={tavoleLibere}
                     areaScelta={area.chiave} onScegliArea={scegliArea}
                     sceltaChiave={mappaScelta} onScegli={scegliPlanimetria}
                     onCambiato={async () => { await Promise.all([dati.ricarica(), albero.ricarica()]); }} />
                 </div>
               </nav>
             )}
-            {/* I Memento: il pozzo disegnato al posto della colonna delle aree, nella colonna. */}
+            {/* I Memento: il pozzo disegnato al posto della colonna delle aree, nella colonna. Da 1024 px la colonna è
+                alta quanto le altre, e pozzo e dedali scorrono insieme al suo interno. */}
             {memento && (
-              <div className="flex min-w-0 flex-col gap-2">
+              <div className="flex min-w-0 flex-col gap-2 lg:min-h-0 lg:area-scorrevole lg:p-2">
                 <MappaMemento aree={d.aree} selezionata={area.chiave} onSeleziona={scegliArea}
-                  className="mx-auto w-[min(100%,calc(min(46vh,460px)*1.6))] xl:w-full" />
+                  className="mx-auto w-[min(100%,calc(min(46vh,460px)*1.6))] lg:w-full lg:shrink-0" />
                 <FilaScorrevole className="items-center" role="tablist" aria-label="Dedali">
                   {d.aree.map((a) => <VoceArea key={a.chiave} a={a} memento compatta scelta={a.chiave === area.chiave} suggerita={areaSuggerita(a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
                 </FilaScorrevole>
@@ -343,8 +365,10 @@ export function DungeonDettaglioPage() {
             )}
 
             {/* ---- L'area scelta: mappa e obiettivi ---- */}
-            <div className={`order-1 grid grid-cols-1 items-start gap-4 lg:order-none ${memento ? '2xl:grid-cols-[minmax(0,1fr)_340px]' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
-              <section className="card flex flex-col gap-2.5">
+            {/* Da 1024 a 1279 px mappa e raccolta stanno una sotto l'altra in **un'area sola** che scorre; da 1280 px
+                sono due colonne, ognuna con il suo scorrimento, e la mappa si allunga fino in fondo alla sua. */}
+            <div className={`order-1 grid grid-cols-1 items-start gap-4 lg:order-none lg:min-h-0 lg:max-xl:area-scorrevole lg:max-xl:p-2 xl:grid-rows-[minmax(0,1fr)] xl:items-stretch ${memento ? 'xl:grid-cols-[minmax(0,1fr)_340px]' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
+              <section className="card flex flex-col gap-2.5 xl:min-h-0 xl:area-scorrevole">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>
                   {/* `key`: cambiando area il modulo si rimonta, altrimenti resterebbe aperto con il
@@ -360,9 +384,11 @@ export function DungeonDettaglioPage() {
                   <span className="text-[12px] text-text-muted">{memento ? 'dedalo' : 'area'} {area.ordine + 1} di {d.aree.length}</span>
                   <span className="flex-1" />
                 </div>
-                {area.descrizione && <p className="m-0 text-[13px] text-text-secondary">{area.descrizione}</p>}
-                {/* Il pezzo con cui il gioco disegna il dedalo nel pozzo: non una pianta, i piani si generano. */}
-                {memento && <span className="flex h-[min(46vh,420px)] w-full items-center justify-center overflow-hidden rounded bg-[#8d0012]">
+                {/* La descrizione si ripiega: per esteso spingeva la mappa (o il dedalo) sotto il bordo della colonna. */}
+                {area.descrizione && <TestoRipiegabile testo={area.descrizione} massimo={140} className="text-[13px] text-text-secondary" />}
+                {/* Il pezzo con cui il gioco disegna il dedalo nel pozzo: non una pianta, i piani si generano. Da 1280 px
+                    riempie la colonna come la mappa di un Palazzo. */}
+                {memento && <span className="flex h-[min(46vh,420px)] w-full items-center justify-center overflow-hidden rounded bg-[#8d0012] xl:h-auto xl:min-h-[240px] xl:flex-1">
                   <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`} className="max-h-full max-w-full object-contain" />
                 </span>}
                 {/* La planimetria dell'atlante legata all'area, se c'è. */}
@@ -370,8 +396,27 @@ export function DungeonDettaglioPage() {
                   {area.mappe.length > 1 && (
                     <Selettore etichetta="Planimetria" valore={mappaScelta} opzioni={area.mappe.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={setPianta} />
                   )}
-                  <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} altezza="max(300px, min(41vh, 560px))" onCambiato={() => void dati.ricarica()} />
-                  <p className="m-0 text-[11px] text-text-muted">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
+                  {/* Una planimetria che contiene più aree della guida le mostra tutte, in ordine: toccarne una la apre. */}
+                  {areeDellaPianta.length > 1 && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] uppercase tracking-wide text-text-muted">Su questa planimetria</span>
+                      <ol className="m-0 flex list-none flex-wrap gap-1 p-0" aria-label="Aree della guida su questa planimetria">
+                        {areeDellaPianta.map((a) => (
+                          <li key={a.chiave}>
+                            <button type="button" className={`chip touch text-[11px] ${a.chiave === area.chiave ? 'chip--attivo' : ''}`} aria-pressed={a.chiave === area.chiave}
+                              onClick={() => { if (a.chiave !== area.chiave) { const k = mappaScelta; scegliArea(a.chiave); setPianta(k); } }}>
+                              {a.ordine + 1}. {a.nome}
+                            </button>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+                  {/* Da 1280 px la mappa prende tutta l'altezza che la colonna le lascia, mai meno di 240 px (scelta
+                      dell'utente, 2026-09-30: sotto quel minimo scorre la colonna, non la pagina); sotto, l'altezza di prima. */}
+                  <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} classeVisore="h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-[240px] xl:flex-1" onCambiato={() => void dati.ricarica()} />
+                  {/* Da 1280 px la colonna è alta quanto lo schermo: la nota lascia il posto alla mappa, che ha già «Modifica mappa». */}
+                  <p className="m-0 text-[11px] text-text-muted xl:hidden">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
                 </>}
                 {/* **Dove manca il legame si collega, non si mostra un'altra immagine.** Prima qui
                     c'era la pianta scaricata dalla guida: una seconda figura della stessa stanza,
@@ -380,20 +425,21 @@ export function DungeonDettaglioPage() {
                     legame, e questo è il posto per farlo — la scelta vale per tutte le partite. */}
                 {!mappaScelta && !memento && (
                   <div className="flex flex-col gap-2 rounded-md bg-white/[0.04] px-3 py-2 text-[12px]" role="status">
-                    <p className="m-0 text-text-muted">Quest’area non ha ancora una planimetria: sceglila fra le tavole del Palazzo non ancora assegnate. Quel che c’è da raccogliere sta nella colonna accanto.</p>
-                    {tavoleLibere.length > 0
+                    <p className="m-0 text-text-muted">Quest’area non ha ancora una planimetria: sceglila fra le tavole del Palazzo — anche una che contiene già altre aree, si aggiunge a quelle. Quel che c’è da raccogliere sta nella colonna accanto.</p>
+                    {d.planimetrie.length > 0
                       ? <Selettore etichetta="Collega una planimetria" valore="" vuoto="— scegli —"
-                          opzioni={tavoleLibere.map((t) => ({ chiave: t.chiave, nome: nomeSenzaPalazzo(t.nome), dettaglio: t.n > 0 ? `${t.n} da raccogliere` : undefined }))}
-                          onCambia={(k) => { if (!k) return; void aggiornaMappa(k, { entita: { tipo: 'area', chiave: area.chiave } })
+                          opzioni={d.planimetrie.map((t) => ({ chiave: t.chiave, nome: nomeSenzaPalazzo(t.nome),
+                            dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna area'].filter(Boolean).join(' · ') }))}
+                          onCambia={(k) => { const t = d.planimetrie.find((x) => x.chiave === k); if (!t) return; void impostaAreeMappa(t.chiave, [...t.aree.map((a) => a.chiave), area.chiave])
                             .then(async () => { await dati.ricarica(); notifica('success', `Planimetria collegata a «${area.nome}».`); })
                             .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Collegamento non riuscito.')); }} />
-                      : <span className="text-text-muted">Nel Palazzo non restano tavole libere: aggiungine una dal pannello «Planimetrie».</span>}
+                      : <span className="text-text-muted">Il Palazzo non ha ancora planimetrie: aggiungine una dall’elenco del Palazzo.</span>}
                   </div>
                 )}
               </section>
 
               {/* ---- La colonna degli obiettivi: quel che fa la percentuale, e sotto i punti della guida ---- */}
-              <aside className="card flex flex-col gap-3" aria-label={memento ? `Obiettivi di ${area.nome}` : areaConRaccolta ? `Da raccogliere in ${area.nome}` : `Da raccogliere nel ${d.nome}`}>
+              <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={memento ? `Obiettivi di ${area.nome}` : areaConRaccolta ? `Da raccogliere in ${area.nome}` : `Da raccogliere nel ${d.nome}`}>
                 {!memento && planimetriaAperta
                   ? <RaccoltaPlanimetrie planimetrie={[planimetriaAperta]} partitaId={partitaId} onRaccolto={segnaRaccolto}
                       etichetta="Su questa planimetria" nota="Planimetria scelta dal pannello: qui c’è solo quel che si raccoglie su di lei."

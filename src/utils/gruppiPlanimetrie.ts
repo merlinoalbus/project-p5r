@@ -37,8 +37,8 @@ export interface GruppoPlanimetrie {
   /** Collezionabili e raccolti di tutta la stanza. */
   totale: number;
   presi: number | null;
-  /** Le aree della guida legate a una delle versioni (di norma una sola). */
-  aree: Array<{ chiave: string; nome: string }>;
+  /** Le aree della guida contenute nelle sue versioni, senza doppioni e in ordine di guida. */
+  aree: Array<{ chiave: string; nome: string; ordine: number }>;
 }
 
 /**
@@ -64,7 +64,8 @@ export function raggruppaPlanimetrie(planimetrie: Planimetria[], albero: MappaRi
       gruppo.versioni.push(versione);
       gruppo.totale += p.n;
       if (gruppo.presi !== null && p.presi !== null) gruppo.presi += p.presi;
-      if (p.area && !gruppo.aree.some((a) => a.chiave === p.area!.chiave)) gruppo.aree.push(p.area);
+      for (const a of p.aree) if (!gruppo.aree.some((x) => x.chiave === a.chiave)) gruppo.aree.push(a);
+      gruppo.aree.sort(perOrdineDiGuida);
       continue;
     }
     indice.set(id, gruppi.length);
@@ -74,10 +75,15 @@ export function raggruppaPlanimetrie(planimetrie: Planimetria[], albero: MappaRi
       versioni: [versione],
       totale: p.n,
       presi: p.presi,
-      aree: p.area ? [p.area] : [],
+      aree: [...p.aree].sort(perOrdineDiGuida),
     });
   }
   return gruppi;
+}
+
+/** Una planimetria può contenere più aree (2026-09-29): si mostrano sempre nell'ordine della guida. */
+export function perOrdineDiGuida(a: { ordine: number; chiave: string }, b: { ordine: number; chiave: string }): number {
+  return a.ordine - b.ordine || a.chiave.localeCompare(b.chiave);
 }
 
 /** «Palazzo di Kamoshida › Torre» → «Torre»: il Palazzo lo dice già la pagina. */

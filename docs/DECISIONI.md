@@ -603,4 +603,22 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - Le illustrazioni delle attività generate da Codex vanno nel database (regola della migrazione 079), non in
   `public/asset/attivita/` come diceva per errore la consegna del 2026-09-13.
 
+### 2026-09-30 — Più aree della guida per planimetria; Palazzi e Memento in una schermata
+- **Una planimetria contiene più aree della guida** (richiesta dell'utente del 2026-09-29: «devo poter selezionare più
+  elementi della guida alla stessa mappa… deve mostrare le sue aree in ordine»). Resta la decisione del 2026-09-18:
+  **un'area ha una sola planimetria**; spuntarla su un'altra la sposta, e la finestra lo dice prima di salvare. Le
+  aree si mostrano sempre in ordine di guida (`dungeon_area.ordine`).
+- Le colonne `mappa.entita_tipo/entita_chiave` restano un legame solo: quando la mappa è legata ad aree dichiarano la
+  **prima in ordine di guida**. Passando da un'area a un legame di altro tipo (quartiere, luogo) le altre aree
+  restano in `mappa_entita`; si tolgono con la scelta delle aree.
+- Le aree si legano solo alle planimetrie **del loro Palazzo** (non alla mappa d'insieme `dungeon-<k>`), anche da un
+  pacchetto e spostando una mappa (con tutto il suo sottoalbero) sotto un altro genitore.
+- **Palazzi e Memento stanno in una schermata da 1024 px** (richiesta dell'utente: niente barra di pagina, colonne
+  che finiscono alla stessa altezza; «sì, anche i Memento»). Scelte dell'utente: **intestazione compatta su due
+  righe** da 1024 px; **mappa con minimo 240 px** — sotto quel minimo scorre la sola colonna della mappa, mai la
+  pagina. Sotto i 1024 px resta la colonna unica con lo scorrimento di pagina.
+- Limite noto: `riconciliaAreeGuida` (migrazione 042 e sincronizzazione delle mappe) converte una mappa **senza
+  geometria** in «area della guida» leggendo le colonne, cioè la sola prima area; una planimetria senza immagine
+  legata a più aree non viene gestita per le altre. Oggi tutte le planimetrie dei Palazzi hanno l'immagine.
+
 

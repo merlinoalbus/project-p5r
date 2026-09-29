@@ -29,6 +29,8 @@ export const bodyCreaMappa = z.object({
   passaggio: z.boolean().optional(), ritorno: z.boolean().optional(),
 });
 export const bodyAggiornaMappa = bodyCreaMappa.omit({ chiave: true, passaggio: true, ritorno: true }).partial();
+/** L'insieme delle aree della guida contenute in una planimetria (vuoto = nessuna). */
+export const bodyAreeMappa = z.object({ aree: z.array(z.string().trim().min(1).max(160)).max(200) });
 /** Raggruppamento di una planimetria: la stanza a cui appartiene e che cosa mostra la sua versione. */
 export const bodyPresentazioneMappa = z.object({
   gruppoId: z.string().max(200).nullable().optional(), gruppoNome: z.string().max(LIMITI_GUIDA.mappa.gruppoNome).optional(), etichetta: z.string().max(LIMITI_GUIDA.mappa.etichetta).nullable().optional(),
