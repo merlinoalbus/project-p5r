@@ -288,8 +288,8 @@ describe('EditorMappaPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Aggiungi/ }));
     const palette = within(screen.getByRole('group', { name: 'Tipo del nuovo spillo' }));
     for (const g of ['Spostamento', 'Città', 'Consumabile', 'Informativo']) expect(palette.getByText(g)).toBeInTheDocument();
-    expect(palette.getAllByRole('button')).toHaveLength(40);
-    for (const nome of ['Bevande', 'Sigarette', 'Cercalavoro', 'Lavoro part-time', 'Bagno pubblico', 'Timbro dei Mementos', 'Punto del rampino', 'Porta chiusa', 'Ingresso al Palazzo']) expect(palette.getByRole('button', { name: nome })).toBeInTheDocument();
+    expect(palette.getAllByRole('button')).toHaveLength(42);
+    for (const nome of ['Bevande', 'Sigarette', 'Cercalavoro', 'Lavoro part-time', 'Bagno pubblico', 'Timbro dei Mementos', 'Punto del rampino', 'Porta chiusa', 'Ingresso al Palazzo', 'Oggetto', 'Punto di infiltrazione']) expect(palette.getByRole('button', { name: nome })).toBeInTheDocument();
     expect(palette.queryByRole('button', { name: 'Distributore' })).toBeNull();
   });
 });

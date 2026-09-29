@@ -6,6 +6,13 @@ Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `ri
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
+**Aggiornamento 2026-09-29**: consegnati 14 file della consegna (12 approvati, 2 in uso provvisorio e da consegnare di nuovo)
+[consegna-2026-09-29-spilli-e-categorie.md](consegna-2026-09-29-spilli-e-categorie.md) — `ui/spillo-oggetto`,
+`ui/spillo-infiltrazione`, `ui/spillo-ingresso-palazzo`, `ui/spillo-sicura` (rifatto), `ui/scheda-progressi`,
+`ui/categoria-obiettivo`, `ui/categoria-allenamento` in `public/asset/ui/`, e le 7 illustrazioni `attivita/videogioco-*`
+nel database di gioco. **Da consegnare di nuovo**: `attivita/videogioco-golfer-sarutahiko` e
+`attivita/videogioco-star-forneus` (fondo pieno fino ai bordi; prompt di rifacimento al §2 della consegna).
+
 ## Generazioni non consegnate
 
 Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con alfa reale, ridotta proporzionalmente e approvata da galaxy_task_validator.

@@ -132,7 +132,9 @@ describe('i testi della guida si possono risalvare così come sono', () => {
         }
       }
     }
-  });
+  // percorre ogni Palazzo con tutte le aree e i punti (centinaia di richieste): da solo ci mette ~2 s, ma nella
+  // suite completa, con i file in parallelo, superava il limite predefinito di 5 s
+  }, 30_000);
 
   it('anche il nome di ogni mappa dell’atlante sta dentro il tetto dello schema', () => {
     // qui basta lo schema: sono 333 mappe, e la rotta la provano già gli altri test

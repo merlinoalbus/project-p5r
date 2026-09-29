@@ -43,6 +43,8 @@ const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
   tesoro: (d) => <svg {...base(d)}><path d="M6 3h12l4 6-10 12L2 9z" /><path d="M2 9h20" /><path d="M9 3l3 6 3-6" /><path d="M9 9l3 12 3-12" /></svg>,
   'tesoro-palazzo': (d) => <svg {...base(d)}><path d="M4 18h16" /><path d="M5 18l-1.5-9 4.5 3.5L12 5l4 7.5 4.5-3.5L19 18z" /><path d="M12 9.5v.01" /></svg>,
   'seme-bramosia': (d) => <svg {...base(d)}><path d="M12 3l4 5-4 13-4-13z" /><path d="M8 8h8" /><path d="M4.5 5.5l1 1M19.5 5.5l-1 1" /></svg>,
+  // Un sacchetto chiuso dal laccio, con il nodo: raccolto da terra, ma né chiave né scrigno (niente scintilla: è il segno del forziere raro).
+  oggetto: (d) => <svg {...base(d)}><path d="M8 9h8l2.5 9a2 2 0 0 1-2 2.5h-9a2 2 0 0 1-2-2.5z" /><path d="M9 9l-1-3h8l-1 3" /><path d="M10 12.5h4" /><path d="M12 9l-2 2.5M12 9l2 2.5" /></svg>,
   'oggetto-chiave': (d) => <svg {...base(d)}><circle cx="8" cy="8" r="4" /><path d="M11 11l9 9" /><path d="M17 17l2-2" /><path d="M14.5 14.5l2-2" /></svg>,
   boss: (d) => <svg {...base(d)}><path d="M4 8l3 2 5-6 5 6 3-2-2 9H6z" /><path d="M8 20h8" /><path d="M9 14h.01M15 14h.01" /></svg>,
   miniboss: (d) => <svg {...base(d)}><path d="M12 3a7 7 0 0 0-7 7v4h3v4h8v-4h3v-4a7 7 0 0 0-7-7z" /><path d="M9 11h.01M15 11h.01" /><path d="M10 18v3M14 18v3" /></svg>,
@@ -63,6 +65,9 @@ const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
   mementos: (d) => <svg {...base(d)}><path d="M4 20V11a8 8 0 0 1 16 0v9" /><path d="M9 20v-6a3 3 0 0 1 6 0v6" /><path d="M2 20h20" /><path d="M12 8v3" /></svg>,
   // L'ingresso al Palazzo: un portale con l'occhio del Meta-Nav sopra.
   'ingresso-palazzo': (d) => <svg {...base(d)}><path d="M5 21V9l7-5 7 5v12" /><path d="M9 21v-7h6v7" /><path d="M2 21h20" /><circle cx="12" cy="8" r="1.5" /></svg>,
+  // Il punto di infiltrazione: la mascherina da ladro sopra due anelli concentrici sul pavimento (il varco visto di
+  // scorcio), il punto da cui si entra e si torna.
+  infiltrazione: (d) => <svg {...base(d)}><path d="M3 6c3-1.5 6-1.5 9 .5 3-2 6-2 9-.5-.5 3-2.5 5-5 5-1.8 0-3-1-4-2.2-1 1.2-2.2 2.2-4 2.2-2.5 0-4.5-2-5-5z" /><path d="M7.5 8h.01M16.5 8h.01" /><ellipse cx="12" cy="19" rx="7" ry="2.6" /><ellipse cx="12" cy="19" rx="3" ry="1" /></svg>,
   // ---- Città (15.24): sigaretta col fumo, rivista con lente, valigetta, vasca con vapori, lavatrice, ciak, libri, torii, joypad, casa ----
   sigarette: (d) => <svg {...base(d)}><rect x="3" y="13" width="15" height="4" rx="1" /><path d="M18 15h3" /><path d="M6 10c0-1.5 1.2-2 1.2-3.5M10 10c0-1.5 1.2-2 1.2-3.5" /><path d="M14 13v4" /></svg>,
   cercalavoro: (d) => <svg {...base(d)}><path d="M4 4h11v16H4z" /><path d="M7 8h5M7 11h5M7 14h3" /><circle cx="17" cy="16" r="3" /><path d="M19.2 18.2L22 21" /></svg>,

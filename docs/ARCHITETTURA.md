@@ -403,7 +403,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 ### Mappe a livelli e spilli dell'editor (Fase 13.1)
 Studio in `docs/MAPPE.md`. Migrazione 027: `mappa` (albero con `genitore_chiave`, `immagine_chiave` nell'ambito «mappa» dell'istanza oppure
 `asset` del repository, `larghezza`/`altezza`, `entita_tipo`/`entita_chiave` verso quartiere/dungeon/area, `origine` seed|utente, `note`),
-`spillo` (x/y in percentuale dell'immagine, `tipo` del registro `shared/spilli.ts` — 34 tipi in cinque gruppi dal 15.24, tabella in MAPPE §4 —, riferimento tipizzato mappa|negozio|punto|luogo|confidente|
+`spillo` (x/y in percentuale dell'immagine, `tipo` del registro `shared/spilli.ts` — 42 tipi in quattro categorie (`CATEGORIE_SPILLO`, aggiornamento del 2026-09-29), tabella in MAPPE §4 —, riferimento tipizzato mappa|negozio|punto|luogo|confidente|
 richiesta|attivita, `collezionabile`), `spillo_partita` (raccolto per partita). `server/services/mappe/sincronizzaMappe.ts` è idempotente:
 crea `tokyo` → `citta-<quartiere>` e `dungeon-<chiave>` → `<area>` dalle tabelle della guida e trasforma `marcatore_mappa`/`marcatore_luogo` in
 spilli (riferimento `punto`/`luogo`, stessa origine); gira nella migrazione (istanze esistenti) e alla fine di `caricaSeed`, seguita
@@ -751,3 +751,10 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   larghezza perché blocco, legenda e riga delle fermate chiuse stiano nell'altezza della colonna (sincrono,
   `ResizeObserver` su colonna e blocco, pavimento 240 px, 10:7 intatto); la riga «Non ancora nel mondo» diventa il
   conto con «Quali» (finestra con nome e condizione).
+- **Tipi di spillo (2026-09-29)**: 42 in `shared/spilli.ts`; nuovi `oggetto` (consumabile, riferimento punto) e
+  `infiltrazione` (spostamento, riferimento mappa, destinazione come gli altri spostamenti), entrambi in
+  `TIPI_STRUTTURALI`. Nessuna migrazione: `spillo.tipo` non ha vincoli e zod usa `z.enum(TIPI_SPILLO)`. Tavolozza
+  dell'editor e legenda del visore portano il nome del tipo anche in `title` (i nomi lunghi sono troncati).
+- **Illustrazioni dei videogiochi**: `VideogiochiPage` mostra `attivita/<chiave>` (database) con riserva l'icona dei
+  videogiochi; le attività di tipo «sfida» usano la figura `categoria-obiettivo` (alias in `src/utils/categorie.ts`),
+  «allenamento» la sua `categoria-allenamento`.

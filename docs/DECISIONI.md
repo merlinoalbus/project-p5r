@@ -592,4 +592,15 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   gli scorrimenti fatti a mano. Nelle schermate «senza scorrimento» (Home, scheda «Oggi») la pagina scorreva comunque
   di 50-70 px per la mappa di Tokyo: ora la mappa si adatta alla colonna e scorre solo la guida.
 
+### 2026-09-29 — «Oggetto» e «Punto di infiltrazione»; le illustrazioni restano nel database
+- **Tipo di spillo «Oggetto»**, consumabile accanto a «Oggetto chiave», «Forziere» e «Forziere raro» (richiesta
+  dell'utente). **Solo il tipo nuovo** (scelta dell'utente): gli spilli esistenti non si riclassificano e i punti
+  «oggetto» della guida continuano a diventare «Oggetto chiave»; li si cambia a mano dall'editor.
+- **Tipo di spillo «Punto di infiltrazione»**, spostamento **con destinazione** (scelta dell'utente): porta a un'altra
+  mappa come Passaggio e Uscita. È dentro il Palazzo, distinto da «Ingresso al Palazzo» che sta sulla mappa di città.
+- **Le correzioni visive proposte sono state approvate dall'utente**: Giorno/Sera affiancati a metà larghezza sotto
+  l'etichetta, schede dei quartieri in una griglia con colonne di almeno 300 px.
+- Le illustrazioni delle attività generate da Codex vanno nel database (regola della migrazione 079), non in
+  `public/asset/attivita/` come diceva per errore la consegna del 2026-09-13.
+
 

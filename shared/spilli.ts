@@ -13,7 +13,9 @@ export const TIPI_SPILLO = [
   'passaggio', 'scala', 'uscita', 'treno',
   'negozio', 'ristorante', 'distributore', 'sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'attivita',
   'confidente', 'dialogo',
-  'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia',
+  // «Oggetto» accanto a «Oggetto chiave»: un oggetto comune trovato a terra non è una chiave
+  // della trama (richiesta dell'utente, 2026-09-29).
+  'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia',
   // I due ingressi che non sono né un negozio né una stanza di un Palazzo, e che finora non
   // avevano un segno proprio. L'**ingresso ai Memento** portava lo spillo della stazione
   // ferroviaria, perché il suo luogo è classificato `trasporto`: sulla mappa di Shibuya la porta
@@ -22,6 +24,9 @@ export const TIPI_SPILLO = [
   'velluto', 'mementos',
   // L'ingresso a un Palazzo dal mondo reale: mancava (richiesta dell'utente, 2026-09-11).
   'ingresso-palazzo',
+  // Il punto di infiltrazione dentro il Palazzo, da cui si entra e si torna nel mondo reale
+  // (richiesta dell'utente, 2026-09-29): diverso dall'ingresso, che sta sulla mappa di città.
+  'infiltrazione',
   'nota',
 ] as const;
 export type TipoSpillo = (typeof TIPI_SPILLO)[number];
@@ -49,9 +54,9 @@ export const DEFINIZIONI_CATEGORIA: Record<CategoriaSpillo, { nome: string; desc
   informativo: { nome: 'Informativo', descrizione: 'Un segno sulla mappa con nome e descrizione, e basta.' },
 };
 const CATEGORIA_PER_TIPO: Record<TipoSpillo, CategoriaSpillo> = {
-  passaggio: 'spostamento', scala: 'spostamento', uscita: 'spostamento', treno: 'spostamento', velluto: 'spostamento', mementos: 'spostamento', 'ingresso-palazzo': 'spostamento', scorciatoia: 'spostamento', rampino: 'spostamento',
+  passaggio: 'spostamento', scala: 'spostamento', uscita: 'spostamento', treno: 'spostamento', velluto: 'spostamento', mementos: 'spostamento', 'ingresso-palazzo': 'spostamento', infiltrazione: 'spostamento', scorciatoia: 'spostamento', rampino: 'spostamento',
   negozio: 'citta', ristorante: 'citta', distributore: 'citta', sigarette: 'citta', cercalavoro: 'citta', lavoro: 'citta', terme: 'citta', lavanderia: 'citta', cinema: 'citta', biblioteca: 'citta', culto: 'citta', 'sala-giochi': 'citta', casa: 'citta', attivita: 'citta', confidente: 'citta',
-  dialogo: 'consumabile', forziere: 'consumabile', 'forziere-raro': 'consumabile', tesoro: 'consumabile', 'tesoro-palazzo': 'consumabile', 'seme-bramosia': 'consumabile', 'oggetto-chiave': 'consumabile', timbro: 'consumabile', boss: 'consumabile', miniboss: 'consumabile', nemico: 'consumabile',
+  dialogo: 'consumabile', forziere: 'consumabile', 'forziere-raro': 'consumabile', tesoro: 'consumabile', 'tesoro-palazzo': 'consumabile', 'seme-bramosia': 'consumabile', oggetto: 'consumabile', 'oggetto-chiave': 'consumabile', timbro: 'consumabile', boss: 'consumabile', miniboss: 'consumabile', nemico: 'consumabile',
   'punto-sensibile': 'informativo', meccanismo: 'informativo', porta: 'informativo', sicura: 'informativo', nota: 'informativo',
 };
 export function categoriaSpillo(tipo: string): CategoriaSpillo {
@@ -89,8 +94,8 @@ export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRif
  * dalla mappa di Tokyo porta a un quartiere che apre a giugno, in aprile, davvero non c'è.
  */
 export const TIPI_STRUTTURALI: readonly TipoSpillo[] = [
-  'passaggio', 'scala', 'uscita', 'scorciatoia', 'rampino', 'porta', 'meccanismo', 'sicura',
-  'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave',
+  'passaggio', 'scala', 'uscita', 'infiltrazione', 'scorciatoia', 'rampino', 'porta', 'meccanismo', 'sicura',
+  'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave',
   'timbro', 'punto-sensibile', 'boss', 'miniboss', 'nemico', 'nota',
 ];
 
@@ -154,6 +159,8 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   tesoro: { nome: 'Tesoro', colore: '#a855f7', collezionabile: true, riferimento: 'punto' },
   'tesoro-palazzo': { nome: 'Tesoro del Palazzo', colore: '#d946ef', collezionabile: true, riferimento: 'punto' },
   'seme-bramosia': { nome: 'Seme della bramosia', colore: '#c85cff', collezionabile: true, riferimento: 'punto' },
+  /** Oggetto comune trovato a terra (un'arma, un accessorio, un consumabile): si raccoglie, ma non è una chiave della trama. */
+  oggetto: { nome: 'Oggetto', colore: '#34d399', collezionabile: true, riferimento: 'punto' },
   'oggetto-chiave': { nome: 'Oggetto chiave', colore: '#fbbf24', collezionabile: true, riferimento: 'punto' },
   /** Timbro dei Mementos (Royal): postazione fissa per piano, si «raccoglie» una volta timbrato. */
   timbro: { nome: 'Timbro dei Mementos', colore: '#f0abfc', collezionabile: true, riferimento: null },
@@ -178,6 +185,9 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   mementos: { nome: 'Ingresso ai Memento', colore: '#7f1d1d', collezionabile: false, riferimento: 'mappa' },
   /** L'ingresso a un Palazzo dal mondo reale (Shujin per Kamoshida, l'atelier per Madarame…): porta alla mappa del Palazzo. */
   'ingresso-palazzo': { nome: 'Ingresso al Palazzo', colore: '#dc2626', collezionabile: false, riferimento: 'mappa' },
+  /** Il punto di infiltrazione dentro il Palazzo: ci si arriva entrando e da lì si torna nel mondo reale. Porta a una mappa
+   *  come gli altri spostamenti (per esempio il luogo di città da cui ci si infiltra). */
+  infiltrazione: { nome: 'Punto di infiltrazione', colore: '#ff2e63', collezionabile: false, riferimento: 'mappa' },
   // ---- Altro ----
   nota: { nome: 'Nota', colore: '#ececf1', collezionabile: false, riferimento: null },
 };

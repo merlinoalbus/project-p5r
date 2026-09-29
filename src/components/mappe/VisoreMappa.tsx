@@ -530,7 +530,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 const attivo = !tipiNascosti.has(t);
                 return (
                   <li key={t}>
-                    <button type="button" className={`visore-mappa__categoria ${attivo ? '' : 'visore-mappa__categoria--nascosta'}`} aria-pressed={attivo}
+                    <button type="button" className={`visore-mappa__categoria ${attivo ? '' : 'visore-mappa__categoria--nascosta'}`} aria-pressed={attivo} title={DEFINIZIONI_SPILLO[t].nome}
                       onClick={() => setTipiNascosti((prev) => { const n = new Set(prev); if (n.has(t)) n.delete(t); else n.add(t); return n; })}>
                       <PuntoSpillo tipo={t} colore={DEFINIZIONI_SPILLO[t].colore} />
                       <span className="flex-1 min-w-0 truncate">{DEFINIZIONI_SPILLO[t].nome}</span>

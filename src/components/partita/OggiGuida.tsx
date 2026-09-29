@@ -32,10 +32,14 @@ export function OggiGuida({ oggi, riempi }: Props) {
         <CollegamentoVisivo to={`/guida/percorso/${g.giorno}`} tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida completa" />
       </div>
       {!indice.dataCorrente && <p className="m-0 text-[12px] text-text-muted shrink-0">Nessun giorno corrente impostato: scegli il giorno e premi «Segna come giorno corrente».</p>}
-      <div className="flex flex-wrap items-center gap-1.5 shrink-0" role="group" aria-label="Momento della giornata nella partita">
-        <span className="text-[12px] text-text-muted">Momento della giornata:</span>
-        <PulsanteVisivo tono="secondario" compatto attivo={oggi.fascia === 'giorno'} icona={<IconaFascia fascia="giorno" dimensione={20} className="w-5 h-5 object-contain" />} titolo="Giorno" dettaglio="mattina, pranzo, pomeriggio, dopo scuola" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('giorno')} />
-        <PulsanteVisivo tono="secondario" compatto attivo={oggi.fascia === 'sera'} icona={<IconaFascia fascia="sera" dimensione={20} className="w-5 h-5 object-contain" />} titolo="Sera" dettaglio="dopo il tramonto" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('sera')} />
+      {/* Etichetta sopra e i due momenti affiancati a metà larghezza, a ogni misura: in fila con l'etichetta il
+          dettaglio lungo del «Giorno» spingeva «Sera» da solo sulla riga sotto (rilievo dell'utente, 2026-09-29). */}
+      <div className="flex flex-col gap-1 shrink-0" role="group" aria-label="Momento della giornata nella partita">
+        <span className="text-[12px] text-text-muted">Momento della giornata</span>
+        <div className="grid grid-cols-2 gap-1.5">
+          <PulsanteVisivo tono="secondario" compatto className="btn-visivo--a-capo w-full" attivo={oggi.fascia === 'giorno'} icona={<IconaFascia fascia="giorno" dimensione={20} className="w-5 h-5 object-contain" />} titolo="Giorno" dettaglio="mattina, pranzo, pomeriggio, dopo scuola" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('giorno')} />
+          <PulsanteVisivo tono="secondario" compatto className="btn-visivo--a-capo w-full" attivo={oggi.fascia === 'sera'} icona={<IconaFascia fascia="sera" dimensione={20} className="w-5 h-5 object-contain" />} titolo="Sera" dettaglio="dopo il tramonto" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('sera')} />
+        </div>
       </div>
       <div className={riempi ? 'md:min-h-0 md:area-scorrevole md:p-1' : ''}>
         <GiornoGuida onGiornataModificata={() => oggi.ricarica()} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} />

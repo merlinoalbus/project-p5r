@@ -21,6 +21,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { AssetImg } from '../components/shared/AssetImg';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
@@ -45,7 +46,10 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
   return (
     <li className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${g.fatto ? 'border-success/50' : ''}`}>
       <div className="flex items-start gap-3">
-        <IconaCategoria categoria="minigiochi" dimensione={44} />
+        {/* L'illustrazione del gioco (`attivita/<chiave>`, la stessa della pagina delle attività); finché non c'è, l'icona dei
+            videogiochi. Prima c'era sempre l'icona: le sette illustrazioni consegnate non si sarebbero viste da nessuna parte. */}
+        <AssetImg nome={`attivita/${g.chiave}`} alt="" decorativa className="shrink-0 rounded-md object-contain" style={{ width: 56, height: 56 }}
+          fallback={<span className="shrink-0"><IconaCategoria categoria="minigiochi" dimensione={44} /></span>} />
         <div className="min-w-0 flex-1">
           <h3 className="m-0 text-lg leading-tight">{g.nome}</h3>
           <p className="m-0 text-xs text-text-secondary">{g.sedeNome ?? g.luogo}</p>

@@ -89,6 +89,10 @@ Regole:
 
 ## 4. Registro dei tipi di spillo (condiviso, `shared/spilli.ts`)
 
+> **Aggiornamento 2026-09-29**: i tipi sono **42**, in **quattro categorie** (spostamento, città, consumabile,
+> informativo: `CATEGORIE_SPILLO`, che sono i gruppi della tavolozza). Ultimi aggiunti: `oggetto` (consumabile, accanto
+> a `oggetto-chiave`) e `infiltrazione` (spostamento con destinazione). Il testo qui sotto descrive lo stato del 15.24.
+
 34 tipi (15.24) in cinque gruppi, che sono anche i gruppi della palette dell'editor (`GRUPPI_SPILLO`). I tipi della città seguono le etichette
 che la mappa del gioco dà ai punti di interesse: quando il giocatore vede «Bevande», «Sigarette» o «Cercalavoro» sulla mappa di Yongen-Jaya o
 del Sottopasso trova lo stesso nome nella palette. Analisi dei punti di interesse (2026-09-05): città = negozi, ristoranti, distributori di
@@ -220,7 +224,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   di distanza); lo spillo viene selezionato e si trascina dove sta davvero l'ingresso. 409 se la mappa ha già uno spillo verso quella
   destinazione, 400 verso sé stessa, 404 se la destinazione non esiste. I passaggi automatici del seed (radici Città/Palazzo/Dedalo, `sincronizzaMappe`)
   non cambiano.
-- La palette di «Aggiungi» è a gruppi (Spostamenti, Città, Persone, Palazzi e Mementos, Altro — `GRUPPI_SPILLO`), con i 34 tipi del registro (§4).
+- La palette di «Aggiungi» è divisa nelle quattro categorie (Spostamento, Città, Consumabile, Informativo — `CATEGORIE_SPILLO` e `tipiDellaCategoria`), con i 42 tipi del registro (§4; fino al 2026-09-11 erano cinque gruppi `GRUPPI_SPILLO`).
 - Esporta (ZIP per luogo, JSON di tutto) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); nessuno stato «non salvato»: ogni modifica è salvata subito.
 
 ## 9. Integrazione (13.4) — sostituzione ordinata di Città, Palazzi e Dedali (punti 6, 7, 8)

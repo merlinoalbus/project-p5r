@@ -20,7 +20,7 @@ import { Blocco, Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
 
 /** La figura di ogni tipo: le illustrazioni delle categorie. */
-const CATEGORIA_TIPO: Record<string, string> = { 'mini-gioco': 'minigiochi', lavoro: 'lavori', studio: 'studio', lettura: 'libri', videogioco: 'minigiochi', allenamento: 'battaglia', cibo: 'cibo', sfida: 'obiettivo', altro: 'altro' };
+const CATEGORIA_TIPO: Record<string, string> = { 'mini-gioco': 'minigiochi', lavoro: 'lavori', studio: 'studio', lettura: 'libri', videogioco: 'minigiochi', allenamento: 'allenamento', cibo: 'cibo', sfida: 'obiettivo', altro: 'altro' };
 const OPZIONI_TIPO: OpzioneIcone[] = TIPI_ATTIVITA.map((t) => ({ chiave: t.chiave, nome: t.nome, categoria: CATEGORIA_TIPO[t.chiave] }));
 const ICONA_FASCIA: Record<string, ReactNode> = {
   giorno: <span className="text-warning"><IconSole size={28} /></span>,

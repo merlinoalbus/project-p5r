@@ -69,7 +69,10 @@ export function CittaPage() {
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
             <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null}
               evidenziato={acceso} onEvidenzia={setAcceso} className="xl:sticky xl:top-2 xl:min-w-0" />
-            <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:flex-1 xl:min-w-[280px] xl:grid-cols-1 2xl:grid-cols-2 xl:max-h-[calc(68vh+2.5rem)] xl:area-scorrevole xl:p-1" aria-label="Quartieri">
+            {/* Tante colonne quante ne stanno con schede di almeno 300 px: con colonne fisse per larghezza della
+                finestra, da 1536 px ne entravano due nella colonna di 411 px accanto alla mappa, e il nome del
+                quartiere andava a capo una lettera per riga (rilievo dell'utente, 2026-09-29). */}
+            <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] xl:flex-1 xl:min-w-[340px] xl:max-h-[calc(68vh+2.5rem)] xl:area-scorrevole xl:p-1" aria-label="Quartieri">
             {q.map((x) => {
               const aperto = quartiereAperto(x, attiva?.dataGioco ?? null);
               const suggerito = sugg.evidenziato('quartieri', x.chiave);
@@ -89,7 +92,7 @@ export function CittaPage() {
                     {/* Il quartiere chiuso resta in elenco — la guida serve anche a sapere cosa
                         arriverà — ma la scheda lo dice, perché lassù non c'è una sagoma da
                         accendere e il collegamento sembrerebbe rotto. */}
-                    {!aperto && <span className="chip text-[11px]" title={x.bloccoMotivo ?? undefined}>Non ancora aperto{x.sbloccoData ? ` · dal ${x.sbloccoData}` : ''}</span>}
+                    {!aperto && <span className="chip text-[11px]" title={x.bloccoMotivo ?? undefined}>Non ancora aperto{x.sbloccoData && <> · <span className="whitespace-nowrap">dal {x.sbloccoData}</span></>}</span>}
                   </span>
                   {suggerito && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
                   <span className="text-[12px] text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>

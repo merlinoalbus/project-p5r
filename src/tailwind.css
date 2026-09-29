@@ -214,6 +214,8 @@
   .btn-visivo__dettaglio { font-family: var(--font-sans); font-size: 11px; opacity: .82; letter-spacing: 0; text-transform: none; white-space: nowrap; }
   .btn-visivo--compatto { --btn-visivo-icona: 32px; padding: 3px 10px 3px 6px; min-height: 44px; gap: 6px; }
   .btn-visivo--compatto .btn-visivo__titolo { font-size: 13px; }
+  /* Pulsante in una colonna di griglia: il dettaglio va a capo dentro il pulsante invece di allargarlo. */
+  .btn-visivo--a-capo .btn-visivo__dettaglio { white-space: normal; line-height: 1.15; }
   /* Disposizione a colonna (gruppi di interruttori: modificatori delle Doti, moltiplicatori dei Confidenti): icona 48 px sopra al testo
      centrato che può andare a capo; i tasselli si dividono la riga (flex-basis 96 px, min-width 0) così stanno in tre anche a 375 px. */
   .btn-visivo--colonna { --btn-visivo-icona: 48px; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 6px 10px 5px; gap: 4px; flex: 1 1 96px; min-width: 0; max-width: 200px; }

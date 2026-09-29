@@ -4,7 +4,7 @@
 
 import type { ReactNode } from 'react';
 import { IconBolt, IconFusion, IconHome, IconMask, IconStar } from '../shared/icons';
-import { IconAltro, IconAppunti, IconBussola, IconChiave, IconCuore, IconFilm, IconGioca, IconGioco, IconGoccia, IconLibro, IconMaschera, IconMessaggio, IconNegozio, IconPersone, IconScudo, IconStella, IconValigetta } from '../shared/iconeGuida';
+import { IconAltro, IconAppunti, IconBersaglio, IconBussola, IconChiave, IconCuore, IconFilm, IconGioca, IconGioco, IconGoccia, IconLibro, IconMaschera, IconMessaggio, IconNegozio, IconPersone, IconScudo, IconStella, IconValigetta } from '../shared/iconeGuida';
 import { useAsset } from '../../stores/assetStore';
 import { chiaveCategoria } from '../../utils/categorie';
 
@@ -29,6 +29,10 @@ const ICONE: Record<string, (size: number) => ReactNode> = {
   attivita: (s) => <IconGioca size={s} />, esame: (s) => <IconAppunti size={s} />,
   // La maschera è la trama dei Ladri Fantasma; nella Stanza di Velluto si fondono le Persona.
   trama: (s) => <IconMaschera size={s} />, velluto: (s) => <IconFusion size={s} />, casa: (s) => <IconHome size={s} />,
+  // I due tipi di attività che cadevano sul cartiglio generico (2026-09-29): la sfida (chiave `obiettivo`, alias in
+  // `utils/categorie.ts`) e l'allenamento. Figure consegnate: `ui/categoria-obiettivo`, `ui/categoria-allenamento`.
+  obiettivo: (s) => <IconBersaglio size={s} />,
+  allenamento: (s) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M6.5 6.5l11 11" /><path d="M3 10l7-7M14 21l7-7" /><path d="M5 12l7-7M12 19l7-7" /></svg>,
 };
 
 interface Props {

@@ -5,6 +5,14 @@ voci mancanti, invece di fare un censimento a parte alla fine. È la risposta al
 dell'utente — non si sa quali elementi grafici servono finché le pagine non sono rifatte — quindi
 lo si scrive mentre lo si scopre.
 
+> **Aggiornamento 2026-09-29** — censimento rifatto confrontando i registri del codice (`RISERVA_SPILLO`,
+> `RISERVA_AZIONE`, `RISERVA_SCHEDA`, `RISERVA_SEGNO`, `ICONE` di `IconaCategoria`, `attivita/<chiave>`) con
+> `public/asset/ui/` e con la tabella `immagine` del database: chiavi nuove `ui/spillo-oggetto`, `ui/spillo-infiltrazione`,
+> `ui/categoria-obiettivo` (tipo di attività «sfida»), `ui/categoria-allenamento`; consegnati anche `ui/spillo-ingresso-palazzo`,
+> `ui/scheda-progressi`, `ui/spillo-sicura` (rifatto) e le 7 illustrazioni dei videogiochi. Esito, prompt e i due videogiochi
+> da rifare: [consegna-2026-09-29-spilli-e-categorie.md](consegna-2026-09-29-spilli-e-categorie.md). Le tabelle più sotto
+> sono ferme all'8 settembre (per esempio «37 spilli»: oggi sono 42).
+
 **Chi fa cosa:** i prompt li scrive chi ha rifatto la pagina che ne ha bisogno, li verifica
 l'altro, e **la generazione è di Codex**. Un prompt sbagliato costa una generazione buttata;
 verificarlo costa una lettura.

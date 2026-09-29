@@ -278,7 +278,7 @@ function PannelloEditor(p: PropsPannello) {
                 <span className="editor-mappa__gruppo" title={DEFINIZIONI_CATEGORIA[c].descrizione}>{DEFINIZIONI_CATEGORIA[c].nome}</span>
                 <div className="editor-mappa__palette">
                   {tipiDellaCategoria(c).map((t) => (
-                    <button key={t} type="button" className={`editor-mappa__tipo ${t === tipoNuovo ? 'editor-mappa__tipo--attivo' : ''}`} aria-pressed={t === tipoNuovo} onClick={() => p.onTipoNuovo(t)}>
+                    <button key={t} type="button" className={`editor-mappa__tipo ${t === tipoNuovo ? 'editor-mappa__tipo--attivo' : ''}`} aria-pressed={t === tipoNuovo} title={DEFINIZIONI_SPILLO[t].nome} onClick={() => p.onTipoNuovo(t)}>
                       <PuntoSpillo tipo={t} colore={DEFINIZIONI_SPILLO[t].colore} />
                       <span className="truncate">{DEFINIZIONI_SPILLO[t].nome}</span>
                     </button>

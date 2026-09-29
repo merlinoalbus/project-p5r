@@ -830,6 +830,22 @@ evento aggiunto restava sotto, nel riquadro «Le mie note». Lavoro direttamente
 
 Aperto, da decidere con l'utente: con il vincolo «Home in una schermata» la finestra della guida resta piccola sugli
 schermi bassi (Home: 48 px a 1366×768 per la stella che cresce con l'altezza da 1360 px, 141 px a 1024×768, 168 px a
-1280×720, 189 px a 768×1024).
+1280×720, 189 px a 768×1024). Dopo il lotto seguente (pulsanti del momento della giornata in griglia) a 1366×768 è 75 px.
 
+## Visualizzazioni, spilli «Oggetto» e «Punto di infiltrazione», grafica mancante (29 settembre 2026) — fatto
+
+Richieste dell'utente: due visualizzazioni da sistemare (screenshot), i tipi di spillo «Oggetto» (consumabile) e «Punto
+di infiltrazione» (spostamento) nelle mappe e nell'editor, la verifica degli elementi senza grafica adatta con i prompt per
+Codex. Su `main`.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | «Momento della giornata» (scheda «Oggi»): etichetta sopra e Giorno/Sera affiancati a metà larghezza (`.btn-visivo--a-capo`); Città: schede dei quartieri in `repeat(auto-fill, minmax(min(100%,300px),1fr))`, colonna accanto alla mappa di almeno 340 px, data di apertura mai spezzata; timeout del test «ogni Palazzo…» (arrivato col merge) portato a 30 s | ✅ validata |
+| 2 | `shared/spilli.ts`: `oggetto` (consumabile, `#34d399`) e `infiltrazione` (spostamento con destinazione, `#ff2e63`), sempre visibili; riserve SVG; nessuna riclassificazione (decisione dell'utente); tooltip col nome sui tipi troncati di tavolozza e legenda | ✅ validata |
+| 3 | 14 asset di Codex controllati e integrati (`docs/grafica/consegna-2026-09-29-spilli-e-categorie.md`): 7 `ui/*` in `public/asset/ui/`, 7 illustrazioni dei videogiochi nel database (`PUT /api/immagini/attivita/<chiave>`); alias `sfida → obiettivo`, riserve `obiettivo`/`allenamento`, `VideogiochiPage` mostra `attivita/<chiave>`; golfer-sarutahiko e star-forneus da rifare (fondo pieno) | ✅ validata |
+| 4 | Documenti, commit su `main` | ✅ |
+
+Da fare dall'utente: togliere `public/asset/attivita/` (duplicato locale, il permesso di spostarla è stato negato; non è
+in git); caricare le 7 illustrazioni nell'istanza di produzione e rigenerare il pacchetto da lì; far rifare a Codex i due
+videogiochi con i prompt del §2 della consegna.
 

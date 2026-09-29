@@ -23,6 +23,8 @@ const ALIAS: Record<string, string> = {
   // bisogno di stare qui; `libro` e `videogioco` erano già tradotti sopra. Resta l'oggetto chiave,
   // che il file scrive al plurale.
   'oggetto-chiave': 'oggetti-chiave',
+  // La sfida fra le attività ha la figura dell'obiettivo (`ui/categoria-obiettivo`, consegnata il 2026-09-29).
+  sfida: 'obiettivo',
   // Le categorie dell'archivio degli equipaggiamenti sono le chiavi inglesi del dataset (`Weapon`,
   // `Gun`, `Protector`, `Accessory`), come per le skill: il nome italiano lo dà la tabella
   // `traduzione`, e qui si dà loro la figura. Un'arma da fuoco e una da mischia condividono la
