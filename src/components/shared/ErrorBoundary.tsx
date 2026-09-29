@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Si è verificato un errore nell'applicazione. I dati salvati non sono stati persi.
             </p>
             {this.state.error && (
-              <pre className="text-left p-3 rounded-[6px] bg-[#1c1c24] text-[#ff6b6b] text-[0.75rem] overflow-auto max-h-[120px] m-0 mb-6">
+              <pre className="text-left p-3 rounded-[6px] [--area-fondo:#1c1c24] text-[#ff6b6b] text-[0.75rem] area-scorrevole whitespace-pre-wrap break-words max-h-[120px] m-0 mb-6">
                 {this.state.error.message}
               </pre>
             )}

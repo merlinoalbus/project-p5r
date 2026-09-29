@@ -93,7 +93,7 @@ export function DotiSociali({ partitaId }: Props) {
           </div>
           <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote.</p>
         </section>
-        <ul className="m-0 p-0 list-none flex flex-col gap-2 min-w-0 md:min-h-0 md:overflow-y-auto md:pr-1">
+        <ul className="m-0 p-0 list-none flex flex-col gap-2 min-w-0 md:min-h-0 md:area-scorrevole md:p-1">
           {dati?.map((d) => (
             <li key={d.chiave} id={`dote-${d.chiave}`} className={`card flex flex-col gap-1.5 py-2 transition-colors ${selezionata === d.chiave ? 'border-primary' : ''} ${classiSuggerito(sugg.evidenziato('doti', d.chiave))}`}>
               <CartaDote

@@ -51,7 +51,7 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
       <span className="text-[12px] uppercase tracking-wide text-text-muted">{etichetta}</span>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o arcano…" />
       {candidate.length > 0 && (
-        <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[280px] overflow-y-auto" role="listbox" aria-label={`Risultati per ${etichetta}`}>
+        <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[280px] area-scorrevole" role="listbox" aria-label={`Risultati per ${etichetta}`}>
           {candidate.map((p) => (
             <li key={p.id} role="option" aria-selected={false}>
               <button type="button" className="w-full text-left flex items-center gap-3 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary touch" onClick={() => { onScegli(p); setQ(''); }}>

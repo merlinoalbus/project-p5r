@@ -247,6 +247,7 @@ export const paramsAgendaVoce = z.object({ id: z.coerce.number().int().positive(
 export const bodyEvento = z.object({
   data: dataGioco,
   tipo: z.enum(['evento', 'scadenza', 'promemoria']).optional(),
+  fascia: z.enum(['giorno', 'sera']).optional(),
   titolo: testo(200).min(1),
   dettaglio: testo(2000).optional(),
   riferimento,

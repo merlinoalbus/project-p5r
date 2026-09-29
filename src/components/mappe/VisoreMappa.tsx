@@ -234,6 +234,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     const el = tela.current;
     if (!el) return;
     const suRotella = (e: WheelEvent) => {
+      // Sopra un popup o un'area che scorre (la merce di un negozio, l'elenco di un gruppo di spilli) la rotellina è
+      // di quell'area: la fa scorrere, e al capo si ferma lì (`overscroll-behavior: contain`). Prima ingrandiva la
+      // mappa sotto, e l'elenco non si poteva scorrere con la rotellina (richiesta dell'utente sugli scroll annidati).
+      const area = e.target instanceof Element ? e.target.closest('.spillo-popup, .area-scorrevole') : null;
+      if (area && el.contains(area)) return;
       e.preventDefault();
       const r = el.getBoundingClientRect();
       applicaZoom(stato.current.zoom * (e.deltaY < 0 ? PASSO_ROTELLA : 1 / PASSO_ROTELLA), e.clientX - r.left, e.clientY - r.top);
@@ -718,7 +723,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   <strong className="flex-1 text-[13px] leading-tight">{gruppoScelto.spilli.length === 1 ? 'Un altro spillo qui' : `${gruppoScelto.spilli.length} spilli qui`}</strong>
                   <button type="button" className="spillo-popup__chiudi touch" onClick={() => setGruppoAperto(null)} aria-label="Chiudi l’elenco">×</button>
                 </div>
-                <ul className="m-0 p-0 list-none flex flex-col gap-0.5" style={elenco.altezzaVoci === undefined ? undefined : { maxHeight: elenco.altezzaVoci, overflowY: 'auto' }}>
+                <ul className={`m-0 list-none flex flex-col gap-0.5 ${elenco.altezzaVoci === undefined ? 'p-0' : 'area-scorrevole p-0.5'}`} style={elenco.altezzaVoci === undefined ? undefined : { maxHeight: elenco.altezzaVoci }}>
                   {gruppoScelto.spilli.map((s) => (
                     <li key={s.id}>
                       <button type="button" className="visore-mappa__voce" onClick={() => { setGruppoAperto(null); seleziona(s.id); }}>
@@ -875,7 +880,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
             </button>
           )}
           {articoliVisibili.length > 0 && (
-            <div className="overflow-x-auto">
+            <div className="area-scorrevole-x">
               {/* `tabella--adattiva`: nel pannello, largo 280 px, quattro colonne fisse spezzavano
                   l'intestazione lettera per lettera. La regola guarda la larghezza del contenitore,
                   non quella della finestra, quindi qui scatta anche su un monitor largo. */}

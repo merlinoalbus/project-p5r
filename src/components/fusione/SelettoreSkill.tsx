@@ -43,7 +43,7 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
         <>
           <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca una skill (nome o effetto)…" />
           {candidate.length > 0 && (
-            <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[260px] overflow-y-auto" role="listbox" aria-label="Skill trovate">
+            <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[260px] area-scorrevole" role="listbox" aria-label="Skill trovate">
               {candidate.map((s) => (
                 <li key={s.id} role="option" aria-selected={false}>
                   <button type="button" className="w-full text-left flex items-center gap-2 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>

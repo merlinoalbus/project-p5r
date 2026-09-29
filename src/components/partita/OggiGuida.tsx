@@ -5,18 +5,10 @@
 import { GiornoGuida } from '../guida/GiornoGuida';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { AssetImg } from '../shared/AssetImg';
 import { IconChevronLeft, IconChevronRight } from '../shared/icons';
-import { IconLuna, IconSole } from '../shared/iconeGuida';
+import { IconaFascia } from '../guida/FasciaGiornata';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import type { Oggi } from '../../hooks/useOggi';
-import type { FasciaGioco } from '../../types';
-
-/** Icona della fascia: asset `ui/giorno` / `ui/sera` con riserva sole / luna (come nelle intestazioni della guida). */
-function IconaFascia({ fascia }: { fascia: FasciaGioco }) {
-  const sera = fascia === 'sera';
-  return <AssetImg nome={`ui/${fascia}`} alt="" decorativa className="w-5 h-5 object-contain" fallback={<span className={`inline-flex ${sera ? 'text-info' : 'text-warning'}`}>{sera ? <IconLuna size={20} /> : <IconSole size={20} />}</span>} />;
-}
 
 interface Props {
   oggi: Oggi;
@@ -42,11 +34,11 @@ export function OggiGuida({ oggi, riempi }: Props) {
       {!indice.dataCorrente && <p className="m-0 text-[12px] text-text-muted shrink-0">Nessun giorno corrente impostato: scegli il giorno e premi «Segna come giorno corrente».</p>}
       <div className="flex flex-wrap items-center gap-1.5 shrink-0" role="group" aria-label="Momento della giornata nella partita">
         <span className="text-[12px] text-text-muted">Momento della giornata:</span>
-        <PulsanteVisivo tono="secondario" compatto attivo={oggi.fascia === 'giorno'} icona={<IconaFascia fascia="giorno" />} titolo="Giorno" dettaglio="mattina, pranzo, pomeriggio, dopo scuola" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('giorno')} />
-        <PulsanteVisivo tono="secondario" compatto attivo={oggi.fascia === 'sera'} icona={<IconaFascia fascia="sera" />} titolo="Sera" dettaglio="dopo il tramonto" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('sera')} />
+        <PulsanteVisivo tono="secondario" compatto attivo={oggi.fascia === 'giorno'} icona={<IconaFascia fascia="giorno" dimensione={20} className="w-5 h-5 object-contain" />} titolo="Giorno" dettaglio="mattina, pranzo, pomeriggio, dopo scuola" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('giorno')} />
+        <PulsanteVisivo tono="secondario" compatto attivo={oggi.fascia === 'sera'} icona={<IconaFascia fascia="sera" dimensione={20} className="w-5 h-5 object-contain" />} titolo="Sera" dettaglio="dopo il tramonto" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('sera')} />
       </div>
-      <div className={riempi ? 'md:min-h-0 md:overflow-y-auto md:pr-1' : ''}>
-        <GiornoGuida onAgendaAggiornata={() => { void oggi.ricarica(); }} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} />
+      <div className={riempi ? 'md:min-h-0 md:area-scorrevole md:p-1' : ''}>
+        <GiornoGuida onGiornataModificata={() => oggi.ricarica()} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} />
       </div>
     </div>
   );

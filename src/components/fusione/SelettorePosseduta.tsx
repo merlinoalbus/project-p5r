@@ -32,7 +32,7 @@ export function SelettorePosseduta({ etichetta, persone, sceltaId, onScegli, esc
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Cambia" onClick={() => onScegli(null)} aria-label={`Cambia ${etichetta}`} />
         </div>
       ) : (
-        <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-[260px] overflow-y-auto" aria-label={`Scelte per ${etichetta}`}>
+        <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-[260px] area-scorrevole p-1" aria-label={`Scelte per ${etichetta}`}>
           {persone.filter((p) => p.id !== escludiId).map((p) => (
             <li key={p.id} className="min-w-0">
               <button type="button" className="w-full text-left flex items-center gap-2 card card--cliccabile py-1.5 px-2 touch" onClick={() => onScegli(p.id)} aria-label={`${etichetta}: ${p.nomeIt}`}>

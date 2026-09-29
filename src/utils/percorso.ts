@@ -2,7 +2,10 @@
 // percorso — etichette dei tipi di azione e collegamenti alle schede dell'app (Fase 7.5b)
 // ============================================================
 
-import type { AzionePercorsoDto, EffettiAzioneDto } from '../types';
+import type { AzionePercorsoDto, EffettiAzioneDto, EventoUtenteDto } from '../types';
+
+/** Etichette dei tipi di evento che l'utente aggiunge alla giornata. */
+export const NOME_TIPO_EVENTO: Record<EventoUtenteDto['tipo'], string> = { evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' };
 
 export const NOME_TIPO_AZIONE: Record<string, string> = {
   confidente: 'Confidente',

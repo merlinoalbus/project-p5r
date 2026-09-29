@@ -67,6 +67,8 @@ export function useOggi(partitaId: number): Oggi {
       if (!g) return;
       const azioni = g.azioni.map((x) => (x.indice === a.indice ? a : x));
       giorno.imposta({ ...g, azioni, fatte: azioni.filter((x) => x.fatta).length });
+      // i conteggi «fatte/azioni» dei giorni vengono dall'indice: si riallineano come dopo ogni altra modifica della giornata
+      void indice.ricarica();
     },
     segnaCorrente: async () => {
       if (!g) return;

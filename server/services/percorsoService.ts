@@ -6,11 +6,12 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, EffettiAzioneDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto, StatoAzioneDto } from '../../shared/types.js';
-import { aggiornaConfidente, aggiornaDote, confidenti, leggiPartita, puntiDaNote } from './partiteService.js';
+import { aggiornaConfidente, aggiornaDote, annullaEffetti, confidenti, leggiPartita, puntiDaNote } from './partiteService.js';
 import { impostaLettura } from './attivitaService.js';
+import { azioneGuida, correttoreGuida, guidaDelGiorno, type AzioneSeed } from './correzioniGuidaService.js';
+import { agendaDelGiorno, conteggiAgenda } from './agendaService.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; azioni_json: string; avvisi_json: string; fonte: string; coperto: number }
-type AzioneSeed = Omit<AzionePercorsoDto, 'indice' | 'fatta'>;
 
 
 function partitaEsiste(partitaId: number): void {
@@ -38,13 +39,21 @@ function dataCorrente(partitaId: number | undefined): string | null {
   return (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco ?? null;
 }
 
-/** Indice di tutti i giorni (leggero) con conteggi delle azioni e delle azioni fatte; giorno corrente della partita. */
+/** Indice di tutti i giorni (leggero) con conteggi delle azioni e delle azioni fatte; giorno corrente della partita.
+ *  Le azioni contate sono quelle della giornata come la vede l'utente: guida corretta (le rimosse no) più le sue cose da fare. */
 export function indicePercorso(partitaId?: number): PercorsoIndiceDto {
   const fatte = fattePartita(partitaId);
+  const correggi = correttoreGuida();
+  const agenda = conteggiAgenda(partitaId);
   const righe = prepared('SELECT data, ordine, giorno_settimana, fase, meteo, azioni_json, avvisi_json, coperto FROM giorno_percorso ORDER BY ordine').all() as Array<Pick<Riga, 'data' | 'ordine' | 'giorno_settimana' | 'fase' | 'meteo' | 'azioni_json' | 'avvisi_json' | 'coperto'>>;
   const giorni = righe.map((r) => {
-    const azioni = JSON.parse(r.azioni_json) as AzioneSeed[];
-    return { giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, meteo: r.meteo, azioni: azioni.length, fatte: azioni.filter((_, i) => fatte.has(`${r.data}/${i}`)).length, avvisi: (JSON.parse(r.avvisi_json) as string[]).length, coperto: r.coperto === 1 };
+    const { azioni } = correggi(r.data, JSON.parse(r.azioni_json) as AzioneSeed[]);
+    const mie = agenda.get(r.data) ?? { azioni: 0, fatte: 0 };
+    return {
+      giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, meteo: r.meteo,
+      azioni: azioni.length + mie.azioni, fatte: azioni.filter((a) => fatte.has(`${r.data}/${a.indice}`)).length + mie.fatte,
+      avvisi: (JSON.parse(r.avvisi_json) as string[]).length, coperto: r.coperto === 1,
+    };
   });
   return { giorni, dataCorrente: dataCorrente(partitaId), totaleGiorni: giorni.length, giorniCoperti: giorni.filter((g) => g.coperto).length };
 }
@@ -56,12 +65,14 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
   const fatte = fattePartita(partitaId, data);
   const effetti = effettiPartita(partitaId, data);
   const conf = partitaId ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null;
-  const azioni = (JSON.parse(r.azioni_json) as AzioneSeed[]).map((a, i) => ({ ...a, indice: i, fatta: fatte.has(`${data}/${i}`), effetti: effetti.get(`${data}/${i}`) ?? null, stato: conf ? statoAzione(a, conf) : null, mappa: mappaAzione(a) }));
+  const guida = guidaDelGiorno(data, JSON.parse(r.azioni_json) as AzioneSeed[]);
+  const azioni = guida.azioni.map((a) => ({ ...a, fatta: fatte.has(`${data}/${a.indice}`), effetti: effetti.get(`${data}/${a.indice}`) ?? null, stato: conf ? statoAzione(a, conf) : null, mappa: mappaAzione(a) }));
   const prec = prepared('SELECT data FROM giorno_percorso WHERE ordine < ? ORDER BY ordine DESC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   return {
     giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
+    rimosse: guida.rimosse, correzioniSuperate: guida.superate, agenda: agendaDelGiorno(data, partitaId),
   };
 }
 
@@ -136,11 +147,10 @@ function effettiDi(partitaId: number, data: string, indice: number): EffettiAzio
  */
 export function impostaAzione(partitaId: number, data: string, indice: number, fatta: boolean, opz: OpzioniSpunta = {}): AzionePercorsoDto {
   partitaEsiste(partitaId);
-  const r = prepared('SELECT azioni_json FROM giorno_percorso WHERE data = ?').get(data) as { azioni_json: string } | undefined;
-  if (!r) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
-  const azioni = JSON.parse(r.azioni_json) as AzioneSeed[];
-  const a = azioni[indice];
-  if (!a) throw httpErrors.notFound('azione-non-trovata', `Il giorno ${data} non ha un'azione con indice ${indice}.`);
+  // l'azione come la vede l'utente (testo, note e fascia corretti: i punti si leggono dalle note corrette);
+  // un'azione rimossa non si spunta, ma si può ancora togliere la spunta per annullarne i punti
+  const { azione: a, rimossa } = azioneGuida(data, indice);
+  if (fatta && rimossa) throw httpErrors.badRequest('azione-rimossa', 'Questa azione è stata rimossa dalla giornata: ripristinala per spuntarla.');
   const adesso = nowIso();
   let effetti: EffettiAzioneDto | null = null;
   getDb().transaction(() => {
@@ -165,7 +175,9 @@ export function impostaAzione(partitaId: number, data: string, indice: number, f
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return { ...a, indice, fatta, effetti };
+  // stato e mappa come nella scheda del giorno: chi sostituisce la riga nell'elenco non perde «Sulla mappa» né il semaforo
+  const conf = new Map(confidenti(partitaId).map((c) => [c.chiave, c]));
+  return { ...a, indice, fatta, effetti, stato: statoAzione(a, conf), mappa: mappaAzione(a) };
 }
 
 /** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. */
@@ -227,11 +239,6 @@ function applicaEffetti(partitaId: number, a: AzioneSeed, opz: OpzioniSpunta): E
     }
   }
   return doti.length || confidente ? { doti, confidente } : null;
-}
-
-export function annullaEffetti(partitaId: number, e: EffettiAzioneDto): void {
-  for (const d of e.doti) aggiornaDote(partitaId, d.chiave, { delta: -d.delta });
-  if (e.confidente) aggiornaConfidente(partitaId, e.confidente.chiave, { deltaPunti: -e.confidente.punti });
 }
 
 function descriviEffetti(e: EffettiAzioneDto): string {

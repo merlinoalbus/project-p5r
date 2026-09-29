@@ -11,7 +11,7 @@ import { registraEvento } from './storicoService.js';
 import { verificaObiettivi } from './obiettiviService.js';
 import { semaforiConfidente, statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto,
   FasciaGioco,
 } from '../../shared/types.js';
@@ -309,6 +309,14 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
     }
     return confidenti(partitaId).find((c) => c.chiave === chiave)!;
   })();
+}
+
+/** Annulla esattamente i punti applicati spuntando un'azione (della guida o dell'utente): Doti e punti del Confidente.
+ *  Sta qui e non in `percorsoService` perché la usano sia il percorso sia l'agenda, e il percorso legge l'agenda:
+ *  tenerla nel percorso chiudeva un giro di import fra i due servizi. */
+export function annullaEffetti(partitaId: number, e: EffettiAzioneDto): void {
+  for (const d of e.doti) aggiornaDote(partitaId, d.chiave, { delta: -d.delta });
+  if (e.confidente) aggiornaConfidente(partitaId, e.confidente.chiave, { deltaPunti: -e.confidente.punti });
 }
 
 // ---- Compendio personale ----

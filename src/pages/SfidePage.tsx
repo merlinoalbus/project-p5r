@@ -114,7 +114,7 @@ function SchedaTratti({ d }: { d: SfideDto }) {
         <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={categorie.map((c) => ({ chiave: c, nome: c }))} onCambia={setCategoria} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">{visibili.length} tratti su {t.elenco.length}.</p>
-      <div className="overflow-x-auto">
+      <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Tratto</th><th>Effetto</th><th>Categoria</th><th>Di chi</th></tr></thead>
           <tbody>{visibili.map((x) => <tr key={x.nome}><td data-etichetta="Tratto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>}</td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Categoria">{x.categoria ?? '—'}</td><td data-etichetta="Di chi">{x.personaggio ?? '—'}</td></tr>)}</tbody>

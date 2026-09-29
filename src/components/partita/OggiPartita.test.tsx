@@ -12,15 +12,15 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import type { MappaDto, PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../types';
 
-const api = vi.hoisted(() => ({ risolviMappa: vi.fn(), getAgenda: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), getQuartieri: vi.fn().mockResolvedValue([]), getDungeons: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
+const api = vi.hoisted(() => ({ risolviMappa: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), getQuartieri: vi.fn().mockResolvedValue([]), getDungeons: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
 vi.mock('../../services/api', () => api);
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', azioni: 2, fatte: 0, coperto: true } as PercorsoIndiceDto['giorni'][number]], dataCorrente: '04-12', totaleGiorni: 346, giorniCoperti: 300 };
 const giorno: PercorsoGiornoDto = {
-  giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo giorno.', vincoli: [], meteo: 'sereno', avvisi: [], fonte: '', coperto: true, precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 0,
+  giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo giorno.', vincoli: [], meteo: 'sereno', avvisi: [], fonte: '', coperto: true, precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 0, rimosse: [], correzioniSuperate: [], agenda: { giorno: '04-12', eventi: [], azioni: [] },
   azioni: [
-    { indice: 0, fascia: 'giorno', azione: 'Parla con Ryuji in cortile', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'ryuji' }, riferimentoTesto: 'Ryuji', rangoAtteso: 2, note: null, fatta: false, effetti: null, stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' }, mappa: { chiave: 'citta-shibuya', spilloId: 7 } },
-    { indice: 1, fascia: 'sera', azione: 'Vai da Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Takemi', rangoAtteso: 3, note: null, fatta: false, effetti: null, stato: { tipo: 'bloccata', motivo: 'Coraggio rango 2 (rango 1 di 2)' }, mappa: null },
+    { indice: 0, fascia: 'giorno', azione: 'Parla con Ryuji in cortile', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'ryuji' }, riferimentoTesto: 'Ryuji', rangoAtteso: 2, note: null, fatta: false, effetti: null, stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' }, mappa: { chiave: 'citta-shibuya', spilloId: 7 }, correzione: null },
+    { indice: 1, fascia: 'sera', azione: 'Vai da Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Takemi', rangoAtteso: 3, note: null, fatta: false, effetti: null, stato: { tipo: 'bloccata', motivo: 'Coraggio rango 2 (rango 1 di 2)' }, mappa: null, correzione: null },
   ],
 };
 const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, nomeRivisto: false, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: null, percorso: [{ chiave, nome }], figli: [], arrivi: [],
@@ -30,7 +30,6 @@ describe('OggiPartita', () => {
   beforeEach(() => {
     for (const f of Object.values(api)) if ('mockReset' in f) f.mockReset();
     api.risolviMappa.mockImplementation(async (mappa: string) => ({tipo:'mappa',mappa}));
-    api.getAgenda.mockResolvedValue({ giorno: '04-12', eventi: [], azioni: [] });
     api.getPercorsoIndice.mockResolvedValue(indice);
     api.getPercorsoGiorno.mockResolvedValue(giorno);
     api.getImmagini.mockResolvedValue([]);

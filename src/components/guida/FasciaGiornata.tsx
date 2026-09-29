@@ -5,6 +5,12 @@
 import { AssetImg } from '../shared/AssetImg';
 import { IconLuna, IconSole } from '../shared/iconeGuida';
 
+/** Icona della fascia: asset `ui/giorno` / `ui/sera` con riserva sole / luna. Dentro un PulsanteVisivo la misura la impone il pulsante. */
+export function IconaFascia({ fascia, dimensione = 24, className = 'w-7 h-7 object-contain' }: { fascia: 'giorno' | 'sera'; dimensione?: number; className?: string }) {
+  const sera = fascia === 'sera';
+  return <AssetImg nome={`ui/${fascia}`} alt="" decorativa className={className} fallback={<span className={`inline-flex ${sera ? 'text-info' : 'text-warning'}`}>{sera ? <IconLuna size={dimensione} /> : <IconSole size={dimensione} />}</span>} />;
+}
+
 interface Props {
   fascia: 'giorno' | 'sera';
   /** Conteggio facoltativo (es. azioni fatte su totali). */
@@ -15,11 +21,10 @@ interface Props {
 
 /** Intestazione h2 in carattere display con l'icona della fascia. */
 export function FasciaGiornata({ fascia, dettaglio, attiva }: Props) {
-  const sera = fascia === 'sera';
   return (
     <h2 className="m-0 flex items-center gap-2 font-display uppercase tracking-wide text-[20px] leading-none">
-      <AssetImg nome={`ui/${fascia}`} alt="" decorativa className="w-7 h-7 object-contain" fallback={<span className={`inline-flex ${sera ? 'text-info' : 'text-warning'}`}>{sera ? <IconLuna size={24} /> : <IconSole size={24} />}</span>} />
-      {sera ? 'Di sera' : 'Di giorno'}
+      <IconaFascia fascia={fascia} />
+      {fascia === 'sera' ? 'Di sera' : 'Di giorno'}
       {attiva && <span className="chip chip--attivo font-sans normal-case tracking-normal text-[11px]" title="Momento della giornata impostato nella partita">Adesso</span>}
       {dettaglio && <span className="font-sans normal-case tracking-normal text-[12px] text-text-muted">{dettaglio}</span>}
     </h2>

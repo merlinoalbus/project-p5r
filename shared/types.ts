@@ -1024,6 +1024,35 @@ export interface AzionePercorsoDto {
   stato: StatoAzioneDto | null;
   /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
   mappa: { chiave: string; spilloId: number | null } | null;
+  /** Correzione dell'utente applicata (vale per tutte le partite): i campi com'erano nella guida, per mostrarli e per «Ripristina». Null = azione com'è nella guida. */
+  correzione: { azione: string; note: string | null; fascia: FasciaGioco } | null;
+}
+
+/** Campi di un'azione della guida che l'utente può correggere. */
+export interface CorrezioneAzioneGuida {
+  azione?: string;
+  note?: string | null;
+  fascia?: FasciaGioco;
+}
+
+/** Azione della guida rimossa dall'utente: resta ripristinabile. */
+export interface AzioneGuidaRimossaDto {
+  indice: number;
+  fascia: FasciaGioco;
+  azione: string;
+}
+
+/** Correzione non più applicata perché la guida (un pacchetto nuovo) ha cambiato l'azione a quel posto:
+ *  non la si applica in silenzio all'azione sbagliata, la si mostra perché l'utente la riapplichi o la scarti. */
+export interface CorrezioneSuperataDto {
+  indice: number;
+  /** Testo dell'azione quando l'utente l'ha corretta. */
+  azioneAllora: string;
+  /** Testo dell'azione che oggi sta a quel posto (null: la guida non ha più un'azione a quel posto). */
+  azioneAttuale: string | null;
+  /** Il testo corretto dall'utente, se l'aveva cambiato. */
+  azioneCorretta: string | null;
+  nascosta: boolean;
 }
 
 export interface PercorsoGiornoRiassuntoDto {
@@ -1067,7 +1096,14 @@ export interface PercorsoGiornoDto {
   precedente: string | null;
   successivo: string | null;
   dataCorrente: string | null;
+  /** Azioni della guida fatte (le rimosse non contano). */
   fatte: number;
+  /** Azioni della guida rimosse dall'utente, ripristinabili. */
+  rimosse: AzioneGuidaRimossaDto[];
+  /** Correzioni che la guida attuale non permette più di applicare. */
+  correzioniSuperate: CorrezioneSuperataDto[];
+  /** Eventi e cose da fare dell'utente per il giorno: si mostrano dentro «Di giorno» / «Di sera». */
+  agenda: AgendaGiornoDto;
 }
 
 // ---- Negozi e inventario (Fase 8.2) ----
@@ -2058,6 +2094,8 @@ export interface EventoUtenteDto {
   /** Giorno del calendario di gioco ('MM-GG'). Si chiama «giorno» e non «data» perché l'envelope `{ data }` delle risposte lascia intatti gli oggetti che hanno già una chiave `data`. */
   giorno: string;
   tipo: 'evento' | 'scadenza' | 'promemoria';
+  /** Momento della giornata in cui l'evento compare: dentro «Di giorno» o «Di sera». */
+  fascia: FasciaGioco;
   titolo: string;
   dettaglio: string;
   riferimento: { tipo: string; chiave: string } | null;

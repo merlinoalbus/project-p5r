@@ -5,7 +5,7 @@
 import type {
   ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiGet, queryString } from './_helpers';
-import type { VideogiochiDto } from '../../types';
+import type { AzionePercorsoDto, CorrezioneAzioneGuida, VideogiochiDto } from '../../types';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
 export interface FiltriPersona {
@@ -41,6 +41,17 @@ export const getCompletamento = (partita?: number): Promise<CompletamentoDto> =>
 export const getPercorsoIndice = (partita?: number): Promise<PercorsoIndiceDto> => apiGet(`/compendio/percorso${queryString({ partita })}`);
 /** Scheda di un giorno del percorso. */
 export const getPercorsoGiorno = (data: string, partita?: number): Promise<PercorsoGiornoDto> => apiGet(`/compendio/percorso/${data}${queryString({ partita })}`);
+/** Corregge testo, note o fascia di un'azione della guida (vale per tutte le partite). */
+export const correggiAzioneGuida = (data: string, indice: number, correzione: CorrezioneAzioneGuida): Promise<AzionePercorsoDto> =>
+  apiPut(`/compendio/percorso/${data}/azioni/${indice}`, correzione);
+/** Rimuove dalla giornata (o rimette) un'azione della guida, per tutte le partite. */
+export const rimuoviAzioneGuida = (data: string, indice: number, rimossa: boolean): Promise<AzionePercorsoDto> =>
+  apiPut(`/compendio/percorso/${data}/azioni/${indice}/rimossa`, { rimossa });
+/** Riapplica all'azione attuale una correzione superata da un pacchetto nuovo. */
+export const riapplicaCorrezioneGuida = (data: string, indice: number): Promise<AzionePercorsoDto> =>
+  apiPut(`/compendio/percorso/${data}/azioni/${indice}/riapplica`, {});
+/** Riporta l'azione com'è nella guida (toglie correzione e rimozione; scarta anche una correzione superata). */
+export const ripristinaAzioneGuida = (data: string, indice: number): Promise<void> => apiDelete(`/compendio/percorso/${data}/azioni/${indice}/correzione`);
 /** Negozi con conteggi degli articoli. */
 /** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */
 export const getNegozi = (partita?: number): Promise<NegozioRiassuntoDto[]> => apiGet(`/compendio/negozi${queryString({ partita })}`);

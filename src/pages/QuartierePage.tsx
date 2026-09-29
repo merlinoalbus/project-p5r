@@ -73,7 +73,7 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
         </div>
       )}
       {l.piatti && l.piatti.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="area-scorrevole-x">
           <table className="tabella tabella--adattiva text-[12px]">
             <thead><tr><th>Piatto</th><th>Prezzo</th><th>Effetto</th></tr></thead>
             <tbody>{l.piatti.map((p) => <tr key={p.nome}><td data-etichetta="Piatto"><strong>{p.nome}</strong></td><td data-etichetta="Prezzo" className="tabular-nums">{p.prezzo !== null ? `${p.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td><td data-etichetta="Effetto">{p.effetto}</td></tr>)}</tbody>

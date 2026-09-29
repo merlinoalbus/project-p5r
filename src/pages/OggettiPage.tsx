@@ -72,7 +72,7 @@ function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
         <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={Object.entries(NOME_CATEGORIA).filter(([k]) => d.consumabili.some((x) => x.categoria === k)).map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setCategoria} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">{visibili.length} oggetti su {d.consumabili.length}.</p>
-      <div className="overflow-x-auto">
+      <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Oggetto</th><th>Categoria</th><th>Effetto</th><th>Dove</th><th>Prezzo</th></tr></thead>
           <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.categoria}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Categoria"><CellaCategoria categoria={x.categoria} nome={NOME_CATEGORIA[x.categoria] ?? x.categoria} /></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
@@ -94,7 +94,7 @@ function SchedaChiave({ d }: { d: OggettiGuidaDto }) {
         <Selettore compatto etichetta="Tipo" valore={tipo} vuoto="Chiave e materiali" opzioni={[{ chiave: 'chiave', nome: 'Oggetti chiave' }, { chiave: 'materiale', nome: 'Materiali' }]} onCambia={setTipo} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">{visibili.length} voci su {d.chiaveEMateriali.length}.</p>
-      <div className="overflow-x-auto">
+      <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Oggetto</th><th>Tipo</th><th>Uso</th><th>Dove</th></tr></thead>
           <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.tipo}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Tipo"><CellaCategoria categoria={x.tipo === 'chiave' ? 'oggetti-chiave' : 'materiali'} nome={x.tipo === 'chiave' ? 'Oggetto chiave' : 'Materiale'} /></td><td data-etichetta="Uso">{x.uso}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
@@ -115,7 +115,7 @@ function SchedaFabbricazione({ d }: { d: OggettiGuidaDto }) {
         {f.regole.length > 0 && <ul className="m-0 pl-4">{f.regole.map((r) => <li key={r}>{r}</li>)}</ul>}
         <Fonte url={f.fonte} />
       </section>
-      <div className="overflow-x-auto">
+      <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           {/* Niente colonna «Prodotti»: la guida non la compila per **nessuna** ricetta, quindi
               era una colonna di trattini — larghezza tolta a «Materiali», che invece serve. */}
@@ -139,7 +139,7 @@ function SchedaArmi({ d }: { d: OggettiGuidaDto }) {
         <Fonte url={p.fonte} />
       </section>
       {p.effetti.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="area-scorrevole-x">
           <table className="tabella tabella--adattiva text-[12px]">
             <thead><tr><th>Modifica</th><th>Effetto</th><th>Costo</th></tr></thead>
             <tbody>{p.effetti.map((e) => <tr key={e.nome}><td data-etichetta="Modifica"><strong>{e.nome}</strong></td><td data-etichetta="Effetto">{e.effetto}</td><td data-etichetta="Costo">{e.costo ?? '—'}</td></tr>)}</tbody>
@@ -171,7 +171,7 @@ function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
       </section>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un abito o un personaggio…" />
       <p className="m-0 text-[12px] text-text-muted">{visibili.length} abiti su {d.abiti.elenco.length}.</p>
-      <div className="overflow-x-auto">
+      <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Abito</th><th>Per</th><th>Dove</th></tr></thead>
           <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.per}`}><td data-etichetta="Abito"><strong>{x.nome}</strong></td><td data-etichetta="Per"><RitrattoPersonaggio chi={x.per} /></td><td data-etichetta="Dove">{x.dove}</td></tr>)}</tbody>
@@ -227,7 +227,7 @@ function SchedaEquipaggiamento() {
           <Selettore compatto etichetta="Per chi" valore={per} vuoto="Per chiunque" opzioni={[{ chiave: 'nessuno', nome: 'Senza vincolo' }, ...vincoli.map(([k, n]) => ({ chiave: k, nome: n }))]} onCambia={setPer} />
         </div>
         <p className="m-0 text-[12px] text-text-muted" role="status">{visibili.length} pezzi su {tutti.length}.</p>
-        <div className="overflow-x-auto">
+        <div className="area-scorrevole-x">
           <table className="tabella tabella--adattiva text-[12px]">
             <thead><tr><th>Equipaggiamento</th><th>Tipo</th><th>Per</th><th>Effetto</th></tr></thead>
             <tbody>{visibili.map((o) => (
@@ -270,7 +270,7 @@ function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
         <section key={s.venditore} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.venditore}</h2><span className="chip">{s.dove}</span><Secondaria v={s.verificato} /></div>
           {s.quando && <Voce titolo="Quando">{s.quando}</Voce>}
-          <div className="overflow-x-auto">
+          <div className="area-scorrevole-x">
             <table className="tabella tabella--adattiva text-[12px]">
               <thead><tr><th>Ricevi</th><th>Dai</th><th>Note</th></tr></thead>
               <tbody>{s.offerte.map((o, i) => <tr key={i}><td data-etichetta="Ricevi"><strong>{o.ricevi}</strong></td><td data-etichetta="Dai">{o.dai}</td><td data-etichetta="Note">{o.note ?? '—'}</td></tr>)}</tbody>

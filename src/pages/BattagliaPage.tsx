@@ -171,7 +171,7 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
   return (
     <div className="flex flex-col gap-3 text-[13px]">
       <p className="m-0 text-text-secondary">{d.sistema.esitiColpo.tecnico}. Colpisci un nemico già colpito da uno stato alterato con l'elemento indicato per ottenere un colpo Tecnico (danno bonus e possibile «1 More»).</p>
-      <div className="overflow-x-auto">
+      <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva">
           <thead><tr><th>Stato alterato</th><th>Colpo tecnico con</th><th>Effetto dello stato</th></tr></thead>
           <tbody>{d.tecnico.stati.map((s) => <tr key={s.stato}><td data-etichetta="Stato"><strong>{s.stato}</strong></td><td data-etichetta="Tecnico con">{s.elementi.join(', ')}</td><td data-etichetta="Effetto" className="text-text-secondary">{effetti.get(s.stato) ?? '—'}</td></tr>)}</tbody>
@@ -217,7 +217,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
           <Voce titolo="Attivazione">{sp.attivazione}</Voce>
           <Voce titolo="Danno">{sp.proprietaDanno}</Voce>
         </Dati>
-        <div className="overflow-x-auto">
+        <div className="area-scorrevole-x">
           <table className="tabella tabella--adattiva text-[12px]">
             <thead><tr><th>Speciale</th><th>Coppia</th><th>Sblocco</th></tr></thead>
             <tbody>{sp.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Speciale"><strong>{e.nome}</strong></td><td data-etichetta="Coppia">{e.personaggi.join(' e ')}</td><td data-etichetta="Sblocco">{e.sblocco}</td></tr>)}</tbody>
@@ -288,7 +288,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
           <Voce titolo="Resistenze">{t.resistenzeGenerali}</Voce>
           {t.tecnicheConsigliate.length > 0 && <Voce titolo="Tecniche consigliate">{t.tecnicheConsigliate.join('; ')}</Voce>}
         </Dati>
-        <div className="overflow-x-auto">
+        <div className="area-scorrevole-x">
           <table className="tabella tabella--adattiva text-[12px]">
             <thead><tr><th>Demone del Tesoro</th><th>Livello</th><th>Arcano</th><th>Dove</th></tr></thead>
             <tbody>{t.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Demone"><strong>{e.nome}</strong></td><td data-etichetta="Livello" className="tabular-nums">{e.livello}</td><td data-etichetta="Arcano">{e.arcano}</td><td data-etichetta="Dove">{e.dove}</td></tr>)}</tbody>

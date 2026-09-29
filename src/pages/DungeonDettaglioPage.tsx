@@ -284,7 +284,7 @@ export function DungeonDettaglioPage() {
                 <FilaScorrevole className="items-center lg:hidden" role="tablist" aria-label="Aree">
                   {d.aree.map((a) => <VoceArea key={a.chiave} a={a} memento={false} compatta scelta={a.chiave === area.chiave} suggerita={areaSuggerita(a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
                 </FilaScorrevole>
-                <div className="card hidden max-h-[min(47vh,560px)] flex-col gap-1.5 overflow-y-auto p-2 lg:flex" role="tablist" aria-label="Aree">
+                <div className="card hidden max-h-[min(47vh,560px)] flex-col gap-1.5 area-scorrevole p-2 lg:flex" role="tablist" aria-label="Aree">
                   {d.aree.map((a) => <VoceArea key={a.chiave} a={a} memento={false} scelta={a.chiave === area.chiave} suggerita={areaSuggerita(a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
                 </div>
               </nav>

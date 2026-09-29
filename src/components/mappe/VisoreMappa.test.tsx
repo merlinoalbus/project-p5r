@@ -398,12 +398,20 @@ it('con molte voci l’elenco si limita allo spazio della tela e le voci scorron
     fireEvent.click(screen.getByRole('button', { name: /17 spilli vicini/ }));
     const elenco = screen.getByRole('dialog', { name: '17 spilli vicini' });
     const voci = elenco.querySelector('ul') as HTMLElement;
-    expect(voci.style.overflowY).toBe('auto');
+    // scorre come ogni area annidata: confine, contenimento del gesto e barra d'accento vengono da `area-scorrevole`
+    expect(voci).toHaveClass('area-scorrevole');
     const tetto = Number(voci.style.maxHeight.replace('px', ''));
     expect(tetto).toBeGreaterThan(0);
     expect(tetto).toBeLessThan(500);          // sta dentro la tela, non nei 858 px che chiederebbe
     // e «Ingrandisci qui» resta fuori dall'area che scorre, sempre raggiungibile
     expect(within(elenco).getByRole('button', { name: /Ingrandisci qui/ })).toBeInTheDocument();
+    // la rotellina sopra l'elenco è dell'elenco (lo fa scorrere), non della mappa sotto; sulla tela ingrandisce come prima
+    const sopraElenco = new WheelEvent('wheel', { deltaY: 100, bubbles: true, cancelable: true });
+    voci.dispatchEvent(sopraElenco);
+    expect(sopraElenco.defaultPrevented).toBe(false);
+    const sullaTela = new WheelEvent('wheel', { deltaY: 100, bubbles: true, cancelable: true });
+    (container.querySelector('.visore-mappa__tela') as HTMLElement).dispatchEvent(sullaTela);
+    expect(sullaTela.defaultPrevented).toBe(true);
   } finally { misura.mockRestore(); }
 });
 

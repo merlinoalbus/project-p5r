@@ -178,7 +178,7 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
   return (
     <Modal titolo="Aggiungi Persona alla scorta" aperta={aperta} onChiudi={onChiudi}>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca nel compendio…" autoFocus />
-      <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[50vh] overflow-y-auto">
+      <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[50vh] area-scorrevole">
         {filtrate.map((p) => (
           <li key={p.id} className="flex items-center gap-2 py-2">
             <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
@@ -331,7 +331,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
             <div className="relative">
               <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Aggiungi una skill…" />
               {candidate.length > 0 && (
-                <ul className="m-0 p-0 list-none absolute z-10 left-0 right-0 mt-1 card p-1 max-h-[220px] overflow-y-auto shadow-lg">
+                <ul className="m-0 p-0 list-none absolute z-10 left-0 right-0 mt-1 card p-1 max-h-[220px] area-scorrevole shadow-lg">
                   {candidate.map((s) => (
                     <li key={s.id}>
                       {/* `touch`: con il solo `py-2` la voce restava a 42 px — sfuggita alla prima

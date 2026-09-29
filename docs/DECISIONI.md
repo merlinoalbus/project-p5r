@@ -494,3 +494,19 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   uno spillo di spostamento, voci dell'elenco dei passaggi, e «Apri l'arrivo» spostato in cima al
   pannello dello spillo. Nel visore basta un clic, ma nell'editor il clic seleziona per modificare:
   la via d'uscita va data a parte, altrimenti l'unico modo era un pulsante in fondo al pannello.
+
+### 2026-09-29 — La giornata della guida si modifica, e ciò che scorre dentro la pagina si vede
+- **Le correzioni alle azioni della guida valgono sempre per tutte le partite** (scelta dell'utente fra «per partita»,
+  «a scelta» e «tutte»). Vivono nel file delle partite (`correzione_azione_guida`), non nella guida: il pacchetto la
+  sostituisce per intero e le spunte sono legate alla posizione dell'azione, quindi l'azione si corregge o si
+  «rimuove» (nascosta, ripristinabile) senza spostare nient'altro.
+- **Gli eventi dell'utente stanno dentro «Di giorno» / «Di sera»** (scelta dell'utente, invece che nella scheda del
+  giorno): hanno una fascia e un cartellino, e non si spuntano. Il riquadro «Le mie note» non esiste più.
+- **Una correzione che la guida nuova ha superato non si applica in silenzio**: se a quella posizione c'è un'azione con
+  un altro testo, la correzione si mostra in «Correzioni da rivedere» (Riapplica / Scarta) e intanto non la si può
+  sovrascrivere né dall'interfaccia né dall'API (409).
+- **Si lavora direttamente su `main`, senza ramo dedicato né PR** (richiesta dell'utente del 2026-09-29).
+- **Aree che scorrono dentro altre** (richiesta dell'utente): l'area deve essere riconoscibile e il gesto non deve
+  passare a una seconda barra. Regola unica nelle utility `area-scorrevole` / `area-scorrevole-x` e un test che vieta
+  gli scorrimenti fatti a mano. Nelle schermate «senza scorrimento» (Home, scheda «Oggi») la pagina scorreva comunque
+  di 50-70 px per la mappa di Tokyo: ora la mappa si adatta alla colonna e scorre solo la guida.

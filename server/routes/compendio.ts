@@ -14,12 +14,13 @@ import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../se
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
+import { correggiAzioneGuida, riapplicaCorrezioneGuida, rimuoviAzioneGuida, ripristinaAzioneGuida } from '../services/correzioniGuidaService.js';
 import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/richiesteService.js';
 import { httpErrors } from '../utils/httpError.js';
-import type { OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
+import type { CorrezioneAzioneGuida, OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
-import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import { bodyCorreggiAzioneGuida, bodyRimuoviAzioneGuida, paramsAzioneGuida, paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
   dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
@@ -118,6 +119,22 @@ router.get('/percorso', validate({ query: queryDomande }), (req, res) => {
 });
 router.get('/percorso/:data', validate({ params: z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) }), query: queryDomande }), (req, res) => {
   res.json(giornoPercorso(String(req.params.data), (req.query as unknown as { partita?: number }).partita));
+});
+// Correzioni dell'utente alle azioni della guida: testo, note, fascia, rimozione. Valgono per tutte le partite.
+router.put('/percorso/:data/azioni/:indice', validate({ params: paramsAzioneGuida, body: bodyCorreggiAzioneGuida }), (req, res) => {
+  res.json(correggiAzioneGuida(String(req.params.data), Number(req.params.indice), req.body as CorrezioneAzioneGuida));
+});
+router.put('/percorso/:data/azioni/:indice/rimossa', validate({ params: paramsAzioneGuida, body: bodyRimuoviAzioneGuida }), (req, res) => {
+  res.json(rimuoviAzioneGuida(String(req.params.data), Number(req.params.indice), (req.body as { rimossa: boolean }).rimossa));
+});
+/** Correzione superata da un pacchetto nuovo: la si riapplica all'azione che oggi sta a quel posto. */
+router.put('/percorso/:data/azioni/:indice/riapplica', validate({ params: paramsAzioneGuida }), (req, res) => {
+  res.json(riapplicaCorrezioneGuida(String(req.params.data), Number(req.params.indice)));
+});
+/** Riporta l'azione com'è nella guida (toglie correzione e rimozione). */
+router.delete('/percorso/:data/azioni/:indice/correzione', validate({ params: paramsAzioneGuida }), (req, res) => {
+  ripristinaAzioneGuida(String(req.params.data), Number(req.params.indice));
+  res.status(204).end();
 });
 router.get('/negozi', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaNegozi((req.query as unknown as { partita?: number }).partita));

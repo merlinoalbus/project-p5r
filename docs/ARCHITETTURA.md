@@ -689,3 +689,33 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   proxy — che al server non arriva nemmeno — erediterebbe l'esito riuscito di ore prima e si direbbe riuscito. Se lo
   stato di partenza non si riesce a leggere, l'errore resta un errore. L'attesa si interrompe con «Smetti di
   attendere» e quando la card viene smontata.
+
+## Giornata modificabile e aree che scorrono (2026-09-29)
+
+- **Correzioni della guida**: tabella `utente.correzione_azione_guida` (PK `data, indice`; `originale_json` = l'azione
+  quando l'utente l'ha toccata; `modifiche_json` = soli campi diversi fra `azione`, `note`, `fascia`; `nascosta`),
+  migrazione «utente» 005 (che aggiunge anche `evento_utente.fascia`). `server/services/correzioniGuidaService.ts`
+  applica le correzioni alla lettura (`guidaDelGiorno`, `correttoreGuida` per l'indice, `azioneGuida` per la spunta)
+  e le scrive (`correggiAzioneGuida`, `rimuoviAzioneGuida`, `ripristinaAzioneGuida`, `riapplicaCorrezioneGuida`); una
+  riga il cui `originale_json.azione` non coincide più con la guida è «superata» (`CorrezioneSuperataDto`), non si
+  applica e blocca con 409 `correzione-superata` le scritture a quella posizione. Rotte:
+  `PUT /api/compendio/percorso/:data/azioni/:indice` (`{ azione?, note?, fascia? }`), `PUT …/rimossa`
+  (`{ rimossa }`), `PUT …/riapplica`, `DELETE …/correzione`. `percorsoService` le usa in `indicePercorso` (conteggi =
+  azioni visibili + cose da fare dell'utente, `agendaService.conteggiAgenda`), `giornoPercorso` (`rimosse`,
+  `correzioniSuperate`, `agenda`) e `impostaAzione`; `suggerimentiService` idem. `annullaEffetti` sta in
+  `partiteService`.
+- **Interfaccia**: `GiornoGuida` rende «Di giorno» e «Di sera» (eventi → azioni della guida → cose da fare), il menu per
+  voce (`MenuVoce`), la finestra unica per aggiungere e modificare (`ModuloVoceGiornata`), le righe dell'utente
+  (`VociAgenda`), le rimosse in fondo alla sezione e le correzioni da rivedere nella scheda del giorno. Chi lo ospita
+  passa `onGiornataModificata` (ricarica giorno e indice).
+- **Aree che scorrono**: `@utility area-scorrevole` (verticale: bordo, `overscroll-behavior: contain`,
+  `scrollbar-gutter: stable`, barra d'accento, ombre di bordo con fondo `--area-fondo`) e `@utility area-scorrevole-x`
+  (orizzontale: contenimento e barra d'accento, sfondo intatto) in `src/tailwind.css`; le regole CSS scorrevoli
+  dichiarano `overscroll-behavior`. `src/test/areeScorrevoli.test.ts` vieta classi `overflow-*-auto/scroll`, classi
+  arbitrarie e stili in linea che fanno scorrere (unica eccezione: `main` di `MainLayout`). Nel visore delle mappe la
+  rotellina sopra `.spillo-popup` / `.area-scorrevole` resta a quell'area.
+- **Mappa di Tokyo nella schermata piena**: `MappaTokyo riempi` (passato da `OggiMappa`) mette mappa e legenda in
+  `.blocco-mappa-tokyo__mappa` (contenitore `mappaTokyo` delle container query) e `useLarghezzaCheSta` ne calcola la
+  larghezza perché blocco, legenda e riga delle fermate chiuse stiano nell'altezza della colonna (sincrono,
+  `ResizeObserver` su colonna e blocco, pavimento 240 px, 10:7 intatto); la riga «Non ancora nel mondo» diventa il
+  conto con «Quali» (finestra con nome e condizione).

@@ -6,16 +6,18 @@
 // guida, che il seed riscrive per intero a ogni aggiornamento dei dati. `partita_id` nullo significa «vale per tutte le
 // partite» (una conoscenza, come le mappe dell'utente); valorizzato significa «solo in questa partita» (un promemoria).
 // La data viene validata contro i giorni del gioco, ma senza chiave esterna: la riga sopravvive a un cambio del seed.
+// Eventi e cose da fare hanno una fascia e si mostrano dentro «Di giorno» / «Di sera» accanto alle azioni della guida
+// (la scheda del giorno li porta in `PercorsoGiornoDto.agenda`, l'indice dei giorni li conta).
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { annullaEffetti } from './percorsoService.js';
+import { annullaEffetti } from './partiteService.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { AgendaGiornoDto, AzioneUtenteDto, EventoUtenteDto, FasciaGioco } from '../../shared/types.js';
 
 interface RigaEvento {
-  id: number; partita_id: number | null; data: string; tipo: string; titolo: string; dettaglio: string;
+  id: number; partita_id: number | null; data: string; tipo: string; fascia: string; titolo: string; dettaglio: string;
   riferimento_tipo: string | null; riferimento_chiave: string | null; ordine: number;
 }
 interface RigaAzione {
@@ -25,7 +27,7 @@ interface RigaAzione {
 
 function eventoDto(r: RigaEvento): EventoUtenteDto {
   return {
-    id: r.id, partitaId: r.partita_id, giorno: r.data, tipo: r.tipo as EventoUtenteDto['tipo'], titolo: r.titolo, dettaglio: r.dettaglio,
+    id: r.id, partitaId: r.partita_id, giorno: r.data, tipo: r.tipo as EventoUtenteDto['tipo'], fascia: (r.fascia === 'sera' ? 'sera' : 'giorno') as FasciaGioco, titolo: r.titolo, dettaglio: r.dettaglio,
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave } : null, ordine: r.ordine,
   };
 }
@@ -74,8 +76,18 @@ export function giorniConAgenda(partitaId?: number): string[] {
   return righe.map((r) => r.data);
 }
 
+/** Per l'indice dei giorni: quante cose da fare ha ogni data e quante sono fatte nella partita (gli eventi non si spuntano e non contano). */
+export function conteggiAgenda(partitaId?: number): Map<string, { azioni: number; fatte: number }> {
+  const filtro = partitaId === undefined ? 'a.partita_id IS NULL' : '(a.partita_id IS NULL OR a.partita_id = ?)';
+  const par = partitaId === undefined ? [] : [partitaId, partitaId];
+  const righe = prepared(`SELECT a.data AS data, COUNT(*) AS azioni, COUNT(p.azione_utente_id) AS fatte FROM azione_utente a
+    LEFT JOIN azione_utente_partita p ON p.azione_utente_id = a.id AND p.partita_id = ${partitaId === undefined ? 'NULL' : '?'}
+    WHERE ${filtro} GROUP BY a.data`).all(...par) as Array<{ data: string; azioni: number; fatte: number }>;
+  return new Map(righe.map((r) => [r.data, { azioni: r.azioni, fatte: r.fatte }]));
+}
+
 export interface DatiEvento {
-  data: string; tipo?: EventoUtenteDto['tipo']; titolo: string; dettaglio?: string;
+  data: string; tipo?: EventoUtenteDto['tipo']; fascia?: FasciaGioco; titolo: string; dettaglio?: string;
   riferimento?: { tipo: string; chiave: string } | null; partitaId?: number | null; ordine?: number;
 }
 export interface DatiAzione {
@@ -91,8 +103,8 @@ export function creaEvento(d: DatiEvento): EventoUtenteDto {
   verificaData(d.data);
   const partita = verificaPartita(d.partitaId);
   const adesso = nowIso();
-  const info = prepared(`INSERT INTO evento_utente (partita_id, data, tipo, titolo, dettaglio, riferimento_tipo, riferimento_chiave, ordine, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partita, d.data, d.tipo ?? 'evento', d.titolo.trim(), d.dettaglio ?? '', d.riferimento?.tipo ?? null, d.riferimento?.chiave ?? null,
+  const info = prepared(`INSERT INTO evento_utente (partita_id, data, tipo, fascia, titolo, dettaglio, riferimento_tipo, riferimento_chiave, ordine, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partita, d.data, d.tipo ?? 'evento', d.fascia ?? 'giorno', d.titolo.trim(), d.dettaglio ?? '', d.riferimento?.tipo ?? null, d.riferimento?.chiave ?? null,
     d.ordine ?? prossimoOrdine('evento_utente', d.data), adesso, adesso);
   return eventoDto(prepared('SELECT * FROM evento_utente WHERE id = ?').get(Number(info.lastInsertRowid)) as RigaEvento);
 }
@@ -102,8 +114,8 @@ export function aggiornaEvento(id: number, d: Partial<DatiEvento>): EventoUtente
   if (!r) throw httpErrors.notFound('evento-non-trovato', `L'evento ${id} non esiste.`);
   if (d.data) verificaData(d.data);
   if (d.partitaId !== undefined) verificaPartita(d.partitaId);
-  prepared(`UPDATE evento_utente SET data = ?, tipo = ?, titolo = ?, dettaglio = ?, riferimento_tipo = ?, riferimento_chiave = ?, partita_id = ?, ordine = ?, updated_at = ? WHERE id = ?`).run(
-    d.data ?? r.data, d.tipo ?? r.tipo, (d.titolo ?? r.titolo).trim(), d.dettaglio ?? r.dettaglio,
+  prepared(`UPDATE evento_utente SET data = ?, tipo = ?, fascia = ?, titolo = ?, dettaglio = ?, riferimento_tipo = ?, riferimento_chiave = ?, partita_id = ?, ordine = ?, updated_at = ? WHERE id = ?`).run(
+    d.data ?? r.data, d.tipo ?? r.tipo, d.fascia ?? r.fascia, (d.titolo ?? r.titolo).trim(), d.dettaglio ?? r.dettaglio,
     d.riferimento === undefined ? r.riferimento_tipo : d.riferimento?.tipo ?? null,
     d.riferimento === undefined ? r.riferimento_chiave : d.riferimento?.chiave ?? null,
     d.partitaId === undefined ? r.partita_id : d.partitaId, d.ordine ?? r.ordine, nowIso(), id);

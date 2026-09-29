@@ -242,7 +242,7 @@ export function RichiestePage() {
               {d.jose.scambi.length > 0 && (
                 <SezioneConFregio chiave="jose-scambi" forma="banda" disposizione="fascia" aria-label="Scambi con Jose">
                   <h3 className="m-0 font-display text-[15px] uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
-                  <div className="overflow-x-auto">
+                  <div className="area-scorrevole-x">
                     <table className="tabella tabella--adattiva text-[12px]">
                       <thead><tr><th>Oggetto</th><th>Fiori</th><th>Effetto</th><th>Requisito</th></tr></thead>
                       <tbody>{d.jose.scambi.map((s, i) => <tr key={i}><td data-etichetta="Oggetto"><strong>{s.nome}</strong></td><td data-etichetta="Fiori" className="tabular-nums">{s.costo}</td><td data-etichetta="Effetto">{s.effetto}</td><td data-etichetta="Requisito">{s.requisito}</td></tr>)}</tbody>

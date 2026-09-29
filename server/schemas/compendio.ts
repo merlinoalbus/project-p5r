@@ -28,3 +28,17 @@ export const queryOggetti = z.object({
   q: testoRicerca,
   categoria: z.string().trim().min(1).max(20).optional(),
 });
+
+// ---- Guida giorno per giorno: correzioni dell'utente alle azioni (valgono per tutte le partite) ----
+
+export const paramsAzioneGuida = z.object({
+  data: z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.'),
+  indice: z.coerce.number().int().min(0).max(200),
+});
+export const bodyCorreggiAzioneGuida = z.object({
+  // la guida ha azioni fino a ~780 caratteri e note fino a ~820: il margine lascia correggere senza tagliare
+  azione: z.string().trim().min(1).max(2000).optional(),
+  note: z.string().trim().max(2000).nullable().optional(),
+  fascia: z.enum(['giorno', 'sera']).optional(),
+}).refine((b) => b.azione !== undefined || b.note !== undefined || b.fascia !== undefined, { message: 'Indica almeno un campo da correggere (azione, note o fascia).' });
+export const bodyRimuoviAzioneGuida = z.object({ rimossa: z.boolean() });

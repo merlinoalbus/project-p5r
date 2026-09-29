@@ -55,6 +55,7 @@ export function OggiMappa({ oggi, riempi }: Props) {
       </div>
       {suTokyo ? (
         <MappaTokyo
+          riempi={riempi}
           quartieri={quartieri.dati ?? []}
           dungeon={dungeon.dati ?? []}
           dataGioco={attiva?.dataGioco ?? null}

@@ -276,6 +276,9 @@
   .modal-body {
     padding: 20px;
     overflow-y: auto;
+    overscroll-behavior: contain; /* il gesto resta nella finestra: la pagina sotto è ferma */
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -420,7 +423,18 @@
   /* Contenitore di misura per targhe e legenda: decidono in base a quanto è larga *la mappa*, non
      la finestra — la stessa mappa sta in una card piena sul telefono e in una colonna stretta
      accanto alla guida sul monitor. */
-  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; container: mappaTokyo / inline-size; }
+  .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; }
+  /* Il contenitore di misura è la coppia mappa + legenda: fuori dalla schermata piena è largo quanto il
+     blocco (la stessa misura di prima), dentro è largo quanto la mappa. */
+  .blocco-mappa-tokyo__mappa { width: 100%; margin-inline: auto; container: mappaTokyo / inline-size; }
+  /* Nella schermata senza scorrimento il blocco prende l'altezza e la larghezza che restano nella colonna
+     (la riga delle fermate chiuse va a capo a tutta larghezza); la larghezza di mappa e legenda la calcola
+     `useLarghezzaCheSta` (MappaTokyo.tsx) perché tutto ci stia. */
+  @media (min-width: 768px) {
+    .blocco-mappa-tokyo--riempi { flex: 1 1 0; min-height: 0; width: 100%; }
+    /* la cornice non si schiaccia mai: stringerla in altezza romperebbe il 10:7, e con esso le posizioni in percentuale */
+    .blocco-mappa-tokyo--riempi .blocco-mappa-tokyo__mappa, .blocco-mappa-tokyo--riempi .mappa-tokyo { flex-shrink: 0; }
+  }
   .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; width: 100%; touch-action: none; user-select: none; }
   /* La mano compare solo quando c'e' davvero qualcosa da spostare: a zoom 1 la tela e' tutta li'. */
   .mappa-tokyo--spostabile { cursor: grab; }
@@ -477,7 +491,7 @@
   .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: 17px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
   .spillo-mappa__punto { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; border: 1px solid rgba(255,255,255,.7); }
   .spillo-mappa__punto--grande { width: 34px; height: 34px; }
-  .visore-mappa__pannello { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; padding: 10px; overflow-y: auto; border-right: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); min-height: 0; }
+  .visore-mappa__pannello { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; padding: 10px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border-right: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); min-height: 0; }
   .visore-mappa__azione-testo { background: none; border: 1px solid var(--color-border); color: var(--color-text-secondary); font: inherit; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 4px 8px; cursor: pointer; min-height: 30px; }
   .visore-mappa__azione-testo:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-text); }
   /* con `.touch` il bersaglio resta di 44 px anche se la regola qui sopra ne fissa 30 (stesso layer, dichiarata dopo `.touch`) */
@@ -517,12 +531,12 @@
   .spillo-popup .btn-visivo { --btn-visivo-icona: 28px; padding: 3px 8px 3px 6px; }
   .spillo-popup .btn-visivo__titolo { font-size: 12px; }
   /* La merce del negozio dentro il popup: poche righe, il resto scorre. */
-  .spillo-popup__merce { max-height: 30vh; overflow-y: auto; }
+  .spillo-popup__merce { max-height: 30vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border-block: 1px solid var(--color-border-light); }
   /* Sotto i 768 px il popup non sta più sulla mappa: diventa un foglio dal basso, largo quanto lo
      schermo, con la merce che scorre dentro — un riquadro da 260 px agganciato allo spillo su un
      telefono copriva la mappa e usciva dai bordi (richiesta dell'utente: layout per i tre formati). */
   @media (max-width: 767px) {
-    .spillo-popup, .spillo-popup--sotto { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom)); top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; z-index: 40; }
+    .spillo-popup, .spillo-popup--sotto { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom)); top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; }
     .spillo-popup::after, .spillo-popup--sotto::after { display: none; }
     .spillo-popup__merce { max-height: none; overflow: visible; }
   }
@@ -532,7 +546,7 @@
      che scorre e si vede tutto — è il gesto che sul telefono si conosce già. */
   /* I 64 px di stacco servono a scavalcare la barra inferiore, che c'è solo sotto i 1024: da lì in
      su il foglio starebbe a galleggiare su un vuoto preso da un altro contesto. */
-  .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; z-index: 40; }
+  .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; }
   .spillo-popup--foglio::after { display: none; }
   @media (max-width: 1023px) {
     .spillo-popup--foglio { bottom: calc(64px + env(safe-area-inset-bottom)); }
@@ -600,7 +614,7 @@
   .editor-mappa__tipo--attivo { border-color: var(--color-primary); background: var(--color-primary-bg); }
   .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--color-text-secondary); }
   .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: 13px; }
-  .editor-mappa__risultati { max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border); }
+  .editor-mappa__risultati { max-height: 180px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border: 1px solid var(--color-border); }
   .editor-mappa__avviso { font-size: 12px; color: var(--color-warning, #f5c542); }
   /* palette dei tipi a gruppi (15.24) e righe «senza passaggio» dell'albero: testo + pulsante «Crea passaggio» (44 px al tocco) */
   .editor-mappa__gruppo { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); padding: 2px 0 0; }
@@ -612,7 +626,7 @@
   /* Dove la voce è essa stessa il bersaglio da toccare (elenco dei passaggi), i 40px di riga non bastano. */
   .visore-mappa__figlia.touch, .visore-mappa__voce.touch { min-height: 44px; }
   .visore-mappa__voce--attiva { border-color: var(--color-primary); background: var(--color-primary-bg); }
-  .visore-mappa__elenco { max-height: 40vh; overflow-y: auto; }
+  .visore-mappa__elenco { max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
   .visore-mappa__scheda { border: 1px solid var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary)); padding: 10px; }
   /* Larghezze fisse: nel pannello (≤340 px) il layout automatico, con `overflow-wrap: anywhere` ereditato da body, riduceva «Articolo» a un
      carattere (min-content) e lasciava 700+ px alla «Disponibile» senza a capo. Le parole lunghe si spezzano solo quando non stanno nella cella. */
@@ -794,7 +808,7 @@
        ferma mentre si guarda l'elenco. `dvh` invece di `vh` perche' su tablet e telefono la barra
        del browser entra e esce e `vh` non se ne accorge. */
     .negozio-merce { min-height: 0; }
-    .negozio-elenco { flex: 1 1 auto; overflow-y: auto; min-height: 0; padding-right: 4px; }
+    .negozio-elenco { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border: 1px solid var(--color-border); border-radius: var(--radius-md); min-height: 0; padding: 4px; }
   }
 
   @media (min-width: 1440px) {
@@ -1017,6 +1031,8 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
+    /* in fondo alla fila il gesto si ferma: non passa alla pagina né al «torna indietro» del browser */
+    overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1366,7 +1382,7 @@
 .selettore__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
 .selettore__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
 .selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }
-.selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; }
+.selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; }
 .selettore__gruppo { display:block; padding:6px 8px 2px; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
 .selettore__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:13px; text-align:left; cursor:pointer; }
 .selettore__voce--evidenziata .selettore__pulsante { background:color-mix(in srgb, var(--color-primary) 18%, transparent); }
@@ -1456,11 +1472,15 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .filtri-articoli__riga { display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; }
 .filtri-articoli__riga > .relative { flex:1 1 240px; min-width:0; }
 .segmenti { display:inline-flex; flex-wrap:wrap; border:1px solid var(--color-border); }
-.segmenti__voce { min-height:44px; padding:0 12px; border:0; background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:13px; cursor:pointer; }
+/* `overflow-wrap:normal`: il body ha `anywhere`, che sul telefono spezzava «Promemoria» a metà parola; così la voce non scende
+   sotto la parola più lunga e, se lo spazio non basta, a capo va il segmento intero (`flex-wrap`), non le lettere. */
+.segmenti__voce { min-height:44px; padding:0 12px; border:0; background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:13px; cursor:pointer; overflow-wrap:normal; }
 .segmenti__voce + .segmenti__voce { border-left:1px solid var(--color-border); }
 .segmenti__voce--attiva { background:var(--color-primary); color:var(--color-text-on-primary); }
 .segmenti__voce:focus-visible { outline:2px solid white; outline-offset:-2px; }
-@media (max-width:767px) { .segmenti { display:flex; width:100%; } .segmenti__voce { flex:1 1 0; padding:0 6px; } }
+/* Sul telefono le voci si spartiscono la riga in base al testo (`auto`, mai sotto la parola più lunga): a parti uguali
+   (`1 1 0`) «Promemoria» usciva dal suo riquadro accanto a tre voci corte. */
+@media (max-width:767px) { .segmenti { display:flex; width:100%; } .segmenti__voce { flex:1 1 auto; min-width:min-content; padding:0 6px; } }
 
 /* Editor degli orari: chip per i giorni e le fasce, levetta per la pioggia, nota, anteprima. */
 .orari-editor { display:flex; flex-direction:column; gap:8px; }
@@ -1533,3 +1553,37 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    invisibile dentro un contenitore che ritaglia non riceve niente. */
 .spillo-tokyo, .spillo-esteso { position: absolute; }
 .spillo-tokyo::after, .spillo-esteso::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+
+/* ---- Aree che scorrono dentro la pagina (richiesta dell'utente, 2026-09-29) ----
+   «Quando gestisci gli scrollbar dentro altri scrollbar l'area in cui viene applicato lo scrollbar deve essere ben chiara;
+   da evitare scroll di più barre insieme.» Ogni contenitore che scorre dentro un altro che scorre usa una di queste due
+   utility (varianti comprese: `md:area-scorrevole`), e un test (`src/test/areeScorrevoli.test.ts`) lo fa rispettare:
+   - `overscroll-behavior: contain`: arrivati in fondo (o in cima) il gesto si ferma lì, non passa alla pagina sotto;
+   - un confine visibile (bordo e angoli) che dice fin dove arriva l'area;
+   - (verticale) un'ombra al bordo superiore/inferiore solo quando di là c'è contenuto nascosto: le due fasce del colore
+     del fondo scorrono col contenuto (`local`) e, piene per i primi 12 px, coprono del tutto le ombre fisse (`scroll`,
+     12 px) quando si è al capo. Il fondo è `--area-fondo` (quello delle card): un'area su un fondo diverso lo ridefinisce;
+   - la barra di scorrimento del colore d'accento (in verticale sempre presente, `scrollbar-gutter: stable`: comparendo
+     non sposta niente; in orizzontale compare solo quando la tabella deborda, ed è lei a dire che di là c'è altro).
+   L'orizzontale non tocca lo sfondo: sta su card, tabelle e fondo pagina illustrato, e un colore suo li coprirebbe. */
+@utility area-scorrevole {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(var(--area-fondo, var(--color-bg-secondary)) 12px, transparent 28px) top / 100% 28px no-repeat local,
+    linear-gradient(to top, var(--area-fondo, var(--color-bg-secondary)) 12px, transparent 28px) bottom / 100% 28px no-repeat local,
+    radial-gradient(farthest-side at 50% 0, color-mix(in srgb, var(--color-primary) 45%, transparent), transparent) top / 100% 12px no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, color-mix(in srgb, var(--color-primary) 45%, transparent), transparent) bottom / 100% 12px no-repeat scroll,
+    var(--area-fondo, var(--color-bg-secondary));
+}
+@utility area-scorrevole-x {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
+}

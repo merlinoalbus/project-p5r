@@ -99,7 +99,7 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
         {a.differenze.length === 0 ? (
           <p className="m-0 text-text-muted">Stessi conteggi dell'istanza in ogni tabella.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="area-scorrevole-x">
             <table className="w-full border-collapse text-[13px]" aria-label="Tabelle che cambiano">
               <thead><tr className="text-left text-text-muted"><th className="py-0.5 pr-2 font-normal">Tabella</th><th className="py-0.5 pr-2 font-normal text-right">Ora</th><th className="py-0.5 font-normal text-right">Pacchetto</th></tr></thead>
               <tbody>

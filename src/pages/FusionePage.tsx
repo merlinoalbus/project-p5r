@@ -146,7 +146,7 @@ export function FusionePage() {
         )}
 
         {dati && vista === 'matrice' && (
-          <div className="card overflow-x-auto p-0">
+          <div className="card area-scorrevole-x p-0">
             <table className="tabella text-[11px]">
               <thead>
                 <tr>
@@ -194,7 +194,7 @@ export function FusionePage() {
         )}
 
         {dati && vista === 'tesori' && (
-          <div className="card overflow-x-auto p-0">
+          <div className="card area-scorrevole-x p-0">
             <p className="m-0 px-3 pt-3 text-[12px] text-text-secondary">Fondendo un Demone del Tesoro con una Persona, il risultato è la Persona dello stesso arcano spostata di tanti ranghi quanti indicati (+ verso l'alto, − verso il basso).</p>
             <table className="tabella text-[12px]">
               <thead>

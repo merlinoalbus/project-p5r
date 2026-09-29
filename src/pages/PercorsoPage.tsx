@@ -33,7 +33,8 @@ export function PercorsoPage() {
   const [occupatoGiorno, setOccupatoGiorno] = useState(false);
   const mesi = useMemo(() => [...new Set((indice.dati?.giorni ?? []).map((x) => x.giorno.slice(0, 2)))], [indice.dati]);
   const giorniDelMese = useMemo(() => (indice.dati?.giorni ?? []).filter((x) => data && x.giorno.slice(0, 2) === data.slice(0, 2)), [indice.dati, data]);
-  const aggiorna = (a: AzionePercorsoDto) => { if (g) { const azioni = g.azioni.map((x) => (x.indice === a.indice ? a : x)); giorno.imposta({ ...g, azioni, fatte: azioni.filter((x) => x.fatta).length }); } };
+  // la riga spuntata si sostituisce subito; l'indice si ricarica perché il selettore del giorno mostra «fatte/azioni»
+  const aggiorna = (a: AzionePercorsoDto) => { if (g) { const azioni = g.azioni.map((x) => (x.indice === a.indice ? a : x)); giorno.imposta({ ...g, azioni, fatte: azioni.filter((x) => x.fatta).length }); void indice.ricarica(); } };
   const segnaCorrente = async () => {
     if (!partitaId || !g) return;
     setOccupatoGiorno(true);
@@ -62,7 +63,7 @@ export function PercorsoPage() {
             {partitaId && g.dataCorrente !== g.giorno && <button type="button" className="btn btn-primary btn-sm touch ml-auto" disabled={occupatoGiorno} onClick={() => void segnaCorrente()}>Segna come giorno corrente</button>}
             {partitaId && g.dataCorrente === g.giorno && <span className="chip chip--attivo ml-auto">Oggi nella partita</span>}
           </div>
-          <GiornoGuida onAgendaAggiornata={() => { void giorno.ricarica(); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} onSullaMappa={(a) => { if (a.mappa) navigate(`/guida/mappe/${encodeURIComponent(a.mappa.chiave)}${a.mappa.spilloId ? `?spillo=${a.mappa.spilloId}` : ''}`); }} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
+          <GiornoGuida onGiornataModificata={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} onSullaMappa={(a) => { if (a.mappa) navigate(`/guida/mappe/${encodeURIComponent(a.mappa.chiave)}${a.mappa.spilloId ? `?spillo=${a.mappa.spilloId}` : ''}`); }} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
         </div>
       )}
     </PageState>

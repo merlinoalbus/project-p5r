@@ -2,7 +2,7 @@
 // API catalogo e agenda — righe aggiunte o corrette dall'utente, eventi e cose da fare del giorno (Fase 16.1)
 // ============================================================
 
-import type { AgendaGiornoDto, AzioneUtenteDto, ElementoCatalogoDto, EventoUtenteDto, OggettoSelezionabileDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
+import type { AzioneUtenteDto, ElementoCatalogoDto, EventoUtenteDto, OggettoSelezionabileDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
@@ -44,17 +44,14 @@ export const eliminaElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Pro
   apiDelete(`/catalogo/${tipo}/${encodeURIComponent(chiave)}`);
 
 // ---- Agenda del giorno ----
-
-/** Eventi e cose da fare di un giorno: quelli di tutte le partite più quelli della partita indicata. */
-export const getAgenda = (giorno: string, partita?: number): Promise<AgendaGiornoDto> =>
-  apiGet(`/catalogo/agenda/${giorno}${queryString({ partita })}`);
+// Eventi e cose da fare di un giorno arrivano con la scheda del giorno (`PercorsoGiornoDto.agenda`): qui restano le scritture.
 
 /** Giorni che hanno qualcosa in agenda (per segnarli nel calendario). */
 export const getGiorniConAgenda = (partita?: number): Promise<{ giorni: string[] }> =>
   apiGet(`/catalogo/agenda${queryString({ partita })}`);
 
 export interface DatiEventoApi {
-  data: string; tipo?: EventoUtenteDto['tipo']; titolo: string; dettaglio?: string;
+  data: string; tipo?: EventoUtenteDto['tipo']; fascia?: 'giorno' | 'sera'; titolo: string; dettaglio?: string;
   riferimento?: { tipo: string; chiave: string } | null; partitaId?: number | null; ordine?: number;
 }
 export interface DatiAzioneApi {

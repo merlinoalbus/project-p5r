@@ -194,7 +194,7 @@ function PannelloLuogo({ mappe, figliDi, gruppo, percorso, nodo, nome, onPercors
         varianti di una figura sola: stanno insieme, in cima, e non sparse fra i figli. */}
     {alRadice && gruppo.versioni.length > 1 && <ImmaginiLuogo mappe={gruppo.versioni} nome={nome} />}
     {contenute.length > 0
-      ? <div className="max-h-[min(72vh,860px)] overflow-y-auto pr-1">
+      ? <div className="max-h-[min(72vh,860px)] area-scorrevole p-1">
           <GriglieDelLuogo contenute={contenute} nome={nome} onScendi={(k) => onPercorso([...percorso, k])} />
         </div>
       : <p className="m-0 text-[13px] text-text-muted" role="status">Qui dentro non ci sono altre planimetrie: c’è solo questa.</p>}
@@ -204,7 +204,7 @@ function PannelloLuogo({ mappe, figliDi, gruppo, percorso, nodo, nome, onPercors
         scorrimento. È lo stesso elenco di prima, ma dentro un contenitore che lo contiene. */}
     {contenute.length > 0 && <details className="border-t border-border-light pt-2">
       <summary className="touch cursor-pointer text-[12px] text-text-muted">Elenco completo, con tutti i livelli</summary>
-      <div className="max-h-[420px] overflow-auto pt-2">
+      <div className="max-h-[420px] area-scorrevole mt-2 p-1">
         <AlberoLuoghi mappe={mappe} genitore={nodo.chiave} espandibile />
       </div>
     </details>}

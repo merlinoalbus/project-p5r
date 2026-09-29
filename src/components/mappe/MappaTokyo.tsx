@@ -26,7 +26,7 @@
 // ============================================================
 
 import { Link } from 'react-router-dom';
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
 import { dentroFinestra, quartiereAperto } from './aperturaTokyo';
 import { dataLeggibile } from '../../../shared/condizioniSpillo';
@@ -35,6 +35,9 @@ import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
 import { assetCovoLadri, assetPalazzo, assetTokyoQuartiere, nascondiSagomaAssente } from './assetTokyo';
+import { Modal } from '../shared/Modal';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
  *
@@ -68,6 +71,72 @@ interface Props {
    *  e quei cartellini non facevano niente. */
   onApri?: (href: string) => boolean;
   className?: string;
+  /** Schermata senza scorrimento (Home, scheda «Oggi», da 768 px): il blocco occupa l'altezza che gli
+   *  lascia la colonna e la mappa si stringe finché mappa, legenda e riga delle fermate chiuse ci
+   *  stanno. Senza, il tetto di larghezza era sull'altezza della finestra (68vh) e nella colonna la
+   *  mappa usciva di 50-70 px: la pagina scorreva insieme alla guida, due barre per un gesto. */
+  riempi?: boolean;
+}
+
+/** Altezza degli elementi visibili fra quelli dati, più gli intervalli fra loro (il `gap` del contenitore). */
+function altezzaVisibili(elementi: HTMLElement[], contenitore: HTMLElement): { altezza: number; quanti: number } {
+  const visibili = elementi.filter((f) => getComputedStyle(f).display !== 'none');
+  const intervallo = parseFloat(getComputedStyle(contenitore).rowGap) || 0;
+  return { altezza: visibili.reduce((s, f) => s + f.getBoundingClientRect().height, 0) + Math.max(0, visibili.length - 1) * intervallo, quanti: visibili.length };
+}
+
+/** Larghezza della mappa perché il blocco stia nella sua altezza (schermata senza scorrimento).
+ *
+ *  Il blocco ha l'altezza che gli lascia la colonna e la sua larghezza intera: la riga delle fermate
+ *  chiuse sta lì, a tutta larghezza, e la sua altezza non dipende dalla mappa. Mappa (10:7) e legenda
+ *  stanno nel contenitore `mappa`, a cui si dà la larghezza: la legenda va a capo in più righe quanto più
+ *  è stretto, quindi si misura e si ricalcola — partendo dalla colonna intera la larghezza può solo
+ *  scendere e si ferma in pochi passaggi.
+ *
+ *  La larghezza si scrive sull'elemento, non nello stato: il calcolo è sincrono (prima del disegno, e
+ *  senza aspettare fotogrammi, che in una scheda in secondo piano non arrivano) e si osservano la
+ *  colonna e il blocco, la cui misura non dipende dalla mappa: niente giri di `ResizeObserver`. */
+function useLarghezzaCheSta(attivo: boolean, contenuto: string) {
+  const blocco = useRef<HTMLDivElement>(null);
+  const mappa = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const b = blocco.current;
+    const m = mappa.current;
+    // senza `matchMedia` (ambienti senza motore di layout) non c'è una schermata da riempire: la mappa resta alla sua misura
+    if (!b || !m || !attivo || typeof window.matchMedia !== 'function') return;
+    // la schermata senza scorrimento c'è da 768 px: sotto, la pagina scorre e la mappa torna alla sua misura
+    const schermo = window.matchMedia('(min-width: 768px)');
+    const calcola = () => {
+      const colonna = b.parentElement;
+      if (!schermo.matches || !colonna) { m.style.width = ''; return; }
+      const massima = b.clientWidth;
+      // quel che sta nel blocco oltre alla mappa (la riga delle fermate chiuse), con l'intervallo che lo separa
+      const fuori = altezzaVisibili(([...b.children] as HTMLElement[]).filter((f) => f !== m), b);
+      const disponibile = b.clientHeight - fuori.altezza - (fuori.quanti > 0 ? parseFloat(getComputedStyle(b).rowGap) || 0 : 0);
+      let larghezza = massima;
+      for (let passo = 0; passo < 8; passo++) {
+        m.style.width = `${larghezza}px`;
+        // il primo figlio è la cornice della mappa; il resto (la legenda) va a capo secondo questa larghezza
+        const [cornice, ...altri] = [...m.children] as HTMLElement[];
+        const legenda = altezzaVisibili(altri, m);
+        const spazio = disponibile - legenda.altezza - (legenda.quanti > 0 ? parseFloat(getComputedStyle(m).rowGap) || 0 : 0);
+        // un pavimento: sotto i 240 px la mappa non si legge più (schermi al limite: lì resta lo scorrimento della pagina)
+        const nuova = Math.max(240, Math.min(massima, Math.floor((spazio * 10) / 7)));
+        if (!cornice || nuova >= larghezza - 1) break;
+        larghezza = nuova;
+      }
+      m.style.width = `${larghezza}px`;
+    };
+    calcola();
+    const oss = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(calcola);
+    // la colonna e il blocco: la loro misura non dipende dalla larghezza data alla mappa, quindi nessun giro
+    if (b.parentElement) oss?.observe(b.parentElement);
+    oss?.observe(b);
+    schermo.addEventListener('change', calcola);
+    return () => { oss?.disconnect(); schermo.removeEventListener('change', calcola); m.style.width = ''; };
+    // `contenuto` cambia quando compaiono o spariscono legenda e riga delle fermate: si rimisura
+  }, [attivo, contenuto]);
+  return { blocco, mappa };
 }
 
 
@@ -187,7 +256,7 @@ function Rete({ nomi }: { nomi: Map<string, string> }) {
 const ZOOM_MAX = 4;
 const ZOOM_PASSO = 1.4;
 
-export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, onApri, className = '' }: Props) {
+export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, onApri, className = '', riempi = false }: Props) {
   // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
   // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
   const cornice = useRef<HTMLDivElement>(null);
@@ -326,12 +395,17 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
     }
     return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente), nomiFermate: nomi };
   }, [quartieri, dungeon, dataGioco]);
+  const [elencoAssenti, setElencoAssenti] = useState(false);
+  const { blocco, mappa } = useLarghezzaCheSta(riempi, `${presenti.length}/${assenti.length}/${dataGioco ?? ''}`);
 
   // Il tetto di larghezza sta **sul blocco**, non sulla sola cornice: sotto la mappa c'è la riga
   // delle fermate non ancora aperte, che è lunga, e messa in una colonna larga quanto vuole
   // spingeva l'intera colonna a 1750 px buttando le schede fuori dallo schermo. Con il tetto qui
   // la riga va a capo dentro la misura della mappa, che è dove deve stare.
-  return <div className={`blocco-mappa-tokyo flex flex-col gap-2 ${className}`}>
+  return <div ref={blocco} className={`blocco-mappa-tokyo flex flex-col gap-2 ${riempi ? 'blocco-mappa-tokyo--riempi' : ''} ${className}`}>
+    {/* Mappa e legenda stanno insieme: la loro larghezza è quella della mappa (e il contenitore «mappaTokyo»
+        con cui targhe e legenda decidono se comparire); la riga delle fermate chiuse sta sotto, nel blocco. */}
+    <div ref={mappa} className="blocco-mappa-tokyo__mappa flex flex-col gap-2">
     {/* Il riquadro: bordo, fondo e proporzione fissa, come ogni altra mappa dell'app. Dentro, una
         tela che si ingrandisce e si trascina — questa mappa era l'unica a non farlo, e su una tela
         piena di sagome accostate lo zoom non è un lusso: è il modo di leggere le targhe piccole e
@@ -400,7 +474,16 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         </li>
       ))}
     </ul>
-    {dataGioco && assenti.length > 0 && <p className="m-0 text-[12px] text-text-muted">
+    </div>
+    {dataGioco && assenti.length > 0 && (riempi ? (
+      // Nella schermata senza scorrimento l'elenco per esteso (una trentina di nomi, 144 px su una colonna
+      // di 360) spingeva la pagina a scorrere insieme alla guida: qui resta il conto, e i nomi — con il
+      // perché scritto per esteso, che al passaggio del mouse col dito non si legge — stanno nella finestra.
+      <p className="m-0 flex flex-wrap items-center gap-x-2 text-[12px] text-text-muted">
+        <span>Non ancora nel mondo, al {dataLeggibile(dataGioco)}: {assenti.length === 1 ? '1 luogo' : `${assenti.length} luoghi`}.</span>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo="Quali" aria-label={`Quali luoghi non sono ancora nel mondo (${assenti.length})`} onClick={() => setElencoAssenti(true)} />
+      </p>
+    ) : <p className="m-0 text-[12px] text-text-muted">
       {/* Non spariscono e basta: si dice **quali**, altrimenti la mappa sembra incompleta invece
           che aggiornata al giorno della partita. Il perché sta sul nome, al passaggio del mouse:
           da quando le condizioni non sono più solo date — un rango di Confidente, un libro da
@@ -408,7 +491,19 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       Non ancora nel mondo, al {dataLeggibile(dataGioco)}: {assenti.map((s, i) => <span key={s.chiave}>
         {i > 0 && ' · '}<span className="cursor-help underline decoration-dotted underline-offset-2" title={s.quando ?? 'condizione non indicata'}>{s.nome}</span>
       </span>)}
-    </p>}
+    </p>)}
+    {elencoAssenti && dataGioco && (
+      <Modal aperta titolo={`Non ancora nel mondo, al ${dataLeggibile(dataGioco)}`} onChiudi={() => setElencoAssenti(false)}>
+        <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light text-[13px]">
+          {assenti.map((s) => (
+            <li key={s.chiave} className="flex flex-wrap items-baseline justify-between gap-x-3 py-1.5">
+              <span>{s.nome}</span>
+              <span className="text-[12px] text-text-muted">{s.quando ?? 'condizione non indicata'}</span>
+            </li>
+          ))}
+        </ul>
+      </Modal>
+    )}
     {!dataGioco && <p className="m-0 text-[12px] text-text-muted">
       Nessuna partita attiva: la mappa mostra il mondo intero, quartieri e Palazzi compresi.
     </p>}

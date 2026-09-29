@@ -610,3 +610,19 @@ come alternativa dentro un pannello richiudibile. Verificato dal vivo con una ca
 un pacchetto da 311 MB, rifiuto di un file non valido e di tre tentativi di risalita) e a 1280/768/375 senza overflow
 con bersagli da 44 px. Test: `server/services/pacchettoDeposito.test.ts` (cartella assente, non leggibile, elenco
 ordinato, risalite) e tre casi nella card.
+
+## Giornata della guida modificabile e aree che scorrono (29 settembre 2026) — fatto
+
+Richiesta dell'utente: le attività «Di giorno» / «Di sera» non si potevano modificare, aggiungere né rimuovere, e un
+evento aggiunto restava sotto, nel riquadro «Le mie note». Lavoro direttamente su `main` (decisione dell'utente).
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Backend: correzioni alle azioni della guida per tutte le partite (`correzione_azione_guida` nel file delle partite, migrazione «utente» 005; `correzioniGuidaService`: testo, note, fascia, rimozione, ripristino, correzioni «superate» da un pacchetto nuovo con Riapplica/Scarta e 409 su chi le sovrascriverebbe); applicate in scheda del giorno, indice dei giorni, spunta (Doti dalle note corrette; un'azione rimossa non si spunta ma la spunta si toglie) e suggerimenti; `evento_utente.fascia`; `PercorsoGiornoDto` con `rimosse`, `correzioniSuperate`, `agenda`; `annullaEffetti` in `partiteService` (niente giro di import) | ✅ validata |
+| 2 | Frontend: «Di giorno» e «Di sera» sempre presenti con «Aggiungi»; eventi, azioni della guida e cose da fare dell'utente nella stessa lista; menu per voce (Modifica, Sposta, Ripristina originale, Rimuovi/Elimina) con conferme (azione spuntata con punti, eliminazione), azioni rimosse da rimettere, «Correzioni da rivedere»; `ModuloVoceGiornata`, `MenuVoce`, `VociAgenda`; via `AgendaGiorno`; segmenti senza parole spezzate sul telefono | ✅ validata |
+| 3 | Aree che scorrono dentro la pagina: utility `area-scorrevole` / `area-scorrevole-x` (confine, `overscroll-behavior: contain`, barra d'accento, ombre di bordo), applicate a ogni contenitore annidato e alle regole CSS scorrevoli; test di guardia `src/test/areeScorrevoli.test.ts`; Home e scheda «Oggi» di nuovo in una schermata (la mappa di Tokyo si adatta alla colonna, `MappaTokyo riempi`, riga «Non ancora nel mondo» compatta con «Quali»); la rotellina sopra popup ed elenchi del visore li fa scorrere invece di ingrandire la mappa | ✅ validata |
+| 4 | Documenti, commit su `main` | ✅ |
+
+Aperto, da decidere con l'utente: con il vincolo «Home in una schermata» la finestra della guida resta piccola sugli
+schermi bassi (Home: 48 px a 1366×768 per la stella che cresce con l'altezza da 1360 px, 141 px a 1024×768, 168 px a
+1280×720, 189 px a 768×1024).

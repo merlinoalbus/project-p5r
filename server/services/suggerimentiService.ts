@@ -14,10 +14,8 @@ import { httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
 import { confidenti } from './partiteService.js';
 import { statoAzione } from './percorsoService.js';
-import type { AzionePercorsoDto, SuggerimentiOggiDto } from '../../shared/types.js';
-
-/** Azione come sta nel seed del percorso (gli stessi campi che legge `percorsoService`). */
-type AzioneSeed = Omit<AzionePercorsoDto, 'indice' | 'fatta'>;
+import { guidaDelGiorno, type AzioneSeed } from './correzioniGuidaService.js';
+import type { SuggerimentiOggiDto } from '../../shared/types.js';
 
 const DOTI = ['conoscenza', 'fascino', 'gentilezza', 'coraggio', 'perizia'] as const;
 const RE_DOTE_GUADAGNO = new RegExp(`(?:(${DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${DOTI.join('|')}))`, 'gi');
@@ -150,8 +148,8 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
   const fatte = new Set((prepared('SELECT indice FROM azione_partita WHERE partita_id = ? AND data = ?').all(partitaId, data) as Array<{ indice: number }>).map((x) => x.indice));
   // Un'azione bloccata dai requisiti non è un suggerimento: la si esclude come fa la Guida (`statoAzione`).
   const conf = new Map(confidenti(partitaId).map((c) => [c.chiave, c]));
-  const azioni = (JSON.parse(righeGiorno.azioni_json) as AzioneSeed[])
-    .map((a, i) => ({ ...a, indice: i }))
+  // la guida come la vede l'utente: testo, note e fascia corretti, le azioni rimosse non suggeriscono nulla
+  const azioni = guidaDelGiorno(data, JSON.parse(righeGiorno.azioni_json) as AzioneSeed[]).azioni
     .filter((a) => !fatte.has(a.indice) && statoAzione(a, conf).tipo !== 'bloccata');
   const r = nuovaRaccolta();
   const motivi: SuggerimentiOggiDto['motivi'] = [];

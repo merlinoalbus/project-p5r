@@ -57,7 +57,7 @@ export function TraduzioniEditor() {
         <button type="button" className={`chip touch ${soloUtente ? 'chip--attivo' : ''}`} onClick={() => setSoloUtente((v) => !v)} aria-pressed={soloUtente}>Solo modificate</button>
       </div>
       <PageState isLoading={voci.caricamento} error={voci.errore} onRetry={() => void voci.ricarica()}>
-        <ul className="m-0 p-0 list-none divide-y divide-border-light max-h-[60vh] overflow-y-auto">
+        <ul className="m-0 p-0 list-none divide-y divide-border-light max-h-[60vh] area-scorrevole">
           {(voci.dati ?? []).map((t) => (
             <li key={t.chiave} className="py-2 flex flex-col gap-1">
               <div className="text-[12px] text-text-muted break-words">{t.chiave}</div>
