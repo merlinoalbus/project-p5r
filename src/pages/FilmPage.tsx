@@ -4,7 +4,7 @@
 //
 // La scheda dice dove si vede (la pellicola per il cinema, il disco per il DVD), quando è in
 // programmazione (le condizioni, non una frase), che cosa dà la prima visione e — al cinema —
-// quanto rende rivederlo (gli effetti dichiarati con «anche alle volte successive»). Un DVD si
+// quanto rende rivederlo (gli effetti dichiarati «dalla seconda volta in poi»). Un DVD si
 // completa in più sessioni; al cinema una visione basta e le rivisioni si contano senza tetto.
 // ============================================================
 

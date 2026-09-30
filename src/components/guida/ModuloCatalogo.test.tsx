@@ -205,6 +205,17 @@ it('la paga in yen compare solo per un lavoro', () => {
   expect(screen.getByLabelText(/Paga in yen/)).toBeInTheDocument();
 });
 
+it('un lavoro (contato per volte) offre «vale dalla seconda volta in poi» e spiega che cosa dà ogni turno', async () => {
+  render(<ModuloCatalogo tipo="attivita" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
+  fireEvent.click(tessera('Tipo', 'Lavoro part-time'));
+  fireEvent.click(screen.getByRole('button', { name: /Aggiungi un effetto/ }));
+  expect(screen.getByRole('checkbox', { name: /Vale dalla seconda volta in poi/ })).toBeInTheDocument();
+  expect(screen.getByText(/Ogni turno registrato .* dà questi punti/)).toBeInTheDocument();
+  // un'attività che non si conta per volte (il cibo) non ha turni né voci «dalla seconda volta»
+  fireEvent.click(tessera('Tipo', 'Cibo e bevande'));
+  expect(screen.queryByRole('checkbox', { name: /Vale dalla seconda volta in poi/ })).toBeNull();
+});
+
 it('un videogioco è un’attività col tipo fissato e i round da contare', async () => {
   api.creaElementoCatalogo.mockResolvedValue({ nome: 'Star Forneus' });
   render(<ModuloCatalogo tipo="videogioco" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
@@ -217,13 +228,13 @@ it('un videogioco è un’attività col tipo fissato e i round da contare', asyn
 });
 
 /** Al cinema la visione è una e rivedere può valere; in DVD si contano le visioni e «ripetuto» non c'è. */
-it('un film al cinema si completa in una visione e offre «vale anche alle volte successive»; un DVD no', async () => {
+it('un film al cinema si completa in una visione e offre «vale dalla seconda volta in poi»; un DVD no', async () => {
   api.creaElementoCatalogo.mockResolvedValue({ nome: 'Il ladro' });
   render(<ModuloCatalogo tipo="film" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
   fireEvent.change(screen.getByLabelText(/Titolo del film/), { target: { value: 'Il ladro' } });
   expect(screen.queryByLabelText(/Visioni per completarlo/)).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: /Aggiungi un effetto/ }));
-  fireEvent.click(screen.getByRole('checkbox', { name: /Vale anche alle volte successive/ }));
+  fireEvent.click(screen.getByRole('checkbox', { name: /Vale dalla seconda volta in poi/ }));
   fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('film', expect.objectContaining({
     dove: 'cinema', sessioni: 1, effetti_json: [{ effetto: { famiglia: 'dote', dote: 'conoscenza', note: 1 }, ripetuto: true }],
@@ -231,7 +242,7 @@ it('un film al cinema si completa in una visione e offre «vale anche alle volte
 
   fireEvent.click(tessera('Dove si vede', 'In DVD'));
   expect(screen.getByLabelText(/Visioni per completarlo/)).toHaveValue(2);
-  expect(screen.queryByRole('checkbox', { name: /Vale anche alle volte successive/ })).toBeNull();
+  expect(screen.queryByRole('checkbox', { name: /Vale dalla seconda volta in poi/ })).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('film', expect.objectContaining({
     dove: 'dvd', sessioni: 2, effetti_json: [{ effetto: { famiglia: 'dote', dote: 'conoscenza', note: 1 } }],

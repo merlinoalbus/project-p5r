@@ -5,20 +5,25 @@
 // Test ConfidenteDettaglioPage — prossimo rango evidenziato, dialoghi con scelte migliori e romantiche, regali con spunta
 // ============================================================
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ConfidenteDettaglioPage } from './ConfidenteDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { ConfidenteDettaglioDto, ConfidentePartitaDto, PartitaDto } from '../types';
 
-const { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto } = vi.hoisted(() => ({ getConfidenteDettaglio: vi.fn(), getConfidentiPartita: vi.fn(), impostaRegaloFatto: vi.fn() }));
-vi.mock('../services/api', () => ({ getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto }));
+const { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro } = vi.hoisted(() => ({ getConfidenteDettaglio: vi.fn(), getConfidentiPartita: vi.fn(), impostaRegaloFatto: vi.fn(), impostaDotiIncontro: vi.fn() }));
+vi.mock('../services/api', () => ({ getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
 vi.mock('../components/shared/ImmagineEntita', () => ({ ImmagineEntita: () => null }));
 
 const dettaglio: ConfidenteDettaglioDto = {
   chiave: 'takemi', nome: 'Takemi', arcana: 'Death', arcanaNome: 'Morte', ordine: 13,
   abilita: [{ rango: 1, nome: 'Rigenerazione', descrizione: 'Più oggetti curativi.' }, { rango: 3, nome: 'Sterilizzazione', descrizione: '' }],
+  dotiIncontro: [
+    { rango: 1, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio, 1 nota' },
+    { rango: 2, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio, 1 nota' },
+    { rango: 3, doti: [], testo: '' },
+  ],
   dialoghi: [
     { id: 1, rango: 1, etichetta: '1', note: 'Data consigliata 18 aprile.', scelte: [{ ordine: 1, testo: 'Hai farmaci speciali?', punti: 2, puntiTesto: '+2', romantica: false, avviso: null }] },
     { id: 2, rango: 2, etichetta: '2', note: 'Richiede Coraggio 2.', scelte: [{ ordine: 1, testo: 'Voglio fare un test', punti: 3, puntiTesto: '+3', romantica: false, avviso: null }, { ordine: 2, testo: 'Vado via', punti: 0, puntiTesto: '+0', romantica: false, avviso: 'Da evitare' }] },
@@ -54,5 +59,26 @@ describe('ConfidenteDettaglioPage', () => {
     expect(cactus).not.toBeChecked();
     await act(async () => { fireEvent.click(cactus); });
     expect(impostaRegaloFatto).toHaveBeenCalledWith(7, 'takemi', 'Mini cactus', true);
+  });
+
+  it('la Dote a ogni incontro per rango: il prossimo evidenziato, si modifica e si salva', async () => {
+    usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova' } as PartitaDto });
+    getConfidenteDettaglio.mockResolvedValue(dettaglio);
+    getConfidentiPartita.mockResolvedValue([stato]);
+    impostaDotiIncontro.mockResolvedValue(dettaglio);
+    render(<MemoryRouter initialEntries={['/confidenti/takemi']}><Routes><Route path="/confidenti/:chiave" element={<ConfidenteDettaglioPage />} /></Routes></MemoryRouter>);
+    const sezione = await screen.findByRole('region', { name: 'Dote a ogni incontro' });
+    // rango 1 nella partita: il prossimo incontro vale verso il 2
+    expect(within(sezione).getByText('verso 2')).toHaveClass('chip--oro');
+    expect(within(sezione).getAllByText('Coraggio, 1 nota')).toHaveLength(2);
+    expect(within(sezione).queryByText('verso 3')).toBeNull();
+    fireEvent.click(within(sezione).getByRole('button', { name: 'Modifica' }));
+    const finestra = screen.getByRole('dialog', { name: 'Dote a ogni incontro: Takemi' });
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi una Dote al rango 3' }));
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli la Dote 1 del rango 1' }));
+    await act(async () => { fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' })); });
+    expect(impostaDotiIncontro).toHaveBeenCalledWith('takemi', [
+      { rango: 1, doti: [] }, { rango: 2, doti: [{ dote: 'coraggio', note: 1 }] }, { rango: 3, doti: [{ dote: 'fascino', note: 2 }] },
+    ]);
   });
 });

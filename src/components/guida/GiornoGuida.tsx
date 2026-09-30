@@ -12,31 +12,31 @@
 // ============================================================
 
 import { useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import {
   correggiAzioneGuida, eliminaAzioneAgenda, eliminaEventoAgenda, aggiornaAzioneAgenda, aggiornaEventoAgenda, impostaAzioneAgendaFatta,
   impostaAzionePercorso, riapplicaCorrezioneGuida, rimuoviAzioneGuida, ripristinaAzioneGuida,
 } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
-import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti } from '../../utils/percorso';
+import { descriviEffetti } from '../../utils/percorso';
 import type { AzionePercorsoDto, AzioneUtenteDto, CorrezioneSuperataDto, EventoUtenteDto, FasciaGioco, PercorsoGiornoDto } from '../../types';
 import { DataP5 } from '../shared/DataP5';
 import { MeteoIcona } from './MeteoIcona';
 import { FasciaGiornata, IconaFascia } from './FasciaGiornata';
-import { IconaCategoria } from './IconaCategoria';
-import { EmblemaDungeon } from './EmblemaDungeon';
-import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Modal } from '../shared/Modal';
-import { IconaSpillo } from '../mappe/IconaSpillo';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { GestiVoce, PulsanteMenuVoce, type GestoVoce } from './MenuVoce';
 import { ModuloVoceGiornata, type SoggettoVoce } from './ModuloVoceGiornata';
 import { VoceEvento, VoceMia } from './VociAgenda';
+import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
+import { chiedeNote } from '../../utils/azioneStrutturata';
 
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
 const nomeFascia = (f: FasciaGioco) => (f === 'giorno' ? 'di giorno' : 'di sera');
+
+/** «Sulla mappa» di una voce: la mappa (e lo spillo) e, per un'azione della guida, il suo indice (da evidenziare); null per le voci dell'utente. */
+export type SullaMappa = (mappa: { chiave: string; spilloId: number | null }, indiceGuida: number | null) => void;
 
 interface PropsAzione {
   a: AzionePercorsoDto;
@@ -44,7 +44,7 @@ interface PropsAzione {
   partitaId: number | null;
   onCambiata: (a: AzionePercorsoDto) => void;
   /** Azione con un luogo sulla mappa: il pulsante «Sulla mappa» la centra (scheda «Oggi») o apre la mappa (pagina della guida). */
-  onSullaMappa?: (a: AzionePercorsoDto) => void;
+  onSullaMappa?: SullaMappa;
   evidenziata?: boolean;
   /** Gesti della voce (Modifica, Sposta, Rimuovi, Ripristina): assenti = riga di sola lettura. */
   gesti?: GestoVoce[];
@@ -61,10 +61,9 @@ export function Azione({ a, data, partitaId, onCambiata, onSullaMappa, evidenzia
   const [occupato, setOccupato] = useState(false);
   // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
   const [chiediNote, setChiediNote] = useState(false);
-  const chiedeNote = a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente';
   const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false) => {
     if (!partitaId) return;
-    if (fatta && chiedeNote && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
+    if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
     setChiediNote(false);
     setOccupato(true);
     try {
@@ -75,49 +74,22 @@ export function Azione({ a, data, partitaId, onCambiata, onSullaMappa, evidenzia
       if (fatta && agg.effetti) notifica('success', descriviEffetti(agg.effetti));
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
-  const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
     <li className={`azione flex flex-wrap items-start gap-2 py-1.5 ${a.fatta ? 'opacity-60' : ''} ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''}`} aria-current={evidenziata ? 'true' : undefined}>
       {/* idem: il bersaglio è l'etichetta, non il quadratino */}
       {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
-      {a.riferimento?.tipo === 'confidente' ? (
-        <ImmagineEntita ambito="confidente" chiave={a.riferimento.chiave} etichetta={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} adatta="copri" />
-      ) : a.riferimento?.tipo === 'dungeon' ? (
-        <EmblemaDungeon chiave={a.riferimento.chiave} nome={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} />
-      ) : (
-        <IconaCategoria categoria={a.tipo} dimensione={40} />
-      )}
+      <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}</span>
-        <span className="flex flex-wrap items-center gap-1.5">
-          <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
-          {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]">{link.etichetta}</Link> : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
-          {a.mappa && onSullaMappa && (
-            <button type="button" className="chip chip--icona touch text-[11px]" onClick={() => onSullaMappa(a)} aria-label={`Sulla mappa: ${a.azione.slice(0, 60)}`}>
-              <IconaSpillo tipo="passaggio" dimensione={14} />Sulla mappa
-            </button>
-          )}
-          {a.correzione && <span className="chip text-[11px]" title="L'hai corretta tu: vale per tutte le partite. «Ripristina originale» la riporta com'è nella guida.">Corretta</span>}
-          {daRivedere && <span className="chip chip--oro text-[11px]" title="La guida è cambiata a questo posto: riapplica o scarta la tua correzione in «Correzioni da rivedere», in cima al giorno.">Correzione da rivedere</span>}
-          {stato?.tipo === 'consigliata' && <span className="chip chip--oro text-[11px]" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
-          {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata text-[11px]" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
-          {stato?.tipo === 'neutra' && stato.motivo && <span className="text-[12px] text-text-muted">{stato.motivo}</span>}
-          {a.rangoAtteso !== null && <span className="text-[12px] text-text-muted">rango atteso {a.rangoAtteso}</span>}
-          {a.note && <span className="text-[12px] text-text-secondary">{a.note}</span>}
-          {a.fatta && a.effetti && <span className="chip chip--attivo text-[11px]" title="Punti applicati alla spunta: si annullano togliendola">{descriviEffetti(a.effetti)}</span>}
-        </span>
-        {chiediNote && (
-          <span className="flex flex-wrap items-center gap-1.5 text-[12px]" role="group" aria-label="Note ottenute con il Confidente">
-            <span className="text-text-secondary">Quante note hai ottenuto?</span>
-            {([1, 2, 3] as const).map((n) => (
-              <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => void cambia(true, n)} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'♪'.repeat(n)}</button>
-            ))}
-            <button type="button" className="chip touch" disabled={occupato} onClick={() => void cambia(true, undefined, true)}>Nessun punto</button>
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setChiediNote(false)} />
-          </span>
-        )}
+        <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.indice) : undefined} propri={(
+          <>
+            {a.correzione && <span className="chip text-[11px]" title="L'hai corretta tu: vale per tutte le partite. «Ripristina originale» la riporta com'è nella guida.">Corretta</span>}
+            {daRivedere && <span className="chip chip--oro text-[11px]" title="La guida è cambiata a questo posto: riapplica o scarta la tua correzione in «Correzioni da rivedere», in cima al giorno.">Correzione da rivedere</span>}
+          </>
+        )} />
+        {chiediNote && <SceltaNote occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
       </div>
       {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
       {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato || bloccata} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} />}
@@ -131,7 +103,7 @@ interface Props {
   onAggiorna: (a: AzionePercorsoDto) => void;
   /** Dopo una modifica della giornata (correzione, rimozione, voce aggiunta o spuntata): va ricaricata. */
   onGiornataModificata?: () => void | Promise<void>;
-  onSullaMappa?: (a: AzionePercorsoDto) => void;
+  onSullaMappa?: SullaMappa;
   azioneEvidenziata?: number | null;
   /** Nella scheda «Oggi»: intestazione più compatta. */
   compatto?: boolean;
@@ -162,13 +134,14 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     // testo, fascia o presenza di un'azione cambiano cosa il giorno suggerisce
     useSuggerimentiStore.getState().invalida();
   };
-  const esegui = async (op: () => Promise<unknown>, ok: string) => {
+  /** `ok`: il messaggio, oppure una funzione che lo ricava dall'esito (la spunta dice che cosa ha dato). */
+  const esegui = async <T,>(op: () => Promise<T>, ok: string | ((esito: T) => string)) => {
     setOccupato(true);
     try {
-      await op();
+      const esito = await op();
       await aggiornata();
       setMenu(null);
-      notifica('success', ok);
+      notifica('success', typeof ok === 'string' ? ok : ok(esito));
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.');
     } finally {
@@ -189,7 +162,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     if (partitaId && a.fatta && a.effetti) {
       chiedi({
         titolo: 'Rimuovere un\'azione già spuntata?',
-        testo: <>Nella partita questa azione è spuntata e ha dato <strong>{descriviEffetti(a.effetti)}</strong>. Puoi togliere prima la spunta (i punti vengono annullati) oppure rimuoverla lasciando i punti. La rimozione vale per tutte le partite e si può annullare con «Rimetti».</>,
+        testo: <>Nella partita questa azione è spuntata e ha dato <strong>{descriviEffetti(a.effetti)}</strong>. Puoi togliere prima la spunta (Doti, punti e turni vengono annullati; letture e visioni restano) oppure rimuoverla lasciando i punti. La rimozione vale per tutte le partite e si può annullare con «Rimetti».</>,
         scelte: [
           { titolo: 'Togli la spunta e rimuovi', tono: 'primario', icona: 'annulla-ultimo', esegui: async () => { await impostaAzionePercorso(partitaId, g.giorno, a.indice, false); await rimuovi(); }, ok: 'Spunta tolta, punti annullati e azione rimossa dalla giornata.' },
           { titolo: 'Rimuovi lasciando i punti', tono: 'pericolo', icona: 'elimina', esegui: rimuovi, ok: 'Azione rimossa dalla giornata.' },
@@ -207,7 +180,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     if (c.nascosta && partitaId && attuale?.fatta && attuale.effetti) {
       chiedi({
         titolo: 'Riapplicare la rimozione a un\'azione spuntata?',
-        testo: <>La correzione toglie dalla giornata «{attuale.azione}», che nella partita è spuntata e ha dato <strong>{descriviEffetti(attuale.effetti)}</strong>. Puoi togliere prima la spunta (i punti vengono annullati) oppure riapplicarla lasciando i punti.</>,
+        testo: <>La correzione toglie dalla giornata «{attuale.azione}», che nella partita è spuntata e ha dato <strong>{descriviEffetti(attuale.effetti)}</strong>. Puoi togliere prima la spunta (Doti, punti e turni vengono annullati; letture e visioni restano) oppure riapplicarla lasciando i punti.</>,
         scelte: [
           { titolo: 'Togli la spunta e riapplica', tono: 'primario', icona: 'annulla-ultimo', esegui: async () => { await impostaAzionePercorso(partitaId, g.giorno, c.indice, false); await riapplicaLa(); }, ok: 'Spunta tolta, punti annullati e correzione riapplicata.' },
           { titolo: 'Riapplica lasciando i punti', tono: 'pericolo', icona: 'elimina', esegui: riapplicaLa, ok: 'Correzione riapplicata.' },
@@ -229,10 +202,17 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const gestiMia = (a: AzioneUtenteDto): GestoVoce[] => [
     { chiave: 'modifica', titolo: 'Modifica', icona: <IconaAzione chiave="modifica" dimensione={20} />, onClick: () => apri({ tipo: 'mia', azione: a }) },
     { chiave: 'sposta', titolo: `Sposta ${nomeFascia(altraFascia(a.fascia))}`, icona: <IconaFascia fascia={altraFascia(a.fascia)} />, onClick: () => void esegui(() => aggiornaAzioneAgenda(a.id, { fascia: altraFascia(a.fascia) }), `Spostata ${nomeFascia(altraFascia(a.fascia))}.`) },
-    { chiave: 'elimina', titolo: 'Elimina', tono: 'pericolo', icona: <IconaAzione chiave="elimina" dimensione={20} />, onClick: () => chiedi({
-      titolo: 'Eliminare la cosa da fare?', testo: <>«{a.azione}» viene cancellata{a.partitaId === null ? ' da tutte le partite' : ''}: non si può recuperare.</>,
-      scelte: [{ titolo: 'Elimina', tono: 'pericolo', icona: 'elimina', esegui: () => eliminaAzioneAgenda(a.id), ok: 'Cosa da fare eliminata.' }],
-    }) },
+    { chiave: 'elimina', titolo: 'Elimina', tono: 'pericolo', icona: <IconaAzione chiave="elimina" dimensione={20} />, onClick: () => chiedi(
+      // spuntata con effetti: prima si toglie la spunta (i punti tornano indietro), altrimenti resterebbero senza la riga che li spiega
+      partitaId && a.fatta && a.effetti ? {
+        titolo: 'Eliminare una cosa da fare già spuntata?',
+        testo: <>Nella partita «{a.azione}» è spuntata e ha dato <strong>{descriviEffetti(a.effetti)}</strong>. Eliminandola si toglie prima la spunta (Doti, punti e turni vengono annullati; letture e visioni restano); poi viene cancellata{a.partitaId === null ? ' da tutte le partite' : ''} e non si può recuperare.</>,
+        scelte: [{ titolo: 'Togli la spunta ed elimina', tono: 'pericolo', icona: 'elimina', esegui: async () => { await impostaAzioneAgendaFatta(a.id, partitaId, false); await eliminaAzioneAgenda(a.id); }, ok: 'Spunta tolta, punti annullati e cosa da fare eliminata.' }],
+      } : {
+        titolo: 'Eliminare la cosa da fare?', testo: <>«{a.azione}» viene cancellata{a.partitaId === null ? ' da tutte le partite' : ''}: non si può recuperare.</>,
+        scelte: [{ titolo: 'Elimina', tono: 'pericolo', icona: 'elimina', esegui: () => eliminaAzioneAgenda(a.id), ok: 'Cosa da fare eliminata.' }],
+      },
+    ) },
   ];
   const gestiEvento = (e: EventoUtenteDto): GestoVoce[] => [
     { chiave: 'modifica', titolo: 'Modifica', icona: <IconaAzione chiave="modifica" dimensione={20} />, onClick: () => apri({ tipo: 'evento', evento: e }) },
@@ -243,9 +223,9 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     }) },
   ];
 
-  const spuntaMia = (a: AzioneUtenteDto, fatta: boolean) => {
+  const spuntaMia = (a: AzioneUtenteDto, fatta: boolean, noteRisposta?: 1 | 2 | 3) => {
     if (!partitaId) return;
-    void esegui(() => impostaAzioneAgendaFatta(a.id, partitaId, fatta), fatta ? 'Segnata come fatta.' : 'Riaperta.');
+    void esegui(() => impostaAzioneAgendaFatta(a.id, partitaId, fatta, noteRisposta), (agg) => (fatta && agg.effetti ? descriviEffetti(agg.effetti) : fatta ? 'Segnata come fatta.' : 'Riaperta.'));
   };
 
   const perFascia = (f: FasciaGioco) => ({
@@ -278,7 +258,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
               {v.guida.map((a) => <Azione key={`g${a.indice}`} a={a} data={g.giorno} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === a.indice}
                 // una correzione superata a questo posto si rivede prima (Riapplica o Scarta): i gesti la sovrascriverebbero in silenzio
                 gesti={daRivedere.has(a.indice) ? undefined : gestiGuida(a)} daRivedere={daRivedere.has(a.indice)} bloccata={occupato} {...menuDi(`g${a.indice}`)} />)}
-              {v.mie.map((a) => <VoceMia key={`m${a.id}`} a={a} partitaId={partitaId} onSpunta={(fatta) => spuntaMia(a, fatta)} gesti={gestiMia(a)} occupato={occupato} {...menuDi(`m${a.id}`)} />)}
+              {v.mie.map((a) => <VoceMia key={`m${a.id}`} a={a} partitaId={partitaId} onSpunta={(fatta, note) => spuntaMia(a, fatta, note)} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, null) : undefined} gesti={gestiMia(a)} occupato={occupato} {...menuDi(`m${a.id}`)} />)}
             </ul>
           )}
         {v.rimosse.length > 0 && (

@@ -19,8 +19,8 @@ const base: FilmDto = {
 };
 const cinema: FilmDto = { ...base, chiave: 'cinema-prova', nome: 'Film di prova', dove: 'cinema', totaleSessioni: 1, posizioni: [{ tipo: 'quartiere', chiave: 'shibuya', etichetta: 'Cinema di Shibuya', ruolo: 'cinema' }],
   condizioni: [{ tipo: 'data', testo: 'dal 24 aprile' } as unknown as NonNullable<FilmDto['condizioni']>[number]],
-  effetti: [{ effetto: { famiglia: 'dote', dote: 'coraggio', note: 3 }, testo: 'Coraggio ♪♪♪' }, { effetto: { famiglia: 'dote', dote: 'coraggio', note: 1 }, ripetuto: true, testo: 'Coraggio ♪, anche alle volte successive' }],
-  effettiTesto: ['Coraggio ♪♪♪', 'Coraggio ♪, anche alle volte successive'] };
+  effetti: [{ effetto: { famiglia: 'dote', dote: 'coraggio', note: 3 }, testo: 'Coraggio ♪♪♪' }, { effetto: { famiglia: 'dote', dote: 'coraggio', note: 1 }, ripetuto: true, testo: 'Coraggio ♪, dalla seconda volta in poi' }],
+  effettiTesto: ['Coraggio ♪♪♪', 'Coraggio ♪, dalla seconda volta in poi'] };
 const dto = (...film: FilmDto[]): FilmDvdDto => ({ film, iniziati: film.filter((f) => f.iniziato).length, completati: film.filter((f) => f.fatto).length, sessioniCompletamentoFatte: film.reduce((n, f) => n + Math.min(f.progresso, f.totaleSessioni), 0), sessioniObiettivo: film.reduce((n, f) => n + f.totaleSessioni, 0), visioniRegistrate: film.reduce((n, f) => n + f.progresso, 0) });
 
 describe('FilmPage', () => {
@@ -52,7 +52,7 @@ describe('FilmPage', () => {
     render(<MemoryRouter><FilmPage /></MemoryRouter>);
     await screen.findByText('Film di prova');
     expect(screen.getByText('Cinema · dal 24 aprile')).toBeInTheDocument();
-    expect(screen.getByText('Coraggio ♪, anche alle volte successive')).toBeInTheDocument();
+    expect(screen.getByText('Coraggio ♪, dalla seconda volta in poi')).toBeInTheDocument();
     expect(screen.queryByText('Iniziale')).toBeNull();
     expect(screen.queryByText('fonte')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una visione a Film di prova' }));

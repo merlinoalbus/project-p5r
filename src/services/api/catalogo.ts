@@ -2,7 +2,8 @@
 // API catalogo e agenda — righe aggiunte o corrette dall'utente, eventi e cose da fare del giorno (Fase 16.1)
 // ============================================================
 
-import type { AzioneUtenteDto, ElementoCatalogoDto, EventoUtenteDto, OggettoSelezionabileDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
+import type { AzionePercorsoDto, AzioneUtenteDto, ElementoCatalogoDto, EventoUtenteDto, OggettoSelezionabileDto, RiepilogoCatalogoDto, RiferimentoAzioneDto, TipoCatalogo } from '../../types';
+import type { EffettoAzione } from '../../../shared/effettiAzione';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
@@ -55,8 +56,11 @@ export interface DatiEventoApi {
   riferimento?: { tipo: string; chiave: string } | null; partitaId?: number | null; ordine?: number;
 }
 export interface DatiAzioneApi {
-  data: string; fascia?: 'giorno' | 'sera'; tipo?: string; azione: string;
-  riferimento?: { tipo: string; chiave: string } | null; rangoAtteso?: number | null; note?: string | null; partitaId?: number | null; ordine?: number;
+  data: string; fascia?: 'giorno' | 'sera'; tipo?: AzionePercorsoDto['tipo']; azione: string;
+  riferimento?: { tipo: RiferimentoAzioneDto['tipo']; chiave: string } | null; rangoAtteso?: number | null; note?: string | null;
+  /** Effetti della spunta, come per le azioni della guida. */
+  produce?: EffettoAzione[];
+  partitaId?: number | null; ordine?: number;
 }
 
 export const creaEventoAgenda = (dati: DatiEventoApi): Promise<EventoUtenteDto> => apiPost('/catalogo/agenda/eventi', dati);
@@ -66,6 +70,6 @@ export const eliminaEventoAgenda = (id: number): Promise<void> => apiDelete(`/ca
 export const creaAzioneAgenda = (dati: DatiAzioneApi): Promise<AzioneUtenteDto> => apiPost('/catalogo/agenda/azioni', dati);
 export const aggiornaAzioneAgenda = (id: number, dati: Partial<DatiAzioneApi>): Promise<AzioneUtenteDto> => apiPut(`/catalogo/agenda/azioni/${id}`, dati);
 export const eliminaAzioneAgenda = (id: number): Promise<void> => apiDelete(`/catalogo/agenda/azioni/${id}`);
-/** Spunta una cosa da fare nella partita. */
-export const impostaAzioneAgendaFatta = (id: number, partita: number, fatta: boolean): Promise<AzioneUtenteDto> =>
-  apiPut(`/catalogo/agenda/azioni/${id}/fatta`, { partita, fatta });
+/** Spunta una cosa da fare nella partita: applica i suoi effetti (con le note ottenute, se è un incontro con un Confidente). */
+export const impostaAzioneAgendaFatta = (id: number, partita: number, fatta: boolean, noteRisposta?: 1 | 2 | 3): Promise<AzioneUtenteDto> =>
+  apiPut(`/catalogo/agenda/azioni/${id}/fatta`, { partita, fatta, ...(noteRisposta ? { noteRisposta } : {}) });

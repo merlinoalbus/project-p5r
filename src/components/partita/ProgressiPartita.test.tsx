@@ -22,7 +22,10 @@ const dati: ProgressiPartitaDto = {
     { chiave: 'evento-futaba', nome: 'Evento con Futaba (entra in squadra)', origine: 'calcolato', avvenuto: false, membro: 'futaba', membroNome: 'Futaba Sakura' },
     { chiave: 'evento-haru', nome: 'Evento con Haru (entra in squadra)', origine: 'calcolato', avvenuto: null, membro: 'haru', membroNome: 'Haru Okumura' },
   ],
-  attivita: [{ chiave: 'biliardo', nome: 'Biliardo', tipo: 'mini-gioco', volte: 1 }],
+  attivita: [
+    { chiave: 'biliardo', nome: 'Biliardo', tipo: 'mini-gioco', volte: 1, effettiTurno: [] },
+    { chiave: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', tipo: 'lavoro', volte: 0, effettiTurno: ['1° turno: Gentilezza, 2 note', 'Dal 2° turno: Gentilezza, 2 note'] },
+  ],
   puntiNegozio: [{ negozio: 'vestiti-usati-kichijoji', nome: 'Vestiti usati', programma: 'Punti del negozio', unita: 'punti', punti: 20 }],
   rangoCliente: [{ negozio: 'tanaka-affari-loschi', nome: 'Affari loschi di Tanaka', programma: 'Grado cliente', spesa: 12000, rango: { chiave: 'nero', nome: 'Nero' }, prossimo: { chiave: 'oscuro', nome: 'Oscuro', spesa: 50000 } }],
   contatori: [{ chiave: 'libri-letti', nome: 'Libri letti', valore: 3 }],
@@ -61,4 +64,15 @@ it('separa i calcolati (sola lettura, tre stati) da quel che si segna a mano', a
   impostaPuntiNegozio.mockResolvedValue(dati);
   fireEvent.click(screen.getByRole('button', { name: 'Vestiti usati: dieci punti in più' }));
   expect(impostaPuntiNegozio).toHaveBeenCalledWith(1, 'vestiti-usati-kichijoji', 30);
+});
+
+it('un lavoro dice che cosa dà ogni turno, e il + avvisa dei punti dati', async () => {
+  const { notifica } = await import('../../stores/notificationStore');
+  render(<MemoryRouter><ProgressiPartita partitaId={1} /></MemoryRouter>);
+  const attivita = await screen.findByRole('region', { name: 'Attività svolte' });
+  expect(within(attivita).getByText('1° turno: Gentilezza, 2 note · Dal 2° turno: Gentilezza, 2 note')).toBeInTheDocument();
+  impostaAttivitaSvolta.mockResolvedValue({ ...dati, cambioDoti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3 }] });
+  await act(async () => { fireEvent.click(within(attivita).getByRole('button', { name: 'Fioraio Rafflesia: una volta in più' })); });
+  expect(impostaAttivitaSvolta).toHaveBeenCalledWith(1, 'lavoro-rafflesia', 1);
+  expect(notifica).toHaveBeenCalledWith('success', 'Gentilezza +3');
 });

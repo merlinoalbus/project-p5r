@@ -5,8 +5,8 @@
 // Libri, film e attività portavano l'effetto spezzato in colonne di forme diverse: `dote` + `note`,
 // `note_successive`, `doti_json[].condizione` con la spiegazione in prosa, `effetto_json` singolo.
 // Da qui in poi ogni riga ha `effetti_json`: un elenco di voci, ciascuna con un effetto dichiarato
-// (`shared/effettiOggetto.ts`), se vale anche alle visioni successive (`ripetuto`, i film al
-// cinema) e le condizioni sotto cui scatta (`condizioni`, per esempio «piove» per lo studio al
+// (`shared/effettiOggetto.ts`), se vale dalla seconda volta in poi e non alla prima (`ripetuto`, i
+// film al cinema e i turni) e le condizioni sotto cui scatta (`condizioni`, per esempio «piove» per lo studio al
 // Leblanc). I punti Dote di un conseguimento si calcolano da qui (`dotiDaEffetti`).
 // ============================================================
 
@@ -15,7 +15,8 @@ import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizion
 
 export interface VoceEffetto {
   effetto: EffettoOggetto;
-  /** Vale anche ai conseguimenti successivi al primo (le visioni ripetute di un film al cinema). */
+  /** Vale dal secondo conseguimento in poi, e non al primo (le visioni ripetute di un film al cinema, i turni dopo il primo);
+   *  una voce senza vale solo al primo (`dotiDaEffetti`). */
   ripetuto?: boolean;
   /** Scatta solo quando queste condizioni sono vere (vuoto = sempre). */
   condizioni?: RequisitoSpillo[];
@@ -55,10 +56,11 @@ export function dotiDaEffetti(voci: VoceEffetto[], opz: { successiva?: boolean }
     .map((v) => ({ dote: (v.effetto as { dote: string }).dote, note: (v.effetto as { note: number }).note, condizioni: v.condizioni ?? [] }));
 }
 
-/** La frase di una voce: l'effetto, poi «anche alle visioni successive» e le condizioni. */
+/** La frase di una voce: l'effetto, poi «dalla seconda volta in poi» se è `ripetuto`, e le condizioni. */
 export function descriviVoceEffetto(v: VoceEffetto, nomi: NomiEffetto & { condizioni?: NomiCondizioni } = {}): string {
   let testo = descriviEffetto(v.effetto, nomi);
-  if (v.ripetuto) testo += ', anche alle volte successive';
+  // `dotiDaEffetti`: una voce «ripetuto» vale dalla seconda volta in poi, una senza solo alla prima
+  if (v.ripetuto) testo += ', dalla seconda volta in poi';
   if (v.condizioni?.length) testo += ` (${v.condizioni.map((c) => descriviRequisitoSpillo(c, nomi.condizioni ?? {})).join('; ')})`;
   return testo;
 }

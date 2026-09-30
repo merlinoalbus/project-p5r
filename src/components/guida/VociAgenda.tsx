@@ -6,8 +6,11 @@
 // («La mia», «Evento», «Scadenza», «Promemoria»). Le voci senza partita valgono per tutte le partite e lo dichiarano.
 // ============================================================
 
+import { useState } from 'react';
 import { IconaCategoria } from './IconaCategoria';
 import { GestiVoce, PulsanteMenuVoce, type GestoVoce } from './MenuVoce';
+import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
+import { chiedeNote } from '../../utils/azioneStrutturata';
 import { NOME_TIPO_EVENTO } from '../../utils/percorso';
 import type { AzioneUtenteDto, EventoUtenteDto } from '../../types';
 
@@ -21,20 +24,33 @@ interface PropsMenu {
   occupato: boolean;
 }
 
-/** Cosa da fare dell'utente: spunta per partita, testo, note, menu dei gesti. */
-export function VoceMia({ a, partitaId, onSpunta, menuAperto, onMenu, gesti, occupato }: PropsMenu & { a: AzioneUtenteDto; partitaId: number | null; onSpunta: (fatta: boolean) => void }) {
+/** Cosa da fare dell'utente: come un'azione della guida (tipo, collegamento, stato, effetti della spunta, note del Confidente),
+ *  con il cartellino «La mia» e il menu dei gesti. */
+export function VoceMia({ a, partitaId, onSpunta, onSullaMappa, menuAperto, onMenu, gesti, occupato }: PropsMenu & {
+  a: AzioneUtenteDto; partitaId: number | null; onSpunta: (fatta: boolean, noteRisposta?: 1 | 2 | 3) => void; onSullaMappa?: () => void;
+}) {
+  // incontro con un Confidente: alla spunta si chiedono le note ottenute, come per le azioni della guida
+  const [chiediNoteOra, setChiediNoteOra] = useState(false);
+  const spunta = (fatta: boolean) => {
+    if (fatta && chiedeNote(a)) { setChiediNoteOra(true); return; }
+    onSpunta(fatta);
+  };
+  const stato = a.fatta ? null : a.stato;
+  const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
-    <li className={`azione flex flex-wrap items-start gap-2 py-1.5 ${a.fatta ? 'opacity-60' : ''}`}>
+    <li className={`azione flex flex-wrap items-start gap-2 py-1.5 ${a.fatta ? 'opacity-60' : ''} ${classeStato}`}>
       {/* la casella da sola è 20 px: l'etichetta attorno la rende toccabile per 44 senza cambiarne l'aspetto */}
-      {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato} onChange={(e) => onSpunta(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
-      <IconaCategoria categoria={a.tipo} dimensione={40} />
+      {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato} onChange={(e) => spunta(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
+      <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}</span>
-        <span className="flex flex-wrap items-center gap-1.5">
-          <span className="chip chip--attivo text-[11px]">La mia</span>
-          {a.note && <span className="text-[12px] text-text-secondary">{a.note}</span>}
-          {a.partitaId === null && <span className="text-[11px] text-text-muted">tutte le partite</span>}
-        </span>
+        <CartelliniAzione a={a} onSullaMappa={onSullaMappa} propri={(
+          <>
+            <span className="chip chip--attivo text-[11px]">La mia</span>
+            {a.partitaId === null && <span className="text-[11px] text-text-muted">tutte le partite</span>}
+          </>
+        )} />
+        {chiediNoteOra && <SceltaNote occupato={occupato} onScegli={(n) => { setChiediNoteOra(false); onSpunta(true, n ?? undefined); }} onAnnulla={() => setChiediNoteOra(false)} />}
       </div>
       <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato} uscita="elimina" />
       {menuAperto && <GestiVoce gesti={gesti} disabled={occupato} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} />}

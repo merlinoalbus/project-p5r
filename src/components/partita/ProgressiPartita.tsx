@@ -38,7 +38,12 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
 
   const salva = (chiave: string, azione: () => Promise<Progressi>) => {
     setOccupato(chiave);
-    return azione().then((nuovo) => { setStato(nuovo); useSuggerimentiStore.getState().invalida(); }).catch((e) => notifica('error', messaggio(e))).finally(() => setOccupato(null));
+    return azione().then((nuovo) => {
+      setStato(nuovo);
+      useSuggerimentiStore.getState().invalida();
+      // un turno aggiunto o tolto dà o restituisce i suoi punti: si dice quali
+      if (nuovo.cambioDoti?.length) notifica('success', nuovo.cambioDoti.map((d) => `${d.nome} ${d.delta > 0 ? '+' : ''}${d.delta}`).join(' · '));
+    }).catch((e) => notifica('error', messaggio(e))).finally(() => setOccupato(null));
   };
   const calcolati = p?.eventi.filter((e) => e.origine === 'calcolato') ?? [];
   const manuali = p?.eventi.filter((e) => e.origine === 'manuale') ?? [];
@@ -117,13 +122,14 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
 
               <section className="card flex flex-col gap-2" aria-labelledby="progressi-attivita">
                 <h3 id="progressi-attivita" className="m-0 text-[15px]">Attività svolte</h3>
-                <p className="m-0 text-[12px] text-text-muted">Quante volte l’hai fatta: le condizioni «svolta almeno n volte» leggono da qui. I videogiochi si contano per round in Letture e giochi.</p>
+                <p className="m-0 text-[12px] text-text-muted">Quante volte l’hai fatta: le condizioni «svolta almeno n volte» leggono da qui, e ogni turno dà i suoi punti (togliendolo tornano indietro); spuntare un turno nella giornata della guida lo conta qui. I videogiochi si contano per round in Letture e giochi.</p>
                 <ul className="m-0 p-0 list-none flex flex-col gap-1">
                   {p.attivita.map((a) => (
                     <li key={a.chiave} className="progressi-partita__riga">
                       <span className="min-w-0 flex-1">
                         <span className="block">{a.nome}</span>
                         <span className="block text-[11px] text-text-muted">{(NOME_TIPO_ATTIVITA as Record<string, string>)[a.tipo] ?? a.tipo}</span>
+                        {a.effettiTurno?.length > 0 && <span className="block text-[11px] text-text-secondary">{a.effettiTurno.join(' · ')}</span>}
                       </span>
                       <span className="condizione-numero" role="group" aria-label={`Volte: ${a.nome}`}>
                         <button type="button" className="touch" aria-label={`${a.nome}: una volta in meno`} disabled={occupato === a.chiave || a.volte <= 0} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte - 1))}><IconaAzione chiave="meno" dimensione={16} /></button>

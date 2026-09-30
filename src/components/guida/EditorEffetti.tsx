@@ -3,8 +3,8 @@
 // ============================================================
 //
 // Ogni voce è un effetto dichiarato (`EditorEffetto`), con due cose in più che le letture hanno e
-// gli articoli no: «vale anche alle volte successive» (i film al cinema, dove la guida dichiara
-// quanto rende rivederli) e le condizioni sotto cui la voce scatta (lo studio al Leblanc: 2 note,
+// gli articoli no: «vale dalla seconda volta in poi» (i film al cinema, dove la guida dichiara
+// quanto rende rivederli, e i turni delle attività contate per volte; una voce senza vale solo alla prima) e le condizioni sotto cui la voce scatta (lo studio al Leblanc: 2 note,
 // 3 con la pioggia). È il campo che la partita usa: i punti Dote di un conseguimento vengono da qui.
 // ============================================================
 
@@ -20,7 +20,7 @@ import { descriviVoceEffetto } from '../../../shared/effettiCatalogo';
 interface Props extends NomiPerEffetti {
   voci: VoceEffetto[];
   onCambia: (v: VoceEffetto[]) => void;
-  /** Offre «vale anche alle volte successive»: solo dove rivedere conta (i film al cinema). */
+  /** Offre «vale dalla seconda volta in poi»: solo dove si ripete (i film al cinema, le attività contate per volte). */
   conRipetuto?: boolean;
   disabilitato?: boolean;
   aiuto?: string;
@@ -40,7 +40,7 @@ function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quar
         {conRipetuto && (
           <label className="flex items-center gap-2 text-[13px] touch">
             <input type="checkbox" className="w-5 h-5" checked={voce.ripetuto === true} disabled={disabilitato} onChange={(e) => onCambia({ ...voce, ripetuto: e.target.checked || undefined })} />
-            Vale anche alle volte successive
+            Vale dalla seconda volta in poi
           </label>
         )}
         <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato} aria-expanded={condizioniAperte} onClick={() => setCondizioniAperte((a) => !a)}>

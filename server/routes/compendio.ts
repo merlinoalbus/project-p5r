@@ -15,16 +15,18 @@ import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuart
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
-import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
+import { conTesti, giornoPercorso, indicePercorso } from '../services/percorsoService.js';
+import { elenchiAzione, nomiEffetti } from '../services/azioniStrutturateService.js';
 import { correggiAzioneGuida, riapplicaCorrezioneGuida, rimuoviAzioneGuida, ripristinaAzioneGuida } from '../services/correzioniGuidaService.js';
 import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/richiesteService.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { CorrezioneAzioneGuida, OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
-import { bodyCorreggiAzioneGuida, bodyRimuoviAzioneGuida, paramsAzioneGuida, paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import { bodyCorreggiAzioneGuida, bodyDotiIncontro, bodyRimuoviAzioneGuida, paramsAzioneGuida, paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import type { DoteNote } from '../../shared/effettiAzione.js';
 import {
-  dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
+  dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, impostaDotiIncontro, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
 
 const queryDomande = z.object({ partita: z.coerce.number().int().positive().optional() });
@@ -122,16 +124,21 @@ router.get('/percorso', validate({ query: queryDomande }), (req, res) => {
 router.get('/percorso/:data', validate({ params: z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) }), query: queryDomande }), (req, res) => {
   res.json(giornoPercorso(String(req.params.data), (req.query as unknown as { partita?: number }).partita));
 });
-// Correzioni dell'utente alle azioni della guida: testo, note, fascia, rimozione. Valgono per tutte le partite.
+/** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
+router.get('/percorso-elenchi', (_req, res) => {
+  res.json(elenchiAzione());
+});
+// Correzioni dell'utente alle azioni della guida: testo, note, fascia, tipo, collegamento, rango atteso, effetti, rimozione.
+// Valgono per tutte le partite; la risposta porta anche gli effetti in parole.
 router.put('/percorso/:data/azioni/:indice', validate({ params: paramsAzioneGuida, body: bodyCorreggiAzioneGuida }), (req, res) => {
-  res.json(correggiAzioneGuida(String(req.params.data), Number(req.params.indice), req.body as CorrezioneAzioneGuida));
+  res.json(conTesti(correggiAzioneGuida(String(req.params.data), Number(req.params.indice), req.body as CorrezioneAzioneGuida), nomiEffetti()));
 });
 router.put('/percorso/:data/azioni/:indice/rimossa', validate({ params: paramsAzioneGuida, body: bodyRimuoviAzioneGuida }), (req, res) => {
-  res.json(rimuoviAzioneGuida(String(req.params.data), Number(req.params.indice), (req.body as { rimossa: boolean }).rimossa));
+  res.json(conTesti(rimuoviAzioneGuida(String(req.params.data), Number(req.params.indice), (req.body as { rimossa: boolean }).rimossa), nomiEffetti()));
 });
 /** Correzione superata da un pacchetto nuovo: la si riapplica all'azione che oggi sta a quel posto. */
 router.put('/percorso/:data/azioni/:indice/riapplica', validate({ params: paramsAzioneGuida }), (req, res) => {
-  res.json(riapplicaCorrezioneGuida(String(req.params.data), Number(req.params.indice)));
+  res.json(conTesti(riapplicaCorrezioneGuida(String(req.params.data), Number(req.params.indice)), nomiEffetti()));
 });
 /** Riporta l'azione com'è nella guida (toglie correzione e rimozione). */
 router.delete('/percorso/:data/azioni/:indice/correzione', validate({ params: paramsAzioneGuida }), (req, res) => {
@@ -223,6 +230,10 @@ router.get('/domande', validate({ query: queryDomande }), (req, res) => {
 });
 router.get('/confidenti/:chiave', (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
+});
+/** La Dote a ogni incontro, rango per rango (dato di gioco, come gli effetti di libri e attività). */
+router.put('/confidenti/:chiave/doti-incontro', validate({ body: bodyDotiIncontro }), (req, res) => {
+  res.json(impostaDotiIncontro(String(req.params.chiave), (req.body as { ranghi: Array<{ rango: number; doti: DoteNote[] }> }).ranghi));
 });
 
 export default router;

@@ -6,6 +6,8 @@ import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
 import { corrispondeRicerca } from '../../shared/testo.js';
+import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
+import { descriviEffettoAzione, type DoteNote } from '../../shared/effettiAzione.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -271,6 +273,30 @@ export function elencaOggetti(f: { q?: string; categoria?: string } = {}): Ogget
   return q ? dto.filter((o) => corrispondeRicerca(q, o.nome, o.nomeIt)) : dto;
 }
 
+/** La Dote che il Confidente dà a ogni incontro verso ciascun rango da 1 a 10 (`confidente_dote_incontro`, migrazione 088). */
+function dotiIncontro(chiave: string): ConfidenteDettaglioDto['dotiIncontro'] {
+  const righe = new Map((prepared('SELECT verso_rango, effetti_json FROM confidente_dote_incontro WHERE confidente_chiave = ?').all(chiave) as Array<{ verso_rango: number; effetti_json: string | null }>)
+    .map((r) => [r.verso_rango, r.effetti_json]));
+  return Array.from({ length: 10 }, (_, i) => i + 1).map((rango) => {
+    const doti = leggiVociEffetto(righe.get(rango) ?? null).filter((v) => v.effetto.famiglia === 'dote')
+      .map((v) => ({ dote: (v.effetto as { dote: string }).dote as DoteNote['dote'], note: Math.min(3, Math.max(1, (v.effetto as { note: number }).note)) as 1 | 2 | 3 }));
+    return { rango, doti, testo: doti.map((d) => descriviEffettoAzione({ tipo: 'dote', ...d })).join(' · ') };
+  });
+}
+
+/** Cambia la Dote a ogni incontro dei ranghi indicati (gli altri restano): voci «dote» al posto di quelle che il rango aveva. */
+export function impostaDotiIncontro(chiave: string, ranghi: Array<{ rango: number; doti: DoteNote[] }>): ConfidenteDettaglioDto {
+  if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
+  getDb().transaction(() => {
+    for (const r of ranghi) {
+      const voci = JSON.stringify(r.doti.map((d) => ({ effetto: { famiglia: 'dote', dote: d.dote, note: d.note } })));
+      prepared('INSERT INTO confidente_dote_incontro (confidente_chiave, verso_rango, effetti_json) VALUES (?, ?, ?) ON CONFLICT(confidente_chiave, verso_rango) DO UPDATE SET effetti_json = excluded.effetti_json')
+        .run(chiave, r.rango, voci);
+    }
+  })();
+  return dettaglioConfidente(chiave);
+}
+
 /** Scheda completa di un Confidente: abilità, dialoghi, regali, disponibilità (dal seed allgamestaff). */
 export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const c = prepared('SELECT chiave, nome, arcana, ordine FROM confidente WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; arcana: string; ordine: number } | undefined;
@@ -281,7 +307,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const regali = prepared('SELECT nome, dove, costo, effetto, sconsigliato FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ nome: string; dove: string | null; costo: string | null; effetto: string | null; sconsigliato: number }>;
   const disp = prepared('SELECT * FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { giorni_json: string; fasce_json: string; luogo: string; sblocco_data: string; sblocco_requisiti: string; note: string; note_generali: string; fonti_json: string } | undefined;
   return {
-    ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi,
+    ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi, dotiIncontro: dotiIncontro(chiave),
     regali: regali.filter((g) => g.sconsigliato === 0).map(({ nome, dove, costo, effetto }) => ({ nome, dove, costo, effetto })),
     regaliSconsigliati: regali.filter((g) => g.sconsigliato === 1).map((g) => g.nome),
     disponibilita: disp ? { giorni: JSON.parse(disp.giorni_json) as string[], fasce: JSON.parse(disp.fasce_json) as string[], luogo: disp.luogo, sbloccoData: disp.sblocco_data, sbloccoRequisiti: disp.sblocco_requisiti, note: disp.note } : { giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '' },

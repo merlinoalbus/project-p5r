@@ -21,6 +21,8 @@ import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { leggiProgrammaPunti } from '../services/negoziService.js';
+import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaService.js';
+import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { httpErrors } from '../utils/httpError.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento } from '../../shared/condizioniSpillo.js';
 import type { ProgressiPartitaDto } from '../../shared/types.js';
@@ -37,7 +39,10 @@ function negoziConProgramma() {
 }
 /** Le attività che si contano per volte svolte: le sole che una condizione «svolta almeno n volte» può leggere. */
 function attivitaConteggiabili() {
-  return prepared("SELECT chiave, nome, tipo FROM attivita WHERE nascosto = 0 AND tracciamento = 'svolta' ORDER BY nome").all() as Array<{ chiave: string; nome: string; tipo: string }>;
+  // contata per volte come la intendono i turni (`attivitaConTurni`): un valore fuori catalogo vale quello del tipo
+  return (prepared('SELECT chiave, nome, tipo, tracciamento, effetti_json FROM attivita WHERE nascosto = 0 ORDER BY nome').all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string; effetti_json: string | null }>)
+    .filter((a) => (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta')
+    .map(({ effetti_json, tracciamento: _t, ...a }) => ({ ...a, effettiTurno: effettiDelTurno({ effetti_json }) }));
 }
 
 router.get('/elenchi', (_req, res) => {
@@ -104,14 +109,10 @@ router.put('/partite/:partita/eventi/:chiave', validate({ params: z.object({ par
 
 router.put('/partite/:partita/attivita/:chiave', validate({ params: z.object({ partita: idPartita, chiave }), body: z.object({ volte: z.number().int().min(0).max(999) }) }), (req, res) => {
   const id = Number(req.params.partita); verificaPartita(id);
-  const attivita = String(req.params.chiave);
-  const riga = prepared('SELECT tracciamento FROM attivita WHERE chiave = ?').get(attivita) as { tracciamento: string } | undefined;
-  if (!riga) throw httpErrors.notFound('attivita-non-trovata', 'Attività non trovata.');
-  if (riga.tracciamento !== 'svolta') throw httpErrors.badRequest('attivita-non-conteggiabile', 'Questa attività non si conta per volte svolte.');
+  // ogni turno aggiunto o tolto dal contatore dà o restituisce i suoi punti, come dalla spunta della giornata
   const { volte } = req.body as { volte: number };
-  prepared('INSERT INTO attivita_svolta_partita (partita_id, attivita_chiave, volte, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, attivita_chiave) DO UPDATE SET volte = excluded.volte, updated_at = excluded.updated_at').run(id, attivita, volte, nowIso());
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), id);
-  res.json(progressi(id));
+  const cambioDoti = impostaVolteAttivita(id, String(req.params.chiave), volte);
+  res.json({ ...progressi(id), cambioDoti });
 });
 
 router.put('/partite/:partita/punti-negozio/:chiave', validate({ params: z.object({ partita: idPartita, chiave }), body: z.object({ punti: z.number().int().min(0).max(999999) }) }), (req, res) => {

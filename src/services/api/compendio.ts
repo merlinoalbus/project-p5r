@@ -5,7 +5,8 @@
 import type {
   ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
-import type { AzionePercorsoDto, CorrezioneAzioneGuida, VideogiochiDto } from '../../types';
+import type { AzionePercorsoDto, CorrezioneAzioneGuida, ElenchiAzioneDto, VideogiochiDto } from '../../types';
+import type { DoteNote } from '../../../shared/effettiAzione';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
 export interface FiltriPersona {
@@ -41,7 +42,9 @@ export const getCompletamento = (partita?: number): Promise<CompletamentoDto> =>
 export const getPercorsoIndice = (partita?: number): Promise<PercorsoIndiceDto> => apiGet(`/compendio/percorso${queryString({ partita })}`);
 /** Scheda di un giorno del percorso. */
 export const getPercorsoGiorno = (data: string, partita?: number): Promise<PercorsoGiornoDto> => apiGet(`/compendio/percorso/${data}${queryString({ partita })}`);
-/** Corregge testo, note o fascia di un'azione della guida (vale per tutte le partite). */
+/** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
+export const getElenchiAzione = (): Promise<ElenchiAzioneDto> => apiGet('/compendio/percorso-elenchi');
+/** Corregge un'azione della guida — testo, note, fascia, tipo, collegamento, rango atteso, effetti — per tutte le partite. */
 export const correggiAzioneGuida = (data: string, indice: number, correzione: CorrezioneAzioneGuida): Promise<AzionePercorsoDto> =>
   apiPut(`/compendio/percorso/${data}/azioni/${indice}`, correzione);
 /** Rimuove dalla giornata (o rimette) un'azione della guida, per tutte le partite. */
@@ -99,6 +102,9 @@ export const getCalendario = (partita?: number, mese?: string): Promise<Calendar
 /** Domande in classe ed esami (con stato «fatta» e prossime se c'è la partita). */
 export const getDomande = (partita?: number): Promise<DomandeDto> => apiGet(`/compendio/domande${queryString({ partita })}`);
 export const getConfidenteDettaglio = (chiave: string): Promise<ConfidenteDettaglioDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}`);
+/** La Dote a ogni incontro dei ranghi indicati (gli altri restano); risponde con la scheda aggiornata. */
+export const impostaDotiIncontro = (chiave: string, ranghi: Array<{ rango: number; doti: DoteNote[] }>): Promise<ConfidenteDettaglioDto> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/doti-incontro`, { ranghi });
 export const getConfidenti = (): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
 /** Tutti i luoghi della città, come voci da scegliere (la sede di un negozio o di un'attività). */
 export const getLuoghi = (): Promise<LuogoOpzioneDto[]> => apiGet('/compendio/luoghi');

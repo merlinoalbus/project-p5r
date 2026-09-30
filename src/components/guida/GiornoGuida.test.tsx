@@ -8,20 +8,31 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { MemoryRouter } from 'react-router-dom';
 import { useState } from 'react';
 import { GiornoGuida } from './GiornoGuida';
-import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
+import type { AzionePercorsoDto, AzioneUtenteDto, PercorsoGiornoDto } from '../../types';
 
 const api = vi.hoisted(() => ({
   correggiAzioneGuida: vi.fn(), rimuoviAzioneGuida: vi.fn(), riapplicaCorrezioneGuida: vi.fn(), ripristinaAzioneGuida: vi.fn(),
   impostaAzionePercorso: vi.fn(), creaAzioneAgenda: vi.fn(), creaEventoAgenda: vi.fn(), aggiornaAzioneAgenda: vi.fn(), aggiornaEventoAgenda: vi.fn(),
   eliminaAzioneAgenda: vi.fn(), eliminaEventoAgenda: vi.fn(), impostaAzioneAgendaFatta: vi.fn(),
   getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
+  getElenchiAzione: vi.fn(),
 }));
+const ELENCHI = {
+  confidenti: [{ chiave: 'takemi', nome: 'Tae Takemi', dettaglio: 'Morte' }], dungeon: [{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }], richieste: [],
+  libri: [{ chiave: 'zorro-il-fuorilegge', nome: 'Zorro, il fuorilegge' }], film: [], videogiochi: [],
+  attivita: [{ chiave: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', turni: true }, { chiave: 'studio-leblanc', nome: 'Studio al Leblanc', turni: false }], negozi: [], doti: [],
+};
 vi.mock('../../services/api', () => api);
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
 vi.mock('../../stores/notificationStore', () => ({ notifica }));
 
 const azione = (p: Partial<AzionePercorsoDto> & Pick<AzionePercorsoDto, 'indice' | 'azione'>): AzionePercorsoDto => ({
-  fascia: 'giorno', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null, fatta: false, effetti: null, stato: null, mappa: null, correzione: null, ...p,
+  fascia: 'giorno', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: null, mappa: null, correzione: null, ...p,
+});
+
+const mia = (p: Partial<AzioneUtenteDto> & Pick<AzioneUtenteDto, 'id' | 'azione'>): AzioneUtenteDto => ({
+  partitaId: null, giorno: '04-12', fascia: 'giorno', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null,
+  produce: [], produceTesto: [], ordine: 1, fatta: false, effetti: null, stato: null, mappa: null, ...p,
 });
 
 const base: PercorsoGiornoDto = {
@@ -29,14 +40,14 @@ const base: PercorsoGiornoDto = {
   precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 1,
   azioni: [
     azione({ indice: 0, azione: 'Biblioteca: prendere Zorro', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 3, note: 2, cinema: false }], confidente: null } }),
-    azione({ indice: 1, azione: 'Palazzo di Kamoshida: infiltrazione', note: 'Oggetti principali', correzione: { azione: 'Palazzo: testo della guida', note: null, fascia: 'giorno' } }),
+    azione({ indice: 1, azione: 'Palazzo di Kamoshida: infiltrazione', note: 'Oggetti principali', correzione: { azione: 'Palazzo: testo della guida', note: null, fascia: 'giorno', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, produce: [], produceTesto: [] } }),
   ],
   rimosse: [{ indice: 2, fascia: 'sera', azione: 'Mansarda: fabbricare Grimaldelli' }],
   correzioniSuperate: [],
   agenda: {
     giorno: '04-12',
     eventi: [{ id: 5, partitaId: 3, giorno: '04-12', tipo: 'scadenza', fascia: 'sera', titolo: 'Consegna del Palazzo', dettaglio: '', riferimento: null, ordine: 1 }],
-    azioni: [{ id: 10, partitaId: null, giorno: '04-12', fascia: 'giorno', tipo: 'altro', azione: 'Comprare i Bionutrienti', riferimento: null, rangoAtteso: null, note: null, ordine: 1, fatta: false }],
+    azioni: [mia({ id: 10, azione: 'Comprare i Bionutrienti' })],
   },
 };
 
@@ -58,6 +69,7 @@ describe('GiornoGuida — giornata modificabile', () => {
   beforeEach(() => {
     for (const f of Object.values(api)) f.mockReset();
     api.getImmagini.mockResolvedValue([]);
+    api.getElenchiAzione.mockResolvedValue(ELENCHI);
     notifica.mockReset();
   });
 
@@ -112,7 +124,7 @@ describe('GiornoGuida — giornata modificabile', () => {
     fireEvent.change(within(finestra).getByLabelText('Che cosa fare'), { target: { value: 'Passare dal Bagno pubblico' } });
     fireEvent.change(within(finestra).getByLabelText('Note'), { target: { value: 'di pomeriggio' } });
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi' }));
-    await waitFor(() => expect(api.creaAzioneAgenda).toHaveBeenCalledWith({ data: '04-12', fascia: 'giorno', azione: 'Passare dal Bagno pubblico', note: 'di pomeriggio', partitaId: null }));
+    await waitFor(() => expect(api.creaAzioneAgenda).toHaveBeenCalledWith({ data: '04-12', fascia: 'giorno', azione: 'Passare dal Bagno pubblico', note: 'di pomeriggio', partitaId: null, tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [] }));
   });
 
   it('modifica un\'azione della guida: la finestra è precompilata, mostra l\'originale e salva la correzione', async () => {
@@ -130,8 +142,59 @@ describe('GiornoGuida — giornata modificabile', () => {
     fireEvent.change(within(finestra).getByLabelText('Che cosa fare'), { target: { value: 'Palazzo in un viaggio solo' } });
     fireEvent.click(within(finestra).getByRole('radio', { name: 'Di sera' }));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
-    await waitFor(() => expect(api.correggiAzioneGuida).toHaveBeenCalledWith('04-12', 1, { azione: 'Palazzo in un viaggio solo', note: 'Oggetti principali', fascia: 'sera' }));
+    await waitFor(() => expect(api.correggiAzioneGuida).toHaveBeenCalledWith('04-12', 1, {
+      azione: 'Palazzo in un viaggio solo', note: 'Oggetti principali', fascia: 'sera', tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [],
+    }));
     await waitFor(() => expect(ricarica).toHaveBeenCalled());
+  });
+
+  it('modifica tipo, collegamento, rango ed effetti di un\'azione della guida (la Guida si modifica al 100%)', async () => {
+    api.correggiAzioneGuida.mockResolvedValue({});
+    disegna({ ...base, azioni: [azione({ indice: 0, azione: 'Sbloccare il lavoro da fioraio Rafflesia', tipo: 'lavoro', produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }], produceTesto: ['Turno: Fioraio Rafflesia'] })] });
+    // la riga dice che cosa applica la spunta
+    expect(screen.getByText('Alla spunta: Turno: Fioraio Rafflesia')).toBeInTheDocument();
+    apriMenu('Sbloccare il lavoro');
+    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    const finestra = screen.getByRole('dialog', { name: 'Modifica l\'azione della guida' });
+    await waitFor(() => expect(within(finestra).getByRole('combobox', { name: 'Tipo' })).toBeInTheDocument());
+    // l'effetto «turno» si toglie: lo sblocco non dà la Gentilezza del turno
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli l\'effetto 1' }));
+    expect(within(finestra).getByText('Nessun effetto: la spunta segna solo che l\'hai fatto.')).toBeInTheDocument();
+    // tipo «Confidente», collegata a Takemi, rango atteso 2, con una Dote: Coraggio ♪
+    const scegli = (combo: string, voce: string) => {
+      fireEvent.click(within(finestra).getByRole('combobox', { name: combo }));
+      fireEvent.click(within(within(finestra).getByRole('listbox', { name: combo })).getByRole('button', { name: new RegExp(`^${voce}`) }));
+    };
+    scegli('Tipo', 'Confidente');
+    scegli('Collegata a', 'Confidente');
+    // a collegamento incompleto non si salva
+    expect(within(finestra).getByRole('button', { name: 'Salva' })).toBeDisabled();
+    scegli('Quale', 'Tae Takemi');
+    scegli('Rango atteso', 'Rango 2');
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));
+    scegli('Dote', 'Coraggio');
+    fireEvent.click(within(finestra).getByRole('radio', { name: '♪' }));
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
+    await waitFor(() => expect(api.correggiAzioneGuida).toHaveBeenCalledWith('04-12', 0, {
+      azione: 'Sbloccare il lavoro da fioraio Rafflesia', note: null, fascia: 'giorno', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, rangoAtteso: 2,
+      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }],
+    }));
+  });
+
+  it('un turno si sceglie solo fra le attività contate per volte; una lettura va completata prima di salvare', async () => {
+    disegna({ ...base, azioni: [azione({ indice: 0, azione: 'Qualcosa' })] });
+    apriMenu('Qualcosa');
+    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    const finestra = screen.getByRole('dialog', { name: 'Modifica l\'azione della guida' });
+    await waitFor(() => expect(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' })).toBeInTheDocument());
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));
+    fireEvent.click(within(finestra).getByRole('combobox', { name: 'Effetto 1' }));
+    fireEvent.click(within(within(finestra).getByRole('listbox', { name: 'Effetto 1' })).getByRole('button', { name: /^Turno/ }));
+    expect(within(finestra).getByRole('button', { name: 'Salva' })).toBeDisabled();
+    fireEvent.click(within(finestra).getByRole('combobox', { name: 'Attività (contata per volte)' }));
+    const elenco = within(within(finestra).getByRole('listbox', { name: 'Attività (contata per volte)' }));
+    expect(elenco.getByRole('button', { name: /^Fioraio Rafflesia/ })).toBeInTheDocument();
+    expect(elenco.queryByRole('button', { name: /^Studio al Leblanc/ })).toBeNull();
   });
 
   it('dal menu: sposta un\'azione della guida di sera e ripristina quella corretta', async () => {
@@ -217,7 +280,7 @@ describe('GiornoGuida — giornata modificabile', () => {
     api.eliminaAzioneAgenda.mockResolvedValue(undefined);
     disegna();
     fireEvent.click(screen.getByLabelText('Fatto: Comprare i Bionutrienti'));
-    await waitFor(() => expect(api.impostaAzioneAgendaFatta).toHaveBeenCalledWith(10, 3, true));
+    await waitFor(() => expect(api.impostaAzioneAgendaFatta).toHaveBeenCalledWith(10, 3, true, undefined));
     apriMenu('Comprare i Bionutrienti');
     fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
     expect(api.eliminaAzioneAgenda).not.toHaveBeenCalled();
@@ -225,6 +288,51 @@ describe('GiornoGuida — giornata modificabile', () => {
     expect(within(finestra).getByText(/da tutte le partite/)).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Elimina' }));
     await waitFor(() => expect(api.eliminaAzioneAgenda).toHaveBeenCalledWith(10));
+  });
+
+  it('una cosa da fare è come un\'azione della guida: tipo, collegamento, «Alla spunta», stato; un incontro chiede le note', async () => {
+    api.impostaAzioneAgendaFatta.mockResolvedValue(mia({ id: 11, azione: 'Clinica Takemi', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }], confidente: null } }));
+    disegna({ ...base, agenda: { ...base.agenda, azioni: [mia({
+      id: 11, azione: 'Clinica Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
+      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio, 1 nota'], stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' },
+    })] } });
+    const giorno = within(sezione('Di giorno'));
+    expect(giorno.getByText('La mia')).toBeInTheDocument();
+    expect(giorno.getByText('Confidente')).toBeInTheDocument();
+    expect(giorno.getByText('Alla spunta: Coraggio, 1 nota')).toBeInTheDocument();
+    expect(giorno.getByText(/^Consigliata/)).toBeInTheDocument();
+    expect(giorno.getByText('rango atteso 2')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi'));
+    // prima si chiedono le note: nessuna chiamata finché non si sceglie
+    expect(api.impostaAzioneAgendaFatta).not.toHaveBeenCalled();
+    fireEvent.click(within(screen.getByRole('group', { name: 'Note ottenute con il Confidente' })).getByRole('button', { name: '2 note' }));
+    await waitFor(() => expect(api.impostaAzioneAgendaFatta).toHaveBeenCalledWith(11, 3, true, 2));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', 'Coraggio +2 (♪)'));
+  });
+
+  it('una cosa da fare spuntata con effetti si elimina togliendo prima la spunta; la finestra ne modifica anche collegamento ed effetti', async () => {
+    api.impostaAzioneAgendaFatta.mockResolvedValue(mia({ id: 12, azione: 'Bagno' }));
+    api.eliminaAzioneAgenda.mockResolvedValue(undefined);
+    api.aggiornaAzioneAgenda.mockResolvedValue({});
+    const fatta = mia({ id: 12, azione: 'Bagno', partitaId: 3, fatta: true, produce: [{ tipo: 'dote', dote: 'fascino', note: 2 }], produceTesto: ['Fascino, 2 note'], effetti: { doti: [{ chiave: 'fascino', nome: 'Fascino', delta: 3, note: 2 }], confidente: null } });
+    disegna({ ...base, agenda: { ...base.agenda, azioni: [fatta] } });
+    apriMenu('Bagno');
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    const conferma = screen.getByRole('dialog', { name: 'Eliminare una cosa da fare già spuntata?' });
+    expect(within(conferma).getByText(/Fascino \+3/)).toBeInTheDocument();
+    fireEvent.click(within(conferma).getByRole('button', { name: 'Togli la spunta ed elimina' }));
+    await waitFor(() => expect(api.eliminaAzioneAgenda).toHaveBeenCalledWith(12));
+    expect(api.impostaAzioneAgendaFatta).toHaveBeenCalledWith(12, 3, false);
+    expect(api.impostaAzioneAgendaFatta.mock.invocationCallOrder[0]).toBeLessThan(api.eliminaAzioneAgenda.mock.invocationCallOrder[0]);
+
+    apriMenu('Bagno');
+    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    const finestra = screen.getByRole('dialog', { name: 'Modifica la cosa da fare' });
+    await waitFor(() => expect(within(finestra).getByText('Classificazione ed effetti')).toBeInTheDocument());
+    expect(within(finestra).getByText(/già spuntata: gli effetti nuovi valgono dalla prossima spunta/)).toBeInTheDocument();
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli l\'effetto 1' }));
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
+    await waitFor(() => expect(api.aggiornaAzioneAgenda).toHaveBeenCalledWith(12, { azione: 'Bagno', note: null, fascia: 'giorno', partitaId: 3, tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [] }));
   });
 
   it('evento dell\'utente: modifica con tipo e fascia, sposta di giorno', async () => {

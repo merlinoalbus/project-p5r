@@ -4,6 +4,7 @@
 
 import { z } from 'zod';
 import { boolQuery, idParam, livello, testoRicerca } from './comuni.js';
+import { DOTI_AZIONE, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type ChiaveDoteAzione, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione.js';
 
 export const paramsId = z.object({ id: idParam });
 
@@ -35,10 +36,27 @@ export const paramsAzioneGuida = z.object({
   data: z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.'),
   indice: z.coerce.number().int().min(0).max(200),
 });
+/** Tipo, collegamento, rango atteso ed effetti di un'azione della giornata (guida corretta o azione dell'utente): i valori
+ *  ammessi sono gli elenchi chiusi di `shared/effettiAzione.ts`; che gli elementi esistano lo verifica il servizio. */
+export const campiAzioneStrutturata = {
+  tipo: z.enum(TIPI_AZIONE.map((t) => t.chiave) as [TipoAzione, ...TipoAzione[]]).optional(),
+  riferimento: z.object({ tipo: z.enum(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave) as [TipoRiferimentoAzione, ...TipoRiferimentoAzione[]]), chiave: z.string().trim().min(1).max(200) }).nullable().optional(),
+  rangoAtteso: z.number().int().min(1).max(10).nullable().optional(),
+  produce: z.array(z.unknown()).max(20).optional(),
+};
 export const bodyCorreggiAzioneGuida = z.object({
   // la guida ha azioni fino a ~780 caratteri e note fino a ~820: il margine lascia correggere senza tagliare
   azione: z.string().trim().min(1).max(2000).optional(),
   note: z.string().trim().max(2000).nullable().optional(),
   fascia: z.enum(['giorno', 'sera']).optional(),
-}).refine((b) => b.azione !== undefined || b.note !== undefined || b.fascia !== undefined, { message: 'Indica almeno un campo da correggere (azione, note o fascia).' });
+  ...campiAzioneStrutturata,
+}).refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da correggere (testo, note, fascia, tipo, collegamento, rango atteso o effetti).' });
 export const bodyRimuoviAzioneGuida = z.object({ rimossa: z.boolean() });
+
+/** La Dote a ogni incontro di un Confidente, rango per rango: Doti chiuse, note 1–3, al massimo cinque per rango. */
+export const bodyDotiIncontro = z.object({
+  ranghi: z.array(z.object({
+    rango: z.number().int().min(1).max(10),
+    doti: z.array(z.object({ dote: z.enum(DOTI_AZIONE.map((d) => d.chiave) as [ChiaveDoteAzione, ...ChiaveDoteAzione[]]), note: z.union([z.literal(1), z.literal(2), z.literal(3)]) })).max(5),
+  })).min(1).max(10),
+});

@@ -74,6 +74,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
         else if (delta < 0) setUltimo((u) => ({ ...u, [chiave]: 0 }));
       }
       if (prima && agg.rango !== prima.rango) setUltimo((u) => ({ ...u, [chiave]: 0 }));
+      // la Dote a ogni incontro: il passaggio di rango o la risposta hanno registrato un incontro (o l'hanno tolto)
+      if (agg.doteIncontro?.length) notifica('success', `Incontro con ${agg.nome}: ${agg.doteIncontro.map((d) => `${d.nome} ${d.delta > 0 ? '+' : ''}${d.delta}`).join(' · ')}`);
       if (prima && agg.puntiNecessari !== null && agg.puntiNecessari > 0 && agg.mancanti === 0 && (prima.mancanti ?? 1) > 0) {
         notifica('success', `${agg.nome}: punti sufficienti per il rango ${agg.rango + 1}! Passa del tempo insieme per salire di rango.`);
       }

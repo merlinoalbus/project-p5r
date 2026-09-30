@@ -36,7 +36,8 @@ export interface Oggi {
   impostaFascia: (fascia: FasciaGioco) => Promise<void>;
   occupato: boolean;
   mappa: StatoMappaOggi;
-  sullaMappa: (a: AzionePercorsoDto) => void;
+  /** «Sulla mappa» di una voce della giornata: la sua mappa e, per un'azione della guida, l'indice da evidenziare (null per le voci dell'utente). */
+  sullaMappa: (mappa: { chiave: string; spilloId: number | null }, indiceGuida: number | null) => void;
   tornaAllaMappaGlobale: () => void;
   /** Scende a una mappa dell'atlante restando nella scheda «Oggi»: il clic su un quartiere della
    *  mappa di Tokyo non deve portare via dal giorno che si sta guardando. */
@@ -105,7 +106,7 @@ export function useOggi(partitaId: number): Oggi {
     },
     occupato,
     mappa,
-    sullaMappa: (a) => { if (a.mappa) setMappa({ chiave: a.mappa.chiave, spilloId: a.mappa.spilloId, azione: a.indice }); },
+    sullaMappa: (m, indiceGuida) => setMappa({ chiave: m.chiave, spilloId: m.spilloId, azione: indiceGuida }),
     tornaAllaMappaGlobale: () => setMappa({ chiave: 'tokyo', spilloId: null, azione: null }),
     apriMappa: (chiave) => setMappa({ chiave, spilloId: null, azione: null }),
   };

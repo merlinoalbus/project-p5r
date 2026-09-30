@@ -17,6 +17,7 @@ import type { DialogoConfidenteDto } from '../types';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { DotiIncontro } from '../components/partita/DotiIncontro';
 
 /** Un dialogo di rango: scelte in ordine, con le migliori evidenziate (punti massimi), le romantiche e gli avvisi. */
 export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void }) {
@@ -149,6 +150,8 @@ export function ConfidenteDettaglioPage() {
               </ul>
             )}
           </section>
+
+          <DotiIncontro confidente={c} rangoPartita={mio ? mio.rango : null} onSalvato={ricarica} />
 
           <section className="card flex flex-col gap-2">
             <h2 className="m-0 text-[15px] font-semibold">Risposte migliori per rango</h2>

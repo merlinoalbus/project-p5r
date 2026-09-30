@@ -50,20 +50,21 @@ router.delete('/agenda/eventi/:id', validate({ params: paramsAgendaVoce }), (req
   res.status(204).end();
 });
 
-router.post('/agenda/azioni', validate({ body: bodyAzione }), (req, res) => {
-  res.status(201).json(creaAzione(req.body as Parameters<typeof creaAzione>[0]));
+// `?partita=` facoltativo: la risposta dice se la cosa da fare è spuntata in quella partita, con stato ed effetti
+router.post('/agenda/azioni', validate({ body: bodyAzione, query: queryAgenda }), (req, res) => {
+  res.status(201).json(creaAzione(req.body as Parameters<typeof creaAzione>[0], (req.query as unknown as { partita?: number }).partita));
 });
-router.put('/agenda/azioni/:id', validate({ params: paramsAgendaVoce, body: bodyAggiornaAzione }), (req, res) => {
-  res.json(aggiornaAzione(Number(req.params.id), req.body as Parameters<typeof aggiornaAzione>[1]));
+router.put('/agenda/azioni/:id', validate({ params: paramsAgendaVoce, body: bodyAggiornaAzione, query: queryAgenda }), (req, res) => {
+  res.json(aggiornaAzione(Number(req.params.id), req.body as Parameters<typeof aggiornaAzione>[1], (req.query as unknown as { partita?: number }).partita));
 });
 router.delete('/agenda/azioni/:id', validate({ params: paramsAgendaVoce }), (req, res) => {
   eliminaAzione(Number(req.params.id));
   res.status(204).end();
 });
-/** Spunta di una cosa da fare nella partita. */
+/** Spunta di una cosa da fare nella partita: applica i suoi effetti (con le note del Confidente, se è un incontro). */
 router.put('/agenda/azioni/:id/fatta', validate({ params: paramsAgendaVoce, body: bodyAzioneFatta }), (req, res) => {
-  const b = req.body as { partita: number; fatta: boolean };
-  res.json(impostaAzioneFatta(b.partita, Number(req.params.id), b.fatta));
+  const b = req.body as { partita: number; fatta: boolean; noteRisposta?: 1 | 2 | 3 };
+  res.json(impostaAzioneFatta(b.partita, Number(req.params.id), b.fatta, { noteRisposta: b.noteRisposta }));
 });
 
 // ---- Catalogo ----

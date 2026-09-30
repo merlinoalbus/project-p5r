@@ -9,6 +9,7 @@ import { FASCE_ORARIO, GIORNI_SETTIMANA_CHIAVI } from '../../shared/orariNegozio
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shared/attivita.js';
 import { FAMIGLIE_EFFETTO } from '../../shared/effettiOggetto.js';
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
+import { campiAzioneStrutturata } from './compendio.js';
 
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
 
@@ -256,16 +257,16 @@ export const bodyEvento = z.object({
 });
 export const bodyAggiornaEvento = bodyEvento.partial();
 
+/** Una cosa da fare dell'utente si classifica e si collega come un'azione della guida (tipo, collegamento, rango, effetti:
+ *  gli stessi elenchi chiusi di `campiAzioneStrutturata`). */
 export const bodyAzione = z.object({
   data: dataGioco,
   fascia: z.enum(['giorno', 'sera']).optional(),
-  tipo: z.string().trim().max(40).optional(),
   azione: testo(400).min(1),
-  riferimento,
-  rangoAtteso: z.number().int().min(1).max(10).nullable().optional(),
   note: testo(600).nullable().optional(),
   partitaId: z.number().int().positive().nullable().optional(),
   ordine: z.number().int().min(0).max(9999).optional(),
+  ...campiAzioneStrutturata,
 });
 export const bodyAggiornaAzione = bodyAzione.partial();
-export const bodyAzioneFatta = z.object({ partita: z.number().int().positive(), fatta: z.boolean() });
+export const bodyAzioneFatta = z.object({ partita: z.number().int().positive(), fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional() });

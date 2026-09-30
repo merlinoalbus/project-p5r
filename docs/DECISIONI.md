@@ -648,4 +648,37 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   geometria** in «area della guida» leggendo le colonne, cioè la sola prima area; una planimetria senza immagine
   legata a più aree non viene gestita per le altre. Oggi tutte le planimetrie dei Palazzi hanno l'immagine.
 
+### 2026-09-30 — Le azioni della Guida dichiarano i loro effetti; la Guida si modifica al 100%
+
+- Difetti segnalati dall'utente: finito Zorro, il fuorilegge la Gentilezza non è salita («3 note + bonus libro doveva
+  fare un +7», da tutti e tre i punti dell'app); la nota di Coraggio del rango 2 di Takemi non è stata contata; il bagno
+  del 25 aprile dava +3 note di Fascino e in gioco ne ha date 2; «Sbloccare il lavoro da fioraio Rafflesia…» dava la
+  Gentilezza, che «è per quando effettivamente faccio quel lavoro». Causa comune: la spunta leggeva i punti dal testo
+  delle note e segnava come letto ogni libro collegato (anche solo preso in prestito).
+- Piano approvato dall'utente (6 voci): **effetti strutturati** dell'azione (Dote, Lettura, Turno), modificabili; le
+  note restano testo; una conversione una volta sola dalle note di oggi.
+- Scelte dell'utente: per il 26 aprile «2 voci distinte» (sblocco e primo giorno di lavoro), e più in generale gli
+  eventi della Guida, anche quelli aggiunti dall'utente, devono potersi classificare e collegare (Confidenti, Libri,
+  Doti…) «al 100%»; la Dote dei Confidenti a ogni incontro arriva **da ogni incontro registrato**; le partite già in
+  corso **restano come sono** (nessuna correzione dei libri già segnati letti); «mi interessa risolvere il problema, al
+  dato finale ci penso io»: l'app deve permettere di correggere i dati, non li corregge da sé (il bagno del 25 aprile
+  resta +3 nella guida finché l'utente non lo cambia).
+- Regole di realizzazione della Dote a ogni incontro (scelte dell'implementazione dentro «da ogni incontro registrato» e «il
+  passaggio al rango R conta una volta sola», approvate col piano; non parole dell'utente): la Dote è un dato del Confidente
+  per ciascun rango verso cui vale (1–10, modificabile nella sua scheda); un incontro è unico per Confidente, giorno e fascia
+  (nel gioco si esce con un Confidente una volta per fascia: più risposte o più parti che lo segnano non lo contano due
+  volte); passaggi di ranghi diversi segnati a mano nello stesso momento sono incontri a sé; «Annulla ultimo» che riporta i
+  punti a prima delle risposte toglie l'incontro. Le azioni della guida con un rango atteso non danno più la Dote da sé
+  (la dà l'incontro); lo studio con Makoto, senza rango, la tiene sull'azione.
+- Limiti noti del lotto (dalle revisioni, da conoscere usando l'app):
+  - le risposte segnate nella pagina Confidenti valgono per il giorno e la fascia **della partita**, la spunta per quelli
+    **dell'azione**: se la fascia della partita non è quella dell'incontro, pagina e spunta non si riconoscono e la Dote
+    arriva due volte; tenere aggiornato il momento della giornata, o segnare quell'incontro da una parte sola;
+  - alzare il rango dalla pagina registra un passaggio per ogni rango attraversato, ciascuno con la sua Dote: chi porta una
+    partita già avanzata da 0 a 5 riceve le Doti di quegli incontri (se le aveva già messe a mano, raddoppiano);
+  - una Dote messa a mano fra gli effetti di un'azione di tipo Confidente si somma a quella dell'incontro;
+  - la spunta di un libro non ancora disponibile alla data della partita ora è rifiutata con il motivo (409), e quella di
+    un'attività senza turni (400): prima riusciva senza dare punti;
+  - togliere una spunta non disfa le letture (si disfano dalla pagina dei Libri o dei Film), come già prima.
+
 

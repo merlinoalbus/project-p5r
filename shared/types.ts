@@ -4,6 +4,7 @@ import type { TipoLuogo } from './tipiLuogo.js';
 import type { RequisitoSpillo } from './condizioniSpillo.js';
 import type { OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
+import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 // ============================================================
 // Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
 // ============================================================
@@ -208,6 +209,8 @@ export interface RegaloConfidenteDto {
 /** Scheda completa di un Confidente (Fase 6.1). */
 export interface ConfidenteDettaglioDto extends ConfidenteDto {
   abilita: Array<{ rango: number; nome: string; descrizione: string }>;
+  /** La Dote che dà ogni incontro verso ciascun rango da 1 a 10 (`confidente_dote_incontro`), modificabile; `testo` in parole. */
+  dotiIncontro: Array<{ rango: number; doti: DoteNote[]; testo: string }>;
   dialoghi: DialogoConfidenteDto[];
   regali: RegaloConfidenteDto[];
   regaliSconsigliati: string[];
@@ -531,6 +534,8 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** Semafori dei ranghi superiori a quello attuale (Fase 12.3), in ordine di rango. */
   semafori: SemaforiRangoDto[];
   updatedAt: string | null;
+  /** Solo nella risposta a una modifica dalla pagina Confidenti: di quanto sono cambiate le Doti con gli incontri registrati o tolti. */
+  doteIncontro?: Array<{ chiave: string; nome: string; delta: number }>;
 }
 
 /** Bonus agli esami: primo del corso ×1,5, fra i primi dieci ×1,2. */
@@ -962,10 +967,32 @@ export interface CompletamentoDto {
 
 // ---- Guida giorno per giorno (Fase 7.5b) ----
 
+/** Un incontro con un Confidente registrato nella partita, con la Dote che ha dato (`confidente_rango.effetti_json` del rango verso cui vale). */
+export interface IncontroConfidenteDto {
+  id: number | null;
+  marcato: number | null;
+  confidente: string;
+  nome: string;
+  /** Il rango verso cui vale l'incontro (quello che raggiunge, se è un passaggio). */
+  verso: number;
+  passaggio: boolean;
+  giaContato: boolean;
+  doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
+}
+
 export interface EffettiAzioneDto {
   /** `delta` sono i punti applicati; `note` le note della guida da cui derivano (1–3); `cinema` se «Anima da cineasta» ha alzato lo scalino. */
   doti: Array<{ chiave: string; nome: string; delta: number; note?: number; cinema?: boolean }>;
   confidente: { chiave: string; nome: string; noteRisposta: 1 | 2 | 3; punti: number; bonusArcano: boolean } | null;
+  /** Letture e visioni portate avanti dalla spunta (`prima` → `dopo`) con le Doti che l'elemento ha dato (`doti`): i punti li dà
+   *  l'elemento, e togliere la spunta non disfa la lettura. `visione`: una visione al cinema contata con le altre spunte. */
+  letture?: Array<{ categoria: CategoriaLettura; chiave: string; nome: string; prima: number; dopo: number; doti?: Array<{ chiave: string; nome: string; delta: number }>; visione?: boolean }>;
+  /** L'incontro con un Confidente che la spunta ha registrato (la Dote a ogni incontro): `id` se l'ha creato (togliendo la spunta
+   *  si toglie con le sue Doti), `marcato` se ha segnato come passaggio di rango un incontro già registrato in quel momento della
+   *  giornata, `giaContato` se quell'incontro (o il passaggio a quel rango) c'era già e non ha dato niente di nuovo. */
+  incontro?: IncontroConfidenteDto;
+  /** Turni registrati dalla spunta (`ordine` del turno nell'attività): togliendo la spunta si toglie quel turno e i suoi punti. */
+  turni?: Array<{ attivita: string; nome: string; ordine: number; doti: Array<{ chiave: string; nome: string; delta: number; note: number }> }>;
 }
 
 export interface RiferimentoAzioneDto {
@@ -1016,23 +1043,55 @@ export interface AzionePercorsoDto {
   riferimentoTesto: string | null;
   rangoAtteso: number | null;
   note: string | null;
+  /** Che cosa produce la spunta (`shared/effettiAzione.ts`): dato strutturato e modificabile; le note sono solo testo. */
+  produce: EffettoAzione[];
+  /** Gli effetti di `produce` in parole, con i nomi di libri, film e attività («Zorro, il fuorilegge: completato»). */
+  produceTesto: string[];
   /** Fatta nella partita. */
   fatta: boolean;
-  /** Punti applicati alla spunta (Fase 12.3): Doti «+N» dalle note della guida e note del Confidente; annullati togliendo la spunta. */
+  /** Ciò che la spunta ha applicato (dagli effetti `produce` e dalle note del Confidente): Doti, punti e turni si annullano togliendola, le letture restano. */
   effetti: EffettiAzioneDto | null;
   /** Stato rispetto alla partita (solo con partita): consigliata/bloccata/neutra con motivo. */
   stato: StatoAzioneDto | null;
   /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
   mappa: { chiave: string; spilloId: number | null } | null;
   /** Correzione dell'utente applicata (vale per tutte le partite): i campi com'erano nella guida, per mostrarli e per «Ripristina». Null = azione com'è nella guida. */
-  correzione: { azione: string; note: string | null; fascia: FasciaGioco } | null;
+  correzione: {
+    azione: string; note: string | null; fascia: FasciaGioco;
+    tipo: AzionePercorsoDto['tipo']; riferimento: RiferimentoAzioneDto | null; riferimentoTesto: string | null; rangoAtteso: number | null;
+    produce: EffettoAzione[]; produceTesto: string[];
+  } | null;
 }
 
-/** Campi di un'azione della guida che l'utente può correggere. */
+/** Un elemento che un'azione può collegare o nominare negli effetti. */
+export interface VoceElencoAzione { chiave: string; nome: string; dettaglio?: string }
+
+/** Gli elenchi da cui la finestra di un'azione sceglie collegamento ed effetti (`GET /api/compendio/percorso-elenchi`). */
+export interface ElenchiAzioneDto {
+  confidenti: VoceElencoAzione[];
+  dungeon: VoceElencoAzione[];
+  richieste: VoceElencoAzione[];
+  libri: VoceElencoAzione[];
+  film: VoceElencoAzione[];
+  videogiochi: VoceElencoAzione[];
+  /** `turni`: si conta per volte, quindi può essere l'attività di un effetto «turno». */
+  attivita: Array<VoceElencoAzione & { turni: boolean }>;
+  negozi: VoceElencoAzione[];
+  doti: VoceElencoAzione[];
+}
+
+/** Campi di un'azione della guida che l'utente può correggere: tutti, dal testo agli effetti della spunta. */
 export interface CorrezioneAzioneGuida {
   azione?: string;
   note?: string | null;
   fascia?: FasciaGioco;
+  tipo?: AzionePercorsoDto['tipo'];
+  /** Il collegamento (null = nessuno); `riferimentoTesto` lo calcola il server dal nome dell'elemento. */
+  riferimento?: RiferimentoAzioneDto | null;
+  riferimentoTesto?: string | null;
+  rangoAtteso?: number | null;
+  /** Effetti della spunta al posto di quelli della guida. */
+  produce?: EffettoAzione[];
 }
 
 /** Azione della guida rimossa dall'utente: resta ripristinabile. */
@@ -2060,8 +2119,10 @@ export interface LuogoOpzioneDto { chiave: string; nome: string; tipo: string; q
 export interface ProgressiPartitaDto {
   /** `calcolato`: dalla squadra (tre stati: sì, no, non segnato); `manuale`: la spunta. */
   eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string }>;
-  /** Le sole attività che si contano per volte svolte. */
-  attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number }>;
+  /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza, 2 note»). */
+  attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[] }>;
+  /** Dopo un + o − del contatore: di quanto sono cambiate le Doti (i turni danno e restituiscono i loro punti). */
+  cambioDoti?: Array<{ chiave: string; nome: string; delta: number }>;
   /** I negozi con programma punti manuale. */
   puntiNegozio: Array<{ negozio: string; nome: string; programma: string; unita: string; punti: number }>;
   /** I negozi con il grado cliente: dalla spesa segnata, con la prossima soglia. */
@@ -2136,14 +2197,25 @@ export interface AzioneUtenteDto {
   /** Giorno del calendario di gioco ('MM-GG'); vedi la nota su EventoUtenteDto. */
   giorno: string;
   fascia: FasciaGioco;
-  tipo: string;
+  /** Come le azioni della guida (un valore fuori elenco, scritto prima del 2026-09-30, si legge «altro»). */
+  tipo: AzionePercorsoDto['tipo'];
   azione: string;
-  riferimento: { tipo: string; chiave: string } | null;
+  riferimento: RiferimentoAzioneDto | null;
+  /** Il nome dell'elemento collegato, dal server. */
+  riferimentoTesto: string | null;
   rangoAtteso: number | null;
   note: string | null;
+  /** Che cosa produce la spunta, come per le azioni della guida (`shared/effettiAzione.ts`). */
+  produce: EffettoAzione[];
+  produceTesto: string[];
   ordine: number;
   /** Spuntata nella partita indicata. */
   fatta: boolean;
+  /** Ciò che la spunta ha applicato nella partita; si annulla togliendola (le letture restano). */
+  effetti: EffettiAzioneDto | null;
+  /** Stato rispetto alla partita (solo con partita), come per le azioni della guida. */
+  stato: StatoAzioneDto | null;
+  mappa: { chiave: string; spilloId: number | null } | null;
 }
 
 export interface AgendaGiornoDto {

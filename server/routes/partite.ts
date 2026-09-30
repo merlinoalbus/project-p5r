@@ -23,6 +23,7 @@ import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraSe
 import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { impostaAcquisto } from '../services/negoziService.js';
 import { confermaRequisito } from '../services/semaforiService.js';
+import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
@@ -32,7 +33,7 @@ import { t } from '../services/traduzioniService.js';
 import { eliminaEventi, eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
-  aggiornaCompendio, aggiornaConfidente, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita, registraPossedutaNelCompendio,
+  aggiornaCompendio, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita, registraPossedutaNelCompendio,
   confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, leggiPartita, partitaAttiva, personePossedute, rimuoviPosseduta,
 } from '../services/partiteService.js';
 
@@ -87,8 +88,9 @@ router.patch('/:id/squadra/:chiave', validate({ params: paramsPartitaChiave, bod
 router.get('/:id/confidenti', validate({ params: paramsPartita }), (req, res) => {
   res.json(confidenti(Number(req.params.id)));
 });
+// dalla pagina Confidenti: oltre a punti e rango registra gli incontri (la Dote a ogni incontro, una volta per incontro)
 router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, body: bodyConfidente }), (req, res) => {
-  res.json(aggiornaConfidente(Number(req.params.id), String(req.params.chiave), req.body));
+  res.json(aggiornaConfidenteDallaPagina(Number(req.params.id), String(req.params.chiave), req.body));
 });
 
 /** Conferma manuale di un requisito non verificabile dall'app (semafori, Fase 12.3); restituisce il Confidente aggiornato. */

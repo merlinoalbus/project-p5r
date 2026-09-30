@@ -510,9 +510,10 @@ che supera la precedente esclusione.
 - `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, Palazzi completati — `palazziService` —, richieste completate, ranghi, giorno e meteo
   correnti, conferme) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato);
   `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.
-- Percorso: `impostaAzione` applica alla spunta gli effetti della guida (`dotiDalleNote`: «Perizia +2» = 2 punti; `noteRisposta` 1–3 per gli
-  incontri con un Confidente col bonus dell'arcano dalla scorta) e li registra in `azione_partita.effetti_json` (migrazione 025) per annullarli
-  togliendo la spunta; `AzionePercorsoDto.effetti`; scelta delle note nella pagina Percorso.
+- Percorso: `impostaAzione` applica alla spunta gli effetti dichiarati dell'azione (`produce`, con `effettiAzioneService` dal
+  2026-09-30: vedi «Effetti delle azioni della Guida»; `noteRisposta` 1–3 per gli incontri con un Confidente col bonus dell'arcano
+  dalla scorta) e li registra in `azione_partita.effetti_json` (migrazione 025) per annullarli togliendo la spunta (le letture
+  restano); `AzionePercorsoDto.effetti`; scelta delle note nella pagina Percorso.
 
 ### Fusione: revisione visiva (Fase 14)
 - `components/fusione/PersonaChip.tsx`: tassello con `AnteprimaPersona`, nome e livello (variante `evidenza` per risultato/bersaglio, `inScorta`);
@@ -531,7 +532,7 @@ che supera la precedente esclusione.
 - **Spilli dall'asset** — `SpilloGrafico`/`PuntoSpillo` (`src/components/mappe/IconaSpillo.tsx`): se `ui/spillo-<tipo>` esiste è lo spillo intero (`.spillo-mappa__figura`, punta sul punto ancorato), altrimenti la goccia colorata col disegno di riserva; legenda, elenco e popup usano la stessa immagine in piccolo.
 - **Personaggi** — ambito immagine `personaggio` (`AMBITI_IMMAGINE`, `chiaviAssetPredefinito` → `personaggi/<chiave>`): Protagonista, Stanza di Velluto e Jose usano `ImmagineEntita` come i Confidenti; `PersonaDelPersonaggio` apre la Persona in una finestra al tocco.
 - **Home desktop** — da 1360 px `.home-griglia` è «carta mappa / oggi mappa» (5/12 + 7/12), senza accessi rapidi; la stella della carta è `max(230px, min(40vh, 50cqw, 420px))` (`.home-carta` è un contenitore di query).
-- **Doti a scalini** — `puntiDaNote(note, libro, fortuna, cinema)` (`server/services/partiteService.ts`): scalini 2/3/5/7, libro a resa maggiorata = quarto scalino, «Anima da cineasta» +1 scalino (solo film e DVD), poi ×1,5 per difetto. Alla spunta di un'azione della guida (`percorsoService.applicaEffetti`) le «+N» delle note sono NOTE (1–3, 132 azioni segnano «+1» e un guadagno da un punto non esiste) convertite in punti; lo scalino del cinema scatta da solo per le azioni `dvd` e per quelle con `riferimento` di tipo `film` (le tre visite al cinema della guida sono collegate al film) se `lettura_partita` contiene il libro `anima-da-cineasta`; i DVD valgono sempre due note (3 punti, 5 col libro: la guida li segna «+3» contando il libro, che l'app valuta a parte). `EffettiAzioneDto.doti[]` porta `delta` (punti applicati, usati per l'annullamento), `note` e `cinema`.
+- **Doti a scalini** — `puntiDaNote(note, libro, fortuna, cinema)` (`server/services/partiteService.ts`): scalini 2/3/5/7, libro a resa maggiorata = quarto scalino, «Anima da cineasta» +1 scalino (solo film e DVD), poi ×1,5 per difetto. Alla spunta di un'azione della guida le Doti vengono dagli **effetti dichiarati** dell'azione (`produce`, dal 2026-09-30: vedi «Effetti delle azioni della Guida»), in NOTE (1–3) convertite in punti; lo scalino del cinema scatta da solo per le azioni `dvd` e per quelle con `riferimento` di tipo `film` se `lettura_partita` contiene il libro `anima-da-cineasta`. `EffettiAzioneDto.doti[]` porta `delta` (punti applicati, usati per l'annullamento), `note` e `cinema`.
 - **Formati** — `Topbar` e `PartitaSelettore` stanno in 375 px (logo e selettore restringibili); `.titolo-tasselli` scala sulla larghezza (`clamp(20px, 5.4vw, 42px)`); `FilaScorrevole` (`src/components/shared/FilaScorrevole.tsx`, CSS `.fila-scorrevole`) rende le file di schede/filtri una riga sola scorrevole sotto i 768 px, con la scheda attiva portata in vista; `.home-griglia` con aree per telefono/tablet/desktop; `.kpi-griglia` 2/3/auto colonne; `.sr-only { top:0; left:0 }` fuori dai layer perché un riquadro assoluto da 1 px in fondo a un elenco che scorre allungava il documento (seconda barra verticale); `.btn-nota` compatto col mouse e 44 px sui dispositivi a tocco.
 
 ### Backup e ripristino dell'istanza (Fase 15.29)
@@ -834,3 +835,97 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   ultima fonte, dall'identità di seed (`seed_identita_json`) quando lo spillo è stato modificato e ha perso il
   collegamento (il 1616 della Shujin) — senza scrivere condizioni: vale anche dopo ogni sincronizzazione. Gli archi
   (`arco`) restano legati alla data.
+
+### Effetti delle azioni della Guida (2026-09-30)
+
+- **Che cosa produce un'azione è un dato**, non il testo delle note: `AzionePercorsoDto.produce: EffettoAzione[]`
+  (`shared/effettiAzione.ts`, normalizzato alla lettura in `correzioniGuidaService.applica`). Tre effetti:
+  `dote` (Dote + note 1–3), `lettura` (libro/film/videogioco portato **almeno** a `almeno` sessioni o visioni, null =
+  completato; mai indietro) e `turno` (un turno di un'attività contata per volte, con `doti` proprie facoltative al
+  posto di quelle dell'attività). Le note restano testo libero.
+- **Conversione una volta sola** (`server/db/conversioneEffettiAzione.ts`, migrazione 086): Doti dalle note come
+  faceva la spunta, tranne dove sbagliava. Libri e film collegati: prestito, noleggio, acquisto e ritiro non leggono;
+  «(n/m)» → n; «iniziare» → 1; «completare/finire/terminare» → completato; «restituire X e prendere Y» → X completato;
+  «leggere/guardare X» → una sessione se più avanti un'azione lo completa, altrimenti completato; al cinema ogni azione
+  vale «una visione» (`almeno: null`; la 087 corregge le azioni che la prima versione della 086 aveva scritto come «almeno
+  n visioni»); i titoli si cercano solo prima del «;». Lavori con una Dote nelle note → `turno` del lavoro (dal negozio:
+  `LAVORO_DEL_NEGOZIO`), con Doti proprie se diverse da quelle del lavoro. I quattro lavori ricevono in
+  `attivita.effetti_json` la Dote di ogni turno (voce del primo e voce `ripetuto`). La migrazione **utente 007** dà a ogni
+  correzione dell'utente che cambiava note o testo gli effetti che quel testo corretto dava (`CorrezioneAzioneGuida.produce`,
+  applicato da `correzioniGuidaService.applica` e tenuto da `scrivi` solo se diverso dalla guida).
+- **Motore** (`server/services/effettiAzioneService.ts`): `applicaEffettiAzione` alza le Doti, porta avanti le letture
+  con `impostaLettura` (i punti li dà l'elemento, una volta: `avanzamentoLettura` dice dov'è arrivato) e registra i
+  turni con `attivitaService.registraTurno`. Al cinema (nessun totale) «completato» è una visione: l'obiettivo è quante
+  spunte della partita (`azione_partita`, `azione_utente_partita`) hanno già contato una visione di quel film, più una;
+  saltare una visita della guida non regala visioni, togliere e rimettere una spunta non ne aggiunge. Un errore (libro
+  non ancora disponibile, 409; attività senza turni, 400) ferma la spunta invece di lasciarla senza punti: prima la
+  spunta riusciva in silenzio. `annullaEffettiAzione` toglie Doti, punti del Confidente e turni (`togliTurno` di
+  quell'`ordine`); le letture restano (si disfano dalla loro pagina). `EffettiAzioneDto` registra anche `letture`
+  (prima → dopo, le Doti che l'elemento ha dato, `visione` al cinema) e `turni` (attività, ordine, Doti).
+- **Turni** (`attivitaService`): `registraTurno` / `togliTurno` / `impostaVolteAttivita` sulle attività contate per
+  volte (`tracciamento = 'svolta'`, con lo stesso ripiego sul tipo della scheda). Ogni turno registrato ha la sua riga
+  in `utente.turno_partita` (migrazione utente 007) e ciò che ha dato sta in `effetto_lettura_partita` con tipo
+  `attivita` e lo stesso `ordine` (il primo usa le voci non ripetute, gli altri le `ripetuto`). La spunta toglie il suo
+  turno solo se c'è ancora; il contatore (`PUT /api/condizioni/partite/:id/attivita/:chiave`, ora `impostaVolteAttivita`)
+  toglie l'ultimo registrato o, se non ce ne sono, uno di quelli contati prima del registro (senza punti). Entrambe le
+  tabelle sono in `RIFERIMENTI_PARTITE` per gli orfani del pacchetto.
+- Il pacchetto in git è stato portato alla versione corrente applicando le sole migrazioni ai suoi dati (stesse righe in
+  ogni tabella): `ricaricaPacchetto` (solo test) copia i dati del pacchetto senza rifare le migrazioni.
+- **Guida modificabile al 100%** (voce 2): `CorrezioneAzioneGuida` porta anche `tipo`, `riferimento` (null = nessun
+  collegamento), `riferimentoTesto` (calcolato dal server), `rangoAtteso` e `produce`; `correzioniGuidaService` li applica,
+  li tiene solo se diversi dalla guida (`scrivi`) e confronta tutto con `firma`; `AzionePercorsoDto.correzione` porta tutti
+  i campi originali. La finestra rimanda tutti i campi: `correggiAzioneGuida` verifica solo il collegamento e gli effetti
+  **nuovi** (diversi da quelli della guida e della correzione in vigore), così correggere una nota non fallisce se il
+  catalogo ha nascosto l'elemento collegato. Il nome di un collegamento corretto si ricalcola a ogni lettura
+  (`nomeAttuale`: segue le rinomine del pacchetto; se l'elemento non c'è più resta quello salvato). La riapplicazione di
+  una correzione superata non rivalida collegamento ed effetti: se il pacchetto nuovo non ha più l'elemento, è la spunta
+  a dire quale (409/400 con il nome) e l'utente lo cambia dalla finestra. `bodyCorreggiAzioneGuida` accetta gli elenchi chiusi di `shared/effettiAzione.ts` (`TIPI_AZIONE`,
+  `TIPI_RIFERIMENTO_AZIONE`: `campiAzioneStrutturata`, riusabile). `azioniStrutturateService`: `nomeRiferimento`
+  (400 `riferimento-inesistente`; per i Confidenti «Nome - Arcano» come la guida; libri, film, attività e negozi nascosti
+  dal catalogo non si collegano), `verificaEffetti` (400
+  `effetto-non-valido` / `effetto-inesistente`: letture su elementi esistenti, turni solo su attività contate per
+  volte, Doti proprie non vuote), `nomiEffetti` + `testoEffetti` per `produceTesto` (calcolato solo dove si costruisce il
+  DTO: `percorsoService.conTesti`, la scheda del giorno, la spunta e le route delle correzioni), `elenchiAzione` per
+  `GET /api/compendio/percorso-elenchi` (`ElenchiAzioneDto`). FE: `EditorAzioneStrutturata` (tipo, «Collegata a» +
+  «Quale», rango atteso per i Confidenti, effetti Dote/Lettura/Turno con Doti proprie) dentro `ModuloVoceGiornata` per le
+  azioni della guida (finestra larga, un'unica area scorrevole); `utils/azioneStrutturata` (`campiCompleti`: a
+  collegamento o effetto incompleto «Salva» è spento); ogni riga non spuntata mostra «Alla spunta: …».
+  `NOME_TIPO_AZIONE` viene da `TIPI_AZIONE`.
+- **Cose da fare dell'utente come azioni della guida** (voce 3): `azione_utente.produce_json` (migrazione utente 008, che
+  ricava gli effetti delle righe già scritte dalle loro note con `effettiDellAzione`, senza punti retroattivi);
+  `bodyAzione` usa `campiAzioneStrutturata` (tipo e collegamento chiusi); `agendaService` verifica solo collegamento ed
+  effetti nuovi (`strutturaDaSalvare`), e `AzioneUtenteDto` porta tipo, `riferimentoTesto`, `produce`, `produceTesto`,
+  `effetti`, `stato`, `mappa` (un tipo o un collegamento fuori elenco, scritto prima, si legge «altro» / nessuno).
+  `impostaAzioneFatta(partita, id, fatta, { noteRisposta })` applica gli effetti con `applicaEffettiAzione` (note del
+  Confidente comprese) una volta sola, li scrive in `azione_utente_partita.effetti_json`, registra l'evento «percorso»
+  («la mia») e li annulla con `annullaEffettiAzione`; `PUT /api/catalogo/agenda/azioni/:id/fatta` accetta `noteRisposta`.
+  `statoAzione` e `mappaAzione` stanno ora in `azioniStrutturateService` (riesportate da `percorsoService`), e
+  `agendaDelGiorno` riceve i Confidenti già calcolati dalla scheda del giorno. FE: `PartiAzione` (`ImmagineAzione`,
+  `CartelliniAzione`, `SceltaNote`) condiviso da `Azione` (guida) e `VoceMia` (utente, con «La mia»); la finestra mostra
+  l'editor anche per le cose da fare (nuove o da modificare); eliminare una cosa da fare spuntata con effetti chiede
+  «Togli la spunta ed elimina»; `onSullaMappa(mappa, indiceGuida | null)` vale per entrambe (`useOggi`, `PercorsoPage`).
+  Eliminare una cosa da fare con effetti in qualche partita risponde 400 nominando le partite in cui riaprirla.
+- **Lavori e turni** (voce 4): la Dote di ogni turno è l'`effetti_json` dell'attività, modificabile in `ModuloAttivita`,
+  che per le attività contate per volte offre «Vale dalla seconda volta in poi» (`EditorEffetti conRipetuto`) con la
+  spiegazione dei turni. La semantica di `ripetuto` è quella di `dotiDaEffetti`: una voce senza vale solo alla prima volta,
+  una con la spunta dalla seconda in poi; `descriviVoceEffetto` e le etichette lo dicono ora così («dalla seconda volta in
+  poi», prima «anche alle volte successive», che faceva pensare a una somma). Il contatore di Partita → Progressi passa
+  da `impostaVolteAttivita`, che restituisce di quanto sono cambiate le Doti (`ProgressiPartitaDto.cambioDoti`, un avviso
+  dopo + o −); ogni attività porta `effettiTurno` («1° turno: Gentilezza ♪♪ · Dal 2° turno: Gentilezza ♪♪»,
+  `attivitaService.effettiDelTurno`).
+- **Dote a ogni incontro con un Confidente** (voce 5): un dato del Confidente, `confidente_dote_incontro`
+  (confidente, `verso_rango` 1–10, `effetti_json` di voci «dote»; migrazione 088, che lo riempie dalle 31 azioni della guida
+  con rango atteso e ne toglie la Dote solo dopo averla scritta; la 089 ripara i file dove girò la prima 088, che la
+  scriveva in `confidente_rango` — ranghi 1–9 — perdendo il rango 10). Lettura e modifica nella scheda del Confidente
+  (`ConfidenteDettaglioDto.dotiIncontro`, `PUT /api/compendio/confidenti/:chiave/doti-incontro`, `DotiIncontro.tsx` con
+  `RigaDote` condivisa). `incontriService` registra gli incontri in `utente.incontro_confidente_partita` (migrazioni utente
+  009, 010, 011): un incontro vale verso il rango successivo a quello della partita, o verso `rangoAtteso` se è il
+  passaggio a quel rango. Regole: in un momento della giornata (giorno + fascia) un solo incontro «semplice»; il passaggio al
+  rango R una volta sola; un passaggio dove c'è l'incontro semplice di quel momento lo trasforma (niente Dote in più);
+  passaggi di ranghi diversi nello stesso momento sono incontri a sé. Fonti: la spunta (guida e cose da fare:
+  `applicaEffettiAzione` con `momento`, `EffettiAzioneDto.incontro`), la pagina Confidenti (`aggiornaConfidenteDallaPagina`
+  dalla route `PUT /api/partite/:id/confidenti/:chiave`: salire di rango = passaggi, scendere = toglie i passaggi della
+  pagina oltre il nuovo rango, risposta o uscita = incontro semplice del momento della partita, «Annulla ultimo» che torna
+  ai `punti_prima` = toglie quell'incontro; `ConfidentePartitaDto.doteIncontro` per l'avviso). Togliere una spunta toglie
+  l'incontro che aveva creato, salvo un passaggio al rango che la partita ha comunque raggiunto dalla pagina (resta come
+  incontro della pagina). `incontro_confidente_partita` è in `RIFERIMENTI_PARTITE`.

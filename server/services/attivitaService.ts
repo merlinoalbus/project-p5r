@@ -15,7 +15,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
 import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
-import { aggiornaDote, puntiDaNote } from './partiteService.js';
+import { aggiornaDote, dotiSociali, puntiDaNote } from './partiteService.js';
 import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { descriviVoceEffetto, dotiDaEffetti, leggiVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -214,8 +214,8 @@ function haAnimaDaCineasta(partitaId: number): boolean {
 
 /** Le note che un conseguimento dà, Dote per Dote, dagli effetti dichiarati.
  *
- * `successiva` è vero dalla seconda volta in poi e riguarda solo i film al cinema: contano le voci
- * `ripetuto`, e dove la guida non dichiara niente rivederlo non dà niente. Una voce con condizioni
+ * `successiva` è vero dalla seconda volta in poi e riguarda i film al cinema e i turni delle attività
+ * contate per volte: contano le voci `ripetuto`, e dove la guida non dichiara niente ripetere non dà niente. Una voce con condizioni
  * («piove») conta solo se la partita le soddisfa in quel momento. */
 function noteDelConseguimento(riga: RigaLibro | RigaFilm | RigaAttivita, successiva: boolean, st: StatoDisponibilita): Array<{ dote: string; note: 1 | 2 | 3 }> {
   const voci: VoceEffetto[] = leggiVociEffetto(riga.effetti_json);
@@ -329,4 +329,123 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   })();
   const stato = letturePartita(partitaId);
   return tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri')) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm()) : videogiocoDto(riga as RigaAttivita, stato, nomiLuoghi(), articoliCollegati('videogiochi'));
+}
+
+/** Dove è arrivata una lettura nella partita: sessioni lette, visioni o serate, sessioni di gioco; il totale (null al cinema, che non ne ha) e il nome. */
+export function avanzamentoLettura(partitaId: number, tipo: TipoLettura, chiave: string): { avanzamento: number; totale: number | null; nome: string } {
+  const riga = (tipo === 'libro' ? prepared('SELECT * FROM libro WHERE chiave = ? AND nascosto = 0').get(chiave) : tipo === 'film' ? prepared('SELECT * FROM film WHERE chiave = ? AND nascosto = 0').get(chiave) : prepared("SELECT * FROM attivita WHERE chiave = ? AND tipo='videogioco' AND nascosto = 0").get(chiave)) as RigaLibro | RigaFilm | RigaAttivita | undefined;
+  if (!riga) throw httpErrors.notFound('lettura-non-trovata', `${tipo === 'libro' ? 'Il libro' : tipo === 'film' ? 'Il film' : 'Il videogioco'} '${chiave}' non esiste.`);
+  const nome = tipo === 'libro' ? (riga as RigaLibro).nome_it ?? riga.nome : riga.nome;
+  if (tipo === 'libro') {
+    const totale = totaleLibro(riga as RigaLibro);
+    const letto = !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = ?").get(partitaId, chiave);
+    const r = prepared('SELECT avanzamento FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined;
+    return { avanzamento: letto ? Math.max(totale, r?.avanzamento ?? 0) : r?.avanzamento ?? 0, totale, nome };
+  }
+  if (tipo === 'film') {
+    const r = prepared('SELECT avanzamento FROM progresso_film_partita WHERE partita_id = ? AND film_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined;
+    return { avanzamento: r?.avanzamento ?? 0, totale: (riga as RigaFilm).dove === 'cinema' ? null : Math.max((riga as RigaFilm).sessioni ?? 1, 1), nome };
+  }
+  const r = prepared('SELECT avanzamento FROM progresso_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined;
+  return { avanzamento: r?.avanzamento ?? 0, totale: Math.max((riga as RigaAttivita).sessioni ?? 1, 1), nome };
+}
+
+// ---- Turni delle attività contate per volte (i lavori) ----
+//
+// Un turno registrato alza le Doti che l'attività dichiara (il primo le voci senza `ripetuto`, gli
+// altri quelle «dalla seconda volta in poi», e non le prime), oppure quelle che il turno dichiara da sé (il secondo
+// turno al Beef Bowl Shop). Ogni turno registrato ha la sua riga in `turno_partita` (`ordine`), e
+// ciò che ha dato sta in `effetto_lettura_partita` (tipo «attivita», stesso `ordine`), per toglierlo
+// identico: dalla spunta della giornata o dal contatore, i punti vengono da una parte sola.
+
+/** L'attività contata per volte (`tracciamento = 'svolta'`), o un errore che dice perché no. */
+function attivitaConTurni(chiave: string): RigaAttivita {
+  const riga = prepared('SELECT * FROM attivita WHERE chiave = ?').get(chiave) as RigaAttivita | undefined;
+  if (!riga) throw httpErrors.notFound('attivita-non-trovata', `L'attività '${chiave}' non esiste.`);
+  // come la scheda dell'attività: un valore fuori catalogo vale quello del tipo
+  const tracciamento = eTracciamentoAttivita(riga.tracciamento) ? riga.tracciamento : tracciamentoPerTipo(riga.tipo);
+  if (tracciamento !== 'svolta') throw httpErrors.badRequest('attivita-non-conteggiabile', `«${riga.nome}» non si conta per volte svolte: non ha turni da registrare.`);
+  return riga;
+}
+
+function volteSvolte(partitaId: number, chiave: string): number {
+  return (prepared('SELECT volte FROM attivita_svolta_partita WHERE partita_id = ? AND attivita_chiave = ?').get(partitaId, chiave) as { volte: number } | undefined)?.volte ?? 0;
+}
+
+function scriviVolte(partitaId: number, chiave: string, volte: number, adesso: string): void {
+  prepared('INSERT INTO attivita_svolta_partita (partita_id, attivita_chiave, volte, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, attivita_chiave) DO UPDATE SET volte = excluded.volte, updated_at = excluded.updated_at').run(partitaId, chiave, volte, adesso);
+}
+
+export interface TurnoRegistrato {
+  attivita: string;
+  nome: string;
+  ordine: number;
+  doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
+}
+
+/** Registra un turno in più e ne applica le Doti (`doti` del turno, se dichiarate, al posto di quelle dell'attività). */
+export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ dote: string; note: 1 | 2 | 3 }>): TurnoRegistrato {
+  const riga = attivitaConTurni(chiave);
+  const adesso = nowIso();
+  return getDb().transaction(() => {
+    const prima = volteSvolte(partitaId, chiave);
+    // dopo i turni già contati (anche quelli segnati prima del registro, che non hanno riga) e dopo l'ultimo registrato
+    const ultimo = (prepared('SELECT MAX(ordine) AS m FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ?').get(partitaId, chiave) as { m: number | null }).m ?? 0;
+    const ordine = Math.max(ultimo, prima) + 1;
+    scriviVolte(partitaId, chiave, prima + 1, adesso);
+    prepared('INSERT INTO turno_partita (partita_id, attivita_chiave, ordine, created_at) VALUES (?, ?, ?, ?)').run(partitaId, chiave, ordine, adesso);
+    const daApplicare = doti ?? noteDelConseguimento(riga, ordine > 1, statoDisponibilitaPartita(partitaId));
+    const applicate: TurnoRegistrato['doti'] = [];
+    for (const d of daApplicare) {
+      const punti = puntiDaNote(d.note, false);
+      const agg = aggiornaDote(partitaId, d.dote, { delta: punti });
+      prepared("INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, 'attivita', ?, ?, ?, ?, ?, ?)")
+        .run(partitaId, chiave, ordine, d.dote, punti, d.note, adesso);
+      applicate.push({ chiave: d.dote, nome: agg.nome, delta: punti, note: d.note });
+    }
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate };
+  })();
+}
+
+/** Toglie un turno con i punti che aveva dato: quello di `ordine` (la spunta che lo aveva registrato), solo se c'è
+ *  ancora — il contatore può averlo già tolto, e `volte` non deve scendere due volte —, oppure l'ultimo (il contatore):
+ *  l'ultimo registrato, o uno di quelli contati prima del registro, che non hanno punti da restituire. */
+export function togliTurno(partitaId: number, chiave: string, ordine?: number): void {
+  attivitaConTurni(chiave);
+  const adesso = nowIso();
+  getDb().transaction(() => {
+    const prima = volteSvolte(partitaId, chiave);
+    const bersaglio = ordine !== undefined
+      ? (prepared('SELECT ordine FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').get(partitaId, chiave, ordine) as { ordine: number } | undefined)?.ordine ?? null
+      : (prepared('SELECT MAX(ordine) AS m FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ?').get(partitaId, chiave) as { m: number | null }).m;
+    if (ordine !== undefined && bersaglio === null) return;
+    if (bersaglio !== null) {
+      for (const e of prepared("SELECT dote_chiave, punti FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").all(partitaId, chiave, bersaglio) as Array<{ dote_chiave: string; punti: number }>) {
+        aggiornaDote(partitaId, e.dote_chiave, { delta: -e.punti });
+      }
+      prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
+      prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
+    }
+    if (prima > 0) scriviVolte(partitaId, chiave, prima - 1, adesso);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  })();
+}
+
+/** Il contatore dell'attività: porta le volte a `volte` registrando o togliendo turni, ognuno con i suoi punti.
+ *  Dice di quanto è cambiata ogni Dote (per avvisare chi ha premuto + o −). */
+export function impostaVolteAttivita(partitaId: number, chiave: string, volte: number): Array<{ chiave: string; nome: string; delta: number }> {
+  attivitaConTurni(chiave);
+  const prima = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.punti]));
+  getDb().transaction(() => {
+    for (let v = volteSvolte(partitaId, chiave); v < volte; v++) registraTurno(partitaId, chiave);
+    for (let v = volteSvolte(partitaId, chiave); v > volte; v--) togliTurno(partitaId, chiave);
+  })();
+  return dotiSociali(partitaId).filter((d) => d.punti !== (prima.get(d.chiave) ?? 0)).map((d) => ({ chiave: d.chiave, nome: d.nome, delta: d.punti - (prima.get(d.chiave) ?? 0) }));
+}
+
+/** Che cosa dà un turno dell'attività, in parole: le voci del primo turno e quelle dal secondo in poi. */
+export function effettiDelTurno(riga: { effetti_json: string | null }): string[] {
+  const nomi = nomiCondizioniMemo();
+  return leggiVociEffetto(riga.effetti_json).filter((v) => v.effetto.famiglia === 'dote').map((v) => `${v.ripetuto ? 'Dal 2° turno' : '1° turno'}: ${descriviVoceEffetto({ ...v, ripetuto: undefined }, { condizioni: nomi })}`);
 }

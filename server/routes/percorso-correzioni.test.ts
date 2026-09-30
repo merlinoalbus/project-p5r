@@ -8,7 +8,7 @@ import { closeDb, initDb, prepared } from '../db/dbService.js';
 import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import type { AzionePercorsoDto, DoteSocialePartitaDto, PercorsoGiornoDto, PercorsoIndiceDto, SuggerimentiOggiDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, DoteSocialePartitaDto, ElenchiAzioneDto, PercorsoGiornoDto, PercorsoIndiceDto, SuggerimentiOggiDto } from '../../shared/types.js';
 
 const app = createApp();
 
@@ -71,17 +71,18 @@ describe('API — correzioni della guida giorno per giorno', () => {
     await request(app).delete('/api/compendio/percorso/04-12/azioni/0/correzione');
   });
 
-  it('le Doti della spunta si leggono dalle note corrette', async () => {
+  it('le note sono solo testo: correggerle non cambia i punti della spunta, che vengono dagli effetti dell\'azione', async () => {
     const p = await nuovaPartita('Note corrette');
     await request(app).put('/api/compendio/percorso/04-12/azioni/0').send({ note: 'Coraggio +2' });
     const a = (await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-12', indice: 0, fatta: true })).body.data as AzionePercorsoDto;
-    expect(a.effetti?.doti.map((d) => d.chiave)).toEqual(['coraggio']);
+    expect(a.produce).toEqual([{ tipo: 'dote', dote: 'conoscenza', note: 1 }]);
+    expect(a.effetti?.doti.map((d) => d.chiave)).toEqual(['conoscenza']);
     // la riga restituita dalla spunta porta stato e mappa come la scheda del giorno
     expect(a.stato).not.toBeNull();
     expect(a).toHaveProperty('mappa');
     const doti = (await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[];
-    expect(doti.find((d) => d.chiave === 'coraggio')!.punti).toBeGreaterThan(0);
-    expect(doti.find((d) => d.chiave === 'conoscenza')!.punti).toBe(0);
+    expect(doti.find((d) => d.chiave === 'conoscenza')!.punti).toBe(2);
+    expect(doti.find((d) => d.chiave === 'coraggio')!.punti).toBe(0);
     await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-12', indice: 0, fatta: false });
     await request(app).delete('/api/compendio/percorso/04-12/azioni/0/correzione');
   });
@@ -202,5 +203,120 @@ describe('API — correzioni della guida giorno per giorno', () => {
     const spostato = (await request(app).put(`/api/catalogo/agenda/eventi/${ev.id}`).send({ fascia: 'giorno' })).body.data as { fascia: string };
     expect(spostato.fascia).toBe('giorno');
     expect((await request(app).post('/api/catalogo/agenda/eventi').send({ data: '04-14', titolo: 'x', fascia: 'notte' })).status).toBe(400);
+  });
+
+  // ---- La Guida si modifica al 100% (richiesta dell'utente, 2026-09-30): tipo, collegamento, rango atteso, effetti ----
+
+  it('corregge tipo, collegamento, rango atteso ed effetti; il nome del collegamento lo dà il server; l\'originale resta leggibile', async () => {
+    const prima = (await giorno('04-26')).azioni.find((a) => a.indice === 0)!;
+    expect(prima.produce).toEqual([{ tipo: 'turno', attivita: 'lavoro-rafflesia' }]);
+    expect(prima.produceTesto).toEqual(['Turno: Fioraio Rafflesia']);
+    const r = await request(app).put('/api/compendio/percorso/04-26/azioni/0').send({
+      azione: 'Sbloccare il lavoro da fioraio Rafflesia esaminando le riviste del Cercalavoro', tipo: 'confidente',
+      riferimento: { tipo: 'confidente', chiave: 'takemi' }, rangoAtteso: 2, produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }],
+    });
+    expect(r.status).toBe(200);
+    expect(r.body.data).toMatchObject({
+      tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
+      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio, 1 nota'],
+      correzione: { tipo: 'lavoro', riferimento: prima.riferimento, riferimentoTesto: prima.riferimentoTesto, rangoAtteso: null, produce: prima.produce, produceTesto: ['Turno: Fioraio Rafflesia'] },
+    });
+    // la scheda del giorno e la spunta leggono l'azione corretta: Coraggio, nessun turno
+    const p = await nuovaPartita('Guida al 100%');
+    const a = (await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-26', indice: 0, fatta: true })).body.data as AzionePercorsoDto;
+    expect(a.effetti).toMatchObject({ doti: [{ chiave: 'coraggio', delta: 2 }] });
+    expect(a.effetti?.turni).toBeUndefined();
+    expect(prepared("SELECT COUNT(*) AS n FROM attivita_svolta_partita WHERE partita_id = ? AND attivita_chiave = 'lavoro-rafflesia'").get(p)).toEqual({ n: 0 });
+    await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-26', indice: 0, fatta: false });
+    // togliere il collegamento: nessun nome; riportare tutto com'era toglie la correzione
+    const senza = (await request(app).put('/api/compendio/percorso/04-26/azioni/0').send({ riferimento: null })).body.data as AzionePercorsoDto;
+    expect(senza).toMatchObject({ riferimento: null, riferimentoTesto: null });
+    await request(app).put('/api/compendio/percorso/04-26/azioni/0').send({
+      azione: prima.azione, tipo: prima.tipo, riferimento: prima.riferimento, rangoAtteso: prima.rangoAtteso, produce: prima.produce,
+    }).expect(200);
+    expect(prepared("SELECT COUNT(*) AS n FROM correzione_azione_guida WHERE data = '04-26'").get()).toEqual({ n: 0 });
+    expect((await giorno('04-26')).azioni.find((x) => x.indice === 0)).toMatchObject({ riferimentoTesto: prima.riferimentoTesto, correzione: null });
+  });
+
+  it('il bagno del 25 aprile si corregge a due note: la spunta dà 3 punti di Fascino', async () => {
+    const bagno = (await giorno('04-25')).azioni.find((a) => /Bagno pubblico/.test(a.azione))!;
+    expect(bagno.produce).toEqual([{ tipo: 'dote', dote: 'fascino', note: 3 }]);
+    await request(app).put(`/api/compendio/percorso/04-25/azioni/${bagno.indice}`).send({ produce: [{ tipo: 'dote', dote: 'fascino', note: 2 }] }).expect(200);
+    const p = await nuovaPartita('Bagno');
+    await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-25', indice: bagno.indice, fatta: true }).expect(200);
+    const doti = (await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[];
+    expect(doti.find((d) => d.chiave === 'fascino')!.punti).toBe(3);
+    await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-25', indice: bagno.indice, fatta: false });
+    await request(app).delete(`/api/compendio/percorso/04-25/azioni/${bagno.indice}/correzione`).expect(204);
+  });
+
+  it('un collegamento o un effetto che punta al nulla non si salva, e nemmeno un effetto storto', async () => {
+    const put = (body: object) => request(app).put('/api/compendio/percorso/04-12/azioni/0').send(body);
+    expect((await put({ riferimento: { tipo: 'confidente', chiave: 'nessuno' } })).body.error.code).toBe('riferimento-inesistente');
+    expect((await put({ riferimento: { tipo: 'pianeta', chiave: 'x' } })).status).toBe(400);
+    expect((await put({ tipo: 'boh' })).status).toBe(400);
+    expect((await put({ rangoAtteso: 11 })).status).toBe(400);
+    expect((await put({ produce: [{ tipo: 'lettura', categoria: 'libro', chiave: 'libro-inesistente', almeno: null }] })).body.error.code).toBe('effetto-inesistente');
+    expect((await put({ produce: [{ tipo: 'turno', attivita: 'studio-leblanc' }] })).body.error.code).toBe('effetto-non-valido');
+    expect((await put({ produce: [{ tipo: 'dote', dote: 'fascino', note: 4 }] })).body.error.code).toBe('effetto-non-valido');
+    expect((await put({ produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia', doti: [] }] })).status).toBe(400);
+    expect(prepared('SELECT COUNT(*) AS n FROM correzione_azione_guida').get()).toEqual({ n: 0 });
+  });
+
+  it('la finestra rimanda tutti i campi: correggere una nota riesce anche se il libro collegato è stato nascosto dal catalogo', async () => {
+    const zorro = (await giorno('04-25')).azioni.find((a) => a.riferimento?.chiave === 'la-ballerina-seducente' || a.produce.some((e) => e.tipo === 'lettura' && e.chiave === 'zorro-il-fuorilegge'))!;
+    const corpo = (note: string) => ({ azione: zorro.azione, note, fascia: zorro.fascia, tipo: zorro.tipo, riferimento: zorro.riferimento, rangoAtteso: zorro.rangoAtteso, produce: zorro.produce });
+    prepared("UPDATE libro SET nascosto = 1 WHERE chiave IN ('zorro-il-fuorilegge', 'la-ballerina-seducente')").run();
+    try {
+      const r = await request(app).put(`/api/compendio/percorso/04-25/azioni/${zorro.indice}`).send(corpo('Nota mia'));
+      expect(r.status).toBe(200);
+      expect(r.body.data).toMatchObject({ note: 'Nota mia', riferimento: zorro.riferimento, riferimentoTesto: zorro.riferimentoTesto, produce: zorro.produce });
+      // di nuovo, ora che la correzione esiste: gli stessi valori passano
+      expect((await request(app).put(`/api/compendio/percorso/04-25/azioni/${zorro.indice}`).send(corpo('Nota mia, ancora'))).status).toBe(200);
+      // un effetto nuovo su un libro nascosto invece no
+      expect((await request(app).put(`/api/compendio/percorso/04-25/azioni/${zorro.indice}`).send({ produce: [...zorro.produce, { tipo: 'lettura', categoria: 'libro', chiave: 'la-ballerina-seducente', almeno: 1 }] })).body.error.code).toBe('effetto-inesistente');
+    } finally {
+      prepared("UPDATE libro SET nascosto = 0 WHERE chiave IN ('zorro-il-fuorilegge', 'la-ballerina-seducente')").run();
+      await request(app).delete(`/api/compendio/percorso/04-25/azioni/${zorro.indice}/correzione`);
+    }
+  });
+
+  it('ogni azione della guida, rimandata invariata come fa la finestra, risponde 200 e non lascia correzioni', async () => {
+    const indice = (await request(app).get('/api/compendio/percorso')).body.data as PercorsoIndiceDto;
+    const rifiutate: string[] = [];
+    let provate = 0;
+    for (const gg of indice.giorni) {
+      const g = await giorno(gg.giorno);
+      for (const a of g.azioni) {
+        const r = await request(app).put(`/api/compendio/percorso/${gg.giorno}/azioni/${a.indice}`)
+          .send({ azione: a.azione, note: a.note, fascia: a.fascia, tipo: a.tipo, riferimento: a.riferimento, rangoAtteso: a.rangoAtteso, produce: a.produce });
+        provate++;
+        if (r.status !== 200) rifiutate.push(`${gg.giorno}/${a.indice} ${r.status} ${JSON.stringify(r.body.error)}`);
+      }
+    }
+    expect(rifiutate).toEqual([]);
+    expect(provate).toBeGreaterThan(900);
+    expect(prepared('SELECT COUNT(*) AS n FROM correzione_azione_guida').get()).toEqual({ n: 0 });
+  }, 120_000);
+
+  it('il nome del collegamento corretto segue le rinomine del pacchetto', async () => {
+    await request(app).put('/api/compendio/percorso/04-12/azioni/0').send({ riferimento: { tipo: 'confidente', chiave: 'takemi' } }).expect(200);
+    const nome = (prepared("SELECT nome FROM confidente WHERE chiave = 'takemi'").get() as { nome: string }).nome;
+    prepared("UPDATE confidente SET nome = 'Tae Takemi (rinominata)' WHERE chiave = 'takemi'").run();
+    try {
+      expect((await giorno('04-12')).azioni.find((a) => a.indice === 0)!.riferimentoTesto).toBe('Tae Takemi (rinominata) - Morte');
+    } finally {
+      prepared("UPDATE confidente SET nome = ? WHERE chiave = 'takemi'").run(nome);
+      await request(app).delete('/api/compendio/percorso/04-12/azioni/0/correzione');
+    }
+  });
+
+  it('gli elenchi per la finestra: Confidenti con l\'arcano, attività con i turni solo se contate per volte', async () => {
+    const e = (await request(app).get('/api/compendio/percorso-elenchi')).body.data as ElenchiAzioneDto;
+    expect(e.confidenti.find((c) => c.chiave === 'takemi')).toEqual({ chiave: 'takemi', nome: 'Tae Takemi', dettaglio: 'Morte' });
+    expect(e.attivita.find((a) => a.chiave === 'lavoro-rafflesia')?.turni).toBe(true);
+    expect(e.attivita.find((a) => a.chiave === 'studio-leblanc')?.turni).toBe(false);
+    expect(e.libri.some((l) => l.chiave === 'zorro-il-fuorilegge')).toBe(true);
+    expect(e.doti.map((d) => d.chiave)).toEqual(expect.arrayContaining(['conoscenza', 'coraggio', 'fascino', 'gentilezza', 'perizia']));
   });
 });

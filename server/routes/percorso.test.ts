@@ -136,12 +136,12 @@ describe('API percorso giorno per giorno', () => {
     // il libro chiede di aver già visto un film: qui si prova il bonus, non la disponibilità
     getDb().prepare("UPDATE libro SET sessioni=2, condizioni_json='[]' WHERE chiave='anima-da-cineasta'").run();
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', avanzamento: 1 })).status).toBe(200);
-    // cerco il primo DVD della guida che dà una Dote
+    // cerco il primo DVD della guida che dà una Dote e che la spunta completa («(1/2)» è solo la prima serata: i punti arrivano alla fine)
     let trovato: { giorno: string; indice: number; note: number; dote: string; chiave: string | null } | null = null;
     const indice = (await request(app).get('/api/compendio/percorso')).body.data as { giorni: Array<{ giorno: string }> };
     for (const g of indice.giorni) {
       const giorno = (await request(app).get(`/api/compendio/percorso/${g.giorno}?partita=${id}`)).body.data as PercorsoGiornoDto;
-      const dvd = giorno.azioni.find((x) => x.tipo === 'dvd' && /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.test(x.note ?? ''));
+      const dvd = giorno.azioni.find((x) => x.tipo === 'dvd' && /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.test(x.note ?? '') && x.produce.some((e) => e.tipo === 'lettura' && e.almeno === null));
       if (dvd) { const m = /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.exec(dvd.note ?? '')!; trovato = { giorno: g.giorno, indice: dvd.indice, note: Number(m[2]), dote: m[1].toLowerCase(), chiave: dvd.riferimento?.tipo === 'film' ? dvd.riferimento.chiave : null }; break; }
     }
     expect(trovato).not.toBeNull();
@@ -150,11 +150,12 @@ describe('API percorso giorno per giorno', () => {
     // l'azione lo segna come visto. La sorgente dev'essere una sola, altrimenti chi spunta qui e
     // segna anche la visione sulla pagina Film prende i punti due volte — un errore che non si vede
     // subito e che settimane dopo lascia un rango in più senza sapere quali punti fossero veri.
-    // Quindi si guarda la Dote, non gli effetti dell'azione, che per un elemento tracciato sono
-    // vuoti apposta.
+    // Quindi si guarda la Dote: gli effetti dell'azione registrano solo la visione portata avanti,
+    // senza Doti proprie.
     const puntiDi = async () => ((await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>).find((d) => d.chiave === dote)!.punti;
     const senza = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: true })).body.data as AzionePercorsoDto;
-    expect(senza.effetti).toBeNull();
+    expect(senza.effetti?.doti).toEqual([]);
+    expect(senza.effetti?.letture).toEqual([expect.objectContaining({ categoria: 'film', chiave, prima: 0 })]);
     // un DVD dà due note: 3 punti senza il libro
     expect(await puntiDi()).toBe(3);
 

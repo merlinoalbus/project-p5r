@@ -1,9 +1,9 @@
 // ============================================================
-// ModuloFilm — titolo, dove si vede a tessere, prezzo, visioni (solo DVD), dettagli, effetti con «vale anche dopo» (solo cinema)
+// ModuloFilm — titolo, dove si vede a tessere, prezzo, visioni (solo DVD), dettagli, effetti con «vale dalla seconda volta in poi» (solo cinema)
 // ============================================================
 //
-// Al cinema una visione basta e la guida dichiara quanto rende rivederlo: la spunta «vale anche
-// alle volte successive» c'è solo lì. Un DVD si completa in più visioni e non ha visioni ripetute.
+// Al cinema una visione basta e la guida dichiara quanto rende rivederlo: la spunta «vale dalla
+// seconda volta in poi» c'è solo lì. Un DVD si completa in più visioni e non ha visioni ripetute.
 // Il periodo in prosa non c'è più: quando è in programmazione lo dicono le condizioni.
 // ============================================================
 
@@ -38,7 +38,7 @@ export function ModuloFilm({ dati, imposta, disabilitato }: PropsModulo) {
         <Campo nome="dettagli" etichetta="Dettagli" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
       </Griglia>
       <EditorEffetti voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} conRipetuto={cinema} disabilitato={disabilitato} {...nomi}
-        aiuto={cinema ? 'La Dote della prima visione; con «vale anche alle volte successive» quanto rende rivederlo.' : undefined} />
+        aiuto={cinema ? 'La Dote della prima visione; con «vale dalla seconda volta in poi» quanto rende rivederlo.' : undefined} />
     </div>
   );
 }
