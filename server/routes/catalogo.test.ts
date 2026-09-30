@@ -13,10 +13,13 @@ const app = createApp();
 
 describe('API catalogo e agenda (Fase 16.1)', () => {
   let partitaId = 0;
+  /** Il pacchetto è la fotografia dell'istanza: porta già i negozi creati dall'app, e i conteggi partono da lì. */
+  let creatiNelPacchetto = 0;
   beforeAll(async () => {
     const db = initDb(':memory:');
     caricaPacchetto(db);
     invalidaCacheTraduzioni();
+    creatiNelPacchetto = (prepared("SELECT COUNT(*) AS n FROM negozio WHERE origine = 'utente' AND seed_json IS NULL").get() as { n: number }).n;
     partitaId = ((await request(app).post('/api/partite').send({ nome: 'Catalogo' })).body.data as { id: number }).id;
   });
   afterAll(() => closeDb());
@@ -80,7 +83,8 @@ describe('API catalogo e agenda (Fase 16.1)', () => {
     expect((await request(app).post('/api/catalogo/negozio').send({ nome: '' })).status).toBe(400);
     const riepilogo = (await request(app).get('/api/catalogo')).body.data as RiepilogoCatalogoDto;
     const negozi = riepilogo.perTipo.find((t) => t.tipo === 'negozio')!;
-    expect(negozi.creati).toBe(1);
+    // quelli del pacchetto più quello creato dal primo test
+    expect(negozi.creati).toBe(creatiNelPacchetto + 1);
     expect(negozi.totale).toBeGreaterThan(40);
   });
 

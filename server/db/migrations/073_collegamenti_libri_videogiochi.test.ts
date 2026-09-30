@@ -22,10 +22,12 @@ it('collega l’articolo di una libreria al libro omonimo, collega un videogioco
   expect(db.prepare('SELECT negozio_chiave, prezzo, categoria, oggetto_chiave, origine FROM articolo WHERE chiave = ?').get(chiaveArticoloVideogioco('videogioco-star-forneus'))).toEqual({ negozio_chiave: 'yumenoshima', prezzo: 0, categoria: 'videogioco', oggetto_chiave: 'videogioco-star-forneus', origine: 'seed' });
 });
 
-it('nel pacchetto trenta articoli sono libri e i sette videogiochi hanno un articolo, ciascuno nel suo negozio', () => {
+it('nel pacchetto i trenta libri della guida sono articoli collegati e i sette videogiochi hanno un articolo, ciascuno nel suo negozio', () => {
   const db = initDb(':memory:');
   caricaPacchetto(db);
-  expect(db.prepare("SELECT COUNT(*) FROM articolo WHERE oggetto_fonte = 'libri' AND categoria = 'libro' AND oggetto_chiave IN (SELECT chiave FROM libro)").pluck().get()).toBe(30);
+  // i trenta collegati dalla migrazione; gli articoli-libro creati dall'app («utente» senza fotografia della guida) si aggiungono e sono anch'essi collegati
+  expect(db.prepare("SELECT COUNT(*) FROM articolo WHERE oggetto_fonte = 'libri' AND categoria = 'libro' AND oggetto_chiave IN (SELECT chiave FROM libro) AND NOT (origine = 'utente' AND seed_json IS NULL)").pluck().get()).toBe(30);
+  expect(db.prepare("SELECT COUNT(*) FROM articolo WHERE categoria = 'libro' AND (oggetto_fonte IS NOT 'libri' OR oggetto_chiave NOT IN (SELECT chiave FROM libro))").pluck().get()).toBe(0);
   const videogiochi = db.prepare("SELECT chiave, negozio_chiave, prezzo, oggetto_chiave FROM articolo WHERE oggetto_fonte = 'videogiochi' ORDER BY chiave").all() as Array<{ chiave: string; negozio_chiave: string; prezzo: number; oggetto_chiave: string }>;
   expect(videogiochi.map((v) => v.chiave)).toEqual(['super-baron/featherman-seeker', 'super-baron/golfer-sarutahiko', 'super-baron/power-intuition', 'super-baron/punch-ouch', 'super-baron/train-of-life', 'yumenoshima/gambla-goemon', 'yumenoshima/star-forneus']);
   const attivita = new Map((db.prepare("SELECT chiave, costo FROM attivita WHERE tipo = 'videogioco'").all() as Array<{ chiave: string; costo: number }>).map((a) => [a.chiave, a.costo]));

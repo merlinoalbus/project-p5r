@@ -95,7 +95,11 @@ describe('le finestre dei Palazzi, dagli ingressi che collegaPalazziAiLuoghi cre
     const db = initDb(':memory:');
     runMigrations(db);
     caricaPacchetto(db);
-    // il pacchetto e' la fotografia della produzione, senza ingressi: li crea la funzione, a richiesta
+    // Il pacchetto e' la fotografia della produzione: gli ingressi della guida non ci sono, ma l'utente puo'
+    // aver messo collegamenti suoi verso un Palazzo (es. un passaggio interno al Palazzo di Kamoshida), che la
+    // funzione conta come «ingresso gia' presente». Qui si prova la funzione, non i dati dell'utente: si parte
+    // da un file senza spilli verso i Palazzi, e li crea la funzione, a richiesta.
+    db.prepare("DELETE FROM spillo WHERE riferimento_tipo = 'mappa' AND riferimento_chiave LIKE 'dungeon-%'").run();
     collegaPalazziAiLuoghi(db);
   });
   afterAll(() => closeDb());

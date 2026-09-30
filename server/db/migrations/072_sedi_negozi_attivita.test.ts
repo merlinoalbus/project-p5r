@@ -18,12 +18,14 @@ it('la sede viene dall’inverso di luogo.negozio e il quartiere segue la sede',
   expect(db.prepare("SELECT sede_chiave FROM negozio WHERE chiave = 'senza'").pluck().get()).toBeNull();
 });
 
-it('nel pacchetto 57 negozi su 60 e 29 attività su 30 hanno una sede esistente, i tre e l’una senza sono quelli dichiarati', () => {
+it('nel pacchetto i 60 negozi della guida e 29 attività su 30 hanno una sede esistente, salvo i dichiarati e le scelte dell’utente', () => {
   const db = initDb(':memory:');
   caricaPacchetto(db);
-  const negozi = db.prepare('SELECT chiave, sede_chiave, luogo_chiave FROM negozio').all() as Array<{ chiave: string; sede_chiave: string | null; luogo_chiave: string | null }>;
-  expect(negozi.length).toBe(60);
-  expect(negozi.filter((n) => n.sede_chiave === null).map((n) => n.chiave).sort()).toEqual(['home-shopping-tv', 'negozio-palazzo-niijima', 'tanaka-affari-loschi']);
+  const negozi = db.prepare('SELECT chiave, sede_chiave, luogo_chiave, origine, NOT (origine = \'utente\' AND seed_json IS NULL) AS dallaGuida FROM negozio').all() as Array<{ chiave: string; sede_chiave: string | null; luogo_chiave: string | null; origine: string; dallaGuida: number }>;
+  // il pacchetto è la fotografia dell'istanza: ai 60 della guida si aggiungono i negozi creati dall'app
+  expect(negozi.filter((n) => n.dallaGuida).length).toBe(60);
+  // senza sede per migrazione restano i tre dichiarati; un negozio corretto dall'app («utente») porta la sede che l'utente gli ha dato
+  expect(negozi.filter((n) => n.origine === 'seed' && n.sede_chiave === null).map((n) => n.chiave).sort()).toEqual(['home-shopping-tv', 'negozio-palazzo-niijima', 'tanaka-affari-loschi']);
   const attivita = db.prepare('SELECT chiave, sede_chiave, luogo_chiave FROM attivita').all() as Array<{ chiave: string; sede_chiave: string | null; luogo_chiave: string | null }>;
   expect(attivita.length).toBe(30);
   expect(attivita.filter((a) => a.sede_chiave === null).map((a) => a.chiave)).toEqual(['lettura-metropolitana']);

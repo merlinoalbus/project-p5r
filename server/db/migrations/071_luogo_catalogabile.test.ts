@@ -23,9 +23,11 @@ it('prende la regola da sblocco-luoghi e fotografa la riga della guida', () => {
 it('nel pacchetto i tredici luoghi con una regola la portano sulla riga, e tutti hanno la fotografia', () => {
   const db = initDb(':memory:');
   caricaPacchetto(db);
-  const r = db.prepare("SELECT COUNT(*) AS n, SUM(condizioni_json <> '[]') AS conRegola, SUM(seed_json IS NOT NULL) AS conSeed, SUM(origine = 'seed') AS seed FROM luogo").get() as { n: number; conRegola: number; conSeed: number; seed: number };
+  const r = db.prepare("SELECT COUNT(*) AS n, SUM(condizioni_json <> '[]') AS conRegola, SUM(seed_json IS NOT NULL) AS conSeed, SUM(origine = 'seed') AS seed, SUM(origine = 'utente' AND updated_at IS NOT NULL) AS modificati FROM luogo").get() as { n: number; conRegola: number; conSeed: number; seed: number; modificati: number };
   expect(r.conRegola).toBe(13);
   expect(r.conSeed).toBe(r.n);
-  expect(r.seed).toBe(r.n);
+  // il pacchetto è la fotografia dell'istanza: un luogo corretto dall'app diventa «utente» e tiene la fotografia della guida
+  expect(r.seed + r.modificati).toBe(r.n);
+  expect(r.seed).toBeGreaterThan(0);
   expect(JSON.parse(db.prepare("SELECT condizioni_json FROM luogo WHERE chiave = 'ichigaya/laghetto-ichigaya'").pluck().get() as string)).toEqual([{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'lettura', categoria: 'libro', chiave: 'vedetta-lacustre' }, { tipo: 'data', dal: '07-06' }] }]);
 });

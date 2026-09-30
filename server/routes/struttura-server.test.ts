@@ -41,9 +41,11 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     expect(diGiorno.find((n) => n.chiave === 'untouchable')?.disponibilita?.stato).toBe('bloccato');
     expect(diGiorno.find((n) => n.chiave === 'clinica-takemi')?.disponibilita?.stato).toBe('disponibile');
     expect(diSera.find((n) => n.chiave === 'clinica-takemi')?.disponibilita?.stato).toBe('bloccato');
-    // un articolo eredita gli orari (daNegozio) e porta lo sblocco che era del negozio
+    // un articolo eredita gli orari (daNegozio) e porta lo sblocco che era del negozio (uno che la guida lega al
+    // Confidente: alcune medicine l'utente le ha riscritte dall'app con la sola data)
     const takemi = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${sera}`)).body.data as NegozioDettaglioDto;
-    const a = takemi.articoliElenco[0];
+    const a = takemi.articoliElenco.find((x) => x.condizioni?.some((c) => c.tipo === 'confidente'))!;
+    expect(a).toBeDefined();
     expect(a.disponibilita?.requisiti.some((r) => r.daNegozio && r.tipo === 'fascia')).toBe(true);
     expect(a.condizioni?.some((c) => c.tipo === 'confidente')).toBe(true);
   });
@@ -51,18 +53,21 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
   it('la ricerca degli articoli filtra per più categorie, per stato d’acquisto e per disponibilità', async () => {
     const id = await partita({ nome: 'Ricerca', dataGioco: '12-15', fasciaGioco: 'sera' });
     const libriEGiochi = (await request(app).get('/api/compendio/articoli?categorie=libro,videogioco')).body.data as RicercaArticoliDto;
-    expect(libriEGiochi.totale).toBe(37);
+    // il pacchetto è la fotografia dell'istanza: il conteggio atteso si legge dal file (righe visibili di negozi visibili)
+    const visibili = (filtro: string) => getDb().prepare(`SELECT COUNT(*) FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ${filtro}`).pluck().get() as number;
+    expect(libriEGiochi.totale).toBe(visibili("AND a.categoria IN ('libro', 'videogioco')"));
+    expect(libriEGiochi.totale).toBeGreaterThanOrEqual(37);
     expect(libriEGiochi.articoli.every((x) => x.categoria === 'libro' || x.categoria === 'videogioco')).toBe(true);
     const bloccati = (await request(app).get(`/api/compendio/articoli?partita=${id}&disponibilita=bloccati`)).body.data as RicercaArticoliDto;
     expect(bloccati.totale).toBeGreaterThan(0);
     expect(bloccati.articoli.every((x) => x.disponibilita?.stato === 'bloccato')).toBe(true);
     const disponibili = (await request(app).get(`/api/compendio/articoli?partita=${id}&disponibilita=disponibili`)).body.data as RicercaArticoliDto;
-    expect(disponibili.totale + bloccati.totale).toBe(576);
+    expect(disponibili.totale + bloccati.totale).toBe(visibili(''));
     const primo = disponibili.articoli[0];
     await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: primo.chiave, fatto: true });
     const acquistati = (await request(app).get(`/api/compendio/articoli?partita=${id}&stato=acquistati`)).body.data as RicercaArticoliDto;
     expect(acquistati.articoli.map((x) => x.chiave)).toEqual([primo.chiave]);
-    expect(((await request(app).get(`/api/compendio/articoli?partita=${id}&stato=da-acquistare`)).body.data as RicercaArticoliDto).totale).toBe(575);
+    expect(((await request(app).get(`/api/compendio/articoli?partita=${id}&stato=da-acquistare`)).body.data as RicercaArticoliDto).totale).toBe(visibili('') - 1);
     expect((await request(app).get('/api/compendio/articoli?categoria=libro')).status).toBe(200);
   });
 

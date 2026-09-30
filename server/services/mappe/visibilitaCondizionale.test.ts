@@ -74,8 +74,11 @@ describe('visibilità condizionale dei pin', () => {
     // è lo stesso negozio dell'illustrazione del quartiere, e se chiude devono sparire tutti e
     // due. Quello che non deve mai avere condizioni è ciò che è strutturale, e la lista non è
     // scritta a mano qui: è `TIPI_STRUTTURALI`, la stessa che protegge il codice.
+    // Il pacchetto è la fotografia dell'istanza: la regola vale per ciò che viene dalla guida (origine «seed»).
+    // Le finestre che l'utente scrive a mano sui suoi spilli (un nemico solo in certi giorni, un punto di
+    // infiltrazione che cambia) sono scelte sue, e il runtime le tratta come i test qui sotto descrivono.
     const conCondizioni = getDb().prepare(`SELECT tipo, nome, condizioni_json FROM spillo
-      WHERE mappa_chiave LIKE 'nativo-%' AND condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')`)
+      WHERE mappa_chiave LIKE 'nativo-%' AND origine = 'seed' AND condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')`)
       .all() as Array<{ tipo: string; nome: string; condizioni_json: string }>;
     expect(conCondizioni.filter((s) => eStrutturale(s.tipo))
       .map((s) => `${s.tipo} «${s.nome}» ${s.condizioni_json}`)).toEqual([]);
@@ -90,9 +93,10 @@ describe('visibilità condizionale dei pin', () => {
     expect(quanti.n).toBeGreaterThan(1000);
   });
 
-  it('l’unica condizione in uso è la presenza, non il prerequisito', () => {
+  it('l’unica condizione in uso sugli spilli della guida è la presenza, non il prerequisito', () => {
     const tipi = new Set<string>();
-    for (const r of getDb().prepare("SELECT condizioni_json FROM spillo WHERE condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')")
+    // come sopra: la regola è quella dei dati della guida; le condizioni scritte dall'utente sui suoi spilli sono sue
+    for (const r of getDb().prepare("SELECT condizioni_json FROM spillo WHERE origine = 'seed' AND condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')")
       .all() as Array<{ condizioni_json: string }>) {
       for (const c of JSON.parse(r.condizioni_json) as Array<{ tipo: string }>) tipi.add(c.tipo);
     }

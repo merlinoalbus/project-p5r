@@ -7,8 +7,8 @@ import { closeDb, getDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
 import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
-import { creaSpillo, eliminaSpillo, esportaMappe, impostaRaccolto, importaMappe } from '../../services/mappe/mappeService.js';
-import { assegnaUidMancanti, identitaSpillo, uidSpillo } from '../../services/mappe/identitaSpillo.js';
+import { aggiornaSpillo, creaSpillo, eliminaSpillo, esportaMappe, impostaRaccolto, importaMappe } from '../../services/mappe/mappeService.js';
+import { assegnaUidMancanti, identitaSpillo, uidSpillo, uidValido } from '../../services/mappe/identitaSpillo.js';
 import { creaPartita } from '../../services/partiteService.js';
 
 /** Un file di gioco fermo alla 066 con tre spilli (due con la stessa identità), senza uid. */
@@ -57,16 +57,30 @@ describe('uid nell\'applicazione', () => {
   beforeEach(() => { initDb(':memory:'); caricaPacchetto(getDb()); });
   afterEach(() => closeDb());
 
-  it('il pacchetto porta uid deterministici su tutti gli spilli', () => {
-    const righe = getDb().prepare('SELECT mappa_chiave, area_guida_chiave, tipo, nome, x, y, riferimento_tipo, riferimento_chiave, uid FROM spillo ORDER BY id').all() as Array<{ mappa_chiave: string | null; area_guida_chiave: string | null; tipo: string; nome: string; x: number; y: number; riferimento_tipo: string | null; riferimento_chiave: string | null; uid: string }>;
+  it('il pacchetto porta un uid valido e unico su ogni spillo, deterministico su quelli della guida', () => {
+    const righe = getDb().prepare('SELECT mappa_chiave, area_guida_chiave, tipo, nome, x, y, riferimento_tipo, riferimento_chiave, uid, origine FROM spillo ORDER BY id').all() as Array<{ mappa_chiave: string | null; area_guida_chiave: string | null; tipo: string; nome: string; x: number; y: number; riferimento_tipo: string | null; riferimento_chiave: string | null; uid: string; origine: string }>;
     expect(righe.length).toBeGreaterThan(1000);
+    expect(righe.every((r) => uidValido(r.uid))).toBe(true);
+    expect(new Set(righe.map((r) => r.uid)).size).toBe(righe.length);
+    // Il pacchetto è la fotografia dell'istanza: gli spilli toccati dall'utente (spostati, rinominati) tengono
+    // l'uid di quando sono nati, quindi l'impronta dell'identità attuale vale solo per quelli della guida.
     const visti = new Map<string, number>();
-    for (const r of righe) {
+    for (const r of righe.filter((x) => x.origine === 'seed')) {
       const identita = identitaSpillo(r);
       const n = visti.get(identita) ?? 0;
       visti.set(identita, n + 1);
       expect(r.uid).toBe(uidSpillo(identita, n));
     }
+    expect(visti.size).toBeGreaterThan(1000);
+  });
+
+  it('spostare o rinominare uno spillo non ne cambia l\'uid', () => {
+    const creato = creaSpillo('citta-shibuya', { tipo: 'nota', nome: 'Da spostare', x: 7, y: 8 });
+    const uid = getDb().prepare('SELECT uid FROM spillo WHERE id = ?').pluck().get(creato.id) as string;
+    aggiornaSpillo(creato.id, { nome: 'Spostato', x: 70, y: 80 });
+    const dopo = getDb().prepare('SELECT nome, x, y, uid FROM spillo WHERE id = ?').get(creato.id);
+    expect(dopo).toEqual({ nome: 'Spostato', x: 70, y: 80, uid });
+    expect(uid).not.toBe(uidSpillo(identitaSpillo({ mappa_chiave: 'citta-shibuya', tipo: 'nota', nome: 'Spostato', x: 70, y: 80, riferimento_tipo: null, riferimento_chiave: null })));
   });
 
   it('uno spillo creato dall\'app riceve subito l\'uid della sua identità, e la stessa identità su un altro file dà lo stesso uid', () => {

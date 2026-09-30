@@ -87,7 +87,12 @@ describe('API mappe a livelli (Fase 13.1)', () => {
       expect(figlieTokyo.has(p) || radiciNonTokyo.has(p), `passaggio da Tokyo verso ${p}`).toBe(true);
     }
     const kamoshida = (await request(app).get('/api/mappe/dungeon-kamoshida')).body.data as MappaDto;
-    expect(kamoshida.spilli).toHaveLength(0); // Hierarchy alone must not manufacture physical passages.
+    // la sola gerarchia non fabbrica passaggi: quelli che ci sono li ha messi l'utente nell'editor (il pacchetto è la fotografia dell'istanza)
+    expect(kamoshida.spilli.filter((s) => s.origine === 'seed')).toHaveLength(0);
+    // e i passaggi dell'utente ci sono tutti (quanti ne ha il file), così il controllo qui sotto non passa su un elenco vuoto
+    // (i passaggi automatici verso le aree di un Palazzo della guida sono provati in sincronizzaMappe.test.ts)
+    expect(kamoshida.spilli.length).toBe(getDb().prepare("SELECT COUNT(*) FROM spillo WHERE mappa_chiave = 'dungeon-kamoshida'").pluck().get() as number);
+    expect(kamoshida.spilli.length).toBeGreaterThan(0);
     expect(kamoshida.spilli.every((s) => s.tipo === 'passaggio' && s.dettaglio?.tipo === 'mappa' && s.x >= 0 && s.x <= 100)).toBe(true);
     // Tokyo: posizioni stimate dalla mappa ufficiale (Shibuya al centro-sinistra), quando i passaggi sono quelli automatici della guida; Mementos: discesa verticale in ordine
     if (tokyo.origine === 'seed') expect(tokyoDett.spilli.find((s) => s.riferimento?.chiave === 'shibuya')).toMatchObject({ x: 34.5, y: 49.5 });

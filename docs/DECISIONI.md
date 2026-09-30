@@ -773,4 +773,16 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   «solo quando piove» restano visibili come da confermare finché il meteo non si segna.
 - `partitaDto.meteoOra` si calcola a ogni lettura della partita (qualche query per partita): trascurabile con poche partite.
 - Il pacchetto completo locale (`pacchetto/completo/gioco.db`, fuori da git) non è stato rigenerato: si porta alla 91 da
-  solo all'import nell'app (le migrazioni girano all'import); `pacchetto/gioco.db` in git è alla 91.
+  solo all'import nell'app (le migrazioni girano all'import); `pacchetto/gioco.db` in git è alla 91. (Superato lo stesso
+  giorno: entrambi rigenerati dall'export di produzione, vedi sotto.)
+
+### 2026-09-30 — Il pacchetto di gioco è l'export di produzione, così com'è
+- Richiesta dell'utente: rendere l'export di produzione il nuovo pacchetto da caricare via NAS; alla domanda su tre
+  punti emersi dall'analisi (descrizioni «effetto» svuotate su 15 articoli salvati a mano, sede tolta a Prossimo Asso,
+  spilli strutturali con finestre scritte dall'utente) la risposta: «la produzione attuale è quella corretta», il secondo
+  «fuori ambito». Nessun dato è stato toccato: il pacchetto è la fotografia dell'istanza.
+- I test che contavano righe del pacchetto vecchio ora leggono l'atteso dal file o valgono per ciò che viene dalla guida;
+  le condizioni che l'utente scrive sui suoi spilli non sono vincolate dalle regole sui dati della guida.
+- Da proporre a parte (richiesta dell'utente nella stessa risposta): «Raccolto/Non raccolto» come stato dello spillo e
+  visibilità di uno spillo in base allo stato di uno o più altri spilli, in AND o in OR (es. la porta bloccata visibile
+  solo se il meccanismo non è raccolto).

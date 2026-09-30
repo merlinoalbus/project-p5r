@@ -11,6 +11,15 @@ import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArti
 
 const app = createApp();
 
+/**
+ * Il pacchetto è la fotografia dell'istanza (negozi e articoli corretti, creati o nascosti dall'app):
+ * i conteggi attesi si leggono dal file con una regola indipendente — righe non nascoste di negozi non nascosti.
+ */
+function articoliVisibili(categoria?: string): number {
+  return getDb().prepare(`SELECT COUNT(*) FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
+    WHERE a.nascosto = 0 AND n.nascosto = 0 ${categoria ? 'AND a.categoria = ?' : ''}`).pluck().get(...(categoria ? [categoria] : [])) as number;
+}
+
 describe('API negozi e inventario', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
@@ -19,11 +28,13 @@ describe('API negozi e inventario', () => {
   });
   afterAll(() => closeDb());
 
-  it('60 negozi con conteggi, quartiere e Confidente; scheda Untouchable con 218 articoli e fonti', async () => {
+  it('i negozi visibili con conteggi, quartiere e Confidente; scheda Untouchable con 218 articoli e fonti', async () => {
     const n = (await request(app).get('/api/compendio/negozi')).body.data as NegozioRiassuntoDto[];
-    expect(n).toHaveLength(60);
-    // 575 della guida + l'articolo di Star Forneus, che la migrazione 073 ha creato da Yumenoshima
-    expect(n.reduce((s, x) => s + x.articoli, 0)).toBe(576);
+    expect(n).toHaveLength(getDb().prepare('SELECT COUNT(*) FROM negozio WHERE nascosto = 0').pluck().get() as number);
+    expect(n.length).toBeGreaterThanOrEqual(60);
+    // gli articoli visibili: quelli della guida (con Star Forneus, creato dalla 073) più i creati, meno i nascosti
+    expect(n.reduce((s, x) => s + x.articoli, 0)).toBe(articoliVisibili());
+    expect(articoliVisibili()).toBeGreaterThan(500);
     const u = n.find((x) => x.chiave === 'untouchable')!;
     expect(u).toMatchObject({ nome: 'Untouchable', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', articoli: 218 });
     expect(u.confidente).toEqual({ chiave: 'iwai', nome: expect.stringContaining('Iwai') });
@@ -43,7 +54,8 @@ describe('API negozi e inventario', () => {
     expect(r.totale).toBeGreaterThanOrEqual(1);
     expect(r.articoli[0].negozioNome).toBe('Untouchable');
     r = (await request(app).get('/api/compendio/articoli?categoria=consumabile')).body.data as RicercaArticoliDto;
-    expect(r.totale).toBe(101);
+    expect(r.totale).toBe(articoliVisibili('consumabile'));
+    expect(r.totale).toBeGreaterThan(90);
     expect(r.articoli.every((a) => a.categoria === 'consumabile')).toBe(true);
     r = (await request(app).get('/api/compendio/articoli?per=Ann&categoria=arma')).body.data as RicercaArticoliDto;
     expect(r.totale).toBeGreaterThan(0);
@@ -68,11 +80,13 @@ describe('API negozi e inventario', () => {
     expect((await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: 'untouchable/kogatana-nera' })).status).toBe(400);
     // La clinica apre «dal 15 aprile, con l'avvio del Confidente di Takemi»: ora è una condizione vera
     // (Confidente Takemi almeno rango 1), non più una frase ignorata, quindi il Confidente va avviato.
+    // Alcune medicine le ha riscritte l'utente (dal 16 aprile): si compra la prima davvero disponibile quel giorno.
     getDb().prepare("UPDATE confidente_partita SET sbloccato = 1, rango = 1 WHERE partita_id = ? AND confidente_chiave = 'takemi'").run(id);
     await request(app).put(`/api/partite/${id}/giorno`).send({ data: '04-15' });
     const schedaTakemiPrima = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
-    const medicinaDisponibile = schedaTakemiPrima.articoliElenco[0];
-    await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: medicinaDisponibile.chiave, fatto: true });
+    const medicinaDisponibile = schedaTakemiPrima.articoliElenco.find((x) => x.disponibilita?.stato === 'disponibile')!;
+    expect(medicinaDisponibile).toBeDefined();
+    expect((await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: medicinaDisponibile.chiave, fatto: true })).status).toBe(200);
     ricaricaPacchetto(getDb());
     const dopo = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
     expect(dopo.acquistati).toBe(1);
@@ -125,7 +139,7 @@ describe('API negozi e inventario', () => {
       db.exec("UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET condizioni_json = '[]', orari_json = NULL");
       const id = ((await request(app).post('/api/partite').send({ nome: 'Catalogo completo' })).body.data as { id: number }).id;
       const ricerca = (await request(app).get(`/api/compendio/articoli?partita=${id}`)).body.data as RicercaArticoliDto;
-      expect(ricerca.totale).toBe(576);
+      expect(ricerca.totale).toBe(articoliVisibili());
       expect(ricerca.totale).toBeGreaterThan(300);
       expect(ricerca.articoli).toHaveLength(300);
       expect(ricerca.articoli.every((a) => a.disponibilita?.stato === 'disponibile')).toBe(true);

@@ -26,11 +26,12 @@ it('unisce le condizioni del negozio a quelle dell’articolo, svuota il negozio
   expect(db.prepare("SELECT condizioni_json FROM negozio WHERE chiave = 'n'").pluck().get()).toBe('[]');
 });
 
-it('nel pacchetto nessun negozio porta condizioni e gli articoli di Takemi chiedono il Confidente', () => {
+it('nel pacchetto nessun negozio porta condizioni e gli articoli di Takemi della guida chiedono il Confidente', () => {
   const db = initDb(':memory:');
   caricaPacchetto(db);
   expect(db.prepare("SELECT COUNT(*) FROM negozio WHERE condizioni_json IS NOT NULL AND condizioni_json <> '[]'").pluck().get()).toBe(0);
-  const takemi = db.prepare("SELECT condizioni_json FROM articolo WHERE negozio_chiave = 'clinica-takemi'").all() as Array<{ condizioni_json: string }>;
+  // quelli che l'utente ha riscritto dall'app (origine «utente») portano le sue condizioni, non quella della migrazione
+  const takemi = db.prepare("SELECT condizioni_json FROM articolo WHERE negozio_chiave = 'clinica-takemi' AND origine = 'seed'").all() as Array<{ condizioni_json: string }>;
   expect(takemi.length).toBeGreaterThan(0);
   for (const a of takemi) expect(JSON.parse(a.condizioni_json)).toContainEqual({ tipo: 'confidente', confidente: 'takemi', rango: 1 });
   expect(condizioni(db, 'tanaka-affari-loschi/hercules-anklet')).toContainEqual({ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'nero' });
