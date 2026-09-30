@@ -37,7 +37,8 @@ export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidenteP
   const rossi = sem.requisiti.filter((r) => r.stato === 'rosso');
   if (rossi.length > 0) return { tipo: 'bloccata', motivo: rossi.map((r) => (r.dettaglio ? `${r.testo} (${r.dettaglio})` : r.testo)).join(' · ') };
   if (sem.pronto || sem.requisiti.every((r) => r.stato === 'verde')) return { tipo: 'consigliata', motivo: `requisiti del rango ${sem.rango} soddisfatti` };
-  const grigi = sem.requisiti.filter((r) => r.stato === 'grigio');
+  // le avvertenze (`bloccante: false`) non sono «da confermare»: si controllano nel gioco e non fermano niente
+  const grigi = sem.requisiti.filter((r) => r.stato === 'grigio' && r.bloccante !== false);
   return { tipo: 'neutra', motivo: grigi.length > 0 ? `da confermare: ${grigi.map((r) => r.testo).join(' · ')}` : null };
 }
 

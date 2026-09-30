@@ -16,6 +16,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
+import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { PageState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { Segmenti } from '../components/shared/Segmenti';
@@ -36,14 +37,16 @@ const ancoraData = (data: string) => `domande-${data}`;
 function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: DomandaDto; partitaId: number | null; onCambiata: (r: DomandeDto) => void; onCorretta: () => void; evidenzia?: boolean }) {
   const [occupato, setOccupato] = useState(false);
   // Solo dove la guida scrive «Conoscenza +1 nota» (le domande in classe): gli esami «contribuiscono alla
-  // classifica» e i quiz in TV parlano di «aumento», e per quelli la Dote non si accredita da qui.
+  // classifica» e i quiz in TV parlano di «aumento», e per quelli non c'è una nota da ricordare.
   const daConoscenza = /Conoscenza \+/.test(d.ricompensa);
   const segna = async (fatta: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
     try {
-      onCambiata(await impostaDomandaFatta(partitaId, d.id, fatta, fatta && daConoscenza));
-      if (fatta && daConoscenza) notifica('success', 'Domanda segnata: Conoscenza +1 nota registrata nelle Doti.');
+      const esito = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && daConoscenza);
+      onCambiata(esito);
+      // la nota di Conoscenza si segna a mano nelle Doti: l'avviso la ricorda
+      avvisaDotiDaSegnare(esito.daSegnare, 'Domanda segnata');
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {

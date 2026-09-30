@@ -5,7 +5,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
-import { aggiornaDote } from './partiteService.js';
+import { nomeDote, puntiDaNote } from './partiteService.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 
 interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
@@ -48,23 +48,26 @@ export function domande(partitaId?: number): DomandeDto {
   return { domande: tutte, esami: esami(), premi: premi ? (JSON.parse(premi.json) as DomandeDto['premi']) : null, dataGioco, prossime, fatte: fatte.size, totale: tutte.length };
 }
 
-/** Segna una domanda come fatta (o no); con `conoscenza` aggiunge una nota alla Dote Conoscenza e registra l'evento. */
+/** Segna una domanda come fatta (o no) e registra l'evento. Con `conoscenza` la risposta vale una nota di Conoscenza: la
+ *  risposta la dice (`daSegnare`), ma le Doti si segnano a mano (scelta dell'utente, 2026-09-30) e qui non si toccano. */
 export function impostaDomandaFatta(partitaId: number, domandaId: number, fatta: boolean, conoscenza: boolean): DomandeDto {
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const d = prepared('SELECT * FROM domanda WHERE id = ?').get(domandaId) as RigaDomanda | undefined;
   if (!d) throw httpErrors.notFound('domanda-non-trovata', `La domanda ${domandaId} non esiste.`);
   const adesso = nowIso();
+  let nuova = false;
   getDb().transaction(() => {
     if (fatta) {
       const info = prepared('INSERT OR IGNORE INTO domanda_partita (partita_id, domanda_id, fatta_at) VALUES (?, ?, ?)').run(partitaId, domandaId, adesso);
       if (info.changes > 0) {
-        if (conoscenza) aggiornaDote(partitaId, 'conoscenza', { note: 1 });
-        registraEvento(partitaId, 'domanda-risposta', `Domanda del ${d.data} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ' · Conoscenza +1 nota' : ''}`, { domandaId, conoscenza });
+        nuova = true;
+        registraEvento(partitaId, 'domanda-risposta', `Domanda del ${d.data} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ' · il gioco dà Conoscenza +1 nota (da segnare nelle Doti)' : ''}`, { domandaId, conoscenza });
       }
     } else {
       prepared('DELETE FROM domanda_partita WHERE partita_id = ? AND domanda_id = ?').run(partitaId, domandaId);
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return domande(partitaId);
+  const esito = domande(partitaId);
+  return nuova && conoscenza ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1), note: 1 }] } : esito;
 }

@@ -984,6 +984,22 @@
     --chip-bordo: var(--color-primary);
     color: var(--color-primary);
   }
+  /* ---- Momento della giornata e meteo (Partita → Oggi): una riga sola ----
+     «Giorno», «Sera», un separatore e le quattro icone del meteo della fascia attiva (44 px, 2 px fra l'una e l'altra:
+     182 px): ~300 px in tutto, dentro la colonna più stretta (325 px, la Home sul tablet a 768 px); se mai non ci
+     stesse, le icone vanno a capo tutte insieme invece di schiacciare il testo. */
+  .momento-meteo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .momento-meteo__fascia { justify-content: center; gap: 4px; padding-inline: 8px; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+  .momento-meteo__separatore { width: 1px; align-self: stretch; margin-block: 6px; background: var(--color-border); }
+  /* l'allerta del gioco sull'angolo del pulsante della sua fascia: sopra, non accanto, così non allarga la riga */
+  .momento-meteo__allerta { position: absolute; top: 1px; right: 3px; line-height: 0; color: var(--color-warning); pointer-events: none; }
+  .meteo-fascia { display: grid; flex-shrink: 0; grid-template-columns: repeat(4, 44px); gap: 2px; }
+  /* un valore che vale ma non l'hai scelto tu (il meteo della guida): si vede, più tenue della scelta vera */
+  .chip--dalla-guida {
+    --chip-sfondo: color-mix(in srgb, var(--color-primary) 7%, var(--color-bg-secondary));
+    --chip-bordo: color-mix(in srgb, var(--color-primary) 45%, transparent);
+    color: var(--color-text-primary);
+  }
 
   /* ---- Griglia della Home: tre disposizioni diverse, una per formato ----
      Telefono: tutto incolonnato. Tablet: carta a tutta larghezza, poi guida e mappa affiancate.
@@ -1004,7 +1020,8 @@
     .home-oggi, .home-mappa { min-height: 0; }
     /* solo il contenitore della guida riempie l'area: il titolo «Oggi» resta della sua altezza */
     .home-oggi > .riempi-figli { flex: 1 1 auto; min-height: 0; }
-    .home-mappa > * { height: 100%; min-height: 0; }
+    /* la barra col pulsante della mappa sta sopra, la mappa riempie il resto */
+    .home-mappa > :last-child { flex: 1 1 auto; min-height: 0; }
   }
   @media (min-width: 1360px) {
     .home-griglia {
@@ -1013,6 +1030,58 @@
       grid-template-rows: auto minmax(0, 1fr);
     }
   }
+
+  /* ---- Mappa della Home a scomparsa (richiesta dell'utente, 2026-09-30) ----
+     «Nascondi la mappa» la chiude in una linguetta sul bordo destro e la sua parte di pagina va a carta e guida: da 1024 px
+     la carta a sinistra e la guida del giorno a destra, alta quanto la pagina (a 1366×657 la guida passava da pochi pixel
+     a tutta la colonna). Il tocco sulla linguetta la riapre; col mouse (puntatore vero) passarci sopra la fa uscire da
+     destra **sopra** il contenuto, e resta finché il puntatore ci sta sopra; «Tieni aperta» la rimette al suo posto.
+     La mappa resta montata anche chiusa (nascosta con `visibility`): uscendo non si ricarica e ha già le sue misure. */
+  .home-griglia { position: relative; }
+  .home-mappa { display: flex; flex-direction: column; gap: 6px; }
+  .home-mappa__barra { display: flex; justify-content: flex-end; flex-shrink: 0; }
+  .home-griglia--mappa-chiusa { grid-template-areas: "carta" "oggi"; }
+  .home-griglia--mappa-chiusa .home-mappa--a-scomparsa {
+    position: absolute; top: 0; right: 0; bottom: 0; width: min(62%, 860px); z-index: 30;
+    padding: 8px; background: var(--color-bg-secondary); border-left: 1px solid var(--color-border);
+    box-shadow: -10px 0 28px rgb(0 0 0 / .5);
+    transform: translateX(calc(100% + 16px)); visibility: hidden;
+    transition: transform .2s ease, visibility 0s linear .2s;
+  }
+  .home-linguetta {
+    position: absolute; top: 50%; right: 0; z-index: 20; transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px;
+    background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-right: 0; border-radius: 8px 0 0 8px;
+    color: var(--color-text-secondary); font-family: var(--font-display); text-transform: uppercase; letter-spacing: .06em; font-size: 13px;
+  }
+  .home-linguetta:hover, .home-linguetta:focus-visible { color: var(--color-primary); }
+  .home-linguetta__testo { writing-mode: vertical-rl; transform: rotate(180deg); }
+  @media (hover: hover) and (pointer: fine) {
+    .home-linguetta:hover ~ .home-mappa--a-scomparsa, .home-griglia--mappa-chiusa .home-mappa--a-scomparsa:hover {
+      transform: none; visibility: visible; transition: transform .2s ease, visibility 0s;
+    }
+  }
+  @media (min-width: 1024px) {
+    .home-griglia--mappa-chiusa {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-areas: "carta oggi";
+      grid-template-rows: minmax(0, 1fr);
+      padding-right: 40px;
+    }
+    /* la carta affiancata è più stretta e più alta: margine verticale ridotto perché a 1024×690 stia intera; se su uno
+       schermo più basso ancora non ci stesse, scorre lei (accanto alla guida, mai dentro) */
+    .home-griglia--mappa-chiusa .home-carta { overflow-y: auto; overscroll-behavior: contain; padding-block: 8px; }
+  }
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .home-griglia--mappa-chiusa { grid-template-columns: minmax(0, 1fr); grid-template-areas: "carta" "oggi"; padding-right: 40px; }
+  }
+  /* sul telefono la mappa sta in fondo alla pagina: chiusa, al suo posto il pulsante per riaprirla */
+  @media (max-width: 767px) {
+    .home-griglia--mappa-chiusa .home-mappa--a-scomparsa { display: none; }
+    .home-linguetta { position: static; transform: none; flex-direction: row; justify-content: center; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px; }
+    .home-linguetta__testo { writing-mode: horizontal-tb; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .home-griglia--mappa-chiusa .home-mappa--a-scomparsa { transition: none; } }
 
   /* ---- Carta della partita in Home: stella e tessere ----
      La riga stella + tessere e in colonna sul telefono e in riga da 640 px. La larghezza della stella segue la finestra:
@@ -1245,6 +1314,25 @@
 
   /* ---- Etichette di navigazione in carattere «menu» ---- */
   .voce-menu { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 400; }
+  /* ---- Menu laterale richiudibile (≥ lg) ----
+     Il posto nella pagina lo tiene `.barra-laterale` (210 px o 64 px); il pannello ci sta sopra in assoluto, così,
+     ridotto, al passaggio del mouse (o col fuoco da tastiera) si allarga **sopra** il contenuto senza spostarlo.
+     Il passaggio vale solo con un puntatore vero (`hover: hover` e `pointer: fine`): sul tablet vale il pulsante. */
+  .barra-laterale { position: relative; width: 210px; transition: width .18s ease; }
+  .barra-laterale__pannello { position: absolute; inset: 0 auto 0 0; width: 210px; z-index: 40; overflow: hidden; transition: width .18s ease, box-shadow .18s ease; }
+  .barra-laterale__etichetta { white-space: nowrap; }
+  .barra-laterale--ridotta { width: 64px; }
+  .barra-laterale--ridotta .barra-laterale__pannello { width: 64px; }
+  .barra-laterale--ridotta .barra-laterale__etichetta { display: none; }
+  /* solo il fuoco da tastiera: una voce toccata sul tablet resta a fuoco, e con `:focus-within` il menu resterebbe
+     aperto sopra la pagina appena aperta */
+  .barra-laterale--ridotta:has(:focus-visible) .barra-laterale__pannello { width: 210px; box-shadow: 8px 0 24px rgb(0 0 0 / .45); }
+  .barra-laterale--ridotta:has(:focus-visible) .barra-laterale__etichetta { display: revert; }
+  @media (hover: hover) and (pointer: fine) {
+    .barra-laterale--ridotta:hover .barra-laterale__pannello { width: 210px; box-shadow: 8px 0 24px rgb(0 0 0 / .45); }
+    .barra-laterale--ridotta:hover .barra-laterale__etichetta { display: revert; }
+  }
+  @media (prefers-reduced-motion: reduce) { .barra-laterale, .barra-laterale__pannello { transition: none; } }
 
   /* ---- KPI ---- */
   .kpi-tile {

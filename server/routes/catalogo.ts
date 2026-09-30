@@ -12,6 +12,7 @@ import {
   paramsAgendaGiorno, paramsAgendaVoce, paramsElementoCatalogo, paramsTipoCatalogo, queryAgenda, queryNascosti,
 } from '../schemas/catalogo.js';
 import { httpErrors } from '../utils/httpError.js';
+import { avanzaSeGiornoCompleto } from '../services/percorsoService.js';
 import type { TipoCatalogo } from '../../shared/types.js';
 
 const router = Router();
@@ -64,7 +65,10 @@ router.delete('/agenda/azioni/:id', validate({ params: paramsAgendaVoce }), (req
 /** Spunta di una cosa da fare nella partita: applica i suoi effetti (con le note del Confidente, se è un incontro). */
 router.put('/agenda/azioni/:id/fatta', validate({ params: paramsAgendaVoce, body: bodyAzioneFatta }), (req, res) => {
   const b = req.body as { partita: number; fatta: boolean; noteRisposta?: 1 | 2 | 3 };
-  res.json(impostaAzioneFatta(b.partita, Number(req.params.id), b.fatta, { noteRisposta: b.noteRisposta }));
+  const azione = impostaAzioneFatta(b.partita, Number(req.params.id), b.fatta, { noteRisposta: b.noteRisposta });
+  // come per le azioni della guida: l'ultima attività del giorno corrente spuntata fa passare al giorno dopo
+  const giornoAvanzato = b.fatta ? avanzaSeGiornoCompleto(b.partita, azione.giorno) : null;
+  res.json(giornoAvanzato ? { ...azione, giornoAvanzato } : azione);
 });
 
 // ---- Catalogo ----

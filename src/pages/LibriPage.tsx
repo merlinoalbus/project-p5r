@@ -18,6 +18,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
+import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { PageState } from '../components/shared/PageState';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
@@ -84,6 +85,8 @@ export function LibriPage() {
         if (desiderato === confermato || partitaIdRef.current !== partitaCorrente) break;
         const aggiornato = await impostaProgressoLibro(partitaCorrente, libro.chiave, desiderato);
         confermatiRef.current.set(coda, aggiornato.progresso);
+        // il libro finito dà le sue Doti: si segnano a mano, l'avviso le ricorda
+        avvisaDotiDaSegnare(aggiornato.daSegnare, aggiornato.nomeIt ?? aggiornato.nome);
         if (partitaIdRef.current === partitaCorrente) sostituisciLibro(aggiornato);
       }
     } catch (err) {

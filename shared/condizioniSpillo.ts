@@ -59,6 +59,14 @@ export const EVENTI_STORIA = [
   { chiave: 'evento-akechi', nome: 'Evento con Akechi (entra in squadra)', membro: 'akechi' },
   { chiave: 'primo-strumento-creato', nome: 'Primo strumento di infiltrazione creato' },
   { chiave: 'biliardo-rango-tecnico-3', nome: 'Biliardo: rango tecnico 3 raggiunto' },
+  // Fatti che i requisiti dei Confidenti chiedono e che nessun altro dato della partita sa dedurre
+  // (migrazione 090): si segnano in Partita → Progressi o col «Condizione soddisfatta» del Confidente,
+  // che scrive lo stesso dato.
+  { chiave: 'caffe-leblanc', nome: 'Caffè preparato al Leblanc' },
+  { chiave: 'duello-akechi-vinto', nome: 'Duello con Akechi vinto nei Memento' },
+  { chiave: 'pietra-sacra-comprata', nome: 'Pietra Sacra comprata da Chihaya' },
+  { chiave: 'chiamata-kawakami-pagata', nome: 'Chiamata a Kawakami pagata' },
+  { chiave: 'oratore-shibuya-ascoltato', nome: 'Oratore di Shibuya ascoltato' },
 ] as const;
 export type EventoStoria = (typeof EVENTI_STORIA)[number]['chiave'];
 /** Il Ladro che fa avvenire l'evento, o null se l'evento si segna a mano. */

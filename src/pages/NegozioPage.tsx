@@ -30,7 +30,7 @@ export function NegozioPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   // giorno corrente e fascia della giornata decidono la disponibilità: al cambio si ricarica
-  const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}`;
+  const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
   const dati = useCarica(() => getNegozio(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
   const n = dati.dati;
   useDocumentTitle(n?.nome ?? 'Negozio');

@@ -14,19 +14,28 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 | `palazzo` | 15 | automatica quando il boss del Palazzo è segnato «ottenuto» nella Guida; altrimenti grigio da confermare |
 | `richiesta` | 11 | automatica quando la richiesta dei Mementos è completata nella partita; altrimenti grigio da confermare |
 | `persona-abilita` | 10 | automatica: la Persona richiesta con quella skill nella scorta della partita (Gemelle Custodi) |
-| `manuale` | 6 | **sempre grigio**: solo la conferma dell'utente lo rende verde |
+| `evento` | 5 | dall'**evento di storia** segnato nella partita (Partita → Progressi, o «Condizione soddisfatta» sul Confidente, che scrive lo stesso dato): verde se segnato, grigio (bloccante) finché non lo è |
+| `avviso` | 1 | **non blocca**: grigio con l'icona di avvertenza, da controllare nel gioco; non si conferma e non conta in «n di m requisiti» |
 | `confidente` | 1 | automatica: rango dell'altro Confidente nella partita |
 
-## Requisiti manuali (non verificabili dall'app)
+`manuale` (grigio finché confermato a mano) resta valutato per i pacchetti che lo usano ancora, ma nel seed non c'è più:
+la migrazione 090 (2026-09-30) ha convertito le sei righe manuali, dopo che Sojiro era rimasto fermo al rango 3.
 
-| Confidente | Rango | Requisito |
+## Requisiti da segnare come eventi (migrazione 090)
+
+| Confidente | Rango | Requisito | Evento di storia |
+|---|---|---|---|
+| Sojiro Sakura | 3 | Aver preparato il caffè al Leblanc almeno una volta | `caffe-leblanc` — Caffè preparato al Leblanc |
+| Goro Akechi | 8 | Bisogna VINCERE il duello uno contro uno con Akechi nei Memento: se si perde il Confidente non avanza e occorre chiedergli la rivincita. | `duello-akechi-vinto` — Duello con Akechi vinto nei Memento |
+| Chihaya Mifune | 1 | Bisogna comprare da Chihaya la Pietra Sacra per 100.000 yen: senza l'acquisto il Confidente non si sviluppa. | `pietra-sacra-comprata` — Pietra Sacra comprata da Chihaya |
+| Sadayo Kawakami | 1 | Occorre pagare i 5.000 yen della chiamata al servizio di cameriere. | `chiamata-kawakami-pagata` — Chiamata a Kawakami pagata |
+| Toranosuke Yoshida | 1 | Sbloccare il Confidente parlando in Piazza della Stazione di Shibuya con l'Oratore di strada (Yoshida) | `oratore-shibuya-ascoltato` — Oratore di Shibuya ascoltato |
+
+## Avvertenze (non bloccano)
+
+| Confidente | Rango | Avvertenza |
 |---|---|---|
 | Futaba Sakura | 4 | L'evento del Rango 4 richiede che la scuola sia aperta: non è disponibile durante le chiusure scolastiche. |
-| Goro Akechi | 8 | Bisogna VINCERE il duello uno contro uno con Akechi nei Memento: se si perde il Confidente non avanza e occorre chiedergli la rivincita. |
-| Sojiro Sakura | 3 | Aver preparato il caffè al Leblanc almeno una volta |
-| Chihaya Mifune | 1 | Bisogna comprare da Chihaya la Pietra Sacra per 100.000 yen: senza l'acquisto il Confidente non si sviluppa. |
-| Sadayo Kawakami | 1 | Occorre pagare i 5.000 yen della chiamata al servizio di cameriere. |
-| Toranosuke Yoshida | 1 | Sbloccare il Confidente parlando in Piazza della Stazione di Shibuya con l'Oratore di strada (Yoshida) |
 
 ## Gemelle Custodi: semaforo automatico sulla scorta
 
@@ -137,7 +146,7 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 ### Sojiro Sakura (Hierophant)
 
 - Rango 1 · `palazzo` — `kamoshida`: Aver completato il Palazzo di Kamoshida
-- Rango 3 · `manuale`: Aver preparato il caffè al Leblanc almeno una volta
+- Rango 3 · `evento` — `caffe-leblanc`: Aver preparato il caffè al Leblanc almeno una volta
 - Rango 5 · `data` — `08-22`: Non disponibile prima del 22 agosto (scadenza del Palazzo di Futaba)
 - Rango 7 · `dote` — `gentilezza`: Gentilezza al massimo (Rango 5 - Angelico)
 - Rango 9 · `richiesta` — `Lo zio ingordo`: Completare la richiesta dei Mementos "Lo zio ingordo"
@@ -172,7 +181,7 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 - Rango 6 · `data` — `09-03`: Non avviabile prima del 3 settembre
 - Rango 7 · `data` — `11-02`: Non avviabile prima del 2 novembre
 - Rango 7 · `dote` — `conoscenza`: Conoscenza al rango 4 (Dotto)
-- Rango 8 · `manuale`: Bisogna VINCERE il duello uno contro uno con Akechi nei Memento: se si perde il Confidente non avanza e occorre chiedergli la rivincita.
+- Rango 8 · `evento` — `duello-akechi-vinto`: Bisogna VINCERE il duello uno contro uno con Akechi nei Memento: se si perde il Confidente non avanza e occorre chiedergli la rivincita.
 - Rango 9 · `palazzo` — `shido`: Si attiva automaticamente durante il Palazzo di Shido
 - Rango 10 · `palazzo` — `shido`: Si attiva automaticamente durante il Palazzo di Shido
 
@@ -180,14 +189,14 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 
 - Rango 1 · `data` — `08-31`: Disponibile dal 31 agosto: il confidente si sblocca quando Futaba invita il protagonista ad Akihabara dopo l'incontro al Leblanc con Sojiro
 - Rango 2 · `dote` — `gentilezza`: Gentilezza al rango 4 (Altruista)
-- Rango 4 · `manuale`: L'evento del Rango 4 richiede che la scuola sia aperta: non è disponibile durante le chiusure scolastiche.
+- Rango 4 · `avviso` (non blocca): L'evento del Rango 4 richiede che la scuola sia aperta: non è disponibile durante le chiusure scolastiche.
 - Rango 8 · `richiesta` — `È una figlia o un buono pasto?`: Completare la richiesta dei Mementos "E una figlia o un buono pasto?" (sbloccata al rango 7)
 
 ### Chihaya Mifune (Fortune)
 
 - Rango 1 · `richiesta` — `Un fidanzato violento`: Completare la richiesta dei Mementos "Un fidanzato violento" prima di poter far salire il Rango Confidente
 - Rango 1 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
-- Rango 1 · `manuale`: Bisogna comprare da Chihaya la Pietra Sacra per 100.000 yen: senza l'acquisto il Confidente non si sviluppa.
+- Rango 1 · `evento` — `pietra-sacra-comprata`: Bisogna comprare da Chihaya la Pietra Sacra per 100.000 yen: senza l'acquisto il Confidente non si sviluppa.
 - Rango 2 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
 - Rango 3 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
 - Rango 4 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
@@ -233,7 +242,7 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 
 - Rango 1 · `data` — `06-04`: Confidente disponibile solo dopo l'evento di sblocco: il 3 giugno parte l'Operazione Guardia MAIDica, il 4 giugno si parla con Kawakami a scuola ottenendo i contatti
 - Rango 1 · `dote` — `coraggio`: Coraggio al rango 3 (Coraggioso): senza questo livello non e possibile chiamare Kawakami
-- Rango 1 · `manuale`: Occorre pagare i 5.000 yen della chiamata al servizio di cameriere.
+- Rango 1 · `evento` — `chiamata-kawakami-pagata`: Occorre pagare i 5.000 yen della chiamata al servizio di cameriere.
 - Rango 9 · `richiesta` — `Le fatiche di una maid in cattedra`: Completare la richiesta dei Mementos "Le fatiche di una maid in cattedra"
 
 ### Ichiko Ohya (Devil)
@@ -272,7 +281,7 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 ### Toranosuke Yoshida (Sun)
 
 - Rango 1 · `meteo` — `non-piove`: Yoshida non è disponibile se piove.
-- Rango 1 · `manuale`: Sbloccare il Confidente parlando in Piazza della Stazione di Shibuya con l'Oratore di strada (Yoshida)
+- Rango 1 · `evento` — `oratore-shibuya-ascoltato`: Sbloccare il Confidente parlando in Piazza della Stazione di Shibuya con l'Oratore di strada (Yoshida)
 - Rango 2 · `meteo` — `non-piove`: Yoshida non è disponibile se piove.
 - Rango 3 · `meteo` — `non-piove`: Yoshida non è disponibile se piove.
 - Rango 4 · `meteo` — `non-piove`: Yoshida non è disponibile se piove.

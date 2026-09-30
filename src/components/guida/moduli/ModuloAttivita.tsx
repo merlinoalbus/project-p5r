@@ -61,11 +61,11 @@ export function ModuloAttivita({ dati, imposta, disabilitato }: PropsModulo) {
         )}
         <Campo nome="dettagli" etichetta="Come funziona, premi, note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={4000} />
       </Griglia>
-      {/* contata per volte (un lavoro): ogni turno dà i suoi punti, il primo le voci senza la spunta, gli altri quelle «dalla seconda volta in poi» */}
+      {/* contata per volte (un lavoro): ogni turno dice i suoi punti (da segnare a mano), il primo le voci senza la spunta, gli altri quelle «dalla seconda volta in poi» */}
       <EditorEffetti voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} disabilitato={disabilitato} {...nomi}
         conRipetuto={testoDi(dati.tracciamento) === 'svolta'}
         aiuto={testoDi(dati.tracciamento) === 'svolta'
-          ? 'Ogni turno registrato (dalla spunta della giornata o dal contatore in Partita → Progressi) dà questi punti: il primo le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
+          ? 'Il gioco dà questi punti a ogni turno: l\'app te li ricorda quando registri un turno (dalla spunta della giornata o dal contatore in Partita → Progressi) e li segni tu nella scheda Doti. Il primo turno le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
           : undefined} />
     </div>
   );

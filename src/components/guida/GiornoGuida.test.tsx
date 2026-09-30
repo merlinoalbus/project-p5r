@@ -49,6 +49,7 @@ const base: PercorsoGiornoDto = {
     eventi: [{ id: 5, partitaId: 3, giorno: '04-12', tipo: 'scadenza', fascia: 'sera', titolo: 'Consegna del Palazzo', dettaglio: '', riferimento: null, ordine: 1 }],
     azioni: [mia({ id: 10, azione: 'Comprare i Bionutrienti' })],
   },
+  meteoPartita: null,
 };
 
 const disegna = (g: PercorsoGiornoDto = base, partitaId: number | null = 3) => {
@@ -152,7 +153,7 @@ describe('GiornoGuida — giornata modificabile', () => {
     api.correggiAzioneGuida.mockResolvedValue({});
     disegna({ ...base, azioni: [azione({ indice: 0, azione: 'Sbloccare il lavoro da fioraio Rafflesia', tipo: 'lavoro', produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }], produceTesto: ['Turno: Fioraio Rafflesia'] })] });
     // la riga dice che cosa applica la spunta
-    expect(screen.getByText('Alla spunta: Turno: Fioraio Rafflesia')).toBeInTheDocument();
+    expect(screen.getByText('Il gioco dà: Turno: Fioraio Rafflesia')).toBeInTheDocument();
     apriMenu('Sbloccare il lavoro');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
     const finestra = screen.getByRole('dialog', { name: 'Modifica l\'azione della guida' });
@@ -290,7 +291,7 @@ describe('GiornoGuida — giornata modificabile', () => {
     await waitFor(() => expect(api.eliminaAzioneAgenda).toHaveBeenCalledWith(10));
   });
 
-  it('una cosa da fare è come un\'azione della guida: tipo, collegamento, «Alla spunta», stato; un incontro chiede le note', async () => {
+  it('una cosa da fare è come un\'azione della guida: tipo, collegamento, «Il gioco dà», stato; un incontro chiede le note', async () => {
     api.impostaAzioneAgendaFatta.mockResolvedValue(mia({ id: 11, azione: 'Clinica Takemi', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }], confidente: null } }));
     disegna({ ...base, agenda: { ...base.agenda, azioni: [mia({
       id: 11, azione: 'Clinica Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
@@ -299,7 +300,7 @@ describe('GiornoGuida — giornata modificabile', () => {
     const giorno = within(sezione('Di giorno'));
     expect(giorno.getByText('La mia')).toBeInTheDocument();
     expect(giorno.getByText('Confidente')).toBeInTheDocument();
-    expect(giorno.getByText('Alla spunta: Coraggio, 1 nota')).toBeInTheDocument();
+    expect(giorno.getByText('Il gioco dà: Coraggio, 1 nota')).toBeInTheDocument();
     expect(giorno.getByText(/^Consigliata/)).toBeInTheDocument();
     expect(giorno.getByText('rango atteso 2')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi'));
@@ -307,7 +308,8 @@ describe('GiornoGuida — giornata modificabile', () => {
     expect(api.impostaAzioneAgendaFatta).not.toHaveBeenCalled();
     fireEvent.click(within(screen.getByRole('group', { name: 'Note ottenute con il Confidente' })).getByRole('button', { name: '2 note' }));
     await waitFor(() => expect(api.impostaAzioneAgendaFatta).toHaveBeenCalledWith(11, 3, true, 2));
-    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', 'Coraggio +2 (♪)'));
+    // le Doti si segnano a mano: l'avviso le ricorda invece di dirle date
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', 'Da segnare nelle Doti: Coraggio +2'));
   });
 
   it('una cosa da fare spuntata con effetti si elimina togliendo prima la spunta; la finestra ne modifica anche collegamento ed effetti', async () => {

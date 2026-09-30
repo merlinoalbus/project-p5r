@@ -31,7 +31,7 @@ export function NegoziPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   // giorno corrente e fascia della giornata decidono la disponibilità: al cambio si ricarica
-  const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}`;
+  const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
   const negozi = useCarica(() => getNegozi(partitaId ?? undefined), [partitaId, momento]);
   // **I filtri stanno nell'indirizzo.** `/guida/negozi?categorie=arma,libro&stato=da-acquistare`
   // apre l'elenco già filtrato, e chi torna indietro lo ritrova: un filtro è un valore

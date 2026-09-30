@@ -26,8 +26,8 @@ export interface MappaPartita {
 
 /** Carica la mappa `chiave` con lo stato della partita; `versione` forza un nuovo caricamento; `onCambiato` avvisa la pagina ospite di ogni azione salvata. */
 export function useMappaPartita(chiave: string, partitaId: number | null, opz: { versione?: string | number; onCambiato?: () => void } = {}): MappaPartita {
-  // la fascia della giornata e il giorno corrente della partita decidono quali spilli sono disponibili: al cambio si ricarica
-  const momento = usePartitaStore((s) => (s.attiva?.id === partitaId ? `${s.attiva.dataGioco ?? ''}|${s.attiva.fasciaGioco ?? ''}` : ''));
+  // la fascia della giornata, il giorno corrente e il meteo di adesso decidono quali spilli sono disponibili: al cambio si ricarica
+  const momento = usePartitaStore((s) => (s.attiva?.id === partitaId ? `${s.attiva.dataGioco ?? ''}|${s.attiva.fasciaGioco ?? ''}|${s.attiva.meteoOra ?? ''}` : ''));
   const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, opz.versione, momento]);
   const [aggiornati, setAggiornati] = useState<Map<number, SpilloDto>>(new Map());
   const mappa = useMemo(() => (dati ? { ...dati, spilli: dati.spilli.map((s) => aggiornati.get(s.id) ?? s) } : null), [dati, aggiornati]);

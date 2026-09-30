@@ -5,14 +5,17 @@
 // Ogni requisito del seed viene valutato sullo stato della partita: Doti (rango), Persona dell'arcano in scorta, Persona con una
 // skill precisa in scorta (Gemelle Custodi), Palazzo (completato: boss finale nella Guida o sulla mappa, Tesoro
 // del Palazzo o raccolta al 100% — `palazziService.palazziCompletati`; mai grigio), richiesta dei Mementos completata, rango di un altro Confidente, data di gioco corrente,
-// meteo del giorno corrente. I requisiti non verificabili («manuale») sono grigi finché l'utente non li conferma; un requisito
-// verificabile ma senza dati sufficienti (per esempio nessun giorno corrente) è grigio e accetta la conferma manuale.
+// meteo del giorno corrente, evento di storia segnato nella partita (il caffè al Leblanc, il duello con Akechi: Partita →
+// Progressi). I requisiti non verificabili («manuale») sono grigi finché l'utente non li conferma; le avvertenze («avviso»)
+// sono grigie ma non bloccano il rango (`bloccante: false`).
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 // quando un Palazzo è completato lo decide `palazziService` (boss finale, Tesoro, 100%: mai la data)
 import { palazziCompletati } from './palazziService.js';
-import { dataLeggibile } from '../../shared/condizioniSpillo.js';
+import { EVENTI_STORIA, dataLeggibile } from '../../shared/condizioniSpillo.js';
+import { guastaLAperto, nomeMeteo, type MeteoPartita } from '../../shared/meteoPartita.js';
+import { meteoOra } from './meteoService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
@@ -38,8 +41,11 @@ export interface StatoPartitaSemafori {
   dataGioco: string | null;
   /** Momento della giornata corrente della partita (scheda «Oggi»): «giorno» o «sera». */
   fasciaGioco: 'giorno' | 'sera' | null;
-  meteoOggi: string | null;
+  /** Il meteo del giorno corrente **nella fascia corrente**: segnato nella partita o, se no, della guida (`meteoService.meteoOra`). */
+  meteoOra: { meteo: MeteoPartita; origine: 'partita' | 'guida' } | null;
   conferme: Set<string>;
+  /** Gli eventi di storia segnati come avvenuti (Partita → Progressi): i requisiti `evento` li leggono da qui. */
+  eventi: Set<string>;
 }
 
 export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<string, number>, doti: Map<string, number>): StatoPartitaSemafori {
@@ -51,7 +57,6 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
   const dataGioco = partita?.data_gioco ?? null;
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
-  const meteo = dataGioco ? (prepared('SELECT meteo FROM giorno_calendario WHERE data = ?').get(dataGioco) as { meteo: string | null } | undefined)?.meteo ?? null : null;
   const conferme = new Set((prepared('SELECT confidente_chiave, rango, indice FROM requisito_partita WHERE partita_id = ? AND confermato = 1').all(partitaId) as Array<{ confidente_chiave: string; rango: number; indice: number }>).map((r) => `${r.confidente_chiave}/${r.rango}/${r.indice}`));
   // Chi e' in squadra: i Ladri di cui la partita ha una riga. La riga nasce quando ne segni il
   // livello, quindi «ha una riga» vuol dire «l'ho gia' con me», che e' la domanda della condizione.
@@ -59,7 +64,8 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati: palazziCompletati(partitaId), richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOggi: meteo, conferme };
+  const eventi = new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave));
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati: palazziCompletati(partitaId), richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), conferme, eventi };
 }
 
 function confrontaDate(a: string, b: string): number {
@@ -129,14 +135,34 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
       return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Disponibile dal ${dataLeggibile(String(dati.dal))} (oggi ${dataLeggibile(st.dataGioco)})` : `Disponibile dal ${dataLeggibile(String(dati.dal))}, oggi è il ${dataLeggibile(st.dataGioco)}`, manuale: false };
     }
     case 'meteo': {
-      if (!st.meteoOggi) return { ...base, stato: 'rosso', dettaglio: "Evento all'aperto: il meteo del giorno corrente non risulta (Partita → Oggi)", manuale: false };
-      const piove = /piogg|tempor|nev/i.test(st.meteoOggi);
-      return { ...base, stato: piove ? 'rosso' : 'verde', dettaglio: piove ? `Oggi ${st.meteoOggi}: evento non disponibile` : `Oggi ${st.meteoOggi}`, manuale: false };
+      // Senza meteo (né segnato né nella guida) non si sa: da controllare, ma non si blocca il rango per un dato che
+      // manca (scelta dell'utente, 2026-09-30). Col meteo, conta quello della fascia in cui si è: «Sereno/Pioggia» di sera è pioggia.
+      if (!st.meteoOra) return { ...base, stato: 'grigio', dettaglio: 'Il meteo di oggi non è segnato: controllalo nel gioco o segnalo in Partita → Oggi (non blocca)', manuale: false, bloccante: false };
+      const quando = st.fasciaGioco === 'sera' ? 'Stasera' : 'Oggi';
+      const come = `${quando} ${nomeMeteo(st.meteoOra.meteo).toLowerCase()}${st.meteoOra.origine === 'guida' ? ' (dalla guida)' : ''}`;
+      const guasto = guastaLAperto(st.meteoOra.meteo);
+      return { ...base, stato: guasto ? 'rosso' : 'verde', dettaglio: guasto ? `${come}: evento all'aperto non disponibile` : come, manuale: false };
     }
+    case 'evento': {
+      // Un fatto della storia che solo tu sai (il caffè al Leblanc, il duello con Akechi): un dato della
+      // partita, lo stesso interruttore di Partita → Progressi. Il «Condizione soddisfatta» qui lo scrive
+      // (`confermaRequisito`), e il semaforo lo legge, non una conferma a parte.
+      const chiave = String(dati.evento);
+      const nome = EVENTI_STORIA.find((e) => e.chiave === chiave)?.nome ?? chiave;
+      const ok = st.eventi.has(chiave);
+      return { ...base, confermato: ok, stato: ok ? 'verde' : 'grigio', dettaglio: ok ? `${nome}: segnato` : `${nome}: da segnare, qui o in Partita → Progressi`, manuale: true };
+    }
+    case 'avviso':
+      // Da controllare nel gioco, ma non ferma il rango: senza un dato che lo dica, bloccare vorrebbe
+      // dire bloccare anche quando è tutto a posto (scelta dell'utente, 2026-09-30).
+      return { ...base, stato: 'grigio', dettaglio: 'Da controllare nel gioco: non blocca il rango', manuale: false, bloccante: false };
     default:
       return grigio('Non verificabile dall\'app');
   }
 }
+
+/** Il requisito conta per sapere se il rango è raggiungibile: le avvertenze no. */
+export const requisitoBloccante = (r: SemaforoRequisitoDto): boolean => r.bloccante !== false;
 
 /** Semafori dei ranghi superiori a `rangoAttuale` per un Confidente. */
 export function semaforiConfidente(chiave: string, rangoAttuale: number, st: StatoPartitaSemafori): SemaforiRangoDto[] {
@@ -145,17 +171,42 @@ export function semaforiConfidente(chiave: string, rangoAttuale: number, st: Sta
   for (const r of righe) { const l = perRango.get(r.rango) ?? []; l.push(r); perRango.set(r.rango, l); }
   return [...perRango.entries()].map(([rango, lista]) => {
     const requisiti = lista.map((r) => valuta(r, st));
-    return { rango, requisiti, pronto: requisiti.every((q) => q.stato === 'verde') };
+    return { rango, requisiti, pronto: requisiti.filter(requisitoBloccante).every((q) => q.stato === 'verde') };
   });
 }
 
-/** Conferma (o revoca) a mano un requisito non verificabile. */
+/** Segna (o toglie) un evento di storia della partita: lo stesso dato dell'interruttore di Partita → Progressi. */
+export function impostaEventoStoria(partitaId: number, evento: string, avvenuto: boolean): void {
+  prepared('INSERT INTO evento_storia_partita (partita_id, evento_chiave, avvenuto, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, evento_chiave) DO UPDATE SET avvenuto = excluded.avvenuto, updated_at = excluded.updated_at').run(partitaId, evento, avvenuto ? 1 : 0, nowIso());
+}
+
+/** Conferma (o revoca) a mano un requisito non verificabile. Un requisito `evento` non ha una conferma sua:
+ *  segna l'evento della partita, così il Confidente e Partita → Progressi dicono la stessa cosa. */
 export function confermaRequisito(partitaId: number, chiave: string, rango: number, indice: number, confermato: boolean): void {
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
-  if (!prepared('SELECT 1 FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').get(chiave, rango, indice)) throw httpErrors.notFound('requisito-non-trovato', 'Requisito non trovato.');
+  const riga = prepared('SELECT tipo, dati_json FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').get(chiave, rango, indice) as { tipo: string; dati_json: string } | undefined;
+  if (!riga) throw httpErrors.notFound('requisito-non-trovato', 'Requisito non trovato.');
+  if (riga.tipo === 'avviso') throw httpErrors.badRequest('requisito-non-confermabile', 'È un\'avvertenza da controllare nel gioco: non blocca il rango e non si conferma.');
+  const evento = riga.tipo === 'evento' ? String((JSON.parse(riga.dati_json) as { evento?: unknown }).evento ?? '') : null;
+  if (evento !== null && !EVENTI_STORIA.some((e) => e.chiave === evento)) throw httpErrors.notFound('evento-non-trovato', 'Evento di storia non trovato.');
   getDb().transaction(() => {
-    prepared(`INSERT INTO requisito_partita (partita_id, confidente_chiave, rango, indice, confermato, updated_at) VALUES (?, ?, ?, ?, ?, ?)
+    if (evento !== null) impostaEventoStoria(partitaId, evento, confermato);
+    else prepared(`INSERT INTO requisito_partita (partita_id, confidente_chiave, rango, indice, confermato, updated_at) VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT(partita_id, confidente_chiave, rango, indice) DO UPDATE SET confermato = excluded.confermato, updated_at = excluded.updated_at`).run(partitaId, chiave, rango, indice, confermato ? 1 : 0, nowIso());
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
   })();
+}
+
+/** Per ogni evento di storia, i ranghi dei Confidenti che lo chiedono («Sojiro Sakura, rango 3»). */
+export function ranghiPerEvento(): Map<string, string[]> {
+  const righe = prepared(`SELECT r.rango, r.dati_json, c.nome FROM confidente_requisito r JOIN confidente c ON c.chiave = r.confidente_chiave
+    WHERE r.tipo = 'evento' ORDER BY c.ordine, r.rango`).all() as Array<{ rango: number; dati_json: string; nome: string }>;
+  const out = new Map<string, string[]>();
+  for (const r of righe) {
+    const evento = String((JSON.parse(r.dati_json) as { evento?: unknown }).evento ?? '');
+    const l = out.get(evento) ?? [];
+    l.push(`${r.nome}, rango ${r.rango}`);
+    out.set(evento, l);
+  }
+  return out;
 }

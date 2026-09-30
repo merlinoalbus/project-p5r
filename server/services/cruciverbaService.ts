@@ -5,7 +5,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
-import { aggiornaDote, puntiDaNote } from './partiteService.js';
+import { nomeDote, puntiDaNote } from './partiteService.js';
 import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
 import { indiceGiornoScolastico } from './domandeService.js';
 
@@ -36,19 +36,17 @@ export function impostaCruciverba(partitaId: number, data: string, fatto: boolea
   const r = prepared('SELECT * FROM cruciverba WHERE data = ?').get(data) as Riga | undefined;
   if (!r) throw httpErrors.notFound('cruciverba-non-trovato', `Nessun cruciverba il ${data}.`);
   const adesso = nowIso();
+  let nuovo = false;
   getDb().transaction(() => {
     const era = !!prepared('SELECT 1 FROM cruciverba_partita WHERE partita_id = ? AND data = ?').get(partitaId, data);
     if (fatto) prepared('INSERT INTO cruciverba_partita (partita_id, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(partita_id, data) DO UPDATE SET updated_at = excluded.updated_at').run(partitaId, data, adesso);
     else prepared('DELETE FROM cruciverba_partita WHERE partita_id = ? AND data = ?').run(partitaId, data);
-    // Il cruciverba di Leblanc dà una nota di Conoscenza, e questo evento lo **scriveva** da sempre
-    // senza che nessuno la applicasse: lo storico diceva «Conoscenza +1 nota» e i punti restavano
-    // dov'erano. È lo stesso difetto dei libri e dei film — la promessa senza l'effetto — e si
-    // chiude allo stesso modo, chiamando chi i punti li assegna; togliere la spunta li restituisce
-    // esatti. La chiamata è la stessa che `domandeService` fa per una risposta giusta in classe.
-    if (fatto && !era) aggiornaDote(partitaId, 'conoscenza', { note: 1 });
-    else if (!fatto && era) aggiornaDote(partitaId, 'conoscenza', { delta: -puntiDaNote(1) });
-    if (fatto && !era) registraEvento(partitaId, 'cruciverba', `Cruciverba risolto: ${r.risposta}`, `${r.indizio} · Conoscenza +1 nota.`, { data });
+    // Il cruciverba di Leblanc dà una nota di Conoscenza: la risposta lo dice (`daSegnare`), ma le Doti si
+    // segnano a mano (scelta dell'utente, 2026-09-30) e qui non si toccano, né risolvendolo né togliendo la spunta.
+    nuovo = fatto && !era;
+    if (nuovo) registraEvento(partitaId, 'cruciverba', `Cruciverba risolto: ${r.risposta}`, `${r.indizio} · il gioco dà Conoscenza +1 nota (da segnare nelle Doti).`, { data });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return dto(r, new Set(fatto ? [data] : []));
+  const esito = dto(r, new Set(fatto ? [data] : []));
+  return nuovo ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1), note: 1 }] } : esito;
 }

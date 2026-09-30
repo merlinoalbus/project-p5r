@@ -88,7 +88,50 @@ it('il livello si alza di un tocco e l’esperienza si scrive nel campo', async 
 it('il denaro si muove per differenza, e il movimento ha un campo solo', async () => {
   render(<SquadraPartita partitaId={1} />);
   expect(await screen.findByText('12.500 ¥')).toBeInTheDocument();
-  await userEvent.type(screen.getByLabelText('Quanti yen sono entrati o usciti'), '1500');
+  await userEvent.type(screen.getByLabelText('Importo in yen'), '1500');
   await userEvent.click(screen.getByRole('button', { name: 'Togli questi yen al gruppo' }));
   await waitFor(() => expect(api.impostaYen).toHaveBeenCalledWith(1, { delta: -1500 }));
+});
+
+it('«Imposta» riscrive il saldo col numero del campo, anche zero', async () => {
+  api.impostaYen.mockResolvedValueOnce({ ...squadra, yen: 98765 });
+  render(<SquadraPartita partitaId={1} />);
+  const imposta = await screen.findByRole('button', { name: 'Imposta il denaro del gruppo a questo importo' });
+  expect(imposta).toBeDisabled();
+  await userEvent.type(screen.getByLabelText('Importo in yen'), '98765');
+  await userEvent.click(imposta);
+  await waitFor(() => expect(api.impostaYen).toHaveBeenCalledWith(1, { yen: 98765 }));
+  expect(await screen.findByText(/98\.?765 ¥/)).toBeInTheDocument();
+  expect(screen.getByLabelText('Importo in yen')).toHaveValue('');
+  // lo zero è un saldo vero: si imposta, mentre Incassa/Spendi con zero non farebbero nulla
+  await userEvent.type(screen.getByLabelText('Importo in yen'), '0');
+  await userEvent.click(imposta);
+  await waitFor(() => expect(api.impostaYen).toHaveBeenLastCalledWith(1, { yen: 0 }));
+});
+
+it('l’importo scritto col punto delle migliaia vale per intero: «123.450» è 123.450 ¥', async () => {
+  render(<SquadraPartita partitaId={1} />);
+  await userEvent.type(await screen.findByLabelText('Importo in yen'), '123.450');
+  await userEvent.click(screen.getByRole('button', { name: 'Imposta il denaro del gruppo a questo importo' }));
+  await waitFor(() => expect(api.impostaYen).toHaveBeenCalledWith(1, { yen: 123450 }));
+});
+
+it('anche Incassa e Spendi leggono il punto delle migliaia; senza cifre i tre pulsanti restano spenti', async () => {
+  render(<SquadraPartita partitaId={1} />);
+  const campo = await screen.findByLabelText('Importo in yen');
+  await userEvent.type(campo, 'abc');
+  for (const nome of ['Aggiungi questi yen al gruppo', 'Togli questi yen al gruppo', 'Imposta il denaro del gruppo a questo importo']) {
+    expect(screen.getByRole('button', { name: nome })).toBeDisabled();
+  }
+  await userEvent.clear(campo);
+  await userEvent.type(campo, '1.500');
+  await userEvent.click(screen.getByRole('button', { name: 'Aggiungi questi yen al gruppo' }));
+  await waitFor(() => expect(api.impostaYen).toHaveBeenCalledWith(1, { delta: 1500 }));
+});
+
+it('l’importo oltre il tetto del server si ferma al massimo accettato', async () => {
+  render(<SquadraPartita partitaId={1} />);
+  await userEvent.type(await screen.findByLabelText('Importo in yen'), '123456789');
+  await userEvent.click(screen.getByRole('button', { name: 'Imposta il denaro del gruppo a questo importo' }));
+  await waitFor(() => expect(api.impostaYen).toHaveBeenCalledWith(1, { yen: 9_999_999 }));
 });

@@ -55,8 +55,9 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={apri} disabled={confidente.dotiIncontro.length === 0} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">
-        Ogni incontro dà queste Doti, una volta per incontro: spuntandolo nella giornata, segnando le note di risposta o il passaggio di rango in
-        Partita → Confidenti. Un incontro vale verso il rango successivo a quello raggiunto.
+        Il gioco dà queste Doti a ogni incontro: l'app te le ricorda quando lo registri — spuntandolo nella giornata, segnando le note di risposta
+        o il passaggio di rango in Partita → Confidenti —, una volta per incontro, e le segni tu nella scheda Doti. Un incontro vale verso il
+        rango successivo a quello raggiunto.
       </p>
       {conDoti.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessuna Dote dichiarata.</p> : (
         <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
@@ -75,7 +76,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
             <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={occupato} onClick={() => void salva()} />
           </div>
         )}>
-          <p className="m-0 text-[12px] text-text-muted">Per ogni rango, le Doti che dà un incontro verso quel rango. I punti già dati nelle partite non cambiano.</p>
+          <p className="m-0 text-[12px] text-text-muted">Per ogni rango, le Doti che il gioco dà a un incontro verso quel rango. Vale dai prossimi incontri: le Doti delle partite non cambiano (le segni tu).</p>
           <ul className="m-0 p-0 list-none flex flex-col gap-3">
             {bozza.map((r) => (
               <li key={r.rango} className="flex flex-col gap-2 rounded border border-border p-2" aria-label={`Rango ${r.rango}`}>

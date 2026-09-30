@@ -4,6 +4,7 @@
 
 import { z } from 'zod';
 import { idParam, livello } from './comuni.js';
+import { METEO_PARTITA, type MeteoPartita } from '../../shared/meteoPartita.js';
 
 export const difficolta = z.enum(['sicura', 'facile', 'normale', 'difficile', 'spietata']);
 
@@ -167,6 +168,13 @@ export const paramsPartitaCiclo = z.object({ id: z.coerce.number().int().positiv
 export const bodyTrofeo = z.object({ trofeo: z.string().min(1).max(120), ottenuto: z.boolean() });
 export const bodyAzionePercorso = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/), indice: z.number().int().min(0).max(200), fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional() });
 export const bodyGiornoCorrente = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) });
+
+// ---- Meteo della partita ----
+export const paramsPartitaData = z.object({ id: idParam, data: z.string().regex(/^\d{2}-\d{2}$/) });
+/** Per fascia: un meteo, o `null` per tornare a quello della guida; una fascia assente resta com'è. */
+const meteoFascia = z.enum(METEO_PARTITA.map((m) => m.chiave) as [MeteoPartita, ...MeteoPartita[]]).nullable().optional();
+export const bodyMeteo = z.object({ giorno: meteoFascia, sera: meteoFascia }).strict()
+  .refine((b) => b.giorno !== undefined || b.sera !== undefined, { message: 'Indica il meteo del giorno («giorno») o della sera («sera»).' });
 export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean() });
 export const bodyCruciverba = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/), fatto: z.boolean() });
 const chiaveLettura = z.string().min(1).max(160);

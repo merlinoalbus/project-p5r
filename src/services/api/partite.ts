@@ -5,7 +5,8 @@
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
-import type { VideogiocoDto } from '../../types';
+import type { MeteoGiornoDto, VideogiocoDto } from '../../types';
+import type { MeteoPartita } from '../../../shared/meteoPartita';
 
 /** Campi modificabili di una partita. */
 export interface DatiPartita {
@@ -65,6 +66,11 @@ export const confermaRequisitoConfidente = (id: number, chiave: string, rango: n
 export const impostaAzionePercorso = (id: number, data: string, indice: number, fatta: boolean, noteRisposta?: 1 | 2 | 3): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { data, indice, fatta, ...(noteRisposta ? { noteRisposta } : {}) });
 /** Giorno corrente della partita (calendario di gioco); la risposta porta anche la partita aggiornata da riportare nello store. */
 export const impostaGiornoCorrente = (id: number, data: string): Promise<GiornoCorrenteDto> => apiPut(`/partite/${id}/giorno`, { data });
+/** Il meteo di un giorno nella partita, di giorno e di sera. */
+export const getMeteoGiorno = (id: number, data: string): Promise<MeteoGiornoDto> => apiGet(`/partite/${id}/meteo/${data}`);
+/** Segna il meteo di una fascia (o di entrambe); `null` = torna a quello della guida. Restituisce anche la partita (`meteoOra`). */
+export const impostaMeteoGiorno = (id: number, data: string, mod: { giorno?: MeteoPartita | null; sera?: MeteoPartita | null }): Promise<{ meteo: MeteoGiornoDto; partita: PartitaDto }> =>
+  apiPut(`/partite/${id}/meteo/${data}`, mod);
 
 /** Chiavi da evidenziare in oro: entità coinvolte nelle azioni ancora da fare del giorno corrente. */
 export const getSuggerimenti = (id: number): Promise<SuggerimentiOggiDto> => apiGet(`/partite/${id}/suggerimenti`);

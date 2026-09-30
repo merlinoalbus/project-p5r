@@ -8,9 +8,10 @@
 // libro in prestito lo dava già letto (difetti segnalati dall'utente). Ora un'azione dichiara i
 // suoi effetti come dato (`produce`), modificabile come ogni altro campo; le note restano testo.
 //
-// - `dote`: la Dote sale delle note indicate (1–3, come le mostra il gioco);
+// - `dote`: il gioco dà quella Dote delle note indicate (1–3, come le mostra il gioco): l'app la ricorda, l'utente la
+//   segna a mano (scelta dell'utente, 2026-09-30);
 // - `lettura`: un libro, un film o un videogioco arriva **almeno** a quel punto (`almeno`: sessioni
-//   o visioni; null = completato). Non torna mai indietro, e i punti li dà l'elemento, una volta
+//   o visioni; null = completato). Non torna mai indietro, e le Doti sono quelle dell'elemento, ricordate una volta
 //   sola, da qualunque parte lo si segni. Al cinema, che non ha un totale, null vale «una visione»:
 //   ogni spunta che la dichiara conta una visione, contata insieme alle altre spunte (saltare la
 //   prima visita della guida non regala una visione mai fatta; togliere e rimettere la spunta non

@@ -120,8 +120,10 @@ export function EditorAzioneStrutturata({ valore, onCambia }: Props) {
         )}
       </div>
       <div className="flex flex-col gap-2">
-        <span className="text-[13px] text-text-secondary">Alla spunta</span>
+        {/* le Doti sono ciò che il gioco dà, da segnare a mano; letture e turni li segna la spunta (scelta dell'utente, 2026-09-30) */}
+        <span className="text-[13px] text-text-secondary">Il gioco dà</span>
         {valore.produce.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessun effetto: la spunta segna solo che l'hai fatto.</p>}
+        {valore.produce.length > 0 && <p className="m-0 text-[12px] text-text-muted">Le Doti te le ricorda e le segni tu nella scheda Doti; letture e turni li segna la spunta.</p>}
         <ul className="flex flex-col gap-2 list-none m-0 p-0">
           {valore.produce.map((e, i) => (
             <RigaEffetto key={i} numero={i + 1} effetto={e} elenchi={elenchi}
@@ -133,8 +135,8 @@ export function EditorAzioneStrutturata({ valore, onCambia }: Props) {
           <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un effetto" onClick={() => imposta({ produce: [...valore.produce, effettoNuovo('dote')] })} />
         )}
         <p className="m-0 text-[12px] text-text-muted">
-          Le note sono solo testo: i punti della spunta vengono da qui. Una lettura porta avanti il libro o il film e i punti li dà lui, una volta sola;
-          un turno conta un turno dell'attività con le sue Doti.
+          Le note sono solo testo: che cosa ricorda la spunta viene da qui. Una lettura porta avanti il libro o il film, e l'avviso ricorda le Doti
+          del libro o del film, una volta sola; un turno conta un turno dell'attività e ne ricorda le Doti. Le Doti le segni tu nella scheda Doti.
         </p>
       </div>
     </fieldset>

@@ -33,6 +33,7 @@ import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
 import { CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
+import { ritornoMappe } from '../utils/ritornoMappe';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
 
@@ -65,7 +66,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   // le condizioni di visibilità escludono nel giorno e nella fascia della partita attiva — così si
   // controlla il lavoro senza uscire dalla modifica. Senza partita attiva non c'è un «oggi»: resta spento.
   const attiva = usePartitaStore((s) => s.attiva);
-  const momento = usePartitaStore((s) => `${s.attiva?.dataGioco ?? ''}|${s.attiva?.fasciaGioco ?? ''}`);
+  const momento = usePartitaStore((s) => `${s.attiva?.dataGioco ?? ''}|${s.attiva?.fasciaGioco ?? ''}|${s.attiva?.meteoOra ?? ''}`);
   const [giornoCorrente, setGiornoCorrente] = useState(false);
   const conGiorno = giornoCorrente && !!attiva;
   const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, conGiorno ? attiva.id : undefined), [chiave, conGiorno, attiva?.id, momento]);
@@ -140,7 +141,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           partitaId={conGiorno ? attiva.id : null}
           vistaGiornoCorrente={conGiorno}
           onNaviga={vai}
-          onChiudi={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)}
+          onChiudi={() => navigate(ritornoMappe() ?? `/guida/mappe/${encodeURIComponent(chiave)}`)}
           editor={editor}
           className="visore-mappa--editor"
           intestazione={<span className="editor-mappa__targhetta">Modifica</span>}

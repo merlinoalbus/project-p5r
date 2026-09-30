@@ -7,12 +7,14 @@
 //    navigazione in basso con bersagli touch da 56px.
 // ============================================================
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { annotaNavigazione } from '../../utils/ritornoMappe';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Topbar } from './Topbar';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { ToastContainer } from '../shared/Toast';
+import { MeteoAlCambioGiorno } from '../partita/MeteoAlCambioGiorno';
 import { useGlossarioStore } from '../../stores/glossarioStore';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useAsset, useAssetStore } from '../../stores/assetStore';
@@ -38,6 +40,14 @@ export function MainLayout() {
   const allarmeAttivo = usePartitaStore((s) => !!s.attiva?.allarmeAttivo);
   const sfondoSezione = useAsset(sfondoPerPercorso(location.pathname, allarmeAttivo));
   const icona = useAsset('identita/icona-32');
+  // Da quale pagina si entra nelle mappe: «Chiudi» di visore ed editor ci riporta lì (`utils/ritornoMappe`).
+  const paginaPrecedente = useRef<string | null>(null);
+  useEffect(() => {
+    const qui = location.pathname + location.search;
+    if (paginaPrecedente.current === qui) return;
+    annotaNavigazione(paginaPrecedente.current, location.pathname);
+    paginaPrecedente.current = qui;
+  }, [location.pathname, location.search]);
   useEffect(() => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     if (!link) return;
@@ -63,6 +73,8 @@ export function MainLayout() {
         </main>
       </div>
       <BottomNav />
+      {/* cambiato il giorno della partita, il meteo del giorno nuovo */}
+      <MeteoAlCambioGiorno />
       <ToastContainer />
     </div>
   );

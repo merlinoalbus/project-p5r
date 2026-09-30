@@ -47,6 +47,11 @@ export type RequisitoSeed =
   | { tipo: 'squadra'; membro: string; testo: string }
   | { tipo: 'data'; dal: string; testo: string }
   | { tipo: 'meteo'; condizione: 'non-piove'; testo: string }
+  /** Un fatto della storia segnato nella partita (`EVENTI_STORIA`, Partita → Progressi): il caffè al Leblanc, il duello con Akechi… */
+  | { tipo: 'evento'; evento: string; testo: string }
+  /** Un'avvertenza da controllare nel gioco, che **non blocca** il rango (la scuola aperta per Futaba al rango 4). */
+  | { tipo: 'avviso'; testo: string }
+  /** Non verificabile dall'app: grigio finché non lo confermi a mano (resta per i pacchetti che lo usano ancora). */
   | { tipo: 'manuale'; testo: string };
 
 export interface RequisitiRangoSeed {

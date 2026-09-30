@@ -16,6 +16,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { notifica } from '../stores/notificationStore';
+import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
@@ -139,6 +140,8 @@ export function VideogiochiPage() {
         if (desiderato === confermato || partitaId !== id) break;
         const nuovo = await impostaProgressoVideogioco(id, g.chiave, desiderato);
         confermati.current.set(g.chiave, nuovo.progresso);
+        // il gioco completato dà le sue Doti: si segnano a mano, l'avviso le ricorda
+        avvisaDotiDaSegnare(nuovo.daSegnare, nuovo.nome);
         setGiochi((xs) => xs.map((x) => (x.chiave === nuovo.chiave ? nuovo : x)));
       }
     } catch (err) {

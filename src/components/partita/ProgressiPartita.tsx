@@ -20,6 +20,7 @@ import { PageState } from '../shared/PageState';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_TIPO_ATTIVITA } from '../../../shared/attivita';
 import { formattaYen } from '../../utils/letture';
+import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 
 function messaggio(err: unknown): string { return err instanceof Error ? err.message : String(err); }
 
@@ -41,8 +42,8 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
     return azione().then((nuovo) => {
       setStato(nuovo);
       useSuggerimentiStore.getState().invalida();
-      // un turno aggiunto o tolto dà o restituisce i suoi punti: si dice quali
-      if (nuovo.cambioDoti?.length) notifica('success', nuovo.cambioDoti.map((d) => `${d.nome} ${d.delta > 0 ? '+' : ''}${d.delta}`).join(' · '));
+      // un turno aggiunto (o tolto) dice le Doti che dà (o dava): da segnare a mano, l'app non le tocca
+      avvisaDotiDaSegnare(nuovo.daSegnare);
     }).catch((e) => notifica('error', messaggio(e))).finally(() => setOccupato(null));
   };
   const calcolati = p?.eventi.filter((e) => e.origine === 'calcolato') ?? [];
@@ -112,8 +113,13 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
                     <li key={e.chiave}>
                       <label className="progressi-partita__riga touch">
                         <input type="checkbox" className="w-5 h-5" checked={e.avvenuto === true} disabled={occupato === e.chiave} onChange={(ev) => void salva(e.chiave, () => impostaEventoStoria(partitaId, e.chiave, ev.target.checked))} />
-                        <span className="min-w-0 flex-1">{e.nome}</span>
-                        <span className={`text-[11px] ${e.avvenuto ? 'text-success' : 'text-text-muted'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
+                        {/* a che cosa serve segnarlo: il rango del Confidente che lo aspetta, lo stesso
+                            dato del «Condizione soddisfatta» nella sua scheda */}
+                        <span className="min-w-0 flex-1">
+                          <span className="block">{e.nome}</span>
+                          {e.serveA && e.serveA.length > 0 && <span className="block text-[11px] text-text-muted">Sblocca: {e.serveA.join(' · ')}</span>}
+                        </span>
+                        <span className={`shrink-0 text-[11px] ${e.avvenuto ? 'text-success' : 'text-text-muted'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
                       </label>
                     </li>
                   ))}
@@ -122,7 +128,7 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
 
               <section className="card flex flex-col gap-2" aria-labelledby="progressi-attivita">
                 <h3 id="progressi-attivita" className="m-0 text-[15px]">Attività svolte</h3>
-                <p className="m-0 text-[12px] text-text-muted">Quante volte l’hai fatta: le condizioni «svolta almeno n volte» leggono da qui, e ogni turno dà i suoi punti (togliendolo tornano indietro); spuntare un turno nella giornata della guida lo conta qui. I videogiochi si contano per round in Letture e giochi.</p>
+                <p className="m-0 text-[12px] text-text-muted">Quante volte l’hai fatta: le condizioni «svolta almeno n volte» leggono da qui, e ogni turno ti ricorda le Doti che dà, da segnare tu nella scheda Doti; spuntare un turno nella giornata della guida lo conta qui. I videogiochi si contano per round in Letture e giochi.</p>
                 <ul className="m-0 p-0 list-none flex flex-col gap-1">
                   {p.attivita.map((a) => (
                     <li key={a.chiave} className="progressi-partita__riga">

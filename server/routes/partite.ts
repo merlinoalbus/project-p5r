@@ -9,7 +9,9 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
+import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
+import type { MeteoPartita } from '../../shared/meteoPartita.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
 import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
@@ -27,7 +29,7 @@ import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
-import { impostaAzione, impostaGiornoCorrente } from '../services/percorsoService.js';
+import { avanzaSeGiornoCompleto, impostaAzione, impostaGiornoCorrente } from '../services/percorsoService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
 import { t } from '../services/traduzioniService.js';
 import { eliminaEventi, eliminaEvento, storico } from '../services/storicoService.js';
@@ -112,10 +114,24 @@ router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }),
 });
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
   const b = req.body as { data: string; indice: number; fatta: boolean; noteRisposta?: 1 | 2 | 3 };
-  res.json(impostaAzione(Number(req.params.id), b.data, b.indice, b.fatta, { noteRisposta: b.noteRisposta }));
+  const azione = impostaAzione(Number(req.params.id), b.data, b.indice, b.fatta, { noteRisposta: b.noteRisposta });
+  // l'ultima attività del giorno corrente spuntata: la partita passa al giorno dopo (togliere la spunta non torna indietro)
+  const giornoAvanzato = b.fatta ? avanzaSeGiornoCompleto(Number(req.params.id), b.data) : null;
+  res.json(giornoAvanzato ? { ...azione, giornoAvanzato } : azione);
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
   res.json(impostaGiornoCorrente(Number(req.params.id), (req.body as { data: string }).data));
+});
+
+// ---- Meteo della partita: di giorno e di sera, scelto o della guida ----
+router.get('/:id/meteo/:data', validate({ params: paramsPartitaData }), (req, res) => {
+  leggiPartita(Number(req.params.id));
+  res.json(meteoDelGiorno(Number(req.params.id), String(req.params.data)));
+});
+/** Restituisce anche la partita: il suo `meteoOra` fa ricaricare mappe, negozi e disponibilità. */
+router.put('/:id/meteo/:data', validate({ params: paramsPartitaData, body: bodyMeteo }), (req, res) => {
+  const meteo = impostaMeteo(Number(req.params.id), String(req.params.data), req.body as { giorno?: MeteoPartita | null; sera?: MeteoPartita | null });
+  res.json({ meteo, partita: leggiPartita(Number(req.params.id)) });
 });
 router.put('/:id/acquisti', validate({ params: paramsPartita, body: bodyAcquisto }), (req, res) => {
   const b = req.body as { articolo: string; fatto: boolean };

@@ -13,6 +13,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
+import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { PageState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { Segmenti } from '../components/shared/Segmenti';
@@ -34,7 +35,12 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
   const cambia = async (fatto: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
-    try { onCambiato(await impostaCruciverba(partitaId, c.giorno, fatto)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
+    try {
+      const esito = await impostaCruciverba(partitaId, c.giorno, fatto);
+      onCambiato(esito);
+      // la nota di Conoscenza del cruciverba si segna a mano nelle Doti: l'avviso la ricorda
+      avvisaDotiDaSegnare(esito.daSegnare, 'Cruciverba risolto');
+    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
     <li id={evidenzia ? ancoraGiorno(c.giorno) : undefined} className={`card flex flex-col gap-1 text-[13px] scroll-mt-20 ${c.fatto ? 'opacity-70' : ''} ${evidenzia ? 'border-primary' : ''}`}>

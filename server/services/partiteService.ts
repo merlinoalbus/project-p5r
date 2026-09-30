@@ -9,7 +9,8 @@ import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import { verificaObiettivi } from './obiettiviService.js';
-import { semaforiConfidente, statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
+import { requisitoBloccante, semaforiConfidente, statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
+import { meteoOra } from './meteoService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto,
@@ -27,6 +28,7 @@ function partitaDto(r: RigaPartita): PartitaDto {
     fasciaGioco: r.fascia_gioco === 'sera' ? 'sera' : 'giorno',
     difficolta: r.difficolta, nuovaPartitaPlus: r.nuova_partita_plus === 1, dlcPosseduti: JSON.parse(r.dlc_posseduti_json) as number[],
     allarmeAttivo: r.allarme_attivo === 1, createdAt: r.created_at, updatedAt: r.updated_at,
+    meteoOra: meteoOra(r.id, r.data_gioco, r.fascia_gioco === 'sera' ? 'sera' : 'giorno')?.meteo ?? null,
   };
 }
 
@@ -177,7 +179,20 @@ export function dotiSociali(partitaId: number): DoteSocialePartitaDto[] {
     });
 }
 
-/** Imposta (`punti`), incrementa (`delta`) o aggiunge le `note` visualizzate in gioco; mai sotto zero. */
+/** Il nome di una Dote sociale («Gentilezza»), per dire che cosa il gioco dà senza toccarla (`DotiDaSegnare`). */
+export function nomeDote(chiave: string): string {
+  if (!prepared('SELECT 1 FROM dote_sociale WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
+  return t('doteSociale', chiave);
+}
+
+/**
+ * Imposta (`punti`), incrementa (`delta`) o aggiunge le `note` visualizzate in gioco; mai sotto zero.
+ *
+ * **Solo a mano** (scelta dell'utente, 2026-09-30: «fai che i punti Doti Sociali li sposto solo io manualmente e non
+ * automaticamente»): la chiamano la scheda Doti e l'API delle Doti, nient'altro. Spunte, letture, turni, incontri,
+ * domande e cruciverba dicono che cosa il gioco dà (`DotiDaSegnare`) e lo ricordano, ma non toccano i punti — né
+ * aggiungendo né togliendo, nemmeno togliendo la spunta di un'azione di prima.
+ */
 export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDote): DoteSocialePartitaDto {
   rigaPartita(partitaId);
   const dote = prepared('SELECT chiave FROM dote_sociale WHERE chiave = ?').get(chiave);
@@ -265,11 +280,12 @@ export function impostaRegaloFatto(partitaId: number, chiave: string, regalo: st
   return confidenti(partitaId).find((c) => c.chiave === chiave)!;
 }
 
-/** Requisiti non verdi (né confermati) del semaforo di `rango`: il Confidente è bloccato finché non lo sono tutti. */
+/** Requisiti non verdi (né confermati) del semaforo di `rango`: il Confidente è bloccato finché non lo sono tutti.
+ *  Le avvertenze da controllare nel gioco (`bloccante: false`) non bloccano. */
 export function bloccoRango(semafori: SemaforiRangoDto[], rango: number): { rango: number; motivi: string[] } | null {
   const sem = semafori.find((s) => s.rango === rango);
   if (!sem || sem.pronto || sem.requisiti.length === 0) return null;
-  const motivi = sem.requisiti.filter((r) => r.stato !== 'verde').map((r) => (r.dettaglio ? `${r.testo} (${r.dettaglio})` : r.testo));
+  const motivi = sem.requisiti.filter((r) => requisitoBloccante(r) && r.stato !== 'verde').map((r) => (r.dettaglio ? `${r.testo} (${r.dettaglio})` : r.testo));
   return motivi.length > 0 ? { rango, motivi } : null;
 }
 
@@ -311,11 +327,11 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
   })();
 }
 
-/** Annulla esattamente i punti applicati spuntando un'azione (della guida o dell'utente): Doti e punti del Confidente.
+/** Annulla esattamente i punti del Confidente applicati spuntando un'azione (della guida o dell'utente). Le Doti no: si
+ *  segnano solo a mano, e le spunte di prima — che le avevano alzate — togliendosi non le abbassano (`aggiornaDote`).
  *  Sta qui e non in `percorsoService` perché la usano sia il percorso sia l'agenda, e il percorso legge l'agenda:
  *  tenerla nel percorso chiudeva un giro di import fra i due servizi. */
 export function annullaEffetti(partitaId: number, e: EffettiAzioneDto): void {
-  for (const d of e.doti) aggiornaDote(partitaId, d.chiave, { delta: -d.delta });
   if (e.confidente) aggiornaConfidente(partitaId, e.confidente.chiave, { deltaPunti: -e.confidente.punti });
 }
 

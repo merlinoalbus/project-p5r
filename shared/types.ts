@@ -5,6 +5,7 @@ import type { RequisitoSpillo } from './condizioniSpillo.js';
 import type { OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
+import type { MeteoPartita } from './meteoPartita.js';
 // ============================================================
 // Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
 // ============================================================
@@ -433,6 +434,30 @@ export interface PartitaDto {
   allarmeAttivo: boolean;
   createdAt: string;
   updatedAt: string;
+  /** Il meteo del giorno corrente nella fascia corrente (segnato nella partita o, se no, della guida): negozi, mappe e
+   *  disponibilità lo usano per sapere quando ricaricarsi. `null` = nessuno dei due lo dice. */
+  meteoOra: MeteoPartita | null;
+}
+
+/** Il meteo di una fascia del giorno: quello che vale (`meteo`), da dove viene, e quello della guida per confronto. */
+export interface MeteoFasciaDto {
+  meteo: MeteoPartita | null;
+  /** «partita» = scelto dall'utente; «guida» = non scelto, vale quello della guida; null = nessuno dei due. */
+  origine: 'partita' | 'guida' | null;
+  guida: MeteoPartita | null;
+  /** Le allerte del gioco in questa fascia (date fisse del catalogo, `allerta_meteo`): le mostra l'app, non si scelgono.
+   *  Possono essere due (il 17 agosto di sera: pioggia torrenziale e notte torrida). */
+  allerte: Array<{ chiave: string; nome: string; effetti: string[] }>;
+}
+
+/** Il meteo di un giorno nella partita, di giorno e di sera («Sereno/Pioggia» della guida = sereno di giorno, pioggia di sera). */
+export interface MeteoGiornoDto {
+  /** 'MM-GG'. Non si chiama `data`: una risposta con un campo `data` sarebbe presa per già imbustata (`responseShape`). */
+  dataGioco: string;
+  giorno: MeteoFasciaDto;
+  sera: MeteoFasciaDto;
+  /** Il testo della guida così com'è («Neve/Nuvoloso (ondata di gelo)»), o null. */
+  testoGuida: string | null;
 }
 
 /** Un Ladro Fantasma nella partita: a che livello è, quanta esperienza ha, e se l'hai segnato.
@@ -507,12 +532,15 @@ export interface SemaforoRequisitoDto {
   /** Richiede la conferma manuale dell'utente. */
   manuale: boolean;
   confermato: boolean;
+  /** `false` = un'avvertenza da controllare nel gioco: grigia, ma non ferma il rango (`pronto`, `bloccoRango`).
+   *  Assente = blocca, come ogni requisito. */
+  bloccante?: boolean;
 }
 
 export interface SemaforiRangoDto {
   rango: number;
   requisiti: SemaforoRequisitoDto[];
-  /** Tutti i requisiti verdi (o confermati). */
+  /** Tutti i requisiti bloccanti verdi (o confermati): le avvertenze (`bloccante: false`) non contano. */
   pronto: boolean;
 }
 
@@ -534,8 +562,9 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** Semafori dei ranghi superiori a quello attuale (Fase 12.3), in ordine di rango. */
   semafori: SemaforiRangoDto[];
   updatedAt: string | null;
-  /** Solo nella risposta a una modifica dalla pagina Confidenti: di quanto sono cambiate le Doti con gli incontri registrati o tolti. */
-  doteIncontro?: Array<{ chiave: string; nome: string; delta: number }>;
+  /** Solo nella risposta a una modifica dalla pagina Confidenti: le Doti che gli incontri registrati danno (o quelli tolti
+   *  davano), da segnare a mano nelle Doti — l'app non le tocca. */
+  doteIncontro?: DoteDaSegnareDto[];
 }
 
 /** Bonus agli esami: primo del corso ×1,5, fra i primi dieci ×1,2. */
@@ -837,7 +866,18 @@ export interface EsameDto {
   note: string;
 }
 
+/** Una Dote che il gioco dà (o, disfacendo un conseguimento, toglie): da segnare **a mano** nella scheda Doti — l'app non
+ *  la tocca (scelta dell'utente, 2026-09-30). `delta` in punti, `note` le note del gioco quando si sanno. */
+export interface DoteDaSegnareDto {
+  chiave: string;
+  nome: string;
+  delta: number;
+  note?: number;
+}
+
 export interface DomandeDto {
+  /** Solo nella risposta di una spunta: la nota di Conoscenza della risposta giusta, da segnare nelle Doti. */
+  daSegnare?: DoteDaSegnareDto[];
   domande: DomandaDto[];
   esami: EsameDto[];
   premi: { fascinoPerPiazzamento?: Record<string, string>; moltiplicatoreConfidenti?: string; requisitoConoscenza?: Record<string, string>; trofeo?: string; fonte?: string; noteGenerali?: string } | null;
@@ -984,8 +1024,8 @@ export interface EffettiAzioneDto {
   /** `delta` sono i punti applicati; `note` le note della guida da cui derivano (1–3); `cinema` se «Anima da cineasta» ha alzato lo scalino. */
   doti: Array<{ chiave: string; nome: string; delta: number; note?: number; cinema?: boolean }>;
   confidente: { chiave: string; nome: string; noteRisposta: 1 | 2 | 3; punti: number; bonusArcano: boolean } | null;
-  /** Letture e visioni portate avanti dalla spunta (`prima` → `dopo`) con le Doti che l'elemento ha dato (`doti`): i punti li dà
-   *  l'elemento, e togliere la spunta non disfa la lettura. `visione`: una visione al cinema contata con le altre spunte. */
+  /** Letture e visioni portate avanti dalla spunta (`prima` → `dopo`) con le Doti che l'elemento dà (`doti`, da segnare a
+   *  mano: l'app non le tocca), e togliere la spunta non disfa la lettura. `visione`: una visione al cinema contata con le altre spunte. */
   letture?: Array<{ categoria: CategoriaLettura; chiave: string; nome: string; prima: number; dopo: number; doti?: Array<{ chiave: string; nome: string; delta: number }>; visione?: boolean }>;
   /** L'incontro con un Confidente che la spunta ha registrato (la Dote a ogni incontro): `id` se l'ha creato (togliendo la spunta
    *  si toglie con le sue Doti), `marcato` se ha segnato come passaggio di rango un incontro già registrato in quel momento della
@@ -1061,6 +1101,8 @@ export interface AzionePercorsoDto {
     tipo: AzionePercorsoDto['tipo']; riferimento: RiferimentoAzioneDto | null; riferimentoTesto: string | null; rangoAtteso: number | null;
     produce: EffettoAzione[]; produceTesto: string[];
   } | null;
+  /** Solo nella risposta di una spunta: era l'ultima attività del giorno corrente e la partita è passata al giorno dopo. */
+  giornoAvanzato?: GiornoAvanzatoDto;
 }
 
 /** Un elemento che un'azione può collegare o nominare negli effetti. */
@@ -1140,6 +1182,14 @@ export interface GiornoCorrenteDto {
   partita: PartitaDto;
 }
 
+/** Spuntata l'ultima attività del giorno corrente, la partita è passata al giorno dopo, di giorno (richiesta dell'utente,
+ *  2026-09-30). Arriva nella risposta della spunta (azione della guida o cosa da fare) che l'ha fatto scattare. */
+export interface GiornoAvanzatoDto {
+  da: string;
+  a: string;
+  partita: PartitaDto;
+}
+
 export interface PercorsoGiornoDto {
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;
@@ -1163,6 +1213,8 @@ export interface PercorsoGiornoDto {
   correzioniSuperate: CorrezioneSuperataDto[];
   /** Eventi e cose da fare dell'utente per il giorno: si mostrano dentro «Di giorno» / «Di sera». */
   agenda: AgendaGiornoDto;
+  /** Con una partita: il meteo del giorno nella partita, di giorno e di sera (Partita → Oggi). */
+  meteoPartita: MeteoGiornoDto | null;
 }
 
 // ---- Negozi e inventario (Fase 8.2) ----
@@ -1240,6 +1292,8 @@ export interface RicercaArticoliDto {
 // ---- Cruciverba di Leblanc (Fase 7.5) ----
 
 export interface CruciverbaDto {
+  /** Solo nella risposta di una spunta: la nota di Conoscenza del cruciverba, da segnare nelle Doti. */
+  daSegnare?: DoteDaSegnareDto[];
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;
   /** Chiave del catalogo (giorno e posizione): serve a correggere la riga. */
@@ -1381,6 +1435,8 @@ export interface AttivitaDto {
 }
 
 export interface LibroDto {
+  /** Solo nella risposta di un avanzamento: le Doti che il conseguimento dà (o toglie), da segnare nelle Doti. */
+  daSegnare?: DoteDaSegnareDto[];
   chiave: string;
   nome: string;
   nomeIt: string | null;
@@ -1429,6 +1485,8 @@ export interface LibriDto {
 }
 
 export interface FilmDto {
+  /** Solo nella risposta di un avanzamento: le Doti che la visione dà (o toglie), da segnare nelle Doti. */
+  daSegnare?: DoteDaSegnareDto[];
   chiave: string;
   nome: string;
   nomeIt: string | null;
@@ -1471,6 +1529,8 @@ export interface FilmDvdDto {
 }
 
 export interface VideogiocoDto extends AttivitaDto {
+  /** Solo nella risposta di un avanzamento: le Doti che il gioco completato dà (o toglie), da segnare nelle Doti. */
+  daSegnare?: DoteDaSegnareDto[];
   tipo: 'videogioco';
   /** Dove si compra: gli articoli collegati (migrazione 073). */
   negozi: Array<{ articolo: string; negozio: string; negozioNome: string; prezzo: number | null }>;
@@ -2118,11 +2178,12 @@ export interface LuogoOpzioneDto { chiave: string; nome: string; tipo: string; q
 /** Gli stati di una partita per le condizioni: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
 export interface ProgressiPartitaDto {
   /** `calcolato`: dalla squadra (tre stati: sì, no, non segnato); `manuale`: la spunta. */
-  eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string }>;
+  /** `serveA`: i ranghi dei Confidenti che l'evento sblocca, dai requisiti (es. «Sojiro Sakura, rango 3»). */
+  eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string; serveA?: string[] }>;
   /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza, 2 note»). */
   attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[] }>;
-  /** Dopo un + o − del contatore: di quanto sono cambiate le Doti (i turni danno e restituiscono i loro punti). */
-  cambioDoti?: Array<{ chiave: string; nome: string; delta: number }>;
+  /** Dopo un + o − del contatore: le Doti che i turni aggiunti danno (o quelli tolti davano), da segnare a mano nelle Doti. */
+  daSegnare?: DoteDaSegnareDto[];
   /** I negozi con programma punti manuale. */
   puntiNegozio: Array<{ negozio: string; nome: string; programma: string; unita: string; punti: number }>;
   /** I negozi con il grado cliente: dalla spesa segnata, con la prossima soglia. */
@@ -2216,6 +2277,8 @@ export interface AzioneUtenteDto {
   /** Stato rispetto alla partita (solo con partita), come per le azioni della guida. */
   stato: StatoAzioneDto | null;
   mappa: { chiave: string; spilloId: number | null } | null;
+  /** Solo nella risposta di una spunta: era l'ultima attività del giorno corrente e la partita è passata al giorno dopo. */
+  giornoAvanzato?: GiornoAvanzatoDto;
 }
 
 export interface AgendaGiornoDto {

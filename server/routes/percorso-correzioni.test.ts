@@ -71,17 +71,19 @@ describe('API — correzioni della guida giorno per giorno', () => {
     await request(app).delete('/api/compendio/percorso/04-12/azioni/0/correzione');
   });
 
-  it('le note sono solo testo: correggerle non cambia i punti della spunta, che vengono dagli effetti dell\'azione', async () => {
+  it('le note sono solo testo: correggerle non cambia che cosa la spunta ricorda, che viene dagli effetti dell\'azione', async () => {
     const p = await nuovaPartita('Note corrette');
     await request(app).put('/api/compendio/percorso/04-12/azioni/0').send({ note: 'Coraggio +2' });
     const a = (await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-12', indice: 0, fatta: true })).body.data as AzionePercorsoDto;
     expect(a.produce).toEqual([{ tipo: 'dote', dote: 'conoscenza', note: 1 }]);
-    expect(a.effetti?.doti.map((d) => d.chiave)).toEqual(['conoscenza']);
+    // gli effetti dicono che cosa il gioco dà (Conoscenza, 2 punti), non la nota corretta a testo
+    expect(a.effetti?.doti).toEqual([expect.objectContaining({ chiave: 'conoscenza', delta: 2 })]);
     // la riga restituita dalla spunta porta stato e mappa come la scheda del giorno
     expect(a.stato).not.toBeNull();
     expect(a).toHaveProperty('mappa');
+    // le Doti si segnano a mano: la spunta non le tocca
     const doti = (await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[];
-    expect(doti.find((d) => d.chiave === 'conoscenza')!.punti).toBe(2);
+    expect(doti.find((d) => d.chiave === 'conoscenza')!.punti).toBe(0);
     expect(doti.find((d) => d.chiave === 'coraggio')!.punti).toBe(0);
     await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-12', indice: 0, fatta: false });
     await request(app).delete('/api/compendio/percorso/04-12/azioni/0/correzione');
@@ -238,14 +240,15 @@ describe('API — correzioni della guida giorno per giorno', () => {
     expect((await giorno('04-26')).azioni.find((x) => x.indice === 0)).toMatchObject({ riferimentoTesto: prima.riferimentoTesto, correzione: null });
   });
 
-  it('il bagno del 25 aprile si corregge a due note: la spunta dà 3 punti di Fascino', async () => {
+  it('il bagno del 25 aprile si corregge a due note: la spunta dice 3 punti di Fascino (da segnare a mano)', async () => {
     const bagno = (await giorno('04-25')).azioni.find((a) => /Bagno pubblico/.test(a.azione))!;
     expect(bagno.produce).toEqual([{ tipo: 'dote', dote: 'fascino', note: 3 }]);
     await request(app).put(`/api/compendio/percorso/04-25/azioni/${bagno.indice}`).send({ produce: [{ tipo: 'dote', dote: 'fascino', note: 2 }] }).expect(200);
     const p = await nuovaPartita('Bagno');
-    await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-25', indice: bagno.indice, fatta: true }).expect(200);
+    const a = (await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-25', indice: bagno.indice, fatta: true }).expect(200)).body.data as AzionePercorsoDto;
+    expect(a.effetti?.doti).toEqual([expect.objectContaining({ chiave: 'fascino', delta: 3, note: 2 })]);
     const doti = (await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[];
-    expect(doti.find((d) => d.chiave === 'fascino')!.punti).toBe(3);
+    expect(doti.find((d) => d.chiave === 'fascino')!.punti).toBe(0);
     await request(app).put(`/api/partite/${p}/percorso`).send({ data: '04-25', indice: bagno.indice, fatta: false });
     await request(app).delete(`/api/compendio/percorso/04-25/azioni/${bagno.indice}/correzione`).expect(204);
   });

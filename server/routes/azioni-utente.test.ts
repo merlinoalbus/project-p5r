@@ -46,7 +46,7 @@ describe('API — cose da fare dell\'utente come azioni della guida', () => {
     await request(app).delete(`/api/catalogo/agenda/azioni/${(r.body.data as AzioneUtenteDto).id}`).expect(204);
   });
 
-  it('la spunta applica gli effetti e le note del Confidente, e li annulla togliendola; con effetti non si elimina', async () => {
+  it('la spunta dice le Doti (senza toccarle), applica le note del Confidente e le annulla togliendola; con effetti non si elimina', async () => {
     const p = await nuovaPartita('Takemi mia', '04-25');
     await request(app).put(`/api/partite/${p}/confidenti/takemi`).send({ forza: true, rango: 1 }).expect(200);
     // il rango 1 dalla pagina è già un incontro (la Dote a ogni incontro, voce 5): si misura da qui
@@ -59,12 +59,13 @@ describe('API — cose da fare dell\'utente come azioni della guida', () => {
       doti: [{ chiave: 'coraggio', delta: 2, note: 1 }], confidente: { chiave: 'takemi', noteRisposta: 2 },
       incontro: { verso: 2, passaggio: true, giaContato: false, doti: [{ chiave: 'coraggio', delta: 2, note: 1 }] },
     });
-    expect(await dote(p, 'coraggio')).toBe(base + 4);
+    // le Doti si segnano a mano: gli effetti le dicono, i punti delle Doti non si muovono
+    expect(await dote(p, 'coraggio')).toBe(base);
     const puntiTakemi = async () => ((await request(app).get(`/api/partite/${p}/confidenti`)).body.data as Array<{ chiave: string; punti: number }>).find((c) => c.chiave === 'takemi')!.punti;
     expect(await puntiTakemi()).toBeGreaterThan(0);
-    // una seconda spunta non dà punti due volte
+    // una seconda spunta non applica niente due volte
     await spunta(a.id, p, true, 2).expect(200);
-    expect(await dote(p, 'coraggio')).toBe(base + 4);
+    expect(await dote(p, 'coraggio')).toBe(base);
     // con effetti non si elimina: prima si toglie la spunta
     const rifiuto = (await request(app).delete(`/api/catalogo/agenda/azioni/${a.id}`)).body.error as { code: string; message: string };
     expect(rifiuto.code).toBe('azione-con-effetti');
@@ -83,14 +84,15 @@ describe('API — cose da fare dell\'utente come azioni della guida', () => {
     const p = await nuovaPartita('Letture mie', '04-26');
     const zorro = (await crea({ data: '04-25', azione: 'Finire Zorro', tipo: 'libro', riferimento: { tipo: 'libro', chiave: 'zorro-il-fuorilegge' }, produce: [{ tipo: 'lettura', categoria: 'libro', chiave: 'zorro-il-fuorilegge', almeno: null }], partitaId: p })).body.data as AzioneUtenteDto;
     expect(zorro.produceTesto).toEqual(['Zorro, il fuorilegge: completato']);
-    await spunta(zorro.id, p, true).expect(200);
-    expect(await dote(p, 'gentilezza')).toBe(7);
+    // Zorro finito: la lettura la segna la spunta, la Gentilezza (+7) la dice e la segni tu
+    const letto = (await spunta(zorro.id, p, true).expect(200)).body.data as AzioneUtenteDto;
+    expect(letto.effetti?.letture).toEqual([expect.objectContaining({ chiave: 'zorro-il-fuorilegge', doti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 7 }] })]);
+    expect(await dote(p, 'gentilezza')).toBe(0);
     const turno = (await crea({ data: '04-26', azione: 'Svolgere il primo giorno di lavoro dal Fioraio', tipo: 'lavoro', riferimento: { tipo: 'attivita', chiave: 'lavoro-rafflesia' }, produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }], partitaId: p })).body.data as AzioneUtenteDto;
     const r = (await spunta(turno.id, p, true).expect(200)).body.data as AzioneUtenteDto;
-    expect(r.effetti?.turni).toEqual([expect.objectContaining({ attivita: 'lavoro-rafflesia', ordine: 1 })]);
-    expect(await dote(p, 'gentilezza')).toBe(10);
+    expect(r.effetti?.turni).toEqual([expect.objectContaining({ attivita: 'lavoro-rafflesia', ordine: 1, doti: [expect.objectContaining({ chiave: 'gentilezza', delta: 3 })] })]);
     await spunta(turno.id, p, false).expect(200);
-    expect(await dote(p, 'gentilezza')).toBe(7);
+    expect(await dote(p, 'gentilezza')).toBe(0);
     expect(prepared("SELECT volte FROM attivita_svolta_partita WHERE partita_id = ? AND attivita_chiave = 'lavoro-rafflesia'").get(p)).toEqual({ volte: 0 });
   });
 

@@ -21,6 +21,7 @@ import { getFilm, getLibri, getVideogiochi } from '../../services/api/compendio'
 import { impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco } from '../../services/api/partite';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
+import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { PageState } from '../shared/PageState';
 import { IconaCategoria } from '../guida/IconaCategoria';
 import type { FilmDto, LibroDto, VideogiocoDto } from '../../types';
@@ -132,10 +133,13 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const cambia = async (gruppo: Gruppo, v: Voce, avanzamento: number) => {
     setOccupati((o) => ({ ...o, [v.chiave]: true }));
     try {
-      const agg = gruppo === 'libri' ? daLibro(await impostaProgressoLibro(partitaId, v.chiave, avanzamento))
-        : gruppo === 'film' ? daFilm(await impostaProgressoFilm(partitaId, v.chiave, avanzamento))
-          : daGioco(await impostaProgressoVideogioco(partitaId, v.chiave, avanzamento));
+      const esito = gruppo === 'libri' ? await impostaProgressoLibro(partitaId, v.chiave, avanzamento)
+        : gruppo === 'film' ? await impostaProgressoFilm(partitaId, v.chiave, avanzamento)
+          : await impostaProgressoVideogioco(partitaId, v.chiave, avanzamento);
+      const agg = gruppo === 'libri' ? daLibro(esito as LibroDto) : gruppo === 'film' ? daFilm(esito as FilmDto) : daGioco(esito as VideogiocoDto);
       setToccate((t) => ({ ...t, [agg.chiave]: agg }));
+      // il conseguimento dà le sue Doti: si segnano a mano, l'avviso le ricorda
+      avvisaDotiDaSegnare(esito.daSegnare, v.nome);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {

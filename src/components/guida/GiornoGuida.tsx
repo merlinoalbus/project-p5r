@@ -17,7 +17,8 @@ import {
   impostaAzionePercorso, riapplicaCorrezioneGuida, rimuoviAzioneGuida, ripristinaAzioneGuida,
 } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
-import { descriviEffetti } from '../../utils/percorso';
+import { avvisoSpunta, descriviEffetti } from '../../utils/percorso';
+import { dotiDaSegnareDaEffetti } from '../../utils/dotiDaSegnare';
 import type { AzionePercorsoDto, AzioneUtenteDto, CorrezioneSuperataDto, EventoUtenteDto, FasciaGioco, PercorsoGiornoDto } from '../../types';
 import { DataP5 } from '../shared/DataP5';
 import { MeteoIcona } from './MeteoIcona';
@@ -31,6 +32,7 @@ import { ModuloVoceGiornata, type SoggettoVoce } from './ModuloVoceGiornata';
 import { VoceEvento, VoceMia } from './VociAgenda';
 import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
 import { chiedeNote } from '../../utils/azioneStrutturata';
+import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
 const nomeFascia = (f: FasciaGioco) => (f === 'giorno' ? 'di giorno' : 'di sera');
@@ -71,7 +73,10 @@ export function Azione({ a, data, partitaId, onCambiata, onSullaMappa, evidenzia
       onCambiata(agg);
       // spuntando (o riaprendo) un'azione cambia cosa il giorno suggerisce: l'alone dorato si aggiorna da solo
       useSuggerimentiStore.getState().invalida();
-      if (fatta && agg.effetti) notifica('success', descriviEffetti(agg.effetti));
+      // che cosa è successo e, a parte, le Doti da segnare a mano (la spunta non le tocca)
+      if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
+      // era l'ultima attività del giorno: la partita è passata al giorno dopo
+      seGiornoAvanzato(agg);
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   const stato = a.fatta ? null : a.stato;
@@ -162,7 +167,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     if (partitaId && a.fatta && a.effetti) {
       chiedi({
         titolo: 'Rimuovere un\'azione già spuntata?',
-        testo: <>Nella partita questa azione è spuntata e ha dato <strong>{descriviEffetti(a.effetti)}</strong>. Puoi togliere prima la spunta (Doti, punti e turni vengono annullati; letture e visioni restano) oppure rimuoverla lasciando i punti. La rimozione vale per tutte le partite e si può annullare con «Rimetti».</>,
+        testo: <>Nella partita questa azione è spuntata (<strong>{descriviEffetti(a.effetti)}</strong>). Puoi togliere prima la spunta (punti del Confidente e turni vengono annullati; le Doti restano come le hai segnate tu, letture e visioni restano) oppure rimuoverla lasciando tutto com'è. La rimozione vale per tutte le partite e si può annullare con «Rimetti».</>,
         scelte: [
           { titolo: 'Togli la spunta e rimuovi', tono: 'primario', icona: 'annulla-ultimo', esegui: async () => { await impostaAzionePercorso(partitaId, g.giorno, a.indice, false); await rimuovi(); }, ok: 'Spunta tolta, punti annullati e azione rimossa dalla giornata.' },
           { titolo: 'Rimuovi lasciando i punti', tono: 'pericolo', icona: 'elimina', esegui: rimuovi, ok: 'Azione rimossa dalla giornata.' },
@@ -180,7 +185,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     if (c.nascosta && partitaId && attuale?.fatta && attuale.effetti) {
       chiedi({
         titolo: 'Riapplicare la rimozione a un\'azione spuntata?',
-        testo: <>La correzione toglie dalla giornata «{attuale.azione}», che nella partita è spuntata e ha dato <strong>{descriviEffetti(attuale.effetti)}</strong>. Puoi togliere prima la spunta (Doti, punti e turni vengono annullati; letture e visioni restano) oppure riapplicarla lasciando i punti.</>,
+        testo: <>La correzione toglie dalla giornata «{attuale.azione}», che nella partita è spuntata (<strong>{descriviEffetti(attuale.effetti)}</strong>). Puoi togliere prima la spunta (punti del Confidente e turni vengono annullati; le Doti restano come le hai segnate tu, letture e visioni restano) oppure riapplicarla lasciando tutto com'è.</>,
         scelte: [
           { titolo: 'Togli la spunta e riapplica', tono: 'primario', icona: 'annulla-ultimo', esegui: async () => { await impostaAzionePercorso(partitaId, g.giorno, c.indice, false); await riapplicaLa(); }, ok: 'Spunta tolta, punti annullati e correzione riapplicata.' },
           { titolo: 'Riapplica lasciando i punti', tono: 'pericolo', icona: 'elimina', esegui: riapplicaLa, ok: 'Correzione riapplicata.' },
@@ -203,10 +208,11 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     { chiave: 'modifica', titolo: 'Modifica', icona: <IconaAzione chiave="modifica" dimensione={20} />, onClick: () => apri({ tipo: 'mia', azione: a }) },
     { chiave: 'sposta', titolo: `Sposta ${nomeFascia(altraFascia(a.fascia))}`, icona: <IconaFascia fascia={altraFascia(a.fascia)} />, onClick: () => void esegui(() => aggiornaAzioneAgenda(a.id, { fascia: altraFascia(a.fascia) }), `Spostata ${nomeFascia(altraFascia(a.fascia))}.`) },
     { chiave: 'elimina', titolo: 'Elimina', tono: 'pericolo', icona: <IconaAzione chiave="elimina" dimensione={20} />, onClick: () => chiedi(
-      // spuntata con effetti: prima si toglie la spunta (i punti tornano indietro), altrimenti resterebbero senza la riga che li spiega
+      // spuntata con effetti: prima si toglie la spunta (punti del Confidente e turni tornano indietro; le Doti le segna l'utente),
+      // altrimenti resterebbero senza la riga che li spiega
       partitaId && a.fatta && a.effetti ? {
         titolo: 'Eliminare una cosa da fare già spuntata?',
-        testo: <>Nella partita «{a.azione}» è spuntata e ha dato <strong>{descriviEffetti(a.effetti)}</strong>. Eliminandola si toglie prima la spunta (Doti, punti e turni vengono annullati; letture e visioni restano); poi viene cancellata{a.partitaId === null ? ' da tutte le partite' : ''} e non si può recuperare.</>,
+        testo: <>Nella partita «{a.azione}» è spuntata (<strong>{descriviEffetti(a.effetti)}</strong>). Eliminandola si toglie prima la spunta (punti del Confidente e turni vengono annullati; le Doti restano come le hai segnate tu, letture e visioni restano); poi viene cancellata{a.partitaId === null ? ' da tutte le partite' : ''} e non si può recuperare.</>,
         scelte: [{ titolo: 'Togli la spunta ed elimina', tono: 'pericolo', icona: 'elimina', esegui: async () => { await impostaAzioneAgendaFatta(a.id, partitaId, false); await eliminaAzioneAgenda(a.id); }, ok: 'Spunta tolta, punti annullati e cosa da fare eliminata.' }],
       } : {
         titolo: 'Eliminare la cosa da fare?', testo: <>«{a.azione}» viene cancellata{a.partitaId === null ? ' da tutte le partite' : ''}: non si può recuperare.</>,
@@ -225,7 +231,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
 
   const spuntaMia = (a: AzioneUtenteDto, fatta: boolean, noteRisposta?: 1 | 2 | 3) => {
     if (!partitaId) return;
-    void esegui(() => impostaAzioneAgendaFatta(a.id, partitaId, fatta, noteRisposta), (agg) => (fatta && agg.effetti ? descriviEffetti(agg.effetti) : fatta ? 'Segnata come fatta.' : 'Riaperta.'));
+    void esegui(async () => { const agg = await impostaAzioneAgendaFatta(a.id, partitaId, fatta, noteRisposta); seGiornoAvanzato(agg); return agg; },
+      (agg) => (fatta && agg.effetti ? avvisoSpunta(agg.effetti) : fatta ? 'Segnata come fatta.' : 'Riaperta.'));
   };
 
   const perFascia = (f: FasciaGioco) => ({

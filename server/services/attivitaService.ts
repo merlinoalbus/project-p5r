@@ -13,9 +13,9 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
-import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
+import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
-import { aggiornaDote, dotiSociali, puntiDaNote } from './partiteService.js';
+import { nomeDote, puntiDaNote } from './partiteService.js';
 import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { descriviVoceEffetto, dotiDaEffetti, leggiVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -225,8 +225,9 @@ function noteDelConseguimento(riga: RigaLibro | RigaFilm | RigaAttivita, success
     .map((d) => ({ dote: d.dote, note: Math.min(3, Math.max(1, d.note)) as 1 | 2 | 3 }));
 }
 
-/** Applica le note di un conseguimento e **scrive che cosa ha dato**, per poterlo togliere identico
- *  (tre note lette in un libro valgono il quarto scalino: `puntiDaNote` lo sa già). */
+/** Registra le note di un conseguimento: **che cosa il gioco dà** (tre note lette in un libro valgono il quarto scalino:
+ *  `puntiDaNote` lo sa già). Le Doti non si toccano — si segnano a mano (`aggiornaDote`, scelta dell'utente 2026-09-30) —:
+ *  il registro dice che cosa ricordare e, al cinema, quale visione è la prima. */
 function applicaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: string, riga: RigaLibro | RigaFilm | RigaAttivita, successiva: boolean, adesso: string, st: StatoDisponibilita): void {
   const doti = noteDelConseguimento(riga, successiva, st);
   if (doti.length === 0) return;
@@ -234,28 +235,33 @@ function applicaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const cinema = tipo === 'film' && haAnimaDaCineasta(partitaId);
   for (const n of doti) {
     const punti = puntiDaNote(n.note, tipo === 'libro', false, cinema);
-    aggiornaDote(partitaId, n.dote, { delta: punti });
     prepared('INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
       .run(partitaId, tipo, chiave, ordine, n.dote, punti, n.note, adesso);
   }
 }
 
-/** Toglie l'**ultimo** conseguimento registrato: al cinema la prima visione vale più delle altre. */
+/** Toglie dal registro l'**ultimo** conseguimento: al cinema la prima visione vale più delle altre. Le Doti restano come sono. */
 function annullaUltimoEffettoLettura(partitaId: number, tipo: TipoLettura, chiave: string): void {
   const ultimo = prepared('SELECT ordine FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? ORDER BY ordine DESC LIMIT 1').get(partitaId, tipo, chiave) as { ordine: number } | undefined;
   if (!ultimo) return;
-  for (const e of prepared('SELECT dote_chiave, punti FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? AND ordine = ?').all(partitaId, tipo, chiave, ultimo.ordine) as Array<{ dote_chiave: string; punti: number }>) {
-    aggiornaDote(partitaId, e.dote_chiave, { delta: -e.punti });
-  }
   prepared('DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? AND ordine = ?').run(partitaId, tipo, chiave, ultimo.ordine);
 }
 
-/** Toglie tutto quello che un elemento ha dato: si usa quando si disfa un completamento. */
+/** Toglie dal registro tutto quello che un elemento dava: si usa quando si disfa un completamento. Le Doti restano come sono. */
 function annullaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: string): void {
-  for (const e of prepared('SELECT dote_chiave, punti FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').all(partitaId, tipo, chiave) as Array<{ dote_chiave: string; punti: number }>) {
-    aggiornaDote(partitaId, e.dote_chiave, { delta: -e.punti });
-  }
   prepared('DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').run(partitaId, tipo, chiave);
+}
+
+/** I punti che il registro dei conseguimenti attribuisce a un elemento, Dote per Dote. */
+function puntiRegistrati(partitaId: number, tipo: string, chiave: string): Map<string, number> {
+  return new Map((prepared('SELECT dote_chiave, SUM(punti) AS punti FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? GROUP BY dote_chiave').all(partitaId, tipo, chiave) as Array<{ dote_chiave: string; punti: number }>)
+    .map((r) => [r.dote_chiave, r.punti]));
+}
+
+/** Che cosa cambia fra due letture del registro: le Doti da segnare a mano (in più o in meno). */
+function daSegnareFra(prima: Map<string, number>, dopo: Map<string, number>): DoteDaSegnareDto[] {
+  const chiavi = [...new Set([...prima.keys(), ...dopo.keys()])];
+  return chiavi.map((c) => ({ chiave: c, nome: nomeDote(c), delta: (dopo.get(c) ?? 0) - (prima.get(c) ?? 0) })).filter((d) => d.delta !== 0);
 }
 
 /**
@@ -279,6 +285,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   if (richiesto > 0 && conDisponibilita(riga.condizioni_json, st).disponibilita?.stato === 'bloccato') {
     throw httpErrors.conflict('lettura-non-disponibile', `'${riga.nome}' non è ancora disponibile nella partita: la condizione di sblocco non è soddisfatta.`);
   }
+  const registroPrima = puntiRegistrati(partitaId, tipo, chiave);
   getDb().transaction(() => {
     // Quante visioni/sessioni c'erano **prima** di questa scrittura: al cinema serve a sapere
     // quante se ne aggiungono o se ne tolgono, perché ognuna è un conseguimento a sé.
@@ -313,9 +320,10 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
       const dove = tipo === 'libro' ? (riga as RigaLibro).dove : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
       registraEvento(partitaId, 'lettura', `${etichetta}: ${titolo}`, `${dove}${dote}.`, { tipo, chiave });
     }
-    // ---- Il conseguimento alza le Doti: un libro finito, un film visto, un gioco completato ----
-    // Un film al cinema si rivede, e ogni visione conta: la prima con le sue note, quelle dopo con
-    // le voci «ripetuto». Libri, DVD e videogiochi si conseguono una volta sola.
+    // ---- Il conseguimento dà le sue Doti: un libro finito, un film visto, un gioco completato ----
+    // Si registrano (da segnare a mano nelle Doti, che qui non si toccano). Un film al cinema si
+    // rivede, e ogni visione conta: la prima con le sue note, quelle dopo con le voci «ripetuto».
+    // Libri, DVD e videogiochi si conseguono una volta sola.
     if (tipo !== 'film' || (riga as RigaFilm).dove !== 'cinema') {
       if (registrato && !era) applicaEffettiLettura(partitaId, tipo, chiave, riga, false, adesso, st);
       else if (!registrato && era) annullaEffettiLettura(partitaId, tipo, chiave);
@@ -328,7 +336,10 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   const stato = letturePartita(partitaId);
-  return tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri')) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm()) : videogiocoDto(riga as RigaAttivita, stato, nomiLuoghi(), articoliCollegati('videogiochi'));
+  // che cosa il conseguimento dà (o, disfatto, dava): da segnare a mano nelle Doti
+  const daSegnare = daSegnareFra(registroPrima, puntiRegistrati(partitaId, tipo, chiave));
+  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri')) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm()) : videogiocoDto(riga as RigaAttivita, stato, nomiLuoghi(), articoliCollegati('videogiochi'));
+  return daSegnare.length ? { ...dto, daSegnare } : dto;
 }
 
 /** Dove è arrivata una lettura nella partita: sessioni lette, visioni o serate, sessioni di gioco; il totale (null al cinema, che non ne ha) e il nome. */
@@ -352,11 +363,12 @@ export function avanzamentoLettura(partitaId: number, tipo: TipoLettura, chiave:
 
 // ---- Turni delle attività contate per volte (i lavori) ----
 //
-// Un turno registrato alza le Doti che l'attività dichiara (il primo le voci senza `ripetuto`, gli
+// Un turno registrato dice le Doti che l'attività dichiara (il primo le voci senza `ripetuto`, gli
 // altri quelle «dalla seconda volta in poi», e non le prime), oppure quelle che il turno dichiara da sé (il secondo
-// turno al Beef Bowl Shop). Ogni turno registrato ha la sua riga in `turno_partita` (`ordine`), e
-// ciò che ha dato sta in `effetto_lettura_partita` (tipo «attivita», stesso `ordine`), per toglierlo
-// identico: dalla spunta della giornata o dal contatore, i punti vengono da una parte sola.
+// turno al Beef Bowl Shop): il gioco le dà, l'utente le segna a mano (le Doti qui non si toccano). Ogni turno
+// registrato ha la sua riga in `turno_partita` (`ordine`), e ciò che dà sta in `effetto_lettura_partita`
+// (tipo «attivita», stesso `ordine`), per toglierlo identico e dire quanto: dalla spunta della giornata o dal
+// contatore, il turno si conta da una parte sola.
 
 /** L'attività contata per volte (`tracciamento = 'svolta'`), o un errore che dice perché no. */
 function attivitaConTurni(chiave: string): RigaAttivita {
@@ -394,14 +406,14 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     const ordine = Math.max(ultimo, prima) + 1;
     scriviVolte(partitaId, chiave, prima + 1, adesso);
     prepared('INSERT INTO turno_partita (partita_id, attivita_chiave, ordine, created_at) VALUES (?, ?, ?, ?)').run(partitaId, chiave, ordine, adesso);
+    // che cosa dà il turno: si registra e si ricorda, le Doti si segnano a mano (`aggiornaDote`)
     const daApplicare = doti ?? noteDelConseguimento(riga, ordine > 1, statoDisponibilitaPartita(partitaId));
     const applicate: TurnoRegistrato['doti'] = [];
     for (const d of daApplicare) {
       const punti = puntiDaNote(d.note, false);
-      const agg = aggiornaDote(partitaId, d.dote, { delta: punti });
       prepared("INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, 'attivita', ?, ?, ?, ?, ?, ?)")
         .run(partitaId, chiave, ordine, d.dote, punti, d.note, adesso);
-      applicate.push({ chiave: d.dote, nome: agg.nome, delta: punti, note: d.note });
+      applicate.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: punti, note: d.note });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     return { attivita: chiave, nome: riga.nome, ordine, doti: applicate };
@@ -421,9 +433,7 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number): 
       : (prepared('SELECT MAX(ordine) AS m FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ?').get(partitaId, chiave) as { m: number | null }).m;
     if (ordine !== undefined && bersaglio === null) return;
     if (bersaglio !== null) {
-      for (const e of prepared("SELECT dote_chiave, punti FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").all(partitaId, chiave, bersaglio) as Array<{ dote_chiave: string; punti: number }>) {
-        aggiornaDote(partitaId, e.dote_chiave, { delta: -e.punti });
-      }
+      // il turno esce dal registro; le Doti restano come sono (si segnano a mano)
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
     }
@@ -432,16 +442,16 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number): 
   })();
 }
 
-/** Il contatore dell'attività: porta le volte a `volte` registrando o togliendo turni, ognuno con i suoi punti.
- *  Dice di quanto è cambiata ogni Dote (per avvisare chi ha premuto + o −). */
-export function impostaVolteAttivita(partitaId: number, chiave: string, volte: number): Array<{ chiave: string; nome: string; delta: number }> {
+/** Il contatore dell'attività: porta le volte a `volte` registrando o togliendo turni. Dice che cosa danno i turni
+ *  aggiunti (o davano quelli tolti), da segnare a mano nelle Doti. */
+export function impostaVolteAttivita(partitaId: number, chiave: string, volte: number): DoteDaSegnareDto[] {
   attivitaConTurni(chiave);
-  const prima = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.punti]));
+  const prima = puntiRegistrati(partitaId, 'attivita', chiave);
   getDb().transaction(() => {
     for (let v = volteSvolte(partitaId, chiave); v < volte; v++) registraTurno(partitaId, chiave);
     for (let v = volteSvolte(partitaId, chiave); v > volte; v--) togliTurno(partitaId, chiave);
   })();
-  return dotiSociali(partitaId).filter((d) => d.punti !== (prima.get(d.chiave) ?? 0)).map((d) => ({ chiave: d.chiave, nome: d.nome, delta: d.punti - (prima.get(d.chiave) ?? 0) }));
+  return daSegnareFra(prima, puntiRegistrati(partitaId, 'attivita', chiave));
 }
 
 /** Che cosa dà un turno dell'attività, in parole: le voci del primo turno e quelle dal secondo in poi. */

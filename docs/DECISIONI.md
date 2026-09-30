@@ -682,3 +682,95 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   - togliere una spunta non disfa le letture (si disfano dalla pagina dei Libri o dei Film), come già prima.
 
 
+
+### 2026-09-30 — Il denaro del gruppo si imposta anche a un valore nuovo
+- Richiesta dell'utente: «cambiare il denaro corrente settando un valore nuovo (ora sono incassa o spendi)». Scelta
+  dell'utente fra due proposte: terzo pulsante «Imposta» accanto a Incassa e Spendi, sullo stesso campo (ora «Importo»),
+  invece della cifra modificabile al tocco.
+- Il server lo sapeva già fare (`PATCH /api/partite/:id/squadra/yen` con `yen`): cambia solo l'interfaccia. Lo zero è un
+  saldo valido e si imposta; l'importo oltre 9.999.999 si ferma al tetto accettato da `bodyYen`. Nello storico va la
+  differenza («Entrata»/«Spesa»), come per gli altri movimenti.
+- Il campo non è più `type="number"`: leggeva il punto delle migliaia come separatore decimale, e «123.450» copiato
+  dal gioco diventava 12.345 ¥ (difetto che c'era già per Incassa e Spendi). Ora è testo con tastiera numerica e
+  contano solo le cifre («123.450», «123450», «¥123.450» sono lo stesso importo); senza cifre i pulsanti restano spenti.
+
+### 2026-09-30 — I requisiti «non verificabili» dei Confidenti diventano eventi della partita
+- Segnalazione dell'utente: Sojiro fermo al rango 3 perché «il caffè al Leblanc» non risultava, e l'interruttore non stava in
+  Partita → Progressi, dove stanno gli altri eventi. Scelta dell'utente: «Interruttori in Progressi».
+- Le cinque righe `manuale` che sono **fatti** (caffè, duello con Akechi vinto, Pietra Sacra, chiamata a Kawakami, Oratore di
+  Shibuya) diventano requisiti `evento` su cinque eventi nuovi di `EVENTI_STORIA` (migrazione 090). Un dato solo: il
+  «Condizione soddisfatta» del Confidente e l'interruttore di Progressi scrivono e leggono `evento_storia_partita`; le conferme
+  già date sono convertite in eventi avvenuti e la riga della conferma si toglie (utente 012), e un evento già segnato non si tocca.
+  Finché non è segnato il requisito resta grigio e **blocca**, come prima: è una condizione vera del gioco.
+- La sesta, «la scuola aperta» di Futaba al rango 4, non è un fatto da segnare ma un'avvertenza: diventa `avviso`, grigio con
+  icona, **non bloccante** e non confermabile (scelta dell'utente: «da confermare», non blocca).
+- Non c'è un articolo «Pietra Sacra» nel catalogo: per questo è un evento e non la condizione `articolo`.
+
+### 2026-09-30 — Il meteo si segna nella partita, per fascia, con un tocco
+- Scelte dell'utente: «Meteo impostabile + non blocca»; poi «fammi impostare il meteo…»; alla domanda sugli stati
+  («i meteo sono tutti i possibili?») «Base a mano + allerte automatiche»; il cambio «deve essere diretto… non con doppio
+  passaggio»; infine «la barra dei pulsanti in una riga unica… GIORNO deve vedersi bene» → «Giorno · Sera · meteo di adesso».
+- Quattro meteo di base per fascia (`meteo_partita`, NULL = vale la guida). La guida «A/B» è A di giorno e B di sera; il
+  modificatore fra parentesi non conta. Senza meteo (58 giorni della guida) i requisiti «non deve piovere» sono grigi e non
+  bloccano; «piove» è grigio («ignoto»). All'aperto guastano pioggia e neve, «piove» è solo la pioggia (come prima).
+- Le allerte del gioco cadono in date fisse: la migrazione 091 legge una volta sola la prosa del catalogo («Date: 27/7,
+  29/7 (sera), 22/8-26/8», «(solo di giorno)») e le mette per giorno e fascia; una fascia può averne due (17 agosto sera).
+  La pioggia torrenziale vale come pioggia dove l'utente non ha segnato altro.
+- Riga unica di 44 px: «Giorno» e «Sera» sono testo (con l'icona non starebbero, con le quattro icone del meteo, nella
+  colonna della guida a 768 e 1024 px); la spiegazione («mattina, pranzo…») è nel `title` e nel nome accessibile; l'allerta
+  è un bollino sull'angolo del pulsante. `PartitaDto.meteoOra` entra nelle chiavi di ricarica di mappe e negozi.
+- Il DTO del meteo ha `dataGioco` e non `data`: una risposta con un campo `data` sarebbe presa per già imbustata
+  (`responseShape`).
+
+### 2026-09-30 — Menu laterale e mappa della Home a scomparsa; «Chiudi» delle mappe torna da dove eri
+- Segnalazione dell'utente: «spazi in scroll troppo piccoli»; proposta dell'utente: menu a sinistra e mappa a destra a
+  scomparsa, col pulsante e col passaggio del mouse; e «se si chiude una mappa vorrei tornare alla pagina visualizzata
+  prima di aprire la mappa». Proposta confermata così com'era descritta; ordine: dopo il meteo, prima del cambio giorno.
+- Menu: ridotto alle icone o largo, ricordato sul dispositivo. Ridotto, si apre sopra il contenuto al passaggio del mouse
+  (solo con un puntatore vero: sul tablet un tocco simulerebbe il passaggio) o col fuoco **da tastiera** (`:has(:focus-visible)`:
+  con `:focus-within` una voce toccata resterebbe a fuoco e il menu aperto sopra la pagina appena aperta).
+- Mappa della Home: chiusa, la sua parte di pagina va a carta e guida (da 1024 px affiancate, la guida alta quanto la
+  pagina); la linguetta sul bordo destro la riapre al tocco e la fa uscire sopra il contenuto al passaggio del mouse; la
+  mappa resta montata e nascosta con `visibility`, così uscendo non si ricarica. «Sulla mappa» di un'azione la riapre:
+  l'azione chiede proprio di vederla. Sul telefono (Home incolonnata) chiusa lascia il pulsante «Mappa».
+- «Chiudi» delle mappe: si annota la pagina da cui si entra nelle mappe (`/guida/mappe/<chiave>`, visore o editor) e
+  «Chiudi» ci torna; fra mappe, livelli, visore ed editor l'annotazione resta, uscendo dalle mappe si cancella. L'elenco
+  delle mappe conta come pagina di partenza. Aperta direttamente, «Chiudi» resta com'era (visore → elenco, editor →
+  visore): la proposta confermata diceva «come oggi». In sessionStorage: regge al ricaricamento, non passa fra schede.
+
+### 2026-09-30 — Il giorno completato passa al successivo; al cambio di giorno si chiede il meteo
+- Richiesta dell'utente: «fammi impostare il meteo quando faccio il cambio giorno... se completo tutte le attività di un
+  giorno deve spostare automaticamente il giorno corrente al giorno successivo modalità giorno».
+- Lo decide il server alla spunta: se il giorno spuntato è quello corrente e sono fatte tutte le azioni della guida come
+  l'utente la vede (correzioni applicate, rimosse escluse) e tutte le sue cose da fare, la partita passa al giorno dopo,
+  di giorno, e lo storico lo registra. Gli eventi dell'agenda non si spuntano e non contano; un giorno senza attività non
+  avanza; togliere una spunta non torna indietro e ricompletare un giorno passato non sposta niente.
+- La richiesta del meteo non è legata a un pulsante: la apre `MeteoAlCambioGiorno` quando la data della partita attiva
+  cambia per la stessa partita, da qualunque punto (spunta, «Segna come giorno corrente», Calendario, Riepilogo); non al
+  primo caricamento né passando a un'altra partita. Chi non segna niente tiene il meteo della guida.
+
+### 2026-09-30 — Le Doti sociali si segnano solo a mano, con promemoria
+- Richiesta dell'utente: «fai che i punti Doti Sociali li sposto solo io manualmente e non automaticamente per favore...»;
+  scelta «Sempre a mano, con promemoria».
+- Nessuna fonte automatica tocca più le Doti: spunte della guida e delle cose da fare, letture/visioni/videogiochi, turni
+  (spunta e contatore), incontri con i Confidenti, domande in classe, cruciverba. Né aggiungendo né togliendo — anche
+  togliendo la spunta di un'azione che, prima di questa scelta, le aveva alzate: i punti restano come l'utente li ha.
+- Restano tracciati: letture e visioni, turni (e il loro registro di che cosa danno, che serve anche a sapere quale visione
+  è la prima), incontri, punti del Confidente dalle note di risposta.
+- Il promemoria: ogni gesto che il gioco premia con una Dote dice «Da segnare nelle Doti: …» (in negativo disfacendo), le
+  righe della guida dicono «Il gioco dà: …», e lo storico scrive «da segnare nelle Doti».
+- Limiti noti: i punti già dati in automatico prima di questa scelta restano nelle Doti (non si ricalcola niente); il
+  promemoria è un avviso che scompare, non un elenco di Doti in sospeso.
+
+### Limiti noti del lotto del 30 settembre (denaro, requisiti, meteo, cambio giorno, Doti a mano)
+- Il passaggio del mouse che apre il menu ridotto e la mappa della Home non si è potuto provare con un gesto vero nel
+  pannello di prova (sotto emulazione non arriva, a grandezza reale il pannello è sotto i 1024 px): le regole sono nel CSS
+  servito, da provare al primo uso su desktop.
+- Il cambio giorno automatico scatta a ogni spunta sul giorno corrente con tutto fatto: riportare la partita su un giorno già
+  completato e rispuntare una voce (o spuntarne una nuova) la fa passare di nuovo al giorno dopo. Lo storico scrive le date
+  in «MM-GG».
+- Il meteo senza dato (58 giorni della guida) rende «ignoto» e non «bloccato» ciò che dipende dalla pioggia: spilli e azioni
+  «solo quando piove» restano visibili come da confermare finché il meteo non si segna.
+- `partitaDto.meteoOra` si calcola a ogni lettura della partita (qualche query per partita): trascurabile con poche partite.
+- Il pacchetto completo locale (`pacchetto/completo/gioco.db`, fuori da git) non è stato rigenerato: si porta alla 91 da
+  solo all'import nell'app (le migrazioni girano all'import); `pacchetto/gioco.db` in git è alla 91.

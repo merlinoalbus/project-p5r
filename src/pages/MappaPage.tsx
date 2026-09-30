@@ -27,6 +27,7 @@ import { VisoreMappa } from '../components/mappe/VisoreMappa';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { NOME_TIPO_MAPPA } from '../../shared/spilli';
+import { ritornoMappe } from '../utils/ritornoMappe';
 
 /** Tokyo non ha un visore proprio: la sua mappa è quella disegnata nella Città.
  *
@@ -365,7 +366,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           onRaccolto={raccolto}
           onStatoPunto={statoPunto}
           onAcquisto={acquisto}
-          onChiudi={() => navigate('/guida/mappe')}
+          onChiudi={() => navigate(ritornoMappe() ?? '/guida/mappe')}
           azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>Scheda del luogo</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" /></>}
         /></>}
         {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} />}

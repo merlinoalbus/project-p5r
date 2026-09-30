@@ -31,6 +31,11 @@ function riserva(chiave: ChiaveMeteo, size: number): ReactNode {
   }
 }
 
+/** L'icona di un solo meteo (`meteo/<chiave>`, con la riserva vettoriale), decorativa: il nome lo dice chi la usa. */
+export function IconaMeteo({ chiave, dimensione = 22 }: { chiave: ChiaveMeteo; dimensione?: number }) {
+  return <AssetImg nome={`meteo/${chiave}`} alt="" decorativa className="object-contain" style={{ width: dimensione, height: dimensione }} fallback={riserva(chiave, dimensione)} />;
+}
+
 /** Icone del meteo (giorno/sera se il testo ha due parti); il testo originale resta nel `title` e, a richiesta, accanto. */
 export function MeteoIcona({ meteo, dimensione = 22, conTesto, className }: Props) {
   const segmenti = segmentiMeteo(meteo);

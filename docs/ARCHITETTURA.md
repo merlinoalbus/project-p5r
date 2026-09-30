@@ -275,6 +275,26 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 
 ## 7. Frontend
 - Layout tablet-first: `MainLayout` con `Sidebar` visibile da `lg` (1024px) e `BottomNav` fissa sotto (5 voci, 64px); verificato a 375/768/1280 px.
+  Dal 2026-09-30 la `Sidebar` è richiudibile: `.barra-laterale` tiene il posto (210 px o 64 px), il pannello le sta sopra in
+  assoluto e, ridotto, si allarga sopra il contenuto al passaggio del mouse (`hover: hover` e `pointer: fine`) o col fuoco da
+  tastiera; la scelta sta in `preferenzeStore.menuRidotto` (localStorage `p5r-preferenze`, con `mappaHomeChiusa` per la Home).
+  Home: `.home-griglia--mappa-chiusa` (da `preferenzeStore.mappaHomeChiusa`) ridispone carta e guida senza la mappa; la mappa
+  diventa `.home-mappa--a-scomparsa` (assoluta a destra, nascosta con `visibility`, esce al `:hover` della `.home-linguetta` o
+  di sé stessa con puntatore vero); `HomePage` avvolge `oggi.sullaMappa` perché riapra la mappa.
+  Ritorno dalle mappe: `MainLayout` chiama `utils/ritornoMappe.annotaNavigazione(paginaPrecedente, percorso)` a ogni cambio
+  di pagina; `MappaPage` ed `EditorMappaPage` chiudono verso `ritornoMappe()` (sessionStorage `p5r-ritorno-mappe`).
+- **Cambio di giorno** (2026-09-30): `percorsoService.avanzaSeGiornoCompleto(partita, data)` — chiamata dalle rotte delle due
+  spunte (`PUT /api/partite/:id/percorso`, `PUT /api/catalogo/agenda/azioni/:id/fatta`) solo alla spunta — fa passare la
+  partita al giorno dopo (fascia giorno) quando il giorno corrente ha tutte le attività fatte, e la risposta porta
+  `giornoAvanzato` (`GiornoAvanzatoDto`). FE: `utils/giornoAvanzato.seGiornoAvanzato` (store + avviso) da `GiornoGuida`;
+  `useOggi` segue `attiva.dataGioco` e rilegge la giornata a ogni `meteoStore.versione`; `MeteoAlCambioGiorno` in `MainLayout`
+  apre la scelta del meteo quando la data della partita attiva cambia (`meteoStore.richiesta`).
+- **Doti solo a mano** (2026-09-30): `partiteService.aggiornaDote` la chiama solo `PATCH /api/partite/:id/doti/:chiave` (scheda
+  Doti). Le fonti automatiche dicono che cosa il gioco dà (`DoteDaSegnareDto`, `nomeDote`): `EffettiAzioneDto.doti` / letture /
+  turni / incontro delle spunte, `daSegnare` nelle risposte di `PUT …/letture` (differenza del registro
+  `effetto_lettura_partita`, `attivitaService.daSegnareFra`), del contatore dei turni, di domande e cruciverba, e
+  `ConfidentePartitaDto.doteIncontro`. `annullaEffetti` restituisce solo i punti del Confidente. FE: `utils/dotiDaSegnare.ts`
+  (`dotiDaSegnareDaEffetti`, `promemoriaDoti`, `avvisaDotiDaSegnare`), `utils/percorso.avvisoSpunta`.
 - Dati remoti per pagina con `useCarica` (chiave = dipendenze serializzate + generazione; caricamento derivato) + `PageState`;
   stato globale in zustand: config, notifiche, glossario (rese italiane), partite (elenco + attiva, cambio dalla Topbar).
 - Elenchi Persona/skill caricati una volta e filtrati lato client (istantanei su tablet; ~360 KB per le 232 Persona).
@@ -508,8 +528,20 @@ che supera la precedente esclusione.
 - `disponibilitaService`: `statoDisponibilitaPartita` = `statoPartitaSemafori` + giorno della settimana + sblocchi dei quartieri + letture, contatori, attività svolte (`attivita_svolta_partita`), spesa per negozio (somma dei prezzi degli acquisti), punti negozio (`punti_negozio_partita`), eventi (`evento_storia_partita`), `arcoCorrente`; `valutaRequisiti(condizioni, stato)` → `{ stato: disponibile | bloccato | ignoto, requisiti }` (rosso ⇒ bloccato; grigio solo quando alla partita manca il dato); `valutaRequisitiSpillo` nasconde il pin solo per le condizioni di presenza (`CONDIZIONI_DI_PRESENZA`, ora anche `arco`). I requisiti dei Confidenti passano da `semaforiService.valuta`.
 - `/api/condizioni`: `/elenchi` (articoli, letture, arcani, Persona, abilità, Ladri, attività, negozi, eventi, contatori — gli elenchi chiusi dell'editor); `/partite/:id/progressi` e i `PUT .../eventi/:chiave`, `.../attivita/:chiave`, `.../punti-negozio/:chiave` (scheda **Partita → Progressi**, `ProgressiPartita.tsx`). Frontend: `guida/CondizioniEditor.tsx` (righe `[NON] [Stato ▾] [operatore] [valori]`, blocchi TUTTE/ALMENO UNA, numeri a passi) e `shared/Selettore.tsx` (2026-09-12: l'unico elenco chiuso dell'app — pulsante `combobox` + `listbox`, ricerca scrivendo da dieci voci in su o con `ricerca="sempre"`, voce `vuoto` in testa, gruppi, variante `compatto` per i filtri; `utils/selettore.ts` con `opzioniDaNomi` e la soglia; nessuna `<select>` nel frontend, vietata da ESLint e da `src/selettoriUnificati.test.ts`).
 - `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, Palazzi completati — `palazziService` —, richieste completate, ranghi, giorno e meteo
-  correnti, conferme) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato);
-  `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.
+  correnti, conferme, eventi di storia avvenuti) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato,
+  `bloccante`); `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.
+  Requisito `evento` (migrazione 090, 2026-09-30): legge `evento_storia_partita`, e il «Condizione soddisfatta» (`confermaRequisito`) scrive l'evento
+  (`impostaEventoStoria`, la stessa del `PUT /api/condizioni/partite/:id/eventi/:chiave`) invece di una conferma in `requisito_partita`; Partita →
+  Progressi mostra per ogni evento i ranghi che sblocca (`ranghiPerEvento` → `serveA`). Requisito `avviso`: grigio con `bloccante: false`, escluso da
+  `pronto`, da `bloccoRango` e dal conto «n di m» di `SemaforiRango`, non confermabile (400 `requisito-non-confermabile`).
+- **Meteo della partita** (2026-09-30): `shared/meteoPartita.ts` (`METEO_PARTITA`, `fasceDellaGuida`, `guastaLAperto`, `piove`,
+  `leggiDateAllerta`, `ALLERTA_PIOGGIA`); `meteoService` (`meteoDelGiorno` fascia per fascia: scelto in `meteo_partita` —
+  utente 013 —, altrimenti pioggia se c'è la pioggia torrenziale, altrimenti la guida `giorno_calendario`/`giorno_percorso`;
+  `allerte` da `allerta_meteo` — migrazione 091 —; `meteoOra` per giorno e fascia correnti; `impostaMeteo`). API
+  `GET|PUT /api/partite/:id/meteo/:data` (il PUT restituisce anche la partita), `PercorsoGiornoDto.meteoPartita`,
+  `PartitaDto.meteoOra`. `StatoPartitaSemafori.meteoOra` sostituisce `meteoOggi` (semafori `meteo` e disponibilità `piove`).
+  Frontend: riga `momento-meteo` in `OggiGuida` con `MeteoGiornata` (quattro icone, `utils/meteoFascia.ts`), `useOggi.impostaMeteo`;
+  `meteoOra` nelle chiavi di ricarica di `useMappaPartita`, `ContenutiGuidaMappa`, `EditorMappaPage`, `NegozioPage`, `NegoziPage`.
 - Percorso: `impostaAzione` applica alla spunta gli effetti dichiarati dell'azione (`produce`, con `effettiAzioneService` dal
   2026-09-30: vedi «Effetti delle azioni della Guida»; `noteRisposta` 1–3 per gli incontri con un Confidente col bonus dell'arcano
   dalla scorta) e li registra in `azione_partita.effetti_json` (migrazione 025) per annullarli togliendo la spunta (le letture
@@ -853,8 +885,9 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   `attivita.effetti_json` la Dote di ogni turno (voce del primo e voce `ripetuto`). La migrazione **utente 007** dà a ogni
   correzione dell'utente che cambiava note o testo gli effetti che quel testo corretto dava (`CorrezioneAzioneGuida.produce`,
   applicato da `correzioniGuidaService.applica` e tenuto da `scrivi` solo se diverso dalla guida).
-- **Motore** (`server/services/effettiAzioneService.ts`): `applicaEffettiAzione` alza le Doti, porta avanti le letture
-  con `impostaLettura` (i punti li dà l'elemento, una volta: `avanzamentoLettura` dice dov'è arrivato) e registra i
+- **Motore** (`server/services/effettiAzioneService.ts`): `applicaEffettiAzione` dice le Doti che il gioco dà (senza
+  toccarle: dal 2026-09-30 si segnano a mano, vedi «Doti solo a mano»), porta avanti le letture con `impostaLettura`
+  (le Doti sono quelle dell'elemento, ricordate una volta: `avanzamentoLettura` dice dov'è arrivato) e registra i
   turni con `attivitaService.registraTurno`. Al cinema (nessun totale) «completato» è una visione: l'obiettivo è quante
   spunte della partita (`azione_partita`, `azione_utente_partita`) hanno già contato una visione di quel film, più una;
   saltare una visita della guida non regala visioni, togliere e rimettere una spunta non ne aggiunge. Un errore (libro

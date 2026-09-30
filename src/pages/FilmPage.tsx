@@ -18,6 +18,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
+import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
@@ -91,6 +92,8 @@ export function FilmPage() {
         if (desiderato === confermato || partitaIdRef.current !== partitaCorrente) break;
         const aggiornato = await impostaProgressoFilm(partitaCorrente, film.chiave, desiderato);
         confermatiRef.current.set(coda, aggiornato.progresso);
+        // la visione dà le sue Doti: si segnano a mano, l'avviso le ricorda
+        avvisaDotiDaSegnare(aggiornato.daSegnare, aggiornato.nomeIt ?? aggiornato.nome);
         if (partitaIdRef.current === partitaCorrente) sostituisciFilm(aggiornato);
       }
     } catch (err) {
@@ -194,7 +197,7 @@ export function FilmPage() {
       </section>
 
       {partitaId && <NotaPuntiDote cosa="quali titoli hai visto e quante volte"
-        dettaglio="Al cinema la prima visione e le successive possono valere diverso: lo dicono gli effetti del titolo, e l’app applica quelli." />}
+        dettaglio="Al cinema prima visione e successive possono valere diverso: l’avviso dice quanto." />}
 
       <section className="filtri-articoli" aria-label="Filtri film e DVD">
         <div className="filtri-articoli__riga">

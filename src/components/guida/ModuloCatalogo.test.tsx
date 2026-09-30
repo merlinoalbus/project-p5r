@@ -210,7 +210,8 @@ it('un lavoro (contato per volte) offre «vale dalla seconda volta in poi» e sp
   fireEvent.click(tessera('Tipo', 'Lavoro part-time'));
   fireEvent.click(screen.getByRole('button', { name: /Aggiungi un effetto/ }));
   expect(screen.getByRole('checkbox', { name: /Vale dalla seconda volta in poi/ })).toBeInTheDocument();
-  expect(screen.getByText(/Ogni turno registrato .* dà questi punti/)).toBeInTheDocument();
+  // le Doti si segnano a mano: il turno le ricorda, non le dà
+  expect(screen.getByText(/Il gioco dà questi punti a ogni turno: l'app te li ricorda .* li segni tu nella scheda Doti/)).toBeInTheDocument();
   // un'attività che non si conta per volte (il cibo) non ha turni né voci «dalla seconda volta»
   fireEvent.click(tessera('Tipo', 'Cibo e bevande'));
   expect(screen.queryByRole('checkbox', { name: /Vale dalla seconda volta in poi/ })).toBeNull();

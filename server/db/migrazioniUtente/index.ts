@@ -18,5 +18,7 @@ import { utente008 } from './008_effetti_delle_azioni_utente.js';
 import { utente009 } from './009_incontri_con_i_confidenti.js';
 import { utente010 } from './010_incontri_piu_passaggi.js';
 import { utente011 } from './011_incontro_punti_prima.js';
+import { utente012 } from './012_conferme_come_eventi.js';
+import { utente013 } from './013_meteo_della_partita.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013];

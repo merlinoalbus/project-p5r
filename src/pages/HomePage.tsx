@@ -13,6 +13,9 @@ import { useCarica } from '../hooks/useCarica';
 import { useOggi } from '../hooks/useOggi';
 import { getDoti, getPossedute } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
+import { usePreferenzeStore } from '../stores/preferenzeStore';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconBolt, IconBook, IconFusion, IconMask, IconStar } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { StellaCinque } from '../components/shared/StellaCinque';
@@ -66,13 +69,23 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
     return [...visti.entries()].map(([chiave, nome]) => ({ chiave, nome }));
   }, [scorta.dati]);
 
+  // La mappa a scomparsa (richiesta dell'utente, 2026-09-30): chiusa, resta una linguetta sul bordo destro e carta e
+  // guida prendono la sua parte di pagina; il tocco sulla linguetta la riapre, col mouse il passaggio la fa uscire sopra
+  // il contenuto. «Sulla mappa» di un'azione la riapre da sé: l'azione vuole mostrarla.
+  const mappaChiusa = usePreferenzeStore((s) => s.mappaHomeChiusa);
+  const impostaMappaChiusa = usePreferenzeStore((s) => s.impostaMappaHomeChiusa);
+  const oggiHome = useMemo(() => ({
+    ...oggi,
+    sullaMappa: (m: Parameters<typeof oggi.sullaMappa>[0], indiceGuida: number | null) => { impostaMappaChiusa(false); oggi.sullaMappa(m, indiceGuida); },
+  }), [oggi, impostaMappaChiusa]);
+
   const guidaPronta = Boolean(oggi.indice && oggi.giorno);
   const statoOggi = oggi.errore
     ? <p className="m-0 text-[13px] text-text-secondary" role="alert">Guida del giorno non disponibile: {oggi.errore}</p>
     : <div className="flex items-center justify-center py-6" aria-busy="true"><Spinner /></div>;
 
   return (
-    <div className="home-griglia">
+    <div className={`home-griglia ${mappaChiusa && guidaPronta ? 'home-griglia--mappa-chiusa' : ''}`}>
       <div className="home-carta card flex flex-col gap-2 py-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[12px] uppercase tracking-wide text-text-muted">Partita attiva</span>
@@ -122,10 +135,24 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
 
       <section className="home-oggi flex flex-col gap-1.5" aria-label="Oggi nella partita">
         <h2 className="m-0 font-display text-[19px] uppercase shrink-0">Oggi</h2>
-        <div className="flex-1 min-h-0 riempi-figli">{guidaPronta ? <OggiGuida oggi={oggi} riempi /> : statoOggi}</div>
+        <div className="flex-1 min-h-0 riempi-figli">{guidaPronta ? <OggiGuida oggi={oggiHome} riempi /> : statoOggi}</div>
       </section>
 
-      {guidaPronta && <div className="home-mappa riempi-figli"><OggiMappa oggi={oggi} riempi /></div>}
+      {guidaPronta && mappaChiusa && (
+        <button type="button" className="home-linguetta touch" onClick={() => impostaMappaChiusa(false)} aria-label="Mostra la mappa" title="Mostra la mappa (col mouse basta passarci sopra)">
+          <IconaAzione chiave="mappa" dimensione={20} /><span className="home-linguetta__testo">Mappa</span>
+        </button>
+      )}
+      {guidaPronta && (
+        <div className={`home-mappa ${mappaChiusa ? 'home-mappa--a-scomparsa' : ''}`}>
+          <div className="home-mappa__barra">
+            {mappaChiusa
+              ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Tieni aperta" onClick={() => impostaMappaChiusa(false)} />
+              : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nascondi la mappa" onClick={() => impostaMappaChiusa(true)} />}
+          </div>
+          <OggiMappa oggi={oggiHome} riempi />
+        </div>
+      )}
     </div>
   );
 }

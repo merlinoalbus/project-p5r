@@ -12,6 +12,7 @@ import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { ContenutiMappaDto } from '../../shared/organizzazioneMappe';
 import { MappaPage } from './MappaPage';
+import { annotaNavigazione } from '../utils/ritornoMappe';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../types';
 
@@ -37,6 +38,8 @@ function monta(percorso: string) {
         {/* La Città vera monta la mappa disegnata e chiama l'API: qui serve solo sapere che ci
             si arriva, non rifarla. */}
         <Route path="/guida/citta" element={<h1>La città</h1>} />
+        {/* la pagina da cui si è aperta la mappa: «Chiudi» ci riporta qui */}
+        <Route path="/partita" element={<h1>Pagina di partenza</h1>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -54,6 +57,22 @@ beforeEach(() => {
   });
 
 describe('MappaPage', () => {
+  it('«Chiudi» del visore torna alla pagina da cui si era aperta la mappa; senza, all’elenco delle mappe', async () => {
+    annotaNavigazione('/partita?scheda=oggi', '/guida/mappe/citta-shibuya');
+    monta('/guida/mappe/citta-shibuya');
+    fireEvent.click(await screen.findByRole('button', { name: /^Chiudi/ }));
+    expect(await screen.findByRole('heading', { name: 'Pagina di partenza' })).toBeInTheDocument();
+  });
+
+  it('aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima', async () => {
+    // nessuna pagina prima: si parte da fuori dalle mappe (annotazione cancellata) e si apre la mappa col primo caricamento
+    annotaNavigazione(null, '/home');
+    annotaNavigazione(null, '/guida/mappe/citta-shibuya');
+    monta('/guida/mappe/citta-shibuya');
+    fireEvent.click(await screen.findByRole('button', { name: /^Chiudi/ }));
+    expect(await screen.findByRole('button', { name: /^Tokyo/ })).toBeInTheDocument();
+  });
+
   it('l’indice apre una radice nel pannello e ne mostra le mappe', async () => {
     monta('/guida/mappe');
     // Le radici sono **scelte**, non collegamenti: aprono il pannello a fianco. Finché non se ne

@@ -55,8 +55,9 @@ export function CartelliniAzione({ a, propri, onSullaMappa }: PropsCartellini) {
       {stato?.tipo === 'neutra' && stato.motivo && <span className="text-[12px] text-text-muted">{stato.motivo}</span>}
       {a.rangoAtteso !== null && <span className="text-[12px] text-text-muted">rango atteso {a.rangoAtteso}</span>}
       {a.note && <span className="text-[12px] text-text-secondary">{a.note}</span>}
-      {!a.fatta && a.produceTesto?.length > 0 && <span className="text-[12px] text-text-muted" title="Che cosa applica la spunta: si cambia da «Modifica»">Alla spunta: {a.produceTesto.join(' · ')}</span>}
-      {a.fatta && a.effetti && <span className="chip chip--attivo text-[11px]" title="Effetti della spunta: togliendola si annullano Doti, punti e turni; letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
+      {/* le Doti che il gioco dà si segnano a mano (scelta dell'utente, 2026-09-30): la riga le dice, la spunta non le tocca */}
+      {!a.fatta && a.produceTesto?.length > 0 && <span className="text-[12px] text-text-muted" title="Che cosa dà il gioco: le Doti le segni tu nella scheda Doti, letture e turni li segna la spunta. Si cambia da «Modifica»">Il gioco dà: {a.produceTesto.join(' · ')}</span>}
+      {a.fatta && a.effetti && <span className="chip chip--attivo text-[11px]" title="Effetti della spunta: togliendola si annullano i punti del Confidente e i turni; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
     </span>
   );
 }

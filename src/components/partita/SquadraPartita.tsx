@@ -8,8 +8,9 @@
 //
 // **I gesti veri, non i moduli.** Col tablet in mano durante il gioco quello che si fa è «ho preso
 // 15.000 ¥», «ho speso 12.000», «Ryuji è salito di un livello»: quindi i yen si cambiano per
-// **differenza** con due campi rapidi, e il livello con un tocco. Il valore assoluto resta
-// possibile, perché la prima volta che apri la scheda i numeri li copi dal gioco.
+// **differenza** con due pulsanti rapidi, e il livello con un tocco. Il valore assoluto resta
+// possibile col terzo pulsante, «Imposta»: la prima volta che apri la scheda, o quando i conti non
+// tornano più, il saldo si copia dal gioco (richiesta dell'utente, 2026-09-30).
 //
 // **Il non segnato si vede.** Un Ladro che non hai ancora toccato non mostra «livello 1» come se
 // glielo avessi confermato tu: lo dice, ed è un'informazione diversa.
@@ -27,6 +28,8 @@ import { ImmagineEntita } from '../shared/ImmagineEntita';
 import type { MembroSquadraDto, SquadraPartitaDto } from '../../types';
 
 const yen = (n: number) => `${n.toLocaleString('it-IT')} ¥`;
+/** Lo stesso tetto di `bodyYen` sul server: oltre, la richiesta verrebbe rifiutata. */
+const YEN_MASSIMI = 9_999_999;
 
 export function SquadraPartita({ partitaId }: { partitaId: number }) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getSquadra(partitaId), [partitaId]);
@@ -38,11 +41,31 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
     try { imposta(await azione()); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(null); }
   };
 
+  /** L'importo scritto nel campo, intero e dentro i limiti che il server accetta (`bodyYen`).
+   *  Contano solo le cifre: «123.450», «123450» e «¥123.450» sono lo stesso numero, come nel gioco,
+   *  che di decimali non ne ha. */
+  const importo = () => Math.min(YEN_MASSIMI, Number(movimento.replace(/\D/g, '')) || 0);
+  /** Nel campo c'è un numero: senza cifre i tre pulsanti restano spenti, e «Imposta» non azzera il saldo per una lettera. */
+  const conCifre = /\d/.test(movimento);
+
   /** Un movimento di cassa: il numero scritto una volta, speso o incassato con due pulsanti. */
   const muovi = (segno: 1 | -1) => {
-    const n = Math.abs(Math.trunc(Number(movimento.replace(/[^\d-]/g, '')) || 0));
+    const n = importo();
     if (n === 0) return;
     void conEsito('yen', async () => { const s = await impostaYen(partitaId, { delta: segno * n }); setMovimento(''); return s; });
+  };
+
+  /** Il saldo riscritto da capo, quando la cifra dell'app e quella del gioco non tornano più:
+   *  si copia quella del gioco invece di calcolare a mano la differenza. Zero è un valore valido. */
+  const impostaSaldo = () => {
+    if (!conCifre) return;
+    const n = importo();
+    void conEsito('yen', async () => {
+      const s = await impostaYen(partitaId, { yen: n });
+      setMovimento('');
+      notifica('success', `Denaro impostato a ${yen(s.yen)}.`);
+      return s;
+    });
   };
 
   /** Il livello di Joker vive in due case — qui e `partita.livello_protagonista`, che la fusione
@@ -131,19 +154,25 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
               <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave="medaglie" dimensione={14} />Denaro del gruppo</span>
               <span className="font-display text-[28px] leading-none tabular-nums">{yen(dati.yen)}</span>
             </span>
-            {/* Il numero si scrive una volta e poi si dice se è entrato o uscito: durante il gioco
-                si sa quanto si è speso, non quanto resta. */}
+            {/* Il numero si scrive una volta e poi si dice che cosa è: entrato, uscito, oppure il
+                saldo intero da copiare dal gioco («Imposta»), quando i conti non tornano più. */}
             <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
               <label className="editor-mappa__campo min-w-[150px] flex-1">
-                <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Movimento</span>
-                <input className="form-input tabular-nums" type="number" min={0} inputMode="numeric" value={movimento} placeholder="0"
-                  aria-label="Quanti yen sono entrati o usciti" disabled={occupato === 'yen'}
+                <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Importo</span>
+                {/* Testo con tastiera numerica, non `type="number"`: quello legge «123.450» come
+                    decimale e ne faceva 12.345 ¥, proprio col punto delle migliaia che si copia dal gioco. */}
+                <input className="form-input tabular-nums" type="text" inputMode="numeric" autoComplete="off" value={movimento} placeholder="0"
+                  aria-label="Importo in yen" disabled={occupato === 'yen'}
                   onChange={(e) => setMovimento(e.target.value)} />
               </label>
-              <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Incassa"
-                disabled={occupato === 'yen' || !movimento} onClick={() => muovi(1)} aria-label="Aggiungi questi yen al gruppo" />
-              <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Spendi"
-                disabled={occupato === 'yen' || !movimento} onClick={() => muovi(-1)} aria-label="Togli questi yen al gruppo" />
+              <span className="flex shrink-0 flex-wrap gap-2">
+                <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Incassa"
+                  disabled={occupato === 'yen' || !conCifre} onClick={() => muovi(1)} aria-label="Aggiungi questi yen al gruppo" />
+                <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Spendi"
+                  disabled={occupato === 'yen' || !conCifre} onClick={() => muovi(-1)} aria-label="Togli questi yen al gruppo" />
+                <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Imposta"
+                  disabled={occupato === 'yen' || !conCifre} onClick={impostaSaldo} aria-label="Imposta il denaro del gruppo a questo importo" />
+              </span>
             </div>
           </section>
 

@@ -5,13 +5,14 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
-import type { AzionePercorsoDto, EffettiAzioneDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, EffettiAzioneDto, GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
 import { confidenti, leggiPartita } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { azioneGuida, correttoreGuida, guidaDelGiorno, type AzioneGuida, type AzioneSeed } from './correzioniGuidaService.js';
 import { mappaAzione, nomiEffetti, statoAzione, testoEffetti } from './azioniStrutturateService.js';
 import type { NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import { agendaDelGiorno, conteggiAgenda } from './agendaService.js';
+import { meteoDelGiorno } from './meteoService.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; azioni_json: string; avvisi_json: string; fonte: string; coperto: number }
 
@@ -76,6 +77,7 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
     giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
     rimosse: guida.rimosse, correzioniSuperate: guida.superate, agenda: agendaDelGiorno(data, partitaId, conf),
+    meteoPartita: partitaId ? meteoDelGiorno(partitaId, data) : null,
   };
 }
 
@@ -137,6 +139,32 @@ export function conTesti(a: AzioneGuida, nomi: NomiEffettiAzione): Omit<AzionePe
 }
 
 /** Imposta il giorno corrente della partita (data del calendario di gioco) e restituisce anche la partita aggiornata, così il client allinea lo store senza ricaricare l'elenco. */
+/**
+ * Spuntata l'ultima attività del giorno corrente, la partita passa al giorno dopo, di giorno (richiesta dell'utente,
+ * 2026-09-30: «se completo tutte le attività di un giorno deve spostare automaticamente il giorno corrente al giorno
+ * successivo modalità giorno»). Le attività sono quelle che l'utente vede: la guida del giorno com'è corretta (le rimosse
+ * no) e le sue cose da fare; gli eventi dell'agenda non si spuntano e non contano. Scatta solo se `data` è il giorno
+ * corrente della partita e c'è almeno un'attività; togliere una spunta non torna indietro (chi chiama lo invoca solo
+ * alla spunta). Restituisce il passaggio, o null.
+ */
+export function avanzaSeGiornoCompleto(partitaId: number, data: string): GiornoAvanzatoDto | null {
+  if (dataCorrente(partitaId) !== data) return null;
+  const r = prepared('SELECT ordine, azioni_json FROM giorno_percorso WHERE data = ?').get(data) as { ordine: number; azioni_json: string } | undefined;
+  if (!r) return null;
+  const guida = guidaDelGiorno(data, JSON.parse(r.azioni_json) as AzioneSeed[]).azioni;
+  const fatte = fattePartita(partitaId, data);
+  const agenda = conteggiAgenda(partitaId).get(data) ?? { azioni: 0, fatte: 0 };
+  if (guida.length + agenda.azioni === 0) return null;
+  if (!guida.every((a) => fatte.has(`${data}/${a.indice}`)) || agenda.fatte < agenda.azioni) return null;
+  const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
+  if (!succ) return null;
+  getDb().transaction(() => {
+    prepared("UPDATE partita SET data_gioco = ?, fascia_gioco = 'giorno', updated_at = ? WHERE id = ?").run(succ.data, nowIso(), partitaId);
+    registraEvento(partitaId, 'percorso', `Giornata del ${data} completata`, `Tutte le attività del giorno sono fatte: la partita passa al ${succ.data}, di giorno.`, { da: data, a: succ.data });
+  })();
+  return { da: data, a: succ.data, partita: leggiPartita(partitaId) };
+}
+
 export function impostaGiornoCorrente(partitaId: number, data: string): GiornoCorrenteDto {
   partitaEsiste(partitaId);
   if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);

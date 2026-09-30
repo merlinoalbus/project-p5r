@@ -144,8 +144,8 @@ export function ModuloVoceGiornata({ soggetto, giorno, partitaId, onChiudi, onSa
         )}
         {soggetto.tipo !== 'guida' && partitaId === null && <p className="m-0 text-[12px] text-text-muted">Senza una partita attiva la voce vale per tutte le partite.</p>}
         {conStruttura && <EditorAzioneStrutturata valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} />}
-        {soggetto.tipo === 'mia' && soggetto.azione.fatta && <p className="m-0 text-[12px] text-text-muted">Questa cosa da fare è già spuntata: gli effetti nuovi valgono dalla prossima spunta, i punti già dati restano finché non la togli.</p>}
-        {guida && <p className="m-0 text-[12px] text-text-muted">La correzione vale per tutte le partite; le spunte restano dove sono.{guida.fatta ? ' Questa azione è già spuntata: gli effetti nuovi valgono dalla prossima spunta, i punti già dati restano finché non la togli.' : ''}</p>}
+        {soggetto.tipo === 'mia' && soggetto.azione.fatta && <p className="m-0 text-[12px] text-text-muted">Questa cosa da fare è già spuntata: gli effetti nuovi valgono dalla prossima spunta; le Doti le segni tu, e restano come sono.</p>}
+        {guida && <p className="m-0 text-[12px] text-text-muted">La correzione vale per tutte le partite; le spunte restano dove sono.{guida.fatta ? ' Questa azione è già spuntata: gli effetti nuovi valgono dalla prossima spunta; le Doti le segni tu, e restano come sono.' : ''}</p>}
         {guida?.correzione && (
           <div className="flex flex-col gap-1 text-[12px] text-text-secondary border-l-2 border-border pl-2">
             <span className="text-text-muted">Com'è nella guida ({guida.correzione.fascia === 'sera' ? 'di sera' : 'di giorno'}):</span>
@@ -156,7 +156,7 @@ export function ModuloVoceGiornata({ soggetto, giorno, partitaId, onChiudi, onSa
               {guida.correzione.riferimentoTesto ? ` · ${guida.correzione.riferimentoTesto}` : ''}
               {guida.correzione.rangoAtteso !== null ? ` · rango atteso ${guida.correzione.rangoAtteso}` : ''}
             </span>
-            <span className="text-text-muted">Alla spunta: {guida.correzione.produceTesto?.length ? guida.correzione.produceTesto.join(' · ') : 'nessun effetto'}</span>
+            <span className="text-text-muted">Il gioco dà: {guida.correzione.produceTesto?.length ? guida.correzione.produceTesto.join(' · ') : 'nessun effetto'}</span>
           </div>
         )}
       </form>

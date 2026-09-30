@@ -5,8 +5,10 @@
 // Un solo caricamento per (partita, giorno) condiviso dalla guida e dalla mappa, che nella Home stanno in due colonne diverse.
 // ============================================================
 
-import { useState } from 'react';
-import { getPercorsoGiorno, getPercorsoIndice, impostaFasciaGioco, impostaGiornoCorrente } from '../services/api';
+import { useEffect, useRef, useState } from 'react';
+import { useMeteoStore } from '../stores/meteoStore';
+import { getPercorsoGiorno, getPercorsoIndice, impostaFasciaGioco, impostaGiornoCorrente, impostaMeteoGiorno } from '../services/api';
+import type { MeteoPartita } from '../../shared/meteoPartita';
 import { useCarica } from './useCarica';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -34,6 +36,8 @@ export interface Oggi {
   /** Momento della giornata nella partita («giorno» o «sera»): decide quali spilli, articoli e negozi sono disponibili ora. */
   fascia: FasciaGioco;
   impostaFascia: (fascia: FasciaGioco) => Promise<void>;
+  /** Segna il meteo di una fascia del giorno mostrato (`null` = torna a quello della guida). */
+  impostaMeteo: (fascia: FasciaGioco, valore: MeteoPartita | null) => Promise<void>;
   occupato: boolean;
   mappa: StatoMappaOggi;
   /** «Sulla mappa» di una voce della giornata: la sua mappa e, per un'azione della guida, l'indice da evidenziare (null per le voci dell'utente). */
@@ -49,7 +53,20 @@ export function useOggi(partitaId: number): Oggi {
   const indice = useCarica(() => getPercorsoIndice(partitaId), [partitaId]);
   const [dataScelta, setDataScelta] = useState<string | null>(null);
   const data = dataScelta ?? indice.dati?.dataCorrente ?? indice.dati?.giorni[0]?.giorno ?? null;
-  const giorno = useCarica(() => (data ? getPercorsoGiorno(data, partitaId) : Promise.resolve(null)), [data, partitaId]);
+  // il meteo segnato dalla finestra del cambio di giorno (`MeteoAlCambioGiorno`) cambia la giornata mostrata: si rilegge
+  const versioneMeteo = useMeteoStore((s) => s.versione);
+  const giorno = useCarica(() => (data ? getPercorsoGiorno(data, partitaId) : Promise.resolve(null)), [data, partitaId, versioneMeteo]);
+  // Il giorno della partita è cambiato fuori da qui (l'ultima attività spuntata l'ha fatto avanzare, il Calendario, il
+  // Riepilogo): «Oggi» va al giorno nuovo e l'indice (giorno corrente, conteggi) si rilegge.
+  const dataPartita = usePartitaStore((s) => (s.attiva?.id === partitaId ? s.attiva.dataGioco ?? null : null));
+  const ultimaDataPartita = useRef(dataPartita);
+  const ricaricaIndice = indice.ricarica;
+  useEffect(() => {
+    if (ultimaDataPartita.current === dataPartita) return;
+    ultimaDataPartita.current = dataPartita;
+    setDataScelta(null);
+    void ricaricaIndice();
+  }, [dataPartita, ricaricaIndice]);
   const [mappa, setMappa] = useState<StatoMappaOggi>({ chiave: 'tokyo', spilloId: null, azione: null });
   const [occupato, setOccupato] = useState(false);
   // la fascia vive nella partita dello store: cambiandola si ricaricano da sole mappa incorporata, negozi e articoli
@@ -97,7 +114,26 @@ export function useOggi(partitaId: number): Oggi {
         const partita = await impostaFasciaGioco(partitaId, nuova);
         usePartitaStore.getState().aggiornaLocale(partita);
         useSuggerimentiStore.getState().invalida();
+        // di sera può piovere e di giorno no («Sereno/Pioggia»): gli stati delle azioni del giorno si rileggono
+        void giorno.ricarica();
         notifica('success', nuova === 'sera' ? 'Ora è sera nella partita.' : 'Ora è giorno nella partita.');
+      } catch (err) {
+        notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+      } finally {
+        setOccupato(false);
+      }
+    },
+    impostaMeteo: async (quale, valore) => {
+      if (!g) return;
+      setOccupato(true);
+      try {
+        const esito = await impostaMeteoGiorno(partitaId, g.giorno, { [quale]: valore });
+        giorno.imposta({ ...g, meteoPartita: esito.meteo });
+        // il meteo cambia che cosa è disponibile ora: `meteoOra` della partita fa ricaricare mappa, negozi e articoli,
+        // e le azioni del giorno (semafori «non deve piovere») si rileggono
+        usePartitaStore.getState().aggiornaLocale(esito.partita);
+        useSuggerimentiStore.getState().invalida();
+        await giorno.ricarica();
       } catch (err) {
         notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
       } finally {

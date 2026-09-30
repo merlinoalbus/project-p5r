@@ -17,11 +17,13 @@
 // - togliere la spunta toglie l'incontro che aveva creato (o il segno di passaggio che aveva messo); abbassare il rango
 //   dalla pagina toglie i passaggi registrati dalla pagina oltre il nuovo rango; «Annulla ultimo» che riporta i punti a
 //   quelli di prima delle risposte di quel momento (`punti_prima`, migrazione utente 011) toglie l'incontro che le
-//   risposte avevano registrato. Le Doti tornano indietro identiche.
+//   risposte avevano registrato.
+// Le Doti non si toccano (scelta dell'utente, 2026-09-30: si segnano solo a mano): l'incontro registra e dice la Dote che il
+// gioco dà (`doti`, `doteIncontro`), e togliendolo dice quella che dava, perché l'utente la segni o la tolga lui.
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { aggiornaConfidente, aggiornaDote, puntiDaNote } from './partiteService.js';
+import { aggiornaConfidente, nomeDote, puntiDaNote } from './partiteService.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { ConfidentePartitaDto, IncontroConfidenteDto, ModificaConfidente } from '../../shared/types.js';
 
@@ -77,24 +79,19 @@ export function registraIncontro(partitaId: number, confidente: string, momento:
     // lo stesso incontro segnato di nuovo (un'altra risposta, la spunta dopo la pagina): niente Dote nuova
     return { ...base, id: null, marcato: null, giaContato: true };
   }
+  // la Dote che l'incontro dà: si registra e si ricorda, le Doti si segnano a mano (`aggiornaDote`)
   const doti: IncontroConfidenteDto['doti'] = [];
   for (const d of dotiDellIncontro(confidente, verso)) {
-    const punti = puntiDaNote(d.note, false);
-    const agg = aggiornaDote(partitaId, d.dote, { delta: punti });
-    doti.push({ chiave: d.dote, nome: agg.nome, delta: punti, note: d.note });
+    doti.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDaNote(d.note, false), note: d.note });
   }
   const id = Number(prepared(`INSERT INTO incontro_confidente_partita (partita_id, confidente_chiave, data, fascia, verso_rango, passaggio, origine, doti_json, created_at, punti_prima)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, confidente, momento.data, momento.fascia, verso, passaggio ? 1 : 0, momento.origine, JSON.stringify(doti), nowIso(), puntiPrima).lastInsertRowid);
   return { ...base, id, marcato: null, giaContato: false, doti };
 }
 
-/** Toglie un incontro registrato con le Doti che aveva dato. */
-function togliRiga(partitaId: number, r: RigaIncontro): Array<{ chiave: string; nome: string; delta: number }> {
-  const out: Array<{ chiave: string; nome: string; delta: number }> = [];
-  for (const d of JSON.parse(r.doti_json) as Array<{ chiave: string; delta: number }>) {
-    const agg = aggiornaDote(partitaId, d.chiave, { delta: -d.delta });
-    out.push({ chiave: d.chiave, nome: agg.nome, delta: -d.delta });
-  }
+/** Toglie un incontro registrato e dice le Doti che dava (in meno, da togliere a mano se le avevi segnate): le Doti non si toccano. */
+function togliRiga(_partitaId: number, r: RigaIncontro): Array<{ chiave: string; nome: string; delta: number }> {
+  const out = (JSON.parse(r.doti_json) as Array<{ chiave: string; delta: number }>).map((d) => ({ chiave: d.chiave, nome: nomeDote(d.chiave), delta: -d.delta }));
   prepared('DELETE FROM incontro_confidente_partita WHERE id = ?').run(r.id);
   return out;
 }
@@ -116,8 +113,8 @@ export function annullaIncontro(partitaId: number, inc: IncontroConfidenteDto): 
 /**
  * La modifica di un Confidente dalla pagina Confidenti: oltre ai punti e al rango, registra gli incontri. Salire di rango è il
  * passaggio a ogni rango raggiunto; scendere toglie i passaggi registrati dalla pagina oltre il nuovo rango; una risposta
- * (note) o un'uscita senza cambio di rango è un incontro nel momento della giornata della partita. Dice di quanto sono
- * cambiate le Doti (`doteIncontro`).
+ * (note) o un'uscita senza cambio di rango è un incontro nel momento della giornata della partita. Dice le Doti che gli
+ * incontri registrati danno (o quelli tolti davano), da segnare a mano (`doteIncontro`).
  */
 export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
   return getDb().transaction(() => {

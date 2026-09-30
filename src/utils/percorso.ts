@@ -4,6 +4,7 @@
 
 import type { AzionePercorsoDto, EffettiAzioneDto, EventoUtenteDto } from '../types';
 import { TIPI_AZIONE } from '../../shared/effettiAzione';
+import { dotiDaSegnareDaEffetti, promemoriaDoti } from './dotiDaSegnare';
 
 /** Etichette dei tipi di evento che l'utente aggiunge alla giornata. */
 export const NOME_TIPO_EVENTO: Record<EventoUtenteDto['tipo'], string> = { evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' };
@@ -47,12 +48,22 @@ export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferime
   }
 }
 
-/** Testo breve degli effetti applicati alla spunta (es. «Perizia +2 · Zorro, il fuorilegge 1 → 2 · Fioraio Rafflesia: turno 1 (Gentilezza +3) · Ryuji Sakamoto +15 punti»). */
-export function descriviEffetti(e: EffettiAzioneDto): string {
-  const parti = e.doti.map((d) => `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''})` : ''}`);
-  for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome} ${l.prima} → ${l.dopo}` : `${l.nome} già a ${l.prima}`}${l.doti?.length ? ` (${l.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
-  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.doti.length ? ` (${t.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
-  if (e.incontro) parti.push(e.incontro.giaContato ? `Incontro con ${e.incontro.nome} già contato` : `Incontro con ${e.incontro.nome}${e.incontro.doti.length ? `: ${e.incontro.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')}` : ''}`);
+/** Testo breve degli effetti della spunta (es. «Perizia +2 · Zorro, il fuorilegge 1 → 2 · Fioraio Rafflesia: turno 1 (Gentilezza +3) · Ryuji Sakamoto +15 punti»).
+ *  Le Doti sono ciò che il gioco dà (l'app non le tocca: si segnano a mano); `senzaDoti` le lascia fuori, per metterle nel
+ *  promemoria «Da segnare nelle Doti» (`utils/dotiDaSegnare`). */
+export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean } = {}): string {
+  const doti = (lista: Array<{ nome: string; delta: number }>, prima: string, dopo: string) => (!opz.senzaDoti && lista.length ? `${prima}${lista.map((d) => `${d.nome} +${d.delta}`).join(', ')}${dopo}` : '');
+  const parti = opz.senzaDoti ? [] : e.doti.map((d) => `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''})` : ''}`);
+  for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome} ${l.prima} → ${l.dopo}` : `${l.nome} già a ${l.prima}`}${doti(l.doti ?? [], ' (', ')')}`);
+  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${doti(t.doti, ' (', ')')}`);
+  if (e.incontro) parti.push(e.incontro.giaContato ? `Incontro con ${e.incontro.nome} già contato` : `Incontro con ${e.incontro.nome}${doti(e.incontro.doti, ': ', '')}`);
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti`);
   return parti.join(' · ');
+}
+
+/** L'avviso dopo una spunta: che cosa è successo e, a parte, le Doti da segnare a mano. */
+export function avvisoSpunta(e: EffettiAzioneDto): string {
+  const altro = descriviEffetti(e, { senzaDoti: true });
+  const promemoria = promemoriaDoti(dotiDaSegnareDaEffetti(e));
+  return [altro, promemoria].filter(Boolean).join(' · ') || 'Segnata come fatta.';
 }

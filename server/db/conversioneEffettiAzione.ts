@@ -12,7 +12,7 @@
 //   «restituire X e prendere Y» finisce X, non Y; «leggere X» è una sessione se un'azione più avanti
 //   lo completa, altrimenti lo finisce; al cinema ogni spunta è una visione (`almeno: null`, contata
 //   dal motore insieme alle altre spunte);
-// - un lavoro che dava una Dote diventa il turno del lavoro (i punti li dà il lavoro, e il contatore
+// - un lavoro che dava una Dote diventa il turno del lavoro (le Doti sono quelle del lavoro, e il contatore
 //   dei turni sale), con Doti proprie quando la guida ne scrive di diverse da quelle del lavoro;
 // - il resto (bagni, bevande, domande in classe, incontri) resta Dote con le sue note.
 // È un punto di partenza fedele alla guida: il dato finale lo corregge l'utente dalla giornata.

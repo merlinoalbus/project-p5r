@@ -8,7 +8,7 @@ import { PageState } from '../shared/PageState';
 export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; area?: string | null; dungeon?: string }) {
   const attiva = usePartitaStore(s => s.attiva);
   const [selezionato, seleziona] = useState<number | null>(null);
-  const contenuti = useCarica(() => getContenutiMappa(mappa, attiva?.id), [mappa, attiva?.id, attiva?.dataGioco, attiva?.fasciaGioco]);
+  const contenuti = useCarica(() => getContenutiMappa(mappa, attiva?.id), [mappa, attiva?.id, attiva?.dataGioco, attiva?.fasciaGioco, attiva?.meteoOra]);
   // Ogni comando di questo pannello è l'unico contenuto della sua riga — un `li`, uno `strong`,
   // una riga a sé — e non una parola dentro una frase: valgono 44 px come tutti gli altri. Erano
   // 19-22 px, e si vedevano solo aprendo il pannello sulla radice di un Palazzo, che è una vista

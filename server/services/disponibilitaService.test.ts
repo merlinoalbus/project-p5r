@@ -21,7 +21,7 @@ function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilit
   return {
     doti: new Map([['fascino', 1], ['coraggio', 1], ['conoscenza', 1], ['perizia', 1], ['gentilezza', 1]]),
     arcaniInScorta: new Set(), personeConAbilita: new Set(), palazziCompletati: new Map(), richiesteCompletate: new Set(),
-    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), membriFuoriSquadra: new Set<string>(['akechi']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(),
+    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), membriFuoriSquadra: new Set<string>(['akechi']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOra: { meteo: 'sereno', origine: 'guida' }, conferme: new Set(),
     giornoSettimana: 'mercoledi',
     sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara', dal: '08-31' }], ['shinjuku', { nome: 'Shinjuku', dal: '06-18' }], ['kichijoji', { nome: 'Kichijoji', dal: null }]]),
     articoliOttenuti: new Set(), letture: new Set(), contatori: new Map(), attivitaSvolte: new Map(), spesaPerNegozio: new Map(), puntiNegozio: new Map(), eventi: new Set(),
@@ -175,8 +175,11 @@ describe('valutaRequisiti — ogni stato sulla partita', () => {
     expect(daProsa(['solo di sera'], stato()).stato).toBe('bloccato');
     expect(daProsa(['solo di sera'], stato({ fasciaGioco: 'sera' })).stato).toBe('disponibile');
     expect(daProsa(['solo di sera'], stato({ fasciaGioco: null })).stato).toBe('bloccato');
-    expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOggi: 'Sereno' })).stato).toBe('bloccato');
-    expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOggi: 'Pioggia' })).stato).toBe('disponibile');
+    expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOra: { meteo: 'sereno', origine: 'guida' } })).stato).toBe('bloccato');
+    expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOra: { meteo: 'pioggia', origine: 'partita' } })).stato).toBe('disponibile');
+    // la neve non è pioggia; senza meteo non si sa (grigio, «ignoto»), non «bloccato»
+    expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOra: { meteo: 'neve', origine: 'guida' } })).stato).toBe('bloccato');
+    expect(daProsa(['solo nei giorni di pioggia'], stato({ meteoOra: null })).stato).toBe('ignoto');
     expect(daProsa(['solo la domenica'], stato({ giornoSettimana: 'mercoledi' })).stato).toBe('bloccato');
     expect(daProsa(['solo la domenica'], stato({ giornoSettimana: 'domenica' })).stato).toBe('disponibile');
     expect(daProsa(['solo in inverno'], stato({ dataGioco: '04-20' })).stato).toBe('bloccato');
@@ -207,8 +210,8 @@ describe('valutaRequisiti — ogni stato sulla partita', () => {
       { tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'evento', evento: 'mansarda-pulita' }, { tipo: 'non', condizione: { tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'piove' }] } }] },
     ] };
     expect(valutaRequisiti(conTesto([c]), stato()).stato).toBe('disponibile');
-    expect(valutaRequisiti(conTesto([c]), stato({ eventi: new Set(['mansarda-pulita']), meteoOggi: 'Sereno' })).stato).toBe('disponibile');
-    expect(valutaRequisiti(conTesto([c]), stato({ eventi: new Set(['mansarda-pulita']), meteoOggi: 'Pioggia' })).stato).toBe('bloccato');
+    expect(valutaRequisiti(conTesto([c]), stato({ eventi: new Set(['mansarda-pulita']), meteoOra: { meteo: 'sereno', origine: 'guida' } })).stato).toBe('disponibile');
+    expect(valutaRequisiti(conTesto([c]), stato({ eventi: new Set(['mansarda-pulita']), meteoOra: { meteo: 'pioggia', origine: 'guida' } })).stato).toBe('bloccato');
   });
 
   it('per uno spillo solo la presenza nasconde: un prerequisito rosso lascia il pin, un arco non raggiunto lo toglie', () => {

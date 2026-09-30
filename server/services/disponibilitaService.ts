@@ -21,6 +21,7 @@ import { prepared } from '../db/dbService.js';
 import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
@@ -51,7 +52,6 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   /** Yen spesi in ciascun negozio: la somma dei prezzi degli articoli segnati come acquistati. */
   spesaPerNegozio: Map<string, number>;
   puntiNegozio: Map<string, number>;
-  eventi: Set<string>;
   giornoSettimana: string | null;
   /** Quartieri della Guida con la data di sblocco («MM-GG») quando il testo dello sblocco comincia con una data. */
   sbloccoQuartieri: Map<string, SbloccoQuartiere>;
@@ -107,7 +107,6 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     attivitaSvolte: new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?').all(partitaId) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte])),
     spesaPerNegozio: new Map((prepared('SELECT a.negozio_chiave AS negozio, COALESCE(SUM(a.prezzo), 0) AS spesa FROM acquisto_partita q JOIN articolo a ON a.chiave = q.articolo_chiave WHERE q.partita_id = ? GROUP BY a.negozio_chiave').all(partitaId) as Array<{ negozio: string; spesa: number }>).map((r) => [r.negozio, r.spesa])),
     puntiNegozio: new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(partitaId) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti])),
-    eventi: new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave)),
     giornoSettimana: giorno ? piatto(giorno) : null,
     sbloccoQuartieri: sbloccoQuartieri(),
     arcoCorrente: arcoAllaData(st.dataGioco, finestreArchi()),
@@ -192,9 +191,11 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return esito('data', dentro ? 'verde' : 'rosso', r.dal === r.al ? (dentro ? `Solo il ${dataLeggibile(r.dal)}: è oggi` : `Solo il ${dataLeggibile(r.dal)}, oggi è il ${dataLeggibile(st.dataGioco)}`) : dentro ? `Nel periodo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)} (oggi ${dataLeggibile(st.dataGioco)})` : `Solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}, oggi è il ${dataLeggibile(st.dataGioco)}`);
     }
     case 'piove': {
-      if (!st.meteoOggi) return esito('meteo', 'rosso', 'Il meteo del giorno corrente non risulta: la condizione non è soddisfatta (Partita → Oggi)');
-      const piove = /piogg|tempor/i.test(st.meteoOggi);
-      return esito('meteo', piove ? 'verde' : 'rosso', piove ? `Oggi ${st.meteoOggi}` : `Solo con la pioggia: oggi ${st.meteoOggi}`);
+      // il meteo della fascia corrente (segnato nella partita o della guida); senza, non si sa — come «non deve piovere»
+      if (!st.meteoOra) return esito('meteo', 'grigio', 'Il meteo di oggi non è segnato: segnalo in Partita → Oggi');
+      const come = `${st.fasciaGioco === 'sera' ? 'stasera' : 'oggi'} ${nomeMeteo(st.meteoOra.meteo).toLowerCase()}${st.meteoOra.origine === 'guida' ? ' (dalla guida)' : ''}`;
+      const ok = piove(st.meteoOra.meteo);
+      return esito('meteo', ok ? 'verde' : 'rosso', ok ? come.charAt(0).toUpperCase() + come.slice(1) : `Solo con la pioggia: ${come}`);
     }
     case 'giorno-settimana': {
       if (!st.giornoSettimana) return esito('giorno-settimana', 'rosso', 'Il giorno corrente della partita non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');

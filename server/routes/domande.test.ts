@@ -60,16 +60,19 @@ describe('API domande', () => {
     expect(d.fatte).toBe(1);
     expect(d.domande.find((x) => x.id === prima.id)?.fatta).toBe(true);
     expect(d.prossime.some((x) => x.id === prima.id)).toBe(false);
+    // la nota di Conoscenza si ricorda (una nota = 2 punti), ma le Doti si segnano a mano: non si toccano
+    expect(d.daSegnare).toEqual([{ chiave: 'conoscenza', nome: 'Conoscenza', delta: 2, note: 1 }]);
     let doti = (await request(app).get(`/api/partite/${id}/doti`)).body.data as DoteSocialePartitaDto[];
-    expect(doti.find((x) => x.chiave === 'conoscenza')!.punti).toBe(conPrima + 2); // una nota = 2 punti
-    // seconda spunta: nessun doppio conteggio
-    await request(app).put(`/api/partite/${id}/domande/${prima.id}`).send({ fatta: true, conoscenza: true });
+    expect(doti.find((x) => x.chiave === 'conoscenza')!.punti).toBe(conPrima);
+    // seconda spunta: nessun doppio promemoria
+    d = (await request(app).put(`/api/partite/${id}/domande/${prima.id}`).send({ fatta: true, conoscenza: true })).body.data as DomandeDto;
+    expect(d.daSegnare).toBeUndefined();
     doti = (await request(app).get(`/api/partite/${id}/doti`)).body.data as DoteSocialePartitaDto[];
-    expect(doti.find((x) => x.chiave === 'conoscenza')!.punti).toBe(conPrima + 2);
+    expect(doti.find((x) => x.chiave === 'conoscenza')!.punti).toBe(conPrima);
     const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=domanda-risposta`)).body.data as StoricoDto;
     expect(storico.totale).toBe(1);
-    expect(storico.eventi[0].dettaglio).toContain('Conoscenza +1 nota');
-    // rimozione della spunta (i punti restano: registrati nelle Doti)
+    expect(storico.eventi[0].dettaglio).toContain('il gioco dà Conoscenza +1 nota (da segnare nelle Doti)');
+    // rimozione della spunta (le Doti restano come l'utente le ha segnate)
     d = (await request(app).put(`/api/partite/${id}/domande/${prima.id}`).send({ fatta: false })).body.data as DomandeDto;
     expect(d.fatte).toBe(0);
     expect((await request(app).put(`/api/partite/${id}/domande/999999`).send({ fatta: true })).status).toBe(404);

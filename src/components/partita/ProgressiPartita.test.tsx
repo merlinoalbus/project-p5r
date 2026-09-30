@@ -66,13 +66,30 @@ it('separa i calcolati (sola lettura, tre stati) da quel che si segna a mano', a
   expect(impostaPuntiNegozio).toHaveBeenCalledWith(1, 'vestiti-usati-kichijoji', 30);
 });
 
-it('un lavoro dice che cosa dà ogni turno, e il + avvisa dei punti dati', async () => {
+it('un lavoro dice che cosa dà ogni turno, e il + ricorda le Doti da segnare a mano (in meno se si toglie)', async () => {
   const { notifica } = await import('../../stores/notificationStore');
   render(<MemoryRouter><ProgressiPartita partitaId={1} /></MemoryRouter>);
   const attivita = await screen.findByRole('region', { name: 'Attività svolte' });
   expect(within(attivita).getByText('1° turno: Gentilezza, 2 note · Dal 2° turno: Gentilezza, 2 note')).toBeInTheDocument();
-  impostaAttivitaSvolta.mockResolvedValue({ ...dati, cambioDoti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3 }] });
+  expect(within(attivita).getByText(/ti ricorda le Doti che dà, da segnare tu nella scheda Doti/)).toBeInTheDocument();
+  impostaAttivitaSvolta.mockResolvedValue({ ...dati, daSegnare: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3 }] });
   await act(async () => { fireEvent.click(within(attivita).getByRole('button', { name: 'Fioraio Rafflesia: una volta in più' })); });
   expect(impostaAttivitaSvolta).toHaveBeenCalledWith(1, 'lavoro-rafflesia', 1);
-  expect(notifica).toHaveBeenCalledWith('success', 'Gentilezza +3');
+  expect(notifica).toHaveBeenCalledWith('info', 'Da segnare nelle Doti: Gentilezza +3', 7000);
+  impostaAttivitaSvolta.mockResolvedValue({ ...dati, daSegnare: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: -3 }] });
+  await act(async () => { fireEvent.click(within(attivita).getByRole('button', { name: 'Fioraio Rafflesia: una volta in più' })); });
+  expect(notifica).toHaveBeenLastCalledWith('info', 'Da segnare nelle Doti: Gentilezza −3', 7000);
+});
+
+it('un evento chiesto da un Confidente dice quale rango sblocca', async () => {
+  getProgressiPartita.mockResolvedValue({ ...dati, eventi: [...dati.eventi, { chiave: 'caffe-leblanc', nome: 'Caffè preparato al Leblanc', origine: 'manuale', avvenuto: false, serveA: ['Sojiro Sakura, rango 3'] }] });
+  render(<MemoryRouter><ProgressiPartita partitaId={1} /></MemoryRouter>);
+  const eventi = await screen.findByRole('region', { name: 'Eventi di storia' });
+  const riga = within(eventi).getByRole('checkbox', { name: /Caffè preparato al Leblanc/ });
+  expect(riga).toHaveAccessibleName(/Sblocca: Sojiro Sakura, rango 3/);
+  // la mansarda non la chiede nessun Confidente: niente riga «Sblocca»
+  expect(within(eventi).getAllByText(/^Sblocca:/)).toHaveLength(1);
+  impostaEventoStoria.mockResolvedValue(dati);
+  await act(async () => { fireEvent.click(riga); });
+  expect(impostaEventoStoria).toHaveBeenCalledWith(1, 'caffe-leblanc', true);
 });

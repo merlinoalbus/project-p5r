@@ -12,12 +12,12 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import type { MappaDto, PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../types';
 
-const api = vi.hoisted(() => ({ risolviMappa: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), getQuartieri: vi.fn().mockResolvedValue([]), getDungeons: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
+const api = vi.hoisted(() => ({ risolviMappa: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), impostaMeteoGiorno: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), getQuartieri: vi.fn().mockResolvedValue([]), getDungeons: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
 vi.mock('../../services/api', () => api);
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', azioni: 2, fatte: 0, coperto: true } as PercorsoIndiceDto['giorni'][number]], dataCorrente: '04-12', totaleGiorni: 346, giorniCoperti: 300 };
 const giorno: PercorsoGiornoDto = {
-  giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo giorno.', vincoli: [], meteo: 'sereno', avvisi: [], fonte: '', coperto: true, precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 0, rimosse: [], correzioniSuperate: [], agenda: { giorno: '04-12', eventi: [], azioni: [] },
+  giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo giorno.', vincoli: [], meteo: 'sereno', avvisi: [], fonte: '', coperto: true, precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 0, rimosse: [], correzioniSuperate: [], agenda: { giorno: '04-12', eventi: [], azioni: [] }, meteoPartita: null,
   azioni: [
     { indice: 0, fascia: 'giorno', azione: 'Parla con Ryuji in cortile', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'ryuji' }, riferimentoTesto: 'Ryuji', rangoAtteso: 2, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' }, mappa: { chiave: 'citta-shibuya', spilloId: 7 }, correzione: null },
     { indice: 1, fascia: 'sera', azione: 'Vai da Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Takemi', rangoAtteso: 3, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: { tipo: 'bloccata', motivo: 'Coraggio rango 2 (rango 1 di 2)' }, mappa: null, correzione: null },
@@ -77,7 +77,7 @@ describe('OggiPartita', () => {
     api.impostaFasciaGioco.mockImplementation(async (_id: number, fascia: 'giorno' | 'sera') => ({ ...partita, fasciaGioco: fascia, updatedAt: '2026-09-05T11:00:00.000Z' }));
     api.getSuggerimenti.mockResolvedValue({ giorno: '04-12', motivi: [] });
     render(<MemoryRouter><OggiPartita partita={partita} /></MemoryRouter>);
-    const gruppo = within(await screen.findByRole('group', { name: 'Momento della giornata nella partita' }));
+    const gruppo = within(await screen.findByRole('group', { name: 'Momento della giornata e meteo nella partita' }));
     expect(gruppo.getByRole('button', { name: /Giorno/ })).toHaveAttribute('aria-pressed', 'true');
     expect(gruppo.getByRole('button', { name: /Sera/ })).toHaveAttribute('aria-pressed', 'false');
     // la sezione del momento corrente porta il chip «Adesso» (15.27): di giorno è «Di giorno»
@@ -122,5 +122,32 @@ describe('OggiPartita', () => {
     expect(usePartitaStore.getState().partite[0]).toEqual(aggiornata);
     // i suggerimenti del giorno vengono ricaricati per la stessa partita
     await waitFor(() => expect(api.getSuggerimenti).toHaveBeenCalledWith(4));
+  });
+
+  it('una riga: Giorno, Sera e il meteo della fascia attiva; un tocco lo segna, lo store riceve il meteo di adesso e la giornata si rilegge', async () => {
+    const partita = { id: 4, nome: 'Prova', dataGioco: '04-12', fasciaGioco: 'sera', meteoOra: 'pioggia', updatedAt: '2026-09-05T10:00:00.000Z' } as PartitaDto;
+    usePartitaStore.setState({ partite: [partita], attiva: partita });
+    useSuggerimentiStore.setState({ partitaId: 4, dati: null, caricamento: false });
+    api.getSuggerimenti.mockResolvedValue({ giorno: '04-12', motivi: [] });
+    const allerta = { chiave: 'allerta-polline', nome: 'Allerta polline', effetti: ['I nemici possono comparire addormentati.'] };
+    const meteo = { dataGioco: '04-12', testoGuida: 'Sereno/Pioggia',
+      giorno: { meteo: 'sereno' as const, origine: 'guida' as const, guida: 'sereno' as const, allerte: [allerta] },
+      sera: { meteo: 'pioggia' as const, origine: 'guida' as const, guida: 'pioggia' as const, allerte: [] } };
+    api.getPercorsoGiorno.mockResolvedValue({ ...giorno, meteoPartita: meteo });
+    const segnato = { ...meteo, sera: { ...meteo.sera, meteo: 'sereno' as const, origine: 'partita' as const } };
+    api.impostaMeteoGiorno.mockResolvedValue({ meteo: segnato, partita: { ...partita, meteoOra: 'sereno' } });
+    render(<MemoryRouter><OggiPartita partita={partita} /></MemoryRouter>);
+    const gruppo = within(await screen.findByRole('group', { name: 'Momento della giornata e meteo nella partita' }));
+    // l'allerta del gioco è segnalata nel pulsante della sua fascia, col nome nel nome accessibile
+    expect(gruppo.getByRole('button', { name: 'Giorno (mattina, pranzo, pomeriggio, dopo scuola); allerta: allerta polline' })).toHaveAttribute('aria-pressed', 'false');
+    expect(gruppo.getByRole('button', { name: 'Sera (dopo il tramonto)' })).toHaveAttribute('aria-pressed', 'true');
+    // le icone sono quelle della fascia attiva, la sera: quattro, non otto
+    expect(gruppo.getByRole('group', { name: 'Di sera: pioggia, dalla guida' })).toBeInTheDocument();
+    expect(gruppo.queryByRole('group', { name: /^Di giorno/ })).toBeNull();
+    const letture = api.getPercorsoGiorno.mock.calls.length;
+    fireEvent.click(gruppo.getByRole('button', { name: 'Di sera: Sereno' }));
+    await waitFor(() => expect(api.impostaMeteoGiorno).toHaveBeenCalledWith(4, '04-12', { sera: 'sereno' }));
+    await waitFor(() => expect(usePartitaStore.getState().attiva?.meteoOra).toBe('sereno'));
+    await waitFor(() => expect(api.getPercorsoGiorno.mock.calls.length).toBeGreaterThan(letture));
   });
 });
