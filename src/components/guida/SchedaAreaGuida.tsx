@@ -15,6 +15,8 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { notifica } from '../../stores/notificationStore';
 import { SOGLIA_RICERCA } from '../../utils/selettore';
 import { corrispondeRicerca } from '../../../shared/testo';
+import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
+import { CampoCorrezione } from './CorrezioneGuida';
 
 interface Props {
   area: { chiave: string; nome: string; ordine: number; descrizione: string };
@@ -23,13 +25,17 @@ interface Props {
   /** Le planimetrie del Palazzo, già con il nome e quel che contengono. */
   tavole: Array<{ chiave: string; nome: string; dettaglio?: string }>;
   onCollega: (planimetria: string) => Promise<void>;
+  /** Il testo dell'area della guida: nome e descrizione, per tutte le partite. */
+  onSalvaTesto: (testo: { nome: string; descrizione: string }) => Promise<void>;
   onElimina: () => Promise<void>;
   onChiudi: () => void;
 }
 
-export function SchedaAreaGuida({ area, punti, tavole, onCollega, onElimina, onChiudi }: Props) {
+export function SchedaAreaGuida({ area, punti, tavole, onCollega, onSalvaTesto, onElimina, onChiudi }: Props) {
   const [conferma, setConferma] = useState(false);
   const [occupato, setOccupato] = useState(false);
+  const [testo, setTesto] = useState({ nome: area.nome, descrizione: area.descrizione });
+  const testoCambiato = !!testo.nome.trim() && (testo.nome.trim() !== area.nome || testo.descrizione !== area.descrizione);
   const [cerca, setCerca] = useState('');
   const visibili = tavole.filter((t) => corrispondeRicerca(cerca, t.nome, t.dettaglio));
   const esegui = async (azione: () => Promise<void>) => {
@@ -53,11 +59,18 @@ export function SchedaAreaGuida({ area, punti, tavole, onCollega, onElimina, onC
             </div>
           </div>
         : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={onChiudi} />}>
-      <p className="m-0 text-[13px] text-text-secondary">
-        Area della guida senza planimetria{area.descrizione ? `: ${area.descrizione}` : '.'}
-      </p>
+      {/* Il testo dell'area (richiesta dell'utente, 2026-09-30: «come faccio a modificare il testo delle Aree
+          della guida?»): qui, oltre che dal modulo «Modifica testo» accanto al titolo dell'area aperta. */}
+      <form className="flex flex-col gap-2" aria-label={`Testo dell’area «${area.nome}»`}
+        onSubmit={(e) => { e.preventDefault(); if (testoCambiato && !occupato) void esegui(() => onSalvaTesto({ nome: testo.nome.trim(), descrizione: testo.descrizione })); }}>
+        <span className="text-[12px] text-text-muted">Area della guida senza planimetria.</span>
+        <CampoCorrezione etichetta="Nome dell’area" valore={testo.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => setTesto((t) => ({ ...t, nome: v }))} />
+        <CampoCorrezione etichetta="Descrizione" valore={testo.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => setTesto((t) => ({ ...t, descrizione: v }))} />
+        <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva il testo" className="self-end" disabled={occupato || !testoCambiato} />
+      </form>
       {/* Le planimetrie stanno nella finestra, non in una tendina: dentro il corpo che scorre una tendina
           si apriva oltre il bordo e restava tagliata (verifica nel browser a 1366×657, 2026-09-30). */}
+      <div className="border-t border-border-light" aria-hidden />
       {tavole.length > 0
         ? <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0">
             <legend className="mb-1 p-0 text-[12px]">Collega a una planimetria</legend>

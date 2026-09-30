@@ -876,3 +876,16 @@ mostra», eliminare aree e planimetrie; i nemici non devono essere raccoglibili 
 | 2 | Interfaccia: colonna «elenco + scheda» (`PlanimetriePalazzo` con `useRiordino`: trascinamento della maniglia con scorrimento automatico e frecce, focus mantenuto; `SchedaPlanimetria`, `SchedaAreaGuida`, «Nuova planimetria» in finestra; conferme nel piè); «Elimina» nel modulo dell'area; verificata dal vivo senza salvare (richieste intercettate) a 1440×789, 1366×657, 1024×690, 768, 375 | ✅ validata |
 | 3 | Documenti, commit su `main` | ✅ |
 
+## Stanze delle planimetrie, testo delle aree, nome della stanza (30 settembre 2026) — fatto
+
+Richieste dell'utente: rendere una mappa a sé planimetria di un'altra e il viceversa; modificare il testo delle aree
+della guida; poi «Nome della stanza quando lo cambio non prende la modifica. Nome della planimetria quando lo cambio
+cambia anche Nome della stanza». Su `main`.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | `PUT /api/mappe/:chiave/stanza` (`impostaStanzaMappa`): entra nella stanza di un'altra planimetria dello stesso luogo, in fondo alle versioni e subito dopo nell'ordine, o diventa una stanza a sé; etichetta conservata. Scheda della planimetria: sezione «Stanza» («Rendila una stanza a sé», «Sposta in un'altra stanza…» con ricerca, ferma con modifiche non salvate) | ✅ |
+| 2 | Testo delle aree: nome e descrizione nella scheda dell'area senza planimetria; «Modifica testo» per esteso accanto al titolo dell'area aperta | ✅ |
+| 3 | Nome della stanza: `gruppoImmagini.nomeRivisto` (scritto con `gruppoNome`, `impostaStanzaMappa`, ereditato da chi entra, conservato dal pacchetto) vince in `titoloGruppoImmagini` sul nome rivisto della mappa; il server (`aggiornaMappa`) fissa il titolo della stanza quando si rinomina la sua prima planimetria, anche dall'editor; la scheda fissa il nome della stanza salvando quello della planimetria; «Modifica testo» con nome accessibile che lo contiene; stanze proposte solo dello stesso livello; aree di testo con overscroll contenuto | ✅ |
+| 4 | Verifica dal vivo (planimetrie di prova create ed eliminate) e dei formati 1440×789, 1366×657, 1024×690, 768×1024, 375×812; documenti, commit su `main` | ✅ |
+

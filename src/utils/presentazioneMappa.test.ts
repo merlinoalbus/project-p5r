@@ -54,6 +54,13 @@ it('i contesti completi continuano a mostrare tutte le alternative senza nomi ne
   expect(risolviContesto(m,'a|b').stato).toBe('multiplo');
 });
 
+// ---- Il nome della stanza scelto da una persona (2026-09-30) ----
+it('il nome della stanza scelto da una persona vince sul nome rivisto della mappa; senza, resta quello della mappa', () => {
+  const stanza = { nome: 'Prigione sotterranea - Tutorial', nomeRivisto: true, gruppoImmagini: { id: 'g', nome: 'Prigione', ordine: 0, nomeRivisto: true } };
+  expect(titoloGruppoImmagini(stanza)).toBe('Prigione');
+  expect(titoloGruppoImmagini({ ...stanza, gruppoImmagini: { id: 'g', nome: 'Prigione', ordine: 0 } })).toBe('Prigione sotterranea - Tutorial');
+});
+
 // ---- Il nome rivisto a mano (082) ----
 //
 // Il caso da cui è nata la regola: due versioni della stessa immagine del sottopasso di Shibuya,

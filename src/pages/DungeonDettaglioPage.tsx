@@ -376,7 +376,9 @@ export function DungeonDettaglioPage() {
                   <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>
                   {/* `key`: cambiando area il modulo si rimonta, altrimenti resterebbe aperto con il
                       testo dell'area di prima e lo salverebbe su quella nuova (rilievo della revisione). */}
-                  {!memento && <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`}
+                  {/* «Modifica testo» per esteso: la sola ✎ accanto al titolo non si trovava («come faccio a modificare
+                      il testo delle Aree della guida?», 2026-09-30) */}
+                  {!memento && <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} etichetta="Modifica testo"
                     iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
                     onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
                     // «Devo poter rimuovere un'area» (2026-09-30): l'eliminazione vera, per tutte le partite

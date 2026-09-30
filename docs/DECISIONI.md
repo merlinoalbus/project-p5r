@@ -626,6 +626,13 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **I nemici non si raccolgono** («si rigenerano»): categoria informativa, fuori dal completamento e dai «da
   raccogliere». Boss e miniboss restano consumabili. Il conteggio «esauribili» della pagina dei Palazzi riguarda i punti
   della guida (comprese le ombre sciagura esauribili), non il completamento delle mappe: resta com'è.
+- **Stanze**: una planimetria entra nella stanza di un'altra o diventa una stanza a sé dalla sua scheda (richiesta
+  dell'utente). Solo fra planimetrie dello stesso luogo; l'etichetta resta; entrando va in fondo alle versioni.
+- **Il nome della stanza scelto da una persona vince** sul nome rivisto della singola mappa, e rinominare una
+  planimetria che sta in una stanza non rinomina la stanza, da qualunque schermata (editor compreso): se era lei a
+  dare il titolo alla stanza, quel titolo si fissa com'era (difetto segnalato dall'utente: il nome della stanza non
+  si vedeva, quello della planimetria rinominava la stanza). Una mappa che non sta in nessuna stanza è stanza e
+  planimetria insieme: lì il nome è uno solo, salvo che la sua scheda fissa un nome di stanza separato.
 - Limite noto: `riconciliaAreeGuida` (migrazione 042 e sincronizzazione delle mappe) converte una mappa **senza
   geometria** in «area della guida» leggendo le colonne, cioè la sola prima area; una planimetria senza immagine
   legata a più aree non viene gestita per le altre. Oggi tutte le planimetrie dei Palazzi hanno l'immagine.

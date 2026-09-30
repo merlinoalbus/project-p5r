@@ -32,6 +32,9 @@ export const impostaAreeMappa = (chiave: string, aree: string[]): Promise<{ aree
 /** Raggruppamento di una planimetria: la stanza a cui appartiene e che cosa mostra la sua versione. */
 export const aggiornaPresentazioneMappa = (chiave: string, dati: { gruppoId?: string | null; gruppoNome?: string; etichetta?: string | null }): Promise<MappaDto> =>
   apiPut(`/mappe/${encodeURIComponent(chiave)}/presentazione`, dati);
+/** La stanza di una planimetria: entra in quella di un'altra (`con`, con il nome da dare alla stanza se non ne ha uno) o diventa una stanza a sé (`con: null`). */
+export const impostaStanzaMappa = (chiave: string, dati: { con: string | null; nome?: string }): Promise<MappaDto> =>
+  apiPut(`/mappe/${encodeURIComponent(chiave)}/stanza`, dati);
 export const riordinaMappe = (genitore: string | null, chiavi: string[]): Promise<MappaRiassuntoDto[]> => apiPut('/mappe/ordine', { genitore, chiavi });
 
 /** Carica l'immagine di base della mappa (file dell'utente, mai nel repository): corpo grezzo `image/*`. */

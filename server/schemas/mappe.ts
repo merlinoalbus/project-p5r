@@ -35,6 +35,8 @@ export const bodyAreeMappa = z.object({ aree: z.array(z.string().trim().min(1).m
 export const bodyPresentazioneMappa = z.object({
   gruppoId: z.string().max(200).nullable().optional(), gruppoNome: z.string().max(LIMITI_GUIDA.mappa.gruppoNome).optional(), etichetta: z.string().max(LIMITI_GUIDA.mappa.etichetta).nullable().optional(),
 });
+/** La stanza di una planimetria: `con` = entra nella stanza di quella, `null` = diventa una stanza a sé. */
+export const bodyStanzaMappa = z.object({ con: chiaveMappa.nullable(), nome: z.string().trim().min(1).max(LIMITI_GUIDA.mappa.gruppoNome).optional() });
 /** Riordino in blocco delle mappe figlie di un genitore (`null` = radici): l'elenco è il nuovo ordine. */
 export const bodyRiordinaMappe = z.object({ genitore: chiaveMappa.nullable(), chiavi: z.array(chiaveMappa).max(500) });
 /** Passaggio verso un'altra mappa creato dall'albero dell'editor (15.24): il server sceglie un punto libero. */

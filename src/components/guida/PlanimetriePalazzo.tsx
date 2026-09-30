@@ -27,7 +27,7 @@
 // ============================================================
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
-import { aggiornaMappa, aggiornaPresentazioneMappa, creaMappa, eliminaArea, eliminaMappa, impostaAreeMappa, riordinaMappe } from '../../services/api';
+import { aggiornaArea, aggiornaMappa, aggiornaPresentazioneMappa, creaMappa, eliminaArea, eliminaMappa, impostaAreeMappa, impostaStanzaMappa, riordinaMappe } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
 import { CampoCorrezione } from './CorrezioneGuida';
@@ -231,6 +231,8 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
 
   const stanze = useRiordino(gruppi.map((g) => g.id), blocco, (id, a) => salvaOrdine(spostaGruppo(gruppi, id, a), 'Ordine delle stanze salvato.'));
 
+  /** Il genitore di una planimetria secondo l'atlante (`undefined` finché l'atlante non la conosce). */
+  const genitoreDi = (chiave: string): string | null | undefined => albero.find((m) => m.chiave === chiave)?.genitore;
   /** Il nome di una tavola in una riga sola: stanza e, se c'è, che cosa mostra. */
   const etichettaTavola = (t: Planimetria): string => {
     const m = albero.find((x) => x.chiave === t.chiave);
@@ -358,7 +360,19 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
           <SchedaPlanimetria key={p.chiave} planimetria={p} stanza={g.nome} versioni={g.versioni.length}
             etichetta={m?.gruppoImmagini?.etichetta ?? ''} etichettaDedotta={dedotta} nome={nomeSenzaPalazzo(p.nome)}
             aree={aree} altrove={areeAltrove(p.chiave)}
+            // solo le stanze dello stesso livello: il Palazzo elenca anche le planimetrie annidate, ma una stanza
+            // raccoglie tavole dello stesso genitore, e il server rifiuta le altre (rilievo della revisione)
+            altreStanze={gruppi.filter((x) => x.id !== g.id && genitoreDi(x.versioni[0].planimetria.chiave) === genitoreDi(p.chiave)).map((x) => ({
+              chiave: x.versioni[0].planimetria.chiave,
+              nome: x.nome,
+              dettaglio: [x.versioni.length === 1 ? 'una planimetria' : `${x.versioni.length} planimetrie`, x.aree.length ? testoAree(x.aree) : null].filter(Boolean).join(' · '),
+            }))}
             onSalva={(mod) => salvaScheda(p, mod)}
+            onCambiaStanza={async (con, nome) => {
+              setOrdine(null);
+              const messaggio = con === null ? `«${v.etichetta}» è ora la stanza «${nome}».` : `«${v.etichetta}» è ora una planimetria di «${nome}».`;
+              if (await esegui(() => impostaStanzaMappa(p.chiave, { con, nome }), messaggio)) setScheda(null);
+            }}
             onElimina={async () => { setOrdine(null); if (await esegui(() => eliminaMappa(p.chiave), `«${v.etichetta}» di ${g.nome} eliminata.`)) setScheda(null); }}
             onChiudi={() => setScheda(null)} />
         );
@@ -369,6 +383,9 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
           onCollega={async (k) => {
             const t = planimetrie.find((x) => x.chiave === k);
             if (t && await esegui(() => impostaAreeMappa(t.chiave, [...t.aree.map((x) => x.chiave), schedaArea.chiave]), `«${schedaArea.nome}» collegata a «${etichettaTavola(t)}».`)) setSchedaArea(null);
+          }}
+          onSalvaTesto={async (testo) => {
+            if (await esegui(() => aggiornaArea(schedaArea.chiave, testo), `Testo dell’area «${testo.nome}» salvato.`)) setSchedaArea(null);
           }}
           onElimina={async () => {
             const a = schedaArea;

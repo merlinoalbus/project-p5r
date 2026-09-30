@@ -318,6 +318,10 @@
     transition: border-color 0.15s;
   }
   .form-input:focus { border-color: var(--color-primary); }
+  /* Un'area di testo scorre per conto suo quando il testo è lungo, e spesso sta dentro una finestra che scorre
+     (la descrizione di un'area nella sua scheda): arrivata in fondo, il gesto si ferma lì, non passa alla
+     finestra — mai due barre che scorrono una dopo l'altra (regola dell'utente, 2026-09-29). */
+  textarea.form-input { overscroll-behavior: contain; }
   /* Compatto vuol dire **stretto**, non basso: la larghezza resta `auto`, che è il motivo per cui la
      variante esiste; l'altezza no. La usano i livelli minimo e massimo dei filtri del Compendio e
      le statistiche della scorta in Partita — comandi veri — e restano 44 px a ogni larghezza:

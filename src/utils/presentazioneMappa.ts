@@ -1,5 +1,7 @@
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { nomeConVersione } from './etichettaVersione';
+// il gergo dell'estrattore: condiviso col server, che fissa i nomi delle stanze come li mostra l'interfaccia
+import { senzaGergo } from '../../shared/nomiMappe';
 type IdentitaMappa = Pick<MappaRiassuntoDto, 'nome' | 'contesti' | 'gruppoImmagini' | 'genitoreNome' | 'nomeRivisto'>;
 type RisoluzioneContesto = { stato: 'assente' | 'non-valido' | 'senza-titolo' | 'multiplo'; titolo: null; ids: string[] } | { stato: 'nominato'; titolo: string; ids: string[] };
 
@@ -52,6 +54,9 @@ export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string 
  * Esiste perché quei tre punti leggevano `gruppoImmagini.nome` per conto loro, e una mappa rivista
  * a mano finiva per chiamarsi in un modo nell'editor e in un altro nell'albero. */
 export function titoloGruppoImmagini(mappa: IdentitaMappa): string {
+  // Il nome della stanza scelto da una persona vince su tutto (2026-09-30): finché vinceva il nome rivisto della
+  // singola mappa, «Nome della stanza» non si vedeva e «Nome della planimetria» rinominava anche la stanza.
+  if (mappa.gruppoImmagini?.nomeRivisto) return mappa.gruppoImmagini.nome;
   if (mappa.nomeRivisto) return mappa.nome;
   // Anche il nome del gruppo passa dal filtro del gergo: è un'istantanea dell'estrazione come il
   // resto, e quattro fogli non attribuiti di un Palazzo si presentavano ancora come «Palazzo di
@@ -60,25 +65,6 @@ export function titoloGruppoImmagini(mappa: IdentitaMappa): string {
   return mappa.gruppoImmagini ? senzaGergo(mappa.gruppoImmagini.nome) : nomePresentazioneMappa(mappa);
 }
 
-/** Il vocabolario dell'estrattore non arriva a chi gioca.
- *
- * Quattordici mappe dell'atlante si presentano così: «Palazzo di Madarame — Immagini native che
- * nessun campo usa — tela quadrata, disegno minuto — la seconda per estensione». Ogni pezzo vuol
- * dire qualcosa a chi ha estratto i file — nessun campo del gioco fa riferimento a quell'immagine,
- * il rapporto fra i lati della tela, quanta parte ne occupa il disegno, l'ordine per estensione —
- * e **niente** a chi sta cercando dove andare. Due di quelle di Kamoshida hanno pure cinque
- * spilli, quindi non stanno nemmeno in fondo: compaiono fra le aree vere.
- *
- * Qui resta il fatto onesto — è una planimetria che l'estrazione non ha saputo attribuire a una
- * stanza — e sparisce il resto. A distinguerle ci pensano la miniatura, che si vede, e il numero
- * che `etichetteDistinte` aggiunge quando due finiscono con lo stesso nome. Il nome tecnico resta
- * nei dati: la ricerca lo trova ancora, e chi cura l'atlante ce l'ha nell'editor. */
-function senzaGergo(nome: string): string {
-  const i = nome.search(/(?:\s*—\s*)?Immagini native che nessun campo usa/i);
-  if (i < 0) return nome;
-  const prefisso = nome.slice(0, i).replace(/\s*—\s*$/, '');
-  return prefisso ? `${prefisso} — Planimetria non attribuita` : 'Planimetria non attribuita';
-}
 
 /** Le etichette di un elenco, con un numero d'ordine dove due mappe si chiamerebbero uguale.
  *

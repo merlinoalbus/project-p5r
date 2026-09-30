@@ -22,6 +22,7 @@ import { nomiCondizioni } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 
@@ -551,10 +552,10 @@ export function aggiornaPresentazioneMappa(chiave: string, dati: { gruppoId?: st
   chiave = r.chiave;
   if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) throw httpErrors.badRequest('presentazione-non-disponibile', 'Questa istanza non ha la tabella delle presentazioni.');
   const riga = prepared('SELECT contesti_json, gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(chiave) as { contesti_json: string; gruppo_immagini_json: string | null } | undefined;
-  const attuale = riga?.gruppo_immagini_json ? JSON.parse(riga.gruppo_immagini_json) as { id: string; nome: string; ordine: number; etichetta?: string } : null;
+  const attuale = riga?.gruppo_immagini_json ? JSON.parse(riga.gruppo_immagini_json) as GruppoImmagini : null;
   // niente gruppo e nessun nome nuovo: la mappa esce dal raggruppamento e torna a stare da sola
   const esce = dati.gruppoId === null && !dati.gruppoNome;
-  let gruppo: { id: string; nome: string; ordine: number; etichetta?: string } | null = null;
+  let gruppo: GruppoImmagini | null = null;
   if (!esce) {
     const id = dati.gruppoId ?? attuale?.id ?? `utente:${chiave}`;
     // il nome della stanza vale per tutte le mappe del gruppo: si scrive su tutte, o due tavole
@@ -562,7 +563,11 @@ export function aggiornaPresentazioneMappa(chiave: string, dati: { gruppoId?: st
     const nome = dati.gruppoNome?.trim() || nomeDelGruppo(id) || attuale?.nome || r.nome;
     const ordine = attuale?.ordine ?? 0;
     const etichetta = dati.etichetta === undefined ? attuale?.etichetta : (dati.etichetta?.trim() || undefined);
-    gruppo = { id, nome, ordine, ...(etichetta ? { etichetta } : {}) };
+    // Un nome di stanza scritto da una persona vince sul nome rivisto della singola mappa (2026-09-30): senza
+    // questo segno, cambiare il nome della stanza non si vedeva e cambiare quello della planimetria rinominava
+    // anche la stanza. Chi entra in una stanza con il nome già scelto lo eredita.
+    const nomeRivisto = !!dati.gruppoNome?.trim() || !!attuale?.nomeRivisto || gruppoConNomeRivisto(id);
+    gruppo = { id, nome, ordine, ...(etichetta ? { etichetta } : {}), ...(nomeRivisto ? { nomeRivisto } : {}) };
   }
   getDb().transaction(() => {
     prepared('INSERT INTO mappa_presentazione (mappa_chiave, contesti_json, gruppo_immagini_json) VALUES (?, ?, ?) ON CONFLICT(mappa_chiave) DO UPDATE SET gruppo_immagini_json = excluded.gruppo_immagini_json')
@@ -582,13 +587,116 @@ function nomeDelGruppo(id: string): string | null {
   return null;
 }
 
-/** Una stanza ha un nome solo: rinominarla lo scrive su tutte le sue tavole. */
+/** Una stanza ha un nome solo: rinominarla lo scrive su tutte le sue tavole, segnato come scelto da una persona. */
 function rinominaGruppo(id: string, nome: string): void {
   for (const r of prepared('SELECT mappa_chiave, gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ mappa_chiave: string; gruppo_immagini_json: string }>) {
-    const g = JSON.parse(r.gruppo_immagini_json) as { id: string; nome: string };
-    if (g.id !== id || g.nome === nome) continue;
-    prepared('UPDATE mappa_presentazione SET gruppo_immagini_json = ? WHERE mappa_chiave = ?').run(JSON.stringify({ ...g, nome }), r.mappa_chiave);
+    const g = JSON.parse(r.gruppo_immagini_json) as GruppoImmagini;
+    if (g.id !== id || (g.nome === nome && g.nomeRivisto)) continue;
+    prepared('UPDATE mappa_presentazione SET gruppo_immagini_json = ? WHERE mappa_chiave = ?').run(JSON.stringify({ ...g, nome, nomeRivisto: true }), r.mappa_chiave);
   }
+}
+
+/**
+ * Rinominare una planimetria non rinomina la sua stanza (difetto segnalato dall'utente, 2026-09-30). Il titolo
+ * di una stanza senza nome scelto viene dalla sua **prima** planimetria: il suo nome, se rivisto a mano,
+ * altrimenti quello del gruppo senza il gergo dell'estrattore (`titoloGruppoImmagini`). Se la mappa che cambia
+ * nome è quella prima, il titolo cambierebbe con lei: si fissa com'è adesso, come nome scelto per la stanza.
+ * Vale da qualunque schermata, editor compreso. Una mappa senza stanza è stanza e planimetria insieme: lì il
+ * nome è uno solo, e cambia per entrambe.
+ */
+function nomeStanzaDaFissare(r: RigaMappa): { id: string; nome: string } | null {
+  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) return null;
+  const riga = prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(r.chiave) as { gruppo_immagini_json: string | null } | undefined;
+  const gruppo = riga?.gruppo_immagini_json ? JSON.parse(riga.gruppo_immagini_json) as GruppoImmagini : null;
+  if (!gruppo || gruppo.nomeRivisto) return null;
+  // la prima planimetria della stanza, nell'ordine in cui la scheda del Palazzo le mostra
+  const membri = (prepared(`SELECT m.chiave FROM mappa m JOIN mappa_presentazione p ON p.mappa_chiave = m.chiave
+    WHERE p.gruppo_immagini_json IS NOT NULL AND json_extract(p.gruppo_immagini_json, '$.id') = ? ORDER BY m.ordine, m.chiave`).all(gruppo.id) as Array<{ chiave: string }>);
+  if (membri[0]?.chiave !== r.chiave) return null;
+  const nome = conNomeRivisto() && r.nome_rivisto ? r.nome : senzaGergo(gruppo.nome);
+  return { id: gruppo.id, nome };
+}
+
+/** Qualche tavola della stanza ha già il nome scelto da una persona. */
+function gruppoConNomeRivisto(id: string): boolean {
+  for (const r of prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ gruppo_immagini_json: string }>) {
+    const g = JSON.parse(r.gruppo_immagini_json) as GruppoImmagini;
+    if (g.id === id && g.nomeRivisto) return true;
+  }
+  return false;
+}
+
+type GruppoImmagini = { id: string; nome: string; ordine: number; etichetta?: string; nomeRivisto?: boolean };
+
+/**
+ * In quale stanza sta una planimetria (richiesta dell'utente, 2026-09-30: «rendere una mappa censita come a sé
+ * planimetria di un'altra, e viceversa eleggere una planimetria a mappa individuale»). La stanza è il gruppo
+ * di immagini (`mappa_presentazione.gruppo_immagini_json`), e l'operazione è una sola, in transazione:
+ * - `con` = un'altra planimetria: questa entra nella stanza di quella, **in fondo** alle sue versioni. Se
+ *   quella non ha ancora una stanza, ne nasce una con il nome `nome` (quello con cui l'interfaccia la mostra);
+ * - `con` = `null`: questa esce e diventa **una stanza a sé**, chiamata `nome`.
+ * In entrambi i casi l'etichetta («che cosa mostra») resta. Solo fra planimetrie dello stesso luogo: una
+ * stanza è un pezzo di un Palazzo, non un raccoglitore di tavole di posti diversi.
+ */
+export function impostaStanzaMappa(chiavePubblica: string, dati: { con: string | null; nome?: string }): MappaDto {
+  const r = rigaMappa(chiavePubblica);
+  const chiave = r.chiave;
+  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) throw httpErrors.badRequest('presentazione-non-disponibile', 'Questa istanza non ha la tabella delle presentazioni.');
+  const leggi = (k: string): { contesti: string; gruppo: GruppoImmagini | null } => {
+    const riga = prepared('SELECT contesti_json, gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(k) as { contesti_json: string; gruppo_immagini_json: string | null } | undefined;
+    return { contesti: riga?.contesti_json ?? '[]', gruppo: riga?.gruppo_immagini_json ? JSON.parse(riga.gruppo_immagini_json) as GruppoImmagini : null };
+  };
+  const scrivi = (k: string, contesti: string, gruppo: GruppoImmagini) => {
+    prepared('INSERT INTO mappa_presentazione (mappa_chiave, contesti_json, gruppo_immagini_json) VALUES (?, ?, ?) ON CONFLICT(mappa_chiave) DO UPDATE SET gruppo_immagini_json = excluded.gruppo_immagini_json')
+      .run(k, contesti, JSON.stringify(gruppo));
+    prepared("UPDATE mappa SET origine = 'utente', updated_at = ? WHERE chiave = ?").run(nowIso(), k);
+  };
+  const questa = leggi(chiave);
+  const etichetta = questa.gruppo?.etichetta ? { etichetta: questa.gruppo.etichetta } : {};
+
+  if (dati.con === null) {
+    const nome = dati.nome?.trim() || r.nome;
+    // un id nuovo: con quello di prima resterebbe nella stanza che lascia
+    getDb().transaction(() => scrivi(chiave, questa.contesti, { id: `utente:${chiave}:${Date.now().toString(36)}`, nome, ordine: 0, ...etichetta, nomeRivisto: true }))();
+    return dettaglioMappa(chiave);
+  }
+
+  const altra = rigaMappa(dati.con);
+  if (altra.chiave === chiave) throw httpErrors.badRequest('stanza-non-valida', 'Una planimetria non può entrare nella propria stanza.');
+  if (altra.genitore_chiave !== r.genitore_chiave) throw httpErrors.badRequest('stanza-di-altro-luogo', 'Le due planimetrie non stanno nello stesso luogo: una stanza raccoglie solo tavole dello stesso posto.');
+  const diQuella = leggi(altra.chiave);
+  getDb().transaction(() => {
+    let gruppo = diQuella.gruppo;
+    if (!gruppo) {
+      gruppo = { id: `utente:${altra.chiave}`, nome: dati.nome?.trim() || altra.nome, ordine: 0, nomeRivisto: true };
+      scrivi(altra.chiave, diQuella.contesti, gruppo);
+    }
+    if (questa.gruppo?.id === gruppo.id) return;
+    // in fondo alle versioni della stanza: l'ordinale («Immagine N») non si sovrappone a quelli che ci sono
+    let ultimo = -1;
+    for (const x of prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ gruppo_immagini_json: string }>) {
+      const g = JSON.parse(x.gruppo_immagini_json) as GruppoImmagini;
+      if (g.id === gruppo.id) ultimo = Math.max(ultimo, g.ordine);
+    }
+    scrivi(chiave, questa.contesti, { id: gruppo.id, nome: gruppo.nome, ordine: ultimo + 1, ...etichetta, ...(gruppo.nomeRivisto ? { nomeRivisto: true } : {}) });
+    // Anche nell'ordine del luogo la planimetria va subito dopo l'ultima versione della stanza: le versioni si
+    // mostrano nell'ordine delle mappe, e restando dov'era poteva finire davanti a quelle che c'erano già
+    // («Immagine 2» sopra «Immagine 1» — verifica nel browser, 2026-09-30).
+    // stesso ordinamento della scheda del Palazzo (`planimetrieDelPalazzo`): a pari ordine decide la chiave
+    const fratelli = (r.genitore_chiave === null
+      ? prepared('SELECT chiave, ordine FROM mappa WHERE genitore_chiave IS NULL ORDER BY ordine, chiave').all()
+      : prepared('SELECT chiave, ordine FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, chiave').all(r.genitore_chiave)) as Array<{ chiave: string; ordine: number }>;
+    const membri = new Set((prepared('SELECT mappa_chiave, gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ mappa_chiave: string; gruppo_immagini_json: string }>)
+      .filter((x) => x.mappa_chiave !== chiave && (JSON.parse(x.gruppo_immagini_json) as GruppoImmagini).id === gruppo.id).map((x) => x.mappa_chiave));
+    const senza = fratelli.filter((f) => f.chiave !== chiave);
+    let dopo = -1;
+    senza.forEach((f, i) => { if (membri.has(f.chiave)) dopo = i; });
+    if (dopo >= 0) {
+      const nuovo = [...senza.slice(0, dopo + 1), { chiave, ordine: -1 }, ...senza.slice(dopo + 1)];
+      nuovo.forEach((f, i) => { if (f.ordine !== i) prepared('UPDATE mappa SET ordine = ? WHERE chiave = ?').run(i, f.chiave); });
+    }
+  })();
+  return dettaglioMappa(chiave);
 }
 
 export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaRiassuntoDto[] {
@@ -724,7 +832,9 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     if (dati.entita?.tipo === 'area') areeDopo.add(dati.entita.chiave);
     verificaAreePalazzo(genitoreDopo, [...areeDopo]);
   } else if (dati.entita?.tipo === 'area') verificaAreePalazzo(genitoreDopo, [dati.entita.chiave]);
+  const stanzaDaFissare = dati.nome !== undefined && dati.nome.trim() !== r.nome ? nomeStanzaDaFissare(r) : null;
   getDb().transaction(()=>{
+  if (stanzaDaFissare) rinominaGruppo(stanzaDaFissare.id, stanzaDaFissare.nome);
   if (conNomeRivisto()) prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(rivisto, chiave);
   prepared(`UPDATE mappa SET nome = ?, tipo = ?, genitore_chiave = ?, ordine = ?, asset = ?, larghezza = ?, altezza = ?, entita_tipo = ?, entita_chiave = ?, note = ?, origine = 'utente', updated_at = ? WHERE chiave = ?`).run(
     dati.nome ?? r.nome, dati.tipo ?? r.tipo, dati.genitore === undefined ? r.genitore_chiave : dati.genitore, dati.ordine ?? r.ordine, dati.asset === undefined ? r.asset : dati.asset,
@@ -1206,7 +1316,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         areeDaLegare.push({ mappa: m.chiave, aree, fonte });
       }
       if ((m.contesti !== undefined || m.gruppoImmagini !== undefined) && prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
-        const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative(),etichetta:z.string().min(1).max(160).optional()}).nullable()});
+        const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative(),etichetta:z.string().min(1).max(160).optional(),nomeRivisto:z.boolean().optional()}).nullable()});
         const v=schema.safeParse({contesti:m.contesti??[],gruppo:m.gruppoImmagini??null});
         if(!v.success || new Set(v.data.contesti.map(c=>c.id)).size!==v.data.contesti.length)throw httpErrors.badRequest('contesti-non-validi','Contesti della planimetria non validi o duplicati.');
         prepared('INSERT INTO mappa_presentazione VALUES(?,?,?) ON CONFLICT(mappa_chiave) DO UPDATE SET contesti_json=excluded.contesti_json,gruppo_immagini_json=excluded.gruppo_immagini_json').run(m.chiave,JSON.stringify(v.data.contesti),v.data.gruppo?JSON.stringify(v.data.gruppo):null);

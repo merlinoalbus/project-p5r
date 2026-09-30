@@ -23,6 +23,8 @@ import { SceltaAreePlanimetria } from './SceltaAreePlanimetria';
 import { notifica } from '../../stores/notificationStore';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { perOrdineDiGuida, type Planimetria } from '../../utils/gruppiPlanimetrie';
+import { SOGLIA_RICERCA } from '../../utils/selettore';
+import { corrispondeRicerca } from '../../../shared/testo';
 
 export interface ModificheScheda {
   stanza?: string;
@@ -47,13 +49,19 @@ interface Props {
   /** Tutte le aree del Palazzo, in ordine di guida. */
   aree: Array<{ chiave: string; nome: string; ordine: number }>;
   altrove: ReadonlyMap<string, string>;
+  /** Le altre stanze del Palazzo, ognuna rappresentata da una sua planimetria (`chiave`). */
+  altreStanze: Array<{ chiave: string; nome: string; dettaglio?: string }>;
   onSalva: (m: ModificheScheda) => Promise<void>;
+  /** Entra nella stanza di `con` (`nome`: come chiamarla se non ha ancora un nome suo) o, con `null`, diventa una stanza a sé (`nome`). */
+  onCambiaStanza: (con: string | null, nome: string) => Promise<void>;
   onElimina: () => Promise<void>;
   onChiudi: () => void;
 }
 
-export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta, etichettaDedotta, nome, aree, altrove, onSalva, onElimina, onChiudi }: Props) {
+export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta, etichettaDedotta, nome, aree, altrove, altreStanze, onSalva, onCambiaStanza, onElimina, onChiudi }: Props) {
   const [valori, setValori] = useState({ stanza, etichetta, nome });
+  const [sposta, setSposta] = useState(false);
+  const [cerca, setCerca] = useState('');
   // le aree all'apertura: il metro per capire se l'insieme è cambiato
   const [iniziali] = useState(() => new Set(p.aree.map((a) => a.chiave)));
   const [spuntate, setSpuntate] = useState<Set<string>>(() => new Set(iniziali));
@@ -64,6 +72,9 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
   if (valori.stanza.trim() && valori.stanza.trim() !== stanza) modifiche.stanza = valori.stanza.trim();
   if (valori.etichetta.trim() !== etichetta) modifiche.etichetta = valori.etichetta.trim() || null;
   if (valori.nome.trim() && valori.nome.trim() !== nome) modifiche.nome = valori.nome.trim();
+  // Rinominare la planimetria non deve rinominare la stanza: una mappa rinominata a mano presentava il suo nome
+  // anche come titolo della stanza. Fissando qui il nome della stanza, lo decide la stanza (2026-09-30).
+  if (modifiche.nome !== undefined && modifiche.stanza === undefined) modifiche.stanza = stanza;
   const areeCambiate = spuntate.size !== iniziali.size || [...spuntate].some((k) => !iniziali.has(k));
   if (areeCambiate) modifiche.aree = aree.filter((a) => spuntate.has(a.chiave)).map((a) => a.chiave);
   const daSalvare = Object.keys(modifiche).length > 0;
@@ -115,6 +126,45 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
         {/* invio da tastiera nei campi di testo */}
         <button type="submit" hidden aria-hidden tabIndex={-1} />
       </form>
+
+      {/* La stanza (richiesta dell'utente, 2026-09-30): una planimetria a sé può diventare una versione di
+          un'altra stanza, e una versione può diventare una stanza a sé. Sono azioni immediate, che rileggono
+          il Palazzo: con modifiche non salvate nel modulo si aspetta, altrimenti andrebbero perse. */}
+      <section aria-label="Stanza della planimetria" className="flex flex-col gap-2 border-t border-border-light pt-3">
+        <span className="text-[12px]">Stanza</span>
+        {daSalvare && <span className="text-[11px] text-text-muted" role="status">Salva prima le modifiche qui sopra per cambiare stanza.</span>}
+        {versioni > 1
+          ? <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[12px] text-text-muted">È una delle {versioni} planimetrie di «{stanza}».</span>
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Rendila una stanza a sé" disabled={occupato || daSalvare || conferma}
+                onClick={() => void esegui(() => onCambiaStanza(null, valori.nome.trim() || nome))} />
+            </div>
+          : <span className="text-[12px] text-text-muted">È una stanza a sé.</span>}
+        {altreStanze.length > 0 && (sposta
+          ? <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0">
+              <legend className="mb-1 p-0 text-[12px]">Sposta in un’altra stanza</legend>
+              <span className="text-[11px] text-text-muted">Diventa una planimetria di quella stanza, in fondo alle sue; le sue aree e i suoi spilli restano suoi.</span>
+              {altreStanze.length >= SOGLIA_RICERCA && (
+                <input className="form-input" type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder="Cerca una stanza…" aria-label="Cerca una stanza" autoComplete="off" />
+              )}
+              <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label="Stanze in cui spostarla">
+                {altreStanze.filter((s) => corrispondeRicerca(cerca, s.nome, s.dettaglio)).map((s) => (
+                  <li key={s.chiave}>
+                    <button type="button" className="touch flex w-full flex-col rounded-md border border-border-light px-2.5 py-1.5 text-left hover:border-primary disabled:opacity-50" disabled={occupato || daSalvare || conferma}
+                      onClick={() => void esegui(() => onCambiaStanza(s.chiave, s.nome))}>
+                      <span className="text-[13px] font-semibold leading-tight">{s.nome}</span>
+                      {s.dettaglio && <span className="text-[11px] leading-tight text-text-muted">{s.dettaglio}</span>}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Lascia nella sua stanza" className="self-start" onClick={() => { setSposta(false); setCerca(''); }} />
+            </fieldset>
+          : <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[12px] text-text-muted">Può diventare una planimetria di un’altra stanza.</span>
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Sposta in un’altra stanza…" disabled={occupato || daSalvare || conferma} onClick={() => setSposta(true)} />
+            </div>)}
+      </section>
 
       <div className="flex flex-col gap-2 border-t border-border-light pt-3">
         <div className="flex flex-wrap items-center justify-between gap-2">

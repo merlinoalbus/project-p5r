@@ -76,7 +76,9 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
   if (!bozza) {
     return (
       <button type="button" className={`touch shrink-0 rounded px-1.5 text-text-muted hover:text-text ${compatto ? 'text-[11px]' : 'text-[12px]'}`}
-        aria-label={`Correggi ${cosa}`} title={`Correggi ${cosa}`}
+        // Con una scritta accanto alla matita il nome accessibile comincia da quella (WCAG 2.5.3): chi dà comandi a
+        // voce dice quello che legge, «Modifica testo», e deve trovarlo nel nome del pulsante.
+        aria-label={etichetta ? `${etichetta}: ${cosa}` : `Correggi ${cosa}`} title={`Correggi ${cosa}`}
         onClick={() => { const v = iniziale(); setBozza({ partenza: v, corrente: v }); }}>
         ✎{etichetta ? <span className="ml-1">{etichetta}</span> : null}
       </button>

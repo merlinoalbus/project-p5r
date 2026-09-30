@@ -12,8 +12,8 @@ import { impostaMarcatore } from '../services/dungeonService.js';
 import { impostaMarcatoreLuogo, scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
@@ -109,6 +109,10 @@ router.delete('/:chiave', validate({ params: paramsMappa }), (req, res) => {
 /** Immagine di base (corpo grezzo `image/*`): salvata nell'istanza nell'ambito «mappa» con la chiave della mappa. */
 router.put('/:chiave/presentazione', validate({ params: paramsMappa, body: bodyPresentazioneMappa }), (req, res) => {
   res.json(aggiornaPresentazioneMappa(String(req.params.chiave), req.body as Parameters<typeof aggiornaPresentazioneMappa>[1]));
+});
+/** La stanza della planimetria: entra in quella di un'altra (`con`) o diventa una stanza a sé (`con: null`). */
+router.put('/:chiave/stanza', validate({ params: paramsMappa, body: bodyStanzaMappa }), (req, res) => {
+  res.json(impostaStanzaMappa(String(req.params.chiave), req.body as { con: string | null; nome?: string }));
 });
 
 router.put('/:chiave/immagine', validate({ params: paramsMappa }), express.raw({ type: 'image/*', limit: MAX_BYTE_IMMAGINE }), (req, res) => {

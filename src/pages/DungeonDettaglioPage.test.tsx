@@ -9,11 +9,11 @@ import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea } = vi.hoisted(() => ({
+const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
-  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
+vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
 vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
 vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
@@ -334,6 +334,83 @@ it('mentre un ordine si salva, la maniglia dice perché è ferma', async () => {
   await waitFor(() => expect(pannello.getByRole('button', { name: 'Sposta la stanza «Cancello»' })).toHaveAttribute('title', 'Un momento: sto salvando l’ultima modifica'));
 });
 
+// ---- Stanze e testo delle aree (richiesta dell'utente, 2026-09-30) ----
+
+it('rinominare la planimetria non rinomina la stanza: il nome della stanza resta fissato com’era', async () => {
+  const pannello = await apriPlanimetrie();
+  aggiornaPresentazioneMappa.mockResolvedValue({});
+  aggiornaMappa.mockResolvedValue({});
+  fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
+  fireEvent.change(finestra.getByLabelText('Nome della planimetria'), { target: { value: 'Cancello, lato nord' } });
+  fireEvent.click(finestra.getByRole('button', { name: 'Salva' }));
+  await waitFor(() => expect(aggiornaMappa).toHaveBeenCalledWith('m-cancello', { nome: 'Cancello, lato nord' }));
+  expect(aggiornaPresentazioneMappa).toHaveBeenCalledWith('m-cancello', { gruppoNome: 'Cancello' });
+});
+
+it('una planimetria a sé si sposta nella stanza di un’altra, dalla sua scheda', async () => {
+  const pannello = await apriPlanimetrie();
+  impostaStanzaMappa.mockResolvedValue({});
+  fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
+  const stanza = within(finestra.getByRole('region', { name: 'Stanza della planimetria' }));
+  expect(stanza.getByText('È una stanza a sé.')).toBeInTheDocument();
+  expect(stanza.queryByRole('button', { name: 'Rendila una stanza a sé' })).toBeNull();
+  fireEvent.click(stanza.getByRole('button', { name: 'Sposta in un’altra stanza…' }));
+  const scelte = within(stanza.getByRole('list', { name: 'Stanze in cui spostarla' })).getAllByRole('button');
+  // le altre stanze, non la sua
+  expect(scelte.map((b) => b.textContent)).toEqual(['Torreuna planimetria']);
+  fireEvent.click(scelte[0]);
+  await waitFor(() => expect(impostaStanzaMappa).toHaveBeenCalledWith('m-cancello', { con: 'm-torre', nome: 'Torre' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+});
+
+it('fra le stanze in cui spostarla ci sono solo quelle dello stesso livello (il server rifiuta le altre)', async () => {
+  const { dungeon, albero } = conDueVersioni();
+  // «Torre» sta sotto un'altra mappa del Palazzo: una stanza annidata, di un altro livello
+  getDungeon.mockResolvedValue(dungeon);
+  getAlberoMappe.mockResolvedValue([...albero, { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', genitore: 'm-cancello' }]);
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  fireEvent.click(await screen.findByRole('button', { name: 'Gestisci «Pianta completa» di Cancello' }));
+  const stanza = within(within(screen.getByRole('dialog')).getByRole('region', { name: 'Stanza della planimetria' }));
+  // l'unica altra stanza è di un altro livello: niente da proporre
+  expect(stanza.queryByRole('button', { name: 'Sposta in un’altra stanza…' })).toBeNull();
+});
+
+it('una planimetria di una stanza con più versioni diventa una stanza a sé, col suo nome', async () => {
+  const { dungeon, albero } = conDueVersioni();
+  getDungeon.mockResolvedValue(dungeon);
+  getAlberoMappe.mockResolvedValue(albero);
+  impostaStanzaMappa.mockResolvedValue({});
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  fireEvent.click(await screen.findByRole('button', { name: 'Gestisci «Porzione ovest» di Cancello' }));
+  const stanza = within(within(screen.getByRole('dialog')).getByRole('region', { name: 'Stanza della planimetria' }));
+  expect(stanza.getByText('È una delle 2 planimetrie di «Cancello».')).toBeInTheDocument();
+  fireEvent.click(stanza.getByRole('button', { name: 'Rendila una stanza a sé' }));
+  await waitFor(() => expect(impostaStanzaMappa).toHaveBeenCalledWith('m-cancello-ovest', { con: null, nome: 'Cancello ovest' }));
+});
+
+it('il testo di un’area si modifica: dalla scheda dell’area senza planimetria e con «Modifica testo» sopra la mappa', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  getAlberoMappe.mockResolvedValue([]);
+  aggiornaArea.mockResolvedValue({});
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  // sopra la mappa il comando dice che cosa fa, non è più una ✎ sola
+  // e il nome accessibile comincia dal testo che si vede (chi comanda a voce dice «Modifica testo»)
+  expect(screen.getByRole('button', { name: 'Modifica testo: l’area «Cancello»' })).toHaveTextContent('Modifica testo');
+  fireEvent.click(screen.getByRole('button', { name: 'Gestisci l’area «Torre»' }));
+  const finestra = within(screen.getByRole('dialog', { name: '2. Torre' }));
+  expect(finestra.getByRole('button', { name: 'Salva il testo' })).toBeDisabled();
+  fireEvent.change(finestra.getByLabelText('Nome dell’area'), { target: { value: 'Torre nord' } });
+  fireEvent.change(finestra.getByLabelText('Descrizione'), { target: { value: 'La torre dell’ala nord.' } });
+  fireEvent.click(finestra.getByRole('button', { name: 'Salva il testo' }));
+  await waitFor(() => expect(aggiornaArea).toHaveBeenCalledWith('k-02', { nome: 'Torre nord', descrizione: 'La torre dell’ala nord.' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+});
+
 it('un’area senza planimetria ha la sua scheda: si collega a una qualsiasi tavola, che la aggiunge alle sue', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   getAlberoMappe.mockResolvedValue([]);
@@ -380,7 +457,7 @@ it('anche l’area aperta si elimina, dal suo modulo di correzione, e la scheda 
   eliminaArea.mockResolvedValue(undefined);
   render(<MemoryRouter initialEntries={['/guida/dungeon/kamoshida?area=k-03']}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
   expect(await screen.findByRole('heading', { name: 'Cortile' })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: /Correggi l’area/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’area/ }));
   const modulo = within(screen.getByRole('form', { name: /Correggi l’area/ }));
   fireEvent.click(modulo.getByRole('button', { name: 'Elimina' }));
   expect(modulo.getByText(/Se ne va dalla guida per tutte le partite/)).toBeInTheDocument();
@@ -444,7 +521,9 @@ it('le aree di una planimetria si scelgono insieme nella scheda: in ordine, con 
   fireEvent.click(caselle[1]);
   // spuntare un'area che sta altrove lo dice prima di salvare
   expect(finestra.getByText(/si sposta qui da «Torre»/)).toBeInTheDocument();
-  expect(finestra.getByRole('status')).toHaveTextContent('Un’area lascia la planimetria dove stava: Torre.');
+  expect(finestra.getByText('Un’area lascia la planimetria dove stava: Torre.', { exact: false })).toHaveAttribute('role', 'status');
+  // con una modifica non salvata, cambiare stanza aspetta (la scheda lo dice)
+  expect(finestra.getByText('Salva prima le modifiche qui sopra per cambiare stanza.')).toBeInTheDocument();
   fireEvent.click(caselle[0]);
   fireEvent.click(finestra.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-cancello', ['k-02', 'k-03']));
@@ -461,14 +540,14 @@ it('la bozza di correzione appartiene al pezzo che stai correggendo, non alla sc
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
 
   // scrivo nel modulo dell'area, poi cambio area senza salvare
-  fireEvent.click(screen.getByRole('button', { name: /Correggi l’area/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’area/ }));
   const modulo = screen.getByRole('form', { name: /Correggi l’area/ });
   fireEvent.change(within(modulo).getByLabelText('Nome dell’area'), { target: { value: 'Scritto per sbaglio' } });
   // si cambia area dall'elenco: «Torre» è un'area senza planimetria, in coda (non la stanza omonima)
   fireEvent.click(within(screen.getByRole('list', { name: 'Aree della guida senza planimetria' })).getByRole('button', { name: /^2\. Torre/ }));
 
   // il modulo si è chiuso con la sua bozza: riaprendolo sull'altra area c'è il nome dell'altra area
-  fireEvent.click(screen.getByRole('button', { name: /Correggi l’area/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’area/ }));
   expect(within(screen.getByRole('form', { name: /Correggi l’area/ })).getByLabelText('Nome dell’area')).toHaveValue('Torre');
   expect(aggiornaArea).not.toHaveBeenCalled();
 });
@@ -479,7 +558,7 @@ it('salvata l’intestazione, la scheda si rilegge con la partita attiva', async
   monta('kamoshida');
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
   getDungeon.mockClear();
-  fireEvent.click(screen.getByRole('button', { name: /Correggi il Palazzo/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Correggi la scheda: il Palazzo/ }));
   const modulo = screen.getByRole('form', { name: /Correggi il Palazzo/ });
   fireEvent.change(within(modulo).getByLabelText('Nome'), { target: { value: 'Castello' } });
   fireEvent.click(within(modulo).getByRole('button', { name: 'Salva' }));

@@ -806,3 +806,13 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
 - **Nemici**: `nemico` è di categoria `informativo` (`shared/spilli.ts`, `collezionabile: false`), migrazione 085 per
   gli spilli esistenti; `impostaRaccolto` risponde 400 `spillo-non-raccoglibile` a `raccolto=true` su un nemico;
   i punti della guida «ombra-sciagura» non risultano collezionabili in `contenutiMappa`.
+- **Stanze** (gruppo di immagini in `mappa_presentazione.gruppo_immagini_json`): `impostaStanzaMappa`
+  (`PUT /api/mappe/:chiave/stanza`, `{ con, nome? }`) fa entrare una planimetria nella stanza di un'altra dello
+  stesso genitore (la crea se manca, ordinale in fondo, posizione nell'ordine subito dopo l'ultima versione) o la
+  rende una stanza a sé (`con: null`, id nuovo), conservando l'etichetta. `gruppoImmagini.nomeRivisto` segna un
+  nome di stanza scelto da una persona (`gruppoNome`, `rinominaGruppo`, `impostaStanzaMappa`; viaggia nel pacchetto
+  delle mappe) e in `titoloGruppoImmagini` vince sul `nomeRivisto` della singola mappa. `aggiornaMappa`, quando cambia
+  il nome della prima planimetria (ordine, chiave) di una stanza senza nome scelto, fissa il titolo che la stanza
+  mostrava (`nomeStanzaDaFissare`, con `senzaGergo` ora in `shared/nomiMappe.ts`, condiviso col frontend).
+- **Testo delle aree**: `aggiornaArea` dalla scheda dell'area senza planimetria e dal modulo «Modifica testo» accanto
+  al titolo dell'area aperta.

@@ -1741,7 +1741,9 @@ export interface MappaRiassuntoDto {
   /** Ordinale di una collezione presentativa di immagini omonime, mai numero di piano. */
   immagineCollezione?: {indice:number;totale:number;ambito:string};
   contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
-  gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string};
+  /** La stanza (gruppo di immagini). `nomeRivisto`: il nome della stanza l'ha scelto una persona (2026-09-30),
+   *  e vince sul nome rivisto della singola mappa. */
+  gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string;nomeRivisto?:boolean};
   /** `nome` l'ha scritto una persona nell'editor, non l'estrazione: vince su contesti e gruppo
    * (082). Solo il salvataggio del nome lo accende; l'importazione di un pacchetto lo spegne. */
   nomeRivisto: boolean;
@@ -1888,7 +1890,7 @@ export interface EsportazioneMappeDto {
   mappe: Array<{
     ruoloImmagine?: RuoloImmagine;
     contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
-    gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string};
+    gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string;nomeRivisto?:boolean};
     assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
