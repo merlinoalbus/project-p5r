@@ -811,3 +811,28 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - Limiti noti: il posto nella finestra si sposta di un passo per volta (al massimo una decina di voci per fascia);
   l'elenco del posto mostra il testo delle altre voci su una riga, tagliato; un testo della guida oltre ~860 caratteri
   scorre ancora dentro il suo campo sul telefono (tetto di 24 righe).
+
+### 2026-10-01 — Il pacchetto dal canone di produzione; Zorro e la Ballerina in due voci
+- L'istanza di produzione, aggiornata, era già alla 92 con 954 voci (le sue correzioni e 4 voci aggiunte, convertite dalla
+  «utente» 015); il pacchetto preparato dall'export del giorno prima ne aveva 950 e l'anteprima di importazione mostrava la
+  perdita di 4 voci e 3 spunte orfane: importazione annullata. Il pacchetto si rigenera dall'export dell'istanza
+  (`--da-istanza`), come sempre: l'istanza è la fonte del canone.
+- La voce del 25 aprile «Finire di leggere "Zorro, il fuorilegge" sulla metro e restituirlo in Biblioteca.» segnava finita
+  anche «La ballerina seducente»: l'utente aveva corretto il testo della voce d'origine («Biblioteca: restituire Zorro… e
+  prendere in prestito La ballerina seducente»), il collegamento era rimasto sulla Ballerina e la conversione della
+  «utente» 007 ne ha ricavato «Ballerina + Zorro completati» (riprodotto: stesso risultato). Scelta dell'utente: «questo
+  evento deve diventare due eventi distinti... uno è finire la lettura di zorro, l'altro è consegnare il libro in
+  bibblioteca e prendere in prestito la Ballerina (non leggere solo prendere in prestito)». Migrazione 093: la voce della
+  guida diventa «Finire di leggere "Zorro, il fuorilegge" sulla metro.» (collegata a Zorro, Zorro completato); la voce del
+  prestito che l'utente aveva aggiunto diventa «Restituire "Zorro, il fuorilegge" in Biblioteca e prendere in prestito "La
+  ballerina seducente".» (collegata alla Ballerina, nessun effetto), subito dopo; dove quella voce non c'è, nasce. Solo
+  se la voce della guida è com'era nella guida d'origine o nel canone difettoso; si applica da sola in produzione
+  all'aggiornamento. Pacchetto alla 93.
+- Il nome di un collegamento senza nome salvato (scelto dall'utente, o riparato) si legge anche se l'elemento è nascosto
+  dal catalogo (`nomeRiferimento(…, { ancheNascosti: true })` solo in lettura): nasconderlo non toglie il nome alle voci;
+  un collegamento **nuovo** a un elemento nascosto resta rifiutato.
+- Limite noto: la 093 ripara la guida, non le partite. Se fra la conversione in produzione (sera del 2026-09-30) e
+  l'aggiornamento con la 093 la voce di Zorro del 25 aprile è stata spuntata, quella spunta ha segnato letta anche la
+  Ballerina: si vede nella pagina Libri (Ballerina letta senza averla letta) e si corregge da lì. Non misurato: i dati
+  delle partite di produzione non erano disponibili. Il pacchetto alla 93 si importa solo con l'app aggiornata; con
+  l'app aggiornata la 093 ripara la produzione all'avvio e l'importazione non serve.

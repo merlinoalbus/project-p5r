@@ -61,9 +61,12 @@ export function mappaAzione(a: AzioneClassificata): { chiave: string; spilloId: 
   return null;
 }
 
-/** Il nome dell'elemento collegato, come lo scrive la guida («Tae Takemi - Morte»); 400 se il collegamento non esiste. */
-export function nomeRiferimento(rif: { tipo: string; chiave: string }): string {
+/** Il nome dell'elemento collegato, come lo scrive la guida («Tae Takemi - Morte»); 400 se il collegamento non esiste.
+ *  Un libro, un film, un'attività o un negozio nascosti dal catalogo non si collegano (collegamento nuovo); per **leggere** il
+ *  nome di un collegamento che la voce ha già, `ancheNascosti` li trova lo stesso: nasconderli non toglie il nome alle voci. */
+export function nomeRiferimento(rif: { tipo: string; chiave: string }, opz: { ancheNascosti?: boolean } = {}): string {
   if (!TIPI_RIFERIMENTO.has(rif.tipo)) throw httpErrors.badRequest('riferimento-non-valido', `Non si collega un'azione a «${rif.tipo}».`);
+  const visibile = opz.ancheNascosti ? '' : ' AND nascosto = 0';
   const riga = ((): { nome: string } | undefined => {
     switch (rif.tipo as RiferimentoAzioneDto['tipo']) {
       case 'confidente': {
@@ -72,10 +75,10 @@ export function nomeRiferimento(rif: { tipo: string; chiave: string }): string {
       }
       case 'dungeon': return prepared('SELECT nome FROM dungeon WHERE chiave = ?').get(rif.chiave) as { nome: string } | undefined;
       case 'richiesta': return prepared('SELECT nome FROM richiesta WHERE chiave = ?').get(rif.chiave) as { nome: string } | undefined;
-      case 'libro': return prepared('SELECT COALESCE(nome_it, nome) AS nome FROM libro WHERE chiave = ? AND nascosto = 0').get(rif.chiave) as { nome: string } | undefined;
-      case 'film': return prepared('SELECT COALESCE(nome_it, nome) AS nome FROM film WHERE chiave = ? AND nascosto = 0').get(rif.chiave) as { nome: string } | undefined;
-      case 'attivita': return prepared('SELECT nome FROM attivita WHERE chiave = ? AND nascosto = 0').get(rif.chiave) as { nome: string } | undefined;
-      case 'negozio': return prepared('SELECT nome FROM negozio WHERE chiave = ? AND nascosto = 0').get(rif.chiave) as { nome: string } | undefined;
+      case 'libro': return prepared(`SELECT COALESCE(nome_it, nome) AS nome FROM libro WHERE chiave = ?${visibile}`).get(rif.chiave) as { nome: string } | undefined;
+      case 'film': return prepared(`SELECT COALESCE(nome_it, nome) AS nome FROM film WHERE chiave = ?${visibile}`).get(rif.chiave) as { nome: string } | undefined;
+      case 'attivita': return prepared(`SELECT nome FROM attivita WHERE chiave = ?${visibile}`).get(rif.chiave) as { nome: string } | undefined;
+      case 'negozio': return prepared(`SELECT nome FROM negozio WHERE chiave = ?${visibile}`).get(rif.chiave) as { nome: string } | undefined;
       case 'dote': return prepared('SELECT nome FROM dote_sociale WHERE chiave = ?').get(rif.chiave) as { nome: string } | undefined;
     }
   })();

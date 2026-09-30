@@ -52,15 +52,26 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     letto: !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = ?").get(p, chiave),
   });
   const azione = async (data: string, indice: number) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.uid === uidDi(data, indice))!;
+  /** Gli effetti che la conversione (086) ha dato all'azione della guida d'origine (`azioni_json`, copia storica): il pacchetto è
+   *  la fotografia dell'istanza, e l'utente può aver cambiato gli effetti della voce nel canone. */
+  const produceDellaGuida = (data: string, indice: number) => (JSON.parse(prepared('SELECT azioni_json FROM giorno_percorso WHERE data = ?').pluck().get(data) as string) as Array<{ produce: unknown }>)[indice].produce;
 
-  it('la guida dichiara gli effetti delle azioni dei libri secondo il loro senso', async () => {
-    expect((await azione('04-18', 0)).produce).toEqual([]); // prendere in prestito La leggenda dei pirati
-    expect((await azione('04-19', 5)).produce).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'la-leggenda-dei-pirati', almeno: 1 }]);
-    expect((await azione('04-20', 0)).produce).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'la-leggenda-dei-pirati', almeno: null }]);
-    expect((await azione('04-25', 1)).produce).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'zorro-il-fuorilegge', almeno: null }]);
-    expect((await azione('04-25', 4)).produce).toEqual([{ tipo: 'dote', dote: 'fascino', note: 3 }]); // bagno: la guida scrive +3
-    expect((await azione('04-26', 0)).produce).toEqual([{ tipo: 'turno', attivita: 'lavoro-rafflesia' }]);
-    expect((await azione('05-08', 4)).produce).toEqual([{ tipo: 'turno', attivita: 'lavoro-ore-no-beko', doti: [{ dote: 'perizia', note: 3 }] }]);
+  it('la guida d\'origine dichiara gli effetti delle azioni dei libri secondo il loro senso', async () => {
+    expect(produceDellaGuida('04-18', 0)).toEqual([]); // prendere in prestito La leggenda dei pirati
+    expect(produceDellaGuida('04-19', 5)).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'la-leggenda-dei-pirati', almeno: 1 }]);
+    expect(produceDellaGuida('04-20', 0)).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'la-leggenda-dei-pirati', almeno: null }]);
+    expect(produceDellaGuida('04-25', 1)).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'zorro-il-fuorilegge', almeno: null }]);
+    expect(produceDellaGuida('04-25', 4)).toEqual([{ tipo: 'dote', dote: 'fascino', note: 3 }]); // bagno: la guida scrive +3
+    expect(produceDellaGuida('04-26', 0)).toEqual([{ tipo: 'turno', attivita: 'lavoro-rafflesia' }]);
+    expect(produceDellaGuida('05-08', 4)).toEqual([{ tipo: 'turno', attivita: 'lavoro-ore-no-beko', doti: [{ dote: 'perizia', note: 3 }] }]);
+    // e le voci della giornata le hanno portate con sé (092): dove l'utente non le ha cambiate sono le stesse
+    expect((await azione('04-26', 0)).produce).toEqual(produceDellaGuida('04-26', 0));
+    expect((await azione('04-25', 4)).produce).toEqual(produceDellaGuida('04-25', 4));
+    // la voce di Zorro del 25 aprile nel canone (riparata dalla 093, scelta dell'utente): finire Zorro, e basta — la Ballerina
+    // non si legge qui (la sua restituzione e il prestito sono una voce a parte, senza effetti)
+    const zorro = await azione('04-25', 1);
+    expect(zorro).toMatchObject({ azione: 'Finire di leggere "Zorro, il fuorilegge" sulla metro.', riferimento: { tipo: 'libro', chiave: 'zorro-il-fuorilegge' } });
+    expect(zorro.produce).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'zorro-il-fuorilegge', almeno: null }]);
   });
 
   it('Zorro: il prestito non legge, «(1/2)» porta a una sessione, «restituire Zorro» lo finisce e dice la Gentilezza (+7), non la Ballerina', async () => {

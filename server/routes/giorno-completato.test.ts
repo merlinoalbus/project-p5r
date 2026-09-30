@@ -66,9 +66,12 @@ describe('Giorno completato → giorno dopo', () => {
 
   it('una voce eliminata dalla giornata non conta', async () => {
     const g = await giorno('04-11');
-    expect(g.azioni.length).toBe(2);
-    await request(app).delete(`/api/compendio/percorso/voci/${g.azioni[1].uid}`).expect(204);
-    const esito = await spunta(g.azioni[0].uid, true);
+    // (quante voci ha il giorno dipende dal canone del pacchetto: se ne elimina l'ultima e si spuntano le altre)
+    expect(g.azioni.length).toBeGreaterThanOrEqual(2);
+    const [ultima, ...altre] = [g.azioni.at(-1)!, ...g.azioni.slice(0, -1)];
+    await request(app).delete(`/api/compendio/percorso/voci/${ultima.uid}`).expect(204);
+    for (const a of altre.slice(0, -1)) expect((await spunta(a.uid, true)).giornoAvanzato).toBeUndefined();
+    const esito = await spunta(altre.at(-1)!.uid, true);
     expect(esito.giornoAvanzato).toMatchObject({ da: '04-11', a: '04-12' });
   });
 });

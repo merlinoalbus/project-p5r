@@ -49,7 +49,8 @@ function produceDi(r: RigaVoce): EffettoAzione[] {
 function nomeDi(r: RigaVoce, rif: RiferimentoAzioneDto | null): string | null {
   if (!rif) return null;
   if (r.riferimento_testo) return r.riferimento_testo;
-  try { return nomeRiferimento(rif); } catch { return null; }
+  // un elemento nascosto dal catalogo non si collega di nuovo, ma la voce che lo ha già ne tiene il nome
+  try { return nomeRiferimento(rif, { ancheNascosti: true }); } catch { return null; }
 }
 
 /** Una voce con i campi della guida, senza lo stato nella partita (fatta, effetti, semaforo). */
