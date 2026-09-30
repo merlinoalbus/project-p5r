@@ -507,7 +507,7 @@ che supera la precedente esclusione.
 - **Prosa → stati una volta sola**: `shared/migraCondizioni.ts` (`convertiProsa` → `{ condizioni, scartate }`) converte le frasi della guida al caricamento del seed (`sincronizzaDateQuartieri` prima, poi `sincronizzaCondizioniCatalogo`/`Letture`), nella migrazione 064 e nell'esportazione del seed; ciò che non converte non diventa una condizione. Il contesto (nomi → chiavi di richieste, libri, film, articoli; quartieri datati; libri di Jinbocho; finestre dei Palazzi) lo costruisce `server/services/condizioni/contestoConversione.ts` (`contestoConversione(db)` + `contestoRiga` per negozio e gestore). Non c'è più nessuna lettura di prosa a runtime né a ogni avvio.
 - `disponibilitaService`: `statoDisponibilitaPartita` = `statoPartitaSemafori` + giorno della settimana + sblocchi dei quartieri + letture, contatori, attività svolte (`attivita_svolta_partita`), spesa per negozio (somma dei prezzi degli acquisti), punti negozio (`punti_negozio_partita`), eventi (`evento_storia_partita`), `arcoCorrente`; `valutaRequisiti(condizioni, stato)` → `{ stato: disponibile | bloccato | ignoto, requisiti }` (rosso ⇒ bloccato; grigio solo quando alla partita manca il dato); `valutaRequisitiSpillo` nasconde il pin solo per le condizioni di presenza (`CONDIZIONI_DI_PRESENZA`, ora anche `arco`). I requisiti dei Confidenti passano da `semaforiService.valuta`.
 - `/api/condizioni`: `/elenchi` (articoli, letture, arcani, Persona, abilità, Ladri, attività, negozi, eventi, contatori — gli elenchi chiusi dell'editor); `/partite/:id/progressi` e i `PUT .../eventi/:chiave`, `.../attivita/:chiave`, `.../punti-negozio/:chiave` (scheda **Partita → Progressi**, `ProgressiPartita.tsx`). Frontend: `guida/CondizioniEditor.tsx` (righe `[NON] [Stato ▾] [operatore] [valori]`, blocchi TUTTE/ALMENO UNA, numeri a passi) e `shared/Selettore.tsx` (2026-09-12: l'unico elenco chiuso dell'app — pulsante `combobox` + `listbox`, ricerca scrivendo da dieci voci in su o con `ricerca="sempre"`, voce `vuoto` in testa, gruppi, variante `compatto` per i filtri; `utils/selettore.ts` con `opzioniDaNomi` e la soglia; nessuna `<select>` nel frontend, vietata da ESLint e da `src/selettoriUnificati.test.ts`).
-- `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, boss segnati, richieste completate, ranghi, giorno e meteo
+- `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, Palazzi completati — `palazziService` —, richieste completate, ranghi, giorno e meteo
   correnti, conferme) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato);
   `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.
 - Percorso: `impostaAzione` applica alla spunta gli effetti della guida (`dotiDalleNote`: «Perizia +2» = 2 punti; `noteRisposta` 1–3 per gli
@@ -816,3 +816,21 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   mostrava (`nomeStanzaDaFissare`, con `senzaGergo` ora in `shared/nomiMappe.ts`, condiviso col frontend).
 - **Testo delle aree**: `aggiornaArea` dalla scheda dell'area senza planimetria e dal modulo «Modifica testo» accanto
   al titolo dell'area aperta.
+- **Palazzo completato** (2026-09-30, `server/services/palazziService.ts`): `StatoPartitaSemafori.palazziCompletati`
+  (mappa Palazzo → motivo, al posto di `bossGestiti`) viene da `palazziCompletati(partita)`: il **boss finale**
+  (`bossFinali`: i punti «boss» dell'ultima area, in ordine di guida, che ne ha) segnato in `punto_partita`, oppure
+  sull'albero `dungeon-<k>` (`palazzoDiOgniMappa`) uno spillo `boss` finale (collegato a un punto finale, su una
+  planimetria che contiene l'area finale, oppure qualunque boss del Palazzo quando `BossFinale.unico`: una sola area
+  della guida ha boss — Kamoshida, Madarame, Futaba — e l'area finale può non essere legata a nessuna planimetria) o
+  `tesoro-palazzo` raccolto, oppure il 100% con la regola di `raccoltaMappe` (raccolto o collegato a un punto
+  gestito). La valuta il caso `palazzo` di `valuta`, e con lui disponibilità e spilli. `impostaRaccolto` chiama
+  `allineaBossDellaGuida`: Tesoro o boss finale raccolti segnano il boss finale della Guida con
+  `utente.punto_partita.automatico = 1` (migrazione utente 006, DDL in `schemaUtente.ts`; `ON CONFLICT DO NOTHING`,
+  un segno già presente non si tocca); tolti, si cancellano **solo** le righe `automatico = 1` e solo se nient'altro
+  sulla mappa completa il Palazzo. Le scritture dell'utente (`impostaStatoPunto`, il punto collegato di
+  `impostaRaccolto`) mettono `automatico = 0`, e le righe preesistenti nascono 0: un segno messo a mano non si toglie
+  mai da solo. `dettagliSpillo` (`senzaIngressoAPalazzoCompletato`, `palazzoDiIngresso`) blocca gli spilli che da
+  fuori portano in un Palazzo completato — riconosciuti dal riferimento a una sua mappa, dalla destinazione o, come
+  ultima fonte, dall'identità di seed (`seed_identita_json`) quando lo spillo è stato modificato e ha perso il
+  collegamento (il 1616 della Shujin) — senza scrivere condizioni: vale anche dopo ogni sincronizzazione. Gli archi
+  (`arco`) restano legati alla data.

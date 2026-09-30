@@ -12,5 +12,6 @@ import { utente002 } from './002_spilli_raccolti_per_uid.js';
 import { utente003 } from './003_timbri_dedalo.js';
 import { utente004 } from './004_eventi_calcolati.js';
 import { utente005 } from './005_giornata_modificabile.js';
+import { utente006 } from './006_boss_segnato_dal_raccolto.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006];

@@ -3,13 +3,15 @@
 // ============================================================
 //
 // Ogni requisito del seed viene valutato sullo stato della partita: Doti (rango), Persona dell'arcano in scorta, Persona con una
-// skill precisa in scorta (Gemelle Custodi), Palazzo (boss
-// segnato ottenuto/esaurito nella Guida), richiesta dei Mementos completata, rango di un altro Confidente, data di gioco corrente,
+// skill precisa in scorta (Gemelle Custodi), Palazzo (completato: boss finale nella Guida o sulla mappa, Tesoro
+// del Palazzo o raccolta al 100% — `palazziService.palazziCompletati`; mai grigio), richiesta dei Mementos completata, rango di un altro Confidente, data di gioco corrente,
 // meteo del giorno corrente. I requisiti non verificabili («manuale») sono grigi finché l'utente non li conferma; un requisito
-// verificabile ma senza dati sufficienti (nessun giorno corrente, boss non segnato) è grigio e accetta la conferma manuale.
+// verificabile ma senza dati sufficienti (per esempio nessun giorno corrente) è grigio e accetta la conferma manuale.
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+// quando un Palazzo è completato lo decide `palazziService` (boss finale, Tesoro, 100%: mai la data)
+import { palazziCompletati } from './palazziService.js';
 import { dataLeggibile } from '../../shared/condizioniSpillo.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
@@ -25,7 +27,8 @@ export interface StatoPartitaSemafori {
   arcaniInScorta: Set<string>;
   /** Coppie «persona|abilità» (minuscole) presenti nella scorta: per le richieste delle Gemelle Custodi. */
   personeConAbilita: Set<string>;
-  bossGestiti: Set<string>;
+  /** I Palazzi completati nella partita, con il perché (vedi `palazziCompletati`). */
+  palazziCompletati: Map<string, string>;
   richiesteCompletate: Set<string>;
   ranghiConfidenti: Map<string, number>;
   /** I Ladri che hai detto di avere nel gruppo. */
@@ -44,8 +47,6 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const abilita = new Set((prepared(`SELECT p.nome AS persona, s.nome AS abilita FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id
     JOIN persona_posseduta_skill ps ON ps.posseduta_id = pp.id JOIN skill s ON s.id = ps.skill_id WHERE pp.partita_id = ?`).all(partitaId) as Array<{ persona: string; abilita: string }>)
     .map((r) => `${r.persona.toLowerCase()}|${r.abilita.toLowerCase()}`));
-  const boss = new Set((prepared(`SELECT DISTINCT a.dungeon_chiave FROM punto_partita sp JOIN punto_interesse pi ON pi.chiave = sp.punto_chiave JOIN dungeon_area a ON a.chiave = pi.area_chiave
-    WHERE sp.partita_id = ? AND pi.tipo = 'boss'`).all(partitaId) as Array<{ dungeon_chiave: string }>).map((r) => r.dungeon_chiave));
   const richieste = new Set((prepared("SELECT rp.richiesta_chiave, r.nome FROM richiesta_partita rp JOIN richiesta r ON r.chiave = rp.richiesta_chiave WHERE rp.partita_id = ? AND rp.stato = 'completata'").all(partitaId) as Array<{ richiesta_chiave: string; nome: string }>).flatMap((r) => [r.richiesta_chiave, r.nome.toLowerCase()]));
   const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
   const dataGioco = partita?.data_gioco ?? null;
@@ -58,7 +59,7 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOggi: meteo, conferme };
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati: palazziCompletati(partitaId), richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOggi: meteo, conferme };
 }
 
 function confrontaDate(a: string, b: string): number {
@@ -94,10 +95,11 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
     }
     case 'palazzo': {
       const nome = NOMI_DUNGEON[String(dati.dungeon)] ?? String(dati.dungeon);
-      if (st.bossGestiti.has(String(dati.dungeon))) return { ...base, stato: 'verde', dettaglio: `${nome}: boss segnato nella Guida`, manuale: false };
+      const perche = st.palazziCompletati.get(String(dati.dungeon));
+      if (perche) return { ...base, stato: 'verde', dettaglio: `${nome}: completato (${perche})`, manuale: false };
       // Il boss sconfitto è uno stato che l'app registra: o risulta o non risulta, e finché non
       // risulta la condizione è falsa (decisione dell'utente, 2026-09-13).
-      return { ...base, stato: 'rosso', dettaglio: `${nome}: boss non ancora segnato come sconfitto (Guida → Palazzi)`, manuale: false };
+      return { ...base, stato: 'rosso', dettaglio: `${nome}: non risulta completato — segna il boss finale sconfitto (nella Guida o sulla mappa), il Tesoro del Palazzo o tutto il raccolto (Guida → Palazzi)`, manuale: false };
     }
     case 'richiesta': {
       const nome = String(dati.richiesta);

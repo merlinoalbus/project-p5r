@@ -20,7 +20,7 @@ const FINESTRE = new Map([['kamoshida', { dal: '04-12', al: '05-02' }], ['madara
 function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilita {
   return {
     doti: new Map([['fascino', 1], ['coraggio', 1], ['conoscenza', 1], ['perizia', 1], ['gentilezza', 1]]),
-    arcaniInScorta: new Set(), personeConAbilita: new Set(), bossGestiti: new Set(), richiesteCompletate: new Set(),
+    arcaniInScorta: new Set(), personeConAbilita: new Set(), palazziCompletati: new Map(), richiesteCompletate: new Set(),
     ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), membriFuoriSquadra: new Set<string>(['akechi']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(),
     giornoSettimana: 'mercoledi',
     sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara', dal: '08-31' }], ['shinjuku', { nome: 'Shinjuku', dal: '06-18' }], ['kichijoji', { nome: 'Kichijoji', dal: null }]]),
@@ -160,7 +160,7 @@ describe('valutaRequisiti — ogni stato sulla partita', () => {
     expect(daProsa(['richiede Fascino Rango 3'], stato({ doti: new Map([['fascino', 3]]) })).stato).toBe('disponibile');
     expect(daProsa(['Rango Confidente Sojiro 6'], stato({ ranghiConfidenti: new Map([['sojiro', 6]]) })).stato).toBe('disponibile');
     expect(daProsa(['dopo Palazzo di Kamoshida'], stato()).stato).toBe('bloccato');
-    expect(daProsa(['dopo Palazzo di Kamoshida'], stato({ bossGestiti: new Set(['kamoshida']) })).stato).toBe('disponibile');
+    expect(daProsa(['dopo Palazzo di Kamoshida'], stato({ palazziCompletati: new Map([['kamoshida', 'boss segnato nella Guida']]) })).stato).toBe('disponibile');
     const richiesta = daProsa(['richiede il completamento della richiesta Lo zio ingordo'], stato());
     expect(richiesta.stato).toBe('bloccato');
     expect(richiesta.requisiti[0].dettaglio).not.toMatch(/conferma qui/);

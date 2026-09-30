@@ -52,7 +52,7 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
   { chiave: 'quartiere', nome: 'Quartiere', gruppo: 'Calendario e mondo', origine: 'data di sblocco nella Guida', operatori: [{ chiave: 'sbloccato', nome: 'sbloccato', campi: [campo('quartiere', 'quartiere', 'Quartiere')] }] },
   { chiave: 'arco', nome: 'Arco della storia', gruppo: 'Calendario e mondo', origine: 'data di gioco', operatori: [{ chiave: 'almeno', nome: 'arrivato almeno a', campi: [campo('dungeon', 'arco', 'Palazzo')] }] },
   // — Storia e progressi —
-  { chiave: 'palazzo', nome: 'Palazzo', gruppo: 'Storia e progressi', origine: 'boss segnato nella Guida', operatori: [{ chiave: 'completato', nome: 'completato', campi: [campo('dungeon', 'palazzo', 'Palazzo')] }] },
+  { chiave: 'palazzo', nome: 'Palazzo', gruppo: 'Storia e progressi', origine: 'boss finale segnato (Guida o mappa), Tesoro del Palazzo raccolto o raccolta al 100%', operatori: [{ chiave: 'completato', nome: 'completato', campi: [campo('dungeon', 'palazzo', 'Palazzo')] }] },
   { chiave: 'dote', nome: 'Dote sociale', gruppo: 'Storia e progressi', origine: 'Partita → Doti sociali', operatori: [{ chiave: 'almeno', nome: 'almeno rango', campi: [campo('dote', 'dote', 'Dote'), campo('rango', 'rango5', 'Rango')] }] },
   { chiave: 'confidente', nome: 'Confidente', gruppo: 'Storia e progressi', origine: 'Partita → Confidenti', operatori: [{ chiave: 'almeno', nome: 'almeno rango', campi: [campo('confidente', 'confidente', 'Confidente'), campo('rango', 'rango10', 'Rango')] }] },
   { chiave: 'squadra', nome: 'Ladro Fantasma', gruppo: 'Storia e progressi', origine: 'Partita → Denaro e squadra', operatori: [{ chiave: 'in-squadra', nome: 'in squadra', campi: [campo('membro', 'membro', 'Ladro')] }] },

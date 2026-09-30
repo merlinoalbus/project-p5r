@@ -633,6 +633,17 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   dare il titolo alla stanza, quel titolo si fissa com'era (difetto segnalato dall'utente: il nome della stanza non
   si vedeva, quello della planimetria rinominava la stanza). Una mappa che non sta in nessuna stanza è stanza e
   planimetria insieme: lì il nome è uno solo, salvo che la sua scheda fissa un nome di stanza separato.
+- **Un Palazzo è completato dai fatti della partita, mai dalla data** (richiesta dell'utente): boss **finale** segnato
+  nella Guida o raccolto sulla mappa, oppure Tesoro del Palazzo raccolto (suggerimento dell'utente), oppure raccolta al
+  100% con la regola della scheda. Il boss finale è quello dell'ultima area che ha boss: gli intermedi (Akechi a Shido,
+  Sumire a Maruki) non completano il Palazzo.
+- Scelte dell'utente (domande del 2026-09-30): il **boss finale della Guida si segna da solo** raccogliendo il Tesoro o il
+  boss finale sulla mappa, e **si toglie** se si tolgono (salvo che la mappa dica ancora «finito»); l'**ingresso al
+  Palazzo sparisce** a Palazzo completato, anche prima della scadenza; gli **archi** («dall'arco del Palazzo di X»)
+  **restano legati alla data**, non al completamento anticipato.
+- Precisazione della revisione (non parole dell'utente): togliendo il Tesoro o il boss finale sulla mappa si toglie solo
+  il segno che il raccolto aveva messo nella Guida (`punto_partita.automatico = 1`); un boss della Guida segnato a mano
+  dall'utente resta, perché è un suo dato e non un effetto del raccolto.
 - Limite noto: `riconciliaAreeGuida` (migrazione 042 e sincronizzazione delle mappe) converte una mappa **senza
   geometria** in «area della guida» leggendo le colonne, cioè la sola prima area; una planimetria senza immagine
   legata a più aree non viene gestita per le altre. Oggi tutte le planimetrie dei Palazzi hanno l'immagine.

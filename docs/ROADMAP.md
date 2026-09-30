@@ -889,3 +889,15 @@ cambia anche Nome della stanza». Su `main`.
 | 3 | Nome della stanza: `gruppoImmagini.nomeRivisto` (scritto con `gruppoNome`, `impostaStanzaMappa`, ereditato da chi entra, conservato dal pacchetto) vince in `titoloGruppoImmagini` sul nome rivisto della mappa; il server (`aggiornaMappa`) fissa il titolo della stanza quando si rinomina la sua prima planimetria, anche dall'editor; la scheda fissa il nome della stanza salvando quello della planimetria; «Modifica testo» con nome accessibile che lo contiene; stanze proposte solo dello stesso livello; aree di testo con overscroll contenuto | ✅ |
 | 4 | Verifica dal vivo (planimetrie di prova create ed eliminate) e dei formati 1440×789, 1366×657, 1024×690, 768×1024, 375×812; documenti, commit su `main` | ✅ |
 
+## Palazzo completato dai fatti della partita, non dalla data (30 settembre 2026) — fatto
+
+Richiesta dell'utente: «se un palazzo è completato al 100% bisogna che gli eventi diano quel palazzo come completato a
+prescindere dalla data di scadenza» — Kamoshida al 100%, con l'Ombra di Kamoshida segnata raccolta sulla mappa, il 22
+aprile risultava ancora da completare; poi: che scatti anche col Tesoro del Palazzo o col boss finale raccolto. Su `main`.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | `palazziService.palazziCompletati(partita)`: completato col boss **finale** segnato nella Guida o raccolto sulla mappa, col Tesoro del Palazzo raccolto o col 100% (regola della scheda); il motivo sta nel semaforo; vale per ogni condizione «Palazzo completato» (requisiti dei Confidenti, spilli, articoli, disponibilità). Boss finale = quello dell'ultima area della Guida con boss; se il Palazzo ha una sola area con boss (Kamoshida, la cui area finale non è legata a nessuna planimetria) ogni boss del Palazzo sulla mappa è il finale | ✅ |
+| 2 | Scelte dell'utente: il boss finale della Guida si segna e si toglie da solo col Tesoro o il boss finale sulla mappa (`allineaBossDellaGuida`); ciò che il raccolto aggiunge è marcato `automatico` (migrazione utente 006) e togliendo il raccolto si toglie solo quello, mai il segno messo a mano. L'ingresso al Palazzo completato sparisce dalla mappa (`senzaIngressoAPalazzoCompletato`), riconosciuto anche dall'identità di seed quando lo spillo è stato modificato e ha perso il collegamento (il 1616 della Shujin); gli archi restano legati alla data | ✅ |
+| 3 | Test (`palazzo-completato.test.ts`: Kamoshida senza collegamenti artificiali, segno a mano che sopravvive, ingresso 1616; aggiornati `disponibilitaService`, `mappe-editor`), verifica via API su una partita di prova (poi eliminata) e del testo nella scheda del Confidente a 1440, 768, 375; documenti; validatore APPROVATO al terzo esame; commit su `main` | ✅ |
+

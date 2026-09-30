@@ -1,0 +1,153 @@
+// ============================================================
+// Un Palazzo completato è completato, qualunque sia la data (richiesta dell'utente, 2026-09-30)
+// ============================================================
+//
+// «Gli interruttori che si attivano al completamento di un Palazzo non verificano lo stato effettivo… (così come
+// la visibilità dello stesso sulla mappa) se un palazzo è completato al 100% bisogna che gli eventi diano quel
+// palazzo come completato a prescindere dalla data di scadenza», con l'Ombra di Kamoshida segnata raccolta sulla
+// mappa. Poi: il boss della Guida deve scattare col Tesoro del Palazzo o col boss finale; scelte dell'utente:
+// il boss della Guida si segna e si toglie da solo, l'ingresso sparisce a Palazzo completato.
+// ============================================================
+
+import request from 'supertest';
+import { closeDb, initDb, prepared } from '../db/dbService.js';
+import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { createApp } from '../bootstrap.js';
+import { creaMappa } from '../services/mappe/mappeService.js';
+import { statoPartitaSemafori, valuta } from '../services/semaforiService.js';
+import { bossFinali, palazziCompletati } from '../services/palazziService.js';
+import type { MappaDto } from '../../shared/types.js';
+
+const app = createApp();
+
+/** Le planimetrie di un Palazzo: l'albero sotto `dungeon-<chiave>`. */
+const albero = (dungeon: string): string[] => (prepared(`WITH RECURSIVE a(chiave) AS (SELECT ? UNION ALL SELECT m.chiave FROM mappa m JOIN a ON m.genitore_chiave = a.chiave) SELECT chiave FROM a`)
+  .all(`dungeon-${dungeon}`) as Array<{ chiave: string }>).map((r) => r.chiave);
+
+describe('Palazzo completato', () => {
+  let partita: number;
+  const bossGuida = (punto: string) => !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, punto);
+  const segna = (spillo: number, raccolto: boolean) => request(app).put(`/api/partite/${partita}/spilli/${spillo}`).send({ raccolto }).expect(200);
+  const requisito = (dungeon: string) => valuta({ confidente_chiave: 'prova', rango: 1, indice: 0, tipo: 'palazzo', dati_json: JSON.stringify({ dungeon }), testo: 'Completare il Palazzo' }, statoPartitaSemafori(partita, new Map(), new Map()));
+
+  beforeAll(async () => {
+    const db = initDb(':memory:');
+    caricaPacchetto(db);
+    invalidaCacheTraduzioni();
+    partita = ((await request(app).post('/api/partite').send({ nome: 'Prova Palazzi' })).body.data as { id: number }).id;
+    // il giorno dopo il furto: la data non deve contare
+    prepared("UPDATE partita SET data_gioco = '04-22' WHERE id = ?").run(partita);
+  });
+  afterAll(() => closeDb());
+
+  it('il boss finale raccolto sulla mappa completa il Palazzo e segna il boss della Guida; tolto, si toglie', async () => {
+    const finale = bossFinali().get('kamoshida')!;
+    expect(finale.punti.length).toBeGreaterThan(0);
+    expect(palazziCompletati(partita).has('kamoshida')).toBe(false);
+    expect(requisito('kamoshida').stato).toBe('rosso');
+    // come nei dati veri: l'area finale di Kamoshida non è legata a nessuna planimetria, ma Kamoshida non ha boss
+    // intermedi, e l'«Ombra di Kamoshida» messa su una planimetria qualunque del Palazzo è il boss finale
+    expect(finale.unico).toBe(true);
+    const mappa = creaMappa(undefined, { nome: 'Stanza del Tesoro di prova', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    const boss = (await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo: 'boss', nome: 'Ombra di Kamoshida', x: 50, y: 50 })).body.data as { id: number };
+    await segna(boss.id, true);
+    expect(palazziCompletati(partita).get('kamoshida')).toBe('boss finale segnato nella Guida');
+    expect(finale.punti.every(bossGuida)).toBe(true);
+    const esito = requisito('kamoshida');
+    expect(esito.stato).toBe('verde');
+    expect(esito.dettaglio).toMatch(/completato \(boss finale segnato nella Guida\)/);
+    // togliendo il raccolto, e senza nient'altro che dica «finito», il boss della Guida torna non sconfitto
+    await segna(boss.id, false);
+    expect(finale.punti.some(bossGuida)).toBe(false);
+    expect(palazziCompletati(partita).has('kamoshida')).toBe(false);
+  });
+
+  it('il boss della Guida segnato a mano resta suo: togliere un raccolto non lo cancella', async () => {
+    const finale = bossFinali().get('kamoshida')!;
+    // segnato dall'utente nella Guida
+    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: finale.punti[0], stato: 'esaurito' }).expect(200);
+    // poi il Tesoro raccolto e tolto (per correggere un errore): il segno dell'utente resta, «esaurito» compreso
+    const tesoro = prepared("SELECT s.id FROM spillo s WHERE s.tipo = 'tesoro-palazzo' AND s.mappa_chiave IN (" + albero('kamoshida').map(() => '?').join(',') + ') LIMIT 1').get(...albero('kamoshida')) as { id: number };
+    await segna(tesoro.id, true);
+    await segna(tesoro.id, false);
+    expect(prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, finale.punti[0])).toEqual({ stato: 'esaurito' });
+    expect(palazziCompletati(partita).get('kamoshida')).toBe('boss finale segnato nella Guida');
+  });
+
+  it('l’ingresso vero (lo spillo della Shujin modificato a mano, senza più collegamento) sparisce a Palazzo completato', async () => {
+    // lo spillo 1616: oggi «punto sensibile» senza riferimento; la sua identità di seed è il passaggio verso dungeon-kamoshida
+    const vero = prepared("SELECT id, mappa_chiave, riferimento_tipo FROM spillo WHERE seed_identita_json LIKE '%\"dungeon-kamoshida\"%' AND mappa_chiave NOT LIKE 'dungeon-%'").get() as { id: number; mappa_chiave: string; riferimento_tipo: string | null };
+    expect(vero.riferimento_tipo).toBeNull();
+    // Kamoshida è completato dal test precedente (boss segnato a mano): siamo il 22 aprile, dentro la finestra 12/4–2/5
+    const spillo = ((await request(app).get(`/api/mappe/${vero.mappa_chiave}?partita=${partita}`)).body.data as MappaDto).spilli.find((s) => s.id === vero.id)!;
+    expect(spillo.disponibilita?.stato).toBe('bloccato');
+    expect(spillo.disponibilita?.requisiti.at(-1)?.dettaglio).toMatch(/Palazzo di Kamoshida: completato .*non ci si entra più/);
+  });
+
+  it('un boss che non è il finale non completa niente (Shido: i boss intermedi prima dell’Aula magna)', async () => {
+    const finale = bossFinali().get('shido')!;
+    expect(finale.unico).toBe(false);
+    const intermedio = prepared(`SELECT pi.chiave FROM punto_interesse pi JOIN dungeon_area a ON a.chiave = pi.area_chiave
+      WHERE a.dungeon_chiave = 'shido' AND pi.tipo = 'boss' AND a.chiave <> ? LIMIT 1`).get(finale.area) as { chiave: string } | undefined;
+    expect(intermedio).toBeTruthy();
+    prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', 'x')").run(partita, intermedio!.chiave);
+    expect(palazziCompletati(partita).has('shido')).toBe(false);
+    // uno spillo «Boss» su una planimetria senza l'area finale non conta, e non tocca la Guida
+    const mappa = creaMappa(undefined, { nome: 'Sala macchine di prova', tipo: 'area', genitore: 'dungeon-shido' });
+    const boss = (await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo: 'boss', nome: 'Akechi', x: 50, y: 50 })).body.data as { id: number };
+    await segna(boss.id, true);
+    expect(palazziCompletati(partita).has('shido')).toBe(false);
+    expect(finale.punti.some(bossGuida)).toBe(false);
+    // il boss finale nella Guida sì
+    prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', 'x')").run(partita, finale.punti[0]);
+    expect(palazziCompletati(partita).get('shido')).toBe('boss finale segnato nella Guida');
+  });
+
+  it('il Tesoro del Palazzo raccolto completa il Palazzo e segna il boss finale della Guida; tolto, si toglie', async () => {
+    const finale = bossFinali().get('okumura')!;
+    const mappa = creaMappa(undefined, { nome: 'Caveau di prova', tipo: 'area', genitore: 'dungeon-okumura' });
+    const tesoro = (await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo: 'tesoro-palazzo', nome: 'Tesoro del Palazzo', x: 50, y: 50 })).body.data as { id: number };
+    expect(palazziCompletati(partita).has('okumura')).toBe(false);
+    await segna(tesoro.id, true);
+    expect(finale.punti.every(bossGuida)).toBe(true);
+    expect(palazziCompletati(partita).has('okumura')).toBe(true);
+    await segna(tesoro.id, false);
+    expect(finale.punti.some(bossGuida)).toBe(false);
+    expect(palazziCompletati(partita).has('okumura')).toBe(false);
+  });
+
+  it('con tutto raccolto (100%, la stessa regola della scheda del Palazzo) il Palazzo è completato', async () => {
+    // un Palazzo senza spilli «Boss» né «Tesoro del Palazzo»: resta solo la raccolta a decidere
+    const mappe = albero('madarame');
+    const segnaposti = mappe.map(() => '?').join(',');
+    prepared(`DELETE FROM spillo WHERE tipo IN ('boss', 'tesoro-palazzo') AND mappa_chiave IN (${segnaposti})`).run(...mappe);
+    const da = prepared(`SELECT uid FROM spillo WHERE collezionabile = 1 AND uid IS NOT NULL AND mappa_chiave IN (${segnaposti})`).all(...mappe) as Array<{ uid: string }>;
+    expect(da.length).toBeGreaterThan(1);
+    for (const s of da.slice(1)) prepared("INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, 1, 'x')").run(partita, s.uid);
+    expect(palazziCompletati(partita).has('madarame')).toBe(false);
+    // l'ultimo è collegato a un punto della Guida già gestito: per la scheda è raccolto, e qui pure
+    const punto = prepared("SELECT pi.chiave FROM punto_interesse pi JOIN dungeon_area a ON a.chiave = pi.area_chiave WHERE a.dungeon_chiave = 'madarame' AND pi.tipo <> 'boss' LIMIT 1").get() as { chiave: string };
+    prepared("UPDATE spillo SET riferimento_tipo = 'punto', riferimento_chiave = ? WHERE uid = ?").run(punto.chiave, da[0].uid);
+    prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', 'x')").run(partita, punto.chiave);
+    expect(palazziCompletati(partita).get('madarame')).toBe(`raccolto tutto (${da.length}/${da.length})`);
+    expect(requisito('madarame').stato).toBe('verde');
+  });
+
+  it('l’ingresso a un Palazzo completato sparisce dalla mappa, anche prima della scadenza', async () => {
+    const citta = prepared("SELECT chiave FROM mappa WHERE chiave LIKE 'citta-%' LIMIT 1").get() as { chiave: string };
+    const ingresso = (await request(app).post(`/api/mappe/${citta.chiave}/spilli`).send({ tipo: 'passaggio', nome: 'Palazzo di Kaneshiro', x: 20, y: 20, riferimento: { tipo: 'mappa', chiave: 'dungeon-kaneshiro' } })).body.data as { id: number };
+    const stato = async () => ((await request(app).get(`/api/mappe/${citta.chiave}?partita=${partita}`)).body.data as MappaDto).spilli.find((s) => s.id === ingresso.id)!.disponibilita;
+    expect((await stato())?.stato).not.toBe('bloccato');
+    const finale = bossFinali().get('kaneshiro')!;
+    prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', 'x')").run(partita, finale.punti[0]);
+    const dopo = await stato();
+    expect(dopo?.stato).toBe('bloccato');
+    expect(dopo?.requisiti.at(-1)?.dettaglio).toMatch(/completato \(boss finale segnato nella Guida\), non ci si entra più/);
+    // dentro il Palazzo le planimetrie restano consultabili: i passaggi fra le sue stanze non spariscono
+    const interna = albero('kaneshiro').find((k) => k !== 'dungeon-kaneshiro')!;
+    const passaggio = (await request(app).post(`/api/mappe/${interna}/spilli`).send({ tipo: 'passaggio', nome: 'Verso la radice', x: 10, y: 10, riferimento: { tipo: 'mappa', chiave: 'dungeon-kaneshiro' } })).body.data as { id: number };
+    const dentro = ((await request(app).get(`/api/mappe/${interna}?partita=${partita}`)).body.data as MappaDto).spilli.find((s) => s.id === passaggio.id)!;
+    expect(dentro.disponibilita?.stato).not.toBe('bloccato');
+  });
+});

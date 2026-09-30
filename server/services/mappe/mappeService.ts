@@ -20,6 +20,7 @@ import { dettaglioNegozio } from '../negoziService.js';
 import { giocabili } from '../squadraService.js';
 import { nomiCondizioni } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
+import { allineaBossDellaGuida, palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
@@ -222,7 +223,7 @@ function immaginiDiSpillo(spilloId: number): ImmagineSpilloDto[] {
 }
 
 /** Contesto comune agli spilli di una risposta: partita, spilli raccolti, stato per le condizioni, nomi per le descrizioni. */
-interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni }
+interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string> }
 
 /** Nomi (Confidenti, quartieri, richieste, Palazzi) per descrivere le condizioni: letti una volta per risposta. */
 
@@ -230,7 +231,30 @@ function contestoSpilli(partitaId?: number): ContestoSpilli {
   if (partitaId && !prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   // «raccolto» è legato all'uid dello spillo (067): sopravvive a un pacchetto reimportato o a un gioco.db sostituito
   const raccolti = partitaId ? new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((x) => x.spillo_uid)) : undefined;
-  return { partitaId, raccolti, st: partitaId ? statoDisponibilitaPartita(partitaId) : null, nomi: nomiCondizioni() };
+  const st = partitaId ? statoDisponibilitaPartita(partitaId) : null;
+  // per gli ingressi dei Palazzi completati: le mappe di ogni Palazzo e le destinazioni degli spilli, lette una volta
+  const destinazioni = st && st.palazziCompletati.size > 0 && prepared("SELECT 1 FROM sqlite_master WHERE name='spillo_destinazione'").get()
+    ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
+    : undefined;
+  return { partitaId, raccolti, st, nomi: nomiCondizioni(), palazzi: st && st.palazziCompletati.size > 0 ? palazzoDiOgniMappa() : undefined, destinazioni };
+}
+
+/**
+ * Un Palazzo completato non ha più ingresso (scelta dell'utente, 2026-09-30: «sparisce a Palazzo completato»,
+ * come nel gioco): lo spillo che da fuori porta dentro — l'ingresso dalla città, il passaggio da Tokyo — risulta
+ * bloccato, anche prima della scadenza. Si valuta qui, sul collegamento, e non con una condizione scritta sullo
+ * spillo: così vale anche per gli ingressi aggiunti o modificati a mano e sopravvive a ogni sincronizzazione.
+ */
+function senzaIngressoAPalazzoCompletato(esito: DisponibilitaDto | undefined, r: RigaSpillo, ctx: ContestoSpilli): DisponibilitaDto | undefined {
+  if (!esito || !ctx.st || !ctx.palazzi) return esito;
+  const dungeon = palazzoDiIngresso(r, ctx.destinazioni?.get(r.id) ?? null, ctx.palazzi);
+  const perche = dungeon ? ctx.st.palazziCompletati.get(dungeon) : undefined;
+  if (!dungeon || !perche) return esito;
+  const nome = (ctx.nomi ?? nomiCondizioni()).dungeon?.[dungeon] ?? dungeon;
+  return {
+    stato: 'bloccato',
+    requisiti: [...esito.requisiti, { indice: esito.requisiti.length, tipo: 'palazzo', testo: `${nome} non ancora completato`, stato: 'rosso', dettaglio: `${nome}: completato (${perche}), non ci si entra più`, manuale: false, confermato: false }],
+  };
 }
 
 /** Condizioni salvate nello spillo (JSON) → elenco normalizzato; un JSON rovinato vale come nessuna condizione. */
@@ -287,7 +311,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
   // (il valutatore dei semafori lo usa nel dettaglio e riconosce sia la chiave sia il nome), nel DTO resta la chiave per l'editor.
   const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
-  const esito = conNegozioVivo(ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined, dettaglio);
+  const esito = senzaIngressoAPalazzoCompletato(conNegozioVivo(ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined, dettaglio), r, ctx);
   // Un pin che viene dall'atlante nativo e' un elemento fisso del mondo — una porta, un forziere,
   // una scala, una stanza sicura — e non si nasconde mai, qualunque condizione gli venga
   // attaccata. E' un invariante del runtime, non una convenzione dei dati: passa sopra a
@@ -1046,9 +1070,13 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
     prepared(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
       ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, r.uid, raccolto ? 1 : 0, adesso);
     if (r.riferimento_tipo === 'punto' && r.riferimento_chiave) {
-      if (raccolto) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO NOTHING`).run(partitaId, r.riferimento_chiave, adesso);
+      // raccogliere lo spillo di un punto è segnare quel punto: è dell'utente, non un segno automatico (utente 006)
+      if (raccolto) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET automatico = 0`).run(partitaId, r.riferimento_chiave, adesso);
       else prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, r.riferimento_chiave);
     }
+    // il Tesoro del Palazzo o il boss finale raccolti sulla mappa segnano il boss finale della Guida, e lo
+    // tolgono se si tolgono (scelta dell'utente, 2026-09-30)
+    allineaBossDellaGuida(partitaId, r, raccolto, adesso);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo, contestoSpilli(partitaId));
