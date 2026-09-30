@@ -35,6 +35,8 @@ export interface MomentoIncontro {
   /** Giorno ('MM-GG') e fascia dell'incontro: quelli dell'azione, o quelli della partita per la pagina Confidenti. */
   data: string;
   fascia: string;
+  /** 'azione': la spunta di una voce della giornata; 'pagina': la pagina Confidenti. 'mia' la scrivevano le cose da fare
+   *  dell'utente prima che diventassero voci della guida (2026-09-30): resta sulle righe di allora. */
   origine: 'azione' | 'mia' | 'pagina';
 }
 

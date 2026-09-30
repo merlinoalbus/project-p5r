@@ -7,13 +7,15 @@
 
 import type { ReactNode } from 'react';
 import { AssetImg } from './AssetImg';
-import { IconAdatta, IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconCompletati, IconDettagli, IconElenco, IconEvoca, IconFilm, IconFiltro, IconGioca, IconGioco, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMaschera, IconMatita, IconMedaglia, IconMeno, IconMessaggio, IconNegozio, IconNuvola, IconOrologio, IconPersone, IconPianta, IconPiu, IconPodio, IconPosizione, IconRegalo, IconRicalcola, IconRicetta, IconRiepilogo, IconSpunta, IconStella, IconUscita, IconZoomMeno, IconZoomPiu } from './iconeGuida';
+import { IconAdatta, IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconCompletati, IconDettagli, IconElenco, IconEvoca, IconFilm, IconFiltro, IconGioca, IconGioco, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMaschera, IconMatita, IconMedaglia, IconMeno, IconMessaggio, IconNegozio, IconNuvola, IconOrologio, IconPersone, IconPianta, IconPiu, IconPodio, IconPosizione, IconRegalo, IconRicalcola, IconRicetta, IconRiepilogo, IconSpunta, IconStella, IconSu, IconGiu, IconUscita, IconZoomMeno, IconZoomPiu } from './iconeGuida';
 
 export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 'sbloccato' | 'bloccato' | 'note' | 'modifica' | 'sms' | 'esame-primo' | 'esame-top10' | 'fortuna' | 'libro' | 'evoca' | 'esegui' | 'allarme' | 'elimina' | 'ricalcola' | 'riapri' | 'albero' | 'ricetta' | 'piano' | 'scheda' | 'raggiunto' | 'annulla' | 'tutti' | 'aperti' | 'obiettivo' | 'carica-altri' | 'seleziona' | 'deseleziona' | 'riprova' | 'registra' | 'accettata' | 'esaurito' | 'calendario' | 'adatta' | 'riduci' | 'ingrandisci' | 'mappa' | 'attiva' | 'chiudi' | 'url' | 'carica' | 'indietro' | 'filtri' | 'copia' | 'incolla'
   // Aggiunte col rifacimento delle pagine: **nessun pulsante di solo testo**, quindi ogni gesto
   // nuovo porta qui la sua chiave, con la riserva SVG qui sotto e la riga nel censimento
   // (`docs/grafica/fabbisogno.md`, voce 7) perché Codex ne generi l'immagine.
-  | 'piu' | 'meno' | 'completati' | 'dettagli' | 'pianta' | 'posizione';
+  | 'piu' | 'meno' | 'completati' | 'dettagli' | 'pianta' | 'posizione'
+  // L'ordine della giornata (2026-10-01): «Sposta su» e «Sposta giù» (prompt §21, aggiunta del 2026-10-01).
+  | 'su' | 'giu';
 export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico' | 'riepilogo' | 'fusione-speciali' | 'fusione-forca' | 'fusione-cicli' | 'fusione-skill' | 'fusione-piani' | 'fusione-con' | 'fusione-ricette' | 'fusione-calcolatore'
   // Le schede di Trofei e finali, Sfide, Oggetti e Richieste: erano barre di sole parole, e con
   // l'immagine sopra l'etichetta (la forma che l'utente ha indicato) senza figura resterebbero
@@ -90,6 +92,8 @@ const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = 
   'dettagli': (d) => <IconDettagli size={d} />,
   'pianta': (d) => <IconPianta size={d} />,
   'posizione': (d) => <IconPosizione size={d} />,
+  'su': (d) => <IconSu size={d} />,
+  'giu': (d) => <IconGiu size={d} />,
 };
 
 const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = {

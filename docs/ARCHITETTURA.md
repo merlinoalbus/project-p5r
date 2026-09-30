@@ -209,6 +209,7 @@ effetto, statistiche, disponibilità, `verificato`), `acquisto_partita`. `negozi
 (LIKE su nome/effetto/negozio, filtro categoria e destinatario con «tutti», massimo 300 risultati) e spunta con evento «acquisto».
 
 ### Guida giorno per giorno (Fase 7.5b)
+(Dal 2026-10-01 le voci della giornata stanno in `voce_giornata` e le spunte in `spunta_voce_partita`: vedi «La giornata è canone».)
 `giorno_percorso` (data 'MM-GG', azioni in JSON con riferimento risolto in fase di build del seed) e `azione_partita` (data + indice
 dell'azione). Il giorno corrente è `partita.data_gioco`. `percorsoService`: indice leggero, scheda del giorno con precedente/successivo,
 spunta con evento «percorso», impostazione del giorno corrente.
@@ -283,9 +284,9 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   di sé stessa con puntatore vero); `HomePage` avvolge `oggi.sullaMappa` perché riapra la mappa.
   Ritorno dalle mappe: `MainLayout` chiama `utils/ritornoMappe.annotaNavigazione(paginaPrecedente, percorso)` a ogni cambio
   di pagina; `MappaPage` ed `EditorMappaPage` chiudono verso `ritornoMappe()` (sessionStorage `p5r-ritorno-mappe`).
-- **Cambio di giorno** (2026-09-30): `percorsoService.avanzaSeGiornoCompleto(partita, data)` — chiamata dalle rotte delle due
-  spunte (`PUT /api/partite/:id/percorso`, `PUT /api/catalogo/agenda/azioni/:id/fatta`) solo alla spunta — fa passare la
-  partita al giorno dopo (fascia giorno) quando il giorno corrente ha tutte le attività fatte, e la risposta porta
+- **Cambio di giorno** (2026-09-30): `percorsoService.avanzaSeGiornoCompleto(partita, data)` — chiamata dalla rotta della
+  spunta (`PUT /api/partite/:id/percorso`, per uid dal 2026-10-01: vedi «La giornata è canone») solo alla spunta — fa passare la
+  partita al giorno dopo (fascia giorno) quando il giorno corrente ha tutte le voci del genere «azione» fatte, e la risposta porta
   `giornoAvanzato` (`GiornoAvanzatoDto`). FE: `utils/giornoAvanzato.seGiornoAvanzato` (store + avviso) da `GiornoGuida`;
   `useOggi` segue `attiva.dataGioco` e rilegge la giornata a ogni `meteoStore.versione`; `MeteoAlCambioGiorno` in `MainLayout`
   apre la scelta del meteo quando la data della partita attiva cambia (`meteoStore.richiesta`).
@@ -542,10 +543,11 @@ che supera la precedente esclusione.
   `PartitaDto.meteoOra`. `StatoPartitaSemafori.meteoOra` sostituisce `meteoOggi` (semafori `meteo` e disponibilità `piove`).
   Frontend: riga `momento-meteo` in `OggiGuida` con `MeteoGiornata` (quattro icone, `utils/meteoFascia.ts`), `useOggi.impostaMeteo`;
   `meteoOra` nelle chiavi di ricarica di `useMappaPartita`, `ContenutiGuidaMappa`, `EditorMappaPage`, `NegozioPage`, `NegoziPage`.
-- Percorso: `impostaAzione` applica alla spunta gli effetti dichiarati dell'azione (`produce`, con `effettiAzioneService` dal
-  2026-09-30: vedi «Effetti delle azioni della Guida»; `noteRisposta` 1–3 per gli incontri con un Confidente col bonus dell'arcano
-  dalla scorta) e li registra in `azione_partita.effetti_json` (migrazione 025) per annullarli togliendo la spunta (le letture
-  restano); `AzionePercorsoDto.effetti`; scelta delle note nella pagina Percorso.
+- Percorso: la spunta (`giornataService.spuntaVoce` dal 2026-10-01, prima `impostaAzione`) applica gli effetti dichiarati
+  della voce (`produce`, con `effettiAzioneService` dal 2026-09-30: vedi «Effetti delle azioni della Guida»; `noteRisposta` 1–3
+  per gli incontri con un Confidente col bonus dell'arcano dalla scorta) e li registra in `spunta_voce_partita.effetti_json`
+  (prima `azione_partita.effetti_json`, migrazione 025) per annullarli togliendo la spunta (le letture restano);
+  `AzionePercorsoDto.effetti`; scelta delle note nella pagina Percorso.
 
 ### Fusione: revisione visiva (Fase 14)
 - `components/fusione/PersonaChip.tsx`: tassello con `AnteprimaPersona`, nome e livello (variante `evidenza` per risultato/bersaglio, `inScorta`);
@@ -755,6 +757,10 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
 
 ## Giornata modificabile e aree che scorrono (2026-09-29)
 
+(Superati dal 2026-10-01 i punti «Correzioni della guida» e «Interfaccia» — correzioni, rimosse, agenda del giorno, cose
+da fare per partita —: vedi «La giornata è canone». Restano validi gli altri punti: aree che scorrono, mappa di Tokyo nella
+schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
+
 - **Correzioni della guida**: tabella `utente.correzione_azione_guida` (PK `data, indice`; `originale_json` = l'azione
   quando l'utente l'ha toccata; `modifiche_json` = soli campi diversi fra `azione`, `note`, `fascia`; `nascosta`),
   migrazione «utente» 005 (che aggiunge anche `evento_utente.fascia`). `server/services/correzioniGuidaService.ts`
@@ -871,7 +877,8 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
 ### Effetti delle azioni della Guida (2026-09-30)
 
 - **Che cosa produce un'azione è un dato**, non il testo delle note: `AzionePercorsoDto.produce: EffettoAzione[]`
-  (`shared/effettiAzione.ts`, normalizzato alla lettura in `correzioniGuidaService.applica`). Tre effetti:
+  (`shared/effettiAzione.ts`, normalizzato alla lettura: dal 2026-10-01 in `giornataService.voceBase`, prima in
+  `correzioniGuidaService.applica`). Tre effetti:
   `dote` (Dote + note 1–3), `lettura` (libro/film/videogioco portato **almeno** a `almeno` sessioni o visioni, null =
   completato; mai indietro) e `turno` (un turno di un'attività contata per volte, con `doti` proprie facoltative al
   posto di quelle dell'attività). Le note restano testo libero.
@@ -883,13 +890,13 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   n visioni»); i titoli si cercano solo prima del «;». Lavori con una Dote nelle note → `turno` del lavoro (dal negozio:
   `LAVORO_DEL_NEGOZIO`), con Doti proprie se diverse da quelle del lavoro. I quattro lavori ricevono in
   `attivita.effetti_json` la Dote di ogni turno (voce del primo e voce `ripetuto`). La migrazione **utente 007** dà a ogni
-  correzione dell'utente che cambiava note o testo gli effetti che quel testo corretto dava (`CorrezioneAzioneGuida.produce`,
-  applicato da `correzioniGuidaService.applica` e tenuto da `scrivi` solo se diverso dalla guida).
+  correzione dell'utente che cambiava note o testo gli effetti che quel testo corretto dava (`modifiche_json.produce`; dal
+  2026-10-01 la «utente» 015 scrive le correzioni direttamente nelle voci della giornata: vedi «La giornata è canone»).
 - **Motore** (`server/services/effettiAzioneService.ts`): `applicaEffettiAzione` dice le Doti che il gioco dà (senza
   toccarle: dal 2026-09-30 si segnano a mano, vedi «Doti solo a mano»), porta avanti le letture con `impostaLettura`
   (le Doti sono quelle dell'elemento, ricordate una volta: `avanzamentoLettura` dice dov'è arrivato) e registra i
   turni con `attivitaService.registraTurno`. Al cinema (nessun totale) «completato» è una visione: l'obiettivo è quante
-  spunte della partita (`azione_partita`, `azione_utente_partita`) hanno già contato una visione di quel film, più una;
+  spunte della partita (`spunta_voce_partita`; prima `azione_partita` e `azione_utente_partita`) hanno già contato una visione di quel film, più una;
   saltare una visita della guida non regala visioni, togliere e rimettere una spunta non ne aggiunge. Un errore (libro
   non ancora disponibile, 409; attività senza turni, 400) ferma la spunta invece di lasciarla senza punti: prima la
   spunta riusciva in silenzio. `annullaEffettiAzione` toglie Doti, punti del Confidente e turni (`togliTurno` di
@@ -904,7 +911,12 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   tabelle sono in `RIFERIMENTI_PARTITE` per gli orfani del pacchetto.
 - Il pacchetto in git è stato portato alla versione corrente applicando le sole migrazioni ai suoi dati (stesse righe in
   ogni tabella): `ricaricaPacchetto` (solo test) copia i dati del pacchetto senza rifare le migrazioni.
-- **Guida modificabile al 100%** (voce 2): `CorrezioneAzioneGuida` porta anche `tipo`, `riferimento` (null = nessun
+- **Guida modificabile al 100%** (voce 2). *Superato dal 2026-10-01 per tutto ciò che riguarda le correzioni sovrapposte
+  (`CorrezioneAzioneGuida`, `correzioniGuidaService`, `AzionePercorsoDto.correzione`, `correggiAzioneGuida`, correzioni
+  superate, `bodyCorreggiAzioneGuida`, `percorsoService.conTesti`, le rotte delle correzioni): la voce si modifica
+  direttamente, vedi «La giornata è canone». Restano validi `campiAzioneStrutturata`, `azioniStrutturateService`
+  (`nomeRiferimento`, `verificaEffetti`, `nomiEffetti`, `testoEffetti`, `elenchiAzione`) e `EditorAzioneStrutturata`.*
+  Com'era: `CorrezioneAzioneGuida` porta anche `tipo`, `riferimento` (null = nessun
   collegamento), `riferimentoTesto` (calcolato dal server), `rangoAtteso` e `produce`; `correzioniGuidaService` li applica,
   li tiene solo se diversi dalla guida (`scrivi`) e confronta tutto con `firma`; `AzionePercorsoDto.correzione` porta tutti
   i campi originali. La finestra rimanda tutti i campi: `correggiAzioneGuida` verifica solo il collegamento e gli effetti
@@ -924,7 +936,12 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   azioni della guida (finestra larga, un'unica area scorrevole); `utils/azioneStrutturata` (`campiCompleti`: a
   collegamento o effetto incompleto «Salva» è spento); ogni riga non spuntata mostra «Alla spunta: …».
   `NOME_TIPO_AZIONE` viene da `TIPI_AZIONE`.
-- **Cose da fare dell'utente come azioni della guida** (voce 3): `azione_utente.produce_json` (migrazione utente 008, che
+- **Cose da fare dell'utente come azioni della guida** (voce 3). *Superato dal 2026-10-01: le cose da fare sono voci della
+  giornata come le altre (`voce_giornata`, spunta `PUT /api/partite/:id/percorso` per uid, niente `azione_utente`,
+  `agendaService`, `AzioneUtenteDto`, `impostaAzioneFatta`, `VoceMia` né «La mia»; `SullaMappa(mappa, voce: string | null)`;
+  eliminare con effetti in una partita risponde 409 `voce-con-effetti`): vedi «La giornata è canone». Resta valido che
+  `statoAzione` e `mappaAzione` stanno in `azioniStrutturateService` e che `PartiAzione` dà i pezzi della riga.*
+  Com'era: `azione_utente.produce_json` (migrazione utente 008, che
   ricava gli effetti delle righe già scritte dalle loro note con `effettiDellAzione`, senza punti retroattivi);
   `bodyAzione` usa `campiAzioneStrutturata` (tipo e collegamento chiusi); `agendaService` verifica solo collegamento ed
   effetti nuovi (`strutturaDaSalvare`), e `AzioneUtenteDto` porta tipo, `riferimentoTesto`, `produce`, `produceTesto`,
@@ -962,3 +979,42 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   ai `punti_prima` = toglie quell'incontro; `ConfidentePartitaDto.doteIncontro` per l'avviso). Togliere una spunta toglie
   l'incontro che aveva creato, salvo un passaggio al rango che la partita ha comunque raggiunto dalla pagina (resta come
   incontro della pagina). `incontro_confidente_partita` è in `RIFERIMENTI_PARTITE`.
+
+## La giornata è canone (richiesta del 2026-09-30, in vigore dal 2026-10-01)
+
+Richieste dell'utente: le voci aggiunte finivano sempre in fondo («devo fare un ordinamento esatto»), anche le azioni
+della guida si spostano, «Sposta su / giù» nel menu, niente «La mia», e «le modifiche diventano nuovo canone a tutti gli
+effetti quindi non sono mai singola partita... ma tutte devono alterare i dati iniziali». Sostituisce le correzioni
+sovrapposte, le rimosse e l'agenda del giorno delle sezioni «Guida giorno per giorno» e «Giornata modificabile».
+
+- **Dati (file di gioco)**: `voce_giornata` (migrazione 092): `uid` (32 esadecimali; per le azioni della guida l'impronta di
+  data, posizione d'origine e testo, così file discesi dalla stessa guida danno lo stesso uid; per le voci nuove casuale),
+  `data`, `fascia`, `ordine` (0..n-1 dentro la fascia, sempre compatto), `genere` (`azione` si spunta; `evento`,
+  `scadenza`, `promemoria` si mostrano), testo, note, tipo, collegamento (`riferimento_testo` salvato solo per quelli
+  d'origine della guida: un collegamento scelto dall'utente si nomina alla lettura e segue le rinomine), rango atteso,
+  `produce_json`, `indice_guida` (la posizione in `giorno_percorso.azioni_json`, che resta come copia storica e non si
+  legge più). Canone: vale per tutte le partite ed esce col pacchetto esportato; **importare un pacchetto sostituisce
+  anche la giornata**: le modifiche fatte nell'istanza e non esportate si perdono, e le spunte delle voci che il pacchetto
+  non ha diventano orfani dichiarati nell'anteprima (`RIFERIMENTI_PARTITE`: `spunta_voce_partita.voce_uid` →
+  `voce_giornata.uid`).
+- **Dati (file delle partite)**: `spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json)`. La migrazione
+  «utente» 015 converte il modello di prima: spunte per posizione e per id → per uid; correzioni scritte nelle voci (solo
+  su voci intatte dalla 092); rimosse eliminate (tranne quelle spuntate con effetti, che restano per poterli annullare);
+  cose da fare ed eventi dell'utente (anche per singola partita) → voci di tutte le partite; nei giorni toccati l'ordine
+  che l'utente vedeva (eventi, guida, cose da fare); rientrante accanto a un file di gioco che ha già il canone; toglie
+  `azione_partita`, `azione_utente`, `azione_utente_partita`, `correzione_azione_guida`, `evento_utente` e
+  `ordine_giornata` (la «utente» 014, nata e superata lo stesso giorno). Le tabelle di allora restano in
+  `schemaUtente.DDL_UTENTE_STORICHE` perché la 001 e la 066 le creano e le portano per i file vecchi.
+- **Server**: `giornataService` (`vociDelGiorno`, `conteggiGiornate`, `creaVoce` al posto `posizione`, `aggiornaVoce`
+  anche di fascia/posto/genere, `spostaVoce` ±1, `eliminaVoce`, `spuntaVoce`); `percorsoService` (indice, scheda,
+  giorno completato, giorno corrente) e `suggerimentiService` leggono le voci. Eliminare una voce, o farne un evento,
+  con una spunta con effetti in qualunque partita risponde 409 `voce-con-effetti` nominando le partite. Rotte:
+  `POST /api/compendio/percorso/:data/voci`, `PUT /api/compendio/percorso/voci/:uid`, `PUT …/voci/:uid/sposta`
+  (`{ verso: -1 | 1 }`), `DELETE …/voci/:uid`, `PUT /api/partite/:id/percorso` (`{ uid, fatta, noteRisposta? }`); tolte le
+  rotte delle correzioni per indice e `/api/catalogo/agenda*`. `AzionePercorsoDto` ha `uid`, `giorno`, `genere` (niente
+  `indice` né `correzione`); `PercorsoGiornoDto.azioni` sono tutte le voci, prima di giorno poi di sera, nel loro ordine.
+- **Interfaccia**: `GiornoGuida` una lista per fascia nell'ordine del server; gesti di ogni voce Modifica, Sposta su, Sposta
+  giù (il menu resta aperto e il fuoco sul gesto), Sposta di giorno/di sera, Elimina (con conferma; «Togli la spunta ed
+  elimina» se spuntata con effetti nella partita). `ModuloVoceGiornata`: genere, testo, note, fascia e «Posto nella
+  giornata» (l'elenco numerato della fascia con la voce al suo posto, Su/Giù); tipo, collegamento, rango ed effetti per le
+  azioni. Icone `ui/azione-su` e `ui/azione-giu` (riserva SVG `IconSu`/`IconGiu`, censimento §21).

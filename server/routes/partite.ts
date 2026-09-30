@@ -29,7 +29,8 @@ import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
-import { avanzaSeGiornoCompleto, impostaAzione, impostaGiornoCorrente } from '../services/percorsoService.js';
+import { avanzaSeGiornoCompleto, impostaGiornoCorrente } from '../services/percorsoService.js';
+import { spuntaVoce } from '../services/giornataService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
 import { t } from '../services/traduzioniService.js';
 import { eliminaEventi, eliminaEvento, storico } from '../services/storicoService.js';
@@ -113,10 +114,10 @@ router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }),
   res.json(impostaTrofeo(Number(req.params.id), b.trofeo, b.ottenuto));
 });
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
-  const b = req.body as { data: string; indice: number; fatta: boolean; noteRisposta?: 1 | 2 | 3 };
-  const azione = impostaAzione(Number(req.params.id), b.data, b.indice, b.fatta, { noteRisposta: b.noteRisposta });
+  const b = req.body as { uid: string; fatta: boolean; noteRisposta?: 1 | 2 | 3 };
+  const azione = spuntaVoce(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta });
   // l'ultima attività del giorno corrente spuntata: la partita passa al giorno dopo (togliere la spunta non torna indietro)
-  const giornoAvanzato = b.fatta ? avanzaSeGiornoCompleto(Number(req.params.id), b.data) : null;
+  const giornoAvanzato = b.fatta ? avanzaSeGiornoCompleto(Number(req.params.id), azione.giorno) : null;
   res.json(giornoAvanzato ? { ...azione, giornoAvanzato } : azione);
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {

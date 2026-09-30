@@ -16,7 +16,7 @@
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
-import { DDL_UTENTE, TABELLE_UTENTE } from '../schemaUtente.js';
+import { DDL_UTENTE, DDL_UTENTE_STORICHE, TABELLE_UTENTE, TABELLE_UTENTE_STORICHE } from '../schemaUtente.js';
 import { assegnaUidMancanti } from '../../services/mappe/identitaSpillo.js';
 import { logger } from '../../utils/logger.js';
 
@@ -26,10 +26,12 @@ export const migration066: Migration = {
   up(db) {
     const inMain = new Set((db.prepare("SELECT name FROM main.sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
     const inUtente = new Set((db.prepare("SELECT name FROM utente.sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
-    for (const sql of DDL_UTENTE) db.exec(sql);
+    // con le tabelle della giornata di prima della «utente» 015, che il file unico può avere: la 015 le converte poi in canone
+    for (const sql of [...DDL_UTENTE, ...DDL_UTENTE_STORICHE]) db.exec(sql);
     // Le tabelle si copiano in ordine di dipendenza: prima `partita`, poi le altre (i vincoli sono
     // spenti durante la migrazione, ma l'ordine rende leggibile un eventuale errore).
-    const ordinate = ['partita', ...TABELLE_UTENTE.filter((t) => t !== 'partita' && t !== 'persona_posseduta_skill' && t !== 'persona_posseduta'), 'persona_posseduta', 'persona_posseduta_skill'];
+    const tutte: string[] = [...TABELLE_UTENTE, ...TABELLE_UTENTE_STORICHE];
+    const ordinate = ['partita', ...tutte.filter((t) => t !== 'partita' && t !== 'persona_posseduta_skill' && t !== 'persona_posseduta'), 'persona_posseduta', 'persona_posseduta_skill'];
     let righe = 0;
     for (const tabella of ordinate) {
       if (!inMain.has(tabella)) continue;

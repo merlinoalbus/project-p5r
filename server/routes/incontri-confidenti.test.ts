@@ -15,7 +15,7 @@ import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
 import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
-import type { AzionePercorsoDto, AzioneUtenteDto, ConfidenteDettaglioDto, ConfidentePartitaDto, DoteSocialePartitaDto, PercorsoGiornoDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, ConfidenteDettaglioDto, ConfidentePartitaDto, DoteSocialePartitaDto, PercorsoGiornoDto } from '../../shared/types.js';
 
 const app = createApp();
 
@@ -33,7 +33,7 @@ describe('API — Dote a ogni incontro con un Confidente', () => {
   };
   const coraggio = async (p: number) => ((await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[]).find((d) => d.chiave === 'coraggio')!.punti;
   const pagina = async (p: number, corpo: object) => (await request(app).put(`/api/partite/${p}/confidenti/takemi`).send({ forza: true, ...corpo }).expect(200)).body.data as ConfidentePartitaDto;
-  const spunta = (p: number, data: string, indice: number, fatta = true) => request(app).put(`/api/partite/${p}/percorso`).send({ data, indice, fatta });
+  const spunta = (p: number, uid: string, fatta = true) => request(app).put(`/api/partite/${p}/percorso`).send({ uid, fatta });
   const incontri = (p: number) => prepared('SELECT verso_rango AS verso, passaggio, origine FROM incontro_confidente_partita WHERE partita_id = ? ORDER BY id').all(p);
   const azioneTakemi = async (data: string) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.riferimento?.chiave === 'takemi')!;
   const nota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2 }];
@@ -62,7 +62,7 @@ describe('API — Dote a ogni incontro con un Confidente', () => {
     expect((await pagina(p, { rango: 1 })).doteIncontro).toEqual(nota); // il primo incontro (verso il rango 1): Coraggio ♪
     expect((await pagina(p, { rango: 2 })).doteIncontro).toEqual(nota);
     const a = await azioneTakemi('04-25');
-    const s = (await spunta(p, '04-25', a.indice).expect(200)).body.data as AzionePercorsoDto;
+    const s = (await spunta(p, a.uid).expect(200)).body.data as AzionePercorsoDto;
     expect(s.effetti?.incontro).toMatchObject({ verso: 2, passaggio: true, giaContato: true, doti: [] });
     // abbassare il rango dalla pagina toglie il passaggio registrato lì, e dice di togliere la sua nota
     expect((await pagina(p, { rango: 1 })).doteIncontro).toEqual(menoNota);
@@ -74,10 +74,10 @@ describe('API — Dote a ogni incontro con un Confidente', () => {
     const p = await nuovaPartita('Takemi spunta', '04-25');
     await pagina(p, { rango: 1 });
     const a = await azioneTakemi('04-25');
-    const s = (await spunta(p, '04-25', a.indice).expect(200)).body.data as AzionePercorsoDto;
+    const s = (await spunta(p, a.uid).expect(200)).body.data as AzionePercorsoDto;
     expect(s.effetti?.incontro).toMatchObject({ verso: 2, passaggio: true, giaContato: false, doti: [{ chiave: 'coraggio', delta: 2, note: 1 }] });
     expect((await pagina(p, { rango: 2 })).doteIncontro).toEqual([]);
-    await spunta(p, '04-25', a.indice, false).expect(200);
+    await spunta(p, a.uid, false).expect(200);
     expect(incontri(p)).toEqual([{ verso: 1, passaggio: 1, origine: 'pagina' }, { verso: 2, passaggio: 1, origine: 'pagina' }]);
     expect(await coraggio(p)).toBe(0);
   });
@@ -86,9 +86,9 @@ describe('API — Dote a ogni incontro con un Confidente', () => {
     const p = await nuovaPartita('Takemi solo spunta', '04-25');
     await pagina(p, { rango: 1 });
     const a = await azioneTakemi('04-25');
-    const s = (await spunta(p, '04-25', a.indice).expect(200)).body.data as AzionePercorsoDto;
+    const s = (await spunta(p, a.uid).expect(200)).body.data as AzionePercorsoDto;
     expect(s.effetti?.incontro?.doti).toEqual([{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }]);
-    await spunta(p, '04-25', a.indice, false).expect(200);
+    await spunta(p, a.uid, false).expect(200);
     expect(incontri(p)).toEqual([{ verso: 1, passaggio: 1, origine: 'pagina' }]);
     expect(await coraggio(p)).toBe(0);
   });
@@ -116,23 +116,23 @@ describe('API — Dote a ogni incontro con un Confidente', () => {
     expect((await pagina(p, { noteRisposta: 2 })).doteIncontro).toEqual(nota); // l'incontro semplice di 04-25 di giorno, verso il rango 2
     const a = await azioneTakemi('04-25');
     expect(a.fascia).toBe('giorno');
-    const s = (await spunta(p, '04-25', a.indice).expect(200)).body.data as AzionePercorsoDto;
+    const s = (await spunta(p, a.uid).expect(200)).body.data as AzionePercorsoDto;
     expect(s.effetti?.incontro).toMatchObject({ id: null, marcato: expect.any(Number), verso: 2, passaggio: true, giaContato: true, doti: [] });
     expect(prepared("SELECT verso_rango AS verso, passaggio, origine FROM incontro_confidente_partita WHERE partita_id = ? AND data = '04-25'").all(p)).toEqual([{ verso: 2, passaggio: 1, origine: 'pagina' }]);
     // il rango nella partita è ancora 1: togliendo la spunta l'incontro resta (le risposte ci sono state) e torna semplice
-    await spunta(p, '04-25', a.indice, false).expect(200);
+    await spunta(p, a.uid, false).expect(200);
     expect(prepared("SELECT passaggio FROM incontro_confidente_partita WHERE partita_id = ? AND data = '04-25'").all(p)).toEqual([{ passaggio: 0 }]);
     expect(await coraggio(p)).toBe(0);
   });
 
-  it('anche una cosa da fare dell\'utente è un incontro, con le stesse regole', async () => {
+  it('anche una voce aggiunta dall\'utente è un incontro, con le stesse regole', async () => {
     const p = await nuovaPartita('Takemi mia', '05-02');
     await pagina(p, { rango: 2 });
     // di sera: un momento diverso da quello dei passaggi segnati dalla pagina (di giorno)
-    const a = (await request(app).post('/api/catalogo/agenda/azioni').send({ data: '05-02', fascia: 'sera', azione: 'Clinica', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, partitaId: p })).body.data as AzioneUtenteDto;
-    const r = (await request(app).put(`/api/catalogo/agenda/azioni/${a.id}/fatta`).send({ partita: p, fatta: true, noteRisposta: 2 }).expect(200)).body.data as AzioneUtenteDto;
+    const a = (await request(app).post('/api/compendio/percorso/05-02/voci').send({ fascia: 'sera', azione: 'Clinica', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' } })).body.data as AzionePercorsoDto;
+    const r = (await request(app).put(`/api/partite/${p}/percorso`).send({ uid: a.uid, fatta: true, noteRisposta: 2 }).expect(200)).body.data as AzionePercorsoDto;
     expect(r.effetti?.incontro).toMatchObject({ verso: 3, passaggio: false, giaContato: false, doti: [{ chiave: 'coraggio', delta: 2 }] });
-    await request(app).put(`/api/catalogo/agenda/azioni/${a.id}/fatta`).send({ partita: p, fatta: false }).expect(200);
+    await request(app).put(`/api/partite/${p}/percorso`).send({ uid: a.uid, fatta: false }).expect(200);
     expect(prepared("SELECT COUNT(*) AS n FROM incontro_confidente_partita WHERE partita_id = ? AND fascia = 'sera'").get(p)).toEqual({ n: 0 });
     expect(await coraggio(p)).toBe(0);
   });

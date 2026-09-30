@@ -357,6 +357,15 @@ non c'è al suo posto sta un'icona SVG disegnata in codice (`iconeGuida.tsx`), c
 | `azione-pianta.png` | Vista «pianta della guida» di un'area | planimetria schematica: rettangolo con una parete interna e un'apertura |
 | `azione-posizione.png` | «Mostra posizione» di un libro o di un film | spillo da mappa a goccia con il foro tondo |
 
+### Aggiunta del 2026-10-01 — ordine della giornata (2) — stesse regole
+Richiesta dell'utente: l'ordine esatto delle voci di «Di giorno» / «Di sera», con «Sposta su» e «Sposta giù» nel menu di ogni voce e nella
+finestra di una voce. Finché il file manca, la riserva SVG è in `iconeGuida.tsx` (`IconSu`, `IconGiu`).
+
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `azione-su.png` | «Sposta su» una voce della giornata (un posto prima) | freccia spessa verso l'alto sopra una riga orizzontale corta |
+| `azione-giu.png` | «Sposta giù» una voce della giornata (un posto dopo) | freccia spessa verso il basso sotto una riga orizzontale corta |
+
 ## 22. Icone di categoria (22) — `ui/categoria-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-07
 Le figure che stanno **dentro il cartiglio rosso a taglio diagonale** delle schede: tipo di negozio, categoria di oggetto, tipo di attività, tipo di
 azione del percorso. L'app le mostra a 18–44 px sopra il cartiglio, quindi il soggetto deve leggersi anche piccolo: silhouette piena, niente

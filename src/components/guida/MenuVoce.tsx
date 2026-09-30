@@ -1,5 +1,5 @@
 // ============================================================
-// MenuVoce — i gesti su una voce della giornata (azione della guida, cosa da fare, evento): Modifica, Sposta, Rimuovi, Ripristina
+// MenuVoce — i gesti su una voce della giornata (azione, cosa da fare, evento): Modifica, Sposta su/giù, Sposta di fascia, Elimina
 // ============================================================
 //
 // Un solo pulsante a icona per riga (44 px) apre sotto la voce la fila dei gesti: su un telefono quattro pulsanti su ogni
@@ -25,24 +25,22 @@ interface PropsPulsante {
   aperto: boolean;
   onCambia: (aperto: boolean) => void;
   disabled?: boolean;
-  /** Il gesto di uscita della voce, come lo chiama la fila: «rimuovi» (azione della guida, si rimette) o «elimina» (voce dell'utente, si cancella). */
-  uscita?: 'rimuovi' | 'elimina';
 }
 
 /** Il pulsante che apre e chiude i gesti della voce. */
-export function PulsanteMenuVoce({ voce, aperto, onCambia, disabled, uscita = 'rimuovi' }: PropsPulsante) {
+export function PulsanteMenuVoce({ voce, aperto, onCambia, disabled }: PropsPulsante) {
   return (
-    <button type="button" className={`btn btn-sm touch shrink-0 self-start ${aperto ? 'btn-primary' : 'btn-ghost'}`} disabled={disabled} aria-expanded={aperto} aria-label={`Modifica, sposta o ${uscita}: ${voce.slice(0, 60)}`} onClick={() => onCambia(!aperto)}>
+    <button type="button" className={`btn btn-sm touch shrink-0 self-start ${aperto ? 'btn-primary' : 'btn-ghost'}`} disabled={disabled} aria-expanded={aperto} aria-label={`Modifica, sposta o elimina: ${voce.slice(0, 60)}`} onClick={() => onCambia(!aperto)}>
       <IconaAzione chiave="dettagli" dimensione={20} />
     </button>
   );
 }
 
 /** La fila dei gesti, mostrata sotto la voce quando il menu è aperto. */
-export function GestiVoce({ gesti, disabled, etichetta }: { gesti: GestoVoce[]; disabled?: boolean; etichetta: string }) {
+export function GestiVoce({ gesti, disabled, etichetta, voce }: { gesti: GestoVoce[]; disabled?: boolean; etichetta: string; /** Identità della voce: chi sposta la voce ritrova la sua fila (e ci rimette il fuoco). */ voce?: string }) {
   return (
     // `basis-full`: nella riga (flex a capo) la fila va sotto tutta la voce e ne prende l'intera larghezza, non la colonna stretta del testo
-    <div className="flex flex-wrap justify-end gap-1.5 basis-full" role="group" aria-label={etichetta}>
+    <div className="flex flex-wrap justify-end gap-1.5 basis-full" role="group" aria-label={etichetta} data-voce={voce}>
       {gesti.map((g) => <PulsanteVisivo key={g.chiave} compatto tono={g.tono ?? 'secondario'} icona={g.icona} titolo={g.titolo} disabled={disabled} onClick={g.onClick} />)}
     </div>
   );

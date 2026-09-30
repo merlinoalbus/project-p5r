@@ -786,3 +786,28 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - Da proporre a parte (richiesta dell'utente nella stessa risposta): «Raccolto/Non raccolto» come stato dello spillo e
   visibilità di uno spillo in base allo stato di uno o più altri spilli, in AND o in OR (es. la porta bloccata visibile
   solo se il meccanismo non è raccolto).
+
+### 2026-09-30 / 2026-10-01 — La giornata della guida è canone, in ordine esatto
+- Date: richieste e scelte dell'utente la sera del 2026-09-30 (per questo i commenti del codice le datano così); lavoro
+  concluso e in vigore il 2026-10-01 (i rimandi «dal 2026-10-01» nei documenti).
+- Richieste dell'utente: «le azioni che aggiungo alla guida vanno sempre erroneamente in fondo... vorrei selezionare il
+  punto ordinato della lista dove aggiungerle (DI GIORNO o DI SERA e anche rispetto agli altri punti riportati)»; «no devo
+  fare un ordinamento esatto... non solo in cima o dopo...»; anche le azioni della guida si spostano («Sì, anche la
+  guida»); «Anche Su/Giù nel menu»; «Il tag La mia è irrilevante...»; «le modifiche diventano nuovo canone a tutti gli
+  effetti quindi non sono mai singola partita... ma tutte devono alterare i dati iniziali».
+- Scelte dell'utente: la guida si modifica direttamente (ogni voce con identità stabile, la giornata è una lista unica nel
+  file di gioco; le spunte si agganciano all'identità; niente più correzioni sovrapposte né «superate»); le voci «solo in
+  questa partita» diventano di tutte; «Rimuovi» elimina, senza recupero.
+- Ordine: il posto si sceglie nella finestra (l'elenco della fascia con la voce al suo posto, Su/Giù) e dal menu (Sposta
+  su/giù); cambiare fascia porta in fondo all'altra fascia (o al posto scelto nella finestra).
+- Eliminare una voce spuntata con effetti in una partita (punti del Confidente, turni, visioni) si rifiuta finché la spunta
+  non è tolta, e il messaggio nomina le partite: gli effetti resterebbero altrimenti applicati senza una spunta da cui
+  disfarli (rilievo del validatore sul primo disegno, che li lasciava). Nella partita aperta l'interfaccia offre «Togli la
+  spunta ed elimina». Lo stesso vale per trasformare un'azione spuntata con effetti in evento. La conversione delle voci
+  «rimosse» di prima segue la stessa regola: una rimossa spuntata con effetti resta nella giornata.
+- Conseguenza del canone: le modifiche vivono nel file di gioco dell'istanza in cui si fanno e diventano dato predefinito
+  solo esportando il pacchetto; importare un pacchetto sostituisce anche la giornata (le spunte di voci che non ci sono
+  più si dichiarano come orfani nell'anteprima).
+- Limiti noti: il posto nella finestra si sposta di un passo per volta (al massimo una decina di voci per fascia);
+  l'elenco del posto mostra il testo delle altre voci su una riga, tagliato; un testo della guida oltre ~860 caratteri
+  scorre ancora dentro il suo campo sul telefono (tetto di 24 righe).

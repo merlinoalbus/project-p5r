@@ -30,13 +30,10 @@ export const queryOggetti = z.object({
   categoria: z.string().trim().min(1).max(20).optional(),
 });
 
-// ---- Guida giorno per giorno: correzioni dell'utente alle azioni (valgono per tutte le partite) ----
+// ---- Guida giorno per giorno: le voci della giornata (canone, per tutte le partite) ----
 
-export const paramsAzioneGuida = z.object({
-  data: z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.'),
-  indice: z.coerce.number().int().min(0).max(200),
-});
-/** Tipo, collegamento, rango atteso ed effetti di un'azione della giornata (guida corretta o azione dell'utente): i valori
+export const paramsGiornoGuida = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.') });
+/** Tipo, collegamento, rango atteso ed effetti di una voce della giornata: i valori
  *  ammessi sono gli elenchi chiusi di `shared/effettiAzione.ts`; che gli elementi esistano lo verifica il servizio. */
 export const campiAzioneStrutturata = {
   tipo: z.enum(TIPI_AZIONE.map((t) => t.chiave) as [TipoAzione, ...TipoAzione[]]).optional(),
@@ -44,14 +41,22 @@ export const campiAzioneStrutturata = {
   rangoAtteso: z.number().int().min(1).max(10).nullable().optional(),
   produce: z.array(z.unknown()).max(20).optional(),
 };
-export const bodyCorreggiAzioneGuida = z.object({
-  // la guida ha azioni fino a ~780 caratteri e note fino a ~820: il margine lascia correggere senza tagliare
+/** Una voce della giornata (azione della guida, cosa da fare, evento): canone, per tutte le partite. */
+export const paramsVoceGiornata = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/, 'Identità della voce non valida.') });
+const campiVoce = {
+  genere: z.enum(['azione', 'evento', 'scadenza', 'promemoria']).optional(),
+  // la guida ha azioni fino a ~780 caratteri e note fino a ~820: il margine lascia scrivere senza tagliare
   azione: z.string().trim().min(1).max(2000).optional(),
   note: z.string().trim().max(2000).nullable().optional(),
   fascia: z.enum(['giorno', 'sera']).optional(),
+  /** Il posto nella fascia, da 0 (in cima). */
+  posizione: z.number().int().min(0).max(500).optional(),
   ...campiAzioneStrutturata,
-}).refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da correggere (testo, note, fascia, tipo, collegamento, rango atteso o effetti).' });
-export const bodyRimuoviAzioneGuida = z.object({ rimossa: z.boolean() });
+};
+export const bodyNuovaVoce = z.object({ ...campiVoce, azione: z.string().trim().min(1).max(2000) });
+export const bodyAggiornaVoce = z.object(campiVoce)
+  .refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da cambiare (testo, note, genere, fascia, posizione, tipo, collegamento, rango atteso o effetti).' });
+export const bodySpostaVoce = z.object({ verso: z.union([z.literal(-1), z.literal(1)]) });
 
 /** La Dote a ogni incontro di un Confidente, rango per rango: Doti chiuse, note 1–3, al massimo cinque per rango. */
 export const bodyDotiIncontro = z.object({

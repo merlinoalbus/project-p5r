@@ -1,5 +1,5 @@
 // ============================================================
-// Test API catalogo e agenda (Fase 16.1): righe aggiunte o corrette dall'utente che sopravvivono al reseed, eventi e cose da fare del giorno
+// Test API catalogo (Fase 16.1): righe aggiunte o corrette dall'utente che sopravvivono al reseed (l'agenda del giorno è ora nella giornata)
 // ============================================================
 
 import request from 'supertest';
@@ -7,20 +7,18 @@ import { closeDb, initDb, prepared } from '../db/dbService.js';
 import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import type { AgendaGiornoDto, ElementoCatalogoDto, NegozioDettaglioDto, NegozioRiassuntoDto, RiepilogoCatalogoDto } from '../../shared/types.js';
+import type { ElementoCatalogoDto, NegozioDettaglioDto, NegozioRiassuntoDto, RiepilogoCatalogoDto } from '../../shared/types.js';
 
 const app = createApp();
 
-describe('API catalogo e agenda (Fase 16.1)', () => {
-  let partitaId = 0;
+describe('API catalogo (Fase 16.1)', () => {
   /** Il pacchetto è la fotografia dell'istanza: porta già i negozi creati dall'app, e i conteggi partono da lì. */
   let creatiNelPacchetto = 0;
-  beforeAll(async () => {
+  beforeAll(() => {
     const db = initDb(':memory:');
     caricaPacchetto(db);
     invalidaCacheTraduzioni();
     creatiNelPacchetto = (prepared("SELECT COUNT(*) AS n FROM negozio WHERE origine = 'utente' AND seed_json IS NULL").get() as { n: number }).n;
-    partitaId = ((await request(app).post('/api/partite').send({ nome: 'Catalogo' })).body.data as { id: number }).id;
   });
   afterAll(() => closeDb());
 
@@ -135,33 +133,9 @@ describe('API catalogo e agenda (Fase 16.1)', () => {
     expect(((await request(app).get('/api/catalogo/domanda/04-12')).body.data as ElementoCatalogoDto).origine).toBe('seed');
   });
 
-  it('agenda: eventi e cose da fare di un giorno, globali o della sola partita, con la spunta', async () => {
-    const evento = (await request(app).post('/api/catalogo/agenda/eventi').send({ data: '05-19', tipo: 'promemoria', titolo: 'Quiz televisivo al Leblanc', dettaglio: 'Risposta: Produrre rumori molesti' })).body.data as { id: number; partitaId: number | null };
-    expect(evento.partitaId).toBeNull();
-    const azione = (await request(app).post('/api/catalogo/agenda/azioni').send({ data: '05-19', fascia: 'sera', tipo: 'attivita', azione: 'Guardare il quiz in TV', partitaId, note: 'Conoscenza +1' })).body.data as { id: number; fatta: boolean };
-    expect(azione.fatta).toBe(false);
-
-    const agenda = (await request(app).get(`/api/catalogo/agenda/05-19?partita=${partitaId}`)).body.data as AgendaGiornoDto;
-    expect(agenda.eventi.map((e) => e.titolo)).toEqual(['Quiz televisivo al Leblanc']);
-    expect(agenda.azioni.map((a) => a.azione)).toEqual(['Guardare il quiz in TV']);
-    // senza partita si vedono solo le voci globali
-    expect(((await request(app).get('/api/catalogo/agenda/05-19')).body.data as AgendaGiornoDto).azioni).toHaveLength(0);
-
-    const fatta = (await request(app).put(`/api/catalogo/agenda/azioni/${azione.id}/fatta`).send({ partita: partitaId, fatta: true })).body.data as { fatta: boolean };
-    expect(fatta.fatta).toBe(true);
-    expect(((await request(app).get(`/api/catalogo/agenda/05-19?partita=${partitaId}`)).body.data as AgendaGiornoDto).azioni[0].fatta).toBe(true);
-    expect(((await request(app).get(`/api/catalogo/agenda?partita=${partitaId}`)).body.data as { giorni: string[] }).giorni).toContain('05-19');
-
-    // modifica e cancellazione
-    expect(((await request(app).put(`/api/catalogo/agenda/eventi/${evento.id}`).send({ titolo: 'Quiz TV' })).body.data as { titolo: string }).titolo).toBe('Quiz TV');
-    expect((await request(app).delete(`/api/catalogo/agenda/eventi/${evento.id}`)).status).toBe(204);
-    expect((await request(app).delete(`/api/catalogo/agenda/azioni/${azione.id}`)).status).toBe(204);
-    expect(((await request(app).get(`/api/catalogo/agenda/05-19?partita=${partitaId}`)).body.data as AgendaGiornoDto).eventi).toHaveLength(0);
-  });
-
-  it('agenda: rifiuta date fuori dal calendario e partite inesistenti', async () => {
-    expect((await request(app).post('/api/catalogo/agenda/eventi').send({ data: '02-31', titolo: 'Mai' })).status).toBe(400);
-    expect((await request(app).post('/api/catalogo/agenda/eventi').send({ data: '13-01', titolo: 'Mai' })).status).toBe(400);
-    expect((await request(app).post('/api/catalogo/agenda/azioni').send({ data: '05-19', azione: 'Mai', partitaId: 9999 })).status).toBe(404);
+  it('l\'agenda del catalogo non c\'è più: eventi e cose da fare sono voci della giornata (`/api/compendio/percorso`)', async () => {
+    // «agenda» non è un tipo del catalogo: le rotte generiche la rifiutano
+    expect((await request(app).get('/api/catalogo/agenda/05-19')).status).toBe(400);
+    expect((await request(app).post('/api/catalogo/agenda').send({ data: '05-19', azione: 'Mai' })).status).toBe(400);
   });
 });

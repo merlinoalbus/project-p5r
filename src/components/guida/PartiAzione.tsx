@@ -2,13 +2,12 @@
 // PartiAzione — i pezzi comuni di una riga d'azione della giornata: immagine, cartellini, scelta delle note del Confidente
 // ============================================================
 //
-// Un'azione della guida e una cosa da fare dell'utente sono la stessa cosa (richiesta dell'utente, 2026-09-30: «devo poter
-// modificare al 100% gli eventi della guida», anche quelli aggiunti): tipo, collegamento, rango atteso, note, effetti
-// della spunta, stato nella partita. Le due righe (`Azione` in GiornoGuida, `VoceMia` in VociAgenda) li mostrano con
-// questi stessi pezzi, e aggiungono solo ciò che è loro (correzione della guida, «La mia»).
+// Dal 2026-09-30 un'azione della guida e una cosa da fare aggiunta dall'utente sono la stessa cosa, una voce della giornata
+// canone per tutte le partite («devo poter modificare al 100% gli eventi della guida»; «le modifiche diventano nuovo canone»):
+// tipo, collegamento, rango atteso, note, effetti della spunta, stato nella partita. La riga `Azione` di GiornoGuida li
+// mostra con questi pezzi; eventi, scadenze e promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
 // ============================================================
 
-import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti } from '../../utils/percorso';
 import type { AzionePercorsoDto } from '../../types';
@@ -19,7 +18,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconaSpillo } from '../mappe/IconaSpillo';
 
-/** Ciò che le due righe hanno in comune. */
+/** Ciò che i cartellini di una riga d'azione leggono. */
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa'>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
@@ -31,13 +30,11 @@ export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'rif
 
 interface PropsCartellini {
   a: AzioneMostrata;
-  /** Cartellini propri della riga, dopo «Sulla mappa» (Corretta, Da rivedere, La mia…). */
-  propri?: ReactNode;
   onSullaMappa?: () => void;
 }
 
 /** Tipo, collegamento, «Sulla mappa», stato nella partita, rango atteso, note, effetti dichiarati o applicati. */
-export function CartelliniAzione({ a, propri, onSullaMappa }: PropsCartellini) {
+export function CartelliniAzione({ a, onSullaMappa }: PropsCartellini) {
   const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
   return (
@@ -49,7 +46,6 @@ export function CartelliniAzione({ a, propri, onSullaMappa }: PropsCartellini) {
           <IconaSpillo tipo="passaggio" dimensione={14} />Sulla mappa
         </button>
       )}
-      {propri}
       {stato?.tipo === 'consigliata' && <span className="chip chip--oro text-[11px]" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
       {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata text-[11px]" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
       {stato?.tipo === 'neutra' && stato.motivo && <span className="text-[12px] text-text-muted">{stato.motivo}</span>}

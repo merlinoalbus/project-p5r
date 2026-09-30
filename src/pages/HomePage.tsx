@@ -76,7 +76,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
   const impostaMappaChiusa = usePreferenzeStore((s) => s.impostaMappaHomeChiusa);
   const oggiHome = useMemo(() => ({
     ...oggi,
-    sullaMappa: (m: Parameters<typeof oggi.sullaMappa>[0], indiceGuida: number | null) => { impostaMappaChiusa(false); oggi.sullaMappa(m, indiceGuida); },
+    sullaMappa: (m: Parameters<typeof oggi.sullaMappa>[0], voce: string | null) => { impostaMappaChiusa(false); oggi.sullaMappa(m, voce); },
   }), [oggi, impostaMappaChiusa]);
 
   const guidaPronta = Boolean(oggi.indice && oggi.giorno);

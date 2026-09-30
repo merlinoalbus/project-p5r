@@ -19,8 +19,8 @@ import type { AzionePercorsoDto, FasciaGioco, PercorsoGiornoDto, PercorsoIndiceD
 export interface StatoMappaOggi {
   chiave: string;
   spilloId: number | null;
-  /** Indice dell'azione che ha scelto questa mappa (evidenziata nell'elenco); null = mappa globale. */
-  azione: number | null;
+  /** Identità della voce che ha scelto questa mappa (evidenziata nell'elenco); null = mappa globale. */
+  azione: string | null;
 }
 
 export interface Oggi {
@@ -40,8 +40,8 @@ export interface Oggi {
   impostaMeteo: (fascia: FasciaGioco, valore: MeteoPartita | null) => Promise<void>;
   occupato: boolean;
   mappa: StatoMappaOggi;
-  /** «Sulla mappa» di una voce della giornata: la sua mappa e, per un'azione della guida, l'indice da evidenziare (null per le voci dell'utente). */
-  sullaMappa: (mappa: { chiave: string; spilloId: number | null }, indiceGuida: number | null) => void;
+  /** «Sulla mappa» di una voce della giornata: la sua mappa e l'identità della voce da evidenziare. */
+  sullaMappa: (mappa: { chiave: string; spilloId: number | null }, voce: string | null) => void;
   tornaAllaMappaGlobale: () => void;
   /** Scende a una mappa dell'atlante restando nella scheda «Oggi»: il clic su un quartiere della
    *  mappa di Tokyo non deve portare via dal giorno che si sta guardando. */
@@ -83,7 +83,7 @@ export function useOggi(partitaId: number): Oggi {
     vaiAlGiorno: (d) => { if (d) setDataScelta(d); },
     aggiornaAzione: (a) => {
       if (!g) return;
-      const azioni = g.azioni.map((x) => (x.indice === a.indice ? a : x));
+      const azioni = g.azioni.map((x) => (x.uid === a.uid ? a : x));
       giorno.imposta({ ...g, azioni, fatte: azioni.filter((x) => x.fatta).length });
       // i conteggi «fatte/azioni» dei giorni vengono dall'indice: si riallineano come dopo ogni altra modifica della giornata
       void indice.ricarica();
@@ -142,7 +142,7 @@ export function useOggi(partitaId: number): Oggi {
     },
     occupato,
     mappa,
-    sullaMappa: (m, indiceGuida) => setMappa({ chiave: m.chiave, spilloId: m.spilloId, azione: indiceGuida }),
+    sullaMappa: (m, voce) => setMappa({ chiave: m.chiave, spilloId: m.spilloId, azione: voce }),
     tornaAllaMappaGlobale: () => setMappa({ chiave: 'tokyo', spilloId: null, azione: null }),
     apriMappa: (chiave) => setMappa({ chiave, spilloId: null, azione: null }),
   };

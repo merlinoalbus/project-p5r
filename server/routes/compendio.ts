@@ -15,15 +15,15 @@ import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuart
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
-import { conTesti, giornoPercorso, indicePercorso } from '../services/percorsoService.js';
-import { elenchiAzione, nomiEffetti } from '../services/azioniStrutturateService.js';
-import { correggiAzioneGuida, riapplicaCorrezioneGuida, rimuoviAzioneGuida, ripristinaAzioneGuida } from '../services/correzioniGuidaService.js';
+import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
+import { elenchiAzione } from '../services/azioniStrutturateService.js';
+import { aggiornaVoce, creaVoce, eliminaVoce, spostaVoce } from '../services/giornataService.js';
 import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/richiesteService.js';
 import { httpErrors } from '../utils/httpError.js';
-import type { CorrezioneAzioneGuida, OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
+import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
-import { bodyCorreggiAzioneGuida, bodyDotiIncontro, bodyRimuoviAzioneGuida, paramsAzioneGuida, paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import { bodyAggiornaVoce, bodyDotiIncontro, bodyNuovaVoce, bodySpostaVoce, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import {
   dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, impostaDotiIncontro, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
@@ -128,21 +128,20 @@ router.get('/percorso/:data', validate({ params: z.object({ data: z.string().reg
 router.get('/percorso-elenchi', (_req, res) => {
   res.json(elenchiAzione());
 });
-// Correzioni dell'utente alle azioni della guida: testo, note, fascia, tipo, collegamento, rango atteso, effetti, rimozione.
-// Valgono per tutte le partite; la risposta porta anche gli effetti in parole.
-router.put('/percorso/:data/azioni/:indice', validate({ params: paramsAzioneGuida, body: bodyCorreggiAzioneGuida }), (req, res) => {
-  res.json(conTesti(correggiAzioneGuida(String(req.params.data), Number(req.params.indice), req.body as CorrezioneAzioneGuida), nomiEffetti()));
+// Le voci della giornata sono canone (file di gioco, per tutte le partite): aggiungere al posto esatto, modificare (anche
+// fascia e posto), spostare di un passo, eliminare. `?partita=` facoltativo: la risposta porta lo stato nella partita.
+router.post('/percorso/:data/voci', validate({ params: paramsGiornoGuida, body: bodyNuovaVoce, query: queryDomande }), (req, res) => {
+  res.status(201).json(creaVoce(String(req.params.data), req.body as DatiVoceGiornata, (req.query as unknown as { partita?: number }).partita));
 });
-router.put('/percorso/:data/azioni/:indice/rimossa', validate({ params: paramsAzioneGuida, body: bodyRimuoviAzioneGuida }), (req, res) => {
-  res.json(conTesti(rimuoviAzioneGuida(String(req.params.data), Number(req.params.indice), (req.body as { rimossa: boolean }).rimossa), nomiEffetti()));
+router.put('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, body: bodyAggiornaVoce, query: queryDomande }), (req, res) => {
+  res.json(aggiornaVoce(String(req.params.uid), req.body as DatiVoceGiornata, (req.query as unknown as { partita?: number }).partita));
 });
-/** Correzione superata da un pacchetto nuovo: la si riapplica all'azione che oggi sta a quel posto. */
-router.put('/percorso/:data/azioni/:indice/riapplica', validate({ params: paramsAzioneGuida }), (req, res) => {
-  res.json(conTesti(riapplicaCorrezioneGuida(String(req.params.data), Number(req.params.indice)), nomiEffetti()));
+/** Sposta la voce di un passo nella sua fascia; risponde con tutte le voci del giorno, nel nuovo ordine. */
+router.put('/percorso/voci/:uid/sposta', validate({ params: paramsVoceGiornata, body: bodySpostaVoce, query: queryDomande }), (req, res) => {
+  res.json(spostaVoce(String(req.params.uid), (req.body as { verso: -1 | 1 }).verso, (req.query as unknown as { partita?: number }).partita));
 });
-/** Riporta l'azione com'è nella guida (toglie correzione e rimozione). */
-router.delete('/percorso/:data/azioni/:indice/correzione', validate({ params: paramsAzioneGuida }), (req, res) => {
-  ripristinaAzioneGuida(String(req.params.data), Number(req.params.indice));
+router.delete('/percorso/voci/:uid', validate({ params: paramsVoceGiornata }), (req, res) => {
+  eliminaVoce(String(req.params.uid));
   res.status(204).end();
 });
 router.get('/negozi', validate({ query: queryDomande }), (req, res) => {

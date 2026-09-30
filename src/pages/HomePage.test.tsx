@@ -22,7 +22,7 @@ vi.mock('../hooks/useOggi', () => ({
   useOggi: (): Partial<Oggi> => ({ indice: { giorni: [], dataCorrente: '04-12', totaleGiorni: 1, giorniCoperti: 1 } as unknown as Oggi['indice'], giorno: {} as Oggi['giorno'], caricamento: false, errore: null, sullaMappa }),
 }));
 vi.mock('../components/partita/OggiGuida', () => ({
-  OggiGuida: ({ oggi }: { oggi: Oggi }) => <button type="button" onClick={() => oggi.sullaMappa({ chiave: 'citta-shibuya', spilloId: 7 }, 0)}>Sulla mappa: prova</button>,
+  OggiGuida: ({ oggi }: { oggi: Oggi }) => <button type="button" onClick={() => oggi.sullaMappa({ chiave: 'citta-shibuya', spilloId: 7 }, '00000000000000000000000000000000')}>Sulla mappa: prova</button>,
 }));
 vi.mock('../components/partita/OggiMappa', () => ({ OggiMappa: () => <div data-testid="mappa">mappa</div> }));
 
@@ -66,5 +66,5 @@ it('«Sulla mappa» di un’azione riapre la mappa chiusa e ci porta l’azione'
   disegna();
   await userEvent.click(screen.getByRole('button', { name: 'Sulla mappa: prova' }));
   expect(usePreferenzeStore.getState().mappaHomeChiusa).toBe(false);
-  expect(sullaMappa).toHaveBeenCalledWith({ chiave: 'citta-shibuya', spilloId: 7 }, 0);
+  expect(sullaMappa).toHaveBeenCalledWith({ chiave: 'citta-shibuya', spilloId: 7 }, '00000000000000000000000000000000');
 });

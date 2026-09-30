@@ -1074,9 +1074,22 @@ export interface StatoAzioneDto {
   motivo: string | null;
 }
 
+/** Che cosa è una voce della giornata: un'azione (si spunta) o un evento, una scadenza, un promemoria (si mostrano). */
+export type GenereVoce = 'azione' | 'evento' | 'scadenza' | 'promemoria';
+
+/**
+ * Una voce della giornata (`voce_giornata`, file di gioco, dalla migrazione 092): azione della guida, cosa da fare o evento
+ * aggiunti dall'utente sono la stessa cosa e sono canone, per tutte le partite (richiesta dell'utente, 2026-09-30). Le voci di
+ * una fascia arrivano nel loro ordine esatto.
+ */
 export interface AzionePercorsoDto {
-  indice: number;
+  /** Identità stabile: le spunte delle partite si agganciano a questa. */
+  uid: string;
+  /** Giorno del calendario di gioco ('MM-GG'); «giorno» e non «data» per l'envelope `{ data }` delle risposte. */
+  giorno: string;
   fascia: 'giorno' | 'sera';
+  genere: GenereVoce;
+  /** Il testo della voce (il titolo, per un evento). */
   azione: string;
   tipo: 'confidente' | 'dote' | 'palazzo' | 'richiesta' | 'acquisto' | 'lavoro' | 'libro' | 'dvd' | 'attivita' | 'esame' | 'trama' | 'velluto' | 'altro';
   riferimento: RiferimentoAzioneDto | null;
@@ -1095,12 +1108,6 @@ export interface AzionePercorsoDto {
   stato: StatoAzioneDto | null;
   /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
   mappa: { chiave: string; spilloId: number | null } | null;
-  /** Correzione dell'utente applicata (vale per tutte le partite): i campi com'erano nella guida, per mostrarli e per «Ripristina». Null = azione com'è nella guida. */
-  correzione: {
-    azione: string; note: string | null; fascia: FasciaGioco;
-    tipo: AzionePercorsoDto['tipo']; riferimento: RiferimentoAzioneDto | null; riferimentoTesto: string | null; rangoAtteso: number | null;
-    produce: EffettoAzione[]; produceTesto: string[];
-  } | null;
   /** Solo nella risposta di una spunta: era l'ultima attività del giorno corrente e la partita è passata al giorno dopo. */
   giornoAvanzato?: GiornoAvanzatoDto;
 }
@@ -1122,38 +1129,22 @@ export interface ElenchiAzioneDto {
   doti: VoceElencoAzione[];
 }
 
-/** Campi di un'azione della guida che l'utente può correggere: tutti, dal testo agli effetti della spunta. */
-export interface CorrezioneAzioneGuida {
+/** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,
+ *  più la posizione esatta nella fascia. */
+export interface DatiVoceGiornata {
+  genere?: GenereVoce;
   azione?: string;
   note?: string | null;
   fascia?: FasciaGioco;
   tipo?: AzionePercorsoDto['tipo'];
-  /** Il collegamento (null = nessuno); `riferimentoTesto` lo calcola il server dal nome dell'elemento. */
+  /** Il collegamento (null = nessuno); il nome lo calcola il server dall'elemento. */
   riferimento?: RiferimentoAzioneDto | null;
-  riferimentoTesto?: string | null;
   rangoAtteso?: number | null;
-  /** Effetti della spunta al posto di quelli della guida. */
+  /** Effetti della spunta (solo per un'azione). */
   produce?: EffettoAzione[];
-}
-
-/** Azione della guida rimossa dall'utente: resta ripristinabile. */
-export interface AzioneGuidaRimossaDto {
-  indice: number;
-  fascia: FasciaGioco;
-  azione: string;
-}
-
-/** Correzione non più applicata perché la guida (un pacchetto nuovo) ha cambiato l'azione a quel posto:
- *  non la si applica in silenzio all'azione sbagliata, la si mostra perché l'utente la riapplichi o la scarti. */
-export interface CorrezioneSuperataDto {
-  indice: number;
-  /** Testo dell'azione quando l'utente l'ha corretta. */
-  azioneAllora: string;
-  /** Testo dell'azione che oggi sta a quel posto (null: la guida non ha più un'azione a quel posto). */
-  azioneAttuale: string | null;
-  /** Il testo corretto dall'utente, se l'aveva cambiato. */
-  azioneCorretta: string | null;
-  nascosta: boolean;
+  /** Posto nella fascia, da 0 (in cima); oltre l'ultimo = in fondo. Omesso: in fondo creando, dov'era modificando (in fondo alla
+   *  fascia nuova se cambia fascia). */
+  posizione?: number;
 }
 
 export interface PercorsoGiornoRiassuntoDto {
@@ -1198,6 +1189,7 @@ export interface PercorsoGiornoDto {
   trama: string;
   vincoli: string[];
   meteo: string | null;
+  /** Tutte le voci del giorno, nel loro ordine esatto: prima quelle di giorno, poi quelle di sera. */
   azioni: AzionePercorsoDto[];
   avvisi: string[];
   fonte: string;
@@ -1205,14 +1197,8 @@ export interface PercorsoGiornoDto {
   precedente: string | null;
   successivo: string | null;
   dataCorrente: string | null;
-  /** Azioni della guida fatte (le rimosse non contano). */
+  /** Azioni fatte nella partita (eventi, scadenze e promemoria non si spuntano e non contano). */
   fatte: number;
-  /** Azioni della guida rimosse dall'utente, ripristinabili. */
-  rimosse: AzioneGuidaRimossaDto[];
-  /** Correzioni che la guida attuale non permette più di applicare. */
-  correzioniSuperate: CorrezioneSuperataDto[];
-  /** Eventi e cose da fare dell'utente per il giorno: si mostrano dentro «Di giorno» / «Di sera». */
-  agenda: AgendaGiornoDto;
   /** Con una partita: il meteo del giorno nella partita, di giorno e di sera (Partita → Oggi). */
   meteoPartita: MeteoGiornoDto | null;
 }
@@ -2234,55 +2220,3 @@ export interface RiepilogoCatalogoDto {
   perTipo: Array<{ tipo: TipoCatalogo; creati: number; modificati: number; nascosti: number; totale: number }>;
 }
 
-// ---- Agenda del giorno: eventi e cose da fare dell'utente (16.1) ----
-
-/** Evento aggiunto dall'utente a una data del calendario; senza `partita` vale per tutte le partite. */
-export interface EventoUtenteDto {
-  id: number;
-  partitaId: number | null;
-  /** Giorno del calendario di gioco ('MM-GG'). Si chiama «giorno» e non «data» perché l'envelope `{ data }` delle risposte lascia intatti gli oggetti che hanno già una chiave `data`. */
-  giorno: string;
-  tipo: 'evento' | 'scadenza' | 'promemoria';
-  /** Momento della giornata in cui l'evento compare: dentro «Di giorno» o «Di sera». */
-  fascia: FasciaGioco;
-  titolo: string;
-  dettaglio: string;
-  riferimento: { tipo: string; chiave: string } | null;
-  ordine: number;
-}
-
-/** Cosa da fare aggiunta dall'utente a una data e fascia; si spunta come le azioni della guida. */
-export interface AzioneUtenteDto {
-  id: number;
-  partitaId: number | null;
-  /** Giorno del calendario di gioco ('MM-GG'); vedi la nota su EventoUtenteDto. */
-  giorno: string;
-  fascia: FasciaGioco;
-  /** Come le azioni della guida (un valore fuori elenco, scritto prima del 2026-09-30, si legge «altro»). */
-  tipo: AzionePercorsoDto['tipo'];
-  azione: string;
-  riferimento: RiferimentoAzioneDto | null;
-  /** Il nome dell'elemento collegato, dal server. */
-  riferimentoTesto: string | null;
-  rangoAtteso: number | null;
-  note: string | null;
-  /** Che cosa produce la spunta, come per le azioni della guida (`shared/effettiAzione.ts`). */
-  produce: EffettoAzione[];
-  produceTesto: string[];
-  ordine: number;
-  /** Spuntata nella partita indicata. */
-  fatta: boolean;
-  /** Ciò che la spunta ha applicato nella partita; si annulla togliendola (le letture restano). */
-  effetti: EffettiAzioneDto | null;
-  /** Stato rispetto alla partita (solo con partita), come per le azioni della guida. */
-  stato: StatoAzioneDto | null;
-  mappa: { chiave: string; spilloId: number | null } | null;
-  /** Solo nella risposta di una spunta: era l'ultima attività del giorno corrente e la partita è passata al giorno dopo. */
-  giornoAvanzato?: GiornoAvanzatoDto;
-}
-
-export interface AgendaGiornoDto {
-  giorno: string;
-  eventi: EventoUtenteDto[];
-  azioni: AzioneUtenteDto[];
-}

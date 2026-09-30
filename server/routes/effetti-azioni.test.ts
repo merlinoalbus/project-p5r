@@ -18,6 +18,8 @@ import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import { contestoConversione, effettiDellAzione } from '../db/conversioneEffettiAzione.js';
 import { utente007 } from '../db/migrazioniUtente/007_effetti_delle_azioni.js';
+import { utente015 } from '../db/migrazioniUtente/015_giornata_canone.js';
+import { DDL_UTENTE_STORICHE } from '../db/schemaUtente.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, EffettiAzioneDto, PercorsoGiornoDto, ProgressiPartitaDto } from '../../shared/types.js';
 
@@ -35,7 +37,9 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     await request(app).put(`/api/partite/${id}/giorno`).send({ data }).expect(200);
     return id;
   };
-  const spunta = (p: number, data: string, indice: number, fatta = true) => request(app).put(`/api/partite/${p}/percorso`).send({ data, indice, fatta });
+  /** La voce della guida che aveva quel posto nella guida d'origine (`indice_guida`): i casi qui sono scritti così. */
+  const uidDi = (data: string, indice: number) => prepared('SELECT uid FROM voce_giornata WHERE data = ? AND indice_guida = ?').pluck().get(data, indice) as string;
+  const spunta = (p: number, data: string, indice: number, fatta = true) => request(app).put(`/api/partite/${p}/percorso`).send({ uid: uidDi(data, indice), fatta });
   const effetti = async (p: number, data: string, indice: number, fatta = true) => ((await spunta(p, data, indice, fatta).expect(200)).body.data as AzionePercorsoDto).effetti;
   const dote = async (p: number, chiave: string) => ((await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[]).find((d) => d.chiave === chiave)!.punti;
   /** Quanto una spunta dice di segnare per una Dote: dall'azione, dalle letture e dai turni. */
@@ -47,7 +51,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     avanzamento: (prepared('SELECT avanzamento FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').get(p, chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0,
     letto: !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = ?").get(p, chiave),
   });
-  const azione = async (data: string, indice: number) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.indice === indice)!;
+  const azione = async (data: string, indice: number) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.uid === uidDi(data, indice))!;
 
   it('la guida dichiara gli effetti delle azioni dei libri secondo il loro senso', async () => {
     expect((await azione('04-18', 0)).produce).toEqual([]); // prendere in prestito La leggenda dei pirati
@@ -102,7 +106,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     const r = await spunta(p, '04-25', 1);
     expect(r.status).toBe(409);
     expect(r.body.error.code).toBe('lettura-non-disponibile');
-    expect(prepared('SELECT COUNT(*) AS n FROM azione_partita WHERE partita_id = ?').get(p)).toEqual({ n: 0 });
+    expect(prepared('SELECT COUNT(*) AS n FROM spunta_voce_partita WHERE partita_id = ?').get(p)).toEqual({ n: 0 });
   });
 
   it('il turno di un lavoro: la spunta registra il turno e dice le Doti del lavoro, togliendola si toglie il turno', async () => {
@@ -211,9 +215,11 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND chiave = 'lavoro-che-non-esiste'").run(p);
   });
 
-  it('migrazione utente 007: una correzione che cambiava le note tiene i punti che quelle note davano', async () => {
+  it('migrazione utente 007: una correzione che cambiava le note tiene i punti che quelle note davano (e la 015 la porta nella voce)', async () => {
     const originale = (JSON.parse((prepared("SELECT azioni_json FROM giorno_percorso WHERE data = '04-12'").get() as { azioni_json: string }).azioni_json) as Array<Record<string, unknown>>)[0];
     const adesso = 'x';
+    // la tabella delle correzioni di allora (la «utente» 015 l'ha convertita in canone e tolta)
+    getDb().exec(DDL_UTENTE_STORICHE.find((s) => s.includes('utente.correzione_azione_guida ('))!);
     // com'era salvata prima della 086: solo la nota corretta, e l'originale senza effetti
     const { produce: _senza, ...originaleVecchio } = originale;
     prepared("INSERT INTO correzione_azione_guida (data, indice, originale_json, modifiche_json, nascosta, created_at, updated_at) VALUES ('04-12', 0, ?, ?, 0, ?, ?)")
@@ -225,13 +231,17 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     expect(JSON.parse((prepared("SELECT modifiche_json FROM correzione_azione_guida WHERE data = '04-12' AND indice = 0").get() as { modifiche_json: string }).modifiche_json))
       .toEqual({ note: 'Coraggio +2', produce: [{ tipo: 'dote', dote: 'coraggio', note: 2 }] });
     expect(JSON.parse((prepared("SELECT modifiche_json FROM correzione_azione_guida WHERE data = '04-12' AND indice = 1").get() as { modifiche_json: string }).modifiche_json)).toEqual({ fascia: 'sera' });
+    // la 015 scrive le correzioni nelle voci (canone) e toglie la tabella
+    utente015.up(getDb());
+    expect(getDb().prepare("SELECT 1 FROM utente.sqlite_master WHERE name = 'correzione_azione_guida'").get()).toBeUndefined();
     // la spunta dice gli effetti della correzione (Coraggio, 2 note = 3 punti), e non quelli della guida
     const p = await nuovaPartita('Correzione convertita', '04-12');
     const r = (await spunta(p, '04-12', 0).expect(200)).body.data as AzionePercorsoDto;
     expect(r.produce).toEqual([{ tipo: 'dote', dote: 'coraggio', note: 2 }]);
+    expect(r.note).toBe('Coraggio +2');
     expect(detta(r.effetti, 'coraggio')).toBe(3);
     expect(detta(r.effetti, 'conoscenza')).toBe(0);
     expect(await tutteAZero(p)).toBe(true);
-    prepared('DELETE FROM correzione_azione_guida').run();
+    expect((await azione('04-12', 1)).fascia).toBe('sera');
   });
 });

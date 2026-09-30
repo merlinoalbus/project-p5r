@@ -75,6 +75,8 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'dote_sociale_partita', colonna: 'dote_chiave', entita: 'Dote sociale', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave' },
   { tabella: 'attivita_svolta_partita', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
   { tabella: 'spillo_partita', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },
+  // la giornata è canone del file di gioco: un pacchetto che non ha più una voce lascia la sua spunta senza voce
+  { tabella: 'spunta_voce_partita', colonna: 'voce_uid', entita: 'voce della giornata', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'punto_partita', colonna: 'punto_chiave', entita: 'punto della guida', tabellaGioco: 'punto_interesse', colonnaGioco: 'chiave' },
   { tabella: 'richiesta_partita', colonna: 'richiesta_chiave', entita: 'richiesta', tabellaGioco: 'richiesta', colonnaGioco: 'chiave' },
   { tabella: 'timbri_dedalo_partita', colonna: 'area_chiave', entita: 'area dei Memento', tabellaGioco: 'dungeon_area', colonnaGioco: 'chiave' },

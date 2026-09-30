@@ -1,19 +1,16 @@
 // @vitest-environment jsdom
 // ============================================================
-// Test GiornoGuida — la giornata modificabile: «Di giorno» / «Di sera» con eventi, azioni della guida e cose da fare
-// dell'utente; Modifica, Sposta, Rimuovi, Ripristina; azioni rimosse da rimettere; correzioni superate; conferme
+// Test GiornoGuida — la giornata canone: «Di giorno» / «Di sera» con le voci nel loro ordine esatto (azioni della guida, cose
+// da fare ed eventi aggiunti sono la stessa cosa); Modifica con il posto nella fascia, Sposta su/giù, Sposta di fascia, Elimina
 // ============================================================
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { useState } from 'react';
 import { GiornoGuida } from './GiornoGuida';
-import type { AzionePercorsoDto, AzioneUtenteDto, PercorsoGiornoDto } from '../../types';
+import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
 
 const api = vi.hoisted(() => ({
-  correggiAzioneGuida: vi.fn(), rimuoviAzioneGuida: vi.fn(), riapplicaCorrezioneGuida: vi.fn(), ripristinaAzioneGuida: vi.fn(),
-  impostaAzionePercorso: vi.fn(), creaAzioneAgenda: vi.fn(), creaEventoAgenda: vi.fn(), aggiornaAzioneAgenda: vi.fn(), aggiornaEventoAgenda: vi.fn(),
-  eliminaAzioneAgenda: vi.fn(), eliminaEventoAgenda: vi.fn(), impostaAzioneAgendaFatta: vi.fn(),
+  creaVoceGiornata: vi.fn(), aggiornaVoceGiornata: vi.fn(), spostaVoceGiornata: vi.fn(), eliminaVoceGiornata: vi.fn(), impostaAzionePercorso: vi.fn(),
   getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
   getElenchiAzione: vi.fn(),
 }));
@@ -26,29 +23,22 @@ vi.mock('../../services/api', () => api);
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
 vi.mock('../../stores/notificationStore', () => ({ notifica }));
 
-const azione = (p: Partial<AzionePercorsoDto> & Pick<AzionePercorsoDto, 'indice' | 'azione'>): AzionePercorsoDto => ({
-  fascia: 'giorno', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: null, mappa: null, correzione: null, ...p,
+const uid = (n: number) => n.toString(16).padStart(32, '0');
+const voce = (p: Partial<AzionePercorsoDto> & Pick<AzionePercorsoDto, 'uid' | 'azione'>): AzionePercorsoDto => ({
+  giorno: '04-12', fascia: 'giorno', genere: 'azione', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null,
+  produce: [], produceTesto: [], fatta: false, effetti: null, stato: null, mappa: null, ...p,
 });
 
-const mia = (p: Partial<AzioneUtenteDto> & Pick<AzioneUtenteDto, 'id' | 'azione'>): AzioneUtenteDto => ({
-  partitaId: null, giorno: '04-12', fascia: 'giorno', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null,
-  produce: [], produceTesto: [], ordine: 1, fatta: false, effetti: null, stato: null, mappa: null, ...p,
-});
+const ZORRO = voce({ uid: uid(1), azione: 'Biblioteca: prendere Zorro', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 3, note: 2, cinema: false }], confidente: null } });
+const PANE = voce({ uid: uid(2), azione: 'Comprare i Bionutrienti' });
+const PALAZZO = voce({ uid: uid(3), azione: 'Palazzo di Kamoshida: infiltrazione', note: 'Oggetti principali' });
+const CONSEGNA = voce({ uid: uid(4), azione: 'Consegna del Palazzo', fascia: 'sera', genere: 'scadenza' });
 
 const base: PercorsoGiornoDto = {
   giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo accesso.', vincoli: [], meteo: null, avvisi: [], fonte: '', coperto: true,
   precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 1,
-  azioni: [
-    azione({ indice: 0, azione: 'Biblioteca: prendere Zorro', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 3, note: 2, cinema: false }], confidente: null } }),
-    azione({ indice: 1, azione: 'Palazzo di Kamoshida: infiltrazione', note: 'Oggetti principali', correzione: { azione: 'Palazzo: testo della guida', note: null, fascia: 'giorno', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, produce: [], produceTesto: [] } }),
-  ],
-  rimosse: [{ indice: 2, fascia: 'sera', azione: 'Mansarda: fabbricare Grimaldelli' }],
-  correzioniSuperate: [],
-  agenda: {
-    giorno: '04-12',
-    eventi: [{ id: 5, partitaId: 3, giorno: '04-12', tipo: 'scadenza', fascia: 'sera', titolo: 'Consegna del Palazzo', dettaglio: '', riferimento: null, ordine: 1 }],
-    azioni: [mia({ id: 10, azione: 'Comprare i Bionutrienti' })],
-  },
+  // l'ordine esatto: la cosa da fare aggiunta dall'utente sta fra le due azioni della guida
+  azioni: [ZORRO, PANE, PALAZZO, CONSEGNA],
   meteoPartita: null,
 };
 
@@ -58,15 +48,10 @@ const disegna = (g: PercorsoGiornoDto = base, partitaId: number | null = 3) => {
   return ricarica;
 };
 const sezione = (nome: 'Di giorno' | 'Di sera') => screen.getByRole('region', { name: nome });
-const apriMenu = (voce: string) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Modifica, sposta o (rimuovi|elimina): ${voce}`) }));
+const apriMenu = (testo: string) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Modifica, sposta o elimina: ${testo}`) }));
+const gestiDi = (testo: string) => within(screen.getByRole('group', { name: new RegExp(`^Gesti per: ${testo}`) }));
 
-/** La giornata come la tiene la pagina: dopo una modifica arriva la versione successiva dal «server». */
-function GiornataViva({ versioni }: { versioni: PercorsoGiornoDto[] }) {
-  const [n, setN] = useState(0);
-  return <MemoryRouter><GiornoGuida g={versioni[n]} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={() => setN((x) => Math.min(x + 1, versioni.length - 1))} /></MemoryRouter>;
-}
-
-describe('GiornoGuida — giornata modificabile', () => {
+describe('GiornoGuida — la giornata canone', () => {
   beforeEach(() => {
     for (const f of Object.values(api)) f.mockReset();
     api.getImmagini.mockResolvedValue([]);
@@ -74,97 +59,148 @@ describe('GiornoGuida — giornata modificabile', () => {
     notifica.mockReset();
   });
 
-  it('mette eventi, azioni della guida e cose da fare nella loro fascia; conta le cose da fare; le sezioni ci sono anche vuote', () => {
+  it('mostra le voci di ogni fascia nel loro ordine, senza cartellini «La mia» o «Corretta»; contano solo le azioni', () => {
     disegna();
+    const righe = within(screen.getByRole('list', { name: 'Azioni di giorno' })).getAllByRole('listitem').map((li) => li.textContent ?? '');
+    expect(righe.map((t) => t.includes('Zorro') ? 'zorro' : t.includes('Bionutrienti') ? 'pane' : t.includes('infiltrazione') ? 'palazzo' : '?')).toEqual(['zorro', 'pane', 'palazzo']);
     const giorno = within(sezione('Di giorno'));
-    expect(giorno.getByText('Biblioteca: prendere Zorro')).toBeInTheDocument();
-    expect(giorno.getByText('Comprare i Bionutrienti')).toBeInTheDocument();
-    expect(giorno.getByText('La mia')).toBeInTheDocument();
-    expect(giorno.getByText('Corretta')).toBeInTheDocument();
-    // 1 fatta su 3 (due della guida + una dell'utente)
+    expect(giorno.queryByText('La mia')).toBeNull();
+    expect(giorno.queryByText('Corretta')).toBeNull();
+    // 1 fatta su 3 azioni (la scadenza non si spunta e non conta)
     expect(giorno.getByRole('heading', { name: /Di giorno.*1 su 3/ })).toBeInTheDocument();
     const sera = within(sezione('Di sera'));
     expect(sera.getByText('Consegna del Palazzo')).toBeInTheDocument();
     expect(sera.getByText('Scadenza')).toBeInTheDocument();
-    // l'evento non si spunta
     expect(screen.queryByLabelText(/^Fatto: Consegna/)).toBeNull();
     expect(screen.getByText('1 azioni fatte su 3.')).toBeInTheDocument();
-    // «Le mie note» non c'è più
-    expect(screen.queryByText('Le mie note')).toBeNull();
+    // niente più rimosse né correzioni da rivedere
+    expect(screen.queryByText(/rimoss/)).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Correzioni da rivedere' })).toBeNull();
   });
 
   it('un giorno senza voci mostra comunque le due sezioni con «Aggiungi»', () => {
-    disegna({ ...base, azioni: [], rimosse: [], agenda: { giorno: '04-12', eventi: [], azioni: [] } });
+    disegna({ ...base, azioni: [] });
     expect(within(sezione('Di giorno')).getByText(/Niente di giorno per questo giorno/)).toBeInTheDocument();
     expect(within(sezione('Di sera')).getByText(/Niente di sera per questo giorno/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Aggiungi di giorno' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Aggiungi di sera' })).toBeInTheDocument();
   });
 
-  it('«Aggiungi» di sera crea un evento della partita in quella fascia e ricarica la giornata', async () => {
-    api.creaEventoAgenda.mockResolvedValue({});
+  it('«Aggiungi» mostra il posto nella fascia: in fondo all\'inizio, poi su di un posto; crea la voce lì, per tutte le partite', async () => {
+    api.creaVoceGiornata.mockResolvedValue({});
     const ricarica = disegna();
-    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi di sera' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi di giorno' }));
     const finestra = screen.getByRole('dialog', { name: 'Aggiungi alla giornata' });
-    fireEvent.click(within(finestra).getByRole('radio', { name: 'Evento' }));
-    expect(within(finestra).getByRole('radio', { name: 'Di sera' })).toHaveAttribute('aria-checked', 'true');
-    fireEvent.change(within(finestra).getByLabelText('Che cosa succede'), { target: { value: '  Quiz televisivo  ' } });
+    expect(within(finestra).queryByText('Solo in questa partita')).toBeNull();
+    expect(within(finestra).getByText(/per tutte le partite ed entra nel pacchetto/)).toBeInTheDocument();
+    fireEvent.change(within(finestra).getByLabelText('Che cosa fare'), { target: { value: '  Passare dal Bagno pubblico  ' } });
+    const posto = within(within(finestra).getByRole('group', { name: 'Posto nella giornata, di giorno' }));
+    expect(posto.getByText('Posto nella giornata (di giorno): 4 di 4')).toBeInTheDocument();
+    // in fondo: «giù» spento; due posti su → fra Zorro e i Bionutrienti
+    expect(posto.getByRole('button', { name: 'Sposta giù di un posto' })).toBeDisabled();
+    fireEvent.click(posto.getByRole('button', { name: 'Sposta su di un posto' }));
+    fireEvent.click(posto.getByRole('button', { name: 'Sposta su di un posto' }));
+    expect(posto.getByText('Posto nella giornata (di giorno): 2 di 4')).toBeInTheDocument();
+    const righe = posto.getAllByRole('listitem').map((li) => li.textContent);
+    expect(righe[1]).toContain('Passare dal Bagno pubblico');
+    expect(righe[0]).toContain('Zorro');
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi' }));
-    await waitFor(() => expect(api.creaEventoAgenda).toHaveBeenCalledWith({ data: '04-12', tipo: 'evento', fascia: 'sera', titolo: 'Quiz televisivo', partitaId: 3 }));
+    await waitFor(() => expect(api.creaVoceGiornata).toHaveBeenCalledWith('04-12', {
+      genere: 'azione', azione: 'Passare dal Bagno pubblico', note: null, fascia: 'giorno', posizione: 1, tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [],
+    }, 3));
     await waitFor(() => expect(ricarica).toHaveBeenCalled());
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('senza partita la cosa da fare vale per tutte le partite e non ci sono spunte', async () => {
-    api.creaAzioneAgenda.mockResolvedValue({});
+  it('un evento di sera: il genere si sceglie, niente effetti, il posto in cima', async () => {
+    api.creaVoceGiornata.mockResolvedValue({});
+    disegna();
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi di sera' }));
+    const finestra = screen.getByRole('dialog', { name: 'Aggiungi alla giornata' });
+    fireEvent.click(within(finestra).getByRole('radio', { name: 'Evento' }));
+    expect(within(finestra).getByRole('radio', { name: 'Di sera' })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.change(within(finestra).getByLabelText('Che cosa succede'), { target: { value: 'Quiz televisivo' } });
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Sposta su di un posto' }));
+    expect(within(finestra).getByRole('button', { name: 'Sposta su di un posto' })).toBeDisabled();
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi' }));
+    await waitFor(() => expect(api.creaVoceGiornata).toHaveBeenCalledWith('04-12', { genere: 'evento', azione: 'Quiz televisivo', note: null, fascia: 'sera', posizione: 0 }, 3));
+  });
+
+  it('senza partita non ci sono spunte, e la voce si crea senza partita', async () => {
+    api.creaVoceGiornata.mockResolvedValue({});
     disegna(base, null);
     expect(screen.queryByRole('checkbox')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Aggiungi di giorno' }));
     const finestra = screen.getByRole('dialog');
-    expect(within(finestra).getByText('Senza una partita attiva la voce vale per tutte le partite.')).toBeInTheDocument();
     fireEvent.change(within(finestra).getByLabelText('Che cosa fare'), { target: { value: 'Passare dal Bagno pubblico' } });
     fireEvent.change(within(finestra).getByLabelText('Note'), { target: { value: 'di pomeriggio' } });
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi' }));
-    await waitFor(() => expect(api.creaAzioneAgenda).toHaveBeenCalledWith({ data: '04-12', fascia: 'giorno', azione: 'Passare dal Bagno pubblico', note: 'di pomeriggio', partitaId: null, tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [] }));
+    await waitFor(() => expect(api.creaVoceGiornata).toHaveBeenCalledWith('04-12', { genere: 'azione', azione: 'Passare dal Bagno pubblico', note: 'di pomeriggio', fascia: 'giorno', posizione: 3, tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [] }, undefined));
   });
 
-  it('modifica un\'azione della guida: la finestra è precompilata, mostra l\'originale e salva la correzione', async () => {
-    api.correggiAzioneGuida.mockResolvedValue({});
+  it('modifica una voce: finestra precompilata col suo posto; cambiando fascia va in fondo all\'altra; il posto si manda solo se cambia', async () => {
+    api.aggiornaVoceGiornata.mockResolvedValue({});
     const ricarica = disegna();
     apriMenu('Palazzo di Kamoshida');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
-    const finestra = screen.getByRole('dialog', { name: 'Modifica l\'azione della guida' });
-    // aprendo la finestra il menu della voce si chiude: il prossimo tocco sul pulsante della riga lo riapre, non lo chiude
+    const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
+    // aprendo la finestra il menu della voce si chiude
     expect(screen.queryByRole('group', { name: /^Gesti per:/ })).toBeNull();
     expect(within(finestra).getByLabelText('Che cosa fare')).toHaveValue('Palazzo di Kamoshida: infiltrazione');
     expect(within(finestra).getByLabelText('Note')).toHaveValue('Oggetti principali');
-    expect(within(finestra).getByText('Palazzo: testo della guida')).toBeInTheDocument();
-    expect(within(finestra).queryByText('Solo in questa partita')).toBeNull();
+    expect(within(finestra).getByText('Posto nella giornata (di giorno): 3 di 3')).toBeInTheDocument();
+    // solo il testo: il posto non si manda
     fireEvent.change(within(finestra).getByLabelText('Che cosa fare'), { target: { value: 'Palazzo in un viaggio solo' } });
-    fireEvent.click(within(finestra).getByRole('radio', { name: 'Di sera' }));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
-    await waitFor(() => expect(api.correggiAzioneGuida).toHaveBeenCalledWith('04-12', 1, {
-      azione: 'Palazzo in un viaggio solo', note: 'Oggetti principali', fascia: 'sera', tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [],
-    }));
+    await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(3), {
+      genere: 'azione', azione: 'Palazzo in un viaggio solo', note: 'Oggetti principali', fascia: 'giorno', tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [],
+    }, 3));
     await waitFor(() => expect(ricarica).toHaveBeenCalled());
+
+    apriMenu('Palazzo di Kamoshida');
+    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    const di_nuovo = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
+    fireEvent.click(within(di_nuovo).getByRole('radio', { name: 'Di sera' }));
+    // di sera c'è la scadenza: in fondo è il secondo posto
+    expect(within(di_nuovo).getByText('Posto nella giornata (di sera): 2 di 2')).toBeInTheDocument();
+    fireEvent.click(within(di_nuovo).getByRole('button', { name: 'Salva' }));
+    await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenLastCalledWith(uid(3), expect.objectContaining({ fascia: 'sera', posizione: 1 }), 3));
   });
 
-  it('modifica tipo, collegamento, rango ed effetti di un\'azione della guida (la Guida si modifica al 100%)', async () => {
-    api.correggiAzioneGuida.mockResolvedValue({});
-    disegna({ ...base, azioni: [azione({ indice: 0, azione: 'Sbloccare il lavoro da fioraio Rafflesia', tipo: 'lavoro', produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }], produceTesto: ['Turno: Fioraio Rafflesia'] })] });
-    // la riga dice che cosa applica la spunta
+  it('modifica una voce spostandola nella stessa fascia: il posto nuovo si manda; una voce spuntata lo dice', async () => {
+    api.aggiornaVoceGiornata.mockResolvedValue({});
+    disegna();
+    apriMenu('Biblioteca');
+    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
+    // Zorro è spuntata: gli effetti nuovi valgono dalla prossima spunta
+    expect(within(finestra).getByText(/già spuntata: gli effetti nuovi valgono dalla prossima spunta/)).toBeInTheDocument();
+    expect(within(finestra).getByText('Posto nella giornata (di giorno): 1 di 3')).toBeInTheDocument();
+    // in cima: «su» spento; due posti giù → in fondo
+    expect(within(finestra).getByRole('button', { name: 'Sposta su di un posto' })).toBeDisabled();
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Sposta giù di un posto' }));
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Sposta giù di un posto' }));
+    expect(within(finestra).getByText('Posto nella giornata (di giorno): 3 di 3')).toBeInTheDocument();
+    // arrivati in fondo «giù» si spegne: il fuoco passa a «su», la tastiera non lo perde
+    await waitFor(() => expect(within(finestra).getByRole('button', { name: 'Sposta su di un posto' })).toHaveFocus());
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
+    await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(1), expect.objectContaining({ fascia: 'giorno', posizione: 2 }), 3));
+  });
+
+  it('modifica tipo, collegamento, rango ed effetti (la Guida si modifica al 100%)', async () => {
+    api.aggiornaVoceGiornata.mockResolvedValue({});
+    const rafflesia = voce({ uid: uid(9), azione: 'Sbloccare il lavoro da fioraio Rafflesia', tipo: 'lavoro', produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }], produceTesto: ['Turno: Fioraio Rafflesia'] });
+    disegna({ ...base, azioni: [rafflesia] });
     expect(screen.getByText('Il gioco dà: Turno: Fioraio Rafflesia')).toBeInTheDocument();
     apriMenu('Sbloccare il lavoro');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
-    const finestra = screen.getByRole('dialog', { name: 'Modifica l\'azione della guida' });
+    const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     await waitFor(() => expect(within(finestra).getByRole('combobox', { name: 'Tipo' })).toBeInTheDocument());
-    // l'effetto «turno» si toglie: lo sblocco non dà la Gentilezza del turno
     fireEvent.click(within(finestra).getByRole('button', { name: 'Togli l\'effetto 1' }));
     expect(within(finestra).getByText('Nessun effetto: la spunta segna solo che l\'hai fatto.')).toBeInTheDocument();
-    // tipo «Confidente», collegata a Takemi, rango atteso 2, con una Dote: Coraggio ♪
-    const scegli = (combo: string, voce: string) => {
+    const scegli = (combo: string, testo: string) => {
       fireEvent.click(within(finestra).getByRole('combobox', { name: combo }));
-      fireEvent.click(within(within(finestra).getByRole('listbox', { name: combo })).getByRole('button', { name: new RegExp(`^${voce}`) }));
+      fireEvent.click(within(within(finestra).getByRole('listbox', { name: combo })).getByRole('button', { name: new RegExp(`^${testo}`) }));
     };
     scegli('Tipo', 'Confidente');
     scegli('Collegata a', 'Confidente');
@@ -176,17 +212,17 @@ describe('GiornoGuida — giornata modificabile', () => {
     scegli('Dote', 'Coraggio');
     fireEvent.click(within(finestra).getByRole('radio', { name: '♪' }));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
-    await waitFor(() => expect(api.correggiAzioneGuida).toHaveBeenCalledWith('04-12', 0, {
-      azione: 'Sbloccare il lavoro da fioraio Rafflesia', note: null, fascia: 'giorno', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, rangoAtteso: 2,
+    await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(9), {
+      genere: 'azione', azione: 'Sbloccare il lavoro da fioraio Rafflesia', note: null, fascia: 'giorno', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, rangoAtteso: 2,
       produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }],
-    }));
+    }, 3));
   });
 
   it('un turno si sceglie solo fra le attività contate per volte; una lettura va completata prima di salvare', async () => {
-    disegna({ ...base, azioni: [azione({ indice: 0, azione: 'Qualcosa' })] });
+    disegna({ ...base, azioni: [voce({ uid: uid(9), azione: 'Qualcosa' })] });
     apriMenu('Qualcosa');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
-    const finestra = screen.getByRole('dialog', { name: 'Modifica l\'azione della guida' });
+    const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     await waitFor(() => expect(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' })).toBeInTheDocument());
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));
     fireEvent.click(within(finestra).getByRole('combobox', { name: 'Effetto 1' }));
@@ -198,184 +234,125 @@ describe('GiornoGuida — giornata modificabile', () => {
     expect(elenco.queryByRole('button', { name: /^Studio al Leblanc/ })).toBeNull();
   });
 
-  it('dal menu: sposta un\'azione della guida di sera e ripristina quella corretta', async () => {
-    api.correggiAzioneGuida.mockResolvedValue({});
-    api.ripristinaAzioneGuida.mockResolvedValue(undefined);
-    disegna();
-    apriMenu('Palazzo di Kamoshida');
-    const gesti = screen.getByRole('group', { name: /^Gesti per: Palazzo/ });
-    fireEvent.click(within(gesti).getByRole('button', { name: 'Sposta di sera' }));
-    await waitFor(() => expect(api.correggiAzioneGuida).toHaveBeenCalledWith('04-12', 1, { fascia: 'sera' }));
-    apriMenu('Palazzo di Kamoshida');
-    fireEvent.click(screen.getByRole('button', { name: 'Ripristina originale' }));
-    await waitFor(() => expect(api.ripristinaAzioneGuida).toHaveBeenCalledWith('04-12', 1));
-  });
-
-  it('rimuove un\'azione della guida non spuntata senza chiedere: sparisce dalla lista e compare fra le rimosse, da dove si rimette', async () => {
-    api.rimuoviAzioneGuida.mockResolvedValue({});
-    const palazzo = base.azioni[1];
-    const dopo: PercorsoGiornoDto = { ...base, azioni: [base.azioni[0]], rimosse: [...base.rimosse, { indice: 1, fascia: 'giorno', azione: palazzo.azione }] };
-    render(<GiornataViva versioni={[base, dopo, base]} />);
-    expect(within(sezione('Di giorno')).queryByText(/azioni? della guida rimoss/)).toBeNull();
-    apriMenu('Palazzo di Kamoshida');
-    fireEvent.click(screen.getByRole('button', { name: 'Rimuovi' }));
-    await waitFor(() => expect(api.rimuoviAzioneGuida).toHaveBeenCalledWith('04-12', 1, true));
-    // la giornata ricaricata: la riga non c'è più e sta fra le rimosse della sua fascia
-    const lista = () => screen.getByRole('list', { name: 'Azioni di giorno' });
-    await waitFor(() => expect(within(lista()).queryByText(palazzo.azione)).toBeNull());
-    expect(within(sezione('Di giorno')).getByText('1 azione della guida rimossa')).toBeInTheDocument();
-    expect(within(screen.getByRole('list', { name: 'Azioni rimosse di giorno' })).getByText(palazzo.azione)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: `Rimetti: ${palazzo.azione}` }));
-    await waitFor(() => expect(api.rimuoviAzioneGuida).toHaveBeenCalledWith('04-12', 1, false));
-    await waitFor(() => expect(within(lista()).getByText(palazzo.azione)).toBeInTheDocument());
-    expect(within(sezione('Di giorno')).queryByText(/azioni? della guida rimoss/)).toBeNull();
-  });
-
-  it('il pulsante di riga dice il gesto di uscita giusto: «rimuovi» per la guida, «elimina» per le voci dell\'utente', () => {
-    disegna();
-    expect(screen.getByRole('button', { name: /^Modifica, sposta o rimuovi: Palazzo di Kamoshida/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Modifica, sposta o elimina: Comprare i Bionutrienti/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Modifica, sposta o elimina: Consegna del Palazzo/ })).toBeInTheDocument();
-  });
-
-  it('un\'azione con una correzione superata non offre gesti: la si rivede solo in «Correzioni da rivedere»', () => {
-    disegna({ ...base, correzioniSuperate: [{ indice: 1, azioneAllora: 'Vecchia', azioneAttuale: base.azioni[1].azione, azioneCorretta: 'Mia', nascosta: false }] });
-    expect(screen.queryByRole('button', { name: /^Modifica, sposta o rimuovi: Palazzo di Kamoshida/ })).toBeNull();
-    expect(within(sezione('Di giorno')).getByText('Correzione da rivedere')).toBeInTheDocument();
-    // le altre azioni li hanno ancora
-    expect(screen.getByRole('button', { name: /^Modifica, sposta o rimuovi: Biblioteca/ })).toBeInTheDocument();
-  });
-
-  it('riapplicare una rimozione superata a un\'azione spuntata con punti chiede prima, come «Rimuovi»', async () => {
-    api.impostaAzionePercorso.mockResolvedValue({});
-    api.riapplicaCorrezioneGuida.mockResolvedValue({});
-    disegna({ ...base, correzioniSuperate: [{ indice: 0, azioneAllora: 'Vecchia', azioneAttuale: base.azioni[0].azione, azioneCorretta: 'Mia', nascosta: true }] });
-    expect(screen.getByText(/Avevi corretto «Vecchia» in «Mia» e poi l'avevi rimossa\./)).toBeInTheDocument();
-    fireEvent.click(within(screen.getByRole('group', { name: 'Correzioni da rivedere' })).getByRole('button', { name: /Riapplica/ }));
-    expect(api.riapplicaCorrezioneGuida).not.toHaveBeenCalled();
-    const finestra = screen.getByRole('dialog', { name: 'Riapplicare la rimozione a un\'azione spuntata?' });
-    expect(within(finestra).getByText(/Coraggio \+3/)).toBeInTheDocument();
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli la spunta e riapplica' }));
-    await waitFor(() => expect(api.riapplicaCorrezioneGuida).toHaveBeenCalledWith('04-12', 0));
-    expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, '04-12', 0, false);
-    expect(api.impostaAzionePercorso.mock.invocationCallOrder[0]).toBeLessThan(api.riapplicaCorrezioneGuida.mock.invocationCallOrder[0]);
-  });
-
-  it('un\'azione spuntata con punti chiede prima: togliere la spunta (annulla i punti) e poi rimuovere', async () => {
-    api.impostaAzionePercorso.mockResolvedValue({});
-    api.rimuoviAzioneGuida.mockResolvedValue({});
+  it('dal menu: Sposta su / giù solo dove si può, il menu resta sulla voce per spostarla ancora; Sposta di sera', async () => {
+    api.spostaVoceGiornata.mockResolvedValue([]);
+    api.aggiornaVoceGiornata.mockResolvedValue({});
     disegna();
     apriMenu('Biblioteca');
-    fireEvent.click(screen.getByRole('button', { name: 'Rimuovi' }));
-    const finestra = screen.getByRole('dialog', { name: 'Rimuovere un\'azione già spuntata?' });
-    expect(within(finestra).getByText(/Coraggio \+3/)).toBeInTheDocument();
-    expect(api.rimuoviAzioneGuida).not.toHaveBeenCalled();
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli la spunta e rimuovi' }));
-    await waitFor(() => expect(api.rimuoviAzioneGuida).toHaveBeenCalledWith('04-12', 0, true));
-    expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, '04-12', 0, false);
-    expect(api.impostaAzionePercorso.mock.invocationCallOrder[0]).toBeLessThan(api.rimuoviAzioneGuida.mock.invocationCallOrder[0]);
+    expect(gestiDi('Biblioteca').queryByRole('button', { name: 'Sposta su' })).toBeNull();
+    fireEvent.click(gestiDi('Biblioteca').getByRole('button', { name: 'Sposta giù' }));
+    await waitFor(() => expect(api.spostaVoceGiornata).toHaveBeenCalledWith(uid(1), 1, 3));
+    // il menu è ancora aperto sulla stessa voce, con il fuoco sul gesto appena usato
+    await waitFor(() => expect(screen.getByRole('group', { name: /^Gesti per: Biblioteca/ })).toBeInTheDocument());
+    await waitFor(() => expect(gestiDi('Biblioteca').getByRole('button', { name: 'Sposta giù' })).toHaveFocus());
+    apriMenu('Biblioteca');
+    apriMenu('Palazzo di Kamoshida');
+    expect(gestiDi('Palazzo').queryByRole('button', { name: 'Sposta giù' })).toBeNull();
+    fireEvent.click(gestiDi('Palazzo').getByRole('button', { name: 'Sposta su' }));
+    await waitFor(() => expect(api.spostaVoceGiornata).toHaveBeenCalledWith(uid(3), -1, 3));
+    fireEvent.click(gestiDi('Palazzo').getByRole('button', { name: 'Sposta di sera' }));
+    await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(3), { fascia: 'sera' }, 3));
   });
 
-  it('cosa da fare dell\'utente: spunta per la partita ed eliminazione solo dopo conferma', async () => {
-    api.impostaAzioneAgendaFatta.mockResolvedValue({});
-    api.eliminaAzioneAgenda.mockResolvedValue(undefined);
-    disegna();
-    fireEvent.click(screen.getByLabelText('Fatto: Comprare i Bionutrienti'));
-    await waitFor(() => expect(api.impostaAzioneAgendaFatta).toHaveBeenCalledWith(10, 3, true, undefined));
+  it('eliminare una voce non spuntata chiede conferma e la toglie dalla guida', async () => {
+    api.eliminaVoceGiornata.mockResolvedValue(undefined);
+    const ricarica = disegna();
     apriMenu('Comprare i Bionutrienti');
     fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
-    expect(api.eliminaAzioneAgenda).not.toHaveBeenCalled();
-    const finestra = screen.getByRole('dialog', { name: 'Eliminare la cosa da fare?' });
-    expect(within(finestra).getByText(/da tutte le partite/)).toBeInTheDocument();
+    expect(api.eliminaVoceGiornata).not.toHaveBeenCalled();
+    const finestra = screen.getByRole('dialog', { name: 'Eliminare la voce?' });
+    expect(within(finestra).getByText(/esce dalla guida per tutte le partite/)).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Elimina' }));
-    await waitFor(() => expect(api.eliminaAzioneAgenda).toHaveBeenCalledWith(10));
+    await waitFor(() => expect(api.eliminaVoceGiornata).toHaveBeenCalledWith(uid(2)));
+    await waitFor(() => expect(ricarica).toHaveBeenCalled());
   });
 
-  it('una cosa da fare è come un\'azione della guida: tipo, collegamento, «Il gioco dà», stato; un incontro chiede le note', async () => {
-    api.impostaAzioneAgendaFatta.mockResolvedValue(mia({ id: 11, azione: 'Clinica Takemi', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }], confidente: null } }));
-    disegna({ ...base, agenda: { ...base.agenda, azioni: [mia({
-      id: 11, azione: 'Clinica Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
+  it('una voce spuntata con effetti si elimina togliendo prima la spunta', async () => {
+    api.impostaAzionePercorso.mockResolvedValue({});
+    api.eliminaVoceGiornata.mockResolvedValue(undefined);
+    disegna();
+    apriMenu('Biblioteca');
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    const finestra = screen.getByRole('dialog', { name: 'Eliminare una voce già spuntata?' });
+    expect(within(finestra).getByText(/Coraggio \+3/)).toBeInTheDocument();
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli la spunta ed elimina' }));
+    await waitFor(() => expect(api.eliminaVoceGiornata).toHaveBeenCalledWith(uid(1)));
+    expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, uid(1), false);
+    expect(api.impostaAzionePercorso.mock.invocationCallOrder[0]).toBeLessThan(api.eliminaVoceGiornata.mock.invocationCallOrder[0]);
+  });
+
+  it('spunta tolta ma eliminazione rifiutata (effetti in un\'altra partita): lo dice com\'è e la giornata si rilegge', async () => {
+    api.impostaAzionePercorso.mockResolvedValue({});
+    api.eliminaVoceGiornata.mockRejectedValue(new Error('Questa voce è spuntata con effetti in una partita («Altra»): togli prima la spunta in ciascuna per annullarne gli effetti, poi eliminala.'));
+    const ricarica = disegna();
+    apriMenu('Biblioteca');
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Eliminare una voce già spuntata?' })).getByRole('button', { name: 'Togli la spunta ed elimina' }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringMatching(/^Spunta tolta e punti annullati in questa partita, ma la voce non è stata eliminata: .*«Altra»/)));
+    expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, uid(1), false);
+    await waitFor(() => expect(ricarica).toHaveBeenCalled());
+  });
+
+  it('se il server rifiuta l\'eliminazione (spuntata con effetti in un\'altra partita) lo dice', async () => {
+    api.eliminaVoceGiornata.mockRejectedValue(new Error('Questa voce è spuntata con effetti in una partita («Altra»): togli prima la spunta in ciascuna per annullarne gli effetti, poi eliminala.'));
+    disegna();
+    apriMenu('Comprare i Bionutrienti');
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Elimina' }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringContaining('«Altra»')));
+  });
+
+  it('una voce aggiunta è come un\'azione della guida: tipo, collegamento, «Il gioco dà», stato; un incontro chiede le note', async () => {
+    api.impostaAzionePercorso.mockResolvedValue(voce({ uid: uid(11), azione: 'Clinica Takemi', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }], confidente: null } }));
+    disegna({ ...base, azioni: [voce({
+      uid: uid(11), azione: 'Clinica Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
       produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio, 1 nota'], stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' },
-    })] } });
+    })] });
     const giorno = within(sezione('Di giorno'));
-    expect(giorno.getByText('La mia')).toBeInTheDocument();
+    expect(giorno.queryByText('La mia')).toBeNull();
     expect(giorno.getByText('Confidente')).toBeInTheDocument();
     expect(giorno.getByText('Il gioco dà: Coraggio, 1 nota')).toBeInTheDocument();
     expect(giorno.getByText(/^Consigliata/)).toBeInTheDocument();
     expect(giorno.getByText('rango atteso 2')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi'));
     // prima si chiedono le note: nessuna chiamata finché non si sceglie
-    expect(api.impostaAzioneAgendaFatta).not.toHaveBeenCalled();
+    expect(api.impostaAzionePercorso).not.toHaveBeenCalled();
     fireEvent.click(within(screen.getByRole('group', { name: 'Note ottenute con il Confidente' })).getByRole('button', { name: '2 note' }));
-    await waitFor(() => expect(api.impostaAzioneAgendaFatta).toHaveBeenCalledWith(11, 3, true, 2));
+    await waitFor(() => expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, uid(11), true, 2));
     // le Doti si segnano a mano: l'avviso le ricorda invece di dirle date
-    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', 'Da segnare nelle Doti: Coraggio +2'));
+    // (resta 7 secondi, come per ogni spunta che ha Doti da segnare)
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', 'Da segnare nelle Doti: Coraggio +2', 7000));
   });
 
-  it('una cosa da fare spuntata con effetti si elimina togliendo prima la spunta; la finestra ne modifica anche collegamento ed effetti', async () => {
-    api.impostaAzioneAgendaFatta.mockResolvedValue(mia({ id: 12, azione: 'Bagno' }));
-    api.eliminaAzioneAgenda.mockResolvedValue(undefined);
-    api.aggiornaAzioneAgenda.mockResolvedValue({});
-    const fatta = mia({ id: 12, azione: 'Bagno', partitaId: 3, fatta: true, produce: [{ tipo: 'dote', dote: 'fascino', note: 2 }], produceTesto: ['Fascino, 2 note'], effetti: { doti: [{ chiave: 'fascino', nome: 'Fascino', delta: 3, note: 2 }], confidente: null } });
-    disegna({ ...base, agenda: { ...base.agenda, azioni: [fatta] } });
-    apriMenu('Bagno');
-    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
-    const conferma = screen.getByRole('dialog', { name: 'Eliminare una cosa da fare già spuntata?' });
-    expect(within(conferma).getByText(/Fascino \+3/)).toBeInTheDocument();
-    fireEvent.click(within(conferma).getByRole('button', { name: 'Togli la spunta ed elimina' }));
-    await waitFor(() => expect(api.eliminaAzioneAgenda).toHaveBeenCalledWith(12));
-    expect(api.impostaAzioneAgendaFatta).toHaveBeenCalledWith(12, 3, false);
-    expect(api.impostaAzioneAgendaFatta.mock.invocationCallOrder[0]).toBeLessThan(api.eliminaAzioneAgenda.mock.invocationCallOrder[0]);
-
-    apriMenu('Bagno');
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
-    const finestra = screen.getByRole('dialog', { name: 'Modifica la cosa da fare' });
-    await waitFor(() => expect(within(finestra).getByText('Classificazione ed effetti')).toBeInTheDocument());
-    expect(within(finestra).getByText(/già spuntata: gli effetti nuovi valgono dalla prossima spunta/)).toBeInTheDocument();
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli l\'effetto 1' }));
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
-    await waitFor(() => expect(api.aggiornaAzioneAgenda).toHaveBeenCalledWith(12, { azione: 'Bagno', note: null, fascia: 'giorno', partitaId: 3, tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [] }));
-  });
-
-  it('evento dell\'utente: modifica con tipo e fascia, sposta di giorno', async () => {
-    api.aggiornaEventoAgenda.mockResolvedValue({});
+  it('un evento: modifica il genere (resta dov\'è), sposta di giorno', async () => {
+    api.aggiornaVoceGiornata.mockResolvedValue({});
     disegna();
     apriMenu('Consegna del Palazzo');
     fireEvent.click(screen.getByRole('button', { name: 'Sposta di giorno' }));
-    await waitFor(() => expect(api.aggiornaEventoAgenda).toHaveBeenCalledWith(5, { fascia: 'giorno' }));
+    await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(4), { fascia: 'giorno' }, 3));
     apriMenu('Consegna del Palazzo');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
-    const finestra = screen.getByRole('dialog', { name: 'Modifica l\'evento' });
+    const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     expect(within(finestra).getByRole('radio', { name: 'Scadenza' })).toHaveAttribute('aria-checked', 'true');
+    // un evento non ha tipo, collegamento ed effetti
+    expect(within(finestra).queryByRole('button', { name: 'Aggiungi un effetto' })).toBeNull();
     fireEvent.click(within(finestra).getByRole('radio', { name: 'Promemoria' }));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
-    await waitFor(() => expect(api.aggiornaEventoAgenda).toHaveBeenLastCalledWith(5, { tipo: 'promemoria', titolo: 'Consegna del Palazzo', dettaglio: '', fascia: 'sera', partitaId: 3 }));
-  });
-
-  it('correzioni superate da un pacchetto nuovo: si riapplicano o si scartano; senza azione attuale solo «Scarta»', async () => {
-    api.riapplicaCorrezioneGuida.mockResolvedValue({});
-    api.ripristinaAzioneGuida.mockResolvedValue(undefined);
-    disegna({ ...base, correzioniSuperate: [
-      { indice: 4, azioneAllora: 'Vecchia azione', azioneAttuale: 'Azione nuova', azioneCorretta: 'La mia versione', nascosta: false },
-      { indice: 6, azioneAllora: 'Sparita', azioneAttuale: null, azioneCorretta: null, nascosta: true },
-    ] });
-    const gruppo = within(screen.getByRole('group', { name: 'Correzioni da rivedere' }));
-    expect(gruppo.getByText(/Avevi corretto «Vecchia azione» in «La mia versione»/)).toBeInTheDocument();
-    expect(gruppo.getByText(/Avevi rimosso «Sparita».*non c'è più nessuna azione/)).toBeInTheDocument();
-    expect(gruppo.getAllByRole('button', { name: /Riapplica/ })).toHaveLength(1);
-    fireEvent.click(gruppo.getByRole('button', { name: /Riapplica/ }));
-    await waitFor(() => expect(api.riapplicaCorrezioneGuida).toHaveBeenCalledWith('04-12', 4));
-    fireEvent.click(gruppo.getAllByRole('button', { name: 'Scarta' })[1]);
-    await waitFor(() => expect(api.ripristinaAzioneGuida).toHaveBeenCalledWith('04-12', 6));
+    await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenLastCalledWith(uid(4), { genere: 'promemoria', azione: 'Consegna del Palazzo', note: null, fascia: 'sera' }, 3));
+    // la conferma dice che cosa si elimina: qui una scadenza
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    apriMenu('Consegna del Palazzo');
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    expect(screen.getByRole('dialog', { name: 'Eliminare la scadenza?' })).toBeInTheDocument();
   });
 
   it('un errore del server resta visibile e la finestra non si chiude', async () => {
-    api.correggiAzioneGuida.mockRejectedValue(new Error('Il testo dell\'azione non può essere vuoto.'));
+    api.aggiornaVoceGiornata.mockRejectedValue(new Error('Il testo della voce non può essere vuoto.'));
     disegna();
     apriMenu('Palazzo di Kamoshida');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Salva' }));
-    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Il testo dell\'azione non può essere vuoto.'));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Il testo della voce non può essere vuoto.'));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

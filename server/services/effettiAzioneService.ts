@@ -39,12 +39,9 @@ function haAnimaDaCineasta(partitaId: number): boolean {
   return !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = 'anima-da-cineasta'").get(partitaId);
 }
 
-/** Le visioni al cinema di un film già contate dalle spunte della partita (della guida e dell'utente). */
+/** Le visioni al cinema di un film già contate dalle spunte della partita (voci della giornata). */
 function visioniDalleSpunte(partitaId: number, chiave: string): number {
-  const righe = [
-    ...(prepared('SELECT effetti_json FROM azione_partita WHERE partita_id = ? AND effetti_json LIKE ?').all(partitaId, `%${chiave}%`) as Array<{ effetti_json: string }>),
-    ...(prepared('SELECT effetti_json FROM azione_utente_partita WHERE partita_id = ? AND effetti_json LIKE ?').all(partitaId, `%${chiave}%`) as Array<{ effetti_json: string }>),
-  ];
+  const righe = prepared('SELECT effetti_json FROM spunta_voce_partita WHERE partita_id = ? AND effetti_json LIKE ?').all(partitaId, `%${chiave}%`) as Array<{ effetti_json: string }>;
   let n = 0;
   for (const r of righe) {
     const e = JSON.parse(r.effetti_json) as EffettiAzioneDto;

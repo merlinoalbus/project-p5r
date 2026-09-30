@@ -5,7 +5,7 @@
 import type {
   ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
-import type { AzionePercorsoDto, CorrezioneAzioneGuida, ElenchiAzioneDto, VideogiochiDto } from '../../types';
+import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, VideogiochiDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
@@ -44,17 +44,19 @@ export const getPercorsoIndice = (partita?: number): Promise<PercorsoIndiceDto> 
 export const getPercorsoGiorno = (data: string, partita?: number): Promise<PercorsoGiornoDto> => apiGet(`/compendio/percorso/${data}${queryString({ partita })}`);
 /** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
 export const getElenchiAzione = (): Promise<ElenchiAzioneDto> => apiGet('/compendio/percorso-elenchi');
-/** Corregge un'azione della guida — testo, note, fascia, tipo, collegamento, rango atteso, effetti — per tutte le partite. */
-export const correggiAzioneGuida = (data: string, indice: number, correzione: CorrezioneAzioneGuida): Promise<AzionePercorsoDto> =>
-  apiPut(`/compendio/percorso/${data}/azioni/${indice}`, correzione);
-/** Rimuove dalla giornata (o rimette) un'azione della guida, per tutte le partite. */
-export const rimuoviAzioneGuida = (data: string, indice: number, rimossa: boolean): Promise<AzionePercorsoDto> =>
-  apiPut(`/compendio/percorso/${data}/azioni/${indice}/rimossa`, { rimossa });
-/** Riapplica all'azione attuale una correzione superata da un pacchetto nuovo. */
-export const riapplicaCorrezioneGuida = (data: string, indice: number): Promise<AzionePercorsoDto> =>
-  apiPut(`/compendio/percorso/${data}/azioni/${indice}/riapplica`, {});
-/** Riporta l'azione com'è nella guida (toglie correzione e rimozione; scarta anche una correzione superata). */
-export const ripristinaAzioneGuida = (data: string, indice: number): Promise<void> => apiDelete(`/compendio/percorso/${data}/azioni/${indice}/correzione`);
+// ---- Voci della giornata: canone della guida, per tutte le partite (`partita`: la risposta porta lo stato in quella partita) ----
+
+/** Aggiunge una voce al giorno, al posto `posizione` della sua fascia (in fondo se omesso). */
+export const creaVoceGiornata = (data: string, dati: DatiVoceGiornata, partita?: number): Promise<AzionePercorsoDto> =>
+  apiPost(`/compendio/percorso/${data}/voci${queryString({ partita })}`, dati);
+/** Modifica una voce: testo, note, genere, fascia, posto, tipo, collegamento, rango atteso, effetti. */
+export const aggiornaVoceGiornata = (uid: string, dati: DatiVoceGiornata, partita?: number): Promise<AzionePercorsoDto> =>
+  apiPut(`/compendio/percorso/voci/${uid}${queryString({ partita })}`, dati);
+/** Sposta una voce di un passo nella sua fascia (-1 su, +1 giù); risponde con tutte le voci del giorno. */
+export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number): Promise<AzionePercorsoDto[]> =>
+  apiPut(`/compendio/percorso/voci/${uid}/sposta${queryString({ partita })}`, { verso });
+/** Elimina una voce dalla guida (409 se in una partita è spuntata con effetti: prima si toglie la spunta). */
+export const eliminaVoceGiornata = (uid: string): Promise<void> => apiDelete(`/compendio/percorso/voci/${uid}`);
 /** Negozi con conteggi degli articoli. */
 /** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */
 export const getNegozi = (partita?: number): Promise<NegozioRiassuntoDto[]> => apiGet(`/compendio/negozi${queryString({ partita })}`);

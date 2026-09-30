@@ -5,15 +5,18 @@
 import { closeDb, initDb, prepared } from '../dbService.js';
 import { utente005 } from './005_giornata_modificabile.js';
 import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { runMigrations } from '../migrationRunner.js';
+import { migrations } from '../migrations/index.js';
+import { migrazioniUtente } from './index.js';
 
 afterEach(() => closeDb());
 
 it('su un file di prima: crea la tabella delle correzioni e dà la fascia «giorno» agli eventi già scritti; è idempotente', () => {
   const db = initDb(':memory:');
   caricaPacchetto(db);
-  // il file delle partite com'era prima della 005
-  db.exec('DROP TABLE utente.correzione_azione_guida');
-  db.exec('DROP TABLE utente.evento_utente');
+  // il file delle partite com'era prima della 005 (dalla 015 queste tabelle non ci sono più: la giornata è canone)
+  db.exec('DROP TABLE IF EXISTS utente.correzione_azione_guida');
+  db.exec('DROP TABLE IF EXISTS utente.evento_utente');
   db.exec(`CREATE TABLE utente.evento_utente (
     id INTEGER PRIMARY KEY, partita_id INTEGER, data TEXT NOT NULL,
     tipo TEXT NOT NULL DEFAULT 'evento' CHECK (tipo IN ('evento','scadenza','promemoria')),
@@ -30,9 +33,9 @@ it('su un file di prima: crea la tabella delle correzioni e dà la fascia «gior
   expect((prepared('SELECT COUNT(*) AS n FROM evento_utente').get() as { n: number }).n).toBe(1);
 });
 
-it('su un file nuovo le tabelle hanno già la forma attuale', () => {
+it('su un file nuovo, fino alla 014, le tabelle hanno la forma della 005 (la 015 poi le converte e le toglie)', () => {
   const db = initDb(':memory:');
-  caricaPacchetto(db);
+  runMigrations(db, migrations, migrazioniUtente.filter((m) => m.id < 15));
   const colonne = (db.prepare('PRAGMA utente.table_info(evento_utente)').all() as Array<{ name: string }>).map((c) => c.name);
   expect(colonne).toContain('fascia');
   expect((db.prepare('PRAGMA utente.table_info(correzione_azione_guida)').all() as Array<{ name: string }>).map((c) => c.name))

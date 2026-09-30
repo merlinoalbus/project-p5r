@@ -343,6 +343,24 @@ export function IconUscita(p: IconProps) {
   );
 }
 
+/** Freccia in su sopra una riga corta (sposta la voce un posto prima). */
+export function IconSu(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M12 16V4M7 9l5-5 5 5" /><path d="M8 20h8" />
+    </svg>
+  );
+}
+
+/** Freccia in giù sotto una riga corta (sposta la voce un posto dopo). */
+export function IconGiu(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M8 4h8" /><path d="M12 8v12M7 15l5 5 5-5" />
+    </svg>
+  );
+}
+
 /** Freccia indietro (annulla l’ultimo). */
 export function IconIndietro(p: IconProps) {
   return (

@@ -1,9 +1,8 @@
 // ============================================================
-// API catalogo e agenda — righe aggiunte o corrette dall'utente, eventi e cose da fare del giorno (Fase 16.1)
+// API catalogo — righe aggiunte o corrette dall'utente (Fase 16.1)
 // ============================================================
 
-import type { AzionePercorsoDto, AzioneUtenteDto, ElementoCatalogoDto, EventoUtenteDto, OggettoSelezionabileDto, RiepilogoCatalogoDto, RiferimentoAzioneDto, TipoCatalogo } from '../../types';
-import type { EffettoAzione } from '../../../shared/effettiAzione';
+import type { ElementoCatalogoDto, OggettoSelezionabileDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
@@ -44,32 +43,4 @@ export const nascondiElementoCatalogo = (tipo: TipoCatalogo, chiave: string, nas
 export const eliminaElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise<{ esito: 'eliminata' | 'ripristinata'; elemento: ElementoCatalogoDto | null }> =>
   apiDelete(`/catalogo/${tipo}/${encodeURIComponent(chiave)}`);
 
-// ---- Agenda del giorno ----
-// Eventi e cose da fare di un giorno arrivano con la scheda del giorno (`PercorsoGiornoDto.agenda`): qui restano le scritture.
-
-/** Giorni che hanno qualcosa in agenda (per segnarli nel calendario). */
-export const getGiorniConAgenda = (partita?: number): Promise<{ giorni: string[] }> =>
-  apiGet(`/catalogo/agenda${queryString({ partita })}`);
-
-export interface DatiEventoApi {
-  data: string; tipo?: EventoUtenteDto['tipo']; fascia?: 'giorno' | 'sera'; titolo: string; dettaglio?: string;
-  riferimento?: { tipo: string; chiave: string } | null; partitaId?: number | null; ordine?: number;
-}
-export interface DatiAzioneApi {
-  data: string; fascia?: 'giorno' | 'sera'; tipo?: AzionePercorsoDto['tipo']; azione: string;
-  riferimento?: { tipo: RiferimentoAzioneDto['tipo']; chiave: string } | null; rangoAtteso?: number | null; note?: string | null;
-  /** Effetti della spunta, come per le azioni della guida. */
-  produce?: EffettoAzione[];
-  partitaId?: number | null; ordine?: number;
-}
-
-export const creaEventoAgenda = (dati: DatiEventoApi): Promise<EventoUtenteDto> => apiPost('/catalogo/agenda/eventi', dati);
-export const aggiornaEventoAgenda = (id: number, dati: Partial<DatiEventoApi>): Promise<EventoUtenteDto> => apiPut(`/catalogo/agenda/eventi/${id}`, dati);
-export const eliminaEventoAgenda = (id: number): Promise<void> => apiDelete(`/catalogo/agenda/eventi/${id}`);
-
-export const creaAzioneAgenda = (dati: DatiAzioneApi): Promise<AzioneUtenteDto> => apiPost('/catalogo/agenda/azioni', dati);
-export const aggiornaAzioneAgenda = (id: number, dati: Partial<DatiAzioneApi>): Promise<AzioneUtenteDto> => apiPut(`/catalogo/agenda/azioni/${id}`, dati);
-export const eliminaAzioneAgenda = (id: number): Promise<void> => apiDelete(`/catalogo/agenda/azioni/${id}`);
-/** Spunta una cosa da fare nella partita: applica i suoi effetti (con le note ottenute, se è un incontro con un Confidente). */
-export const impostaAzioneAgendaFatta = (id: number, partita: number, fatta: boolean, noteRisposta?: 1 | 2 | 3): Promise<AzioneUtenteDto> =>
-  apiPut(`/catalogo/agenda/azioni/${id}/fatta`, { partita, fatta, ...(noteRisposta ? { noteRisposta } : {}) });
+// L'agenda del giorno (eventi e cose da fare) dal 2026-09-30 è fatta di voci della giornata: `services/api/compendio.ts`.

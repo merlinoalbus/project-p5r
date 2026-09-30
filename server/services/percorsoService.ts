@@ -1,40 +1,23 @@
 // ============================================================
-// percorsoService — guida giorno per giorno: indice dei giorni, scheda del giorno con azioni spuntabili, giorno corrente della partita (Fase 7.5b)
+// percorsoService — guida giorno per giorno: indice dei giorni, scheda del giorno con le voci spuntabili, giorno corrente della partita (Fase 7.5b)
+// ============================================================
+//
+// Le voci della giornata (azioni della guida, cose da fare ed eventi aggiunti dall'utente, tutti canone) stanno in
+// `voce_giornata` e le gestisce `giornataService`; qui la scheda del giorno, l'indice dei giorni e il giorno corrente.
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
-import type { AzionePercorsoDto, EffettiAzioneDto, GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
+import type { GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
 import { confidenti, leggiPartita } from './partiteService.js';
-import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
-import { azioneGuida, correttoreGuida, guidaDelGiorno, type AzioneGuida, type AzioneSeed } from './correzioniGuidaService.js';
-import { mappaAzione, nomiEffetti, statoAzione, testoEffetti } from './azioniStrutturateService.js';
-import type { NomiEffettiAzione } from '../../shared/effettiAzione.js';
-import { agendaDelGiorno, conteggiAgenda } from './agendaService.js';
+import { conteggiGiornate, righeDelGiorno, spuntePartita, vociDelGiorno } from './giornataService.js';
 import { meteoDelGiorno } from './meteoService.js';
 
-interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; azioni_json: string; avvisi_json: string; fonte: string; coperto: number }
-
+interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string; coperto: number }
 
 function partitaEsiste(partitaId: number): void {
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
-}
-
-function fattePartita(partitaId: number | undefined, data?: string): Set<string> {
-  if (partitaId === undefined) return new Set();
-  partitaEsiste(partitaId);
-  const righe = (data === undefined
-    ? prepared('SELECT data, indice FROM azione_partita WHERE partita_id = ?').all(partitaId)
-    : prepared('SELECT data, indice FROM azione_partita WHERE partita_id = ? AND data = ?').all(partitaId, data)) as Array<{ data: string; indice: number }>;
-  return new Set(righe.map((r) => `${r.data}/${r.indice}`));
-}
-
-/** Effetti registrati alla spunta per le azioni di un giorno (chiave `data/indice`). */
-function effettiPartita(partitaId: number | undefined, data: string): Map<string, EffettiAzioneDto> {
-  if (partitaId === undefined) return new Map();
-  const righe = prepared('SELECT indice, effetti_json FROM azione_partita WHERE partita_id = ? AND data = ? AND effetti_json IS NOT NULL').all(partitaId, data) as Array<{ indice: number; effetti_json: string }>;
-  return new Map(righe.map((r) => [`${data}/${r.indice}`, JSON.parse(r.effetti_json) as EffettiAzioneDto]));
 }
 
 function dataCorrente(partitaId: number | undefined): string | null {
@@ -43,119 +26,52 @@ function dataCorrente(partitaId: number | undefined): string | null {
 }
 
 /** Indice di tutti i giorni (leggero) con conteggi delle azioni e delle azioni fatte; giorno corrente della partita.
- *  Le azioni contate sono quelle della giornata come la vede l'utente: guida corretta (le rimosse no) più le sue cose da fare. */
+ *  Le azioni contate sono le voci che si spuntano (eventi, scadenze e promemoria no). */
 export function indicePercorso(partitaId?: number): PercorsoIndiceDto {
-  const fatte = fattePartita(partitaId);
-  const correggi = correttoreGuida();
-  const agenda = conteggiAgenda(partitaId);
-  const righe = prepared('SELECT data, ordine, giorno_settimana, fase, meteo, azioni_json, avvisi_json, coperto FROM giorno_percorso ORDER BY ordine').all() as Array<Pick<Riga, 'data' | 'ordine' | 'giorno_settimana' | 'fase' | 'meteo' | 'azioni_json' | 'avvisi_json' | 'coperto'>>;
+  if (partitaId !== undefined) partitaEsiste(partitaId);
+  const conteggi = conteggiGiornate(partitaId);
+  const righe = prepared('SELECT data, ordine, giorno_settimana, fase, meteo, avvisi_json, coperto FROM giorno_percorso ORDER BY ordine').all() as Array<Pick<Riga, 'data' | 'ordine' | 'giorno_settimana' | 'fase' | 'meteo' | 'avvisi_json' | 'coperto'>>;
   const giorni = righe.map((r) => {
-    const { azioni } = correggi(r.data, JSON.parse(r.azioni_json) as AzioneSeed[]);
-    const mie = agenda.get(r.data) ?? { azioni: 0, fatte: 0 };
+    const c = conteggi.get(r.data) ?? { azioni: 0, fatte: 0 };
     return {
-      giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, meteo: r.meteo,
-      azioni: azioni.length + mie.azioni, fatte: azioni.filter((a) => fatte.has(`${r.data}/${a.indice}`)).length + mie.fatte,
+      giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, meteo: r.meteo, azioni: c.azioni, fatte: c.fatte,
       avvisi: (JSON.parse(r.avvisi_json) as string[]).length, coperto: r.coperto === 1,
     };
   });
   return { giorni, dataCorrente: dataCorrente(partitaId), totaleGiorni: giorni.length, giorniCoperti: giorni.filter((g) => g.coperto).length };
 }
 
-/** Scheda di un giorno con le azioni (fatte nella partita), giorno precedente e successivo. */
+/** Scheda di un giorno con le voci nel loro ordine (fatte nella partita), giorno precedente e successivo. */
 export function giornoPercorso(data: string, partitaId?: number): PercorsoGiornoDto {
   const r = prepared('SELECT * FROM giorno_percorso WHERE data = ?').get(data) as Riga | undefined;
   if (!r) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
-  const fatte = fattePartita(partitaId, data);
-  const effetti = effettiPartita(partitaId, data);
+  if (partitaId !== undefined) partitaEsiste(partitaId);
   const conf = partitaId ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null;
-  const guida = guidaDelGiorno(data, JSON.parse(r.azioni_json) as AzioneSeed[]);
-  const nomi = nomiEffetti();
-  const azioni = guida.azioni.map((a) => ({ ...conTesti(a, nomi), fatta: fatte.has(`${data}/${a.indice}`), effetti: effetti.get(`${data}/${a.indice}`) ?? null, stato: conf ? statoAzione(a, conf) : null, mappa: mappaAzione(a) }));
+  const azioni = vociDelGiorno(data, partitaId, conf);
   const prec = prepared('SELECT data FROM giorno_percorso WHERE ordine < ? ORDER BY ordine DESC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   return {
     giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
-    rimosse: guida.rimosse, correzioniSuperate: guida.superate, agenda: agendaDelGiorno(data, partitaId, conf),
     meteoPartita: partitaId ? meteoDelGiorno(partitaId, data) : null,
   };
 }
 
-// Stato e mappa di un'azione valgono per la guida e per le azioni dell'utente: stanno in `azioniStrutturateService`.
-export { mappaAzione, statoAzione };
-
-function effettiDi(partitaId: number, data: string, indice: number): EffettiAzioneDto | null {
-  const r = prepared('SELECT effetti_json FROM azione_partita WHERE partita_id = ? AND data = ? AND indice = ?').get(partitaId, data, indice) as { effetti_json: string | null } | undefined;
-  return r?.effetti_json ? (JSON.parse(r.effetti_json) as EffettiAzioneDto) : null;
-}
-
-/**
- * Spunta o toglie un'azione della guida. Alla spunta applica ciò che l'azione produce (`produce`: Doti, letture, turni; note del
- * Confidente se `noteRisposta` è indicato, col bonus dell'arcano se una Persona dello stesso arcano è in scorta) e lo registra;
- * togliendo la spunta lo annulla esattamente (le letture restano: si disfano dalla loro pagina).
- */
-export function impostaAzione(partitaId: number, data: string, indice: number, fatta: boolean, opz: OpzioniSpunta = {}): AzionePercorsoDto {
-  partitaEsiste(partitaId);
-  // l'azione come la vede l'utente (testo, note, fascia ed effetti corretti);
-  // un'azione rimossa non si spunta, ma si può ancora togliere la spunta per annullarne i punti
-  const { azione: a, rimossa } = azioneGuida(data, indice);
-  if (fatta && rimossa) throw httpErrors.badRequest('azione-rimossa', 'Questa azione è stata rimossa dalla giornata: ripristinala per spuntarla.');
-  const adesso = nowIso();
-  let effetti: EffettiAzioneDto | null = null;
-  getDb().transaction(() => {
-    const era = !!prepared('SELECT 1 FROM azione_partita WHERE partita_id = ? AND data = ? AND indice = ?').get(partitaId, data, indice);
-    if (fatta) {
-      if (era) {
-        effetti = effettiDi(partitaId, data, indice);
-      } else {
-        effetti = applicaEffettiAzione(partitaId, { ...a, momento: { data, fascia: a.fascia, origine: 'azione' } }, opz);
-      }
-      prepared('INSERT INTO azione_partita (partita_id, data, indice, updated_at, effetti_json) VALUES (?, ?, ?, ?, ?) ON CONFLICT(partita_id, data, indice) DO UPDATE SET updated_at = excluded.updated_at, effetti_json = COALESCE(azione_partita.effetti_json, excluded.effetti_json)')
-        .run(partitaId, data, indice, adesso, effetti ? JSON.stringify(effetti) : null);
-    } else {
-      const precedenti = era ? effettiDi(partitaId, data, indice) : null;
-      if (precedenti) annullaEffettiAzione(partitaId, precedenti);
-      prepared('DELETE FROM azione_partita WHERE partita_id = ? AND data = ? AND indice = ?').run(partitaId, data, indice);
-    }
-    if (fatta && !era) {
-      const dett = [`${a.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${a.tipo}${a.riferimentoTesto ? ` · ${a.riferimentoTesto}` : ''}`];
-      if (effetti) dett.push(descriviEffettiApplicati(effetti));
-      registraEvento(partitaId, 'percorso', `Percorso ${data}: ${a.azione.slice(0, 80)}${a.azione.length > 80 ? '…' : ''}`, `${dett.join(' · ')}.`, { data, indice, tipo: a.tipo, riferimento: a.riferimento, effetti });
-    }
-    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
-  })();
-  // stato e mappa come nella scheda del giorno: chi sostituisce la riga nell'elenco non perde «Sulla mappa» né il semaforo
-  const conf = new Map(confidenti(partitaId).map((c) => [c.chiave, c]));
-  return { ...conTesti(a, nomiEffetti()), indice, fatta, effetti, stato: statoAzione(a, conf), mappa: mappaAzione(a) };
-}
-
-/** L'azione con gli effetti in parole, anche quelli com'erano nella guida quando una correzione li cambia. */
-export function conTesti(a: AzioneGuida, nomi: NomiEffettiAzione): Omit<AzionePercorsoDto, 'fatta' | 'effetti' | 'stato' | 'mappa'> {
-  return {
-    ...a,
-    produceTesto: testoEffetti(a.produce, nomi),
-    correzione: a.correzione ? { ...a.correzione, produceTesto: testoEffetti(a.correzione.produce, nomi) } : null,
-  };
-}
-
-/** Imposta il giorno corrente della partita (data del calendario di gioco) e restituisce anche la partita aggiornata, così il client allinea lo store senza ricaricare l'elenco. */
 /**
  * Spuntata l'ultima attività del giorno corrente, la partita passa al giorno dopo, di giorno (richiesta dell'utente,
  * 2026-09-30: «se completo tutte le attività di un giorno deve spostare automaticamente il giorno corrente al giorno
- * successivo modalità giorno»). Le attività sono quelle che l'utente vede: la guida del giorno com'è corretta (le rimosse
- * no) e le sue cose da fare; gli eventi dell'agenda non si spuntano e non contano. Scatta solo se `data` è il giorno
- * corrente della partita e c'è almeno un'attività; togliere una spunta non torna indietro (chi chiama lo invoca solo
- * alla spunta). Restituisce il passaggio, o null.
+ * successivo modalità giorno»). Le attività sono le voci che si spuntano (eventi, scadenze e promemoria no). Scatta solo se
+ * `data` è il giorno corrente della partita e c'è almeno un'attività; togliere una spunta non torna indietro (chi chiama lo
+ * invoca solo alla spunta). Restituisce il passaggio, o null.
  */
 export function avanzaSeGiornoCompleto(partitaId: number, data: string): GiornoAvanzatoDto | null {
   if (dataCorrente(partitaId) !== data) return null;
-  const r = prepared('SELECT ordine, azioni_json FROM giorno_percorso WHERE data = ?').get(data) as { ordine: number; azioni_json: string } | undefined;
+  const r = prepared('SELECT ordine FROM giorno_percorso WHERE data = ?').get(data) as { ordine: number } | undefined;
   if (!r) return null;
-  const guida = guidaDelGiorno(data, JSON.parse(r.azioni_json) as AzioneSeed[]).azioni;
-  const fatte = fattePartita(partitaId, data);
-  const agenda = conteggiAgenda(partitaId).get(data) ?? { azioni: 0, fatte: 0 };
-  if (guida.length + agenda.azioni === 0) return null;
-  if (!guida.every((a) => fatte.has(`${data}/${a.indice}`)) || agenda.fatte < agenda.azioni) return null;
+  const azioni = righeDelGiorno(data).filter((v) => v.genere === 'azione');
+  if (azioni.length === 0) return null;
+  const fatte = spuntePartita(partitaId, data);
+  if (!azioni.every((a) => fatte.has(a.uid))) return null;
   const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   if (!succ) return null;
   getDb().transaction(() => {
@@ -165,6 +81,7 @@ export function avanzaSeGiornoCompleto(partitaId: number, data: string): GiornoA
   return { da: data, a: succ.data, partita: leggiPartita(partitaId) };
 }
 
+/** Imposta il giorno corrente della partita (data del calendario di gioco) e restituisce anche la partita aggiornata, così il client allinea lo store senza ricaricare l'elenco. */
 export function impostaGiornoCorrente(partitaId: number, data: string): GiornoCorrenteDto {
   partitaEsiste(partitaId);
   if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);

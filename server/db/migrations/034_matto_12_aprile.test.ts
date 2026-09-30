@@ -5,12 +5,15 @@
 import { closeDb, getDb, initDb, prepared } from '../dbService.js';
 import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { spostaSpuntaMatto } from './034_matto_12_aprile.js';
+import { DDL_UTENTE_STORICHE } from '../schemaUtente.js';
 
 
 describe('migrazione 034 — Il Matto il 12 aprile', () => {
   beforeAll(() => {
     const db = initDb(':memory:');
     caricaPacchetto(db);
+    // le spunte per posizione di allora (dalla «utente» 015 sono per identità, `spunta_voce_partita`)
+    db.exec(DDL_UTENTE_STORICHE.find((s) => s.includes('utente.azione_partita ('))!);
   });
   afterAll(() => closeDb());
 

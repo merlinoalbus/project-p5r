@@ -13,8 +13,8 @@ import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
 import { confidenti } from './partiteService.js';
-import { statoAzione } from './percorsoService.js';
-import { guidaDelGiorno, type AzioneSeed } from './correzioniGuidaService.js';
+import { statoAzione } from './azioniStrutturateService.js';
+import { righeDelGiorno, spuntePartita, voceBase } from './giornataService.js';
 import type { SuggerimentiOggiDto } from '../../shared/types.js';
 
 const DOTI = ['conoscenza', 'fascino', 'gentilezza', 'coraggio', 'perizia'] as const;
@@ -142,15 +142,14 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
   };
   const data = partita.data_gioco;
   if (!data) return vuoto;
-  const righeGiorno = prepared('SELECT azioni_json FROM giorno_percorso WHERE data = ?').get(data) as { azioni_json: string } | undefined;
-  if (!righeGiorno) return { ...vuoto, giorno: data };
+  if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) return { ...vuoto, giorno: data };
 
-  const fatte = new Set((prepared('SELECT indice FROM azione_partita WHERE partita_id = ? AND data = ?').all(partitaId, data) as Array<{ indice: number }>).map((x) => x.indice));
+  const fatte = spuntePartita(partitaId, data);
   // Un'azione bloccata dai requisiti non è un suggerimento: la si esclude come fa la Guida (`statoAzione`).
   const conf = new Map(confidenti(partitaId).map((c) => [c.chiave, c]));
-  // la guida come la vede l'utente: testo, note e fascia corretti, le azioni rimosse non suggeriscono nulla
-  const azioni = guidaDelGiorno(data, JSON.parse(righeGiorno.azioni_json) as AzioneSeed[]).azioni
-    .filter((a) => !fatte.has(a.indice) && statoAzione(a, conf).tipo !== 'bloccata');
+  // la giornata com'è (canone): le voci che si spuntano e non sono ancora fatte; eventi e promemoria non suggeriscono nulla
+  const azioni = righeDelGiorno(data).filter((v) => v.genere === 'azione' && !fatte.has(v.uid)).map(voceBase)
+    .filter((a) => statoAzione(a, conf).tipo !== 'bloccata');
   const r = nuovaRaccolta();
   const motivi: SuggerimentiOggiDto['motivi'] = [];
   let articoli: Map<string, Array<{ chiave: string; negozio: string }>> | null = null;

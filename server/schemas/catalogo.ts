@@ -9,7 +9,6 @@ import { FASCE_ORARIO, GIORNI_SETTIMANA_CHIAVI } from '../../shared/orariNegozio
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shared/attivita.js';
 import { FAMIGLIE_EFFETTO } from '../../shared/effettiOggetto.js';
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
-import { campiAzioneStrutturata } from './compendio.js';
 
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
 
@@ -31,7 +30,6 @@ const effettiJson = z.array(voceEffetto).max(20).transform((v) => JSON.stringify
 
 const dataGioco = z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.');
 const testo = (max: number) => z.string().trim().max(max);
-const riferimento = z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }).nullable().optional();
 
 /** I tipi accettati nel percorso. Erano scritti a mano e sono rimasti indietro quando il catalogo
  *  si e' esteso: un `POST /catalogo/libro` rispondeva «atteso negozio|articolo» pur essendo tutto
@@ -238,35 +236,3 @@ export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, l
 export const SCHEMI_CATALOGO_PARZIALI = { negozio: datiNegozio.partial(), articolo: datiArticolo.partial(), libro: datiLibro.partial(), film: datiFilmParziale, attivita: datiAttivitaParziale, luogo: datiLuogo.partial(), domanda: datiDomanda.partial(), cruciverba: datiCruciverba.partial() } as const;
 export const queryNascosti = z.object({ nascosti: z.enum(['1', 'true']).optional(), negozio: z.string().min(1).max(200).optional() });
 export const bodyNascondi = z.object({ nascosta: z.boolean() });
-
-// ---- Agenda ----
-
-export const queryAgenda = z.object({ partita: z.coerce.number().int().positive().optional() });
-export const paramsAgendaGiorno = z.object({ data: dataGioco });
-export const paramsAgendaVoce = z.object({ id: z.coerce.number().int().positive() });
-
-export const bodyEvento = z.object({
-  data: dataGioco,
-  tipo: z.enum(['evento', 'scadenza', 'promemoria']).optional(),
-  fascia: z.enum(['giorno', 'sera']).optional(),
-  titolo: testo(200).min(1),
-  dettaglio: testo(2000).optional(),
-  riferimento,
-  partitaId: z.number().int().positive().nullable().optional(),
-  ordine: z.number().int().min(0).max(9999).optional(),
-});
-export const bodyAggiornaEvento = bodyEvento.partial();
-
-/** Una cosa da fare dell'utente si classifica e si collega come un'azione della guida (tipo, collegamento, rango, effetti:
- *  gli stessi elenchi chiusi di `campiAzioneStrutturata`). */
-export const bodyAzione = z.object({
-  data: dataGioco,
-  fascia: z.enum(['giorno', 'sera']).optional(),
-  azione: testo(400).min(1),
-  note: testo(600).nullable().optional(),
-  partitaId: z.number().int().positive().nullable().optional(),
-  ordine: z.number().int().min(0).max(9999).optional(),
-  ...campiAzioneStrutturata,
-});
-export const bodyAggiornaAzione = bodyAzione.partial();
-export const bodyAzioneFatta = z.object({ partita: z.number().int().positive(), fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional() });

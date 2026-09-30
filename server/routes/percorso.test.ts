@@ -30,7 +30,11 @@ describe('API percorso giorno per giorno', () => {
     expect(g).toMatchObject({ giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', precedente: '04-11', successivo: '04-13', coperto: true });
     expect(g.trama.length).toBeGreaterThan(20);
     expect(g.azioni.length).toBeGreaterThanOrEqual(3);
-    expect(g.azioni.map((a) => a.indice)).toEqual(g.azioni.map((_, k) => k));
+    // ogni voce ha la sua identità; prima quelle di giorno, poi quelle di sera
+    expect(new Set(g.azioni.map((a) => a.uid)).size).toBe(g.azioni.length);
+    expect(g.azioni.every((a) => /^[0-9a-f]{32}$/.test(a.uid) && a.giorno === '04-12' && a.genere === 'azione')).toBe(true);
+    const fasce = g.azioni.map((a) => a.fascia);
+    expect(fasce).toEqual([...fasce].sort((x, y) => (x === y ? 0 : x === 'giorno' ? -1 : 1)));
     expect(g.azioni.find((a) => a.tipo === 'palazzo')?.riferimento).toEqual({ tipo: 'dungeon', chiave: 'kamoshida' });
     expect(g.azioni.find((a) => a.fascia === 'giorno' && a.tipo === 'confidente')?.riferimento).toEqual({ tipo: 'confidente', chiave: 'ryuji' });
     expect(g.avvisi.length).toBeGreaterThan(0);
@@ -41,19 +45,20 @@ describe('API percorso giorno per giorno', () => {
 
   it('azioni fatte per partita con evento (una sola volta), riapertura, validazione; giorno corrente; reseed stabile', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Percorso' })).body.data as { id: number }).id;
-    let a = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-12', indice: 0, fatta: true })).body.data as AzionePercorsoDto;
-    expect(a).toMatchObject({ indice: 0, fatta: true });
-    a = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-12', indice: 0, fatta: true })).body.data as AzionePercorsoDto; // idempotente
+    const prima = ((await request(app).get('/api/compendio/percorso/04-12')).body.data as PercorsoGiornoDto).azioni[0];
+    let a = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: prima.uid, fatta: true })).body.data as AzionePercorsoDto;
+    expect(a).toMatchObject({ uid: prima.uid, giorno: '04-12', fatta: true });
+    a = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: prima.uid, fatta: true })).body.data as AzionePercorsoDto; // idempotente
     const g = (await request(app).get(`/api/compendio/percorso/04-12?partita=${id}`)).body.data as PercorsoGiornoDto;
     expect(g.fatte).toBe(1);
     expect(g.azioni[0].fatta).toBe(true);
     const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=percorso`)).body.data as StoricoDto;
     expect(storico.totale).toBe(1);
     expect(storico.eventi[0].titolo).toContain('04-12');
-    a = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-12', indice: 0, fatta: false })).body.data as AzionePercorsoDto;
+    a = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: prima.uid, fatta: false })).body.data as AzionePercorsoDto;
     expect(a.fatta).toBe(false);
-    expect((await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-12', indice: 99, fatta: true })).status).toBe(404);
-    expect((await request(app).put(`/api/partite/${id}/percorso`).send({ data: '2016-04-12', indice: 0, fatta: true })).status).toBe(400);
+    expect((await request(app).put(`/api/partite/${id}/percorso`).send({ uid: '0'.repeat(32), fatta: true })).status).toBe(404);
+    expect((await request(app).put(`/api/partite/${id}/percorso`).send({ uid: 'non-un-uid', fatta: true })).status).toBe(400);
     const gc = (await request(app).put(`/api/partite/${id}/giorno`).send({ data: '05-19' })).body.data as GiornoCorrenteDto;
     expect(gc.dataCorrente).toBe('05-19');
     expect(gc.partita.id).toBe(id);
@@ -61,7 +66,9 @@ describe('API percorso giorno per giorno', () => {
     const i = (await request(app).get(`/api/compendio/percorso?partita=${id}`)).body.data as PercorsoIndiceDto;
     expect(i.dataCorrente).toBe('05-19');
     expect((await request(app).put(`/api/partite/${id}/giorno`).send({ data: '13-40' })).status).toBe(404);
-    await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-19', indice: 0, fatta: true });
+    const primaDel19 = ((await request(app).get('/api/compendio/percorso/05-19')).body.data as PercorsoGiornoDto).azioni[0];
+    await request(app).put(`/api/partite/${id}/percorso`).send({ uid: primaDel19.uid, fatta: true });
+    // il pacchetto ricaricato ridà le stesse voci con le stesse identità: la spunta resta
     ricaricaPacchetto(getDb());
     const dopo = (await request(app).get(`/api/compendio/percorso/05-19?partita=${id}`)).body.data as PercorsoGiornoDto;
     expect(dopo.azioni[0].fatta).toBe(true);
@@ -98,24 +105,24 @@ describe('API percorso giorno per giorno', () => {
     // le «+N» della guida sono note: 1 → 2 punti, 2 → 3, 3 → 5
     const noteGuida = Number(/Conoscenza \+(\d)/.exec(conDote.note ?? '')![1]);
     const atteso = [2, 3, 5][noteGuida - 1];
-    const fatta = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-12', indice: conDote.indice, fatta: true })).body.data as AzionePercorsoDto;
+    const fatta = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: conDote.uid, fatta: true })).body.data as AzionePercorsoDto;
     expect(fatta.effetti?.doti).toEqual([{ chiave: 'conoscenza', nome: 'Conoscenza', delta: atteso, note: noteGuida, cinema: false }]);
     // le Doti si segnano a mano: la spunta le dice, non le tocca
     const doti = (await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>;
     expect(doti.find((d) => d.chiave === 'conoscenza')!.punti).toBe(0);
     // la scheda del giorno espone gli effetti registrati; togliere la spunta non tocca le Doti
     const rilettura = (await request(app).get(`/api/compendio/percorso/04-12?partita=${id}`)).body.data as PercorsoGiornoDto;
-    expect(rilettura.azioni[conDote.indice].effetti?.doti[0].delta).toBe(atteso);
-    await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-12', indice: conDote.indice, fatta: false });
+    expect(rilettura.azioni.find((x) => x.uid === conDote.uid)!.effetti?.doti[0].delta).toBe(atteso);
+    await request(app).put(`/api/partite/${id}/percorso`).send({ uid: conDote.uid, fatta: false });
     expect(((await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>).find((d) => d.chiave === 'conoscenza')!.punti).toBe(0);
     // Confidente: serve il rango 1 e la scelta delle note; senza Persona del Carro in scorta 2 note = 10 punti
     await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ forza: true, rango: 1 });
     const indice = (await request(app).get(`/api/compendio/percorso?partita=${id}`)).body.data as PercorsoIndiceDto;
-    let trovata: { data: string; indice: number } | null = null;
+    let trovata: { uid: string } | null = null;
     for (const giorno of indice.giorni) {
       const gg = (await request(app).get(`/api/compendio/percorso/${giorno.giorno}?partita=${id}`)).body.data as PercorsoGiornoDto;
       const az = gg.azioni.find((x) => x.tipo === 'confidente' && x.riferimento?.chiave === 'ryuji' && (x.rangoAtteso ?? 0) >= 2);
-      if (az) { trovata = { data: giorno.giorno, indice: az.indice }; break; }
+      if (az) { trovata = { uid: az.uid }; break; }
     }
     expect(trovata).not.toBeNull();
     const conNote = (await request(app).put(`/api/partite/${id}/percorso`).send({ ...trovata!, fatta: true, noteRisposta: 2 })).body.data as AzionePercorsoDto;
@@ -138,15 +145,15 @@ describe('API percorso giorno per giorno', () => {
     getDb().prepare("UPDATE libro SET sessioni=2, condizioni_json='[]' WHERE chiave='anima-da-cineasta'").run();
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', avanzamento: 1 })).status).toBe(200);
     // cerco il primo DVD della guida che dà una Dote e che la spunta completa («(1/2)» è solo la prima serata: i punti arrivano alla fine)
-    let trovato: { giorno: string; indice: number; note: number; dote: string; chiave: string | null } | null = null;
+    let trovato: { uid: string; note: number; dote: string; chiave: string | null } | null = null;
     const indice = (await request(app).get('/api/compendio/percorso')).body.data as { giorni: Array<{ giorno: string }> };
     for (const g of indice.giorni) {
       const giorno = (await request(app).get(`/api/compendio/percorso/${g.giorno}?partita=${id}`)).body.data as PercorsoGiornoDto;
       const dvd = giorno.azioni.find((x) => x.tipo === 'dvd' && /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.test(x.note ?? '') && x.produce.some((e) => e.tipo === 'lettura' && e.almeno === null));
-      if (dvd) { const m = /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.exec(dvd.note ?? '')!; trovato = { giorno: g.giorno, indice: dvd.indice, note: Number(m[2]), dote: m[1].toLowerCase(), chiave: dvd.riferimento?.tipo === 'film' ? dvd.riferimento.chiave : null }; break; }
+      if (dvd) { const m = /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.exec(dvd.note ?? '')!; trovato = { uid: dvd.uid, note: Number(m[2]), dote: m[1].toLowerCase(), chiave: dvd.riferimento?.tipo === 'film' ? dvd.riferimento.chiave : null }; break; }
     }
     expect(trovato).not.toBeNull();
-    const { giorno, indice: idx, dote, chiave } = trovato!;
+    const { uid, dote, chiave } = trovato!;
     // I punti non li applica più il percorso: li dà il **conseguimento** del DVD, e spuntare
     // l'azione lo segna come visto. La sorgente dev'essere una sola, altrimenti chi spunta qui e
     // segna anche la visione sulla pagina Film prende i punti due volte — un errore che non si vede
@@ -154,7 +161,7 @@ describe('API percorso giorno per giorno', () => {
     // Quindi si guarda la Dote detta dalla visione: gli effetti dell'azione registrano la visione
     // portata avanti, con le Doti che dà (da segnare a mano), senza Doti proprie dell'azione.
     const dettaDalla = (a: AzionePercorsoDto) => (a.effetti?.letture ?? []).flatMap((l) => l.doti ?? []).filter((d) => d.chiave === dote).reduce((s, d) => s + d.delta, 0);
-    const senza = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: true })).body.data as AzionePercorsoDto;
+    const senza = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid, fatta: true })).body.data as AzionePercorsoDto;
     expect(senza.effetti?.doti).toEqual([]);
     expect(senza.effetti?.letture).toEqual([expect.objectContaining({ categoria: 'film', chiave, prima: 0 })]);
     // un DVD dà due note: 3 punti senza il libro
@@ -164,7 +171,7 @@ describe('API percorso giorno per giorno', () => {
     // tracciamento dice «l'ho visto». Disfarla da qui butterebbe via un avanzamento che potrebbe
     // essere stato segnato sulla pagina Film, e fra un'asimmetria e una perdita di dati si sceglie
     // l'asimmetria.
-    await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: false });
+    await request(app).put(`/api/partite/${id}/percorso`).send({ uid, fatta: false });
 
     // Col libro letto lo scalino sale, e vale per le visioni **da lì in avanti**: si disfa la
     // visione dalla sua pagina — che è dove quel dato vive — e la si rifà.
@@ -172,7 +179,7 @@ describe('API percorso giorno per giorno', () => {
     const disfatta = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'film', chiave, avanzamento: 0 })).body.data as { daSegnare?: Array<{ chiave: string; delta: number }> };
     expect(disfatta.daSegnare?.find((d) => d.chiave === dote)?.delta).toBe(-3);
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', fatto: true })).status).toBe(200);
-    const col = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: true })).body.data as AzionePercorsoDto;
+    const col = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid, fatta: true })).body.data as AzionePercorsoDto;
     expect(dettaDalla(col)).toBe(5);
     // le Doti della partita non si sono mosse: si segnano a mano
     expect(((await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>).find((d) => d.chiave === dote)!.punti).toBe(0);
@@ -187,13 +194,13 @@ describe('API percorso giorno per giorno', () => {
     // Anche qui i punti li dice il conseguimento, non la spunta: tre note al cinema sono 5 punti, 7
     // col libro. Che la regola dello scalino continui a valere è il senso di questa prova.
     const gentilezza = (a: AzionePercorsoDto) => (a.effetti?.letture ?? []).flatMap((l) => l.doti ?? []).filter((d) => d.chiave === 'gentilezza').reduce((s, d) => s + d.delta, 0);
-    const prima = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: true })).body.data as AzionePercorsoDto;
+    const prima = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: film.uid, fatta: true })).body.data as AzionePercorsoDto;
     expect(gentilezza(prima)).toBe(5);
 
     await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'film', chiave: 'cinema-the-cake-knight-rises', avanzamento: 0 });
-    await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: false });
+    await request(app).put(`/api/partite/${id}/percorso`).send({ uid: film.uid, fatta: false });
     await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', fatto: true });
-    const col = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: true })).body.data as AzionePercorsoDto;
+    const col = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: film.uid, fatta: true })).body.data as AzionePercorsoDto;
     expect(gentilezza(col)).toBe(7);
   });
 });

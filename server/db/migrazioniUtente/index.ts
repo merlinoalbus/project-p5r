@@ -20,5 +20,7 @@ import { utente010 } from './010_incontri_piu_passaggi.js';
 import { utente011 } from './011_incontro_punti_prima.js';
 import { utente012 } from './012_conferme_come_eventi.js';
 import { utente013 } from './013_meteo_della_partita.js';
+import { utente014 } from './014_ordine_della_giornata.js';
+import { utente015 } from './015_giornata_canone.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015];

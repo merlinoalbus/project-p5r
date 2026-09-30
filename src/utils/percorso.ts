@@ -2,12 +2,15 @@
 // percorso — etichette dei tipi di azione e collegamenti alle schede dell'app (Fase 7.5b)
 // ============================================================
 
-import type { AzionePercorsoDto, EffettiAzioneDto, EventoUtenteDto } from '../types';
+import type { AzionePercorsoDto, EffettiAzioneDto, GenereVoce } from '../types';
 import { TIPI_AZIONE } from '../../shared/effettiAzione';
 import { dotiDaSegnareDaEffetti, promemoriaDoti } from './dotiDaSegnare';
 
-/** Etichette dei tipi di evento che l'utente aggiunge alla giornata. */
-export const NOME_TIPO_EVENTO: Record<EventoUtenteDto['tipo'], string> = { evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' };
+/** I generi di una voce della giornata: un'azione si spunta, gli altri si mostrano. */
+export const NOME_GENERE: Record<GenereVoce, string> = { azione: 'Cosa da fare', evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' };
+
+/** Etichette dei generi che si mostrano e non si spuntano (il cartellino della voce). */
+export const NOME_TIPO_EVENTO: Record<Exclude<GenereVoce, 'azione'>, string> = { evento: NOME_GENERE.evento, scadenza: NOME_GENERE.scadenza, promemoria: NOME_GENERE.promemoria };
 
 /** Etichette dei tipi di azione: un elenco solo, quello condiviso con il server (`TIPI_AZIONE`). */
 export const NOME_TIPO_AZIONE: Record<string, string> = Object.fromEntries(TIPI_AZIONE.map((t) => [t.chiave, t.nome]));

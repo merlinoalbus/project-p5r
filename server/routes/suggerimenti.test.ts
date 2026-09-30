@@ -74,7 +74,7 @@ describe('API suggerimenti del giorno', () => {
     // spunta dell'azione del libro: il libro non è più fra i suggerimenti
     const giorno = (await request(app).get(`/api/compendio/percorso/04-18?partita=${id}`)).body.data as PercorsoGiornoDto;
     const azione = giorno.azioni.find((a) => a.riferimento?.tipo === 'libro')!;
-    expect((await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-18', indice: azione.indice, fatta: true })).status).toBe(200);
+    expect((await request(app).put(`/api/partite/${id}/percorso`).send({ uid: azione.uid, fatta: true })).status).toBe(200);
     const dopo = (await request(app).get(`/api/partite/${id}/suggerimenti`)).body.data as SuggerimentiOggiDto;
     expect(dopo.libri).not.toContain('la-leggenda-dei-pirati');
   });
