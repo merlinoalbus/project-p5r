@@ -74,4 +74,4 @@ export async function aggiungiImmagineSpillo(spilloId: number, file: File, didas
 }
 export const aggiornaImmagineSpillo = (id: number, dati: { didascalia?: string; ordine?: number }): Promise<SpilloDto> => apiPut(`/mappe/spilli/immagini/${id}`, dati);
 export const eliminaImmagineSpillo = (id: number): Promise<SpilloDto> => apiDelete(`/mappe/spilli/immagini/${id}`);
-export const importaMappe = (pacchetto: EsportazioneMappeDto, sovrascrivi: boolean): Promise<{ mappe: number; spilli: number; immagini: number; saltate: string[]; condizioniScartate: number }> => apiPost('/mappe/importa', { pacchetto, sovrascrivi }, { timeoutMs: 120_000 });
+export const importaMappe = (pacchetto: EsportazioneMappeDto, sovrascrivi: boolean): Promise<{ mappe: number; spilli: number; immagini: number; saltate: string[]; condizioniScartate: number; vociScartate: number }> => apiPost('/mappe/importa', { pacchetto, sovrascrivi }, { timeoutMs: 120_000 });

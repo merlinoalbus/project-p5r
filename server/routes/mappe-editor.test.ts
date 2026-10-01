@@ -27,7 +27,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     caricaPacchetto(db);
     invalidaCacheTraduzioni();
     // Explicit positioned fixture: editorial seed points no longer pretend to have a physical map.
-    const punto=db.prepare('SELECT chiave FROM punto_interesse LIMIT 1').get() as {chiave:string};
+    // una voce del Palazzo della planimetria di prova (che è figlia di Kamoshida), che si segna: le regole del collegamento (094)
+    const punto=db.prepare("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'kamoshida' AND p.tipo <> 'altro' ORDER BY p.chiave LIMIT 1").get() as {chiave:string};
     const fixture=creaMappa(undefined,{nome:'Fixture geografica',tipo:'area',genitore:'dungeon-kamoshida'});
     creaSpillo(fixture.chiave,{tipo:'nota',nome:'Punto verificato fixture',x:10,y:20,riferimento:{tipo:'punto',chiave:punto.chiave}});
     partitaId = ((await request(app).post('/api/partite').send({ nome: 'Mappe' })).body.data as { id: number }).id;
@@ -110,9 +111,11 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const dettaglio = (await request(app).get(`/api/mappe/${area.chiave}?partita=${partitaId}`)).body.data as MappaDto;
     expect(dettaglio.percorso.map((p) => p.chiave)).toEqual([area.genitore, area.chiave]);
     expect(dettaglio.spilli.length).toBe(area.numeroSpilli);
-    const spilloPunto = dettaglio.spilli.find((s) => s.riferimento?.tipo === 'punto')!;
-    expect(spilloPunto.dettaglio?.tipo).toBe('punto');
-    expect(spilloPunto.dettaglio?.punto?.area).toBeTruthy();
+    // la voce della guida sta nel campo suo (094): il riferimento «punto» dato alla creazione è diventato la voce
+    const spilloPunto = dettaglio.spilli.find((s) => !!s.voce)!;
+    expect(spilloPunto.riferimento).toBeNull();
+    expect(spilloPunto.dettaglio).toBeNull();
+    expect(spilloPunto.voce?.area).toBeTruthy();
     expect(spilloPunto.raccolto).toBe(false);
     expect(spilloPunto.x).toBeGreaterThanOrEqual(0);
     expect(spilloPunto.x).toBeLessThanOrEqual(100);
@@ -173,17 +176,17 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const albero = (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[];
     const area = albero.find((m) => m.nome === 'Fixture geografica')!;
     const prima = (await request(app).get(`/api/mappe/${area.chiave}?partita=${partitaId}`)).body.data as MappaDto;
-    const spillo = prima.spilli.find((s) => s.riferimento?.tipo === 'punto')!;
+    const spillo = prima.spilli.find((s) => !!s.voce)!;
     const raccolto = (await request(app).put(`/api/partite/${partitaId}/spilli/${spillo.id}`).send({ raccolto: true })).body.data as SpilloDto;
     expect(raccolto.raccolto).toBe(true);
-    expect(raccolto.dettaglio?.punto?.stato).toBe('ottenuto');
+    expect(raccolto.voce?.stato).toBe('ottenuto');
     // senza partita lo stato non compare; con un'altra partita resta non raccolto
     expect((await request(app).get(`/api/mappe/${area.chiave}`)).body.data.spilli.find((s: SpilloDto) => s.id === spillo.id).raccolto).toBe(false);
     const altra = ((await request(app).post('/api/partite').send({ nome: 'Altra' })).body.data as { id: number }).id;
     expect((await request(app).get(`/api/mappe/${area.chiave}?partita=${altra}`)).body.data.spilli.find((s: SpilloDto) => s.id === spillo.id).raccolto).toBe(false);
     const annullato = (await request(app).put(`/api/partite/${partitaId}/spilli/${spillo.id}`).send({ raccolto: false })).body.data as SpilloDto;
     expect(annullato.raccolto).toBe(false);
-    expect(annullato.dettaglio?.punto?.stato).toBeNull();
+    expect(annullato.voce?.stato).toBeNull();
     expect((await request(app).put(`/api/partite/${partitaId}/spilli/999999`).send({ raccolto: true })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${partitaId}/spilli/${spillo.id}`).send({ raccolto: 'sì' })).status).toBe(400);
   });

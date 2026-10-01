@@ -1892,6 +1892,9 @@ export interface DettaglioSpilloDto {
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
 
+/** La voce della guida di un pin (`SpilloDto.voce`): la stessa forma del dettaglio di un riferimento a un punto. */
+export type VoceDelPinDto = NonNullable<DettaglioSpilloDto['punto']>;
+
 /** Condizione di visibilità con il testo in italiano pronto per la scheda. */
 export type CondizioneSpilloDto = RequisitoSpillo & { testo: string };
 /** Una voce di effetto di un libro, film o attività, con la sua frase (shared/effettiCatalogo). */
@@ -1966,7 +1969,11 @@ export interface SpilloDto {
   origine: 'seed' | 'utente';
   /** Raccolto nella partita (o punto già gestito nella Guida). */
   raccolto: boolean;
+  /** Il riferimento del pin (dove porta, il luogo, il Confidente…) risolto. Non dice più la voce della guida: quella è `voce`. */
   dettaglio: DettaglioSpilloDto | null;
+  /** La voce della guida a cui il pin appartiene, con il suo stato nella partita (2026-10-01): separata dal riferimento, così un
+   *  passaggio porta alla sua mappa *e* fa parte di una voce. null = il pin non è di nessuna voce. */
+  voce: VoceDelPinDto | null;
   /** Schermate di riferimento (istanza o asset del repository), in ordine. */
   immagini: ImmagineSpilloDto[];
   updatedAt: string;
@@ -2011,7 +2018,7 @@ export interface EsportazioneMappeDto {
     /** Tutte le aree della guida contenute nella planimetria, in ordine di guida (2026-09-29). `entita` ne
      *  dichiara una sola, la prima; un pacchetto di prima non ha questo campo. */
     aree?: string[];
-    spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
+    spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; /** La voce della guida del pin (094); un pacchetto di prima la porta come riferimento «punto». */ voce?: string | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */

@@ -689,13 +689,17 @@ planimetria la scheda offre il selettore di tutte le tavole e aggiunge l'area co
 bassa della colonna dell'area: le voci (`punto_interesse`) sempre visibili, anche in un'area senza voci, con correzione,
 eliminazione, «Su»/«Giù» (`PUT /api/compendio/punti/:chiave/sposta`, `spostaPunto`: ricompatta l'ordine dell'area) e
 «Aggiungi una voce». Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
-/api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta sul pin (`riferimento = punto`), un pin
-già collegato ad altro si rifiuta (409 `pin-gia-collegato`, col nome di ciò a cui è collegato), uno fuori dal Palazzo pure
+/api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta sul pin, in un campo suo
+(`spillo.voce_chiave`, migrazione 094; `ON DELETE SET NULL`), separato dal riferimento, che resta la destinazione o il Confidente
+del pin; la regola unica di lettura è `VOCE_DEL_PIN` / `voceDelPin` (`mappe/voceDelPin.ts`, senza dipendenze: il campo, o il riferimento «punto»
+degli elementi della guida senza mappa, lasciati com'erano) e il DTO del pin la porta in `SpilloDto.voce`; le regole del collegamento
+sono una funzione sola, `erroreVoceDelPin` (`collegamentiGuida.ts`), per la guida, l'editor delle mappe e il pacchetto. Un pin già di un'altra
+voce si rifiuta (409 `pin-gia-collegato`, col nome della voce), uno fuori dal Palazzo pure
 (400). I pin si scelgono **sulla mappa, dentro la voce**: `MappaIncorporata`/`VisoreMappa` con la prop `scelta`
 (`SceltaPin`: senza testata, tocco = `onScegli` invece del popup, tutti i pin visibili, i collegati con `.spillo-mappa--scelto`,
 ricerca passata dalla voce); l'altezza della mappa si **misura** sul contenitore che scorre. `PuntoInteresseDto.pin`
 (`PinDelPuntoDto`) porta i pin collegati; la riga dice «N pin» o «da collegare» (`shared/spilli.ts`: `pinDelPunto`,
-`puntoDaCollegare` — il tipo ha di solito un pin; `puntoDescrittivo` — solo «Altro», senza pin né stato). I tipi delle voci (2026-10-01): Stanze sicure, Porta, Meccanismo, Forziere normale, Forziere raro, Semi della bramosia, Enigma, Mini-boss, Boss, Nemico, Persona, Oggetto, Scorciatoia, Storia, Altro (`NOME_TIPO`; le chiavi dei dati restano `sicura`, `forziere-chiuso`, `volonta`, `ombra-sciagura`); ogni tipo tranne «Altro» si collega a qualunque pin del Palazzo che non abbia già un riferimento proprio (una destinazione, un Confidente: lo supera la voce «campo dedicato alla voce»). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
+`puntoDaCollegare` — il tipo ha di solito un pin; `puntoDescrittivo` — solo «Altro», senza pin né stato). I tipi delle voci (2026-10-01): Stanze sicure, Porta, Meccanismo, Forziere normale, Forziere raro, Semi della bramosia, Enigma, Mini-boss, Boss, Nemico, Persona, Oggetto, Scorciatoia, Storia, Altro (`NOME_TIPO`; le chiavi dei dati restano `sicura`, `forziere-chiuso`, `volonta`, `ombra-sciagura`); ogni tipo tranne «Altro» si collega a qualunque pin del Palazzo, anche a uno con una destinazione o un Confidente (dalla 094). Dall'editor delle mappe un riferimento «punto» diventa la voce del pin senza toccarne il riferimento; il pacchetto delle mappe la porta come `voce` (§6 di `MAPPE.md`). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
 `impostaStatoPunto` raccoglie o riapre tutti i pin della voce; `impostaRaccolto` segna la voce quando sono raccolti **tutti**
 i suoi pin delle planimetrie e la riapre togliendone uno; collegando, `allineaStatiPunto` unisce gli stati delle partite
 (voce segnata → pin raccolti; pin tutti raccolti → voce segnata), scollegando restano come sono. La risposta del

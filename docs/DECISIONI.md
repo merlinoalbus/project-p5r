@@ -919,3 +919,20 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   (misurato anche sul canone di produzione).
 - Chiarito: una voce si collega a più pin (un pin a una sola voce). «Enigma» diventa un contenitore di passi (voce 3 in ROADMAP):
   il caso d'uso dell'utente è la porta che si apre con un meccanismo di sblocco, ciascuno col suo pin.
+
+### 2026-10-01 — La voce della guida di un pin sta in un campo suo
+- Scelta dell'utente: «Campo dedicato alla voce». `spillo.voce_chiave` (migrazione 094, `ON DELETE SET NULL`) porta la voce; il
+  riferimento resta quello del pin (destinazione, Confidente…). Così qualunque pin del Palazzo si collega, compresi gli 88 del
+  canone di produzione che avevano già un riferimento.
+- I collegamenti esistenti dei pin delle planimetrie passano dal riferimento al campo nuovo, con uid e stati delle partite intatti;
+  un riferimento a una voce che non c'è più resta com'era (nessun collegamento rotto). Gli elementi della guida senza mappa tengono
+  il loro riferimento «punto»: nessuna riconciliazione, come scelto per la guida. La regola di lettura è una sola (`VOCE_DEL_PIN`).
+- Le regole del collegamento sono le stesse per ogni strada che lo scrive (`erroreVoceDelPin`, rilievo della revisione): la guida,
+  l'editor delle mappe (un riferimento «punto» in ingresso diventa la voce e **non tocca** il riferimento del pin: un passaggio
+  tiene la sua destinazione) e il pacchetto delle mappe (voce non valida → 400; voce inesistente, descrittiva o di un altro Palazzo
+  → scartata e contata). Nel pacchetto la voce viaggia come `voce` (anche `null`); un pacchetto di prima (riferimento «punto») la
+  ritrova nel campo nuovo; la voce non entra nell'identità del pin. Un pacchetto che tace sulla voce non toglie quella collegata
+  dall'utente: il pin invariato la tiene, quello tolto e reinserito con lo stesso uid la ritrova; uno che la dichiara `null` la
+  toglie. Misura: in produzione `importaMappe` si chiama solo dall'editor (origine `utente`), il ramo `seed` resta per i test.
+  «Sulla mappa» di una voce porta ai suoi pin. Spostato dall'editor su una planimetria fuori dal Palazzo della sua voce, un pin
+  si rifiuta (400 `pin-fuori-dal-palazzo`): prima si scollega.

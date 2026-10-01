@@ -12,7 +12,7 @@ const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: s
   ({ tipo: 'luogo', genitore: 'quartiere', nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 
 const spillo = (extra: Partial<SpilloDto> & { id: number; nome: string }): SpilloDto =>
-  ({ mappaChiave: 'sottopasso', tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '', ...extra });
+  ({ mappaChiave: 'sottopasso', tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '', ...extra });
 
 const albero: MappaRiassuntoDto[] = [
   riassunto({ chiave: 'quartiere', nome: 'Shibuya', tipo: 'quartiere', genitore: null }),

@@ -190,7 +190,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                 const pacchetto = JSON.parse(await file.text()) as EsportazioneMappeDto;
                 const esito = await importaMappe(pacchetto, sovrascrivi);
                 await albero.ricarica();
-                notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}${esito.condizioniScartate ? `; ${esito.condizioniScartate} condizioni scartate perché citano chiavi assenti dalla Guida` : ''}.`);
+                notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}${esito.condizioniScartate ? `; ${esito.condizioniScartate} condizioni scartate perché citano chiavi assenti dalla Guida` : ''}${esito.vociScartate ? `; ${esito.vociScartate} voci della guida scartate (inesistenti, descrittive o di un altro Palazzo)` : ''}.`);
               })}
               onVai={vai}
             />
@@ -431,8 +431,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     if (c !== 'spostamento') setDestinazione(null);
     if (c === 'citta') setCondizioni([]);
   };
-  // Uno spostamento che **è** un luogo o un punto della Guida (stazione, scorciatoia) tiene quel riferimento: è la sua identità
-  // per il seed e per lo stato condiviso con la scheda del Palazzo; la destinazione vive a parte. Il riferimento «mappa» si
+  // Uno spostamento che **è** un luogo (una stazione) tiene quel riferimento: è la sua identità per il seed; la voce della guida
+  // sta in un campo suo (`voce`, 094) e la destinazione vive a parte. Il riferimento «mappa» si
   // scrive solo per chi non ha un'identità propria (i passaggi vecchi lo usano come ripiego).
   const riferimentoEffettivo = categoria === 'spostamento'
     ? (riferimento && riferimento.tipo !== 'mappa' ? riferimento : (destinazione ? { tipo: 'mappa' as const, chiave: destinazione.mappa } : null))
@@ -446,7 +446,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     if (!condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null)) { notifica('error', 'Completa o rimuovi i gruppi vuoti prima di salvare.'); return; }
     void onSalva(dati);
   };
-  const puntoGuida = s.dettaglio?.tipo === 'punto' ? s.dettaglio.punto ?? null : null;
+  // la voce della guida del pin (094): sta in un campo suo, accanto al riferimento
+  const puntoGuida = s.voce;
   return (
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
       <div className="flex items-start gap-2">
@@ -471,7 +472,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
         {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
-        {categoria !== 'citta' && puntoGuida && <p className="m-0 text-[12px] text-text-secondary">Punto della Guida: <strong>{puntoGuida.nome}</strong> — lo stato «ottenuto / esaurito» si condivide con la scheda del Palazzo.</p>}
+        {puntoGuida && <p className="m-0 text-[12px] text-text-secondary">Punto della Guida: <strong>{puntoGuida.nome}</strong> — lo stato «ottenuto / esaurito» si condivide con la scheda del Palazzo.</p>}
         {categoria === 'consumabile' && <p className="m-0 text-[12px] text-text-muted">Si segna come fatto nella partita; non porta da nessuna parte.</p>}
         {categoria !== 'citta' && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo />}
 

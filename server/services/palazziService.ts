@@ -21,6 +21,7 @@
 
 import { prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
+import { voceDelPin } from './mappe/voceDelPin.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
 export function palazzoDiOgniMappa(): Map<string, string> {
@@ -64,7 +65,7 @@ function areeDelleMappe(): Map<string, Set<string>> {
   return out;
 }
 
-interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string; riferimentoTipo: string | null; riferimentoChiave: string | null }
+interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string; /** La voce della guida del pin (`voceDelPin`). */ voce: string | null }
 
 /**
  * È il boss finale del suo Palazzo? Se punta a un punto boss finale; se sta sulla planimetria che contiene l'area
@@ -75,21 +76,22 @@ interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string
  */
 function eBossFinale(s: SpilloCollezionabile, finale: BossFinale | undefined, aree: Map<string, Set<string>>): boolean {
   if (s.tipo !== 'boss' || !finale) return false;
-  if (s.riferimentoTipo === 'punto' && s.riferimentoChiave && finale.punti.includes(s.riferimentoChiave)) return true;
+  if (s.voce && finale.punti.includes(s.voce)) return true;
   if (aree.get(s.mappa)?.has(finale.area)) return true;
   return finale.unico;
 }
 
 /** I collezionabili sulle planimetrie di ogni Palazzo. */
 function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, SpilloCollezionabile[]> {
-  const uid = (prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).some((c) => c.name === 'uid');
+  const colonne = new Set((prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).map((c) => c.name));
   const out = new Map<string, SpilloCollezionabile[]>();
-  const righe = prepared(`SELECT ${uid ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave, riferimento_tipo, riferimento_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ uid: string | null; tipo: string; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null }>;
+  // la voce (094) c'è dal suo turno in poi, come l'uid (067): prima vale il solo riferimento «punto»
+  const righe = prepared(`SELECT ${colonne.has('uid') ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave, riferimento_tipo, riferimento_chiave${colonne.has('voce_chiave') ? ', voce_chiave' : ''} FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ uid: string | null; tipo: string; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null; voce_chiave?: string | null }>;
   for (const r of righe) {
     const dungeon = palazzi.get(r.mappa_chiave);
     if (!dungeon) continue;
     const elenco = out.get(dungeon) ?? [];
-    elenco.push({ uid: r.uid, tipo: r.tipo, mappa: r.mappa_chiave, riferimentoTipo: r.riferimento_tipo, riferimentoChiave: r.riferimento_chiave });
+    elenco.push({ uid: r.uid, tipo: r.tipo, mappa: r.mappa_chiave, voce: voceDelPin(r) });
     out.set(dungeon, elenco);
   }
   return out;
@@ -98,7 +100,7 @@ function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, Spi
 /** Il completamento **senza** il boss della Guida: serve anche a decidere se il boss della Guida va tolto. */
 function completamentoDallaMappa(spilli: SpilloCollezionabile[], finale: BossFinale | undefined, aree: Map<string, Set<string>>, raccolti: Set<string>, puntiGestiti: Set<string>): string | null {
   // la stessa regola della scheda del Palazzo: raccolto, o collegato a un punto della Guida già gestito
-  const preso = (s: SpilloCollezionabile) => (!!s.uid && raccolti.has(s.uid)) || (s.riferimentoTipo === 'punto' && !!s.riferimentoChiave && puntiGestiti.has(s.riferimentoChiave));
+  const preso = (s: SpilloCollezionabile) => (!!s.uid && raccolti.has(s.uid)) || (!!s.voce && puntiGestiti.has(s.voce));
   if (spilli.some((s) => eBossFinale(s, finale, aree) && !!s.uid && raccolti.has(s.uid))) return 'boss finale raccolto sulla mappa';
   if (spilli.some((s) => s.tipo === 'tesoro-palazzo' && !!s.uid && raccolti.has(s.uid))) return 'Tesoro del Palazzo raccolto';
   const presi = spilli.filter(preso).length;
@@ -129,7 +131,7 @@ export function palazziCompletati(partitaId: number): Map<string, string> {
  * se sulla mappa nient'altro dice che il Palazzo è finito (l'altro fra Tesoro e boss, o il 100%).
  * Va chiamata nella transazione di chi segna il raccolto, dopo la scrittura.
  */
-export function allineaBossDellaGuida(partitaId: number, spillo: { tipo: string; mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; uid: string | null }, raccolto: boolean, adesso: string): void {
+export function allineaBossDellaGuida(partitaId: number, spillo: { tipo: string; mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; voce_chiave?: string | null; uid: string | null }, raccolto: boolean, adesso: string): void {
   if (!spillo.mappa_chiave || (spillo.tipo !== 'tesoro-palazzo' && spillo.tipo !== 'boss')) return;
   const palazzi = palazzoDiOgniMappa();
   const dungeon = palazzi.get(spillo.mappa_chiave);
@@ -137,7 +139,7 @@ export function allineaBossDellaGuida(partitaId: number, spillo: { tipo: string;
   const finale = bossFinali().get(dungeon);
   if (!finale) return;
   const aree = areeDelleMappe();
-  const questo: SpilloCollezionabile = { uid: spillo.uid, tipo: spillo.tipo, mappa: spillo.mappa_chiave, riferimentoTipo: spillo.riferimento_tipo, riferimentoChiave: spillo.riferimento_chiave };
+  const questo: SpilloCollezionabile = { uid: spillo.uid, tipo: spillo.tipo, mappa: spillo.mappa_chiave, voce: voceDelPin(spillo) };
   if (spillo.tipo === 'boss' && !eBossFinale(questo, finale, aree)) return;
   if (raccolto) {
     // `automatico`: è il raccolto a metterlo, e solo un segno così si toglie togliendo il raccolto (utente 006);

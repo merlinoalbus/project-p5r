@@ -10,10 +10,12 @@ import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMapp
 
 vi.mock('../../services/api', () => ({ aggiornaSpillo: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
 
+const voce = (tipo: string) => ({ chiave: 'futaba-02/0', tipo, nome: 'Tesoro avvistato', descrizione: '', esauribile: false, dungeon: 'futaba', area: 'futaba-02', stato: null });
 const elemento = (tipoPunto: string): SchedaContenutoGuidaDto => ({
   id: 48, uid: 'u48', tipo: 'nota', tipoNome: 'Nota', nome: 'Tesoro avvistato', colore: '#ececf1', descrizione: 'Visibile da lontano.', riferimento: { tipo: 'punto', chiave: 'futaba-02/0' },
   collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, condizioni: [], immagini: [], updatedAt: '', areaGuida: 'futaba-02',
-  dettaglio: { tipo: 'punto', punto: { chiave: 'futaba-02/0', tipo: tipoPunto, nome: 'Tesoro avvistato', descrizione: '', esauribile: false, dungeon: 'futaba', area: 'futaba-02', stato: null } },
+  // il server dà la voce sia nel dettaglio del riferimento (strato di prima) sia nel campo `voce` (094): la scheda legge `voce`
+  dettaglio: { tipo: 'punto', punto: voce(tipoPunto) }, voce: voce(tipoPunto),
 } as unknown as SchedaContenutoGuidaDto);
 
 it('collegato a una voce «altro»: la dicitura, nessun Ottenuto', () => {

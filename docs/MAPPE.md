@@ -73,6 +73,9 @@ spillo
   seed_identita_json TEXT NULL       migrazione 030: identità (tipo, nome, x, y, riferimento) dello spillo del seed quando l'utente lo
                                      modifica e diventa `utente`; al reseed il pacchetto salta lo spillo con quella identità (niente doppioni,
                                      modifiche e condizioni conservate)
+  voce_chiave      TEXT NULL → punto_interesse(chiave) ON DELETE SET NULL   migrazione 094 (2026-10-01): la voce della guida a cui
+                                     il pin appartiene, in un campo suo; il riferimento resta libero (una destinazione, un Confidente).
+                                     Una voce, più pin; un pin, una voce. Gli elementi della guida senza mappa tengono il riferimento «punto»
 
 spillo_partita  (stato per partita)
   partita_id, spillo_id PK, raccolto INTEGER NOT NULL DEFAULT 0, updated_at
@@ -81,7 +84,8 @@ spillo_partita  (stato per partita)
 Regole:
 - Il tipo `passaggio` con `riferimento_tipo = 'mappa'` è il collegamento fra livelli (punti 6 e 8): il click apre la mappa di destinazione;
   la mappa figlia mostra il pulsante «Torna a <genitore>» e il percorso (breadcrumb) ricostruito con `genitore_chiave`.
-- Uno spillo con `riferimento_tipo = 'punto'` eredita lo stato del punto di dungeon della partita (`stato_punto`: ottenuto/esaurito ⇒
+- Uno spillo di una voce della guida (`voce_chiave`, dalla 094; prima `riferimento_tipo = 'punto'`, che resta per gli elementi della guida
+  senza mappa — la regola unica è `VOCE_DEL_PIN` / `voceDelPin` in `mappe/voceDelPin.ts`, riesportata da `collegamentiGuida.ts`) eredita lo stato del punto di dungeon della partita (`stato_punto`: ottenuto/esaurito ⇒
   raccolto) così i forzieri già gestiti nella Guida spariscono anche sulla mappa; gli spilli senza riferimento usano `spillo_partita`.
 - `riferimento_tipo = 'negozio'` ⇒ la scheda dello spillo mostra gli articoli del negozio (punto 5) con prezzo, disponibilità e stato
   d'acquisto della partita (già tracciato da `acquisto_partita`).
@@ -171,7 +175,13 @@ Stato: il pacchetto JSON (versione 1) è quello descritto sotto; per il reposito
 `mappe.json` esportato = `{ versione: 1, mappe: [{ chiave, nome, tipo, genitore, ordine, immagine: 'immagini/<chiave>.png' | asset, larghezza,
 altezza, entita, note, spilli: [{ tipo, nome, descrizione, x, y, riferimento, collezionabile, ordine, condizioni }] }] }` (`condizioni` assente quando vuoto:
 elenco di `RequisitoSpillo` di `shared/condizioniSpillo.ts`; all'importazione le voci non calcolabili o con chiavi assenti dalla Guida vengono scartate e contate
-nell'esito). Lo stesso file, con le
+nell'esito). Dalla migrazione 094 ogni spillo porta anche `voce` (la voce della guida, o `null`): un pacchetto di prima che la dava
+come `riferimento: { tipo: 'punto' }` si importa con la voce nel campo suo e il riferimento libero. All'importazione la voce segue le
+regole del collegamento dalla guida (`erroreVoceDelPin`: esiste, non è descrittiva, è del Palazzo della planimetria), verificate a
+genitori risolti; una che non regge si scarta e si conta (`vociScartate` nell'esito). La voce non fa parte dell'identità del pin.
+Un pacchetto che **tace** sulla voce (di prima della 094, o il seed del repository) non toglie quella collegata nell'istanza: il pin
+invariato la tiene, e il pin che il pacchetto cambia — tolto e reinserito, con lo stesso uid — la ritrova (come «raccolto», che
+segue l'uid); un pacchetto che la dichiara `null` la toglie. Lo stesso file, con le
 immagini in `public/asset/mappe/`, è letto da `caricaSeed` come `data/seed/mappe-editor.json` (origine `seed`): un `POST /importa` dello
 ZIP esportato e un commit sono l'intero flusso «creo in app → pubblico nel repository». Il pacchetto è completo: immagini di base e schermate degli spilli comprese, anche quelle scaricate dalle guide (la loro provenienza
 è annotata nel LEGGIMI; decisione dell'utente del 2026-09-04 sera, registrata in `DECISIONI.md`). Le mappe `seed` sono modificabili
@@ -188,6 +198,9 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 - Click su uno spillo → popup ancorato allo spillo e scheda nel pannello: nome, descrizione, immagine dell'entità collegata (mappa e Confidente: negozi, luoghi, punti e richieste non hanno immagini nell'app; lo spillo può però avere le proprie schermate di riferimento, 13.3),
   azioni: «Apri mappa» (passaggio), «Ottenuto/Esaurito/Riapri» (punto di dungeon, stessi stati della Guida), «Raccolto» (collezionabile), articoli del negozio con acquisto
   (`negozi.json`: nome, prezzo, disponibilità, stato «comprato» della partita), «Scheda del Confidente», «Richiesta».
+  Il popup sta sopra lo spillo, sotto quando in alto non c'è spazio, e diventa il foglio dal basso quando non sta da nessun lato
+  (2026-10-01): l'altezza è misurata, non stimata — dalla 094 uno spostamento di una voce della guida porta anche «Ottenuto», e
+  su una tela bassa (tablet, visore incorporato) la stima fissa lo lasciava tagliare dalla tela. Sotto i 768 px è sempre il foglio.
 - Raccolti nascosti per default; interruttore «Mostra anche i raccolti» (punto 9) con conteggio; stato per partita attiva.
 - In uso normale nessun posizionamento: nessun click sulla mappa modifica dati (punto 10). Il pulsante «Modifica mappa» apre l'editor.
 

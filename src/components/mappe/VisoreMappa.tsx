@@ -13,7 +13,7 @@ import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 // click sulla mappa modifica i dati: l'editor (13.3) passa i propri strumenti tramite `editor`.
 // ============================================================
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { MappaDto, SpilloDto } from '../../types';
@@ -176,6 +176,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
+  // l'altezza del popup dello spillo, misurata quando è ancorato al punto (vedi `popupSotto`): per spillo, così una nuova selezione rimisura
+  const popupRif = useRef<HTMLDivElement | null>(null);
+  const [altezzaPopupMisurata, setAltezzaPopupMisurata] = useState<{ id: number; h: number } | null>(null);
   const [natCaricata, setNatCaricata] = useState<(Dimensioni & { src: string; area: AreaMappa | null }) | null>(null);
   const [zoomEsplicito, setZoomEsplicito] = useState<number | null>(null);
   const [panEsplicito, setPanEsplicito] = useState<Punto | null>(null);
@@ -406,11 +409,27 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const bloccato = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
   const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (scelta !== undefined || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
-  // Popup sopra allo spillo; sotto quando nella tela (overflow nascosto) non c'è spazio sopra: il popup più alto misura ~215 px più i 42 px della punta.
-  // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio (con la merce di un negozio è più alto), e
-  // scorre in orizzontale quanto basta per restare dentro la tela: la freccia resta sullo spillo.
-  const altezzaPopup = selezionato && categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio ? 480 : 260;
-  const popupSotto = selezionato !== null && pan.y + (selezionato.y / 100) * nat.h * zoom < altezzaPopup;
+  // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
+  // tela: la freccia resta sullo spillo. L'altezza è **misurata** (`altezzaPopupMisurata`), non stimata: dalla 094 uno spostamento
+  // di una voce della guida ha anche «Ottenuto», e su una tela bassa (il visore incorporato, il tablet) il popup non ci stava
+  // più né sopra né sotto e la tela lo tagliava. Quando non sta da nessun lato diventa il foglio, come l'elenco di un gruppo.
+  // Prima della misura (il primo disegno) vale la stima di prima: ~215 px, la merce di un negozio di più.
+  const misuraPopup = selezionato && altezzaPopupMisurata?.id === selezionato.id ? altezzaPopupMisurata.h : null;
+  const altezzaPopup = misuraPopup ?? (selezionato && categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio ? 438 : 218);
+  const yPopup = selezionato ? pan.y + (selezionato.y / 100) * nat.h * zoom : 0;
+  // 42 di punta sopra, 14 sotto, e 8 di respiro dal bordo della tela
+  const staSopra = yPopup >= altezzaPopup + 42 + 8;
+  const staSotto = dim.h - yPopup >= altezzaPopup + 14 + 8;
+  const popupSotto = selezionato !== null && !staSopra && (staSotto || misuraPopup === null || dim.h === 0);
+  // il foglio solo con l'altezza misurata e la tela misurata: una stima non basta a togliere il popup dal suo punto
+  const popupFoglio = selezionato !== null && !schermoStretto && misuraPopup !== null && dim.h > 0 && !staSopra && !staSotto;
+  // misurato solo ancorato al punto (largo 260): nel foglio è più largo e più basso, e misurarlo lì lo farebbe saltare da un modo all'altro
+  useLayoutEffect(() => {
+    const el = popupRif.current;
+    if (!el || !selezionato || schermoStretto || popupFoglio) return;
+    const h = el.offsetHeight;
+    if (h > 0 && (altezzaPopupMisurata?.id !== selezionato.id || altezzaPopupMisurata.h !== h)) setAltezzaPopupMisurata({ id: selezionato.id, h });
+  }, [selezionato, schermoStretto, popupFoglio, altezzaPopupMisurata]);
   /** Di quanto far scorrere un riquadro ancorato a `x` (in percentuale) per tenerlo dentro la tela. */
   const scostamento = useCallback((x: number) => {
     if (dim.w === 0) return 0;
@@ -656,8 +675,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 </button>
               );
             })}
-            {selezionato && !editor && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(schermoStretto, (
-              <div className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''}`} role="dialog" aria-label={selezionato.nome} style={schermoStretto ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+            {selezionato && !editor && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(schermoStretto || popupFoglio, (
+              <div ref={popupRif} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={selezionato.nome} style={schermoStretto || popupFoglio ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
@@ -683,7 +702,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <div className="flex flex-wrap gap-1">
                   {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
                   {/* anche un pin non collezionabile collegato a una voce della guida (una sicura, un passaggio): lo stato della voce è il suo (2026-10-01) */}
-                  {(categoriaSpillo(selezionato.tipo) === 'consumabile' || selezionato.dettaglio?.tipo === 'punto') && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
+                  {(categoriaSpillo(selezionato.tipo) === 'consumabile' || !!selezionato.voce) && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
                   {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && (
                     <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Scheda del negozio" />
                   )}
@@ -697,7 +716,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   {categoriaSpillo(selezionato.tipo) === 'citta' && (selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'attivita') && selezionato.dettaglio.luogo && !selezionato.dettaglio.negozio && (
                     <CollegamentoVisivo to={`/guida/citta/${encodeURIComponent(selezionato.dettaglio.luogo.quartiere)}`} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={selezionato.dettaglio.luogo.nome} dettaglio={selezionato.dettaglio.luogo.quando ?? selezionato.dettaglio.luogo.cosaOffre ?? 'scheda del quartiere'} />
                   )}
-                  {(selezionato.dettaglio?.negozio || selezionato.dettaglio?.tipo === 'punto' || selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'confidente' || selezionato.dettaglio?.tipo === 'richiesta' || selezionato.immagini.length > 0) && (
+                  {(selezionato.dettaglio?.negozio || !!selezionato.voce || selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'confidente' || selezionato.dettaglio?.tipo === 'richiesta' || selezionato.immagini.length > 0) && (
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Dettagli" onClick={apriScheda} />
                   )}
                 </div>
@@ -824,7 +843,7 @@ interface PropsAzioni<T extends SpilloDto | SchedaContenutoGuidaDto> { spillo: T
 
 /** Azioni di stato nella partita: per i punti della Guida «Ottenuto/Esaurito/Riapri» (stessi stati della scheda del Palazzo), altrimenti «Raccolto/Riapri». */
 export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
-  const punto = s.dettaglio?.tipo === 'punto' ? s.dettaglio.punto ?? null : null;
+  const punto = s.voce;
   // una voce descrittiva della guida (solo «Altro») si legge, non si segna (scelta dell'utente, 2026-10-01): come nella scheda del Palazzo
   if (punto && puntoDescrittivo(punto.tipo)) return <span className="text-[12px] text-text-muted">Voce descrittiva della guida: si legge, non si segna.</span>;
   if (punto && onStatoPunto) {
@@ -887,9 +906,9 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
       <GalleriaSpillo immagini={s.immagini} nome={s.nome} />
 
       {!nonSpaziale && onNaviga && "mappaChiave" in s && <NavigazioneSpillo spillo={s} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={s.destinazioneNomi?.mappa} nomeSpillo={s.destinazioneNomi?.spillo ?? undefined} />}
-      {d?.tipo === 'punto' && d.punto && (
+      {s.voce && (
         <p className="m-0 text-[12px] text-text-secondary">
-          {d.punto.esauribile ? 'Esauribile · ' : ''}{d.punto.stato ? `Nella Guida: ${d.punto.stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(d.punto.dungeon)}`} className="text-primary">scheda del Palazzo</Link>
+          {s.voce.esauribile ? 'Esauribile · ' : ''}{s.voce.stato ? `Nella Guida: ${s.voce.stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(s.voce.dungeon)}`} className="text-primary">scheda del Palazzo</Link>
         </p>
       )}
       {(d?.tipo === 'luogo' || d?.tipo === 'attivita') && d.luogo && (
@@ -957,7 +976,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         {!nonSpaziale && onCentra && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Centra" onClick={onCentra} />}
         {partitaId && <AzioniStato spillo={s} occupato={occupato} onRaccolto={onRaccolto} onStatoPunto={onStatoPunto} />}
       </div>
-      {(s.collezionabile || d?.tipo === 'punto' || negozio) && !partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti raccolti e gli acquisti.</span>}
+      {(s.collezionabile || !!s.voce || negozio) && !partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti raccolti e gli acquisti.</span>}
     </section>
   );
 }

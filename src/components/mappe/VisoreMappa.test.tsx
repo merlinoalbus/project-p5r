@@ -12,7 +12,7 @@ import * as inquadratura from '../../utils/inquadraturaMappa';
 import type { MappaDto, SpilloDto } from '../../types';
 
 function spillo(extra: Partial<SpilloDto> & { id: number; nome: string; tipo: SpilloDto['tipo'] }): SpilloDto {
-  return { mappaChiave: 'citta-shibuya', tipoNome: extra.tipo, colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '2026-09-04T00:00:00.000Z', ...extra };
+  return { mappaChiave: 'citta-shibuya', tipoNome: extra.tipo, colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '2026-09-04T00:00:00.000Z', ...extra };
 }
 
 const mappa: MappaDto = {
@@ -25,7 +25,7 @@ const mappa: MappaDto = {
     spillo({ id: 2, nome: 'Scrigno raccolto', tipo: 'forziere', tipoNome: 'Forziere', x: 80, y: 80, collezionabile: true, raccolto: true }),
     spillo({ id: 3, nome: 'Verso il centro', tipo: 'passaggio', tipoNome: 'Passaggio', x: 10, y: 90, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' }, dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: '/api/immagini/mappa/shibuya-centro/file', asset: null } }, immagini: [{ id: 31, url: '/api/immagini/spillo/3-a/file', asset: null, didascalia: 'La scala', ordine: 0 }, { id: 32, url: null, asset: 'spilli/citta-shibuya/3-2', didascalia: '', ordine: 1 }] }),
     spillo({ id: 4, nome: 'Scrigno da aprire', tipo: 'forziere', tipoNome: 'Forziere', x: 90, y: 10, collezionabile: true, descrizione: 'Contiene un Panino a mezzaluna.' }),
-    spillo({ id: 5, nome: 'Forziere del corridoio', tipo: 'forziere', tipoNome: 'Forziere', x: 40, y: 60, collezionabile: true, riferimento: { tipo: 'punto', chiave: 'kamoshida-02/3' }, dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-02/3', tipo: 'forziere', nome: 'Forziere del corridoio', descrizione: '', esauribile: true, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } } }),
+    spillo({ id: 5, nome: 'Forziere del corridoio', tipo: 'forziere', tipoNome: 'Forziere', x: 40, y: 60, collezionabile: true, voce: { chiave: 'kamoshida-02/3', tipo: 'forziere', nome: 'Forziere del corridoio', descrizione: '', esauribile: true, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } }),
     // spillo con una condizione non soddisfatta alla data corrente della partita: nascosto finché non si chiede di vederlo
     spillo({ id: 6, nome: 'Bancarella estiva', tipo: 'attivita', tipoNome: 'Attività', x: 60, y: 30, condizioni: [{ tipo: 'data', dal: '06-18', testo: 'dal 18 giugno' }], disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'data', stato: 'rosso', testo: 'dal 18 giugno', dettaglio: 'Disponibile dal 18 giugno, oggi è il 20 aprile', manuale: false, confermato: false }] } }),
   ],
@@ -650,8 +650,8 @@ describe('VisoreMappa in modalità scelta', () => {
 });
 
 it('un pin non collezionabile collegato a una voce della guida si segna dal suo popup, come la voce', async () => {
-  const sicura = spillo({ id: 9, nome: 'Stanza sicura', tipo: 'sicura', tipoNome: 'Stanza sicura', x: 30, y: 40, riferimento: { tipo: 'punto', chiave: 'kamoshida-02/0' },
-    dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-02/0', tipo: 'sicura', nome: 'Stanza sicura', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } } });
+  const sicura = spillo({ id: 9, nome: 'Stanza sicura', tipo: 'sicura', tipoNome: 'Stanza sicura', x: 30, y: 40,
+    voce: { chiave: 'kamoshida-02/0', tipo: 'sicura', nome: 'Stanza sicura', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } });
   const onStatoPunto = vi.fn().mockResolvedValue(undefined);
   render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [sicura] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={onStatoPunto} /></MemoryRouter>);
   fireEvent.click(screen.getByRole('button', { name: 'Stanza sicura: Stanza sicura' }));
@@ -659,13 +659,60 @@ it('un pin non collezionabile collegato a una voce della guida si segna dal suo 
   await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 9 }), 'ottenuto'));
 });
 
+it('un passaggio con la sua destinazione e una voce «Storia» porta altrove e si segna, le due cose insieme (094)', async () => {
+  const passaggio = spillo({ id: 11, nome: 'Verso la sala', tipo: 'passaggio', tipoNome: 'Passaggio', x: 30, y: 40, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
+    dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: null, asset: null } },
+    voce: { chiave: 'kamoshida-02/12', tipo: 'storia', nome: 'Entra nella sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } });
+  const onStatoPunto = vi.fn().mockResolvedValue(undefined);
+  const onNaviga = vi.fn();
+  render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={onNaviga} onRaccolto={vi.fn()} onStatoPunto={onStatoPunto} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Verso la sala' }));
+  const popup = within(screen.getByRole('dialog', { name: 'Verso la sala' }));
+  expect(popup.getByRole('button', { name: /Shibuya centro/ })).toBeInTheDocument();
+  fireEvent.click(popup.getByRole('button', { name: 'Ottenuto' }));
+  await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 11 }), 'ottenuto'));
+});
+
 it('un pin collegato a una voce descrittiva della guida non offre stato, né nel popup né nella scheda laterale', () => {
-  const nota = spillo({ id: 10, nome: 'Nota della sala', tipo: 'nota', tipoNome: 'Nota', x: 30, y: 40, riferimento: { tipo: 'punto', chiave: 'kamoshida-02/9' },
-    dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-02/9', tipo: 'altro', nome: 'Nota della sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } } });
+  const nota = spillo({ id: 10, nome: 'Nota della sala', tipo: 'nota', tipoNome: 'Nota', x: 30, y: 40,
+    voce: { chiave: 'kamoshida-02/9', tipo: 'altro', nome: 'Nota della sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } });
   render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [nota] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
   fireEvent.click(screen.getByRole('button', { name: 'Nota: Nota della sala' }));
   // popup e scheda laterale (il pannello è aperto a schermo intero): la dicitura, nessun pulsante di stato
   expect(screen.getAllByText('Voce descrittiva della guida: si legge, non si segna.')).toHaveLength(2);
   expect(screen.queryByRole('button', { name: 'Ottenuto' })).toBeNull();
   expect(screen.queryByRole('button', { name: 'Riapri' })).toBeNull();
+});
+
+describe('il popup dello spillo si misura (094: uno spostamento di una voce ha anche «Ottenuto»)', () => {
+  const passaggio = spillo({ id: 40, nome: 'Torre Inferiore', tipo: 'passaggio', tipoNome: 'Passaggio', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
+    dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: null, asset: null } },
+    voce: { chiave: 'kamoshida-15/1', tipo: 'storia', nome: 'Si apre la torre', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-15', stato: null } });
+  const apri = async (tela: { w: number; h: number }) => {
+    cleanup();
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: tela.w, height: tela.h, left: 0, top: 0, right: tela.w, bottom: tela.h, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    // jsdom non impagina: il popup misura quel che misura nel browser (238 px, rilevati a 768 sul canone)
+    const altezza = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) { return this.classList.contains('spillo-popup') ? 238 : 0; });
+    try {
+      render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
+      fireEvent.click(await screen.findByRole('button', { name: /^Passaggio: Torre Inferiore/ }));
+      await screen.findByRole('dialog', { name: 'Torre Inferiore' });
+    } finally { misura.mockRestore(); altezza.mockRestore(); }
+  };
+
+  it('su una tela bassa, dove non sta né sopra né sotto, diventa il foglio invece di farsi tagliare', async () => {
+    await apri({ w: 900, h: 300 });
+    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Torre Inferiore' }).className).toContain('spillo-popup--foglio'));
+    // nel foglio ci sono la navigazione e lo stato
+    const foglio = within(screen.getByRole('dialog', { name: 'Torre Inferiore' }));
+    expect(foglio.getByRole('button', { name: /Shibuya centro/ })).toBeInTheDocument();
+    expect(foglio.getByRole('button', { name: 'Ottenuto' })).toBeInTheDocument();
+  });
+
+  it('su una tela alta resta ancorato allo spillo, sopra', async () => {
+    await apri({ w: 1000, h: 900 });
+    const popup = screen.getByRole('dialog', { name: 'Torre Inferiore' });
+    expect(popup.className).not.toContain('spillo-popup--foglio');
+    expect(popup.className).not.toContain('spillo-popup--sotto');
+  });
 });

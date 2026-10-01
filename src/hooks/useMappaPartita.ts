@@ -45,11 +45,14 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
 
   /** Stato del punto della Guida (ottenuto/esaurito/riaperto): lo spillo collegato segue lo stato (raccolto se gestito). */
   const statoPunto = async (s: SpilloDto, stato: StatoPuntoMappa) => {
-    if (!partitaId || s.dettaglio?.tipo !== 'punto' || !s.dettaglio.punto) return;
-    const punto = s.dettaglio.punto;
+    if (!partitaId || !s.voce) return;
+    const punto = s.voce;
     try {
       const aggiornato = await impostaStatoPunto(partitaId, punto.chiave, stato);
-      setAggiornati((m) => new Map(m).set(s.id, { ...s, raccolto: aggiornato.stato !== null, dettaglio: { ...s.dettaglio!, punto: { ...punto, stato: aggiornato.stato } } }));
+      const voce = { ...punto, stato: aggiornato.stato };
+      // gli elementi della guida senza mappa portano la voce anche nel dettaglio del riferimento: si aggiornano insieme
+      const dettaglio = s.dettaglio?.tipo === 'punto' && s.dettaglio.punto?.chiave === punto.chiave ? { ...s.dettaglio, punto: voce } : s.dettaglio;
+      setAggiornati((m) => new Map(m).set(s.id, { ...s, raccolto: aggiornato.stato !== null, voce, dettaglio }));
       notifica('success', stato === null ? `«${s.nome}» riaperto.` : `«${s.nome}» segnato come ${stato}.`);
       opz.onCambiato?.();
     } catch (err) { errori(err); }

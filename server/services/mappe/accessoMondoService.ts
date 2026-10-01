@@ -80,8 +80,8 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
       }
       // Un punto di interesse sta in un'area della guida, e l'area — quando una planimetria la
       // dichiara — è un posto sulla mappa. È un'associazione registrata, non una somiglianza: il
-      // punto porta dove porta la sua area. I pin che riferiscono i punti hanno tutti
-      // `mappa_chiave` nullo, quindi senza questo passo un punto non arriverebbe da nessuna parte.
+      // punto porta dove porta la sua area. I suoi pin sulle planimetrie (`voce_chiave`, 094) portano al posto esatto, più sotto;
+      // una voce senza pin, o con i soli elementi della guida senza mappa, arriva comunque alla sua area.
       if (tipo === 'punto') {
         const a = prepared('SELECT area_chiave FROM punto_interesse WHERE chiave = ?').get(chiave) as { area_chiave: string | null } | undefined;
         if (a?.area_chiave) riferimenti.push({ tipo: 'area', chiave: a.area_chiave });
@@ -99,6 +99,12 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
         for (const r of riferimenti) {
           for (const s of prepared('SELECT s.id,s.nome,s.mappa_chiave FROM spillo s JOIN mappa m ON m.chiave=s.mappa_chiave WHERE s.riferimento_tipo=? AND s.riferimento_chiave=? ORDER BY s.mappa_chiave,s.ordine,s.id').all(r.tipo, r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {
             aggiungi(s.mappa_chiave, s.id, s.nome, 'riferimento-spillo', r);
+          }
+          // i pin di una voce della guida la portano nel campo suo (094), non nel riferimento
+          if (r.tipo === 'punto') {
+            for (const s of prepared('SELECT s.id,s.nome,s.mappa_chiave FROM spillo s JOIN mappa m ON m.chiave=s.mappa_chiave WHERE s.voce_chiave=? ORDER BY s.mappa_chiave,s.ordine,s.id').all(r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {
+              aggiungi(s.mappa_chiave, s.id, s.nome, 'riferimento-spillo', r);
+            }
           }
           for (const m of prepared('SELECT chiave FROM mappa WHERE entita_tipo=? AND entita_chiave=? ORDER BY chiave').all(r.tipo, r.chiave) as Array<{ chiave: string }>) aggiungi(m.chiave, null, null, 'entita-mappa', r);
           for (const m of prepared('SELECT mappa_chiave AS chiave FROM mappa_entita WHERE entita_tipo=? AND entita_chiave=? ORDER BY mappa_chiave').all(r.tipo,r.chiave) as Array<{chiave:string}>) aggiungi(m.chiave,null,null,'entita-mappa',r);

@@ -23,7 +23,7 @@ vi.mock('../services/api', () => api);
 
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 const albero: MappaRiassuntoDto[] = [riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta' }), riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo' })];
-const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '' };
+const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
 const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [] };
 
 function monta() {
@@ -178,8 +178,8 @@ describe('EditorMappaPage', () => {
     expect(vociSelettore('Al: giorno')).toHaveLength(30);
   });
 
-  it('uno spostamento che è un punto della Guida tiene quel riferimento: la scheda non risulta modificata e il salvataggio non lo cancella', async () => {
-    const scorciatoia: SpilloDto = { ...nota, id: 21, tipo: 'scorciatoia', tipoNome: 'Scorciatoia', nome: 'Condotto', riferimento: { tipo: 'punto', chiave: 'kamoshida-04/5' }, dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-04/5', tipo: 'scorciatoia', nome: 'Condotto', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', stato: null } } };
+  it('uno spostamento che è di una voce della Guida la mostra: la scheda non risulta modificata e il salvataggio non tocca la voce, che sta nel campo suo (094)', async () => {
+    const scorciatoia: SpilloDto = { ...nota, id: 21, tipo: 'scorciatoia', tipoNome: 'Scorciatoia', nome: 'Condotto', voce: { chiave: 'kamoshida-04/5', tipo: 'scorciatoia', nome: 'Condotto', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', stato: null } };
     api.getMappa.mockResolvedValue({ ...base, spilli: [scorciatoia] });
     api.aggiornaSpillo.mockResolvedValue(scorciatoia);
     monta();
@@ -189,7 +189,7 @@ describe('EditorMappaPage', () => {
     expect(form.getByRole('button', { name: 'Salva spillo' })).toBeDisabled();
     fireEvent.change(form.getByLabelText('Descrizione'), { target: { value: 'Passa dietro le cucine' } });
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
-    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(21, { nome: 'Condotto', tipo: 'scorciatoia', descrizione: 'Passa dietro le cucine', riferimento: { tipo: 'punto', chiave: 'kamoshida-04/5' }, condizioni: [], destinazione: null }));
+    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(21, { nome: 'Condotto', tipo: 'scorciatoia', descrizione: 'Passa dietro le cucine', riferimento: null, condizioni: [], destinazione: null }));
   });
 
   it('le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa', async () => {

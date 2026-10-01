@@ -21,7 +21,7 @@ import { giocabili } from '../squadraService.js';
 import { nomiCondizioni } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { allineaBossDellaGuida, palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
-import { pinDelPuntoGuida } from './collegamentiGuida.js';
+import { allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, voceDelPin } from './collegamentiGuida.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
@@ -30,7 +30,7 @@ import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, Esporta
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
-interface RigaSpillo { area_guida_chiave?: string|null; solo_posizione: number; id: number; uid: string; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null; nativo_json?: string | null }
+interface RigaSpillo { area_guida_chiave?: string|null; solo_posizione: number; id: number; uid: string; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null; nativo_json?: string | null; /** La voce della guida del pin (094). */ voce_chiave?: string | null }
 
 /** La colonna della 082 c'è dal suo turno in poi; prima il nome rivisto non è dichiarabile. */
 function conNomeRivisto(): boolean {
@@ -305,9 +305,14 @@ function conNegozioVivo(esito: DisponibilitaDto | undefined, dettaglio: Dettagli
 type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione' | 'destinazioneNonDisponibile'>;
 function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo {
   const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx.partitaId);
+  // la voce della guida del pin (094): il suo campo, o il riferimento «punto» degli elementi senza mappa di prima
+  const chiaveVoce = voceDelPin(r);
+  const voce = !chiaveVoce ? null
+    : dettaglio?.tipo === 'punto' && dettaglio.punto?.chiave === chiaveVoce ? dettaglio.punto
+    : (dettaglioRiferimento('punto', chiaveVoce, ctx.partitaId)?.punto ?? null);
   let raccolto = ctx.raccolti?.has(r.uid) ?? false;
   // Un punto di dungeon già gestito nella Guida (ottenuto/esaurito) conta come raccolto anche sulla mappa.
-  if (dettaglio?.tipo === 'punto' && dettaglio.punto?.stato) raccolto = true;
+  if (voce?.stato) raccolto = true;
   const nomi = ctx.nomi ?? nomiCondizioni();
   const condizioni: CondizioneSpilloDto[] = condizioniDiRiga(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
@@ -334,7 +339,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
     id: r.id, tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
     nome: r.nome, descrizione: r.descrizione,
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_tipo==='mappa'?chiaveMappa(r.riferimento_chiave):r.riferimento_chiave } : null,
-    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativoDiSpillo(r) ? { nativo: nativoDiSpillo(r) } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
+    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativoDiSpillo(r) ? { nativo: nativoDiSpillo(r) } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, voce, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
   };
 }
 
@@ -1001,10 +1006,23 @@ function applicaRegoleCategoria<T extends DatiSpillo>(tipo: TipoSpillo, dati: T)
   return out as T;
 }
 
+/**
+ * Su un pin di una planimetria un riferimento «punto» in ingresso (un client o un pacchetto di prima della 094) è la sua voce
+ * della guida: va nel campo suo, con le regole del collegamento dalla guida (`erroreVoceDelPin`), e il riferimento del pin non
+ * si tocca — un passaggio tiene la sua destinazione (`undefined` = invariato; uno spillo nuovo nasce senza).
+ */
+function separaVoce<T extends DatiSpillo>(dati: T): { dati: T; voce: string | undefined } {
+  if (dati.riferimento?.tipo !== 'punto') return { dati, voce: undefined };
+  return { dati: { ...dati, riferimento: undefined }, voce: dati.riferimento.chiave };
+}
+
 export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoSpillo; nome: string; x: number; y: number }): SpilloDto {
   return getDb().transaction(() => {
   mappaChiave=rigaMappa(mappaChiave).chiave;
   if (!(TIPI_SPILLO as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di spillo non ammesso.');
+  const separata = separaVoce(dati);
+  dati = separata.dati;
+  if (separata.voce) { const errore = erroreVoceDelPin({ nome: dati.nome, mappa: mappaChiave, voce: null }, separata.voce); if (errore) throw errore; }
   dati = applicaRegoleCategoria(dati.tipo, dati);
   if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
   verificaRiferimento(dati.riferimento);
@@ -1015,7 +1033,10 @@ export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoS
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(mappaChiave, dati.tipo, dati.nome, dati.descrizione ?? '', dati.x, dati.y, dati.riferimento?.tipo ?? null, dati.riferimento?.chiave ?? null,
     dati.collezionabile ? 1 : 0, dati.ordine ?? 0, adesso, jsonCondizioni(dati.condizioni));
   prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(dati.soloPosizione ? 1 : 0, Number(info.lastInsertRowid));
+  if (separata.voce) prepared('UPDATE spillo SET voce_chiave = ? WHERE id = ?').run(separata.voce, Number(info.lastInsertRowid));
   assegnaUidMancanti(getDb());
+  // un pin che nasce già di una voce ne unisce gli stati, come collegarlo dalla guida
+  if (separata.voce) allineaStatiPunto(getDb(), separata.voce, adesso);
   salvaDestinazioneSpillo(Number(info.lastInsertRowid), destinazione);
   prepared("UPDATE mappa SET updated_at = ? WHERE chiave = ?").run(adesso, mappaChiave);
   return spilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(Number(info.lastInsertRowid)) as RigaSpillo);
@@ -1029,6 +1050,17 @@ export function aggiornaSpillo(id: number, dati: DatiSpillo & { mappa?: string }
 
   if(r.area_guida_chiave && ['x','y','mappa','destinazione'].some(k=>Object.prototype.hasOwnProperty.call(dati,k)))throw httpErrors.badRequest('contenuto-non-spaziale','Una scheda guida non accetta coordinate o destinazioni.');
   if (dati.tipo && !(TIPI_SPILLO as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di spillo non ammesso.');
+  // su una planimetria il riferimento «punto» in ingresso è la voce del pin (094); gli elementi della guida senza mappa restano com'erano
+  const separata = r.mappa_chiave !== null ? separaVoce(dati) : { dati, voce: undefined };
+  dati = separata.dati;
+  if (separata.voce) { const errore = erroreVoceDelPin({ nome: dati.nome ?? r.nome, mappa: dati.mappa ? rigaMappa(dati.mappa).chiave : r.mappa_chiave, voce: voceDelPin(r) }, separata.voce); if (errore) throw errore; }
+  // spostato su un'altra planimetria, un pin di una voce resta soggetto alle stesse regole: fuori dal Palazzo della voce si rifiuta
+  const voceAttuale = r.mappa_chiave !== null ? voceDelPin(r) : null;
+  if (!separata.voce && voceAttuale && dati.mappa && rigaMappa(dati.mappa).chiave !== r.mappa_chiave) {
+    const errore = erroreVoceDelPin({ nome: dati.nome ?? r.nome, mappa: rigaMappa(dati.mappa).chiave, voce: voceAttuale }, voceAttuale);
+    // solo il Palazzo: una voce rimasta da prima (descrittiva) non impedisce di spostare il pin
+    if (errore?.code === 'pin-fuori-dal-palazzo') throw errore;
+  }
   // Cambiando tipo il riferimento di prima può non essere più ammesso: quello che il client non
   // tocca **non si ri-verifica** (le schede della Guida hanno riferimenti a mappe che non esistono
   // più, e un salvataggio del nome non deve fallire per questo); se non è più della categoria, cade.
@@ -1047,6 +1079,10 @@ export function aggiornaSpillo(id: number, dati: DatiSpillo & { mappa?: string }
     dati.riferimento === undefined ? r.riferimento_tipo : dati.riferimento?.tipo ?? null, dati.riferimento === undefined ? r.riferimento_chiave : dati.riferimento?.chiave ?? null,
     dati.collezionabile === undefined ? r.collezionabile : dati.collezionabile ? 1 : 0, dati.ordine ?? r.ordine, nowIso(), dati.condizioni === undefined ? r.condizioni_json : jsonCondizioni(dati.condizioni), identitaSeed, id);
   if (dati.soloPosizione !== undefined) prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(dati.soloPosizione ? 1 : 0, id);
+  if (separata.voce && separata.voce !== voceDelPin(r)) {
+    prepared('UPDATE spillo SET voce_chiave = ? WHERE id = ?').run(separata.voce, id);
+    allineaStatiPunto(getDb(), separata.voce, nowIso());
+  }
   salvaDestinazioneSpillo(id, destinazione);
   return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo);
   })();
@@ -1073,22 +1109,23 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
   // resta sempre possibile, così un segno rimasto da prima si può ripulire.
   // Un nemico collegato a un punto della guida sì (2026-10-01): è un'Ombra sciagura o un incontro unico, e segnarlo è
   // segnare quel punto.
-  if (raccolto && r.tipo === 'nemico' && r.riferimento_tipo !== 'punto') throw httpErrors.badRequest('spillo-non-raccoglibile', `«${r.nome}» è un nemico: si rigenera, non si raccoglie.`);
+  if (raccolto && r.tipo === 'nemico' && !voceDelPin(r)) throw httpErrors.badRequest('spillo-non-raccoglibile', `«${r.nome}» è un nemico: si rigenera, non si raccoglie.`);
 
   const adesso = nowIso();
   getDb().transaction(() => {
     prepared(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
       ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, r.uid, raccolto ? 1 : 0, adesso);
     // una voce descrittiva della guida non ha stato (2026-10-01): il raccolto del pin non la segna
-    const tipoPunto = r.riferimento_tipo === 'punto' && r.riferimento_chiave
-      ? (prepared('SELECT tipo FROM punto_interesse WHERE chiave = ?').get(r.riferimento_chiave) as { tipo: string } | undefined)?.tipo ?? null : null;
-    if (r.riferimento_tipo === 'punto' && r.riferimento_chiave && tipoPunto !== null && !puntoDescrittivo(tipoPunto)) {
+    const voce = voceDelPin(r);
+    const tipoPunto = voce
+      ? (prepared('SELECT tipo FROM punto_interesse WHERE chiave = ?').get(voce) as { tipo: string } | undefined)?.tipo ?? null : null;
+    if (voce && tipoPunto !== null && !puntoDescrittivo(tipoPunto)) {
       // raccogliere lo spillo di un punto è segnare quel punto: è dell'utente, non un segno automatico (utente 006). Un punto
       // con più pin sulle planimetrie (2026-10-01) è segnato quando li ha raccolti **tutti**; toglierne uno lo riapre.
-      const tutti = r.mappa_chiave === null || pinDelPuntoGuida(getDb(), r.riferimento_chiave)
+      const tutti = r.mappa_chiave === null || pinDelPuntoGuida(getDb(), voce)
         .every((p) => p.uid === r.uid || !!prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ? AND raccolto = 1').get(partitaId, p.uid));
-      if (raccolto && tutti) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET automatico = 0`).run(partitaId, r.riferimento_chiave, adesso);
-      else if (!raccolto) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, r.riferimento_chiave);
+      if (raccolto && tutti) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET automatico = 0`).run(partitaId, voce, adesso);
+      else if (!raccolto) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, voce);
     }
     // il Tesoro del Palazzo o il boss finale raccolti sulla mappa segnano il boss finale della Guida, e lo
     // tolgono se si tolgono (scelta dell'utente, 2026-09-30)
@@ -1202,7 +1239,7 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
       ...destinazionePerPacchetto(s.id),
       uid: s.uid,
-      tipo: s.tipo, nome: s.nome, descrizione: s.descrizione, x: s.x, y: s.y, riferimento: s.riferimento_tipo && s.riferimento_chiave ? { tipo: s.riferimento_tipo, chiave: s.riferimento_chiave } : null, soloPosizione: s.solo_posizione === 1, collezionabile: s.collezionabile === 1, ordine: s.ordine,
+      tipo: s.tipo, nome: s.nome, descrizione: s.descrizione, x: s.x, y: s.y, riferimento: s.riferimento_tipo && s.riferimento_chiave ? { tipo: s.riferimento_tipo, chiave: s.riferimento_chiave } : null, voce: s.voce_chiave ?? null, soloPosizione: s.solo_posizione === 1, collezionabile: s.collezionabile === 1, ordine: s.ordine,
       ...(condizioniDiRiga(s.condizioni_json).length > 0 ? { condizioni: condizioniDiRiga(s.condizioni_json) } : {}),
       // schermate: asset del repository oppure file dell'istanza in base64 (sempre inclusi: il pacchetto è completo)
       immagini: (prepared('SELECT * FROM spillo_immagine WHERE spillo_id = ? ORDER BY ordine, id').all(s.id) as RigaImmagineSpillo[]).flatMap((i): Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> => {
@@ -1237,13 +1274,40 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   return { versione: 1, esportato: nowIso(), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
 
+/** Il riferimento proprio di un pin del pacchetto, con le regole della sua categoria: un «punto» (pacchetti di prima della 094)
+ *  non è un riferimento ma la voce della guida del pin (`voceDichiarata`). */
+function riferimentoDelPacchetto(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined, categoria: ReturnType<typeof categoriaSpillo>): { tipo: TipoRiferimento; chiave: string } | null {
+  return rif && rif.tipo !== 'punto' && RIFERIMENTI_PER_CATEGORIA[categoria].includes(rif.tipo) ? rif : null;
+}
+
+/** La voce della guida che un pin del pacchetto dichiara (094): il campo `voce`, o il riferimento «punto» di un pacchetto di prima.
+ *  `undefined` = il pacchetto non ne dice niente (un pacchetto di prima, o del seed del repository). */
+function voceDichiarata(s: { riferimento: { tipo: TipoRiferimento; chiave: string } | null; voce?: string | null }): string | null | undefined {
+  return s.voce !== undefined ? s.voce : s.riferimento?.tipo === 'punto' ? s.riferimento.chiave : undefined;
+}
+
+/** La voce che il pin avrà davvero su quella planimetria: quella data, se le regole del collegamento la ammettono
+ *  (`erroreVoceDelPin`: esiste, non è descrittiva, è del Palazzo della planimetria), altrimenti nessuna. */
+function voceAmmessa(nome: string, mappa: string, voce: string | null): string | null {
+  return voce && !erroreVoceDelPin({ nome, mappa, voce: null }, voce) ? voce : null;
+}
+
+/** L'identità di un pin del pacchetto: la voce della guida non ne fa parte (è un collegamento, come «raccolto»), e un riferimento
+ *  «punto» di un pacchetto di prima è la voce. */
+function identitaDelPacchetto(s: { tipo: string; nome: string; riferimento: { tipo: TipoRiferimento; chiave: string } | null }, x: number, y: number): string {
+  return identitaSpillo({ tipo: s.tipo, nome: s.nome, x, y, riferimento: s.riferimento?.tipo === 'punto' ? null : s.riferimento });
+}
+
 /** Un reseed identico conserva ID, raccolte, schermate e destinazioni del pin. */
 /** `verificata`: la destinazione del pacchetto già verificata prima degli inserimenti (con le mappe in arrivo); senza, si verifica qui e un errore vale «diverso». */
 function spilloInvariatoNelSeed(r: RigaSpillo, s: EsportazioneMappeDto['mappe'][number]['spilli'][number], verificata?: DestinazioneDaSalvare | null): boolean {
   // si confronta con quel che il pacchetto **produrrebbe** (regole di categoria applicate), non con quel che scrive
   const categoria = categoriaSpillo(s.tipo);
-  const riferimento = s.riferimento && RIFERIMENTI_PER_CATEGORIA[categoria].includes(s.riferimento.tipo) ? s.riferimento : null;
+  const riferimento = riferimentoDelPacchetto(s.riferimento, categoria);
   if (r.tipo!==s.tipo || r.nome!==s.nome || r.descrizione!==(s.descrizione??'') || r.x!==s.x || r.y!==s.y || r.riferimento_tipo!==(riferimento?.tipo??null) || r.riferimento_chiave!==(riferimento?.chiave??null) || r.collezionabile!==(categoria==='consumabile'?1:0) || r.ordine!==(s.ordine??0) || r.solo_posizione!==(s.soloPosizione?1:0)) return false;
+  // la voce della guida, come la destinazione: un pacchetto che non la dichiara non toglie quella che l'utente ha collegato
+  const dichiarata = voceDichiarata(s);
+  if (dichiarata !== undefined && (r.voce_chiave ?? null) !== voceAmmessa(s.nome, r.mappa_chiave, dichiarata)) return false;
   if (JSON.stringify(condizioniDiRiga(r.condizioni_json))!==JSON.stringify(normalizzaCondizioniSpillo(categoria==='citta'?[]:(s.condizioni??[])))) return false;
   // A destination absent from the seed does not erase an arrival configured in the instance.
   if (s.destinazione!==undefined || s.destinazioneNonDisponibile!==undefined) {
@@ -1279,7 +1343,7 @@ function identitaRettificata(identita:string): {identita:string;mappa?:string} {
   return r?{identita:identitaSpillo({...r.dopo,riferimento:r.dopo.riferimento??null}),mappa:r.mappa}:{identita};
 }
 
-export interface EsitoImportazione { mappe: number; spilli: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number }
+export interface EsitoImportazione { mappe: number; spilli: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number }
 
 /** Importa un pacchetto (o il seed): per chiave, con `sovrascrivi` sostituisce mappe e spilli esistenti; altrimenti salta le mappe già presenti
  * (il seed aggiorna solo le mappe di origine seed, sostituendo i soli spilli di origine seed e conservando quelli dell'utente). */
@@ -1293,11 +1357,13 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     if (s.soloPosizione !== undefined && typeof s.soloPosizione !== 'boolean') throw httpErrors.badRequest('posizione-non-valida', 'Il campo soloPosizione deve essere booleano.');
     if (s.destinazioneNonDisponibile !== undefined && typeof s.destinazioneNonDisponibile !== 'boolean') throw httpErrors.badRequest('destinazione-non-valida', 'Stato della destinazione non valido.');
     if (s.destinazioneNonDisponibile && s.destinazione) throw httpErrors.badRequest('destinazione-non-valida', 'Una destinazione non può essere presente e invalidata.');
+    // la voce della guida (094): una chiave o null; altro è un pacchetto rovinato, non un errore del server
+    if (s.voce !== undefined && s.voce !== null && (typeof s.voce !== 'string' || s.voce.length === 0 || s.voce.length > 200)) throw httpErrors.badRequest('voce-non-valida', 'La voce della guida di uno spillo deve essere una chiave (o null).');
     // verificata qui, scritta dopo gli inserimenti: il pacchetto resta com'è, così il confronto «invariato nel seed» legge la forma originale
     verificate.set(s, verificaDestinazioneSpillo(s.destinazione, incoming));
   }
   const origine = opz.origine ?? 'utente';
-  const esito: EsitoImportazione = { mappe: 0, spilli: 0, immagini: 0, saltate: [], condizioniScartate: 0 };
+  const esito: EsitoImportazione = { mappe: 0, spilli: 0, immagini: 0, saltate: [], condizioniScartate: 0, vociScartate: 0 };
   getDb().transaction(() => {
     // Uno spostamento conserva l'identità originale, non la mappa corrente.
     // Il fallback richiede una sola sorgente nell'intero seed e un solo erede utente.
@@ -1308,7 +1374,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       const rettificheAttive = new Set<string>();
       for (const pacco of opz.pacchettiSeed ?? [pacchetto]) for (const mappa of pacco.mappe) for (const s of mappa.spilli ?? []) {
         const riferimento = s.riferimento?.tipo === 'mappa' ? { ...s.riferimento, chiave: idMappa(s.riferimento.chiave) } : s.riferimento ?? null;
-        const identita = identitaSpillo({ tipo:s.tipo, nome:s.nome, x:Math.min(100,Math.max(0,s.x)), y:Math.min(100,Math.max(0,s.y)), riferimento });
+        const identita = identitaDelPacchetto({ tipo:s.tipo, nome:s.nome, riferimento }, Math.min(100,Math.max(0,s.x)), Math.min(100,Math.max(0,s.y)));
         occorrenze.set(identita, (occorrenze.get(identita) ?? 0) + 1);
         sorgenti.set(identita,idMappa(mappa.chiave));
         if(RETTIFICHE_NOMI_SEED.some(r=>r.mappa===idMappa(mappa.chiave)&&isDeepStrictEqual(Object.fromEntries(Object.entries(s).filter(([,v])=>v!==undefined)),r.dopo)))rettificheAttive.add(identita);
@@ -1320,6 +1386,10 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     }
     const arrivi: Array<{id:number; valore:DestinazioneDaSalvare|null|undefined; invalidata:boolean}> = [];
     const areeDaLegare: Array<{ mappa: string; aree: string[]; fonte: string }> = [];
+    // le voci della guida dei pin (094): da scrivere a genitori risolti; quelle dei pin tolti, per uid, per chi torna con lo stesso
+    const conVoce = colonnaSpillo('voce_chiave');
+    const vociDaScrivere: Array<{ id: number; nome: string; mappa: string; voce: string }> = [];
+    const vociDiPrima = new Map<string, string>();
     const adesso = nowIso();
     // prima le mappe (in ordine di dipendenza: i genitori possono arrivare dopo → secondo passaggio per i genitori)
     for (const m of pacchetto.mappe) {
@@ -1377,6 +1447,11 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       const daTogliere = (opz.sovrascrivi ? prepared('SELECT id FROM spillo WHERE mappa_chiave = ?').all(m.chiave) : prepared('SELECT id FROM spillo WHERE mappa_chiave = ? AND origine = ?').all(m.chiave, origine)) as Array<{ id: number }>;
       for (const { id } of daTogliere) {
         if ([...invariati.values()].includes(id)) continue;
+        // la voce collegata dall'utente segue il pin reinserito con lo stesso uid, se il pacchetto non ne dice niente
+        if (conVoce) {
+          const v = prepared('SELECT uid, voce_chiave FROM spillo WHERE id = ?').get(id) as { uid: string | null; voce_chiave: string | null };
+          if (v.uid && v.voce_chiave) vociDiPrima.set(v.uid, v.voce_chiave);
+        }
         for (const i of prepared('SELECT immagine_chiave FROM spillo_immagine WHERE spillo_id = ?').all(id) as Array<{ immagine_chiave: string | null }>) if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
         prepared('DELETE FROM spillo WHERE id = ?').run(id);
       }
@@ -1386,14 +1461,14 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         if (invariati.has(indiceSpillo)) continue;
         if (!(TIPI_SPILLO as readonly string[]).includes(s.tipo)) continue;
         const x = Math.min(100, Math.max(0, s.x)); const y = Math.min(100, Math.max(0, s.y));
-        const identita = identitaSpillo({ tipo: s.tipo, nome: s.nome, x, y, riferimento: s.riferimento ?? null });
+        const identita = identitaDelPacchetto({ tipo: s.tipo, nome: s.nome, riferimento: s.riferimento ?? null }, x, y);
         if (identitaUtente.has(identita) || identitaSpostate.has(identita)) continue;
         // le condizioni con chiavi assenti dalla Guida si scartano (contate nell'esito), come l'API le rifiuta: mai uno spillo nascosto per sempre
         // le regole di categoria valgono anche per un pacchetto: uno spillo di città non ha condizioni, un consumabile è collezionabile, un riferimento estraneo alla categoria non entra
         const categoria = categoriaSpillo(s.tipo);
         const { valide, scartate } = condizioniConChiaviEsistenti(categoria === 'citta' ? [] : s.condizioni);
         esito.condizioniScartate += scartate.length;
-        const riferimento = s.riferimento && RIFERIMENTI_PER_CATEGORIA[categoria].includes(s.riferimento.tipo) ? s.riferimento : null;
+        const riferimento = riferimentoDelPacchetto(s.riferimento, categoria);
         // l'uid viaggia col pacchetto (così «raccolto» lo ritrova); se manca o è già preso, si calcola dall'identità
         const info = prepared(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at, condizioni_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
           .run(m.chiave, s.tipo, s.nome, s.descrizione ?? '', x, y, riferimento?.tipo ?? null, riferimento?.chiave ?? null, categoria === 'consumabile' ? 1 : 0, s.ordine ?? 0, origine, adesso, jsonCondizioni(valide));
@@ -1401,6 +1476,14 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         if (uidValido(s.uid) && colonnaSpillo('uid') && !prepared('SELECT 1 FROM spillo WHERE uid = ?').get(s.uid)) prepared('UPDATE spillo SET uid = ? WHERE id = ?').run(s.uid, Number(info.lastInsertRowid));
         assegnaUidMancanti(getDb());
         prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(s.soloPosizione ? 1 : 0, Number(info.lastInsertRowid));
+        // la voce della guida del pin (la colonna arriva con la 094, come sopra): quella dichiarata dal pacchetto o, se tace, quella
+        // che il pin aveva prima di essere reinserito; si scrive a genitori risolti, quando il Palazzo della planimetria è noto
+        if (conVoce) {
+          const dichiarata = voceDichiarata({ riferimento: s.riferimento ?? null, voce: s.voce });
+          const uid = prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(Number(info.lastInsertRowid)) as string | null;
+          const voce = dichiarata !== undefined ? dichiarata : uid ? vociDiPrima.get(uid) ?? null : null;
+          if (voce) vociDaScrivere.push({ id: Number(info.lastInsertRowid), nome: s.nome, mappa: m.chiave, voce });
+        }
         // Le prove native del pin — tipo, parte grafica, nome dello sprite, e per i tipi ancora da
         // identificare tutto ciò che serve a verificarli — vanno conservate come dato. Nella sola
         // descrizione si potevano cancellare senza che nulla se ne accorgesse, e la verifica
@@ -1443,6 +1526,12 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     }
     // già verificate prima degli inserimenti; lo spillo d'arrivo descritto per nome e posizione si risolve adesso, a mappe complete
     for (const arrivo of arrivi) salvaDestinazioneSpillo(arrivo.id, arrivo.valore, arrivo.invalidata);
+    // le voci della guida, con le regole del collegamento dalla guida (`erroreVoceDelPin`): una che non regge si scarta e si conta
+    for (const v of vociDaScrivere) {
+      if (voceAmmessa(v.nome, v.mappa, v.voce) !== v.voce) { esito.vociScartate++; continue; }
+      prepared('UPDATE spillo SET voce_chiave = ? WHERE id = ?').run(v.voce, v.id);
+      allineaStatiPunto(getDb(), v.voce, adesso);
+    }
     sincronizzaPercorsiMappe(getDb());
     if(pacchetto.ingressi?.length && prepared("SELECT 1 FROM sqlite_master WHERE name='quartiere_ingresso'").get()) {
       const ingressi=z.array(z.object({quartiere:z.string().min(1).max(80),mappa:z.string().min(1).max(200),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6)})).max(1000).safeParse(pacchetto.ingressi);

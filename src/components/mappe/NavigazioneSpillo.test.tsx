@@ -4,7 +4,7 @@ import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { urlMappa } from '../../utils/navigazioneMappa';
 import type { SpilloDto } from '../../types';
 
-const base: SpilloDto = { id: 1, mappaChiave: 'origine', tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Collegamento', colore: '#fff', descrizione: '', x: 10, y: 20, riferimento: { tipo: 'mappa', chiave: 'vecchia' }, collezionabile: false, condizioni: [], ordine: 0, origine: 'utente', raccolto: false, immagini: [], updatedAt: '2026-09-06', dettaglio: { tipo: 'mappa', mappa: { chiave: 'vecchia', nome: 'Vecchia', tipo: 'luogo' } }, destinazione: { mappa: 'nuova', spillo: 42 }, destinazioneNomi: { mappa: 'Nuova', spillo: 'Ingresso' } };
+const base: SpilloDto = { id: 1, mappaChiave: 'origine', tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Collegamento', colore: '#fff', descrizione: '', x: 10, y: 20, riferimento: { tipo: 'mappa', chiave: 'vecchia' }, collezionabile: false, condizioni: [], ordine: 0, origine: 'utente', raccolto: false, immagini: [], updatedAt: '2026-09-06', dettaglio: { tipo: 'mappa', mappa: { chiave: 'vecchia', nome: 'Vecchia', tipo: 'luogo' } }, destinazione: { mappa: 'nuova', spillo: 42 }, destinazioneNomi: { mappa: 'Nuova', spillo: 'Ingresso' }, voce: null };
 
 it.each(['passaggio', 'treno', 'scala', 'uscita', 'rampino', 'scorciatoia', 'velluto', 'mementos', 'ingresso-palazzo', 'infiltrazione'] as const)('%s porta alla mappa di arrivo con lo spillo indicato già selezionato', (tipo) => {
   const onNaviga = vi.fn(); render(<NavigazioneSpillo spillo={{ ...base, tipo }} partitaId={null} onNaviga={onNaviga} nomeMappa="Nuova" nomeSpillo="Ingresso" />);

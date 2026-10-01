@@ -19,8 +19,8 @@ import { DEFINIZIONI_SPILLO, puntoDescrittivo, type TipoSpillo } from '../../sha
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
-import { palazziCompletati, palazzoDiOgniMappa } from './palazziService.js';
-import { allineaStatiPunto, pinDelPuntoGuida } from './mappe/collegamentiGuida.js';
+import { palazziCompletati } from './palazziService.js';
+import { allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, VOCE_DEL_PIN, voceDelPin } from './mappe/collegamentiGuida.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
@@ -34,14 +34,14 @@ function statiPartita(partitaId: number | undefined): Map<string, StatoPunto> {
 
 /** I pin delle planimetrie collegati ai punti (tutti, o di un punto solo), in ordine di id. */
 function pinDeiPunti(punto?: string): Map<string, PinDelPuntoDto[]> {
-  const righe = prepared(`SELECT id, nome, tipo, mappa_chiave, riferimento_chiave FROM spillo
-    WHERE riferimento_tipo = 'punto' AND mappa_chiave IS NOT NULL${punto ? ' AND riferimento_chiave = ?' : ''} ORDER BY id`)
-    .all(...(punto ? [punto] : [])) as Array<{ id: number; nome: string; tipo: string; mappa_chiave: string; riferimento_chiave: string }>;
+  const righe = prepared(`SELECT id, nome, tipo, mappa_chiave, ${VOCE_DEL_PIN} AS voce FROM spillo
+    WHERE mappa_chiave IS NOT NULL AND ${VOCE_DEL_PIN} ${punto ? '= ?' : 'IS NOT NULL'} ORDER BY id`)
+    .all(...(punto ? [punto] : [])) as Array<{ id: number; nome: string; tipo: string; mappa_chiave: string; voce: string }>;
   const out = new Map<string, PinDelPuntoDto[]>();
   for (const r of righe) {
-    const elenco = out.get(r.riferimento_chiave) ?? [];
+    const elenco = out.get(r.voce) ?? [];
     elenco.push({ id: r.id, nome: r.nome, tipo: r.tipo, mappa: chiaveMappa(r.mappa_chiave), mappaNome: nomePercorso(r.mappa_chiave) });
-    out.set(r.riferimento_chiave, elenco);
+    out.set(r.voce, elenco);
   }
   return out;
 }
@@ -90,9 +90,9 @@ export function raccoltaMappe(dungeonChiave: string, partitaId?: number): Raccol
   const raccolti = partitaId === undefined ? null : new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
   // un punto della guida già gestito (ottenuto/esaurito) conta come raccolto anche sulla mappa: è la regola del visore
   const puntiGestiti = partitaId === undefined ? null : new Set((prepared('SELECT punto_chiave FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave));
-  const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome, riferimento_tipo, riferimento_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string; riferimento_tipo: string | null; riferimento_chiave: string | null }>;
+  const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome, ${VOCE_DEL_PIN} AS voce FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string; voce: string | null }>;
   for (const r of righe) {
-    const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (r.riferimento_tipo === 'punto' && !!r.riferimento_chiave && !!puntiGestiti?.has(r.riferimento_chiave));
+    const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (!!r.voce && !!puntiGestiti?.has(r.voce));
     const m = perMappa.get(r.mappa_chiave) ?? { n: 0, presi: raccolti === null ? null : 0, spilli: [] };
     m.n += 1;
     if (raccolto && m.presi !== null) m.presi += 1;
@@ -348,6 +348,7 @@ export function eliminaArea(chiaveArea: string): void {
       // i pin delle planimetrie tengono il loro «raccolto» (lo stato vive nei pin, 2026-10-01): perdono solo il collegamento
       prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(chiave);
       prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(chiave);
+      prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(chiave);
     }
     prepared('DELETE FROM punto_interesse WHERE area_chiave = ?').run(chiaveArea);
     // gli spilli della guida (senza mappa) vincolano l'area con RESTRICT: vanno via prima di lei
@@ -478,35 +479,31 @@ export function spostaPunto(puntoChiave: string, verso: -1 | 1): PuntoInteresseD
 
 /**
  * Collega (o scollega) un pin di una planimetria a un punto della guida (2026-10-01): «lo stato di questi punti deve essere
- * integrato con gli elementi in mappa». Il collegamento sta sul pin (`riferimento = punto`); un punto può averne più d'uno.
- * Solo un pin di una planimetria del Palazzo del punto, libero o già di quel punto: un pin che porta altrove (un luogo, un
- * negozio, un altro punto) si rifiuta dicendo a che cosa è collegato. Collegando, gli stati delle partite si uniscono
+ * integrato con gli elementi in mappa». Il collegamento sta sul pin, in un campo suo (`voce_chiave`, 094): così anche un pin
+ * che ha già un riferimento — un passaggio con la sua destinazione, un Confidente — può essere di una voce, e il riferimento
+ * resta com'è. Un punto può avere più pin, un pin una voce sola. Solo un pin di una planimetria del Palazzo del punto, libero
+ * o già di quel punto: un pin di un'altra voce si rifiuta dicendo quale. Collegando, gli stati delle partite si uniscono
  * (`allineaStatiPunto`); scollegando restano come sono, a ciascuno il suo.
  */
 export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega: boolean): PuntoInteresseDto {
-  const p = prepared('SELECT p.chiave, p.nome, p.tipo, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(puntoChiave) as { chiave: string; nome: string; tipo: string; dungeon_chiave: string } | undefined;
-  if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  if (collega && puntoDescrittivo(p.tipo)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
-  const s = prepared('SELECT id, nome, mappa_chiave, riferimento_tipo, riferimento_chiave FROM spillo WHERE id = ?').get(spilloId) as { id: number; nome: string; mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null } | undefined;
+  if (!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(puntoChiave)) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
+  const s = prepared('SELECT id, nome, mappa_chiave, riferimento_tipo, riferimento_chiave, voce_chiave FROM spillo WHERE id = ?').get(spilloId) as { id: number; nome: string; mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; voce_chiave: string | null } | undefined;
   if (!s) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${spilloId} non esiste.`);
-  const suoPunto = s.riferimento_tipo === 'punto' && s.riferimento_chiave === puntoChiave;
+  const voce = voceDelPin(s);
+  const suoPunto = voce === puntoChiave;
   if (!collega) {
     if (!suoPunto) throw httpErrors.conflict('pin-non-collegato', `«${s.nome}» non è collegato a questo punto.`);
-    prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL, updated_at = ? WHERE id = ?").run(nowIso(), spilloId);
+    // un collegamento rimasto nel riferimento (prima della 094) si toglie da lì; il riferimento vero di un pin non si tocca
+    if (s.riferimento_tipo === 'punto' && s.riferimento_chiave === puntoChiave) prepared('UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE id = ?').run(spilloId);
+    prepared('UPDATE spillo SET voce_chiave = NULL, updated_at = ? WHERE id = ?').run(nowIso(), spilloId);
     return aggiornaPunto(puntoChiave, {});
   }
-  if (!s.mappa_chiave || palazzoDiOgniMappa().get(s.mappa_chiave) !== p.dungeon_chiave) {
-    throw httpErrors.badRequest('pin-fuori-dal-palazzo', `«${s.nome}» non sta su una planimetria di questo Palazzo.`);
-  }
-  if (!suoPunto && s.riferimento_tipo) {
-    const altro = s.riferimento_tipo === 'punto' && s.riferimento_chiave
-      ? `al punto «${(prepared('SELECT nome FROM punto_interesse WHERE chiave = ?').get(s.riferimento_chiave) as { nome: string } | undefined)?.nome ?? s.riferimento_chiave}»`
-      : `a ${s.riferimento_tipo} «${s.riferimento_chiave ?? ''}»`;
-    throw httpErrors.conflict('pin-gia-collegato', `«${s.nome}» è già collegato ${altro}: scollegalo prima.`);
-  }
+  // le regole sono le stesse dell'editor delle mappe e del pacchetto (`erroreVoceDelPin`)
+  const errore = erroreVoceDelPin({ nome: s.nome, mappa: s.mappa_chiave, voce }, puntoChiave);
+  if (errore) throw errore;
   const adesso = nowIso();
   getDb().transaction(() => {
-    if (!suoPunto) prepared("UPDATE spillo SET riferimento_tipo = 'punto', riferimento_chiave = ?, updated_at = ? WHERE id = ?").run(puntoChiave, adesso, spilloId);
+    if (!suoPunto) prepared('UPDATE spillo SET voce_chiave = ?, updated_at = ? WHERE id = ?').run(puntoChiave, adesso, spilloId);
     allineaStatiPunto(getDb(), puntoChiave, adesso);
   })();
   return aggiornaPunto(puntoChiave, {});
@@ -539,6 +536,7 @@ export function eliminaPunto(puntoChiave: string): void {
     prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
     prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
     prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
+    prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(puntoChiave);
     prepared('DELETE FROM punto_interesse WHERE chiave = ?').run(puntoChiave);
   })();
 }
