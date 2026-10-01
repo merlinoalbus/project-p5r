@@ -877,6 +877,10 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   e i Memento, una volta aperti, restano un posto dove andare): sulla **mappa di Tokyo** (`MappaTokyo`, da `CittaPage` e
   `OggiMappa`, che ora passano la partita a `getDungeons`) un Palazzo completato non ha più cartellino anche dentro
   la sua finestra di date, e nell'elenco dei luoghi assenti porta «completato: <motivo>» (2026-10-01).
+  `ingressoDelPalazzo(dungeon, giorno)` usa la stessa `palazzoDiIngresso` al contrario: per «Sulla mappa» di una voce
+  collegata a un Palazzo (o di una richiesta, Memento) `mappaAzione` dà lo spillo d'ingresso aperto nel giorno della voce
+  (sole condizioni di data in cima), in città prima; senza ingresso la prima planimetria del Palazzo (`ruolo_immagine`
+  pianta o illustrazione, ordine della scheda), senza nemmeno quella la radice `dungeon-<k>` (2026-10-01).
 
 ### Effetti delle azioni della Guida (2026-09-30)
 

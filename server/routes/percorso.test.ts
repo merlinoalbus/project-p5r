@@ -85,7 +85,8 @@ describe('API percorso giorno per giorno', () => {
       expect(a.stato).not.toBeNull();
       expect(['consigliata', 'bloccata', 'neutra']).toContain(a.stato!.tipo);
       if (a.stato!.tipo === 'bloccata') expect(a.stato!.motivo).toBeTruthy();
-      if (a.riferimento?.tipo === 'dungeon') expect(a.mappa).toEqual({ chiave: `dungeon-${a.riferimento.chiave}`, spilloId: null });
+      // un Palazzo porta al suo ingresso in città, centrato sullo spillo (Kamoshida: la Shujin), non alla radice senza pianta
+      if (a.riferimento?.tipo === 'dungeon') expect(a.mappa).toEqual({ chiave: 'citta-shujin-academy', spilloId: expect.any(Number) });
     }
     // un giorno con un Confidente e rango atteso: lo stato riflette i semafori del rango (bloccata se un requisito è rosso)
     const giorni = ((await request(app).get(`/api/compendio/percorso?partita=${id}`)).body.data as PercorsoIndiceDto).giorni.filter((x) => x.azioni > 0).slice(0, 40);

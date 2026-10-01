@@ -81,10 +81,15 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
       </div>
     );
   }
-  if (!haPlanimetria(mappa)) return <section className={`card ${className ?? ''}`}>
-    <h3>{mappa.nome}</h3>
+  // Le mappe figlie in un'area scorrevole propria (rilievo dell'utente, 2026-10-01): le stanze di un Palazzo sono decine
+  // e l'elenco usciva dal riquadro della scheda «Oggi». Nel riquadro con un'altezza (`className` dell'ospite) l'area
+  // prende lo spazio che resta; senza, ha un tetto suo.
+  if (!haPlanimetria(mappa)) return <section className={`card flex flex-col gap-2 min-h-0 ${className ?? ''}`}>
+    <h3 className="m-0">{mappa.nome}</h3>
     <Link className="touch inline-flex items-center self-start" to={urlMappa(mappa.chiave)}>Apri il luogo e i contenuti della guida</Link>
-    {!!mappa.figli.length && <ul>{mappa.figli.map(f => <li key={f.chiave}><Link className="touch inline-flex items-center" to={urlMappa(f.chiave)}>{f.nome}</Link></li>)}</ul>}
+    {!!mappa.figli.length && <ul className="m-0 px-2 py-1 list-none area-scorrevole min-h-0 flex-1 max-h-[min(60vh,520px)]" aria-label={`Mappe di ${mappa.nome}`}>
+      {mappa.figli.map(f => <li key={f.chiave}><Link className="touch inline-flex items-center" to={urlMappa(f.chiave)}>{f.nome}</Link></li>)}
+    </ul>}
   </section>;
   return (
     <div className={[className, classeVisore].filter(Boolean).join(' ') || undefined} style={altezza !== undefined ? { height: altezza } : className || classeVisore ? undefined : { height: 560 }}>

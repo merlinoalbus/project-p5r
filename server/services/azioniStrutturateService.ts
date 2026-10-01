@@ -13,6 +13,7 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
+import { ingressoDelPalazzo } from './palazziService.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, RiferimentoAzioneDto, StatoAzioneDto } from '../../shared/types.js';
@@ -20,7 +21,7 @@ import type { ConfidentePartitaDto, ElenchiAzioneDto, RiferimentoAzioneDto, Stat
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
 
 /** Il minimo di un'azione (della guida o dell'utente) che stato e mappa leggono. */
-export interface AzioneClassificata { tipo: string; riferimento: { tipo: string; chiave: string } | null; rangoAtteso: number | null }
+export interface AzioneClassificata { tipo: string; riferimento: { tipo: string; chiave: string } | null; rangoAtteso: number | null; /** MM-GG della voce, se è di un giorno. */ giorno?: string }
 
 /** Stato dell'azione nella partita (12.4): per gli incontri con un Confidente valuta i semafori del rango atteso (o del prossimo). */
 export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidentePartitaDto>): StatoAzioneDto {
@@ -42,12 +43,12 @@ export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidenteP
   return { tipo: 'neutra', motivo: grigi.length > 0 ? `da confermare: ${grigi.map((r) => r.testo).join(' · ')}` : null };
 }
 
-/** Mappa (e spillo) del luogo dell'azione: Palazzo → `dungeon-<k>`, richiesta → Mementos, negozio/Confidente → spillo del luogo in città. */
+/** Mappa (e spillo) del luogo dell'azione: Palazzo → il suo ingresso (`ingressoDelPalazzo`: lo spillo in città, o la prima
+ *  planimetria), richiesta → l'ingresso dei Mementos, negozio/Confidente → spillo del luogo in città. */
 export function mappaAzione(a: AzioneClassificata): { chiave: string; spilloId: number | null } | null {
   const r = a.riferimento;
-  const mappaEsiste = (chiave: string) => !!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(chiave);
-  if (r?.tipo === 'dungeon') return mappaEsiste(`dungeon-${r.chiave}`) ? { chiave: `dungeon-${r.chiave}`, spilloId: null } : null;
-  if (r?.tipo === 'richiesta' || a.tipo === 'richiesta') return mappaEsiste('dungeon-mementos') ? { chiave: 'dungeon-mementos', spilloId: null } : null;
+  if (r?.tipo === 'dungeon') return ingressoDelPalazzo(r.chiave, a.giorno);
+  if (r?.tipo === 'richiesta' || a.tipo === 'richiesta') return ingressoDelPalazzo('mementos', a.giorno);
   if (r?.tipo === 'negozio') {
     const s = prepared(`SELECT id, mappa_chiave FROM spillo WHERE (riferimento_tipo = 'negozio' AND riferimento_chiave = ?)
       OR (riferimento_tipo = 'luogo' AND riferimento_chiave IN (SELECT sede_chiave FROM negozio WHERE chiave = ? AND sede_chiave IS NOT NULL)) ORDER BY id LIMIT 1`).get(r.chiave, r.chiave) as { id: number; mappa_chiave: string } | undefined;

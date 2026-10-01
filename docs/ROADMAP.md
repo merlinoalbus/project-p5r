@@ -971,3 +971,13 @@ nelle mappe dei quartieri.
 | Voce | Contenuto | Stato |
 |------|-----------|-------|
 | 1 | `DungeonRiassuntoDto.completato` (motivo di `palazziCompletati`, una volta per elenco; null senza partita e per i Memento, che non si completano); `CittaPage` e `OggiMappa` chiedono i Palazzi con la partita; `MappaTokyo` toglie il cartellino di un Palazzo completato e lo elenca fra gli assenti con «completato: <motivo>». Test: `palazzo-completato` (elenco e scheda con e senza partita, dopo il raccolto e dopo il tolto; Memento col boss finale segnato: null), `MappaTokyo` (cartellino presente, poi assente col motivo), `CittaPage` e `OggiPartita` (`getDungeons` con la partita), ognuno visto rosso senza la correzione. Verifica nel browser a 1280/768/375 su una partita di prova, poi eliminata | ✅ validata (2° esame) |
+
+## «Sulla mappa» di un Palazzo: l'ingresso in città (1 ottobre 2026) — fatto
+
+Rilievo dell'utente (screenshot della scheda «Oggi», 11 aprile): «Sulla mappa» sulla voce «Prima infiltrazione tutorial nel
+Palazzo di Kamoshida…» apriva la radice `dungeon-kamoshida`, senza planimetria: l'elenco nudo delle stanze, fuori dal
+riquadro. Scelta dell'utente: «Ingresso in città».
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | `palazziService.ingressoDelPalazzo(dungeon, giorno)`: lo spillo che da fuori porta nel Palazzo (`palazzoDiIngresso`), quello aperto nel giorno della voce (condizioni di data), in città prima; senza ingresso la prima planimetria del Palazzo in ordine logico; senza nemmeno quella la radice. `mappaAzione` lo usa per le voci collegate a un Palazzo e per le richieste (Memento). `MappaIncorporata`: le mappe figlie di una mappa senza planimetria in un'`area-scorrevole` contenuta nel riquadro. Test: `sulla-mappa-palazzo` (Shujin; 11 aprile → l'ingresso del solo 11, 12 aprile → quello fino al 2 maggio; Palazzo senza ingresso → prima planimetria; Memento; dungeon inesistente), `percorso`, `OrganizzazioneMappe` (area scorrevole), ognuno visto rosso senza la correzione. Verifica nel browser a 1366×657, 768, 375 su una partita di prova, poi eliminata | ✅ validata (2° esame) |

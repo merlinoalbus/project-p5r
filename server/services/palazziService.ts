@@ -20,6 +20,7 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
+import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
 export function palazzoDiOgniMappa(): Map<string, string> {
@@ -167,6 +168,49 @@ export function palazzoDiIngresso(spillo: { mappa_chiave: string | null; riferim
   const dungeon = palazzi.get(verso);
   if (!dungeon) return null;
   return spillo.mappa_chiave && palazzi.get(spillo.mappa_chiave) === dungeon ? null : dungeon;
+}
+
+/**
+ * Dove si entra in un Palazzo (o nei Memento), per «Sulla mappa» di una voce collegata al dungeon (scelta dell'utente,
+ * 2026-10-01: «Ingresso in città»). La radice `dungeon-<k>` non ha planimetria, e aprirla mostrava l'elenco nudo
+ * delle stanze. Si cerca lo spillo che da fuori porta dentro, con la stessa regola che a Palazzo completato lo blocca
+ * (`palazzoDiIngresso`: riferimento, destinazione, identità di seed). Fra più ingressi vince quello aperto nel giorno
+ * della voce (le sue condizioni di data: la Shujin ha l'ingresso del solo 11 aprile e quello dal 12 aprile al 2 maggio),
+ * poi quello in città, poi il primo. Se il dungeon non ha ingresso sulle mappe, la prima planimetria del Palazzo in
+ * ordine logico (quello della scheda del Palazzo); se non ha nemmeno quella, la radice. `null` se il dungeon non ha mappe.
+ */
+export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: string; spilloId: number | null } | null {
+  const radice = `dungeon-${dungeon}`;
+  if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(radice)) return null;
+  const palazzi = palazzoDiOgniMappa();
+  const destinazioni = prepared("SELECT 1 FROM sqlite_master WHERE name = 'spillo_destinazione'").get()
+    ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
+    : new Map<number, string>();
+  const spilli = prepared('SELECT id, mappa_chiave, riferimento_tipo, riferimento_chiave, seed_identita_json, condizioni_json FROM spillo WHERE mappa_chiave IS NOT NULL ORDER BY id')
+    .all() as Array<{ id: number; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null; seed_identita_json: string | null; condizioni_json: string | null }>;
+  const ingressi = spilli.filter((s) => palazzoDiIngresso(s, destinazioni.get(s.id) ?? null, palazzi) === dungeon);
+  const inCitta = (s: { mappa_chiave: string }) => s.mappa_chiave.startsWith('citta-');
+  const aperti = giorno ? ingressi.filter((s) => apertoIl(s.condizioni_json, giorno)) : ingressi;
+  const ingresso = aperti.find(inCitta) ?? aperti[0] ?? ingressi.find(inCitta) ?? ingressi[0];
+  if (ingresso) return { chiave: ingresso.mappa_chiave, spilloId: ingresso.id };
+  // la prima planimetria vera (pianta del gioco o illustrazione), nell'ordine che si cambia trascinando nella scheda
+  const prima = prepared(`WITH RECURSIVE albero(chiave) AS (
+      SELECT chiave FROM mappa WHERE chiave = ?
+      UNION ALL
+      SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
+    )
+    SELECT m.chiave FROM mappa m JOIN albero t ON t.chiave = m.chiave
+    WHERE m.chiave <> ? AND m.ruolo_immagine IN ('planimetria-nativa', 'illustrazione-editoriale')
+    ORDER BY m.ordine, m.chiave LIMIT 1`).get(radice, radice) as { chiave: string } | undefined;
+  return { chiave: prima?.chiave ?? radice, spilloId: null };
+}
+
+/** Le condizioni di data dello spillo (in cima, cioè in AND) reggono quel giorno? Le altre non si guardano: qui conta solo
+ *  scegliere fra più ingressi quello del giorno, non dire se adesso si entra (quello lo dice la mappa). */
+function apertoIl(json: string | null, giorno: string): boolean {
+  const oggi = ordineGioco(giorno);
+  return leggiCondizioniSalvate(json).every((c) => c.tipo === 'data' ? oggi >= ordineGioco(c.dal)
+    : c.tipo === 'intervallo' ? oggi >= ordineGioco(c.dal) && oggi <= ordineGioco(c.al) : true);
 }
 
 /** La mappa a cui portava lo spillo quando è nato dal seed (`seed_identita_json.riferimento`), se era una mappa. */

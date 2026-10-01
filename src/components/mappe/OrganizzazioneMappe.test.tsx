@@ -74,6 +74,8 @@ it.each([{larghezza:null,altezza:null},{larghezza:0,altezza:600},{larghezza:800,
   render(<MemoryRouter><MappaIncorporata chiave="palazzo"/></MemoryRouter>);
   expect(await screen.findByRole('link',{name:'Apri il luogo e i contenuti della guida'})).toHaveAttribute('href','/guida/mappe/palazzo');
   expect(screen.getByRole('link',{name:'Ingresso'})).toHaveAttribute('href','/guida/mappe/ingresso');
+  // le stanze in un'area scorrevole sua, con confine e contenimento: decine di nomi non escono dal riquadro
+  expect(screen.getByRole('list',{name:'Mappe di Palazzo di Kamoshida'})).toHaveClass('area-scorrevole','min-h-0');
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
 });
 it('il riquadro con asset nativo e dimensioni positive conserva il visore reale',async()=>{

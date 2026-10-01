@@ -845,3 +845,12 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   Memento non si completano e restano sulla mappa anche con un boss finale segnato (rilievo della revisione).
 - Il motivo mostrato è il primo che la regola trova: raccogliere il Tesoro segna da sé il boss finale della Guida, quindi
   di solito si legge «boss finale segnato nella Guida».
+
+### 2026-10-01 — «Sulla mappa» di un Palazzo porta al suo ingresso in città
+- Rilievo dell'utente: la voce collegata al Palazzo di Kamoshida apriva la radice del Palazzo (nessuna planimetria) e la
+  scheda «Oggi» mostrava l'elenco nudo delle stanze, fuori dal riquadro. Scelta dell'utente fra tre proposte: «Ingresso
+  in città» — lo spillo che da fuori porta dentro, centrato; se il Palazzo non ha ingresso sulle mappe, la sua prima
+  planimetria in ordine logico. Vale anche per le richieste dei Memento.
+- Fra più ingressi vince quello aperto nel giorno della voce: nel canone la Shujin ha l'ingresso del solo 11 aprile
+  (prima infiltrazione) e quello dal 12 aprile al 2 maggio. Contano solo le condizioni di data; il resto lo dice la mappa.
+- La scheda di una mappa senza planimetria tiene comunque l'elenco delle mappe figlie in un'area scorrevole propria.
