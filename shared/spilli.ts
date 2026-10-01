@@ -15,7 +15,7 @@ export const TIPI_SPILLO = [
   'confidente', 'dialogo',
   // «Oggetto» accanto a «Oggetto chiave»: un oggetto comune trovato a terra non è una chiave
   // della trama (richiesta dell'utente, 2026-09-29).
-  'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia',
+  'forziere', 'forziere-raro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia',
   // I due ingressi che non sono né un negozio né una stanza di un Palazzo, e che finora non
   // avevano un segno proprio. L'**ingresso ai Memento** portava lo spillo della stazione
   // ferroviaria, perché il suo luogo è classificato `trasporto`: sulla mappa di Shibuya la porta
@@ -56,7 +56,7 @@ export const DEFINIZIONI_CATEGORIA: Record<CategoriaSpillo, { nome: string; desc
 const CATEGORIA_PER_TIPO: Record<TipoSpillo, CategoriaSpillo> = {
   passaggio: 'spostamento', scala: 'spostamento', uscita: 'spostamento', treno: 'spostamento', velluto: 'spostamento', mementos: 'spostamento', 'ingresso-palazzo': 'spostamento', infiltrazione: 'spostamento', scorciatoia: 'spostamento', rampino: 'spostamento',
   negozio: 'citta', ristorante: 'citta', distributore: 'citta', sigarette: 'citta', cercalavoro: 'citta', lavoro: 'citta', terme: 'citta', lavanderia: 'citta', cinema: 'citta', biblioteca: 'citta', culto: 'citta', 'sala-giochi': 'citta', casa: 'citta', attivita: 'citta', confidente: 'citta',
-  dialogo: 'consumabile', forziere: 'consumabile', 'forziere-raro': 'consumabile', tesoro: 'consumabile', 'tesoro-palazzo': 'consumabile', 'seme-bramosia': 'consumabile', oggetto: 'consumabile', 'oggetto-chiave': 'consumabile', timbro: 'consumabile', boss: 'consumabile', miniboss: 'consumabile',
+  dialogo: 'consumabile', forziere: 'consumabile', 'forziere-raro': 'consumabile', 'tesoro-palazzo': 'consumabile', 'seme-bramosia': 'consumabile', oggetto: 'consumabile', 'oggetto-chiave': 'consumabile', timbro: 'consumabile', boss: 'consumabile', miniboss: 'consumabile',
   // I nemici si rigenerano: non si «raccolgono» e non contano per completare la mappa (richiesta dell'utente, 2026-09-30).
   nemico: 'informativo',
   'punto-sensibile': 'informativo', meccanismo: 'informativo', porta: 'informativo', sicura: 'informativo', nota: 'informativo',
@@ -97,7 +97,7 @@ export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRif
  */
 export const TIPI_STRUTTURALI: readonly TipoSpillo[] = [
   'passaggio', 'scala', 'uscita', 'infiltrazione', 'scorciatoia', 'rampino', 'porta', 'meccanismo', 'sicura',
-  'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave',
+  'forziere', 'forziere-raro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave',
   'timbro', 'punto-sensibile', 'boss', 'miniboss', 'nemico', 'nota',
 ];
 
@@ -158,7 +158,7 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   // (normal) e `R_TBOX`/`RARE_TBOX`, e convivono su 21 planimetrie. Renderli entrambi
   // «Forziere» cancellava una distinzione che il gioco fa.
   'forziere-raro': { nome: 'Forziere raro', colore: '#fde047', collezionabile: true, riferimento: 'punto' },
-  tesoro: { nome: 'Tesoro', colore: '#a855f7', collezionabile: true, riferimento: 'punto' },
+  // «Tesoro» (generico) tolto il 2026-10-01: nessun pin né voce lo usava, ridondante con il Tesoro del Palazzo (rilievo dell'utente)
   'tesoro-palazzo': { nome: 'Tesoro del Palazzo', colore: '#d946ef', collezionabile: true, riferimento: 'punto' },
   'seme-bramosia': { nome: 'Seme della bramosia', colore: '#c85cff', collezionabile: true, riferimento: 'punto' },
   /** Oggetto comune trovato a terra (un'arma, un accessorio, un consumabile): si raccoglie, ma non è una chiave della trama. */
@@ -201,8 +201,9 @@ export function spilloPerPunto(tipoPunto: string): TipoSpillo {
     case 'forziere': case 'forziere-chiuso': return 'forziere';
     case 'oggetto': return 'oggetto-chiave';
     case 'volonta': return 'seme-bramosia';
-    case 'tesoro': return 'tesoro-palazzo';
     case 'puzzle': return 'punto-sensibile';
+    case 'porta': return 'porta';
+    case 'meccanismo': return 'meccanismo';
     case 'boss': return 'boss';
     case 'miniboss': return 'miniboss';
     case 'ombra-sciagura': return 'nemico';
@@ -213,22 +214,30 @@ export function spilloPerPunto(tipoPunto: string): TipoSpillo {
 }
 
 /**
- * I tipi di pin che possono rappresentare sulla mappa un punto della guida, nell'ordine di preferenza (scelta dell'utente,
- * 2026-10-01: lo stato dei punti vive nei pin). Un forziere della guida può essere un forziere o un forziere raro della
- * planimetria, un oggetto un oggetto o un oggetto chiave, un enigma un meccanismo o un punto sensibile. Vuoto per i punti
- * **descrittivi** (negoziazione delle Persona, note «altro»): sono testo della guida, non hanno un pin né uno stato.
+ * I tipi di pin che di solito rappresentano sulla mappa un punto della guida, nell'ordine di preferenza (scelta dell'utente,
+ * 2026-10-01: lo stato dei punti vive nei pin). Un forziere della guida è un forziere o un forziere raro della planimetria,
+ * un oggetto un oggetto o un oggetto chiave, un enigma un meccanismo o un punto sensibile. Serve a dire «da collegare» a
+ * una voce che il pin dovrebbe averlo: il collegamento in sé accetta qualunque pin del Palazzo. Vuoto per i tipi che un
+ * pin tipico non l'hanno (Persona, Storia: si collegano a qualunque pin, ma non mancano di niente) e per «Altro».
  */
 const PIN_DEL_PUNTO: Record<string, TipoSpillo[]> = {
   forziere: ['forziere', 'forziere-raro'], 'forziere-chiuso': ['forziere-raro', 'forziere'], oggetto: ['oggetto', 'oggetto-chiave'],
-  volonta: ['seme-bramosia'], tesoro: ['tesoro-palazzo'], puzzle: ['meccanismo', 'punto-sensibile'], boss: ['boss'], miniboss: ['miniboss'],
-  'ombra-sciagura': ['nemico'], sicura: ['sicura'], scorciatoia: ['scorciatoia'],
+  volonta: ['seme-bramosia'], puzzle: ['meccanismo', 'punto-sensibile'], boss: ['boss'], miniboss: ['miniboss'],
+  'ombra-sciagura': ['nemico'], sicura: ['sicura'], scorciatoia: ['scorciatoia'], porta: ['porta'], meccanismo: ['meccanismo', 'punto-sensibile'],
 };
 export function pinDelPunto(tipoPunto: string): TipoSpillo[] {
   return PIN_DEL_PUNTO[tipoPunto] ?? [];
 }
-/** Un punto della guida senza pin possibile: si legge, non si segna. */
+/** Una voce che di solito ha un pin: senza, la guida la dice «da collegare». */
+export function puntoDaCollegare(tipoPunto: string): boolean {
+  return pinDelPunto(tipoPunto).length > 0;
+}
+/**
+ * Un punto della guida senza pin né stato: si legge, non si segna. Solo «Altro» (scelta dell'utente, 2026-10-01: «altro
+ * niente pin»); Persona e Storia si collegano a qualunque pin e hanno lo stato.
+ */
 export function puntoDescrittivo(tipoPunto: string): boolean {
-  return pinDelPunto(tipoPunto).length === 0;
+  return tipoPunto === 'altro';
 }
 
 export const TIPI_MAPPA = ['citta', 'quartiere', 'luogo', 'palazzo', 'area', 'dedalo', 'generica'] as const;

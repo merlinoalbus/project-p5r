@@ -17,7 +17,7 @@ import { collegaPinAlPunto, creaPunto, eliminaPunto, aggiornaPunto as salvaPunto
 import { notifica } from '../../stores/notificationStore';
 import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
-import { puntoDescrittivo } from '../../../shared/spilli';
+import { puntoDaCollegare, puntoDescrittivo } from '../../../shared/spilli';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto } from '../../types';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
@@ -90,7 +90,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
 
   const puntiVisibili = useMemo(() => area.punti.filter((p) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato || p.chiave === selezionato)), [area, filtro, mostraGestiti, selezionato]);
   const gestitiArea = area.punti.filter((p) => p.stato && !puntoDescrittivo(p.tipo)).length;
-  const daCollegare = area.punti.filter((p) => !puntoDescrittivo(p.tipo) && p.pin.length === 0).length;
+  const daCollegare = area.punti.filter((p) => puntoDaCollegare(p.tipo) && p.pin.length === 0).length;
   // le planimetrie dell'area prima, poi il resto del Palazzo
   const opzioniMappa = useMemo(() => {
     const dellArea = new Set(area.mappe.map((m) => m.chiave));
@@ -160,7 +160,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
                   </span>
                   {p.pin.length > 0
                     ? <span className="chip chip--icona shrink-0 text-[11px]" title={p.pin.map((x) => `${x.nome} (${nomeSenzaPalazzo(x.mappaNome)})`).join(', ')}><IconaAzione chiave="posizione" dimensione={14} />{p.pin.length === 1 ? '1 pin' : `${p.pin.length} pin`}</span>
-                    : !puntoDescrittivo(p.tipo) && <span className="chip shrink-0 text-[11px] text-text-muted">da collegare</span>}
+                    : puntoDaCollegare(p.tipo) && <span className="chip shrink-0 text-[11px] text-text-muted">da collegare</span>}
                 </button>
                 {aperto && (
                   <div className="flex flex-col gap-1.5 pl-5">
@@ -177,7 +177,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
                         ))}
                       </ul>
                     )}
-                    {/* una voce descrittiva (Persona, «altro») si legge e basta: niente stato, niente pin (scelta dell'utente) */}
+                    {/* una voce descrittiva (solo «Altro») si legge e basta: niente stato, niente pin (scelta dell'utente) */}
                     {puntoDescrittivo(p.tipo)
                       ? <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
                       : <div className="flex flex-wrap items-center gap-1.5">

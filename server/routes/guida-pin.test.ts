@@ -158,8 +158,24 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect(segnato(p.chiave)).toBe('ottenuto');
   });
 
-  it('una voce descrittiva (Persona, «altro») non ha stato né pin: il server lo rifiuta, e uno stato rimasto si ignora', async () => {
-    const d = await nuovoPunto('Negoziazione di prova', 'persona');
+  it('i tipi del 2026-10-01: Persona e Storia si collegano a qualunque pin e si segnano; Porta e Meccanismo esistono', async () => {
+    const persona = await nuovoPunto('Leanan Sidhe', 'persona');
+    await collega(persona.chiave, pinLiberi[0].id).expect(200);
+    await statoPunto(persona.chiave, 'ottenuto');
+    expect(raccolto(pinLiberi[0].uid)).toBe(1);
+    const storia = await nuovoPunto('Si apre il passaggio della torre', 'storia');
+    // «Storia» si collega a qualunque pin, anche a uno di un tipo che non c'entra col suo nome
+    await collega(storia.chiave, pinLiberi[1].id).expect(200);
+    await statoPunto(storia.chiave, 'ottenuto');
+    expect(segnato(storia.chiave)).toBe('ottenuto');
+    for (const tipo of ['porta', 'meccanismo']) expect((await nuovoPunto(`Prova ${tipo}`, tipo)).tipo).toBe(tipo);
+    // il pin «Tesoro» generico non esiste più
+    const mappa = prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(pinLiberi[0].id) as string;
+    await request(app).post(`/api/mappe/${mappa}/spilli`).send({ tipo: 'tesoro', nome: 'Tesoro', x: 10, y: 10 }).expect(400);
+  });
+
+  it('una voce descrittiva («Altro») non ha stato né pin: il server lo rifiuta, e uno stato rimasto si ignora', async () => {
+    const d = await nuovoPunto('Nota di prova', 'altro');
     expect((await request(app).put(`/api/partite/${partita}/punti`).send({ punto: d.chiave, stato: 'ottenuto' }).expect(400)).body.error.code).toBe('punto-descrittivo');
     // azzerare resta possibile (per ripulire)
     await request(app).put(`/api/partite/${partita}/punti`).send({ punto: d.chiave, stato: null }).expect(200);

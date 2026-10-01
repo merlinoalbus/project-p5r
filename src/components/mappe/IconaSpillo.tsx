@@ -40,7 +40,6 @@ const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
   // Lo stesso forziere con una scintilla: il gioco li disegna uguali sulla mappa d'insieme, ma
   // sono cose diverse (procedure `N_TBOX` contro `R_TBOX`), e chi guarda deve poterli distinguere.
   'forziere-raro': (d) => <svg {...base(d)}><rect x="3" y="10" width="15" height="10" rx="2" /><path d="M3 14h15" /><path d="M6 10V8a4.5 4.5 0 0 1 9 0v2" /><path d="M10.5 14v2.5" /><path d="M20 3v4M18 5h4" /></svg>,
-  tesoro: (d) => <svg {...base(d)}><path d="M6 3h12l4 6-10 12L2 9z" /><path d="M2 9h20" /><path d="M9 3l3 6 3-6" /><path d="M9 9l3 12 3-12" /></svg>,
   'tesoro-palazzo': (d) => <svg {...base(d)}><path d="M4 18h16" /><path d="M5 18l-1.5-9 4.5 3.5L12 5l4 7.5 4.5-3.5L19 18z" /><path d="M12 9.5v.01" /></svg>,
   'seme-bramosia': (d) => <svg {...base(d)}><path d="M12 3l4 5-4 13-4-13z" /><path d="M8 8h8" /><path d="M4.5 5.5l1 1M19.5 5.5l-1 1" /></svg>,
   // Un sacchetto chiuso dal laccio, con il nodo: raccolto da terra, ma né chiave né scrigno (niente scintilla: è il segno del forziere raro).

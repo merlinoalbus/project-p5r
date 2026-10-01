@@ -1003,3 +1003,11 @@ mostrava tutto il Palazzo); scelte in `DECISIONI.md`.
 |------|-----------|-------|
 | 1 | GitHub Actions: checkout v7, setup-node v7, setup-buildx v4, build-push v7, Node 24 (ci.yml e docker-publish.yml). Docker: `node:24-alpine`, `nginx:1.30-alpine`. Dipendenze: eslint 10 / @eslint/js 10 (+ correzioni delle regole nuove), react 19.3, react-router 7.18.4, zod 4.6.5, vite 8.3.2, tsx, typescript-eslint 8.71, supertest, globals, tipi; `npm audit` 0. Restano fuori di proposito: TypeScript 7, vitest 5 (+ coverage, jest-dom 7), @types/node 26, concurrently 10; better-sqlite3 12 (bug npm con la 13). `engines` a Node ≥ 22.13 (minima di eslint 10 e vite 8). Verifica: typecheck, lint, lint:ci, 1222 test, build Vite, build e avvio delle due immagini Docker in locale, app nel browser, pipeline su GitHub | ✅ validata (1° esame) |
 | Da riprendere | better-sqlite3 13 quando npm/cli#9837 è corretto (toglie il deprecato `prebuild-install`); vitest 5; TypeScript 7 quando typescript-eslint lo supporta | da fare |
+
+## Tipi delle voci della guida ed Enigma contenitore (1 ottobre 2026) — in corso
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Tipi: etichette «Stanze sicure», «Semi della bramosia», «Forziere normale», «Forziere raro», «Nemico»; nuovi Porta, Meccanismo, Storia; Persona e Storia collegabili a qualunque pin e con stato, «Altro» solo descrittivo; «da collegare» solo per i tipi che hanno di solito un pin (`puntoDaCollegare`); pin «Tesoro» tolto dal registro. Test: `guida-pin` (+1), `GuidaDellArea` (+1, descrittiva ora «Altro»), registro dei pin (41 tipi), palette dell'editor, fixture della mappa; ognuno visto rosso senza la correzione | ✅ validata (2° esame) |
+| 2 | Campo dedicato alla voce: il collegamento alla guida separato dal riferimento del pin, così si collegano anche i pin con una destinazione o un Confidente (88 nel canone di produzione); migrazione dei collegamenti esistenti | da fare |
+| 3 | Enigma contenitore: passi (voci di qualunque tipo) ordinati dentro l'Enigma, risolto quando i passi sono fatti, pin solo sui passi | da fare |

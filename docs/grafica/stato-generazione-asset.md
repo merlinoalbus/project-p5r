@@ -95,7 +95,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-passaggio.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-negozio.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-forziere.png` — 128×128 (§18)
-- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro.png` — 128×128 (§18) — **non più usato**: il tipo di pin «Tesoro» è stato tolto il 2026-10-01 (ridondante col Tesoro del Palazzo); il file resta fra gli asset finché non si decide di rimuoverlo
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-boss.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-miniboss.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-sicura.png` — 128×128 (§18)

@@ -5,19 +5,19 @@
 import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, eStrutturale, spilloPerPunto, tipiDellaCategoria } from './spilli.js';
 
 describe('registro dei tipi di spillo', () => {
-  it('conta 42 tipi distinti, ognuno con nome, colore esadecimale e riserva nel registro', () => {
-    expect(TIPI_SPILLO).toHaveLength(42);
-    expect(new Set(TIPI_SPILLO).size).toBe(42);
+  it('conta 41 tipi distinti (il «Tesoro» generico è stato tolto), ognuno con nome, colore esadecimale e riserva nel registro', () => {
+    expect(TIPI_SPILLO).toHaveLength(41);
+    expect(new Set(TIPI_SPILLO).size).toBe(41);
     for (const t of TIPI_SPILLO) expect(DEFINIZIONI_SPILLO[t]).toMatchObject({ nome: expect.any(String), colore: expect.stringMatching(/^#[0-9a-f]{6}$/) });
-    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].colore)).size).toBe(42);
-    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].nome)).size).toBe(42);
+    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].colore)).size).toBe(41);
+    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].nome)).size).toBe(41);
   });
 
   it('le quattro categorie coprono ogni tipo una sola volta, e i riferimenti tipici stanno nella categoria', () => {
     const perCategoria = CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c));
     expect([...perCategoria].sort()).toEqual([...TIPI_SPILLO].sort());
     expect(tipiDellaCategoria('spostamento')).toEqual(['passaggio', 'scala', 'uscita', 'treno', 'rampino', 'scorciatoia', 'velluto', 'mementos', 'ingresso-palazzo', 'infiltrazione']);
-    expect(tipiDellaCategoria('consumabile')).toEqual(['dialogo', 'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave', 'timbro', 'boss', 'miniboss']);
+    expect(tipiDellaCategoria('consumabile')).toEqual(['dialogo', 'forziere', 'forziere-raro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto', 'oggetto-chiave', 'timbro', 'boss', 'miniboss']);
     // i nemici si rigenerano: informativi, non consumabili (2026-09-30)
     expect(categoriaSpillo('nemico')).toBe('informativo');
     expect(DEFINIZIONI_SPILLO.nemico.collezionabile).toBe(false);

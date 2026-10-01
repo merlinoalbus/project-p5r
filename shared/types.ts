@@ -1648,7 +1648,7 @@ export type StatoPunto = 'ottenuto' | 'esaurito';
 export interface PuntoInteresseDto {
   chiave: string;
   ordine: number;
-  tipo: 'sicura' | 'forziere' | 'forziere-chiuso' | 'volonta' | 'puzzle' | 'miniboss' | 'boss' | 'ombra-sciagura' | 'persona' | 'oggetto' | 'scorciatoia' | 'altro';
+  tipo: 'sicura' | 'porta' | 'meccanismo' | 'forziere' | 'forziere-chiuso' | 'volonta' | 'puzzle' | 'miniboss' | 'boss' | 'ombra-sciagura' | 'persona' | 'oggetto' | 'scorciatoia' | 'storia' | 'altro';
   nome: string;
   descrizione: string;
   esauribile: boolean;

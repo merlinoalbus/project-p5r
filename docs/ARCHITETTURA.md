@@ -695,12 +695,12 @@ già collegato ad altro si rifiuta (409 `pin-gia-collegato`, col nome di ciò a 
 (`SceltaPin`: senza testata, tocco = `onScegli` invece del popup, tutti i pin visibili, i collegati con `.spillo-mappa--scelto`,
 ricerca passata dalla voce); l'altezza della mappa si **misura** sul contenitore che scorre. `PuntoInteresseDto.pin`
 (`PinDelPuntoDto`) porta i pin collegati; la riga dice «N pin» o «da collegare» (`shared/spilli.ts`: `pinDelPunto`,
-`puntoDescrittivo` — persona e altro non hanno pin). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
+`puntoDaCollegare` — il tipo ha di solito un pin; `puntoDescrittivo` — solo «Altro», senza pin né stato). I tipi delle voci (2026-10-01): Stanze sicure, Porta, Meccanismo, Forziere normale, Forziere raro, Semi della bramosia, Enigma, Mini-boss, Boss, Nemico, Persona, Oggetto, Scorciatoia, Storia, Altro (`NOME_TIPO`; le chiavi dei dati restano `sicura`, `forziere-chiuso`, `volonta`, `ombra-sciagura`); ogni tipo tranne «Altro» si collega a qualunque pin del Palazzo che non abbia già un riferimento proprio (una destinazione, un Confidente: lo supera la voce «campo dedicato alla voce»). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
 `impostaStatoPunto` raccoglie o riapre tutti i pin della voce; `impostaRaccolto` segna la voce quando sono raccolti **tutti**
 i suoi pin delle planimetrie e la riapre togliendone uno; collegando, `allineaStatiPunto` unisce gli stati delle partite
 (voce segnata → pin raccolti; pin tutti raccolti → voce segnata), scollegando restano come sono. La risposta del
 collegamento non porta lo stato della partita: dopo ogni tocco `GuidaDellArea` rilegge la scheda (`onRicarica`, con la
-partita e `versioneStati`). Le voci **descrittive** (`puntoDescrittivo`: persona, altro) non hanno stato né pin: il server
+partita e `versioneStati`). Le voci **descrittive** (`puntoDescrittivo`: solo «Altro») non hanno stato né pin: il server
 rifiuta di segnarle e di collegarle (400 `punto-descrittivo`; azzerarle resta possibile), rifiuta di far diventare
 descrittiva una voce con pin (409 `punto-con-pin`), e in lettura ignora uno stato rimasto (DTO `stato: null`, fuori da
 `gestiti`) senza cancellarlo. Vale anche dal lato mappa: il dettaglio `punto` di un pin (`dettaglioRiferimento`) porta

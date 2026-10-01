@@ -45,7 +45,7 @@ it('la riga dice se la voce è collegata («N pin») o da collegare; le descritt
   monta([
     punto({}),
     punto({ chiave: 'p2', tipo: 'sicura', nome: 'Stanza sicura', pin: [{ id: 9, nome: 'Sicura', tipo: 'sicura', mappa: 'm-sala', mappaNome: 'Palazzo di Kamoshida › Sala' }] }),
-    punto({ chiave: 'p3', tipo: 'persona', nome: 'Negoziazione' }),
+    punto({ chiave: 'p3', tipo: 'altro', nome: 'Negoziazione' }),
   ]);
   expect(screen.getByText(/Guida dell’area · 3 voci · 1 da collegare/)).toBeInTheDocument();
   expect(within(screen.getByRole('button', { name: /Forziere della sala/ })).getByText('da collegare')).toBeInTheDocument();
@@ -116,7 +116,7 @@ it('si aggiunge una voce in fondo all’area, e si apre per sistemarla', async (
 });
 
 it('una voce descrittiva si legge e basta: niente Ottenuto, niente «Collega pin», e non conta fra le segnate', () => {
-  monta([punto({ chiave: 'p3', tipo: 'persona', nome: 'Negoziazione', stato: null })]);
+  monta([punto({ chiave: 'p3', tipo: 'altro', nome: 'Negoziazione', stato: null })]);
   expect(screen.getByText(/Guida dell’area · 1 voce$/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /Negoziazione/ }));
   expect(screen.getByText('Voce descrittiva: si legge, non si segna e non ha pin.')).toBeInTheDocument();
@@ -124,4 +124,31 @@ it('una voce descrittiva si legge e basta: niente Ottenuto, niente «Collega pin
   expect(screen.queryByRole('button', { name: 'Collega pin' })).toBeNull();
   // si corregge, si sposta e si elimina come le altre
   expect(screen.getByRole('button', { name: /^Modifica: la voce «Negoziazione»/ })).toBeInTheDocument();
+});
+
+it('i tipi si chiamano come li vuole l’utente, e Persona e Storia si collegano e si segnano senza dirsi «da collegare»', () => {
+  monta([
+    punto({ chiave: 'a', tipo: 'sicura', nome: 'Safe Room' }),
+    punto({ chiave: 'b', tipo: 'volonta', nome: 'Seme rosso' }),
+    punto({ chiave: 'c', tipo: 'forziere-chiuso', nome: 'Forziere chiuso a chiave' }),
+    punto({ chiave: 'd', tipo: 'forziere', nome: 'Forziere comune' }),
+    punto({ chiave: 'e', tipo: 'ombra-sciagura', nome: 'Furia nera' }),
+    punto({ chiave: 'f', tipo: 'porta', nome: 'Porta del caveau' }),
+    punto({ chiave: 'g', tipo: 'persona', nome: 'Leanan Sidhe' }),
+    punto({ chiave: 'h', tipo: 'storia', nome: 'Si apre la torre' }),
+  ]);
+  const riga = (nome: string) => screen.getByRole('button', { name: new RegExp(`^${nome}`) });
+  expect(riga('Safe Room')).toHaveTextContent('Stanze sicure');
+  expect(riga('Seme rosso')).toHaveTextContent('Semi della bramosia');
+  expect(riga('Forziere chiuso a chiave')).toHaveTextContent('Forziere raro');
+  expect(riga('Forziere comune')).toHaveTextContent('Forziere normale');
+  expect(riga('Furia nera')).toHaveTextContent('Nemico');
+  // una porta senza pin è «da collegare»; Persona e Storia no (il pin non gli manca)
+  expect(riga('Porta del caveau')).toHaveTextContent('da collegare');
+  expect(riga('Leanan Sidhe')).not.toHaveTextContent('da collegare');
+  expect(riga('Si apre la torre')).not.toHaveTextContent('da collegare');
+  // ma si segnano e si collegano
+  fireEvent.click(riga('Si apre la torre'));
+  expect(screen.getByRole('button', { name: 'Ottenuto' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Collega pin' })).toBeInTheDocument();
 });

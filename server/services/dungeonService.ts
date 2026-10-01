@@ -175,7 +175,7 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
     finestra: finestreDungeon().get(r.chiave) ?? null, livelloConsigliato: r.livello_consigliato,
     aree: (prepared('SELECT COUNT(*) AS n FROM dungeon_area WHERE dungeon_chiave = ?').get(r.chiave) as { n: number }).n,
     punti: punti.length, esauribili: punti.filter((p) => p.esauribile === 1).length,
-    // le voci descrittive della guida (Persona, «altro») non hanno stato (scelta dell'utente, 2026-10-01): non contano
+    // le voci descrittive della guida (solo «Altro») non hanno stato (scelta dell'utente, 2026-10-01): non contano
     gestiti: conPartita ? punti.filter((p) => !puntoDescrittivo(p.tipo) && stati.has(p.chiave)).length : null,
     raccolta,
     // solo i Palazzi si completano: i Memento, una volta aperti, restano un posto dove andare

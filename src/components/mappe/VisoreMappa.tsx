@@ -825,7 +825,7 @@ interface PropsAzioni<T extends SpilloDto | SchedaContenutoGuidaDto> { spillo: T
 /** Azioni di stato nella partita: per i punti della Guida «Ottenuto/Esaurito/Riapri» (stessi stati della scheda del Palazzo), altrimenti «Raccolto/Riapri». */
 export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
   const punto = s.dettaglio?.tipo === 'punto' ? s.dettaglio.punto ?? null : null;
-  // una voce descrittiva della guida (Persona, «altro») si legge, non si segna (scelta dell'utente, 2026-10-01): come nella scheda del Palazzo
+  // una voce descrittiva della guida (solo «Altro») si legge, non si segna (scelta dell'utente, 2026-10-01): come nella scheda del Palazzo
   if (punto && puntoDescrittivo(punto.tipo)) return <span className="text-[12px] text-text-muted">Voce descrittiva della guida: si legge, non si segna.</span>;
   if (punto && onStatoPunto) {
     return (

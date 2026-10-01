@@ -15,7 +15,7 @@
 import { z } from 'zod';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 
-export const TIPI_PUNTO = ['sicura', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'altro'] as const;
+export const TIPI_PUNTO = ['sicura', 'porta', 'meccanismo', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'storia', 'altro'] as const;
 
 export const paramsChiaveGuida = z.object({ chiave: z.string().min(1).max(200) });
 export const bodyDungeon = z.object({

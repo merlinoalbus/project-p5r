@@ -27,7 +27,7 @@ const albero: MappaRiassuntoDto[] = [
   riassunto({ chiave: 'kamoshida-01', nome: 'Ingresso', tipo: 'area', genitore: 'dungeon-kamoshida', numeroSpilli: 5 }),
 ];
 const forziere: SpilloDto = { id: 4, mappaChiave: 'citta-shibuya', tipo: 'forziere', tipoNome: 'Forziere', colore: '#eab308', nome: 'Scrigno', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: true, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '' };
-const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2, immagineUrl: '/pianta-test.png' }), larghezza: 800, altezza: 600, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], arrivi: [], spilli: [forziere, { ...forziere, id: 5, nome: 'Passaggio', tipo: 'passaggio', tipoNome: 'Passaggio', collezionabile: false, x: 60, y: 60 }, { ...forziere, id: 6, nome: 'Tesoro del Palazzo', tipo: 'tesoro', tipoNome: 'Tesoro', x: 70, y: 20, riferimento: { tipo: 'punto', chiave: 'kamoshida-01/2' }, dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-01/2', tipo: 'tesoro', nome: 'Tesoro del Palazzo', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-01', stato: null } } }] };
+const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2, immagineUrl: '/pianta-test.png' }), larghezza: 800, altezza: 600, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], arrivi: [], spilli: [forziere, { ...forziere, id: 5, nome: 'Passaggio', tipo: 'passaggio', tipoNome: 'Passaggio', collezionabile: false, x: 60, y: 60 }, { ...forziere, id: 6, nome: 'Tesoro del Palazzo', tipo: 'tesoro-palazzo', tipoNome: 'Tesoro del Palazzo', x: 70, y: 20, riferimento: { tipo: 'punto', chiave: 'kamoshida-01/2' }, dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-01/2', tipo: 'tesoro', nome: 'Tesoro del Palazzo', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-01', stato: null } } }] };
 
 function monta(percorso: string) {
   render(
@@ -109,11 +109,11 @@ describe('MappaPage', () => {
   it('un punto della Guida segnato «Ottenuto» dalla mappa aggiorna lo stato del punto e conta come raccolto', async () => {
     impostaStatoPunto.mockResolvedValue({ chiave: 'kamoshida-01/2', stato: 'ottenuto' });
     monta('/guida/mappe/citta-shibuya');
-    fireEvent.click(await screen.findByRole('button', { name: 'Tesoro: Tesoro del Palazzo' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Tesoro del Palazzo: Tesoro del Palazzo' }));
     fireEvent.click(within(screen.getByRole('dialog', { name: 'Tesoro del Palazzo' })).getByRole('button', { name: 'Ottenuto' }));
     expect(impostaStatoPunto).toHaveBeenCalledWith(7, 'kamoshida-01/2', 'ottenuto');
     expect(await screen.findByText('1 di 2 raccolti · 50%')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Tesoro: Tesoro del Palazzo' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Tesoro del Palazzo: Tesoro del Palazzo' })).not.toBeInTheDocument();
   });
 });
 

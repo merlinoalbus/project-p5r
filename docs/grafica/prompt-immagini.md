@@ -189,7 +189,7 @@ rampino magenta scuro `#a21caf`, porta rosso scuro `#b91c1c`. Ogni soggetto deve
 | `spillo-passaggio.png` | ingresso/passaggio verso un'altra mappa | porta ad arco con freccia |
 | `spillo-negozio.png` | negozio | insegna con borsa della spesa |
 | `spillo-forziere.png` | forziere | scrigno chiuso |
-| `spillo-tesoro.png` | tesoro collezionabile | gemma sfaccettata |
+| ~~`spillo-tesoro.png`~~ | (tipo «Tesoro» tolto il 2026-10-01: ridondante col Tesoro del Palazzo) | — |
 | `spillo-boss.png` | boss | teschio con corona |
 | `spillo-miniboss.png` | miniboss | teschio semplice |
 | `spillo-sicura.png` | stanza sicura | scudo con spunta |

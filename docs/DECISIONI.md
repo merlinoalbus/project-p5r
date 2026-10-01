@@ -903,3 +903,19 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - better-sqlite3 resta alla 12 (scelta dell'utente): la 13 toglie il deprecato `prebuild-install`, ma per un bug aperto di
   npm (npm/cli#9837, WiseLibs/better-sqlite3#1516) con il lockfile si compila sempre da sorgente — su un clone nuovo per
   Windows servirebbero Visual Studio Build Tools e Python. Da riprendere quando npm lo corregge.
+
+### 2026-10-01 — I tipi delle voci della guida, allineati ai pin
+- Rilievo dell'utente configurando un'area: mancano gli elementi di avanzamento della storia; «Altro dovrebbe essere solo per
+  elementi senza punti in mappa»; da rivedere le categorie. Spiegati i tipi dai dati veri (Sicura = Safe Room, Volontà = Semi
+  della Bramosia, Enigma = enigmi e dispositivi, Persona = le Ombre dell'area, Ombra sciagura = Ombre singole/guardiani).
+- Scelte dell'utente: «Sicura» resta con nome «Stanze sicure» e si aggiungono «Porta» e «Meccanismo»; «Volontà» diventa «Semi
+  della bramosia»; «Forziere» → «Forziere normale», «Forziere chiuso» → «Forziere raro», «Ombra sciagura» → «Nemico»; nuovo
+  tipo «Storia», collegabile a qualunque pin; «Persona» collegabile, con lo stato; «Altro» senza pin. Limite misurato in revisione:
+  un pin che ha già un riferimento (88 nel canone di produzione: rampini, passaggi, scale, scorciatoie, infiltrazioni, uscita,
+  ingresso, un Confidente) non si collega finché il collegamento alla guida usa lo stesso campo; scelta dell'utente: un campo
+  dedicato alla voce (voce 2 della sezione in ROADMAP). Cambiano le etichette,
+  non le chiavi dei dati (nessuna migrazione).
+- Il pin «Tesoro» (generico) si toglie dal registro: ridondante con «Tesoro del Palazzo», nessun pin né voce lo usava
+  (misurato anche sul canone di produzione).
+- Chiarito: una voce si collega a più pin (un pin a una sola voce). «Enigma» diventa un contenitore di passi (voce 3 in ROADMAP):
+  il caso d'uso dell'utente è la porta che si apre con un meccanismo di sblocco, ciascuno col suo pin.

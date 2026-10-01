@@ -98,7 +98,7 @@ Regole:
 che la mappa del gioco dà ai punti di interesse: quando il giocatore vede «Bevande», «Sigarette» o «Cercalavoro» sulla mappa di Yongen-Jaya o
 del Sottopasso trova lo stesso nome nella palette. Analisi dei punti di interesse (2026-09-05): città = negozi, ristoranti, distributori di
 bevande, distributori di sigarette/tabaccaio, espositori del Cercalavoro, posti dei lavori part-time, bagno pubblico, lavanderia, cinema,
-biblioteca, chiese e templi, sale giochi, abitazioni, altre attività, stazioni; Palazzi e Mementos = forzieri, tesori, Tesoro del Palazzo, Semi
+biblioteca, chiese e templi, sale giochi, abitazioni, altre attività, stazioni; Palazzi e Mementos = forzieri, Tesoro del Palazzo, Semi
 della Bramosia, oggetti, Timbri dei Mementos, boss, miniboss, nemici, punti sensibili, meccanismi (leve, interruttori, pannelli), punti del
 rampino, porte chiuse, stanze sicure, scorciatoie. Restano senza tipo proprio, perché coperti da un tipo esistente: chioschi e bancarelle (negozio
 o Confidente), laghetto di pesca, gabbie di battuta, palestra e punti di studio (attività), Jose (negozio), bersagli delle richieste (boss/miniboss
@@ -125,7 +125,6 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Persone | confidente | Confidente | spillo-confidente | rosa | no | confidente |
 | Persone | dialogo | Dialogo | spillo-dialogo | indaco | sì (conversazione fatta) | — (personaggio non Confidente; luogo scelto a mano se utile) |
 | Palazzi e Mementos | forziere | Forziere | spillo-forziere | oro | sì | punto |
-| Palazzi e Mementos | tesoro | Tesoro | spillo-tesoro | viola | sì | punto |
 | Palazzi e Mementos | tesoro-palazzo | Tesoro del Palazzo | spillo-tesoro-palazzo | fucsia | sì | punto (Tesoro del Palazzo) |
 | Palazzi e Mementos | seme-bramosia | Seme della bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
 | Palazzi e Mementos | oggetto-chiave | Oggetto chiave | spillo-oggetto-chiave | ambra | sì | punto |
@@ -140,13 +139,13 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Palazzi e Mementos | scorciatoia | Scorciatoia | spillo-scorciatoia | grigio | no | punto |
 | Altro | nota | Nota | spillo-nota | bianco | no | — |
 
-Le corrispondenze automatiche dalla guida (`spilloPerPunto`, `spilloPerLuogo`) non usano i tipi nuovi: i luoghi «servizio» restano attività e i
+Le corrispondenze automatiche dalla guida (`spilloPerPunto`, `spilloPerLuogo`) usano i tipi nuovi solo dove la guida ha un tipo corrispondente (dal 2026-10-01 porta → porta e meccanismo → meccanismo): i luoghi «servizio» restano attività e i
 punti «puzzle» punti sensibili; i tipi nuovi si scelgono nell'editor. Il pacchetto `citta-yongen-jaya.json` riclassifica bagno pubblico, cinema,
 lavanderia e la casa di Sojiro Sakura (prima «punto sensibile», tipo da Palazzo) con i tipi dedicati (reseed automatico via hash). I pulsanti della
 palette sono alti 44 px (bersaglio touch).
 
-I 12 tipi dei punti di dungeon esistenti (`utils/dungeon.ts`) si mappano su questi (persona → nota con riferimento al punto, puzzle → punto-sensibile,
-volontà → seme-bramosia, tesoro → tesoro-palazzo, ombra-sciagura → nemico, forziere-chiuso → forziere, oggetto → oggetto-chiave). Quando la corrispondenza cambia,
+I 15 tipi dei punti di dungeon (`utils/dungeon.ts`; dal 2026-10-01 anche porta, meccanismo e storia) si mappano su questi (persona, storia e altro → nota con riferimento al punto, puzzle → punto-sensibile,
+volontà → seme-bramosia, ombra-sciagura → nemico, forziere-chiuso → forziere, oggetto → oggetto-chiave, porta → porta, meccanismo → meccanismo; il tipo di pin «tesoro» è stato tolto il 2026-10-01, ridondante col Tesoro del Palazzo). Quando la corrispondenza cambia,
 `sincronizzaMappe` riclassifica a ogni avvio gli spilli di origine `seed` (tipo e collezionabilità), senza toccare quelli dell'utente né gli stati per partita.
 
 ## 5. API (`/api/mappe`, sostituisce le rotte attuali mantenendo `scarica` come sorgente opzionale dell'immagine)
