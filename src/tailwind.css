@@ -548,7 +548,7 @@
      schermo, con la merce che scorre dentro — un riquadro da 260 px agganciato allo spillo su un
      telefono copriva la mappa e usciva dai bordi (richiesta dell'utente: layout per i tre formati). */
   @media (max-width: 767px) {
-    .spillo-popup, .spillo-popup--sotto { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom)); top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; }
+    .spillo-popup, .spillo-popup--sotto { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom)); top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; background: rgb(11,11,14); }
     .spillo-popup::after, .spillo-popup--sotto::after { display: none; }
     .spillo-popup__merce { max-height: none; overflow: visible; }
   }
@@ -558,7 +558,7 @@
      che scorre e si vede tutto — è il gesto che sul telefono si conosce già. */
   /* I 64 px di stacco servono a scavalcare la barra inferiore, che c'è solo sotto i 1024: da lì in
      su il foglio starebbe a galleggiare su un vuoto preso da un altro contesto. */
-  .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; }
+  .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; background: rgb(11,11,14); }
   .spillo-popup--foglio::after { display: none; }
   @media (max-width: 1023px) {
     .spillo-popup--foglio { bottom: calc(64px + env(safe-area-inset-bottom)); }

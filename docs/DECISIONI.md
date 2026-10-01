@@ -936,3 +936,18 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   toglie. Misura: in produzione `importaMappe` si chiama solo dall'editor (origine `utente`), il ramo `seed` resta per i test.
   «Sulla mappa» di una voce porta ai suoi pin. Spostato dall'editor su una planimetria fuori dal Palazzo della sua voce, un pin
   si rifiuta (400 `pin-fuori-dal-palazzo`): prima si scollega.
+
+### 2026-10-01 — Notifiche sopra il foglio, foglio opaco
+- Rilievo emerso nella prova della 094, e richiesta dell'utente («devi sistemarli entrambi»): l'avviso «segnato come ottenuto»
+  finiva sotto il foglio dal basso del popup di una mappa, e il foglio lasciava trasparire la pagina sotto.
+- Causa del primo: il layout è `isolate`, e lo `z-[9999]` della coda delle notifiche valeva solo lì dentro, sotto al foglio, che sta
+  in un portale su `body`. La coda passa anche lei in un portale su `body`, e non copre il popup di uno spillo (`postoDellaCoda`,
+  `src/utils/postoCoda.ts`): sopra un foglio dal basso si alza a misura appena oltre il
+  suo bordo alto; un popup ancorato che scende nella sua zona lo scansa di lato (sopra, se di lato non c'è posto). In basso
+  coprirebbe i pulsanti («Riapri» subito dopo «Ottenuto»), in alto la barra
+  degli strumenti della mappa (una prima versione la metteva lì: rilievo del validatore). Il foglio diventa opaco (`rgb(11,11,14)`).
+  Da 1024 px in su, quando la coda passa a sinistra per scansare un popup ancorato in basso a destra, per i pochi secondi della
+  notifica sta sopra la parte bassa della barra laterale (provato a 768; a 1280 nessun pin dei dati locali porta lì un popup).
+  Le misure si ripetono solo a un cambiamento: i popup si osservano una volta sola (0 misure in 2 s di inattività, contate in Edge).
+- Effetto dichiarato: la coda ora sta sopra anche alle modali (overlay `z-index` 5000, portale su `body`); prima ci finiva sotto,
+  nascosta. La × della notifica la chiude e lascia la modale aperta (provato su «Rimuovi tutte», solo la conferma).

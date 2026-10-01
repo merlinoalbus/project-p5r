@@ -201,6 +201,8 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   Il popup sta sopra lo spillo, sotto quando in alto non c'è spazio, e diventa il foglio dal basso quando non sta da nessun lato
   (2026-10-01): l'altezza è misurata, non stimata — dalla 094 uno spostamento di una voce della guida porta anche «Ottenuto», e
   su una tela bassa (tablet, visore incorporato) la stima fissa lo lasciava tagliare dalla tela. Sotto i 768 px è sempre il foglio.
+  Il foglio è opaco, e la coda delle notifiche (portale su `body`, `postoDellaCoda`) non copre il popup aperto: sopra un foglio si alza a
+  misura, un popup ancorato nella sua zona lo scansa di lato; in basso ne coprirebbe i pulsanti, in alto la barra della mappa (2026-10-01).
 - Raccolti nascosti per default; interruttore «Mostra anche i raccolti» (punto 9) con conteggio; stato per partita attiva.
 - In uso normale nessun posizionamento: nessun click sulla mappa modifica dati (punto 10). Il pulsante «Modifica mappa» apre l'editor.
 

@@ -688,16 +688,20 @@ describe('il popup dello spillo si misura (094: uno spostamento di una voce ha a
   const passaggio = spillo({ id: 40, nome: 'Torre Inferiore', tipo: 'passaggio', tipoNome: 'Passaggio', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
     dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: null, asset: null } },
     voce: { chiave: 'kamoshida-15/1', tipo: 'storia', nome: 'Si apre la torre', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-15', stato: null } });
-  const apri = async (tela: { w: number; h: number }) => {
+  // Le misure restano finte per tutto il caso: in jsdom la tela si misura in un rAF, che può arrivare dopo la comparsa del popup.
+  let tela = { w: 0, h: 0 };
+  beforeEach(() => {
     cleanup();
-    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: tela.w, height: tela.h, left: 0, top: 0, right: tela.w, bottom: tela.h, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({ width: tela.w, height: tela.h, left: 0, top: 0, right: tela.w, bottom: tela.h, x: 0, y: 0, toJSON: () => ({}) } as DOMRect));
     // jsdom non impagina: il popup misura quel che misura nel browser (238 px, rilevati a 768 sul canone)
-    const altezza = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) { return this.classList.contains('spillo-popup') ? 238 : 0; });
-    try {
-      render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
-      fireEvent.click(await screen.findByRole('button', { name: /^Passaggio: Torre Inferiore/ }));
-      await screen.findByRole('dialog', { name: 'Torre Inferiore' });
-    } finally { misura.mockRestore(); altezza.mockRestore(); }
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) { return this.classList.contains('spillo-popup') ? 238 : 0; });
+  });
+  afterEach(() => vi.restoreAllMocks());
+  const apri = async (dimensioni: { w: number; h: number }) => {
+    tela = dimensioni;
+    render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: /^Passaggio: Torre Inferiore/ }));
+    await screen.findByRole('dialog', { name: 'Torre Inferiore' });
   };
 
   it('su una tela bassa, dove non sta né sopra né sotto, diventa il foglio invece di farsi tagliare', async () => {
@@ -711,8 +715,10 @@ describe('il popup dello spillo si misura (094: uno spostamento di una voce ha a
 
   it('su una tela alta resta ancorato allo spillo, sopra', async () => {
     await apri({ w: 1000, h: 900 });
-    const popup = screen.getByRole('dialog', { name: 'Torre Inferiore' });
-    expect(popup.className).not.toContain('spillo-popup--foglio');
-    expect(popup.className).not.toContain('spillo-popup--sotto');
+    await waitFor(() => {
+      const popup = screen.getByRole('dialog', { name: 'Torre Inferiore' });
+      expect(popup.className).not.toContain('spillo-popup--foglio');
+      expect(popup.className).not.toContain('spillo-popup--sotto');
+    });
   });
 });
