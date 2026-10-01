@@ -610,3 +610,62 @@ it('nel sorgente non ricompare il fattore zoom sugli spostamenti in pixel di sch
   expect(sorgente).toContain('${elencoDx}px');
   expect(sorgente).toContain('${g.scosto?.x ?? 0}px');
 });
+
+// ---- Modalità scelta: i pin per una voce della guida (richiesta dell'utente, 2026-10-01) ----
+describe('VisoreMappa in modalità scelta', () => {
+  it('resta la sola mappa; il tocco su un pin lo sceglie invece di aprirne il popup; si vedono anche raccolti e non disponibili', () => {
+    const onScegli = vi.fn();
+    const { onRaccolto } = monta({ incorporato: true, scelta: { titolo: 'Forziere della sala', scelti: new Set([2]), onScegli } });
+    // niente testata: percorso, pannello e comandi li porta la voce che ospita la mappa
+    expect(screen.queryByRole('navigation', { name: 'Percorso della mappa' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Pannello' })).toBeNull();
+    // il raccolto (2) e il non disponibile (6) ci sono: si sceglie un posto, non si consulta il giorno
+    const raccolto = screen.getByRole('button', { name: 'Forziere: Scrigno raccolto (collegato: tocca per scollegare)' });
+    expect(raccolto).toHaveAttribute('aria-pressed', 'true');
+    expect(raccolto).toHaveClass('spillo-mappa--scelto');
+    expect(screen.getByRole('button', { name: 'Attività: Bancarella estiva (tocca per collegare)' })).toBeInTheDocument();
+    const libero = screen.getByRole('button', { name: 'Forziere: Scrigno da aprire (tocca per collegare)' });
+    expect(libero).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(libero);
+    expect(onScegli).toHaveBeenCalledWith(expect.objectContaining({ id: 4 }));
+    // nessun popup né raccolto: il tocco ha solo scelto
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(onRaccolto).not.toHaveBeenCalled();
+  });
+
+  it('la ricerca arriva dalla voce e filtra i pin sulla mappa', () => {
+    monta({ incorporato: true, scelta: { titolo: 'Voce', scelti: new Set(), onScegli: vi.fn(), ricerca: 'corridoio' } });
+    expect(screen.queryByRole('button', { name: /Scrigno da aprire/ })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Forziere: Forziere del corridoio (tocca per collegare)' })).toBeInTheDocument();
+  });
+
+  it('mentre si salva un tocco i pin non rispondono', () => {
+    const onScegli = vi.fn();
+    monta({ incorporato: true, scelta: { titolo: 'Voce', scelti: new Set(), onScegli, occupato: true } });
+    const pin = screen.getByRole('button', { name: 'Forziere: Scrigno da aprire (tocca per collegare)' });
+    expect(pin).toBeDisabled();
+    fireEvent.click(pin);
+    expect(onScegli).not.toHaveBeenCalled();
+  });
+});
+
+it('un pin non collezionabile collegato a una voce della guida si segna dal suo popup, come la voce', async () => {
+  const sicura = spillo({ id: 9, nome: 'Stanza sicura', tipo: 'sicura', tipoNome: 'Stanza sicura', x: 30, y: 40, riferimento: { tipo: 'punto', chiave: 'kamoshida-02/0' },
+    dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-02/0', tipo: 'sicura', nome: 'Stanza sicura', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } } });
+  const onStatoPunto = vi.fn().mockResolvedValue(undefined);
+  render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [sicura] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={onStatoPunto} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Stanza sicura: Stanza sicura' }));
+  fireEvent.click(within(screen.getByRole('dialog', { name: 'Stanza sicura' })).getByRole('button', { name: 'Ottenuto' }));
+  await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 9 }), 'ottenuto'));
+});
+
+it('un pin collegato a una voce descrittiva della guida non offre stato, né nel popup né nella scheda laterale', () => {
+  const nota = spillo({ id: 10, nome: 'Nota della sala', tipo: 'nota', tipoNome: 'Nota', x: 30, y: 40, riferimento: { tipo: 'punto', chiave: 'kamoshida-02/9' },
+    dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-02/9', tipo: 'altro', nome: 'Nota della sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } } });
+  render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [nota] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Nota: Nota della sala' }));
+  // popup e scheda laterale (il pannello è aperto a schermo intero): la dicitura, nessun pulsante di stato
+  expect(screen.getAllByText('Voce descrittiva della guida: si legge, non si segna.')).toHaveLength(2);
+  expect(screen.queryByRole('button', { name: 'Ottenuto' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Riapri' })).toBeNull();
+});

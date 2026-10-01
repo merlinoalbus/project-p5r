@@ -17,7 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { MappaDto, SpilloDto } from '../../types';
-import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, categoriaSpillo, type TipoSpillo } from '../../../shared/spilli';
+import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, categoriaSpillo, puntoDescrittivo, type TipoSpillo } from '../../../shared/spilli';
 import { useAsset } from '../../stores/assetStore';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
@@ -85,6 +85,23 @@ interface Props {
   /** Elemento davanti al percorso nella barra (es. targhetta «Modifica»). */
   intestazione?: ReactNode;
   className?: string;
+  /** Modalità **scelta** (2026-10-01): la mappa serve a scegliere dei pin per una voce della guida, e ci sta dentro. Il
+   *  tocco su un pin chiama `onScegli` invece di aprirne il popup; i pin scelti restano evidenziati; si vedono tutti i pin,
+   *  raccolti e non ancora disponibili compresi (si sceglie un posto, non si consulta il giorno). Resta la sola mappa: la
+   *  testata no, i comandi (planimetria, ricerca, «Fatto») li porta la voce, e la ricerca arriva da lì. */
+  scelta?: SceltaPin;
+}
+
+/** Vedi `Props.scelta`. */
+export interface SceltaPin {
+  /** Per chi si sceglie (la voce della guida): sta nel nome accessibile dei pin. */
+  titolo: string;
+  scelti: ReadonlySet<number>;
+  onScegli: (spillo: SpilloDto) => void;
+  /** Il testo cercato nei comandi della voce: filtra i pin sulla mappa. */
+  ricerca?: string;
+  /** Mentre si salva un tocco: i pin non rispondono. */
+  occupato?: boolean;
 }
 
 const FATTORE_ZOOM_MASSIMO = 8;
@@ -155,7 +172,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
   return a.disponibileDal?.trim() || 'sempre';
 }
 
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale, scelta }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -207,7 +224,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const zoomMax = zoomMin * FATTORE_ZOOM_MASSIMO;
   const zoom = zoomEsplicito === null ? zoomMin : limita(zoomEsplicito, zoomMin, zoomMax);
   const pan: Punto = panEsplicito ?? fit.pan;
-  const selezionatoId = editor ? editor.selezionatoId : selezionatoUso;
+  // in modalità scelta non c'è selezione (né popup): il tocco sceglie
+  const selezionatoId = scelta ? null : editor ? editor.selezionatoId : selezionatoUso;
   const seleziona = useCallback((id: number | null) => { if (editor) editor.onSeleziona(id); else setSelezionatoUso(id); }, [editor]);
 
   // Misura dell'area visibile (ResizeObserver quando disponibile; altrimenti finestra).
@@ -364,7 +382,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto).length, [mappa.spilli]);
   const filtraBloccati = Boolean(partitaId) && (!editor || vistaGiornoCorrente === true);
   const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter((s) => s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile').length : 0), [mappa.spilli, filtraBloccati]);
-  const ricercaNorm = ricerca.trim().toLowerCase();
+  const ricercaNorm = (scelta ? scelta.ricerca ?? '' : ricerca).trim().toLowerCase();
   /** Uno spillo che non soddisfa le sue condizioni non c'è **di regola**, e ricompare solo se lo si chiede.
    *
    * La distinzione è quella che conta, ed è la decisione dell'utente: la mappa attiva mostra il
@@ -386,7 +404,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    * lo stesso. Il cartellino «Da segnare» resta, sotto «mostra anche i non disponibili», e porta
    * al punto dove si segna lo stato che manca. */
   const bloccato = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
-  const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
+  const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (scelta !== undefined || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Popup sopra allo spillo; sotto quando nella tela (overflow nascosto) non c'è spazio sopra: il popup più alto misura ~215 px più i 42 px della punta.
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio (con la merce di un negozio è più alto), e
@@ -468,7 +486,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
 
   return (
     <div className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${className ?? ''}`} data-testid="visore-mappa">
-      <header className="visore-mappa__barra">
+      {/* in modalità scelta la mappa sta dentro la voce della guida, che porta i comandi: la testata ruberebbe la tela */}
+      {!scelta && <header className="visore-mappa__barra">
         <nav className="visore-mappa__percorso" aria-label="Percorso della mappa">
           {intestazione}
           {mappa.percorso.map((p, i) => (
@@ -484,7 +503,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => setPannelloScelto(!pannelloAperto)} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
           {onChiudi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo={etichettaChiudi ?? 'Chiudi'} onClick={onChiudi} />}
         </div>
-      </header>
+      </header>}
 
       <div className="visore-mappa__corpo">
         <aside id="visore-mappa-pannello" className="visore-mappa__pannello" hidden={!pannelloAperto} aria-label="Pannello della mappa">
@@ -574,7 +593,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
             <ul className="m-0 p-0 list-none flex flex-col visore-mappa__elenco" aria-label="Spilli visibili">
               {visibili.map((s) => (
                 <li key={s.id}>
-                  <button type="button" className={`visore-mappa__voce ${s.id === selezionatoId ? 'visore-mappa__voce--attiva' : ''} ${s.raccolto ? 'opacity-60' : ''}`} onClick={() => { seleziona(s.id); centraSu(s); }} aria-pressed={s.id === selezionatoId}>
+                  <button type="button" className={`visore-mappa__voce ${s.id === selezionatoId ? 'visore-mappa__voce--attiva' : ''} ${s.raccolto ? 'opacity-60' : ''}`} onClick={() => { if (scelta) { scelta.onScegli(s); centraSu(s); return; } seleziona(s.id); centraSu(s); }} aria-pressed={scelta ? scelta.scelti.has(s.id) : s.id === selezionatoId}>
                     <PuntoSpillo tipo={s.tipo} colore={s.colore} />
                     <span className="flex-1 min-w-0 truncate">{s.nome}</span>
                     <span className="text-[11px] text-text-muted">{s.tipoNome}{s.raccolto ? ' · raccolto' : ''}</span>
@@ -612,13 +631,14 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <button
                   key={s.id}
                   type="button"
-                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${s.raccolto ? 'spillo-mappa--raccolto' : ''} ${bloccato(s) ? 'spillo-mappa--bloccato' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
+                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${bloccato(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il pin si fa da parte come il gruppo: il tocco
                   // serve a posare uno spillo in quel punto, e prima su un pin esistente non
                   // succedeva nulla, senza nemmeno un segnale (rilievo del validatore, 2026-09-13).
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
-                  aria-label={`${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
-                  aria-pressed={attivo}
+                  aria-label={scelta ? `${s.tipoNome}: ${s.nome}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
+                  aria-pressed={scelta ? scelta.scelti.has(s.id) : attivo}
+                  disabled={scelta?.occupato}
                   title={s.nome}
                   onPointerDown={(e) => {
                     e.stopPropagation();
@@ -628,7 +648,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       tela.current?.setPointerCapture?.(e.pointerId);
                     }
                   }}
-                  onClick={(e) => { e.stopPropagation(); if (editor && editor.strumento !== 'seleziona') return; seleziona(attivo ? null : s.id); }}
+                  onClick={(e) => { e.stopPropagation(); if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; seleziona(attivo ? null : s.id); }}
                   onDoubleClick={(e) => { if (!visitabile) return; e.stopPropagation(); e.preventDefault(); editor!.onVisita!(visitabile.mappa); }}
                 >
                   <SpilloGrafico tipo={s.tipo} colore={s.colore} />
@@ -662,7 +682,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && <MerceNelPopup negozio={selezionato.dettaglio.negozio} spillo={selezionato} partitaId={partitaId} occupato={occupato} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} />}
                 <div className="flex flex-wrap gap-1">
                   {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
-                  {categoriaSpillo(selezionato.tipo) === 'consumabile' && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
+                  {/* anche un pin non collezionabile collegato a una voce della guida (una sicura, un passaggio): lo stato della voce è il suo (2026-10-01) */}
+                  {(categoriaSpillo(selezionato.tipo) === 'consumabile' || selezionato.dettaglio?.tipo === 'punto') && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
                   {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && (
                     <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Scheda del negozio" />
                   )}
@@ -731,10 +752,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <ul className={`m-0 list-none flex flex-col gap-0.5 ${elenco.altezzaVoci === undefined ? 'p-0' : 'area-scorrevole p-0.5'}`} style={elenco.altezzaVoci === undefined ? undefined : { maxHeight: elenco.altezzaVoci }}>
                   {gruppoScelto.spilli.map((s) => (
                     <li key={s.id}>
-                      <button type="button" className="visore-mappa__voce" onClick={() => { setGruppoAperto(null); seleziona(s.id); }}>
+                      {/* in modalità scelta l'elenco resta aperto: nello stesso punto se ne collegano anche più d'uno */}
+                      <button type="button" className={`visore-mappa__voce ${scelta?.scelti.has(s.id) ? 'visore-mappa__voce--attiva' : ''}`} disabled={scelta?.occupato}
+                        aria-pressed={scelta ? scelta.scelti.has(s.id) : undefined}
+                        onClick={() => { if (scelta) { scelta.onScegli(s); return; } setGruppoAperto(null); seleziona(s.id); }}>
                         <PuntoSpillo tipo={s.tipo} colore={s.colore} />
                         <span className="flex-1 min-w-0 break-words text-left">{s.nome}</span>
-                        <span className="text-[11px] text-text-muted shrink-0">{s.tipoNome}</span>
+                        <span className="text-[11px] text-text-muted shrink-0">{s.tipoNome}{scelta?.scelti.has(s.id) ? ' · collegato' : ''}</span>
                       </button>
                     </li>
                   ))}
@@ -801,6 +825,8 @@ interface PropsAzioni<T extends SpilloDto | SchedaContenutoGuidaDto> { spillo: T
 /** Azioni di stato nella partita: per i punti della Guida «Ottenuto/Esaurito/Riapri» (stessi stati della scheda del Palazzo), altrimenti «Raccolto/Riapri». */
 export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
   const punto = s.dettaglio?.tipo === 'punto' ? s.dettaglio.punto ?? null : null;
+  // una voce descrittiva della guida (Persona, «altro») si legge, non si segna (scelta dell'utente, 2026-10-01): come nella scheda del Palazzo
+  if (punto && puntoDescrittivo(punto.tipo)) return <span className="text-[12px] text-text-muted">Voce descrittiva della guida: si legge, non si segna.</span>;
   if (punto && onStatoPunto) {
     return (
       <>

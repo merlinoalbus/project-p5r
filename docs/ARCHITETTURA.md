@@ -684,6 +684,36 @@ propaga a tutte le sue tavole, l'etichetta resta della singola versione. **La pi
 dalla guida non esiste più** per le aree dei Palazzi (resta per i quartieri): dove manca la
 planimetria la scheda offre il selettore di tutte le tavole e aggiunge l'area con `impostaAreeMappa` (2026-09-30).
 
+**La guida dell'area, modificabile e collegata ai pin** (2026-10-01). `src/components/guida/GuidaDellArea.tsx` è la parte
+bassa della colonna dell'area: le voci (`punto_interesse`) sempre visibili, anche in un'area senza voci, con correzione,
+eliminazione, «Su»/«Giù» (`PUT /api/compendio/punti/:chiave/sposta`, `spostaPunto`: ricompatta l'ordine dell'area) e
+«Aggiungi una voce». Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
+/api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta sul pin (`riferimento = punto`), un pin
+già collegato ad altro si rifiuta (409 `pin-gia-collegato`, col nome di ciò a cui è collegato), uno fuori dal Palazzo pure
+(400). I pin si scelgono **sulla mappa, dentro la voce**: `MappaIncorporata`/`VisoreMappa` con la prop `scelta`
+(`SceltaPin`: senza testata, tocco = `onScegli` invece del popup, tutti i pin visibili, i collegati con `.spillo-mappa--scelto`,
+ricerca passata dalla voce); l'altezza della mappa si **misura** sul contenitore che scorre. `PuntoInteresseDto.pin`
+(`PinDelPuntoDto`) porta i pin collegati; la riga dice «N pin» o «da collegare» (`shared/spilli.ts`: `pinDelPunto`,
+`puntoDescrittivo` — persona e altro non hanno pin). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
+`impostaStatoPunto` raccoglie o riapre tutti i pin della voce; `impostaRaccolto` segna la voce quando sono raccolti **tutti**
+i suoi pin delle planimetrie e la riapre togliendone uno; collegando, `allineaStatiPunto` unisce gli stati delle partite
+(voce segnata → pin raccolti; pin tutti raccolti → voce segnata), scollegando restano come sono. La risposta del
+collegamento non porta lo stato della partita: dopo ogni tocco `GuidaDellArea` rilegge la scheda (`onRicarica`, con la
+partita e `versioneStati`). Le voci **descrittive** (`puntoDescrittivo`: persona, altro) non hanno stato né pin: il server
+rifiuta di segnarle e di collegarle (400 `punto-descrittivo`; azzerarle resta possibile), rifiuta di far diventare
+descrittiva una voce con pin (409 `punto-con-pin`), e in lettura ignora uno stato rimasto (DTO `stato: null`, fuori da
+`gestiti`) senza cancellarlo. Vale anche dal lato mappa: il dettaglio `punto` di un pin (`dettaglioRiferimento`) porta
+`stato: null` per una descrittiva, `impostaRaccolto` non scrive lo stato di una descrittiva, `verificaRiferimento` rifiuta
+un riferimento **nuovo** a una descrittiva (400 `punto-descrittivo`; quelli già esistenti — 4 elementi della guida senza
+mappa nel canone, collegati a voci «altro» — restano e restano modificabili) e `AzioniStato` (popup, scheda laterale,
+`SchedaContenutoGuida`) al posto dei pulsanti dice «Voce descrittiva della guida: si legge, non si segna.». Il popup offre
+i comandi di stato anche ai pin non collezionabili collegati a una voce che si segna (una sicura, un passaggio). Un nemico collegato a una
+voce si segna (Ombre sciagura). `eliminaPunto` / `eliminaArea` scollegano i pin delle planimetrie **lasciando** il loro
+raccolto (cancellano solo quello degli elementi della guida senza mappa). Nessuna riconciliazione automatica dei dati
+(scelta dell'utente): gli elementi della guida senza mappa (`area_guida_chiave`, 187 nel canone) restano com'erano.
+Con un'area scelta la colonna mostra la raccolta **di quell'area** (o dice che non ce n'è); il resto del Palazzo sta solo
+nella piega chiusa.
+
 `src/components/guida/PlanimetriePalazzo.tsx` è la colonna «Il Palazzo» della scheda: elenca **tutte** le planimetrie
 dell'albero `dungeon-<chiave>` che `DungeonDettaglioDto.planimetrie` porta con `ordine` e `aree` (in ordine di guida),
 raggruppate per stanza, e in coda le aree della guida senza planimetria. **L'elenco serve a scegliere, la scheda a

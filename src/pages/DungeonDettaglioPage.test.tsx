@@ -9,11 +9,11 @@ import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa } = vi.hoisted(() => ({
+const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
-  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(), collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
+vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
 vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
 vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
@@ -33,7 +33,7 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
   raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, note: '', fonti: [],
   aree: [
-    area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null }] }),
+    area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [] }] }),
     area({ chiave: 'k-02', ordine: 1, nome: 'Torre', punti: [] }),
     area({ chiave: 'k-03', ordine: 2, nome: 'Cortile', mappe: [{ chiave: 'm-cortile', nome: 'Palazzo di Kamoshida › Cortile', n: 0, presi: partita ? 0 : null, spilli: [] }] }),
   ],
@@ -45,7 +45,7 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
 const mementos = (): DungeonDettaglioDto => ({
   ...palazzo(true), chiave: 'mementos', tipo: 'mementos', nome: 'Memento', raccolta: { totale: 9, presi: 1, mappe: 2, mappeComplete: 0 }, planimetrie: [],
   aree: [
-    area({ chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', dedalo: { timbri: { totale: 8, raccolti: 1 }, richieste: [{ chiave: 'bulli', nome: 'Bullismo sui bulli', stato: null }], obiettivi: { totale: 9, fatti: 1 } }, punti: [{ chiave: 'p2', ordine: 0, tipo: 'boss', nome: 'Boss', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null }] }),
+    area({ chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', dedalo: { timbri: { totale: 8, raccolti: 1 }, richieste: [{ chiave: 'bulli', nome: 'Bullismo sui bulli', stato: null }], obiettivi: { totale: 9, fatti: 1 } }, punti: [{ chiave: 'p2', ordine: 0, tipo: 'boss', nome: 'Boss', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [] }] }),
     area({ chiave: 'mementos-01-qimranut', ordine: 1, nome: 'Dedalo di Qimranut', dedalo: { timbri: { totale: null, raccolti: null }, richieste: [], obiettivi: { totale: 0, fatti: 0 } } }),
   ],
 });
@@ -70,11 +70,12 @@ it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Racco
   await waitFor(() => expect(impostaSpilloRaccolto).toHaveBeenCalledWith(4, 2, true));
   await waitFor(() => expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50'));
   expect(getDungeon).toHaveBeenCalledTimes(1);
-  // le altre planimetrie del Palazzo, ripiegate con quanto resta; i punti della guida in una piega a parte con Ottenuto
+  // le altre planimetrie del Palazzo, ripiegate con quanto resta; sotto, la guida dell'area (aperta) con Ottenuto
   expect(screen.getByText(/Tutte le planimetrie del Palazzo · 2 da raccogliere/)).toBeInTheDocument();
-  fireEvent.click(screen.getByText(/Dalla guida · 1 punti/));
+  // una sicura senza pin è una voce «da collegare»
+  expect(screen.getByText(/Guida dell’area · 1 voce · 1 da collegare/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
-  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null });
+  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [] });
   fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
   await waitFor(() => expect(impostaStatoPunto).toHaveBeenCalledWith(4, 'p1', 'ottenuto'));
   // un punto della guida può contare sulle planimetrie: la raccolta si rilegge dal server
@@ -83,28 +84,59 @@ it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Racco
   expect(within(screen.getByLabelText('Planimetrie del Palazzo')).getAllByText(/Cancello/).length).toBeGreaterThan(0);
 });
 
-it('quando l’area non ha planimetrie legate la colonna mostra subito tutto il Palazzo, non una piega chiusa', async () => {
+// Con un'area scelta la colonna mostra **quell'area** (rilievo dell'utente, 2026-10-01: «in ogni area sembrano poi vedersi
+// i raccoglibili di tutte le altre aree»): il resto del Palazzo sta solo nella piega chiusa.
+it('quando l’area non ha planimetrie legate la colonna lo dice, e il Palazzo resta nella piega chiusa', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   render(<MemoryRouter initialEntries={['/guida/dungeon/kamoshida?area=k-02']}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
-  const colonna = screen.getByRole('complementary', { name: 'Da raccogliere nel Palazzo di Kamoshida' });
-  expect(within(colonna).getByRole('heading', { name: 'Da raccogliere nel Palazzo · 3' })).toBeInTheDocument();
-  expect(within(colonna).getByText(/Quest’area non ha planimetrie legate/)).toBeInTheDocument();
-  expect(within(colonna).queryByText(/Tutte le planimetrie del Palazzo/)).toBeNull();
-  expect(within(colonna).getAllByRole('checkbox')).toHaveLength(3);
+  const colonna = screen.getByRole('complementary', { name: 'Da raccogliere in Torre' });
+  expect(within(colonna).getByRole('status')).toHaveTextContent('Quest’area non ha planimetrie legate: niente da raccogliere qui.');
+  expect(within(colonna).queryByRole('heading', { name: /Da raccogliere nel Palazzo/ })).toBeNull();
+  const piega = within(colonna).getByText(/Tutte le planimetrie del Palazzo · 3 da raccogliere/).closest('details')!;
+  expect(piega).not.toHaveAttribute('open');
+  // un'area senza voci della guida: si dice, e se ne aggiunge una
+  expect(within(colonna).getByText('La guida non ha voci per quest’area: aggiungile qui sotto.')).toBeInTheDocument();
+  expect(within(colonna).getByRole('button', { name: 'Aggiungi una voce' })).toBeInTheDocument();
   // nell'elenco unico un'area senza planimetria è una riga in coda, da collegare
   expect(screen.getAllByText('area della guida · nessuna planimetria').length).toBeGreaterThan(0);
 });
 
-it('un’area con la planimetria legata ma senza collezionabili lo dice così, e la colonna mostra il Palazzo', async () => {
+it('un’area con la planimetria legata ma senza collezionabili lo dice così, senza mostrare il resto del Palazzo', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   render(<MemoryRouter initialEntries={['/guida/dungeon/kamoshida?area=k-03']}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
   expect(screen.getByText('Visore: m-cortile')).toBeInTheDocument();
-  const colonna = screen.getByRole('complementary', { name: 'Da raccogliere nel Palazzo di Kamoshida' });
-  expect(within(colonna).getByText(/La planimetria di quest’area non ha collezionabili/)).toBeInTheDocument();
+  const colonna = screen.getByRole('complementary', { name: 'Da raccogliere in Cortile' });
+  expect(within(colonna).getByRole('status')).toHaveTextContent('Niente da raccogliere sulle planimetrie di quest’area.');
   expect(within(colonna).queryByText(/non ha planimetrie legate/)).toBeNull();
+  expect(within(colonna).getByText(/Tutte le planimetrie del Palazzo · 3 da raccogliere/).closest('details')).not.toHaveAttribute('open');
   expect(screen.getAllByText('area della guida · nessuna planimetria').length).toBeGreaterThan(0);
+});
+
+// Collegare o scollegare un pin può cambiare lo stato della voce nella partita (gli stati si uniscono), e la risposta del
+// server non lo porta: la scheda si rilegge con la partita (rilievo della revisione, 2026-10-01).
+it('scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge', async () => {
+  const conVoce = (pin: boolean): DungeonDettaglioDto => {
+    const p = palazzo(true);
+    const voce = { ...p.aree[0].punti[0], tipo: 'forziere' as const, nome: 'Forziere del cancello', stato: 'ottenuto' as const, pin: pin ? [{ id: 1, nome: 'Forziere', tipo: 'forziere', mappa: 'm-cancello', mappaNome: 'Palazzo di Kamoshida › Cancello' }] : [] };
+    return { ...p, aree: [{ ...p.aree[0], punti: [voce] }, ...p.aree.slice(1)] };
+  };
+  getDungeon.mockResolvedValueOnce(conVoce(true)).mockResolvedValue(conVoce(false));
+  // la risposta del collegamento: i pin sì, lo stato della partita no
+  collegaPinAlPunto.mockResolvedValue({ ...conVoce(false).aree[0].punti[0], stato: null });
+  monta('kamoshida');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Anche le segnate (1)' }));
+  fireEvent.click(screen.getByRole('button', { name: /^Forziere del cancello/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Scollega Forziere da Forziere del cancello' }));
+  await waitFor(() => expect(collegaPinAlPunto).toHaveBeenCalledWith('p1', 1, false));
+  await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(2));
+  expect(getDungeon).toHaveBeenLastCalledWith('kamoshida', 4);
+  const riga = screen.getByRole('button', { name: /^Forziere del cancello/ });
+  expect(riga).toHaveTextContent('· ottenuto');
+  expect(riga).toHaveTextContent('da collegare');
+  expect(screen.queryByRole('button', { name: 'Ottenuto' })).toBeNull();
 });
 
 it('senza partita non ci sono spunte, e l’elenco resta consultabile', async () => {

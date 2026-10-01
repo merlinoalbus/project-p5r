@@ -854,3 +854,31 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - Fra più ingressi vince quello aperto nel giorno della voce: nel canone la Shujin ha l'ingresso del solo 11 aprile
   (prima infiltrazione) e quello dal 12 aprile al 2 maggio. Contano solo le condizioni di data; il resto lo dice la mappa.
 - La scheda di una mappa senza planimetria tiene comunque l'elenco delle mappe figlie in un'area scorrevole propria.
+
+### 2026-10-01 — La guida del Palazzo si modifica e si collega ai pin; lo stato è uno solo
+- Rilievo dell'utente: nella scheda del Palazzo la guida delle aree «non è molto editabile», i suoi elementi raccoglibili
+  sono slegati dai pin («non è corretto»), e con un'area scelta la colonna mostrava i raccoglibili di tutte le altre aree.
+  «Mi può andar bene che ci sia una guida con degli step descrittivi integrati, ma lo stato di questi punti deve essere
+  integrato (ove possibile) con gli elementi in mappa.»
+- Scelte dell'utente: i punti descrittivi non hanno stato; un punto può avere più pin; il collegamento si fa a mano, con uno
+  strumento. Poi: «lascia i punti come sono senza fare riconciliazioni... li sistemo io via via a mano» — niente
+  abbinamenti automatici né migrazioni dei dati; «Mi serve in questo momento la possibilità di modificare proprio la
+  guida... aggiungere, rimuovere le voci... agganciandoli ad elementi della mappa». I pin si scelgono «con ricerca e
+  scelta dalla mappa», «non al visore» ma «contestuale al punto dove si fa questa associazione»: la mappa di scelta si apre
+  dentro la voce.
+- Conseguenze dichiarate: una voce collegata ha lo stato dei suoi pin, in tutte e due le direzioni (con più pin è segnata
+  quando sono tutti raccolti); collegando, gli stati che c'erano nelle partite si uniscono senza perdere niente;
+  eliminare una voce scollega i pin e lascia il loro «raccolto» (prima lo cancellava); un nemico collegato a una voce si
+  può segnare (un'Ombra sciagura non si rigenera). Le voci non collegate si segnano come prima.
+- Emerso nell'analisi: le coordinate degli elementi della guida senza mappa sono delle vecchie mappe disegnate delle aree,
+  cancellate dalla 042: non valgono sulle planimetrie, quindi non se ne ricavano pin.
+- Rilievi della revisione (1° esame), applicati: le voci descrittive non hanno stato né pin anche lato server (uno stato
+  rimasto da prima si ignora in lettura e non si cancella: nessuna riconciliazione); dopo ogni collegamento la scheda si
+  rilegge con la partita, perché il collegamento può cambiare lo stato della voce. Un pin non collezionabile collegato a una
+  voce (un passaggio, una sicura) si segna dalla mappa con i comandi della voce (Ottenuto/Riapri), nella sua scheda e ora
+  anche nel suo popup (prima il popup li mostrava solo ai collezionabili).
+- Rilievi della revisione (2° esame), applicati: la regola delle descrittive vale anche dal lato mappa (dettaglio del pin,
+  raccolto, editor delle mappe, popup e schede). Misurato su `data/gioco.db`, `pacchetto/gioco.db` e sull'export di
+  produzione: nessun pin delle planimetrie collegato a una voce descrittiva; 4 elementi della guida senza mappa collegati
+  a voci «altro» (Tesoro avvistato, Cassiere Ombra, Barriera bloccante, Ricompensa completamento arena). Restano come
+  sono (nessuna riconciliazione) e si leggono senza stato.

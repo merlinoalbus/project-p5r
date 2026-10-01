@@ -212,6 +212,25 @@ export function spilloPerPunto(tipoPunto: string): TipoSpillo {
   }
 }
 
+/**
+ * I tipi di pin che possono rappresentare sulla mappa un punto della guida, nell'ordine di preferenza (scelta dell'utente,
+ * 2026-10-01: lo stato dei punti vive nei pin). Un forziere della guida può essere un forziere o un forziere raro della
+ * planimetria, un oggetto un oggetto o un oggetto chiave, un enigma un meccanismo o un punto sensibile. Vuoto per i punti
+ * **descrittivi** (negoziazione delle Persona, note «altro»): sono testo della guida, non hanno un pin né uno stato.
+ */
+const PIN_DEL_PUNTO: Record<string, TipoSpillo[]> = {
+  forziere: ['forziere', 'forziere-raro'], 'forziere-chiuso': ['forziere-raro', 'forziere'], oggetto: ['oggetto', 'oggetto-chiave'],
+  volonta: ['seme-bramosia'], tesoro: ['tesoro-palazzo'], puzzle: ['meccanismo', 'punto-sensibile'], boss: ['boss'], miniboss: ['miniboss'],
+  'ombra-sciagura': ['nemico'], sicura: ['sicura'], scorciatoia: ['scorciatoia'],
+};
+export function pinDelPunto(tipoPunto: string): TipoSpillo[] {
+  return PIN_DEL_PUNTO[tipoPunto] ?? [];
+}
+/** Un punto della guida senza pin possibile: si legge, non si segna. */
+export function puntoDescrittivo(tipoPunto: string): boolean {
+  return pinDelPunto(tipoPunto).length === 0;
+}
+
 export const TIPI_MAPPA = ['citta', 'quartiere', 'luogo', 'palazzo', 'area', 'dedalo', 'generica'] as const;
 export type TipoMappa = (typeof TIPI_MAPPA)[number];
 export const NOME_TIPO_MAPPA: Record<TipoMappa, string> = { citta: 'Città', quartiere: 'Quartiere', luogo: 'Luogo', palazzo: 'Palazzo', area: 'Area', dedalo: 'Dedalo', generica: 'Mappa' };

@@ -1658,7 +1658,12 @@ export interface PuntoInteresseDto {
   stato: StatoPunto | null;
   /** Posizione dello spillo sulla mappa dell'area (percentuali), se fissato. */
   marcatore: { x: number; y: number } | null;
+  /** I pin delle planimetrie collegati al punto (2026-10-01): lo stato del punto è il loro. Vuoto = non collegato. */
+  pin: PinDelPuntoDto[];
 }
+
+/** Un pin di una planimetria collegato a un punto della guida. */
+export interface PinDelPuntoDto { id: number; nome: string; tipo: string; mappa: string; mappaNome: string }
 
 export interface AreaDungeonDto {
   chiave: string;

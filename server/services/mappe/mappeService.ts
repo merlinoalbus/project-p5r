@@ -21,10 +21,11 @@ import { giocabili } from '../squadraService.js';
 import { nomiCondizioni } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { allineaBossDellaGuida, palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
+import { pinDelPuntoGuida } from './collegamentiGuida.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
-import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
@@ -156,7 +157,8 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
     case 'punto': {
       const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, a.dungeon_chiave, a.chiave AS area_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; dungeon_chiave: string; area_chiave: string } | undefined;
       if (!p) return null;
-      const stato = partitaId ? (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, chiave) as { stato: string } | undefined)?.stato ?? null : null;
+      // una voce descrittiva non ha stato: uno rimasto da prima si ignora, come nella scheda del Palazzo (2026-10-01)
+      const stato = partitaId && !puntoDescrittivo(p.tipo) ? (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, chiave) as { stato: string } | undefined)?.stato ?? null : null;
       return { tipo: 'punto', punto: { chiave: p.chiave, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dungeon: p.dungeon_chiave, area: p.area_chiave, stato } };
     }
     case 'attivita':
@@ -966,11 +968,17 @@ export function verificaCondizioni(condizioni: RequisitoSpillo[] | null | undefi
   }
 }
 
-function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined): void {
+function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined, attuale?: { tipo: string | null; chiave: string | null }): void {
   if (!rif) return;
   if (!(TIPI_RIFERIMENTO as readonly string[]).includes(rif.tipo)) throw httpErrors.badRequest('riferimento-non-valido', 'Tipo di riferimento non ammesso.');
   const tabella: Record<TipoRiferimento, string> = { mappa: 'SELECT 1 FROM mappa WHERE chiave = ?', negozio: 'SELECT 1 FROM negozio WHERE chiave = ?', punto: 'SELECT 1 FROM punto_interesse WHERE chiave = ?', luogo: 'SELECT 1 FROM luogo WHERE chiave = ?', confidente: 'SELECT 1 FROM confidente WHERE chiave = ?', richiesta: 'SELECT 1 FROM richiesta WHERE chiave = ?', attivita: 'SELECT 1 FROM luogo WHERE chiave = ?' };
   if (!prepared(tabella[rif.tipo]).get(rif.chiave)) throw httpErrors.notFound('riferimento-non-trovato', `${rif.tipo} '${rif.chiave}' non trovato.`);
+  // Un collegamento **nuovo** a una voce descrittiva della guida si rifiuta, come da `collegaPinAlPunto` (2026-10-01): le
+  // descrittive non hanno pin. Quello che c'è già (gli elementi della guida senza mappa di prima) resta: nessuna riconciliazione.
+  if (rif.tipo === 'punto' && !(attuale?.tipo === 'punto' && attuale.chiave === rif.chiave)) {
+    const p = prepared('SELECT nome, tipo FROM punto_interesse WHERE chiave = ?').get(rif.chiave) as { nome: string; tipo: string };
+    if (puntoDescrittivo(p.tipo)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
+  }
 }
 
 /** La categoria del tipo decide il resto dello spillo (richiesta dell'utente, 2026-09-11).
@@ -1029,7 +1037,7 @@ export function aggiornaSpillo(id: number, dati: DatiSpillo & { mappa?: string }
   dati = applicaRegoleCategoria(tipoFinale, dati);
   if (dati.mappa) dati={...dati,mappa:rigaMappa(dati.mappa).chiave};
   if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
-  verificaRiferimento(dati.riferimento);
+  verificaRiferimento(dati.riferimento, { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave });
   verificaCondizioni(dati.condizioni);
   const destinazione = verificaDestinazioneSpillo(dati.destinazione);
   // uno spillo del seed modificato diventa dell'utente: si ricorda com'era, così il reseed non ne reinserisce una copia
@@ -1063,16 +1071,24 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
   // Un nemico si rigenera: non si segna raccolto (2026-09-30). Solo lui: «raccolto» su uno spillo collegato a un
   // punto della guida è anche il modo di segnare quel punto, qualunque sia il tipo. Togliere un «raccolto»
   // resta sempre possibile, così un segno rimasto da prima si può ripulire.
-  if (raccolto && r.tipo === 'nemico') throw httpErrors.badRequest('spillo-non-raccoglibile', `«${r.nome}» è un nemico: si rigenera, non si raccoglie.`);
+  // Un nemico collegato a un punto della guida sì (2026-10-01): è un'Ombra sciagura o un incontro unico, e segnarlo è
+  // segnare quel punto.
+  if (raccolto && r.tipo === 'nemico' && r.riferimento_tipo !== 'punto') throw httpErrors.badRequest('spillo-non-raccoglibile', `«${r.nome}» è un nemico: si rigenera, non si raccoglie.`);
 
   const adesso = nowIso();
   getDb().transaction(() => {
     prepared(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
       ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, r.uid, raccolto ? 1 : 0, adesso);
-    if (r.riferimento_tipo === 'punto' && r.riferimento_chiave) {
-      // raccogliere lo spillo di un punto è segnare quel punto: è dell'utente, non un segno automatico (utente 006)
-      if (raccolto) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET automatico = 0`).run(partitaId, r.riferimento_chiave, adesso);
-      else prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, r.riferimento_chiave);
+    // una voce descrittiva della guida non ha stato (2026-10-01): il raccolto del pin non la segna
+    const tipoPunto = r.riferimento_tipo === 'punto' && r.riferimento_chiave
+      ? (prepared('SELECT tipo FROM punto_interesse WHERE chiave = ?').get(r.riferimento_chiave) as { tipo: string } | undefined)?.tipo ?? null : null;
+    if (r.riferimento_tipo === 'punto' && r.riferimento_chiave && tipoPunto !== null && !puntoDescrittivo(tipoPunto)) {
+      // raccogliere lo spillo di un punto è segnare quel punto: è dell'utente, non un segno automatico (utente 006). Un punto
+      // con più pin sulle planimetrie (2026-10-01) è segnato quando li ha raccolti **tutti**; toglierne uno lo riapre.
+      const tutti = r.mappa_chiave === null || pinDelPuntoGuida(getDb(), r.riferimento_chiave)
+        .every((p) => p.uid === r.uid || !!prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ? AND raccolto = 1').get(partitaId, p.uid));
+      if (raccolto && tutti) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET automatico = 0`).run(partitaId, r.riferimento_chiave, adesso);
+      else if (!raccolto) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, r.riferimento_chiave);
     }
     // il Tesoro del Palazzo o il boss finale raccolti sulla mappa segnano il boss finale della Guida, e lo
     // tolgono se si tolgono (scelta dell'utente, 2026-09-30)

@@ -97,6 +97,11 @@ export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDun
 export const creaPunto = (area: string, dati: DatiPuntoApi & { nome: string; tipo: PuntoInteresseDto['tipo'] }): Promise<PuntoInteresseDto> => apiPost(`/compendio/aree/${encodeURIComponent(area)}/punti`, dati);
 export const aggiornaPunto = (chiave: string, dati: DatiPuntoApi): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}`, dati);
 export const eliminaPunto = (chiave: string): Promise<void> => apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}`);
+/** Un posto su (-1) o giù (+1) nella guida dell'area. */
+export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/sposta`, { verso });
+/** Collega (o scollega) un pin di una planimetria del Palazzo alla voce della guida. */
+export const collegaPinAlPunto = (chiave: string, spilloId: number, collega: boolean): Promise<PuntoInteresseDto> =>
+  collega ? apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`, {}) : apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`);
 /** Elimina un'area della guida per tutte le partite, con i suoi punti e i suoi legami. */
 export const eliminaArea = (chiave: string): Promise<void> => apiDelete(`/compendio/aree/${encodeURIComponent(chiave)}`);
 /** Calendario di gioco (con oggi e scadenze se c'è la partita). */

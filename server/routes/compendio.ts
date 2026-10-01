@@ -9,8 +9,8 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { aggiornaArea, aggiornaDungeon, aggiornaPunto, creaPunto, eliminaArea, eliminaPunto } from '../services/dungeonService.js';
-import { bodyArea, bodyDungeon, bodyNuovoPunto, bodyPunto, paramsChiaveGuida } from '../schemas/guidaDungeon.js';
+import { aggiornaArea, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaPunto, eliminaArea, eliminaPunto, spostaPunto } from '../services/dungeonService.js';
+import { bodyArea, bodyDungeon, bodyNuovoPunto, bodyPunto, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto } from '../schemas/guidaDungeon.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
@@ -218,6 +218,18 @@ router.put('/punti/:chiave', validate({ params: paramsChiaveGuida, body: bodyPun
 router.delete('/punti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   eliminaPunto(String(req.params.chiave));
   res.status(204).end();
+});
+router.put('/punti/:chiave/sposta', validate({ params: paramsChiaveGuida, body: bodySpostaPunto }), (req, res) => {
+  res.json(spostaPunto(String(req.params.chiave), (req.body as { verso: -1 | 1 }).verso));
+});
+/** I pin delle planimetrie che rappresentano il punto (2026-10-01): si collegano e si scollegano uno alla volta. */
+router.put('/punti/:chiave/pin/:spillo', validate({ params: paramsPinDelPunto }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; spillo: number };
+  res.json(collegaPinAlPunto(String(p.chiave), Number(p.spillo), true));
+});
+router.delete('/punti/:chiave/pin/:spillo', validate({ params: paramsPinDelPunto }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; spillo: number };
+  res.json(collegaPinAlPunto(String(p.chiave), Number(p.spillo), false));
 });
 
 router.get('/calendario', validate({ query: queryCalendario }), (req, res) => {

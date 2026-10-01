@@ -522,6 +522,12 @@
   /* al passaggio o alla selezione lo spillo suggerito tiene l'alone dorato e aggiunge quello rosso */
   .spillo-mappa--suggerito:hover .spillo-mappa__goccia, .spillo-mappa--suggerito.spillo-mappa--selezionato .spillo-mappa__goccia { box-shadow: 0 0 0 3px var(--color-oro), 0 0 16px rgba(245,197,66,.6), 0 0 0 6px color-mix(in srgb, var(--color-primary) 70%, transparent); }
   .spillo-mappa--suggerito { z-index: 14; }
+  /* Modalità scelta (pin per una voce della guida, 2026-10-01): il riquadro verde, dentro la voce, dice che il tocco collega
+     invece di aprire; i pin già collegati hanno l'anello verde e il nome sempre visibile. */
+  .scelta-pin { display: flex; flex-direction: column; gap: 6px; padding: 6px; border: 1px solid var(--color-success); border-radius: var(--radius-md); background: color-mix(in srgb, var(--color-success) 10%, var(--color-bg-secondary)); }
+  .spillo-mappa--scelto { z-index: 12; }
+  .spillo-mappa--scelto .spillo-mappa__goccia { box-shadow: 0 0 0 3px var(--color-success), 0 0 14px color-mix(in srgb, var(--color-success) 60%, transparent); }
+  .spillo-mappa--scelto .spillo-mappa__etichetta { opacity: 1; }
   .spillo-popup { position: absolute; z-index: 20; width: 260px; max-width: 70vw; display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; background: rgba(11,11,14,.96); border: 1px solid var(--color-primary); color: var(--color-text); transform-origin: 0 0; box-shadow: 0 6px 18px rgba(0,0,0,.6); cursor: default; }
   /* La freccia sta sullo spillo anche quando il popup è scorso di lato per restare nella tela (`--spillo-popup-freccia`). */
   .spillo-popup::after { content: ''; position: absolute; left: var(--spillo-popup-freccia, 50%); bottom: -7px; width: 12px; height: 12px; background: rgba(11,11,14,.96); border-right: 1px solid var(--color-primary); border-bottom: 1px solid var(--color-primary); transform: translateX(-50%) rotate(45deg); }

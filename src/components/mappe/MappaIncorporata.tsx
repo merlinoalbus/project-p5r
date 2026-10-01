@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useMappaPartita } from '../../hooks/useMappaPartita';
-import { VisoreMappa } from './VisoreMappa';
+import { VisoreMappa, type SceltaPin } from './VisoreMappa';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Spinner } from '../shared/PageState';
@@ -47,6 +47,8 @@ interface Props {
    * pulsante veniva da qui — cioè da me. In `CittaPage` l'avevo già tolto, ma per un'altra strada
    * (togliendo il visore), quindi il difetto era rimasto in piedi ovunque si usi `DoveSiTrova`. */
   conEditor?: boolean;
+  /** Modalità scelta dei pin per una voce della guida (vedi `VisoreMappa`). */
+  scelta?: SceltaPin;
 }
 
 export function MappaIncorporata(props: Props) {
@@ -59,7 +61,7 @@ export function MappaIncorporata(props: Props) {
   </PageState>;
 }
 
-function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true }: Props) {
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
@@ -105,6 +107,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         onStatoPunto={statoPunto}
         onAcquisto={acquisto}
         onChiudi={intero ? () => setIntero(false) : undefined}
+        scelta={scelta}
         etichettaChiudi="Torna alla pagina"
         azioni={<>
           {!intero && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ingrandisci" dimensione={20} />} titolo="Schermo intero" onClick={() => setIntero(true)} />}

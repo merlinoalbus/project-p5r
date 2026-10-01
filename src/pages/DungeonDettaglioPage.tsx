@@ -20,7 +20,7 @@
 import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { aggiornaArea, aggiornaDungeon, aggiornaPunto as salvaPunto, creaPunto, eliminaArea, eliminaPunto, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
+import { aggiornaArea, aggiornaDungeon, eliminaArea, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -39,29 +39,14 @@ import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
 import { ObiettiviDedalo } from '../components/guida/ObiettiviDedalo';
 import { dataBreve } from '../utils/testoBreve';
-import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../types';
-import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
-import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
+import { GuidaDellArea } from '../components/guida/GuidaDellArea';
+import { IconaSegno } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { MappaMemento } from '../components/mappe/MappaMemento';
 import { urlStratoDedalo } from '../components/mappe/stratiMemento';
-
-const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
-
-function Dettagli({ d }: { d: Record<string, unknown> }) {
-  const voci = Object.entries(d).filter(([, v]) => v !== null && v !== '' && !(Array.isArray(v) && v.length === 0));
-  if (voci.length === 0) return null;
-  return (
-    <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-[12px]">
-      {voci.map(([k, v]) => (
-        <div key={k} className="contents"><dt className="text-text-muted capitalize">{k.replace(/([A-Z])/g, ' $1').toLowerCase()}</dt><dd className="m-0">{Array.isArray(v) ? v.map(String).join(', ') : typeof v === 'object' ? JSON.stringify(v) : String(v)}</dd></div>
-      ))}
-    </dl>
-  );
-}
 
 /** Le tre date di un Palazzo come una linea: si apre, conviene rubare, scade. La prosa della guida nel `title`. */
 function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
@@ -139,16 +124,11 @@ export function DungeonDettaglioPage() {
   const d = dati.dati;
   const areaChiave = params.get('area') ?? d?.aree[0]?.chiave ?? null;
   const area: AreaDungeonDto | null = useMemo(() => d?.aree.find((a) => a.chiave === areaChiave) ?? d?.aree[0] ?? null, [d, areaChiave]);
-  const [filtro, setFiltro] = useState<Set<PuntoInteresseDto['tipo']>>(new Set());
-  const [mostraGestiti, setMostraGestiti] = useState(false);
-  const [selezionato, setSelezionato] = useState<string | null>(null);
   const [mappaVersione] = useState(0);
   // ogni cambio di stato dalla colonna ricarica il visore (e viceversa il visore ricarica la pagina)
   const [versioneStati, setVersioneStati] = useState(0);
   const memento = d?.tipo === 'mementos';
 
-  const puntiVisibili = useMemo(() => (area?.punti ?? []).filter((p) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato)), [area, filtro, mostraGestiti]);
-  const gestitiArea = (area?.punti ?? []).filter((p) => p.stato).length;
 
   const aggiornaPunto = (nuovo: PuntoInteresseDto) => {
     if (!d) return;
@@ -201,7 +181,6 @@ export function DungeonDettaglioPage() {
   // Una planimetria scelta dal pannello «Planimetrie» vale **su tutto il Palazzo**, anche quando non
   // è legata a nessuna area: è il modo di guardare (e segnare) una tavola che la guida non aggancia.
   const [planimetriaLibera, setPlanimetriaLibera] = useState<string | null>(null);
-  const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo'] } | null>(null);
   // L'atlante serve all'elenco del Palazzo: da lì vengono il nome di presentazione, il
   // gruppo che dice quali tavole sono la stessa stanza e l'etichetta di ogni versione. Si carica
   // subito, perché l'elenco è la colonna di atterraggio, e **si rilegge dopo ogni modifica**:
@@ -211,16 +190,15 @@ export function DungeonDettaglioPage() {
   const albero = useCarica(() => (memento ? Promise.resolve([]) : getAlberoMappe()), [memento]);
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
-  const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setPlanimetriaLibera(null); };
+  const scegliArea = (k: string) => { setParams({ area: k }); setPianta(null); setPlanimetriaLibera(null); };
   /** Un'area eliminata dalla guida: se era quella aperta, la scheda torna alla prima (senza parametro). */
-  const areaEliminata = (k: string) => { if (area?.chiave === k) { setParams({}); setSelezionato(null); setPianta(null); } };
+  const areaEliminata = (k: string) => { if (area?.chiave === k) { setParams({}); setPianta(null); } };
   /**
    * Una planimetria scelta dal pannello: se contiene aree della guida si apre la sua prima in ordine di
    * guida — o resta quella aperta, se la planimetria contiene anche lei —, altrimenti resta «libera».
    */
   const scegliPlanimetria = (k: string) => {
     const p = (d?.planimetrie ?? []).find((x) => x.chiave === k);
-    setSelezionato(null);
     const prima = p ? [...p.aree].sort(perOrdineDiGuida)[0] : undefined;
     if (p && prima) { setParams({ area: area && p.aree.some((a) => a.chiave === area.chiave) ? area.chiave : prima.chiave }); setPianta(k); setPlanimetriaLibera(null); }
     else setPlanimetriaLibera(k);
@@ -236,11 +214,10 @@ export function DungeonDettaglioPage() {
     { etichetta: 'Scade', valore: d.date.scadenza },
   ] as const).filter((t) => !!t.valore && t.valore !== dataBreve(t.valore));
   const mappeArea = area?.mappe ?? [];
-  // 132 collezionabili su 185 stanno su planimetrie che la guida non lega a nessuna area: quando l'area
-  // scelta non ne ha, la colonna mostra direttamente la raccolta di tutto il Palazzo, non una piega chiusa.
-  const areaConRaccolta = mappeArea.some((m) => m.n > 0);
-  // Perché la colonna mostra tutto il Palazzo: l'area non ha una planimetria legata, oppure ce l'ha ma senza collezionabili.
-  const notaPalazzo = mappeArea.length === 0 ? 'Quest’area non ha planimetrie legate: qui c’è tutto il Palazzo.' : 'La planimetria di quest’area non ha collezionabili: qui c’è tutto il Palazzo.';
+  // Con un'area scelta la colonna mostra **quell'area** (rilievo dell'utente, 2026-10-01: «in ogni area sembrano poi vedersi
+  // i raccoglibili di tutte le altre aree»). Prima, quando l'area non aveva collezionabili, la colonna passava da sola a
+  // tutto il Palazzo; ora lo dice, e il resto del Palazzo sta nella piega qui sotto.
+  const vuotoArea = mappeArea.length === 0 ? 'Quest’area non ha planimetrie legate: niente da raccogliere qui.' : 'Niente da raccogliere sulle planimetrie di quest’area.';
   const altrePlanimetrie = (d?.planimetrie ?? []).filter((p) => !mappeArea.some((m) => m.chiave === p.chiave));
   // La planimetria a schermo e le aree della guida che contiene, in ordine di guida (possono essere più d'una).
   const areeDellaPianta = [...((d?.planimetrie ?? []).find((p) => p.chiave === mappaScelta)?.aree ?? [])].sort(perOrdineDiGuida);
@@ -449,7 +426,7 @@ export function DungeonDettaglioPage() {
               </section>
 
               {/* ---- La colonna degli obiettivi: quel che fa la percentuale, e sotto i punti della guida ---- */}
-              <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={memento ? `Obiettivi di ${area.nome}` : areaConRaccolta ? `Da raccogliere in ${area.nome}` : `Da raccogliere nel ${d.nome}`}>
+              <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={memento ? `Obiettivi di ${area.nome}` : `Da raccogliere in ${area.nome}`}>
                 {!memento && planimetriaAperta
                   ? <RaccoltaPlanimetrie planimetrie={[planimetriaAperta]} partitaId={partitaId} onRaccolto={segnaRaccolto}
                       etichetta="Su questa planimetria" nota="Planimetria scelta dal pannello: qui c’è solo quel che si raccoglie su di lei."
@@ -458,11 +435,9 @@ export function DungeonDettaglioPage() {
                   ? (area.dedalo
                     ? <ObiettiviDedalo areaChiave={area.chiave} areaNome={area.nome} dedalo={area.dedalo} partitaId={partitaId} onTimbri={(n) => aggiornaTimbri(area.chiave, n)} onRichiesta={(k, s) => aggiornaRichiesta(area.chiave, k, s)} />
                     : <p className="m-0 text-[12px] text-text-muted" role="status">La guida non dichiara obiettivi per questo dedalo.</p>)
-                  : areaConRaccolta
-                    ? <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} />
-                    : <RaccoltaPlanimetrie planimetrie={d.planimetrie} partitaId={partitaId} onRaccolto={segnaRaccolto} etichetta="Da raccogliere nel Palazzo" nota={notaPalazzo} vuoto="Nessun collezionabile sulle planimetrie di questo Palazzo." />}
-                {/* Le altre planimetrie del Palazzo, quando l'area ne ha di sue: ripiegate, con quanto resta. */}
-                {!memento && areaConRaccolta && altrePlanimetrie.length > 0 && (
+                  : <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} vuoto={vuotoArea} />}
+                {/* Il resto del Palazzo, sempre ripiegato: con un'area scelta si vede quell'area (rilievo dell'utente, 2026-10-01). */}
+                {!memento && !planimetriaAperta && altrePlanimetrie.length > 0 && (
                   <details className="text-[12px]">
                     <summary className="touch cursor-pointer text-text-muted">Tutte le planimetrie del Palazzo · {restanoAltre} da raccogliere</summary>
                     <div className="pt-2">
@@ -472,80 +447,9 @@ export function DungeonDettaglioPage() {
                 )}
                 {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare quel che raccogli.</span>}
 
-                {/* I punti della guida: sicure, scorciatoie, enigmi, incontri e boss. Si segnano Ottenuto/Esaurito, ma non fanno la percentuale. */}
-                {area.punti.length > 0 && (
-                  <details className="text-[12px]">
-                    <summary className="touch cursor-pointer text-text-muted">Dalla guida · {area.punti.length} punti{gestitiArea > 0 ? ` (${gestitiArea} segnati)` : ''}</summary>
-                    <div className="flex flex-col gap-2 pt-2">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-[11px] text-text-muted">Non contano nella percentuale: quella misura {memento ? 'gli obiettivi dei dedali' : 'le planimetrie'}.</span>
-                        <button type="button" className={`chip touch text-[11px] ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche i gestiti ({gestitiArea})</button>
-                      </div>
-                      <div className="flex flex-wrap gap-1" aria-label="Filtri per tipo">
-                        {TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
-                          <button key={tp} type="button" className={`chip touch text-[11px] ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
-                            <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: COLORE_TIPO[tp] }} aria-hidden="true" />{NOME_TIPO[tp]} ({area.punti.filter((p) => p.tipo === tp).length})
-                          </button>
-                        ))}
-                        {filtro.size > 0 && <button type="button" className="chip touch text-[11px]" onClick={() => setFiltro(new Set())}>Tutti</button>}
-                      </div>
-                      <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`Punti della guida di ${area.nome}`}>
-                        {puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessun punto con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} gestiti nascosti)` : ''}.</li>}
-                        {puntiVisibili.map((p) => (
-                          <li key={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${p.chiave === selezionato ? 'bg-primary-bg' : ''} ${p.stato ? 'opacity-60' : ''}`}>
-                            <button type="button" className="touch flex items-start gap-2 text-left" onClick={() => setSelezionato(p.chiave === selezionato ? null : p.chiave)} aria-expanded={p.chiave === selezionato}>
-                              <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
-                              <span className="min-w-0 flex-1">
-                                <span className="font-semibold">{p.nome}</span>
-                                <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.stato ? ` · ${p.stato}` : ''}</span>
-                              </span>
-                            </button>
-                            {p.chiave === selezionato && (
-                              <div className="flex flex-col gap-1.5 pl-5">
-                                {p.descrizione && <p className="m-0 text-text-secondary">{p.descrizione}</p>}
-                                <Dettagli d={p.dettagli} />
-                                <div className="flex flex-wrap gap-1.5">
-                                  {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
-                                  {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
-                                  {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
-                                  <CorrezioneGuida key={p.chiave} cosa={`il punto «${p.nome}»`} compatto
-                                    iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no' })}
-                                    onSalva={async (b) => { await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì' }); await dati.ricarica(); }}
-                                    elimina={{ avviso: 'Se ne va dalla guida, con quel che le partite ne avevano segnato.', onElimina: async () => { await eliminaPunto(p.chiave); await dati.ricarica(); } }}>
-                                    {(b, cambia) => <>
-                                      <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => cambia({ nome: v })} />
-                                      <span className="min-w-[150px]">
-                                        <Selettore etichetta="Tipo" valore={b.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
-                                      </span>
-                                      <label className="touch flex items-center gap-1.5 text-[12px]">
-                                        <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
-                                      </label>
-                                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.punto.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
-                                    </>}
-                                  </CorrezioneGuida>
-                                </div>
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                      {/* La guida non ha trascritto tutto: quel che manca si aggiunge qui, dove lo si è cercato. */}
-                      {nuovoPunto
-                        ? <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
-                            onSubmit={(e) => { e.preventDefault(); const n = nuovoPunto.nome.trim(); if (!n) return; void creaPunto(area.chiave, { nome: n, tipo: nuovoPunto.tipo }).then(async () => { setNuovoPunto(null); await dati.ricarica(); notifica('success', `Punto «${n}» aggiunto a ${area.nome}.`); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Punto non aggiunto.')); }}>
-                            <CampoCorrezione etichetta="Nuovo punto" valore={nuovoPunto.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, nome: v })} />
-                            <span className="min-w-[150px]">
-                              <Selettore etichetta="Tipo" valore={nuovoPunto.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, tipo: v as PuntoInteresseDto['tipo'] })} />
-                            </span>
-                            <div className="flex gap-1.5">
-                              <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Aggiungi" disabled={!nuovoPunto.nome.trim()} />
-                              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setNuovoPunto(null)} />
-                            </div>
-                          </form>
-                        : <button type="button" className="chip touch self-start text-[11px]" onClick={() => setNuovoPunto({ nome: '', tipo: 'altro' })}>+ Aggiungi un punto</button>}
-                    </div>
-                  </details>
-                )}
+                {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
+                <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} memento={memento} partitaId={partitaId} mappaAperta={mappaScelta}
+                  cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />
               </aside>
             </div>
           </div>
