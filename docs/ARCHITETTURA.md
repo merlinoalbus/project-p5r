@@ -714,6 +714,13 @@ raccolto (cancellano solo quello degli elementi della guida senza mappa). Nessun
 Con un'area scelta la colonna mostra la raccolta **di quell'area** (o dice che non ce n'è); il resto del Palazzo sta solo
 nella piega chiusa.
 
+**Nuova area della guida** (2026-10-01): `creaArea` in `dungeonService` (`POST /api/compendio/dungeon/:chiave/aree`,
+`bodyNuovaArea`): chiave `<dungeon>-<slug del nome>` (unica anche rispetto a `guida_alias`; lo slug si tronca perché la chiave, suffisso «-N» compreso, stia nei 200 caratteri delle route delle aree; senza lettere né cifre vale «area»), posto `dopo` un'area /
+`null` in cima / assente in fondo, ordine del Palazzo riscritto 0…n-1, e con `planimetria` l'area si aggiunge a quelle della
+tavola via `impostaAreeMappa` nella stessa transazione. Interfaccia: `src/components/guida/ModuloNuovaArea.tsx`, nella
+scheda della planimetria (`SchedaPlanimetria`, sezione «Nuova area della guida») e nella colonna del Palazzo
+(`PlanimetriePalazzo`, pulsante «Nuova area»); creata, `onScegliArea` la apre. Nella scheda il modulo aspetta (`bloccato`, con il perché) finché ci sono modifiche non salvate o la conferma d'eliminazione è aperta: creando, la finestra si chiude.
+
 `src/components/guida/PlanimetriePalazzo.tsx` è la colonna «Il Palazzo» della scheda: elenca **tutte** le planimetrie
 dell'albero `dungeon-<chiave>` che `DungeonDettaglioDto.planimetrie` porta con `ordine` e `aree` (in ordine di guida),
 raggruppate per stanza, e in coda le aree della guida senza planimetria. **L'elenco serve a scegliere, la scheda a

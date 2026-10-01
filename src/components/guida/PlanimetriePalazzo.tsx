@@ -27,7 +27,7 @@
 // ============================================================
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
-import { aggiornaArea, aggiornaMappa, aggiornaPresentazioneMappa, creaMappa, eliminaArea, eliminaMappa, impostaAreeMappa, impostaStanzaMappa, riordinaMappe } from '../../services/api';
+import { aggiornaArea, aggiornaMappa, aggiornaPresentazioneMappa, creaArea, creaMappa, eliminaArea, eliminaMappa, impostaAreeMappa, impostaStanzaMappa, riordinaMappe } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
 import { CampoCorrezione } from './CorrezioneGuida';
@@ -40,6 +40,7 @@ import { etichettaVersione } from '../../utils/etichettaVersione';
 import { titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import type { MappaRiassuntoDto } from '../../types';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
+import { ModuloNuovaArea, type DatiNuovaArea } from './ModuloNuovaArea';
 
 export type { Planimetria };
 
@@ -204,6 +205,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
   const [scheda, setScheda] = useState<{ gruppo: GruppoPlanimetrie; versione: VersionePlanimetria } | null>(null);
   const [schedaArea, setSchedaArea] = useState<Props['areeOrfane'][number] | null>(null);
   const [nuova, setNuova] = useState<string | null>(null);
+  const [nuovaArea, setNuovaArea] = useState(false);
 
   const gruppi = useMemo(() => {
     const inOrdine = ordine
@@ -251,6 +253,15 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
     dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna area'].filter(Boolean).join(' · '),
   }));
 
+  /** Una sezione nuova della guida (2026-10-01): nella planimetria data o senza; creata, la scheda la apre. */
+  const nuovaSezione = async (dati: DatiNuovaArea, planimetria?: Planimetria): Promise<boolean> => {
+    let creata: string | null = null;
+    const ok = await esegui(async () => { creata = (await creaArea(dungeonChiave, { ...dati, ...(planimetria ? { planimetria: planimetria.chiave } : {}) })).chiave; },
+      planimetria ? `Area «${dati.nome}» creata in «${etichettaTavola(planimetria)}».` : `Area «${dati.nome}» creata: collegala a una planimetria con «Gestisci».`);
+    if (ok && creata) onScegliArea(creata);
+    return ok;
+  };
+
   const salvaScheda = async (p: Planimetria, m: ModificheScheda) => {
     const ok = await esegui(async () => {
       if (m.stanza !== undefined || m.etichetta !== undefined) {
@@ -270,7 +281,10 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
     <div className="flex flex-col gap-2.5" aria-label="Planimetrie del Palazzo">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="m-0 font-display text-[15px] uppercase leading-none">Il Palazzo · {gruppi.length + areeOrfane.length}</h3>
-        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => setNuova('')} />
+        <span className="flex flex-wrap gap-1.5">
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" aria-label="Aggiungi una planimetria" disabled={occupato} onClick={() => setNuova('')} />
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Nuova area" aria-label="Nuova area della guida" disabled={occupato} onClick={() => setNuovaArea(true)} />
+        </span>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="chip text-[11px]" title="Le tavole dell’atlante: più di una per stanza quando l’estrazione ne ha trovate diverse inquadrature.">{planimetrie.length} planimetrie</span>
@@ -374,6 +388,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
               if (await esegui(() => impostaStanzaMappa(p.chiave, { con, nome }), messaggio)) setScheda(null);
             }}
             onElimina={async () => { setOrdine(null); if (await esegui(() => eliminaMappa(p.chiave), `«${v.etichetta}» di ${g.nome} eliminata.`)) setScheda(null); }}
+            onCreaArea={async (dati) => { if (await nuovaSezione(dati, p)) setScheda(null); }}
             onChiudi={() => setScheda(null)} />
         );
       })()}
@@ -392,6 +407,14 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
             if (await esegui(() => eliminaArea(a.chiave), `Area «${a.nome}» eliminata dalla guida.`)) { setSchedaArea(null); onAreaEliminata(a.chiave); }
           }}
           onChiudi={() => setSchedaArea(null)} />
+      )}
+
+      {/* Una sezione nuova della guida senza planimetria (2026-10-01): finisce fra le aree in coda, e si collega da «Gestisci». */}
+      {nuovaArea && (
+        <Modal titolo="Nuova area della guida" aperta onChiudi={() => setNuovaArea(false)}>
+          <ModuloNuovaArea aree={aree} occupato={occupato}
+            onCrea={async (dati) => { if (await nuovaSezione(dati)) setNuovaArea(false); }} onAnnulla={() => setNuovaArea(false)} />
+        </Modal>
       )}
 
       {nuova !== null && (

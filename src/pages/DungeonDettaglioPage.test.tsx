@@ -9,11 +9,11 @@ import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto } = vi.hoisted(() => ({
+const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
-  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(), collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(), collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaArea: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
+vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
 vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
 vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
@@ -609,4 +609,80 @@ it('la scheda salva solo quel che cambia: la sola etichetta non tocca nome, stan
   await waitFor(() => expect(aggiornaPresentazioneMappa).toHaveBeenCalledWith('m-cancello', { etichetta: 'Livello 0' }));
   expect(aggiornaMappa).not.toHaveBeenCalled();
   expect(impostaAreeMappa).not.toHaveBeenCalled();
+});
+
+// ---- Una sezione nuova della guida (richiesta dell'utente, 2026-10-01) ----
+
+it('dalla scheda di una planimetria senza aree si crea un’area dentro di lei: nome della stanza proposto, in fondo al Palazzo', async () => {
+  const pannello = await apriPlanimetrie();
+  creaArea.mockResolvedValue({ chiave: 'kamoshida-cancello-interno', nome: 'Cancello', ordine: 1 });
+  fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Torre' }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Torre · Immagine 1' }));
+  // la Torre non contiene aree: lo dice, e offre di crearne una
+  expect(finestra.getByText('Non contiene sezioni della guida: creane una qui.')).toBeInTheDocument();
+  fireEvent.click(finestra.getByRole('button', { name: 'Nuova area della guida…' }));
+  const modulo = within(finestra.getByRole('form', { name: 'Nuova area della guida' }));
+  expect(modulo.getByLabelText('Nome dell’area')).toHaveValue('Torre');
+  // il modulo si apre dal nome
+  expect(modulo.getByLabelText('Nome dell’area')).toHaveFocus();
+  fireEvent.change(modulo.getByLabelText('Nome dell’area'), { target: { value: 'Torre di guardia' } });
+  fireEvent.change(modulo.getByLabelText('Descrizione'), { target: { value: 'In cima alle scale.' } });
+  fireEvent.click(modulo.getByRole('button', { name: 'Crea l’area' }));
+  // la Torre non ha aree: va in fondo; con la planimetria, si aggiunge a lei
+  await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Torre di guardia', descrizione: 'In cima alle scale.', planimetria: 'm-torre' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(getDungeon).toHaveBeenCalledTimes(2);
+});
+
+it('una planimetria che ha già un’area propone il posto subito dopo di lei', async () => {
+  const pannello = await apriPlanimetrie();
+  creaArea.mockResolvedValue({ chiave: 'kamoshida-garitta', nome: 'Garitta', ordine: 1 });
+  fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
+  fireEvent.click(finestra.getByRole('button', { name: 'Nuova area della guida…' }));
+  const modulo = within(finestra.getByRole('form', { name: 'Nuova area della guida' }));
+  expect(modulo.getByText('Dopo «1. Cancello»')).toBeInTheDocument();
+  fireEvent.change(modulo.getByLabelText('Nome dell’area'), { target: { value: 'Garitta' } });
+  fireEvent.click(modulo.getByRole('button', { name: 'Crea l’area' }));
+  await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Garitta', descrizione: '', dopo: 'k-01', planimetria: 'm-cancello' }));
+});
+
+it('a modulo aperto, con modifiche non salvate nella scheda l’area non si crea: lo dice, e l’invio aspetta', async () => {
+  const pannello = await apriPlanimetrie();
+  fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Torre' }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Torre · Immagine 1' }));
+  fireEvent.click(finestra.getByRole('button', { name: 'Nuova area della guida…' }));
+  const modulo = within(finestra.getByRole('form', { name: 'Nuova area della guida' }));
+  expect(modulo.getByRole('button', { name: 'Crea l’area' })).toBeEnabled();
+  // una modifica nella scheda, con il modulo già aperto: creando, la finestra si chiuderebbe e la modifica andrebbe persa
+  fireEvent.change(finestra.getByLabelText('Che cosa mostra'), { target: { value: 'Piano alto' } });
+  expect(modulo.getByRole('status')).toHaveTextContent('Salva prima le modifiche della scheda: creando l’area la finestra si chiude.');
+  expect(modulo.getByRole('button', { name: 'Crea l’area' })).toBeDisabled();
+  fireEvent.submit(finestra.getByRole('form', { name: 'Nuova area della guida' }));
+  expect(creaArea).not.toHaveBeenCalled();
+  // la conferma dell'eliminazione aperta ferma anche lei
+  fireEvent.change(finestra.getByLabelText('Che cosa mostra'), { target: { value: '' } });
+  expect(modulo.getByRole('button', { name: 'Crea l’area' })).toBeEnabled();
+  fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
+  expect(modulo.getByRole('status')).toHaveTextContent('Chiudi prima la conferma dell’eliminazione.');
+  expect(modulo.getByRole('button', { name: 'Crea l’area' })).toBeDisabled();
+});
+
+it('dalla colonna del Palazzo si crea un’area senza planimetria, nel posto scelto, e la scheda la apre', async () => {
+  // l'area nuova in fondo alla risposta: se la scheda non la aprisse, resterebbe aperta la prima (Cancello)
+  const conAtrio = (): DungeonDettaglioDto => { const p = palazzo(true); return { ...p, aree: [...p.aree, { ...p.aree[1], chiave: 'kamoshida-atrio', nome: 'Atrio', ordine: 3, punti: [] }] }; };
+  const pannello = await apriPlanimetrie();
+  getDungeon.mockResolvedValue(conAtrio());
+  creaArea.mockResolvedValue({ chiave: 'kamoshida-atrio', nome: 'Atrio', ordine: 0 });
+  fireEvent.click(pannello.getByRole('button', { name: 'Nuova area della guida' }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Nuova area della guida' }));
+  fireEvent.change(finestra.getByLabelText('Nome dell’area'), { target: { value: 'Atrio' } });
+  // il posto: «All'inizio del Palazzo»
+  fireEvent.click(finestra.getByRole('combobox', { name: 'Dove va nella guida' }));
+  fireEvent.click(screen.getByRole('option', { name: 'All’inizio del Palazzo' }).querySelector('button')!);
+  fireEvent.click(finestra.getByRole('button', { name: 'Crea l’area' }));
+  await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Atrio', descrizione: '', dopo: null }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  // creata, la scheda apre l'area nuova (la riletta la contiene)
+  expect(await screen.findByRole('heading', { name: 'Atrio' })).toBeInTheDocument();
 });

@@ -14,11 +14,11 @@ import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
 import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
-import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
-import { staccaAreaDaOgniMappa } from './mappe/mappeService.js';
+import { impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
 import { palazziCompletati, palazzoDiOgniMappa } from './palazziService.js';
 import { allineaStatiPunto, pinDelPuntoGuida } from './mappe/collegamentiGuida.js';
 
@@ -403,6 +403,43 @@ function colonnaSpilloGuida(): boolean {
 }
 function tabellaUtente(nome: string): boolean {
   return !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
+}
+
+/** La lunghezza massima della chiave di un'area: quella che accettano le sue route (`paramsChiaveGuida`). */
+const MAX_CHIAVE_AREA = 200;
+
+/**
+ * Una sezione nuova della guida di un Palazzo (richiesta dell'utente, 2026-10-01: «come faccio ad aggiungere una nuova
+ * sezione di guida ad una planimetria che non ha sezioni di guida autonome?»). Nasce nel posto scelto — `dopo` un'area
+ * del Palazzo, `null` in cima, assente in fondo — e l'ordine del Palazzo si ricompatta (0, 1, 2…); con `planimetria` si
+ * aggiunge alle aree di quella planimetria (`impostaAreeMappa`, che controlla che sia del Palazzo). È canone: vale per tutte
+ * le partite e va nel pacchetto di gioco, come ogni correzione della guida.
+ */
+export function creaArea(dungeonChiave: string, dati: { nome: string; descrizione?: string; dopo?: string | null; planimetria?: string }): { chiave: string; nome: string; ordine: number } {
+  if (!prepared('SELECT 1 FROM dungeon WHERE chiave = ?').get(dungeonChiave)) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${dungeonChiave}' non esiste.`);
+  const nome = dati.nome.trim();
+  const elenco = (prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine, chiave').all(dungeonChiave) as Array<{ chiave: string }>).map((r) => r.chiave);
+  if (dati.dopo && !elenco.includes(dati.dopo)) throw httpErrors.badRequest('area-non-del-palazzo', `L'area '${dati.dopo}' non è di questo Palazzo.`);
+  // La chiave sta nei 200 caratteri che le route delle aree accettano (`paramsChiaveGuida`), suffisso «-N» compreso (fino a «-99999»): un nome
+  // di 300 caratteri darebbe un'area che poi non si modifica né si elimina (rilievo della revisione). Senza lettere né cifre
+  // («???») lo slug è vuoto: si usa «area».
+  const radice = (slug(nome) || 'area').slice(0, Math.max(1, MAX_CHIAVE_AREA - dungeonChiave.length - 1 - 6)).replace(/-+$/, '') || 'area';
+  const base = `${dungeonChiave}-${radice}`;
+  let chiave = base;
+  // la chiave non deve coincidere con un'area né con un alias della guida (le vecchie mappe d'area, 042)
+  const alias = tabellaGioco('guida_alias');
+  for (let i = 2; prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiave) || (alias && prepared('SELECT 1 FROM guida_alias WHERE chiave = ?').get(chiave)); i++) chiave = `${base}-${i}`;
+  const posto = dati.dopo === null ? 0 : dati.dopo === undefined ? elenco.length : elenco.indexOf(dati.dopo) + 1;
+  elenco.splice(posto, 0, chiave);
+  getDb().transaction(() => {
+    prepared('INSERT INTO dungeon_area (chiave, dungeon_chiave, ordine, nome, descrizione) VALUES (?, ?, ?, ?, ?)').run(chiave, dungeonChiave, posto, nome, dati.descrizione ?? '');
+    elenco.forEach((k, n) => prepared('UPDATE dungeon_area SET ordine = ? WHERE chiave = ?').run(n, k));
+    if (dati.planimetria) {
+      const gia = (prepared("SELECT entita_chiave FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area'").all(idMappa(dati.planimetria)) as Array<{ entita_chiave: string }>).map((r) => r.entita_chiave);
+      impostaAreeMappa(dati.planimetria, [...gia, chiave]);
+    }
+  })();
+  return { chiave, nome, ordine: posto };
 }
 
 export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number }

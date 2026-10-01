@@ -97,6 +97,9 @@ export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDun
 export const creaPunto = (area: string, dati: DatiPuntoApi & { nome: string; tipo: PuntoInteresseDto['tipo'] }): Promise<PuntoInteresseDto> => apiPost(`/compendio/aree/${encodeURIComponent(area)}/punti`, dati);
 export const aggiornaPunto = (chiave: string, dati: DatiPuntoApi): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}`, dati);
 export const eliminaPunto = (chiave: string): Promise<void> => apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}`);
+/** Una sezione nuova della guida del Palazzo: `dopo` un'area (null = in cima, assente = in fondo), e se data nella planimetria. */
+export const creaArea = (dungeon: string, dati: { nome: string; descrizione?: string; dopo?: string | null; planimetria?: string }): Promise<{ chiave: string; nome: string; ordine: number }> =>
+  apiPost(`/compendio/dungeon/${encodeURIComponent(dungeon)}/aree`, dati);
 /** Un posto su (-1) o giù (+1) nella guida dell'area. */
 export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/sposta`, { verso });
 /** Collega (o scollega) un pin di una planimetria del Palazzo alla voce della guida. */

@@ -882,3 +882,12 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   produzione: nessun pin delle planimetrie collegato a una voce descrittiva; 4 elementi della guida senza mappa collegati
   a voci «altro» (Tesoro avvistato, Cassiere Ombra, Barriera bloccante, Ricompensa completamento arena). Restano come
   sono (nessuna riconciliazione) e si leggono senza stato.
+
+### 2026-10-01 — Una sezione nuova della guida si crea dall'app
+- Domanda dell'utente: «come faccio ad aggiungere una nuova sezione di guida ad una planimetria che non ha sezioni di guida
+  autonome?» — non si poteva (le aree si modificavano, eliminavano e collegavano, ma non si creavano). Proposta approvata
+  («implementa»): «Nuova area della guida…» nella scheda della planimetria (l'area nasce dentro di lei, col nome della
+  stanza proposto e il posto dopo la sua ultima area) e «Nuova area» nella colonna del Palazzo (senza planimetria, da
+  collegare dopo); nome, descrizione e posto nell'ordine del Palazzo. È canone: vale per tutte le partite e va nel pacchetto.
+- Chiarito all'utente: «Nome della stanza» è dell'atlante (raggruppa le planimetrie dello stesso posto), l'area è una
+  sezione della guida col suo testo e le sue voci; spesso coincidono nel nome, per questo il nome proposto è quello della stanza.

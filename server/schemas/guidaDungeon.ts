@@ -29,6 +29,11 @@ export const bodyPunto = z.object({
   tipo: z.enum(TIPI_PUNTO).optional(), esauribile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(),
 });
 export const bodyNuovoPunto = bodyPunto.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
+/** Una sezione nuova della guida: dove va (`dopo` un'area, `null` in cima, assente in fondo) e, se c'è, la planimetria che la contiene. */
+export const bodyNuovaArea = z.object({
+  nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional(),
+  dopo: z.string().min(1).max(200).nullable().optional(), planimetria: z.string().min(1).max(200).optional(),
+});
 /** Un posto su o giù nella guida dell'area. */
 export const bodySpostaPunto = z.object({ verso: z.union([z.literal(-1), z.literal(1)]) });
 /** Il pin di una planimetria da collegare o scollegare (`PUT` / `DELETE`). */

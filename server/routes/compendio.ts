@@ -9,8 +9,8 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { aggiornaArea, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaPunto, eliminaArea, eliminaPunto, spostaPunto } from '../services/dungeonService.js';
-import { bodyArea, bodyDungeon, bodyNuovoPunto, bodyPunto, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto } from '../schemas/guidaDungeon.js';
+import { aggiornaArea, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaArea, creaPunto, eliminaArea, eliminaPunto, spostaPunto } from '../services/dungeonService.js';
+import { bodyArea, bodyDungeon, bodyNuovaArea, bodyNuovoPunto, bodyPunto, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto } from '../schemas/guidaDungeon.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
@@ -200,6 +200,10 @@ router.get('/dungeon/:chiave', validate({ query: queryDomande }), (req, res) => 
 /* ---- Correzione dei testi della guida: la sezione dei Palazzi non è più in sola lettura ---- */
 router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyDungeon }), (req, res) => {
   res.json(aggiornaDungeon(String(req.params.chiave), req.body as Parameters<typeof aggiornaDungeon>[1]));
+});
+/** Una sezione nuova della guida del Palazzo, al posto scelto e, se data, nella planimetria (2026-10-01). */
+router.post('/dungeon/:chiave/aree', validate({ params: paramsChiaveGuida, body: bodyNuovaArea }), (req, res) => {
+  res.status(201).json(creaArea(String(req.params.chiave), req.body as Parameters<typeof creaArea>[1]));
 });
 router.put('/aree/:chiave', validate({ params: paramsChiaveGuida, body: bodyArea }), (req, res) => {
   res.json(aggiornaArea(String(req.params.chiave), req.body as Parameters<typeof aggiornaArea>[1]));

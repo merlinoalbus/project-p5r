@@ -20,6 +20,7 @@ import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { CampoCorrezione } from './CorrezioneGuida';
 import { SceltaAreePlanimetria } from './SceltaAreePlanimetria';
+import { ModuloNuovaArea, type DatiNuovaArea } from './ModuloNuovaArea';
 import { notifica } from '../../stores/notificationStore';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { perOrdineDiGuida, type Planimetria } from '../../utils/gruppiPlanimetrie';
@@ -55,10 +56,12 @@ interface Props {
   /** Entra nella stanza di `con` (`nome`: come chiamarla se non ha ancora un nome suo) o, con `null`, diventa una stanza a sé (`nome`). */
   onCambiaStanza: (con: string | null, nome: string) => Promise<void>;
   onElimina: () => Promise<void>;
+  /** Una sezione nuova della guida dentro questa planimetria (2026-10-01). */
+  onCreaArea: (dati: DatiNuovaArea) => Promise<void>;
   onChiudi: () => void;
 }
 
-export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta, etichettaDedotta, nome, aree, altrove, altreStanze, onSalva, onCambiaStanza, onElimina, onChiudi }: Props) {
+export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta, etichettaDedotta, nome, aree, altrove, altreStanze, onSalva, onCambiaStanza, onElimina, onCreaArea, onChiudi }: Props) {
   const [valori, setValori] = useState({ stanza, etichetta, nome });
   const [sposta, setSposta] = useState(false);
   const [cerca, setCerca] = useState('');
@@ -66,6 +69,7 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
   const [iniziali] = useState(() => new Set(p.aree.map((a) => a.chiave)));
   const [spuntate, setSpuntate] = useState<Set<string>>(() => new Set(iniziali));
   const [conferma, setConferma] = useState(false);
+  const [nuovaArea, setNuovaArea] = useState(false);
   const [occupato, setOccupato] = useState(false);
 
   const modifiche: ModificheScheda = {};
@@ -126,6 +130,24 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
         {/* invio da tastiera nei campi di testo */}
         <button type="submit" hidden aria-hidden tabIndex={-1} />
       </form>
+
+      {/* Una sezione nuova della guida dentro questa planimetria (richiesta dell'utente, 2026-10-01): per una stanza che la
+          guida non ha trascritto. Il nome proposto è quello della stanza; il posto, dopo l'ultima area che la planimetria ha.
+          Come per la stanza, con modifiche non salvate qui sopra si aspetta: rileggendo il Palazzo andrebbero perse. */}
+      <section aria-label="Nuova area della guida" className="flex flex-col gap-2 border-t border-border-light pt-3">
+        {nuovaArea
+          ? <ModuloNuovaArea aree={aree} nomeIniziale={stanza} occupato={occupato}
+              // creata l'area la scheda si chiude e il Palazzo si rilegge: con modifiche non salvate qui sopra (o la conferma
+              // d'eliminazione aperta) si aspetta, anche a modulo già aperto (rilievo della revisione)
+              bloccato={daSalvare ? 'Salva prima le modifiche della scheda: creando l’area la finestra si chiude.' : conferma ? 'Chiudi prima la conferma dell’eliminazione.' : undefined}
+              dopoIniziale={[...p.aree].sort(perOrdineDiGuida).at(-1)?.chiave}
+              onCrea={(dati) => esegui(() => onCreaArea(dati))} onAnnulla={() => setNuovaArea(false)} />
+          : <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[12px] text-text-muted">{p.aree.length === 0 ? 'Non contiene sezioni della guida: creane una qui.' : 'Una sezione della guida in più, dentro questa planimetria.'}</span>
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Nuova area della guida…" disabled={occupato || daSalvare || conferma} onClick={() => setNuovaArea(true)} />
+            </div>}
+        {daSalvare && !nuovaArea && <span className="text-[11px] text-text-muted" role="status">Salva prima le modifiche qui sopra per creare un’area.</span>}
+      </section>
 
       {/* La stanza (richiesta dell'utente, 2026-09-30): una planimetria a sé può diventare una versione di
           un'altra stanza, e una versione può diventare una stanza a sé. Sono azioni immediate, che rileggono
