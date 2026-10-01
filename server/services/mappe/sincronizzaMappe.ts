@@ -76,7 +76,6 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   const insMappa = db.prepare(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, entita_tipo, entita_chiave, origine, updated_at${conRuolo ? ', ruolo_immagine' : ''})
     VALUES (@chiave, @nome, @tipo, @genitore, @ordine, @immagine, @asset, @entitaTipo, @entitaChiave, 'seed', @adesso${conRuolo ? ", CASE WHEN @asset IS NULL AND @immagine IS NULL THEN 'nessuna' WHEN @asset LIKE 'palazzi/%' THEN 'emblema' ELSE 'illustrazione-editoriale' END" : ''})
     ON CONFLICT(chiave) DO UPDATE SET immagine_chiave = COALESCE(mappa.immagine_chiave, excluded.immagine_chiave), asset = COALESCE(mappa.asset, excluded.asset)${conRuolo ? ", ruolo_immagine = CASE WHEN mappa.ruolo_immagine <> 'nessuna' THEN mappa.ruolo_immagine ELSE excluded.ruolo_immagine END" : ''}`);
-  let mappe = 0;
   const prima = (db.prepare('SELECT COUNT(*) AS n FROM mappa').get() as { n: number }).n;
   const t = adesso();
   insMappa.run({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta', genitore: null, ordine: 0, immagine: immaginiMappa.has('tokyo') ? 'tokyo' : null, asset: 'mappe/tokyo', entitaTipo: null, entitaChiave: null, adesso: t });
@@ -100,7 +99,7 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       }
     }
   }
-  mappe = (db.prepare('SELECT COUNT(*) AS n FROM mappa').get() as { n: number }).n - prima;
+  const mappe = (db.prepare('SELECT COUNT(*) AS n FROM mappa').get() as { n: number }).n - prima;
 
   // ---- Spilli dai marcatori ----
   const esiste = db.prepare('SELECT 1 FROM spillo WHERE riferimento_tipo = ? AND riferimento_chiave = ?');

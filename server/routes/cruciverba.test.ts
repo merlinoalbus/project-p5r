@@ -36,6 +36,7 @@ describe('API cruciverba', () => {
     let c = (await request(app).put(`/api/partite/${id}/cruciverba`).send({ data: '04-18', fatto: true })).body.data as CruciverbaDto;
     expect(c.fatto).toBe(true);
     c = (await request(app).put(`/api/partite/${id}/cruciverba`).send({ data: '04-18', fatto: true })).body.data as CruciverbaDto;
+    expect(c.fatto).toBe(true);
     const con = (await request(app).get(`/api/compendio/cruciverba?partita=${id}`)).body.data as CruciverbaTuttiDto;
     expect(con.risolti).toBe(1);
     expect(con.cruciverba[0].fatto).toBe(true);

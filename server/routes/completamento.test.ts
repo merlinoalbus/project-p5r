@@ -44,6 +44,7 @@ describe('API completamento', () => {
     let t = (await request(app).put(`/api/partite/${id}/trofei`).send({ trofeo: 'assedio-al-castello-della-lussuria', ottenuto: true })).body.data as TrofeoDto;
     expect(t.ottenuto).toBe(true);
     t = (await request(app).put(`/api/partite/${id}/trofei`).send({ trofeo: 'assedio-al-castello-della-lussuria', ottenuto: true })).body.data as TrofeoDto;
+    expect(t.ottenuto).toBe(true);
     const con = (await request(app).get(`/api/compendio/completamento?partita=${id}`)).body.data as CompletamentoDto;
     expect(con.ottenuti).toBe(1);
     expect(con.trofei[0].ottenuto).toBe(true);

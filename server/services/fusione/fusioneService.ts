@@ -116,7 +116,7 @@ export function fondiDto(aId: number, bId: number, opz: OpzioniContesto): EsitoF
       : null;
     return { a: personaDto(a), b: personaDto(b), ricetta: ricettaScontata(ricettaDto(r), sconto), motivo: null, dlcPosseduti, sconto, bonusConfidente };
   }
-  let motivo = 'Nessuna Persona corrisponde a questa combinazione.';
+  let motivo: string;
   if (a.rara && b.rara) motivo = 'Questi due Demoni del Tesoro non producono alcuna Persona con la fusione normale.';
   else if (a.rara || b.rara) motivo = 'Il Demone del Tesoro non ha una Persona a quella distanza nell\'arcano: la fusione non è possibile.';
   else if (a.arcana === b.arcana) motivo = 'Nessuna Persona dello stesso arcano ha un livello adatto al di sotto del riferimento (esclusi gli ingredienti).';

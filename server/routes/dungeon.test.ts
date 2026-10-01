@@ -80,6 +80,7 @@ describe('API dungeon', () => {
     let p = (await request(app).put(`/api/partite/${id}/punti`).send({ punto: forziere.chiave, stato: 'ottenuto' })).body.data as PuntoInteresseDto;
     expect(p).toMatchObject({ chiave: forziere.chiave, stato: 'ottenuto' });
     p = (await request(app).put(`/api/partite/${id}/punti`).send({ punto: forziere.chiave, stato: 'ottenuto' })).body.data as PuntoInteresseDto; // idempotente: nessun secondo evento
+    expect(p).toMatchObject({ chiave: forziere.chiave, stato: 'ottenuto' });
     p = (await request(app).put(`/api/partite/${id}/punti`).send({ punto: sicura.chiave, stato: 'esaurito' })).body.data as PuntoInteresseDto;
     expect(p.stato).toBe('esaurito');
     const lista = (await request(app).get(`/api/compendio/dungeon?partita=${id}`)).body.data as DungeonRiassuntoDto[];

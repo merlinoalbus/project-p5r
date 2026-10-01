@@ -891,3 +891,15 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   collegare dopo); nome, descrizione e posto nell'ordine del Palazzo. È canone: vale per tutte le partite e va nel pacchetto.
 - Chiarito all'utente: «Nome della stanza» è dell'atlante (raggruppa le planimetrie dello stesso posto), l'area è una
   sezione della guida col suo testo e le sue voci; spesso coincidono nel nome, per questo il nome proposto è quello della stanza.
+
+### 2026-10-01 — Aggiornamento di pipeline, immagini e dipendenze
+- Avviso di GitHub segnalato dall'utente (action su Node 20, deprecato) e richiesta «in generale andrebbe aggiornato se ci sono
+  questa o altre librerie deprecate», «sia su backend che su frontend». Perimetro scelto dall'utente: pipeline, immagini Docker,
+  pacchetti deprecati e aggiornamenti minori; TypeScript 7 (non ancora supportato da typescript-eslint) e vitest 5 restano
+  per un lavoro a parte.
+- Fatto: action alle ultime versioni su Node 24 e pipeline su Node 24; `node:24-alpine` (LTS) e `nginx:1.30-alpine`; eslint 10
+  (con le correzioni chieste dalle regole nuove: assegnazioni inutili e `cause` dell'errore; nei test le chiamate ripetute
+  per l'idempotenza ora controllano il valore restituito); aggiornamenti minori; vulnerabilità di `undici` (sviluppo) chiusa.
+- better-sqlite3 resta alla 12 (scelta dell'utente): la 13 toglie il deprecato `prebuild-install`, ma per un bug aperto di
+  npm (npm/cli#9837, WiseLibs/better-sqlite3#1516) con il lockfile si compila sempre da sorgente — su un clone nuovo per
+  Windows servirebbero Visual Studio Build Tools e Python. Da riprendere quando npm lo corregge.

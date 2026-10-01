@@ -49,6 +49,7 @@ describe('API Richieste dei Mementos', () => {
     r = (await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: prima.chiave, stato: 'completata' })).body.data as RichiestaDto;
     expect(r.stato).toBe('completata');
     r = (await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: prima.chiave, stato: 'completata' })).body.data as RichiestaDto;
+    expect(r.stato).toBe('completata');
     const con = (await request(app).get(`/api/compendio/richieste?partita=${id}`)).body.data as RichiesteDto;
     expect(con.completate).toBe(1);
     expect(con.richieste[0].stato).toBe('completata');

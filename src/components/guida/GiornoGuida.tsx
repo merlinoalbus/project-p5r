@@ -162,7 +162,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
             await impostaAzionePercorso(partitaId, v.uid, false);
             // la spunta è già tolta: se l'eliminazione non riesce (spuntata con effetti in un'altra partita) si dice tutto com'è
             try { await via(); } catch (err) {
-              throw new Error(`Spunta tolta e punti annullati in questa partita, ma la voce non è stata eliminata: ${err instanceof Error ? err.message : 'errore del server.'}`);
+              throw new Error(`Spunta tolta e punti annullati in questa partita, ma la voce non è stata eliminata: ${err instanceof Error ? err.message : 'errore del server.'}`, { cause: err });
             }
           },
         }],

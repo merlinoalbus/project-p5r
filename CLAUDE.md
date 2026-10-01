@@ -31,7 +31,7 @@ italiana tramite la tabella `traduzione`.
   chiamate in `src/services/api/` (barrel `index.ts`), tema in `src/tailwind.css` (token CSS-first, mai classi interpolate).
 - Layout adattivo: sidebar da 1024px in su, barra inferiore sotto; bersagli touch ≥ 44px (classe `.touch`).
 - Dati di gioco (`gioco.db`, dal pacchetto: con dentro anche tutte le immagini che non sono del compendio né di `ui/`) e dati utente (`partite.db`, tabelle per `partita_id`) vivono in DUE FILE separati sulla stessa connessione: sostituire il DB di gioco non tocca l'avanzamento.
-- Test con Vitest accanto ai sorgenti (`*.test.ts[x]`); typecheck `tsc -b tsconfig.full.json`; lint ESLint 9.
+- Test con Vitest accanto ai sorgenti (`*.test.ts[x]`); typecheck `tsc -b tsconfig.full.json`; lint ESLint 10.
 
 ## Procedura di lavoro obbligatoria
 1. Studiare il codice esistente e proporre la soluzione prima di implementare.

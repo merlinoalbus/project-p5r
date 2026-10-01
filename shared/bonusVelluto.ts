@@ -120,10 +120,10 @@ export function moltiplicatoreForca(o: OpzioniForca): EsitoForca {
     m = base;
   } else {
     const r = Math.max(0, Math.min(10, o.rangoConfidente));
-    let rangoMolt = 1;
     if (r >= 1) {
       const chiave = o.igorMax ? 'igorMax' : 'igorNonMax';
       const doc = FORCA_RANGHI_DOCUMENTATI.find((x) => x.rango === r);
+      let rangoMolt: number;
       if (doc) rangoMolt = doc[chiave];
       else {
         const inferiore = [...FORCA_RANGHI_DOCUMENTATI].reverse().find((x) => x.rango < r)!;

@@ -27,11 +27,12 @@ realizzeranno secondo `docs/ROADMAP.md`.
 ## 2. Stack e versioni
 | Livello | Tecnologia |
 |---|---|
-| Runtime | Node ≥ 22, TypeScript 5.9, ESM (`"type": "module"`) |
+| Runtime | Node ≥ 22.13 (immagini Docker e CI su Node 24 LTS), TypeScript 5.9, ESM (`"type": "module"`) |
 | Frontend | React 19, react-router 7, zustand 5, Tailwind 4 (plugin Vite, config CSS-first), Vite 8 |
 | Backend | Express 5, better-sqlite3 12, zod 4, pino 10, tsx (esegue i `.ts` a runtime, anche in produzione) |
 | Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (`server/bootstrap.test.ts`, `server/routes/api.test.ts`), DB in memoria con seed reale (`server/services/seed/caricaSeed.test.ts`), migrazioni (`server/db/migrationRunner.test.ts`), pipeline seed (`scripts/seed/*.test.ts`) |
-| Qualità | ESLint 9 flat config, `tsc -b` su 4 progetti (app / node / server / test) |
+| Qualità | ESLint 10 flat config, `tsc -b` su 4 progetti (app / node / server / test) |
+| Deploy | Immagini `node:24-alpine` (backend) e `nginx:1.30-alpine` (frontend); GitHub Actions su Node 24 (checkout v7, setup-node v7, setup-buildx v4, build-push v7) |
 
 ## 3. Struttura del repository
 ```

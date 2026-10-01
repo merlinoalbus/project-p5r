@@ -105,6 +105,7 @@ describe('API città e attività', () => {
     let r = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: libro.chiave, fatto: true })).body.data as LibroDto;
     expect(r.fatto).toBe(true);
     r = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: libro.chiave, fatto: true })).body.data as LibroDto; // idempotente
+    expect(r.fatto).toBe(true);
     await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'film', chiave: a.film[0].chiave, fatto: true });
     const con = (await request(app).get(`/api/compendio/attivita?partita=${id}`)).body.data as AttivitaTutteDto;
     expect(con).toMatchObject({ libriLetti: 1, filmVisti: 1 });

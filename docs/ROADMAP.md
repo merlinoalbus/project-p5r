@@ -996,3 +996,10 @@ mostrava tutto il Palazzo); scelte in `DECISIONI.md`.
 | Voce | Contenuto | Stato |
 |------|-----------|-------|
 | 1 | `creaArea` (`POST /api/compendio/dungeon/:chiave/aree`: nome, descrizione, `dopo` un'area / `null` in cima / assente in fondo, `planimetria`; ordine del Palazzo ricompattato; chiave unica anche rispetto agli alias della guida, entro i 200 caratteri delle route (slug troncato; «area» se il nome non ha lettere); tutto o niente con la planimetria). `ModuloNuovaArea` nella scheda della planimetria («Nuova area della guida…», nome della stanza proposto, posto dopo la sua ultima area, in vista e dal nome, invio sospeso con modifiche non salvate o conferma d'eliminazione aperta) e nella colonna del Palazzo («Nuova area»); creata, la scheda la apre. Test: `nuova-area` (6), `DungeonDettaglioPage` (+4), ognuno visto rosso senza la correzione. Verifica nel browser a 1366×657, 768×1024, 375×812 (area di prova creata ed eliminata, ordine delle aree identico a prima) | ✅ validata (3° esame) |
+
+## Aggiornamento di pipeline, immagini e dipendenze (1 ottobre 2026) — fatto
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | GitHub Actions: checkout v7, setup-node v7, setup-buildx v4, build-push v7, Node 24 (ci.yml e docker-publish.yml). Docker: `node:24-alpine`, `nginx:1.30-alpine`. Dipendenze: eslint 10 / @eslint/js 10 (+ correzioni delle regole nuove), react 19.3, react-router 7.18.4, zod 4.6.5, vite 8.3.2, tsx, typescript-eslint 8.71, supertest, globals, tipi; `npm audit` 0. Restano fuori di proposito: TypeScript 7, vitest 5 (+ coverage, jest-dom 7), @types/node 26, concurrently 10; better-sqlite3 12 (bug npm con la 13). `engines` a Node ≥ 22.13 (minima di eslint 10 e vite 8). Verifica: typecheck, lint, lint:ci, 1222 test, build Vite, build e avvio delle due immagini Docker in locale, app nel browser, pipeline su GitHub | ✅ validata (1° esame) |
+| Da riprendere | better-sqlite3 13 quando npm/cli#9837 è corretto (toglie il deprecato `prebuild-install`); vitest 5; TypeScript 7 quando typescript-eslint lo supporta | da fare |

@@ -68,6 +68,7 @@ describe('API negozi e inventario', () => {
     let a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: true })).body.data as ArticoloDto;
     expect(a.acquistato).toBe(true);
     a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: true })).body.data as ArticoloDto; // idempotente
+    expect(a.acquistato).toBe(true);
     const d = (await request(app).get(`/api/compendio/negozi/untouchable?partita=${id}`)).body.data as NegozioDettaglioDto;
     expect(d.acquistati).toBe(1);
     expect(d.articoliElenco.find((x) => x.chiave === acquistabile.chiave)?.acquistato).toBe(true);

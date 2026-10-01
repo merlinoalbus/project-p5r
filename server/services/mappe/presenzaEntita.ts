@@ -51,7 +51,7 @@ export function fasciaDaTesto(quando: string | null | undefined): RequisitoSpill
 
 /** I giorni della settimana del luogo (`giorni_json`, migrazione 080): chiavi già pulite; la settimana intera non è una condizione. */
 export function giorniDaJson(json: string | null | undefined): RequisitoSpillo[] {
-  let scelti: string[] = [];
+  let scelti: string[];
   try {
     const v = JSON.parse(json || '[]') as unknown;
     scelti = Array.isArray(v) ? [...new Set(v.map(String).filter((g) => GIORNI[g]))] : [];

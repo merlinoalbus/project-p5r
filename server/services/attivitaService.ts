@@ -28,7 +28,7 @@ interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number
 /** La disponibilità di una riga, dalle condizioni strutturate. La condizione non nasconde niente:
  *  dice «non ancora», che in una guida è un'informazione, non un ostacolo. */
 function conDisponibilita(condizioniJson: string | null, st: StatoDisponibilita | null): { condizioni: CondizioneSpilloDto[] | null; disponibilita: DisponibilitaDto | null } {
-  let grezze: RequisitoSpillo[] = [];
+  let grezze: RequisitoSpillo[];
   try { grezze = normalizzaCondizioniSpillo(condizioniJson ? (JSON.parse(condizioniJson) as unknown) : []); } catch { grezze = []; }
   if (grezze.length === 0) return { condizioni: null, disponibilita: null };
   const nomi = nomiCondizioniMemo();

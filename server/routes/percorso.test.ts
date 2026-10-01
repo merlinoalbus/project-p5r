@@ -49,6 +49,7 @@ describe('API percorso giorno per giorno', () => {
     let a = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: prima.uid, fatta: true })).body.data as AzionePercorsoDto;
     expect(a).toMatchObject({ uid: prima.uid, giorno: '04-12', fatta: true });
     a = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: prima.uid, fatta: true })).body.data as AzionePercorsoDto; // idempotente
+    expect(a).toMatchObject({ uid: prima.uid, fatta: true });
     const g = (await request(app).get(`/api/compendio/percorso/04-12?partita=${id}`)).body.data as PercorsoGiornoDto;
     expect(g.fatte).toBe(1);
     expect(g.azioni[0].fatta).toBe(true);

@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
-// ESLint 9 flat config: blocco FE (globals browser) + blocco BE (globals node).
+// ESLint 10 flat config: blocco FE (globals browser) + blocco BE (globals node).
 
 export default defineConfig([
   globalIgnores(['dist', 'node_modules', 'coverage', 'data']),
