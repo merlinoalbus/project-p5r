@@ -872,7 +872,11 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   fuori portano in un Palazzo completato — riconosciuti dal riferimento a una sua mappa, dalla destinazione o, come
   ultima fonte, dall'identità di seed (`seed_identita_json`) quando lo spillo è stato modificato e ha perso il
   collegamento (il 1616 della Shujin) — senza scrivere condizioni: vale anche dopo ogni sincronizzazione. Gli archi
-  (`arco`) restano legati alla data.
+  (`arco`) restano legati alla data. Lo stesso motivo arriva al FE in `DungeonRiassuntoDto.completato` (`elencaDungeon`
+  e `dettaglioDungeon` con `?partita=`, null senza; solo per `tipo = 'palazzo'`: `palazziCompletati` non filtra per tipo
+  e i Memento, una volta aperti, restano un posto dove andare): sulla **mappa di Tokyo** (`MappaTokyo`, da `CittaPage` e
+  `OggiMappa`, che ora passano la partita a `getDungeons`) un Palazzo completato non ha più cartellino anche dentro
+  la sua finestra di date, e nell'elenco dei luoghi assenti porta «completato: <motivo>» (2026-10-01).
 
 ### Effetti delle azioni della Guida (2026-09-30)
 

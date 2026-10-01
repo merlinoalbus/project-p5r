@@ -17,7 +17,7 @@ import { createApp } from '../bootstrap.js';
 import { creaMappa } from '../services/mappe/mappeService.js';
 import { statoPartitaSemafori, valuta } from '../services/semaforiService.js';
 import { bossFinali, palazziCompletati } from '../services/palazziService.js';
-import type { MappaDto } from '../../shared/types.js';
+import type { DungeonRiassuntoDto, MappaDto } from '../../shared/types.js';
 
 const app = createApp();
 
@@ -112,9 +112,32 @@ describe('Palazzo completato', () => {
     await segna(tesoro.id, true);
     expect(finale.punti.every(bossGuida)).toBe(true);
     expect(palazziCompletati(partita).has('okumura')).toBe(true);
+    // l'elenco dei Palazzi lo dice, col perché: la mappa di Tokyo lo toglie anche dentro la sua finestra
+    const elenco = async (q = `?partita=${partita}`) => ((await request(app).get(`/api/compendio/dungeon${q}`)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'okumura')!;
+    expect((await elenco()).completato).toBe(palazziCompletati(partita).get('okumura'));
+    expect((await request(app).get(`/api/compendio/dungeon/okumura?partita=${partita}`)).body.data.completato).toBe(palazziCompletati(partita).get('okumura'));
+    expect((await elenco('')).completato).toBeNull();
     await segna(tesoro.id, false);
     expect(finale.punti.some(bossGuida)).toBe(false);
     expect(palazziCompletati(partita).has('okumura')).toBe(false);
+    expect((await elenco()).completato).toBeNull();
+  });
+
+  it('i Memento non si completano: anche con un boss segnato nella Guida restano sulla mappa di Tokyo', async () => {
+    // il boss finale dei Memento secondo la regola; se il pacchetto non ne ha, se ne crea uno nell'ultima area
+    // (la Guida è modificabile al 100%: il caso è possibile)
+    if (!bossFinali().get('mementos')) {
+      const area = prepared("SELECT chiave FROM dungeon_area WHERE dungeon_chiave = 'mementos' ORDER BY ordine DESC LIMIT 1").pluck().get() as string;
+      prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte) VALUES ('mementos-boss-di-prova', ?, 999, 'boss', 'Boss di prova', '', 0, '{}', '')").run(area);
+    }
+    const punto = bossFinali().get('mementos')!.punti[0];
+    prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', 'x') ON CONFLICT DO NOTHING").run(partita, punto);
+    // per la regola generale il dungeon risulterebbe completato; per l'elenco no, perché non è un Palazzo
+    expect(palazziCompletati(partita).has('mementos')).toBe(true);
+    const memento = ((await request(app).get(`/api/compendio/dungeon?partita=${partita}`)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'mementos')!;
+    expect(memento.completato).toBeNull();
+    expect((await request(app).get(`/api/compendio/dungeon/mementos?partita=${partita}`)).body.data.completato).toBeNull();
+    prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partita, punto);
   });
 
   it('con tutto raccolto (100%, la stessa regola della scheda del Palazzo) il Palazzo è completato', async () => {

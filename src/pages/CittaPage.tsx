@@ -42,8 +42,8 @@ export function CittaPage() {
   // è quella a decidere se compaiono. Senza partita non decide nulla e si vedono tutte. Qui va
   // `radiciMetaverso` e non `soloPalazzi`, che è il filtro dell'*elenco* dei Palazzi: sulla mappa
   // ci stanno anche i Memento, che l'utente ha chiesto per nome e che dal 9 maggio sono un posto
-  // dove si può andare quanto gli altri.
-  const dungeon = useCarica(async () => radiciMetaverso(await getDungeons()), []);
+  // dove si può andare quanto gli altri. Con la partita, perché un Palazzo completato sparisce.
+  const dungeon = useCarica(async () => radiciMetaverso(await getDungeons(attiva?.id)), [attiva?.id]);
   const q = dati.dati;
   return (
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>

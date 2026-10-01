@@ -45,7 +45,8 @@ export function OggiMappa({ oggi, riempi }: Props) {
   const suTokyo = mappa.chiave === 'tokyo';
   // Si caricano solo quando servono davvero, cioè al livello di Tokyo.
   const quartieri = useCarica(() => (suTokyo ? getQuartieri(oggi.partitaId) : Promise.resolve([])), [suTokyo, oggi.partitaId]);
-  const dungeon = useCarica(async () => (suTokyo ? radiciMetaverso(await getDungeons()) : []), [suTokyo]);
+  // con la partita: un Palazzo completato sulla mappa di Tokyo non c'è più
+  const dungeon = useCarica(async () => (suTokyo ? radiciMetaverso(await getDungeons(oggi.partitaId)) : []), [suTokyo, oggi.partitaId]);
 
   return (
     <div className={`flex flex-col gap-1.5 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>

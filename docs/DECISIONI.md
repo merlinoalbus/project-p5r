@@ -836,3 +836,12 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   Ballerina: si vede nella pagina Libri (Ballerina letta senza averla letta) e si corregge da lì. Non misurato: i dati
   delle partite di produzione non erano disponibili. Il pacchetto alla 93 si importa solo con l'app aggiornata; con
   l'app aggiornata la 093 ripara la produzione all'avvio e l'importazione non serve.
+
+### 2026-10-01 — Un Palazzo completato sparisce anche dalla mappa di Tokyo
+- Rilievo dell'utente: «come mai vedo KAMOSHIDA nonostante il Tesoro al palazzo è stato recuperato?». Soluzione proposta e
+  approvata («procedi»): la stessa regola di «Palazzo completato» degli ingressi (`palazziCompletati`: boss finale segnato,
+  Tesoro o boss finale raccolto, 100%) vale per il cartellino del Palazzo sulla mappa di Tokyo, anche dentro la sua
+  finestra di date; il Palazzo resta nominato fra i luoghi assenti, col motivo («completato: …»). Solo i Palazzi: i
+  Memento non si completano e restano sulla mappa anche con un boss finale segnato (rilievo della revisione).
+- Il motivo mostrato è il primo che la regola trova: raccogliere il Tesoro segna da sé il boss finale della Guida, quindi
+  di solito si legge «boss finale segnato nella Guida».

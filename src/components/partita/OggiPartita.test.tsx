@@ -55,6 +55,8 @@ describe('OggiPartita', () => {
     // nodo da caricare, e' un disegno.
     expect(await screen.findByRole('img', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
     expect(api.getMappa).not.toHaveBeenCalledWith('tokyo', 4);
+    // i Palazzi con la partita: uno completato sulla mappa di Tokyo non c'è più
+    expect(api.getDungeons).toHaveBeenCalledWith(4);
     expect(screen.getByRole('link', { name: 'Guida completa' })).toHaveAttribute('href', '/guida/percorso/04-12');
   });
 

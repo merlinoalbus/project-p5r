@@ -19,6 +19,7 @@ import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { staccaAreaDaOgniMappa } from './mappe/mappeService.js';
+import { palazziCompletati } from './palazziService.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
@@ -149,7 +150,7 @@ function finestreDungeon(): Map<string, { dal: string; al: string | null }> {
 /** Da chiamare quando i dati di gioco vengono ricaricati: la trascrizione può essere cambiata. */
 export function invalidaFinestreDungeon(): void { finestreCache = null; }
 
-function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined): DungeonRiassuntoDto {
+function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, completati: Map<string, string> | null): DungeonRiassuntoDto {
   const conPartita = partitaId !== undefined;
   const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string }>;
   const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(raccoltaMappe(r.chiave, partitaId));
@@ -161,12 +162,16 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
     punti: punti.length, esauribili: punti.filter((p) => p.esauribile === 1).length,
     gestiti: conPartita ? punti.filter((p) => stati.has(p.chiave)).length : null,
     raccolta,
+    // solo i Palazzi si completano: i Memento, una volta aperti, restano un posto dove andare
+    completato: r.tipo === 'palazzo' ? completati?.get(r.chiave) ?? null : null,
   };
 }
 
 export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
   const stati = statiPartita(partitaId);
-  return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId));
+  // i Palazzi completati si calcolano una volta per tutto l'elenco
+  const completati = partitaId !== undefined ? palazziCompletati(partitaId) : null;
+  return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId, completati));
 }
 
 /**
@@ -230,7 +235,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
     dedalo: richieste ? dedaloDto(a, richieste.get(a.chiave) ?? [], timbri) : null,
   }));
   const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
-  return { ...riassunto(r, stati, partitaId), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
+  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
 }
 
 /** Stato di un punto nella partita: 'ottenuto', 'esaurito' oppure null per azzerare. */

@@ -6,7 +6,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MappaTokyo } from './MappaTokyo';
-import type { QuartiereRiassuntoDto } from '../../types';
+import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
 
 const quartieri = [
   { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, sbloccoData: null, descrizione: '' },
@@ -31,5 +31,15 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
     expect(within(voce).getByText('dal 09-01')).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Chiudi' }));
     expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('un Palazzo completato non c’è più, anche dentro la sua finestra, e si dice perché', () => {
+    const kamoshida = { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', finestra: { dal: '04-12', al: '05-02' }, completato: null } as DungeonRiassuntoDto;
+    const cartellino = () => document.querySelector('a[href="/guida/mondo/dungeon/kamoshida"]');
+    const { rerender } = render(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[kamoshida]} dataGioco="04-22" /></MemoryRouter>);
+    expect(cartellino()).not.toBeNull();
+    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, completato: 'Tesoro del Palazzo raccolto' }]} dataGioco="04-22" /></MemoryRouter>);
+    expect(cartellino()).toBeNull();
+    expect(screen.getByText('Palazzo di Kamoshida', { selector: 'span[title]' })).toHaveAttribute('title', 'completato: Tesoro del Palazzo raccolto');
   });
 });

@@ -377,8 +377,10 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         // posti dell'altro mondo, non fermate del treno.
         src: assetPalazzo(d.chiave), dove, palazzo: true,
         href: `/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`,
-        presente: !dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al),
-        quando: f ? (f.al ? `dal ${f.dal} al ${f.al}` : `dal ${f.dal}`) : null,
+        // Un Palazzo completato non c'è più, anche dentro la sua finestra: come nel gioco, e come
+        // l'ingresso dalla città che a Palazzo completato risulta bloccato (`palazziService`).
+        presente: !d.completato && (!dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al)),
+        quando: d.completato ? `completato: ${d.completato}` : f ? (f.al ? `dal ${f.dal} al ${f.al}` : `dal ${f.dal}`) : null,
       });
     }
     // Il nome di ogni fermata, cartellino o non cartellino. Serve ai pallini: quando una fermata

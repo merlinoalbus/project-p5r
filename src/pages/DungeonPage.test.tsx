@@ -18,7 +18,7 @@ const dungeon = (extra: Partial<DungeonRiassuntoDto>): DungeonRiassuntoDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Suguru Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile (Martedì) — prima infiltrazione esplorativa nel Palazzo', scadenza: '2 maggio (ultimo giorno utile)', furtoConsigliato: '22 Aprile' },
   finestra: { dal: '04-12', al: '05-02' },
-  livelloConsigliato: 'Non esplicitato testualmente da allgamestaff. Il boss finale è di Livello 11.', aree: 18, punti: 58, esauribili: 41, gestiti: 29, raccolta: { totale: 34, presi: 17, mappe: 12, mappeComplete: 4 }, ...extra,
+  livelloConsigliato: 'Non esplicitato testualmente da allgamestaff. Il boss finale è di Livello 11.', aree: 18, punti: 58, esauribili: 41, gestiti: 29, raccolta: { totale: 34, presi: 17, mappe: 12, mappeComplete: 4 }, completato: null, ...extra,
 });
 
 beforeEach(() => {
