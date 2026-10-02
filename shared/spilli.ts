@@ -239,6 +239,10 @@ export function puntoDaCollegare(tipoPunto: string): boolean {
 export function puntoDescrittivo(tipoPunto: string): boolean {
   return tipoPunto === 'altro';
 }
+/** Un Enigma (2026-10-01): una voce che può contenere i passi che lo risolvono — voci di qualunque tipo, coi loro pin. */
+export function puntoEnigma(tipoPunto: string): boolean {
+  return tipoPunto === 'puzzle';
+}
 
 export const TIPI_MAPPA = ['citta', 'quartiere', 'luogo', 'palazzo', 'area', 'dedalo', 'generica'] as const;
 export type TipoMappa = (typeof TIPI_MAPPA)[number];

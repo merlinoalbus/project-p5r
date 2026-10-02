@@ -17,7 +17,7 @@ import { collegaPinAlPunto, creaPunto, eliminaPunto, aggiornaPunto as salvaPunto
 import { notifica } from '../../stores/notificationStore';
 import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
-import { puntoDaCollegare, puntoDescrittivo } from '../../../shared/spilli';
+import { puntoDaCollegare, puntoDescrittivo, puntoEnigma } from '../../../shared/spilli';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto } from '../../types';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
@@ -60,7 +60,8 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   const [filtro, setFiltro] = useState<Set<PuntoInteresseDto['tipo']>>(new Set());
   const [mostraGestiti, setMostraGestiti] = useState(false);
   const [selezionato, setSelezionato] = useState<string | null>(null);
-  const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo'] } | null>(null);
+  /** Il modulo della voce nuova: in fondo all'area, o in fondo ai passi di un Enigma (`contenitore`, 095). */
+  const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null } | null>(null);
   /** La voce a cui si stanno collegando i pin, e su quale planimetria. */
   const [collegando, setCollegando] = useState<{ punto: string; mappa: string | null; ricerca: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -88,9 +89,22 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   }, [puntoInScelta]);
   useEffect(() => { if (puntoInScelta) riquadroScelta.current?.scrollIntoView?.({ block: 'nearest' }); }, [puntoInScelta, altezzaScelta]);
 
-  const puntiVisibili = useMemo(() => area.punti.filter((p) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato || p.chiave === selezionato)), [area, filtro, mostraGestiti, selezionato]);
+  // I passi di ogni Enigma (095), nel loro ordine: stanno dentro l'Enigma, non nell'elenco dell'area.
+  const passiPer = useMemo(() => {
+    const m = new Map<string, PuntoInteresseDto[]>();
+    for (const p of area.punti) if (p.contenitore) m.set(p.contenitore, [...(m.get(p.contenitore) ?? []), p]);
+    return m;
+  }, [area]);
+  const voceVisibile = (p: PuntoInteresseDto) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato || p.chiave === selezionato);
+  // in cima le voci fuori da ogni Enigma; un Enigma si vede anche quando i filtri prendono solo qualche suo passo
+  const vociDellArea = area.punti.filter((p) => !p.contenitore);
+  // (una nota descrittiva fra i passi non ha stato: senza filtri non basta a tenere in vista un Enigma segnato — rilievo del validatore)
+  const puntiVisibili = vociDellArea.filter((p) => voceVisibile(p) || (passiPer.get(p.chiave) ?? []).some((x) => voceVisibile(x) && (filtro.size > 0 || !puntoDescrittivo(x.tipo))));
   const gestitiArea = area.punti.filter((p) => p.stato && !puntoDescrittivo(p.tipo)).length;
-  const daCollegare = area.punti.filter((p) => puntoDaCollegare(p.tipo) && p.pin.length === 0).length;
+  // un Enigma coi suoi passi non ha pin suoi (stanno sui passi): non è «da collegare»
+  const daCollegare = area.punti.filter((p) => puntoDaCollegare(p.tipo) && p.pin.length === 0 && !passiPer.has(p.chiave)).length;
+  // gli Enigmi dell'area che possono accogliere passi (non sono a loro volta passi)
+  const enigmi = vociDellArea.filter((p) => puntoEnigma(p.tipo));
   // le planimetrie dell'area prima, poi il resto del Palazzo
   const opzioniMappa = useMemo(() => {
     const dellArea = new Set(area.mappe.map((m) => m.chiave));
@@ -123,6 +137,135 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   };
   const fineCollegamento = async () => { setCollegando(null); await onRicarica(); };
 
+  /** Il modulo della voce nuova: in fondo all'area o, con `contenitore`, in fondo ai passi di un Enigma (095). */
+  const moduloNuovaVoce = (n: { nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null }) => (
+    <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
+      onSubmit={(e) => { e.preventDefault(); const nome = n.nome.trim(); if (!nome) return; void creaPunto(area.chiave, { nome, tipo: n.tipo, ...(n.contenitore ? { contenitore: n.contenitore } : {}) }).then(async (nuovo) => { setNuovoPunto(null); await onRicarica(); setSelezionato(nuovo.chiave); notifica('success', n.contenitore ? `Passo «${nome}» aggiunto all’Enigma.` : `Voce «${nome}» aggiunta a ${area.nome}.`); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Voce non aggiunta.')); }}>
+      <CampoCorrezione etichetta={n.contenitore ? 'Nuovo passo' : 'Nuova voce'} valore={n.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => setNuovoPunto({ ...n, nome: v })} />
+      <span className="min-w-[150px]">
+        <Selettore etichetta="Tipo" valore={n.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setNuovoPunto({ ...n, tipo: v as PuntoInteresseDto['tipo'] })} />
+      </span>
+      <div className="flex gap-1.5">
+        <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Aggiungi" disabled={!n.nome.trim()} />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setNuovoPunto(null)} />
+      </div>
+    </form>
+  );
+
+  /** Una voce della guida, fra le sue `fratelli` (le voci dell'area, o i passi dello stesso Enigma): riga, scheda aperta e, per un
+   *  Enigma, i suoi passi dentro di lui (095). */
+  const riga = (p: PuntoInteresseDto, fratelli: PuntoInteresseDto[]) => {
+    const indice = fratelli.indexOf(p);
+    const aperto = p.chiave === selezionato;
+    const scelta = collegando?.punto === p.chiave ? collegando : null;
+    const passi = passiPer.get(p.chiave) ?? [];
+    const conPassi = passi.length > 0;
+    // l'Enigma è risolto quando i passi che si segnano sono fatti: qui quanti
+    const passiDaSegnare = passi.filter((x) => !puntoDescrittivo(x.tipo));
+    const passiFatti = passiDaSegnare.filter((x) => x.stato).length;
+    const puoAccogliere = puntoEnigma(p.tipo) && !p.contenitore;
+    // gli Enigmi di cui la voce può diventare un passo (non sé stessa; un Enigma coi suoi passi non entra in un altro; un Enigma con
+    // pin non accoglie passi, come dice il server)
+    const enigmiPossibili = conPassi ? [] : enigmi.filter((e) => e.chiave !== p.chiave && (e.pin.length === 0 || e.chiave === p.contenitore));
+    return (
+      <li key={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${aperto ? 'bg-primary-bg' : ''}`}>
+        <button type="button" className={`touch flex items-start gap-2 text-left ${p.stato && !aperto ? 'opacity-60' : ''}`} onClick={() => { setSelezionato(aperto ? null : p.chiave); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
+          <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            <span className="font-semibold">{p.nome}</span>
+            <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.stato ? ` · ${p.stato}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
+          </span>
+          {p.pin.length > 0
+            ? <span className="chip chip--icona shrink-0 text-[11px]" title={p.pin.map((x) => `${x.nome} (${nomeSenzaPalazzo(x.mappaNome)})`).join(', ')}><IconaAzione chiave="posizione" dimensione={14} />{p.pin.length === 1 ? '1 pin' : `${p.pin.length} pin`}</span>
+            : puntoDaCollegare(p.tipo) && !conPassi && <span className="chip shrink-0 text-[11px] text-text-muted">da collegare</span>}
+        </button>
+        {aperto && (
+          <div className="flex flex-col gap-1.5 pl-5">
+            {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
+            <DettagliPunto d={p.dettagli} />
+            {conPassi && <p className="m-0 text-[11px] text-text-muted">Risolto quando i suoi passi sono fatti: segnarlo li segna tutti, riaprirlo li riapre. I pin stanno sui passi.</p>}
+            {p.pin.length > 0 && (
+              <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label={`Pin collegati a ${p.nome}`}>
+                {p.pin.map((x) => (
+                  <li key={x.id} className="flex items-center gap-2 text-[12px]">
+                    <IconaAzione chiave="posizione" dimensione={16} />
+                    <span className="min-w-0 flex-1">{x.nome} <span className="text-text-muted">· {nomeSenzaPalazzo(x.mappaNome)}</span></span>
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={18} />} titolo="Scollega" aria-label={`Scollega ${x.nome} da ${p.nome}`} disabled={occupato} onClick={() => void scegliPin(p, x.id, x.nome)} />
+                  </li>
+                ))}
+              </ul>
+            )}
+            {/* una voce descrittiva (solo «Altro») si legge e basta: niente stato, niente pin (scelta dell'utente) */}
+            {puntoDescrittivo(p.tipo)
+              ? <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
+              : <div className="flex flex-wrap items-center gap-1.5">
+                {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
+                {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
+                {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
+              </div>}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {!puntoDescrittivo(p.tipo) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Chiudi la mappa' : 'Collega pin'}
+                aria-expanded={!!scelta} disabled={planimetrie.length === 0}
+                onClick={() => (scelta ? void fineCollegamento() : setCollegando({ punto: p.chiave, mappa: mappaIniziale(p), ricerca: '' }))} />}
+              {puoAccogliere && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un passo" aria-label={`Aggiungi un passo a ${p.nome}`}
+                disabled={p.pin.length > 0} title={p.pin.length > 0 ? 'Scollega prima i pin dell’Enigma: i pin stanno sui passi' : undefined}
+                onClick={() => setNuovoPunto({ nome: '', tipo: 'meccanismo', contenitore: p.chiave })} />}
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${p.nome}`} disabled={occupato || indice <= 0} onClick={() => void sposta(p, -1)} />
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${p.nome}`} disabled={occupato || indice >= fratelli.length - 1} onClick={() => void sposta(p, 1)} />
+              <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} compatto etichetta="Modifica"
+                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '' })}
+                onSalva={async (b) => { onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì', ...(b.contenitore !== (p.contenitore ?? '') ? { contenitore: b.contenitore || null } : {}) })); await onRicarica(); }}
+                elimina={{ avviso: conPassi ? 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I suoi passi restano, voci dell’area con il loro stato.' : 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I pin collegati restano sulla mappa, col loro «raccolto».', onElimina: async () => { await eliminaPunto(p.chiave); setSelezionato(null); setCollegando(null); await onRicarica(); } }}>
+                {(b, cambia) => <>
+                  <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => cambia({ nome: v })} />
+                  <span className="min-w-[150px]">
+                    {/* un Enigma coi suoi passi resta un Enigma: il server lo rifiuta, qui non lo si offre */}
+                    <Selettore etichetta="Tipo" valore={b.tipo} opzioni={(conPassi ? TIPI.filter(puntoEnigma) : TIPI).map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
+                  </span>
+                  {(enigmiPossibili.length > 0 || p.contenitore) && <span className="min-w-[180px]">
+                    <Selettore etichetta="Passo di" valore={b.contenitore} opzioni={[{ chiave: '', nome: '— nessun Enigma (voce dell’area) —' }, ...enigmiPossibili.map((e) => ({ chiave: e.chiave, nome: e.nome }))]} onCambia={(v) => cambia({ contenitore: v })} />
+                  </span>}
+                  <label className="touch flex items-center gap-1.5 text-[12px]">
+                    <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
+                  </label>
+                  <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.punto.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
+                </>}
+              </CorrezioneGuida>
+            </div>
+            {scelta && (
+              <div ref={riquadroScelta} className="scelta-pin" role="group" aria-label={`Scelta dei pin per ${p.nome}`}>
+                <p className="m-0 text-[11px] leading-tight" title="Tocca un pin sulla mappa per collegarlo alla voce, toccalo di nuovo per scollegarlo">Tocca i pin da collegare · <strong>{p.pin.length === 1 ? '1 collegato' : `${p.pin.length} collegati`}</strong></p>
+                <Selettore etichetta="Planimetria" valore={scelta.mappa ?? ''} opzioni={opzioniMappa}
+                  onCambia={(k) => setCollegando({ ...scelta, mappa: k })} />
+                <div className="flex items-center gap-1.5">
+                  <label className="min-w-0 flex-1">
+                    <span className="sr-only">Cerca un pin sulla mappa</span>
+                    <input type="search" className="form-input" placeholder="Cerca un pin…" value={scelta.ricerca} onChange={(e) => setCollegando({ ...scelta, ricerca: e.target.value })} />
+                  </label>
+                  <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Fatto" onClick={() => void fineCollegamento()} />
+                </div>
+                {scelta.mappa && <div data-mappa-scelta style={{ height: altezzaScelta }}>
+                  <MappaIncorporata key={scelta.mappa} chiave={scelta.mappa} partitaId={partitaId} conEditor={false} altezza={altezzaScelta}
+                    scelta={{ titolo: p.nome, scelti: new Set(p.pin.map((x) => x.id)), occupato, ricerca: scelta.ricerca, onScegli: (s) => void scegliPin(p, s.id, s.nome) }} />
+                </div>}
+              </div>
+            )}
+          </div>
+        )}
+        {/* i passi dell'Enigma, dentro di lui: ognuno è una voce vera, coi suoi pin e il suo stato */}
+        {puoAccogliere && (conPassi || nuovoPunto?.contenitore === p.chiave) && (
+          <div className="ml-5 mt-1 flex flex-col gap-1 border-l-2 border-border-light pl-2">
+            <p className="m-0 text-[11px] text-text-muted">Passi dell’Enigma</p>
+            <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`Passi di ${p.nome}`}>
+              {passi.filter(voceVisibile).map((x) => riga(x, passi))}
+            </ul>
+            {nuovoPunto?.contenitore === p.chiave && moduloNuovaVoce(nuovoPunto)}
+          </div>
+        )}
+      </li>
+    );
+  };
+
   return (
     <details className="text-[12px]" open aria-label={`Guida di ${area.nome}`}>
       <summary className="touch cursor-pointer text-text-muted">
@@ -146,105 +289,12 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
         <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`Voci della guida di ${area.nome}`}>
           {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">La guida non ha voci per quest’area: aggiungile qui sotto.</li>}
           {area.punti.length > 0 && puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessuna voce con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} segnate nascoste)` : ''}.</li>}
-          {puntiVisibili.map((p) => {
-            const indice = area.punti.indexOf(p);
-            const aperto = p.chiave === selezionato;
-            const scelta = collegando?.punto === p.chiave ? collegando : null;
-            return (
-              <li key={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${aperto ? 'bg-primary-bg' : ''}`}>
-                <button type="button" className={`touch flex items-start gap-2 text-left ${p.stato && !aperto ? 'opacity-60' : ''}`} onClick={() => { setSelezionato(aperto ? null : p.chiave); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
-                  <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
-                  <span className="min-w-0 flex-1">
-                    <span className="font-semibold">{p.nome}</span>
-                    <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.stato ? ` · ${p.stato}` : ''}</span>
-                  </span>
-                  {p.pin.length > 0
-                    ? <span className="chip chip--icona shrink-0 text-[11px]" title={p.pin.map((x) => `${x.nome} (${nomeSenzaPalazzo(x.mappaNome)})`).join(', ')}><IconaAzione chiave="posizione" dimensione={14} />{p.pin.length === 1 ? '1 pin' : `${p.pin.length} pin`}</span>
-                    : puntoDaCollegare(p.tipo) && <span className="chip shrink-0 text-[11px] text-text-muted">da collegare</span>}
-                </button>
-                {aperto && (
-                  <div className="flex flex-col gap-1.5 pl-5">
-                    {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
-                    <DettagliPunto d={p.dettagli} />
-                    {p.pin.length > 0 && (
-                      <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label={`Pin collegati a ${p.nome}`}>
-                        {p.pin.map((x) => (
-                          <li key={x.id} className="flex items-center gap-2 text-[12px]">
-                            <IconaAzione chiave="posizione" dimensione={16} />
-                            <span className="min-w-0 flex-1">{x.nome} <span className="text-text-muted">· {nomeSenzaPalazzo(x.mappaNome)}</span></span>
-                            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={18} />} titolo="Scollega" aria-label={`Scollega ${x.nome} da ${p.nome}`} disabled={occupato} onClick={() => void scegliPin(p, x.id, x.nome)} />
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {/* una voce descrittiva (solo «Altro») si legge e basta: niente stato, niente pin (scelta dell'utente) */}
-                    {puntoDescrittivo(p.tipo)
-                      ? <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
-                      : <div className="flex flex-wrap items-center gap-1.5">
-                        {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
-                        {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
-                        {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
-                      </div>}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {!puntoDescrittivo(p.tipo) && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Chiudi la mappa' : 'Collega pin'}
-                        aria-expanded={!!scelta} disabled={planimetrie.length === 0}
-                        onClick={() => (scelta ? void fineCollegamento() : setCollegando({ punto: p.chiave, mappa: mappaIniziale(p), ricerca: '' }))} />}
-                      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${p.nome}`} disabled={occupato || indice <= 0} onClick={() => void sposta(p, -1)} />
-                      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${p.nome}`} disabled={occupato || indice >= area.punti.length - 1} onClick={() => void sposta(p, 1)} />
-                      <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} compatto etichetta="Modifica"
-                        iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no' })}
-                        onSalva={async (b) => { onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì' })); await onRicarica(); }}
-                        elimina={{ avviso: 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I pin collegati restano sulla mappa, col loro «raccolto».', onElimina: async () => { await eliminaPunto(p.chiave); setSelezionato(null); setCollegando(null); await onRicarica(); } }}>
-                        {(b, cambia) => <>
-                          <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => cambia({ nome: v })} />
-                          <span className="min-w-[150px]">
-                            <Selettore etichetta="Tipo" valore={b.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
-                          </span>
-                          <label className="touch flex items-center gap-1.5 text-[12px]">
-                            <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
-                          </label>
-                          <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.punto.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
-                        </>}
-                      </CorrezioneGuida>
-                    </div>
-                    {scelta && (
-                      <div ref={riquadroScelta} className="scelta-pin" role="group" aria-label={`Scelta dei pin per ${p.nome}`}>
-                        <p className="m-0 text-[11px] leading-tight" title="Tocca un pin sulla mappa per collegarlo alla voce, toccalo di nuovo per scollegarlo">Tocca i pin da collegare · <strong>{p.pin.length === 1 ? '1 collegato' : `${p.pin.length} collegati`}</strong></p>
-                        <Selettore etichetta="Planimetria" valore={scelta.mappa ?? ''} opzioni={opzioniMappa}
-                          onCambia={(k) => setCollegando({ ...scelta, mappa: k })} />
-                        <div className="flex items-center gap-1.5">
-                          <label className="min-w-0 flex-1">
-                            <span className="sr-only">Cerca un pin sulla mappa</span>
-                            <input type="search" className="form-input" placeholder="Cerca un pin…" value={scelta.ricerca} onChange={(e) => setCollegando({ ...scelta, ricerca: e.target.value })} />
-                          </label>
-                          <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Fatto" onClick={() => void fineCollegamento()} />
-                        </div>
-                        {scelta.mappa && <div data-mappa-scelta style={{ height: altezzaScelta }}>
-                          <MappaIncorporata key={scelta.mappa} chiave={scelta.mappa} partitaId={partitaId} conEditor={false} altezza={altezzaScelta}
-                            scelta={{ titolo: p.nome, scelti: new Set(p.pin.map((x) => x.id)), occupato, ricerca: scelta.ricerca, onScegli: (s) => void scegliPin(p, s.id, s.nome) }} />
-                        </div>}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </li>
-            );
-          })}
+          {puntiVisibili.map((p) => riga(p, vociDellArea))}
         </ul>
         {/* La guida non ha trascritto tutto: quel che manca si aggiunge qui, dove lo si è cercato; poi si sposta dove va. */}
-        {nuovoPunto
-          ? <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
-              onSubmit={(e) => { e.preventDefault(); const n = nuovoPunto.nome.trim(); if (!n) return; void creaPunto(area.chiave, { nome: n, tipo: nuovoPunto.tipo }).then(async (nuovo) => { setNuovoPunto(null); await onRicarica(); setSelezionato(nuovo.chiave); notifica('success', `Voce «${n}» aggiunta a ${area.nome}.`); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Voce non aggiunta.')); }}>
-              <CampoCorrezione etichetta="Nuova voce" valore={nuovoPunto.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, nome: v })} />
-              <span className="min-w-[150px]">
-                <Selettore etichetta="Tipo" valore={nuovoPunto.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setNuovoPunto({ ...nuovoPunto, tipo: v as PuntoInteresseDto['tipo'] })} />
-              </span>
-              <div className="flex gap-1.5">
-                <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Aggiungi" disabled={!nuovoPunto.nome.trim()} />
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setNuovoPunto(null)} />
-              </div>
-            </form>
-          : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" className="self-start" onClick={() => setNuovoPunto({ nome: '', tipo: 'altro' })} />}
+        {nuovoPunto && !nuovoPunto.contenitore
+          ? moduloNuovaVoce(nuovoPunto)
+          : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" className="self-start" onClick={() => setNuovoPunto({ nome: '', tipo: 'altro', contenitore: null })} />}
       </div>
     </details>
   );

@@ -90,7 +90,9 @@ export const getDungeon = (chiave: string, partita?: number): Promise<DungeonDet
 /* ---- Correzione dei testi della guida ai Palazzi: la sezione non è più in sola lettura ---- */
 export interface DatiDungeonApi { nome?: string; sovrano?: string; dataSblocco?: string; dataScadenza?: string; furtoConsigliato?: string; livelloConsigliato?: string; note?: string }
 export interface DatiAreaApi { nome?: string; descrizione?: string }
-export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number }
+export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
+  /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
+  contenitore?: string | null }
 
 export const aggiornaDungeon = (chiave: string, dati: DatiDungeonApi): Promise<DungeonDettaglioDto> => apiPut(`/compendio/dungeon/${encodeURIComponent(chiave)}`, dati);
 export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDungeonDto> => apiPut(`/compendio/aree/${encodeURIComponent(chiave)}`, dati);

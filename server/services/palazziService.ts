@@ -19,9 +19,10 @@
 // resto); l'ingresso al Palazzo **sparisce** dalla mappa a Palazzo completato. Gli archi restano legati alla data.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { voceDelPin } from './mappe/voceDelPin.js';
+import { allineaEnigmaDellaVoce } from './mappe/statiGuida.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
 export function palazzoDiOgniMappa(): Map<string, string> {
@@ -145,6 +146,8 @@ export function allineaBossDellaGuida(partitaId: number, spillo: { tipo: string;
     // `automatico`: è il raccolto a metterlo, e solo un segno così si toglie togliendo il raccolto (utente 006);
     // uno già segnato dall'utente resta com'è, suo
     for (const p of finale.punti) prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at, automatico) VALUES (?, ?, 'ottenuto', ?, 1) ON CONFLICT(partita_id, punto_chiave) DO NOTHING").run(partitaId, p, adesso);
+    // il boss finale può essere un passo di un Enigma (095): l'Enigma segue i suoi passi
+    for (const p of finale.punti) allineaEnigmaDellaVoce(getDb(), partitaId, p, adesso);
     return;
   }
   const raccolti = new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
@@ -154,6 +157,7 @@ export function allineaBossDellaGuida(partitaId: number, spillo: { tipo: string;
   if (completamentoDallaMappa(spilli, finale, aree, raccolti, puntiGestiti)) return;
   // solo il segno messo dal raccolto: un boss segnato a mano non si perde per un raccolto tolto
   for (const p of finale.punti) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ? AND automatico = 1').run(partitaId, p);
+  for (const p of finale.punti) allineaEnigmaDellaVoce(getDb(), partitaId, p, adesso);
 }
 
 /**

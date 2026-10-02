@@ -15,16 +15,21 @@ import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
 import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
-import { DEFINIZIONI_SPILLO, puntoDescrittivo, type TipoSpillo } from '../../shared/spilli.js';
+import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
 import { palazziCompletati } from './palazziService.js';
-import { allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, VOCE_DEL_PIN, voceDelPin } from './mappe/collegamentiGuida.js';
+import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma, VOCE_DEL_PIN, voceDelPin } from './mappe/collegamentiGuida.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
-interface RigaPunto { chiave: string; area_chiave: string; ordine: number; tipo: PuntoInteresseDto['tipo']; nome: string; descrizione: string; esauribile: number; dettagli_json: string; fonte: string }
+interface RigaPunto { chiave: string; area_chiave: string; ordine: number; tipo: PuntoInteresseDto['tipo']; nome: string; descrizione: string; esauribile: number; dettagli_json: string; fonte: string; contenitore_chiave?: string | null }
+
+/** La voce della guida come la vede il client: una sola forma per la scheda del Palazzo e per le risposte delle modifiche. */
+function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[]): PuntoInteresseDto {
+  return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli: JSON.parse(r.dettagli_json) as Record<string, unknown>, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null };
+}
 
 function statiPartita(partitaId: number | undefined): Map<string, StatoPunto> {
   if (partitaId === undefined) return new Map();
@@ -245,18 +250,20 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
       const rm = raccolta?.perMappa.get(m.chiave);
       return { chiave: chiaveMappa(m.chiave), nome: m.nome, n: rm?.n ?? 0, presi: partitaId === undefined ? null : (rm?.presi ?? 0), spilli: rm?.spilli ?? [] };
     }),
-    punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(a.chiave) as RigaPunto[]).map((p): PuntoInteresseDto => ({
-      chiave: p.chiave, ordine: p.ordine, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dettagli: JSON.parse(p.dettagli_json) as Record<string, unknown>, fonte: p.fonte,
-      // uno stato rimasto su una voce descrittiva (di prima della scelta) si ignora in lettura, senza cancellarlo
-      stato: puntoDescrittivo(p.tipo) ? null : stati.get(p.chiave) ?? null, marcatore: marc.get(p.chiave) ?? null, pin: pinPunti.get(p.chiave) ?? [],
-    })),
+    // uno stato rimasto su una voce descrittiva (di prima della scelta) si ignora in lettura, senza cancellarlo
+    punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(a.chiave) as RigaPunto[])
+      .map((p) => puntoDto(p, puntoDescrittivo(p.tipo) ? null : stati.get(p.chiave) ?? null, marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [])),
     dedalo: richieste ? dedaloDto(a, richieste.get(a.chiave) ?? [], timbri) : null,
   }));
   const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
   return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
 }
 
-/** Stato di un punto nella partita: 'ottenuto', 'esaurito' oppure null per azzerare. */
+/**
+ * Stato di un punto nella partita: 'ottenuto', 'esaurito' oppure null per azzerare. Lo stato del punto è quello dei suoi pin
+ * (2026-10-01): segnarlo li raccoglie, riaprirlo li riapre. Un Enigma con i suoi passi (095) è risolto quando i passi sono
+ * fatti: segnarlo segna i passi, riaprirlo li riapre; e un passo segnato o riaperto porta con sé il suo Enigma.
+ */
 export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato: StatoPunto | null): PuntoInteresseDto {
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const p = prepared('SELECT p.*, a.nome AS area_nome, d.nome AS dungeon_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE p.chiave = ?').get(puntoChiave) as (RigaPunto & { area_nome: string; dungeon_nome: string }) | undefined;
@@ -264,23 +271,20 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
   // una voce descrittiva si legge, non si segna (scelta dell'utente, 2026-10-01); azzerarla resta possibile, per ripulire
   if (stato !== null && puntoDescrittivo(p.tipo)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: si legge, non si segna.`);
   const adesso = nowIso();
+  const db = getDb();
   getDb().transaction(() => {
     const prima = (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, puntoChiave) as { stato: StatoPunto } | undefined)?.stato ?? null;
-    if (stato === null) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, puntoChiave);
-    // segnato dall'utente: non è più il segno automatico del Tesoro o del boss raccolti (utente 006)
-    else prepared('INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET stato = excluded.stato, updated_at = excluded.updated_at, automatico = 0').run(partitaId, puntoChiave, stato, adesso);
+    // un Enigma con i suoi passi: i passi seguono (risolto = passi fatti)
+    segnaPassiDellEnigma(db, partitaId, puntoChiave, stato, adesso);
+    scriviStatoVoce(db, partitaId, puntoChiave, stato, adesso);
+    // un passo: il suo Enigma segue
+    allineaEnigmaDellaVoce(db, partitaId, puntoChiave, adesso);
     if (stato !== null && stato !== prima) {
       registraEvento(partitaId, 'punto-dungeon', `${p.dungeon_nome} · ${p.area_nome}: ${p.nome} ${stato === 'ottenuto' ? 'ottenuto' : 'esaurito'}`, p.descrizione.slice(0, 200), { punto: puntoChiave, tipo: p.tipo, stato });
     }
-    // lo stato del punto è quello dei suoi pin (2026-10-01): segnarlo li raccoglie, riaprirlo li riapre
-    for (const pin of pinDelPuntoGuida(getDb(), puntoChiave)) {
-      prepared(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
-        ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, pin.uid, stato === null ? 0 : 1, adesso);
-    }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  const marc = marcatori().get(puntoChiave) ?? null;
-  return { chiave: p.chiave, ordine: p.ordine, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dettagli: JSON.parse(p.dettagli_json) as Record<string, unknown>, fonte: p.fonte, stato, marcatore: marc, pin: pinDeiPunti(puntoChiave).get(puntoChiave) ?? [] };
+  return puntoDto(p, stato, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? []);
 }
 
 /** Posiziona (o rimuove con null) lo spillo di un punto sulla mappa della sua area (coordinate in percentuale). */
@@ -443,9 +447,34 @@ export function creaArea(dungeonChiave: string, dati: { nome: string; descrizion
   return { chiave, nome, ordine: posto };
 }
 
-export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number }
+export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
+  /** L'Enigma di cui la voce diventa un passo (095); null = torna una voce dell'area; assente = invariato. */
+  contenitore?: string | null }
 
-/** Un punto della guida (sicura, enigma, boss…): testo, tipo, esauribilità, posto nell'elenco. */
+/**
+ * Le regole di un passo (095, scelte dell'utente del 2026-10-01): l'Enigma è una voce «Enigma» della stessa area, non è a sua
+ * volta un passo e non ha pin suoi (i pin stanno sui passi); la voce non è sé stessa né un Enigma con i suoi passi (un livello
+ * solo: un Enigma dentro un Enigma non si leggerebbe più).
+ */
+function verificaEnigma(voce: { chiave: string; nome: string; area_chiave: string } | null, area: string, enigmaChiave: string): void {
+  const e = prepared('SELECT chiave, nome, tipo, area_chiave, contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(enigmaChiave) as { chiave: string; nome: string; tipo: string; area_chiave: string; contenitore_chiave: string | null } | undefined;
+  if (!e) throw httpErrors.notFound('punto-non-trovato', `L'Enigma '${enigmaChiave}' non esiste.`);
+  if (!puntoEnigma(e.tipo)) throw httpErrors.badRequest('non-un-enigma', `«${e.nome}» non è un Enigma: i passi stanno solo dentro un Enigma.`);
+  if (e.area_chiave !== area) throw httpErrors.badRequest('enigma-di-altra-area', `«${e.nome}» è di un'altra area: i passi stanno nell'area del loro Enigma.`);
+  if (e.contenitore_chiave) throw httpErrors.badRequest('enigma-dentro-enigma', `«${e.nome}» è a sua volta un passo: un Enigma dentro un Enigma non si può.`);
+  if (voce) {
+    if (voce.chiave === e.chiave) throw httpErrors.badRequest('enigma-dentro-enigma', `«${voce.nome}» non può essere un passo di sé stesso.`);
+    if (passiDi(getDb(), voce.chiave).length > 0) throw httpErrors.badRequest('enigma-dentro-enigma', `«${voce.nome}» è un Enigma con i suoi passi: un Enigma dentro un Enigma non si può.`);
+  }
+  if (pinDelPuntoGuida(getDb(), e.chiave).length > 0) throw httpErrors.conflict('enigma-con-pin', `«${e.nome}» ha dei pin collegati: scollegali (i pin stanno sui passi) prima di dargli dei passi.`);
+}
+
+/** Il posto in fondo fra le voci accanto (della stessa area e dello stesso Enigma, o fuori da ogni Enigma). */
+function ordineInFondo(area: string, contenitore: string | null): number {
+  return (prepared('SELECT COALESCE(MAX(ordine), -1) AS n FROM punto_interesse WHERE area_chiave = ? AND contenitore_chiave IS ?').get(area, contenitore) as { n: number }).n + 1;
+}
+
+/** Un punto della guida (sicura, enigma, boss…): testo, tipo, esauribilità, posto nell'elenco, Enigma di cui è un passo. */
 export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoInteresseDto {
   const p = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
@@ -453,23 +482,42 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   if (dati.tipo && puntoDescrittivo(dati.tipo) && pinDelPuntoGuida(getDb(), puntoChiave).length > 0) {
     throw httpErrors.conflict('punto-con-pin', `«${p.nome}» ha dei pin collegati: scollegali prima di farne una voce descrittiva.`);
   }
-  prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ? WHERE chiave = ?').run(
-    dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), dati.ordine ?? p.ordine, puntoChiave);
+  // un Enigma con i suoi passi resta un Enigma: i passi tornerebbero orfani
+  if (dati.tipo && !puntoEnigma(dati.tipo) && passiDi(getDb(), puntoChiave).length > 0) {
+    throw httpErrors.conflict('enigma-con-passi', `«${p.nome}» ha dei passi: toglili dall'Enigma prima di cambiargli tipo.`);
+  }
+  const prima = p.contenitore_chiave ?? null;
+  const dopo = dati.contenitore === undefined ? prima : dati.contenitore;
+  if (dopo !== null && dopo !== prima) verificaEnigma(p, p.area_chiave, dopo);
+  const adesso = nowIso();
+  const db = getDb();
+  db.transaction(() => {
+    // cambiando Enigma (o uscendone) la voce va in fondo fra le sue nuove compagne
+    const ordine = dati.ordine ?? (dopo !== prima ? ordineInFondo(p.area_chiave, dopo) : p.ordine);
+    prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ?, contenitore_chiave = ? WHERE chiave = ?').run(
+      dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), ordine, dopo, puntoChiave);
+    // gli Enigmi toccati (lasciato, raggiunto, o il proprio, se cambia tipo e con lui il conto dei passi da segnare) seguono i passi
+    for (const enigma of new Set([prima, dopo].filter((x): x is string => x !== null))) allineaEnigmaInOgniPartita(db, enigma, adesso);
+  })();
   const r = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto;
-  return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli: JSON.parse(r.dettagli_json) as Record<string, unknown>, fonte: r.fonte, stato: null, marcatore: marcatori().get(puntoChiave) ?? null, pin: pinDeiPunti(puntoChiave).get(puntoChiave) ?? [] };
+  return puntoDto(r, null, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? []);
 }
 
 /**
- * Sposta un punto di un posto su o giù nella guida della sua area. L'ordine dell'area si ricompatta (0, 1, 2…), così
- * eventuali pari merito di una trascrizione vecchia non lasciano lo spostamento senza effetto.
+ * Sposta un punto di un posto su o giù nella guida della sua area — fra le voci accanto: quelle fuori da ogni Enigma, o i passi
+ * dello stesso Enigma. L'ordine si ricompatta (0, 1, 2…), così eventuali pari merito di una trascrizione vecchia non lasciano
+ * lo spostamento senza effetto.
  */
 export function spostaPunto(puntoChiave: string, verso: -1 | 1): PuntoInteresseDto {
-  const p = prepared('SELECT area_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { area_chiave: string } | undefined;
+  const p = prepared('SELECT area_chiave, contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { area_chiave: string; contenitore_chiave: string | null } | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  const elenco = (prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(p.area_chiave) as Array<{ chiave: string }>).map((r) => r.chiave);
+  const elenco = (prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ? AND contenitore_chiave IS ? ORDER BY ordine, chiave').all(p.area_chiave, p.contenitore_chiave ?? null) as Array<{ chiave: string }>).map((r) => r.chiave);
   const i = elenco.indexOf(puntoChiave);
   const j = i + verso;
-  if (j < 0 || j >= elenco.length) throw httpErrors.conflict('punto-al-limite', verso < 0 ? 'Il punto è già il primo della sua area.' : 'Il punto è già l’ultimo della sua area.');
+  if (j < 0 || j >= elenco.length) {
+    const dove = p.contenitore_chiave ? 'del suo Enigma' : 'della sua area';
+    throw httpErrors.conflict('punto-al-limite', verso < 0 ? `Il punto è già il primo ${dove}.` : `Il punto è già l’ultimo ${dove}.`);
+  }
   [elenco[i], elenco[j]] = [elenco[j], elenco[i]];
   getDb().transaction(() => {
     elenco.forEach((k, n) => prepared('UPDATE punto_interesse SET ordine = ? WHERE chiave = ?').run(n, k));
@@ -515,9 +563,16 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
   const base = `${chiaveArea}-${slug(dati.nome)}`;
   let chiave = base;
   for (let i = 2; prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
-  const ordine = dati.ordine ?? ((prepared('SELECT COALESCE(MAX(ordine), -1) AS n FROM punto_interesse WHERE area_chiave = ?').get(chiaveArea) as { n: number }).n + 1);
-  prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte) VALUES (?, ?, ?, ?, ?, ?, ?, '{}', 'utente')")
-    .run(chiave, chiaveArea, ordine, dati.tipo, dati.nome.trim(), dati.descrizione ?? '', dati.esauribile ? 1 : 0);
+  // un passo nasce in fondo ai passi del suo Enigma, con le regole dei passi (095)
+  const contenitore = dati.contenitore ?? null;
+  if (contenitore) verificaEnigma(null, chiaveArea, contenitore);
+  const ordine = dati.ordine ?? ordineInFondo(chiaveArea, contenitore);
+  getDb().transaction(() => {
+    prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte, contenitore_chiave) VALUES (?, ?, ?, ?, ?, ?, ?, '{}', 'utente', ?)")
+      .run(chiave, chiaveArea, ordine, dati.tipo, dati.nome.trim(), dati.descrizione ?? '', dati.esauribile ? 1 : 0, contenitore);
+    // l'Enigma segue i passi: un passo nuovo ancora da fare lo riapre dove era risolto (scelta dell'utente, 2026-10-02)
+    if (contenitore) allineaEnigmaInOgniPartita(getDb(), contenitore, nowIso());
+  })();
   return aggiornaPunto(chiave, {});
 }
 
@@ -528,15 +583,25 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
  * collegamento: dal 2026-10-01 lo stato vive nei pin, e il loro «raccolto» è vero anche senza la voce della guida.
  * Gli elementi della guida senza mappa (strato di prima) invece non esistono fuori dalla guida: il loro «raccolto»
  * se ne va con il punto (rilievo della revisione, 2026-09-18: un collezionabile orfano segnato preso).
+ * Un Enigma tolto lascia i suoi passi come voci dell'area, in fondo e nel loro ordine, con il loro stato; un passo tolto lascia
+ * il suo Enigma, che segue i passi rimasti (095).
  */
 export function eliminaPunto(puntoChiave: string): void {
-  if (!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(puntoChiave)) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
+  const p = prepared('SELECT contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { contenitore_chiave: string | null } | undefined;
+  if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   getDb().transaction(() => {
     prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
     prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
     prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
     prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
     prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(puntoChiave);
+    // i passi di un Enigma tolto restano, voci dell'area con il loro stato (095)
+    for (const passo of passiDi(getDb(), puntoChiave)) {
+      const area = (prepared('SELECT area_chiave FROM punto_interesse WHERE chiave = ?').get(passo.chiave) as { area_chiave: string }).area_chiave;
+      prepared('UPDATE punto_interesse SET contenitore_chiave = NULL, ordine = ? WHERE chiave = ?').run(ordineInFondo(area, null), passo.chiave);
+    }
     prepared('DELETE FROM punto_interesse WHERE chiave = ?').run(puntoChiave);
+    // un passo tolto: il suo Enigma segue i passi che restano
+    if (p.contenitore_chiave) allineaEnigmaInOgniPartita(getDb(), p.contenitore_chiave, nowIso());
   })();
 }

@@ -716,6 +716,19 @@ i comandi di stato anche ai pin non collezionabili collegati a una voce che si s
 voce si segna (Ombre sciagura). `eliminaPunto` / `eliminaArea` scollegano i pin delle planimetrie **lasciando** il loro
 raccolto (cancellano solo quello degli elementi della guida senza mappa). Nessuna riconciliazione automatica dei dati
 (scelta dell'utente): gli elementi della guida senza mappa (`area_guida_chiave`, 187 nel canone) restano com'erano.
+**L'Enigma contiene i suoi passi** (migrazione 095, `punto_interesse.contenitore_chiave`, `ON DELETE SET NULL`): i passi sono
+voci vere della stessa area, di qualunque tipo e coi loro pin, ordinate fra loro (`spostaPunto` si muove fra le voci accanto:
+quelle fuori da ogni Enigma, o i passi dello stesso). Regole (`verificaEnigma` in `dungeonService`): il contenitore è un
+Enigma (`puntoEnigma`) della stessa area, non è a sua volta un passo, non ha pin suoi (409 `enigma-con-pin`); un Enigma coi
+passi non entra in un altro e non cambia tipo (409 `enigma-con-passi`), e non riceve pin da nessuna strada (`erroreVoceDelPin`,
+400 `enigma-con-passi`). Lo stato: `mappe/statiGuida.ts` (senza dipendenze dai servizi, riesportato da `collegamentiGuida.ts`: `scriviStatoVoce`, `segnaPassiDellEnigma`, `allineaEnigma`, `allineaEnigmaDellaVoce`,
+`allineaEnigmaInOgniPartita`) — l'Enigma con passi da segnare (le voci descrittive non contano) è risolto quando lo sono
+tutti, e il suo stato in `punto_partita` segue i passi a ogni scrittura (stato dalla guida, pin raccolto, collegamento che
+unisce gli stati, boss finale segnato dal Tesoro raccolto); segnarlo segna i passi ancora da fare e i loro pin (quelli già
+segnati restano come sono), riaprirlo li riapre; un passo nuovo ancora da fare riapre l'Enigma risolto (scelta dell'utente).
+Eliminato l'Enigma, i passi tornano voci dell'area, in fondo e nel loro ordine, col loro stato. `PuntoInteresseDto.contenitore`
+porta l'Enigma; `GuidaDellArea` mostra i passi dentro l'Enigma («N/M passi», «Aggiungi un passo», «Passo di» nella modifica),
+e i contenuti della guida di una planimetria (`contenutiMappa`, `conPassiDentro`) li mettono subito sotto di lui.
 Con un'area scelta la colonna mostra la raccolta **di quell'area** (o dice che non ce n'è); il resto del Palazzo sta solo
 nella piega chiusa.
 

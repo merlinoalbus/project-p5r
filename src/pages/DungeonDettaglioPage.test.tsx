@@ -33,7 +33,7 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
   raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, note: '', fonti: [],
   aree: [
-    area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [] }] }),
+    area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null }] }),
     area({ chiave: 'k-02', ordine: 1, nome: 'Torre', punti: [] }),
     area({ chiave: 'k-03', ordine: 2, nome: 'Cortile', mappe: [{ chiave: 'm-cortile', nome: 'Palazzo di Kamoshida › Cortile', n: 0, presi: partita ? 0 : null, spilli: [] }] }),
   ],
@@ -45,17 +45,25 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
 const mementos = (): DungeonDettaglioDto => ({
   ...palazzo(true), chiave: 'mementos', tipo: 'mementos', nome: 'Memento', raccolta: { totale: 9, presi: 1, mappe: 2, mappeComplete: 0 }, planimetrie: [],
   aree: [
-    area({ chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', dedalo: { timbri: { totale: 8, raccolti: 1 }, richieste: [{ chiave: 'bulli', nome: 'Bullismo sui bulli', stato: null }], obiettivi: { totale: 9, fatti: 1 } }, punti: [{ chiave: 'p2', ordine: 0, tipo: 'boss', nome: 'Boss', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [] }] }),
+    area({ chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', dedalo: { timbri: { totale: 8, raccolti: 1 }, richieste: [{ chiave: 'bulli', nome: 'Bullismo sui bulli', stato: null }], obiettivi: { totale: 9, fatti: 1 } }, punti: [{ chiave: 'p2', ordine: 0, tipo: 'boss', nome: 'Boss', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null }] }),
     area({ chiave: 'mementos-01-qimranut', ordine: 1, nome: 'Dedalo di Qimranut', dedalo: { timbri: { totale: null, raccolti: null }, richieste: [], obiettivi: { totale: 0, fatti: 0 } } }),
   ],
 });
 
 const monta = (chiave: string) => render(<MemoryRouter initialEntries={[`/guida/dungeon/${chiave}`]}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
 
-beforeEach(() => { vi.clearAllMocks(); getAlberoMappe.mockResolvedValue([]); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
+// reset, non clear: le risposte «una volta» non consumate da un test non devono passare al successivo
+beforeEach(() => { vi.resetAllMocks(); getAlberoMappe.mockResolvedValue([]); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
 
-it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi senza ricaricare', async () => {
-  getDungeon.mockResolvedValue(palazzo(true));
+it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095)', async () => {
+  // la rilettura dopo il raccolto: lo spillo 2 raccolto, 2 su 4 (come lo direbbe il server)
+  const dopo = palazzo(true);
+  dopo.planimetrie[0] = { ...dopo.planimetrie[0], presi: 2, spilli: [spillo(1, true), spillo(2, true)] };
+  dopo.aree[0] = { ...dopo.aree[0], mappe: [{ ...dopo.aree[0].mappe[0], presi: 2, spilli: [spillo(1, true), spillo(2, true)] }] };
+  dopo.raccolta = { ...dopo.raccolta, presi: 2, mappeComplete: 1 };
+  // la seconda lettura (quella dopo il raccolto) resta in sospeso finché il test non la risolve: così si vede l'aggiornamento immediato
+  let risolviRilettura: (v: DungeonDettaglioDto) => void = () => {};
+  getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementationOnce(() => new Promise<DungeonDettaglioDto>((r) => { risolviRilettura = r; })).mockResolvedValue(dopo);
   impostaSpilloRaccolto.mockResolvedValue({});
   monta('kamoshida');
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
@@ -68,8 +76,13 @@ it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Racco
   expect(within(colonna).queryByRole('checkbox', { name: 'Forziere 1 di Cancello raccolto' })).toBeNull();
   fireEvent.click(within(colonna).getByRole('checkbox', { name: 'Forziere 2 di Cancello raccolto' }));
   await waitFor(() => expect(impostaSpilloRaccolto).toHaveBeenCalledWith(4, 2, true));
-  await waitFor(() => expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50'));
-  expect(getDungeon).toHaveBeenCalledTimes(1);
+  // subito, senza aspettare il server: la rilettura è partita ma non ha ancora risposto
+  await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(2));
+  expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50');
+  expect(within(colonna).queryByRole('checkbox', { name: 'Forziere 2 di Cancello raccolto' })).toBeNull();
+  // poi la rilettura risponde, e la scheda resta coerente
+  await act(async () => { risolviRilettura(dopo); });
+  expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50');
   // le altre planimetrie del Palazzo, ripiegate con quanto resta; sotto, la guida dell'area (aperta) con Ottenuto
   expect(screen.getByText(/Tutte le planimetrie del Palazzo · 2 da raccogliere/)).toBeInTheDocument();
   // una sicura senza pin è una voce «da collegare»
@@ -78,10 +91,33 @@ it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Racco
   impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [] });
   fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
   await waitFor(() => expect(impostaStatoPunto).toHaveBeenCalledWith(4, 'p1', 'ottenuto'));
-  // un punto della guida può contare sulle planimetrie: la raccolta si rilegge dal server
-  await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(2));
+  // un punto della guida può contare sulle planimetrie: la raccolta si rilegge dal server (terza lettura: la seconda è dopo il raccolto)
+  await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(3));
   // la stanza compare nell'elenco del Palazzo, con l'area a cui è legata
   expect(within(screen.getByLabelText('Planimetrie del Palazzo')).getAllByText(/Cancello/).length).toBeGreaterThan(0);
+});
+
+it('due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascrive quella nuova', async () => {
+  const dopo = palazzo(true);
+  dopo.planimetrie[0] = { ...dopo.planimetrie[0], presi: 2, spilli: [spillo(1, true), spillo(2, true)] };
+  dopo.aree[0] = { ...dopo.aree[0], mappe: [{ ...dopo.aree[0].mappe[0], presi: 2, spilli: [spillo(1, true), spillo(2, true)] }] };
+  dopo.raccolta = { ...dopo.raccolta, presi: 2, mappeComplete: 1 };
+  // la rilettura dopo il raccolto risponde per ultima, e con la scheda di prima (1 su 4)
+  let risolviVecchia: (v: DungeonDettaglioDto) => void = () => {};
+  getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementationOnce(() => new Promise<DungeonDettaglioDto>((r) => { risolviVecchia = r; })).mockResolvedValueOnce(dopo);
+  impostaSpilloRaccolto.mockResolvedValue({});
+  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null });
+  monta('kamoshida');
+  const colonna = await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' });
+  fireEvent.click(within(colonna).getByRole('checkbox', { name: 'Forziere 2 di Cancello raccolto' }));
+  await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(2));
+  fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+  await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(3));
+  await waitFor(() => expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50'));
+  // ora risponde la rilettura vecchia: non conta più
+  await act(async () => { risolviVecchia(palazzo(true)); });
+  expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50');
 });
 
 // Con un'area scelta la colonna mostra **quell'area** (rilievo dell'utente, 2026-10-01: «in ogni area sembrano poi vedersi

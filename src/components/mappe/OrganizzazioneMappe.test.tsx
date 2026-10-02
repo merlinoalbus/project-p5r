@@ -36,6 +36,16 @@ it('i contenuti mantengono testo e punti senza inventare coordinate o attività'
   expect(within(sezione).getByText('Biblioteca').closest('details')).toHaveAttribute('open');
 });
 
+it('i passi di un Enigma rientrano sotto di lui (095), le altre voci no', async () => {
+  const voce = (id: string, nome: string, contenitore: string | null) => ({ id, nome, descrizione: '', tipo: 'nota', riferimento: { tipo: 'punto', chiave: id.slice(6) }, collezionabile: false, soloPosizione: false, ruolo: 'punto', contenitore });
+  api.getContenutiMappa.mockResolvedValue({ mappa: 'palazzo', aree: [{ chiave: 'sala', nome: 'Sala', descrizione: '', note: '', mappe: [], punti: [voce('punto:e', 'La porta della torre', null), voce('punto:a', 'Tira la leva', 'punto:e'), voce('punto:f', 'Forziere', null)] }] });
+  render(<MemoryRouter><ContenutiGuidaMappa mappa="palazzo" area="sala" /></MemoryRouter>);
+  const elementi = within(await screen.findByRole('list', { name: 'Elementi di Sala' })).getAllByRole('listitem');
+  expect(elementi.map((li) => [li.textContent, li.getAttribute('data-passo-di')])).toEqual([['La porta della torre', null], ['Tira la leva', 'punto:e'], ['Forziere', null]]);
+  expect(elementi[1].className).toContain('ml-4');
+  expect(elementi[0].className).not.toContain('ml-4');
+});
+
 it('la sezione originale della guida rimane aperta quando il vecchio riquadro era editoriale',async()=>{
   api.risolviMappa.mockResolvedValue({tipo:'guida',area:'biblioteca',dungeon:'castello',mappaPalazzo:'palazzo',nome:'Biblioteca'});
   render(<MemoryRouter><h1>Scheda originale</h1><MappaIncorporata chiave="vecchia-area"/></MemoryRouter>);

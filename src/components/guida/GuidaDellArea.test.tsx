@@ -3,7 +3,8 @@
 // Test GuidaDellArea — voci modificabili, spostabili e collegate ai pin scelti sulla mappa, dentro la voce (2026-10-01)
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { scegliVoce, vociSelettore } from '../../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { GuidaDellArea } from './GuidaDellArea';
 import type { SceltaPin } from '../mappe/VisoreMappa';
@@ -21,7 +22,7 @@ vi.mock('../mappe/MappaIncorporata', () => ({
 }));
 
 const punto = (extra: Partial<PuntoInteresseDto>): PuntoInteresseDto => ({
-  chiave: 'p1', ordine: 0, tipo: 'forziere', nome: 'Forziere della sala', descrizione: 'Dietro la statua.', esauribile: true, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], ...extra,
+  chiave: 'p1', ordine: 0, tipo: 'forziere', nome: 'Forziere della sala', descrizione: 'Dietro la statua.', esauribile: true, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, ...extra,
 });
 const area = (punti: PuntoInteresseDto[]): AreaDungeonDto => ({
   chiave: 'k-02', ordine: 1, nome: 'Sala Centrale', descrizione: '', mappa: true, mappe: [{ chiave: 'm-sala', nome: 'Palazzo di Kamoshida › Sala', n: 0, presi: 0, spilli: [] }], punti, dedalo: null,
@@ -151,4 +152,83 @@ it('i tipi si chiamano come li vuole l’utente, e Persona e Storia si collegano
   fireEvent.click(riga('Si apre la torre'));
   expect(screen.getByRole('button', { name: 'Ottenuto' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Collega pin' })).toBeInTheDocument();
+});
+
+describe('l’Enigma contiene i suoi passi (095)', () => {
+  const enigma = punto({ chiave: 'e1', tipo: 'puzzle', nome: 'La porta della torre', esauribile: false });
+  const leva = punto({ chiave: 'e1-a', ordine: 0, tipo: 'meccanismo', nome: 'Tira la leva', esauribile: false, contenitore: 'e1', stato: 'ottenuto' });
+  const porta = punto({ chiave: 'e1-b', ordine: 1, tipo: 'porta', nome: 'Apri la porta', esauribile: false, contenitore: 'e1' });
+  const nota = punto({ chiave: 'e1-c', ordine: 2, tipo: 'altro', nome: 'Come si fa', esauribile: false, contenitore: 'e1' });
+
+  it('i passi stanno dentro l’Enigma, non fra le voci dell’area; la riga dice quanti sono fatti e niente «da collegare»', () => {
+    monta([punto({}), enigma, leva, porta, nota]);
+    const voci = within(screen.getByRole('list', { name: 'Voci della guida di Sala Centrale' }));
+    const passi = () => within(screen.getByRole('list', { name: 'Passi di La porta della torre' }));
+    expect(passi().getByRole('button', { name: /Apri la porta/ })).toBeInTheDocument();
+    // un passo segnato si nasconde come ogni voce segnata, finché non si chiedono anche le segnate
+    expect(passi().queryByRole('button', { name: /Tira la leva/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    expect(passi().getByRole('button', { name: /Tira la leva/ })).toBeInTheDocument();
+    // le righe dirette dell'elenco dell'area: il forziere e l'Enigma (i passi stanno nel sotto-elenco)
+    const dirette = [...screen.getByRole('list', { name: 'Voci della guida di Sala Centrale' }).children].map((li) => li.querySelector('button')?.textContent ?? '');
+    expect(dirette).toHaveLength(2);
+    const rigaEnigma = voci.getByRole('button', { name: /La porta della torre/ });
+    // la voce descrittiva non conta: 1 fatto su 2 da segnare
+    expect(rigaEnigma).toHaveTextContent('1/2 passi');
+    expect(within(rigaEnigma).queryByText('da collegare')).toBeNull();
+  });
+
+  it('aperto, l’Enigma coi passi non collega pin e offre «Aggiungi un passo»; il passo nasce dentro di lui', async () => {
+    const { onRicarica } = monta([enigma, leva, porta]);
+    fireEvent.click(screen.getByRole('button', { name: /La porta della torre/ }));
+    expect(screen.queryByRole('button', { name: 'Collega pin' })).toBeNull();
+    expect(screen.getByText(/Risolto quando i suoi passi sono fatti/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi un passo a La porta della torre' }));
+    fireEvent.change(screen.getByLabelText('Nuovo passo'), { target: { value: 'Prendi la chiave' } });
+    creaPunto.mockResolvedValue(punto({ chiave: 'e1-d', nome: 'Prendi la chiave', contenitore: 'e1' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi' }));
+    await waitFor(() => expect(creaPunto).toHaveBeenCalledWith('k-02', { nome: 'Prendi la chiave', tipo: 'meccanismo', contenitore: 'e1' }));
+    await waitFor(() => expect(onRicarica).toHaveBeenCalled());
+  });
+
+  it('Su e Giù di un passo si muovono fra i passi', () => {
+    monta([punto({}), enigma, leva, porta]);
+    fireEvent.click(screen.getByRole('button', { name: /Apri la porta/ }));
+    // ultimo dei passi: Giù spento anche se l'area ha altre voci
+    expect(screen.getByRole('button', { name: 'Sposta giù: Apri la porta' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Sposta su: Apri la porta' })).not.toBeDisabled();
+  });
+
+  it('un Enigma risolto si nasconde con le segnate anche se fra i passi ha una nota (le descrittive non hanno stato)', () => {
+    monta([punto({}), { ...enigma, stato: 'ottenuto' }, { ...leva, stato: 'ottenuto' }, { ...porta, stato: 'ottenuto' }, nota]);
+    expect(screen.queryByRole('button', { name: /La porta della torre/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    expect(screen.getByRole('button', { name: /La porta della torre/ })).toBeInTheDocument();
+  });
+
+  it('«Passo di» non propone un Enigma con pin (il server lo rifiuta)', () => {
+    const conPin = punto({ chiave: 'e2', tipo: 'puzzle', nome: 'Enigma col pin', pin: [{ id: 9, nome: 'Leva', tipo: 'meccanismo', mappa: 'm-sala', mappaNome: 'Palazzo di Kamoshida › Sala' }] });
+    monta([punto({}), enigma, conPin]);
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    expect(vociSelettore('Passo di')).toEqual(['— nessun Enigma (voce dell’area) —', 'La porta della torre']);
+  });
+
+  it('dalla modifica una voce diventa un passo di un Enigma dell’area; un Enigma coi passi resta un Enigma', async () => {
+    const { onRicarica } = monta([punto({}), enigma, leva]);
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    expect(vociSelettore('Passo di')).toEqual(['— nessun Enigma (voce dell’area) —', 'La porta della torre']);
+    scegliVoce('Passo di', 'La porta della torre');
+    aggiornaPunto.mockResolvedValue(punto({ contenitore: 'e1' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalledWith('p1', expect.objectContaining({ contenitore: 'e1' })));
+    await waitFor(() => expect(onRicarica).toHaveBeenCalled());
+    cleanup();
+    monta([enigma, leva]);
+    fireEvent.click(screen.getByRole('button', { name: /La porta della torre/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «La porta della torre»/ }));
+    expect(vociSelettore('Tipo')).toEqual(['Enigma']);
+    expect(screen.queryByRole('combobox', { name: 'Passo di' })).toBeNull();
+  });
 });

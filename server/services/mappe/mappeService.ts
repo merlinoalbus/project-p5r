@@ -21,7 +21,7 @@ import { giocabili } from '../squadraService.js';
 import { nomiCondizioni } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { allineaBossDellaGuida, palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
-import { allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, voceDelPin } from './collegamentiGuida.js';
+import { allineaEnigmaDellaVoce, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, segnaPassiDellEnigma, voceDelPin } from './collegamentiGuida.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
@@ -1126,6 +1126,11 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
         .every((p) => p.uid === r.uid || !!prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ? AND raccolto = 1').get(partitaId, p.uid));
       if (raccolto && tutti) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET automatico = 0`).run(partitaId, voce, adesso);
       else if (!raccolto) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, voce);
+      // un Enigma coi suoi passi (095), raggiunto da un elemento della guida di prima: i passi seguono, come segnandolo dalla guida
+      const segnata = !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, voce);
+      segnaPassiDellEnigma(getDb(), partitaId, voce, segnata ? 'ottenuto' : null, adesso);
+      // un passo di un Enigma (095): l'Enigma segue i suoi passi
+      allineaEnigmaDellaVoce(getDb(), partitaId, voce, adesso);
     }
     // il Tesoro del Palazzo o il boss finale raccolti sulla mappa segnano il boss finale della Guida, e lo
     // tolgono se si tolgono (scelta dell'utente, 2026-09-30)

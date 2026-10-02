@@ -951,3 +951,19 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   Le misure si ripetono solo a un cambiamento: i popup si osservano una volta sola (0 misure in 2 s di inattività, contate in Edge).
 - Effetto dichiarato: la coda ora sta sopra anche alle modali (overlay `z-index` 5000, portale su `body`); prima ci finiva sotto,
   nascosta. La × della notifica la chiude e lascia la modale aperta (provato su «Rimuovi tutte», solo la conferma).
+
+### 2026-10-02 — L'Enigma contiene i suoi passi
+- Richiesta dell'utente: «Enigma deve diventare un contenitore di sotto elementi che insieme descrivono l'enigma e come
+  sbloccarlo»; «una porta chiusa può aprirsi con un Meccanismo di sblocco... questo deve essere rappresentabile in guida con i
+  relativi Pin agganciati». Scelte dell'utente: i passi sono **voci vere, di qualunque tipo**; l'Enigma è **risolto quando i
+  passi sono fatti**; i pin stanno **solo sui passi**.
+- Realizzazione: `punto_interesse.contenitore_chiave` (migrazione 095). Un livello solo (un Enigma coi passi non entra in un
+  altro); i passi stanno nell'area del loro Enigma. Le voci descrittive («Altro») possono stare fra i passi — spiegano come si
+  fa — e non contano per risolverlo. Segnare l'Enigma segna i passi (e i loro pin), riaprirlo li riapre; un passo segnato o
+  riaperto, dalla guida o dalla mappa, porta con sé l'Enigma. Segnare l'Enigma non riscrive i passi già segnati (un passo
+  «esaurito» resta tale). Eliminato l'Enigma, i passi restano voci dell'area, col loro stato. Anche il boss finale segnato in
+  automatico dal Tesoro raccolto porta con sé l'Enigma, se ne è un passo.
+- Scelta dell'utente (2026-10-02, sottoposta dal validatore): a un Enigma già risolto in una partita si aggiunge un passo (o si
+  porta dentro una voce) ancora da fare → **l'Enigma si riapre**; il passo non viene segnato da solo. I progressi non cambiano
+  senza che l'utente li tocchi; lo si risegna con un tocco (segnare l'Enigma segna i passi).
+- Un Enigma senza passi da segnare si segna da sé, come prima: le voci «Enigma» del canone (nessuna con passi oggi) non cambiano.

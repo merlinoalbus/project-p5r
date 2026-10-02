@@ -13,6 +13,7 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
   // una riga a sé — e non una parola dentro una frase: valgono 44 px come tutti gli altri. Erano
   // 19-22 px, e si vedevano solo aprendo il pannello sulla radice di un Palazzo, che è una vista
   // che la passata di misura non campionava (rilievo del validatore, 2026-09-13).
+  // I passi di un Enigma (095) arrivano dal server subito sotto di lui, con `contenitore`: qui rientrano, come nella scheda del Palazzo.
   return <PageState isLoading={contenuti.caricamento} error={contenuti.errore} onRetry={contenuti.ricarica}>
     {!!contenuti.dati?.aree.length && <section className="card flex flex-col gap-3" aria-label="Contenuti della guida">
       <h2 className="m-0 text-lg">Contenuti della guida</h2>
@@ -26,7 +27,7 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
           {selezionato === c.id && <SchedaContenutoGuida key={`${c.id}:${attiva?.id ?? 'nessuna'}`} spillo={c} partitaId={attiva?.id ?? null} onChiudi={() => seleziona(null)} onCambiato={contenuti.ricarica} />}
         </div>)}</details>}
         {!!a.mappe.length && <ul aria-label={`Planimetrie di ${a.nome}`}>{a.mappe.map(m => <li key={m.chiave}><Link className="touch inline-flex items-center" to={`/guida/mappe/${encodeURIComponent(m.chiave)}`}>{m.nome}</Link></li>)}</ul>}
-        {!!a.punti.length && <ul className="list-none p-0 flex flex-col gap-2" aria-label={`Elementi di ${a.nome}`}>{a.punti.filter(p => p.ruolo !== 'sezione').map(p => <li key={p.id}><strong>{p.scheda ? <button type="button" className="touch inline-flex items-center text-left" onClick={() => seleziona(p.scheda!.id)}>{p.nome}</button> : p.nome}</strong>{p.descrizione && <p className="whitespace-pre-wrap">{p.descrizione}</p>}{p.scheda && selezionato === p.id && <SchedaContenutoGuida key={`${p.id}:${attiva?.id ?? 'nessuna'}`} spillo={p.scheda} partitaId={attiva?.id ?? null} onChiudi={() => seleziona(null)} onCambiato={contenuti.ricarica} />}</li>)}</ul>}
+        {!!a.punti.length && <ul className="list-none p-0 flex flex-col gap-2" aria-label={`Elementi di ${a.nome}`}>{a.punti.filter(p => p.ruolo !== 'sezione').map(p => <li key={p.id} className={p.contenitore != null ? 'ml-4 border-l-2 border-border-light pl-2' : undefined} data-passo-di={p.contenitore ?? undefined}><strong>{p.scheda ? <button type="button" className="touch inline-flex items-center text-left" onClick={() => seleziona(p.scheda!.id)}>{p.nome}</button> : p.nome}</strong>{p.descrizione && <p className="whitespace-pre-wrap">{p.descrizione}</p>}{p.scheda && selezionato === p.id && <SchedaContenutoGuida key={`${p.id}:${attiva?.id ?? 'nessuna'}`} spillo={p.scheda} partitaId={attiva?.id ?? null} onChiudi={() => seleziona(null)} onCambiato={contenuti.ricarica} />}</li>)}</ul>}
       </details>)}
     </section>}
   </PageState>;

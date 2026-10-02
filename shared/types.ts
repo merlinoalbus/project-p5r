@@ -1660,6 +1660,9 @@ export interface PuntoInteresseDto {
   marcatore: { x: number; y: number } | null;
   /** I pin delle planimetrie collegati al punto (2026-10-01): lo stato del punto è il loro. Vuoto = non collegato. */
   pin: PinDelPuntoDto[];
+  /** L'Enigma di cui la voce è un passo (095), o null. I passi stanno nella stessa area, ordinati fra loro; l'Enigma che ne ha
+   *  è risolto quando i passi che si segnano sono tutti fatti, e non ha pin suoi. */
+  contenitore: string | null;
 }
 
 /** Un pin di una planimetria collegato a un punto della guida. */

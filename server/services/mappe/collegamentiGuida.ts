@@ -11,24 +11,29 @@
 // ============================================================
 
 import type { AppDatabase } from '../../db/dbService.js';
-import { prepared } from '../../db/dbService.js';
+import { getDb, prepared } from '../../db/dbService.js';
 import { httpErrors, type HttpError } from '../../utils/httpError.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
 import { palazzoDiOgniMappa } from '../palazziService.js';
 import { VOCE_DEL_PIN, voceDelPin } from './voceDelPin.js';
+import { allineaEnigmaDellaVoce, passiDi, pinDelPuntoGuida } from './statiGuida.js';
 
 export { VOCE_DEL_PIN, voceDelPin };
+export { allineaEnigma, allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, enigmaDi, passiDaSegnare, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './statiGuida.js';
 
 /**
  * Le regole del collegamento di un pin a una voce, le stesse per ogni strada che lo scrive — la guida (`collegaPinAlPunto`),
  * l'editor delle mappe (un riferimento «punto» in ingresso), il pacchetto delle mappe (rilievo della revisione, 2026-10-01):
- * la voce esiste e non è descrittiva, il pin sta su una planimetria del Palazzo della voce, e non è già di un'altra voce.
+ * la voce esiste, non è descrittiva e non è un Enigma con i suoi passi, il pin sta su una planimetria del Palazzo della voce, e
+ * non è già di un'altra voce.
  * Restituisce l'errore da lanciare, o `null` se il collegamento è ammesso (chi importa un pacchetto lo scarta e lo conta).
  */
 export function erroreVoceDelPin(pin: { nome: string; mappa: string | null; voce: string | null }, puntoChiave: string): HttpError | null {
   const p = prepared('SELECT p.nome, p.tipo, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(puntoChiave) as { nome: string; tipo: string; dungeon_chiave: string } | undefined;
   if (!p) return httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   if (puntoDescrittivo(p.tipo)) return httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
+  // un Enigma con i suoi passi non ha pin suoi: stanno sui passi (scelta dell'utente, 2026-10-01)
+  if (passiDi(getDb(), puntoChiave).length > 0) return httpErrors.badRequest('enigma-con-passi', `«${p.nome}» è un Enigma con i suoi passi: i pin si collegano ai passi.`);
   if (!pin.mappa || palazzoDiOgniMappa().get(pin.mappa) !== p.dungeon_chiave) {
     return httpErrors.badRequest('pin-fuori-dal-palazzo', `«${pin.nome}» non sta su una planimetria di questo Palazzo.`);
   }
@@ -39,15 +44,10 @@ export function erroreVoceDelPin(pin: { nome: string; mappa: string | null; voce
   return null;
 }
 
-/** I pin (sulle planimetrie, non gli elementi della guida senza mappa) collegati a un punto. */
-export function pinDelPuntoGuida(db: AppDatabase, punto: string): Array<{ id: number; uid: string }> {
-  return db.prepare(`SELECT id, uid FROM spillo WHERE ${VOCE_DEL_PIN} = ? AND mappa_chiave IS NOT NULL AND uid IS NOT NULL ORDER BY id`)
-    .all(punto) as Array<{ id: number; uid: string }>;
-}
-
 /**
  * Quando un punto riceve i suoi pin, i due stati che fino a quel momento vivevano separati si uniscono, in ogni partita:
- * un punto già segnato segna i suoi pin, un punto con tutti i pin già raccolti risulta segnato. Non toglie niente.
+ * un punto già segnato segna i suoi pin, un punto con tutti i pin già raccolti risulta segnato (e, se è un passo, il suo Enigma
+ * lo segue). Non toglie niente.
  * Va eseguita con il file delle partite attaccato (`utente`); senza, non fa niente.
  */
 export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string): void {
@@ -66,6 +66,9 @@ export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string
       for (const u of uids) if (!raccolto.get(partita, u)) raccogli.run(partita, u, adesso);
     } else if (uids.every((u) => raccolto.get(partita, u))) {
       segna.run(partita, punto, adesso);
+      // un passo segnato: il suo Enigma lo segue
+      allineaEnigmaDellaVoce(db, partita, punto, adesso);
     }
   }
 }
+

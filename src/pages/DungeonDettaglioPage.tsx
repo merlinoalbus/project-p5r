@@ -17,7 +17,7 @@
 // richieste — che fanno la percentuale. La pianta della guida non c'è: i piani si generano.
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { aggiornaArea, aggiornaDungeon, eliminaArea, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
@@ -134,6 +134,15 @@ export function DungeonDettaglioPage() {
     if (!d) return;
     dati.imposta({ ...d, aree: d.aree.map((a) => ({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) })) });
   };
+  // Le riletture in silenzio della scheda (dopo uno stato o un raccolto) possono sovrapporsi: vale solo l'ultima chiesta, una
+  // risposta più vecchia che arriva dopo non sovrascrive quella più nuova (rilievo del validatore).
+  const ultimaLettura = useRef(0);
+  const rileggiInSilenzio = async () => {
+    if (!partitaId) return;
+    const n = ++ultimaLettura.current;
+    const fresco = await getDungeon(chiave, partitaId);
+    if (n === ultimaLettura.current) dati.imposta(fresco);
+  };
   const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null) => {
     if (!partitaId) return;
     try {
@@ -141,8 +150,7 @@ export function DungeonDettaglioPage() {
       setVersioneStati((v) => v + 1);
       // Un punto della guida può essere agganciato a uno spillo collezionabile (il server lo conta come raccolto):
       // la raccolta si rilegge dal server, senza stato di caricamento, così anello e colonna non divergono.
-      const fresco = await getDungeon(chiave, partitaId);
-      dati.imposta(fresco);
+      await rileggiInSilenzio();
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     }
@@ -160,6 +168,9 @@ export function DungeonDettaglioPage() {
     const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
     dati.imposta({ ...d, planimetrie, aree, raccolta: { ...d.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.n > 0 && p.presi === p.n).length } });
     setVersioneStati((v) => v + 1);
+    // Il raccolto di un pin segna (o riapre) la sua voce della guida e, se è un passo, il suo Enigma (095): stati che qui non si
+    // possono dedurre. Si rilegge la scheda dal server, senza stato di caricamento, come dopo uno stato cambiato dalla guida.
+    void rileggiInSilenzio().catch(() => { /* resta l'aggiornamento immediato */ });
   };
   /** I timbri di un dedalo cambiano: obiettivi del dedalo e anello dei Memento seguono. */
   const aggiornaTimbri = (chiaveArea: string, raccolti: number) => {

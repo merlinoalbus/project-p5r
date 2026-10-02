@@ -27,6 +27,8 @@ export const bodyArea = z.object({ nome: z.string().trim().min(1).max(LIMITI_GUI
 export const bodyPunto = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.punto.descrizione).optional(),
   tipo: z.enum(TIPI_PUNTO).optional(), esauribile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(),
+  /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
+  contenitore: z.string().min(1).max(200).nullable().optional(),
 });
 export const bodyNuovoPunto = bodyPunto.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 /** Una sezione nuova della guida: dove va (`dopo` un'area, `null` in cima, assente in fondo) e, se c'è, la planimetria che la contiene. */
