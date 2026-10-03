@@ -1,0 +1,262 @@
+# Verifica completa del codice — 3 ottobre 2026
+
+Branch `ottimizzazione/verifica-completa`, voce 1 della sezione «Verifica completa del codice, commenti e Swagger» (ROADMAP).
+
+**Metodo.** Cinque verifiche in sola lettura, una per area (API del server; servizi mappe e guida; altri servizi e database;
+condivisi e stato del frontend; pagine e componenti), poi cinque **controverifiche indipendenti** che hanno ripreso ogni rilievo
+dal codice cercando di smentirlo (grep su `server/`, `shared/`, `src/`, `scripts/` e test; database aperti in sola lettura). I
+rilievi più gravi li ho riletti io sul codice. Qui restano solo i rilievi confermati (o confermati in parte, con la parte vera);
+la gravità è quella corretta dalla controverifica. Dopo la prima validazione sono state aggiunte due verifiche: script, deploy,
+configurazione e test (§5-bis, con l'elenco di cosa è stato guardato), e commenti e documenti che descrivono codice che non
+esiste più (§5-ter). Nessun rilievo è risultato del tutto falso; le correzioni proposte che la
+controverifica ha smentito sono riportate già corrette.
+
+Legenda: **G** gravità (A alta, M media, B bassa) · **C** la correzione cambia un comportamento osservabile (sì/no) ·
+**Fase** dove si corregge (2 bug e criticità, 3 ridondanze e ottimizzazioni, 4 commenti e documenti) · **Decide** chi deve scegliere (U = l'utente).
+
+## 1. API del server (`server/index.ts`, `bootstrap.ts`, `middleware/`, `routes/`, `schemas/`, `utils/`)
+
+187 rotte (partite 58, compendio 52, mappe 27, catalogo 9, impostazioni 9, fusione 8, immagini 8, condizioni 6, font 4,
+traduzioni 4, cioè 185 nei router, più `/api/health` e `/api/config` in `bootstrap.ts`; la ROADMAP conta le 185 dei router).
+
+| ID | G | Rilievo | Correzione | C | Fase |
+|----|---|---------|------------|---|------|
+| F01 | M | `bootstrap.ts:46` `cors()` aperto: qualunque sito aperto nel browser può chiamare l'API (che non ha autenticazione) anche con PUT/DELETE; il frontend non ne ha bisogno (stessa origine: proxy Vite / nginx) | togliere `cors()` | sì | 2 · **U** |
+| F02 | M | `errorHandler.ts:85` restituisce `err.message` nei 500 e `/api/health` lo restituisce in `db.error` di una risposta 200 (messaggi SQLite, percorsi assoluti) | messaggio fisso, dettaglio solo nel log col `requestId` | sì | 2 |
+| F03 | B (M se pubblicata) | `scaricaDaUrl.ts:43-52,76` scarica qualunque URL http(s) con redirect seguiti: l'importazione di un'immagine da URL (unico chiamante, vedi §6) può interrogare host interni | rifiutare indirizzi locali/privati e rivalidare i redirect | sì | 2 · **U** |
+| F04 | M | `/api/health` risponde 200 anche con il DB rotto: l'HEALTHCHECK Docker non se ne accorge | 503 quando il DB non risponde (`getHealth` del frontend non è usato) | sì | 2 |
+| F05 | M | `impostazioni.ts:42` `res.download(…, () => rmSync)`: in Express 5 l'errore va solo alla callback (richiesta appesa) e un'eccezione di `rmSync` fa cadere il processo | callback con `try/catch` e `next(err)` | sì (solo su errore) | 2 |
+| F06 | B | una mappa radice chiamata «Albero», «Esporta», «Ordine», «Riferimenti», «Marcatori»… prende una chiave che le rotte letterali oscurano | chiavi riservate rifiutate in `creaMappa` e `importaMappe` | sì | 2 |
+| F07 | B | `schemas/catalogo.ts:52` accetta `condizioni_json` sul negozio ma il servizio lo scarta in silenzio; commento orfano | togliere il campo e il commento | sì | 2 |
+| F08 | B | gli errori 4xx di Express senza caso (es. 404 ENOENT di `sendFile`) diventano «richiesta non valida» | gestire 404/403/416 | sì | 2 |
+| F09 | B | `catalogo.ts:20` usa il codice `dati-non-validi` dove il resto usa `validation-error` | uniformare | sì | 2 |
+| F10 | B | `condizioni.ts:116-117,136-137` due scritture fuori transazione | transazione | no | 2 |
+| F11 | B | `nodoPiano` ricorsivo senza limite di profondità (`profondita` del piano senza massimo) | limite di profondità | sì (input patologici) | 2 |
+| F12 | B | 6 rotte usano `req.params` senza schema (`compendio.ts:197,246,250`, `catalogo.ts:39`, `mappe.ts:23,24`) | `validate({ params })` | no | 2 |
+| F13 | B | `queryCicli.dlc` stringa libera interpretata a mano; booleani diversi da `queryPiani` | schemi comuni | sì | 3 |
+| F14 | B | `responseShape` riconosce la busta dalla presenza di `data`/`error`; `condizioni.ts:70` la costruisce a mano | marcatore esplicito; `res.json(array)` | no | 2 |
+| F15 | B | IIFE `void (async () => …)()` in `impostazioni.ts` (Express 5 propaga già le promise) | handler `async` | no | 3 |
+| F16 | B | schemi e costanti duplicati (categorie articolo, doti ×3, regex data ×7, id intero ×3, `booleano`=`boolQuery`, elenchi di numeri) | `schemas/comuni.ts` e `shared/` | no | 3 |
+| F17 | B | export superflui (`httpErrors.internal` mai usato; altri da togliere solo come `export`) | togliere | no | 3 |
+| F18 | B | il controllo «la partita esiste» ripetuto (vedi K4) | un helper | no | 3 |
+| F19 | M | `depositaCopia`/`depositaContenuto` sincroni su centinaia di MB; ZIP con CRC in JS e doppio buffer | I/O asincrono, `zlib.crc32`, ZIP a flusso | no | 3 |
+| F20 | B | `/condizioni/elenchi` e `progressi` rifanno 7 query a ogni chiamata | cache invalidata dalle scritture (facoltativo) | no | 3 |
+| F21 | B | PUT requisiti calcola tutti i Confidenti per restituirne uno | funzione per un solo Confidente (vedi P1 servizi) | no | 3 |
+| F22 | B | `datiGuida` rifà `JSON.parse` dei blob a ogni GET | cache per chiave, clonata (la rotta la modifica) | no | 3 |
+
+## 2. Servizi mappe e guida (`services/mappe/`, `dungeonService`, `palazziService`, `disponibilitaService`, `semaforiService`, `condizioni/`, `catalogoService`, `cittaService`)
+
+| ID | G | Rilievo | Correzione | C | Fase |
+|----|---|---------|------------|---|------|
+| B1 | M | `creaPunto` (`dungeonService.ts:563`) non limita la chiave: un nome lungo crea un punto che le rotte (max 200) non sanno più modificare; uno slug vuoto dà una chiave che finisce con `-` | la stessa regola di `creaArea` | sì | 2 |
+| B2 | B | `invalidaFinestreDungeon` non è mai chiamata: dopo un pacchetto le finestre dei Palazzi restano vecchie fino al riavvio | invalidarla con le altre cache (vedi R1) | sì | 2 |
+| B3 | M | `importaMappe` (con `sovrascrivi`) non riporta a radice una mappa il cui genitore nel pacchetto è nullo | scrivere sempre `genitore_chiave` (NULL compreso) | sì | 2 |
+| B4 | M | reimportando una mappa i pin vengono reinseriti con id nuovi: i passaggi di **altre** mappe che arrivavano su quei pin perdono lo spillo d'arrivo (`ON DELETE SET NULL`) | rimappare `spillo_arrivo_id` per uid | sì | 2 |
+| B5 | M | eliminando un pin, una mappa o un'area le immagini (ambito `spillo` e, per la mappa, ambito `mappa`) restano in `gioco.db` | cancellarle nella stessa transazione | no (spazio) | 2 |
+| B6 | B | nelle condizioni annidate (gruppi, NON) il dettaglio mostra le chiavi grezze invece dei nomi | passare i nomi | sì (testo) | 2 |
+| B7 | B | la regola «pin segnato tramite la voce» è scritta tre volte; due non escludono le voci descrittive | una query condivisa | sì (dati legacy) | 2 |
+| B8 | B | `dettaglioMappa` elenca fra i figli di Tokyo anche i Memento, che `conteggi` esclude (24 contati, 25 mostrati) | filtrare come `elencaMappe` | sì | 2 |
+| B9 | B | immagine di pin e di mappa salvate fuori da una transazione comune | transazione | no | 2 |
+| B10 | B | `negozioDettaglio` inghiotte ogni errore | intercettare solo «negozio non trovato» | no | 2 |
+| B11 | B | `aggiornaPunto(x, {})` usata per leggere: UPDATE inutile e riallineamento degli Enigmi | `leggiPunto` | no | 3 |
+| B12 | B | a parità di `ordine` alcune viste ordinano per nome, altre per chiave | `ordine, chiave` ovunque | sì (pareggi) | 2 |
+| B13 | B | due regole per «il Palazzo di una mappa» (oggi coincidono sui dati) | una sola (vedi R3) | no | 3 |
+| B14 | B | eliminando un luogo/negozio/attività dell'utente restano pin e legami di mappa che lo citano | 409 se citato, oppure azzerare i riferimenti | sì | 2 |
+| P1 | A | per ogni pin con un negozio si ricalcola tutto lo stato della partita (`dettaglioNegozio`), già calcolato nel contesto | passare lo stato | no | 3 |
+| P2 | M | `percorsiMappe` compila gli statement a ogni chiamata (anche nei cicli) | statement preparati una volta | no | 3 |
+| P3 | M | `elencaMappe` fa decine di query per mappa (333 mappe) | caricamenti in blocco | no | 3 |
+| P4 | M | `contenutiMappa` calcola le schede di **tutti** i 187 contenuti guida per ogni mappa | filtrare per le aree della mappa | no | 3 |
+| P5 | B | `importaMappe` rilegge colonne e uid a ogni pin | una volta per importazione | no | 3 |
+| P6 | B | condizioni valutate due volte (tre per i fissi) e `pinCitato` interrogato a ogni valutazione | memoizzare per richiesta (non sostituire con `nomi.spilli`) | no | 3 |
+| P7 | B | `dettaglioDungeon` calcola due volte la raccolta; `elencaDungeon` rilegge i segni per ogni Palazzo | calcolo unico | no | 3 |
+| P8 | B | parse ripetuti di `nativo_json`, `includes` in un ciclo, nome del genitore due volte, `collezioniImmagini` intera per una mappa | piccole correzioni | no | 3 |
+| R1 | B | la lettura di `finestre-dungeon` è scritta cinque volte | una funzione con cache invalidabile | no | 3 |
+| R2 | B | `semaforiService` riscrive `ordineGioco` e i nomi dei Palazzi | importare | no | 3 |
+| R3 | B | nove implementazioni di «sottoalbero / Palazzo di una mappa» | una CTE condivisa | no | 3 |
+| R4 | B | `eliminaArea` ripete riga per riga la pulizia di `eliminaPunto` | `staccaPunto` | no | 3 |
+| R5 | B | cinque ricerche di un gruppo di immagini in JS dove una usa `json_extract` | `json_extract` | no | 3 |
+| R6 | B | il nome della richiesta tradotto due volte | toglierne una | no | 3 |
+| R7 | B | `creaMappa` legge tre volte il genitore | una lettura | no | 3 |
+| R8 | B | parse di `giorni_json` duplicato (le uscite differiscono) | helper per il solo parse | no | 3 |
+| R9 | B | codice morto: `luoghiDungeon`, `soloPresenza`, `reimpostaDatiMappe`/`TABELLE_MAPPE` (e lo script citato nei documenti che non esiste); export solo interni | togliere | no | 3 |
+
+## 3. Altri servizi e database (`services/` restanti, `db/`)
+
+| ID | G | Rilievo | Correzione | C | Fase |
+|----|---|---------|------------|---|------|
+| C1 | M | `ripristinaIstanza` non prende il lucchetto dell'importazione: due ripristini, o un ripristino e un'importazione, si possono sovrapporre | lucchetto comune, 409 | sì | 2 |
+| C2 | M | il ripristino accetta un database con schema **più nuovo** del codice | rifiutarlo come fa l'importazione | sì | 2 |
+| C3 | M | `scriviDatabase` scrive direttamente sul file vivo (~300 MB): un crash a metà lo lascia troncato | file temporaneo + `rename` | no | 2 |
+| B1' | M | dopo un'importazione o un ripristino restano vecchie le finestre dei Palazzi e la cache dello stato dei semafori | invalidarle | sì | 2 |
+| B2' | M | la cache dei semafori ha come chiave `partita.updated_at`, che i collegamenti alla guida non aggiornano: semafori vecchi | togliere la cache, calcolo unico in `confidenti()` | sì | 2 |
+| B3' | M | il livello di Joker sta in due posti e il riepilogo ne aggiorna uno solo: Squadra e Fusione mostrano livelli diversi | fonte unica `partita.livello_protagonista` (è sempre la più recente: la migrazione proposta nel rapporto copiava nel verso sbagliato) | sì | 2 |
+| B4' | B | `verificaDatabase` lascia in `data/tmp` i file `-wal`/`-shm` (14 trovati) | cancellarli | no | 2 |
+| B5' | B | la rotazione delle copie di sicurezza lascia `-wal`/`-shm` (30 trovati) | cancellarli | no | 2 |
+| B6' | B | il numero delle copie di sicurezza mostrato è il doppio | contare solo i `.db` di gioco | sì | 2 |
+| C4 | B | il controllo delle chiavi esterne delle migrazioni avviene dopo il commit: una violazione si vede una volta sola | dentro la transazione | sì | 2 |
+| C5 | B | se riaprire l'istanza fallisce durante il ritorno alla copia di sicurezza, l'errore non è gestito | `try/catch` con dettaglio (rimettere anche `partite.db` è corretto) | no | 2 |
+| C6 | B | scritture e `updated_at` della partita fuori transazione (meteo, obiettivi, piani, cicli) | transazione | no | 2 |
+| R1' | B | indice `idx_effetto_lettura_partita` duplicato dalla chiave primaria | migrazione utente che lo toglie (e DDL aggiornata) | no | 3 |
+| R2' | B | indice `idx_traduzione_ambito` duplicato dalla chiave primaria | migrazione 096 | no | 3 |
+| R3' | B | tabella `seed_meta` che nessuno scrive (valori fermi al 9 settembre); campo `seed` dello stato dell'istanza | togliere tabella e campo | sì (DTO) | 3 |
+| R4' | B | `giorno_percorso.azioni_json` non più letta dai servizi | **nessuna azione**: serve a convertire un `partite.db` vecchio | — | — |
+| R5' | B | nessun indice su `spunta_voce_partita.voce_uid` | indice (facoltativo) | no | 3 |
+| R6' | B | `libro.effetto_json` vuoto ovunque ma letto come ripiego | togliere il ripiego | no | 3 |
+| K1–K5 | B | `haAnimaDaCineasta` e `rangoArcana` duplicate; letture di `dati_guida` copiate; «la partita esiste» ripetuto 25 volte; export mai usati | condividere / togliere | no | 3 |
+| P1' | M | `confidenti()` fa una query regali per Confidente e calcola tutto più volte per una sola richiesta | query raggruppate, calcolo unico, funzione per uno | no | 3 |
+| P2' | M | `possedutaDto` ~100 query per una scorta di 12 Persona | JOIN unica | no | 3 |
+| P3' | M | importazione dal deposito e copia dell'istanza tengono in memoria e riscrivono più volte ~300 MB | file temporaneo unico, ZIP a flusso | no | 3 |
+| P4'–P6' | B | `elencaPersona` una query per Persona; doppi calcoli in `attivitaService`; meteo per ogni partita dell'elenco | caricamenti in blocco, calcolo unico (P6' facoltativo) | no | 3 |
+
+## 4. Condivisi e stato del frontend (`shared/`, `src/services`, `stores`, `hooks`, `utils`)
+
+| ID | G | Rilievo | Correzione | C | Fase |
+|----|---|---------|------------|---|------|
+| B1" | A | `descriviGiorni([])` restituisce «` e undefined`»: ogni luogo senza giorni mostra «Giorni:  e undefined»; inoltre «dal lunedì **al** domenica» | caso vuoto, `congiunzione` condivisa, «alla domenica» | sì | 2 |
+| B2" | M | il client ritenta in automatico **anche POST e PATCH**: dopo un 5xx o un timeout a scrittura avvenuta si raddoppiano yen, fusioni, creazioni | ritentare solo GET/HEAD/PUT/DELETE | sì | 2 |
+| B3" | M-B | due spunte ravvicinate nella giornata (anche in `PercorsoPage`) annullano a schermo la prima | aggiornamento funzionale (`imposta(d => …)`) | sì | 2 |
+| B4" | B | `suggerimentiStore`: una risposta vecchia può sovrascrivere una nuova | contatore di generazione | sì | 2 |
+| B5" | B | `partitaStore.carica()` non ordina le risposte | contatore di generazione | sì | 2 |
+| B6" | M | `useCarica.ricarica()` si risolve subito: chi la attende (molte pagine) crede di avere dati freschi | promessa risolta a rilettura avvenuta (anche se fallisce) | sì | 2 |
+| B7" | B | busta `{ data: null }` restituita intera dal client; il server non imbusta oggetti con chiave `data` (latente) | entrambi i lati | no oggi | 2 |
+| B8" | B | quattro upload leggono il JSON prima di controllare `res.ok`: un 413/502 in HTML dà un errore incomprensibile | un `uploadRaw` condiviso | sì (messaggio) | 2 |
+| B9" | B | `normalizzaVociEffetto` controlla solo la famiglia: un effetto malformato fa cadere le descrizioni | normalizzazione per famiglia | no (dati validi) | 2 |
+| B10" | B | cambiando partita si vedono per un attimo i suggerimenti della partita precedente | azzerarli | sì | 2 |
+| B11" | B | righe irraggiungibili nel client HTTP; `externalSignal` mai usato (annullare non fermerebbe comunque il server) | togliere il codice morto | no | 3 |
+| R1"–R8" | B | statistiche, doti, `formattaYen`, date di gioco, `congiunzione`, forme di tipo duplicate (`ElenchiRegole` solo nel client, rotte non tipizzate); export morti e un file vuoto (`src/services/api/guida.ts`) | una sola fonte in `shared/`, tipi condivisi, togliere i morti (`MESI` di `migraCondizioni` e i due costruttori di URL **non** sono duplicati veri) | no | 3 |
+| R9" | B | `chiaveAllerta` simile a `slug` | **nessuna azione**: la usa la migrazione 091 | — | — |
+| P1"–P5" | B-M | raggruppamento degli spilli ricalcolato a ogni frame; analisi della planimetria a piena risoluzione; nessun caricamento differito delle pagine; iscrizioni troppo larghe agli store; `useOggi` ricrea tutto a ogni render | memo, tela ridotta, `lazy`, selettori, `useCallback` | no | 3 |
+
+## 5. Pagine e componenti (`src/pages/`, `src/components/`, `src/tailwind.css`)
+
+| ID | G | Rilievo | Correzione | C | Fase |
+|----|---|---------|------------|---|------|
+| A1 | A | `VideogiochiPage.tsx:126-166`: la coda dei progressi ha come chiave solo il gioco e la guardia `partitaId !== id` confronta la closure con sé stessa (non scatta mai); la pagina non si rimonta al cambio di partita: dopo il cambio «+» scrive nella partita B il valore della partita A +1 e sostituisce il gioco con i dati di A | chiave `partita:gioco` e riferimento alla partita corrente, nell'hook comune di R1 | sì | 2 |
+| A2 | M-B | `tailwind.css:1366-1668` sta fuori da ogni `@layer`: `.selettore{min-width:0}` batte le utility `min-w-[…]` (EditorAzioneStrutturata, RigaDote, TraduzioniEditor) | spostare in `@layer components` **solo** le regole `.selettore*` (spostare tutto il blocco cambierebbe la cascata di `.immagine-entita`, `.spillo-*`, 44 px…); poi verifica visiva | sì (larghezze) | 2 |
+| A3 | B-M | righe con stato locale e chiave = indice: `CondizioniEditor.tsx:211` (`opScelto`), i sottogruppi `Blocco` (`aperto`, `:240`), `EditorEffetti.tsx:63` (`condizioniAperte`): eliminando una riga lo stato passa alla successiva | **id stabile** tenuto in parallelo nello stato del blocco (una chiave per contenuto non va: ogni modifica crea un oggetto nuovo e rimonterebbe la riga perdendo `opScelto`) | sì | 2 |
+| A4 | M | `VisoreMappa.tsx:283-307` azzera zoom e centro a ogni ridimensionamento (rotazione del tablet, tastiera) | azzerare solo al cambio di mappa/centro | sì | 2 |
+| A5 | M | `Modal.tsx` (30 usi): nessun focus iniziale, nessuna trappola del Tab, focus non restituito alla chiusura | gestione del focus; il salvataggio di `activeElement` in un effetto che dipende solo da `aperta` | sì | 2 |
+| A6 | B-M | `immaginiCache.ts:17` conserva anche una richiesta fallita: le immagini restano assenti fino alla rimozione multipla | togliere la promessa fallita solo se è ancora quella registrata | sì | 2 |
+| A7 | B-M | `aria-label` su `div`/`span` senza ruolo (VisoreMappa, PersonaChip, LivelloBadge, CondizioniEditor, Libri, Film, Videogiochi): i lettori di schermo non lo leggono | `role="img"`/`role="group"` o testo nascosto | no (visivo) | 2 |
+| A8 | B | `ConfidenteDettaglioPage.tsx:188` `new URL(f)` nel render: un valore non valido fa cadere la pagina | `try/catch` | no (dati validi) | 2 |
+| A9 | B | `SquadraPartita.tsx:123` campo del livello non controllato: dopo un errore o una normalizzazione («5.7») mostra un valore diverso da quello salvato | campo controllato | sì | 2 |
+| A10 | B | `CondizioniEditor.tsx` costruisce la classe `condizioni-blocco--${modo}`, contro la regola in testa a `tailwind.css` («mai classi interpolate») | mappa statica modo → classe | no | 3 |
+| R1‴ | M | la coda dei progressi è copiata in Libri, Film e Videogiochi (questa divergente, vedi A1) | hook `useCodaProgresso` | no | 2 (con A1) |
+| R2‴ | B | `BackupIstanza.tsx:26-33` e `PacchettoGioco.tsx:31-38` identici | helper comune | no | 3 |
+| R3‴ | B | `Voce`/`Fonte` copiati in Completamento, Oggetti, Sfide (Battaglia diversa) | componente comune | no | 3 |
+| R4‴ | B | `piatto` copiata quattro volte (Cruciverba, Domande, Richieste, `utils/articoli.ts`) | `utils/testo.ts` | no | 3 |
+| R5‴ | B | `yen` duplica `formattaYen`; `NOME_MODO` doppio; `contorno` doppio (Tokyo con ombra); `Numero` solo simile | condividere i primi tre; `Numero` resta | no | 3 |
+| R6‴ | B | codice morto: `MiniaturaMappa.tsx`, `IconCheck`, `IconPlus`, `segnaImmaginePresente`, `mappaVersione` sempre 0 | togliere | no | 3 |
+| R7‴ | B | otto classi CSS mai usate in `tailwind.css` | togliere | no | 3 |
+| R8‴ | B | regole sovrascritte (`tailwind.css:384`, `:514` da `:1625-1631`) e commento `:1621` che spiega male il motivo | togliere le regole vinte, correggere il commento | no | 3 |
+| P1‴ | M | `VisoreMappa.tsx:421,451,459` ricalcola filtri e `raggruppaSpilli` (O(n³)) a ogni movimento di pan/zoom | `useMemo` e centri precalcolati | no | 3 |
+
+## 5-bis. Script, deploy, configurazione e test
+
+Aree aggiunte su richiesta del validatore.
+
+**Cosa è stato controllato:**
+- i 15 file tracciati in `scripts/` e i due file `*.tmp.*` nella radice;
+- `Dockerfile.backend` e `Dockerfile.frontend`, `docker-compose.yml`, `nginx.conf`, `.dockerignore`, i due workflow in `.github/`;
+- `server/config.ts`, tutti i `process.env`, `.env.example`;
+- i sei `tsconfig*.json` (con `--listFilesOnly`), `vite.config.ts`, `vitest.config.ts`, `eslint.config.js`;
+- ogni dipendenza di `package.json` (tutte risultano usate);
+- i 247 file di test con 1229 casi: `.skip`, `.only` e `.todo`, test senza asserzioni, mock, setup, pragma jsdom.
+
+**Risultati senza rilievi:**
+- le porte 3101 e 5273 sono coerenti ovunque;
+- non ci sono test saltati né test senza asserzioni (l'unico segnalato era un falso positivo);
+- tutti i file DOM hanno il pragma jsdom;
+- `test/setup.ts` è corretto;
+- `font-italiano.py` e `verifiche/prova-stop-linux.sh` sono a posto.
+
+| ID | G | Rilievo | Correzione | C | Fase |
+|----|---|---------|------------|---|------|
+| S1 | M | `scripts/copertura-accesso.ts:41` (`npm run accesso:copertura`) apre `data/project-p5r.db`, il vecchio nome. Crea quindi un DB vuoto e ci fa girare le migrazioni, poi gli attacca il `partite.db` vero: la misura è falsa e in `data/` resta un file spurio | `resolveDbPath()` e `config.dataDir` | sì (solo lo script) | 2 |
+| S2 | B | `genera-24.tmp.mjs` e `blocco-24.tmp.md` sono tracciati nella radice: uno script usa e getta con un percorso che non esiste più | togliere | no | 3 |
+| S3 | B | `scripts/atlas-organization.ts` è uno script una tantum che nessuno invoca, legge `spillo_partita` senza lo schema `utente` ed è ancora sotto typecheck | togliere | no | 3 |
+| S4 | M | `CLAUDE.md:56` dice «non c'è hot reload lato BE», ma `start-be.sh:10` avvia `tsx watch`, che si riavvia da solo (17 «Restarting» in BE.log) | allineare la documentazione del progetto | no | 3 |
+| S5 | B | gli script e Vite ignorano `BE_PORT` di `.env` (porte scritte a mano in `_comuni.sh:28-29` e `vite.config.ts:14,18`) | leggere `.env` / `loadEnv` | no | 3 |
+| S6 | B | `start-be.sh` e `start-fe.sh` dichiarano riuscito l'avvio anche se la porta è occupata da un processo che non è node | controllare il processo e uscire con 1 | sì (messaggio) | 2 |
+| S7 | B | `genera-pacchetto.ts` lascia in `tmpdir` fino a ~600 MB se fallisce a metà; i commenti parlano ancora del «seed» | `try/finally` e commenti | no | 2 |
+| S8 | B | il comando di avvio è scritto in quattro posti e non sempre uguale (`vite` con o senza `--host`) | gli script chiamano `npm run` | no | 3 |
+| D1 | M | `nginx.conf:26,42` risolve il nome del BE una sola volta: quando Watchtower ricrea il container, il FE risponde 502 finché non viene riavviato anche lui | `resolver 127.0.0.11` + variabile | sì (niente 502) | 2 |
+| D2 | M | nginx limita `/api/` a 10M (`nginx.conf:54`), Express accetta 64 MB su `/api/mappe/importa`: in produzione un pacchetto di mappe oltre 10 MB dà 413 | `location = /api/mappe/importa` a 64m | sì (solo produzione) | 2 |
+| D3 | B | il blocco `/api/impostazioni/` a 1024m presuppone upload di DB e un'importazione da indirizzo che non esistono più | 10M, commento aggiornato (timeout invariati) | no | 3 |
+| D4 | B | `immutable` per 7 giorni anche su `favicon.svg` e `/font/*.woff2`, che non hanno l'hash nel nome | `immutable` solo su `/assets/` | sì (cache) | 2 |
+| D5 | B | nessuna compressione (né gzip in nginx né `compression` in Express) | `gzip on` per JS, CSS, JSON, SVG | sì (prestazioni) | 3 |
+| D6 | B | `lint` e `lint:ci` sono identici e girano due volte in CI, con commenti falsi | unificare | no | 3 |
+| D7 | B | `docker-publish.yml` rifà la verifica della CI al push su main, senza `npm audit`, mentre `ci.yml` dice che non serve | workflow riusabile oppure commento corretto | no | 3 |
+| D8 | B | le due build Docker condividono la stessa cache GHA e se la sovrascrivono a vicenda | `scope` separati | no | 3 |
+| D9 | B | `Dockerfile.frontend` installa anche `better-sqlite3`, che il FE non usa | install mirato o toolchain | no | 3 |
+| D10 | B | variabili ripetute fra compose e Dockerfile; HEALTHCHECK con la porta scritta a mano | una sola fonte, `process.env.PORT` | no | 3 |
+| D11 | B | `pino-pretty` sta fra le dipendenze di produzione ma in produzione non viene caricato | `devDependencies` | no | 3 |
+| D12 | B | `docker-compose.yml:15,93-94` ha come valori predefiniti l'IP e il percorso del NAS personale | nessun default, errore se manca | no | 3 |
+| D13 | B | `.dockerignore` non esclude `.codex-temp/`, `.pids/`, `data/tmp/`, `test/` | aggiungerli | no | 3 |
+| K1‴ | B | `.env.example`: `SEED_DIR` e `RIFERIMENTI_DIR` non sono più letti; mancano `PACCHETTO_DIR` e `ASSET_DIR` | allineare | no | 3 |
+| K2‴ | B | `config.logLevel` non è usato; `logger.ts:17` rilegge `LOG_LEVEL` con `??` invece di `\|\|` | usare `config.logLevel` | no | 3 |
+| K3‴ | — | `cors()` aperto | è F01 (stessa decisione, §6) | — | — |
+| K4‴ | M | `vite/assetPredefiniti.test.ts` non viene type-checkato da nessun progetto (escluso da `tsconfig.node.json`, assente da `tsconfig.test.json`) | includerlo in `tsconfig.test.json` | no | 2 |
+| K5‴ | B | `tsconfig.test.json` ricontrolla tutto il sorgente (760 file) e non ha `noUnusedLocals`/`noUnusedParameters` | solo i test, flag allineati | no | 3 |
+| K6‴ | B | ESLint ignora `test/**` (`test/selettore.ts` è usato da 14 test) | aggiungerlo al blocco Node | no | 3 |
+| K7‴ | B | in `vitest.config.ts` l'alias `@shared` (0 usi) e l'include `scripts/**/*.test.ts` (0 file) sono morti | togliere | no | 3 |
+| K8‴ | B | `README.md:37,47` e `.gitignore`/`.gitattributes` citano `data/seed/`, `data/atlas`, `tools/…`, che non esistono più; `.codex-temp/` è ripetuto | allineare | no | 3 |
+| T1 | M | mock di `services/api` riscritti a mano in 62 file; `urlImmagine` (funzione pura) finta in 18 file con 5 varianti; `notificationStore` mockato in 33 file | `test/mockApi.ts` con `importOriginal`, `test/mockNotifiche.ts` | no | 3 |
+| T2 | B | 98 file ricostruiscono il DB di prova con lo stesso blocco; in 43 c'è un `invalidaCacheTraduzioni()` che `caricaPacchetto` fa già; 7 file ricaricano il pacchetto a ogni test | `test/dbDiProva.ts`, togliere i doppioni, `beforeAll` dove i test non scrivono | no | 3 |
+| T3 | B | 15 sorgenti importano i sottomoduli API invece del barrel (contro la convenzione), quindi i test devono mockare due cose | import dal barrel | no | 3 |
+| T4 | B | `raggruppaSpilli.pacchetto.test.ts:52` salterebbe in silenzio senza il pacchetto e non chiude il DB | fallire, `afterAll(close)` | no | 3 |
+
+## 5-ter. Commenti e documenti che descrivono codice che non esiste più
+
+**Metodo.**
+- **Documenti** (CLAUDE.md, README, `pacchetto/README.md`, ARCHITETTURA, MAPPE, i 9 file di `docs/riferimenti/`): estratti gli identificatori in backtick (1.565 occorrenze, ~1.100 voci distinte) e cercati nel codice. Ripetuta poi la ricerca sul codice senza commenti, per trovare i nomi che sopravvivono solo lì.
+- **Commenti di 760 file `.ts`/`.tsx`:** 1.350 identificatori (719 distinti).
+- **Rotte:** le 102 rotte citate nei documenti e le ~196 chiamate del client, confrontate con le 185 dei router.
+- **Database:** tabelle e colonne confrontate con `gioco.db` e con `schemaUtente.ts`.
+- **Ricerca mirata:** ~60 termini delle funzioni dismesse.
+- **Esclusi:** ROADMAP e DECISIONI (registri storici), più le sezioni che si dichiarano superate.
+- **Verificati di persona:** O9, O4 e O12.
+
+| ID | G | Rilievo | Correzione | C | Fase |
+|----|---|---------|------------|---|------|
+| O9 | M | **difetto funzionale**: la rotta `POST /api/mappe/piante/:area/scarica` è stata tolta con `f82c42cf` (18 settembre, «la pianta della guida esce di scena»), ma `scaricaPianta` (`src/services/api/immagini.ts:23`) e `EditorMappaPage.tsx:172` la chiamano ancora: «Scarica dalla guida» su una mappa di un'area dà 404. Restano anche il commento orfano `routes/mappe.ts:36` e i passaggi ARCHITETTURA 187, 226-228, 445-446, MAPPE 155, 262 | togliere `scaricaPianta` e il ramo `area` (il pulsante resta per i quartieri), il commento e i documenti | sì (sparisce un pulsante che fallisce sempre) | 2 |
+| O4 | B | la fase `'scarico'` (`shared/types.ts:2141`) e la sua etichetta (`PacchettoGioco.tsx:51`) non vengono mai impostate dal server; i commenti a `:126,132` parlano di file del dispositivo e di indirizzi | togliere la fase e l'etichetta, aggiornare i commenti | no | 3 |
+| O12 | B | `shared/seed.ts`: 32 tipi su 33 non sono usati (resta `RequisitoSeed`); il commento a `:2-3` dice il contrario | tenere solo `RequisitoSeed` (spostato in `types.ts`) e togliere il file | no | 3 |
+| O1–O3, O5–O8 | B | importazione del pacchetto: commenti e documenti descrivono ancora il file nel corpo e lo scaricamento da indirizzo (`scaricaDaUrl.ts:5-9,23`, `pacchettoGiocoService.ts:18-22,263`, `impostazioni.ts:66-69`, `nginx.conf:21-24`, `index.ts:28-32`, `impostazioniService.ts:8-10,30-31`, `BackupIstanza.tsx:40`, `pacchetto/README.md:8,11`, `pacchettoGioco.ts:11-12`, `.gitignore:51-52`, ARCHITETTURA 595, 606, 809-823). `MAX_BYTE_RIPRISTINO` è esportata ma non usata | riscrivere sulla cartella d'appoggio, togliere la costante | no | 4 |
+| O10 | B | ARCHITETTURA 431, 500-501, 526, 586 e MAPPE 151: `sincronizzaMappe` «a ogni avvio». Oggi la chiama solo la migrazione 027 (`sincronizzaMappe.ts:10-11`); le rotte `/marcatori` e `/marcatori-luoghi` le usano solo i test | aggiornare i passaggi; le due rotte vanno nella fase 3 come codice morto | no | 3-4 |
+| O11, O13–O16, O19–O21 | B | residui del seed JSON dismesso il 12 settembre: ARCHITETTURA (19-21, 33, 112-122, 421, 429-432, 447, 486, 490-492, 529, 597, 609, 619), `migraCondizioni.ts:7-9`, `catalogoService.ts:12-15`, `src/services/api/catalogo.ts:38`, `genera-pacchetto.ts:2`, `reimpostaDatiMappe.ts:2,5` (senza chiamanti, vedi R9), README 12, 38, 39, 46, `.env.example`, `.gitignore`, una ventina di commenti `data/seed/*.json` (oggi righe di `dati_guida`) | riscrivere al presente, sezioni di fase marcate come storiche | no | 4 |
+| O17 | B | `zip.ts:2` dice che serve alle mappe: lo usa solo l'istanza completa | commento | no | 4 |
+| O18 | B | MAPPE.md: `GET /api/mappe` (è `/albero`), esportazione «ZIP» (è JSON), difesa `modalita=editor` inesistente, `CondizioniSpilloEditor` (oggi `CondizioniEditor`), `stato_punto` (oggi `punto_partita`) | aggiornare | no | 4 |
+| O22–O24 | B | ARCHITETTURA 999 (`annullaEffettiAzione` toglie le Doti: non è vero), 1060 (`cambioDoti` non esiste, ora `daSegnare`), 107 («32 tabelle», sono 33), 45-46 (migrazioni ferme alla 078 e alla 003), 3 («aggiornato allo step 0.5»); `partiteService.ts:182,193` `DotiDaSegnare` (è `DoteDaSegnareDto`) | aggiornare | no | 4 |
+| O25–O26 | B | `docs/riferimenti/`: percorsi `data/seed/…`, `scripts/seed/…`, `data/riferimenti/…` e tabelle proposte mai create (`confidente_bonus_fusione`, `scontoCompendio`) | indicare dove vivono oggi i dati, marcare come storico | no | 4 |
+
+Fuori dal perimetro, segnalati soltanto: `docs/ATLANTE-STATO.md` (577, 630, 764) e `docs/ESITOVERIFICHE.md:2634` citano script npm che non esistono più. Sono resoconti storici.
+
+## 6. Decisioni che spettano all'utente
+
+Tutte le altre correzioni ripristinano il comportamento atteso, oppure non cambiano nulla di visibile. Restano due scelte di comportamento:
+
+1. **CORS (F01).** Opzioni:
+   - togliere `cors()`. Il frontend non ne ha bisogno: usa la stessa origine tramite proxy Vite o nginx.
+   - in alternativa, limitarlo alle origini di sviluppo, configurabili da `.env`.
+
+   Raccomandato: togliere. Nessun client legittimo lo usa, e un sito qualsiasi aperto nel browser oggi può chiamare tutte le API, comprese quelle che cancellano.
+2. **Scaricamento da URL (F03).** Opzioni:
+   - rifiutare gli indirizzi locali e privati (loopback, 10/8, 172.16/12, 192.168/16, link-local), con controllo anche dopo ogni redirect;
+   - oppure lasciarlo così.
+
+   Oggi `scaricaDaUrl` ha un solo chiamante, `importaImmagineDaUrl`, che è usato da `POST /api/immagini/:ambito/:chiave/da-url` e da `cittaService.ts:172` (immagine di un quartiere da URL). L'importazione del pacchetto da URL non esiste più: dal 12 settembre il pacchetto arriva dalla cartella d'appoggio sul NAS (DECISIONI.md:446). Il blocco quindi toccherebbe **solo le immagini prese da un indirizzo**: non si potrebbe più incollare l'URL di un'immagine ospitata su una macchina della rete di casa o di Tailscale. Il caricamento del file resta disponibile.
+
+   Va ricordata la scelta già documentata in ARCHITETTURA.md:816-821 («nessuna lista di blocco»): era motivata dal caso d'uso del pacchetto scaricato dal PC di casa via Tailscale, e quel presupposto non c'è più.
+
+   Raccomandato: bloccare. L'app non ha autenticazione, e un indirizzo interno dato per sbaglio o da una pagina incollata non deve diventare una richiesta del server verso la rete locale.
+
+## 7. Riepilogo
+
+- **Rilievi confermati:** 22 sull'API; 31 su mappe e guida; 29 su servizi e DB; 25 condivisi/FE; 19 pagine e componenti (A10 trovato dalla controverifica); 32 script, deploy, configurazione e test (K3‴ coincide con F01 e non è contato); 26 commenti e documenti obsoleti (O1–O26). Totale 184.
+- **Falsi:** nessuno.
+- **Sette correzioni proposte riviste dalla controverifica** (P6 servizi, B2' semafori, B3' Joker, A2, A3, A6, C5).
+- **Due voci senza azione:** `giorno_percorso.azioni_json` (R4', conteggiata fra i servizi) e `chiaveAllerta` (R9"). Servono alle migrazioni.
+- **Fase 2 (bug e criticità):** ogni correzione con un test e la sua variante rossa.
+- **Fase 3 (ridondanze e ottimizzazioni):** comportamento invariato, protetto dai test esistenti più quelli nuovi della fase 2.
+- **Fase 4 (commenti):** oltre ai commenti nuovi, si correggono quelli e i documenti obsoleti di §5-ter.

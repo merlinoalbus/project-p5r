@@ -1032,3 +1032,21 @@ inseriti tra i pin che condizionano altri pin e il cui status diventa collegabil
 | Voce | Contenuto | Stato |
 |------|-----------|-------|
 | 1 | Una regola sola per «ha uno stato» (`statoCitabile`): i tipi con uno stato loro e qualunque pin collegato a una voce della guida non descrittiva («ottenuto»); la usano il segno sulla mappa (400 `spillo-senza-stato` anche per un pin di una voce «Altro»), l'elenco dei pin citabili, la validazione e la valutazione delle condizioni. Parole (tabella completa scelta dall'utente): Dialogo «Parlato», Confidente «Incontrato» (stato proprio, resta pin di città), Forziere e Forziere raro «Aperto» (si «Richiudono» → «chiuso»), Tesoro del Palazzo «Rubato», Timbro «Timbrato»; semi e oggetti «Raccolto»; le altre come prima. Il Confidente collegato a una voce la segna e ne è segnato. Test: `condizioni-pin` (+5: Confidente, Dialogo, stanza sicura con voce, voce «Altro», pacchetto, Confidente con voce), `spilli` (tabella, ritorni, `statoCitabile`), `EditorMappaPage`, `RaccoltaPlanimetrie`, e le parole aggiornate in `VisoreMappa`, `MappaPage`, `DungeonDettaglioPage`, `ContenutiGuidaAccesso`, `SchedaSpilloStato`; importazione: i pin del pacchetto si accettano all'inserimento e si verificano a pacchetto inserito, con le voci già scritte (l'esito non dipende più dall'ordine: +3 test, visti rossi prima); il Confidente nell'editor dice il suo stato; il suo «Incontrato» resta separato dal Confidente della partita (scelta dell'utente); 14 rossi; prova in Edge a 1280/768/375 (Confidente «Incontrato» / «Annulla», Dialogo «Parlato», editor con «Confidente · incontrato», «Dialogo · parlato» e la descrizione del Confidente) e reimportazione reale via API, DB ripristinati identici — 1° esame: rigettato (importazione dipendente dall'ordine, documenti, editor del Confidente, commenti, un rosso mancante); 2° esame: rigettato (mancava il test del caso contrario: un pacchetto che cita un suo pin senza stato — aggiunto, con la sua variante rossa: 15 rossi). Note: «Mostra anche i raccolti», «X di Y raccolti», «Tutto raccolto» restano generici dei collezionabili; un pin con stato suo e con voce della guida mostra nel popup gli stati della voce («Ottenuto») e nella condizione la parola del tipo | ✅ validata (3° esame) |
+
+## Verifica completa del codice, commenti e Swagger (3 ottobre 2026) — in corso
+
+Richiesta dell'utente: «fai una verifica completa del codice di BE e di FE su un branch di ottimizzazione, verifica che non ci siano
+dati e strutture ridondanti, che il codice sia ottimizzato, modulare, senza bug o criticità… Aggiungi commenti al codice (in
+italiano) per spiegare le funzioni cosa fanno e la logica interna, aggiungi swagger e fai in modo che la documentazione sia
+consultabile». Piano approvato dall'utente; branch `ottimizzazione/verifica-completa`, chiusura con la sola PR (il merge lo fa
+l'utente). Misure di partenza: server 210 file / 21k righe, frontend 275 / 26k, condivisi 24 / 5k; 185 rotte nei router
+(187 con `/api/health` e `/api/config`) senza documentazione; ~895 funzioni senza commento, 51 file senza intestazione.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Verifica in sola lettura (server, condivisi, frontend): bug e criticità, dati e strutture ridondanti, punti lenti; ogni rilievo verificato sul codice; elenco all'utente (le scelte che cambiano comportamento sono sue) | fatto — cinque verifiche e cinque controverifiche indipendenti; dopo la prima validazione aggiunte script/deploy/configurazione/test e commenti e documenti obsoleti; 184 rilievi confermati, nessuno falso, in `docs/analisi/verifica-completa-2026-10-03.md` con gravità, correzione, fase e le due scelte per l'utente (CORS, scaricamento di immagini da URL) |
+| 2 | Correzione di bug e criticità, ciascuna con test e variante rossa | da fare |
+| 3 | Ridondanze e ottimizzazioni senza cambiare il comportamento | da fare |
+| 4 | Commenti in italiano: intestazione dei file, commento di ogni funzione (cosa fa e logica interna) | da fare |
+| 5 | Swagger: OpenAPI generato dagli schemi zod, descrizione in italiano di ogni rotta, test di copertura, `/api/docs` e `/api/openapi.json`, collegamento da Impostazioni | da fare |
+| 6 | Chiusura: typecheck, lint, test, browser a 1280/768/375, PR verso main | da fare |
