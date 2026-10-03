@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
@@ -82,10 +83,6 @@ function pianoDto(r: RigaPiano, scorta: Set<number>): PianoSalvatoDto {
     opzioni: JSON.parse(r.opzioni_json) as PianoSalvatoDto['opzioni'], skill: skillIds.map((id) => skillDto(id)).filter((s): s is SkillRiassuntoDto => s !== null),
     piano, costo: r.costo, avanzamento: avanzamentoPiano(piano.radice, scorta), createdAt: r.created_at, updatedAt: r.updated_at,
   };
-}
-
-function verificaPartita(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
 }
 
 function verificaObiettivo(partitaId: number, obiettivoId: number | null | undefined, personaId: number): void {

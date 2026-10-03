@@ -17,7 +17,6 @@ export const METEO_PARTITA = [
 export type MeteoPartita = (typeof METEO_PARTITA)[number]['chiave'];
 
 export const nomeMeteo = (m: MeteoPartita): string => METEO_PARTITA.find((x) => x.chiave === m)?.nome ?? m;
-export const eMeteoPartita = (x: unknown): x is MeteoPartita => METEO_PARTITA.some((m) => m.chiave === x);
 
 /** Un segmento del testo della guida («Pioggia (acquazzone)», «Nuvoloso (ondata di gelo)») → il meteo; il modificatore fra parentesi non conta. */
 export function meteoDelSegmento(segmento: string): MeteoPartita | null {

@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
@@ -33,7 +34,7 @@ export function domande(partitaId?: number): DomandeDto {
   let dataGioco: string | null = null;
   if (partitaId !== undefined) {
     const p = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
-    if (!p) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+    if (!p) throw partitaNonTrovata(partitaId);
     dataGioco = p.data_gioco;
     fatte = new Set((prepared('SELECT domanda_id FROM domanda_partita WHERE partita_id = ?').all(partitaId) as Array<{ domanda_id: number }>).map((r) => r.domanda_id));
   }
@@ -51,7 +52,7 @@ export function domande(partitaId?: number): DomandeDto {
 /** Segna una domanda come fatta (o no) e registra l'evento. Con `conoscenza` la risposta vale una nota di Conoscenza: la
  *  risposta la dice (`daSegnare`), ma le Doti si segnano a mano (scelta dell'utente, 2026-09-30) e qui non si toccano. */
 export function impostaDomandaFatta(partitaId: number, domandaId: number, fatta: boolean, conoscenza: boolean): DomandeDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const d = prepared('SELECT * FROM domanda WHERE id = ?').get(domandaId) as RigaDomanda | undefined;
   if (!d) throw httpErrors.notFound('domanda-non-trovata', `La domanda ${domandaId} non esiste.`);
   const adesso = nowIso();

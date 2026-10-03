@@ -14,7 +14,6 @@
 
 /** Ambiti delle immagini caricate dall'utente per un'entità. */
 export const AMBITI_CARICAMENTO = ['arcana', 'confidente', 'personaggio', 'persona', 'skill', 'mappa', 'spillo', 'altro'] as const;
-export type AmbitoCaricamento = (typeof AMBITI_CARICAMENTO)[number];
 
 /** Le famiglie della grafica predefinita che vivono nel database (tutto ciò che non è compendio né `ui/`). */
 export const AMBITI_PREDEFINITI = ['affinita', 'attivita', 'confidenti', 'decori', 'doti', 'elementi', 'guida', 'identita', 'illustrazioni', 'mappe', 'meteo', 'palazzi', 'persona-gruppo', 'personaggi', 'sfondi', 'spilli'] as const;
@@ -23,10 +22,6 @@ export type AmbitoPredefinito = (typeof AMBITI_PREDEFINITI)[number];
 /** Tutti gli ambiti ammessi dalla tabella e dalle rotte. */
 export const AMBITI_IMMAGINE = [...AMBITI_CARICAMENTO, ...AMBITI_PREDEFINITI] as const;
 export type AmbitoImmagine = (typeof AMBITI_IMMAGINE)[number];
-
-export function ePredefinito(ambito: string): ambito is AmbitoPredefinito {
-  return (AMBITI_PREDEFINITI as readonly string[]).includes(ambito);
-}
 
 /** Estensioni ammesse per i file della grafica predefinita, in ordine di preferenza a parità di chiave (come il manifest di Vite). */
 export const ESTENSIONI_IMMAGINE = ['webp', 'png', 'svg', 'jpg', 'jpeg', 'gif'] as const;

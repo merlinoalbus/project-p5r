@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
 import { contestoDa, personaOErrore, scontoPartita } from './fusione/fusioneService.js';
@@ -32,7 +33,7 @@ function rangoArcana(partitaId: number, arcana: string): number {
 }
 
 /** Ricalcola e valida gli anelli: fusioni valide, catena continua, ritorno al bersaglio, lunghezza 2–5. */
-export function anelliValidati(partitaId: number, personaId: number, input: AnelloInput[]): AnelloCicloDto[] {
+function anelliValidati(partitaId: number, personaId: number, input: AnelloInput[]): AnelloCicloDto[] {
   if (input.length < 2 || input.length > 5) throw httpErrors.badRequest('ciclo-non-valido', 'Un ciclo ha da 2 a 5 anelli.');
   const { ctx } = contestoDa({ partitaId });
   const registro = new Set((prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1').all(partitaId) as Array<{ persona_id: number }>).map((r) => r.persona_id));
@@ -78,10 +79,6 @@ function riga(partitaId: number, id: number): RigaCiclo {
   const r = prepared(`${SQL_CICLO} WHERE c.id = ? AND c.partita_id = ?`).get(id, partitaId) as RigaCiclo | undefined;
   if (!r) throw httpErrors.notFound('ciclo-non-trovato', `Il ciclo ${id} non esiste in questa partita.`);
   return r;
-}
-
-function verificaPartita(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
 }
 
 export function cicliSalvati(partitaId: number): CicloSalvatoDto[] {

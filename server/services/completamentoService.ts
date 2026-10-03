@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { datiGuida } from './richiesteService.js';
 import type { CompletamentoDto, TrofeoDto } from '../../shared/types.js';
@@ -15,7 +16,7 @@ const dto = (r: RigaTrofeo, ottenuti: Set<string>): TrofeoDto => ({ chiave: r.ch
 
 function ottenutiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   return new Set((prepared('SELECT trofeo_chiave FROM trofeo_partita WHERE partita_id = ?').all(partitaId) as Array<{ trofeo_chiave: string }>).map((r) => r.trofeo_chiave));
 }
 
@@ -30,7 +31,7 @@ export function completamento(partitaId?: number): CompletamentoDto {
 
 /** Segna (o toglie) un trofeo come ottenuto nella partita; evento alla prima spunta. */
 export function impostaTrofeo(partitaId: number, chiave: string, ottenuto: boolean): TrofeoDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const r = prepared('SELECT * FROM trofeo WHERE chiave = ?').get(chiave) as RigaTrofeo | undefined;
   if (!r) throw httpErrors.notFound('trofeo-non-trovato', `Il trofeo '${chiave}' non esiste.`);
   const adesso = nowIso();

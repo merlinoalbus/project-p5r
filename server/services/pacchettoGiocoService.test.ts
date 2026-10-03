@@ -34,26 +34,35 @@ function unArticolo(): string {
   return (prepared('SELECT chiave FROM articolo WHERE negozio_chiave = ? ORDER BY chiave LIMIT 1').get(NEGOZIO) as { chiave: string }).chiave;
 }
 
-/** Il pacchetto esportato, letto in memoria e ripulito del file temporaneo. */
-async function pacchettoEsportato(): Promise<Buffer> {
+let progressivo = 0;
+/** Un percorso nuovo nella cartella di prova. */
+const fileDiProva = (nome: string): string => path.join(dataDir, `${++progressivo}-${nome}`);
+
+/** Il pacchetto esportato, spostato in un file della cartella di prova (il servizio lavora su file). */
+async function pacchettoEsportato(): Promise<string> {
   const { percorso, nome } = await esportaPacchetto();
   expect(nome).toMatch(/^project-p5r-gioco-.*\.db$/);
-  const contenuto = fs.readFileSync(percorso);
-  fs.rmSync(percorso, { force: true });
-  return contenuto;
+  const qui = fileDiProva('esportato.db');
+  fs.renameSync(percorso, qui);
+  return qui;
 }
 
-/** Una copia del pacchetto modificata a parte (versione, tabelle…). */
-function pacchettoModificato(contenuto: Buffer, modifica: (db: Database.Database) => void): Buffer {
-  const prova = path.join(dataDir, `modificato-${Date.now()}.db`);
-  fs.writeFileSync(prova, contenuto);
+/** Una copia del pacchetto modificata a parte (versione, tabelle…), in un file suo. */
+function pacchettoModificato(pacchetto: string, modifica: (db: Database.Database) => void): string {
+  const prova = fileDiProva('modificato.db');
+  fs.copyFileSync(pacchetto, prova);
   const db = new Database(prova);
   db.pragma('journal_mode = DELETE');
   modifica(db);
   db.close();
-  const esito = fs.readFileSync(prova);
-  fs.rmSync(prova, { force: true });
-  return esito;
+  return prova;
+}
+
+/** Un file con un contenuto qualunque (non un database). */
+function fileQualunque(testo: string): string {
+  const p = fileDiProva('qualunque.db');
+  fs.writeFileSync(p, testo);
+  return p;
 }
 
 beforeAll(() => {
@@ -75,8 +84,8 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
   it('una importazione per volta, con la fase interrogabile e l’esito che resta', async () => {
     // la seconda parte nello stesso giro sincrono della prima, quando il lucchetto è appena stato preso
     expect(statoImportazione().inCorso).toBe(false);
-    const prima = importaPacchetto(Buffer.from('non sono un database'));
-    const seconda = importaPacchetto(Buffer.from('nemmeno io'));
+    const prima = importaPacchetto(fileQualunque('non sono un database'));
+    const seconda = importaPacchetto(fileQualunque('nemmeno io'));
     expect(statoImportazione()).toMatchObject({ inCorso: true, fase: 'verifica' });
     const operazione = statoImportazione().operazione;
     expect(operazione).toBeTruthy();
@@ -87,7 +96,9 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
     expect(dopo.ultima).toMatchObject({ riuscita: false, esito: null, operazione });
     expect(dopo.ultima?.messaggio).toContain('non è un pacchetto di gioco');
     // il lucchetto è tornato libero
-    await expect(importaPacchetto(Buffer.from('ancora altro'))).rejects.toMatchObject({ code: 'pacchetto-non-valido' });
+    await expect(importaPacchetto(fileQualunque('ancora altro'))).rejects.toMatchObject({ code: 'pacchetto-non-valido' });
+    // la cartella di lavoro dell'importazione non resta in data/tmp, nemmeno quando fallisce
+    expect(fs.readdirSync(path.join(dataDir, 'tmp')).filter((f) => f.startsWith('importazione-'))).toEqual([]);
   });
 
   it('la versione dello schema che il codice sa leggere è l’ultima migrazione', () => {
@@ -95,10 +106,8 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
   });
 
   it('esporta il solo gioco.db, con le immagini dentro e senza partite', async () => {
-    const gioco = await pacchettoEsportato();
-    expect(gioco.toString('utf-8', 0, 15)).toBe('SQLite format 3');
-    const prova = path.join(dataDir, 'esportato.db');
-    fs.writeFileSync(prova, gioco);
+    const prova = await pacchettoEsportato();
+    expect(fs.readFileSync(prova).toString('utf-8', 0, 15)).toBe('SQLite format 3');
     const db = new Database(prova, { readonly: true });
     expect(db.prepare("SELECT COUNT(*) AS n FROM sqlite_master WHERE name = 'partita'").get()).toEqual({ n: 0 });
     expect((db.prepare("SELECT contenuto FROM immagine WHERE ambito = 'mappe' AND chiave = 'tokyo'").get() as { contenuto: Buffer }).contenuto.toString()).toBe('tokyo');
@@ -125,7 +134,9 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
     expect(a.motivo).toBeNull();
     expect(a.versioneSchema).toBe(a.versioneSchemaIstanza);
     expect(a.versioneSchemaCodice).toBe(versioneSchemaCodice());
-    expect(a.databaseByte).toBe(contenuto.length);
+    expect(a.databaseByte).toBe(fs.statSync(contenuto).size);
+    // l'anteprima non lascia giornali accanto al file
+    expect(fs.existsSync(`${contenuto}-wal`) || fs.existsSync(`${contenuto}-shm`)).toBe(false);
     expect(a.differenze).toEqual([{ tabella: 'articolo', istanza: articoliOra, pacchetto: articoliOra - 1 }, { tabella: 'immagine', istanza: immaginiOra, pacchetto: immaginiOra - 1 }]);
     expect(a.tabelleAssenti).toEqual([]);
     expect(a.immagini).toEqual({ istanza: 2, pacchetto: 1 });
@@ -150,9 +161,10 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
   });
 
   it('rifiuta ciò che non è un pacchetto di gioco: non SQLite, backup ZIP dell’istanza, database con le partite', async () => {
-    expect(() => anteprimaPacchetto(Buffer.from('non sono un database'))).toThrowError(expect.objectContaining({ code: 'pacchetto-non-valido' }));
+    expect(() => anteprimaPacchetto(fileQualunque('non sono un database'))).toThrowError(expect.objectContaining({ code: 'pacchetto-non-valido' }));
     const backup = await copiaIstanza();
-    expect(() => anteprimaPacchetto(backup.contenuto)).toThrowError(expect.objectContaining({ code: 'pacchetto-non-valido' }));
+    expect(() => anteprimaPacchetto(backup.percorso)).toThrowError(expect.objectContaining({ code: 'pacchetto-non-valido' }));
+    fs.rmSync(backup.percorso, { force: true });
     const contenuto = await pacchettoEsportato();
     const conPartite = pacchettoModificato(contenuto, (db) => { db.exec('CREATE TABLE partita (id INTEGER PRIMARY KEY)'); });
     expect(() => anteprimaPacchetto(conPartite)).toThrowError(expect.objectContaining({ code: 'pacchetto-con-partite' }));

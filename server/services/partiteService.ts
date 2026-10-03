@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata } from './verificaPartita.js';
 import { CHIAVI_STATISTICHE, origineStima, statisticheStimate, type Osservazione, type Statistiche } from '../../shared/statistiche.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
@@ -34,7 +35,7 @@ function partitaDto(r: RigaPartita): PartitaDto {
 
 function rigaPartita(id: number): RigaPartita {
   const r = prepared('SELECT * FROM partita WHERE id = ?').get(id) as RigaPartita | undefined;
-  if (!r) throw httpErrors.notFound('partita-non-trovata', `La partita ${id} non esiste.`);
+  if (!r) throw partitaNonTrovata(id);
   return r;
 }
 

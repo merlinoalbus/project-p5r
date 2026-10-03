@@ -44,7 +44,7 @@ function chiaveDi(ambito: string, chiave: string): string {
   return ambito === 'mappa' ? idMappa(chiave) : chiave;
 }
 
-export function urlFileImmagine(ambito: string, chiave: string): string {
+function urlFileImmagine(ambito: string, chiave: string): string {
   return `/api/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/file`;
 }
 

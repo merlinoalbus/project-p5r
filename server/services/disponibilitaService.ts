@@ -22,10 +22,9 @@ import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
-import type { RequisitoSeed } from '../../shared/seed.js';
 import { VOCE_DEL_PIN, VOCI_GESTITE_SQL } from './mappe/voceDelPin.js';
 import { nomiCondizioniMemo, pinCitato } from './condizioni/nomiCondizioni.js';
-import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
+import type { DisponibilitaDto, RequisitoRango, SemaforoRequisitoDto } from '../../shared/types.js';
 
 /** Stagioni del calendario di gioco per mese (aprile → marzo). */
 const STAGIONE_PER_MESE: Record<number, string> = { 4: 'primavera', 5: 'primavera', 6: 'estate', 7: 'estate', 8: 'estate', 9: 'autunno', 10: 'autunno', 11: 'autunno', 12: 'inverno', 1: 'inverno', 2: 'inverno', 3: 'primavera' };
@@ -39,7 +38,7 @@ function piatto(testo: string): string {
 export { ordineGioco, dataSbloccoQuartiere };
 
 /** Un requisito da valutare: quello di un Confidente (dal seed, con il suo testo) o una condizione con il testo generato. */
-export type RequisitoDisponibilita = RequisitoSeed | (RequisitoSpillo & { testo: string });
+export type RequisitoDisponibilita = RequisitoRango | (RequisitoSpillo & { testo: string });
 
 export interface SbloccoQuartiere { nome: string; dal: string | null }
 
@@ -70,7 +69,7 @@ export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
 }
 
 /** Le finestre dei Palazzi (data/seed/finestre-dungeon.json), lette da `dati_guida`. */
-export function finestreArchi(): Map<string, { dal: string; al: string | null }> {
+function finestreArchi(): Map<string, { dal: string; al: string | null }> {
   const out = new Map<string, { dal: string; al: string | null }>();
   const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
   if (!riga) return out;
@@ -251,7 +250,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return { ...esitoData, dettaglio: `${nome}: ${esitoData.dettaglio}` };
     }
     default: {
-      const { tipo, testo, ...dati } = r as RequisitoSeed & Record<string, unknown>;
+      const { tipo, testo, ...dati } = r as RequisitoRango & Record<string, unknown>;
       if (tipo === 'richiesta') dati.richiesta = (prepared('SELECT nome FROM richiesta WHERE chiave=?').get(String(dati.richiesta)) as { nome: string } | undefined)?.nome ?? dati.richiesta;
       const riga: RigaRequisito = { confidente_chiave: '', rango: 0, indice, tipo, dati_json: JSON.stringify(dati), testo };
       const valutato = valuta(riga, st);

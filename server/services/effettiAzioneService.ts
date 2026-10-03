@@ -104,7 +104,7 @@ export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): vo
 }
 
 /** «Incontro con Tae Takemi: Coraggio +2», o «già contato» se quell'incontro (o quel passaggio di rango) c'era già. */
-export function descriviIncontro(i: IncontroConfidenteDto): string {
+function descriviIncontro(i: IncontroConfidenteDto): string {
   if (i.giaContato) return `Incontro con ${i.nome} già contato`;
   return `Incontro con ${i.nome}${i.doti.length ? `: ${i.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')}` : ''}`;
 }

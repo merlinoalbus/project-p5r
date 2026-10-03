@@ -18,11 +18,12 @@ import { guastaLAperto, nomeMeteo, type MeteoPartita } from '../../shared/meteoP
 import { meteoOra } from './meteoService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
+import { nomeDote } from '../../shared/doti.js';
 import { t } from './traduzioniService.js';
-import type { RequisitoSeed } from '../../shared/seed.js';
-import type { SemaforiRangoDto, SemaforoRequisitoDto } from '../../shared/types.js';
+import type { RequisitoRango, SemaforiRangoDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
-export interface RigaRequisito { confidente_chiave: string; rango: number; indice: number; tipo: RequisitoSeed['tipo']; dati_json: string; testo: string }
+export interface RigaRequisito { confidente_chiave: string; rango: number; indice: number; tipo: RequisitoRango['tipo']; dati_json: string; testo: string }
 
 /** Stato della partita letto una volta per tutti i Confidenti. */
 export interface StatoPartitaSemafori {
@@ -74,7 +75,6 @@ function confrontaDate(a: string, b: string): number {
   return ordine(a) - ordine(b);
 }
 
-const NOMI_DOTI: Record<string, string> = { conoscenza: 'Conoscenza', coraggio: 'Coraggio', fascino: 'Fascino', gentilezza: 'Gentilezza', perizia: 'Perizia' };
 const NOMI_DUNGEON: Record<string, string> = { kamoshida: 'Palazzo di Kamoshida', madarame: 'Palazzo di Madarame', kaneshiro: 'Palazzo di Kaneshiro', futaba: 'Palazzo di Futaba', okumura: 'Palazzo di Okumura', niijima: 'Palazzo di Niijima', shido: 'Palazzo di Shido', maruki: 'Palazzo di Maruki', iweleth: 'Dedalo di Iweleth' };
 
 export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDto {
@@ -87,7 +87,7 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
     case 'dote': {
       const attuale = st.doti.get(String(dati.dote)) ?? 1;
       const richiesto = Number(dati.rango);
-      return { ...base, stato: attuale >= richiesto ? 'verde' : 'rosso', dettaglio: `${NOMI_DOTI[String(dati.dote)] ?? dati.dote}: rango ${attuale} di ${richiesto}`, manuale: false };
+      return { ...base, stato: attuale >= richiesto ? 'verde' : 'rosso', dettaglio: `${nomeDote(String(dati.dote))}: rango ${attuale} di ${richiesto}`, manuale: false };
     }
     case 'persona-arcano': {
       const ok = st.arcaniInScorta.has(String(dati.arcano));
@@ -183,7 +183,7 @@ export function impostaEventoStoria(partitaId: number, evento: string, avvenuto:
 /** Conferma (o revoca) a mano un requisito non verificabile. Un requisito `evento` non ha una conferma sua:
  *  segna l'evento della partita, così il Confidente e Partita → Progressi dicono la stessa cosa. */
 export function confermaRequisito(partitaId: number, chiave: string, rango: number, indice: number, confermato: boolean): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const riga = prepared('SELECT tipo, dati_json FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').get(chiave, rango, indice) as { tipo: string; dati_json: string } | undefined;
   if (!riga) throw httpErrors.notFound('requisito-non-trovato', 'Requisito non trovato.');
   if (riga.tipo === 'avviso') throw httpErrors.badRequest('requisito-non-confermabile', 'È un\'avvertenza da controllare nel gioco: non blocca il rango e non si conferma.');

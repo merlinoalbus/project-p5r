@@ -16,9 +16,9 @@ import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { leggiCondizioniSalvate, normalizzaCondizioniSpillo } from '../../../shared/condizioniSpillo.js';
 
-export const LIBRERIE = ['libreria-taiheido', 'hinokuniya', 'libreria-nagiuri'] as const;
+const LIBRERIE = ['libreria-taiheido', 'hinokuniya', 'libreria-nagiuri'] as const;
 /** Dove si compra ogni videogioco; chi non è qui sta da Super Baron. */
-export const NEGOZIO_VIDEOGIOCO: Readonly<Record<string, string>> = {
+const NEGOZIO_VIDEOGIOCO: Readonly<Record<string, string>> = {
   'videogioco-star-forneus': 'yumenoshima',
   'videogioco-gambla-goemon': 'yumenoshima',
 };

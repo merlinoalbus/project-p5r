@@ -29,7 +29,7 @@ import { quartiereSbloccato } from './061_libro_sblocca_un_luogo.js';
 const dote = (nome: string, note: number, extra: Partial<VoceEffetto> = {}): VoceEffetto => ({ effetto: { famiglia: 'dote', dote: nome.toLowerCase(), note }, ...extra });
 
 /** Le due attività di studio che rendono di più con la pioggia: «2 punti, 3 nei giorni di pioggia». */
-export const STUDIO_CON_PIOGGIA: ReadonlySet<string> = new Set(['studio-leblanc', 'studio-diner-shibuya']);
+const STUDIO_CON_PIOGGIA: ReadonlySet<string> = new Set(['studio-leblanc', 'studio-diner-shibuya']);
 
 function leggiEffetto(json: string | null): VoceEffetto[] {
   if (!json) return [];

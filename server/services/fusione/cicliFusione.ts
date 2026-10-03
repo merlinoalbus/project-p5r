@@ -15,7 +15,7 @@ import { prezzoEvocazione, type Disponibilita } from './alberoFusione.js';
 export type ModoPartner = 'scorta' | 'registro' | 'cattura';
 
 /** Numero massimo di anelli ammesso per un ciclo. */
-export const LUNGHEZZA_MASSIMA = 15;
+const LUNGHEZZA_MASSIMA = 15;
 
 export interface AnelloCiclo {
   ingrediente: PersonaFusione;

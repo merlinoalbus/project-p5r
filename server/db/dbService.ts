@@ -32,9 +32,6 @@ import { config } from '../config.js';
 /** Tipo della connessione SQLite condivisa dal processo backend. */
 export type AppDatabase = Database.Database;
 
-/** Nome dello schema attaccato che contiene le tabelle delle partite. */
-export const SCHEMA_UTENTE = 'utente';
-
 let db: AppDatabase | null = null;
 
 /** Percorso assoluto del file SQLite dei dati di gioco. */
@@ -48,7 +45,7 @@ export function resolvePartitePath(): string {
 }
 
 /** Il file delle partite che accompagna un dato file di gioco (`:memory:` resta in memoria). */
-export function percorsoPartiteDi(dbPath: string): string {
+function percorsoPartiteDi(dbPath: string): string {
   if (dbPath === ':memory:') return ':memory:';
   return dbPath === resolveDbPath() ? resolvePartitePath() : path.join(path.dirname(dbPath), config.partiteFileName);
 }

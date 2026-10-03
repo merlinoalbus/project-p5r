@@ -12,11 +12,12 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { ALLERTA_PIOGGIA, fasceDellaGuida, type MeteoPartita } from '../../shared/meteoPartita.js';
 import type { FasciaGioco, MeteoFasciaDto, MeteoGiornoDto } from '../../shared/types.js';
 
 /** Il testo del meteo della guida per il giorno: il calendario, e il percorso dove il calendario tace. */
-export function testoMeteoGuida(data: string): string | null {
+function testoMeteoGuida(data: string): string | null {
   const r = prepared(`SELECT COALESCE(c.meteo, p.meteo) AS meteo FROM (SELECT ? AS data) d
     LEFT JOIN giorno_calendario c ON c.data = d.data LEFT JOIN giorno_percorso p ON p.data = d.data`).get(data) as { meteo: string | null } | undefined;
   return r?.meteo ?? null;
@@ -60,7 +61,7 @@ export function meteoOra(partitaId: number, data: string | null, momento: Fascia
 
 /** Segna il meteo di un giorno: per ogni fascia indicata un meteo, o `null` per tornare a quello della guida. */
 export function impostaMeteo(partitaId: number, data: string, mod: { giorno?: MeteoPartita | null; sera?: MeteoPartita | null }): MeteoGiornoDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   if (!prepared('SELECT 1 FROM giorno_calendario WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Il ${data} non è un giorno del calendario di gioco.`);
   const prima = scelto(partitaId, data);
   const giorno = mod.giorno === undefined ? prima.giorno : mod.giorno;

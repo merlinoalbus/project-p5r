@@ -3,8 +3,8 @@
 // ============================================================
 
 import { z } from 'zod';
-import { boolQuery, idParam, livello, testoRicerca } from './comuni.js';
-import { DOTI_AZIONE, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type ChiaveDoteAzione, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione.js';
+import { boolQuery, dataGioco, dote, idParam, livello, testoRicerca, uidVoce } from './comuni.js';
+import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione.js';
 
 export const paramsId = z.object({ id: idParam });
 
@@ -32,17 +32,17 @@ export const queryOggetti = z.object({
 
 // ---- Guida giorno per giorno: le voci della giornata (canone, per tutte le partite) ----
 
-export const paramsGiornoGuida = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.') });
+export const paramsGiornoGuida = z.object({ data: dataGioco });
 /** Tipo, collegamento, rango atteso ed effetti di una voce della giornata: i valori
  *  ammessi sono gli elenchi chiusi di `shared/effettiAzione.ts`; che gli elementi esistano lo verifica il servizio. */
-export const campiAzioneStrutturata = {
+const campiAzioneStrutturata = {
   tipo: z.enum(TIPI_AZIONE.map((t) => t.chiave) as [TipoAzione, ...TipoAzione[]]).optional(),
   riferimento: z.object({ tipo: z.enum(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave) as [TipoRiferimentoAzione, ...TipoRiferimentoAzione[]]), chiave: z.string().trim().min(1).max(200) }).nullable().optional(),
   rangoAtteso: z.number().int().min(1).max(10).nullable().optional(),
   produce: z.array(z.unknown()).max(20).optional(),
 };
 /** Una voce della giornata (azione della guida, cosa da fare, evento): canone, per tutte le partite. */
-export const paramsVoceGiornata = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/, 'Identità della voce non valida.') });
+export const paramsVoceGiornata = z.object({ uid: uidVoce });
 const campiVoce = {
   genere: z.enum(['azione', 'evento', 'scadenza', 'promemoria']).optional(),
   // la guida ha azioni fino a ~780 caratteri e note fino a ~820: il margine lascia scrivere senza tagliare
@@ -62,6 +62,6 @@ export const bodySpostaVoce = z.object({ verso: z.union([z.literal(-1), z.litera
 export const bodyDotiIncontro = z.object({
   ranghi: z.array(z.object({
     rango: z.number().int().min(1).max(10),
-    doti: z.array(z.object({ dote: z.enum(DOTI_AZIONE.map((d) => d.chiave) as [ChiaveDoteAzione, ...ChiaveDoteAzione[]]), note: z.union([z.literal(1), z.literal(2), z.literal(3)]) })).max(5),
+    doti: z.array(z.object({ dote, note: z.union([z.literal(1), z.literal(2), z.literal(3)]) })).max(5),
   })).min(1).max(10),
 });

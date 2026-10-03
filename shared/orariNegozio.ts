@@ -47,10 +47,6 @@ export function leggiOrari(json: string | null | undefined): OrariNegozio {
   try { return normalizzaOrari(JSON.parse(json)); } catch { return ORARI_SEMPRE; }
 }
 
-export function eSempreAperto(o: OrariNegozio): boolean {
-  return o.giorni.length === 0 && o.fasce.length === 0 && !o.chiusoConPioggia;
-}
-
 /** Le condizioni di presenza equivalenti: sono quelle che il visore e le schede sanno già valutare. */
 export function orariComeCondizioni(o: OrariNegozio): RequisitoSpillo[] {
   const out: RequisitoSpillo[] = [];

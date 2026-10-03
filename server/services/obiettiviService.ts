@@ -8,6 +8,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
@@ -64,10 +65,6 @@ function rigaObiettivo(partitaId: number, id: number): RigaObiettivo {
   const r = prepared(`${SQL_OBIETTIVO} WHERE o.id = ? AND o.partita_id = ?`).get(id, partitaId) as RigaObiettivo | undefined;
   if (!r) throw httpErrors.notFound('obiettivo-non-trovato', `L'obiettivo ${id} non esiste in questa partita.`);
   return r;
-}
-
-function verificaPartita(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
 }
 
 function verificaSkill(skillIds: number[] | undefined): void {

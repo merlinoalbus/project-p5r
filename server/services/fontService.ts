@@ -15,7 +15,7 @@ import { httpErrors } from '../utils/httpError.js';
 import type { FontDto, FormatoFont, RuoloFont } from '../../shared/types.js';
 
 export const RUOLI_FONT = ['display', 'menu', 'decor'] as const;
-export const FORMATI_FONT = ['ttf', 'otf', 'woff', 'woff2'] as const;
+const FORMATI_FONT = ['ttf', 'otf', 'woff', 'woff2'] as const;
 export const MAX_BYTE_FONT = 4 * 1024 * 1024;
 
 const MIME_PER_FORMATO: Record<FormatoFont, string> = { ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2' };

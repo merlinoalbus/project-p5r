@@ -21,7 +21,7 @@ export function pinCitati(condizioni: readonly RequisitoSpillo[]): string[] {
  * Il giro che si chiuderebbe dando al pin `uid` queste condizioni, come elenco di uid dal pin al pin (`[A, B, A]`), o null.
  * Gli altri pin portano le condizioni salvate.
  */
-export function giroDiCondizioni(db: AppDatabase, uid: string, condizioni: readonly RequisitoSpillo[]): string[] | null {
+function giroDiCondizioni(db: AppDatabase, uid: string, condizioni: readonly RequisitoSpillo[]): string[] | null {
   const righe = db.prepare("SELECT uid, condizioni_json FROM spillo WHERE uid IS NOT NULL AND condizioni_json LIKE '%\"spillo\"%'").all() as Array<{ uid: string; condizioni_json: string }>;
   const archi = new Map(righe.map((r) => [r.uid, pinCitati(leggiCondizioniSalvate(r.condizioni_json))]));
   archi.set(uid, pinCitati(condizioni));

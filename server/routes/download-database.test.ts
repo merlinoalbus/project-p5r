@@ -49,7 +49,7 @@ describe('GET /api/impostazioni/istanza/database — errori dell\'invio', () => 
       expect(res.body).toBe('contenuto');
       expect(rm).toHaveBeenCalled();
       // la pulizia fallita è stata gestita (e scritta nel log), non lasciata uscire dalla callback
-      expect(avvisi).toContain('copia temporanea del database non rimossa');
+      expect(avvisi).toContain('file temporaneo dello scaricamento non rimosso');
     } finally {
       rm.mockRestore();
       fs.rmSync(stato.percorso, { force: true });

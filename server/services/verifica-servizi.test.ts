@@ -8,6 +8,7 @@
 // ============================================================
 
 import fs from 'node:fs';
+import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import Database from 'better-sqlite3';
@@ -16,7 +17,7 @@ import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
 import { runMigrations } from '../db/migrationRunner.js';
 import { pulisciGiornaliOrfani, ruotaCopieDiAvvio } from '../db/backupService.js';
 import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
-import { copiaDatabase, riapriIstanza, ripristinaIstanza, scriviDatabase, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
+import { copiaDatabase, installaDatabase, riapriIstanza, ripristinaIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import { elencaDungeon } from './dungeonService.js';
 import { importaPacchetto } from './pacchettoGiocoService.js';
 import { creaPartita, aggiornaPartita } from './partiteService.js';
@@ -39,15 +40,16 @@ afterAll(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
 });
 
-/** Una copia del file delle partite con `user_version` cambiato. */
-async function partiteConVersione(versione: number): Promise<Buffer> {
+/** Una copia del file delle partite con `user_version` cambiato, in un file della cartella di prova. */
+async function partiteConVersione(versione: number): Promise<string> {
   const copia = await copiaDatabase('partite');
   const db = new Database(copia.percorso);
   db.pragma(`user_version = ${versione}`);
   db.close();
-  const contenuto = fs.readFileSync(copia.percorso);
+  const qui = path.join(dataDir, `partite-${versione}-${Date.now()}.db`);
+  fs.copyFileSync(copia.percorso, qui);
   for (const coda of ['', '-wal', '-shm']) fs.rmSync(`${copia.percorso}${coda}`, { force: true });
-  return contenuto;
+  return qui;
 }
 
 describe('verifica servizi e DB', () => {
@@ -55,7 +57,7 @@ describe('verifica servizi e DB', () => {
     const istantanea = await partiteConVersione(getDb().pragma('utente.user_version', { simple: true }) as number);
     const primo = ripristinaIstanza(istantanea);
     await expect(ripristinaIstanza(istantanea)).rejects.toMatchObject({ code: 'importazione-in-corso', status: 409 });
-    await expect(importaPacchetto(Buffer.from('qualunque cosa'))).rejects.toMatchObject({ code: 'importazione-in-corso', status: 409 });
+    await expect(importaPacchetto(istantanea)).rejects.toMatchObject({ code: 'importazione-in-corso', status: 409 });
     await primo;
     // finito il primo, il lucchetto è libero
     const secondo = await ripristinaIstanza(istantanea);
@@ -68,19 +70,78 @@ describe('verifica servizi e DB', () => {
     expect(prepared('SELECT COUNT(*) AS n FROM persona').get()).toBeDefined(); // l'istanza è rimasta aperta
   });
 
-  it('C3: se la scrittura si interrompe, il database vivo resta intatto e non restano file a metà', () => {
-    const bersaglio = path.join(dataDir, 'atomico.db');
-    fs.writeFileSync(bersaglio, 'contenuto originale');
-    const scrivi = vi.spyOn(fs, 'writeSync').mockImplementation(() => { throw new Error('ENOSPC: disco pieno'); });
-    try {
-      expect(() => scriviDatabase(Buffer.from('contenuto nuovo che non arriverà'), bersaglio)).toThrow('ENOSPC');
-    } finally {
-      scrivi.mockRestore();
-    }
-    expect(fs.readFileSync(bersaglio, 'utf-8')).toBe('contenuto originale');
-    expect(fs.readdirSync(dataDir).filter((f) => f.startsWith('atomico.db.nuovo'))).toEqual([]);
-    scriviDatabase(Buffer.from('contenuto nuovo'), bersaglio);
-    expect(fs.readFileSync(bersaglio, 'utf-8')).toBe('contenuto nuovo');
+  describe('C3: il database vivo si sostituisce atomicamente (installaDatabase)', () => {
+    const bersaglio = (): string => path.join(dataDir, 'atomico.db');
+    const sorgente = (testo: string): string => { const p = path.join(dataDir, `sorgente-${Math.random().toString(36).slice(2)}.db`); fs.writeFileSync(p, testo); return p; };
+    const nuoviRimasti = (): string[] => fs.readdirSync(dataDir).filter((f) => f.startsWith('atomico.db.nuovo'));
+    beforeEach(() => {
+      fs.writeFileSync(bersaglio(), 'contenuto originale');
+      for (const coda of ['-wal', '-shm']) fs.writeFileSync(`${bersaglio()}${coda}`, 'giornale vecchio');
+    });
+
+    it('copia: se la scrittura si interrompe (disco pieno) il file vivo resta intatto e non restano file a metà', async () => {
+      const copia = vi.spyOn(fsp, 'copyFile').mockImplementation(async () => { throw new Error('ENOSPC: disco pieno'); });
+      try {
+        await expect(installaDatabase(sorgente('contenuto nuovo che non arriverà'), bersaglio(), 'copia')).rejects.toThrow('ENOSPC');
+      } finally {
+        copia.mockRestore();
+      }
+      expect(fs.readFileSync(bersaglio(), 'utf-8')).toBe('contenuto originale');
+      expect(nuoviRimasti()).toEqual([]);
+    });
+
+    it('copia: se il rename finale fallisce il file vivo resta intatto e il file nuovo si toglie', async () => {
+      const rinomina = vi.spyOn(fsp, 'rename').mockImplementation(async () => { throw new Error('EPERM: occupato'); });
+      try {
+        await expect(installaDatabase(sorgente('contenuto nuovo'), bersaglio(), 'copia')).rejects.toThrow('EPERM');
+      } finally {
+        rinomina.mockRestore();
+      }
+      expect(fs.readFileSync(bersaglio(), 'utf-8')).toBe('contenuto originale');
+      expect(nuoviRimasti()).toEqual([]);
+    });
+
+    it('copia: a lavoro finito c\'è il contenuto nuovo, il sorgente resta e i giornali vecchi non ci sono più', async () => {
+      const s = sorgente('contenuto nuovo');
+      await installaDatabase(s, bersaglio(), 'copia');
+      expect(fs.readFileSync(bersaglio(), 'utf-8')).toBe('contenuto nuovo');
+      expect(fs.existsSync(s)).toBe(true);
+      expect(fs.existsSync(`${bersaglio()}-wal`) || fs.existsSync(`${bersaglio()}-shm`)).toBe(false);
+    });
+
+    it('sposta: il file prende il posto di quello vivo senza copie; con dischi diversi (EXDEV) si ripiega sulla copia', async () => {
+      const s = sorgente('spostato');
+      await installaDatabase(s, bersaglio(), 'sposta');
+      expect(fs.readFileSync(bersaglio(), 'utf-8')).toBe('spostato');
+      expect(fs.existsSync(s)).toBe(false);
+      const altro = sorgente('da un altro disco');
+      const veraRinomina = fsp.rename;
+      let primo = true;
+      const rinomina = vi.spyOn(fsp, 'rename').mockImplementation(async (da, a) => {
+        if (primo) { primo = false; throw Object.assign(new Error('EXDEV: cross-device link'), { code: 'EXDEV' }); }
+        return veraRinomina(da, a);
+      });
+      try {
+        await installaDatabase(altro, bersaglio(), 'sposta');
+      } finally {
+        rinomina.mockRestore();
+      }
+      expect(fs.readFileSync(bersaglio(), 'utf-8')).toBe('da un altro disco');
+      expect(nuoviRimasti()).toEqual([]);
+    });
+
+    it('sposta: un errore che non è EXDEV non diventa una copia, e il file vivo resta intatto', async () => {
+      const rinomina = vi.spyOn(fsp, 'rename').mockImplementation(async () => { throw Object.assign(new Error('EACCES: permesso negato'), { code: 'EACCES' }); });
+      const copia = vi.spyOn(fsp, 'copyFile');
+      try {
+        await expect(installaDatabase(sorgente('mai'), bersaglio(), 'sposta')).rejects.toThrow('EACCES');
+        expect(copia).not.toHaveBeenCalled();
+      } finally {
+        rinomina.mockRestore();
+        copia.mockRestore();
+      }
+      expect(fs.readFileSync(bersaglio(), 'utf-8')).toBe('contenuto originale');
+    });
   });
 
   it('C4: una migrazione che viola una chiave esterna è annullata e resta da applicare', () => {
@@ -111,14 +172,14 @@ describe('verifica servizi e DB', () => {
     }
   });
 
-  it('C5: se dopo un errore anche la riapertura fallisce, l\'errore lo dice e indica la copia di sicurezza', () => {
+  it('C5: se dopo un errore anche la riapertura fallisce, l\'errore lo dice e indica la copia di sicurezza', async () => {
     const vera = config.dataDir;
     const rotta = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-riapertura-'));
     fs.mkdirSync(path.join(rotta, config.dbFileName)); // al posto del file c'è una cartella: SQLite non la apre
     (config as { dataDir: string }).dataDir = rotta;
     let errore: unknown;
     try {
-      tornaAllaCopiaDiSicurezza(path.join(rotta, 'copia-inesistente'), new Error('scrittura fallita'), 'ripristino-fallito', 'Ripristino');
+      await tornaAllaCopiaDiSicurezza(path.join(rotta, 'copia-inesistente'), new Error('scrittura fallita'), 'ripristino-fallito', 'Ripristino');
     } catch (err) {
       errore = err;
     } finally {
@@ -199,12 +260,14 @@ describe('verifica servizi e DB', () => {
     expect(prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(id)).toEqual({ livello_protagonista: 31 });
   });
 
-  it('B4\': la verifica di un file non lascia giornali in data/tmp', async () => {
+  it('B4\': la verifica di un file non lascia giornali, né accanto al file né in data/tmp', async () => {
     const copia = await copiaDatabase('gioco');
-    const contenuto = fs.readFileSync(copia.percorso);
-    for (const coda of ['', '-wal', '-shm']) fs.rmSync(`${copia.percorso}${coda}`, { force: true });
-    expect(verificaDatabase(contenuto)).toBe('gioco');
-    expect(fs.readdirSync(path.join(dataDir, 'tmp')).filter((f) => f.startsWith('verifica-'))).toEqual([]);
+    for (const coda of ['-wal', '-shm']) fs.rmSync(`${copia.percorso}${coda}`, { force: true });
+    const primaInTmp = fs.readdirSync(path.join(dataDir, 'tmp')).sort();
+    expect(verificaDatabase(copia.percorso)).toBe('gioco');
+    expect(fs.existsSync(`${copia.percorso}-wal`) || fs.existsSync(`${copia.percorso}-shm`)).toBe(false);
+    expect(fs.readdirSync(path.join(dataDir, 'tmp')).sort()).toEqual(primaInTmp);
+    fs.rmSync(copia.percorso, { force: true });
   });
 
   it('B5\': i giornali delle copie di avvio rimasti senza il loro database si tolgono; quelli di una copia presente restano', () => {

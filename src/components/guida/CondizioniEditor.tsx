@@ -16,7 +16,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { ARCHI_STORIA, CONTATORI, DOTI_CONDIZIONE, EVENTI_STORIA, GIORNI_NEL_MESE, GIORNI_SETTIMANA, MESI_GIOCO, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataLeggibile, descriviRequisitoSpillo, nascondeIlPin, nomePalazzo, ordineGioco, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
+import { DOTI_SOCIALI } from '../../../shared/doti';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_NEL_MESE, GIORNI_SETTIMANA, MESI_GIOCO, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataLeggibile, descriviRequisitoSpillo, nascondeIlPin, nomePalazzo, ordineGioco, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizione, valorePredefinito, type CampoCondizione, type SceltaCondizione, type TipoCampo, type ValoriCondizione } from '../../../shared/statiPartita';
 import { useCarica } from '../../hooks/useCarica';
 import { useIdStabili } from '../../hooks/useIdStabili';
@@ -43,7 +44,7 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'quartiere': return e.base.quartieri.filter((q) => q.sbloccoData != null).map((q) => ({ chiave: q.chiave, nome: q.nome, dettaglio: `dal ${dataLeggibile(q.sbloccoData!)}` }));
     case 'arco': return ARCHI_STORIA.map((d) => ({ chiave: d, nome: nomePalazzo(d) }));
     case 'palazzo': { const p = e.base.dungeon.filter((d) => d.tipo === 'palazzo'); return (p.length ? p : PALAZZI_CONDIZIONE).map((d) => ({ chiave: d.chiave, nome: d.nome })); }
-    case 'dote': return DOTI_CONDIZIONE.map((d) => ({ chiave: d.chiave, nome: d.nome }));
+    case 'dote': return DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome }));
     case 'confidente': return e.base.confidenti.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcana }));
     case 'membro': return e.extra.squadra;
     case 'richiesta': return e.base.richieste.map((r) => ({ chiave: r.chiave, nome: r.nome }));

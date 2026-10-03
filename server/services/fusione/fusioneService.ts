@@ -4,6 +4,7 @@
 
 import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
+import { partitaNonTrovata } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
 import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
@@ -26,7 +27,7 @@ export function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti:
   let dlc = opz.dlc ?? [];
   if (opz.partitaId !== undefined) {
     const r = prepared('SELECT dlc_posseduti_json FROM partita WHERE id = ?').get(opz.partitaId) as { dlc_posseduti_json: string } | undefined;
-    if (!r) throw httpErrors.notFound('partita-non-trovata', `La partita ${opz.partitaId} non esiste.`);
+    if (!r) throw partitaNonTrovata(opz.partitaId);
     dlc = JSON.parse(r.dlc_posseduti_json) as number[];
   }
   return { ctx: creaContesto(dlc), dlcPosseduti: dlc };
@@ -55,7 +56,7 @@ function ranghiPerArcana(partitaId: number | undefined): Map<string, { chiave: s
 /** Stato della Stanza di Velluto per la partita. */
 export function vellutoDto(partitaId: number): VellutoDto {
   const partita = prepared('SELECT id, allarme_attivo FROM partita WHERE id = ?').get(partitaId) as { id: number; allarme_attivo: number } | undefined;
-  if (!partita) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  if (!partita) throw partitaNonTrovata(partitaId);
   const c = scontoPartita(partitaId);
   const ranghi = ranghiPerArcana(partitaId);
   const gemelle = ranghi.get('Strength')?.rango ?? 0;

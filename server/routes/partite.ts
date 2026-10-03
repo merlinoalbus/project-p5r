@@ -29,6 +29,7 @@ import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
+import { idParam } from '../schemas/comuni.js';
 import { avanzaSeGiornoCompleto, impostaGiornoCorrente } from '../services/percorsoService.js';
 import { spuntaVoce } from '../services/giornataService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
@@ -180,7 +181,7 @@ router.get('/:id/suggerimenti', validate({ params: paramsPartita }), (req, res) 
 });
 
 /** Stato «raccolto» di uno spillo della mappa nella partita (Fase 13). */
-router.put('/:id/spilli/:spilloId', validate({ params: z.object({ id: z.coerce.number().int().positive(), spilloId: z.coerce.number().int().positive() }), body: bodyRaccolto }), (req, res) => {
+router.put('/:id/spilli/:spilloId', validate({ params: z.object({ id: idParam, spilloId: idParam }), body: bodyRaccolto }), (req, res) => {
   res.json(impostaRaccolto(Number(req.params.id), Number(req.params.spilloId), (req.body as { raccolto: boolean }).raccolto));
 });
 

@@ -15,14 +15,13 @@
 // gioco.db, riapertura con migrazioni e regole dell'avvio, orfani ricalcolati sui dati nuovi. Se
 // qualcosa fallisce a connessione chiusa, si torna alla copia di sicurezza.
 //
-// **Il pacchetto può anche NON passare dal browser.** Un'istanza pubblicata sta dietro un proxy (nginx,
-// un tunnel) che rifiuta i corpi grandi: 311 MB non attraversano quella strada, e il browser vede solo
-// «Failed to fetch». Con `scaricaPacchettoDaUrl` è il server a prendersi il file da un indirizzo che
-// raggiunge lui (la stessa rete privata, un file server interno): dal browser parte solo l'indirizzo,
-// poche decine di byte, e il limite del proxy non c'entra più.
+// **Il pacchetto non passa dal browser.** Un'istanza pubblicata sta dietro un proxy (nginx, un tunnel) che
+// rifiuta i corpi grandi: 311 MB non attraversano quella strada. Il file si mette nella cartella d'appoggio
+// (il NAS montato sul server, `DEPOSITO_DIR`) e il server lo legge da lì: dal browser parte solo il nome.
 // ============================================================
 
 import fs from 'node:fs';
+import fsp from 'node:fs/promises';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 import { logger } from '../utils/logger.js';
@@ -31,9 +30,9 @@ import { closeDb, getDb, resolveDbPath, resolvePartitePath } from '../db/dbServi
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
-import { cartellaTemporanea, copiaDatabase, copiaDiSicurezza, riapriIstanza, scriviDatabase, statoIstanza, timbro, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
+import { conCartellaDiLavoro, copiaDatabase, copiaDiSicurezza, installaDatabase, riapriIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
-import { ESTENSIONI_PACCHETTO, elencaDeposito as elencaCartella, leggiDalDeposito, percorsoNelDeposito } from './depositoService.js';
+import { ESTENSIONI_PACCHETTO, copiaDalDeposito, elencaDeposito as elencaCartella, percorsoNelDeposito } from './depositoService.js';
 
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
@@ -162,30 +161,61 @@ export function anteprimaPacchettoDaDeposito(nome: string): AnteprimaPacchettoDt
   const byte = fs.statSync(percorso).size;
   if (byte < 100) throw httpErrors.badRequest('pacchetto-non-valido', `«${nome}» è troppo piccolo per essere un pacchetto di gioco.`);
   // la firma sta nei primi sedici byte: si legge solo quella, non tutto il file
+  if (!haFirmaSqlite(percorso)) throw httpErrors.badRequest('pacchetto-non-valido', `«${nome}» non è un database SQLite: nella cartella d'appoggio serve il file gioco.db scaricato dall'app.`);
+  return conPacchettoAperto(percorso, (db) => anteprimaDalDatabase(db, byte, nome));
+}
+
+/** Il file comincia con l'intestazione di SQLite? Legge solo i primi sedici byte. */
+function haFirmaSqlite(percorso: string): boolean {
   const firma = Buffer.alloc(16);
   const f = fs.openSync(percorso, 'r');
   try {
-    fs.readSync(f, firma, 0, 16, 0);
+    return fs.readSync(f, firma, 0, 16, 0) === 16 && firma.toString('utf-8') === FIRMA_SQLITE;
   } finally {
     fs.closeSync(f);
   }
-  if (firma.toString('utf-8') !== FIRMA_SQLITE) throw httpErrors.badRequest('pacchetto-non-valido', `«${nome}» non è un database SQLite: nella cartella d'appoggio serve il file gioco.db scaricato dall'app.`);
-  const db = new Database(percorso, { readonly: true });
+}
+
+/**
+ * Apre un pacchetto dov'è, in sola lettura, con le partite dell'istanza attaccate (per il confronto degli orfani), e lo passa a
+ * `fn`. Il file non cambia: aprire un database in WAL può creare i suoi giornali, e si tolgono quelli che prima non c'erano
+ * (anche sul deposito, dove altrimenti restavano accanto al pacchetto).
+ */
+function conPacchettoAperto<T>(percorso: string, fn: (db: Database.Database) => T): T {
+  const giornaliPrima = new Set(['-wal', '-shm'].filter((coda) => fs.existsSync(`${percorso}${coda}`)));
   try {
-    db.prepare('ATTACH DATABASE ? AS utente').run(resolvePartitePath());
-    return anteprimaDalDatabase(db, byte, nome);
+    const db = new Database(percorso, { readonly: true });
+    try {
+      db.prepare('ATTACH DATABASE ? AS utente').run(resolvePartitePath());
+      return fn(db);
+    } finally {
+      db.close();
+    }
   } finally {
-    db.close();
+    for (const coda of ['-wal', '-shm']) if (!giornaliPrima.has(coda)) fs.rmSync(`${percorso}${coda}`, { force: true });
   }
 }
 
-/** Sostituisce i dati di gioco con un pacchetto depositato sul NAS. */
+/** L'importazione non c'è per un'istanza che tiene il database in memoria (nessun file da sostituire). */
+function richiediIstanzaSuDisco(): void {
+  if (!fs.existsSync(resolveDbPath())) throw httpErrors.badRequest('istanza-in-memoria', 'Questa istanza tiene il database in memoria: l\'importazione del pacchetto non è disponibile.');
+}
+
+/**
+ * Sostituisce i dati di gioco con un pacchetto depositato sul NAS. Il file si copia una volta sola nella cartella di lavoro locale
+ * (`data/tmp`): lì si verifica, e da lì prende il posto di gioco.db con un `rename`. Prima si leggeva tutto in memoria e si riscriveva
+ * tre volte (verifica, anteprima, sostituzione: rilievo P3' della verifica, 2026-10-03).
+ */
 export async function importaPacchettoDaDeposito(nome: string): Promise<EsitoImportazionePacchettoDto> {
   const operazione = impegna('lettura');
   try {
-    const contenuto = leggiDalDeposito(nome);
-    avanza('verifica');
-    const esito = await sostituisciDatiDiGioco(contenuto);
+    richiediIstanzaSuDisco();
+    const esito = await conCartellaDiLavoro('importazione', async (lavoro) => {
+      const file = path.join(lavoro, 'gioco.db');
+      await copiaDalDeposito(nome, file);
+      avanza('verifica');
+      return sostituisciDatiDiGioco(file);
+    });
     libera(operazione, true, `Dati di gioco sostituiti da «${nome}» (schema ${esito.versioneSchema}).`, esito);
     return esito;
   } catch (err) {
@@ -200,36 +230,18 @@ export function esportaPacchetto(): Promise<{ percorso: string; nome: string }> 
 }
 
 /** Il file è un pacchetto di gioco: SQLite integro, con i dati di gioco e senza partite. */
-function verificaPacchetto(contenuto: Buffer): void {
-  if (contenuto.length < 100 || contenuto.toString('utf-8', 0, 16) !== FIRMA_SQLITE) {
+function verificaPacchetto(percorso: string): void {
+  if (fs.statSync(percorso).size < 100 || !haFirmaSqlite(percorso)) {
     throw httpErrors.badRequest('pacchetto-non-valido', 'Il file non è un pacchetto di gioco: carica il file gioco.db scaricato da «Scarica il pacchetto di gioco».');
   }
-  const cosa = verificaDatabase(contenuto);
+  const cosa = verificaDatabase(percorso);
   if (cosa !== 'gioco') throw httpErrors.badRequest('pacchetto-con-partite', cosa === 'partite' ? 'Il file contiene solo partite: un pacchetto di gioco porta i dati di gioco.' : 'Il file contiene anche le partite (vecchio file unico): un pacchetto di gioco porta solo i dati di gioco. Per quel file usa «Backup e ripristino».');
 }
 
-/** Il file temporaneo del gioco.db del pacchetto, aperto a parte con le partite dell'istanza attaccate per il confronto. */
-function conDatabaseDelPacchetto<T>(gioco: Buffer, fn: (db: Database.Database) => T): T {
-  const prova = path.join(cartellaTemporanea(), `anteprima-${timbro()}.db`);
-  fs.writeFileSync(prova, gioco);
-  try {
-    const db = new Database(prova);
-    try {
-      db.pragma('journal_mode = DELETE');
-      db.prepare('ATTACH DATABASE ? AS utente').run(resolvePartitePath());
-      return fn(db);
-    } finally {
-      db.close();
-    }
-  } finally {
-    for (const coda of ['', '-wal', '-shm']) fs.rmSync(`${prova}${coda}`, { force: true });
-  }
-}
-
-/** Che cosa cambierebbe importando il pacchetto. Legge il file e non sostituisce nulla. */
-export function anteprimaPacchetto(contenuto: Buffer): AnteprimaPacchettoDto {
-  verificaPacchetto(contenuto);
-  return conDatabaseDelPacchetto(contenuto, (db) => anteprimaDalDatabase(db, contenuto.length));
+/** Che cosa cambierebbe importando il pacchetto in `percorso` (un file locale). Lo verifica per intero e non sostituisce nulla. */
+export function anteprimaPacchetto(percorso: string): AnteprimaPacchettoDto {
+  verificaPacchetto(percorso);
+  return conPacchettoAperto(percorso, (db) => anteprimaDalDatabase(db, fs.statSync(percorso).size));
 }
 
 /** Il confronto vero e proprio, su un pacchetto già aperto (in un temporaneo o dov'è depositato). */
@@ -301,11 +313,16 @@ export function statoImportazione(): StatoImportazionePacchettoDto {
   return { inCorso: inCorso !== null, operazione: inCorso?.operazione ?? null, fase: inCorso?.fase ?? null, iniziataIl: inCorso?.iniziataIl ?? null, ultima };
 }
 
-/** Sostituisce i dati di gioco con il pacchetto già in mano (corpo della richiesta). */
-export async function importaPacchetto(contenuto: Buffer): Promise<EsitoImportazionePacchettoDto> {
+/** Sostituisce i dati di gioco con il pacchetto in un file locale (`percorso` resta com'è: se ne lavora una copia). */
+export async function importaPacchetto(percorso: string): Promise<EsitoImportazionePacchettoDto> {
   const operazione = impegna('verifica');
   try {
-    const esito = await sostituisciDatiDiGioco(contenuto);
+    richiediIstanzaSuDisco();
+    const esito = await conCartellaDiLavoro('importazione', async (lavoro) => {
+      const file = path.join(lavoro, 'gioco.db');
+      await fsp.copyFile(percorso, file);
+      return sostituisciDatiDiGioco(file);
+    });
     libera(operazione, true, `Dati di gioco sostituiti (schema ${esito.versioneSchema}).`, esito);
     return esito;
   } catch (err) {
@@ -315,27 +332,26 @@ export async function importaPacchetto(contenuto: Buffer): Promise<EsitoImportaz
 }
 
 /**
- * Il lavoro vero: copia di sicurezza, chiusura, scrittura di gioco.db, riapertura con migrazioni e regole
- * dell'avvio. Le partite restano. Chiamata solo con il lucchetto in mano.
+ * Il lavoro vero, sul file nella cartella di lavoro: verifica e anteprima, copia di sicurezza, chiusura, il file al posto di gioco.db,
+ * riapertura con migrazioni e regole dell'avvio. Le partite restano. Chiamata solo con il lucchetto in mano.
  */
-async function sostituisciDatiDiGioco(contenuto: Buffer): Promise<EsitoImportazionePacchettoDto> {
-  if (!fs.existsSync(resolveDbPath())) throw httpErrors.badRequest('istanza-in-memoria', 'Questa istanza tiene il database in memoria: l\'importazione del pacchetto non è disponibile.');
-  // l'anteprima si rifà qui (il file arriva di nuovo dal browser: quella mostrata all'utente non è vincolante), quindi il file
-  // passa due volte dalla cartella temporanea; in locale è il costo di qualche secondo su ~300 MB
-  const anteprima = anteprimaPacchetto(contenuto);
+async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePacchettoDto> {
+  // l'anteprima si rifà qui, sul file che si sta per installare: quella mostrata all'utente era sul file depositato, che
+  // nel frattempo può essere cambiato
+  const anteprima = anteprimaPacchetto(file);
   if (!anteprima.importabile) throw httpErrors.badRequest('pacchetto-troppo-nuovo', anteprima.motivo ?? 'Il pacchetto non è importabile.');
   avanza('copia-di-sicurezza');
   const salvataggio = await copiaDiSicurezza();
   closeDb();
   try {
     avanza('sostituzione');
-    scriviDatabase(contenuto, resolveDbPath());
+    await installaDatabase(file, resolveDbPath(), 'sposta');
     avanza('riapertura');
     riapriIstanza();
     // le stesse regole dell'avvio sui dati nuovi (l'assorbimento delle immagini su disco, già fatto da riapriIstanza, qui non trova nulla)
     regoleAllAvvio(getDb());
   } catch (err) {
-    tornaAllaCopiaDiSicurezza(salvataggio, err, 'importazione-fallita', 'Importazione del pacchetto');
+    await tornaAllaCopiaDiSicurezza(salvataggio, err, 'importazione-fallita', 'Importazione del pacchetto');
   }
   avanza('controllo');
   const db = getDb();

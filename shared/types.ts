@@ -4,6 +4,8 @@ import type { TipoLuogo } from './tipiLuogo.js';
 import type { RequisitoSpillo } from './condizioniSpillo.js';
 import type { OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
+import type { DoteChiave } from './doti.js';
+import type { CategoriaArticolo } from './articoli.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 import type { MeteoPartita } from './meteoPartita.js';
 // ============================================================
@@ -173,6 +175,27 @@ export interface OggettoDto {
   descrizione: string;
   descrizioneNome: string;
 }
+
+/** Requisito strutturato per raggiungere un rango di un Confidente (Fase 12.3; righe di `confidente_requisito`). Era
+ *  `RequisitoSeed` in `shared/seed.ts`, l'ultimo tipo vivo del seed JSON dismesso (rilievo O12 della verifica, 2026-10-03). */
+export type RequisitoRango =
+  | { tipo: 'dote'; dote: string; rango: number; testo: string }
+  | { tipo: 'persona-arcano'; arcano: string; testo: string }
+  /** Una Persona precisa con una skill precisa nella scorta (richieste delle Gemelle Custodi). */
+  | { tipo: 'persona-abilita'; persona: string; abilita: string; testo: string }
+  | { tipo: 'palazzo'; dungeon: string; testo: string }
+  | { tipo: 'richiesta'; richiesta: string; testo: string }
+  | { tipo: 'confidente'; confidente: string; rango: number; testo: string }
+  /** Un Ladro Fantasma gia' in squadra: il dato sta in `membro_squadra_partita` (migrazione 057). */
+  | { tipo: 'squadra'; membro: string; testo: string }
+  | { tipo: 'data'; dal: string; testo: string }
+  | { tipo: 'meteo'; condizione: 'non-piove'; testo: string }
+  /** Un fatto della storia segnato nella partita (`EVENTI_STORIA`, Partita → Progressi): il caffè al Leblanc, il duello con Akechi… */
+  | { tipo: 'evento'; evento: string; testo: string }
+  /** Un'avvertenza da controllare nel gioco, che **non blocca** il rango (la scuola aperta per Futaba al rango 4). */
+  | { tipo: 'avviso'; testo: string }
+  /** Non verificabile dall'app: grigio finché non lo confermi a mano (resta per i pacchetti che lo usano ancora). */
+  | { tipo: 'manuale'; testo: string };
 
 export interface ConfidenteDto {
   chiave: string;
@@ -1246,7 +1269,7 @@ export interface ArticoloDto {
   negozioNome: string;
   nome: string;
   nomeIt: string | null;
-  categoria: 'arma' | 'protezione' | 'accessorio' | 'abito' | 'consumabile' | 'regalo' | 'materiale' | 'cibo' | 'cura' | 'sp' | 'battaglia' | 'stato' | 'esplorazione' | 'oggetto-chiave' | 'libro' | 'film' | 'dvd' | 'videogioco' | 'altro';
+  categoria: CategoriaArticolo;
   /** Personaggio destinatario, «tutti», «party» o null se non indicato. */
   per: string | null;
   prezzo: number | null;
@@ -1305,7 +1328,7 @@ export interface CruciverbaTuttiDto {
 
 // ---- Città, attività, libri e film (Fase 8.1) ----
 
-export type DoteChiave = 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia';
+export type { DoteChiave } from './doti.js';
 
 export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number }
 export interface QuartiereRiassuntoDto {
@@ -2128,9 +2151,6 @@ export interface DepositoFileDto {
   motivo: string | null;
   file: FileDepositoDto[];
 }
-
-/** Nome storico, mantenuto come sinonimo per chi legge i pacchetti. */
-export type DepositoPacchettiDto = DepositoFileDto;
 
 /** A che punto è l'importazione del pacchetto, mentre la si aspetta.
  *

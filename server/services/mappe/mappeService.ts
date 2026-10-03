@@ -14,6 +14,7 @@ import { slug } from '../../../shared/slug.js';
 
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
+import { verificaPartita } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
 import { dettaglioNegozio } from '../negoziService.js';
@@ -234,7 +235,7 @@ interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: Stat
 /** Nomi (Confidenti, quartieri, richieste, Palazzi) per descrivere le condizioni: letti una volta per risposta. */
 
 function contestoSpilli(partitaId?: number): ContestoSpilli {
-  if (partitaId && !prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  if (partitaId) verificaPartita(partitaId);
   // «raccolto» è legato all'uid dello spillo (067): sopravvive a un pacchetto reimportato o a un gioco.db sostituito
   const raccolti = partitaId ? new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((x) => x.spillo_uid)) : undefined;
   const st = partitaId ? statoDisponibilitaPartita(partitaId) : null;
@@ -264,7 +265,7 @@ function senzaIngressoAPalazzoCompletato(esito: DisponibilitaDto | undefined, r:
 }
 
 /** Condizioni salvate nello spillo (JSON) → elenco normalizzato; un JSON rovinato vale come nessuna condizione. */
-export function condizioniDiRiga(json: string | null): RequisitoSpillo[] {
+function condizioniDiRiga(json: string | null): RequisitoSpillo[] {
   return leggiCondizioniSalvate(json);
 }
 
@@ -522,7 +523,7 @@ function allineaColonneArea(mappa: string): void {
 }
 
 /** Le aree della guida legate a una mappa, in ordine di guida. */
-export function areeDellaMappa(mappa: string): Array<{ chiave: string; nome: string; ordine: number }> {
+function areeDellaMappa(mappa: string): Array<{ chiave: string; nome: string; ordine: number }> {
   return prepared(`SELECT a.chiave, a.nome, a.ordine FROM mappa_entita e JOIN dungeon_area a ON a.chiave = e.entita_chiave
     WHERE e.mappa_chiave = ? AND e.entita_tipo = 'area' ORDER BY a.ordine, a.chiave`).all(mappa) as Array<{ chiave: string; nome: string; ordine: number }>;
 }
@@ -1167,7 +1168,7 @@ export function eliminaSpillo(id: number): void {
 /** Stato «raccolto» di uno spillo per partita (in uso normale; per gli spilli collegati a un punto aggiorna anche lo stato del punto nella Guida). */
 export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: boolean): SpilloDto | SchedaContenutoGuidaDto {
   assegnaUidMancanti(getDb());
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${spilloId} non esiste.`);
   // Si segna un pin che ha uno stato (2026-10-03, `statoCitabile`: la stessa regola delle condizioni «Pin di una mappa»):
@@ -1278,7 +1279,7 @@ export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30):
 // ---- Esportazione / importazione ----
 
 /** Chiavi della mappa `radice` e di tutte le discendenti (ordine di visita: genitori prima dei figli). */
-export function discendentiDi(radice: string): string[] {
+function discendentiDi(radice: string): string[] {
   rigaMappa(radice);
   const out: string[] = [radice];
   for (let i = 0; i < out.length; i++) {

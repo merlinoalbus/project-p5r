@@ -18,14 +18,11 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import type { MembroSquadraDto, SquadraPartitaDto } from '../../shared/types.js';
 
 interface RigaPersonaggio { chiave: string; nome: string; ordine: number }
-
-function partitaEsiste(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
-}
 
 /** I Ladri giocabili, nell'ordine del seed: è il seed a dire chi sono, non un elenco scritto qui. */
 export function giocabili(): RigaPersonaggio[] {
@@ -38,7 +35,7 @@ export function giocabili(): RigaPersonaggio[] {
 
 /** Denaro del gruppo e stato di ogni Ladro; `segnato` distingue il non compilato dallo zero. */
 export function squadraPartita(partitaId: number): SquadraPartitaDto {
-  partitaEsiste(partitaId);
+  verificaPartita(partitaId);
   const p = prepared('SELECT yen, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { yen: number; livello_protagonista: number };
   const righe = new Map((prepared('SELECT personaggio_chiave, livello, esperienza, in_squadra, updated_at FROM membro_squadra_partita WHERE partita_id = ?').all(partitaId) as Array<{ personaggio_chiave: string; livello: number; esperienza: number; in_squadra: number; updated_at: string }>).map((r) => [r.personaggio_chiave, r]));
   const membri: MembroSquadraDto[] = giocabili().map((g) => {
@@ -61,7 +58,7 @@ export function squadraPartita(partitaId: number): SquadraPartitaDto {
 
 /** Cambia i yen del gruppo: valore assoluto o differenza, mai sotto zero. */
 export function impostaYen(partitaId: number, mod: { yen?: number; delta?: number }): SquadraPartitaDto {
-  partitaEsiste(partitaId);
+  verificaPartita(partitaId);
   const attuale = (prepared('SELECT yen FROM partita WHERE id = ?').get(partitaId) as { yen: number }).yen;
   const nuovo = Math.max(0, mod.yen !== undefined ? mod.yen : attuale + (mod.delta ?? 0));
   const adesso = nowIso();
@@ -77,7 +74,7 @@ export function impostaYen(partitaId: number, mod: { yen?: number; delta?: numbe
 
 /** Livello ed esperienza di un Ladro. La riga nasce alla prima scrittura: prima non era «zero», era «non segnato». */
 export function impostaMembro(partitaId: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number; inSquadra?: boolean }): SquadraPartitaDto {
-  partitaEsiste(partitaId);
+  verificaPartita(partitaId);
   const g = giocabili().find((x) => x.chiave === chiave);
   if (!g) throw httpErrors.notFound('membro-non-trovato', `'${chiave}' non è un membro giocabile della squadra.`);
   const r = prepared('SELECT livello, esperienza, in_squadra FROM membro_squadra_partita WHERE partita_id = ? AND personaggio_chiave = ?').get(partitaId, chiave) as { livello: number; esperienza: number; in_squadra: number } | undefined;

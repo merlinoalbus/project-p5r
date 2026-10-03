@@ -10,15 +10,15 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata } from './verificaPartita.js';
 import { slug } from '../../shared/slug.js';
 import { confidenti } from './partiteService.js';
 import { statoAzione } from './azioniStrutturateService.js';
 import { righeDelGiorno, spuntePartita, voceBase } from './giornataService.js';
 import type { SuggerimentiOggiDto } from '../../shared/types.js';
+import { CHIAVI_DOTI } from '../../shared/doti.js';
 
-const DOTI = ['conoscenza', 'fascino', 'gentilezza', 'coraggio', 'perizia'] as const;
-const RE_DOTE_GUADAGNO = new RegExp(`(?:(${DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${DOTI.join('|')}))`, 'gi');
+const RE_DOTE_GUADAGNO = new RegExp(`(?:(${CHIAVI_DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${CHIAVI_DOTI.join('|')}))`, 'gi');
 
 /** Doti citate come guadagno nel testo dell'azione o nelle sue note («Perizia +2», «Aumenta Coraggio»). */
 function dotiDalTesto(testo: string): string[] {
@@ -135,7 +135,7 @@ function personaggiDiConfidente(chiaveConfidente: string): string[] {
 /** Chiavi da evidenziare per le azioni ancora da fare del giorno corrente della partita. */
 export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
   const partita = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
-  if (!partita) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  if (!partita) throw partitaNonTrovata(partitaId);
   const vuoto: SuggerimentiOggiDto = {
     giorno: null, confidenti: [], personaggi: [], dungeon: [], aree: [], libri: [], film: [], articoli: [], attivita: [],
     richieste: [], negozi: [], luoghi: [], quartieri: [], doti: [], mappe: [], spilli: [], motivi: [],

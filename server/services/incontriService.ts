@@ -41,7 +41,7 @@ export interface MomentoIncontro {
 }
 
 /** Le Doti (con le note) che dà un incontro verso il rango `verso` del Confidente. */
-export function dotiDellIncontro(confidente: string, verso: number): Array<{ dote: string; note: 1 | 2 | 3 }> {
+function dotiDellIncontro(confidente: string, verso: number): Array<{ dote: string; note: 1 | 2 | 3 }> {
   const r = prepared('SELECT effetti_json FROM confidente_dote_incontro WHERE confidente_chiave = ? AND verso_rango = ?').get(confidente, verso) as { effetti_json: string | null } | undefined;
   return leggiVociEffetto(r?.effetti_json).filter((v) => v.effetto.famiglia === 'dote')
     .map((v) => ({ dote: (v.effetto as { dote: string }).dote, note: Math.min(3, Math.max(1, (v.effetto as { note: number }).note)) as 1 | 2 | 3 }));

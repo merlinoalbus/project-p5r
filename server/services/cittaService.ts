@@ -173,7 +173,7 @@ export async function scaricaPiantaQuartiere(quartiere: string): Promise<{ quart
   return { quartiere, mime: img.mime, byte: img.byte, fonte: p.fonte, url: p.url };
 }
 
-export function ingressoQuartiere(quartiere: string): IngressoQuartiereDto | null {
+function ingressoQuartiere(quartiere: string): IngressoQuartiereDto | null {
  const i = prepared('SELECT * FROM quartiere_ingresso WHERE quartiere_chiave=?').get(quartiere) as { mappa_chiave: string; x: number; y: number; zoom: number } | undefined;
  return i ? { mappa: chiaveMappa(i.mappa_chiave), nome: nomePercorso(i.mappa_chiave), x: i.x, y: i.y, zoom: i.zoom } : null;
 }

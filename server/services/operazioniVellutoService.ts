@@ -9,6 +9,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
@@ -40,7 +41,7 @@ function rangoArcana(partitaId: number, arcana: string): number {
 
 function partitaInfo(partitaId: number): { allarme: boolean; livelloProtagonista: number } {
   const r = prepared('SELECT allarme_attivo, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { allarme_attivo: number; livello_protagonista: number } | undefined;
-  if (!r) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  if (!r) throw partitaNonTrovata(partitaId);
   return { allarme: r.allarme_attivo === 1, livelloProtagonista: r.livello_protagonista };
 }
 

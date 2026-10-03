@@ -39,7 +39,7 @@ export function skillDto(id: number): SkillRiassuntoDto | null {
   return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento, elementoNome: t('elementoSkill', s.elemento), costo: costoDto(s.costo_tipo, s.costo_valore), effetto: s.effetto, effettoNome: t('effettoSkill', s.effetto) };
 }
 
-export function costoDto(tipo: 'sp' | 'hp' | 'nessuno', valore: number): CostoSkillDto {
+function costoDto(tipo: 'sp' | 'hp' | 'nessuno', valore: number): CostoSkillDto {
   const testo = tipo === 'sp' ? `${valore} SP` : tipo === 'hp' ? `${valore}% HP` : '—';
   return { tipo, valore, testo };
 }

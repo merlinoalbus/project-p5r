@@ -77,7 +77,7 @@ function scriviPredefinita(db: Db, ambito: string, chiave: string, nomeFile: str
 }
 
 /** (2) Le famiglie della grafica di gioco in `dirAsset` (`public/asset`): una riga per file, chiave del manifesto. */
-export function assorbiFamiglieDelRepository(db: Db, dirAsset: string, adesso: string = new Date().toISOString()): number {
+function assorbiFamiglieDelRepository(db: Db, dirAsset: string, adesso: string = new Date().toISOString()): number {
   let n = 0;
   for (const famiglia of AMBITI_PREDEFINITI) {
     const dir = path.join(dirAsset, famiglia);
@@ -95,7 +95,7 @@ export function assorbiFamiglieDelRepository(db: Db, dirAsset: string, adesso: s
 }
 
 /** (3) Dal pacchetto del repository (connessione a parte, sola lettura): le righe piene che l'istanza non ha o ha vuote. */
-export function assorbiDalPacchetto(db: Db, percorsoPacchetto: string): number {
+function assorbiDalPacchetto(db: Db, percorsoPacchetto: string): number {
   const corrente = percorsoMain(db);
   // un database in memoria è un test: non si trascinano dentro centinaia di MB di immagini
   if (!corrente || !fs.existsSync(percorsoPacchetto) || path.resolve(corrente) === path.resolve(percorsoPacchetto)) return 0;

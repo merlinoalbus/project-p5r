@@ -73,8 +73,3 @@ export function runMigrations(db: AppDatabase, list: Migration[] = allMigrations
   applica(db, 'main', list);
   applica(db, 'utente', listaUtente);
 }
-
-/** Solo le migrazioni delle partite: per un `partite.db` nuovo accanto a un `gioco.db` già a posto. */
-export function runMigrationsUtente(db: AppDatabase, listaUtente: Migration[] = allUtente): void {
-  applica(db, 'utente', listaUtente);
-}

@@ -280,7 +280,7 @@ const PIN_DEL_PUNTO: Record<string, TipoSpillo[]> = {
   volonta: ['seme-bramosia'], puzzle: ['meccanismo', 'punto-sensibile'], boss: ['boss'], miniboss: ['miniboss'],
   'ombra-sciagura': ['nemico'], sicura: ['sicura'], scorciatoia: ['scorciatoia'], porta: ['porta'], meccanismo: ['meccanismo', 'punto-sensibile'],
 };
-export function pinDelPunto(tipoPunto: string): TipoSpillo[] {
+function pinDelPunto(tipoPunto: string): TipoSpillo[] {
   return PIN_DEL_PUNTO[tipoPunto] ?? [];
 }
 /** Una voce che di solito ha un pin: senza, la guida la dice «da collegare». */

@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { ETICHETTE_EVENTO, TIPI_EVENTO, type TipoEvento } from '../../shared/eventi.js';
 import type { EventoPartitaDto, StoricoDto } from '../../shared/types.js';
@@ -45,7 +46,7 @@ export interface FiltroStorico {
 
 /** Eventi della partita dal più recente, con cursore per la pagina successiva e totale del filtro. */
 export function storico(partitaId: number, filtro: FiltroStorico = {}): StoricoDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const limite = Math.min(200, Math.max(1, filtro.limite ?? 50));
   const condizioni = ['e.partita_id = ?'];
   const parametri: unknown[] = [partitaId];

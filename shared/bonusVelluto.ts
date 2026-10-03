@@ -12,7 +12,7 @@ export type Affidabilita = 'alta' | 'media' | 'bassa';
 // ---- Registro del Prigioniero: sconto per completamento del compendio ----
 
 /** Soglie di completamento (Persona registrate, esclusi i DLC) → sconto sui prezzi di evocazione. Affidabilità alta. */
-export const SCONTI_REGISTRO: ReadonlyArray<{ soglia: number; sconto: number }> = [
+const SCONTI_REGISTRO: ReadonlyArray<{ soglia: number; sconto: number }> = [
   { soglia: 25, sconto: 10 },
   { soglia: 50, sconto: 15 },
   { soglia: 75, sconto: 25 },
@@ -33,7 +33,7 @@ export function prezzoScontato(prezzo: number, sconto: number): number {
 
 // ---- Bonus EXP del Confidente sulla fusione (tabella generica, affidabilità media) ----
 
-export const MOLTIPLICATORE_EXP_CONFIDENTE: Readonly<Record<number, number>> = { 0: 1.0, 1: 1.15, 2: 1.3, 3: 1.5, 4: 1.7, 5: 2.0, 6: 2.15, 7: 2.3, 8: 2.5, 9: 2.7, 10: 3.0 };
+const MOLTIPLICATORE_EXP_CONFIDENTE: Readonly<Record<number, number>> = { 0: 1.0, 1: 1.15, 2: 1.3, 3: 1.5, 4: 1.7, 5: 2.0, 6: 2.15, 7: 2.3, 8: 2.5, 9: 2.7, 10: 3.0 };
 
 /** Moltiplicatore EXP della Persona fusa in base al rango del Confidente del suo arcano (0–10). */
 export function moltiplicatoreExpConfidente(rango: number): number {
@@ -68,7 +68,7 @@ export function bonusLivelliFusione(rangoMatto: number, rangoArcano: number): { 
 }
 
 /** Punti statistica casuali aggiunti alla Persona fusa durante l'Allarme (senza incidente). Affidabilità alta (game8, omoteura). */
-export const PUNTI_ALLARME_FUSIONE = 15;
+const PUNTI_ALLARME_FUSIONE = 15;
 
 /** Punti dell'Allarme in base a quante Persona «cariche» (gialle) sono fra gli ingredienti: 15 / 20 / 25 (wikiwiki.jp 合体警報). Affidabilità alta. */
 export function puntiAllarmeFusione(cariche: number): number {
@@ -78,7 +78,7 @@ export function puntiAllarmeFusione(cariche: number): number {
 // ---- Forca / Potenziamento (Gallows) ----
 
 /** Moltiplicatori documentati per rango del Confidente dell'arcano del ricevente (ranghi 1, 5, 10; Igor non al massimo / al massimo). Affidabilità alta. */
-export const FORCA_RANGHI_DOCUMENTATI: ReadonlyArray<{ rango: number; igorNonMax: number; igorMax: number }> = [
+const FORCA_RANGHI_DOCUMENTATI: ReadonlyArray<{ rango: number; igorNonMax: number; igorMax: number }> = [
   { rango: 1, igorNonMax: 1.25, igorMax: 1.5 },
   { rango: 5, igorNonMax: 2.25, igorMax: 2.75 },
   { rango: 10, igorNonMax: 3.5, igorMax: 4.0 },
@@ -164,7 +164,7 @@ export function giorniIsolamento(rangoGemelle: number): number {
 }
 
 /** Livello della Persona al deposito → skill di resistenza ottenuta (X = elemento della debolezza). Affidabilità alta. */
-export const TIER_RESISTENZA: ReadonlyArray<{ livelloMin: number; livelloMax: number | null; skill: string; chiave: string }> = [
+const TIER_RESISTENZA: ReadonlyArray<{ livelloMin: number; livelloMax: number | null; skill: string; chiave: string }> = [
   { livelloMin: 1, livelloMax: 25, skill: 'Schiva X (Dodge)', chiave: 'Dodge' },
   { livelloMin: 26, livelloMax: 33, skill: 'Super schiva X (Evade)', chiave: 'Evade' },
   { livelloMin: 34, livelloMax: 52, skill: 'Resistenza X (Resist)', chiave: 'Resist' },
@@ -187,7 +187,7 @@ export const INCENSI: ReadonlyArray<{ chiave: string; nome: string; nomeOriginal
 ];
 
 /** Giorni per applicazione dell'incenso. */
-export const GIORNI_PER_APPLICAZIONE = 2;
+const GIORNI_PER_APPLICAZIONE = 2;
 
 /** Punti guadagnati per statistica interessata con un incenso per `giorni` giorni (Allarme: effetto raddoppiato). Affidabilità media. */
 export function guadagnoIncenso(incenso: (typeof INCENSI)[number], giorni: number, allarme: boolean): { applicazioni: number; puntiPerStatistica: number; totale: number } {

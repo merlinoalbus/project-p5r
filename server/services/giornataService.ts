@@ -16,6 +16,7 @@
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
@@ -76,10 +77,6 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   };
 }
 
-function partitaEsiste(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
-}
-
 function giornoEsiste(data: string): void {
   if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
 }
@@ -100,7 +97,7 @@ export function spuntePartita(partitaId: number | undefined, data?: string): Map
 
 /** Le voci di un giorno per l'interfaccia, con lo stato nella partita se indicata. `conf`: i Confidenti, se chi chiama li ha già. */
 export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<string, ConfidentePartitaDto> | null): AzionePercorsoDto[] {
-  if (partitaId !== undefined) partitaEsiste(partitaId);
+  if (partitaId !== undefined) verificaPartita(partitaId);
   const ctx: Contesto = {
     fatte: spuntePartita(partitaId, data),
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
@@ -174,7 +171,7 @@ const noteValide = (n: string | null | undefined) => (n === undefined ? undefine
 /** Aggiunge una voce alla giornata (canone, per tutte le partite), al posto indicato della fascia (in fondo se omesso). */
 export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number): AzionePercorsoDto {
   // la partita (per rispondere con lo stato) si controlla prima di scrivere: un 404 dopo aver cambiato la guida mentirebbe
-  if (partitaId !== undefined) partitaEsiste(partitaId);
+  if (partitaId !== undefined) verificaPartita(partitaId);
   giornoEsiste(data);
   const azione = testoValido(d.azione);
   if (!azione) throw httpErrors.badRequest('voce-vuota', 'Scrivi che cosa c\'è da fare o che cosa succede.');
@@ -194,7 +191,7 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
 
 /** Modifica una voce: testo, note, genere, tipo, collegamento, rango, effetti, fascia e posto nella fascia. */
 export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: number): AzionePercorsoDto {
-  if (partitaId !== undefined) partitaEsiste(partitaId);
+  if (partitaId !== undefined) verificaPartita(partitaId);
   const r = rigaVoce(uid);
   const azione = testoValido(d.azione);
   const genere: GenereVoce = d.genere ?? genereDi(r);
@@ -227,7 +224,7 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
 
 /** Sposta una voce di un passo dentro la sua fascia (-1 su, +1 giù); ai bordi non cambia nulla. */
 export function spostaVoce(uid: string, verso: -1 | 1, partitaId?: number): AzionePercorsoDto[] {
-  if (partitaId !== undefined) partitaEsiste(partitaId);
+  if (partitaId !== undefined) verificaPartita(partitaId);
   const r = rigaVoce(uid);
   getDb().transaction(() => {
     compatta(r.data, r.fascia);
@@ -267,7 +264,7 @@ export function eliminaVoce(uid: string): void {
  * restano: si disfano dalla loro pagina). Eventi, scadenze e promemoria non si spuntano.
  */
 export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: OpzioniSpunta = {}): AzionePercorsoDto {
-  partitaEsiste(partitaId);
+  verificaPartita(partitaId);
   const r = rigaVoce(uid);
   const v = voceBase(r);
   if (v.genere !== 'azione') throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');

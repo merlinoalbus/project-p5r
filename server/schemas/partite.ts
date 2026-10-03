@@ -3,7 +3,7 @@
 // ============================================================
 
 import { z } from 'zod';
-import { idParam, livello } from './comuni.js';
+import { dataGioco, idParam, livello, uidVoce } from './comuni.js';
 import { METEO_PARTITA, type MeteoPartita } from '../../shared/meteoPartita.js';
 
 export const difficolta = z.enum(['sicura', 'facile', 'normale', 'difficile', 'spietata']);
@@ -12,7 +12,7 @@ const campiPartita = {
   nome: z.string().trim().min(1).max(80),
   note: z.string().max(2000),
   livelloProtagonista: livello,
-  dataGioco: z.string().regex(/^\d{2}-\d{2}$/, 'Formato atteso MM-GG').nullable(),
+  dataGioco: dataGioco.nullable(),
   fasciaGioco: z.enum(['giorno', 'sera']),
   difficolta,
   nuovaPartitaPlus: z.boolean(),
@@ -92,10 +92,10 @@ export const bodyAggiungiPosseduta = z.object({ personaId: z.number().int().posi
 
 export const queryStorico = z.object({
   limite: z.coerce.number().int().min(1).max(200).optional(),
-  prima: z.coerce.number().int().positive().optional(),
+  prima: idParam.optional(),
   /** Tipi separati da virgola. */
   tipi: z.string().max(1000).optional(),
-  persona: z.coerce.number().int().positive().optional(),
+  persona: idParam.optional(),
 });
 const campiObiettivo = {
   skillIds: z.array(z.number().int().positive()).max(8).optional(),
@@ -106,7 +106,7 @@ const campiObiettivo = {
 export const bodyCreaObiettivo = z.object({ personaId: z.number().int().positive(), ...campiObiettivo });
 export const bodyAggiornaObiettivo = z.object({ ...campiObiettivo, stato: z.enum(['aperto', 'raggiunto', 'annullato']).optional() });
 export const queryObiettivi = z.object({ stato: z.enum(['aperto', 'raggiunto', 'annullato']).optional() });
-export const paramsPartitaObiettivo = z.object({ id: z.coerce.number().int().positive(), obiettivoId: z.coerce.number().int().positive() });
+export const paramsPartitaObiettivo = z.object({ id: idParam, obiettivoId: idParam });
 /** Livelli massimi di un albero di fusione salvato. Il motore produce al massimo `profondita` 4 (`queryPiani`), cioè 5 livelli
  *  con la radice: 8 lascia margine senza permettere un corpo annidato all'infinito. */
 export const LIVELLI_MAX_PIANO = 8;
@@ -136,8 +136,8 @@ export const bodySalvaPiano = z.object({
   note: z.string().max(2000).optional(),
 });
 export const bodyAggiornaPianoSalvato = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), obiettivoId: z.number().int().positive().nullable().optional() });
-export const queryPianiSalvati = z.object({ obiettivo: z.coerce.number().int().positive().optional() });
-export const paramsPartitaPiano = z.object({ id: z.coerce.number().int().positive(), pianoId: z.coerce.number().int().positive() });
+export const queryPianiSalvati = z.object({ obiettivo: idParam.optional() });
+export const paramsPartitaPiano = z.object({ id: idParam, pianoId: idParam });
 const statistichePunti = z.object({
   forza: z.number().int().min(0).max(99).optional(), magia: z.number().int().min(0).max(99).optional(), resistenza: z.number().int().min(0).max(99).optional(),
   agilita: z.number().int().min(0).max(99).optional(), fortuna: z.number().int().min(0).max(99).optional(),
@@ -174,20 +174,20 @@ export const bodySalvaCiclo = z.object({
   note: z.string().max(2000).optional(),
 });
 export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(4).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
-export const paramsPartitaCiclo = z.object({ id: z.coerce.number().int().positive(), cicloId: z.coerce.number().int().positive() });
+export const paramsPartitaCiclo = z.object({ id: idParam, cicloId: idParam });
 export const bodyTrofeo = z.object({ trofeo: z.string().min(1).max(120), ottenuto: z.boolean() });
 /** Spunta di una voce della giornata, per uid (le 32 cifre esadecimali di `voce_giornata.uid`). */
-export const bodyAzionePercorso = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/, 'Identità della voce non valida.'), fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional() });
-export const bodyGiornoCorrente = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) });
+export const bodyAzionePercorso = z.object({ uid: uidVoce, fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional() });
+export const bodyGiornoCorrente = z.object({ data: dataGioco });
 
 // ---- Meteo della partita ----
-export const paramsPartitaData = z.object({ id: idParam, data: z.string().regex(/^\d{2}-\d{2}$/) });
+export const paramsPartitaData = z.object({ id: idParam, data: dataGioco });
 /** Per fascia: un meteo, o `null` per tornare a quello della guida; una fascia assente resta com'è. */
 const meteoFascia = z.enum(METEO_PARTITA.map((m) => m.chiave) as [MeteoPartita, ...MeteoPartita[]]).nullable().optional();
 export const bodyMeteo = z.object({ giorno: meteoFascia, sera: meteoFascia }).strict()
   .refine((b) => b.giorno !== undefined || b.sera !== undefined, { message: 'Indica il meteo del giorno («giorno») o della sera («sera»).' });
 export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean() });
-export const bodyCruciverba = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/), fatto: z.boolean() });
+export const bodyCruciverba = z.object({ data: dataGioco, fatto: z.boolean() });
 const chiaveLettura = z.string().min(1).max(160);
 export const bodyLettura = z.union([
   z.object({ tipo: z.literal('videogioco'), chiave: chiaveLettura, fatto: z.boolean(), avanzamento: z.never().optional() }).strict(),
@@ -200,9 +200,9 @@ export const bodyLettura = z.union([
 export const bodyStatoRichiesta = z.object({ richiesta: z.string().min(1).max(120), stato: z.enum(['accettata', 'completata']).nullable() });
 export const bodyStatoPunto = z.object({ punto: z.string().min(1).max(200), stato: z.enum(['ottenuto', 'esaurito']).nullable() });
 export const bodyDomandaFatta = z.object({ fatta: z.boolean(), conoscenza: z.boolean().optional() });
-export const paramsPartitaDomanda = z.object({ id: z.coerce.number().int().positive(), domandaId: z.coerce.number().int().positive() });
+export const paramsPartitaDomanda = z.object({ id: idParam, domandaId: idParam });
 export const bodyRegalo = z.object({ regalo: z.string().min(1).max(120), fatto: z.boolean() });
-export const paramsPartitaEvento = z.object({ id: z.coerce.number().int().positive(), eventoId: z.coerce.number().int().positive() });
+export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);
 

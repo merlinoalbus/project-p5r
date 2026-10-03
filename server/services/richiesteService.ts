@@ -9,6 +9,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import type { JoseDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
 
@@ -28,7 +29,7 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>): RichiestaDto
 
 function statiPartita(partitaId: number | undefined): Map<string, StatoRichiesta> {
   if (partitaId === undefined) return new Map();
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   return new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>).map((r) => [r.richiesta_chiave, r.stato]));
 }
 
@@ -55,7 +56,7 @@ export function richieste(partitaId?: number): RichiesteDto {
 
 /** Stato di una Richiesta nella partita ('accettata', 'completata' o null per azzerare); evento al completamento. */
 export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: StatoRichiesta | null): RichiestaDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const r = prepared(`${SQL} WHERE r.chiave = ?`).get(chiave) as RigaRichiesta | undefined;
   if (!r) throw httpErrors.notFound('richiesta-non-trovata', `La Richiesta '${chiave}' non esiste.`);
   const adesso = nowIso();

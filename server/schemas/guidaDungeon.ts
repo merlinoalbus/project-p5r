@@ -14,8 +14,9 @@
 
 import { z } from 'zod';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
+import { idParam } from './comuni.js';
 
-export const TIPI_PUNTO = ['sicura', 'porta', 'meccanismo', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'storia', 'altro'] as const;
+const TIPI_PUNTO = ['sicura', 'porta', 'meccanismo', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'storia', 'altro'] as const;
 
 export const paramsChiaveGuida = z.object({ chiave: z.string().min(1).max(200) });
 export const bodyDungeon = z.object({
@@ -39,4 +40,4 @@ export const bodyNuovaArea = z.object({
 /** Un posto su o giù nella guida dell'area. */
 export const bodySpostaPunto = z.object({ verso: z.union([z.literal(-1), z.literal(1)]) });
 /** Il pin di una planimetria da collegare o scollegare (`PUT` / `DELETE`). */
-export const paramsPinDelPunto = z.object({ chiave: z.string().min(1).max(200), spillo: z.coerce.number().int().positive() });
+export const paramsPinDelPunto = z.object({ chiave: z.string().min(1).max(200), spillo: idParam });

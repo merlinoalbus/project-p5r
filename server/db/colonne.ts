@@ -8,7 +8,7 @@ export function haTabella(db: Database.Database, tabella: string, schema: 'main'
   return !!db.prepare(`SELECT 1 FROM ${schema}.sqlite_master WHERE type = 'table' AND name = ?`).get(tabella);
 }
 
-export function haColonna(db: Database.Database, tabella: string, colonna: string, schema: 'main' | 'utente' = 'main'): boolean {
+function haColonna(db: Database.Database, tabella: string, colonna: string, schema: 'main' | 'utente' = 'main'): boolean {
   return (db.prepare(`PRAGMA ${schema}.table_info(${tabella})`).all() as Array<{ name: string }>).some((c) => c.name === colonna);
 }
 

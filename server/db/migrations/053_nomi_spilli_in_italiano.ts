@@ -39,7 +39,7 @@ import type Database from 'better-sqlite3';
  * L'ultimo è la stringa esadecimale: sono i byte Shift-JIS di `マイパレス_アイテム配置したとき`
  * — «il mio palazzo», che in italiano il gioco chiama Covo dei Ladri, «quando è stato posizionato
  * un oggetto». */
-export const NOMI_NATIVI: Record<string, string> = {
+const NOMI_NATIVI: Record<string, string> = {
   'ミニマップ：自分用アイコン': 'minimappa: icona del giocatore',
   'ミニマップ：目的地・認知ロックポ': 'minimappa: destinazione, punto di blocco cognitivo',
   'ミニマップ：チェック': 'minimappa: punto da esaminare',

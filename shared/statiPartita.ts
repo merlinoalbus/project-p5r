@@ -13,7 +13,8 @@
 // devono restare l'una l'inversa dell'altra: è la proprietà che i test verificano.
 // ============================================================
 
-import { ARCHI_STORIA, CONTATORI, DOTI_CONDIZIONE, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo } from './condizioniSpillo.js';
+import { DOTI_SOCIALI, eDote } from './doti.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo } from './condizioniSpillo.js';
 import { uidValido } from './spilli.js';
 
 /** Come si sceglie un valore: da quale elenco, o che numero. */
@@ -97,7 +98,7 @@ export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
     case 'stagione': return STAGIONI[0].chiave;
     case 'arco': return ARCHI_STORIA[1];
     case 'palazzo': return PALAZZI_CONDIZIONE[0].chiave;
-    case 'dote': return DOTI_CONDIZIONE[0].chiave;
+    case 'dote': return DOTI_SOCIALI[0].chiave;
     case 'rango5': return 2;
     case 'rango10': return 1;
     case 'volte': return 1;
@@ -135,7 +136,7 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'quartiere': return s(v.quartiere) ? { tipo: 'quartiere', quartiere: s(v.quartiere) } : null;
     case 'arco': return (ARCHI_STORIA as readonly string[]).includes(s(v.dungeon)) ? { tipo: 'arco', dungeon: s(v.dungeon) } : null;
     case 'palazzo': return s(v.dungeon) ? { tipo: 'palazzo', dungeon: s(v.dungeon) } : null;
-    case 'dote': return DOTI_CONDIZIONE.some((d) => d.chiave === v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;
+    case 'dote': return eDote(v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;
     case 'confidente': return s(v.confidente) && n(v.rango) >= 1 && n(v.rango) <= 10 ? { tipo: 'confidente', confidente: s(v.confidente), rango: n(v.rango) } : null;
     case 'squadra': return s(v.membro) ? { tipo: 'squadra', membro: s(v.membro) } : null;
     case 'richiesta': return s(v.richiesta) ? { tipo: 'richiesta', richiesta: s(v.richiesta) } : null;

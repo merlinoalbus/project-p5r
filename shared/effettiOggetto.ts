@@ -21,6 +21,8 @@
 // mostrano identica, e chi cerca «ripristina SP» li trova tutti e due.
 // ============================================================
 
+import { nomeDote } from './doti.js';
+
 /** Su chi ricade l'effetto. Ricavato dai dati: 89 volte su chi lo usa, 53 su un alleato, 46 su tutti. */
 export const BERSAGLI = ['chi-lo-usa', 'un-alleato', 'tutta-la-squadra', 'un-nemico', 'tutti-i-nemici'] as const;
 export type Bersaglio = (typeof BERSAGLI)[number];
@@ -128,8 +130,6 @@ const conValore = (misura: Misura, valore: number | null) =>
  * Stesso metodo di `descriviRequisitoSpillo`: la funzione sta in `shared/` e non puo' leggere il
  * database, quindi i nomi glieli passa chi li ha. Senza, ripiega sulla chiave — che e' brutto ma
  * onesto, e succede solo dove nessuno ha fornito l'elenco. */
-/** Le Doti sociali col nome mostrato: le chiavi sono minuscole, la frase le scrive con l'iniziale. */
-export const NOME_DOTE_EFFETTO: Record<string, string> = { conoscenza: 'Conoscenza', fascino: 'Fascino', coraggio: 'Coraggio', gentilezza: 'Gentilezza', perizia: 'Perizia' };
 
 export interface NomiEffetto { luoghi?: Record<string, string>; attivita?: Record<string, string> }
 
@@ -152,7 +152,7 @@ export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): stri
     case 'resiste-stato': return `Resiste a ${NOME_STATO[e.stato]}`;
     case 'previene-stato': return `Previene ${NOME_STATO[e.stato]}`;
     case 'statistica': return `${NOME_STATISTICA[e.statistica]} ${e.valore >= 0 ? '+' : ''}${e.valore}`;
-    case 'dote': return `${NOME_DOTE_EFFETTO[e.dote] ?? e.dote} ${'♪'.repeat(Math.max(1, Math.min(4, e.note)))}`;
+    case 'dote': return `${nomeDote(e.dote)} ${'♪'.repeat(Math.max(1, Math.min(4, e.note)))}`;
     case 'regalo': return e.graditoA.length ? `Regalo, gradito a ${e.graditoA.join(', ')}` : 'Regalo';
     case 'sblocca-luogo': return `Sblocca ${nomi.luoghi?.[e.luogo] ?? e.luogo}`;
     case 'sblocca-funzione': return `Sblocca ${NOME_FUNZIONE[e.funzione]}${e.dove ? ` in ${nomi.attivita?.[e.dove] ?? e.dove}` : ''}`;

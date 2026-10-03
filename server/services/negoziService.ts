@@ -11,6 +11,7 @@ import { descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo }
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
 import { registraEvento } from './storicoService.js';
 import { risolviOggettoCollegato } from './oggettiSelezionabili.js';
@@ -80,7 +81,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
 
 function acquistiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   return new Set((prepared('SELECT articolo_chiave FROM acquisto_partita WHERE partita_id = ?').all(partitaId) as Array<{ articolo_chiave: string }>).map((r) => r.articolo_chiave));
 }
 
@@ -137,7 +138,7 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
 
 /** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. */
 export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean): ArticoloDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloChiave) as RigaArticolo | undefined;
   if (!r) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
   const st = statoDisponibilitaPartita(partitaId);

@@ -23,6 +23,8 @@ import { pinConStato } from '../services/condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { impostaEventoStoria, ranghiPerEvento } from '../services/semaforiService.js';
 import { leggiProgrammaPunti } from '../services/negoziService.js';
+import { verificaPartita } from '../services/verificaPartita.js';
+import { idParam } from '../schemas/comuni.js';
 import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaService.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -30,9 +32,8 @@ import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento } from '../.
 import type { ProgressiPartitaDto } from '../../shared/types.js';
 
 const router = Router();
-const idPartita = z.coerce.number().int().positive();
+const idPartita = idParam;
 const chiave = z.string().regex(/^[a-z0-9][a-z0-9-]{0,119}$/);
-const verificaPartita = (id: number) => { if (!prepared('SELECT 1 FROM partita WHERE id=?').get(id)) throw httpErrors.notFound('partita-non-trovata', 'Partita non trovata.'); };
 
 /** I negozi con il loro programma punti (null se non ne hanno). */
 function negoziConProgramma() {
