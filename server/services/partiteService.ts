@@ -232,38 +232,77 @@ export function puntiConfidente(mod: ModificaConfidente): number {
   return round2(base * molt);
 }
 
-export function confidenti(partitaId: number): ConfidentePartitaDto[] {
-  rigaPartita(partitaId);
-  const righe = (prepared(`SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
+interface RigaConfidentePartita { chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null; in_scorta: number }
+
+/** I Confidenti con lo stato nella partita; con `chiave`, quel Confidente solo. */
+function righeConfidenti(partitaId: number, chiave?: string): RigaConfidentePartita[] {
+  const sql = `SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
       COALESCE(cp.note, '') AS note, cp.updated_at, cr.punti_necessari,
       EXISTS (SELECT 1 FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.partita_id = ? AND p.arcana = c.arcana) AS in_scorta
     FROM confidente c
     LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ?
-    LEFT JOIN confidente_rango cr ON cr.confidente_chiave = c.chiave AND cr.rango = COALESCE(cp.rango, 0)
-    ORDER BY c.ordine`).all(partitaId, partitaId) as Array<{ chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null; in_scorta: number }>)
-    .map((c) => ({
+    LEFT JOIN confidente_rango cr ON cr.confidente_chiave = c.chiave AND cr.rango = COALESCE(cp.rango, 0)`;
+  return (chiave === undefined
+    ? prepared(`${sql} ORDER BY c.ordine`).all(partitaId, partitaId)
+    : prepared(`${sql} WHERE c.chiave = ?`).all(partitaId, partitaId, chiave)) as RigaConfidentePartita[];
+}
+
+/** Il rango di ogni Confidente nella partita (0 se non incontrato): quello che i semafori e la disponibilità devono sapere. */
+export function ranghiConfidenti(partitaId: number): Map<string, number> {
+  const righe = prepared('SELECT c.chiave, COALESCE(cp.rango, 0) AS rango FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? ORDER BY c.ordine').all(partitaId) as Array<{ chiave: string; rango: number }>;
+  return new Map(righe.map((r) => [r.chiave, r.rango]));
+}
+
+/** I regali consegnati, per Confidente, in una lettura sola (prima una query per Confidente: rilievo P1' della verifica). */
+function regaliFatti(partitaId: number, chiave?: string): Map<string, string[]> {
+  const righe = (chiave === undefined
+    ? prepared('SELECT confidente_chiave, regalo FROM regalo_partita WHERE partita_id = ? ORDER BY fatto_at').all(partitaId)
+    : prepared('SELECT confidente_chiave, regalo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? ORDER BY fatto_at').all(partitaId, chiave)) as Array<{ confidente_chiave: string; regalo: string }>;
+  const perConfidente = new Map<string, string[]>();
+  for (const r of righe) { const l = perConfidente.get(r.confidente_chiave) ?? []; l.push(r.regalo); perConfidente.set(r.confidente_chiave, l); }
+  return perConfidente;
+}
+
+/**
+ * I DTO delle righe date. Lo stato della partita per i semafori (`statoPartitaSemafori`) si calcola una volta e vale per tutte le
+ * righe; i ranghi che servono ai requisiti sono quelli di TUTTI i Confidenti, anche quando le righe sono una sola. Prima lo stato
+ * stava in una cache di modulo con la firma su `partita.updated_at`, che alcune scritture (i collegamenti alla guida) non toccano:
+ * semafori vecchi.
+ */
+function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, string[]>): ConfidentePartitaDto[] {
+  const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
+  const stato: StatoPartitaSemafori = statoPartitaSemafori(partitaId, ranghi, doti);
+  return righe.map((c) => {
+    const semafori = semaforiConfidente(c.chiave, c.rango, stato);
+    return {
       chiave: c.chiave, nome: c.nome, arcana: c.arcana, arcanaNome: t('arcana', c.arcana), ordine: c.ordine, sbloccato: c.sbloccato === 1, rango: c.rango,
       punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari,
       mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
-      regaliFatti: regaliFattiDi(partitaId, c.chiave),
-      note: c.note, semafori: [] as SemaforiRangoDto[], updatedAt: c.updated_at,
-    }));
-  // Lo stato della partita per i semafori si calcola una volta per chiamata e vale per tutti i Confidenti. Prima stava in una cache
-  // di modulo con la firma su `partita.updated_at`, che alcune scritture (i collegamenti alla guida) non toccano: semafori vecchi.
-  const stato = statoSemafori(partitaId, righe);
-  return righe.map((c) => { const semafori = semaforiConfidente(c.chiave, c.rango, stato); return { ...c, semafori, bloccato: bloccoRango(semafori, c.rango + 1) }; });
+      regaliFatti: regali.get(c.chiave) ?? [],
+      note: c.note, semafori, updatedAt: c.updated_at,
+      bloccato: bloccoRango(semafori, c.rango + 1),
+    };
+  });
 }
 
-/** Stato della partita per i semafori: ranghi dei Confidenti e Doti sociali, letti adesso. */
-function statoSemafori(partitaId: number, confidentiPartita: Array<{ chiave: string; rango: number }>): StatoPartitaSemafori {
-  const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
-  const ranghi = new Map(confidentiPartita.map((c) => [c.chiave, c.rango]));
-  return statoPartitaSemafori(partitaId, ranghi, doti);
+/** Tutti i Confidenti della partita, nell'ordine del gioco. */
+export function confidenti(partitaId: number): ConfidentePartitaDto[] {
+  rigaPartita(partitaId);
+  const righe = righeConfidenti(partitaId);
+  return confidentiDto(partitaId, righe, new Map(righe.map((c) => [c.chiave, c.rango])), regaliFatti(partitaId));
 }
 
-function regaliFattiDi(partitaId: number, chiave: string): string[] {
-  return (prepared('SELECT regalo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? ORDER BY fatto_at').all(partitaId, chiave) as Array<{ regalo: string }>).map((r) => r.regalo);
+/**
+ * Un Confidente della partita: lo stesso DTO di `confidenti`, ma con i semafori e i regali del solo Confidente chiesto. Prima chi
+ * ne voleva uno (la conferma di un requisito, un regalo, i punti) li calcolava tutti e ne teneva uno, fino a tre volte per
+ * richiesta (rilievi F21/P1' della verifica completa, 2026-10-03).
+ */
+export function confidente(partitaId: number, chiave: string): ConfidentePartitaDto {
+  rigaPartita(partitaId);
+  const righe = righeConfidenti(partitaId, chiave);
+  if (righe.length === 0) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
+  return confidentiDto(partitaId, righe, ranghiConfidenti(partitaId), regaliFatti(partitaId, chiave))[0];
 }
 
 /** Segna un regalo come consegnato (o non consegnato) al Confidente nella partita. */
@@ -278,7 +317,7 @@ export function impostaRegaloFatto(partitaId: number, chiave: string, regalo: st
     else prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partitaId, chiave, nome);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return confidenti(partitaId).find((c) => c.chiave === chiave)!;
+  return confidente(partitaId, chiave);
 }
 
 /** Requisiti non verdi (né confermati) del semaforo di `rango`: il Confidente è bloccato finché non lo sono tutti.
@@ -291,9 +330,8 @@ export function bloccoRango(semafori: SemaforiRangoDto[], rango: number): { rang
 }
 
 export function aggiornaConfidente(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
-  rigaPartita(partitaId);
-  if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
-  const attuale = confidenti(partitaId).find((c) => c.chiave === chiave)!;
+  // `confidente` controlla anche che partita e Confidente esistano (404)
+  const attuale = confidente(partitaId, chiave);
   const rango = dati.rango ?? attuale.rango;
   // Invariante: un rango > 0 implica lo sblocco (anche se il client manda sbloccato=false).
   const sbloccato = rango > 0 ? true : (dati.sbloccato ?? attuale.sbloccato);
@@ -324,7 +362,7 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
     if (rango !== attuale.rango) {
       registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`, `Da rango ${attuale.rango}.`, { confidente: chiave, da: attuale.rango, a: rango });
     }
-    return confidenti(partitaId).find((c) => c.chiave === chiave)!;
+    return confidente(partitaId, chiave);
   })();
 }
 

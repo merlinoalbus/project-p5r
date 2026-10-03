@@ -18,7 +18,8 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { confidenti, dotiSociali } from './partiteService.js';
+import { dotiSociali, ranghiConfidenti } from './partiteService.js';
+import { finestreDungeon, type FinestraDungeon } from './datiGuida.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
@@ -68,20 +69,8 @@ export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
   return new Map(righe.map((q) => [q.chiave, { nome: q.nome, dal: q.sblocco_data }]));
 }
 
-/** Le finestre dei Palazzi (data/seed/finestre-dungeon.json), lette da `dati_guida`. */
-function finestreArchi(): Map<string, { dal: string; al: string | null }> {
-  const out = new Map<string, { dal: string; al: string | null }>();
-  const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
-  if (!riga) return out;
-  try {
-    const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> };
-    for (const f of dati.finestre ?? []) if (f.dal) out.set(f.dungeon, { dal: f.dal, al: f.al ?? null });
-  } catch { /* trascrizione illeggibile: nessuna finestra */ }
-  return out;
-}
-
 /** L'arco raggiunto a una data: l'ultimo Palazzo la cui finestra è già cominciata; prima del primo si è comunque nel primo. */
-export function arcoAllaData(dataGioco: string | null, finestre: Map<string, { dal: string; al: string | null }>): string | null {
+export function arcoAllaData(dataGioco: string | null, finestre: ReadonlyMap<string, FinestraDungeon>): string | null {
   if (!dataGioco) return null;
   const oggi = ordineGioco(dataGioco);
   let arco: string = ARCHI_STORIA[0];
@@ -93,7 +82,8 @@ export function arcoAllaData(dataGioco: string | null, finestre: Map<string, { d
 }
 
 export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita {
-  const ranghi = new Map(confidenti(partitaId).map((c) => [c.chiave, c.rango]));
+  // i ranghi soli: prima si calcolavano i Confidenti interi (semafori e regali di tutti) per leggerne il rango (rilievo P1')
+  const ranghi = ranghiConfidenti(partitaId);
   const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
   const st = statoPartitaSemafori(partitaId, ranghi, doti);
   const giorno = st.dataGioco ? (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(st.dataGioco) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null : null;
@@ -113,7 +103,7 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     puntiNegozio: new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(partitaId) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti])),
     giornoSettimana: giorno ? piatto(giorno) : null,
     sbloccoQuartieri: sbloccoQuartieri(),
-    arcoCorrente: arcoAllaData(st.dataGioco, finestreArchi()),
+    arcoCorrente: arcoAllaData(st.dataGioco, finestreDungeon()),
     spilliSegnati: spilliSegnati(partitaId),
   };
 }

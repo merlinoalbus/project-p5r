@@ -5,7 +5,7 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { mappaAmbito } from './traduzioniService.js';
-import { datiGuida } from './richiesteService.js';
+import { datiGuida } from './datiGuida.js';
 import type { BattagliaDto, OmbraDto } from '../../shared/types.js';
 
 type SeedBattaglia = Omit<BattagliaDto, 'ombre'> & { ombre: Array<Omit<OmbraDto, 'personaCollegata'>> };

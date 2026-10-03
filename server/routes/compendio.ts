@@ -19,7 +19,7 @@ import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { elenchiAzione } from '../services/azioniStrutturateService.js';
 import { aggiornaVoce, creaVoce, eliminaVoce, spostaVoce } from '../services/giornataService.js';
 import { completamento } from '../services/completamentoService.js';
-import { datiGuida } from '../services/richiesteService.js';
+import { datiGuida } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
@@ -94,17 +94,14 @@ router.get('/oggetti-guida', (_req, res) => {
   // anche articoli del catalogo, e per quelli la riga può arrivare alla mappa. Gli altri no, e va
   // bene così: un abbinamento incerto porterebbe nel posto sbagliato.
   const ponte = datiGuida<{ abbinamenti: Array<{ nome: string; articolo?: string; negozi: string[] }> }>('oggetti-crosswalk');
-  if (ponte) {
-    const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
-    const lega = (v: { nome: string; articolo?: string; negozi?: string[] }) => {
-      const a = per.get(v.nome);
-      if (!a) return;
-      if (a.articolo) v.articolo = a.articolo; else v.negozi = a.negozi;
-    };
-    for (const v of dati.consumabili ?? []) lega(v);
-    for (const v of dati.chiaveEMateriali ?? []) lega(v);
-  }
-  res.json(dati);
+  if (!ponte) { res.json(dati); return; }
+  // i dati della guida sono condivisi e congelati (`datiGuida`): le voci collegate si costruiscono nuove, non si modificano
+  const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
+  const lega = <V extends { nome: string }>(v: V): V => {
+    const a = per.get(v.nome);
+    return !a ? v : a.articolo ? { ...v, articolo: a.articolo } : { ...v, negozi: a.negozi };
+  };
+  res.json({ ...dati, consumabili: dati.consumabili?.map(lega), chiaveEMateriali: dati.chiaveEMateriali?.map(lega) });
 });
 router.get('/personaggi', (_req, res) => {
   const dati = datiGuida<PersonaggiDto>('personaggi');

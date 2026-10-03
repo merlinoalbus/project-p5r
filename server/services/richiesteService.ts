@@ -10,6 +10,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
+import { datiGuida } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import type { JoseDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
 
@@ -31,12 +32,6 @@ function statiPartita(partitaId: number | undefined): Map<string, StatoRichiesta
   if (partitaId === undefined) return new Map();
   verificaPartita(partitaId);
   return new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>).map((r) => [r.richiesta_chiave, r.stato]));
-}
-
-/** Dati della guida in JSON per chiave (es. «jose», «battaglia»). */
-export function datiGuida<T>(chiave: string): T | null {
-  const r = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get(chiave) as { json: string } | undefined;
-  return r ? (JSON.parse(r.json) as T) : null;
 }
 
 export function richieste(partitaId?: number): RichiesteDto {

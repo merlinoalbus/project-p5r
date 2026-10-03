@@ -17,6 +17,7 @@ import { statoAzione } from './azioniStrutturateService.js';
 import { righeDelGiorno, spuntePartita, voceBase } from './giornataService.js';
 import type { SuggerimentiOggiDto } from '../../shared/types.js';
 import { CHIAVI_DOTI } from '../../shared/doti.js';
+import { datiGuida } from './datiGuida.js';
 
 const RE_DOTE_GUADAGNO = new RegExp(`(?:(${CHIAVI_DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${CHIAVI_DOTI.join('|')}))`, 'gi');
 
@@ -121,15 +122,15 @@ function luoghiPerTesto(dove: string | null | undefined): string[] {
 
 /** Personaggi della guida collegati a un Confidente (o con la stessa chiave). */
 function personaggiDiConfidente(chiaveConfidente: string): string[] {
-  const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'personaggi'").get() as { json: string } | undefined;
-  if (!riga) return [];
+  let dati: { personaggi?: Array<{ chiave: string; confidente?: string | null }> } | Array<{ chiave: string; confidente?: string | null }> | null;
   try {
-    const dati = JSON.parse(riga.json) as { personaggi?: Array<{ chiave: string; confidente?: string | null }> } | Array<{ chiave: string; confidente?: string | null }>;
-    const elenco = Array.isArray(dati) ? dati : dati.personaggi ?? [];
-    return elenco.filter((p) => p.confidente === chiaveConfidente || p.chiave === chiaveConfidente).map((p) => p.chiave);
+    dati = datiGuida('personaggi');
   } catch {
-    return [];
+    return []; // trascrizione illeggibile: nessun personaggio collegato
   }
+  if (!dati) return [];
+  const elenco = Array.isArray(dati) ? dati : dati.personaggi ?? [];
+  return elenco.filter((p) => p.confidente === chiaveConfidente || p.chiave === chiaveConfidente).map((p) => p.chiave);
 }
 
 /** Chiavi da evidenziare per le azioni ancora da fare del giorno corrente della partita. */

@@ -20,7 +20,7 @@ import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
 import { copiaDatabase, installaDatabase, riapriIstanza, ripristinaIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import { elencaDungeon } from './dungeonService.js';
 import { importaPacchetto } from './pacchettoGiocoService.js';
-import { creaPartita, aggiornaPartita } from './partiteService.js';
+import { aggiornaConfidente, confidente, confidenti, creaPartita, aggiornaPartita, impostaRegaloFatto, ranghiConfidenti } from './partiteService.js';
 import { impostaMembro, squadraPartita } from './squadraService.js';
 import { impostaMeteo } from './meteoService.js';
 import { creaObiettivo, eliminaObiettivo, obiettivi } from './obiettiviService.js';
@@ -247,6 +247,21 @@ describe('verifica servizi e DB', () => {
       prepared("UPDATE dati_guida SET json = ? WHERE chiave = 'finestre-dungeon'").run(riga);
       riapriIstanza();
     }
+  });
+
+  it('F21/P1\': un Confidente solo è lo stesso DTO dell\'elenco (semafori, regali, blocco), e uno che non c\'è è un 404', () => {
+    const id = creaPartita({ nome: 'Un Confidente' }).id;
+    aggiornaConfidente(id, 'ryuji', { rango: 2, forza: true });
+    impostaRegaloFatto(id, 'ann', 'Rossetto', true);
+    impostaRegaloFatto(id, 'ann', 'Collana', true);
+    for (const chiave of ['ryuji', 'ann', 'morgana', 'igor']) {
+      expect(confidente(id, chiave)).toEqual(confidenti(id).find((c) => c.chiave === chiave));
+    }
+    expect(confidente(id, 'ann').regaliFatti).toEqual(['Rossetto', 'Collana']);
+    expect(() => confidente(id, 'mai-esistito')).toThrowError(expect.objectContaining({ code: 'confidente-non-trovato', status: 404 }));
+    expect(() => confidente(999999, 'ryuji')).toThrowError(expect.objectContaining({ code: 'partita-non-trovata', status: 404 }));
+    // i ranghi della disponibilità sono quelli dell'elenco
+    expect([...ranghiConfidenti(id)]).toEqual(confidenti(id).map((c) => [c.chiave, c.rango]));
   });
 
   it('B3\': il livello di Joker è uno solo, da qualunque scheda lo si cambi', () => {

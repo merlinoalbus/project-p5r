@@ -15,7 +15,7 @@
 import { prepared } from '../db/dbService.js';
 import type { EffettiAzioneDto, IncontroConfidenteDto, RiferimentoAzioneDto } from '../../shared/types.js';
 import type { EffettoAzione } from '../../shared/effettiAzione.js';
-import { aggiornaConfidente, annullaEffetti, confidenti, nomeDote, puntiDaNote } from './partiteService.js';
+import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote, puntiDaNote } from './partiteService.js';
 import { avanzamentoLettura, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
 
@@ -85,7 +85,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   }
   let confidente: EffettiAzioneDto['confidente'] = null;
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && opz.noteRisposta) {
-    const c = confidenti(partitaId).find((x) => x.chiave === a.riferimento!.chiave);
+    // solo quel Confidente, non tutti (rilievo P1' della verifica); un riferimento a un Confidente che non c'è non dà punti
+    const c = prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(a.riferimento.chiave) ? confidenteDellaPartita(partitaId, a.riferimento.chiave) : undefined;
     if (c && c.rango > 0 && c.rango < 10) {
       const prima = c.punti;
       const agg = aggiornaConfidente(partitaId, c.chiave, { noteRisposta: opz.noteRisposta, bonusArcano: c.personaArcanoInScorta });

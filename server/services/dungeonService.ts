@@ -14,7 +14,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
-import { registraCacheDiGioco } from './cacheDiGioco.js';
+import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { vociGestite } from './mappe/voceDelPin.js';
 import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
@@ -152,27 +152,6 @@ function mappePresenti(): Map<string, string | null> {
   return new Map((prepared("SELECT chiave, origine_url FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; origine_url: string | null }>).map((r) => [r.chiave, r.origine_url ?? null]));
 }
 
-/** Le finestre trascritte in `finestre-dungeon`, lette una volta sola: dicono alla mappa di Tokyo quando un Palazzo c'è. */
-let finestreCache: Map<string, { dal: string; al: string | null }> | null = null;
-
-function finestreDungeon(): Map<string, { dal: string; al: string | null }> {
-  if (finestreCache) return finestreCache;
-  finestreCache = new Map();
-  const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
-  if (riga) {
-    try {
-      const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> };
-      for (const f of dati.finestre ?? []) {
-        if (f.dal) finestreCache.set(f.dungeon, { dal: f.dal, al: f.al ?? null });
-      }
-    } catch { /* trascrizione illeggibile: si resta senza finestre, non si indovina */ }
-  }
-  return finestreCache;
-}
-
-/** Da chiamare quando i dati di gioco vengono ricaricati: la trascrizione può essere cambiata. */
-export function invalidaFinestreDungeon(): void { finestreCache = null; }
-registraCacheDiGioco(invalidaFinestreDungeon);
 
 function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, completati: Map<string, string> | null): DungeonRiassuntoDto {
   const conPartita = partitaId !== undefined;
@@ -349,6 +328,16 @@ export function aggiornaArea(chiaveArea: string, dati: DatiArea): AreaDungeonDto
 export function eliminaArea(chiaveArea: string): void {
   const a = prepared('SELECT * FROM dungeon_area WHERE chiave = ?').get(chiaveArea) as RigaArea | undefined;
   if (!a) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  // la pulizia riscrive `dati_guida`: la copia in memoria (`datiGuida`) si butta a transazione chiusa, comunque sia finita
+  // (dentro la transazione una rilettura la rimetterebbe in memoria con dati che un annullamento toglierebbe)
+  try {
+    eliminaAreaInTransazione(chiaveArea, a);
+  } finally {
+    invalidaDatiGuida();
+  }
+}
+
+function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
   getDb().transaction(() => {
     for (const { chiave } of prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ?').all(chiaveArea) as Array<{ chiave: string }>) {
       prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(chiave);
@@ -387,6 +376,7 @@ function ripulisciRiferimentiTestuali(chiaveArea: string): void {
     }
   }
   if (!tabellaGioco('dati_guida')) return;
+  // qui si riscrive `dati_guida`: chi chiama (`eliminaArea`) butta la copia in memoria a transazione chiusa
   const battaglia = prepared("SELECT json FROM dati_guida WHERE chiave = 'battaglia'").get() as { json: string } | undefined;
   if (battaglia) {
     const dati = JSON.parse(battaglia.json) as { ombre?: Array<{ areaChiave?: string | null }> };

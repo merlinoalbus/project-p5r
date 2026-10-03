@@ -28,8 +28,9 @@
 // inventare una tabella di mezzo da tenere allineata a sua volta.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
+import { getDb } from '../db/dbService.js';
 import { elencaOggetti } from './compendioService.js';
+import { datiGuida } from './datiGuida.js';
 import { descriviVoceEffetto, leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { OggettiGuidaDto } from '../../shared/types.js';
 
@@ -55,11 +56,6 @@ export interface OggettoSelezionabileDto {
   /** Vincolo di equipaggiamento («Solo Joker», «Solo donne»), che nel modulo è «Per chi». */
   per: string | null;
   prezzo: number | null;
-}
-
-function datiGuida<T>(chiave: string): T | null {
-  const r = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get(chiave) as { json: string } | undefined;
-  return r ? (JSON.parse(r.json) as T) : null;
 }
 
 const vuoto = (s: string | null | undefined) => (s && s.trim() ? s.trim() : null);

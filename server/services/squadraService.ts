@@ -19,6 +19,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
+import { datiGuida } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import type { MembroSquadraDto, SquadraPartitaDto } from '../../shared/types.js';
 
@@ -26,9 +27,8 @@ interface RigaPersonaggio { chiave: string; nome: string; ordine: number }
 
 /** I Ladri giocabili, nell'ordine del seed: è il seed a dire chi sono, non un elenco scritto qui. */
 export function giocabili(): RigaPersonaggio[] {
-  const r = prepared("SELECT json FROM dati_guida WHERE chiave = 'personaggi'").get() as { json: string } | undefined;
-  if (!r) return [];
-  const dati = JSON.parse(r.json) as { personaggi: Array<{ chiave: string; nome: string; ordine: number; giocabile?: boolean }> };
+  const dati = datiGuida<{ personaggi: Array<{ chiave: string; nome: string; ordine: number; giocabile?: boolean }> }>('personaggi');
+  if (!dati) return [];
   return dati.personaggi.filter((p) => p.giocabile).map((p) => ({ chiave: p.chiave, nome: p.nome, ordine: p.ordine }))
     .sort((a, b) => a.ordine - b.ordine);
 }
