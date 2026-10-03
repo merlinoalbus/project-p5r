@@ -24,6 +24,7 @@ import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
 import type { DomandaDto, DomandeDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { piatto } from '../utils/testo';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
@@ -31,7 +32,6 @@ type FiltroStato = 'tutte' | 'da-fare' | 'fatte';
 const TIPI: ReadonlyArray<{ chiave: FiltroTipo; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'classe', nome: 'In classe' }, { chiave: 'esami', nome: 'Esami' }, { chiave: 'tv', nome: 'Quiz TV' }];
 const STATI: ReadonlyArray<{ chiave: FiltroStato; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'da-fare', nome: 'Da fare' }, { chiave: 'fatte', nome: 'Fatte' }];
 const eEsame = (t: DomandaDto['tipo']) => t === 'esame-medio' || t === 'esame-finale';
-const piatto = (s: string | null | undefined) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
 const ancoraData = (data: string) => `domande-${data}`;
 
 function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: DomandaDto; partitaId: number | null; onCambiata: (r: DomandeDto) => void; onCorretta: () => void; evidenzia?: boolean }) {

@@ -32,6 +32,8 @@ import { IconaAzione } from '../shared/IconaAzione';
 /** La condizione con cui nasce una riga nuova: valida, e la più comune. */
 const NUOVA: RequisitoSpillo = { tipo: 'data', dal: '04-18' };
 const MODO_NOME = { tutte: 'TUTTE', 'almeno-una': 'ALMENO UNA' } as const;
+/** La classe di ogni modo, scritta per intero: mai classi composte a runtime (regola in testa a tailwind.css, rilievo A10). */
+const CLASSE_MODO = { tutte: 'condizioni-blocco--tutte', 'almeno-una': 'condizioni-blocco--almeno-una' } as const;
 const MODO_SPIEGA = { tutte: 'devono valere tutte', 'almeno-una': 'basta che ne valga una' } as const;
 
 /** `spilli`: i pin con uno stato, solo nell'editor delle mappe (`perSpillo`): altrove la condizione «Pin di una mappa» non c'è. */
@@ -196,7 +198,7 @@ function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRi
   const radice = profondita === 0;
   const pieno = condizioni.length >= 20;
   return (
-    <div className={`condizioni-blocco condizioni-blocco--${modo} ${negato ? 'condizioni-blocco--negato' : ''} ${radice ? 'condizioni-blocco--radice' : ''}`} role="group" aria-label={radice ? 'Elenco delle condizioni' : `Gruppo ${negato ? 'NON ' : ''}${MODO_NOME[modo]}`}>
+    <div className={`condizioni-blocco ${CLASSE_MODO[modo]} ${negato ? 'condizioni-blocco--negato' : ''} ${radice ? 'condizioni-blocco--radice' : ''}`} role="group" aria-label={radice ? 'Elenco delle condizioni' : `Gruppo ${negato ? 'NON ' : ''}${MODO_NOME[modo]}`}>
       <div className="condizioni-blocco__testa">
         {!radice && onNega && <button type="button" className={`condizione-non touch ${negato ? 'condizione-non--attivo' : ''}`} aria-pressed={negato} disabled={disabilitato} title={negato ? 'Gruppo negato' : 'Nega il gruppo'} onClick={onNega}>NON</button>}
         {onCambiaModo

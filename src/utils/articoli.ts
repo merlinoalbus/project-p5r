@@ -9,6 +9,7 @@
 // ============================================================
 
 import type { ArticoloDto } from '../types';
+import { piatto } from './testo';
 
 export type StatoAcquisto = 'tutti' | 'acquistati' | 'da-acquistare';
 export type FiltroDisponibilita = 'tutti' | 'disponibili' | 'bloccati';
@@ -36,10 +37,6 @@ export const FILTRI_DISPONIBILITA: ReadonlyArray<{ chiave: FiltroDisponibilita; 
 /** Vero se il filtro chiede qualcosa oltre «tutto». */
 export function filtroAttivo(f: FiltroArticoli): boolean {
   return f.q.trim().length > 0 || f.categorie.length > 0 || f.per !== '' || f.stato !== 'tutti' || f.disponibilita !== 'tutti';
-}
-
-function piatto(s: string | null | undefined): string {
-  return (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
 }
 
 /** Gli articoli che passano il filtro, nell'ordine in cui arrivano. Stato e disponibilità valgono solo con una partita

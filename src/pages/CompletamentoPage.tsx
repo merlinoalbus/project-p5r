@@ -2,7 +2,8 @@
 // CompletamentoPage — trofei con spunta per partita, finali con condizioni, Covo dei Ladri, DLC, meteo, Nuova Partita+, gestione del tempo (Fase 9.1)
 // ============================================================
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
+import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { opzioniDaNomi } from '../utils/selettore';
 import { useSearchParams } from 'react-router-dom';
@@ -30,13 +31,6 @@ const SCHEDE = [
 ] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 const NOME_TIPO_TROFEO: Record<TrofeoDto['tipo'], string> = { bronzo: 'Bronzo', argento: 'Argento', oro: 'Oro', platino: 'Platino' };
-
-function Fonte({ url }: { url: string }) {
-  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a> : null;
-}
-function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
-  return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;
-}
 
 /** Il colore del metallo: un trofeo si riconosce dal metallo prima che dal nome. */
 const COLORE_TROFEO: Record<TrofeoDto['tipo'], string> = {
@@ -157,7 +151,7 @@ export function CompletamentoPage() {
                   <h2 className="m-0 text-[15px] font-semibold">{f.nome}</h2>
                   {f.descrizione && <p className="m-0 text-text-secondary">{f.descrizione}</p>}
                   {f.condizioni.length > 0 && <ul className="m-0 pl-4">{f.condizioni.map((c) => <li key={c}>{c}</li>)}</ul>}
-                  {f.date.length > 0 && <Voce titolo="Date chiave">{f.date.join(' · ')}</Voce>}
+                  {f.date.length > 0 && <VoceTesto titolo="Date chiave">{f.date.join(' · ')}</VoceTesto>}
                   <Fonte url={f.fonte} />
                 </li>
               ))}
@@ -178,8 +172,8 @@ export function CompletamentoPage() {
               <section className="card flex flex-col gap-1">
                 <h2 className="m-0 text-[15px] font-semibold">Nuova Partita+</h2>
                 {d.nuovaPartitaPlus.note && <p className="m-0 text-text-secondary">{d.nuovaPartitaPlus.note}</p>}
-                <Voce titolo="Si trasferisce">{d.nuovaPartitaPlus.trasferito.join(' · ')}</Voce>
-                <Voce titolo="Non si trasferisce">{d.nuovaPartitaPlus.nonTrasferito.join(' · ')}</Voce>
+                <VoceTesto titolo="Si trasferisce">{d.nuovaPartitaPlus.trasferito.join(' · ')}</VoceTesto>
+                <VoceTesto titolo="Non si trasferisce">{d.nuovaPartitaPlus.nonTrasferito.join(' · ')}</VoceTesto>
                 <Fonte url={d.nuovaPartitaPlus.fonte} />
               </section>
               <section className="card flex flex-col gap-1">

@@ -2,7 +2,8 @@
 // OggettiPage — consumabili, oggetti chiave e materiali, fabbricazione, personalizzazione delle armi, abiti e lavanderia, scambi (Fase 10.2)
 // ============================================================
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
+import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getOggetti, getOggettiGuida } from '../services/api';
@@ -36,12 +37,6 @@ const SCHEDE = [
 type Scheda = (typeof SCHEDE)[number][0];
 const NOME_CATEGORIA: Record<string, string> = { cura: 'Cura HP', sp: 'Recupero SP', stato: 'Stati alterati', battaglia: 'Battaglia', esplorazione: 'Esplorazione', altro: 'Altro' };
 
-function Fonte({ url }: { url: string | null | undefined }) {
-  return url ? <a href={url.split(' ;')[0]} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a> : null;
-}
-function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
-  return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;
-}
 function Secondaria({ v }: { v: boolean }) {
   return v ? null : <span className="chip text-[11px]" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
 }
@@ -111,7 +106,7 @@ function SchedaFabbricazione({ d }: { d: OggettiGuidaDto }) {
     <div className="flex flex-col gap-2 text-[13px]">
       <section className="card flex flex-col gap-1">
         <p className="m-0">{f.introduzione}</p>
-        {f.sblocco && <Voce titolo="Sblocco">{f.sblocco}</Voce>}
+        {f.sblocco && <VoceTesto titolo="Sblocco">{f.sblocco}</VoceTesto>}
         {f.regole.length > 0 && <ul className="m-0 pl-4">{f.regole.map((r) => <li key={r}>{r}</li>)}</ul>}
         <Fonte url={f.fonte} />
       </section>
@@ -133,8 +128,8 @@ function SchedaArmi({ d }: { d: OggettiGuidaDto }) {
     <div className="flex flex-col gap-2 text-[13px]">
       <section className="card flex flex-col gap-1">
         <p className="m-0">{p.introduzione}</p>
-        {p.requisiti && <Voce titolo="Requisiti">{p.requisiti}</Voce>}
-        {p.costi && <Voce titolo="Costi">{p.costi}</Voce>}
+        {p.requisiti && <VoceTesto titolo="Requisiti">{p.requisiti}</VoceTesto>}
+        {p.costi && <VoceTesto titolo="Costi">{p.costi}</VoceTesto>}
         {p.note && <p className="m-0 text-text-muted">{p.note}</p>}
         <Fonte url={p.fonte} />
       </section>
@@ -164,8 +159,8 @@ function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
       {d.abiti.introduzione && <p className="m-0 text-text-secondary">{d.abiti.introduzione}</p>}
       <section className="card flex flex-col gap-1">
         <h2 className="m-0 text-[15px] font-semibold">Lavanderia</h2>
-        <Voce titolo="Dove">{d.abiti.lavanderia.dove}</Voce>
-        <Voce titolo="Costo">{d.abiti.lavanderia.costo}</Voce>
+        <VoceTesto titolo="Dove">{d.abiti.lavanderia.dove}</VoceTesto>
+        <VoceTesto titolo="Costo">{d.abiti.lavanderia.costo}</VoceTesto>
         {d.abiti.lavanderia.regole.length > 0 && <ul className="m-0 pl-4">{d.abiti.lavanderia.regole.map((r) => <li key={r}>{r}</li>)}</ul>}
         <Fonte url={d.abiti.lavanderia.fonte} />
       </section>
@@ -269,7 +264,7 @@ function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
       {venditori.map((s) => (
         <section key={s.venditore} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.venditore}</h2><span className="chip">{s.dove}</span><Secondaria v={s.verificato} /></div>
-          {s.quando && <Voce titolo="Quando">{s.quando}</Voce>}
+          {s.quando && <VoceTesto titolo="Quando">{s.quando}</VoceTesto>}
           <div className="area-scorrevole-x">
             <table className="tabella tabella--adattiva text-[12px]">
               <thead><tr><th>Ricevi</th><th>Dai</th><th>Note</th></tr></thead>

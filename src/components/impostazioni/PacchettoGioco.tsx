@@ -27,15 +27,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, OrfanoPartiteDto } from '../../types';
 import { Selettore } from '../shared/Selettore';
 import { BarraInvio } from './BarraInvio';
-
-function salvaFile(nome: string, blob: Blob): void {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = nome;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+import { salvaFile } from '../../utils/salvaFile';
 
 const numero = (n: number): string => n.toLocaleString('it-IT');
 

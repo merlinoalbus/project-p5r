@@ -48,9 +48,3 @@ export function urlImmagineVersionata(ambito: AmbitoImmagine, chiave: string): s
 export function registraImmagine(ambito: AmbitoImmagine, chiave: string, createdAt: string): void {
   datazioni.set(`${ambito}/${chiave}`, createdAt);
 }
-
-/** Aggiorna la cache di esistenza quando un'immagine viene creata fuori dai riquadri (es. pianta scaricata dalla guida). */
-export function segnaImmaginePresente(ambito: AmbitoImmagine, chiave: string): void {
-  void chiaviPresenti(ambito).then((set) => set.add(chiave));
-  versioniImmagini.set(`${ambito}/${chiave}`, (versioniImmagini.get(`${ambito}/${chiave}`) ?? 0) + 1);
-}

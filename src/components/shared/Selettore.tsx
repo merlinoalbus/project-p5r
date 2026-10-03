@@ -14,6 +14,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { LARGHEZZA_TENDINA, SOGLIA_RICERCA, TETTO_VOCI } from '../../utils/selettore';
+import { piatto } from '../../utils/testo';
 
 export interface OpzioneSelettore { chiave: string; nome: string; dettaglio?: string; gruppo?: string }
 
@@ -32,10 +33,6 @@ export interface PropsSelettore {
   /** Stretto quanto il contenuto, senza l'etichetta sopra il valore: per i filtri in linea. */
   compatto?: boolean;
   className?: string;
-}
-
-function piatto(s: string): string {
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, className }: PropsSelettore) {

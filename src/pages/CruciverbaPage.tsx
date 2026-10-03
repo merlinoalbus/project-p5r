@@ -23,10 +23,10 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { piatto } from '../utils/testo';
 
 type FiltroStato = 'tutti' | 'da-fare' | 'fatti';
 const STATI: ReadonlyArray<{ chiave: FiltroStato; nome: string }> = [{ chiave: 'tutti', nome: 'Tutti' }, { chiave: 'da-fare', nome: 'Da fare' }, { chiave: 'fatti', nome: 'Fatti' }];
-const piatto = (s: string | null | undefined) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
 const ancoraGiorno = (giorno: string) => `cruciverba-${giorno}`;
 
 function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: CruciverbaDto; partitaId: number | null; onCambiato: (c: CruciverbaDto) => void; onCorretto: () => void; evidenzia: boolean }) {

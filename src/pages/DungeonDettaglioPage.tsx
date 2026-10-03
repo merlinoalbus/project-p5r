@@ -124,7 +124,6 @@ export function DungeonDettaglioPage() {
   const d = dati.dati;
   const areaChiave = params.get('area') ?? d?.aree[0]?.chiave ?? null;
   const area: AreaDungeonDto | null = useMemo(() => d?.aree.find((a) => a.chiave === areaChiave) ?? d?.aree[0] ?? null, [d, areaChiave]);
-  const [mappaVersione] = useState(0);
   // ogni cambio di stato dalla colonna ricarica il visore (e viceversa il visore ricarica la pagina)
   const [versioneStati, setVersioneStati] = useState(0);
   const memento = d?.tipo === 'mementos';
@@ -417,7 +416,7 @@ export function DungeonDettaglioPage() {
                   )}
                   {/* Da 1280 px la mappa prende tutta l'altezza che la colonna le lascia, mai meno di 240 px (scelta
                       dell'utente, 2026-09-30: sotto quel minimo scorre la colonna, non la pagina); sotto, l'altezza di prima. */}
-                  <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} classeVisore="h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-[240px] xl:flex-1" onCambiato={() => void dati.ricarica()} />
+                  <MappaIncorporata chiave={mappaScelta} versione={versioneStati} classeVisore="h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-[240px] xl:flex-1" onCambiato={() => void dati.ricarica()} />
                   {/* Da 1280 px la colonna è alta quanto lo schermo: la nota lascia il posto alla mappa, che ha già «Modifica mappa». */}
                   <p className="m-0 text-[11px] text-text-muted xl:hidden">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
                 </>}

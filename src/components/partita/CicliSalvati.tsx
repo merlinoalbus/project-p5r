@@ -10,6 +10,7 @@ import { notifica } from '../../stores/notificationStore';
 import { EmptyState, Spinner } from '../shared/PageState';
 import { EseguiFusioneModal } from '../fusione/EseguiFusioneModal';
 import { formattaYen } from '../../utils/punti';
+import { NOME_MODO_PARTNER } from '../../utils/cicli';
 import type { CicloSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -20,8 +21,6 @@ import { OperatoreRicetta } from '../fusione/RicettaRiga';
 interface Props {
   partitaId: number;
 }
-
-const NOME_MODO = { scorta: 'dalla scorta', registro: 'dal Registro', cattura: 'da catturare' } as const;
 
 function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo: CicloSalvatoDto; partitaId: number; onCambiato: (c: CicloSalvatoDto) => void; onElimina: () => void }) {
   const [esecuzione, setEsecuzione] = useState(false);
@@ -71,7 +70,7 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
           <li key={i} className={`flex flex-wrap items-center gap-1.5 text-[13px] rounded-md px-1 ${i === ciclo.anelloCorrente ? 'bg-primary-bg' : ''}`}>
             <button type="button" className={`chip touch ${i === ciclo.anelloCorrente ? 'chip--attivo' : ''}`} onClick={() => void impostaAnello(i)} title="Imposta come anello corrente" aria-pressed={i === ciclo.anelloCorrente}>{i + 1}</button>
             <PersonaChip p={x.ingrediente} /><OperatoreRicetta tipo="piu" /><PersonaChip p={x.partner} />
-            <span className="text-[12px] text-text-muted">{NOME_MODO[x.partnerModo]}{x.partnerModo === 'registro' ? ` · ${formattaYen(x.partnerCosto)}` : ''}</span>
+            <span className="text-[12px] text-text-muted">{NOME_MODO_PARTNER[x.partnerModo]}{x.partnerModo === 'registro' ? ` · ${formattaYen(x.partnerCosto)}` : ''}</span>
             <OperatoreRicetta tipo="risultato" /><PersonaChip p={x.risultato} evidenza />
             {x.bonusLivelli.max > 0 && <span className="text-[12px] text-text-muted">+{x.bonusLivelli.min === x.bonusLivelli.max ? x.bonusLivelli.min : `${x.bonusLivelli.min}…${x.bonusLivelli.max}`} livelli</span>}
           </li>

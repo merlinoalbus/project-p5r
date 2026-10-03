@@ -11,6 +11,7 @@ import { notifica } from '../../stores/notificationStore';
 import { SelettorePersona } from './SelettorePersona';
 import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
+import { NOME_MODO_PARTNER } from '../../utils/cicli';
 import type { CicloFusioneDto, PersonaRiassuntoDto } from '../../types';
 import { PersonaChip } from './PersonaChip';
 import { OperatoreRicetta } from './RicettaRiga';
@@ -25,8 +26,6 @@ interface Props {
   inizialeId?: number;
   onSalvato?: () => void;
 }
-
-const NOME_MODO = { scorta: 'dalla scorta', registro: 'dal Registro', cattura: 'da catturare' } as const;
 
 /** Un ciclo: anelli in sequenza con partner, modo/costo, risultato e bonus di livello. */
 export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloFusioneDto; indice: number; onSalva?: () => void; salvato?: boolean }) {
@@ -48,7 +47,7 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
             <OperatoreRicetta tipo="piu" />
             <span className="inline-flex flex-col items-start gap-0.5">
               <PersonaChip p={a.partner} title={`${a.partner.arcanaNome} · livello ${a.partner.livello}`} />
-              <span className={`chip chip--icona text-[11px] ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
+              <span className={`chip chip--icona text-[11px] ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO_PARTNER[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
             </span>
             <OperatoreRicetta tipo="risultato" />
             <PersonaChip p={a.risultato} evidenza={i === ciclo.anelli.length - 1} />

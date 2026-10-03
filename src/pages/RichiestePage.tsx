@@ -35,6 +35,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { coloreElemento } from '../utils/elementi';
+import { piatto } from '../utils/testo';
 
 type Accettazione = 'tutte' | 'accettate' | 'non-accettate';
 type Completamento = 'tutte' | 'completate' | 'da-completare';
@@ -136,7 +137,6 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
   );
 }
 
-const piatto = (s: string | null | undefined) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
 
 export function RichiestePage() {
   useDocumentTitle('Richieste dei Mementos');

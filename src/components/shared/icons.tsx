@@ -134,25 +134,6 @@ export function IconClose(p: IconProps) {
   );
 }
 
-/** Spunta. */
-export function IconCheck(p: IconProps) {
-  return (
-    <svg {...base(p)}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-/** Più. */
-export function IconPlus(p: IconProps) {
-  return (
-    <svg {...base(p)}>
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
 /** Stella (preferito / registrato). */
 export function IconStar(p: IconProps) {
   return (

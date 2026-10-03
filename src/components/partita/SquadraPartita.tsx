@@ -26,8 +26,8 @@ import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import type { MembroSquadraDto, SquadraPartitaDto } from '../../types';
+import { formattaYen } from '../../utils/punti';
 
-const yen = (n: number) => `${n.toLocaleString('it-IT')} ¥`;
 /** Lo stesso tetto di `bodyYen` sul server: oltre, la richiesta verrebbe rifiutata. */
 const YEN_MASSIMI = 9_999_999;
 
@@ -85,7 +85,7 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
     void conEsito('yen', async () => {
       const s = await impostaYen(partitaId, { yen: n });
       setMovimento('');
-      notifica('success', `Denaro impostato a ${yen(s.yen)}.`);
+      notifica('success', `Denaro impostato a ${formattaYen(s.yen)}.`);
       return s;
     });
   };
@@ -172,7 +172,7 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
           <section className="card flex flex-col gap-3" aria-label="Denaro del gruppo">
             <span className="flex flex-col gap-0.5">
               <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave="medaglie" dimensione={14} />Denaro del gruppo</span>
-              <span className="font-display text-[28px] leading-none tabular-nums">{yen(dati.yen)}</span>
+              <span className="font-display text-[28px] leading-none tabular-nums">{formattaYen(dati.yen)}</span>
             </span>
             {/* Il numero si scrive una volta e poi si dice che cosa è: entrato, uscito, oppure il
                 saldo intero da copiare dal gioco («Imposta»), quando i conti non tornano più. */}

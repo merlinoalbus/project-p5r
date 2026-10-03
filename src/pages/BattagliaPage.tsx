@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useMemo, useState, type ReactNode } from 'react';
+import { Fonte } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getBattaglia } from '../services/api';
@@ -32,10 +33,6 @@ const SCHEDE = [
   ['nemici', 'Nemici speciali', 'protezioni'],
 ] as const;
 type Scheda = (typeof SCHEDE)[number][0];
-
-function Fonte({ url }: { url: string | null | undefined }) {
-  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte: allgamestaff</a> : null;
-}
 
 /** Un dato con la sua etichetta: **l'etichetta sopra, piccola**, non un grassetto dentro la frase.
  *
@@ -164,7 +161,7 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Regole</h2>
         <ul className="m-0 pl-4">{n.regole.map((r) => <li key={r}>{r}</li>)}</ul>
         {n.incertezze && <p className="m-0 text-text-muted text-[12px]">{n.incertezze}</p>}
-        <span>{n.urlFonti.map((u) => <Fonte key={u} url={u} />).reduce<ReactNode[]>((acc, x, i) => (i ? [...acc, ' · ', x] : [x]), [])}</span>
+        <span>{n.urlFonti.map((u) => <Fonte etichetta="fonte: allgamestaff" allineato={false} key={u} url={u} />).reduce<ReactNode[]>((acc, x, i) => (i ? [...acc, ' · ', x] : [x]), [])}</span>
       </SezioneConFregio>
     </div>
   );
@@ -188,7 +185,7 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
           <Voce titolo="1 More">{d.sistema.unoMore}</Voce>
         </Dati>
         <p className="m-0 text-text-muted text-[12px]">{d.sistema.notaFineBattaglia}</p>
-        <Fonte url={d.tecnico.urlFonte} />
+        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={d.tecnico.urlFonte} />
       </SezioneConFregio>
     </div>
   );
@@ -212,7 +209,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         <div className="flex flex-wrap gap-1.5">
           {s.ranghi.map((r) => <span key={r.rango} className="rounded-md border border-border-light bg-white/[0.03] px-2 py-1 text-[12px]"><strong className="font-display">Rango {r.rango}</strong> · {r.bonus}</span>)}
         </div>
-        <Fonte url={s.urlFonte} />
+        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={s.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-speciali" disposizione="lato">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Speciali</h2>
@@ -227,7 +224,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
             <tbody>{sp.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Speciale"><strong>{e.nome}</strong></td><td data-etichetta="Coppia">{e.personaggi.join(' e ')}</td><td data-etichetta="Sblocco">{e.sblocco}</td></tr>)}</tbody>
           </table>
         </div>
-        <Fonte url={sp.urlFonte} />
+        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={sp.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-assalto" disposizione="grande">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Rapina, Assalto e Parla</h2>
@@ -238,7 +235,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
           <Voce titolo="Avvio dello scontro">{d.sistema.avvioScontro}</Voce>
         </Dati>
         <ul className="m-0 pl-4">{d.sistema.comandi.map((c) => <li key={c}>{c}</li>)}</ul>
-        <Fonte url={a.urlFonte} />
+        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={a.urlFonte} />
       </SezioneConFregio>
     </div>
   );
@@ -265,7 +262,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
           <Voce titolo="Dove">{o.doveCompaiono}</Voce>
         </Dati>
         <p className="m-0 text-text-muted text-[12px]">{o.incertezze}</p>
-        <Fonte url={o.urlFonte} />
+        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={o.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-mietitore" disposizione="alta">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">{m.categoria}</h2>
@@ -280,7 +277,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         </Dati>
         {/* La strategia è una sequenza: resta numerata, che è la sua forma. */}
         <ol className="m-0 pl-4">{m.strategia.map((s) => <li key={s}>{s}</li>)}</ol>
-        <Fonte url={m.urlFonte} />
+        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={m.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-demoni-tesoro" disposizione="lato">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">{t.categoria}</h2>
@@ -298,7 +295,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
             <tbody>{t.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Demone"><strong>{e.nome}</strong></td><td data-etichetta="Livello" className="tabular-nums">{e.livello}</td><td data-etichetta="Arcano">{e.arcano}</td><td data-etichetta="Dove">{e.dove}</td></tr>)}</tbody>
           </table>
         </div>
-        <Fonte url={t.urlFonte} />
+        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={t.urlFonte} />
       </SezioneConFregio>
     </div>
   );

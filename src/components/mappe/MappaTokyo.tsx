@@ -38,19 +38,15 @@ import { assetCovoLadri, assetPalazzo, assetTokyoQuartiere, nascondiSagomaAssent
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { contornoSagoma } from '../../utils/contornoSagoma';
 
 /** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
  *
  * Bianco a riposo, oro quando ci passi sopra. L'oro non e' decorazione: su una mappa fatta di
  * sagome accostate serve capire **quale** si sta per aprire, e un semplice ingrandimento non
  * basta quando due cartellini si sfiorano. */
-function contorno(colore: string, spessore = 1) {
-  const o = [`${spessore}px 0`, `-${spessore}px 0`, `0 ${spessore}px`, `0 -${spessore}px`];
-  return o.map((d) => `drop-shadow(${d} 0 ${colore})`).join(' ') + ' drop-shadow(0 2px 3px rgba(0,0,0,0.5))';
-}
-
-const CONTORNO = contorno('#fff');
-const CONTORNO_ORO = contorno('#ffd23f', 2) + ' brightness(1.05)';
+const CONTORNO = contornoSagoma('#fff', 1, true);
+const CONTORNO_ORO = contornoSagoma('#ffd23f', 2, true) + ' brightness(1.05)';
 
 interface Props {
   quartieri: QuartiereRiassuntoDto[];
