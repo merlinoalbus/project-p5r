@@ -79,6 +79,11 @@ export function useCodaProgresso<T extends { chiave: string; progresso: number }
     } finally {
       inVoloRef.current.delete(coda);
       setOccupati((x) => ({ ...x, [coda]: false }));
+      // Ferma la coda (valore raggiunto, partita cambiata, errore), il valore chiesto non serve più: il numero mostrato torna a
+      // essere quello dell'elemento. Restando, tornando alla partita si sarebbe visto un valore mai salvato, e una rilettura dei
+      // dati (una correzione da un'altra pagina) non si sarebbe vista.
+      desideratiRef.current.delete(coda);
+      setDesiderati((x) => { const { [coda]: _tolto, ...resto } = x; void _tolto; return resto; });
     }
   }, []);
 

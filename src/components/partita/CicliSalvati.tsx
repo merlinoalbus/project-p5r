@@ -105,12 +105,13 @@ export function CicliSalvati({ partitaId }: Props) {
   const lista = useCarica(() => getCicliSalvati(partitaId), [partitaId]);
   const scorta = useCarica(() => getPossedute(partitaId), [partitaId]);
   const totaleGiri = useMemo(() => (lista.dati ?? []).reduce((s, c) => s + c.iterazioni, 0), [lista.dati]);
-  const sostituisci = (c: CicloSalvatoDto) => { lista.imposta((lista.dati ?? []).map((x) => (x.id === c.id ? c : x))); void scorta.ricarica(); };
+  // gli aggiornamenti arrivano dopo un `await`: si parte dai dati correnti (forma funzionale), non da quelli di questo render
+  const sostituisci = (c: CicloSalvatoDto) => { lista.imposta((correnti) => correnti.map((x) => (x.id === c.id ? c : x))); void scorta.ricarica(); };
   const elimina = async (c: CicloSalvatoDto) => {
     if (!window.confirm(`Eliminare il ciclo «${c.titolo}»?`)) return;
     try {
       await eliminaCiclo(partitaId, c.id);
-      lista.imposta((lista.dati ?? []).filter((x) => x.id !== c.id));
+      lista.imposta((correnti) => correnti.filter((x) => x.id !== c.id));
       notifica('info', 'Ciclo eliminato.');
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Eliminazione fallita.');

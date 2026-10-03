@@ -108,7 +108,8 @@ export function PianiSalvati({ partitaId }: Props) {
   const rinomina = async (p: PianoSalvatoDto, titolo: string) => {
     try {
       const agg = await aggiornaPianoSalvato(partitaId, p.id, { nome: titolo });
-      lista.imposta((lista.dati ?? []).map((x) => (x.id === p.id ? agg : x)));
+      // dai dati correnti (forma funzionale): dopo l'`await` `lista.dati` è quello del render
+      lista.imposta((correnti) => correnti.map((x) => (x.id === p.id ? agg : x)));
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Salvataggio fallito.');
     }
@@ -117,7 +118,7 @@ export function PianiSalvati({ partitaId }: Props) {
     if (!window.confirm(`Eliminare il piano «${p.titolo || p.nomeIt}»?`)) return;
     try {
       await eliminaPianoSalvato(partitaId, p.id);
-      lista.imposta((lista.dati ?? []).filter((x) => x.id !== p.id));
+      lista.imposta((correnti) => correnti.filter((x) => x.id !== p.id));
       notifica('info', 'Piano eliminato.');
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Eliminazione fallita.');

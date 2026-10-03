@@ -57,7 +57,9 @@ export function ScortaPersona({ partitaId }: Props) {
     setSalita(p.id);
     try {
       const agg = await aggiornaPosseduta(partitaId, p.id, { livello: p.livello + 1 });
-      imposta(dati.map((x) => (x.id === p.id ? agg : x)));
+      // dai dati correnti (forma funzionale): dopo l'`await` `dati` è quello del render, e un'altra Persona cambiata nel frattempo
+      // tornerebbe indietro
+      imposta((correnti) => correnti.map((x) => (x.id === p.id ? agg : x)));
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Salita di livello fallita.');
     } finally {
@@ -69,7 +71,7 @@ export function ScortaPersona({ partitaId }: Props) {
     if (!dati || !window.confirm(`Rimuovere ${p.nomeIt} dalla scorta? Resta registrata nel compendio.`)) return;
     try {
       await rimuoviPosseduta(partitaId, p.id);
-      imposta(dati.filter((x) => x.id !== p.id));
+      imposta((correnti) => correnti.filter((x) => x.id !== p.id));
       notifica('info', `${p.nomeIt} rimossa dalla scorta.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Rimozione fallita.');
@@ -135,7 +137,7 @@ export function ScortaPersona({ partitaId }: Props) {
       <AggiungiPersonaModal
         aperta={aggiunta}
         onChiudi={() => setAggiunta(false)}
-        onAggiunta={(p) => { imposta([p, ...(dati ?? [])]); setAggiunta(false); }}
+        onAggiunta={(p) => { if (dati) imposta((correnti) => [p, ...correnti]); else imposta([p]); setAggiunta(false); }}
         partitaId={partitaId}
       />
       {modifica && (
@@ -143,7 +145,7 @@ export function ScortaPersona({ partitaId }: Props) {
           posseduta={modifica}
           partitaId={partitaId}
           onChiudi={() => setModifica(null)}
-          onSalvata={(p) => { imposta((dati ?? []).map((x) => (x.id === p.id ? p : x))); setModifica(null); }}
+          onSalvata={(p) => { imposta((correnti) => correnti.map((x) => (x.id === p.id ? p : x))); setModifica(null); }}
         />
       )}
     </PageState>

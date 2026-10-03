@@ -11,6 +11,14 @@ import path from 'node:path';
 import request from 'supertest';
 
 const stato = vi.hoisted(() => ({ percorso: '' }));
+// il logger della richiesta: si registra l'avviso della pulizia fallita, così il test lo può pretendere
+const avvisi = vi.hoisted(() => [] as string[]);
+vi.mock('../middleware/requestContext.js', async (originale) => {
+  const vero = await originale<typeof import('../middleware/requestContext.js')>();
+  const registra = (_o: unknown, messaggio?: string) => { if (messaggio) avvisi.push(messaggio); };
+  const finto = { warn: registra, error: registra, info: () => {}, debug: () => {}, child: () => finto };
+  return { ...vero, getRequestLogger: () => finto };
+});
 
 vi.mock('../services/impostazioniService.js', async (originale) => ({
   ...(await originale<typeof import('../services/impostazioniService.js')>()),
@@ -40,6 +48,8 @@ describe('GET /api/impostazioni/istanza/database — errori dell\'invio', () => 
       expect(res.status).toBe(200);
       expect(res.body).toBe('contenuto');
       expect(rm).toHaveBeenCalled();
+      // la pulizia fallita è stata gestita (e scritta nel log), non lasciata uscire dalla callback
+      expect(avvisi).toContain('copia temporanea del database non rimossa');
     } finally {
       rm.mockRestore();
       fs.rmSync(stato.percorso, { force: true });

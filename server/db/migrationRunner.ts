@@ -26,6 +26,12 @@ export interface Migration {
   up: (db: AppDatabase) => void;
 }
 
+/** Le violazioni di chiave esterna di uno schema, come testo confrontabile («tabella#riga→padre»). */
+function violazioni(db: AppDatabase, schema: 'main' | 'utente'): Set<string> {
+  const righe = db.pragma(`${schema}.foreign_key_check`) as Array<{ table: string; rowid: number | null; parent: string; fkid: number }>;
+  return new Set(righe.map((r) => `${r.table}#${r.rowid ?? '?'}→${r.parent}/${r.fkid}`));
+}
+
 /** Applica in ordine le migrazioni successive a `PRAGMA <schema>.user_version`. */
 function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]): void {
   const current = db.pragma(`${schema}.user_version`, { simple: true }) as number;
@@ -37,16 +43,18 @@ function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]):
     db.pragma('foreign_keys = OFF');
     try {
       db.transaction(() => {
+        // Il controllo delle chiavi esterne sta DENTRO la transazione, prima di avanzare `user_version`: una violazione **portata
+        // dalla migrazione** la annulla e la lascia da applicare (fatto dopo il commit, falliva un avvio solo, e a quello dopo i
+        // dati incoerenti passavano). Si confrontano le violazioni prima e dopo, nel solo schema della migrazione (SQLite non ha
+        // chiavi esterne fra due file): una violazione che c'era già non è colpa della migrazione e non deve bloccare ogni avvio
+        // per sempre — si scrive nel log.
+        const prima = violazioni(db, schema);
         m.up(db);
-        // Il controllo delle chiavi esterne sta DENTRO la transazione, prima di avanzare `user_version`: una violazione annulla la
-        // migrazione e la lascia da applicare. Fatto dopo il commit, falliva un avvio solo: a quello dopo la migrazione risultava
-        // già applicata e i dati incoerenti passavano.
-        const violations = db.pragma('foreign_key_check') as unknown[];
-        if (Array.isArray(violations) && violations.length > 0) {
-          throw new Error(
-            `Migrazione ${schema} ${m.id} (${m.name}): violazioni di integrità referenziale: ${JSON.stringify(violations.slice(0, 5))}`,
-          );
+        const nuove = [...violazioni(db, schema)].filter((v) => !prima.has(v));
+        if (nuove.length > 0) {
+          throw new Error(`Migrazione ${schema} ${m.id} (${m.name}): violazioni di integrità referenziale: ${nuove.slice(0, 5).join(', ')}`);
         }
+        if (prima.size > 0) logger.warn({ schema, id: m.id, violazioni: [...prima].slice(0, 5), totale: prima.size }, 'violazioni di integrità referenziale già presenti prima della migrazione');
         db.pragma(`${schema}.user_version = ${m.id}`);
       })();
     } finally {

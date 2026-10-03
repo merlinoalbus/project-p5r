@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { NegoziPage } from './NegoziPage';
 import { usePartitaStore } from '../stores/partitaStore';
-import type { PartitaDto } from '../types';
+import type { ArticoloDto, PartitaDto } from '../types';
 
 const negoziBase = [
   { chiave:'u-vuoto', nome:'Bottega nuova', luogoChiave:'shibuya', quartiereNome:'Shibuya', tipo:'altro', luogo:'Stazione', articoli:0, verificati:0 },
@@ -11,15 +11,18 @@ const negoziBase = [
 ];
 const libreriaBloccata = { chiave:'libreria-segreta', nome:'Libreria segreta', luogoChiave:'jinbocho', quartiereNome:'Jinbocho', tipo:'libri', luogo:'Vicolo', articoli:4, verificati:4, disponibilita: { stato: 'bloccato' as const, requisiti: [] } };
 
-const { getNegozi, ricercaArticoli, posizioni } = vi.hoisted(() => ({
+const { getNegozi, ricercaArticoli, impostaAcquisto, posizioni } = vi.hoisted(() => ({
   getNegozi: vi.fn(),
   ricercaArticoli: vi.fn().mockResolvedValue({ totale:0, articoli:[] }),
+  impostaAcquisto: vi.fn(),
   posizioni: [] as Array<Record<string, unknown>>,
 }));
 vi.mock('../services/api', () => ({
   getNegozi,
   ricercaArticoli,
+  impostaAcquisto,
 }));
+vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 vi.mock('../components/mappe/DoveSiTrova', () => ({
   DoveSiTrova: (props: Record<string, unknown>) => {
@@ -113,4 +116,22 @@ it('con la partita i segmenti di stato e disponibilità arrivano al server', asy
   await waitFor(() => expect(ricercaArticoli).toHaveBeenCalledWith(expect.objectContaining({ stato: 'da-acquistare' }), 5));
   fireEvent.click(await screen.findByRole('radio', { name: 'Bloccati' }));
   await waitFor(() => expect(ricercaArticoli).toHaveBeenLastCalledWith(expect.objectContaining({ stato: 'da-acquistare', disponibilita: 'bloccati' }), 5));
+});
+
+it('due spunte ravvicinate nei risultati: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
+  usePartitaStore.setState({ attiva: { id: 5, nome: 'Prova' } as PartitaDto });
+  const art = (chiave: string, nome: string): ArticoloDto => ({ chiave, negozioChiave: 'officina', negozioNome: 'Officina', nome, nomeIt: null, categoria: 'arma', per: 'Joker', prezzo: 1000, effetto: 'Effetto', statistiche: null, quantita: null, oggettoFonte: null, oggettoChiave: null, disponibileDal: null, condizione: null, nota: null, verificato: true, acquistato: false });
+  const articoli = [art('officina/spada', 'Spada'), art('officina/lancia', 'Lancia')];
+  ricercaArticoli.mockResolvedValue({ totale: 2, articoli });
+  let rispondiSpada!: (a: ArticoloDto) => void;
+  impostaAcquisto.mockImplementation((_id: number, chiave: string) => (chiave === 'officina/spada'
+    ? new Promise<ArticoloDto>((ok) => { rispondiSpada = ok; })
+    : Promise.resolve({ ...articoli[1], acquistato: true })));
+  render(<MemoryRouter initialEntries={['/guida/negozi?categoria=arma']}><NegoziPage /></MemoryRouter>);
+  await screen.findByRole('checkbox', { name: 'Spada acquistato' });
+  await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Spada acquistato' })); }); // in volo
+  await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Lancia acquistato' })); }); // arriva subito
+  await act(async () => { rispondiSpada({ ...articoli[0], acquistato: true }); });
+  expect(screen.getByRole('checkbox', { name: 'Lancia acquistato' })).toBeChecked();
+  expect(screen.getByRole('checkbox', { name: 'Spada acquistato' })).toBeChecked();
 });

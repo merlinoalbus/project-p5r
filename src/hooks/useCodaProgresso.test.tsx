@@ -62,6 +62,22 @@ describe('useCodaProgresso', () => {
     expect(opz.segnalaErrore).toHaveBeenCalledWith('rete giù');
   });
 
+  it('N2: ferma la coda, il numero torna a seguire l\'elemento (ritorno alla partita, dati riletti)', async () => {
+    const { risposte, opz } = prepara();
+    const { result, rerender } = renderHook(({ p }) => useCodaProgresso<Gioco>(p, opz), { initialProps: { p: 1 as number | null } });
+    const g = { chiave: 'tetris', progresso: 0 };
+    act(() => { result.current.accoda(g, 1); });
+    act(() => { result.current.accoda(g, 2); });
+    rerender({ p: 2 });
+    await act(async () => { risposte[0]({ chiave: 'tetris', progresso: 1 }); });
+    rerender({ p: 1 }); // di nuovo nella partita 1: il «2» chiesto non è mai stato salvato
+    expect(result.current.valore({ chiave: 'tetris', progresso: 1 })).toBe(1);
+    // a coda finita, un elemento riletto con un altro valore (corretto da un'altra pagina) si vede com'è
+    act(() => { result.current.accoda({ chiave: 'tetris', progresso: 1 }, 3); });
+    await act(async () => { risposte[1]({ chiave: 'tetris', progresso: 3 }); });
+    expect(result.current.valore({ chiave: 'tetris', progresso: 0 })).toBe(0);
+  });
+
   it('senza partita non si scrive niente', () => {
     const { invia, opz } = prepara();
     const { result } = renderHook(() => useCodaProgresso<Gioco>(null, opz));

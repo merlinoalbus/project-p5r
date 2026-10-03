@@ -32,6 +32,22 @@ export function pulisciGiornaliOrfani(backupsDir: string): void {
   }
 }
 
+/** Tiene le ultime `KEEP_LAST` copie di avvio. Una copia vecchia se ne va con le partite accanto e con i giornali di entrambe
+ *  (`-wal`/`-shm`): prima si toglieva solo il `.db`, e i giornali restavano a decine. Esportata per i test. */
+export function ruotaCopieDiAvvio(backupsDir: string): void {
+  const copie = fs
+    .readdirSync(backupsDir)
+    .filter((f) => f.startsWith(PREFIX) && f.endsWith('.db') && !f.endsWith('.partite.db'))
+    .sort()
+    .reverse();
+  for (const vecchia of copie.slice(KEEP_LAST)) {
+    for (const nome of [vecchia, vecchia.replace(/\.db$/, '.partite.db')]) {
+      for (const coda of ['', '-wal', '-shm']) fs.rmSync(path.join(backupsDir, `${nome}${coda}`), { force: true });
+    }
+  }
+  pulisciGiornaliOrfani(backupsDir);
+}
+
 /** Crea una copia consistente del database e conserva gli ultimi 7 snapshot. */
 export async function runBootBackup(): Promise<void> {
   const dbPath = resolveDbPath();
@@ -65,19 +81,7 @@ export async function runBootBackup(): Promise<void> {
     const targetPartite = path.join(backupsDir, `${PREFIX}${stamp}.partite.db`);
     if (fs.existsSync(resolvePartitePath())) await copiaSchema(getDb(), targetPartite, 'utente');
     logger.info({ target, targetPartite }, 'backup di avvio completato');
-
-    const entries = fs
-      .readdirSync(backupsDir)
-      .filter((f) => f.startsWith(PREFIX) && f.endsWith('.db') && !f.endsWith('.partite.db'))
-      .sort()
-      .reverse();
-    // una copia vecchia se ne va con le partite accanto e con i giornali di entrambe (-wal/-shm): prima restavano a decine
-    for (const stale of entries.slice(KEEP_LAST)) {
-      for (const nome of [stale, stale.replace(/\.db$/, '.partite.db')]) {
-        for (const coda of ['', '-wal', '-shm']) fs.rmSync(path.join(backupsDir, `${nome}${coda}`), { force: true });
-      }
-    }
-    pulisciGiornaliOrfani(backupsDir);
+    ruotaCopieDiAvvio(backupsDir);
   } catch (err) {
     logger.warn({ err }, 'backup di avvio fallito — si prosegue');
   }

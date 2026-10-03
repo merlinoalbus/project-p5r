@@ -52,9 +52,10 @@ export const creaVoceGiornata = (data: string, dati: DatiVoceGiornata, partita?:
 /** Modifica una voce: testo, note, genere, fascia, posto, tipo, collegamento, rango atteso, effetti. */
 export const aggiornaVoceGiornata = (uid: string, dati: DatiVoceGiornata, partita?: number): Promise<AzionePercorsoDto> =>
   apiPut(`/compendio/percorso/voci/${uid}${queryString({ partita })}`, dati);
-/** Sposta una voce di un passo nella sua fascia (-1 su, +1 giù); risponde con tutte le voci del giorno. */
+/** Sposta una voce di un passo nella sua fascia (-1 su, +1 giù); risponde con tutte le voci del giorno. È relativo (un passo da dove
+ *  sta): ripetuto dopo un 5xx o un timeout a scrittura già avvenuta la sposterebbe di due, quindi nessun nuovo tentativo. */
 export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number): Promise<AzionePercorsoDto[]> =>
-  apiPut(`/compendio/percorso/voci/${uid}/sposta${queryString({ partita })}`, { verso });
+  apiPut(`/compendio/percorso/voci/${uid}/sposta${queryString({ partita })}`, { verso }, { maxRetries: 0 });
 /** Elimina una voce dalla guida (409 se in una partita è spuntata con effetti: prima si toglie la spunta). */
 export const eliminaVoceGiornata = (uid: string): Promise<void> => apiDelete(`/compendio/percorso/voci/${uid}`);
 /** Negozi con conteggi degli articoli. */
@@ -102,8 +103,8 @@ export const eliminaPunto = (chiave: string): Promise<void> => apiDelete(`/compe
 /** Una sezione nuova della guida del Palazzo: `dopo` un'area (null = in cima, assente = in fondo), e se data nella planimetria. */
 export const creaArea = (dungeon: string, dati: { nome: string; descrizione?: string; dopo?: string | null; planimetria?: string }): Promise<{ chiave: string; nome: string; ordine: number }> =>
   apiPost(`/compendio/dungeon/${encodeURIComponent(dungeon)}/aree`, dati);
-/** Un posto su (-1) o giù (+1) nella guida dell'area. */
-export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/sposta`, { verso });
+/** Un posto su (-1) o giù (+1) nella guida dell'area. Relativo come `spostaVoceGiornata`: nessun nuovo tentativo. */
+export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/sposta`, { verso }, { maxRetries: 0 });
 /** Collega (o scollega) un pin di una planimetria del Palazzo alla voce della guida. */
 export const collegaPinAlPunto = (chiave: string, spilloId: number, collega: boolean): Promise<PuntoInteresseDto> =>
   collega ? apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`, {}) : apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`);

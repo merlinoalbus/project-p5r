@@ -5,7 +5,7 @@
 // Test CicliSalvati — anello corrente, stato di ingrediente/partner, evocazione del partner, esecuzione e avanzamento
 // ============================================================
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { CicliSalvati } from './CicliSalvati';
@@ -60,5 +60,47 @@ describe('CicliSalvati', () => {
     render(<MemoryRouter><CicliSalvati partitaId={7} /></MemoryRouter>);
     expect(await screen.findByText('Nessun ciclo salvato')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Vai ai cicli di fusione' })).toHaveAttribute('href', '/fusione?vista=cicli');
+  });
+});
+
+describe('CicliSalvati — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  const cicloA = ciclo({ id: 5, titolo: 'Ciclo A' });
+  const cicloB = ciclo({ id: 6, titolo: 'Ciclo B' });
+  beforeEach(() => {
+    getCicliSalvati.mockReset(); getPossedute.mockReset(); aggiornaCiclo.mockReset(); eliminaCiclo.mockReset();
+    getPossedute.mockResolvedValue([]);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  });
+  afterEach(() => vi.restoreAllMocks());
+  const secondoAnello = (titolo: string) => within(screen.getByRole('list', { name: `Anelli di ${titolo}` })).getAllByTitle('Imposta come anello corrente')[1];
+
+  it('anello corrente: la risposta del ciclo A arrivata dopo quella del ciclo B non riporta indietro B', async () => {
+    getCicliSalvati.mockResolvedValue([cicloA, cicloB]);
+    let risolviA!: (c: CicloSalvatoDto) => void;
+    aggiornaCiclo.mockImplementation((_p: number, id: number) => (id === 5
+      ? new Promise<CicloSalvatoDto>((ok) => { risolviA = ok; })
+      : Promise.resolve({ ...cicloB, anelloCorrente: 1 })));
+    render(<MemoryRouter><CicliSalvati partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('list', { name: 'Anelli di Ciclo B' });
+    await act(async () => { fireEvent.click(secondoAnello('Ciclo A')); }); // in volo
+    await act(async () => { fireEvent.click(secondoAnello('Ciclo B')); }); // arriva subito
+    expect(secondoAnello('Ciclo B')).toHaveAttribute('aria-pressed', 'true');
+    await act(async () => { risolviA({ ...cicloA, anelloCorrente: 1 }); });
+    expect(secondoAnello('Ciclo A')).toHaveAttribute('aria-pressed', 'true');
+    expect(secondoAnello('Ciclo B')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('eliminazione: il ciclo eliminato mentre un altro cambia anello non ricompare', async () => {
+    getCicliSalvati.mockResolvedValue([cicloA, cicloB]);
+    let risolviA!: (c: CicloSalvatoDto) => void;
+    aggiornaCiclo.mockImplementation(() => new Promise<CicloSalvatoDto>((ok) => { risolviA = ok; }));
+    eliminaCiclo.mockResolvedValue(undefined);
+    render(<MemoryRouter><CicliSalvati partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('list', { name: 'Anelli di Ciclo B' });
+    await act(async () => { fireEvent.click(secondoAnello('Ciclo A')); }); // in volo
+    await act(async () => { fireEvent.click(screen.getAllByRole('button', { name: /Elimina/ })[1]); }); // il ciclo B
+    expect(screen.queryByRole('list', { name: 'Anelli di Ciclo B' })).toBeNull();
+    await act(async () => { risolviA({ ...cicloA, anelloCorrente: 1 }); });
+    expect(screen.queryByRole('list', { name: 'Anelli di Ciclo B' })).toBeNull();
   });
 });

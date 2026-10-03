@@ -43,7 +43,8 @@ export function ObiettiviPartita({ partitaId }: Props) {
     return c;
   }, [lista.dati]);
 
-  const sostituisci = (o: ObiettivoDto) => lista.imposta((lista.dati ?? []).map((x) => (x.id === o.id ? o : x)));
+  // gli aggiornamenti arrivano dopo un `await`: si parte dai dati correnti (forma funzionale), non da quelli di questo render
+  const sostituisci = (o: ObiettivoDto) => lista.imposta((correnti) => correnti.map((x) => (x.id === o.id ? o : x)));
 
   const cambiaStato = async (o: ObiettivoDto, s: StatoObiettivo) => {
     try {
@@ -58,7 +59,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
     if (!window.confirm(`Eliminare l'obiettivo «${o.nomeIt}»?`)) return;
     try {
       await eliminaObiettivo(partitaId, o.id);
-      lista.imposta((lista.dati ?? []).filter((x) => x.id !== o.id));
+      lista.imposta((correnti) => correnti.filter((x) => x.id !== o.id));
       notifica('info', 'Obiettivo eliminato.');
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Eliminazione fallita.');

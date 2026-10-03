@@ -53,9 +53,11 @@ export function DotiSociali({ partitaId }: Props) {
     if (!dati) return;
     setOccupata(chiave);
     try {
-      const agg = await aggiornaDote(partitaId, chiave, mod);
       const prima = dati.find((d) => d.chiave === chiave);
-      imposta(dati.map((d) => (d.chiave === chiave ? agg : d)));
+      const agg = await aggiornaDote(partitaId, chiave, mod);
+      // dai dati correnti (forma funzionale): dopo l'`await` `dati` è quello del render, e un'altra Dote segnata nel frattempo
+      // tornerebbe indietro
+      imposta((correnti) => correnti.map((d) => (d.chiave === chiave ? agg : d)));
       if (prima && agg.rango > prima.rango) notifica('success', `${agg.nome}: nuovo rango ${agg.rango} — ${agg.nomeRango}!`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');

@@ -305,9 +305,10 @@ export function tornaAllaCopiaDiSicurezza(salvataggio: string, err: unknown, cod
   try {
     riapriIstanza();
   } catch (err3) {
-    // senza connessione l'app risponderebbe 500 a tutto senza dire perché: si dice che cosa è successo e dove sta la copia
+    // senza connessione l'app risponderebbe 500 a tutto senza dire perché: si dice che cosa è successo e dove sta la copia.
+    // Il motivo tecnico (messaggio di SQLite o del file system, con i percorsi) resta nel log, come per ogni 500 (F02).
     logger.error({ err: err3, salvataggio }, 'riapertura dopo il ritorno alla copia di sicurezza fallita: serve un riavvio');
-    throw httpErrors.internal(`${azione} non riuscito, e anche la riapertura dell'istanza è fallita (${err3 instanceof Error ? err3.message : 'errore sconosciuto'}): riavvia il server. La copia di sicurezza è in data/backups/${path.basename(salvataggio)}.`);
+    throw httpErrors.internal(`${azione} non riuscito, e anche la riapertura dell'istanza è fallita: riavvia il server. La copia di sicurezza è in data/backups/${path.basename(salvataggio)}.`);
   }
   const dettaglio = ripristinoFile ? ` I file non sono tornati tutti al loro posto: la copia è in data/backups/${path.basename(salvataggio)}.` : ' L\'istanza precedente è stata rimessa com\'era.';
   throw httpErrors.badRequest(codice, `${azione} non riuscito (${err instanceof Error ? err.message : 'errore sconosciuto'}).${dettaglio}`);

@@ -208,6 +208,76 @@ it('nei Memento la colonna sono gli obiettivi del dedalo: timbri con −/+ e ric
   expect(screen.queryByRole('button', { name: 'Aggiungi un timbro' })).toBeNull();
 });
 
+// ---- Due gesti ravvicinati (B3", verifica completa 2026-10-03) ----
+//
+// Ogni aggiornamento locale arriva dopo un `await`: costruito dalla scheda del render in cui era partito, cancellava un secondo
+// gesto completato nel frattempo. Le riletture in silenzio restano in sospeso, così si guarda l'aggiornamento locale da solo.
+
+describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
+  const anello = (nome: string) => screen.getByRole('progressbar', { name: new RegExp(`Avanzamento in ${nome}`) });
+
+  it('Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre', async () => {
+    getDungeon.mockResolvedValue(mementos());
+    let rispondiTimbri!: (v: unknown) => void;
+    impostaTimbri.mockImplementation(() => new Promise((ok) => { rispondiTimbri = ok; }));
+    impostaStatoRichiesta.mockResolvedValue({ chiave: 'bulli', stato: 'completata' });
+    monta('mementos');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Obiettivi di Dedalo di Aiyatsbus' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro' })); }); // in volo
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Completata' })); }); // arriva subito
+    await act(async () => { rispondiTimbri({ area: 'mementos-02-aiyatsbus', raccolti: 2, totale: 8, completato: false }); });
+    // (2 timbri + 1 richiesta) su 9
+    expect(anello('Memento')).toHaveAttribute('aria-valuenow', '33');
+    expect(colonna.getByText('2 su 8')).toBeInTheDocument();
+  });
+
+  it('Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro', async () => {
+    getDungeon.mockResolvedValue(mementos());
+    let rispondiRichiesta!: (v: unknown) => void;
+    impostaStatoRichiesta.mockImplementation(() => new Promise((ok) => { rispondiRichiesta = ok; }));
+    impostaTimbri.mockResolvedValue({ area: 'mementos-02-aiyatsbus', raccolti: 2, totale: 8, completato: false });
+    monta('mementos');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Obiettivi di Dedalo di Aiyatsbus' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Completata' })); }); // in volo
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro' })); }); // arriva subito
+    await act(async () => { rispondiRichiesta({ chiave: 'bulli', stato: 'completata' }); });
+    expect(anello('Memento')).toHaveAttribute('aria-valuenow', '33');
+    expect(colonna.getByText('2 su 8')).toBeInTheDocument();
+  });
+
+  it('Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto', async () => {
+    getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementation(() => new Promise(() => {}));
+    let rispondiStato!: (v: unknown) => void;
+    impostaStatoPunto.mockImplementation(() => new Promise((ok) => { rispondiStato = ok; }));
+    impostaSpilloRaccolto.mockResolvedValue({});
+    monta('kamoshida');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' }));
+    fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' })); }); // in volo
+    await act(async () => { fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })); }); // arriva subito
+    expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
+    await act(async () => { rispondiStato({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null }); });
+    expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
+    expect(screen.getByRole('button', { name: 'Anche le segnate (1)' })).toBeInTheDocument();
+  });
+
+  it('Palazzo: un raccolto, arrivato dopo lo stato di una voce, non riporta indietro la voce', async () => {
+    getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementation(() => new Promise(() => {}));
+    let rispondiRaccolto!: (v: unknown) => void;
+    impostaSpilloRaccolto.mockImplementation(() => new Promise((ok) => { rispondiRaccolto = ok; }));
+    impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null });
+    monta('kamoshida');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })); }); // in volo
+    fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' })); }); // arriva subito
+    expect(screen.getByRole('button', { name: 'Anche le segnate (1)' })).toBeInTheDocument();
+    await act(async () => { rispondiRaccolto({}); });
+    expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
+    expect(screen.getByRole('button', { name: 'Anche le segnate (1)' })).toBeInTheDocument();
+  });
+});
+
 // ---- L'elenco del Palazzo (ordine logico, legame con l'area, planimetria libera) ----
 //
 // Non si apre più niente: **l'elenco è la colonna di atterraggio** (scelta dell'utente,

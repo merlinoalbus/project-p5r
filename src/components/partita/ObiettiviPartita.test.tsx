@@ -5,7 +5,7 @@
 // Test ObiettiviPartita — elenco con avanzamento, filtri per stato, azioni e collegamento al piano con le skill
 // ============================================================
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ObiettiviPartita } from './ObiettiviPartita';
 import { linkPiano } from '../../utils/obiettivi';
@@ -62,5 +62,45 @@ describe('ObiettiviPartita', () => {
     expect(linkPiano({ personaId: 4, skill: [] })).toBe('/fusione?vista=piani&piani=4');
     expect(linkPiano({ personaId: 4, skill: [{ id: 9 }] })).toBe('/fusione?vista=piani&piani=4&skill=9');
     expect(linkPiano({ id: 3, personaId: 4, skill: [] })).toBe('/fusione?vista=piani&piani=4&obiettivo=3');
+  });
+});
+
+describe('ObiettiviPartita — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  const jack = () => ob(1, {});
+  const pixie = () => ob(2, { personaId: 3, nome: 'Pixie', nomeIt: 'Pixie' });
+  beforeEach(() => {
+    getObiettivi.mockReset(); aggiornaObiettivo.mockReset(); eliminaObiettivo.mockReset();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  });
+  afterEach(() => vi.restoreAllMocks());
+  const voce = (nome: string) => screen.getAllByRole('listitem').find((li) => li.textContent?.includes(nome))!;
+
+  it('cambio di stato: la risposta di Jack Frost arrivata dopo quella di Pixie non riapre Pixie', async () => {
+    getObiettivi.mockResolvedValue([jack(), pixie()]);
+    let risolviJack!: (o: ObiettivoDto) => void;
+    aggiornaObiettivo.mockImplementation((_p: number, id: number) => (id === 1
+      ? new Promise<ObiettivoDto>((ok) => { risolviJack = ok; })
+      : Promise.resolve({ ...pixie(), stato: 'raggiunto' })));
+    render(<MemoryRouter><ObiettiviPartita partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('link', { name: 'Jack Frost' });
+    await act(async () => { fireEvent.click(within(voce('Jack Frost')).getByRole('button', { name: /Segna raggiunto/ })); });
+    await act(async () => { fireEvent.click(within(voce('Pixie')).getByRole('button', { name: /Segna raggiunto/ })); });
+    expect(screen.getByRole('button', { name: 'Raggiunti (1)' })).toBeInTheDocument();
+    await act(async () => { risolviJack({ ...jack(), stato: 'raggiunto' }); });
+    expect(screen.getByRole('button', { name: 'Raggiunti (2)' })).toBeInTheDocument();
+  });
+
+  it('eliminazione: l\'obiettivo eliminato mentre un altro cambia stato non ricompare', async () => {
+    getObiettivi.mockResolvedValue([jack(), pixie()]);
+    let risolviJack!: (o: ObiettivoDto) => void;
+    aggiornaObiettivo.mockImplementation(() => new Promise<ObiettivoDto>((ok) => { risolviJack = ok; }));
+    eliminaObiettivo.mockResolvedValue(undefined);
+    render(<MemoryRouter><ObiettiviPartita partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('link', { name: 'Jack Frost' });
+    await act(async () => { fireEvent.click(within(voce('Jack Frost')).getByRole('button', { name: /Segna raggiunto/ })); });
+    await act(async () => { fireEvent.click(within(voce('Pixie')).getByRole('button', { name: /Elimina/ })); });
+    expect(screen.queryByRole('link', { name: 'Pixie' })).toBeNull();
+    await act(async () => { risolviJack({ ...jack(), stato: 'raggiunto' }); });
+    expect(screen.queryByRole('link', { name: 'Pixie' })).toBeNull();
   });
 });

@@ -232,8 +232,9 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   ancora»); dopo ogni segno sulla mappa il visore si rilegge e i pin che ne dipendono compaiono o spariscono subito. Il pin
   aperto non è fra quelli offerti, e un giro di condizioni (A dipende da B, B da A) si rifiuta al salvataggio coi nomi dei
   pin. Non esiste negli editor del catalogo (articoli, negozi, letture, effetti) né nelle schede della guida senza mappa.
-- Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
-  collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).
+- Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» per la mappa di un
+  **quartiere** (`pianta_quartiere`; per le aree dei Palazzi non c'è più, dal 2026-09-18), oppure asset del repository (§19).
+  Cambiare immagine mantiene gli spilli (percentuali).
 - Gestione dell'albero: crea mappa (tipo, nome, genitore), rinomina, sposta, elimina; anteprima delle miniature.
 - **Albero e passaggi** (15.24). L'albero dice chi contiene chi (percorso, «Su», elenco «Mappe figlie», esportazione per luogo); sulla mappa ci si
   sposta con gli spilli «passaggio» (riferimento a un'altra mappa), che sono porte disegnate sull'immagine. Le due cose restano distinte ma l'editor

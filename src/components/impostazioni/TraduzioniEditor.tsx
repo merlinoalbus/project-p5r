@@ -37,7 +37,8 @@ export function TraduzioniEditor() {
   const applica = async (t: TraduzioneDto, nuovo?: string) => {
     try {
       const agg = nuovo === undefined ? await ripristinaTraduzione(t.ambito, t.chiave) : await aggiornaTraduzione(t.ambito, t.chiave, nuovo);
-      voci.imposta((voci.dati ?? []).map((v) => (v.chiave === agg.chiave ? agg : v)));
+      // dai dati correnti (forma funzionale): la risposta arriva dopo un `await`, e un'altra voce salvata nel frattempo si perderebbe
+      voci.imposta((correnti) => correnti.map((v) => (v.chiave === agg.chiave ? agg : v)));
       setInModifica(null);
       void ricaricaGlossario();
       void ambiti.ricarica();

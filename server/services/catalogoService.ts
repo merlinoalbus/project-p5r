@@ -285,10 +285,6 @@ export function nascondiElemento(tipo: TipoCatalogo, chiave: string, nascosta: b
   return dto(tipo, riga(tipo, chiave));
 }
 
-/**
- * Elimina una riga creata dall'utente, oppure riporta al seed una riga del seed che l'utente aveva corretto o nascosto.
- * Restituisce che cosa è successo, perché l'interfaccia lo dice all'utente.
- */
 /** I riferimenti dei pin e delle mappe sono polimorfici (tipo + chiave) e nessuna chiave esterna li segue: eliminata una riga
  *  dell'utente, chi la citava perde il collegamento invece di puntare a una cosa che non c'è (`dettaglioRiferimento` restituiva
  *  `null` in silenzio). Come per i punti della guida tolti (`eliminaArea`), il pin resta e torna senza riferimento. Un pin
@@ -302,6 +298,10 @@ function staccaDalleMappe(tipo: TipoCatalogo, chiave: string): void {
   }
 }
 
+/**
+ * Elimina una riga creata dall'utente, oppure riporta al seed una riga del seed che l'utente aveva corretto o nascosto.
+ * Restituisce che cosa è successo, perché l'interfaccia lo dice all'utente.
+ */
 export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'eliminata' | 'ripristinata'; elemento: ElementoCatalogoDto | null } {
   const r = riga(tipo, chiave);
   if (r.origine === 'utente' && r.seed_json === null) {

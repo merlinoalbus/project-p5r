@@ -93,3 +93,88 @@ describe('ScortaPersona — valori reali (15.26)', () => {
     await waitFor(() => expect(api.aggiornaPosseduta).toHaveBeenLastCalledWith(7, 2, expect.objectContaining({ osservate: null })));
   });
 });
+
+describe('ScortaPersona — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  const pixie: PersonaPossedutaDto = { ...stimata, id: 3, personaId: 9, nome: 'Pixie', nomeIt: 'Pixie', arcana: 'Lovers', arcanaNome: 'Amanti', livello: 2 };
+  const conLivello = (p: PersonaPossedutaDto, livello: number): PersonaPossedutaDto => ({ ...p, livello });
+  beforeEach(() => {
+    for (const f of Object.values(api)) f.mockReset();
+    api.isApiError.mockReturnValue(false);
+    api.getCompendioPartita.mockResolvedValue([]);
+    api.getSkills.mockResolvedValue([]);
+    api.getImmagini.mockResolvedValue([]);
+    api.urlImmagine.mockImplementation((ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  /** La salita di Arsène resta in volo; risolverla dopo un altro gesto non deve annullare quel gesto. */
+  function arseneInVolo() {
+    let risolvi!: (p: PersonaPossedutaDto) => void;
+    api.aggiornaPosseduta.mockImplementation((_id: number, possedutaId: number) => (possedutaId === 1
+      ? new Promise<PersonaPossedutaDto>((ok) => { risolvi = ok; })
+      : Promise.resolve(conLivello(pixie, 3))));
+    return (p: PersonaPossedutaDto) => risolvi(p);
+  }
+
+  it('salita di livello: la risposta di Arsène arrivata dopo quella di Pixie non riporta Pixie indietro', async () => {
+    api.getPossedute.mockResolvedValue([stimata, pixie]);
+    const risolviArsene = arseneInVolo();
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Sali di livello: Arsène al livello 3' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sali di livello: Pixie al livello 3' }));
+    expect(await screen.findByRole('button', { name: 'Sali di livello: Pixie al livello 4' })).toBeInTheDocument();
+    risolviArsene(conLivello(stimata, 3));
+    expect(await screen.findByRole('button', { name: 'Sali di livello: Arsène al livello 4' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sali di livello: Pixie al livello 4' })).toBeInTheDocument();
+  });
+
+  it('rimozione: la Persona tolta mentre un\'altra sale di livello non ricompare', async () => {
+    api.getPossedute.mockResolvedValue([stimata, pixie]);
+    const risolviArsene = arseneInVolo();
+    api.rimuoviPosseduta.mockResolvedValue(undefined);
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Sali di livello: Arsène al livello 3' }));
+    const cartaPixie = (await screen.findAllByRole('listitem')).find((li) => within(li).queryByText('Pixie'))!;
+    fireEvent.click(within(cartaPixie).getByRole('button', { name: /Rimuovi/ }));
+    await waitFor(() => expect(screen.queryByRole('button', { name: /Sali di livello: Pixie/ })).toBeNull());
+    risolviArsene(conLivello(stimata, 3));
+    expect(await screen.findByRole('button', { name: 'Sali di livello: Arsène al livello 4' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Sali di livello: Pixie/ })).toBeNull();
+  });
+
+  it('aggiunta: una Persona aggiunta mentre un\'altra è appena salita di livello non riporta indietro il livello', async () => {
+    api.getPossedute.mockResolvedValue([stimata, pixie]);
+    api.aggiornaPosseduta.mockResolvedValue(conLivello(pixie, 3));
+    api.getPersone.mockResolvedValue([{ id: 20, nome: 'Jack Frost', nomeIt: 'Jack Frost', arcanaNome: 'Mago', livello: 11, rara: false }]);
+    let risolviAggiunta!: (p: PersonaPossedutaDto) => void;
+    api.aggiungiPosseduta.mockImplementation(() => new Promise<PersonaPossedutaDto>((ok) => { risolviAggiunta = ok; }));
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: '+ Aggiungi Persona' }));
+    const finestra = within(await screen.findByRole('dialog'));
+    fireEvent.click(await finestra.findByRole('button', { name: 'Aggiungi' })); // in volo
+    fireEvent.click(screen.getByRole('button', { name: 'Sali di livello: Pixie al livello 3' })); // arriva subito
+    expect(await screen.findByRole('button', { name: 'Sali di livello: Pixie al livello 4' })).toBeInTheDocument();
+    risolviAggiunta({ ...stimata, id: 20, personaId: 20, nome: 'Jack Frost', nomeIt: 'Jack Frost' });
+    expect(await screen.findByRole('button', { name: /Sali di livello: Jack Frost/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sali di livello: Pixie al livello 4' })).toBeInTheDocument();
+  });
+
+  it('modifica: il salvataggio di una Persona arrivato dopo la salita di un\'altra non la riporta indietro', async () => {
+    api.getPossedute.mockResolvedValue([stimata, pixie]);
+    let risolviModifica!: (p: PersonaPossedutaDto) => void;
+    api.aggiornaPosseduta.mockImplementation((_id: number, possedutaId: number) => (possedutaId === 1
+      ? new Promise<PersonaPossedutaDto>((ok) => { risolviModifica = ok; })
+      : Promise.resolve(conLivello(pixie, 3))));
+    monta();
+    const cartaArsene = (await screen.findAllByRole('listitem')).find((li) => within(li).queryByText('Arsène'))!;
+    fireEvent.click(within(cartaArsene).getByRole('button', { name: /Modifica/ }));
+    const finestra = within(await screen.findByRole('dialog'));
+    fireEvent.click(finestra.getByRole('button', { name: 'Salva' })); // in volo
+    fireEvent.click(screen.getByRole('button', { name: 'Sali di livello: Pixie al livello 3' })); // arriva subito
+    expect(await screen.findByRole('button', { name: 'Sali di livello: Pixie al livello 4' })).toBeInTheDocument();
+    risolviModifica({ ...stimata, note: 'salvata' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(screen.getByRole('button', { name: 'Sali di livello: Pixie al livello 4' })).toBeInTheDocument();
+  });
+});

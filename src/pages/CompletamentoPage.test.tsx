@@ -51,4 +51,21 @@ describe('CompletamentoPage', () => {
     expect(screen.queryByText('Stomaco di ferro')).toBeNull();
     expect(screen.getByRole('link', { name: /Covo dei Ladri/ })).toHaveAttribute('href', '/guida/covo');
   });
+
+  it('due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
+    usePartitaStore.setState({ attiva: { id: 2, nome: 'Prova' } as PartitaDto });
+    getCompletamento.mockResolvedValue(dati);
+    let rispondiAssedio!: (t: TrofeoDto) => void;
+    impostaTrofeo.mockImplementation((_id: number, chiave: string) => (chiave === 'assedio'
+      ? new Promise<TrofeoDto>((ok) => { rispondiAssedio = ok; })
+      : Promise.resolve({ ...dati.trofei[1], ottenuto: true })));
+    render(<MemoryRouter><CompletamentoPage /></MemoryRouter>);
+    await screen.findByText('Assedio al castello della lussuria');
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Trofeo Assedio al castello della lussuria ottenuto' })); }); // in volo
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Trofeo Il ladro fantasma definitivo ottenuto' })); }); // arriva subito
+    await act(async () => { rispondiAssedio({ ...dati.trofei[0], ottenuto: true }); });
+    expect(screen.getByRole('checkbox', { name: 'Trofeo Il ladro fantasma definitivo ottenuto' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Trofeo Assedio al castello della lussuria ottenuto' })).toBeChecked();
+    expect(screen.getByText(/2 trofei ottenuti/)).toBeInTheDocument();
+  });
 });

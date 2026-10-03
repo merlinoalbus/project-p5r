@@ -109,11 +109,15 @@ docs/                 documentazione di bordo e riferimenti di dominio
 6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; errori 4xx di Express/body-parser (JSON malformato 400, corpo oltre il limite 413, percorso non decodificabile 400) e di `sendFile`/`download` (404 `not-found`, 403, 416) → envelope in italiano, con le intestazioni di una risposta JSON anche se la rotta stava per mandare un file; altro → 500 `internal-error` con un **messaggio fisso** (il dettaglio resta nel log, col `requestId`).
 7. Client (`src/services/api/_httpClient.ts`): timeout e tentativi sui 5xx e sugli errori di rete **solo per i metodi
    idempotenti**; POST e PATCH non si ripetono (una scrittura già avvenuta verrebbe raddoppiata), salvo `maxRetries` esplicito.
+   Anche un PUT **relativo** non si ripete, con `{ maxRetries: 0 }` nella sua funzione: lo spostamento di una voce della giornata
+   (`spostaVoceGiornata`) o di un punto (`spostaPunto`) di un posto e i punti di un Confidente (`aggiornaConfidente`, che li somma)
+   ripetuti dopo una risposta persa sposterebbero o sommerebbero due volte.
 
 ## 5. Persistenza
 - **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, indice immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le 32 tabelle delle partite, DDL in `server/db/schemaUtente.ts`). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
 - Connessione better-sqlite3, pragma `journal_mode=WAL` (su entrambi i file), `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
-- Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, con `foreign_key_check` **dentro** la transazione prima di avanzare `user_version` (una violazione annulla la migrazione, che resta da applicare; dal 2026-10-03, prima il controllo era dopo il commit).
+- Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, con `foreign_key_check` **dentro** la transazione prima di avanzare `user_version` (dal 2026-10-03, prima il controllo era dopo il commit). Il controllo si fa prima e dopo `up`: solo le violazioni **nuove**, introdotte da quella migrazione, la annullano (resta da applicare); quelle già presenti nel file si scrivono nel log come avviso e non bloccano l'avvio, che altrimenti si fermerebbe per sempre su un dato vecchio che nessuna migrazione tocca.
+- `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
 - Il seed JSON non esiste più: `seed_meta` resta come memoria dell'ultimo caricamento; i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto, lotto successivo).
 - Schema in due famiglie (migrazioni 001–004; `user_version` = 4):
@@ -229,10 +233,13 @@ differenze e tempo sono JSON in `dati_guida` («completamento»). `completamento
 ### Sfide (Fase 9.2)
 `sfide.json` è consultazione pura in `dati_guida` («sfide»); le domande del game show in TV riusano il modello `domanda` (tipo «altro», chi «Game show in TV») e quindi la spunta per partita.
 
-### Piante delle aree (Fase 7.4)
-Migrazione 020: `pianta_area` (URL, pagina, fonte, licenza, alternative in JSON) e colonna `origine` su `marcatore_mappa`. Le immagini non
-entrano mai nel repository: `scaricaPianta` le importa nell'istanza (ambito «mappa») al primo accesso all'area, provando le fonti
-alternative; gli spilli del seed hanno `origine = 'seed'` e il reseed non tocca quelli fissati dall'utente.
+### Piante delle aree (Fase 7.4) — *superato dal 2026-09-18*
+Migrazione 020: `pianta_area` (URL, pagina, fonte, licenza, alternative in JSON) e colonna `origine` su `marcatore_mappa`. Fino al
+2026-09-18 la pianta della guida si scaricava nell'istanza (ambito «mappa», chiave dell'area) al primo accesso all'area; con
+`f82c42cf` («la pianta della guida esce di scena») la rotta `POST /api/mappe/piante/:area/scarica` e il servizio sono stati tolti, e
+dal 2026-10-03 anche la funzione del client `scaricaPianta` e il pulsante «Scarica dalla guida» sulle planimetrie d'area (O9). Le
+immagini delle piante già scaricate restano in `immagine` con la chiave dell'area: un'immagine di base di mappa con la stessa chiave
+non si cancella con la mappa (`eliminaImmagineDellaMappa`). «Scarica dalla guida» resta solo per i quartieri (Fase 8.3).
 
 ### Mappe della città (Fase 8.3)
 Migrazione 022: `pianta_quartiere` e `marcatore_luogo` (origine seed/utente). L'immagine del quartiere vive in `immagine` (ambito «mappa»,

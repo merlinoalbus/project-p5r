@@ -54,8 +54,11 @@ export const aggiornaDote = (id: number, chiave: string, mod: ModificaDote): Pro
   apiPatch(`/partite/${id}/doti/${encodeURIComponent(chiave)}`, mod);
 
 export const getConfidentiPartita = (id: number): Promise<ConfidentePartitaDto[]> => apiGet(`/partite/${id}/confidenti`);
+/** Rango, sblocco e punti di un Confidente. Può essere relativo (`deltaPunti`, le note di una risposta, un regalo, un'uscita
+ *  aggiungono punti): ripetuto dopo un 5xx o un timeout a scrittura già avvenuta li conterebbe due volte, quindi nessun nuovo
+ *  tentativo, come per le PATCH (rilievo F7 della validazione, 2026-10-03). */
 export const aggiornaConfidente = (id: number, chiave: string, dati: ModificaConfidente): Promise<ConfidentePartitaDto> =>
-  apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}`, dati);
+  apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}`, dati, { maxRetries: 0 });
 
 /** Trofeo ottenuto (o tolto) nella partita. */
 export const impostaTrofeo = (id: number, trofeo: string, ottenuto: boolean): Promise<TrofeoDto> => apiPut(`/partite/${id}/trofei`, { trofeo, ottenuto });

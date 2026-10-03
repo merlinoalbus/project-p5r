@@ -62,3 +62,51 @@ describe('PianiSalvati', () => {
     expect(screen.getByRole('link', { name: 'Tutti i piani' })).toBeInTheDocument();
   });
 });
+
+describe('PianiSalvati — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  const pianoA = { ...piano, id: 5, titolo: 'Piano A' };
+  const pianoB = { ...piano, id: 6, titolo: 'Piano B' };
+  beforeEach(() => {
+    getPianiSalvati.mockReset(); getPossedute.mockReset(); aggiornaPianoSalvato.mockReset(); eliminaPianoSalvato.mockReset();
+    getPossedute.mockResolvedValue([]);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  });
+  afterEach(() => vi.restoreAllMocks());
+  /** Rinomina il piano col titolo `vecchio` in `nuovo` dalla sua scheda. */
+  const rinomina = async (vecchio: string, nuovo: string) => {
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${vecchio}`) })); });
+    const campo = screen.getByLabelText('Titolo del piano');
+    fireEvent.change(campo, { target: { value: nuovo } });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ok' })); });
+  };
+
+  it('rinomina: la risposta del piano A arrivata dopo quella del piano B non rimette il vecchio titolo di B', async () => {
+    getPianiSalvati.mockResolvedValue([pianoA, pianoB]);
+    let risolviA!: (p: PianoSalvatoDto) => void;
+    aggiornaPianoSalvato.mockImplementation((_p: number, id: number, d: { nome: string }) => (id === 5
+      ? new Promise<PianoSalvatoDto>((ok) => { risolviA = ok; })
+      : Promise.resolve({ ...pianoB, titolo: d.nome })));
+    render(<MemoryRouter><PianiSalvati partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('button', { name: /^Piano A/ });
+    await rinomina('Piano A', 'Piano A nuovo'); // in volo
+    await rinomina('Piano B', 'Piano B nuovo'); // arriva subito
+    expect(screen.getByRole('button', { name: /^Piano B nuovo/ })).toBeInTheDocument();
+    await act(async () => { risolviA({ ...pianoA, titolo: 'Piano A nuovo' }); });
+    expect(screen.getByRole('button', { name: /^Piano A nuovo/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Piano B nuovo/ })).toBeInTheDocument();
+  });
+
+  it('eliminazione: il piano eliminato mentre un altro viene rinominato non ricompare', async () => {
+    getPianiSalvati.mockResolvedValue([pianoA, pianoB]);
+    let risolviA!: (p: PianoSalvatoDto) => void;
+    aggiornaPianoSalvato.mockImplementation(() => new Promise<PianoSalvatoDto>((ok) => { risolviA = ok; }));
+    eliminaPianoSalvato.mockResolvedValue(undefined);
+    render(<MemoryRouter><PianiSalvati partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('button', { name: /^Piano B/ });
+    await rinomina('Piano A', 'Piano A nuovo'); // in volo
+    await act(async () => { fireEvent.click(screen.getAllByRole('button', { name: 'Elimina' })[1]); }); // il piano B
+    expect(screen.queryByRole('button', { name: /^Piano B/ })).toBeNull();
+    await act(async () => { risolviA({ ...pianoA, titolo: 'Piano A nuovo' }); });
+    expect(screen.queryByRole('button', { name: /^Piano B/ })).toBeNull();
+  });
+});

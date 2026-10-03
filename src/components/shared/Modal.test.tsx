@@ -144,3 +144,26 @@ it('A5: in StrictMode (sviluppo) il campo con autoFocus tiene il fuoco, e alla c
   act(() => { fireEvent.keyDown(window, { key: 'Escape' }); });
   expect(document.activeElement).toBe(apri);
 });
+
+it('A5: un clic che non sposta il fuoco (documento senza il fuoco del sistema) conta come apertura: alla chiusura il fuoco torna al pulsante cliccato', () => {
+  function DaClic() {
+    const [aperta, setAperta] = useState(false);
+    return (
+      <>
+        <input aria-label="Campo della pagina" />
+        <button type="button" onClick={() => setAperta(true)}><span>Apri col clic</span></button>
+        <Modal titolo="Dal clic" aperta={aperta} onChiudi={() => setAperta(false)}>corpo</Modal>
+      </>
+    );
+  }
+  render(<DaClic />);
+  const campo = screen.getByRole('textbox', { name: 'Campo della pagina' });
+  const apri = screen.getByRole('button', { name: 'Apri col clic' });
+  campo.focus();
+  // in jsdom, come in una finestra del browser in secondo piano, il clic non sposta il fuoco: l'ultimo `focusin` resta sul campo;
+  // il clic parte dall'etichetta interna, e il registro risale al pulsante
+  fireEvent.click(apri.querySelector('span')!);
+  expect(document.activeElement).toBe(screen.getByRole('dialog', { name: 'Dal clic' }));
+  act(() => { fireEvent.keyDown(window, { key: 'Escape' }); });
+  expect(document.activeElement).toBe(apri);
+});

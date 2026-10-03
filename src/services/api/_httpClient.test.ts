@@ -93,3 +93,28 @@ describe('B8": inviaFile', () => {
     await expect(inviaFile('PUT', '/font/display', file)).resolves.toEqual({ metodo: 'PUT', tipo: 'image/png' });
   });
 });
+
+describe('F7 (validazione voce 2): le PUT relative non si ripetono', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
+
+  it('spostamenti e punti dei Confidenti: un solo tentativo dopo un 5xx; una PUT assoluta si ritenta', async () => {
+    const { spostaVoceGiornata, spostaPunto, aggiornaPunto } = await import('./compendio');
+    const { aggiornaConfidente } = await import('./partite');
+    for (const chiamata of [() => spostaVoceGiornata('u1', 1), () => spostaPunto('p1', -1), () => aggiornaConfidente(1, 'sojiro', { noteRisposta: 3 })]) {
+      const fetchFinto = vi.fn(async () => risposta500());
+      vi.stubGlobal('fetch', fetchFinto);
+      const p = chiamata().catch((e: unknown) => e);
+      await vi.runAllTimersAsync();
+      expect(await p).toBeInstanceOf(ApiError);
+      expect(fetchFinto).toHaveBeenCalledTimes(1);
+    }
+    // controllo: una PUT assoluta (il testo di un punto) resta ripetibile
+    const fetchFinto = vi.fn(async () => risposta500());
+    vi.stubGlobal('fetch', fetchFinto);
+    const p = aggiornaPunto('p1', { descrizione: 'x' }).catch(() => null);
+    await vi.runAllTimersAsync();
+    await p;
+    expect(fetchFinto).toHaveBeenCalledTimes(3);
+  });
+});

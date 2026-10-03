@@ -57,4 +57,41 @@ describe('PercorsoPage', () => {
     expect(await screen.findByText('Oggi nella partita')).toBeInTheDocument();
     expect(usePartitaStore.getState().attiva).toEqual(aggiornata);
   });
+
+  const apri = () => render(<MemoryRouter initialEntries={['/guida/percorso']}><Routes><Route path="/guida/percorso" element={<PercorsoPage />} /><Route path="/guida/percorso/:data" element={<PercorsoPage />} /></Routes></MemoryRouter>);
+
+  it('due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
+    usePartitaStore.setState({ attiva: { id: 4, nome: 'Prova' } as PartitaDto });
+    getPercorsoIndice.mockResolvedValue(indice);
+    getPercorsoGiorno.mockResolvedValue(giorno);
+    let rispondiPrima!: (a: PercorsoGiornoDto['azioni'][number]) => void;
+    impostaAzionePercorso.mockImplementation((_id: number, uid: string) => (uid === giorno.azioni[0].uid
+      ? new Promise((ok) => { rispondiPrima = ok; })
+      : Promise.resolve({ ...giorno.azioni[1], fatta: true })));
+    apri();
+    await screen.findByText('Primo accesso al Palazzo di Kamoshida.');
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: /Rispondere alla domanda/ })); }); // in volo
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: /esplorazione del secondo livello/ })); }); // arriva subito
+    await act(async () => { rispondiPrima({ ...giorno.azioni[0], fatta: true }); });
+    expect(screen.getByRole('checkbox', { name: /esplorazione del secondo livello/ })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /Rispondere alla domanda/ })).toBeChecked();
+    expect(screen.getByText('2 azioni fatte su 3.')).toBeInTheDocument();
+  });
+
+  it('una spunta fatta mentre si segna il giorno corrente resta (B3")', async () => {
+    usePartitaStore.setState({ attiva: { id: 4, nome: 'Prova' } as PartitaDto });
+    getPercorsoIndice.mockResolvedValue({ ...indice, dataCorrente: '04-11' });
+    getPercorsoGiorno.mockResolvedValue({ ...giorno, dataCorrente: '04-11' });
+    impostaAzionePercorso.mockResolvedValue({ ...giorno.azioni[0], fatta: true });
+    let rispondiGiorno!: (v: { dataCorrente: string; partita: PartitaDto }) => void;
+    impostaGiornoCorrente.mockImplementation(() => new Promise((ok) => { rispondiGiorno = ok; }));
+    render(<MemoryRouter initialEntries={['/guida/percorso/04-12']}><Routes><Route path="/guida/percorso/:data" element={<PercorsoPage />} /></Routes></MemoryRouter>);
+    await screen.findByText('Primo accesso al Palazzo di Kamoshida.');
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Segna come giorno corrente' })); }); // in volo
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: /Rispondere alla domanda/ })); }); // arriva subito
+    await act(async () => { rispondiGiorno({ dataCorrente: '04-12', partita: { id: 4, nome: 'Prova', dataGioco: '04-12' } as PartitaDto }); });
+    expect(screen.getByText('Oggi nella partita')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /Rispondere alla domanda/ })).toBeChecked();
+    expect(screen.getByText('1 azioni fatte su 3.')).toBeInTheDocument();
+  });
 });

@@ -108,6 +108,23 @@ describe('NegozioPage', () => {
     expect(screen.queryByText('fonte')).toBeNull();
     expect(screen.queryByText(/Sblocco:/)).toBeNull();
   });
+
+  it('due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
+    usePartitaStore.setState({ attiva: { id: 9, nome: 'Prova' } as PartitaDto });
+    getNegozio.mockResolvedValue(negozio);
+    let rispondiKogatana!: (a: ArticoloDto) => void;
+    impostaAcquisto.mockImplementation((_id: number, chiave: string) => (chiave === 'untouchable/kogatana-nera'
+      ? new Promise<ArticoloDto>((ok) => { rispondiKogatana = ok; })
+      : Promise.resolve({ ...negozio.articoliElenco[1], acquistato: true })));
+    render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Untouchable' });
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Kogatana nera acquistato' })); }); // in volo
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Frusta acquistato' })); }); // arriva subito
+    await act(async () => { rispondiKogatana({ ...negozio.articoliElenco[0], acquistato: true }); });
+    expect(screen.getByRole('checkbox', { name: 'Frusta acquistato' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Kogatana nera acquistato' })).toBeChecked();
+    expect(screen.getByText(/2 acquistati/)).toBeInTheDocument();
+  });
 });
 
 /** **La porta a senso unico.** «Nascondi dagli elenchi» toglieva la riga da ogni elenco e il

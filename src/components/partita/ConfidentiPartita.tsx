@@ -68,7 +68,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
     try {
       const prima = dati.find((c) => c.chiave === chiave);
       const agg = await aggiornaConfidente(partitaId, chiave, cambio);
-      imposta(dati.map((c) => (c.chiave === chiave ? agg : c)));
+      // dai dati correnti: dopo l'`await` `dati` è quello del render, e un altro Confidente aggiornato nel frattempo si perderebbe
+      imposta((correnti) => correnti.map((c) => (c.chiave === chiave ? agg : c)));
       if (prima && cambio.rango === undefined && cambio.punti === undefined) {
         const delta = Math.round((agg.punti - prima.punti) * 100) / 100;
         if (delta > 0) setUltimo((u) => ({ ...u, [chiave]: delta }));
@@ -94,7 +95,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
     setOccupato(c.chiave);
     try {
       const agg = await confermaRequisitoConfidente(partitaId, c.chiave, rango, indice, confermato);
-      imposta((dati ?? []).map((x) => (x.chiave === agg.chiave ? agg : x)));
+      imposta((correnti) => correnti.map((x) => (x.chiave === agg.chiave ? agg : x)));
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {

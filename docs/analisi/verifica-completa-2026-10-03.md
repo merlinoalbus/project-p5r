@@ -271,8 +271,25 @@ Tutti i rilievi segnati «2» nelle tabelle sono corretti:
 - A1–A9 con R1‴;
 - S1, S6, S7, D1, D2, D4, K4‴, O9.
 
-Ogni correzione ha un test. Ognuna è stata tolta di nuovo, una alla volta, per vedere fallire il suo test (variante rossa); poi
-i file sono tornati identici al confronto byte per byte. In totale 70 varianti, tutte rosse.
+**Varianti rosse.** Ogni correzione verificabile con un test automatico è stata tolta di nuovo, una alla volta, per vedere
+fallire il suo test; poi i file sono tornati identici al confronto byte per byte. Script e output nella cartella di lavoro della
+sessione (`rossi-*.sh` / `rossi-*.out`):
+
+| Script | Varianti | Che cosa tolgono |
+|--------|---------:|------------------|
+| `rossi-api` | 16 | lotto API (F01–F14, B2", B7") |
+| `rossi-mappe-servizi` | 24 | lotto mappe e servizi (F10, B1–B14, C1–C6 meteo, B2'–B6') |
+| `rossi-fe` | 24 | condivisi, stato, pagine e componenti, K4 (rossa come errore di `tsc`, non come test) |
+| `rossi-modal` | 7 | fuoco delle finestre (A5): ingresso, ritorno, `autoFocus`, StrictMode, registro dei clic, Tab |
+| `rossi-validazione2` | 21 | correzioni chieste dalla prima validazione (F2, F6, F7, F8, N1, N2, `prepared`, B1', B5', B14 negozio, C6 piani e cicli) |
+| `rossi-strutturale` | 15 | il test strutturale di B3"/F2: ognuno dei 15 file torna alla versione di `main` e il test nomina le sue righe |
+| `rossi-b3` | 8 | i test «due gesti ravvicinati» delle 8 pagine e hook di B3": ogni sorgente torna alla versione di `main` (14 test rossi) |
+
+In totale **115 varianti, tutte rosse**, più le prove rosse manuali del paragrafo «Prove fuori dai test».
+
+**Correzioni senza test automatico** (solo prova manuale, verde con il codice e rossa con quello di `main`, output grezzo
+salvato): A2 (CSS, misura nel browser), S1, S6, S7 (script), D1, D2, D4 (`nginx.conf`, con Docker). Tutte le altre hanno un test e
+una variante rossa.
 
 **Test per lotto:**
 
@@ -283,18 +300,35 @@ i file sono tornati identici al confronto byte per byte. In totale 70 varianti, 
 | Servizi e DB | `server/services/verifica-servizi.test.ts` |
 | Condivisi e stato | `shared/verifica-condivisi.test.ts`, `src/hooks/useCarica.test.tsx`, `src/stores/verifica-store.test.ts` |
 | Pagine e componenti | `src/hooks/useCodaProgresso.test.tsx`, `src/hooks/useCarica.test.tsx`, `src/components/shared/Modal.test.tsx`, `src/components/shared/immaginiCache.test.ts`, `src/accessibilita.test.ts`, `src/components/guida/EditorEffetti.test.tsx` |
+| Aggiornamenti locali (B3", F2) | `src/aggiornamentiLocali.test.ts` (strutturale), `src/hooks/useOggi.test.tsx`, `src/components/impostazioni/TraduzioniEditor.test.tsx` |
 
-Nel lotto pagine e componenti ci sono anche casi nuovi nei test esistenti: VideogiochiPage, CondizioniEditor, VisoreMappa,
-ConfidenteDettaglioPage, SquadraPartita, EditorMappaPage.
+Casi nuovi nei test esistenti:
+- pagine e componenti: VideogiochiPage, CondizioniEditor, VisoreMappa, ConfidenteDettaglioPage, SquadraPartita, EditorMappaPage;
+- «due gesti ravvicinati» (B3", F2): CompletamentoPage, CruciverbaPage, RichiestePage, NegozioPage, NegoziPage, PercorsoPage,
+  DungeonDettaglioPage, DotiSociali, ConfidentiPartita, ScortaPersona, ObiettiviPartita, PianiSalvati, CicliSalvati;
+- servizi: `verifica-servizi` (C6 piani e cicli, rotazione B5', `prepared`, B1', violazioni già presenti); `verifica-mappe`
+  (B14 negozio); `download-database` (pulizia fallita, N1); `_httpClient` (PUT relativi, F7).
 
-**Prove fuori dai test:**
-- **nginx (D1, D2):** prova con Docker su un backend finto. Configurazione nuova: 200, 413, 200. Configurazione di prima: 413,
-  413, 502.
-- **D4:** intestazioni di cache verificate.
-- **S6:** porta occupata da un altro programma → uscita 1.
-- **S7:** cartella di lavoro tolta dopo un errore.
-- **S1:** misura sul `gioco.db` vero, DB invariati (SHA uguale).
-- **Browser:** focus delle finestre, `min-width` dei selettori, ruoli, nessuno scorrimento orizzontale a 375/768/1280.
+I test preesistenti modificati non perdono asserzioni: le 15 righe tolte sono il test CORS (tolto per decisione dell'utente; F01
+ne verifica l'assenza), cinque import riscritti, il mock di `scaricaPianta` (funzione tolta con O9) e un commento riscritto.
+
+**Prove fuori dai test** (output grezzi nella cartella di lavoro della sessione, `prove-voce2/`):
+- **nginx (D1, D2, D4)**, con Docker su un backend finto (`nginx-prova.sh`, `F1-nginx-docker.txt`):
+  - configurazione nuova: importazione da 20 MB 200, altra API da 20 MB 413, API dopo la ricreazione del backend con un altro IP
+    200; `/assets/` `immutable`, `/favicon.svg` `max-age=3600, stale-while-revalidate`;
+  - configurazione di `main`: 413, 413, **502**; anche `/favicon.svg` `immutable` per 7 giorni.
+- **S1** (`F1-S1.txt`, `F1-S1-main.txt`): sul `gioco.db` vero 1470 voci misurate, SHA-256 di `gioco.db` e `partite.db` uguali
+  prima e dopo; lo script di `main`, su una copia dei dati, crea un `project-p5r.db` vuoto e misura 0 voci.
+- **S6** (`F1-S6.txt`): con la porta tenuta da `powershell.exe`, `start-be.sh` esce con 1 e lo dice; quello di `main` esce con 0
+  («già in ascolto»); con la porta tenuta dal BE (node) esce con 0.
+- **S7** (`F1-S7.txt`): con un pacchetto che non è un database lo script fallisce (`SQLITE_NOTADB`) e non lascia cartelle
+  `p5r-pacchetto-*`; quello di `main` ne lascia una. `pacchetto/` e `data/` invariati.
+- **Browser** (`F1-browser.txt`), a 1280×689, 768×1024 e 375×812:
+  - A2: il selettore con `min-w-[220px]` misura 220 px (299 a 375); con la regola fuori dal layer, come su `main`, `min-width`
+    vale 0 e il selettore misura 71 px a 1280 e 111 a 375;
+  - A5: la finestra «Nuova partita» prende il fuoco all'apertura e lo ridà al pulsante alla chiusura;
+  - nessuno scorrimento orizzontale.
+- **Suite, typecheck, lint** (`F1-vitest.txt`, `F1-tsc.txt`, `F1-lint.txt`): output integrali sullo stato finale.
 
 **Emerso durante le correzioni e corretto nello stesso lotto:**
 - **F05:** un errore dopo che la rotta aveva dichiarato un file (`Content-Type: application/vnd.sqlite3`) partiva con quel tipo.
@@ -302,8 +336,14 @@ ConfidenteDettaglioPage, SquadraPartita, EditorMappaPage.
 - **B5:** l'immagine di base di una mappa non si toglie se la stessa chiave è anche la pianta di un quartiere o di un'area. Le 9
   immagini «senza mappa» del DB vivo sono piante d'area, non orfane.
 - **B1:** un'area con la chiave più lunga possibile ora contiene punti raggiungibili (prima la correzione li rifiutava).
-- **B3":** lo stesso errore (dati presi dal render dopo un `await`) era anche in Completamento, Cruciverba, Richieste,
-  DungeonDettaglio, NegozioPage, NegoziPage e ObiettiviPartita: corretto ovunque con la forma funzionale di `imposta`.
+- **B3":** lo stesso errore (dati presi dal render dopo un `await`) era in 15 file:
+  - nel primo giro, Completamento, Cruciverba, Richieste, DungeonDettaglio, NegozioPage, NegoziPage, PercorsoPage, `useOggi` e una
+    riga di ObiettiviPartita;
+  - dopo la prima validazione (F2), le altre righe di ObiettiviPartita, PianiSalvati, CicliSalvati, ConfidentiPartita,
+    ScortaPersona, DotiSociali e TraduzioniEditor.
+
+  Ora usano tutte la forma funzionale di `imposta`. Ogni file ha un test con due gesti ravvicinati, rosso con la sua versione di
+  `main`. Il test strutturale `src/aggiornamentiLocali.test.ts` impedisce che la forma vecchia torni.
 - **B6":** con `ricarica()` che ora aspetta la rilettura, l'editor delle mappe passa alla mappa nuova solo con l'albero già
   riletto; il test che dava per scontata la navigazione immediata ora la aspetta.
 - **B9":** `articolo.effetto_json` e `libro.effetto_json` avevano la stessa validazione apparente: ora usano lo stesso
@@ -318,7 +358,31 @@ ConfidenteDettaglioPage, SquadraPartita, EditorMappaPage.
 - **A2:** si sposta nel livello dei componenti solo la regola di base `.selettore`. Il resto del blocco fuori dai layer è voluto,
   e spostarlo cambierebbe `width` e `display` dei selettori compatti.
 
+**Prima validazione (rigettata) e correzioni:**
+- **F1:** gli output grezzi ora sono salvati (paragrafo «Prove fuori dai test»).
+- **F2:** le righe di B3" rimaste (sopra) sono corrette, ognuna con il suo test.
+- **F3:** i conteggi sono quelli della tabella delle varianti; le varianti del fuoco sono nello script `rossi-modal`.
+- **F4:** aggiunti test e varianti per C6 (piani e cicli), B5' (rotazione), B14 (ramo del negozio), B1' e B3"; per le correzioni
+  senza test vale l'elenco «Correzioni senza test automatico».
+- **F5:** ARCHITETTURA (piante delle aree, superate dal 2026-09-18) e MAPPE.md dicono che «Scarica dalla guida» resta solo per i
+  quartieri.
+- **F6:** `PRAGMA foreign_key_check` sui due file vivi e su `pacchetto/gioco.db` dà 0 righe (`F6-foreign_key_check.txt`). Il
+  controllo ora è per schema, prima e dopo la migrazione: solo le violazioni nuove la annullano, e quelle già presenti vanno nel
+  log. Così un dato vecchio, non toccato da nessuna migrazione, non blocca l'avvio per sempre.
+- **F7:** `spostaVoceGiornata`, `spostaPunto` e `aggiornaConfidente` (PUT relativi) non si ripetono più.
+- **F8:** il 500 della riapertura fallita non porta più il messaggio interno; il dettaglio resta nel log.
+- **N1:** il test della pulizia fallita ora verifica il messaggio nel log.
+- **N2:** `useCodaProgresso` toglie il valore chiesto quando la coda si ferma, anche al cambio di partita.
+- **N3:** il commento di `eliminaElemento` è tornato sopra la sua funzione.
+- **N4:** il diff dei test preesistenti è salvato (`N4-test-preesistenti.diff`, con la nota `N4-nota.txt`).
+
+Emerso durante queste correzioni:
+- **`prepared`:** uno statement in cache cambiato da `.pluck()` restava cambiato per tutti; ora torna in modalità normale a ogni
+  presa. È stato trovato scrivendo il test di B1'.
+- **A5:** il registro dei clic (documento senza il fuoco del sistema) non aveva un test; ora ce l'ha (varianti 5 e 7 di
+  `rossi-modal`).
+
 **Da segnalare, non toccati:**
-- in `%TEMP%` c'è una cartella `p5r-pacchetto-*` lasciata da un'esecuzione fallita di `genera-pacchetto` di prima (il difetto
-  S7);
+- in `%TEMP%` c'è una cartella `p5r-pacchetto-Kty6zZ` lasciata da un'esecuzione fallita di `genera-pacchetto` di prima (il
+  difetto S7); va tolta a mano;
 - in `data/backups` i giornali orfani delle copie di avvio sono stati tolti al riavvio del backend, come previsto da B5'.
