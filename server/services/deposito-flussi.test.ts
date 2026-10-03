@@ -15,8 +15,8 @@ import path from 'node:path';
 import { config } from '../config.js';
 import { closeDb, initDb, prepared } from '../db/dbService.js';
 import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
-import { copiaIstanza, ripristinaIstanzaDaDeposito } from './impostazioniService.js';
-import { anteprimaPacchettoDaDeposito, esportaPacchetto, importaPacchettoDaDeposito } from './pacchettoGiocoService.js';
+import { copiaDatabase, copiaIstanza, ripristinaIstanzaDaDeposito } from './impostazioniService.js';
+import { anteprimaPacchettoDaDeposito, importaPacchettoDaDeposito } from './pacchettoGiocoService.js';
 import { depositaCopia } from './depositoService.js';
 
 let dataDir = '';
@@ -75,7 +75,7 @@ describe('cartella d\'appoggio — copie e letture a flusso', () => {
   });
 
   it('importa un pacchetto depositato: il file sul NAS resta com\'era, senza giornali, e la cartella di lavoro si toglie', async () => {
-    const { percorso } = await esportaPacchetto();
+    const { percorso } = await copiaDatabase('gioco');
     const depositato = path.join(deposito, 'gioco.db');
     fs.renameSync(percorso, depositato);
     const primaByte = fs.readFileSync(depositato);

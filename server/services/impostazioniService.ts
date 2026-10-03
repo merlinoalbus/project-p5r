@@ -63,14 +63,6 @@ function fileDellaCartella(base: string, prefisso = ''): Array<{ relativo: strin
   return out;
 }
 
-function meta(chiave: string): string | null {
-  try {
-    return (getDb().prepare('SELECT valore FROM seed_meta WHERE chiave = ?').get(chiave) as { valore: string } | undefined)?.valore ?? null;
-  } catch {
-    return null;
-  }
-}
-
 /** Stato dell'istanza mostrato in Impostazioni (dimensioni, versioni, conteggi). */
 export function statoIstanza(): StatoIstanzaDto {
   const dbPath = resolveDbPath();
@@ -90,7 +82,6 @@ export function statoIstanza(): StatoIstanzaDto {
     versioneSchema: getDb().pragma('main.user_version', { simple: true }) as number,
     versioneSchemaPartite: getDb().pragma('utente.user_version', { simple: true }) as number,
     versioneApp: config.appVersion,
-    seed: { versione: meta('versione'), hash: meta('hash'), caricatoIl: meta('caricatoIl') },
     database: { nome: config.dbFileName, byte: inMemoria ? 0 : fs.statSync(dbPath).size, inMemoria },
     databasePartite: { nome: config.partiteFileName, byte: inMemoria || !fs.existsSync(partitePath) ? 0 : fs.statSync(partitePath).size },
     immagini: { file: immagini.file, byte: immagini.byte },

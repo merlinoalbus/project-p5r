@@ -44,6 +44,11 @@ export function scontoPartita(partitaId: number | undefined): { registrate: numb
   return { registrate, totale, percentuale, sconto: scontoRegistro(percentuale) };
 }
 
+/** Il rango più alto fra i Confidenti di un arcano nella partita (0 se nessuno). Era copiata in cicli salvati e operazioni della Velluto (K2). */
+export function rangoArcana(partitaId: number, arcana: string): number {
+  return (prepared('SELECT MAX(COALESCE(cp.rango, 0)) AS r FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? WHERE c.arcana = ?').get(partitaId, arcana) as { r: number | null }).r ?? 0;
+}
+
 /** Rango del Confidente per arcano nella partita (0 se assente). */
 function ranghiPerArcana(partitaId: number | undefined): Map<string, { chiave: string; nome: string; rango: number }> {
   const m = new Map<string, { chiave: string; nome: string; rango: number }>();

@@ -20,7 +20,6 @@ vi.mock('../../stores/partitaStore', () => ({ usePartitaStore: { getState: () =>
 
 const stato: StatoIstanzaDto = {
   versioneSchema: 79, versioneApp: '0.1.0', versioneSchemaPartite: 4,
-  seed: { versione: null, hash: null, caricatoIl: null },
   database: { nome: 'gioco.db', byte: 320_000_000, inMemoria: false }, databasePartite: { nome: 'partite.db', byte: 120_000 },
   immagini: { file: 640, byte: 300_000_000 }, caratteri: { file: 0, byte: 0 }, partite: 2, copieDiSicurezza: 1, vuota: false, completo: true,
 };

@@ -256,3 +256,27 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     expect((await azione('04-12', 1)).fascia).toBe('sera');
   });
 });
+
+describe('API — il contatore dei turni registra le stesse Doti di un turno alla volta (P5\')', () => {
+  beforeAll(() => {
+    const db = initDb(':memory:');
+    caricaPacchetto(db);
+    // una voce che vale solo dal 3° turno in poi: dipende proprio dalle volte svolte, l'unica parte dello stato che un turno cambia
+    const riga = prepared("SELECT effetti_json FROM attivita WHERE chiave = 'lavoro-rafflesia'").get() as { effetti_json: string };
+    const voci = [...(JSON.parse(riga.effetti_json) as unknown[]), { effetto: { famiglia: 'dote', dote: 'fascino', note: 1 }, ripetuto: true, condizioni: [{ tipo: 'attivita', attivita: 'lavoro-rafflesia', volte: 3 }] }];
+    prepared("UPDATE attivita SET effetti_json = ? WHERE chiave = 'lavoro-rafflesia'").run(JSON.stringify(voci));
+  });
+  afterAll(() => closeDb());
+
+  const registro = (p: number) => prepared("SELECT ordine, dote_chiave, punti, note FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = 'lavoro-rafflesia' ORDER BY ordine, dote_chiave").all(p);
+
+  it('quattro turni in una volta e quattro turni uno per uno danno lo stesso registro, con la voce condizionata dal 3° turno', async () => {
+    const insieme = ((await request(app).post('/api/partite').send({ nome: 'Insieme' })).body.data as { id: number }).id;
+    const unoAllaVolta = ((await request(app).post('/api/partite').send({ nome: 'Uno alla volta' })).body.data as { id: number }).id;
+    await request(app).put(`/api/condizioni/partite/${insieme}/attivita/lavoro-rafflesia`).send({ volte: 4 }).expect(200);
+    for (let v = 1; v <= 4; v++) await request(app).put(`/api/condizioni/partite/${unoAllaVolta}/attivita/lavoro-rafflesia`).send({ volte: v }).expect(200);
+    expect(registro(insieme)).toEqual(registro(unoAllaVolta));
+    const fascino = (registro(insieme) as Array<{ ordine: number; dote_chiave: string }>).filter((r) => r.dote_chiave === 'fascino').map((r) => r.ordine);
+    expect(fascino).toEqual([3, 4]);
+  });
+});

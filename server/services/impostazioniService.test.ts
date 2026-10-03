@@ -63,7 +63,8 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     expect(s.immagini).toEqual({ file: 1, byte: 14 });
     expect(s.caratteri).toEqual({ file: 1, byte: 'finto carattere'.length });
     expect(s.partite).toBe(1);
-    expect(s.seed.hash).toMatch(/^\d+:[0-9a-f]{64}$/);
+    // la memoria del seed JSON dismesso non c'è più (migrazione 096, rilievo R3')
+    expect(s).not.toHaveProperty('seed');
   });
 
   it('esporta il database come file SQLite valido e l’istanza completa come ZIP con i due database, i caratteri e il manifesto', async () => {

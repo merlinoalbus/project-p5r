@@ -15,8 +15,8 @@ import { closeDb, getDb, initDb, prepared, resolvePartitePath } from '../db/dbSe
 import { migrations } from '../db/migrations/index.js';
 import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
 import { creaPartita } from './partiteService.js';
-import { copiaIstanza } from './impostazioniService.js';
-import { anteprimaPacchetto, esportaPacchetto, importaPacchetto, orfaniPartite, statoImportazione, versioneSchemaCodice } from './pacchettoGiocoService.js';
+import { copiaDatabase, copiaIstanza } from './impostazioniService.js';
+import { anteprimaPacchetto, importaPacchetto, orfaniPartite, statoImportazione, versioneSchemaCodice } from './pacchettoGiocoService.js';
 
 let dataDir = '';
 let partitaId = 0;
@@ -40,7 +40,7 @@ const fileDiProva = (nome: string): string => path.join(dataDir, `${++progressiv
 
 /** Il pacchetto esportato, spostato in un file della cartella di prova (il servizio lavora su file). */
 async function pacchettoEsportato(): Promise<string> {
-  const { percorso, nome } = await esportaPacchetto();
+  const { percorso, nome } = await copiaDatabase('gioco');
   expect(nome).toMatch(/^project-p5r-gioco-.*\.db$/);
   const qui = fileDiProva('esportato.db');
   fs.renameSync(percorso, qui);

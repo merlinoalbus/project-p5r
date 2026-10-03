@@ -23,7 +23,7 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 
 interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; fonte: string; verificato: number; condizioni_json: string | null }
-interface RigaLibro { effetto_json?: string | null; effetti_json: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
 /** La disponibilità di una riga, dalle condizioni strutturate. La condizione non nasconde niente:
@@ -80,13 +80,14 @@ const CHIAVE_LETTURA_RAPIDA = 'lettura-rapida';
 const haLetturaRapida = (stato: StatoLetture) => stato.fatti.has(`libro/${CHIAVE_LETTURA_RAPIDA}`);
 const totaleLibro = (r: RigaLibro) => Math.max(r.sessioni ?? 1, 1);
 
-/** Il quartiere che un libro apre, letto dagli effetti dichiarati (voce «sblocca-luogo»); il nome lo risolve il server. */
-function luogoSbloccato(effettiJson: string | null, effettoJson: string | null | undefined): { sbloccaLuogo: string | null; sbloccaLuogoNome: string | null } {
+/**
+ * Il quartiere che un libro apre, letto dagli effetti dichiarati (voce «sblocca-luogo»); il nome lo risolve il server. Il vecchio
+ * `libro.effetto_json` non si legge più come ripiego (rilievo R6'): è vuoto in tutti i 46 libri, e il catalogo, se lo riceve,
+ * lo converte già in `effetti_json` (`normalizzaScrittura`).
+ */
+function luogoSbloccato(effettiJson: string | null): { sbloccaLuogo: string | null; sbloccaLuogoNome: string | null } {
   let luogo: string | null = null;
   for (const v of leggiVociEffetto(effettiJson)) if (v.effetto.famiglia === 'sblocca-luogo') { luogo = v.effetto.luogo; break; }
-  if (!luogo && effettoJson) {
-    try { const e = JSON.parse(effettoJson) as { famiglia?: string; luogo?: string }; if (e.famiglia === 'sblocca-luogo' && e.luogo) luogo = e.luogo; } catch { /* dichiarazione illeggibile: nessun luogo */ }
-  }
   if (!luogo) return { sbloccaLuogo: null, sbloccaLuogoNome: null };
   const q = prepared('SELECT nome FROM quartiere WHERE chiave = ?').get(luogo) as { nome: string } | undefined;
   return { sbloccaLuogo: luogo, sbloccaLuogoNome: q?.nome ?? null };
@@ -99,7 +100,7 @@ const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, Libr
   // «Lettura rapida», che è un fatto della partita, riallineato esplicitamente in `impostaLettura`.
   const fatto = stato.fatti.has(`libro/${r.chiave}`);
   return {
-    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, ...luogoSbloccato(r.effetti_json, r.effetto_json), sessioni: r.sessioni, dettagli: r.dettagli,
+    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, ...luogoSbloccato(r.effetti_json), sessioni: r.sessioni, dettagli: r.dettagli,
     ...effettiDto(r.effetti_json), negozi: negozi.get(r.chiave) ?? [],
     verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
@@ -163,21 +164,25 @@ function posizioniLibri(): Map<string, LibroDto['posizioni']> {
   return esito;
 }
 
-function elencoLibri(partitaId?: number): LibroDto[] {
-  const stato = letturePartita(partitaId);
+/**
+ * I libri come DTO. Letture e stato della disponibilità si passano quando il chiamante li ha già (rilievo P5': `attivitaTutte` e
+ * `libriTutti` li calcolavano due volte); senza, si leggono qui.
+ */
+function elencoLibri(partitaId: number | undefined, stato: StatoLetture = letturePartita(partitaId),
+  st: StatoDisponibilita | null = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId)): LibroDto[] {
   const posizioni = posizioniLibri();
   const negozi = articoliCollegati('libri');
-  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   return (prepared('SELECT * FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, negozi, st));
 }
 
 export function libriTutti(partitaId?: number): LibriDto {
-  const libri = elencoLibri(partitaId);
+  const stato = letturePartita(partitaId);
+  const libri = elencoLibri(partitaId, stato);
   return {
     libri, completati: libri.filter((l) => l.fatto).length,
     sessioniFatte: libri.reduce((n, l) => n + l.progresso, 0),
     sessioniTotali: libri.reduce((n, l) => n + l.totaleSessioni, 0),
-    letturaRapida: haLetturaRapida(letturePartita(partitaId)),
+    letturaRapida: haLetturaRapida(stato),
   };
 }
 
@@ -202,14 +207,14 @@ export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const sedi = nomiLuoghi();
   const attivita = (prepared('SELECT * FROM attivita WHERE nascosto = 0 ORDER BY ordine').all() as RigaAttivita[]).map((r) => attivitaDto(r, sedi, st));
-  const libri = elencoLibri(partitaId);
+  const libri = elencoLibri(partitaId, stato, st);
   const posizioni = posizioniFilm();
   const film = (prepared('SELECT * FROM film WHERE nascosto = 0 ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni, st));
   return { attivita: attivita.filter((a) => a.tipo !== 'lavoro'), lavori: attivita.filter((a) => a.tipo === 'lavoro'), libri, film, libriLetti: libri.filter((l) => l.fatto).length, filmVisti: film.filter((f) => f.iniziato).length };
 }
 
-/** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. */
-function haAnimaDaCineasta(partitaId: number): boolean {
+/** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. La usano anche gli effetti delle azioni (K1). */
+export function haAnimaDaCineasta(partitaId: number): boolean {
   return !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = 'anima-da-cineasta'").get(partitaId);
 }
 
@@ -396,8 +401,12 @@ export interface TurnoRegistrato {
   doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
 }
 
-/** Registra un turno in più e ne applica le Doti (`doti` del turno, se dichiarate, al posto di quelle dell'attività). */
-export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ dote: string; note: 1 | 2 | 3 }>): TurnoRegistrato {
+/**
+ * Registra un turno in più e ne applica le Doti (`doti` del turno, se dichiarate, al posto di quelle dell'attività). `st` è lo
+ * stato della partita già calcolato da chi registra più turni di fila (P5'): il turno ne aggiorna il conto delle volte, l'unica
+ * parte dello stato che un turno cambia, così ogni turno vede quel che vedrebbe ricalcolandolo.
+ */
+export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ dote: string; note: 1 | 2 | 3 }>, st?: StatoDisponibilita): TurnoRegistrato {
   const riga = attivitaConTurni(chiave);
   const adesso = nowIso();
   return getDb().transaction(() => {
@@ -408,7 +417,9 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     scriviVolte(partitaId, chiave, prima + 1, adesso);
     prepared('INSERT INTO turno_partita (partita_id, attivita_chiave, ordine, created_at) VALUES (?, ?, ?, ?)').run(partitaId, chiave, ordine, adesso);
     // che cosa dà il turno: si registra e si ricorda, le Doti si segnano a mano (`aggiornaDote`)
-    const daApplicare = doti ?? noteDelConseguimento(riga, ordine > 1, statoDisponibilitaPartita(partitaId));
+    // lo stato si legge dopo aver scritto le volte, come quando si ricalcolava qui: quello passato si aggiorna allo stesso punto
+    st?.attivitaSvolte.set(chiave, prima + 1);
+    const daApplicare = doti ?? noteDelConseguimento(riga, ordine > 1, st ?? statoDisponibilitaPartita(partitaId));
     const applicate: TurnoRegistrato['doti'] = [];
     for (const d of daApplicare) {
       const punti = puntiDaNote(d.note, false);
@@ -449,7 +460,10 @@ export function impostaVolteAttivita(partitaId: number, chiave: string, volte: n
   attivitaConTurni(chiave);
   const prima = puntiRegistrati(partitaId, 'attivita', chiave);
   getDb().transaction(() => {
-    for (let v = volteSvolte(partitaId, chiave); v < volte; v++) registraTurno(partitaId, chiave);
+    // lo stato della partita si calcola una volta per tutti i turni da aggiungere, non una per turno (P5')
+    const da = volteSvolte(partitaId, chiave);
+    const st = da < volte ? statoDisponibilitaPartita(partitaId) : undefined;
+    for (let v = da; v < volte; v++) registraTurno(partitaId, chiave, undefined, st);
     for (let v = volteSvolte(partitaId, chiave); v > volte; v--) togliTurno(partitaId, chiave);
   })();
   return daSegnareFra(prima, puntiRegistrati(partitaId, 'attivita', chiave));

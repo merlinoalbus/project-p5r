@@ -2064,7 +2064,6 @@ export interface StatoIstanzaDto {
   /** Versione dello schema del file delle partite (partite.db, migrazioni «utente»). */
   versioneSchemaPartite: number;
   versioneApp: string;
-  seed: { versione: string | null; hash: string | null; caricatoIl: string | null };
   /** Il file dei dati di gioco (gioco.db). */
   database: { nome: string; byte: number; inMemoria: boolean };
   /** Il file delle partite (partite.db), attaccato alla stessa connessione. */

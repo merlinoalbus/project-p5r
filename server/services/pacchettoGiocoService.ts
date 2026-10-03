@@ -30,7 +30,7 @@ import { closeDb, getDb, resolveDbPath, resolvePartitePath } from '../db/dbServi
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
-import { conCartellaDiLavoro, copiaDatabase, copiaDiSicurezza, installaDatabase, riapriIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
+import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
 import { ESTENSIONI_PACCHETTO, copiaDalDeposito, elencaDeposito as elencaCartella, percorsoNelDeposito } from './depositoService.js';
 
@@ -222,11 +222,6 @@ export async function importaPacchettoDaDeposito(nome: string): Promise<EsitoImp
     libera(operazione, false, err instanceof Error ? err.message : String(err), null);
     throw err;
   }
-}
-
-/** Il pacchetto di gioco dell'istanza: la copia consistente di gioco.db (immagini comprese), da leggere e poi cancellare. */
-export function esportaPacchetto(): Promise<{ percorso: string; nome: string }> {
-  return copiaDatabase('gioco');
 }
 
 /** Il file è un pacchetto di gioco: SQLite integro, con i dati di gioco e senza partite. */

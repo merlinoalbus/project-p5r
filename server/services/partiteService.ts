@@ -7,14 +7,14 @@ import { httpErrors } from '../utils/httpError.js';
 import { partitaNonTrovata } from './verificaPartita.js';
 import { CHIAVI_STATISTICHE, origineStima, statisticheStimate, type Osservazione, type Statistiche } from '../../shared/statistiche.js';
 import { t } from './traduzioniService.js';
-import { skillDto } from './compendioService.js';
+import { skillDto, skillRiassunti } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import { verificaObiettivi } from './obiettiviService.js';
 import { requisitoBloccante, semaforiConfidente, statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
 import { meteoOra } from './meteoService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
-  SemaforiRangoDto,
+  SemaforiRangoDto, SkillRiassuntoDto,
   FasciaGioco,
 } from '../../shared/types.js';
 
@@ -480,16 +480,43 @@ interface RigaPosseduta extends ColonneOsservate {
   id: number; partita_id: number; persona_id: number; livello: number; forza: number | null; magia: number | null; resistenza: number | null;
   agilita: number | null; fortuna: number | null; bonus_forza: number; bonus_magia: number; bonus_resistenza: number; bonus_agilita: number; bonus_fortuna: number;
   tratto_skill_id: number | null; in_squadra: number; carica: number; note: string; created_at: string; updated_at: string;
-  nome: string; arcana: string; livello_base: number; b_forza: number; b_magia: number; b_resistenza: number; b_agilita: number; b_fortuna: number; tratto_nome: string;
+  nome: string; arcana: string; livello_base: number; b_forza: number; b_magia: number; b_resistenza: number; b_agilita: number; b_fortuna: number;
+  /** L'id della skill del tratto del dataset (per nome), quando la partita non ne ha scelto uno. */
+  tratto_dataset_id: number | null;
 }
 
 const SQL_POSSEDUTA = `SELECT pp.*, p.nome, p.arcana, p.livello AS livello_base, p.forza AS b_forza, p.magia AS b_magia, p.resistenza AS b_resistenza,
-  p.agilita AS b_agilita, p.fortuna AS b_fortuna, p.tratto AS tratto_nome FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id`;
+  p.agilita AS b_agilita, p.fortuna AS b_fortuna, (SELECT s.id FROM skill s WHERE s.nome = p.tratto) AS tratto_dataset_id
+  FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id`;
 
-function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
-  const trattoId = r.tratto_skill_id ?? (prepared('SELECT id FROM skill WHERE nome = ?').get(r.tratto_nome) as { id: number } | undefined)?.id ?? null;
-  const skill = (prepared('SELECT slot, skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(r.id) as Array<{ slot: number; skill_id: number }>)
-    .map((s) => ({ slot: s.slot, ...skillDto(s.skill_id)! }));
+/**
+ * Le Persona possedute scelte da `dove` (con i suoi parametri), nell'ordine della query, come DTO. Skill e tratti si leggono in
+ * blocco — gli slot di tutte le Persona con una query, i riassunti delle skill con un'altra — invece che con due o tre query per
+ * Persona e una per skill (rilievo P2': circa 100 query per una scorta di 12 Persona con 8 skill).
+ */
+function possedute(dove: string, ...parametri: unknown[]): PersonaPossedutaDto[] {
+  const righe = prepared(`${SQL_POSSEDUTA} ${dove}`).all(...parametri) as RigaPosseduta[];
+  if (righe.length === 0) return [];
+  const slot = prepared('SELECT posseduta_id, slot, skill_id FROM persona_posseduta_skill WHERE posseduta_id IN (SELECT value FROM json_each(?)) ORDER BY posseduta_id, slot')
+    .all(JSON.stringify(righe.map((r) => r.id))) as Array<{ posseduta_id: number; slot: number; skill_id: number }>;
+  const slotDi = new Map<number, Array<{ slot: number; skill_id: number }>>();
+  for (const s of slot) {
+    const elenco = slotDi.get(s.posseduta_id);
+    if (elenco) elenco.push(s); else slotDi.set(s.posseduta_id, [s]);
+  }
+  const tratto = (r: RigaPosseduta) => r.tratto_skill_id ?? r.tratto_dataset_id ?? null;
+  const riassunti = skillRiassunti([...slot.map((s) => s.skill_id), ...righe.map(tratto).filter((id): id is number => id !== null)]);
+  return righe.map((r) => possedutaDto(r, tratto(r), slotDi.get(r.id) ?? [], riassunti));
+}
+
+/** Una Persona posseduta per id (della partita, se data), o null. */
+export function possedutaPerId(id: number, partitaId?: number): PersonaPossedutaDto | null {
+  return (partitaId === undefined ? possedute('WHERE pp.id = ?', id) : possedute('WHERE pp.id = ? AND pp.partita_id = ?', id, partitaId))[0] ?? null;
+}
+
+function possedutaDto(r: RigaPosseduta, trattoId: number | null, slot: Array<{ slot: number; skill_id: number }>, riassunti: Map<number, SkillRiassuntoDto>): PersonaPossedutaDto {
+  // una skill che non esiste più nel dataset resta uno slot senza dati, come prima (`...null` non aggiunge nulla)
+  const skill = slot.map((s) => ({ slot: s.slot, ...riassunti.get(s.skill_id) })) as PersonaPossedutaDto['skill'];
   const bonus = { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna };
   const statisticheBase = CHIAVI_STATISTICHE.every((k) => bonus[k] === 0);
   const base = { forza: r.b_forza, magia: r.b_magia, resistenza: r.b_resistenza, agilita: r.b_agilita, fortuna: r.b_fortuna };
@@ -505,13 +532,13 @@ function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
     osservate,
     origineStima: origineStima(osservate, r.livello),
     statisticheConfermate: osservate !== null && osservate.livello === r.livello && statisticheBase,
-    statisticheBaseLivello: base, tratto: trattoId ? skillDto(trattoId) : null, inSquadra: r.in_squadra === 1, carica: r.carica === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
+    statisticheBaseLivello: base, tratto: trattoId ? (riassunti.get(trattoId) ?? null) : null, inSquadra: r.in_squadra === 1, carica: r.carica === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
 
 export function personePossedute(partitaId: number): PersonaPossedutaDto[] {
   rigaPartita(partitaId);
-  return (prepared(`${SQL_POSSEDUTA} WHERE pp.partita_id = ? ORDER BY pp.in_squadra DESC, pp.livello DESC, p.nome`).all(partitaId) as RigaPosseduta[]).map(possedutaDto);
+  return possedute('WHERE pp.partita_id = ? ORDER BY pp.in_squadra DESC, pp.livello DESC, p.nome', partitaId);
 }
 
 /** Dati di una Persona posseduta (creazione/aggiornamento). */
@@ -577,7 +604,7 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, personaId);
-    return possedutaDto(prepared(`${SQL_POSSEDUTA} WHERE pp.id = ?`).get(id) as RigaPosseduta);
+    return possedutaPerId(id)!;
   })();
 }
 
@@ -650,7 +677,7 @@ export function aggiornaPosseduta(partitaId: number, possedutaId: number, dati: 
     // Il compendio NON segue i cambiamenti: come in gioco, l'istantanea si aggiorna solo con «Registra».
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, r.persona_id);
-    return possedutaDto(prepared(`${SQL_POSSEDUTA} WHERE pp.id = ?`).get(possedutaId) as RigaPosseduta);
+    return possedutaPerId(possedutaId)!;
   })();
 }
 

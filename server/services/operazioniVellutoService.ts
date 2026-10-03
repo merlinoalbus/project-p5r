@@ -13,9 +13,9 @@ import { partitaNonTrovata } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
-import { aggiungiPosseduta, personePossedute, skillInnateFinoAlLivello } from './partiteService.js';
+import { aggiungiPosseduta, possedutaPerId, skillInnateFinoAlLivello } from './partiteService.js';
 import { verificaObiettivi } from './obiettiviService.js';
-import { contestoDa, ingredienteDa, personaOErrore } from './fusione/fusioneService.js';
+import { contestoDa, ingredienteDa, personaOErrore, rangoArcana } from './fusione/fusioneService.js';
 import { fondi, ricettaSpeciale, type RicettaFusione } from './fusione/motoreFusione.js';
 import { analisiEredita } from './fusione/eredita.js';
 import { CHIAVI_STATISTICHE, type Statistiche } from '../../shared/statistiche.js';
@@ -35,18 +35,15 @@ function skillDi(possedutaId: number): number[] {
   return (prepared('SELECT skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(possedutaId) as Array<{ skill_id: number }>).map((x) => x.skill_id);
 }
 
-function rangoArcana(partitaId: number, arcana: string): number {
-  return (prepared('SELECT MAX(COALESCE(cp.rango, 0)) AS r FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? WHERE c.arcana = ?').get(partitaId, arcana) as { r: number | null }).r ?? 0;
-}
-
 function partitaInfo(partitaId: number): { allarme: boolean; livelloProtagonista: number } {
   const r = prepared('SELECT allarme_attivo, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { allarme_attivo: number; livello_protagonista: number } | undefined;
   if (!r) throw partitaNonTrovata(partitaId);
   return { allarme: r.allarme_attivo === 1, livelloProtagonista: r.livello_protagonista };
 }
 
+/** Una Persona della scorta, letta da sola: prima si costruiva tutta la scorta per tenerne una (P2'). */
 function possedutaDto(partitaId: number, id: number): PersonaPossedutaDto {
-  const p = personePossedute(partitaId).find((x) => x.id === id);
+  const p = possedutaPerId(id, partitaId);
   if (!p) throw httpErrors.notFound('posseduta-non-trovata', `La Persona posseduta ${id} non esiste.`);
   return p;
 }

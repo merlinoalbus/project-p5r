@@ -7,7 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
-import { contestoDa, personaOErrore, scontoPartita } from './fusione/fusioneService.js';
+import { contestoDa, personaOErrore, rangoArcana, scontoPartita } from './fusione/fusioneService.js';
 import { fondi } from './fusione/motoreFusione.js';
 import { prezzoEvocazione } from './fusione/alberoFusione.js';
 import { bonusLivelliFusione, prezzoScontato } from '../../shared/bonusVelluto.js';
@@ -26,10 +26,6 @@ export interface ModificaCiclo { nome?: string; note?: string; anelloCorrente?: 
 function personaDto(id: number): PersonaFusioneDto {
   const p = personaOErrore(id);
   return { id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livello: p.livello, speciale: p.speciale, rara: p.rara, dlc: p.dlc };
-}
-
-function rangoArcana(partitaId: number, arcana: string): number {
-  return (prepared('SELECT MAX(COALESCE(cp.rango, 0)) AS r FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? WHERE c.arcana = ?').get(partitaId, arcana) as { r: number | null }).r ?? 0;
 }
 
 /** Ricalcola e valida gli anelli: fusioni valide, catena continua, ritorno al bersaglio, lunghezza 2–5. */
