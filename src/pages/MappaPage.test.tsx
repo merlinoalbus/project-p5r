@@ -7,7 +7,7 @@ import { useAssetStore } from '../stores/assetStore';
 // Test MappaPage — indice dell'albero e visore con stato «raccolto» della partita attiva (Fase 13.2)
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { ContenutiMappaDto } from '../../shared/organizzazioneMappe';
@@ -93,27 +93,83 @@ describe('MappaPage', () => {
     expect(within(screen.getByRole('list', { name: 'Aree di Palazzo di Kamoshida' })).getByRole('link', { name: /Ingresso/ })).toBeInTheDocument();
   });
 
-  it('il visore carica la mappa con la partita attiva e segna un collezionabile raccolto tramite l’API', async () => {
+  /** La seconda lettura della mappa (quella in silenzio dopo un'azione) resta in sospeso finché il test non la risolve. */
+  const rilettura = () => {
+    let risolvi: (m: MappaDto) => void = () => {};
+    getMappa.mockResolvedValueOnce(dettaglio).mockImplementationOnce(() => new Promise<MappaDto>((r) => { risolvi = r; }));
+    return (m: MappaDto) => act(async () => { risolvi(m); });
+  };
+
+  it('il visore carica la mappa con la partita attiva e segna un collezionabile raccolto tramite l’API, poi rilegge la mappa in silenzio', async () => {
     impostaSpilloRaccolto.mockResolvedValue({ ...forziere, raccolto: true });
+    const risolviRilettura = rilettura();
     monta('/guida/mappe/citta-shibuya');
     const spillo = await screen.findByRole('button', { name: 'Forziere: Scrigno' });
     expect(getMappa).toHaveBeenCalledWith('citta-shibuya', 7);
     fireEvent.click(spillo);
     fireEvent.click(within(screen.getByRole('dialog', { name: 'Scrigno' })).getByRole('button', { name: 'Raccolto' }));
     expect(impostaSpilloRaccolto).toHaveBeenCalledWith(7, 4, true);
-    // lo spillo raccolto sparisce dalla mappa e il progresso passa a 1 su 2
+    // subito, con la rilettura ancora in corso: lo spillo raccolto sparisce e il progresso passa a 1 su 2
     expect(await screen.findByText('1 di 2 raccolti · 50%')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Forziere: Scrigno' })).not.toBeInTheDocument();
+    // poi la mappa si rilegge (lo stato di un pin può decidere la visibilità degli altri) e lo stato resta quello del server
+    await waitFor(() => expect(getMappa).toHaveBeenCalledTimes(2));
+    await risolviRilettura({ ...dettaglio, spilli: dettaglio.spilli.map((s) => (s.id === 4 ? { ...s, raccolto: true } : s)) });
+    expect(screen.getByText('1 di 2 raccolti · 50%')).toBeInTheDocument();
   });
 
   it('un punto della Guida segnato «Ottenuto» dalla mappa aggiorna lo stato del punto e conta come raccolto', async () => {
     impostaStatoPunto.mockResolvedValue({ chiave: 'kamoshida-01/2', stato: 'ottenuto' });
+    const risolviRilettura = rilettura();
     monta('/guida/mappe/citta-shibuya');
     fireEvent.click(await screen.findByRole('button', { name: 'Tesoro del Palazzo: Tesoro del Palazzo' }));
     fireEvent.click(within(screen.getByRole('dialog', { name: 'Tesoro del Palazzo' })).getByRole('button', { name: 'Ottenuto' }));
     expect(impostaStatoPunto).toHaveBeenCalledWith(7, 'kamoshida-01/2', 'ottenuto');
     expect(await screen.findByText('1 di 2 raccolti · 50%')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Tesoro del Palazzo: Tesoro del Palazzo' })).not.toBeInTheDocument();
+    await waitFor(() => expect(getMappa).toHaveBeenCalledTimes(2));
+    await risolviRilettura({ ...dettaglio, spilli: dettaglio.spilli.map((s) => (s.id === 6 ? { ...s, raccolto: true, voce: { ...s.voce!, stato: 'ottenuto' } } : s)) });
+    expect(screen.getByText('1 di 2 raccolti · 50%')).toBeInTheDocument();
+  });
+
+  it('due azioni ravvicinate: la rilettura vecchia che arriva per ultima non sovrascrive quella nuova', async () => {
+    const leva: SpilloDto = { ...forziere, id: 8, tipo: 'meccanismo', tipoNome: 'Meccanismo', nome: 'Leva', collezionabile: false, x: 20, y: 20 };
+    const quadro: SpilloDto = { ...forziere, id: 10, tipo: 'punto-sensibile', tipoNome: 'Punto sensibile', nome: 'Quadro', collezionabile: false, x: 80, y: 20 };
+    const prima: MappaDto = { ...dettaglio, spilli: [leva, quadro] };
+    const risolutori: Array<(m: MappaDto) => void> = [];
+    getMappa.mockReset().mockResolvedValueOnce(prima).mockImplementation(() => new Promise<MappaDto>((r) => { risolutori.push(r); }));
+    impostaSpilloRaccolto.mockImplementation(async (_p: number, id: number) => ({ ...(id === 8 ? leva : quadro), raccolto: true }));
+    monta('/guida/mappe/citta-shibuya');
+    fireEvent.click(await screen.findByRole('button', { name: 'Meccanismo: Leva' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Leva' })).getByRole('button', { name: 'Azionato' }));
+    await waitFor(() => expect(risolutori).toHaveLength(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Punto sensibile: Quadro' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Quadro' })).getByRole('button', { name: 'Gestito' }));
+    await waitFor(() => expect(risolutori).toHaveLength(2));
+    // la rilettura nuova (leva e quadro segnati) arriva prima, quella vecchia (solo la leva) dopo: resta la nuova
+    await act(async () => { risolutori[1]({ ...prima, spilli: [{ ...leva, raccolto: true }, { ...quadro, raccolto: true }] }); });
+    await act(async () => { risolutori[0]({ ...prima, spilli: [{ ...leva, raccolto: true }, quadro] }); });
+    expect(screen.getByRole('button', { name: 'Punto sensibile: Quadro (gestito)' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Meccanismo: Leva (azionato)' })).toBeInTheDocument();
+  });
+
+  it('dopo un’azione la rilettura applica la visibilità calcolata dal server: un pin che dipendeva dallo stato appena segnato sparisce', async () => {
+    // la porta è visibile solo finché la leva non è azionata (condizione «Pin di una mappa: non segnato»)
+    const leva: SpilloDto = { ...forziere, id: 8, tipo: 'meccanismo', tipoNome: 'Meccanismo', nome: 'Leva', collezionabile: false, x: 20, y: 20 };
+    const porta: SpilloDto = { ...forziere, id: 9, tipo: 'porta', tipoNome: 'Porta chiusa', nome: 'Porta del ponte', collezionabile: false, x: 80, y: 80 };
+    const prima: MappaDto = { ...dettaglio, spilli: [leva, porta] };
+    // (il server, nella rilettura, ha anche un nome nuovo per la leva: la sua copia vince su quella locale)
+    getMappa.mockReset().mockResolvedValueOnce(prima).mockResolvedValueOnce({ ...prima, spilli: [{ ...leva, nome: 'Leva del ponte', raccolto: true }, { ...porta, disponibilita: { stato: 'bloccato', requisiti: [] } }] });
+    impostaSpilloRaccolto.mockResolvedValue({ ...leva, raccolto: true });
+    monta('/guida/mappe/citta-shibuya');
+    fireEvent.click(await screen.findByRole('button', { name: 'Meccanismo: Leva' }));
+    expect(screen.getByRole('button', { name: 'Porta chiusa: Porta del ponte' })).toBeInTheDocument();
+    // il pulsante dice lo stato del meccanismo, non «Raccolto»
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Leva' })).getByRole('button', { name: 'Azionato' }));
+    expect(impostaSpilloRaccolto).toHaveBeenCalledWith(7, 8, true);
+    await waitFor(() => expect(screen.queryByRole('button', { name: /^Porta chiusa: Porta del ponte/ })).not.toBeInTheDocument());
+    // la leva azionata resta sulla mappa (non è un collezionabile), segnata col suo stato, con la copia del server
+    expect(screen.getByRole('button', { name: 'Meccanismo: Leva del ponte (azionato)' })).toBeInTheDocument();
   });
 });
 

@@ -243,4 +243,34 @@ describe('Enigma con i suoi passi', () => {
     expect([segnato(a.chiave), segnato(b.chiave)]).toEqual(['ottenuto', null]);
     expect(prepared('SELECT COUNT(*) FROM punto_interesse WHERE contenitore_chiave = ?').pluck().get(enigma.chiave)).toBe(0);
   });
+
+  it('gli stati nuovi dei pin (2026-10-03) seguono la guida e l’Enigma: leva azionata e porta aperta risolvono l’Enigma, e il contrario', async () => {
+    const mappaArea = prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(pinLiberi[0].id) as string;
+    const nuovoPin = async (tipo: string, nome: string) => (await request(app).post(`/api/mappe/${mappaArea}/spilli`).send({ tipo, nome, x: 5, y: 5 }).expect(201)).body.data as { id: number };
+    const uid = (id: number) => prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(id) as string;
+    const segna = (id: number, si: boolean) => request(app).put(`/api/partite/${partita}/spilli/${id}`).send({ raccolto: si }).expect(200);
+    const leva = await nuovoPin('meccanismo', 'Leva del ponte');
+    const porta = await nuovoPin('porta', 'Porta del ponte');
+    const enigma = await nuova('Il ponte levatoio', 'puzzle');
+    const passoLeva = await nuova('Aziona la leva', 'meccanismo', enigma.chiave);
+    const passoPorta = await nuova('Apri la porta del ponte', 'porta', enigma.chiave);
+    await collega(passoLeva.chiave, leva.id).expect(200);
+    await collega(passoPorta.chiave, porta.id).expect(200);
+    // pin → voce → Enigma
+    await segna(leva.id, true);
+    expect([segnato(passoLeva.chiave), segnato(enigma.chiave)]).toEqual(['ottenuto', null]);
+    await segna(porta.id, true);
+    expect([segnato(passoPorta.chiave), segnato(enigma.chiave)]).toEqual(['ottenuto', 'ottenuto']);
+    // la porta richiusa riapre il suo passo e l'Enigma; la leva resta azionata
+    await segna(porta.id, false);
+    expect([segnato(passoLeva.chiave), segnato(passoPorta.chiave), segnato(enigma.chiave)]).toEqual(['ottenuto', null, null]);
+    // l'Enigma segnato dalla guida segna i passi e i loro pin
+    await statoPunto(enigma.chiave, 'ottenuto');
+    expect([raccolto(uid(leva.id)), raccolto(uid(porta.id))]).toEqual([1, 1]);
+    const spilli = (await request(app).get(`/api/mappe/${mappaArea}?partita=${partita}`).expect(200)).body.data.spilli as Array<{ id: number; raccolto: boolean; voce: { stato: string | null } | null }>;
+    expect(spilli.find((s) => s.id === porta.id)).toMatchObject({ raccolto: true, voce: { stato: 'ottenuto' } });
+    // riaperto l'Enigma, tutto torna da fare: passi e pin
+    await statoPunto(enigma.chiave, null);
+    expect([raccolto(uid(leva.id)), raccolto(uid(porta.id)), segnato(passoLeva.chiave), segnato(passoPorta.chiave)]).toEqual([0, 0, null, null]);
+  });
 });

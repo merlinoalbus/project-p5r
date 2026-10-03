@@ -94,7 +94,8 @@ describe('uid nell\'applicazione', () => {
 
   it('«raccolto» segue l\'uid: un pacchetto mappe reimportato lo conserva, eliminare lo spillo pulisce il segno', () => {
     const partita = creaPartita({ nome: 'Prova uid' });
-    const creato = creaSpillo('citta-shibuya', { tipo: 'nota', nome: 'Da raccogliere', x: 5, y: 6 });
+    // un forziere: una nota non ha stato da segnare (2026-10-03)
+    const creato = creaSpillo('citta-shibuya', { tipo: 'forziere', nome: 'Da raccogliere', x: 5, y: 6 });
     impostaRaccolto(partita.id, creato.id, true);
     const uid = getDb().prepare('SELECT uid FROM spillo WHERE id = ?').pluck().get(creato.id) as string;
     expect(getDb().prepare('SELECT raccolto FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').pluck().get(partita.id, uid)).toBe(1);

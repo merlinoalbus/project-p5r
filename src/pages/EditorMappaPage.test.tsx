@@ -91,6 +91,19 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(api.eliminaSpillo).toHaveBeenCalledWith(9));
   });
 
+  it('la descrizione del tipo dice se il pin ha uno stato nella partita (2026-10-03): la nota è un segno e basta, il meccanismo si aziona, il boss si sconfigge', async () => {
+    api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
+    expect(form.getByText('Un segno sulla mappa con nome e descrizione, e basta.')).toBeInTheDocument();
+    scegliVoce('Tipo', 'Meccanismo');
+    expect(form.getByText('Un segno sulla mappa con uno stato da segnare nella partita («azionato»); non conta nel completamento della mappa.')).toBeInTheDocument();
+    expect(form.queryByText('Un segno sulla mappa con nome e descrizione, e basta.')).toBeNull();
+    scegliVoce('Tipo', 'Boss');
+    expect(form.getByText('Si segna nella partita («sconfitto»); non porta da nessuna parte.')).toBeInTheDocument();
+  });
+
   it('«Copia» sullo spillo selezionato mette negli appunti tutti i campi tranne la posizione; con «Incolla» un tocco sulla mappa crea lo spillo identico nel nuovo punto', async () => {
     const negozio: SpilloDto = { ...nota, soloPosizione: true, id: 12, tipo: 'negozio', tipoNome: 'Negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', riferimento: { tipo: 'negozio', chiave: 'untouchable' } };
     api.getMappa.mockResolvedValue({ ...base, spilli: [negozio] });

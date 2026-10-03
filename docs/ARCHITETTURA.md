@@ -898,8 +898,20 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   `guida_mappa`, `guida_alias` in cascata, `richiesta.area_chiave` a NULL; l'ordine delle aree si ricompatta.
   I dati di gioco stanno in `gioco.db`: un pacchetto importato dopo rimette l'area.
 - **Nemici**: `nemico` è di categoria `informativo` (`shared/spilli.ts`, `collezionabile: false`), migrazione 085 per
-  gli spilli esistenti; `impostaRaccolto` risponde 400 `spillo-non-raccoglibile` a `raccolto=true` su un nemico;
-  i punti della guida «ombra-sciagura» non risultano collezionabili in `contenutiMappa`.
+  gli spilli esistenti; i punti della guida «ombra-sciagura» non risultano collezionabili in `contenutiMappa`.
+- **Stato dei pin** (2026-10-03, `shared/spilli.ts` `statoDelTipo` / `statoDelPin` / `parolaDelloStato` /
+  `ritornoDelloStato`): un consumabile si «raccoglie», boss e miniboss sono «sconfitti» (e restano collezionabili);
+  meccanismo «azionato», punto sensibile «gestito», nemico «affrontato», porta chiusa «aperta». È lo stesso dato
+  (`spillo_partita.raccolto` per uid), con la stessa API (`PUT /api/partite/:id/spilli/:spilloId`); i quattro tipi
+  informativi non sono collezionabili: non contano nel completamento e il pin segnato resta sulla mappa, attenuato.
+  Per togliere il segno: «Richiudi» (la porta torna «chiusa»), «Annulla» per gli altri («non più …»); un pin collegato
+  a una voce della guida usa gli stati della voce («Ottenuto», «Esaurito», «Riapri») e ne mostra la parola.
+  `impostaRaccolto` risponde 400 `spillo-senza-stato` a `raccolto=true` su un pin senza stato e senza voce della guida
+  (la voce si segna da qualunque pin, e con lei il suo Enigma). Dopo ogni azione `useMappaPartita` aggiorna subito il
+  pin e rilegge la mappa in silenzio: vince l'ultima lettura chiesta, e ogni caricamento completo (mappa, partita,
+  versione, momento della giornata, `ricarica`) rende vecchie le riletture in sospeso; le copie locali dei pin valgono
+  solo sulla copia della mappa a cui si riferiscono. La visibilità che dipende dallo stato degli altri pin la calcola
+  il server.
 - **Stanze** (gruppo di immagini in `mappa_presentazione.gruppo_immagini_json`): `impostaStanzaMappa`
   (`PUT /api/mappe/:chiave/stanza`, `{ con, nome? }`) fa entrare una planimetria nella stanza di un'altra dello
   stesso genitore (la crea se manca, ordinale in fondo, posizione nell'ordine subito dopo l'ultima versione) o la

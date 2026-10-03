@@ -96,15 +96,33 @@ describe('eliminare un’area della guida', () => {
     expect(Object.keys(json('mappe-assenti'))).not.toContain(assente);
   });
 
-  it('un nemico non si segna raccolto (si rigenera); togliere un vecchio «raccolto» resta possibile', async () => {
+  it('nemico, meccanismo, punto sensibile e porta chiusa hanno uno stato (affrontato, azionato, gestito, aperta) che non conta nel completamento; un pin senza stato non si segna', async () => {
     const mappa = creaMappa(undefined, { nome: 'Planimetria con un nemico', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    const nemico = await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo: 'nemico', nome: 'Ombra di guardia', x: 10, y: 10 });
-    expect(nemico.status).toBe(201);
-    expect(nemico.body.data.collezionabile).toBe(false);
-    const r = await request(app).put(`/api/partite/${partita}/spilli/${nemico.body.data.id}`).send({ raccolto: true });
+    const pin = async (tipo: string, nome: string) => {
+      const r = await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo, nome, x: 10, y: 10 });
+      expect(r.status).toBe(201);
+      // non sono collezionabili: il nemico si rigenera, la leva non si porta via
+      expect(r.body.data.collezionabile).toBe(false);
+      return r.body.data.id as number;
+    };
+    for (const [tipo, nome] of [['nemico', 'Ombra di guardia'], ['meccanismo', 'Leva del ponte'], ['punto-sensibile', 'Quadro elettrico'], ['porta', 'Porta della torre']]) {
+      const id = await pin(tipo, nome);
+      const segnato = await request(app).put(`/api/partite/${partita}/spilli/${id}`).send({ raccolto: true });
+      expect(segnato.status).toBe(200);
+      expect(segnato.body.data.raccolto).toBe(true);
+      const riaperto = await request(app).put(`/api/partite/${partita}/spilli/${id}`).send({ raccolto: false });
+      expect(riaperto.status).toBe(200);
+      expect(riaperto.body.data.raccolto).toBe(false);
+    }
+    // la mappa non ha collezionabili: il progresso non li conta
+    const letta = await request(app).get(`/api/mappe/${mappa.chiave}?partita=${partita}`).expect(200);
+    expect((letta.body.data.spilli as Array<{ collezionabile: boolean }>).filter((s) => s.collezionabile)).toHaveLength(0);
+    // una stanza sicura non ha stato: non si segna, ma togliere un vecchio segno resta possibile
+    const sicura = await pin('sicura', 'Stanza sicura del cortile');
+    const r = await request(app).put(`/api/partite/${partita}/spilli/${sicura}`).send({ raccolto: true });
     expect(r.status).toBe(400);
-    expect(r.body.error.code).toBe('spillo-non-raccoglibile');
-    expect((await request(app).put(`/api/partite/${partita}/spilli/${nemico.body.data.id}`).send({ raccolto: false })).status).toBe(200);
+    expect(r.body.error.code).toBe('spillo-senza-stato');
+    expect((await request(app).put(`/api/partite/${partita}/spilli/${sicura}`).send({ raccolto: false })).status).toBe(200);
   });
 
   it('un’area che non esiste è un 404', async () => {

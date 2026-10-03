@@ -1,5 +1,5 @@
 // ============================================================
-// RaccoltaPlanimetrie — i collezionabili delle planimetrie di un Palazzo, con «Raccolto» in un tocco
+// RaccoltaPlanimetrie — i collezionabili delle planimetrie di un Palazzo, con «Raccolto» («Sconfitto» per i boss) in un tocco
 // ============================================================
 //
 // La percentuale del Palazzo conta i collezionabili sulle planimetrie (forzieri, forzieri rari,
@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { impostaSpilloRaccolto } from '../../services/api/mappe';
 import { notifica } from '../../stores/notificationStore';
+import { parolaDelloStato } from '../../../shared/spilli';
 import type { SpilloRaccoltaDto } from '../../types';
 
 export interface PlanimetriaRaccolta { chiave: string; nome: string; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }
@@ -69,12 +70,14 @@ export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etiche
               </div>
               {visibili.length > 0 && (
                 <ul className="m-0 flex list-none flex-col p-0">
-                  {visibili.map((s) => { const omonimiTutti = p.spilli.filter((x) => x.nome === s.nome); const numero = omonimiTutti.indexOf(s) + 1; const omonimi = omonimiTutti.length > 1; return (
+                  {visibili.map((s) => { const omonimiTutti = p.spilli.filter((x) => x.nome === s.nome); const numero = omonimiTutti.indexOf(s) + 1; const omonimi = omonimiTutti.length > 1;
+                    // la parola del tipo: «raccolto», «sconfitto» per boss e miniboss (scelta dell'utente, 2026-10-03)
+                    const parola = parolaDelloStato({ tipo: s.tipo, collezionabile: true }); return (
                     <li key={s.id} className="flex items-center gap-2 text-[12px]">
                       <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: s.colore }} aria-hidden="true" />
                       <span className={`min-w-0 flex-1 ${s.raccolto ? 'line-through text-text-muted' : ''}`}>{s.nome}{omonimi ? ` ${numero}` : ''}</span>
                       {partitaId
-                        ? <label className="touch flex items-center gap-1.5 text-[11px]"><input type="checkbox" className="h-5 w-5" checked={s.raccolto === true} disabled={!!occupati[s.id]} onChange={(e) => void cambia(s, e.target.checked)} aria-label={`${s.nome} ${numero} di ${nomeBreve(p.nome)} raccolto`} />Raccolto</label>
+                        ? <label className="touch flex items-center gap-1.5 text-[11px]"><input type="checkbox" className="h-5 w-5" checked={s.raccolto === true} disabled={!!occupati[s.id]} onChange={(e) => void cambia(s, e.target.checked)} aria-label={`${s.nome} ${numero} di ${nomeBreve(p.nome)} ${parola}`} />{parola.charAt(0).toUpperCase() + parola.slice(1)}</label>
                         : null}
                     </li>
                   ); })}

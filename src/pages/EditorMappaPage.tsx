@@ -31,7 +31,7 @@ import { PassaggiMappa } from '../components/mappe/PassaggiMappa';
 
 import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
-import { CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
+import { CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import { ritornoMappe } from '../utils/ritornoMappe';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
@@ -467,13 +467,14 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         <div className="editor-mappa__campo">
           <Selettore etichetta="Tipo" valore={tipo} opzioni={CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c).map((t) => ({ chiave: t, nome: DEFINIZIONI_SPILLO[t].nome, gruppo: DEFINIZIONI_CATEGORIA[c].nome })))} onCambia={(k) => cambiaTipo(k as TipoSpillo)} />
         </div>
-        <p className="m-0 text-[12px] text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
+        {/* un informativo con uno stato suo (meccanismo, punto sensibile, nemico, porta chiusa: 2026-10-03) non è «un segno e basta» */}
+        <p className="m-0 text-[12px] text-text-muted">{categoria === 'informativo' && statoDelTipo(tipo) ? `Un segno sulla mappa con uno stato da segnare nella partita («${statoDelTipo(tipo)}»); non conta nel completamento della mappa.` : DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
         <label className="editor-mappa__campo">Descrizione<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={LIMITI_GUIDA.spillo.descrizione} /></label>
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
         {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
         {puntoGuida && <p className="m-0 text-[12px] text-text-secondary">Punto della Guida: <strong>{puntoGuida.nome}</strong> — lo stato «ottenuto / esaurito» si condivide con la scheda del Palazzo.</p>}
-        {categoria === 'consumabile' && <p className="m-0 text-[12px] text-text-muted">Si segna come fatto nella partita; non porta da nessuna parte.</p>}
+        {categoria === 'consumabile' && <p className="m-0 text-[12px] text-text-muted">Si segna nella partita («{statoDelTipo(tipo)}»); non porta da nessuna parte.</p>}
         {categoria !== 'citta' && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo />}
 
         <div className="flex flex-wrap gap-1.5">

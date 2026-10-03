@@ -25,7 +25,7 @@ import { allineaEnigmaDellaVoce, allineaStatiPunto, erroreVoceDelPin, pinDelPunt
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
-import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, statoDelTipo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
@@ -1104,12 +1104,12 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${spilloId} non esiste.`);
-  // Un nemico si rigenera: non si segna raccolto (2026-09-30). Solo lui: «raccolto» su uno spillo collegato a un
-  // punto della guida è anche il modo di segnare quel punto, qualunque sia il tipo. Togliere un «raccolto»
-  // resta sempre possibile, così un segno rimasto da prima si può ripulire.
-  // Un nemico collegato a un punto della guida sì (2026-10-01): è un'Ombra sciagura o un incontro unico, e segnarlo è
-  // segnare quel punto.
-  if (raccolto && r.tipo === 'nemico' && !voceDelPin(r)) throw httpErrors.badRequest('spillo-non-raccoglibile', `«${r.nome}» è un nemico: si rigenera, non si raccoglie.`);
+  // Si segna un pin che ha uno stato (2026-10-03, `statoDelTipo`): raccolto un consumabile, sconfitto un boss o un
+  // miniboss, azionato un meccanismo, gestito un punto sensibile, affrontato un nemico, aperta una porta chiusa. Un pin
+  // collegato a una voce della guida si segna qualunque sia il tipo: è il modo di segnare quella voce. Gli altri — una
+  // nota, una stanza sicura, un passaggio — non hanno stato. Togliere il segno resta sempre possibile, così un segno
+  // rimasto da prima si può ripulire.
+  if (raccolto && statoDelTipo(r.tipo) === null && !voceDelPin(r)) throw httpErrors.badRequest('spillo-senza-stato', `«${r.nome}» (${DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo}) non ha uno stato da segnare.`);
 
   const adesso = nowIso();
   getDb().transaction(() => {

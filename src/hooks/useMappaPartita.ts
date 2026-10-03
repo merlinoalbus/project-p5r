@@ -3,14 +3,16 @@
 // ============================================================
 //
 // Condiviso dal visore a schermo intero (MappaPage) e da quello incorporato (MappaIncorporata): dopo ogni azione lo spillo viene
-// sostituito nel DTO locale senza ricaricare la mappa (zoom e posizione restano).
+// sostituito subito nel DTO locale, poi la mappa si rilegge in silenzio (zoom e posizione restano): lo stato di un pin può
+// decidere la visibilità degli altri (condizione «Pin di una mappa», 2026-10-03), e quella la calcola il server.
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCarica } from './useCarica';
 import { getMappa, impostaAcquisto, impostaSpilloRaccolto, impostaStatoPunto } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
+import { parolaDelloStato, ritornoDelloStato } from '../../shared/spilli';
 import type { MappaDto, SpilloDto } from '../types';
 import type { StatoPuntoMappa } from '../components/mappe/VisoreMappa';
 
@@ -28,18 +30,44 @@ export interface MappaPartita {
 export function useMappaPartita(chiave: string, partitaId: number | null, opz: { versione?: string | number; onCambiato?: () => void } = {}): MappaPartita {
   // la fascia della giornata, il giorno corrente e il meteo di adesso decidono quali spilli sono disponibili: al cambio si ricarica
   const momento = usePartitaStore((s) => (s.attiva?.id === partitaId ? `${s.attiva.dataGioco ?? ''}|${s.attiva.fasciaGioco ?? ''}|${s.attiva.meteoOra ?? ''}` : ''));
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, opz.versione, momento]);
-  const [aggiornati, setAggiornati] = useState<Map<number, SpilloDto>>(new Map());
-  const mappa = useMemo(() => (dati ? { ...dati, spilli: dati.spilli.map((s) => aggiornati.get(s.id) ?? s) } : null), [dati, aggiornati]);
+  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, opz.versione, momento]);
+  // Gli spilli aggiornati in locale dopo un'azione valgono **sulla copia della mappa a cui si riferiscono**: arrivata una copia
+  // nuova (la rilettura, o un caricamento completo per un cambio di versione, momento o mappa) vale quella del server.
+  const [locali, setLocali] = useState<{ di: MappaDto | null; spilli: Map<number, SpilloDto> }>({ di: null, spilli: new Map() });
+  const datiAttuali = useRef(dati);
+  useEffect(() => { datiAttuali.current = dati; }, [dati]);
+  const aggiorna = (s: SpilloDto) => setLocali((l) => {
+    const di = datiAttuali.current;
+    return { di, spilli: new Map(l.di === di ? l.spilli : undefined).set(s.id, s) };
+  });
+  const aggiornati = locali.di === dati ? locali.spilli : null;
+  const mappa = useMemo(() => (dati ? { ...dati, spilli: dati.spilli.map((s) => aggiornati?.get(s.id) ?? s) } : null), [dati, aggiornati]);
   const errori = (err: unknown) => notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+
+  // La rilettura dopo un'azione: vince l'ultima chiesta. Ogni caricamento completo — cambio di mappa, di partita, di
+  // versione, di momento della giornata, o `ricarica` — la rende vecchia: una risposta in sospeso che arriva dopo non
+  // sovrascrive niente.
+  const ultimaLettura = useRef(0);
+  useEffect(() => { ultimaLettura.current++; }, [chiave, partitaId, opz.versione, momento]);
+  const ricaricaTutto = useCallback(async () => { ultimaLettura.current++; await ricarica(); }, [ricarica]);
+  const rileggiInSilenzio = async () => {
+    const n = ++ultimaLettura.current;
+    try {
+      const fresca = await getMappa(chiave, partitaId ?? undefined);
+      if (n === ultimaLettura.current) imposta(fresca);
+    } catch { /* resta l'aggiornamento immediato */ }
+  };
 
   const raccolto = async (s: SpilloDto, valore: boolean) => {
     if (!partitaId) return;
     try {
       const nuovo = await impostaSpilloRaccolto(partitaId, s.id, valore);
-      setAggiornati((m) => new Map(m).set(nuovo.id, nuovo));
-      notifica('success', valore ? `«${s.nome}» segnato come raccolto.` : `«${s.nome}» riaperto.`);
+      aggiorna(nuovo);
+      // «Scrigno: raccolto», «Porta della torre: aperta», «Porta della torre: chiusa», «Leva: non più azionato»: la parola
+      // concorda col tipo (scelte dell'utente, 2026-10-03)
+      notifica('success', `«${s.nome}»: ${valore ? parolaDelloStato(s) : ritornoDelloStato(s).parola}.`);
       opz.onCambiato?.();
+      void rileggiInSilenzio();
     } catch (err) { errori(err); }
   };
 
@@ -52,9 +80,10 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
       const voce = { ...punto, stato: aggiornato.stato };
       // gli elementi della guida senza mappa portano la voce anche nel dettaglio del riferimento: si aggiornano insieme
       const dettaglio = s.dettaglio?.tipo === 'punto' && s.dettaglio.punto?.chiave === punto.chiave ? { ...s.dettaglio, punto: voce } : s.dettaglio;
-      setAggiornati((m) => new Map(m).set(s.id, { ...s, raccolto: aggiornato.stato !== null, voce, dettaglio }));
+      aggiorna({ ...s, raccolto: aggiornato.stato !== null, voce, dettaglio });
       notifica('success', stato === null ? `«${s.nome}» riaperto.` : `«${s.nome}» segnato come ${stato}.`);
       opz.onCambiato?.();
+      void rileggiInSilenzio();
     } catch (err) { errori(err); }
   };
 
@@ -64,11 +93,13 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     const negozio = s.dettaglio.negozio;
     try {
       const a = await impostaAcquisto(partitaId, articoloChiave, fatto);
-      setAggiornati((m) => new Map(m).set(s.id, { ...s, dettaglio: { ...s.dettaglio!, negozio: { ...negozio, articoli: negozio.articoli.map((x) => (x.chiave === a.chiave ? { ...x, comprato: a.acquistato } : x)) } } }));
+      aggiorna({ ...s, dettaglio: { ...s.dettaglio!, negozio: { ...negozio, articoli: negozio.articoli.map((x) => (x.chiave === a.chiave ? { ...x, comprato: a.acquistato } : x)) } } });
       notifica('success', fatto ? `«${a.nomeIt ?? a.nome}» segnato come comprato.` : `«${a.nomeIt ?? a.nome}» riaperto.`);
       opz.onCambiato?.();
+      // un articolo ottenuto può essere la condizione di un altro pin
+      void rileggiInSilenzio();
     } catch (err) { errori(err); }
   };
 
-  return { mappa, caricamento, errore, ricarica, raccolto, statoPunto, acquisto };
+  return { mappa, caricamento, errore, ricarica: ricaricaTutto, raccolto, statoPunto, acquisto };
 }

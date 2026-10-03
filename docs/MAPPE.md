@@ -133,12 +133,12 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Palazzi e Mementos | seme-bramosia | Seme della bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
 | Palazzi e Mementos | oggetto-chiave | Oggetto chiave | spillo-oggetto-chiave | ambra | sì | punto |
 | Palazzi e Mementos | timbro | Timbro dei Mementos (postazione fissa per piano) | spillo-timbro | rosa lilla | sì (timbrato) | — |
-| Palazzi e Mementos | boss / miniboss | Boss / Miniboss | spillo-boss / spillo-miniboss | rosso / arancio | sì (sconfitto) | punto |
-| Palazzi e Mementos | nemico | Nemico (categoria informativa dal 2026-09-30: si rigenera, non si raccoglie né conta nel completamento; migrazione 085) | spillo-nemico | grigio-azzurro | no | punto (Ombra della Sciagura) |
-| Palazzi e Mementos | punto-sensibile | Punto sensibile | spillo-punto-sensibile | verde acqua | no | punto (enigma) |
-| Palazzi e Mementos | meccanismo | Meccanismo (leva, interruttore, pannello) | spillo-meccanismo | ardesia | no | punto |
+| Palazzi e Mementos | boss / miniboss | Boss / Miniboss (stato «sconfitto», 2026-10-03) | spillo-boss / spillo-miniboss | rosso / arancio | sì (sconfitto) | punto |
+| Palazzi e Mementos | nemico | Nemico (categoria informativa dal 2026-09-30: si rigenera, non si raccoglie né conta nel completamento; migrazione 085; stato «affrontato» dal 2026-10-03) | spillo-nemico | grigio-azzurro | no (stato «affrontato») | punto (Ombra della Sciagura) |
+| Palazzi e Mementos | punto-sensibile | Punto sensibile (stato «gestito», 2026-10-03) | spillo-punto-sensibile | verde acqua | no (stato «gestito») | punto (enigma) |
+| Palazzi e Mementos | meccanismo | Meccanismo (leva, interruttore, pannello; stato «azionato», 2026-10-03) | spillo-meccanismo | ardesia | no (stato «azionato») | punto |
 | Palazzi e Mementos | rampino | Punto del rampino (Royal) | spillo-rampino | magenta scuro | no | — |
-| Palazzi e Mementos | porta | Porta chiusa (chiave, tessera, dall'altro lato) | spillo-porta | rosso scuro | no | punto |
+| Palazzi e Mementos | porta | Porta chiusa (chiave, tessera, dall'altro lato; stato «aperta», si «Richiude», 2026-10-03) | spillo-porta | rosso scuro | no (stato «aperta») | punto |
 | Palazzi e Mementos | sicura | Stanza sicura | spillo-sicura | azzurro | no | punto |
 | Palazzi e Mementos | scorciatoia | Scorciatoia | spillo-scorciatoia | grigio | no | punto |
 | Altro | nota | Nota | spillo-nota | bianco | no | — |
@@ -161,7 +161,7 @@ volontà → seme-bramosia, ombra-sciagura → nemico, forziere-chiuso → forzi
 | POST/PUT/DELETE | `/api/mappe`, `/api/mappe/:chiave` | editor: crea, rinomina, sposta nell'albero, elimina (con conferma se ha figli) |
 | PUT | `/api/mappe/:chiave/immagine` | immagine di base (corpo grezzo `image/*`, come `/api/immagini`), larghezza/altezza calcolate |
 | POST/PUT/DELETE | `/api/mappe/:chiave/spilli`, `/api/mappe/spilli/:id` | editor: spilli (tipo, nome, descrizione, x/y, riferimento, collezionabile, condizioni di visibilità) |
-| PUT | `/api/partite/:id/spilli/:spilloId` | `{ raccolto }` in uso normale (punto 9) |
+| PUT | `/api/partite/:id/spilli/:spilloId` | `{ raccolto }` in uso normale (punto 9): lo stato del pin — raccolto, o sconfitto/azionato/gestito/affrontato/aperta per boss e miniboss, meccanismo, punto sensibile, nemico e porta chiusa (2026-10-03); 400 `spillo-senza-stato` sugli altri senza voce della guida |
 | GET | `/api/mappe/esporta` | ZIP con `mappe.json` (mappe + spilli + tipi) e `immagini/<chiave>.<ext>` (punto 1) |
 | POST | `/api/mappe/importa` | ZIP (stesso formato): unione per chiave, con `sovrascrivi` |
 

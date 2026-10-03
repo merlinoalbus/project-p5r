@@ -148,10 +148,12 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     await request(app).put(`/api/compendio/punti/${encodeURIComponent(dopo[0])}/sposta`).send({ verso: 2 }).expect(400);
   });
 
-  it('un nemico collegato a una voce (un’Ombra sciagura) si segna; uno libero no', async () => {
+  it('un nemico si segna «affrontato» anche libero (2026-10-03); collegato a una voce (un’Ombra sciagura), segnarlo segna la voce', async () => {
     const nemico = prepared("SELECT id, uid FROM spillo WHERE tipo = 'nemico' AND riferimento_tipo IS NULL AND mappa_chiave IN (SELECT chiave FROM mappa WHERE chiave LIKE 'nativo-rmap-15%') LIMIT 1").get() as { id: number; uid: string } | undefined;
     expect(nemico).toBeTruthy();
-    await request(app).put(`/api/partite/${partita}/spilli/${nemico!.id}`).send({ raccolto: true }).expect(400);
+    await raccogli(nemico!.id, true);
+    expect(raccolto(nemico!.uid)).toBe(1);
+    await raccogli(nemico!.id, false);
     const dungeon = palazzoDiOgniMappa().get(prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(nemico!.id) as string)!;
     const areaNemico = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
     const p = (await request(app).post(`/api/compendio/aree/${areaNemico}/punti`).send({ nome: 'Ombra sciagura di prova', tipo: 'ombra-sciagura' }).expect(201)).body.data as PuntoInteresseDto;

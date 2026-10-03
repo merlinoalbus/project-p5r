@@ -17,7 +17,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { MappaDto, SpilloDto } from '../../types';
-import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, categoriaSpillo, puntoDescrittivo, type TipoSpillo } from '../../../shared/spilli';
+import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, puntoDescrittivo, ritornoDelloStato, statoDelPin, type TipoSpillo } from '../../../shared/spilli';
 import { useAsset } from '../../stores/assetStore';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
@@ -56,7 +56,7 @@ interface Props {
   partitaId: number | null;
   /** Apertura di un'altra mappa (percorso, figlie, passaggi). */
   onNaviga: NavigaMappa;
-  /** Cambio dello stato «raccolto» di uno spillo collezionabile nella partita. */
+  /** Cambio dello stato di uno spillo nella partita (raccolto, sconfitto, azionato, gestito, affrontato, aperta: `statoDelPin`). */
   onRaccolto?: (spillo: SpilloDto, raccolto: boolean) => Promise<void> | void;
   /** Stato nella Guida di un punto di dungeon collegato allo spillo (ottenuto, esaurito, riaperto). */
   onStatoPunto?: (spillo: SpilloDto, stato: StatoPuntoMappa) => Promise<void> | void;
@@ -615,7 +615,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   <button type="button" className={`visore-mappa__voce ${s.id === selezionatoId ? 'visore-mappa__voce--attiva' : ''} ${s.raccolto ? 'opacity-60' : ''}`} onClick={() => { if (scelta) { scelta.onScegli(s); centraSu(s); return; } seleziona(s.id); centraSu(s); }} aria-pressed={scelta ? scelta.scelti.has(s.id) : s.id === selezionatoId}>
                     <PuntoSpillo tipo={s.tipo} colore={s.colore} />
                     <span className="flex-1 min-w-0 truncate">{s.nome}</span>
-                    <span className="text-[11px] text-text-muted">{s.tipoNome}{s.raccolto ? ' · raccolto' : ''}</span>
+                    <span className="text-[11px] text-text-muted">{s.tipoNome}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</span>
                   </button>
                 </li>
               ))}
@@ -655,7 +655,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   // serve a posare uno spillo in quel punto, e prima su un pin esistente non
                   // succedeva nulla, senza nemmeno un segnale (rilievo del validatore, 2026-09-13).
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
-                  aria-label={scelta ? `${s.tipoNome}: ${s.nome}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
+                  aria-label={scelta ? `${s.tipoNome}: ${s.nome}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${s.nome}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={scelta ? scelta.scelti.has(s.id) : attivo}
                   disabled={scelta?.occupato}
                   title={s.nome}
@@ -681,7 +681,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
                     <strong className="block text-[13px] leading-tight">{selezionato.nome}</strong>
-                    <span className="block text-[11px] text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ' · raccolto' : ''}</span>
+                    <span className="block text-[11px] text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ` · ${parolaSegnato(selezionato)}` : ''}</span>
                     {selezionato.disponibilita && <ChipDisponibilita disponibilita={selezionato.disponibilita} compatto />}
                   </div>
                   <button type="button" className="spillo-popup__chiudi" onClick={() => seleziona(null)} aria-label="Chiudi il popup">×</button>
@@ -701,8 +701,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && <MerceNelPopup negozio={selezionato.dettaglio.negozio} spillo={selezionato} partitaId={partitaId} occupato={occupato} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} />}
                 <div className="flex flex-wrap gap-1">
                   {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
-                  {/* anche un pin non collezionabile collegato a una voce della guida (una sicura, un passaggio): lo stato della voce è il suo (2026-10-01) */}
-                  {(categoriaSpillo(selezionato.tipo) === 'consumabile' || !!selezionato.voce) && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
+                  {/* un pin con uno stato (un consumabile, un meccanismo, una porta…: `statoDelPin`, 2026-10-03), e anche un pin senza
+                      collegato a una voce della guida (una sicura, un passaggio): lo stato della voce è il suo (2026-10-01) */}
+                  {(statoDelPin(selezionato) !== null || !!selezionato.voce) && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
                   {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && (
                     <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Scheda del negozio" />
                   )}
@@ -841,7 +842,21 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto }: { n
 
 interface PropsAzioni<T extends SpilloDto | SchedaContenutoGuidaDto> { spillo: T; occupato: boolean; onRaccolto?: (spillo: T, raccolto: boolean) => Promise<void>; onStatoPunto?: (spillo: T, stato: StatoPuntoMappa) => Promise<void> }
 
-/** Azioni di stato nella partita: per i punti della Guida «Ottenuto/Esaurito/Riapri» (stessi stati della scheda del Palazzo), altrimenti «Raccolto/Riapri». */
+/** La parola di un pin segnato: lo stato della sua voce della guida («ottenuto», «esaurito») se ne ha una, che è anche quello dei
+ *  pulsanti, altrimenti quella del tipo («raccolto», «azionato», «aperta»…). */
+function parolaSegnato(s: SpilloDto | SchedaContenutoGuidaDto): string {
+  return s.voce?.stato ?? parolaDelloStato(s);
+}
+
+/** Che cosa si potrebbe segnare con una partita attiva: la voce della guida, lo stato del pin con la sua parola, gli acquisti. */
+function invitoSenzaPartita(s: SpilloDto | SchedaContenutoGuidaDto, negozio: boolean): string {
+  const stato = statoDelPin(s);
+  const cose = [s.voce ? 'segnare la sua voce della guida' : stato ? `segnarne lo stato (${stato})` : null, negozio ? 'segnare gli acquisti' : null].filter((x): x is string => x !== null);
+  return cose.join(' e ');
+}
+
+/** Azioni di stato nella partita: per i punti della Guida «Ottenuto/Esaurito/Riapri» (stessi stati della scheda del Palazzo), altrimenti lo stato del pin
+ *  («Raccolto», «Sconfitto», «Azionato», «Gestito», «Affrontato», «Aperta») e, per toglierlo, «Annulla» («Richiudi» per la porta). */
 export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
   const punto = s.voce;
   // una voce descrittiva della guida (solo «Altro») si legge, non si segna (scelta dell'utente, 2026-10-01): come nella scheda del Palazzo
@@ -855,10 +870,13 @@ export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spi
       </>
     );
   }
-  if (!s.collezionabile || !onRaccolto) return null;
+  // «Raccolto» per un consumabile, «Sconfitto» per boss e miniboss, «Azionato», «Gestito», «Affrontato», «Aperta» per meccanismo,
+  // punto sensibile, nemico e porta chiusa (2026-10-03)
+  const stato = statoDelPin(s);
+  if (stato === null || !onRaccolto) return null;
   return s.raccolto
-    ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void onRaccolto(s, false)} disabled={occupato} />
-    : <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Raccolto" onClick={() => void onRaccolto(s, true)} disabled={occupato} />;
+    ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo={ritornoDelloStato(s).pulsante} onClick={() => void onRaccolto(s, false)} disabled={occupato} />
+    : <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={stato.charAt(0).toUpperCase() + stato.slice(1)} onClick={() => void onRaccolto(s, true)} disabled={occupato} />;
 }
 
 interface PropsScheda<T extends SpilloDto | SchedaContenutoGuidaDto> {
@@ -895,7 +913,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         <ImmagineRiferimento immagine={d?.immagine} nome={s.nome} />
         <div className="flex-1 min-w-0">
           <h3 className="m-0 font-display text-[19px] leading-tight break-words">{s.nome}</h3>
-          <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">{s.tipoNome}{s.collezionabile ? ' · collezionabile' : ''}{s.raccolto ? ' · raccolto' : ''}</p>
+          <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">{s.tipoNome}{s.collezionabile ? ' · collezionabile' : ''}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</p>
           {s.disponibilita && <ChipDisponibilita disponibilita={s.disponibilita} compatto />}
         </div>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi la scheda">×</button>
@@ -976,7 +994,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         {!nonSpaziale && onCentra && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Centra" onClick={onCentra} />}
         {partitaId && <AzioniStato spillo={s} occupato={occupato} onRaccolto={onRaccolto} onStatoPunto={onStatoPunto} />}
       </div>
-      {(s.collezionabile || !!s.voce || negozio) && !partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti raccolti e gli acquisti.</span>}
+      {(statoDelPin(s) !== null || !!s.voce || negozio) && !partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per {invitoSenzaPartita(s, !!negozio)}.</span>}
     </section>
   );
 }

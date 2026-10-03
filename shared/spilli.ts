@@ -57,12 +57,47 @@ const CATEGORIA_PER_TIPO: Record<TipoSpillo, CategoriaSpillo> = {
   passaggio: 'spostamento', scala: 'spostamento', uscita: 'spostamento', treno: 'spostamento', velluto: 'spostamento', mementos: 'spostamento', 'ingresso-palazzo': 'spostamento', infiltrazione: 'spostamento', scorciatoia: 'spostamento', rampino: 'spostamento',
   negozio: 'citta', ristorante: 'citta', distributore: 'citta', sigarette: 'citta', cercalavoro: 'citta', lavoro: 'citta', terme: 'citta', lavanderia: 'citta', cinema: 'citta', biblioteca: 'citta', culto: 'citta', 'sala-giochi': 'citta', casa: 'citta', attivita: 'citta', confidente: 'citta',
   dialogo: 'consumabile', forziere: 'consumabile', 'forziere-raro': 'consumabile', 'tesoro-palazzo': 'consumabile', 'seme-bramosia': 'consumabile', oggetto: 'consumabile', 'oggetto-chiave': 'consumabile', timbro: 'consumabile', boss: 'consumabile', miniboss: 'consumabile',
-  // I nemici si rigenerano: non si «raccolgono» e non contano per completare la mappa (richiesta dell'utente, 2026-09-30).
+  // I nemici si rigenerano: non si «raccolgono» e non contano per completare la mappa (richiesta dell'utente, 2026-09-30);
+  // hanno però uno stato, «affrontato» (2026-10-03, `STATO_PER_TIPO` qui sotto).
   nemico: 'informativo',
   'punto-sensibile': 'informativo', meccanismo: 'informativo', porta: 'informativo', sicura: 'informativo', nota: 'informativo',
 };
 export function categoriaSpillo(tipo: string): CategoriaSpillo {
   return CATEGORIA_PER_TIPO[tipo as TipoSpillo] ?? 'informativo';
+}
+
+// ============================================================
+// Lo stato di un pin nella partita (richiesta dell'utente, 2026-09-30, ripresa il 2026-10-03)
+// ============================================================
+//
+// Un consumabile si **raccoglie**, un boss o un miniboss si **sconfigge**. Un meccanismo si
+// **aziona**, un punto sensibile si **gestisce**, un nemico si **affronta**, una porta chiusa si
+// **apre**: sono lo stesso dato del raccolto (`spillo_partita`), si segnano e si tolgono allo stesso
+// modo e valgono allo stesso modo nelle condizioni sugli altri pin. Cambia solo la parola. Boss e
+// miniboss restano collezionabili e contano nel completamento come prima; gli altri quattro no (un
+// nemico si rigenera, una leva non si porta via) e, segnati, restano sulla mappa. Gli altri pin non
+// hanno stato: si leggono e basta.
+//
+// Le parole (scelte dell'utente, 2026-10-03): «sconfitto» per boss e miniboss; per togliere il segno
+// la porta ha «Richiudi» e torna «chiusa», gli altri «Annulla» e tornano «non più …».
+const STATO_PER_TIPO: Partial<Record<TipoSpillo, string>> = { boss: 'sconfitto', miniboss: 'sconfitto', meccanismo: 'azionato', 'punto-sensibile': 'gestito', nemico: 'affrontato', porta: 'aperta' };
+const RITORNO_PER_TIPO: Partial<Record<TipoSpillo, { pulsante: string; parola: string }>> = { porta: { pulsante: 'Richiudi', parola: 'chiusa' } };
+
+/** La parola dello stato di un pin («raccolto», «sconfitto», «azionato», «gestito», «affrontato», «aperta»), o null se il pin non ne ha. */
+export function statoDelPin(s: { tipo: string; collezionabile: boolean }): string | null {
+  return STATO_PER_TIPO[s.tipo as TipoSpillo] ?? (s.collezionabile ? 'raccolto' : null);
+}
+/** La parola dello stato di un tipo di pin, per chi ha solo il tipo (le condizioni, il server); null = il tipo non ha stato. */
+export function statoDelTipo(tipo: string): string | null {
+  return STATO_PER_TIPO[tipo as TipoSpillo] ?? (categoriaSpillo(tipo) === 'consumabile' ? 'raccolto' : null);
+}
+/** Lo stato da mostrare per un pin segnato: la sua parola o, per un pin segnato solo tramite la sua voce della guida, «raccolto» come prima. */
+export function parolaDelloStato(s: { tipo: string; collezionabile: boolean }): string {
+  return statoDelPin(s) ?? 'raccolto';
+}
+/** Togliere il segno: il pulsante («Richiudi» per la porta, «Annulla» per gli altri) e la parola dello stato di prima («chiusa», «non più azionato»). */
+export function ritornoDelloStato(s: { tipo: string; collezionabile: boolean }): { pulsante: string; parola: string } {
+  return RITORNO_PER_TIPO[s.tipo as TipoSpillo] ?? { pulsante: 'Annulla', parola: `non più ${parolaDelloStato(s)}` };
 }
 /** I tipi di ogni categoria, nell'ordine di `TIPI_SPILLO`. */
 export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
@@ -168,7 +203,7 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   timbro: { nome: 'Timbro dei Mementos', colore: '#f0abfc', collezionabile: true, riferimento: null },
   boss: { nome: 'Boss', colore: '#e5352b', collezionabile: true, riferimento: 'punto' },
   miniboss: { nome: 'Miniboss', colore: '#f97316', collezionabile: true, riferimento: 'punto' },
-  /** Si rigenera: resta un segno sulla mappa, ma non si segna né conta nel completamento (2026-09-30). */
+  /** Si rigenera: resta sulla mappa e non conta nel completamento (2026-09-30); si segna «affrontato» (2026-10-03). */
   nemico: { nome: 'Nemico', colore: '#b0b0c0', collezionabile: false, riferimento: 'punto' },
   'punto-sensibile': { nome: 'Punto sensibile', colore: '#7fd8c8', collezionabile: false, riferimento: 'punto' },
   /** Leva, interruttore, pannello o quadro di controllo da azionare. */

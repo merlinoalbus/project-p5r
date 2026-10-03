@@ -80,7 +80,8 @@ it('cambiando partita ricarica stato e condizioni del contenuto mantenendo la se
   act(()=>usePartitaStore.setState({attiva:partita(8)}));
   await waitFor(()=>expect(api.getContenutiMappa).toHaveBeenLastCalledWith('palazzo-castello',8));
   const s=within(await screen.findByRole('region',{name:'Scheda: Scrigno della biblioteca'}));
-  expect(s.getByRole('button',{name:'Riapri'})).toBeInTheDocument();
+  // togliere il segno a un raccolto si chiama «Annulla» (scelta dell'utente, 2026-10-03)
+  expect(s.getByRole('button',{name:'Annulla'})).toBeInTheDocument();
   expect(s.getByRole('img',{name:'Condizione soddisfatta'})).toBeInTheDocument();
   expect(s.queryByText('La partita è nel momento di giorno')).not.toBeInTheDocument();
   expect(api.impostaSpilloRaccolto).not.toHaveBeenCalled();
@@ -90,7 +91,7 @@ it('aggiorna lo stato del medesimo ID nella partita e ricarica il contenuto',asy
   api.impostaSpilloRaccolto.mockImplementation(async(id:number,spilloId:number,valore:boolean)=>{expect(spilloId).toBe(ID);if(valore)raccolti.add(id);else raccolti.delete(id);return scheda(id);});
   monta();await apri();fireEvent.click(screen.getByRole('button',{name:'Raccolto'}));
   await waitFor(()=>expect(api.impostaSpilloRaccolto).toHaveBeenCalledWith(7,ID,true));
-  expect(await screen.findByRole('button',{name:'Riapri'})).toBeInTheDocument();
+  expect(await screen.findByRole('button',{name:'Annulla'})).toBeInTheDocument();
   expect(api.getContenutiMappa).toHaveBeenCalledTimes(2);
 });
 
@@ -98,6 +99,6 @@ it('senza partita conserva la consultazione senza offrire modifiche allo stato d
   usePartitaStore.setState({attiva:null});monta();const s=within(await apri());
   expect(api.getContenutiMappa).toHaveBeenCalledWith('palazzo-castello',undefined);
   expect(s.getByText('Solo la sera')).toBeInTheDocument();
-  expect(s.queryByRole('button',{name:'Raccolto'})).not.toBeInTheDocument();expect(s.queryByRole('button',{name:'Riapri'})).not.toBeInTheDocument();
+  expect(s.queryByRole('button',{name:'Raccolto'})).not.toBeInTheDocument();expect(s.queryByRole('button',{name:'Annulla'})).not.toBeInTheDocument();
   expect(s.queryByRole('button',{name:'Centra'})).not.toBeInTheDocument();
 });

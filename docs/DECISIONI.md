@@ -967,3 +967,25 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   porta dentro una voce) ancora da fare → **l'Enigma si riapre**; il passo non viene segnato da solo. I progressi non cambiano
   senza che l'utente li tocchi; lo si risegna con un tocco (segnare l'Enigma segna i passi).
 - Un Enigma senza passi da segnare si segna da sé, come prima: le voci «Enigma» del canone (nessuna con passi oggi) non cambiano.
+
+## 2026-10-03 — Stato dei pin oltre il «raccolto» e condizioni sullo stato di altri pin
+
+- Richiesta dell'utente del 30 settembre (registrata come «da proporre» e poi persa nel riassunto della conversazione,
+  senza voce in ROADMAP), ripresa il 3 ottobre: «i pin dei meccanismi e dei punti sensibili non gestiscono uno status
+  (azionato o gestito) … lo stato deve essere identico a come gestisci lo stato raccolto degli oggetti. Per i nemici la
+  dicitura va anche cambiata in affrontato», e poi «anche la porta chiusa può essere sbloccata e diventare aperta».
+- Stato per tipo: meccanismo «azionato», punto sensibile «gestito», nemico «affrontato» (prima non segnabile: 400
+  `spillo-non-raccoglibile`), porta chiusa «aperta», ogni consumabile «raccolto». Stesso dato e stessa API del raccolto;
+  non contano nel completamento (restano non collezionabili) e il pin segnato resta visibile. Gli altri tipi (stanza
+  sicura, passaggi, note…) non hanno stato: 400 `spillo-senza-stato`, salvo che il pin sia collegato a una voce della
+  guida.
+- Scelte dell'utente (2026-10-03, domande poste su richiesta del validatore): boss e miniboss **«sconfitto»** (restano
+  collezionabili e contano nel completamento come prima); per togliere il segno la **porta** ha il pulsante «Richiudi» e
+  torna «chiusa», gli altri tipi «Annulla» e tornano «non più azionato / gestito / affrontato / raccolto / sconfitto».
+- L'avviso dice ««Nome»: aperta.» / ««Nome»: chiusa.» invece di «segnato come …»: la parola dello stato concorda col
+  tipo («aperta»). Un pin collegato a una voce della guida mostra lo stato della voce («ottenuto», «esaurito»), lo
+  stesso dei suoi pulsanti.
+- Su richiesta dell'utente («controlla che questi stati siano collegati correttamente anche con gli stati della guida…
+  quando i pin sono collegati», «vale anche per gli enigmi»): un meccanismo o una porta collegati ai passi di un Enigma
+  segnano i passi e, con l'ultimo, l'Enigma; togliere il segno li riapre; segnare o riaprire l'Enigma dalla guida segna
+  o riapre i pin dei passi (test `enigmi-guida`).
