@@ -30,6 +30,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { closeDb, getDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
+import { occupaIstanza } from './lucchettoIstanza.js';
 import { cartellaTemporanea, copiaDatabase, copiaDiSicurezza, riapriIstanza, scriviDatabase, statoIstanza, timbro, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
 import { ESTENSIONI_PACCHETTO, elencaDeposito as elencaCartella, leggiDalDeposito, percorsoNelDeposito } from './depositoService.js';
@@ -272,9 +273,13 @@ let contatore = 0;
 let inCorso: { operazione: string; iniziataIl: string; fase: FaseImportazionePacchetto } | null = null;
 let ultima: StatoImportazionePacchettoDto['ultima'] = null;
 
-/** Prende il lucchetto; rifiuta se un'altra importazione è già in corso. */
+/** Rilascia il lucchetto comune dell'istanza preso da `impegna` (null quando nessuna importazione è in corso). */
+let rilasciaIstanza: (() => void) | null = null;
+
+/** Prende il lucchetto; rifiuta se un'altra importazione, o un ripristino dell'istanza, è già in corso. */
 function impegna(fase: FaseImportazionePacchetto): string {
   if (inCorso) throw httpErrors.conflict('importazione-in-corso', `Un'importazione è già in corso da ${inCorso.iniziataIl} (fase: ${inCorso.fase}): attendi che finisca.`);
+  rilasciaIstanza = occupaIstanza("Un'importazione del pacchetto di gioco");
   contatore += 1;
   inCorso = { operazione: `${AVVIO}-${contatore}`, iniziataIl: new Date().toISOString(), fase };
   return inCorso.operazione;
@@ -286,6 +291,8 @@ function avanza(fase: FaseImportazionePacchetto): void {
 
 function libera(operazione: string, riuscita: boolean, messaggio: string, esito: EsitoImportazionePacchettoDto | null): void {
   inCorso = null;
+  rilasciaIstanza?.();
+  rilasciaIstanza = null;
   ultima = { operazione, riuscita, conclusaIl: new Date().toISOString(), messaggio, esito };
 }
 

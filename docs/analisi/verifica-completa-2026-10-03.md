@@ -37,7 +37,7 @@ traduzioni 4, cioè 185 nei router, più `/api/health` e `/api/config` in `boots
 | F14 | B | `responseShape` riconosce la busta dalla presenza di `data`/`error`; `condizioni.ts:70` la costruisce a mano | marcatore esplicito; `res.json(array)` | no | 2 |
 | F15 | B | IIFE `void (async () => …)()` in `impostazioni.ts` (Express 5 propaga già le promise) | handler `async` | no | 3 |
 | F16 | B | schemi e costanti duplicati (categorie articolo, doti ×3, regex data ×7, id intero ×3, `booleano`=`boolQuery`, elenchi di numeri) | `schemas/comuni.ts` e `shared/` | no | 3 |
-| F17 | B | export superflui (`httpErrors.internal` mai usato; altri da togliere solo come `export`) | togliere | no | 3 |
+| F17 | B | export superflui (`httpErrors.internal` mai usato; altri da togliere solo come `export`) | togliere (`httpErrors.internal` resta: dalla fase 2 lo usa C5) | no | 3 |
 | F18 | B | il controllo «la partita esiste» ripetuto (vedi K4) | un helper | no | 3 |
 | F19 | M | `depositaCopia`/`depositaContenuto` sincroni su centinaia di MB; ZIP con CRC in JS e doppio buffer | I/O asincrono, `zlib.crc32`, ZIP a flusso | no | 3 |
 | F20 | B | `/condizioni/elenchi` e `progressi` rifanno 7 query a ogni chiamata | cache invalidata dalle scritture (facoltativo) | no | 3 |

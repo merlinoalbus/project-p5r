@@ -22,9 +22,7 @@ import { config } from '../../config.js';
 import { logger } from '../../utils/logger.js';
 import { resolveDbPath, type AppDatabase } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
-import { invalidaCacheTraduzioni } from '../traduzioniService.js';
-import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
-import { invalidaEredita } from '../fusione/eredita.js';
+import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
 import { traduciNomiSpilli } from '../../db/migrations/053_nomi_spilli_in_italiano.js';
 import { collegaLuoghiAllePlanimetrie } from '../../db/migrations/054_luoghi_con_la_loro_planimetria.js';
 import { riallineaSpilliLuoghi } from '../mappe/sincronizzaMappe.js';
@@ -151,9 +149,7 @@ export function caricaPacchetto(db: AppDatabase, percorso: string = percorsoPacc
   }
   runMigrations(db);
   regoleAllAvvio(db);
-  invalidaCacheTraduzioni();
-  invalidaMotoreFusione();
-  invalidaEredita();
+  invalidaCacheDiGioco();
   return { tabelle, righe, versione };
 }
 
@@ -191,8 +187,6 @@ export function ricaricaPacchetto(db: AppDatabase, percorso: string = percorsoPa
     db.pragma('foreign_keys = ON');
     db.prepare('DETACH DATABASE pacchetto').run();
   }
-  invalidaCacheTraduzioni();
-  invalidaMotoreFusione();
-  invalidaEredita();
+  invalidaCacheDiGioco();
   return { tabelle, righe };
 }

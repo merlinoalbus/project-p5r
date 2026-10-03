@@ -17,10 +17,11 @@ import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { closeDb, copiaSchema, getDb, initDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
-import { runMigrations } from '../db/migrationRunner.js';
-import { invalidaCacheTraduzioni } from './traduzioniService.js';
-import { invalidaMotoreFusione } from './fusione/motoreFusione.js';
-import { invalidaEredita } from './fusione/eredita.js';
+import { runMigrations, type Migration } from '../db/migrationRunner.js';
+import { invalidaCacheDiGioco } from './cacheDiGioco.js';
+import { occupaIstanza } from './lucchettoIstanza.js';
+import { migrations } from '../db/migrations/index.js';
+import { migrazioniUtente } from '../db/migrazioniUtente/index.js';
 import { assorbiImmaginiSuDisco } from './pacchetto/pacchettoGioco.js';
 import { ESTENSIONI_BACKUP, elencaDeposito as elencaCartella, leggiDalDeposito } from './depositoService.js';
 import type { DepositoFileDto } from '../../shared/types.js';
@@ -78,7 +79,7 @@ export function statoIstanza(): StatoIstanzaDto {
     try { return (getDb().prepare('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n; } catch { return 0; }
   })();
   // snapshot di avvio (file .db) e copie di ripristino (cartelle): l'utente le vede come un'unica riserva
-  const copie = fs.existsSync(cartella('backups')) ? fs.readdirSync(cartella('backups'), { withFileTypes: true }).filter((v) => (v.isFile() && v.name.endsWith('.db')) || (v.isDirectory() && v.name.startsWith('prima-del-ripristino-'))).length : 0;
+  const copie = fs.existsSync(cartella('backups')) ? fs.readdirSync(cartella('backups'), { withFileTypes: true }).filter((v) => (v.isFile() && v.name.endsWith('.db') && !v.name.endsWith('.partite.db')) || (v.isDirectory() && v.name.startsWith('prima-del-ripristino-'))).length : 0;
   return {
     versioneSchema: getDb().pragma('main.user_version', { simple: true }) as number,
     versioneSchemaPartite: getDb().pragma('utente.user_version', { simple: true }) as number,
@@ -161,6 +162,11 @@ export function ripristinaIstanzaDaDeposito(nome: string): Promise<EsitoRipristi
 /** Il file è un database SQLite riconoscibile? Solo controlli sul contenuto, nessun effetto. Esportata per i test.
  *  Restituisce che cosa contiene: dati di gioco, partite, o il vecchio file unico (entrambi). */
 export function verificaDatabase(contenuto: Buffer): ContenutoDatabase {
+  return esaminaDatabase(contenuto).tipo;
+}
+
+/** Come `verificaDatabase`, con in più la versione dello schema (`user_version`) del file. */
+function esaminaDatabase(contenuto: Buffer): { tipo: ContenutoDatabase; versione: number } {
   if (contenuto.length < 100 || contenuto.toString('utf-8', 0, 16) !== FIRMA_SQLITE) {
     throw httpErrors.badRequest('file-non-valido', 'Il file non è un database SQLite: carica il file .db esportato dall\'app oppure lo ZIP dell\'istanza.');
   }
@@ -179,12 +185,13 @@ export function verificaDatabase(contenuto: Buffer): ContenutoDatabase {
       }
       const versione = db.pragma('user_version', { simple: true }) as number;
       if (versione < 1) throw httpErrors.badRequest('database-estraneo', 'Il database caricato non ha uno schema riconoscibile (nessuna migrazione applicata).');
-      return gioco && partite ? 'unico' : gioco ? 'gioco' : 'partite';
+      return { tipo: gioco && partite ? 'unico' : gioco ? 'gioco' : 'partite', versione };
     } finally {
       db.close();
     }
   } finally {
-    fs.rmSync(prova, { force: true });
+    // anche i giornali: aprire un database WAL ne crea, e in data/tmp restavano a decine
+    for (const coda of ['', '-wal', '-shm']) fs.rmSync(`${prova}${coda}`, { force: true });
   }
 }
 
@@ -229,10 +236,25 @@ function ripristinaCopiaDiSicurezza(dir: string): void {
   }
 }
 
-/** Scrive un file di database sostituendo quello dell'istanza; i giornali WAL della vecchia connessione vanno rimossi. */
+/** Scrive un file di database sostituendo quello dell'istanza; i giornali WAL della vecchia connessione vanno rimossi.
+ *  La scrittura è atomica: si scrive un file nuovo nella stessa cartella, lo si porta su disco (fsync) e lo si mette al posto del
+ *  vecchio con un `rename`. Un crash o un disco pieno a metà dei ~300 MB lasciano il file vivo intatto, non troncato. */
 export function scriviDatabase(contenuto: Buffer, dbPath: string): void {
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-  fs.writeFileSync(dbPath, contenuto);
+  const nuovo = `${dbPath}.nuovo-${process.pid}`;
+  try {
+    const fd = fs.openSync(nuovo, 'w');
+    try {
+      for (let scritti = 0; scritti < contenuto.length;) scritti += fs.writeSync(fd, contenuto, scritti, contenuto.length - scritti);
+      fs.fsyncSync(fd);
+    } finally {
+      fs.closeSync(fd);
+    }
+    fs.renameSync(nuovo, dbPath);
+  } catch (err) {
+    fs.rmSync(nuovo, { force: true });
+    throw err;
+  }
   for (const coda of ['-wal', '-shm']) fs.rmSync(`${dbPath}${coda}`, { force: true });
 }
 
@@ -246,9 +268,7 @@ export function riapriIstanza(): void {
   const db = initDb();
   runMigrations(db);
   assorbiImmaginiSuDisco(db);
-  invalidaCacheTraduzioni();
-  invalidaMotoreFusione();
-  invalidaEredita();
+  invalidaCacheDiGioco();
 }
 
 /**
@@ -282,7 +302,13 @@ export function tornaAllaCopiaDiSicurezza(salvataggio: string, err: unknown, cod
     ripristinoFile = err2;
     logger.error({ err: err2, salvataggio }, 'ripristino dei file della copia di sicurezza fallito: la copia resta su disco');
   }
-  riapriIstanza();
+  try {
+    riapriIstanza();
+  } catch (err3) {
+    // senza connessione l'app risponderebbe 500 a tutto senza dire perché: si dice che cosa è successo e dove sta la copia
+    logger.error({ err: err3, salvataggio }, 'riapertura dopo il ritorno alla copia di sicurezza fallita: serve un riavvio');
+    throw httpErrors.internal(`${azione} non riuscito, e anche la riapertura dell'istanza è fallita (${err3 instanceof Error ? err3.message : 'errore sconosciuto'}): riavvia il server. La copia di sicurezza è in data/backups/${path.basename(salvataggio)}.`);
+  }
   const dettaglio = ripristinoFile ? ` I file non sono tornati tutti al loro posto: la copia è in data/backups/${path.basename(salvataggio)}.` : ' L\'istanza precedente è stata rimessa com\'era.';
   throw httpErrors.badRequest(codice, `${azione} non riuscito (${err instanceof Error ? err.message : 'errore sconosciuto'}).${dettaglio}`);
 }
@@ -292,6 +318,24 @@ export function tornaAllaCopiaDiSicurezza(salvataggio: string, err: unknown, cod
  * le migrazioni vengono rieseguite, le cache in memoria invalidate. In caso di errore si ripristina la copia di sicurezza.
  */
 export async function ripristinaIstanza(contenuto: Buffer): Promise<EsitoRipristinoDto> {
+  // lo stesso lucchetto dell'importazione del pacchetto: due sostituzioni dei file non si intrecciano (409 alla seconda)
+  const rilascia = occupaIstanza("Un ripristino dell'istanza");
+  try {
+    return await ripristinaIstanzaOccupata(contenuto);
+  } finally {
+    rilascia();
+  }
+}
+
+/** Uno schema più nuovo di quello che il codice conosce non si ripristina: le migrazioni non farebbero nulla e il codice girerebbe su
+ *  tabelle che non sa leggere. È la stessa regola dell'importazione del pacchetto (`pacchetto-troppo-nuovo`). */
+function schemaNonPiuNuovo(versione: number, elenco: readonly Migration[], quale: string): void {
+  const codice = elenco.reduce((max, m) => Math.max(max, m.id), 0);
+  if (versione > codice) throw httpErrors.badRequest('database-troppo-nuovo', `Il database ${quale} ha lo schema ${versione}, più nuovo di quello che questa versione dell'app sa leggere (${codice}): aggiorna l'app prima di ripristinarlo.`);
+}
+
+/** Il ripristino vero e proprio, con il lucchetto dell'istanza già in mano. */
+async function ripristinaIstanzaOccupata(contenuto: Buffer): Promise<EsitoRipristinoDto> {
   if (!fs.existsSync(resolveDbPath())) {
     throw httpErrors.badRequest('istanza-in-memoria', 'Questa istanza tiene il database in memoria: il ripristino da file non è disponibile.');
   }
@@ -322,9 +366,18 @@ export async function ripristinaIstanza(contenuto: Buffer): Promise<EsitoRiprist
     const contenutoFile = verificaDatabase(contenuto);
     if (contenutoFile === 'gioco') gioco = contenuto; else if (contenutoFile === 'partite') partite = contenuto; else unico = contenuto;
   }
-  if (gioco && verificaDatabase(gioco) === 'partite') throw httpErrors.badRequest('database-estraneo', 'Il file dei dati di gioco dello ZIP contiene solo partite.');
-  if (partite && verificaDatabase(partite) === 'gioco') throw httpErrors.badRequest('database-estraneo', 'Il file delle partite dello ZIP contiene solo dati di gioco.');
-  if (unico) verificaDatabase(unico);
+  if (gioco) {
+    const e = esaminaDatabase(gioco);
+    if (e.tipo === 'partite') throw httpErrors.badRequest('database-estraneo', 'Il file dei dati di gioco dello ZIP contiene solo partite.');
+    schemaNonPiuNuovo(e.versione, migrations, 'dei dati di gioco');
+  }
+  if (partite) {
+    const e = esaminaDatabase(partite);
+    if (e.tipo === 'gioco') throw httpErrors.badRequest('database-estraneo', 'Il file delle partite dello ZIP contiene solo dati di gioco.');
+    schemaNonPiuNuovo(e.versione, migrazioniUtente, 'delle partite');
+  }
+  // il file unico di prima della 066 segue la numerazione dei dati di gioco
+  if (unico) schemaNonPiuNuovo(esaminaDatabase(unico).versione, migrations, 'dell\'istanza');
 
   const salvataggio = await copiaDiSicurezza();
   closeDb();

@@ -111,8 +111,10 @@ export function aggiornaCiclo(partitaId: number, id: number, dati: ModificaCiclo
   const lunghezza = (JSON.parse(r.anelli_json) as AnelloCicloDto[]).length;
   if (dati.anelloCorrente !== undefined && (dati.anelloCorrente < 0 || dati.anelloCorrente >= lunghezza)) throw httpErrors.badRequest('anello-non-valido', `L'anello corrente va da 0 a ${lunghezza - 1}.`);
   const adesso = nowIso();
-  prepared('UPDATE ciclo_salvato SET nome = ?, note = ?, anello_corrente = ?, iterazioni = ?, updated_at = ? WHERE id = ?').run(dati.nome ?? r.nome, dati.note ?? r.note, dati.anelloCorrente ?? r.anello_corrente, dati.iterazioni ?? r.iterazioni, adesso, id);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  getDb().transaction(() => {
+    prepared('UPDATE ciclo_salvato SET nome = ?, note = ?, anello_corrente = ?, iterazioni = ?, updated_at = ? WHERE id = ?').run(dati.nome ?? r.nome, dati.note ?? r.note, dati.anelloCorrente ?? r.anello_corrente, dati.iterazioni ?? r.iterazioni, adesso, id);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  })();
   return cicloDto(riga(partitaId, id));
 }
 
@@ -136,7 +138,9 @@ export function avanzaCiclo(partitaId: number, id: number): CicloSalvatoDto {
 
 export function eliminaCiclo(partitaId: number, id: number): void {
   verificaPartita(partitaId);
-  const info = prepared('DELETE FROM ciclo_salvato WHERE id = ? AND partita_id = ?').run(id, partitaId);
-  if (info.changes === 0) throw httpErrors.notFound('ciclo-non-trovato', `Il ciclo ${id} non esiste in questa partita.`);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  getDb().transaction(() => {
+    const info = prepared('DELETE FROM ciclo_salvato WHERE id = ? AND partita_id = ?').run(id, partitaId);
+    if (info.changes === 0) throw httpErrors.notFound('ciclo-non-trovato', `Il ciclo ${id} non esiste in questa partita.`);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  })();
 }

@@ -109,6 +109,8 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
       dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,
     );
     if (dati.livelloProtagonista !== undefined && dati.livelloProtagonista !== r.livello_protagonista) {
+      // la riga di Joker nella squadra ricopia lo stesso numero (la fonte resta la partita): mai due livelli diversi nel file
+      prepared("UPDATE membro_squadra_partita SET livello = ? WHERE partita_id = ? AND personaggio_chiave = 'joker'").run(dati.livelloProtagonista, id);
       registraEvento(id, 'livello-protagonista', `Protagonista al livello ${dati.livelloProtagonista}`, `Da ${r.livello_protagonista} a ${dati.livelloProtagonista}.`, { da: r.livello_protagonista, a: dati.livelloProtagonista });
     }
     if (dati.allarmeAttivo !== undefined && (dati.allarmeAttivo ? 1 : 0) !== r.allarme_attivo) {
@@ -231,7 +233,7 @@ export function puntiConfidente(mod: ModificaConfidente): number {
 
 export function confidenti(partitaId: number): ConfidentePartitaDto[] {
   rigaPartita(partitaId);
-  return (prepared(`SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
+  const righe = (prepared(`SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
       COALESCE(cp.note, '') AS note, cp.updated_at, cr.punti_necessari,
       EXISTS (SELECT 1 FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.partita_id = ? AND p.arcana = c.arcana) AS in_scorta
     FROM confidente c
@@ -245,20 +247,18 @@ export function confidenti(partitaId: number): ConfidentePartitaDto[] {
       personaArcanoInScorta: c.in_scorta === 1,
       regaliFatti: regaliFattiDi(partitaId, c.chiave),
       note: c.note, semafori: [] as SemaforiRangoDto[], updatedAt: c.updated_at,
-    }))
-    .map((c, _i, tutti) => { const semafori = semaforiConfidente(c.chiave, c.rango, statoSemafori(partitaId, tutti)); return { ...c, semafori, bloccato: bloccoRango(semafori, c.rango + 1) }; });
+    }));
+  // Lo stato della partita per i semafori si calcola una volta per chiamata e vale per tutti i Confidenti. Prima stava in una cache
+  // di modulo con la firma su `partita.updated_at`, che alcune scritture (i collegamenti alla guida) non toccano: semafori vecchi.
+  const stato = statoSemafori(partitaId, righe);
+  return righe.map((c) => { const semafori = semaforiConfidente(c.chiave, c.rango, stato); return { ...c, semafori, bloccato: bloccoRango(semafori, c.rango + 1) }; });
 }
 
-let cacheStato: { partitaId: number; firma: string; stato: StatoPartitaSemafori } | null = null;
-/** Stato della partita per i semafori, calcolato una volta per chiamata (stessa firma dei ranghi). */
+/** Stato della partita per i semafori: ranghi dei Confidenti e Doti sociali, letti adesso. */
 function statoSemafori(partitaId: number, confidentiPartita: Array<{ chiave: string; rango: number }>): StatoPartitaSemafori {
-  const firma = `${partitaId}|${confidentiPartita.map((c) => `${c.chiave}:${c.rango}`).join(',')}|${(prepared('SELECT updated_at FROM partita WHERE id = ?').get(partitaId) as { updated_at: string } | undefined)?.updated_at ?? ''}`;
-  if (cacheStato && cacheStato.partitaId === partitaId && cacheStato.firma === firma) return cacheStato.stato;
   const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
   const ranghi = new Map(confidentiPartita.map((c) => [c.chiave, c.rango]));
-  const stato = statoPartitaSemafori(partitaId, ranghi, doti);
-  cacheStato = { partitaId, firma, stato };
-  return stato;
+  return statoPartitaSemafori(partitaId, ranghi, doti);
 }
 
 function regaliFattiDi(partitaId: number, chiave: string): string[] {

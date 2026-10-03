@@ -38,16 +38,19 @@ function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]):
     try {
       db.transaction(() => {
         m.up(db);
+        // Il controllo delle chiavi esterne sta DENTRO la transazione, prima di avanzare `user_version`: una violazione annulla la
+        // migrazione e la lascia da applicare. Fatto dopo il commit, falliva un avvio solo: a quello dopo la migrazione risultava
+        // già applicata e i dati incoerenti passavano.
+        const violations = db.pragma('foreign_key_check') as unknown[];
+        if (Array.isArray(violations) && violations.length > 0) {
+          throw new Error(
+            `Migrazione ${schema} ${m.id} (${m.name}): violazioni di integrità referenziale: ${JSON.stringify(violations.slice(0, 5))}`,
+          );
+        }
         db.pragma(`${schema}.user_version = ${m.id}`);
       })();
     } finally {
       db.pragma('foreign_keys = ON');
-    }
-    const violations = db.pragma('foreign_key_check') as unknown[];
-    if (Array.isArray(violations) && violations.length > 0) {
-      throw new Error(
-        `Migrazione ${schema} ${m.id} (${m.name}): violazioni di integrità referenziale: ${JSON.stringify(violations.slice(0, 5))}`,
-      );
     }
     logger.info({ schema, id: m.id, name: m.name }, 'migrazione applicata');
   }

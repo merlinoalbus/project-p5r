@@ -13,7 +13,7 @@ import { slug } from '../../../shared/slug.js';
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
-import { httpErrors } from '../../utils/httpError.js';
+import { HttpError, httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
 import { dettaglioNegozio } from '../negoziService.js';
@@ -129,7 +129,7 @@ function discendenzaDi(radici: string[]): Set<string> {
 export function elencaMappe(): MappaRiassuntoDto[] {
   const collezioni=collezioniImmagini();
   const memento = discendenzaDi(RADICI_MEMENTO);
-  return (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, nome').all() as RigaMappa[])
+  return (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[])
     .filter((r) => !memento.has(r.chiave))
     .map(r=>riassunto(r,collezioni));
 }
@@ -193,12 +193,15 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
 }
 
 function negozioDettaglio(chiave: string, partitaId?: number): NonNullable<DettaglioSpilloDto['negozio']> | null {
+  let n: ReturnType<typeof dettaglioNegozio>;
   try {
-    const n = dettaglioNegozio(chiave, partitaId);
-    return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, disponibilita: a.disponibilita })) };
-  } catch {
-    return null;
+    n = dettaglioNegozio(chiave, partitaId);
+  } catch (err) {
+    // un pin che cita un negozio tolto resta un pin senza negozio; ogni altro errore (SQL, partita inesistente) deve vedersi
+    if (err instanceof HttpError && err.code === 'negozio-non-trovato') return null;
+    throw err;
   }
+  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, disponibilita: a.disponibilita })) };
 }
 
 /** Le prove native dello spillo, se ne ha.
@@ -319,7 +322,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
   // (il valutatore dei semafori lo usa nel dettaglio e riconosce sia la chiave sia il nome), nel DTO resta la chiave per l'editor.
   const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
-  const esitoCondizioni = conNegozioVivo(ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined, dettaglio);
+  const esitoCondizioni = conNegozioVivo(ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st, nomi) : undefined, dettaglio);
   // Un pin che viene dall'atlante nativo e' un elemento fisso del mondo — una porta, un forziere,
   // una scala, una stanza sicura — e non si nasconde mai, qualunque condizione gli venga
   // attaccata. E' un invariante del runtime, non una convenzione dei dati: passa sopra a
@@ -392,7 +395,9 @@ export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   const r = rigaMappa(chiave);
   chiave = r.chiave;
   const collezioni=collezioniImmagini();
-  const figli = (prepared('SELECT * FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, nome').all(chiave) as RigaMappa[]).map(r=>riassunto(r,collezioni));
+  // gli stessi figli che `conteggi` conta (senza il nodo dei Memento, tolto dall'albero): Tokyo diceva 24 luoghi e ne elencava 25.
+  // A pari ordine decide la chiave, come nella scheda del Palazzo e nel riordino.
+  const figli = (prepared("SELECT * FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos' ORDER BY ordine, chiave").all(chiave) as RigaMappa[]).map(r=>riassunto(r,collezioni));
   const ctx = contestoSpilli(partitaId);
   const spilli = (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(chiave) as RigaSpillo[]).map((s) => spilloDto(s, ctx));
   const immagine = immagineDi(r);
@@ -773,8 +778,8 @@ export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaR
   getDb().transaction(() => {
     for (const [padre, scelte] of perGenitore) {
       const sorelle = (padre === null
-        ? prepared('SELECT chiave FROM mappa WHERE genitore_chiave IS NULL ORDER BY ordine, nome').all()
-        : prepared('SELECT chiave FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, nome').all(padre)) as Array<{ chiave: string }>;
+        ? prepared('SELECT chiave FROM mappa WHERE genitore_chiave IS NULL ORDER BY ordine, chiave').all()
+        : prepared('SELECT chiave FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, chiave').all(padre)) as Array<{ chiave: string }>;
       const finale = [...scelte, ...sorelle.map((f) => f.chiave).filter((c) => !scelte.includes(c))];
       finale.forEach((c, i) => prepared('UPDATE mappa SET ordine = ?, updated_at = ? WHERE chiave = ?').run(i, adesso, c));
       toccate.push(...finale);
@@ -894,9 +899,27 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
   return dettaglioMappa(chiave);
 }
 
+/** Toglie da `gioco.db` le schermate caricate dei pin scelti da `condizione` (sui campi di `spillo s`). Le righe di `spillo_immagine`
+ *  cadono in cascata col pin, ma il contenuto sta nella tabella `immagine`, che nessun vincolo segue: senza questa pulizia ogni pin
+ *  eliminato lasciava i suoi BLOB nel file. Va chiamata nella stessa transazione, prima di cancellare i pin. */
+export function eliminaImmaginiDeiPin(condizione: 's.id = ?' | 's.mappa_chiave = ?' | 's.area_guida_chiave = ?', valore: string | number): void {
+  prepared(`DELETE FROM immagine WHERE ambito = 'spillo' AND chiave IN (SELECT si.immagine_chiave FROM spillo_immagine si JOIN spillo s ON s.id = si.spillo_id
+    WHERE si.immagine_chiave IS NOT NULL AND ${condizione})`).run(valore);
+}
+
+/** L'immagine di base caricata per una mappa (ambito «mappa», stessa chiave), se è solo sua. La stessa chiave può essere anche la pianta
+ *  di un quartiere (`citta-<quartiere>`, `chiaveImmagineQuartiere`) o di un'area di un Palazzo (la chiave dell'area): quelle restano. */
+function eliminaImmagineDellaMappa(chiave: string): void {
+  if (prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiave)) return;
+  if (chiave.startsWith('citta-') && prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(chiave.slice('citta-'.length))) return;
+  prepared("DELETE FROM immagine WHERE ambito = 'mappa' AND chiave = ?").run(chiave);
+}
+
 export function eliminaMappa(chiave: string): void {
   chiave=rigaMappa(chiave).chiave;
   getDb().transaction(() => {
+    eliminaImmaginiDeiPin('s.mappa_chiave = ?', chiave);
+    eliminaImmagineDellaMappa(chiave);
     prepared('UPDATE mappa SET genitore_chiave = NULL WHERE genitore_chiave = ?').run(chiave);
     // gli spilli cadono in cascata con la mappa; i loro «raccolto» stanno in un altro file e si puliscono qui
     if (colonnaSpillo('uid')) prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
@@ -908,9 +931,12 @@ export function eliminaMappa(chiave: string): void {
 /** Immagine di base nell'istanza (ambito «mappa», chiave = chiave della mappa); dimensioni lette dall'intestazione PNG/JPEG/WEBP/GIF quando possibile. */
 export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer): MappaDto {
   chiave=rigaMappa(chiave).chiave;
-  salvaImmagine('mappa', chiave, mime, contenuto);
   const dim = dimensioniImmagine(contenuto);
-  prepared("UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, origine = 'utente', updated_at = ? WHERE chiave = ?").run(chiave, dim?.larghezza ?? null, dim?.altezza ?? null, nowIso(), chiave);
+  // immagine e dimensioni insieme: una mappa con l'immagine nuova e le dimensioni vecchie sbaglierebbe la posizione di ogni pin
+  getDb().transaction(() => {
+    salvaImmagine('mappa', chiave, mime, contenuto);
+    prepared("UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, origine = 'utente', updated_at = ? WHERE chiave = ?").run(chiave, dim?.larghezza ?? null, dim?.altezza ?? null, nowIso(), chiave);
+  })();
   return dettaglioMappa(chiave);
 }
 
@@ -1131,6 +1157,7 @@ export function eliminaSpillo(id: number): void {
   const r = prepared('SELECT id, uid FROM spillo WHERE id = ?').get(id) as { id: number; uid: string | null } | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
   getDb().transaction(() => {
+    eliminaImmaginiDeiPin('s.id = ?', id);
     prepared('DELETE FROM spillo WHERE id = ?').run(id);
     // «raccolto» sta in un altro file: il vincolo non lo pulisce, lo si fa qui
     if (r.uid) prepared('DELETE FROM spillo_partita WHERE spillo_uid = ?').run(r.uid);
@@ -1192,11 +1219,14 @@ function rigaSpillo(id: number): RigaSpillo {
 export function aggiungiImmagineSpillo(spilloId: number, mime: string, contenuto: Buffer, didascalia = ''): SpilloDto | SchedaContenutoGuidaDto {
   const r = rigaSpillo(spilloId);
   const chiave = `${spilloId}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-  salvaImmagine('spillo', chiave, mime, contenuto);
   const adesso = nowIso();
-  const ordine = (prepared('SELECT COALESCE(MAX(ordine), -1) + 1 AS n FROM spillo_immagine WHERE spillo_id = ?').get(spilloId) as { n: number }).n;
-  prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, ?, NULL, ?, ?)').run(spilloId, ordine, chiave, didascalia.slice(0, 300), adesso);
-  prepared("UPDATE spillo SET updated_at = ? WHERE id = ?").run(adesso, spilloId);
+  // il BLOB e la riga che lo lega al pin nascono insieme: se la seconda fallisse, il primo resterebbe orfano in gioco.db
+  getDb().transaction(() => {
+    salvaImmagine('spillo', chiave, mime, contenuto);
+    const ordine = (prepared('SELECT COALESCE(MAX(ordine), -1) + 1 AS n FROM spillo_immagine WHERE spillo_id = ?').get(spilloId) as { n: number }).n;
+    prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, ?, NULL, ?, ?)').run(spilloId, ordine, chiave, didascalia.slice(0, 300), adesso);
+    prepared("UPDATE spillo SET updated_at = ? WHERE id = ?").run(adesso, spilloId);
+  })();
   return elementoSpilloDto(rigaSpillo(r.id));
 }
 
@@ -1432,6 +1462,10 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       for (const [identita,n] of conteggioEredi) if (n===1&&occorrenze.get(identita)===1) identitaSpostate.add(identita);
     }
     const arrivi: Array<{id:number; valore:DestinazioneDaSalvare|null|undefined; invalidata:boolean}> = [];
+    /** Passaggi di pin che restano (di altre mappe o dell'utente) il cui spillo d'arrivo sta per essere tolto e reinserito: la DELETE
+     *  azzera `spillo_arrivo_id` (ON DELETE SET NULL), quindi si ricollegano al pin reinserito con lo stesso uid. */
+    const arriviDaRicollegare: Array<{ spilloId: number; mappa: string; uid: string }> = [];
+    const conUid = colonnaSpillo('uid');
     const areeDaLegare: Array<{ mappa: string; aree: string[]; fonte: string }> = [];
     // le voci della guida dei pin (094): da scrivere a genitori risolti; quelle dei pin tolti, per uid, per chi torna con lo stesso
     const conVoce = colonnaSpillo('voce_chiave');
@@ -1501,6 +1535,10 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
           const v = prepared('SELECT uid, voce_chiave FROM spillo WHERE id = ?').get(id) as { uid: string | null; voce_chiave: string | null };
           if (v.uid && v.voce_chiave) vociDiPrima.set(v.uid, v.voce_chiave);
         }
+        if (conUid) {
+          const uid = prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(id) as string | null;
+          if (uid) for (const d of prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE spillo_arrivo_id = ?').all(id) as Array<{ spillo_id: number; mappa_chiave: string }>) arriviDaRicollegare.push({ spilloId: d.spillo_id, mappa: d.mappa_chiave, uid });
+        }
         for (const i of prepared('SELECT immagine_chiave FROM spillo_immagine WHERE spillo_id = ?').all(id) as Array<{ immagine_chiave: string | null }>) if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
         prepared('DELETE FROM spillo WHERE id = ?').run(id);
       }
@@ -1560,8 +1598,12 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       }
       esito.mappe++;
     }
+    // Il genitore si scrive sempre per le mappe importate, anche quando è nullo o assente: una mappa che il pacchetto dichiara radice
+    // (o il cui genitore non esiste) è radice anche se prima ne aveva uno — «sovrascrivi» la sostituisce per intero, come una mappa nuova.
     for (const m of pacchetto.mappe) {
-      if (m.genitore && !esito.saltate.includes(m.chiave) && prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(m.genitore)) prepared('UPDATE mappa SET genitore_chiave = ? WHERE chiave = ?').run(m.genitore, m.chiave);
+      if (esito.saltate.includes(m.chiave)) continue;
+      const genitore = m.genitore && m.genitore !== m.chiave && prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(m.genitore) ? m.genitore : null;
+      prepared('UPDATE mappa SET genitore_chiave = ? WHERE chiave = ?').run(genitore, m.chiave);
     }
     // a genitori scritti: le stesse regole dell'app (aree esistenti e dello stesso Palazzo della planimetria)
     for (const { mappa, aree, fonte } of areeDaLegare) {
@@ -1576,6 +1618,12 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     }
     // già verificate prima degli inserimenti; lo spillo d'arrivo descritto per nome e posizione si risolve adesso, a mappe complete
     for (const arrivo of arrivi) salvaDestinazioneSpillo(arrivo.id, arrivo.valore, arrivo.invalidata);
+    // i passaggi rimasti ritrovano il loro spillo d'arrivo, reinserito con lo stesso uid sulla stessa mappa (un passaggio tolto
+    // insieme alla sua mappa è già sparito in cascata, e l'UPDATE non tocca niente)
+    for (const a of arriviDaRicollegare) {
+      const nuovo = prepared('SELECT id FROM spillo WHERE uid = ? AND mappa_chiave = ?').pluck().get(a.uid, a.mappa) as number | undefined;
+      if (nuovo !== undefined) prepared('UPDATE spillo_destinazione SET spillo_arrivo_id = ? WHERE spillo_id = ? AND mappa_chiave = ? AND spillo_arrivo_id IS NULL').run(nuovo, a.spilloId, a.mappa);
+    }
     // le voci della guida, con le regole del collegamento dalla guida (`erroreVoceDelPin`): una che non regge si scarta e si conta
     for (const v of vociDaScrivere) {
       if (voceAmmessa(v.nome, v.mappa, v.voce) !== v.voce) { esito.vociScartate++; continue; }

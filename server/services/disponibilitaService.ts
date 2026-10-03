@@ -20,12 +20,11 @@
 import { prepared } from '../db/dbService.js';
 import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
-import { TIPO_PUNTO_DESCRITTIVO } from '../../shared/spilli.js';
-import { VOCE_DEL_PIN } from './mappe/voceDelPin.js';
-import { pinCitato } from './condizioni/nomiCondizioni.js';
+import { VOCE_DEL_PIN, VOCI_GESTITE_SQL } from './mappe/voceDelPin.js';
+import { nomiCondizioniMemo, pinCitato } from './condizioni/nomiCondizioni.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
 /** Stagioni del calendario di gioco per mese (aprile → marzo). */
@@ -124,8 +123,7 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
  *  «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), che non dà stato alle voci descrittive («Altro»). */
 function spilliSegnati(partitaId: number): Set<string> {
   const righe = prepared(`SELECT spillo_uid AS uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1
-    UNION SELECT uid FROM spillo WHERE uid IS NOT NULL AND ${VOCE_DEL_PIN} IN (
-      SELECT pp.punto_chiave FROM punto_partita pp JOIN punto_interesse pi ON pi.chiave = pp.punto_chiave WHERE pp.partita_id = ? AND pi.tipo <> ?)`).all(partitaId, partitaId, TIPO_PUNTO_DESCRITTIVO) as Array<{ uid: string }>;
+    UNION SELECT uid FROM spillo WHERE uid IS NOT NULL AND ${VOCE_DEL_PIN} IN (${VOCI_GESTITE_SQL})`).all(partitaId, partitaId) as Array<{ uid: string }>;
   return new Set(righe.map((r) => r.uid));
 }
 
@@ -136,20 +134,24 @@ function nomeAttivita(chiave: string): string {
   return (prepared('SELECT nome FROM attivita WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome ?? chiave;
 }
 
-/** Valuta un requisito: quelli dei Confidenti col valutatore dei semafori, gli altri qui. */
-function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDisponibilita): SemaforoRequisitoDto {
+/** Valuta un requisito: quelli dei Confidenti col valutatore dei semafori, gli altri qui. `nomi` servono a scrivere il testo delle
+ *  condizioni dentro un gruppo o un NON (quelle di primo livello arrivano col testo già scritto dal chiamante): senza, il dettaglio
+ *  di un gruppo mostrava le chiavi grezze («sojiro», «tanaka-affari-loschi») invece dei nomi. */
+function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDisponibilita, nomi?: NomiCondizioni): SemaforoRequisitoDto {
   const base = { indice, testo: r.testo, confermato: false } as const;
   const esito = (tipo: SemaforoRequisitoDto['tipo'], stato: SemaforoRequisitoDto['stato'], dettaglio: string): SemaforoRequisitoDto => ({ ...base, tipo, stato, dettaglio, manuale: false });
   switch (r.tipo) {
     case 'gruppo': {
-      const esiti = r.condizioni.map((c, i) => valutaRequisito({ ...c, testo: descriviRequisitoSpillo(c) }, i, st));
+      const n = nomi ?? nomiCondizioniMemo();
+      const esiti = r.condizioni.map((c, i) => valutaRequisito({ ...c, testo: descriviRequisitoSpillo(c, n) }, i, st, n));
       const stato = r.modo === 'tutte'
         ? (esiti.some((e) => e.stato === 'rosso') ? 'rosso' : esiti.some((e) => e.stato === 'grigio') ? 'grigio' : 'verde')
         : (esiti.some((e) => e.stato === 'verde') ? 'verde' : esiti.some((e) => e.stato === 'grigio') ? 'grigio' : 'rosso');
       return esito('gruppo', stato, esiti.map((e) => e.testo + ': ' + e.dettaglio).join(' · '));
     }
     case 'non': {
-      const dentro = valutaRequisito({ ...r.condizione, testo: descriviRequisitoSpillo(r.condizione) }, indice, st);
+      const n = nomi ?? nomiCondizioniMemo();
+      const dentro = valutaRequisito({ ...r.condizione, testo: descriviRequisitoSpillo(r.condizione, n) }, indice, st, n);
       return { ...dentro, ...base, tipo: 'non', stato: dentro.stato === 'verde' ? 'rosso' : dentro.stato === 'rosso' ? 'verde' : 'grigio', dettaglio: 'Non: ' + dentro.dettaglio };
     }
     case 'articolo': {
@@ -274,8 +276,8 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
  * quartiere apre a giugno, in aprile quel negozio non c'è, e mostrarlo manda il giocatore a
  * cercare una cosa che non esiste ancora.
  */
-export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): DisponibilitaDto {
-  const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st));
+export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: StatoDisponibilita, nomi?: NomiCondizioni): DisponibilitaDto {
+  const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st, nomi));
   const stato = presenzaRossa(elenco, st) ? 'bloccato'
     : requisiti.some((q) => q.stato === 'rosso' || q.stato === 'grigio') ? 'ignoto' : 'disponibile';
   return { stato, requisiti };

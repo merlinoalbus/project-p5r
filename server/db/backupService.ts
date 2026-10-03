@@ -22,11 +22,26 @@ import { migrazioniUtente } from './migrazioniUtente/index.js';
 const KEEP_LAST = 7;
 const PREFIX = 'project-p5r-';
 
+/** Toglie i giornali (`-wal`/`-shm`) delle copie di avvio rimasti senza il loro database: le rotazioni di prima toglievano solo
+ *  il `.db`, e in `data/backups` ne restavano a decine. Esportata per i test. */
+export function pulisciGiornaliOrfani(backupsDir: string): void {
+  if (!fs.existsSync(backupsDir)) return;
+  for (const f of fs.readdirSync(backupsDir)) {
+    const base = f.match(/^(.*\.db)-(?:wal|shm)$/)?.[1];
+    if (base && f.startsWith(PREFIX) && !fs.existsSync(path.join(backupsDir, base))) fs.rmSync(path.join(backupsDir, f), { force: true });
+  }
+}
+
 /** Crea una copia consistente del database e conserva gli ultimi 7 snapshot. */
 export async function runBootBackup(): Promise<void> {
   const dbPath = resolveDbPath();
   if (!fs.existsSync(dbPath)) {
     return;
+  }
+  try {
+    pulisciGiornaliOrfani(path.join(config.dataDir, 'backups'));
+  } catch (err) {
+    logger.warn({ err }, 'pulizia dei giornali delle copie di avvio non riuscita — si prosegue');
   }
   // DB appena creato da initDb (nessuna migrazione applicata): nulla da salvare.
   if ((getDb().pragma('user_version', { simple: true }) as number) === 0) {
@@ -56,10 +71,13 @@ export async function runBootBackup(): Promise<void> {
       .filter((f) => f.startsWith(PREFIX) && f.endsWith('.db') && !f.endsWith('.partite.db'))
       .sort()
       .reverse();
+    // una copia vecchia se ne va con le partite accanto e con i giornali di entrambe (-wal/-shm): prima restavano a decine
     for (const stale of entries.slice(KEEP_LAST)) {
-      fs.unlinkSync(path.join(backupsDir, stale));
-      fs.rmSync(path.join(backupsDir, stale.replace(/\.db$/, '.partite.db')), { force: true });
+      for (const nome of [stale, stale.replace(/\.db$/, '.partite.db')]) {
+        for (const coda of ['', '-wal', '-shm']) fs.rmSync(path.join(backupsDir, `${nome}${coda}`), { force: true });
+      }
     }
+    pulisciGiornaliOrfani(backupsDir);
   } catch (err) {
     logger.warn({ err }, 'backup di avvio fallito — si prosegue');
   }

@@ -113,7 +113,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 ## 5. Persistenza
 - **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, indice immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le 32 tabelle delle partite, DDL in `server/db/schemaUtente.ts`). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
 - Connessione better-sqlite3, pragma `journal_mode=WAL` (su entrambi i file), `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
-- Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, `foreign_key_check` dopo ogni applicazione.
+- Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, con `foreign_key_check` **dentro** la transazione prima di avanzare `user_version` (una violazione annulla la migrazione, che resta da applicare; dal 2026-10-03, prima il controllo era dopo il commit).
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
 - Il seed JSON non esiste più: `seed_meta` resta come memoria dell'ultimo caricamento; i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto, lotto successivo).
 - Schema in due famiglie (migrazioni 001–004; `user_version` = 4):
@@ -1122,3 +1122,39 @@ sovrapposte, le rimosse e l'agenda del giorno delle sezioni «Guida giorno per g
   elimina» se spuntata con effetti nella partita). `ModuloVoceGiornata`: genere, testo, note, fascia e «Posto nella
   giornata» (l'elenco numerato della fascia con la voce al suo posto, Su/Giù); tipo, collegamento, rango ed effetti per le
   azioni. Icone `ui/azione-su` e `ui/azione-giu` (riserva SVG `IconSu`/`IconGiu`, censimento §21).
+
+## Regole trasversali dalla verifica completa del codice (2026-10-03)
+
+Rapporto dei rilievi in `docs/analisi/verifica-completa-2026-10-03.md`; qui le regole che ne sono uscite e che valgono per chi
+scrive codice nuovo.
+
+- **Cache dei dati di gioco: un registro unico** (`server/services/cacheDiGioco.ts`). Ogni modulo che tiene in memoria letture del
+  DB di gioco registra la propria invalidazione al caricamento (`registraCacheDiGioco(invalidaX)`): traduzioni, motore di
+  fusione, eredità, finestre dei Palazzi, nomi delle condizioni. Chi sostituisce o ricarica `gioco.db` (`caricaPacchetto`,
+  `ricaricaPacchetto`, `riapriIstanza`) chiama solo `invalidaCacheDiGioco()`. Una cache nuova si registra lì, non si aggiunge a
+  mano agli elenchi dei chiamanti (le finestre dei Palazzi ne erano rimaste fuori). I semafori dei Confidenti non hanno più una
+  cache fra le chiamate: lo stato si calcola una volta per `confidenti()`.
+- **Una sostituzione dei file alla volta** (`server/services/lucchettoIstanza.ts`, `occupaIstanza`): la prendono l'importazione
+  del pacchetto e il ripristino dell'istanza; la seconda richiesta riceve 409 `importazione-in-corso`. Il ripristino rifiuta
+  anche uno schema più nuovo del codice (400 `database-troppo-nuovo`), come già l'importazione (`pacchetto-troppo-nuovo`).
+- **Scrittura atomica dei database** (`scriviDatabase`): file nuovo nella stessa cartella, `fsync`, `rename` sopra il vivo. Un
+  crash a metà lascia il file di prima, non un file troncato. Se dopo un errore fallisce anche la riapertura, la risposta è un
+  500 che dice di riavviare e dove sta la copia di sicurezza.
+- **Livello di Joker: fonte unica `partita.livello_protagonista`**. La squadra lo legge da lì; la riga `joker` di
+  `membro_squadra_partita` lo ricopia (anche dal riepilogo della partita) ma non è mai letta per il livello.
+- **Voci della guida gestite: una regola sola** (`VOCI_GESTITE_SQL` / `vociGestite` in `services/mappe/voceDelPin.ts`): uno stato
+  su una voce descrittiva («Altro») non segna i pin, né sul visore e nelle condizioni né nella raccolta e nel completamento dei
+  Palazzi.
+- **Immagini che appartengono a qualcosa se ne vanno con lui**: eliminando un pin, una mappa o un'area, le schermate dei pin
+  (`immagine`, ambito `spillo`) si tolgono nella stessa transazione (`eliminaImmaginiDeiPin`). L'immagine di base di una mappa
+  si toglie solo se è soltanto sua: la stessa chiave può essere la pianta di un quartiere (`citta-<quartiere>`) o di un'area.
+  Immagine e righe che la legano nascono in una transazione.
+- **Riferimenti polimorfici**: un luogo o un negozio dell'utente eliminato stacca i pin e le mappe che lo citavano
+  (`staccaDalleMappe`), come già i punti della guida.
+- **Importazione delle mappe**: il genitore si scrive sempre (una mappa dichiarata radice torna radice) e i passaggi di altre
+  mappe che arrivavano su un pin reinserito ritrovano lo spillo d'arrivo per uid.
+- **Chiavi**: una mappa non può avere come chiave un segmento letterale delle rotte di `/api/mappe` (`CHIAVI_MAPPA_RISERVATE`,
+  coperto da un test sul router); la chiave di un punto della guida sta nei 200 caratteri delle sue rotte anche in un'area con
+  la chiave più lunga possibile.
+- **Copie di avvio**: la rotazione toglie anche i giornali `-wal`/`-shm`, quelli rimasti senza il loro database si tolgono a ogni
+  avvio (`pulisciGiornaliOrfani`), e in Impostazioni una copia (gioco + partite) si conta una volta.

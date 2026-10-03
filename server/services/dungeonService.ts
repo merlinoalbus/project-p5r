@@ -13,12 +13,14 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
+import { registraCacheDiGioco } from './cacheDiGioco.js';
+import { vociGestite } from './mappe/voceDelPin.js';
 import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
-import { impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
+import { eliminaImmaginiDeiPin, impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
 import { palazziCompletati } from './palazziService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma, VOCE_DEL_PIN, voceDelPin } from './mappe/collegamentiGuida.js';
 
@@ -94,7 +96,7 @@ export function raccoltaMappe(dungeonChiave: string, partitaId?: number): Raccol
   if (mappe.length === 0) return { perMappa, totale: 0, presi: partitaId === undefined ? null : 0, mappe: 0, mappeComplete: partitaId === undefined ? null : 0 };
   const raccolti = partitaId === undefined ? null : new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
   // un punto della guida già gestito (ottenuto/esaurito) conta come raccolto anche sulla mappa: è la regola del visore
-  const puntiGestiti = partitaId === undefined ? null : new Set((prepared('SELECT punto_chiave FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave));
+  const puntiGestiti = partitaId === undefined ? null : vociGestite(partitaId);
   const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome, ${VOCE_DEL_PIN} AS voce FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string; voce: string | null }>;
   for (const r of righe) {
     const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (!!r.voce && !!puntiGestiti?.has(r.voce));
@@ -169,6 +171,7 @@ function finestreDungeon(): Map<string, { dal: string; al: string | null }> {
 
 /** Da chiamare quando i dati di gioco vengono ricaricati: la trascrizione può essere cambiata. */
 export function invalidaFinestreDungeon(): void { finestreCache = null; }
+registraCacheDiGioco(invalidaFinestreDungeon);
 
 function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, completati: Map<string, string> | null): DungeonRiassuntoDto {
   const conPartita = partitaId !== undefined;
@@ -358,6 +361,7 @@ export function eliminaArea(chiaveArea: string): void {
     // gli spilli della guida (senza mappa) vincolano l'area con RESTRICT: vanno via prima di lei
     if (colonnaSpilloGuida()) {
       prepared('DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE area_guida_chiave = ? AND uid IS NOT NULL)').run(chiaveArea);
+      eliminaImmaginiDeiPin('s.area_guida_chiave = ?', chiaveArea);
       prepared('DELETE FROM spillo WHERE area_guida_chiave = ?').run(chiaveArea);
     }
     if (tabellaUtente('timbri_dedalo_partita')) prepared('DELETE FROM timbri_dedalo_partita WHERE area_chiave = ?').run(chiaveArea);
@@ -560,7 +564,13 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
 /** Un punto in più, dove la guida non l'aveva trascritto: nasce in fondo all'area. */
 export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; tipo: PuntoInteresseDto['tipo'] }): PuntoInteresseDto {
   if (!prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiaveArea)) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
-  const base = `${chiaveArea}-${slug(dati.nome)}`;
+  // Come per le aree: la chiave sta nei 200 caratteri che le route dei punti accettano (`paramsChiaveGuida`), suffisso «-N» compreso
+  // (fino a «-99999»), altrimenti il punto nascerebbe ma non si potrebbe più modificare, spostare né eliminare. Senza lettere né cifre
+  // («???») lo slug è vuoto: si usa «punto», invece di una chiave che finisce con un trattino. Il prefisso dell'area è una convenzione
+  // (l'area sta in `area_chiave`): se l'area ha già una chiave lunghissima, si accorcia anche lui, lasciando al nome almeno 8 caratteri.
+  const radice = (slug(dati.nome) || 'punto').slice(0, Math.max(8, MAX_CHIAVE_AREA - chiaveArea.length - 1 - 6)).replace(/-+$/, '') || 'punto';
+  const prefisso = chiaveArea.slice(0, MAX_CHIAVE_AREA - 6 - 1 - radice.length).replace(/-+$/, '');
+  const base = `${prefisso}-${radice}`;
   let chiave = base;
   for (let i = 2; prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
   // un passo nasce in fondo ai passi del suo Enigma, con le regole dei passi (095)

@@ -14,6 +14,7 @@ import { httpErrors } from '../utils/httpError.js';
 import type { TraduzioneDto } from '../../shared/types.js';
 import Database from 'better-sqlite3';
 import { percorsoPacchettoDb } from './pacchetto/pacchettoGioco.js';
+import { registraCacheDiGioco } from './cacheDiGioco.js';
 
 interface RigaTraduzione {
   ambito: string;
@@ -44,6 +45,7 @@ function caricaCache(): Map<string, Map<string, RigaTraduzione>> {
 export function invalidaCacheTraduzioni(): void {
   cache = null;
 }
+registraCacheDiGioco(invalidaCacheTraduzioni);
 
 /** Resa italiana di una chiave; se assente restituisce la chiave stessa. */
 export function t(ambito: string, chiave: string): string {

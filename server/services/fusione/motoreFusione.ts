@@ -15,6 +15,7 @@
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
+import { registraCacheDiGioco } from '../cacheDiGioco.js';
 
 export interface PersonaFusione {
   id: number;
@@ -54,11 +55,12 @@ interface Snapshot {
 let snapshot: Snapshot | null = null;
 const contesti = new Map<string, Contesto>();
 
-/** Da chiamare dopo un reseed. */
+/** Da chiamare quando il DB di gioco cambia (registrata in `cacheDiGioco`). */
 export function invalidaMotoreFusione(): void {
   snapshot = null;
   contesti.clear();
 }
+registraCacheDiGioco(invalidaMotoreFusione);
 
 function caricaSnapshot(): Snapshot {
   if (snapshot) return snapshot;

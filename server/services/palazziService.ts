@@ -21,7 +21,7 @@
 
 import { getDb, prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
-import { voceDelPin } from './mappe/voceDelPin.js';
+import { voceDelPin, vociGestite } from './mappe/voceDelPin.js';
 import { allineaEnigmaDellaVoce } from './mappe/statiGuida.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
@@ -113,7 +113,7 @@ function completamentoDallaMappa(spilli: SpilloCollezionabile[], finale: BossFin
 export function palazziCompletati(partitaId: number): Map<string, string> {
   const out = new Map<string, string>();
   const finali = bossFinali();
-  const puntiGestiti = new Set((prepared('SELECT punto_chiave FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave));
+  const puntiGestiti = vociGestite(partitaId);
   for (const [dungeon, f] of finali) if (f.punti.some((p) => puntiGestiti.has(p))) out.set(dungeon, 'boss finale segnato nella Guida');
   const palazzi = palazzoDiOgniMappa();
   const raccolti = new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
@@ -152,7 +152,7 @@ export function allineaBossDellaGuida(partitaId: number, spillo: { tipo: string;
   }
   const raccolti = new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
   // i punti della Guida gestiti, **senza** il boss finale: è proprio lui che si sta decidendo se togliere
-  const puntiGestiti = new Set((prepared('SELECT punto_chiave FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave).filter((p) => !finale.punti.includes(p)));
+  const puntiGestiti = new Set([...vociGestite(partitaId)].filter((p) => !finale.punti.includes(p)));
   const spilli = collezionabiliPerPalazzo(palazzi).get(dungeon) ?? [];
   if (completamentoDallaMappa(spilli, finale, aree, raccolti, puntiGestiti)) return;
   // solo il segno messo dal raccolto: un boss segnato a mano non si perde per un raccolto tolto

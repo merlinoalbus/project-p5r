@@ -144,14 +144,18 @@ export function aggiornaPianoSalvato(partitaId: number, id: number, dati: Modifi
   if (!r) throw httpErrors.notFound('piano-non-trovato', `Il piano ${id} non esiste in questa partita.`);
   if (dati.obiettivoId !== undefined) verificaObiettivo(partitaId, dati.obiettivoId, r.persona_id);
   const adesso = nowIso();
-  prepared('UPDATE piano_salvato SET nome = ?, note = ?, obiettivo_id = ?, updated_at = ? WHERE id = ?').run(dati.nome ?? r.nome, dati.note ?? r.note, dati.obiettivoId === undefined ? r.obiettivo_id : dati.obiettivoId, adesso, id);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  getDb().transaction(() => {
+    prepared('UPDATE piano_salvato SET nome = ?, note = ?, obiettivo_id = ?, updated_at = ? WHERE id = ?').run(dati.nome ?? r.nome, dati.note ?? r.note, dati.obiettivoId === undefined ? r.obiettivo_id : dati.obiettivoId, adesso, id);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  })();
   return pianoDto(prepared(`${SQL_PIANO} WHERE s.id = ?`).get(id) as RigaPiano, scortaDi(partitaId));
 }
 
 export function eliminaPianoSalvato(partitaId: number, id: number): void {
   verificaPartita(partitaId);
-  const info = prepared('DELETE FROM piano_salvato WHERE id = ? AND partita_id = ?').run(id, partitaId);
-  if (info.changes === 0) throw httpErrors.notFound('piano-non-trovato', `Il piano ${id} non esiste in questa partita.`);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  getDb().transaction(() => {
+    const info = prepared('DELETE FROM piano_salvato WHERE id = ? AND partita_id = ?').run(id, partitaId);
+    if (info.changes === 0) throw httpErrors.notFound('piano-non-trovato', `Il piano ${id} non esiste in questa partita.`);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  })();
 }

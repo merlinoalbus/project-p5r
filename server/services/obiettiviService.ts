@@ -140,9 +140,11 @@ export function aggiornaObiettivo(partitaId: number, id: number, dati: DatiObiet
 
 export function eliminaObiettivo(partitaId: number, id: number): void {
   verificaPartita(partitaId);
-  const info = prepared('DELETE FROM obiettivo_partita WHERE id = ? AND partita_id = ?').run(id, partitaId);
-  if (info.changes === 0) throw httpErrors.notFound('obiettivo-non-trovato', `L'obiettivo ${id} non esiste in questa partita.`);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  getDb().transaction(() => {
+    const info = prepared('DELETE FROM obiettivo_partita WHERE id = ? AND partita_id = ?').run(id, partitaId);
+    if (info.changes === 0) throw httpErrors.notFound('obiettivo-non-trovato', `L'obiettivo ${id} non esiste in questa partita.`);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  })();
 }
 
 /**

@@ -15,6 +15,7 @@
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
+import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import type { PersonaFusione } from './motoreFusione.js';
 
 export interface SkillEredita {
@@ -42,6 +43,7 @@ let snapshot: SnapshotEredita | null = null;
 export function invalidaEredita(): void {
   snapshot = null;
 }
+registraCacheDiGioco(invalidaEredita);
 
 function carica(): SnapshotEredita {
   if (snapshot) return snapshot;

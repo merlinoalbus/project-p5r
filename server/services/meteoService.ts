@@ -10,7 +10,7 @@
 // quando l'utente non ha segnato altro.
 // ============================================================
 
-import { nowIso, prepared } from '../db/dbService.js';
+import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { ALLERTA_PIOGGIA, fasceDellaGuida, type MeteoPartita } from '../../shared/meteoPartita.js';
 import type { FasciaGioco, MeteoFasciaDto, MeteoGiornoDto } from '../../shared/types.js';
@@ -66,9 +66,12 @@ export function impostaMeteo(partitaId: number, data: string, mod: { giorno?: Me
   const giorno = mod.giorno === undefined ? prima.giorno : mod.giorno;
   const sera = mod.sera === undefined ? prima.sera : mod.sera;
   const adesso = nowIso();
-  if (giorno === null && sera === null) prepared('DELETE FROM meteo_partita WHERE partita_id = ? AND data = ?').run(partitaId, data);
-  else prepared(`INSERT INTO meteo_partita (partita_id, data, giorno, sera, updated_at) VALUES (?, ?, ?, ?, ?)
-    ON CONFLICT(partita_id, data) DO UPDATE SET giorno = excluded.giorno, sera = excluded.sera, updated_at = excluded.updated_at`).run(partitaId, data, giorno, sera, adesso);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  // il meteo e la data di modifica della partita cambiano insieme
+  getDb().transaction(() => {
+    if (giorno === null && sera === null) prepared('DELETE FROM meteo_partita WHERE partita_id = ? AND data = ?').run(partitaId, data);
+    else prepared(`INSERT INTO meteo_partita (partita_id, data, giorno, sera, updated_at) VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(partita_id, data) DO UPDATE SET giorno = excluded.giorno, sera = excluded.sera, updated_at = excluded.updated_at`).run(partitaId, data, giorno, sera, adesso);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  })();
   return meteoDelGiorno(partitaId, data);
 }

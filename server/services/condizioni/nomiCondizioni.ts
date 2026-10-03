@@ -8,6 +8,7 @@
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
+import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { giocabili } from '../squadraService.js';
 import type { NomiCondizioni } from '../../../shared/condizioniSpillo.js';
 import { statoCitabile } from '../../../shared/spilli.js';
@@ -16,6 +17,7 @@ import { VOCE_DEL_PIN } from '../mappe/voceDelPin.js';
 /** Gli elenchi dei negozi valutano centinaia di righe per risposta: i nomi si leggono una volta e restano buoni un secondo.
  *  Senza i pin: le condizioni del catalogo e della città non citano lo stato di un pin (2026-10-03). */
 let memo: { nomi: NomiCondizioni; a: number } | null = null;
+registraCacheDiGioco(() => { memo = null; });
 export function nomiCondizioniMemo(): NomiCondizioni {
   const ora = Date.now();
   if (!memo || ora - memo.a > 1000) memo = { nomi: nomiCondizioni({ conPin: false }), a: ora };
