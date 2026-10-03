@@ -99,6 +99,10 @@ export function parolaDelloStato(s: { tipo: string; collezionabile: boolean }): 
 export function ritornoDelloStato(s: { tipo: string; collezionabile: boolean }): { pulsante: string; parola: string } {
   return RITORNO_PER_TIPO[s.tipo as TipoSpillo] ?? { pulsante: 'Annulla', parola: `non più ${parolaDelloStato(s)}` };
 }
+/** L'uid di un pin: 32 cifre esadecimali (l'identità stabile, `identitaSpillo` sul server). */
+export function uidValido(uid: unknown): uid is string {
+  return typeof uid === 'string' && /^[0-9a-f]{32}$/.test(uid);
+}
 /** I tipi di ogni categoria, nell'ordine di `TIPI_SPILLO`. */
 export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
   return TIPI_SPILLO.filter((t) => CATEGORIA_PER_TIPO[t] === categoria);
@@ -271,8 +275,9 @@ export function puntoDaCollegare(tipoPunto: string): boolean {
  * Un punto della guida senza pin né stato: si legge, non si segna. Solo «Altro» (scelta dell'utente, 2026-10-01: «altro
  * niente pin»); Persona e Storia si collegano a qualunque pin e hanno lo stato.
  */
+export const TIPO_PUNTO_DESCRITTIVO = 'altro';
 export function puntoDescrittivo(tipoPunto: string): boolean {
-  return tipoPunto === 'altro';
+  return tipoPunto === TIPO_PUNTO_DESCRITTIVO;
 }
 /** Un Enigma (2026-10-01): una voce che può contenere i passi che lo risolvono — voci di qualunque tipo, coi loro pin. */
 export function puntoEnigma(tipoPunto: string): boolean {

@@ -13,6 +13,7 @@ const CAMPIONE: RequisitoSpillo[] = [
   { tipo: 'evento', evento: 'mansarda-pulita' }, { tipo: 'contatore', cosa: 'film-completati', almeno: 2 }, { tipo: 'lettura', categoria: 'libro', chiave: 'x' }, { tipo: 'lettura', categoria: 'film', chiave: 'y' },
   { tipo: 'attivita', attivita: 'biliardo', volte: 3 }, { tipo: 'articolo', articolo: 'a/b' }, { tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'nero' }, { tipo: 'punti-negozio', negozio: 'v', punti: 50 },
   { tipo: 'persona-arcano', arcano: 'Fool' }, { tipo: 'persona-abilita', persona: 'Pixie', abilita: 'Dia' },
+  { tipo: 'spillo', spillo: 'a'.repeat(32), segnato: true }, { tipo: 'spillo', spillo: 'b'.repeat(32), segnato: false },
 ];
 
 describe('costruisciCondizione / scomponiCondizione', () => {

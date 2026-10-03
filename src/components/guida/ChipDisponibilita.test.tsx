@@ -53,4 +53,12 @@ describe('ChipDisponibilita', () => {
     const { container } = render(<MemoryRouter><ChipDisponibilita disponibilita={{ stato: 'disponibile', requisiti: [] } as DisponibilitaDto} /></MemoryRouter>);
     expect(container.firstChild).toBeNull();
   });
+
+  it('lo stato di un pin che non c’è più (2026-10-03) è una condizione da correggere nell’editor, non un dato da segnare nella partita', () => {
+    const d = { stato: 'ignoto', requisiti: [req('spillo', 'Il pin di questa condizione non c’è più: correggila nell’editor della mappa')] } as DisponibilitaDto;
+    render(<MemoryRouter><ChipDisponibilita disponibilita={d} /></MemoryRouter>);
+    expect(screen.getByLabelText(/^Condizione da correggere nell’editor della mappa: /)).toHaveTextContent('Da correggere');
+    expect(screen.queryByText('Da segnare')).toBeNull();
+    expect(screen.queryByRole('link')).toBeNull();
+  });
 });

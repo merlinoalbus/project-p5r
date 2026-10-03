@@ -19,6 +19,10 @@ export interface ElenchiRegole {
 }
 export const getElenchiRegole = (): Promise<ElenchiRegole> => apiGet('/condizioni/elenchi');
 
+/** I pin con uno stato (raccolto, azionato, aperta…) per la condizione «Pin di una mappa»: `chiave` è l'uid, `gruppo` la mappa. */
+export interface PinConStato { chiave: string; nome: string; tipo: string; gruppo: string }
+export const getPinConStato = (): Promise<PinConStato[]> => apiGet('/condizioni/spilli');
+
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
 export type ProgressiPartita = ProgressiPartitaDto;
 export const getProgressiPartita = (id: number): Promise<ProgressiPartita> => apiGet(`/condizioni/partite/${id}/progressi`);

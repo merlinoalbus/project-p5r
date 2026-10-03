@@ -19,6 +19,7 @@ import { z } from 'zod';
 import { prepared, nowIso } from '../db/dbService.js';
 import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
+import { pinConStato } from '../services/condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { impostaEventoStoria, ranghiPerEvento } from '../services/semaforiService.js';
 import { leggiProgrammaPunti } from '../services/negoziService.js';
@@ -61,6 +62,12 @@ router.get('/elenchi', (_req, res) => {
     eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null })),
     contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome })),
   });
+});
+
+/** I pin con uno stato, per la condizione «Pin di una mappa» (2026-10-03): solo l'editor delle mappe li chiede, a parte, perché
+ *  sono centinaia e agli altri editor non servono. */
+router.get('/spilli', (_req, res) => {
+  res.json({ data: pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa })) });
 });
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano, completi anche dove non c'è ancora una riga. */

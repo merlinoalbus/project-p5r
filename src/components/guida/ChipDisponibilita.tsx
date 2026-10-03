@@ -58,11 +58,20 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   const grigiProprie = proprie.filter((r) => r.stato === 'grigio');
   if (grigiProprie.length === 0 && proprie.every((r) => r.stato !== 'rosso')) return null;
   const nonLeggibili = grigiProprie.some((r) => r.tipo === 'manuale');
-  return nonLeggibili ? (
+  // il grigio di uno stato di un altro pin (2026-10-03) è una condizione rotta — il pin citato non c'è più o non ha più uno
+  // stato —: nella partita non c'è niente da segnare, la si corregge nell'editor della mappa
+  const daCorreggere = grigiProprie.some((r) => r.tipo === 'spillo');
+  if (nonLeggibili) return (
     <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Da verificare: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da verificare
     </span>
-  ) : (
+  );
+  if (daCorreggere) return (
+    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Condizione da correggere nell’editor della mappa: ${motivi}`}>
+      <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da correggere
+    </span>
+  );
+  return (
     // **Un avviso che dice «segna» e non porta dove si segna e' mezzo avviso.** Il dettaglio
     // nominava la pagina — «Partita → Denaro e squadra» — ma restava testo in un `title`: bisognava
     // leggerlo, ricordarselo e cercarsela a mano. Qui il cartellino e' il collegamento.

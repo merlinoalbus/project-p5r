@@ -167,6 +167,12 @@ export function GalleriaSpillo({ immagini, nome, compatta }: { immagini: Immagin
   );
 }
 
+/** Uno spillo che le sue condizioni tolgono dalla mappa: non disponibile, salvo gli elementi fissi del gioco che restano in vista
+ *  marcati (`restaInVista`, 2026-10-03). */
+function nascostoPerCondizioni(s: SpilloDto): boolean {
+  return s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile' && !s.disponibilita.restaInVista;
+}
+
 /** Etichetta leggibile della disponibilità di un articolo: il dato porta già la preposizione («dal 18 aprile», «dopo Palazzo di Madarame», «solo in primavera»), come in ArticoliTabella. */
 function disponibilita(a: { disponibileDal: string | null }): string {
   return a.disponibileDal?.trim() || 'sempre';
@@ -280,7 +286,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     const s = mappa.spilli.find((x) => x.id === selezioneIniziale);
     // Uno spillo bloccato non si apre nemmeno da un indirizzo: era il modo per rivelarlo
     // aggirando il filtro, e un deep link non deve poter fare quello che l'interfaccia non fa.
-    if (!s || (partitaId && !editor && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile')) return;
+    if (!s || (partitaId && !editor && nascostoPerCondizioni(s))) return;
     const id = setTimeout(() => {
       // uno spillo nascosto perché già raccolto va reso visibile: altrimenti la mappa si centra sul vuoto
       if (s.collezionabile && s.raccolto) setMostraRaccolti(true);
@@ -384,7 +390,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const tipiPresenti = useMemo(() => TIPI_SPILLO.filter((t) => mappa.spilli.some((s) => s.tipo === t)), [mappa.spilli]);
   const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto).length, [mappa.spilli]);
   const filtraBloccati = Boolean(partitaId) && (!editor || vistaGiornoCorrente === true);
-  const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter((s) => s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile').length : 0), [mappa.spilli, filtraBloccati]);
+  const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter(nascostoPerCondizioni).length : 0), [mappa.spilli, filtraBloccati]);
   const ricercaNorm = (scelta ? scelta.ricerca ?? '' : ricerca).trim().toLowerCase();
   /** Uno spillo che non soddisfa le sue condizioni non c'è **di regola**, e ricompare solo se lo si chiede.
    *
@@ -405,8 +411,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    * l'idea che l'assenza di prova non fosse una prova di blocco; ma in una guida che dice «questo
    * c'è adesso» un forse vale come un no, e il pin di qualcosa che forse non c'è manda a cercarlo
    * lo stesso. Il cartellino «Da segnare» resta, sotto «mostra anche i non disponibili», e porta
-   * al punto dove si segna lo stato che manca. */
-  const bloccato = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
+   * al punto dove si segna lo stato che manca.
+   *
+   * **Gli elementi fissi del gioco restano in vista** (`restaInVista`, scelta dell'utente, 2026-10-03): una porta o un forziere
+   * nativi con una condizione che non vale ci sono lo stesso, e si vedono marcati «non ancora»; si nascondono solo per lo
+   * stato di altri pin. `nonDisponibile` marca, `bloccato` nasconde. */
+  const nonDisponibile = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
+  const bloccato = (s: SpilloDto) => filtraBloccati && nascostoPerCondizioni(s);
   const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (scelta !== undefined || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
@@ -650,12 +661,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <button
                   key={s.id}
                   type="button"
-                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${bloccato(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
+                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${nonDisponibile(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il pin si fa da parte come il gruppo: il tocco
                   // serve a posare uno spillo in quel punto, e prima su un pin esistente non
                   // succedeva nulla, senza nemmeno un segnale (rilievo del validatore, 2026-09-13).
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
-                  aria-label={scelta ? `${s.tipoNome}: ${s.nome}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${s.nome}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${bloccato(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
+                  aria-label={scelta ? `${s.tipoNome}: ${s.nome}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${s.nome}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={scelta ? scelta.scelti.has(s.id) : attivo}
                   disabled={scelta?.occupato}
                   title={s.nome}

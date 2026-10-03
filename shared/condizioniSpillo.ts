@@ -19,6 +19,8 @@
 // Condiviso fra server (validazione, valutazione, pacchetti, seed) e frontend (editor, visore).
 // ============================================================
 
+import { statoDelTipo, uidValido } from './spilli.js';
+
 export const PALAZZI_CONDIZIONE = [
   { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }, { chiave: 'madarame', nome: 'Palazzo di Madarame' }, { chiave: 'kaneshiro', nome: 'Palazzo di Kaneshiro' },
   { chiave: 'futaba', nome: 'Palazzo di Futaba' }, { chiave: 'okumura', nome: 'Palazzo di Okumura' }, { chiave: 'niijima', nome: 'Palazzo di Niijima' },
@@ -110,7 +112,11 @@ export type RequisitoSpillo =
   | { tipo: 'contatore'; cosa: ContatoreChiave; almeno: number }
   // — scorta —
   | { tipo: 'persona-arcano'; arcano: string }
-  | { tipo: 'persona-abilita'; persona: string; abilita: string };
+  | { tipo: 'persona-abilita'; persona: string; abilita: string }
+  // — mappe —
+  /** Lo stato di un altro pin nella partita (raccolto, azionato, aperta…: `statoDelTipo`), per uid: «la porta si vede finché la
+   *  leva non è azionata» (richiesta dell'utente, 2026-09-30 e 2026-10-03). Solo nelle condizioni dei pin. */
+  | { tipo: 'spillo'; spillo: string; segnato: boolean };
 
 export type TipoCondizioneSpillo = RequisitoSpillo['tipo'];
 export const PROFONDITA_MASSIMA = 5;
@@ -129,9 +135,13 @@ export const CONDIZIONI_PER_GRUPPO = 20;
  * non puoi ancora usarla. Nascondere un prerequisito vorrebbe dire che la guida ti mostra dov'è
  * una porta solo dopo che l'hai aperta, cioè quando non ti serve più. Quelle condizioni si
  * scrivono e si spiegano, non tolgono il pin.
+ *
+ * Lo **stato di un altro pin** è di presenza per scelta dell'utente (2026-09-30): «la Porta Bloccata si visualizza solo se
+ * lo spillo Meccanismo risulta non Raccolto», «un Meccanismo risulta visibile solo se sono stati raccolti gli oggetti
+ * chiave». Chi la scrive vuole proprio che il pin compaia e sparisca con l'altro.
  */
 export const CONDIZIONI_DI_PRESENZA = [
-  'data', 'intervallo', 'fascia', 'piove', 'meteo', 'giorno-settimana', 'stagione', 'quartiere', 'arco',
+  'data', 'intervallo', 'fascia', 'piove', 'meteo', 'giorno-settimana', 'stagione', 'quartiere', 'arco', 'spillo',
 ] as const;
 
 /** Vero se questa condizione, non soddisfatta, deve far sparire il pin invece che spiegarsi. */
@@ -151,11 +161,16 @@ export function nascondeIlPin(tipo: string): boolean {
  * - in un `tutte` restano i rami che dicono qualcosa — se tutti tacciono, tace anche il gruppo;
  * - in un `almeno-una` basta **un** ramo che tace perché il gruppo taccia: la cosa potrebbe
  *   esserci per quella strada, e non si può concludere che manchi;
- * - `non` segue ciò che nega.
+ * - `non` segue ciò che nega **solo se ciò che nega è tutto di presenza**: `non(tutte(dote 3, leva azionata))` è vera anche
+ *   con la leva azionata, se la dote manca, e negarne la sola parte di presenza farebbe sparire il pin a torto (difetto
+ *   corretto su richiesta dell'utente, 2026-10-03). Un `non` su un gruppo misto tace.
+ *
+ * `tieni` sceglie quali foglie contano: di norma le condizioni di presenza; con `(t) => t === 'spillo'` resta la sola parte
+ * che dipende dagli altri pin (serve a non trattarla come le date sugli elementi fissi del mondo, `mappeService`).
  */
-export function proiezioneDiPresenza<T extends { tipo: string; condizioni?: T[]; condizione?: T; modo?: string }>(c: T): T | null {
+export function proiezioneDiPresenza<T extends { tipo: string; condizioni?: T[]; condizione?: T; modo?: string }>(c: T, tieni: (tipo: string) => boolean = nascondeIlPin): T | null {
   if (c.tipo === 'gruppo') {
-    const figlie = (c.condizioni ?? []).map((f) => proiezioneDiPresenza(f));
+    const figlie = (c.condizioni ?? []).map((f) => proiezioneDiPresenza(f, tieni));
     if (c.modo === 'almeno-una') {
       return figlie.some((f) => f === null) ? null
         : { ...c, condizioni: figlie as T[] };
@@ -164,10 +179,10 @@ export function proiezioneDiPresenza<T extends { tipo: string; condizioni?: T[];
     return tenute.length ? { ...c, condizioni: tenute } : null;
   }
   if (c.tipo === 'non') {
-    const dentro = c.condizione ? proiezioneDiPresenza(c.condizione) : null;
-    return dentro ? { ...c, condizione: dentro } : null;
+    const dentro = c.condizione ? proiezioneDiPresenza(c.condizione, tieni) : null;
+    return dentro && JSON.stringify(dentro) === JSON.stringify(c.condizione) ? c : null;
   }
-  return nascondeIlPin(c.tipo) ? c : null;
+  return tieni(c.tipo) ? c : null;
 }
 
 const NOMI_MESI: Record<string, string> = Object.fromEntries(MESI_GIOCO.map((m) => [m.numero, m.nome]));
@@ -224,6 +239,8 @@ export interface NomiCondizioni {
   negozi?: Record<string, string>;
   /** I Ladri Fantasma (per «in squadra»); quando manca si prova con i Confidenti. */
   squadra?: Record<string, string>;
+  /** I pin con uno stato, per uid: nome, tipo (dà la parola dello stato) e mappa. */
+  spilli?: Record<string, { nome: string; tipo: string; mappa: string }>;
 }
 
 function congiunzione(voci: string[]): string {
@@ -263,6 +280,12 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'contatore': return `${CONTATORI.find((c) => c.chiave === r.cosa)?.nome ?? r.cosa}: almeno ${r.almeno}`;
     case 'persona-arcano': return 'Persona in scorta dell’Arcano ' + r.arcano;
     case 'persona-abilita': return r.persona + ' in scorta con ' + r.abilita;
+    case 'spillo': {
+      // «Leva del ponte (Vecchio castello 1P): non azionato»; un pin che non c'è più lo dice, invece di mostrare un uid
+      const p = nomi.spilli?.[r.spillo];
+      const parola = (p && statoDelTipo(p.tipo)) ?? 'segnato';
+      return `${p ? `${p.nome} (${p.mappa})` : 'Pin non più presente'}: ${r.segnato ? parola : `non ${parola}`}`;
+    }
   }
 }
 
@@ -321,6 +344,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'contatore': { const cosa = testoPulito(o.cosa, 40); const almeno = intero(o.almeno, 1, 9999); return cosa && CONTATORI.some((c) => c.chiave === cosa) && almeno ? { tipo: 'contatore', cosa: cosa as ContatoreChiave, almeno } : null; }
     case 'persona-arcano': { const arcano = testoPulito(o.arcano, 80); return arcano ? { tipo: 'persona-arcano', arcano } : null; }
     case 'persona-abilita': { const persona = testoPulito(o.persona, 120), abilita = testoPulito(o.abilita, 120); return persona && abilita ? { tipo: 'persona-abilita', persona, abilita } : null; }
+    case 'spillo': return uidValido(o.spillo) && typeof o.segnato === 'boolean' ? { tipo: 'spillo', spillo: o.spillo, segnato: o.segnato } : null;
     default: return null;
   }
 }

@@ -26,8 +26,9 @@ export function uidSpillo(identita: string, ordinale = 0): string {
   return createHash('sha256').update(ordinale > 0 ? `${identita}#${ordinale + 1}` : identita).digest('hex').slice(0, 32);
 }
 
-/** Vero se l'uid ha la forma prodotta qui (o importata da un pacchetto). */
-export function uidValido(uid: unknown): uid is string { return typeof uid === 'string' && /^[0-9a-f]{32}$/.test(uid); }
+/** Vero se l'uid ha la forma prodotta qui (o importata da un pacchetto): la regola sta in `shared/spilli.ts`, la usano anche
+ *  le condizioni sugli altri pin. */
+export { uidValido } from '../../../shared/spilli.js';
 
 /**
  * Assegna l'uid a ogni spillo che non ce l'ha, in ordine di id, evitando gli uid già presenti nel

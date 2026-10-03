@@ -989,3 +989,20 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   quando i pin sono collegati», «vale anche per gli enigmi»): un meccanismo o una porta collegati ai passi di un Enigma
   segnano i passi e, con l'ultimo, l'Enigma; togliere il segno li riapre; segnare o riaprire l'Enigma dalla guida segna
   o riapre i pin dei passi (test `enigmi-guida`).
+- Condizione «Pin di una mappa» (voce 2): `{ tipo: 'spillo', spillo: uid, segnato }`, con «non segnato» come operatore (oltre a
+  NON) perché l'esempio dell'utente è proprio «la porta si vede se il meccanismo **non** è raccolto». È **di presenza** e, unica
+  fra tutte, nasconde anche gli elementi fissi del gioco: chi la scrive vuole che il pin compaia e sparisca con l'altro.
+  Riferimento per uid (sopravvive a reseed e pacchetti); un pin eliminato, o diventato di un tipo senza stato, lascia la
+  condizione grigia («Pin non più presente», «… non ha più uno stato»), con il cartellino «Da correggere» — non la si toglie
+  da sola, perché togliere una foglia da un TUTTE o da un NON cambierebbe il senso della condizione senza che l'utente lo
+  sappia. Solo nelle condizioni dei pin **delle mappe**: il catalogo la rifiuta anche negli effetti (schema), e le schede
+  della guida senza mappa pure (400 `condizione-solo-pin`); gli editor fuori dalle mappe non la offrono.
+- Scelte dell'utente (2026-10-03, poste su richiesta del validatore):
+  - **giri di condizioni fra pin rifiutati** al salvataggio (API, editor, pacchetto importato), con i nomi dei pin del giro
+    (`condizioni-in-giro`); un pin che cita se stesso è rifiutato comunque (`condizione-su-se-stesso`) e l'editor non lo offre;
+  - **ripristinata la regola degli elementi fissi**: dal 2026-09-13 il visore nasconde anche lo stato «ignoto», e la
+    vecchia conversione bloccato → ignoto dei pin fissi nativi non li teneva più in vista. Ora il server lascia lo stato vero
+    e aggiunge `restaInVista`: la porta, il forziere, la scala nativi con una condizione che non vale si vedono marcati
+    «non ancora»; si nascondono solo per lo stato di altri pin e, come prima, l'ingresso a un Palazzo completato;
+  - **corretto il NON su un gruppo misto**: `NON(TUTTE(Coraggio 5, Leva azionata))` faceva sparire il pin appena la leva era
+    azionata anche col Coraggio basso; ora un NON su un gruppo che mescola presenza e prerequisiti non nasconde da solo.

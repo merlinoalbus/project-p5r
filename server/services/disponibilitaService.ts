@@ -23,6 +23,8 @@ import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type S
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
+import { statoDelTipo, TIPO_PUNTO_DESCRITTIVO } from '../../shared/spilli.js';
+import { VOCE_DEL_PIN } from './mappe/voceDelPin.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
 /** Stagioni del calendario di gioco per mese (aprile → marzo). */
@@ -57,6 +59,9 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   sbloccoQuartieri: Map<string, SbloccoQuartiere>;
   /** L'arco della storia in cui si trova la partita, dalla data di gioco e dalle finestre dei Palazzi. */
   arcoCorrente: string | null;
+  /** Gli uid dei pin segnati nella partita (raccolto, azionato, aperta…), anche tramite la loro voce della guida: le condizioni
+   *  «Pin di una mappa». Facoltativo per chi costruisce uno stato a mano (test): senza, nessun pin è segnato. */
+  spilliSegnati?: Set<string>;
 }
 
 export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
@@ -110,7 +115,17 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     giornoSettimana: giorno ? piatto(giorno) : null,
     sbloccoQuartieri: sbloccoQuartieri(),
     arcoCorrente: arcoAllaData(st.dataGioco, finestreArchi()),
+    spilliSegnati: spilliSegnati(partitaId),
   };
+}
+
+/** I pin segnati in una partita: il loro segno (`spillo_partita`) o la loro voce della guida segnata — la stessa regola del
+ *  «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), che non dà stato alle voci descrittive («Altro»). */
+function spilliSegnati(partitaId: number): Set<string> {
+  const righe = prepared(`SELECT spillo_uid AS uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1
+    UNION SELECT uid FROM spillo WHERE uid IS NOT NULL AND ${VOCE_DEL_PIN} IN (
+      SELECT pp.punto_chiave FROM punto_partita pp JOIN punto_interesse pi ON pi.chiave = pp.punto_chiave WHERE pp.partita_id = ? AND pi.tipo <> ?)`).all(partitaId, partitaId, TIPO_PUNTO_DESCRITTIVO) as Array<{ uid: string }>;
+  return new Set(righe.map((r) => r.uid));
 }
 
 function nomeNegozio(chiave: string): string {
@@ -213,6 +228,16 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       const ok = attuale === r.stagione;
       return esito('stagione', ok ? 'verde' : 'rosso', ok ? `Siamo in ${attuale}` : `Solo in ${r.stagione}: siamo in ${attuale}`);
     }
+    case 'spillo': {
+      const p = prepared('SELECT nome, tipo FROM spillo WHERE uid = ?').get(r.spillo) as { nome: string; tipo: string } | undefined;
+      // un pin eliminato dopo aver scritto la condizione: non si sa, e lo si dice dove correggerlo
+      if (!p) return esito('spillo', 'grigio', 'Il pin di questa condizione non c’è più: correggila nell’editor della mappa');
+      // il pin è diventato di un tipo senza stato (una nota): non si può più segnare, e la condizione non deve nascondere per sempre
+      const parola = statoDelTipo(p.tipo);
+      if (parola === null) return esito('spillo', 'grigio', `${p.nome} non ha più uno stato da segnare: correggi la condizione nell’editor della mappa`);
+      const segnato = st.spilliSegnati?.has(r.spillo) ?? false;
+      return esito('spillo', segnato === r.segnato ? 'verde' : 'rosso', `${p.nome}: ${segnato ? parola : `non ${parola}`}`);
+    }
     case 'quartiere': {
       const q = st.sbloccoQuartieri.get(r.quartiere);
       const nome = q?.nome ?? r.quartiere;
@@ -249,16 +274,27 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
  */
 export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): DisponibilitaDto {
   const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st));
-  // Si valuta la **proiezione di presenza** di ciascun requisito, non il requisito intero: di
-  // `tutte(fascia sera, dote 3)` resta `tutte(fascia sera)`, e se quella è rossa la cosa in
-  // quel momento non c'è — dote o non dote.
-  const bloccante = elenco.some((r, i) => {
-    const presenza = proiezioneDiPresenza(r as unknown as { tipo: string }) as RequisitoDisponibilita | null;
-    return presenza !== null && valutaRequisito({ ...presenza, testo: r.testo }, i, st).stato === 'rosso';
-  });
-  const stato = bloccante ? 'bloccato'
+  const stato = presenzaRossa(elenco, st) ? 'bloccato'
     : requisiti.some((q) => q.stato === 'rosso' || q.stato === 'grigio') ? 'ignoto' : 'disponibile';
   return { stato, requisiti };
+}
+
+/**
+ * Si valuta la **proiezione di presenza** di ciascun requisito, non il requisito intero: di `tutte(fascia sera, dote 3)` resta
+ * `tutte(fascia sera)`, e se quella è rossa la cosa in quel momento non c'è — dote o non dote. `tieni` sceglie le foglie
+ * (di norma le condizioni di presenza).
+ */
+function presenzaRossa(elenco: RequisitoDisponibilita[], st: StatoDisponibilita, tieni?: (tipo: string) => boolean): boolean {
+  return elenco.some((r, i) => {
+    const presenza = proiezioneDiPresenza(r as unknown as { tipo: string }, tieni) as RequisitoDisponibilita | null;
+    return presenza !== null && valutaRequisito({ ...presenza, testo: r.testo }, i, st).stato === 'rosso';
+  });
+}
+
+/** Vero se un pin manca **per lo stato di altri pin** (condizione «Pin di una mappa» rossa): è il caso in cui nemmeno un
+ *  elemento fisso del mondo resta in vista, perché chi l'ha scritta vuole proprio che compaia e sparisca con l'altro pin. */
+export function bloccatoDaAltriPin(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): boolean {
+  return presenzaRossa(elenco, st, (tipo) => tipo === 'spillo');
 }
 
 /** Disponibilità complessiva: «bloccato» con almeno un rosso, «ignoto» se resta del grigio, «disponibile» altrimenti (anche senza requisiti). */

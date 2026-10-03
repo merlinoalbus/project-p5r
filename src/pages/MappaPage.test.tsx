@@ -132,6 +132,18 @@ describe('MappaPage', () => {
     expect(screen.getByText('1 di 2 raccolti · 50%')).toBeInTheDocument();
   });
 
+  it('un elemento fisso del gioco con condizioni che non valgono resta in vista, marcato «non ancora»; gli altri pin non disponibili spariscono (2026-10-03)', async () => {
+    const porta: SpilloDto = { ...forziere, id: 12, tipo: 'porta', tipoNome: 'Porta chiusa', nome: 'Porta del gioco', collezionabile: false, x: 20, y: 70, disponibilita: { stato: 'bloccato', requisiti: [], restaInVista: true } };
+    const negozio: SpilloDto = { ...forziere, id: 13, tipo: 'negozio', tipoNome: 'Negozio', nome: 'Bottega chiusa', collezionabile: false, x: 80, y: 70, disponibilita: { stato: 'bloccato', requisiti: [] } };
+    getMappa.mockReset().mockResolvedValue({ ...dettaglio, spilli: [porta, negozio] });
+    monta('/guida/mappe/citta-shibuya');
+    const vista = await screen.findByRole('button', { name: 'Porta chiusa: Porta del gioco (non ancora disponibile)' });
+    expect(vista).toHaveClass('spillo-mappa--bloccato');
+    expect(screen.queryByRole('button', { name: /Negozio: Bottega chiusa/ })).toBeNull();
+    // il conteggio dei nascosti conta solo la bottega
+    expect(screen.getByRole('button', { name: /Mostra anche i non ancora disponibili \(1\)/ })).toBeInTheDocument();
+  });
+
   it('due azioni ravvicinate: la rilettura vecchia che arriva per ultima non sovrascrive quella nuova', async () => {
     const leva: SpilloDto = { ...forziere, id: 8, tipo: 'meccanismo', tipoNome: 'Meccanismo', nome: 'Leva', collezionabile: false, x: 20, y: 20 };
     const quadro: SpilloDto = { ...forziere, id: 10, tipo: 'punto-sensibile', tipoNome: 'Punto sensibile', nome: 'Quadro', collezionabile: false, x: 80, y: 20 };

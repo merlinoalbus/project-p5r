@@ -20,7 +20,8 @@ import { ARCHI_STORIA, CONTATORI, DOTI_CONDIZIONE, EVENTI_STORIA, GIORNI_NEL_MES
 import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizione, valorePredefinito, type CampoCondizione, type SceltaCondizione, type TipoCampo, type ValoriCondizione } from '../../../shared/statiPartita';
 import { useCarica } from '../../hooks/useCarica';
 import { getConfidenti, getDungeons, getQuartieri, getRichieste } from '../../services/api/compendio';
-import { getElenchiRegole, type ElenchiRegole } from '../../services/api/condizioni';
+import { getElenchiRegole, getPinConStato, type ElenchiRegole, type PinConStato } from '../../services/api/condizioni';
+import { DEFINIZIONI_SPILLO, statoDelTipo, type TipoSpillo } from '../../../shared/spilli';
 import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
 import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Selettore';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -30,7 +31,8 @@ const NUOVA: RequisitoSpillo = { tipo: 'data', dal: '04-18' };
 const MODO_NOME = { tutte: 'TUTTE', 'almeno-una': 'ALMENO UNA' } as const;
 const MODO_SPIEGA = { tutte: 'devono valere tutte', 'almeno-una': 'basta che ne valga una' } as const;
 
-interface Elenchi { base: ElenchiCondizioni; extra: ElenchiRegole }
+/** `spilli`: i pin con uno stato, solo nell'editor delle mappe (`perSpillo`): altrove la condizione «Pin di una mappa» non c'è. */
+interface Elenchi { base: ElenchiCondizioni; extra: ElenchiRegole; spilli: PinConStato[] }
 
 /** Le voci offerte per ogni tipo di campo: dalla Guida quando dipendono dai dati, fisse altrimenti. */
 function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
@@ -56,6 +58,8 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'arcano': return e.extra.arcani;
     case 'persona': return e.extra.persone;
     case 'abilita': return e.extra.abilita;
+    // raggruppati per mappa, col tipo e la parola del suo stato: «Leva del ponte — Meccanismo · azionato»
+    case 'spillo': return e.spilli.map((p) => ({ chiave: p.chiave, nome: p.nome, gruppo: p.gruppo, dettaglio: `${DEFINIZIONI_SPILLO[p.tipo as TipoSpillo]?.nome ?? p.tipo} · ${statoDelTipo(p.tipo) ?? ''}` }));
     default: return [];
   }
 }
@@ -124,6 +128,8 @@ function Campo({ campo, valori, onCambia, elenchi, disabilitato }: { campo: Camp
 }
 
 const OPZIONI_STATO: OpzioneRicerca[] = STATI_PARTITA.map((s) => ({ chiave: s.chiave, nome: s.nome, gruppo: s.gruppo }));
+/** Fuori dall'editor delle mappe niente stati dei soli pin («Pin di una mappa»). */
+const OPZIONI_STATO_NON_PIN: OpzioneRicerca[] = STATI_PARTITA.filter((s) => !s.soloSpilli).map((s) => ({ chiave: s.chiave, nome: s.nome, gruppo: s.gruppo }));
 
 /** Una condizione semplice: stato, operatore, valori. Ogni cambio produce subito la condizione nuova. */
 function Riga({ condizione, negata, onCambia, onRimuovi, elenchi, nomi, disabilitato, perSpillo }: { condizione: RequisitoSpillo; negata: boolean; onCambia: (c: RequisitoSpillo) => void; onRimuovi: () => void; elenchi: Elenchi; nomi: NomiCondizioni; disabilitato?: boolean; perSpillo?: boolean }) {
@@ -163,7 +169,7 @@ function Riga({ condizione, negata, onCambia, onRimuovi, elenchi, nomi, disabili
   return (
     <div className={`condizione-riga ${negata ? 'condizione-riga--negata' : ''}`} role="group" aria-label={`Condizione: ${negata ? 'non ' : ''}${testo}`}>
       <button type="button" className={`condizione-non touch ${negata ? 'condizione-non--attivo' : ''}`} aria-pressed={negata} disabled={disabilitato} title={negata ? 'Negata: vale quando NON è così' : 'Nega questa condizione'} onClick={() => onCambia(negata ? condizione : { tipo: 'non', condizione })}>NON</button>
-      <Selettore etichetta="Stato" valore={def.chiave} opzioni={OPZIONI_STATO} onCambia={cambiaStato} disabilitato={disabilitato} className="condizione-stato" />
+      <Selettore etichetta="Stato" valore={def.chiave} opzioni={perSpillo ? OPZIONI_STATO : OPZIONI_STATO_NON_PIN} onCambia={cambiaStato} disabilitato={disabilitato} className="condizione-stato" />
       {def.operatori.length > 1
         ? <Selettore compatto className="condizione-operatore" etichetta="Operatore" valore={operatore.chiave} disabilitato={disabilitato} opzioni={def.operatori.map((o) => ({ chiave: o.chiave, nome: o.nome }))} onCambia={cambiaOperatore} />
         : <span className="condizione-operatore condizione-operatore--fisso">{operatore.nome}</span>}
@@ -216,23 +222,31 @@ function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRi
   );
 }
 
-interface Props { condizioni: RequisitoSpillo[]; onCambia: (r: RequisitoSpillo[]) => void; elenchi?: ElenchiCondizioni; disabilitato?: boolean; /** Nell'editor delle mappe: segna le condizioni di presenza, che nascondono il pin. */ perSpillo?: boolean }
+interface Props {
+  condizioni: RequisitoSpillo[]; onCambia: (r: RequisitoSpillo[]) => void; elenchi?: ElenchiCondizioni; disabilitato?: boolean;
+  /** Nell'editor delle mappe: segna le condizioni di presenza, che nascondono il pin. */ perSpillo?: boolean;
+  /** L'uid del pin che si sta modificando: non può dipendere dal proprio stato (2026-10-03), quindi non si offre. */ pinCorrente?: string;
+}
 
-export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo }: Props) {
+export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo, pinCorrente }: Props) {
   const dati = useCarica(async () => {
-    const [extra, base] = await Promise.all([
+    const [extra, base, spilli] = await Promise.all([
       getElenchiRegole(),
       elenchi ? Promise.resolve(elenchi) : Promise.all([getConfidenti(), getQuartieri(), getRichieste(), getDungeons()]).then(([confidenti, quartieri, richieste, dungeon]) => ({ confidenti, quartieri, richieste: richieste.richieste, dungeon })),
+      perSpillo ? getPinConStato() : Promise.resolve([]),
     ]);
-    return { extra, base } as Elenchi;
-  }, []);
+    return { extra, base, spilli } as Elenchi;
+  }, [perSpillo]);
   const [aperto, setAperto] = useState(condizioni.length > 0);
   const nomi = useMemo<NomiCondizioni>(() => {
     if (!dati.dati) return {};
     const e = dati.dati;
     const mappa = (o: Array<{ chiave: string; nome: string }>) => Object.fromEntries(o.map((x) => [x.chiave, x.nome]));
-    return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra) };
+    return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra),
+      spilli: Object.fromEntries(e.spilli.map((p) => [p.chiave, { nome: p.nome, tipo: p.tipo, mappa: p.gruppo }])) };
   }, [dati.dati]);
+  // fra i pin offerti non c'è quello che si sta modificando (i nomi sì: una condizione vecchia su se stesso si legge)
+  const offerti = useMemo(() => (dati.dati ? { ...dati.dati, spilli: dati.dati.spilli.filter((p) => p.chiave !== pinCorrente) } : null), [dati.dati, pinCorrente]);
   return (
     <fieldset disabled={disabilitato} className="condizioni-editor">
       <legend className="condizioni-editor__titolo">
@@ -243,8 +257,8 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
       </legend>
       {(aperto || condizioni.length > 0) && (dati.errore
         ? <p role="alert" className="m-0 text-[13px]">{dati.errore} <button type="button" className="btn btn-sm touch" onClick={() => void dati.ricarica()}>Riprova</button></p>
-        : dati.dati
-          ? <Blocco condizioni={condizioni} modo="tutte" onCambia={onCambia} profondita={0} elenchi={dati.dati} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />
+        : offerti
+          ? <Blocco condizioni={condizioni} modo="tutte" onCambia={onCambia} profondita={0} elenchi={offerti} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />
           : <p className="m-0 text-[13px] text-text-muted">Caricamento degli elenchi…</p>)}
     </fieldset>
   );

@@ -224,6 +224,14 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   con l'esportazione JSON. Nel visore, con una partita attiva, lo spillo con una condizione rossa sparisce (chip «Mostra anche i non ancora
   disponibili (N)» nella barra laterale); popup e scheda mostrano ogni condizione con il suo semaforo e il chip «Non ancora»; senza partita le
   condizioni si leggono soltanto. Tutti gli spilli esistenti (seed e utente) sono nati senza condizioni.
+- **Stato di un altro pin** (2026-10-03): nell'editor delle mappe lo stato «Pin di una mappa» (gruppo «Mappe») con gli operatori
+  «segnato» / «non segnato» e il pin scelto con la ricerca fra quelli che hanno uno stato, di tutte le mappe («Leva del ponte —
+  Meccanismo · azionato», raggruppati per «Palazzo › planimetria»). Esempi della richiesta: la porta bloccata con «Leva: non
+  segnato»; il meccanismo con TUTTE «Chiave rossa: segnato», «Chiave blu: segnato»; più pin in ALMENO UNA per l'«o». È di
+  presenza e nasconde anche le porte e i meccanismi del gioco (che per le altre condizioni restano in vista, marcati «non
+  ancora»); dopo ogni segno sulla mappa il visore si rilegge e i pin che ne dipendono compaiono o spariscono subito. Il pin
+  aperto non è fra quelli offerti, e un giro di condizioni (A dipende da B, B da A) si rifiuta al salvataggio coi nomi dei
+  pin. Non esiste negli editor del catalogo (articoli, negozi, letture, effetti) né nelle schede della guida senza mappa.
 - Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
   collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).
 - Gestione dell'albero: crea mappa (tipo, nome, genitore), rinomina, sposta, elimina; anteprima delle miniature.

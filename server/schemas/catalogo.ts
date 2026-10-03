@@ -1,4 +1,9 @@
-import { condizioneSpillo } from './mappe.js';
+import { condizioneSpillo as condizioneDiUnPin } from './mappe.js';
+import { foglieCondizione } from '../../shared/condizioniSpillo.js';
+
+/** Le condizioni del catalogo (articoli, negozi, letture, attività, e i loro effetti): quelle dei pin senza lo stato di un altro
+ *  pin, che vale solo nelle condizioni dei pin delle mappe (2026-10-03), a qualunque profondità di TUTTE / ALMENO UNA / NON. */
+const condizioneSpillo = condizioneDiUnPin.refine((c) => !foglieCondizione(c).some((f) => f.tipo === 'spillo'), 'Lo stato di un pin si usa solo nelle condizioni dei pin delle mappe.');
 // ============================================================
 // Schemi zod — catalogo estensibile dall'utente e agenda del giorno (Fase 16.1)
 // ============================================================

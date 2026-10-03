@@ -204,7 +204,9 @@ describe('visibilità condizionale dei pin', () => {
     const mappa = dettaglioMappa(nativo!.mappa_chiave, partita.id);
     const spillo = mappa.spilli.find((x) => x.id === nativo!.id);
     expect(spillo).toBeTruthy();
-    expect(spillo!.disponibilita?.stato).not.toBe('bloccato');
+    // lo stato resta quello vero (di giorno la condizione «sera» non vale: «non ancora»), ma il pin resta in vista: il visore
+    // lo mostra marcato invece di nasconderlo (regola ripristinata il 2026-10-03, `restaInVista`)
+    expect(spillo!.disponibilita).toMatchObject({ stato: 'bloccato', restaInVista: true });
     getDb().prepare('UPDATE spillo SET condizioni_json = NULL WHERE id = ?').run(nativo!.id);
     getDb().prepare('DELETE FROM partita WHERE id = ?').run(partita.id);
   });

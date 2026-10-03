@@ -18,7 +18,14 @@ const api = vi.hoisted(() => ({
 aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
-vi.mock('../services/api/condizioni', () => ({ getElenchiRegole: vi.fn().mockResolvedValue({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] }) }));
+vi.mock('../services/api/condizioni', () => ({
+  getElenchiRegole: vi.fn().mockResolvedValue({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] }),
+  // i pin con uno stato di tutte le mappe, per la condizione «Pin di una mappa» (2026-10-03)
+  getPinConStato: vi.fn().mockResolvedValue([
+    { chiave: 'a'.repeat(32), nome: 'Leva del ponte', tipo: 'meccanismo', gruppo: 'Palazzo di Kamoshida › Torre' },
+    { chiave: 'b'.repeat(32), nome: 'Chiave della cella', tipo: 'oggetto-chiave', gruppo: 'Palazzo di Kamoshida › Prigione' },
+  ]),
+}));
 vi.mock('../services/api', () => api);
 
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
@@ -172,6 +179,49 @@ describe('EditorMappaPage', () => {
     expect(form.queryByRole('group', { name: 'Gruppo ALMENO UNA' })).toBeNull();
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Nota', tipo: 'nota', descrizione: '', riferimento: null, condizioni: [{ tipo: 'non', condizione: { tipo: 'palazzo', dungeon: 'madarame' } }], destinazione: null }));
+  });
+
+  it('la condizione «Pin di una mappa» (2026-10-03): si cerca il pin fra quelli con uno stato, «segnato» o «non segnato», è di presenza e si salva con l’uid', async () => {
+    api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
+    api.aggiornaSpillo.mockResolvedValue(nota);
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
+    fireEvent.click(await form.findByRole('button', { name: /^Condizioni/ }));
+    fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
+    fireEvent.click(form.getByRole('combobox', { name: 'Stato' }));
+    fireEvent.click(form.getByRole('option', { name: 'Pin di una mappa' }).querySelector('button')!);
+    // il primo pin dell'elenco, «segnato»; la parola è quella del suo tipo
+    expect(form.getByRole('group', { name: 'Condizione: Leva del ponte (Palazzo di Kamoshida › Torre): azionato' })).toBeInTheDocument();
+    // si cerca fra i pin di tutte le mappe
+    fireEvent.click(form.getByRole('combobox', { name: 'Pin' }));
+    fireEvent.change(form.getByLabelText('Cerca Pin'), { target: { value: 'cella' } });
+    fireEvent.click(form.getByRole('option', { name: /Chiave della cella/ }).querySelector('button')!);
+    expect(form.getByRole('group', { name: 'Condizione: Chiave della cella (Palazzo di Kamoshida › Prigione): raccolto' })).toBeInTheDocument();
+    fireEvent.click(form.getByRole('combobox', { name: 'Operatore' }));
+    fireEvent.click(form.getByRole('option', { name: 'non segnato' }).querySelector('button')!);
+    const riga = form.getByRole('group', { name: 'Condizione: Chiave della cella (Palazzo di Kamoshida › Prigione): non raccolto' });
+    // fa sparire il pin quando non vale
+    expect(within(riga).getByLabelText(/Condizione di presenza/)).toBeInTheDocument();
+    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ condizioni: [{ tipo: 'spillo', spillo: 'b'.repeat(32), segnato: false }] })));
+  });
+
+  it('fra i pin citabili non c’è quello che si sta modificando: un pin non dipende da se stesso', async () => {
+    // la nota aperta è proprio la «Leva del ponte» dell'elenco (stesso uid)
+    api.getMappa.mockResolvedValue({ ...base, spilli: [{ ...nota, uid: 'a'.repeat(32) }] });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
+    fireEvent.click(await form.findByRole('button', { name: /^Condizioni/ }));
+    fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
+    fireEvent.click(form.getByRole('combobox', { name: 'Stato' }));
+    fireEvent.click(form.getByRole('option', { name: 'Pin di una mappa' }).querySelector('button')!);
+    // il primo pin offerto è l'altro
+    expect(form.getByRole('group', { name: /^Condizione: Chiave della cella/ })).toBeInTheDocument();
+    fireEvent.click(form.getByRole('combobox', { name: 'Pin' }));
+    expect(form.queryByRole('option', { name: /Leva del ponte/ })).toBeNull();
+    expect(form.getByRole('option', { name: /Chiave della cella/ })).toBeInTheDocument();
   });
 
   it('un periodo resta sempre valido: la fine segue l’inizio, e i giorni offerti sono quelli del mese', async () => {

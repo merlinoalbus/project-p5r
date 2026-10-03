@@ -14,6 +14,7 @@
 // ============================================================
 
 import { ARCHI_STORIA, CONTATORI, DOTI_CONDIZIONE, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo } from './condizioniSpillo.js';
+import { uidValido } from './spilli.js';
 
 /** Come si sceglie un valore: da quale elenco, o che numero. */
 export type TipoCampo =
@@ -23,17 +24,20 @@ export type TipoCampo =
   | 'libro' | 'film' | 'articolo'
   | 'attivita' | 'volte' | 'negozio-con-gradi' | 'rango-cliente' | 'negozio-con-punti' | 'punti'
   | 'evento' | 'contatore' | 'almeno'
-  | 'arcano' | 'persona' | 'abilita';
+  | 'arcano' | 'persona' | 'abilita'
+  | 'spillo';
 
 export interface CampoCondizione { nome: string; tipo: TipoCampo; etichetta: string }
 export interface OperatoreCondizione { chiave: string; nome: string; campi: CampoCondizione[] }
 export interface DefinizioneStato {
   chiave: string;
   nome: string;
-  gruppo: 'Calendario e mondo' | 'Storia e progressi' | 'Guida' | 'Negozi' | 'Scorta';
+  gruppo: 'Calendario e mondo' | 'Storia e progressi' | 'Guida' | 'Negozi' | 'Scorta' | 'Mappe';
   /** Da dove la partita lo legge: si mostra nell'editor, così si sa dove andare a segnarlo. */
   origine: string;
   operatori: OperatoreCondizione[];
+  /** Solo nelle condizioni dei pin (l'editor delle mappe): lo stato di un altro pin non dice niente a un articolo o a un libro. */
+  soloSpilli?: true;
 }
 
 const campo = (nome: string, tipo: TipoCampo, etichetta: string): CampoCondizione => ({ nome, tipo, etichetta });
@@ -70,6 +74,11 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
   // — Scorta —
   { chiave: 'persona-arcano', nome: 'Persona di un Arcano', gruppo: 'Scorta', origine: 'Partita → Scorta', operatori: [{ chiave: 'in-scorta', nome: 'in scorta', campi: [campo('arcano', 'arcano', 'Arcano')] }] },
   { chiave: 'persona-abilita', nome: 'Persona con abilità', gruppo: 'Scorta', origine: 'Partita → Scorta', operatori: [{ chiave: 'in-scorta', nome: 'in scorta', campi: [campo('persona', 'persona', 'Persona'), campo('abilita', 'abilita', 'Abilità')] }] },
+  // — Mappe — lo stato di un altro pin (richiesta dell'utente, 2026-09-30): raccolto, azionato, gestito, affrontato, aperta, sconfitto
+  { chiave: 'spillo', nome: 'Pin di una mappa', gruppo: 'Mappe', origine: 'stato del pin nella partita (raccolto, azionato, aperta…)', soloSpilli: true, operatori: [
+    { chiave: 'segnato', nome: 'segnato', campi: [campo('spillo', 'spillo', 'Pin')] },
+    { chiave: 'non-segnato', nome: 'non segnato', campi: [campo('spillo', 'spillo', 'Pin')] },
+  ] },
 ];
 
 export type ValoriCondizione = Record<string, string | number | string[]>;
@@ -140,6 +149,7 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'punti-negozio': return s(v.negozio) && n(v.punti) >= 1 ? { tipo: 'punti-negozio', negozio: s(v.negozio), punti: n(v.punti) } : null;
     case 'persona-arcano': return s(v.arcano) ? { tipo: 'persona-arcano', arcano: s(v.arcano) } : null;
     case 'persona-abilita': return s(v.persona) && s(v.abilita) ? { tipo: 'persona-abilita', persona: s(v.persona), abilita: s(v.abilita) } : null;
+    case 'spillo': return uidValido(v.spillo) ? { tipo: 'spillo', spillo: v.spillo, segnato: scelta.operatore === 'segnato' } : null;
     default: return null;
   }
 }
@@ -171,5 +181,6 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'punti-negozio': return { stato: 'punti-negozio', operatore: 'almeno', valori: { negozio: c.negozio, punti: c.punti } };
     case 'persona-arcano': return { stato: 'persona-arcano', operatore: 'in-scorta', valori: { arcano: c.arcano } };
     case 'persona-abilita': return { stato: 'persona-abilita', operatore: 'in-scorta', valori: { persona: c.persona, abilita: c.abilita } };
+    case 'spillo': return { stato: 'spillo', operatore: c.segnato ? 'segnato' : 'non-segnato', valori: { spillo: c.spillo } };
   }
 }

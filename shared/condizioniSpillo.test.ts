@@ -2,7 +2,7 @@
 // Test condizioni di visibilità degli spilli — descrizione in italiano e normalizzazione (Fase 15.22)
 // ============================================================
 
-import { dataLeggibile, dataSbloccoQuartiere, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, ordineGioco } from './condizioniSpillo';
+import { dataLeggibile, dataSbloccoQuartiere, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, nascondeIlPin, normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, ordineGioco, proiezioneDiPresenza } from './condizioniSpillo';
 
 describe('descriviRequisitoSpillo', () => {
   it('usa lo stesso stile dei requisiti della guida e i nomi quando li ha', () => {
@@ -107,5 +107,39 @@ describe('normalizzaRequisitoSpillo', () => {
     expect(leggiCondizioniSalvate('{rotto')).toEqual([]);
     expect(leggiCondizioniSalvate('[{"tipo":"da-configurare","nota":"x"},{"tipo":"piove"}]')).toEqual([{ tipo: 'piove' }]);
     expect(leggiCondizioniSalvate(null)).toEqual([]);
+  });
+});
+
+describe('la condizione «Pin di una mappa» (2026-10-03)', () => {
+  const LEVA = 'a'.repeat(32);
+  it('si normalizza solo con un uid valido e un «segnato» booleano', () => {
+    expect(normalizzaRequisitoSpillo({ tipo: 'spillo', spillo: LEVA, segnato: false })).toEqual({ tipo: 'spillo', spillo: LEVA, segnato: false });
+    expect(normalizzaRequisitoSpillo({ tipo: 'spillo', spillo: 'leva', segnato: true })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'spillo', spillo: LEVA.toUpperCase(), segnato: true })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'spillo', spillo: LEVA, segnato: 'sì' })).toBeNull();
+  });
+  it('si legge col nome del pin, la sua mappa e la parola del suo stato; un pin che non c’è più lo dice', () => {
+    const nomi = { spilli: { [LEVA]: { nome: 'Leva del ponte', tipo: 'meccanismo', mappa: 'Palazzo di Kamoshida › Torre' } } };
+    expect(descriviRequisitoSpillo({ tipo: 'spillo', spillo: LEVA, segnato: false }, nomi)).toBe('Leva del ponte (Palazzo di Kamoshida › Torre): non azionato');
+    expect(descriviRequisitoSpillo({ tipo: 'spillo', spillo: LEVA, segnato: true }, nomi)).toBe('Leva del ponte (Palazzo di Kamoshida › Torre): azionato');
+    expect(descriviRequisitoSpillo({ tipo: 'spillo', spillo: 'b'.repeat(32), segnato: true }, nomi)).toBe('Pin non più presente: segnato');
+  });
+  it('è di presenza, e la proiezione sui soli pin isola la parte che dipende dagli altri pin', () => {
+    expect(nascondeIlPin('spillo')).toBe(true);
+    const misto = { tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'data', dal: '05-01' }, { tipo: 'spillo', spillo: LEVA, segnato: false }] } as const;
+    expect(proiezioneDiPresenza(misto as never)).toEqual(misto);
+    expect(proiezioneDiPresenza(misto as never, (t) => t === 'spillo')).toEqual({ ...misto, condizioni: [{ tipo: 'spillo', spillo: LEVA, segnato: false }] });
+    expect(proiezioneDiPresenza({ tipo: 'data', dal: '05-01' }, (t) => t === 'spillo')).toBeNull();
+  });
+});
+
+describe('NON su un gruppo misto (difetto corretto il 2026-10-03)', () => {
+  it('nega la presenza solo se ciò che nega è tutto di presenza', () => {
+    const leva = { tipo: 'spillo', spillo: 'a'.repeat(32), segnato: true } as const;
+    // tutto di presenza: si nega
+    expect(proiezioneDiPresenza({ tipo: 'non', condizione: leva } as never)).toEqual({ tipo: 'non', condizione: leva });
+    expect(proiezioneDiPresenza({ tipo: 'non', condizione: { tipo: 'gruppo', modo: 'tutte', condizioni: [leva, { tipo: 'piove' }] } } as never)).not.toBeNull();
+    // misto (una dote e la leva): negarne la sola leva sarebbe sbagliato, tace
+    expect(proiezioneDiPresenza({ tipo: 'non', condizione: { tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'dote', dote: 'coraggio', rango: 5 }, leva] } } as never)).toBeNull();
   });
 });
