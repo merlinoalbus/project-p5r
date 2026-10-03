@@ -22,7 +22,8 @@ import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizio
 import { useCarica } from '../../hooks/useCarica';
 import { useIdStabili } from '../../hooks/useIdStabili';
 import { getConfidenti, getDungeons, getQuartieri, getRichieste } from '../../services/api/compendio';
-import { getElenchiRegole, getPinConStato, type ElenchiRegole, type PinConStato } from '../../services/api/condizioni';
+import { getElenchiRegole, getPinConStato } from '../../services/api/condizioni';
+import type { ElenchiRegoleDto as ElenchiRegole, PinConStatoDto as PinConStato } from '../../types';
 import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
 import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
 import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Selettore';

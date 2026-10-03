@@ -8,6 +8,7 @@ import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 import type { MeteoPartita } from './meteoPartita.js';
+import type { Osservazione, Statistiche } from './statistiche.js';
 // ============================================================
 // Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
 // ============================================================
@@ -44,13 +45,8 @@ export interface AffinitaDto {
   codiceSigla: string;
 }
 
-export interface StatisticheDto {
-  forza: number;
-  magia: number;
-  resistenza: number;
-  agilita: number;
-  fortuna: number;
-}
+/** Le cinque statistiche: la forma è quella di `shared/statistiche.ts`, una sola (rilievo R1" della verifica completa). */
+export type StatisticheDto = Statistiche;
 
 /** Riga di elenco del compendio. */
 export interface PersonaRiassuntoDto {
@@ -634,9 +630,7 @@ export interface CompendioPartitaDto {
 }
 
 /** Valori reali letti nella scheda della Persona nel gioco a un livello (15.26): da lì in su la stima riparte da questi. */
-export interface OsservazioneStatisticheDto extends StatisticheDto {
-  livello: number;
-}
+export type OsservazioneStatisticheDto = Osservazione;
 
 export interface PersonaPossedutaDto {
   id: number;
@@ -2203,6 +2197,42 @@ export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita'
 
 /** Un luogo della città come voce da scegliere (sede di un negozio o di un'attività). */
 export interface LuogoOpzioneDto { chiave: string; nome: string; tipo: string; quartiere: string; quartiereNome: string }
+
+/**
+ * Gli elenchi chiusi da cui l'editor delle condizioni prende i valori (`GET /condizioni/elenchi`). Questa forma e le due sotto
+ * esistevano solo nel client, con le rotte che rispondevano senza tipo: una divergenza non si vedeva (rilievo R6").
+ */
+export interface ElenchiRegoleDto {
+  articoli: Array<{ chiave: string; nome: string; gruppo: string }>;
+  letture: Array<{ chiave: string; nome: string; categoria: 'libro' | 'film' }>;
+  arcani: Array<{ chiave: string; nome: string }>;
+  persone: Array<{ chiave: string; nome: string }>;
+  abilita: Array<{ chiave: string; nome: string }>;
+  squadra: Array<{ chiave: string; nome: string }>;
+  /** Le sole attività che si contano per volte svolte. */
+  attivita: Array<{ chiave: string; nome: string }>;
+  /** Con il programma punti: «punti negozio» va solo ai programmi manuali, «grado cliente» solo a chi ha il rango. */
+  negozi: Array<{ chiave: string; nome: string; programma: 'manuale' | 'rango-cliente' | null }>;
+  /** `calcolato`: l'evento si legge dalla squadra della partita e non si segna a mano. */
+  eventi: Array<{ chiave: string; nome: string; calcolato: boolean }>;
+  contatori: Array<{ chiave: string; nome: string }>;
+}
+
+/** Un pin con uno stato (raccolto, aperto, parlato, incontrato, azionato…, o «ottenuto» dalla voce della guida) per la condizione
+ *  «Pin di una mappa» (`GET /condizioni/spilli`): `chiave` è l'uid, `gruppo` la mappa. */
+export interface PinConStatoDto {
+  chiave: string; nome: string; tipo: string; gruppo: string;
+  /** La parola dello stato con cui si cita: quella del tipo, o «ottenuto» per un pin che la prende dalla sua voce della guida. */
+  parola: string;
+}
+
+/** La grafica predefinita che vive nel database, nella forma del manifest degli asset (`GET /immagini/manifest`). */
+export interface ManifestImmaginiDto {
+  generato: string;
+  totale: number;
+  /** «ambito/chiave» → URL versionato. */
+  file: Record<string, string>;
+}
 
 /** Gli stati di una partita per le condizioni: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
 export interface ProgressiPartitaDto {

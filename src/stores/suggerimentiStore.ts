@@ -6,7 +6,7 @@
 // Le pagine usano `useSuggerimenti()`: restituisce `evidenziato(categoria, chiave)` e il motivo da mostrare come suggerimento.
 // ============================================================
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { create } from 'zustand';
 import { getSuggerimenti } from '../services/api';
 import { usePartitaStore } from './partitaStore';
@@ -64,25 +64,29 @@ const VUOTI: Suggerimenti = { evidenziato: () => false, motivo: () => null, gior
 
 /** Suggerimenti del giorno per la partita attiva: carica una volta e resta condiviso fra le pagine. */
 export function useSuggerimenti(): Suggerimenti {
-  const attiva = usePartitaStore((s) => s.attiva);
+  // solo l'id della partita attiva (P4"): l'oggetto intero cambia a ogni aggiornamento della partita, e i dodici componenti che
+  // usano i suggerimenti si ridisegnavano tutti; il risultato resta lo stesso oggetto finché non cambiano dati o partita
+  const attivaId = usePartitaStore((s) => s.attiva?.id ?? null);
   const dati = useSuggerimentiStore((s) => s.dati);
   const partitaId = useSuggerimentiStore((s) => s.partitaId);
   const carica = useSuggerimentiStore((s) => s.carica);
   useEffect(() => {
-    if (attiva && partitaId !== attiva.id) void carica(attiva.id);
-  }, [attiva, partitaId, carica]);
-  if (!attiva || !dati) return VUOTI;
-  return {
-    giorno: dati.giorno,
-    evidenziato: (categoria, chiave) => {
-      if (chiave === null || chiave === undefined) return false;
-      const elenco = dati[categoria] as Array<string | number> | undefined;
-      return Array.isArray(elenco) && elenco.some((x) => x === chiave);
-    },
-    motivo: (categoria, chiave) => {
-      if (chiave === null || chiave === undefined) return null;
-      const m = dati.motivi.find((x) => x.categoria === categoria && x.chiave === String(chiave));
-      return m ? `Suggerito oggi (${m.fascia}): ${m.azione}` : null;
-    },
-  };
+    if (attivaId !== null && partitaId !== attivaId) void carica(attivaId);
+  }, [attivaId, partitaId, carica]);
+  return useMemo<Suggerimenti>(() => {
+    if (attivaId === null || !dati) return VUOTI;
+    return {
+      giorno: dati.giorno,
+      evidenziato: (categoria, chiave) => {
+        if (chiave === null || chiave === undefined) return false;
+        const elenco = dati[categoria] as Array<string | number> | undefined;
+        return Array.isArray(elenco) && elenco.some((x) => x === chiave);
+      },
+      motivo: (categoria, chiave) => {
+        if (chiave === null || chiave === undefined) return null;
+        const m = dati.motivi.find((x) => x.categoria === categoria && x.chiave === String(chiave));
+        return m ? `Suggerito oggi (${m.fascia}): ${m.azione}` : null;
+      },
+    };
+  }, [attivaId, dati]);
 }

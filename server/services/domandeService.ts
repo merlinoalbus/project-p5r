@@ -7,16 +7,19 @@ import { httpErrors } from '../utils/httpError.js';
 import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
+import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 
 interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
-/** Indice SOLO per ordinare/confrontare date di gioco 'MM-GG' nell'anno scolastico (aprile → marzo): mese×31+giorno, non conta i giorni reali. */
+/**
+ * Indice SOLO per ordinare/confrontare date di gioco 'MM-GG' nell'anno scolastico (aprile → marzo), non conta i giorni reali.
+ * È `ordineGioco` (R4": il conto dei mesi era scritto anche qui), con -1 per una data che non si legge.
+ */
 export function indiceGiornoScolastico(data: string): number {
   const [m, g] = data.split('-').map(Number);
   if (!Number.isInteger(m) || !Number.isInteger(g)) return -1;
-  const mese = (m - 4 + 12) % 12;
-  return mese * 31 + g;
+  return ordineGioco(data);
 }
 
 function domandaDto(r: RigaDomanda, fatte: Set<number>): DomandaDto {

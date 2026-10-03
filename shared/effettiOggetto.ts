@@ -22,6 +22,7 @@
 // ============================================================
 
 import { nomeDote } from './doti.js';
+import { NOMI_STATISTICHE } from './statistiche.js';
 
 /** Su chi ricade l'effetto. Ricavato dai dati: 89 volte su chi lo usa, 53 su un alleato, 46 su tutti. */
 export const BERSAGLI = ['chi-lo-usa', 'un-alleato', 'tutta-la-squadra', 'un-nemico', 'tutti-i-nemici'] as const;
@@ -61,7 +62,7 @@ export const STATISTICHE_OGGETTO = ['forza', 'magia', 'resistenza', 'agilita', '
 export type StatisticaOggetto = (typeof STATISTICHE_OGGETTO)[number];
 
 export const NOME_STATISTICA: Record<StatisticaOggetto, string> = {
-  forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna',
+  ...NOMI_STATISTICHE,
   'hp-massimi': 'HP massimi', 'sp-massimi': 'SP massimi', critico: 'Critico',
   // Uscite dal residuo: «Evasione fisica più 5», «Evasione magica bassa», «Tutte le statistiche più 5».
   'evasione-fisica': 'Evasione fisica', 'evasione-magica': 'Evasione magica', tutte: 'Tutte le statistiche',

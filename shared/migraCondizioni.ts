@@ -20,7 +20,7 @@
 // condividono tutte le parole.
 // ============================================================
 
-import { ARCHI_STORIA, dataValida, type RequisitoSpillo } from './condizioniSpillo.js';
+import { ARCHI_STORIA, GIORNI_SETTIMANA, dataValida, type RequisitoSpillo } from './condizioniSpillo.js';
 
 /** Quello che il convertitore deve chiedere ai dati: nomi → chiavi, e la finestra di un arco. */
 export interface ContestoConversione {
@@ -46,7 +46,8 @@ export interface ContestoConversione {
 export interface EsitoConversione { condizioni: RequisitoSpillo[]; scartate: string[] }
 
 const MESI: Record<string, number> = { gennaio: 1, febbraio: 2, marzo: 3, aprile: 4, maggio: 5, giugno: 6, luglio: 7, agosto: 8, settembre: 9, ottobre: 10, novembre: 11, dicembre: 12 };
-const GIORNI = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'] as const;
+// i giorni della settimana nell'ordine del gioco, dalla tabella condivisa (R4"): prima erano scritti di nuovo qui
+const GIORNI = GIORNI_SETTIMANA.map((g) => g.chiave);
 const CONFIDENTI = ['igor', 'morgana', 'ryuji', 'ann', 'yusuke', 'makoto', 'futaba', 'haru', 'akechi', 'kasumi', 'sojiro', 'chihaya', 'iwai', 'takemi', 'kawakami', 'ohya', 'shinya', 'hifumi', 'mishima', 'yoshida', 'sae', 'gemelle', 'maruki'] as const;
 /** Come la guida chiama i Confidenti quando non usa la chiave. */
 const ALIAS_CONFIDENTE: Record<string, string> = { 'ichiko ohya': 'ohya', ichiko: 'ohya', 'tae takemi': 'takemi', 'shinya oda': 'shinya', 'gemelle custodi': 'gemelle', eremita: 'takemi', torre: 'shinya', imperatrice: 'haru', morte: 'takemi', imperatore: 'yusuke', luna: 'mishima', sole: 'yoshida', diavolo: 'ohya', stella: 'hifumi', forza: 'gemelle', fortuna: 'chihaya', 'appeso': 'iwai', temperanza: 'kawakami', gerarca: 'sojiro', giudizio: 'sae', consigliere: 'maruki' };

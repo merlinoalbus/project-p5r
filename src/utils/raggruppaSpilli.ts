@@ -40,24 +40,39 @@ export function raggruppaSpilli(visibili: SpilloDto[], inq: Inquadratura, opzion
   // punta *sul* punto (il bottone è traslato di -100% in verticale), quindi il suo centro sta
   // mezza goccia più in alto; la pastiglia del gruppo, invece, è centrata sul punto. Confrontando
   // i punti anziché i centri restavano due bersagli a 44,3 px pur avendone chiesti 46.
-  const centro = (n: Nube) => {
-    const p = n.spilli.map(perSchermo);
-    const x = p.reduce((a, q) => a + q.x, 0) / p.length;
-    const y = p.reduce((a, q) => a + q.y, 0) / p.length;
-    return { x, y: p.length === 1 ? y - ALTEZZA_GOCCIA / 2 : y };
-  };
+  //
+  // Le nubi si fondono a coppie, sempre la **prima** coppia troppo vicina nell'ordine (i, j) — l'ordine decide chi si unisce a chi.
+  // Prima, dopo ogni fusione la scansione ripartiva da (0, 1) e ricalcolava il centro di ogni nube a ogni confronto: O(n³) a ogni
+  // disegno (rilievo P1" della verifica completa). Ora ogni nube tiene le somme delle coordinate sullo schermo, accumulate nello
+  // stesso ordine di prima (il centro è lo stesso numero, bit per bit), e dopo la fusione di (i, j) si riprende da dove la coppia
+  // successiva può stare: le coppie prima di (i, j) che non toccano i sono le stesse di prima, già lontane; restano da rivedere
+  // quelle (k, i) con k < i e la riga di i. Il risultato è quello della scansione da capo.
+  type Somma = { sx: number; sy: number };
+  const punti = visibili.map(perSchermo);
   const nubi: Nube[] = visibili.map((s) => ({ spilli: [s] }));
-  for (let fuso = true; fuso; ) {
-    fuso = false;
-    for (let i = 0; i < nubi.length && !fuso; i++) {
-      for (let j = i + 1; j < nubi.length && !fuso; j++) {
-        const a = centro(nubi[i]), b = centro(nubi[j]);
-        if ((a.x - b.x) ** 2 + (a.y - b.y) ** 2 >= DISTANZA_MINIMA_SPILLI ** 2) continue;
-        nubi[i] = { spilli: [...nubi[i].spilli, ...nubi[j].spilli] };
-        nubi.splice(j, 1);
-        fuso = true;
-      }
-    }
+  const somme: Somma[] = punti.map((p) => ({ sx: 0 + p.x, sy: 0 + p.y }));
+  const puntiNube: Punto[][] = punti.map((p) => [p]);
+  const centro = (i: number) => {
+    const n = puntiNube[i].length;
+    const y = somme[i].sy / n;
+    return { x: somme[i].sx / n, y: n === 1 ? y - ALTEZZA_GOCCIA / 2 : y };
+  };
+  const centri = nubi.map((_, i) => centro(i));
+  const vicine = (i: number, j: number) => (centri[i].x - centri[j].x) ** 2 + (centri[i].y - centri[j].y) ** 2 < DISTANZA_MINIMA_SPILLI ** 2;
+  const cercaDa = (riga: number): [number, number] | null => {
+    for (let i = riga; i < nubi.length; i++) for (let j = i + 1; j < nubi.length; j++) if (vicine(i, j)) return [i, j];
+    return null;
+  };
+  for (let coppia = cercaDa(0); coppia; ) {
+    const [i, j] = coppia;
+    nubi[i] = { spilli: [...nubi[i].spilli, ...nubi[j].spilli] };
+    for (const q of puntiNube[j]) { somme[i].sx += q.x; somme[i].sy += q.y; }
+    puntiNube[i] = [...puntiNube[i], ...puntiNube[j]];
+    nubi.splice(j, 1); somme.splice(j, 1); puntiNube.splice(j, 1); centri.splice(j, 1);
+    centri[i] = centro(i);
+    coppia = null;
+    for (let k = 0; k < i && !coppia; k++) if (vicine(k, i)) coppia = [k, i];
+    coppia ??= cercaDa(i);
   }
   const singoli: SpilloDto[] = [];
   const gruppi: Gruppo[] = [];

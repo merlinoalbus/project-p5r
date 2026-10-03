@@ -2,7 +2,7 @@
 // API immagini — elenco, caricamento file, import da URL, rimozione
 // ============================================================
 
-import type { ImmagineDto } from '../../types';
+import type { ImmagineDto, ManifestImmaginiDto } from '../../types';
 import { API_BASE_URL } from '../../utils/constants';
 import { apiDelete, apiGet, apiPost, inviaFile, queryString } from './_helpers';
 
@@ -10,7 +10,7 @@ import type { AmbitoImmagine } from '../../../shared/immagini';
 export type { AmbitoImmagine };
 
 /** La grafica predefinita che vive nel database (mappe, Confidenti, sfondi…), nella forma del manifest degli asset. */
-export const getManifestoImmagini = (): Promise<{ generato: string; totale: number; file: Record<string, string> }> => apiGet('/immagini/manifest');
+export const getManifestoImmagini = (): Promise<ManifestImmaginiDto> => apiGet('/immagini/manifest');
 
 export const getImmagini = (ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
 

@@ -429,7 +429,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    * stato di altri pin. `nonDisponibile` marca, `bloccato` nasconde. */
   const nonDisponibile = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
   const bloccato = (s: SpilloDto) => filtraBloccati && nascostoPerCondizioni(s);
-  const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (scelta !== undefined || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
+  // in memoria finché non cambiano spilli o filtri: è l'ingresso del raggruppamento qui sotto, che così non si rifà a ogni disegno (P1")
+  const inScelta = scelta !== undefined;
+  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm))),
+    [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, ricercaNorm]);
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
   // tela: la freccia resta sullo spillo. L'altezza è **misurata** (`altezzaPopupMisurata`), non stimata: dalla 094 uno spostamento
@@ -467,7 +470,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
 
   // Chi si vede sulla mappa e dove: la regola sta in `raggruppaSpilli`, che è pura e si prova sui
   // dati veri del pacchetto invece che a mano (vedi `src/utils/raggruppaSpilli.ts`).
-  const { singoli, gruppi } = raggruppaSpilli(visibili, { pan, zoom, nat, dim }, { selezionatoId, editor: editor !== undefined });
+  // Rifatto solo quando cambia qualcosa che conta (P1"): prima girava a ogni disegno, anche per un popup che si apre. Le dipendenze
+  // sono i numeri, non gli oggetti — `pan` e `nat` sono oggetti nuovi a ogni disegno anche quando i valori restano quelli.
+  const inEditor = editor !== undefined;
+  const { singoli, gruppi } = useMemo(
+    () => raggruppaSpilli(visibili, { pan: { x: pan.x, y: pan.y }, zoom, nat: { w: nat.w, h: nat.h }, dim: { w: dim.w, h: dim.h } }, { selezionatoId, editor: inEditor }),
+    [visibili, pan.x, pan.y, zoom, nat.w, nat.h, dim.w, dim.h, selezionatoId, inEditor],
+  );
   /** Se ingrandendo il gruppo si è sciolto, l'elenco sparisce da sé: nessun effetto da sincronizzare. */
   const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
   // **Quanto è alto l'elenco, e da che parte sta.** Non basta stimarne l'altezza e ribaltarlo: un

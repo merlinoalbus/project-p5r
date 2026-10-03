@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { eseguiForca } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
-import { CHIAVI_STATISTICHE, NOMI_STATISTICHE } from '../../utils/statistiche';
+import { CHIAVI_STATISTICHE, NOMI_STATISTICHE } from '../../../shared/statistiche';
 import { FORCA_INCIDENTE_BONUS } from '../../../shared/bonusVelluto';
 import type { EsitoForca } from '../../../shared/bonusVelluto';
 import type { EsitoForcaDto, PersonaPossedutaDto } from '../../types';

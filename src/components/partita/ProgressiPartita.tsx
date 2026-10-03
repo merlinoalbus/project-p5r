@@ -12,7 +12,8 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getProgressiPartita, impostaAttivitaSvolta, impostaEventoStoria, impostaPuntiNegozio, type ProgressiPartita as Progressi } from '../../services/api/condizioni';
+import { getProgressiPartita, impostaAttivitaSvolta, impostaEventoStoria, impostaPuntiNegozio } from '../../services/api/condizioni';
+import type { ProgressiPartitaDto as Progressi } from '../../types';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';

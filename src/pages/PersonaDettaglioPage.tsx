@@ -17,8 +17,7 @@ import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconChevronLeft } from '../components/shared/icons';
 import type { RicettaSpecialeDto } from '../types';
-import { MASSIMO_STATISTICA, statistichePerLivello } from '../../shared/statistiche';
-import { ORDINE_STATISTICHE } from '../utils/elementi';
+import { CHIAVI_STATISTICHE, MASSIMO_STATISTICA, NOMI_STATISTICHE, statistichePerLivello } from '../../shared/statistiche';
 import { slug } from '../../shared/slug';
 import { useAsset } from '../stores/assetStore';
 import { AssetImg } from '../components/shared/AssetImg';
@@ -33,7 +32,6 @@ import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 
-const NOMI_STATISTICHE: Record<(typeof ORDINE_STATISTICHE)[number], string> = { forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna' };
 
 /** Ricetta speciale come riga di tasselli (stessa resa delle ricette di fusione: 14.10). */
 function Ricetta({ r }: { r: RicettaSpecialeDto }) {
@@ -115,9 +113,9 @@ export function PersonaDettaglioPage() {
   const statisticheMostrate = statisticheAlLivello ?? p?.statistiche ?? { forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 };
   const [scalaUnica, setScalaUnica] = useState(true);
   const [stellaIngrandita, setStellaIngrandita] = useState(false);
-  const tettoAdattato = Math.min(MASSIMO_STATISTICA, Math.max(10, Math.ceil(Math.max(...ORDINE_STATISTICHE.map((k) => statisticheMostrate[k])) / 10) * 10));
+  const tettoAdattato = Math.min(MASSIMO_STATISTICA, Math.max(10, Math.ceil(Math.max(...CHIAVI_STATISTICHE.map((k) => statisticheMostrate[k])) / 10) * 10));
   const tettoStella = scalaUnica ? MASSIMO_STATISTICA : tettoAdattato;
-  const assiStella = ORDINE_STATISTICHE.map((k) => ({ chiave: k, etichetta: NOMI_STATISTICHE[k], valore: statisticheMostrate[k] / tettoStella, badge: `ui/stat-${k}`, testo: statisticheMostrate[k] }));
+  const assiStella = CHIAVI_STATISTICHE.map((k) => ({ chiave: k, etichetta: NOMI_STATISTICHE[k], valore: statisticheMostrate[k] / tettoStella, badge: `ui/stat-${k}`, testo: statisticheMostrate[k] }));
   const etichettaStella = `${p && livelloScelto > p.livello ? `Statistiche stimate al livello ${livelloScelto}` : `Statistiche al livello ${p?.livello ?? ''}`}, scala 0–${tettoStella}`;
   const aggiungi = async () => {
     if (!attiva || !p) return;

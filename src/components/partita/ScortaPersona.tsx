@@ -13,9 +13,9 @@ import { CampoRicerca } from '../shared/CampoRicerca';
 import { ElementoChip } from '../compendio/ElementoChip';
 import { StatisticheBarre } from '../compendio/StatisticheBarre';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
-import { origineStima, statisticheStimate } from '../../../shared/statistiche';
+import { CHIAVI_STATISTICHE, origineStima, statisticheStimate } from '../../../shared/statistiche';
 import type { CompendioPartitaDto, OsservazioneStatisticheDto, PersonaPossedutaDto, StatisticheDto } from '../../types';
-import { ORDINE_STATISTICHE, SIGLA_STATISTICA } from '../../utils/elementi';
+import { SIGLA_STATISTICA } from '../../utils/elementi';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -209,7 +209,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
   const osservate = reali ?? (dimentica ? null : posseduta.osservate);
   const origine = origineStima(osservate, livello);
   const stimate = statisticheStimate(posseduta.statisticheBaseLivello, posseduta.livelloBase, osservate, livello);
-  const effettive = Object.fromEntries(ORDINE_STATISTICHE.map((k) => [k, Math.min(99, Math.max(1, stimate[k] + bonus[k]))])) as unknown as StatisticheDto;
+  const effettive = Object.fromEntries(CHIAVI_STATISTICHE.map((k) => [k, Math.min(99, Math.max(1, stimate[k] + bonus[k]))])) as unknown as StatisticheDto;
   const realeMostrato = (k: keyof StatisticheDto) => (reali && reali.livello === livello ? reali[k] : effettive[k]);
   // scrivere un valore reale registra tutti e cinque i valori al livello corrente e azzera i bonus (i valori reali li comprendono già)
   const impostaReale = (k: keyof StatisticheDto, valore: number) => {
@@ -270,7 +270,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
           <div className="flex flex-col gap-1">
             <span className="form-label m-0">Valori reali nel gioco al livello {livello}</span>
             <div className="grid grid-cols-5 gap-1">
-              {ORDINE_STATISTICHE.map((k) => (
+              {CHIAVI_STATISTICHE.map((k) => (
                 <label key={k} className="text-[11px] text-text-muted text-center">
                   {SIGLA_STATISTICA[k]}
                   <input type="number" min={1} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={realeMostrato(k)} onFocus={(e) => e.target.select()} onChange={(e) => impostaReale(k, Number(e.target.value))} aria-label={`${SIGLA_STATISTICA[k]} reale`} />
@@ -293,7 +293,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
           <div className="flex flex-col gap-1">
             <span className="form-label m-0">Bonus per statistica (Potenziamento, Addestramento, Isolamento, Forca)</span>
             <div className="grid grid-cols-5 gap-1">
-              {ORDINE_STATISTICHE.map((k) => (
+              {CHIAVI_STATISTICHE.map((k) => (
                 <label key={k} className="text-[11px] text-text-muted text-center">
                   {SIGLA_STATISTICA[k]} <span className="text-text-secondary">({stimate[k]})</span>
                   <input type="number" min={-99} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={bonus[k]} onFocus={(e) => e.target.select()} onChange={(e) => setBonus({ ...bonus, [k]: Math.max(-99, Math.min(99, Number(e.target.value) || 0)) })} aria-label={`Bonus ${SIGLA_STATISTICA[k]}`} />
@@ -302,7 +302,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
               ))}
             </div>
             <div className="flex justify-end">
-              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i bonus" disabled={ORDINE_STATISTICHE.every((k) => bonus[k] === 0)} onClick={() => setBonus({ forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 })} />
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i bonus" disabled={CHIAVI_STATISTICHE.every((k) => bonus[k] === 0)} onClick={() => setBonus({ forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 })} />
             </div>
           </div>
           <StatisticheBarre
@@ -357,22 +357,22 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
 // ---- Aiuti: bonus e istantanea del compendio ----
 
 function totaleBonus(b: StatisticheDto): number {
-  return ORDINE_STATISTICHE.reduce((acc, k) => acc + b[k], 0);
+  return CHIAVI_STATISTICHE.reduce((acc, k) => acc + b[k], 0);
 }
 
 function descriviBonus(b: StatisticheDto): string {
-  return ORDINE_STATISTICHE.filter((k) => b[k] !== 0).map((k) => `${SIGLA_STATISTICA[k]} ${b[k] > 0 ? '+' : ''}${b[k]}`).join(' · ') || 'nessuno';
+  return CHIAVI_STATISTICHE.filter((k) => b[k] !== 0).map((k) => `${SIGLA_STATISTICA[k]} ${b[k] > 0 ? '+' : ''}${b[k]}`).join(' · ') || 'nessuno';
 }
 
 function descriviOsservate(o: OsservazioneStatisticheDto): string {
-  return ORDINE_STATISTICHE.map((k) => `${SIGLA_STATISTICA[k]} ${o[k]}`).join(' · ');
+  return CHIAVI_STATISTICHE.map((k) => `${SIGLA_STATISTICA[k]} ${o[k]}`).join(' · ');
 }
 
 /** Confronta l'esemplare con l'istantanea del compendio: assente, da aggiornare o aggiornata. */
 function statoIstantanea(p: PersonaPossedutaDto, c: CompendioPartitaDto | undefined): 'assente' | 'da-aggiornare' | 'aggiornata' {
   if (!c || !c.registrata || c.livelloRegistrato === null) return 'assente';
   const stesseSkill = c.skill.length === p.skill.length && c.skill.every((s, i) => s.id === p.skill[i]?.id);
-  const stessoBonus = ORDINE_STATISTICHE.every((k) => c.bonus[k] === p.bonus[k]);
-  const stesseOsservate = (c.osservate === null) === (p.osservate === null) && (!c.osservate || !p.osservate || (c.osservate.livello === p.osservate.livello && ORDINE_STATISTICHE.every((k) => c.osservate![k] === p.osservate![k])));
+  const stessoBonus = CHIAVI_STATISTICHE.every((k) => c.bonus[k] === p.bonus[k]);
+  const stesseOsservate = (c.osservate === null) === (p.osservate === null) && (!c.osservate || !p.osservate || (c.osservate.livello === p.osservate.livello && CHIAVI_STATISTICHE.every((k) => c.osservate![k] === p.osservate![k])));
   return c.livelloRegistrato === p.livello && stesseSkill && stessoBonus && stesseOsservate && (c.tratto?.id ?? null) === (p.tratto?.id ?? null) && c.carica === p.carica ? 'aggiornata' : 'da-aggiornare';
 }

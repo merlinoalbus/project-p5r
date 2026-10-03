@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
+  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, VideogiochiDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
@@ -20,7 +20,6 @@ export interface FiltriPersona {
   skill?: string;
 }
 
-export const getArcani = (): Promise<ArcanaDto[]> => apiGet('/compendio/arcani');
 export const getGlossario = (): Promise<GlossarioDto> => apiGet('/compendio/glossario');
 export const getTermini = (): Promise<TermineDto[]> => apiGet('/compendio/termini');
 

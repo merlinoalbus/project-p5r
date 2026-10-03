@@ -41,7 +41,6 @@ export interface DatiPosseduta {
 }
 
 export const getPartite = (): Promise<PartitaDto[]> => apiGet('/partite');
-export const getPartitaAttiva = (): Promise<PartitaDto | null> => apiGet('/partite/attiva');
 export const creaPartita = (dati: DatiPartita & { nome: string; attiva?: boolean }): Promise<PartitaDto> => apiPost('/partite', dati);
 export const aggiornaPartita = (id: number, dati: DatiPartita): Promise<PartitaDto> => apiPut(`/partite/${id}`, dati);
 /** Momento della giornata corrente della partita (scheda «Oggi»): «giorno» o «sera». */

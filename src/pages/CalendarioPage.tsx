@@ -11,7 +11,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
-import { MESI_GIOCO, dataGiocoTesto } from '../utils/dateGioco';
+import { NOMI_MESI_GIOCO, dataGiocoTesto } from '../utils/dateGioco';
 import type { GiornoCalendarioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DataP5 } from '../components/shared/DataP5';
@@ -114,10 +114,10 @@ export function CalendarioPage() {
 
           <FilaScorrevole className="items-center" role="tablist" aria-label="Mesi">
             {MESI_CHIAVE.filter((m) => d.mesi.includes(m)).map((m, i) => (
-              <button key={m} type="button" role="tab" className={`chip touch ${mese === m ? 'chip--attivo' : ''}`} onClick={() => setMeseScelto(m)} aria-selected={mese === m}>{MESI_GIOCO[MESI_CHIAVE.indexOf(m)] ?? m}{i === 0 ? '' : ''}</button>
+              <button key={m} type="button" role="tab" className={`chip touch ${mese === m ? 'chip--attivo' : ''}`} onClick={() => setMeseScelto(m)} aria-selected={mese === m}>{NOMI_MESI_GIOCO[MESI_CHIAVE.indexOf(m)] ?? m}{i === 0 ? '' : ''}</button>
             ))}
           </FilaScorrevole>
-          <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label={`Giorni di ${MESI_GIOCO[MESI_CHIAVE.indexOf(mese)] ?? mese}`}>
+          <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label={`Giorni di ${NOMI_MESI_GIOCO[MESI_CHIAVE.indexOf(mese)] ?? mese}`}>
             {giorniMese.map((g) => (
               <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} />
             ))}

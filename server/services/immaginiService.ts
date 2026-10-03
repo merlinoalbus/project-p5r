@@ -16,7 +16,7 @@ import { randomUUID } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
-import type { ImmagineDto } from '../../shared/types.js';
+import type { ImmagineDto, ManifestImmaginiDto } from '../../shared/types.js';
 import { idMappa } from './mappe/percorsiMappe.js';
 import { scaricaDaUrl } from '../utils/scaricaDaUrl.js';
 
@@ -61,7 +61,7 @@ export function elencaImmagini(ambito?: string): ImmagineDto[] {
 }
 
 /** Il manifesto della grafica predefinita nel database: chiave del manifesto → URL del file versionato. */
-export function manifestoPredefinite(): { generato: string; totale: number; file: Record<string, string> } {
+export function manifestoPredefinite(): ManifestImmaginiDto {
   const righe = prepared(`SELECT ambito, chiave, created_at FROM immagine WHERE contenuto IS NOT NULL AND ambito IN (${segnapostoPredefiniti}) ORDER BY ambito, chiave`).all(...AMBITI_PREDEFINITI) as Array<{ ambito: string; chiave: string; created_at: string }>;
   const file: Record<string, string> = {};
   for (const r of righe) file[`${r.ambito}/${r.chiave}`] = `${urlFileImmagine(r.ambito, r.chiave)}?v=${encodeURIComponent(r.created_at)}`;

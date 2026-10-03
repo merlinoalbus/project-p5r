@@ -3,6 +3,7 @@
 // ============================================================
 
 import type { DisponibilitaDto, VoceEffettoDto } from '../types';
+import { formattaYen } from './punti';
 
 /** Vero se fra gli effetti dichiarati c'è la Dote indicata (il filtro «Dote» delle pagine). */
 export function haDote(effetti: VoceEffettoDto[], dote: string): boolean {
@@ -21,7 +22,8 @@ export function motivoBlocco(d: DisponibilitaDto | null | undefined): string {
   return (rossi.length ? rossi : d!.requisiti).map((r) => r.dettaglio || r.testo).join(' · ');
 }
 
-export const formattaYen = (n: number): string => `${n.toLocaleString('it-IT')} ¥`;
+// gli yen si scrivono in un posto solo (`utils/punti`): qui si riesportano per le pagine che li prendono con il resto (R3")
+export { formattaYen };
 /** Il prezzo accanto al nome di un negozio: «· 700 ¥», «· Gratis», niente se non dichiarato. */
 export const prezzoChip = (n: number | null): string => (n === null ? '' : n === 0 ? ' · Gratis' : ` · ${formattaYen(n)}`);
 

@@ -14,17 +14,14 @@
 // ============================================================
 
 import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 import { usePreferenzeStore } from './preferenzeStore';
 import { getManifestoImmagini } from '../services/api';
+import type { ManifestImmaginiDto } from '../types';
 
-export interface ManifestAsset {
-  generato: string;
-  totale: number;
-  file: Record<string, string>;
-}
 
 interface AssetState {
-  manifest: ManifestAsset | null;
+  manifest: ManifestImmaginiDto | null;
   caricato: boolean;
   mancanti: Record<string, true>;
   carica: () => Promise<void>;
@@ -34,7 +31,7 @@ interface AssetState {
 type Sorgente = { generato: string; file: Record<string, string> };
 const VUOTA: Sorgente = { generato: '', file: {} };
 
-function sorgente(dati: Partial<ManifestAsset> | null | undefined): Sorgente {
+function sorgente(dati: Partial<ManifestImmaginiDto> | null | undefined): Sorgente {
   return dati && typeof dati.file === 'object' && dati.file !== null ? { generato: dati.generato ?? '', file: dati.file } : VUOTA;
 }
 
@@ -43,7 +40,7 @@ async function manifestPubblico(): Promise<Sorgente> {
   try {
     const res = await fetch('/asset/manifest.json', { cache: 'no-cache', signal: AbortSignal.timeout(10_000) });
     if (!res.ok) throw new Error(`manifest ${res.status}`);
-    return sorgente((await res.json()) as Partial<ManifestAsset>);
+    return sorgente((await res.json()) as Partial<ManifestImmaginiDto>);
   } catch {
     return VUOTA;
   }
@@ -80,9 +77,9 @@ export const useAssetStore = create<AssetState>((set, get) => ({
  */
 export function useAssetMulti(nomi: ReadonlyArray<string | null | undefined>): Array<string | null> {
   const attiva = usePreferenzeStore((s) => s.graficaPredefinita);
-  const file = useAssetStore((s) => s.manifest?.file);
-  const mancanti = useAssetStore((s) => s.mancanti);
-  return nomi.map((nome) => (attiva && nome && file?.[nome] && !mancanti[nome] ? file[nome] : null));
+  // il risultato si calcola nel selettore e si confronta voce per voce (P4"): iscritti a tutto `mancanti`, ogni file mancante
+  // segnato altrove ridisegnava chi usa questi nomi, con un elenco nuovo anche quando non cambiava nulla
+  return useAssetStore(useShallow((s) => nomi.map((nome) => (attiva && nome && s.manifest?.file[nome] && !s.mancanti[nome] ? s.manifest.file[nome] : null))));
 }
 
 /**

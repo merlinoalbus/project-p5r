@@ -16,13 +16,6 @@ export const getCatalogo = (tipo: TipoCatalogo, filtro: { nascosti?: boolean; ne
 export const getElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise<ElementoCatalogoDto> =>
   apiGet(`/catalogo/${tipo}/${encodeURIComponent(chiave)}`);
 
-/** Gli oggetti che l'app già conosce di una categoria, da agganciare a un negozio.
- *
- * Un elenco vuoto è una risposta valida — di regali, materiali, cibo e «altro» non c'è archivio —
- * e il modulo la sa leggere: lì si scrive a mano, come si è sempre fatto. */
-export const getOggettiSelezionabili = (categoria: string): Promise<OggettoSelezionabileDto[]> =>
-  apiGet(`/catalogo/oggetti-di/${encodeURIComponent(categoria)}`);
-
 /** **Tutti** gli oggetti che l'app conosce, di qualunque tipo, in un elenco solo.
  *
  * Chi mette qualcosa in vendita cerca «Il magnifico ladro», non «libro»: la categoria arriva con

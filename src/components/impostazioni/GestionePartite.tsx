@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import { NuovaPartitaModal } from '../partita/NuovaPartitaModal';
@@ -11,7 +12,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 
 /** Gestione delle partite multiple. */
 export function GestionePartite() {
-  const { partite, rendiAttiva, elimina } = usePartitaStore();
+  const { partite, rendiAttiva, elimina } = usePartitaStore(useShallow((s) => ({ partite: s.partite, rendiAttiva: s.rendiAttiva, elimina: s.elimina })));
   const [nuova, setNuova] = useState(false);
   const [occupato, setOccupato] = useState<number | null>(null);
 

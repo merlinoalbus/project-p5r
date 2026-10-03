@@ -7,9 +7,3 @@ export function haPlanimetria(mappa: MappaDto): boolean {
   if (mappa.ruoloImmagine) return mappa.ruoloImmagine === 'planimetria-nativa' || mappa.ruoloImmagine === 'illustrazione-editoriale';
   return Boolean(mappa.immagineUrl || (mappa.assetOriginale && (mappa.larghezza ?? 0) > 0 && (mappa.altezza ?? 0) > 0));
 }
-
-/** Vero solo per le piante estratte dal gioco: un'illustrazione dell'applicazione non lo è, e
- * l'interfaccia deve dirlo invece di lasciarla passare per una pianta. */
-export function planimetriaDelGioco(mappa: MappaDto): boolean {
-  return mappa.ruoloImmagine === 'planimetria-nativa';
-}

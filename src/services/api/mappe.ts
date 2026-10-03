@@ -17,9 +17,6 @@ export const getAlberoMappe = (): Promise<MappaRiassuntoDto[]> => apiGet('/mappe
 /** Mappa con percorso, figli e spilli; con `partita` include lo stato «raccolto» e i dettagli della partita (articoli comprati, punti). */
 export const getMappa = (chiave: string, partita?: number): Promise<MappaDto> => apiGet(`/mappe/${encodeURIComponent(chiave)}${queryString({ partita })}`);
 
-/** Mappa collegata a un'entità della guida (quartiere, area, dungeon); errore 404 se non esiste. */
-export const getMappaPerEntita = (tipo: string, chiave: string): Promise<MappaRiassuntoDto> => apiGet(`/mappe/entita/${encodeURIComponent(tipo)}/${encodeURIComponent(chiave)}`);
-
 export const creaMappa = (dati: DatiMappaApi & { chiave?: string; nome: string; tipo: TipoMappa }): Promise<MappaDto> => apiPost('/mappe', dati);
 export const aggiornaMappa = (chiave: string, dati: DatiMappaApi): Promise<MappaDto> => apiPut(`/mappe/${encodeURIComponent(chiave)}`, dati);
 export const eliminaMappa = (chiave: string): Promise<void> => apiDelete(`/mappe/${encodeURIComponent(chiave)}`);

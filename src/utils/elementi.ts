@@ -2,6 +2,8 @@
 // Elementi, affinità e statistiche — colori e ordinamenti per l'interfaccia
 // ============================================================
 
+import type { ChiaveStatistica } from '../../shared/statistiche';
+
 /** Chiave elemento → nome del token colore in tailwind.css (`--color-el-*`). */
 const TOKEN_ELEMENTO: Record<string, string> = {
   phys: 'fisico',
@@ -43,11 +45,8 @@ export const STILE_AFFINITA: Record<string, { classe: string; titolo: string }> 
   ab: { classe: 'bg-success/25 text-success font-bold', titolo: 'Assorbe' },
 };
 
-/** Chiavi delle statistiche nell'ordine di gioco. */
-export const ORDINE_STATISTICHE = ['forza', 'magia', 'resistenza', 'agilita', 'fortuna'] as const;
-
-/** Sigla mostrata quando il glossario non è disponibile. */
-export const SIGLA_STATISTICA: Record<(typeof ORDINE_STATISTICHE)[number], string> = {
+/** Sigla mostrata quando il glossario non è disponibile (le chiavi e l'ordine sono `CHIAVI_STATISTICHE` di `shared/statistiche`). */
+export const SIGLA_STATISTICA: Record<ChiaveStatistica, string> = {
   forza: 'FR',
   magia: 'MA',
   resistenza: 'RS',

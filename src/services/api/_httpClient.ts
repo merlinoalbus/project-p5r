@@ -16,13 +16,16 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RETRIES = 2;
 const RETRY_BACKOFF_MS = [500, 1500, 4500];
 
-/** Opzioni aggiuntive del client, compreso il segnale di annullamento. */
+/**
+ * Opzioni aggiuntive del client. Il segnale di annullamento esterno (`externalSignal`) non c'è più: nessuno lo passava, e
+ * annullare una richiesta non ferma il lavoro già partito sul server (rilievo B11" della verifica completa). `useCarica`
+ * scarta le risposte superate.
+ */
 export interface HttpFetchOptions {
   timeoutMs?: number;
   maxRetries?: number;
   /** true: nessun toast automatico (il chiamante gestisce il messaggio). */
   silent?: boolean;
-  externalSignal?: AbortSignal;
 }
 
 /** GET, HEAD, PUT, DELETE e OPTIONS si possono ripetere senza effetti in più (RFC 9110 §9.2.2); POST e PATCH no. */
@@ -67,8 +70,9 @@ export async function httpFetch(
     throw new TypeError('offline: navigator.onLine === false');
   }
 
-  let lastError: unknown;
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  // L'ultimo tentativo esce sempre dal ciclo con la risposta (anche un 5xx, che il chiamante trasforma in errore) o con
+  // l'errore: dopo il ciclo non si arriva mai, e la coda che c'era (un toast «tentativi esauriti») non scattava (B11").
+  for (let attempt = 0; ; attempt++) {
     if (attempt > 0) {
       const delay = RETRY_BACKOFF_MS[attempt - 1] ?? 4500;
       await new Promise((r) => setTimeout(r, delay));
@@ -76,35 +80,16 @@ export async function httpFetch(
 
     const ctrl = new AbortController();
     const timeoutHandle = setTimeout(() => ctrl.abort(), timeoutMs);
-    const onExternalAbort = (): void => ctrl.abort();
-    if (opts.externalSignal) {
-      if (opts.externalSignal.aborted) ctrl.abort();
-      else opts.externalSignal.addEventListener('abort', onExternalAbort, { once: true });
-    }
-
     try {
       const res = await fetch(input, { ...init, signal: ctrl.signal });
       clearTimeout(timeoutHandle);
-      opts.externalSignal?.removeEventListener('abort', onExternalAbort);
-
-      if (res.ok) return res;
-      if (!isRetriableStatus(res.status) || attempt >= maxRetries) {
-        return res;
-      }
-      lastError = new Error(`HTTP ${res.status} on ${input}`);
-      continue;
+      if (res.ok || !isRetriableStatus(res.status) || attempt >= maxRetries) return res;
     } catch (err) {
       clearTimeout(timeoutHandle);
-      opts.externalSignal?.removeEventListener('abort', onExternalAbort);
-      if (opts.externalSignal?.aborted) throw err;
-      lastError = err;
       if (!isRetriableError(err) || attempt >= maxRetries) {
         notifyError(`Errore di rete: ${err instanceof Error ? err.message : String(err)}`, silent);
         throw err;
       }
     }
   }
-
-  notifyError('Backend non raggiungibile dopo più tentativi. Riprova fra qualche secondo.', silent);
-  throw lastError ?? new Error('httpFetch: tentativi esauriti');
 }

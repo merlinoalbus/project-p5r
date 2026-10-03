@@ -29,7 +29,7 @@ import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaServi
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { httpErrors } from '../utils/httpError.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento } from '../../shared/condizioniSpillo.js';
-import type { ProgressiPartitaDto } from '../../shared/types.js';
+import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto } from '../../shared/types.js';
 
 const router = Router();
 const idPartita = idParam;
@@ -49,12 +49,12 @@ function attivitaConteggiabili() {
 }
 
 router.get('/elenchi', (_req, res) => {
-  res.json({
-    articoli: prepared('SELECT a.chiave, COALESCE(a.nome_it, a.nome) AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome').all(),
-    letture: prepared("SELECT chiave, COALESCE(nome_it, nome) AS nome, 'libro' AS categoria FROM libro WHERE nascosto = 0 UNION ALL SELECT chiave, COALESCE(nome_it, nome), 'film' FROM film WHERE nascosto = 0 ORDER BY nome").all(),
-    arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all(),
-    persone: prepared('SELECT nome AS chiave, nome FROM persona ORDER BY nome').all(),
-    abilita: prepared('SELECT nome AS chiave, nome FROM skill ORDER BY nome').all(),
+  const elenchi: ElenchiRegoleDto = {
+    articoli: prepared('SELECT a.chiave, COALESCE(a.nome_it, a.nome) AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome').all() as ElenchiRegoleDto['articoli'],
+    letture: prepared("SELECT chiave, COALESCE(nome_it, nome) AS nome, 'libro' AS categoria FROM libro WHERE nascosto = 0 UNION ALL SELECT chiave, COALESCE(nome_it, nome), 'film' FROM film WHERE nascosto = 0 ORDER BY nome").all() as ElenchiRegoleDto['letture'],
+    arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all() as ElenchiRegoleDto['arcani'],
+    persone: prepared('SELECT nome AS chiave, nome FROM persona ORDER BY nome').all() as ElenchiRegoleDto['persone'],
+    abilita: prepared('SELECT nome AS chiave, nome FROM skill ORDER BY nome').all() as ElenchiRegoleDto['abilita'],
     // I Ladri Fantasma per «in squadra»: chi sia la squadra lo dice il seed con `giocabile`.
     squadra: giocabili().map((p) => ({ chiave: p.chiave, nome: p.nome })),
     attivita: attivitaConteggiabili().map((a) => ({ chiave: a.chiave, nome: a.nome })),
@@ -62,13 +62,15 @@ router.get('/elenchi', (_req, res) => {
     negozi: negoziConProgramma().map((n) => ({ chiave: n.chiave, nome: n.nome, programma: n.programma?.calcolo ?? null })),
     eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null })),
     contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome })),
-  });
+  };
+  res.json(elenchi);
 });
 
 /** I pin con uno stato, per la condizione «Pin di una mappa» (2026-10-03): solo l'editor delle mappe li chiede, a parte, perché
  *  sono centinaia e agli altri editor non servono. */
 router.get('/spilli', (_req, res) => {
-  res.json(pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola })));
+  const spilli: PinConStatoDto[] = pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola }));
+  res.json(spilli);
 });
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano, completi anche dove non c'è ancora una riga. */

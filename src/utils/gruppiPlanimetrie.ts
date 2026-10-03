@@ -105,13 +105,6 @@ export function spostaGruppo(gruppi: GruppoPlanimetrie[], id: string, a: number)
   return nuovo;
 }
 
-/** Sposta la versione `chiave` di una posizione dentro la sua stanza (`passo` −1 o +1). */
-export function spostaVersione(gruppi: GruppoPlanimetrie[], id: string, chiave: string, passo: -1 | 1): GruppoPlanimetrie[] {
-  const g = gruppi.find((x) => x.id === id);
-  const da = g ? g.versioni.findIndex((v) => v.planimetria.chiave === chiave) : -1;
-  return spostaVersioneA(gruppi, id, chiave, da + passo);
-}
-
 /** Sposta la versione `chiave` alla posizione `a` dentro la sua stanza (il trascinamento la lascia lì). */
 export function spostaVersioneA(gruppi: GruppoPlanimetrie[], id: string, chiave: string, a: number): GruppoPlanimetrie[] {
   return gruppi.map((g) => {

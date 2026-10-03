@@ -7,7 +7,7 @@ import { Selettore } from '../shared/Selettore';
 import { eseguiIsolamento, getPossedute, getSuggerimentoIsolamento } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { EseguiForcaModal } from './EseguiForcaModal';
-import { NOMI_STATISTICHE } from '../../utils/statistiche';
+import { CHIAVI_STATISTICHE, NOMI_STATISTICHE, type ChiaveStatistica } from '../../../shared/statistiche';
 import { useCarica } from '../../hooks/useCarica';
 import { Spinner } from '../shared/PageState';
 import { FORCA_INCIDENTE_BONUS, INCENSI, ISOLAMENTO_AVVISO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza } from '../../../shared/bonusVelluto';
@@ -103,7 +103,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
   const allarme = velluto?.allarmeAttivo ?? false;
   const rangoGemelle = velluto?.gemelle.rango ?? 0;
   const guadagno = guadagnoIncenso(incenso, giorni, allarme);
-  const [statScelte, setStatScelte] = useState<string[]>(['forza']);
+  const [statScelte, setStatScelte] = useState<ChiaveStatistica[]>(['forza']);
   const [occupato, setOccupato] = useState(false);
   const suggerimento = useCarica(() => (persona ? getSuggerimentoIsolamento(partitaId, persona.id) : Promise.resolve(null)), [partitaId, persona?.id, persona?.livello]);
   const registra = async () => {
@@ -148,8 +148,8 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
         )}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[12px] text-text-muted">Statistiche interessate ({incenso.statistiche}):</span>
-          {Object.entries(NOMI_STATISTICHE).map(([k, n]) => (
-            <button key={k} type="button" className={`chip touch ${statScelte.includes(k) ? 'chip--attivo' : ''}`} aria-pressed={statScelte.includes(k)} onClick={() => setStatScelte((sc) => (sc.includes(k) ? sc.filter((x) => x !== k) : sc.length < incenso.statistiche ? [...sc, k] : [...sc.slice(1), k]))}>{n}</button>
+          {CHIAVI_STATISTICHE.map((k) => (
+            <button key={k} type="button" className={`chip touch ${statScelte.includes(k) ? 'chip--attivo' : ''}`} aria-pressed={statScelte.includes(k)} onClick={() => setStatScelte((sc) => (sc.includes(k) ? sc.filter((x) => x !== k) : sc.length < incenso.statistiche ? [...sc, k] : [...sc.slice(1), k]))}>{NOMI_STATISTICHE[k]}</button>
           ))}
         </div>
         {persona && (

@@ -21,8 +21,12 @@ export interface Statistiche {
   fortuna: number;
 }
 
+/** Le chiavi nell'ordine di gioco. Unica fonte di chiavi e nomi: prima c'erano quattro copie dei nomi e due delle chiavi (R1"). */
 export const CHIAVI_STATISTICHE = ['forza', 'magia', 'resistenza', 'agilita', 'fortuna'] as const;
 export type ChiaveStatistica = (typeof CHIAVI_STATISTICHE)[number];
+
+/** I nomi italiani delle statistiche. */
+export const NOMI_STATISTICHE: Readonly<Record<ChiaveStatistica, string>> = { forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna' };
 
 /** Punti di statistica guadagnati per ogni livello. */
 export const PUNTI_PER_LIVELLO = 3;

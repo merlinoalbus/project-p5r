@@ -4,6 +4,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useShallow } from 'zustand/react/shallow';
 import { useNotificationStore, type NotificationType } from '../../stores/notificationStore';
 import { MARGINE, postoDellaCoda, type PostoCoda } from '../../utils/postoCoda';
 
@@ -22,7 +23,7 @@ const TOAST_BORDER: Record<NotificationType, string> = {
  * ancorato che scende nella sua zona. In basso coprirebbe i pulsanti («Riapri» subito dopo «Ottenuto»), in alto la barra della
  * mappa: dove va copre solo la mappa, per qualche secondo. */
 export function ToastContainer() {
-  const { notifications, removeNotification } = useNotificationStore();
+  const { notifications, removeNotification } = useNotificationStore(useShallow((s) => ({ notifications: s.notifications, removeNotification: s.removeNotification })));
   const coda = useRef<HTMLDivElement | null>(null);
   const [posto, setPosto] = useState<PostoCoda>({ bottom: null, aSinistra: false });
   const visibile = notifications.length > 0;
