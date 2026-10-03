@@ -15,6 +15,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
+import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { vociGestite } from './mappe/voceDelPin.js';
 import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
@@ -82,22 +83,30 @@ export interface RaccoltaDungeon { perMappa: Map<string, RaccoltaMappa>; totale:
 
 /** Le mappe dell'albero del Palazzo: la radice `dungeon-<chiave>` e tutte le discendenti. */
 function mappeDelPalazzo(dungeonChiave: string): string[] {
-  return (prepared(`WITH RECURSIVE albero(chiave) AS (
-      SELECT chiave FROM mappa WHERE chiave = ?
-      UNION ALL
-      SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
-    ) SELECT chiave FROM albero`).all(`dungeon-${dungeonChiave}`) as Array<{ chiave: string }>).map((r) => r.chiave);
+  return [...sottoalberoMappe([radiceDelPalazzo(dungeonChiave)])];
+}
+
+/** I segni della partita che decidono il «raccolto» di un pin: gli uid raccolti e le voci della guida già gestite. */
+interface SegniPartita { raccolti: Set<string>; puntiGestiti: Set<string> }
+
+function segniPartita(partitaId: number): SegniPartita {
+  return {
+    raccolti: new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid)),
+    // un punto della guida già gestito (ottenuto/esaurito) conta come raccolto anche sulla mappa: è la regola del visore
+    puntiGestiti: vociGestite(partitaId),
+  };
 }
 
 /** I collezionabili di ogni mappa del Palazzo e, con la partita, quanti sono raccolti.
- *  Una mappa senza collezionabili è completa per definizione e non conta fra le mappe. */
-export function raccoltaMappe(dungeonChiave: string, partitaId?: number): RaccoltaDungeon {
+ *  Una mappa senza collezionabili è completa per definizione e non conta fra le mappe.
+ *  `segni` li passa chi li ha già letti (l'elenco dei Palazzi li legge una volta per tutti: rilievo P7). */
+export function raccoltaMappe(dungeonChiave: string, partitaId?: number, segni?: SegniPartita): RaccoltaDungeon {
   const mappe = mappeDelPalazzo(dungeonChiave);
   const perMappa = new Map<string, RaccoltaMappa>();
   if (mappe.length === 0) return { perMappa, totale: 0, presi: partitaId === undefined ? null : 0, mappe: 0, mappeComplete: partitaId === undefined ? null : 0 };
-  const raccolti = partitaId === undefined ? null : new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
-  // un punto della guida già gestito (ottenuto/esaurito) conta come raccolto anche sulla mappa: è la regola del visore
-  const puntiGestiti = partitaId === undefined ? null : vociGestite(partitaId);
+  const s = partitaId === undefined ? null : segni ?? segniPartita(partitaId);
+  const raccolti = s?.raccolti ?? null;
+  const puntiGestiti = s?.puntiGestiti ?? null;
   const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome, ${VOCE_DEL_PIN} AS voce FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string; voce: string | null }>;
   for (const r of righe) {
     const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (!!r.voce && !!puntiGestiti?.has(r.voce));
@@ -153,10 +162,13 @@ function mappePresenti(): Map<string, string | null> {
 }
 
 
-function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, completati: Map<string, string> | null): DungeonRiassuntoDto {
+/** Il riassunto di un Palazzo. `gia` porta quello che chi chiama ha già calcolato: la raccolta (la scheda del Palazzo la calcola
+ *  per le planimetrie) e i segni della partita (l'elenco li legge una volta per tutti): prima si ricalcolavano qui (P7). */
+function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, completati: Map<string, string> | null,
+  gia: { raccolta?: RaccoltaDungeon | null; segni?: SegniPartita } = {}): DungeonRiassuntoDto {
   const conPartita = partitaId !== undefined;
   const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string }>;
-  const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(raccoltaMappe(r.chiave, partitaId));
+  const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(gia.raccolta ?? raccoltaMappe(r.chiave, partitaId, gia.segni));
   return {
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
     date: { sblocco: r.data_sblocco, scadenza: r.data_scadenza, furtoConsigliato: r.furto_consigliato },
@@ -175,7 +187,9 @@ export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
   const stati = statiPartita(partitaId);
   // i Palazzi completati si calcolano una volta per tutto l'elenco
   const completati = partitaId !== undefined ? palazziCompletati(partitaId) : null;
-  return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId, completati));
+  // e i segni della partita (pin raccolti, voci gestite), che prima ogni Palazzo rileggeva
+  const segni = partitaId !== undefined ? segniPartita(partitaId) : undefined;
+  return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId, completati, { segni }));
 }
 
 /**
@@ -188,15 +202,11 @@ export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
  * campo usa — non comparivano da nessuna parte, e non c'era modo di ordinarle né di toglierle.
  */
 function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon, partitaId?: number): DungeonDettaglioDto['planimetrie'] {
-  const righe = prepared(`WITH RECURSIVE albero(chiave) AS (
-      SELECT chiave FROM mappa WHERE chiave = ?
-      UNION ALL
-      SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
-    )
+  const righe = prepared(`${SQL_SOTTOALBERO}
     SELECT m.chiave, m.ordine
     FROM mappa m JOIN albero t ON t.chiave = m.chiave
     WHERE m.chiave <> ?
-    ORDER BY m.ordine, m.chiave`).all(`dungeon-${dungeonChiave}`, `dungeon-${dungeonChiave}`) as Array<{ chiave: string; ordine: number }>;
+    ORDER BY m.ordine, m.chiave`).all(radiceDelPalazzo(dungeonChiave), radiceDelPalazzo(dungeonChiave)) as Array<{ chiave: string; ordine: number }>;
   // Una planimetria può contenere più aree della guida (2026-09-29): si leggono a parte, in ordine di
   // guida. Con il LEFT JOIN di prima una mappa con due aree sarebbe comparsa due volte nell'elenco.
   const areePerMappa = new Map<string, Array<{ chiave: string; nome: string; ordine: number }>>();
@@ -239,7 +249,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
     dedalo: richieste ? dedaloDto(a, richieste.get(a.chiave) ?? [], timbri) : null,
   }));
   const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
-  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
+  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
 }
 
 /**

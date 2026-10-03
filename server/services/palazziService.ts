@@ -23,12 +23,14 @@ import { getDb, prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { voceDelPin, vociGestite } from './mappe/voceDelPin.js';
 import { allineaEnigmaDellaVoce } from './mappe/statiGuida.js';
+import { radiceDelPalazzo, SQL_RADICE_PALAZZO, SQL_SOTTOALBERO } from './mappe/alberoMappe.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
 export function palazzoDiOgniMappa(): Map<string, string> {
+  // tutte le radici dei Palazzi insieme (la regola è quella di `alberoMappe`), con il loro dungeon portato giù per l'albero
   const righe = prepared(`WITH RECURSIVE albero(chiave, dungeon) AS (
-      SELECT chiave, substr(chiave, 9) FROM mappa WHERE chiave LIKE 'dungeon-%' AND genitore_chiave IS NULL
-      UNION ALL
+      SELECT chiave, substr(chiave, 9) FROM mappa WHERE ${SQL_RADICE_PALAZZO}
+      UNION
       SELECT m.chiave, a.dungeon FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
     ) SELECT chiave, dungeon FROM albero`).all() as Array<{ chiave: string; dungeon: string }>;
   return new Map(righe.map((r) => [r.chiave, r.dungeon]));
@@ -186,7 +188,7 @@ export function palazzoDiIngresso(spillo: { mappa_chiave: string | null; riferim
  * ordine logico (quello della scheda del Palazzo); se non ha nemmeno quella, la radice. `null` se il dungeon non ha mappe.
  */
 export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: string; spilloId: number | null } | null {
-  const radice = `dungeon-${dungeon}`;
+  const radice = radiceDelPalazzo(dungeon);
   if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(radice)) return null;
   const palazzi = palazzoDiOgniMappa();
   const destinazioni = prepared("SELECT 1 FROM sqlite_master WHERE name = 'spillo_destinazione'").get()
@@ -200,11 +202,7 @@ export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: 
   const ingresso = aperti.find(inCitta) ?? aperti[0] ?? ingressi.find(inCitta) ?? ingressi[0];
   if (ingresso) return { chiave: ingresso.mappa_chiave, spilloId: ingresso.id };
   // la prima planimetria vera (pianta del gioco o illustrazione), nell'ordine che si cambia trascinando nella scheda
-  const prima = prepared(`WITH RECURSIVE albero(chiave) AS (
-      SELECT chiave FROM mappa WHERE chiave = ?
-      UNION ALL
-      SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
-    )
+  const prima = prepared(`${SQL_SOTTOALBERO}
     SELECT m.chiave FROM mappa m JOIN albero t ON t.chiave = m.chiave
     WHERE m.chiave <> ? AND m.ruolo_immagine IN ('planimetria-nativa', 'illustrazione-editoriale')
     ORDER BY m.ordine, m.chiave LIMIT 1`).get(radice, radice) as { chiave: string } | undefined;

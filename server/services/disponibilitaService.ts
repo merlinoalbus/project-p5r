@@ -62,6 +62,17 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   /** Gli uid dei pin segnati nella partita (raccolto, aperto, parlato, incontrato, azionato…), anche tramite la loro voce della guida: le condizioni
    *  «Pin di una mappa». Facoltativo per chi costruisce uno stato a mano (test): senza, nessun pin è segnato. */
   spilliSegnati?: Set<string>;
+  /** I pin citati dalle condizioni già letti in questa richiesta (uid → pin, null se non c'è): una mappa valuta le stesse condizioni
+   *  più volte (requisiti, presenza, stato di altri pin), e prima ogni valutazione rileggeva il pin (rilievo P6 della verifica). Lo
+   *  stato vive una richiesta sola, quindi i pin letti sono sempre quelli di adesso. */
+  pinCitati?: Map<string, ReturnType<typeof pinCitato>>;
+}
+
+/** `pinCitato` con la memoria dello stato della richiesta, se lo stato ce l'ha. */
+function pinCitatoNelloStato(uid: string, st: StatoDisponibilita): ReturnType<typeof pinCitato> {
+  if (!st.pinCitati) return pinCitato(uid);
+  if (!st.pinCitati.has(uid)) st.pinCitati.set(uid, pinCitato(uid));
+  return st.pinCitati.get(uid)!;
 }
 
 export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
@@ -105,6 +116,7 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     sbloccoQuartieri: sbloccoQuartieri(),
     arcoCorrente: arcoAllaData(st.dataGioco, finestreDungeon()),
     spilliSegnati: spilliSegnati(partitaId),
+    pinCitati: new Map(),
   };
 }
 
@@ -221,7 +233,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return esito('stagione', ok ? 'verde' : 'rosso', ok ? `Siamo in ${attuale}` : `Solo in ${r.stagione}: siamo in ${attuale}`);
     }
     case 'spillo': {
-      const p = pinCitato(r.spillo);
+      const p = pinCitatoNelloStato(r.spillo, st);
       // un pin eliminato dopo aver scritto la condizione: non si sa, e lo si dice dove correggerlo
       if (!p) return esito('spillo', 'grigio', 'Il pin di questa condizione non c’è più: correggila nell’editor della mappa');
       // il pin non ha più uno stato (diventato una nota, o scollegato dalla sua voce della guida): non si può più segnare, e la

@@ -17,7 +17,7 @@ import { HttpError, httpErrors } from '../../utils/httpError.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
-import { dettaglioNegozio } from '../negoziService.js';
+import { acquistiDellaPartita, dettaglioNegozio } from '../negoziService.js';
 import { giocabili } from '../squadraService.js';
 import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
 import { bloccatoDaAltriPin, statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
@@ -26,6 +26,7 @@ import { allineaEnigmaDellaVoce, allineaStatiPunto, erroreVoceDelPin, pinDelPunt
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
@@ -45,17 +46,6 @@ function rigaMappa(chiave: string): RigaMappa {
   return r;
 }
 
-function conteggi(chiave: string): { spilli: number; figli: number } {
-  return {
-    spilli: (prepared('SELECT COUNT(*) AS n FROM spillo WHERE mappa_chiave = ?').get(chiave) as { n: number }).n,
-    // I figli si contano fra quelli che si vedono: il nodo dei Memento è tolto dall'albero, e
-    // contarlo lo stesso faceva dire a Tokyo «venticinque luoghi» mostrandone ventiquattro. Un
-    // conteggio che non torna con l'elenco sotto è peggio che nessun conteggio.
-    figli: (prepared("SELECT COUNT(*) AS n FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos'")
-      .get(chiave) as { n: number }).n,
-  };
-}
-
 /** Chiave dell'immagine di base nell'istanza: quella registrata, altrimenti un'immagine dell'ambito «mappa» con la chiave della mappa
  * (le piante scaricate dalla guida per aree e quartieri usano proprio quella chiave). */
 function immagineDi(r: RigaMappa): { chiave: string; createdAt: string } | null {
@@ -67,30 +57,66 @@ function immagineDi(r: RigaMappa): { chiave: string; createdAt: string } | null 
   return null;
 }
 
-function presentazioneMappa(chiave: string): Pick<MappaRiassuntoDto, 'contesti' | 'gruppoImmagini'> {
-  if(!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get())return {};
-  const r=prepared('SELECT contesti_json,gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave=?').get(chiave) as {contesti_json:string;gruppo_immagini_json:string|null}|undefined;
-  return r?{contesti:JSON.parse(r.contesti_json),...(r.gruppo_immagini_json?{gruppoImmagini:JSON.parse(r.gruppo_immagini_json)}:{})}:{};
+/**
+ * Quello che serve a descrivere le mappe di una risposta, letto in blocco una volta: presentazioni, numerazione delle collezioni,
+ * conteggi, nomi e immagini. Prima ogni mappa costava da sei a dieci query (la presentazione con un controllo dello schema, due
+ * conteggi, il nome del genitore, fino a tre ricerche dell'immagine), e la numerazione delle collezioni rileggeva la presentazione
+ * di tutte le 333 mappe a ogni dettaglio: era quasi metà del tempo di una mappa (rilievi P3 e P8 della verifica, 2026-10-03).
+ */
+interface ContestoMappe {
+  presentazioni: Map<string, Pick<MappaRiassuntoDto, 'contesti' | 'gruppoImmagini'>>;
+  collezioni: ReturnType<typeof calcolaCollezioniImmagini>;
+  spilli: Map<string, number>;
+  figli: Map<string, number>;
+  nomi: Map<string, string>;
+  /** Immagini dell'ambito «mappa»: chiave (già in forma `idMappa`) → data di caricamento. */
+  immagini: Map<string, string>;
 }
 
-function collezioniImmagini(){
- const righe=prepared('SELECT * FROM mappa').all() as RigaMappa[];
- // La numerazione delle omonime riguarda le piante del gioco: l'illustrazione di un quartiere
- // porta lo stesso nome ma è un'altra cosa, e non entra nella collezione.
- return calcolaCollezioniImmagini(righe.map(r=>({chiave:r.chiave,genitore:r.genitore_chiave,nome:r.nome,ordine:r.ordine,...presentazioneMappa(r.chiave),fisica:r.ruolo_immagine==='planimetria-nativa'})));
-}
-function riassunto(r: RigaMappa, collezioni=collezioniImmagini()): MappaRiassuntoDto {
-  const c = conteggi(r.chiave);
-  const img = immagineDi(r);
+function contestoMappe(): ContestoMappe {
+  const righe = prepared('SELECT * FROM mappa').all() as RigaMappa[];
+  const presentazioni = new Map<string, Pick<MappaRiassuntoDto, 'contesti' | 'gruppoImmagini'>>();
+  if (prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
+    for (const p of prepared('SELECT mappa_chiave, contesti_json, gruppo_immagini_json FROM mappa_presentazione').all() as Array<{ mappa_chiave: string; contesti_json: string; gruppo_immagini_json: string | null }>) {
+      presentazioni.set(p.mappa_chiave, { contesti: JSON.parse(p.contesti_json), ...(p.gruppo_immagini_json ? { gruppoImmagini: JSON.parse(p.gruppo_immagini_json) } : {}) });
+    }
+  }
+  const conta = (sql: string) => new Map((prepared(sql).all() as Array<{ chiave: string; n: number }>).map((r) => [r.chiave, r.n]));
   return {
-    ...presentazioneMappa(r.chiave),
-    ...(collezioni.has(r.chiave)?{immagineCollezione:collezioni.get(r.chiave)}:{}),
+    presentazioni,
+    // La numerazione delle omonime riguarda le piante del gioco: l'illustrazione di un quartiere
+    // porta lo stesso nome ma è un'altra cosa, e non entra nella collezione.
+    collezioni: calcolaCollezioniImmagini(righe.map((r) => ({ chiave: r.chiave, genitore: r.genitore_chiave, nome: r.nome, ordine: r.ordine, ...(presentazioni.get(r.chiave) ?? {}), fisica: r.ruolo_immagine === 'planimetria-nativa' }))),
+    spilli: conta('SELECT mappa_chiave AS chiave, COUNT(*) AS n FROM spillo WHERE mappa_chiave IS NOT NULL GROUP BY mappa_chiave'),
+    // I figli si contano fra quelli che si vedono: il nodo dei Memento è tolto dall'albero, e contarlo lo stesso faceva dire a
+    // Tokyo «venticinque luoghi» mostrandone ventiquattro. Un conteggio che non torna con l'elenco sotto è peggio di nessuno.
+    figli: conta("SELECT genitore_chiave AS chiave, COUNT(*) AS n FROM mappa WHERE genitore_chiave IS NOT NULL AND chiave <> 'citta-mementos' GROUP BY genitore_chiave"),
+    nomi: new Map(righe.map((r) => [r.chiave, r.nome])),
+    immagini: new Map((prepared("SELECT chiave, created_at FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; created_at: string }>).map((i) => [i.chiave, i.created_at])),
+  };
+}
+
+/** Come `immagineDi`, ma dalle immagini già lette nel contesto. */
+function immagineDalContesto(r: RigaMappa, ctx: ContestoMappe): { chiave: string; createdAt: string } | null {
+  for (const chiave of [r.immagine_chiave, chiaveMappa(r.chiave), r.chiave]) {
+    if (!chiave) continue;
+    const createdAt = ctx.immagini.get(idMappa(chiave));
+    if (createdAt !== undefined) return { chiave, createdAt };
+  }
+  return null;
+}
+
+function riassunto(r: RigaMappa, ctx: ContestoMappe = contestoMappe()): MappaRiassuntoDto {
+  const img = immagineDalContesto(r, ctx);
+  return {
+    ...(ctx.presentazioni.get(r.chiave) ?? {}),
+    ...(ctx.collezioni.has(r.chiave)?{immagineCollezione:ctx.collezioni.get(r.chiave)}:{}),
     chiave: chiaveMappa(r.chiave), nome: r.nome, nomeCompleto:nomePercorso(r.chiave), tipo: r.tipo, genitore: r.genitore_chiave?chiaveMappa(r.genitore_chiave):null, ordine: r.ordine,
-    genitoreNome: r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as {nome:string}|undefined)?.nome ?? null : null,
+    genitoreNome: r.genitore_chiave ? ctx.nomi.get(r.genitore_chiave) ?? null : null,
     immagineUrl: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null,
     asset: assetPredefinitoMappa(chiaveMappa(r.chiave)), assetOriginale:r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
     ruoloImmagine: r.ruolo_immagine,
-    origine: r.origine, nomeRivisto: r.nome_rivisto === 1, numeroSpilli: c.spilli, numeroFigli: c.figli, updatedAt: r.updated_at,
+    origine: r.origine, nomeRivisto: r.nome_rivisto === 1, numeroSpilli: ctx.spilli.get(r.chiave) ?? 0, numeroFigli: ctx.figli.get(r.chiave) ?? 0, updatedAt: r.updated_at,
   };
 }
 
@@ -110,29 +136,14 @@ const RADICI_MEMENTO = [
   'citta-mementos',
 ];
 
-/** Le radici date e tutta la loro discendenza, seguendo i genitori finché l'insieme smette di crescere. */
-function discendenzaDi(radici: string[]): Set<string> {
-  const dentro = new Set<string>(radici);
-  const nodi = prepared('SELECT chiave, genitore_chiave FROM mappa').all() as Array<{ chiave: string; genitore_chiave: string | null }>;
-  for (let cresciuto = true; cresciuto;) {
-    cresciuto = false;
-    for (const n of nodi) {
-      if (n.genitore_chiave && dentro.has(n.genitore_chiave) && !dentro.has(n.chiave)) {
-        dentro.add(n.chiave);
-        cresciuto = true;
-      }
-    }
-  }
-  return dentro;
-}
 
 /** Albero completo (piatto, con genitore): radici prima, poi per ordine. Senza i Memento. */
 export function elencaMappe(): MappaRiassuntoDto[] {
-  const collezioni=collezioniImmagini();
-  const memento = discendenzaDi(RADICI_MEMENTO);
+  const ctx = contestoMappe();
+  const memento = sottoalberoMappe(RADICI_MEMENTO);
   return (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[])
     .filter((r) => !memento.has(r.chiave))
-    .map(r=>riassunto(r,collezioni));
+    .map(r=>riassunto(r, ctx));
 }
 
 function percorsoDi(r: RigaMappa): Array<{ chiave: string; nome: string }> {
@@ -147,8 +158,9 @@ function percorsoDi(r: RigaMappa): Array<{ chiave: string; nome: string }> {
   return out;
 }
 
-function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | null, partitaId?: number): DettaglioSpilloDto | null {
+function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | null, ctx: ContestoSpilli = {}): DettaglioSpilloDto | null {
   if (!tipo || !chiave) return null;
+  const partitaId = ctx.partitaId;
   switch (tipo) {
     case 'mappa': {
       const m = prepared('SELECT * FROM mappa WHERE chiave = ?').get(chiave) as RigaMappa | undefined;
@@ -169,11 +181,11 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       if (!l) return null;
       // il negozio che ha qui la sua sede (migrazione 072): il primo, se più d'uno
       const sede = prepared('SELECT chiave FROM negozio WHERE sede_chiave = ? AND nascosto = 0 ORDER BY ordine LIMIT 1').get(l.chiave) as { chiave: string } | undefined;
-      const negozio = sede ? negozioDettaglio(sede.chiave, partitaId) : null;
+      const negozio = sede ? negozioDettaglio(sede.chiave, ctx) : null;
       return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando }, negozio };
     }
     case 'negozio': {
-      const n = negozioDettaglio(chiave, partitaId);
+      const n = negozioDettaglio(chiave, ctx);
       return n ? { tipo: 'negozio', negozio: n } : null;
     }
     case 'confidente': {
@@ -193,10 +205,14 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
   }
 }
 
-function negozioDettaglio(chiave: string, partitaId?: number): NonNullable<DettaglioSpilloDto['negozio']> | null {
+function negozioDettaglio(chiave: string, ctx: ContestoSpilli): NonNullable<DettaglioSpilloDto['negozio']> | null {
+  // lo stato della partita è già nel contesto della risposta: prima ogni pin di negozio lo ricalcolava da capo (rilievo P1);
+  // gli acquisti si leggono alla prima occorrenza e restano per gli altri pin
+  const partitaId = ctx.partitaId;
+  const contesto = partitaId !== undefined && ctx.st ? { st: ctx.st, acquistati: (ctx.acquistati ??= acquistiDellaPartita(partitaId)) } : undefined;
   let n: ReturnType<typeof dettaglioNegozio>;
   try {
-    n = dettaglioNegozio(chiave, partitaId);
+    n = dettaglioNegozio(chiave, partitaId, contesto);
   } catch (err) {
     // un pin che cita un negozio tolto resta un pin senza negozio; ogni altro errore (SQL, partita inesistente) deve vedersi
     if (err instanceof HttpError && err.code === 'negozio-non-trovato') return null;
@@ -230,7 +246,7 @@ function immaginiDiSpillo(spilloId: number): ImmagineSpilloDto[] {
 }
 
 /** Contesto comune agli spilli di una risposta: partita, spilli raccolti, stato per le condizioni, nomi per le descrizioni. */
-interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string> }
+interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string>; acquistati?: Set<string> }
 
 /** Nomi (Confidenti, quartieri, richieste, Palazzi) per descrivere le condizioni: letti una volta per risposta. */
 
@@ -309,12 +325,12 @@ function conNegozioVivo(esito: DisponibilitaDto | undefined, dettaglio: Dettagli
 
 type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione' | 'destinazioneNonDisponibile'>;
 function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo {
-  const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx.partitaId);
+  const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx);
   // la voce della guida del pin (094): il suo campo, o il riferimento «punto» degli elementi senza mappa di prima
   const chiaveVoce = voceDelPin(r);
   const voce = !chiaveVoce ? null
     : dettaglio?.tipo === 'punto' && dettaglio.punto?.chiave === chiaveVoce ? dettaglio.punto
-    : (dettaglioRiferimento('punto', chiaveVoce, ctx.partitaId)?.punto ?? null);
+    : (dettaglioRiferimento('punto', chiaveVoce, ctx)?.punto ?? null);
   let raccolto = ctx.raccolti?.has(r.uid) ?? false;
   // Un punto di dungeon già gestito nella Guida (ottenuto/esaurito) conta come raccolto anche sulla mappa.
   if (voce?.stato) raccolto = true;
@@ -343,15 +359,17 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // Due eccezioni. Lo **stato di un altro pin** (2026-09-30): «la porta bloccata si vede solo se il meccanismo non è
   // azionato» è scritta da chi vuole proprio che la porta sparisca. E l'**ingresso a un Palazzo completato** (2026-09-30),
   // che sparisce come nel gioco: per questo si valuta dopo, sull'esito già deciso.
+  // le prove native si leggono una volta (prima tre: rilievo P8)
+  const nativo = nativoDiSpillo(r);
   const fisso = esitoCondizioni !== undefined && esitoCondizioni.stato !== 'disponibile'
-    && nativoDiSpillo(r) !== null && eStrutturale(r.tipo) && !(ctx.st && bloccatoDaAltriPin(perValutazione, ctx.st));
+    && nativo !== null && eStrutturale(r.tipo) && !(ctx.st && bloccatoDaAltriPin(perValutazione, ctx.st));
   const esitoVisibilita = senzaIngressoAPalazzoCompletato(fisso ? { ...esitoCondizioni, restaInVista: true as const } : esitoCondizioni, r, ctx);
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
     id: r.id, ...(r.uid ? { uid: r.uid } : {}), tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
     nome: r.nome, descrizione: r.descrizione,
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_tipo==='mappa'?chiaveMappa(r.riferimento_chiave):r.riferimento_chiave } : null,
-    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativoDiSpillo(r) ? { nativo: nativoDiSpillo(r) } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, voce, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
+    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativo ? { nativo } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, voce, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
   };
 }
 
@@ -368,10 +386,16 @@ function spilloDto(r: RigaSpillo, ctx: ContestoSpilli = {}): SpilloDto {
 function elementoSpilloDto(r:RigaSpillo,ctx:ContestoSpilli={}):SpilloDto|SchedaContenutoGuidaDto {
   return r.area_guida_chiave?{...dettagliSpillo(r,ctx),areaGuida:r.area_guida_chiave}:spilloDto(r,ctx);
 }
-export function schedeContenutiGuida(partitaId?:number):Map<number,SchedaContenutoGuidaDto> {
-  const ctx=contestoSpilli(partitaId);
-  const righe=prepared('SELECT * FROM spillo WHERE area_guida_chiave IS NOT NULL ORDER BY id').all() as RigaSpillo[];
-  return new Map(righe.map(r=>[r.id,{...dettagliSpillo(r,ctx),areaGuida:r.area_guida_chiave!}]));
+/**
+ * Le schede degli elementi della guida (spilli senza mappa) delle aree date, per id. Prima si calcolavano quelle di tutte le aree
+ * (187 elementi, con le loro condizioni) per ogni mappa aperta, che ne mostra una o due (rilievo P4 della verifica, 2026-10-03).
+ */
+export function schedeContenutiGuida(partitaId: number | undefined, aree: readonly string[]): Map<number, SchedaContenutoGuidaDto> {
+  // senza aree niente da descrivere: lo stato della partita (il pezzo costoso) non serve. La partita la verifica chi chiama.
+  if (aree.length === 0) return new Map();
+  const ctx = contestoSpilli(partitaId);
+  const righe = prepared(`SELECT * FROM spillo WHERE area_guida_chiave IN (${aree.map(() => '?').join(',')}) ORDER BY id`).all(...aree) as RigaSpillo[];
+  return new Map(righe.map((r) => [r.id, { ...dettagliSpillo(r, ctx), areaGuida: r.area_guida_chiave! }]));
 }
 
 /**
@@ -395,18 +419,19 @@ function arriviVerso(chiave: string): MappaDto['arrivi'] {
 export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   const r = rigaMappa(chiave);
   chiave = r.chiave;
-  const collezioni=collezioniImmagini();
-  // gli stessi figli che `conteggi` conta (senza il nodo dei Memento, tolto dall'albero): Tokyo diceva 24 luoghi e ne elencava 25.
+  const mappe = contestoMappe();
+  // gli stessi figli che i conteggi contano (senza il nodo dei Memento, tolto dall'albero): Tokyo diceva 24 luoghi e ne elencava 25.
   // A pari ordine decide la chiave, come nella scheda del Palazzo e nel riordino.
-  const figli = (prepared("SELECT * FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos' ORDER BY ordine, chiave").all(chiave) as RigaMappa[]).map(r=>riassunto(r,collezioni));
+  const figli = (prepared("SELECT * FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos' ORDER BY ordine, chiave").all(chiave) as RigaMappa[]).map((f) => riassunto(f, mappe));
   const ctx = contestoSpilli(partitaId);
   const spilli = (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(chiave) as RigaSpillo[]).map((s) => spilloDto(s, ctx));
-  const immagine = immagineDi(r);
+  const immagine = immagineDalContesto(r, mappe);
   return {
-    ...riassunto(r,collezioni), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
+    ...riassunto(r, mappe), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
     immagineUrl: immagine ? `/api/immagini/mappa/${encodeURIComponent(immagine.chiave)}/file?v=${encodeURIComponent(immagine.createdAt)}` : null,
     percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
-    genitoreNome: r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as { nome: string } | undefined)?.nome ?? null : null,
+    // dai nomi già letti nel contesto: prima una query in più (P8)
+    genitoreNome: r.genitore_chiave ? mappe.nomi.get(r.genitore_chiave) ?? null : null,
   };
 }
 
@@ -469,29 +494,13 @@ function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave:
 }
 
 /**
- * Il Palazzo a cui appartiene una planimetria, risalendo dal suo genitore fino alla radice `dungeon-<k>`
- * (la mappa che dichiara `entita_tipo = 'dungeon'`). Null se la catena non arriva a un Palazzo.
- */
-function palazzoDaGenitore(genitore: string | null): string | null {
-  let cur = genitore;
-  for (let passo = 0; cur && passo < 64; passo++) {
-    const r = prepared('SELECT chiave, genitore_chiave, entita_tipo, entita_chiave FROM mappa WHERE chiave = ?').get(cur) as { chiave: string; genitore_chiave: string | null; entita_tipo: string | null; entita_chiave: string | null } | undefined;
-    if (!r) return null;
-    if (r.entita_tipo === 'dungeon' && r.entita_chiave) return r.entita_chiave;
-    if (r.chiave.startsWith('dungeon-') && !r.genitore_chiave) return r.chiave.slice('dungeon-'.length);
-    cur = r.genitore_chiave;
-  }
-  return null;
-}
-
-/**
  * Un'area si lega solo a una planimetria **del suo Palazzo**: una planimetria di Kamoshida con un'area di
  * Madarame comparirebbe in un Palazzo senza quell'area e nell'altro sotto un'area che non la contiene.
  * La radice del Palazzo non è una planimetria (non compare nell'elenco): non si lega.
  */
 function verificaAreePalazzo(genitore: string | null, aree: string[]): void {
   if (!aree.length) return;
-  const palazzo = palazzoDaGenitore(genitore);
+  const palazzo = palazzoDellaMappa(genitore);
   if (!palazzo) throw httpErrors.badRequest('mappa-fuori-palazzo', 'Le aree della guida si legano solo alle planimetrie di un Palazzo.');
   const segnaposti = aree.map(() => '?').join(',');
   const trovate = prepared(`SELECT chiave, dungeon_chiave FROM dungeon_area WHERE chiave IN (${segnaposti})`).all(...aree) as Array<{ chiave: string; dungeon_chiave: string }>;
@@ -754,17 +763,9 @@ export function impostaStanzaMappa(chiavePubblica: string, dati: { con: string |
 
 export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaRiassuntoDto[] {
   const radice = genitore === null ? null : rigaMappa(genitore).chiave;
-  const nelSottoalbero = (chiave: string): boolean => {
-    if (radice === null) return true;
-    let corrente: string | null = chiave;
-    const visti = new Set<string>();
-    while (corrente && !visti.has(corrente)) {
-      visti.add(corrente);
-      corrente = (prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').get(corrente) as { genitore_chiave: string | null } | undefined)?.genitore_chiave ?? null;
-      if (corrente === radice) return true;
-    }
-    return false;
-  };
+  // le discendenti del genitore (lui escluso): il sottoalbero si legge una volta, non risalendo da ogni chiave
+  const sotto = radice === null ? null : sottoalberoMappe([radice]);
+  const nelSottoalbero = (chiave: string): boolean => sotto === null || (chiave !== radice && sotto.has(chiave));
   // per genitore effettivo: le chiavi scelte, nell'ordine in cui sono arrivate
   const perGenitore = new Map<string | null, string[]>();
   for (const k of chiavi) {
@@ -786,8 +787,8 @@ export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaR
       toccate.push(...finale);
     }
   })();
-  const collezioni = collezioniImmagini();
-  return toccate.map((c) => riassunto(rigaMappa(c), collezioni));
+  const ctx = contestoMappe();
+  return toccate.map((c) => riassunto(rigaMappa(c), ctx));
 }
 
 export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: string; tipo: TipoMappa }): MappaDto {
@@ -879,8 +880,7 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     // Spostata sotto un altro genitore, la planimetria porta con sé **tutte** le sue aree: devono restare
     // del Palazzo in cui arriva (rilievo della revisione). Quella che questo salvataggio sostituisce non conta.
     // Con lei si spostano le discendenti: anche le loro aree devono restare del Palazzo di arrivo.
-    const sottoalbero = [chiave];
-    for (let i = 0; i < sottoalbero.length; i++) for (const f of prepared('SELECT chiave FROM mappa WHERE genitore_chiave = ?').all(sottoalbero[i]) as Array<{ chiave: string }>) if (!sottoalbero.includes(f.chiave)) sottoalbero.push(f.chiave);
+    const sottoalbero = [...sottoalberoMappe([chiave])];
     const areeDopo = new Set(sottoalbero.flatMap((k) => areeDellaMappa(k).map((a) => a.chiave)));
     if (dati.entita !== undefined && r.entita_tipo === 'area' && r.entita_chiave) areeDopo.delete(r.entita_chiave);
     if (dati.entita?.tipo === 'area') areeDopo.add(dati.entita.chiave);
@@ -1278,14 +1278,10 @@ export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30):
 
 // ---- Esportazione / importazione ----
 
-/** Chiavi della mappa `radice` e di tutte le discendenti (ordine di visita: genitori prima dei figli). */
-function discendentiDi(radice: string): string[] {
+/** Chiavi della mappa `radice` e di tutte le discendenti (404 se la radice non c'è). */
+function discendentiDi(radice: string): Set<string> {
   rigaMappa(radice);
-  const out: string[] = [radice];
-  for (let i = 0; i < out.length; i++) {
-    for (const f of prepared('SELECT chiave FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, chiave').all(out[i]) as Array<{ chiave: string }>) if (!out.includes(f.chiave)) out.push(f.chiave);
-  }
-  return out;
+  return sottoalberoMappe([radice]);
 }
 
 function base64Immagine(ambito: string, chiave: string): { mime: string; base64: string } | null {
@@ -1303,9 +1299,10 @@ function base64Immagine(ambito: string, chiave: string): { mime: string; base64:
 export function esportaMappe(radice?: string): EsportazioneMappeDto {
   assegnaUidMancanti(getDb());
   if(radice)radice=rigaMappa(radice).chiave;
-  const ammesse = radice ? new Set(discendentiDi(radice)) : null;
+  const ammesse = radice ? discendentiDi(radice) : null;
+  const presentazioni = contestoMappe().presentazioni;
   const mappe: EsportazioneMappeDto['mappe'] = (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[]).filter((m) => !ammesse || ammesse.has(m.chiave)).map((m) => ({
-    ...presentazioneMappa(m.chiave),
+    ...(presentazioni.get(m.chiave) ?? {}),
     chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, assetOriginale:m.asset, larghezza: m.larghezza, altezza: m.altezza,
     ruoloImmagine: m.ruolo_immagine,
     entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
@@ -1475,6 +1472,15 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     /** I pin inseriti con condizioni sullo stato di altri pin: si ricontrollano a pacchetto inserito. */
     const conCondizioniSuPin: number[] = [];
     const adesso = nowIso();
+    // Lo schema non cambia durante l'importazione: colonne e tabelle si controllano una volta, non per ogni mappa e ogni pin
+    // (rilievo P5 della verifica, 2026-10-03; nei test lo schema può essere indietro, per questo si controllano).
+    const conRuolo = (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === 'ruolo_immagine');
+    const conEntita = !!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get();
+    const conPresentazione = !!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get();
+    const conNativo = colonnaNativoJson();
+    // I pin che erano già senza uid lo ricevono adesso, come prima al primo pin inserito (in ordine di id, prima dei nuovi):
+    // poi `assegnaUidMancanti` serve solo per un pin nuovo rimasto senza uid, e non va più rifatta per ogni pin.
+    if (conUid) assegnaUidMancanti(getDb());
     // prima le mappe (in ordine di dipendenza: i genitori possono arrivare dopo → secondo passaggio per i genitori)
     for (const m of pacchetto.mappe) {
       if (!chiaveValida(m.chiave) || !(TIPI_MAPPA as readonly string[]).includes(m.tipo)) { esito.saltate.push(m.chiave); continue; }
@@ -1485,7 +1491,6 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       const ruolo: RuoloImmagine = m.ruoloImmagine && (RUOLI_IMMAGINE as readonly string[]).includes(m.ruoloImmagine)
         ? m.ruoloImmagine
         : m.asset?.startsWith('palazzi/') ? 'emblema' : (m.asset ?? m.immagine) ? 'illustrazione-editoriale' : 'nessuna';
-      const conRuolo = (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === 'ruolo_immagine');
       prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at${conRuolo ? ', ruolo_immagine' : ''})
         VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?${conRuolo ? ', ?' : ''})
         ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, tipo = excluded.tipo, ordine = excluded.ordine, immagine_chiave = COALESCE(excluded.immagine_chiave, mappa.immagine_chiave), asset = excluded.asset,
@@ -1496,7 +1501,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       if (conNomeRivisto()) prepared('UPDATE mappa SET nome_rivisto = 0 WHERE chiave = ?').run(m.chiave);
       // L'entità dichiarata dalla mappa vale anche come associazione consultabile: è così che la
       // scheda dell'area della guida mostra la sua planimetria e che le altre sezioni la trovano.
-      if (prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) {
+      if (conEntita) {
         // Si sostituiscono solo i legami che il pacchetto dichiara — le aree della guida e il tipo di
         // `entita` —, non tutti: un luogo legato dalla migrazione 054 non viaggia nel pacchetto e
         // cancellarlo lo perdeva. Le aree sono l'elenco `aree` (2026-09-29, più d'una per planimetria);
@@ -1513,7 +1518,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         // che il pacchetto dichiara dopo la figlia) non hanno ancora un genitore (rilievo della revisione).
         areeDaLegare.push({ mappa: m.chiave, aree, fonte });
       }
-      if ((m.contesti !== undefined || m.gruppoImmagini !== undefined) && prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
+      if ((m.contesti !== undefined || m.gruppoImmagini !== undefined) && conPresentazione) {
         const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative(),etichetta:z.string().min(1).max(160).optional(),nomeRivisto:z.boolean().optional()}).nullable()});
         const v=schema.safeParse({contesti:m.contesti??[],gruppo:m.gruppoImmagini??null});
         if(!v.success || new Set(v.data.contesti.map(c=>c.id)).size!==v.data.contesti.length)throw httpErrors.badRequest('contesti-non-validi','Contesti della planimetria non validi o duplicati.');
@@ -1529,17 +1534,15 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         (m.spilli??[]).forEach((s,i)=>{const r=presenti.find(r=>!usati.has(r.id)&&spilloInvariatoNelSeed(r,s,verificate.get(s)));if(r){invariati.set(i,r.id);usati.add(r.id);}});
       }
       const daTogliere = (opz.sovrascrivi ? prepared('SELECT id FROM spillo WHERE mappa_chiave = ?').all(m.chiave) : prepared('SELECT id FROM spillo WHERE mappa_chiave = ? AND origine = ?').all(m.chiave, origine)) as Array<{ id: number }>;
+      // i pin che restano invariati, in un insieme (prima un array ricreato e scorso per ogni pin da togliere: P8)
+      const tenuti = new Set(invariati.values());
       for (const { id } of daTogliere) {
-        if ([...invariati.values()].includes(id)) continue;
+        if (tenuti.has(id)) continue;
+        // uid e voce in una lettura sola (prima due)
+        const prima = conUid ? prepared(`SELECT uid${conVoce ? ', voce_chiave' : ''} FROM spillo WHERE id = ?`).get(id) as { uid: string | null; voce_chiave?: string | null } : null;
         // la voce collegata dall'utente segue il pin reinserito con lo stesso uid, se il pacchetto non ne dice niente
-        if (conVoce) {
-          const v = prepared('SELECT uid, voce_chiave FROM spillo WHERE id = ?').get(id) as { uid: string | null; voce_chiave: string | null };
-          if (v.uid && v.voce_chiave) vociDiPrima.set(v.uid, v.voce_chiave);
-        }
-        if (conUid) {
-          const uid = prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(id) as string | null;
-          if (uid) for (const d of prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE spillo_arrivo_id = ?').all(id) as Array<{ spillo_id: number; mappa_chiave: string }>) arriviDaRicollegare.push({ spilloId: d.spillo_id, mappa: d.mappa_chiave, uid });
-        }
+        if (conVoce && prima?.uid && prima.voce_chiave) vociDiPrima.set(prima.uid, prima.voce_chiave);
+        if (prima?.uid) for (const d of prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE spillo_arrivo_id = ?').all(id) as Array<{ spillo_id: number; mappa_chiave: string }>) arriviDaRicollegare.push({ spilloId: d.spillo_id, mappa: d.mappa_chiave, uid: prima.uid });
         for (const i of prepared('SELECT immagine_chiave FROM spillo_immagine WHERE spillo_id = ?').all(id) as Array<{ immagine_chiave: string | null }>) if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
         prepared('DELETE FROM spillo WHERE id = ?').run(id);
       }
@@ -1561,14 +1564,23 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         const info = prepared(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at, condizioni_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
           .run(m.chiave, s.tipo, s.nome, s.descrizione ?? '', x, y, riferimento?.tipo ?? null, riferimento?.chiave ?? null, categoria === 'consumabile' ? 1 : 0, s.ordine ?? 0, origine, adesso, jsonCondizioni(valide));
         // (la colonna arriva con la 067; nei test lo schema puo' essere indietro, come per nativo_json)
-        if (uidValido(s.uid) && colonnaSpillo('uid') && !prepared('SELECT 1 FROM spillo WHERE uid = ?').get(s.uid)) prepared('UPDATE spillo SET uid = ? WHERE id = ?').run(s.uid, Number(info.lastInsertRowid));
-        assegnaUidMancanti(getDb());
+        let uidNuovo: string | null = null;
+        if (conUid) {
+          if (uidValido(s.uid) && !prepared('SELECT 1 FROM spillo WHERE uid = ?').get(s.uid)) {
+            prepared('UPDATE spillo SET uid = ? WHERE id = ?').run(s.uid, Number(info.lastInsertRowid));
+            uidNuovo = s.uid as string;
+          } else {
+            // l'uid del pacchetto manca o è già preso: si calcola dall'identità, come per i pin che ne erano senza
+            assegnaUidMancanti(getDb());
+            uidNuovo = prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(Number(info.lastInsertRowid)) as string | null;
+          }
+        }
         prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(s.soloPosizione ? 1 : 0, Number(info.lastInsertRowid));
         // la voce della guida del pin (la colonna arriva con la 094, come sopra): quella dichiarata dal pacchetto o, se tace, quella
         // che il pin aveva prima di essere reinserito; si scrive a genitori risolti, quando il Palazzo della planimetria è noto
         if (conVoce) {
           const dichiarata = voceDichiarata({ riferimento: s.riferimento ?? null, voce: s.voce });
-          const uid = prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(Number(info.lastInsertRowid)) as string | null;
+          const uid = uidNuovo;
           const voce = dichiarata !== undefined ? dichiarata : uid ? vociDiPrima.get(uid) ?? null : null;
           if (voce) vociDaScrivere.push({ id: Number(info.lastInsertRowid), nome: s.nome, mappa: m.chiave, voce });
         }
@@ -1580,7 +1592,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         // schema e' ancora indietro (nei test le migrazioni si applicano a scaglioni, per
         // riprodurre un'installazione vecchia): dove non c'e', le prove non si scrivono invece di
         // far fallire l'import.
-        if (s.nativo && colonnaNativoJson()) prepared('UPDATE spillo SET nativo_json = ? WHERE id = ?')
+        if (s.nativo && conNativo) prepared('UPDATE spillo SET nativo_json = ? WHERE id = ?')
           .run(JSON.stringify(s.nativo), Number(info.lastInsertRowid));
         const spilloId = Number(info.lastInsertRowid);
         if (pinCitati(valide).length > 0) conCondizioniSuPin.push(spilloId);

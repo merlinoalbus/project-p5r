@@ -93,11 +93,20 @@ export function elencaNegozi(partitaId?: number): NegozioRiassuntoDto[] {
 }
 
 /** Scheda di un negozio con gli articoli (acquistati nella partita, se indicata). */
-export function dettaglioNegozio(chiave: string, partitaId?: number): NegozioDettaglioDto {
+/** Lo stato della partita già calcolato da chi chiama: una mappa con molti negozi lo passa invece di farlo ricalcolare per ogni pin. */
+export interface ContestoNegozio { st: StatoDisponibilita; acquistati: Set<string> }
+
+/** Gli acquisti segnati nella partita (con la verifica della partita), per costruire un `ContestoNegozio`. */
+export function acquistiDellaPartita(partitaId: number): Set<string> {
+  return acquistiPartita(partitaId);
+}
+
+export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: ContestoNegozio): NegozioDettaglioDto {
   const n = prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(chiave) as RigaNegozio | undefined;
   if (!n) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);
-  const acquistati = acquistiPartita(partitaId);
-  const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
+  // lo stato della partita (rilievo P1 della verifica): dal contesto se c'è, altrimenti calcolato qui
+  const acquistati = partitaId !== undefined && contesto ? contesto.acquistati : acquistiPartita(partitaId);
+  const st = partitaId === undefined ? undefined : contesto?.st ?? statoDisponibilitaPartita(partitaId);
   const riepilogo = riassunto(n, st);
   const articoli = (prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(chiave) as RigaArticolo[]).map((r) => articoloDto(r, acquistati, st));
   const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
