@@ -287,6 +287,10 @@ sessione (`rossi-*.sh` / `rossi-*.out`):
 
 In totale **115 varianti, tutte rosse**, più le prove rosse manuali del paragrafo «Prove fuori dai test».
 
+Le tre varianti di F7 sono state rieseguite una per una con `rossi-f7.sh` (output in `rossi-f7.out`). In `rossi-validazione2` la
+terza era girata con `compendio.ts` non ancora ripristinato. Lo script nuovo si ferma se i file non sono identici al commit prima
+della variante, se l'altro file cambia, o se il ripristino fallisce.
+
 **Correzioni senza test automatico** (solo prova manuale, verde con il codice e rossa con quello di `main`, output grezzo
 salvato): A2 (CSS, misura nel browser), S1, S6, S7 (script), D1, D2, D4 (`nginx.conf`, con Docker). Tutte le altre hanno un test e
 una variante rossa.
@@ -309,8 +313,13 @@ Casi nuovi nei test esistenti:
 - servizi: `verifica-servizi` (C6 piani e cicli, rotazione B5', `prepared`, B1', violazioni già presenti); `verifica-mappe`
   (B14 negozio); `download-database` (pulizia fallita, N1); `_httpClient` (PUT relativi, F7).
 
-I test preesistenti modificati non perdono asserzioni: le 15 righe tolte sono il test CORS (tolto per decisione dell'utente; F01
-ne verifica l'assenza), cinque import riscritti, il mock di `scaricaPianta` (funzione tolta con O9) e un commento riscritto.
+Nei 22 test preesistenti modificati (`git diff main..fd75ca78`) le righe tolte sono 18. L'unica asserzione tolta è il test CORS:
+è stato tolto per decisione dell'utente, e F01 verifica il contrario, cioè che gli header non ci siano. Le altre righe tolte sono:
+- sette import o `vi.hoisted` riscritti con nomi in più;
+- il mock di `scaricaPianta` (funzione tolta con O9);
+- un commento riscritto.
+
+Elenco riga per riga in `prove-voce2/N4-nota.txt`.
 
 **Prove fuori dai test** (output grezzi nella cartella di lavoro della sessione, `prove-voce2/`):
 - **nginx (D1, D2, D4)**, con Docker su un backend finto (`nginx-prova.sh`, `F1-nginx-docker.txt`):
