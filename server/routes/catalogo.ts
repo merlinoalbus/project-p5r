@@ -3,6 +3,7 @@
 // ============================================================
 
 import { Router } from 'express';
+import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { aggiornaElemento, creaElemento, elencaCatalogo, elencaNascosti, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo } from '../services/catalogoService.js';
 import { oggettiSelezionabili, tuttiGliOggettiSelezionabili } from '../services/oggettiSelezionabili.js';
@@ -17,7 +18,7 @@ function corpoPerTipo(tipo: TipoCatalogo, corpo: unknown, parziale: boolean): Re
   const schema = parziale ? SCHEMI_CATALOGO_PARZIALI[tipo] : SCHEMI_CATALOGO[tipo];
   const esito = schema.safeParse(corpo);
   if (!esito.success) {
-    throw httpErrors.badRequest('dati-non-validi', `Dati del ${tipo} non validi: ${esito.error.issues.map((i) => `${i.path.join('.') || 'corpo'} — ${i.message}`).join('; ')}`, { issues: esito.error.issues });
+    throw httpErrors.badRequest('validation-error', `Dati del ${tipo} non validi: ${esito.error.issues.map((i) => `${i.path.join('.') || 'corpo'} — ${i.message}`).join('; ')}`, { issues: esito.error.issues });
   }
   return esito.data as Record<string, unknown>;
 }
@@ -36,8 +37,8 @@ router.get('/', (_req, res) => {
  * **Sta prima di `/:tipo`, e non è un dettaglio di stile**: `/:tipo` accetta qualunque parola,
  * quindi registrata dopo questa rotta non verrebbe mai raggiunta — `oggetti-di` finirebbe dentro
  * `tipo` e la validazione risponderebbe «tipo di catalogo sconosciuto». */
-router.get('/oggetti-di/:categoria', (req, res) => {
-  res.json(oggettiSelezionabili(req.params.categoria));
+router.get('/oggetti-di/:categoria', validate({ params: z.object({ categoria: z.string().min(1).max(80) }) }), (req, res) => {
+  res.json(oggettiSelezionabili(String(req.params.categoria)));
 });
 
 /** **Tutto** quello che l'app conosce, senza filtro di categoria.

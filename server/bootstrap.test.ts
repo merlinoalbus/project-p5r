@@ -63,12 +63,5 @@ describe('createApp', () => {
     expect(res.body.error.code).toBe('percorso-non-valido');
   });
 
-  it('preflight OPTIONS risponde con header CORS', async () => {
-    const res = await request(createApp())
-      .options('/api/health')
-      .set('Origin', 'http://esempio.test')
-      .set('Access-Control-Request-Method', 'GET');
-    expect(res.status).toBe(204);
-    expect(res.headers['access-control-allow-origin']).toBe('*');
-  });
+  // CORS tolto il 2026-10-03 (DECISIONI): l'assenza degli header è verificata in routes/verifica-api.test.ts (F01).
 });

@@ -194,7 +194,7 @@ router.get('/richieste', validate({ query: queryDomande }), (req, res) => {
 router.get('/dungeon', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaDungeon((req.query as unknown as { partita?: number }).partita));
 });
-router.get('/dungeon/:chiave', validate({ query: queryDomande }), (req, res) => {
+router.get('/dungeon/:chiave', validate({ params: paramsChiaveGuida, query: queryDomande }), (req, res) => {
   res.json(dettaglioDungeon(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
 });
 /* ---- Correzione dei testi della guida: la sezione dei Palazzi non è più in sola lettura ---- */
@@ -243,11 +243,11 @@ router.get('/calendario', validate({ query: queryCalendario }), (req, res) => {
 router.get('/domande', validate({ query: queryDomande }), (req, res) => {
   res.json(domande((req.query as unknown as { partita?: number }).partita));
 });
-router.get('/confidenti/:chiave', (req, res) => {
+router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
 });
 /** La Dote a ogni incontro, rango per rango (dato di gioco, come gli effetti di libri e attività). */
-router.put('/confidenti/:chiave/doti-incontro', validate({ body: bodyDotiIncontro }), (req, res) => {
+router.put('/confidenti/:chiave/doti-incontro', validate({ params: paramsChiaveGuida, body: bodyDotiIncontro }), (req, res) => {
   res.json(impostaDotiIncontro(String(req.params.chiave), (req.body as { ranghi: Array<{ rango: number; doti: DoteNote[] }> }).ranghi));
 });
 

@@ -6,7 +6,7 @@ import condizioniRouter from './routes/condizioni.js';
 // Ordine:
 //   1. requestContext  — requestId + child logger per richiesta
 //   2. responseShape   — envelope { data } su ogni res.json
-//   3. cors + express.json
+//   3. express.json (niente CORS: il frontend è sulla stessa origine, proxy Vite / nginx — DECISIONI 2026-10-03)
 //   4. router di area: /api/compendio, /api/traduzioni, /api/partite, /api/immagini, /api/fusione, /api/mappe, /api/font, /api/impostazioni
 //   5. /api/health + /api/config
 //   6. 404 JSON per /api/* sconosciute
@@ -14,10 +14,9 @@ import condizioniRouter from './routes/condizioni.js';
 // ============================================================
 
 import express, { type Express } from 'express';
-import cors from 'cors';
 import { z } from 'zod';
 import { config } from './config.js';
-import { requestContextMiddleware } from './middleware/requestContext.js';
+import { getRequestLogger, requestContextMiddleware } from './middleware/requestContext.js';
 import { responseShapeMiddleware } from './middleware/responseShape.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { httpErrors } from './utils/httpError.js';
@@ -43,7 +42,6 @@ export function createApp(): Express {
   // ---- Middleware globali ----
   app.use(requestContextMiddleware);
   app.use(responseShapeMiddleware);
-  app.use(cors());
   // Il pacchetto delle mappe include le immagini: deve essere letto prima del limite globale.
   app.post('/api/mappe/importa', express.json({ limit: '64mb' }));
   app.use(express.json({ limit: '5mb' }));
@@ -61,17 +59,20 @@ export function createApp(): Express {
   app.use('/api/condizioni', condizioniRouter);
 
   // ---- Health ----
-  app.get('/api/health', (_req, res) => {
-    let dbHealth: Record<string, unknown>;
+  // 503 quando il database non risponde: l'HEALTHCHECK di Docker guarda solo il codice HTTP.
+  // Il motivo resta nel log, non nella risposta (può contenere percorsi e messaggi di SQLite).
+  app.get('/api/health', (req, res) => {
+    let dbHealth: { ok: true; userVersion: number } | { ok: false; error: string };
     try {
       const db = getDb();
       db.prepare('SELECT 1').get();
       const userVersion = db.pragma('user_version', { simple: true }) as number;
       dbHealth = { ok: true, userVersion };
     } catch (err) {
-      dbHealth = { ok: false, error: err instanceof Error ? err.message : 'verifica db fallita' };
+      getRequestLogger().error({ err, path: req.path }, 'verifica del database fallita');
+      dbHealth = { ok: false, error: 'Il database non risponde.' };
     }
-    res.json({
+    res.status(dbHealth.ok ? 200 : 503).json({
       status: dbHealth.ok ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
       db: dbHealth,

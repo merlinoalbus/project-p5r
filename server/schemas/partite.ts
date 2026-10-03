@@ -107,18 +107,28 @@ export const bodyCreaObiettivo = z.object({ personaId: z.number().int().positive
 export const bodyAggiornaObiettivo = z.object({ ...campiObiettivo, stato: z.enum(['aperto', 'raggiunto', 'annullato']).optional() });
 export const queryObiettivi = z.object({ stato: z.enum(['aperto', 'raggiunto', 'annullato']).optional() });
 export const paramsPartitaObiettivo = z.object({ id: z.coerce.number().int().positive(), obiettivoId: z.coerce.number().int().positive() });
-const nodoPiano: z.ZodType<unknown> = z.lazy(() => z.object({
-  persona: z.object({ id: z.number().int().positive() }).passthrough(),
-  modo: z.enum(['scorta', 'registro', 'cattura', 'fusione']),
-  costo: z.number().min(0),
-  tipo: z.enum(['normale', 'stesso-arcano', 'tesoro', 'speciale']).optional(),
-  figli: z.array(nodoPiano).max(12),
-  skillPortate: z.array(z.object({ id: z.number().int(), nome: z.string(), nomeIt: z.string() })).max(8).default([]),
-  skillDaLivello: z.array(z.object({ id: z.number().int(), nome: z.string(), nomeIt: z.string() })).max(8).default([]),
-}).passthrough());
+/** Livelli massimi di un albero di fusione salvato. Il motore produce al massimo `profondita` 4 (`queryPiani`), cioè 5 livelli
+ *  con la radice: 8 lascia margine senza permettere un corpo annidato all'infinito. */
+export const LIVELLI_MAX_PIANO = 8;
+const skillDelNodo = z.array(z.object({ id: z.number().int(), nome: z.string(), nomeIt: z.string() })).max(8).default([]);
+/** Schema di un nodo con al più `livelli` livelli (lui compreso). Lo schema è finito, non `z.lazy`: un corpo annidato oltre il
+ *  limite si ferma con un 400 al livello in eccesso, invece di far ricorrere la validazione fino a esaurire lo stack. */
+function nodoPiano(livelli: number): z.ZodType<unknown> {
+  return z.object({
+    persona: z.object({ id: z.number().int().positive() }).passthrough(),
+    modo: z.enum(['scorta', 'registro', 'cattura', 'fusione']),
+    costo: z.number().min(0),
+    tipo: z.enum(['normale', 'stesso-arcano', 'tesoro', 'speciale']).optional(),
+    figli: livelli > 1
+      ? z.array(nodoPiano(livelli - 1)).max(12)
+      : z.array(z.unknown()).max(0, `Un piano salvato ha al massimo ${LIVELLI_MAX_PIANO} livelli.`),
+    skillPortate: skillDelNodo,
+    skillDaLivello: skillDelNodo,
+  }).passthrough();
+}
 export const bodySalvaPiano = z.object({
   personaId: z.number().int().positive(),
-  piano: z.object({ radice: nodoPiano, costo: z.number().min(0), profondita: z.number().int().min(0), catture: z.number().int().min(0), evocazioni: z.number().int().min(0), fusioni: z.number().int().min(0) }).passthrough(),
+  piano: z.object({ radice: nodoPiano(LIVELLI_MAX_PIANO), costo: z.number().min(0), profondita: z.number().int().min(0), catture: z.number().int().min(0), evocazioni: z.number().int().min(0), fusioni: z.number().int().min(0) }).passthrough(),
   opzioni: z.object({}).passthrough().optional(),
   skillIds: z.array(z.number().int().positive()).max(8).optional(),
   obiettivoId: z.number().int().positive().nullable().optional(),

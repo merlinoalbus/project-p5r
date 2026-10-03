@@ -4,7 +4,8 @@
 //
 //   - abort per tentativo dopo `timeoutMs` (default 30s);
 //   - retry sui fallimenti transitori (5xx, rete, timeout) fino a
-//     `maxRetries` con backoff esponenziale (500, 1500, 4500 ms);
+//     `maxRetries` con backoff esponenziale (500, 1500, 4500 ms), solo per
+//     i metodi idempotenti (POST e PATCH: 0 tentativi in più, salvo richiesta);
 //   - offline → toast e stop immediato;
 //   - i 4xx passano intatti al chiamante.
 // ============================================================
@@ -22,6 +23,11 @@ export interface HttpFetchOptions {
   /** true: nessun toast automatico (il chiamante gestisce il messaggio). */
   silent?: boolean;
   externalSignal?: AbortSignal;
+}
+
+/** GET, HEAD, PUT, DELETE e OPTIONS si possono ripetere senza effetti in più (RFC 9110 §9.2.2); POST e PATCH no. */
+function metodoIdempotente(metodo: string | undefined): boolean {
+  return !['POST', 'PATCH'].includes((metodo ?? 'GET').toUpperCase());
 }
 
 function isRetriableStatus(status: number): boolean {
@@ -51,7 +57,9 @@ export async function httpFetch(
   opts: HttpFetchOptions = {},
 ): Promise<Response> {
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  const maxRetries = opts.maxRetries ?? DEFAULT_MAX_RETRIES;
+  // POST e PATCH non sono idempotenti: un 5xx o un timeout possono arrivare a scrittura già avvenuta (yen aggiunti, fusione
+  // eseguita), e ripeterli la raddoppierebbe. Si ritentano solo se il chiamante lo chiede esplicitamente.
+  const maxRetries = opts.maxRetries ?? (metodoIdempotente(init.method) ? DEFAULT_MAX_RETRIES : 0);
   const silent = opts.silent ?? false;
 
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {

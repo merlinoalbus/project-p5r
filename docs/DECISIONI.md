@@ -1029,3 +1029,14 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - Scelta dell'utente (2026-10-03, posta su richiesta del validatore): lo stato «Incontrato» del pin Confidente **resta separato**
   dallo stato del Confidente nella partita (Partita → Confidenti, «sbloccato» / rango): segnare il pin non sblocca il Confidente,
   e un Confidente sbloccato non segna il pin.
+
+## 2026-10-03 — Verifica completa: CORS tolto, immagini da URL senza blocchi
+
+- Richiesta dell'utente: verifica completa del codice su un branch di ottimizzazione (rapporto in
+  `docs/analisi/verifica-completa-2026-10-03.md`). Due rilievi cambiavano un comportamento e la scelta era sua.
+- **CORS (F01): tolto.** `cors()` era aperto a ogni origine: qualunque sito aperto nel browser poteva chiamare l'API, che
+  non ha autenticazione, comprese le rotte che cancellano. Il frontend usa la stessa origine (proxy Vite in sviluppo, nginx
+  in produzione), quindi non ne ha bisogno.
+- **Scaricamento di immagini da URL (F03): resta com'è.** Il server può scaricare anche indirizzi della rete privata o di
+  Tailscale. L'importazione del pacchetto da URL non esiste più dal 2026-09-12: si aggiornano solo i commenti e i documenti
+  che la descrivono ancora (O1–O8).

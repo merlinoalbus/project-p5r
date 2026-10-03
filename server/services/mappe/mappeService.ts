@@ -415,7 +415,15 @@ export function mappaPerEntita(tipo: string, chiave: string): MappaRiassuntoDto 
 /** `passaggio`/`ritorno` (15.24) valgono solo alla creazione con un genitore: passaggio nel genitore verso la nuova mappa e viceversa. */
 export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
 
-const chiaveValida = (chiave: string): boolean => /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiave);
+/** Primi segmenti letterali delle rotte di `/api/mappe` (`routes/mappe.ts`): una mappa con una di queste chiavi verrebbe oscurata
+ *  dalla rotta omonima (`GET /api/mappe/albero` non arriverebbe mai alla mappa «albero»). `struttura-server.test.ts` verifica che
+ *  l'elenco copra tutte le rotte del router. */
+export const CHIAVI_MAPPA_RISERVATE: ReadonlySet<string> = new Set([
+  'accesso', 'albero', 'contenuti', 'entita', 'esporta', 'importa', 'marcatori', 'marcatori-luoghi', 'ordine', 'piante-citta',
+  'riferimenti', 'risolvi', 'spilli',
+]);
+
+const chiaveValida = (chiave: string): boolean => /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiave) && !CHIAVI_MAPPA_RISERVATE.has(chiave);
 
 /**
  * Il legame fra una mappa e l'entità della guida vive in due posti: le colonne `entita_tipo` /
@@ -781,6 +789,7 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
   const richiesta=chiave;
   if(richiesta && prepared('SELECT 1 FROM mappa WHERE chiave=?').get(idMappa(richiesta)))throw httpErrors.conflict('mappa-esistente','La chiave indicata appartiene già a una mappa.');
   chiave=(dati.genitore && rigaMappa(dati.genitore).tipo!=='citta'?chiaveMappa(dati.genitore)+'-':'')+slug(dati.nome);
+  if (CHIAVI_MAPPA_RISERVATE.has(chiave)) throw httpErrors.badRequest('chiave-riservata', `Il nome «${dati.nome}» darebbe alla mappa la chiave '${chiave}', riservata alle funzioni dell'app: scegline un altro.`);
   if (!chiaveValida(chiave)) throw httpErrors.badRequest('chiave-non-valida', 'La chiave della mappa ammette solo minuscole, cifre e trattini (1–180 caratteri).');
   if (prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(chiave)) throw httpErrors.conflict('mappa-esistente', `Esiste già una mappa con chiave '${chiave}'.`);
   if (!(TIPI_MAPPA as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di mappa non ammesso.');

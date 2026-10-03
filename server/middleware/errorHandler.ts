@@ -7,12 +7,14 @@
 // `HttpError` serializza la forma canonica; gli errori 4xx di Express/
 // body-parser (JSON malformato, corpo oltre il limite, percorso non
 // decodificabile) diventano envelope canonici in italiano; qualsiasi
-// altro Error è loggato con lo stack e risponde 500 con la stessa forma.
+// altro Error è loggato con lo stack e risponde 500 con la stessa forma e
+// un messaggio fisso (il dettaglio resta nel log, col requestId).
 // ============================================================
 
 import type { Request, Response, NextFunction } from 'express';
 import { HttpError } from '../utils/httpError.js';
 import { getRequestLogger, getRequestId } from './requestContext.js';
+import { segnaRispostaFormata } from './responseShape.js';
 
 interface RispostaErrore {
   status: number;
@@ -42,7 +44,22 @@ function mappaErroreExpress(err: unknown): RispostaErrore | null {
   if (e.type === 'request.aborted') {
     return { status: 400, code: 'richiesta-interrotta', message: 'La richiesta è stata interrotta prima del completamento.' };
   }
+  // Errori di `res.sendFile`/`res.download` (modulo `send`): file sparito, percorso vietato, intervallo di byte impossibile.
+  if (status === 404) return { status, code: 'not-found', message: 'La risorsa richiesta non esiste.' };
+  if (status === 403) return { status, code: 'accesso-negato', message: 'La risorsa richiesta non è accessibile.' };
+  if (status === 416) return { status, code: 'intervallo-non-valido', message: "L'intervallo di byte richiesto non è disponibile." };
   return { status, code: 'richiesta-non-valida', message: 'La richiesta non è valida.' };
+}
+
+/** Scrive il corpo dell'errore così com'è (senza la busta `{ data }` di `responseShape`). Una rotta che stava per mandare un file
+ *  può aver già impostato tipo e allegato (`application/vnd.sqlite3`, `attachment`): `res.json` non sovrascrive un Content-Type
+ *  esistente, quindi si rimettono le intestazioni di una risposta JSON. */
+function inviaErrore(res: Response, status: number, corpo: unknown): void {
+  if (res.headersSent) return;
+  segnaRispostaFormata(res);
+  res.removeHeader('Content-Disposition');
+  res.type('application/json');
+  res.status(status).json(corpo);
 }
 
 /** Converte gli errori applicativi nell'envelope HTTP comune. */
@@ -56,9 +73,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     } else {
       log.warn({ status: err.status, code: err.code, path: req.path, method: req.method }, 'http error');
     }
-    if (!res.headersSent) {
-      res.status(err.status).json(err.toBody(requestId));
-    }
+    inviaErrore(res, err.status, err.toBody(requestId));
     return;
   }
 
@@ -68,23 +83,17 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   if (rispostaExpress) {
     const causa = err as Error & { type?: string };
     log.warn({ path: req.path, method: req.method, status: rispostaExpress.status, code: rispostaExpress.code, tipo: causa.type, causa: causa.message }, 'richiesta rifiutata');
-    if (!res.headersSent) {
-      res.status(rispostaExpress.status).json({
-        error: { code: rispostaExpress.code, message: rispostaExpress.message },
-        ...(requestId ? { requestId } : {}),
-      });
-    }
+    inviaErrore(res, rispostaExpress.status, {
+      error: { code: rispostaExpress.code, message: rispostaExpress.message },
+      ...(requestId ? { requestId } : {}),
+    });
     return;
   }
 
+  // Il messaggio vero (SQLite, percorsi assoluti…) resta nel log, ritrovabile col requestId.
   log.error({ err, path: req.path, method: req.method }, 'errore non gestito');
-  if (!res.headersSent) {
-    res.status(500).json({
-      error: {
-        code: 'internal-error',
-        message: err instanceof Error ? err.message : 'Errore interno del server.',
-      },
-      ...(requestId ? { requestId } : {}),
-    });
-  }
+  inviaErrore(res, 500, {
+    error: { code: 'internal-error', message: 'Errore interno del server.' },
+    ...(requestId ? { requestId } : {}),
+  });
 }

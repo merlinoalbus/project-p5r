@@ -20,8 +20,10 @@ const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.nu
 
 const bodyMarcatore = z.object({ punto: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
 const router = Router();
-router.get('/risolvi/:chiave', (req,res) => res.json(risolviPercorsoMappa(String(req.params.chiave))));
-router.get('/contenuti/:chiave', validate({ query: queryMappa }), (req,res) => res.json(contenutiMappa(String(req.params.chiave), (req.query as unknown as {partita?:number}).partita)));
+// Chiave libera ma limitata: un indirizzo scritto a mano che non corrisponde a nulla resta un 404 «mappa-non-trovata», non un 400.
+const paramsChiaveLibera = z.object({ chiave: z.string().min(1).max(200) });
+router.get('/risolvi/:chiave', validate({ params: paramsChiaveLibera }), (req,res) => res.json(risolviPercorsoMappa(String(req.params.chiave))));
+router.get('/contenuti/:chiave', validate({ params: paramsChiaveLibera, query: queryMappa }), (req,res) => res.json(contenutiMappa(String(req.params.chiave), (req.query as unknown as {partita?:number}).partita)));
 
 /** Accesso comune ai luoghi da città, Palazzi, negozi e articoli. */
 router.get('/accesso/:tipo/:chiave', validate({ params: z.object({ tipo: z.enum(TIPI_ACCESSO_MONDO), chiave: z.string().min(1).max(200) }) }), (req, res) => {

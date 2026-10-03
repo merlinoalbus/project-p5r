@@ -16,7 +16,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import { prepared, nowIso } from '../db/dbService.js';
+import { getDb, prepared, nowIso } from '../db/dbService.js';
 import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
 import { pinConStato } from '../services/condizioni/nomiCondizioni.js';
@@ -67,7 +67,7 @@ router.get('/elenchi', (_req, res) => {
 /** I pin con uno stato, per la condizione «Pin di una mappa» (2026-10-03): solo l'editor delle mappe li chiede, a parte, perché
  *  sono centinaia e agli altri editor non servono. */
 router.get('/spilli', (_req, res) => {
-  res.json({ data: pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola })) });
+  res.json(pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola })));
 });
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano, completi anche dove non c'è ancora una riga. */
@@ -112,9 +112,12 @@ router.put('/partite/:partita/eventi/:chiave', validate({ params: z.object({ par
   // «Entra in squadra» si legge dalla squadra della partita: si segna lì, non qui.
   if (membroDellEvento(evento)) throw httpErrors.badRequest('evento-calcolato', 'Questo evento si calcola dalla squadra della partita (Partita → Denaro e squadra): non si segna a mano.');
   const { avvenuto } = req.body as { avvenuto: boolean };
-  // lo stesso dato del «Condizione soddisfatta» dei Confidenti (`confermaRequisito`)
-  impostaEventoStoria(id, evento, avvenuto);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), id);
+  // lo stesso dato del «Condizione soddisfatta» dei Confidenti (`confermaRequisito`); evento e data di modifica della partita
+  // cambiano insieme o per niente
+  getDb().transaction(() => {
+    impostaEventoStoria(id, evento, avvenuto);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), id);
+  })();
   res.json(progressi(id));
 });
 
@@ -133,8 +136,11 @@ router.put('/partite/:partita/punti-negozio/:chiave', validate({ params: z.objec
   if (!riga) throw httpErrors.notFound('negozio-non-trovato', 'Negozio non trovato.');
   if (leggiProgrammaPunti(riga.programma_punti_json)?.calcolo !== 'manuale') throw httpErrors.badRequest('negozio-senza-punti', 'Questo negozio non ha un programma punti da segnare a mano.');
   const { punti } = req.body as { punti: number };
-  prepared('INSERT INTO punti_negozio_partita (partita_id, negozio_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, negozio_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at').run(id, negozio, punti, nowIso());
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), id);
+  getDb().transaction(() => {
+    const adesso = nowIso();
+    prepared('INSERT INTO punti_negozio_partita (partita_id, negozio_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, negozio_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at').run(id, negozio, punti, adesso);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, id);
+  })();
   res.json(progressi(id));
 });
 

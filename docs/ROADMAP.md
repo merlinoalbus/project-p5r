@@ -1045,7 +1045,7 @@ l'utente). Misure di partenza: server 210 file / 21k righe, frontend 275 / 26k, 
 | Voce | Contenuto | Stato |
 |------|-----------|-------|
 | 1 | Verifica in sola lettura (server, condivisi, frontend): bug e criticità, dati e strutture ridondanti, punti lenti; ogni rilievo verificato sul codice; elenco all'utente (le scelte che cambiano comportamento sono sue) | fatto — cinque verifiche e cinque controverifiche indipendenti; dopo la prima validazione aggiunte script/deploy/configurazione/test e commenti e documenti obsoleti; 184 rilievi confermati, nessuno falso, in `docs/analisi/verifica-completa-2026-10-03.md` con gravità, correzione, fase e le due scelte per l'utente (CORS, scaricamento di immagini da URL) |
-| 2 | Correzione di bug e criticità, ciascuna con test e variante rossa | da fare |
+| 2 | Correzione di bug e criticità, ciascuna con test e variante rossa | in corso — scelte dell'utente: CORS tolto, immagini da URL senza blocchi (DECISIONI 2026-10-03) |
 | 3 | Ridondanze e ottimizzazioni senza cambiare il comportamento | da fare |
 | 4 | Commenti in italiano: intestazione dei file, commento di ogni funzione (cosa fa e logica interna) | da fare |
 | 5 | Swagger: OpenAPI generato dagli schemi zod, descrizione in italiano di ogni rotta, test di copertura, `/api/docs` e `/api/openapi.json`, collegamento da Impostazioni | da fare |

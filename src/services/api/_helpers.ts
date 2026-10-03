@@ -64,8 +64,14 @@ async function requestJson<T>(
   if (!res.ok) throw await parseError(res, `API ${method} ${path}`);
   const text = await res.text();
   if (!text) return undefined as T;
-  const parsed = JSON.parse(text);
-  return (parsed?.data ?? parsed) as T;
+  return payloadDellaBusta<T>(JSON.parse(text));
+}
+
+/** Il contenuto della busta `{ data }` che il server mette su ogni risposta riuscita (`responseShape`). Si guarda la presenza
+ *  della chiave, non il valore: `{ data: null }` vale `null`, non la busta intera. */
+export function payloadDellaBusta<T>(parsed: unknown): T {
+  if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed) && 'data' in parsed) return (parsed as { data: T }).data;
+  return parsed as T;
 }
 
 /** GET → contenuto di `data`. */

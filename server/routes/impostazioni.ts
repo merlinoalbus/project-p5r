@@ -18,6 +18,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
+import { getRequestLogger } from '../middleware/requestContext.js';
 import fs from 'node:fs';
 import { copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanzaDaDeposito, statoIstanza } from '../services/impostazioniService.js';
 import { depositaContenuto, depositaCopia } from '../services/depositoService.js';
@@ -39,7 +40,16 @@ router.get('/istanza/database', (_req, res, next) => {
       const depositato = depositaCopia(percorso, nome);
       res.setHeader('Content-Type', 'application/vnd.sqlite3');
       if (depositato) res.setHeader('X-Deposito-File', depositato);
-      res.download(percorso, nome, () => fs.rmSync(percorso, { force: true }));
+      // In Express 5 l'errore dell'invio arriva solo a questa callback: va passato a `next`, altrimenti la richiesta resta
+      // appesa; e la pulizia della copia temporanea non deve far cadere il processo se fallisce.
+      res.download(percorso, nome, (errInvio) => {
+        try {
+          fs.rmSync(percorso, { force: true });
+        } catch (errPulizia) {
+          getRequestLogger().warn({ err: errPulizia, percorso }, 'copia temporanea del database non rimossa');
+        }
+        if (errInvio) next(errInvio);
+      });
     } catch (err) {
       next(err);
     }

@@ -43,13 +43,9 @@ export const paramsTipoCatalogo = z.object({ tipo: z.enum(TIPI_CATALOGO) });
 export const paramsElementoCatalogo = paramsTipoCatalogo.extend({ chiave: z.string().min(1).max(200) });
 
 /** Campi di un negozio scrivibili dall'utente (le colonne della tabella, in snake_case come nel servizio). */
+// Dalla voce 5 (2026-09-12) il negozio non ha condizioni proprie: la sua disponibilità sono gli orari e le condizioni stanno sugli
+// articoli (`CAMPI.negozio` in catalogoService). Lo schema non accetta più un campo che il servizio avrebbe scartato in silenzio.
 export const datiNegozio = z.object({
-  /** **Confermato da te.** Una riga che aggiungi nasce non verificata, ed e' giusto: non viene
-   *  dalla guida. Ma finora quel marchio si poteva solo mettere, mai togliere - il campo non era
-   *  nel modulo e l'API non lo accettava - quindi ogni cosa inserita restava «da verificare» per
-   *  sempre, senza che esistesse un modo di verificarla. */
-  
-  condizioni_json: z.array(condizioneSpillo).max(20).transform(v=>JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   luogo: testo(200).default(''),
   luogo_chiave: z.string().max(80).nullable().optional(),
