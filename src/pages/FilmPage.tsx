@@ -15,6 +15,7 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { opzioniDaNomi } from '../utils/selettore';
 import { getFilm, impostaProgressoFilm } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useCodaProgresso } from '../hooks/useCodaProgresso';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
@@ -34,18 +35,13 @@ import type { FilmDto, FilmDvdDto } from '../types';
 
 type SupportoFiltro = 'tutti' | 'cinema' | 'dvd';
 const SUPPORTI: ReadonlyArray<{ chiave: SupportoFiltro; nome: string }> = [{ chiave: 'tutti', nome: 'Cinema e DVD' }, { chiave: 'cinema', nome: 'Solo cinema' }, { chiave: 'dvd', nome: 'Solo DVD' }];
-const chiaveCoda = (partitaId: number, film: string) => `${partitaId}:${film}`;
 const nomeFilm = (film: FilmDto) => film.nomeIt ?? film.nome;
 
 export function FilmPage() {
   useDocumentTitle('Film e DVD');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
-  const partitaIdRef = useRef(partitaId);
-  useEffect(() => { partitaIdRef.current = partitaId; }, [partitaId]);
   const dati = useCarica(() => getFilm(partitaId ?? undefined), [partitaId]);
-  const datiRef = useRef<FilmDvdDto | null>(null);
-  useEffect(() => { datiRef.current = dati.dati; }, [dati.dati]);
   const [ricerca, setRicerca] = useState('');
   const [stato, setStato] = useState<StatoLettura>('tutti');
   const [supporto, setSupporto] = useState<SupportoFiltro>('tutti');
@@ -53,71 +49,32 @@ export function FilmPage() {
   const [selezionato, setSelezionato] = useState<string | null>(null);
   const [posizioneSelezionata, setPosizioneSelezionata] = useState(0);
   const [mostraFatti, setMostraFatti] = useState(false);
-  const [desiderati, setDesiderati] = useState<Record<string, number>>({});
-  const [occupati, setOccupati] = useState<Record<string, boolean>>({});
   const pannelloRef = useRef<HTMLElement | null>(null);
-  const desideratiRef = useRef(new Map<string, number>());
-  const confermatiRef = useRef(new Map<string, number>());
-  const inVoloRef = useRef(new Set<string>());
 
-  const sostituisciFilm = (film: FilmDto) => {
-    const correnti = datiRef.current;
-    if (!correnti) return;
-    const elenco = correnti.film.map((f) => f.chiave === film.chiave ? film : f);
-    const nuovi: FilmDvdDto = {
-      ...correnti,
-      film: elenco,
-      iniziati: elenco.filter((f) => f.iniziato).length,
-      completati: elenco.filter((f) => f.fatto).length,
-      sessioniCompletamentoFatte: elenco.reduce((n, f) => n + Math.min(f.progresso, f.totaleSessioni), 0),
-      visioniRegistrate: elenco.reduce((n, f) => n + f.progresso, 0),
-    };
-    datiRef.current = nuovi;
-    dati.imposta(nuovi);
-  };
-
-  /** Le pressioni rapide si mettono in coda: una richiesta per volta insegue l'ultimo valore chiesto. */
-  const eseguiCoda = async (film: FilmDto) => {
-    if (!partitaId) return;
-    const partitaCorrente = partitaId;
-    const coda = chiaveCoda(partitaCorrente, film.chiave);
-    if (inVoloRef.current.has(coda)) return;
-    inVoloRef.current.add(coda);
-    confermatiRef.current.set(coda, film.progresso);
-    setOccupati((x) => ({ ...x, [coda]: true }));
-    try {
-      while (true) {
-        const confermato = confermatiRef.current.get(coda) ?? film.progresso;
-        const desiderato = desideratiRef.current.get(coda) ?? confermato;
-        if (desiderato === confermato || partitaIdRef.current !== partitaCorrente) break;
-        const aggiornato = await impostaProgressoFilm(partitaCorrente, film.chiave, desiderato);
-        confermatiRef.current.set(coda, aggiornato.progresso);
-        // la visione dà le sue Doti: si segnano a mano, l'avviso le ricorda
-        avvisaDotiDaSegnare(aggiornato.daSegnare, aggiornato.nomeIt ?? aggiornato.nome);
-        if (partitaIdRef.current === partitaCorrente) sostituisciFilm(aggiornato);
-      }
-    } catch (err) {
-      const confermato = confermatiRef.current.get(coda) ?? film.progresso;
-      desideratiRef.current.set(coda, confermato);
-      setDesiderati((x) => ({ ...x, [coda]: confermato }));
-      if (partitaIdRef.current === partitaCorrente) notifica('error', err instanceof Error ? err.message : 'Aggiornamento della visione fallito.');
-    } finally {
-      inVoloRef.current.delete(coda);
-      setOccupati((x) => ({ ...x, [coda]: false }));
-    }
-  };
-
-  const accoda = (film: FilmDto, valore: number) => {
-    if (!partitaId) return;
-    const desiderato = film.dove === 'dvd' ? Math.min(Math.max(valore, 0), film.totaleSessioni) : Math.max(valore, 0);
-    const coda = chiaveCoda(partitaId, film.chiave);
-    desideratiRef.current.set(coda, desiderato);
-    setDesiderati((x) => ({ ...x, [coda]: desiderato }));
-    void eseguiCoda(film);
-  };
+  // Le pressioni rapide su visioni e sessioni: una richiesta per volta per film insegue l'ultimo valore chiesto, nella partita di partenza.
+  const coda = useCodaProgresso<FilmDto>(partitaId, {
+    invia: impostaProgressoFilm,
+    // il film aggiornato sostituisce il suo nei dati correnti, con i conteggi della pagina
+    applica: (film) => dati.imposta((correnti): FilmDvdDto => {
+      const elenco = correnti.film.map((f) => f.chiave === film.chiave ? film : f);
+      return {
+        ...correnti,
+        film: elenco,
+        iniziati: elenco.filter((f) => f.iniziato).length,
+        completati: elenco.filter((f) => f.fatto).length,
+        sessioniCompletamentoFatte: elenco.reduce((n, f) => n + Math.min(f.progresso, f.totaleSessioni), 0),
+        visioniRegistrate: elenco.reduce((n, f) => n + f.progresso, 0),
+      };
+    }),
+    // la visione dà le sue Doti: si segnano a mano, l'avviso le ricorda
+    dopoOgniInvio: (film) => avvisaDotiDaSegnare(film.daSegnare, film.nomeIt ?? film.nome),
+    messaggioErrore: 'Aggiornamento della visione fallito.',
+    segnalaErrore: (m) => notifica('error', m),
+  });
+  const accoda = (film: FilmDto, valore: number) => coda.accoda(film, film.dove === 'dvd' ? Math.min(Math.max(valore, 0), film.totaleSessioni) : Math.max(valore, 0));
 
   const completatoCon = (film: FilmDto, progresso: number) => (film.dove === 'cinema' ? progresso > 0 : progresso >= film.totaleSessioni);
-  const progressoDi = (film: FilmDto) => (partitaId ? desiderati[chiaveCoda(partitaId, film.chiave)] ?? film.progresso : film.progresso);
+  const progressoDi = coda.valore;
 
   const visibili = useMemo(() => {
     const q = ricerca.trim().toLocaleLowerCase('it');
@@ -128,8 +85,7 @@ export function FilmPage() {
       if (dote && !haDote(f.effetti, dote)) return false;
       return passaStato(stato, progresso, completatoCon(f, progresso));
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dati.dati, desiderati, ricerca, stato, supporto, dote, partitaId]);
+  }, [dati.dati, progressoDi, ricerca, stato, supporto, dote]);
 
   const filmSelezionato = dati.dati?.film.find((f) => f.chiave === selezionato) ?? null;
   const posizione = filmSelezionato?.posizioni[posizioneSelezionata] ?? null;
@@ -141,7 +97,6 @@ export function FilmPage() {
   /** La scheda di un titolo: la stessa nei due gruppi, quindi scritta una volta sola. */
   const scheda = (film: FilmDto) => {
     const titolo = nomeFilm(film);
-    const coda = partitaId ? chiaveCoda(partitaId, film.chiave) : film.chiave;
     const progresso = progressoDi(film);
     const iniziato = progresso > 0;
     const completato = completatoCon(film, progresso);
@@ -162,11 +117,11 @@ export function FilmPage() {
       <div><div className="mb-1 flex justify-between text-xs text-text-secondary"><span>{cinema ? `${progresso} ${progresso === 1 ? 'visione' : 'visioni'}` : `${progresso} di ${film.totaleSessioni} sessioni`}</span>{!cinema && <span>{percentuale}%</span>}</div><div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${titolo}`} aria-valuemin={0} aria-valuemax={cinema ? Math.max(1, progresso) : film.totaleSessioni} aria-valuenow={progresso}><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></div></div>
       {/* Due pulsanti larghi uguali: il gesto è la visione. Al cinema non c'è tetto (le rivisioni
           contano); con il titolo non ancora disponibile il «+» resta spento e il motivo sta sotto. */}
-      {partitaId && <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${titolo}`}>
+      {partitaId && <div className="grid grid-cols-2 gap-2" role="group" aria-label={`Avanzamento ${titolo}`}>
         <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli" disabled={progresso === 0} onClick={() => accoda(film, progresso - 1)} aria-label={`Togli una ${cinema ? 'visione' : 'sessione'} a ${titolo}`} />
         <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo={cinema ? 'Visione' : 'Sessione'} disabled={(!cinema && progresso >= film.totaleSessioni) || (nonAncora && progresso === 0)} onClick={() => accoda(film, progresso + 1)} aria-label={`Aggiungi una ${cinema ? 'visione' : 'sessione'} a ${titolo}`} />
         {nonAncora && progresso === 0 && <p className="col-span-2 m-0 text-xs text-text-secondary" role="note">Non ancora {cinema ? 'in programmazione' : 'disponibile'}: {motivoBlocco(film.disponibilita)}</p>}
-        {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
+        {coda.occupato(film) && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
       </div>}
       <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Che cosa fa</dt>

@@ -113,6 +113,22 @@ e_node() {
   esac
 }
 
+# gia_avviato_o_esci <porta> <etichetta> → 0 (e lo dice) se ad ascoltare sulla porta è node, cioè il nostro server già avviato;
+# 1 (e lo dice) se è un altro programma: prima l'avvio si dichiarava riuscito anche con la porta occupata da altri, e l'app non
+# partiva senza che niente lo segnalasse.
+gia_avviato_o_esci() {
+  local porta="$1" etichetta="$2" pid nome
+  pid="$(pid_in_ascolto "$porta")"
+  carica_tabella_processi
+  nome="$(nome_processo "$pid")"
+  if e_node "$nome"; then
+    echo "[$etichetta] già in ascolto sulla porta $porta"
+    return 0
+  fi
+  echo "[$etichetta] ERRORE: la porta $porta è occupata da un altro programma (${nome:-sconosciuto}, PID $pid): liberala o cambia porta" >&2
+  return 1
+}
+
 # e_runtime_nostro <nome> → 0 se è un anello intermedio dei nostri avvii (mai bash: potrebbe
 # essere il terminale dell'utente; la radice bash è ammessa SOLO se coincide col pidfile)
 e_runtime_nostro() {

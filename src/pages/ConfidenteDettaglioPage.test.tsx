@@ -82,3 +82,14 @@ describe('ConfidenteDettaglioPage', () => {
     ]);
   });
 });
+
+describe('ConfidenteDettaglioPage — fonti (A8, verifica 2026-10-03)', () => {
+  it('una fonte scritta a parole si mostra come testo invece di far cadere la pagina; un indirizzo resta un collegamento col nome del sito', async () => {
+    usePartitaStore.setState({ attiva: null });
+    getConfidenteDettaglio.mockResolvedValue({ ...dettaglio, fonti: ['guida cartacea', 'https://www.allgamestaff.it/x'] });
+    render(<MemoryRouter initialEntries={['/confidenti/takemi']}><Routes><Route path="/confidenti/:chiave" element={<ConfidenteDettaglioPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: 'Takemi' })).toBeInTheDocument();
+    expect(screen.getByText(/guida cartacea/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'www.allgamestaff.it' })).toHaveAttribute('href', 'https://www.allgamestaff.it/x');
+  });
+});

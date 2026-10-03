@@ -68,7 +68,7 @@ function RigaRuolo({ def, stato }: { def: Ruolo; stato: FontDto | undefined }) {
         <span className="font-semibold text-[14px]">{def.nome}</span>
         <span className="text-[12px] text-text-muted">{def.descrizione}</span>
       </div>
-      <div className={`${def.classe} text-text break-words`} aria-label={`Anteprima ${def.nome}`}>{def.anteprima}</div>
+      <div className={`${def.classe} text-text break-words`} role="group" aria-label={`Anteprima ${def.nome}`}>{def.anteprima}</div>
       <div className="flex items-center gap-2 flex-wrap text-[13px]">
         {stato?.presente ? (
           <span className="chip chip--attivo">File caricato · {stato.formato?.toUpperCase()} · {formatoByte(stato.byte)}</span>

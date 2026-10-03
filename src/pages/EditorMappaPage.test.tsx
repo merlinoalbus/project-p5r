@@ -5,7 +5,7 @@
 // Test EditorMappaPage — aggiunta di uno spillo con un tocco sulla mappa, proprietà e riferimento cercato, copia/incolla, mappa (Fase 13.3, 15.18)
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { EditorMappaPage } from './EditorMappaPage';
@@ -14,7 +14,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 
 const api = vi.hoisted(() => ({
   risolviMappa: vi.fn(), getMappa: vi.fn(), getAlberoMappe: vi.fn(), creaSpillo: vi.fn(), aggiornaSpillo: vi.fn(), eliminaSpillo: vi.fn(), cercaRiferimenti: vi.fn(),
-  aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPianta: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
+  aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
 aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
@@ -282,6 +282,21 @@ describe('EditorMappaPage', () => {
     expect(screen.queryByRole('button', { name: /Esporta questo luogo/ })).toBeNull();
   });
 
+  it('O9: su una planimetria d\'area «Scarica dalla guida» non c\'è (la rotta delle piante d\'area non esiste più); su un quartiere scarica la sua pianta', async () => {
+    api.getMappa.mockResolvedValue({ ...base, chiave: 'kamoshida-02', nome: 'Sala centrale', tipo: 'area', genitore: null, entita: { tipo: 'area', chiave: 'kamoshida-02' } });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    await screen.findByRole('region', { name: 'Proprietà della mappa' });
+    expect(screen.queryByRole('button', { name: 'Scarica dalla guida' })).toBeNull();
+    cleanup();
+    api.getMappa.mockResolvedValue(base);
+    api.scaricaPiantaQuartiere.mockResolvedValue({ quartiere: 'shibuya', mime: 'image/png', byte: 1, fonte: 'x', url: 'x' });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Scarica dalla guida' }));
+    await waitFor(() => expect(api.scaricaPiantaQuartiere).toHaveBeenCalledWith('shibuya'));
+  });
+
   it('albero (15.24): le figlie senza spillo che le raggiunge e il genitore senza ritorno hanno «Crea passaggio», che chiama l’API e seleziona lo spillo creato', async () => {
     const figliaRaggiunta = riassunto({ chiave: 'luogo-a', nome: 'Luogo A', tipo: 'luogo', genitore: 'citta-shibuya' });
     const figliaOrfana = riassunto({ chiave: 'luogo-b', nome: 'Luogo B', tipo: 'luogo', genitore: 'citta-shibuya' });
@@ -337,7 +352,9 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith({ nome: 'Bar nuovo', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, passaggio: true, ritorno: true }));
     // riaperta, la finestra parte pulita (nome, chiave, asset e caselle ai valori iniziali)
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    // la pagina passa alla mappa appena creata e la ricarica: si attende il pannello
+    // la pagina passa alla mappa appena creata dopo aver riletto l'albero (`ricarica()` si risolve a rilettura avvenuta):
+    // si attende la lettura della mappa nuova, poi il pannello
+    await waitFor(() => expect(api.getMappa.mock.calls.some((c: unknown[]) => c[0] === 'bar-nuovo')).toBe(true));
     fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
     fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
     const riaperta = within(await screen.findByRole('dialog'));

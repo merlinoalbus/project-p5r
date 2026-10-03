@@ -278,7 +278,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
   const senzaArea = gruppi.filter((g) => g.aree.length === 0).length;
 
   return (
-    <div className="flex flex-col gap-2.5" aria-label="Planimetrie del Palazzo">
+    <div className="flex flex-col gap-2.5" role="group" aria-label="Planimetrie del Palazzo">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="m-0 font-display text-[15px] uppercase leading-none">Il Palazzo · {gruppi.length + areeOrfane.length}</h3>
         <span className="flex flex-wrap gap-1.5">

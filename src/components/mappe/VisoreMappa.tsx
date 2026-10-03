@@ -280,14 +280,23 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   }, [applicaZoom]);
 
   const adatta = () => { setZoomEsplicito(null); setPanEsplicito(null); };
+  // L'inquadratura iniziale (spillo selezionato o punto d'arrivo) si applica **una volta** per mappa e per richiesta, quando l'area
+  // è misurata, e ancora una volta quando l'immagine ha le sue dimensioni vere (`nat` parte dalla riserva o dalle dimensioni
+  // dichiarate dalla mappa: finché l'immagine non è caricata non si sa dove cade il punto). Prima si
+  // riapplicava a ogni ridimensionamento — rotazione del tablet, tastiera che compare — e zoom e spostamenti fatti a mano si
+  // perdevano (rilievo A4 della verifica completa, 2026-10-03).
+  const inquadraturaApplicata = useRef<string | null>(null);
   // Selezione iniziale: centra lo spillo appena l'area è misurata (rinviato di un tick: nessuno stato impostato durante il render)
   useEffect(() => {
     if (!selezioneIniziale || dim.w === 0) return;
+    const chiave = `selezione|${mappa.chiave}|${selezioneIniziale}|${nat.w}x${nat.h}`;
+    if (inquadraturaApplicata.current === chiave) return;
     const s = mappa.spilli.find((x) => x.id === selezioneIniziale);
     // Uno spillo bloccato non si apre nemmeno da un indirizzo: era il modo per rivelarlo
     // aggirando il filtro, e un deep link non deve poter fare quello che l'interfaccia non fa.
     if (!s || (partitaId && !editor && nascostoPerCondizioni(s))) return;
     const id = setTimeout(() => {
+      inquadraturaApplicata.current = chiave;
       // uno spillo nascosto perché già raccolto va reso visibile: altrimenti la mappa si centra sul vuoto
       if (s.collezionabile && s.raccolto) setMostraRaccolti(true);
       // Arrivando da uno spostamento la mappa resta **adattata alla finestra** e lo spillo è già
@@ -302,9 +311,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   useEffect(() => {
     if (!puntoIniziale || selezioneIniziale || dim.w === 0 || dim.h === 0) return;
     const {x,y,zoom:fattore}=puntoIniziale;
-    const id=setTimeout(()=>{const z=stato.current.zoomMin*limita(fattore,1,6);setZoomEsplicito(z);setPanEsplicito({x:dim.w/2-x/100*nat.w*z,y:dim.h/2-y/100*nat.h*z});},0);
+    const chiave = `punto|${mappa.chiave}|${x}|${y}|${fattore}|${nat.w}x${nat.h}`;
+    if (inquadraturaApplicata.current === chiave) return;
+    const id=setTimeout(()=>{inquadraturaApplicata.current = chiave;const z=stato.current.zoomMin*limita(fattore,1,6);setZoomEsplicito(z);setPanEsplicito({x:dim.w/2-x/100*nat.w*z,y:dim.h/2-y/100*nat.h*z});},0);
     return ()=>clearTimeout(id);
-  },[puntoIniziale, selezioneIniziale,dim.w,dim.h,nat.w,nat.h,zoomMin]);
+  },[puntoIniziale, selezioneIniziale,dim.w,dim.h,nat.w,nat.h,zoomMin,mappa.chiave]);
   const zoomCentro = (fattore: number) => applicaZoom(zoom * fattore, dim.w / 2, dim.h / 2);
   const centraSu = (s: SpilloDto) => {
     const z = Math.max(zoom, zoomMin * 2.5);
@@ -977,7 +988,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                     {acquistabile
                       ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato}
                           onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} /></label>
-                      : <span className="w-5 shrink-0 text-center" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
+                      : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
                     <span className="min-w-0 flex-1">
                       <span className={`block text-[13px] leading-tight ${a.comprato ? 'line-through' : ''}`}>
                         {a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>

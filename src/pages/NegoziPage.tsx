@@ -99,7 +99,7 @@ export function NegoziPage() {
               {risultati.dati && (
                 <div className="flex flex-col gap-1.5">
                   <p className="m-0 text-[12px] text-text-muted">{`${risultati.dati.totale} articoli trovati${risultati.dati.totale > articoliVisibili.length ? ` (mostrati i primi ${articoliVisibili.length})` : ''}`}.</p>
-                  <ArticoliTabella articoli={articoliVisibili} partitaId={partitaId} mostraNegozio onCambiato={(a) => risultati.imposta(risultati.dati ? { ...risultati.dati, articoli: risultati.dati.articoli.map((x) => (x.chiave === a.chiave ? a : x)) } : null)} />
+                  <ArticoliTabella articoli={articoliVisibili} partitaId={partitaId} mostraNegozio onCambiato={(a) => risultati.imposta((attuali) => ({ ...attuali, articoli: attuali.articoli.map((x) => (x.chiave === a.chiave ? a : x)) }))} />
                 </div>
               )}
             </PageState>

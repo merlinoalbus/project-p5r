@@ -47,7 +47,7 @@ export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etiche
   };
   if (conCollezionabili.length === 0) return <p className="m-0 text-[12px] text-text-muted" role="status">{vuoto}</p>;
   return (
-    <div className="flex flex-col gap-2" aria-label={etichetta}>
+    <div className="flex flex-col gap-2" role="group" aria-label={etichetta}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="m-0 font-display text-[15px] uppercase leading-none">{etichetta} · {partitaId ? Math.max(0, totale - presi) : totale}</h3>
         {partitaId && presi > 0 && <button type="button" className={`chip touch text-[11px] ${mostraRaccolti ? 'chip--attivo' : ''}`} aria-pressed={mostraRaccolti} onClick={() => setMostraRaccolti((v) => !v)}>Anche i raccolti ({presi})</button>}

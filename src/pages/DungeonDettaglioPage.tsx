@@ -130,9 +130,10 @@ export function DungeonDettaglioPage() {
   const memento = d?.tipo === 'mementos';
 
 
+  // Gli aggiornamenti locali partono dai dati correnti (forma funzionale di `imposta`), non dalla `d` del render: arrivano dopo
+  // un `await`, e due gesti ravvicinati si annullerebbero a vicenda.
   const aggiornaPunto = (nuovo: PuntoInteresseDto) => {
-    if (!d) return;
-    dati.imposta({ ...d, aree: d.aree.map((a) => ({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) })) });
+    dati.imposta((attuale) => ({ ...attuale, aree: attuale.aree.map((a) => ({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) })) }));
   };
   // Le riletture in silenzio della scheda (dopo uno stato o un raccolto) possono sovrapporsi: vale solo l'ultima chiesta, una
   // risposta più vecchia che arriva dopo non sovrascrive quella più nuova (rilievo del validatore).
@@ -163,10 +164,12 @@ export function DungeonDettaglioPage() {
       const spilli = m.spilli.map((s) => (s.id === spilloId ? { ...s, raccolto } : s));
       return { ...m, spilli, presi: spilli.filter((s) => s.raccolto).length };
     };
-    const planimetrie = d.planimetrie.map(aggiornaMappa);
-    const aree = d.aree.map((a) => ({ ...a, mappe: a.mappe.map(aggiornaMappa) }));
-    const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
-    dati.imposta({ ...d, planimetrie, aree, raccolta: { ...d.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.n > 0 && p.presi === p.n).length } });
+    dati.imposta((attuale) => {
+      const planimetrie = attuale.planimetrie.map(aggiornaMappa);
+      const aree = attuale.aree.map((a) => ({ ...a, mappe: a.mappe.map(aggiornaMappa) }));
+      const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
+      return { ...attuale, planimetrie, aree, raccolta: { ...attuale.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.n > 0 && p.presi === p.n).length } };
+    });
     setVersioneStati((v) => v + 1);
     // Il raccolto di un pin segna (o riapre) la sua voce della guida e, se è un passo, il suo Enigma (095): stati che qui non si
     // possono dedurre. Si rilegge la scheda dal server, senza stato di caricamento, come dopo uno stato cambiato dalla guida.
@@ -174,18 +177,20 @@ export function DungeonDettaglioPage() {
   };
   /** I timbri di un dedalo cambiano: obiettivi del dedalo e anello dei Memento seguono. */
   const aggiornaTimbri = (chiaveArea: string, raccolti: number) => {
-    if (!d) return;
-    const aree = d.aree.map((a) => a.chiave === chiaveArea && a.dedalo ? { ...a, dedalo: { ...a.dedalo, timbri: { ...a.dedalo.timbri, raccolti }, obiettivi: { ...a.dedalo.obiettivi, fatti: raccolti + a.dedalo.richieste.filter((r) => r.stato === 'completata').length } } } : a);
-    dati.imposta({ ...d, aree, raccolta: { ...d.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } });
+    dati.imposta((attuale) => {
+      const aree = attuale.aree.map((a) => a.chiave === chiaveArea && a.dedalo ? { ...a, dedalo: { ...a.dedalo, timbri: { ...a.dedalo.timbri, raccolti }, obiettivi: { ...a.dedalo.obiettivi, fatti: raccolti + a.dedalo.richieste.filter((r) => r.stato === 'completata').length } } } : a);
+      return { ...attuale, aree, raccolta: { ...attuale.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } };
+    });
   };
   const aggiornaRichiesta = (chiaveArea: string, chiaveRichiesta: string, stato: StatoRichiesta | null) => {
-    if (!d) return;
-    const aree = d.aree.map((a) => {
-      if (a.chiave !== chiaveArea || !a.dedalo) return a;
-      const richieste = a.dedalo.richieste.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r));
-      return { ...a, dedalo: { ...a.dedalo, richieste, obiettivi: { ...a.dedalo.obiettivi, fatti: (a.dedalo.timbri.raccolti ?? 0) + richieste.filter((r) => r.stato === 'completata').length } } };
+    dati.imposta((attuale) => {
+      const aree = attuale.aree.map((a) => {
+        if (a.chiave !== chiaveArea || !a.dedalo) return a;
+        const richieste = a.dedalo.richieste.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r));
+        return { ...a, dedalo: { ...a.dedalo, richieste, obiettivi: { ...a.dedalo.obiettivi, fatti: (a.dedalo.timbri.raccolti ?? 0) + richieste.filter((r) => r.stato === 'completata').length } } };
+      });
+      return { ...attuale, aree, raccolta: { ...attuale.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } };
     });
-    dati.imposta({ ...d, aree, raccolta: { ...d.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } });
   };
   // Quale planimetria dell'area si sta guardando: quasi sempre una sola; la scelta si azzera cambiando area.
   const [piantaScelta, setPianta] = useState<string | null>(null);

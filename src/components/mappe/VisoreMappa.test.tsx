@@ -5,7 +5,7 @@
 // Test VisoreMappa — spilli con icona, raccolti nascosti, categorie, popup ancorato, scheda del negozio, navigazione (Fase 13.2)
 // ============================================================
 
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { VisoreMappa } from './VisoreMappa';
 import * as inquadratura from '../../utils/inquadraturaMappa';
@@ -221,6 +221,27 @@ it('centra il punto iniziale con lo zoom configurato senza selezionare un pin',a
  }finally{misura.mockRestore();}
 });
 
+
+it('A4 (verifica 2026-10-03): ridimensionare la finestra non annulla lo zoom fatto a mano dopo l’inquadratura iniziale', async () => {
+  let tela = { width: 1000, height: 500 };
+  const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({ ...tela, left: 0, top: 0, right: tela.width, bottom: tela.height, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect);
+  const scala = () => Number(/scale\(([-.\d]+)\)/.exec((document.querySelector('.visore-mappa__livello') as HTMLElement).style.transform)?.[1]);
+  try {
+    monta({ puntoIniziale: { x: 20, y: 80, zoom: 2.5 } });
+    await waitFor(() => expect(scala()).toBeCloseTo(0.864 * 2.5, 3));
+    fireEvent.click(screen.getByRole('button', { name: 'Ingrandisci' }));
+    const ingrandita = scala();
+    expect(ingrandita).toBeGreaterThan(0.864 * 2.5);
+    // la tela cambia misura (rotazione del tablet, tastiera che compare)
+    tela = { width: 800, height: 600 };
+    await act(async () => { window.dispatchEvent(new Event('resize')); });
+    // gli effetti partono a fine `act`, e l'inquadratura iniziale si applica con un `setTimeout`: si lascia passare un giro
+    await act(async () => { await new Promise((r) => setTimeout(r, 30)); });
+    // la tela è cambiata davvero (l'adattamento ora darebbe un altro fit), ma lo zoom scelto a mano resta
+    expect(screen.getByRole('button', { name: 'Riduci' })).not.toBeDisabled();
+    expect(scala()).toBeCloseTo(ingrandita, 5);
+  } finally { misura.mockRestore(); }
+});
 
 it('applica l’arrivo dopo il fit definitivo senza alterare le percentuali originali', async () => {
   const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 600, height: 400, x: 0, y: 0, top: 0, left: 0, right: 600, bottom: 400, toJSON: () => ({}) });

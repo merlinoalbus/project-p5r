@@ -18,31 +18,36 @@ interface Stato {
   partitaId: number | null;
   dati: SuggerimentiOggiDto | null;
   caricamento: boolean;
-  carica: (partitaId: number) => Promise<void>;
+  /** Carica i suggerimenti della partita; `forza` ne chiede di nuovi anche se una richiesta è già in corso (la più recente vince). */
+  carica: (partitaId: number, forza?: boolean) => Promise<void>;
   /** Dopo una spunta nella guida (o un cambio di giorno) i suggerimenti cambiano: ricarica in silenzio. */
   invalida: () => void;
 }
+
+/** Ogni richiesta ha una generazione: vale solo la risposta dell'ultima. Confrontare la sola partita non bastava, perché una
+ *  richiesta vecchia (partita prima di una spunta) poteva arrivare dopo quella nuova e rimettere l'alone superato. */
+let generazione = 0;
 
 export const useSuggerimentiStore = create<Stato>((set, get) => ({
   partitaId: null,
   dati: null,
   caricamento: false,
-  carica: async (partitaId) => {
-    if (get().caricamento && get().partitaId === partitaId) return;
-    set({ caricamento: true, partitaId });
+  carica: async (partitaId, forza = false) => {
+    if (!forza && get().caricamento && get().partitaId === partitaId) return;
+    const questa = ++generazione;
+    // cambiando partita i suggerimenti della precedente spariscono subito: meglio nessun alone che quello di un'altra partita
+    set(get().partitaId === partitaId ? { caricamento: true } : { caricamento: true, partitaId, dati: null });
     try {
       const dati = await getSuggerimenti(partitaId);
-      // se nel frattempo è cambiata la partita, il risultato è obsoleto
-      if (get().partitaId === partitaId) set({ dati, caricamento: false });
+      if (questa === generazione) set({ dati, caricamento: false });
     } catch {
       // nessun suggerimento: l'interfaccia resta senza aloni, mai un errore bloccante
-      if (get().partitaId === partitaId) set({ dati: null, caricamento: false });
+      if (questa === generazione) set({ dati: null, caricamento: false });
     }
   },
   invalida: () => {
     const id = get().partitaId;
-    set({ caricamento: false });
-    if (id) void get().carica(id);
+    if (id) void get().carica(id, true);
   },
 }));
 

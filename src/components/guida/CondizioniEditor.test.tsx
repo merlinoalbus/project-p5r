@@ -141,3 +141,17 @@ describe('CondizioniEditor', () => {
     expect(riga.queryByRole('option', { name: 'Pin di una mappa' })).toBeNull();
   });
 });
+
+describe('CondizioniEditor — righe con chiavi stabili (A3, verifica 2026-10-03)', () => {
+  it('togliendo una riga, quella dopo tiene il suo operatore scelto invece di prendere lo stato della riga tolta', async () => {
+    render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }, { tipo: 'data', dal: '05-02' }]} />);
+    const seconda = within(await screen.findByRole('group', { name: 'Condizione: dal 2 maggio' }));
+    scegli(seconda, 'Operatore', 'tra');
+    // «tra» con le due date uguali si salva come un giorno solo: è lo stato della riga a ricordare la scelta (due campi)
+    const dopoScelta = screen.getAllByRole('group').find((g) => g.getAttribute('aria-label')?.includes('2 maggio'))!;
+    expect(within(dopoScelta).getByRole('combobox', { name: 'Operatore' })).toHaveAttribute('title', 'tra');
+    fireEvent.click(screen.getByRole('button', { name: 'Togli la condizione: dal 18 aprile' }));
+    const rimasta = screen.getAllByRole('group').find((g) => g.getAttribute('aria-label')?.includes('2 maggio'))!;
+    expect(within(rimasta).getByRole('combobox', { name: 'Operatore' })).toHaveAttribute('title', 'tra');
+  });
+});

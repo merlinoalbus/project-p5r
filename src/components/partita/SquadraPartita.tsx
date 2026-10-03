@@ -31,6 +31,28 @@ const yen = (n: number) => `${n.toLocaleString('it-IT')} ¥`;
 /** Lo stesso tetto di `bodyYen` sul server: oltre, la richiesta verrebbe rifiutata. */
 const YEN_MASSIMI = 9_999_999;
 
+/**
+ * Il campo dell'esperienza di un Ladro, controllato: mentre si scrive mostra la bozza, a fine modifica (uscita dal campo) mostra
+ * sempre un numero vero — quello normalizzato, o quello salvato se il salvataggio fallisce. Prima era un campo libero
+ * (`defaultValue`): dopo un errore, o scrivendo «5.7» con 5 già salvato, restava il testo scritto invece del dato (rilievo A9
+ * della verifica completa, 2026-10-03).
+ */
+function CampoEsperienza({ valore, nome, disabilitato, onSalva }: { valore: number; nome: string; disabilitato: boolean; onSalva: (v: number) => Promise<unknown> }) {
+  const [bozza, setBozza] = useState<string | null>(null);
+  const conferma = async () => {
+    if (bozza === null) return;
+    const v = Math.max(0, Math.trunc(Number(bozza) || 0));
+    if (v !== valore) await onSalva(v);
+    // finita la modifica il campo torna a mostrare il valore della scheda: quello nuovo se salvato, quello di prima se no
+    setBozza(null);
+  };
+  return (
+    <input className="form-input tabular-nums" type="number" min={0} inputMode="numeric" value={bozza ?? String(valore)}
+      aria-label={`Esperienza di ${nome}`} disabled={disabilitato}
+      onChange={(e) => setBozza(e.target.value)} onBlur={() => void conferma()} />
+  );
+}
+
 export function SquadraPartita({ partitaId }: { partitaId: number }) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getSquadra(partitaId), [partitaId]);
   const [movimento, setMovimento] = useState('');
@@ -68,10 +90,9 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
     });
   };
 
-  /** Il livello di Joker vive in due case — qui e `partita.livello_protagonista`, che la fusione
-   *  legge — e il server le tiene allineate. Ma l'elenco delle partite sta in uno store caricato
-   *  all'avvio: cambiato il livello, il database era giusto e **lo schermo no**, con la barra in
-   *  alto e le impostazioni ferme al numero di prima. Qui glielo si dice. */
+  /** Il livello di Joker è `partita.livello_protagonista` (fonte unica dal 2026-10-03: la scheda e la fusione leggono quello).
+   *  Ma l'elenco delle partite sta in uno store caricato all'avvio: cambiato il livello, il database era giusto e **lo schermo
+   *  no**, con la barra in alto e le impostazioni ferme al numero di prima. Qui glielo si dice. */
   const riallineaPartite = (chiave: string) => { if (chiave === 'joker') void usePartitaStore.getState().carica(); };
 
   /**
@@ -120,9 +141,8 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
         <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
           <label className="editor-mappa__campo min-w-[150px] flex-1">
             <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Esperienza</span>
-            <input className="form-input tabular-nums" type="number" min={0} inputMode="numeric" defaultValue={m.esperienza}
-              aria-label={`Esperienza di ${m.nome}`} disabled={fermo}
-              onBlur={(e) => { const v = Math.max(0, Math.trunc(Number(e.target.value) || 0)); if (v !== m.esperienza) void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { esperienza: v })); }} />
+            <CampoEsperienza valore={m.esperienza} nome={m.nome} disabilitato={fermo}
+              onSalva={(v) => conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { esperienza: v }))} />
           </label>
           <span className="editor-mappa__campo shrink-0">
             <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Livello</span>

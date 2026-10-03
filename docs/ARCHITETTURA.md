@@ -1158,3 +1158,25 @@ scrive codice nuovo.
   la chiave più lunga possibile.
 - **Copie di avvio**: la rotazione toglie anche i giornali `-wal`/`-shm`, quelli rimasti senza il loro database si tolgono a ogni
   avvio (`pulisciGiornaliOrfani`), e in Impostazioni una copia (gioco + partite) si conta una volta.
+- **Client HTTP e busta**: vedi §4 (tentativi solo sui metodi idempotenti, `payloadDellaBusta` per chiave). Gli invii di file
+  passano tutti da `inviaFile` (`src/services/api/_helpers.ts`), che controlla lo stato prima di leggere il corpo: un rifiuto del
+  proxy in HTML diventa un `ApiError` leggibile.
+- **`useCarica`**: `ricarica()` si risolve quando la rilettura è arrivata (anche fallita; subito se il componente è smontato);
+  `imposta` accetta una funzione che riceve i dati **correnti**. Un aggiornamento locale che arriva dopo un `await` usa sempre la
+  forma con funzione: partire dai dati del render annullava un secondo gesto fatto nel frattempo.
+- **Store con richieste che si sovrappongono** (`partitaStore`, `suggerimentiStore`): un contatore di generazione, vale solo la
+  risposta dell'ultima richiesta; cambiando partita i suggerimenti della precedente si azzerano subito.
+- **Progressi a pressioni rapide** (libri, film, videogiochi): un solo hook, `useCodaProgresso` — una richiesta per volta per
+  elemento, chiave `partita:elemento`, la coda si ferma se la partita attiva cambia.
+- **Elenchi modificabili con stato per riga** (condizioni, effetti): chiavi da `useIdStabili`, mai l'indice né il contenuto.
+- **Finestre di dialogo** (`Modal`): il fuoco entra nella finestra (campo `autoFocus` o la finestra stessa, mai un campo a caso:
+  su telefono aprirebbe la tastiera), Tab resta dentro, alla chiusura torna a chi l'ha aperta (registro unico di fuoco e clic,
+  perché molte finestre nascono già aperte e un `autoFocus` prende il fuoco prima degli effetti).
+- **Accessibilità**: un `div`/`span` con `aria-label` ha sempre un `role` (`group` per i contenitori, `img` per i segni); lo
+  verifica `src/accessibilita.test.ts` leggendo i sorgenti.
+- **Deploy (`nginx.conf`)**: il backend si risolve per nome a ogni richiesta (`resolver 127.0.0.11`, variabile `$backend`), così
+  un container ricreato da Watchtower non lascia nginx sul vecchio IP (502); `/api/mappe/importa` accetta 64 MB come Express;
+  `immutable` solo sui file con hash di `/assets/`, gli altri statici si rivalidano dopo un'ora.
+- **Script**: `start-be.sh`/`start-fe.sh` si dichiarano «già in ascolto» solo se sulla porta c'è node (`gia_avviato_o_esci`),
+  altrimenti escono con 1; `genera-pacchetto.ts` toglie la cartella di lavoro anche quando fallisce; `accesso:copertura` misura il
+  `gioco.db` dell'istanza.

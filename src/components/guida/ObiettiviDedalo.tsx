@@ -49,7 +49,7 @@ export function ObiettiviDedalo({ areaChiave, areaNome, dedalo, partitaId, onTim
   };
   const fatti = obiettivi.fatti ?? 0;
   return (
-    <div className="flex flex-col gap-2" aria-label={`Obiettivi di ${areaNome}`}>
+    <div className="flex flex-col gap-2" role="group" aria-label={`Obiettivi di ${areaNome}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="m-0 font-display text-[15px] uppercase leading-none">Obiettivi del dedalo</h3>
         <span className="text-[11px] tabular-nums text-text-muted">{partitaId ? `${fatti}/${obiettivi.totale}` : `${obiettivi.totale} in tutto`}</span>

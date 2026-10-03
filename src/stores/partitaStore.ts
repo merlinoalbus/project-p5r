@@ -20,6 +20,10 @@ interface PartitaState {
   aggiornaLocale: (p: PartitaDto) => void;
 }
 
+/** Generazione dell'ultima lettura dell'elenco: `carica` è chiamata più volte di seguito (ogni +1/−1 di Joker, dopo un
+ *  ripristino…) e una risposta vecchia arrivata dopo una nuova non deve riportare indietro la partita attiva. */
+let generazione = 0;
+
 /** Stato delle partite: l'attiva è quella su cui lavorano tutte le pagine di tracking. */
 export const usePartitaStore = create<PartitaState>((set, get) => ({
   partite: [],
@@ -28,12 +32,13 @@ export const usePartitaStore = create<PartitaState>((set, get) => ({
   caricata: false,
   errore: null,
   carica: async () => {
+    const questa = ++generazione;
     set({ caricamento: true, errore: null });
     try {
       const partite = await getPartite();
-      set({ partite, attiva: partite.find((p) => p.attiva) ?? null, caricamento: false, caricata: true });
+      if (questa === generazione) set({ partite, attiva: partite.find((p) => p.attiva) ?? null, caricamento: false, caricata: true });
     } catch (err) {
-      set({ caricamento: false, caricata: true, errore: err instanceof Error ? err.message : 'Errore di caricamento delle partite' });
+      if (questa === generazione) set({ caricamento: false, caricata: true, errore: err instanceof Error ? err.message : 'Errore di caricamento delle partite' });
     }
   },
   crea: async (dati) => {

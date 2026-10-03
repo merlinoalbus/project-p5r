@@ -21,7 +21,7 @@ export function PannelloEredita({ a, b, partitaId }: Props) {
   const ereditabili = dati.candidate.filter((c) => c.ereditabile && !c.giaAppresa);
   const escluse = dati.candidate.filter((c) => !c.ereditabile || c.giaAppresa);
   return (
-    <div className="flex flex-col gap-2" aria-label="Eredità delle skill">
+    <div className="flex flex-col gap-2" role="group" aria-label="Eredità delle skill">
       <div className="flex items-baseline gap-3 flex-wrap">
         <h3 className="m-0 text-[14px] font-semibold">Eredità delle skill</h3>
         <span className="text-[13px] text-text-secondary">

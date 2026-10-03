@@ -5,9 +5,7 @@
 import type { DestinazioneSpillo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../types';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
-import { API_BASE_URL } from '../../utils/constants';
-import { httpFetch } from './_httpClient';
-import { ApiError, apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
+import { apiDelete, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
 
 /** `passaggio`/`ritorno` valgono solo alla creazione con un genitore: spillo «passaggio» nel genitore verso la nuova mappa e viceversa (15.24). */
 export interface DatiMappaApi { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
@@ -38,16 +36,7 @@ export const impostaStanzaMappa = (chiave: string, dati: { con: string | null; n
 export const riordinaMappe = (genitore: string | null, chiavi: string[]): Promise<MappaRiassuntoDto[]> => apiPut('/mappe/ordine', { genitore, chiavi });
 
 /** Carica l'immagine di base della mappa (file dell'utente, mai nel repository): corpo grezzo `image/*`. */
-export async function caricaImmagineMappa(chiave: string, file: File): Promise<MappaDto> {
-  const res = await httpFetch(
-    `${API_BASE_URL}/mappe/${encodeURIComponent(chiave)}/immagine`,
-    { method: 'PUT', body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } },
-    { maxRetries: 0, timeoutMs: 120_000 },
-  );
-  const body = await res.json();
-  if (!res.ok) throw new ApiError(res.status, body?.error?.code ?? 'http-error', body?.error?.message ?? `Caricamento fallito (${res.status})`, body?.error?.details, body?.requestId);
-  return body.data as MappaDto;
-}
+export const caricaImmagineMappa = (chiave: string, file: File): Promise<MappaDto> => inviaFile('PUT', `/mappe/${encodeURIComponent(chiave)}/immagine`, file);
 
 export const creaSpillo = (mappa: string, dati: DatiSpilloApi & { tipo: TipoSpillo; nome: string; x: number; y: number }): Promise<SpilloDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/spilli`, dati);
 /** Spillo «passaggio» da `mappa` verso `destinazione` in un punto libero scelto dal server (al centro; in basso se la destinazione è il genitore): poi si trascina. 409 se esiste già. */
@@ -66,12 +55,8 @@ export const cercaRiferimenti = (tipo: TipoRiferimento, q: string, limite = 30):
 export const esportaMappe = (radice?: string): Promise<EsportazioneMappeDto> => apiGet(`/mappe/esporta${queryString({ radice })}`, { timeoutMs: 120_000 });
 
 /** Schermata di riferimento di uno spillo (file dell'utente, resta nell'istanza). */
-export async function aggiungiImmagineSpillo(spilloId: number, file: File, didascalia = ''): Promise<SpilloDto> {
-  const res = await httpFetch(`${API_BASE_URL}/mappe/spilli/${spilloId}/immagini${queryString({ didascalia: didascalia || undefined })}`, { method: 'POST', body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } }, { maxRetries: 0, timeoutMs: 120_000 });
-  const body = await res.json();
-  if (!res.ok) throw new ApiError(res.status, body?.error?.code ?? 'http-error', body?.error?.message ?? `Caricamento fallito (${res.status})`, body?.error?.details, body?.requestId);
-  return body.data as SpilloDto;
-}
+export const aggiungiImmagineSpillo = (spilloId: number, file: File, didascalia = ''): Promise<SpilloDto> =>
+  inviaFile('POST', `/mappe/spilli/${spilloId}/immagini${queryString({ didascalia: didascalia || undefined })}`, file);
 export const aggiornaImmagineSpillo = (id: number, dati: { didascalia?: string; ordine?: number }): Promise<SpilloDto> => apiPut(`/mappe/spilli/immagini/${id}`, dati);
 export const eliminaImmagineSpillo = (id: number): Promise<SpilloDto> => apiDelete(`/mappe/spilli/immagini/${id}`);
 export const importaMappe = (pacchetto: EsportazioneMappeDto, sovrascrivi: boolean): Promise<{ mappe: number; spilli: number; immagini: number; saltate: string[]; condizioniScartate: number; vociScartate: number }> => apiPost('/mappe/importa', { pacchetto, sovrascrivi }, { timeoutMs: 120_000 });

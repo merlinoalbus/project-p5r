@@ -20,6 +20,7 @@
 // ============================================================
 
 import { statoDelTipo, uidValido } from './spilli.js';
+import { congiunzione } from './testo.js';
 
 export const PALAZZI_CONDIZIONE = [
   { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }, { chiave: 'madarame', nome: 'Palazzo di Madarame' }, { chiave: 'kaneshiro', nome: 'Palazzo di Kaneshiro' },
@@ -243,11 +244,6 @@ export interface NomiCondizioni {
   /** I pin con uno stato, per uid: nome, tipo e mappa; `parola` è quella dello stato con cui si cita (`statoCitabile`: «ottenuto»
    *  per un pin che la prende dalla sua voce della guida), e se manca vale quella del tipo. */
   spilli?: Record<string, { nome: string; tipo: string; mappa: string; parola?: string }>;
-}
-
-function congiunzione(voci: string[]): string {
-  if (voci.length <= 1) return voci.join('');
-  return `${voci.slice(0, -1).join(', ')} e ${voci[voci.length - 1]}`;
 }
 
 export function nomePalazzo(chiave: string, nomi: NomiCondizioni = {}): string {

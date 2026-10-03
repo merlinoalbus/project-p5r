@@ -135,3 +135,23 @@ it('l’importo oltre il tetto del server si ferma al massimo accettato', async 
   await userEvent.click(screen.getByRole('button', { name: 'Imposta il denaro del gruppo a questo importo' }));
   await waitFor(() => expect(api.impostaYen).toHaveBeenCalledWith(1, { yen: 9_999_999 }));
 });
+
+it('A9 (verifica 2026-10-03): l’esperienza mostra sempre un numero vero — normalizzato, o quello salvato se il salvataggio fallisce', async () => {
+  render(<SquadraPartita partitaId={1} />);
+  const joker = await scheda('Protagonista');
+  const campo = joker.getByLabelText('Esperienza di Protagonista') as HTMLInputElement;
+  expect(campo.value).toBe('1200');
+  // «1200.7» con 1200 già salvato: niente da salvare, e il campo torna a 1200 invece di restare «1200.7»
+  await userEvent.clear(campo);
+  await userEvent.type(campo, '1200.7');
+  await userEvent.tab();
+  expect(api.impostaMembroSquadra).not.toHaveBeenCalled();
+  expect(campo.value).toBe('1200');
+  // un salvataggio che fallisce lascia il valore salvato, non quello scritto
+  api.impostaMembroSquadra.mockRejectedValueOnce(new Error('rete giù'));
+  await userEvent.clear(campo);
+  await userEvent.type(campo, '5000');
+  await userEvent.tab();
+  await waitFor(() => expect(api.impostaMembroSquadra).toHaveBeenCalledWith(1, 'joker', { esperienza: 5000 }));
+  await waitFor(() => expect(campo.value).toBe('1200'));
+});

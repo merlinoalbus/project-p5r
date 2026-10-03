@@ -83,8 +83,11 @@ export function useOggi(partitaId: number): Oggi {
     vaiAlGiorno: (d) => { if (d) setDataScelta(d); },
     aggiornaAzione: (a) => {
       if (!g) return;
-      const azioni = g.azioni.map((x) => (x.uid === a.uid ? a : x));
-      giorno.imposta({ ...g, azioni, fatte: azioni.filter((x) => x.fatta).length });
+      // dai dati correnti, non dalla `g` di questo render: arriva dopo un `await`, e una seconda spunta nel frattempo si perderebbe
+      giorno.imposta((attuale) => {
+        const azioni = attuale.azioni.map((x) => (x.uid === a.uid ? a : x));
+        return { ...attuale, azioni, fatte: azioni.filter((x) => x.fatta).length };
+      });
       // i conteggi «fatte/azioni» dei giorni vengono dall'indice: si riallineano come dopo ogni altra modifica della giornata
       void indice.ricarica();
     },
@@ -93,8 +96,8 @@ export function useOggi(partitaId: number): Oggi {
       setOccupato(true);
       try {
         const esito = await impostaGiornoCorrente(partitaId, g.giorno);
-        giorno.imposta({ ...g, dataCorrente: g.giorno });
-        if (indice.dati) indice.imposta({ ...indice.dati, dataCorrente: g.giorno });
+        giorno.imposta((attuale) => ({ ...attuale, dataCorrente: g.giorno }));
+        indice.imposta((attuale) => ({ ...attuale, dataCorrente: g.giorno }));
         // la data di gioco vive in `partitaStore.attiva` (chip dell'intestazione, Riepilogo, ScuolaOggi, Calendario): si allinea alla partita restituita dal server
         usePartitaStore.getState().aggiornaLocale(esito.partita);
         // cambiando giorno cambiano le azioni suggerite: l'alone dorato si aggiorna da solo
@@ -128,7 +131,7 @@ export function useOggi(partitaId: number): Oggi {
       setOccupato(true);
       try {
         const esito = await impostaMeteoGiorno(partitaId, g.giorno, { [quale]: valore });
-        giorno.imposta({ ...g, meteoPartita: esito.meteo });
+        giorno.imposta((attuale) => ({ ...attuale, meteoPartita: esito.meteo }));
         // il meteo cambia che cosa è disponibile ora: `meteoOra` della partita fa ricaricare mappa, negozi e articoli,
         // e le azioni del giorno (semafori «non deve piovere») si rileggono
         usePartitaStore.getState().aggiornaLocale(esito.partita);

@@ -101,6 +101,16 @@ describe('verifica API — rotte vere', () => {
     expect(res.body.error.code).toBe('validation-error');
   });
 
+  it('B9": il catalogo rifiuta un effetto senza i campi della sua famiglia e salva quelli validi normalizzati', async () => {
+    const rotto = await request(app).post('/api/catalogo/libro').send({ nome: 'Libro B9', effetti_json: [{ effetto: { famiglia: 'regalo' } }] });
+    expect(rotto.status).toBe(400);
+    expect(rotto.body.error.code).toBe('validation-error');
+    const buono = await request(app).post('/api/catalogo/libro').send({ nome: 'Libro B9 buono', effetti_json: [{ effetto: { famiglia: 'regalo', graditoA: ['Ann'], estraneo: true } }] });
+    expect(buono.status).toBe(201);
+    const salvato = getDb().prepare('SELECT effetti_json FROM libro WHERE chiave = ?').pluck().get(buono.body.data.chiave) as string;
+    expect(JSON.parse(salvato)).toEqual([{ effetto: { famiglia: 'regalo', graditoA: ['Ann'] } }]);
+  });
+
   it('F12: i parametri prima liberi sono validati (chiave oltre i 200 caratteri → 400)', async () => {
     const lunga = 'a'.repeat(201);
     for (const p of [`/api/compendio/confidenti/${lunga}`, `/api/compendio/dungeon/${lunga}`, `/api/catalogo/oggetti-di/${'b'.repeat(81)}`, `/api/mappe/risolvi/${lunga}`, `/api/mappe/contenuti/${lunga}`]) {

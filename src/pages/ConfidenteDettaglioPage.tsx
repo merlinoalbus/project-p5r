@@ -18,6 +18,7 @@ import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { DotiIncontro } from '../components/partita/DotiIncontro';
+import { sitoDellaFonte } from '../utils/fonti';
 
 /** Un dialogo di rango: scelte in ordine, con le migliori evidenziate (punti massimi), le romantiche e gli avvisi. */
 export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void }) {
@@ -185,7 +186,13 @@ export function ConfidenteDettaglioPage() {
           </section>
 
           {c.fonti.length > 0 && (
-            <p className="m-0 text-[11px] text-text-muted">Fonti: {c.fonti.map((f, i) => <a key={i} href={f} target="_blank" rel="noreferrer" className="credito">{new URL(f).hostname}{i < c.fonti.length - 1 ? ', ' : ''}</a>)}</p>
+            <p className="m-0 text-[11px] text-text-muted">Fonti: {c.fonti.map((f, i) => {
+              const sito = sitoDellaFonte(f);
+              const separatore = i < c.fonti.length - 1 ? ', ' : '';
+              return sito
+                ? <a key={i} href={f} target="_blank" rel="noreferrer" className="credito">{sito}{separatore}</a>
+                : <span key={i}>{f}{separatore}</span>;
+            })}</p>
           )}
         </div>
       )}

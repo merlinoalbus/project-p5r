@@ -51,6 +51,25 @@ describe('VideogiochiPage', () => {
     await waitFor(() => expect(screen.getByText('3 di 5 round')).toBeInTheDocument());
   });
 
+  it('A1 (verifica 2026-10-03): cambiata la partita a metà coda, nella nuova non si scrive il valore della vecchia', async () => {
+    let sblocca!: (g: VideogiocoDto) => void;
+    impostaProgressoVideogioco.mockImplementationOnce(() => new Promise<VideogiocoDto>((res) => { sblocca = res; }))
+      .mockImplementation(async (_id: number, _chiave: string, valore: number) => ({ ...gioco, progresso: valore, iniziato: true }));
+    render(<MemoryRouter><VideogiochiPage /></MemoryRouter>);
+    const piu = await screen.findByRole('button', { name: 'Aggiungi un round a Tycoon dello spazio' });
+    fireEvent.click(piu);
+    fireEvent.click(piu); // il secondo resta in coda dietro il primo, nella partita 3
+    expect(impostaProgressoVideogioco).toHaveBeenCalledWith(3, 'tycoon', 1);
+    // l'utente passa alla partita 4, dove il gioco è a 0
+    await act(async () => { usePartitaStore.setState({ attiva: { id: 4, nome: 'Altra' } as PartitaDto }); });
+    expect(await screen.findByText('0 di 5 round')).toBeInTheDocument();
+    await act(async () => sblocca({ ...gioco, progresso: 1, iniziato: true }));
+    // la coda della partita 3 si è fermata: nessuna scrittura nella 4, e la scheda della 4 resta a 0
+    expect(impostaProgressoVideogioco).toHaveBeenCalledTimes(1);
+    expect(impostaProgressoVideogioco.mock.calls.some((c) => c[0] === 4)).toBe(false);
+    expect(screen.getByText('0 di 5 round')).toBeInTheDocument();
+  });
+
   it('mostra dove si compra, che cosa alza e la sede; niente fonte', async () => {
     render(<MemoryRouter><VideogiochiPage /></MemoryRouter>);
     await screen.findByText('Tycoon dello spazio');

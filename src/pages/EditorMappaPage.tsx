@@ -16,7 +16,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -169,8 +169,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onSalvaMappa={(d) => esegui(async()=>{const aggiornata=await aggiornaMappa(chiave,d);await albero.ricarica();if(aggiornata.chiave!==chiave)vai(aggiornata.chiave);}, 'Mappa salvata.')}
               onImmagine={(file) => esegui(() => caricaImmagineMappa(chiave, file), 'Immagine di base caricata (resta nella tua istanza).')}
               onScaricaDallaGuida={() => esegui(async () => {
-                if (dati.entita?.tipo === 'area') await scaricaPianta(dati.entita.chiave);
-                else if (dati.entita?.tipo === 'quartiere') await scaricaPiantaQuartiere(dati.entita.chiave);
+                if (dati.entita?.tipo === 'quartiere') await scaricaPiantaQuartiere(dati.entita.chiave);
               }, 'Pianta scaricata dalla guida nella tua istanza.')}
               onEliminaMappa={() => setConfermaEliminaMappa(true)}
               onNuovaMappa={() => setNuovaMappaAperta(true)}
@@ -252,7 +251,8 @@ function PannelloEditor(p: PropsPannello) {
   const inputImporta = useRef<HTMLInputElement | null>(null);
   const [sovrascrivi, setSovrascrivi] = useState(false);
   const {sezione,onSezione:setSezione} = p;
-  const scaricabile = mappa.entita?.tipo === 'area' || mappa.entita?.tipo === 'quartiere';
+  // solo la pianta di un quartiere si scarica dalla guida: quella delle aree dei Palazzi non c'è più (rotta tolta il 2026-09-18)
+  const scaricabile = mappa.entita?.tipo === 'quartiere';
   // l'asset del repository è un puntatore: consegnato solo se sta nel manifest degli asset
   const assetAttuale = useAsset(mappa.asset);
   const assetOriginale = useAsset(mappa.assetOriginale);

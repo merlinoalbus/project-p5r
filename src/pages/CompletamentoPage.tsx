@@ -103,7 +103,8 @@ export function CompletamentoPage() {
   const [soloDaFare, setSoloDaFare] = useState(false);
   const d = dati.dati;
   const trofeiVisibili = useMemo(() => (d?.trofei ?? []).filter((t) => (!tipo || t.tipo === tipo) && (!soloDaFare || !t.ottenuto)), [d, tipo, soloDaFare]);
-  const aggiorna = (t: TrofeoDto) => { if (d) { const trofei = d.trofei.map((x) => (x.chiave === t.chiave ? t : x)); dati.imposta({ ...d, trofei, ottenuti: trofei.filter((x) => x.ottenuto).length } as CompletamentoDto); } };
+  // dai dati correnti: la riga arriva dopo un `await`, e due spunte ravvicinate non devono annullarsi
+  const aggiorna = (t: TrofeoDto) => dati.imposta((attuale) => { const trofei = attuale.trofei.map((x) => (x.chiave === t.chiave ? t : x)); return { ...attuale, trofei, ottenuti: trofei.filter((x) => x.ottenuto).length } as CompletamentoDto; });
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (

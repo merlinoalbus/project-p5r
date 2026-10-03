@@ -185,3 +185,52 @@ export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia'
   { chiave: 'aumenta-punti', nome: 'Fa guadagnare più punti Dote' },
   { chiave: 'descrittivo', nome: 'Altro (descritto a parole)' },
 ];
+
+const unoDi = <T extends string>(elenco: readonly T[], v: unknown): v is T => typeof v === 'string' && (elenco as readonly string[]).includes(v);
+const numeroONull = (v: unknown): v is number | null => v === null || (typeof v === 'number' && Number.isFinite(v));
+const numero = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+
+/**
+ * Un valore qualunque come effetto dichiarato valido, o `null`. Ogni famiglia ha i suoi campi obbligatori, con i loro valori ammessi;
+ * il risultato porta solo quelli (niente campi in più). Prima si controllava solo `famiglia`: un `{ famiglia: 'regalo' }` senza
+ * `graditoA` entrava nel catalogo e poi `descriviEffetto` cadeva su `e.graditoA.length`, facendo fallire le letture che descrivono
+ * gli effetti. È la regola unica: la usano la lettura (`normalizzaVociEffetto`) e la validazione del server.
+ */
+export function normalizzaEffettoOggetto(x: unknown): EffettoOggetto | null {
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
+  const e = x as Record<string, unknown>;
+  switch (e.famiglia) {
+    case 'ripristina':
+      if (!unoDi(RISORSE, e.risorsa) || !unoDi(MISURE, e.misura) || !numeroONull(e.valore) || !unoDi(BERSAGLI, e.bersaglio)) return null;
+      return { famiglia: 'ripristina', risorsa: e.risorsa, misura: e.misura, valore: e.valore, bersaglio: e.bersaglio, ...(e.soloInPostiSicuri === true ? { soloInPostiSicuri: true } : {}) };
+    case 'rianima':
+      return numeroONull(e.percentuale) && unoDi(BERSAGLI, e.bersaglio) ? { famiglia: 'rianima', percentuale: e.percentuale, bersaglio: e.bersaglio } : null;
+    case 'cura-stato':
+      return (e.stato === 'tutti' || unoDi(STATI_ALTERATI, e.stato)) && unoDi(BERSAGLI, e.bersaglio) ? { famiglia: 'cura-stato', stato: e.stato, bersaglio: e.bersaglio } : null;
+    case 'infliggi-stato':
+      return unoDi(STATI_ALTERATI, e.stato) && unoDi(PROBABILITA, e.probabilita) && unoDi(BERSAGLI, e.bersaglio) ? { famiglia: 'infliggi-stato', stato: e.stato, probabilita: e.probabilita, bersaglio: e.bersaglio } : null;
+    case 'resiste-stato':
+      return unoDi(STATI_ALTERATI, e.stato) ? { famiglia: 'resiste-stato', stato: e.stato } : null;
+    case 'previene-stato':
+      return unoDi(STATI_ALTERATI, e.stato) ? { famiglia: 'previene-stato', stato: e.stato } : null;
+    case 'statistica':
+      return unoDi(STATISTICHE_OGGETTO, e.statistica) && numero(e.valore) ? { famiglia: 'statistica', statistica: e.statistica, valore: e.valore } : null;
+    // i testi si controllano per tipo, non per lunghezza: l'editor parte da «» (`effettoPredefinito`) e `descriviEffetto` li regge
+    case 'dote':
+      return typeof e.dote === 'string' && numero(e.note) ? { famiglia: 'dote', dote: e.dote, note: e.note } : null;
+    case 'regalo':
+      return Array.isArray(e.graditoA) && e.graditoA.every((g) => typeof g === 'string') ? { famiglia: 'regalo', graditoA: [...e.graditoA as string[]] } : null;
+    case 'sblocca-luogo':
+      return typeof e.luogo === 'string' ? { famiglia: 'sblocca-luogo', luogo: e.luogo } : null;
+    case 'sblocca-funzione':
+      return unoDi(FUNZIONI, e.funzione) && (e.dove === null || typeof e.dove === 'string') ? { famiglia: 'sblocca-funzione', funzione: e.funzione, dove: e.dove } : null;
+    case 'moltiplica':
+      return unoDi(RESE, e.cosa) && numero(e.fattore) ? { famiglia: 'moltiplica', cosa: e.cosa, fattore: e.fattore } : null;
+    case 'aumenta-punti':
+      return unoDi(GUADAGNI, e.dove) ? { famiglia: 'aumenta-punti', dove: e.dove } : null;
+    case 'descrittivo':
+      return typeof e.testo === 'string' ? { famiglia: 'descrittivo', testo: e.testo } : null;
+    default:
+      return null;
+  }
+}

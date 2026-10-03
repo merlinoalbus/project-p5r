@@ -3,7 +3,7 @@
 // ============================================================
 
 import { httpFetch } from './_httpClient';
-import { apiGet, apiPost, payloadDellaBusta } from './_helpers';
+import { ApiError, apiGet, apiPost, inviaFile, payloadDellaBusta } from './_helpers';
 
 vi.mock('../../stores/notificationStore', () => ({ useNotificationStore: { getState: () => ({ addNotification: vi.fn() }) } }));
 
@@ -69,5 +69,27 @@ describe('busta { data }', () => {
   it('un DTO con un campo `data` dentro la busta resta il DTO', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ data: { id: 1, data: '04-12' } }), { status: 200 })));
     await expect(apiPost('/x', {})).resolves.toEqual({ id: 1, data: '04-12' });
+  });
+});
+
+describe('B8": inviaFile', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const file = new File(['x'], 'mappa.png', { type: 'image/png' });
+
+  it('un rifiuto del proxy in HTML (413 di nginx) diventa un ApiError leggibile, non «Unexpected token <»', async () => {
+    const fetchFinto = vi.fn(async () => new Response('<html><body>413 Request Entity Too Large</body></html>', { status: 413, statusText: 'Request Entity Too Large', headers: { 'Content-Type': 'text/html' } }));
+    vi.stubGlobal('fetch', fetchFinto);
+    const errore = await inviaFile('PUT', '/mappe/x/immagine', file).catch((e: unknown) => e);
+    expect(errore).toBeInstanceOf(ApiError);
+    expect(errore).toMatchObject({ status: 413, code: 'http-error' });
+    expect((errore as Error).message).toMatch(/413/);
+    expect(fetchFinto).toHaveBeenCalledTimes(1);
+  });
+
+  it('un errore JSON del server tiene il suo codice; una risposta riuscita restituisce `data`', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { code: 'immagine-troppo-grande', message: 'Troppo grande.' } }), { status: 400 })));
+    await expect(inviaFile('POST', '/mappe/spilli/1/immagini', file)).rejects.toMatchObject({ code: 'immagine-troppo-grande', message: 'Troppo grande.' });
+    vi.stubGlobal('fetch', vi.fn(async (_u: string, init?: RequestInit) => new Response(JSON.stringify({ data: { metodo: init?.method, tipo: (init?.headers as Record<string, string>)['Content-Type'] } }), { status: 200 })));
+    await expect(inviaFile('PUT', '/font/display', file)).resolves.toEqual({ metodo: 'PUT', tipo: 'image/png' });
   });
 });

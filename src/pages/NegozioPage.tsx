@@ -94,7 +94,7 @@ export function NegozioPage() {
                 <FiltriArticoli filtro={filtro} onCambia={setFiltro} categorie={categorie} destinatari={destinatari} conPartita={partitaId !== null} />
               )}
               {articoli.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
-                : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => apriArticolo(a.chiave)} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta({ ...n, articoliElenco: n.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: n.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length })} /></div>}
+                : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => apriArticolo(a.chiave)} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, articoliElenco: attuale.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: attuale.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length }))} /></div>}
               {/* Gli articoli nascosti di questo negozio, con il ripristino in un tocco: la pagina «Rimossi» li ha tutti. */}
               <ElementiRimossi tipo="articolo" negozio={chiave} versione={versione} onRipristinato={() => void dati.ricarica()} />
             </div>

@@ -128,7 +128,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
         <ObiettivoModal
           partitaId={partitaId}
           onChiudi={() => setNuovo(false)}
-          onSalvato={(o) => { lista.imposta([o, ...(lista.dati ?? [])]); setNuovo(false); }}
+          onSalvato={(o) => { if (lista.dati) lista.imposta((attuali) => [o, ...attuali]); else lista.imposta([o]); setNuovo(false); }}
         />
       )}
       {modifica && (

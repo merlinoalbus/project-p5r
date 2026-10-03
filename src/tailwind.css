@@ -268,6 +268,8 @@
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
     animation: scale-in 0.15s ease-out;
   }
+  /* la finestra riceve il fuoco all'apertura (Modal.tsx): il bordo che già ha basta, niente contorno attorno a tutta la finestra */
+  .modal-content:focus { outline: none; }
   .modal-header {
     display: flex;
     align-items: center;
@@ -1474,7 +1476,10 @@
 .condizione-togli:hover { color:var(--color-error); }
 
 /* Selettore con ricerca: pulsante con etichetta e valore; tendina con campo e voci da 44 px. */
-.selettore { position:relative; min-width:0; }
+/* La regola di base sta nel livello dei componenti: fuori dai layer `min-width:0` batteva le utility `min-w-[…]` che chi usa il
+   selettore gli passa (EditorAzioneStrutturata, RigaDote, TraduzioniEditor), e la larghezza minima chiesta veniva ignorata.
+   Le altre regole del selettore restano dove sono: spostarle cambierebbe la cascata anche per `width`/`display` del compatto. */
+@layer components { .selettore { position:relative; min-width:0; } }
 .selettore__scelta { position:relative; display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 22px 3px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
 .selettore__scelta:disabled { opacity:0.6; cursor:default; }
 .selettore__etichetta { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }

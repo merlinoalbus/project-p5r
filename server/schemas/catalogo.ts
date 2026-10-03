@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { TIPI_CATALOGO } from '../../shared/types.js';
 import { FASCE_ORARIO, GIORNI_SETTIMANA_CHIAVI } from '../../shared/orariNegozio.js';
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shared/attivita.js';
-import { FAMIGLIE_EFFETTO } from '../../shared/effettiOggetto.js';
+import { normalizzaEffettoOggetto, type EffettoOggetto } from '../../shared/effettiOggetto.js';
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
 
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
@@ -25,9 +25,15 @@ export const orariNegozio = z.object({
   nota: z.string().trim().max(300).nullable().default(null),
 });
 
+/** Un effetto dichiarato valido per la sua famiglia (`normalizzaEffettoOggetto`, la stessa regola della lettura): non basta la
+ *  famiglia, servono i suoi campi. Il valore salvato è quello normalizzato, senza campi in più. */
+const effettoOggetto = z.custom<EffettoOggetto>((v) => normalizzaEffettoOggetto(v) !== null, 'Effetto non valido per la sua famiglia')
+  .transform((v) => normalizzaEffettoOggetto(v)!);
+const effettoJson = effettoOggetto.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v)));
+
 /** Una voce di effetto (shared/effettiCatalogo): l'effetto dichiarato, se vale alle volte successive, le sue condizioni. */
 export const voceEffetto = z.object({
-  effetto: z.object({ famiglia: z.enum(chiaviDi(FAMIGLIE_EFFETTO)) }).passthrough(),
+  effetto: effettoOggetto,
   ripetuto: z.boolean().optional(),
   condizioni: z.array(condizioneSpillo).max(20).optional(),
 });
@@ -90,8 +96,7 @@ export const datiArticolo = z.object({
   // negozio. Per un articolo collegato non si scrivono: la lettura li prende dall'oggetto.
   // La dichiarazione strutturata (shared/effettiOggetto). `effetto` resta la frase che ne discende:
   // la ricerca per testo ci passa sopra, e chi legge il database senza l'app deve capire lo stesso.
-  effetto_json: z.object({ famiglia: z.string().min(1).max(40) }).passthrough().nullable().optional()
-    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
+  effetto_json: effettoJson,
   effetto: testo(600).nullable().optional(),
   statistiche: testo(400).nullable().optional(),
   nota: testo(600).nullable().optional(),
@@ -104,8 +109,7 @@ export const datiLibro = z.object({
    * Da non confondere con `condizioni_json`, che e' il verso opposto: quelle dicono quando il
    * libro e' disponibile, questa che cosa il libro sblocca. Per `sblocca-luogo` il luogo e' la
    * chiave di un quartiere, cosi' l'app ci puo' portare. */
-  effetto_json: z.object({ famiglia: z.string().min(1).max(40) }).passthrough().nullable().optional()
-    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
+  effetto_json: effettoJson,
   // Le condizioni valgono anche qui. L'editor le mostrava già e finivano nel nulla, perché la
   // colonna non esisteva (migrazione 052): sono la disponibilità, «dal 18 aprile».
   verificato: z.boolean().optional(),

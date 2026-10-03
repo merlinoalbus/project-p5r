@@ -3,7 +3,8 @@
 source "$(dirname "${BASH_SOURCE[0]}")/_comuni.sh"
 cd "$ROOT_DIR"
 if porta_in_ascolto "$FE_PORT"; then
-  echo "[FE] già in ascolto sulla porta $FE_PORT"
+  # «già in ascolto» vale solo se ad ascoltare è node (Vite): un altro programma sulla porta è un errore
+  gia_avviato_o_esci "$FE_PORT" "FE" || exit 1
   exit 0
 fi
 : > "$FE_LOG"

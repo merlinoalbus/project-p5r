@@ -260,3 +260,65 @@ Tutte le altre correzioni ripristinano il comportamento atteso, oppure non cambi
 - **Fase 2 (bug e criticità):** ogni correzione con un test e la sua variante rossa.
 - **Fase 3 (ridondanze e ottimizzazioni):** comportamento invariato, protetto dai test esistenti più quelli nuovi della fase 2.
 - **Fase 4 (commenti):** oltre ai commenti nuovi, si correggono quelli e i documenti obsoleti di §5-ter.
+
+## 8. Fase 2 — correzioni fatte (voce 2 della ROADMAP)
+
+Tutti i rilievi segnati «2» nelle tabelle sono corretti:
+- F01, F02, F04–F12, F14;
+- B1–B10, B12, B14;
+- C1–C6, B1'–B6';
+- B1"–B10";
+- A1–A9 con R1‴;
+- S1, S6, S7, D1, D2, D4, K4‴, O9.
+
+Ogni correzione ha un test. Ognuna è stata tolta di nuovo, una alla volta, per vedere fallire il suo test (variante rossa); poi
+i file sono tornati identici al confronto byte per byte. In totale 70 varianti, tutte rosse.
+
+**Test per lotto:**
+
+| Lotto | Test |
+|-------|------|
+| API | `server/routes/verifica-api.test.ts`, `server/routes/download-database.test.ts`, `src/services/api/_httpClient.test.ts` |
+| Mappe e guida | `server/routes/verifica-mappe.test.ts`, `server/routes/negozio-del-pin.test.ts` |
+| Servizi e DB | `server/services/verifica-servizi.test.ts` |
+| Condivisi e stato | `shared/verifica-condivisi.test.ts`, `src/hooks/useCarica.test.tsx`, `src/stores/verifica-store.test.ts` |
+| Pagine e componenti | `src/hooks/useCodaProgresso.test.tsx`, `src/hooks/useCarica.test.tsx`, `src/components/shared/Modal.test.tsx`, `src/components/shared/immaginiCache.test.ts`, `src/accessibilita.test.ts`, `src/components/guida/EditorEffetti.test.tsx` |
+
+Nel lotto pagine e componenti ci sono anche casi nuovi nei test esistenti: VideogiochiPage, CondizioniEditor, VisoreMappa,
+ConfidenteDettaglioPage, SquadraPartita, EditorMappaPage.
+
+**Prove fuori dai test:**
+- **nginx (D1, D2):** prova con Docker su un backend finto. Configurazione nuova: 200, 413, 200. Configurazione di prima: 413,
+  413, 502.
+- **D4:** intestazioni di cache verificate.
+- **S6:** porta occupata da un altro programma → uscita 1.
+- **S7:** cartella di lavoro tolta dopo un errore.
+- **S1:** misura sul `gioco.db` vero, DB invariati (SHA uguale).
+- **Browser:** focus delle finestre, `min-width` dei selettori, ruoli, nessuno scorrimento orizzontale a 375/768/1280.
+
+**Emerso durante le correzioni e corretto nello stesso lotto:**
+- **F05:** un errore dopo che la rotta aveva dichiarato un file (`Content-Type: application/vnd.sqlite3`) partiva con quel tipo.
+  Ora `errorHandler` rimette le intestazioni JSON.
+- **B5:** l'immagine di base di una mappa non si toglie se la stessa chiave è anche la pianta di un quartiere o di un'area. Le 9
+  immagini «senza mappa» del DB vivo sono piante d'area, non orfane.
+- **B1:** un'area con la chiave più lunga possibile ora contiene punti raggiungibili (prima la correzione li rifiutava).
+- **B3":** lo stesso errore (dati presi dal render dopo un `await`) era anche in Completamento, Cruciverba, Richieste,
+  DungeonDettaglio, NegozioPage, NegoziPage e ObiettiviPartita: corretto ovunque con la forma funzionale di `imposta`.
+- **B6":** con `ricarica()` che ora aspetta la rilettura, l'editor delle mappe passa alla mappa nuova solo con l'albero già
+  riletto; il test che dava per scontata la navigazione immediata ora la aspetta.
+- **B9":** `articolo.effetto_json` e `libro.effetto_json` avevano la stessa validazione apparente: ora usano lo stesso
+  normalizzatore. I 109 effetti salvati nel DB vivo e nel pacchetto lo superano identici.
+- **A4:** la chiave dell'inquadratura usa le dimensioni effettive dell'immagine (`nat` non è mai zero).
+- **A5:** la finestra ridà il fuoco a chi l'ha aperta anche quando:
+  - nasce già aperta;
+  - ha un campo `autoFocus`;
+  - è in StrictMode;
+  - il documento non ha il fuoco del sistema.
+- **A7:** i `div`/`span` con `aria-label` senza ruolo erano 20, non 7. Un test sui sorgenti impedisce che tornino.
+- **A2:** si sposta nel livello dei componenti solo la regola di base `.selettore`. Il resto del blocco fuori dai layer è voluto,
+  e spostarlo cambierebbe `width` e `display` dei selettori compatti.
+
+**Da segnalare, non toccati:**
+- in `%TEMP%` c'è una cartella `p5r-pacchetto-*` lasciata da un'esecuzione fallita di `genera-pacchetto` di prima (il difetto
+  S7);
+- in `data/backups` i giornali orfani delle copie di avvio sono stati tolti al riavvio del backend, come previsto da B5'.

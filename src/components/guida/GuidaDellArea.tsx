@@ -276,7 +276,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
           Una voce collegata ai pin ha il loro stato; le altre si segnano qui e non contano nella percentuale, che misura {memento ? 'gli obiettivi dei dedali' : 'le planimetrie'}.
         </p>
         {area.punti.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1" aria-label="Filtri per tipo">
+          <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Filtri per tipo">
             {TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
               <button key={tp} type="button" className={`chip touch text-[11px] ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
                 <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: COLORE_TIPO[tp] }} aria-hidden="true" />{NOME_TIPO[tp]} ({area.punti.filter((p) => p.tipo === tp).length})

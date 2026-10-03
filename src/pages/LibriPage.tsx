@@ -15,6 +15,7 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { opzioniDaNomi } from '../utils/selettore';
 import { getLibri, impostaProgressoLibro } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useCodaProgresso } from '../hooks/useCodaProgresso';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
@@ -30,95 +31,49 @@ import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { NOME_DOTE } from '../utils/citta';
 import { STATI_LETTURA, bloccata, formattaYen, haDote, motivoBlocco, passaStato, prezzoChip, type StatoLettura } from '../utils/letture';
-import type { LibroDto, LibriDto } from '../types';
-
-const chiaveCoda = (partitaId: number, libroChiave: string) => `${partitaId}:${libroChiave}`;
+import type { LibroDto } from '../types';
 
 export function LibriPage() {
   useDocumentTitle('Libri');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
-  const partitaIdRef = useRef(partitaId);
-  useEffect(() => { partitaIdRef.current = partitaId; }, [partitaId]);
   const dati = useCarica(() => getLibri(partitaId ?? undefined), [partitaId]);
-  const datiRef = useRef<LibriDto | null>(null);
-  useEffect(() => { datiRef.current = dati.dati; }, [dati.dati]);
   const [ricerca, setRicerca] = useState('');
   const [stato, setStato] = useState<StatoLettura>('tutti');
   const [dote, setDote] = useState('');
   const [selezionato, setSelezionato] = useState<string | null>(null);
   const [mostraFatti, setMostraFatti] = useState(false);
   const [fonteSelezionata, setFonteSelezionata] = useState(0);
-  const [desiderati, setDesiderati] = useState<Record<string, number>>({});
-  const [occupati, setOccupati] = useState<Record<string, boolean>>({});
   const pannelloRef = useRef<HTMLElement | null>(null);
-  const desideratiRef = useRef(new Map<string, number>());
-  const confermatiRef = useRef(new Map<string, number>());
-  const inVoloRef = useRef(new Set<string>());
 
-  const sostituisciLibro = (libro: LibroDto) => {
-    const correnti = datiRef.current;
-    if (!correnti) return;
-    const nuovi = {
+  // Le pressioni rapide sulle sessioni: una richiesta per volta per libro insegue l'ultimo valore chiesto, nella partita di partenza.
+  const coda = useCodaProgresso<LibroDto>(partitaId, {
+    invia: impostaProgressoLibro,
+    // il libro aggiornato sostituisce il suo nei dati correnti, con i conteggi della pagina
+    applica: (libro) => dati.imposta((correnti) => ({
       ...correnti,
       libri: correnti.libri.map((l) => l.chiave === libro.chiave ? libro : l),
       completati: correnti.libri.reduce((n, l) => n + (l.chiave === libro.chiave ? Number(libro.fatto) : Number(l.fatto)), 0),
       sessioniFatte: correnti.libri.reduce((n, l) => n + (l.chiave === libro.chiave ? libro.progresso : l.progresso), 0),
-    };
-    datiRef.current = nuovi;
-    dati.imposta(nuovi);
-  };
-
-  /** Le pressioni rapide si mettono in coda: una richiesta per volta insegue l'ultimo valore chiesto. */
-  const eseguiCoda = async (libro: LibroDto) => {
-    if (!partitaId) return;
-    const partitaCorrente = partitaId;
-    const coda = chiaveCoda(partitaCorrente, libro.chiave);
-    if (inVoloRef.current.has(coda)) return;
-    inVoloRef.current.add(coda);
-    confermatiRef.current.set(coda, libro.progresso);
-    setOccupati((x) => ({ ...x, [coda]: true }));
-    try {
-      while (true) {
-        const confermato = confermatiRef.current.get(coda) ?? libro.progresso;
-        const desiderato = desideratiRef.current.get(coda) ?? confermato;
-        if (desiderato === confermato || partitaIdRef.current !== partitaCorrente) break;
-        const aggiornato = await impostaProgressoLibro(partitaCorrente, libro.chiave, desiderato);
-        confermatiRef.current.set(coda, aggiornato.progresso);
-        // il libro finito dà le sue Doti: si segnano a mano, l'avviso le ricorda
-        avvisaDotiDaSegnare(aggiornato.daSegnare, aggiornato.nomeIt ?? aggiornato.nome);
-        if (partitaIdRef.current === partitaCorrente) sostituisciLibro(aggiornato);
-      }
-    } catch (err) {
-      const confermato = confermatiRef.current.get(coda) ?? libro.progresso;
-      desideratiRef.current.set(coda, confermato);
-      setDesiderati((x) => ({ ...x, [coda]: confermato }));
-      if (partitaIdRef.current === partitaCorrente) notifica('error', err instanceof Error ? err.message : 'Aggiornamento del libro fallito.');
-    } finally {
-      inVoloRef.current.delete(coda);
-      setOccupati((x) => ({ ...x, [coda]: false }));
-    }
-  };
-
-  const accoda = (libro: LibroDto, valore: number) => {
-    if (!partitaId) return;
-    const desiderato = Math.min(Math.max(valore, 0), libro.totaleSessioni);
-    const coda = chiaveCoda(partitaId, libro.chiave);
-    desideratiRef.current.set(coda, desiderato);
-    setDesiderati((x) => ({ ...x, [coda]: desiderato }));
-    void eseguiCoda(libro);
-  };
+    })),
+    // il libro finito dà le sue Doti: si segnano a mano, l'avviso le ricorda
+    dopoOgniInvio: (libro) => avvisaDotiDaSegnare(libro.daSegnare, libro.nomeIt ?? libro.nome),
+    messaggioErrore: 'Aggiornamento del libro fallito.',
+    segnalaErrore: (m) => notifica('error', m),
+  });
+  const accoda = (libro: LibroDto, valore: number) => coda.accoda(libro, Math.min(Math.max(valore, 0), libro.totaleSessioni));
+  const valoreDi = coda.valore;
 
   const visibili = useMemo(() => {
     const q = ricerca.trim().toLocaleLowerCase('it');
     return (dati.dati?.libri ?? []).filter((l) => {
-      const progresso = partitaId ? desiderati[chiaveCoda(partitaId, l.chiave)] ?? l.progresso : l.progresso;
+      const progresso = valoreDi(l);
       // Nella ricerca entra anche il testo «dove» della guida: per i libri senza negozio né posizione (premi, eventi) è l'unica indicazione.
       if (q && !`${l.nome} ${l.nomeIt ?? ''} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${l.dove} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
       if (dote && !haDote(l.effetti, dote)) return false;
       return passaStato(stato, progresso, l.fatto);
     });
-  }, [dati.dati, desiderati, ricerca, stato, dote, partitaId]);
+  }, [dati.dati, valoreDi, ricerca, stato, dote]);
 
   const libroSelezionato = dati.dati?.libri.find((l) => l.chiave === selezionato) ?? null;
   const posizione = libroSelezionato?.posizioni[fonteSelezionata] ?? null;
@@ -131,8 +86,7 @@ export function LibriPage() {
 
   /** La scheda di un libro: la stessa nei due gruppi, scritta una volta sola. */
   const scheda = (libro: LibroDto) => {
-    const coda = partitaId ? chiaveCoda(partitaId, libro.chiave) : libro.chiave;
-    const progresso = partitaId ? desiderati[coda] ?? libro.progresso : libro.progresso;
+    const progresso = valoreDi(libro);
     // «Lettura rapida» non tocca il libro stesso: è il pomeriggio che rende il doppio.
     const passo = d?.letturaRapida && libro.chiave !== 'lettura-rapida' ? 2 : 1;
     const percentuale = Math.round((progresso / libro.totaleSessioni) * 100);
@@ -154,13 +108,13 @@ export function LibriPage() {
       {/* Il gesto è la sessione: due pulsanti larghi uguali. Con il libro non ancora disponibile il
           «+» resta spento e il motivo sta sotto, così non si registra una lettura che il gioco non
           permette (il server la rifiuterebbe comunque). */}
-      {partitaId && <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${titolo}`}>
+      {partitaId && <div className="grid grid-cols-2 gap-2" role="group" aria-label={`Avanzamento ${titolo}`}>
         <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli"
           disabled={progresso === 0} onClick={() => accoda(libro, Math.max(progresso - passo, 0))} aria-label={`Togli una sessione a ${titolo}`} />
         <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Sessione"
           disabled={progresso >= libro.totaleSessioni || (nonAncora && progresso === 0)} onClick={() => accoda(libro, Math.min(progresso + passo, libro.totaleSessioni))} aria-label={`Aggiungi una sessione a ${titolo}`} />
         {nonAncora && progresso === 0 && <p className="col-span-2 m-0 text-xs text-text-secondary" role="note">Non ancora leggibile: {motivoBlocco(libro.disponibilita)}</p>}
-        {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
+        {coda.occupato(libro) && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
       </div>}
       <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Dove</dt>

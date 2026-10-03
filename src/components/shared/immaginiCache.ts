@@ -14,7 +14,16 @@ const datazioni = new Map<string, string>();
 export function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
   let p = elenchi.get(ambito);
   if (!p) {
-    p = getImmagini(ambito).then((lista) => { for (const i of lista) if (i.createdAt) datazioni.set(`${ambito}/${i.chiave}`, i.createdAt); return new Set(lista.map((i) => i.chiave)); }).catch(() => new Set<string>());
+    const questa: Promise<Set<string>> = getImmagini(ambito)
+      .then((lista) => { for (const i of lista) if (i.createdAt) datazioni.set(`${ambito}/${i.chiave}`, i.createdAt); return new Set(lista.map((i) => i.chiave)); })
+      .catch(() => {
+        // Un elenco fallito (rete giù, server in riavvio) non resta in cache come «nessuna immagine»: i riquadri montati dopo
+        // lo richiedono. Si toglie solo se è ancora questa la richiesta registrata (un `azzeraCacheImmagini` nel frattempo
+        // può averne già avviata una più nuova). Rilievo A6 della verifica completa, 2026-10-03.
+        if (elenchi.get(ambito) === questa) elenchi.delete(ambito);
+        return new Set<string>();
+      });
+    p = questa;
     elenchi.set(ambito, p);
   }
   return p;

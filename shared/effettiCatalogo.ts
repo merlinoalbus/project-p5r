@@ -10,7 +10,7 @@
 // Leblanc). I punti Dote di un conseguimento si calcolano da qui (`dotiDaEffetti`).
 // ============================================================
 
-import { FAMIGLIE_EFFETTO, descriviEffetto, type EffettoOggetto, type NomiEffetto } from './effettiOggetto.js';
+import { descriviEffetto, normalizzaEffettoOggetto, type EffettoOggetto, type NomiEffetto } from './effettiOggetto.js';
 import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from './condizioniSpillo.js';
 
 export interface VoceEffetto {
@@ -22,20 +22,18 @@ export interface VoceEffetto {
   condizioni?: RequisitoSpillo[];
 }
 
-const FAMIGLIE = new Set<string>(FAMIGLIE_EFFETTO.map((f) => f.chiave));
-
-/** Rende un valore qualunque un elenco di voci valide: le voci senza una famiglia nota cadono. */
+/** Rende un valore qualunque un elenco di voci valide: le voci il cui effetto non è valido per la sua famiglia cadono
+ *  (`normalizzaEffettoOggetto`: prima si guardava solo la famiglia, e un regalo senza `graditoA` faceva cadere le descrizioni). */
 export function normalizzaVociEffetto(x: unknown): VoceEffetto[] {
   if (!Array.isArray(x)) return [];
   const out: VoceEffetto[] = [];
   for (const v of x) {
     if (!v || typeof v !== 'object') continue;
     const voce = v as Record<string, unknown>;
-    const effetto = voce.effetto as Record<string, unknown> | undefined;
-    if (!effetto || typeof effetto !== 'object' || typeof effetto.famiglia !== 'string' || !FAMIGLIE.has(effetto.famiglia)) continue;
-    if (effetto.famiglia === 'dote' && (typeof effetto.dote !== 'string' || typeof effetto.note !== 'number')) continue;
-    const pulita: VoceEffetto = { effetto: effetto as unknown as EffettoOggetto };
-    if (effetto.famiglia === 'dote') pulita.effetto = { famiglia: 'dote', dote: String(effetto.dote).toLowerCase(), note: Math.max(1, Math.round(Number(effetto.note))) };
+    const effetto = normalizzaEffettoOggetto(voce.effetto);
+    if (!effetto) continue;
+    // la Dote si scrive in minuscolo e vale almeno una nota intera
+    const pulita: VoceEffetto = { effetto: effetto.famiglia === 'dote' ? { famiglia: 'dote', dote: effetto.dote.toLowerCase(), note: Math.max(1, Math.round(effetto.note)) } : effetto };
     if (voce.ripetuto === true) pulita.ripetuto = true;
     const condizioni = normalizzaCondizioniSpillo(voce.condizioni);
     if (condizioni.length > 0) pulita.condizioni = condizioni;

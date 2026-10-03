@@ -118,7 +118,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
                 </Link>
               </div>
               {scorta.dati && (
-                <div className="flex flex-wrap items-center gap-1.5" aria-label="Arcani potenziati dalla scorta">
+                <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Arcani potenziati dalla scorta">
                   <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
                   {arcaniInScorta.length === 0 && <span className="text-[12px] text-text-muted">nessuna Persona in scorta</span>}
                   {arcaniInScorta.map((a) => (

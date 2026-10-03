@@ -10,6 +10,7 @@
 
 import { useState } from 'react';
 import { CondizioniEditor } from './CondizioniEditor';
+import { useIdStabili } from '../../hooks/useIdStabili';
 import { EditorEffetto } from './EditorEffetto';
 import { effettoPredefinito, type NomiPerEffetti } from '../../utils/effetti';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -53,6 +54,8 @@ function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quar
 }
 
 export function EditorEffetti({ voci, onCambia, conRipetuto, disabilitato, quartieri, attivita, confidenti, erroreNomi, riprovaNomi, aiuto }: Props) {
+  // ogni voce ha uno stato suo (le condizioni aperte): la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(voci.length);
   return (
     <fieldset className="regole-editor editor-effetti flex flex-col gap-2">
       <legend>Che cosa fa</legend>
@@ -60,12 +63,12 @@ export function EditorEffetti({ voci, onCambia, conRipetuto, disabilitato, quart
       {voci.length === 0 && <p className="m-0 text-[12px] text-text-muted" role="status">Nessun effetto dichiarato.</p>}
       <ul className="m-0 flex list-none flex-col gap-3 p-0">
         {voci.map((v, i) => (
-          <Voce key={i} voce={v} indice={i} conRipetuto={conRipetuto} disabilitato={disabilitato} quartieri={quartieri} attivita={attivita} confidenti={confidenti} erroreNomi={erroreNomi} riprovaNomi={riprovaNomi}
-            onCambia={(nuova) => onCambia(voci.map((x, j) => (j === i ? nuova : x)))} onTogli={() => onCambia(voci.filter((_, j) => j !== i))} />
+          <Voce key={chiavi.ids[i]} voce={v} indice={i} conRipetuto={conRipetuto} disabilitato={disabilitato} quartieri={quartieri} attivita={attivita} confidenti={confidenti} erroreNomi={erroreNomi} riprovaNomi={riprovaNomi}
+            onCambia={(nuova) => onCambia(voci.map((x, j) => (j === i ? nuova : x)))} onTogli={() => { chiavi.togli(i); onCambia(voci.filter((_, j) => j !== i)); }} />
         ))}
       </ul>
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un effetto" disabled={disabilitato}
-        onClick={() => onCambia([...voci, { effetto: effettoPredefinito('dote') }])} />
+        onClick={() => { chiavi.aggiungi(); onCambia([...voci, { effetto: effettoPredefinito('dote') }]); }} />
     </fieldset>
   );
 }

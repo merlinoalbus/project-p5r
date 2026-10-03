@@ -36,8 +36,6 @@ router.put('/marcatori', validate({ body: bodyMarcatore }), (req, res) => {
   res.json({ punto: b.punto, marcatore: impostaMarcatore(b.punto, b.x === null || b.y === null ? null : { x: b.x, y: b.y }) });
 });
 
-/** Scarica nell'istanza la pianta dell'area dalla guida collegata nel seed (immagine mai nel repository). */
-
 /** Fissa o rimuove lo spillo di un luogo sulla mappa del quartiere. */
 router.put('/marcatori-luoghi', validate({ body: bodyMarcatoreLuogo }), (req, res) => {
   const b = req.body as { luogo: string; x: number | null; y: number | null };

@@ -34,7 +34,7 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   const motivi = motiviDisponibilita(d);
   if (d.stato === 'bloccato') {
     return (
-      <span className={`chip chip--icona chip--bloccata ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Non ancora disponibile: ${motivi}`}>
+      <span className={`chip chip--icona chip--bloccata ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Non ancora disponibile: ${motivi}`}>
         <IconaAzione chiave="bloccato" dimensione={compatto ? 12 : 14} />Non ancora
       </span>
     );
@@ -62,12 +62,12 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   // stato —: nella partita non c'è niente da segnare, la si corregge nell'editor della mappa
   const daCorreggere = grigiProprie.some((r) => r.tipo === 'spillo');
   if (nonLeggibili) return (
-    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Da verificare: ${motivi}`}>
+    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Da verificare: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da verificare
     </span>
   );
   if (daCorreggere) return (
-    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Condizione da correggere nell’editor della mappa: ${motivi}`}>
+    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Condizione da correggere nell’editor della mappa: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da correggere
     </span>
   );

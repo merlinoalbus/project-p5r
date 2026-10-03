@@ -166,11 +166,11 @@ export function RichiestePage() {
     // Le completate in fondo: restano consultabili, ma non davanti a quelle da fare.
     .sort((a, b) => Number(a.stato === 'completata') - Number(b.stato === 'completata')), [d, dedalo, accettazione, completamento, q]);
   const accettate = useMemo(() => (d?.richieste ?? []).filter((r) => r.stato === 'accettata').length, [d]);
-  const aggiorna = (r: RichiestaDto) => {
-    if (!d) return;
-    const richieste = d.richieste.map((x) => (x.chiave === r.chiave ? r : x));
-    dati.imposta({ ...d, richieste, completate: richieste.filter((x) => x.stato === 'completata').length, dedali: d.dedali.map((x) => ({ ...x, completate: richieste.filter((y) => y.areaChiave === x.chiave && y.stato === 'completata').length })) });
-  };
+  // dai dati correnti: la riga arriva dopo un `await`, e due cambi di stato ravvicinati non devono annullarsi
+  const aggiorna = (r: RichiestaDto) => dati.imposta((attuale) => {
+    const richieste = attuale.richieste.map((x) => (x.chiave === r.chiave ? r : x));
+    return { ...attuale, richieste, completate: richieste.filter((x) => x.stato === 'completata').length, dedali: attuale.dedali.map((x) => ({ ...x, completate: richieste.filter((y) => y.areaChiave === x.chiave && y.stato === 'completata').length })) };
+  });
   const filtriAttivi = !!q || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte';
 
   return (

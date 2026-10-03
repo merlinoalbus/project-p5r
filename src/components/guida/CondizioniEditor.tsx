@@ -19,6 +19,7 @@ import { useMemo, useState } from 'react';
 import { ARCHI_STORIA, CONTATORI, DOTI_CONDIZIONE, EVENTI_STORIA, GIORNI_NEL_MESE, GIORNI_SETTIMANA, MESI_GIOCO, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataLeggibile, descriviRequisitoSpillo, nascondeIlPin, nomePalazzo, ordineGioco, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizione, valorePredefinito, type CampoCondizione, type SceltaCondizione, type TipoCampo, type ValoriCondizione } from '../../../shared/statiPartita';
 import { useCarica } from '../../hooks/useCarica';
+import { useIdStabili } from '../../hooks/useIdStabili';
 import { getConfidenti, getDungeons, getQuartieri, getRichieste } from '../../services/api/compendio';
 import { getElenchiRegole, getPinConStato, type ElenchiRegole, type PinConStato } from '../../services/api/condizioni';
 import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
@@ -174,7 +175,7 @@ function Riga({ condizione, negata, onCambia, onRimuovi, elenchi, nomi, disabili
         ? <Selettore compatto className="condizione-operatore" etichetta="Operatore" valore={operatore.chiave} disabilitato={disabilitato} opzioni={def.operatori.map((o) => ({ chiave: o.chiave, nome: o.nome }))} onCambia={cambiaOperatore} />
         : <span className="condizione-operatore condizione-operatore--fisso">{operatore.nome}</span>}
       {operatore.campi.map((c) => <Campo key={c.nome} campo={c} valori={scelta.valori} onCambia={cambiaValore} elenchi={elenchi} disabilitato={disabilitato} />)}
-      {perSpillo && nascondeIlPin(condizione.tipo) && <span className="condizione-presenza" title="Se non vale, lo spillo sparisce dalla mappa" aria-label="Condizione di presenza: se non vale, lo spillo sparisce dalla mappa">presenza</span>}
+      {perSpillo && nascondeIlPin(condizione.tipo) && <span className="condizione-presenza" title="Se non vale, lo spillo sparisce dalla mappa" role="note" aria-label="Condizione di presenza: se non vale, lo spillo sparisce dalla mappa">presenza</span>}
       <span className="condizione-origine" title={`Si legge da: ${def.origine}`}>{def.origine}</span>
       <button type="button" className="condizione-togli touch" aria-label={`Togli la condizione: ${testo}`} title="Togli" disabled={disabilitato} onClick={onRimuovi}><IconaAzione chiave="chiudi" dimensione={16} /></button>
     </div>
@@ -185,9 +186,11 @@ interface PropsBlocco { condizioni: RequisitoSpillo[]; modo: 'tutte' | 'almeno-u
 
 /** Un gruppo E/O con le sue righe e i suoi sottogruppi. Al primo livello è il TUTTE implicito. */
 function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRimuovi, profondita, elenchi, nomi, disabilitato, perSpillo }: PropsBlocco) {
+  // le righe hanno uno stato loro (l'operatore scelto): la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(condizioni.length);
   const sostituisci = (i: number, c: RequisitoSpillo) => onCambia(condizioni.map((v, j) => (j === i ? c : v)));
-  const rimuovi = (i: number) => onCambia(condizioni.filter((_, j) => j !== i));
-  const aggiungi = (c: RequisitoSpillo) => onCambia([...condizioni, c]);
+  const rimuovi = (i: number) => { chiavi.togli(i); onCambia(condizioni.filter((_, j) => j !== i)); };
+  const aggiungi = (c: RequisitoSpillo) => { chiavi.aggiungi(); onCambia([...condizioni, c]); };
   const radice = profondita === 0;
   const pieno = condizioni.length >= 20;
   return (
@@ -206,9 +209,9 @@ function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRi
           if (dentro.tipo === 'gruppo') {
             const g = dentro;
             const scrivi = (nuovo: RequisitoSpillo) => sostituisci(i, negata ? { tipo: 'non', condizione: nuovo } : nuovo);
-            return <Blocco key={`${i}:gruppo`} condizioni={g.condizioni} modo={g.modo} onCambia={(cs) => (cs.length ? scrivi({ ...g, condizioni: cs }) : rimuovi(i))} onCambiaModo={(m) => scrivi({ ...g, modo: m })} negato={negata} onNega={() => sostituisci(i, negata ? g : { tipo: 'non', condizione: g })} onRimuovi={() => rimuovi(i)} profondita={profondita + 1} elenchi={elenchi} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />;
+            return <Blocco key={`gruppo-${chiavi.ids[i]}`} condizioni={g.condizioni} modo={g.modo} onCambia={(cs) => (cs.length ? scrivi({ ...g, condizioni: cs }) : rimuovi(i))} onCambiaModo={(m) => scrivi({ ...g, modo: m })} negato={negata} onNega={() => sostituisci(i, negata ? g : { tipo: 'non', condizione: g })} onRimuovi={() => rimuovi(i)} profondita={profondita + 1} elenchi={elenchi} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />;
           }
-          return <Riga key={i} condizione={dentro} negata={negata} onCambia={(nuova) => sostituisci(i, nuova)} onRimuovi={() => rimuovi(i)} elenchi={elenchi} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />;
+          return <Riga key={`riga-${chiavi.ids[i]}`} condizione={dentro} negata={negata} onCambia={(nuova) => sostituisci(i, nuova)} onRimuovi={() => rimuovi(i)} elenchi={elenchi} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />;
         })}
       </div>
       <div className="condizioni-blocco__azioni">

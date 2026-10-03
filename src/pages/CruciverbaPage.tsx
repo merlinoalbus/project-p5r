@@ -89,7 +89,11 @@ export function CruciverbaPage() {
     }
     return [...m.entries()];
   }, [visibili]);
-  const aggiorna = (c: CruciverbaDto) => { if (d) { const lista = d.cruciverba.map((x) => (x.giorno === c.giorno ? c : x)); dati.imposta({ ...d, cruciverba: lista, risolti: lista.filter((x) => x.fatto).length, prossimo: d.prossimo?.giorno === c.giorno && c.fatto ? (lista.find((x) => !x.fatto && d.dataGioco !== null && x.giorno >= d.dataGioco) ?? null) : d.prossimo }); } };
+  // dai dati correnti: la riga arriva dopo un `await`, e due spunte ravvicinate non devono annullarsi
+  const aggiorna = (c: CruciverbaDto) => dati.imposta((attuale) => {
+    const lista = attuale.cruciverba.map((x) => (x.giorno === c.giorno ? c : x));
+    return { ...attuale, cruciverba: lista, risolti: lista.filter((x) => x.fatto).length, prossimo: attuale.prossimo?.giorno === c.giorno && c.fatto ? (lista.find((x) => !x.fatto && attuale.dataGioco !== null && x.giorno >= attuale.dataGioco) ?? null) : attuale.prossimo };
+  });
   const prossimo = d?.prossimo ?? null;
   // Il rimando azzera i filtri e scorre alla riga evidenziata al giro successivo, quando esiste.
   const vaiAlProssimo = () => {

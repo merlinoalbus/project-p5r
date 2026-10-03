@@ -90,6 +90,21 @@ export const apiPatch = <T>(path: string, body?: unknown, opts?: HttpFetchOption
 export const apiDelete = <T>(path: string, opts?: HttpFetchOptions): Promise<T> =>
   requestJson<T>('DELETE', path, undefined, opts);
 
+/**
+ * Invia un file come corpo grezzo (Content-Type = tipo del file) e restituisce il contenuto di `data`. Lo stato si controlla
+ * PRIMA di leggere il corpo: un rifiuto del proxy (413 di nginx oltre i 10 MB, 502) è una pagina HTML, e leggerla come JSON dava
+ * «Unexpected token '<'» invece di un errore leggibile. Nessun nuovo tentativo: un caricamento non si ripete da solo.
+ */
+export async function inviaFile<T>(method: 'PUT' | 'POST', path: string, file: File): Promise<T> {
+  const res = await httpFetch(
+    `${API_BASE_URL}${path}`,
+    { method, body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } },
+    { maxRetries: 0, timeoutMs: 120_000 },
+  );
+  if (!res.ok) throw await parseError(res, 'Caricamento fallito');
+  return payloadDellaBusta<T>(await res.json());
+}
+
 /** Costruisce una query string da un oggetto, saltando i valori vuoti. */
 export function queryString(params: object): string {
   const sp = new URLSearchParams();

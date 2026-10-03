@@ -16,7 +16,7 @@ interface Props {
 export function AffinitaGriglia({ affinita, compatta }: Props) {
   if (compatta) {
     return (
-      <div className="flex gap-1 flex-wrap" aria-label="Affinità">
+      <div className="flex gap-1 flex-wrap" role="group" aria-label="Affinità">
         {affinita.map((a) => {
           const stile = STILE_AFFINITA[a.codice] ?? STILE_AFFINITA['-'];
           return (
@@ -34,7 +34,7 @@ export function AffinitaGriglia({ affinita, compatta }: Props) {
     );
   }
   return (
-    <div className="griglia-affinita gap-2" aria-label="Affinità">
+    <div className="griglia-affinita gap-2" role="group" aria-label="Affinità">
       {affinita.map((a) => {
         const stile = STILE_AFFINITA[a.codice] ?? STILE_AFFINITA['-'];
         return (
