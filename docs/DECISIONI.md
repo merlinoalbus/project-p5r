@@ -1006,3 +1006,6 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
     «non ancora»; si nascondono solo per lo stato di altri pin e, come prima, l'ingresso a un Palazzo completato;
   - **corretto il NON su un gruppo misto**: `NON(TUTTE(Coraggio 5, Leva azionata))` faceva sparire il pin appena la leva era
     azionata anche col Coraggio basso; ora un NON su un gruppo che mescola presenza e prerequisiti non nasconde da solo.
+- Confermati dall'utente (2026-10-03, «1 ok, 2 corretto»): sui passaggi e le scale del gioco che restano in vista marcati
+  «non ancora» il pulsante «Vai: …» resta disattivato; un pin di un tipo senza stato ma collegato a una voce della guida si
+  segna tramite la voce ma non si può citare in una condizione «Pin di una mappa» (l'elenco offre solo i tipi con uno stato).
