@@ -349,14 +349,7 @@ export function eliminaArea(chiaveArea: string): void {
 
 function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
   getDb().transaction(() => {
-    for (const { chiave } of prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ?').all(chiaveArea) as Array<{ chiave: string }>) {
-      prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(chiave);
-      prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(chiave);
-      // i pin delle planimetrie tengono il loro «raccolto» (lo stato vive nei pin, 2026-10-01): perdono solo il collegamento
-      prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(chiave);
-      prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(chiave);
-      prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(chiave);
-    }
+    for (const { chiave } of prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ?').all(chiaveArea) as Array<{ chiave: string }>) staccaPunto(chiave);
     prepared('DELETE FROM punto_interesse WHERE area_chiave = ?').run(chiaveArea);
     // gli spilli della guida (senza mappa) vincolano l'area con RESTRICT: vanno via prima di lei
     if (colonnaSpilloGuida()) {
@@ -504,7 +497,17 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
     // gli Enigmi toccati (lasciato, raggiunto, o il proprio, se cambia tipo e con lui il conto dei passi da segnare) seguono i passi
     for (const enigma of new Set([prima, dopo].filter((x): x is string => x !== null))) allineaEnigmaInOgniPartita(db, enigma, adesso);
   })();
-  const r = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto;
+  return leggiPunto(puntoChiave);
+}
+
+/**
+ * Il DTO di un punto com'è adesso, senza scrivere nulla. Spostamento, collegamento di un pin e creazione lo chiedevano a
+ * `aggiornaPunto(chiave, {})` (rilievo B11): un UPDATE con gli stessi valori e il riallineamento degli Enigmi in ogni partita,
+ * inutili perché quelle operazioni allineano già quel che toccano (`allineaStatiPunto`, `creaPunto`).
+ */
+function leggiPunto(puntoChiave: string): PuntoInteresseDto {
+  const r = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
+  if (!r) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   return puntoDto(r, null, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? []);
 }
 
@@ -527,7 +530,7 @@ export function spostaPunto(puntoChiave: string, verso: -1 | 1): PuntoInteresseD
   getDb().transaction(() => {
     elenco.forEach((k, n) => prepared('UPDATE punto_interesse SET ordine = ? WHERE chiave = ?').run(n, k));
   })();
-  return aggiornaPunto(puntoChiave, {});
+  return leggiPunto(puntoChiave);
 }
 
 /**
@@ -549,7 +552,7 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
     // un collegamento rimasto nel riferimento (prima della 094) si toglie da lì; il riferimento vero di un pin non si tocca
     if (s.riferimento_tipo === 'punto' && s.riferimento_chiave === puntoChiave) prepared('UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE id = ?').run(spilloId);
     prepared('UPDATE spillo SET voce_chiave = NULL, updated_at = ? WHERE id = ?').run(nowIso(), spilloId);
-    return aggiornaPunto(puntoChiave, {});
+    return leggiPunto(puntoChiave);
   }
   // le regole sono le stesse dell'editor delle mappe e del pacchetto (`erroreVoceDelPin`)
   const errore = erroreVoceDelPin({ nome: s.nome, mappa: s.mappa_chiave, voce }, puntoChiave);
@@ -559,7 +562,7 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
     if (!suoPunto) prepared('UPDATE spillo SET voce_chiave = ?, updated_at = ? WHERE id = ?').run(puntoChiave, adesso, spilloId);
     allineaStatiPunto(getDb(), puntoChiave, adesso);
   })();
-  return aggiornaPunto(puntoChiave, {});
+  return leggiPunto(puntoChiave);
 }
 
 /** Un punto in più, dove la guida non l'aveva trascritto: nasce in fondo all'area. */
@@ -584,7 +587,7 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
     // l'Enigma segue i passi: un passo nuovo ancora da fare lo riapre dove era risolto (scelta dell'utente, 2026-10-02)
     if (contenitore) allineaEnigmaInOgniPartita(getDb(), contenitore, nowIso());
   })();
-  return aggiornaPunto(chiave, {});
+  return leggiPunto(chiave);
 }
 
 /**
@@ -597,15 +600,25 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
  * Un Enigma tolto lascia i suoi passi come voci dell'area, in fondo e nel loro ordine, con il loro stato; un passo tolto lascia
  * il suo Enigma, che segue i passi rimasti (095).
  */
+/**
+ * Quello che un punto della guida lascia nel resto dei dati, tolto prima di lui (dentro la transazione di chi chiama): gli stati
+ * delle partite, il marcatore, il «raccolto» degli elementi della guida senza mappa che lo citano; i pin delle planimetrie tengono
+ * il loro «raccolto» (lo stato vive nei pin, 2026-10-01) e perdono solo il collegamento. Lo usano `eliminaPunto` ed `eliminaArea`,
+ * che prima lo scriveva una seconda volta riga per riga (rilievo R4 della verifica, 2026-10-03).
+ */
+function staccaPunto(puntoChiave: string): void {
+  prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
+  prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
+  prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
+  prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
+  prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(puntoChiave);
+}
+
 export function eliminaPunto(puntoChiave: string): void {
   const p = prepared('SELECT contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { contenitore_chiave: string | null } | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   getDb().transaction(() => {
-    prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
-    prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
-    prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
-    prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
-    prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(puntoChiave);
+    staccaPunto(puntoChiave);
     // i passi di un Enigma tolto restano, voci dell'area con il loro stato (095)
     for (const passo of passiDi(getDb(), puntoChiave)) {
       const area = (prepared('SELECT area_chiave FROM punto_interesse WHERE chiave = ?').get(passo.chiave) as { area_chiave: string }).area_chiave;

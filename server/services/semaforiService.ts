@@ -13,7 +13,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 // quando un Palazzo è completato lo decide `palazziService` (boss finale, Tesoro, 100%: mai la data)
 import { palazziCompletati } from './palazziService.js';
-import { EVENTI_STORIA, dataLeggibile } from '../../shared/condizioniSpillo.js';
+import { EVENTI_STORIA, dataLeggibile, nomePalazzo, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { guastaLAperto, nomeMeteo, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { meteoOra } from './meteoService.js';
 export { dataLeggibile };
@@ -69,13 +69,8 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati: palazziCompletati(partitaId), richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), conferme, eventi };
 }
 
-function confrontaDate(a: string, b: string): number {
-  // calendario di gioco: da aprile (04) a marzo (03) dell'anno dopo
-  const ordine = (d: string): number => { const [m, g] = d.split('-').map(Number); return ((m + 8) % 12) * 100 + g; };
-  return ordine(a) - ordine(b);
-}
-
-const NOMI_DUNGEON: Record<string, string> = { kamoshida: 'Palazzo di Kamoshida', madarame: 'Palazzo di Madarame', kaneshiro: 'Palazzo di Kaneshiro', futaba: 'Palazzo di Futaba', okumura: 'Palazzo di Okumura', niijima: 'Palazzo di Niijima', shido: 'Palazzo di Shido', maruki: 'Palazzo di Maruki', iweleth: 'Dedalo di Iweleth' };
+// L'ordine del calendario di gioco e i nomi dei Palazzi vengono da `shared/condizioniSpillo.ts`: qui erano riscritti a mano
+// (rilievo R2 della verifica completa, 2026-10-03).
 
 export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDto {
   const dati = JSON.parse(r.dati_json) as Record<string, string | number>;
@@ -100,7 +95,7 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
       return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `${persona} con ${skill} in scorta` : `Nessuna ${persona} con ${skill} in scorta`, manuale: false };
     }
     case 'palazzo': {
-      const nome = NOMI_DUNGEON[String(dati.dungeon)] ?? String(dati.dungeon);
+      const nome = nomePalazzo(String(dati.dungeon));
       const perche = st.palazziCompletati.get(String(dati.dungeon));
       if (perche) return { ...base, stato: 'verde', dettaglio: `${nome}: completato (${perche})`, manuale: false };
       // Il boss sconfitto è uno stato che l'app registra: o risulta o non risulta, e finché non
@@ -131,7 +126,7 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
     }
     case 'data': {
       if (!st.dataGioco) return { ...base, stato: 'rosso', dettaglio: `Disponibile dal ${dataLeggibile(String(dati.dal))}: il giorno corrente della partita non è impostato (Partita → Oggi)`, manuale: false };
-      const ok = confrontaDate(st.dataGioco, String(dati.dal)) >= 0;
+      const ok = ordineGioco(st.dataGioco) >= ordineGioco(String(dati.dal));
       return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Disponibile dal ${dataLeggibile(String(dati.dal))} (oggi ${dataLeggibile(st.dataGioco)})` : `Disponibile dal ${dataLeggibile(String(dati.dal))}, oggi è il ${dataLeggibile(st.dataGioco)}`, manuale: false };
     }
     case 'meteo': {

@@ -1,5 +1,5 @@
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
-import { GIORNI_SETTIMANA_CHIAVI, descriviGiorni, type GiornoChiave } from '../../shared/orariNegozio.js';
+import { descriviGiorni, leggiGiorni } from '../../shared/orariNegozio.js';
 import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 // ============================================================
 // cittaService — quartieri di Tokyo e luoghi con ciò che offrono (Fase 8.1)
@@ -28,15 +28,6 @@ interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | 
 export const chiaveImmagineQuartiere = (quartiere: string): string => `citta-${quartiere}`;
 
 interface RigaQuartiere { sblocco_data: string | null; chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string }
-/** Le chiavi dei giorni da `giorni_json`: solo quelle valide, senza doppioni. */
-function giorniDiRiga(json: string | null | undefined): GiornoChiave[] {
-  try {
-    const v = JSON.parse(json || '[]') as unknown;
-    return Array.isArray(v) ? [...new Set(v.filter((g): g is GiornoChiave => (GIORNI_SETTIMANA_CHIAVI as readonly string[]).includes(String(g))))] : [];
-  } catch {
-    return [];
-  }
-}
 
 interface RigaLuogo { chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; quando: string | null; giorni_json: string; sblocco: string | null; confidenti_json: string; piatti_json: string | null; note: string | null; fonte: string; verificato: number; origine: string; condizioni_json: string | null }
 
@@ -66,8 +57,9 @@ function luogoDto(r: RigaLuogo, nomiConfidenti: Map<string, string>, legami: Col
   const nomi = nomiCondizioniMemo();
   const condizioni = grezze.length ? grezze.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })) : null;
   const negozi = legami.negozi.get(r.chiave) ?? [];
+  const giorni = leggiGiorni(r.giorni_json);
   return {
-    chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando: r.quando as LuogoDto['quando'], giorni: giorniDiRiga(r.giorni_json), giorniTesto: descriviGiorni(giorniDiRiga(r.giorni_json)), sblocco: r.sblocco,
+    chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando: r.quando as LuogoDto['quando'], giorni, giorniTesto: descriviGiorni(giorni), sblocco: r.sblocco,
     confidenti, attivita: legami.attivita.get(r.chiave) ?? [], negozi, negozio: negozi[0]?.chiave ?? null, origine: r.origine === 'utente' ? 'utente' : 'seed',
     piatti: r.piatti_json ? (JSON.parse(r.piatti_json) as LuogoDto['piatti']) : null, note: r.note, verificato: r.verificato === 1,
     marcatore: marcatori.get(r.chiave) ?? null,

@@ -336,10 +336,9 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   if (voce?.stato) raccolto = true;
   const nomi = ctx.nomi ?? nomiCondizioni();
   const condizioni: CondizioneSpilloDto[] = condizioniDiRiga(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
-  // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
-  // (il valutatore dei semafori lo usa nel dettaglio e riconosce sia la chiave sia il nome), nel DTO resta la chiave per l'editor.
-  const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
-  const esitoCondizioni = conNegozioVivo(ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st, nomi) : undefined, dettaglio);
+  // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La chiave della richiesta la
+  // traduce nel nome il valutatore stesso (`valutaRequisito`): tradurla anche qui era un secondo passaggio inutile (rilievo R6).
+  const esitoCondizioni = conNegozioVivo(ctx.st ? valutaRequisitiSpillo(condizioni, ctx.st, nomi) : undefined, dettaglio);
   // Un pin che viene dall'atlante nativo e' un elemento fisso del mondo — una porta, un forziere,
   // una scala, una stanza sicura — e non si nasconde mai, qualunque condizione gli venga
   // attaccata. E' un invariante del runtime, non una convenzione dei dati: passa sopra a
@@ -362,7 +361,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // le prove native si leggono una volta (prima tre: rilievo P8)
   const nativo = nativoDiSpillo(r);
   const fisso = esitoCondizioni !== undefined && esitoCondizioni.stato !== 'disponibile'
-    && nativo !== null && eStrutturale(r.tipo) && !(ctx.st && bloccatoDaAltriPin(perValutazione, ctx.st));
+    && nativo !== null && eStrutturale(r.tipo) && !(ctx.st && bloccatoDaAltriPin(condizioni, ctx.st));
   const esitoVisibilita = senzaIngressoAPalazzoCompletato(fisso ? { ...esitoCondizioni, restaInVista: true as const } : esitoCondizioni, r, ctx);
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
@@ -640,21 +639,29 @@ export function aggiornaPresentazioneMappa(chiave: string, dati: { gruppoId?: st
   return dettaglioMappa(chiave);
 }
 
+/**
+ * Le tavole di una stanza (le righe di `mappa_presentazione` con quel gruppo), nell'ordine della tabella. Il filtro sull'id
+ * lo fa SQLite con `json_extract` (rilievo R5 della verifica completa): prima ognuna delle quattro domande sulla stanza
+ * leggeva e interpretava tutte le presentazioni per tenerne poche. `json_extract` e `===` concordano sul tipo: un id
+ * numerico non è uguale alla stringa con le stesse cifre, né qui né là.
+ */
+function tavoleDelGruppo(id: string): Array<{ mappaChiave: string; gruppo: GruppoImmagini }> {
+  return (prepared(`SELECT mappa_chiave, gruppo_immagini_json FROM mappa_presentazione
+    WHERE gruppo_immagini_json IS NOT NULL AND json_extract(gruppo_immagini_json, '$.id') = ?`).all(id) as Array<{ mappa_chiave: string; gruppo_immagini_json: string }>)
+    .map((r) => ({ mappaChiave: r.mappa_chiave, gruppo: JSON.parse(r.gruppo_immagini_json) as GruppoImmagini }));
+}
+
 /** Il nome già in uso per quel gruppo, se qualche mappa ce l'ha. */
 function nomeDelGruppo(id: string): string | null {
-  for (const r of prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ gruppo_immagini_json: string }>) {
-    const g = JSON.parse(r.gruppo_immagini_json) as { id: string; nome: string };
-    if (g.id === id) return g.nome;
-  }
-  return null;
+  const prima = tavoleDelGruppo(id)[0];
+  return prima ? prima.gruppo.nome : null;
 }
 
 /** Una stanza ha un nome solo: rinominarla lo scrive su tutte le sue tavole, segnato come scelto da una persona. */
 function rinominaGruppo(id: string, nome: string): void {
-  for (const r of prepared('SELECT mappa_chiave, gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ mappa_chiave: string; gruppo_immagini_json: string }>) {
-    const g = JSON.parse(r.gruppo_immagini_json) as GruppoImmagini;
-    if (g.id !== id || (g.nome === nome && g.nomeRivisto)) continue;
-    prepared('UPDATE mappa_presentazione SET gruppo_immagini_json = ? WHERE mappa_chiave = ?').run(JSON.stringify({ ...g, nome, nomeRivisto: true }), r.mappa_chiave);
+  for (const { mappaChiave, gruppo: g } of tavoleDelGruppo(id)) {
+    if (g.nome === nome && g.nomeRivisto) continue;
+    prepared('UPDATE mappa_presentazione SET gruppo_immagini_json = ? WHERE mappa_chiave = ?').run(JSON.stringify({ ...g, nome, nomeRivisto: true }), mappaChiave);
   }
 }
 
@@ -681,11 +688,7 @@ function nomeStanzaDaFissare(r: RigaMappa): { id: string; nome: string } | null 
 
 /** Qualche tavola della stanza ha già il nome scelto da una persona. */
 function gruppoConNomeRivisto(id: string): boolean {
-  for (const r of prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ gruppo_immagini_json: string }>) {
-    const g = JSON.parse(r.gruppo_immagini_json) as GruppoImmagini;
-    if (g.id === id && g.nomeRivisto) return true;
-  }
-  return false;
+  return tavoleDelGruppo(id).some((t) => !!t.gruppo.nomeRivisto);
 }
 
 type GruppoImmagini = { id: string; nome: string; ordine: number; etichetta?: string; nomeRivisto?: boolean };
@@ -735,11 +738,9 @@ export function impostaStanzaMappa(chiavePubblica: string, dati: { con: string |
     }
     if (questa.gruppo?.id === gruppo.id) return;
     // in fondo alle versioni della stanza: l'ordinale («Immagine N») non si sovrappone a quelli che ci sono
+    const tavole = tavoleDelGruppo(gruppo.id);
     let ultimo = -1;
-    for (const x of prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ gruppo_immagini_json: string }>) {
-      const g = JSON.parse(x.gruppo_immagini_json) as GruppoImmagini;
-      if (g.id === gruppo.id) ultimo = Math.max(ultimo, g.ordine);
-    }
+    for (const t of tavole) ultimo = Math.max(ultimo, t.gruppo.ordine);
     scrivi(chiave, questa.contesti, { id: gruppo.id, nome: gruppo.nome, ordine: ultimo + 1, ...etichetta, ...(gruppo.nomeRivisto ? { nomeRivisto: true } : {}) });
     // Anche nell'ordine del luogo la planimetria va subito dopo l'ultima versione della stanza: le versioni si
     // mostrano nell'ordine delle mappe, e restando dov'era poteva finire davanti a quelle che c'erano già
@@ -748,8 +749,8 @@ export function impostaStanzaMappa(chiavePubblica: string, dati: { con: string |
     const fratelli = (r.genitore_chiave === null
       ? prepared('SELECT chiave, ordine FROM mappa WHERE genitore_chiave IS NULL ORDER BY ordine, chiave').all()
       : prepared('SELECT chiave, ordine FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, chiave').all(r.genitore_chiave)) as Array<{ chiave: string; ordine: number }>;
-    const membri = new Set((prepared('SELECT mappa_chiave, gruppo_immagini_json FROM mappa_presentazione WHERE gruppo_immagini_json IS NOT NULL').all() as Array<{ mappa_chiave: string; gruppo_immagini_json: string }>)
-      .filter((x) => x.mappa_chiave !== chiave && (JSON.parse(x.gruppo_immagini_json) as GruppoImmagini).id === gruppo.id).map((x) => x.mappa_chiave));
+    // le tavole lette prima di scrivere questa: la planimetria che entra non c'era ancora (il filtro sulla chiave resta per chiarezza)
+    const membri = new Set(tavole.filter((t) => t.mappaChiave !== chiave).map((t) => t.mappaChiave));
     const senza = fratelli.filter((f) => f.chiave !== chiave);
     let dopo = -1;
     senza.forEach((f, i) => { if (membri.has(f.chiave)) dopo = i; });
@@ -792,15 +793,16 @@ export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaR
 }
 
 export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: string; tipo: TipoMappa }): MappaDto {
-  if(dati.genitore)dati={...dati,genitore:rigaMappa(dati.genitore).chiave};
-  const richiesta=chiave;
-  if(richiesta && prepared('SELECT 1 FROM mappa WHERE chiave=?').get(idMappa(richiesta)))throw httpErrors.conflict('mappa-esistente','La chiave indicata appartiene già a una mappa.');
-  chiave=(dati.genitore && rigaMappa(dati.genitore).tipo!=='citta'?chiaveMappa(dati.genitore)+'-':'')+slug(dati.nome);
+  // il genitore si legge una volta sola (rilievo R7): la lettura ne verifica l'esistenza (404) e dà chiave interna e tipo
+  const genitore = dati.genitore ? rigaMappa(dati.genitore) : null;
+  if (genitore) dati = { ...dati, genitore: genitore.chiave };
+  const richiesta = chiave;
+  if (richiesta && prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(idMappa(richiesta))) throw httpErrors.conflict('mappa-esistente', 'La chiave indicata appartiene già a una mappa.');
+  chiave = (genitore && genitore.tipo !== 'citta' ? chiaveMappa(genitore.chiave) + '-' : '') + slug(dati.nome);
   if (CHIAVI_MAPPA_RISERVATE.has(chiave)) throw httpErrors.badRequest('chiave-riservata', `Il nome «${dati.nome}» darebbe alla mappa la chiave '${chiave}', riservata alle funzioni dell'app: scegline un altro.`);
   if (!chiaveValida(chiave)) throw httpErrors.badRequest('chiave-non-valida', 'La chiave della mappa ammette solo minuscole, cifre e trattini (1–180 caratteri).');
   if (prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(chiave)) throw httpErrors.conflict('mappa-esistente', `Esiste già una mappa con chiave '${chiave}'.`);
   if (!(TIPI_MAPPA as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di mappa non ammesso.');
-  if (dati.genitore) rigaMappa(dati.genitore);
   if (dati.entita?.tipo === 'area') verificaAreePalazzo(dati.genitore ?? null, [dati.entita.chiave]);
   const adesso = nowIso();
   // 15.25: senza indicazione l'asset del repository è `mappe/<chiave>`, lo stesso percorso che «Esporta questo luogo» dà all'immagine di base:
@@ -812,7 +814,7 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
       VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(chiave, dati.nome, dati.tipo, dati.genitore ?? null, dati.ordine ?? 0, asset, dati.larghezza ?? null, dati.altezza ?? null, dati.entita?.tipo ?? null, dati.entita?.chiave ?? null, dati.note ?? '', adesso);
     sincronizzaPercorsiMappe(getDb());
     sincronizzaLegameEntita(chiave, dati.entita ?? null);
-    if(richiesta&&richiesta!==chiave&&!getDb().prepare('SELECT 1 FROM mappa_alias WHERE chiave=?').get(richiesta))prepared('INSERT INTO mappa_alias VALUES(?,?)').run(richiesta,chiave);
+    if (richiesta && richiesta !== chiave && !prepared('SELECT 1 FROM mappa_alias WHERE chiave = ?').get(richiesta)) prepared('INSERT INTO mappa_alias VALUES (?, ?)').run(richiesta, chiave);
     // 15.24: la nuova mappa nasce già raggiungibile dal genitore (e, se richiesto, con la via del ritorno); una chiave riusata dopo una
     // cancellazione può avere ancora un vecchio passaggio verso di sé: in quel caso non se ne crea un secondo.
     if (dati.genitore && dati.passaggio && !passaggioEsistente(dati.genitore, chiave)) creaPassaggio(dati.genitore, chiave);

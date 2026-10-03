@@ -47,6 +47,20 @@ export function leggiOrari(json: string | null | undefined): OrariNegozio {
   try { return normalizzaOrari(JSON.parse(json)); } catch { return ORARI_SEMPRE; }
 }
 
+/**
+ * I giorni della settimana di un luogo (`luogo.giorni_json`, migrazione 080): solo le chiavi valide, senza doppioni, nell'ordine
+ * del dato; vuoto se il JSON manca o è rovinato. Prima la stessa lettura era scritta due volte (città e presenza sulle mappe,
+ * rilievo R8), e quella delle mappe accettava anche le chiavi ereditate da `Object` («constructor»).
+ */
+export function leggiGiorni(json: string | null | undefined): GiornoChiave[] {
+  try {
+    const v = JSON.parse(json || '[]') as unknown;
+    return Array.isArray(v) ? [...new Set(v.map(String).filter((g): g is GiornoChiave => (GIORNI_SETTIMANA_CHIAVI as readonly string[]).includes(g)))] : [];
+  } catch {
+    return [];
+  }
+}
+
 /** Le condizioni di presenza equivalenti: sono quelle che il visore e le schede sanno già valutare. */
 export function orariComeCondizioni(o: OrariNegozio): RequisitoSpillo[] {
   const out: RequisitoSpillo[] = [];

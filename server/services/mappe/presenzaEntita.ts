@@ -30,14 +30,9 @@
 // ============================================================
 
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { leggiOrari, orariComeCondizioni } from '../../../shared/orariNegozio.js';
+import { leggiGiorni, leggiOrari, orariComeCondizioni } from '../../../shared/orariNegozio.js';
 import { eStrutturale } from '../../../shared/spilli.js';
 import type { AppDatabase } from '../../db/dbService.js';
-
-const GIORNI: Record<string, string> = {
-  lunedi: 'lunedi', martedi: 'martedi', mercoledi: 'mercoledi', giovedi: 'giovedi',
-  venerdi: 'venerdi', sabato: 'sabato', domenica: 'domenica',
-};
 
 function senzaAccenti(t: string): string {
   return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
@@ -51,13 +46,7 @@ function fasciaDaTesto(quando: string | null | undefined): RequisitoSpillo[] {
 
 /** I giorni della settimana del luogo (`giorni_json`, migrazione 080): chiavi già pulite; la settimana intera non è una condizione. */
 function giorniDaJson(json: string | null | undefined): RequisitoSpillo[] {
-  let scelti: string[];
-  try {
-    const v = JSON.parse(json || '[]') as unknown;
-    scelti = Array.isArray(v) ? [...new Set(v.map(String).filter((g) => GIORNI[g]))] : [];
-  } catch {
-    scelti = [];
-  }
+  const scelti = leggiGiorni(json);
   return scelti.length === 0 || scelti.length >= 7 ? [] : [{ tipo: 'giorno-settimana', giorni: scelti }];
 }
 
