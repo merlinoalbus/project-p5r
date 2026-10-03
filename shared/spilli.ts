@@ -70,26 +70,42 @@ export function categoriaSpillo(tipo: string): CategoriaSpillo {
 // Lo stato di un pin nella partita (richiesta dell'utente, 2026-09-30, ripresa il 2026-10-03)
 // ============================================================
 //
-// Un consumabile si **raccoglie**, un boss o un miniboss si **sconfigge**. Un meccanismo si
-// **aziona**, un punto sensibile si **gestisce**, un nemico si **affronta**, una porta chiusa si
-// **apre**: sono lo stesso dato del raccolto (`spillo_partita`), si segnano e si tolgono allo stesso
-// modo e valgono allo stesso modo nelle condizioni sugli altri pin. Cambia solo la parola. Boss e
-// miniboss restano collezionabili e contano nel completamento come prima; gli altri quattro no (un
-// nemico si rigenera, una leva non si porta via) e, segnati, restano sulla mappa. Gli altri pin non
-// hanno stato: si leggono e basta.
+// Ogni pin con uno stato lo segna nello stesso dato del raccolto (`spillo_partita`): si segna e si toglie allo stesso modo e
+// vale allo stesso modo nelle condizioni sugli altri pin e coi collegamenti alla guida. Cambia solo la parola. I collezionabili
+// (forzieri, tesoro, semi, oggetti, timbri, dialoghi, boss) contano nel completamento come prima; meccanismo, punto sensibile,
+// nemico, porta e Confidente no (un nemico si rigenera, una leva non si porta via, un Confidente non si «raccoglie») e,
+// segnati, restano sulla mappa. Gli altri pin non hanno stato: si leggono e basta, salvo quelli collegati a una voce della
+// guida, che prendono il suo (`statoCitabile`).
 //
-// Le parole (scelte dell'utente, 2026-10-03): «sconfitto» per boss e miniboss; per togliere il segno
-// la porta ha «Richiudi» e torna «chiusa», gli altri «Annulla» e tornano «non più …».
-const STATO_PER_TIPO: Partial<Record<TipoSpillo, string>> = { boss: 'sconfitto', miniboss: 'sconfitto', meccanismo: 'azionato', 'punto-sensibile': 'gestito', nemico: 'affrontato', porta: 'aperta' };
-const RITORNO_PER_TIPO: Partial<Record<TipoSpillo, { pulsante: string; parola: string }>> = { porta: { pulsante: 'Richiudi', parola: 'chiusa' } };
+// Le parole (scelte dell'utente, 2026-10-03, «tabella completa»): un dialogo si «parla», un Confidente si «incontra», un
+// forziere si «apre», il Tesoro del Palazzo si «ruba», un timbro si «timbra», boss e miniboss si «sconfiggono», un meccanismo si
+// «aziona», un punto sensibile si «gestisce», un nemico si «affronta», una porta chiusa si «apre»; semi e oggetti restano
+// «raccolti». Per togliere il segno porta e forzieri si «Richiudono» e tornano «chiusa» / «chiuso», gli altri si «Annullano» e
+// tornano «non più …».
+const STATO_PER_TIPO: Partial<Record<TipoSpillo, string>> = {
+  dialogo: 'parlato', confidente: 'incontrato', forziere: 'aperto', 'forziere-raro': 'aperto', 'tesoro-palazzo': 'rubato', timbro: 'timbrato',
+  boss: 'sconfitto', miniboss: 'sconfitto', meccanismo: 'azionato', 'punto-sensibile': 'gestito', nemico: 'affrontato', porta: 'aperta',
+};
+const RITORNO_PER_TIPO: Partial<Record<TipoSpillo, { pulsante: string; parola: string }>> = {
+  porta: { pulsante: 'Richiudi', parola: 'chiusa' }, forziere: { pulsante: 'Richiudi', parola: 'chiuso' }, 'forziere-raro': { pulsante: 'Richiudi', parola: 'chiuso' },
+};
 
-/** La parola dello stato di un pin («raccolto», «sconfitto», «azionato», «gestito», «affrontato», «aperta»), o null se il pin non ne ha. */
+/** La parola dello stato di un pin («raccolto», «aperto», «parlato», «incontrato», «sconfitto», «azionato»…), o null se il pin non ne ha. */
 export function statoDelPin(s: { tipo: string; collezionabile: boolean }): string | null {
-  return STATO_PER_TIPO[s.tipo as TipoSpillo] ?? (s.collezionabile ? 'raccolto' : null);
+  // un consumabile ha lo stato se è collezionabile (un elemento della guida senza mappa lo decide da sé); gli altri tipi per tipo
+  return categoriaSpillo(s.tipo) === 'consumabile' && !s.collezionabile ? null : statoDelTipo(s.tipo);
 }
 /** La parola dello stato di un tipo di pin, per chi ha solo il tipo (le condizioni, il server); null = il tipo non ha stato. */
 export function statoDelTipo(tipo: string): string | null {
   return STATO_PER_TIPO[tipo as TipoSpillo] ?? (categoriaSpillo(tipo) === 'consumabile' ? 'raccolto' : null);
+}
+/**
+ * La parola dello stato con cui un pin si può citare in una condizione «Pin di una mappa»: quella del suo tipo o, per un pin senza
+ * stato proprio collegato a una voce della guida che non sia descrittiva (un Confidente, una stanza sicura con la sua voce),
+ * «ottenuto», lo stato della voce (richiesta dell'utente, 2026-10-03). null = non citabile.
+ */
+export function statoCitabile(tipo: string, tipoVoce: string | null): string | null {
+  return statoDelTipo(tipo) ?? (tipoVoce !== null && !puntoDescrittivo(tipoVoce) ? 'ottenuto' : null);
 }
 /** Lo stato da mostrare per un pin segnato: la sua parola o, per un pin segnato solo tramite la sua voce della guida, «raccolto» come prima. */
 export function parolaDelloStato(s: { tipo: string; collezionabile: boolean }): string {

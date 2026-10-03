@@ -76,12 +76,12 @@ it('salva la descrizione sullo stesso ID e ricarica la scheda senza cancellare l
 
 it('cambiando partita ricarica stato e condizioni del contenuto mantenendo la selezione',async()=>{
   monta();await apri();
-  expect(screen.getByRole('button',{name:'Raccolto'})).toBeInTheDocument();
+  // un forziere si «apre» e si «richiude» (scelte dell'utente, 2026-10-03)
+  expect(screen.getByRole('button',{name:'Aperto'})).toBeInTheDocument();
   act(()=>usePartitaStore.setState({attiva:partita(8)}));
   await waitFor(()=>expect(api.getContenutiMappa).toHaveBeenLastCalledWith('palazzo-castello',8));
   const s=within(await screen.findByRole('region',{name:'Scheda: Scrigno della biblioteca'}));
-  // togliere il segno a un raccolto si chiama «Annulla» (scelta dell'utente, 2026-10-03)
-  expect(s.getByRole('button',{name:'Annulla'})).toBeInTheDocument();
+  expect(s.getByRole('button',{name:'Richiudi'})).toBeInTheDocument();
   expect(s.getByRole('img',{name:'Condizione soddisfatta'})).toBeInTheDocument();
   expect(s.queryByText('La partita è nel momento di giorno')).not.toBeInTheDocument();
   expect(api.impostaSpilloRaccolto).not.toHaveBeenCalled();
@@ -89,9 +89,9 @@ it('cambiando partita ricarica stato e condizioni del contenuto mantenendo la se
 
 it('aggiorna lo stato del medesimo ID nella partita e ricarica il contenuto',async()=>{
   api.impostaSpilloRaccolto.mockImplementation(async(id:number,spilloId:number,valore:boolean)=>{expect(spilloId).toBe(ID);if(valore)raccolti.add(id);else raccolti.delete(id);return scheda(id);});
-  monta();await apri();fireEvent.click(screen.getByRole('button',{name:'Raccolto'}));
+  monta();await apri();fireEvent.click(screen.getByRole('button',{name:'Aperto'}));
   await waitFor(()=>expect(api.impostaSpilloRaccolto).toHaveBeenCalledWith(7,ID,true));
-  expect(await screen.findByRole('button',{name:'Annulla'})).toBeInTheDocument();
+  expect(await screen.findByRole('button',{name:'Richiudi'})).toBeInTheDocument();
   expect(api.getContenutiMappa).toHaveBeenCalledTimes(2);
 });
 
@@ -99,6 +99,6 @@ it('senza partita conserva la consultazione senza offrire modifiche allo stato d
   usePartitaStore.setState({attiva:null});monta();const s=within(await apri());
   expect(api.getContenutiMappa).toHaveBeenCalledWith('palazzo-castello',undefined);
   expect(s.getByText('Solo la sera')).toBeInTheDocument();
-  expect(s.queryByRole('button',{name:'Raccolto'})).not.toBeInTheDocument();expect(s.queryByRole('button',{name:'Annulla'})).not.toBeInTheDocument();
+  expect(s.queryByRole('button',{name:'Aperto'})).not.toBeInTheDocument();expect(s.queryByRole('button',{name:'Richiudi'})).not.toBeInTheDocument();
   expect(s.queryByRole('button',{name:'Centra'})).not.toBeInTheDocument();
 });

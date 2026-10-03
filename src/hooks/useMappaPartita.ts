@@ -63,8 +63,8 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     try {
       const nuovo = await impostaSpilloRaccolto(partitaId, s.id, valore);
       aggiorna(nuovo);
-      // «Scrigno: raccolto», «Porta della torre: aperta», «Porta della torre: chiusa», «Leva: non più azionato»: la parola
-      // concorda col tipo (scelte dell'utente, 2026-10-03)
+      // «Scrigno: aperto», «Scrigno: chiuso», «Porta della torre: aperta», «Vecchietto: parlato», «Leva: non più azionato»: la
+      // parola concorda col tipo (scelte dell'utente, 2026-10-03)
       notifica('success', `«${s.nome}»: ${valore ? parolaDelloStato(s) : ritornoDelloStato(s).parola}.`);
       opz.onCambiato?.();
       void rileggiInSilenzio();

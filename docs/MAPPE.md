@@ -126,10 +126,10 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Città | sala-giochi | Sala giochi | spillo-sala-giochi | lime | no | luogo |
 | Città | casa | Casa (abitazione) | spillo-casa | pesca | no | luogo |
 | Città | attivita | Attività | spillo-attivita | giallo | no | attivita / luogo |
-| Persone | confidente | Confidente | spillo-confidente | rosa | no | confidente |
-| Persone | dialogo | Dialogo | spillo-dialogo | indaco | sì (conversazione fatta) | — (personaggio non Confidente; luogo scelto a mano se utile) |
-| Palazzi e Mementos | forziere | Forziere | spillo-forziere | oro | sì | punto |
-| Palazzi e Mementos | tesoro-palazzo | Tesoro del Palazzo | spillo-tesoro-palazzo | fucsia | sì | punto (Tesoro del Palazzo) |
+| Persone | confidente | Confidente (stato «incontrato», 2026-10-03) | spillo-confidente | rosa | no (stato «incontrato») | confidente |
+| Persone | dialogo | Dialogo (stato «parlato», 2026-10-03) | spillo-dialogo | indaco | sì (parlato) | — (personaggio non Confidente; luogo scelto a mano se utile) |
+| Palazzi e Mementos | forziere / forziere-raro | Forziere / Forziere raro (stato «aperto», si «Richiude», 2026-10-03) | spillo-forziere | oro | sì (aperto) | punto |
+| Palazzi e Mementos | tesoro-palazzo | Tesoro del Palazzo (stato «rubato», 2026-10-03) | spillo-tesoro-palazzo | fucsia | sì (rubato) | punto (Tesoro del Palazzo) |
 | Palazzi e Mementos | seme-bramosia | Seme della bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
 | Palazzi e Mementos | oggetto-chiave | Oggetto chiave | spillo-oggetto-chiave | ambra | sì | punto |
 | Palazzi e Mementos | timbro | Timbro dei Mementos (postazione fissa per piano) | spillo-timbro | rosa lilla | sì (timbrato) | — |

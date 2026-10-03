@@ -17,8 +17,11 @@ it('senza partita l’invito dice che cosa si potrebbe segnare, con la parola de
   expect(screen.queryByText(/punti raccolti/)).toBeNull();
   unmount();
   const forziere = monta(pin({ tipo: 'forziere', tipoNome: 'Forziere', nome: 'Scrigno', collezionabile: true }), null);
-  expect(screen.getByText(/per segnarne lo stato \(raccolto\)\./)).toBeInTheDocument();
+  expect(screen.getByText(/per segnarne lo stato \(aperto\)\./)).toBeInTheDocument();
   forziere.unmount();
+  const seme = monta(pin({ tipo: 'seme-bramosia', tipoNome: 'Seme della bramosia', nome: 'Seme', collezionabile: true }), null);
+  expect(screen.getByText(/per segnarne lo stato \(raccolto\)\./)).toBeInTheDocument();
+  seme.unmount();
   const conVoce = monta(pin({ voce: { chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null } }), null);
   expect(screen.getByText(/per segnare la sua voce della guida\./)).toBeInTheDocument();
   conVoce.unmount();

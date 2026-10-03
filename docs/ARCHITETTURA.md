@@ -529,8 +529,11 @@ che supera la precedente esclusione.
 - **Prosa → stati una volta sola**: `shared/migraCondizioni.ts` (`convertiProsa` → `{ condizioni, scartate }`) converte le frasi della guida al caricamento del seed (`sincronizzaDateQuartieri` prima, poi `sincronizzaCondizioniCatalogo`/`Letture`), nella migrazione 064 e nell'esportazione del seed; ciò che non converte non diventa una condizione. Il contesto (nomi → chiavi di richieste, libri, film, articoli; quartieri datati; libri di Jinbocho; finestre dei Palazzi) lo costruisce `server/services/condizioni/contestoConversione.ts` (`contestoConversione(db)` + `contestoRiga` per negozio e gestore). Non c'è più nessuna lettura di prosa a runtime né a ogni avvio.
 - `disponibilitaService`: `statoDisponibilitaPartita` = `statoPartitaSemafori` + giorno della settimana + sblocchi dei quartieri + letture, contatori, attività svolte (`attivita_svolta_partita`), spesa per negozio (somma dei prezzi degli acquisti), punti negozio (`punti_negozio_partita`), eventi (`evento_storia_partita`), `arcoCorrente`; `valutaRequisiti(condizioni, stato)` → `{ stato: disponibile | bloccato | ignoto, requisiti }` (rosso ⇒ bloccato; grigio solo quando alla partita manca il dato); `valutaRequisitiSpillo` nasconde il pin solo per le condizioni di presenza (`CONDIZIONI_DI_PRESENZA`, ora anche `arco` e `spillo`). I requisiti dei Confidenti passano da `semaforiService.valuta`.
 - **Condizione «Pin di una mappa»** (2026-10-03, `{ tipo: 'spillo', spillo: uid, segnato }`): lo stato di un altro pin nella
-  partita (raccolto, azionato, aperta…, `statoDelTipo`), letto da `spilliSegnati` dello stato della partita (`spillo_partita`
-  più i pin la cui voce della guida è segnata, la stessa regola del visore). È di presenza e si combina con TUTTE / ALMENO
+  partita — qualunque pin con uno stato (`statoCitabile`, letto da `nomiCondizioni.pinCitato`: la parola del tipo, «parlato»,
+  «incontrato», «aperto», «azionato»…, o «ottenuto» per un pin con una voce della guida non descrittiva) —, letto da
+  `spilliSegnati` dello stato della partita (`spillo_partita` più i pin la cui voce della guida è segnata, la stessa regola del
+  visore). In un'importazione i pin dello stesso pacchetto si accettano all'inserimento e si verificano a pacchetto inserito,
+  con le voci già scritte, così l'esito non dipende dall'ordine. È di presenza e si combina con TUTTE / ALMENO
   UNA / NON. È l'unica che nasconde anche un elemento fisso del gioco (porta, meccanismo nativi): in `dettagliSpillo` un pin
   fisso nativo con condizioni che non valgono porta `disponibilita.restaInVista` (il visore lo mostra marcato invece di
   nasconderlo, `VisoreMappa.nascostoPerCondizioni`), salvo quando `bloccatoDaAltriPin` (proiezione sui soli `spillo`) è vero; il
@@ -916,15 +919,17 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   I dati di gioco stanno in `gioco.db`: un pacchetto importato dopo rimette l'area.
 - **Nemici**: `nemico` è di categoria `informativo` (`shared/spilli.ts`, `collezionabile: false`), migrazione 085 per
   gli spilli esistenti; i punti della guida «ombra-sciagura» non risultano collezionabili in `contenutiMappa`.
-- **Stato dei pin** (2026-10-03, `shared/spilli.ts` `statoDelTipo` / `statoDelPin` / `parolaDelloStato` /
-  `ritornoDelloStato`): un consumabile si «raccoglie», boss e miniboss sono «sconfitti» (e restano collezionabili);
-  meccanismo «azionato», punto sensibile «gestito», nemico «affrontato», porta chiusa «aperta». È lo stesso dato
-  (`spillo_partita.raccolto` per uid), con la stessa API (`PUT /api/partite/:id/spilli/:spilloId`); i quattro tipi
-  informativi non sono collezionabili: non contano nel completamento e il pin segnato resta sulla mappa, attenuato.
-  Per togliere il segno: «Richiudi» (la porta torna «chiusa»), «Annulla» per gli altri («non più …»); un pin collegato
-  a una voce della guida usa gli stati della voce («Ottenuto», «Esaurito», «Riapri») e ne mostra la parola.
-  `impostaRaccolto` risponde 400 `spillo-senza-stato` a `raccolto=true` su un pin senza stato e senza voce della guida
-  (la voce si segna da qualunque pin, e con lei il suo Enigma). Dopo ogni azione `useMappaPartita` aggiorna subito il
+- **Stato dei pin** (2026-10-03, `shared/spilli.ts` `statoDelTipo` / `statoDelPin` / `statoCitabile` / `parolaDelloStato`
+  / `ritornoDelloStato`): la parola per tipo è una tabella (`STATO_PER_TIPO`, scelta dell'utente): dialogo «parlato»,
+  Confidente «incontrato», forzieri «aperto», Tesoro del Palazzo «rubato», timbro «timbrato», semi e oggetti «raccolto»,
+  boss e miniboss «sconfitto», meccanismo «azionato», punto sensibile «gestito», nemico «affrontato», porta chiusa
+  «aperta». È lo stesso dato (`spillo_partita.raccolto` per uid), con la stessa API (`PUT /api/partite/:id/spilli/:spilloId`);
+  i tipi con stato non collezionabili (meccanismo, punto sensibile, nemico, porta, Confidente) non contano nel completamento
+  e il pin segnato resta sulla mappa, attenuato. Per togliere il segno: «Richiudi» (porta → «chiusa», forzieri → «chiuso»),
+  «Annulla» per gli altri («non più …»); un pin collegato a una voce della guida usa gli stati della voce («Ottenuto»,
+  «Esaurito», «Riapri») e ne mostra la parola. «Ha uno stato» è una regola sola (`statoCitabile`, letta sul database da
+  `nomiCondizioni.pinCitato`): il tipo ha uno stato, o il pin ha una voce della guida non descrittiva («ottenuto»); la usano
+  `impostaRaccolto` (400 `spillo-senza-stato` altrimenti), l'elenco dei pin citabili e le condizioni «Pin di una mappa». Dopo ogni azione `useMappaPartita` aggiorna subito il
   pin e rilegge la mappa in silenzio: vince l'ultima lettura chiesta, e ogni caricamento completo (mappa, partita,
   versione, momento della giornata, `ricarica`) rende vecchie le riletture in sospeso; le copie locali dei pin valgono
   solo sulla copia della mappa a cui si riferiscono. La visibilità che dipende dallo stato degli altri pin la calcola

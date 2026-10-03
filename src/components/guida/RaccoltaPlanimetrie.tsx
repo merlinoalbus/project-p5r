@@ -1,5 +1,5 @@
 // ============================================================
-// RaccoltaPlanimetrie — i collezionabili delle planimetrie di un Palazzo, con «Raccolto» («Sconfitto» per i boss) in un tocco
+// RaccoltaPlanimetrie — i collezionabili delle planimetrie di un Palazzo, segnati in un tocco con la parola del tipo («Aperto», «Rubato», «Sconfitto», «Raccolto»…)
 // ============================================================
 //
 // La percentuale del Palazzo conta i collezionabili sulle planimetrie (forzieri, forzieri rari,
@@ -71,7 +71,7 @@ export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etiche
               {visibili.length > 0 && (
                 <ul className="m-0 flex list-none flex-col p-0">
                   {visibili.map((s) => { const omonimiTutti = p.spilli.filter((x) => x.nome === s.nome); const numero = omonimiTutti.indexOf(s) + 1; const omonimi = omonimiTutti.length > 1;
-                    // la parola del tipo: «raccolto», «sconfitto» per boss e miniboss (scelta dell'utente, 2026-10-03)
+                    // la parola del tipo: «aperto» per i forzieri, «rubato» per il Tesoro, «sconfitto» per i boss, «raccolto» per semi e oggetti… (scelta dell'utente, 2026-10-03)
                     const parola = parolaDelloStato({ tipo: s.tipo, collezionabile: true }); return (
                     <li key={s.id} className="flex items-center gap-2 text-[12px]">
                       <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: s.colore }} aria-hidden="true" />

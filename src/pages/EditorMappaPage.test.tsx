@@ -22,8 +22,11 @@ vi.mock('../services/api/condizioni', () => ({
   getElenchiRegole: vi.fn().mockResolvedValue({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] }),
   // i pin con uno stato di tutte le mappe, per la condizione «Pin di una mappa» (2026-10-03)
   getPinConStato: vi.fn().mockResolvedValue([
-    { chiave: 'a'.repeat(32), nome: 'Leva del ponte', tipo: 'meccanismo', gruppo: 'Palazzo di Kamoshida › Torre' },
-    { chiave: 'b'.repeat(32), nome: 'Chiave della cella', tipo: 'oggetto-chiave', gruppo: 'Palazzo di Kamoshida › Prigione' },
+    { chiave: 'a'.repeat(32), nome: 'Leva del ponte', tipo: 'meccanismo', gruppo: 'Palazzo di Kamoshida › Torre', parola: 'azionato' },
+    { chiave: 'b'.repeat(32), nome: 'Chiave della cella', tipo: 'oggetto-chiave', gruppo: 'Palazzo di Kamoshida › Prigione', parola: 'raccolto' },
+    // un Confidente (stato suo) e una stanza sicura con la sua voce della guida (2026-10-03)
+    { chiave: 'c'.repeat(32), nome: 'Sala giochi', tipo: 'confidente', gruppo: 'Tokyo › Akihabara', parola: 'incontrato' },
+    { chiave: 'd'.repeat(32), nome: 'Stanza sicura del cortile', tipo: 'sicura', gruppo: 'Palazzo di Kamoshida › Cortile', parola: 'ottenuto' },
   ]),
 }));
 vi.mock('../services/api', () => api);
@@ -109,6 +112,11 @@ describe('EditorMappaPage', () => {
     expect(form.queryByText('Un segno sulla mappa con nome e descrizione, e basta.')).toBeNull();
     scegliVoce('Tipo', 'Boss');
     expect(form.getByText('Si segna nella partita («sconfitto»); non porta da nessuna parte.')).toBeInTheDocument();
+    // un pin di città con uno stato suo: il Confidente si «incontra»; un negozio no
+    scegliVoce('Tipo', 'Confidente');
+    expect(form.getByText('Ha uno stato da segnare nella partita («incontrato»); non conta nel completamento della mappa.')).toBeInTheDocument();
+    scegliVoce('Tipo', 'Negozio');
+    expect(form.queryByText(/Ha uno stato da segnare nella partita/)).toBeNull();
   });
 
   it('«Copia» sullo spillo selezionato mette negli appunti tutti i campi tranne la posizione; con «Incolla» un tocco sulla mappa crea lo spillo identico nel nuovo punto', async () => {
@@ -222,6 +230,9 @@ describe('EditorMappaPage', () => {
     fireEvent.click(form.getByRole('combobox', { name: 'Pin' }));
     expect(form.queryByRole('option', { name: /Leva del ponte/ })).toBeNull();
     expect(form.getByRole('option', { name: /Chiave della cella/ })).toBeInTheDocument();
+    // tutti i pin con uno stato, ciascuno con la sua parola: il Confidente «incontrato», la stanza sicura con la sua voce «ottenuto»
+    expect(form.getByRole('option', { name: /Sala giochi/ })).toHaveTextContent('Confidente · incontrato');
+    expect(form.getByRole('option', { name: /Stanza sicura del cortile/ })).toHaveTextContent('Stanza sicura · ottenuto');
   });
 
   it('un periodo resta sempre valido: la fine segue l’inizio, e i giorni offerti sono quelli del mese', async () => {

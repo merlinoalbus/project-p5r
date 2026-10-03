@@ -67,7 +67,7 @@ router.get('/elenchi', (_req, res) => {
 /** I pin con uno stato, per la condizione «Pin di una mappa» (2026-10-03): solo l'editor delle mappe li chiede, a parte, perché
  *  sono centinaia e agli altri editor non servono. */
 router.get('/spilli', (_req, res) => {
-  res.json({ data: pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa })) });
+  res.json({ data: pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola })) });
 });
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano, completi anche dove non c'è ancora una riga. */

@@ -72,14 +72,14 @@ it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Racco
   expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '25');
   const colonna = screen.getByRole('complementary', { name: 'Da raccogliere in Cancello' });
   expect(within(colonna).getByRole('heading', { name: 'Da raccogliere · 1' })).toBeInTheDocument();
-  // il raccolto sta nascosto finché non si chiede
-  expect(within(colonna).queryByRole('checkbox', { name: 'Forziere 1 di Cancello raccolto' })).toBeNull();
-  fireEvent.click(within(colonna).getByRole('checkbox', { name: 'Forziere 2 di Cancello raccolto' }));
+  // il raccolto sta nascosto finché non si chiede (un forziere si «apre», scelta dell'utente del 2026-10-03)
+  expect(within(colonna).queryByRole('checkbox', { name: 'Forziere 1 di Cancello aperto' })).toBeNull();
+  fireEvent.click(within(colonna).getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' }));
   await waitFor(() => expect(impostaSpilloRaccolto).toHaveBeenCalledWith(4, 2, true));
   // subito, senza aspettare il server: la rilettura è partita ma non ha ancora risposto
   await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(2));
   expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50');
-  expect(within(colonna).queryByRole('checkbox', { name: 'Forziere 2 di Cancello raccolto' })).toBeNull();
+  expect(within(colonna).queryByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })).toBeNull();
   // poi la rilettura risponde, e la scheda resta coerente
   await act(async () => { risolviRilettura(dopo); });
   expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50');
@@ -109,7 +109,7 @@ it('due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascri
   impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null });
   monta('kamoshida');
   const colonna = await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' });
-  fireEvent.click(within(colonna).getByRole('checkbox', { name: 'Forziere 2 di Cancello raccolto' }));
+  fireEvent.click(within(colonna).getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' }));
   await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(2));
   fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
   fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));

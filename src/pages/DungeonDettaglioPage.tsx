@@ -8,7 +8,7 @@
 // misura dell'anello in cima. **Il tre colonne è progressivo** (aree, mappa, obiettivi).
 //
 // **Quel che si raccoglie sta sulle planimetrie** (voce 5): l'anello conta i collezionabili
-// dell'atlante, e la colonna di destra li elenca con «Raccolto» in un tocco — quelli dell'area
+// dell'atlante, e la colonna di destra li elenca da segnare in un tocco, con la parola del loro tipo («Aperto», «Sconfitto»…) — quelli dell'area
 // scelta e, ripiegate, tutte le planimetrie del Palazzo. I punti della guida (sicure, enigmi,
 // boss) restano in una piega «Dalla guida» con Ottenuto/Esaurito, senza effetto sulla percentuale.
 //

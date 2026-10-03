@@ -2,7 +2,7 @@
 // Test registro dei tipi di spillo — conteggio, completezza delle definizioni, colori distinti, gruppi della palette, tipi «dialogo» e della città
 // ============================================================
 
-import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, eStrutturale, parolaDelloStato, ritornoDelloStato, spilloPerPunto, statoDelPin, statoDelTipo, tipiDellaCategoria } from './spilli.js';
+import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, eStrutturale, parolaDelloStato, ritornoDelloStato, spilloPerPunto, statoCitabile, statoDelPin, statoDelTipo, tipiDellaCategoria } from './spilli.js';
 
 describe('registro dei tipi di spillo', () => {
   it('conta 41 tipi distinti (il «Tesoro» generico è stato tolto), ognuno con nome, colore esadecimale e riserva nel registro', () => {
@@ -63,31 +63,44 @@ describe('registro dei tipi di spillo', () => {
 });
 
 describe('lo stato di un pin nella partita (2026-10-03)', () => {
-  it('ogni consumabile si raccoglie, boss e miniboss si sconfiggono; meccanismo, punto sensibile, nemico e porta chiusa hanno la loro parola; gli altri non hanno stato', () => {
-    for (const t of tipiDellaCategoria('consumabile').filter((t) => t !== 'boss' && t !== 'miniboss')) expect(statoDelTipo(t)).toBe('raccolto');
-    expect(statoDelTipo('boss')).toBe('sconfitto');
-    expect(statoDelTipo('miniboss')).toBe('sconfitto');
-    // boss e miniboss restano collezionabili: contano nel completamento come prima
+  it('la tabella completa delle parole (scelta dell’utente, 2026-10-03); gli altri tipi non hanno stato', () => {
+    const attese: Record<string, string> = {
+      dialogo: 'parlato', confidente: 'incontrato', forziere: 'aperto', 'forziere-raro': 'aperto', 'tesoro-palazzo': 'rubato', timbro: 'timbrato',
+      'seme-bramosia': 'raccolto', oggetto: 'raccolto', 'oggetto-chiave': 'raccolto', boss: 'sconfitto', miniboss: 'sconfitto',
+      meccanismo: 'azionato', 'punto-sensibile': 'gestito', nemico: 'affrontato', porta: 'aperta',
+    };
+    for (const [t, parola] of Object.entries(attese)) expect(statoDelTipo(t), t).toBe(parola);
+    // ogni consumabile ha uno stato
+    for (const t of tipiDellaCategoria('consumabile')) expect(statoDelTipo(t), t).not.toBeNull();
+    // boss e miniboss restano collezionabili: contano nel completamento come prima; il Confidente resta un pin di città
     expect(DEFINIZIONI_SPILLO.boss.collezionabile).toBe(true);
-    expect(statoDelTipo('meccanismo')).toBe('azionato');
-    expect(statoDelTipo('punto-sensibile')).toBe('gestito');
-    expect(statoDelTipo('nemico')).toBe('affrontato');
-    expect(statoDelTipo('porta')).toBe('aperta');
-    for (const t of ['nota', 'sicura', 'passaggio', 'rampino', 'negozio', 'confidente', 'tipo-inesistente']) expect(statoDelTipo(t)).toBeNull();
+    expect(categoriaSpillo('confidente')).toBe('citta');
+    for (const t of ['nota', 'sicura', 'passaggio', 'rampino', 'negozio', 'tipo-inesistente']) expect(statoDelTipo(t), t).toBeNull();
   });
-  it('per un pin conta anche il suo «collezionabile» (un elemento della guida senza mappa lo decide da sé); la parola mostrata ha sempre un valore', () => {
-    expect(statoDelPin({ tipo: 'forziere', collezionabile: true })).toBe('raccolto');
+  it('per un consumabile conta anche il suo «collezionabile» (un elemento della guida senza mappa lo decide da sé); la parola mostrata ha sempre un valore', () => {
+    expect(statoDelPin({ tipo: 'forziere', collezionabile: true })).toBe('aperto');
     expect(statoDelPin({ tipo: 'forziere', collezionabile: false })).toBeNull();
     expect(statoDelPin({ tipo: 'meccanismo', collezionabile: false })).toBe('azionato');
+    expect(statoDelPin({ tipo: 'confidente', collezionabile: false })).toBe('incontrato');
     expect(statoDelPin({ tipo: 'sicura', collezionabile: false })).toBeNull();
     // una stanza sicura segnata tramite la sua voce della guida resta «raccolto», come prima
     expect(parolaDelloStato({ tipo: 'sicura', collezionabile: false })).toBe('raccolto');
     expect(parolaDelloStato({ tipo: 'porta', collezionabile: false })).toBe('aperta');
   });
-  it('togliere il segno: la porta si richiude e torna «chiusa», gli altri si annullano e tornano «non più …» (scelta dell’utente, 2026-10-03)', () => {
+  it('togliere il segno: porta e forzieri si richiudono e tornano «chiusa» / «chiuso», gli altri si annullano e tornano «non più …» (scelta dell’utente, 2026-10-03)', () => {
     expect(ritornoDelloStato({ tipo: 'porta', collezionabile: false })).toEqual({ pulsante: 'Richiudi', parola: 'chiusa' });
+    expect(ritornoDelloStato({ tipo: 'forziere', collezionabile: true })).toEqual({ pulsante: 'Richiudi', parola: 'chiuso' });
+    expect(ritornoDelloStato({ tipo: 'forziere-raro', collezionabile: true })).toEqual({ pulsante: 'Richiudi', parola: 'chiuso' });
     expect(ritornoDelloStato({ tipo: 'meccanismo', collezionabile: false })).toEqual({ pulsante: 'Annulla', parola: 'non più azionato' });
     expect(ritornoDelloStato({ tipo: 'boss', collezionabile: true })).toEqual({ pulsante: 'Annulla', parola: 'non più sconfitto' });
-    expect(ritornoDelloStato({ tipo: 'forziere', collezionabile: true })).toEqual({ pulsante: 'Annulla', parola: 'non più raccolto' });
+    expect(ritornoDelloStato({ tipo: 'dialogo', collezionabile: true })).toEqual({ pulsante: 'Annulla', parola: 'non più parlato' });
+    expect(ritornoDelloStato({ tipo: 'confidente', collezionabile: false })).toEqual({ pulsante: 'Annulla', parola: 'non più incontrato' });
+  });
+  it('si cita in una condizione un pin con uno stato: il suo tipo o, per un pin senza stato proprio, una voce della guida non descrittiva («ottenuto»)', () => {
+    expect(statoCitabile('confidente', null)).toBe('incontrato');
+    expect(statoCitabile('dialogo', null)).toBe('parlato');
+    expect(statoCitabile('sicura', 'sicura')).toBe('ottenuto');
+    expect(statoCitabile('sicura', 'altro')).toBeNull();
+    expect(statoCitabile('nota', null)).toBeNull();
   });
 });

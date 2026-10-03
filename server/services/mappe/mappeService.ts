@@ -18,7 +18,7 @@ import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
 import { dettaglioNegozio } from '../negoziService.js';
 import { giocabili } from '../squadraService.js';
-import { nomiCondizioni } from '../condizioni/nomiCondizioni.js';
+import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
 import { bloccatoDaAltriPin, statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { allineaBossDellaGuida, palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
 import { allineaEnigmaDellaVoce, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, segnaPassiDellEnigma, voceDelPin } from './collegamentiGuida.js';
@@ -26,7 +26,7 @@ import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
-import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, statoDelTipo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
@@ -938,11 +938,11 @@ export interface DatiSpillo { soloPosizione?: boolean; destinazione?: Destinazio
  * Guida, quartiere con una data di sblocco leggibile (gli altri quartieri non sono valutabili). Separa le valide dalle sconosciute.
  *
  * Lo stato di un altro pin (`spillo`, 2026-10-03) vale solo nelle condizioni dei pin (`pin` presente) e deve citare un pin con
- * uno stato (`statoDelTipo`): nel database o, in un'importazione, fra quelli dello stesso pacchetto (uid → tipo), che arrivano
- * dopo.
+ * uno stato (`statoCitabile`: il suo tipo, o la sua voce della guida). In un'importazione un pin dello stesso pacchetto si
+ * accetta all'inserimento e si verifica a pacchetto inserito, con le voci già scritte (`importaMappe`).
  */
 const SOLO_PIN = 'Stato di un pin (solo nelle condizioni dei pin)';
-function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | undefined, pin?: { delPacchetto: Map<string, string> }): { valide: RequisitoSpillo[]; scartate: Array<{ cosa: string; chiave: string }> } {
+function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | undefined, pin?: { delPacchetto: ReadonlySet<string> }): { valide: RequisitoSpillo[]; scartate: Array<{ cosa: string; chiave: string }> } {
   const valide: RequisitoSpillo[] = [];
   const scartate: Array<{ cosa: string; chiave: string }> = [];
   const sorgente = condizioni == null ? [] : Array.isArray(condizioni) ? condizioni : [null];
@@ -976,9 +976,11 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
       chiave = c.spillo;
       if (!pin) { cosa = SOLO_PIN; ok = false; }
       else {
+        // citabile come nel resto dell'app (`statoCitabile`, letto da `pinCitato`): un tipo con stato, o una voce della guida non
+        // descrittiva. In un'importazione un pin del pacchetto si accetta qui e si verifica a pacchetto inserito: la sua voce si
+        // scrive alla fine, e prima — che il pin sia già reinserito o arrivi dopo — l'esito dipenderebbe dall'ordine dei pin.
         cosa = 'Pin con uno stato';
-        const tipo = (prepared('SELECT tipo FROM spillo WHERE uid = ?').get(c.spillo) as { tipo: string } | undefined)?.tipo ?? pin.delPacchetto.get(c.spillo);
-        ok = tipo !== undefined && statoDelTipo(tipo) !== null;
+        ok = pin.delPacchetto.has(c.spillo) || pinCitato(c.spillo)?.parola != null;
       }
     }
     if (ok) valide.push(c); else scartate.push({ cosa, chiave });
@@ -989,11 +991,11 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
 /** Editor (API): una chiave sconosciuta è un errore 404, non uno scarto silenzioso. `perSpillo`: le condizioni di un pin, che
  *  possono citare lo stato di un altro pin (il catalogo no). */
 export function verificaCondizioni(condizioni: RequisitoSpillo[] | null | undefined, perSpillo = false): void {
-  const { scartate } = condizioniConChiaviEsistenti(condizioni, perSpillo ? { delPacchetto: new Map() } : undefined);
+  const { scartate } = condizioniConChiaviEsistenti(condizioni, perSpillo ? { delPacchetto: new Set() } : undefined);
   if (scartate.length > 0) {
     if (scartate[0].cosa === 'Condizione' || scartate[0].cosa === 'Condizioni') throw httpErrors.badRequest('condizione-non-valida', 'Una condizione non è valida (troppo annidata o malformata): ricontrollala nell’editor.');
     if (scartate[0].cosa === SOLO_PIN) throw httpErrors.badRequest('condizione-solo-pin', 'Lo stato di un pin si usa solo nelle condizioni dei pin delle mappe.');
-    if (scartate[0].cosa === 'Pin con uno stato') throw httpErrors.notFound('condizione-non-trovata', 'Il pin della condizione non esiste o non ha uno stato da segnare (raccolto, azionato, aperta…).');
+    if (scartate[0].cosa === 'Pin con uno stato') throw httpErrors.notFound('condizione-non-trovata', 'Il pin della condizione non esiste o non ha uno stato da segnare (raccolto, aperto, parlato, incontrato, azionato…).');
     throw httpErrors.notFound('condizione-non-trovata', `${scartate[0].cosa} '${scartate[0].chiave}' non trovato nella Guida.`);
   }
 }
@@ -1132,12 +1134,12 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${spilloId} non esiste.`);
-  // Si segna un pin che ha uno stato (2026-10-03, `statoDelTipo`): raccolto un consumabile, sconfitto un boss o un
-  // miniboss, azionato un meccanismo, gestito un punto sensibile, affrontato un nemico, aperta una porta chiusa. Un pin
-  // collegato a una voce della guida si segna qualunque sia il tipo: è il modo di segnare quella voce. Gli altri — una
-  // nota, una stanza sicura, un passaggio — non hanno stato. Togliere il segno resta sempre possibile, così un segno
-  // rimasto da prima si può ripulire.
-  if (raccolto && statoDelTipo(r.tipo) === null && !voceDelPin(r)) throw httpErrors.badRequest('spillo-senza-stato', `«${r.nome}» (${DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo}) non ha uno stato da segnare.`);
+  // Si segna un pin che ha uno stato (2026-10-03, `statoCitabile`: la stessa regola delle condizioni «Pin di una mappa»):
+  // raccolto un consumabile, sconfitto un boss o un miniboss, azionato un meccanismo, gestito un punto sensibile, affrontato
+  // un nemico, aperta una porta chiusa; e qualunque pin collegato a una voce della guida non descrittiva, che è il modo di
+  // segnare quella voce (un Confidente, una stanza sicura). Gli altri — una nota, un passaggio senza voce, un pin di una
+  // voce «Altro» — non hanno stato. Togliere il segno resta sempre possibile, così un segno rimasto da prima si può ripulire.
+  if (raccolto && pinCitato(r.uid)?.parola == null) throw httpErrors.badRequest('spillo-senza-stato', `«${r.nome}» (${DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo}) non ha uno stato da segnare.`);
 
   const adesso = nowIso();
   getDb().transaction(() => {
@@ -1386,7 +1388,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
   for(const m of pacchetto.mappe){m.chiave=idMappa(m.chiave);if(m.assetOriginale)m.asset=m.assetOriginale;if(m.genitore)m.genitore=idMappa(m.genitore);for(const s of m.spilli??[])if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=idMappa(s.riferimento.chiave);}
   const incoming = new Set(pacchetto.mappe.filter(m => chiaveValida(m.chiave) && (TIPI_MAPPA as readonly string[]).includes(m.tipo)).map(m => m.chiave));
   // i pin del pacchetto per uid: una condizione «Pin di una mappa» può citarne uno che si inserisce dopo (2026-10-03)
-  const pinDelPacchetto = { delPacchetto: new Map(pacchetto.mappe.flatMap((m) => (m.spilli ?? []).filter((s) => uidValido(s.uid)).map((s) => [s.uid as string, s.tipo] as const))) };
+  // (accettati all'inserimento, verificati a pacchetto inserito: vedi `condizioniConChiaviEsistenti`)
+  const pinDelPacchetto = { delPacchetto: new Set(pacchetto.mappe.flatMap((m) => (m.spilli ?? []).filter((s) => uidValido(s.uid)).map((s) => s.uid as string))) };
   const verificate = new Map<object, DestinazioneDaSalvare | null | undefined>();
   for (const m of pacchetto.mappe) for (const s of m.spilli ?? []) {
     if (s.soloPosizione !== undefined && typeof s.soloPosizione !== 'boolean') throw httpErrors.badRequest('posizione-non-valida', 'Il campo soloPosizione deve essere booleano.');
@@ -1575,7 +1578,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     // pacchetto, come l'editor rifiuta il salvataggio).
     for (const id of conCondizioniSuPin) {
       const p = prepared('SELECT uid, condizioni_json FROM spillo WHERE id = ?').get(id) as { uid: string | null; condizioni_json: string | null };
-      const { valide, scartate } = condizioniConChiaviEsistenti(leggiCondizioniSalvate(p.condizioni_json), { delPacchetto: new Map() });
+      const { valide, scartate } = condizioniConChiaviEsistenti(leggiCondizioniSalvate(p.condizioni_json), { delPacchetto: new Set() });
       if (scartate.length > 0) {
         esito.condizioniScartate += scartate.length;
         prepared('UPDATE spillo SET condizioni_json = ? WHERE id = ?').run(jsonCondizioni(valide), id);

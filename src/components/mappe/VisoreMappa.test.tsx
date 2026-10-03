@@ -47,7 +47,8 @@ describe('VisoreMappa', () => {
     expect(screen.getByRole('button', { name: 'Forziere: Scrigno da aprire' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Scrigno raccolto/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Mostra anche i raccolti (1)' }));
-    expect(screen.getByRole('button', { name: 'Forziere: Scrigno raccolto (raccolto)' })).toBeInTheDocument();
+    // un forziere si «apre» (scelta dell'utente, 2026-10-03)
+    expect(screen.getByRole('button', { name: 'Forziere: Scrigno raccolto (aperto)' })).toBeInTheDocument();
     // progresso dei collezionabili: 1 su 3
     expect(screen.getByRole('progressbar', { name: 'Collezionabili raccolti' })).toHaveAttribute('aria-valuenow', '33');
     expect(screen.getByText('1 di 3 raccolti · 33%')).toBeInTheDocument();
@@ -84,7 +85,7 @@ describe('VisoreMappa', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Forziere: Scrigno da aprire' }));
     const popup = within(screen.getByRole('dialog', { name: 'Scrigno da aprire' }));
     expect(popup.getByText('Contiene un Panino a mezzaluna.')).toBeInTheDocument();
-    fireEvent.click(popup.getByRole('button', { name: 'Raccolto' }));
+    fireEvent.click(popup.getByRole('button', { name: 'Aperto' }));
     expect(onRaccolto).toHaveBeenCalledWith(expect.objectContaining({ id: 4 }), true);
     fireEvent.click(screen.getByRole('button', { name: 'Negozio: Untouchable' }));
     const scheda = within(await screen.findByRole('region', { name: 'Scheda: Untouchable' }));
@@ -121,7 +122,7 @@ describe('VisoreMappa', () => {
     fireEvent.click(within(screen.getByRole('list', { name: 'Mappe figlie' })).getByRole('button', { name: /Shibuya centro/ }));
     expect(onNaviga).toHaveBeenLastCalledWith('shibuya-centro');
     fireEvent.click(screen.getByRole('button', { name: 'Forziere: Scrigno da aprire' }));
-    expect(within(screen.getByRole('dialog', { name: 'Scrigno da aprire' })).queryByRole('button', { name: 'Raccolto' })).not.toBeInTheDocument();
+    expect(within(screen.getByRole('dialog', { name: 'Scrigno da aprire' })).queryByRole('button', { name: 'Aperto' })).not.toBeInTheDocument();
     expect(screen.getByText(/attiva una partita per segnarli/)).toBeInTheDocument();
   });
 
@@ -129,7 +130,7 @@ describe('VisoreMappa', () => {
     const { onStatoPunto, onAcquisto } = monta();
     fireEvent.click(screen.getByRole('button', { name: 'Forziere: Forziere del corridoio' }));
     const popup = within(screen.getByRole('dialog', { name: 'Forziere del corridoio' }));
-    expect(popup.queryByRole('button', { name: 'Raccolto' })).not.toBeInTheDocument();
+    expect(popup.queryByRole('button', { name: 'Aperto' })).not.toBeInTheDocument();
     fireEvent.click(popup.getByRole('button', { name: 'Esaurito' }));
     expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 5 }), 'esaurito');
     await waitFor(() => expect(popup.getByRole('button', { name: 'Ottenuto' })).not.toBeDisabled());

@@ -114,8 +114,9 @@ export type RequisitoSpillo =
   | { tipo: 'persona-arcano'; arcano: string }
   | { tipo: 'persona-abilita'; persona: string; abilita: string }
   // — mappe —
-  /** Lo stato di un altro pin nella partita (raccolto, azionato, aperta…: `statoDelTipo`), per uid: «la porta si vede finché la
-   *  leva non è azionata» (richiesta dell'utente, 2026-09-30 e 2026-10-03). Solo nelle condizioni dei pin. */
+  /** Lo stato di un altro pin nella partita, per uid: qualunque pin con uno stato (`statoCitabile`: «raccolto», «parlato»,
+   *  «incontrato», «azionato»…, o «ottenuto» dalla sua voce della guida). «La porta si vede finché la leva non è azionata»
+   *  (richiesta dell'utente, 2026-09-30 e 2026-10-03). Solo nelle condizioni dei pin. */
   | { tipo: 'spillo'; spillo: string; segnato: boolean };
 
 export type TipoCondizioneSpillo = RequisitoSpillo['tipo'];
@@ -239,8 +240,9 @@ export interface NomiCondizioni {
   negozi?: Record<string, string>;
   /** I Ladri Fantasma (per «in squadra»); quando manca si prova con i Confidenti. */
   squadra?: Record<string, string>;
-  /** I pin con uno stato, per uid: nome, tipo (dà la parola dello stato) e mappa. */
-  spilli?: Record<string, { nome: string; tipo: string; mappa: string }>;
+  /** I pin con uno stato, per uid: nome, tipo e mappa; `parola` è quella dello stato con cui si cita (`statoCitabile`: «ottenuto»
+   *  per un pin che la prende dalla sua voce della guida), e se manca vale quella del tipo. */
+  spilli?: Record<string, { nome: string; tipo: string; mappa: string; parola?: string }>;
 }
 
 function congiunzione(voci: string[]): string {
@@ -283,7 +285,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'spillo': {
       // «Leva del ponte (Vecchio castello 1P): non azionato»; un pin che non c'è più lo dice, invece di mostrare un uid
       const p = nomi.spilli?.[r.spillo];
-      const parola = (p && statoDelTipo(p.tipo)) ?? 'segnato';
+      const parola = (p && (p.parola ?? statoDelTipo(p.tipo))) ?? 'segnato';
       return `${p ? `${p.nome} (${p.mappa})` : 'Pin non più presente'}: ${r.segnato ? parola : `non ${parola}`}`;
     }
   }

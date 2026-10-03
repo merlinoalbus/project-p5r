@@ -56,7 +56,7 @@ interface Props {
   partitaId: number | null;
   /** Apertura di un'altra mappa (percorso, figlie, passaggi). */
   onNaviga: NavigaMappa;
-  /** Cambio dello stato di uno spillo nella partita (raccolto, sconfitto, azionato, gestito, affrontato, aperta: `statoDelPin`). */
+  /** Cambio dello stato di uno spillo nella partita (la parola del suo tipo — raccolto, aperto, parlato, incontrato, azionato…: `statoDelPin`). */
   onRaccolto?: (spillo: SpilloDto, raccolto: boolean) => Promise<void> | void;
   /** Stato nella Guida di un punto di dungeon collegato allo spillo (ottenuto, esaurito, riaperto). */
   onStatoPunto?: (spillo: SpilloDto, stato: StatoPuntoMappa) => Promise<void> | void;
@@ -854,7 +854,7 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto }: { n
 interface PropsAzioni<T extends SpilloDto | SchedaContenutoGuidaDto> { spillo: T; occupato: boolean; onRaccolto?: (spillo: T, raccolto: boolean) => Promise<void>; onStatoPunto?: (spillo: T, stato: StatoPuntoMappa) => Promise<void> }
 
 /** La parola di un pin segnato: lo stato della sua voce della guida («ottenuto», «esaurito») se ne ha una, che è anche quello dei
- *  pulsanti, altrimenti quella del tipo («raccolto», «azionato», «aperta»…). */
+ *  pulsanti, altrimenti quella del tipo («raccolto», «aperto», «parlato», «incontrato», «azionato»…). */
 function parolaSegnato(s: SpilloDto | SchedaContenutoGuidaDto): string {
   return s.voce?.stato ?? parolaDelloStato(s);
 }
@@ -867,7 +867,8 @@ function invitoSenzaPartita(s: SpilloDto | SchedaContenutoGuidaDto, negozio: boo
 }
 
 /** Azioni di stato nella partita: per i punti della Guida «Ottenuto/Esaurito/Riapri» (stessi stati della scheda del Palazzo), altrimenti lo stato del pin
- *  («Raccolto», «Sconfitto», «Azionato», «Gestito», «Affrontato», «Aperta») e, per toglierlo, «Annulla» («Richiudi» per la porta). */
+ *  con la parola del tipo («Raccolto», «Aperto», «Parlato», «Incontrato», «Sconfitto», «Azionato»…: `statoDelPin`) e, per toglierlo,
+ *  «Richiudi» per porta e forzieri, «Annulla» per gli altri (`ritornoDelloStato`). */
 export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
   const punto = s.voce;
   // una voce descrittiva della guida (solo «Altro») si legge, non si segna (scelta dell'utente, 2026-10-01): come nella scheda del Palazzo
@@ -881,8 +882,7 @@ export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spi
       </>
     );
   }
-  // «Raccolto» per un consumabile, «Sconfitto» per boss e miniboss, «Azionato», «Gestito», «Affrontato», «Aperta» per meccanismo,
-  // punto sensibile, nemico e porta chiusa (2026-10-03)
+  // la parola del tipo (tabella scelta dall'utente, 2026-10-03: `shared/spilli.ts` `STATO_PER_TIPO`)
   const stato = statoDelPin(s);
   if (stato === null || !onRaccolto) return null;
   return s.raccolto

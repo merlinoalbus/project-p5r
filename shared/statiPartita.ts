@@ -74,8 +74,8 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
   // — Scorta —
   { chiave: 'persona-arcano', nome: 'Persona di un Arcano', gruppo: 'Scorta', origine: 'Partita → Scorta', operatori: [{ chiave: 'in-scorta', nome: 'in scorta', campi: [campo('arcano', 'arcano', 'Arcano')] }] },
   { chiave: 'persona-abilita', nome: 'Persona con abilità', gruppo: 'Scorta', origine: 'Partita → Scorta', operatori: [{ chiave: 'in-scorta', nome: 'in scorta', campi: [campo('persona', 'persona', 'Persona'), campo('abilita', 'abilita', 'Abilità')] }] },
-  // — Mappe — lo stato di un altro pin (richiesta dell'utente, 2026-09-30): raccolto, azionato, gestito, affrontato, aperta, sconfitto
-  { chiave: 'spillo', nome: 'Pin di una mappa', gruppo: 'Mappe', origine: 'stato del pin nella partita (raccolto, azionato, aperta…)', soloSpilli: true, operatori: [
+  // — Mappe — lo stato di un altro pin (richiesta dell'utente, 2026-09-30): qualunque pin con uno stato (`statoCitabile`)
+  { chiave: 'spillo', nome: 'Pin di una mappa', gruppo: 'Mappe', origine: 'stato del pin nella partita (raccolto, aperto, parlato, incontrato, azionato…)', soloSpilli: true, operatori: [
     { chiave: 'segnato', nome: 'segnato', campi: [campo('spillo', 'spillo', 'Pin')] },
     { chiave: 'non-segnato', nome: 'non segnato', campi: [campo('spillo', 'spillo', 'Pin')] },
   ] },

@@ -23,8 +23,9 @@ import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type S
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
-import { statoDelTipo, TIPO_PUNTO_DESCRITTIVO } from '../../shared/spilli.js';
+import { TIPO_PUNTO_DESCRITTIVO } from '../../shared/spilli.js';
 import { VOCE_DEL_PIN } from './mappe/voceDelPin.js';
+import { pinCitato } from './condizioni/nomiCondizioni.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
 /** Stagioni del calendario di gioco per mese (aprile → marzo). */
@@ -59,7 +60,7 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   sbloccoQuartieri: Map<string, SbloccoQuartiere>;
   /** L'arco della storia in cui si trova la partita, dalla data di gioco e dalle finestre dei Palazzi. */
   arcoCorrente: string | null;
-  /** Gli uid dei pin segnati nella partita (raccolto, azionato, aperta…), anche tramite la loro voce della guida: le condizioni
+  /** Gli uid dei pin segnati nella partita (raccolto, aperto, parlato, incontrato, azionato…), anche tramite la loro voce della guida: le condizioni
    *  «Pin di una mappa». Facoltativo per chi costruisce uno stato a mano (test): senza, nessun pin è segnato. */
   spilliSegnati?: Set<string>;
 }
@@ -229,11 +230,12 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return esito('stagione', ok ? 'verde' : 'rosso', ok ? `Siamo in ${attuale}` : `Solo in ${r.stagione}: siamo in ${attuale}`);
     }
     case 'spillo': {
-      const p = prepared('SELECT nome, tipo FROM spillo WHERE uid = ?').get(r.spillo) as { nome: string; tipo: string } | undefined;
+      const p = pinCitato(r.spillo);
       // un pin eliminato dopo aver scritto la condizione: non si sa, e lo si dice dove correggerlo
       if (!p) return esito('spillo', 'grigio', 'Il pin di questa condizione non c’è più: correggila nell’editor della mappa');
-      // il pin è diventato di un tipo senza stato (una nota): non si può più segnare, e la condizione non deve nascondere per sempre
-      const parola = statoDelTipo(p.tipo);
+      // il pin non ha più uno stato (diventato una nota, o scollegato dalla sua voce della guida): non si può più segnare, e la
+      // condizione non deve nascondere per sempre
+      const parola = p.parola;
       if (parola === null) return esito('spillo', 'grigio', `${p.nome} non ha più uno stato da segnare: correggi la condizione nell’editor della mappa`);
       const segnato = st.spilliSegnati?.has(r.spillo) ?? false;
       return esito('spillo', segnato === r.segnato ? 'verde' : 'rosso', `${p.nome}: ${segnato ? parola : `non ${parola}`}`);

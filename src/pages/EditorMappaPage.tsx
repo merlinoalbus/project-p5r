@@ -469,6 +469,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         </div>
         {/* un informativo con uno stato suo (meccanismo, punto sensibile, nemico, porta chiusa: 2026-10-03) non è «un segno e basta» */}
         <p className="m-0 text-[12px] text-text-muted">{categoria === 'informativo' && statoDelTipo(tipo) ? `Un segno sulla mappa con uno stato da segnare nella partita («${statoDelTipo(tipo)}»); non conta nel completamento della mappa.` : DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
+        {/* un pin di città con uno stato suo (il Confidente, «incontrato»: 2026-10-03) */}
+        {categoria === 'citta' && statoDelTipo(tipo) && <p className="m-0 text-[12px] text-text-muted">Ha uno stato da segnare nella partita («{statoDelTipo(tipo)}»); non conta nel completamento della mappa.</p>}
         <label className="editor-mappa__campo">Descrizione<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={LIMITI_GUIDA.spillo.descrizione} /></label>
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}

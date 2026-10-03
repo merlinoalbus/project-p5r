@@ -4,7 +4,7 @@
 //
 // La richiesta dell'utente (2026-09-30): «La Porta Bloccata si visualizza solo se lo spillo Meccanismo risulta non Raccolto, o un
 // Meccanismo risulta visibile solo se sono stati raccolti gli oggetti chiave… la condizione deve essere singola o multipla su
-// altri spilli diversi e deve essere in and o in or». Lo stato è quello della partita (raccolto, azionato, aperta…), anche
+// altri spilli diversi e deve essere in and o in or». Lo stato è quello della partita (raccolto, aperto, parlato, incontrato, azionato…), anche
 // tramite la voce della guida del pin; la condizione è di presenza e vale anche per gli elementi fissi del gioco.
 // ============================================================
 
@@ -13,7 +13,7 @@ import { closeDb, initDb, prepared } from '../db/dbService.js';
 import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import { esportaMappe, importaMappe, verificaCondizioni } from '../services/mappe/mappeService.js';
+import { creaMappa, esportaMappe, importaMappe, verificaCondizioni } from '../services/mappe/mappeService.js';
 import { palazzoDiOgniMappa } from '../services/palazziService.js';
 import type { PuntoInteresseDto } from '../../shared/types.js';
 
@@ -207,12 +207,146 @@ describe('condizione «Pin di una mappa»', () => {
     expect(await stato(cartello.id)).toBe('disponibile');
   });
 
+  it('tutti i pin con uno stato si segnano e si citano con la loro parola: Confidente «incontrato», Dialogo «parlato»; un pin senza stato proprio, con la sua voce della guida, «ottenuto»', async () => {
+    const confidente = await nuovoPin('confidente', 'Confidente al parco');
+    const dialogo = await nuovoPin('dialogo', 'Chiacchiera col custode');
+    const sicura = await nuovoPin('sicura', 'Stanza sicura con la sua voce');
+    const porta = await nuovoPin('porta', 'Porta dei tre');
+    // la stanza sicura da sola non si cita (nessuno stato); con una voce della guida sì
+    expect((await condiziona(porta.id, [su(sicura.uid, true)])).body.error.code).toBe('condizione-non-trovata');
+    const dungeon = palazzoDiOgniMappa().get(mappa)!;
+    const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
+    const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: 'Riposa nella stanza sicura', tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${sicura.id}`).expect(200);
+    await condiziona(porta.id, [{ tipo: 'gruppo', modo: 'tutte', condizioni: [su(confidente.uid, true), su(dialogo.uid, true), su(sicura.uid, true)] }]).expect(200);
+    const testi = (await leggi(porta.id)).condizioni[0].testo;
+    expect(testi).toMatch(/Confidente al parco \(.+\): incontrato/);
+    expect(testi).toMatch(/Chiacchiera col custode \(.+\): parlato/);
+    expect(testi).toMatch(/Stanza sicura con la sua voce \(.+\): ottenuto/);
+    // nell'elenco dell'editor, con la loro parola
+    const elenco = (await request(app).get('/api/condizioni/spilli').expect(200)).body.data as Array<{ chiave: string; parola: string }>;
+    expect(Object.fromEntries(elenco.filter((p) => [confidente.uid, dialogo.uid, sicura.uid].includes(p.chiave)).map((p) => [p.chiave, p.parola])))
+      .toEqual({ [confidente.uid]: 'incontrato', [dialogo.uid]: 'parlato', [sicura.uid]: 'ottenuto' });
+    expect(await stato(porta.id)).toBe('bloccato');
+    await segna(confidente.id, true);
+    await segna(dialogo.id, true);
+    expect(await stato(porta.id)).toBe('bloccato');
+    // la stanza sicura si segna dalla sua voce della guida
+    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: voce.chiave, stato: 'ottenuto' }).expect(200);
+    expect(await stato(porta.id)).toBe('disponibile');
+  });
+
+  it('un pacchetto: la porta che entra prima cita un pin citabile solo per la sua voce della guida, che entra dopo', async () => {
+    const sicura = await nuovoPin('sicura', 'Stanza sicura del pacchetto');
+    const dungeon = palazzoDiOgniMappa().get(mappa)!;
+    const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
+    const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: 'Riposa nella stanza del pacchetto', tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${sicura.id}`).expect(200);
+    await nuovoPin('porta', 'Porta del pacchetto', [su(sicura.uid, true)]);
+    const pacchetto = structuredClone(esportaMappe(mappa));
+    for (const m of pacchetto.mappe) m.spilli = [...m.spilli].sort((x, y) => (x.nome === 'Porta del pacchetto' ? -1 : y.nome === 'Porta del pacchetto' ? 1 : 0));
+    // (le altre condizioni del caso precedente: tolte, così si conta solo questa)
+    for (const s of pacchetto.mappe.flatMap((m) => m.spilli)) if (s.nome !== 'Porta del pacchetto') delete s.condizioni;
+    expect(importaMappe(pacchetto, { sovrascrivi: true }).condizioniScartate).toBe(0);
+    expect(JSON.parse(prepared("SELECT condizioni_json FROM spillo WHERE nome = 'Porta del pacchetto'").pluck().get() as string)).toEqual([su(sicura.uid, true)]);
+  });
+
+  describe('un pacchetto con un pin citabile solo per la sua voce della guida: l’esito non dipende dall’ordine dei pin (F1)', () => {
+    /** Una stanza sicura collegata a una voce della guida, sulla planimetria `su`, e una porta che la cita sulla planimetria `porta`. */
+    const prepara = async (nomeSicura: string, nomePorta: string, mappaPorta = mappa) => {
+      const sicura = await nuovoPin('sicura', nomeSicura);
+      const dungeon = palazzoDiOgniMappa().get(mappa)!;
+      const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
+      const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: `Voce di ${nomeSicura}`, tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
+      await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${sicura.id}`).expect(200);
+      const r = await request(app).post(`/api/mappe/${mappaPorta}/spilli`).send({ tipo: 'porta', nome: nomePorta, x: 20, y: 20, condizioni: [su(sicura.uid, true)] });
+      expect(r.status, JSON.stringify(r.body)).toBe(201);
+      return sicura;
+    };
+    const condizioniDi = (nome: string) => JSON.parse((prepared('SELECT condizioni_json FROM spillo WHERE nome = ?').pluck().get(nome) as string | null) ?? '[]');
+    /** Solo le condizioni del caso: le altre (dei casi precedenti) non devono contare negli scarti. */
+    const soloQuesta = (p: ReturnType<typeof esportaMappe>, nomePorta: string) => { for (const s of p.mappe.flatMap((m) => m.spilli)) if (s.nome !== nomePorta) delete s.condizioni; return p; };
+
+    it('la stanza sicura viene prima della porta, sulla stessa planimetria', async () => {
+      const sicura = await prepara('Stanza sicura che viene prima', 'Porta che viene dopo');
+      const pacchetto = soloQuesta(structuredClone(esportaMappe(mappa)), 'Porta che viene dopo');
+      for (const m of pacchetto.mappe) m.spilli = [...m.spilli].sort((x, y) => (x.nome === 'Stanza sicura che viene prima' ? -1 : y.nome === 'Stanza sicura che viene prima' ? 1 : 0));
+      expect(importaMappe(pacchetto, { sovrascrivi: true }).condizioniScartate).toBe(0);
+      expect(condizioniDi('Porta che viene dopo')).toEqual([su(sicura.uid, true)]);
+    });
+
+    it('la stanza sicura sta su una planimetria importata prima di quella della porta', async () => {
+      const altra = creaMappa(undefined, { nome: 'Planimetria della porta', tipo: 'area', genitore: prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').pluck().get(mappa) as string });
+      const sicura = await prepara('Stanza sicura dell’altra mappa', 'Porta dell’altra mappa', altra.chiave);
+      const prima = soloQuesta(structuredClone(esportaMappe(mappa)), 'Porta dell’altra mappa');
+      const seconda = soloQuesta(structuredClone(esportaMappe(altra.chiave)), 'Porta dell’altra mappa');
+      const pacchetto = { ...prima, mappe: [...prima.mappe, ...seconda.mappe.filter((m) => !prima.mappe.some((p) => p.chiave === m.chiave))] };
+      expect(importaMappe(pacchetto, { sovrascrivi: true }).condizioniScartate).toBe(0);
+      expect(condizioniDi('Porta dell’altra mappa')).toEqual([su(sicura.uid, true)]);
+    });
+
+    it('il contrario: una porta che cita un pin del pacchetto senza stato si scarta a pacchetto inserito — una nota, o una stanza sicura la cui voce non è ammessa (G1)', async () => {
+      const nota = await nuovoPin('nota', 'Nota del pacchetto');
+      const sicura = await nuovoPin('sicura', 'Stanza sicura con una voce di un altro Palazzo');
+      await nuovoPin('porta', 'Porta che cita una nota');
+      await nuovoPin('porta', 'Porta che cita la stanza sbagliata');
+      // una voce di un altro Palazzo: `voceAmmessa` la scarta, e la stanza resta senza stato
+      const dungeon = palazzoDiOgniMappa().get(mappa)!;
+      const altraArea = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave <> ? ORDER BY dungeon_chiave, ordine LIMIT 1').pluck().get(dungeon) as string;
+      const voceAltrove = (await request(app).post(`/api/compendio/aree/${altraArea}/punti`).send({ nome: 'Voce di un altro Palazzo', tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
+      const pacchetto = structuredClone(esportaMappe(mappa));
+      for (const s of pacchetto.mappe.flatMap((m) => m.spilli)) {
+        if (s.nome === 'Porta che cita una nota') s.condizioni = [su(nota.uid, true)];
+        else if (s.nome === 'Porta che cita la stanza sbagliata') s.condizioni = [su(sicura.uid, true)];
+        else delete s.condizioni;
+        if (s.nome === 'Stanza sicura con una voce di un altro Palazzo') (s as { voce?: string | null }).voce = voceAltrove.chiave;
+      }
+      // all'inserimento si accettano (pin del pacchetto); il riesame le scarta, una ciascuna
+      const esito = importaMappe(pacchetto, { sovrascrivi: true });
+      expect(esito.condizioniScartate).toBe(2);
+      expect(esito.vociScartate).toBe(1);
+      expect(condizioniDi('Porta che cita una nota')).toEqual([]);
+      expect(condizioniDi('Porta che cita la stanza sbagliata')).toEqual([]);
+    });
+
+    it('un pacchetto senza il campo della voce (di prima della 094): la voce del pin reinserito vale lo stesso', async () => {
+      const sicura = await prepara('Stanza sicura senza voce nel pacchetto', 'Porta del pacchetto senza voce');
+      const pacchetto = soloQuesta(structuredClone(esportaMappe(mappa)), 'Porta del pacchetto senza voce');
+      for (const s of pacchetto.mappe.flatMap((m) => m.spilli)) delete (s as { voce?: unknown }).voce;
+      for (const m of pacchetto.mappe) m.spilli = [...m.spilli].sort((x, y) => (x.nome === 'Porta del pacchetto senza voce' ? -1 : y.nome === 'Porta del pacchetto senza voce' ? 1 : 0));
+      expect(importaMappe(pacchetto, { sovrascrivi: true }).condizioniScartate).toBe(0);
+      expect(condizioniDi('Porta del pacchetto senza voce')).toEqual([su(sicura.uid, true)]);
+    });
+  });
+
+  it('un Confidente collegato a una voce della guida la segna quando lo si incontra, e la voce segnata segna lui', async () => {
+    const confidente = await nuovoPin('confidente', 'Confidente della guida');
+    const dungeon = palazzoDiOgniMappa().get(mappa)!;
+    const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
+    const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: 'Incontra il Confidente', tipo: 'persona' }).expect(201)).body.data as PuntoInteresseDto;
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${confidente.id}`).expect(200);
+    await segna(confidente.id, true);
+    expect(prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').pluck().get(partita, voce.chiave)).toBe('ottenuto');
+    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: voce.chiave, stato: null }).expect(200);
+    expect((await leggi(confidente.id)).raccolto).toBe(false);
+  });
+
+  it('un pin senza stato proprio collegato solo a una voce «Altro» (descrittiva) non si segna e non si cita', async () => {
+    const nota = await nuovoPin('nota', 'Nota con una voce descrittiva');
+    prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte) SELECT 'prova-altro-descrittiva', chiave, 999, 'altro', 'Descrizione', '', 0, '{}', '' FROM dungeon_area ORDER BY ordine LIMIT 1").run();
+    prepared("UPDATE spillo SET voce_chiave = 'prova-altro-descrittiva' WHERE id = ?").run(nota.id);
+    expect((await request(app).put(`/api/partite/${partita}/spilli/${nota.id}`).send({ raccolto: true })).body.error.code).toBe('spillo-senza-stato');
+    const porta = await nuovoPin('porta', 'Porta della nota descrittiva');
+    expect((await condiziona(porta.id, [su(nota.uid, true)])).body.error.code).toBe('condizione-non-trovata');
+  });
+
   it('l’elenco per l’editor: solo i pin con uno stato, con la mappa e il tipo', async () => {
     await nuovoPin('nota', 'Nota fuori elenco');
     const leva = await nuovoPin('meccanismo', 'Leva in elenco');
-    const elenco = (await request(app).get('/api/condizioni/spilli').expect(200)).body.data as Array<{ chiave: string; nome: string; tipo: string; gruppo: string }>;
-    expect(elenco.find((p) => p.chiave === leva.uid)).toMatchObject({ nome: 'Leva in elenco', tipo: 'meccanismo', gruppo: expect.stringContaining(' › ') });
+    const elenco = (await request(app).get('/api/condizioni/spilli').expect(200)).body.data as Array<{ chiave: string; nome: string; tipo: string; gruppo: string; parola: string }>;
+    expect(elenco.find((p) => p.chiave === leva.uid)).toMatchObject({ nome: 'Leva in elenco', tipo: 'meccanismo', gruppo: expect.stringContaining(' › '), parola: 'azionato' });
     expect(elenco.some((p) => p.nome === 'Nota fuori elenco')).toBe(false);
-    expect(elenco.every((p) => !['nota', 'sicura', 'passaggio'].includes(p.tipo))).toBe(true);
+    // i tipi senza stato proprio ci sono solo con una voce della guida, e allora col suo «ottenuto»
+    expect(elenco.filter((p) => ['nota', 'sicura', 'passaggio'].includes(p.tipo)).every((p) => p.parola === 'ottenuto')).toBe(true);
   });
 });

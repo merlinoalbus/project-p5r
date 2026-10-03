@@ -1006,6 +1006,26 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
     «non ancora»; si nascondono solo per lo stato di altri pin e, come prima, l'ingresso a un Palazzo completato;
   - **corretto il NON su un gruppo misto**: `NON(TUTTE(Coraggio 5, Leva azionata))` faceva sparire il pin appena la leva era
     azionata anche col Coraggio basso; ora un NON su un gruppo che mescola presenza e prerequisiti non nasconde da solo.
-- Confermati dall'utente (2026-10-03, «1 ok, 2 corretto»): sui passaggi e le scale del gioco che restano in vista marcati
-  «non ancora» il pulsante «Vai: …» resta disattivato; un pin di un tipo senza stato ma collegato a una voce della guida si
-  segna tramite la voce ma non si può citare in una condizione «Pin di una mappa» (l'elenco offre solo i tipi con uno stato).
+- Confermato dall'utente (2026-10-03, «1 ok»): sui passaggi e le scale del gioco che restano in vista marcati «non ancora» il
+  pulsante «Vai: …» resta disattivato. Il «2 corretto» (pin senza stato ma con voce della guida non citabile) l'avevo letto
+  come una conferma; la domanda successiva dell'utente sul pin Confidente ha chiarito che andava **corretto**: vedi sotto.
+
+## 2026-10-03 — Tutti i pin con uno stato: parole e condizioni
+
+- Richiesta dell'utente: «perché tra i pin della mappa selezionabili non vedo anche il PIN Confidente (che ha Ottenuto
+  true/false)?», «anche i dialoghi… insomma tutti i pin che hanno uno stato», «vanno integrati con i termini attivo/disattivo
+  corretti e inseriti tra i pin che condizionano altri pin e il cui status diventa collegabile con gli elementi della guida».
+- **Una regola sola** per «un pin ha uno stato» (`shared/spilli.ts` `statoCitabile`): il suo tipo ha uno stato, oppure il pin è
+  collegato a una voce della guida non descrittiva, di cui prende l'«ottenuto». La usano il segno sulla mappa, l'elenco dei pin
+  citabili, la validazione e la valutazione delle condizioni: un pin che si segna si cita, e viceversa. Un pin collegato solo a
+  una voce «Altro» non si segna (prima il server lo accettava, anche se il popup non lo offriva).
+- **Parole** (tabella completa proposta e scelta dall'utente): Dialogo «Parlato», Confidente «Incontrato», Forziere e Forziere
+  raro «Aperto», Tesoro del Palazzo «Rubato», Timbro dei Mementos «Timbrato», Seme della bramosia e oggetti «Raccolto», Boss e
+  Miniboss «Sconfitto», Nemico «Affrontato», Meccanismo «Azionato», Punto sensibile «Gestito», Porta chiusa «Aperta»; per
+  togliere il segno porta e forzieri si «Richiudono» (→ «chiusa» / «chiuso»), gli altri si «Annullano» (→ «non più …»).
+- Il **Confidente** ha uno stato proprio (si segna anche senza voce) ma resta un pin di città: non conta nel completamento e,
+  segnato, resta sulla mappa. Collegato a una voce della guida (qualunque pin si collega a una voce, dalla 094), incontrarlo
+  segna la voce e la voce segnata segna lui, come per gli altri pin.
+- Scelta dell'utente (2026-10-03, posta su richiesta del validatore): lo stato «Incontrato» del pin Confidente **resta separato**
+  dallo stato del Confidente nella partita (Partita → Confidenti, «sbloccato» / rango): segnare il pin non sblocca il Confidente,
+  e un Confidente sbloccato non segna il pin.

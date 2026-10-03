@@ -21,7 +21,7 @@ import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizio
 import { useCarica } from '../../hooks/useCarica';
 import { getConfidenti, getDungeons, getQuartieri, getRichieste } from '../../services/api/compendio';
 import { getElenchiRegole, getPinConStato, type ElenchiRegole, type PinConStato } from '../../services/api/condizioni';
-import { DEFINIZIONI_SPILLO, statoDelTipo, type TipoSpillo } from '../../../shared/spilli';
+import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
 import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
 import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Selettore';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -59,7 +59,7 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'persona': return e.extra.persone;
     case 'abilita': return e.extra.abilita;
     // raggruppati per mappa, col tipo e la parola del suo stato: «Leva del ponte — Meccanismo · azionato»
-    case 'spillo': return e.spilli.map((p) => ({ chiave: p.chiave, nome: p.nome, gruppo: p.gruppo, dettaglio: `${DEFINIZIONI_SPILLO[p.tipo as TipoSpillo]?.nome ?? p.tipo} · ${statoDelTipo(p.tipo) ?? ''}` }));
+    case 'spillo': return e.spilli.map((p) => ({ chiave: p.chiave, nome: p.nome, gruppo: p.gruppo, dettaglio: `${DEFINIZIONI_SPILLO[p.tipo as TipoSpillo]?.nome ?? p.tipo} · ${p.parola}` }));
     default: return [];
   }
 }
@@ -243,7 +243,7 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
     const e = dati.dati;
     const mappa = (o: Array<{ chiave: string; nome: string }>) => Object.fromEntries(o.map((x) => [x.chiave, x.nome]));
     return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra),
-      spilli: Object.fromEntries(e.spilli.map((p) => [p.chiave, { nome: p.nome, tipo: p.tipo, mappa: p.gruppo }])) };
+      spilli: Object.fromEntries(e.spilli.map((p) => [p.chiave, { nome: p.nome, tipo: p.tipo, mappa: p.gruppo, parola: p.parola }])) };
   }, [dati.dati]);
   // fra i pin offerti non c'è quello che si sta modificando (i nomi sì: una condizione vecchia su se stesso si legge)
   const offerti = useMemo(() => (dati.dati ? { ...dati.dati, spilli: dati.dati.spilli.filter((p) => p.chiave !== pinCorrente) } : null), [dati.dati, pinCorrente]);

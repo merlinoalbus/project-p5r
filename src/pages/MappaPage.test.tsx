@@ -107,7 +107,8 @@ describe('MappaPage', () => {
     const spillo = await screen.findByRole('button', { name: 'Forziere: Scrigno' });
     expect(getMappa).toHaveBeenCalledWith('citta-shibuya', 7);
     fireEvent.click(spillo);
-    fireEvent.click(within(screen.getByRole('dialog', { name: 'Scrigno' })).getByRole('button', { name: 'Raccolto' }));
+    // un forziere si «apre» (scelta dell'utente, 2026-10-03)
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Scrigno' })).getByRole('button', { name: 'Aperto' }));
     expect(impostaSpilloRaccolto).toHaveBeenCalledWith(7, 4, true);
     // subito, con la rilettura ancora in corso: lo spillo raccolto sparisce e il progresso passa a 1 su 2
     expect(await screen.findByText('1 di 2 raccolti · 50%')).toBeInTheDocument();

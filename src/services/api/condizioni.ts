@@ -19,8 +19,13 @@ export interface ElenchiRegole {
 }
 export const getElenchiRegole = (): Promise<ElenchiRegole> => apiGet('/condizioni/elenchi');
 
-/** I pin con uno stato (raccolto, azionato, aperta…) per la condizione «Pin di una mappa»: `chiave` è l'uid, `gruppo` la mappa. */
-export interface PinConStato { chiave: string; nome: string; tipo: string; gruppo: string }
+/** I pin con uno stato (raccolto, aperto, parlato, incontrato, azionato…, o «ottenuto» dalla voce della guida) per la condizione
+ *  «Pin di una mappa»: `chiave` è l'uid, `gruppo` la mappa. */
+export interface PinConStato {
+  chiave: string; nome: string; tipo: string; gruppo: string;
+  /** La parola dello stato con cui si cita: quella del tipo, o «ottenuto» per un pin che la prende dalla sua voce della guida. */
+  parola: string;
+}
 export const getPinConStato = (): Promise<PinConStato[]> => apiGet('/condizioni/spilli');
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
