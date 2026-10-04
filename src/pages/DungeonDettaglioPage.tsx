@@ -47,6 +47,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { AtterraggioTokyo } from '../components/guida/AtterraggioTokyo';
 import { MappaMemento } from '../components/mappe/MappaMemento';
 import { urlStratoDedalo } from '../components/mappe/stratiMemento';
 
@@ -336,6 +337,8 @@ export function DungeonDettaglioPage() {
                 {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno. */}
                 <div className="flex flex-wrap items-center gap-2 lg:contents">
                   <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa del Palazzo" />
+                  {/* Quando compare sulla mappa di Tokyo e dove si atterra toccandolo (2026-10-04) */}
+                  <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} />
                   <span className="chip">{d.aree.length} {memento ? 'dedali' : 'aree'}</span>
                   <span className="chip" title={memento ? 'Timbri dichiarati dalla guida e richieste dei dedali: sono questi a fare la percentuale.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'obiettivi' : 'da raccogliere'}</span>
                   {!memento && <span className="chip" title="Le tavole dell’atlante del Palazzo. Si ordinano e si correggono nell’elenco qui sotto.">

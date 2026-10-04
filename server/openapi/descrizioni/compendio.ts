@@ -278,6 +278,18 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
     errori: [[404, 'dungeon-non-trovato']],
   },
+  'PUT /api/compendio/dungeon/:chiave/finestra': {
+    sommario: 'Cambia la finestra in cui il Palazzo compare sulla mappa di Tokyo',
+    descrizione: 'Scrive la voce del Palazzo in `finestre-dungeon` (dati della guida), creandola se manca: `dal` e `al` sono giorni MM-GG del calendario di gioco (aprile → marzo), `al: null` vuol dire senza fine. La stessa finestra decide anche l\'arco corrente delle condizioni. Le altre voci del blocco restano come sono.',
+    risposta: 'La finestra salvata, `{ dal, al }`',
+    errori: [[404, 'dungeon-non-trovato'], [400, 'data-non-valida'], [400, 'fine-prima-di-inizio']],
+  },
+  'PUT /api/compendio/dungeon/:chiave/atterraggi': {
+    sommario: 'Sostituisce le regole di atterraggio dalla mappa di Tokyo',
+    descrizione: 'Le regole si salvano tutte insieme, nell\'ordine dato, che è l\'ordine in cui si provano: vale la prima che copre il giorno della partita (senza partita o senza giorno, la prima senza date). Ogni regola vale sempre (date nulle), da `dal` in poi (`al` nullo), fra `dal` e `al` compresi, o in un giorno solo (`dal` = `al`), e porta a una planimetria di questo Palazzo, centrata sul pin `spillo` se dato. Prima di scrivere si controlla tutto: giorni esistenti, fine non prima dell\'inizio, planimetria del Palazzo (non la mappa d\'insieme), pin su quella planimetria. Un elenco vuoto toglie tutte le regole.',
+    risposta: 'Le regole salvate, elenco di `AtterraggioPalazzoDto`',
+    errori: [[404, 'dungeon-non-trovato'], [400, 'data-non-valida'], [400, 'fine-senza-inizio'], [400, 'fine-prima-di-inizio'], [404, 'mappa-non-trovata'], [400, 'mappa-fuori-palazzo'], [400, 'spillo-fuori-mappa'], [409, 'schema-non-aggiornato']],
+  },
   'POST /api/compendio/dungeon/:chiave/aree': {
     sommario: 'Aggiunge una sezione nuova alla guida di un Palazzo',
     descrizione: 'L\'area nasce `dopo` l\'area indicata, in cima con `dopo: null`, in fondo se `dopo` manca; l\'ordine del Palazzo si ricompatta. La chiave si ricava dal nome (resa unica e nei limiti accettati dalle rotte). Con `planimetria` l\'area si aggiunge alle aree di quella planimetria, che deve essere del Palazzo. È canone: vale per tutte le partite.',

@@ -10,7 +10,7 @@ import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
 import { aggiornaArea, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaArea, creaPunto, eliminaArea, eliminaPunto, spostaPunto } from '../services/dungeonService.js';
-import { bodyArea, bodyDungeon, bodyNuovaArea, bodyNuovoPunto, bodyPunto, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto } from '../schemas/guidaDungeon.js';
+import { bodyArea, bodyAtterraggi, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovoPunto, bodyPunto, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto } from '../schemas/guidaDungeon.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
@@ -21,6 +21,7 @@ import { aggiornaVoce, creaVoce, eliminaVoce, spostaVoce } from '../services/gio
 import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
+import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
 import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
 import { bodyAggiornaVoce, bodyDotiIncontro, bodyNuovaVoce, bodySpostaVoce, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
@@ -199,6 +200,15 @@ router.get('/dungeon/:chiave', validate({ params: paramsChiaveGuida, query: quer
 /* ---- Correzione dei testi della guida: la sezione dei Palazzi non è più in sola lettura ---- */
 router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyDungeon }), (req, res) => {
   res.json(aggiornaDungeon(String(req.params.chiave), req.body as Parameters<typeof aggiornaDungeon>[1]));
+});
+/** La finestra del Palazzo sulla mappa di Tokyo: da quando (e fino a quando) compare per il giorno della partita (2026-10-04). */
+router.put('/dungeon/:chiave/finestra', validate({ params: paramsChiaveGuida, body: bodyFinestraDungeon }), (req, res) => {
+  const { dal, al } = req.body as { dal: string; al: string | null };
+  res.json(impostaFinestra(String(req.params.chiave), dal, al));
+});
+/** Le regole d'atterraggio dalla mappa di Tokyo, sostituite tutte insieme nell'ordine dato (2026-10-04). */
+router.put('/dungeon/:chiave/atterraggi', validate({ params: paramsChiaveGuida, body: bodyAtterraggi }), (req, res) => {
+  res.json(impostaAtterraggi(String(req.params.chiave), (req.body as { regole: RegolaAtterraggio[] }).regole));
 });
 /** Una sezione nuova della guida del Palazzo, al posto scelto e, se data, nella planimetria (2026-10-01). */
 router.post('/dungeon/:chiave/aree', validate({ params: paramsChiaveGuida, body: bodyNuovaArea }), (req, res) => {

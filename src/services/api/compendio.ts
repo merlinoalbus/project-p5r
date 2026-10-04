@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
+  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, VideogiochiDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
@@ -121,6 +121,12 @@ export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteres
 /** Collega (o scollega) un pin di una planimetria del Palazzo alla voce della guida. */
 export const collegaPinAlPunto = (chiave: string, spilloId: number, collega: boolean): Promise<PuntoInteresseDto> =>
   collega ? apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`, {}) : apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`);
+/** Quando il Palazzo compare sulla mappa di Tokyo: dal–al in MM-GG del calendario di gioco, `al` null = senza fine. */
+export const impostaFinestraDungeon = (dungeon: string, dal: string, al: string | null): Promise<{ dal: string; al: string | null }> =>
+  apiPut(`/compendio/dungeon/${encodeURIComponent(dungeon)}/finestra`, { dal, al });
+/** Sostituisce le regole d'atterraggio dalla mappa di Tokyo (nell'ordine in cui si provano); risponde con l'elenco salvato. */
+export const impostaAtterraggiDungeon = (dungeon: string, regole: Array<{ dal: string | null; al: string | null; mappa: string; spillo: number | null }>): Promise<AtterraggioPalazzoDto[]> =>
+  apiPut(`/compendio/dungeon/${encodeURIComponent(dungeon)}/atterraggi`, { regole });
 /** Elimina un'area della guida per tutte le partite, con i suoi punti e i suoi legami. */
 export const eliminaArea = (chiave: string): Promise<void> => apiDelete(`/compendio/aree/${encodeURIComponent(chiave)}`);
 /** Calendario di gioco (con oggi e scadenze se c'è la partita). */

@@ -10,11 +10,11 @@ import { scegliVoce, vociSelettore } from '../../test/selettore';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto, PuntoInteresseDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea } = vi.hoisted(() => ({
+const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaAtterraggiDungeon, getMappa } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
-  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(), collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaArea: vi.fn(),
+  riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(), collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaArea: vi.fn(), impostaAtterraggiDungeon: vi.fn(), getMappa: vi.fn(),
 }));
-vi.mock('../services/api', (vero) => moduloApi(vero, { getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, impostaAtterraggiDungeon, getMappa }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave }: { chiave: string }) => <div>Visore: {chiave}</div> }));
@@ -35,7 +35,7 @@ const area = (extra: Partial<AreaDungeonDto>): AreaDungeonDto => ({
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
-  raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, note: '', fonti: [],
+  raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, atterraggio: null, atterraggi: [], note: '', fonti: [],
   aree: [
     area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null }] }),
     area({ chiave: 'k-02', ordine: 1, nome: 'Torre', punti: [] }),
@@ -989,4 +989,26 @@ it('dalla colonna del Palazzo si crea un’area senza planimetria, nel posto sce
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   // creata, la scheda apre l'area nuova (la riletta la contiene)
   expect(await screen.findByRole('heading', { name: 'Atrio' })).toBeInTheDocument();
+});
+
+it('dall’intestazione del Palazzo si sceglie dove si atterra dalla mappa di Tokyo: salvata la regola, la scheda si rilegge e la mostra (2026-10-04)', async () => {
+  /** La scheda dopo il salvataggio: finestra 11 aprile – 2 maggio e una regola «sempre» sul Cancello, che vale oggi. */
+  const conRegola = (): DungeonDettaglioDto => ({ ...palazzo(true), finestra: { dal: '04-11', al: '05-02' },
+    atterraggi: [{ dal: null, al: null, mappa: 'm-cancello', mappaNome: 'Palazzo di Kamoshida › Cancello', spillo: null, spilloNome: null }], atterraggio: { mappa: 'm-cancello', spillo: null } });
+  getDungeon.mockResolvedValueOnce(palazzo(true)).mockResolvedValue(conRegola());
+  getMappa.mockResolvedValue({ chiave: 'm-cancello', spilli: [] });
+  impostaAtterraggiDungeon.mockResolvedValue(conRegola().atterraggi);
+  monta('kamoshida');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+  // senza finestra il Palazzo c'è sempre, e lo dice il pulsante
+  fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo.*sempre/ }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Sulla mappa di Tokyo — Palazzo di Kamoshida' }));
+  expect(finestra.getByText('Oggi nessuna regola vale: si apre la scheda del Palazzo.')).toBeInTheDocument();
+  fireEvent.click(finestra.getByRole('button', { name: /Aggiungi una regola/ }));
+  fireEvent.click(finestra.getByRole('button', { name: /Salva le regole/ }));
+  await waitFor(() => expect(impostaAtterraggiDungeon).toHaveBeenCalledWith('kamoshida', [{ dal: null, al: null, mappa: 'm-cancello', spillo: null }]));
+  // la scheda riletta: la regola vale oggi, e il pulsante dice la finestra
+  expect(await finestra.findByText(/Oggi si atterra su:/)).toHaveTextContent('Oggi si atterra su: Cancello.');
+  expect(getDungeon).toHaveBeenCalledTimes(2);
+  expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo.*dal 11 aprile al 2 maggio/ })).toBeInTheDocument();
 });

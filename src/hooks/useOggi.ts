@@ -44,8 +44,9 @@ export interface Oggi {
   sullaMappa: (mappa: { chiave: string; spilloId: number | null }, voce: string | null) => void;
   tornaAllaMappaGlobale: () => void;
   /** Scende a una mappa dell'atlante restando nella scheda «Oggi»: il clic su un quartiere della
-   *  mappa di Tokyo non deve portare via dal giorno che si sta guardando. */
-  apriMappa: (chiave: string) => void;
+   *  mappa di Tokyo non deve portare via dal giorno che si sta guardando. Con lo spillo (l'atterraggio di un Palazzo,
+   *  2026-10-04) la mappa si apre centrata su quello. */
+  apriMappa: (chiave: string, spilloId?: number | null) => void;
 }
 
 /** Carica il giorno corrente della partita (o quello scelto) con le sue azioni e tiene lo stato della mappa collegata. */
@@ -150,6 +151,6 @@ export function useOggi(partitaId: number): Oggi {
     mappa,
     sullaMappa: (m, voce) => setMappa({ chiave: m.chiave, spilloId: m.spilloId, azione: voce }),
     tornaAllaMappaGlobale: () => setMappa({ chiave: 'tokyo', spilloId: null, azione: null }),
-    apriMappa: (chiave) => setMappa({ chiave, spilloId: null, azione: null }),
+    apriMappa: (chiave, spilloId = null) => setMappa({ chiave, spilloId, azione: null }),
   }), [datiIndice, caricaIndice, erroreIndice, rileggiIndice, impostaIndice, g, caricaGiorno, erroreGiorno, rileggiGiorno, impostaGiorno, partitaId, fascia, occupato, mappa]);
 }

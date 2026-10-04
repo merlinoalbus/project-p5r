@@ -47,7 +47,7 @@ server/
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod; gli schemi restano leggibili con `schemiDiValidazione`), errorHandler
   openapi/            documentazione dell'API (voce 5 della verifica completa): rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
   db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
-  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema); registro in index.ts, `index.test.ts` pretende id consecutivi
+  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema), 097 (atterraggio dei Palazzi dalla mappa di Tokyo); registro in index.ts, `index.test.ts` pretende id consecutivi
   db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
@@ -129,7 +129,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 - `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
 - Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto). `seed_meta`, la memoria dell'ultimo caricamento del seed, è uscita con la migrazione 096 (verifica completa, R3'), e con lei il campo `seed` dello stato dell'istanza.
-- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 096 e `utente` alla 016). Le righe qui sotto descrivono
+- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 097 e `utente` alla 016). Le righe qui sotto descrivono
   il nucleo di allora; il caricamento era `caricaSeed` con l'hash in `seed_meta`, mentre oggi i dati di gioco arrivano con il
   pacchetto (`caricaPacchetto` / importazione) e le immagini stanno nella tabella `immagine` di `gioco.db` (079):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
@@ -1041,6 +1041,27 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   collegata a un Palazzo (o di una richiesta, Memento) `mappaAzione` dà lo spillo d'ingresso aperto nel giorno della voce
   (sole condizioni di data in cima), in città prima; senza ingresso la prima planimetria del Palazzo (`ruolo_immagine`
   pianta o illustrazione, ordine della scheda), senza nemmeno quella la radice `dungeon-<k>` (2026-10-01).
+- **Quando un Palazzo compare sulla mappa di Tokyo e dove si atterra** (2026-10-04, `atterraggioPalazziService`).
+  - **La finestra** è la voce del Palazzo in `finestre-dungeon` (`dati_guida`). Si cambia con
+    `PUT /api/compendio/dungeon/:chiave/finestra` (`impostaFinestra`: copia del blocco congelato, poi `invalidaDatiGuida`).
+    La 097 porta Kamoshida al 04-11, solo se la data era ancora 04-12.
+  - **Le regole** stanno in `dungeon_atterraggio` (097, in `gioco.db`): `ordine`, `dal`/`al` in MM-GG (nulli = sempre; `al`
+    nullo = da `dal` in poi; uguali = un giorno), `mappa_chiave` interna e `spillo_id` facoltativo.
+    - Si sostituiscono tutte insieme con `PUT /api/compendio/dungeon/:chiave/atterraggi` (`impostaAtterraggi`). Prima di
+      scrivere si controllano le date, una planimetria non radice del Palazzo e il pin su quella planimetria.
+    - Cancellazioni: la planimetria porta via le sue regole (CASCADE); il pin eliminato lascia la regola senza pin
+      (SET NULL).
+    - `importaMappe` ricollega per uid il pin reinserito, come i passaggi (`atterraggiDaRicollegare`).
+  - **Dove si atterra.** `atterraggioDelGiorno` dà la prima regola che copre `partita.data_gioco` (`regolaCopre`, calendario
+    aprile → marzo); senza partita, la prima regola «sempre». Il risultato va in `DungeonRiassuntoDto.atterraggio`; la scheda
+    porta l'elenco in `DungeonDettaglioDto.atterraggi`.
+  - **Nel FE.**
+    - `MappaTokyo` fa del cartellino `urlMappa(mappa, { spillo })`, e senza regola resta la scheda del Palazzo.
+    - `OggiMappa` riconosce `?spillo=` e scende con `apriMappa(chiave, spillo)`, centrata sul pin.
+    - `OggiMappa` e `CittaPage` rileggono i Palazzi quando cambia `attiva.dataGioco`.
+    - L'editor è `AtterraggioTokyo`, una finestra aperta dal pulsante «Sulla mappa di Tokyo» nell'intestazione del Palazzo.
+      Il selettore di date è `components/shared/SelettoreData` (estratto da `CondizioniEditor`); i pin omonimi si distinguono
+      con `utils/pinArrivo`.
 
 ### Effetti delle azioni della Guida (2026-09-30)
 

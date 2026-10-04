@@ -41,3 +41,22 @@ export const bodyNuovaArea = z.object({
 export const bodySpostaPunto = z.object({ verso: z.union([z.literal(-1), z.literal(1)]) });
 /** Il pin di una planimetria da collegare o scollegare (`PUT` / `DELETE`). */
 export const paramsPinDelPunto = z.object({ chiave: z.string().min(1).max(200), spillo: idParam });
+
+/** Il giorno MM-GG del calendario di gioco (l'esistenza del giorno la controlla il servizio con `dataValida`). */
+const giornoGioco = z.string().regex(/^\d{2}-\d{2}$/, 'Il giorno è nel formato MM-GG.');
+
+/** La finestra del Palazzo sulla mappa di Tokyo (2026-10-04): da quando c'è e fino a quando (null = senza fine). */
+export const bodyFinestraDungeon = z.object({ dal: giornoGioco, al: giornoGioco.nullable() });
+
+/**
+ * Le regole d'atterraggio dalla mappa di Tokyo (2026-10-04), nell'ordine in cui si provano: quando valgono (date nulle = sempre;
+ * `al` nullo = da `dal` in poi; `dal` = `al` = un giorno solo), la planimetria del Palazzo (chiave pubblica) e il pin d'arrivo.
+ */
+export const bodyAtterraggi = z.object({
+  regole: z.array(z.object({
+    dal: giornoGioco.nullable(),
+    al: giornoGioco.nullable(),
+    mappa: z.string().trim().min(1).max(200),
+    spillo: z.number().int().positive().nullable(),
+  })).max(30),
+});

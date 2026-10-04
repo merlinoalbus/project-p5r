@@ -33,10 +33,11 @@ interface Props {
  *
  * I cartellini portano a `/guida/mappe/<chiave>` (a volte con `?x&y&zoom`) oppure a
  * `/guida/mondo/...` e `/guida/covo` per i pochi che un nodo d'atlante non ce l'hanno. Solo i
- * primi si possono aprire qui dentro: per gli altri si lascia fare al collegamento. */
-function chiaveMappaDaHref(href: string): string | null {
-  const m = /^\/guida\/mappe\/([^/?#]+)/.exec(href);
-  return m ? decodeURIComponent(m[1]) : null;
+ * primi si possono aprire qui dentro: per gli altri si lascia fare al collegamento. Un `?spillo=` (il pin d'arrivo
+ * dell'atterraggio di un Palazzo) passa con la chiave, per aprire la planimetria centrata su quel pin. */
+function mappaDaHref(href: string): { chiave: string; spillo: number | null } | null {
+  const m = /^\/guida\/mappe\/([^/?#]+)(?:\?spillo=(\d+))?/.exec(href);
+  return m ? { chiave: decodeURIComponent(m[1]), spillo: m[2] ? Number(m[2]) : null } : null;
 }
 
 /** La colonna della mappa, sullo stato condiviso `oggi`: al livello di Tokyo la `MappaTokyo` della
@@ -49,8 +50,9 @@ export function OggiMappa({ oggi, riempi }: Props) {
   const suTokyo = mappa.chiave === 'tokyo';
   // Si caricano solo quando servono davvero, cioè al livello di Tokyo.
   const quartieri = useCarica(() => (suTokyo ? getQuartieri(oggi.partitaId) : Promise.resolve([])), [suTokyo, oggi.partitaId]);
-  // con la partita: un Palazzo completato sulla mappa di Tokyo non c'è più
-  const dungeon = useCarica(async () => (suTokyo ? radiciMetaverso(await getDungeons(oggi.partitaId)) : []), [suTokyo, oggi.partitaId]);
+  // con la partita: un Palazzo completato sulla mappa di Tokyo non c'è più; col suo giorno, che decide dove si atterra
+  // toccando un Palazzo (`atterraggio`, 2026-10-04)
+  const dungeon = useCarica(async () => (suTokyo ? radiciMetaverso(await getDungeons(oggi.partitaId)) : []), [suTokyo, oggi.partitaId, attiva?.dataGioco]);
 
   return (
     <div className={`flex flex-col gap-1.5 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>
@@ -64,7 +66,7 @@ export function OggiMappa({ oggi, riempi }: Props) {
           quartieri={quartieri.dati ?? []}
           dungeon={dungeon.dati ?? []}
           dataGioco={attiva?.dataGioco ?? null}
-          onApri={(href) => { const k = chiaveMappaDaHref(href); if (!k) return false; oggi.apriMappa(k); return true; }}
+          onApri={(href) => { const m = mappaDaHref(href); if (!m) return false; oggi.apriMappa(m.chiave, m.spillo); return true; }}
         />
       ) : (
         <MappaIncorporata

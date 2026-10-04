@@ -382,7 +382,11 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         // l'utente ha chiesto di lasciare com'è. La targa scura le distingue dai quartieri: sono
         // posti dell'altro mondo, non fermate del treno.
         src: assetPalazzo(d.chiave), dove, palazzo: true,
-        href: `/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`,
+        // Dove si atterra lo dicono le regole del Palazzo per il giorno della partita (2026-10-04): una planimetria, centrata
+        // sul pin d'arrivo se c'è. Senza una regola che copra il giorno resta la scheda del Palazzo.
+        href: d.atterraggio
+          ? urlMappa(d.atterraggio.mappa, d.atterraggio.spillo !== null ? { spillo: d.atterraggio.spillo } : undefined)
+          : `/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`,
         // Un Palazzo completato non c'è più, anche dentro la sua finestra: come nel gioco, e come
         // l'ingresso dalla città che a Palazzo completato risulta bloccato (`palazziService`).
         presente: !d.completato && (!dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al)),

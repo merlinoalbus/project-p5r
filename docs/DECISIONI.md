@@ -1160,3 +1160,49 @@ Che cosa ne segue:
   - la conferma di eliminazione distingue le aree che restano su altre planimetrie da quelle che restano senza;
   - nella pagina del Palazzo, «Planimetrie di quest'area» collega l'area aperta anche a un'altra planimetria, o la scollega da
     quella a schermo.
+
+## 2026-10-04 — Il Palazzo sulla mappa di Tokyo: quando compare e dove si atterra
+
+Segnalazione dell'utente: «come mai nella mappa non vedo giorno 11/04 e il 12/4 l'icona del palazzo di kamoshida?», poi «l'11/04
+dovrebbe atterrare nei sotterranei "Prigione sotterranea - Tutorial" mentre il 12/04 dalla mappa bisognerebbe atterrare su
+Tutorial Palazzo 12/04 (Sala Centrale)», e infine: «per la sequenza non devi annotare niente... devi visualizzare l'icona e
+permettermi di valorizzare per fasce temporali o giorni specifici il punto di atterraggio dell'icona della mappa rispetto al
+mappamondo delle planimetrie».
+
+Il Palazzo non compariva perché la finestra di Kamoshida in `finestre-dungeon` partiva dal 12 aprile, e il tocco sull'icona
+portava sempre alla scheda del Palazzo.
+
+Risposte dell'utente, parola per parola:
+- il giorno che decide la mappa: «Il giorno della partita»;
+- la comparsa del Palazzo: «Finestra modificabile (Recommended)»;
+- dove si atterra: «Regole per date nel Palazzo (Recommended)»;
+- la proposta: «Sì, procedi (Recommended)».
+
+Che cosa ne segue:
+- **La finestra si modifica dalla pagina del Palazzo** («Quando compare»: dal, al o senza fine). È la voce di `finestre-dungeon`,
+  la stessa che dice l'arco corrente alle condizioni dei pin. La migrazione 097 porta Kamoshida dal 12 all'11 aprile, solo se la
+  data è ancora quella trascritta in origine.
+- **Le regole d'atterraggio** stanno nella tabella `dungeon_atterraggio` (097), in `gioco.db`, e viaggiano col pacchetto. Ogni
+  regola vale sempre, un giorno, da un giorno in poi o dal–al, e porta a una planimetria del Palazzo e, se indicato, a un suo pin.
+  Vale la prima regola che copre il giorno della partita; l'ordine si cambia con le frecce. Senza partita vale la prima regola
+  «Sempre». Se nessuna regola vale, il tocco apre la scheda del Palazzo, come prima.
+- **Il tocco sull'icona** apre la planimetria: nella Home dentro la mappa, senza cambiare pagina e centrata sul pin; nella
+  Città, la pagina della mappa con il pin selezionato. Cambiato il giorno della partita, i Palazzi si rileggono.
+
+Scelte tecniche mie, dentro la proposta approvata:
+- **Dove sta l'editor.** È una finestra aperta dal pulsante «Sulla mappa di Tokyo» nell'intestazione del Palazzo, che mostra
+  anche la finestra attuale, e non una sezione nella pagina. Da 1024 px la pagina del Palazzo sta in una schermata, e una
+  sezione in più l'avrebbe allungata.
+  - Da 1175 px in su (misurato a 1175, 1200, 1240, 1280, 1366) l'intestazione resta alta 170 px.
+  - Sotto i 1175 px le righe di chip vanno a capo una volta in più: l'intestazione è alta 222 px a 1024 e 1100 px, e 201 px a
+    1150. La pagina resta senza scorrimento (misurato a 1024×690). A 1024 px le due righe di chip erano già piene, a 7 px dal
+    margine, quindi qualunque comando nuovo nell'intestazione avrebbe aggiunto una riga.
+- **«Da un giorno in poi»** si aggiunge a «un giorno», «dal–al» e «sempre». È un dal–al senza fine, che il server accetta
+  comunque.
+- **I pin con lo stesso nome** si distinguono col posto («Passaggio — 1° di 2 dall'alto»). Le planimetrie native ne hanno più
+  d'uno.
+- **Eliminazioni.**
+  - Eliminare la planimetria porta via le sue regole.
+  - Eliminare il pin d'arrivo lascia la regola sulla planimetria intera.
+  - Reimportando la planimetria dal pacchetto, il pin reinserito con lo stesso uid torna nella regola, come già succede ai
+    passaggi.

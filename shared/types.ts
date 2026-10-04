@@ -1763,6 +1763,28 @@ export interface DungeonRiassuntoDto {
    *  Guida», «raccolto tutto (n/n)»: `palazziService.palazziCompletati`); null se non lo è o senza partita.
    *  Sulla mappa di Tokyo un Palazzo completato non c'è più, come nel gioco. */
   completato: string | null;
+  /** Dove si atterra toccando il Palazzo sulla mappa di Tokyo, per il giorno della partita (senza partita, o senza data: la
+   *  regola che vale sempre): la prima regola di `dungeon_atterraggio` che lo copre (2026-10-04). Null se nessuna lo copre. */
+  atterraggio: { mappa: string; spillo: number | null } | null;
+}
+
+/**
+ * Una regola di atterraggio di un Palazzo (2026-10-04): quando vale e dove si atterra toccandolo sulla mappa di Tokyo. Le regole
+ * si provano nell'ordine dell'elenco; vale la prima che copre il giorno della partita.
+ */
+export interface AtterraggioPalazzoDto {
+  /** Inizio, in MM-GG del calendario di gioco; null con `al` null = vale sempre (l'accesso standard). */
+  dal: string | null;
+  /** Fine compresa, in MM-GG; uguale a `dal` per un giorno solo; null = da `dal` in poi. */
+  al: string | null;
+  /** La planimetria del Palazzo dove si atterra (chiave pubblica, quella degli URL). */
+  mappa: string;
+  /** Il nome della planimetria, per l'elenco. */
+  mappaNome: string;
+  /** Il pin d'arrivo su cui centrarla, o null. */
+  spillo: number | null;
+  /** Il nome del pin d'arrivo, o null. */
+  spilloNome: string | null;
 }
 
 /** Pianta dell'area pubblicata da una guida: solo collegamento e credito; l'immagine si scarica nell'istanza al primo uso. */
@@ -1789,6 +1811,8 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
    *  planimetrie, 2026-10-04). Le planimetrie senza collezionabili ci sono lo stesso, perché è da qui che si
    *  ordinano, si legano e si cancellano. Vuoto per i Memento, che contano gli obiettivi dei dedali. */
   planimetrie: Array<{ chiave: string; nome: string; ordine: number; aree: Array<{ chiave: string; nome: string; ordine: number }>; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
+  /** Le regole di atterraggio dalla mappa di Tokyo, nell'ordine in cui si provano (2026-10-04). */
+  atterraggi: AtterraggioPalazzoDto[];
 }
 
 // ---- Calendario di gioco (Fase 6.3) ----

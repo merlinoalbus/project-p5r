@@ -17,7 +17,7 @@
 
 import { useMemo, useState } from 'react';
 import { DOTI_SOCIALI } from '../../../shared/doti';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_NEL_MESE, GIORNI_SETTIMANA, MESI_GIOCO, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataLeggibile, descriviRequisitoSpillo, nascondeIlPin, nomePalazzo, ordineGioco, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataLeggibile, descriviRequisitoSpillo, nascondeIlPin, nomePalazzo, ordineGioco, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizione, valorePredefinito, type CampoCondizione, type SceltaCondizione, type TipoCampo, type ValoriCondizione } from '../../../shared/statiPartita';
 import { useCarica } from '../../hooks/useCarica';
 import { useIdStabili } from '../../hooks/useIdStabili';
@@ -27,6 +27,7 @@ import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
 import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
 import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Selettore';
 import { IconaAzione } from '../shared/IconaAzione';
+import { SelettoreData } from '../shared/SelettoreData';
 
 /** La condizione con cui nasce una riga nuova: valida, e la più comune. */
 const NUOVA: RequisitoSpillo = { tipo: 'data', dal: '04-18' };
@@ -76,23 +77,6 @@ function valoriIniziali(campi: CampoCondizione[], e: Elenchi): ValoriCondizione 
     v[c.nome] = fisso === '' ? (opzioniPer(c.tipo, e)[0]?.chiave ?? '') : fisso;
   }
   return v;
-}
-
-/** Giorno e mese del calendario di gioco; i giorni offerti sono quelli del mese scelto (niente 31 aprile). */
-function SelettoreData({ etichetta, valore, onCambia, disabilitato }: { etichetta: string; valore: string; onCambia: (v: string) => void; disabilitato?: boolean }) {
-  const [mese, giorno] = valore.split('-');
-  const giorni = Array.from({ length: GIORNI_NEL_MESE[mese] ?? 31 }, (_, i) => String(i + 1).padStart(2, '0'));
-  /** Cambia il mese tenendo il giorno, ma lo riduce all'ultimo del nuovo mese se lo supera (31 marzo → 30 aprile). */
-  const cambiaMese = (nuovoMese: string) => {
-    const massimo = GIORNI_NEL_MESE[nuovoMese] ?? 31;
-    onCambia(`${nuovoMese}-${String(Math.min(Number(giorno), massimo)).padStart(2, '0')}`);
-  };
-  return (
-    <span className="condizione-data" role="group" aria-label={etichetta}>
-      <Selettore compatto ricerca="mai" etichetta={`${etichetta}: giorno`} valore={giorno} disabilitato={disabilitato} opzioni={giorni.map((g) => ({ chiave: g, nome: String(Number(g)) }))} onCambia={(g) => onCambia(`${mese}-${g}`)} />
-      <Selettore compatto ricerca="mai" etichetta={`${etichetta}: mese`} valore={mese} disabilitato={disabilitato} opzioni={MESI_GIOCO.map((m) => ({ chiave: m.numero, nome: m.nome }))} onCambia={cambiaMese} />
-    </span>
-  );
 }
 
 /** Un numero che si muove con più e meno: niente da digitare. */

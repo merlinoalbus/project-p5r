@@ -24,6 +24,7 @@ import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { eliminaImmaginiDeiPin, impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
 import { palazziCompletati } from './palazziService.js';
+import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma, VOCE_DEL_PIN, voceDelPin } from './mappe/collegamentiGuida.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
@@ -193,7 +194,15 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
     raccolta,
     // solo i Palazzi si completano: i Memento, una volta aperti, restano un posto dove andare
     completato: r.tipo === 'palazzo' ? completati?.get(r.chiave) ?? null : null,
+    // dove si atterra toccandolo sulla mappa di Tokyo, per il giorno della partita (2026-10-04)
+    atterraggio: atterraggioDelGiorno(r.chiave, giornoDellaPartita(partitaId)),
   };
+}
+
+/** Il giorno di gioco (MM-GG) della partita, o null senza partita o se la partita non ha ancora un giorno. */
+function giornoDellaPartita(partitaId: number | undefined): string | null {
+  if (partitaId === undefined) return null;
+  return (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco ?? null;
 }
 
 /** I riassunti di tutti i Palazzi e dei Memento in ordine di gioco; con la partita, anche stati, raccolta e completamento. */
@@ -268,7 +277,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
     dedalo: richieste ? dedaloDto(a, richieste.get(a.chiave) ?? [], timbri) : null,
   }));
   const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
-  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
+  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave) };
 }
 
 /**

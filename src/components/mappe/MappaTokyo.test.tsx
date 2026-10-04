@@ -43,4 +43,16 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
     expect(cartellino()).toBeNull();
     expect(screen.getByText('Palazzo di Kamoshida', { selector: 'span[title]' })).toHaveAttribute('title', 'completato: Tesoro del Palazzo raccolto');
   });
+
+  it('toccando il Palazzo si atterra dove dice la regola del giorno: planimetria e pin d’arrivo; senza regola la scheda (2026-10-04)', () => {
+    const kamoshida = { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', finestra: { dal: '04-11', al: '05-02' }, completato: null, atterraggio: null } as DungeonRiassuntoDto;
+    /** L'indirizzo del cartellino del Palazzo (l'unico link con la sua targa). */
+    const indirizzo = () => screen.getByRole('link', { name: /Palazzo di Kamoshida/ }).getAttribute('href');
+    const { rerender } = render(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[kamoshida]} dataGioco="04-11" /></MemoryRouter>);
+    expect(indirizzo()).toBe('/guida/mondo/dungeon/kamoshida');
+    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, atterraggio: { mappa: 'kamoshida/prigione', spillo: 42 } }]} dataGioco="04-11" /></MemoryRouter>);
+    expect(indirizzo()).toBe('/guida/mappe/kamoshida%2Fprigione?spillo=42');
+    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, atterraggio: { mappa: 'kamoshida/ingresso', spillo: null } }]} dataGioco="04-11" /></MemoryRouter>);
+    expect(indirizzo()).toBe('/guida/mappe/kamoshida%2Fingresso');
+  });
 });

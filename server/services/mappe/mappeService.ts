@@ -1544,6 +1544,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     /** Passaggi di pin che restano (di altre mappe o dell'utente) il cui spillo d'arrivo sta per essere tolto e reinserito: la DELETE
      *  azzera `spillo_arrivo_id` (ON DELETE SET NULL), quindi si ricollegano al pin reinserito con lo stesso uid. */
     const arriviDaRicollegare: Array<{ spilloId: number; mappa: string; uid: string }> = [];
+    /** Le regole d'atterraggio dei Palazzi (097) il cui pin d'arrivo sta per essere tolto e reinserito: stesso motivo, stesso rimedio. */
+    const atterraggiDaRicollegare: Array<{ id: number; uid: string }> = [];
+    const conAtterraggi = !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'dungeon_atterraggio'").get();
     const conUid = colonnaSpillo('uid');
     const areeDaLegare: Array<{ mappa: string; aree: string[]; fonte: string }> = [];
     // le voci della guida dei pin (094): da scrivere a genitori risolti; quelle dei pin tolti, per uid, per chi torna con lo stesso
@@ -1624,6 +1627,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         // la voce collegata dall'utente segue il pin reinserito con lo stesso uid, se il pacchetto non ne dice niente
         if (conVoce && prima?.uid && prima.voce_chiave) vociDiPrima.set(prima.uid, prima.voce_chiave);
         if (prima?.uid) for (const d of prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE spillo_arrivo_id = ?').all(id) as Array<{ spillo_id: number; mappa_chiave: string }>) arriviDaRicollegare.push({ spilloId: d.spillo_id, mappa: d.mappa_chiave, uid: prima.uid });
+        if (prima?.uid && conAtterraggi) for (const a of prepared('SELECT id FROM dungeon_atterraggio WHERE spillo_id = ?').pluck().all(id) as number[]) atterraggiDaRicollegare.push({ id: a, uid: prima.uid });
         for (const i of prepared('SELECT immagine_chiave FROM spillo_immagine WHERE spillo_id = ?').all(id) as Array<{ immagine_chiave: string | null }>) if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
         prepared('DELETE FROM spillo WHERE id = ?').run(id);
       }
@@ -1714,6 +1718,10 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     for (const a of arriviDaRicollegare) {
       const nuovo = prepared('SELECT id FROM spillo WHERE uid = ? AND mappa_chiave = ?').pluck().get(a.uid, a.mappa) as number | undefined;
       if (nuovo !== undefined) prepared('UPDATE spillo_destinazione SET spillo_arrivo_id = ? WHERE spillo_id = ? AND mappa_chiave = ? AND spillo_arrivo_id IS NULL').run(nuovo, a.spilloId, a.mappa);
+    }
+    for (const a of atterraggiDaRicollegare) {
+      const nuovo = prepared('SELECT s.id FROM spillo s JOIN dungeon_atterraggio d ON d.mappa_chiave = s.mappa_chiave WHERE d.id = ? AND s.uid = ?').pluck().get(a.id, a.uid) as number | undefined;
+      if (nuovo !== undefined) prepared('UPDATE dungeon_atterraggio SET spillo_id = ? WHERE id = ? AND spillo_id IS NULL').run(nuovo, a.id);
     }
     // le voci della guida, con le regole del collegamento dalla guida (`erroreVoceDelPin`): una che non regge si scarta e si conta
     for (const v of vociDaScrivere) {
