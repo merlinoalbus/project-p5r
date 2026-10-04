@@ -16,6 +16,7 @@ const { getRichieste, impostaStatoRichiesta } = vi.hoisted(() => ({ getRichieste
 vi.mock('../services/api', (vero) => moduloApi(vero, { getRichieste, impostaStatoRichiesta }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Una richiesta di Mishima nel dedalo dato (bersaglio Nakanohara, debole al Tuono), senza stato; `extra` sovrascrive i campi. */
 const ric = (chiave: string, nome: string, areaChiave: string, areaNome: string, extra: Partial<RichiestaDto> = {}): RichiestaDto => ({ chiave, nome, committente: 'Mishima', disponibileDal: '7 maggio', scadenza: '', area: areaNome, areaChiave, piano: 'Area 1', bersaglio: { nome: 'Nakanohara', livello: null, formaDemoniaca: 'Obariyon', debolezze: ['Tuono'], resistenze: [], vulnerabileConfusione: true }, areaNome, areaOrdine: 1, ricompense: ['485 PE'], confidente: null, note: '', fonte: 'https://www.allgamestaff.it/x', stato: null, ...extra });
 const dati: RichiesteDto = {
   dedali: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', ordine: 0, totale: 1, completate: 0 }, { chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', ordine: 1, totale: 1, completate: 0 }],
@@ -90,6 +91,7 @@ describe('RichiestePage', () => {
       ? new Promise<RichiestaDto>((ok) => { rispondiA = ok; })
       : Promise.resolve({ ...dati.richieste[1], stato: 'completata' })));
     render(<MemoryRouter><RichiestePage /></MemoryRouter>);
+    /** Le query limitate alla carta (voce d'elenco) della richiesta `nome`. */
     const carta = (nome: string) => within(screen.getByText(nome).closest('li')!);
     await screen.findByText('Un ex piuttosto appiccicoso');
     await act(async () => { fireEvent.click(carta('Un ex piuttosto appiccicoso').getByRole('button', { name: 'Completata' })); }); // in volo

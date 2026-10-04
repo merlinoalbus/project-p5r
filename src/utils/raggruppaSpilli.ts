@@ -150,6 +150,7 @@ export function raggruppaSpilli(visibili: SpilloDto[], inq: Inquadratura, opzion
       if (libera(base)) continue;
       // Il raggio arriva a 220 px e non a 96: su una tela stretta, ingrandendo, lo spazio vicino si
       // satura e novantasei pixel non bastavano — ed era proprio lì che si finiva nel ripiego.
+      /** Percorre la semiretta dal punto di base con l'angolo dato, un pixel alla volta fino a 220, e restituisce il primo punto ammesso (null se nessuno). */
       const lungo = (ang: number, ammessa: (p: Punto) => boolean) => {
         const u = { x: Math.cos(ang), y: Math.sin(ang) };
         for (let d = 0; d <= 220; d += 1) {

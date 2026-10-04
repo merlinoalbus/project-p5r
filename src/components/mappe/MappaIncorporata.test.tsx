@@ -21,6 +21,7 @@ vi.mock('../../hooks/useMappaPartita', () => ({
 vi.mock('../../utils/presentazioneMappa', () => ({ presentaMappa: (m: unknown) => m }));
 vi.mock('./VisoreMappa', () => ({ VisoreMappa: () => <div data-testid="visore">Visore</div> }));
 
+/** Disegna la mappa incorporata m-sala con le classi di riquadro «h-[300px] xl:flex-1» da passare al visore. */
 const monta = () => render(<MemoryRouter><MappaIncorporata chiave="m-sala" classeVisore="h-[300px] xl:flex-1" /></MemoryRouter>);
 
 beforeEach(() => { vi.clearAllMocks(); risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'm-sala' }); });

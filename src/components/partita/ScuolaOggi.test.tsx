@@ -14,6 +14,7 @@ import type { CruciverbaTuttiDto, DomandeDto, PartitaDto } from '../../types';
 const { getDomande, getCruciverba } = vi.hoisted(() => ({ getDomande: vi.fn(), getCruciverba: vi.fn() }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { getDomande, getCruciverba, getImmagini: vi.fn() }));
 
+/** Partita attiva «Prova» (id 1, difficoltà normale) alla data di gioco indicata, o senza data se null. */
 const partita = (dataGioco: string | null): PartitaDto => ({
   id: 1, nome: 'Prova', note: '', attiva: true, livelloProtagonista: 1, dataGioco, difficolta: 'normale',
   nuovaPartitaPlus: false, dlcPosseduti: [], allarmeAttivo: false, createdAt: '', updatedAt: '',

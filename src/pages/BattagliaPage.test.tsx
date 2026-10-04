@@ -14,6 +14,8 @@ import type { BattagliaDto, OmbraDto } from '../types';
 const { getBattaglia } = vi.hoisted(() => ({ getBattaglia: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { getBattaglia }));
 
+/** Costruisce un'Ombra del dungeon dato con Persona, debolezze e personalità, collegata alla Persona Bicorn; `extra`
+ *  sovrascrive i campi. */
 const ombra = (dungeonChiave: string, dungeon: string, ombra: string | null, persona: string, debolezze: string[], personalita: string | null, extra: Partial<OmbraDto> = {}): OmbraDto => ({ dungeonChiave, dungeon, area: null, areaChiave: null, ombra, persona, livello: null, debolezze, resistenze: [], personalita, fonte: 'https://www.allgamestaff.it/x', personaCollegata: { id: 3, nome: 'Bicorn', nomeIt: 'Bicorno' }, ...extra });
 const dati: BattagliaDto = {
   fonti: { principale: 'allgamestaff', note: '' },

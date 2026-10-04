@@ -58,6 +58,7 @@ describe('PercorsoPage', () => {
     expect(usePartitaStore.getState().attiva).toEqual(aggiornata);
   });
 
+  /** Monta la pagina del percorso su `/guida/percorso`, con anche la rotta del singolo giorno (`/guida/percorso/:data`). */
   const apri = () => render(<MemoryRouter initialEntries={['/guida/percorso']}><Routes><Route path="/guida/percorso" element={<PercorsoPage />} /><Route path="/guida/percorso/:data" element={<PercorsoPage />} /></Routes></MemoryRouter>);
 
   it('due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {

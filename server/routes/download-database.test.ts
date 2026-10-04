@@ -15,6 +15,7 @@ const stato = vi.hoisted(() => ({ percorso: '' }));
 const avvisi = vi.hoisted(() => [] as string[]);
 vi.mock('../middleware/requestContext.js', async (originale) => {
   const vero = await originale<typeof import('../middleware/requestContext.js')>();
+  /** Finto metodo di log: ignora l'oggetto di contesto e, se c'è un messaggio, lo accoda in `avvisi`. */
   const registra = (_o: unknown, messaggio?: string) => { if (messaggio) avvisi.push(messaggio); };
   const finto = { warn: registra, error: registra, info: () => {}, debug: () => {}, child: () => finto };
   return { ...vero, getRequestLogger: () => finto };

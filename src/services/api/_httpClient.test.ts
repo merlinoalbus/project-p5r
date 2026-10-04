@@ -7,6 +7,7 @@ import { ApiError, apiGet, apiPost, inviaFile, payloadDellaBusta } from './_help
 
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { useNotificationStore: { getState: () => ({ addNotification: vi.fn() }) } }));
 
+/** Una nuova risposta HTTP 500 con il corpo d'errore dell'API (`internal-error`); nuova a ogni chiamata, perché il corpo si legge una volta sola. */
 const risposta500 = () => new Response(JSON.stringify({ error: { code: 'internal-error', message: 'x' } }), { status: 500 });
 
 describe('httpFetch — tentativi', () => {

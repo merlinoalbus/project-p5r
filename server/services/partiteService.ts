@@ -43,6 +43,7 @@ function rigaPartita(id: number): RigaPartita {
 
 // ---- Partite ----
 
+/** Tutte le partite: prima quella attiva, poi le altre dalla modificata più di recente. */
 export function elencaPartite(): PartitaDto[] {
   return (prepared('SELECT * FROM partita ORDER BY attiva DESC, updated_at DESC').all() as RigaPartita[]).map(partitaDto);
 }

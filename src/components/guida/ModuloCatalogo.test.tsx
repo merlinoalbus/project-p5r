@@ -34,6 +34,7 @@ const negozioSeed: ElementoCatalogoDto = {
   dati: { nome: 'Untouchable', tipo: 'armi', luogo: 'Shibuya, retro', luogo_chiave: 'shibuya', sede_chiave: 'shibuya/untouchable', gestore: 'Munehisa Iwai', confidente_chiave: 'iwai', orari_json: '{"giorni":[],"fasce":["sera"],"chiusoConPioggia":false,"nota":null}', programma_punti_json: null, note: null },
 };
 
+/** La tessera (radio) con il nome dato dentro il gruppo di scelta con l'etichetta `gruppo`. */
 const tessera = (gruppo: string, nome: string | RegExp) => within(screen.getByRole('radiogroup', { name: gruppo })).getByRole('radio', { name: nome });
 
 describe('ModuloCatalogo', () => {

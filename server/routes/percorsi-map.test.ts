@@ -1,3 +1,7 @@
+// ============================================================
+// percorsi-map.test.ts — gerarchia delle mappe: chiave e asset derivati dagli antenati, rinomina e spostamento di un sottoalbero con pin, progressi e vecchie URL, collisioni e cicli rifiutati
+// ============================================================
+
 import request from 'supertest';
 import {createApp} from '../bootstrap.js';
 import {closeDb,prepared,getDb} from '../db/dbService.js';
@@ -5,6 +9,7 @@ import { regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 const app=createApp();
 beforeEach(()=>{dbDiProva();});afterEach(()=>closeDb());
+/** Crea una mappa di tipo area col nome dato sotto il genitore indicato, pretende il 201 e la restituisce. */
 const crea=async(nome:string,genitore:string)=>{const r=await request(app).post('/api/mappe').send({nome,tipo:'area',genitore});expect(r.status).toBe(201);return r.body.data;};
 it('deriva chiave e asset da tutta la gerarchia, preservando i nomi naturali',async()=>{
   const castello=await crea('Castello Imperiale','shibuya');const piano=await crea('Piano 0',castello.chiave);

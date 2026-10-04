@@ -40,6 +40,7 @@ describe('datiGuida', () => {
   });
 
   it('eliminare un\'area butta la copia in memoria: la battaglia non indica più quell\'area', () => {
+    /** Ombre della battaglia rilette a ogni chiamata, così da vedere l'effetto dell'eliminazione sulla copia in memoria. */
     const ombre = () => battaglia().ombre;
     const conArea = ombre().find((o) => o.areaChiave)!;
     expect(conArea).toBeDefined();

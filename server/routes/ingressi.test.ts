@@ -1,3 +1,7 @@
+// ============================================================
+// ingressi.test.ts — ingresso di un quartiere sulla mappa: salvataggio e validazione delle coordinate, rinomina e reseed, ripristino alla rimozione, trasporto nel pacchetto mappe
+// ============================================================
+
 import request from 'supertest';
 import {createApp} from '../bootstrap.js';
 import {closeDb,getDb} from '../db/dbService.js';

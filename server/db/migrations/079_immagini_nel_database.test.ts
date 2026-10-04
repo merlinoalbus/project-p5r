@@ -12,6 +12,7 @@ let radice = '';
 beforeEach(() => { radice = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-079-')); });
 afterEach(() => { closeDb(); fs.rmSync(radice, { recursive: true, force: true }); });
 
+/** Scrive il file di testo `rel` (percorso relativo) sotto la cartella temporanea della prova, creando le cartelle intermedie. */
 function scrivi(rel: string, contenuto: string): void {
   const p = path.join(radice, rel);
   fs.mkdirSync(path.dirname(p), { recursive: true });
@@ -51,6 +52,7 @@ it('aggiunge la colonna e assorbe i file delle righe, le famiglie del repository
   for (const r of db.prepare('SELECT ambito, chiave, nome_file, mime, byte, created_at FROM immagine').all() as Array<Record<string, unknown>>) suFile.prepare('INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at) VALUES (?, ?, ?, ?, ?, ?)').run(r.ambito, r.chiave, r.nome_file, r.mime, r.byte, r.created_at);
   const opzioni = { radici: [path.join(radice, 'dati', 'immagini'), path.join(radice, 'pacchetto', 'immagini')], dirAsset: path.join(radice, 'asset'), pacchetto: path.join(radice, 'pacchetto', 'gioco.db') };
   expect(assorbiImmagini(suFile, opzioni)).toEqual({ daDisco: 2, dalRepository: 3, dalPacchetto: 1, senzaContenuto: 1 });
+  /** Contenuto, tipo MIME e dimensione dichiarata dell'immagine (`ambito`, `chiave`) nel database su file `istanza.db`. */
   const leggi = (ambito: string, chiave: string) => suFile.prepare('SELECT contenuto, mime, byte FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as { contenuto: Buffer | null; mime: string; byte: number };
   expect(leggi('mappa', 'citta-yongen-jaya').contenuto?.toString()).toBe('pianta di yongen');
   expect(leggi('mappa', 'citta-shibuya').contenuto?.toString()).toBe('pianta di shibuya');

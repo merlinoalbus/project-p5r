@@ -7,6 +7,7 @@ import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
+/** Voci d'effetto della riga `chiave` della `tabella` indicata (libro, film, attività…), lette da `effetti_json` con `leggiVociEffetto`. */
 const effetti = (db: ReturnType<typeof initDb>, tabella: string, chiave: string) => leggiVociEffetto(db.prepare(`SELECT effetti_json FROM ${tabella} WHERE chiave = ?`).pluck().get(chiave) as string);
 
 it('converte dote+note, note successive, sblocca e le spiegazioni delle attività', () => {

@@ -36,6 +36,7 @@ const velluto: VellutoDto = {
   ],
 };
 
+/** Persona posseduta nella scorta ridotta ai soli campi che servono al pannello (id, Persona, nome, arcano, livello). */
 function posseduta(id: number, personaId: number, nome: string, arcana: string, arcanaNome: string, livello: number): PersonaPossedutaDto {
   return { id, personaId, nome, nomeIt: nome, arcana, arcanaNome, livello } as unknown as PersonaPossedutaDto;
 }

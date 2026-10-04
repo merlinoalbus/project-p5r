@@ -30,6 +30,7 @@ const reale: PersonaPossedutaDto = {
   osservate: { livello: 2, forza: 4, magia: 2, resistenza: 2, agilita: 4, fortuna: 1 }, origineStima: 'osservate', statisticheConfermate: true,
 };
 
+/** Disegna la scorta delle Persona della partita 7 dentro un router. */
 function monta() {
   render(<MemoryRouter><ScortaPersona partitaId={7} /></MemoryRouter>);
 }
@@ -94,6 +95,7 @@ describe('ScortaPersona — valori reali (15.26)', () => {
 
 describe('ScortaPersona — due gesti ravvicinati (B3", validazione voce 2)', () => {
   const pixie: PersonaPossedutaDto = { ...stimata, id: 3, personaId: 9, nome: 'Pixie', nomeIt: 'Pixie', arcana: 'Lovers', arcanaNome: 'Amanti', livello: 2 };
+  /** Copia della Persona posseduta `p` con il livello sostituito. */
   const conLivello = (p: PersonaPossedutaDto, livello: number): PersonaPossedutaDto => ({ ...p, livello });
   beforeEach(() => {
     for (const f of Object.values(api)) f.mockReset();

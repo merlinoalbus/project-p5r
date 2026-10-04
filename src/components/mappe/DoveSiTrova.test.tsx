@@ -37,6 +37,7 @@ vi.mock('./MappaIncorporata', () => ({
 
 const { DoveSiTrova } = await import('./DoveSiTrova');
 
+/** Destinazione sul mondo di prova (spillo 42 «Untouchable» sulla mappa di Shibuya, senza provenienze), con i campi di `p` che sovrascrivono i predefiniti. */
 function destinazione(p: Partial<DestinazioneMondoDto> = {}): DestinazioneMondoDto {
   return {
     mappa: 'citta-shibuya', nomeMappa: 'Shibuya', spillo: 42, nomeSpillo: 'Untouchable',
@@ -44,6 +45,7 @@ function destinazione(p: Partial<DestinazioneMondoDto> = {}): DestinazioneMondoD
   };
 }
 
+/** Fa rispondere `getAccessoMondo` con `risposta` e disegna «Dove si trova» per il negozio untouchable, con le props aggiuntive date. */
 function monta(risposta: AccessoMondoDto, props: Record<string, unknown> = {}) {
   getAccessoMondo.mockResolvedValue(risposta);
   return render(<MemoryRouter><DoveSiTrova tipo="negozio" chiave="untouchable" {...props} /></MemoryRouter>);

@@ -25,6 +25,7 @@ it('estende il CHECK, converte «Game show in TV» e aggiunge i quesiti dalle ri
   expect(indiciDomanda(db)).toEqual(['idx_domanda_chiave', 'idx_domanda_data']);
 });
 
+/** Nomi, in ordine alfabetico, degli indici espliciti della tabella `domanda` (esclusi quelli automatici, che non hanno `sql`). */
 const indiciDomanda = (db: ReturnType<typeof initDb>) => (db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'domanda' AND sql IS NOT NULL ORDER BY name").all() as Array<{ name: string }>).map((i) => i.name);
 
 it('nel pacchetto le undici domande del quiz sono «tv», nessuna resta «altro», ogni riga d’esame porta i quesiti', () => {

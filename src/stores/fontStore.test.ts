@@ -6,7 +6,9 @@
 import { regoleFontFace, useFontStore } from './fontStore';
 import type { FontDto } from '../types';
 
+/** Un font caricato per il ruolo dato, nel formato dato, con data di aggiornamento fissa e l'URL del suo file. */
 const presente = (ruolo: FontDto['ruolo'], formato: FontDto['formato']): FontDto => ({ ruolo, presente: true, formato, byte: 1000, aggiornato: '2026-09-04T05:00:00.000Z', url: `/api/font/${ruolo}/file` });
+/** Un ruolo senza font caricato: niente formato, data né URL. */
 const assente = (ruolo: FontDto['ruolo']): FontDto => ({ ruolo, presente: false, formato: null, byte: 0, aggiornato: null, url: null });
 
 describe('fontStore', () => {

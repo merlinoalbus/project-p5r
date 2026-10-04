@@ -1,3 +1,7 @@
+// ============================================================
+// organizzazioneMappe.test.ts — organizzazione geografica delle mappe e contenuti della guida collegati (conversioni, reseed, percorsi, accesso al mondo)
+// ============================================================
+
 import request from 'supertest';
 import { createApp } from '../../bootstrap.js';
 import { closeDb, initDb } from '../../db/dbService.js';

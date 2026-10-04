@@ -90,7 +90,7 @@ Regole:
 - Il tipo `passaggio` con `riferimento_tipo = 'mappa'` è il collegamento fra livelli (punti 6 e 8): il click apre la mappa di destinazione;
   la mappa figlia mostra il pulsante «Torna a <genitore>» e il percorso (breadcrumb) ricostruito con `genitore_chiave`.
 - Uno spillo di una voce della guida (`voce_chiave`, dalla 094; prima `riferimento_tipo = 'punto'`, che resta per gli elementi della guida
-  senza mappa — la regola unica è `VOCE_DEL_PIN` / `voceDelPin` in `mappe/voceDelPin.ts`, riesportata da `collegamentiGuida.ts`) eredita lo stato del punto di dungeon della partita (`stato_punto`: ottenuto/esaurito ⇒
+  senza mappa — la regola unica è `VOCE_DEL_PIN` / `voceDelPin` in `mappe/voceDelPin.ts`, riesportata da `collegamentiGuida.ts`) eredita lo stato del punto di dungeon della partita (`punto_partita`, in `partite.db`: ottenuto/esaurito ⇒
   raccolto) così i forzieri già gestiti nella Guida spariscono anche sulla mappa; gli spilli senza riferimento usano `spillo_partita`.
 - `riferimento_tipo = 'negozio'` ⇒ la scheda dello spillo mostra gli articoli del negozio (punto 5) con prezzo, disponibilità e stato
   d'acquisto della partita (già tracciato da `acquisto_partita`).
@@ -247,8 +247,9 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 - **Albero e passaggi** (15.24). L'albero dice chi contiene chi (percorso, «Su», elenco «Mappe figlie», esportazione per luogo); sulla mappa ci si
   sposta con gli spilli «passaggio» (riferimento a un'altra mappa), che sono porte disegnate sull'immagine. Le due cose restano distinte ma l'editor
   le tiene allineate: (1) «Nuova mappa» chiede se creare il passaggio sulla mappa genitore verso la nuova (preselezionato) e il passaggio di ritorno
-  nella nuova mappa (a scelta) — `POST /api/mappe` con `passaggio`/`ritorno`; la stessa finestra propone l'asset del repository «mappe/chiave»
-  (segue la chiave finché non lo si tocca; vuoto = nessun asset, 15.25); (2) nell'elenco «Mappe figlie» ogni figlia che nessuno spillo di
+  nella nuova mappa (a scelta) — `POST /api/mappe` con `passaggio`/`ritorno`; la chiave nasce dal nome, preceduta da quella del genitore (non
+  sotto la città). L'asset del repository non si sceglie più nella finestra: il server lo pone a «mappe/chiave»
+  (`assetPredefinitoMappa`, 15.25); (2) nell'elenco «Mappe figlie» ogni figlia che nessuno spillo di
   questa mappa raggiunge porta la riga «Senza passaggio da questa mappa» con il pulsante «Crea passaggio»; (3) sotto «Su: <genitore>», se nessuno
   spillo punta al genitore, «Crea passaggio di ritorno». Entrambi i pulsanti chiamano `POST /api/mappe/:chiave/passaggi` `{ destinazione }`: il
   server crea lo spillo «passaggio» col nome della destinazione nel punto libero più vicino al centro (o in basso al centro, 50/92, quando la
@@ -257,7 +258,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   destinazione, 400 verso sé stessa, 404 se la destinazione non esiste. I passaggi automatici del seed (radici Città/Palazzo/Dedalo, `sincronizzaMappe`)
   non cambiano.
 - La palette di «Aggiungi» è divisa nelle quattro categorie (Spostamento, Città, Consumabile, Informativo — `CATEGORIE_SPILLO` e `tipiDellaCategoria`), con i 42 tipi del registro (§4; fino al 2026-09-11 erano cinque gruppi `GRUPPI_SPILLO`).
-- Esporta (ZIP per luogo, JSON di tutto) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); nessuno stato «non salvato»: ogni modifica è salvata subito.
+- Esporta (tutte le mappe in un JSON; l'API accetta anche `radice` per un solo luogo, senza pulsante) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); nessuno stato «non salvato»: ogni modifica è salvata subito.
 
 ## 9. Integrazione (13.4) — sostituzione ordinata di Città, Palazzi e Dedali (punti 6, 7, 8)
 

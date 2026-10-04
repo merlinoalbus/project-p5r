@@ -18,7 +18,9 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 const PNG = Buffer.from('89504e470d0a1a0a0000000d4948445200000001000000010806000000', 'hex');
+/** Crea una partita col nome dato e ne restituisce l'id. */
 const nuovaPartita = async (nome: string) => (await request(app).post('/api/partite').send({ nome })).body.data.id as number;
+/** Conta le immagini salvate con ambito «spillo». */
 const immaginiSpillo = () => getDb().prepare("SELECT COUNT(*) FROM immagine WHERE ambito = 'spillo'").pluck().get() as number;
 
 describe('verifica mappe e guida', () => {
@@ -65,6 +67,7 @@ describe('verifica mappe e guida', () => {
 
   it('B2\': i semafori dei Confidenti vedono un evento segnato anche se la data della partita non cambia', async () => {
     const id = await nuovaPartita('Semafori');
+    /** Lo stato del requisito evento (il caffè al Leblanc) del semaforo del rango 3 di Sojiro nella partita. */
     const statoCaffe = () => confidenti(id).find((c) => c.chiave === 'sojiro')!.semafori.find((s) => s.rango === 3)!.requisiti.find((r) => r.tipo === 'evento')!.stato;
     expect(statoCaffe()).not.toBe('verde');
     const prima = getDb().prepare('SELECT updated_at FROM partita WHERE id = ?').pluck().get(id);
@@ -88,6 +91,7 @@ describe('verifica mappe e guida', () => {
     const partenza = creaMappa(undefined, { nome: 'Partenza B4', tipo: 'luogo' });
     const porta = creaSpillo(arrivo.chiave, { tipo: 'passaggio', nome: 'Porta B4', x: 40, y: 40 } as Parameters<typeof creaSpillo>[1]) as { id: number };
     const uscita = creaSpillo(partenza.chiave, { tipo: 'passaggio', nome: 'Uscita B4', x: 10, y: 10, destinazione: { mappa: arrivo.chiave, spillo: porta.id } } as Parameters<typeof creaSpillo>[1]) as { id: number };
+    /** L'id dello spillo d'arrivo che la destinazione dell'uscita di prova punta ora (null se non ne ha). */
     const arrivoDi = () => getDb().prepare('SELECT spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id = ?').pluck().get(uscita.id) as number | null;
     expect(arrivoDi()).toBe(porta.id);
     const pacchetto = esportaMappe(arrivo.chiave);

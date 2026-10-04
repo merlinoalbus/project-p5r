@@ -15,6 +15,7 @@ import type { AttivitaTutteDto, CruciverbaTuttiDto, DungeonDettaglioDto, Dungeon
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+/** Crea una partita coi dati indicati (nome, data, fascia…) e ne restituisce l'id. */
 const partita = async (dati: Record<string, unknown>) => ((await request(app).post('/api/partite').send(dati)).body.data as { id: number }).id;
 
 describe('voce 5 — il server legge i valori del catalogo', () => {

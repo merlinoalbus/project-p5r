@@ -1,3 +1,7 @@
+// ============================================================
+// tipiLuogo.test.ts — catalogo dei tipi di luogo: chiavi, spillo e colore derivati dagli spilli, riconoscimento e ordinamento
+// ============================================================
+
 import { TIPI_LUOGO, definizioneTipoLuogo, eTipoLuogo, ordinaTipiLuogo, spilloPerLuogo } from './tipiLuogo';
 import { DEFINIZIONI_SPILLO, TIPI_SPILLO } from './spilli';
 

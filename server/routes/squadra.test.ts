@@ -23,8 +23,11 @@ import type { PartitaDto, SquadraPartitaDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+/** Crea una partita col nome dato e ne restituisce l'id. */
 const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
+/** Legge la squadra della partita `id` (membri, denaro, esperienza). */
 const squadra = async (id: number) => (await request(app).get(`/api/partite/${id}/squadra`)).body.data as SquadraPartitaDto;
+/** Il membro della squadra con la chiave data. */
 const membro = (s: SquadraPartitaDto, chiave: string) => s.membri.find((m) => m.chiave === chiave)!;
 
 describe('API squadra — denaro ed esperienza', () => {

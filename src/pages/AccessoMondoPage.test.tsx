@@ -1,4 +1,8 @@
 /** @vitest-environment jsdom */
+// ============================================================
+// Test AccessoMondoPage — dall'entità della guida al pin sulla mappa: pin unico, scelta fra più destinazioni, catalogo di ripiego, risposte tardive, ingressi
+// ============================================================
+
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AccessoMondoPage } from './AccessoMondoPage';
@@ -10,9 +14,13 @@ const { getAccessoMondo } = vi.hoisted(() => ({ getAccessoMondo: vi.fn() }));
 // funzionare lo stesso — è il motivo per cui non passa da `PageState` e non blocca niente.
 vi.mock('../services/api', (vero) => moduloApi(vero, { getAccessoMondo, getAlberoMappe: vi.fn(async () => []) }));
 const destinazione: DestinazioneMondoDto = { mappa: 'shibuya', nomeMappa: 'Shibuya', spillo: 207, nomeSpillo: 'Untouchable', centro: null, provenienze: [] };
+/** Risposta dell'accesso dal mondo per il negozio «untouchable» con le destinazioni date; l'esito («assente», «unica»,
+ *  «multipla») segue dal loro numero. */
 const risposta = (destinazioni: DestinazioneMondoDto[]): AccessoMondoDto => ({ entita: { tipo: 'negozio', chiave: 'untouchable' }, esito: destinazioni.length === 0 ? 'assente' : destinazioni.length === 1 ? 'unica' : 'multipla', destinazioni });
+/** Pagina d'arrivo finta: mostra percorso e query dell'indirizzo corrente, per verificare dove ha portato la navigazione. */
 function Indirizzo() { const l = useLocation(); return <div data-testid="indirizzo">{l.pathname}{l.search}</div>; }
-function monta(url = '/guida/mondo/negozio/untouchable') {
+/** Monta la pagina sull'indirizzo `url` con un collegamento a un altro luogo e la rotta delle mappe che mostra `Indirizzo`. */
+function monta(url ='/guida/mondo/negozio/untouchable') {
   return render(<MemoryRouter initialEntries={[url]}><Link to="/guida/mondo/negozio/leblanc">Altro luogo</Link><Routes>
     <Route path="/guida/mondo/:tipo/:chiave" element={<AccessoMondoPage />} />
     <Route path="/guida/mappe/:chiave" element={<Indirizzo />} />

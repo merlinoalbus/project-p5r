@@ -16,6 +16,7 @@ const { getCompletamento, impostaTrofeo } = vi.hoisted(() => ({ getCompletamento
 vi.mock('../services/api', (vero) => moduloApi(vero, { getCompletamento, impostaTrofeo }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Costruisce un trofeo verificato, non ancora ottenuto, con chiave, nome e tipo dati. */
 const trofeo = (chiave: string, nome: string, tipo: TrofeoDto['tipo']): TrofeoDto => ({ chiave, nome, nomeEn: null, tipo, descrizione: 'Descrizione', come: 'Come si ottiene', mancabile: null, quando: null, fonte: 'https://www.allgamestaff.it/t', verificato: true, ottenuto: false });
 const dati: CompletamentoDto = {
   trofei: [trofeo('assedio', 'Assedio al castello della lussuria', 'bronzo'), trofeo('platino', 'Il ladro fantasma definitivo', 'platino')], ottenuti: 0,

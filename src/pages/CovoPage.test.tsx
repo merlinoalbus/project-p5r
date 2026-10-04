@@ -39,6 +39,8 @@ const covo = {
 };
 const dati = { covo } as unknown as CompletamentoDto;
 
+/** Monta la pagina del Covo con i dati di prova (o con i campi del Covo sostituiti da `sostituto`) e restituisce la
+ *  promessa del titolo «Covo dei Ladri», che si risolve quando la pagina è caricata. */
 function apri(sostituto?: Partial<typeof covo>) {
   getCompletamento.mockResolvedValue(sostituto ? ({ covo: { ...covo, ...sostituto } } as unknown as CompletamentoDto) : dati);
   render(<MemoryRouter><CovoPage /></MemoryRouter>);

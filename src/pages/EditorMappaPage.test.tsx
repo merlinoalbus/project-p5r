@@ -31,11 +31,13 @@ vi.mock('../services/api', (vero) => moduloApi(vero, {
   ]),
 }));
 
+/** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 const albero: MappaRiassuntoDto[] = [riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta' }), riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo' })];
 const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
 const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [] };
 
+/** Monta l'editor sulla mappa di Shibuya (`/guida/mappe/citta-shibuya/modifica`). */
 function monta() {
   render(
     <MemoryRouter initialEntries={['/guida/mappe/citta-shibuya/modifica']}>
@@ -411,6 +413,8 @@ it('il doppio tocco su uno spillo di spostamento apre la mappa d’arrivo, resta
   await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina', undefined));
 });
 
+/** Monta l'editor di Shibuya con un passaggio in uscita e un arrivo dalla banchina di Yongen-Jaya, apre la scheda
+ *  «Collegamenti» e restituisce le query limitate alla regione dei passaggi. */
 async function apriCollegamenti() {
   api.getMappa.mockResolvedValue({ ...base, spilli: [passaggio], arrivi: [{ spilloId: 21, tipo: 'treno', nome: 'Shibuya', mappa: 'yongen-banchina', mappaNome: 'Banchina di Yongen-Jaya' }] });
   monta();

@@ -15,7 +15,9 @@ import type { DungeonDettaglioDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+/** Chiave e ordine delle aree del Palazzo di Kamoshida, in ordine (a parità d'ordine, per chiave). */
 const aree = () => (prepared("SELECT chiave, ordine FROM dungeon_area WHERE dungeon_chiave = 'kamoshida' ORDER BY ordine, chiave").all() as Array<{ chiave: string; ordine: number }>);
+/** Crea un'area nel dungeon dato (di serie Kamoshida) col corpo indicato (restituisce la richiesta, per controllarne l'esito). */
 const crea = (corpo: Record<string, unknown>, dungeon = 'kamoshida') => request(app).post(`/api/compendio/dungeon/${dungeon}/aree`).send(corpo);
 
 describe('nuova area della guida', () => {

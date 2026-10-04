@@ -14,6 +14,7 @@ beforeEach(() => {
   usePreferenzeStore.setState({ menuRidotto: false });
 });
 
+/** Disegna la barra laterale dentro un router posizionato su /home. */
 const disegna = () => render(<MemoryRouter initialEntries={['/home']}><Sidebar /></MemoryRouter>);
 
 it('il pulsante riduce il menu alle icone e lo riapre; la scelta resta nelle preferenze del dispositivo', async () => {

@@ -13,6 +13,7 @@ import type { VoceEffetto } from '../../../shared/effettiCatalogo';
 vi.mock('./CondizioniEditor', () => ({ CondizioniEditor: () => <div>editor delle condizioni</div> }));
 vi.mock('./EditorEffetto', () => ({ EditorEffetto: () => null }));
 
+/** L'editor dentro uno stato vero: ogni modifica alle voci aggiorna lo stato e quindi il DOM, come nelle pagine. */
 function Prova({ iniziali }: { iniziali: VoceEffetto[] }) {
   const [voci, setVoci] = useState(iniziali);
   return <EditorEffetti voci={voci} onCambia={setVoci} />;

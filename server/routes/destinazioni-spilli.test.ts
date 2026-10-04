@@ -1,3 +1,7 @@
+// ============================================================
+// destinazioni-spilli.test.ts — destinazione «mappa + spillo» degli spostamenti: salvataggio, rinomina, eliminazione dell'arrivo, esportazione e importazione dei pacchetti
+// ============================================================
+
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
 import { initDb, closeDb, getDb } from '../db/dbService.js';
@@ -19,7 +23,9 @@ beforeEach(async () => {
   ingressoId = (await request(app).post('/api/mappe/arrivo/spilli').send({ tipo: 'porta', nome: 'Ingresso', x: 50, y: 90 })).body.data.id;
 });
 afterEach(() => closeDb());
+/** Crea sulla mappa «partenza» uno spillo «Attraversamento» (di serie un passaggio) con i campi aggiuntivi dati. */
 const crea = (extra: Record<string, unknown> = {}) => request(app).post('/api/mappe/partenza/spilli').send({ tipo: 'passaggio', nome: 'Attraversamento', x: 10, y: 20, ...extra });
+/** Rilegge la mappa «partenza» e restituisce lo spillo con quell'id. */
 const leggi = async (id: number) => (await request(app).get('/api/mappe/partenza')).body.data.spilli.find((s: { id: number }) => s.id === id);
 
 it('ogni tipo di spostamento accetta mappa e spillo di arrivo; il riferimento alla mappa si allinea; i nomi arrivano con lo spillo', async () => {

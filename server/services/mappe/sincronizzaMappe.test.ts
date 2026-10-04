@@ -125,6 +125,7 @@ describe('sincronizzaMappe: i passaggi automatici verso le mappe figlie di una r
     mappa.run('palazzo-dell-utente-sala', 'Sala', 'area', 'palazzo-dell-utente', 1, 'utente', t);
 
     sincronizzaMappe(db);
+    /** Chiavi delle mappe a cui portano gli spilli «passaggio» posti sulla mappa `radice`, in ordine alfabetico. */
     const verso = (radice: string) => (db.prepare("SELECT riferimento_chiave FROM spillo WHERE mappa_chiave = ? AND riferimento_tipo = 'mappa' AND tipo = 'passaggio' ORDER BY riferimento_chiave").all(radice) as Array<{ riferimento_chiave: string }>).map((r) => r.riferimento_chiave);
     expect(verso('palazzo-di-prova')).toEqual(['palazzo-di-prova-ingresso', 'palazzo-di-prova-torre']);
     expect(verso('palazzo-dell-utente')).toEqual([]);

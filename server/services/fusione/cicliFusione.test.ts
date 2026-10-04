@@ -10,6 +10,7 @@ import { prepared } from '../../db/dbService.js';
 import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
+/** Id della Persona col nome dato, letto dalla tabella `persona`. */
 function idDi(nome: string): number {
   return (prepared('SELECT id FROM persona WHERE nome = ?').get(nome) as { id: number }).id;
 }

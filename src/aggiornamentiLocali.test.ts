@@ -19,6 +19,7 @@ const VIETATI: Array<{ nome: string; re: RegExp }> = [
   { nome: 'imposta({ ...d, … }) con d presa dal render', re: /\bimposta\(\{\s*\.\.\.[A-Za-z_]\w*\s*[,}]/ },
 ];
 
+/** Percorre ricorsivamente `dir` e restituisce i percorsi dei file `.ts`/`.tsx` che non sono test (quelli da esaminare). */
 function* sorgenti(dir: string): Generator<string> {
   for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, f.name);

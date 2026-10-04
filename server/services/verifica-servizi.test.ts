@@ -71,8 +71,11 @@ describe('verifica servizi e DB', () => {
   });
 
   describe('C3: il database vivo si sostituisce atomicamente (installaDatabase)', () => {
+    /** Percorso del database «vivo» da sostituire, `atomico.db` nella cartella dati di prova. */
     const bersaglio = (): string => path.join(dataDir, 'atomico.db');
+    /** Scrive il testo in un file sorgente dal nome casuale nella cartella dati e ne restituisce il percorso. */
     const sorgente = (testo: string): string => { const p = path.join(dataDir, `sorgente-${Math.random().toString(36).slice(2)}.db`); fs.writeFileSync(p, testo); return p; };
+    /** File temporanei `atomico.db.nuovo…` rimasti nella cartella dati: le prove controllano che una sostituzione non ne lasci in giro. */
     const nuoviRimasti = (): string[] => fs.readdirSync(dataDir).filter((f) => f.startsWith('atomico.db.nuovo'));
     beforeEach(() => {
       fs.writeFileSync(bersaglio(), 'contenuto originale');

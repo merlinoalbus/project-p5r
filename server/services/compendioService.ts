@@ -121,6 +121,7 @@ function ricettaDto(risultatoId: number): RicettaSpecialeDto {
 
 // ---- Arcani, glossario, regole ----
 
+/** Gli arcani nell'ordine di gioco, con numero e nome italiano. */
 export function elencaArcani(): ArcanaDto[] {
   return (prepared('SELECT chiave, ordine, numero FROM arcana ORDER BY ordine').all() as Array<{ chiave: string; ordine: number; numero: number | null }>)
     .map((a) => ({ ...a, nome: t('arcana', a.chiave) }));
@@ -329,6 +330,10 @@ export function dettaglioSkill(id: number): SkillDettaglioDto {
 
 // ---- Oggetti, Confidenti ----
 
+/**
+ * Gli oggetti del compendio con le rese italiane di nome, categoria, vincolo e descrizione, ordinati per categoria e nome.
+ * Filtri facoltativi: la categoria (in SQL) e un testo cercato su nome e nome italiano (dopo la traduzione).
+ */
 export function elencaOggetti(f: { q?: string; categoria?: string } = {}): OggettoDto[] {
   const cond: string[] = [];
   const par: unknown[] = [];

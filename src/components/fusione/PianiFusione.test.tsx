@@ -16,12 +16,14 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, {
   
 }));
 
+/** Riassunto di una Persona del compendio con nome italiano uguale al nome, arcano già tradotto e statistiche a 1. */
 function persona(id: number, nome: string, arcana: string, livello: number): PersonaRiassuntoDto {
   return {
     id, nome, nomeIt: nome, arcana, arcanaNome: arcana, livello, eredita: null, ereditaNome: null, speciale: false, rara: false, dlc: false, richiedeConfidenteMax: false,
     tratto: '', statistiche: { forza: 1, magia: 1, resistenza: 1, agilita: 1, fortuna: 1 }, affinita: [],
   };
 }
+/** Riduce un riassunto di Persona alla forma usata nelle ricette di fusione (sempre non speciale, non rara, non DLC). */
 const fus = (p: PersonaRiassuntoDto): PersonaFusioneDto => ({ id: p.id, nome: p.nome, nomeIt: p.nomeIt, arcana: p.arcana, arcanaNome: p.arcanaNome, livello: p.livello, speciale: false, rara: false, dlc: false });
 const jack = persona(88, 'Jack Frost', 'Mago', 11);
 const succube = persona(10, 'Succube', 'Diavolo', 7);

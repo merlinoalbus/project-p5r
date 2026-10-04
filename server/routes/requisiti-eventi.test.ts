@@ -23,9 +23,13 @@ describe('Requisiti dei Confidenti come eventi della partita', () => {
   });
   afterAll(() => closeDb());
 
+  /** Il Confidente con la chiave data, con lo stato della partita di prova. */
   const confidente = async (chiave: string) => ((await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[]).find((c) => c.chiave === chiave)!;
+  /** I progressi della partita di prova (eventi, attività, negozi…). */
   const progressi = async () => (await request(app).get(`/api/condizioni/partite/${id}/progressi`)).body.data as ProgressiPartitaDto;
+  /** Segna come avvenuto (o non avvenuto) l'evento nella partita di prova (restituisce la richiesta, per controllarne l'esito). */
   const segnaEvento = (evento: string, avvenuto: boolean) => request(app).put(`/api/condizioni/partite/${id}/eventi/${evento}`).send({ avvenuto });
+  /** Il requisito di tipo evento del semaforo del rango 3 del Confidente (per Sojiro, il caffè al Leblanc). */
   const caffe = (c: ConfidentePartitaDto) => c.semafori.find((s) => s.rango === 3)!.requisiti.find((r) => r.tipo === 'evento')!;
 
   it('il caffè al Leblanc: da segnare e bloccante, e in Progressi dice a che cosa serve', async () => {

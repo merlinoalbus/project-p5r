@@ -29,6 +29,8 @@ const INGRANDIMENTI = [1, 1.5, 3, 8];
 
 interface Riga { chiave: string; larghezza: number; altezza: number }
 
+/** Legge dal DB del pacchetto gli spilli della mappa (id, nome, tipo, posizione, in ordine di id) e li completa in
+ *  `SpilloDto` con valori neutri: al raggruppamento servono solo posizione e identità. */
 function spilliDi(db: Database.Database, mappa: string): SpilloDto[] {
   const righe = db.prepare('SELECT id, nome, tipo, x, y FROM spillo WHERE mappa_chiave = ? ORDER BY id').all(mappa) as { id: number; nome: string; tipo: string; x: number; y: number }[];
   return righe.map((r) => ({
@@ -40,6 +42,7 @@ function spilliDi(db: Database.Database, mappa: string): SpilloDto[] {
 
 /** Il centro del bersaglio di ogni cosa resa: la goccia è ancorata alla punta, la pastiglia no. */
 function centriResi(singoli: SpilloDto[], gruppi: Gruppo[], inq: { pan: { x: number; y: number }; zoom: number; nat: { w: number; h: number } }) {
+  /** Porta una posizione in percentuale della pianta in pixel di schermo: frazione della misura naturale, per lo zoom, più il pan. */
   const perSchermo = (x: number, y: number) => ({ x: inq.pan.x + (x / 100) * inq.nat.w * inq.zoom, y: inq.pan.y + (y / 100) * inq.nat.h * inq.zoom });
   const out = singoli.map((s) => { const p = perSchermo(s.x, s.y); return { chi: s.nome, x: p.x, y: p.y - ALTEZZA_GOCCIA / 2 }; });
   for (const g of gruppi) {

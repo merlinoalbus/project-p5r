@@ -5,6 +5,7 @@
 import { migrations } from './index.js';
 import { migrazioniUtente } from '../migrazioniUtente/index.js';
 
+/** Verifica che la sequenza di migrazioni `nome` abbia id senza ripetizioni, consecutivi da 1 nell'ordine dell'elenco, e ogni migrazione un nome non vuoto. */
 function verificaSequenza(lista: Array<{ id: number; name: string }>, nome: string): void {
   const id = lista.map((m) => m.id);
   expect(new Set(id).size, `${nome}: id ripetuti`).toBe(id.length);

@@ -11,12 +11,14 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
+/** Cerca nel compendio la Persona con quel nome esatto e ne restituisce l'id; se manca, lancia un errore. */
 async function idDi(nome: string): Promise<number> {
   const lista = (await request(app).get(`/api/compendio/persona?q=${encodeURIComponent(nome)}`)).body.data as PersonaRiassuntoDto[];
   const p = lista.find((x) => x.nome === nome);
   if (!p) throw new Error(`Persona ${nome} non trovata`);
   return p.id;
 }
+/** Le foglie dell'albero di un piano: scende ricorsivamente nei nodi di fusione e restituisce i nodi che non lo sono. */
 function foglie(n: NodoPianoDto): NodoPianoDto[] {
   return n.modo === 'fusione' ? n.figli.flatMap(foglie) : [n];
 }
@@ -28,7 +30,9 @@ describe('API piani salvati', () => {
   afterAll(() => closeDb());
 
   it('avanzamentoPiano: foglie, fusioni fatte, passi eseguibili e completamento', () => {
+    /** Una Persona fittizia del Matto, livello 1, con l'id e il nome dati. */
     const p = (id: number, nome: string): NodoPianoDto['persona'] => ({ id, nome, nomeIt: nome, arcana: 'Fool', arcanaNome: 'Matto', livello: 1, speciale: false, rara: false, dlc: false });
+    /** Un nodo foglia del piano (Persona fittizia «F<id>» ottenuta per cattura, senza figli). */
     const foglia = (id: number): NodoPianoDto => ({ persona: p(id, `F${id}`), modo: 'cattura', costo: 0, figli: [], skillPortate: [], skillDaLivello: [] });
     const albero: NodoPianoDto = {
       persona: p(100, 'Bersaglio'), modo: 'fusione', costo: 0, tipo: 'normale', skillPortate: [], skillDaLivello: [],

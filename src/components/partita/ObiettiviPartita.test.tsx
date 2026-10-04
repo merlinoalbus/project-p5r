@@ -18,11 +18,13 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, { getObiettivi, aggiorna
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../shared/ImmagineEntita', () => ({ ImmagineEntita: () => null }));
 
+/** Riassunto di una skill di Fuoco da 4 PS con il nome italiano uguale al nome. */
 function skill(id: number, nome: string): SkillRiassuntoDto {
   return { id, nome, nomeIt: nome, elemento: 'fire', elementoNome: 'Fuoco', costo: { tipo: 'sp', valore: 4, testo: '4 PS' }, effetto: '', effettoNome: '' } as unknown as SkillRiassuntoDto;
 }
 const agi = skill(1, 'Agi');
 const dia = skill(2, 'Dia');
+/** Obiettivo aperto con l'id dato: Jack Frost al livello 15 con Agi e Dia, entrambe ancora mancanti, con i campi di `extra` che sovrascrivono i predefiniti. */
 function ob(id: number, extra: Partial<ObiettivoDto>): ObiettivoDto {
   return {
     id, personaId: 88, nome: 'Jack Frost', nomeIt: 'Jack Frost', arcana: 'Magician', arcanaNome: 'Mago', livelloBase: 11, speciale: false, rara: false, dlc: false,
@@ -66,13 +68,16 @@ describe('ObiettiviPartita', () => {
 });
 
 describe('ObiettiviPartita — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  /** Un obiettivo nuovo (id 1) su Jack Frost, con i valori predefiniti. */
   const jack = () => ob(1, {});
+  /** Un obiettivo nuovo (id 2) su Pixie, per il resto uguale a quello di Jack Frost. */
   const pixie = () => ob(2, { personaId: 3, nome: 'Pixie', nomeIt: 'Pixie' });
   beforeEach(() => {
     getObiettivi.mockReset(); aggiornaObiettivo.mockReset(); eliminaObiettivo.mockReset();
     vi.spyOn(window, 'confirm').mockReturnValue(true);
   });
   afterEach(() => vi.restoreAllMocks());
+  /** La voce d'elenco il cui testo contiene il nome dato (si assume che esista). */
   const voce = (nome: string) => screen.getAllByRole('listitem').find((li) => li.textContent?.includes(nome))!;
 
   it('cambio di stato: la risposta di Jack Frost arrivata dopo quella di Pixie non riapre Pixie', async () => {

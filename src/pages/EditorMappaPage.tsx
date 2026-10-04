@@ -584,7 +584,8 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
   const [tipo, setTipo] = useState<TipoMappa>(genitore.tipo === 'palazzo' || genitore.tipo === 'dedalo' || genitore.tipo === 'area' ? 'area' : genitore.tipo === 'citta' ? 'quartiere' : 'luogo');
   const [passaggio, setPassaggio] = useState(true);
   const [ritorno, setRitorno] = useState(false);
-  // la chiave nasce dal nome, preceduta da quella del genitore (non sotto la città): unica e valida per abilitare «Crea»
+  // la chiave nasce dal nome, preceduta da quella del genitore (non sotto la città): unica e valida per abilitare «Crea»;
+  // l'asset del repository non si chiede: lo pone il server, «mappe/<chiave>» (`assetPredefinitoMappa`)
   const chiaveEffettiva = (genitore.tipo==='citta'?'':genitore.chiave+'-')+slug(nome);
   const esiste = albero.some((m) => m.chiave === chiaveEffettiva);
   const valida = /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiaveEffettiva) && !esiste && nome.trim().length > 0;

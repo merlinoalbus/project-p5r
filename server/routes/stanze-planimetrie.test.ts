@@ -18,6 +18,7 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 const app = createApp();
 
 type Gruppo = { id: string; nome: string; ordine: number; etichetta?: string; nomeRivisto?: boolean };
+/** Il gruppo di immagini (la stanza) salvato nella presentazione della planimetria, o null se non ne ha. */
 const gruppo = (mappa: string): Gruppo | null => {
   const r = prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(mappa) as { gruppo_immagini_json: string | null } | undefined;
   return r?.gruppo_immagini_json ? JSON.parse(r.gruppo_immagini_json) as Gruppo : null;

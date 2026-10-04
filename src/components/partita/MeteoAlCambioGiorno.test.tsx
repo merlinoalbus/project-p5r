@@ -17,6 +17,7 @@ const notifica = vi.hoisted(() => vi.fn());
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 vi.mock('../../stores/suggerimentiStore', () => ({ useSuggerimentiStore: { getState: () => ({ invalida: vi.fn() }) } }));
 
+/** Partita «Prova» (id 4 per default) alla data di gioco indicata, di giorno e senza meteo impostato. */
 const partita = (dataGioco: string, id = 4) => ({ id, nome: 'Prova', dataGioco, fasciaGioco: 'giorno', meteoOra: null } as unknown as PartitaDto);
 const meteo: MeteoGiornoDto = {
   dataGioco: '04-13', testoGuida: 'Nuvoloso',

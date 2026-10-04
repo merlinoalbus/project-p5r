@@ -10,6 +10,7 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
+/** Cerca nel compendio la Persona con quel nome esatto e ne restituisce l'id; se manca, lancia un errore. */
 async function idDi(nome: string): Promise<number> {
   const lista = (await request(app).get(`/api/compendio/persona?q=${encodeURIComponent(nome)}`)).body.data as PersonaRiassuntoDto[];
   const p = lista.find((x) => x.nome === nome);
@@ -108,6 +109,7 @@ describe('API fusione', () => {
     expect(conPartita.opzioni.livelloMax).toBe(12);
     for (const piano of conPartita.piani) {
       expect(piano.costo).toBeGreaterThanOrEqual(0);
+      /** Visita ricorsivamente l'albero del piano: ogni fusione entro il livello 12 e nessun nodo ottenuto per cattura. */
       const controlla = (n: PianiFusioneDto['piani'][number]['radice']) => {
         if (n.modo === 'fusione') expect(n.persona.livello).toBeLessThanOrEqual(12);
         expect(n.modo).not.toBe('cattura');

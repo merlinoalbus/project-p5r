@@ -1296,6 +1296,7 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
 
 // ---- Immagini degli spilli (schermate di riferimento) ----
 
+/** La riga di uno spillo per id; 404 «spillo-non-trovato» se non esiste. */
 function rigaSpillo(id: number): RigaSpillo {
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);

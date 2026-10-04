@@ -15,6 +15,7 @@ const { getCalendario, aggiornaPartita } = vi.hoisted(() => ({ getCalendario: vi
 vi.mock('../services/api', (vero) => moduloApi(vero, { getCalendario, aggiornaPartita }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Costruisce un giorno del calendario (sereno, senza eventi, settimana 4) con data e giorno della settimana dati. */
 const giorno = (data: string, gs: string, extra: Partial<GiornoCalendarioDto> = {}): GiornoCalendarioDto => ({ data, giornoSettimana: gs, meteo: 'Sereno', eventi: [], tempoLibero: null, settimana: 4, ...extra });
 const dati: CalendarioDto = {
   giorni: [

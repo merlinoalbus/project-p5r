@@ -11,6 +11,7 @@ let dir = '';
 beforeEach(() => { dir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-zip-')); });
 afterEach(() => { fs.rmSync(dir, { recursive: true, force: true }); });
 
+/** Estrae la voce `nome` dell'archivio `zip` in un file dal nome casuale nella cartella di prova e ne restituisce il contenuto. */
 async function estraiTesto(zip: string, nome: string): Promise<Buffer> {
   const voce = (await leggiIndiceZip(zip)).find((v) => v.nome === nome)!;
   const fuori = path.join(dir, `estratto-${Math.random().toString(36).slice(2)}`);

@@ -102,6 +102,7 @@ function ricetteDi(r: Ricerca, p: PersonaFusione): RicettaFusione[] {
 
 // ---- Propagazione delle skill a catena ----
 
+/** Le skill che p ha al suo livello base (innate più apprese fino a lì): calcolate una volta per Persona e tenute nella cache della ricerca. */
 function innateDi(r: Ricerca, p: PersonaFusione): SkillEredita[] {
   let s = r.innate.get(p.id);
   if (!s) { s = skillAlLivello(p.id, p.livello); r.innate.set(p.id, s); }

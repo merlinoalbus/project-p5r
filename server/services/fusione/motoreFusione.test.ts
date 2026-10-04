@@ -9,6 +9,7 @@ import {
 } from './motoreFusione.js';
 
 
+/** Persona ammessa nel contesto di fusione col nome dato; se non c'è lancia un errore, così la prova fallisce subito. */
 function perNome(ctx: Contesto, nome: string): PersonaFusione {
   const p = ctx.ammesse.find((x) => x.nome === nome);
   if (!p) throw new Error(`Persona ${nome} non ammessa nel contesto`);

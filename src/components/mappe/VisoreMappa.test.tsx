@@ -11,6 +11,7 @@ import { VisoreMappa } from './VisoreMappa';
 import * as inquadratura from '../../utils/inquadraturaMappa';
 import type { MappaDto, SpilloDto } from '../../types';
 
+/** Spillo seed al centro della mappa di Shibuya, con id, nome e tipo obbligatori (il nome del tipo ripete il tipo) e gli altri campi di `extra`. */
 function spillo(extra: Partial<SpilloDto> & { id: number; nome: string; tipo: SpilloDto['tipo'] }): SpilloDto {
   return { mappaChiave: 'citta-shibuya', tipoNome: extra.tipo, colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '2026-09-04T00:00:00.000Z', ...extra };
 }
@@ -31,6 +32,7 @@ const mappa: MappaDto = {
   ],
 };
 
+/** Disegna il visore sulla mappa di Shibuya per la partita 7, con le props di `extra`, e restituisce i mock di navigazione, raccolta, stato del punto e acquisto. */
 function monta(extra: Partial<Parameters<typeof VisoreMappa>[0]> = {}) {
   const onNaviga = vi.fn();
   const onRaccolto = vi.fn().mockResolvedValue(undefined);
@@ -225,6 +227,7 @@ it('centra il punto iniziale con lo zoom configurato senza selezionare un pin',a
 it('A4 (verifica 2026-10-03): ridimensionare la finestra non annulla lo zoom fatto a mano dopo l’inquadratura iniziale', async () => {
   let tela = { width: 1000, height: 500 };
   const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(() => ({ ...tela, left: 0, top: 0, right: tela.width, bottom: tela.height, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect);
+  /** Il fattore di scala attuale, letto dal `scale(…)` nella trasformazione del livello della mappa. */
   const scala = () => Number(/scale\(([-.\d]+)\)/.exec((document.querySelector('.visore-mappa__livello') as HTMLElement).style.transform)?.[1]);
   try {
     monta({ puntoIniziale: { x: 20, y: 80, zoom: 2.5 } });
@@ -334,12 +337,17 @@ describe('apertura del gruppo di spilli', () => {
 // spillo. Senza, a 768 e 1280 l'intestazione e il tasto di chiusura finivano fuori dal ritaglio
 // (rilievo del validatore, 2026-09-13).
 describe('l’elenco del gruppo resta dentro la tela', () => {
+  /** La mappa con due sole note quasi sovrapposte attorno al punto (x, y), che il visore raccoglie in un gruppo. */
   const conGruppoIn = (x: number, y: number): MappaDto => ({
     ...mappa, numeroSpilli: 2, spilli: [
       spillo({ id: 31, nome: 'Uno', tipo: 'nota', tipoNome: 'Nota', x, y }),
       spillo({ id: 32, nome: 'Due', tipo: 'nota', tipoNome: 'Nota', x: x + 0.2, y }),
     ],
   });
+  /**
+   * Ridisegna da capo il visore su `m` con una tela finta di 1000×500, attende l'inquadratura misurata (scala 0,864),
+   * apre l'elenco del gruppo e ne restituisce classe e trasformazione; la misura finta si ripristina sempre.
+   */
   const conTela = async (m: MappaDto) => {
     cleanup();
     const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 1000, height: 500, left: 0, top: 0, right: 1000, bottom: 500, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
@@ -382,6 +390,7 @@ describe('chiusura dell’elenco del gruppo', () => {
       spillo({ id: 42, nome: 'Beta', tipo: 'nota', tipoNome: 'Nota', x: 50, y: 50 }),
     ],
   };
+  /** Disegna il visore con i due spilli vicinissimi, clicca il gruppo e controlla che si apra l'elenco «2 spilli vicini». */
   const apri = () => {
     render(<MemoryRouter><VisoreMappa mappa={vicinissimi} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: /spilli vicini/ }));
@@ -439,10 +448,15 @@ it('con molte voci l’elenco si limita allo spazio della tela e le voci scorron
 
 // Tre casi che il tetto dell'elenco deve rispettare, e che sfuggivano al primo tentativo.
 describe('l’elenco del gruppo e lo spazio che ha davvero', () => {
+  /** La mappa con `n` note in fila a 0,05 punti percentuali l'una dall'altra, tutte in un unico gruppo. */
   const molti = (n: number): MappaDto => ({
     ...mappa, numeroSpilli: n,
     spilli: Array.from({ length: n }, (_, i) => spillo({ id: 200 + i, nome: `Spillo ${i + 1}`, tipo: 'nota', tipoNome: 'Nota', x: 50 + i * 0.05, y: 50 })),
   });
+  /**
+   * Ridisegna il visore su `m` con una tela finta delle dimensioni date e un `matchMedia` che risponde `stretto`,
+   * apre l'elenco del gruppo e restituisce la finestra e la sua lista di voci; misura e `matchMedia` si ripristinano sempre.
+   */
   const apri = async (m: MappaDto, tela: { w: number; h: number }, stretto = false) => {
     cleanup();
     const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: tela.w, height: tela.h, left: 0, top: 0, right: tela.w, bottom: tela.h, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
@@ -511,7 +525,9 @@ function distanzaDalPin(container: HTMLElement): number {
   const t = /translate\(([-.\d]+)px, ([-.\d]+)px\) scale\(([-.\d]+)\)/.exec(liv.style.transform)!;
   const [, panX, panY, z] = t.slice(0).map(String);
   const zoom = Number(z);
+  /** La posizione percentuale di un elemento sulla mappa, letta dai suoi `left`/`top` in linea. */
   const perc = (el: HTMLElement) => ({ x: Number(el.style.left.replace('%', '')), y: Number(el.style.top.replace('%', '')) });
+  /** Converte una posizione percentuale sulla mappa (1000×500) in pixel sullo schermo, applicando spostamento e zoom correnti. */
   const schermo = (p: { x: number; y: number }) => ({ x: Number(panX) + (p.x / 100) * 1000 * zoom, y: Number(panY) + (p.y / 100) * 500 * zoom });
   const pin = container.querySelector('.spillo-mappa--selezionato:not(.spillo-mappa--gruppo)') as HTMLElement;
   const pastiglia = container.querySelector('.spillo-mappa--gruppo') as HTMLElement;
@@ -561,6 +577,7 @@ describe('la pastiglia scostata guarda anche i vicini, e non sfarfalla', () => {
       return { gruppo, x: Number(panX) + (x / 100) * 1000 * zoom + dx, y: Number(panY) + (y / 100) * 500 * zoom + dy - (gruppo ? 0 : 19) };
     });
   };
+  /** Esegue `f` con una tela finta di 900×700 e ne restituisce il risultato, ripristinando sempre la misura vera. */
   const conTela = <T,>(f: () => T): T => {
     const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 900, height: 700, left: 0, top: 0, right: 900, bottom: 700, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
     try { return f(); } finally { misura.mockRestore(); }
@@ -719,6 +736,7 @@ describe('il popup dello spillo si misura (094: uno spostamento di una voce ha a
     vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) { return this.classList.contains('spillo-popup') ? 238 : 0; });
   });
   afterEach(() => vi.restoreAllMocks());
+  /** Imposta le dimensioni della tela finta, disegna il visore col solo passaggio «Torre Inferiore» per la partita 7, lo clicca e attende il suo popup. */
   const apri = async (dimensioni: { w: number; h: number }) => {
     tela = dimensioni;
     render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);

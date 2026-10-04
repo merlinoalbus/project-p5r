@@ -22,10 +22,15 @@ vi.mock('../components/mappe/CollegamentoMappa', () => ({ CollegamentoMappa: () 
 vi.mock('../components/shared/ImmagineEntita', () => ({ ImmagineEntita: () => <div>Immagine</div> }));
 vi.mock('../components/guida/EmblemaDungeon', () => ({ EmblemaDungeon: () => null }));
 
+/** Uno spillo forziere con id e stato di raccolta dati (`null` = senza partita). */
 const spillo = (id: number, raccolto: boolean | null) => ({ id, uid: `u${id}`, tipo: 'forziere', nome: 'Forziere', colore: '#eab308', raccolto });
+/** Un'area del dungeon («Cancello», k-01, senza mappe né voci) con i campi di `extra` sovrascritti. */
 const area = (extra: Partial<AreaDungeonDto>): AreaDungeonDto => ({
   chiave: 'k-01', ordine: 0, nome: 'Cancello', descrizione: '', mappa: false, mappe: [], punti: [], dedalo: null, ...extra,
 });
+/** Il Palazzo di Kamoshida di prova: tre aree (Cancello con una sicura e una planimetria di 2 forzieri, Torre, Cortile)
+ *  e due planimetrie (Cancello e Torre). Con `partita` i conteggi e gli spilli portano lo stato della partita (1 preso
+ *  su 4), senza restano `null`. */
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
@@ -40,6 +45,8 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
     { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', ordine: 1, aree: [], n: 2, presi: partita ? 0 : null, spilli: [spillo(3, partita ? false : null), spillo(4, partita ? false : null)] },
   ],
 });
+/** Il Memento di prova: due Dedali, Aiyatsbus con timbri (1 su 8), una richiesta aperta e un boss, e Qimranut senza
+ *  timbri dichiarati; nessuna planimetria, 1 obiettivo su 9 raccolto. */
 const mementos = (): DungeonDettaglioDto => ({
   ...palazzo(true), chiave: 'mementos', tipo: 'mementos', nome: 'Memento', raccolta: { totale: 9, presi: 1, mappe: 2, mappeComplete: 0 }, planimetrie: [],
   aree: [
@@ -48,6 +55,7 @@ const mementos = (): DungeonDettaglioDto => ({
   ],
 });
 
+/** Monta la scheda del dungeon `chiave` sulla sua rotta `/guida/dungeon/:chiave`. */
 const monta = (chiave: string) => render(<MemoryRouter initialEntries={[`/guida/dungeon/${chiave}`]}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
 
 // reset, non clear: le risposte «una volta» non consumate da un test non devono passare al successivo
@@ -151,6 +159,8 @@ it('un’area con la planimetria legata ma senza collezionabili lo dice così, s
 // Collegare o scollegare un pin può cambiare lo stato della voce nella partita (gli stati si uniscono), e la risposta del
 // server non lo porta: la scheda si rilegge con la partita (rilievo della revisione, 2026-10-01).
 it('scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge', async () => {
+  /** Il Palazzo con la sola voce «Forziere del cancello», «ottenuto» nella partita, nella prima area: con `pin` vero
+   *  la voce ha collegato il pin 1, altrimenti nessuno. */
   const conVoce = (pin: boolean): DungeonDettaglioDto => {
     const p = palazzo(true);
     const voce = { ...p.aree[0].punti[0], tipo: 'forziere' as const, nome: 'Forziere del cancello', stato: 'ottenuto' as const, pin: pin ? [{ id: 1, nome: 'Forziere', tipo: 'forziere', mappa: 'm-cancello', mappaNome: 'Palazzo di Kamoshida › Cancello' }] : [] };
@@ -212,6 +222,7 @@ it('nei Memento la colonna sono gli obiettivi del dedalo: timbri con −/+ e ric
 // gesto completato nel frattempo. Le riletture in silenzio restano in sospeso, così si guarda l'aggiornamento locale da solo.
 
 describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
+  /** L'anello d'avanzamento (progressbar) il cui nome comincia con «Avanzamento in <nome>». */
   const anello = (nome: string) => screen.getByRole('progressbar', { name: new RegExp(`Avanzamento in ${nome}`) });
 
   it('Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre', async () => {
@@ -282,6 +293,8 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
 // 2026-09-19). Prima stava dietro un pulsante, e chi non sapeva di doverlo premere non vedeva
 // nessun modo di sistemare le planimetrie del Palazzo.
 
+/** Monta la scheda del Palazzo di Kamoshida (con partita, atlante vuoto), aspetta il titolo e restituisce le query
+ *  limitate alla colonna «Planimetrie del Palazzo». */
 async function apriPlanimetrie() {
   getDungeon.mockResolvedValue(palazzo(true));
   getAlberoMappe.mockResolvedValue([]);
@@ -343,6 +356,7 @@ it('toccare una stanza porta la sua planimetria nel visore e nella colonna dei s
 it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui non si sa quali tavole sono la stessa stanza', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   riordinaMappe.mockResolvedValue([]);
+  /** Risolutore dell'atlante in sospeso: il test lo chiama per far arrivare l'albero delle mappe quando vuole. */
   let arriva: (v: unknown) => void = () => {};
   getAlberoMappe.mockReturnValue(new Promise((r) => { arriva = r; }));
   monta('kamoshida');
@@ -361,6 +375,8 @@ it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui 
 const conDueVersioni = () => {
   const p = palazzo(true);
   const ovest = { ...p.planimetrie[0], chiave: 'm-cancello-ovest', nome: 'Palazzo di Kamoshida › Cancello ovest', aree: [], n: 0, presi: 0, spilli: [] };
+  /** Voce dell'albero delle mappe per la planimetria `chiave`, figlia del Palazzo e nel gruppo d'immagini «Cancello»
+   *  con l'ordine e l'etichetta di versione dati. */
   const gruppo = (chiave: string, ordine: number, etichetta: string) => ({ chiave, nome: `Palazzo di Kamoshida › ${chiave}`, genitore: 'dungeon-kamoshida', gruppoImmagini: { id: 'g-cancello', nome: 'Cancello', ordine, etichetta } });
   return {
     dungeon: { ...p, planimetrie: [p.planimetrie[0], ovest, p.planimetrie[1]] },

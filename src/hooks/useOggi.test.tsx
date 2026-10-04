@@ -18,6 +18,7 @@ vi.mock('../services/api', (vero) => moduloApi(vero, { getPercorsoIndice, getPer
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimentiStore: { getState: () => ({ invalida: vi.fn() }) } }));
 
+/** Costruisce l'azione numero `n` del 12 aprile, non ancora fatta, con un uid di 32 cifre ricavato da `n`. */
 const azione = (n: number): AzionePercorsoDto => ({ uid: String(n).padStart(32, '0'), giorno: '04-12', genere: 'azione', fascia: 'giorno', azione: `Azione ${n}`, tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: null, mappa: null } as AzionePercorsoDto);
 const indice = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', fase: '', meteo: null, azioni: 2, fatte: 0, avvisi: 0, coperto: true }], dataCorrente: '04-11', totaleGiorni: 1, giorniCoperti: 1 } as PercorsoIndiceDto;
 const giorno = { giorno: '04-12', giornoSettimana: 'mar', fase: '', trama: '', vincoli: [], meteo: null, azioni: [azione(0), azione(1)], avvisi: [], fonte: '', coperto: true, precedente: null, successivo: null, dataCorrente: '04-11', fatte: 0, meteoPartita: null } as PercorsoGiornoDto;
@@ -29,6 +30,7 @@ beforeEach(() => {
   getPercorsoGiorno.mockReset().mockResolvedValue(giorno);
 });
 
+/** Monta `useOggi` sulla partita 4 e aspetta che la giornata sia caricata; restituisce il risultato di `renderHook`. */
 async function apri() {
   const h = renderHook(() => useOggi(4));
   await waitFor(() => expect(h.result.current.giorno).not.toBeNull());

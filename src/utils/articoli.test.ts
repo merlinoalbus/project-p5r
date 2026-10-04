@@ -5,6 +5,8 @@
 import { FILTRO_VUOTO, categoriePresenti, destinatariPresenti, filtraArticoli, filtroAttivo, filtroDaParametri, parametriDaFiltro } from './articoli';
 import type { ArticoloDto } from '../types';
 
+/** Un articolo dell'Untouchable da 100 yen, verificato e non acquistato, con chiave, nome, categoria e destinatario dati;
+ *  `extra` sovrascrive i campi. */
 const art = (chiave: string, nome: string, categoria: ArticoloDto['categoria'], per: string | null, extra: Partial<ArticoloDto> = {}): ArticoloDto => ({
   chiave, negozioChiave: 'u', negozioNome: 'Untouchable', nome, nomeIt: null, categoria, per, prezzo: 100, effetto: null, statistiche: null, quantita: null,
   oggettoFonte: null, oggettoChiave: null, disponibileDal: null, condizione: null, nota: null, verificato: true, acquistato: false, ...extra,

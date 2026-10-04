@@ -19,11 +19,13 @@ vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../fusione/EseguiFusioneModal', () => ({ EseguiFusioneModal: ({ possedutaIds, onEseguita }: { possedutaIds: number[]; onEseguita: () => void }) => <div><span>Modale fusione {possedutaIds.join('+')}</span><button type="button" onClick={onEseguita}>Conferma fusione</button></div> }));
 vi.mock('../shared/Modal', () => ({ Modal: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
 
+/** Persona di un anello del ciclo: arcano Mago, livello 10, con il nome italiano uguale al nome. */
 const p = (id: number, nome: string): AnelloCicloDto['ingrediente'] => ({ id, nome, nomeIt: nome, arcana: 'Magician', arcanaNome: 'Mago', livello: 10, speciale: false, rara: false, dlc: false });
 const anelli: AnelloCicloDto[] = [
   { ingrediente: p(88, 'Jack Frost'), partner: p(2, 'Pixie'), partnerModo: 'registro', partnerCosto: 2300, risultato: p(50, 'Agathion'), tipo: 'normale', bonusLivelli: { min: 2, max: 2 }, rangoArcano: 4 },
   { ingrediente: p(50, 'Agathion'), partner: p(3, 'Bicorn'), partnerModo: 'registro', partnerCosto: 2500, risultato: p(88, 'Jack Frost'), tipo: 'normale', bonusLivelli: { min: 0, max: 0 }, rangoArcano: 0 },
 ];
+/** Il ciclo salvato «Il mio ciclo» (id 5) di Jack Frost con i due anelli di prova, fermo al primo anello e non eseguibile, con i campi di `extra` che sovrascrivono i predefiniti. */
 const ciclo = (extra: Partial<CicloSalvatoDto> = {}): CicloSalvatoDto => ({
   id: 5, personaId: 88, nome: 'Jack Frost', nomeIt: 'Jack Frost', arcanaNome: 'Mago', titolo: 'Il mio ciclo', note: '', anelli, costo: 4800, lunghezza: 2, iterazioni: 0, anelloCorrente: 0,
   avanzamento: { ingredientePossedutaId: 11, partnerPossedutaId: null, partnerRegistrato: true, eseguibile: false }, createdAt: '2026-09-03T10:00:00.000Z', updatedAt: '2026-09-03T10:00:00.000Z', ...extra,
@@ -72,6 +74,7 @@ describe('CicliSalvati — due gesti ravvicinati (B3", validazione voce 2)', () 
     vi.spyOn(window, 'confirm').mockReturnValue(true);
   });
   afterEach(() => vi.restoreAllMocks());
+  /** Il secondo pulsante «Imposta come anello corrente» nell'elenco degli anelli del ciclo con il titolo dato. */
   const secondoAnello = (titolo: string) => within(screen.getByRole('list', { name: `Anelli di ${titolo}` })).getAllByTitle('Imposta come anello corrente')[1];
 
   it('anello corrente: la risposta del ciclo A arrivata dopo quella del ciclo B non riporta indietro B', async () => {

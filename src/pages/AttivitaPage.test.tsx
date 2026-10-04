@@ -17,6 +17,8 @@ vi.mock('../services/api', (vero) => moduloApi(vero, { getAttivita }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ chiave }: { chiave: string }) => <div>Dove: {chiave}</div> }));
 
+/** Costruisce un'attività verificata a Kichijoji (sede Penguin Sniper, sera, 800 yen) che dà una nota della Dote `dote`;
+ *  `extra` sovrascrive i campi. */
 const att = (chiave: string, nome: string, tipo: AttivitaDto['tipo'], dote: 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia', extra: Partial<AttivitaDto> = {}): AttivitaDto => ({
   chiave, nome, tipo, luogo: 'Kichijoji, Penguin Sniper', luogoChiave: 'kichijoji', fascia: 'sera', costo: 800, sblocco: '5 giugno', sessioni: null, doti: [], altriEffetti: null, regole: 'Regole.', premi: null,
   pagaYen: null, pagaMassima: null, dettagli: 'Come funziona: tre freccette a turno.', effetti: [{ effetto: { famiglia: 'dote', dote, note: 1 }, testo: `${dote[0].toUpperCase()}${dote.slice(1)} ♪` }], effettiTesto: [`${dote[0].toUpperCase()}${dote.slice(1)} ♪`],

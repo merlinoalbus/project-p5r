@@ -32,6 +32,7 @@ beforeEach(() => {
   api.impostaYen.mockResolvedValue(squadra);
 });
 
+/** Attende le voci d'elenco e restituisce, per cercarci dentro, quella che contiene un elemento con il titolo `nome`; se manca lancia un errore. */
 const scheda = async (nome: string) => {
   const voce = (await screen.findAllByRole('listitem')).find((li) => within(li).queryByTitle(nome));
   if (!voce) throw new Error(`scheda di ${nome} non trovata`);

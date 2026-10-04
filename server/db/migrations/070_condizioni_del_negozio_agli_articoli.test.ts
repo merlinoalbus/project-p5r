@@ -6,6 +6,7 @@ import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
+/** Condizioni dell'articolo `chiave`, cioè il suo `condizioni_json` già decodificato. */
 const condizioni = (db: ReturnType<typeof initDb>, chiave: string) => JSON.parse(db.prepare('SELECT condizioni_json FROM articolo WHERE chiave = ?').pluck().get(chiave) as string) as unknown[];
 
 it('unisce le condizioni del negozio a quelle dell’articolo, svuota il negozio e converte le frasi residue', () => {

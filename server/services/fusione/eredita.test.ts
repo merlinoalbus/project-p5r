@@ -7,6 +7,7 @@ import { creaContesto, fondi, invalidaMotoreFusione, type Contesto, type Persona
 import { analisiEredita, copre, elementoEreditabile, invalidaEredita, skillAlLivello, slotEreditabili, tipoEredita, trattoDi } from './eredita.js';
 import { dbDiProva } from '../../../test/dbDiProva.js';
 
+/** Persona ammessa nel contesto di fusione col nome dato; se non c'è lancia un errore col nome, così la prova fallisce subito. */
 function perNome(ctx: Contesto, nome: string): PersonaFusione {
   const p = ctx.ammesse.find((x) => x.nome === nome);
   if (!p) throw new Error(nome);

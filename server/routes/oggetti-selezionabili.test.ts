@@ -22,6 +22,7 @@ import type { OggettoSelezionabileDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+/** Elenca gli oggetti che l'editor offre per la categoria data. */
 const per = async (categoria: string) =>
   (await request(app).get(`/api/catalogo/oggetti-di/${categoria}`)).body.data as OggettoSelezionabileDto[];
 

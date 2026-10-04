@@ -14,6 +14,7 @@ import { chiaveCategoria } from '../../utils/categorie';
 import { useAssetStore } from '../../stores/assetStore';
 import { usePreferenzeStore } from '../../stores/preferenzeStore';
 
+/** Manifest degli asset che contiene soltanto le icone `ui/categoria-<chiave>` delle chiavi date. */
 const manifest = (chiavi: string[]) => ({
   generato: 'T', totale: chiavi.length,
   file: Object.fromEntries(chiavi.map((k) => [`ui/categoria-${k}`, `/asset/ui/categoria-${k}.png`])),

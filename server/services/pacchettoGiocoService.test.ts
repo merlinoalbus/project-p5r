@@ -30,6 +30,7 @@ const ORFANI_ATTESI = [
   { tabella: 'progresso_videogioco_partita', colonna: 'videogioco_chiave', entita: 'videogioco', righe: 1, partite: 1, esempi: [VIDEOGIOCO_INESISTENTE], nota: null },
 ];
 
+/** Chiave del primo articolo, in ordine alfabetico, del negozio di prova `NEGOZIO`. */
 function unArticolo(): string {
   return (prepared('SELECT chiave FROM articolo WHERE negozio_chiave = ? ORDER BY chiave LIMIT 1').get(NEGOZIO) as { chiave: string }).chiave;
 }

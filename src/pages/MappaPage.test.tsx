@@ -1,12 +1,13 @@
-import { usePreferenzeStore } from '../stores/preferenzeStore';
-import { useAssetStore } from '../stores/assetStore';
 /**
  * @vitest-environment jsdom
  */
 // ============================================================
-// Test MappaPage — indice dell'albero e visore con stato «raccolto» della partita attiva (Fase 13.2)
+// Test MappaPage — la pagina delle mappe: indice delle radici, visore con la partita attiva e stato «raccolto» (Fase 13.2),
+// «Chiudi» e riletture in silenzio
 // ============================================================
 
+import { usePreferenzeStore } from '../stores/preferenzeStore';
+import { useAssetStore } from '../stores/assetStore';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -19,6 +20,7 @@ import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../type
 const { risolviMappa, getContenutiMappa, getAlberoMappe, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getContenutiMappa: vi.fn(async (mappa: string): Promise<ContenutiMappaDto> => ({mappa,aree:[]})), getAlberoMappe: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { risolviMappa, getContenutiMappa, getAlberoMappe, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
 
+/** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 const albero: MappaRiassuntoDto[] = [
   riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta', numeroFigli: 1, asset: 'mappe/tokyo' }),
@@ -29,6 +31,8 @@ const albero: MappaRiassuntoDto[] = [
 const forziere: SpilloDto = { id: 4, mappaChiave: 'citta-shibuya', tipo: 'forziere', tipoNome: 'Forziere', colore: '#eab308', nome: 'Scrigno', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: true, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
 const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2, immagineUrl: '/pianta-test.png' }), larghezza: 800, altezza: 600, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], arrivi: [], spilli: [forziere, { ...forziere, id: 5, nome: 'Passaggio', tipo: 'passaggio', tipoNome: 'Passaggio', collezionabile: false, x: 60, y: 60 }, { ...forziere, id: 6, nome: 'Tesoro del Palazzo', tipo: 'tesoro-palazzo', tipoNome: 'Tesoro del Palazzo', x: 70, y: 20, voce: { chiave: 'kamoshida-01/2', tipo: 'tesoro', nome: 'Tesoro del Palazzo', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-01', stato: null } }] };
 
+/** Monta la pagina delle mappe all'indirizzo `percorso`, con le rotte finte della Città e della pagina di partenza
+ *  (`/partita`) per verificare dove portano i collegamenti e «Chiudi». */
 function monta(percorso: string) {
   render(
     <MemoryRouter initialEntries={[percorso]}>
@@ -95,6 +99,7 @@ describe('MappaPage', () => {
 
   /** La seconda lettura della mappa (quella in silenzio dopo un'azione) resta in sospeso finché il test non la risolve. */
   const rilettura = () => {
+    /** Risolutore della rilettura sospesa: vuoto finché la seconda `getMappa` non parte, poi quello della sua promessa. */
     let risolvi: (m: MappaDto) => void = () => {};
     getMappa.mockResolvedValueOnce(dettaglio).mockImplementationOnce(() => new Promise<MappaDto>((r) => { risolvi = r; }));
     return (m: MappaDto) => act(async () => { risolvi(m); });

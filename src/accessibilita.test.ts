@@ -12,6 +12,7 @@ import path from 'node:path';
 
 const GENERICI = /<(div|span|p|strong|em|small|b|i)\b/g;
 
+/** Percorre ricorsivamente `dir` e restituisce i percorsi dei file `.tsx` che non sono test (quelli da esaminare). */
 function* sorgenti(dir: string): Generator<string> {
   for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, f.name);

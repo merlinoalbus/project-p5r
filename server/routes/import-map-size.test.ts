@@ -1,9 +1,14 @@
+// ============================================================
+// import-map-size.test.ts — limiti di dimensione del corpo HTTP: 64 MB solo per l'importazione dei pacchetti mappe, 5 MB altrove, JSON malformato rifiutato senza inserire mappe
+// ============================================================
+
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
 import { closeDb, getDb, initDb } from '../db/dbService.js';
 import { runMigrations } from '../db/migrationRunner.js';
 
 const app = createApp();
+/** Conta le mappe presenti nel DB, per verificare che un'importazione rifiutata non ne abbia inserite. */
 const countMaps = () => (getDb().prepare('SELECT COUNT(*) AS n FROM mappa').get() as { n: number }).n;
 
 describe('dimensione dei pacchetti mappe HTTP', () => {

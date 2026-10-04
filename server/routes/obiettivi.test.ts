@@ -10,12 +10,14 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
+/** Cerca nel compendio la Persona con quel nome esatto e ne restituisce l'id; se manca, lancia un errore. */
 async function idDi(nome: string): Promise<number> {
   const lista = (await request(app).get(`/api/compendio/persona?q=${encodeURIComponent(nome)}`)).body.data as PersonaRiassuntoDto[];
   const p = lista.find((x) => x.nome === nome);
   if (!p) throw new Error(`Persona ${nome} non trovata`);
   return p.id;
 }
+/** Cerca nel compendio la skill con quel nome esatto e ne restituisce l'id; se manca, lancia un errore. */
 async function skillId(nome: string): Promise<number> {
   const lista = (await request(app).get(`/api/compendio/skill?q=${encodeURIComponent(nome)}`)).body.data as SkillRiassuntoDto[];
   const s = lista.find((x) => x.nome === nome);

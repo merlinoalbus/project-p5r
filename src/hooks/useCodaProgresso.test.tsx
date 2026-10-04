@@ -8,6 +8,8 @@ import { useCodaProgresso, type OpzioniCodaProgresso } from './useCodaProgresso'
 
 interface Gioco { chiave: string; progresso: number }
 
+/** Prepara le opzioni della coda con funzioni finte: `invia` resta in sospeso e accoda la propria risoluzione in
+ *  `risposte` (il test risponde quando vuole), `applica` e `segnalaErrore` registrano le chiamate. */
 function prepara() {
   const risposte: Array<(g: Gioco) => void> = [];
   const invia = vi.fn((_partita: number, chiave: string, progresso: number) => new Promise<Gioco>((ok) => { risposte.push(ok); void chiave; void progresso; }));

@@ -35,6 +35,7 @@ beforeEach(() => {
   usePartitaStore.setState({ attiva: { id: 4, nome: 'Prova', livelloProtagonista: 1, allarmeAttivo: false } as PartitaDto });
 });
 
+/** Disegna la Home dentro un router in memoria. */
 const disegna = () => render(<MemoryRouter><HomePage /></MemoryRouter>);
 
 it('«Nascondi la mappa» la chiude in una linguetta e lo ricorda; la linguetta la riapre', async () => {

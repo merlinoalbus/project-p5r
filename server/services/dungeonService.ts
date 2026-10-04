@@ -126,6 +126,10 @@ export function raccoltaMappe(dungeonChiave: string, partitaId?: number, segni?:
 
 // ---- Gli obiettivi dei dedali dei Memento ----
 
+/**
+ * Le richieste dei dedali di un dungeon raggruppate per area, nell'ordine delle aree e delle richieste. Con la partita ognuna
+ * porta il suo stato (null se mai toccata); senza, lo stato è sempre null.
+ */
 function richiestePerArea(dungeonChiave: string, partitaId?: number): Map<string, DedaloDto['richieste']> {
   const stati = partitaId === undefined ? new Map<string, StatoRichiesta>() : new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>).map((r) => [r.richiesta_chiave, r.stato]));
   const out = new Map<string, DedaloDto['richieste']>();

@@ -21,9 +21,11 @@ vi.mock('../mappe/MappaIncorporata', () => ({
   MappaIncorporata: ({ chiave, scelta }: { chiave: string; scelta?: SceltaPin }) => { ultimaScelta = scelta; return <div>Mappa di scelta: {chiave} · {scelta?.scelti.size ?? 0} scelti</div>; },
 }));
 
+/** Punto d'interesse di prova (un forziere esauribile, non segnato e senza pin) con i campi di `extra` che sovrascrivono i predefiniti. */
 const punto = (extra: Partial<PuntoInteresseDto>): PuntoInteresseDto => ({
   chiave: 'p1', ordine: 0, tipo: 'forziere', nome: 'Forziere della sala', descrizione: 'Dietro la statua.', esauribile: true, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, ...extra,
 });
+/** L'area «Sala Centrale» (k-02) del Palazzo di Kamoshida, con la sua planimetria m-sala e i punti dati. */
 const area = (punti: PuntoInteresseDto[]): AreaDungeonDto => ({
   chiave: 'k-02', ordine: 1, nome: 'Sala Centrale', descrizione: '', mappa: true, mappe: [{ chiave: 'm-sala', nome: 'Palazzo di Kamoshida › Sala', n: 0, presi: 0, spilli: [] }], punti, dedalo: null,
 });
@@ -32,6 +34,7 @@ const planimetrie: DungeonDettaglioDto['planimetrie'] = [
   { chiave: 'm-sala', nome: 'Palazzo di Kamoshida › Sala', ordine: 1, aree: [{ chiave: 'k-02', nome: 'Sala Centrale', ordine: 1 }], n: 0, presi: 0, spilli: [] },
 ];
 
+/** Disegna la guida dell'area con i punti dati (partita 4, planimetria m-sala aperta) e restituisce i mock di aggiornamento, ricarica e cambio di stato. */
 function monta(punti: PuntoInteresseDto[]) {
   const onPuntoAggiornato = vi.fn();
   const onRicarica = vi.fn().mockResolvedValue(undefined);
@@ -138,6 +141,7 @@ it('i tipi si chiamano come li vuole l’utente, e Persona e Storia si collegano
     punto({ chiave: 'g', tipo: 'persona', nome: 'Leanan Sidhe' }),
     punto({ chiave: 'h', tipo: 'storia', nome: 'Si apre la torre' }),
   ]);
+  /** Il pulsante della riga di voce il cui nome accessibile comincia con `nome`. */
   const riga = (nome: string) => screen.getByRole('button', { name: new RegExp(`^${nome}`) });
   expect(riga('Safe Room')).toHaveTextContent('Stanze sicure');
   expect(riga('Seme rosso')).toHaveTextContent('Semi della bramosia');
@@ -163,6 +167,7 @@ describe('l’Enigma contiene i suoi passi (095)', () => {
   it('i passi stanno dentro l’Enigma, non fra le voci dell’area; la riga dice quanti sono fatti e niente «da collegare»', () => {
     monta([punto({}), enigma, leva, porta, nota]);
     const voci = within(screen.getByRole('list', { name: 'Voci della guida di Sala Centrale' }));
+    /** Riletto a ogni uso: il sotto-elenco dei passi dell'Enigma «La porta della torre». */
     const passi = () => within(screen.getByRole('list', { name: 'Passi di La porta della torre' }));
     expect(passi().getByRole('button', { name: /Apri la porta/ })).toBeInTheDocument();
     // un passo segnato si nasconde come ogni voce segnata, finché non si chiedono anche le segnate

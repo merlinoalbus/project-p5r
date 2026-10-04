@@ -23,9 +23,13 @@ describe('Giorno completato → giorno dopo', () => {
   });
   afterAll(() => closeDb());
 
+  /** Legge il percorso del giorno `data` con lo stato della partita di prova. */
   const giorno = async (data: string) => (await request(app).get(`/api/compendio/percorso/${data}?partita=${id}`)).body.data as PercorsoGiornoDto;
+  /** Rilegge la partita di prova (data e fascia correnti comprese). */
   const partita = async () => (await request(app).get(`/api/partite/${id}`)).body.data as PartitaDto;
+  /** Spunta o toglie la spunta della voce `uid` nella partita di prova e restituisce la voce aggiornata. */
   const spunta = async (uid: string, fatta: boolean) => (await request(app).put(`/api/partite/${id}/percorso`).send({ uid, fatta })).body.data as AzionePercorsoDto;
+  /** Aggiunge una voce al percorso del giorno `data` col corpo dato e restituisce la voce creata. */
   const crea = async (data: string, corpo: object) => (await request(app).post(`/api/compendio/percorso/${data}/voci`).send(corpo)).body.data as AzionePercorsoDto;
 
   it('le attività una per una: solo l’ultima fa passare al giorno dopo, di giorno, e lo scrive nello storico', async () => {

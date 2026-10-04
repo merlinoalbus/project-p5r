@@ -22,12 +22,19 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
   let partita: number;
   let area: string;
   let pinLiberi: Array<{ id: number; uid: string; tipo: string }>;
+  /** Crea nell'area di prova una voce della guida (di serie un forziere), pretende il 201 e la restituisce. */
   const nuovoPunto = async (nome: string, tipo = 'forziere') => (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome, tipo }).expect(201)).body.data as PuntoInteresseDto;
+  /** Collega la voce della guida al pin dato (restituisce la richiesta, per controllarne l'esito). */
   const collega = (punto: string, pin: number) => request(app).put(`/api/compendio/punti/${encodeURIComponent(punto)}/pin/${pin}`);
+  /** Scollega la voce della guida dal pin dato (restituisce la richiesta, per controllarne l'esito). */
   const scollega = (punto: string, pin: number) => request(app).delete(`/api/compendio/punti/${encodeURIComponent(punto)}/pin/${pin}`);
+  /** Valore di «raccolto» dello spillo `uid` nella partita di prova, letto dal DB (0 se non c'è la riga). */
   const raccolto = (uid: string) => (prepared('SELECT raccolto FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').get(partita, uid) as { raccolto: number } | undefined)?.raccolto ?? 0;
+  /** Stato salvato della voce nella partita di prova, letto dal DB (null se non segnata). */
   const segnato = (punto: string) => (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, punto) as { stato: string } | undefined)?.stato ?? null;
+  /** Segna (o toglie il segno) del pin nella partita di prova, pretendendo il 200. */
   const raccogli = (pin: number, si: boolean) => request(app).put(`/api/partite/${partita}/spilli/${pin}`).send({ raccolto: si }).expect(200);
+  /** Imposta (o, con null, toglie) lo stato della voce nella partita di prova, pretendendo il 200. */
   const statoPunto = (punto: string, stato: string | null) => request(app).put(`/api/partite/${partita}/punti`).send({ punto, stato }).expect(200);
 
   beforeAll(async () => {
@@ -133,6 +140,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
   });
 
   it('sposta una voce su e giù nella sua area, con l’ordine ricompattato; ai capi dice di no', async () => {
+    /** Le chiavi delle voci dell'area di prova nell'ordine in cui la scheda del Palazzo di Kamoshida le mostra. */
     const ordine = async () => ((await request(app).get('/api/compendio/dungeon/kamoshida').expect(200)).body.data as DungeonDettaglioDto).aree.find((a) => a.chiave === area)!.punti.map((p) => p.chiave);
     const prima = await ordine();
     const ultimo = prima[prima.length - 1];
@@ -357,6 +365,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     const pin = prepared("SELECT id, uid FROM spillo WHERE mappa_chiave = ? AND origine = 'seed' AND tipo = 'porta'").get(mappa) as { id: number; uid: string };
     const [v, w] = prepared("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'mementos' AND p.tipo <> 'altro' ORDER BY p.chiave LIMIT 2").pluck().all() as string[];
     await collega(v, pin.id).expect(200);
+    /** Esporta la planimetria dei Memento e toglie da ogni spillo il campo `voce`, come un pacchetto che non lo porta. */
     const muto = () => { const x = esportaMappe(mappa); for (const s of x.mappe.flatMap((m) => m.spilli)) delete s.voce; return x; };
     // invariato: stesso id, stessa voce
     importaMappe(muto(), { origine: 'seed' });

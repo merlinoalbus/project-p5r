@@ -26,8 +26,11 @@ const albero = (dungeon: string): string[] => (prepared(`WITH RECURSIVE a(chiave
 
 describe('Palazzo completato', () => {
   let partita: number;
+  /** Vero se la voce della guida `punto` (il boss) risulta segnata nella partita di prova. */
   const bossGuida = (punto: string) => !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, punto);
+  /** Segna (o toglie il segno) dello spillo nella partita di prova, pretendendo il 200. */
   const segna = (spillo: number, raccolto: boolean) => request(app).put(`/api/partite/${partita}/spilli/${spillo}`).send({ raccolto }).expect(200);
+  /** Valuta, sullo stato dei semafori della partita, un requisito di Confidente «Completare il Palazzo» del dungeon dato. */
   const requisito = (dungeon: string) => valuta({ confidente_chiave: 'prova', rango: 1, indice: 0, tipo: 'palazzo', dati_json: JSON.stringify({ dungeon }), testo: 'Completare il Palazzo' }, statoPartitaSemafori(partita, new Map(), new Map()));
 
   beforeAll(async () => {
@@ -157,6 +160,7 @@ describe('Palazzo completato', () => {
   it('l’ingresso a un Palazzo completato sparisce dalla mappa, anche prima della scadenza', async () => {
     const citta = prepared("SELECT chiave FROM mappa WHERE chiave LIKE 'citta-%' LIMIT 1").get() as { chiave: string };
     const ingresso = (await request(app).post(`/api/mappe/${citta.chiave}/spilli`).send({ tipo: 'passaggio', nome: 'Palazzo di Kaneshiro', x: 20, y: 20, riferimento: { tipo: 'mappa', chiave: 'dungeon-kaneshiro' } })).body.data as { id: number };
+    /** Rilegge la mappa della città con la partita e restituisce la disponibilità del pin d'ingresso al Palazzo di Kaneshiro. */
     const stato = async () => ((await request(app).get(`/api/mappe/${citta.chiave}?partita=${partita}`)).body.data as MappaDto).spilli.find((s) => s.id === ingresso.id)!.disponibilita;
     expect((await stato())?.stato).not.toBe('bloccato');
     const finale = bossFinali().get('kaneshiro')!;

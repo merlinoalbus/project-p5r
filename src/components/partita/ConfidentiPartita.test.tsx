@@ -25,6 +25,7 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, {
   
 }));
 
+/** Confidente di prova (Ryuji, Carro, sbloccato al rango 2 senza punti né semafori), con i campi di `sovrascrivi` che sostituiscono i predefiniti. */
 function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidentePartitaDto {
   return {
     chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot', arcanaNome: 'Carro', ordine: 7,
@@ -123,7 +124,9 @@ describe('ConfidentiPartita', () => {
 });
 
 describe('ConfidentiPartita — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  /** Il Confidente Ann Takamaki (Amanti) al rango dato. */
   const ann = (rango: number) => confidente({ chiave: 'ann', nome: 'Ann Takamaki', arcana: 'Lovers', arcanaNome: 'Amanti', ordine: 6, rango });
+  /** Il testo del rango («Rango N» o «Rango MAX») mostrato nella voce d'elenco del Confidente con il nome dato. */
   const rangoDi = (nome: string) => within(screen.getAllByRole('listitem').find((li) => within(li).queryByText(nome))!).getByText(/^Rango \d|^Rango MAX/).textContent;
 
   it('il rango di un Confidente arrivato dopo quello di un altro non riporta indietro il secondo (salva)', async () => {
@@ -144,6 +147,7 @@ describe('ConfidentiPartita — due gesti ravvicinati (B3", validazione voce 2)'
 
   it('la conferma di un requisito arrivata dopo il rango di un altro Confidente non lo riporta indietro (conferma)', async () => {
     const requisito = { indice: 0, tipo: 'evento', testo: 'Evento della storia', stato: 'grigio' as const, dettaglio: '', manuale: true, confermato: false };
+    /** Ryuji con il semaforo del rango 3 legato al requisito manuale, pronto e confermato secondo `confermato`. */
     const conSemaforo = (confermato: boolean) => confidente({ semafori: [{ rango: 3, pronto: confermato, requisiti: [{ ...requisito, confermato }] }] });
     getConfidentiPartita.mockResolvedValue([conSemaforo(false), ann(1)]);
     let rispondiConferma!: (c: ConfidentePartitaDto) => void;

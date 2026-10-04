@@ -32,6 +32,7 @@ function Prova({ iniziali = [], onCambia }: { iniziali?: RequisitoSpillo[]; onCa
   const [c, setC] = useState<RequisitoSpillo[]>(iniziali);
   return <CondizioniEditor condizioni={c} onCambia={(n) => { setC(n); onCambia?.(n); }} />;
 }
+/** Dentro `ambito` apre il menu a tendina con l'etichetta data e clicca il pulsante dell'opzione `voce`. */
 const scegli = (ambito: ReturnType<typeof within>, etichetta: string, voce: string | RegExp) => {
   fireEvent.click(ambito.getByRole('combobox', { name: etichetta }));
   fireEvent.click(ambito.getByRole('option', { name: voce }).querySelector('button')!);
@@ -97,6 +98,7 @@ describe('CondizioniEditor', () => {
   it('gli stati con più campi: attività con volte, grado cliente di un negozio, Persona con abilità', async () => {
     const onCambia = vi.fn();
     render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }]} onCambia={onCambia} />);
+    /** Riletta a ogni passo: la prima riga di condizione com'è nel DOM dopo l'ultimo cambio di stato. */
     const riga = () => within(screen.getAllByRole('group', { name: /^Condizione:/ })[0]);
     await screen.findByRole('group', { name: 'Condizione: dal 18 aprile' });
     scegli(riga(), 'Stato', 'Attività');
@@ -116,6 +118,7 @@ describe('CondizioniEditor', () => {
   it('i negozi si offrono secondo il loro programma punti', async () => {
     const onCambia = vi.fn();
     render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }]} onCambia={onCambia} />);
+    /** Riletta a ogni passo: la prima riga di condizione com'è nel DOM dopo l'ultimo cambio di stato. */
     const riga = () => within(screen.getAllByRole('group', { name: /^Condizione:/ })[0]);
     await screen.findByRole('group', { name: 'Condizione: dal 18 aprile' });
     scegli(riga(), 'Stato', 'Grado cliente');

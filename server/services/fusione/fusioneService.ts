@@ -311,6 +311,7 @@ export function cicliDto(personaId: number, opz: OpzioniCicliDto): CicliFusioneD
 
 // ---- Eredità delle skill (Fase 3) ----
 
+/** Una skill dell'eredità come DTO: id, nome canonico, resa italiana ed elemento. */
 function skillDto(s: SkillEredita): { id: number; nome: string; nomeIt: string; elemento: string } {
   return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento };
 }

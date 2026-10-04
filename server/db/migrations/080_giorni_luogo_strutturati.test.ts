@@ -27,6 +27,7 @@ it('aggiunge la colonna, converte le righe e mette la precisazione nelle note; �
       ('q/b', 'q', 2, 'altro', 'B', '', 'domenica (regolare) e festività', 'nota esistente'),
       ('q/c', 'q', 3, 'altro', 'C', '', NULL, NULL)`);
   runMigrations(db);
+  /** `giorni_json` e note del luogo `k`, come li ha lasciati la migrazione. */
   const leggi = (k: string) => db.prepare('SELECT giorni_json, note FROM luogo WHERE chiave = ?').get(k) as { giorni_json: string; note: string | null };
   expect(leggi('q/a')).toEqual({ giorni_json: '["venerdi","sabato"]', note: null });
   expect(leggi('q/b')).toEqual({ giorni_json: '["domenica"]', note: 'nota esistente · Giorni (dalla guida): domenica (regolare) e festività' });

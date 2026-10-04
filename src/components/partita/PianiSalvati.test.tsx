@@ -14,7 +14,9 @@ const { getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato
 vi.mock('../../services/api', (vero) => moduloApi(vero, { getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Persona di un nodo del piano: arcano Mago, livello 10, con il nome italiano uguale al nome. */
 const p = (id: number, nome: string): NodoPianoDto['persona'] => ({ id, nome, nomeIt: nome, arcana: 'Magician', arcanaNome: 'Mago', livello: 10, speciale: false, rara: false, dlc: false });
+/** Foglia dell'albero del piano: la Persona data presa dalla scorta, senza costo, figli né skill. */
 const foglia = (id: number, nome: string): NodoPianoDto => ({ persona: p(id, nome), modo: 'scorta', costo: 0, figli: [], skillPortate: [], skillDaLivello: [] });
 const radice: NodoPianoDto = { persona: p(88, 'Jack Frost'), modo: 'fusione', costo: 0, tipo: 'normale', figli: [foglia(1, 'Arsène'), foglia(2, 'Pixie')], skillPortate: [], skillDaLivello: [] };
 const piano: PianoSalvatoDto = {

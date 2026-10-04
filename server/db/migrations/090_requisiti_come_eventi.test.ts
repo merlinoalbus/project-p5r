@@ -10,6 +10,7 @@ import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
+/** Tipo e `dati_json` del requisito `indice` del rango `rango` del confidente `c`. */
 const requisito = (db: ReturnType<typeof initDb>, c: string, rango: number, indice: number) =>
   db.prepare('SELECT tipo, dati_json FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').get(c, rango, indice) as { tipo: string; dati_json: string };
 

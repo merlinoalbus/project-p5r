@@ -1,3 +1,7 @@
+// ============================================================
+// posizioni-spilli.test.ts — regole di categoria degli spilli: niente condizioni sugli spilli di città, collezionabile e riferimento decisi dalla categoria, anche dopo esportazione e importazione
+// ============================================================
+
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
 import { initDb, closeDb } from '../db/dbService.js';
@@ -12,12 +16,14 @@ import { runMigrations } from '../db/migrationRunner.js';
 const app = createApp();
 beforeEach(async () => { runMigrations(initDb(':memory:')); await request(app).post('/api/mappe').send({ chiave: 'luoghi', nome: 'Luoghi', tipo: 'luogo' }).expect(201); });
 afterEach(() => closeDb());
+/** Crea sulla mappa «luoghi» uno spillo «Luogo» (di serie un'attività) con i campi aggiuntivi dati. */
 const crea = (extra: Record<string, unknown> = {}) => request(app).post('/api/mappe/luoghi/spilli').send({ tipo: 'attivita', nome: 'Luogo', x: 20, y: 30, ...extra });
 
 it('uno spillo di città non è mai condizionato né bloccato: le condizioni inviate non si salvano, il pin resta', async () => {
   const partita = (await request(app).post('/api/partite').send({ nome: 'Posizioni' })).body.data.id;
   const s = (await crea({ condizioni: [{ tipo: 'fascia', fascia: 'sera' }] })).body.data;
   expect(s.condizioni).toEqual([]);
+  /** Rilegge la mappa «luoghi» con la partita e restituisce il suo primo (e unico) spillo. */
   const leggi = async () => (await request(app).get(`/api/mappe/luoghi?partita=${partita}`)).body.data.spilli[0];
   expect((await leggi()).disponibilita?.stato).not.toBe('bloccato');
   await request(app).put(`/api/mappe/spilli/${s.id}`).send({ condizioni: [{ tipo: 'piove' }] }).expect(200);

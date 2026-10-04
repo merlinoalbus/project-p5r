@@ -18,6 +18,7 @@ const ranghiFascino = [
   { rango: 5, nome: 'Irresistibile', soglia: 132 },
 ];
 
+/** La Dote Fascino con punti, rango e soglia dati; i punti mancanti sono soglia − punti, o null quando non c'è una soglia successiva. */
 function dote(punti: number, rango: number, nomeRango: string, sogliaProssima: number | null): DoteSocialePartitaDto {
   return { chiave: 'fascino', nome: 'Fascino', ordine: 1, punti, rango, nomeRango, sogliaProssima, mancanti: sogliaProssima === null ? null : sogliaProssima - punti, ranghi: ranghiFascino, updatedAt: null };
 }
@@ -88,6 +89,7 @@ describe('DotiSociali', () => {
 
 describe('DotiSociali — due gesti ravvicinati (B3", validazione voce 2)', () => {
   it('la risposta di una Dote arrivata dopo quella di un\'altra non riporta indietro la seconda', async () => {
+    /** La Dote Coraggio al rango 1 «Indifferente» (soglia 6) con i punti dati, costruita sulla base di Fascino. */
     const coraggio = (punti: number): DoteSocialePartitaDto => ({ ...dote(punti, 1, 'Indifferente', 6), chiave: 'coraggio', nome: 'Coraggio', ordine: 2 });
     getDoti.mockResolvedValue([dote(0, 1, 'Indifferente', 6), coraggio(0)]);
     let rispondiFascino!: (d: DoteSocialePartitaDto) => void;

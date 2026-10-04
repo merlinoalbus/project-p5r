@@ -303,6 +303,7 @@ describe('API', () => {
     // al livello 4 la stima riparte dai valori reali (+3 punti in totale, bonus a parte)
     const liv4 = (await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 4 })).body.data as PersonaPossedutaDto;
     expect(liv4.origineStima).toBe('osservate');
+    /** Somma tutti i valori numerici di un oggetto di statistiche (forza, magia, …): serve a contare i punti distribuiti. */
     const somma = (s: object) => Object.values(s as Record<string, number>).reduce((a, b) => a + b, 0);
     expect(somma(liv4.statisticheStimate) - somma(valoriReali)).toBe(3);
     // sotto il livello registrato si torna alla base del dataset

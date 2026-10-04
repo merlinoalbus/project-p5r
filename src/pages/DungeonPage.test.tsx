@@ -14,6 +14,7 @@ const { getDungeons } = vi.hoisted(() => ({ getDungeons: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { getDungeons }));
 vi.mock('../stores/partitaStore', () => ({ usePartitaStore: (sel: (s: { attiva: { id: number } | null }) => unknown) => sel({ attiva: { id: 1 } }) }));
 
+/** Il riassunto del Palazzo di Kamoshida con date, finestra e conteggi della guida; `extra` sovrascrive i campi. */
 const dungeon = (extra: Partial<DungeonRiassuntoDto>): DungeonRiassuntoDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Suguru Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile (Martedì) — prima infiltrazione esplorativa nel Palazzo', scadenza: '2 maggio (ultimo giorno utile)', furtoConsigliato: '22 Aprile' },

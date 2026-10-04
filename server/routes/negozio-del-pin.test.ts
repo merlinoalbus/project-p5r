@@ -26,6 +26,7 @@ describe('B10 — negozio del pin', () => {
   afterAll(() => closeDb());
   afterEach(() => { guasto.errore = null; });
 
+  /** Legge la mappa con i pin di negozio e restituisce lo stato HTTP e, per ogni pin di negozio, il negozio del dettaglio (null se manca). */
   const negozioDelPin = async () => {
     const res = await request(app).get(`/api/mappe/${mappa}`);
     return { status: res.status, negozi: (res.body.data?.spilli ?? []).filter((s: { riferimento?: { tipo: string } }) => s.riferimento?.tipo === 'negozio').map((s: { dettaglio?: { negozio?: unknown } }) => s.dettaglio?.negozio ?? null) };

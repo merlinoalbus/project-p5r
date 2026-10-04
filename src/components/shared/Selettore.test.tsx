@@ -13,6 +13,7 @@ import { scegliVoce, valoreSelettore, vociSelettore } from '../../../test/selett
 const poche: OpzioneSelettore[] = [{ chiave: 'a', nome: 'Alfa' }, { chiave: 'b', nome: 'Beta' }, { chiave: 'c', nome: 'Gamma' }];
 const molte: OpzioneSelettore[] = Array.from({ length: 12 }, (_, i) => ({ chiave: `v${i}`, nome: `Voce ${i}`, gruppo: i < 6 ? 'Prime' : 'Seconde' }));
 
+/** Il selettore «Scelta» dentro uno stato vero (vuoto all'inizio): ogni scelta aggiorna il valore mostrato e la si inoltra a `onCambia`. */
 function Prova({ opzioni, vuoto, ricerca, onCambia }: { opzioni: OpzioneSelettore[]; vuoto?: string; ricerca?: 'auto' | 'sempre' | 'mai'; onCambia?: (k: string) => void }) {
   const [v, setV] = useState('');
   return <Selettore etichetta="Scelta" valore={v} opzioni={opzioni} vuoto={vuoto} ricerca={ricerca} onCambia={(k) => { setV(k); onCambia?.(k); }} />;
@@ -135,6 +136,7 @@ describe('Selettore', () => {
     const pulsante = screen.getByRole('combobox', { name: 'Partita attiva' });
     const larghezzaOriginale = window.innerWidth;
     Object.defineProperty(window, 'innerWidth', { value: 1000, configurable: true });
+    /** Rettangolo finto del pulsante (80×44 px) con il bordo sinistro alla coordinata data. */
     const rettangolo = (left: number): DOMRect => ({ left, top: 0, width: 80, height: 44, right: left + 80, bottom: 44, x: left, y: 0, toJSON: () => ({}) }) as DOMRect;
     pulsante.getBoundingClientRect = () => rettangolo(900);
     fireEvent.click(pulsante);

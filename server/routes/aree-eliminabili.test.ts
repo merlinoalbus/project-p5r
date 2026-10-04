@@ -17,7 +17,9 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
+/** Elenca chiave e ordine delle aree del dungeon dato, nell'ordine in cui la guida le presenta. */
 const aree = (dungeon: string) => prepared('SELECT chiave, ordine FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(dungeon) as Array<{ chiave: string; ordine: number }>;
+/** Esegue una query `SELECT COUNT(*) AS n …` con i parametri dati e restituisce il conteggio. */
 const conta = (sql: string, ...p: unknown[]) => (prepared(sql).get(...p) as { n: number }).n;
 
 describe('eliminare un’area della guida', () => {
@@ -72,6 +74,7 @@ describe('eliminare un’area della guida', () => {
   });
 
   it('i riferimenti dentro i testi JSON seguono l’area: piante delle altre aree, Ombre della Battaglia, mappe assenti', async () => {
+    /** Legge dalla tabella `dati_guida` il blocco con la chiave data e ne restituisce il JSON già decodificato. */
     const json = (chiave: string) => JSON.parse((prepared('SELECT json FROM dati_guida WHERE chiave = ?').get(chiave) as { json: string }).json) as Record<string, unknown>;
     // una pianta che dice di coprire un'altra area
     const pianta = prepared("SELECT area_chiave, copre_aree_json FROM pianta_area WHERE copre_aree_json LIKE '[\"%' LIMIT 1").get() as { area_chiave: string; copre_aree_json: string };
@@ -95,6 +98,7 @@ describe('eliminare un’area della guida', () => {
 
   it('nemico, meccanismo, punto sensibile e porta chiusa hanno uno stato (affrontato, azionato, gestito, aperta) che non conta nel completamento; un pin senza stato non si segna', async () => {
     const mappa = creaMappa(undefined, { nome: 'Planimetria con un nemico', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    /** Crea sulla planimetria di prova un pin del tipo dato, verifica il 201 e che non risulti collezionabile, e ne restituisce l'id. */
     const pin = async (tipo: string, nome: string) => {
       const r = await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo, nome, x: 10, y: 10 });
       expect(r.status).toBe(201);

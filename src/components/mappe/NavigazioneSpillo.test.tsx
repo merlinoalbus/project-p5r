@@ -1,4 +1,8 @@
 /** @vitest-environment jsdom */
+// ============================================================
+// Test NavigazioneSpillo — il pulsante «Vai» degli spostamenti: mappa e spillo di arrivo, blocchi della partita, collegamenti vecchi, spilli che non portano altrove
+// ============================================================
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { urlMappa } from '../../utils/navigazioneMappa';

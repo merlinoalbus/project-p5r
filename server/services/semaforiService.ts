@@ -75,6 +75,11 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
 // L'ordine del calendario di gioco e i nomi dei Palazzi vengono da `shared/condizioniSpillo.ts`: qui erano riscritti a mano
 // (rilievo R2 della verifica completa, 2026-10-03).
 
+/**
+ * Il semaforo di un requisito di rango sullo stato della partita: per tipo (Dote, Persona dell'arcano o con un'abilità,
+ * Palazzo, richiesta, membro in squadra, rango di un Confidente, data, meteo, evento) dice verde o rosso con il dettaglio di
+ * che cosa manca. Quel che l'app non sa verificare è grigio, verde se l'utente l'ha confermato a mano; gli avvisi non bloccano.
+ */
 export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDto {
   const dati = JSON.parse(r.dati_json) as Record<string, string | number>;
   const chiaveConferma = `${r.confidente_chiave}/${r.rango}/${r.indice}`;

@@ -35,6 +35,7 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
 
   it('un Palazzo completato non c’è più, anche dentro la sua finestra, e si dice perché', () => {
     const kamoshida = { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', finestra: { dal: '04-12', al: '05-02' }, completato: null } as DungeonRiassuntoDto;
+    /** Il cartellino del Palazzo di Kamoshida sulla mappa (il link alla sua scheda), o null se non è disegnato. */
     const cartellino = () => document.querySelector('a[href="/guida/mondo/dungeon/kamoshida"]');
     const { rerender } = render(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[kamoshida]} dataGioco="04-22" /></MemoryRouter>);
     expect(cartellino()).not.toBeNull();

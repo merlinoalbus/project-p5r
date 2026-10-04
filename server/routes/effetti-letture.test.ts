@@ -25,10 +25,13 @@ const app = createApp();
 
 // a metà maggio libri e film usati qui sono disponibili: una lettura bloccata dalla guida non si registra (409)
 const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome, dataGioco: '05-15' })).body.data as { id: number }).id;
+/** Restituisce i punti che la partita `id` ha nella Dote sociale data. */
 const punti = async (id: number, dote: string) =>
   ((await request(app).get(`/api/partite/${id}/doti`)).body.data as DoteSocialePartitaDto[]).find((d) => d.chiave === dote)!.punti;
+/** Imposta l'avanzamento di una lettura (libro, film…) della partita, pretende il 200 e restituisce le Doti da segnare (lista vuota se nessuna). */
 const segna = async (id: number, tipo: string, chiave: string, avanzamento: number) =>
   ((await request(app).put(`/api/partite/${id}/letture`).send({ tipo, chiave, avanzamento }).expect(200)).body.data as { daSegnare?: DoteDaSegnareDto[] }).daSegnare ?? [];
+/** Il delta che la lista delle Doti da segnare indica per la Dote data (0 se non c'è). */
 const delta = (lista: DoteDaSegnareDto[], dote: string) => lista.find((d) => d.chiave === dote)?.delta ?? 0;
 
 describe('API — il conseguimento dice le Doti, non le tocca', () => {
@@ -96,6 +99,7 @@ describe('API — il cruciverba ricorda la sua nota di Conoscenza', () => {
     const id = await nuovaPartita('Cruciverba');
     const tutti = (await request(app).get('/api/compendio/cruciverba')).body.data as { cruciverba: Array<{ giorno: string }> };
     const g = tutti.cruciverba[0].giorno;
+    /** Segna (o toglie) come risolto il cruciverba del giorno `g` nella partita e restituisce la risposta, con le Doti da segnare. */
     const spunta = async (fatto: boolean) => (await request(app).put(`/api/partite/${id}/cruciverba`).send({ data: g, fatto }).expect(200)).body.data as CruciverbaDto;
 
     // Una nota è il primo scalino: 2 punti.

@@ -11,11 +11,13 @@ import { runMigrations } from '../../db/migrationRunner.js';
 import { importaMappe, dettaglioMappa, aggiornaSpillo, creaSpillo } from './mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
+/** Nodo di mappa generico per il pacchetto di prova (nome uguale alla chiave, senza immagine né spilli), figlio di `genitore` se indicato. */
 const mappa = (chiave: string, genitore: string | null = null): EsportazioneMappeDto['mappe'][number] =>
   ({ chiave, nome: chiave, tipo: 'generica', genitore, ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '', spilli: [] });
 
 afterEach(() => closeDb());
 
+/** Database in memoria con tutte le migrazioni e un piccolo atlante seed: un quartiere con due figlie, sottopasso e banchina. */
 function atlante() {
   const db = initDb(':memory:');
   runMigrations(db);

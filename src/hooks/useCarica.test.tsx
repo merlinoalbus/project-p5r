@@ -6,6 +6,8 @@
 import { act, render, screen } from '@testing-library/react';
 import { useCarica } from './useCarica';
 
+/** Componente di prova: carica con `useCarica` i dati di `id` (ricaricando al suo cambio) e mostra in una riga lo stato
+ *  (caricamento, errore o dati), con un pulsante «ricarica» che chiama `ricarica()`. */
 function Prova({ id, carica }: { id: number; carica: (id: number) => Promise<string> }) {
   const { dati, caricamento, errore, ricarica } = useCarica(() => carica(id), [id]);
   return (
@@ -25,6 +27,7 @@ function Sonda<T>({ carica, suStato }: { carica: () => Promise<T>; suStato: (s: 
 describe('useCarica', () => {
   it('carica i dati, poi ricarica e reagisce al cambio delle dipendenze', async () => {
     let chiamate = 0;
+    /** Caricatore finto: conta le chiamate e restituisce `valore-<id>-<numero della chiamata>`, così ogni lettura è riconoscibile. */
     const carica = async (id: number) => {
       chiamate++;
       return `valore-${id}-${chiamate}`;
@@ -52,6 +55,8 @@ describe('useCarica', () => {
   it('B6": ricarica() si risolve quando la rilettura è arrivata (anche se fallisce), non prima', async () => {
     const rilettura: { risolvi: ((v: string) => void) | null; rifiuta: ((e: Error) => void) | null } = { risolvi: null, rifiuta: null };
     let n = 0;
+    /** La prima lettura risponde subito «primo»; ogni rilettura successiva resta in sospeso e il test la risolve o la
+     *  rifiuta a mano tramite `rilettura.risolvi` / `rilettura.rifiuta`. */
     const carica = () => (++n === 1 ? Promise.resolve('primo') : new Promise<string>((ok, ko) => { rilettura.risolvi = ok; rilettura.rifiuta = ko; }));
     let stato: ReturnType<typeof useCarica<string>> | null = null;
     render(<Sonda carica={carica} suStato={(s) => { stato = s; }} />);

@@ -1,3 +1,7 @@
+// ============================================================
+// conservazione.test.ts — conservazione di catalogo e spunte: righe nascoste fuori da conteggi e ricerca, chiavi distinte, dati personali che sopravvivono a una guida aggiornata
+// ============================================================
+
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';

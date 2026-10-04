@@ -47,6 +47,7 @@ function righeDi(tabella: string): string[] {
     .map((r) => colonne.map((c) => `${c}=${String(r[c])}`).join(' | '));
 }
 
+/** Impronta del livello mappe: per ciascuna tabella di `TABELLE`, tutte le sue righe serializzate in ordine stabile. */
 function impronta(): Record<string, string[]> {
   return Object.fromEntries(TABELLE.map((t) => [t, righeDi(t)]));
 }

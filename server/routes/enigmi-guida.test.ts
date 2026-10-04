@@ -22,14 +22,22 @@ describe('Enigma con i suoi passi', () => {
   let area: string;
   let altraArea: string;
   let pinLiberi: Array<{ id: number; uid: string }>;
+  /** Crea una voce della guida nell'area (di serie quella di prova), dentro un contenitore se indicato; pretende il 201 e la restituisce. */
   const nuova = async (nome: string, tipo: string, contenitore?: string, inArea = area) =>
     (await request(app).post(`/api/compendio/aree/${inArea}/punti`).send({ nome, tipo, ...(contenitore ? { contenitore } : {}) }).expect(201)).body.data as PuntoInteresseDto;
+  /** Modifica la voce della guida con quella chiave (restituisce la richiesta, per controllarne l'esito). */
   const modifica = (chiave: string, dati: Record<string, unknown>) => request(app).put(`/api/compendio/punti/${encodeURIComponent(chiave)}`).send(dati);
+  /** Imposta (o, con null, toglie) lo stato della voce nella partita di prova, pretendendo il 200. */
   const statoPunto = (punto: string, stato: string | null) => request(app).put(`/api/partite/${partita}/punti`).send({ punto, stato }).expect(200);
+  /** Stato salvato della voce nella partita di prova, letto dal DB (null se non segnata). */
   const segnato = (punto: string) => (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, punto) as { stato: string } | undefined)?.stato ?? null;
+  /** Valore di «raccolto» dello spillo `uid` nella partita di prova, letto dal DB (0 se non c'è la riga). */
   const raccolto = (uid: string) => (prepared('SELECT raccolto FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').get(partita, uid) as { raccolto: number } | undefined)?.raccolto ?? 0;
+  /** Collega la voce della guida al pin dato (restituisce la richiesta, per controllarne l'esito). */
   const collega = (punto: string, pin: number) => request(app).put(`/api/compendio/punti/${encodeURIComponent(punto)}/pin/${pin}`);
+  /** Legge la scheda del Palazzo di Kamoshida con la partita di prova, pretendendo il 200. */
   const scheda = async () => (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${partita}`).expect(200)).body.data as DungeonDettaglioDto;
+  /** Le voci (punti) dell'area data, di serie quella di prova, come le mostra la scheda del Palazzo. */
   const vociDi = async (a = area) => (await scheda()).aree.find((x) => x.chiave === a)!.punti;
 
   beforeAll(async () => {
@@ -243,8 +251,11 @@ describe('Enigma con i suoi passi', () => {
 
   it('gli stati nuovi dei pin (2026-10-03) seguono la guida e l’Enigma: leva azionata e porta aperta risolvono l’Enigma, e il contrario', async () => {
     const mappaArea = prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(pinLiberi[0].id) as string;
+    /** Crea sulla planimetria dell'area un pin del tipo dato, pretende il 201 e ne restituisce l'id. */
     const nuovoPin = async (tipo: string, nome: string) => (await request(app).post(`/api/mappe/${mappaArea}/spilli`).send({ tipo, nome, x: 5, y: 5 }).expect(201)).body.data as { id: number };
+    /** Restituisce l'uid stabile dello spillo con quell'id. */
     const uid = (id: number) => prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(id) as string;
+    /** Segna (o toglie il segno) del pin `id` nella partita di prova, pretendendo il 200. */
     const segna = (id: number, si: boolean) => request(app).put(`/api/partite/${partita}/spilli/${id}`).send({ raccolto: si }).expect(200);
     const leva = await nuovoPin('meccanismo', 'Leva del ponte');
     const porta = await nuovoPin('porta', 'Porta del ponte');

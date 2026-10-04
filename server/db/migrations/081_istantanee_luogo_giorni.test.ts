@@ -25,6 +25,7 @@ it('sul database: istantanee aggiornate, riga della guida senza istantanea fotog
       ('q/a', 'q', 1, 'altro', 'A', '', '["venerdi"]', '{"chiave":"q/a","giorni":"venerdì, sabato","note":null}'),
       ('q/b', 'q', 2, 'altro', 'B', '', '[]', NULL)`);
   runMigrations(db);
+  /** Istantanea del seed (`seed_json`) del luogo `k`, decodificata. */
   const leggi = (k: string) => JSON.parse(db.prepare('SELECT seed_json FROM luogo WHERE chiave = ?').pluck().get(k) as string) as Record<string, unknown>;
   expect(leggi('q/a')).toMatchObject({ giorni_json: '["venerdi","sabato"]', note: null });
   expect(leggi('q/b')).toMatchObject({ chiave: 'q/b', nome: 'B', giorni_json: '[]' });

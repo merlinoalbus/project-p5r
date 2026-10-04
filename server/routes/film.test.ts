@@ -52,6 +52,7 @@ describe('API Film e DVD', () => {
     expect(JSON.parse((getDb().prepare("SELECT condizioni_json FROM articolo WHERE chiave='hinokuniya/anima-da-cineasta'").get() as { condizioni_json: string }).condizioni_json)).toEqual([{ tipo: 'quartiere', quartiere: 'shinjuku' }, requisito]);
 
     const id = ((await request(app).post('/api/partite').send({ nome: 'Prima visione', dataGioco: '12-15' })).body.data as { id: number }).id;
+    /** Valuta il requisito «almeno un film completato» sullo stato della partita di prova e ne restituisce lo stato. */
     const valuta = () => valutaRequisiti([{ ...requisito, testo: 'Prima visione Film/DVD' }], statoDisponibilitaPartita(id)).stato;
     expect(valuta()).toBe('bloccato');
     // il contatore non si imposta a mano: si calcola dai progressi, e non esiste un endpoint per scriverlo

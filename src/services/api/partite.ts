@@ -199,6 +199,7 @@ export const eliminaEventi = (id: number, ids: number[]): Promise<{ eliminati: n
 
 // ---- Denaro del gruppo e livelli dei Ladri ----
 
+/** Denaro del gruppo e Ladri della partita, con livello, esperienza e presenza in squadra. */
 export const getSquadra = (id: number): Promise<SquadraPartitaDto> => apiGet(`/partite/${id}/squadra`);
 
 /** I yen: valore assoluto (`yen`) o differenza (`delta`), che è il gesto vero — «ho speso 12.000». */

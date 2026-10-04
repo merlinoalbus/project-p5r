@@ -1,3 +1,7 @@
+// ============================================================
+// Test presentazioneMappa — come si chiama una mappa a schermo: contesti, nome rivisto, gruppi ed etichette, gergo dell'estrattore
+// ============================================================
+
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { alternativeMappa, etichetteDistinte, nomePresentazioneMappa, titoloContesto, risolviContesto, etichettaPlanimetria, presentaMappa, titoloGruppoImmagini } from './presentazioneMappa';
 const m = {nome:'Area tecnica',nomeRivisto:false,contesti:[{id:'a',nome:'Museo, 1P',campo:'F1',texpack:1},{id:'b',nome:'Museo, 2P',campo:'F2',texpack:2},{id:'c',nome:'Museo, 2P',campo:'F3',texpack:2}]};
@@ -101,6 +105,7 @@ it('due versioni riviste con lo stesso nome restano distinguibili negli elenchi'
 });
 
 // ---- Il vocabolario dell'estrattore non arriva a chi gioca ----
+/** Il riassunto di una mappa con il solo nome grezzo dato (non rivisto, senza contesti). */
 const grezza = (nome: string) => ({ nome, nomeRivisto: false, contesti: [] } as unknown as MappaRiassuntoDto);
 
 it('toglie il gergo dell’estrazione e tiene il luogo davanti', () => {
@@ -132,6 +137,7 @@ it('numera solo le etichette che finirebbero uguali, nell’ordine dell’elenco
 
 it('confronta le etichette dopo la trasformazione, non prima', () => {
   const elenco = [grezza('Palazzo di Shido — Sala d’ingresso'), grezza('Palazzo di Shido — Sala d’ingresso')];
+  /** Trasformazione d'esempio delle etichette: toglie il prefisso «Palazzo di Shido — ». */
   const senzaPrefisso = (t: string) => t.replace('Palazzo di Shido — ', '');
   expect(etichetteDistinte(elenco, senzaPrefisso)).toEqual(['Sala d’ingresso · 1', 'Sala d’ingresso · 2']);
 });

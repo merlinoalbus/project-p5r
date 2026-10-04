@@ -157,6 +157,10 @@ export function ScortaPersona({ partitaId }: Props) {
 
 // ---- Modale: aggiunta dal compendio ----
 
+/**
+ * Finestra «Aggiungi Persona alla scorta»: carica il compendio solo quando è aperta, filtra per nome, nome italiano o arcano
+ * (escluse le rare, al più 40 risultati) e aggiunge con un tocco; una Persona già posseduta diventa un avviso, non un errore.
+ */
 function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { aperta: boolean; onChiudi: () => void; onAggiunta: (p: PersonaPossedutaDto) => void; partitaId: number }) {
   const { dati } = useCarica(() => (aperta ? getPersone() : Promise.resolve([])), [aperta]);
   const [q, setQ] = useState('');
@@ -201,6 +205,10 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
 
 // ---- Modale: modifica livello, statistiche, skill, squadra, note ----
 
+/**
+ * Finestra di modifica di una Persona posseduta: livello, presenza in squadra, note, bonus alle statistiche, valori reali letti
+ * nel gioco (o il loro oblio) e skill, cercate nel catalogo escludendo i tratti e quelle già presenti. Tutto si salva insieme.
+ */
 function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: { posseduta: PersonaPossedutaDto; partitaId: number; onChiudi: () => void; onSalvata: (p: PersonaPossedutaDto) => void }) {
   const { dati: tutteSkill } = useCarica(() => getSkills(), []);
   const [livello, setLivello] = useState(posseduta.livello);
@@ -364,6 +372,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
 
 // ---- Aiuti: bonus e istantanea del compendio ----
 
+/** La somma dei bonus sulle cinque statistiche. */
 function totaleBonus(b: StatisticheDto): number {
   return CHIAVI_STATISTICHE.reduce((acc, k) => acc + b[k], 0);
 }

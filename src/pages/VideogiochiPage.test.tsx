@@ -22,6 +22,7 @@ const gioco: VideogiocoDto = {
   negozi: [{ articolo: 'super-baron/tycoon', negozio: 'super-baron', negozioNome: 'Super Baron', prezzo: 4800 }], dettagli: 'Si gioca in soffitta.',
 } as unknown as VideogiocoDto;
 
+/** La risposta dei videogiochi con il solo gioco `g` e i totali ricavati da lui (iniziati/completati 0 o 1, round fatti e obiettivo). */
 const dto = (g: VideogiocoDto) => ({ videogiochi: [g], iniziati: Number(g.iniziato), completati: Number(g.fatto), roundFatti: g.progresso, roundObiettivo: g.totaleRound });
 
 beforeEach(() => {

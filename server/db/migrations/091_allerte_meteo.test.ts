@@ -25,6 +25,7 @@ it('legge le date: per tutte le fasce, «(solo di giorno)», «(sera)», «(nott
 
 it('sul pacchetto: ogni allerta con i suoi giorni e le sue fasce, come nel catalogo', () => {
   const db = dbDiProva();
+  /** Numero di righe dell'allerta meteo `chiave` nella fascia indicata (giorno o sera), cioè quanti giorni la portano in quella fascia. */
   const conta = (chiave: string, fascia: string) => (db.prepare('SELECT COUNT(*) AS n FROM allerta_meteo WHERE chiave = ? AND fascia = ?').get(chiave, fascia) as { n: number }).n;
   expect([conta('pioggia-torrenziale', 'giorno'), conta('pioggia-torrenziale', 'sera')]).toEqual([6, 8]);
   expect([conta('allerta-polline', 'giorno'), conta('allerta-polline', 'sera')]).toEqual([8, 8]);

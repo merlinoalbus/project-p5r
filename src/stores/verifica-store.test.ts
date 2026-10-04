@@ -14,7 +14,9 @@ vi.mock('../services/api', (vero) => moduloApi(vero, {
 import { useSuggerimentiStore } from './suggerimentiStore';
 import { usePartitaStore } from './partitaStore';
 
+/** Dei suggerimenti finti per il giorno dato, senza motivi. */
 const sugg = (giorno: string) => ({ giorno, motivi: [] }) as unknown;
+/** Una partita attiva finta «P<id>» con il livello del protagonista dato. */
 const partita = (id: number, livello: number) => ({ id, nome: `P${id}`, attiva: true, livelloProtagonista: livello }) as unknown;
 
 beforeEach(() => {

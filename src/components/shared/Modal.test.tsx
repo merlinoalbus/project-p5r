@@ -44,6 +44,7 @@ describe('Modal', () => {
 });
 
 describe('Modal — fuoco (A5, verifica 2026-10-03)', () => {
+  /** Pulsante «Apri» più una finestra «Finestra» chiusa all'inizio, con un campo «Nome» (autoFocus solo se richiesto) e l'azione «Conferma». */
   function Apribile({ conAutoFocus = false }: { conAutoFocus?: boolean }) {
     const [aperta, setAperta] = useState(false);
     return (
@@ -88,6 +89,7 @@ describe('Modal — fuoco (A5, verifica 2026-10-03)', () => {
 });
 
 it('A5: anche con un campo autoFocus, alla chiusura il fuoco torna al pulsante che ha aperto la finestra', () => {
+  /** Pulsante «Apri con campo» più una finestra sempre montata, chiusa all'inizio, con un campo «Testo» in autoFocus. */
   function ConAutoFocus() {
     const [aperta, setAperta] = useState(false);
     return (
@@ -107,6 +109,7 @@ it('A5: anche con un campo autoFocus, alla chiusura il fuoco torna al pulsante c
 });
 
 it('A5: una finestra montata già aperta dal genitore (e smontata alla chiusura) ridà il fuoco a chi l\'ha aperta', () => {
+  /** Pulsante «Aggiungi» che monta la finestra già aperta (con un campo «Voce» in autoFocus); la chiusura la smonta. */
   function MontataAperta() {
     const [mostra, setMostra] = useState(false);
     return (
@@ -127,6 +130,7 @@ it('A5: una finestra montata già aperta dal genitore (e smontata alla chiusura)
 });
 
 it('A5: in StrictMode (sviluppo) il campo con autoFocus tiene il fuoco, e alla chiusura il fuoco torna a chi ha aperto', () => {
+  /** Pulsante «Apri severa» che monta la finestra già aperta (con un «Campo severo» in autoFocus); la chiusura la smonta. Va disegnata in StrictMode. */
   function MontataAperta() {
     const [mostra, setMostra] = useState(false);
     return (
@@ -146,6 +150,7 @@ it('A5: in StrictMode (sviluppo) il campo con autoFocus tiene il fuoco, e alla c
 });
 
 it('A5: un clic che non sposta il fuoco (documento senza il fuoco del sistema) conta come apertura: alla chiusura il fuoco torna al pulsante cliccato', () => {
+  /** Un campo della pagina, un pulsante «Apri col clic» (testo dentro uno span) e la finestra «Dal clic», chiusa all'inizio. */
   function DaClic() {
     const [aperta, setAperta] = useState(false);
     return (

@@ -6,6 +6,7 @@ import { aggiornaMappa, importaMappe } from '../../services/mappe/mappeService.j
 
 afterEach(() => closeDb());
 
+/** Database in memoria con tutte le migrazioni e una sola mappa seed «nativa» dal nome tecnico «Area 4 — RMAP 153». */
 function conMappa() {
   const db = initDb(':memory:');
   runMigrations(db);
@@ -13,6 +14,7 @@ function conMappa() {
     VALUES ('nativa', 'Area 4 — RMAP 153', 'area', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 'seed', '', '2026-09-09T00:00:00.000Z')`).run();
   return db;
 }
+/** Valore della colonna `nome_rivisto` della mappa `chiave` (di norma quella «nativa»). */
 const rivisto = (db: ReturnType<typeof initDb>, chiave = 'nativa') =>
   db.prepare('SELECT nome_rivisto FROM mappa WHERE chiave = ?').pluck().get(chiave) as number;
 

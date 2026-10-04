@@ -9,12 +9,15 @@ import { elementoEreditabile, invalidaEredita, skillAlLivello, skillPerId, tipoE
 import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
+/** Persona ammessa nel contesto di fusione col nome dato; se non c'è lancia un errore, così la prova fallisce subito. */
 function perNome(ctx: Contesto, nome: string): PersonaFusione {
   const p = ctx.ammesse.find((x) => x.nome === nome);
   if (!p) throw new Error(`Persona ${nome} non ammessa`);
   return p;
 }
+/** Disponibilità vuota: nessuna Persona in scorta né nel registro. */
 const vuota = (): Disponibilita => ({ scorta: new Map(), registro: new Set() });
+/** Nodi foglia del piano (tutto ciò che non è una fusione), raccolti ricorsivamente da sinistra a destra. */
 function foglie(n: NodoPiano): NodoPiano[] {
   return n.modo === 'fusione' ? n.figli.flatMap(foglie) : [n];
 }
@@ -89,6 +92,7 @@ describe('alberoFusione', () => {
     for (const p of conCatture) {
       expect(p.profondita).toBeLessThanOrEqual(2);
       expect(pianoCoerente(p.radice, ctx)).toBe(true);
+      /** Percorre il piano e controlla che nessun nodo di fusione o di cattura superi il livello 60 e che nessuna Persona catturata sia rara o speciale. */
       const controlla = (n: NodoPiano) => {
         if (n.modo === 'fusione') {
           expect(n.persona.livello).toBeLessThanOrEqual(60);
@@ -133,6 +137,11 @@ describe('alberoFusione', () => {
     const tarukaja = ctx.ammesse.flatMap((p) => skillAlLivello(p.id, 99)).find((s) => s.nome === 'Tarukaja')!;
     const piani = pianiFusione(jack, ctx, vuota(), { profondita: 2, alternative: 4, catture: true, livelloMax: null, skill: [tarukaja.id] });
     expect(piani.length).toBeGreaterThan(0);
+    /**
+     * Percorre il piano e controlla che ogni skill richiesta a un nodo sia davvero ottenibile: in una fusione, se non è innata
+     * né appresa salendo di livello, deve portarla un figlio e l'elemento deve essere ereditabile dalla Persona risultante;
+     * in una foglia (scorta, registro o cattura) la Persona deve già possederla o apprenderla col livello.
+     */
     const verifica = (n: NodoPiano) => {
       const richieste = new Set(n.skillPortate);
       if (n.modo === 'fusione') {

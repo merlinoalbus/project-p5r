@@ -13,7 +13,9 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../../stores/glossarioStore', () => ({ useGlossarioStore: (sel: (s: { ricarica: () => Promise<void> }) => unknown) => sel({ ricarica: async () => {} }) }));
 
+/** Traduzione dell'ambito «arcana» con la chiave, il testo e la fonte dati. */
 const voce = (chiave: string, testo: string, fonte: TraduzioneDto['fonte']): TraduzioneDto => ({ ambito: 'arcana', chiave, testo, extra: null, fonte, updatedAt: '' });
+/** La voce d'elenco il cui testo comincia con la chiave data (si assume che esista). */
 const riga = (chiave: string) => screen.getAllByRole('listitem').find((li) => li.textContent?.startsWith(chiave))!;
 
 beforeEach(() => {

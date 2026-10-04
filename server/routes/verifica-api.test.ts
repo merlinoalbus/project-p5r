@@ -154,7 +154,9 @@ describe('verifica API — rotte vere', () => {
 });
 
 describe('F11: profondità di un piano salvato', () => {
+  /** Un nodo di fusione minimo con una catena di `livelli` livelli: costruisce ricorsivamente un solo figlio per livello. */
   const nodo = (livelli: number): Record<string, unknown> => ({ persona: { id: 1 }, modo: 'fusione', costo: 0, figli: livelli > 1 ? [nodo(livelli - 1)] : [] });
+  /** Il corpo di salvataggio di un piano la cui radice è profonda `livelli` livelli. */
   const piano = (livelli: number) => ({ personaId: 1, piano: { radice: nodo(livelli), costo: 0, profondita: 0, catture: 0, evocazioni: 0, fusioni: 0 } });
 
   it(`un piano di ${LIVELLI_MAX_PIANO} livelli passa, uno di ${LIVELLI_MAX_PIANO + 1} no`, () => {

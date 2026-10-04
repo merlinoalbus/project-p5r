@@ -19,6 +19,7 @@ import type { DisponibilitaDto } from '../../types';
 
 vi.mock('../shared/IconaAzione', () => ({ IconaAzione: () => null, IconaSegno: () => null }));
 
+/** Requisito di disponibilità in stato grigio e manuale, del tipo dato, con testo e dettaglio uguali a `dettaglio`. */
 const req = (tipo: string, dettaglio: string) => ({ indice: 0, tipo, testo: dettaglio, stato: 'grigio', dettaglio, manuale: true } as unknown as DisponibilitaDto['requisiti'][number]);
 
 describe('ChipDisponibilita', () => {

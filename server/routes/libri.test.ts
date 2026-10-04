@@ -82,10 +82,13 @@ describe('API Libri', () => {
    * Quel che raddoppia è quanto rende un pomeriggio **da qui in avanti**. Il requisito del libro
    * non si muove, e non si muove nemmeno quel che hai già letto; a muoversi è il passo. */
   describe('«Lettura rapida»', () => {
+    /** Legge l'elenco dei libri con lo stato della partita `id` (compreso il flag di «Lettura rapida»). */
     const libri = async (id: number) => (await request(app).get(`/api/compendio/libri?partita=${id}`)).body.data as LibriDto;
+    /** Trova nell'elenco dei libri quello con la chiave data. */
     const trova = (d: LibriDto, chiave: string) => d.libri.find((l) => l.chiave === chiave)!;
     // «Lettura rapida» esce il 1º luglio: la partita sta oltre, e un libro da tre sessioni ancora bloccato (un prerequisito) non si può leggere
     const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome, dataGioco: '12-15' })).body.data as { id: number }).id;
+    /** Imposta a `avanzamento` le sessioni lette del libro nella partita `id` (restituisce la richiesta, per controllarne l'esito). */
     const leggi = (id: number, chiave: string, avanzamento: number) =>
       request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave, avanzamento });
 

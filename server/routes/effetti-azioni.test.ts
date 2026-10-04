@@ -31,6 +31,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
   });
   afterAll(() => closeDb());
 
+  /** Crea una partita col nome dato, la porta al giorno `data` (MM-GG) e ne restituisce l'id. */
   const nuovaPartita = async (nome: string, data: string) => {
     const id = ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
     await request(app).put(`/api/partite/${id}/giorno`).send({ data }).expect(200);
@@ -38,18 +39,24 @@ describe('API — effetti strutturati delle azioni della guida', () => {
   };
   /** La voce della guida che aveva quel posto nella guida d'origine (`indice_guida`): i casi qui sono scritti così. */
   const uidDi = (data: string, indice: number) => prepared('SELECT uid FROM voce_giornata WHERE data = ? AND indice_guida = ?').pluck().get(data, indice) as string;
+  /** Spunta (o, con `fatta` falso, toglie la spunta) della voce della guida del giorno `data` al posto `indice`, nella partita `p`. */
   const spunta = (p: number, data: string, indice: number, fatta = true) => request(app).put(`/api/partite/${p}/percorso`).send({ uid: uidDi(data, indice), fatta });
+  /** Esegue la spunta come `spunta`, pretende il 200 e restituisce gli effetti che la risposta dichiara. */
   const effetti = async (p: number, data: string, indice: number, fatta = true) => ((await spunta(p, data, indice, fatta).expect(200)).body.data as AzionePercorsoDto).effetti;
+  /** Restituisce i punti che la partita `p` ha nella Dote sociale con la chiave data. */
   const dote = async (p: number, chiave: string) => ((await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[]).find((d) => d.chiave === chiave)!.punti;
   /** Quanto una spunta dice di segnare per una Dote: dall'azione, dalle letture e dai turni. */
   const detta = (e: EffettiAzioneDto | null | undefined, chiave: string) => [
     ...(e?.doti ?? []), ...(e?.letture ?? []).flatMap((l) => l.doti ?? []), ...(e?.turni ?? []).flatMap((t) => t.doti),
   ].filter((d) => d.chiave === chiave).reduce((s, d) => s + d.delta, 0);
+  /** Vero se tutte le Doti sociali della partita `p` hanno ancora 0 punti (le spunte non le toccano). */
   const tutteAZero = async (p: number) => ((await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[]).every((d) => d.punti === 0);
+  /** Stato del libro nella partita `p`: sessioni di lettura registrate (0 se nessuna) e se risulta letto. */
   const libro = (p: number, chiave: string) => ({
     avanzamento: (prepared('SELECT avanzamento FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').get(p, chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0,
     letto: !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = ?").get(p, chiave),
   });
+  /** Legge il percorso del giorno `data` (senza partita) e restituisce l'azione della guida al posto `indice`. */
   const azione = async (data: string, indice: number) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.uid === uidDi(data, indice))!;
   /** Gli effetti che la conversione (086) ha dato all'azione della guida d'origine (`azioni_json`, copia storica): il pacchetto è
    *  la fotografia dell'istanza, e l'utente può aver cambiato gli effetti della voce nel canone. */
@@ -121,6 +128,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
 
   it('il turno di un lavoro: la spunta registra il turno e dice le Doti del lavoro, togliendola si toglie il turno', async () => {
     const p = await nuovaPartita('Rafflesia', '04-26');
+    /** Quante volte la partita ha svolto il lavoro al fioraio Rafflesia (0 se non c'è la riga). */
     const volte = () => (prepared("SELECT volte FROM attivita_svolta_partita WHERE partita_id = ? AND attivita_chiave = 'lavoro-rafflesia'").get(p) as { volte: number } | undefined)?.volte ?? 0;
     const e = await effetti(p, '04-26', 0);
     expect(e?.turni).toEqual([{ attivita: 'lavoro-rafflesia', nome: expect.any(String), ordine: 1, doti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3, note: 2 }] }]);
@@ -144,6 +152,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
 
   it('la conversione legge i titoli solo prima del «;»; al cinema ogni azione è «una visione»', () => {
     const ctx = contestoConversione(getDb());
+    /** Trova fra le azioni del contesto di conversione quella del giorno `data` al posto `indice` della guida. */
     const trova = (data: string, indice: number) => ctx.successive.find((s) => s.data === data && s.indice === indice)!;
     const rivelazioni = trova('10-31', 0);
     expect(effettiDellAzione(rivelazioni.azione, rivelazioni, ctx)).toEqual([{ tipo: 'lettura', categoria: 'libro', chiave: 'rivelazioni-eroiche', almeno: null }]);
@@ -157,6 +166,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
 
   it('al cinema una spunta è una visione: saltare la prima visita non regala una visione, togliere e rimettere non ne aggiunge', async () => {
     const p = await nuovaPartita('Cinema', '07-31');
+    /** Quante visioni di «L'amore chissà» al cinema ha registrato la partita (0 se non c'è la riga). */
     const visioni = () => (prepared("SELECT avanzamento FROM progresso_film_partita WHERE partita_id = ? AND film_chiave = 'cinema-l-amore-chissa'").get(p) as { avanzamento: number } | undefined)?.avanzamento ?? 0;
     // la seconda visita della guida, senza la prima: una visione, con i punti della prima (tre note, 5 punti)
     const e = await effetti(p, '07-31', 2);
@@ -175,6 +185,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
 
   it('spunta e contatore dei turni restano coerenti: un turno tolto dal contatore non si toglie una seconda volta', async () => {
     const p = await nuovaPartita('Turni', '05-08');
+    /** Quante volte la partita ha svolto il lavoro al Beef Bowl Shop (0 se non c'è la riga). */
     const volte = () => (prepared("SELECT volte FROM attivita_svolta_partita WHERE partita_id = ? AND attivita_chiave = 'lavoro-ore-no-beko'").get(p) as { volte: number } | undefined)?.volte ?? 0;
     await spunta(p, '05-06', 7).expect(200); // turno 1: Perizia, 2 note = 3
     await spunta(p, '05-08', 4).expect(200); // turno 2: Perizia, 3 note = 5
@@ -194,6 +205,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
 
   it('il contatore dice le Doti di ogni turno aggiunto o tolto, anche accanto a turni contati prima del registro', async () => {
     const p = await nuovaPartita('Contatore', '04-26');
+    /** Imposta a `volte` il contatore dei turni di Rafflesia della partita e restituisce i progressi risposti (con le Doti da segnare). */
     const contatore = async (volte: number) => (await request(app).put(`/api/condizioni/partite/${p}/attivita/lavoro-rafflesia`).send({ volte }).expect(200)).body.data as ProgressiPartitaDto;
     // la risposta dice le Doti da segnare e che cosa dà un turno
     const r = await contatore(2);
@@ -266,6 +278,7 @@ describe('API — il contatore dei turni registra le stesse Doti di un turno all
   });
   afterAll(() => closeDb());
 
+  /** Il registro degli effetti dei turni di Rafflesia della partita `p` (ordine, Dote, punti, note), in ordine stabile per il confronto. */
   const registro = (p: number) => prepared("SELECT ordine, dote_chiave, punti, note FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = 'lavoro-rafflesia' ORDER BY ordine, dote_chiave").all(p);
 
   it('quattro turni in una volta e quattro turni uno per uno danno lo stesso registro, con la voce condizionata dal 3° turno', async () => {
