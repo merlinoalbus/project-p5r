@@ -5,7 +5,7 @@ Un solo file, `gioco.db`: i dati di gioco (compendio, guida, catalogo, mappe, lu
 | Dove | In git | Contenuto | Uso |
 |---|---|---|---|
 | `pacchetto/gioco.db` | sì (pochi MB) | schema e dati **senza** il contenuto delle immagini | copiato in `DATA_DIR/gioco.db` al primo avvio: l'interfaccia si apre subito; usato anche dai test (`caricaPacchetto`) |
-| `pacchetto/completo/gioco.db` | **NO** (`.gitignore`, ~311 MB) | lo stesso **con le immagini dentro** (tabella `immagine`, colonna `contenuto`, migrazione 079) | **il caricamento iniziale completo avviene sempre dall'app**: Impostazioni → Pacchetto di gioco → «Importa un pacchetto» (anteprima, poi il file sostituisce quello dell'istanza sul volume; le partite non si toccano) |
+| `pacchetto/completo/gioco.db` | **NO** (`.gitignore`, ~311 MB) | lo stesso **con le immagini dentro** (tabella `immagine`, colonna `contenuto`, migrazione 079) | **il caricamento iniziale completo avviene sempre dall'app**: si mette il file nella cartella d'appoggio (`DEPOSITO_DIR`, in produzione il NAS montato su `/deposito`), poi Impostazioni → Pacchetto di gioco → lo si sceglie dall'elenco (anteprima, poi il file sostituisce quello dell'istanza sul volume; le partite non si toccano). Il browser non trasporta più il file: dal 2026-10-03 nessun file viaggia nel corpo di una richiesta |
 
 Il file completo non sta su GitHub perché supera il limite di 100 MB (decisione dell'utente del 2026-09-12: niente LFS per
 ora, si rivaluta quando il database sarà definitivo). Va conservato qui in locale e passato a mano a chi installa.

@@ -3,6 +3,11 @@
 Studio scritto il 2026-09-04 a partire dal requisito dell'utente (riportato qui sotto parola per parola) e dallo stato del codice.
 È il riferimento per l'implementazione degli step 13.1–13.6 e di 12.4; ogni scelta rimanda al punto del requisito che soddisfa.
 
+> **Come leggerlo oggi** (verifica completa, 2026-10-04): le sezioni descrivono il progetto e poi lo stato raggiunto. Dove il
+> codice è cambiato dopo, il testo è stato corretto (API, formato di esportazione, editor delle condizioni). Il **seed JSON**
+> (`data/seed/*.json`, `caricaSeed`) è stato dismesso il 12 settembre 2026: le mappe della guida oggi stanno in `gioco.db` e arrivano
+> con il pacchetto di gioco.
+
 ## 1. Requisito dell'utente
 
 1. «Mi serve un metodo per poter creare le mappe in app e poterle poi esportare insieme ai punti di interesse (spilli)», da inserire
@@ -150,27 +155,30 @@ palette sono alti 44 px (bersaglio touch).
 
 I 15 tipi dei punti di dungeon (`utils/dungeon.ts`; dal 2026-10-01 anche porta, meccanismo e storia) si mappano su questi (persona, storia e altro → nota con riferimento al punto, puzzle → punto-sensibile,
 volontà → seme-bramosia, ombra-sciagura → nemico, forziere-chiuso → forziere, oggetto → oggetto-chiave, porta → porta, meccanismo → meccanismo; il tipo di pin «tesoro» è stato tolto il 2026-10-01, ridondante col Tesoro del Palazzo). Quando la corrispondenza cambia,
-`sincronizzaMappe` riclassifica a ogni avvio gli spilli di origine `seed` (tipo e collezionabilità), senza toccare quelli dell'utente né gli stati per partita.
+`sincronizzaMappe` riclassifica gli spilli di origine `seed` (tipo e collezionabilità), senza toccare quelli dell'utente né gli stati per partita. Oggi gira solo dentro la migrazione 027 (all'epoca del seed girava anche a ogni caricamento).
 
 ## 5. API (`/api/mappe`, sostituisce le rotte attuali mantenendo `scarica` come sorgente opzionale dell'immagine)
 
 | Metodo | Rotta | Uso |
 |---|---|---|
-| GET | `/api/mappe` | albero delle mappe (chiave, nome, tipo, genitore, miniatura, conteggi degli spilli) |
+| GET | `/api/mappe/albero` | albero delle mappe (chiave, nome, tipo, genitore, miniatura, conteggi degli spilli) |
 | GET | `/api/mappe/:chiave?partita=` | mappa con spilli e stato raccolto/ottenuto della partita, articoli dei negozi collegati |
 | POST/PUT/DELETE | `/api/mappe`, `/api/mappe/:chiave` | editor: crea, rinomina, sposta nell'albero, elimina (con conferma se ha figli) |
 | PUT | `/api/mappe/:chiave/immagine` | immagine di base (corpo grezzo `image/*`, come `/api/immagini`), larghezza/altezza calcolate |
 | POST/PUT/DELETE | `/api/mappe/:chiave/spilli`, `/api/mappe/spilli/:id` | editor: spilli (tipo, nome, descrizione, x/y, riferimento, collezionabile, condizioni di visibilità) |
 | PUT | `/api/partite/:id/spilli/:spilloId` | `{ raccolto }` in uso normale (punto 9): lo stato del pin — raccolto, o sconfitto/azionato/gestito/affrontato/aperta per boss e miniboss, meccanismo, punto sensibile, nemico e porta chiusa (2026-10-03); 400 `spillo-senza-stato` sugli altri senza voce della guida |
-| GET | `/api/mappe/esporta` | ZIP con `mappe.json` (mappe + spilli + tipi) e `immagini/<chiave>.<ext>` (punto 1) |
-| POST | `/api/mappe/importa` | ZIP (stesso formato): unione per chiave, con `sovrascrivi` |
+| GET | `/api/mappe/esporta?radice=` | pacchetto JSON (versione 1, §6) con mappe, spilli e immagini; con `radice` solo quel luogo e le sue discendenti (punto 1) |
+| POST | `/api/mappe/importa` | lo stesso pacchetto JSON (fino a 64 MB): unione per chiave, con `sovrascrivi` |
 
-Validazione zod come per le altre rotte; le scritture dell'editor sono negate se la richiesta non ha `modalita=editor` (difesa in
-profondità del punto 10, oltre all'interfaccia).
+Validazione zod come per le altre rotte. La difesa prevista qui (scritture dell'editor negate senza `modalita=editor`) non è stata
+realizzata: l'editor si separa dall'uso solo nell'interfaccia.
 
 ## 6. Formato di esportazione e seed del repository (punto 1)
 
-Stato: il pacchetto JSON (versione 1) è quello descritto sotto; per il repository l'editor produce inoltre uno ZIP per luogo (radice + discendenti) con `data/seed/mappe/<chiave>.json` e gli asset in `public/asset/mappe/` (e `public/asset/spilli/` per le schermate degli spilli), scritto da `server/utils/zip.ts` senza dipendenze; il seed carica `mappe-editor.json` e poi `data/seed/mappe/*.json`. Decisione dell'utente (2026-09-04 sera): il pacchetto è completo, immagini di base e schermate degli spilli comprese, puntate come asset; l'utente lo consegna e viene caricato come dato preimpostato dell'app (supera la precedente esclusione delle piante scaricate).
+Stato: il pacchetto JSON (versione 1) è quello descritto sotto, e l'esportazione di un luogo (radice + discendenti) è lo stesso
+pacchetto limitato a quel sottoalbero. Al tempo del seed l'editor produceva anche uno ZIP per il repository (`data/seed/mappe/<chiave>.json`
+e gli asset in `public/asset/`), caricato da `caricaSeed`: con il seed è uscito anche quello, e `server/utils/zip.ts` oggi serve solo
+alla copia completa dell'istanza. Decisione dell'utente (2026-09-04 sera): il pacchetto è completo, immagini di base e schermate degli spilli comprese, puntate come asset; l'utente lo consegna e viene caricato come dato preimpostato dell'app (supera la precedente esclusione delle piante scaricate).
 
 `mappe.json` esportato = `{ versione: 1, mappe: [{ chiave, nome, tipo, genitore, ordine, immagine: 'immagini/<chiave>.png' | asset, larghezza,
 altezza, entita, note, spilli: [{ tipo, nome, descrizione, x, y, riferimento, collezionabile, ordine, condizioni }] }] }` (`condizioni` assente quando vuoto:
@@ -181,9 +189,9 @@ regole del collegamento dalla guida (`erroreVoceDelPin`: esiste, non è descritt
 genitori risolti; una che non regge si scarta e si conta (`vociScartate` nell'esito). La voce non fa parte dell'identità del pin.
 Un pacchetto che **tace** sulla voce (di prima della 094, o il seed del repository) non toglie quella collegata nell'istanza: il pin
 invariato la tiene, e il pin che il pacchetto cambia — tolto e reinserito, con lo stesso uid — la ritrova (come «raccolto», che
-segue l'uid); un pacchetto che la dichiara `null` la toglie. Lo stesso file, con le
-immagini in `public/asset/mappe/`, è letto da `caricaSeed` come `data/seed/mappe-editor.json` (origine `seed`): un `POST /importa` dello
-ZIP esportato e un commit sono l'intero flusso «creo in app → pubblico nel repository». Il pacchetto è completo: immagini di base e schermate degli spilli comprese, anche quelle scaricate dalle guide (la loro provenienza
+segue l'uid); un pacchetto che la dichiara `null` la toglie. Al tempo del seed lo stesso file, con le
+immagini in `public/asset/mappe/`, era letto da `caricaSeed` come `data/seed/mappe-editor.json` (origine `seed`), e il flusso «creo in
+app → pubblico nel repository» passava da lì; oggi le mappe della guida si pubblicano rigenerando il pacchetto di gioco (`npm run pacchetto`). Il pacchetto è completo: immagini di base e schermate degli spilli comprese, anche quelle scaricate dalle guide (la loro provenienza
 è annotata nel LEGGIMI; decisione dell'utente del 2026-09-04 sera, registrata in `DECISIONI.md`). Le mappe `seed` sono modificabili
 nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la stessa chiave.
 
@@ -212,7 +220,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   modifiche non salvate). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
   spillo nel punto), **Incolla** (attivo dopo «Copia»: un tocco sulla mappa crea lo spillo copiato — stesso tipo, nome, descrizione, collezionabile, riferimento e condizioni di visibilità — nel punto toccato, poi si torna a Seleziona; gli appunti vivono in `sessionStorage` e restano per altre copie, anche su altre mappe); **Copia** ed **Elimina** sono pulsanti nel pannello dello spillo selezionato (non strumenti a parte); il tipo dello spillo si cambia dal pannello senza ricrearlo; pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
   fra negozi, punti di dungeon, luoghi, Confidenti, richieste, mappe; «Crea mappa collegata» (crea la mappa figlia e collega lo spillo).
-- **Condizioni di visibilità** (15.22, `CondizioniSpilloEditor`): elenco delle condizioni dello spillo con «Togli» e costruttore «Nuova condizione»
+- **Condizioni di visibilità** (15.22, `CondizioniSpilloEditor`, oggi `CondizioniEditor` in `src/components/guida/`): elenco delle condizioni dello spillo con «Togli» e costruttore «Nuova condizione»
   con il tipo scelto da un elenco chiuso e i parametri da selettori, mai testo libero — da una data (giorno + mese del calendario di gioco), solo in un
   periodo, dopo un Palazzo (elenco dei Palazzi della Guida), Dote almeno a un rango (1–5), Confidente almeno a un rango (1–10, elenco dei Confidenti),
   richiesta dei Mementos completata (elenco), solo con la pioggia / mai con la pioggia, solo di giorno / solo di sera (il momento della giornata

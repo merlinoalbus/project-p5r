@@ -1,5 +1,10 @@
 # Glossario della localizzazione italiana di Persona 5 Royal
 
+> **Dove è oggi** (verifica completa, 2026-10-04): le rese italiane citate come `data/seed/traduzioni.json` e
+> `scripts/seed/localizzazione-it.json` stanno nella tabella `traduzione` di `gioco.db` (ambiti `skill`, `persona`, `oggetto`,
+> `termine`…), modificabili da Impostazioni → Traduzioni; `scripts/seed/glossario.ts` era della pipeline del seed, dismessa il
+> 2026-09-12.
+
 Censimento (2026-09-03) dei termini ufficiali italiani dalla guida allgamestaff.it, integrato nell'app tramite
 `scripts/seed/localizzazione-it.json` → `data/seed/traduzioni.json` (`skill`, `persone`, `termini`) → tabella `traduzione`
 (ambiti `skill`, `persona`, `termine`). Nell'app: nomi italiani delle skill e delle Persona ovunque (con il nome canonico

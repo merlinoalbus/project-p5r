@@ -1,7 +1,11 @@
 # Architettura — project-p5r
 
-Aggiornato allo step **0.5 (frontend)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
-realizzeranno secondo `docs/ROADMAP.md`.
+Aggiornato alla verifica completa del 4 ottobre 2026. Le sezioni §1–§8 e quelle senza data descrivono il sistema com'è
+oggi. Le sezioni intitolate con una fase («Fase 6.1», «Fase 13.2»…) o con una data sono il **registro** di quando una parte è
+nata: dicono come era fatta allora e quale scelta l'ha guidata. Dove una cosa è cambiata dopo, lo dice la sezione più recente.
+In particolare, quelle sezioni citano spesso i file del **seed JSON** (`data/seed/*.json`, caricati da `caricaSeed` al boot). Il
+seed è stato dismesso il 12 settembre 2026: quei dati oggi stanno nelle tabelle di `gioco.db` (o nei blocchi di `dati_guida`) e
+arrivano con il pacchetto di gioco. Le parole «seed» e «reseed» vanno lette come «dati della guida» e «ricarica del pacchetto».
 
 ## 1. Vista d'insieme
 
@@ -16,9 +20,9 @@ realizzeranno secondo `docs/ROADMAP.md`.
  └──────────────────────┘   { data } / { error }└─────────┬────────────────┘
                                                           │ SQLite (WAL)
                                                           ▼
-                                         data/project-p5r.db  (volume /data in Docker)
-                                         ├─ tabelle DATI DI GIOCO  (dal seed, rigenerabili)
-                                         └─ tabelle DATI UTENTE    (per partita_id)
+                                         data/  (volume /data in Docker)
+                                         ├─ gioco.db    DATI DI GIOCO  (dal pacchetto, sostituibile)
+                                         └─ partite.db  DATI UTENTE    (per partita_id, schema «utente»)
 ```
 
 - **Un solo processo backend**, nessun DB esterno, nessuna autenticazione (app personale in LAN/Tailscale).
@@ -30,7 +34,7 @@ realizzeranno secondo `docs/ROADMAP.md`.
 | Runtime | Node ≥ 22.13 (immagini Docker e CI su Node 24 LTS), TypeScript 5.9, ESM (`"type": "module"`) |
 | Frontend | React 19, react-router 7, zustand 5, Tailwind 4 (plugin Vite, config CSS-first), Vite 8 |
 | Backend | Express 5, better-sqlite3 12, zod 4, pino 10, tsx (esegue i `.ts` a runtime, anche in produzione) |
-| Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (`server/bootstrap.test.ts`, `server/routes/api.test.ts`), DB in memoria con seed reale (`server/services/seed/caricaSeed.test.ts`), migrazioni (`server/db/migrationRunner.test.ts`), pipeline seed (`scripts/seed/*.test.ts`) |
+| Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (tramite `test/supertest.ts`), DB in memoria con il pacchetto iniziale (`test/dbDiProva.ts`), moduli finti dal modulo vero (`test/mockModuli.ts`), migrazioni (`server/db/migrationRunner.test.ts`, `migrations/index.test.ts`) |
 | Qualità | ESLint 10 flat config, `tsc -b` su 4 progetti (app / node / server / test) |
 | Deploy | Immagini `node:24-alpine` (backend) e `nginx:1.30-alpine` (frontend); GitHub Actions su Node 24 (checkout v7, setup-node v7, setup-buildx v4, build-push v7) |
 
@@ -42,8 +46,8 @@ server/
   config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, PACCHETTO_DIR, LOG_LEVEL)
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
   db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
-  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»); registro in index.ts
-  db/migrazioniUtente/ partite: 001 schema, 002 spillo_partita per uid, 003 timbri_dedalo_partita; registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
+  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema); registro in index.ts, `index.test.ts` pretende id consecutivi
+  db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/pacchetto/ pacchettoGioco.ts: primo avvio dal pacchetto (`assicuraPacchettoIniziale`), `caricaPacchetto`/`ricaricaPacchetto` (test), `regoleAllAvvio`
@@ -117,13 +121,15 @@ docs/                 documentazione di bordo e riferimenti di dominio
    ripetuti dopo una risposta persa sposterebbero o sommerebbero due volte.
 
 ## 5. Persistenza
-- **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, indice immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le 32 tabelle delle partite, DDL in `server/db/schemaUtente.ts`). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
+- **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, indice immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le 33 tabelle delle partite, DDL in `server/db/schemaUtente.ts`). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
 - Connessione better-sqlite3, pragma `journal_mode=WAL` (su entrambi i file), `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
 - Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, con `foreign_key_check` **dentro** la transazione prima di avanzare `user_version` (dal 2026-10-03, prima il controllo era dopo il commit). Il controllo si fa prima e dopo `up`: solo le violazioni **nuove**, introdotte da quella migrazione, la annullano (resta da applicare); quelle già presenti nel file si scrivono nel log come avviso e non bloccano l'avvio, che altrimenti si fermerebbe per sempre su un dato vecchio che nessuna migrazione tocca.
 - `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
 - Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto). `seed_meta`, la memoria dell'ultimo caricamento del seed, è uscita con la migrazione 096 (verifica completa, R3'), e con lei il campo `seed` dello stato dell'istanza.
-- Schema in due famiglie (migrazioni 001–004; `user_version` = 4):
+- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 096 e `utente` alla 016). Le righe qui sotto descrivono
+  il nucleo di allora; il caricamento era `caricaSeed` con l'hash in `seed_meta`, mentre oggi i dati di gioco arrivano con il
+  pacchetto (`caricaPacchetto` / importazione) e le immagini stanno nella tabella `immagine` di `gioco.db` (079):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
     `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,
     `confidente` + `confidente_rango` (punti necessari per rango, 0 = non a punti), `dote_sociale` + `dote_sociale_rango` (5 ranghi
@@ -267,7 +273,7 @@ chiave `citta-<quartiere>`), scaricata al primo uso; `MappaInterattiva` accetta 
 Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
 
 ## 6. Motore di fusione *(fasi 1–4 realizzate)*
-- `server/services/fusione/motoreFusione.ts`: snapshot in memoria del compendio (invalidato al reseed) e contesti memoizzati per insieme di DLC posseduti;
+- `server/services/fusione/motoreFusione.ts`: snapshot in memoria del compendio (invalidato con le altre cache di gioco, `cacheDiGioco`, quando il pacchetto cambia) e contesti memoizzati per insieme di DLC posseduti;
   regole di chinhodado (speciale a due → Demone del Tesoro + normale con modificatore di rango → arcani diversi: prima Persona con livello
   ≥ 1+⌊(La+Lb)/2⌋ → stesso arcano: la più alta con livello ≤, esclusi gli ingredienti); ricette inverse per enumerazione delle coppie di arcani
   che producono l'arcano del target + fusioni con Demone del Tesoro; costo Σ(27L²+126L+2147). `fusioneService.ts` produce i DTO con nomi
@@ -445,7 +451,7 @@ Studio in `docs/MAPPE.md`. Migrazione 027: `mappa` (albero con `genitore_chiave`
 `spillo` (x/y in percentuale dell'immagine, `tipo` del registro `shared/spilli.ts` — 42 tipi in quattro categorie (`CATEGORIE_SPILLO`, aggiornamento del 2026-09-29), tabella in MAPPE §4 —, riferimento tipizzato mappa|negozio|punto|luogo|confidente|
 richiesta|attivita, `collezionabile`), `spillo_partita` (raccolto per partita). `server/services/mappe/sincronizzaMappe.ts` è idempotente:
 crea `tokyo` → `citta-<quartiere>` e `dungeon-<chiave>` → `<area>` dalle tabelle della guida e trasforma `marcatore_mappa`/`marcatore_luogo` in
-spilli (riferimento `punto`/`luogo`, stessa origine); gira nella migrazione (istanze esistenti) e alla fine di `caricaSeed`, seguita
+spilli (riferimento `punto`/`luogo`, stessa origine). Oggi gira solo dentro la migrazione 027 (O10 della verifica completa); al tempo del seed girava anche alla fine di `caricaSeed`, seguita
 dall'importazione del seed `data/seed/mappe-editor.json` (origine «seed», mai sopra le mappe modificate dall'utente).
 **Il nome con cui una mappa si presenta** (2026-09-13) lo calcola `src/utils/presentazioneMappa.ts`, e ci passano tutte le schermate:
 titolo del visore e dell'editor, briciole, albero, indice, selettori, miniature (`titoloGruppoImmagini` per la testata di un gruppo di
@@ -504,7 +510,7 @@ esportazione le trasportano nel campo `condizioni` dello spillo (all'importazion
 verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in griglia, da trascinare nell'editor: la mappa globale di Tokyo
 e la mappa verticale dei Mementos sono immagini dell'utente nell'istanza (mai nel repository) con i quartieri e i Dedali come passaggi;
 gli accessi ai Palazzi e ai Mementos sono passaggi dentro le mappe dei luoghi (es. la stazione di Shibuya). Esportazione: `esportaMappe(radice)`
-limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «store» in `server/utils/zip.ts`) con `data/seed/mappe/<chiave>.json`
+limita al sottoalbero e produce un pacchetto JSON (al tempo del seed `creaPacchettoRepository`, poi tolto, ne faceva uno ZIP con `data/seed/mappe/<chiave>.json`
 (immagini di base come `asset: mappe/<chiave>`, schermate come `asset: spilli/<mappa>/<n>-<m>`) e i file in `public/asset/`;
 `caricaSeed` importa `mappe-editor.json` e poi ogni `data/seed/mappe/*.json` (nell'hash del seed).
 
@@ -601,7 +607,7 @@ che supera la precedente esclusione.
 - **Suggerimenti del giorno** — `server/services/suggerimentiService.ts`, rotta `GET /api/partite/:id/suggerimenti`, DTO `SuggerimentiOggiDto` (campo `giorno`, non `data`: `responseShapeMiddleware` non avvolge un payload che ha già una chiave `data`). Dalle azioni del giorno corrente ancora da fare e **non bloccate** (`statoAzione`) ricava le chiavi da accendere: confidenti e personaggi, dungeon e aree, libri/film e gli articoli a scaffale risolti per slug (30 libri su 46), attività, richieste, negozi, luoghi, quartieri, doti (lette dal testo «Dote +N»: 250 azioni contro 2 riferimenti espliciti), mappe e spilli. Lato client `src/stores/suggerimentiStore.ts` (`useSuggerimenti()` → `evidenziato`, `motivo`), `src/utils/suggerimenti.ts` (`classiSuggerito`), `TargaSuggerito`; `GiornoGuida` invalida lo store alla spunta. CSS `.suggerito*`, `.targa-suggerito`, `.spillo-mappa--suggerito`, token `--color-oro`.
 - **Scuola del giorno** — `src/components/partita/ScuolaOggi.tsx` nell'intestazione di `PartitaPage`: filtra lato client `getDomande`/`getCruciverba` sul giorno di gioco; per le date d'esame usa le domande numerate di `esami` e il riassunto dell'elenco generale solo come ripiego (nei dati reali i due elenchi non condividono mai il testo).
 - **Semafori** — nuovo tipo `persona-abilita` (`RequisitoRango` in `shared/types.ts`, `semaforiService`): verde quando la scorta contiene la Persona indicata con quella skill (`persona_posseduta` × `persona_posseduta_skill` × `skill`). Seed dei requisiti ricostruito dalla guida Royal (vedi `docs/riferimenti/semafori-confidenti.md`); regola di merito: un semaforo è solo ciò che il gioco impone.
-- **Spilli** — `sincronizzaMappe` riclassifica a ogni avvio gli spilli di origine `seed` con riferimento `punto` quando `spilloPerPunto` cambia (tipo e collezionabilità), senza toccare gli spilli dell'utente né `spillo_partita`; restituisce `riclassificati`.
+- **Spilli** — `sincronizzaMappe` riclassifica (quando gira: oggi solo nella migrazione 027) gli spilli di origine `seed` con riferimento `punto` quando `spilloPerPunto` cambia (tipo e collezionabilità), senza toccare gli spilli dell'utente né `spillo_partita`; restituisce `riclassificati`.
 - **Spilli dall'asset** — `SpilloGrafico`/`PuntoSpillo` (`src/components/mappe/IconaSpillo.tsx`): se `ui/spillo-<tipo>` esiste è lo spillo intero (`.spillo-mappa__figura`, punta sul punto ancorato), altrimenti la goccia colorata col disegno di riserva; legenda, elenco e popup usano la stessa immagine in piccolo.
 - **Personaggi** — ambito immagine `personaggio` (`AMBITI_IMMAGINE`, `chiaviAssetPredefinito` → `personaggi/<chiave>`): Protagonista, Stanza di Velluto e Jose usano `ImmagineEntita` come i Confidenti; `PersonaDelPersonaggio` apre la Persona in una finestra al tocco.
 - **Home desktop** — da 1360 px `.home-griglia` è «carta mappa / oggi mappa» (5/12 + 7/12), senza accessi rapidi; la stella della carta è `max(230px, min(40vh, 50cqw, 420px))` (`.home-carta` è un contenitore di query).
@@ -836,7 +842,9 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   (`disponibile: false` con il motivo) invece di sembrare vuoto. **Il NAS non ospita `/data`**: SQLite gira in WAL,
   che richiede memoria condivisa e non funziona su filesystem di rete; sul NAS sta solo il file di scambio.
 
-- **Il file nel corpo** (istanza locale). `src/services/api/impostazioni.ts` invia con **XMLHttpRequest**, non con
+- *Storico (superato il 2026-10-03: oggi il file arriva solo dalla cartella d'appoggio, qui sopra; le rotte
+  `PUT /istanza/gioco`, `/anteprima-da-url` e `/da-url` e l'invio con XHR non ci sono più).* Le due strade di allora:
+- **Il file nel corpo** (istanza locale). `src/services/api/impostazioni.ts` inviava con **XMLHttpRequest**, non con
   `fetch`, perché solo XHR dice quanti byte sono partiti (`upload.onprogress` → `AvanzamentoInvio` → `BarraInvio`,
   percentuale e MB, poi barra indeterminata mentre lavora il server). Il timeout complessivo è sparito: resta quello
   di **inattività** (dieci minuti che ripartono a ogni evento), perché un invio lento non è un invio morto.
@@ -845,13 +853,13 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   delle API resta a 10M/120s), e `server/index.ts` alza `server.requestTimeout` a 30 minuti: i 300 secondi
   predefiniti di Node troncavano la ricezione di un pacchetto grande a metà.
 - **L'indirizzo** (istanza pubblicata). `POST /istanza/gioco/anteprima-da-url` e `PUT /istanza/gioco/da-url`
-  ricevono solo l'URL: il file se lo prende il server con `server/utils/scaricaDaUrl.ts`, che distingue l'attesa
+  ricevevano solo l'URL: il file se lo prendeva il server con `server/utils/scaricaDaUrl.ts` (che resta, per le immagini), che distingue l'attesa
   delle **intestazioni** (30s) dall'**inattività** del corpo (120s che ripartono a ogni blocco) e applica il tetto
   *mentre* scarica, così un'origine senza `Content-Length` non può far crescere la memoria. Lo usa anche
   `importaImmagineDaUrl`. La scelta consapevole: l'indirizzo lo decide chi usa l'app e può puntare alla rete privata
   (è il caso d'uso: il PC di casa in Tailscale), quindi nessuna lista di blocco.
 - **L'importazione è una alla volta e osservabile**: `pacchettoGiocoService` tiene un lucchetto (409
-  `importazione-in-corso`), aggiorna la fase (`scarico`, `verifica`, `copia-di-sicurezza`, `sostituzione`,
+  `importazione-in-corso`), aggiorna la fase (`lettura` dalla cartella d'appoggio, `verifica`, `copia-di-sicurezza`, `sostituzione`,
   `riapertura`, `controllo`) e conserva l'esito dell'ultima. `GET /istanza/gioco/importazione` lo espone
   (`StatoImportazionePacchettoDto`). Serve perché un tunnel chiude la connessione dopo ~100 secondi mentre il server
   sta ancora sostituendo i dati: il frontend, invece di dire «fallita», interroga lo stato, segue le fasi e mostra
@@ -1027,8 +1035,8 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   spunte della partita (`spunta_voce_partita`; prima `azione_partita` e `azione_utente_partita`) hanno già contato una visione di quel film, più una;
   saltare una visita della guida non regala visioni, togliere e rimettere una spunta non ne aggiunge. Un errore (libro
   non ancora disponibile, 409; attività senza turni, 400) ferma la spunta invece di lasciarla senza punti: prima la
-  spunta riusciva in silenzio. `annullaEffettiAzione` toglie Doti, punti del Confidente e turni (`togliTurno` di
-  quell'`ordine`); le letture restano (si disfano dalla loro pagina). `EffettiAzioneDto` registra anche `letture`
+  spunta riusciva in silenzio. `annullaEffettiAzione` toglie i punti del Confidente e i turni (`togliTurno` di
+  quell'`ordine`); le Doti non si toccano (si segnano solo a mano, scelta dell'utente del 2026-09-30) e le letture restano (si disfano dalla loro pagina). `EffettiAzioneDto` registra anche `letture`
   (prima → dopo, le Doti che l'elemento ha dato, `visione` al cinema) e `turni` (attività, ordine, Doti).
 - **Turni** (`attivitaService`): `registraTurno` / `togliTurno` / `impostaVolteAttivita` sulle attività contate per
   volte (`tracciamento = 'svolta'`, con lo stesso ripiego sul tipo della scheda). Ogni turno registrato ha la sua riga
@@ -1088,7 +1096,7 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   spiegazione dei turni. La semantica di `ripetuto` è quella di `dotiDaEffetti`: una voce senza vale solo alla prima volta,
   una con la spunta dalla seconda in poi; `descriviVoceEffetto` e le etichette lo dicono ora così («dalla seconda volta in
   poi», prima «anche alle volte successive», che faceva pensare a una somma). Il contatore di Partita → Progressi passa
-  da `impostaVolteAttivita`, che restituisce di quanto sono cambiate le Doti (`ProgressiPartitaDto.cambioDoti`, un avviso
+  da `impostaVolteAttivita`, che restituisce le Doti da segnare per i turni aggiunti o tolti (`ProgressiPartitaDto.daSegnare`, un avviso
   dopo + o −); ogni attività porta `effettiTurno` («1° turno: Gentilezza ♪♪ · Dal 2° turno: Gentilezza ♪♪»,
   `attivitaService.effettiDelTurno`).
 - **Dote a ogni incontro con un Confidente** (voce 5): un dato del Confidente, `confidente_dote_incontro`

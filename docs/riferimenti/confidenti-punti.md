@@ -1,5 +1,9 @@
 # Punti dei Confidenti e note delle Doti sociali — Persona 5 Royal
 
+> **Dove sono oggi** (verifica completa, 2026-10-04): i dati citati come `data/seed/confidenti.json` e `data/seed/doti.json` stanno
+> nelle tabelle `confidente`, `confidente_rango`, `dote_sociale` e `dote_sociale_rango` di `gioco.db`, e arrivano con il pacchetto
+> di gioco; `scripts/seed/…` era la pipeline del seed JSON, dismessa il 2026-09-12 insieme al seed.
+
 Riferimento di gioco usato dal tracker della partita (scheda Doti e scheda Confidenti).
 Le fonti sono comunitarie e non ufficiali: dove due fonti indipendenti concordano il dato è
 considerato affidabile; le discrepanze sono segnalate.
