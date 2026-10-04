@@ -196,8 +196,10 @@ function testoAree(aree: Array<{ nome: string; ordine: number; chiave: string }>
 }
 
 /**
- * La spunta di completamento (scelta dell'utente, 2026-10-04): verde e solo visiva, prima del nome. Chi usa un lettore di schermo
- * sente invece `TestoCompletata`, messo dopo il nome.
+ * La spunta di completamento (scelta dell'utente, 2026-10-04): verde e solo visiva. Come nella proposta approvata, davanti al
+ * nome di un'area («✓ 2. Sala Centrale», nelle righe, nelle versioni, fra le aree senza planimetria e nei chip) e dopo il nome
+ * della stanza («3. Vecchio castello 1P ✓»), così si distingue la stanza completa dalle sue aree. Chi usa un lettore di schermo
+ * sente invece `TestoCompletata`, sempre dopo il nome.
  */
 export function SpuntaCompletata({ dimensione = 12 }: { dimensione?: number }) {
   return <span aria-hidden className="inline-flex shrink-0 align-[-2px] text-success" data-completata=""><IconSpunta size={dimensione} /></span>;

@@ -1131,3 +1131,6 @@ Che cosa ne segue:
 - **Dove compare.** Accanto a ogni area della guida nella lista «Il Palazzo» (nelle stanze, nelle loro versioni e fra le aree
   senza planimetria), accanto alla stanza che ha tutte le sue aree completate, e nei chip «Su questa planimetria».
 - **Nessun cambio nel server.** I dati ci sono già nel dettaglio del Palazzo, e la spunta si ricalcola a ogni voce segnata.
+- **Posizione della spunta**, come nell'anteprima della proposta approvata: davanti al nome di un'area («✓ 2. Sala Centrale») e
+  dopo il nome della stanza («3. Vecchio castello 1P ✓»), così una stanza completa si distingue dalle sue aree. Per i lettori di
+  schermo, «(completata)» viene dopo il nome.

@@ -700,6 +700,47 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     expect(screen.getByRole('list', { name: 'Stanze del Palazzo' }).querySelectorAll('[data-completata]')).toHaveLength(0);
   });
 
+  it('in una stanza con più versioni la spunta compare sulla stanza, nelle sue aree e in ogni versione che contiene l’area', async () => {
+    const { dungeon, albero } = conDueVersioni();
+    // l'area Cancello è completata; la versione «Porzione ovest» non contiene aree
+    dungeon.aree[0] = { ...dungeon.aree[0], punti: [voceGuida('a', 'sicura', 'ottenuto')] };
+    getDungeon.mockResolvedValue(dungeon);
+    getAlberoMappe.mockResolvedValue(albero);
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
+    const versioni = within(await pannello.findByRole('list', { name: 'Planimetrie di Cancello' }));
+    const [completa, ovest] = versioni.getAllByRole('listitem');
+    // la versione che contiene l'area ha la spunta, quella senza aree no
+    expect(completa.querySelectorAll('[data-completata]')).toHaveLength(1);
+    expect(within(completa).getByRole('button', { name: /Pianta completa.*1\. Cancello \(completata\)/ })).toBeInTheDocument();
+    expect(ovest.querySelectorAll('[data-completata]')).toHaveLength(0);
+    // in tutto la riga della stanza ne ha tre: la stanza, l'area nell'intestazione e la versione che la contiene
+    // (è il conteggio visto nel browser su «Cancello del castello» di Kamoshida, con «porzione occidentale» senza aree)
+    const stanza = within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem')[0];
+    expect(stanza.querySelectorAll('[data-completata]')).toHaveLength(3);
+  });
+
+  it('segnando l’ultima voce dalla guida la spunta compare subito, prima della rilettura; riaprendola sparisce subito', async () => {
+    // le riletture dopo ogni gesto restano in sospeso: quello che si vede viene solo dall'aggiornamento immediato della pagina
+    getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementation(() => new Promise<DungeonDettaglioDto>(() => {}));
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    const stanze = () => screen.getByRole('list', { name: 'Stanze del Palazzo' });
+    expect(stanze().querySelectorAll('[data-completata]')).toHaveLength(0);
+    // la Sicura del cancello è l'unica voce dell'area Cancello
+    fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
+    impostaStatoPunto.mockResolvedValueOnce(voceGuida('p1', 'sicura', 'ottenuto'));
+    fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+    await waitFor(() => expect(impostaStatoPunto).toHaveBeenCalledWith(4, 'p1', 'ottenuto'));
+    // spunta sull'area e sulla stanza, che ha solo quell'area
+    await waitFor(() => expect(stanze().querySelectorAll('[data-completata]')).toHaveLength(2));
+    impostaStatoPunto.mockResolvedValueOnce(voceGuida('p1', 'sicura', null));
+    fireEvent.click(screen.getByRole('button', { name: 'Riapri' }));
+    await waitFor(() => expect(impostaStatoPunto).toHaveBeenLastCalledWith(4, 'p1', null));
+    await waitFor(() => expect(stanze().querySelectorAll('[data-completata]')).toHaveLength(0));
+  });
+
   it('senza partita le voci non hanno stato: nessuna spunta', async () => {
     usePartitaStore.setState({ attiva: null });
     getDungeon.mockResolvedValue(conVoci({ 'k-01': [voceGuida('a', 'sicura', null)] }));
