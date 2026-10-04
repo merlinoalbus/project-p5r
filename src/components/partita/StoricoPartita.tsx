@@ -42,6 +42,10 @@ function formattaIstante(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
+/** Lo storico degli eventi della partita: filtro per gruppo con il totale, selezione multipla,
+ * eliminazione singola o multipla (le voci eliminate si tolgono in locale, senza ricaricare) e
+ * «Carica altri» per le pagine successive, valide solo per il filtro con cui sono state chieste.
+ * In modalità `compatto` resta solo la prima pagina (le voci più recenti), senza filtri né comandi. */
 export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: Props) {
   const [gruppo, setGruppo] = useState<Gruppo>('tutti');
   const tipi = gruppo === 'tutti' ? undefined : tipiDelGruppo(gruppo);
@@ -58,6 +62,8 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
   const prossimo = extraValide ? extraValide.prossimo : prima.dati?.prossimo ?? null;
   const totale = prima.dati ? Math.max(0, prima.dati.totale - Object.keys(eliminati).length) : 0;
 
+  /** Chiede la pagina che segue l'ultima caricata e la accoda a quelle extra dello stesso filtro
+   * (quelle di un filtro precedente si scartano). */
   const caricaAltri = async () => {
     if (prossimo === null) return;
     setCaricamentoAltri(true);
@@ -72,6 +78,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
   };
 
   const idSelezionati = Object.keys(selezionati).map(Number).filter((id) => !eliminati[id]);
+  /** Elimina dallo storico le voci selezionate dopo conferma, le segna come eliminate e svuota la selezione. */
   const eliminaSelezionati = async () => {
     if (idSelezionati.length === 0) return;
     if (!window.confirm(`Eliminare ${idSelezionati.length} ${idSelezionati.length === 1 ? 'voce' : 'voci'} dallo storico? Le modifiche registrate restano valide.`)) return;
@@ -88,6 +95,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
     }
   };
 
+  /** Elimina una sola voce dallo storico dopo conferma e la segna come eliminata. */
   const elimina = async (e: EventoPartitaDto) => {
     if (!window.confirm(`Eliminare la voce «${e.titolo}» dallo storico? La modifica registrata resta valida.`)) return;
     try {

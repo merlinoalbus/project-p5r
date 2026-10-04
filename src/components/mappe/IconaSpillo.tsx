@@ -26,6 +26,7 @@ import type { TipoSpillo } from '../../../shared/spilli';
 
 interface Props { tipo: TipoSpillo; dimensione?: number; className?: string }
 
+/** Attributi comuni degli SVG di riserva: lato `d`, griglia 24×24, solo tratto nel colore corrente, decorativi. */
 function base(d: number) {
   return { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true as const };
 }

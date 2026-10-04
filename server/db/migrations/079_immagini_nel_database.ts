@@ -28,6 +28,7 @@ import { slugPercorso } from '../../../shared/slug.js';
 
 type Db = AppDatabase | Database.Database;
 
+/** Vero se la tabella `immagine` dello schema indicato ha già la colonna `contenuto` (le immagini dentro il database). */
 function haColonnaContenuto(db: Db, schema = 'main'): boolean {
   return (db.prepare(`PRAGMA "${schema}".table_info(immagine)`).all() as Array<{ name: string }>).some((c) => c.name === 'contenuto');
 }
@@ -56,6 +57,7 @@ export function assorbiFileDelleRighe(db: Db, radici: string[]): number {
   return n;
 }
 
+/** Tutti i file sotto `dir`, a ogni profondità, come percorsi relativi a `base` con le barre `/`, in ordine; vuoto se la cartella non esiste. */
 function fileRicorsivi(dir: string, base = dir): string[] {
   if (!fs.existsSync(dir)) return [];
   const out: string[] = [];

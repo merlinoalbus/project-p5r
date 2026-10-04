@@ -36,6 +36,7 @@ const CODICI_PREDEFINITI: Array<{ chiave: string; nome: string }> = [
   { chiave: 'wk', nome: 'Debole' }, { chiave: 'rs', nome: 'Resiste' }, { chiave: 'nu', nome: 'Annulla' }, { chiave: 'rp', nome: 'Riflette' }, { chiave: 'ab', nome: 'Assorbe' },
 ];
 
+/** Legge un livello da un parametro dell'URL o da un campo: lo accetta solo se è un intero fra 1 e 99, altrimenti restituisce il predefinito. */
 const livelloValido = (v: string | null, predefinito: number): number => {
   const n = Number(v);
   return Number.isInteger(n) && n >= 1 && n <= 99 ? n : predefinito;
@@ -45,6 +46,15 @@ const livelloValido = (v: string | null, predefinito: number): number => {
 /** Parametri dell'URL gestiti dal pannello dei filtri (ricerca e ordinamento esclusi). */
 const CHIAVI_FILTRI = ['arcana', 'lvMin', 'lvMax', 'el', 'aff', 'img', 'dlc', 'catturabili'] as const;
 
+/**
+ * Pagina del compendio: carica tutte le Persona e legge ogni filtro dall'URL (ricerca su nome,
+ * nome italiano e arcano; arcano; livello minimo e massimo, accettati anche invertiti; DLC; solo
+ * catturabili; elemento e tipo d'affinità; immagine personalizzata presente o assente), poi
+ * ordina per livello, nome o arcano nel verso scelto. I filtri diversi da ricerca e ordinamento
+ * stanno in un pannello (aperto di partenza se l'URL ne contiene) e sono riassunti da chip
+ * rimovibili. Al ritorno dalla scheda di dettaglio porta in vista l'ultima Persona aperta e la
+ * evidenzia per tre secondi.
+ */
 export function CompendioPage() {
   useDocumentTitle('Compendio');
   const glossario = useGlossarioStore((s) => s.glossario);
@@ -104,6 +114,7 @@ export function CompendioPage() {
       && (!immagine || (immagine === 'con') === (conImmagine?.has(p.nome) ?? false)),
     );
     const ordArcana = new Map((glossario?.arcani ?? []).map((a) => [a.chiave, a.ordine]));
+    /** Confronto crescente secondo l'ordine scelto: per nome italiano; per ordine dell'arcano nel glossario e poi livello; per livello e poi nome (predefinito). */
     const confronto = (a: typeof lista[number], b: typeof lista[number]) => {
       if (ordine === 'nome') return a.nomeIt.localeCompare(b.nomeIt, 'it');
       if (ordine === 'arcana') return (ordArcana.get(a.arcana) ?? 0) - (ordArcana.get(b.arcana) ?? 0) || a.livello - b.livello;
@@ -139,6 +150,7 @@ export function CompendioPage() {
   if (immagine) filtriAttivi.push({ chiave: 'img', testo: immagine === 'con' ? 'Con immagine mia' : 'Senza immagine mia', togli: () => imposta('img', '', '') });
   if (!mostraDlc) filtriAttivi.push({ chiave: 'dlc', testo: 'Senza DLC', togli: () => imposta('dlc', true, true) });
   if (soloCatturabili) filtriAttivi.push({ chiave: 'catturabili', testo: 'Solo catturabili', togli: () => imposta('catturabili', false, false) });
+  /** Toglie dall'URL tutti i parametri del pannello dei filtri in un solo aggiornamento, lasciando ricerca e ordinamento. */
   const azzeraFiltri = () => impostaTutti(Object.fromEntries(CHIAVI_FILTRI.map((k) => [k, null])));
 
   return (

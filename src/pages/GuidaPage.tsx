@@ -8,6 +8,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
 import { SEZIONI_GUIDA } from '../components/guida/sezioniGuida';
 
+/** Indice della guida: una piastrella per ogni sezione di `SEZIONI_GUIDA`, con l'illustrazione `guida/<chiave>` (o l'icona di riserva se l'asset non c'è), titolo e descrizione, che porta alla sezione. */
 export function GuidaPage() {
   useDocumentTitle('Guida');
   return (

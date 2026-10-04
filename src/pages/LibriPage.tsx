@@ -33,6 +33,14 @@ import { NOME_DOTE } from '../utils/citta';
 import { STATI_LETTURA, bloccata, formattaYen, haDote, motivoBlocco, passaStato, prezzoChip, type StatoLettura } from '../utils/letture';
 import type { LibroDto } from '../types';
 
+/**
+ * Pagina dei libri: carica il catalogo per la partita attiva, mostra i conteggi di lettura,
+ * l'avviso di «Lettura rapida» quando vale (allora «+» e «−» avanzano di due) e i filtri (testo
+ * su titolo, negozi, «dove» della guida ed effetti; Dote; stato di lettura). Le schede sono
+ * divise fra da leggere e completati (questi ripiegati); le sessioni passano da una coda per
+ * libro che invia una richiesta per volta e aggiorna i conteggi. «Mostra posizione» apre il
+ * pannello con la mappa del luogo scelto e ci scorre.
+ */
 export function LibriPage() {
   useDocumentTitle('Libri');
   const attiva = usePartitaStore((s) => s.attiva);
@@ -61,6 +69,7 @@ export function LibriPage() {
     messaggioErrore: 'Aggiornamento del libro fallito.',
     segnalaErrore: (m) => notifica('error', m),
   });
+  /** Mette in coda il nuovo numero di sessioni del libro, tenuto fra zero e le sessioni che lo completano. */
   const accoda = (libro: LibroDto, valore: number) => coda.accoda(libro, Math.min(Math.max(valore, 0), libro.totaleSessioni));
   const valoreDi = coda.valore;
 

@@ -42,6 +42,7 @@ function chiaveCruciverba(data: string, ordine: number): string {
   return `${data}-${ordine}`;
 }
 
+/** Aggiunge alla tabella le colonne del catalogo (`COLONNE`) che non ha ancora: rieseguibile senza errori. */
 function aggiungiColonne(db: Database.Database, tabella: string): void {
   const presenti = new Set((db.prepare(`PRAGMA table_info(${tabella})`).all() as Array<{ name: string }>).map((c) => c.name));
   for (const [nome, tipo] of COLONNE) if (!presenti.has(nome)) db.exec(`ALTER TABLE ${tabella} ADD COLUMN ${nome} ${tipo}`);

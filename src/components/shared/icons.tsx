@@ -8,6 +8,7 @@ interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
 }
 
+/** Attributi comuni delle icone: quadrato di `size` px (16 se assente), tratto a 2 nel colore del testo, nascoste ai lettori di schermo; le altre props passano sopra. */
 function base({ size = 16, ...rest }: IconProps) {
   return {
     width: size,

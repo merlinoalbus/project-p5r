@@ -46,6 +46,7 @@ const NOME_DB_LEGACY_NELLO_ZIP = 'database/project-p5r.db';
 /** Che cosa contiene un file SQLite dell'app: solo dati di gioco, solo partite, o il vecchio file unico. */
 export type ContenutoDatabase = 'gioco' | 'partite' | 'unico';
 
+/** Il percorso di una cartella dell'istanza dentro `DATA_DIR` (non la crea). */
 export function cartella(nome: 'immagini' | 'font' | 'backups'): string {
   return path.join(config.dataDir, nome);
 }
@@ -93,12 +94,14 @@ export function statoIstanza(): StatoIstanzaDto {
   };
 }
 
+/** La cartella di lavoro locale `data/tmp`, creata se manca: sta sullo stesso disco dei database. */
 export function cartellaTemporanea(): string {
   const dir = path.join(config.dataDir, 'tmp');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
 
+/** Data e ora correnti in ISO con «:» e «.» sostituiti da «-», per i nomi dei file. */
 export const timbro = (): string => new Date().toISOString().replace(/[:.]/g, '-');
 
 /**
@@ -228,6 +231,7 @@ function eZip(percorso: string): boolean {
   return testa.length === 4 && testa.readUInt32LE(0) === 0x04034b50;
 }
 
+/** Toglie la cartella con tutto il suo contenuto, se esiste. */
 function svuotaCartella(dir: string): void {
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
 }

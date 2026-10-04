@@ -13,6 +13,7 @@ import type { PropsModulo } from './base';
 import { Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
 
+/** I campi di un libro: titolo, prezzo, sessioni di lettura, dettagli ed effetti dichiarati (le condizioni le aggiunge il guscio). */
 export function ModuloLibro({ dati, imposta, disabilitato }: PropsModulo) {
   const nomi = useNomiPerEffetti();
   return (

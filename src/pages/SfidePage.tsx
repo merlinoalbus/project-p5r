@@ -24,10 +24,12 @@ const SCHEDE = [
 ] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 
+/** Un elenco puntato con il suo titolo in grassetto; niente se le voci sono zero. */
 function Elenco({ titolo, voci }: { titolo: string; voci: string[] }) {
   return voci.length > 0 ? <div><strong>{titolo}:</strong><ul className="m-0 pl-4">{voci.map((v) => <li key={v}>{v}</li>)}</ul></div> : null;
 }
 
+/** Le Battaglie Sfida: introduzione, sblocco e regole generali, poi una carta per sfida con regole, nemici, punteggi, ricompense, strategia e fonte. */
 function SchedaBattaglie({ d }: { d: SfideDto }) {
   const b = d.battaglieSfida;
   return (
@@ -53,6 +55,7 @@ function SchedaBattaglie({ d }: { d: SfideDto }) {
   );
 }
 
+/** I boss segreti, una carta ciascuno con il ritratto (le Gemelle Custodi ne hanno due, Caroline e Justine), dove, quando, requisiti, mosse, debolezze, resistenze, strategia, ricompense e statistiche; in fondo il rimando al Mietitore e ai Demoni del Tesoro. */
 function SchedaBoss({ d }: { d: SfideDto }) {
   return (
     <div className="flex flex-col gap-2 text-[13px]">
@@ -77,6 +80,11 @@ function SchedaBoss({ d }: { d: SfideDto }) {
   );
 }
 
+/**
+ * Magnate reso in modo generico dai campi del dato (tranne fonte e verificato): il nome del campo
+ * in camelCase diventa il titolo a parole, gli elenchi diventano elenchi puntati, gli oggetti
+ * elenchi «chiave: valore» e i testi voci semplici; i campi vuoti si saltano.
+ */
 function SchedaMagnate({ d }: { d: SfideDto }) {
   const m = d.magnate;
   if (!m) return <p className="m-0 text-[13px] text-text-muted">Nessun dato su Magnate.</p>;
@@ -95,6 +103,7 @@ function SchedaMagnate({ d }: { d: SfideDto }) {
   );
 }
 
+/** Tabella dei tratti delle Persona con ricerca (nome italiano e inglese, effetto, personaggio) e filtro per categoria, con le categorie ricavate dai tratti stessi. */
 function SchedaTratti({ d }: { d: SfideDto }) {
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
@@ -120,6 +129,7 @@ function SchedaTratti({ d }: { d: SfideDto }) {
   );
 }
 
+/** Pagina delle sfide: carica una volta i dati, sceglie la scheda dal parametro `scheda` dell'URL (le Battaglie Sfida quando manca o non è valido) e mostra la barra delle quattro schede con quella attiva sotto. */
 export function SfidePage() {
   useDocumentTitle('Battaglie Sfida, boss segreti e tratti');
   const dati = useCarica(() => getSfide(), []);

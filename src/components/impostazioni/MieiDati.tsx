@@ -14,6 +14,11 @@ import { useCarica } from '../../hooks/useCarica';
 import { ModuloCatalogo } from '../guida/ModuloCatalogo';
 import type { ElementoCatalogoDto, TipoCatalogo } from '../../types';
 
+/**
+ * Card «I miei dati» delle Impostazioni: per ogni tipo del catalogo con righe dell'utente mostra quante ne ha
+ * aggiunte, corrette o nascoste; toccando un tipo si apre l'elenco delle sue righe (caricato solo allora) e
+ * ogni riga si apre nel modulo del catalogo per correggerla o ripristinarla.
+ */
 export function MieiDati() {
   const riepilogo = useCarica(() => getRiepilogoCatalogo(), []);
   const [aperto, setAperto] = useState<TipoCatalogo | null>(null);
@@ -22,6 +27,7 @@ export function MieiDati() {
   const perTipo = riepilogo.dati?.perTipo ?? [];
   const totale = perTipo.reduce((s, t) => s + t.creati + t.modificati + t.nascosti, 0);
 
+  /** Rilegge sia il riepilogo per tipo sia l'elenco del tipo aperto (dopo un salvataggio nel modulo). */
   const ricarica = () => { void riepilogo.ricarica(); void elenco.ricarica(); };
 
   return (

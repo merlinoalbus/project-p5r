@@ -61,6 +61,13 @@ interface Props {
   onChiudi: () => void;
 }
 
+/**
+ * La finestra di una planimetria. Calcola a ogni disegno le modifiche da salvare confrontando i campi (stanza,
+ * etichetta, nome, aree spuntate) con i valori d'apertura: un'etichetta svuotata si salva come null, e rinominando
+ * la planimetria si fissa anche il nome della stanza. Offre «Salva», la creazione di un'area dentro la planimetria,
+ * il cambio di stanza (a sé o in un'altra), il collegamento all'editor ed «Elimina…» con la conferma nel piè.
+ * Le azioni immediate aspettano finché ci sono modifiche non salvate o la conferma è aperta.
+ */
 export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta, etichettaDedotta, nome, aree, altrove, altreStanze, onSalva, onCambiaStanza, onElimina, onCreaArea, onChiudi }: Props) {
   const [valori, setValori] = useState({ stanza, etichetta, nome });
   const [sposta, setSposta] = useState(false);
@@ -83,6 +90,7 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
   if (areeCambiate) modifiche.aree = aree.filter((a) => spuntate.has(a.chiave)).map((a) => a.chiave);
   const daSalvare = Object.keys(modifiche).length > 0;
 
+  /** Esegue un'operazione con i comandi bloccati; l'errore va in notifica (l'esito positivo lo gestisce chi apre la scheda). */
   const esegui = async (azione: () => Promise<void>) => {
     setOccupato(true);
     try { await azione(); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); } finally { setOccupato(false); }

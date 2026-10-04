@@ -35,8 +35,16 @@ import type { FilmDto, FilmDvdDto } from '../types';
 
 type SupportoFiltro = 'tutti' | 'cinema' | 'dvd';
 const SUPPORTI: ReadonlyArray<{ chiave: SupportoFiltro; nome: string }> = [{ chiave: 'tutti', nome: 'Cinema e DVD' }, { chiave: 'cinema', nome: 'Solo cinema' }, { chiave: 'dvd', nome: 'Solo DVD' }];
+/** Il titolo da mostrare: quello italiano quando c'è, altrimenti l'originale. */
 const nomeFilm = (film: FilmDto) => film.nomeIt ?? film.nome;
 
+/**
+ * Pagina di film e DVD: carica i titoli per la partita attiva, mostra i conteggi di riepilogo e i
+ * filtri (testo su titolo, effetti e dettagli; supporto; Dote; stato della visione), poi le
+ * schede divise fra da vedere e completati (questi ripiegati). Le visioni e le sessioni passano
+ * da una coda per titolo che invia una richiesta per volta e aggiorna i conteggi della pagina;
+ * «Mostra posizione» apre, sopra gli elenchi, il pannello con la mappa del luogo scelto e ci scorre.
+ */
 export function FilmPage() {
   useDocumentTitle('Film e DVD');
   const attiva = usePartitaStore((s) => s.attiva);
@@ -71,8 +79,10 @@ export function FilmPage() {
     messaggioErrore: 'Aggiornamento della visione fallito.',
     segnalaErrore: (m) => notifica('error', m),
   });
+  /** Mette in coda il nuovo avanzamento del titolo: mai sotto zero e, per un DVD, mai oltre le sessioni che lo completano; al cinema non c'è tetto. */
   const accoda = (film: FilmDto, valore: number) => coda.accoda(film, film.dove === 'dvd' ? Math.min(Math.max(valore, 0), film.totaleSessioni) : Math.max(valore, 0));
 
+  /** Se il titolo è completato con quell'avanzamento: al cinema basta una visione, un DVD vuole tutte le sue sessioni. */
   const completatoCon = (film: FilmDto, progresso: number) => (film.dove === 'cinema' ? progresso > 0 : progresso >= film.totaleSessioni);
   const progressoDi = coda.valore;
 

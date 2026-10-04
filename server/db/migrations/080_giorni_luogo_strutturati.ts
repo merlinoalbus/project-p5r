@@ -14,6 +14,7 @@ import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { GIORNI_SETTIMANA_CHIAVI, type GiornoChiave } from '../../../shared/orariNegozio.js';
 
+/** Il testo in minuscolo, senza accenti (forma NFD privata dei segni diacritici) e senza spazi ai capi. */
 const senzaAccenti = (t: string): string => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 const CHIAVI = new Set<string>(GIORNI_SETTIMANA_CHIAVI);
 

@@ -21,6 +21,11 @@ import type { ProgrammaPunti } from './definizioni';
 
 const OPZIONI_TIPO = Object.entries(NOME_TIPO_NEGOZIO).map(([chiave, nome]) => ({ chiave, nome }));
 
+/**
+ * I campi di un negozio: nome, tipo, sede (con il quartiere), come trovarlo, gestore, Confidente (dall'elenco
+ * caricato), orari, programma punti (spuntandolo nasce come «Punti» a calcolo manuale; togliendo la spunta sparisce)
+ * e note.
+ */
 export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
   const confidenti = useCarica(() => getConfidenti(), []);
   const orari = dati.orari_json as OrariNegozio;

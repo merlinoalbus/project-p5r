@@ -23,6 +23,7 @@ export interface AnelloInput { ingredienteId: number; partnerId: number; risulta
 export interface DatiCiclo { personaId: number; anelli: AnelloInput[]; nome?: string; note?: string }
 export interface ModificaCiclo { nome?: string; note?: string; anelloCorrente?: number; iterazioni?: number }
 
+/** La Persona del compendio in forma ridotta per gli anelli, con nome e arcano tradotti; 404 se l'id non esiste. */
 function personaDto(id: number): PersonaFusioneDto {
   const p = personaOErrore(id);
   return { id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livello: p.livello, speciale: p.speciale, rara: p.rara, dlc: p.dlc };
@@ -54,11 +55,15 @@ function anelliValidati(partitaId: number, personaId: number, input: AnelloInput
   return out;
 }
 
+/** Un ciclo salvato come DTO, con l'avanzamento dell'anello corrente (limitato all'ultimo anello): quale Persona posseduta
+ *  fa da ingrediente e quale da partner (la prima che corrisponde), se il partner è registrato nel compendio, ed è eseguibile
+ *  quando le due ci sono e non sono la stessa. */
 function cicloDto(r: RigaCiclo): CicloSalvatoDto {
   const anelli = JSON.parse(r.anelli_json) as AnelloCicloDto[];
   const corrente = Math.min(r.anello_corrente, anelli.length - 1);
   const a = anelli[corrente];
   const possedute = prepared('SELECT id, persona_id FROM persona_posseduta WHERE partita_id = ?').all(r.partita_id) as Array<{ id: number; persona_id: number }>;
+  /** L'id della prima Persona posseduta di quel tipo nella partita, o null. */
   const poss = (personaId: number) => possedute.find((p) => p.persona_id === personaId)?.id ?? null;
   const registrato = !!prepared('SELECT 1 FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND registrata = 1').get(r.partita_id, a.partner.id);
   const ingredientePossedutaId = poss(a.ingrediente.id);
@@ -71,17 +76,21 @@ function cicloDto(r: RigaCiclo): CicloSalvatoDto {
   };
 }
 
+/** Il ciclo della partita con nome e arcano della Persona bersaglio; 404 se non esiste o è di un'altra partita. */
 function riga(partitaId: number, id: number): RigaCiclo {
   const r = prepared(`${SQL_CICLO} WHERE c.id = ? AND c.partita_id = ?`).get(id, partitaId) as RigaCiclo | undefined;
   if (!r) throw httpErrors.notFound('ciclo-non-trovato', `Il ciclo ${id} non esiste in questa partita.`);
   return r;
 }
 
+/** I cicli salvati della partita, dal più recente. */
 export function cicliSalvati(partitaId: number): CicloSalvatoDto[] {
   verificaPartita(partitaId);
   return (prepared(`${SQL_CICLO} WHERE c.partita_id = ? ORDER BY c.id DESC`).all(partitaId) as RigaCiclo[]).map(cicloDto);
 }
 
+/** Salva un ciclo dopo averne ricalcolato e validato gli anelli: il costo è la somma dei partner da evocare dal registro,
+ *  il nome predefinito è «Ciclo per <Persona>», e il salvataggio finisce nello storico della partita. */
 export function salvaCiclo(partitaId: number, dati: DatiCiclo): CicloSalvatoDto {
   verificaPartita(partitaId);
   const anelli = anelliValidati(partitaId, dati.personaId, dati.anelli);
@@ -98,6 +107,8 @@ export function salvaCiclo(partitaId: number, dati: DatiCiclo): CicloSalvatoDto 
   })();
 }
 
+/** Modifica nome, note, anello corrente o iterazioni di un ciclo (i campi assenti restano com'erano); l'anello corrente
+ *  deve stare fra 0 e l'ultimo anello (400). Gli anelli non si toccano. */
 export function aggiornaCiclo(partitaId: number, id: number, dati: ModificaCiclo): CicloSalvatoDto {
   verificaPartita(partitaId);
   const r = riga(partitaId, id);
@@ -129,6 +140,7 @@ export function avanzaCiclo(partitaId: number, id: number): CicloSalvatoDto {
   })();
 }
 
+/** Elimina un ciclo della partita; 404 se non c'era. */
 export function eliminaCiclo(partitaId: number, id: number): void {
   verificaPartita(partitaId);
   getDb().transaction(() => {

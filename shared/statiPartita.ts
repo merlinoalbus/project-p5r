@@ -41,6 +41,7 @@ export interface DefinizioneStato {
   soloSpilli?: true;
 }
 
+/** Un campo dell'editor delle condizioni: nome del valore, tipo e etichetta mostrata. */
 const campo = (nome: string, tipo: TipoCampo, etichetta: string): CampoCondizione => ({ nome, tipo, etichetta });
 
 export const STATI_PARTITA: readonly DefinizioneStato[] = [
@@ -85,6 +86,7 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
 export type ValoriCondizione = Record<string, string | number | string[]>;
 export interface SceltaCondizione { stato: string; operatore: string; valori: ValoriCondizione }
 
+/** La definizione dello stato con quella chiave in `STATI_PARTITA`; undefined se non esiste. */
 export function definizioneStato(chiave: string): DefinizioneStato | undefined {
   return STATI_PARTITA.find((s) => s.chiave === chiave);
 }
@@ -111,7 +113,9 @@ export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
   }
 }
 
+/** Il valore se è una stringa, altrimenti la stringa vuota. */
 const s = (v: unknown): string => (typeof v === 'string' ? v : '');
+/** Il valore se è un intero, altrimenti NaN (che nessun controllo di intervallo lascia passare). */
 const n = (v: unknown): number => (typeof v === 'number' && Number.isInteger(v) ? v : NaN);
 
 /** Dalla scelta (stato, operatore, valori) alla condizione; `null` finché manca un valore. */

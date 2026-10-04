@@ -1,3 +1,13 @@
+// ============================================================
+// AlberoLuoghi — l'albero delle mappe dell'atlante, per genitore, con le famiglie di immagini raccolte
+// ============================================================
+//
+// Ogni livello è un elenco dei figli di un nodo: le mappe che appartengono a una stessa famiglia
+// di immagini (gruppo esplicito o collezione di presentazione) stanno insieme come miniature sotto
+// un solo titolo, le altre sono collegamenti singoli. I discendenti si annidano ricorsivamente,
+// eventualmente dentro un `details` da espandere.
+// ============================================================
+
 import { etichetteDistinte, nomePresentazioneMappa, titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import { urlImmagine } from '../../services/api';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
@@ -9,12 +19,22 @@ import { IconaAzione } from '../shared/IconaAzione';
 export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { mappe: MappaRiassuntoDto[]; genitore?: string | null; espandibile?: boolean }) {
   const figli = new Map<string | null, MappaRiassuntoDto[]>();
   for (const m of mappe) figli.set(m.genitore, [...(figli.get(m.genitore) ?? []), m]);
+  /** Disegna l'elenco dei figli di `parent` e, ricorsivamente, i loro discendenti.
+   *
+   * `antenati` contiene le chiavi già sul cammino dalla radice: un figlio che vi compare viene
+   * scartato, così un ciclo nei dati non manda in ricorsione infinita. Le mappe della stessa
+   * famiglia escono una volta sola (sul primo membro) come blocco di miniature; le altre come
+   * collegamento con il nome reso distinto fra fratelli. Senza figli restituisce `null`. */
   function ramo(parent: string | null, antenati: Set<string>): React.ReactNode {
     const nodi = (figli.get(parent) ?? []).filter(m => !antenati.has(m.chiave));
     if (!nodi.length) return null;
-    const gruppo = (m: MappaRiassuntoDto) => m.gruppoImmagini ? `esplicito:${m.gruppoImmagini.id}` : m.immagineCollezione ? `presentazione:${m.immagineCollezione.ambito}` : null;
+    /** Chiave della famiglia di immagini a cui appartiene la mappa: prima il gruppo esplicito, poi
+     * l'ambito della collezione di presentazione; `null` se la mappa sta da sola. */
+    const gruppo =(m: MappaRiassuntoDto) => m.gruppoImmagini ? `esplicito:${m.gruppoImmagini.id}` : m.immagineCollezione ? `presentazione:${m.immagineCollezione.ambito}` : null;
     const gruppi = new Map<string, MappaRiassuntoDto[]>();
     for (const m of nodi) { const id = gruppo(m); if (id) gruppi.set(id, [...(gruppi.get(id) ?? []), m]); }
+    /** Il sottoalbero di una mappa (aggiungendola agli antenati); con `espandibile` e un
+     * contenuto non vuoto lo chiude in un `details` che riporta quante mappe figlie contiene. */
     function discendenti(m: MappaRiassuntoDto) {
       const contenuto = ramo(m.chiave, new Set([...antenati, m.chiave]));
       return espandibile && contenuto ? <details>

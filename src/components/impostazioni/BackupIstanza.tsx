@@ -24,6 +24,11 @@ import type { DepositoFileDto } from '../../types';
 import { Selettore } from '../shared/Selettore';
 import { salvaFile } from '../../utils/salvaFile';
 
+/**
+ * Card «Backup e ripristino» delle Impostazioni: riepiloga lo stato dell'istanza (database, partite, immagini, caratteri,
+ * copie di sicurezza), scarica l'istanza completa e ripristina uno ZIP scelto dalla cartella d'appoggio del server,
+ * passando sempre da una finestra di conferma. Non ha props: legge e aggiorna lo stato da sé.
+ */
 export function BackupIstanza() {
   const stato = useCarica(() => getStatoIstanza(), []);
   const [occupato, setOccupato] = useState(false);
@@ -34,6 +39,10 @@ export function BackupIstanza() {
   const [lavoroSulServer, setLavoroSulServer] = useState(false);
   const s = stato.dati;
 
+  /**
+   * Scarica l'istanza completa e la salva sul dispositivo; la notifica dice anche con che nome il server l'ha
+   * depositata nella cartella d'appoggio, se lo ha fatto. I pulsanti restano disabilitati per tutta l'operazione.
+   */
   const esporta = async () => {
     setOccupato(true);
     try {

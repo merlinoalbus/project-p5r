@@ -47,10 +47,12 @@ function dotiDellIncontro(confidente: string, verso: number): Array<{ dote: stri
     .map((v) => ({ dote: (v.effetto as { dote: string }).dote, note: Math.min(3, Math.max(1, (v.effetto as { note: number }).note)) as 1 | 2 | 3 }));
 }
 
+/** Il rango del Confidente nella partita (0 se non ha ancora una riga). */
 function rangoAttuale(partitaId: number, confidente: string): number {
   return (prepared('SELECT rango FROM confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, confidente) as { rango: number } | undefined)?.rango ?? 0;
 }
 
+/** Il nome del Confidente, o la chiave se non esiste. */
 function nomeConfidente(confidente: string): string {
   return (prepared('SELECT nome FROM confidente WHERE chiave = ?').get(confidente) as { nome: string } | undefined)?.nome ?? confidente;
 }

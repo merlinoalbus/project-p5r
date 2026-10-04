@@ -24,6 +24,7 @@ import type { AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIs
 
 interface RigaScorta { id: number; persona_id: number; livello: number; carica: number; nome: string; arcana: string; livello_base: number; rara: number }
 
+/** La Persona della scorta (con nome, arcano, livello base e rarità del compendio); 404 se non è nella scorta della partita. */
 function possedutaOErrore(partitaId: number, possedutaId: number): RigaScorta {
   const r = prepared(`SELECT pp.id, pp.persona_id, pp.livello, pp.carica, p.nome, p.arcana, p.livello AS livello_base, p.rara
     FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.id = ? AND pp.partita_id = ?`).get(possedutaId, partitaId) as RigaScorta | undefined;
@@ -31,10 +32,12 @@ function possedutaOErrore(partitaId: number, possedutaId: number): RigaScorta {
   return r;
 }
 
+/** Gli id delle skill di una Persona posseduta, nell'ordine degli slot. */
 function skillDi(possedutaId: number): number[] {
   return (prepared('SELECT skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(possedutaId) as Array<{ skill_id: number }>).map((x) => x.skill_id);
 }
 
+/** Se l'allarme della fusione è attivo e il livello del protagonista; 404 se la partita non esiste. */
 function partitaInfo(partitaId: number): { allarme: boolean; livelloProtagonista: number } {
   const r = prepared('SELECT allarme_attivo, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { allarme_attivo: number; livello_protagonista: number } | undefined;
   if (!r) throw partitaNonTrovata(partitaId);
@@ -224,6 +227,7 @@ export function eseguiForca(partitaId: number, dati: DatiForca): EsitoForcaDto {
   })();
 }
 
+/** Il totale dei punti statistica indicati, contando zero quelli assenti o negativi. */
 function sommaPunti(p: Partial<Statistiche>): number {
   return CHIAVI_STATISTICHE.reduce((s, k) => s + Math.max(0, p[k] ?? 0), 0);
 }

@@ -27,11 +27,18 @@ import { piatto } from '../utils/testo';
 
 type FiltroStato = 'tutti' | 'da-fare' | 'fatti';
 const STATI: ReadonlyArray<{ chiave: FiltroStato; nome: string }> = [{ chiave: 'tutti', nome: 'Tutti' }, { chiave: 'da-fare', nome: 'Da fare' }, { chiave: 'fatti', nome: 'Fatti' }];
+/** L'id dell'elemento della riga di un giorno, usato come ancora per scorrere al prossimo cruciverba. */
 const ancoraGiorno = (giorno: string) => `cruciverba-${giorno}`;
 
+/**
+ * La riga di un cruciverba: spunta di risolto (solo con una partita), data, indizio e segno di
+ * «prossimo». La risposta resta nascosta finché non la si chiede o finché il cruciverba non è
+ * risolto. Porta l'ancora solo quando è il prossimo, e offre la correzione della voce.
+ */
 function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: CruciverbaDto; partitaId: number | null; onCambiato: (c: CruciverbaDto) => void; onCorretto: () => void; evidenzia: boolean }) {
   const [mostra, setMostra] = useState(false);
   const [occupato, setOccupato] = useState(false);
+  /** Segna il cruciverba risolto o no nella partita, disattivando la spunta durante la richiesta; passa al genitore la riga aggiornata e ricorda le note di Doti da segnare, oppure notifica l'errore. */
   const cambia = async (fatto: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
@@ -64,6 +71,13 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
   );
 }
 
+/**
+ * Pagina dei cruciverba: carica l'elenco per la partita attiva, filtra per stato (tutti, da fare,
+ * fatti) e per testo libero (data scritta e chiave, indizio, risposta italiana e inglese), e
+ * raggruppa le righe per mese di gioco. In cima il rimando al prossimo cruciverba; la spunta
+ * aggiorna la riga nei dati correnti, il conteggio dei risolti e, se si è risolto proprio il
+ * prossimo, sceglie come nuovo prossimo il primo non risolto dalla data di gioco in poi.
+ */
 export function CruciverbaPage() {
   useDocumentTitle('Cruciverba di Leblanc');
   const attiva = usePartitaStore((s) => s.attiva);

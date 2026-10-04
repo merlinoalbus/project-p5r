@@ -39,6 +39,8 @@ const YEN_MASSIMI = 9_999_999;
  */
 function CampoEsperienza({ valore, nome, disabilitato, onSalva }: { valore: number; nome: string; disabilitato: boolean; onSalva: (v: number) => Promise<unknown> }) {
   const [bozza, setBozza] = useState<string | null>(null);
+  /** All'uscita dal campo: normalizza la bozza a intero non negativo (testo non numerico vale 0),
+   * la salva solo se diversa dal valore attuale e poi torna a mostrare il valore della scheda. */
   const conferma = async () => {
     if (bozza === null) return;
     const v = Math.max(0, Math.trunc(Number(bozza) || 0));
@@ -53,11 +55,17 @@ function CampoEsperienza({ valore, nome, disabilitato, onSalva }: { valore: numb
   );
 }
 
+/** La scheda «Denaro e squadra»: il saldo del gruppo con un campo importo e i pulsanti Incassa,
+ * Spendi e Imposta, poi una scheda per Ladro con l'interruttore «In squadra» (Joker sempre dentro),
+ * l'esperienza e il livello con −1/+1. Ogni risposta del server sostituisce l'intera squadra; un
+ * cambio del livello di Joker fa ricaricare anche l'elenco delle partite nello store. */
 export function SquadraPartita({ partitaId }: { partitaId: number }) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getSquadra(partitaId), [partitaId]);
   const [movimento, setMovimento] = useState('');
   const [occupato, setOccupato] = useState<string | null>(null);
 
+  /** Esegue l'azione tenendo occupato `chi` (un Ladro o il denaro), mette la squadra restituita al
+   * posto di quella mostrata e trasforma un errore in notifica (senza rilanciarlo). */
   const conEsito = async (chi: string, azione: () => Promise<SquadraPartitaDto>) => {
     setOccupato(chi);
     try { imposta(await azione()); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(null); }

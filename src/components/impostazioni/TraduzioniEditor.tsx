@@ -34,6 +34,10 @@ export function TraduzioniEditor() {
   const [testo, setTesto] = useState('');
   const ricaricaGlossario = useGlossarioStore((s) => s.ricarica);
 
+  /**
+   * Salva il testo `nuovo` della voce o, se manca, la riporta al testo del seed; poi sostituisce la voce
+   * nell'elenco, chiude la modifica e ricarica glossario e conteggi degli ambiti.
+   */
   const applica = async (t: TraduzioneDto, nuovo?: string) => {
     try {
       const agg = nuovo === undefined ? await ripristinaTraduzione(t.ambito, t.chiave) : await aggiornaTraduzione(t.ambito, t.chiave, nuovo);

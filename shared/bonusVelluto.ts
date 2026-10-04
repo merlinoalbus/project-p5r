@@ -173,6 +173,7 @@ const TIER_RESISTENZA: ReadonlyArray<{ livelloMin: number; livelloMax: number | 
   { livelloMin: 75, livelloMax: null, skill: 'Assorbe X (Drain)', chiave: 'Drain' },
 ];
 
+/** La fascia di `TIER_RESISTENZA` che comprende il livello; fuori da ogni fascia (livello sotto 1) vale la prima. */
 export function tierResistenza(livello: number): (typeof TIER_RESISTENZA)[number] {
   return TIER_RESISTENZA.find((t) => livello >= t.livelloMin && (t.livelloMax === null || livello <= t.livelloMax)) ?? TIER_RESISTENZA[0];
 }
@@ -209,6 +210,7 @@ export const SBLOCCHI_GEMELLE: ReadonlyArray<{ rango: number; nome: string; effe
   { rango: 10, nome: 'Trattamento VIP', effetto: 'riduce il costo del Trattamento speciale' },
 ];
 
+/** Gli sblocchi delle Gemelle già ottenuti al rango dato e il primo ancora da ottenere (null se sono tutti ottenuti). */
 export function sblocchiGemelle(rango: number): { ottenuti: typeof SBLOCCHI_GEMELLE; prossimo: (typeof SBLOCCHI_GEMELLE)[number] | null } {
   return { ottenuti: SBLOCCHI_GEMELLE.filter((s) => s.rango <= rango), prossimo: SBLOCCHI_GEMELLE.find((s) => s.rango > rango) ?? null };
 }

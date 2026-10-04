@@ -56,6 +56,13 @@ interface Props {
   onRicarica: () => Promise<void>;
 }
 
+/**
+ * La guida di un'area, a scomparsa (aperta all'inizio): conteggi di voci, segnate e «da collegare», filtri per tipo e
+ * «Anche le segnate» (le voci con uno stato restano nascoste salvo quella aperta), l'elenco delle voci con i passi
+ * degli Enigmi annidati sotto il loro Enigma, e in fondo «Aggiungi una voce». Ogni voce si apre con un tocco: stato
+ * nella partita, pin collegati, spostamento, correzione o eliminazione e la scelta dei pin sulla mappa, il cui riquadro
+ * viene misurato per stare tutto nello spazio visibile e portato in vista. Ogni modifica fa rileggere la scheda.
+ */
 export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica }: Props) {
   const [filtro, setFiltro] = useState<Set<PuntoInteresseDto['tipo']>>(new Set());
   const [mostraGestiti, setMostraGestiti] = useState(false);
@@ -74,6 +81,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   const [altezzaScelta, setAltezzaScelta] = useState(300);
   useLayoutEffect(() => {
     if (!puntoInScelta) return;
+    /** Altezza della mappa = spazio visibile del contenitore che scorre (o della finestra) meno i comandi della scelta, entro i limiti. */
     const misura = () => {
       const box = riquadroScelta.current;
       if (!box) return;
@@ -95,6 +103,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
     for (const p of area.punti) if (p.contenitore) m.set(p.contenitore, [...(m.get(p.contenitore) ?? []), p]);
     return m;
   }, [area]);
+  /** Una voce si vede se passa il filtro per tipo (nessun filtro = tutti) e se non è segnata, salvo con «Anche le segnate» o se è quella aperta. */
   const voceVisibile = (p: PuntoInteresseDto) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato || p.chiave === selezionato);
   // in cima le voci fuori da ogni Enigma; un Enigma si vede anche quando i filtri prendono solo qualche suo passo
   const vociDellArea = area.punti.filter((p) => !p.contenitore);
@@ -111,18 +120,21 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
     return [...planimetrie].sort((a, b) => Number(dellArea.has(b.chiave)) - Number(dellArea.has(a.chiave)))
       .map((p) => ({ chiave: p.chiave, nome: nomeSenzaPalazzo(p.nome), dettaglio: dellArea.has(p.chiave) ? 'di quest’area' : undefined }));
   }, [planimetrie, area.mappe]);
+  /** La planimetria da cui parte la scelta dei pin di una voce. */
   const mappaIniziale = (p: PuntoInteresseDto): string | null => {
     const dellArea = area.mappe.map((m) => m.chiave);
     // dove sta già un suo pin, altrimenti la planimetria aperta (se è dell'area), altrimenti la prima dell'area o del Palazzo
     return p.pin[0]?.mappa ?? (mappaAperta && dellArea.includes(mappaAperta) ? mappaAperta : dellArea[0] ?? planimetrie[0]?.chiave ?? null);
   };
 
+  /** Sposta la voce di un posto (su o giù) fra le sue sorelle e rilegge la scheda; l'errore va in notifica. */
   const sposta = async (p: PuntoInteresseDto, verso: -1 | 1) => {
     setOccupato(true);
     try { await spostaPunto(p.chiave, verso); await onRicarica(); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Spostamento non riuscito.'); }
     finally { setOccupato(false); }
   };
+  /** Collega il pin alla voce o, se è già collegato, lo scollega; poi rilegge la scheda e notifica. */
   const scegliPin = async (p: PuntoInteresseDto, spilloId: number, nome: string) => {
     const collegato = p.pin.some((x) => x.id === spilloId);
     setOccupato(true);
@@ -135,6 +147,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Collegamento non riuscito.'); }
     finally { setOccupato(false); }
   };
+  /** Chiude la scelta dei pin e rilegge la scheda. */
   const fineCollegamento = async () => { setCollegando(null); await onRicarica(); };
 
   /** Il modulo della voce nuova: in fondo all'area o, con `contenitore`, in fondo ai passi di un Enigma (095). */

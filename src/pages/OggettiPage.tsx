@@ -37,6 +37,7 @@ const SCHEDE = [
 type Scheda = (typeof SCHEDE)[number][0];
 const NOME_CATEGORIA: Record<string, string> = { cura: 'Cura HP', sp: 'Recupero SP', stato: 'Stati alterati', battaglia: 'Battaglia', esplorazione: 'Esplorazione', altro: 'Altro' };
 
+/** Il segno «da fonte secondaria» accanto a una voce non verificata sulla guida italiana; niente se la voce è verificata. */
 function Secondaria({ v }: { v: boolean }) {
   return v ? null : <span className="chip text-[11px]" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
 }
@@ -56,6 +57,7 @@ function CellaCategoria({ categoria, nome }: { categoria: string; nome: string }
   );
 }
 
+/** Tabella dei consumabili con ricerca (nome italiano e inglese, effetto, dove) e filtro per categoria, offerta solo fra le categorie presenti; il «dove» porta alla mappa dell'articolo o dei negozi che lo vendono. */
 function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
@@ -78,6 +80,7 @@ function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
   );
 }
 
+/** Tabella degli oggetti chiave e dei materiali con ricerca (nome, uso, dove) e filtro per tipo; il «dove» porta alla mappa come nei consumabili. */
 function SchedaChiave({ d }: { d: OggettiGuidaDto }) {
   const [q, setQ] = useState('');
   const [tipo, setTipo] = useState('');
@@ -100,6 +103,7 @@ function SchedaChiave({ d }: { d: OggettiGuidaDto }) {
   );
 }
 
+/** La fabbricazione degli attrezzi: introduzione, sblocco, regole e fonte, poi la tabella delle ricette con i materiali e le loro quantità. */
 function SchedaFabbricazione({ d }: { d: OggettiGuidaDto }) {
   const f = d.fabbricazione;
   return (
@@ -122,6 +126,7 @@ function SchedaFabbricazione({ d }: { d: OggettiGuidaDto }) {
   );
 }
 
+/** La personalizzazione delle armi da Iwai: introduzione, requisiti, costi e note, la tabella delle modifiche e la progressione col Confidente, le cui voci possono essere testi o oggetti resi come «chiave: valore». */
 function SchedaArmi({ d }: { d: OggettiGuidaDto }) {
   const p = d.personalizzazioneArmi;
   return (
@@ -151,6 +156,7 @@ function SchedaArmi({ d }: { d: OggettiGuidaDto }) {
   );
 }
 
+/** Gli abiti: introduzione, la carta della lavanderia e la tabella degli abiti con ricerca (nome, personaggio, dove) e il ritratto di chi li indossa. */
 function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
   const [q, setQ] = useState('');
   const visibili = useMemo(() => { const n = normalizzaTesto(q); return d.abiti.elenco.filter((x) => !n || normalizzaTesto(`${x.nome} ${x.per} ${x.dove}`).includes(n)); }, [d, q]);
@@ -248,6 +254,7 @@ function SchedaEquipaggiamento() {
   );
 }
 
+/** Gli scambi dei venditori speciali, una carta per venditore con la tabella di quel che si riceve e si dà; Jose è escluso e resta solo il rimando alle Richieste dei Mementos. */
 function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
   // **Jose sta nelle Richieste dei Mementos**, dove ha il suo foglio con i fiori, i timbri e la
   // tabella degli scambi. Ripeterlo qui era la stessa bottega scritta due volte in due pagine
@@ -278,6 +285,11 @@ function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
   );
 }
 
+/**
+ * Pagina degli oggetti: carica una volta i dati della guida sugli oggetti, sceglie la scheda dal
+ * parametro `scheda` dell'URL (i consumabili quando manca o non è valido) e mostra la barra delle
+ * sette schede con la scheda attiva sotto; l'equipaggiamento carica i suoi dati da sé.
+ */
 export function OggettiPage() {
   useDocumentTitle('Oggetti, materiali e fabbricazione');
   const dati = useCarica(() => getOggettiGuida(), []);

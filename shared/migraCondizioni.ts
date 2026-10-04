@@ -71,6 +71,7 @@ const ALIAS_RICHIESTA: Record<string, string> = { 'i baro non vincono mai': 'I v
 function piatto(testo: string): string {
   return testo.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’‘`´“”„"]/g, "'").toLowerCase().replace(/\s+/g, ' ').replace(/\.$/, '').trim();
 }
+/** Giorno («12», «primo», «1°») e nome del mese come data «MM-GG»; null se il mese non è riconosciuto o la data non esiste. */
 function data(giorno: string, mese: string): string | null {
   const m = MESI[mese];
   if (!m) return null;
@@ -78,22 +79,27 @@ function data(giorno: string, mese: string): string | null {
   const d = `${String(m).padStart(2, '0')}-${String(g).padStart(2, '0')}`;
   return dataValida(d) ? d : null;
 }
+/** L'ultimo giorno del mese nominato come «MM-GG» (febbraio sempre 28); null se il mese non è riconosciuto. */
 function fineMese(mese: string): string | null {
   const m = MESI[mese];
   if (!m) return null;
   const giorni: Record<number, number> = { 1: 31, 2: 28, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31 };
   return `${String(m).padStart(2, '0')}-${giorni[m]}`;
 }
+/** La chiave della richiesta citata per nome, cercata dal contesto (passando prima per `ALIAS_RICHIESTA`); null se non si trova. */
 function richiestaDa(nome: string, ctx: ContestoConversione): string | null {
   const n = piatto(nome);
   return ctx.richiesta?.(ALIAS_RICHIESTA[n] ?? nome) ?? null;
 }
+/** Il Confidente citato per nome: il nome stesso se è in `CONFIDENTI`, altrimenti il suo alias; null se non è nessuno dei due. */
 function confidenteDa(nome: string): string | null {
   const n = nome.trim();
   if ((CONFIDENTI as readonly string[]).includes(n)) return n;
   return ALIAS_CONFIDENTE[n] ?? null;
 }
+/** Le condizioni da soddisfare tutte: la condizione stessa se è una sola, altrimenti un gruppo «tutte». */
 const tutte = (c: RequisitoSpillo[]): RequisitoSpillo => (c.length === 1 ? c[0] : { tipo: 'gruppo', modo: 'tutte', condizioni: c });
+/** Le condizioni di cui ne basta una: la condizione stessa se è una sola, altrimenti un gruppo «almeno-una». */
 const almenoUna = (c: RequisitoSpillo[]): RequisitoSpillo => (c.length === 1 ? c[0] : { tipo: 'gruppo', modo: 'almeno-una', condizioni: c });
 
 /** Frammenti che non sono condizioni (posizione, prezzo, rifornimenti, note): si scartano senza rumore. */

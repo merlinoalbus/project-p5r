@@ -31,6 +31,11 @@ const STATI: ReadonlyArray<{ v: StatoObiettivo | 'tutti'; l: string }> = [
   { v: 'tutti', l: 'Tutti' },
 ];
 
+/** La scheda «Obiettivi»: filtro per stato con i conteggi (predefinito «Aperti»), una card per
+ * obiettivo con livello e skill richieste confrontate con la copia in scorta, collegamenti a piano
+ * di fusione, ricette e piani salvati, e i comandi di modifica, cambio di stato ed eliminazione.
+ * «Nuovo obiettivo» e «Modifica» aprono `ObiettivoModal`; il risultato entra in cima o sostituisce
+ * la voce in elenco. */
 export function ObiettiviPartita({ partitaId }: Props) {
   const [stato, setStato] = useState<StatoObiettivo | 'tutti'>('aperto');
   const lista = useCarica(() => getObiettivi(partitaId), [partitaId]);
@@ -46,6 +51,8 @@ export function ObiettiviPartita({ partitaId }: Props) {
   // gli aggiornamenti arrivano dopo un `await`: si parte dai dati correnti (forma funzionale), non da quelli di questo render
   const sostituisci = (o: ObiettivoDto) => lista.imposta((correnti) => correnti.map((x) => (x.id === o.id ? o : x)));
 
+  /** Porta l'obiettivo allo stato indicato (raggiunto, annullato o riaperto) e lo sostituisce in
+   * elenco; riaprirlo quando ce n'è già uno aperto per la stessa Persona dà un messaggio dedicato. */
   const cambiaStato = async (o: ObiettivoDto, s: StatoObiettivo) => {
     try {
       sostituisci(await aggiornaObiettivo(partitaId, o.id, { stato: s }));
@@ -55,6 +62,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
     }
   };
 
+  /** Elimina l'obiettivo dopo conferma e lo toglie dall'elenco. */
   const elimina = async (o: ObiettivoDto) => {
     if (!window.confirm(`Eliminare l'obiettivo «${o.nomeIt}»?`)) return;
     try {
@@ -155,6 +163,9 @@ interface ModalProps {
   onSalvato: (o: ObiettivoDto) => void;
 }
 
+/** Finestra di creazione o modifica di un obiettivo. Senza `obiettivo` né `personaIniziale` fa
+ * cercare la Persona fra quelle non rare (al più 12 risultati); poi skill desiderate (fino a 8),
+ * livello minimo fra 1 e 99, priorità e note. Il risultato del salvataggio va a `onSalvato`. */
 export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi, onSalvato }: ModalProps) {
   const persone = useCarica(() => (obiettivo || personaIniziale ? Promise.resolve([] as PersonaRiassuntoDto[]) : getPersone()), [obiettivo?.id, personaIniziale?.id]);
   const tutteSkill = useCarica(() => getSkills(), []);
@@ -171,6 +182,8 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
   }, [persone.dati, q]);
   const sceltaNome = obiettivo?.nomeIt ?? personaIniziale?.nomeIt ?? (persone.dati ?? []).find((p) => p.id === personaId)?.nomeIt ?? null;
 
+  /** Aggiorna l'obiettivo esistente o ne crea uno per la Persona scelta; un obiettivo creato già
+   * soddisfatto dalla scorta lo dice. Un obiettivo aperto già presente per la Persona dà un messaggio dedicato. */
   const salva = async () => {
     if (!personaId) return;
     setOccupato(true);

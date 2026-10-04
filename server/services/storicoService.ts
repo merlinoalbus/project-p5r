@@ -15,6 +15,8 @@ interface RigaEvento {
 
 const SQL_EVENTO = 'SELECT e.*, p.nome AS persona_nome FROM evento_partita e LEFT JOIN persona p ON p.id = e.persona_id';
 
+/** Un evento come DTO: nome e gruppo del tipo dalle etichette (il tipo stesso e «partita» se il tipo non è noto), dati dal
+ *  JSON, Persona collegata con il nome tradotto. */
 function eventoDto(r: RigaEvento): EventoPartitaDto {
   return {
     id: r.id, tipo: r.tipo, tipoNome: ETICHETTE_EVENTO[r.tipo]?.nome ?? r.tipo, gruppo: ETICHETTE_EVENTO[r.tipo]?.gruppo ?? 'partita',
@@ -82,6 +84,7 @@ export function eliminaEventi(partitaId: number, ids: number[]): number {
   return eliminati;
 }
 
+/** Elimina una voce dello storico della partita (correzione di un errore dell'utente); 404 se non c'era. */
 export function eliminaEvento(partitaId: number, eventoId: number): void {
   const info = prepared('DELETE FROM evento_partita WHERE id = ? AND partita_id = ?').run(eventoId, partitaId);
   if (info.changes === 0) throw httpErrors.notFound('evento-non-trovato', `L'evento ${eventoId} non esiste in questa partita.`);

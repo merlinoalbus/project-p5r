@@ -8,6 +8,7 @@
 
 import { IconaAzione } from './IconaAzione';
 
+/** Targhetta «Oggi» con l'icona del calendario; `motivo` diventa il suggerimento al passaggio, `compatta` la rimpicciolisce. */
 export function TargaSuggerito({ motivo, compatta }: { motivo?: string | null; compatta?: boolean }) {
   return (
     <span className={`targa-suggerito ${compatta ? 'targa-suggerito--compatta' : ''}`} title={motivo ?? undefined}>

@@ -18,6 +18,7 @@ import { VOCE_DEL_PIN } from '../mappe/voceDelPin.js';
  *  Senza i pin: le condizioni del catalogo e della città non citano lo stato di un pin (2026-10-03). */
 let memo: { nomi: NomiCondizioni; a: number } | null = null;
 registraCacheDiGioco(() => { memo = null; });
+/** I nomi senza pin dalla memoria, riletti se hanno più di un secondo o se la cache dei dati di gioco è stata svuotata. */
 export function nomiCondizioniMemo(): NomiCondizioni {
   const ora = Date.now();
   if (!memo || ora - memo.a > 1000) memo = { nomi: nomiCondizioni({ conPin: false }), a: ora };
@@ -33,6 +34,7 @@ export function nomiCondizioniMemo(): NomiCondizioni {
  * verifica, 2026-10-03). I nomi letti sono sempre quelli di adesso: niente cache fra una risposta e l'altra.
  */
 export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
+  /** Da una query chiave/nome a una funzione che, chiamata, restituisce l'oggetto chiave → nome. */
   const mappa = (sql: string) => () => Object.fromEntries((prepared(sql).all() as Array<{ chiave: string; nome: string }>).map((r) => [r.chiave, r.nome]));
   const elenchi: { [K in keyof NomiCondizioni]-?: () => NonNullable<NomiCondizioni[K]> } = {
     articoli: mappa('SELECT chiave, COALESCE(nome_it, nome) AS nome FROM articolo'),

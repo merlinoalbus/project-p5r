@@ -1,3 +1,7 @@
+// ============================================================
+// haPlanimetria — se una mappa ha un'immagine su cui aprire il visore
+// ============================================================
+
 import type { MappaDto } from '../types';
 /** La mappa ha un'immagine su cui aprire il visore. Lo dichiara il dato (migrazione 043) invece
  * di dedurlo dal percorso dell'asset, che frontend e backend leggevano in modo diverso: lo stemma

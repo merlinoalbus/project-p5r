@@ -124,6 +124,7 @@ function useRiordino(ids: string[], blocco: string | null, onSposta: (id: string
     return () => window.clearInterval(timer);
   }, [trascinato, indiceSotto]);
 
+  /** Chiude il trascinamento: niente riga trascinata né posizione bersaglio, scorrimento automatico fermo. */
   const fine = () => { setTrascinato(null); setSopra(null); velocita.current = 0; contenitore.current = null; };
 
   return {
@@ -190,6 +191,13 @@ function testoAree(aree: Array<{ nome: string; ordine: number; chiave: string }>
   return aree.length ? [...aree].sort(perOrdineDiGuida).map((a) => `${a.ordine + 1}. ${a.nome}`).join(' · ') : 'nessuna area della guida';
 }
 
+/**
+ * L'elenco delle stanze del Palazzo: intestazione con «Aggiungi» (planimetria) e «Nuova area», conteggi, le stanze
+ * raggruppate secondo l'atlante (una riga per stanza; quelle con più versioni si aprono sulle loro planimetrie),
+ * riordinabili trascinando la maniglia con l'ordine applicato subito in locale e poi salvato, e in coda le aree della
+ * guida senza planimetria. «Gestisci» apre la scheda della planimetria o dell'area; le finestre creano planimetrie e
+ * aree. Ogni modifica passa da un'unica esecuzione che fa rileggere il Palazzo e notifica l'esito.
+ */
 export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, areeOrfane, areaScelta, onScegliArea, sceltaChiave, onScegli, onCambiato, onAreaEliminata }: Props) {
   // L'ordine mostrato è locale finché il server non risponde: il trascinamento deve vedersi subito.
   // Vale solo per le planimetrie che ci sono adesso; quelle appena aggiunte si accodano nell'ordine
@@ -217,6 +225,10 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
     return raggruppaPlanimetrie(inOrdine, albero);
   }, [ordine, planimetrie, albero]);
 
+  /**
+   * Esegue una modifica con i comandi bloccati: a buon fine fa rileggere il Palazzo, notifica e restituisce true; in
+   * errore notifica, scarta l'ordine locale (torna quello del server) e restituisce false.
+   */
   const esegui = async (azione: () => Promise<unknown>, messaggio: string): Promise<boolean> => {
     setOccupato(true);
     try { await azione(); await onCambiato(); notifica('success', messaggio); return true; }
@@ -262,6 +274,10 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
     return ok;
   };
 
+  /**
+   * Salva le modifiche della scheda di una planimetria, mandando solo i campi cambiati: presentazione (nome della stanza
+   * ed etichetta), nome e aree della guida, in quest'ordine; a buon fine chiude la scheda.
+   */
   const salvaScheda = async (p: Planimetria, m: ModificheScheda) => {
     const ok = await esegui(async () => {
       if (m.stanza !== undefined || m.etichetta !== undefined) {

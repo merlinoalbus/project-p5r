@@ -18,10 +18,17 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 
+/**
+ * La carta di un personaggio: immagine (quella del Confidente se lo è, altrimenti il ritratto),
+ * nome, suggerimento, nome in codice, arcano, ruolo e le sue Persona collegate al compendio. «Più
+ * dettagli» apre presentazione, armi, battaglia, scuola ed età, doppiatori (con il segno sui campi
+ * da fonte secondaria), il rimando alla scheda Confidente e la fonte.
+ */
 function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<string, number> }) {
   const [aperto, setAperto] = useState(false);
   const sugg = useSuggerimenti();
   const secondari = new Set(p.campiDaFontiSecondarie);
+  /** Il segno «(fonte secondaria)» se quel campo del personaggio non viene dalla guida italiana, altrimenti niente. */
   const nota = (campo: string) => (secondari.has(campo) ? <span className="text-[11px] text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
   return (
     <li className={`card flex gap-3 min-w-0 ${classiSuggerito(sugg.evidenziato('personaggi', p.chiave))}`}>
@@ -58,6 +65,11 @@ function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<s
   );
 }
 
+/**
+ * Pagina dei personaggi: carica il cast e il compendio (per collegare le Persona per nome
+ * italiano, originale o minuscolo), mostra la barra dei gruppi con il numero di membri e i gruppi
+ * scelti (tutti, o uno solo), con le carte dei loro membri.
+ */
 export function PersonaggiPage() {
   useDocumentTitle('Personaggi');
   const dati = useCarica(() => getPersonaggi(), []);

@@ -51,6 +51,7 @@ export function urlValido(indirizzo: string): URL {
   return u;
 }
 
+/** Byte in megabyte (MiB) arrotondati all'intero, per i messaggi all'utente. */
 const megabyte = (byte: number): number => Math.round(byte / 1024 / 1024);
 
 /** Scarica il contenuto dell'indirizzo: intestazioni entro `attesaRispostaMs`, corpo a blocchi entro il tetto. */
@@ -61,7 +62,9 @@ export async function scaricaDaUrl(indirizzo: string, opzioni: OpzioniScarico): 
   const ctrl = new AbortController();
   let motivo: 'risposta' | 'inattivita' | null = null;
   let orologio: NodeJS.Timeout | null = null;
+  /** Disarma il timer in corso, se c'è. */
   const fermaOrologio = (): void => { if (orologio) { clearTimeout(orologio); orologio = null; } };
+  /** Riarma il timer da capo: allo scadere annota il motivo (`risposta` o `inattivita`) e interrompe la richiesta. */
   const armaOrologio = (ms: number, quale: 'risposta' | 'inattivita'): void => {
     fermaOrologio();
     orologio = setTimeout(() => { motivo = quale; ctrl.abort(); }, ms);

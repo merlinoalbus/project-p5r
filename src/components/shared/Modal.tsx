@@ -29,6 +29,7 @@ interface ModalProps {
 /** Gli elementi che ricevono il fuoco con Tab. */
 const ATTIVABILI = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+/** Gli elementi raggiungibili con Tab dentro il contenitore, in ordine di documento, esclusi quelli in zone `hidden` o `inert`. */
 function attivabili(contenitore: HTMLElement): HTMLElement[] {
   return [...contenitore.querySelectorAll<HTMLElement>(ATTIVABILI)].filter((el) => !el.closest('[hidden], [inert]'));
 }
@@ -42,6 +43,7 @@ function attivabili(contenitore: HTMLElement): HTMLElement[] {
 // senza il fuoco del sistema — una finestra in secondo piano — che sposta il fuoco senza generare `focusin`.
 let ultimo: HTMLElement | null = null;
 let penultimo: HTMLElement | null = null;
+/** Fa scorrere il registro: l'elemento diventa l'ultimo, il precedente ultimo il penultimo (ignora body, non-HTML e ripetizioni). */
 function registra(el: Element | null | undefined): void {
   if (!(el instanceof HTMLElement) || el === document.body || el === ultimo) return;
   penultimo = ultimo;
@@ -52,6 +54,10 @@ if (typeof document !== 'undefined') {
   // dal clic si risale all'elemento attivabile (il pulsante, non l'icona dentro): è quello che apre la finestra
   document.addEventListener('click', (e) => registra((e.target as Element | null)?.closest?.(ATTIVABILI)), true);
 }
+/**
+ * L'elemento a cui ridare il fuoco alla chiusura: l'ultimo registrato, oppure il penultimo se l'ultimo sta già dentro
+ * la finestra (il suo campo con `autoFocus`); nessuno se anche il candidato sta dentro la finestra.
+ */
 function chiHaApertoLaFinestra(finestra: HTMLElement | null): HTMLElement | null {
   const candidato = ultimo && finestra?.contains(ultimo) ? penultimo : ultimo;
   return candidato && !finestra?.contains(candidato) ? candidato : null;
@@ -67,6 +73,7 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga }: Mod
 
   useEffect(() => {
     if (!aperta) return;
+    /** Esc chiude la finestra. */
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') chiudi.current();
     };

@@ -64,6 +64,8 @@ function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto
   return out;
 }
 
+/** Una riga di `attivita` come DTO: Doti dal JSON, effetti dichiarati con le loro frasi, nome della sede risolto da `sedi`,
+ *  tracciamento ricondotto a quello del tipo quando il valore è fuori catalogo, e la disponibilità valutata se c'è lo stato della partita. */
 const attivitaDto = (r: RigaAttivita, sedi: Map<string, string>, st: StatoDisponibilita | null = null): AttivitaDto => ({
   chiave: r.chiave, nome: r.nome, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: r.costo, sblocco: r.sblocco, sessioni: r.sessioni,
   doti: JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
@@ -77,7 +79,9 @@ interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>
 /** Il libro che cambia le regole di tutti gli altri, **da lì in avanti**: «Lettura rapida» raddoppia
  *  quanto rende un pomeriggio, non è retroattivo (le sessioni già lette restano quelle). */
 const CHIAVE_LETTURA_RAPIDA = 'lettura-rapida';
+/** Vero se nella partita «Lettura rapida» risulta letto. */
 const haLetturaRapida = (stato: StatoLetture) => stato.fatti.has(`libro/${CHIAVE_LETTURA_RAPIDA}`);
+/** Le sessioni che servono a finire un libro: quelle del catalogo, almeno una (null o zero valgono uno). */
 const totaleLibro = (r: RigaLibro) => Math.max(r.sessioni ?? 1, 1);
 
 /**
@@ -92,6 +96,8 @@ function luogoSbloccato(effettiJson: string | null): { sbloccaLuogo: string | nu
   const q = prepared('SELECT nome FROM quartiere WHERE chiave = ?').get(luogo) as { nome: string } | undefined;
   return { sbloccaLuogo: luogo, sbloccaLuogoNome: q?.nome ?? null };
 }
+/** Un libro come DTO con il suo stato nella partita: sessioni totali, avanzamento limitato fra 0 e il totale (pieno se il
+ *  libro risulta letto), quartiere che apre, negozi che lo vendono, posizioni e disponibilità. */
 const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null): LibroDto => {
   const totaleSessioni = totaleLibro(r);
   const grezzo = stato.progressiLibri.get(r.chiave) ?? 0;
@@ -107,6 +113,8 @@ const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, Libr
     ...conDisponibilita(r.condizioni_json, st),
   };
 };
+/** Un film come DTO con il suo stato nella partita. Il DVD ha un tetto (le sessioni) ed è finito quando lo raggiunge; al
+ *  cinema le visioni non hanno tetto e il film conta come visto dalla prima. */
 const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDto['posizioni']>, st: StatoDisponibilita | null = null): FilmDto => {
   const totaleSessioni = Math.max(r.sessioni, 1);
   const grezzo = Math.max(stato.progressiFilm.get(r.chiave) ?? 0, 0);
@@ -120,6 +128,8 @@ const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDt
   };
 };
 
+/** Lo stato delle letture di una partita: fruizioni completate (`tipo/chiave`) e avanzamenti di libri, film e videogiochi.
+ *  Senza partita restituisce uno stato vuoto; con partita ne verifica prima l'esistenza. */
 function letturePartita(partitaId: number | undefined): StatoLetture {
   if (partitaId === undefined) return { fatti: new Set(), progressiLibri: new Map(), progressiFilm: new Map(), progressiVideogiochi: new Map() };
   verificaPartita(partitaId);
@@ -130,12 +140,15 @@ function letturePartita(partitaId: number | undefined): StatoLetture {
   return { fatti, progressiLibri, progressiFilm, progressiVideogiochi };
 }
 
+/** Un videogioco (riga di `attivita` di tipo «videogioco») come DTO: i round sono le sessioni (almeno uno), l'avanzamento è
+ *  limitato fra 0 e il totale, iniziato dal primo round e completato al raggiungimento del totale. */
 const videogiocoDto = (r: RigaAttivita, stato: StatoLetture, sedi: Map<string, string>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null): VideogiocoDto => {
   const totaleRound = Math.max(r.sessioni ?? 1, 1);
   const progresso = Math.min(Math.max(stato.progressiVideogiochi.get(r.chiave) ?? 0, 0), totaleRound);
   return { ...attivitaDto(r, sedi, st), tipo: 'videogioco', negozi: negozi.get(r.chiave) ?? [], totaleRound, progresso, iniziato: progresso > 0, fatto: progresso >= totaleRound };
 };
 
+/** I videogiochi non nascosti, con il loro stato nella partita (se c'è) e i totali: iniziati, completati, round fatti e round da fare. */
 export function videogiochiTutti(partitaId?: number): VideogiochiDto {
   const stato = letturePartita(partitaId);
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
@@ -144,6 +157,7 @@ export function videogiochiTutti(partitaId?: number): VideogiochiDto {
   return { videogiochi, iniziati: videogiochi.filter((v) => v.iniziato).length, completati: videogiochi.filter((v) => v.fatto).length, roundFatti: videogiochi.reduce((n, v) => n + v.progresso, 0), roundObiettivo: videogiochi.reduce((n, v) => n + v.totaleRound, 0) };
 }
 
+/** Le posizioni di ogni film (`film_posizione`), raggruppate per film nell'ordine dichiarato. */
 function posizioniFilm(): Map<string, FilmDto['posizioni']> {
   const esito = new Map<string, FilmDto['posizioni']>();
   for (const r of prepared('SELECT film_chiave, tipo, chiave, etichetta, ruolo FROM film_posizione ORDER BY film_chiave, ordine').all() as RigaPosizioneFilm[]) {
@@ -154,6 +168,7 @@ function posizioniFilm(): Map<string, FilmDto['posizioni']> {
   return esito;
 }
 
+/** Le posizioni di ogni libro (`libro_posizione`), raggruppate per libro nell'ordine dichiarato. */
 function posizioniLibri(): Map<string, LibroDto['posizioni']> {
   const esito = new Map<string, LibroDto['posizioni']>();
   for (const r of prepared('SELECT libro_chiave, tipo, chiave, etichetta FROM libro_posizione ORDER BY libro_chiave, ordine').all() as RigaPosizioneLibro[]) {
@@ -175,6 +190,7 @@ function elencoLibri(partitaId: number | undefined, stato: StatoLetture = lettur
   return (prepared('SELECT * FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, negozi, st));
 }
 
+/** I libri non nascosti con i totali della partita: libri finiti, sessioni lette e da leggere, e se vale «Lettura rapida». */
 export function libriTutti(partitaId?: number): LibriDto {
   const stato = letturePartita(partitaId);
   const libri = elencoLibri(partitaId, stato);
@@ -186,6 +202,8 @@ export function libriTutti(partitaId?: number): LibriDto {
   };
 }
 
+/** Film e DVD non nascosti con i totali della partita. Le sessioni di completamento contano ogni film fino al suo totale
+ *  (le visioni al cinema oltre il totale non gonfiano il conto); `visioniRegistrate` le conta tutte. */
 export function filmDvdTutti(partitaId?: number): FilmDvdDto {
   const stato = letturePartita(partitaId);
   const posizioni = posizioniFilm();
@@ -386,10 +404,12 @@ function attivitaConTurni(chiave: string): RigaAttivita {
   return riga;
 }
 
+/** Le volte che l'attività risulta svolta nella partita (zero se non c'è riga). */
 function volteSvolte(partitaId: number, chiave: string): number {
   return (prepared('SELECT volte FROM attivita_svolta_partita WHERE partita_id = ? AND attivita_chiave = ?').get(partitaId, chiave) as { volte: number } | undefined)?.volte ?? 0;
 }
 
+/** Scrive (inserendo o aggiornando) il conto delle volte svolte di un'attività nella partita. */
 function scriviVolte(partitaId: number, chiave: string, volte: number, adesso: string): void {
   prepared('INSERT INTO attivita_svolta_partita (partita_id, attivita_chiave, volte, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, attivita_chiave) DO UPDATE SET volte = excluded.volte, updated_at = excluded.updated_at').run(partitaId, chiave, volte, adesso);
 }

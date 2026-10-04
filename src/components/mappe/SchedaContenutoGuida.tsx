@@ -1,13 +1,23 @@
+// ============================================================
+// SchedaContenutoGuida — la scheda di un contenuto della guida fuori dal visore, con il suo editor
+// ============================================================
+
 import { useState } from 'react';
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 import { aggiornaSpillo, aggiungiImmagineSpillo, aggiornaImmagineSpillo, eliminaImmagineSpillo, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } from '../../services/api';
 import { CondizioniEditor } from '../guida/CondizioniEditor';
 import { SchedaSpillo } from './VisoreMappa';
 
+/** Mostra la `SchedaSpillo` del visore in modalità non spaziale per un contenuto della guida, con
+ * le azioni della partita (raccolto, stato del punto, acquisto), e un pulsante che apre o chiude
+ * l'editor del contenuto. Ogni azione passa da `esegui`, che segna l'operazione in corso e mostra
+ * l'eventuale errore. */
 export function SchedaContenutoGuida({ spillo, partitaId, onChiudi, onCambiato }: { spillo: SchedaContenutoGuidaDto; partitaId: number | null; onChiudi: () => void; onCambiato: () => Promise<void> }) {
   const [occupato, setOccupato] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
   const [modifica, setModifica] = useState(false);
+  /** Esegue un'azione verso il server e poi `onCambiato`; durante l'esecuzione i comandi sono
+   * disattivati, un fallimento ne mostra il messaggio sopra la scheda. */
   const esegui = async (azione: () => Promise<unknown>) => {
     setOccupato(true); setErrore(null);
     try { await azione(); await onCambiato(); }
@@ -25,6 +35,9 @@ export function SchedaContenutoGuida({ spillo, partitaId, onChiudi, onCambiato }
   </div>;
 }
 
+/** Modulo di modifica del contenuto: nome, descrizione, collezionabile e condizioni si salvano
+ * insieme con «Salva contenuto»; le immagini si aggiungono alla scelta del file, la didascalia si
+ * salva all'uscita dal campo se è cambiata, e ognuna si può rimuovere. Tutto passa da `esegui`. */
 function EditorContenuto({ spillo, occupato, esegui }: { spillo: SchedaContenutoGuidaDto; occupato: boolean; esegui: (azione: () => Promise<unknown>) => Promise<void> }) {
   const [nome, setNome] = useState(spillo.nome);
   const [descrizione, setDescrizione] = useState(spillo.descrizione);

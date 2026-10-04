@@ -45,6 +45,7 @@ export const migration065: Migration = {
     const consumabili = tipiDellaCategoria('consumabile');
     const inCitta = tipiDellaCategoria('citta');
     const spostamenti = tipiDellaCategoria('spostamento');
+    /** `n` segnaposto `?` separati da virgola, per una clausola `IN (…)` con parametri. */
     const segnaposto = (n: number) => Array(n).fill('?').join(',');
     const collezionabili = db.prepare(`UPDATE spillo SET collezionabile = 1 WHERE tipo IN (${segnaposto(consumabili.length)}) AND collezionabile = 0`).run(...consumabili).changes;
     const nonCollezionabili = db.prepare(`UPDATE spillo SET collezionabile = 0 WHERE tipo NOT IN (${segnaposto(consumabili.length)}) AND collezionabile = 1`).run(...consumabili).changes;
@@ -60,6 +61,7 @@ export const migration065: Migration = {
   },
 };
 
+/** Vero se uno spillo della categoria può avere un riferimento di quel tipo (`RIFERIMENTI_PER_CATEGORIA`). */
 function ammesso(categoria: string, riferimento: string): boolean {
   return ((RIFERIMENTI_PER_CATEGORIA as Record<string, readonly string[]>)[categoria] ?? []).includes(riferimento);
 }

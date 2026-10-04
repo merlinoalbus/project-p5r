@@ -27,6 +27,11 @@ interface Props extends NomiPerEffetti {
   aiuto?: string;
 }
 
+/**
+ * Una voce dell'elenco: la frase che descrive l'effetto, «Togli», l'editor della famiglia e dei parametri (se si
+ * sceglie «nessuno» torna a una Dote predefinita), la spunta «vale dalla seconda volta in poi» solo con `conRipetuto`
+ * e le condizioni, a scomparsa (aperte all'inizio se la voce ne ha). Un elenco di condizioni vuoto si salva come assente.
+ */
 function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quartieri, attivita, confidenti, erroreNomi, riprovaNomi }: { voce: VoceEffetto; indice: number; onCambia: (v: VoceEffetto) => void; onTogli: () => void } & Pick<Props, 'conRipetuto' | 'disabilitato' | 'quartieri' | 'attivita' | 'confidenti' | 'erroreNomi' | 'riprovaNomi'>) {
   const [condizioniAperte, setCondizioniAperte] = useState((voce.condizioni?.length ?? 0) > 0);
   const nomi = { luoghi: Object.fromEntries((quartieri ?? []).map((q) => [q.chiave, q.nome])), attivita: Object.fromEntries((attivita ?? []).map((a) => [a.chiave, a.nome])) };
@@ -53,6 +58,10 @@ function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quar
   );
 }
 
+/**
+ * L'elenco degli effetti dichiarati con «Aggiungi un effetto» (nasce come Dote predefinita): ogni voce si modifica o
+ * si toglie sul posto e ogni cambio passa al genitore l'elenco intero. `aiuto` sostituisce la spiegazione predefinita.
+ */
 export function EditorEffetti({ voci, onCambia, conRipetuto, disabilitato, quartieri, attivita, confidenti, erroreNomi, riprovaNomi, aiuto }: Props) {
   // ogni voce ha uno stato suo (le condizioni aperte): la chiave è un id stabile, non l'indice (`useIdStabili`)
   const chiavi = useIdStabili(voci.length);

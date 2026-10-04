@@ -11,6 +11,11 @@ export const versioniImmagini = new Map<string, number>();
 /** Data di creazione per (ambito/chiave) dall'elenco del server: entra nell'URL del file, che il browser può tenere in cache a lungo. */
 const datazioni = new Map<string, string>();
 
+/**
+ * Le chiavi dell'ambito che hanno un'immagine caricata. La prima chiamata per ambito chiede l'elenco al server e
+ * ne annota anche le date di creazione; le successive riusano la stessa promessa (e lo stesso insieme, che i
+ * riquadri aggiornano dopo un caricamento o una rimozione). Se la richiesta fallisce restituisce un insieme vuoto.
+ */
 export function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
   let p = elenchi.get(ambito);
   if (!p) {

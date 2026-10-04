@@ -27,6 +27,10 @@ function giroDiCondizioni(db: AppDatabase, uid: string, condizioni: readonly Req
   archi.set(uid, pinCitati(condizioni));
   const visti = new Set<string>();
   const cammino: string[] = [];
+  /**
+   * Visita in profondità i pin citati da `da`: vero appena si torna a `uid`, e intanto il cammino si ricostruisce
+   * all'indietro. Ogni pin si visita una volta sola (un pin già visto non ha portato al giro).
+   */
   const cerca = (da: string): boolean => {
     for (const verso of archi.get(da) ?? []) {
       if (verso !== uid) {
@@ -46,6 +50,7 @@ function giroDiCondizioni(db: AppDatabase, uid: string, condizioni: readonly Req
 export function verificaGiro(db: AppDatabase, uid: string, condizioni: readonly RequisitoSpillo[]): void {
   const giro = giroDiCondizioni(db, uid, condizioni);
   if (!giro) return;
+  /** Il nome del pin per il messaggio; l'uid stesso se il pin non c'è (ancora) nel database. */
   const nome = (u: string) => (db.prepare('SELECT nome FROM spillo WHERE uid = ?').get(u) as { nome: string } | undefined)?.nome ?? u;
   if (giro.length === 2) throw httpErrors.badRequest('condizione-su-se-stesso', `«${nome(uid)}» non può dipendere dal proprio stato: scegli un altro pin.`);
   throw httpErrors.badRequest('condizioni-in-giro', `Le condizioni farebbero un giro fra i pin (${giro.map(nome).join(' → ')}): nessuno di loro potrebbe più comparire. Togli uno dei collegamenti.`);

@@ -56,7 +56,8 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[]): S
 
   useEffect(() => {
     let attivo = true;
-    const concludi = (e: Esito<T>): void => {
+    /** Registra l'esito del caricamento (se l'effetto è ancora attivo) e risolve le `ricarica()` in attesa di questa generazione o di una precedente. */
+    const concludi =(e: Esito<T>): void => {
       if (!attivo) return;
       setEsito(e);
       const pronte = attese.current.filter((a) => a.tick <= tick);

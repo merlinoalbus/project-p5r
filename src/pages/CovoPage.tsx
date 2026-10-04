@@ -65,6 +65,7 @@ function medaglie(n: number): string {
   return `${n} ${n === 1 ? 'medaglia' : 'medaglie'}`;
 }
 
+/** Un numero di riepilogo: etichetta piccola con il suo segno, il valore in grande e, se c'è, una nota sotto; `tono` sostituisce lo sfondo predefinito. */
 function Numero({ etichetta, valore, nota, tono = '', segno }: { etichetta: string; valore: string; nota?: string; tono?: string; segno: ChiaveSegno }) {
   return (
     <span className={`flex flex-col gap-0.5 rounded-md px-3 py-2 ${tono || 'bg-white/[0.05]'}`}>
@@ -75,6 +76,12 @@ function Numero({ etichetta, valore, nota, tono = '', segno }: { etichetta: stri
   );
 }
 
+/**
+ * Pagina del Covo dei Ladri: prende la sezione `covo` dal completamento (senza partita), mostra i
+ * numeri di riepilogo ricavati da `conti`, l'introduzione e il testo della guida sulle medaglie,
+ * poi una ricerca unica che filtra insieme le sfide (nome e requisito) e i premi (nome, sblocco,
+ * effetto), elencati in due colonne con il conteggio dei visibili sul totale.
+ */
 export function CovoPage() {
   useDocumentTitle('Covo dei Ladri');
   const dati = useCarica(() => getCompletamento(), []);

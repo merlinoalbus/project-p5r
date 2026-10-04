@@ -45,6 +45,10 @@ function posaDelloStrato(i: number, quanti: number) {
   };
 }
 
+/** Il pozzo dei Memento: sfondo del cratere in SVG, venature, catene e profilo della città come
+ * decoro, e un pulsante per ogni dedalo raggiunto, nell'ordine del catalogo, col pezzo dello strato
+ * corrispondente. Quello `selezionata` si ingrandisce, si accende in oro, passa davanti e mostra il
+ * nome; un tocco chiama `onSeleziona`. Con `sbloccati` vuoto o assente si mostrano tutti i dedali. */
 export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, className = '' }: Props) {
   // L'ordine della discesa è quello del catalogo — Qimranut, Aiyatsbus, Chemdah, Kaitul,
   // Akzeriyyuth, Adyeshach, Sheriruth, Iweleth, Da'at — non quello in cui l'API li consegna. Su

@@ -1,3 +1,7 @@
+// ============================================================
+// bootstrap — costruzione dell'applicazione Express (middleware, router di area, health, 404, errori)
+// ============================================================
+
 import condizioniRouter from './routes/condizioni.js';
 // ============================================================
 // Factory dell'app Express + catena middleware

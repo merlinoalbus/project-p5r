@@ -12,8 +12,10 @@ import { indiceGiornoScolastico } from './domandeService.js';
 
 interface Riga { data: string; chiave: string | null; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
 
+/** Un cruciverba come DTO: il giorno è la data della riga, ed è fatto se quella data è fra quelle risolte. */
 const dto = (r: Riga, fatti: Set<string>): CruciverbaDto => ({ giorno: r.data, chiave: r.chiave ?? null, indizio: r.indizio, risposta: r.risposta, rispostaEn: r.risposta_en, fatto: fatti.has(r.data) });
 
+/** Le date dei cruciverba risolti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function fattiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
   verificaPartita(partitaId);

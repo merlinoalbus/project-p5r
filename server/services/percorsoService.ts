@@ -17,6 +17,7 @@ import { meteoDelGiorno } from './meteoService.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string; coperto: number }
 
+/** La data di gioco della partita ('MM-GG'); null senza partita, se la partita non esiste o se la data non è impostata. */
 function dataCorrente(partitaId: number | undefined): string | null {
   if (partitaId === undefined) return null;
   return (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco ?? null;

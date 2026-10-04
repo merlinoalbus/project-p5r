@@ -1,3 +1,7 @@
+// ============================================================
+// MappaIncorporata — il visore delle mappe dentro un'altra pagina (descrizione completa più sotto)
+// ============================================================
+
 import { haPlanimetria } from '../../utils/haPlanimetria';
 import { presentaMappa } from '../../utils/presentazioneMappa';
 import { risolviMappa } from '../../services/api';
@@ -51,6 +55,9 @@ interface Props {
   scelta?: SceltaPin;
 }
 
+/** Risolve prima la chiave ricevuta (si ricarica anche al cambio di `versione`): se è una sezione
+ * della guida mostra un riquadro col collegamento al luogo che la contiene, aperto su quell'area;
+ * se è una mappa passa a `MappaIncorporataRisolta` con la chiave risolta. */
 export function MappaIncorporata(props: Props) {
   const esito = useCarica(() => risolviMappa(props.chiave), [props.chiave, props.versione]);
   return <PageState isLoading={esito.caricamento} error={esito.errore} onRetry={esito.ricarica}>
@@ -61,6 +68,13 @@ export function MappaIncorporata(props: Props) {
   </PageState>;
 }
 
+/** Il visore di una mappa già risolta, con lo stato degli spilli della partita indicata (o di quella
+ * attiva). Mostra uno spinner al primo caricamento e un avviso con «Riprova» se la mappa manca; una
+ * mappa senza planimetria diventa una scheda con il collegamento e l'elenco scorrevole delle figlie.
+ * Altrimenti incorpora `VisoreMappa` (rimontato quando cambiano mappa, spillo o punto iniziale) con
+ * «Schermo intero», che porta la stessa istanza a tutto schermo finché non si chiude o si preme Esc,
+ * e, se `conEditor`, «Modifica mappa». Senza `onNaviga` la navigazione fra livelli apre la pagina
+ * della mappa. Senza `altezza` né classi dell'ospite il riquadro è alto 560 px. */
 function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
@@ -70,6 +84,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
   const [intero, setIntero] = useState(false);
   useEffect(() => {
     if (!intero) return;
+    /** Esc riporta il visore dentro la pagina. */
     const suTasto = (e: KeyboardEvent) => { if (e.key === 'Escape') setIntero(false); };
     window.addEventListener('keydown', suTasto);
     return () => window.removeEventListener('keydown', suTasto);

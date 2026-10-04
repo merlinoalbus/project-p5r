@@ -63,6 +63,11 @@ export function FregioSezione({ chiave, forma = 'angolo', className = '' }: Prop
  *  - `alta`    a tutta altezza della carta: per i soggetti verticali. */
 export type DisposizioneFregio = 'fascia' | 'lato' | 'grande' | 'alta';
 
+/**
+ * Carta di sezione con la prosa in un contenitore proprio e il fregio come blocco fratello. `disposizione`
+ * sceglie la classe di impaginazione (`sezione-fregio--<disposizione>`), `chiave` e `forma` passano al fregio,
+ * gli altri attributi HTML vanno sulla `<section>`.
+ */
 export function SezioneConFregio({ chiave, forma, disposizione = 'lato', className = '', children, ...resto }: Props & { disposizione?: DisposizioneFregio; children: ReactNode } & React.HTMLAttributes<HTMLElement>) {
   return (
     <section className={`card sezione-fregio sezione-fregio--${disposizione} ${className}`} {...resto}>

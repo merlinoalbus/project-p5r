@@ -16,6 +16,7 @@ interface Props {
   className?: string;
 }
 
+/** L'icona vettoriale che sostituisce l'asset del meteo quando manca (caldo e freddo condividono il termometro). */
 function riserva(chiave: ChiaveMeteo, size: number): ReactNode {
   switch (chiave) {
     case 'sereno': return <IconSole size={size} />;

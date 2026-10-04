@@ -14,6 +14,7 @@ export function PartitaSelettore() {
   const { partite, attiva, rendiAttiva } = usePartitaStore(useShallow((s) => ({ partite: s.partite, attiva: s.attiva, rendiAttiva: s.rendiAttiva })));
   const navigate = useNavigate();
 
+  /** «Nuova partita…» porta alle impostazioni; un'altra partita diventa attiva (con notifica), la stessa o un valore vuoto non fa nulla. */
   const cambia = async (valore: string) => {
     if (valore === '__nuova') {
       navigate('/impostazioni');

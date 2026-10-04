@@ -43,6 +43,7 @@ interface EventoUtente {
   ordine: number; created_at: string; updated_at: string;
 }
 
+/** L'uid stabile di una voce nata da una riga dell'utente: i primi 32 caratteri dello SHA-256 di tabella, id e data di creazione (stessa riga, stesso uid a ogni esecuzione). */
 const uidUtente = (tabella: string, id: number, creata: string) => createHash('sha256').update(`utente|${tabella}|${id}|${creata}`).digest('hex').slice(0, 32);
 /** Una voce della guida ancora com'era dopo la 092 (nessuno l'ha toccata). */
 const intatta = (v: RigaVoce) => v.indice_guida !== null && v.created_at === v.updated_at;
@@ -58,8 +59,10 @@ export const utente015: Migration = {
       effetti_json  TEXT,
       PRIMARY KEY (partita_id, voce_uid)
     )`);
+    /** Vero se la tabella esiste nello schema indicato (gioco o partite). */
     const c = (schema: 'main' | 'utente', t: string) => !!db.prepare(`SELECT 1 FROM ${schema}.sqlite_master WHERE type = 'table' AND name = ?`).get(t);
     const vecchie = ['azione_partita', 'azione_utente', 'azione_utente_partita', 'correzione_azione_guida', 'evento_utente'];
+    /** Le righe di una tabella vecchia del file delle partite (0 se la tabella non c'è). */
     const conta = (t: string) => (c('utente', t) ? (db.prepare(`SELECT COUNT(*) AS n FROM utente.${t}`).get() as { n: number }).n : 0);
     const righeVecchie = vecchie.reduce((n, t) => n + conta(t), 0);
     if (!c('main', 'voce_giornata')) {
@@ -69,6 +72,7 @@ export const utente015: Migration = {
       for (const t of [...vecchie, 'ordine_giornata']) db.exec(`DROP TABLE IF EXISTS utente.${t}`);
       return;
     }
+    /** Tutte le righe di una tabella vecchia del file delle partite (nessuna se la tabella non c'è). */
     const tutte = <T,>(t: string): T[] => (c('utente', t) ? (db.prepare(`SELECT * FROM utente.${t}`).all() as T[]) : []);
     const adesso = new Date().toISOString();
     /** Posto nell'ordine che l'utente vedeva: 0 eventi, 1 guida (per indice), 2 cose da fare (per ordine, id). */
@@ -79,6 +83,7 @@ export const utente015: Migration = {
     const cambiataFascia = new Set<string>();
     const toccati = new Set<string>();
     const log: Record<string, number> = {};
+    /** Somma `n` al contatore `k` del resoconto finale nel log. */
     const segna = (k: string, n = 1) => { log[k] = (log[k] ?? 0) + n; };
 
     // 1. spunte delle azioni della guida: la posizione d'origine dice la voce
@@ -94,6 +99,7 @@ export const utente015: Migration = {
     // 2. correzioni: si applicano se a quel posto la guida d'origine ha ancora il testo corretto dall'utente e la voce non è
     //    stata cambiata dopo la 092
     const seed = new Map<string, Array<{ azione?: string }>>();
+    /** Il testo dell'azione `indice` del giorno nella guida d'origine (`giorno_percorso`), letto una volta per giorno; undefined se non c'è. */
     const testoGuida = (data: string, indice: number): string | undefined => {
       if (!seed.has(data)) {
         const r = db.prepare('SELECT azioni_json FROM main.giorno_percorso WHERE data = ?').get(data) as { azioni_json: string } | undefined;
@@ -181,7 +187,8 @@ export const utente015: Migration = {
       const comeLoVedeva = voci.every((v) => intatta(v) || nostre.has(v.uid));
       if (!comeLoVedeva) segna('giorniConVociNuoveInFondo');
       for (const fascia of ['giorno', 'sera']) {
-        const chiave = (v: RigaVoce): [number, number, number] => comeLoVedeva
+        /** La chiave d'ordinamento di una voce nella fascia (tre numeri confrontati in sequenza). */
+        const chiave =(v: RigaVoce): [number, number, number] => comeLoVedeva
           ? posto.get(v.uid) ?? [1, v.indice_guida ?? Number.MAX_SAFE_INTEGER, v.ordine]
           // il canone del giorno è già cambiato altrove: le voci che c'erano nel loro ordine, poi quelle passate qui da una
           // correzione, poi quelle nuove (eventi prima delle cose da fare)

@@ -44,10 +44,12 @@ function chiaveDi(ambito: string, chiave: string): string {
   return ambito === 'mappa' ? idMappa(chiave) : chiave;
 }
 
+/** L'URL dell'API che serve il file dell'immagine, con ambito e chiave codificati. */
 function urlFileImmagine(ambito: string, chiave: string): string {
   return `/api/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/file`;
 }
 
+/** I metadati di un'immagine per il client, con l'URL del file (mai i byte). */
 function dto(r: RigaImmagine): ImmagineDto {
   return { id: r.id, ambito: r.ambito, chiave: r.chiave, mime: r.mime, byte: r.byte, url: urlFileImmagine(r.ambito, r.chiave), createdAt: r.created_at, origineUrl: r.origine_url ?? null };
 }
@@ -122,6 +124,7 @@ export function eliminaImmaginiAmbito(ambito?: string): number {
   return esito.changes;
 }
 
+/** Elimina l'immagine di un'entità (per le mappe la chiave si riconduce all'identità della mappa); 404 se non c'era. */
 export function eliminaImmagine(ambito: string, chiave: string): void {
   const esito = prepared('DELETE FROM immagine WHERE ambito = ? AND chiave = ?').run(ambito, chiaveDi(ambito, chiave));
   if (esito.changes === 0) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);

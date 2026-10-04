@@ -17,6 +17,7 @@ import type { TimbriDedaloDto } from '../../shared/types.js';
 
 interface RigaArea { chiave: string; nome: string; dungeon_chiave: string; timbri_totale: number | null }
 
+/** I timbri raccolti nella partita, per dedalo (i dedali senza riga non compaiono). Non verifica la partita. */
 export function timbriPartita(partitaId: number): Map<string, number> {
   return new Map((prepared('SELECT area_chiave, raccolti FROM timbri_dedalo_partita WHERE partita_id = ?').all(partitaId) as Array<{ area_chiave: string; raccolti: number }>).map((r) => [r.area_chiave, r.raccolti]));
 }

@@ -32,12 +32,19 @@ interface Props {
 /** Il nome della mappa senza il prefisso del Palazzo («Palazzo di Kamoshida › Torre» → «Torre»). */
 const nomeBreve = (nome: string) => nome.split(' › ').slice(1).join(' › ') || nome;
 
+/**
+ * I collezionabili delle planimetrie che ne hanno: titolo con quanti ne restano (con una partita) o il totale, barra
+ * di avanzamento, e per ogni planimetria il collegamento alla mappa e i suoi spilli (numerati quando hanno lo stesso
+ * nome) con la spunta e la parola del tipo. I raccolti restano nascosti finché non si accende «Anche i raccolti».
+ * Senza collezionabili mostra solo il testo `vuoto`.
+ */
 export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etichetta = 'Da raccogliere', nota, vuoto = 'Niente da raccogliere sulle planimetrie di quest’area.' }: Props) {
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
   const [occupati, setOccupati] = useState<Record<number, boolean>>({});
   const totale = planimetrie.reduce((s, p) => s + p.n, 0);
   const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
   const conCollezionabili = planimetrie.filter((p) => p.n > 0);
+  /** Segna o toglie lo spillo come raccolto nella partita (spunta disabilitata nel frattempo) e avvisa la pagina; l'errore va in notifica. */
   const cambia = async (s: SpilloRaccoltaDto, raccolto: boolean) => {
     if (!partitaId) return;
     setOccupati((o) => ({ ...o, [s.id]: true }));

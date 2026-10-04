@@ -46,6 +46,11 @@ function gruppoDi(c: ConfidentePartitaDto): 'attivi' | 'bloccati' {
   return c.rango > 0 || c.sbloccato || !c.bloccato ? 'attivi' : 'bloccati';
 }
 
+/** I Confidenti della partita in due gruppi (attivi e sbloccabili, non ancora disponibili), uno
+ * «poster» per Confidente: rango con +/− (e «Segna comunque» se bloccato dai requisiti), semafori
+ * del rango successivo, punti con note della risposta, regalo e uscita calcolati coi moltiplicatori
+ * scelti in testa (esami, invito SMS) e col bonus arcano della card, «Annulla ultimo», sblocco e
+ * note in una finestra. Ogni aggiornamento sostituisce il solo Confidente toccato. */
 export function ConfidentiPartita({ partitaId }: Props) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getConfidentiPartita(partitaId), [partitaId]);
   const [occupato, setOccupato] = useState<string | null>(null);
@@ -60,8 +65,13 @@ export function ConfidentiPartita({ partitaId }: Props) {
   // Ultimo incremento per card, per il pulsante "Annulla ultimo".
   const [ultimo, setUltimo] = useState<Record<string, number>>({});
 
+  /** Bonus arcano della card: quello forzato a mano, altrimenti la presenza in scorta di una Persona dello stesso arcano. */
   const bonusArcanoDi = (c: ConfidentePartitaDto) => bonusForzato[c.chiave] ?? c.personaArcanoInScorta;
 
+  /** Invia la modifica di un Confidente e ne sostituisce i dati in elenco. Per i soli incrementi
+   * di punti ricorda l'aumento per «Annulla ultimo» (azzerato se i punti calano o il rango cambia);
+   * avvisa delle Doti da segnare per l'incontro e annuncia quando la soglia del rango successivo è
+   * appena stata raggiunta. Restituisce il Confidente aggiornato, o `null` in caso di errore. */
   const salva = async (chiave: string, cambio: ModificaConfidente): Promise<ConfidentePartitaDto | null> => {
     if (!dati) return null;
     setOccupato(chiave);
@@ -91,6 +101,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
     }
   };
 
+  /** Conferma (o toglie la conferma a) un requisito di rango verificato a mano e aggiorna il Confidente. */
   const conferma = async (c: ConfidentePartitaDto, rango: number, indice: number, confermato: boolean) => {
     setOccupato(c.chiave);
     try {
@@ -103,6 +114,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
     }
   };
 
+  /** Salva le note del Confidente in modifica e chiude la finestra se il salvataggio riesce. */
   const salvaNote = async () => {
     if (!modifica) return;
     const esito = await salva(modifica.chiave, { note });

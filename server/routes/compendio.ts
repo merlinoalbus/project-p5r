@@ -97,6 +97,7 @@ router.get('/oggetti-guida', (_req, res) => {
   if (!ponte) { res.json(dati); return; }
   // i dati della guida sono condivisi e congelati (`datiGuida`): le voci collegate si costruiscono nuove, non si modificano
   const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
+  /** La voce con il suo collegamento dal crosswalk: l'articolo del catalogo se c'è, altrimenti i negozi; invariata se il nome non è abbinato. */
   const lega = <V extends { nome: string }>(v: V): V => {
     const a = per.get(v.nome);
     return !a ? v : a.articolo ? { ...v, articolo: a.articolo } : { ...v, negozi: a.negozi };

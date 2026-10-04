@@ -25,12 +25,14 @@ const supertestVero = createRequire(import.meta.url)('supertest') as typeof supe
 /** I server e l'agente aperti da questo file di test: `test/setup.ts` li chiude in `afterAll`. */
 const APERTI_KEY = '__serverSupertestCondivisi';
 type Registro = Set<http.Server | http.Agent>;
+/** Il registro di server e agente aperti, tenuto su `globalThis` e creato al primo uso. */
 const aperti = (): Registro => ((globalThis as Record<string, unknown>)[APERTI_KEY] ??= new Set<http.Server | http.Agent>()) as Registro;
 
 const serverPerApp = new WeakMap<object, http.Server>();
 
 /** Superagent per default non usa un agente (`agent: false`): una connessione nuova per richiesta. Questo le riusa. */
 let agente: http.Agent | null = null;
+/** L'agente keep-alive unico del file di test, creato alla prima richiesta e registrato per la chiusura. */
 function agenteKeepAlive(): http.Agent {
   if (!agente) {
     agente = new http.Agent({ keepAlive: true });
@@ -39,7 +41,11 @@ function agenteKeepAlive(): http.Agent {
   return agente;
 }
 
-function serverDi(app: Parameters<typeof supertestVero>[0]): Parameters<typeof supertestVero>[0] {
+/**
+ * Il server su cui supertest manda le richieste: per un'app Express (una funzione) quello condiviso, creato alla prima
+ * richiesta in ascolto su una porta effimera e registrato per la chiusura; un server o un indirizzo passano invariati.
+ */
+function serverDi(app:Parameters<typeof supertestVero>[0]): Parameters<typeof supertestVero>[0] {
   if (typeof app !== 'function') return app;
   let server = serverPerApp.get(app);
   if (!server) {

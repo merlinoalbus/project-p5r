@@ -1,3 +1,7 @@
+// ============================================================
+// migrations/index — registro delle migrazioni dei dati di gioco
+// ============================================================
+
 import { migration042 } from './042_contenuti_guida.js';
 import { migration040 } from './040_destinazioni_spilli.js';
 import { migration039 } from './039_ingressi_quartieri.js';

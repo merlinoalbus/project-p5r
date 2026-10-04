@@ -60,10 +60,12 @@ export const TIPI_EFFETTO_AZIONE = [
 
 const CATEGORIE = new Set<string>(CATEGORIE_LETTURA.map((c) => c.chiave));
 
+/** Il numero di note se è esattamente 1, 2 o 3; altrimenti null. */
 function nota(x: unknown): 1 | 2 | 3 | null {
   return x === 1 || x === 2 || x === 3 ? x : null;
 }
 
+/** Una coppia Dote-note valida (Dote riconosciuta, note 1–3) ripulita dei campi in più; altrimenti null. */
 function doteNote(x: unknown): DoteNote | null {
   if (!x || typeof x !== 'object') return null;
   const o = x as Record<string, unknown>;
@@ -110,6 +112,7 @@ export interface NomiEffettiAzione {
   attivita?: Record<string, string>;
 }
 
+/** «1 nota», «2 note». */
 const noteTesto = (n: number): string => `${n} ${n === 1 ? 'nota' : 'note'}`;
 
 /** La frase di un effetto: «Gentilezza, 2 note», «Zorro, il fuorilegge: completato», «Turno: Fioraio Rafflesia». */

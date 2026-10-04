@@ -35,6 +35,7 @@ function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number
   return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli: JSON.parse(r.dettagli_json) as Record<string, unknown>, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null };
 }
 
+/** Lo stato di ogni punto della guida segnato dalla partita (chiave → stato); vuota senza partita, 404 se la partita non esiste. */
 function statiPartita(partitaId: number | undefined): Map<string, StatoPunto> {
   if (partitaId === undefined) return new Map();
   verificaPartita(partitaId);
@@ -55,6 +56,7 @@ function pinDeiPunti(punto?: string): Map<string, PinDelPuntoDto[]> {
   return out;
 }
 
+/** Le posizioni dei marcatori dei punti della guida sulla mappa (`marcatore_mappa`): chiave del punto → coordinate. */
 function marcatori(): Map<string, { x: number; y: number }> {
   return new Map((prepared('SELECT punto_chiave, x, y FROM marcatore_mappa').all() as Array<{ punto_chiave: string; x: number; y: number }>).map((r) => [r.punto_chiave, { x: r.x, y: r.y }]));
 }
@@ -89,6 +91,7 @@ function mappeDelPalazzo(dungeonChiave: string): string[] {
 /** I segni della partita che decidono il «raccolto» di un pin: gli uid raccolti e le voci della guida già gestite. */
 interface SegniPartita { raccolti: Set<string>; puntiGestiti: Set<string> }
 
+/** Legge i segni della partita: gli uid dei pin segnati «raccolto» e le voci della guida già gestite. */
 function segniPartita(partitaId: number): SegniPartita {
   return {
     raccolti: new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid)),
@@ -143,6 +146,11 @@ function dedaloDto(a: RigaArea, richieste: DedaloDto['richieste'], timbri: Map<s
   return { timbri: { totale: a.timbri_totale, raccolti: a.timbri_totale === null ? null : raccolti }, richieste, obiettivi: { totale, fatti } };
 }
 
+/**
+ * La raccolta dei Memento nella stessa forma di quella dei Palazzi: al posto delle planimetrie i dedali (le aree con almeno un
+ * obiettivo misurabile), al posto dei collezionabili gli obiettivi (timbri e richieste); un dedalo è completo quando sono fatti tutti.
+ * Senza partita i conteggi del fatto sono null.
+ */
 function raccoltaMementos(dungeonChiave: string, partitaId?: number): DungeonRiassuntoDto['raccolta'] {
   const aree = prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(dungeonChiave) as RigaArea[];
   const richieste = richiestePerArea(dungeonChiave, partitaId);
@@ -157,6 +165,7 @@ function raccoltaMementos(dungeonChiave: string, partitaId?: number): DungeonRia
   return { totale, presi: partitaId === undefined ? null : fatti, mappe: dedali, mappeComplete: partitaId === undefined ? null : complete };
 }
 
+/** Le immagini di ambito «mappa» presenti nel database (chiave → URL di origine): dicono quali aree hanno la loro mappa. */
 function mappePresenti(): Map<string, string | null> {
   return new Map((prepared("SELECT chiave, origine_url FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; origine_url: string | null }>).map((r) => [r.chiave, r.origine_url ?? null]));
 }
@@ -183,6 +192,7 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
   };
 }
 
+/** I riassunti di tutti i Palazzi e dei Memento in ordine di gioco; con la partita, anche stati, raccolta e completamento. */
 export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
   const stati = statiPartita(partitaId);
   // i Palazzi completati si calcolano una volta per tutto l'elenco
@@ -226,6 +236,11 @@ function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon,
   });
 }
 
+/**
+ * La scheda completa di un Palazzo o dei Memento (404 se non esiste): riassunto, note e fonti, aree con le loro planimetrie
+ * native e i collezionabili raccolti, punti della guida con stato, marcatore e pin collegati; per i Memento il dedalo di ogni
+ * area (timbri e richieste), per i Palazzi l'elenco delle planimetrie. Le letture comuni si fanno una volta per tutta la scheda.
+ */
 export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDettaglioDto {
   const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
   if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
@@ -334,6 +349,11 @@ export function eliminaArea(chiaveArea: string): void {
   }
 }
 
+/**
+ * Il lavoro di `eliminaArea` in una transazione sola: stacca e cancella i punti dell'area, toglie gli spilli della guida senza
+ * mappa (con «raccolto» e immagini) che la vincolano, i timbri dei dedali, i legami con le planimetrie e i riferimenti nei testi
+ * JSON, poi cancella l'area e fa salire di un posto quelle che la seguivano.
+ */
 function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
   getDb().transaction(() => {
     for (const { chiave } of prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ?').all(chiaveArea) as Array<{ chiave: string }>) staccaPunto(chiave);
@@ -383,6 +403,7 @@ function ripulisciRiferimentiTestuali(chiaveArea: string): void {
     }
   }
 }
+/** Vero se la tabella esiste nel database di gioco (schema `main`): nei test lo schema può essere indietro. */
 function tabellaGioco(nome: string): boolean {
   return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 }
@@ -391,6 +412,7 @@ function tabellaGioco(nome: string): boolean {
 function colonnaSpilloGuida(): boolean {
   return (prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).some((c) => c.name === 'area_guida_chiave');
 }
+/** Vero se la tabella esiste nel database delle partite (schema `utente`). */
 function tabellaUtente(nome: string): boolean {
   return !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 }
@@ -601,6 +623,10 @@ function staccaPunto(puntoChiave: string): void {
   prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(puntoChiave);
 }
 
+/**
+ * Elimina un punto della guida in una transazione (404 se non esiste): ne stacca le tracce (`staccaPunto`), riporta i passi di
+ * un Enigma fra le voci dell'area in fondo all'elenco, cancella la voce e riallinea in ogni partita l'Enigma di cui era un passo.
+ */
 export function eliminaPunto(puntoChiave: string): void {
   const p = prepared('SELECT contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { contenitore_chiave: string | null } | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);

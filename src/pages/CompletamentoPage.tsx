@@ -46,6 +46,7 @@ const COLORE_TROFEO: Record<TrofeoDto['tipo'], string> = {
 function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number | null; onCambiato: (t: TrofeoDto) => void }) {
   const [occupato, setOccupato] = useState(false);
   const colore = COLORE_TROFEO[t.tipo];
+  /** Segna il trofeo come ottenuto o no nella partita (solo se c'è una partita), disattivando la spunta durante la richiesta; passa al genitore il trofeo aggiornato o notifica l'errore. */
   const cambia = async (ottenuto: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
@@ -86,6 +87,13 @@ function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number 
   );
 }
 
+/**
+ * Pagina di trofei e finali: carica il completamento per la partita attiva, sceglie la scheda dal
+ * parametro `scheda` dell'URL (i trofei quando manca) e offre un rimando al Covo dei Ladri. Nella
+ * scheda dei trofei filtra per metallo e, con una partita, per «solo da ottenere», mostra i
+ * conteggi per metallo e le spunte; le altre schede elencano finali, DLC, meteo, Nuova Partita+ e
+ * regole del tempo. La spunta aggiorna il trofeo nei dati correnti e ricalcola il totale ottenuto.
+ */
 export function CompletamentoPage() {
   useDocumentTitle('Trofei e finali');
   const attiva = usePartitaStore((s) => s.attiva);

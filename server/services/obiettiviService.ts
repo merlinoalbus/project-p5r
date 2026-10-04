@@ -32,6 +32,8 @@ export interface DatiObiettivo {
 
 interface Posseduta { id: number; livello: number; skill: number[] }
 
+/** La copia della Persona nella scorta della partita, con livello e skill; null se non è posseduta (se ce ne sono più copie,
+ *  quella che la query restituisce per prima). */
 function possedutaDi(partitaId: number, personaId: number): Posseduta | null {
   const r = prepared('SELECT id, livello FROM persona_posseduta WHERE partita_id = ? AND persona_id = ?').get(partitaId, personaId) as { id: number; livello: number } | undefined;
   if (!r) return null;
@@ -48,6 +50,8 @@ function avanzamento(partitaId: number, personaId: number, skillIds: number[], l
   return { possedutaId: p.id, livelloAttuale: p.livello, skillMancanti, livelloRaggiunto, soddisfatto: skillMancanti.length === 0 && livelloRaggiunto };
 }
 
+/** Un obiettivo come DTO: dati della Persona con i nomi tradotti, skill desiderate (quelle che non esistono più si
+ *  scartano), avanzamento rispetto alla scorta e numero di piani salvati collegati. */
 function obiettivoDto(r: RigaObiettivo): ObiettivoDto {
   const skillIds = JSON.parse(r.skill_json) as number[];
   const skill = skillIds.map((id) => skillDto(id)).filter((s): s is SkillRiassuntoDto => s !== null);
@@ -61,12 +65,14 @@ function obiettivoDto(r: RigaObiettivo): ObiettivoDto {
   };
 }
 
+/** L'obiettivo della partita con i dati della Persona; 404 se non esiste o è di un'altra partita. */
 function rigaObiettivo(partitaId: number, id: number): RigaObiettivo {
   const r = prepared(`${SQL_OBIETTIVO} WHERE o.id = ? AND o.partita_id = ?`).get(id, partitaId) as RigaObiettivo | undefined;
   if (!r) throw httpErrors.notFound('obiettivo-non-trovato', `L'obiettivo ${id} non esiste in questa partita.`);
   return r;
 }
 
+/** Controlla le skill desiderate, se indicate: al massimo 8, senza doppioni, esistenti (404) e non tratti (che non si ereditano). */
 function verificaSkill(skillIds: number[] | undefined): void {
   if (!skillIds) return;
   if (skillIds.length > 8) throw httpErrors.badRequest('troppe-skill', 'Un obiettivo può indicare al massimo 8 skill.');
@@ -87,6 +93,8 @@ export function obiettivi(partitaId: number, stato?: StatoObiettivo): ObiettivoD
   return righe.map(obiettivoDto);
 }
 
+/** Crea un obiettivo aperto per una Persona (409 se ce n'è già uno aperto), lo registra nello storico e lo verifica subito
+ *  contro la scorta: se la Persona posseduta lo soddisfa già, nasce raggiunto. Priorità predefinita 1. */
 export function creaObiettivo(partitaId: number, personaId: number, dati: DatiObiettivo): ObiettivoDto {
   verificaPartita(partitaId);
   const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
@@ -110,6 +118,9 @@ export function creaObiettivo(partitaId: number, personaId: number, dati: DatiOb
   })();
 }
 
+/** Modifica un obiettivo (i campi assenti restano com'erano). Riaprirlo è vietato se la Persona ne ha già un altro aperto
+ *  (409); segnarlo raggiunto a mano conserva la data del primo raggiungimento e lo registra nello storico; uscire da
+ *  «raggiunto» ne azzera la data; se resta aperto si riverifica contro la scorta. */
 export function aggiornaObiettivo(partitaId: number, id: number, dati: DatiObiettivo): ObiettivoDto {
   verificaPartita(partitaId);
   const r = rigaObiettivo(partitaId, id);
@@ -135,6 +146,7 @@ export function aggiornaObiettivo(partitaId: number, id: number, dati: DatiObiet
   })();
 }
 
+/** Elimina un obiettivo della partita; 404 se non c'era. */
 export function eliminaObiettivo(partitaId: number, id: number): void {
   verificaPartita(partitaId);
   getDb().transaction(() => {

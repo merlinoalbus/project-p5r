@@ -98,6 +98,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'piano_salvato', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
 ];
 
+/** I nomi delle tabelle di uno schema in ordine alfabetico, escluse quelle interne di SQLite (`sqlite_%`). */
 function tabelleDi(db: Database.Database, schema: string): string[] {
   return (db.prepare(`SELECT name FROM "${schema}".sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name`).all() as Array<{ name: string }>).map((r) => r.name);
 }
@@ -292,10 +293,13 @@ function impegna(fase: FaseImportazionePacchetto): string {
   return inCorso.operazione;
 }
 
+/** Aggiorna la fase dell'importazione in corso, se ce n'è una: è quella che `statoImportazione` riporta. */
 function avanza(fase: FaseImportazionePacchetto): void {
   if (inCorso) inCorso.fase = fase;
 }
 
+/** Chiude l'importazione in corso: rilascia il lucchetto dell'istanza e conserva come «ultima» l'esito (riuscita,
+ *  messaggio, data), che resta interrogabile anche se la richiesta che l'aveva avviata non c'è più. */
 function libera(operazione: string, riuscita: boolean, messaggio: string, esito: EsitoImportazionePacchettoDto | null): void {
   inCorso = null;
   rilasciaIstanza?.();

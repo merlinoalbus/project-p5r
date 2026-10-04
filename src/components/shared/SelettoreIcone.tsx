@@ -35,9 +35,15 @@ interface Base {
 interface Singolo extends Base { multiplo?: false; valore: string; onCambia: (chiave: string) => void }
 interface Multiplo extends Base { multiplo: true; valore: string[]; onCambia: (chiavi: string[]) => void }
 
+/**
+ * Tessere con figura e nome, una per voce di `opzioni`. Con `multiplo` è un gruppo di interruttori e `valore`
+ * è l'elenco delle chiavi accese; altrimenti è un gruppo radio con una sola chiave scelta. La figura è `icona`
+ * se data, altrimenti l'illustrazione di categoria; `conteggio` si aggiunge accanto al nome.
+ */
 export function SelettoreIcone(props: Singolo | Multiplo) {
   const { etichetta, opzioni, disabilitato, compatto, className } = props;
   const scelte = new Set(props.multiplo ? props.valore : [props.valore]);
+  /** A scelta multipla accende o spegne la voce nell'elenco; a scelta singola la comunica come nuova scelta. */
   const scegli = (chiave: string) => {
     if (props.multiplo) props.onCambia(scelte.has(chiave) ? props.valore.filter((v) => v !== chiave) : [...props.valore, chiave]);
     else props.onCambia(chiave);

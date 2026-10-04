@@ -38,6 +38,10 @@ export function ToastContainer() {
     // Si osservano solo i popup nuovi e si lasciano quelli spariti: ricollegarli tutti a ogni misura farebbe ripartire ogni volta
     // l'osservazione (che notifica da 0×0), cioè una misura a ogni frame finché la notifica è in vista (rilievo del validatore).
     const osservati = new Set<Element>();
+    /**
+     * Ricalcola il posto della coda (aggiornando lo stato solo se cambia) e allinea l'osservatore delle dimensioni
+     * ai popup di spillo presenti adesso: osserva i nuovi, smette con quelli spariti.
+     */
     const misura = () => {
       frame = 0;
       const nuovo = postoDellaCoda(coda.current);
@@ -47,6 +51,7 @@ export function ToastContainer() {
       for (const f of osservati) if (!presenti.has(f)) { dimensioni.unobserve(f); osservati.delete(f); }
       for (const f of presenti) if (!osservati.has(f)) { dimensioni.observe(f); osservati.add(f); }
     };
+    /** Chiede una misura al prossimo frame, se non ce n'è già una in attesa. */
     function pianifica() { if (!frame) frame = requestAnimationFrame(misura); }
     misura();
     const osservatore = new MutationObserver(pianifica);

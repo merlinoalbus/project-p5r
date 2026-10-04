@@ -58,6 +58,7 @@ export function CorreggiElemento({ tipo, chiave, titolo = 'Correggi', compatto =
 }) {
   const [elemento, setElemento] = useState<ElementoCatalogoDto | null>(null);
   const [occupato, setOccupato] = useState(false);
+  /** Carica l'elemento completo dall'API (pulsante disabilitato nel frattempo) e, arrivato, apre il modulo; l'errore va in notifica. */
   const apri = () => {
     setOccupato(true);
     void getElementoCatalogo(tipoCatalogoDi(tipo), chiave)

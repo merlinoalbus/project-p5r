@@ -33,10 +33,12 @@ function metodoIdempotente(metodo: string | undefined): boolean {
   return !['POST', 'PATCH'].includes((metodo ?? 'GET').toUpperCase());
 }
 
+/** Stati che meritano un nuovo tentativo: solo gli errori del server (5xx). */
 function isRetriableStatus(status: number): boolean {
   return status >= 500 && status < 600;
 }
 
+/** Errori transitori che meritano un nuovo tentativo: annullamento per timeout e `TypeError` (errore di rete di `fetch`). */
 function isRetriableError(err: unknown): boolean {
   if (!(err instanceof Error)) return false;
   if (err.name === 'AbortError' || err.name === 'TimeoutError') return true;
@@ -44,6 +46,7 @@ function isRetriableError(err: unknown): boolean {
   return false;
 }
 
+/** Mostra un toast d'errore, salvo modalità silenziosa; se lo store delle notifiche non risponde si limita a un avviso in console. */
 function notifyError(message: string, silent: boolean): void {
   if (silent) return;
   try {

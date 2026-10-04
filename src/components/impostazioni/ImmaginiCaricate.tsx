@@ -37,6 +37,10 @@ export function ImmaginiCaricate() {
   }, [elenco.dati]);
   const totale = elenco.dati?.length ?? 0;
 
+  /**
+   * Esegue la rimozione confermata nella finestra: elimina sul server le immagini dell'ambito scelto (o tutte),
+   * svuota la cache locale delle immagini per lo stesso ambito, chiude la finestra e ricarica i conteggi.
+   */
   const rimuovi = async () => {
     if (!daRimuovere) return;
     setOccupato(true);
@@ -53,7 +57,8 @@ export function ImmaginiCaricate() {
     }
   };
 
-  const nomeAmbito = (a: AmbitoImmagine | 'tutte') => (a === 'tutte' ? 'tutte le immagini caricate' : `le immagini caricate per ${AMBITI.find((x) => x.chiave === a)?.nome ?? a}`);
+  /** Complemento oggetto per il testo della conferma: «tutte le immagini caricate» o «le immagini caricate per <ambito>». */
+  const nomeAmbito = (a:AmbitoImmagine | 'tutte') => (a === 'tutte' ? 'tutte le immagini caricate' : `le immagini caricate per ${AMBITI.find((x) => x.chiave === a)?.nome ?? a}`);
 
   return (
     <section className="card flex flex-col gap-3">

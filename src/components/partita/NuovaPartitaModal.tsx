@@ -22,6 +22,7 @@ export function NuovaPartitaModal({ aperta, onChiudi }: Props) {
   const [ngPlus, setNgPlus] = useState(false);
   const [occupato, setOccupato] = useState(false);
 
+  /** Crea la partita (che lo store rende attiva) col nome ripulito dagli spazi, poi svuota il nome e chiude; con nome vuoto non fa nulla. */
   const conferma = async () => {
     if (!nome.trim()) return;
     setOccupato(true);

@@ -23,6 +23,13 @@ const NOME_TIPO: Record<string, string> = { storia: 'Storia', scadenza: 'Scadenz
 const CLASSE_TIPO: Record<string, string> = { scadenza: 'chip--attivo', esame: 'chip--attivo' };
 const MESI_CHIAVE = ['04', '05', '06', '07', '08', '09', '10', '11', '12', '01', '02', '03'];
 
+/**
+ * Un giorno del calendario: riga cliccabile con data (evidenziata se è oggi o festivo, cioè
+ * domenica o con un evento di festa o vacanza), meteo, assenza di tempo libero e i primi tre
+ * eventi troncati a 40 caratteri. Aperto mostra tutti gli eventi con tipo, dettaglio e fonte, il
+ * tempo libero di giorno e di sera e, se c'è una partita e il giorno non è già oggi, il comando
+ * per impostarlo come data di gioco.
+ */
 function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioDto; oggi: boolean; aperto: boolean; onToggle: () => void; onImposta?: () => void }) {
   const festivo = g.giornoSettimana === 'Domenica' || g.eventi.some((e) => e.tipo === 'festa' || e.tipo === 'vacanza');
   return (
@@ -55,6 +62,12 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioD
   );
 }
 
+/**
+ * Pagina del calendario: carica i giorni per la partita attiva (ricaricando quando cambia la sua
+ * data di gioco), mostra la carta di oggi con eventi, settimana della guida e prossime scadenze,
+ * la barra dei mesi (di partenza quello della data di gioco, altrimenti aprile) e i giorni del
+ * mese scelto, uno aperto per volta.
+ */
 export function CalendarioPage() {
   useDocumentTitle('Calendario di gioco');
   const attiva = usePartitaStore((s) => s.attiva);
@@ -66,9 +79,11 @@ export function CalendarioPage() {
   const [aperto, setAperto] = useState<string | null>(null);
   const mese = meseScelto ?? (d?.dataGioco ? d.dataGioco.slice(0, 2) : '04');
   const giorniMese = useMemo(() => (d?.giorni ?? []).filter((g) => g.data.startsWith(mese)), [d, mese]);
+  /** La settimana della guida a cui appartiene il giorno, o null se il giorno manca o non ha settimana. */
   const settimanaDi = (g: GiornoCalendarioDto | null) => (g?.settimana !== null && g?.settimana !== undefined ? d?.settimane.find((s) => s.numero === g.settimana) ?? null : null);
   const settimanaOggi = settimanaDi(d?.oggi ?? null);
 
+  /** Salva la data come data di gioco della partita attiva, aggiorna lo store locale con la partita restituita e notifica l'esito (anche l'errore). */
   const imposta = async (data: string) => {
     if (!attiva) return;
     try {

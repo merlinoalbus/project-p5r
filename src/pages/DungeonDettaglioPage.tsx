@@ -112,6 +112,15 @@ function VoceArea({ a, memento, scelta, suggerita, onScegli, compatta }: {
   );
 }
 
+/**
+ * Scheda di un Palazzo o dei Memento presa dalla chiave nell'URL: carica il dettaglio per la
+ * partita attiva e l'area dal parametro `area` (la prima quando manca o non esiste). Mostra
+ * l'intestazione (emblema, anello d'avanzamento, correzione della scheda, linea del tempo,
+ * conteggi, dettagli in prosa) e sotto, a colonne da 1024 px, l'elenco delle planimetrie e delle
+ * aree (o il pozzo con i dedali), l'area scelta con la sua planimetria o il disegno del dedalo, e
+ * la colonna di quel che si raccoglie con la guida dell'area. I gesti aggiornano i dati locali
+ * subito e, dove lo stato dipende dal server, li rileggono in silenzio.
+ */
 export function DungeonDettaglioPage() {
   const sugg = useSuggerimenti();
   const { chiave = '' } = useParams();
@@ -137,12 +146,14 @@ export function DungeonDettaglioPage() {
   // Le riletture in silenzio della scheda (dopo uno stato o un raccolto) possono sovrapporsi: vale solo l'ultima chiesta, una
   // risposta più vecchia che arriva dopo non sovrascrive quella più nuova (rilievo del validatore).
   const ultimaLettura = useRef(0);
+  /** Rilegge la scheda dal server senza stato di caricamento (solo con una partita) e la applica solo se nel frattempo non è partita una lettura più nuova. */
   const rileggiInSilenzio = async () => {
     if (!partitaId) return;
     const n = ++ultimaLettura.current;
     const fresco = await getDungeon(chiave, partitaId);
     if (n === ultimaLettura.current) dati.imposta(fresco);
   };
+  /** Imposta (o toglie, con null) lo stato di un punto della guida nella partita: aggiorna il punto locale, fa ricaricare il visore e poi rilegge la scheda; l'errore viene notificato. */
   const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null) => {
     if (!partitaId) return;
     try {
@@ -158,6 +169,7 @@ export function DungeonDettaglioPage() {
   /** Uno spillo raccolto (o riaperto): si aggiornano le planimetrie del Palazzo, quelle delle aree e l'anello, senza ricaricare. */
   const segnaRaccolto = (spilloId: number, raccolto: boolean) => {
     if (!d) return;
+    /** Una planimetria con lo spillo segnato raccolto o no e il conteggio dei presi ricalcolato; resta identica se lo spillo non è suo. */
     const aggiornaMappa = <T extends { presi: number | null; spilli: Array<{ id: number; raccolto: boolean | null }> }>(m: T): T => {
       if (!m.spilli.some((s) => s.id === spilloId)) return m;
       const spilli = m.spilli.map((s) => (s.id === spilloId ? { ...s, raccolto } : s));
@@ -181,6 +193,7 @@ export function DungeonDettaglioPage() {
       return { ...attuale, aree, raccolta: { ...attuale.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } };
     });
   };
+  /** Lo stato di una richiesta di un dedalo cambia: gli obiettivi fatti del dedalo diventano timbri raccolti più richieste completate, e l'anello dei Memento ne somma tutti i dedali. */
   const aggiornaRichiesta = (chiaveArea: string, chiaveRichiesta: string, stato: StatoRichiesta | null) => {
     dati.imposta((attuale) => {
       const aree = attuale.aree.map((a) => {
@@ -205,6 +218,7 @@ export function DungeonDettaglioPage() {
   const albero = useCarica(() => (memento ? Promise.resolve([]) : getAlberoMappe()), [memento]);
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
+  /** Apre un'area mettendola nell'URL (che perde gli altri parametri) e azzera la planimetria scelta e quella libera. */
   const scegliArea = (k: string) => { setParams({ area: k }); setPianta(null); setPlanimetriaLibera(null); };
   /** Un'area eliminata dalla guida: se era quella aperta, la scheda torna alla prima (senza parametro). */
   const areaEliminata = (k: string) => { if (area?.chiave === k) { setParams({}); setPianta(null); } };
@@ -222,6 +236,7 @@ export function DungeonDettaglioPage() {
   const quota = d && d.raccolta.presi !== null && d.raccolta.totale > 0 ? d.raccolta.presi / d.raccolta.totale : null;
   const areeSuggerite = (d?.aree ?? []).filter((a) => sugg.evidenziato('aree', a.chiave)).length;
   const suggerimentoDiffuso = !!d && d.aree.length > 0 && areeSuggerite === d.aree.length;
+  /** Se un'area va evidenziata come suggerita: no quando lo sono tutte, perché allora il suggerimento riguarda il Palazzo intero e lo dice il chip dell'intestazione. */
   const areaSuggerita = (chiaveArea: string) => !suggerimentoDiffuso && sugg.evidenziato('aree', chiaveArea);
   const tempoInProsa = !d ? [] : ([
     { etichetta: 'Si apre', valore: d.date.sblocco },
@@ -276,7 +291,9 @@ export function DungeonDettaglioPage() {
                     <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
                       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
                       onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
-                      {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
+                      {(b, cambia) => {
+                        /** Un campo del modulo di correzione legato alla chiave della bozza, con etichetta, limite di lunghezza ed eventuale testo su più righe. */
+                        const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
                         return <>
                           {campo('nome', 'Nome', LIMITI_GUIDA.dungeon.nome)}{campo('sovrano', 'Sovrano', LIMITI_GUIDA.dungeon.sovrano)}
                           {campo('dataSblocco', 'Si apre', LIMITI_GUIDA.dungeon.data)}{campo('furtoConsigliato', 'Furto consigliato', LIMITI_GUIDA.dungeon.data)}{campo('dataScadenza', 'Scade', LIMITI_GUIDA.dungeon.data)}

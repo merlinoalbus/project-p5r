@@ -76,6 +76,11 @@ server.requestTimeout = RICEZIONE_MAX_MS;
 
 let inArresto = false;
 
+/**
+ * Arresto ordinato su SIGINT/SIGTERM, una volta sola anche se i segnali si ripetono: smette di
+ * accettare connessioni, chiude il database e esce con 0; se le connessioni non si chiudono entro
+ * 5 secondi chiude comunque il database ed esce con 1.
+ */
 function arresta(segnale: NodeJS.Signals): void {
   if (inArresto) return;
   inArresto = true;

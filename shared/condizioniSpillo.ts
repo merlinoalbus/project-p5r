@@ -242,6 +242,7 @@ export interface NomiCondizioni {
   spilli?: Record<string, { nome: string; tipo: string; mappa: string; parola?: string }>;
 }
 
+/** Il nome di un Palazzo per le frasi delle condizioni: dai nomi passati, poi dall'elenco `PALAZZI_CONDIZIONE`, infine la chiave stessa. */
 export function nomePalazzo(chiave: string, nomi: NomiCondizioni = {}): string {
   return nomi.dungeon?.[chiave] ?? PALAZZI_CONDIZIONE.find((p) => p.chiave === chiave)?.nome ?? chiave;
 }
@@ -283,13 +284,16 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
   }
 }
 
+/** Il testo senza spazi ai capi, se è una stringa non vuota lunga al massimo `max` (misurata prima di togliere gli spazi); altrimenti null. */
 function testoPulito(x: unknown, max = 200): string | null {
   return typeof x === 'string' && x.trim().length > 0 && x.length <= max ? x.trim() : null;
 }
+/** Una chiave valida: testo pulito fatto di segmenti `[a-z0-9-]` (senza trattino iniziale) separati da `/`; altrimenti null. */
 function chiavePulita(x: unknown, max = 120): string | null {
   const t = testoPulito(x, max);
   return t && /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/.test(t) ? t : null;
 }
+/** Il valore se è un intero compreso fra `min` e `max` (estremi inclusi); altrimenti null. */
 function intero(x: unknown, min: number, max: number): number | null {
   return typeof x === 'number' && Number.isInteger(x) && x >= min && x <= max ? x : null;
 }

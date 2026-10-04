@@ -12,6 +12,7 @@ import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shar
 import { normalizzaEffettoOggetto, type EffettoOggetto } from '../../shared/effettiOggetto.js';
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
 
+/** Le chiavi di un elenco di costanti, nella forma di tupla non vuota che `z.enum` richiede. */
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
 
 /** Le condizioni del catalogo (articoli, negozi, letture, attività, e i loro effetti): quelle dei pin senza lo stato di un altro
@@ -40,6 +41,7 @@ const voceEffetto = z.object({
 });
 const effettiJson = z.array(voceEffetto).max(20).transform((v) => JSON.stringify(v)).optional();
 
+/** Un testo con gli spazi ai capi tolti e lungo al massimo `max` caratteri. */
 const testo = (max: number) => z.string().trim().max(max);
 
 /** I tipi accettati nel percorso. Erano scritti a mano e sono rimasti indietro quando il catalogo

@@ -1,3 +1,12 @@
+// ============================================================
+// percorsiMappe — dalla chiave interna di una mappa al suo percorso leggibile, e ritorno
+// ============================================================
+//
+// Ogni mappa ha un'identità interna (la chiave storica) e un percorso fatto dai nomi della sua
+// catena di genitori (`mappa_percorso`), che è quello di URL, ricerca ed esportazioni; i percorsi
+// di prima restano come alias (`mappa_alias`), così i collegamenti vecchi continuano a funzionare.
+// ============================================================
+
 import type Database from 'better-sqlite3';
 import type { AppDatabase } from '../../db/dbService.js';
 import { getDb } from '../../db/dbService.js';
@@ -15,6 +24,7 @@ interface Nodo { chiave:string; nome:string; tipo:string; genitore_chiave:string
 const statementPerConnessione = new WeakMap<AppDatabase, Map<string, Database.Statement>>();
 const conPercorsi = new WeakSet<AppDatabase>();
 
+/** Lo statement di quella SQL su quella connessione: compilato la prima volta, poi ripreso dalla cache della connessione. */
 function stmt(db: AppDatabase, sql: string): Database.Statement {
   let cache = statementPerConnessione.get(db);
   if (!cache) { cache = new Map(); statementPerConnessione.set(db, cache); }
@@ -23,6 +33,7 @@ function stmt(db: AppDatabase, sql: string): Database.Statement {
   return s;
 }
 
+/** Vero se la connessione ha la tabella `mappa_percorso`; il sì si ricorda, il no si ricontrolla (la tabella può arrivare dopo). */
 function haPercorsi(db: AppDatabase): boolean {
   if (conPercorsi.has(db)) return true;
   if (!stmt(db, "SELECT 1 FROM sqlite_master WHERE name='mappa_percorso'").get()) return false;
@@ -35,10 +46,12 @@ export function idMappa(chiave:string,db:AppDatabase=getDb()):string {
   if(!haPercorsi(db))return chiave;
   return (stmt(db,'SELECT mappa_chiave FROM mappa_percorso WHERE chiave=? UNION ALL SELECT mappa_chiave FROM mappa_alias WHERE chiave=? LIMIT 1').get(chiave,chiave) as {mappa_chiave:string}|undefined)?.mappa_chiave??chiave;
 }
+/** Il percorso pubblico di una mappa dalla sua chiave interna; la chiave stessa se non c'è (ancora) un percorso. */
 export function chiaveMappa(identita:string,db:AppDatabase=getDb()):string {
   if(!haPercorsi(db))return identita;
   return (stmt(db,'SELECT chiave FROM mappa_percorso WHERE mappa_chiave=?').get(identita) as {chiave:string}|undefined)?.chiave??identita;
 }
+/** Il nome completo di una mappa con i genitori significativi («Palazzo › Piano»); la chiave stessa se non c'è un percorso. */
 export function nomePercorso(identita:string,db:AppDatabase=getDb()):string {
   return (stmt(db,'SELECT nome FROM mappa_percorso WHERE mappa_chiave=?').get(identita) as {nome:string}|undefined)?.nome??identita;
 }

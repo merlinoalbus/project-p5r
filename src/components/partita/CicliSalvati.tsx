@@ -22,12 +22,20 @@ interface Props {
   partitaId: number;
 }
 
+/** La scheda di un ciclo salvato: Persona di partenza, giri completati e costo per giro, gli anelli
+ * (ognuno impostabile come corrente), lo stato in scorta di ingrediente e partner dell'anello
+ * corrente con i comandi per procurare il partner o esplorare come ottenere l'ingrediente, e
+ * l'esecuzione dell'anello nella finestra di fusione, attiva solo quando l'anello è eseguibile.
+ * Ogni aggiornamento risale con `onCambiato`; l'eliminazione con `onElimina`. */
 function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo: CicloSalvatoDto; partitaId: number; onCambiato: (c: CicloSalvatoDto) => void; onElimina: () => void }) {
   const [esecuzione, setEsecuzione] = useState(false);
   const [occupato, setOccupato] = useState(false);
   const a = ciclo.anelli[ciclo.anelloCorrente];
   const av = ciclo.avanzamento;
 
+  /** Aggiunge alla scorta il partner dell'anello corrente, con l'origine adatta (evocazione dal
+   * Registro, cattura o aggiunta per il ciclo), e poi ricarica il ciclo; se il partner è già in
+   * scorta lo dice con un messaggio dedicato. */
   const procuraPartner = async () => {
     setOccupato(true);
     try {
@@ -40,10 +48,14 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
       setOccupato(false);
     }
   };
+  /** Rilegge i cicli della partita e ne restituisce questo, aggiornato (o quello attuale se non c'è più). */
   const ricaricaUno = async () => (await getCicliSalvati(partitaId)).find((c) => c.id === ciclo.id) ?? ciclo;
+  /** Salva l'anello `n` come anello corrente del ciclo. */
   const impostaAnello = async (n: number) => {
     try { onCambiato(await aggiornaCiclo(partitaId, ciclo.id, { anelloCorrente: n })); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }
   };
+  /** Dopo una fusione eseguita chiude la finestra e fa avanzare il ciclo all'anello successivo;
+   * quando torna al primo anello annuncia l'iterazione completata. */
   const dopoEsecuzione = async () => {
     setEsecuzione(false);
     try {
@@ -100,12 +112,16 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
   );
 }
 
+/** La scheda «Cicli» della partita: spiegazione con i giri totali, lo stato vuoto con il rimando
+ * ai cicli di fusione, oppure una `SchedaCicloSalvato` per ciclo. Un ciclo aggiornato sostituisce
+ * quello in elenco e fa ricaricare la scorta. */
 export function CicliSalvati({ partitaId }: Props) {
   const lista = useCarica(() => getCicliSalvati(partitaId), [partitaId]);
   const scorta = useCarica(() => getPossedute(partitaId), [partitaId]);
   const totaleGiri = useMemo(() => (lista.dati ?? []).reduce((s, c) => s + c.iterazioni, 0), [lista.dati]);
   // gli aggiornamenti arrivano dopo un `await`: si parte dai dati correnti (forma funzionale), non da quelli di questo render
   const sostituisci = (c: CicloSalvatoDto) => { lista.imposta((correnti) => correnti.map((x) => (x.id === c.id ? c : x))); void scorta.ricarica(); };
+  /** Elimina il ciclo dopo conferma e lo toglie dall'elenco. */
   const elimina = async (c: CicloSalvatoDto) => {
     if (!window.confirm(`Eliminare il ciclo «${c.titolo}»?`)) return;
     try {

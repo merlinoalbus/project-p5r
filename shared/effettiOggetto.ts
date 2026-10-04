@@ -118,6 +118,7 @@ export type EffettoOggetto =
   | { famiglia: 'aumenta-punti'; dove: Guadagno }
   | { famiglia: 'descrittivo'; testo: string };
 
+/** Quanto ripristina, in parole: «tutti» per la misura `tutto`, «il N%» per una percentuale, altrimenti il numero (0 se manca). */
 const conValore = (misura: Misura, valore: number | null) =>
   misura === 'tutto' ? 'tutti' : misura === 'percentuale' ? `il ${valore ?? 0}%` : String(valore ?? 0);
 
@@ -134,6 +135,11 @@ const conValore = (misura: Misura, valore: number | null) =>
 
 export interface NomiEffetto { luoghi?: Record<string, string>; attivita?: Record<string, string> }
 
+/**
+ * La frase italiana di un effetto, una sola forma per ogni effetto uguale: un ramo per famiglia, con i
+ * nomi di bersagli, stati, statistiche, funzioni e rese dalle tabelle del modulo; luoghi e attività dai
+ * `nomi` passati, altrimenti la chiave. La Dote si scrive con le note come simboli ♪ (da 1 a 4).
+ */
 export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): string {
   switch (e.famiglia) {
     case 'ripristina': {
@@ -187,8 +193,11 @@ export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia'
   { chiave: 'descrittivo', nome: 'Altro (descritto a parole)' },
 ];
 
+/** Vero se il valore è una delle stringhe dell'elenco. */
 const unoDi = <T extends string>(elenco: readonly T[], v: unknown): v is T => typeof v === 'string' && (elenco as readonly string[]).includes(v);
+/** Vero se il valore è null o un numero finito. */
 const numeroONull = (v: unknown): v is number | null => v === null || (typeof v === 'number' && Number.isFinite(v));
+/** Vero se il valore è un numero finito (né NaN né infinito). */
 const numero = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 
 /**

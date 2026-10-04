@@ -34,6 +34,7 @@ import { leggiGiorni, leggiOrari, orariComeCondizioni } from '../../../shared/or
 import { eStrutturale } from '../../../shared/spilli.js';
 import type { AppDatabase } from '../../db/dbService.js';
 
+/** Il testo in minuscolo, senza accenti e senza spazi ai bordi, per confrontare le parole della trascrizione. */
 function senzaAccenti(t: string): string {
   return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 }

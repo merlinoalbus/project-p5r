@@ -29,6 +29,13 @@ function destinazione(grigi: DisponibilitaDto['requisiti']): string {
   }
 }
 
+/**
+ * Cartellino di disponibilità: niente se disponibile o senza dato; «Non ancora» se bloccato. Altrimenti guarda solo i
+ * requisiti propri della riga (non quelli ereditati dal negozio) e, se nessuno è in sospeso, non mostra nulla; poi in
+ * ordine: «Da verificare» se una condizione non è leggibile dall'app, «Da correggere» se rimanda a uno stato di un pin
+ * che non c'è più, altrimenti «Da segnare» come collegamento alla scheda della Partita dove si registra il dato.
+ * `compatto` riduce testo e icona.
+ */
 export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilita: DisponibilitaDto | undefined; compatto?: boolean }) {
   if (!d || d.stato === 'disponibile') return null;
   const motivi = motiviDisponibilita(d);

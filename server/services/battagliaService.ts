@@ -10,6 +10,8 @@ import type { BattagliaDto, OmbraDto } from '../../shared/types.js';
 
 type SeedBattaglia = Omit<BattagliaDto, 'ombre'> & { ombre: Array<Omit<OmbraDto, 'personaCollegata'>> };
 
+/** Forma di confronto di un nome: minuscolo, senza accenti (decomposizione NFD e rimozione dei segni diacritici), ogni
+ *  sequenza di caratteri che non è lettera o cifra ridotta a uno spazio, senza spazi ai bordi. */
 function normalizza(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 }

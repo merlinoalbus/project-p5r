@@ -65,6 +65,13 @@ function elementoBase(v: string): string {
   return v.replace(/\s*\(.*\)\s*$/, '').trim();
 }
 
+/**
+ * Ricerca rapida delle Ombre: un testo libero (nome dell'Ombra, della Persona, della Persona
+ * collegata o dell'area, confrontati normalizzati) e tre filtri (dungeon, debolezza ridotta
+ * all'elemento base, personalità), con le opzioni ricavate dalle Ombre stesse. Mostra il conteggio
+ * e una griglia di carte con debolezze, resistenze, livello, collegamento alla scheda Persona e
+ * all'area del dungeon.
+ */
 function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
   const [q, setQ] = useState('');
   const [dungeon, setDungeon] = useState('');
@@ -120,6 +127,11 @@ function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
   );
 }
 
+/**
+ * La negoziazione: quando e come si negozia con le opzioni dell'Hold Up, la ricerca delle risposte
+ * per domanda (quando la guida le ha), le carte per personalità con le risposte da dare e da
+ * evitare, e infine regole, incertezze e fonti separate da un punto.
+ */
 function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
   const n = d.negoziazione;
   return (
@@ -167,6 +179,11 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
   );
 }
 
+/**
+ * Il danno tecnico: tabella stato alterato → elementi che danno il colpo tecnico, con l'effetto
+ * dello stato preso dal sistema di battaglia (trattino se manca), poi gli esiti del colpo, il
+ * «1 More» e la nota di fine battaglia.
+ */
 function SchedaTecnico({ d }: { d: BattagliaDto }) {
   const effetti = new Map(d.sistema.statiAlterati.map((s) => [s.stato, s.effetto]));
   return (
@@ -191,6 +208,7 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
   );
 }
 
+/** Tre sezioni della guida: la Staffetta con i ranghi e i bonus, gli Speciali con la tabella delle coppie e dello sblocco, e Rapina, Assalto e Parla con i comandi di battaglia. */
 function SchedaStaffetta({ d }: { d: BattagliaDto }) {
   const s = d.staffetta; const sp = d.speciali; const a = d.assaltoEHoldUp;
   return (
@@ -241,6 +259,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
   );
 }
 
+/** I nemici speciali: le Ombre sciagura (riconoscimento, comportamento, stati, ricompense), il Mietitore con la strategia numerata e i Demoni del Tesoro con la loro tabella. */
 function SchedaNemici({ d }: { d: BattagliaDto }) {
   const o = d.ombreSciagura; const m = d.mietitore; const t = d.demoniTesoro;
   return (
@@ -301,6 +320,12 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
   );
 }
 
+/**
+ * Pagina dell'aiuto in battaglia: carica una volta il pacchetto `getBattaglia`, sceglie la scheda
+ * dal parametro `scheda` dell'URL (le Ombre quando manca o non è valido) e mostra la barra delle
+ * cinque schede con la scheda attiva sotto. Cambiare scheda sostituisce l'URL senza aggiungere
+ * voci alla cronologia.
+ */
 export function BattagliaPage() {
   useDocumentTitle('Aiuto in battaglia');
   const dati = useCarica(() => getBattaglia(), []);

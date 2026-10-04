@@ -58,6 +58,7 @@ const ELEMENTO_DA_TESTO: Array<[RegExp, string]> = [
   [/^armi da fuoco/i, 'gun'],
 ];
 
+/** La chiave dell'elemento riconosciuta dall'inizio del testo della guida (spazi esterni ignorati), o null se nessuna regola lo riconosce. */
 function chiaveElemento(testo: string): string | null {
   return ELEMENTO_DA_TESTO.find(([r]) => r.test(testo.trim()))?.[1] ?? null;
 }
@@ -74,10 +75,18 @@ function Affinita({ testo, tipo }: { testo: string; tipo: 'debole' | 'resiste' }
   </span>;
 }
 
+/**
+ * La carta di una Richiesta: nome, dedalo e piano, stato nella partita, suggerimento, il
+ * bersaglio con forma demoniaca, livello, debolezze e resistenze colorate e l'utilità della
+ * confusione, il Confidente collegato e le ricompense; «Dettagli» apre committente, date e note.
+ * Con una partita offre i comandi Accettata, Completata e Riapri secondo lo stato, e sempre i
+ * collegamenti al dedalo e al Confidente.
+ */
 function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: number | null; onCambiata: (r: RichiestaDto) => void }) {
   const [aperta, setAperta] = useState(false);
   const sugg = useSuggerimenti();
   const [occupato, setOccupato] = useState(false);
+  /** Imposta lo stato della Richiesta nella partita (null la riapre), disattivando i comandi durante la richiesta; passa al genitore la Richiesta aggiornata o notifica l'errore. */
   const cambia = async (stato: StatoRichiesta | null) => {
     if (!partitaId) return;
     setOccupato(true);
@@ -138,6 +147,14 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
 }
 
 
+/**
+ * Pagina delle Richieste dei Mementos: carica le Richieste per la partita attiva e legge dall'URL
+ * il foglio (Richieste o Jose, offerto solo se i dati di Jose ci sono) e il dedalo scelto. Nel
+ * foglio delle Richieste mostra i conteggi, i filtri (testo, dedalo, accettazione e
+ * completamento) e le carte con le completate in fondo; il cambio di stato aggiorna la riga nei
+ * dati correnti e ricalcola le completate in tutto e per dedalo. Il foglio di Jose mostra fiori,
+ * timbri, boss segreto e la tabella degli scambi.
+ */
 export function RichiestePage() {
   useDocumentTitle('Richieste dei Mementos');
   const attiva = usePartitaStore((s) => s.attiva);
@@ -150,6 +167,7 @@ export function RichiestePage() {
   const [params, setParams] = useSearchParams();
   const foglio: Foglio = params.get('foglio') === 'jose' ? 'jose' : 'richieste';
   const dedalo = params.get('dedalo') ?? '';
+  /** Scrive il dedalo scelto nel parametro `dedalo` dell'URL (lo toglie se vuoto) senza aggiungere voci alla cronologia. */
   const impostaDedalo = (k: string) => setParams((p) => { const n = new URLSearchParams(p); if (k) n.set('dedalo', k); else n.delete('dedalo'); return n; }, { replace: true });
   const d = dati.dati;
   const q = piatto(ricerca.trim());

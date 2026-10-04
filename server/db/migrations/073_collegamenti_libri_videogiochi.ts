@@ -26,6 +26,7 @@ const NOTA_VIDEOGIOCO: Readonly<Record<string, string>> = {
   'videogioco-star-forneus': 'Incluso nel Set per retrogaming',
 };
 
+/** La chiave dell'articolo che vende il videogioco: `<negozio>/<nome senza «videogioco-»>`, con Super Baron come negozio predefinito. */
 export function chiaveArticoloVideogioco(attivita: string): string {
   return `${NEGOZIO_VIDEOGIOCO[attivita] ?? 'super-baron'}/${attivita.replace(/^videogioco-/, '')}`;
 }

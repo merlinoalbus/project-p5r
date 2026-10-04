@@ -12,10 +12,12 @@ export interface OpzioniFusione {
   limite?: number;
 }
 
-export const getFondi = (a: number, b: number, opz: Pick<OpzioniFusione, 'partita'> = {}): Promise<EsitoFusioneDto> =>
+/** Fusione diretta di due Persona per id: il risultato, o il motivo per cui non è possibile (DLC della partita se indicata). */
+export const getFondi =(a: number, b: number, opz: Pick<OpzioniFusione, 'partita'> = {}): Promise<EsitoFusioneDto> =>
   apiGet(`/fusione/fondi${queryString({ a, b, partita: opz.partita })}`);
 
-export const getRicettePer = (personaId: number, opz: OpzioniFusione = {}): Promise<RicetteFusioneDto> =>
+/** Fusione inversa: le ricette che producono la Persona, filtrate per livello massimo e limitate in numero. */
+export const getRicettePer =(personaId: number, opz: OpzioniFusione = {}): Promise<RicetteFusioneDto> =>
   apiGet(`/fusione/ricette/${personaId}${queryString({ partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite })}`);
 
 export interface OpzioniPiani {
@@ -48,5 +50,6 @@ export const getVelluto = (partita: number): Promise<VellutoDto> => apiGet(`/fus
 export const getCicliFusione = (id: number, opz: { partita?: number; lunghezza?: number; lunghezzaMin?: number; partnerDistinti?: boolean; alternative?: number; catture?: boolean; limitaLivello?: boolean } = {}): Promise<CicliFusioneDto> =>
   apiGet(`/fusione/cicli/${id}${queryString({ partita: opz.partita, lunghezza: opz.lunghezza, lunghezzaMin: opz.lunghezzaMin, partnerDistinti: opz.partnerDistinti === undefined ? undefined : String(opz.partnerDistinti), alternative: opz.alternative, catture: opz.catture === undefined ? undefined : String(opz.catture), limitaLivello: opz.limitaLivello === undefined ? undefined : String(opz.limitaLivello) })}`);
 
-export const getFusioniCon = (personaId: number, opz: OpzioniFusione = {}): Promise<RicetteFusioneDto> =>
+/** Le fusioni in cui la Persona è ingrediente, filtrate per livello massimo e limitate in numero. */
+export const getFusioniCon =(personaId: number, opz: OpzioniFusione = {}): Promise<RicetteFusioneDto> =>
   apiGet(`/fusione/con/${personaId}${queryString({ partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite })}`);

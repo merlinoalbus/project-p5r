@@ -44,6 +44,7 @@ export function regoleFontFace(elenco: FontDto[]): string {
     .join('\n');
 }
 
+/** Scrive le regole @font-face nel <style> dedicato del documento, creandolo alla prima volta (fuori dal browser non fa nulla). */
 function applicaFontFace(elenco: FontDto[]): void {
   if (typeof document === 'undefined') return;
   let style = document.getElementById(ID_STYLE) as HTMLStyleElement | null;
@@ -65,6 +66,7 @@ interface FontState {
 }
 
 const RUOLI: RuoloFont[] = ['display', 'menu', 'decor'];
+/** Stato di un ruolo senza file caricato. */
 const assente = (ruolo: RuoloFont): FontDto => ({ ruolo, presente: false, formato: null, byte: 0, aggiornato: null, url: null });
 
 /** Stato dei font dell'utente, caricato una volta all'avvio. */

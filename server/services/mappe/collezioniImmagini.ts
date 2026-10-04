@@ -1,3 +1,12 @@
+// ============================================================
+// collezioniImmagini — numerazione delle planimetrie omonime dello stesso luogo («Immagine N di M»)
+// ============================================================
+//
+// Le planimetrie native senza stanza dichiarata che hanno lo stesso genitore e lo stesso titolo (i nomi
+// dei loro contesti, o il nome della mappa) formano una famiglia: se sono almeno due, ognuna riceve il
+// suo indice nell'ordine delle mappe e un ambito stabile, ricavato dall'hash della famiglia.
+// ============================================================
+
 import { createHash } from 'node:crypto';
 import type { MappaRiassuntoDto } from '../../../shared/types.js';
 export interface ImmagineCandidataCollezione {

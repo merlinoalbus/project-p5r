@@ -1,3 +1,7 @@
+// ============================================================
+// Route /api/mappe — mappe, spilli, percorsi, accesso ai luoghi, piante dei quartieri, import/export
+// ============================================================
+
 import { risolviPercorsoMappa, contenutiMappa } from '../services/mappe/contenutiGuidaService.js';
 import { risolviAccessoMondo } from '../services/mappe/accessoMondoService.js';
 import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../../shared/accessoMondo.js';

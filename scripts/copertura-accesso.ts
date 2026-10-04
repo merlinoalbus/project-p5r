@@ -31,6 +31,7 @@ const SORGENTI: Partial<Record<TipoAccessoMondo, string>> = {
   punto: 'SELECT chiave FROM punto_interesse',
 };
 
+/** Il valore che segue l'opzione `nome` sulla riga di comando (`--dati <cartella>`); undefined se l'opzione manca. */
 function argomento(nome: string): string | undefined {
   const i = process.argv.indexOf(nome);
   return i >= 0 ? process.argv[i + 1] : undefined;

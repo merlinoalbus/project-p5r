@@ -40,19 +40,27 @@ export interface DatiPosseduta {
   origine?: string;
 }
 
+/** Elenco di tutte le partite. */
 export const getPartite = (): Promise<PartitaDto[]> => apiGet('/partite');
+/** Crea una partita (diventa attiva se è la prima o se `attiva` è richiesto); risponde con la partita creata. */
 export const creaPartita = (dati: DatiPartita & { nome: string; attiva?: boolean }): Promise<PartitaDto> => apiPost('/partite', dati);
-export const aggiornaPartita = (id: number, dati: DatiPartita): Promise<PartitaDto> => apiPut(`/partite/${id}`, dati);
+/** Modifica i campi della partita; risponde con la partita aggiornata. */
+export const aggiornaPartita =(id: number, dati: DatiPartita): Promise<PartitaDto> => apiPut(`/partite/${id}`, dati);
 /** Momento della giornata corrente della partita (scheda «Oggi»): «giorno» o «sera». */
 export const impostaFasciaGioco = (id: number, fascia: FasciaGioco): Promise<PartitaDto> => apiPut(`/partite/${id}`, { fasciaGioco: fascia });
+/** Rende attiva la partita (le altre smettono di esserlo); risponde con la partita. */
 export const attivaPartita = (id: number): Promise<PartitaDto> => apiPost(`/partite/${id}/attiva`);
+/** Elimina la partita; se era quella attiva, il server attiva la più recente tra quelle rimaste. */
 export const eliminaPartita = (id: number): Promise<void> => apiDelete(`/partite/${id}`);
 
+/** Le Doti sociali della partita con punti, rango e punti mancanti al successivo. */
 export const getDoti = (id: number): Promise<DoteSocialePartitaDto[]> => apiGet(`/partite/${id}/doti`);
-export const aggiornaDote = (id: number, chiave: string, mod: ModificaDote): Promise<DoteSocialePartitaDto> =>
+/** Modifica a mano una Dote sociale: punti assoluti, differenza o note viste in gioco (mai sotto zero); risponde con la Dote aggiornata. */
+export const aggiornaDote =(id: number, chiave: string, mod: ModificaDote): Promise<DoteSocialePartitaDto> =>
   apiPatch(`/partite/${id}/doti/${encodeURIComponent(chiave)}`, mod);
 
-export const getConfidentiPartita = (id: number): Promise<ConfidentePartitaDto[]> => apiGet(`/partite/${id}/confidenti`);
+/** I Confidenti con lo stato nella partita (rango, punti, sblocco). */
+export const getConfidentiPartita =(id: number): Promise<ConfidentePartitaDto[]> => apiGet(`/partite/${id}/confidenti`);
 /** Rango, sblocco e punti di un Confidente. Può essere relativo (`deltaPunti`, le note di una risposta, un regalo, un'uscita
  *  aggiungono punti): ripetuto dopo un 5xx o un timeout a scrittura già avvenuta li conterebbe due volte, quindi nessun nuovo
  *  tentativo, come per le PATCH (rilievo F7 della validazione, 2026-10-03). */
@@ -86,7 +94,8 @@ export const impostaCruciverba = (id: number, data: string, fatto: boolean): Pro
 
 /** Libro letto / film visto nella partita. */
 export const impostaLettura = (id: number, tipo: TipoLettura, chiave: string, fatto: boolean): Promise<LibroDto | FilmDto | VideogiocoDto> => apiPut(`/partite/${id}/letture`, { tipo, chiave, fatto });
-export const impostaProgressoVideogioco = (id: number, chiave: string, avanzamento: number): Promise<VideogiocoDto> => apiPut(`/partite/${id}/letture`, { tipo: 'videogioco', chiave, avanzamento });
+/** Registra l'avanzamento di un videogioco nella partita (stessa rotta delle letture, tipo «videogioco»). */
+export const impostaProgressoVideogioco =(id: number, chiave: string, avanzamento: number): Promise<VideogiocoDto> => apiPut(`/partite/${id}/letture`, { tipo: 'videogioco', chiave, avanzamento });
 /** Registra quante sessioni di un libro sono state completate. */
 export const impostaProgressoLibro = (id: number, chiave: string, avanzamento: number): Promise<LibroDto> => apiPut(`/partite/${id}/letture`, { tipo: 'libro', chiave, avanzamento });
 /** Registra sessioni DVD o visioni al cinema; queste ultime possono superare uno. */
@@ -108,16 +117,22 @@ export const impostaDomandaFatta = (id: number, domandaId: number, fatta: boolea
 export const impostaRegaloFatto = (id: number, chiave: string, regalo: string, fatto: boolean): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}/regali`, { regalo, fatto });
 
+/** Il compendio personale della partita: le Persona registrate con la loro istantanea. */
 export const getCompendioPartita = (id: number): Promise<CompendioPartitaDto[]> => apiGet(`/partite/${id}/compendio`);
-export const aggiornaCompendio = (id: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): Promise<CompendioPartitaDto[]> =>
+/** Registra a mano una Persona nel compendio (istantanea di solo livello, senza bonus né skill) o la toglie; risponde con il compendio intero. */
+export const aggiornaCompendio =(id: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): Promise<CompendioPartitaDto[]> =>
   apiPut(`/partite/${id}/compendio/${personaId}`, dati);
 
+/** Le Persona nella scorta della partita. */
 export const getPossedute = (id: number): Promise<PersonaPossedutaDto[]> => apiGet(`/partite/${id}/persona`);
-export const aggiungiPosseduta = (id: number, personaId: number, dati: DatiPosseduta = {}): Promise<PersonaPossedutaDto> =>
+/** Aggiunge una Persona alla scorta con i dati indicati; risponde con l'esemplare creato. */
+export const aggiungiPosseduta =(id: number, personaId: number, dati: DatiPosseduta = {}): Promise<PersonaPossedutaDto> =>
   apiPost(`/partite/${id}/persona`, { personaId, ...dati });
-export const aggiornaPosseduta = (id: number, possedutaId: number, dati: DatiPosseduta): Promise<PersonaPossedutaDto> =>
+/** Modifica un esemplare della scorta (livello, bonus, skill, tratto, squadra, note…); il compendio non segue. Risponde con l'esemplare aggiornato. */
+export const aggiornaPosseduta =(id: number, possedutaId: number, dati: DatiPosseduta): Promise<PersonaPossedutaDto> =>
   apiPut(`/partite/${id}/persona/${possedutaId}`, dati);
-export const rimuoviPosseduta = (id: number, possedutaId: number): Promise<void> => apiDelete(`/partite/${id}/persona/${possedutaId}`);
+/** Toglie un esemplare dalla scorta (il server registra l'evento nello storico). */
+export const rimuoviPosseduta =(id: number, possedutaId: number): Promise<void> => apiDelete(`/partite/${id}/persona/${possedutaId}`);
 /** Registra nel compendio l'istantanea dell'esemplare (livello, bonus, skill, tratto, carica). */
 export const registraPosseduta = (id: number, possedutaId: number): Promise<CompendioPartitaDto[]> => apiPost(`/partite/${id}/persona/${possedutaId}/registra`);
 
@@ -129,39 +144,56 @@ export interface DatiObiettivo {
   stato?: StatoObiettivo;
   note?: string;
 }
+/** Gli obiettivi della partita, filtrabili per stato. */
 export const getObiettivi = (id: number, stato?: StatoObiettivo): Promise<ObiettivoDto[]> => apiGet(`/partite/${id}/obiettivi${queryString({ stato })}`);
+/** Crea un obiettivo per una Persona (skill volute, livello minimo, priorità, note); risponde con l'obiettivo creato. */
 export const creaObiettivo = (id: number, personaId: number, dati: DatiObiettivo = {}): Promise<ObiettivoDto> => apiPost(`/partite/${id}/obiettivi`, { personaId, ...dati });
+/** Modifica un obiettivo; risponde con l'obiettivo aggiornato. */
 export const aggiornaObiettivo = (id: number, obiettivoId: number, dati: DatiObiettivo): Promise<ObiettivoDto> => apiPut(`/partite/${id}/obiettivi/${obiettivoId}`, dati);
-export const eliminaObiettivo = (id: number, obiettivoId: number): Promise<void> => apiDelete(`/partite/${id}/obiettivi/${obiettivoId}`);
+/** Elimina un obiettivo. */
+export const eliminaObiettivo =(id: number, obiettivoId: number): Promise<void> => apiDelete(`/partite/${id}/obiettivi/${obiettivoId}`);
 
 /** Piani di fusione salvati (avanzamento ricalcolato sulla scorta). */
 export const getPianiSalvati = (id: number, obiettivo?: number): Promise<PianoSalvatoDto[]> => apiGet(`/partite/${id}/piani${queryString({ obiettivo })}`);
-export const salvaPiano = (id: number, dati: { personaId: number; piano: PianoFusioneDto; opzioni: object; skillIds?: number[]; obiettivoId?: number | null; nome?: string; note?: string }): Promise<PianoSalvatoDto> =>
+/** Salva un piano di fusione calcolato, con le opzioni usate e l'eventuale obiettivo collegato; risponde con il piano salvato. */
+export const salvaPiano =(id: number, dati: { personaId: number; piano: PianoFusioneDto; opzioni: object; skillIds?: number[]; obiettivoId?: number | null; nome?: string; note?: string }): Promise<PianoSalvatoDto> =>
   apiPost(`/partite/${id}/piani`, dati);
+/** Modifica nome, note o obiettivo collegato di un piano salvato; risponde con il piano aggiornato. */
 export const aggiornaPianoSalvato = (id: number, pianoId: number, dati: { nome?: string; note?: string; obiettivoId?: number | null }): Promise<PianoSalvatoDto> => apiPut(`/partite/${id}/piani/${pianoId}`, dati);
-export const eliminaPianoSalvato = (id: number, pianoId: number): Promise<void> => apiDelete(`/partite/${id}/piani/${pianoId}`);
+/** Elimina un piano salvato. */
+export const eliminaPianoSalvato =(id: number, pianoId: number): Promise<void> => apiDelete(`/partite/${id}/piani/${pianoId}`);
 
 /** Cicli di fusione salvati (Fase 5.5). */
 export const getCicliSalvati = (id: number): Promise<CicloSalvatoDto[]> => apiGet(`/partite/${id}/cicli`);
+/** Salva un ciclo di fusione (bersaglio e anelli ingrediente + partner → risultato); risponde con il ciclo salvato. */
 export const salvaCiclo = (id: number, dati: { personaId: number; anelli: Array<{ ingredienteId: number; partnerId: number; risultatoId: number }>; nome?: string; note?: string }): Promise<CicloSalvatoDto> => apiPost(`/partite/${id}/cicli`, dati);
+/** Modifica nome, note, anello corrente o iterazioni di un ciclo salvato; risponde con il ciclo aggiornato. */
 export const aggiornaCiclo = (id: number, cicloId: number, dati: { nome?: string; note?: string; anelloCorrente?: number; iterazioni?: number }): Promise<CicloSalvatoDto> => apiPut(`/partite/${id}/cicli/${cicloId}`, dati);
+/** Segna eseguito l'anello corrente e passa al successivo (al ritorno sul bersaglio il server conta un'iterazione); risponde con il ciclo. */
 export const avanzaCiclo = (id: number, cicloId: number): Promise<CicloSalvatoDto> => apiPost(`/partite/${id}/cicli/${cicloId}/avanza`);
-export const eliminaCiclo = (id: number, cicloId: number): Promise<void> => apiDelete(`/partite/${id}/cicli/${cicloId}`);
+/** Elimina un ciclo salvato. */
+export const eliminaCiclo =(id: number, cicloId: number): Promise<void> => apiDelete(`/partite/${id}/cicli/${cicloId}`);
 
 /** Operazioni della Stanza di Velluto eseguite dalla scorta (Fase 5.4). */
 export const getAnteprimaFusione = (id: number, dati: { possedutaIds: number[]; risultatoId?: number }): Promise<AnteprimaFusioneDto> => apiPost(`/partite/${id}/velluto/fusione/anteprima`, dati);
-export const eseguiFusioneScorta = (id: number, dati: { possedutaIds: number[]; risultatoId?: number; skillIds?: number[]; trattoSkillId?: number | null; livello?: number; statistiche?: StatisticheDto | null; note?: string }): Promise<EsitoFusioneScortaDto> =>
+/** Esegue la fusione con esemplari della scorta: il server rimuove gli ingredienti, aggiunge il risultato e registra l'evento. */
+export const eseguiFusioneScorta =(id: number, dati: { possedutaIds: number[]; risultatoId?: number; skillIds?: number[]; trattoSkillId?: number | null; livello?: number; statistiche?: StatisticheDto | null; note?: string }): Promise<EsitoFusioneScortaDto> =>
   apiPost(`/partite/${id}/velluto/fusione`, dati);
-export const eseguiForca = (id: number, dati: { riceventeId: number; sacrificioId: number; nuovoLivello?: number; skillTrasferiteIds?: number[]; skillRimosseIds?: number[]; incidente?: boolean; puntiStatistica?: Partial<StatisticheDto> }): Promise<EsitoForcaDto> =>
+/** Esegue la Forca: il server rimuove il sacrificio, aggiorna livello, skill e statistiche del ricevente e registra l'evento. */
+export const eseguiForca =(id: number, dati: { riceventeId: number; sacrificioId: number; nuovoLivello?: number; skillTrasferiteIds?: number[]; skillRimosseIds?: number[]; incidente?: boolean; puntiStatistica?: Partial<StatisticheDto> }): Promise<EsitoForcaDto> =>
   apiPost(`/partite/${id}/velluto/forca`, dati);
-export const eseguiIsolamento = (id: number, dati: { possedutaId: number; incenso?: string; giorni: number; statistiche?: string[]; skillResistenzaId?: number | null; skillRimossaId?: number | null }): Promise<EsitoIsolamentoDto> =>
+/** Registra un ciclo di isolamento di un esemplare: punti dall'incenso sulle statistiche scelte e skill di resistenza appresa
+ *  (con la skill da dimenticare se ne ha già 8). */
+export const eseguiIsolamento =(id: number, dati: { possedutaId: number; incenso?: string; giorni: number; statistiche?: string[]; skillResistenzaId?: number | null; skillRimossaId?: number | null }): Promise<EsitoIsolamentoDto> =>
   apiPost(`/partite/${id}/velluto/isolamento`, dati);
-export const getSuggerimentoIsolamento = (id: number, possedutaId: number): Promise<SuggerimentoIsolamentoDto> => apiGet(`/partite/${id}/velluto/isolamento/${possedutaId}`);
+/** La skill di resistenza che l'isolamento darebbe all'esemplare (elemento, grado e skill, calcolati da debolezza e livello). */
+export const getSuggerimentoIsolamento =(id: number, possedutaId: number): Promise<SuggerimentoIsolamentoDto> => apiGet(`/partite/${id}/velluto/isolamento/${possedutaId}`);
 
 /** Storico della partita dal più recente; `prima` è il cursore restituito come `prossimo`. */
 export const getStorico = (id: number, opz: { limite?: number; prima?: number; tipi?: string[]; persona?: number } = {}): Promise<StoricoDto> =>
   apiGet(`/partite/${id}/storico${queryString({ limite: opz.limite, prima: opz.prima, tipi: opz.tipi?.join(','), persona: opz.persona })}`);
-export const eliminaEvento = (id: number, eventoId: number): Promise<void> => apiDelete(`/partite/${id}/storico/${eventoId}`);
+/** Elimina una voce dello storico (solo la voce: gli effetti già applicati restano). */
+export const eliminaEvento =(id: number, eventoId: number): Promise<void> => apiDelete(`/partite/${id}/storico/${eventoId}`);
 /** Elimina più voci dello storico in una volta. */
 export const eliminaEventi = (id: number, ids: number[]): Promise<{ eliminati: number }> => apiPost(`/partite/${id}/storico/elimina`, { ids });
 
@@ -173,5 +205,6 @@ export const getSquadra = (id: number): Promise<SquadraPartitaDto> => apiGet(`/p
 export const impostaYen = (id: number, mod: { yen?: number; delta?: number }): Promise<SquadraPartitaDto> =>
   apiPatch(`/partite/${id}/squadra/yen`, mod);
 
-export const impostaMembroSquadra = (id: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number; inSquadra?: boolean }): Promise<SquadraPartitaDto> =>
+/** Livello (assoluto o differenza), esperienza e presenza in squadra di un Ladro; risponde con la squadra aggiornata. */
+export const impostaMembroSquadra =(id: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number; inSquadra?: boolean }): Promise<SquadraPartitaDto> =>
   apiPatch(`/partite/${id}/squadra/${encodeURIComponent(chiave)}`, mod);

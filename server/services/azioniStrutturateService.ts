@@ -110,6 +110,7 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
 
 /** I nomi di libri, film, videogiochi e attività per descrivere gli effetti: una lettura per richiesta. */
 export function nomiEffetti(): NomiEffettiAzione {
+  /** Esegue la query (che deve dare `chiave` e `nome`) e ne fa un oggetto chiave → nome. */
   const mappa = (sql: string) => Object.fromEntries((prepared(sql).all() as Array<{ chiave: string; nome: string }>).map((r) => [r.chiave, r.nome]));
   return {
     libri: mappa('SELECT chiave, COALESCE(nome_it, nome) AS nome FROM libro'),
@@ -119,6 +120,7 @@ export function nomiEffetti(): NomiEffettiAzione {
   };
 }
 
+/** La frase di ogni effetto, nello stesso ordine, con i nomi presi da `nomi`. */
 export function testoEffetti(produce: EffettoAzione[], nomi: NomiEffettiAzione): string[] {
   return produce.map((e) => descriviEffettoAzione(e, nomi));
 }
@@ -126,7 +128,9 @@ export function testoEffetti(produce: EffettoAzione[], nomi: NomiEffettiAzione):
 /** Gli elenchi da cui la finestra dell'azione sceglie collegamento ed effetti: gli stessi elementi che `nomeRiferimento` e
  *  `verificaEffetti` accettano (le attività con i turni sono quelle contate per volte). */
 export function elenchiAzione(): ElenchiAzioneDto {
+  /** Le righe della query: `chiave`, `nome` e, se la query lo dà, `dettaglio`. */
   const voci = (sql: string) => prepared(sql).all() as Array<{ chiave: string; nome: string; dettaglio?: string | null }>;
+  /** Le stesse righe senza `dettaglio` quando è vuoto o nullo, così il campo compare solo se ha un valore. */
   const pulite = (r: Array<{ chiave: string; nome: string; dettaglio?: string | null }>) => r.map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dettaglio ? { dettaglio: x.dettaglio } : {}) }));
   const attivita = prepared('SELECT chiave, nome, tipo, tracciamento FROM attivita WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string }>;
   return {

@@ -26,11 +26,13 @@ import { aggiungiColonna } from '../colonne.js';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../../shared/effettiCatalogo.js';
 import { quartiereSbloccato } from './061_libro_sblocca_un_luogo.js';
 
+/** Una voce d'effetto «dote» (nome in minuscolo, con le sue note), con eventuali campi in più come le condizioni. */
 const dote = (nome: string, note: number, extra: Partial<VoceEffetto> = {}): VoceEffetto => ({ effetto: { famiglia: 'dote', dote: nome.toLowerCase(), note }, ...extra });
 
 /** Le due attività di studio che rendono di più con la pioggia: «2 punti, 3 nei giorni di pioggia». */
 const STUDIO_CON_PIOGGIA: ReadonlySet<string> = new Set(['studio-leblanc', 'studio-diner-shibuya']);
 
+/** Le voci d'effetto dal vecchio `effetto_json` (un solo effetto): vuote se manca o se il JSON non si legge. */
 function leggiEffetto(json: string | null): VoceEffetto[] {
   if (!json) return [];
   try { return normalizzaVociEffetto([{ effetto: JSON.parse(json) }]); } catch { return []; }

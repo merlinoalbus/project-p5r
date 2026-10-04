@@ -28,6 +28,8 @@ export function isApiError(err: unknown, code?: string): err is ApiError {
   return code === undefined || err.code === code;
 }
 
+/** Trasforma una risposta non riuscita in `ApiError`: usa codice, messaggio, dettagli e requestId della busta d'errore del
+ *  server se il corpo è JSON con `error.code`, altrimenti un errore generico `http-error` con stato e testo HTTP. */
 async function parseError(res: Response, fallbackPrefix: string): Promise<ApiError> {
   try {
     const body = await res.json();
@@ -46,6 +48,8 @@ async function parseError(res: Response, fallbackPrefix: string): Promise<ApiErr
   return new ApiError(res.status, 'http-error', `${fallbackPrefix}: ${res.status} ${res.statusText}`);
 }
 
+/** Richiesta JSON verso l'API: serializza il corpo (se c'è) con Content-Type JSON, lancia `ApiError` sugli stati non riusciti,
+ *  restituisce `undefined` per un corpo vuoto e altrimenti il contenuto della busta `{ data }`. */
 async function requestJson<T>(
   method: string,
   path: string,

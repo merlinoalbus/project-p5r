@@ -25,6 +25,7 @@ type ImportaVero = () => Promise<unknown>;
 /** Le esportazioni del barrel dell'API che non toccano la rete: restano quelle vere. */
 const PURE_API = new Set(['ApiError', 'isApiError', 'queryString', 'urlImmagine', 'payloadDellaBusta']);
 
+/** Fa fallire il test se fra i sostituti c'è un nome che il modulo vero non esporta (un refuso non passa in silenzio). */
 function controllaSostituti(vero: Modulo, sostituti: Modulo, modulo: string): void {
   const estranei = Object.keys(sostituti).filter((nome) => !(nome in vero));
   if (estranei.length) throw new Error(`${modulo} finto: ${estranei.join(', ')} non esiste nel modulo vero`);

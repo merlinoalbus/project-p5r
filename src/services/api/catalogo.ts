@@ -22,9 +22,11 @@ export const getElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise
  * l'oggetto scelto invece di doverla indovinare prima. */
 export const getTuttiGliOggetti = (): Promise<OggettoSelezionabileDto[]> => apiGet('/catalogo/oggetti');
 
+/** Crea una riga dell'utente nel catalogo del tipo; risponde con la riga creata. */
 export const creaElementoCatalogo = (tipo: TipoCatalogo, dati: Record<string, unknown>): Promise<ElementoCatalogoDto> =>
   apiPost(`/catalogo/${tipo}`, dati);
 
+/** Modifica una riga del catalogo (una della guida diventa corretta dall'utente, con l'originale conservato); risponde con la riga aggiornata. */
 export const aggiornaElementoCatalogo = (tipo: TipoCatalogo, chiave: string, dati: Record<string, unknown>): Promise<ElementoCatalogoDto> =>
   apiPut(`/catalogo/${tipo}/${encodeURIComponent(chiave)}`, dati);
 

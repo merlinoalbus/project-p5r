@@ -62,6 +62,7 @@ const CATEGORIA_PER_TIPO: Record<TipoSpillo, CategoriaSpillo> = {
   nemico: 'informativo',
   'punto-sensibile': 'informativo', meccanismo: 'informativo', porta: 'informativo', sicura: 'informativo', nota: 'informativo',
 };
+/** La categoria del tipo di pin (`CATEGORIA_PER_TIPO`); un tipo sconosciuto vale «informativo». */
 export function categoriaSpillo(tipo: string): CategoriaSpillo {
   return CATEGORIA_PER_TIPO[tipo as TipoSpillo] ?? 'informativo';
 }
@@ -156,6 +157,7 @@ export const TIPI_STRUTTURALI: readonly TipoSpillo[] = [
   'timbro', 'punto-sensibile', 'boss', 'miniboss', 'nemico', 'nota',
 ];
 
+/** Vero se il tipo di pin è fra i `TIPI_STRUTTURALI`. */
 export function eStrutturale(tipo: string): boolean {
   return (TIPI_STRUTTURALI as readonly string[]).includes(tipo);
 }
@@ -280,6 +282,7 @@ const PIN_DEL_PUNTO: Record<string, TipoSpillo[]> = {
   volonta: ['seme-bramosia'], puzzle: ['meccanismo', 'punto-sensibile'], boss: ['boss'], miniboss: ['miniboss'],
   'ombra-sciagura': ['nemico'], sicura: ['sicura'], scorciatoia: ['scorciatoia'], porta: ['porta'], meccanismo: ['meccanismo', 'punto-sensibile'],
 };
+/** I tipi di pin tipici di un tipo di punto della guida, in ordine di preferenza; vuoto se non ne ha. */
 function pinDelPunto(tipoPunto: string): TipoSpillo[] {
   return PIN_DEL_PUNTO[tipoPunto] ?? [];
 }
@@ -292,6 +295,7 @@ export function puntoDaCollegare(tipoPunto: string): boolean {
  * niente pin»); Persona e Storia si collegano a qualunque pin e hanno lo stato.
  */
 export const TIPO_PUNTO_DESCRITTIVO = 'altro';
+/** Vero se il punto è del tipo descrittivo («Altro»). */
 export function puntoDescrittivo(tipoPunto: string): boolean {
   return tipoPunto === TIPO_PUNTO_DESCRITTIVO;
 }

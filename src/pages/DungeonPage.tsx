@@ -26,6 +26,12 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { schedaAccessoMondo } from '../utils/accessoMondo';
 import { soloPalazzi } from '../utils/palazzi';
 
+/**
+ * Elenco dei Palazzi: carica i dungeon per la partita attiva tenendo solo i Palazzi (Iweleth
+ * compreso, i Memento esclusi) e li mostra come carte che aprono la scheda, con emblema, anello
+ * dei collezionabili presi (solo se la partita ha un conteggio e c'è qualcosa da raccogliere),
+ * suggerimento del giorno, arcano, sovrano, date in breve, livello consigliato e conteggi.
+ */
 export function DungeonPage() {
   useDocumentTitle('Palazzi');
   const attiva = usePartitaStore((s) => s.attiva);

@@ -60,6 +60,7 @@ export function assorbiImmaginiSuDisco(db: AppDatabase): number {
   return n;
 }
 
+/** Vero se la tabella `immagine` del database di gioco ha già la colonna `contenuto` (le immagini dentro il DB, migrazione 079). */
 function haColonnaContenuto(db: AppDatabase): boolean {
   return (db.prepare('PRAGMA main.table_info(immagine)').all() as Array<{ name: string }>).some((c) => c.name === 'contenuto');
 }

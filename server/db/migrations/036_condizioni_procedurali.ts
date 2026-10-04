@@ -1,3 +1,12 @@
+// ============================================================
+// Migrazione 036 — condizioni procedurali di negozi e articoli
+// ============================================================
+//
+// Aggiunge `condizioni_json` a `negozio` e `articolo` e la riempie convertendo la prosa della guida
+// (sblocco del negozio; disponibilità e condizione dell'articolo) in condizioni strutturate. Crea
+// anche `fatto_gioco` e `fatto_partita`, poi tolte dalla 064.
+// ============================================================
+
 import type { Migration } from '../migrationRunner.js';
 import type Database from 'better-sqlite3';
 import { migraTestiCondizioni } from '../../../shared/migraCondizioni.js';

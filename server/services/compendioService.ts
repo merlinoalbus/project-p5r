@@ -47,11 +47,13 @@ export function skillRiassunti(ids: Iterable<number>): Map<number, SkillRiassunt
   return new Map(righe.map((r) => [r.id, skillRiassunto(r)]));
 }
 
+/** Costo di una skill con il testo da mostrare: «N SP», «N% HP», oppure un trattino per le skill senza costo (passive). */
 function costoDto(tipo: 'sp' | 'hp' | 'nessuno', valore: number): CostoSkillDto {
   const testo = tipo === 'sp' ? `${valore} SP` : tipo === 'hp' ? `${valore}% HP` : '—';
   return { tipo, valore, testo };
 }
 
+/** Da una riga della tabella `skill` al riassunto per l'API: nome, elemento ed effetto con la resa italiana, costo leggibile. */
 function skillRiassunto(r: RigaSkill): SkillRiassuntoDto {
   return {
     id: r.id, nome: r.nome, nomeIt: t('skill', r.nome), elemento: r.elemento, elementoNome: t('elementoSkill', r.elemento),
@@ -81,6 +83,10 @@ function codiciAffinitaDi(ids: readonly number[]): Map<number, Map<string, strin
   return out;
 }
 
+/**
+ * Le affinità per l'API, una per ogni elemento nell'ordine dell'ambito `elementoAffinita`: gli elementi che la Persona
+ * non ha in tabella valgono «-» (neutra); nome e sigla dell'elemento e del codice vengono dalle traduzioni.
+ */
 function affinitaDi(perElemento: Map<string, string>): AffinitaDto[] {
   const ordine = vociAmbito('elementoAffinita');
   return ordine.map((e) => {
@@ -92,6 +98,10 @@ function affinitaDi(perElemento: Map<string, string>): AffinitaDto[] {
   });
 }
 
+/**
+ * Da una riga della tabella `persona` al riassunto per l'API (nomi tradotti, flag booleani, statistiche, affinità).
+ * Le affinità si possono passare già lette in blocco (elenco); se mancano si leggono per la sola Persona.
+ */
 function personaRiassunto(r: RigaPersona, affinita: Map<string, string> = codiciAffinita(r.id)): PersonaRiassuntoDto {
   return {
     id: r.id, nome: r.nome, nomeIt: t('persona', r.nome), arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livello: r.livello,
@@ -103,6 +113,7 @@ function personaRiassunto(r: RigaPersona, affinita: Map<string, string> = codici
   };
 }
 
+/** La ricetta di una fusione speciale: la Persona risultato e i suoi ingredienti nell'ordine della ricetta, con il nome italiano. */
 function ricettaDto(risultatoId: number): RicettaSpecialeDto {
   const ris = prepared('SELECT id, nome FROM persona WHERE id = ?').get(risultatoId) as { id: number; nome: string };
   const ingredienti = prepared('SELECT p.id, p.nome FROM fusione_speciale_ingrediente i JOIN persona p ON p.id = i.ingrediente_id WHERE i.risultato_id = ? ORDER BY i.ordine').all(risultatoId) as Array<{ id: number; nome: string }>;
@@ -116,7 +127,12 @@ export function elencaArcani(): ArcanaDto[] {
     .map((a) => ({ ...a, nome: t('arcana', a.chiave) }));
 }
 
+/**
+ * Il glossario dei codici del compendio con la resa italiana: arcani, elementi, affinità, tipi di eredità, statistiche,
+ * tipi e vincoli degli oggetti, aree di Mementos e Doti sociali (in ordine di gioco). Serve al FE per tradurre i codici.
+ */
 export function glossario(): GlossarioDto {
+  /** Le voci di un ambito come elenco ordinato chiave/nome/sigla (la sigla è nel campo extra, vuota se manca). */
   const conSigla = (ambito: string) => vociAmbito(ambito).map((v) => ({ chiave: v.chiave, nome: v.testo, sigla: String(v.extra?.sigla ?? '') }));
   const affinita: Record<string, { nome: string; sigla: string }> = {};
   for (const v of vociAmbito('affinita')) affinita[v.chiave] = { nome: v.testo, sigla: String(v.extra?.sigla ?? '') };
@@ -141,6 +157,11 @@ export function terminiGlossario(): TermineDto[] {
     .sort((a, b) => a.categoria.localeCompare(b.categoria) || a.nome.localeCompare(b.nome, 'it'));
 }
 
+/**
+ * Tutte le regole di fusione in un colpo: ordine degli arcani, tabella arcano × arcano, ricette speciali, tesori con il
+ * modificatore di rango per ogni arcano (0 dove manca), matrice dell'eredità (tipo × colonna, ammesso sì/no) e Persona
+ * di ciascun set DLC nell'ordine dei set.
+ */
 export function regoleFusione(): RegoleFusioneDto {
   const arcani = (prepared('SELECT chiave FROM arcana ORDER BY ordine').all() as Array<{ chiave: string }>).map((a) => a.chiave);
   const tabella = prepared('SELECT a, b, risultato FROM fusione_arcana').all() as Array<{ a: string; b: string; risultato: string }>;
@@ -181,6 +202,11 @@ export interface FiltroPersona {
   skill?: string;
 }
 
+/**
+ * Elenco delle Persona filtrato, ordinato per livello, ordine dell'arcano e nome. I filtri strutturati diventano condizioni
+ * SQL parametriche (la skill con un EXISTS su `persona_skill`); le affinità si leggono con una query sola per tutte le righe;
+ * la ricerca testuale `q` si applica dopo, sui nomi originale e italiano, perché passa dalla normalizzazione di `corrispondeRicerca`.
+ */
 export function elencaPersona(f: FiltroPersona = {}): PersonaRiassuntoDto[] {
   const cond: string[] = [];
   const par: unknown[] = [];
@@ -220,6 +246,11 @@ export function elencaPersona(f: FiltroPersona = {}): PersonaRiassuntoDto[] {
   return q ? dto.filter((p) => corrispondeRicerca(q, p.nome, p.nomeIt)) : dto;
 }
 
+/**
+ * Scheda completa di una Persona (404 se non esiste): riassunto, skill apprese per livello, dettaglio del tratto, ricetta
+ * speciale e ricette di cui è ingrediente, set DLC, carte skill ottenibili con l'esecuzione, titolo di negoziazione (cercato
+ * fra le skill la cui negoziazione termina con «(nome)», tolta la parentesi), aree di Mementos e oggetti con descrizione tradotta.
+ */
 export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const r = prepared('SELECT * FROM persona WHERE id = ?').get(id) as RigaPersona | undefined;
   if (!r) throw httpErrors.notFound('persona-non-trovata', `La Persona ${id} non esiste.`);
@@ -234,6 +265,7 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const negoz = prepared('SELECT negoziazione FROM skill WHERE negoziazione LIKE ? LIMIT 1').get(`%(${r.nome})`) as { negoziazione: string } | undefined;
   const titolo = negoz?.negoziazione.replace(/\s*\([^)]*\)\s*$/, '') ?? null;
   const aree = (JSON.parse(r.aree_mementos_json) as string[]).map((a) => ({ chiave: a, nome: t('areaMementos', a) }));
+  /** Descrizione italiana di un oggetto dato il nome canonico; null se l'oggetto non è nel catalogo. */
   const descrizioneOggetto = (nome: string): string | null => {
     const o = prepared('SELECT descrizione FROM oggetto WHERE nome = ?').get(nome) as { descrizione: string } | undefined;
     return o ? t('descrizioneOggetto', o.descrizione) : null;
@@ -259,6 +291,7 @@ export interface FiltroSkill {
   elemento?: string;
 }
 
+/** Elenco delle skill per nome, filtrato per elemento in SQL e poi per testo (`q`) su nome, nome italiano ed effetto. */
 export function elencaSkill(f: FiltroSkill = {}): SkillRiassuntoDto[] {
   const cond: string[] = [];
   const par: unknown[] = [];
@@ -272,6 +305,11 @@ export function elencaSkill(f: FiltroSkill = {}): SkillRiassuntoDto[] {
   return q ? dto.filter((s) => corrispondeRicerca(q, s.nome, s.nomeIt, s.effetto, s.effettoNome)) : dto;
 }
 
+/**
+ * Scheda di una skill (404 se non esiste): Persona che la imparano (con livello), Persona da cui si ottiene la carta con
+ * l'esecuzione, fonte della carta, esclusività. La negoziazione è salvata come «Titolo (Persona)»: si traduce il titolo
+ * e si riattacca la parentesi.
+ */
 export function dettaglioSkill(id: number): SkillDettaglioDto {
   const r = prepared('SELECT * FROM skill WHERE id = ?').get(id) as RigaSkill | undefined;
   if (!r) throw httpErrors.notFound('skill-non-trovata', `La skill ${id} non esiste.`);
@@ -350,6 +388,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   };
 }
 
+/** Elenco dei Confidenti nell'ordine di gioco, con il nome italiano dell'arcano. */
 export function elencaConfidenti(): ConfidenteDto[] {
   return (prepared('SELECT chiave, nome, arcana, ordine FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string; arcana: string; ordine: number }>)
     .map((c) => ({ ...c, arcanaNome: t('arcana', c.arcana) }));

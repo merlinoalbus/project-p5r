@@ -1,3 +1,11 @@
+// ============================================================
+// ArticoliTabella — elenco degli articoli del catalogo: nome, prezzo, disponibilità, spunta «acquistato» e dettagli
+// ============================================================
+//
+// Una riga per articolo, resa come riga su desktop e come scheda su tablet/mobile dallo stesso markup. La spunta
+// compare solo con una partita attiva ed è bloccata finché l'articolo non è disponibile (salvo se già acquistato).
+// ============================================================
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { impostaAcquisto } from '../../services/api';
@@ -14,10 +22,16 @@ interface Props {
   onModifica?: (a: ArticoloDto) => void;
 }
 
+/**
+ * Riga di un articolo: nome (barrato se acquistato), categoria e destinatario, statistiche, collegamento alla scheda
+ * del negozio se `mostraNegozio`, prezzo, chip di disponibilità, spunta «Acquistato» (solo con partita), pulsante
+ * «Modifica» se c'è `onModifica` e un riquadro di dettagli con nome originale, requisiti, effetto e nota.
+ */
 function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
   const [occupato, setOccupato] = useState(false);
   const nome = a.nomeIt ?? a.nome;
   const acquistoBloccato = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile' && !a.acquistato;
+  /** Segna o toglie l'acquisto nella partita e passa al genitore l'articolo aggiornato; l'errore va in notifica. */
   const cambia = async (fatto: boolean) => {
     setOccupato(true);
     try { onCambiato(await impostaAcquisto(partitaId!, a.chiave, fatto)); }

@@ -42,6 +42,7 @@ export function normalizzaVociEffetto(x: unknown): VoceEffetto[] {
   return out;
 }
 
+/** Le voci d'effetto da una colonna `effetti_json`, normalizzate; vuote se la colonna è vuota o il JSON non si legge. */
 export function leggiVociEffetto(json: string | null | undefined): VoceEffetto[] {
   if (!json) return [];
   try { return normalizzaVociEffetto(JSON.parse(json)); } catch { return []; }

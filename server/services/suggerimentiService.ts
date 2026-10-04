@@ -60,6 +60,7 @@ interface Raccolta {
   spilli: Set<number>;
 }
 
+/** Una raccolta vuota: un insieme per ogni categoria di chiavi da evidenziare. */
 function nuovaRaccolta(): Raccolta {
   return {
     confidenti: new Set(), personaggi: new Set(), dungeon: new Set(), aree: new Set(), libri: new Set(), film: new Set(),
@@ -154,6 +155,7 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
   const r = nuovaRaccolta();
   const motivi: SuggerimentiOggiDto['motivi'] = [];
   let articoli: Map<string, Array<{ chiave: string; negozio: string }>> | null = null;
+  /** Annota perché una chiave è suggerita: categoria, chiave, testo dell'azione e fascia. */
   const segna = (categoria: string, chiave: string, azione: string, fascia: 'giorno' | 'sera') => motivi.push({ categoria, chiave, azione, fascia });
 
   for (const a of azioni) {

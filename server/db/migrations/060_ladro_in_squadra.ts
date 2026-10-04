@@ -27,6 +27,7 @@
 import type { Migration } from '../migrationRunner.js';
 import type Database from 'better-sqlite3';
 
+/** Aggiunge la colonna solo se la tabella non ce l'ha già (letto da `PRAGMA table_info`): la migrazione resta rieseguibile. */
 function aggiungiColonna(db: Database.Database, tabella: string, colonna: string, tipo: string): void {
   const gia = (db.prepare(`PRAGMA table_info(${tabella})`).all() as Array<{ name: string }>).some((c) => c.name === colonna);
   if (!gia) db.exec(`ALTER TABLE ${tabella} ADD COLUMN ${colonna} ${tipo}`);

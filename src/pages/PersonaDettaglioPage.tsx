@@ -116,6 +116,7 @@ export function PersonaDettaglioPage() {
   const tettoStella = scalaUnica ? MASSIMO_STATISTICA : tettoAdattato;
   const assiStella = CHIAVI_STATISTICHE.map((k) => ({ chiave: k, etichetta: NOMI_STATISTICHE[k], valore: statisticheMostrate[k] / tettoStella, badge: `ui/stat-${k}`, testo: statisticheMostrate[k] }));
   const etichettaStella = `${p && livelloScelto > p.livello ? `Statistiche stimate al livello ${livelloScelto}` : `Statistiche al livello ${p?.livello ?? ''}`}, scala 0–${tettoStella}`;
+  /** Aggiunge la Persona alla scorta della partita attiva al livello scelto (mai sotto il suo livello base); se è già posseduta avvisa invece di segnalare un errore. */
   const aggiungi = async () => {
     if (!attiva || !p) return;
     setOccupato(true);

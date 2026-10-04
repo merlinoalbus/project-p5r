@@ -49,6 +49,10 @@ export interface StatoPartitaSemafori {
   eventi: Set<string>;
 }
 
+/** Lo stato della partita che serve ai semafori: ranghi e Doti li passa chi chiama; qui si leggono arcani in scorta,
+ *  coppie Persona|abilità (in minuscolo), Richieste completate (per chiave e per nome in minuscolo), Palazzi completati,
+ *  data e fascia di gioco (fascia «giorno» se non è «sera»), meteo del momento, requisiti confermati a mano
+ *  (`confidente/rango/indice`), membri della squadra dentro e fuori, eventi di storia avvenuti. */
 export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<string, number>, doti: Map<string, number>): StatoPartitaSemafori {
   const arcani = new Set((prepared('SELECT DISTINCT p.arcana FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.partita_id = ?').all(partitaId) as Array<{ arcana: string }>).map((r) => r.arcana));
   const abilita = new Set((prepared(`SELECT p.nome AS persona, s.nome AS abilita FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id
@@ -77,6 +81,7 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
   const chiaveConferma = `${r.confidente_chiave}/${r.rango}/${r.indice}`;
   const confermato = st.conferme.has(chiaveConferma);
   const base = { indice: r.indice, tipo: r.tipo, testo: r.testo, confermato };
+  /** Il semaforo di un requisito che l'app non sa verificare da sola: grigio, oppure verde se l'utente l'ha confermato a mano. */
   const grigio = (dettaglio: string): SemaforoRequisitoDto => ({ ...base, stato: confermato ? 'verde' : 'grigio', dettaglio: confermato ? `${dettaglio} · confermato a mano` : dettaglio, manuale: true });
   switch (r.tipo) {
     case 'dote': {

@@ -10,6 +10,11 @@
 
 import type { AvanzamentoInvio } from '../../services/api';
 
+/**
+ * Riga di stato con barra animata per un invio o un lavoro lungo. Senza `avanzamento` non mostra nulla; finché
+ * l'invio è in corso il testo è l'`etichetta` con la percentuale, a invio concluso (`inviato`) diventa il testo
+ * di `elaborazione`, perché da lì in poi lavora il server.
+ */
 export function BarraInvio({ avanzamento, etichetta, elaborazione }: {
   avanzamento: AvanzamentoInvio | null;
   /** Che cosa si sta mandando (resta per i casi con percentuale). */

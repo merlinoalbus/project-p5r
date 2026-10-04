@@ -40,11 +40,17 @@ interface SnapshotEredita {
 
 let snapshot: SnapshotEredita | null = null;
 
+/** Butta l'istantanea in memoria: la prossima lettura la ricarica dal DB (registrata fra le cache dei dati di gioco). */
 export function invalidaEredita(): void {
   snapshot = null;
 }
 registraCacheDiGioco(invalidaEredita);
 
+/**
+ * L'istantanea delle regole di eredità, letta una volta e poi tenuta in memoria: tutte le skill, le skill di ogni Persona con
+ * il livello (in ordine di livello), il tratto di ogni Persona (la skill di elemento `trait` con il suo nome), il tipo di
+ * eredità e la matrice tipo × elemento.
+ */
 function carica(): SnapshotEredita {
   if (snapshot) return snapshot;
   const skill = new Map<number, SkillEredita>();
@@ -114,10 +120,12 @@ export function skillPerId(id: number): SkillEredita | null {
   return carica().skill.get(id) ?? null;
 }
 
+/** Il tratto di una Persona (null se non ce l'ha o non è nel catalogo delle skill). */
 export function trattoDi(personaId: number): SkillEredita | null {
   return carica().tratto.get(personaId) ?? null;
 }
 
+/** Il tipo di eredità di una Persona (null per i Demoni del Tesoro e per le Persona sconosciute). */
 export function tipoEredita(personaId: number): string | null {
   return carica().tipo.get(personaId) ?? null;
 }

@@ -75,6 +75,7 @@ function pinCitatoNelloStato(uid: string, st: StatoDisponibilita): ReturnType<ty
   return st.pinCitati.get(uid)!;
 }
 
+/** Ogni quartiere con il nome e la data di sblocco (`sblocco_data`, null se non ne ha una). */
 export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
   const righe = prepared('SELECT chiave, nome, sblocco_data FROM quartiere').all() as Array<{ chiave: string; nome: string; sblocco_data: string | null }>;
   return new Map(righe.map((q) => [q.chiave, { nome: q.nome, dal: q.sblocco_data }]));
@@ -92,12 +93,17 @@ export function arcoAllaData(dataGioco: string | null, finestre: ReadonlyMap<str
   return arco;
 }
 
+/** Lo stato della partita che serve al valutatore: quello dei semafori (ranghi dei Confidenti, Doti, data di gioco…) più
+ *  giorno della settimana normalizzato, contatori di film, videogiochi e libri completati (avanzamento al totale delle
+ *  sessioni), articoli ottenuti, letture, volte delle attività, spesa e punti per negozio, sblocco dei quartieri, arco
+ *  della storia e pin segnati. La memoria dei pin citati parte vuota: lo stato vale una richiesta sola. */
 export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita {
   // i ranghi soli: prima si calcolavano i Confidenti interi (semafori e regali di tutti) per leggerne il rango (rilievo P1')
   const ranghi = ranghiConfidenti(partitaId);
   const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
   const st = statoPartitaSemafori(partitaId, ranghi, doti);
   const giorno = st.dataGioco ? (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(st.dataGioco) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null : null;
+  /** Il conteggio `n` della query, che riceve come unico parametro la partita. */
   const conta = (sql: string): number => (prepared(sql).get(partitaId) as { n: number }).n;
   const contatori = new Map<ContatoreChiave, number>([
     ['film-completati', conta('SELECT COUNT(*) AS n FROM progresso_film_partita p JOIN film f ON f.chiave = p.film_chiave WHERE p.partita_id = ? AND p.avanzamento >= f.sessioni')],
@@ -128,9 +134,11 @@ function spilliSegnati(partitaId: number): Set<string> {
   return new Set(righe.map((r) => r.uid));
 }
 
+/** Il nome del negozio, o la chiave se non esiste. */
 function nomeNegozio(chiave: string): string {
   return (prepared('SELECT nome FROM negozio WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome ?? chiave;
 }
+/** Il nome dell'attività, o la chiave se non esiste. */
 function nomeAttivita(chiave: string): string {
   return (prepared('SELECT nome FROM attivita WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome ?? chiave;
 }
@@ -140,6 +148,7 @@ function nomeAttivita(chiave: string): string {
  *  di un gruppo mostrava le chiavi grezze («sojiro», «tanaka-affari-loschi») invece dei nomi. */
 function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDisponibilita, nomi?: NomiCondizioni): SemaforoRequisitoDto {
   const base = { indice, testo: r.testo, confermato: false } as const;
+  /** Il semaforo del requisito con tipo, colore e dettaglio dati, mai manuale. */
   const esito = (tipo: SemaforoRequisitoDto['tipo'], stato: SemaforoRequisitoDto['stato'], dettaglio: string): SemaforoRequisitoDto => ({ ...base, tipo, stato, dettaglio, manuale: false });
   switch (r.tipo) {
     case 'gruppo': {

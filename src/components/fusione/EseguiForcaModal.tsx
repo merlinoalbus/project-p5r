@@ -22,6 +22,12 @@ interface Props {
   onEseguita: (esito: EsitoForcaDto) => void;
 }
 
+/**
+ * Finestra di registrazione di un'esecuzione alla Forca: mostra la stima dell'EXP (moltiplicatore e fattori), chiede
+ * se c'è stato un incidente oppure il livello raggiunto e le skill trasferite (al massimo 1, o 3 durante l'Allarme),
+ * i punti statistica osservati o garantiti e, se il ricevente supererebbe le 8 skill, quali dimenticare. Il pulsante
+ * di registrazione resta disabilitato finché restano skill da dimenticare o se un incidente non ha punti indicati.
+ */
 export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, allarme, onChiudi, onEseguita }: Props) {
   const [incidente, setIncidente] = useState(false);
   const [nuovoLivello, setNuovoLivello] = useState(ricevente.livello);
@@ -34,6 +40,10 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
   const skillFinali = ricevente.skill.length - rimosse.length + trasferite.filter((id) => !ricevente.skill.some((s) => s.id === id)).length;
   const daDimenticare = Math.max(0, skillFinali - 8);
 
+  /**
+   * Invia l'esecuzione al BE: con l'incidente non manda livello né skill trasferite, i punti statistica solo se il
+   * totale è positivo. A buon fine notifica l'esito e lo passa al genitore; l'errore va in notifica.
+   */
   const esegui = async () => {
     setOccupato(true);
     try {

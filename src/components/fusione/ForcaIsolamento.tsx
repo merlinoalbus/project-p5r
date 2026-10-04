@@ -28,11 +28,13 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
   const [riceventeId, setRiceventeId] = useState<number | null>(null);
   const [sacrificioId, setSacrificioId] = useState<number | null>(null);
   const ricevente = scorta.find((p) => p.id === riceventeId) ?? null;
+  /** Rango del Confidente dell'arcano indicato secondo i dati del Velluto della partita (0 se assenti). */
   const rangoDi = (arcana: string) => velluto?.arcani.find((a) => a.arcana === arcana)?.rango ?? 0;
   const igorMax = rangoDi('Fool') >= 10;
   const allarme = velluto?.allarmeAttivo ?? false;
   const candidati = useMemo(() => {
     if (!ricevente) return [];
+    /** Stessa lettura del rango di sopra, definita dentro il memo così che il calcolo dei candidati usi solo le dipendenze dichiarate (fra cui `velluto`). */
     const rangoDi = (arcana: string) => velluto?.arcani.find((a) => a.arcana === arcana)?.rango ?? 0;
     const igorMax = rangoDi('Fool') >= 10;
     const allarme = velluto?.allarmeAttivo ?? false;
@@ -106,6 +108,11 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
   const [statScelte, setStatScelte] = useState<ChiaveStatistica[]>(['forza']);
   const [occupato, setOccupato] = useState(false);
   const suggerimento = useCarica(() => (persona ? getSuggerimentoIsolamento(partitaId, persona.id) : Promise.resolve(null)), [partitaId, persona?.id, persona?.livello]);
+  /**
+   * Registra l'isolamento della Persona scelta con l'incenso e i giorni indicati, inviando solo le prime N statistiche
+   * scelte (N = quante ne alza l'incenso); a buon fine notifica i punti guadagnati e l'eventuale skill appresa e fa
+   * ricaricare la scorta, altrimenti notifica l'errore.
+   */
   const registra = async () => {
     if (!persona) return;
     setOccupato(true);

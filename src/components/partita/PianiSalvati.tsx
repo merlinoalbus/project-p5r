@@ -96,6 +96,9 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
   );
 }
 
+/** La scheda «Piani»: i piani salvati della partita (solo quelli dell'obiettivo se l'indirizzo porta
+ * `?obiettivo=`), ognuno in una `SchedaPiano` con l'avanzamento calcolato sulla scorta, che si
+ * carica a parte. Dopo l'esecuzione di un passo si ricaricano piani e scorta. */
 export function PianiSalvati({ partitaId }: Props) {
   const [params] = useSearchParams();
   const obiettivoParam = Number(params.get('obiettivo'));
@@ -105,6 +108,7 @@ export function PianiSalvati({ partitaId }: Props) {
   const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((p) => p.personaId)), [scorta.dati]);
   const possedutaDi = useMemo(() => new Map((scorta.dati ?? []).map((p) => [p.personaId, p.id])), [scorta.dati]);
 
+  /** Salva il nuovo titolo del piano e lo sostituisce in elenco. */
   const rinomina = async (p: PianoSalvatoDto, titolo: string) => {
     try {
       const agg = await aggiornaPianoSalvato(partitaId, p.id, { nome: titolo });
@@ -114,6 +118,7 @@ export function PianiSalvati({ partitaId }: Props) {
       notifica('error', err instanceof Error ? err.message : 'Salvataggio fallito.');
     }
   };
+  /** Elimina il piano dopo conferma e lo toglie dall'elenco. */
   const elimina = async (p: PianoSalvatoDto) => {
     if (!window.confirm(`Eliminare il piano «${p.titolo || p.nomeIt}»?`)) return;
     try {

@@ -67,6 +67,11 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     };
   }, [ambito, chiave]);
 
+  /**
+   * Allinea tutto dopo un caricamento o una rimozione: aggiorna l'insieme condiviso delle chiavi presenti
+   * nell'ambito e lo stato locale, poi incrementa la versione dell'immagine (condivisa fra i riquadri della
+   * stessa immagine) perché l'URL cambi e il browser non mostri la copia in cache.
+   */
   const dopoCambio = async (esiste: boolean) => {
     const set = await chiaviPresenti(ambito);
     if (esiste) set.add(chiave);
@@ -77,6 +82,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     setVersione(nuova);
   };
 
+  /** Carica il file scelto come immagine dell'entità, ne registra la data per l'URL versionato e svuota il campo file. */
   const suFile = async (file: File | undefined) => {
     if (!file) return;
     setOccupato(true);
@@ -93,6 +99,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     }
   };
 
+  /** Fa scaricare al server l'immagine dall'indirizzo scritto; se riesce torna ai comandi normali della finestra. */
   const suImporta = async () => {
     if (!url.trim()) return;
     setOccupato(true);
@@ -110,6 +117,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     }
   };
 
+  /** Elimina l'immagine caricata dall'utente: il riquadro torna alla grafica predefinita o alle iniziali. */
   const suRimuovi = async () => {
     setOccupato(true);
     try {
@@ -123,6 +131,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     }
   };
 
+  /** Chiude la finestra e abbandona l'eventuale inserimento dell'URL. */
   const chiudi = () => {
     setAperta(false);
     setModalitaUrl(false);
@@ -144,6 +153,11 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
         : 'Nessuna immagine: mostrate le iniziali';
   const classeAdatta = adatta === 'copri' ? 'object-cover' : 'object-contain';
 
+  /**
+   * L'immagine da mostrare, nella miniatura (`grande` falso: riempie il riquadro con l'adattamento scelto, caricamento
+   * pigro) o nella finestra (sempre senza ritagli). Senza sorgente mostra le iniziali. Se l'immagine non si carica:
+   * quella dell'utente si considera sparita, l'asset predefinito si segna come mancante nello store degli asset.
+   */
   const immagine = (grande: boolean) =>
     src ? (
       <img

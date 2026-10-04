@@ -1,3 +1,14 @@
+// ============================================================
+// Migrazione 042 — contenuti della guida distinti dalle planimetrie
+// ============================================================
+//
+// Crea `guida_mappa`, `guida_alias`, `mappa_entita`, `organizzazione_mappa_esito` e
+// `mappa_presentazione`. Ricostruisce `spillo` (copia, rimozione, rinomina, indici ricreati) perché
+// uno spillo possa stare su una mappa oppure su un'area della guida (`area_guida_chiave` con
+// `ruolo_guida` 'punto' o 'sezione'), mai su entrambe; poi riconcilia le aree della guida e annulla
+// tutto se restano vincoli referenziali violati.
+// ============================================================
+
 import type { Migration } from '../migrationRunner.js';
 import { riconciliaAreeGuida } from '../../services/mappe/organizzazioneMappe.js';
 export const migration042: Migration = { id: 42, name: 'contenuti_guida_distinti_da_planimetrie', up(db) {

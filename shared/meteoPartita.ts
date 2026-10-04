@@ -16,7 +16,8 @@ export const METEO_PARTITA = [
 ] as const;
 export type MeteoPartita = (typeof METEO_PARTITA)[number]['chiave'];
 
-export const nomeMeteo = (m: MeteoPartita): string => METEO_PARTITA.find((x) => x.chiave === m)?.nome ?? m;
+/** Il nome leggibile di un meteo («Pioggia»); la chiave stessa se non è in elenco. */
+export const nomeMeteo =(m: MeteoPartita): string => METEO_PARTITA.find((x) => x.chiave === m)?.nome ?? m;
 
 /** Un segmento del testo della guida («Pioggia (acquazzone)», «Nuvoloso (ondata di gelo)») → il meteo; il modificatore fra parentesi non conta. */
 export function meteoDelSegmento(segmento: string): MeteoPartita | null {
@@ -47,6 +48,7 @@ export function chiaveAllerta(nome: string): string {
   return nome.replace(/\(.*?\)/g, '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+/** Giorno e mese scritti all'italiana («7», «8») come data «MM-GG» («08-07»), con gli zeri davanti. */
 const mmgg = (g: string, m: string): string => `${m.padStart(2, '0')}-${g.padStart(2, '0')}`;
 
 /** Le date di un'allerta dalla riga «Date…» dei suoi effetti: intervalli «MM-GG» con le fasce in cui vale.

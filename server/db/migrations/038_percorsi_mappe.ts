@@ -1,3 +1,12 @@
+// ============================================================
+// Migrazione 038 — percorsi e alias delle mappe
+// ============================================================
+//
+// Crea `mappa_percorso` (per ogni mappa il percorso leggibile usato negli indirizzi, composto dai
+// nomi della sua gerarchia) e `mappa_alias` (chiavi alternative che portano a una mappa), poi le
+// riempie con `sincronizzaPercorsiMappe`.
+// ============================================================
+
 import type { Migration } from '../migrationRunner.js';
 import { sincronizzaPercorsiMappe } from '../../services/mappe/percorsiMappe.js';
 export const migration038:Migration={id:38,name:'percorsi_mappe',up(db){

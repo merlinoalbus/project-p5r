@@ -33,6 +33,7 @@ export const PUNTI_PER_LIVELLO = 3;
 /** Tetto di una statistica. */
 export const MASSIMO_STATISTICA = 99;
 
+/** La somma delle cinque statistiche. */
 export function totaleStatistiche(s: Statistiche): number {
   return CHIAVI_STATISTICHE.reduce((tot, k) => tot + s[k], 0);
 }

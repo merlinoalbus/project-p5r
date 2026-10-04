@@ -12,8 +12,10 @@ import type { CompletamentoDto, TrofeoDto } from '../../shared/types.js';
 interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number }
 type SeedCompletamento = Omit<CompletamentoDto, 'trofei' | 'ottenuti'>;
 
+/** Un trofeo come DTO; `mancabile` resta null quando la guida non lo dice, `ottenuto` viene dall'insieme dato. */
 const dto = (r: RigaTrofeo, ottenuti: Set<string>): TrofeoDto => ({ chiave: r.chiave, nome: r.nome, nomeEn: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? null : r.mancabile === 1, quando: r.quando, fonte: r.fonte, verificato: r.verificato === 1, ottenuto: ottenuti.has(r.chiave) });
 
+/** Le chiavi dei trofei ottenuti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function ottenutiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
   verificaPartita(partitaId);

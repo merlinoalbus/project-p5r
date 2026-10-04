@@ -43,11 +43,13 @@ export function crc32(b: Buffer): number {
   return zlib.crc32(b) >>> 0;
 }
 
+/** Data e ora nel formato MS-DOS dello ZIP: ora (ore, minuti, secondi a passi di 2) e giorno (anni dal 1980, mese, giorno); prima del 1980 vale il 1980. */
 function dataDos(d: Date): { ora: number; giorno: number } {
   const anno = Math.max(1980, d.getFullYear());
   return { ora: (d.getHours() << 11) | (d.getMinutes() << 5) | Math.floor(d.getSeconds() / 2), giorno: ((anno - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate() };
 }
 
+/** Il local file header (30 byte) di una voce «store»: versione 20, nome UTF-8, dimensione compressa = non compressa, nessun campo extra. */
 function intestazioneLocale(nome: Buffer, ora: number, giorno: number, crc: number, dimensione: number): Buffer {
   const b = Buffer.alloc(30);
   b.writeUInt32LE(FIRMA_LOCALE, 0); b.writeUInt16LE(20, 4); b.writeUInt16LE(FLAG_UTF8, 6); b.writeUInt16LE(0, 8);
@@ -56,6 +58,7 @@ function intestazioneLocale(nome: Buffer, ora: number, giorno: number, crc: numb
   return b;
 }
 
+/** La voce della central directory (46 byte) di una voce «store», con la posizione del suo local header; nessun extra, commento o attributo. */
 function intestazioneCentrale(nome: Buffer, ora: number, giorno: number, crc: number, dimensione: number, offsetLocale: number): Buffer {
   const b = Buffer.alloc(46);
   b.writeUInt32LE(FIRMA_CENTRALE, 0); b.writeUInt16LE(20, 4); b.writeUInt16LE(20, 6); b.writeUInt16LE(FLAG_UTF8, 8); b.writeUInt16LE(0, 10);
@@ -75,6 +78,7 @@ export async function scriviZip(destinazione: string, voci: readonly VoceZip[]):
   if (voci.length > MAX_VOCI) throw new Error(`troppe voci per uno ZIP senza ZIP64: ${voci.length}`);
   const out = await fsp.open(destinazione, 'w');
   let posizione = 0;
+  /** Accoda il buffer alla posizione corrente (ripetendo finché è scritto tutto) e la fa avanzare. */
   const scrivi = async (b: Buffer): Promise<void> => {
     for (let fatti = 0; fatti < b.length;) fatti += (await out.write(b, fatti, b.length - fatti, posizione + fatti)).bytesWritten;
     posizione += b.length;

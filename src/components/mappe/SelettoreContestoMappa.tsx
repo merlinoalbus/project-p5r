@@ -1,6 +1,14 @@
+// ============================================================
+// SelettoreContestoMappa — il nome di una mappa che cambia secondo il contesto di gioco
+// ============================================================
+
 import type { MappaRiassuntoDto } from '../../types';
 import { Selettore } from '../shared/Selettore';
 import { alternativeMappa, risolviContesto } from '../../utils/presentazioneMappa';
+/** Selettore del contesto per una mappa che ha più nomi: senza alternative non mostra nulla. Con
+ * la selezione corrente risolve il nome; finché non ne risulta uno solo elenca tutti i nomi e dice
+ * perché (nome dipendente dal contesto, non ricostruito, selezione non valida o con nomi diversi).
+ * La scelta vuota passa `null` a `onCambia`. */
 export function SelettoreContestoMappa({ mappa, selezione, onCambia }: { mappa: MappaRiassuntoDto; selezione: string | null; onCambia: (id: string | null) => void }) {
   const alternative = alternativeMappa(mappa);
   if (!alternative.length) return null;

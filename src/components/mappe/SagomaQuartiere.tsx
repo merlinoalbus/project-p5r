@@ -36,6 +36,8 @@ interface Props {
 const CONTORNO = contornoSagoma('#fff');
 const CONTORNO_ORO = `${contornoSagoma('#ffd23f', 2)} brightness(1.05)`;
 
+/** La sagoma del quartiere in un riquadro fisso (112×84 predefinito), col contorno bianco o, se
+ * `acceso`, oro e leggermente ingrandita; se il file manca l'immagine si nasconde. */
 export function SagomaQuartiere({ chiave, nome, acceso = false, larghezza = 112, altezza = 84, className = '' }: Props) {
   return (
     <span

@@ -16,6 +16,7 @@ import { logger } from '../../utils/logger.js';
 import { aggiungiColonna } from '../colonne.js';
 import { eFasciaAttivita, eTipoAttivita, tracciamentoPerTipo } from '../../../shared/attivita.js';
 
+/** Un importo scritto all'italiana («7.400») come numero: i punti delle migliaia si tolgono. */
 const numero = (s: string): number => Number(s.replace(/\./g, ''));
 
 /** «3.500 yen a turno (fino a 7.400 yen con quiz perfetto)» → 3500 e 7400; «7.200 yen a turno (12.000 yen di domenica)» → 7200 e 12000. */
@@ -27,6 +28,12 @@ export function leggiPaga(testo: string | null | undefined): { pagaYen: number |
   return { pagaYen: numero(base[1]), pagaMassima: massima ? numero(massima[1]) : null };
 }
 
+/**
+ * Il testo dei dettagli di un'attività, composto dalle colonne di prosa: «Come funziona», «Premi»,
+ * «Altri effetti» e, dalle voci di `doti_json` che hanno una condizione, «Note sulle Doti» (Dote con
+ * l'iniziale maiuscola, voci separate da «·»). Paragrafi separati da una riga vuota; null se non
+ * resta nulla. Un `doti_json` illeggibile vale come vuoto.
+ */
 export function componiDettagli(r: { regole: string | null; premi: string | null; altri_effetti: string | null; doti_json: string | null }): string | null {
   const parti: string[] = [];
   if (r.regole && r.regole.trim()) parti.push(`Come funziona: ${r.regole.trim()}`);

@@ -28,12 +28,19 @@ interface Props {
   trattoIniziale?: TrattoOmbra | null;
 }
 
+/**
+ * Ricerca delle domande della negoziazione con le loro risposte e i verdetti per carattere. Mostra 20 domande alla
+ * volta («Mostra altre» ne aggiunge 40; una ricerca nuova riparte da 20). Con un carattere scelto (di partenza
+ * `trattoIniziale`) le risposte si ordinano per il suo esito, quelle senza verdetto per lui subito dopo le passabili,
+ * e la riga si colora se è buona o cattiva. In fondo, l'attribuzione della fonte.
+ */
 export function RisposteNegoziazione({ domande, fonte, trattoIniziale = null }: Props) {
   const [ricerca, setRicerca] = useState('');
   const [tratto, setTratto] = useState<TrattoOmbra | null>(trattoIniziale);
   const [quante, setQuante] = useState(20);
   const trovate = useMemo(() => cercaDomande(domande, ricerca), [domande, ricerca]);
   const visibili = trovate.slice(0, quante);
+  /** Il verdetto di una risposta per il carattere scelto, o null se nessun carattere è scelto o non è verificato. */
   const verdettoDi = (r: NegoziazioneDomandaDto['risposte'][number]) => (tratto ? r.verdetti.find((v) => v.tratto === tratto) ?? null : null);
 
   return (

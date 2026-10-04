@@ -48,6 +48,9 @@ const ETICHETTA: Record<Gruppo, { titolo: string; categoria: 'libri' | 'film' | 
   videogiochi: { titolo: 'Videogiochi', categoria: 'minigiochi', unita: 'round', percorso: '/guida/videogiochi' },
 };
 
+/** Una voce: nome, barra di avanzamento con il conteggio (senza totale per le visioni al cinema),
+ * «Non ancora» se bloccata e mai iniziata, e i pulsanti −/+; il «+» si spegne al tetto o se la voce
+ * è bloccata e ancora a zero. */
 function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupato: boolean; onCambia: (v: Voce, n: number) => void }) {
   const percentuale = v.totale > 0 ? Math.round((v.progresso / v.totale) * 100) : 0;
   return (
@@ -70,6 +73,8 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
   );
 }
 
+/** Il riquadro di un gruppo (libri, film, videogiochi): intestazione con conteggio dei completati e
+ * collegamento alla pagina della Guida, le voci da fare, e i completati chiusi dietro un pulsante. */
 function Sezione({ gruppo, voci, occupati, onCambia }: { gruppo: Gruppo; voci: Voce[]; occupati: Record<string, boolean>; onCambia: (g: Gruppo, v: Voce, n: number) => void }) {
   const [mostraFatti, setMostraFatti] = useState(false);
   const e = ETICHETTA[gruppo];
@@ -104,6 +109,9 @@ function Sezione({ gruppo, voci, occupati, onCambia }: { gruppo: Gruppo; voci: V
   );
 }
 
+/** La scheda della partita per libri, film e videogiochi: carica i tre elenchi, li porta alla forma
+ * comune `Voce` sovrapponendo le righe aggiornate qui (la «toppa»), e mostra il totale dei
+ * completati e le tre sezioni affiancate. */
 export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const libri = useCarica(() => getLibri(partitaId), [partitaId]);
   const film = useCarica(() => getFilm(partitaId), [partitaId]);
@@ -115,10 +123,14 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const [toccate, setToccate] = useState<Record<string, Voce>>({});
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
 
+  /** Un libro come `Voce`: sessioni sul totale, sempre con tetto. */
   const daLibro = (l: LibroDto): Voce => ({ chiave: l.chiave, nome: l.nomeIt ?? l.nome, progresso: l.progresso, totale: l.totaleSessioni, fatto: l.fatto, senzaTetto: false, bloccata: bloccata(l.disponibilita), motivo: motivoBlocco(l.disponibilita) });
+  /** Un film come `Voce`: senza tetto quando si vede al cinema. */
   const daFilm = (f: FilmDto): Voce => ({ chiave: f.chiave, nome: f.nomeIt ?? f.nome, progresso: f.progresso, totale: f.totaleSessioni, fatto: f.fatto, senzaTetto: f.dove === 'cinema', bloccata: bloccata(f.disponibilita), motivo: motivoBlocco(f.disponibilita) });
+  /** Un videogioco come `Voce`: round sul totale. */
   const daGioco = (g: VideogiocoDto): Voce => ({ chiave: g.chiave, nome: g.nome, progresso: g.progresso, totale: g.totaleRound, fatto: g.fatto, senzaTetto: false, bloccata: bloccata(g.disponibilita), motivo: motivoBlocco(g.disponibilita) });
 
+  /** La versione aggiornata qui della voce, se c'è; altrimenti quella caricata. */
   const conToppa = (v: Voce): Voce => toccate[v.chiave] ?? v;
   const locali: Record<Gruppo, Voce[]> = {
     libri: (libri.dati?.libri ?? []).map(daLibro).map(conToppa),
@@ -129,6 +141,8 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const caricamento = (libri.caricamento && !libri.dati) || (film.caricamento && !film.dati) || (giochi.caricamento && !giochi.dati);
   const errore = libri.errore ?? film.errore ?? giochi.errore;
 
+  /** Imposta il progresso della voce con l'API del suo gruppo, mette la risposta nella toppa e
+   * ricorda le Doti da segnare; la riga resta occupata finché la richiesta non finisce. */
   const cambia = async (gruppo: Gruppo, v: Voce, avanzamento: number) => {
     setOccupati((o) => ({ ...o, [v.chiave]: true }));
     try {

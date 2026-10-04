@@ -24,6 +24,12 @@ interface Props {
   onEseguita: (esito: EsitoFusioneScortaDto) => void;
 }
 
+/**
+ * Finestra di esecuzione di una fusione dalla scorta: carica l'anteprima dal BE per gli esemplari `possedutaIds`
+ * (e il `risultatoId` delle ricette speciali) e mostra ingredienti, risultato, tipo di fusione, livello di partenza
+ * (suggerito con il bonus del Confidente, correggibile ma mai sotto la base né sopra 99), tratto (di default l'ultimo
+ * dell'elenco), skill ereditabili da scegliere entro gli slot disponibili, quelle non ereditabili col motivo e le note.
+ */
 export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChiudi, onEseguita }: Props) {
   const anteprima = useCarica(() => getAnteprimaFusione(partitaId, { possedutaIds, risultatoId }), [partitaId, possedutaIds.join(','), risultatoId]);
   const [livello, setLivello] = useState<number | null>(null);
@@ -37,8 +43,13 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
   const nonEreditabili = useMemo(() => (a ? a.candidate.filter((c) => !c.ereditabile) : []), [a]);
   const trattoScelto = tratto ?? a?.tratti[a.tratti.length - 1]?.id ?? null;
 
+  /** Aggiunge o toglie una skill da ereditare; oltre il numero di slot scelti l'aggiunta è ignorata. */
   const toggla = (id: number) => setSkill((s) => (s.includes(id) ? s.filter((x) => x !== id) : s.length < (a?.slotScelti ?? 0) ? [...s, id] : s));
 
+  /**
+   * Esegue la fusione sul BE con skill, tratto, livello e note scelti (senza anteprima non fa nulla); a buon fine
+   * notifica risultato e ingredienti rimossi e passa l'esito al genitore, altrimenti notifica l'errore.
+   */
   const esegui = async () => {
     if (!a) return;
     setOccupato(true);

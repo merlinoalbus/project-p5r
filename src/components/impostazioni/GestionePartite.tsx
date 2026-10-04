@@ -16,6 +16,7 @@ export function GestionePartite() {
   const [nuova, setNuova] = useState(false);
   const [occupato, setOccupato] = useState<number | null>(null);
 
+  /** Rende attiva la partita indicata; durante l'operazione disabilita i pulsanti della sua riga. */
   const attiva = async (id: number) => {
     setOccupato(id);
     try {
@@ -28,6 +29,7 @@ export function GestionePartite() {
     }
   };
 
+  /** Elimina la partita dopo la conferma del browser (l'eliminazione porta via tutto il suo stato e non è reversibile). */
   const rimuovi = async (id: number, nome: string) => {
     if (!window.confirm(`Eliminare la partita «${nome}» con tutto il suo stato (Doti, Confidenti, scorta, compendio)? L'operazione non è reversibile.`)) return;
     setOccupato(id);

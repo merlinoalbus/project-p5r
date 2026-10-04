@@ -1,3 +1,7 @@
+// ============================================================
+// inquadraturaMappa — inquadratura iniziale di una mappa: area visibile dell'immagine, spilli, zoom e spostamento
+// ============================================================
+
 export interface AreaMappa { x: number; y: number; w: number; h: number }
 
 /**
@@ -10,13 +14,16 @@ export interface AreaMappa { x: number; y: number; w: number; h: number }
  */
 export function areaAlpha(data: Uint8ClampedArray, w: number, h: number): AreaMappa | null {
   if (!Number.isInteger(w) || !Number.isInteger(h) || w <= 0 || h <= 0 || data.length !== w * h * 4) return null;
+  /** Il pixel ha alfa diverso da zero. */
   const visibile = (x: number, y: number) => data[(y * w + x) * 4 + 3] !== 0;
+  /** La riga contiene almeno un pixel visibile. */
   const rigaVisibile = (y: number) => { for (let x = 0; x < w; x++) if (visibile(x, y)) return true; return false; };
   let y0 = 0;
   while (y0 < h && !rigaVisibile(y0)) y0++;
   if (y0 === h) return null;
   let y1 = h - 1;
   while (!rigaVisibile(y1)) y1--;
+  /** La colonna contiene almeno un pixel visibile fra le righe y0 e y1. */
   const colonnaVisibile = (x: number) => { for (let y = y0; y <= y1; y++) if (visibile(x, y)) return true; return false; };
   let x0 = 0;
   while (!colonnaVisibile(x0)) x0++;
@@ -37,6 +44,12 @@ export function areaImmagine(img: HTMLImageElement): AreaMappa | null {
   } catch { return null; }
 }
 
+/**
+ * Zoom e spostamento iniziali perché nel riquadro `viewport` stiano l'area visibile dell'immagine (tutta l'immagine
+ * di dimensioni `nat` se l'area manca) e tutti gli spilli (coordinate in percentuale; quelli non finiti si ignorano).
+ * Il rettangolo che li contiene viene centrato nello spazio che resta tolti i margini, con lo zoom più grande che
+ * lo fa entrare per intero; i margini sono spiegati qui sotto.
+ */
 export function inquadraturaMappa(nat: { w: number; h: number }, viewport: { w: number; h: number }, area: AreaMappa | null, pin: ReadonlyArray<{ x: number; y: number }>) {
   let x0 = area?.x ?? 0, y0 = area?.y ?? 0;
   let x1 = x0 + (area?.w ?? nat.w), y1 = y0 + (area?.h ?? nat.h);

@@ -31,6 +31,7 @@ export function ScortaPersona({ partitaId }: Props) {
   const compendio = useCarica(() => getCompendioPartita(partitaId), [partitaId]);
   const istantanee = useMemo(() => new Map((compendio.dati ?? []).map((c) => [c.personaId, c])), [compendio.dati]);
   const [registrazione, setRegistrazione] = useState<number | null>(null);
+  /** Registra l'esemplare nel compendio (livello, bonus, skill, tratto) e sostituisce le istantanee con quelle restituite. */
   const registra = async (p: PersonaPossedutaDto) => {
     setRegistrazione(p.id);
     try {
@@ -52,6 +53,7 @@ export function ScortaPersona({ partitaId }: Props) {
    *  gioco dà altro. Quel che registri con «Modifica» è legato al **livello** a cui l'hai letto; il
    *  bonus di potenziamento resta un valore a parte e si somma dopo. */
   const [salita, setSalita] = useState<number | null>(null);
+  /** Porta la Persona al livello successivo (fermandosi a 99) e la sostituisce in elenco con quella restituita. */
   const saliDiLivello = async (p: PersonaPossedutaDto) => {
     if (!dati || p.livello >= 99) return;
     setSalita(p.id);
@@ -67,6 +69,7 @@ export function ScortaPersona({ partitaId }: Props) {
     }
   };
 
+  /** Toglie la Persona dalla scorta dopo conferma (la registrazione nel compendio resta) e la leva dall'elenco. */
   const rimuovi = async (p: PersonaPossedutaDto) => {
     if (!dati || !window.confirm(`Rimuovere ${p.nomeIt} dalla scorta? Resta registrata nel compendio.`)) return;
     try {
@@ -163,6 +166,7 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
     return (dati ?? []).filter((p) => !p.rara && (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))).slice(0, 40);
   }, [dati, q]);
 
+  /** Aggiunge la Persona alla scorta e la passa a `onAggiunta`; se è già posseduta lo segnala come avviso. */
   const aggiungi = async (personaId: number, nome: string) => {
     setOccupato(personaId);
     try {
@@ -210,6 +214,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
   const origine = origineStima(osservate, livello);
   const stimate = statisticheStimate(posseduta.statisticheBaseLivello, posseduta.livelloBase, osservate, livello);
   const effettive = Object.fromEntries(CHIAVI_STATISTICHE.map((k) => [k, Math.min(99, Math.max(1, stimate[k] + bonus[k]))])) as unknown as StatisticheDto;
+  /** Il valore da mostrare nella casella «reale»: quello scritto in questa finestra se è del livello corrente, altrimenti il valore effettivo stimato. */
   const realeMostrato = (k: keyof StatisticheDto) => (reali && reali.livello === livello ? reali[k] : effettive[k]);
   // scrivere un valore reale registra tutti e cinque i valori al livello corrente e azzera i bonus (i valori reali li comprendono già)
   const impostaReale = (k: keyof StatisticheDto, valore: number) => {
@@ -228,6 +233,8 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
     return tutteSkill.filter((s) => s.elemento !== 'trait' && !skillIds.includes(s.id) && (s.nome.toLowerCase().includes(testo) || s.nomeIt.toLowerCase().includes(testo))).slice(0, 8);
   }, [ricerca, tutteSkill, skillIds]);
 
+  /** Salva livello, squadra, note, skill e bonus; invia anche i valori reali scritti qui, oppure
+   * `null` se si è scelto di dimenticare quelli registrati, altrimenti li lascia invariati. */
   const salva = async () => {
     setOccupato(true);
     try {
@@ -244,6 +251,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
     }
   };
 
+  /** La skill con quell'id dal catalogo completo, o in mancanza fra quelle della Persona; `null` se sconosciuta. */
   const nomeSkill = (id: number) => tutteSkill?.find((s) => s.id === id) ?? posseduta.skill.find((s) => s.id === id) ?? null;
 
   return (
@@ -360,10 +368,12 @@ function totaleBonus(b: StatisticheDto): number {
   return CHIAVI_STATISTICHE.reduce((acc, k) => acc + b[k], 0);
 }
 
+/** I bonus diversi da zero come «FR +2 · MA -1» (sigle dell'app); «nessuno» se sono tutti a zero. */
 function descriviBonus(b: StatisticheDto): string {
   return CHIAVI_STATISTICHE.filter((k) => b[k] !== 0).map((k) => `${SIGLA_STATISTICA[k]} ${b[k] > 0 ? '+' : ''}${b[k]}`).join(' · ') || 'nessuno';
 }
 
+/** I cinque valori reali registrati, sigla e valore, separati da « · ». */
 function descriviOsservate(o: OsservazioneStatisticheDto): string {
   return CHIAVI_STATISTICHE.map((k) => `${SIGLA_STATISTICA[k]} ${o[k]}`).join(' · ');
 }

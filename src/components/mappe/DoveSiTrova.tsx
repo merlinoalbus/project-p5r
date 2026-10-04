@@ -45,6 +45,10 @@ interface Props {
   className?: string;
 }
 
+/** Riquadro «Dove si trova» di un'entità: chiede al risolutore unico le sue destinazioni sul mondo
+ * e, secondo l'esito, dice che non ha un posto, elenca i posti fra cui scegliere, oppure mostra la
+ * mappa incorporata centrata sullo spillo (salvo `soloCollegamento`) con il collegamento all'atlante.
+ * Durante il caricamento mostra uno spinner; in caso di errore non mostra nulla. */
 export function DoveSiTrova({ tipo, chiave, altezza = 260, soloCollegamento = false,
   titolo = 'Dove si trova', className = '' }: Props) {
   const esito = useCarica(() => getAccessoMondo(tipo, chiave), [tipo, chiave]);

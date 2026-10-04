@@ -1,3 +1,7 @@
+// ============================================================
+// types — i tipi condivisi fra frontend e backend (DTO delle API)
+// ============================================================
+
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
 import type { GiornoChiave } from './orariNegozio.js';
 import type { TipoLuogo } from './tipiLuogo.js';

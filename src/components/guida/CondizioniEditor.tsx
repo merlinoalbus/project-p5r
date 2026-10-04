@@ -82,6 +82,7 @@ function valoriIniziali(campi: CampoCondizione[], e: Elenchi): ValoriCondizione 
 function SelettoreData({ etichetta, valore, onCambia, disabilitato }: { etichetta: string; valore: string; onCambia: (v: string) => void; disabilitato?: boolean }) {
   const [mese, giorno] = valore.split('-');
   const giorni = Array.from({ length: GIORNI_NEL_MESE[mese] ?? 31 }, (_, i) => String(i + 1).padStart(2, '0'));
+  /** Cambia il mese tenendo il giorno, ma lo riduce all'ultimo del nuovo mese se lo supera (31 marzo → 30 aprile). */
   const cambiaMese = (nuovoMese: string) => {
     const massimo = GIORNI_NEL_MESE[nuovoMese] ?? 31;
     onCambia(`${nuovoMese}-${String(Math.min(Number(giorno), massimo)).padStart(2, '0')}`);
@@ -105,6 +106,11 @@ function Contatore({ etichetta, valore, min, max, passo = 1, onCambia, disabilit
   );
 }
 
+/**
+ * Il controllo di un campo della condizione secondo il suo tipo: data (giorno e mese), giorni della settimana (chip
+ * spuntabili), ranghi e conteggi (contatori con i loro limiti; i punti vanno a passi di 10), e per tutto il resto un
+ * selettore con ricerca sulle voci di `opzioniPer`. Se il valore salvato non ha il tipo atteso parte da un predefinito.
+ */
 function Campo({ campo, valori, onCambia, elenchi, disabilitato }: { campo: CampoCondizione; valori: ValoriCondizione; onCambia: (nome: string, v: string | number | string[]) => void; elenchi: Elenchi; disabilitato?: boolean }) {
   const v = valori[campo.nome];
   switch (campo.tipo) {
@@ -147,20 +153,25 @@ function Riga({ condizione, negata, onCambia, onRimuovi, elenchi, nomi, disabili
   const valoriBase = valoriIniziali(operatore.campi, elenchi);
   if (operatore.chiave === 'tra' && typeof salvata.valori.dal === 'string' && salvata.valori.al === undefined) valoriBase.al = salvata.valori.dal;
   const scelta: SceltaCondizione = { stato: salvata.stato, operatore: operatore.chiave, valori: { ...valoriBase, ...salvata.valori } };
+  /** Rimette la negazione attorno alla condizione ricostruita, se la riga è negata. */
   const avvolgi = (c: RequisitoSpillo): RequisitoSpillo => (negata ? { tipo: 'non', condizione: c } : c);
+  /** Ricostruisce la condizione dalla scelta (stato, operatore, valori) e la passa al genitore; se non è costruibile non cambia nulla. */
   const applica = (s: SceltaCondizione) => { const c = costruisciCondizione(s); if (c) onCambia(avvolgi(c)); };
+  /** Passa a un altro stato col suo primo operatore e i valori di partenza, dimenticando l'operatore scelto prima. */
   const cambiaStato = (chiave: string) => {
     const d = definizioneStato(chiave); if (!d) return;
     const op = d.operatori[0];
     setOpScelto(null);
     applica({ stato: d.chiave, operatore: op.chiave, valori: valoriIniziali(op.campi, elenchi) });
   };
+  /** Cambia operatore ricordandolo nella riga; i valori già scelti per campi che il nuovo operatore conserva restano, gli altri partono dai valori iniziali. */
   const cambiaOperatore = (chiave: string) => {
     const op = def.operatori.find((o) => o.chiave === chiave); if (!op) return;
     setOpScelto(op.chiave);
     // i valori già scelti restano se il nuovo operatore ha gli stessi campi (dal → tra tiene «dal»)
     applica({ stato: def.chiave, operatore: op.chiave, valori: { ...valoriIniziali(op.campi, elenchi), ...Object.fromEntries(Object.entries(scelta.valori).filter(([k]) => op.campi.some((c) => c.nome === k))) } });
   };
+  /** Cambia il valore di un campo e riapplica la condizione; per un periodo di date tiene inizio e fine in ordine. */
   const cambiaValore = (nome: string, v: string | number | string[]) => {
     const valori = { ...scelta.valori, [nome]: v };
     // Un periodo resta sempre valido: se l'inizio supera la fine, la fine lo segue (e viceversa).
@@ -191,8 +202,11 @@ interface PropsBlocco { condizioni: RequisitoSpillo[]; modo: 'tutte' | 'almeno-u
 function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRimuovi, profondita, elenchi, nomi, disabilitato, perSpillo }: PropsBlocco) {
   // le righe hanno uno stato loro (l'operatore scelto): la chiave è un id stabile, non l'indice (`useIdStabili`)
   const chiavi = useIdStabili(condizioni.length);
+  /** Sostituisce l'elemento in posizione `i` (riga o gruppo) e passa l'elenco nuovo al genitore. */
   const sostituisci = (i: number, c: RequisitoSpillo) => onCambia(condizioni.map((v, j) => (j === i ? c : v)));
+  /** Toglie l'elemento in posizione `i` insieme al suo id stabile. */
   const rimuovi = (i: number) => { chiavi.togli(i); onCambia(condizioni.filter((_, j) => j !== i)); };
+  /** Accoda una riga o un gruppo, con un id stabile nuovo. */
   const aggiungi = (c: RequisitoSpillo) => { chiavi.aggiungi(); onCambia([...condizioni, c]); };
   const radice = profondita === 0;
   const pieno = condizioni.length >= 20;
@@ -211,6 +225,7 @@ function Blocco({ condizioni, modo, onCambia, onCambiaModo, negato, onNega, onRi
           const dentro = negata ? c.condizione : c;
           if (dentro.tipo === 'gruppo') {
             const g = dentro;
+            /** Scrive il gruppo aggiornato al suo posto, conservandone la negazione. */
             const scrivi = (nuovo: RequisitoSpillo) => sostituisci(i, negata ? { tipo: 'non', condizione: nuovo } : nuovo);
             return <Blocco key={`gruppo-${chiavi.ids[i]}`} condizioni={g.condizioni} modo={g.modo} onCambia={(cs) => (cs.length ? scrivi({ ...g, condizioni: cs }) : rimuovi(i))} onCambiaModo={(m) => scrivi({ ...g, modo: m })} negato={negata} onNega={() => sostituisci(i, negata ? g : { tipo: 'non', condizione: g })} onRimuovi={() => rimuovi(i)} profondita={profondita + 1} elenchi={elenchi} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} />;
           }
@@ -234,6 +249,12 @@ interface Props {
   /** L'uid del pin che si sta modificando: non può dipendere dal proprio stato (2026-10-03), quindi non si offre. */ pinCorrente?: string;
 }
 
+/**
+ * L'editor completo delle condizioni di un elemento. Carica gli elenchi che servono alle scelte (quelli delle regole,
+ * più confidenti, quartieri, richieste e dungeon se il genitore non li passa in `elenchi`, più i pin con stato solo
+ * con `perSpillo`), costruisce la mappa chiave → nome per descrivere le condizioni ed esclude dai pin offerti quello in
+ * modifica (`pinCorrente`). Si apre da solo se ci sono già condizioni; con elenchi in errore offre «Riprova».
+ */
 export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo, pinCorrente }: Props) {
   const dati = useCarica(async () => {
     const [extra, base, spilli] = await Promise.all([
@@ -247,6 +268,7 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
   const nomi = useMemo<NomiCondizioni>(() => {
     if (!dati.dati) return {};
     const e = dati.dati;
+    /** Da un elenco di voci a un dizionario chiave → nome. */
     const mappa = (o: Array<{ chiave: string; nome: string }>) => Object.fromEntries(o.map((x) => [x.chiave, x.nome]));
     return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra),
       spilli: Object.fromEntries(e.spilli.map((p) => [p.chiave, { nome: p.nome, tipo: p.tipo, mappa: p.gruppo, parola: p.parola }])) };

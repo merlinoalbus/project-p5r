@@ -31,6 +31,7 @@ interface AssetState {
 type Sorgente = { generato: string; file: Record<string, string> };
 const VUOTA: Sorgente = { generato: '', file: {} };
 
+/** Normalizza un manifest letto da una delle due sorgenti: se manca o non ha la mappa `file`, vale la sorgente vuota. */
 function sorgente(dati: Partial<ManifestImmaginiDto> | null | undefined): Sorgente {
   return dati && typeof dati.file === 'object' && dati.file !== null ? { generato: dati.generato ?? '', file: dati.file } : VUOTA;
 }

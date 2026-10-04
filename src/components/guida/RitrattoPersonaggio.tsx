@@ -75,6 +75,7 @@ function chiPuoUsarlo(chi: string): string[] {
   return SQUADRA.filter((p) => dentro.has(p.chiave)).map((p) => p.chiave);
 }
 
+/** Il ritratto tondo di un membro della squadra (con le prime due lettere del nome se manca l'immagine); niente se la chiave è sconosciuta. */
 function Faccia({ chiave, dimensione }: { chiave: string; dimensione: number }) {
   const p = SQUADRA.find((x) => x.chiave === chiave);
   if (!p) return null;

@@ -1,4 +1,3 @@
-import { descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 // ============================================================
 // negoziService — negozi e articoli (armi, protezioni, accessori, oggetti, regali, cibo) con ricerca e acquisti per partita (Fase 8.2)
 // ============================================================
@@ -9,6 +8,7 @@ import { descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo }
 // sede fra i luoghi della città (072) e, se ce l'ha, un programma punti dichiarato (076).
 // ============================================================
 
+import { descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -42,6 +42,8 @@ export function leggiProgrammaPunti(json: string | null): NegozioRiassuntoDto['p
   } catch { return null; }
 }
 
+/** Il riassunto di un negozio: orari strutturati e in parole (che sono anche le sue condizioni di presenza, valutate se c'è
+ *  lo stato della partita), Confidente, sede, programma punti e conteggi degli articoli non nascosti. */
 function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto {
   const orari = leggiOrari(r.orari_json);
   const condizioni = regoleOrari(orari);
@@ -79,6 +81,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave), ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
 }
 
+/** Le chiavi degli articoli segnati come acquistati nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function acquistiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
   verificaPartita(partitaId);
@@ -101,6 +104,8 @@ export function acquistiDellaPartita(partitaId: number): Set<string> {
   return acquistiPartita(partitaId);
 }
 
+/** La scheda di un negozio non nascosto con i suoi articoli non nascosti, nell'ordine; con la partita, acquisti e
+ *  disponibilità (presi da `contesto` se chi chiama li ha già). 404 se il negozio non c'è o è nascosto. */
 export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: ContestoNegozio): NegozioDettaglioDto {
   const n = prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(chiave) as RigaNegozio | undefined;
   if (!n) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);

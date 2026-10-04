@@ -40,6 +40,7 @@ export const TIPI_LUOGO: readonly DefinizioneTipoLuogo[] = CATALOGO.map((t) => (
 
 const PER_CHIAVE: Record<string, DefinizioneTipoLuogo> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t]));
 
+/** Vero se il valore è la chiave di un tipo di luogo del catalogo. */
 export function eTipoLuogo(x: unknown): x is TipoLuogo {
   return typeof x === 'string' && x in PER_CHIAVE;
 }

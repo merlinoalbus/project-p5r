@@ -34,6 +34,7 @@ export interface Inquadratura { pan: Punto; zoom: number; nat: { w: number; h: n
 export function raggruppaSpilli(visibili: SpilloDto[], inq: Inquadratura, opzioni: { selezionatoId: number | null; editor: boolean }): { singoli: SpilloDto[]; gruppi: Gruppo[] } {
   const { pan, zoom, nat, dim } = inq;
   const { selezionatoId, editor } = opzioni;
+  /** Posizione sullo schermo (px) del punto dello spillo, dalle percentuali sull'immagine con zoom e spostamento correnti. */
   const perSchermo = (s: SpilloDto) => ({ x: pan.x + (s.x / 100) * nat.w * zoom, y: pan.y + (s.y / 100) * nat.h * zoom });
   type Nube = { spilli: SpilloDto[] };
   // Dove cade davvero il bersaglio, che non è il punto ancorato: la goccia di un singolo ha la
@@ -52,13 +53,16 @@ export function raggruppaSpilli(visibili: SpilloDto[], inq: Inquadratura, opzion
   const nubi: Nube[] = visibili.map((s) => ({ spilli: [s] }));
   const somme: Somma[] = punti.map((p) => ({ sx: 0 + p.x, sy: 0 + p.y }));
   const puntiNube: Punto[][] = punti.map((p) => [p]);
+  /** Centro del bersaglio della nube i: media dei suoi punti, alzata di mezza goccia se la nube ha un solo spillo. */
   const centro = (i: number) => {
     const n = puntiNube[i].length;
     const y = somme[i].sy / n;
     return { x: somme[i].sx / n, y: n === 1 ? y - ALTEZZA_GOCCIA / 2 : y };
   };
   const centri = nubi.map((_, i) => centro(i));
+  /** Le nubi i e j hanno i centri più vicini di DISTANZA_MINIMA_SPILLI. */
   const vicine = (i: number, j: number) => (centri[i].x - centri[j].x) ** 2 + (centri[i].y - centri[j].y) ** 2 < DISTANZA_MINIMA_SPILLI ** 2;
+  /** La prima coppia (i, j) troppo vicina con i a partire da `riga`, nell'ordine di scansione; null se non ce ne sono. */
   const cercaDa = (riga: number): [number, number] | null => {
     for (let i = riga; i < nubi.length; i++) for (let j = i + 1; j < nubi.length; j++) if (vicine(i, j)) return [i, j];
     return null;
@@ -115,9 +119,13 @@ export function raggruppaSpilli(visibili: SpilloDto[], inq: Inquadratura, opzion
   // una pastiglia, cioè un bersaglio che si può scostare, come già fa il residuo.
   const selScorporato = editor && selezionatoId !== null ? singoli.find((s) => s.id === selezionatoId) : undefined;
   if (selScorporato) {
+    /** Distanza euclidea fra due punti dello schermo. */
     const dist = (a: Punto, b: Punto) => Math.hypot(a.x - b.x, a.y - b.y);
+    /** Il punto lascia almeno 22 px dai bordi della tela (sempre vero se la tela non è ancora misurata). */
     const dentroTela = (p: Punto) => dim.w === 0 || (p.x >= 22 && p.x <= dim.w - 22 && p.y >= 22 && p.y <= dim.h - 22);
+    /** Centro del bersaglio di una goccia singola: mezza goccia sopra il punto. */
     const centroSpillo = (s: SpilloDto) => { const p = perSchermo(s); return { x: p.x, y: p.y - ALTEZZA_GOCCIA / 2 }; };
+    /** Centro della pastiglia di un gruppo: il suo punto medio portato sullo schermo (la pastiglia è centrata lì). */
     const centroGruppo = (g: Gruppo) => perSchermo({ ...selScorporato, x: g.x, y: g.y });
     const centroPin = centroSpillo(selScorporato);
 
@@ -136,6 +144,7 @@ export function raggruppaSpilli(visibili: SpilloDto[], inq: Inquadratura, opzion
     for (const g of daSistemare) {
       const base = centroGruppo(g);
       const altri = [...fissi, ...gruppi.filter((x) => x !== g).map((x) => posizione.get(x.chiave)!)];
+      /** Il punto dista almeno DISTANZA_MINIMA_SPILLI da ogni altro bersaglio ed è dentro la tela. */
       const libera = (p: Punto) => altri.every((a) => dist(p, a) >= DISTANZA_MINIMA_SPILLI) && dentroTela(p);
       if (libera(base)) continue;
       // Il raggio arriva a 220 px e non a 96: su una tela stretta, ingrandendo, lo spazio vicino si

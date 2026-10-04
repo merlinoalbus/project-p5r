@@ -12,7 +12,8 @@ export type { AmbitoImmagine };
 /** La grafica predefinita che vive nel database (mappe, Confidenti, sfondi…), nella forma del manifest degli asset. */
 export const getManifestoImmagini = (): Promise<ManifestImmaginiDto> => apiGet('/immagini/manifest');
 
-export const getImmagini = (ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
+/** Metadati (con URL del file, mai i byte) delle immagini di un ambito, o di tutti gli ambiti di caricamento se omesso. */
+export const getImmagini =(ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
 
 /** Scarica nell'istanza la mappa del quartiere dalla fonte collegata (immagine mai nel repository). Le piante delle aree dei Palazzi
  *  non si scaricano più dalla guida (rotta tolta il 2026-09-18, «la pianta della guida esce di scena»). */
@@ -27,10 +28,12 @@ export function urlImmagine(ambito: AmbitoImmagine, chiave: string): string {
 export const caricaImmagine = (ambito: AmbitoImmagine, chiave: string, file: File): Promise<ImmagineDto> =>
   inviaFile('PUT', `/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}`, file);
 
-export const importaImmagineDaUrl = (ambito: AmbitoImmagine, chiave: string, url: string): Promise<ImmagineDto> =>
+/** Fa scaricare al server l'immagine dall'URL indicato e la salva come `ambito`/`chiave` (timeout esteso, nessun nuovo tentativo). */
+export const importaImmagineDaUrl =(ambito: AmbitoImmagine, chiave: string, url: string): Promise<ImmagineDto> =>
   apiPost(`/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/da-url`, { url }, { timeoutMs: 60_000, maxRetries: 0 });
 
-export const eliminaImmagine = (ambito: AmbitoImmagine, chiave: string): Promise<void> =>
+/** Rimuove una singola immagine caricata (404 se non esiste). */
+export const eliminaImmagine =(ambito: AmbitoImmagine, chiave: string): Promise<void> =>
   apiDelete(`/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}`);
 
 /** Rimuove tutte le immagini caricate di un ambito (o di tutta l'istanza). */

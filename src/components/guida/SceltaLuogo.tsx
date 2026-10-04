@@ -24,6 +24,11 @@ interface Props {
 
 const SOLO_QUARTIERE = 'q:';
 
+/**
+ * Il selettore della sede: carica quartieri e luoghi e costruisce le voci per quartiere («solo il quartiere» in testa,
+ * poi i luoghi col loro tipo). La voce vuota azzera sede e quartiere; «solo il quartiere» lascia la sede vuota; un
+ * luogo imposta anche il suo quartiere. Un valore salvato che l'elenco non conosce resta come prima voce.
+ */
 export function SceltaLuogo({ valore, onCambia, etichetta = 'Sede', disabilitato }: Props) {
   const dati = useCarica(async () => { const [quartieri, luoghi] = await Promise.all([getQuartieri(), getLuoghi()]); return { quartieri, luoghi }; }, []);
   const opzioni: OpzioneSelettore[] = [];

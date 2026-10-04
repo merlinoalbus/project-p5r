@@ -9,6 +9,7 @@ import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
 
 const NOTE = [{ chiave: '1', nome: '♪' }, { chiave: '2', nome: '♪♪' }, { chiave: '3', nome: '♪♪♪' }] as const;
 
+/** Selettore della Dote e segmenti delle note (1–3) affiancati; ogni cambio passa al genitore la coppia aggiornata. */
 export function RigaDote({ dote, onCambia, etichetta }: { dote: DoteNote; onCambia: (d: DoteNote) => void; etichetta: string }) {
   return (
     <div className="flex flex-wrap items-end gap-2">

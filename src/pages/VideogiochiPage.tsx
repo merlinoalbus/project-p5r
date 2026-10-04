@@ -31,6 +31,7 @@ import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/
 import { bloccata, formattaYen, motivoBlocco, prezzoChip } from '../utils/letture';
 import type { VideogiocoDto } from '../types';
 
+/** Un numero di riepilogo in una carta: il valore in grande e sotto l'etichetta col suo segno. */
 function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
   return (
     <span className="card flex flex-col gap-0.5 px-3 py-2">
@@ -40,6 +41,12 @@ function Numero({ valore, etichetta, segno }: { valore: number | string; etichet
   );
 }
 
+/**
+ * La scheda di un videogioco: illustrazione (o icona dei minigiochi), nome, sede, stato,
+ * disponibilità, barra dei round fatti sul totale. Con una partita offre «Togli» e «Round» (il
+ * secondo spento a gioco finito o finché non è disponibile, con il motivo sotto) e il segno di
+ * salvataggio in corso; poi effetti, negozi che lo vendono o costo, dettagli, posizione e correzione.
+ */
 function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPosizione }: { g: VideogiocoDto; partitaId: number | null; occupato: boolean; progresso: number; onCambia: (g: VideogiocoDto, passo: number) => void; onCorretto: () => void; onPosizione: () => void }) {
   const totale = g.totaleRound;
   const percentuale = totale > 0 ? Math.round((progresso / totale) * 100) : 0;
@@ -100,6 +107,12 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
   );
 }
 
+/**
+ * Pagina dei videogiochi: carica i giochi per la partita attiva, mostra i conteggi (giochi,
+ * completati, round), la ricerca (nome, sede, luogo, effetti) e le schede divise fra da giocare e
+ * completati (questi ripiegati). I round passano da una coda per gioco che invia una richiesta per
+ * volta; «Mostra posizione» apre sopra gli elenchi la mappa del gioco scelto.
+ */
 export function VideogiochiPage() {
   useDocumentTitle('Videogiochi');
   const attiva = usePartitaStore((s) => s.attiva);

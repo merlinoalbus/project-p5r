@@ -64,6 +64,7 @@ export function verificaDestinazioneSpillo(value: unknown, incoming: Set<string>
 /** Lo spillo di `mappa` che meglio corrisponde a nome e posizione: stesso nome se c'è, altrimenti il più vicino entro la tolleranza. */
 export function risolviSpilloArrivo(mappa: string, cerca: { nome: string | null; x: number; y: number }): number | null {
   const candidati = prepared('SELECT id, nome, x, y FROM spillo WHERE mappa_chiave=?').all(mappa) as Array<{ id: number; nome: string; x: number; y: number }>;
+  /** Distanza euclidea dello spillo dalla posizione cercata. */
   const distanza = (s: { x: number; y: number }) => Math.hypot(s.x - cerca.x, s.y - cerca.y);
   const vicini = candidati.filter((s) => distanza(s) <= TOLLERANZA).sort((a, b) => distanza(a) - distanza(b));
   if (cerca.nome) { const conNome = vicini.find((s) => s.nome === cerca.nome); if (conNome) return conNome.id; }
@@ -75,6 +76,10 @@ function haColonnaArrivo(): boolean {
   return (prepared("SELECT name FROM pragma_table_info('spillo_destinazione')").all() as Array<{ name: string }>).some((c) => c.name === 'spillo_arrivo_id');
 }
 
+/**
+ * La destinazione salvata di uno spillo: la mappa (nella chiave pubblica) e lo spillo d'arrivo, se c'è. Una riga con la
+ * mappa nulla è la lapide di un collegamento perso: niente destinazione e `destinazioneNonDisponibile` vero.
+ */
 export function leggiDestinazioneSpillo(id: number): { destinazione: DestinazioneSpillo | null; destinazioneNonDisponibile: boolean } {
   const r = prepared(haColonnaArrivo() ? 'SELECT mappa_chiave, spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?' : 'SELECT mappa_chiave, NULL AS spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?').get(id) as { mappa_chiave: string | null; spillo_arrivo_id: number | null } | undefined;
   return {

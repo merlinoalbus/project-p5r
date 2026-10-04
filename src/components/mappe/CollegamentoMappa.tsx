@@ -1,3 +1,7 @@
+// ============================================================
+// CollegamentoMappa — il collegamento dalla scheda di un'entità al suo punto sull'atlante
+// ============================================================
+
 import { Link } from 'react-router-dom';
 import { IconaAzione } from '../shared/IconaAzione';
 import { percorsoAccessoMondo } from '../../utils/accessoMondo';

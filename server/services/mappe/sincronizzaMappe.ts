@@ -21,6 +21,7 @@ import { finestraDaDate, unisci } from './presenzaEntita.js';
 import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 import { bloccoGuidaDi } from '../datiGuida.js';
 
+/** Data e ora correnti in ISO, per `updated_at` delle righe create. */
 function adesso(): string { return new Date().toISOString(); }
 
 /** Posizioni (in percentuale) dei quartieri sulla mappa globale di Tokyo del gioco (stima dalla mappa ufficiale: da rifinire nell'editor). */
@@ -64,6 +65,13 @@ export function riallineaSpilliLuoghi(db: AppDatabase): number {
   return n;
 }
 
+/**
+ * Una passata di sincronizzazione, in quattro tempi: le mappe (Tokyo, i quartieri, i Palazzi con le loro aree; un'area senza
+ * mappa diventa una sezione della guida se `guida_mappa` c'è), gli spilli dai marcatori dei punti e dei luoghi (con la
+ * riclassificazione di quelli di seed), i passaggi verso le mappe figlie con le condizioni di presenza (sblocco del quartiere,
+ * finestra del Palazzo), infine la riconciliazione delle aree, i percorsi e gli uid. Ogni parte salta le tabelle che
+ * mancano. Restituisce quante mappe e spilli ha creato, quanti spilli ha riclassificato e quanti passaggi hanno una condizione.
+ */
 export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: number; riclassificati: number; conSblocco: number } {
   const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
   if (!tabelle.has('mappa')) return { mappe: 0, spilli: 0, riclassificati: 0, conSblocco: 0 };

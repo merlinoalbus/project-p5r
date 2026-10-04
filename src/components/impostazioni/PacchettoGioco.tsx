@@ -29,12 +29,14 @@ import { Selettore } from '../shared/Selettore';
 import { BarraInvio } from './BarraInvio';
 import { salvaFile } from '../../utils/salvaFile';
 
+/** Numero con i separatori delle migliaia all'italiana. */
 const numero = (n: number): string => n.toLocaleString('it-IT');
 
 /** Ogni quanto si richiede lo stato dell'importazione, e per quanto si insiste. */
 const ATTESA_FRA_CONTROLLI_MS = 5_000;
 const CONTROLLI_MASSIMI = 240; // venti minuti
 
+/** Promessa che si risolve dopo `ms` millisecondi: la pausa fra un controllo dello stato e il successivo. */
 const attendi = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Che cosa sta facendo il server, detto all'utente. */
@@ -111,6 +113,12 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
   );
 }
 
+/**
+ * Card «Pacchetto di gioco» delle Impostazioni: stato dei dati di gioco dell'istanza (con gli avvisi se è vuota o
+ * ha solo i dati iniziali), scaricamento del pacchetto, scelta di un file dalla cartella d'appoggio, anteprima
+ * dell'importazione in una finestra di conferma, avanzamento del lavoro sul server ed esito finale con gli orfani.
+ * Non ha props.
+ */
 export function PacchettoGioco() {
   const stato = useCarica(() => getStatoIstanza(), []);
   const [occupato, setOccupato] = useState(false);
@@ -127,6 +135,10 @@ export function PacchettoGioco() {
   useEffect(() => () => { smetti.current = true; }, []);
   const s = stato.dati;
 
+  /**
+   * Scarica il pacchetto di gioco e lo salva sul dispositivo; la notifica riporta anche il nome con cui il server
+   * lo ha depositato nella cartella d'appoggio, se lo ha fatto.
+   */
   const esporta = async () => {
     setOccupato(true);
     try {
@@ -204,6 +216,11 @@ export function PacchettoGioco() {
     return null;
   };
 
+  /**
+   * Importa il file dell'anteprima confermata (solo se il server l'ha dichiarato importabile). Prima annota l'ultima
+   * operazione d'importazione nota, per riconoscere poi l'esito di questo tentativo; se la richiesta cade, prima di
+   * dichiarare il fallimento segue il lavoro sul server con `seguiSulServer` e, se è riuscito, mostra l'esito vero.
+   */
   const importa = async () => {
     if (!origine || !anteprima?.importabile) return;
     setOccupato(true);
@@ -211,6 +228,7 @@ export function PacchettoGioco() {
     // qual era l'ultima importazione PRIMA di questo tentativo: serve a non scambiare il suo esito per il nostro
     const operazionePrecedente = await statoImportazionePacchetto().then((x) => x.ultima?.operazione ?? null).catch(() => undefined);
     setLavoroSulServer('lettura');
+    /** Chiude l'anteprima e la scelta del file, mostra l'esito, aggiorna lo stato dell'istanza e rilegge le partite. */
     const concludi = async (e: EsitoImportazionePacchettoDto) => {
       setAnteprima(null);
       setOrigine(null);
@@ -235,6 +253,7 @@ export function PacchettoGioco() {
     }
   };
 
+  /** Chiude la finestra dell'anteprima dimenticando anche il file da cui veniva. */
   const chiudiAnteprima = () => { setAnteprima(null); setOrigine(null); };
 
   return (

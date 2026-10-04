@@ -102,6 +102,9 @@ function useLarghezzaCheSta(attivo: boolean, contenuto: string) {
     if (!b || !m || !attivo || typeof window.matchMedia !== 'function') return;
     // la schermata senza scorrimento c'è da 768 px: sotto, la pagina scorre e la mappa torna alla sua misura
     const schermo = window.matchMedia('(min-width: 768px)');
+    /** Sotto i 768 px toglie la larghezza imposta; sopra parte dalla larghezza del blocco e la
+     *  riduce (al più 8 passi) finché la mappa 10:7 più la legenda, che va a capo di conseguenza,
+     *  stanno nell'altezza rimasta, con un minimo di 240 px. */
     const calcola = () => {
       const colonna = b.parentElement;
       if (!schermo.matches || !colonna) { m.style.width = ''; return; }
@@ -252,6 +255,12 @@ function Rete({ nomi }: { nomi: Map<string, string> }) {
 const ZOOM_MAX = 4;
 const ZOOM_PASSO = 1.4;
 
+/** La mappa di viaggio: rete delle linee, cartellini dei luoghi aperti alla data della partita (più
+ * il Covo), zoom con pulsanti, rotellina e doppio clic per adattare, trascinamento quando
+ * ingrandita, e una legenda di collegamenti. I luoghi non ancora aperti si elencano sotto, in linea
+ * o, con `riempi`, come conteggio con una finestra di dettaglio; senza `dataGioco` si mostra tutto e
+ * lo si dice. `evidenziato`/`onEvidenzia` condividono la selezione con le schede dell'ospite e
+ * `onApri` può intercettare il clic sui cartellini. */
 export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, onApri, className = '', riempi = false }: Props) {
   // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
   // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
@@ -308,6 +317,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
   useEffect(() => {
     const el = cornice.current;
     if (!el) return;
+    /** Blocca lo scorrimento della pagina e ingrandisce (rotella in su) o riduce attorno al cursore. */
     const suRotella = (e: WheelEvent) => {
       e.preventDefault();
       const r = el.getBoundingClientRect();

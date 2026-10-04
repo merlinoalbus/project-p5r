@@ -22,10 +22,12 @@ export function indiceGiornoScolastico(data: string): number {
   return ordineGioco(data);
 }
 
+/** Una domanda come DTO: risposte dal JSON, `fatta` se il suo id è fra quelli segnati nella partita. */
 function domandaDto(r: RigaDomanda, fatte: Set<number>): DomandaDto {
   return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id) };
 }
 
+/** Gli esami in ordine, con date e domande lette dai rispettivi JSON. */
 function esami(): EsameDto[] {
   return (prepared('SELECT chiave, nome, date_json, data_risultati, domande_json, note FROM esame ORDER BY ordine').all() as Array<{ chiave: string; nome: string; date_json: string; data_risultati: string | null; domande_json: string; note: string }>)
     .map((e) => ({ chiave: e.chiave, nome: e.nome, date: JSON.parse(e.date_json) as string[], dataRisultati: e.data_risultati, domande: JSON.parse(e.domande_json) as EsameDto['domande'], note: e.note }));

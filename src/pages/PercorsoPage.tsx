@@ -20,6 +20,14 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { GiornoGuida } from '../components/guida/GiornoGuida';
 
+/**
+ * Guida giorno per giorno: carica l'indice dei giorni per la partita attiva e il giorno preso
+ * dall'URL (altrimenti il giorno corrente della partita, altrimenti il primo dell'indice). Offre
+ * la navigazione al giorno precedente e successivo, i selettori di mese e giorno (con le azioni
+ * fatte sul totale), il ritorno a oggi e il comando per fissare il giorno come corrente; sotto, la
+ * giornata con le azioni da spuntare. Una spunta sostituisce la riga nei dati correnti e
+ * ricarica l'indice.
+ */
 export function PercorsoPage() {
   const { data: dataParam } = useParams();
   const navigate = useNavigate();
@@ -40,6 +48,7 @@ export function PercorsoPage() {
     giorno.imposta((attuale) => { const azioni = attuale.azioni.map((x) => (x.uid === a.uid ? a : x)); return { ...attuale, azioni, fatte: azioni.filter((x) => x.fatta).length }; });
     void indice.ricarica();
   };
+  /** Fissa il giorno mostrato come giorno corrente della partita: aggiorna giorno e indice locali, allinea la partita nello store, invalida i suggerimenti del giorno e notifica l'esito. */
   const segnaCorrente = async () => {
     if (!partitaId || !g) return;
     setOccupatoGiorno(true);
@@ -53,6 +62,7 @@ export function PercorsoPage() {
       notifica('success', `Giorno corrente: ${dataGiocoTesto(g.giorno)}.`);
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupatoGiorno(false); }
   };
+  /** Apre la pagina di un altro giorno; con null non fa niente. */
   const vai = (d: string | null) => { if (d) navigate(`/guida/percorso/${d}`); };
   return (
     <PageState isLoading={(indice.caricamento && !indice.dati) || (giorno.caricamento && !g)} error={indice.errore ?? giorno.errore} onRetry={() => { void indice.ricarica(); void giorno.ricarica(); }}>

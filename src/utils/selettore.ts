@@ -1,3 +1,7 @@
+// ============================================================
+// selettore — costanti e aiuti del componente Selettore (soglia della ricerca, tetto delle voci, larghezza)
+// ============================================================
+
 import type { OpzioneSelettore } from '../components/shared/Selettore';
 
 /** Da quante voci in su il Selettore mostra il campo di ricerca quando `ricerca` è `auto`. */

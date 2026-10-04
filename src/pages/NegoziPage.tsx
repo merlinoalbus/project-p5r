@@ -25,6 +25,14 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 
+/**
+ * Pagina dei negozi: carica l'elenco per la partita attiva (ricaricando al cambio di giorno, fascia
+ * o meteo) e legge il filtro degli articoli dai parametri dell'URL. Senza ricerca raggruppa i
+ * negozi per quartiere (con gruppi a parte per online, ambulanti e senza quartiere); con almeno
+ * due lettere o un altro filtro attivo cerca gli articoli in tutti i negozi e, se il testo è di
+ * due lettere o più, elenca anche i negozi il cui nome o luogo lo contiene. Il pulsante
+ * «Posizione» mostra o nasconde la mappa di un negozio; c'è anche l'aggiunta di un negozio.
+ */
 export function NegoziPage() {
   const sugg = useSuggerimenti();
   useDocumentTitle('Negozi e inventario');
@@ -38,6 +46,7 @@ export function NegoziPage() {
   // (`utils/articoli.ts`), letto dai parametri e riscritto lì a ogni cambio.
   const [params, setParams] = useSearchParams();
   const filtro = useMemo(() => filtroDaParametri(params), [params]);
+  /** Riscrive il filtro nei parametri dell'URL (conservando quelli estranei al filtro) senza aggiungere voci alla cronologia. */
   const cambiaFiltro = (f: Filtro) => setParams((precedenti) => parametriDaFiltro(f, precedenti), { replace: true });
   const [negozioSelezionato, setNegozioSelezionato] = useState<NegozioRiassuntoDto | null>(null);
   // negozio aggiunto dall'utente: resta anche quando i dati della guida vengono aggiornati (16.1)
@@ -73,6 +82,7 @@ export function NegoziPage() {
     && (!cerca || negoziTrovati.some((n) => n.chiave === negozioSelezionato.chiave))
     ? negozioSelezionato
     : null;
+  /** Mostra la mappa del negozio, o la nasconde se era già quello selezionato. */
   const cambiaPosizione = (negozio: NegozioRiassuntoDto) => {
     setNegozioSelezionato((corrente) => corrente?.chiave === negozio.chiave ? null : negozio);
   };

@@ -37,7 +37,8 @@ export interface CodaProgresso<T extends { chiave: string; progresso: number }> 
   accoda: (elemento: T, progresso: number) => void;
 }
 
-const chiaveCoda = (partitaId: number, chiave: string): string => `${partitaId}:${chiave}`;
+/** Chiave di una coda: partita ed elemento insieme, così le code di partite diverse non si mescolano. */
+const chiaveCoda =(partitaId: number, chiave: string): string => `${partitaId}:${chiave}`;
 
 /** La coda dei progressi di una pagina, per la partita `partitaId` (null = nessuna partita: niente da scrivere). */
 export function useCodaProgresso<T extends { chiave: string; progresso: number }>(partitaId: number | null, opz: OpzioniCodaProgresso<T>): CodaProgresso<T> {

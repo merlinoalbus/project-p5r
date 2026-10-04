@@ -14,6 +14,7 @@ import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { aggiungiColonna } from '../colonne.js';
 
+/** I timbri totali letti da «N Timbri totali» nella descrizione del dedalo; null se la frase non c'è. */
 export function timbriDallaDescrizione(descrizione: string | null | undefined): number | null {
   const m = (descrizione ?? '').match(/(\d+)\s+timbri\s+totali/i);
   return m ? Number(m[1]) : null;

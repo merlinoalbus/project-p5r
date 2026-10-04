@@ -1,3 +1,13 @@
+// ============================================================
+// accessoMondoService — da un'entità del catalogo ai posti sulle mappe dove la si trova
+// ============================================================
+//
+// «Apri sulla mappa» per un quartiere, un luogo, un negozio, un articolo, un Confidente, un'attività,
+// un Palazzo, un'area o un punto della guida: si seguono solo associazioni registrate (pin con
+// riferimento o voce, mappe dell'entità, sedi, ingressi dei quartieri), mai una somiglianza di nome;
+// se non portano da nessuna parte si allarga al posto che l'entità dichiara.
+// ============================================================
+
 import { destinazioneGuida, risolviPercorsoMappa } from './contenutiGuidaService.js';
 import type { DestinazioneGuidaDto } from '../../../shared/organizzazioneMappe.js';
 import { prepared } from '../../db/dbService.js';
@@ -20,6 +30,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
     chiave = idMappa(chiave);
   }
   const guide = new Map<string, DestinazioneGuidaDto>();
+  /** Aggiunge la sezione di guida dell'area fra quelle da proporre, se l'area ne ha una. */
   const aggiungiGuida = (area: string) => { const d=destinazioneGuida(area); if(d) guide.set(area,d); };
   if (tipo === 'area') aggiungiGuida(chiave);
   if (tipo === 'punto') { const a=prepared('SELECT area_chiave FROM punto_interesse WHERE chiave=?').get(chiave) as { area_chiave: string } | undefined; if(a) aggiungiGuida(a.area_chiave); }
@@ -29,6 +40,11 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
   }
   const destinazioni = new Map<string, DestinazioneMondoDto>();
   let ripiego = false;
+  /**
+   * Registra una destinazione (mappa e, se c'è, pin) con la sua provenienza. Le mappe inesistenti si ignorano; una
+   * destinazione già presente accumula solo le provenienze nuove; durante il ripiego «entità della mappa» diventa
+   * «posto dichiarato».
+   */
   function aggiungi(mappa: string, spillo: number | null, nomeSpillo: string | null,
     criterio: DestinazioneMondoDto['provenienze'][number]['criterio'],
     riferimento: { tipo: TipoAccessoMondo; chiave: string }, centro: DestinazioneMondoDto['centro'] = null) {
@@ -95,6 +111,10 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
         const sede = prepared('SELECT sede_chiave FROM negozio WHERE chiave = ? AND sede_chiave IS NOT NULL').get(n.chiave) as { sede_chiave: string } | undefined;
         if (sede && !riferimenti.some((r) => r.tipo === 'luogo' && r.chiave === sede.sede_chiave)) riferimenti.push({ tipo: 'luogo', chiave: sede.sede_chiave });
       }
+      /**
+       * Per ogni riferimento raccolto: i pin che lo citano nel riferimento (e, per un punto, nel campo della voce), le mappe
+       * che hanno quell'entità come propria e quelle che la dichiarano fra le loro entità (`mappa_entita`).
+       */
       const cerca = () => {
         for (const r of riferimenti) {
           for (const s of prepared('SELECT s.id,s.nome,s.mappa_chiave FROM spillo s JOIN mappa m ON m.chiave=s.mappa_chiave WHERE s.riferimento_tipo=? AND s.riferimento_chiave=? ORDER BY s.mappa_chiave,s.ordine,s.id').all(r.tipo, r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {

@@ -49,6 +49,7 @@ export function DotiSociali({ partitaId }: Props) {
   const [selezionata, setSelezionata] = useState<string | null>(null);
   const sugg = useSuggerimenti();
 
+  /** Invia la modifica di una Dote, ne sostituisce i dati in elenco e annuncia l'eventuale nuovo rango. */
   const modifica = async (chiave: string, mod: ModificaDote) => {
     if (!dati) return;
     setOccupata(chiave);
@@ -66,6 +67,7 @@ export function DotiSociali({ partitaId }: Props) {
     }
   };
 
+  /** Dal vertice della stella: seleziona la Dote e ne porta in vista la scheda. */
   const vaiAllaDote = (chiave: string) => {
     setSelezionata(chiave);
     document.getElementById(`dote-${chiave}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });

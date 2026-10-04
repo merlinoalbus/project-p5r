@@ -34,10 +34,12 @@ interface Base {
 
 const CLASSE_TONO: Record<TonoPulsante, string> = { primario: 'btn-primary', secondario: 'btn-secondary', fantasma: 'btn-ghost', pericolo: 'btn-danger' };
 
+/** Le classi del tassello: base, tono (primario se `attivo`), varianti compatta e a colonna, più le classi del chiamante. */
 function classi({ tono = 'secondario', attivo, compatto, disposizione = 'riga', className }: Base): string {
   return `btn btn-sm btn-visivo ${attivo ? 'btn-primary' : CLASSE_TONO[tono]} ${compatto ? 'btn-visivo--compatto' : ''} ${disposizione === 'colonna' ? 'btn-visivo--colonna' : ''} ${className ?? ''}`;
 }
 
+/** Interno comune a pulsante e collegamento: icona nascosta ai lettori di schermo, titolo e, se non vuoto, dettaglio. */
 function Contenuto({ icona, titolo, dettaglio }: Pick<Base, 'icona' | 'titolo' | 'dettaglio'>) {
   return (
     <>

@@ -1,4 +1,15 @@
+// ============================================================
+// organizzazioneMappe — le vecchie mappe d'area diventano sezioni della guida del loro Palazzo
+// ============================================================
+
 import type { AppDatabase } from '../../db/dbService.js';
+/**
+ * Converte le mappe legate a un'area della guida che non hanno niente di geografico: né immagine o asset, né figlie, né
+ * spilli che vi portano con una destinazione, né un ingresso di quartiere. Per ognuna: la sezione in `guida_mappa`, i suoi
+ * alias e percorsi in `guida_alias` (un alias già di un'altra area è un errore), i suoi spilli diventano elementi «punto»
+ * della guida e gli spilli di altre mappe che vi rimandavano elementi «sezione»; poi la mappa, i suoi alias e percorsi si
+ * cancellano. Le altre restano, con il motivo in `organizzazione_mappa_esito`. Senza la tabella `guida_mappa` non fa niente.
+ */
 export function riconciliaAreeGuida(db: AppDatabase): { convertite: string[]; conservate: string[] } {
   if (!db.prepare("SELECT 1 FROM sqlite_master WHERE name='guida_mappa'").get()) return { convertite: [], conservate: [] };
   const convertite: string[] = [], conservate: string[] = [];

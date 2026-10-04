@@ -1,6 +1,3 @@
-import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
-import { descriviGiorni, leggiGiorni } from '../../shared/orariNegozio.js';
-import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 // ============================================================
 // cittaService — quartieri di Tokyo e luoghi con ciò che offrono (Fase 8.1)
 // ============================================================
@@ -12,6 +9,9 @@ import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.j
 // riga; il JSON `sblocco-luoghi` della guida resta il ripiego per un file ancora senza colonna.
 // ============================================================
 
+import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { descriviGiorni, leggiGiorni } from '../../shared/orariNegozio.js';
+import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { LuogoDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
@@ -34,6 +34,7 @@ interface Collegamenti { negozi: Map<string, Array<{ chiave: string; nome: strin
 
 /** I negozi e le attività di ogni luogo, dalle sedi dichiarate. */
 function collegamenti(quartiere?: string): Collegamenti {
+  /** Raggruppa le righe per sede, conservandone l'ordine. */
   const raggruppa = (righe: Array<{ sede: string; chiave: string; nome: string }>) => {
     const out = new Map<string, Array<{ chiave: string; nome: string }>>();
     for (const r of righe) { const e = out.get(r.sede) ?? []; e.push({ chiave: r.chiave, nome: r.nome }); out.set(r.sede, e); }
@@ -47,6 +48,9 @@ function collegamenti(quartiere?: string): Collegamenti {
   };
 }
 
+/** Un luogo come DTO: Confidenti con il nome (o la chiave se sconosciuti), negozi e attività dalle sedi (il primo negozio fa
+ *  da `negozio`), giorni con la loro frase, marcatore sulla mappa, condizioni di presenza e, con lo stato della partita,
+ *  la loro valutazione. */
 function luogoDto(r: RigaLuogo, nomiConfidenti: Map<string, string>, legami: Collegamenti, marcatori: Map<string, { x: number; y: number }> = new Map(),
   regole: Map<string, RequisitoSpillo[]> = new Map(), st: StatoDisponibilita | null = null): LuogoDto {
   const confidenti = (JSON.parse(r.confidenti_json) as string[]).map((c) => ({ chiave: c, nome: nomiConfidenti.get(c) ?? c }));
@@ -78,6 +82,7 @@ function regoleSbloccoLuoghi(): Map<string, RequisitoSpillo[]> {
   return out;
 }
 
+/** Nome di ogni Confidente, per chiave. */
 function nomiConfidenti(): Map<string, string> {
   return new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome]));
 }
@@ -152,10 +157,13 @@ export async function scaricaPiantaQuartiere(quartiere: string): Promise<{ quart
   return { quartiere, mime: img.mime, byte: img.byte, fonte: p.fonte, url: p.url };
 }
 
+/** Il punto d'ingresso del quartiere su una mappa (chiave pubblica e nome del percorso, posizione e zoom), o null se non è impostato. */
 function ingressoQuartiere(quartiere: string): IngressoQuartiereDto | null {
  const i = prepared('SELECT * FROM quartiere_ingresso WHERE quartiere_chiave=?').get(quartiere) as { mappa_chiave: string; x: number; y: number; zoom: number } | undefined;
  return i ? { mappa: chiaveMappa(i.mappa_chiave), nome: nomePercorso(i.mappa_chiave), x: i.x, y: i.y, zoom: i.zoom } : null;
 }
+/** Imposta (o, con `null`, toglie) l'ingresso del quartiere: la mappa indicata si riconduce alla sua identità interna
+ *  (`idMappa`) e deve esistere; 404 se mancano quartiere o mappa. Restituisce l'ingresso com'è dopo la scrittura. */
 export function impostaIngressoQuartiere(quartiere: string, dati: { mappa: string; x: number; y: number; zoom: number } | null): IngressoQuartiereDto | null {
  if (!prepared('SELECT 1 FROM quartiere WHERE chiave=?').get(quartiere)) throw httpErrors.notFound('quartiere-non-trovato', 'Quartiere inesistente.');
  if (dati === null) { prepared('DELETE FROM quartiere_ingresso WHERE quartiere_chiave=?').run(quartiere); return null; }

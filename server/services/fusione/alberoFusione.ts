@@ -90,6 +90,7 @@ interface Ricerca {
   innate: Map<number, SkillEredita[]>;
 }
 
+/** Le ricette che producono p, memorizzate per la ricerca: si scartano quelle il cui risultato supera il livello massimo. */
 function ricetteDi(r: Ricerca, p: PersonaFusione): RicettaFusione[] {
   let lista = r.ricette.get(p.id);
   if (!lista) {
@@ -143,6 +144,7 @@ function raggiungibili(r: Ricerca, p: PersonaFusione, prof: number, inCorso: Set
   return out;
 }
 
+/** Elemento ed esclusività di una skill per id (null se non esiste), per decidere se è ereditabile. */
 function skillInfo(id: number): SkillEredita | null {
   return skillPerId(id);
 }
@@ -281,6 +283,10 @@ function piani(r: Ricerca, p: PersonaFusione, prof: number, scortaUsata: Map<num
   return esiti;
 }
 
+/**
+ * I numeri di un piano, ricorsivamente: una foglia ha profondità 0 e conta come cattura o evocazione secondo il modo; una
+ * fusione aggiunge un livello alla profondità del figlio più profondo, una fusione al totale e somma catture ed evocazioni dei figli.
+ */
 function riepilogo(nodo: NodoPiano): { profondita: number; catture: number; evocazioni: number; fusioni: number } {
   if (nodo.modo !== 'fusione') return { profondita: 0, catture: nodo.modo === 'cattura' ? 1 : 0, evocazioni: nodo.modo === 'registro' ? 1 : 0, fusioni: 0 };
   const figli = nodo.figli.map(riepilogo);

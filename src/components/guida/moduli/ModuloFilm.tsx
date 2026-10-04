@@ -16,9 +16,14 @@ import { useNomiPerEffetti } from './nomiPerEffetti';
 
 const OPZIONI_DOVE = [{ chiave: 'cinema', nome: 'Al cinema', categoria: 'film' }, { chiave: 'dvd', nome: 'In DVD', categoria: 'dvd' }];
 
+/**
+ * I campi di un film: titolo, dove si vede, prezzo, visioni (solo DVD; al cinema è una), dettagli ed effetti, con
+ * «vale dalla seconda volta in poi» solo al cinema.
+ */
 export function ModuloFilm({ dati, imposta, disabilitato }: PropsModulo) {
   const nomi = useNomiPerEffetti();
   const cinema = dati.dove === 'cinema';
+  /** Cambia dove si vede: al cinema una visione; in DVD due visioni e gli effetti perdono il segno di ripetizione. */
   const cambiaDove = (dove: string) => {
     const voci = dati.effetti_json as VoceEffetto[];
     // Le visioni ripetute valgono solo al cinema: passando al DVD cadono, e al cinema la visione è una.

@@ -20,6 +20,7 @@ export const MAX_BYTE_FONT = 4 * 1024 * 1024;
 
 const MIME_PER_FORMATO: Record<FormatoFont, string> = { ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2' };
 
+/** La cartella dei font dell'istanza (`DATA_DIR/font`). */
 function dirFont(): string {
   return path.join(config.dataDir, 'font');
 }
@@ -37,6 +38,8 @@ export function rilevaFormatoFont(contenuto: Buffer): FormatoFont | null {
   return null;
 }
 
+/** Il file caricato per un ruolo (`<ruolo>.<formato>`), provando i formati nell'ordine di `FORMATI_FONT` e prendendo il
+ *  primo che esiste, con dimensione e data di modifica; null se la cartella o il file mancano. */
 function trovaFile(ruolo: RuoloFont): { percorso: string; formato: FormatoFont; byte: number; aggiornato: string } | null {
   const dir = dirFont();
   if (!fs.existsSync(dir)) return null;
@@ -50,6 +53,7 @@ function trovaFile(ruolo: RuoloFont): { percorso: string; formato: FormatoFont; 
   return null;
 }
 
+/** Lo stato di un ruolo: con il file, formato, byte, data e URL di servizio; senza, «assente» con campi vuoti. */
 function dto(ruolo: RuoloFont): FontDto {
   const f = trovaFile(ruolo);
   return f

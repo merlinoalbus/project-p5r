@@ -20,6 +20,7 @@ export function ePaginaDiMappa(percorso: string): boolean {
   return /^\/guida\/mappe\/[^/?#]+/.test(percorso);
 }
 
+/** Salva (o, con null, cancella) la pagina di ritorno in memoria e, se si può, in sessionStorage. */
 function scrivi(valore: string | null): void {
   inMemoria = valore;
   try {

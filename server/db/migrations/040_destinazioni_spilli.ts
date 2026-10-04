@@ -1,3 +1,11 @@
+// ============================================================
+// Migrazione 040 — destinazione degli spilli
+// ============================================================
+//
+// Crea `spillo_destinazione`: per uno spillo, la mappa e il punto (x, y in percentuale, zoom 1–6)
+// a cui porta; se la mappa sparisce la destinazione resta senza mappa (ON DELETE SET NULL).
+// ============================================================
+
 import type { Migration } from '../migrationRunner.js';
 export const migration040: Migration = { id: 40, name: 'destinazioni_spilli', up(db) {
   db.exec(`CREATE TABLE spillo_destinazione (

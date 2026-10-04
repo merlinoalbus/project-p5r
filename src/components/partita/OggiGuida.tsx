@@ -16,6 +16,10 @@ interface Props {
   riempi?: boolean;
 }
 
+/** La colonna della guida del giorno, sullo stato condiviso `oggi`: frecce fra i giorni, «Segna
+ * come giorno corrente» (o la targa «Oggi nella partita»), «Vai a oggi», collegamento alla guida
+ * completa, la riga fascia + meteo della fascia attiva con le allerte, e la `GiornoGuida` compatta
+ * (con `riempi` scorre nel proprio riquadro). Senza giorno o indice caricati non mostra nulla. */
 export function OggiGuida({ oggi, riempi }: Props) {
   const { giorno: g, indice } = oggi;
   if (!g || !indice) return null;

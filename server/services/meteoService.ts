@@ -23,6 +23,7 @@ function testoMeteoGuida(data: string): string | null {
   return r?.meteo ?? null;
 }
 
+/** Il meteo segnato dall'utente nella partita per il giorno, fascia per fascia (null dove non ha segnato niente). */
 function scelto(partitaId: number, data: string): { giorno: MeteoPartita | null; sera: MeteoPartita | null } {
   const r = prepared('SELECT giorno, sera FROM meteo_partita WHERE partita_id = ? AND data = ?').get(partitaId, data) as { giorno: MeteoPartita | null; sera: MeteoPartita | null } | undefined;
   return { giorno: r?.giorno ?? null, sera: r?.sera ?? null };
@@ -33,6 +34,7 @@ type Allerte = MeteoFasciaDto['allerte'];
 /** Le allerte del giorno per fascia (migrazione 091), in ordine di nome. */
 function allerte(data: string): { giorno: Allerte; sera: Allerte } {
   const righe = prepared('SELECT fascia, chiave, nome, effetti_json FROM allerta_meteo WHERE data = ? ORDER BY nome').all(data) as Array<{ fascia: FasciaGioco; chiave: string; nome: string; effetti_json: string }>;
+  /** Le allerte di una fascia, con gli effetti letti dal JSON. */
   const di = (f: FasciaGioco): Allerte => righe.filter((x) => x.fascia === f).map((r) => ({ chiave: r.chiave, nome: r.nome, effetti: JSON.parse(r.effetti_json) as string[] }));
   return { giorno: di('giorno'), sera: di('sera') };
 }

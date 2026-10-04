@@ -35,6 +35,12 @@ export interface PropsSelettore {
   className?: string;
 }
 
+/**
+ * Pulsante combobox con etichetta e voce scelta (o `segnaposto`) che apre una tendina con l'elenco delle voci,
+ * eventualmente filtrabile; la scelta chiama `onCambia` con la chiave. L'elenco mostra al massimo `TETTO_VOCI`
+ * voci (con l'invito a restringere se ce ne sono di più), filtra senza accenti su nome, dettaglio e gruppo, e si
+ * chiude scegliendo, con Esc o toccando fuori.
+ */
 export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, className }: PropsSelettore) {
   const [aperto, setAperto] = useState(false);
   const [testo, setTesto] = useState('');
@@ -54,6 +60,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
     return { filtrate: base.slice(0, TETTO_VOCI), tagliate: base.length > TETTO_VOCI };
   }, [tutte, testo, conRicerca]);
 
+  /** Apre la tendina con il filtro vuoto e la voce scelta evidenziata, decidendo da che lato ancorarla. */
   const apri = () => {
     setTesto('');
     setEvidenziata(Math.max(0, tutte.findIndex((o) => o.chiave === valore)));
@@ -65,23 +72,31 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   };
   useEffect(() => {
     if (!aperto) return;
+    /** Un tocco fuori dal selettore chiude la tendina. */
     const fuori = (e: PointerEvent) => { if (radice.current && !radice.current.contains(e.target as Node)) setAperto(false); };
     document.addEventListener('pointerdown', fuori);
     return () => document.removeEventListener('pointerdown', fuori);
   }, [aperto]);
 
+  /** Chiude la tendina e riporta il fuoco sul pulsante. */
   const chiudi = () => { setAperto(false); pulsante.current?.focus(); };
+  /** Comunica la voce scelta e chiude. */
   const scegli = (chiave: string) => { onCambia(chiave); chiudi(); };
   useEffect(() => {
     if (!aperto) return;
     elenco.current?.querySelector<HTMLElement>('.selettore__voce--evidenziata')?.scrollIntoView?.({ block: 'nearest' });
   }, [aperto, evidenziata, filtrate]);
+  /** Tastiera nella tendina: Esc chiude, frecce spostano l'evidenziazione entro le voci filtrate, Invio sceglie quella evidenziata. */
   const tastiera = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') { e.preventDefault(); chiudi(); return; }
     if (e.key === 'ArrowDown') { e.preventDefault(); setEvidenziata((i) => Math.min(filtrate.length - 1, i + 1)); return; }
     if (e.key === 'ArrowUp') { e.preventDefault(); setEvidenziata((i) => Math.max(0, i - 1)); return; }
     if (e.key === 'Enter') { e.preventDefault(); const o = filtrate[Math.min(evidenziata, filtrate.length - 1)]; if (o) scegli(o.chiave); }
   };
+  /**
+   * Tastiera sul pulsante: a tendina chiusa le frecce la aprono; a tendina aperta i tasti passano a `tastiera` se non
+   * c'è il campo di ricerca (con il campo li gestisce la tendina stessa), Esc sempre.
+   */
   const tastieraPulsante = (e: React.KeyboardEvent) => {
     if (!aperto && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); apri(); return; }
     if (aperto && (!conRicerca || e.key === 'Escape')) tastiera(e);

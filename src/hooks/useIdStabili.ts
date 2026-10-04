@@ -13,7 +13,8 @@
 import { useState } from 'react';
 
 let contatore = 0;
-const nuovoId = (): number => ++contatore;
+/** Nuovo identificativo di riga, unico in tutta l'app (contatore di modulo crescente). */
+const nuovoId =(): number => ++contatore;
 
 export interface IdStabili {
   /** Un id per riga, nell'ordine dell'elenco: da usare come `key`. */

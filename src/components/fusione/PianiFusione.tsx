@@ -51,6 +51,13 @@ function Piano({ piano, indice, onSalva, salvato }: { piano: PianoFusioneDto; in
 /** Selezione del bersaglio, opzioni (profondità, catture, limite di livello, alternative) e piani ordinati per costo. */
 const TITOLO_MOTIVO: Record<NonNullable<PianiFusioneDto['motivo']>['codice'], string> = { 'non-fondibile': 'Non si ottiene per fusione', 'skill-non-ereditabili': 'Skill non ereditabili', 'skill-senza-fonte': 'Nessuna Persona ha questa skill dall’inizio', 'limite-livello': 'Limite di livello troppo basso' };
 
+/**
+ * Vista dei piani di fusione verso una Persona: scelta del bersaglio (preselezionabile con `inizialeId`), skill da
+ * portare (all'inizio quelle di `skillInizialiIds`, finché l'utente non tocca la selezione), opzioni di ricerca
+ * (profondità, alternative, catture, limite al livello del protagonista, slot casuale) e piani ordinati per costo.
+ * Ricarica i piani dal BE a ogni cambio di bersaglio o opzione; se il BE spiega perché non esistono piani mostra il
+ * motivo, altrimenti i piani salvabili nella partita (legati a `obiettivoId` se presente).
+ */
 export function PianiFusione({ persone, partitaId, livelloProtagonista, inizialeId, skillInizialiIds, obiettivoId }: Props) {
   const [scelta, setScelta] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeId) ?? null);
   const [profondita, setProfondita] = useState(3);
@@ -64,6 +71,11 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
   const skillScelte = skillModificate ?? (skillInizialiIds && tutteSkill.dati ? tutteSkill.dati.filter((s) => skillInizialiIds.includes(s.id)) : []);
   const skillIds = skillScelte.map((s) => s.id);
   const [salvati, setSalvati] = useState<Record<string, true>>({});
+  /**
+   * Salva il piano nella partita con le opzioni restituite dal BE, le skill richieste e l'eventuale obiettivo; a buon
+   * fine lo segna salvato con una chiave che combina bersaglio, posizione e opzioni correnti, notifica e restituisce il
+   * piano salvato. Senza partita o bersaglio non fa nulla; gli errori vanno in notifica.
+   */
   const salva = async (d: PianiFusioneDto, piano: PianoFusioneDto, indice: number) => {
     if (!partitaId || !scelta) return;
     const chiave = `${scelta.id}|${indice}|${skillIds.join(',')}|${profondita}|${alternative}|${catture}|${limitaLivello}|${slotFortunato}`;

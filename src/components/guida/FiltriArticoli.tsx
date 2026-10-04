@@ -28,6 +28,11 @@ interface Props {
   segnaposto?: string;
 }
 
+/**
+ * Il pannello dei filtri: ricerca, «Per chi» (se ci sono destinatari), «Azzera i filtri» quando qualcosa è attivo,
+ * categorie a tessere col conteggio (solo se ce n'è più d'una) e, con una partita, i segmenti di stato d'acquisto e
+ * di disponibilità. Ogni cambio passa al genitore il filtro intero aggiornato.
+ */
 export function FiltriArticoli({ filtro, onCambia, categorie, destinatari, conPartita, segnaposto = 'Cerca un articolo (nome, effetto)…' }: Props) {
   const voci = (categorie ?? Object.keys(NOME_CATEGORIA_ARTICOLO).map((chiave) => ({ chiave, n: undefined as number | undefined }))).map((c) => ({ chiave: c.chiave, nome: NOME_CATEGORIA_ARTICOLO[c.chiave] ?? c.chiave, conteggio: c.n }));
   const per = destinatari ?? [...PERSONAGGI];

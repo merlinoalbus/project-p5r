@@ -1,3 +1,7 @@
+// ============================================================
+// ProveNativeSpillo — le tracce dei dati di gioco per uno spillo dal significato non dimostrato
+// ============================================================
+
 import type { NativoSpilloDto } from '../../../shared/types';
 
 /** Le prove native di uno spillo il cui significato non è ancora dimostrato.
@@ -42,6 +46,7 @@ export function ProveNativeSpillo({ nativo }: { nativo: NativoSpilloDto }) {
   </section>;
 }
 
+/** Un elenco titolato di voci con il numero di occorrenze, dalla più frequente (a parità, in ordine alfabetico). */
 function Elenco({ titolo, voci }: { titolo: string; voci: Record<string, number> }) {
   const righe = Object.entries(voci).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   return <div>

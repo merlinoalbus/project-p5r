@@ -62,6 +62,11 @@ export function invalidaMotoreFusione(): void {
 }
 registraCacheDiGioco(invalidaMotoreFusione);
 
+/**
+ * L'istantanea dei dati di fusione, letta una volta e poi tenuta in memoria: le Persona ordinate per livello e nome (con il
+ * set DLC), la tabella degli arcani resa simmetrica, gli ingredienti delle ricette speciali in ordine, i Demoni del Tesoro
+ * in ordine canonico e, per ogni arcano, il modificatore di ciascun tesoro (0 dove la tabella non ne ha).
+ */
 function caricaSnapshot(): Snapshot {
   if (snapshot) return snapshot;
   const righe = prepared(`SELECT p.id, p.nome, p.arcana, p.livello, p.speciale, p.rara, p.dlc, d.set_id
@@ -120,10 +125,12 @@ export function creaContesto(dlcPosseduti: readonly number[] = []): Contesto {
   return ctx;
 }
 
+/** Chiave di una coppia di id indipendente dall'ordine: «minore-maggiore». */
 function chiaveCoppia(a: number, b: number): string {
   return a < b ? `${a}-${b}` : `${b}-${a}`;
 }
 
+/** La Persona per id dall'istantanea (undefined se non esiste), senza filtro sui DLC. */
 export function personaFusione(id: number): PersonaFusione | undefined {
   return caricaSnapshot().perId.get(id);
 }
@@ -143,6 +150,12 @@ export function livelloFusione(a: PersonaFusione, b: PersonaFusione): number {
   return 1 + Math.floor((a.livello + b.livello) / 2);
 }
 
+/**
+ * La fusione fra due Persona dello stesso genere (due normali o due Demoni del Tesoro), null se non c'è risultato o se la
+ * coppia è una ricetta speciale. Arcani diversi: la prima Persona dell'arcano risultante con livello ≥ al riferimento.
+ * Stesso arcano: scorrendo dall'alto, la prima con livello ≤ al riferimento che non sia uno degli ingredienti. In entrambi
+ * i casi si saltano speciali e rare.
+ */
 function fusioneNormale(a: PersonaFusione, b: PersonaFusione, ctx: Contesto): { risultato: PersonaFusione; tipo: TipoFusione } | null {
   if (a.rara !== b.rara) return null;
   if (ctx.specialiDue.has(chiaveCoppia(a.id, b.id))) return null;
@@ -163,6 +176,11 @@ function fusioneNormale(a: PersonaFusione, b: PersonaFusione, ctx: Contesto): { 
   return null;
 }
 
+/**
+ * Demone del Tesoro + Persona normale: il risultato è la Persona dell'arcano della normale spostata di `modificatore` posizioni
+ * nell'elenco del contesto (ordinato per livello). Se il posto cade su una speciale o una rara si prosegue nella stessa
+ * direzione; null con modificatore 0 o se si esce dall'elenco.
+ */
 function fusioneTesoro(tesoro: PersonaFusione, normale: PersonaFusione, ctx: Contesto): PersonaFusione | null {
   const s = caricaSnapshot();
   const indiceTesoro = s.tesori.findIndex((t) => t.id === tesoro.id);
@@ -219,6 +237,10 @@ export function ricettePer(target: PersonaFusione, ctx: Contesto): RicettaFusion
   const s = caricaSnapshot();
   const ricette: RicettaFusione[] = [];
   const viste = new Set<string>();
+  /**
+   * Tiene una ricetta solo se produce il bersaglio, non lo usa come ingrediente e la coppia non è già stata vista;
+   * gli ingredienti si salvano dal livello più alto al più basso (a pari livello per nome).
+   */
   const aggiungi = (r: RicettaFusione | null) => {
     if (!r || r.risultato.id !== target.id) return;
     if (r.ingredienti.some((i) => i.id === target.id)) return;
