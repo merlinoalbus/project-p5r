@@ -1128,7 +1128,7 @@ Risposte dell'utente, parola per parola:
 - quando un'area è completata: «Voci della guida segnate (Recommended)»;
 - dove compare la spunta: «Lista «Il Palazzo» (Recommended), Chip «Su questa planimetria», Stanza completa»;
 - su quale ramo: «Su main dopo il merge di #96 (Recommended)»;
-- la proposta: «Sì, procedi (Recommended)».
+- «Procedo con la proposta?» → «Sì, procedi (Recommended)».
 
 Che cosa ne segue:
 - **La regola.** Un'area è completata quando ha almeno una voce da segnare e sono tutte Ottenute o Esaurite. Le voci descrittive
@@ -1151,7 +1151,7 @@ area la misura «completa» contava due volte. L'utente l'ha rivista.
 
 Risposte dell'utente, parola per parola:
 - conteggio di un'area su più planimetrie: «Somma le planimetrie (Recommended)»;
-- la proposta: «Sì, procedi (Recommended)».
+- «Procedo con la proposta?» → «Sì, procedi (Recommended)».
 
 Che cosa ne segue:
 - **Supera la decisione del 2026-09-18.** Legare un'area a un'altra planimetria la aggiunge senza staccarla dalle altre. Vale
@@ -1333,3 +1333,25 @@ Che cosa ne segue:
   valutano con la partita come per gli altri pin: rosse, il pin si nasconde.
 - **Negozio, luogo e attività** restano senza condizioni. Cambiando tipo da Confidente a uno di questi, le condizioni se ne
   vanno.
+
+## 2026-10-04 — Nella guida dell'area, «Ottenuto» passa alla voce successiva
+
+Richiesta dell'utente: «sulla guida quando clicco su Ottenuto deve chiudersi l'elemento corrente e nascondersi, andando
+all'elemento successivo».
+
+Prima la voce aperta restava aperta e visibile anche segnata, e la successiva andava aperta a mano.
+
+Risposte dell'utente, parola per parola:
+- «Lo stesso comportamento (chiudi, nascondi, apri la successiva) vale anche per «Esaurito»?» → «Sì, anche Esaurito
+  (Recommended)»;
+- «Procedo con la proposta?» → «Sì, procedi (Recommended)».
+
+Che cosa ne segue:
+- **Dopo il salvataggio.** Con «Ottenuto» o «Esaurito», a salvataggio riuscito, la voce si chiude e, segnata, esce dall'elenco.
+  Con «Anche le segnate» resta, chiusa.
+- **Quale voce si apre.** La successiva da segnare: la prima dopo la corrente nell'ordine dell'elenco (le voci e, dentro un
+  Enigma, i suoi passi), che passa i filtri, non è segnata e non è descrittiva. Segnando un Enigma si saltano i suoi passi,
+  che si segnano con lui. La pagina scorre fino a lei se serve.
+- **Senza successiva** non si apre niente.
+- **Se il salvataggio fallisce** la voce resta aperta, con l'errore notificato. Per questo `cambiaStato` della pagina del
+  Palazzo ora dice se è riuscito.

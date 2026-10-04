@@ -792,7 +792,9 @@ ricerca passata dalla voce); l'altezza della mappa si **misura** sul contenitore
 i suoi pin delle planimetrie e la riapre togliendone uno; collegando, `allineaStatiPunto` unisce gli stati delle partite
 (voce segnata → pin raccolti; pin tutti raccolti → voce segnata), scollegando restano come sono. La risposta del
 collegamento non porta lo stato della partita: dopo ogni tocco `GuidaDellArea` rilegge la scheda (`onRicarica`, con la
-partita e `versioneStati`). Le voci **descrittive** (`puntoDescrittivo`: solo «Altro») non hanno stato né pin: il server
+partita e `versioneStati`). «Ottenuto» ed «Esaurito» (2026-10-04, `segnaEPassaOltre`) chiudono la voce e aprono la successiva
+da segnare nell'ordine dell'elenco (voci e passi; saltate le segnate, le descrittive, quelle fuori filtro e i passi dell'Enigma che si
+segna), portandola in vista; `cambiaStato` della pagina dice se il salvataggio è riuscito. Le voci **descrittive** (`puntoDescrittivo`: solo «Altro») non hanno stato né pin: il server
 rifiuta di segnarle e di collegarle (400 `punto-descrittivo`; azzerarle resta possibile), rifiuta di far diventare
 descrittiva una voce con pin (409 `punto-con-pin`), e in lettura ignora uno stato rimasto (DTO `stato: null`, fuori da
 `gestiti`) senza cancellarlo. Vale anche dal lato mappa: il dettaglio `punto` di un pin (`dettaglioRiferimento`) porta

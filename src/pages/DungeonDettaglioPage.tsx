@@ -169,18 +169,22 @@ export function DungeonDettaglioPage() {
     giornoLetto.current = giornoPartita;
     void rilettura.current().catch(() => { /* resta la scheda di prima */ });
   }, [giornoPartita]);
-  /** Imposta (o toglie, con null) lo stato di un punto della guida nella partita: aggiorna il punto locale, fa ricaricare il visore e poi rilegge la scheda; l'errore viene notificato. */
-  const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null) => {
-    if (!partitaId) return;
+  /** Imposta (o toglie, con null) lo stato di un punto della guida nella partita: aggiorna il punto locale, fa ricaricare il visore e poi
+   *  rilegge la scheda; l'errore viene notificato. Vero se lo stato è stato salvato (la guida passa alla voce successiva solo allora). */
+  const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null): Promise<boolean> => {
+    if (!partitaId) return false;
     try {
       aggiornaPunto(await impostaStatoPunto(partitaId, p.chiave, stato));
       setVersioneStati((v) => v + 1);
-      // Un punto della guida può essere agganciato a uno spillo collezionabile (il server lo conta come raccolto):
-      // la raccolta si rilegge dal server, senza stato di caricamento, così anello e colonna non divergono.
-      await rileggiInSilenzio();
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+      return false;
     }
+    // Un punto della guida può essere agganciato a uno spillo collezionabile (il server lo conta come raccolto):
+    // la raccolta si rilegge dal server, senza stato di caricamento, così anello e colonna non divergono. Lo stato è già
+    // salvato: una rilettura fallita lo dice, ma non lo disfa.
+    try { await rileggiInSilenzio(); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Rilettura della scheda non riuscita.'); }
+    return true;
   };
   /** Uno spillo raccolto (o riaperto): si aggiornano le planimetrie del Palazzo, quelle delle aree e l'anello, senza ricaricare. */
   const segnaRaccolto = (spilloId: number, raccolto: boolean) => {

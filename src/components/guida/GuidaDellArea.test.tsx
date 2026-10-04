@@ -6,6 +6,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce, vociSelettore } from '../../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
+import { useState } from 'react';
 import { GuidaDellArea } from './GuidaDellArea';
 import type { SceltaPin } from '../mappe/VisoreMappa';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../types';
@@ -38,7 +39,7 @@ const planimetrie: DungeonDettaglioDto['planimetrie'] = [
 function monta(punti: PuntoInteresseDto[]) {
   const onPuntoAggiornato = vi.fn();
   const onRicarica = vi.fn().mockResolvedValue(undefined);
-  const cambiaStato = vi.fn().mockResolvedValue(undefined);
+  const cambiaStato = vi.fn().mockResolvedValue(true);
   render(<MemoryRouter><GuidaDellArea area={area(punti)} planimetrie={planimetrie} memento={false} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={onRicarica} /></MemoryRouter>);
   return { onPuntoAggiornato, onRicarica, cambiaStato };
 }
@@ -235,5 +236,98 @@ describe('l’Enigma contiene i suoi passi (095)', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «La porta della torre»/ }));
     expect(vociSelettore('Tipo')).toEqual(['Enigma']);
     expect(screen.queryByRole('combobox', { name: 'Passo di' })).toBeNull();
+  });
+});
+
+describe('«Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono la successiva (2026-10-04)', () => {
+  /** La guida con gli stati tenuti come nella pagina vera: il segno salvato rende la voce «segnata». `esito` decide se il salvataggio riesce. */
+  function Pagina({ punti, esito = true, cambia }: { punti: PuntoInteresseDto[]; esito?: boolean; cambia: (p: PuntoInteresseDto, s: unknown) => void }) {
+    const [elenco, setElenco] = useState(punti);
+    /** Salva lo stato come la pagina: lo applica alla voce (e ai passi di un Enigma), se il salvataggio riesce. */
+    const cambiaStato = async (p: PuntoInteresseDto, stato: PuntoInteresseDto['stato']) => {
+      cambia(p, stato);
+      if (!esito) return false;
+      setElenco((xs) => xs.map((x) => (x.chiave === p.chiave || x.contenitore === p.chiave ? { ...x, stato } : x)));
+      return true;
+    };
+    return <MemoryRouter><GuidaDellArea area={area(elenco)} planimetrie={planimetrie} memento={false} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn().mockResolvedValue(undefined)} /></MemoryRouter>;
+  }
+  // jsdom non ha scrollIntoView: un test lo mette, e dopo si rimette com'era
+  const scrollIntoViewDiPrima = HTMLElement.prototype.scrollIntoView;
+  afterEach(() => { HTMLElement.prototype.scrollIntoView = scrollIntoViewDiPrima; });
+  /** Vero se la voce col nome dato è nell'elenco e aperta. */
+  const aperta = (nome: RegExp) => screen.getByRole('button', { name: nome }).getAttribute('aria-expanded') === 'true';
+  const voci = [
+    punto({ chiave: 'a', nome: 'Forziere A' }),
+    punto({ chiave: 'b', tipo: 'altro', nome: 'Nota descrittiva', esauribile: false }),
+    punto({ chiave: 'c', tipo: 'sicura', nome: 'Stanza sicura già segnata', esauribile: false, stato: 'ottenuto' }),
+    punto({ chiave: 'd', nome: 'Forziere D' }),
+    punto({ chiave: 'e', tipo: 'boss', nome: 'Boss E', esauribile: false }),
+  ];
+
+  it('Ottenuto: la voce si chiude e sparisce, si apre la prossima da segnare (saltate la descrittiva e la già segnata) e la si porta in vista', async () => {
+    const scorri = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scorri;
+    const cambia = vi.fn();
+    render(<Pagina punti={voci} cambia={cambia} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Forziere A/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+    await waitFor(() => expect(aperta(/^Forziere D/)).toBe(true));
+    expect(cambia).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'a' }), 'ottenuto');
+    expect(screen.queryByRole('button', { name: /^Forziere A/ })).toBeNull();
+    expect(scorri).toHaveBeenCalledWith({ block: 'nearest', behavior: 'smooth' });
+    expect(scorri.mock.contexts[0]).toHaveAttribute('data-voce', 'd');
+  });
+
+  it('Esaurito fa lo stesso; con «Anche le segnate» la voce resta in elenco, chiusa', async () => {
+    render(<Pagina punti={voci} cambia={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Forziere A/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Esaurito' }));
+    await waitFor(() => expect(aperta(/^Forziere D/)).toBe(true));
+    expect(aperta(/^Forziere A/)).toBe(false);
+  });
+
+  it('se il salvataggio non riesce la voce resta aperta; all’ultima voce non si apre niente', async () => {
+    const { unmount } = render(<Pagina punti={voci} esito={false} cambia={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Forziere A/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Ottenuto' })).toBeInTheDocument());
+    expect(aperta(/^Forziere A/)).toBe(true);
+    unmount();
+    render(<Pagina punti={voci} cambia={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Boss E/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+    await waitFor(() => expect(screen.queryByRole('button', { name: /^Boss E/ })).toBeNull());
+    expect(screen.queryByRole('button', { expanded: true })).toBeNull();
+  });
+
+  it('con un filtro per tipo la successiva è la prossima che il filtro mostra', async () => {
+    // fra i due forzieri c'è una leva da segnare: col filtro «Forziere» non si vede, e non è lei la successiva
+    const conLeva = [punto({ chiave: 'a', nome: 'Forziere A' }), punto({ chiave: 'm', tipo: 'meccanismo', nome: 'Leva in mezzo', esauribile: false }), punto({ chiave: 'd', nome: 'Forziere D' })];
+    render(<Pagina punti={conLeva} cambia={vi.fn()} />);
+    fireEvent.click(within(screen.getByRole('group', { name: 'Filtri per tipo' })).getByRole('button', { name: /^Forziere normale/ }));
+    expect(screen.queryByRole('button', { name: /^Leva in mezzo/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /^Forziere A/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+    await waitFor(() => expect(aperta(/^Forziere D/)).toBe(true));
+    expect(screen.queryByRole('button', { name: /^Leva in mezzo/ })).toBeNull();
+  });
+
+  it('un passo segnato apre il passo dopo; l’Enigma segnato salta i suoi passi e apre la voce che lo segue', async () => {
+    const enigma = punto({ chiave: 'e1', tipo: 'puzzle', nome: 'La porta della torre', esauribile: false });
+    const leva = punto({ chiave: 'e1-a', ordine: 0, tipo: 'meccanismo', nome: 'Tira la leva', esauribile: false, contenitore: 'e1' });
+    const porta = punto({ chiave: 'e1-b', ordine: 1, tipo: 'porta', nome: 'Apri la porta', esauribile: false, contenitore: 'e1' });
+    const dopo = punto({ chiave: 'z', nome: 'Forziere dopo l’Enigma' });
+    const { unmount } = render(<Pagina punti={[enigma, leva, porta, dopo]} cambia={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Tira la leva/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+    await waitFor(() => expect(aperta(/^Apri la porta/)).toBe(true));
+    unmount();
+    render(<Pagina punti={[enigma, leva, porta, dopo]} cambia={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /^La porta della torre/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+    await waitFor(() => expect(aperta(/^Forziere dopo l’Enigma/)).toBe(true));
+    expect(screen.queryByRole('button', { name: /^Tira la leva/ })).toBeNull();
   });
 });

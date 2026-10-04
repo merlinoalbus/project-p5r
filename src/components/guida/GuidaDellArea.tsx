@@ -49,7 +49,8 @@ interface Props {
   partitaId: number | null;
   /** La planimetria che la pagina sta mostrando: se è dell'area, la scelta parte da lì. */
   mappaAperta: string | null;
-  cambiaStato: (p: PuntoInteresseDto, stato: StatoPunto | null) => Promise<void>;
+  /** Salva lo stato della voce nella partita; vero se è andato a buon fine. */
+  cambiaStato: (p: PuntoInteresseDto, stato: StatoPunto | null) => Promise<boolean>;
   /** Una voce cambiata dal server (collegamento, correzione): la pagina la sostituisce senza ricaricare. */
   onPuntoAggiornato: (p: PuntoInteresseDto) => void;
   /** Rilegge la scheda del Palazzo (ordine cambiato, voce aggiunta o tolta, stati uniti da un collegamento). */
@@ -110,6 +111,33 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   // (una nota descrittiva fra i passi non ha stato: senza filtri non basta a tenere in vista un Enigma segnato — rilievo del validatore)
   const puntiVisibili = vociDellArea.filter((p) => voceVisibile(p) || (passiPer.get(p.chiave) ?? []).some((x) => voceVisibile(x) && (filtro.size > 0 || !puntoDescrittivo(x.tipo))));
   const gestitiArea = area.punti.filter((p) => p.stato && !puntoDescrittivo(p.tipo)).length;
+  // La voce da portare in vista dopo un «Ottenuto»/«Esaurito»: si scorre al primo disegno in cui c'è, già aperta, e poi basta.
+  const daMostrare = useRef<string | null>(null);
+  useEffect(() => {
+    if (!daMostrare.current) return;
+    const chiave = daMostrare.current;
+    const voce = [...document.querySelectorAll<HTMLElement>('[data-voce]')].find((e) => e.dataset.voce === chiave);
+    if (!voce) return;
+    daMostrare.current = null;
+    voce.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+  });
+  /**
+   * «Ottenuto» o «Esaurito» (richiesta dell'utente, 2026-10-04: «quando clicco su Ottenuto deve chiudersi l'elemento corrente e
+   * nascondersi, andando all'elemento successivo»; anche Esaurito, scelta sua). Salvato lo stato, la voce si chiude — e, segnata,
+   * esce dall'elenco salvo «Anche le segnate» — e si apre la voce successiva da segnare: la prima dopo di lei nell'ordine
+   * dell'elenco (le voci e, dentro un Enigma, i suoi passi), che passa i filtri, non è segnata e non è descrittiva. I passi
+   * dell'Enigma che si sta segnando si saltano: segnandolo si segnano anche loro. Senza una voce successiva non si apre niente;
+   * se il salvataggio non riesce la voce resta aperta.
+   */
+  const segnaEPassaOltre = async (p: PuntoInteresseDto, stato: StatoPunto) => {
+    const ordine = vociDellArea.flatMap((v) => [v, ...(passiPer.get(v.chiave) ?? [])]);
+    const dopo = ordine.slice(ordine.indexOf(p) + 1);
+    const successiva = dopo.find((q) => !q.stato && !puntoDescrittivo(q.tipo) && q.contenitore !== p.chiave && (filtro.size === 0 || filtro.has(q.tipo))) ?? null;
+    if (!(await cambiaStato(p, stato))) return;
+    setCollegando(null);
+    setSelezionato(successiva?.chiave ?? null);
+    daMostrare.current = successiva?.chiave ?? null;
+  };
   // un Enigma coi suoi passi non ha pin suoi (stanno sui passi): non è «da collegare»
   const daCollegare = area.punti.filter((p) => puntoDaCollegare(p.tipo) && p.pin.length === 0 && !passiPer.has(p.chiave)).length;
   // gli Enigmi dell'area che possono accogliere passi (non sono a loro volta passi)
@@ -181,7 +209,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
     // pin non accoglie passi, come dice il server)
     const enigmiPossibili = conPassi ? [] : enigmi.filter((e) => e.chiave !== p.chiave && (e.pin.length === 0 || e.chiave === p.contenitore));
     return (
-      <li key={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${aperto ? 'bg-primary-bg' : ''}`}>
+      <li key={p.chiave} data-voce={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${aperto ? 'bg-primary-bg' : ''}`}>
         <button type="button" className={`touch flex items-start gap-2 text-left ${p.stato && !aperto ? 'opacity-60' : ''}`} onClick={() => { setSelezionato(aperto ? null : p.chiave); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
           <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
           <span className="min-w-0 flex-1">
@@ -212,8 +240,8 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
             {puntoDescrittivo(p.tipo)
               ? <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
               : <div className="flex flex-wrap items-center gap-1.5">
-                {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
-                {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
+                {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void segnaEPassaOltre(p, 'ottenuto')}>Ottenuto</button>}
+                {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void segnaEPassaOltre(p, 'esaurito')} />}
                 {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
               </div>}
             <div className="flex flex-wrap items-center gap-1.5">
