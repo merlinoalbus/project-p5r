@@ -797,3 +797,14 @@ Il primo esame è stato rigettato (K1): mancava l'esito di `npm audit`, che fa p
 
 La voce è stata approvata al secondo esame, e con lei sono chiuse tutte e sei le voci. Il job «verify» della CI sulla PR #96 era
 ancora in corso all'ultima lettura: prima del merge va controllato che sia verde.
+
+### CI della PR #96
+
+- Il primo giro della CI sulla PR è fallito su `server/routes/impostazioni-asincrone.test.ts`, un test scritto nel lotto A della
+  voce 3: 2 test su 1478.
+- **Causa.** Il ripristino e l'importazione rifiutano un'istanza senza `gioco.db` su disco (`istanza-in-memoria`) prima di guardare
+  la cartella d'appoggio. Il test usava la `DATA_DIR` dell'ambiente: sul PC di sviluppo c'era il database vero, nella CI no.
+  - In locale quindi passava, ma controllava l'esistenza del file vero.
+- **Correzione** (`23bd8b91`). Il test crea una cartella dati temporanea con un `gioco.db` suo.
+- **Verifica.** La suite completa è stata rifatta come la CI: un worktree pulito, senza `.env` né `data/`, con `npm ci`, typecheck,
+  lint, test (269 file, 1478 test) e audit. Tutto verde: `scratchpad/voce6/12-suite-come-ci.txt`.
