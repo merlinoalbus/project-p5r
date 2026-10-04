@@ -652,8 +652,8 @@ produce è `scratchpad/voce4/prove.sh`.
 - **`GET /api/openapi.json`**: il documento OpenAPI 3.1 (187 operazioni in 11 aree), servito senza la busta `{ data }`.
 - **`GET /api/docs`**: Swagger UI, servita dall'istanza con i file di `swagger-ui-dist` (nessuna CDN: l'app si usa anche senza
   internet).
-  - «Prova» è attivo solo per le GET, perché la pagina parla con i dati veri dell'istanza. È una mia scelta tecnica, non una
-    decisione dell'utente.
+  - «Prova» è attivo solo per le GET di sola lettura, perché la pagina parla con i dati veri dell'istanza. Sono escluse le tre
+    GET marcate `senzaProva` (vedi «Dopo il primo esame»); è la scelta dell'utente del 2026-10-04.
   - Sugli schermi stretti la descrizione di ogni area va sotto il nome, invece di ridursi a una colonna di una parola per riga.
 - **Impostazioni → «Documentazione delle API»**: due collegamenti, Swagger e il JSON, che si aprono in una nuova scheda.
 
@@ -725,3 +725,38 @@ Il documento non è scritto a mano:
 
 - `swagger-ui-dist` 5.33.1 (Apache-2.0), di runtime: serve l'interfaccia.
 - `@seriousme/openapi-schema-validator` 2.11.0 (MIT), di sviluppo: valida il documento nel test.
+
+### Dopo il primo esame (rigettato: J1–J3)
+
+- **J1 — «Prova» su GET che non sono semplici letture.**
+  - La giustificazione di «solo GET» era falsa: lo scaricamento del database e lo ZIP dell'istanza lasciano una copia da centinaia
+    di MB nella cartella d'appoggio (`inviaECancella` → `depositaCopia`, con rotazione delle copie).
+  - Analisi di tutte le 92 GET (`scratchpad/voce5/audit-get.txt`): per ognuna si è seguita la catena delle funzioni chiamate fino
+    a sei livelli, cercando scritture (SQL, file, `depositaCopia`, `registraEvento`) e lavori pesanti. Escluso il falso positivo di
+    `initDb` (la cartella dei dati creata al primo avvio), restano tre GET:
+    - `GET /api/impostazioni/istanza/database` e `GET /api/impostazioni/istanza/completa.zip`: scrittura nel deposito più un file
+      di centinaia di MB;
+    - `GET /api/mappe/esporta`: 12,2 MB di JSON con le immagini in base64, troppo per essere mostrato in una pagina. Prima di
+      esportare assegna l'uid agli spilli che non l'hanno (`assegnaUidMancanti`, una riparazione idempotente).
+
+    Le immagini e i caratteri singoli (al più 8 e 4 MB) restano provabili.
+  - Il registro marca le tre con `senzaProva`, cioè il motivo. Il documento porta `x-senza-prova` e la nota nella descrizione.
+    La pagina toglie loro «Try it out» con un plugin di Swagger UI e le rifiuta comunque nel `requestInterceptor`.
+  - Tre test nuovi:
+    - le GET che passano da `inviaECancella` o `esportaMappe` devono avere `senzaProva`, e nessun'altra rotta lo ha;
+    - documento e pagina elencano le stesse operazioni.
+
+    Le tre varianti rosse, con il diff applicato e il controllo che il file torni identico, sono in
+    `scratchpad/voce5/rosse-j1.txt`.
+  - Il primo plugin non funzionava: avvolgeva `operation` passando `allowTryItOut` tra le props, mentre il valore sta nella mappa
+    dell'operazione. Il secondo avvolgeva `OperationContainer` e gli toglieva le proprietà che riceve dallo stato (l'id
+    dell'operazione diventava vuoto). Entrambi gli errori si sono visti nel browser.
+  - Quello definitivo rimette `allowTryItOut` a falso dentro la mappa. Verificato nel browser:
+    - esportazione, database e ZIP senza «Try it out» e con l'avviso;
+    - albero delle mappe, stato dell'istanza e deposito con «Try it out»;
+    - una POST senza «Try it out»;
+    - il `requestInterceptor` rifiuta `GET /api/mappe/esporta?radice=x` e lascia passare `/api/compendio/arcani`.
+- **J2.** La voce di DECISIONI del 2026-10-04 separa le scelte tecniche dalle tre risposte dell'utente: «Prova», `arch.mts`,
+  `requestTimeout`.
+- **J3.** Su richiesta dell'utente («Rifai a mano»), `docs/ARCHITETTURA.md` è tornato alla versione di `90354f42` e le stesse
+  modifiche sono state riapplicate con Edit. Il diff prodotto dallo script resta in `scratchpad/voce5/arch-script.diff`.

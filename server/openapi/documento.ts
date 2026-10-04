@@ -114,6 +114,14 @@ function corpoRichiesta(r: RottaMontata, d: DescrizioneRotta, schemi: ReturnType
   return undefined;
 }
 
+/**
+ * Le operazioni che la pagina di Swagger non deve eseguire, come «metodo percorso-OpenAPI» («get /api/mappe/esporta»): sono le
+ * rotte con `senzaProva` nel registro. Le GET qui dentro non sono semplici letture o pesano troppo per una pagina.
+ */
+export function operazioniSenzaProva(app: Express): string[] {
+  return elencaRotte(app).filter((r) => DESCRIZIONI[chiaveRotta(r)]?.senzaProva).map((r) => `${r.metodo} ${percorsoOpenApi(r.percorso)}`);
+}
+
 /** Il documento OpenAPI completo dell'app (le rotte senza descrizione compaiono con un sommario che lo dice: il test lo vieta). */
 export function documentoOpenApi(app: Express): Schema {
   const comp: Componenti = { schemi: {}, prossimo: 0 };
@@ -140,7 +148,8 @@ export function documentoOpenApi(app: Express): Schema {
       operationId: `${r.metodo}${r.percorso.replace(/[^A-Za-z0-9]+(.)?/g, (_m, c: string | undefined) => (c ? c.toUpperCase() : ''))}`,
       tags: [AREE[r.area ?? 'sistema']?.nome ?? r.area ?? 'sistema'],
       summary: d.sommario,
-      description: d.descrizione,
+      description: d.senzaProva ? `${d.descrizione}\n\n**Non si prova da questa pagina.** ${d.senzaProva}` : d.descrizione,
+      ...(d.senzaProva ? { 'x-senza-prova': d.senzaProva } : {}),
       parameters: parametri(r, schemi, comp),
       ...(corpo ? { requestBody: corpo } : {}),
       responses: { [String(stato)]: successo, ...errori, default: { $ref: '#/components/responses/Errore' } },

@@ -21,12 +21,14 @@ export const DESCRIZIONI_IMPOSTAZIONI: DescrizioniArea = {
     descrizione: 'Fa una copia consistente di `gioco.db` con il backup in linea di SQLite (sicuro con il WAL attivo, non ferma le scritture) e la manda come allegato `project-p5r-gioco-<data>.db`. Prima dell\'invio ne lascia una copia nella cartella d\'appoggio, se configurata: il nome depositato arriva nell\'intestazione `X-Deposito-File`, e delle copie generate dall\'app se ne tengono le ultime cinque. Se il deposito non riesce lo scaricamento prosegue lo stesso. Il file è lo stesso che si reimporta come pacchetto di gioco.',
     risposta: 'Il file SQLite dei dati di gioco',
     rispostaBinaria: 'application/vnd.sqlite3',
+    senzaProva: 'Non è una semplice lettura: lascia una copia del database (centinaia di MB) nella cartella d\'appoggio, ne toglie le più vecchie oltre il limite, poi manda il file. Si scarica da Impostazioni → Pacchetto di gioco.',
   },
   'GET /api/impostazioni/istanza/completa.zip': {
     sommario: 'Scarica l\'istanza completa in uno ZIP: i due database, i caratteri, il manifesto',
     descrizione: 'Lo ZIP contiene `database/gioco.db` (dati di gioco con le immagini), `database/partite.db` (avanzamento), la cartella `font/` con i caratteri caricati, `manifest.json` con versioni e conteggi e un `LEGGIMI.txt`. L\'archivio si scrive a flusso in un file temporaneo, si manda come allegato `project-p5r-istanza-<data>.zip` e poi si cancella. Come per il database, una copia resta nella cartella d\'appoggio (intestazione `X-Deposito-File`, ultime cinque copie): è il file da usare per il ripristino.',
     risposta: 'L\'archivio ZIP dell\'istanza',
     rispostaBinaria: 'application/zip',
+    senzaProva: 'Non è una semplice lettura: lascia una copia dello ZIP (centinaia di MB) nella cartella d\'appoggio, ne toglie le più vecchie oltre il limite, poi manda il file. Si scarica da Impostazioni → Backup e ripristino.',
   },
   'GET /api/impostazioni/istanza/gioco/deposito': {
     sommario: 'I pacchetti di gioco presenti nella cartella d\'appoggio',

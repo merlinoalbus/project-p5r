@@ -15,7 +15,7 @@ import { Validator } from '@seriousme/openapi-schema-validator';
 import { closeDb, initDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { chiaveRotta, elencaRotte } from './rotte.js';
-import { documentoOpenApi, haCorpoBinario, parametriDelPercorso, rispondeJson, schemiDellaRotta, statoDiSuccesso } from './documento.js';
+import { documentoOpenApi, haCorpoBinario, operazioniSenzaProva, parametriDelPercorso, rispondeJson, schemiDellaRotta, statoDiSuccesso } from './documento.js';
 import { AREE, DESCRIZIONI } from './descrizioni/index.js';
 
 const RADICE = path.resolve(import.meta.dirname, '../..');
@@ -83,6 +83,16 @@ describe('registro delle descrizioni', () => {
     expect(difetti).toEqual([]);
   });
 
+  it('le GET che scrivono o pesano troppo non si provano dalla pagina (senzaProva)', () => {
+    // Una GET che passa da `inviaECancella` lascia una copia nella cartella d'appoggio; `esportaMappe` manda oltre 10 MB di base64.
+    const daVietare = rotte.filter((r) => r.metodo === 'get' && /\b(inviaECancella|esportaMappe)\b/.test(String(r.gestori[r.gestori.length - 1]))).map(chiaveRotta);
+    const vietate = rotte.filter((r) => DESCRIZIONI[chiaveRotta(r)].senzaProva).map(chiaveRotta);
+    expect(daVietare.sort()).toEqual(['GET /api/impostazioni/istanza/completa.zip', 'GET /api/impostazioni/istanza/database', 'GET /api/mappe/esporta']);
+    expect(vietate.sort()).toEqual(daVietare);
+    // ha senso solo su una GET: le altre non si provano comunque
+    expect(rotte.filter((r) => r.metodo !== 'get' && DESCRIZIONI[chiaveRotta(r)].senzaProva).map(chiaveRotta)).toEqual([]);
+  });
+
   it('i codici d\'errore dichiarati il server li lancia davvero', () => {
     // fuori da server/openapi: altrimenti ogni codice scritto nel registro troverebbe sé stesso
     const cartellaOpenApi = path.join(RADICE, 'server', 'openapi');
@@ -95,7 +105,7 @@ describe('registro delle descrizioni', () => {
 });
 
 describe('documento OpenAPI', () => {
-  const documento = documentoOpenApi(app) as { paths: Record<string, Record<string, { parameters: Array<{ name: string; in: string }>; summary: string; requestBody?: unknown }>> };
+  const documento = documentoOpenApi(app) as { paths: Record<string, Record<string, { parameters: Array<{ name: string; in: string }>; summary: string; description: string; requestBody?: unknown; 'x-senza-prova'?: string }>> };
 
   it('è un documento OpenAPI 3.1 valido', async () => {
     const esito = await new Validator().validate(documento as never);
@@ -116,6 +126,20 @@ describe('documento OpenAPI', () => {
     }
     expect(difetti).toEqual([]);
     expect(Object.values(documento.paths).reduce((n, p) => n + Object.keys(p).length, 0)).toBe(rotte.length);
+  });
+
+  it('le operazioni senza prova portano `x-senza-prova` e lo dicono nella descrizione; le altre no', () => {
+    const marcate: string[] = [];
+    for (const [percorso, metodi] of Object.entries(documento.paths)) {
+      for (const [metodo, op] of Object.entries(metodi)) {
+        if (op['x-senza-prova']) {
+          marcate.push(`${metodo} ${percorso}`);
+          expect(op.description).toContain('**Non si prova da questa pagina.**');
+        } else expect(op.description).not.toContain('Non si prova da questa pagina');
+      }
+    }
+    expect(marcate.sort()).toEqual(operazioniSenzaProva(app).sort());
+    expect(marcate.sort()).toEqual(['get /api/impostazioni/istanza/completa.zip', 'get /api/impostazioni/istanza/database', 'get /api/mappe/esporta']);
   });
 });
 
@@ -141,6 +165,15 @@ describe('rotte della documentazione', () => {
     expect(script.status).toBe(200);
     const css = await request(app).get('/api/docs/swagger-ui.css');
     expect(css.status).toBe(200);
+  });
+
+  it('la pagina spegne «Prova» sui metodi che scrivono e sulle GET senza prova', async () => {
+    const pagina = await request(app).get('/api/docs');
+    expect(pagina.text).toContain("supportedSubmitMethods: ['get']");
+    expect(pagina.text).toContain('plugins: [SenzaProvaPlugin]');
+    const elenco = JSON.parse(/var SENZA_PROVA = new Set\((.*)\);/.exec(pagina.text)![1]) as string[];
+    expect(elenco.sort()).toEqual(operazioniSenzaProva(app).sort());
+    expect(elenco).toContain('get /api/mappe/esporta');
   });
 
   it('un file inesistente sotto /api/docs/ è il solito 404 JSON', async () => {

@@ -25,6 +25,11 @@ export interface DescrizioneRotta {
   senzaCorpo?: true;
   /** Il tipo del contenuto quando la risposta è un file e non l'involucro JSON `{ data }`. */
   rispostaBinaria?: string;
+  /**
+   * Perché questa rotta non si prova dalla pagina di Swagger, anche se è una GET: scrive (una copia nella cartella d'appoggio)
+   * o manda un contenuto troppo pesante per essere mostrato in una pagina. Diventa `x-senza-prova` nel documento e spegne «Prova».
+   */
+  senzaProva?: string;
   /** I codici d'errore applicativi (`error.code`) più utili da conoscere, con lo stato HTTP. */
   errori?: ReadonlyArray<readonly [number, string]>;
 }

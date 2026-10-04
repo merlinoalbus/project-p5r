@@ -23,7 +23,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { httpErrors } from './utils/httpError.js';
 import { getDb } from './db/dbService.js';
 import { ROUTER_DI_AREA } from './routes/index.js';
-import { documentoOpenApi } from './openapi/documento.js';
+import { documentoOpenApi, operazioniSenzaProva } from './openapi/documento.js';
 import { CARTELLA_SWAGGER_UI, paginaDocumentazione } from './openapi/pagina.js';
 
 // Messaggi di validazione zod in italiano (details.issues[].message).
@@ -83,7 +83,7 @@ export function createApp(): Express {
     res.type('application/json').send(documento);
   });
   app.get('/api/docs', (_req, res) => {
-    res.type('html').send(paginaDocumentazione());
+    res.type('html').send(paginaDocumentazione(operazioniSenzaProva(app)));
   });
   app.use('/api/docs', express.static(CARTELLA_SWAGGER_UI, { index: false, maxAge: '1d' }));
 

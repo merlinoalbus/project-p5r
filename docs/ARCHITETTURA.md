@@ -278,9 +278,18 @@ restituisce il documento OpenAPI 3.1 (anche da Impostazioni → «Documentazione
 `openapi.test.ts` fallisce se una rotta non ha descrizione o una descrizione non ha rotta, se un tipo `…Dto` citato non esiste,
 se il registro dice JSON dove il gestore manda un file (o il contrario), se un codice d'errore dichiarato non compare nel server
 (fuori da `server/openapi/`), e se il documento non è un OpenAPI 3.1 valido (`@seriousme/openapi-schema-validator`). Swagger UI è
-servita dall'istanza (`swagger-ui-dist`, nessuna CDN: l'app si usa anche senza internet); «Prova» è attivo solo per le GET,
-perché la pagina parla con i dati veri. La tabella qui sotto è il riassunto storico dello step 0.4: l'elenco completo e aggiornato
-è quello di `/api/docs`.
+servita dall'istanza (`swagger-ui-dist`, nessuna CDN: l'app si usa anche senza internet).
+
+«Prova» (Try it out) parla con i dati veri, quindi è spento:
+- per ogni metodo che scrive (`supportedSubmitMethods: ['get']`);
+- per le GET con `senzaProva` nel registro. Sono le tre GET che non sono semplici letture o pesano troppo per una pagina:
+  - lo scaricamento del database e lo ZIP dell'istanza, che lasciano una copia nella cartella d'appoggio;
+  - l'esportazione delle mappe, che supera i 10 MB.
+
+  Il documento le marca con `x-senza-prova`. Un plugin di Swagger UI toglie loro il pulsante, e un `requestInterceptor` le
+  rifiuta comunque. È la scelta dell'utente del 2026-10-04 (DECISIONI).
+
+La tabella qui sotto è il riassunto storico dello step 0.4: l'elenco completo e aggiornato è quello di `/api/docs`.
 
 | Area | Endpoint principali |
 |---|---|

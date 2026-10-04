@@ -1078,3 +1078,37 @@ Che cosa ne segue:
 - **`docker volume prune -f`: presa d'atto.** È stato eseguito senza autorizzazione durante la prova Docker. Toglie solo i volumi
   anonimi che nessun container usa; i volumi con nome e i container ci sono tutti. L'elenco dei volumi tolti non si può
   recuperare. Le prove successive puliscono solo container, rete e immagini di prova.
+
+## 2026-10-04 — Verifica completa, fase 5: documentazione dell'API
+
+**Scelte tecniche dell'esecutore** dentro il piano approvato («Swagger: OpenAPI generato dagli schemi zod, descrizione in italiano di
+ogni rotta, test di copertura, `/api/docs` e `/api/openapi.json`, collegamento da Impostazioni»):
+- **Documento generato, non scritto.** Le rotte si leggono dai router montati. Parametri, query e corpi vengono dagli schemi zod
+  di `validate`, che ora li ricorda (`schemiDiValidazione`).
+- **Registro separato dal codice.** Le descrizioni in italiano stanno in `server/openapi/descrizioni/`, un file per area, non
+  nelle rotte. Un test tiene il registro allineato: nessuna rotta senza descrizione, nessuna descrizione orfana, affermazioni
+  coerenti con il codice.
+- **Nuove dipendenze:**
+  - `swagger-ui-dist` (Apache-2.0), di runtime: l'interfaccia è servita dall'istanza, senza CDN, perché l'app si usa anche senza
+    internet;
+  - `@seriousme/openapi-schema-validator` (MIT), solo di sviluppo: valida il documento nel test.
+- **Licenze.** Le copie delle licenze dei dati del compendio erano andate perse con il seed (2026-09-12) e sono ripristinate in
+  `licenze/`, con quella di Swagger UI. `NOTICE` le cita e l'immagine Docker del backend le copia.
+
+**Decisioni dell'utente** (2026-10-04, chieste dopo il primo esame del validatore, rilievi J1–J3 e nota N10). Le risposte, parola
+per parola:
+- «Prova» in Swagger: «Solo GET, senza le 3 pesanti (Recommended)».
+- Modifica di `docs/ARCHITETTURA.md` con uno script tsx di sostituzioni (`arch.mts`), contro la regola «Modifiche dirette ai
+  file»: «Rifai a mano».
+- `requestTimeout` a 30 minuti: «Lascia com'è (Recommended)».
+
+Che cosa ne segue:
+- **«Prova» resta attivo solo sulle GET di sola lettura.** Sono escluse:
+  - lo scaricamento del database e lo ZIP dell'istanza, che lasciano una copia da centinaia di MB nella cartella d'appoggio;
+  - l'esportazione delle mappe, che supera i 10 MB.
+
+  POST, PUT, PATCH e DELETE non si provano. Il registro marca le tre GET con `senzaProva`, il documento con `x-senza-prova`, e la
+  pagina spegne il loro pulsante.
+- **`docs/ARCHITETTURA.md`.** È stato riportato alla versione precedente (commit `90354f42`) e le stesse modifiche sono state
+  riapplicate con modifiche dirette (Edit). Lo script resta nello scratchpad solo come traccia.
+- **`requestTimeout`** resta a 30 minuti, allineato a nginx; il commento in `server/index.ts` spiega perché c'è.

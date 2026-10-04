@@ -40,6 +40,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     sommario: 'Pacchetto JSON delle mappe da scaricare: tutte o un luogo con le sue discendenti',
     descrizione: 'Mappe, spilli (con le schermate in base64) e immagini di base dell\'istanza in base64: è lo stesso formato che `POST /api/mappe/importa` accetta. Con `radice` solo quella mappa e le sue discendenti. La risposta ha `Content-Disposition: attachment` con il nome `mappe-<radice|tutte>.json`.',
     risposta: '`EsportazioneMappeDto`',
+    senzaProva: 'Troppo pesante per essere mostrato in una pagina: con le immagini in base64 l\'esportazione di tutte le mappe supera i 10 MB. Prima di esportare assegna l\'uid agli spilli che non l\'hanno ancora (`assegnaUidMancanti`). Si scarica dall\'editor delle mappe (Esporta).',
     errori: [[404, 'mappa-non-trovata']],
   },
   'POST /api/mappe/importa': {
