@@ -5,8 +5,8 @@
 // «Gli interruttori che si attivano al completamento di un Palazzo non verificano lo stato effettivo… (così come
 // la visibilità dello stesso sulla mappa) se un palazzo è completato al 100% bisogna che gli eventi diano quel
 // palazzo come completato a prescindere dalla data di scadenza», con l'Ombra di Kamoshida segnata raccolta sulla
-// mappa. Poi: il boss della Guida deve scattare col Tesoro del Palazzo o col boss finale; scelte dell'utente:
-// il boss della Guida si segna e si toglie da solo, l'ingresso sparisce a Palazzo completato.
+// mappa. Poi (2026-09-30) il boss della Guida scattava col Tesoro del Palazzo o col boss finale e si segnava e toglieva da
+// solo (superato il 2026-10-04, qui sotto); resta la scelta dell'utente: l'ingresso sparisce a Palazzo completato.
 //
 // Dal 2026-10-04 (scelta dell'utente: «devono essere entrambe valide le condizioni sono in AND non in OR», poi «Tesoro +
 // boss + raccolto tutto») servono tutte e tre insieme: Tesoro del Palazzo raccolto, boss finale sconfitto (spillo raccolto
