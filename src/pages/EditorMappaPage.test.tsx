@@ -167,9 +167,25 @@ describe('EditorMappaPage', () => {
     expect(form.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ tipo: 'confidente', condizioni: [expect.objectContaining({ tipo: 'data' })] })));
-    // un negozio resta senza: le condizioni spariscono, e non si salvano
+    // un negozio resta senza: la sezione sparisce (che non si salvino lo dice il test qui sotto)
     scegliVoce('Tipo', 'Negozio');
     expect(form.queryByRole('button', { name: /^Condizioni/ })).toBeNull();
+  });
+
+  it('da Confidente con una condizione a Negozio: la condizione non si salva', async () => {
+    api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
+    api.cercaRiferimenti.mockResolvedValue([]);
+    api.aggiornaSpillo.mockResolvedValue(nota);
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
+    scegliVoce('Tipo', 'Confidente');
+    fireEvent.click(form.getByRole('button', { name: /^Condizioni/ }));
+    fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
+    expect(form.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
+    scegliVoce('Tipo', 'Negozio');
+    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ tipo: 'negozio', condizioni: [] })));
   });
 
   it('le condizioni sono stati: una riga nasce già valida, si cambia sul posto con elenchi chiusi, si toglie e si salva con lo spillo', async () => {

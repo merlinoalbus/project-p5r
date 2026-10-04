@@ -41,7 +41,8 @@ export type TipoSpillo = (typeof TIPI_SPILLO)[number];
 //   consumabile. È condizionato (visibile solo in certi momenti).
 // - **città** — un negozio o un punto chiave della città. Non è consumabile e non porta altrove:
 //   toccato, mostra quello che il negozio (o l'attività) offre in quel momento. Non è condizionato:
-//   la disponibilità è del negozio, non del segnalino.
+//   la disponibilità è del negozio, non del segnalino. Fa eccezione il **Confidente**, che si può condizionare
+//   (2026-10-04, `ammetteCondizioni` qui sotto): dal Confidente il pin non eredita nessuna disponibilità.
 // - **consumabile** — si segna come fatto (dialogo, forziere, boss…). Non collega a niente.
 //   Condizionato.
 // - **informativo** — tutto il resto: né consumabile, né collegabile. Condizionato.

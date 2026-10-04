@@ -166,8 +166,9 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     for (const r of righe) {
       const mappa = `citta-${r.quartiere_chiave}`;
       if (esiste.get('luogo', r.luogo_chiave) || !mappaEsiste.get(mappa)) continue;
-      // Uno spillo di città **non è condizionato** (richiesta dell'utente, 2026-09-11): la
-      // disponibilità è del negozio o dell'attività che mostra, non del segnalino. Il quartiere
+      // Questi spilli di città — i luoghi del quartiere — **non sono condizionati** (richiesta dell'utente, 2026-09-11): la
+      // disponibilità è del negozio o dell'attività che mostrano, non del segnalino (fra i pin di città solo il Confidente ha
+      // condizioni, dal 2026-10-04: `ammetteCondizioni`). Il quartiere
       // che si sblocca più avanti nasconde il **passaggio** che ci porta (sotto), non i suoi luoghi.
       insSpillo.run(mappa, spilloPerLuogo(r.tipo), r.nome, r.cosa_offre, r.x, r.y, 'luogo', r.luogo_chiave, 0, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
       spilli++;

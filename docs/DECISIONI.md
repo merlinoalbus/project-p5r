@@ -196,14 +196,14 @@ sopra devono essere trattati come spilli informativi». Decisioni:
    scorciatoia, rampino), città (negozi, servizi, casa, attività, lavoro, **Confidente**), consumabile
    (dialogo, forzieri, tesori, seme, oggetto chiave, timbro, boss, miniboss, nemico), informativo (il resto).
    **Il server applica le regole**, chiunque scriva (API, pacchetti, seed): consumabile ⇒ collezionabile,
-   gli altri no; città ⇒ nessuna condizione; riferimento solo dei tipi ammessi dalla categoria (altrimenti
+   gli altri no; città ⇒ nessuna condizione (salvo il Confidente, vedi 2026-10-04); riferimento solo dei tipi ammessi dalla categoria (altrimenti
    400); destinazione solo per gli spostamenti. Migrazione 065.
 2. **Destinazione = mappa + spillo** (`spillo_destinazione.spillo_arrivo_id`). Il punto in percentuale
    con lo zoom e la checkbox «Posizione del luogo» spariscono dall'interfaccia. All'arrivo la mappa si
    adatta alla finestra e lo spillo è già selezionato. Nei pacchetti lo spillo d'arrivo viaggia per nome e
    posizione (gli id non valgono fra installazioni); i pacchetti vecchi con `x`, `y`, `zoom` diventano lo
    spillo più vicino entro l'8% dell'immagine (24 delle 40 destinazioni esistenti), altrimenti la sola mappa.
-3. **Gli spilli di città non sono condizionati** — neanche dal seed: `sincronizzaMappe` non scrive più
+3. **Gli spilli di città non sono condizionati** (salvo il Confidente dal 2026-10-04, voce «Il pin del Confidente si può condizionare») — neanche dal seed: `sincronizzaMappe` non scrive più
    orari e sblocchi del quartiere sui pin dei luoghi; lo sblocco del quartiere resta sul **passaggio**
    che ci porta. La disponibilità di un negozio la dice il negozio, nel popup.
 4. **Il popup lo decide la categoria**: spostamento → «Vai: mappa (allo spillo «…»)»; città → la merce

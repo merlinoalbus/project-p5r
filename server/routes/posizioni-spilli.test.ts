@@ -4,7 +4,8 @@
 
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
-import { initDb, closeDb } from '../db/dbService.js';
+import { initDb, closeDb, prepared } from '../db/dbService.js';
+import { esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import { runMigrations } from '../db/migrationRunner.js';
 
 // ============================================================
@@ -82,4 +83,23 @@ it('il pin del Confidente si può condizionare (2026-10-04): le condizioni si sa
   const spilli = (await request(app).get('/api/mappe/luoghi')).body.data.spilli as Array<{ nome: string; condizioni: unknown[] }>;
   expect(spilli.find((x) => x.nome === 'Yusuke')?.condizioni).toEqual([expect.objectContaining({ tipo: 'piove' })]);
   expect(spilli.find((x) => x.nome === 'Bottega')?.condizioni).toEqual([]);
+});
+
+it('reseed del seed: un pin Confidente del seed con condizioni resta «invariato» e tiene il suo id (2026-10-04)', async () => {
+  await crea({ tipo: 'confidente', nome: 'Ann', condizioni: [{ tipo: 'fascia', fascia: 'sera' }] });
+  // il pacchetto della mappa, caricato come seed: il pin diventa d'origine «seed», con le sue condizioni
+  const pacchetto = esportaMappe('luoghi');
+  await request(app).delete('/api/mappe/luoghi').expect(204);
+  importaMappe(pacchetto, { origine: 'seed' });
+  const prima = prepared("SELECT id, uid, origine, condizioni_json FROM spillo WHERE nome = 'Ann'").get() as { id: number; uid: string; origine: string; condizioni_json: string };
+  expect(prima.origine).toBe('seed');
+  expect(JSON.parse(prima.condizioni_json)).toEqual([{ tipo: 'fascia', fascia: 'sera' }]);
+  // un pin più nuovo su un'altra mappa: senza, SQLite ridarebbe a un pin tolto e reinserito lo stesso id, e non si vedrebbe
+  await request(app).post('/api/mappe').send({ chiave: 'altrove', nome: 'Altrove', tipo: 'luogo' }).expect(201);
+  await request(app).post('/api/mappe/altrove/spilli').send({ tipo: 'nota', nome: 'Più nuovo', x: 1, y: 1 }).expect(201);
+  // lo stesso seed ricaricato: il pin è invariato, quindi resta com'è (stesso id), con le condizioni
+  importaMappe(esportaMappe('luoghi'), { origine: 'seed' });
+  const dopo = prepared('SELECT id, condizioni_json FROM spillo WHERE uid = ?').get(prima.uid) as { id: number; condizioni_json: string };
+  expect(dopo.id).toBe(prima.id);
+  expect(JSON.parse(dopo.condizioni_json)).toEqual([{ tipo: 'fascia', fascia: 'sera' }]);
 });
