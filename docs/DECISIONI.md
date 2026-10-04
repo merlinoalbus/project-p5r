@@ -1185,7 +1185,14 @@ Risposte dell'utente, parola per parola:
 - il giorno che decide la mappa: «Il giorno della partita»;
 - la comparsa del Palazzo: «Finestra modificabile (Recommended)»;
 - dove si atterra: «Regole per date nel Palazzo (Recommended)»;
-- la proposta: «Sì, procedi (Recommended)».
+- la proposta: «Sì, procedi (Recommended)»;
+- **Dove sta l'editor** (variante della proposta: domanda all'utente con le misure dopo il primo esame del validatore, risposta «Finestra dal pulsante (Recommended)»). È una finestra aperta dal pulsante «Sulla mappa di Tokyo» nell'intestazione del Palazzo, che mostra
+  anche la finestra attuale, e non una sezione nella pagina. Da 1024 px la pagina del Palazzo sta in una schermata, e una
+  sezione in più l'avrebbe allungata.
+  - Da 1175 px in su (misurato a 1175, 1200, 1240, 1280, 1366) l'intestazione resta alta 170 px.
+  - Sotto i 1175 px le righe di chip vanno a capo una volta in più: l'intestazione è alta 222 px a 1024 e 1100 px, e 201 px a
+    1150. La pagina resta senza scorrimento (misurato a 1024×690). A 1024 px le due righe di chip erano già piene, a 7 px dal
+    margine, quindi qualunque comando nuovo nell'intestazione avrebbe aggiunto una riga.
 
 Che cosa ne segue:
 - **La finestra si modifica dalla pagina del Palazzo** («Quando compare»: dal, al o senza fine). È la voce di `finestre-dungeon`,
@@ -1199,13 +1206,6 @@ Che cosa ne segue:
   Città, la pagina della mappa con il pin selezionato. Cambiato il giorno della partita, i Palazzi si rileggono.
 
 Scelte tecniche mie, dentro la proposta approvata:
-- **Dove sta l'editor** (variante della proposta, confermata dall'utente alla domanda con le misure: «Finestra dal pulsante (Recommended)»). È una finestra aperta dal pulsante «Sulla mappa di Tokyo» nell'intestazione del Palazzo, che mostra
-  anche la finestra attuale, e non una sezione nella pagina. Da 1024 px la pagina del Palazzo sta in una schermata, e una
-  sezione in più l'avrebbe allungata.
-  - Da 1175 px in su (misurato a 1175, 1200, 1240, 1280, 1366) l'intestazione resta alta 170 px.
-  - Sotto i 1175 px le righe di chip vanno a capo una volta in più: l'intestazione è alta 222 px a 1024 e 1100 px, e 201 px a
-    1150. La pagina resta senza scorrimento (misurato a 1024×690). A 1024 px le due righe di chip erano già piene, a 7 px dal
-    margine, quindi qualunque comando nuovo nell'intestazione avrebbe aggiunto una riga.
 - **«Da un giorno in poi»** si aggiunge a «un giorno», «dal–al» e «sempre». È un dal–al senza fine, che il server accetta
   comunque.
 - **I pin con lo stesso nome** si distinguono col posto («Passaggio — 1° di 2 dall'alto»). Le planimetrie native ne hanno più
