@@ -1231,11 +1231,13 @@ Richiesta dell'utente: «aggiungi sul visualizzatore mappa un pulsante per torna
 
 Risposte dell'utente, parola per parola:
 - dove porta: «Home, giornata di oggi (Recommended)»;
-- anche nell'editor: «Solo nel visualizzatore (Recommended)».
+- anche nell'editor: «Solo nel visualizzatore (Recommended)»;
+- anche nella pagina di un luogo senza pianta (aggiunta mia, sottoposta all'utente dopo il primo esame del validatore): «Sì,
+  tienilo (Recommended)».
 
 Che cosa ne segue:
 - **Dove compare.** Nella barra del visore della pagina delle mappe, dopo «Pannello» e subito prima di «Chiudi», e fra i comandi
-  di un luogo senza pianta. Compare solo con una partita attiva.
+  di un luogo senza pianta, dopo «Scheda del luogo» e «Modifica luogo». Compare solo con una partita attiva.
 - **I due ritorni.**
   - «Torna alla partita» porta sempre alla Home.
   - «Chiudi» resta il ritorno alla pagina da cui si è entrati nelle mappe.

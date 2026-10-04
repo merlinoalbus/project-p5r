@@ -3,7 +3,7 @@
  */
 // ============================================================
 // Test MappaPage — la pagina delle mappe: indice delle radici, visore con la partita attiva e stato «raccolto» (Fase 13.2),
-// «Chiudi» e riletture in silenzio
+// «Chiudi», «Torna alla partita» (verso la Home, solo con una partita attiva) e riletture in silenzio
 // ============================================================
 
 import { usePreferenzeStore } from '../stores/preferenzeStore';
@@ -30,9 +30,11 @@ const albero: MappaRiassuntoDto[] = [
 ];
 const forziere: SpilloDto = { id: 4, mappaChiave: 'citta-shibuya', tipo: 'forziere', tipoNome: 'Forziere', colore: '#eab308', nome: 'Scrigno', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: true, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
 const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2, immagineUrl: '/pianta-test.png' }), larghezza: 800, altezza: 600, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], arrivi: [], spilli: [forziere, { ...forziere, id: 5, nome: 'Passaggio', tipo: 'passaggio', tipoNome: 'Passaggio', collezionabile: false, x: 60, y: 60 }, { ...forziere, id: 6, nome: 'Tesoro del Palazzo', tipo: 'tesoro-palazzo', tipoNome: 'Tesoro del Palazzo', x: 70, y: 20, voce: { chiave: 'kamoshida-01/2', tipo: 'tesoro', nome: 'Tesoro del Palazzo', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-01', stato: null } }] };
+/** Il Palazzo di Kamoshida come luogo senza pianta: elenca le sue planimetrie, con «Scheda del luogo» e «Modifica luogo». */
+const senzaPianta: MappaDto = { ...dettaglio, chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', genitore: null, immagineUrl: null, asset: null, figli: [albero[3]], spilli: [], percorso: [{ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida' }], entita: { tipo: 'dungeon', chiave: 'kamoshida' } };
 
-/** Monta la pagina delle mappe all'indirizzo `percorso`, con le rotte finte della Città e della pagina di partenza
- *  (`/partita`) per verificare dove portano i collegamenti e «Chiudi». */
+/** Monta la pagina delle mappe all'indirizzo `percorso`, con le rotte finte della Città, della pagina di partenza
+ *  (`/partita`) e della Home (`/home`) per verificare dove portano i collegamenti, «Chiudi» e «Torna alla partita». */
 function monta(percorso: string) {
   render(
     <MemoryRouter initialEntries={[percorso]}>
@@ -82,18 +84,29 @@ describe('MappaPage', () => {
     expect(await screen.findByRole('heading', { name: 'Home della partita' })).toBeInTheDocument();
   });
 
-  it('senza partita attiva «Torna alla partita» non c’è, nel visore e nel luogo senza pianta', async () => {
+  it('senza partita attiva «Torna alla partita» non c’è nel visore', async () => {
     usePartitaStore.setState({ attiva: null });
     monta('/guida/mappe/citta-shibuya');
     expect(await screen.findByRole('button', { name: /^Chiudi/ })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /^Torna alla partita/ })).toBeNull();
   });
 
-  it('nel luogo senza pianta «Torna alla partita» sta fra i comandi del luogo', async () => {
-    getMappa.mockResolvedValue({ ...dettaglio, chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', immagineUrl: null, asset: null, figli: [albero[3]], spilli: [], percorso: [{ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida' }] });
+  it('nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del luogo» e «Modifica luogo» e porta alla Home', async () => {
+    getMappa.mockResolvedValue(senzaPianta);
     monta('/guida/mappe/dungeon-kamoshida');
-    fireEvent.click(await screen.findByRole('link', { name: /^Torna alla partita/ }));
+    const torna = await screen.findByRole('link', { name: /^Torna alla partita/ });
+    // i comandi del luogo: il ritorno è l'ultimo
+    expect([...torna.parentElement!.querySelectorAll('a, button')].map((e) => e.textContent?.trim())).toEqual(['Scheda del luogo', 'Modifica luogo', 'Torna alla partita']);
+    fireEvent.click(torna);
     expect(await screen.findByRole('heading', { name: 'Home della partita' })).toBeInTheDocument();
+  });
+
+  it('senza partita attiva «Torna alla partita» non c’è nel luogo senza pianta', async () => {
+    usePartitaStore.setState({ attiva: null });
+    getMappa.mockResolvedValue(senzaPianta);
+    monta('/guida/mappe/dungeon-kamoshida');
+    expect(await screen.findByRole('link', { name: /^Modifica luogo/ })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^Torna alla partita/ })).toBeNull();
   });
 
   it('aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima', async () => {
