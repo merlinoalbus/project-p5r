@@ -787,3 +787,13 @@ Il documento non è scritto a mano:
 - **Dati di sviluppo.** `data/gioco.db` e `data/partite.db` sono già alle versioni 96 e 16 (decisione H3). In produzione la
   migrazione 096 e la 016 delle partite si applicano al primo avvio della nuova immagine, dopo la copia di sicurezza di avvio.
 - **Merge.** Il merge della PR lo fa l'utente.
+
+### Esame della voce 6
+
+Il primo esame è stato rigettato (K1): mancava l'esito di `npm audit`, che fa parte del gate della CI.
+- `npm ci` più `npm audit --omit=dev --audit-level=high`, eseguiti su un worktree pulito di `28fc7d7d`, danno 0 vulnerabilità, exit 0
+  (`scratchpad/voce6/11-npm-ci-audit-worktree.txt`).
+- Lo stesso risultato si ha anche su tutte le dipendenze, comprese quelle di sviluppo.
+
+La voce è stata approvata al secondo esame, e con lei sono chiuse tutte e sei le voci. Il job «verify» della CI sulla PR #96 era
+ancora in corso all'ultima lettura: prima del merge va controllato che sia verde.
