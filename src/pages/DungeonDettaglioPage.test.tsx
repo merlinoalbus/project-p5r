@@ -528,6 +528,22 @@ describe('un’area su più planimetrie (decisione dell’utente, 2026-10-04)', 
     const conferma = within(finestra.getByRole('alertdialog'));
     expect(conferma.getByText(/L’area della guida «Cortile» resta senza planimetria\. L’area «Cancello» resta sulle altre planimetrie che la contengono\./)).toBeInTheDocument();
   });
+
+  it('con due aree che restano altrove la conferma parla al plurale: «restano … che le contengono»', async () => {
+    const d = palazzoConPiuAree();
+    // Cancello e Cortile stanno anche sulla Torre
+    d.planimetrie[1] = { ...d.planimetrie[1], aree: [...d.planimetrie[1].aree, { chiave: 'k-01', nome: 'Cancello', ordine: 0 }, { chiave: 'k-03', nome: 'Cortile', ordine: 2 }] };
+    getDungeon.mockResolvedValue(d);
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    fireEvent.click(within(screen.getByLabelText('Planimetrie del Palazzo')).getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
+    const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
+    fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
+    const conferma = within(finestra.getByRole('alertdialog'));
+    expect(conferma.getByText(/Le aree «Cancello», «Cortile» restano sulle altre planimetrie che le contengono\./)).toBeInTheDocument();
+    // nessuna resta senza planimetria
+    expect(conferma.queryByText(/senza planimetria/)).toBeNull();
+  });
 });
 
 it('mentre un ordine si salva, la maniglia dice perché è ferma', async () => {

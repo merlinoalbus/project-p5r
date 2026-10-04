@@ -74,7 +74,9 @@ function testoAreeDopoEliminazione(aree: Planimetria['aree'], altrove: ReadonlyM
   const altre = ordinate.filter((a) => !!altrove.get(a.chiave)?.length);
   const parti: string[] = [];
   if (senza.length) parti.push(`${senza.length === 1 ? 'L’area della guida' : 'Le aree della guida'} ${nomi(senza)} ${senza.length === 1 ? 'resta' : 'restano'} senza planimetria.`);
-  if (altre.length) parti.push(`${altre.length === 1 ? 'L’area' : 'Le aree'} ${nomi(altre)} ${altre.length === 1 ? 'resta' : 'restano'} sulle altre planimetrie che la contengono.`);
+  if (altre.length) parti.push(altre.length === 1
+    ? `L’area ${nomi(altre)} resta sulle altre planimetrie che la contengono.`
+    : `Le aree ${nomi(altre)} restano sulle altre planimetrie che le contengono.`);
   return parti.length ? ` ${parti.join(' ')}` : '';
 }
 

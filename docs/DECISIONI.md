@@ -498,7 +498,8 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 ### 2026-09-18 — Le planimetrie di un Palazzo sono una cosa sola, ordinata
 - **Un'area della guida ha una sola planimetria** (decisione dell'utente): legarne una seconda
   stacca la prima. Con più planimetrie per area «completa» non misurava niente, e la stessa stanza
-  compariva due volte nell'elenco del Palazzo.
+  compariva due volte nell'elenco del Palazzo. *Superata il 2026-10-04: un'area può stare su più planimetrie (vedi
+  «2026-10-04 — Un'area della guida su più planimetrie»).*
 - **Il legame si scrive in un posto solo dal punto di vista di chi lo usa**: `mappa_entita` è la
   tabella che leggono scheda del Palazzo e contenuti della guida, e ora la scrive anche l'editor,
   nella stessa transazione delle colonne `entita_*`. Prima il salvataggio dell'editor sembrava
@@ -607,7 +608,8 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Una planimetria contiene più aree della guida** (richiesta dell'utente del 2026-09-29: «devo poter selezionare più
   elementi della guida alla stessa mappa… deve mostrare le sue aree in ordine»). Resta la decisione del 2026-09-18:
   **un'area ha una sola planimetria**; spuntarla su un'altra la sposta, e la finestra lo dice prima di salvare. Le
-  aree si mostrano sempre in ordine di guida (`dungeon_area.ordine`).
+  aree si mostrano sempre in ordine di guida (`dungeon_area.ordine`). *La parte «un'area ha una sola planimetria» è
+  superata il 2026-10-04 (vedi «2026-10-04 — Un'area della guida su più planimetrie»).*
 - Le colonne `mappa.entita_tipo/entita_chiave` restano un legame solo: quando la mappa è legata ad aree dichiarano la
   **prima in ordine di guida**. Passando da un'area a un legame di altro tipo (quartiere, luogo) le altre aree
   restano in `mappa_entita`; si tolgono con la scelta delle aree.
