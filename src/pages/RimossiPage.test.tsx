@@ -20,7 +20,9 @@ it('chiede a ogni tipo le sole righe nascoste e rimette una riga negli elenchi',
   render(<MemoryRouter><RimossiPage /></MemoryRouter>);
   expect(screen.getByRole('heading', { name: 'Rimossi' })).toBeInTheDocument();
   const blocco = await screen.findByRole('region', { name: 'Articoli dei negozi rimossi' });
-  expect(within(blocco).getByText(/Kogatana nera/)).toBeInTheDocument();
+  // la riga si aspetta: il blocco può comparire prima che l'elenco sia caricato (sotto carico, nella suite completa, il
+  // `getByText` subito dopo falliva una volta ogni tanto)
+  expect(await within(blocco).findByText(/Kogatana nera/)).toBeInTheDocument();
   // il negozio col suo nome, non con la chiave
   expect(await within(blocco).findByText(/· Untouchable/)).toBeInTheDocument();
   expect(within(blocco).queryByText(/· untouchable/)).toBeNull();
