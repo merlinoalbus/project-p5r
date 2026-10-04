@@ -65,7 +65,6 @@ export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number)
   apiPut(`/compendio/percorso/voci/${uid}/sposta${queryString({ partita })}`, { verso }, { maxRetries: 0 });
 /** Elimina una voce dalla guida (409 se in una partita è spuntata con effetti: prima si toglie la spunta). */
 export const eliminaVoceGiornata = (uid: string): Promise<void> => apiDelete(`/compendio/percorso/voci/${uid}`);
-/** Negozi con conteggi degli articoli. */
 /** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */
 export const getNegozi = (partita?: number): Promise<NegozioRiassuntoDto[]> => apiGet(`/compendio/negozi${queryString({ partita })}`);
 /** Scheda di un negozio con gli articoli (acquisti della partita se indicata). */

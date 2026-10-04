@@ -1,13 +1,4 @@
 // ============================================================
-// VisoreMappa — il visore delle mappe a livelli con spilli, pannello e schede (descrizione completa più sotto)
-// ============================================================
-
-import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
-import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
-import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
-import { NavigazioneSpillo } from './NavigazioneSpillo';
-import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
-// ============================================================
 // VisoreMappa — visore a schermo intero (o incorporato) di una mappa a livelli (Fase 13.2)
 // ============================================================
 //
@@ -17,6 +8,11 @@ import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 // click sulla mappa modifica i dati: l'editor (13.3) passa i propri strumenti tramite `editor`.
 // ============================================================
 
+import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
+import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
+import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
+import { NavigazioneSpillo } from './NavigazioneSpillo';
+import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';

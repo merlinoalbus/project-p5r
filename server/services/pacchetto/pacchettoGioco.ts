@@ -9,7 +9,7 @@
 //   si apre subito; poi le migrazioni lo portano alla versione del codice, come per ogni istanza;
 // - `pacchetto/completo/gioco.db` (fuori da git, ~311 MB, stesso nome): con le immagini dentro
 //   (migrazione 079). Il caricamento iniziale completo avviene SEMPRE dall'app (Impostazioni →
-//   Pacchetto di gioco → «Importa un pacchetto») e sostituisce il file dell'istanza sul volume.
+//   Pacchetto di gioco → «Importa il file scelto», dalla cartella d’appoggio) e sostituisce il file dell'istanza sul volume.
 //
 // `caricaPacchetto(db)` fa la stessa cosa dentro una connessione già aperta (i test, che lavorano
 // in memoria): copia schema e righe del pacchetto nel file di gioco e poi applica le migrazioni

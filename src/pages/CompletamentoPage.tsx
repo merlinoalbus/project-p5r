@@ -1,5 +1,5 @@
 // ============================================================
-// CompletamentoPage — trofei con spunta per partita, finali con condizioni, Covo dei Ladri, DLC, meteo, Nuova Partita+, gestione del tempo (Fase 9.1)
+// CompletamentoPage — trofei con spunta per partita, finali con condizioni, DLC, meteo, Nuova Partita+, gestione del tempo (Fase 9.1), con un rimando al Covo dei Ladri
 // ============================================================
 
 import { useMemo, useState } from 'react';

@@ -1,5 +1,11 @@
 // ============================================================
-// types — i tipi condivisi fra frontend e backend (DTO delle API)
+// Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
+// ============================================================
+//
+// Questo modulo è importato sia dal server (NodeNext) sia dal client
+// (bundler): SOLO tipi e costanti pure, nessun import di runtime Node.
+// I campi `*Nome` sono la resa italiana risolta dal backend tramite la
+// tabella `traduzione`; i campi senza suffisso sono le chiavi canoniche.
 // ============================================================
 
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
@@ -13,15 +19,6 @@ import type { CategoriaArticolo } from './articoli.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 import type { MeteoPartita } from './meteoPartita.js';
 import type { Osservazione, Statistiche } from './statistiche.js';
-// ============================================================
-// Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
-// ============================================================
-//
-// Questo modulo è importato sia dal server (NodeNext) sia dal client
-// (bundler): SOLO tipi e costanti pure, nessun import di runtime Node.
-// I campi `*Nome` sono la resa italiana risolta dal backend tramite la
-// tabella `traduzione`; i campi senza suffisso sono le chiavi canoniche.
-// ============================================================
 
 /** Risposta di salute del backend. */
 export interface HealthDto {
@@ -1342,7 +1339,7 @@ export interface QuartiereRiassuntoDto {
   /** Il quartiere è già nel mondo, al punto in cui è la partita?
    *
    * Vero anche senza partita: senza non c'è niente da decidere. Le regole stanno in
-   * `sblocco-quartieri.json` e non solo nella data: sette quartieri su ventitré ne hanno una, gli
+   * `dati_guida` (voce `sblocco-quartieri`) e non solo nella data: sette quartieri su ventitré ne hanno una, gli
    * altri si aprono col rango di un Confidente, con un libro letto o durante un Palazzo — e sono
    * chiusi lo stesso. La mappa di Tokyo mostra solo i quartieri disponibili. */
   disponibile?: boolean;
@@ -1377,7 +1374,7 @@ export interface LuogoDto {
   verificato: boolean;
   /** Posizione dello spillo sulla mappa del quartiere (percentuali), se fissato. */
   marcatore: { x: number; y: number } | null;
-  /** La regola di **presenza** del luogo, quando ce n'è una scritta in `sblocco-luoghi.json`.
+  /** La regola di **presenza** del luogo, quando ce n'è una scritta in `dati_guida` (voce `sblocco-luoghi`).
    *
    * `sblocco` qui sopra è la prosa della guida — «lettura del libro “Shitamachi rinato”» — e
    * nessuno la valutava: trentasette luoghi su ottantaquattro portavano una condizione che l'app
@@ -1748,7 +1745,7 @@ export interface DungeonRiassuntoDto {
   date: { sblocco: string; scadenza: string; furtoConsigliato: string };
   /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco. `date` qui sopra è
    *  prosa — «12 Aprile (Martedì) – prima infiltrazione» — e da una frase non si ricava una data
-   *  senza sbagliarne qualcuna in silenzio: questa viene da `finestre-dungeon.json`, trascritto a
+   *  senza sbagliarne qualcuna in silenzio: questa viene dalla voce `finestre-dungeon` di `dati_guida`, trascritta a
    *  mano una volta. Serve a mostrare il Palazzo sulla mappa **solo quando c'è**. `al` manca dove
    *  il gioco non fissa una scadenza: Iweleth e i Memento, una volta aperti, restano. */
   finestra: { dal: string; al: string | null } | null;
@@ -2032,7 +2029,7 @@ export interface MappaDto extends MappaRiassuntoDto {
   arrivi: Array<{ spilloId: number; tipo: TipoSpillo; nome: string; mappa: string; mappaNome: string }>;
 }
 
-/** Pacchetto di esportazione/importazione (versione 1); il seed `mappe-editor.json` usa lo stesso formato senza `immagini`. */
+/** Pacchetto di esportazione/importazione delle mappe (versione 1): il file `mappe-editor.json` che l'editor scarica e reimporta. */
 export interface EsportazioneMappeDto {
   ingressi?:Array<{quartiere:string;mappa:string;x:number;y:number;zoom:number}>;
   versione: 1;

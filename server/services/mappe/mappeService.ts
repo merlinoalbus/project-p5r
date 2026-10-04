@@ -1,5 +1,5 @@
 // ============================================================
-// mappeService — albero delle mappe, spilli con stato per partita, editor, esportazione/importazione
+// mappeService — albero delle mappe, spilli con stato per partita, editor, esportazione/importazione (dalla Fase 13.1)
 // ============================================================
 //
 // Il servizio dell'atlante: lettura delle mappe e dei loro spilli (con lo stato e le condizioni
@@ -17,10 +17,6 @@ import { RUOLI_IMMAGINE } from '../../../shared/types.js';
 import { destinazionePerPacchetto, leggiDestinazioneSpillo, risolviSpilloArrivo, salvaDestinazioneSpillo, verificaDestinazioneSpillo, type DestinazioneDaSalvare } from './destinazioniSpillo.js';
 import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
 import { slug } from '../../../shared/slug.js';
-// ============================================================
-// mappeService — albero delle mappe, spilli con stato per partita, editor, esportazione/importazione (Fase 13.1)
-// ============================================================
-
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
 import { verificaPartita } from '../verificaPartita.js';
@@ -245,13 +241,8 @@ function negozioDettaglio(chiave: string, ctx: ContestoSpilli): NonNullable<Dett
   return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, disponibilita: a.disponibilita })) };
 }
 
-/** Le prove native dello spillo, se ne ha.
- *
- * Un JSON illeggibile non deve far cadere la mappa: se il campo e' corrotto lo spillo resta,
- * semplicemente senza prove. Ma non si inventa un oggetto vuoto al suo posto, perche' «prove
- * assenti» e «prove che non si riescono a leggere» sono due cose diverse.
- */
-/** Se lo schema corrente ha gia' la colonna delle prove native (migrazione 046). */
+/** Vero se la tabella `spillo` dello schema corrente ha la colonna `nome` (le colonne aggiunte dalle migrazioni, per esempio
+ *  `nativo_json` della 046, possono mancare su un file che non le ha ancora applicate). */
 function colonnaSpillo(nome: string): boolean {
   const colonne = getDb().prepare("SELECT name FROM pragma_table_info('spillo')").all() as Array<{ name: string }>;
   return colonne.some((c) => c.name === nome);
@@ -259,7 +250,12 @@ function colonnaSpillo(nome: string): boolean {
 /** Vero se lo spillo ha già la colonna delle prove native `nativo_json` (migrazione 046). */
 function colonnaNativoJson(): boolean { return colonnaSpillo('nativo_json'); }
 
-/** Le prove native dello spillo lette dal JSON; null se non ne ha o se il JSON non si legge (lo spillo resta, senza prove). */
+/** Le prove native dello spillo lette dal JSON; null se non ne ha.
+ *
+ * Un JSON illeggibile non deve far cadere la mappa: se il campo e' corrotto lo spillo resta,
+ * semplicemente senza prove (null). Ma non si inventa un oggetto vuoto al suo posto, perche' «prove
+ * assenti» e «prove che non si riescono a leggere» sono due cose diverse.
+ */
 function nativoDiSpillo(r: RigaSpillo): NativoSpilloDto | null {
   if (!r.nativo_json) return null;
   try { return JSON.parse(r.nativo_json) as NativoSpilloDto; } catch { return null; }
@@ -275,8 +271,9 @@ function immaginiDiSpillo(spilloId: number): ImmagineSpilloDto[] {
 /** Contesto comune agli spilli di una risposta: partita, spilli raccolti, stato per le condizioni, nomi per le descrizioni. */
 interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string>; acquistati?: Set<string> }
 
-/** Nomi (Confidenti, quartieri, richieste, Palazzi) per descrivere le condizioni: letti una volta per risposta. */
-
+/** Il contesto degli spilli di una risposta, letto una volta: la partita verificata, i suoi «raccolto» (per uid), lo stato per
+ *  le condizioni, i nomi (Confidenti, quartieri, richieste, Palazzi) per descriverle e, solo se ci sono Palazzi completati, il
+ *  Palazzo di ogni mappa e le destinazioni degli spilli, per chiudere gli ingressi. */
 function contestoSpilli(partitaId?: number): ContestoSpilli {
   if (partitaId) verificaPartita(partitaId);
   // «raccolto» è legato all'uid dello spillo (067): sopravvive a un pacchetto reimportato o a un gioco.db sostituito
@@ -1037,18 +1034,20 @@ export function dimensioniImmagine(b: Buffer): { larghezza: number; altezza: num
 
 export interface DatiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
 
+/** L'etichetta con cui si scarta lo stato di un pin citato fuori dalle condizioni dei pin. */
+const SOLO_PIN = 'Stato di un pin (solo nelle condizioni dei pin)';
 /**
- * Le chiavi citate dalle condizioni devono essere calcolabili dall'app: Palazzo esistente (non i Mementos), Confidente e richiesta della
- * Guida, quartiere con una data di sblocco leggibile (gli altri quartieri non sono valutabili). Separa le valide dalle sconosciute.
+ * Le chiavi citate dalle condizioni devono esistere ed essere calcolabili dall'app: separa le condizioni valide dalle scartate,
+ * scendendo nei gruppi e nelle negazioni (un gruppo con un figlio scartato si scarta tutto). Più di 20 condizioni o una
+ * condizione malformata sono scarti a sé.
+ *
+ * Si controllano: Palazzo esistente (non i Mementos), Confidente e richiesta della Guida, quartiere con una data di sblocco
+ * leggibile (gli altri quartieri non sono valutabili), e poi articoli, attività, negozi, membri della squadra, letture e Persona
+ * citati, che devono esistere nei dati.
  *
  * Lo stato di un altro pin (`spillo`, 2026-10-03) vale solo nelle condizioni dei pin (`pin` presente) e deve citare un pin con
  * uno stato (`statoCitabile`: il suo tipo, o la sua voce della guida). In un'importazione un pin dello stesso pacchetto si
  * accetta all'inserimento e si verifica a pacchetto inserito, con le voci già scritte (`importaMappe`).
- */
-const SOLO_PIN = 'Stato di un pin (solo nelle condizioni dei pin)';
-/**
- * Controlla le chiavi citate da ogni condizione, scendendo nei gruppi e nelle negazioni (un gruppo con un figlio scartato si
- * scarta tutto). Più di 20 condizioni o una condizione malformata sono scarti a sé.
  */
 function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | undefined, pin?: { delPacchetto: ReadonlySet<string> }): { valide: RequisitoSpillo[]; scartate: Array<{ cosa: string; chiave: string }> } {
   const valide: RequisitoSpillo[] = [];
@@ -1386,8 +1385,8 @@ function base64Immagine(ambito: string, chiave: string): { mime: string; base64:
   }
 }
 
-/** Pacchetto JSON con mappe, spilli (con schermate in base64) e immagini di base dell'istanza (base64): stesso formato del seed
- * `mappe-editor.json`. Con `radice` esporta solo quella mappa e le sue discendenti (un «luogo» completo). */
+/** Pacchetto JSON con mappe, spilli (con schermate in base64) e immagini di base dell'istanza (base64): lo stesso formato del file
+ * `mappe-editor.json` dell'editor. Con `radice` esporta solo quella mappa e le sue discendenti (un «luogo» completo). */
 export function esportaMappe(radice?: string): EsportazioneMappeDto {
   assegnaUidMancanti(getDb());
   if(radice)radice=rigaMappa(radice).chiave;
@@ -1445,7 +1444,7 @@ function riferimentoDelPacchetto(rif: { tipo: TipoRiferimento; chiave: string } 
 }
 
 /** La voce della guida che un pin del pacchetto dichiara (094): il campo `voce`, o il riferimento «punto» di un pacchetto di prima.
- *  `undefined` = il pacchetto non ne dice niente (un pacchetto di prima, o del seed del repository). */
+ *  `undefined` = il pacchetto non ne dice niente (un pacchetto di prima). */
 function voceDichiarata(s: { riferimento: { tipo: TipoRiferimento; chiave: string } | null; voce?: string | null }): string | null | undefined {
   return s.voce !== undefined ? s.voce : s.riferimento?.tipo === 'punto' ? s.riferimento.chiave : undefined;
 }
@@ -1473,7 +1472,7 @@ function spilloInvariatoNelSeed(r: RigaSpillo, s: EsportazioneMappeDto['mappe'][
   const dichiarata = voceDichiarata(s);
   if (dichiarata !== undefined && (r.voce_chiave ?? null) !== voceAmmessa(s.nome, r.mappa_chiave, dichiarata)) return false;
   if (JSON.stringify(condizioniDiRiga(r.condizioni_json))!==JSON.stringify(normalizzaCondizioniSpillo(categoria==='citta'?[]:(s.condizioni??[])))) return false;
-  // A destination absent from the seed does not erase an arrival configured in the instance.
+  // Una destinazione assente dai dati importati non cancella un arrivo configurato nell'istanza.
   if (s.destinazione!==undefined || s.destinazioneNonDisponibile!==undefined) {
     const attuale=leggiDestinazioneSpillo(r.id);
     if(!!attuale.destinazioneNonDisponibile!==!!s.destinazioneNonDisponibile)return false;

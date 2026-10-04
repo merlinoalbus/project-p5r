@@ -38,7 +38,7 @@ export function regoleFontFace(elenco: FontDto[]): string {
     .filter((f) => f.presente && f.formato && f.url)
     .map((f) => {
       const url = `${API_BASE_URL}/font/${encodeURIComponent(f.ruolo)}/file?v=${encodeURIComponent(f.aggiornato ?? '')}`;
-      // unicode-range limitato al latino di base: le lettere accentate (spesso mappate ma vuote nei font della comunità) arrivano dal font di riserva
+      // unicode-range = INTERVALLO_FONT_UTENTE: latino di base con le lettere accentate (vedi il commento della costante)
       return `@font-face { font-family: "${FAMIGLIA_FONT[f.ruolo]}"; src: url("${url}") format("${FORMATO_CSS[f.formato as FormatoFont]}"); font-display: swap; unicode-range: ${INTERVALLO_FONT_UTENTE}; }`;
     })
     .join('\n');

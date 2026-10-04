@@ -34,7 +34,6 @@ interface Props {
   partitaId: number;
 }
 
-/** Griglia «poster» dei Confidenti: rango con +/−, note della risposta con moltiplicatori, anello verso il rango successivo, sblocco, note, immagini. */
 /** Gruppi dell'elenco: in cima chi si puo far crescere adesso (rango > 0, gia sbloccato, o rango 0 con i requisiti del rango 1 soddisfatti). */
 const GRUPPI = [
   { chiave: 'attivi', titolo: 'Attivi e sbloccabili', descrizione: 'in corso o pronti da avviare in gioco' },

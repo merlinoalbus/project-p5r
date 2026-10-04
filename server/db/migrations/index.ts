@@ -1,18 +1,14 @@
 // ============================================================
-// migrations/index — registro delle migrazioni dei dati di gioco
+// migrations/index — registro delle migrazioni dei dati di gioco: import espliciti, array ordinato per id
+// ============================================================
+//
+// Append-only: mai modificare una migrazione già applicata; aggiungerne
+// una nuova con id successivo (`index.test.ts` pretende id consecutivi).
 // ============================================================
 
 import { migration042 } from './042_contenuti_guida.js';
 import { migration040 } from './040_destinazioni_spilli.js';
 import { migration039 } from './039_ingressi_quartieri.js';
-// ============================================================
-// Registro migrazioni — import espliciti, array ordinato
-// ============================================================
-//
-// Append-only: mai modificare una migrazione già applicata; aggiungerne
-// una nuova con id successivo.
-// ============================================================
-
 import type { Migration } from '../migrationRunner.js';
 import { migration001 } from './001_compendio.js';
 import { migration002 } from './002_partita.js';
@@ -54,7 +50,6 @@ import { migration038 } from './038_percorsi_mappe.js';
 import { migration037 } from './037_sblocco_quartieri.js';
 import { migration036 } from './036_condizioni_procedurali.js';
 
-/** Registro append-only applicato dal runner in ordine di `id`. */
 import { migration041 } from './041_posizioni_spilli.js';
 import { migration043 } from './043_ruolo_immagine.js';
 import { migration044 } from './044_ruolo_emblema.js';
@@ -111,4 +106,5 @@ import { migration094 } from './094_voce_dei_pin.js';
 import { migration095 } from './095_passi_degli_enigmi.js';
 import { migration096 } from './096_pulizia_schema.js';
 
+/** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020, migration021, migration022, migration023, migration024, migration025, migration026, migration027, migration028, migration029, migration030, migration031, migration032, migration033, migration034, migration035, migration036, migration037, migration038, migration039, migration040, migration041, migration042, migration043, migration044, migration045, migration046, migration047, migration048, migration049, migration050, migration051, migration052, migration053, migration054, migration055, migration056, migration057, migration058, migration059, migration060, migration061, migration062, migration063, migration064, migration065, migration066, migration067, migration068, migration069, migration070, migration071, migration072, migration073, migration074, migration075, migration076, migration077, migration078, migration079, migration080, migration081, migration082, migration083, migration084, migration085, migration086, migration087, migration088, migration089, migration090, migration091, migration092, migration093, migration094, migration095, migration096];

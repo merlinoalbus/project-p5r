@@ -1,5 +1,5 @@
 // ============================================================
-// FusionePage — tabella degli Arcani e regole (il calcolatore arriva con la Fase 1)
+// FusionePage — calcolatore A + B, ricette per ottenere una Persona, fusioni con una Persona, piani, ricerca per skill, cicli, Forca e Isolamento, ricette speciali
 // ============================================================
 
 import { useMemo, useState } from 'react';

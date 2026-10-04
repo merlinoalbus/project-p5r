@@ -6,7 +6,7 @@
 // «rango cliente Oscuro», «dopo aver giocato a biliardo almeno una volta», «solo la domenica
 // sera». L'app non legge frasi: legge stati (`condizioniSpillo.ts`). Questo modulo è l'unico
 // posto dove una frase diventa uno stato, e lo fa in tre momenti soltanto: la migrazione che
-// converte le righe esistenti, il caricamento del seed, l'esportazione verso il seed.
+// converte le righe esistenti, il salvataggio di una riga del catalogo scritta in prosa, il ripristino di un'istantanea vecchia (`seed_json`).
 //
 // **Che cosa non fa.** Non produce mai una condizione «testuale»: se una frase non corrisponde
 // a nessuna regola, non diventa niente — la riga resta disponibile e la frase finisce fra le
@@ -39,7 +39,7 @@ export interface ContestoConversione {
   quartiereDatato?: (chiave: string) => boolean;
   /** Le chiavi dei libri in vendita a Jinbocho. */
   libriJinbocho?: () => string[];
-  /** Finestra «dal–al» in cui un Palazzo esiste (data/seed/finestre-dungeon.json). */
+  /** Finestra «dal–al» in cui un Palazzo esiste (voce `finestre-dungeon` di `dati_guida`). */
   finestraArco?: (dungeon: string) => { dal: string; al: string | null } | null;
 }
 

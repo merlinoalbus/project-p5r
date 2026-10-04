@@ -8,6 +8,7 @@
 //
 // L'invariante, uno solo: **due bersagli resi non distano mai meno di DISTANZA_MINIMA_SPILLI**,
 // a ogni ingrandimento e a ogni larghezza. Tutto il resto discende da lì.
+// ============================================================
 
 import type { SpilloDto } from '../types';
 

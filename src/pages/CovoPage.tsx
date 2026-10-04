@@ -13,7 +13,7 @@
 // la guida dichiara il totale delle medaglie ottenibili ma non quante ne dia ogni sfida, e le
 // righe dei premi sono categorie che raccolgono più elementi; il perché è scritto sopra `conti`.
 //
-// I dati non sono nuovi e non li ho inventati: sono `completamento.json → covo`, gli stessi che la
+// I dati non sono nuovi e non li ho inventati: sono la voce `covo` dei dati della guida «completamento» (`/api/completamento`), gli stessi che la
 // vecchia linguetta mostrava. Quel che cambia è che si possono cercare, contare e leggere in due
 // colonne invece che in un elenco puntato lungo cinquantadue righe.
 //

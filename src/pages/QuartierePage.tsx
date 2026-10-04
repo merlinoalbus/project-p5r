@@ -15,7 +15,7 @@
 // mappa sta a sinistra e i luoghi a destra, che è la coppia che si guarda insieme. Sotto, in
 // colonna, e i luoghi in due colonne dove c'è spazio.
 //
-// «Configura ingresso da Città» sta accanto alla mappa e non più fra il titolo e il resto: è la
+// «Ingresso da Città» sta accanto alla mappa e non più fra il titolo e il resto: è la
 // didascalia della mappa, non un capitolo della pagina. Decide **quale** planimetria si apre
 // cliccando il quartiere sulla mappa di Tokyo, e centrata su quale punto.
 // ============================================================

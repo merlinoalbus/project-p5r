@@ -91,7 +91,9 @@ export function definizioneStato(chiave: string): DefinizioneStato | undefined {
   return STATI_PARTITA.find((s) => s.chiave === chiave);
 }
 
-/** Valore predefinito di un campo: la prima voce dell'elenco quando è fisso, altrimenti vuoto. */
+/** Valore predefinito di un campo appena aggiunto all'editor: di solito la prima voce dell'elenco, ma per alcuni tipi un valore
+ *  scelto apposta (`data` il 18 aprile, `arco` e `rango-cliente` la seconda voce, gli interi un numero comodo); vuoto per i tipi
+ *  senza un elenco o un numero. */
 export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
   switch (tipo) {
     case 'data': return '04-18';

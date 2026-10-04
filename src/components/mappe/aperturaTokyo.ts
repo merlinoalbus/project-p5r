@@ -7,7 +7,7 @@
 // diverso, si passerebbe sopra a una scheda e non si accenderebbe niente lassù — e il
 // collegamento fra le due sembrerebbe rotto invece che coerente.
 //
-// Le condizioni vengono dalla Fase 2: `quartiere.sblocco_data` e `finestre-dungeon.json`, valutate
+// Le condizioni vengono dalla Fase 2: `quartiere.sblocco_data` e la voce `finestre-dungeon` di `dati_guida`, valutate
 // con `ordineGioco`, la stessa funzione del resto dell'app. Senza partita non c'è niente da
 // decidere e il mondo si vede intero.
 // ============================================================

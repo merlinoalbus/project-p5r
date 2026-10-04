@@ -1,14 +1,15 @@
 // ============================================================
-// Route /api/mappe — mappe, spilli, percorsi, accesso ai luoghi, piante dei quartieri, import/export
+// Route /api/mappe — mappe, spilli, percorsi, contenuti della guida, accesso ai luoghi, piante dei quartieri, import/export
+// ============================================================
+//
+// Le mappe e gli spilli sono dati di gioco condivisi fra le partite; lo stato per partita (raccolto, ottenuto, acquistato) passa
+// dal parametro `partita` delle letture e dalle rotte di /api/partite. Le rotte dei marcatori, che qui c'erano, sono uscite con
+// la verifica completa (O10, 2026-10-04).
 // ============================================================
 
 import { risolviPercorsoMappa, contenutiMappa } from '../services/mappe/contenutiGuidaService.js';
 import { risolviAccessoMondo } from '../services/mappe/accessoMondoService.js';
 import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../../shared/accessoMondo.js';
-// ============================================================
-// Route /api/mappe — marcatori delle mappe interattive (dati dell'utente, condivisi fra le partite)
-// ============================================================
-
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
@@ -30,7 +31,7 @@ router.get('/accesso/:tipo/:chiave', validate({ params: z.object({ tipo: z.enum(
   res.json(risolviAccessoMondo(req.params.tipo as TipoAccessoMondo, String(req.params.chiave)));
 });
 
-/** Scarica nell'istanza la mappa del quartiere dalla fonte collegata nel seed. */
+/** Scarica nell'istanza la mappa del quartiere dall'indirizzo collegato nei dati di gioco (`pianta_quartiere`). */
 router.post('/piante-citta/:quartiere/scarica', validate({ params: z.object({ quartiere: z.string().min(1).max(80) }) }), async (req, res) => {
   res.status(201).json(await scaricaPiantaQuartiere(String(req.params.quartiere)));
 });
@@ -94,7 +95,7 @@ router.delete('/:chiave', validate({ params: paramsMappa }), (req, res) => {
   eliminaMappa(String(req.params.chiave));
   res.status(204).end();
 });
-/** Immagine di base (corpo grezzo `image/*`): salvata nell'istanza nell'ambito «mappa» con la chiave della mappa. */
+/** Raggruppamento della planimetria: la stanza (gruppo di immagini) e l'etichetta della sua versione. */
 router.put('/:chiave/presentazione', validate({ params: paramsMappa, body: bodyPresentazioneMappa }), (req, res) => {
   res.json(aggiornaPresentazioneMappa(String(req.params.chiave), req.body as Parameters<typeof aggiornaPresentazioneMappa>[1]));
 });
@@ -103,6 +104,7 @@ router.put('/:chiave/stanza', validate({ params: paramsMappa, body: bodyStanzaMa
   res.json(impostaStanzaMappa(String(req.params.chiave), req.body as { con: string | null; nome?: string }));
 });
 
+/** Immagine di base (corpo grezzo `image/*`): salvata nell'istanza nell'ambito «mappa» con la chiave della mappa. */
 router.put('/:chiave/immagine', validate({ params: paramsMappa }), express.raw({ type: 'image/*', limit: MAX_BYTE_IMMAGINE }), (req, res) => {
   const mime = String(req.headers['content-type'] ?? '').split(';')[0].trim();
   if (!Buffer.isBuffer(req.body) || req.body.length === 0) throw httpErrors.badRequest('immagine-vuota', 'Invia il file dell\'immagine come corpo grezzo con Content-Type image/*.');

@@ -4,7 +4,8 @@
 
 import { getImmagini, urlImmagine, type AmbitoImmagine } from '../../services/api';
 
-/** Cache locale di esistenza per ambito (una sola richiesta di elenco per ambito, invalidata a ogni scrittura). */
+/** Cache locale di esistenza per ambito: una sola richiesta di elenco per ambito. Dopo un caricamento o una rimozione singola i
+ *  riquadri aggiornano l'insieme già in cache; si svuota con `azzeraCacheImmagini` (rimozione multipla) o quando l'elenco fallisce. */
 const elenchi = new Map<string, Promise<Set<string>>>();
 /** Versione per (ambito/chiave): cambia a ogni sostituzione così l'URL del file è sempre nuovo, anche fra montaggi. */
 export const versioniImmagini = new Map<string, number>();

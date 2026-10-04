@@ -122,11 +122,6 @@ export type EffettoOggetto =
 const conValore = (misura: Misura, valore: number | null) =>
   misura === 'tutto' ? 'tutti' : misura === 'percentuale' ? `il ${valore ?? 0}%` : String(valore ?? 0);
 
-/** La frase italiana di un effetto: **una sola per ogni effetto uguale**.
- *
- * È il punto dell'esercizio. Finché la frase la scriveva una persona, la stessa cosa aveva tre
- * forme e la ricerca ne trovava una; scritta da qui, due oggetti che fanno la stessa cosa la
- * mostrano identica. */
 /** I nomi con cui rendere leggibili i riferimenti: chiave del quartiere, chiave dell'attivita'.
  *
  * Stesso metodo di `descriviRequisitoSpillo`: la funzione sta in `shared/` e non puo' leggere il
@@ -136,9 +131,12 @@ const conValore = (misura: Misura, valore: number | null) =>
 export interface NomiEffetto { luoghi?: Record<string, string>; attivita?: Record<string, string> }
 
 /**
- * La frase italiana di un effetto, una sola forma per ogni effetto uguale: un ramo per famiglia, con i
- * nomi di bersagli, stati, statistiche, funzioni e rese dalle tabelle del modulo; luoghi e attività dai
- * `nomi` passati, altrimenti la chiave. La Dote si scrive con le note come simboli ♪ (da 1 a 4).
+ * La frase italiana di un effetto: **una sola per ogni effetto uguale**. È il punto dell'esercizio: finché la frase la scriveva
+ * una persona, la stessa cosa aveva tre forme e la ricerca ne trovava una; scritta da qui, due oggetti che fanno la stessa cosa
+ * la mostrano identica.
+ *
+ * Un ramo per famiglia, con i nomi di bersagli, stati, statistiche, funzioni e rese dalle tabelle del modulo; luoghi e attività
+ * dai `nomi` passati, altrimenti la chiave. La Dote si scrive con le note come simboli ♪ (da 1 a 4).
  */
 export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): string {
   switch (e.famiglia) {
@@ -169,13 +167,13 @@ export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): stri
   }
 }
 
-/** Le famiglie offerte nel modulo, con l'etichetta e quante frasi coprivano nei dati di partenza. */
 /** La figura di ogni famiglia: le illustrazioni delle categorie (`ui/categoria-<chiave>`) che le somigliano. */
 export const ICONA_FAMIGLIA_EFFETTO: Record<EffettoOggetto['famiglia'], string> = {
   ripristina: 'cura', rianima: 'cura', 'cura-stato': 'stato', 'infliggi-stato': 'battaglia', 'resiste-stato': 'stato', 'previene-stato': 'stato',
   statistica: 'battaglia', dote: 'dote', regalo: 'regali', 'sblocca-luogo': 'esplorazione', 'sblocca-funzione': 'attivita', moltiplica: 'libri', 'aumenta-punti': 'dote', descrittivo: 'altro',
 };
 
+/** Le famiglie offerte nel modulo, con la loro etichetta, nell'ordine in cui il modulo le propone. */
 export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia']; nome: string }> = [
   { chiave: 'ripristina', nome: 'Ripristina HP o SP' },
   { chiave: 'rianima', nome: 'Rianima un alleato caduto' },

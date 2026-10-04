@@ -108,7 +108,7 @@ export function skillAlLivello(personaId: number, livello: number): SkillEredita
   return (carica().apprese.get(personaId) ?? []).filter((a) => a.livello === 0 || a.livello <= livello).map((a) => a.skill);
 }
 
-/** Skill di una Persona posseduta nella scorta (quelle registrate), oppure quelle al suo livello se non registrate. */
+/** Skill di una Persona posseduta nella scorta: quelle registrate negli slot, in ordine; un elenco vuoto se non ne ha registrata nessuna. */
 export function skillPosseduta(possedutaId: number): SkillEredita[] {
   const righe = prepared('SELECT skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(possedutaId) as Array<{ skill_id: number }>;
   const s = carica();

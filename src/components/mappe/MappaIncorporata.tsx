@@ -1,5 +1,8 @@
 // ============================================================
-// MappaIncorporata — il visore delle mappe dentro un'altra pagina (descrizione completa più sotto)
+// MappaIncorporata — visore a altezza fissa dentro una pagina (Città, quartiere, area di un Palazzo, home della Partita) — Fase 13.4
+// ============================================================
+//
+// Stesso visore dello schermo intero: navigazione fra i livelli apre la pagina a schermo intero; «Modifica mappa» apre l'editor.
 // ============================================================
 
 import { haPlanimetria } from '../../utils/haPlanimetria';
@@ -7,13 +10,6 @@ import { presentaMappa } from '../../utils/presentazioneMappa';
 import { risolviMappa } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { PageState } from '../shared/PageState';
-// ============================================================
-// MappaIncorporata — visore a altezza fissa dentro una pagina (Città, quartiere, area di un Palazzo, home della Partita) — Fase 13.4
-// ============================================================
-//
-// Stesso visore dello schermo intero: navigazione fra i livelli apre la pagina a schermo intero; «Modifica mappa» apre l'editor.
-// ============================================================
-
 import { urlMappa, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';

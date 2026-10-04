@@ -448,7 +448,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     if (c !== 'spostamento') setDestinazione(null);
     if (c === 'citta') setCondizioni([]);
   };
-  // Uno spostamento che **è** un luogo (una stazione) tiene quel riferimento: è la sua identità per il seed; la voce della guida
+  // Uno spostamento che **è** un luogo (una stazione) tiene quel riferimento: è la sua identità nel pacchetto, con cui lo si riconosce all’import; la voce della guida
   // sta in un campo suo (`voce`, 094) e la destinazione vive a parte. Il riferimento «mappa» si
   // scrive solo per chi non ha un'identità propria (i passaggi vecchi lo usano come ripiego).
   const riferimentoEffettivo = categoria === 'spostamento'
@@ -531,7 +531,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
 
 interface PropsFormMappa { mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; onSalva: (dati: Parameters<typeof aggiornaMappa>[1]) => Promise<void>; onElimina: () => void }
 
-/** Proprietà della mappa (nome, tipo, genitore, ordine, asset, note). */
+/** Proprietà della mappa (nome, tipo, genitore, ordine, note); il nome dedotto da confermare si segnala sotto il campo Nome. */
 function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMappa) {
   const [nome, setNome] = useState(mappa.nome);
   const [tipo, setTipo] = useState<TipoMappa>(mappa.tipo);
@@ -584,7 +584,7 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
   const [tipo, setTipo] = useState<TipoMappa>(genitore.tipo === 'palazzo' || genitore.tipo === 'dedalo' || genitore.tipo === 'area' ? 'area' : genitore.tipo === 'citta' ? 'quartiere' : 'luogo');
   const [passaggio, setPassaggio] = useState(true);
   const [ritorno, setRitorno] = useState(false);
-  // asset del repository: segue la chiave («mappe/<chiave>») finché l'utente non lo tocca; vuoto = nessun asset (15.25)
+  // la chiave nasce dal nome, preceduta da quella del genitore (non sotto la città): unica e valida per abilitare «Crea»
   const chiaveEffettiva = (genitore.tipo==='citta'?'':genitore.chiave+'-')+slug(nome);
   const esiste = albero.some((m) => m.chiave === chiaveEffettiva);
   const valida = /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiaveEffettiva) && !esiste && nome.trim().length > 0;

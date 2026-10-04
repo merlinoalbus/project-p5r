@@ -1,22 +1,19 @@
 // ============================================================
-// bootstrap — costruzione dell'applicazione Express (middleware, router di area, health, 404, errori)
-// ============================================================
-
-import condizioniRouter from './routes/condizioni.js';
-// ============================================================
-// Factory dell'app Express + catena middleware
+// bootstrap — factory dell'app Express e catena dei middleware
 // ============================================================
 //
 // Ordine:
 //   1. requestContext  — requestId + child logger per richiesta
 //   2. responseShape   — envelope { data } su ogni res.json
 //   3. express.json (niente CORS: il frontend è sulla stessa origine, proxy Vite / nginx — DECISIONI 2026-10-03)
-//   4. router di area: /api/compendio, /api/traduzioni, /api/partite, /api/immagini, /api/fusione, /api/mappe, /api/font, /api/impostazioni
+//   4. router di area: /api/compendio, /api/traduzioni, /api/partite, /api/immagini, /api/fusione, /api/mappe, /api/font,
+//      /api/impostazioni, /api/catalogo, /api/condizioni
 //   5. /api/health + /api/config
 //   6. 404 JSON per /api/* sconosciute
 //   7. errorHandler    — SEMPRE ultimo
 // ============================================================
 
+import condizioniRouter from './routes/condizioni.js';
 import express, { type Express } from 'express';
 import { z } from 'zod';
 import { config } from './config.js';

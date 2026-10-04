@@ -72,7 +72,6 @@ export function storico(partitaId: number, filtro: FiltroStorico = {}): StoricoD
   return { eventi: pagina.map(eventoDto), prossimo: righe.length > limite ? pagina[pagina.length - 1].id : null, totale };
 }
 
-/** Elimina una voce dello storico (correzione di un errore dell'utente). */
 /** Elimina più voci dello storico in una transazione; restituisce quante ne ha trovate ed eliminate. */
 export function eliminaEventi(partitaId: number, ids: number[]): number {
   const unici = [...new Set(ids)];

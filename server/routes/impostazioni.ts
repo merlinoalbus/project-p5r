@@ -4,7 +4,6 @@
 // I file grossi passano dalla CARTELLA D'APPOGGIO condivisa (il NAS montato, `DEPOSITO_DIR`): ogni
 // scaricamento ne lascia lì una copia, e da lì si sceglie che cosa reimportare o ripristinare. Il
 // browser non trasporta più centinaia di MB, quindi i limiti di corpo di nginx e dei tunnel non contano.
-// ============================================================
 //
 // L'esportazione risponde con un file binario (`res.download` / `res.send`), quindi NON passa dall'envelope `{ data }`
 // del middleware, che tocca solo `res.json`.
@@ -74,9 +73,8 @@ router.get('/istanza/completa.zip', async (_req, res, next) => {
 });
 
 // ---- Pacchetto di gioco (voce 10): il solo gioco.db, immagini comprese, senza le partite ----
-// Il download è `GET /istanza/database` (lo stesso file). Qui l'anteprima e l'importazione, in due forme:
-// con il file nel corpo (istanza locale) oppure con un indirizzo da cui il server se lo prende (istanza
-// pubblicata: il proxy davanti rifiuterebbe un corpo da centinaia di MB).
+// Il download è `GET /istanza/database` (lo stesso file). L'anteprima e l'importazione leggono un file della
+// cartella d'appoggio (sotto): dal browser parte solo il nome, in qualunque istanza, locale o pubblicata.
 
 // ---- Cartella d'appoggio (il NAS montato): la strada normale per un'istanza pubblicata ----
 

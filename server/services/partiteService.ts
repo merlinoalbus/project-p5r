@@ -72,7 +72,6 @@ export interface DatiPartita {
   allarmeAttivo?: boolean;
 }
 
-/** Crea una partita; se è la prima (o `attiva` è richiesto) diventa attiva. */
 /** Primo giorno del percorso della guida ('MM-GG'): giorno corrente predefinito di una nuova partita. */
 function primoGiornoDelGioco(): string | null {
   return (prepared('SELECT data FROM giorno_percorso ORDER BY ordine LIMIT 1').get() as { data: string } | undefined)?.data ?? null;
@@ -199,7 +198,7 @@ export function dotiSociali(partitaId: number): DoteSocialePartitaDto[] {
     });
 }
 
-/** Il nome di una Dote sociale («Gentilezza»), per dire che cosa il gioco dà senza toccarla (`DotiDaSegnare`). */
+/** Il nome di una Dote sociale («Gentilezza»), per dire che cosa il gioco dà senza toccarla (`DoteDaSegnareDto`). */
 export function nomeDote(chiave: string): string {
   if (!prepared('SELECT 1 FROM dote_sociale WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
   return t('doteSociale', chiave);
@@ -210,7 +209,7 @@ export function nomeDote(chiave: string): string {
  *
  * **Solo a mano** (scelta dell'utente, 2026-09-30: «fai che i punti Doti Sociali li sposto solo io manualmente e non
  * automaticamente»): la chiamano la scheda Doti e l'API delle Doti, nient'altro. Spunte, letture, turni, incontri,
- * domande e cruciverba dicono che cosa il gioco dà (`DotiDaSegnare`) e lo ricordano, ma non toccano i punti — né
+ * domande e cruciverba dicono che cosa il gioco dà (`DoteDaSegnareDto`) e lo ricordano, ma non toccano i punti — né
  * aggiungendo né togliendo, nemmeno togliendo la spunta di un'azione di prima.
  */
 export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDote): DoteSocialePartitaDto {

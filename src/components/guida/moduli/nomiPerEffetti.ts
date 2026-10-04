@@ -1,5 +1,5 @@
 // ============================================================
-// nomiPerEffetti — quartieri e attività, per scrivere le frasi degli effetti con i nomi e non con le chiavi
+// nomiPerEffetti — quartieri, attività e Confidenti, per scrivere le frasi degli effetti con i nomi e non con le chiavi
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';

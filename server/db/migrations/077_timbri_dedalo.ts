@@ -3,7 +3,7 @@
 // ============================================================
 //
 // La guida dichiara i timbri totali di sei dedali su nove dentro la prosa di
-// `dungeon_area.descrizione» («10 Aree (Area 1-10); Sala d'attesa in Area 6; 20 Timbri totali …»).
+// `dungeon_area.descrizione` («10 Aree (Area 1-10); Sala d'attesa in Area 6; 20 Timbri totali …»).
 // Nasce `timbri_totale`, letto da quella frase con un'espressione esatta; per Qimranut, Chemdah e
 // Iweleth la guida non li dichiara e il valore resta nullo: è un dato che manca, non uno zero.
 // Il conteggio per partita sta nel file delle partite (`timbri_dedalo_partita`, migrazione

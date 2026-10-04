@@ -600,16 +600,6 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
 }
 
 /**
- * Toglie un punto della guida e quel che le partite ne avevano segnato.
- *
- * I pin che lo rappresentavano sulle planimetrie **restano** — sono posti sulla mappa — e perdono solo il
- * collegamento: dal 2026-10-01 lo stato vive nei pin, e il loro «raccolto» è vero anche senza la voce della guida.
- * Gli elementi della guida senza mappa (strato di prima) invece non esistono fuori dalla guida: il loro «raccolto»
- * se ne va con il punto (rilievo della revisione, 2026-09-18: un collezionabile orfano segnato preso).
- * Un Enigma tolto lascia i suoi passi come voci dell'area, in fondo e nel loro ordine, con il loro stato; un passo tolto lascia
- * il suo Enigma, che segue i passi rimasti (095).
- */
-/**
  * Quello che un punto della guida lascia nel resto dei dati, tolto prima di lui (dentro la transazione di chi chiama): gli stati
  * delle partite, il marcatore, il «raccolto» degli elementi della guida senza mappa che lo citano; i pin delle planimetrie tengono
  * il loro «raccolto» (lo stato vive nei pin, 2026-10-01) e perdono solo il collegamento. Lo usano `eliminaPunto` ed `eliminaArea`,
@@ -624,8 +614,16 @@ function staccaPunto(puntoChiave: string): void {
 }
 
 /**
- * Elimina un punto della guida in una transazione (404 se non esiste): ne stacca le tracce (`staccaPunto`), riporta i passi di
- * un Enigma fra le voci dell'area in fondo all'elenco, cancella la voce e riallinea in ogni partita l'Enigma di cui era un passo.
+ * Toglie un punto della guida e quel che le partite ne avevano segnato, in una transazione (404 se non esiste): ne stacca le
+ * tracce (`staccaPunto`), riporta i passi di un Enigma fra le voci dell'area in fondo all'elenco, cancella la voce e riallinea in
+ * ogni partita l'Enigma di cui era un passo.
+ *
+ * I pin che lo rappresentavano sulle planimetrie **restano** — sono posti sulla mappa — e perdono solo il
+ * collegamento: dal 2026-10-01 lo stato vive nei pin, e il loro «raccolto» è vero anche senza la voce della guida.
+ * Gli elementi della guida senza mappa (strato di prima) invece non esistono fuori dalla guida: il loro «raccolto»
+ * se ne va con il punto (rilievo della revisione, 2026-09-18: un collezionabile orfano segnato preso).
+ * Un Enigma tolto lascia i suoi passi come voci dell'area, in fondo e nel loro ordine, con il loro stato; un passo tolto lascia
+ * il suo Enigma, che segue i passi rimasti (095).
  */
 export function eliminaPunto(puntoChiave: string): void {
   const p = prepared('SELECT contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { contenitore_chiave: string | null } | undefined;

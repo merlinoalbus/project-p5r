@@ -42,7 +42,6 @@ const livelloValido = (v: string | null, predefinito: number): number => {
   return Number.isInteger(n) && n >= 1 && n <= 99 ? n : predefinito;
 };
 
-/** Elenco Persona: filtri persistenti nell'URL (così il ritorno dalla scheda li conserva) e vista a piastrelle o compatta. */
 /** Parametri dell'URL gestiti dal pannello dei filtri (ricerca e ordinamento esclusi). */
 const CHIAVI_FILTRI = ['arcana', 'lvMin', 'lvMax', 'el', 'aff', 'img', 'dlc', 'catturabili'] as const;
 
@@ -53,7 +52,7 @@ const CHIAVI_FILTRI = ['arcana', 'lvMin', 'lvMax', 'el', 'aff', 'img', 'dlc', 'c
  * ordina per livello, nome o arcano nel verso scelto. I filtri diversi da ricerca e ordinamento
  * stanno in un pannello (aperto di partenza se l'URL ne contiene) e sono riassunti da chip
  * rimovibili. Al ritorno dalla scheda di dettaglio porta in vista l'ultima Persona aperta e la
- * evidenzia per tre secondi.
+ * evidenzia per tre secondi. La vista, a piastrelle o a elenco, è una preferenza ricordata per dispositivo.
  */
 export function CompendioPage() {
   useDocumentTitle('Compendio');

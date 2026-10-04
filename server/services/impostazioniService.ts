@@ -7,8 +7,8 @@
 // caratteri vivono su disco in DATA_DIR e le partite in un file a parte.
 // Reimportazione: il file SOSTITUISCE l'istanza. Prima si valida (intestazione SQLite, integrity_check, schema riconoscibile),
 // poi si salva una copia di sicurezza di ciò che c'è ora, si chiude la connessione, si mettono al loro posto i file, si riapre e si
-// rieseguono migrazioni e seed. Se qualcosa fallisce dopo la chiusura, la copia di sicurezza viene ripristinata e l'app resta
-// utilizzabile.
+// rieseguono le migrazioni (e si assorbono le immagini rimaste su disco dai backup di prima della 079). Se qualcosa fallisce
+// dopo la chiusura, la copia di sicurezza viene ripristinata e l'app resta utilizzabile.
 //
 // **Tutto passa da file, mai da buffer interi** (rilievi F19/P3' della verifica completa, 2026-10-03). Prima un ripristino teneva in
 // memoria il file letto, poi ogni voce dello ZIP, e riscriveva il database due volte (una copia per verificarlo, una per installarlo):

@@ -28,7 +28,8 @@ import { AssetImg } from './AssetImg';
 interface Props {
   /** Chiave dell'asset `decori/<chiave>`, in italiano e col trattino. */
   chiave: string;
-  /** `angolo` (default): in alto a destra, dietro al testo. `banda`: fascia bassa a tutta larghezza. */
+  /** Le proporzioni della figura: `angolo` (default) quadrata, `banda` larga (16:9). Dove sta nella carta lo decide la
+   *  disposizione di `SezioneConFregio`, non la forma: la figura non sta più dietro al testo. */
   forma?: 'angolo' | 'banda';
   className?: string;
 }
@@ -43,17 +44,6 @@ export function FregioSezione({ chiave, forma = 'angolo', className = '' }: Prop
   );
 }
 
-/** Una sezione di prosa con la sua illustrazione accanto.
- *
- * **Il testo sta in un contenitore suo**, e l'illustrazione gli è sorella: è la differenza fra
- * un'impaginazione e un pasticcio. Il primo tentativo metteva la figura in una colonna di griglia
- * che copriva tutte le righe (`grid-row: 1 / -1`), e la sua altezza si spalmava sulle righe del
- * testo: fra il titolo e il primo paragrafo si apriva un buco di trecento pixel. Rilievo
- * dell'utente, meritato: «non è responsive, non è ottimizzata e non è moderna».
- *
- * Ora sono due blocchi affiancati: il testo prende lo spazio che resta, la figura una colonna fra
- * 160 e 260 px. Sotto i 768 px si incolonnano e **la figura va sopra**, che su un telefono è come
- * si legge: prima l'immagine, poi il discorso. */
 /** Come la figura sta nella sezione. Non c'è un valore buono per tutte: la pagina si compone
  *  scegliendo, sezione per sezione, e il movimento nasce da lì.
  *
@@ -64,9 +54,19 @@ export function FregioSezione({ chiave, forma = 'angolo', className = '' }: Prop
 export type DisposizioneFregio = 'fascia' | 'lato' | 'grande' | 'alta';
 
 /**
- * Carta di sezione con la prosa in un contenitore proprio e il fregio come blocco fratello. `disposizione`
- * sceglie la classe di impaginazione (`sezione-fregio--<disposizione>`), `chiave` e `forma` passano al fregio,
- * gli altri attributi HTML vanno sulla `<section>`.
+ * Una sezione di prosa con la sua illustrazione accanto: la carta, con la prosa in un contenitore proprio e il fregio come
+ * blocco fratello. `disposizione` sceglie la classe di impaginazione (`sezione-fregio--<disposizione>`), `chiave` e `forma`
+ * passano al fregio, gli altri attributi HTML vanno sulla `<section>`.
+ *
+ * **Il testo sta in un contenitore suo**, e l'illustrazione gli è sorella: è la differenza fra
+ * un'impaginazione e un pasticcio. Il primo tentativo metteva la figura in una colonna di griglia
+ * che copriva tutte le righe (`grid-row: 1 / -1`), e la sua altezza si spalmava sulle righe del
+ * testo: fra il titolo e il primo paragrafo si apriva un buco di trecento pixel. Rilievo
+ * dell'utente, meritato: «non è responsive, non è ottimizzata e non è moderna».
+ *
+ * Ora sono due blocchi affiancati: il testo prende lo spazio che resta, la figura una colonna fra
+ * 160 e 260 px. Sotto i 768 px si incolonnano e **la figura va sopra**, che su un telefono è come
+ * si legge: prima l'immagine, poi il discorso.
  */
 export function SezioneConFregio({ chiave, forma, disposizione = 'lato', className = '', children, ...resto }: Props & { disposizione?: DisposizioneFregio; children: ReactNode } & React.HTMLAttributes<HTMLElement>) {
   return (

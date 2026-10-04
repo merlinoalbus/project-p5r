@@ -1,14 +1,16 @@
 // ============================================================
-// catalogoService — negozi e articoli aggiunti o corretti dall'utente (Fase 16.1)
+// catalogoService — le righe della guida aggiunte, corrette o nascoste dall'utente: negozi, articoli, libri, film, attività,
+// luoghi, domande e cruciverba (nato con la Fase 16.1 per negozi e articoli)
 // ============================================================
 //
-// Le righe dell'utente vivono nelle stesse tabelle del seed, distinte da `origine`:
+// Le righe dell'utente vivono nelle stesse tabelle dei dati della guida, distinte da `origine`:
 //   - creare  → nuova riga `origine = 'utente'` con chiave generata dal nome (`u-<slug>`, `<negozio>/u-<slug>`)
-//   - correggere una riga del seed → la riga passa a `origine = 'utente'` e `seed_json` conserva l'originale
-//   - nascondere una riga del seed → `nascosto = 1` (il reseed non la riporterebbe indietro: cancellarla non basterebbe)
-//   - ripristinare → la riga torna com'era nel seed (`seed_json`) e `origine` torna 'seed'
-// Il caricatore del seed aggiorna e cancella soltanto le righe `origine = 'seed'`, quindi il lavoro dell'utente
-// sopravvive agli aggiornamenti dei dati della guida.
+//   - correggere una riga della guida → la riga passa a `origine = 'utente'` e `seed_json` conserva l'originale
+//   - nascondere una riga della guida → `nascosto = 1` (una ricarica dei dati la riporterebbe indietro: cancellarla non basterebbe)
+//   - ripristinare → la riga torna com'era nei dati della guida (`seed_json`) e `origine` torna 'seed'
+// I nomi `seed` e `seed_json` vengono dal seed JSON, dismesso il 2026-09-12: oggi «seed» vuol dire «dato della guida, arrivato
+// con il pacchetto di gioco». La ricarica dei dati della guida (`ricaricaPacchetto`) aggiorna e sostituisce soltanto le righe
+// `origine = 'seed'`, quindi il lavoro dell'utente sopravvive agli aggiornamenti.
 // ============================================================
 
 import { verificaCondizioni } from './mappe/mappeService.js';

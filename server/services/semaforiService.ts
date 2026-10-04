@@ -63,10 +63,9 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const dataGioco = partita?.data_gioco ?? null;
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
   const conferme = new Set((prepared('SELECT confidente_chiave, rango, indice FROM requisito_partita WHERE partita_id = ? AND confermato = 1').all(partitaId) as Array<{ confidente_chiave: string; rango: number; indice: number }>).map((r) => `${r.confidente_chiave}/${r.rango}/${r.indice}`));
-  // Chi e' in squadra: i Ladri di cui la partita ha una riga. La riga nasce quando ne segni il
-  // livello, quindi «ha una riga» vuol dire «l'ho gia' con me», che e' la domanda della condizione.
-  // **L'interruttore, non la presenza della riga.** Prima bastava avere segnato un livello perche'
-  // il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
+  // Chi e' in squadra: i Ladri con l'interruttore «In squadra» acceso (`in_squadra = 1`), e chi e' fuori quelli con
+  // l'interruttore spento. **L'interruttore, non la presenza della riga.** Prima bastava avere segnato un livello (la riga
+  // nasce li') perche' il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const eventi = new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave));

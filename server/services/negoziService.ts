@@ -95,7 +95,6 @@ export function elencaNegozi(partitaId?: number): NegozioRiassuntoDto[] {
     .map((r) => riassunto(r, st));
 }
 
-/** Scheda di un negozio con gli articoli (acquistati nella partita, se indicata). */
 /** Lo stato della partita già calcolato da chi chiama: una mappa con molti negozi lo passa invece di farlo ricalcolare per ogni pin. */
 export interface ContestoNegozio { st: StatoDisponibilita; acquistati: Set<string> }
 

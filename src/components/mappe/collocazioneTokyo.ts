@@ -10,7 +10,7 @@
 // foglio non ci sono: il campo `resa` di ogni sprite vale sempre metà larghezza e metà altezza,
 // cioè è il perno con cui il gioco àncora l'immagine, non il punto in cui la mette.
 //
-// **E nemmeno le linee.** Si è provato a ricavarle da `metropolitana.json`, che ha 91 «tratte»:
+// **E nemmeno le linee.** Si è provato a ricavarle da `metropolitana.json` dell'atlante (`data/atlas/extracted/`), che ha 91 «tratte»:
 // prendendo le coppie consecutive di ogni tratta vengono 61 archi fra 25 nodi, grado medio cinque
 // — una rete di trasporto ne ha due o tre. Guardando una tratta si capisce perché: la prima è
 // *Shibuya, Yongen-Jaya, Aoyama-Itchome, Shinjuku, Akihabara, Kanda, Ichigaya, Jinbocho, Santuario
@@ -128,7 +128,7 @@ export const LINEE_TOKYO: Linea[] = [
  * sulla mappa di viaggio»: vero, e irrilevante, perché non ce l'hanno nemmeno i cinque Palazzi del
  * Meta-Nav qui sotto né il Covo, e stanno tutti sulla mappa. L'utente li aveva chiesti per nome —
  * «il Covo dei Ladri e i mementos possono essere posizionati in aree libere» — la loro finestra è
- * già in `finestre-dungeon.json` (dal 9 maggio, e non si chiude) e la sagoma esiste. Stanno
+ * già nella voce `finestre-dungeon` di `dati_guida` (dal 9 maggio, e non si chiude) e la sagoma esiste. Stanno
  * accanto a Iweleth sul bordo, che è il posto di ciò che si apre col Meta-Nav e non da una
  * fermata. Il perché della confusione è scritto in `src/utils/palazzi.ts`. */
 export const RADICI_TOKYO: Record<string, Collocazione> = {

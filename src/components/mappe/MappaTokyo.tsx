@@ -18,11 +18,11 @@
 // Quando un quartiere si sblocca, sul suo pallino spuntano la sagoma e la targa; finché non si
 // sblocca resta il solo pallino. L'11 aprile Shinjuku è un pallino e basta — apre il 18 giugno —
 // e il Palazzo di Kamoshida c'è dal 12 aprile al 2 maggio e poi sparisce. Le condizioni vengono
-// dalla Fase 2 — `quartiere.sblocco_data` e `finestre-dungeon.json` — valutate con `ordineGioco`,
+// dalla Fase 2 — `quartiere.sblocco_data` e la voce `finestre-dungeon` di `dati_guida` — valutate con `ordineGioco`,
 // la stessa funzione del resto dell'app. Senza partita si vede tutto, e lo si dice.
 //
 // **Posizioni e tracciati sono autorati**, e sta scritto in `collocazioneTokyo.ts`: nel foglio del
-// gioco non ci sono, e le «tratte» di `metropolitana.json` sono raggiungibilità, non binari.
+// gioco non ci sono, e le «tratte» di `metropolitana.json` (l'estrazione dell'atlante, `data/atlas/extracted/`) sono raggiungibilità, non binari.
 // ============================================================
 
 import { Link } from 'react-router-dom';

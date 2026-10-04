@@ -122,7 +122,7 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   const quartieriConSblocco = new Set(haSblocco
     ? (db.prepare("SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL AND sblocco_data <> ''").all() as Array<{ chiave: string }>).map((q) => q.chiave)
     : []);
-  // Le finestre dei Palazzi, trascritte in `data/seed/finestre-dungeon.json` e caricate in
+  // Le finestre dei Palazzi, trascritte a mano nella voce `finestre-dungeon` di
   // `dati_guida`: nel catalogo le date sono prosa, e ricavarle con un'espressione regolare
   // vorrebbe dire sbagliarne qualcuna senza accorgersene.
   // Una trascrizione assente o illeggibile non deve impedire la sincronizzazione: nessuna finestra. (Qui si riempiva anche una

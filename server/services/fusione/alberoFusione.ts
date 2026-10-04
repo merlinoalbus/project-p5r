@@ -187,7 +187,7 @@ function ripartisciSkill(r: Ricerca, p: PersonaFusione, ric: RicettaFusione, ric
   return { perIngrediente, daLivello };
 }
 
-/** Costo della foglia più economica disponibile per p (senza considerare il consumo della scorta), o INFINITO. */
+/** Costo della foglia più economica disponibile per p (senza considerare il consumo della scorta), o null se non ce n'è nessuna. */
 function costoFoglia(r: Ricerca, p: PersonaFusione, scortaUsata?: Map<number, number>): { modo: ModoNodo; costo: number } | null {
   const inScorta = (r.disp.scorta.get(p.id) ?? 0) - (scortaUsata?.get(p.id) ?? 0);
   if (inScorta > 0) return { modo: 'scorta', costo: 0 };

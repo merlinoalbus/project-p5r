@@ -48,7 +48,7 @@ function Piano({ piano, indice, onSalva, salvato }: { piano: PianoFusioneDto; in
   );
 }
 
-/** Selezione del bersaglio, opzioni (profondità, catture, limite di livello, alternative) e piani ordinati per costo. */
+/** Il titolo della spiegazione quando un piano non c'è, per ciascun motivo che il server può dare. */
 const TITOLO_MOTIVO: Record<NonNullable<PianiFusioneDto['motivo']>['codice'], string> = { 'non-fondibile': 'Non si ottiene per fusione', 'skill-non-ereditabili': 'Skill non ereditabili', 'skill-senza-fonte': 'Nessuna Persona ha questa skill dall’inizio', 'limite-livello': 'Limite di livello troppo basso' };
 
 /**

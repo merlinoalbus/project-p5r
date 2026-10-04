@@ -34,7 +34,7 @@ export function BackupIstanza() {
   const [occupato, setOccupato] = useState(false);
   const [deposito, setDeposito] = useState<DepositoFileDto | null>(null);
   const [fileScelto, setFileScelto] = useState('');
-  // il file da ripristinare: dal dispositivo oppure dalla cartella d'appoggio
+  // il file della cartella d'appoggio da ripristinare: non null finché la finestra di conferma è aperta
   const [dalDeposito, setDalDeposito] = useState<string | null>(null);
   const [lavoroSulServer, setLavoroSulServer] = useState(false);
   const s = stato.dati;
