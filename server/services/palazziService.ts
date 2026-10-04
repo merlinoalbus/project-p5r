@@ -10,23 +10,22 @@
 // entrambe valide le condizioni sono in AND non in OR», poi «Tesoro + boss + raccolto tutto») servono **tutte e tre**:
 // - il **Tesoro del Palazzo**: lo spillo «Tesoro del Palazzo» raccolto. Un Palazzo senza quello spillo sulle planimetrie
 //   non si completa finché non lo si mette con l'editor;
-// - il **boss finale** sconfitto: il suo spillo raccolto sulla mappa, o il boss segnato nella Guida **dall'utente**. Il
-//   segno che il raccolto mette da solo (`automatico = 1`, qui sotto) non conta: altrimenti il Tesoro basterebbe anche per
-//   il boss. Prima il boss bastava da solo, ma si può affrontare più volte dentro un Palazzo (rilievo dell'utente);
+// - il **boss finale** sconfitto: il suo spillo raccolto sulla mappa, o il boss segnato nella Guida. Prima il boss bastava
+//   da solo, ma si può affrontare più volte dentro un Palazzo (rilievo dell'utente);
 // - **tutto il raccolto**: il 100% della scheda del Palazzo, con la sua stessa regola.
 // Il boss **finale**, non uno qualsiasi: Shido ha Akechi e il Mastino prima dell'Aula magna, Maruki Sumire
 // prima della fine (rilievo della revisione). Finale = i boss dell'ultima area, in ordine di guida, che ne ha.
 // I Memento non hanno planimetrie: restano completati dal boss finale segnato nella Guida, come prima.
 //
-// Scelte dell'utente (2026-09-30, confermate il 2026-10-04 come solo segno): il boss finale della Guida **si segna da solo**
-// quando si raccoglie il Tesoro o il boss finale sulla mappa, e si toglie quando non ne resta raccolto nessuno dei due;
-// l'ingresso al Palazzo **sparisce** dalla mappa a Palazzo completato. Gli archi restano legati alla data.
+// Il boss finale della Guida **non si segna più da solo** raccogliendo il Tesoro o il boss (scelta dell'utente del
+// 2026-10-04, «Togli l'automatismo»: il segno automatico del 2026-09-30 faceva risultare il boss sconfitto senza che
+// l'utente l'avesse detto; utente 017 toglie quelli rimasti). Restano le scelte del 2026-09-30: l'ingresso al Palazzo
+// **sparisce** dalla mappa a Palazzo completato, e gli archi restano legati alla data.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
+import { prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { voceDelPin, vociGestite } from './mappe/voceDelPin.js';
-import { allineaEnigmaDellaVoce } from './mappe/statiGuida.js';
 import { radiceDelPalazzo, SQL_RADICE_PALAZZO, SQL_SOTTOALBERO } from './mappe/alberoMappe.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
@@ -107,24 +106,19 @@ function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, Spi
 /** Uno spillo segnato raccolto nella partita. */
 const raccolto = (s: SpilloCollezionabile, raccolti: Set<string>): boolean => !!s.uid && raccolti.has(s.uid);
 
-/** Vero se sulla mappa c'è un segno che il Palazzo è finito: il Tesoro o il boss finale raccolti. È quel che fa segnare da solo il boss della Guida. */
-function segnoDiFineSullaMappa(spilli: SpilloCollezionabile[], finale: BossFinale | undefined, aree: Map<string, Set<string>>, raccolti: Set<string>): boolean {
-  return spilli.some((s) => raccolto(s, raccolti) && (s.tipo === 'tesoro-palazzo' || eBossFinale(s, finale, aree)));
-}
-
 /** Un Palazzo nella partita: il perché del completamento, o null; e, se non è completato, che cosa manca. */
 export interface StatoPalazzo { completato: string | null; manca: string | null }
 
 /**
  * Le tre condizioni del completamento di un Palazzo (vedi l'intestazione), tutte insieme: Tesoro raccolto, boss finale
- * sconfitto (spillo raccolto o segnato nella Guida dall'utente), 100% del raccolto con la regola della scheda.
+ * sconfitto (spillo raccolto o segnato nella Guida), 100% del raccolto con la regola della scheda.
  */
-function valutaPalazzo(spilli: SpilloCollezionabile[], finale: BossFinale | undefined, aree: Map<string, Set<string>>, raccolti: Set<string>, puntiGestiti: Set<string>, bossSegnatoDallUtente: boolean): StatoPalazzo {
+function valutaPalazzo(spilli: SpilloCollezionabile[], finale: BossFinale | undefined, aree: Map<string, Set<string>>, raccolti: Set<string>, puntiGestiti: Set<string>, bossSegnato: boolean): StatoPalazzo {
   // la stessa regola della scheda del Palazzo: raccolto, o collegato a un punto della Guida già gestito
   const preso = (s: SpilloCollezionabile) => raccolto(s, raccolti) || (!!s.voce && puntiGestiti.has(s.voce));
   const tesori = spilli.filter((s) => s.tipo === 'tesoro-palazzo');
   const tesoro = tesori.length > 0 && tesori.every((s) => raccolto(s, raccolti));
-  const boss = bossSegnatoDallUtente || spilli.some((s) => eBossFinale(s, finale, aree) && raccolto(s, raccolti));
+  const boss = bossSegnato || spilli.some((s) => eBossFinale(s, finale, aree) && raccolto(s, raccolti));
   const presi = spilli.filter(preso).length;
   const tutto = spilli.length > 0 && presi >= spilli.length;
   if (tesoro && boss && tutto) return { completato: `Tesoro, boss finale e raccolto tutto (${presi}/${spilli.length})`, manca: null };
@@ -141,8 +135,6 @@ export function statoPalazzi(partitaId: number): Map<string, StatoPalazzo> {
   const out = new Map<string, StatoPalazzo>();
   const finali = bossFinali();
   const puntiGestiti = vociGestite(partitaId);
-  // il boss finale segnato dall'utente, non dal raccolto (`automatico = 0`)
-  const segnatiDallUtente = new Set((prepared('SELECT punto_chiave FROM punto_partita WHERE partita_id = ? AND automatico = 0').all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave));
   const tipi = new Map((prepared('SELECT chiave, tipo FROM dungeon').all() as Array<{ chiave: string; tipo: string }>).map((r) => [r.chiave, r.tipo]));
   const palazzi = palazzoDiOgniMappa();
   const raccolti = new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
@@ -156,8 +148,8 @@ export function statoPalazzi(partitaId: number): Map<string, StatoPalazzo> {
       out.set(dungeon, segnato ? { completato: 'boss finale segnato nella Guida', manca: null } : { completato: null, manca: 'il boss finale segnato nella Guida' });
       continue;
     }
-    const bossSegnatoDallUtente = !!finale && finale.punti.some((p) => puntiGestiti.has(p) && segnatiDallUtente.has(p));
-    out.set(dungeon, valutaPalazzo(collezionabili.get(dungeon) ?? [], finale, aree, raccolti, puntiGestiti, bossSegnatoDallUtente));
+    const bossSegnato = !!finale && finale.punti.some((p) => puntiGestiti.has(p));
+    out.set(dungeon, valutaPalazzo(collezionabili.get(dungeon) ?? [], finale, aree, raccolti, puntiGestiti, bossSegnato));
   }
   return out;
 }
@@ -165,39 +157,6 @@ export function statoPalazzi(partitaId: number): Map<string, StatoPalazzo> {
 /** I Palazzi completati nella partita, ognuno col perché. */
 export function palazziCompletati(partitaId: number): Map<string, string> {
   return new Map([...statoPalazzi(partitaId)].flatMap(([k, s]) => (s.completato ? [[k, s.completato] as [string, string]] : [])));
-}
-
-/**
- * Dopo un «raccolto» su uno spillo: se è il Tesoro del Palazzo o il boss finale, il boss finale della Guida
- * lo segue (scelta dell'utente; dal 2026-10-04 è solo un segno, non conta per il completamento). Raccolto → segnato
- * «ottenuto» (se non lo era già). Tolto → si toglie, ma solo se sulla mappa non resta raccolto l'altro fra Tesoro e boss.
- * Va chiamata nella transazione di chi segna il raccolto, dopo la scrittura.
- */
-export function allineaBossDellaGuida(partitaId: number, spillo: { tipo: string; mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; voce_chiave?: string | null; uid: string | null }, raccolto: boolean, adesso: string): void {
-  if (!spillo.mappa_chiave || (spillo.tipo !== 'tesoro-palazzo' && spillo.tipo !== 'boss')) return;
-  const palazzi = palazzoDiOgniMappa();
-  const dungeon = palazzi.get(spillo.mappa_chiave);
-  if (!dungeon) return;
-  const finale = bossFinali().get(dungeon);
-  if (!finale) return;
-  const aree = areeDelleMappe();
-  const questo: SpilloCollezionabile = { uid: spillo.uid, tipo: spillo.tipo, mappa: spillo.mappa_chiave, voce: voceDelPin(spillo) };
-  if (spillo.tipo === 'boss' && !eBossFinale(questo, finale, aree)) return;
-  if (raccolto) {
-    // `automatico`: è il raccolto a metterlo, e solo un segno così si toglie togliendo il raccolto (utente 006);
-    // uno già segnato dall'utente resta com'è, suo
-    for (const p of finale.punti) prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at, automatico) VALUES (?, ?, 'ottenuto', ?, 1) ON CONFLICT(partita_id, punto_chiave) DO NOTHING").run(partitaId, p, adesso);
-    // il boss finale può essere un passo di un Enigma (095): l'Enigma segue i suoi passi
-    for (const p of finale.punti) allineaEnigmaDellaVoce(getDb(), partitaId, p, adesso);
-    return;
-  }
-  const raccolti = new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
-  const spilli = collezionabiliPerPalazzo(palazzi).get(dungeon) ?? [];
-  // resta raccolto l'altro fra Tesoro e boss finale: il segno resta
-  if (segnoDiFineSullaMappa(spilli, finale, aree, raccolti)) return;
-  // solo il segno messo dal raccolto: un boss segnato a mano non si perde per un raccolto tolto
-  for (const p of finale.punti) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ? AND automatico = 1').run(partitaId, p);
-  for (const p of finale.punti) allineaEnigmaDellaVoce(getDb(), partitaId, p, adesso);
 }
 
 /**

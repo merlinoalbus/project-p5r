@@ -48,7 +48,7 @@ server/
   openapi/            documentazione dell'API (voce 5 della verifica completa): rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
   db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
   db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema), 097 (atterraggio dei Palazzi dalla mappa di Tokyo); registro in index.ts, `index.test.ts` pretende id consecutivi
-  db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
+  db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici), 017 (tolti i segni automatici del boss); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/pacchetto/ pacchettoGioco.ts: primo avvio dal pacchetto (`assicuraPacchettoIniziale`), `caricaPacchetto`/`ricaricaPacchetto` (test), `regoleAllAvvio`
@@ -129,7 +129,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 - `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
 - Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto). `seed_meta`, la memoria dell'ultimo caricamento del seed, è uscita con la migrazione 096 (verifica completa, R3'), e con lei il campo `seed` dello stato dell'istanza.
-- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 097 e `utente` alla 016). Le righe qui sotto descrivono
+- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 097 e `utente` alla 017). Le righe qui sotto descrivono
   il nucleo di allora; il caricamento era `caricaSeed` con l'hash in `seed_meta`, mentre oggi i dati di gioco arrivano con il
   pacchetto (`caricaPacchetto` / importazione) e le immagini stanno nella tabella `immagine` di `gioco.db` (079):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
@@ -1028,18 +1028,19 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
       punto finale, se sta su una planimetria che contiene l'area finale, oppure — qualunque boss del Palazzo — quando
       `BossFinale.unico`: una sola area della guida ha boss (Kamoshida, Madarame, Futaba) e l'area finale può non essere
       legata a nessuna planimetria;
-    - oppure il boss finale segnato in `punto_partita` **con `automatico = 0`**, cioè dall'utente;
+    - oppure il boss finale segnato in `punto_partita` (sempre dall'utente: segni automatici non ce ne sono più);
   - il 100% con la regola di `raccoltaMappe` (raccolto o collegato a un punto gestito).
 
   I Memento (`tipo = 'mementos'`, senza planimetrie) restano completati dal boss finale segnato nella Guida. La regola la
-  valuta il caso `palazzo` di `valuta`, e con lui disponibilità e spilli. `impostaRaccolto` chiama
-  `allineaBossDellaGuida`: Tesoro o boss finale raccolti segnano il boss finale della Guida con
-  `utente.punto_partita.automatico = 1` (migrazione utente 006, DDL in `schemaUtente.ts`; `ON CONFLICT DO NOTHING`,
-  un segno già presente non si tocca). È solo un segno e non conta per il completamento. Tolti, si cancellano **solo** le
-  righe `automatico = 1`, e solo se sulla mappa non resta raccolto l'altro fra Tesoro e boss finale
-  (`segnoDiFineSullaMappa`). Le scritture dell'utente (`impostaStatoPunto`, il punto collegato di
-  `impostaRaccolto`) mettono `automatico = 0`, e le righe preesistenti nascono 0: un segno messo a mano non si toglie
-  mai da solo. `dettagliSpillo` (`senzaIngressoAPalazzoCompletato`, `palazzoDiIngresso`) blocca gli spilli che da
+  valuta il caso `palazzo` di `valuta`, e con lui disponibilità e spilli.
+
+  Dal 2026-10-04 il raccolto del Tesoro o del boss **non segna più** il boss finale della Guida: `allineaBossDellaGuida` è
+  stata tolta (scelta dell'utente, «Togli l'automatismo»). Il segno con `utente.punto_partita.automatico = 1` (migrazione
+  utente 006) faceva risultare il boss sconfitto, anche propagandosi ai pin collegati (`allineaStatiPunto`). La migrazione
+  utente 017 toglie i segni rimasti con `automatico = 1` e riallinea l'Enigma di cui il boss fosse un passo. La colonna
+  resta: ogni scrittura (`impostaStatoPunto`, il punto collegato di `impostaRaccolto`, gli Enigmi) mette 0.
+
+  `dettagliSpillo` (`senzaIngressoAPalazzoCompletato`, `palazzoDiIngresso`) blocca gli spilli che da
   fuori portano in un Palazzo completato — riconosciuti dal riferimento a una sua mappa, dalla destinazione o, come
   ultima fonte, dall'identità di seed (`seed_identita_json`) quando lo spillo è stato modificato e ha perso il
   collegamento (il 1616 della Shujin) — senza scrivere condizioni: vale anche dopo ogni sincronizzazione. Gli archi

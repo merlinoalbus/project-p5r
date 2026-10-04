@@ -165,7 +165,7 @@ describe('valutaRequisiti — ogni stato sulla partita', () => {
     expect(daProsa(['richiede Fascino Rango 3'], stato({ doti: new Map([['fascino', 3]]) })).stato).toBe('disponibile');
     expect(daProsa(['Rango Confidente Sojiro 6'], stato({ ranghiConfidenti: new Map([['sojiro', 6]]) })).stato).toBe('disponibile');
     expect(daProsa(['dopo Palazzo di Kamoshida'], stato()).stato).toBe('bloccato');
-    expect(daProsa(['dopo Palazzo di Kamoshida'], stato({ palazziCompletati: new Map([['kamoshida', 'boss segnato nella Guida']]) })).stato).toBe('disponibile');
+    expect(daProsa(['dopo Palazzo di Kamoshida'], stato({ palazziCompletati: new Map([['kamoshida', 'Tesoro, boss finale e raccolto tutto (40/40)']]) })).stato).toBe('disponibile');
     const richiesta = daProsa(['richiede il completamento della richiesta Lo zio ingordo'], stato());
     expect(richiesta.stato).toBe('bloccato');
     expect(richiesta.requisiti[0].dettaglio).not.toMatch(/conferma qui/);

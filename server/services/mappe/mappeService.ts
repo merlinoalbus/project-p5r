@@ -26,7 +26,7 @@ import { acquistiDellaPartita, dettaglioNegozio } from '../negoziService.js';
 import { giocabili } from '../squadraService.js';
 import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
 import { bloccatoDaAltriPin, statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
-import { allineaBossDellaGuida, palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
+import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
 import { allineaEnigmaDellaVoce, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, segnaPassiDellEnigma, voceDelPin } from './collegamentiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
@@ -1274,9 +1274,8 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
       // un passo di un Enigma (095): l'Enigma segue i suoi passi
       allineaEnigmaDellaVoce(getDb(), partitaId, voce, adesso);
     }
-    // il Tesoro del Palazzo o il boss finale raccolti sulla mappa segnano il boss finale della Guida, e lo
-    // tolgono se si tolgono (scelta dell'utente, 2026-09-30)
-    allineaBossDellaGuida(partitaId, r, raccolto, adesso);
+    // il Tesoro o il boss raccolti non segnano più da soli il boss finale della Guida (scelta dell'utente, 2026-10-04: il
+    // boss si affronta più volte, ed è sconfitto solo col suo spillo raccolto o segnato dalla Guida; utente 017)
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo, contestoSpilli(partitaId));

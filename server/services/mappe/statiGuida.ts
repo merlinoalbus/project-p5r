@@ -49,7 +49,7 @@ export function enigmaDi(db: AppDatabase, voce: string): string | null {
 /** Scrive lo stato di una voce in una partita e porta con sé i suoi pin: segnata li raccoglie, riaperta li riapre. */
 export function scriviStatoVoce(db: AppDatabase, partita: number, voce: string, stato: StatoPunto | null, adesso: string): void {
   if (stato === null) db.prepare('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partita, voce);
-  // segnato dall'utente: non è più il segno automatico del Tesoro o del boss raccolti (utente 006)
+  // segnato dall'utente: automatico = 0 (utente 006; dal 2026-10-04 nessuno scrive più 1, e utente 017 ha tolto quelli rimasti)
   else db.prepare('INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET stato = excluded.stato, updated_at = excluded.updated_at, automatico = 0').run(partita, voce, stato, adesso);
   for (const pin of pinDelPuntoGuida(db, voce)) {
     db.prepare(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)

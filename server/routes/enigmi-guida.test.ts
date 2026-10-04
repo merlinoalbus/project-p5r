@@ -209,15 +209,19 @@ describe('Enigma con i suoi passi', () => {
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(ultimo.chiave)}/pin/${pinLiberi[1].id}`).expect(200);
   });
 
-  it('il boss finale che fa da passo: il Tesoro raccolto lo segna e l’Enigma lo segue; tolto, si riapre', async () => {
+  it('il boss finale che fa da passo: il Tesoro raccolto non lo segna più (2026-10-04); segnato dall’utente, l’Enigma lo segue', async () => {
     const finale = bossFinali().get('okumura')!;
     const enigma = await nuova('Enigma del boss', 'puzzle', undefined, finale.area);
     for (const p of finale.punti) await modifica(p, { contenitore: enigma.chiave }).expect(200);
     const mappa = creaMappa(undefined, { nome: 'Caveau degli enigmi', tipo: 'area', genitore: 'dungeon-okumura' });
     const tesoro = (await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo: 'tesoro-palazzo', nome: 'Tesoro del Palazzo', x: 50, y: 50 }).expect(201)).body.data as { id: number };
+    // il Tesoro raccolto non segna il boss della Guida («Togli l'automatismo», scelta dell'utente): né il boss né l'Enigma
     await request(app).put(`/api/partite/${partita}/spilli/${tesoro.id}`).send({ raccolto: true }).expect(200);
+    expect([...finale.punti.map(segnato), segnato(enigma.chiave)].every((s) => s === null)).toBe(true);
+    // segnati dall'utente i passi (il boss finale), l'Enigma li segue; riaperti, si riapre
+    for (const p of finale.punti) await request(app).put(`/api/partite/${partita}/punti`).send({ punto: p, stato: 'ottenuto' }).expect(200);
     expect([...finale.punti.map(segnato), segnato(enigma.chiave)].every((s) => s === 'ottenuto')).toBe(true);
-    await request(app).put(`/api/partite/${partita}/spilli/${tesoro.id}`).send({ raccolto: false }).expect(200);
+    for (const p of finale.punti) await request(app).put(`/api/partite/${partita}/punti`).send({ punto: p, stato: null }).expect(200);
     expect([...finale.punti.map(segnato), segnato(enigma.chiave)].every((s) => s === null)).toBe(true);
   });
 

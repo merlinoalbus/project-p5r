@@ -265,7 +265,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       if (tipo === 'richiesta') dati.richiesta = (prepared('SELECT nome FROM richiesta WHERE chiave=?').get(String(dati.richiesta)) as { nome: string } | undefined)?.nome ?? dati.richiesta;
       const riga: RigaRequisito = { confidente_chiave: '', rango: 0, indice, tipo, dati_json: JSON.stringify(dati), testo };
       const valutato = valuta(riga, st);
-      // Palazzo non completato e richiesta non conclusa sono fatti che l'app registra (boss segnato, richiesta completata): per la
+      // Palazzo non completato e richiesta non conclusa sono fatti che l'app registra (Tesoro, boss e raccolta; richiesta completata): per la
       // disponibilità valgono come blocco, non come dubbio da confermare a mano.
       if ((tipo === 'palazzo' || tipo === 'richiesta') && valutato.stato === 'grigio') {
         return { ...valutato, stato: 'rosso', manuale: false, dettaglio: valutato.dettaglio.replace(/\s*(?:—\s*)?(?:o|oppure) conferma qui\s*$/, '') };

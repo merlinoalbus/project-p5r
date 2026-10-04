@@ -10,8 +10,8 @@
 //
 // Dal 2026-10-04 (scelta dell'utente: «devono essere entrambe valide le condizioni sono in AND non in OR», poi «Tesoro +
 // boss + raccolto tutto») servono tutte e tre insieme: Tesoro del Palazzo raccolto, boss finale sconfitto (spillo raccolto
-// o segnato nella Guida dall'utente: il segno automatico del Tesoro non conta) e il 100% del raccolto. Il boss da solo non
-// basta più: si può affrontare più volte dentro un Palazzo.
+// o segnato nella Guida) e il 100% del raccolto. Il boss da solo non basta più: si può affrontare più volte dentro un Palazzo.
+// E il boss della Guida non si segna più da solo raccogliendo Tesoro o boss («Togli l'automatismo», utente 017).
 // ============================================================
 
 import request from 'supertest';
@@ -60,7 +60,7 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
   });
   afterAll(() => closeDb());
 
-  it('il boss finale raccolto sulla mappa da solo non completa il Palazzo: segna il boss della Guida, e tolto lo toglie', async () => {
+  it('il boss finale raccolto sulla mappa da solo non completa il Palazzo, e non segna niente nella Guida', async () => {
     const finale = bossFinali().get('kamoshida')!;
     expect(finale.punti.length).toBeGreaterThan(0);
     // come nei dati veri: l'area finale di Kamoshida non è legata a nessuna planimetria, ma Kamoshida non ha boss
@@ -68,7 +68,8 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
     expect(finale.unico).toBe(true);
     const boss = await spilloNuovo('kamoshida', 'boss', 'Ombra di Kamoshida');
     await segna(boss.id, true);
-    expect(finale.punti.every(bossGuida)).toBe(true);
+    // raccogliere il boss non segna più da solo il boss della Guida (scelta dell'utente, 2026-10-04: «Togli l'automatismo»)
+    expect(finale.punti.some(bossGuida)).toBe(false);
     // il boss si può affrontare più volte: da solo non dice che il Palazzo è finito (rilievo dell'utente, 2026-10-04)
     expect(palazziCompletati(partita).has('kamoshida')).toBe(false);
     const esito = requisito('kamoshida');
@@ -99,16 +100,16 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
     expect((await elenco()).completato).toBe(palazziCompletati(partita).get('kamoshida'));
     expect((await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${partita}`)).body.data.completato).toBe(palazziCompletati(partita).get('kamoshida'));
     expect((await elenco('')).completato).toBeNull();
-    // tolti gli spilli del boss finale (il segno che il raccolto aveva messo nella Guida resta per il Tesoro, ma non conta):
-    // non è più completato, e mancano il boss e il resto del raccolto
+    // il Tesoro non ha segnato niente nella Guida
+    expect(finale.punti.some(bossGuida)).toBe(false);
+    // tolti gli spilli del boss finale: non è più completato, e mancano il boss e il resto del raccolto
     for (const b of bossi) await segna(b.id, false);
-    expect(finale.punti.every(bossGuida)).toBe(true);
     expect(statoPalazzi(partita).get('kamoshida')).toEqual({ completato: null, manca: `il boss finale sconfitto, tutto il raccolto (${n - bossi.length}/${n})` });
     for (const b of bossi) await segna(b.id, true);
     expect(palazziCompletati(partita).has('kamoshida')).toBe(true);
   });
 
-  it('il segno automatico del boss dato dal Tesoro non vale come boss sconfitto; quello messo dall’utente sì', async () => {
+  it('senza spilli «Boss» sulla mappa il boss finale si dice sconfitto dalla Guida; togliere il Tesoro non lo cancella', async () => {
     // Okumura senza spilli «Boss» sulle planimetrie: il boss si può dire sconfitto solo dalla Guida
     const mappe = albero('okumura');
     prepared(`DELETE FROM spillo WHERE tipo = 'boss' AND mappa_chiave IN (${mappe.map(() => '?').join(',')})`).run(...mappe);
@@ -117,29 +118,39 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
     const tesoro = collezionabili('okumura').find((s) => s.tipo === 'tesoro-palazzo')!;
     raccogliTutti('okumura', (s) => s.tipo !== 'tesoro-palazzo');
     await segna(tesoro.id, true);
-    // il Tesoro ha segnato da solo il boss della Guida (scelta dell'utente: resta come segno), ma non basta
-    expect(finale.punti.every(bossGuida)).toBe(true);
-    expect(prepared('SELECT automatico FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').pluck().get(partita, finale.punti[0])).toBe(1);
+    // il Tesoro non segna il boss: manca solo quello
+    expect(finale.punti.some(bossGuida)).toBe(false);
     expect(statoPalazzi(partita).get('okumura')).toEqual({ completato: null, manca: 'il boss finale sconfitto' });
     // segnato dall'utente nella Guida: ora sì
     await request(app).put(`/api/partite/${partita}/punti`).send({ punto: finale.punti[0], stato: 'ottenuto' }).expect(200);
     expect(palazziCompletati(partita).get('okumura')).toMatch(/^Tesoro, boss finale e raccolto tutto \(\d+\/\d+\)$/);
-    // e resta suo: togliere e rimettere il Tesoro non lo cancella
+    // togliere e rimettere il Tesoro non tocca il boss della Guida
     await segna(tesoro.id, false);
-    expect(prepared('SELECT stato, automatico FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, finale.punti[0])).toEqual({ stato: 'ottenuto', automatico: 0 });
+    expect(prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, finale.punti[0])).toEqual({ stato: 'ottenuto' });
     expect(statoPalazzi(partita).get('okumura')?.manca).toBe('il Tesoro del Palazzo raccolto, tutto il raccolto (' + (collezionabili('okumura').length - 1) + '/' + collezionabili('okumura').length + ')');
     await segna(tesoro.id, true);
     expect(palazziCompletati(partita).has('okumura')).toBe(true);
   });
 
-  it('il Tesoro raccolto e poi tolto toglie il segno automatico del boss, se non resta raccolto il boss finale', async () => {
+  it('con lo spillo del boss collegato alla voce del boss finale, il Tesoro raccolto non raccoglie il boss né completa il Palazzo', async () => {
+    // il caso del validatore: prima il Tesoro segnava il boss della Guida, e la voce segnata raccoglieva il pin collegato
     const finale = bossFinali().get('niijima')!;
+    const mappe = albero('niijima');
+    prepared(`DELETE FROM spillo WHERE tipo = 'boss' AND mappa_chiave IN (${mappe.map(() => '?').join(',')})`).run(...mappe);
     const tesoro = collezionabili('niijima').find((s) => s.tipo === 'tesoro-palazzo') ?? await spilloNuovo('niijima', 'tesoro-palazzo', 'Tesoro del Palazzo');
+    const boss = await spilloNuovo('niijima', 'boss', 'Sae Niijima');
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(finale.punti[0])}/pin/${boss.id}`).send({}).expect(200);
+    raccogliTutti('niijima', (s) => s.tipo !== 'tesoro-palazzo' && s.tipo !== 'boss');
     await segna(tesoro.id, true);
-    expect(finale.punti.every(bossGuida)).toBe(true);
-    await segna(tesoro.id, false);
+    /** Vero se lo spillo del boss risulta raccolto nella partita. */
+    const bossRaccolto = () => !!prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = (SELECT uid FROM spillo WHERE id = ?) AND raccolto = 1').get(partita, boss.id);
     expect(finale.punti.some(bossGuida)).toBe(false);
-    expect(palazziCompletati(partita).has('niijima')).toBe(false);
+    expect(bossRaccolto()).toBe(false);
+    expect(statoPalazzi(partita).get('niijima')?.manca).toMatch(/^il boss finale sconfitto, tutto il raccolto/);
+    // segnato dall'utente dalla Guida: il pin collegato lo segue, e il Palazzo è completato
+    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: finale.punti[0], stato: 'ottenuto' }).expect(200);
+    expect(bossRaccolto()).toBe(true);
+    expect(palazziCompletati(partita).get('niijima')).toMatch(/^Tesoro, boss finale e raccolto tutto \(\d+\/\d+\)$/);
   });
 
   it('senza lo spillo «Tesoro del Palazzo» un Palazzo non si completa, nemmeno al 100% e col boss segnato', async () => {
@@ -166,9 +177,8 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
     raccogliTutti('shido', (s) => s.tipo !== 'tesoro-palazzo');
     await request(app).put(`/api/partite/${partita}/punti`).send({ punto: intermedio!.chiave, stato: 'ottenuto' }).expect(200);
     const tesoro = collezionabili('shido').find((s) => s.tipo === 'tesoro-palazzo')!;
-    // il Tesoro segna il boss finale da solo: lo si toglie, per vedere che Akechi non vale come finale
+    // Tesoro raccolto e tutto il resto: Akechi, raccolto, non vale come boss finale
     await segna(tesoro.id, true);
-    prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave IN (' + finale.punti.map(() => '?').join(',') + ')').run(partita, ...finale.punti);
     expect(prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = (SELECT uid FROM spillo WHERE id = ?) AND raccolto = 1').get(partita, akechi.id)).toBeTruthy();
     expect(statoPalazzi(partita).get('shido')?.manca).toMatch(/il boss finale sconfitto/);
     // il boss finale segnato dall'utente nella Guida sì

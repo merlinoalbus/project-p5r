@@ -40,9 +40,9 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
     const cartellino = () => document.querySelector('a[href="/guida/mondo/dungeon/kamoshida"]');
     const { rerender } = render(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[kamoshida]} dataGioco="04-22" /></MemoryRouter>);
     expect(cartellino()).not.toBeNull();
-    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, completato: 'Tesoro del Palazzo raccolto' }]} dataGioco="04-22" /></MemoryRouter>);
+    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, completato: 'Tesoro, boss finale e raccolto tutto (40/40)' }]} dataGioco="04-22" /></MemoryRouter>);
     expect(cartellino()).toBeNull();
-    expect(screen.getByText('Palazzo di Kamoshida', { selector: 'span[title]' })).toHaveAttribute('title', 'completato: Tesoro del Palazzo raccolto');
+    expect(screen.getByText('Palazzo di Kamoshida', { selector: 'span[title]' })).toHaveAttribute('title', 'completato: Tesoro, boss finale e raccolto tutto (40/40)');
   });
 
   it('toccando il Palazzo si atterra dove dice la regola del giorno: planimetria e pin d’arrivo; senza regola la scheda (2026-10-04)', () => {

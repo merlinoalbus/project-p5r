@@ -644,6 +644,7 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   boss finale sulla mappa, e **si toglie** se si tolgono (salvo che la mappa dica ancora «finito»); l'**ingresso al
   Palazzo sparisce** a Palazzo completato, anche prima della scadenza; gli **archi** («dall'arco del Palazzo di X»)
   **restano legati alla data**, non al completamento anticipato.
+  **Il segno da solo del boss è superato il 2026-10-04** («Togli l'automatismo», utente 017); il resto vale.
 - Precisazione della revisione (non parole dell'utente): togliendo il Tesoro o il boss finale sulla mappa si toglie solo
   il segno che il raccolto aveva messo nella Guida (`punto_partita.automatico = 1`); un boss della Guida segnato a mano
   dall'utente resta, perché è un suo dato e non un effetto del raccolto.
@@ -1257,19 +1258,26 @@ Risposte dell'utente, parola per parola:
 - alla domanda di chiarimento sulle condizioni da mettere in AND: «Tesoro + boss + raccolto tutto»;
 - il segno automatico del boss nella Guida quando si raccoglie il Tesoro: «Sì, resta solo come segno (Recommended)»;
 - la proposta: «Sì, procedi (Recommended)». La proposta diceva anche che il segno automatico del boss dato dal Tesoro non
-  conta per la condizione del boss.
+  conta per la condizione del boss;
+- dopo il primo esame del validatore, alla domanda «Come risolvo il conflitto fra il segno automatico del boss (messo dal
+  Tesoro) e la condizione «boss finale sconfitto»?»: «Togli l'automatismo (Recommended)». Il conflitto stava in due casi:
+  - un pin «Boss» collegato alla voce del boss veniva raccolto dal segno automatico, e il boss risultava sconfitto;
+  - la Guida mostrava il boss già «Ottenuto» mentre il requisito diceva che mancava, senza un modo semplice di
+    confermarlo. Questa risposta supera quella sul segno «solo come segno».
 
 Che cosa ne segue (supera la regola del 2026-09-30, in cui bastava una condizione):
 - **Le tre condizioni.** Un Palazzo è completato quando valgono tutte e tre:
   - **Tesoro:** lo spillo «Tesoro del Palazzo» raccolto. Senza uno spillo così sulle planimetrie il Palazzo non si
     completa finché non lo si mette con l'editor. Nel pacchetto di oggi mancano quelli di Futaba, Iweleth e Maruki.
-  - **Boss finale:** il suo spillo raccolto sulla mappa, oppure il boss segnato nella Guida dall'utente. Il segno che il
-    Tesoro mette da solo nella Guida resta, ma non vale come «boss sconfitto».
+  - **Boss finale:** il suo spillo raccolto sulla mappa, oppure il boss segnato nella Guida.
   - **Raccolto tutto:** il 100% della raccolta, con la regola della scheda del Palazzo.
 - **Il motivo** mostrato diventa «Tesoro, boss finale e raccolto tutto (n/n)».
 - **Il requisito rosso** («Completare il Palazzo», «dopo il Palazzo di X») dice che cosa manca, per esempio «manca il Tesoro
   del Palazzo raccolto, tutto il raccolto (12/40)».
 - **I Memento non hanno planimetrie:** restano completati dal boss finale segnato nella Guida, come prima.
-- **Effetti invariati.** Mappa di Tokyo, ingressi bloccati, requisiti e disponibilità seguono la regola nuova. Il segno
-  automatico del boss si toglie quando non resta raccolto né il Tesoro né il boss finale.
+- **Effetti invariati.** Mappa di Tokyo, ingressi bloccati, requisiti e disponibilità seguono la regola nuova.
+- **Niente più automatismo.** Raccogliere il Tesoro o il boss non segna più niente nella Guida (supera la scelta del
+  2026-09-30). La migrazione utente 017 toglie i segni automatici rimasti nelle partite, e quelli messi dall'utente restano.
+  Se il boss era un passo di un Enigma, l'Enigma segue. I pin non si toccano: un pin raccolto resta raccolto, e se è il boss
+  finale vale come boss sconfitto.
 - **La partita «Tutorial»** dell'utente torna a mostrare Kamoshida all'11/04: il boss raccolto da solo non basta più.

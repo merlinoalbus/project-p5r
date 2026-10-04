@@ -207,7 +207,7 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/spilli/:spilloId': {
     sommario: 'Segna uno spillo di una mappa come raccolto',
-    descrizione: 'Segna (o toglie) lo stato «raccolto» dello spillo nella partita. Si segnano solo i pin che hanno uno stato (consumabili, boss, meccanismi, nemici, porte, pin collegati a una voce non descrittiva della guida): per gli altri 400; togliere il segno è sempre possibile. Un pin collegato a un punto della guida segna il punto quando tutti i suoi pin sono raccolti e lo riapre quando se ne toglie uno; il Tesoro o il boss finale raccolti segnano il boss finale del Palazzo.',
+    descrizione: 'Segna (o toglie) lo stato «raccolto» dello spillo nella partita. Si segnano solo i pin che hanno uno stato (consumabili, boss, meccanismi, nemici, porte, pin collegati a una voce non descrittiva della guida): per gli altri 400; togliere il segno è sempre possibile. Un pin collegato a un punto della guida segna il punto quando tutti i suoi pin sono raccolti e lo riapre quando se ne toglie uno. Il Tesoro o il boss raccolti non segnano più da soli il boss finale della guida (dal 2026-10-04).',
     risposta: '`SpilloDto`, o `SchedaContenutoGuidaDto` per un contenuto della guida senza posto sulla mappa',
     errori: [PARTITA, [404, 'spillo-non-trovato'], [400, 'spillo-senza-stato']],
   },
