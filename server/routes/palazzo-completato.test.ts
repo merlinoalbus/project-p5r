@@ -79,7 +79,7 @@ describe('Palazzo completato', () => {
     // lo spillo 1616: oggi «punto sensibile» senza riferimento; la sua identità di seed è il passaggio verso dungeon-kamoshida
     const vero = prepared("SELECT id, mappa_chiave, riferimento_tipo FROM spillo WHERE seed_identita_json LIKE '%\"dungeon-kamoshida\"%' AND mappa_chiave NOT LIKE 'dungeon-%'").get() as { id: number; mappa_chiave: string; riferimento_tipo: string | null };
     expect(vero.riferimento_tipo).toBeNull();
-    // Kamoshida è completato dal test precedente (boss segnato a mano): siamo il 22 aprile, dentro la finestra 12/4–2/5
+    // Kamoshida è completato dal test precedente (boss segnato a mano): siamo il 22 aprile, dentro la finestra 11/4–2/5 (097)
     const spillo = ((await request(app).get(`/api/mappe/${vero.mappa_chiave}?partita=${partita}`)).body.data as MappaDto).spilli.find((s) => s.id === vero.id)!;
     expect(spillo.disponibilita?.stato).toBe('bloccato');
     expect(spillo.disponibilita?.requisiti.at(-1)?.dettaglio).toMatch(/Palazzo di Kamoshida: completato .*non ci si entra più/);

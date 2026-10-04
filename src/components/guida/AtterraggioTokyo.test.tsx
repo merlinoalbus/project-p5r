@@ -50,7 +50,7 @@ const regola = (n: number) => screen.getByRole('listitem', { name: `Regola ${n}`
 describe('AtterraggioTokyo', () => {
   it('il pulsante dice la finestra; la finestra mostra le regole salvate, i loro pin e dove si atterra oggi', async () => {
     render(<AtterraggioTokyo dungeon={scheda()} onSalvato={vi.fn()} />);
-    expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ })).toHaveTextContent('dal 11 aprile al 2 maggio');
+    expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ })).toHaveTextContent('dall’11 aprile al 2 maggio');
     fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ }));
     expect(screen.getByText(/Oggi si atterra su:/)).toHaveTextContent('Oggi si atterra su: Prigione, sul pin «Cella».');
     expect(valoreSelettore('Quando', regola(1))).toBe('Un giorno');
@@ -140,6 +140,15 @@ describe('AtterraggioTokyo', () => {
     fireEvent.click(within(finestra).getByRole('button', { name: /Salva le regole/ }));
     await vi.waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'regola 1: il pin d\'arrivo non sta su quella planimetria.'));
     expect(onSalvato).not.toHaveBeenCalled();
+  });
+
+  it('la finestra si dice con le preposizioni apostrofate davanti a 8 e 11: «dall’8 aprile all’11 maggio», «dall’11 aprile»', () => {
+    const { rerender } = render(<AtterraggioTokyo dungeon={scheda({ finestra: { dal: '04-08', al: '05-11' } })} onSalvato={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ })).toHaveTextContent('dall’8 aprile all’11 maggio');
+    rerender(<AtterraggioTokyo dungeon={scheda({ finestra: { dal: '04-11', al: null } })} onSalvato={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ })).toHaveTextContent(/dall’11 aprile$/);
+    rerender(<AtterraggioTokyo dungeon={scheda({ finestra: { dal: '05-09', al: null } })} onSalvato={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ })).toHaveTextContent(/dal 9 maggio$/);
   });
 
   it('senza regole e senza finestra: si atterra sulla scheda, e i Memento (senza planimetrie) non hanno regole', () => {

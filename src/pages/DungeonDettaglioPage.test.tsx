@@ -1010,5 +1010,26 @@ it('dall’intestazione del Palazzo si sceglie dove si atterra dalla mappa di To
   // la scheda riletta: la regola vale oggi, e il pulsante dice la finestra
   expect(await finestra.findByText(/Oggi si atterra su:/)).toHaveTextContent('Oggi si atterra su: Cancello.');
   expect(getDungeon).toHaveBeenCalledTimes(2);
-  expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo.*dal 11 aprile al 2 maggio/ })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo.*dall’11 aprile al 2 maggio/ })).toBeInTheDocument();
+});
+
+it('cambiato il giorno della partita, la scheda del Palazzo si rilegge: «Oggi si atterra su…» segue il giorno (2026-10-04)', async () => {
+  /** La scheda con le due regole del tutorial e l'atterraggio del giorno dato. */
+  const conAtterraggio = (mappa: string): DungeonDettaglioDto => ({ ...palazzo(true), finestra: { dal: '04-11', al: '05-02' },
+    atterraggi: [
+      { dal: '04-11', al: '04-11', mappa: 'm-cancello', mappaNome: 'Palazzo di Kamoshida › Cancello', spillo: null, spilloNome: null },
+      { dal: null, al: null, mappa: 'm-torre', mappaNome: 'Palazzo di Kamoshida › Torre', spillo: null, spilloNome: null },
+    ], atterraggio: { mappa, spillo: null } });
+  usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal', dataGioco: '04-11' } as PartitaDto });
+  getDungeon.mockResolvedValueOnce(conAtterraggio('m-cancello')).mockResolvedValue(conAtterraggio('m-torre'));
+  getMappa.mockResolvedValue({ chiave: 'm-cancello', spilli: [] });
+  monta('kamoshida');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Sulla mappa di Tokyo — Palazzo di Kamoshida' }));
+  expect(finestra.getByText(/Oggi si atterra su:/)).toHaveTextContent('Oggi si atterra su: Cancello.');
+  // la partita passa al 12: la scheda si rilegge e la regola «sempre» prende il posto di quella dell'11
+  act(() => usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal', dataGioco: '04-12' } as PartitaDto }));
+  await waitFor(() => expect(finestra.getByText(/Oggi si atterra su:/)).toHaveTextContent('Oggi si atterra su: Torre.'));
+  expect(getDungeon).toHaveBeenCalledTimes(2);
 });

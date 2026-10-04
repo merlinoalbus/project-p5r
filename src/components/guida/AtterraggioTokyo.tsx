@@ -18,7 +18,8 @@
 import { useEffect, useState } from 'react';
 import { getMappa, impostaAtterraggiDungeon, impostaFinestraDungeon } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
-import { dataLeggibile, ordineGioco } from '../../../shared/condizioniSpillo';
+import { ordineGioco } from '../../../shared/condizioniSpillo';
+import { dataGiocoConArticolo } from '../../utils/dateGioco';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
 import { opzioniPinArrivo } from '../../utils/pinArrivo';
 import type { DungeonDettaglioDto, SpilloDto } from '../../types';
@@ -43,10 +44,10 @@ interface RegolaBozza { id: number; quando: Quando; dal: string; al: string; map
 /** Il primo giorno del calendario di gioco (9 aprile): la data di partenza dove il Palazzo non ne ha una. */
 const PRIMO_GIORNO = '04-09';
 
-/** La finestra detta a parole: «dal 11 aprile al 2 maggio», «dal 9 maggio», «sempre». */
+/** La finestra detta a parole, con le preposizioni apostrofate davanti a 8 e 11: «dall’11 aprile al 2 maggio», «dal 9 maggio», «sempre». */
 function testoFinestra(f: { dal: string; al: string | null } | null): string {
   if (!f) return 'sempre';
-  return f.al ? `dal ${dataLeggibile(f.dal)} al ${dataLeggibile(f.al)}` : `dal ${dataLeggibile(f.dal)}`;
+  return f.al ? `${dataGiocoConArticolo(f.dal, 'da')} ${dataGiocoConArticolo(f.al, 'a')}` : dataGiocoConArticolo(f.dal, 'da');
 }
 
 /** Il «quando» di una regola salvata: niente date = sempre, fine assente = da lì in poi, inizio e fine uguali = un giorno. */

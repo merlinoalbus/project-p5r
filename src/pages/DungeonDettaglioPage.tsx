@@ -17,7 +17,7 @@
 // richieste — che fanno la percentuale. La pianta della guida non c'è: i piani si generano.
 // ============================================================
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { aggiornaArea, aggiornaDungeon, eliminaArea, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
@@ -156,6 +156,19 @@ export function DungeonDettaglioPage() {
     const fresco = await getDungeon(chiave, partitaId);
     if (n === ultimaLettura.current) dati.imposta(fresco);
   };
+  // Cambiato il giorno della partita, la scheda si rilegge in silenzio: da quel giorno dipende dove si atterra dalla mappa di
+  // Tokyo («Oggi si atterra su…», 2026-10-04). Non con una dipendenza di `useCarica`, che svuoterebbe la pagina fino alla
+  // risposta e chiuderebbe la finestra aperta.
+  const giornoPartita = attiva?.dataGioco ?? null;
+  const giornoLetto = useRef(giornoPartita);
+  // la rilettura più recente, letta dall'effetto senza farlo ripartire a ogni render
+  const rilettura = useRef(rileggiInSilenzio);
+  useEffect(() => { rilettura.current = rileggiInSilenzio; });
+  useEffect(() => {
+    if (giornoLetto.current === giornoPartita) return;
+    giornoLetto.current = giornoPartita;
+    void rilettura.current().catch(() => { /* resta la scheda di prima */ });
+  }, [giornoPartita]);
   /** Imposta (o toglie, con null) lo stato di un punto della guida nella partita: aggiorna il punto locale, fa ricaricare il visore e poi rilegge la scheda; l'errore viene notificato. */
   const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null) => {
     if (!partitaId) return;

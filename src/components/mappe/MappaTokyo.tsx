@@ -17,7 +17,8 @@
 // binari. La rete c'è tutta dal primo giorno, come nel gioco: ogni fermata è un pallino bianco.
 // Quando un quartiere si sblocca, sul suo pallino spuntano la sagoma e la targa; finché non si
 // sblocca resta il solo pallino. L'11 aprile Shinjuku è un pallino e basta — apre il 18 giugno —
-// e il Palazzo di Kamoshida c'è dal 12 aprile al 2 maggio e poi sparisce. Le condizioni vengono
+// e il Palazzo di Kamoshida c'è dall'11 aprile al 2 maggio (finestra modificabile dalla sua pagina, 2026-10-04) e poi
+// sparisce. Le condizioni vengono
 // dalla Fase 2 — `quartiere.sblocco_data` e la voce `finestre-dungeon` di `dati_guida` — valutate con `ordineGioco`,
 // la stessa funzione del resto dell'app. Senza partita si vede tutto, e lo si dice.
 //
@@ -29,7 +30,7 @@ import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
 import { dentroFinestra, quartiereAperto } from './aperturaTokyo';
-import { dataLeggibile } from '../../../shared/condizioniSpillo';
+import { dataGiocoConArticolo } from '../../utils/dateGioco';
 import { urlMappa } from '../../utils/navigazioneMappa';
 import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
@@ -492,7 +493,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       // di 360) spingeva la pagina a scorrere insieme alla guida: qui resta il conto, e i nomi — con il
       // perché scritto per esteso, che al passaggio del mouse col dito non si legge — stanno nella finestra.
       <p className="m-0 flex flex-wrap items-center gap-x-2 text-[12px] text-text-muted">
-        <span>Non ancora nel mondo, al {dataLeggibile(dataGioco)}: {assenti.length === 1 ? '1 luogo' : `${assenti.length} luoghi`}.</span>
+        <span>Non ancora nel mondo, {dataGiocoConArticolo(dataGioco, 'a')}: {assenti.length === 1 ? '1 luogo' : `${assenti.length} luoghi`}.</span>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo="Quali" aria-label={`Quali luoghi non sono ancora nel mondo (${assenti.length})`} onClick={() => setElencoAssenti(true)} />
       </p>
     ) : <p className="m-0 text-[12px] text-text-muted">
@@ -500,12 +501,12 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
           che aggiornata al giorno della partita. Il perché sta sul nome, al passaggio del mouse:
           da quando le condizioni non sono più solo date — un rango di Confidente, un libro da
           leggere — scriverle tutte per esteso faceva venti righe di testo sotto la mappa. */}
-      Non ancora nel mondo, al {dataLeggibile(dataGioco)}: {assenti.map((s, i) => <span key={s.chiave}>
+      Non ancora nel mondo, {dataGiocoConArticolo(dataGioco, 'a')}: {assenti.map((s, i) => <span key={s.chiave}>
         {i > 0 && ' · '}<span className="cursor-help underline decoration-dotted underline-offset-2" title={s.quando ?? 'condizione non indicata'}>{s.nome}</span>
       </span>)}
     </p>)}
     {elencoAssenti && dataGioco && (
-      <Modal aperta titolo={`Non ancora nel mondo, al ${dataLeggibile(dataGioco)}`} onChiudi={() => setElencoAssenti(false)}>
+      <Modal aperta titolo={`Non ancora nel mondo, ${dataGiocoConArticolo(dataGioco, 'a')}`} onChiudi={() => setElencoAssenti(false)}>
         <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light text-[13px]">
           {assenti.map((s) => (
             <li key={s.chiave} className="flex flex-wrap items-baseline justify-between gap-x-3 py-1.5">

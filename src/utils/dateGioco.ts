@@ -21,10 +21,10 @@ export function meseGioco(data: string): string {
 export const dataGiocoTesto = (data: string): string => dataLeggibile(data);
 
 /** La data con l'articolo davanti, apostrofato davanti a «8» e «11» (che si leggono «otto», «undici»): «il 12 aprile»,
- *  «l'11 aprile»; con la preposizione: «del 12» / «dell'11», «al 12» / «all'11». */
-export function dataGiocoConArticolo(data: string, preposizione: '' | 'di' | 'a' = ''): string {
+ *  «l'11 aprile»; con la preposizione: «del 12» / «dell'11», «al 12» / «all'11», «dal 12» / «dall'11». */
+export function dataGiocoConArticolo(data: string, preposizione: '' | 'di' | 'a' | 'da' = ''): string {
   const testo = dataGiocoTesto(data);
   const vocale = /^(8|11)\s/.test(testo);
-  const articolo = preposizione === 'di' ? (vocale ? 'dell’' : 'del ') : preposizione === 'a' ? (vocale ? 'all’' : 'al ') : (vocale ? 'l’' : 'il ');
+  const articolo = preposizione === 'di' ? (vocale ? 'dell’' : 'del ') : preposizione === 'a' ? (vocale ? 'all’' : 'al ') : preposizione === 'da' ? (vocale ? 'dall’' : 'dal ') : (vocale ? 'l’' : 'il ');
   return articolo + testo;
 }

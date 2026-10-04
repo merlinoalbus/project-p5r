@@ -1169,8 +1169,17 @@ Tutorial Palazzo 12/04 (Sala Centrale)», e infine: «per la sequenza non devi a
 permettermi di valorizzare per fasce temporali o giorni specifici il punto di atterraggio dell'icona della mappa rispetto al
 mappamondo delle planimetrie».
 
-Il Palazzo non compariva perché la finestra di Kamoshida in `finestre-dungeon` partiva dal 12 aprile, e il tocco sull'icona
-portava sempre alla scheda del Palazzo.
+Perché il Palazzo non compariva:
+- **La mappa segue il giorno della partita**, non il giorno guardato in «Oggi». Nello screenshot «Oggi» mostrava il 12 aprile,
+  ma la partita era all'11: la didascalia della mappa diceva «al 11 aprile». Il 12 visto in «Oggi» era quindi, per la mappa,
+  ancora l'11.
+- **La finestra di Kamoshida** in `finestre-dungeon` partiva dal 12 aprile, quindi all'11 il Palazzo non c'era. Era la stessa
+  causa per tutti e due i giorni.
+- **Misurato in sola lettura** sui dati dell'utente: partita al 04-11, Kamoshida non completato. Con la finestra di prima,
+  `dentroFinestra` dà falso al 04-11 e vero al 04-12.
+- Alla domanda «La mappa di Tokyo deve seguire il giorno della partita o il giorno che stai guardando in «Oggi»?» l'utente ha
+  risposto «Il giorno della partita». La mappa resta quindi sulla data della partita, e la finestra parte ora dall'11.
+- Il tocco sull'icona portava sempre alla scheda del Palazzo.
 
 Risposte dell'utente, parola per parola:
 - il giorno che decide la mappa: «Il giorno della partita»;
@@ -1190,7 +1199,7 @@ Che cosa ne segue:
   Città, la pagina della mappa con il pin selezionato. Cambiato il giorno della partita, i Palazzi si rileggono.
 
 Scelte tecniche mie, dentro la proposta approvata:
-- **Dove sta l'editor.** È una finestra aperta dal pulsante «Sulla mappa di Tokyo» nell'intestazione del Palazzo, che mostra
+- **Dove sta l'editor** (variante della proposta, confermata dall'utente alla domanda con le misure: «Finestra dal pulsante (Recommended)»). È una finestra aperta dal pulsante «Sulla mappa di Tokyo» nell'intestazione del Palazzo, che mostra
   anche la finestra attuale, e non una sezione nella pagina. Da 1024 px la pagina del Palazzo sta in una schermata, e una
   sezione in più l'avrebbe allungata.
   - Da 1175 px in su (misurato a 1175, 1200, 1240, 1280, 1366) l'intestazione resta alta 170 px.
@@ -1206,3 +1215,12 @@ Scelte tecniche mie, dentro la proposta approvata:
   - Eliminare il pin d'arrivo lascia la regola sulla planimetria intera.
   - Reimportando la planimetria dal pacchetto, il pin reinserito con lo stesso uid torna nella regola, come già succede ai
     passaggi.
+- **Rilettura al cambio di giorno.** Cambiato il giorno della partita, la scheda del Palazzo si rilegge in silenzio
+  (`rileggiInSilenzio`), senza svuotare la pagina né chiudere la finestra aperta, così «Oggi si atterra su…» segue il giorno.
+- **Date con l'elisione.** Le date si scrivono con l'elisione: «dall'11 aprile», «all'11 aprile». Lo fa `dataGiocoConArticolo`,
+  a cui si aggiunge la preposizione «da». Vale anche per la didascalia «Non ancora nel mondo, all'11 aprile» della mappa di
+  Tokyo.
+- **Note per l'utente.**
+  - Gli ingressi in città con condizioni di data (Shujin: solo l'11 aprile, poi dal 12 al 2 maggio) restano quelli di «Sulla
+    mappa» delle voci della guida. Le regole d'atterraggio valgono per il tocco sull'icona della mappa di Tokyo.
+  - Cambiare la finestra non riscrive le condizioni dei pin di passaggio generati dalla finestra.

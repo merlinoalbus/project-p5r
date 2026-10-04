@@ -23,10 +23,11 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
 
   it('nella schermata piena resta il conto in una riga, e i nomi con il perché stanno nella finestra «Quali»', () => {
     render(<MemoryRouter><MappaTokyo quartieri={quartieri} dataGioco="04-11" riempi /></MemoryRouter>);
-    expect(screen.getByText(/^Non ancora nel mondo, al .*: 1 luogo\.$/)).toBeInTheDocument();
+    // «all’11», non «al 11»: la preposizione si apostrofa davanti a 8 e 11
+    expect(screen.getByText('Non ancora nel mondo, all’11 aprile: 1 luogo.')).toBeInTheDocument();
     expect(screen.queryByText('Ikebukuro', { selector: 'span[title]' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Quali luoghi non sono ancora nel mondo (1)' }));
-    const finestra = screen.getByRole('dialog', { name: /^Non ancora nel mondo, al / });
+    const finestra = screen.getByRole('dialog', { name: 'Non ancora nel mondo, all’11 aprile' });
     const voce = within(finestra).getByText('Ikebukuro').closest('li')!;
     expect(within(voce).getByText('dal 09-01')).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Chiudi' }));
