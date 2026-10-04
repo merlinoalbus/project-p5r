@@ -6,10 +6,9 @@ import type { AccessoMondoDto, DestinazioneMondoDto } from '../../shared/accesso
 import { centroAccessoMondo } from '../utils/accessoMondo';
 
 const { getAccessoMondo } = vi.hoisted(() => ({ getAccessoMondo: vi.fn() }));
-vi.mock('../services/api/accessoMondo', () => ({ getAccessoMondo }));
 // L'albero delle mappe serve solo alle anteprime delle carte: qui non c'è, e la pagina deve
 // funzionare lo stesso — è il motivo per cui non passa da `PageState` e non blocca niente.
-vi.mock('../services/api', () => ({ getAlberoMappe: vi.fn(async () => []) }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getAccessoMondo, getAlberoMappe: vi.fn(async () => []) }));
 const destinazione: DestinazioneMondoDto = { mappa: 'shibuya', nomeMappa: 'Shibuya', spillo: 207, nomeSpillo: 'Untouchable', centro: null, provenienze: [] };
 const risposta = (destinazioni: DestinazioneMondoDto[]): AccessoMondoDto => ({ entita: { tipo: 'negozio', chiave: 'untouchable' }, esito: destinazioni.length === 0 ? 'assente' : destinazioni.length === 1 ? 'unica' : 'multipla', destinazioni });
 function Indirizzo() { const l = useLocation(); return <div data-testid="indirizzo">{l.pathname}{l.search}</div>; }

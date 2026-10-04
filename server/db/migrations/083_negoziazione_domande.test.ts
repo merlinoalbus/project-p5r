@@ -2,14 +2,13 @@
 // La migrazione 083 porta le domande della negoziazione dentro la guida alla battaglia
 // ============================================================
 
-import { closeDb, initDb, prepared } from '../dbService.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { closeDb, prepared } from '../dbService.js';
 import { battaglia } from '../../services/battagliaService.js';
-import { invalidaCacheTraduzioni } from '../../services/traduzioniService.js';
 import { normalizzaDomande, percorsoDatiNegoziazione } from './083_negoziazione_domande.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 describe('migrazione 083 — domande della negoziazione', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('il file dei dati sta nel repository ed è quello che il pacchetto porta', () => {

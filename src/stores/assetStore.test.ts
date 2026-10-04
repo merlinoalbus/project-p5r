@@ -6,7 +6,7 @@
 import { useAssetStore } from './assetStore';
 
 const { getManifestoImmagini } = vi.hoisted(() => ({ getManifestoImmagini: vi.fn() }));
-vi.mock('../services/api', () => ({ getManifestoImmagini }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getManifestoImmagini }));
 
 beforeEach(() => {
   getManifestoImmagini.mockReset();

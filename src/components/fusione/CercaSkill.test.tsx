@@ -9,10 +9,10 @@ import { CercaSkill } from './CercaSkill';
 import type { PersonaFusioneDto, PersonaRiassuntoDto, RicercaSkillDto, SkillRiassuntoDto } from '../../types';
 
 const { getSkills, cercaPerSkill, getImmagini } = vi.hoisted(() => ({ getSkills: vi.fn(), cercaPerSkill: vi.fn(), getImmagini: vi.fn() }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getSkills, cercaPerSkill, getImmagini,
   caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
 function persona(id: number, nome: string, arcana: string, livello: number): PersonaRiassuntoDto {

@@ -3,7 +3,7 @@
 // ============================================================
 
 const getImmagini = vi.hoisted(() => vi.fn());
-vi.mock('../../services/api', () => ({ getImmagini, urlImmagine: (a: string, c: string) => `/api/immagini/${a}/${c}/file` }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getImmagini }));
 
 import { azzeraCacheImmagini, chiaviPresenti } from './immaginiCache';
 

@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { CondizioniEditor } from './CondizioniEditor';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 
-vi.mock('../../services/api/condizioni', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getElenchiRegole: vi.fn(async () => ({
     articoli: [{ chiave: 'untouchable/pistola', nome: 'Pistola', gruppo: 'Untouchable' }],
     letture: [{ chiave: 'spadaccino-provetto', nome: 'Spadaccino provetto', categoria: 'libro' }, { chiave: 'dvd-x', nome: 'Un film', categoria: 'film' }],
@@ -21,8 +21,6 @@ vi.mock('../../services/api/condizioni', () => ({
     eventi: [{ chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita', calcolato: false }],
     contatori: [{ chiave: 'film-completati', nome: 'Film o DVD completati' }],
   })),
-}));
-vi.mock('../../services/api/compendio', () => ({
   getConfidenti: vi.fn(async () => [{ chiave: 'sojiro', nome: 'Sojiro Sakura', arcana: 'Hierophant' }, { chiave: 'ann', nome: 'Ann Takamaki', arcana: 'Lovers' }]),
   getQuartieri: vi.fn(async () => [{ chiave: 'akihabara', nome: 'Akihabara', sbloccoData: '08-31' }, { chiave: 'ueno', nome: 'Ueno', sbloccoData: null }]),
   getRichieste: vi.fn(async () => ({ richieste: [{ chiave: 'lo-zio-ingordo', nome: 'Lo zio ingordo' }] })),

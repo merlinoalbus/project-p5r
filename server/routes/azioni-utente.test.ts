@@ -9,19 +9,18 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { utente008 } from '../db/migrazioniUtente/008_effetti_delle_azioni_utente.js';
 import { DDL_UTENTE_STORICHE } from '../db/schemaUtente.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, PercorsoGiornoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API — voci aggiunte dall\'utente come azioni della guida', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 

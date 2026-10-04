@@ -10,12 +10,12 @@ import type { PersonaPossedutaDto } from '../../types';
 
 const api = vi.hoisted(() => ({
   getPossedute: vi.fn(), aggiornaPosseduta: vi.fn(), aggiungiPosseduta: vi.fn(), rimuoviPosseduta: vi.fn(), getPersone: vi.fn(), getSkills: vi.fn(),
-  getCompendioPartita: vi.fn(), registraPosseduta: vi.fn(), isApiError: vi.fn(() => false),
+  getCompendioPartita: vi.fn(), registraPosseduta: vi.fn(),
   // immagini delle entità (ImmagineEntita → immaginiCache)
-  getImmagini: vi.fn(), urlImmagine: vi.fn((ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
+  getImmagini: vi.fn(), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
 }));
-vi.mock('../../services/api', () => api);
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const zero = { forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 };
 /** Arsène al livello 2: la stima dalla base (2/2/2/3/1) dà 3/3/2/4/1; nel gioco dell'utente si legge 4/2/2/4/1. */
@@ -37,11 +37,9 @@ function monta() {
 describe('ScortaPersona — valori reali (15.26)', () => {
   beforeEach(() => {
     for (const f of Object.values(api)) f.mockReset();
-    api.isApiError.mockReturnValue(false);
     api.getCompendioPartita.mockResolvedValue([]);
     api.getSkills.mockResolvedValue([]);
     api.getImmagini.mockResolvedValue([]);
-    api.urlImmagine.mockImplementation((ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`);
   });
 
   it('nell’elenco distingue la stima dalla base dai valori reali letti nel gioco', async () => {
@@ -99,11 +97,9 @@ describe('ScortaPersona — due gesti ravvicinati (B3", validazione voce 2)', ()
   const conLivello = (p: PersonaPossedutaDto, livello: number): PersonaPossedutaDto => ({ ...p, livello });
   beforeEach(() => {
     for (const f of Object.values(api)) f.mockReset();
-    api.isApiError.mockReturnValue(false);
     api.getCompendioPartita.mockResolvedValue([]);
     api.getSkills.mockResolvedValue([]);
     api.getImmagini.mockResolvedValue([]);
-    api.urlImmagine.mockImplementation((ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`);
     vi.spyOn(window, 'confirm').mockReturnValue(true);
   });
   afterEach(() => vi.restoreAllMocks());

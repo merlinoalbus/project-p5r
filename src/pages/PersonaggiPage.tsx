@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { getPersonaggi } from '../services/api';
+import { getPersonaggi, getPersone } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
@@ -12,7 +12,6 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import type { PersonaggioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PersonaDelPersonaggio } from '../components/guida/PersonaDelPersonaggio';
-import { getPersone } from '../services/api';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';

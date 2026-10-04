@@ -12,12 +12,12 @@ const { getImmagini, eliminaImmagine, importaImmagineDaUrl } = vi.hoisted(() => 
   eliminaImmagine: vi.fn(),
   importaImmagineDaUrl: vi.fn(),
 }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getImmagini,
   eliminaImmagine,
   importaImmagineDaUrl,
   caricaImmagine: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
 beforeEach(() => {

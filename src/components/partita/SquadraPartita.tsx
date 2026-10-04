@@ -17,7 +17,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { getSquadra, impostaMembroSquadra, impostaYen } from '../../services/api/partite';
+import { getSquadra, impostaMembroSquadra, impostaYen } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';

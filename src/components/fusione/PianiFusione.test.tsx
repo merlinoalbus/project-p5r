@@ -9,11 +9,11 @@ import { PianiFusione } from './PianiFusione';
 import type { PersonaFusioneDto, PersonaRiassuntoDto, PianiFusioneDto } from '../../types';
 
 const { getPianiFusione, getImmagini, getSkills, salvaPiano } = vi.hoisted(() => ({ getPianiFusione: vi.fn(), getImmagini: vi.fn(), getSkills: vi.fn(), salvaPiano: vi.fn() }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getPianiFusione, getImmagini, getSkills, salvaPiano,
   caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
 function persona(id: number, nome: string, arcana: string, livello: number): PersonaRiassuntoDto {

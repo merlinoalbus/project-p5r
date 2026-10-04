@@ -16,10 +16,10 @@
 //     era stato registrato resta quello anche se il mondo cambia in mezzo.
 
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { CruciverbaDto, DoteDaSegnareDto, DoteSocialePartitaDto, LibriDto, FilmDvdDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -32,7 +32,7 @@ const segna = async (id: number, tipo: string, chiave: string, avanzamento: numb
 const delta = (lista: DoteDaSegnareDto[], dote: string) => lista.find((d) => d.chiave === dote)?.delta ?? 0;
 
 describe('API — il conseguimento dice le Doti, non le tocca', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('un libro finito dice i suoi punti, col bonus del libro sulle tre note; disfarlo dice di toglierli', async () => {
@@ -89,7 +89,7 @@ describe('API — il conseguimento dice le Doti, non le tocca', () => {
 
 /* Il cruciverba di Leblanc dà una nota di Conoscenza: la risposta la ricorda, le Doti si segnano a mano. */
 describe('API — il cruciverba ricorda la sua nota di Conoscenza', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('risolverne uno la ricorda una volta; le Doti non si toccano né risolvendo né togliendo', async () => {

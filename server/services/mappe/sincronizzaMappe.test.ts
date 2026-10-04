@@ -3,14 +3,13 @@
 // ============================================================
 
 import { closeDb, initDb } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
 import { riallineaSpilliLuoghi, sincronizzaMappe } from './sincronizzaMappe.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
 describe('sincronizzaMappe: riclassificazione degli spilli di seed', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -51,8 +50,7 @@ describe('sincronizzaMappe: riclassificazione degli spilli di seed', () => {
 
 describe('riallineaSpilliLuoghi: gli spilli dei luoghi seguono il catalogo dei tipi di luogo', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -87,8 +85,7 @@ describe('sincronizzaMappe: i passaggi automatici verso le mappe figlie di una r
   // Il pacchetto è la fotografia dell'istanza: Tokyo l'utente l'ha ritoccata (origine «utente») e i suoi
   // passaggi li decide l'editor, quindi i test sulle API non vedono più il caso. Qui si costruisce.
   beforeEach(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterEach(() => closeDb());
 

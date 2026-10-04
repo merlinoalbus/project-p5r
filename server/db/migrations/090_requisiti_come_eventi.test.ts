@@ -4,9 +4,9 @@
 
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { REQUISITI_EVENTO } from './090_requisiti_come_eventi.js';
 import { EVENTI_STORIA } from '../../../shared/condizioniSpillo.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -14,8 +14,7 @@ const requisito = (db: ReturnType<typeof initDb>, c: string, rango: number, indi
   db.prepare('SELECT tipo, dati_json FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').get(c, rango, indice) as { tipo: string; dati_json: string };
 
 it('090: i cinque fatti diventano requisiti «evento» di EVENTI_STORIA, la scuola aperta di Futaba un «avviso»; una riga già cambiata resta com’è', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   // come in un pacchetto di prima: le sei righe ancora «manuale», e una già toccata a mano
   for (const r of REQUISITI_EVENTO) db.prepare("UPDATE confidente_requisito SET tipo = 'manuale', dati_json = '{}' WHERE confidente_chiave = ? AND rango = ? AND indice = ?").run(r.confidente, r.rango, r.indice);
   db.exec("UPDATE confidente_requisito SET tipo = 'manuale', dati_json = '{}' WHERE confidente_chiave = 'futaba' AND rango = 4 AND indice = 0");
@@ -32,8 +31,7 @@ it('090: i cinque fatti diventano requisiti «evento» di EVENTI_STORIA, la scuo
 });
 
 it('utente 012: le conferme già date diventano eventi avvenuti; le altre conferme restano', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   db.prepare("INSERT INTO partita (id, nome, attiva, livello_protagonista, created_at, updated_at) VALUES (3, 'Prova', 1, 1, 'x', 'x')").run();
   const conferma = db.prepare('INSERT INTO requisito_partita (partita_id, confidente_chiave, rango, indice, confermato, updated_at) VALUES (3, ?, ?, ?, ?, ?)');
   conferma.run('sojiro', 3, 0, 1, '2026-09-20T10:00:00.000Z');

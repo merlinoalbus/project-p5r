@@ -10,8 +10,8 @@ import { useMappaPartita } from './useMappaPartita';
 import type { MappaDto, SpilloDto } from '../types';
 
 const { getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto, notifica } = vi.hoisted(() => ({ getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), notifica: vi.fn() }));
-vi.mock('../services/api', () => ({ getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
-vi.mock('../stores/notificationStore', () => ({ notifica }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 
 const leva: SpilloDto = { id: 8, mappaChiave: 'a', tipo: 'meccanismo', tipoNome: 'Meccanismo', colore: '#64748b', nome: 'Leva', descrizione: '', x: 20, y: 20, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
 const mappa = (chiave: string, spilli: SpilloDto[]): MappaDto => ({ chiave, nome: chiave, tipo: 'area', genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'utente', numeroSpilli: spilli.length, numeroFigli: 0, updatedAt: '', larghezza: 100, altezza: 100, note: '', genitoreNome: null, percorso: [], figli: [], arrivi: [], spilli });

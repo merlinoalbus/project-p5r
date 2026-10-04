@@ -3,14 +3,14 @@
 // ============================================================
 
 import Database from 'better-sqlite3';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { bloccoGuidaDi, datiGuida, finestreDaDati, finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { battaglia } from './battagliaService.js';
 import { eliminaArea } from './dungeonService.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
-beforeAll(() => { caricaPacchetto(initDb(':memory:')); });
+beforeAll(() => { dbDiProva(); });
 afterAll(() => closeDb());
 
 describe('datiGuida', () => {

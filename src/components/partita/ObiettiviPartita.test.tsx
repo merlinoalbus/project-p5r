@@ -14,8 +14,8 @@ import type { ObiettivoDto, SkillRiassuntoDto } from '../../types';
 const { getObiettivi, aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getPersone, getSkills } = vi.hoisted(() => ({
   getObiettivi: vi.fn(), aggiornaObiettivo: vi.fn(), creaObiettivo: vi.fn(), eliminaObiettivo: vi.fn(), getPersone: vi.fn(), getSkills: vi.fn(),
 }));
-vi.mock('../../services/api', () => ({ getObiettivi, aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getPersone, getSkills, isApiError: () => false }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getObiettivi, aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getPersone, getSkills }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../shared/ImmagineEntita', () => ({ ImmagineEntita: () => null }));
 
 function skill(id: number, nome: string): SkillRiassuntoDto {

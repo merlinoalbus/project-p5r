@@ -14,8 +14,8 @@ import type { AzionePercorsoDto, PartitaDto, PercorsoGiornoDto, PercorsoIndiceDt
 const { getPercorsoIndice, getPercorsoGiorno, impostaGiornoCorrente, impostaMeteoGiorno, impostaFasciaGioco } = vi.hoisted(() => ({
   getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaMeteoGiorno: vi.fn(), impostaFasciaGioco: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getPercorsoIndice, getPercorsoGiorno, impostaGiornoCorrente, impostaMeteoGiorno, impostaFasciaGioco }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getPercorsoIndice, getPercorsoGiorno, impostaGiornoCorrente, impostaMeteoGiorno, impostaFasciaGioco }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimentiStore: { getState: () => ({ invalida: vi.fn() }) } }));
 
 const azione = (n: number): AzionePercorsoDto => ({ uid: String(n).padStart(32, '0'), giorno: '04-12', genere: 'azione', fascia: 'giorno', azione: `Azione ${n}`, tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: null, mappa: null } as AzionePercorsoDto);

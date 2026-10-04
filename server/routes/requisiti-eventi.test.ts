@@ -8,20 +8,17 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { ConfidentePartitaDto, ProgressiPartitaDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('Requisiti dei Confidenti come eventi della partita', () => {
   let id = 0;
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     id = ((await request(app).post('/api/partite').send({ nome: 'Eventi' })).body.data as { id: number }).id;
   });
   afterAll(() => closeDb());

@@ -9,13 +9,12 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa, esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { MappaDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -27,9 +26,7 @@ describe('più aree della guida nella stessa planimetria', () => {
   let una: MappaDto;
   let altra: MappaDto;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     una = creaMappa(undefined, { nome: 'Planimetria con più aree', tipo: 'area', genitore: 'dungeon-kamoshida' });
     altra = creaMappa(undefined, { nome: 'Planimetria vicina', tipo: 'area', genitore: 'dungeon-kamoshida' });
   });

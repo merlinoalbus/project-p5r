@@ -2,8 +2,8 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { giorniDallaFrase } from './080_giorni_luogo_strutturati.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -38,8 +38,7 @@ it('aggiunge la colonna, converte le righe e mette la precisazione nelle note; Ã
 });
 
 it('nel pacchetto nessun luogo ha piÃ¹ giorni fuori dalle chiavi', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const righe = db.prepare('SELECT giorni_json FROM luogo').all() as Array<{ giorni_json: string }>;
   expect(righe.length).toBeGreaterThan(80);
   for (const r of righe) for (const g of JSON.parse(r.giorni_json) as string[]) expect(['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica']).toContain(g);

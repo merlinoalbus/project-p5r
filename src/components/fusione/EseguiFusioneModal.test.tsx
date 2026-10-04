@@ -12,8 +12,8 @@ import { EseguiFusioneModal } from './EseguiFusioneModal';
 import type { AnteprimaFusioneDto } from '../../types';
 
 const { getAnteprimaFusione, eseguiFusioneScorta } = vi.hoisted(() => ({ getAnteprimaFusione: vi.fn(), eseguiFusioneScorta: vi.fn() }));
-vi.mock('../../services/api', () => ({ getAnteprimaFusione, eseguiFusioneScorta, getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x') }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getAnteprimaFusione, eseguiFusioneScorta, getImmagini: vi.fn().mockResolvedValue([]) }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../shared/Modal', () => ({ Modal: ({ children, titolo }: { children: ReactNode; titolo: string }) => <div><h2>{titolo}</h2>{children}</div> }));
 
 const skill = (id: number, nome: string, ereditabile = true, motivo: string | null = null) => ({ id, nome, nomeIt: nome, elemento: 'fire', elementoNome: 'Fuoco', costo: { tipo: 'sp', valore: 4, testo: '4 PS' }, effetto: '', effettoNome: '', da: [1], ereditabile, giaAppresa: false, motivo }) as unknown as AnteprimaFusioneDto['candidate'][number];

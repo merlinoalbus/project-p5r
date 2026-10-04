@@ -2,10 +2,10 @@
 // Test eredita — slot, matrice tipo × elemento, bacino, tratti, copertura di skill desiderate
 // ============================================================
 
-import { closeDb, initDb } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb } from '../../db/dbService.js';
 import { creaContesto, fondi, invalidaMotoreFusione, type Contesto, type PersonaFusione } from './motoreFusione.js';
 import { analisiEredita, copre, elementoEreditabile, invalidaEredita, skillAlLivello, slotEreditabili, tipoEredita, trattoDi } from './eredita.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 function perNome(ctx: Contesto, nome: string): PersonaFusione {
   const p = ctx.ammesse.find((x) => x.nome === nome);
@@ -16,8 +16,7 @@ function perNome(ctx: Contesto, nome: string): PersonaFusione {
 describe('eredita', () => {
   let ctx: Contesto;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
     invalidaMotoreFusione();
     invalidaEredita();
     ctx = creaContesto([]);

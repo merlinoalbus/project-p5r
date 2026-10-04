@@ -1,8 +1,8 @@
 // Test migrazione 075 — paga in yen, dettagli, tracciamento; tipo e fascia dentro il catalogo
-import { closeDb, initDb } from '../dbService.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { closeDb } from '../dbService.js';
 import { componiDettagli, leggiPaga } from './075_attivita_strutturate.js';
 import { eFasciaAttivita, eTipoAttivita } from '../../../shared/attivita.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -17,8 +17,7 @@ it('legge le quattro forme della paga e compone i dettagli con i loro titoli', (
 });
 
 it('nel pacchetto i quattro lavori hanno la paga, il tracciamento segue il tipo, tipo e fascia sono nel catalogo', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const righe = db.prepare('SELECT chiave, tipo, fascia, paga, paga_yen, paga_massima, tracciamento, dettagli FROM attivita').all() as Array<{ chiave: string; tipo: string; fascia: string | null; paga: string | null; paga_yen: number | null; paga_massima: number | null; tracciamento: string; dettagli: string | null }>;
   expect(righe.length).toBe(30);
   for (const r of righe) {

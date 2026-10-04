@@ -11,8 +11,7 @@ const api = vi.hoisted(() => ({
   aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
-vi.mock('../../services/api', () => api);
-vi.mock('../../services/api/condizioni', () => ({getElenchiRegole:vi.fn(async()=>({articoli:[],letture:[],arcani:[],persone:[],abilita:[],squadra:[],attivita:[],negozi:[],eventi:[],contatori:[]}))}));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { ...api, getElenchiRegole: vi.fn(async () => ({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] })) }));
 
 const ID = 427;
 let descrizione: string;

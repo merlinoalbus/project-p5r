@@ -13,8 +13,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { CompletamentoDto, PartitaDto, TrofeoDto } from '../types';
 
 const { getCompletamento, impostaTrofeo } = vi.hoisted(() => ({ getCompletamento: vi.fn(), impostaTrofeo: vi.fn() }));
-vi.mock('../services/api', () => ({ getCompletamento, impostaTrofeo }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getCompletamento, impostaTrofeo }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const trofeo = (chiave: string, nome: string, tipo: TrofeoDto['tipo']): TrofeoDto => ({ chiave, nome, nomeEn: null, tipo, descrizione: 'Descrizione', come: 'Come si ottiene', mancabile: null, quando: null, fonte: 'https://www.allgamestaff.it/t', verificato: true, ottenuto: false });
 const dati: CompletamentoDto = {

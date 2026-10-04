@@ -5,7 +5,7 @@
 
 const attese = vi.hoisted(() => ({ suggerimenti: [] as Array<(v: unknown) => void>, partite: [] as Array<(v: unknown) => void> }));
 
-vi.mock('../services/api', () => ({
+vi.mock('../services/api', (vero) => moduloApi(vero, {
   getSuggerimenti: () => new Promise((ok) => attese.suggerimenti.push(ok)),
   getPartite: () => new Promise((ok) => attese.partite.push(ok)),
   attivaPartita: vi.fn(), creaPartita: vi.fn(), eliminaPartita: vi.fn(),

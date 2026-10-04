@@ -8,12 +8,12 @@ import { ImmagineEntita } from './ImmagineEntita';
 import { useAssetStore } from '../../stores/assetStore';
 
 const { getImmagini } = vi.hoisted(() => ({ getImmagini: vi.fn() }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getImmagini,
   eliminaImmagine: vi.fn(),
   importaImmagineDaUrl: vi.fn(),
   caricaImmagine: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
 describe('ImmagineEntita — Confidenti fedele/stilizzata', () => {

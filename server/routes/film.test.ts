@@ -3,17 +3,18 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { statoDisponibilitaPartita, valutaRequisiti } from '../services/disponibilitaService.js';
 import { createApp } from '../bootstrap.js';
 import type { AttivitaTutteDto, FilmDto, FilmDvdDto, StoricoDto } from '../../shared/types.js';
 import { migraTestiCondizioni } from '../../shared/migraCondizioni.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API Film e DVD', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('espone 18 film cinema e 12 DVD, 42 sessioni obiettivo e posizioni strutturate', async () => {

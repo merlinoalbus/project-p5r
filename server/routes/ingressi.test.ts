@@ -1,9 +1,10 @@
 import request from 'supertest';
 import {createApp} from '../bootstrap.js';
-import {initDb,closeDb,getDb} from '../db/dbService.js';
-import { caricaPacchetto, regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
+import {closeDb,getDb} from '../db/dbService.js';
+import { regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 const app=createApp();
-beforeEach(()=>{const db=initDb(':memory:');caricaPacchetto(db);});afterEach(()=>closeDb());
+beforeEach(()=>{dbDiProva();});afterEach(()=>closeDb());
 const url='/api/compendio/citta/shibuya/ingresso';
 it('salva ingresso con coordinate anche agli estremi e mantiene destinazione dopo rinomina e reseed',async()=>{
  expect((await request(app).put(url).send({mappa:'shibuya',x:0,y:100,zoom:3})).status).toBe(200);

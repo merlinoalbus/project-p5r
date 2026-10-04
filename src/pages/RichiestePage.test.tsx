@@ -13,8 +13,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { PartitaDto, RichiestaDto, RichiesteDto } from '../types';
 
 const { getRichieste, impostaStatoRichiesta } = vi.hoisted(() => ({ getRichieste: vi.fn(), impostaStatoRichiesta: vi.fn() }));
-vi.mock('../services/api', () => ({ getRichieste, impostaStatoRichiesta }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getRichieste, impostaStatoRichiesta }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const ric = (chiave: string, nome: string, areaChiave: string, areaNome: string, extra: Partial<RichiestaDto> = {}): RichiestaDto => ({ chiave, nome, committente: 'Mishima', disponibileDal: '7 maggio', scadenza: '', area: areaNome, areaChiave, piano: 'Area 1', bersaglio: { nome: 'Nakanohara', livello: null, formaDemoniaca: 'Obariyon', debolezze: ['Tuono'], resistenze: [], vulnerabileConfusione: true }, areaNome, areaOrdine: 1, ricompense: ['485 PE'], confidente: null, note: '', fonte: 'https://www.allgamestaff.it/x', stato: null, ...extra });
 const dati: RichiesteDto = {

@@ -2,17 +2,18 @@ import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
 import request from 'supertest';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
+import { ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import Database from 'better-sqlite3';
 import { percorsoPacchettoDb } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 describe('Conservazione catalogo e spunte', () => {
   let id: number;
   beforeEach(async () => {
-    const db = initDb(':memory:'); caricaPacchetto(db);
+    dbDiProva();
     id = (await request(app).post('/api/partite').send({ nome: 'Conservazione' })).body.data.id as number;
   });
   afterEach(() => closeDb());

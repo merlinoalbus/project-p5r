@@ -13,8 +13,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { DomandaDto, DomandeDto, PartitaDto } from '../types';
 
 const { getDomande, impostaDomandaFatta } = vi.hoisted(() => ({ getDomande: vi.fn(), impostaDomandaFatta: vi.fn() }));
-vi.mock('../services/api', () => ({ getDomande, impostaDomandaFatta }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getDomande, impostaDomandaFatta }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const dom = (id: number, data: string, domanda: string, extra: Partial<DomandaDto> = {}): DomandaDto => ({ id, chiave: data, data, tipo: 'classe', chi: 'Prof. Inui', domanda, risposte: [{ ordine: 1, testo: 'Risposta ' + id }], ricompensa: 'Conoscenza +1 nota', note: '', fonte: '', fatta: false, ...extra });
 const esame = dom(3, '05-11', 'Serie di domande su Yoshitsune', { tipo: 'esame-medio', chi: 'Esame di metà semestre 1', ricompensa: 'Conoscenza (classifica)', risposte: [{ ordine: 1, testo: 'Yoshitsune', domanda: 'Chi?' }, { ordine: 2, testo: 'Yoritomo', domanda: 'Il fratello?' }] });

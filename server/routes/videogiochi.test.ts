@@ -9,16 +9,17 @@
 // veda l'avanzamento dell'altra.
 
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { createApp } from '../bootstrap.js';
 import type { VideogiocoDto, VideogiochiDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API Videogiochi', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('espone il catalogo e round coerenti con il seed', async () => {

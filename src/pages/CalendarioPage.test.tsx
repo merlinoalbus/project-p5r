@@ -12,8 +12,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { CalendarioDto, GiornoCalendarioDto, PartitaDto } from '../types';
 
 const { getCalendario, aggiornaPartita } = vi.hoisted(() => ({ getCalendario: vi.fn(), aggiornaPartita: vi.fn() }));
-vi.mock('../services/api', () => ({ getCalendario, aggiornaPartita }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getCalendario, aggiornaPartita }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const giorno = (data: string, gs: string, extra: Partial<GiornoCalendarioDto> = {}): GiornoCalendarioDto => ({ data, giornoSettimana: gs, meteo: 'Sereno', eventi: [], tempoLibero: null, settimana: 4, ...extra });
 const dati: CalendarioDto = {

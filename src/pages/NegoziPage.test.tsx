@@ -17,12 +17,12 @@ const { getNegozi, ricercaArticoli, impostaAcquisto, posizioni } = vi.hoisted(()
   impostaAcquisto: vi.fn(),
   posizioni: [] as Array<Record<string, unknown>>,
 }));
-vi.mock('../services/api', () => ({
+vi.mock('../services/api', (vero) => moduloApi(vero, {
   getNegozi,
   ricercaArticoli,
   impostaAcquisto,
 }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 vi.mock('../components/mappe/DoveSiTrova', () => ({
   DoveSiTrova: (props: Record<string, unknown>) => {

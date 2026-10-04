@@ -2,8 +2,8 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { aggiornaIstantanea } from './081_istantanee_luogo_giorni.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -36,8 +36,7 @@ it('sul database: istantanee aggiornate, riga della guida senza istantanea fotog
 });
 
 it('nel pacchetto ogni luogo della guida ha un’istantanea con giorni_json coerente con la riga', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const righe = db.prepare("SELECT chiave, giorni_json, seed_json FROM luogo WHERE origine = 'seed'").all() as Array<{ chiave: string; giorni_json: string; seed_json: string | null }>;
   expect(righe.length).toBeGreaterThan(80);
   for (const r of righe) {

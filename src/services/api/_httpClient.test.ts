@@ -5,7 +5,7 @@
 import { httpFetch } from './_httpClient';
 import { ApiError, apiGet, apiPost, inviaFile, payloadDellaBusta } from './_helpers';
 
-vi.mock('../../stores/notificationStore', () => ({ useNotificationStore: { getState: () => ({ addNotification: vi.fn() }) } }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { useNotificationStore: { getState: () => ({ addNotification: vi.fn() }) } }));
 
 const risposta500 = () => new Response(JSON.stringify({ error: { code: 'internal-error', message: 'x' } }), { status: 500 });
 

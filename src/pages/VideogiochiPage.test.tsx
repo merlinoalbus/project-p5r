@@ -11,9 +11,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { PartitaDto, VideogiocoDto } from '../types';
 
 const { getVideogiochi, impostaProgressoVideogioco } = vi.hoisted(() => ({ getVideogiochi: vi.fn(), impostaProgressoVideogioco: vi.fn() }));
-vi.mock('../services/api/compendio', () => ({ getVideogiochi }));
-vi.mock('../services/api/partite', () => ({ impostaProgressoVideogioco }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getVideogiochi, impostaProgressoVideogioco }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ chiave }: { chiave: string }) => <div>Dove: {chiave}</div> }));
 
 const gioco: VideogiocoDto = {

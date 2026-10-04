@@ -2,8 +2,8 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { chiaveArticoloVideogioco } from './073_collegamenti_libri_videogiochi.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -23,8 +23,7 @@ it('collega l’articolo di una libreria al libro omonimo, collega un videogioco
 });
 
 it('nel pacchetto i trenta libri della guida sono articoli collegati e i sette videogiochi hanno un articolo, ciascuno nel suo negozio', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   // i trenta collegati dalla migrazione; gli articoli-libro creati dall'app («utente» senza fotografia della guida) si aggiungono e sono anch'essi collegati
   expect(db.prepare("SELECT COUNT(*) FROM articolo WHERE oggetto_fonte = 'libri' AND categoria = 'libro' AND oggetto_chiave IN (SELECT chiave FROM libro) AND NOT (origine = 'utente' AND seed_json IS NULL)").pluck().get()).toBe(30);
   expect(db.prepare("SELECT COUNT(*) FROM articolo WHERE categoria = 'libro' AND (oggetto_fonte IS NOT 'libri' OR oggetto_chiave NOT IN (SELECT chiave FROM libro))").pluck().get()).toBe(0);

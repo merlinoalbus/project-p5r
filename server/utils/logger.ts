@@ -9,12 +9,14 @@
 // ============================================================
 
 import pino from 'pino';
+import { config } from '../config.js';
 
 const isDev = process.env.NODE_ENV !== 'production' && process.stdout.isTTY;
 
 /** Logger principale del backend. */
 export const logger = pino({
-  level: process.env.LOG_LEVEL ?? 'info',
+  // dalla configurazione, come il resto (rilievo K2‴): con `??` un LOG_LEVEL vuoto arrivava a pino come livello ''
+  level: config.logLevel,
   base: { service: 'project-p5r-be' },
   timestamp: pino.stdTimeFunctions.isoTime,
   ...(isDev

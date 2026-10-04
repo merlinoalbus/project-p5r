@@ -13,8 +13,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { AttivitaDto, AttivitaTutteDto, PartitaDto } from '../types';
 
 const { getAttivita } = vi.hoisted(() => ({ getAttivita: vi.fn() }));
-vi.mock('../services/api', () => ({ getAttivita }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getAttivita }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ chiave }: { chiave: string }) => <div>Dove: {chiave}</div> }));
 
 const att = (chiave: string, nome: string, tipo: AttivitaDto['tipo'], dote: 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia', extra: Partial<AttivitaDto> = {}): AttivitaDto => ({

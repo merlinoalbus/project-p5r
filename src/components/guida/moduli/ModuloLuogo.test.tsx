@@ -6,7 +6,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ModuloLuogo } from './ModuloLuogo';
 
-vi.mock('../../../services/api/compendio', () => ({ getQuartieri: vi.fn(async () => [{ chiave: 'shibuya', nome: 'Shibuya' }]) }));
+vi.mock('../../../services/api', (vero) => moduloApi(vero, { getQuartieri: vi.fn(async () => [{ chiave: 'shibuya', nome: 'Shibuya' }]) }));
 
 it('mostra i sette giorni come chip e aggiorna giorni_json al tocco', async () => {
   const imposta = vi.fn();

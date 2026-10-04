@@ -7,8 +7,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { LibriDto, LibroDto, PartitaDto } from '../types';
 
 const { getLibri, impostaProgressoLibro } = vi.hoisted(() => ({ getLibri: vi.fn(), impostaProgressoLibro: vi.fn() }));
-vi.mock('../services/api', () => ({ getLibri, impostaProgressoLibro }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getLibri, impostaProgressoLibro }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave }: { tipo: string; chiave: string }) => <div>Dove: {tipo}/{chiave}</div> }));
 
 const base: LibroDto = {

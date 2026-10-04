@@ -17,8 +17,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getFilm, getLibri, getVideogiochi } from '../../services/api/compendio';
-import { impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco } from '../../services/api/partite';
+import { getFilm, getLibri, getVideogiochi, impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';

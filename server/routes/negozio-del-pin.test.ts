@@ -4,6 +4,7 @@
 
 import request from 'supertest';
 import { HttpError } from '../utils/httpError.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const guasto = vi.hoisted(() => ({ errore: null as Error | null }));
 
@@ -12,15 +13,14 @@ vi.mock('../services/negoziService.js', async (originale) => {
   return { ...vero, dettaglioNegozio: (...a: Parameters<typeof vero.dettaglioNegozio>) => { if (guasto.errore) throw guasto.errore; return vero.dettaglioNegozio(...a); } };
 });
 
-const { closeDb, getDb, initDb } = await import('../db/dbService.js');
-const { caricaPacchetto } = await import('../services/pacchetto/pacchettoGioco.js');
+const { closeDb, getDb } = await import('../db/dbService.js');
 const { createApp } = await import('../bootstrap.js');
 
 describe('B10 — negozio del pin', () => {
   const app = createApp();
   let mappa = '';
   beforeAll(() => {
-    caricaPacchetto(initDb(':memory:'));
+    dbDiProva();
     mappa = getDb().prepare("SELECT mappa_chiave FROM spillo WHERE riferimento_tipo = 'negozio' AND mappa_chiave IS NOT NULL LIMIT 1").pluck().get() as string;
   });
   afterAll(() => closeDb());

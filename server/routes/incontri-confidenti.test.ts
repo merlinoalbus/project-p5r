@@ -11,18 +11,17 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
 import type { AzionePercorsoDto, ConfidenteDettaglioDto, ConfidentePartitaDto, DoteSocialePartitaDto, PercorsoGiornoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API — Dote a ogni incontro con un Confidente', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 

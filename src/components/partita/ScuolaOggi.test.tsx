@@ -12,7 +12,7 @@ import { ScuolaOggi } from './ScuolaOggi';
 import type { CruciverbaTuttiDto, DomandeDto, PartitaDto } from '../../types';
 
 const { getDomande, getCruciverba } = vi.hoisted(() => ({ getDomande: vi.fn(), getCruciverba: vi.fn() }));
-vi.mock('../../services/api', () => ({ getDomande, getCruciverba, getImmagini: vi.fn(), urlImmagine: () => '' }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getDomande, getCruciverba, getImmagini: vi.fn() }));
 
 const partita = (dataGioco: string | null): PartitaDto => ({
   id: 1, nome: 'Prova', note: '', attiva: true, livelloProtagonista: 1, dataGioco, difficolta: 'normale',

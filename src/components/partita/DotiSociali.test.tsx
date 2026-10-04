@@ -8,7 +8,7 @@ import { DotiSociali } from './DotiSociali';
 import type { DoteSocialePartitaDto, ModificaDote } from '../../types';
 
 const { getDoti, aggiornaDote } = vi.hoisted(() => ({ getDoti: vi.fn(), aggiornaDote: vi.fn() }));
-vi.mock('../../services/api', () => ({ getDoti, aggiornaDote }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getDoti, aggiornaDote }));
 
 const ranghiFascino = [
   { rango: 1, nome: 'Indifferente', soglia: 0 },

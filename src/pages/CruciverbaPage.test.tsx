@@ -12,8 +12,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { CruciverbaTuttiDto, PartitaDto } from '../types';
 
 const { getCruciverba, impostaCruciverba } = vi.hoisted(() => ({ getCruciverba: vi.fn(), impostaCruciverba: vi.fn() }));
-vi.mock('../services/api', () => ({ getCruciverba, impostaCruciverba }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getCruciverba, impostaCruciverba }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const dati: CruciverbaTuttiDto = {
   dataGioco: '04-11',

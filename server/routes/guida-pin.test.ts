@@ -8,14 +8,13 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { palazzoDiOgniMappa } from '../services/palazziService.js';
 import { esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import type { DungeonDettaglioDto, MappaDto, PuntoInteresseDto } from '../../shared/types.js';
 import type { AccessoMondoDto } from '../../shared/accessoMondo.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -32,9 +31,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
   const statoPunto = (punto: string, stato: string | null) => request(app).put(`/api/partite/${partita}/punti`).send({ punto, stato }).expect(200);
 
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Guida e pin' })).body.data as { id: number }).id;
     // un'area di Kamoshida con una planimetria e almeno tre pin liberi (senza collegamento) sopra
     const palazzi = palazzoDiOgniMappa();

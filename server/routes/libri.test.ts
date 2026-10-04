@@ -3,16 +3,17 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { createApp } from '../bootstrap.js';
 import type { LibriDto, LibroDto, StoricoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API Libri', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('espone il catalogo completo senza inventare uno stato di partita e valida tutte le posizioni', async () => {
@@ -148,7 +149,7 @@ describe('API Libri', () => {
 });
 
 describe('API Libri — disponibilità', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 // ============================================================
 // La disponibilità di un libro non è più prosa che nessuno legge (migrazione 052)

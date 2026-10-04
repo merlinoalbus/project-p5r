@@ -9,8 +9,8 @@ import { TraduzioniEditor } from './TraduzioniEditor';
 import type { TraduzioneDto } from '../../types';
 
 const api = vi.hoisted(() => ({ getAmbitiTraduzioni: vi.fn(), getTraduzioni: vi.fn(), aggiornaTraduzione: vi.fn(), ripristinaTraduzione: vi.fn() }));
-vi.mock('../../services/api', () => api);
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../../stores/glossarioStore', () => ({ useGlossarioStore: (sel: (s: { ricarica: () => Promise<void> }) => unknown) => sel({ ricarica: async () => {} }) }));
 
 const voce = (chiave: string, testo: string, fonte: TraduzioneDto['fonte']): TraduzioneDto => ({ ambito: 'arcana', chiave, testo, extra: null, fonte, updatedAt: '' });

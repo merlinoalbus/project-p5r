@@ -8,7 +8,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { SchedaContenutoGuida } from './SchedaContenutoGuida';
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 
-vi.mock('../../services/api', () => ({ aggiornaSpillo: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { aggiornaSpillo: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
 
 const voce = (tipo: string) => ({ chiave: 'futaba-02/0', tipo, nome: 'Tesoro avvistato', descrizione: '', esauribile: false, dungeon: 'futaba', area: 'futaba-02', stato: null });
 const elemento = (tipoPunto: string): SchedaContenutoGuidaDto => ({

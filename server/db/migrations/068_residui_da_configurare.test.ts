@@ -2,7 +2,7 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -15,8 +15,7 @@ it('converte una foglia residua in uno stato della partita', () => {
 });
 
 it('il pacchetto non contiene più «da-configurare» in nessuna tabella con condizioni', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   for (const t of ['attivita', 'libro', 'film', 'negozio', 'articolo', 'spillo', 'luogo']) {
     expect(db.prepare(`SELECT COUNT(*) FROM ${t} WHERE condizioni_json LIKE '%da-configurare%'`).pluck().get(), t).toBe(0);
   }

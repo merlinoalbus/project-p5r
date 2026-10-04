@@ -10,7 +10,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { impostaStatoRichiesta, impostaTimbri } from '../../services/api/partite';
+import { impostaStatoRichiesta, impostaTimbri } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';

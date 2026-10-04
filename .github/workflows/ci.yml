@@ -1,14 +1,15 @@
 # ============================================================
 # CI — gate di verifica (typecheck + lint + test + audit)
 # ============================================================
-# Il gate gira sulle PULL REQUEST. Non anche sul push su main: con il merge di una PR appena
-# verificata sarebbe la stessa verifica due volte, sullo stesso codice, a pochi secondi di distanza.
-# La pubblicazione delle immagini è demandata a docker-publish.yml, che al merge parte comunque.
+# Il gate gira sulle PULL REQUEST e, come workflow riusabile (`workflow_call`), prima della pubblicazione delle immagini
+# (docker-publish.yml, al push su main): un solo gate, scritto una volta, con l'audit anche lì. Prima la pubblicazione ne
+# aveva una copia senza audit, e questo commento diceva che non serviva (rilievo D7 della verifica completa, 2026-10-04).
 
 name: CI
 
 on:
   pull_request:
+  workflow_call:
 
 jobs:
   verify:
@@ -29,12 +30,10 @@ jobs:
       - name: Typecheck (tsc -b su app + node + server + test)
         run: npm run typecheck
 
-      - name: Lint (strict su server/)
-        run: npm run lint:ci
-
-      - name: Lint (intero repo, informativo)
+      # Un lint solo, bloccante, sull'intero repo: `lint` e `lint:ci` erano lo stesso comando e giravano due volte, una
+      # «strict su server/» e una «informativa» (rilievo D6).
+      - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Tests (Vitest — BE + FE + shared)
         run: npm test

@@ -7,8 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import express from 'express';
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { errorHandler } from '../middleware/errorHandler.js';
 import { responseShapeMiddleware } from '../middleware/responseShape.js';
@@ -17,6 +16,7 @@ import { CHIAVI_MAPPA_RISERVATE } from '../services/mappe/mappeService.js';
 import { bodySalvaPiano, LIVELLI_MAX_PIANO } from '../schemas/partite.js';
 import { datiNegozio } from '../schemas/catalogo.js';
 import mappeRouter from './mappe.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 /** Un'app minima con la stessa catena di middleware, per provocare errori che le rotte vere non producono a comando. */
 function appDiProva(): express.Express {
@@ -55,7 +55,7 @@ describe('verifica API — catena dei middleware', () => {
 
 describe('verifica API — rotte vere', () => {
   const app = createApp();
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('F01: nessun header CORS, né sul preflight né su una GET con Origin', async () => {
@@ -147,7 +147,7 @@ describe('verifica API — rotte vere', () => {
       expect(res.body.data.status).toBe('degraded');
       expect(res.body.data.db).toEqual({ ok: false, error: 'Il database non risponde.' });
     } finally {
-      caricaPacchetto(initDb(':memory:'));
+      dbDiProva();
     }
     expect((await request(app).get('/api/health')).status).toBe(200);
   });

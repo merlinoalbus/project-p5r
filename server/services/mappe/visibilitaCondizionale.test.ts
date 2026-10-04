@@ -15,20 +15,19 @@
 // ============================================================
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { closeDb, initDb, getDb, prepared } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../../db/dbService.js';
 import { sincronizzaMappe } from './sincronizzaMappe.js';
 import { applicaPresenzaAiLuoghi } from './presenzaEntita.js';
 import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
 import { eStrutturale } from '../../../shared/spilli.js';
 import { valutaRequisitiSpillo } from '../disponibilitaService.js';
 import { dettaglioMappa } from './mappeService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
 describe('visibilità condizionale dei pin', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    const db = dbDiProva();
     // il pacchetto e' la fotografia della produzione: la formazione dalla guida (spilli dai marcatori,
     // presenza dei luoghi sui pin) non avviene piu' da sola, qui si chiede esplicitamente
     sincronizzaMappe(db);

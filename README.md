@@ -31,12 +31,15 @@ Altri comandi: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
 ## Struttura
 
 ```
-server/        Express: config, bootstrap, middleware, db (migrazioni); routes/services/schemas dallo step 0.4
+server/        Express: config, bootstrap, middleware, db (migrazioni), routes, services, schemas
 src/           React: pages, components (layout tablet-first), stores, services/api, hooks
-shared/        tipi condivisi FE/BE (solo tipi e costanti pure)
-data/seed/     dataset Persona 5 Royal normalizzato (versionato, caricato al boot — dallo step 0.2)
-scripts/       gestione server (+ pipeline di acquisizione/verifica del dataset dallo step 0.2)
-docs/          riferimenti di dominio, decisioni, prompt grafici
+shared/        tipi e regole condivisi FE/BE (funzioni pure, nessun accesso a DB o DOM)
+pacchetto/     gioco.db iniziale (senza immagini, copiato in data/ al primo avvio); il completo sta in pacchetto/completo/, fuori da git
+data/          l'istanza locale: gioco.db, partite.db, copie di sicurezza (fuori da git)
+scripts/       gestione server (start/stop/restart), generazione del pacchetto, misura della copertura dell'accesso
+test/          aiuti condivisi dai test (server di prova, selettore, setup di Vitest)
+vite/          plugin di Vite (asset grafici predefiniti)
+docs/          architettura, roadmap, decisioni, riferimenti di dominio, prompt grafici
 ```
 
 ## Deploy (Portainer + GHCR + watchtower esterno)
@@ -44,7 +47,8 @@ docs/          riferimenti di dominio, decisioni, prompt grafici
 - `docker-compose.yml`: stack `project_p5r` senza porte pubblicate: il frontend nginx è collegato alla rete esterna del tunnel
   Cloudflare (`PROXY_NETWORK`, default `proxy`; cloudflared → `http://project_p5r_fe:80`) e proxa `/api/` verso il backend,
   che vive solo sulla rete interna;
-  DB creato dal backend sul volume `project_p5r_data` al primo avvio (migrazioni + seed inclusi nell'immagine).
+  DB creato dal backend sul volume `project_p5r_data` al primo avvio (pacchetto iniziale e migrazioni inclusi nell'immagine);
+  le variabili `NAS_ADDR` e `NAS_PATH` della cartella d'appoggio sono obbligatorie.
 - `.github/workflows/docker-publish.yml`: a ogni push su `main`, dopo il gate CI, pubblica
   `ghcr.io/merlinoalbus/project-p5r-backend` e `…-frontend` con tag `:latest` e `:sha`.
 - I container portano la label `com.centurylinklabs.watchtower.enable=true` per il watchtower globale dell'host.

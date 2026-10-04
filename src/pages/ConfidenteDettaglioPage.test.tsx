@@ -12,8 +12,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { ConfidenteDettaglioDto, ConfidentePartitaDto, PartitaDto } from '../types';
 
 const { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro } = vi.hoisted(() => ({ getConfidenteDettaglio: vi.fn(), getConfidentiPartita: vi.fn(), impostaRegaloFatto: vi.fn(), impostaDotiIncontro: vi.fn() }));
-vi.mock('../services/api', () => ({ getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/shared/ImmagineEntita', () => ({ ImmagineEntita: () => null }));
 
 const dettaglio: ConfidenteDettaglioDto = {

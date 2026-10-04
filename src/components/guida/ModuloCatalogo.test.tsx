@@ -13,21 +13,21 @@ const api = vi.hoisted(() => ({
   eliminaElementoCatalogo: vi.fn(), nascondiElementoCatalogo: vi.fn(),
 }));
 vi.mock('./CondizioniEditor', () => ({ CondizioniEditor: () => null }));
-vi.mock('../../services/api', () => api);
-vi.mock('../../services/api/compendio', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
+  ...api,
   getQuartieri: vi.fn().mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya' }, { chiave: 'shinjuku', nome: 'Shinjuku' }]),
   getLuoghi: vi.fn().mockResolvedValue([{ chiave: 'shibuya/untouchable', nome: 'Untouchable', tipo: 'negozio', quartiere: 'shibuya', quartiereNome: 'Shibuya' }]),
   getAttivita: vi.fn().mockResolvedValue({ attivita: [] }),
   getConfidenti: vi.fn().mockResolvedValue([{ chiave: 'iwai', nome: 'Munehisa Iwai', arcana: 'hanged', arcanaNome: 'Appeso', ordine: 1 }]),
+  getTuttiGliOggetti: vi.fn().mockResolvedValue(oggetti),
 }));
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
-vi.mock('../../stores/notificationStore', () => ({ notifica }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 // L'archivio unico da cui si sceglie l'oggetto: un libro e un'arma, di due fonti diverse.
 const { oggetti } = vi.hoisted(() => ({ oggetti: [
   { chiave: 'magnifico-ladro', fonte: 'libri', categoria: 'libro', nome: 'Il magnifico ladro', nomeIt: 'Il magnifico ladro', effetto: 'Alza Conoscenza', statistiche: 'Conoscenza ♪♪ · 3 sessioni', per: null, prezzo: 1200 },
   { chiave: '7', fonte: 'equipaggiamento', categoria: 'arma', nome: 'Paradise Lost', nomeIt: 'Paradiso perduto', effetto: 'Attacco altissimo', statistiche: null, per: 'Solo Joker', prezzo: null },
 ] }));
-vi.mock('../../services/api/catalogo', () => ({ getTuttiGliOggetti: vi.fn().mockResolvedValue(oggetti) }));
 
 const negozioSeed: ElementoCatalogoDto = {
   tipo: 'negozio', chiave: 'untouchable', nome: 'Untouchable', origine: 'seed', modificata: false, nascosta: false, aggiornata: null,

@@ -26,7 +26,7 @@ import { useAssetStore } from '../stores/assetStore';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 
 const { getOggettiGuida, getOggetti } = vi.hoisted(() => ({ getOggettiGuida: vi.fn(), getOggetti: vi.fn() }));
-vi.mock('../services/api', () => ({ getOggettiGuida, getOggetti }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getOggettiGuida, getOggetti }));
 
 const vuoto = {
   consumabili: [], chiaveEMateriali: [], scambi: [],

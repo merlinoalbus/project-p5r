@@ -11,8 +11,8 @@ import { StoricoPartita } from './StoricoPartita';
 import type { EventoPartitaDto, StoricoDto } from '../../types';
 
 const { getStorico, eliminaEvento, eliminaEventi } = vi.hoisted(() => ({ getStorico: vi.fn(), eliminaEvento: vi.fn(), eliminaEventi: vi.fn()}));
-vi.mock('../../services/api', () => ({ getStorico, eliminaEvento, eliminaEventi}));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getStorico, eliminaEvento, eliminaEventi}));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 function ev(id: number, tipo: string, titolo: string, extra: Partial<EventoPartitaDto> = {}): EventoPartitaDto {
   return { id, tipo, tipoNome: tipo, gruppo: 'persona', titolo, dettaglio: '', dati: {}, personaId: null, personaNome: null, personaNomeIt: null, createdAt: '2026-09-03T10:00:00.000Z', ...extra };

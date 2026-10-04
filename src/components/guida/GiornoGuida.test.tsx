@@ -11,7 +11,7 @@ import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
 
 const api = vi.hoisted(() => ({
   creaVoceGiornata: vi.fn(), aggiornaVoceGiornata: vi.fn(), spostaVoceGiornata: vi.fn(), eliminaVoceGiornata: vi.fn(), impostaAzionePercorso: vi.fn(),
-  getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
+  getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
   getElenchiAzione: vi.fn(),
 }));
 const ELENCHI = {
@@ -19,9 +19,9 @@ const ELENCHI = {
   libri: [{ chiave: 'zorro-il-fuorilegge', nome: 'Zorro, il fuorilegge' }], film: [], videogiochi: [],
   attivita: [{ chiave: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', turni: true }, { chiave: 'studio-leblanc', nome: 'Studio al Leblanc', turni: false }], negozi: [], doti: [],
 };
-vi.mock('../../services/api', () => api);
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
-vi.mock('../../stores/notificationStore', () => ({ notifica }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 
 const uid = (n: number) => n.toString(16).padStart(32, '0');
 const voce = (p: Partial<AzionePercorsoDto> & Pick<AzionePercorsoDto, 'uid' | 'azione'>): AzionePercorsoDto => ({

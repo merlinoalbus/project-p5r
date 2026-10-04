@@ -7,8 +7,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { FilmDto, FilmDvdDto, PartitaDto } from '../types';
 
 const { getFilm, impostaProgressoFilm } = vi.hoisted(() => ({ getFilm: vi.fn(), impostaProgressoFilm: vi.fn() }));
-vi.mock('../services/api', () => ({ getFilm, impostaProgressoFilm }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getFilm, impostaProgressoFilm }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave }: { tipo: string; chiave: string }) => <div>Dove: {tipo}/{chiave}</div> }));
 
 const base: FilmDto = {

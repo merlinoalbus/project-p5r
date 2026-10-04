@@ -10,7 +10,7 @@
 // ============================================================
 
 import { useCarica } from '../../hooks/useCarica';
-import { getTuttiGliOggetti } from '../../services/api/catalogo';
+import { getTuttiGliOggetti } from '../../services/api';
 import { Selettore } from '../shared/Selettore';
 import type { OggettoSelezionabileDto } from '../../types';
 import { NOME_ARCHIVIO, chiaveOggetto, etichettaOggetto } from '../../utils/oggetti';

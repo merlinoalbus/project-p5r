@@ -1,12 +1,12 @@
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
-import { initDb, closeDb, getDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { urlDestinazioneMondo } from '../../shared/accessoMondo.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 beforeEach(() => {
-  const db = initDb(':memory:'); caricaPacchetto(db);
+  const db = dbDiProva();
   // Isola i casi della fixture dai pin preesistenti di questo solo negozio.
   db.prepare("DELETE FROM spillo WHERE (riferimento_tipo='negozio' AND riferimento_chiave='untouchable') OR (riferimento_tipo='luogo' AND riferimento_chiave IN (SELECT chiave FROM luogo WHERE negozio='untouchable'))").run();
 });

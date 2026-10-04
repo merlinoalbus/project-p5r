@@ -2,7 +2,7 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -27,8 +27,7 @@ it('unisce le condizioni del negozio a quelle dell’articolo, svuota il negozio
 });
 
 it('nel pacchetto nessun negozio porta condizioni e gli articoli di Takemi della guida chiedono il Confidente', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   expect(db.prepare("SELECT COUNT(*) FROM negozio WHERE condizioni_json IS NOT NULL AND condizioni_json <> '[]'").pluck().get()).toBe(0);
   // quelli che l'utente ha riscritto dall'app (origine «utente») portano le sue condizioni, non quella della migrazione
   const takemi = db.prepare("SELECT condizioni_json FROM articolo WHERE negozio_chiave = 'clinica-takemi' AND origine = 'seed'").all() as Array<{ condizioni_json: string }>;

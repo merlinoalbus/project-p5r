@@ -11,8 +11,8 @@ import { PianiSalvati } from './PianiSalvati';
 import type { NodoPianoDto, PianoSalvatoDto } from '../../types';
 
 const { getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato } = vi.hoisted(() => ({ getPianiSalvati: vi.fn(), getPossedute: vi.fn(), aggiornaPianoSalvato: vi.fn(), eliminaPianoSalvato: vi.fn() }));
-vi.mock('../../services/api', () => ({ getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`, }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const p = (id: number, nome: string): NodoPianoDto['persona'] => ({ id, nome, nomeIt: nome, arcana: 'Magician', arcanaNome: 'Mago', livello: 10, speciale: false, rara: false, dlc: false });
 const foglia = (id: number, nome: string): NodoPianoDto => ({ persona: p(id, nome), modo: 'scorta', costo: 0, figli: [], skillPortate: [], skillDaLivello: [] });

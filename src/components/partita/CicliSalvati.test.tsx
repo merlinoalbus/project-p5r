@@ -14,8 +14,8 @@ import type { AnelloCicloDto, CicloSalvatoDto } from '../../types';
 const { getCicliSalvati, getPossedute, aggiungiPosseduta, avanzaCiclo, aggiornaCiclo, eliminaCiclo } = vi.hoisted(() => ({
   getCicliSalvati: vi.fn(), getPossedute: vi.fn(), aggiungiPosseduta: vi.fn(), avanzaCiclo: vi.fn(), aggiornaCiclo: vi.fn(), eliminaCiclo: vi.fn(),
 }));
-vi.mock('../../services/api', () => ({ getCicliSalvati, getPossedute, aggiungiPosseduta, avanzaCiclo, aggiornaCiclo, eliminaCiclo, isApiError: () => false, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`, }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getCicliSalvati, getPossedute, aggiungiPosseduta, avanzaCiclo, aggiornaCiclo, eliminaCiclo, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../fusione/EseguiFusioneModal', () => ({ EseguiFusioneModal: ({ possedutaIds, onEseguita }: { possedutaIds: number[]; onEseguita: () => void }) => <div><span>Modale fusione {possedutaIds.join('+')}</span><button type="button" onClick={onEseguita}>Conferma fusione</button></div> }));
 vi.mock('../shared/Modal', () => ({ Modal: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
 

@@ -16,13 +16,12 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa, riordinaMappe } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { MappaDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -34,9 +33,7 @@ describe('planimetrie di un Palazzo', () => {
   let una: MappaDto;
   let altra: MappaDto;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     una = creaMappa(undefined, { nome: 'Planimetria di prova uno', tipo: 'area', genitore: 'dungeon-kamoshida' });
     altra = creaMappa(undefined, { nome: 'Planimetria di prova due', tipo: 'area', genitore: 'dungeon-kamoshida' });
   });

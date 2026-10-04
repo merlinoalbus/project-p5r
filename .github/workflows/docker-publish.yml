@@ -20,24 +20,9 @@ env:
   FE_IMAGE: ghcr.io/merlinoalbus/project-p5r-frontend
 
 jobs:
+  # lo stesso gate delle pull request (ci.yml), audit compreso: una sola definizione (rilievo D7)
   verify:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Typecheck
-        run: npm run typecheck
-      - name: Lint (strict su server/)
-        run: npm run lint:ci
-      - name: Tests
-        run: npm test
+    uses: ./.github/workflows/ci.yml
 
   build-backend:
     needs: verify
@@ -62,8 +47,9 @@ jobs:
           context: .
           file: ./Dockerfile.backend
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache separate per le due immagini: con la stessa si sovrascrivevano a vicenda (rilievo D8)
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
           tags: |
             ${{ env.BE_IMAGE }}:latest
             ${{ env.BE_IMAGE }}:${{ github.sha }}
@@ -91,8 +77,8 @@ jobs:
           context: .
           file: ./Dockerfile.frontend
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
           tags: |
             ${{ env.FE_IMAGE }}:latest
             ${{ env.FE_IMAGE }}:${{ github.sha }}

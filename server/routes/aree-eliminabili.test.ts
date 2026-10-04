@@ -9,12 +9,11 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -24,9 +23,7 @@ const conta = (sql: string, ...p: unknown[]) => (prepared(sql).get(...p) as { n:
 describe('eliminare un’area della guida', () => {
   let partita: number;
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Prova aree' })).body.data as { id: number }).id;
   });
   afterAll(() => closeDb());

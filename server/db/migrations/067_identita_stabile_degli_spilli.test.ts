@@ -3,13 +3,13 @@
 // ============================================================
 
 import Database from 'better-sqlite3';
-import { closeDb, getDb, initDb } from '../dbService.js';
+import { closeDb, getDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { aggiornaSpillo, creaSpillo, eliminaSpillo, esportaMappe, impostaRaccolto, importaMappe } from '../../services/mappe/mappeService.js';
 import { assegnaUidMancanti, identitaSpillo, uidSpillo, uidValido } from '../../services/mappe/identitaSpillo.js';
 import { creaPartita } from '../../services/partiteService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 /** Un file di gioco fermo alla 066 con tre spilli (due con la stessa identità), senza uid. */
 function fileAlla066(): Database.Database {
@@ -54,7 +54,7 @@ describe('067 — uid deterministico degli spilli', () => {
 });
 
 describe('uid nell\'applicazione', () => {
-  beforeEach(() => { initDb(':memory:'); caricaPacchetto(getDb()); });
+  beforeEach(() => { dbDiProva(); });
   afterEach(() => closeDb());
 
   it('il pacchetto porta un uid valido e unico su ogni spillo, deterministico su quelli della guida', () => {

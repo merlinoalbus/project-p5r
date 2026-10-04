@@ -7,6 +7,7 @@ import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
 import { contenutiMappa, risolviPercorsoMappa } from './contenutiGuidaService.js';
 import { importaMappe, dettaglioMappa, esportaMappe, mappaPerEntita } from './mappeService.js';
 import { risolviAccessoMondo } from './accessoMondoService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 describe('organizzazione geografica e contenuti guida',()=>{
  afterEach(()=>closeDb());
@@ -25,7 +26,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(db.pragma('foreign_key_check')).toEqual([]);
  });
  it('una nuova installazione conserva le sezioni senza creare false planimetrie',()=>{
-  const db=initDb(':memory:');caricaPacchetto(db);
+  const db=dbDiProva();
   const n=db.prepare('SELECT count(*) n FROM dungeon_area').get();
   expect(db.prepare('SELECT count(*) n FROM guida_mappa').get()).toEqual(n);
   expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
@@ -34,7 +35,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(d.reduce((n,d)=>n+contenutiMappa('dungeon-'+d.chiave).aree.reduce((n,a)=>n+a.punti.length,0),0)).toBe(688);
  });
  it('ricaricare il pacchetto base invariato dopo nuove mappe conserva ID e dipendenti dei vecchi pacchetti',()=>{
-  const db=initDb(':memory:');caricaPacchetto(db);
+  const db=dbDiProva();
   const t='2026-09-06T00:00:00Z';
   const pacchetto={versione:1 as const,mappe:[{chiave:'fixture-reseed',nome:'Fixture reseed',tipo:'generica' as const,genitore:null,ordine:0,immagine:null,asset:null,larghezza:null,altezza:null,entita:null,note:'',spilli:[{tipo:'nota' as const,nome:'Nota del seed',descrizione:'',x:20,y:30,riferimento:null,collezionabile:false,ordine:0}]}]};
   importaMappe(pacchetto,{origine:'seed'});
@@ -51,7 +52,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
  });
 
  it('conserva contesti nominali e gruppi immagini senza scegliere un contesto, e non sceglie la prima associazione multipla',()=>{
-  const db=initDb(':memory:');caricaPacchetto(db);
+  const db=dbDiProva();
   const nodo={chiave:'contesti-fixture',nome:'Contesti fixture',tipo:'generica' as const,genitore:null,ordine:0,immagine:null,asset:null,larghezza:null,altezza:null,entita:null,note:'',spilli:[],contesti:[{id:'campo-a',nome:'Nome A',campo:'F001_001_00',texpack:1},{id:'campo-b',nome:'Nome B',campo:'F001_002_00',texpack:2}],gruppoImmagini:{id:'gruppo-fixture',nome:'Gruppo fixture',ordine:0}};
   importaMappe({versione:1,mappe:[nodo]});
   expect(dettaglioMappa(nodo.chiave)).toMatchObject({nome:nodo.nome,contesti:nodo.contesti,gruppoImmagini:nodo.gruppoImmagini});
@@ -68,7 +69,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
  });
 
  it('API guida mantiene immagini, condizioni e stato modificabili sullo stesso ID senza esporre coordinate',async()=>{
-  const db=initDb(':memory:');caricaPacchetto(db);const app=createApp();
+  const db=dbDiProva();const app=createApp();
   const old=db.prepare("SELECT s.* FROM spillo s WHERE area_guida_chiave IS NOT NULL AND ruolo_guida='punto' LIMIT 1").get() as {id:number;area_guida_chiave:string;x:number;y:number};
   const t='2026-09-06T00:00:00Z';const partita=Number(db.prepare("INSERT INTO partita(nome,data_gioco,created_at,updated_at) VALUES('Guida','04-09',?,?)").run(t,t).lastInsertRowid);
   const image=Number(db.prepare("INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,'fixture-immagine','Prima',?)").run(old.id,t).lastInsertRowid);

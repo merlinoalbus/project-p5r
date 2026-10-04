@@ -9,7 +9,7 @@
 // ============================================================
 
 import { useCarica } from '../../hooks/useCarica';
-import { getLuoghi, getQuartieri } from '../../services/api/compendio';
+import { getLuoghi, getQuartieri } from '../../services/api';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
 import { definizioneTipoLuogo } from '../../../shared/tipiLuogo';
 

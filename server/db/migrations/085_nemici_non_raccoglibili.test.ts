@@ -1,14 +1,13 @@
 // Test migrazione 085 — i nemici si rigenerano: non sono più da raccogliere
-import { closeDb, initDb } from '../dbService.js';
+import { closeDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
 it('toglie la collezionabilità agli spilli «Nemico» e lascia com’erano gli altri consumabili', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   db.pragma(`main.user_version = ${migrations.find((m) => m.id === 85)!.id - 1}`);
   // un nemico ancora collezionabile, come lo lasciava la categoria di prima, accanto a un forziere
   db.exec("UPDATE spillo SET collezionabile = 1 WHERE tipo = 'nemico'");

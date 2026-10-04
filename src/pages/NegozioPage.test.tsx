@@ -22,8 +22,8 @@ const { getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getE
   posizioni: [] as Array<Record<string, unknown>>,
 }));
 // `getCatalogo` serve al blocco degli articoli nascosti; senza partita e senza nascosti torna vuoto.
-vi.mock('../services/api', () => ({ getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo, getNegozi: vi.fn().mockResolvedValue([]) }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo, getNegozi: vi.fn().mockResolvedValue([]) }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({
   DoveSiTrova: (props: Record<string, unknown>) => {
     posizioni.push(props);

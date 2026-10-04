@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
-import { getAttivita, getConfidenti, getQuartieri } from '../../../services/api/compendio';
+import { getAttivita, getConfidenti, getQuartieri } from '../../../services/api';
 import type { NomiPerEffetti } from '../../../utils/effetti';
 
 export function useNomiPerEffetti(attivo = true): Required<Omit<NomiPerEffetti, 'erroreNomi' | 'riprovaNomi'>> & Pick<NomiPerEffetti, 'erroreNomi' | 'riprovaNomi'> {

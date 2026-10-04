@@ -12,8 +12,8 @@ import { ForcaIsolamento } from './ForcaIsolamento';
 import type { PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
 
 const { getPossedute, getSuggerimentoIsolamento, eseguiIsolamento } = vi.hoisted(() => ({ getPossedute: vi.fn(), getSuggerimentoIsolamento: vi.fn(), eseguiIsolamento: vi.fn() }));
-vi.mock('../../services/api', () => ({ getPossedute, getSuggerimentoIsolamento, eseguiIsolamento, getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file` }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getPossedute, getSuggerimentoIsolamento, eseguiIsolamento, getImmagini: vi.fn().mockResolvedValue([]) }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const velluto: VellutoDto = {
   partitaId: 1,

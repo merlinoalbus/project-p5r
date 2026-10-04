@@ -13,7 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { MappaIncorporata } from './MappaIncorporata';
 
 const { risolviMappa, haPlanimetria } = vi.hoisted(() => ({ risolviMappa: vi.fn(), haPlanimetria: vi.fn() }));
-vi.mock('../../services/api', () => ({ risolviMappa }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { risolviMappa }));
 vi.mock('../../utils/haPlanimetria', () => ({ haPlanimetria }));
 vi.mock('../../hooks/useMappaPartita', () => ({
   useMappaPartita: () => ({ mappa: { chiave: 'm-sala', nome: 'Sala', figli: [{ chiave: 'm-figlia', nome: 'Stanza figlia' }], spilli: [] }, caricamento: false, errore: null, ricarica: vi.fn(), raccolto: vi.fn(), statoPunto: vi.fn(), acquisto: vi.fn() }),

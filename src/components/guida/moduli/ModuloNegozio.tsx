@@ -8,7 +8,7 @@
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
-import { getConfidenti } from '../../../services/api/compendio';
+import { getConfidenti } from '../../../services/api';
 import { Selettore } from '../../shared/Selettore';
 import { SelettoreIcone } from '../../shared/SelettoreIcone';
 import { OrariEditor } from '../OrariEditor';

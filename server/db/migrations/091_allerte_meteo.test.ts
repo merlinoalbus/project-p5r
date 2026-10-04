@@ -2,10 +2,10 @@
 // Test 091 — le allerte meteo del catalogo diventano giorni e fasce
 // ============================================================
 
-import { closeDb, initDb } from '../dbService.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { closeDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { leggiDateAllerta } from '../../../shared/meteoPartita.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -24,8 +24,7 @@ it('legge le date: per tutte le fasce, «(solo di giorno)», «(sera)», «(nott
 });
 
 it('sul pacchetto: ogni allerta con i suoi giorni e le sue fasce, come nel catalogo', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const conta = (chiave: string, fascia: string) => (db.prepare('SELECT COUNT(*) AS n FROM allerta_meteo WHERE chiave = ? AND fascia = ?').get(chiave, fascia) as { n: number }).n;
   expect([conta('pioggia-torrenziale', 'giorno'), conta('pioggia-torrenziale', 'sera')]).toEqual([6, 8]);
   expect([conta('allerta-polline', 'giorno'), conta('allerta-polline', 'sera')]).toEqual([8, 8]);

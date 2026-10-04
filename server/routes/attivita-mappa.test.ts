@@ -1,11 +1,11 @@
 import request from 'supertest';
 import {createApp} from '../bootstrap.js';
-import {initDb,closeDb,getDb} from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import {closeDb,getDb} from '../db/dbService.js';
 import type {MappaDto,SpilloDto} from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app=createApp();
-beforeAll(()=>{const db=initDb(':memory:');caricaPacchetto(db);});
+beforeAll(()=>{dbDiProva();});
 afterAll(()=>{closeDb();});
 
 it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizioni e pacchetti',async()=>{

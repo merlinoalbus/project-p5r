@@ -9,13 +9,12 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa, esportaMappe, importaMappe, verificaCondizioni } from '../services/mappe/mappeService.js';
 import { palazzoDiOgniMappa } from '../services/palazziService.js';
 import type { PuntoInteresseDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 interface Pin { id: number; nome: string; raccolto: boolean; disponibilita?: { stato: string; requisiti: Array<{ tipo: string; stato: string; dettaglio: string }> }; condizioni: Array<{ tipo: string; testo: string }> }
@@ -36,9 +35,7 @@ describe('condizione «Pin di una mappa»', () => {
   const su = (uid: string, segnato: boolean) => ({ tipo: 'spillo' as const, spillo: uid, segnato });
 
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Pin condizionati' })).body.data as { id: number }).id;
     // una planimetria di un Palazzo con una porta del gioco (nativa): l'elemento fisso che di norma non si nasconde mai
     mappa = prepared("SELECT mappa_chiave FROM spillo WHERE tipo = 'porta' AND nativo_json IS NOT NULL AND mappa_chiave IS NOT NULL ORDER BY id LIMIT 1").pluck().get() as string;

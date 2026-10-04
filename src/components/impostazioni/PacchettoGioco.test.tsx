@@ -12,9 +12,9 @@ import { PacchettoGioco } from './PacchettoGioco';
 import type { AnteprimaPacchettoDto, EsitoImportazionePacchettoDto, StatoIstanzaDto } from '../../types';
 
 const api = vi.hoisted(() => ({ getStatoIstanza: vi.fn(), scaricaPacchettoGioco: vi.fn(), statoImportazionePacchetto: vi.fn(), getDepositoPacchetti: vi.fn(), anteprimaPacchettoDaDeposito: vi.fn(), importaPacchettoDaDeposito: vi.fn() }));
-vi.mock('../../services/api', () => api);
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
-vi.mock('../../stores/notificationStore', () => ({ notifica }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 const { carica } = vi.hoisted(() => ({ carica: vi.fn() }));
 vi.mock('../../stores/partitaStore', () => ({ usePartitaStore: { getState: () => ({ carica }) } }));
 

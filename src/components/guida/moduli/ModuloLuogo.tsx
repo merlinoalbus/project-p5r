@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
-import { getQuartieri } from '../../../services/api/compendio';
+import { getQuartieri } from '../../../services/api';
 import { Selettore } from '../../shared/Selettore';
 import { IconaSpillo } from '../../mappe/IconaSpillo';
 import { SelettoreIcone, type OpzioneIcone } from '../../shared/SelettoreIcone';

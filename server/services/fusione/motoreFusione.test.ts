@@ -2,8 +2,8 @@
 // Test motoreFusione — regole di fusione sul dataset reale (DB in memoria)
 // ============================================================
 
-import { closeDb, initDb } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb } from '../../db/dbService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 import {
   arcanaRisultato, costoFusione, creaContesto, fondi, fusioniCon, invalidaMotoreFusione, livelloFusione, ricettePer, type Contesto, type PersonaFusione,
 } from './motoreFusione.js';
@@ -18,8 +18,7 @@ function perNome(ctx: Contesto, nome: string): PersonaFusione {
 describe('motoreFusione', () => {
   let ctx: Contesto;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
     invalidaMotoreFusione();
     ctx = creaContesto([]);
   });

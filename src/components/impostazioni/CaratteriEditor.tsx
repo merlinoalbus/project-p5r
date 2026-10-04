@@ -8,7 +8,7 @@
 // ============================================================
 
 import { useRef, useState } from 'react';
-import { caricaFont, eliminaFont } from '../../services/api/font';
+import { caricaFont, eliminaFont } from '../../services/api';
 import { useFontStore } from '../../stores/fontStore';
 import { notifica } from '../../stores/notificationStore';
 import type { FontDto, RuoloFont } from '../../types';

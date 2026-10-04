@@ -3,7 +3,7 @@ logs
 *.log
 npm-debug.log*
 
-# Segreti e dati locali (il seed in data/seed/ è versionato)
+# Segreti e dati locali (i dati di gioco iniziali stanno in pacchetto/gioco.db, versionato)
 .env
 data/*.db
 data/*.db-shm
@@ -29,15 +29,7 @@ coverage/
 .pids/
 data/tmp/
 
-# Originali dei CPK ripristinati da data/atlas/original-archives (rigenerabili con
-# `python tools/p5r-map-export/restore_originals.py`, hash verificati file per file)
-data/atlas/extracted/originali/
-
-# Cache dei moduli Python degli strumenti
-__pycache__/
-
-# Cartella di lavoro temporanea del verificatore
-.codex-temp/
+# Configurazione di prova di Vite del verificatore
 vite.config.prova.ts
 
 # Cartelle di lavoro degli altri agenti e worktree smontati. Restano su disco quando Windows

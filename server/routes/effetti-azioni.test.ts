@@ -13,8 +13,7 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { contestoConversione, effettiDellAzione } from '../db/conversioneEffettiAzione.js';
 import { utente007 } from '../db/migrazioniUtente/007_effetti_delle_azioni.js';
@@ -22,13 +21,13 @@ import { utente015 } from '../db/migrazioniUtente/015_giornata_canone.js';
 import { DDL_UTENTE_STORICHE } from '../db/schemaUtente.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, EffettiAzioneDto, PercorsoGiornoDto, ProgressiPartitaDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API — effetti strutturati delle azioni della guida', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -259,8 +258,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
 
 describe('API — il contatore dei turni registra le stesse Doti di un turno alla volta (P5\')', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
     // una voce che vale solo dal 3° turno in poi: dipende proprio dalle volte svolte, l'unica parte dello stato che un turno cambia
     const riga = prepared("SELECT effetti_json FROM attivita WHERE chiave = 'lavoro-rafflesia'").get() as { effetti_json: string };
     const voci = [...(JSON.parse(riga.effetti_json) as unknown[]), { effetto: { famiglia: 'dote', dote: 'fascino', note: 1 }, ripetuto: true, condizioni: [{ tipo: 'attivita', attivita: 'lavoro-rafflesia', volte: 3 }] }];

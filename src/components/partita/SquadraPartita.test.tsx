@@ -15,7 +15,7 @@ import { SquadraPartita } from './SquadraPartita';
 import type { SquadraPartitaDto } from '../../types';
 
 const api = vi.hoisted(() => ({ getSquadra: vi.fn(), impostaMembroSquadra: vi.fn(), impostaYen: vi.fn() }));
-vi.mock('../../services/api/partite', () => api);
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 
 const squadra: SquadraPartitaDto = {
   yen: 12500,

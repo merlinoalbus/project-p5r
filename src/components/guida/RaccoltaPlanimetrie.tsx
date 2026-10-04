@@ -10,7 +10,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { impostaSpilloRaccolto } from '../../services/api/mappe';
+import { impostaSpilloRaccolto } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { parolaDelloStato } from '../../../shared/spilli';
 import type { SpilloRaccoltaDto } from '../../types';

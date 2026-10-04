@@ -2,12 +2,12 @@
 // Test alberoMappe — sottoalbero di una mappa e Palazzo di una planimetria, con una regola sola (R3/B13)
 // ============================================================
 
-import { closeDb, getDb, initDb, prepared } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../../db/dbService.js';
 import { palazzoDellaMappa, radiceDelPalazzo, sottoalberoMappe } from './alberoMappe.js';
 import { palazzoDiOgniMappa } from '../palazziService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
-beforeAll(() => { caricaPacchetto(initDb(':memory:')); });
+beforeAll(() => { dbDiProva(); });
 afterAll(() => closeDb());
 
 describe('alberoMappe', () => {

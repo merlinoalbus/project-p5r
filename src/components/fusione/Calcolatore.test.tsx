@@ -10,10 +10,10 @@ import { RicettePersona } from './RicettePersona';
 import type { EsitoFusioneDto, PersonaFusioneDto, PersonaRiassuntoDto, RicetteFusioneDto } from '../../types';
 
 const { getFondi, getRicettePer, getFusioniCon, getImmagini, getEredita } = vi.hoisted(() => ({ getFondi: vi.fn(), getRicettePer: vi.fn(), getFusioniCon: vi.fn(), getImmagini: vi.fn(), getEredita: vi.fn() }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getFondi, getRicettePer, getFusioniCon, getImmagini, getEredita,
   caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
 function persona(id: number, nome: string, arcana: string, livello: number, extra: Partial<PersonaRiassuntoDto> = {}): PersonaRiassuntoDto {

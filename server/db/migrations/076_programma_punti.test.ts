@@ -1,13 +1,12 @@
 // Test migrazione 076 — i due negozi con un programma punti lo dichiarano, gli altri no
-import { closeDb, initDb } from '../dbService.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { closeDb } from '../dbService.js';
 import { PROGRAMMI_PUNTI } from './076_programma_punti.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
 it('nel pacchetto solo Kichijoji (manuale) e Tanaka (grado cliente) hanno un programma', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const righe = db.prepare('SELECT chiave, programma_punti_json FROM negozio WHERE programma_punti_json IS NOT NULL ORDER BY chiave').all() as Array<{ chiave: string; programma_punti_json: string }>;
   expect(righe.map((r) => r.chiave)).toEqual(['tanaka-affari-loschi', 'vestiti-usati-kichijoji']);
   for (const r of righe) expect(JSON.parse(r.programma_punti_json)).toEqual(PROGRAMMI_PUNTI[r.chiave]);

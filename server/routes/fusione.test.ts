@@ -3,11 +3,10 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, PersonaRiassuntoDto, PianiFusioneDto, RicercaSkillDto, RicetteFusioneDto, SkillRiassuntoDto, VellutoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -20,9 +19,7 @@ async function idDi(nome: string): Promise<number> {
 
 describe('API fusione', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 

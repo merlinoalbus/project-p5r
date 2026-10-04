@@ -11,7 +11,7 @@ import { AlberoLuoghi } from './AlberoLuoghi';
 import { RisolviMappa } from './RisolviMappa';
 import { ContenutiGuidaMappa } from './ContenutiGuidaMappa';
 const api = vi.hoisted(() => ({risolviMappa:vi.fn(),getContenutiMappa:vi.fn(),getMappa:vi.fn()}));
-vi.mock('../../services/api', () => api);
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 function m(chiave:string,genitore:string|null,nome=chiave):MappaRiassuntoDto { return {chiave,genitore,nome,nomeRivisto:false,tipo:'luogo',ordine:0,immagineUrl:null,asset:null,entita:null,origine:'utente',numeroSpilli:0,numeroFigli:0,updatedAt:''}; }
 function Indirizzo(){ const p=useLocation();return <div>{p.pathname}{p.search}</div>; }
 beforeEach(()=>{vi.resetAllMocks();usePreferenzeStore.setState({graficaPredefinita:true});useAssetStore.setState({manifest:null,caricato:true,mancanti:{}});});

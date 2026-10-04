@@ -9,8 +9,8 @@ import { RimossiPage } from './RimossiPage';
 import { TIPI_CATALOGO } from '../../shared/types';
 
 const { getCatalogo, nascondiElementoCatalogo, getNegozi } = vi.hoisted(() => ({ getCatalogo: vi.fn(), nascondiElementoCatalogo: vi.fn(), getNegozi: vi.fn().mockResolvedValue([{ chiave: 'untouchable', nome: 'Untouchable' }]) }));
-vi.mock('../services/api', () => ({ getCatalogo, nascondiElementoCatalogo, getNegozi }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getCatalogo, nascondiElementoCatalogo, getNegozi }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 it('chiede a ogni tipo le sole righe nascoste e rimette una riga negli elenchi', async () => {
   getCatalogo.mockImplementation((tipo: string) => Promise.resolve(tipo === 'articolo'

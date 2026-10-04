@@ -16,9 +16,15 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "strict": true,
+    // gli stessi controlli degli altri progetti: prima mancavano solo qui (rilievo K5‴ della verifica completa)
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx"
   },
+  // Tutto il sorgente, non solo i test: il progetto è `composite` (lo vuole `tsc -b`) e un progetto composite deve elencare
+  // ogni file che i suoi test importano (TS6307). Limitarlo ai test vorrebbe dire far leggere ai test le dichiarazioni emesse
+  // dagli altri progetti, che oggi non emettono nulla (rilievo K5‴: provato il 2026-10-04, 491 errori TS6307).
   "include": [
     "server/**/*.ts",
     "shared/**/*.ts",

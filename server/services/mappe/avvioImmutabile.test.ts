@@ -20,11 +20,11 @@
 // ============================================================
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { closeDb, initDb, getDb } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../../db/dbService.js';
 import { traduciNomiSpilli } from '../../db/migrations/053_nomi_spilli_in_italiano.js';
 import { collegaLuoghiAllePlanimetrie } from '../../db/migrations/054_luoghi_con_la_loro_planimetria.js';
 import { riallineaSpilliLuoghi } from './sincronizzaMappe.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 /** Quel che l'avvio ordinario fa su un database già formato: le regole sui dati di server/index.ts, e nient'altro (il seed non c'è più). */
 function avvioOrdinario(): void { const db = getDb(); traduciNomiSpilli(db); collegaLuoghiAllePlanimetrie(db); riallineaSpilliLuoghi(db); }
@@ -73,8 +73,7 @@ describe('l’avvio ordinario su un database già formato', () => {
   let prima: Record<string, string[]>;
 
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    const db = dbDiProva();
     // Un segno del giocatore, come ce ne sono su una partita vera: se il secondo avvio lo tocca,
     // il test deve dirlo prima che lo faccia su un database dell'utente.
     const partita = db.prepare(`INSERT INTO partita (nome, data_gioco, created_at, updated_at)

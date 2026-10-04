@@ -10,8 +10,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getVideogiochi } from '../services/api/compendio';
-import { impostaProgressoVideogioco } from '../services/api/partite';
+import { getVideogiochi, impostaProgressoVideogioco } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useCarica } from '../hooks/useCarica';
 import { useCodaProgresso } from '../hooks/useCodaProgresso';

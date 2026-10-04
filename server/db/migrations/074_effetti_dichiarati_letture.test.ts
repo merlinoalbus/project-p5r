@@ -2,8 +2,8 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { dotiDaEffetti, leggiVociEffetto } from '../../../shared/effettiCatalogo.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -30,8 +30,7 @@ it('converte dote+note, note successive, sblocca e le spiegazioni delle attivitÃ
 });
 
 it('nel pacchetto ogni libro e film con una Dote la dichiara, i film al cinema durano una visione, nessuna chiave maiuscola', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   for (const t of ['libro', 'film']) {
     const righe = db.prepare(`SELECT chiave, dote, note, effetti_json FROM ${t}`).all() as Array<{ chiave: string; dote: string | null; note: number | null; effetti_json: string }>;
     for (const r of righe) {

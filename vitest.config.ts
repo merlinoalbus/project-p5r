@@ -19,7 +19,6 @@ export default defineConfig({
     include: [
       'server/**/*.test.ts',
       'shared/**/*.test.ts',
-      'scripts/**/*.test.ts',
       'src/**/*.test.ts',
       'src/**/*.test.tsx',
       'vite/**/*.test.ts',

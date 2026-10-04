@@ -13,8 +13,8 @@ import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../
 const { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto } = vi.hoisted(() => ({
   collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPunto: vi.fn(),
 }));
-vi.mock('../../services/api', () => ({ collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 /** Il visore vero è provato a parte: qui basta vedere che cosa riceve e poter «toccare» un pin. */
 let ultimaScelta: SceltaPin | undefined;
 vi.mock('../mappe/MappaIncorporata', () => ({

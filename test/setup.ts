@@ -11,6 +11,16 @@
 process.env.LOG_LEVEL = 'silent';
 
 import '@testing-library/jest-dom/vitest';
+import { moduloApi, moduloNotifiche } from './mockModuli';
+
+// I costruttori dei moduli finti (test/mockModuli.ts) sono globali: le factory di `vi.mock` stanno in cima al file, prima
+// degli import, e non possono usare quel che il file importa.
+declare global {
+  var moduloApi: typeof import('./mockModuli').moduloApi;
+  var moduloNotifiche: typeof import('./mockModuli').moduloNotifiche;
+}
+globalThis.moduloApi = moduloApi;
+globalThis.moduloNotifiche = moduloNotifiche;
 
 // I server dei test di rotta (`test/supertest.ts`, uno per app) si chiudono alla fine di ogni file di test. Il registro sta su
 // globalThis, così qui non si importa supertest anche nei test del frontend.

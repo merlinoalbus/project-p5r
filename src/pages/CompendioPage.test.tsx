@@ -13,13 +13,13 @@ import { azzeraCacheImmagini } from '../components/shared/immaginiCache';
 import type { AffinitaDto, PersonaRiassuntoDto } from '../types';
 
 const { getPersone, getImmagini } = vi.hoisted(() => ({ getPersone: vi.fn(), getImmagini: vi.fn() }));
-vi.mock('../services/api', () => ({
+vi.mock('../services/api', (vero) => moduloApi(vero, {
   getPersone,
   getImmagini,
   caricaImmagine: vi.fn(),
   eliminaImmagine: vi.fn(),
   importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
 const aff = (elemento: string, codice: string): AffinitaDto => ({ elemento, elementoNome: elemento, elementoSigla: elemento.slice(0, 3), codice, codiceNome: codice, codiceSigla: codice });

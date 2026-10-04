@@ -2,9 +2,9 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { ORARI_DALLA_PROSA, orariDallaProsa } from './069_orari_strutturati.js';
 import { descriviOrari, leggiOrari, orariComeCondizioni } from '../../../shared/orariNegozio.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -23,8 +23,7 @@ it('traduce le frasi note, rende «sempre» il vuoto e conserva in nota una fras
 });
 
 it('nel pacchetto ogni negozio ha gli orari strutturati e nessuna frase è finita fuori dizionario', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const righe = db.prepare('SELECT chiave, orari, orari_json FROM negozio').all() as Array<{ chiave: string; orari: string | null; orari_json: string | null }>;
   expect(righe.length).toBeGreaterThan(50);
   for (const r of righe) {

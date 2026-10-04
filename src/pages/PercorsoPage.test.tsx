@@ -12,8 +12,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../types';
 
 const { getPercorsoIndice, getPercorsoGiorno, impostaAzionePercorso, impostaGiornoCorrente } = vi.hoisted(() => ({ getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaAzionePercorso: vi.fn(), impostaGiornoCorrente: vi.fn() }));
-vi.mock('../services/api', () => ({ getPercorsoIndice, getPercorsoGiorno, impostaAzionePercorso, impostaGiornoCorrente, impostaFasciaGioco: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file` }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getPercorsoIndice, getPercorsoGiorno, impostaAzionePercorso, impostaGiornoCorrente, impostaFasciaGioco: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-11', giornoSettimana: 'lun', fase: 'Palazzo di Kamoshida', meteo: null, azioni: 1, fatte: 0, avvisi: 0, coperto: true }, { giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', meteo: null, azioni: 3, fatte: 0, avvisi: 1, coperto: true }, { giorno: '05-01', giornoSettimana: 'dom', fase: 'Dopo il Palazzo di Kamoshida', meteo: null, azioni: 0, fatte: 0, avvisi: 0, coperto: false }], dataCorrente: '04-12', totaleGiorni: 3, giorniCoperti: 2 };
 const giorno: PercorsoGiornoDto = {

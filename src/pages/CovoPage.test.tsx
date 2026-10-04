@@ -20,7 +20,7 @@ import { CovoPage } from './CovoPage';
 import type { CompletamentoDto } from '../types';
 
 const { getCompletamento } = vi.hoisted(() => ({ getCompletamento: vi.fn() }));
-vi.mock('../services/api', () => ({ getCompletamento }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getCompletamento }));
 
 /** Come stanno i dati veri: nessuna sfida dichiara il proprio valore, qualche premio non ha prezzo. */
 const covo = {

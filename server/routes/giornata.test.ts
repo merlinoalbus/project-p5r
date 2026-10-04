@@ -4,12 +4,11 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, ElenchiAzioneDto, PercorsoGiornoDto, PercorsoIndiceDto, SuggerimentiOggiDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -31,9 +30,7 @@ const ordiniCompatti = (data: string) => {
 
 describe('API — la giornata della guida è canone', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 

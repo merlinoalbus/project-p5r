@@ -5,8 +5,7 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { invalidaCacheDiGioco } from '../services/cacheDiGioco.js';
 import { elencaDungeon, raccoltaMappe } from '../services/dungeonService.js';
@@ -15,6 +14,7 @@ import { impostaEventoStoria } from '../services/semaforiService.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo } from '../services/disponibilitaService.js';
 import { aggiungiImmagineSpillo, impostaImmagineMappa, creaMappa, creaSpillo, dettaglioMappa, eliminaMappa, eliminaSpillo, elencaMappe, esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import { salvaImmagine } from '../services/immaginiService.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 const PNG = Buffer.from('89504e470d0a1a0a0000000d4948445200000001000000010806000000', 'hex');
@@ -22,7 +22,7 @@ const nuovaPartita = async (nome: string) => (await request(app).post('/api/part
 const immaginiSpillo = () => getDb().prepare("SELECT COUNT(*) FROM immagine WHERE ambito = 'spillo'").pluck().get() as number;
 
 describe('verifica mappe e guida', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('B1: un punto con un nome lungo nasce con una chiave che le sue rotte accettano; un nome senza lettere non lascia un trattino in fondo', async () => {

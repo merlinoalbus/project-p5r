@@ -21,8 +21,7 @@ import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_NEL_MESE, GIORNI_SETTIMA
 import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizione, valorePredefinito, type CampoCondizione, type SceltaCondizione, type TipoCampo, type ValoriCondizione } from '../../../shared/statiPartita';
 import { useCarica } from '../../hooks/useCarica';
 import { useIdStabili } from '../../hooks/useIdStabili';
-import { getConfidenti, getDungeons, getQuartieri, getRichieste } from '../../services/api/compendio';
-import { getElenchiRegole, getPinConStato } from '../../services/api/condizioni';
+import { getConfidenti, getDungeons, getElenchiRegole, getPinConStato, getQuartieri, getRichieste } from '../../services/api';
 import type { ElenchiRegoleDto as ElenchiRegole, PinConStatoDto as PinConStato } from '../../types';
 import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
 import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';

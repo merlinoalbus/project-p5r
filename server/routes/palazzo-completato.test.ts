@@ -10,14 +10,13 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa } from '../services/mappe/mappeService.js';
 import { statoPartitaSemafori, valuta } from '../services/semaforiService.js';
 import { bossFinali, palazziCompletati } from '../services/palazziService.js';
 import type { DungeonRiassuntoDto, MappaDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -32,9 +31,7 @@ describe('Palazzo completato', () => {
   const requisito = (dungeon: string) => valuta({ confidente_chiave: 'prova', rango: 1, indice: 0, tipo: 'palazzo', dati_json: JSON.stringify({ dungeon }), testo: 'Completare il Palazzo' }, statoPartitaSemafori(partita, new Map(), new Map()));
 
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Prova Palazzi' })).body.data as { id: number }).id;
     // il giorno dopo il furto: la data non deve contare
     prepared("UPDATE partita SET data_gioco = '04-22' WHERE id = ?").run(partita);

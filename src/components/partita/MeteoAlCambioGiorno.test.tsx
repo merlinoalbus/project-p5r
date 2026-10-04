@@ -12,9 +12,9 @@ import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 import type { MeteoGiornoDto, PartitaDto } from '../../types';
 
 const api = vi.hoisted(() => ({ getMeteoGiorno: vi.fn(), impostaMeteoGiorno: vi.fn() }));
-vi.mock('../../services/api', () => api);
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 const notifica = vi.hoisted(() => vi.fn());
-vi.mock('../../stores/notificationStore', () => ({ notifica }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 vi.mock('../../stores/suggerimentiStore', () => ({ useSuggerimentiStore: { getState: () => ({ invalida: vi.fn() }) } }));
 
 const partita = (dataGioco: string, id = 4) => ({ id, nome: 'Prova', dataGioco, fasciaGioco: 'giorno', meteoOra: null } as unknown as PartitaDto);

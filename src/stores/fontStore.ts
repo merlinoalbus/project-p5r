@@ -10,7 +10,7 @@
 // ============================================================
 
 import { create } from 'zustand';
-import { getFont } from '../services/api/font';
+import { getFont } from '../services/api';
 import { API_BASE_URL } from '../utils/constants';
 import type { FontDto, FormatoFont, RuoloFont } from '../types';
 

@@ -11,7 +11,7 @@ import { useAssetStore } from '../stores/assetStore';
 import type { DungeonRiassuntoDto } from '../types';
 
 const { getDungeons } = vi.hoisted(() => ({ getDungeons: vi.fn() }));
-vi.mock('../services/api', () => ({ getDungeons }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getDungeons }));
 vi.mock('../stores/partitaStore', () => ({ usePartitaStore: (sel: (s: { attiva: { id: number } | null }) => unknown) => sel({ attiva: { id: 1 } }) }));
 
 const dungeon = (extra: Partial<DungeonRiassuntoDto>): DungeonRiassuntoDto => ({

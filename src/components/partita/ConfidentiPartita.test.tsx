@@ -14,7 +14,7 @@ const { getConfidentiPartita, aggiornaConfidente, getImmagini, confermaRequisito
   aggiornaConfidente: vi.fn(),
   getImmagini: vi.fn(),
 }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getConfidentiPartita,
   confermaRequisitoConfidente,
   aggiornaConfidente,
@@ -22,7 +22,7 @@ vi.mock('../../services/api', () => ({
   caricaImmagine: vi.fn(),
   eliminaImmagine: vi.fn(),
   importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
 function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidentePartitaDto {

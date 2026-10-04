@@ -25,7 +25,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccessoMondoDto, DestinazioneMondoDto } from '../../../shared/accessoMondo';
 
 const getAccessoMondo = vi.fn();
-vi.mock('../../services/api', () => ({ getAccessoMondo: (...a: unknown[]) => getAccessoMondo(...a) }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getAccessoMondo: (...a: unknown[]) => getAccessoMondo(...a) }));
 
 const argomentiVisore: Array<Record<string, unknown>> = [];
 vi.mock('./MappaIncorporata', () => ({

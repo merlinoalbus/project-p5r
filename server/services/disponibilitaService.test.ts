@@ -2,17 +2,16 @@
 // Test disponibilitaService — dalla prosa della guida agli stati (una volta), e valutazione sulla partita
 // ============================================================
 
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from './traduzioniService.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { arcoAllaData, dataSbloccoQuartiere, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { convertiProsa, migraTestiCondizioni, type ContestoConversione } from '../../shared/migraCondizioni.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 let ctx: ContestoConversione;
 // il valutatore dei semafori traduce i nomi (Confidenti, arcani) leggendo il glossario dal DB
-beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); invalidaCacheTraduzioni(); ctx = contestoConversione(getDb()); });
+beforeAll(() => { dbDiProva(); ctx = contestoConversione(getDb()); });
 afterAll(() => closeDb());
 
 const FINESTRE = new Map([['kamoshida', { dal: '04-12', al: '05-02' }], ['madarame', { dal: '05-16', al: '06-05' }], ['kaneshiro', { dal: '06-19', al: '07-09' }], ['niijima', { dal: '10-29', al: '11-20' }]]);

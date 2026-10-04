@@ -8,20 +8,19 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { bodyAggiornaMappa } from '../schemas/mappe.js';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { creaMappa, aggiornaPresentazioneMappa } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('correzione dei testi della guida', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('i testi del Palazzo si correggono e restano', async () => {
@@ -73,7 +72,7 @@ describe('correzione dei testi della guida', () => {
 });
 
 describe('raggruppamento delle planimetrie', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   const gruppoDi = (chiave: string) => {
@@ -112,7 +111,7 @@ describe('raggruppamento delle planimetrie', () => {
 // nuovo supera un tetto, si rompe qui e non in mano a chi gioca.
 
 describe('i testi della guida si possono risalvare così come sono', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('ogni Palazzo, con le sue aree e i suoi punti, passa la validazione senza modifiche', async () => {
@@ -154,7 +153,7 @@ describe('i testi della guida si possono risalvare così come sono', () => {
 // carattere in più.
 
 describe('i tetti dei campi valgono davvero, e sono quelli condivisi', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   const lungo = (n: number) => 'x'.repeat(n);

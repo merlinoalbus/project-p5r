@@ -8,13 +8,12 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { bossFinali } from '../services/palazziService.js';
 import { creaMappa } from '../services/mappe/mappeService.js';
 import type { DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -34,9 +33,7 @@ describe('Enigma con i suoi passi', () => {
   const vociDi = async (a = area) => (await scheda()).aree.find((x) => x.chiave === a)!.punti;
 
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Enigmi' })).body.data as { id: number }).id;
     // un'area di Kamoshida con una planimetria e due pin liberi sopra; un'altra area del Palazzo
     const righe = prepared(`SELECT e.entita_chiave AS area, s.id, s.uid FROM mappa_entita e JOIN spillo s ON s.mappa_chiave = e.mappa_chiave
