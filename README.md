@@ -24,14 +24,20 @@ bash scripts/start-all.sh     # BE (3101) + FE (5273), con verifica di avvio
 
 Script disponibili in `scripts/`: `start-be.sh`, `start-fe.sh`, `stop-be.sh`, `stop-fe.sh`,
 `restart-be.sh`, `restart-fe.sh`, `start-all.sh`, `stop-all.sh`, `restart-all.sh`.
-Log in `BE.log` / `FE.log`. Il backend **non** si ricarica da solo: dopo modifiche in `server/` usare `restart-be.sh`.
+Log in `BE.log` / `FE.log`. Il backend gira in `tsx watch` e si riavvia da solo a ogni salvataggio in `server/`
+(`restart-be.sh` serve solo se si è fermato). Attenzione: una migrazione nuova si applica subito ai dati di `data/`.
 
 Altri comandi: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
+
+Documentazione dell'API: `http://localhost:5273/api/docs` (Swagger UI) e `/api/openapi.json` (OpenAPI 3.1), anche da
+Impostazioni → «Documentazione delle API». Il documento si costruisce dalle rotte e dagli schemi zod; le descrizioni in italiano
+stanno in `server/openapi/descrizioni/`, e un test fallisce se una rotta ne resta senza.
 
 ## Struttura
 
 ```
-server/        Express: config, bootstrap, middleware, db (migrazioni), routes, services, schemas
+server/        Express: config, bootstrap, middleware, db (migrazioni), routes, services, schemas, openapi (documentazione dell'API)
+licenze/       copie delle licenze citate in NOTICE (dati del compendio, Swagger UI)
 src/           React: pages, components (layout tablet-first), stores, services/api, hooks
 shared/        tipi e regole condivisi FE/BE (funzioni pure, nessun accesso a DB o DOM)
 pacchetto/     gioco.db iniziale (senza immagini, copiato in data/ al primo avvio); il completo sta in pacchetto/completo/, fuori da git

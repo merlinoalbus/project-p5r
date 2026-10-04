@@ -96,7 +96,7 @@ router.put('/istanza/gioco/deposito', validate({ body: corpoFileDeposito }), asy
   res.json(await importaPacchettoDaDeposito((req.body as { nome: string }).nome));
 });
 
-/** Che cosa c'è nella cartella d'appoggio per il ripristino dell'istanza (ZIP o database). */
+/** Che cosa c'è nella cartella d'appoggio per il ripristino dell'istanza: gli ZIP (`ESTENSIONI_BACKUP`); un database si ripristina indicandolo per nome. */
 router.get('/istanza/deposito', (_req, res) => {
   res.json(elencaDepositoBackup());
 });

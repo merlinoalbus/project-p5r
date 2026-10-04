@@ -6,14 +6,14 @@
 //   1. requestContext  — requestId + child logger per richiesta
 //   2. responseShape   — envelope { data } su ogni res.json
 //   3. express.json (niente CORS: il frontend è sulla stessa origine, proxy Vite / nginx — DECISIONI 2026-10-03)
-//   4. router di area: /api/compendio, /api/traduzioni, /api/partite, /api/immagini, /api/fusione, /api/mappe, /api/font,
-//      /api/impostazioni, /api/catalogo, /api/condizioni
+//   4. router di area (`ROUTER_DI_AREA` in routes/index.ts): /api/compendio, /api/traduzioni, /api/partite, /api/immagini,
+//      /api/fusione, /api/mappe, /api/font, /api/impostazioni, /api/catalogo, /api/condizioni
 //   5. /api/health + /api/config
-//   6. 404 JSON per /api/* sconosciute
-//   7. errorHandler    — SEMPRE ultimo
+//   6. documentazione: /api/openapi.json (OpenAPI 3.1) e /api/docs (Swagger UI)
+//   7. 404 JSON per /api/* sconosciute
+//   8. errorHandler    — SEMPRE ultimo
 // ============================================================
 
-import condizioniRouter from './routes/condizioni.js';
 import express, { type Express } from 'express';
 import { z } from 'zod';
 import { config } from './config.js';
@@ -22,15 +22,9 @@ import { responseShapeMiddleware } from './middleware/responseShape.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { httpErrors } from './utils/httpError.js';
 import { getDb } from './db/dbService.js';
-import compendioRouter from './routes/compendio.js';
-import traduzioniRouter from './routes/traduzioni.js';
-import partiteRouter from './routes/partite.js';
-import immaginiRouter from './routes/immagini.js';
-import fusioneRouter from './routes/fusione.js';
-import mappeRouter from './routes/mappe.js';
-import fontRouter from './routes/font.js';
-import impostazioniRouter from './routes/impostazioni.js';
-import catalogoRouter from './routes/catalogo.js';
+import { ROUTER_DI_AREA } from './routes/index.js';
+import { documentoOpenApi } from './openapi/documento.js';
+import { CARTELLA_SWAGGER_UI, paginaDocumentazione } from './openapi/pagina.js';
 
 // Messaggi di validazione zod in italiano (details.issues[].message).
 z.config(z.locales.it());
@@ -48,16 +42,7 @@ export function createApp(): Express {
   app.use(express.json({ limit: '5mb' }));
 
   // ---- Router di area ----
-  app.use('/api/compendio', compendioRouter);
-  app.use('/api/traduzioni', traduzioniRouter);
-  app.use('/api/partite', partiteRouter);
-  app.use('/api/immagini', immaginiRouter);
-  app.use('/api/fusione', fusioneRouter);
-  app.use('/api/mappe', mappeRouter);
-  app.use('/api/font', fontRouter);
-  app.use('/api/impostazioni', impostazioniRouter);
-  app.use('/api/catalogo', catalogoRouter);
-  app.use('/api/condizioni', condizioniRouter);
+  for (const [prefisso, router] of ROUTER_DI_AREA) app.use(prefisso, router);
 
   // ---- Health ----
   // 503 quando il database non risponde: l'HEALTHCHECK di Docker guarda solo il codice HTTP.
@@ -87,6 +72,20 @@ export function createApp(): Express {
       gioco: 'Persona 5 Royal',
     });
   });
+
+  // ---- Documentazione dell'API (OpenAPI 3.1 e Swagger UI) ----
+  // Il documento si costruisce alla prima richiesta, quando tutte le rotte sono montate, e poi resta: le rotte non
+  // cambiano finché il processo vive. Si manda con `res.send`, fuori dalla busta `{ data }`: è il formato che i
+  // client OpenAPI si aspettano.
+  let documento: string | null = null;
+  app.get('/api/openapi.json', (_req, res) => {
+    documento ??= JSON.stringify(documentoOpenApi(app));
+    res.type('application/json').send(documento);
+  });
+  app.get('/api/docs', (_req, res) => {
+    res.type('html').send(paginaDocumentazione());
+  });
+  app.use('/api/docs', express.static(CARTELLA_SWAGGER_UI, { index: false, maxAge: '1d' }));
 
   // ---- 404 JSON per ogni /api/* non gestita ----
   app.use('/api', (req, _res, next) => {

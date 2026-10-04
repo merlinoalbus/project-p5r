@@ -30,6 +30,8 @@ export const orariNegozio = z.object({
 /** Un effetto dichiarato valido per la sua famiglia (`normalizzaEffettoOggetto`, la stessa regola della lettura): non basta la
  *  famiglia, servono i suoi campi. Il valore salvato è quello normalizzato, senza campi in più. */
 const effettoOggetto = z.custom<EffettoOggetto>((v) => normalizzaEffettoOggetto(v) !== null, 'Effetto non valido per la sua famiglia')
+  // la descrizione è solo documentazione (OpenAPI): la forma la controlla `normalizzaEffettoOggetto`
+  .meta({ description: 'Un effetto `EffettoOggetto` (shared/effettiOggetto.ts), validato e normalizzato da `normalizzaEffettoOggetto`. Il campo `famiglia` sceglie i campi richiesti: ripristina, rianima, cura-stato, infliggi-stato, resiste-stato, previene-stato, statistica, dote, regalo, sblocca-luogo, sblocca-funzione, moltiplica, aumenta-punti, descrittivo.' })
   .transform((v) => normalizzaEffettoOggetto(v)!);
 const effettoJson = effettoOggetto.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v)));
 

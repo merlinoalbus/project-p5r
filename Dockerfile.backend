@@ -51,6 +51,8 @@ COPY --from=build /app/server  ./server
 COPY --from=build /app/shared  ./shared
 COPY pacchetto/ ./pacchetto/
 COPY package.json tsconfig.json tsconfig.server.json NOTICE ./
+# le copie delle licenze citate in NOTICE: i dati derivati (pacchetto/) e Swagger UI viaggiano con la loro licenza
+COPY licenze/ ./licenze/
 ENV NODE_ENV=production \
     DATA_DIR=/data \
     PACCHETTO_DIR=/app/pacchetto \

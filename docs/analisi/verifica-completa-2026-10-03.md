@@ -644,3 +644,84 @@ produce è `scratchpad/voce4/prove.sh`.
 
 - `server/index.ts` alza ancora `requestTimeout` a 30 minuti. Serviva al caricamento nel corpo, che non c'è più; il
   commento ora lo dice. Il valore è rimasto: toglierlo cambierebbe un comportamento, e la voce 4 riguarda i commenti.
+
+## 11. Fase 5 — documentazione dell'API (voce 5 della ROADMAP)
+
+### Che cosa c'è
+
+- **`GET /api/openapi.json`**: il documento OpenAPI 3.1 (187 operazioni in 11 aree), servito senza la busta `{ data }`.
+- **`GET /api/docs`**: Swagger UI, servita dall'istanza con i file di `swagger-ui-dist` (nessuna CDN: l'app si usa anche senza
+  internet).
+  - «Prova» è attivo solo per le GET, perché la pagina parla con i dati veri dell'istanza. È una mia scelta tecnica, non una
+    decisione dell'utente.
+  - Sugli schermi stretti la descrizione di ogni area va sotto il nome, invece di ridursi a una colonna di una parola per riga.
+- **Impostazioni → «Documentazione delle API»**: due collegamenti, Swagger e il JSON, che si aprono in una nuova scheda.
+
+### Come è fatto il documento (`server/openapi/`)
+
+Il documento non è scritto a mano:
+- **Rotte.** Si leggono dalla pila dei router montati (`rotte.ts`). I router di area sono in un elenco solo, `ROUTER_DI_AREA` in
+  `server/routes/index.ts`, che `bootstrap` monta e la documentazione legge. Sta in un modulo a sé per evitare un import
+  circolare.
+- **Parametri, query e corpi.** Vengono dagli schemi zod di `validate`. Il middleware ora ricorda i suoi schemi
+  (`schemiDiValidazione`, una `WeakMap`), senza cambiare comportamento. La conversione usa `z.toJSONSchema` nella forma
+  d'ingresso.
+  - Tre schemi non rappresentabili hanno una descrizione (`.meta`) che documenta la forma accettata: condizioni, effetti degli
+    oggetti ed effetti delle azioni. La validazione non cambia.
+- **Stato di successo e tipo di risposta.** Si leggono dal gestore finale: 200, 201 o 204; JSON con busta oppure file.
+- **Descrizioni in italiano.** Stanno in `descrizioni/`, un file per area.
+  - Le 4 rotte di sistema le ho scritte io. Le altre 183 le hanno scritte quattro agenti in parallelo, leggendo rotte e servizi.
+  - Ognuna dà sommario, descrizione e risposta, con il tipo `…Dto` di `shared/` quando c'è, più i codici d'errore principali.
+  - I corpi che non passano da `validate` sono dichiarati nel registro: le varianti per `:tipo` del catalogo e il corpo
+    binario delle rotte con `express.raw`.
+
+### Come si è provato
+
+- **`openapi.test.ts` (11 test).** Fallisce se:
+  - una rotta non ha descrizione, o una descrizione non ha rotta;
+  - un'area non ha nome;
+  - sommario, descrizione o risposta mancano, oppure il sommario supera i 120 caratteri;
+  - un tipo `…Dto` citato non esiste in `shared/`;
+  - il registro dice JSON dove il gestore manda un file, o il contrario (le 204 non hanno corpo);
+  - `corpoBinario` non corrisponde a `express.raw`, oppure una scrittura non dichiara il suo corpo;
+  - un codice d'errore dichiarato non compare nel server fuori da `server/openapi/`;
+  - il documento non è un OpenAPI 3.1 valido (`@seriousme/openapi-schema-validator`);
+  - nel documento mancano un parametro di percorso, una query o un corpo degli schemi zod.
+
+  Controlla anche che `/api/openapi.json`, `/api/docs` e i file statici rispondano, e che un file inesistente dia il 404 JSON.
+- **Varianti rosse** (`scratchpad/voce5/rosse.txt`): chiave cambiata, codice d'errore inventato, risposta non JSON senza
+  `rispostaBinaria`, collegamento di Impostazioni sbagliato. Tutte e quattro fanno fallire il test.
+  - Il codice inventato all'inizio passava: il test cercava i codici anche nei file delle descrizioni, quindi ogni codice
+    trovava sé stesso.
+  - Corretto escludendo `server/openapi/` (anche nello script di verifica degli agenti). Con la ricerca corretta tutti i codici
+    del registro esistono davvero.
+- **Browser** (proxy di Vite):
+  - Swagger carica le 11 aree;
+  - `GET /api/compendio/persona` mostra gli 8 parametri dello schema zod e la descrizione in italiano;
+  - «Try it out» su `GET /api/compendio/arcani` restituisce i dati veri;
+  - sulle POST «Try it out» non c'è.
+  - A 1280, 768 e 375 px non c'è scorrimento orizzontale. In Impostazioni i collegamenti hanno 44 px di altezza e aprono una
+    nuova scheda.
+- **Docker.** L'immagine del backend, costruita e avviata, risponde 200 su `/api/health`, `/api/docs` e il bundle di Swagger, e il
+  documento ha 187 operazioni. Container e immagine sono stati poi rimossi (`docker rm -f -v`, `docker rmi`).
+- **Controlli completi.** Typecheck e lint senza errori; 269 file e 1475 test; censimento severo a zero (812 file, 2509 funzioni).
+
+### Trovati lavorando
+
+- **Licenze.**
+  - `NOTICE` citava le copie delle licenze dei dati del compendio in `data/seed/sorgenti/`, cancellate il 2026-09-12 insieme al
+    seed. I dati derivati però si distribuiscono ancora (`pacchetto/gioco.db`).
+  - Le copie sono state ripristinate dalla storia di git in `licenze/`: chinhodado Apache-2.0, aqiu384 Unlicense (in `.txt`,
+    perché `.dockerignore` esclude i `.md`). C'è anche la licenza di Swagger UI.
+  - `NOTICE` è aggiornato e l'immagine del backend ora copia `licenze/`.
+- **Commenti e documenti.**
+  - Il commento di `GET /api/impostazioni/istanza/deposito` diceva «ZIP o database», ma l'elenco mostra solo gli ZIP.
+  - Il README diceva che il backend non si ricarica da solo.
+  - Entrambi sono corretti.
+- **Nessun difetto di isolamento.** Le eliminazioni dello storico non controllano che la partita esista, ma filtrano per
+  `partita_id`: un evento di un'altra partita non si tocca. La descrizione lo dice.
+
+### Nuove dipendenze
+
+- `swagger-ui-dist` 5.33.1 (Apache-2.0), di runtime: serve l'interfaccia.
+- `@seriousme/openapi-schema-validator` 2.11.0 (MIT), di sviluppo: valida il documento nel test.

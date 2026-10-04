@@ -42,9 +42,10 @@ arrivano con il pacchetto di gioco. Le parole «seed» e «reseed» vanno lette 
 ```
 server/
   index.ts            boot: assicuraPacchettoIniziale → initDb (gioco.db + partite.db attaccato come «utente») → runBootBackup → runMigrations (due sequenze) → regoleAllAvvio → listen; SIGINT/SIGTERM → server.close + closeDb
-  bootstrap.ts        factory Express: middleware in ordine, router, health/config, 404, errorHandler
+  bootstrap.ts        factory Express: middleware in ordine, router di area (`routes/index.ts`, `ROUTER_DI_AREA`), health/config, documentazione (`/api/openapi.json`, `/api/docs`), 404, errorHandler
   config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, PACCHETTO_DIR, LOG_LEVEL)
-  middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
+  middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod; gli schemi restano leggibili con `schemiDiValidazione`), errorHandler
+  openapi/            documentazione dell'API (voce 5 della verifica completa): rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
   db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
   db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema); registro in index.ts, `index.test.ts` pretende id consecutivi
   db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
@@ -109,10 +110,11 @@ docs/                 documentazione di bordo e riferimenti di dominio
 3. `express.json({ limit: '5mb' })` (64 MB solo per `POST /api/mappe/importa`). **Niente CORS** (DECISIONI 2026-10-03): il
    frontend è sulla stessa origine (proxy Vite in sviluppo, nginx in produzione) e l'API non ha autenticazione, quindi un'altra
    origine non deve poterla chiamare dal browser dell'utente.
-4. Router di area (`/api/compendio`, `/api/traduzioni`, `/api/partite`, `/api/immagini`) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
+4. Router di area (`ROUTER_DI_AREA` in `server/routes/index.ts`: compendio, traduzioni, partite, immagini, fusione, mappe, font, impostazioni,
+   catalogo, condizioni) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
    un getter, quindi il middleware fa shadowing sull'istanza).
 5. `/api/health` (stato DB + `user_version`; **503** se il DB non risponde, perché l'HEALTHCHECK di Docker guarda solo il codice),
-   `/api/config` (valori pubblici per il boot FE).
+   `/api/config` (valori pubblici per il boot FE), `/api/openapi.json` e `/api/docs` (documentazione, §5 bis).
 6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; errori 4xx di Express/body-parser (JSON malformato 400, corpo oltre il limite 413, percorso non decodificabile 400) e di `sendFile`/`download` (404 `not-found`, 403, 416) → envelope in italiano, con le intestazioni di una risposta JSON anche se la rotta stava per mandare un file; altro → 500 `internal-error` con un **messaggio fisso** (il dettaglio resta nel log, col `requestId`).
 7. Client (`src/services/api/_httpClient.ts`): timeout e tentativi sui 5xx e sugli errori di rete **solo per i metodi
    idempotenti**; POST e PATCH non si ripetono (una scrittura già avvenuta verrebbe raddoppiata), salvo `maxRetries` esplicito.
@@ -262,6 +264,24 @@ chiave `citta-<quartiere>`), scaricata al primo uso; `MappaInterattiva` accetta 
 `oggetti-guida.json` è consultazione pura in `dati_guida`; distinto dal compendio `oggetti` (equipaggiamento con statistiche) e dai cataloghi dei negozi (prezzi per punto vendita).
 
 ## 5 bis. API (step 0.4)
+
+**Documentazione consultabile (voce 5 della verifica completa, 2026-10-04).** `GET /api/docs` apre Swagger UI e `GET /api/openapi.json`
+restituisce il documento OpenAPI 3.1 (anche da Impostazioni → «Documentazione delle API»). Il documento non è scritto a mano:
+- le rotte si leggono dalla pila dei router montati (`server/openapi/rotte.ts`);
+- parametri, query e corpi vengono dagli schemi zod di `validate` (`schemiDiValidazione`), convertiti con `z.toJSONSchema` nella
+  forma d'ingresso;
+- lo stato di successo (200/201/204) e il tipo di risposta (JSON o file) si leggono dal gestore finale;
+- sommario, descrizione, risposta (con il tipo `…Dto` di `shared/`) e codici d'errore stanno nel registro in italiano
+  `server/openapi/descrizioni/` (un file per area). Per i corpi che non passano da `validate` il registro dichiara le varianti
+  (catalogo, schema scelto da `:tipo`) o il corpo binario (`express.raw`).
+
+`openapi.test.ts` fallisce se una rotta non ha descrizione o una descrizione non ha rotta, se un tipo `…Dto` citato non esiste,
+se il registro dice JSON dove il gestore manda un file (o il contrario), se un codice d'errore dichiarato non compare nel server
+(fuori da `server/openapi/`), e se il documento non è un OpenAPI 3.1 valido (`@seriousme/openapi-schema-validator`). Swagger UI è
+servita dall'istanza (`swagger-ui-dist`, nessuna CDN: l'app si usa anche senza internet); «Prova» è attivo solo per le GET,
+perché la pagina parla con i dati veri. La tabella qui sotto è il riassunto storico dello step 0.4: l'elenco completo e aggiornato
+è quello di `/api/docs`.
+
 | Area | Endpoint principali |
 |---|---|
 | Compendio | `GET /api/compendio/arcani`, `/glossario`, `/termini` (glossario italiano ↔ inglese per categoria), `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |

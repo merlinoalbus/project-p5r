@@ -39,7 +39,8 @@ const campiAzioneStrutturata = {
   tipo: z.enum(TIPI_AZIONE.map((t) => t.chiave) as [TipoAzione, ...TipoAzione[]]).optional(),
   riferimento: z.object({ tipo: z.enum(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave) as [TipoRiferimentoAzione, ...TipoRiferimentoAzione[]]), chiave: z.string().trim().min(1).max(200) }).nullable().optional(),
   rangoAtteso: z.number().int().min(1).max(10).nullable().optional(),
-  produce: z.array(z.unknown()).max(20).optional(),
+  // la descrizione è solo documentazione (OpenAPI): ogni voce la normalizza il servizio con le regole di shared/effettiAzione.ts
+  produce: z.array(z.unknown().meta({ description: 'Un effetto `EffettoAzione` (shared/effettiAzione.ts): `{ tipo: "dote", dote, note }`, `{ tipo: "lettura", categoria, chiave, almeno }` oppure `{ tipo: "turno", attivita, doti? }`.' })).max(20).optional(),
 };
 /** Una voce della giornata (azione della guida, cosa da fare, evento): canone, per tutte le partite. */
 export const paramsVoceGiornata = z.object({ uid: uidVoce });

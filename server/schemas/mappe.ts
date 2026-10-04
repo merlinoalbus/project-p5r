@@ -13,7 +13,10 @@ const chiaveMappa = z.string().regex(/^[a-z0-9][a-z0-9-]{0,179}$/);
 const riferimento = z.object({ tipo: z.enum(TIPI_RIFERIMENTO), chiave: z.string().min(1).max(200) }).nullable();
 const entita = z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }).nullable();
 // Stesso schema ricorsivo per tutte le condizioni dell’app; nessun testo interpretato.
-export const condizioneSpillo = z.custom<RequisitoSpillo>(v => normalizzaRequisitoSpillo(v) !== null, 'Condizione non valida').transform(v => normalizzaRequisitoSpillo(v)!);
+export const condizioneSpillo = z.custom<RequisitoSpillo>(v => normalizzaRequisitoSpillo(v) !== null, 'Condizione non valida')
+  // la descrizione è solo documentazione (OpenAPI): la forma la controlla `normalizzaRequisitoSpillo`
+  .meta({ description: 'Una condizione `RequisitoSpillo` (shared/condizioniSpillo.ts), validata e normalizzata da `normalizzaRequisitoSpillo`. Il campo `tipo` sceglie la forma: gruppo (`modo` tutte o almeno-una, `condizioni` annidate), non, data, intervallo, fascia, piove, meteo, giorno-settimana, stagione, quartiere, arco, palazzo, dote, confidente, squadra, richiesta, lettura, articolo, attivita, rango-cliente, punti-negozio, evento, contatore, persona-arcano, persona-abilita, spillo.' })
+  .transform(v => normalizzaRequisitoSpillo(v)!);
 
 const condizioni = z.array(condizioneSpillo).max(20).nullable().optional();
 
