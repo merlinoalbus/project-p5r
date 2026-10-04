@@ -1304,7 +1304,15 @@ Che cosa ne segue:
   - nella guida completa apre la pagina della mappa.
   
   Senza una regola che copra quel giorno, porta alla scheda del Palazzo come prima.
-- **«Sulla mappa»** accanto resta com'è: porta all'ingresso in città.
+- **«Sulla mappa»** accanto porta ancora all'ingresso in città. Da questa voce in poi, sul telefono, fa anche scorrere la
+  pagina fino alla mappa (punto qui sotto).
+- **Scorrimento sul telefono.** Il primo esame del validatore ha notato che sul telefono la mappa della scheda «Oggi» sta in
+  fondo alla pagina. Alla domanda «Sul telefono (e quando la mappa non è in vista): toccando il cartellino del Palazzo o «Sulla
+  mappa» la pagina deve scorrere fino alla mappa?» l'utente ha risposto «Sì, scorri alla mappa (Recommended)».
+  - Ogni richiesta di una voce incrementa `StatoMappaOggi.richiesta`.
+  - `OggiMappa` porta in vista la colonna solo se è fuori dallo schermo; se è già visibile non si muove niente.
+  - Vale anche per «Sulla mappa».
+  - Anche Alt+clic sul cartellino resta un collegamento.
 
 ## 2026-10-04 — Il pin del Confidente si può condizionare
 
@@ -1325,10 +1333,3 @@ Che cosa ne segue:
   valutano con la partita come per gli altri pin: rosse, il pin si nasconde.
 - **Negozio, luogo e attività** restano senza condizioni. Cambiando tipo da Confidente a uno di questi, le condizioni se ne
   vanno.
-- **Scorrimento sul telefono.** Dopo il primo esame del validatore, che ha notato che sul telefono la mappa della scheda «Oggi»
-  sta in fondo alla pagina, alla domanda «toccando il cartellino del Palazzo o «Sulla mappa» la pagina deve scorrere fino alla
-  mappa?» l'utente ha risposto «Sì, scorri alla mappa (Recommended)».
-  - Ogni richiesta di una voce incrementa `StatoMappaOggi.richiesta`.
-  - `OggiMappa` porta in vista la colonna solo se è fuori dallo schermo; se è già visibile non si muove niente.
-  - Vale anche per «Sulla mappa».
-  - Anche Alt+clic sul cartellino resta un collegamento.

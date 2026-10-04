@@ -70,7 +70,9 @@ describe('OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la p
     HTMLElement.prototype.scrollIntoView = scorri;
     return scorri;
   };
-  afterEach(() => vi.restoreAllMocks());
+  // jsdom non ha scrollIntoView: lo si mette per il test e lo si toglie dopo, così non resta agli altri test
+  const scrollIntoViewDiPrima = HTMLElement.prototype.scrollIntoView;
+  afterEach(() => { vi.restoreAllMocks(); HTMLElement.prototype.scrollIntoView = scrollIntoViewDiPrima; });
 
   it('richiesta nuova con la mappa sotto lo schermo (telefono): scorre; il primo disegno no', () => {
     getDungeons.mockResolvedValue([]);
