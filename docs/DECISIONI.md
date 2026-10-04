@@ -1040,3 +1040,22 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Scaricamento di immagini da URL (F03): resta com'è.** Il server può scaricare anche indirizzi della rete privata o di
   Tailscale. L'importazione del pacchetto da URL non esiste più dal 2026-09-12: si aggiornano solo i commenti e i documenti
   che la descrivono ancora (O1–O8).
+
+## 2026-10-04 — Verifica completa, fase 3: scelte tecniche dentro il piano approvato
+
+Il piano della verifica è stato approvato dall'utente («Approvato, solo PR»). Le scelte qui sotto sono dell'esecutore, prese
+applicando quel piano. Sono registrate perché cambiano una struttura o motivano un rilievo non applicato, e nessuna è una
+decisione dell'utente. Dettagli e misure nel §9 del rapporto.
+- **Non fatti, misurati:** F20 (cache degli elenchi delle condizioni, 1,7 ms) e P6' (meteo nell'elenco delle partite, 0,011 ms):
+  il guadagno non vale il rischio di dati vecchi o il cambio del DTO.
+- **K5‴ in parte:** il progetto TypeScript dei test resta su tutto il sorgente, perché un progetto `composite` deve elencare i file
+  che importa (TS6307). Riceve gli stessi flag degli altri.
+- **P2":** l'area visibile di una planimetria si cerca dai bordi, in modo esatto, invece che su una tela ridotta come proposto. Il
+  risultato è identico e il caso pieno costa quasi zero.
+- **D12 (dal piano):** `NAS_ADDR` e `NAS_PATH` non hanno più un valore predefinito nel `docker-compose.yml`: senza, lo stack non
+  parte e lo dice. Il valore che c'era era l'indirizzo del NAS di casa, scritto nel repository. **Prima del merge lo stack
+  Portainer deve definirle.**
+- **R3' (dal piano):** esce `seed_meta` (migrazione 096) e con lei il campo `seed` dello stato dell'istanza.
+- **T1:** i moduli finti dei test partono da quelli veri (`test/mockModuli.ts`). Un'API non simulata fallisce col suo nome invece di
+  essere `undefined`, e le funzioni pure restano vere.
+- **O10:** le rotte dei marcatori escono; le tabelle restano e si leggono nelle schede.

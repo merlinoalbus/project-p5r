@@ -395,3 +395,115 @@ Emerso durante queste correzioni:
 - in `%TEMP%` c'è una cartella `p5r-pacchetto-Kty6zZ` lasciata da un'esecuzione fallita di `genera-pacchetto` di prima (il
   difetto S7); va tolta a mano;
 - in `data/backups` i giornali orfani delle copie di avvio sono stati tolti al riavvio del backend, come previsto da B5'.
+
+## 9. Fase 3 — ridondanze e ottimizzazioni (voce 3 della ROADMAP)
+
+Tutti i rilievi segnati «3» nelle tabelle sono stati trattati in sette lotti, un commit ciascuno (due per A e per B). Le cartelle
+citate sono nella cartella di lavoro della sessione.
+
+| Lotto | Commit | Rilievi |
+|-------|--------|---------|
+| A — API | `a99451ae`, `54cddd30` | F13, F15–F19, F21, F22 (con P1', P3', K1/K3 dei servizi, R1, R9, O12) |
+| B — mappe e Palazzi | `620fdab4`, `491bff57` | P1–P8, R2–R8, B11, B13 (con R3) |
+| C — servizi e database | `0ddbc826` | R1'–R3', R5', R6', K1, K2, K5, P2', P4', P5' |
+| D — condivisi e stato del frontend | `361c8e02` | B11", R1"–R8", P1"–P5" |
+| E — pagine e componenti | `e353432c` | A10, R2‴–R8‴ (P1‴ coincide con P1") |
+| F — script, deploy, configurazione, test | `c86f9b8b` | S2–S5, S8, D3, D5–D13, K1‴, K2‴, K5‴–K8‴, T1–T4 |
+| G — codice morto residuo | `bb4cfaf8` | O4, O10 (la parte di codice; i documenti sono della voce 4) |
+
+### Come si è provato che il comportamento non cambia
+
+- **Fotografia delle risposte.** Prima del lotto B, su una copia dei dati veri, le impronte SHA di 1831 risposte GET di mappe, guida,
+  Palazzi, negozi, quartieri e Confidenti (`fotografia.mts`, `lotto-b/prima-1.txt`). Dopo ogni passo (`lotto-b/dopo-2…7`) e dopo il
+  lotto C (`lotto-c/foto-dopo.txt`, con le migrazioni 096/016 applicate): **identiche**.
+- **Confronti diretti con l'implementazione di prima,** sullo stesso ingresso:
+  - raggruppamento degli spilli (P1"): 12.300 casi (le mappe del pacchetto × 3 formati × 5 zoom × 2 pan × visore/editor), stesso
+    JSON (`p1/`);
+  - area visibile di una planimetria (P2"): 20.000 immagini a caso (vuote, piene, sparse), stesso risultato (`p2/`);
+  - scorta delle Persona (P2'), compendio e regole di fusione (P4'), Confidenti (F21), stato della disponibilità: impronte uguali
+    (`lotto-c/`, `misura-*.txt`);
+  - `importaMappe` (P5): impronta del database dopo l'importazione `5f9f0873f9c28f1f`, uguale prima e dopo.
+- **Test nuovi con la loro variante rossa:**
+  - P5' (`effetti-azioni.test.ts`): il contatore dei turni registra le stesse Doti di un turno alla volta, con una voce che dipende
+    dalle volte svolte. Con l'aggiornamento dello stato spostato dopo il calcolo il test fallisce («expected [4] to deeply equal
+    [3, 4]»);
+  - T1 (`test/mockModuli.ts`): un sostituto con un nome sbagliato fa fallire il file («getProgressiPartitaRefuso non esiste nel modulo
+    vero»);
+  - `alberoMappe.test.ts` (R3/B13): sottoalbero, Palazzo di ogni mappa con le due strade, ciclo nei genitori.
+- **Nel browser** (scheda nuova, console pulita): home, partita, fusione, impostazioni, mappe, scheda di una Persona, calendario,
+  città, completamento, battaglia, oggetti, sfide, cruciverba; una planimetria con i gruppi «+n» a 768 px, la scheda di una Persona a
+  375 px. R8‴: dimensioni dei comandi del visore misurate prima e dopo, identiche (44 px).
+- **Docker** (lotto F): le due immagini costruite e avviate su una rete di prova. Il backend risulta `healthy` con il nuovo
+  HEALTHCHECK, `nginx -t` passa, gzip è attivo su pagina, bundle (113 kB) e API, e il proxy risponde. `docker compose config` si
+  ferma senza `NAS_ADDR`/`NAS_PATH` e passa con le due variabili.
+- **Script** (lotto F): restart, stop e start di FE e BE con i comandi nuovi. Resta un albero per lato, nessun processo orfano, e
+  `/api/health` risponde attraverso il proxy di Vite.
+
+### Misure
+
+| Che cosa | Prima | Dopo |
+|----------|------:|-----:|
+| dettaglio di una mappa (senza / con partita) | 8,61 / 9,75 ms | 1,71 / 2,78 ms |
+| contenuti di una mappa | 5,92 ms | 0,47 ms |
+| albero delle mappe | 52 ms | 9,6 ms |
+| dettaglio di un Palazzo | 5,97 ms | 1,62 ms |
+| `importaMappe` | 210 ms | 140 ms |
+| un Confidente / `statoDisponibilitaPartita` | 1,10 / 2,09 ms | 0,66 / 0,95 ms |
+| `battaglia()` / `completamento()` | 1,22 / 0,16 ms | 0,20 / 0,05 ms |
+| scorta di 12 Persona con 8 skill | 0,569 ms | 0,212 ms |
+| elenco Persona / filtro per arcano / regole di fusione | 3,58 / 0,275 / 1,20 ms | 2,95 / 0,227 / 0,60 ms |
+| area visibile di una planimetria 4096² (piena / con margini) | 59,5 / 42,3 ms | 0,0 / 8,7 ms |
+| bundle iniziale del frontend | 1.214,7 kB (324,5 gzip) | 367,0 kB (113,0 gzip) |
+
+### Non fatti, o fatti in parte, e perché
+
+- **F20** (cache di `/condizioni/elenchi`): 1,7 ms con l'HTTP, chiamato all'apertura dell'editor. Una cache da invalidare a ogni
+  scrittura del catalogo costa più rischio (elenchi vecchi) di quanto risparmia.
+- **P6'** (meteo nell'elenco delle partite): 0,011 ms per l'intero elenco. Toglierlo avrebbe cambiato il DTO.
+- **K5‴**, parte «solo i test»: il progetto dei test è `composite` e deve elencare ogni file che i test importano (provato: 491 errori
+  TS6307). I flag `noUnusedLocals`/`noUnusedParameters` sono stati allineati.
+- **K5** (servizi): tolto l'alias `esportaPacchetto`. Restano `importaPacchetto` e `anteprimaPacchetto` da file: sono le entrate
+  locali del nucleo comune con quelle dal deposito, e i test del nucleo passano di lì.
+- **P2"**: invece della tela ridotta proposta (qualche pixel di precisione in meno), un bordo esatto cercato dai lati verso
+  l'interno. Il risultato è lo stesso di prima.
+- **P5"**: `useOggi` restituisce lo stesso oggetto finché i suoi ingressi non cambiano. Le righe della giornata si ridisegnano
+  comunque, perché `GiornoGuida` passa a ognuna oggetti nuovi (`gesti`, `menuDi`). Non era nel perimetro del rilievo.
+- **T2**: i `beforeEach` che ricaricano il pacchetto restano dove i test scrivono (creano partite, spostano ed eliminano spilli),
+  perché è l'isolamento che li tiene indipendenti.
+- Nessuna azione per piano: R4', R9" (servono alle migrazioni), R7" (i due costruttori di URL non sono duplicati veri), `Numero` di
+  R5‴.
+
+### Cambiamenti visibili, tutti voluti
+
+- Negli editor di condizioni e azioni le Doti sono nell'ordine di `dote_sociale.ordine`, come nelle altre schede (F16).
+- `/fusione/cicli` con un `dlc` non numerico risponde 400, come `/fusione/piani` (F13).
+- Messaggi unici per la data di gioco e per la partita che non esiste (F16, F18).
+- «Il Palazzo di una mappa» ha una regola sola (B13); sui dati le due regole coincidevano (10 Palazzi su 10).
+- `StatoIstanzaDto` non ha più il campo `seed`, che leggeva valori fermi al 9 settembre (R3', migrazione 096).
+- Le pagine si caricano alla prima visita (P3"): la prima apertura di una sezione mostra l'attesa per un attimo.
+- **Deploy:** lo stack deve definire `NAS_ADDR` e `NAS_PATH` (D12). Il gate CI gira anche prima della pubblicazione, audit
+  compreso (D7).
+
+### Test preesistenti toccati
+
+Fra `b0939456` (voce 2 approvata) e `bb4cfaf8` i file di test cambiati sono 173 (1074 righe aggiunte, 696 tolte). Le righe
+`expect` tolte sono 36, quelle aggiunte 134:
+- 10 provavano le due rotte dei marcatori tolte con O10. Al loro posto, la lettura dei marcatori dal database nelle schede, e le regole
+  dell'avvio che non toccano quelli dell'utente;
+- 1 leggeva `seed.hash`: ora il test verifica che il campo non ci sia;
+- 1 cercava l'avviso «copia temporanea del database non rimossa»: il messaggio è cambiato con F15/F19, e il test cerca quello nuovo;
+- 24 lavoravano su buffer in memoria (`creaZip`/`leggiZip`, `verificaDatabase(Buffer)`, `scriviDatabase`, `importaPacchetto(Buffer)`).
+  Con F19/P3' l'interfaccia è a file e a flusso, e le stesse proprietà si provano sui file: firma, CRC, voci, pulizia,
+  scrittura atomica, 409 durante un'importazione.
+
+Il resto delle modifiche ai test è T1–T3: moduli finti costruiti dal vero e DB di prova comune. Non cambia che cosa si prova.
+
+### Da segnalare
+
+- **Migrazione applicata ai dati veri prima del merge.** Il backend di sviluppo gira in `tsx watch` (il CLAUDE.md del progetto
+  diceva il contrario, ora corretto con S4). Alle 01:16:53 del 2026-10-04 si è riavviato da solo quando sono stati scritti i file
+  delle migrazioni, e ha portato `data/gioco.db` a 96 e `data/partite.db` a 16. Prima ha fatto la sua copia di avvio, regolare:
+  `data/backups/project-p5r-2026-10-03T23-16-53-814Z.db` (95) e `.partite.db` (15). Il contenuto non cambia: escono `seed_meta`, mai
+  scritta, e due indici. Il codice di `main` legge `seed_meta` dentro un `try/catch` e funziona anche sul file migrato.
+- **Docker:** pulendo la prova del lotto F è stato eseguito anche `docker volume prune -f`. Toglie i volumi anonimi che nessun
+  container usa, anche se non sono di questo progetto: non era necessario.

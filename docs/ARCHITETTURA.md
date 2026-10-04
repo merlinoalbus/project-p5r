@@ -122,7 +122,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 - Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, con `foreign_key_check` **dentro** la transazione prima di avanzare `user_version` (dal 2026-10-03, prima il controllo era dopo il commit). Il controllo si fa prima e dopo `up`: solo le violazioni **nuove**, introdotte da quella migrazione, la annullano (resta da applicare); quelle già presenti nel file si scrivono nel log come avviso e non bloccano l'avvio, che altrimenti si fermerebbe per sempre su un dato vecchio che nessuna migrazione tocca.
 - `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
-- Il seed JSON non esiste più: `seed_meta` resta come memoria dell'ultimo caricamento; i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto, lotto successivo).
+- Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto). `seed_meta`, la memoria dell'ultimo caricamento del seed, è uscita con la migrazione 096 (verifica completa, R3'), e con lei il campo `seed` dello stato dell'istanza.
 - Schema in due famiglie (migrazioni 001–004; `user_version` = 4):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
     `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,
@@ -514,8 +514,9 @@ limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «sto
 ad altezza fissa — `altezza`, 560 px se non indicata — o data dalle classi di `classeVisore`, con «Schermo intero» e «Modifica mappa»). «La città» mostra la mappa `tokyo` sopra le piastrelle (`MiniaturaMappa`: immagine
 dell'istanza → asset `mappe/<chiave>` → icona); la scheda del quartiere mostra `citta-<q>`; la scheda del Palazzo mostra la mappa dell'area
 corrente e tiene allineati elenco dei punti e visore (l'elenco ricarica il visore con `versione`, il visore ricarica la scheda con `onCambiato`).
-Il vecchio `MappaInterattiva` e le funzioni client dei marcatori sono rimossi: il posizionamento vive solo nell'editor; le rotte server dei
-marcatori (`PUT /api/mappe/marcatori`, `/marcatori-luoghi`) restano perché alimentano la sincronizzazione iniziale degli spilli e i test.
+Il vecchio `MappaInterattiva` e le funzioni client dei marcatori sono rimossi: il posizionamento vive solo nell'editor. Le rotte server dei
+marcatori (`PUT /api/mappe/marcatori`, `/marcatori-luoghi`) sono uscite con la verifica completa (O10, 2026-10-04): le chiamavano solo i
+test. Le tabelle `marcatore_mappa` e `marcatore_luogo` restano e si leggono nelle schede.
 
 ### Scheda «Oggi» e stato delle azioni della guida (Fase 12.4 / 13.5)
 `GiornoGuida` (`src/components/guida/GiornoGuida.tsx`) rende la scheda del giorno e le azioni (spunta con note del Confidente, collegamenti,
@@ -620,20 +621,32 @@ che supera la precedente esclusione.
 - **Migrazione 079** (`assorbiImmagini`): riempie `contenuto` dai file delle righe (`DATA_DIR/immagini`, `pacchetto/immagini`), dalle famiglie di `config.assetDir` (`public/asset`, `webp` > `png` a parità di chiave) e da `pacchetto/gioco.db` (connessione a parte in sola lettura, solo se ha già la colonna); idempotente; con un database in memoria le due sorgenti pesanti si saltano. `regoleAllAvvio` → `assorbiImmaginiSuDisco`: assorbe ciò che un backup di prima della 079 ha rimesso su disco e sposta `DATA_DIR/immagini` in `DATA_DIR/backups/immagini-su-disco-<istante>`. `caricaPacchetto` copia le righe di `immagine` senza i byte salvo `{ conImmagini: true }`.
 - **Server**: `immaginiService` legge e scrive solo nel database (`nome_file` resta come nome leggibile); `GET /api/immagini/:ambito/:chiave/file` risponde dal BLOB con `ETag` (id, byte, data) e 304; `GET /api/immagini/manifest` = famiglie predefinite con contenuto, chiave → URL versionato; elenco (`GET /api/immagini`) e rimozione in blocco (`DELETE /api/immagini`) toccano solo gli ambiti di caricamento (`queryImmagini`), mentre lettura/PUT/DELETE singoli accettano ogni ambito. `backupService` fa lo snapshot di avvio solo se c'è una migrazione da applicare. `copiaIstanza` non porta più la cartella `immagini/` (i backup vecchi con quella cartella si ripristinano ancora: i file vengono assorbiti alla riapertura). Il ripristino e l'importazione leggono il file dalla cartella d'appoggio, senza un limite di dimensione proprio (la costante `MAX_BYTE_RIPRISTINO` del caricamento nel corpo è stata tolta il 2026-10-03).
 - **Frontend**: `assetStore.carica` unisce `/asset/manifest.json` e `getManifestoImmagini()` (`/api/immagini/manifest`, che vince a parità di chiave): `useAsset`/`AssetImg` invariati. `assetTokyo.ts`, `stratiMemento.ts` (`urlElementoMemento`), `AlberoLuoghi` usano `urlImmagine(famiglia, chiave)` (chiave con `/` codificata: `lmap%2Ftokyo%2Fshibuya`).
-- **Pacchetto di gioco = `gioco.db`** (il completo è fuori da git; il primo avvio copia l'iniziale senza immagini e la card avvisa finché il completo non è importato, `StatoIstanzaDto.completo`): `server/services/pacchettoGiocoService.ts` — `esportaPacchetto` (copia consistente di `main`), `anteprimaPacchetto` (firma SQLite + `verificaDatabase` = 'gioco', versione ≤ ultima migrazione, conteggi per tabella, tabelle assenti, immagini con contenuto, `orfaniPartite` con `RIFERIMENTI_PARTITE`: 30 riferimenti utente→gioco valutati attaccando `partite.db` al file caricato; una tabella di gioco assente rende orfane tutte le righe che la referenziano, con nota), `importaPacchetto` (copia di sicurezza → `closeDb` → `scriviDatabase` → `riapriIstanza` + `regoleAllAvvio` → orfani ricalcolati; errore → `tornaAllaCopiaDiSicurezza`, 400 `importazione-fallita`). Rotte in `routes/impostazioni.ts`: `POST /istanza/gioco/anteprima`, `PUT /istanza/gioco` (corpo grezzo), `POST /istanza/gioco/anteprima-da-url` e `PUT /istanza/gioco/da-url` (il server scarica dall'indirizzo), `GET /istanza/gioco/importazione` (stato); il download è `GET /istanza/database`. DTO: `AnteprimaPacchettoDto`, `EsitoImportazionePacchettoDto`, `OrfanoPartiteDto`. UI: `src/components/impostazioni/PacchettoGioco.tsx` (anteprima obbligatoria, esito con orfani e «Ricarica l'app»).
+- **Pacchetto di gioco = `gioco.db`** (il completo è fuori da git; il primo avvio copia l'iniziale senza immagini e la card avvisa finché il completo non è importato, `StatoIstanzaDto.completo`): `server/services/pacchettoGiocoService.ts` — l'esportazione è `copiaDatabase('gioco')` (copia consistente di `main` in un file temporaneo), `anteprimaPacchetto(percorso)` / `anteprimaPacchettoDaDeposito(nome)` (firma SQLite + `verificaDatabase` = 'gioco' sul file, aperto dov'è in sola lettura; versione ≤ ultima migrazione, conteggi per tabella, tabelle assenti, immagini con contenuto, `orfaniPartite` con `RIFERIMENTI_PARTITE`: 30 riferimenti utente→gioco valutati attaccando `partite.db` al file; una tabella di gioco assente rende orfane tutte le righe che la referenziano, con nota), `importaPacchetto(percorso)` / `importaPacchettoDaDeposito(nome)` (il file in una cartella di lavoro di `data/tmp` → copia di sicurezza → `closeDb` → `installaDatabase` → `riapriIstanza` + `regoleAllAvvio` → orfani ricalcolati; errore → `tornaAllaCopiaDiSicurezza`, 400 `importazione-fallita`). Rotte in `routes/impostazioni.ts` (nessun file nel corpo di una richiesta, dal 2026-10-03): `GET /istanza/gioco/deposito`, `POST /istanza/gioco/deposito/anteprima`, `PUT /istanza/gioco/deposito`, `GET /istanza/gioco/importazione` (stato); il download è `GET /istanza/database`, che lascia anche una copia nel deposito. DTO: `AnteprimaPacchettoDto`, `EsitoImportazionePacchettoDto`, `OrfanoPartiteDto`. UI: `src/components/impostazioni/PacchettoGioco.tsx` (anteprima obbligatoria, esito con orfani e «Ricarica l'app»).
 
 ## 8. Build, test, deploy
-- Test (Vitest, 104 file / 359 casi al 2026-09-05): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
-  FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
-- Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
+- Test (Vitest, 267 file / 1461 casi al 2026-10-04). Aiuti comuni in `test/`:
+  - `dbDiProva()` (`test/dbDiProva.ts`): il DB del backend in memoria con il pacchetto iniziale caricato e migrato;
+  - `test/supertest.ts` (alias di `supertest` in `vitest.config.ts`): un server per app con connessioni keep-alive, chiuso a fine file
+    da `test/setup.ts`, contro gli `EADDRINUSE` di Windows;
+  - `moduloApi` / `moduloNotifiche` (`test/mockModuli.ts`, globali da `test/setup.ts`) per i `vi.mock` del frontend: il modulo
+    finto parte da quello vero, i sostituti dati dal test lo rimpiazzano, le funzioni pure restano vere, e un'API non simulata
+    fallisce dicendo il suo nome.
+  Il frontend gira in jsdom.
+- Dev: `scripts/start-all.sh` (`npm run dev:server` = `tsx watch`, che **si riavvia da solo** a ogni salvataggio in `server/` e
+  applica subito le migrazioni nuove ai dati di `data/`; `npm run dev:client` = `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
+  Le porte vengono da `.env` (`BE_PORT`/`PORT`, `FE_PORT`) per il server, gli script e Vite.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
   radice del pidfile o all'ultimo runtime nostro (mai oltre un `bash` diverso dal pidfile), poi termina l'albero — Linux: SIGTERM,
   attesa ≤5 s, SIGKILL ai superstiti; Windows: `taskkill //T` sul WINPID (tradotto dal PID MSYS). Provato su Windows e WSL Ubuntu.
-- CI (`.github/workflows/ci.yml`): typecheck, lint strict su `server/`, lint informativo, test, audit.
-- Immagini (`docker-publish.yml`): dopo il gate `verify`, build & push su GHCR `merlinoalbus/project-p5r-{backend,frontend}` con tag `latest` e `sha`.
+- CI (`.github/workflows/ci.yml`, anche riusabile con `workflow_call`): typecheck, lint (uno, bloccante), test, audit.
+- Immagini (`docker-publish.yml`): dopo il gate `verify` (lo stesso `ci.yml`, audit compreso), build & push su GHCR
+  `merlinoalbus/project-p5r-{backend,frontend}` con tag `latest` e `sha`; cache GHA separate per le due immagini. Il frontend
+  installa senza script nativi (`npm ci --ignore-scripts`). nginx comprime testi, JSON e SVG (gzip).
 - Il backend in Docker gira come `node --import tsx server/index.ts` (PID 1 = node, riceve SIGTERM da `docker stop`).
 - Runtime (`docker-compose.yml`, stack Portainer dal repo): nessuna porta pubblicata; FE nginx sulla rete esterna `PROXY_NETWORK` (default `proxy`) raggiunto da cloudflared come `http://project_p5r_fe:80`, BE solo su rete interna (3101, proxato da nginx su `/api/`),
-  volume `project_p5r_data` su `/data` (DB creato al primo boot, seed nell'immagine), label watchtower per l'aggiornamento automatico.
+  volume `project_p5r_data` su `/data` (DB creato al primo boot dal pacchetto iniziale nell'immagine), label watchtower per
+  l'aggiornamento automatico. Porta, cartella dei dati e del pacchetto stanno nell'immagine; lo stack deve definire `NAS_ADDR` e
+  `NAS_PATH` della cartella d'appoggio (senza, `docker compose` si ferma con un messaggio).
 
 ### Catalogo personale e agenda (2026-09-05)
 La migrazione 035 separa origine, personalizzazioni e nascondimenti. Il reseed conserva articoli personali/acquisti e riallinea le spunte soltanto su identità certe; quelle ambigue diventano azioni personali mantenendo effetti reversibili. Il quartiere dei negozi è `luogo_chiave`, distinto dalla descrizione `luogo`. La ricerca include negozi vuoti; i prodotti usano un unico elenco accessibile adattato tramite container queries.
@@ -827,7 +840,8 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   `fetch`, perché solo XHR dice quanti byte sono partiti (`upload.onprogress` → `AvanzamentoInvio` → `BarraInvio`,
   percentuale e MB, poi barra indeterminata mentre lavora il server). Il timeout complessivo è sparito: resta quello
   di **inattività** (dieci minuti che ripartono a ogni evento), perché un invio lento non è un invio morto.
-  `nginx.conf` ha una `location ^~ /api/impostazioni/` con `client_max_body_size 1024m` e timeout 1800s (il resto
+  `nginx.conf` aveva una `location ^~ /api/impostazioni/` con `client_max_body_size 1024m` e timeout 1800s (dal 2026-10-04 il corpo è
+  tornato a 10M, rilievo D3, perché nessun file viaggia più nella richiesta; i timeout lunghi restano; il resto
   delle API resta a 10M/120s), e `server/index.ts` alza `server.requestTimeout` a 30 minuti: i 300 secondi
   predefiniti di Node troncavano la ricezione di un pacchetto grande a metà.
 - **L'indirizzo** (istanza pubblicata). `POST /istanza/gioco/anteprima-da-url` e `PUT /istanza/gioco/da-url`
@@ -1147,8 +1161,9 @@ scrive codice nuovo.
 - **Una sostituzione dei file alla volta** (`server/services/lucchettoIstanza.ts`, `occupaIstanza`): la prendono l'importazione
   del pacchetto e il ripristino dell'istanza; la seconda richiesta riceve 409 `importazione-in-corso`. Il ripristino rifiuta
   anche uno schema più nuovo del codice (400 `database-troppo-nuovo`), come già l'importazione (`pacchetto-troppo-nuovo`).
-- **Scrittura atomica dei database** (`scriviDatabase`): file nuovo nella stessa cartella, `fsync`, `rename` sopra il vivo. Un
-  crash a metà lascia il file di prima, non un file troncato. Se dopo un errore fallisce anche la riapertura, la risposta è un
+- **Scrittura atomica dei database** (`installaDatabase`, prima `scriviDatabase`): il file preparato nella cartella di lavoro si
+  sposta sopra il vivo (`fsync`, `rename`; su un altro disco, `EXDEV`, copia in un `.nuovo` accanto e poi `rename`). Un crash a
+  metà lascia il file di prima, non un file troncato. Se dopo un errore fallisce anche la riapertura, la risposta è un
   500 che dice di riavviare e dove sta la copia di sicurezza.
 - **Livello di Joker: fonte unica `partita.livello_protagonista`**. La squadra lo legge da lì; la riga `joker` di
   `membro_squadra_partita` lo ricopia (anche dal riepilogo della partita) ma non è mai letta per il livello.
@@ -1190,3 +1205,50 @@ scrive codice nuovo.
 - **Script**: `start-be.sh`/`start-fe.sh` si dichiarano «già in ascolto» solo se sulla porta c'è node (`gia_avviato_o_esci`),
   altrimenti escono con 1; `genera-pacchetto.ts` toglie la cartella di lavoro anche quando fallisce; `accesso:copertura` misura il
   `gioco.db` dell'istanza.
+
+## Strutture comuni della verifica completa (fase 3, 4 ottobre 2026)
+
+Le ridondanze trovate dalla verifica (`docs/analisi/verifica-completa-2026-10-03.md`, §9) sono diventate un posto solo. Chi aggiunge
+codice parte da qui invece di riscriverle.
+
+**Server**
+- `server/schemas/comuni.ts`: `idParam`, `boolQuery`, `testoRicerca`, `livello`, `dataGioco` (un messaggio solo), `uidVoce`,
+  `elencoInteri`, `dote`, `categoriaArticolo`.
+- `server/services/verificaPartita.ts`: `verificaPartita(id)` e `partitaNonTrovata(id)`, il 404 della partita (prima ripetuto in 26
+  punti).
+- `server/services/datiGuida.ts`: `datiGuida(chiave)` legge una volta i blocchi di `dati_guida` e li tiene in cache, congelati;
+  `finestreDungeon()` per le finestre dei Palazzi. La cache sta nel registro `cacheDiGioco`.
+- `server/services/mappe/alberoMappe.ts`: `sottoalberoMappe`, `palazzoDellaMappa`, `radiceDelPalazzo`, `SQL_SOTTOALBERO`. Una regola
+  per «il Palazzo di una mappa», cioè la radice `dungeon-<chiave>` senza genitore. Prima c'erano nove implementazioni e due regole.
+- `server/utils/zip.ts`: ZIP a flusso (`scriviZip`, `leggiIndiceZip`, `estraiVoce`), CRC di `zlib`. Copia, ripristino e
+  importazione lavorano su file in `data/tmp`, mai su buffer da centinaia di MB, e installano con `installaDatabase`.
+- Caricamenti in blocco al posto di una query per riga:
+  - `contestoMappe()` (mappe);
+  - `possedute()` / `possedutaPerId()` (scorta);
+  - `skillRiassunti()`;
+  - le affinità dell'elenco Persona;
+  - `confidente()` / `ranghiConfidenti()`.
+- Migrazioni 096 (via `seed_meta` e un indice doppio) e utente 016 (via un indice doppio, nuovo indice su
+  `spunta_voce_partita.voce_uid`).
+
+**Condivisi**
+- `shared/doti.ts` (`DOTI_SOCIALI` e nomi, nell'ordine di `dote_sociale.ordine`);
+- `shared/articoli.ts` (categorie);
+- `shared/statistiche.ts` (`CHIAVI_STATISTICHE`, `NOMI_STATISTICHE`; `StatisticheDto` e `OsservazioneStatisticheDto` ne sono
+  alias);
+- `leggiGiorni` in `shared/orariNegozio.ts`;
+- i DTO `ElenchiRegoleDto`, `PinConStatoDto`, `ManifestImmaginiDto`, prima solo nel client.
+
+**Frontend**
+- le pagine si caricano alla prima visita (`router.tsx`, `lazy`), con un `Suspense` attorno all'`Outlet` del layout;
+- il barrel `services/api` esporta tutti i moduli, `condizioni` compreso, e i sorgenti importano solo da lì;
+- aiuti in `src/utils`:
+  - `salvaFile`;
+  - `cicli` (`NOME_MODO_PARTNER`);
+  - `contornoSagoma`;
+  - `piatto` in `testo`;
+  - `dateGioco` (che usa la data leggibile condivisa);
+- `components/shared/VoceFonte` (`VoceTesto`, `Fonte`);
+- il raggruppamento degli spilli tiene in cache i centri delle nubi e, nel visore, sta in un `useMemo`;
+- l'area visibile di una planimetria si cerca dai bordi;
+- iscrizioni agli store con selettori stretti (`useShallow`).
