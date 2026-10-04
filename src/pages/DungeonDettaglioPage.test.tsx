@@ -6,6 +6,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { DungeonDettaglioPage } from './DungeonDettaglioPage';
+import { scegliVoce, vociSelettore } from '../../test/selettore';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto, PuntoInteresseDto } from '../types';
 
@@ -477,6 +478,58 @@ it('la conferma dell’eliminazione nomina le aree della guida che la planimetri
   expect(eliminaMappa).not.toHaveBeenCalled();
 });
 
+describe('un’area su più planimetrie (decisione dell’utente, 2026-10-04)', () => {
+  it('dall’area aperta si collega anche a un’altra planimetria: le si aggiunge l’area, senza toglierla dalla prima', async () => {
+    getDungeon.mockResolvedValue(palazzo(true));
+    impostaAreeMappa.mockResolvedValue({ aree: [] });
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    fireEvent.click(screen.getByText('Planimetrie di quest’area · 1'));
+    // si offrono solo le planimetrie che non hanno già l'area: la Torre
+    expect(vociSelettore('Collega anche a').filter((v) => !v.startsWith('—')).map((v) => v.split(' ')[0])).toEqual(['Torre']);
+    scegliVoce('Collega anche a', /^Torre/);
+    await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-torre', ['k-01']));
+    // la prima planimetria non si tocca, e la scheda si rilegge
+    expect(impostaAreeMappa).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(getDungeon).toHaveBeenCalledTimes(2));
+  });
+
+  it('«Scollega questa planimetria» toglie l’area solo da quella a schermo, e dice dove resta', async () => {
+    const d = palazzo(true);
+    // il Cancello sta su due planimetrie: la sua e la Torre
+    d.planimetrie[1] = { ...d.planimetrie[1], aree: [{ chiave: 'k-01', nome: 'Cancello', ordine: 0 }] };
+    d.aree[0] = { ...d.aree[0], mappe: [...d.aree[0].mappe, { chiave: 'm-torre', nome: d.planimetrie[1].nome, n: 2, presi: 0, spilli: [] }] };
+    getDungeon.mockResolvedValue(d);
+    impostaAreeMappa.mockResolvedValue({ aree: [] });
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    fireEvent.click(screen.getByText('Planimetrie di quest’area · 2'));
+    // non c'è niente da collegare: l'area sta già su tutte le planimetrie
+    expect(screen.queryByRole('combobox', { name: 'Collega anche a' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Scollega questa planimetria l’area resta sulle altre/ }));
+    // la planimetria a schermo è la prima, Cancello: perde l'area e tiene le altre (qui nessuna)
+    await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-cancello', []));
+    expect(impostaAreeMappa).toHaveBeenCalledTimes(1);
+  });
+
+  it('la conferma dell’eliminazione distingue le aree che restano su altre planimetrie da quelle che restano senza', async () => {
+    const d = palazzoConPiuAree();
+    // il Cancello sta anche sulla Torre; il Cortile solo sulla planimetria da eliminare
+    d.planimetrie[1] = { ...d.planimetrie[1], aree: [...d.planimetrie[1].aree, { chiave: 'k-01', nome: 'Cancello', ordine: 0 }] };
+    getDungeon.mockResolvedValue(d);
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
+    fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
+    const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
+    // accanto all'area, dove altro sta
+    expect(finestra.getAllByRole('checkbox')[0].closest('label')!.textContent).toBe('1. Cancelloanche su «Torre»');
+    fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
+    const conferma = within(finestra.getByRole('alertdialog'));
+    expect(conferma.getByText(/L’area della guida «Cortile» resta senza planimetria\. L’area «Cancello» resta sulle altre planimetrie che la contengono\./)).toBeInTheDocument();
+  });
+});
+
 it('mentre un ordine si salva, la maniglia dice perché è ferma', async () => {
   const pannello = await apriPlanimetrie();
   riordinaMappe.mockReturnValue(new Promise(() => {}));
@@ -786,9 +839,9 @@ it('le aree di una planimetria si scelgono insieme nella scheda: in ordine, con 
   // senza cambiamenti non si salva niente
   expect(finestra.getByRole('button', { name: 'Salva' })).toBeDisabled();
   fireEvent.click(caselle[1]);
-  // spuntare un'area che sta altrove lo dice prima di salvare
-  expect(finestra.getByText(/si sposta qui da «Torre»/)).toBeInTheDocument();
-  expect(finestra.getByText('Un’area lascia la planimetria dove stava: Torre.', { exact: false })).toHaveAttribute('role', 'status');
+  // spuntare un'area che sta altrove la aggiunge anche qui, senza toglierla da lì (2026-10-04): niente più «lascia la planimetria»
+  expect(caselle[1].closest('label')!.textContent).toBe('2. Torreanche su «Torre»');
+  expect(finestra.queryByText(/lascia la planimetria|si sposta qui/)).toBeNull();
   // con una modifica non salvata, cambiare stanza aspetta (la scheda lo dice)
   expect(finestra.getByText('Salva prima le modifiche qui sopra per cambiare stanza.')).toBeInTheDocument();
   fireEvent.click(caselle[0]);

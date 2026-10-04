@@ -4,8 +4,8 @@
 //
 // «Quando associo le aree della guida alle mappe nei palazzi devo poter selezionare più elementi della
 // guida alla stessa mappa… Se una mappa contiene più aree della guida deve mostrare le sue aree in
-// ordine.» Resta la decisione del 2026-09-18: un'area ha una sola planimetria. Quindi:
-// una mappa → più aree (in ordine di guida); un'area → al più una mappa.
+// ordine.» E dal 2026-10-04 (decisione dell'utente, che supera quella del 2026-09-18) un'area può stare su
+// più planimetrie. Quindi: una mappa → più aree (in ordine di guida); un'area → una o più mappe.
 // ============================================================
 
 import request from 'supertest';
@@ -52,13 +52,15 @@ describe('più aree della guida nella stessa planimetria', () => {
     expect(colonne(una.chiave)).toEqual({ entita_tipo: 'area', entita_chiave: a[3].chiave });
   });
 
-  it('un’area ha comunque una sola planimetria: aggiungerla altrove la stacca da qui, e le altre aree restano', async () => {
+  it('un’area aggiunta a un’altra planimetria resta anche su questa: tutte e due la contengono (2026-10-04)', async () => {
     const a = areeKamoshida();
     await request(app).put(`/api/mappe/${altra.chiave}/aree`).send({ aree: [a[3].chiave] }).expect(200);
     expect(areeLegate(altra.chiave)).toEqual([a[3].chiave].sort());
-    expect(areeLegate(una.chiave)).toEqual([a[6].chiave, a[9].chiave].sort());
-    // la planimetria che l'ha persa dichiara ora la sua prima area rimasta
-    expect(colonne(una.chiave)).toEqual({ entita_tipo: 'area', entita_chiave: a[6].chiave });
+    expect(areeLegate(una.chiave)).toEqual([a[3].chiave, a[6].chiave, a[9].chiave].sort());
+    // le colonne di questa planimetria non cambiano: la sua prima area è ancora lì
+    expect(colonne(una.chiave)).toEqual({ entita_tipo: 'area', entita_chiave: a[3].chiave });
+    // la scheda del Palazzo vede l'area su entrambe
+    expect(dettaglioDungeon('kamoshida').aree.find((x) => x.chiave === a[3].chiave)!.mappe.map((m) => m.chiave)).toEqual(expect.arrayContaining([una.chiave, altra.chiave]));
   });
 
   it('l’insieme sostituisce: le aree non più elencate si staccano, e l’insieme vuoto le toglie tutte', async () => {
@@ -103,6 +105,16 @@ describe('più aree della guida nella stessa planimetria', () => {
     expect(areeLegate(altra.chiave)).toEqual([a[12].chiave]);
   });
 
+  it('importando il pacchetto, un’area che sta anche su un’altra planimetria resta anche lì (2026-10-04)', async () => {
+    const a = areeKamoshida();
+    // a[1] sta su `una` (test precedente) e anche su `altra`
+    await request(app).put(`/api/mappe/${altra.chiave}/aree`).send({ aree: [a[1].chiave] }).expect(200);
+    const pacchetto = esportaMappe(una.chiave);
+    importaMappe(pacchetto, { sovrascrivi: true });
+    expect(areeLegate(una.chiave)).toContain(a[1].chiave);
+    expect(areeLegate(altra.chiave)).toEqual([a[1].chiave]);
+  });
+
   it('funziona sulle planimetrie vere, che l’interfaccia chiama con la chiave di percorso (diversa da quella interna)', async () => {
     const a = areeKamoshida();
     // una planimetria nativa del pacchetto, con la chiave che la scheda del Palazzo dà all'interfaccia
@@ -111,7 +123,8 @@ describe('più aree della guida nella stessa planimetria', () => {
     const interna = nativa.mappa_chiave;
     const p = dettaglioDungeon('kamoshida').planimetrie.find((x) => x.aree.some((ar) => ar.chiave === nativa.entita_chiave))!;
     expect(interna).not.toBe(p.chiave);
-    const libera = a.find((x) => !prepared("SELECT 1 FROM mappa_entita WHERE entita_tipo = 'area' AND entita_chiave = ?").get(x.chiave))!;
+    // un'area che questa planimetria non ha ancora (può stare anche su altre: dal 2026-10-04 non si stacca da lì)
+    const libera = a.find((x) => !p.aree.some((ar) => ar.chiave === x.chiave))!;
     const r = await request(app).put(`/api/mappe/${encodeURIComponent(p.chiave)}/aree`).send({ aree: [p.aree[0].chiave, libera.chiave] });
     expect(r.status).toBe(200);
     expect(areeLegate(interna)).toEqual([p.aree[0].chiave, libera.chiave].sort());

@@ -498,9 +498,8 @@ const chiaveValida = (chiave: string): boolean => /^[a-z0-9][a-z0-9-]{0,179}$/.t
  * Palazzo (`dungeonService`) e i contenuti della guida. L'editor scriveva solo le colonne: legare
  * una planimetria a un'area non si vedeva da nessuna parte. Qui i due posti si scrivono insieme.
  *
- * **Un'area ha una sola planimetria** (decisione dell'utente, 2026-09-18): legare un'area che ne
- * ha già un'altra stacca la precedente invece di affiancarla, così «completa» resta una misura
- * vera e l'elenco del Palazzo non mostra la stessa stanza due volte.
+ * **Un'area può stare su più planimetrie** (decisione dell'utente, 2026-10-04, che supera quella del 2026-09-18):
+ * legare un'area a una mappa la aggiunge, senza staccarla da quelle che già la avevano.
  */
 function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave: string } | null, precedente: { tipo: string | null; chiave: string | null } | null = null): void {
   if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) return;
@@ -520,8 +519,6 @@ function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave:
     prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(chiave, precedente.chiave);
   }
   if (entita) {
-    // Un'area ha una sola planimetria: si stacca **quel** legame dalla mappa che ce l'aveva, che tiene le sue altre aree.
-    if (entita.tipo === 'area') staccaAreaDalleAltre(entita.chiave, chiave);
     prepared('INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, ?, ?, ?)')
       .run(chiave, entita.tipo, entita.chiave, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
   }
@@ -544,14 +541,6 @@ function verificaAreePalazzo(genitore: string | null, aree: string[]): void {
   if (mancanti.length) throw httpErrors.badRequest('area-inesistente', `Area della guida inesistente: ${mancanti.join(', ')}.`);
   const altrove = trovate.filter((t) => t.dungeon_chiave !== palazzo);
   if (altrove.length) throw httpErrors.badRequest('area-di-altro-palazzo', `Area di un altro Palazzo: ${altrove.map((t) => t.chiave).join(', ')}.`);
-}
-
-/** Un'area ha una sola planimetria: la si stacca dalle mappe che l'avevano, che tengono le loro altre aree. */
-function staccaAreaDalleAltre(area: string, tranne: string): void {
-  for (const altra of prepared("SELECT mappa_chiave FROM mappa_entita WHERE entita_tipo = 'area' AND entita_chiave = ? AND mappa_chiave <> ?").all(area, tranne) as Array<{ mappa_chiave: string }>) {
-    prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(altra.mappa_chiave, area);
-    allineaColonneArea(altra.mappa_chiave);
-  }
 }
 
 /**
@@ -599,9 +588,9 @@ function areePerPacchetto(mappa: string): { aree?: string[] } {
 
 /**
  * Le aree della guida contenute in una planimetria (richiesta dell'utente, 2026-09-29: una mappa può
- * contenerne più d'una). Si passa **l'insieme**: le aree tolte si staccano, quelle nuove si aggiungono e
- * si staccano dalla planimetria che le aveva (un'area ha comunque una sola planimetria, decisione del
- * 2026-09-18); gli altri legami della mappa (luogo, quartiere) restano.
+ * contenerne più d'una). Si passa **l'insieme**: le aree tolte si staccano da questa planimetria, quelle nuove si
+ * aggiungono, e restano anche sulle altre planimetrie che le avevano (un'area può stare su più planimetrie, decisione
+ * dell'utente del 2026-10-04); gli altri legami della mappa (luogo, quartiere) restano.
  */
 export function impostaAreeMappa(chiavePubblica: string, aree: string[]): Array<{ chiave: string; nome: string; ordine: number }> {
   // la chiave che usa l'interfaccia è quella di percorso: la riga si trova come in tutte le altre operazioni
@@ -614,7 +603,6 @@ export function impostaAreeMappa(chiavePubblica: string, aree: string[]): Array<
     const segnaposti = uniche.map(() => '?').join(',');
     prepared(`DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area'${uniche.length ? ` AND entita_chiave NOT IN (${segnaposti})` : ''}`).run(chiave, ...uniche);
     for (const area of uniche) {
-      staccaAreaDalleAltre(area, chiave);
       prepared("INSERT OR IGNORE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, 'area', ?, ?)")
         .run(chiave, area, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
     }
@@ -1714,11 +1702,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     // a genitori scritti: le stesse regole dell'app (aree esistenti e dello stesso Palazzo della planimetria)
     for (const { mappa, aree, fonte } of areeDaLegare) {
       verificaAreePalazzo((prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').get(mappa) as { genitore_chiave: string | null }).genitore_chiave, aree);
-      for (const area of aree) {
-        // un'area ha una sola planimetria anche quando arriva da un pacchetto
-        staccaAreaDalleAltre(area, mappa);
-        prepared("INSERT OR REPLACE INTO mappa_entita VALUES(?,'area',?,?)").run(mappa, area, fonte);
-      }
+      // un'area può stare su più planimetrie (2026-10-04): il pacchetto la aggiunge senza staccarla dalle altre
+      for (const area of aree) prepared("INSERT OR REPLACE INTO mappa_entita VALUES(?,'area',?,?)").run(mappa, area, fonte);
       // anche con l'elenco vuoto: le colonne non devono dichiarare un'area che non c'è più
       allineaColonneArea(mappa);
     }

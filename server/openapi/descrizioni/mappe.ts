@@ -86,7 +86,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'PUT /api/mappe/:chiave/aree': {
     sommario: 'Imposta l\'insieme delle aree della guida contenute in una planimetria',
-    descrizione: 'Si passa l\'insieme completo: le aree tolte si staccano, quelle nuove si aggiungono e si staccano dalla planimetria che le aveva (un\'area ha una sola planimetria). Le aree devono essere del Palazzo della planimetria; la mappa d\'insieme del Palazzo non ne accetta. Gli altri legami della mappa restano; la mappa diventa dell\'utente.',
+    descrizione: 'Si passa l\'insieme completo: le aree tolte si staccano, quelle nuove si aggiungono e restano anche sulle altre planimetrie che le avevano (un\'area può stare su più planimetrie, dal 2026-10-04). Le aree devono essere del Palazzo della planimetria; la mappa d\'insieme del Palazzo non ne accetta. Gli altri legami della mappa restano; la mappa diventa dell\'utente.',
     risposta: '`{ aree }`: le aree legate in ordine di guida, ognuna `{ chiave, nome, ordine }`',
     errori: [[404, 'mappa-non-trovata'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo']],
   },

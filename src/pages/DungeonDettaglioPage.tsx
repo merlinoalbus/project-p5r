@@ -42,7 +42,8 @@ import { ObiettiviDedalo } from '../components/guida/ObiettiviDedalo';
 import { dataBreve } from '../utils/testoBreve';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../types';
 import { GuidaDellArea } from '../components/guida/GuidaDellArea';
-import { IconaSegno } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
@@ -106,7 +107,7 @@ function VoceArea({ a, memento, scelta, suggerita, onScegli, compatta }: {
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[13px] font-semibold leading-tight">{a.nome}</span>
         <span className="text-[11px] text-text-muted">
-          {conto.totale === 0 ? (memento ? 'nessun obiettivo dichiarato' : a.mappe.length === 0 ? 'nessuna planimetria legata' : 'niente da raccogliere sulla sua planimetria') : conto.fatti === null ? `${conto.totale} ${memento ? 'obiettivi' : 'da raccogliere'}` : restano > 0 ? `${restano} ${memento ? 'obiettivi' : 'da prendere'} su ${conto.totale}` : `${conto.totale} ${memento ? 'obiettivi fatti' : 'raccolti'} · completa`}
+          {conto.totale === 0 ? (memento ? 'nessun obiettivo dichiarato' : a.mappe.length === 0 ? 'nessuna planimetria legata' : a.mappe.length > 1 ? 'niente da raccogliere sulle sue planimetrie' : 'niente da raccogliere sulla sua planimetria') : conto.fatti === null ? `${conto.totale} ${memento ? 'obiettivi' : 'da raccogliere'}` : restano > 0 ? `${restano} ${memento ? 'obiettivi' : 'da prendere'} su ${conto.totale}` : `${conto.totale} ${memento ? 'obiettivi fatti' : 'raccolti'} · completa`}
         </span>
       </span>
     </button>
@@ -232,6 +233,25 @@ export function DungeonDettaglioPage() {
     const prima = p ? [...p.aree].sort(perOrdineDiGuida)[0] : undefined;
     if (p && prima) { setParams({ area: area && p.aree.some((a) => a.chiave === area.chiave) ? area.chiave : prima.chiave }); setPianta(k); setPlanimetriaLibera(null); }
     else setPlanimetriaLibera(k);
+  };
+  /**
+   * Lega l'area aperta anche alla planimetria `k`, che tiene le sue altre aree; l'area resta anche sulle planimetrie che già
+   * la avevano (un'area può stare su più tavole, decisione dell'utente del 2026-10-04). Poi rilegge la scheda e lo dice.
+   */
+  const collegaArea = (k: string) => {
+    const t = (d?.planimetrie ?? []).find((x) => x.chiave === k);
+    if (!t || !area) return;
+    void impostaAreeMappa(t.chiave, [...t.aree.map((a) => a.chiave), area.chiave])
+      .then(async () => { await dati.ricarica(); notifica('success', `«${area.nome}» ora sta anche su «${nomeSenzaPalazzo(t.nome)}».`); })
+      .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Collegamento non riuscito.'));
+  };
+  /** Toglie l'area aperta dalla planimetria `k` (le altre aree della planimetria restano), poi rilegge la scheda e lo dice. */
+  const scollegaArea = (k: string) => {
+    const t = (d?.planimetrie ?? []).find((x) => x.chiave === k);
+    if (!t || !area) return;
+    void impostaAreeMappa(t.chiave, t.aree.map((a) => a.chiave).filter((c) => c !== area.chiave))
+      .then(async () => { setPianta(null); await dati.ricarica(); notifica('success', `«${area.nome}» non sta più su «${nomeSenzaPalazzo(t.nome)}».`); })
+      .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Scollegamento non riuscito.'));
   };
   // L'anello conta quel che si raccoglie: collezionabili delle planimetrie (Palazzi) o obiettivi dei dedali (Memento).
   const quota = d && d.raccolta.presi !== null && d.raccolta.totale > 0 ? d.raccolta.presi / d.raccolta.totale : null;
@@ -419,6 +439,26 @@ export function DungeonDettaglioPage() {
                   {area.mappe.length > 1 && (
                     <Selettore etichetta="Planimetria" valore={mappaScelta} opzioni={area.mappe.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={setPianta} />
                   )}
+                  {/* Un'area può stare su più planimetrie (decisione dell'utente, 2026-10-04): qui se ne aggiunge un'altra, o si
+                      toglie quella a schermo. Ripiegato, perché si usa di rado e la mappa resta il primo piano. */}
+                  {area.mappe.length > 0 && (
+                    <details className="text-[12px]">
+                      <summary className="touch cursor-pointer text-text-muted">Planimetrie di quest’area · {area.mappe.length}</summary>
+                      <div className="flex flex-col gap-2 pt-2">
+                        {d.planimetrie.some((t) => !area.mappe.some((m) => m.chiave === t.chiave)) && (
+                          <Selettore etichetta="Collega anche a" valore="" vuoto="— scegli una planimetria —"
+                            opzioni={d.planimetrie.filter((t) => !area.mappe.some((m) => m.chiave === t.chiave)).map((t) => ({ chiave: t.chiave, nome: nomeSenzaPalazzo(t.nome),
+                              dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna area'].filter(Boolean).join(' · ') }))}
+                            onCambia={collegaArea} />
+                        )}
+                        {area.mappe.some((m) => m.chiave === mappaScelta) && (
+                          <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="annulla" dimensione={20} />}
+                            titolo="Scollega questa planimetria" dettaglio={area.mappe.length > 1 ? 'l’area resta sulle altre' : 'l’area resta senza planimetria'}
+                            onClick={() => scollegaArea(mappaScelta)} />
+                        )}
+                      </div>
+                    </details>
+                  )}
                   {/* Una planimetria che contiene più aree della guida le mostra tutte, in ordine: toccarne una la apre. */}
                   {areeDellaPianta.length > 1 && (
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -455,9 +495,7 @@ export function DungeonDettaglioPage() {
                       ? <Selettore etichetta="Collega una planimetria" valore="" vuoto="— scegli —"
                           opzioni={d.planimetrie.map((t) => ({ chiave: t.chiave, nome: nomeSenzaPalazzo(t.nome),
                             dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna area'].filter(Boolean).join(' · ') }))}
-                          onCambia={(k) => { const t = d.planimetrie.find((x) => x.chiave === k); if (!t) return; void impostaAreeMappa(t.chiave, [...t.aree.map((a) => a.chiave), area.chiave])
-                            .then(async () => { await dati.ricarica(); notifica('success', `Planimetria collegata a «${area.nome}».`); })
-                            .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Collegamento non riuscito.')); }} />
+                          onCambia={collegaArea} />
                       : <span className="text-text-muted">Il Palazzo non ha ancora planimetrie: aggiungine una dall’elenco del Palazzo.</span>}
                   </div>
                 )}

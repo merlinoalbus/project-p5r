@@ -55,7 +55,7 @@ mappa
   larghezza, altezza INTEGER NULL    dimensioni dell'immagine di base (per l'adattamento dello zoom)
   entita_tipo      TEXT NULL         'quartiere' | 'luogo' | 'dungeon' | 'area'   collegamento all'entità esistente
   entita_chiave    TEXT NULL         (aree: la prima in ordine di guida; tutte le aree della planimetria stanno in
-                                     `mappa_entita`, più d'una per mappa e al più una mappa per area — 2026-09-30)
+                                     `mappa_entita`, più d'una per mappa — 2026-09-30 — e più mappe per area — 2026-10-04)
   origine          TEXT NOT NULL     'seed' | 'utente'
   note             TEXT NOT NULL DEFAULT ''
   updated_at       TEXT NOT NULL

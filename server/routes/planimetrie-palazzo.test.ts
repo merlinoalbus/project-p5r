@@ -7,8 +7,8 @@
 // 1. **Legare una planimetria a un'area dall'editor non si vedeva.** Il legame vive in due posti —
 //    le colonne `entita_*` della mappa e la tabella `mappa_entita` — e la scheda legge la tabella,
 //    che il salvataggio dell'editor non scriveva mai.
-// 2. **Un'area ha una sola planimetria** (decisione dell'utente, 2026-09-18): legarne una seconda
-//    stacca la prima invece di affiancarla.
+// 2. **Un'area può stare su più planimetrie** (decisione dell'utente, 2026-10-04, che supera quella del
+//    2026-09-18 «un'area ha una sola planimetria»): legarne una seconda la affianca alla prima.
 // 3. **L'ordine si cambia tutto insieme**, ed è quello che il trascinamento salva.
 //
 // E la scheda del Palazzo deve elencare **tutte** le planimetrie dell'albero, non solo quelle che
@@ -48,12 +48,12 @@ describe('planimetrie di un Palazzo', () => {
     expect(scheda.aree.find((a) => a.chiave === area)!.mappe.map((m) => m.chiave)).toContain(una.chiave);
   });
 
-  it('un’area ha una sola planimetria: legarne un’altra stacca la prima', async () => {
+  it('un’area può stare su più planimetrie: legarne un’altra la affianca alla prima (2026-10-04)', async () => {
     const area = areaLegata(una.chiave)!;
     await request(app).put(`/api/mappe/${altra.chiave}`).send({ entita: { tipo: 'area', chiave: area } }).expect(200);
     expect(areaLegata(altra.chiave)).toBe(area);
-    expect(areaLegata(una.chiave)).toBeNull();
-    expect(dettaglioDungeon('kamoshida').aree.find((a) => a.chiave === area)!.mappe).toHaveLength(1);
+    expect(areaLegata(una.chiave)).toBe(area);
+    expect(dettaglioDungeon('kamoshida').aree.find((a) => a.chiave === area)!.mappe.map((m) => m.chiave)).toEqual(expect.arrayContaining([una.chiave, altra.chiave]));
   });
 
   it('togliere il legame lascia la planimetria senza area', async () => {
@@ -92,11 +92,11 @@ describe('planimetrie di un Palazzo', () => {
     expect(areaLegata(una.chiave)).toBe(area);
   });
 
-  it('stacciare un’area dalla mappa che ce l’aveva non tocca i suoi altri legami', async () => {
+  it('legare l’area anche a un’altra mappa non tocca la prima: l’area e gli altri legami (il luogo) restano', async () => {
     const area = areaLegata(una.chiave)!;
     const luogo = (prepared('SELECT chiave FROM luogo LIMIT 1').get() as { chiave: string }).chiave;
     await request(app).put(`/api/mappe/${altra.chiave}`).send({ entita: { tipo: 'area', chiave: area } }).expect(200);
-    expect(areaLegata(una.chiave)).toBeNull();
+    expect(areaLegata(una.chiave)).toBe(area);
     expect((prepared("SELECT entita_chiave FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'luogo'").get(una.chiave) as { entita_chiave: string }).entita_chiave).toBe(luogo);
   });
 

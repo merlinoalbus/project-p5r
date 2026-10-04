@@ -1134,3 +1134,27 @@ Che cosa ne segue:
 - **Posizione della spunta**, come nell'anteprima della proposta approvata: davanti al nome di un'area («✓ 2. Sala Centrale») e
   dopo il nome della stanza («3. Vecchio castello 1P ✓»), così una stanza completa si distingue dalle sue aree. Per i lettori di
   schermo, «(completata)» viene dopo il nome.
+
+## 2026-10-04 — Un'area della guida su più planimetrie
+
+Segnalazione dell'utente: «cmq le aree possono essere agganciate anche a più planimetrie... non capisco perchè se aggancio una
+seconda planimetria si scollega l'area dalla precedente...».
+
+Lo scollegamento era voluto: decisione del 2026-09-18 («un'area ha una sola planimetria»), presa perché con più planimetrie per
+area la misura «completa» contava due volte. L'utente l'ha rivista.
+
+Risposte dell'utente, parola per parola:
+- conteggio di un'area su più planimetrie: «Somma le planimetrie (Recommended)»;
+- la proposta: «Sì, procedi (Recommended)».
+
+Che cosa ne segue:
+- **Supera la decisione del 2026-09-18.** Legare un'area a un'altra planimetria la aggiunge senza staccarla dalle altre. Vale
+  per la scheda della planimetria, per il legame dell'editor e per l'importazione del pacchetto delle mappe.
+- **Nessuna migrazione.** `mappa_entita` lo permetteva già.
+- **Conteggio.** L'area somma i collezionabili di ogni sua planimetria, ognuna una volta. Se due tavole mostrano gli stessi
+  oggetti, li segna l'utente su una sola. Il totale del Palazzo non cambia, perché conta le planimetrie e non le aree.
+- **Nell'interfaccia:**
+  - la scheda della planimetria dice «anche su «X», «Y»», e non più «si sposta qui da»;
+  - la conferma di eliminazione distingue le aree che restano su altre planimetrie da quelle che restano senza;
+  - nella pagina del Palazzo, «Planimetrie di quest'area» collega l'area aperta anche a un'altra planimetria, o la scollega da
+    quella a schermo.

@@ -289,10 +289,13 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
     const m = albero.find((x) => x.chiave === t.chiave);
     return m ? [titoloGruppoImmagini(m), etichettaVersione(m)].filter(Boolean).join(' · ') : nomeSenzaPalazzo(t.nome);
   };
-  /** Dove sta ciascuna area legata a una planimetria diversa da `tranne`: la scheda lo scrive accanto al nome. */
-  const areeAltrove = (tranne: string): Map<string, string> => {
-    const dove = new Map<string, string>();
-    for (const t of planimetrie) if (t.chiave !== tranne) for (const a of t.aree) dove.set(a.chiave, etichettaTavola(t));
+  /**
+   * Su quali altre planimetrie (diverse da `tranne`) sta ciascuna area, in ordine di elenco: la scheda lo scrive accanto al
+   * nome. Sono più d'una quando l'area sta su più tavole (2026-10-04).
+   */
+  const areeAltrove = (tranne: string): Map<string, string[]> => {
+    const dove = new Map<string, string[]>();
+    for (const t of planimetrie) if (t.chiave !== tranne) for (const a of t.aree) dove.set(a.chiave, [...(dove.get(a.chiave) ?? []), etichettaTavola(t)]);
     return dove;
   };
   /** Le tavole fra cui scegliere per un'area: tutte, ognuna con quel che contiene già (l'area si aggiunge). */

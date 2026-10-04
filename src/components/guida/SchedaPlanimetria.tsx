@@ -49,7 +49,8 @@ interface Props {
   nome: string;
   /** Tutte le aree del Palazzo, in ordine di guida. */
   aree: Array<{ chiave: string; nome: string; ordine: number }>;
-  altrove: ReadonlyMap<string, string>;
+  /** Per ogni area che sta anche su altre planimetrie, i nomi di quelle (un'area può stare su più tavole, 2026-10-04). */
+  altrove: ReadonlyMap<string, readonly string[]>;
   /** Le altre stanze del Palazzo, ognuna rappresentata da una sua planimetria (`chiave`). */
   altreStanze: Array<{ chiave: string; nome: string; dettaglio?: string }>;
   onSalva: (m: ModificheScheda) => Promise<void>;
@@ -59,6 +60,22 @@ interface Props {
   /** Una sezione nuova della guida dentro questa planimetria (2026-10-01). */
   onCreaArea: (dati: DatiNuovaArea) => Promise<void>;
   onChiudi: () => void;
+}
+
+/**
+ * Che cosa succede alle aree della guida eliminando la planimetria, per la conferma: quelle che stanno anche su altre tavole
+ * restano lì (2026-10-04), le altre restano senza planimetria. Stringa vuota se la planimetria non contiene aree.
+ */
+function testoAreeDopoEliminazione(aree: Planimetria['aree'], altrove: ReadonlyMap<string, readonly string[]>): string {
+  const ordinate = [...aree].sort(perOrdineDiGuida);
+  /** I nomi delle aree fra virgolette, separati da virgole. */
+  const nomi = (xs: typeof ordinate) => xs.map((a) => `«${a.nome}»`).join(', ');
+  const senza = ordinate.filter((a) => !(altrove.get(a.chiave)?.length));
+  const altre = ordinate.filter((a) => !!altrove.get(a.chiave)?.length);
+  const parti: string[] = [];
+  if (senza.length) parti.push(`${senza.length === 1 ? 'L’area della guida' : 'Le aree della guida'} ${nomi(senza)} ${senza.length === 1 ? 'resta' : 'restano'} senza planimetria.`);
+  if (altre.length) parti.push(`${altre.length === 1 ? 'L’area' : 'Le aree'} ${nomi(altre)} ${altre.length === 1 ? 'resta' : 'restano'} sulle altre planimetrie che la contengono.`);
+  return parti.length ? ` ${parti.join(' ')}` : '';
 }
 
 /**
@@ -104,7 +121,7 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
         ? <div role="alertdialog" aria-label="Conferma eliminazione" className="flex w-full flex-col gap-2 rounded-md border border-primary bg-primary-bg p-2.5">
             <p className="m-0 text-[13px]">
               Elimino «{etichetta || etichettaDedotta}» di {stanza}? Se ne vanno anche i suoi spilli{p.n > 0 ? `, compresi ${p.n} da raccogliere` : ''}.
-              {p.aree.length > 0 ? ` ${p.aree.length === 1 ? 'L’area della guida' : 'Le aree della guida'} ${[...p.aree].sort(perOrdineDiGuida).map((a) => `«${a.nome}»`).join(', ')} ${p.aree.length === 1 ? 'resta' : 'restano'} senza planimetria.` : ''}
+              {testoAreeDopoEliminazione(p.aree, altrove)}
               {' '}L’immagine di base resta fra le immagini caricate.
             </p>
             <div className="flex flex-wrap justify-end gap-1.5">

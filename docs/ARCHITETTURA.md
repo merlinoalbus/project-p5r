@@ -941,11 +941,14 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
 
 ## Più aree per planimetria; Palazzi e Memento in una schermata (2026-09-30)
 
-- **Legame mappa ↔ aree**: vive in `mappa_entita` (righe `entita_tipo='area'`, più d'una per mappa, al più una mappa
-  per area). Le colonne `mappa.entita_tipo/entita_chiave` dichiarano la prima area in ordine di guida
+- **Legame mappa ↔ aree**: vive in `mappa_entita` (righe `entita_tipo='area'`, più d'una per mappa e, dal 2026-10-04,
+  anche più mappe per area: decisione dell'utente che supera quella del 2026-09-18). Le colonne `mappa.entita_tipo/entita_chiave` dichiarano la prima area in ordine di guida
   (`allineaColonneArea`) oppure un legame di altro tipo, che non si tocca. In `mappeService`:
   - `impostaAreeMappa(chiave, aree)` (rotta `PUT /api/mappe/:chiave/aree`, schema `bodyAreeMappa`) sostituisce
-    l'insieme, stacca ogni area dalla mappa che l'aveva (`staccaAreaDalleAltre`) e risponde con `areeDellaMappa`;
+    l'insieme di questa mappa (le aree nuove restano anche sulle altre mappe che le avevano; fino al 2026-10-04
+    `staccaAreaDalleAltre` le toglieva da lì) e risponde con `areeDellaMappa`. Lo stesso vale per il legame singolo
+    dell'editor e per l'importazione del pacchetto delle mappe. Nella pagina del Palazzo, «Planimetrie di quest'area»
+    collega l'area aperta anche a un'altra planimetria o la scollega da quella a schermo;
   - `sincronizzaLegameEntita` (il legame singolo `entita` di creazione e modifica) toglie solo l'area che le colonne
     dichiaravano;
   - `verificaAreePalazzo` / `palazzoDaGenitore` rifiutano (400) aree inesistenti, di un altro Palazzo o sulla radice
