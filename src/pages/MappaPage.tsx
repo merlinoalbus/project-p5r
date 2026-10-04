@@ -35,7 +35,7 @@ import { ritornoMappe } from '../utils/ritornoMappe';
  * Il nodo `tokyo` dell'atlante resta — è il genitore dei quartieri, e senza di lui l'albero non
  * sta in piedi — ma la sua *planimetria* non è più una destinazione: chi ci arrivava vedeva una
  * seconda Tokyo, diversa da quella che aveva appena guardato. Il reindirizzamento è qui e non
- * solo sui collegamenti perché i modi di arrivarci sono tanti (le briciole del visore, «Torna a
+ * solo sui collegamenti perché i modi di arrivarci sono tanti (le briciole del visore, «Su:
  * Tokyo», un indirizzo salvato) e vanno tutti a finire nello stesso posto. */
 const TOKYO = 'tokyo';
 const CITTA = '/guida/citta';

@@ -50,7 +50,7 @@ mappa
   immagine_chiave  TEXT NULL         chiave dell'immagine nell'ambito «mappa» dell'istanza (caricata dall'editor) …
   asset            TEXT NULL         … oppure asset del repository (es. 'mappe/citta-shibuya'); precedenza all'immagine dell'istanza.
                                      Alla creazione dall'editor o dall'API vale 'mappe/<chiave>' se non indicato (15.25, `assetPredefinitoMappa`):
-                                     è il percorso che «Esporta questo luogo» dà all'immagine; `null` esplicito = nessun asset. Se il file
+                                     `null` esplicito = nessun asset (la finestra «Nuova mappa» non lo chiede). Se il file
                                      non è nel manifest degli asset il puntatore è innocuo: si usa l'immagine dell'istanza o la griglia
   larghezza, altezza INTEGER NULL    dimensioni dell'immagine di base (per l'adattamento dello zoom)
   entita_tipo      TEXT NULL         'quartiere' | 'luogo' | 'dungeon' | 'area'   collegamento all'entità esistente
@@ -88,7 +88,7 @@ spillo_partita  (stato per partita)
 
 Regole:
 - Il tipo `passaggio` con `riferimento_tipo = 'mappa'` è il collegamento fra livelli (punti 6 e 8): il click apre la mappa di destinazione;
-  la mappa figlia mostra il pulsante «Torna a <genitore>» e il percorso (breadcrumb) ricostruito con `genitore_chiave`.
+  la mappa figlia mostra il pulsante «Su: <genitore>» (nel progetto «Torna a <genitore>») e il percorso (breadcrumb) ricostruito con `genitore_chiave`.
 - Uno spillo di una voce della guida (`voce_chiave`, dalla 094; prima `riferimento_tipo = 'punto'`, che resta per gli elementi della guida
   senza mappa — la regola unica è `VOCE_DEL_PIN` / `voceDelPin` in `mappe/voceDelPin.ts`, riesportata da `collegamentiGuida.ts`) eredita lo stato del punto di dungeon della partita (`punto_partita`, in `partite.db`: ottenuto/esaurito ⇒
   raccolto) così i forzieri già gestiti nella Guida spariscono anche sulla mappa; gli spilli senza riferimento usano `spillo_partita`.
@@ -133,7 +133,7 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Città | attivita | Attività | spillo-attivita | giallo | no | attivita / luogo |
 | Persone | confidente | Confidente (stato «incontrato», 2026-10-03) | spillo-confidente | rosa | no (stato «incontrato») | confidente |
 | Persone | dialogo | Dialogo (stato «parlato», 2026-10-03) | spillo-dialogo | indaco | sì (parlato) | — (personaggio non Confidente; luogo scelto a mano se utile) |
-| Palazzi e Mementos | forziere / forziere-raro | Forziere / Forziere raro (stato «aperto», si «Richiude», 2026-10-03) | spillo-forziere | oro | sì (aperto) | punto |
+| Palazzi e Mementos | forziere / forziere-raro | Forziere / Forziere raro (stato «aperto», si «Richiudi», 2026-10-03) | spillo-forziere | oro | sì (aperto) | punto |
 | Palazzi e Mementos | tesoro-palazzo | Tesoro del Palazzo (stato «rubato», 2026-10-03) | spillo-tesoro-palazzo | fucsia | sì (rubato) | punto (Tesoro del Palazzo) |
 | Palazzi e Mementos | seme-bramosia | Seme della bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
 | Palazzi e Mementos | oggetto-chiave | Oggetto chiave | spillo-oggetto-chiave | ambra | sì | punto |
@@ -143,7 +143,7 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Palazzi e Mementos | punto-sensibile | Punto sensibile (stato «gestito», 2026-10-03) | spillo-punto-sensibile | verde acqua | no (stato «gestito») | punto (enigma) |
 | Palazzi e Mementos | meccanismo | Meccanismo (leva, interruttore, pannello; stato «azionato», 2026-10-03) | spillo-meccanismo | ardesia | no (stato «azionato») | punto |
 | Palazzi e Mementos | rampino | Punto del rampino (Royal) | spillo-rampino | magenta scuro | no | — |
-| Palazzi e Mementos | porta | Porta chiusa (chiave, tessera, dall'altro lato; stato «aperta», si «Richiude», 2026-10-03) | spillo-porta | rosso scuro | no (stato «aperta») | punto |
+| Palazzi e Mementos | porta | Porta chiusa (chiave, tessera, dall'altro lato; stato «aperta», si «Richiudi», 2026-10-03) | spillo-porta | rosso scuro | no (stato «aperta») | punto |
 | Palazzi e Mementos | sicura | Stanza sicura | spillo-sicura | azzurro | no | punto |
 | Palazzi e Mementos | scorciatoia | Scorciatoia | spillo-scorciatoia | grigio | no | punto |
 | Altro | nota | Nota | spillo-nota | bianco | no | — |
@@ -204,7 +204,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   raggruppamento («+3») quando si sovrappongono sotto lo zoom minimo, etichetta al passaggio del mouse; legenda laterale con i tipi presenti,
   conteggi e filtri per tipo; ricerca per nome.
 - Click su uno spillo → popup ancorato allo spillo e scheda nel pannello: nome, descrizione, immagine dell'entità collegata (mappa e Confidente: negozi, luoghi, punti e richieste non hanno immagini nell'app; lo spillo può però avere le proprie schermate di riferimento, 13.3),
-  azioni: «Apri mappa» (passaggio), «Ottenuto/Esaurito/Riapri» (punto di dungeon, stessi stati della Guida), «Raccolto» (collezionabile), articoli del negozio con acquisto
+  azioni: «Vai: <mappa>» (spostamento; nel progetto era «Apri mappa»), «Ottenuto/Esaurito/Riapri» (punto di dungeon, stessi stati della Guida), «Raccolto» (collezionabile), articoli del negozio con acquisto
   (`negozi.json`: nome, prezzo, disponibilità, stato «comprato» della partita), «Scheda del Confidente», «Richiesta».
   Il popup sta sopra lo spillo, sotto quando in alto non c'è spazio, e diventa il foglio dal basso quando non sta da nessun lato
   (2026-10-01): l'altezza è misurata, non stimata — dalla 094 uno spostamento di una voce della guida porta anche «Ottenuto», e
@@ -216,11 +216,11 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 
 ## 8. Editor (13.3) — `EditorMappa`
 
-- Stessa superficie del visore in modalità dedicata (barra rossa «Modifica: <mappa>» sempre visibile, uscita con conferma se ci sono
-  modifiche non salvate). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
+- Stessa superficie del visore in modalità dedicata (targhetta «Modifica» nell'intestazione e titolo della scheda «Modifica: <mappa> — Mappe»; nessuna conferma all'uscita: creazione, spostamento,
+  incolla ed eliminazione degli spilli si salvano subito, i campi dei pannelli con «Salva spillo» e «Salva mappa»). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
   spillo nel punto), **Incolla** (attivo dopo «Copia»: un tocco sulla mappa crea lo spillo copiato — stesso tipo, nome, descrizione, collezionabile, riferimento e condizioni di visibilità — nel punto toccato, poi si torna a Seleziona; gli appunti vivono in `sessionStorage` e restano per altre copie, anche su altre mappe); **Copia** ed **Elimina** sono pulsanti nel pannello dello spillo selezionato (non strumenti a parte); il tipo dello spillo si cambia dal pannello senza ricrearlo; pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
   fra negozi, punti di dungeon, luoghi, Confidenti, richieste, mappe; «Crea mappa collegata» (crea la mappa figlia e collega lo spillo).
-- **Condizioni di visibilità** (15.22, `CondizioniSpilloEditor`, oggi `CondizioniEditor` in `src/components/guida/`): elenco delle condizioni dello spillo con «Togli» e costruttore «Nuova condizione»
+- **Condizioni di visibilità** (15.22, `CondizioniSpilloEditor`, oggi `CondizioniEditor` in `src/components/guida/`): elenco delle condizioni dello spillo con «Togli» e pulsanti «+ condizione» e «+ gruppo TUTTE» (nel progetto «Nuova condizione»)
   con il tipo scelto da un elenco chiuso e i parametri da selettori, mai testo libero — da una data (giorno + mese del calendario di gioco), solo in un
   periodo, dopo un Palazzo (elenco dei Palazzi della Guida), Dote almeno a un rango (1–5), Confidente almeno a un rango (1–10, elenco dei Confidenti),
   richiesta dei Mementos completata (elenco), solo con la pioggia / mai con la pioggia, solo di giorno / solo di sera (il momento della giornata
@@ -258,7 +258,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   destinazione, 400 verso sé stessa, 404 se la destinazione non esiste. I passaggi automatici del seed (radici Città/Palazzo/Dedalo, `sincronizzaMappe`)
   non cambiano.
 - La palette di «Aggiungi» è divisa nelle quattro categorie (Spostamento, Città, Consumabile, Informativo — `CATEGORIE_SPILLO` e `tipiDellaCategoria`), con i 42 tipi del registro (§4; fino al 2026-09-11 erano cinque gruppi `GRUPPI_SPILLO`).
-- Esporta (tutte le mappe in un JSON; l'API accetta anche `radice` per un solo luogo, senza pulsante) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); nessuno stato «non salvato»: ogni modifica è salvata subito.
+- Esporta (tutte le mappe in un JSON; l'API accetta anche `radice` per un solo luogo, senza pulsante) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); le azioni sugli spilli si salvano subito, i campi dei pannelli con «Salva spillo» e «Salva mappa».
 
 ## 9. Integrazione (13.4) — sostituzione ordinata di Città, Palazzi e Dedali (punti 6, 7, 8)
 
