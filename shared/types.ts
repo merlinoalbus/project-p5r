@@ -1126,6 +1126,10 @@ export interface AzionePercorsoDto {
   stato: StatoAzioneDto | null;
   /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
   mappa: { chiave: string; spilloId: number | null } | null;
+  /** Per una voce collegata a un Palazzo: dove si atterra il giorno della voce, con le regole d'atterraggio della mappa di
+   *  Tokyo (`atterraggioDelGiorno`, 2026-10-04); il cartellino del Palazzo porta lì. Null senza Palazzo o senza una regola che
+   *  copra il giorno (allora porta alla scheda del Palazzo). Assente vale come null. */
+  atterraggio?: { mappa: string; spillo: number | null } | null;
   /** Solo nella risposta di una spunta: era l'ultima attività del giorno corrente e la partita è passata al giorno dopo. */
   giornoAvanzato?: GiornoAvanzatoDto;
 }

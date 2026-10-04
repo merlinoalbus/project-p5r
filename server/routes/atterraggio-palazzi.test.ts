@@ -201,4 +201,29 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
     // le regole salvate sopravvivono alla migrazione ripetuta
     expect(prepared('SELECT COUNT(*) FROM dungeon_atterraggio').pluck().get()).toBe(1);
   });
+
+  it('le voci della guida collegate a un Palazzo portano l’atterraggio del loro giorno, non di quello della partita (2026-10-04)', async () => {
+    await request(app).put('/api/compendio/dungeon/kamoshida/atterraggi').send({ regole: [
+      { dal: '04-11', al: '04-11', mappa: prigione.chiave, spillo: pinPrigione },
+      { dal: '04-12', al: '04-12', mappa: sala.chiave, spillo: null },
+    ] }).expect(200);
+    // la partita è altrove: per le voci conta il loro giorno
+    prepared("UPDATE partita SET data_gioco = '04-20' WHERE id = ?").run(partita);
+    /** Le voci del giorno collegate al Palazzo di Kamoshida, con il loro atterraggio, e quelle senza Palazzo. */
+    const voci = async (giorno: string) => {
+      const azioni = (await request(app).get(`/api/compendio/percorso/${giorno}?partita=${partita}`).expect(200)).body.data.azioni as Array<{ riferimento: { tipo: string; chiave: string } | null; atterraggio: unknown }>;
+      return { kamoshida: azioni.filter((a) => a.riferimento?.tipo === 'dungeon' && a.riferimento.chiave === 'kamoshida'), altre: azioni.filter((a) => a.riferimento?.tipo !== 'dungeon') };
+    };
+    const undici = await voci('04-11');
+    expect(undici.kamoshida.length).toBeGreaterThan(0);
+    expect(undici.kamoshida.every((a) => JSON.stringify(a.atterraggio) === JSON.stringify({ mappa: prigione.chiave, spillo: pinPrigione }))).toBe(true);
+    expect(undici.altre.every((a) => a.atterraggio === null)).toBe(true);
+    const dodici = await voci('04-12');
+    expect(dodici.kamoshida.length).toBeGreaterThan(0);
+    expect(dodici.kamoshida.every((a) => JSON.stringify(a.atterraggio) === JSON.stringify({ mappa: sala.chiave, spillo: null }))).toBe(true);
+    // un giorno che nessuna regola copre: niente atterraggio (il cartellino porta alla scheda del Palazzo)
+    const quindici = await voci('04-15');
+    expect(quindici.kamoshida.length).toBeGreaterThan(0);
+    expect(quindici.kamoshida.every((a) => a.atterraggio === null)).toBe(true);
+  });
 });

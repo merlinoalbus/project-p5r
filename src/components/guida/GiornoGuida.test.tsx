@@ -363,3 +363,38 @@ describe('GiornoGuida — la giornata canone', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });
+
+describe('GiornoGuida — il cartellino del Palazzo segue le regole d’atterraggio (2026-10-04)', () => {
+  beforeEach(() => {
+    for (const f of Object.values(api)) f.mockReset();
+    api.getImmagini.mockResolvedValue([]);
+    api.getElenchiAzione.mockResolvedValue(ELENCHI);
+  });
+  /** Una voce collegata al Palazzo di Kamoshida con l'atterraggio dato. */
+  const conPalazzo = (atterraggio: AzionePercorsoDto['atterraggio']) => ({ ...base, azioni: [voce({ uid: uid(9), azione: 'Palazzo di Kamoshida (dopo scuola)', tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', atterraggio })] });
+
+  it('nella scheda «Oggi» (con la mappa accanto) il cartellino apre la planimetria lì, centrata sul pin, senza cambiare pagina', () => {
+    const sullaMappa = vi.fn();
+    render(<MemoryRouter><GiornoGuida g={conPalazzo({ mappa: 'kamoshida/sala', spillo: 7 })} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={vi.fn()} onSullaMappa={sullaMappa} /></MemoryRouter>);
+    const cartellino = screen.getByRole('link', { name: 'Palazzo di Kamoshida' });
+    expect(cartellino).toHaveAttribute('href', '/guida/mappe/kamoshida%2Fsala?spillo=7');
+    // sull'evento si vede se il cambio di pagina è stato impedito
+    const clic = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+    cartellino.dispatchEvent(clic);
+    expect(clic.defaultPrevented).toBe(true);
+    expect(sullaMappa).toHaveBeenCalledWith({ chiave: 'kamoshida/sala', spilloId: 7 }, uid(9));
+  });
+
+  it('senza la mappa accanto è un collegamento alla planimetria; senza regola porta alla scheda del Palazzo', () => {
+    const { unmount } = render(<MemoryRouter><GiornoGuida g={conPalazzo({ mappa: 'kamoshida/sala', spillo: null })} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={vi.fn()} /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Palazzo di Kamoshida' })).toHaveAttribute('href', '/guida/mappe/kamoshida%2Fsala');
+    unmount();
+    const sullaMappa = vi.fn();
+    render(<MemoryRouter><GiornoGuida g={conPalazzo(null)} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={vi.fn()} onSullaMappa={sullaMappa} /></MemoryRouter>);
+    const cartellino = screen.getByRole('link', { name: 'Palazzo di Kamoshida' });
+    expect(cartellino).toHaveAttribute('href', '/guida/dungeon/kamoshida');
+    const clic = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+    cartellino.dispatchEvent(clic);
+    expect(sullaMappa).not.toHaveBeenCalled();
+  });
+});

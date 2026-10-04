@@ -91,7 +91,8 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
       <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}</span>
-        <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined} />
+        <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined}
+          onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined} />
         {chiediNote && <SceltaNote occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
       </div>
       {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}

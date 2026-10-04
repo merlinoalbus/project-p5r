@@ -21,6 +21,7 @@ import { registraEvento } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
+import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
 import { normalizzaEffettiAzione, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, RiferimentoAzioneDto } from '../../shared/types.js';
 
@@ -82,6 +83,8 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ...v, produceTesto: testoEffetti(v.produce, ctx.nomi),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),
+    // il Palazzo collegato: dove si atterra il giorno della voce, con le regole della mappa di Tokyo (scelta dell'utente, 2026-10-04)
+    atterraggio: v.riferimento?.tipo === 'dungeon' ? atterraggioDelGiorno(v.riferimento.chiave, v.giorno) : null,
   };
 }
 

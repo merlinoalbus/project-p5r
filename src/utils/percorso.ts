@@ -5,6 +5,7 @@
 import type { AzionePercorsoDto, EffettiAzioneDto, GenereVoce } from '../types';
 import { TIPI_AZIONE } from '../../shared/effettiAzione';
 import { dotiDaSegnareDaEffetti, promemoriaDoti } from './dotiDaSegnare';
+import { urlMappa } from './navigazioneMappa';
 
 /** I generi di una voce della giornata: un'azione si spunta, gli altri si mostrano. */
 export const NOME_GENERE: Record<GenereVoce, string> = { azione: 'Cosa da fare', evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' };
@@ -19,16 +20,22 @@ export interface CollegamentoAzione {
   href: string;
   /** Testo del collegamento: il riferimento della soluzione se presente, altrimenti il nome della scheda. */
   etichetta: string;
+  /** Il collegamento porta alla planimetria d'atterraggio di un Palazzo (non alla sua scheda): chi mostra la mappa accanto la può aprire lì. */
+  atterraggio?: { chiave: string; spilloId: number | null };
 }
 
-/** Scheda collegata a un'azione (Confidente con le risposte, dungeon, Richieste, libri…), se ricavabile. */
-export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'>): CollegamentoAzione | null {
+/** Scheda collegata a un'azione (Confidente con le risposte, dungeon, Richieste, libri…), se ricavabile. Per un Palazzo, se c'è
+ *  una regola d'atterraggio per il giorno della voce, la sua planimetria (centrata sul pin d'arrivo), come l'icona della mappa
+ *  di Tokyo (scelta dell'utente, 2026-10-04). */
+export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto' | 'atterraggio'>): CollegamentoAzione | null {
   const r = a.riferimento;
   const testo = a.riferimentoTesto;
   if (r) {
     switch (r.tipo) {
       case 'confidente': return { href: `/confidenti/${r.chiave}`, etichetta: testo ?? 'Scheda Confidente' };
-      case 'dungeon': return { href: `/guida/dungeon/${r.chiave}`, etichetta: testo ?? 'Palazzo' };
+      case 'dungeon': return a.atterraggio
+        ? { href: urlMappa(a.atterraggio.mappa, a.atterraggio.spillo !== null ? { spillo: a.atterraggio.spillo } : undefined), etichetta: testo ?? 'Palazzo', atterraggio: { chiave: a.atterraggio.mappa, spilloId: a.atterraggio.spillo } }
+        : { href: `/guida/dungeon/${r.chiave}`, etichetta: testo ?? 'Palazzo' };
       case 'richiesta': return { href: '/guida/richieste', etichetta: testo ?? 'Richieste dei Mementos' };
       case 'libro': return { href: '/guida/libri', etichetta: testo ?? 'Libri' };
       case 'film': return { href: '/guida/film', etichetta: testo ?? 'Film e DVD' };

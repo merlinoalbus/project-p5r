@@ -1284,3 +1284,24 @@ Che cosa ne segue (supera la regola del 2026-09-30, in cui bastava una condizion
   Se il boss era un passo di un Enigma, l'Enigma segue. I pin non si toccano: un pin raccolto resta raccolto, e se è il boss
   finale vale come boss sconfitto.
 - **La partita «Tutorial»** dell'utente torna a mostrare Kamoshida all'11/04: il boss raccolto da solo non basta più.
+
+## 2026-10-04 — Il cartellino del Palazzo sotto le azioni della guida segue le regole d'atterraggio
+
+Richiesta dell'utente: «anche il link al palazzo riportato sotto le azioni della guida deve rispettare le regole del pin sulla
+mappa». Con due schermate: il cartellino rosso «Palazzo di Kamoshida» sotto un'azione del 12/04 e l'icona KAMOSHIDA sulla mappa
+di Tokyo.
+
+Risposte dell'utente, parola per parola:
+- a quale giorno si applicano le regole: «Il giorno dell'azione (Recommended)»;
+- dove si apre la planimetria: «Come l'icona della mappa (Recommended)», cioè nella scheda «Oggi» dentro la mappa accanto e
+  altrove nella pagina della mappa.
+
+Che cosa ne segue:
+- **Il calcolo sul server.** Il server dà a ogni voce collegata a un Palazzo il suo atterraggio (`AzionePercorsoDto.atterraggio`),
+  calcolato con le stesse regole dell'icona (`atterraggioDelGiorno`) per il giorno della voce, non per quello della partita.
+- **Dove porta il cartellino.** Alla planimetria, centrata sul pin d'arrivo se c'è:
+  - nella scheda «Oggi» (Home e Partita) la apre nella mappa accanto, senza cambiare pagina;
+  - nella guida completa apre la pagina della mappa.
+  
+  Senza una regola che copra quel giorno, porta alla scheda del Palazzo come prima.
+- **«Sulla mappa»** accanto resta com'è: porta all'ingresso in città.

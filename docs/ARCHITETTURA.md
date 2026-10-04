@@ -1075,6 +1075,10 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
     - L'editor è `AtterraggioTokyo`, una finestra aperta dal pulsante «Sulla mappa di Tokyo» nell'intestazione del Palazzo.
       Il selettore di date è `components/shared/SelettoreData` (estratto da `CondizioniEditor`); i pin omonimi si distinguono
       con `utils/pinArrivo`.
+  - **Le voci della guida** collegate a un Palazzo hanno `AzionePercorsoDto.atterraggio` (`giornataService.voceDto`, con
+    `atterraggioDelGiorno` sul **giorno della voce**). `collegamentoAzione` fa del cartellino un collegamento alla planimetria;
+    `CartelliniAzione.onApriMappa` (da `GiornoGuida`, che lo lega a `onSullaMappa`) la apre nella mappa della scheda «Oggi»
+    senza cambiare pagina. Senza regola, resta la scheda del Palazzo.
 
 ### Effetti delle azioni della Guida (2026-09-30)
 

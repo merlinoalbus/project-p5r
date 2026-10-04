@@ -1,9 +1,9 @@
 // ============================================================
-// Test percorso — descriviEffetti: la riga degli effetti di un'azione (Doti, letture, turni, Confidente, incontri)
+// Test percorso — descriviEffetti: la riga degli effetti di un'azione (Doti, letture, turni, Confidente, incontri); collegamentoAzione
 // ============================================================
 
 import { describe, expect, it } from 'vitest';
-import { descriviEffetti } from './percorso';
+import { collegamentoAzione, descriviEffetti } from './percorso';
 
 describe('descriviEffetti', () => {
   it('descrive Doti, letture portate avanti, turni e punti del Confidente', () => {
@@ -26,5 +26,20 @@ describe('descriviEffetti', () => {
 
   it('senza letture né turni resta com\'era', () => {
     expect(descriviEffetti({ doti: [{ chiave: 'perizia', nome: 'Perizia', delta: 2, note: 1 }], confidente: null })).toBe('Perizia +2 (♪)');
+  });
+});
+
+describe('collegamentoAzione — il Palazzo con le regole d’atterraggio (2026-10-04)', () => {
+  /** Una voce collegata al Palazzo di Kamoshida, con l'atterraggio dato. */
+  const palazzo = (atterraggio?: { mappa: string; spillo: number | null } | null) => ({ tipo: 'palazzo' as const, riferimento: { tipo: 'dungeon' as const, chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', atterraggio });
+
+  it('con una regola per il giorno della voce porta alla planimetria, centrata sul pin d’arrivo se c’è', () => {
+    expect(collegamentoAzione(palazzo({ mappa: 'kamoshida/prigione', spillo: 42 }))).toEqual({ href: '/guida/mappe/kamoshida%2Fprigione?spillo=42', etichetta: 'Palazzo di Kamoshida', atterraggio: { chiave: 'kamoshida/prigione', spilloId: 42 } });
+    expect(collegamentoAzione(palazzo({ mappa: 'kamoshida/sala', spillo: null }))).toEqual({ href: '/guida/mappe/kamoshida%2Fsala', etichetta: 'Palazzo di Kamoshida', atterraggio: { chiave: 'kamoshida/sala', spilloId: null } });
+  });
+
+  it('senza regola, o senza il campo, resta la scheda del Palazzo', () => {
+    expect(collegamentoAzione(palazzo(null))).toEqual({ href: '/guida/dungeon/kamoshida', etichetta: 'Palazzo di Kamoshida' });
+    expect(collegamentoAzione(palazzo())).toEqual({ href: '/guida/dungeon/kamoshida', etichetta: 'Palazzo di Kamoshida' });
   });
 });

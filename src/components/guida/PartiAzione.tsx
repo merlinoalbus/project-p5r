@@ -19,7 +19,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { IconaSpillo } from '../mappe/IconaSpillo';
 
 /** Ciò che i cartellini di una riga d'azione leggono. */
-export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa'>;
+export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio'>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -31,16 +31,23 @@ export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'rif
 interface PropsCartellini {
   a: AzioneMostrata;
   onSullaMappa?: () => void;
+  /** Apre una planimetria nella mappa accanto (la scheda «Oggi»): il cartellino di un Palazzo con una regola d'atterraggio la usa
+   *  invece di cambiare pagina, come l'icona della mappa di Tokyo. Senza, il cartellino è un collegamento. */
+  onApriMappa?: (mappa: { chiave: string; spilloId: number | null }) => void;
 }
 
 /** Tipo, collegamento, «Sulla mappa», stato nella partita, rango atteso, note, effetti dichiarati o applicati. */
-export function CartelliniAzione({ a, onSullaMappa }: PropsCartellini) {
+export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartellini) {
   const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
+  // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
+  const apriAccanto = link?.atterraggio && onApriMappa ? link.atterraggio : null;
   return (
     <span className="flex flex-wrap items-center gap-1.5">
       <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
-      {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]">{link.etichetta}</Link> : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
+      {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]"
+        onClick={apriAccanto ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); } } : undefined}>{link.etichetta}</Link>
+        : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
       {a.mappa && onSullaMappa && (
         <button type="button" className="chip chip--icona touch text-[11px]" onClick={onSullaMappa} aria-label={`Sulla mappa: ${a.azione.slice(0, 60)}`}>
           <IconaSpillo tipo="passaggio" dimensione={14} />Sulla mappa
