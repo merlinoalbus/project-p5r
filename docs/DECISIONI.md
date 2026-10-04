@@ -1234,8 +1234,11 @@ Scelte tecniche mie, dentro la proposta approvata:
 Richiesta dell'utente: «aggiungi sul visualizzatore mappa un pulsante per tornare alla partita per favore...».
 
 Risposte dell'utente, parola per parola:
-- dove porta: «Home, giornata di oggi (Recommended)»;
+- dove porta: «Home, giornata di oggi (Recommended)» (superata dalla correzione qui sotto);
 - anche nell'editor: «Solo nel visualizzatore (Recommended)»;
+- correzione, dopo l'approvazione: «perchè torna alla partita mi rimanda in home quando io avevo chiesto di rimandare alla
+  partita?». L'opzione «Home» l'avevo raccomandata io, e la sua richiesta era la pagina Partita. Alla domanda sulla scheda:
+  «Scheda Oggi».
 - anche nella pagina di un luogo senza pianta (aggiunta mia, sottoposta all'utente dopo il primo esame del validatore): «Sì,
   tienilo (Recommended)».
 
@@ -1243,7 +1246,7 @@ Che cosa ne segue:
 - **Dove compare.** Nella barra del visore della pagina delle mappe, dopo «Pannello» e subito prima di «Chiudi», e fra i comandi
   di un luogo senza pianta, dopo «Scheda del luogo» e «Modifica luogo». Compare solo con una partita attiva.
 - **I due ritorni.**
-  - «Torna alla partita» porta sempre alla Home.
+  - «Torna alla partita» porta sempre alla pagina Partita, sulla scheda «Oggi» (`/partita?scheda=oggi`).
   - «Chiudi» resta il ritorno alla pagina da cui si è entrati nelle mappe.
 - **L'icona** è quella della scheda «Oggi». Sul telefono la barra mostra solo le icone, come per gli altri comandi.
 

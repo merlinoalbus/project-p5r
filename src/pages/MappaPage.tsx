@@ -358,13 +358,13 @@ function Griglia({ mappe, nome, etichetta, titoli, onScendi }: { mappe: MappaRia
 }
 
 /**
- * «Torna alla partita» (richiesta dell'utente, 2026-10-04): dal visualizzatore della mappa alla Home, cioè alla giornata di oggi
- * della partita attiva, la schermata che si usa giocando. Solo con una partita attiva; «Chiudi» resta il ritorno alla pagina da
- * cui si è entrati nelle mappe.
+ * «Torna alla partita» (richiesta dell'utente, 2026-10-04): dal visualizzatore della mappa alla pagina Partita, sulla scheda
+ * «Oggi» (correzione dell'utente: «io avevo chiesto di rimandare alla partita»; prima portava alla Home). Solo con una partita
+ * attiva; «Chiudi» resta il ritorno alla pagina da cui si è entrati nelle mappe.
  */
 function TornaAllaPartita({ partitaId }: { partitaId: number | null }) {
   if (partitaId === null) return null;
-  return <CollegamentoVisivo to="/home" tono="fantasma" compatto icona={<IconaScheda chiave="oggi" dimensione={20} />} titolo="Torna alla partita" />;
+  return <CollegamentoVisivo to="/partita?scheda=oggi" tono="fantasma" compatto icona={<IconaScheda chiave="oggi" dimensione={20} />} titolo="Torna alla partita" />;
 }
 
 /** Visore a schermo intero con lo stato della partita attiva. */

@@ -3,14 +3,14 @@
  */
 // ============================================================
 // Test MappaPage — la pagina delle mappe: indice delle radici, visore con la partita attiva e stato «raccolto» (Fase 13.2),
-// «Chiudi», «Torna alla partita» (verso la Home, solo con una partita attiva) e riletture in silenzio
+// «Chiudi», «Torna alla partita» (verso la pagina Partita, scheda Oggi, solo con una partita attiva) e riletture in silenzio
 // ============================================================
 
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { useAssetStore } from '../stores/assetStore';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce } from '../../test/selettore';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import type { ContenutiMappaDto } from '../../shared/organizzazioneMappe';
 import { MappaPage } from './MappaPage';
 import { annotaNavigazione } from '../utils/ritornoMappe';
@@ -33,8 +33,14 @@ const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shi
 /** Il Palazzo di Kamoshida come luogo senza pianta: elenca le sue planimetrie, con «Scheda del luogo» e «Modifica luogo». */
 const senzaPianta: MappaDto = { ...dettaglio, chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', genitore: null, immagineUrl: null, asset: null, figli: [albero[3]], spilli: [], percorso: [{ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida' }], entita: { tipo: 'dungeon', chiave: 'kamoshida' } };
 
-/** Monta la pagina delle mappe all'indirizzo `percorso`, con le rotte finte della Città, della pagina di partenza
- *  (`/partita`) e della Home (`/home`) per verificare dove portano i collegamenti, «Chiudi» e «Torna alla partita». */
+/** La pagina Partita finta: il titolo e la scheda chiesta nell'indirizzo, per vedere dove arriva «Torna alla partita». */
+function PaginaPartita() {
+  const scheda = new URLSearchParams(useLocation().search).get('scheda');
+  return <><h1>Pagina di partenza</h1><p>scheda: {scheda ?? 'nessuna'}</p></>;
+}
+
+/** Monta la pagina delle mappe all'indirizzo `percorso`, con le rotte finte della Città e della pagina Partita (`/partita`,
+ *  da cui si apre la mappa e a cui porta «Torna alla partita») per verificare dove portano i collegamenti e «Chiudi». */
 function monta(percorso: string) {
   render(
     <MemoryRouter initialEntries={[percorso]}>
@@ -44,10 +50,8 @@ function monta(percorso: string) {
         {/* La Città vera monta la mappa disegnata e chiama l'API: qui serve solo sapere che ci
             si arriva, non rifarla. */}
         <Route path="/guida/citta" element={<h1>La città</h1>} />
-        {/* la pagina da cui si è aperta la mappa: «Chiudi» ci riporta qui */}
-        <Route path="/partita" element={<h1>Pagina di partenza</h1>} />
-        {/* la Home con la giornata di oggi: ci porta «Torna alla partita» */}
-        <Route path="/home" element={<h1>Home della partita</h1>} />
+        {/* la pagina da cui si è aperta la mappa: «Chiudi» ci riporta qui; «Torna alla partita» ci porta sulla scheda Oggi */}
+        <Route path="/partita" element={<PaginaPartita />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -72,7 +76,7 @@ describe('MappaPage', () => {
     expect(await screen.findByRole('heading', { name: 'Pagina di partenza' })).toBeInTheDocument();
   });
 
-  it('«Torna alla partita» porta alla Home, la giornata di oggi, e sta subito prima di «Chiudi» (2026-10-04)', async () => {
+  it('«Torna alla partita» porta alla pagina Partita, sulla scheda Oggi, e sta subito prima di «Chiudi» (2026-10-04)', async () => {
     annotaNavigazione('/guida/citta', '/guida/mappe/citta-shibuya');
     monta('/guida/mappe/citta-shibuya');
     const torna = await screen.findByRole('link', { name: /^Torna alla partita/ });
@@ -81,7 +85,8 @@ describe('MappaPage', () => {
     const nomi = [...strumenti.querySelectorAll('a, button')].map((e) => e.textContent?.trim());
     expect(nomi.slice(-3)).toEqual([expect.stringMatching(/[Pp]annello$/), 'Torna alla partita', 'Chiudi']);
     fireEvent.click(torna);
-    expect(await screen.findByRole('heading', { name: 'Home della partita' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pagina di partenza' })).toBeInTheDocument();
+    expect(screen.getByText('scheda: oggi')).toBeInTheDocument();
   });
 
   it('senza partita attiva «Torna alla partita» non c’è nel visore', async () => {
@@ -91,14 +96,15 @@ describe('MappaPage', () => {
     expect(screen.queryByRole('link', { name: /^Torna alla partita/ })).toBeNull();
   });
 
-  it('nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del luogo» e «Modifica luogo» e porta alla Home', async () => {
+  it('nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del luogo» e «Modifica luogo» e porta alla pagina Partita, scheda Oggi', async () => {
     getMappa.mockResolvedValue(senzaPianta);
     monta('/guida/mappe/dungeon-kamoshida');
     const torna = await screen.findByRole('link', { name: /^Torna alla partita/ });
     // i comandi del luogo: il ritorno è l'ultimo
     expect([...torna.parentElement!.querySelectorAll('a, button')].map((e) => e.textContent?.trim())).toEqual(['Scheda del luogo', 'Modifica luogo', 'Torna alla partita']);
     fireEvent.click(torna);
-    expect(await screen.findByRole('heading', { name: 'Home della partita' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Pagina di partenza' })).toBeInTheDocument();
+    expect(screen.getByText('scheda: oggi')).toBeInTheDocument();
   });
 
   it('senza partita attiva «Torna alla partita» non c’è nel luogo senza pianta', async () => {
