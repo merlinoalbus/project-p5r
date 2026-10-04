@@ -760,3 +760,30 @@ Il documento non è scritto a mano:
   `requestTimeout`.
 - **J3.** Su richiesta dell'utente («Rifai a mano»), `docs/ARCHITETTURA.md` è tornato alla versione di `90354f42` e le stesse
   modifiche sono state riapplicate con Edit. Il diff prodotto dallo script resta in `scratchpad/voce5/arch-script.diff`.
+
+## 12. Fase 6 — chiusura (voce 6 della ROADMAP)
+
+- **Allineamento con `main`.** `github/main` è fermo a `15ea5ee9`, la base del ramo: nessun conflitto. Il ramo porta 35 commit.
+- **Controlli completi sull'ultimo commit:**
+  - typecheck, lint e build di produzione (`npm run build`) senza errori;
+  - test: 269 file e 1478 test;
+  - censimento severo dei commenti a zero (812 file, 2510 funzioni).
+- **Stack Docker** (`scratchpad/voce6/01-docker-stack.txt`). Immagini del backend e del frontend costruite dal ramo, su una rete di
+  prova e con un volume anonimo:
+  - `nginx -t` corretto;
+  - attraverso nginx rispondono 200 `/api/health`, una pagina della SPA, `/api/docs`, il bundle di Swagger (servito con gzip),
+    `/api/openapi.json` (187 operazioni) e il compendio;
+  - poi container, rete e immagini sono stati rimossi (`docker rm -f -v`, `docker network rm`, `docker rmi`).
+- **Browser** (`scratchpad/voce6/03-browser.txt`): 34 pagine a 1280, 768 e 375 px, più la pagina «non trovata». Nessun errore a
+  schermo o in console, nessuno scorrimento orizzontale.
+- **Copie di dati veri nello scratchpad** (N9). Su autorizzazione dell'utente («Sì, cancellale») sono state cancellate le 38 copie
+  di database e ZIP fatte per le prove, circa 5 GB; l'elenco è in `scratchpad/voce6/02-copie-dati-cancellate.txt`. Gli originali
+  in `data/` e `pacchetto/` non sono stati toccati.
+
+### Prima del merge (a cura dell'utente)
+
+- **Stack Portainer.** Lo stack deve definire `NAS_ADDR` e `NAS_PATH`: `docker-compose.yml` non ha più un valore predefinito per
+  le due variabili (D12), e senza lo stack non parte.
+- **Dati di sviluppo.** `data/gioco.db` e `data/partite.db` sono già alle versioni 96 e 16 (decisione H3). In produzione la
+  migrazione 096 e la 016 delle partite si applicano al primo avvio della nuova immagine, dopo la copia di sicurezza di avvio.
+- **Merge.** Il merge della PR lo fa l'utente.
