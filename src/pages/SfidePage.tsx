@@ -2,7 +2,8 @@
 // SfidePage — Battaglie Sfida, boss segreti, Magnate e tratti delle Persona (Fase 9.2)
 // ============================================================
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
+import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getSfide } from '../services/api';
@@ -23,34 +24,30 @@ const SCHEDE = [
 ] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 
-function Fonte({ url }: { url: string | null | undefined }) {
-  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a> : null;
-}
-function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
-  return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;
-}
+/** Un elenco puntato con il suo titolo in grassetto; niente se le voci sono zero. */
 function Elenco({ titolo, voci }: { titolo: string; voci: string[] }) {
   return voci.length > 0 ? <div><strong>{titolo}:</strong><ul className="m-0 pl-4">{voci.map((v) => <li key={v}>{v}</li>)}</ul></div> : null;
 }
 
+/** Le Battaglie Sfida: introduzione, sblocco e regole generali, poi una carta per sfida con regole, nemici, punteggi, ricompense, strategia e fonte. */
 function SchedaBattaglie({ d }: { d: SfideDto }) {
   const b = d.battaglieSfida;
   return (
     <div className="flex flex-col gap-2 text-[13px]">
       <section className="card flex flex-col gap-1">
         <p className="m-0">{b.introduzione}</p>
-        {b.sblocco && <Voce titolo="Sblocco">{b.sblocco}</Voce>}
-        {b.regoleGenerali && <Voce titolo="Regole generali">{b.regoleGenerali}</Voce>}
+        {b.sblocco && <VoceTesto titolo="Sblocco">{b.sblocco}</VoceTesto>}
+        {b.regoleGenerali && <VoceTesto titolo="Regole generali">{b.regoleGenerali}</VoceTesto>}
         <Fonte url={b.fonte} />
       </section>
       {b.elenco.map((s) => (
         <section key={s.chiave} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.nomeIt ?? s.nome}</h2>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted text-[12px]">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}</div>
-          <Voce titolo="Regole">{s.regole}</Voce>
+          <VoceTesto titolo="Regole">{s.regole}</VoceTesto>
           <Elenco titolo="Nemici" voci={s.nemici} />
-          {s.punteggi && <Voce titolo="Punteggi">{s.punteggi}</Voce>}
+          {s.punteggi && <VoceTesto titolo="Punteggi">{s.punteggi}</VoceTesto>}
           <Elenco titolo="Ricompense" voci={s.ricompense} />
-          {s.strategia && <Voce titolo="Strategia">{s.strategia}</Voce>}
+          {s.strategia && <VoceTesto titolo="Strategia">{s.strategia}</VoceTesto>}
           <Fonte url={s.fonte} />
         </section>
       ))}
@@ -58,21 +55,22 @@ function SchedaBattaglie({ d }: { d: SfideDto }) {
   );
 }
 
+/** I boss segreti, una carta ciascuno con il ritratto (le Gemelle Custodi ne hanno due, Caroline e Justine), dove, quando, requisiti, mosse, debolezze, resistenze, strategia, ricompense e statistiche; in fondo il rimando al Mietitore e ai Demoni del Tesoro. */
 function SchedaBoss({ d }: { d: SfideDto }) {
   return (
     <div className="flex flex-col gap-2 text-[13px]">
       {d.bossSegreti.map((b) => (
         <section key={b.chiave} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<h2 className="m-0 text-[15px] font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}</div>
-          <Voce titolo="Dove">{b.dove}</Voce>
-          <Voce titolo="Quando">{b.quando}</Voce>
+          <VoceTesto titolo="Dove">{b.dove}</VoceTesto>
+          <VoceTesto titolo="Quando">{b.quando}</VoceTesto>
           <Elenco titolo="Requisiti" voci={b.requisiti} />
           <Elenco titolo="Mosse" voci={b.mosse} />
-          {b.debolezze.length > 0 && <Voce titolo="Debolezze">{b.debolezze.join(', ')}</Voce>}
-          {b.resistenze.length > 0 && <Voce titolo="Resistenze">{b.resistenze.join(', ')}</Voce>}
+          {b.debolezze.length > 0 && <VoceTesto titolo="Debolezze">{b.debolezze.join(', ')}</VoceTesto>}
+          {b.resistenze.length > 0 && <VoceTesto titolo="Resistenze">{b.resistenze.join(', ')}</VoceTesto>}
           <Elenco titolo="Strategia" voci={b.strategia} />
           <Elenco titolo="Ricompense" voci={b.ricompense} />
-          {b.statistiche && <Voce titolo="Statistiche">{Object.entries(b.statistiche).map(([k, v]) => `${k.toUpperCase()} ${v}`).join(' · ')}</Voce>}
+          {b.statistiche && <VoceTesto titolo="Statistiche">{Object.entries(b.statistiche).map(([k, v]) => `${k.toUpperCase()} ${v}`).join(' · ')}</VoceTesto>}
           {b.nota && <p className="m-0 text-[12px] text-text-muted">{b.nota}</p>}
           <Fonte url={b.fonte} />
         </section>
@@ -82,6 +80,11 @@ function SchedaBoss({ d }: { d: SfideDto }) {
   );
 }
 
+/**
+ * Magnate reso in modo generico dai campi del dato (tranne fonte e verificato): il nome del campo
+ * in camelCase diventa il titolo a parole, gli elenchi diventano elenchi puntati, gli oggetti
+ * elenchi «chiave: valore» e i testi voci semplici; i campi vuoti si saltano.
+ */
 function SchedaMagnate({ d }: { d: SfideDto }) {
   const m = d.magnate;
   if (!m) return <p className="m-0 text-[13px] text-text-muted">Nessun dato su Magnate.</p>;
@@ -93,13 +96,14 @@ function SchedaMagnate({ d }: { d: SfideDto }) {
         const titolo = k.replace(/([A-Z])/g, ' $1').toLowerCase().replace(/^./, (c) => c.toUpperCase());
         if (Array.isArray(v)) return <Elenco key={k} titolo={titolo} voci={v.map((x) => (typeof x === 'string' ? x : JSON.stringify(x)))} />;
         if (v && typeof v === 'object') return <div key={k}><strong>{titolo}:</strong><ul className="m-0 pl-4">{Object.entries(v as Record<string, unknown>).map(([kk, vv]) => <li key={kk}><strong>{kk}:</strong> {typeof vv === 'string' ? vv : JSON.stringify(vv)}</li>)}</ul></div>;
-        return v ? <Voce key={k} titolo={titolo}>{String(v)}</Voce> : null;
+        return v ? <VoceTesto key={k} titolo={titolo}>{String(v)}</VoceTesto> : null;
       })}
       <Fonte url={m.fonte} />
     </section>
   );
 }
 
+/** Tabella dei tratti delle Persona con ricerca (nome italiano e inglese, effetto, personaggio) e filtro per categoria, con le categorie ricavate dai tratti stessi. */
 function SchedaTratti({ d }: { d: SfideDto }) {
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
@@ -125,6 +129,7 @@ function SchedaTratti({ d }: { d: SfideDto }) {
   );
 }
 
+/** Pagina delle sfide: carica una volta i dati, sceglie la scheda dal parametro `scheda` dell'URL (le Battaglie Sfida quando manca o non è valido) e mostra la barra delle quattro schede con quella attiva sotto. */
 export function SfidePage() {
   useDocumentTitle('Battaglie Sfida, boss segreti e tratti');
   const dati = useCarica(() => getSfide(), []);

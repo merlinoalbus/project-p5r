@@ -4,23 +4,26 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
-import { datiGuida } from './richiesteService.js';
+import { datiGuida, type Congelato } from './datiGuida.js';
 import type { CompletamentoDto, TrofeoDto } from '../../shared/types.js';
 
 interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number }
 type SeedCompletamento = Omit<CompletamentoDto, 'trofei' | 'ottenuti'>;
 
+/** Un trofeo come DTO; `mancabile` resta null quando la guida non lo dice, `ottenuto` viene dall'insieme dato. */
 const dto = (r: RigaTrofeo, ottenuti: Set<string>): TrofeoDto => ({ chiave: r.chiave, nome: r.nome, nomeEn: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? null : r.mancabile === 1, quando: r.quando, fonte: r.fonte, verificato: r.verificato === 1, ottenuto: ottenuti.has(r.chiave) });
 
+/** Le chiavi dei trofei ottenuti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function ottenutiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   return new Set((prepared('SELECT trofeo_chiave FROM trofeo_partita WHERE partita_id = ?').all(partitaId) as Array<{ trofeo_chiave: string }>).map((r) => r.trofeo_chiave));
 }
 
 /** Trofei (con ottenuti nella partita) e sezioni di consultazione della guida. */
-export function completamento(partitaId?: number): CompletamentoDto {
+export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const seed = datiGuida<SeedCompletamento>('completamento');
   if (!seed) throw httpErrors.notFound('completamento-non-disponibile', 'I dati di completamento non sono caricati.');
   const ottenuti = ottenutiPartita(partitaId);
@@ -30,7 +33,7 @@ export function completamento(partitaId?: number): CompletamentoDto {
 
 /** Segna (o toglie) un trofeo come ottenuto nella partita; evento alla prima spunta. */
 export function impostaTrofeo(partitaId: number, chiave: string, ottenuto: boolean): TrofeoDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const r = prepared('SELECT * FROM trofeo WHERE chiave = ?').get(chiave) as RigaTrofeo | undefined;
   if (!r) throw httpErrors.notFound('trofeo-non-trovato', `Il trofeo '${chiave}' non esiste.`);
   const adesso = nowIso();

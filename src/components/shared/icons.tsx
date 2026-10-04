@@ -8,6 +8,7 @@ interface IconProps extends SVGProps<SVGSVGElement> {
   size?: number;
 }
 
+/** Attributi comuni delle icone: quadrato di `size` px (16 se assente), tratto a 2 nel colore del testo, nascoste ai lettori di schermo; le altre props passano sopra. */
 function base({ size = 16, ...rest }: IconProps) {
   return {
     width: size,
@@ -130,25 +131,6 @@ export function IconClose(p: IconProps) {
     <svg {...base(p)}>
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-/** Spunta. */
-export function IconCheck(p: IconProps) {
-  return (
-    <svg {...base(p)}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-/** Più. */
-export function IconPlus(p: IconProps) {
-  return (
-    <svg {...base(p)}>
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   );
 }

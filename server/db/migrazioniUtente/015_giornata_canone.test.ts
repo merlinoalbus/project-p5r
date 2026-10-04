@@ -61,6 +61,7 @@ describe('utente 015 — correzioni, voci ed eventi dell\'utente entrano nella g
     const db = fileDiPrima();
     runMigrations(db);
     expect(db.pragma('utente.user_version', { simple: true })).toBe(migrazioniUtente.length);
+    /** Voci del 12 aprile nella fascia `f`, in ordine, con azione, genere, note e tipo. */
     const fascia = (f: string) => (db.prepare("SELECT azione, genere, note, tipo FROM main.voce_giornata WHERE data = '04-12' AND fascia = ? ORDER BY ordine").all(f) as Array<{ azione: string; genere: string; note: string | null; tipo: string }>);
     // di giorno: l'evento in cima, poi la guida nel suo ordine (Due spostata qui, Tre rimossa, Quattro con la correzione superata lasciata), poi la cosa da fare
     expect(fascia('giorno').map((v) => v.azione)).toEqual(['Consegna', 'Uno', 'Due corretta', 'Quattro', 'Mia']);
@@ -107,6 +108,7 @@ describe('utente 015 — correzioni, voci ed eventi dell\'utente entrano nella g
     db.prepare(`INSERT INTO main.voce_giornata (uid, data, fascia, ordine, genere, azione, tipo, produce_json, created_at, updated_at)
       VALUES (?, '04-12', 'giorno', 9, 'azione', 'Mia (canone)', 'altro', '[]', 'c1', 'dopo')`).run(uidMia);
     expect(() => runMigrations(db)).not.toThrow();
+    /** Solo le azioni delle voci del 12 aprile nella fascia `f`, in ordine. */
     const fascia = (f: string) => (db.prepare("SELECT azione FROM main.voce_giornata WHERE data = '04-12' AND fascia = ? ORDER BY ordine").pluck().all(f));
     // Due non è stata toccata (la correzione non si applica a una voce già cambiata) e resta di sera; Tre (intatta) è rimossa;
     // «Mia» non si duplica e tiene il testo del canone; l'evento nuovo va in fondo, dopo le voci che c'erano

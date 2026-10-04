@@ -1,4 +1,3 @@
-import { IngressoQuartiere } from '../components/mappe/IngressoQuartiere';
 // ============================================================
 // QuartierePage — un quartiere: la sua mappa e i suoi luoghi
 // ============================================================
@@ -16,11 +15,12 @@ import { IngressoQuartiere } from '../components/mappe/IngressoQuartiere';
 // mappa sta a sinistra e i luoghi a destra, che è la coppia che si guarda insieme. Sotto, in
 // colonna, e i luoghi in due colonne dove c'è spazio.
 //
-// «Configura ingresso da Città» sta accanto alla mappa e non più fra il titolo e il resto: è la
+// «Ingresso da Città» sta accanto alla mappa e non più fra il titolo e il resto: è la
 // didascalia della mappa, non un capitolo della pagina. Decide **quale** planimetria si apre
 // cliccando il quartiere sulla mappa di Tokyo, e centrata su quale punto.
 // ============================================================
 
+import { IngressoQuartiere } from '../components/mappe/IngressoQuartiere';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getQuartiere, scaricaPiantaQuartiere } from '../services/api';
@@ -42,6 +42,13 @@ import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
 import { usePartitaStore } from '../stores/partitaStore';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
+/**
+ * La carta di un luogo del quartiere, con l'ancora `#luogo-…` per arrivarci da fuori: nome, tipo
+ * col suo colore e la sua icona, suggerimento, «non ancora nel mondo» (attenuata, con i requisiti
+ * mancanti nel titolo) o «sbloccato», fascia, dato non verificato; poi che cosa offre, giorni,
+ * sblocco, correzione, Confidenti e attività collegati, tabella dei piatti, rimando agli articoli
+ * in vendita e note.
+ */
 function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
   const sugg = useSuggerimenti();
   // **Il posto che non c'è ancora resta in elenco, e lo dice.** La guida serve anche a sapere che
@@ -86,6 +93,13 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
   );
 }
 
+/**
+ * Pagina di un quartiere presa dalla chiave nell'URL: carica il quartiere per la partita attiva e,
+ * se la sua pianta è pubblicata ma non ancora nell'istanza (e non c'è un ingresso), la scarica.
+ * Mostra l'intestazione con la sagoma, la mappa (quella dell'ingresso o del quartiere) con la sua
+ * didascalia e la configurazione dell'ingresso da Città, e i luoghi filtrabili per tipo nell'ordine
+ * del catalogo. Se l'URL porta un'ancora, dopo il caricamento scorre al luogo indicato.
+ */
 export function QuartierePage() {
   const { chiave = '' } = useParams();
   const navigate = useNavigate();

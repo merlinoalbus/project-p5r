@@ -9,11 +9,14 @@
 #     raggiunge come http://project_p5r_fe:80.
 #   La rete esterna deve già esistere sull'host (docker network create proxy).
 #
-# Variabili di stack (tutte opzionali):
-#   PROXY_NETWORK  nome della rete esterna del tunnel (default: proxy)
-#   LOG_LEVEL      livello di log del backend (default: info)
-#   NAS_ADDR       indirizzo del NAS che ospita la cartella d'appoggio (default: 100.125.101.31)
-#   NAS_PATH       percorso esportato via NFS (default: la cartella del pacchetto di gioco)
+# Variabili di stack:
+#   PROXY_NETWORK  nome della rete esterna del tunnel (facoltativa, default: proxy)
+#   LOG_LEVEL      livello di log del backend (facoltativa, default: info)
+#   NAS_ADDR       indirizzo del NAS che ospita la cartella d'appoggio (OBBLIGATORIA)
+#   NAS_PATH       percorso esportato via NFS (OBBLIGATORIA)
+# NAS_ADDR e NAS_PATH non hanno più un valore predefinito: era l'indirizzo e il percorso del NAS di casa, scritti nel
+# repository; senza le due variabili lo stack non parte e lo dice (rilievo D12 della verifica completa, 2026-10-04).
+# Porta, cartella dei dati e del pacchetto iniziale stanno una volta sola, nell'immagine (Dockerfile.backend, rilievo D10).
 #
 # Watchtower: sull'host è attiva un'istanza GLOBALE esterna — qui NON
 # si aggiunge alcun servizio watchtower: la label
@@ -44,9 +47,6 @@ services:
     expose:
       - "3101"
     environment:
-      - PORT=3101
-      - DATA_DIR=/data
-      - PACCHETTO_DIR=/app/pacchetto
       - DEPOSITO_DIR=/deposito
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
@@ -90,5 +90,5 @@ volumes:
     driver: local
     driver_opts:
       type: nfs
-      device: ":${NAS_PATH:-/Volume1/public/homes_roberto/mediaserver/dbapp/persona5royal/}"
-      o: "addr=${NAS_ADDR:-100.125.101.31},rw,nfsvers=4.1,hard,timeo=600,retrans=2,noatime,nodiratime,nconnect=8,rsize=131072,wsize=131072,actimeo=60,lookupcache=all,local_lock=all"
+      device: ":${NAS_PATH:?imposta NAS_PATH nelle variabili dello stack: il percorso esportato via NFS dal NAS}"
+      o: "addr=${NAS_ADDR:?imposta NAS_ADDR nelle variabili dello stack: l'indirizzo del NAS},rw,nfsvers=4.1,hard,timeo=600,retrans=2,noatime,nodiratime,nconnect=8,rsize=131072,wsize=131072,actimeo=60,lookupcache=all,local_lock=all"

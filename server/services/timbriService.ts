@@ -11,18 +11,20 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import type { TimbriDedaloDto } from '../../shared/types.js';
 
 interface RigaArea { chiave: string; nome: string; dungeon_chiave: string; timbri_totale: number | null }
 
+/** I timbri raccolti nella partita, per dedalo (i dedali senza riga non compaiono). Non verifica la partita. */
 export function timbriPartita(partitaId: number): Map<string, number> {
   return new Map((prepared('SELECT area_chiave, raccolti FROM timbri_dedalo_partita WHERE partita_id = ?').all(partitaId) as Array<{ area_chiave: string; raccolti: number }>).map((r) => [r.area_chiave, r.raccolti]));
 }
 
 /** Imposta i timbri raccolti in un dedalo (0 = azzera); evento ogni volta che il totale viene raggiunto salendo. */
 export function impostaTimbri(partitaId: number, area: string, raccolti: number): TimbriDedaloDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const a = prepared('SELECT chiave, nome, dungeon_chiave, timbri_totale FROM dungeon_area WHERE chiave = ?').get(area) as RigaArea | undefined;
   if (!a) throw httpErrors.notFound('area-non-trovata', `L'area '${area}' non esiste.`);
   if (a.dungeon_chiave !== 'mementos') throw httpErrors.badRequest('non-un-dedalo', `'${area}' non è un dedalo dei Memento: i timbri si contano solo lì.`);

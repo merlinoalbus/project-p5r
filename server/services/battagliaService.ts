@@ -5,11 +5,13 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { mappaAmbito } from './traduzioniService.js';
-import { datiGuida } from './richiesteService.js';
+import { datiGuida, type Congelato } from './datiGuida.js';
 import type { BattagliaDto, OmbraDto } from '../../shared/types.js';
 
 type SeedBattaglia = Omit<BattagliaDto, 'ombre'> & { ombre: Array<Omit<OmbraDto, 'personaCollegata'>> };
 
+/** Forma di confronto di un nome: minuscolo, senza accenti (decomposizione NFD e rimozione dei segni diacritici), ogni
+ *  sequenza di caratteri che non è lettera o cifra ridotta a uno spazio, senza spazi ai bordi. */
 function normalizza(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 }
@@ -30,11 +32,11 @@ function indicePersona(): Map<string, { id: number; nome: string; nomeIt: string
 }
 
 /** Sezioni della guida alla battaglia e indice delle Ombre di Palazzi e Dedali con collegamento alla Persona (maschera). */
-export function battaglia(): BattagliaDto {
+export function battaglia(): Congelato<BattagliaDto> {
   const seed = datiGuida<SeedBattaglia>('battaglia');
   if (!seed) throw httpErrors.notFound('battaglia-non-disponibile', 'I dati della guida alla battaglia non sono caricati.');
   const idx = indicePersona();
-  const ombre: OmbraDto[] = seed.ombre.map((o) => {
+  const ombre: Array<Congelato<OmbraDto>> = seed.ombre.map((o) => {
     const chiave = o.persona ? normalizza(o.persona) : '';
     const p = o.persona ? idx.get(chiave) ?? (ALIAS_MASCHERE[chiave] ? idx.get(normalizza(ALIAS_MASCHERE[chiave])) : undefined) ?? null : null;
     return { ...o, personaCollegata: p };

@@ -10,6 +10,7 @@
 // ============================================================
 
 import { GIORNI_SETTIMANA, type RequisitoSpillo } from './condizioniSpillo.js';
+import { congiunzione } from './testo.js';
 
 export type GiornoChiave = (typeof GIORNI_SETTIMANA)[number]['chiave'];
 export const GIORNI_SETTIMANA_CHIAVI = GIORNI_SETTIMANA.map((g) => g.chiave) as [GiornoChiave, ...GiornoChiave[]];
@@ -46,8 +47,18 @@ export function leggiOrari(json: string | null | undefined): OrariNegozio {
   try { return normalizzaOrari(JSON.parse(json)); } catch { return ORARI_SEMPRE; }
 }
 
-export function eSempreAperto(o: OrariNegozio): boolean {
-  return o.giorni.length === 0 && o.fasce.length === 0 && !o.chiusoConPioggia;
+/**
+ * I giorni della settimana di un luogo (`luogo.giorni_json`, migrazione 080): solo le chiavi valide, senza doppioni, nell'ordine
+ * del dato; vuoto se il JSON manca o è rovinato. Prima la stessa lettura era scritta due volte (città e presenza sulle mappe,
+ * rilievo R8), e quella delle mappe accettava anche le chiavi ereditate da `Object` («constructor»).
+ */
+export function leggiGiorni(json: string | null | undefined): GiornoChiave[] {
+  try {
+    const v = JSON.parse(json || '[]') as unknown;
+    return Array.isArray(v) ? [...new Set(v.map(String).filter((g): g is GiornoChiave => (GIORNI_SETTIMANA_CHIAVI as readonly string[]).includes(g)))] : [];
+  } catch {
+    return [];
+  }
 }
 
 /** Le condizioni di presenza equivalenti: sono quelle che il visore e le schede sanno già valutare. */
@@ -61,15 +72,23 @@ export function orariComeCondizioni(o: OrariNegozio): RequisitoSpillo[] {
 
 const NOME_GIORNO: Record<string, string> = Object.fromEntries(GIORNI_SETTIMANA.map((g) => [g.chiave, g.nome]));
 
-/** «dal lunedì al venerdì» quando i giorni sono consecutivi, altrimenti l'elenco. */
-/** «lunedì, mercoledì e sabato»; vuoto = nessuna limitazione (stringa vuota). */
+/**
+ * I giorni in italiano: «dal lunedì al venerdì» (o «dal giovedì alla domenica») quando sono almeno tre consecutivi, «solo il
+ * martedì» / «solo la domenica» quando è uno, altrimenti l'elenco «lunedì, mercoledì e sabato». Vuoto = nessuna limitazione:
+ * stringa vuota (prima diventava « e undefined», e i luoghi senza giorni mostravano «Giorni:  e undefined»).
+ */
 export function descriviGiorni(giorni: GiornoChiave[]): string {
+  if (giorni.length === 0) return '';
   const indici = giorni.map((g) => GIORNI.indexOf(g)).sort((a, b) => a - b);
   const consecutivi = indici.length >= 3 && indici.every((v, i) => i === 0 || v === indici[i - 1] + 1);
-  if (consecutivi) return `dal ${NOME_GIORNO[GIORNI[indici[0]]]} al ${NOME_GIORNO[GIORNI[indici[indici.length - 1]]]}`;
+  // «domenica» è femminile: «al venerdì», ma «alla domenica» (e «la domenica»)
+  const conArticolo = (preposizione: 'a' | 'solo', nome: string): string => (nome === 'domenica'
+    ? `${preposizione === 'a' ? 'alla' : 'solo la'} ${nome}`
+    : `${preposizione === 'a' ? 'al' : 'solo il'} ${nome}`);
+  if (consecutivi) return `dal ${NOME_GIORNO[GIORNI[indici[0]]]} ${conArticolo('a', NOME_GIORNO[GIORNI[indici[indici.length - 1]]])}`;
   const nomi = indici.map((i) => NOME_GIORNO[GIORNI[i]]);
-  if (nomi.length === 1) return `solo ${nomi[0] === 'domenica' ? 'la' : 'il'} ${nomi[0]}`;
-  return `${nomi.slice(0, -1).join(', ')} e ${nomi[nomi.length - 1]}`;
+  if (nomi.length === 1) return conArticolo('solo', nomi[0]);
+  return congiunzione(nomi);
 }
 
 /** La frase italiana degli orari: una sola per ogni valore uguale. */

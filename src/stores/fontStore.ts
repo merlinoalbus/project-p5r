@@ -10,7 +10,7 @@
 // ============================================================
 
 import { create } from 'zustand';
-import { getFont } from '../services/api/font';
+import { getFont } from '../services/api';
 import { API_BASE_URL } from '../utils/constants';
 import type { FontDto, FormatoFont, RuoloFont } from '../types';
 
@@ -38,12 +38,13 @@ export function regoleFontFace(elenco: FontDto[]): string {
     .filter((f) => f.presente && f.formato && f.url)
     .map((f) => {
       const url = `${API_BASE_URL}/font/${encodeURIComponent(f.ruolo)}/file?v=${encodeURIComponent(f.aggiornato ?? '')}`;
-      // unicode-range limitato al latino di base: le lettere accentate (spesso mappate ma vuote nei font della comunità) arrivano dal font di riserva
+      // unicode-range = INTERVALLO_FONT_UTENTE: latino di base con le lettere accentate (vedi il commento della costante)
       return `@font-face { font-family: "${FAMIGLIA_FONT[f.ruolo]}"; src: url("${url}") format("${FORMATO_CSS[f.formato as FormatoFont]}"); font-display: swap; unicode-range: ${INTERVALLO_FONT_UTENTE}; }`;
     })
     .join('\n');
 }
 
+/** Scrive le regole @font-face nel <style> dedicato del documento, creandolo alla prima volta (fuori dal browser non fa nulla). */
 function applicaFontFace(elenco: FontDto[]): void {
   if (typeof document === 'undefined') return;
   let style = document.getElementById(ID_STYLE) as HTMLStyleElement | null;
@@ -65,6 +66,7 @@ interface FontState {
 }
 
 const RUOLI: RuoloFont[] = ['display', 'menu', 'decor'];
+/** Stato di un ruolo senza file caricato. */
 const assente = (ruolo: RuoloFont): FontDto => ({ ruolo, presente: false, formato: null, byte: 0, aggiornato: null, url: null });
 
 /** Stato dei font dell'utente, caricato una volta all'avvio. */

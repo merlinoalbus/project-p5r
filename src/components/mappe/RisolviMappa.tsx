@@ -1,3 +1,7 @@
+// ============================================================
+// RisolviMappa — risolve una chiave di mappa: alias della guida reindirizzati, mappe passate ai figli
+// ============================================================
+
 import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { risolviMappa } from '../../services/api';

@@ -12,9 +12,23 @@ import { config } from '../config.js';
 import { closeDb, initDb, prepared, resolveDbPath } from '../db/dbService.js';
 import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
 import { copiaDatabase, copiaIstanza, ripristinaIstanza, statoIstanza, verificaDatabase } from './impostazioniService.js';
-import { leggiZip } from '../utils/zip.js';
+import { estraiVoce, leggiIndiceZip, scriviZip, type VoceZip } from '../utils/zip.js';
 
 let dataDir = '';
+
+/** Scrive un contenuto in un file della cartella di prova e ne restituisce il percorso: il servizio lavora su file. */
+function suFile(contenuto: Buffer, nome: string): string {
+  const p = path.join(dataDir, nome);
+  fs.writeFileSync(p, contenuto);
+  return p;
+}
+
+/** Uno ZIP con le voci date, in un file della cartella di prova. */
+async function zipDiProva(nome: string, voci: VoceZip[]): Promise<string> {
+  const p = path.join(dataDir, nome);
+  await scriviZip(p, voci);
+  return p;
+}
 
 /** Prepara un'istanza reale su disco: database migrato e con seed, un'immagine nel database e un carattere finto su disco. */
 function apriIstanza(): void {
@@ -49,7 +63,8 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     expect(s.immagini).toEqual({ file: 1, byte: 14 });
     expect(s.caratteri).toEqual({ file: 1, byte: 'finto carattere'.length });
     expect(s.partite).toBe(1);
-    expect(s.seed.hash).toMatch(/^\d+:[0-9a-f]{64}$/);
+    // la memoria del seed JSON dismesso non c'è più (migrazione 096, rilievo R3')
+    expect(s).not.toHaveProperty('seed');
   });
 
   it('esporta il database come file SQLite valido e l’istanza completa come ZIP con i due database, i caratteri e il manifesto', async () => {
@@ -57,15 +72,20 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     const contenuto = fs.readFileSync(copia.percorso);
     expect(contenuto.toString('utf-8', 0, 15)).toBe('SQLite format 3');
     expect(copia.nome).toMatch(/^project-p5r-gioco-.*\.db$/);
-    expect(verificaDatabase(contenuto)).toBe('gioco');
+    expect(verificaDatabase(copia.percorso)).toBe('gioco');
     const partite = await copiaDatabase('partite');
-    expect(verificaDatabase(fs.readFileSync(partite.percorso))).toBe('partite');
+    expect(verificaDatabase(partite.percorso)).toBe('partite');
+    // la verifica non lascia giornali accanto al file
+    expect(fs.existsSync(`${partite.percorso}-wal`) || fs.existsSync(`${partite.percorso}-shm`)).toBe(false);
     fs.rmSync(partite.percorso, { force: true });
     fs.rmSync(copia.percorso, { force: true });
 
     const zip = await copiaIstanza();
     expect(zip.nome).toMatch(/^project-p5r-istanza-.*\.zip$/);
-    const voci = leggiZip(zip.contenuto);
+    // lo ZIP è un file temporaneo nella cartella di lavoro, non un contenuto in memoria; le copie dei database sono già tolte
+    expect(path.dirname(zip.percorso)).toBe(path.join(dataDir, 'tmp'));
+    expect(fs.readdirSync(path.join(dataDir, 'tmp')).filter((f) => f.endsWith('.db'))).toEqual([]);
+    const voci = await leggiIndiceZip(zip.percorso);
     const nomi = voci.map((v) => v.nome);
     expect(nomi).toContain('database/gioco.db');
     expect(nomi).toContain('database/partite.db');
@@ -73,13 +93,20 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     expect(nomi).toContain('font/display.woff2');
     expect(nomi).toContain('manifest.json');
     expect(nomi).toContain('LEGGIMI.txt');
-    const manifest = JSON.parse(voci.find((v) => v.nome === 'manifest.json')!.contenuto.toString('utf-8')) as { partite: number; esportatoIl: string };
+    const fuori = path.join(dataDir, 'manifest-estratto.json');
+    await estraiVoce(zip.percorso, voci.find((v) => v.nome === 'manifest.json')!, fuori);
+    const manifest = JSON.parse(fs.readFileSync(fuori, 'utf-8')) as { partite: number; esportatoIl: string };
     expect(manifest.partite).toBe(1);
     expect(manifest.esportatoIl).toMatch(/^\d{4}-/);
+    // il database nello ZIP è un SQLite di gioco valido
+    const db = path.join(dataDir, 'gioco-estratto.db');
+    await estraiVoce(zip.percorso, voci.find((v) => v.nome === 'database/gioco.db')!, db);
+    expect(verificaDatabase(db)).toBe('gioco');
+    fs.rmSync(zip.percorso, { force: true });
   });
 
   it('rifiuta i file che non sono database dell’app', async () => {
-    expect(() => verificaDatabase(Buffer.from('non sono un database'))).toThrowError(/non è un database SQLite/);
+    expect(() => verificaDatabase(suFile(Buffer.from('non sono un database'), 'finto.db'))).toThrowError(/non è un database SQLite/);
     // file SQLite valido ma di un'altra applicazione
     const estraneo = path.join(dataDir, 'estraneo.db');
     const Database = (await import('better-sqlite3')).default;
@@ -87,18 +114,21 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     altro.exec('CREATE TABLE cose (id INTEGER PRIMARY KEY)');
     altro.pragma('user_version = 3');
     altro.close();
-    expect(() => verificaDatabase(fs.readFileSync(estraneo))).toThrowError(/non è un'istanza di project-p5r/);
+    expect(() => verificaDatabase(estraneo)).toThrowError(/non è un'istanza di project-p5r/);
   });
 
   it('ripristina da un database esportato: i dati tornano quelli del file e resta una copia di sicurezza', async () => {
     // istantanea del file delle partite con una sola partita, poi si aggiunge una seconda partita che il ripristino deve far sparire
     const copia = await copiaDatabase('partite');
-    const istantanea = fs.readFileSync(copia.percorso);
+    const istantanea = suFile(fs.readFileSync(copia.percorso), 'istantanea-partite.db');
     fs.rmSync(copia.percorso, { force: true });
     prepared("INSERT INTO partita (nome, attiva, livello_protagonista, created_at, updated_at) VALUES ('Dopo la copia', 0, 1, 'x', 'x')").run();
     expect(statoIstanza().partite).toBe(2);
 
     const esito = await ripristinaIstanza(istantanea);
+    // il file di partenza resta com'è (si lavora una copia) e la cartella di lavoro non resta in data/tmp
+    expect(fs.existsSync(istantanea)).toBe(true);
+    expect(fs.readdirSync(path.join(dataDir, 'tmp')).filter((f) => f.startsWith('ripristino-'))).toEqual([]);
     expect(esito).toMatchObject({ formato: 'database', database: false, partite: true, immagini: 0, caratteri: 0 });
     expect(esito.copiaDiSicurezza).toMatch(/^prima-del-ripristino-/);
     expect(fs.existsSync(path.join(dataDir, 'backups', esito.copiaDiSicurezza, 'gioco.db'))).toBe(true);
@@ -115,25 +145,34 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     // l'istanza corrente perde l'immagine e il carattere: il ripristino li rimette
     prepared("DELETE FROM immagine WHERE ambito = 'mappa' AND chiave = 'prova'").run();
     fs.rmSync(path.join(dataDir, 'font', 'display.woff2'), { force: true });
-    const esito = await ripristinaIstanza(zip.contenuto);
+    const esito = await ripristinaIstanza(zip.percorso);
+    fs.rmSync(zip.percorso, { force: true });
     expect(esito).toMatchObject({ formato: 'istanza', immagini: 0, caratteri: 1 });
     expect((prepared("SELECT contenuto FROM immagine WHERE ambito = 'mappa' AND chiave = 'prova'").get() as { contenuto: Buffer }).contenuto.toString()).toBe('finta immagine');
     expect(fs.readFileSync(path.join(dataDir, 'font', 'display.woff2')).toString()).toBe('finto carattere');
   });
 
   it('le voci dello ZIP che porterebbero fuori dalla cartella dati vengono scartate (anche con separatori Windows)', async () => {
-    const { creaZip } = await import('../utils/zip.js');
     const copia = await copiaDatabase();
-    const database = fs.readFileSync(copia.percorso);
-    fs.rmSync(copia.percorso, { force: true });
     const fuori = path.join(path.dirname(dataDir), 'fuori-dalla-cartella-dati.txt');
     fs.rmSync(fuori, { force: true });
-    const zip = creaZip([
-      { nome: 'database/project-p5r.db', contenuto: database },
+    // `scriviZip` scrive «\» come «/»: la voce con le barre rovesciate nasce con un segnaposto («|») che poi, nei byte dell'archivio
+    // (intestazione locale e central directory), diventa «\». Così il nome arriva al ripristino davvero con le barre di Windows.
+    const zip = await zipDiProva('fuori.zip', [
+      { nome: 'database/project-p5r.db', file: copia.percorso },
       { nome: 'immagini/../../fuori-dalla-cartella-dati.txt', contenuto: Buffer.from('con le barre normali') },
-      { nome: 'immagini/..\\..\\fuori-dalla-cartella-dati.txt', contenuto: Buffer.from('con le barre rovesciate') },
+      { nome: 'immagini/..|..|fuori-dalla-cartella-dati.txt', contenuto: Buffer.from('con le barre rovesciate') },
       { nome: 'immagini/mappa/prova.png', contenuto: Buffer.from('finta immagine') },
     ]);
+    fs.rmSync(copia.percorso, { force: true });
+    const byte = fs.readFileSync(zip);
+    const segnaposto = Buffer.from('immagini/..|..|fuori');
+    for (let i = byte.indexOf(segnaposto); i >= 0; i = byte.indexOf(segnaposto, i + 1)) {
+      byte[i + 11] = 0x5c;
+      byte[i + 14] = 0x5c;
+    }
+    fs.writeFileSync(zip, byte);
+    expect((await leggiIndiceZip(zip)).map((v) => v.nome)).toContain('immagini/..\\..\\fuori-dalla-cartella-dati.txt');
     const esito = await ripristinaIstanza(zip);
     // solo l'immagine legittima è stata scritta; poi, alla riapertura, la cartella dei backup di prima della 079 è stata assorbita e messa da parte
     expect(esito.immagini).toBe(1);
@@ -156,15 +195,14 @@ describe('impostazioniService — backup e ripristino (15.29)', () => {
     db.exec('DROP TABLE spillo_immagine; DROP TABLE spillo_destinazione; DROP TABLE spillo');
     db.pragma('user_version = 66');
     db.close();
-    await expect(ripristinaIstanza(fs.readFileSync(percorsoRotto))).rejects.toThrowError(/Ripristino non riuscito/);
+    await expect(ripristinaIstanza(percorsoRotto)).rejects.toThrowError(/Ripristino non riuscito/);
     // l'app è viva e i dati sono quelli di prima
     expect(statoIstanza().partite).toBe(partitePrima);
     expect((prepared('SELECT COUNT(*) AS n FROM traduzione').get() as { n: number }).n).toBeGreaterThan(0);
   });
 
   it('uno ZIP senza database viene rifiutato senza toccare l’istanza', async () => {
-    const { creaZip } = await import('../utils/zip.js');
-    const zip = creaZip([{ nome: 'immagini/mappa/altra.png', contenuto: Buffer.from('x') }]);
+    const zip = await zipDiProva('senza-database.zip', [{ nome: 'immagini/mappa/altra.png', contenuto: Buffer.from('x') }]);
     const prima = (prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n;
     await expect(ripristinaIstanza(zip)).rejects.toThrowError(/non contiene il database/);
     expect((prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n).toBe(prima);

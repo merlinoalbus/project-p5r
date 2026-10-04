@@ -18,11 +18,11 @@
 // Quando un quartiere si sblocca, sul suo pallino spuntano la sagoma e la targa; finché non si
 // sblocca resta il solo pallino. L'11 aprile Shinjuku è un pallino e basta — apre il 18 giugno —
 // e il Palazzo di Kamoshida c'è dal 12 aprile al 2 maggio e poi sparisce. Le condizioni vengono
-// dalla Fase 2 — `quartiere.sblocco_data` e `finestre-dungeon.json` — valutate con `ordineGioco`,
+// dalla Fase 2 — `quartiere.sblocco_data` e la voce `finestre-dungeon` di `dati_guida` — valutate con `ordineGioco`,
 // la stessa funzione del resto dell'app. Senza partita si vede tutto, e lo si dice.
 //
 // **Posizioni e tracciati sono autorati**, e sta scritto in `collocazioneTokyo.ts`: nel foglio del
-// gioco non ci sono, e le «tratte» di `metropolitana.json` sono raggiungibilità, non binari.
+// gioco non ci sono, e le «tratte» di `metropolitana.json` (l'estrazione dell'atlante, `data/atlas/extracted/`) sono raggiungibilità, non binari.
 // ============================================================
 
 import { Link } from 'react-router-dom';
@@ -38,19 +38,15 @@ import { assetCovoLadri, assetPalazzo, assetTokyoQuartiere, nascondiSagomaAssent
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { contornoSagoma } from '../../utils/contornoSagoma';
 
 /** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
  *
  * Bianco a riposo, oro quando ci passi sopra. L'oro non e' decorazione: su una mappa fatta di
  * sagome accostate serve capire **quale** si sta per aprire, e un semplice ingrandimento non
  * basta quando due cartellini si sfiorano. */
-function contorno(colore: string, spessore = 1) {
-  const o = [`${spessore}px 0`, `-${spessore}px 0`, `0 ${spessore}px`, `0 -${spessore}px`];
-  return o.map((d) => `drop-shadow(${d} 0 ${colore})`).join(' ') + ' drop-shadow(0 2px 3px rgba(0,0,0,0.5))';
-}
-
-const CONTORNO = contorno('#fff');
-const CONTORNO_ORO = contorno('#ffd23f', 2) + ' brightness(1.05)';
+const CONTORNO = contornoSagoma('#fff', 1, true);
+const CONTORNO_ORO = contornoSagoma('#ffd23f', 2, true) + ' brightness(1.05)';
 
 interface Props {
   quartieri: QuartiereRiassuntoDto[];
@@ -106,6 +102,9 @@ function useLarghezzaCheSta(attivo: boolean, contenuto: string) {
     if (!b || !m || !attivo || typeof window.matchMedia !== 'function') return;
     // la schermata senza scorrimento c'è da 768 px: sotto, la pagina scorre e la mappa torna alla sua misura
     const schermo = window.matchMedia('(min-width: 768px)');
+    /** Sotto i 768 px toglie la larghezza imposta; sopra parte dalla larghezza del blocco e la
+     *  riduce (al più 8 passi) finché la mappa 10:7 più la legenda, che va a capo di conseguenza,
+     *  stanno nell'altezza rimasta, con un minimo di 240 px. */
     const calcola = () => {
       const colonna = b.parentElement;
       if (!schermo.matches || !colonna) { m.style.width = ''; return; }
@@ -256,6 +255,12 @@ function Rete({ nomi }: { nomi: Map<string, string> }) {
 const ZOOM_MAX = 4;
 const ZOOM_PASSO = 1.4;
 
+/** La mappa di viaggio: rete delle linee, cartellini dei luoghi aperti alla data della partita (più
+ * il Covo), zoom con pulsanti, rotellina e doppio clic per adattare, trascinamento quando
+ * ingrandita, e una legenda di collegamenti. I luoghi non ancora aperti si elencano sotto, in linea
+ * o, con `riempi`, come conteggio con una finestra di dettaglio; senza `dataGioco` si mostra tutto e
+ * lo si dice. `evidenziato`/`onEvidenzia` condividono la selezione con le schede dell'ospite e
+ * `onApri` può intercettare il clic sui cartellini. */
 export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, onApri, className = '', riempi = false }: Props) {
   // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
   // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
@@ -312,6 +317,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
   useEffect(() => {
     const el = cornice.current;
     if (!el) return;
+    /** Blocca lo scorrimento della pagina e ingrandisce (rotella in su) o riduce attorno al cursore. */
     const suRotella = (e: WheelEvent) => {
       e.preventDefault();
       const r = el.getBoundingClientRect();

@@ -31,8 +31,11 @@ import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 
+/** La fascia opposta: giorno ↔ sera. */
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
+/** La fascia come complemento di tempo, per i testi («di giorno», «di sera»). */
 const nomeFascia = (f: FasciaGioco) => (f === 'giorno' ? 'di giorno' : 'di sera');
+/** Vero per le voci che non sono azioni (eventi, scadenze, promemoria), che si mostrano senza spunta. */
 const eEvento = (v: AzionePercorsoDto): v is AzionePercorsoDto & { genere: Exclude<GenereVoce, 'azione'> } => v.genere !== 'azione';
 
 /** «Sulla mappa» di una voce: la mappa (e lo spillo) e l'identità della voce da evidenziare. */
@@ -58,6 +61,11 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
   const [occupato, setOccupato] = useState(false);
   // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
   const [chiediNote, setChiediNote] = useState(false);
+  /**
+   * Spunta o toglie l'azione nella partita. Se spuntandola servono le note e non sono ancora arrivate (né si è scelto
+   * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
+   * aggiornata, invalida i suggerimenti, notifica gli effetti della spunta e controlla se il giorno è avanzato.
+   */
   const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false) => {
     if (!partitaId) return;
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
@@ -119,12 +127,15 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const partita = partitaId ?? undefined;
   // la chiave del menu porta il giorno: cambiando giorno nessun menu resta aperto su una voce che non c'è più
   const chiaveMenu = (uid: string) => `${g.giorno}/${uid}`;
+  /** Le props del menu di una voce: se è quello aperto e come aprirlo o chiuderlo (uno solo aperto alla volta). */
   const menuDi = (uid: string) => ({ menuAperto: menu === chiaveMenu(uid), onMenu: (aperto: boolean) => setMenu(aperto ? chiaveMenu(uid) : null) });
 
   // aprire la finestra o la conferma chiude il menu della voce: tornando alla lista la riga è di nuovo com'era
   const apri = (s: SoggettoVoce) => { setMenu(null); setSoggetto(s); };
+  /** Apre la richiesta di conferma, chiudendo il menu della voce. */
   const chiedi = (c: Conferma) => { setMenu(null); setConferma(c); };
 
+  /** Dopo una modifica della giornata: la fa ricaricare al genitore e invalida i suggerimenti del giorno. */
   const aggiornata = async () => {
     await onGiornataModificata?.();
     // testo, fascia, posto o presenza di una voce cambiano cosa il giorno suggerisce
@@ -147,7 +158,13 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     }
   };
 
+  /**
+   * Chiede conferma per eliminare la voce dalla guida. Se nella partita è spuntata con effetti, la scelta offerta toglie
+   * prima la spunta e poi elimina, con un messaggio che dice com'è andata se l'eliminazione fallisce dopo la spunta tolta;
+   * altrimenti è una conferma semplice, col nome giusto per azione, evento, scadenza o promemoria.
+   */
   const elimina = (v: AzionePercorsoDto) => {
+    /** L'eliminazione vera e propria della voce dalla guida. */
     const via = () => eliminaVoceGiornata(v.uid);
     // spuntata con effetti in questa partita: prima si toglie la spunta (punti del Confidente e turni tornano indietro; le Doti le
     // segna l'utente), altrimenti gli effetti resterebbero senza la spunta da cui disfarli. Il server rifiuta comunque, e dice dove,
@@ -198,6 +215,10 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const consigliate = azioni.filter((a) => !a.fatta && a.stato?.tipo === 'consigliata').length;
   const bloccate = azioni.filter((a) => !a.fatta && a.stato?.tipo === 'bloccata').length;
 
+  /**
+   * La sezione di una fascia: intestazione (evidenziata se è il momento corrente, con fatte su totali in partita),
+   * «Aggiungi» e le voci nel loro ordine, eventi come `VoceEvento` e azioni come `Azione`; vuota, invita ad aggiungere.
+   */
   const sezione = (f: FasciaGioco) => {
     const voci = g.azioni.filter((a) => a.fascia === f);
     const daFare = voci.filter((a) => a.genere === 'azione');

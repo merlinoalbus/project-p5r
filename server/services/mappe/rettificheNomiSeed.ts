@@ -1,3 +1,12 @@
+// ============================================================
+// rettificheNomiSeed — correzioni dei nomi di alcuni spilli del seed («Yongen-Java» → «Yongen-Jaya»)
+// ============================================================
+//
+// Ogni voce dice su quale mappa sta lo spillo, com'era nel pacchetto (`prima`) e come deve essere
+// (`dopo`). Le applica `rettificaNomiSpilliSeed` (mappeService) solo agli spilli di seed rimasti
+// identici a `prima`, e il reseed le usa per riconoscere gli spilli già rettificati.
+// ============================================================
+
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 export const RETTIFICHE_NOMI_SEED: Array<{mappa:string;prima:EsportazioneMappeDto['mappe'][number]['spilli'][number];dopo:EsportazioneMappeDto['mappe'][number]['spilli'][number]}> = [
   {

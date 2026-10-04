@@ -2,11 +2,12 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { dotiDaEffetti, leggiVociEffetto } from '../../../shared/effettiCatalogo.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
+/** Voci d'effetto della riga `chiave` della `tabella` indicata (libro, film, attività…), lette da `effetti_json` con `leggiVociEffetto`. */
 const effetti = (db: ReturnType<typeof initDb>, tabella: string, chiave: string) => leggiVociEffetto(db.prepare(`SELECT effetti_json FROM ${tabella} WHERE chiave = ?`).pluck().get(chiave) as string);
 
 it('converte dote+note, note successive, sblocca e le spiegazioni delle attività', () => {
@@ -30,8 +31,7 @@ it('converte dote+note, note successive, sblocca e le spiegazioni delle attivit�
 });
 
 it('nel pacchetto ogni libro e film con una Dote la dichiara, i film al cinema durano una visione, nessuna chiave maiuscola', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   for (const t of ['libro', 'film']) {
     const righe = db.prepare(`SELECT chiave, dote, note, effetti_json FROM ${t}`).all() as Array<{ chiave: string; dote: string | null; note: number | null; effetti_json: string }>;
     for (const r of righe) {

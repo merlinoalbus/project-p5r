@@ -1,8 +1,3 @@
-import { riconciliaAreeGuida } from './organizzazioneMappe.js';
-import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { categoriaSpillo } from '../../../shared/spilli.js';
-import { finestraDaDate, unisci } from './presenzaEntita.js';
-import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 // ============================================================
 // sincronizzaMappe — crea l'albero delle mappe dalle entità della guida e gli spilli dai marcatori esistenti (Fase 13.1)
 // ============================================================
@@ -17,10 +12,16 @@ import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 
 import { nowIso } from '../../db/dbService.js';
 import type { AppDatabase } from '../../db/dbService.js';
-import { spilloPerPunto } from '../../../shared/spilli.js';
+import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { categoriaSpillo, spilloPerPunto } from '../../../shared/spilli.js';
 import { spilloPerLuogo } from '../../../shared/tipiLuogo.js';
 import { assegnaUidMancanti } from './identitaSpillo.js';
+import { riconciliaAreeGuida } from './organizzazioneMappe.js';
+import { finestraDaDate, unisci } from './presenzaEntita.js';
+import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
+import { bloccoGuidaDi } from '../datiGuida.js';
 
+/** Data e ora correnti in ISO, per `updated_at` delle righe create. */
 function adesso(): string { return new Date().toISOString(); }
 
 /** Posizioni (in percentuale) dei quartieri sulla mappa globale di Tokyo del gioco (stima dalla mappa ufficiale: da rifinire nell'editor). */
@@ -64,6 +65,13 @@ export function riallineaSpilliLuoghi(db: AppDatabase): number {
   return n;
 }
 
+/**
+ * Una passata di sincronizzazione, in quattro tempi: le mappe (Tokyo, i quartieri, i Palazzi con le loro aree; un'area senza
+ * mappa diventa una sezione della guida se `guida_mappa` c'è), gli spilli dai marcatori dei punti e dei luoghi (con la
+ * riclassificazione di quelli di seed), i passaggi verso le mappe figlie con le condizioni di presenza (sblocco del quartiere,
+ * finestra del Palazzo), infine la riconciliazione delle aree, i percorsi e gli uid. Ogni parte salta le tabelle che
+ * mancano. Restituisce quante mappe e spilli ha creato, quanti spilli ha riclassificato e quanti passaggi hanno una condizione.
+ */
 export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: number; riclassificati: number; conSblocco: number } {
   const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
   if (!tabelle.has('mappa')) return { mappe: 0, spilli: 0, riclassificati: 0, conSblocco: 0 };
@@ -114,35 +122,14 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   const quartieriConSblocco = new Set(haSblocco
     ? (db.prepare("SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL AND sblocco_data <> ''").all() as Array<{ chiave: string }>).map((q) => q.chiave)
     : []);
-  // Le finestre dei Palazzi, trascritte in `data/seed/finestre-dungeon.json` e caricate in
+  // Le finestre dei Palazzi, trascritte a mano nella voce `finestre-dungeon` di
   // `dati_guida`: nel catalogo le date sono prosa, e ricavarle con un'espressione regolare
   // vorrebbe dire sbagliarne qualcuna senza accorgersene.
+  // Una trascrizione assente o illeggibile non deve impedire la sincronizzazione: nessuna finestra. (Qui si riempiva anche una
+  // mappa degli ingressi dei Palazzi che nessuno leggeva: rilievo R9 della verifica, 2026-10-03.)
   const finestrePerDungeon = new Map<string, RequisitoSpillo[]>();
-  const luoghiDungeon = new Map<string, { mappa: string; nomeMappa: string; descrizione: string }>();
-  const nomiDungeon = new Map<string, string>(tabelle.has('dungeon')
-    ? (db.prepare('SELECT chiave, nome FROM dungeon').all() as Array<{ chiave: string; nome: string }>).map((d) => [d.chiave, d.nome])
-    : []);
-  if (tabelle.has('dati_guida')) {
-    const riga = db.prepare("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
-    if (riga) {
-      try {
-        const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null; luogo?: { mappa?: string | null; nome?: string | null } }> };
-        for (const f of dati.finestre ?? []) {
-          finestrePerDungeon.set(f.dungeon, finestraDaDate(f.dal, f.al));
-          const l = f.luogo;
-          // solo dove il punto del mondo reale è dichiarato: un ingresso inventato porterebbe il
-          // giocatore nel posto sbagliato, che è peggio di non avere il collegamento
-          if (l?.mappa) {
-            luoghiDungeon.set(f.dungeon, {
-              mappa: l.mappa,
-              nomeMappa: nomiDungeon.get(f.dungeon) ?? f.dungeon,
-              descrizione: `Ingresso nel Metaverso${l.nome ? ` — ${l.nome}` : ''}.`,
-            });
-          }
-        }
-      } catch { /* una trascrizione illeggibile non deve impedire la sincronizzazione */ }
-    }
-  }
+  const blocco = bloccoGuidaDi(db, 'finestre-dungeon') as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> } | null;
+  for (const f of Array.isArray(blocco?.finestre) ? blocco.finestre : []) finestrePerDungeon.set(f.dungeon, finestraDaDate(f.dal, f.al));
   let conSblocco = 0;
   let spilli = 0;
   let riclassificati = 0;
@@ -242,11 +229,9 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
 export function collegaPalazziAiLuoghi(db: AppDatabase): number {
   const t = nowIso();
   const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((x) => x.name));
-  if (!tabelle.has('mappa') || !tabelle.has('dati_guida')) return 0;
-  const riga = db.prepare("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
-  if (!riga) return 0;
-  let dati: { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null; luogo?: { mappa?: string | null; nome?: string | null } }> };
-  try { dati = JSON.parse(riga.json) as typeof dati; } catch { return 0; }
+  if (!tabelle.has('mappa')) return 0;
+  const dati = bloccoGuidaDi(db, 'finestre-dungeon') as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null; luogo?: { mappa?: string | null; nome?: string | null } }> } | null;
+  if (!dati) return 0;
   const nomi = new Map<string, string>(tabelle.has('dungeon')
     ? (db.prepare('SELECT chiave, nome FROM dungeon').all() as Array<{ chiave: string; nome: string }>).map((d) => [d.chiave, d.nome])
     : []);

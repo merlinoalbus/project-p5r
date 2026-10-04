@@ -20,6 +20,14 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { GiornoGuida } from '../components/guida/GiornoGuida';
 
+/**
+ * Guida giorno per giorno: carica l'indice dei giorni per la partita attiva e il giorno preso
+ * dall'URL (altrimenti il giorno corrente della partita, altrimenti il primo dell'indice). Offre
+ * la navigazione al giorno precedente e successivo, i selettori di mese e giorno (con le azioni
+ * fatte sul totale), il ritorno a oggi e il comando per fissare il giorno come corrente; sotto, la
+ * giornata con le azioni da spuntare. Una spunta sostituisce la riga nei dati correnti e
+ * ricarica l'indice.
+ */
 export function PercorsoPage() {
   const { data: dataParam } = useParams();
   const navigate = useNavigate();
@@ -34,20 +42,27 @@ export function PercorsoPage() {
   const mesi = useMemo(() => [...new Set((indice.dati?.giorni ?? []).map((x) => x.giorno.slice(0, 2)))], [indice.dati]);
   const giorniDelMese = useMemo(() => (indice.dati?.giorni ?? []).filter((x) => data && x.giorno.slice(0, 2) === data.slice(0, 2)), [indice.dati, data]);
   // la riga spuntata si sostituisce subito; l'indice si ricarica perché il selettore del giorno mostra «fatte/azioni»
-  const aggiorna = (a: AzionePercorsoDto) => { if (g) { const azioni = g.azioni.map((x) => (x.uid === a.uid ? a : x)); giorno.imposta({ ...g, azioni, fatte: azioni.filter((x) => x.fatta).length }); void indice.ricarica(); } };
+  // dai dati correnti (forma funzionale): la risposta arriva dopo un `await`, e partire dalla `g` di questo render annullerebbe
+  // una seconda spunta fatta nel frattempo
+  const aggiorna = (a: AzionePercorsoDto) => {
+    giorno.imposta((attuale) => { const azioni = attuale.azioni.map((x) => (x.uid === a.uid ? a : x)); return { ...attuale, azioni, fatte: azioni.filter((x) => x.fatta).length }; });
+    void indice.ricarica();
+  };
+  /** Fissa il giorno mostrato come giorno corrente della partita: aggiorna giorno e indice locali, allinea la partita nello store, invalida i suggerimenti del giorno e notifica l'esito. */
   const segnaCorrente = async () => {
     if (!partitaId || !g) return;
     setOccupatoGiorno(true);
     try {
       const esito = await impostaGiornoCorrente(partitaId, g.giorno);
-      giorno.imposta({ ...g, dataCorrente: g.giorno });
-      if (indice.dati) indice.imposta({ ...indice.dati, dataCorrente: g.giorno });
+      giorno.imposta((attuale) => ({ ...attuale, dataCorrente: g.giorno }));
+      indice.imposta((attuale) => ({ ...attuale, dataCorrente: g.giorno }));
       // la data di gioco vive in `partitaStore.attiva`: si allinea alla partita restituita dal server e i suggerimenti del giorno vengono ricaricati
       usePartitaStore.getState().aggiornaLocale(esito.partita);
       useSuggerimentiStore.getState().invalida();
       notifica('success', `Giorno corrente: ${dataGiocoTesto(g.giorno)}.`);
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupatoGiorno(false); }
   };
+  /** Apre la pagina di un altro giorno; con null non fa niente. */
   const vai = (d: string | null) => { if (d) navigate(`/guida/percorso/${d}`); };
   return (
     <PageState isLoading={(indice.caricamento && !indice.dati) || (giorno.caricamento && !g)} error={indice.errore ?? giorno.errore} onRetry={() => { void indice.ricarica(); void giorno.ricarica(); }}>

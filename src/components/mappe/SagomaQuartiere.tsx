@@ -15,6 +15,7 @@
 // ============================================================
 
 import { assetTokyoQuartiere, nascondiSagomaAssente } from './assetTokyo';
+import { contornoSagoma } from '../../utils/contornoSagoma';
 
 interface Props {
   chiave: string;
@@ -32,14 +33,11 @@ interface Props {
  * Il fondo del riquadro è **trasparente**: era rosso, per richiamare la tela della mappa, ma su
  * una scheda scura diventava una macchia che rubava l'occhio al nome. Il contorno bianco basta a
  * staccare la figura, ed è lo stesso della mappa. */
-function contorno(colore: string, spessore = 1) {
-  return [`${spessore}px 0`, `-${spessore}px 0`, `0 ${spessore}px`, `0 -${spessore}px`]
-    .map((d) => `drop-shadow(${d} 0 ${colore})`).join(' ');
-}
+const CONTORNO = contornoSagoma('#fff');
+const CONTORNO_ORO = `${contornoSagoma('#ffd23f', 2)} brightness(1.05)`;
 
-const CONTORNO = contorno('#fff');
-const CONTORNO_ORO = `${contorno('#ffd23f', 2)} brightness(1.05)`;
-
+/** La sagoma del quartiere in un riquadro fisso (112×84 predefinito), col contorno bianco o, se
+ * `acceso`, oro e leggermente ingrandita; se il file manca l'immagine si nasconde. */
 export function SagomaQuartiere({ chiave, nome, acceso = false, larghezza = 112, altezza = 84, className = '' }: Props) {
   return (
     <span

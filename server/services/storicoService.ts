@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { ETICHETTE_EVENTO, TIPI_EVENTO, type TipoEvento } from '../../shared/eventi.js';
 import type { EventoPartitaDto, StoricoDto } from '../../shared/types.js';
@@ -14,6 +15,8 @@ interface RigaEvento {
 
 const SQL_EVENTO = 'SELECT e.*, p.nome AS persona_nome FROM evento_partita e LEFT JOIN persona p ON p.id = e.persona_id';
 
+/** Un evento come DTO: nome e gruppo del tipo dalle etichette (il tipo stesso e «partita» se il tipo non è noto), dati dal
+ *  JSON, Persona collegata con il nome tradotto. */
 function eventoDto(r: RigaEvento): EventoPartitaDto {
   return {
     id: r.id, tipo: r.tipo, tipoNome: ETICHETTE_EVENTO[r.tipo]?.nome ?? r.tipo, gruppo: ETICHETTE_EVENTO[r.tipo]?.gruppo ?? 'partita',
@@ -45,7 +48,7 @@ export interface FiltroStorico {
 
 /** Eventi della partita dal più recente, con cursore per la pagina successiva e totale del filtro. */
 export function storico(partitaId: number, filtro: FiltroStorico = {}): StoricoDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const limite = Math.min(200, Math.max(1, filtro.limite ?? 50));
   const condizioni = ['e.partita_id = ?'];
   const parametri: unknown[] = [partitaId];
@@ -69,7 +72,6 @@ export function storico(partitaId: number, filtro: FiltroStorico = {}): StoricoD
   return { eventi: pagina.map(eventoDto), prossimo: righe.length > limite ? pagina[pagina.length - 1].id : null, totale };
 }
 
-/** Elimina una voce dello storico (correzione di un errore dell'utente). */
 /** Elimina più voci dello storico in una transazione; restituisce quante ne ha trovate ed eliminate. */
 export function eliminaEventi(partitaId: number, ids: number[]): number {
   const unici = [...new Set(ids)];
@@ -81,6 +83,7 @@ export function eliminaEventi(partitaId: number, ids: number[]): number {
   return eliminati;
 }
 
+/** Elimina una voce dello storico della partita (correzione di un errore dell'utente); 404 se non c'era. */
 export function eliminaEvento(partitaId: number, eventoId: number): void {
   const info = prepared('DELETE FROM evento_partita WHERE id = ? AND partita_id = ?').run(eventoId, partitaId);
   if (info.changes === 0) throw httpErrors.notFound('evento-non-trovato', `L'evento ${eventoId} non esiste in questa partita.`);

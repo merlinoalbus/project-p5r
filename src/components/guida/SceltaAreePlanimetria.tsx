@@ -23,7 +23,12 @@ interface Props {
   altrove: ReadonlyMap<string, string>;
 }
 
+/**
+ * Le aree del Palazzo come caselle da spuntare: accanto a quelle legate a un'altra planimetria dice dove stanno (o
+ * che si sposteranno qui, se spuntate), e in cima un riepilogo delle aree che lascerebbero la loro planimetria.
+ */
 export function SceltaAreePlanimetria({ aree, spuntate, onCambia, altrove }: Props) {
+  /** Spunta o toglie un'area e passa al genitore un insieme nuovo (quello ricevuto non si modifica). */
   const cambia = (k: string) => { const n = new Set(spuntate); if (n.has(k)) n.delete(k); else n.add(k); onCambia(n); };
   const spostate = aree.filter((a) => spuntate.has(a.chiave) && altrove.has(a.chiave));
   return (

@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router-dom';
 import { IconaScheda } from '../components/shared/IconaAzione';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
 import { NuovaPartitaModal } from '../components/partita/NuovaPartitaModal';
@@ -47,7 +48,7 @@ const SCHEDE: Array<{ k: Scheda; l: string }> = [
 /** Pagina della partita attiva con schede; senza partite propone la creazione. */
 export function PartitaPage() {
   useDocumentTitle('Partita');
-  const { attiva, caricamento, caricata, errore, carica } = usePartitaStore();
+  const { attiva, caricamento, caricata, errore, carica } = usePartitaStore(useShallow((s) => ({ attiva: s.attiva, caricamento: s.caricamento, caricata: s.caricata, errore: s.errore, carica: s.carica })));
   const [nuova, setNuova] = useState(false);
   const [params, setParams] = useSearchParams();
   const richiesta = params.get('scheda');

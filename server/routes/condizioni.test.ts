@@ -1,12 +1,17 @@
+// ============================================================
+// condizioni.test.ts — condizioni degli spilli: elenchi chiusi dell'editor, eventi, attività, negozi, letture e squadra letti dalla partita, normalizzazione e importazione
+// ============================================================
+
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
-import { initDb, closeDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { valutaRequisiti, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { descriviRequisitoSpillo, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 const app = createApp(); let partita: number;
-beforeEach(async () => { const db = initDb(':memory:'); caricaPacchetto(db); partita = (await request(app).post('/api/partite').send({ nome: 'Regole' })).body.data.id; });
+beforeEach(async () => { dbDiProva(); partita = (await request(app).post('/api/partite').send({ nome: 'Regole' })).body.data.id; });
 afterEach(() => closeDb());
+/** Valuta i requisiti dati (ciascuno col suo testo descrittivo) sullo stato di disponibilità della partita di prova. */
 const valuta = (r: RequisitoSpillo[]) => valutaRequisiti(r.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c) })), statoDisponibilitaPartita(partita));
 
 it('gli elenchi dell\'editor sono chiusi e completi: niente stati a nome libero', async () => {

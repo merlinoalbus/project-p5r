@@ -1,8 +1,3 @@
-import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
-import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
-import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
-import { NavigazioneSpillo } from './NavigazioneSpillo';
-import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 // ============================================================
 // VisoreMappa — visore a schermo intero (o incorporato) di una mappa a livelli (Fase 13.2)
 // ============================================================
@@ -13,6 +8,11 @@ import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 // click sulla mappa modifica i dati: l'editor (13.3) passa i propri strumenti tramite `editor`.
 // ============================================================
 
+import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
+import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
+import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
+import { NavigazioneSpillo } from './NavigazioneSpillo';
+import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
@@ -113,6 +113,7 @@ const DIMENSIONE_RISERVA = 1000;
 
 interface Dimensioni { w: number; h: number }
 
+/** Riporta `v` dentro l'intervallo [min, max]. */
 const limita = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 /** Larghezza del popup dello spillo sul desktop (`.spillo-popup`): serve a tenerlo dentro la tela. */
@@ -126,6 +127,7 @@ function useSchermoStretto(): boolean {
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
     const mq = window.matchMedia(SCHERMO_STRETTO);
+    /** Rilegge la media query e aggiorna lo stato. */
     const aggiorna = () => setStretto(mq.matches);
     // anche su `resize`: l'emulazione del viewport negli strumenti di sviluppo non sempre emette `change`
     mq.addEventListener('change', aggiorna);
@@ -134,6 +136,8 @@ function useSchermoStretto(): boolean {
   }, []);
   return stretto;
 }
+/** Con `fuori` porta il nodo in un portale su `document.body` (fuori dal livello trasformato della
+ * mappa, per il foglio dal basso); altrimenti lo lascia dov'è. */
 const inPortale = (fuori: boolean, nodo: ReactNode): ReactNode => (fuori ? createPortal(nodo, document.body) : nodo);
 
 /** Immagine dell'entità collegata (istanza → asset del repository); niente se l'entità non ha immagini nell'app. */
@@ -178,6 +182,15 @@ function disponibilita(a: { disponibileDal: string | null }): string {
   return a.disponibileDal?.trim() || 'sempre';
 }
 
+/** Il visore di una mappa: barra con percorso e strumenti (assente in modalità `scelta`), pannello
+ * laterale (legenda con filtri, ricerca, schede; o il `pannello` dell'editor) e tela con immagine e
+ * spilli. Lo zoom parte dall'inquadratura «adatta» e arriva a 8 volte tanto; rotellina, pinch,
+ * pulsanti e trascinamento lo cambiano, il doppio clic lo riporta ad «adatta». Gli spilli vicini si
+ * raggruppano in pastiglie «+n» con l'elenco apribile; fuori dall'editor lo spillo selezionato apre
+ * un popup ancorato (o un foglio, se non ci sta o lo schermo è stretto). Gli spilli bloccati dalle
+ * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
+ * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
+ * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
 export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale, scelta }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
@@ -200,6 +213,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Esc chiude l'elenco del gruppo, come ci si aspetta da un riquadro che si apre sopra la mappa.
   useEffect(() => {
     if (!gruppoAperto) return;
+    /** Esc chiude l'elenco del gruppo aperto. */
     const suTasto = (e: KeyboardEvent) => { if (e.key === 'Escape') setGruppoAperto(null); };
     window.addEventListener('keydown', suTasto);
     return () => window.removeEventListener('keydown', suTasto);
@@ -212,6 +226,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // senza scorrimento il pulsante non aveva alcun effetto visibile (scheda sotto la piega nel layout impilato < 860 px e nella mappa incorporata).
   const schedaRef = useRef<HTMLElement | null>(null);
   const [richiestaScheda, setRichiestaScheda] = useState(0);
+  /** Apre il pannello e chiede (contatore) di portare in vista la scheda e darle il fuoco. */
   const apriScheda = () => { setPannelloScelto(true); setRichiestaScheda((n) => n + 1); };
   useEffect(() => {
     if (richiestaScheda === 0) return;
@@ -241,6 +256,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   useEffect(() => {
     const el = tela.current;
     if (!el) return;
+    /** Legge la misura della tela e aggiorna lo stato solo se è cambiata. */
     const misura = () => { const r = el.getBoundingClientRect(); setDim((d) => (d.w === r.width && d.h === r.height ? d : { w: r.width, h: r.height })); };
     if (typeof ResizeObserver === 'undefined') {
       const id = requestAnimationFrame(misura);
@@ -265,6 +281,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   useEffect(() => {
     const el = tela.current;
     if (!el) return;
+    /** Ingrandisce o riduce attorno al cursore, salvo sopra un popup o un'area scorrevole della tela. */
     const suRotella = (e: WheelEvent) => {
       // Sopra un popup o un'area che scorre (la merce di un negozio, l'elenco di un gruppo di spilli) la rotellina è
       // di quell'area: la fa scorrere, e al capo si ferma lì (`overscroll-behavior: contain`). Prima ingrandiva la
@@ -279,15 +296,25 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     return () => el.removeEventListener('wheel', suRotella);
   }, [applicaZoom]);
 
+  /** Torna all'inquadratura «adatta» togliendo zoom e spostamento espliciti. */
   const adatta = () => { setZoomEsplicito(null); setPanEsplicito(null); };
+  // L'inquadratura iniziale (spillo selezionato o punto d'arrivo) si applica **una volta** per mappa e per richiesta, quando l'area
+  // è misurata, e ancora una volta quando l'immagine ha le sue dimensioni vere (`nat` parte dalla riserva o dalle dimensioni
+  // dichiarate dalla mappa: finché l'immagine non è caricata non si sa dove cade il punto). Prima si
+  // riapplicava a ogni ridimensionamento — rotazione del tablet, tastiera che compare — e zoom e spostamenti fatti a mano si
+  // perdevano (rilievo A4 della verifica completa, 2026-10-03).
+  const inquadraturaApplicata = useRef<string | null>(null);
   // Selezione iniziale: centra lo spillo appena l'area è misurata (rinviato di un tick: nessuno stato impostato durante il render)
   useEffect(() => {
     if (!selezioneIniziale || dim.w === 0) return;
+    const chiave = `selezione|${mappa.chiave}|${selezioneIniziale}|${nat.w}x${nat.h}`;
+    if (inquadraturaApplicata.current === chiave) return;
     const s = mappa.spilli.find((x) => x.id === selezioneIniziale);
     // Uno spillo bloccato non si apre nemmeno da un indirizzo: era il modo per rivelarlo
     // aggirando il filtro, e un deep link non deve poter fare quello che l'interfaccia non fa.
     if (!s || (partitaId && !editor && nascostoPerCondizioni(s))) return;
     const id = setTimeout(() => {
+      inquadraturaApplicata.current = chiave;
       // uno spillo nascosto perché già raccolto va reso visibile: altrimenti la mappa si centra sul vuoto
       if (s.collezionabile && s.raccolto) setMostraRaccolti(true);
       // Arrivando da uno spostamento la mappa resta **adattata alla finestra** e lo spillo è già
@@ -302,10 +329,14 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   useEffect(() => {
     if (!puntoIniziale || selezioneIniziale || dim.w === 0 || dim.h === 0) return;
     const {x,y,zoom:fattore}=puntoIniziale;
-    const id=setTimeout(()=>{const z=stato.current.zoomMin*limita(fattore,1,6);setZoomEsplicito(z);setPanEsplicito({x:dim.w/2-x/100*nat.w*z,y:dim.h/2-y/100*nat.h*z});},0);
+    const chiave = `punto|${mappa.chiave}|${x}|${y}|${fattore}|${nat.w}x${nat.h}`;
+    if (inquadraturaApplicata.current === chiave) return;
+    const id=setTimeout(()=>{inquadraturaApplicata.current = chiave;const z=stato.current.zoomMin*limita(fattore,1,6);setZoomEsplicito(z);setPanEsplicito({x:dim.w/2-x/100*nat.w*z,y:dim.h/2-y/100*nat.h*z});},0);
     return ()=>clearTimeout(id);
-  },[puntoIniziale, selezioneIniziale,dim.w,dim.h,nat.w,nat.h,zoomMin]);
+  },[puntoIniziale, selezioneIniziale,dim.w,dim.h,nat.w,nat.h,zoomMin,mappa.chiave]);
+  /** Moltiplica lo zoom per `fattore` tenendo fermo il centro della tela (pulsanti + e −). */
   const zoomCentro = (fattore: number) => applicaZoom(zoom * fattore, dim.w / 2, dim.h / 2);
+  /** Porta lo spillo al centro della tela, ingrandendo almeno a 2,5 volte l'inquadratura «adatta». */
   const centraSu = (s: SpilloDto) => {
     const z = Math.max(zoom, zoomMin * 2.5);
     setZoomEsplicito(z);
@@ -330,6 +361,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [trascinando, setTrascinando] = useState(false);
   const schermoStretto = useSchermoStretto();
 
+  /** Registra il puntatore e ne cattura gli eventi: col secondo dito inizia un pinch (distanza,
+   * zoom e centro di partenza), col primo un trascinamento se non c'è già un gesto in corso. */
   const suPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     puntatori.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -341,6 +374,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       gesto.current = { tipo: 'trascina', x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, mosso: false };
     }
   };
+  /** Fa avanzare il gesto in corso: il pinch scala lo zoom col rapporto fra le distanze tenendo
+   * fermo il centro iniziale; il trascinamento sposta la mappa dopo una soglia di 4 px; lo
+   * spillo dell'editor segue il puntatore (in percentuali dell'immagine) dopo la stessa soglia. */
   const suPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (puntatori.current.has(e.pointerId)) puntatori.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const g = gesto.current;
@@ -362,6 +398,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       if (g.mosso) { const p = percentuali(e.clientX, e.clientY); if (p) setTrascinato({ id: g.id, x: p.x, y: p.y }); }
     }
   };
+  /** Chiude il gesto: il pinch finisce quando resta meno di due dita; uno spillo trascinato
+   * nell'editor viene salvato con `onSposta`; un tocco senza movimento chiude l'elenco del gruppo
+   * e, secondo lo strumento dell'editor, aggiunge/incolla nel punto o toglie la selezione. */
   const suPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
     puntatori.current.delete(e.pointerId);
     const g = gesto.current;
@@ -384,6 +423,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       else seleziona(null);
     }
   };
+  /** Puntatore annullato dal sistema: dimentica puntatori, gesto e spillo trascinato senza salvare nulla. */
   const annullaGesto = () => { puntatori.current.clear(); gesto.current = null; setTrascinato(null); setTrascinando(false); };
 
   // Spilli visibili: filtri per tipo, raccolti nascosti, ricerca.
@@ -417,8 +457,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    * nativi con una condizione che non vale ci sono lo stesso, e si vedono marcati «non ancora»; si nascondono solo per lo
    * stato di altri pin. `nonDisponibile` marca, `bloccato` nasconde. */
   const nonDisponibile = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
+  /** Vero se lo spillo va nascosto per le sue condizioni (con il filtro della partita attivo). */
   const bloccato = (s: SpilloDto) => filtraBloccati && nascostoPerCondizioni(s);
-  const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (scelta !== undefined || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !bloccato(s)))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
+  // in memoria finché non cambiano spilli o filtri: è l'ingresso del raggruppamento qui sotto, che così non si rifà a ogni disegno (P1")
+  const inScelta = scelta !== undefined;
+  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm))),
+    [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, ricercaNorm]);
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
   // tela: la freccia resta sullo spillo. L'altezza è **misurata** (`altezzaPopupMisurata`), non stimata: dalla 094 uno spostamento
@@ -451,12 +495,20 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const collezionabili = mappa.spilli.filter((s) => s.collezionabile);
   const raccolti = collezionabili.filter((s) => s.raccolto).length;
   const percentualeRaccolti = collezionabili.length > 0 ? Math.round((raccolti / collezionabili.length) * 100) : 0;
+  /** Filtri della legenda: rende visibili tutti i tipi. */
   const mostraTutti = () => setTipiNascosti(new Set());
+  /** Filtri della legenda: nasconde tutti i tipi presenti sulla mappa. */
   const nascondiTutti = () => setTipiNascosti(new Set(tipiPresenti));
 
   // Chi si vede sulla mappa e dove: la regola sta in `raggruppaSpilli`, che è pura e si prova sui
   // dati veri del pacchetto invece che a mano (vedi `src/utils/raggruppaSpilli.ts`).
-  const { singoli, gruppi } = raggruppaSpilli(visibili, { pan, zoom, nat, dim }, { selezionatoId, editor: editor !== undefined });
+  // Rifatto solo quando cambia qualcosa che conta (P1"): prima girava a ogni disegno, anche per un popup che si apre. Le dipendenze
+  // sono i numeri, non gli oggetti — `pan` e `nat` sono oggetti nuovi a ogni disegno anche quando i valori restano quelli.
+  const inEditor = editor !== undefined;
+  const { singoli, gruppi } = useMemo(
+    () => raggruppaSpilli(visibili, { pan: { x: pan.x, y: pan.y }, zoom, nat: { w: nat.w, h: nat.h }, dim: { w: dim.w, h: dim.h } }, { selezionatoId, editor: inEditor }),
+    [visibili, pan.x, pan.y, zoom, nat.w, nat.h, dim.w, dim.h, selezionatoId, inEditor],
+  );
   /** Se ingrandendo il gruppo si è sciolto, l'elenco sparisce da sé: nessun effetto da sincronizzare. */
   const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
   // **Quanto è alto l'elenco, e da che parte sta.** Non basta stimarne l'altezza e ribaltarlo: un
@@ -494,16 +546,19 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const elencoSotto = elenco.sotto;
   const elencoDx = elenco.dx;
 
+  /** Inoltra il cambio di stato dello spillo a `onRaccolto`, segnando il visore occupato finché dura. */
   const cambiaRaccolto = async (s: SpilloDto, raccolto: boolean) => {
     if (!onRaccolto) return;
     setOccupato(true);
     try { await onRaccolto(s, raccolto); } finally { setOccupato(false); }
   };
+  /** Inoltra lo stato del punto della guida a `onStatoPunto`, segnando il visore occupato finché dura. */
   const cambiaStatoPunto = async (s: SpilloDto, stato: StatoPuntoMappa) => {
     if (!onStatoPunto) return;
     setOccupato(true);
     try { await onStatoPunto(s, stato); } finally { setOccupato(false); }
   };
+  /** Inoltra l'acquisto (o la riapertura) di un articolo a `onAcquisto`, segnando il visore occupato finché dura. */
   const cambiaAcquisto = async (s: SpilloDto, articolo: string, fatto: boolean) => {
     if (!onAcquisto) return;
     setOccupato(true);
@@ -977,7 +1032,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                     {acquistabile
                       ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato}
                           onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} /></label>
-                      : <span className="w-5 shrink-0 text-center" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
+                      : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
                     <span className="min-w-0 flex-1">
                       <span className={`block text-[13px] leading-tight ${a.comprato ? 'line-through' : ''}`}>
                         {a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>

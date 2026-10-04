@@ -1,4 +1,3 @@
-import { descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 // ============================================================
 // negoziService — negozi e articoli (armi, protezioni, accessori, oggetti, regali, cibo) con ricerca e acquisti per partita (Fase 8.2)
 // ============================================================
@@ -9,8 +8,10 @@ import { descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo }
 // sede fra i luoghi della città (072) e, se ce l'ha, un programma punti dichiarato (076).
 // ============================================================
 
+import { descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
 import { registraEvento } from './storicoService.js';
 import { risolviOggettoCollegato } from './oggettiSelezionabili.js';
@@ -41,6 +42,8 @@ export function leggiProgrammaPunti(json: string | null): NegozioRiassuntoDto['p
   } catch { return null; }
 }
 
+/** Il riassunto di un negozio: orari strutturati e in parole (che sono anche le sue condizioni di presenza, valutate se c'è
+ *  lo stato della partita), Confidente, sede, programma punti e conteggi degli articoli non nascosti. */
 function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto {
   const orari = leggiOrari(r.orari_json);
   const condizioni = regoleOrari(orari);
@@ -78,9 +81,10 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave), ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
 }
 
+/** Le chiavi degli articoli segnati come acquistati nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function acquistiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   return new Set((prepared('SELECT articolo_chiave FROM acquisto_partita WHERE partita_id = ?').all(partitaId) as Array<{ articolo_chiave: string }>).map((r) => r.articolo_chiave));
 }
 
@@ -91,12 +95,22 @@ export function elencaNegozi(partitaId?: number): NegozioRiassuntoDto[] {
     .map((r) => riassunto(r, st));
 }
 
-/** Scheda di un negozio con gli articoli (acquistati nella partita, se indicata). */
-export function dettaglioNegozio(chiave: string, partitaId?: number): NegozioDettaglioDto {
+/** Lo stato della partita già calcolato da chi chiama: una mappa con molti negozi lo passa invece di farlo ricalcolare per ogni pin. */
+export interface ContestoNegozio { st: StatoDisponibilita; acquistati: Set<string> }
+
+/** Gli acquisti segnati nella partita (con la verifica della partita), per costruire un `ContestoNegozio`. */
+export function acquistiDellaPartita(partitaId: number): Set<string> {
+  return acquistiPartita(partitaId);
+}
+
+/** La scheda di un negozio non nascosto con i suoi articoli non nascosti, nell'ordine; con la partita, acquisti e
+ *  disponibilità (presi da `contesto` se chi chiama li ha già). 404 se il negozio non c'è o è nascosto. */
+export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: ContestoNegozio): NegozioDettaglioDto {
   const n = prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(chiave) as RigaNegozio | undefined;
   if (!n) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);
-  const acquistati = acquistiPartita(partitaId);
-  const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
+  // lo stato della partita (rilievo P1 della verifica): dal contesto se c'è, altrimenti calcolato qui
+  const acquistati = partitaId !== undefined && contesto ? contesto.acquistati : acquistiPartita(partitaId);
+  const st = partitaId === undefined ? undefined : contesto?.st ?? statoDisponibilitaPartita(partitaId);
   const riepilogo = riassunto(n, st);
   const articoli = (prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(chiave) as RigaArticolo[]).map((r) => articoloDto(r, acquistati, st));
   const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
@@ -137,7 +151,7 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
 
 /** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. */
 export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean): ArticoloDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloChiave) as RigaArticolo | undefined;
   if (!r) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
   const st = statoDisponibilitaPartita(partitaId);

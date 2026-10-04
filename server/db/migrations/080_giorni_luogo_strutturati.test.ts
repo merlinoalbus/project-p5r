@@ -2,8 +2,8 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { giorniDallaFrase } from './080_giorni_luogo_strutturati.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -27,6 +27,7 @@ it('aggiunge la colonna, converte le righe e mette la precisazione nelle note; �
       ('q/b', 'q', 2, 'altro', 'B', '', 'domenica (regolare) e festività', 'nota esistente'),
       ('q/c', 'q', 3, 'altro', 'C', '', NULL, NULL)`);
   runMigrations(db);
+  /** `giorni_json` e note del luogo `k`, come li ha lasciati la migrazione. */
   const leggi = (k: string) => db.prepare('SELECT giorni_json, note FROM luogo WHERE chiave = ?').get(k) as { giorni_json: string; note: string | null };
   expect(leggi('q/a')).toEqual({ giorni_json: '["venerdi","sabato"]', note: null });
   expect(leggi('q/b')).toEqual({ giorni_json: '["domenica"]', note: 'nota esistente · Giorni (dalla guida): domenica (regolare) e festività' });
@@ -38,8 +39,7 @@ it('aggiunge la colonna, converte le righe e mette la precisazione nelle note; �
 });
 
 it('nel pacchetto nessun luogo ha più giorni fuori dalle chiavi', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const righe = db.prepare('SELECT giorni_json FROM luogo').all() as Array<{ giorni_json: string }>;
   expect(righe.length).toBeGreaterThan(80);
   for (const r of righe) for (const g of JSON.parse(r.giorni_json) as string[]) expect(['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica']).toContain(g);

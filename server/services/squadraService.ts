@@ -18,34 +18,33 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
+import { datiGuida } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import type { MembroSquadraDto, SquadraPartitaDto } from '../../shared/types.js';
 
 interface RigaPersonaggio { chiave: string; nome: string; ordine: number }
 
-function partitaEsiste(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
-}
-
 /** I Ladri giocabili, nell'ordine del seed: è il seed a dire chi sono, non un elenco scritto qui. */
 export function giocabili(): RigaPersonaggio[] {
-  const r = prepared("SELECT json FROM dati_guida WHERE chiave = 'personaggi'").get() as { json: string } | undefined;
-  if (!r) return [];
-  const dati = JSON.parse(r.json) as { personaggi: Array<{ chiave: string; nome: string; ordine: number; giocabile?: boolean }> };
+  const dati = datiGuida<{ personaggi: Array<{ chiave: string; nome: string; ordine: number; giocabile?: boolean }> }>('personaggi');
+  if (!dati) return [];
   return dati.personaggi.filter((p) => p.giocabile).map((p) => ({ chiave: p.chiave, nome: p.nome, ordine: p.ordine }))
     .sort((a, b) => a.ordine - b.ordine);
 }
 
 /** Denaro del gruppo e stato di ogni Ladro; `segnato` distingue il non compilato dallo zero. */
 export function squadraPartita(partitaId: number): SquadraPartitaDto {
-  partitaEsiste(partitaId);
+  verificaPartita(partitaId);
   const p = prepared('SELECT yen, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { yen: number; livello_protagonista: number };
   const righe = new Map((prepared('SELECT personaggio_chiave, livello, esperienza, in_squadra, updated_at FROM membro_squadra_partita WHERE partita_id = ?').all(partitaId) as Array<{ personaggio_chiave: string; livello: number; esperienza: number; in_squadra: number; updated_at: string }>).map((r) => [r.personaggio_chiave, r]));
   const membri: MembroSquadraDto[] = giocabili().map((g) => {
     const r = righe.get(g.chiave);
     return {
       chiave: g.chiave, nome: g.nome,
-      livello: r ? r.livello : (g.chiave === 'joker' ? p.livello_protagonista : 1),
+      // Il livello di Joker ha una sola fonte, `partita.livello_protagonista`: la scrivono sia questa scheda sia il riepilogo della
+      // partita, e la legge la fusione. Leggere la riga della squadra, che il riepilogo non aggiornava, mostrava due livelli diversi.
+      livello: g.chiave === 'joker' ? p.livello_protagonista : (r ? r.livello : 1),
       esperienza: r?.esperienza ?? 0,
       segnato: r !== undefined,
       // Chi non ha riga non e' «fuori dal gruppo»: e' uno di cui non hai ancora detto niente, e la
@@ -59,7 +58,7 @@ export function squadraPartita(partitaId: number): SquadraPartitaDto {
 
 /** Cambia i yen del gruppo: valore assoluto o differenza, mai sotto zero. */
 export function impostaYen(partitaId: number, mod: { yen?: number; delta?: number }): SquadraPartitaDto {
-  partitaEsiste(partitaId);
+  verificaPartita(partitaId);
   const attuale = (prepared('SELECT yen FROM partita WHERE id = ?').get(partitaId) as { yen: number }).yen;
   const nuovo = Math.max(0, mod.yen !== undefined ? mod.yen : attuale + (mod.delta ?? 0));
   const adesso = nowIso();
@@ -75,11 +74,13 @@ export function impostaYen(partitaId: number, mod: { yen?: number; delta?: numbe
 
 /** Livello ed esperienza di un Ladro. La riga nasce alla prima scrittura: prima non era «zero», era «non segnato». */
 export function impostaMembro(partitaId: number, chiave: string, mod: { livello?: number; esperienza?: number; deltaLivello?: number; inSquadra?: boolean }): SquadraPartitaDto {
-  partitaEsiste(partitaId);
+  verificaPartita(partitaId);
   const g = giocabili().find((x) => x.chiave === chiave);
   if (!g) throw httpErrors.notFound('membro-non-trovato', `'${chiave}' non è un membro giocabile della squadra.`);
   const r = prepared('SELECT livello, esperienza, in_squadra FROM membro_squadra_partita WHERE partita_id = ? AND personaggio_chiave = ?').get(partitaId, chiave) as { livello: number; esperienza: number; in_squadra: number } | undefined;
-  const partenza = r?.livello ?? (chiave === 'joker' ? (prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { livello_protagonista: number }).livello_protagonista : 1);
+  // il livello di partenza: per Joker sempre quello della partita (fonte unica), per gli altri la loro riga
+  const attuale = chiave === 'joker' ? (prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { livello_protagonista: number }).livello_protagonista : r?.livello;
+  const partenza = attuale ?? 1;
   const livello = Math.min(99, Math.max(1, mod.livello ?? partenza + (mod.deltaLivello ?? 0)));
   const esperienza = Math.max(0, mod.esperienza ?? r?.esperienza ?? 0);
   const adesso = nowIso();
@@ -92,12 +93,11 @@ export function impostaMembro(partitaId: number, chiave: string, mod: { livello?
     if (mod.inSquadra !== undefined && (r?.in_squadra ?? 1) !== inSquadra) {
       registraEvento(partitaId, 'squadra', `${g.nome}: ${inSquadra ? 'entra nel gruppo' : 'esce dal gruppo'}`, '', { membro: chiave, inSquadra: inSquadra === 1 });
     }
-    // Joker ha due case dove sta lo stesso numero: qui e `partita.livello_protagonista`, che la
-    // fusione legge da sempre per sapere quali Persona si possono evocare. Tenerle allineate qui è
-    // l'unico modo perché non divergano: chi legge l'una o l'altra vede lo stesso livello.
+    // Il livello di Joker vive in `partita.livello_protagonista` (fonte unica, letta dalla fusione e da `squadraPartita`); la riga
+    // della squadra lo ricopia solo per restare coerente, e anche il riepilogo della partita la allinea (`aggiornaPartita`).
     if (chiave === 'joker') prepared('UPDATE partita SET livello_protagonista = ? WHERE id = ?').run(livello, partitaId);
-    if (!r || r.livello !== livello) {
-      registraEvento(partitaId, 'squadra', `${g.nome}: livello ${livello}`, r ? `Da ${r.livello} a ${livello}.` : `Primo livello segnato.`, { membro: chiave, livello, esperienza });
+    if (!r || attuale !== livello) {
+      registraEvento(partitaId, 'squadra', `${g.nome}: livello ${livello}`, r && attuale !== undefined ? `Da ${attuale} a ${livello}.` : `Primo livello segnato.`, { membro: chiave, livello, esperienza });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();

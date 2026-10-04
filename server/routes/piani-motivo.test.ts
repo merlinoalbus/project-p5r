@@ -3,22 +3,20 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { PersonaRiassuntoDto, PianiFusioneDto, SkillRiassuntoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API piani di fusione — motivo', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
+  /** Cerca nel compendio la Persona con quel nome esatto e ne restituisce l'id. */
   const idDi = async (nome: string): Promise<number> => ((await request(app).get(`/api/compendio/persona?q=${encodeURIComponent(nome)}`)).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === nome)!.id;
 
   it('Arsène si ottiene per fusione (stesso arcano): motivo null; con «Bagno di sangue» il motivo spiega che il suo tipo di eredità non ammette l’elemento', async () => {

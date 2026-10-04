@@ -8,20 +8,19 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { bodyAggiornaMappa } from '../schemas/mappe.js';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { creaMappa, aggiornaPresentazioneMappa } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('correzione dei testi della guida', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('i testi del Palazzo si correggono e restano', async () => {
@@ -73,9 +72,10 @@ describe('correzione dei testi della guida', () => {
 });
 
 describe('raggruppamento delle planimetrie', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
+  /** Il gruppo di immagini salvato nella presentazione della mappa (id, nome, etichetta), o null se la mappa non ne ha. */
   const gruppoDi = (chiave: string) => {
     const r = prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(chiave) as { gruppo_immagini_json: string | null } | undefined;
     return r?.gruppo_immagini_json ? JSON.parse(r.gruppo_immagini_json) as { id: string; nome: string; etichetta?: string } : null;
@@ -112,7 +112,7 @@ describe('raggruppamento delle planimetrie', () => {
 // nuovo supera un tetto, si rompe qui e non in mano a chi gioca.
 
 describe('i testi della guida si possono risalvare così come sono', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('ogni Palazzo, con le sue aree e i suoi punti, passa la validazione senza modifiche', async () => {
@@ -154,9 +154,10 @@ describe('i testi della guida si possono risalvare così come sono', () => {
 // carattere in più.
 
 describe('i tetti dei campi valgono davvero, e sono quelli condivisi', () => {
-  beforeAll(() => { caricaPacchetto(initDb(':memory:')); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
+  /** Una stringa di `n` caratteri «x», per provare i tetti di lunghezza. */
   const lungo = (n: number) => 'x'.repeat(n);
 
   it('il Palazzo accetta il massimo dichiarato e rifiuta un carattere in più', async () => {
@@ -192,6 +193,7 @@ describe('i tetti dei campi valgono davvero, e sono quelli condivisi', () => {
 
   it('anche gli spilli dell’editor hanno i tetti del modulo condiviso', async () => {
     const mappa = creaMappa(undefined, { nome: 'Tetti degli spilli', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    /** Il corpo di uno spillo forziere minimo, con i campi dati che ne sostituiscono i valori. */
     const corpo = (extra: Record<string, unknown>) => ({ tipo: 'forziere', nome: 'Spillo', x: 10, y: 10, ...extra });
     await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ nome: lungo(LIMITI_GUIDA.spillo.nome) })).expect(201);
     await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ nome: lungo(LIMITI_GUIDA.spillo.nome + 1) })).expect(400);

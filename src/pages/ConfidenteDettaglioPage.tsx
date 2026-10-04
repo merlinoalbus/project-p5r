@@ -18,6 +18,7 @@ import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { DotiIncontro } from '../components/partita/DotiIncontro';
+import { sitoDellaFonte } from '../utils/fonti';
 
 /** Un dialogo di rango: scelte in ordine, con le migliori evidenziate (punti massimi), le romantiche e gli avvisi. */
 export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void }) {
@@ -55,6 +56,14 @@ export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto;
   );
 }
 
+/**
+ * Scheda di un Confidente presa dalla chiave nell'URL: carica il dettaglio dal catalogo e, se c'è
+ * una partita attiva, lo stato dei Confidenti nella partita per ricavarne rango, semafori dei
+ * requisiti e regali già consegnati. Mostra intestazione con disponibilità, il prossimo passo
+ * (requisiti e dialoghi fino al rango successivo, aperti), i requisiti dei ranghi seguenti, le
+ * abilità per rango (attive fino al rango raggiunto), le Doti dell'incontro, tutti i dialoghi
+ * apribili uno per uno, i regali con la spunta e le fonti.
+ */
 export function ConfidenteDettaglioPage() {
   const { chiave = '' } = useParams();
   const navigate = useNavigate();
@@ -68,6 +77,7 @@ export function ConfidenteDettaglioPage() {
   const prossimo = mio ? mio.rango + 1 : null;
 
   const [confermaInCorso, setConfermaInCorso] = useState(false);
+  /** Conferma o annulla a mano un requisito di rango nella partita attiva, poi rilegge lo stato della partita; durante la richiesta i semafori sono occupati, l'errore viene notificato. */
   const conferma = async (rango: number, indice: number, confermato: boolean) => {
     if (!attiva) return;
     setConfermaInCorso(true);
@@ -81,6 +91,7 @@ export function ConfidenteDettaglioPage() {
     }
   };
 
+  /** Segna un regalo come consegnato o no nella partita attiva, rilegge lo stato della partita e notifica l'esito (anche l'errore). */
   const segnaRegalo = async (nome: string, fatto: boolean) => {
     if (!attiva) return;
     try {
@@ -185,7 +196,13 @@ export function ConfidenteDettaglioPage() {
           </section>
 
           {c.fonti.length > 0 && (
-            <p className="m-0 text-[11px] text-text-muted">Fonti: {c.fonti.map((f, i) => <a key={i} href={f} target="_blank" rel="noreferrer" className="credito">{new URL(f).hostname}{i < c.fonti.length - 1 ? ', ' : ''}</a>)}</p>
+            <p className="m-0 text-[11px] text-text-muted">Fonti: {c.fonti.map((f, i) => {
+              const sito = sitoDellaFonte(f);
+              const separatore = i < c.fonti.length - 1 ? ', ' : '';
+              return sito
+                ? <a key={i} href={f} target="_blank" rel="noreferrer" className="credito">{sito}{separatore}</a>
+                : <span key={i}>{f}{separatore}</span>;
+            })}</p>
           )}
         </div>
       )}

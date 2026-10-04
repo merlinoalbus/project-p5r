@@ -31,17 +31,25 @@ interface Props {
   onSalvato: () => void;
 }
 
+/**
+ * La finestra di creazione o correzione di un elemento del catalogo. Prende dal modulo del tipo (`MODULI`) i dati
+ * iniziali, i campi, la validazione e la preparazione del corpo; aggiunge le condizioni (se il tipo le prevede, lette
+ * dal JSON salvato), la spunta «Confermato» e i comandi del guscio: «Salva» (attivo solo con dati e condizioni validi),
+ * «Ripristina dalla guida» o «Elimina» per le righe dell'utente, corrette o nascoste, e «Nascondi» per quelle della guida.
+ */
 export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onChiudi, onSalvato }: Props) {
   const tipo = tipoCatalogoDi(tipoModulo);
   const modulo = MODULI[tipoModulo];
   const nuovo = !elemento;
   const [dati, setDati] = useState<Dati>(() => modulo.iniziali(elemento ?? null, negozioChiave));
+  /** Unisce una modifica parziale ai dati del modulo. */
   const imposta = (patch: Dati) => setDati((d) => ({ ...d, ...patch }));
   const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => { try { return JSON.parse(String(elemento?.dati.condizioni_json ?? '[]')) as RequisitoSpillo[]; } catch { return []; } });
   const regoleValide = !modulo.conCondizioni || condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null);
   const [occupato, setOccupato] = useState(false);
   const nome = tipoModulo === 'videogioco' ? { singolare: 'Videogioco', nuovo: 'Nuovo videogioco' } : NOME_TIPO_CATALOGO[tipo];
 
+  /** Prepara il corpo col modulo del tipo (più le condizioni, se previste) e crea o aggiorna l'elemento; a buon fine notifica e avvisa il genitore. */
   const salva = async () => {
     setOccupato(true);
     try {
@@ -62,6 +70,7 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
     }
   };
 
+  /** Una sola chiamata di eliminazione: il server elimina la riga dell'utente o rimette l'originale della guida, e la notifica dice quale delle due. */
   const ripristinaOelimina = async () => {
     if (!elemento) return;
     setOccupato(true);
@@ -76,6 +85,7 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
     }
   };
 
+  /** Inverte la visibilità della riga negli elenchi (nasconde o rimostra), notifica e avvisa il genitore. */
   const nascondi = async () => {
     if (!elemento) return;
     setOccupato(true);

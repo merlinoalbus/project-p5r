@@ -17,18 +17,21 @@
 //     evocabili — e nessuno dei due errori si vede finché non serve.
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { PartitaDto, SquadraPartitaDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+/** Crea una partita col nome dato e ne restituisce l'id. */
 const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
+/** Legge la squadra della partita `id` (membri, denaro, esperienza). */
 const squadra = async (id: number) => (await request(app).get(`/api/partite/${id}/squadra`)).body.data as SquadraPartitaDto;
+/** Il membro della squadra con la chiave data. */
 const membro = (s: SquadraPartitaDto, chiave: string) => s.membri.find((m) => m.chiave === chiave)!;
 
 describe('API squadra — denaro ed esperienza', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('la squadra sono i giocabili del seed, e all’inizio nessuno è segnato', async () => {

@@ -28,6 +28,7 @@ export interface ManifestAsset {
   file: Record<string, string>;
 }
 
+/** Tutti i file sotto `dir`, a ogni profondità, come percorsi relativi a `base` con le barre `/`, in ordine; vuoto se la cartella non esiste. */
 function elencaFile(dir: string, base = dir): string[] {
   if (!fs.existsSync(dir)) return [];
   const out: string[] = [];

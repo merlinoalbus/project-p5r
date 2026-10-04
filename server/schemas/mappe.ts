@@ -7,21 +7,25 @@ import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { schemaDestinazioneSpillo } from '../services/mappe/destinazioniSpillo.js';
 import { TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO } from '../../shared/spilli.js';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { idParam } from './comuni.js';
 
 const chiaveMappa = z.string().regex(/^[a-z0-9][a-z0-9-]{0,179}$/);
 const riferimento = z.object({ tipo: z.enum(TIPI_RIFERIMENTO), chiave: z.string().min(1).max(200) }).nullable();
 const entita = z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }).nullable();
 // Stesso schema ricorsivo per tutte le condizioni dell’app; nessun testo interpretato.
-export const condizioneSpillo = z.custom<RequisitoSpillo>(v => normalizzaRequisitoSpillo(v) !== null, 'Condizione non valida').transform(v => normalizzaRequisitoSpillo(v)!);
+export const condizioneSpillo = z.custom<RequisitoSpillo>(v => normalizzaRequisitoSpillo(v) !== null, 'Condizione non valida')
+  // la descrizione è solo documentazione (OpenAPI): la forma la controlla `normalizzaRequisitoSpillo`
+  .meta({ description: 'Una condizione `RequisitoSpillo` (shared/condizioniSpillo.ts), validata e normalizzata da `normalizzaRequisitoSpillo`. Il campo `tipo` sceglie la forma: gruppo (`modo` tutte o almeno-una, `condizioni` annidate), non, data, intervallo, fascia, piove, meteo, giorno-settimana, stagione, quartiere, arco, palazzo, dote, confidente, squadra, richiesta, lettura, articolo, attivita, rango-cliente, punti-negozio, evento, contatore, persona-arcano, persona-abilita, spillo.' })
+  .transform(v => normalizzaRequisitoSpillo(v)!);
 
 const condizioni = z.array(condizioneSpillo).max(20).nullable().optional();
 
 export const paramsMappa = z.object({ chiave: chiaveMappa });
-export const paramsSpillo = z.object({ id: z.coerce.number().int().positive() });
+export const paramsSpillo = z.object({ id: idParam });
 export const queryEsporta = z.object({ radice: chiaveMappa.optional() });
 export const queryDidascalia = z.object({ didascalia: z.string().max(300).optional() });
 export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).optional(), ordine: z.number().int().min(0).max(999).optional() });
-export const queryMappa = z.object({ partita: z.coerce.number().int().positive().optional() });
+export const queryMappa = z.object({ partita: idParam.optional() });
 export const bodyCreaMappa = z.object({
   chiave: chiaveMappa.optional(), nome: z.string().min(1).max(LIMITI_GUIDA.mappa.nome), tipo: z.enum(TIPI_MAPPA), genitore: chiaveMappa.nullable().optional(), ordine: z.number().int().min(0).max(9999).optional(),
   asset: z.string().max(200).nullable().optional(), larghezza: z.number().int().positive().nullable().optional(), altezza: z.number().int().positive().nullable().optional(), entita: entita.optional(), note: z.string().max(LIMITI_GUIDA.mappa.note).optional(),

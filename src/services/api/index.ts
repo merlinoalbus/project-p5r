@@ -3,7 +3,6 @@
 // ============================================================
 
 export { ApiError, isApiError, apiGet, apiPost, apiPut, apiPatch, apiDelete, queryString } from './_helpers';
-export * from './sistema';
 export * from './compendio';
 export * from './traduzioni';
 export * from './partite';
@@ -13,6 +12,7 @@ export * from './fusione';
 export * from './font';
 export * from './impostazioni';
 export * from './catalogo';
+export * from './condizioni';
 
 export * from './organizzazioneMappe';
 export * from './accessoMondo';

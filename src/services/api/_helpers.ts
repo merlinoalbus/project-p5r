@@ -28,6 +28,8 @@ export function isApiError(err: unknown, code?: string): err is ApiError {
   return code === undefined || err.code === code;
 }
 
+/** Trasforma una risposta non riuscita in `ApiError`: usa codice, messaggio, dettagli e requestId della busta d'errore del
+ *  server se il corpo è JSON con `error.code`, altrimenti un errore generico `http-error` con stato e testo HTTP. */
 async function parseError(res: Response, fallbackPrefix: string): Promise<ApiError> {
   try {
     const body = await res.json();
@@ -46,6 +48,8 @@ async function parseError(res: Response, fallbackPrefix: string): Promise<ApiErr
   return new ApiError(res.status, 'http-error', `${fallbackPrefix}: ${res.status} ${res.statusText}`);
 }
 
+/** Richiesta JSON verso l'API: serializza il corpo (se c'è) con Content-Type JSON, lancia `ApiError` sugli stati non riusciti,
+ *  restituisce `undefined` per un corpo vuoto e altrimenti il contenuto della busta `{ data }`. */
 async function requestJson<T>(
   method: string,
   path: string,
@@ -64,8 +68,14 @@ async function requestJson<T>(
   if (!res.ok) throw await parseError(res, `API ${method} ${path}`);
   const text = await res.text();
   if (!text) return undefined as T;
-  const parsed = JSON.parse(text);
-  return (parsed?.data ?? parsed) as T;
+  return payloadDellaBusta<T>(JSON.parse(text));
+}
+
+/** Il contenuto della busta `{ data }` che il server mette su ogni risposta riuscita (`responseShape`). Si guarda la presenza
+ *  della chiave, non il valore: `{ data: null }` vale `null`, non la busta intera. */
+export function payloadDellaBusta<T>(parsed: unknown): T {
+  if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed) && 'data' in parsed) return (parsed as { data: T }).data;
+  return parsed as T;
 }
 
 /** GET → contenuto di `data`. */
@@ -83,6 +93,21 @@ export const apiPatch = <T>(path: string, body?: unknown, opts?: HttpFetchOption
 /** DELETE → contenuto di `data`. */
 export const apiDelete = <T>(path: string, opts?: HttpFetchOptions): Promise<T> =>
   requestJson<T>('DELETE', path, undefined, opts);
+
+/**
+ * Invia un file come corpo grezzo (Content-Type = tipo del file) e restituisce il contenuto di `data`. Lo stato si controlla
+ * PRIMA di leggere il corpo: un rifiuto del proxy (413 di nginx oltre i 10 MB, 502) è una pagina HTML, e leggerla come JSON dava
+ * «Unexpected token '<'» invece di un errore leggibile. Nessun nuovo tentativo: un caricamento non si ripete da solo.
+ */
+export async function inviaFile<T>(method: 'PUT' | 'POST', path: string, file: File): Promise<T> {
+  const res = await httpFetch(
+    `${API_BASE_URL}${path}`,
+    { method, body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } },
+    { maxRetries: 0, timeoutMs: 120_000 },
+  );
+  if (!res.ok) throw await parseError(res, 'Caricamento fallito');
+  return payloadDellaBusta<T>(await res.json());
+}
 
 /** Costruisce una query string da un oggetto, saltando i valori vuoti. */
 export function queryString(params: object): string {

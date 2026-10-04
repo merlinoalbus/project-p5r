@@ -2,7 +2,7 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -21,8 +21,7 @@ it('prende la regola da sblocco-luoghi e fotografa la riga della guida', () => {
 });
 
 it('nel pacchetto i tredici luoghi con una regola la portano sulla riga, e tutti hanno la fotografia', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const r = db.prepare("SELECT COUNT(*) AS n, SUM(condizioni_json <> '[]') AS conRegola, SUM(seed_json IS NOT NULL) AS conSeed, SUM(origine = 'seed') AS seed, SUM(origine = 'utente' AND updated_at IS NOT NULL) AS modificati FROM luogo").get() as { n: number; conRegola: number; conSeed: number; seed: number; modificati: number };
   expect(r.conRegola).toBe(13);
   expect(r.conSeed).toBe(r.n);

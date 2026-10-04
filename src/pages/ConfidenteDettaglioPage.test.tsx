@@ -12,8 +12,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { ConfidenteDettaglioDto, ConfidentePartitaDto, PartitaDto } from '../types';
 
 const { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro } = vi.hoisted(() => ({ getConfidenteDettaglio: vi.fn(), getConfidentiPartita: vi.fn(), impostaRegaloFatto: vi.fn(), impostaDotiIncontro: vi.fn() }));
-vi.mock('../services/api', () => ({ getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/shared/ImmagineEntita', () => ({ ImmagineEntita: () => null }));
 
 const dettaglio: ConfidenteDettaglioDto = {
@@ -80,5 +80,16 @@ describe('ConfidenteDettaglioPage', () => {
     expect(impostaDotiIncontro).toHaveBeenCalledWith('takemi', [
       { rango: 1, doti: [] }, { rango: 2, doti: [{ dote: 'coraggio', note: 1 }] }, { rango: 3, doti: [{ dote: 'fascino', note: 2 }] },
     ]);
+  });
+});
+
+describe('ConfidenteDettaglioPage — fonti (A8, verifica 2026-10-03)', () => {
+  it('una fonte scritta a parole si mostra come testo invece di far cadere la pagina; un indirizzo resta un collegamento col nome del sito', async () => {
+    usePartitaStore.setState({ attiva: null });
+    getConfidenteDettaglio.mockResolvedValue({ ...dettaglio, fonti: ['guida cartacea', 'https://www.allgamestaff.it/x'] });
+    render(<MemoryRouter initialEntries={['/confidenti/takemi']}><Routes><Route path="/confidenti/:chiave" element={<ConfidenteDettaglioPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: 'Takemi' })).toBeInTheDocument();
+    expect(screen.getByText(/guida cartacea/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'www.allgamestaff.it' })).toHaveAttribute('href', 'https://www.allgamestaff.it/x');
   });
 });

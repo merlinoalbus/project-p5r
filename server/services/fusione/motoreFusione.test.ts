@@ -2,13 +2,14 @@
 // Test motoreFusione — regole di fusione sul dataset reale (DB in memoria)
 // ============================================================
 
-import { closeDb, initDb } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb } from '../../db/dbService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 import {
   arcanaRisultato, costoFusione, creaContesto, fondi, fusioniCon, invalidaMotoreFusione, livelloFusione, ricettePer, type Contesto, type PersonaFusione,
 } from './motoreFusione.js';
 
 
+/** Persona ammessa nel contesto di fusione col nome dato; se non c'è lancia un errore, così la prova fallisce subito. */
 function perNome(ctx: Contesto, nome: string): PersonaFusione {
   const p = ctx.ammesse.find((x) => x.nome === nome);
   if (!p) throw new Error(`Persona ${nome} non ammessa nel contesto`);
@@ -18,8 +19,7 @@ function perNome(ctx: Contesto, nome: string): PersonaFusione {
 describe('motoreFusione', () => {
   let ctx: Contesto;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
     invalidaMotoreFusione();
     ctx = creaContesto([]);
   });

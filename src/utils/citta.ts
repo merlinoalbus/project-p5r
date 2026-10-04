@@ -3,13 +3,13 @@
 // ============================================================
 
 import { TIPI_LUOGO } from '../../shared/tipiLuogo';
-import { NOME_DOTE_EFFETTO } from '../../shared/effettiOggetto';
+import { NOMI_DOTI } from '../../shared/doti';
 
 /** Etichette dei tipi di luogo: derivate dal catalogo condiviso (shared/tipiLuogo). */
 export const NOME_TIPO_LUOGO: Record<string, string> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.nome]));
 
-/** I nomi delle Doti: lo stesso catalogo che scrive le frasi degli effetti (shared). */
-export const NOME_DOTE: Record<string, string> = NOME_DOTE_EFFETTO;
+/** I nomi delle Doti, nell'ordine della scheda «Doti sociali»: la fonte unica è `shared/doti.ts`. */
+export const NOME_DOTE: Record<string, string> = NOMI_DOTI;
 
 /** Colori degli spilli dei luoghi sulla mappa del quartiere: dal catalogo condiviso. */
 export const COLORE_TIPO_LUOGO: Record<string, string> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.colore]));

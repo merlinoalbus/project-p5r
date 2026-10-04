@@ -1,11 +1,3 @@
-import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
-import type { GiornoChiave } from './orariNegozio.js';
-import type { TipoLuogo } from './tipiLuogo.js';
-import type { RequisitoSpillo } from './condizioniSpillo.js';
-import type { OrariNegozio } from './orariNegozio.js';
-import type { VoceEffetto } from './effettiCatalogo.js';
-import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
-import type { MeteoPartita } from './meteoPartita.js';
 // ============================================================
 // Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
 // ============================================================
@@ -15,6 +7,18 @@ import type { MeteoPartita } from './meteoPartita.js';
 // I campi `*Nome` sono la resa italiana risolta dal backend tramite la
 // tabella `traduzione`; i campi senza suffisso sono le chiavi canoniche.
 // ============================================================
+
+import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
+import type { GiornoChiave } from './orariNegozio.js';
+import type { TipoLuogo } from './tipiLuogo.js';
+import type { RequisitoSpillo } from './condizioniSpillo.js';
+import type { OrariNegozio } from './orariNegozio.js';
+import type { VoceEffetto } from './effettiCatalogo.js';
+import type { DoteChiave } from './doti.js';
+import type { CategoriaArticolo } from './articoli.js';
+import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
+import type { MeteoPartita } from './meteoPartita.js';
+import type { Osservazione, Statistiche } from './statistiche.js';
 
 /** Risposta di salute del backend. */
 export interface HealthDto {
@@ -42,13 +46,8 @@ export interface AffinitaDto {
   codiceSigla: string;
 }
 
-export interface StatisticheDto {
-  forza: number;
-  magia: number;
-  resistenza: number;
-  agilita: number;
-  fortuna: number;
-}
+/** Le cinque statistiche: la forma è quella di `shared/statistiche.ts`, una sola (rilievo R1" della verifica completa). */
+export type StatisticheDto = Statistiche;
 
 /** Riga di elenco del compendio. */
 export interface PersonaRiassuntoDto {
@@ -173,6 +172,27 @@ export interface OggettoDto {
   descrizione: string;
   descrizioneNome: string;
 }
+
+/** Requisito strutturato per raggiungere un rango di un Confidente (Fase 12.3; righe di `confidente_requisito`). Era
+ *  `RequisitoSeed` in `shared/seed.ts`, l'ultimo tipo vivo del seed JSON dismesso (rilievo O12 della verifica, 2026-10-03). */
+export type RequisitoRango =
+  | { tipo: 'dote'; dote: string; rango: number; testo: string }
+  | { tipo: 'persona-arcano'; arcano: string; testo: string }
+  /** Una Persona precisa con una skill precisa nella scorta (richieste delle Gemelle Custodi). */
+  | { tipo: 'persona-abilita'; persona: string; abilita: string; testo: string }
+  | { tipo: 'palazzo'; dungeon: string; testo: string }
+  | { tipo: 'richiesta'; richiesta: string; testo: string }
+  | { tipo: 'confidente'; confidente: string; rango: number; testo: string }
+  /** Un Ladro Fantasma gia' in squadra: il dato sta in `membro_squadra_partita` (migrazione 057). */
+  | { tipo: 'squadra'; membro: string; testo: string }
+  | { tipo: 'data'; dal: string; testo: string }
+  | { tipo: 'meteo'; condizione: 'non-piove'; testo: string }
+  /** Un fatto della storia segnato nella partita (`EVENTI_STORIA`, Partita → Progressi): il caffè al Leblanc, il duello con Akechi… */
+  | { tipo: 'evento'; evento: string; testo: string }
+  /** Un'avvertenza da controllare nel gioco, che **non blocca** il rango (la scuola aperta per Futaba al rango 4). */
+  | { tipo: 'avviso'; testo: string }
+  /** Non verificabile dall'app: grigio finché non lo confermi a mano (resta per i pacchetti che lo usano ancora). */
+  | { tipo: 'manuale'; testo: string };
 
 export interface ConfidenteDto {
   chiave: string;
@@ -611,9 +631,7 @@ export interface CompendioPartitaDto {
 }
 
 /** Valori reali letti nella scheda della Persona nel gioco a un livello (15.26): da lì in su la stima riparte da questi. */
-export interface OsservazioneStatisticheDto extends StatisticheDto {
-  livello: number;
-}
+export type OsservazioneStatisticheDto = Osservazione;
 
 export interface PersonaPossedutaDto {
   id: number;
@@ -1246,7 +1264,7 @@ export interface ArticoloDto {
   negozioNome: string;
   nome: string;
   nomeIt: string | null;
-  categoria: 'arma' | 'protezione' | 'accessorio' | 'abito' | 'consumabile' | 'regalo' | 'materiale' | 'cibo' | 'cura' | 'sp' | 'battaglia' | 'stato' | 'esplorazione' | 'oggetto-chiave' | 'libro' | 'film' | 'dvd' | 'videogioco' | 'altro';
+  categoria: CategoriaArticolo;
   /** Personaggio destinatario, «tutti», «party» o null se non indicato. */
   per: string | null;
   prezzo: number | null;
@@ -1305,7 +1323,7 @@ export interface CruciverbaTuttiDto {
 
 // ---- Città, attività, libri e film (Fase 8.1) ----
 
-export type DoteChiave = 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia';
+export type { DoteChiave } from './doti.js';
 
 export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number }
 export interface QuartiereRiassuntoDto {
@@ -1321,7 +1339,7 @@ export interface QuartiereRiassuntoDto {
   /** Il quartiere è già nel mondo, al punto in cui è la partita?
    *
    * Vero anche senza partita: senza non c'è niente da decidere. Le regole stanno in
-   * `sblocco-quartieri.json` e non solo nella data: sette quartieri su ventitré ne hanno una, gli
+   * `dati_guida` (voce `sblocco-quartieri`) e non solo nella data: sette quartieri su ventitré ne hanno una, gli
    * altri si aprono col rango di un Confidente, con un libro letto o durante un Palazzo — e sono
    * chiusi lo stesso. La mappa di Tokyo mostra solo i quartieri disponibili. */
   disponibile?: boolean;
@@ -1356,7 +1374,7 @@ export interface LuogoDto {
   verificato: boolean;
   /** Posizione dello spillo sulla mappa del quartiere (percentuali), se fissato. */
   marcatore: { x: number; y: number } | null;
-  /** La regola di **presenza** del luogo, quando ce n'è una scritta in `sblocco-luoghi.json`.
+  /** La regola di **presenza** del luogo, quando ce n'è una scritta in `dati_guida` (voce `sblocco-luoghi`).
    *
    * `sblocco` qui sopra è la prosa della guida — «lettura del libro “Shitamachi rinato”» — e
    * nessuno la valutava: trentasette luoghi su ottantaquattro portavano una condizione che l'app
@@ -1727,7 +1745,7 @@ export interface DungeonRiassuntoDto {
   date: { sblocco: string; scadenza: string; furtoConsigliato: string };
   /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco. `date` qui sopra è
    *  prosa — «12 Aprile (Martedì) – prima infiltrazione» — e da una frase non si ricava una data
-   *  senza sbagliarne qualcuna in silenzio: questa viene da `finestre-dungeon.json`, trascritto a
+   *  senza sbagliarne qualcuna in silenzio: questa viene dalla voce `finestre-dungeon` di `dati_guida`, trascritta a
    *  mano una volta. Serve a mostrare il Palazzo sulla mappa **solo quando c'è**. `al` manca dove
    *  il gioco non fissa una scadenza: Iweleth e i Memento, una volta aperti, restano. */
   finestra: { dal: string; al: string | null } | null;
@@ -2011,7 +2029,7 @@ export interface MappaDto extends MappaRiassuntoDto {
   arrivi: Array<{ spilloId: number; tipo: TipoSpillo; nome: string; mappa: string; mappaNome: string }>;
 }
 
-/** Pacchetto di esportazione/importazione (versione 1); il seed `mappe-editor.json` usa lo stesso formato senza `immagini`. */
+/** Pacchetto di esportazione/importazione delle mappe (versione 1): il file `mappe-editor.json` che l'editor scarica e reimporta. */
 export interface EsportazioneMappeDto {
   ingressi?:Array<{quartiere:string;mappa:string;x:number;y:number;zoom:number}>;
   versione: 1;
@@ -2041,7 +2059,6 @@ export interface StatoIstanzaDto {
   /** Versione dello schema del file delle partite (partite.db, migrazioni «utente»). */
   versioneSchemaPartite: number;
   versioneApp: string;
-  seed: { versione: string | null; hash: string | null; caricatoIl: string | null };
   /** Il file dei dati di gioco (gioco.db). */
   database: { nome: string; byte: number; inMemoria: boolean };
   /** Il file delle partite (partite.db), attaccato alla stessa connessione. */
@@ -2129,16 +2146,13 @@ export interface DepositoFileDto {
   file: FileDepositoDto[];
 }
 
-/** Nome storico, mantenuto come sinonimo per chi legge i pacchetti. */
-export type DepositoPacchettiDto = DepositoFileDto;
-
 /** A che punto è l'importazione del pacchetto, mentre la si aspetta.
  *
  * Serve perché l'attesa può superare quella di chi sta davanti: un proxy (Cloudflare si ferma a cento
  * secondi) chiude la connessione mentre il server sta ancora sostituendo i dati, e il browser lo
  * leggerebbe come un fallimento. Chiedendo lo stato si sa se sta ancora lavorando, e com'è finita.
  */
-export type FaseImportazionePacchetto = 'lettura' | 'scarico' | 'verifica' | 'copia-di-sicurezza' | 'sostituzione' | 'riapertura' | 'controllo';
+export type FaseImportazionePacchetto = 'lettura' | 'verifica' | 'copia-di-sicurezza' | 'sostituzione' | 'riapertura' | 'controllo';
 
 export interface StatoImportazionePacchettoDto {
   inCorso: boolean;
@@ -2184,6 +2198,42 @@ export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita'
 
 /** Un luogo della città come voce da scegliere (sede di un negozio o di un'attività). */
 export interface LuogoOpzioneDto { chiave: string; nome: string; tipo: string; quartiere: string; quartiereNome: string }
+
+/**
+ * Gli elenchi chiusi da cui l'editor delle condizioni prende i valori (`GET /condizioni/elenchi`). Questa forma e le due sotto
+ * esistevano solo nel client, con le rotte che rispondevano senza tipo: una divergenza non si vedeva (rilievo R6").
+ */
+export interface ElenchiRegoleDto {
+  articoli: Array<{ chiave: string; nome: string; gruppo: string }>;
+  letture: Array<{ chiave: string; nome: string; categoria: 'libro' | 'film' }>;
+  arcani: Array<{ chiave: string; nome: string }>;
+  persone: Array<{ chiave: string; nome: string }>;
+  abilita: Array<{ chiave: string; nome: string }>;
+  squadra: Array<{ chiave: string; nome: string }>;
+  /** Le sole attività che si contano per volte svolte. */
+  attivita: Array<{ chiave: string; nome: string }>;
+  /** Con il programma punti: «punti negozio» va solo ai programmi manuali, «grado cliente» solo a chi ha il rango. */
+  negozi: Array<{ chiave: string; nome: string; programma: 'manuale' | 'rango-cliente' | null }>;
+  /** `calcolato`: l'evento si legge dalla squadra della partita e non si segna a mano. */
+  eventi: Array<{ chiave: string; nome: string; calcolato: boolean }>;
+  contatori: Array<{ chiave: string; nome: string }>;
+}
+
+/** Un pin con uno stato (raccolto, aperto, parlato, incontrato, azionato…, o «ottenuto» dalla voce della guida) per la condizione
+ *  «Pin di una mappa» (`GET /condizioni/spilli`): `chiave` è l'uid, `gruppo` la mappa. */
+export interface PinConStatoDto {
+  chiave: string; nome: string; tipo: string; gruppo: string;
+  /** La parola dello stato con cui si cita: quella del tipo, o «ottenuto» per un pin che la prende dalla sua voce della guida. */
+  parola: string;
+}
+
+/** La grafica predefinita che vive nel database, nella forma del manifest degli asset (`GET /immagini/manifest`). */
+export interface ManifestImmaginiDto {
+  generato: string;
+  totale: number;
+  /** «ambito/chiave» → URL versionato. */
+  file: Record<string, string>;
+}
 
 /** Gli stati di una partita per le condizioni: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
 export interface ProgressiPartitaDto {

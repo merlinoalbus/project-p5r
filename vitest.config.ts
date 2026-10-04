@@ -19,7 +19,6 @@ export default defineConfig({
     include: [
       'server/**/*.test.ts',
       'shared/**/*.test.ts',
-      'scripts/**/*.test.ts',
       'src/**/*.test.ts',
       'src/**/*.test.tsx',
       'vite/**/*.test.ts',
@@ -43,8 +42,9 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      '@shared': path.resolve(import.meta.dirname, './shared'),
-    },
+    alias: [
+      // `request(app)` con un server per app invece di uno per richiesta: le porte effimere non finiscono più (test/supertest.ts)
+      { find: /^supertest$/, replacement: path.resolve(import.meta.dirname, './test/supertest.ts') },
+    ],
   },
 });

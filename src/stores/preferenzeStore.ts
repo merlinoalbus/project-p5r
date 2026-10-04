@@ -26,6 +26,8 @@ export interface Preferenze {
 
 const PREDEFINITE: Preferenze = { graficaPredefinita: true, vistaPersona: 'piastrelle', menuRidotto: false, mappaHomeChiusa: false };
 
+/** Legge le preferenze salvate partendo dai valori predefiniti: ogni campo si prende solo se ha un valore valido; storage
+ *  assente o JSON illeggibile danno i predefiniti. */
 function leggi(): Preferenze {
   try {
     const grezzo = globalThis.localStorage?.getItem(CHIAVE_STORAGE);
@@ -43,6 +45,7 @@ function leggi(): Preferenze {
   }
 }
 
+/** Salva le preferenze nel localStorage, ignorando gli errori dello storage. */
 function scrivi(p: Preferenze): void {
   try {
     globalThis.localStorage?.setItem(CHIAVE_STORAGE, JSON.stringify(p));
@@ -60,6 +63,7 @@ interface PreferenzeState extends Preferenze {
 
 /** Preferenze del dispositivo (persistite in localStorage quando possibile). */
 export const usePreferenzeStore = create<PreferenzeState>((set, get) => {
+  /** Applica la modifica allo stato e salva tutte le preferenze correnti. */
   const salva = (modifica: Partial<Preferenze>) => {
     set(modifica);
     const s = get();

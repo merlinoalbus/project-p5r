@@ -1,3 +1,7 @@
+// ============================================================
+// 047_progresso_libri.test.ts — migrazione 047: progresso dei libri per partita, dalle vecchie spunte al totale delle sessioni, e cascata sulla partita
+// ============================================================
+
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';

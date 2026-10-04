@@ -12,9 +12,11 @@ import { QuartierePage } from './QuartierePage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { DungeonRiassuntoDto, MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
 
-const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), urlImmagine: vi.fn((ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file`), getImmagini: vi.fn(() => Promise.resolve([])) }));
-vi.mock('../services/api', () => api);
+const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn(() => Promise.resolve([])) }));
+vi.mock('../services/api', (vero) => moduloApi(vero, api));
 
+/** Costruisce la mappa `chiave`: «tokyo» è la città radice, ogni altra un quartiere figlio di Tokyo; ha un solo spillo
+ *  di passaggio (Shibuya su Tokyo, Untouchable sui quartieri). */
 const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, nomeRivisto: false, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: chiave === 'tokyo' ? null : 'Tokyo', percorso: chiave === 'tokyo' ? [{ chiave: 'tokyo', nome: 'Tokyo' }] : [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave, nome }], figli: [], arrivi: [],
   spilli: [{ id: 1, mappaChiave: chiave, tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#3b82f6', nome: chiave === 'tokyo' ? 'Shibuya' : 'Untouchable', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' }] });
 
@@ -114,7 +116,8 @@ describe('CittaPage', () => {
     const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
     const scheda = within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ });
     const cartellino = within(mappa).getByTitle('Shibuya');
-    const sagomaSulla = (el: HTMLElement) => el.querySelector('img')!.getAttribute('style') ?? '';
+    /** Lo stile della sagoma (l'`img` interna) dell'elemento: contiene il colore del contorno, bianco a riposo e oro se acceso. */
+    const sagomaSulla =(el: HTMLElement) => el.querySelector('img')!.getAttribute('style') ?? '';
 
     // a riposo: contorno bianco da tutte e due le parti
     expect(sagomaSulla(cartellino)).toContain('#fff)');

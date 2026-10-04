@@ -1,3 +1,7 @@
+// ============================================================
+// Test OrganizzazioneMappe — albero dei luoghi, risoluzione dei vecchi indirizzi, contenuti della guida per area, selettore di contesto e mappa incorporata
+// ============================================================
+
 import { usePreferenzeStore } from '../../stores/preferenzeStore';
 import { useAssetStore } from '../../stores/assetStore';
 import { SelettoreContestoMappa } from './SelettoreContestoMappa';
@@ -11,8 +15,10 @@ import { AlberoLuoghi } from './AlberoLuoghi';
 import { RisolviMappa } from './RisolviMappa';
 import { ContenutiGuidaMappa } from './ContenutiGuidaMappa';
 const api = vi.hoisted(() => ({risolviMappa:vi.fn(),getContenutiMappa:vi.fn(),getMappa:vi.fn()}));
-vi.mock('../../services/api', () => api);
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
+/** Riassunto minimo di una mappa di tipo «luogo» con la chiave, il genitore e il nome dati (nome predefinito = chiave), senza immagine né spilli. */
 function m(chiave:string,genitore:string|null,nome=chiave):MappaRiassuntoDto { return {chiave,genitore,nome,nomeRivisto:false,tipo:'luogo',ordine:0,immagineUrl:null,asset:null,entita:null,origine:'utente',numeroSpilli:0,numeroFigli:0,updatedAt:''}; }
+/** Rotta di arrivo dei test: scrive a schermo percorso e query dell'indirizzo corrente, per verificare dove ha portato un reindirizzamento. */
 function Indirizzo(){ const p=useLocation();return <div>{p.pathname}{p.search}</div>; }
 beforeEach(()=>{vi.resetAllMocks();usePreferenzeStore.setState({graficaPredefinita:true});useAssetStore.setState({manifest:null,caricato:true,mancanti:{}});});
 it('rende ogni profondità e mantiene distinti gli omonimi senza icone di passaggio',()=>{
@@ -37,6 +43,7 @@ it('i contenuti mantengono testo e punti senza inventare coordinate o attività'
 });
 
 it('i passi di un Enigma rientrano sotto di lui (095), le altre voci no', async () => {
+  /** Costruisce un punto della guida di tipo «nota» con id `punto:…` e il contenitore indicato (null = voce di primo livello, altrimenti l'Enigma di cui è un passo). */
   const voce = (id: string, nome: string, contenitore: string | null) => ({ id, nome, descrizione: '', tipo: 'nota', riferimento: { tipo: 'punto', chiave: id.slice(6) }, collezionabile: false, soloPosizione: false, ruolo: 'punto', contenitore });
   api.getContenutiMappa.mockResolvedValue({ mappa: 'palazzo', aree: [{ chiave: 'sala', nome: 'Sala', descrizione: '', note: '', mappe: [], punti: [voce('punto:e', 'La porta della torre', null), voce('punto:a', 'Tira la leva', 'punto:e'), voce('punto:f', 'Forziere', null)] }] });
   render(<MemoryRouter><ContenutiGuidaMappa mappa="palazzo" area="sala" /></MemoryRouter>);

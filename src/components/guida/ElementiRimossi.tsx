@@ -27,13 +27,20 @@ interface Props {
   versione?: unknown;
 }
 
+/**
+ * Le righe nascoste di un tipo di catalogo (o dei soli articoli di `negozio`), ciascuna con «Rimetti negli elenchi».
+ * Si ricarica quando cambia `versione`; nella pagina di tutti i tipi gli articoli riportano il nome del loro negozio.
+ * Senza righe non mostra nulla, salvo con `sempre`, dove dice che non ce ne sono.
+ */
 export function ElementiRimossi({ tipo, negozio, onRipristinato, sempre, versione }: Props) {
   const elenco = useCarica(() => getCatalogo(tipo, { nascosti: true, negozio }), [tipo, negozio, versione]);
   // Nella pagina di tutti i tipi un articolo dice di quale negozio è, col nome e non con la chiave.
   const negozi = useCarica(() => (tipo === 'articolo' && !negozio ? getNegozi() : Promise.resolve([])), [tipo, negozio]);
+  /** Il nome del negozio dalla sua chiave; se non è fra quelli caricati resta la chiave stessa. */
   const nomeNegozio = (chiave: unknown) => negozi.dati?.find((n) => n.chiave === chiave)?.nome ?? (typeof chiave === 'string' ? chiave : '');
   const righe = elenco.dati ?? [];
   if (!sempre && righe.length === 0) return null;
+  /** Rimette la riga negli elenchi; a buon fine notifica, ricarica i rimossi e avvisa la pagina, altrimenti notifica l'errore. */
   const ripristina = (chiave: string, nome: string) => {
     void nascondiElementoCatalogo(tipo, chiave, false)
       .then(() => { notifica('success', `«${nome}» è di nuovo negli elenchi.`); void elenco.ricarica(); onRipristinato?.(); })

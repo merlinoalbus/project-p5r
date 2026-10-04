@@ -8,12 +8,12 @@
 // collegati) e se in questa partita si può già giocare: se no il «+» resta spento con il motivo.
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getVideogiochi } from '../services/api/compendio';
-import { impostaProgressoVideogioco } from '../services/api/partite';
+import { getVideogiochi, impostaProgressoVideogioco } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useCarica } from '../hooks/useCarica';
+import { useCodaProgresso } from '../hooks/useCodaProgresso';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { notifica } from '../stores/notificationStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
@@ -31,6 +31,7 @@ import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/
 import { bloccata, formattaYen, motivoBlocco, prezzoChip } from '../utils/letture';
 import type { VideogiocoDto } from '../types';
 
+/** Un numero di riepilogo in una carta: il valore in grande e sotto l'etichetta col suo segno. */
 function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
   return (
     <span className="card flex flex-col gap-0.5 px-3 py-2">
@@ -40,6 +41,12 @@ function Numero({ valore, etichetta, segno }: { valore: number | string; etichet
   );
 }
 
+/**
+ * La scheda di un videogioco: illustrazione (o icona dei minigiochi), nome, sede, stato,
+ * disponibilità, barra dei round fatti sul totale. Con una partita offre «Togli» e «Round» (il
+ * secondo spento a gioco finito o finché non è disponibile, con il motivo sotto) e il segno di
+ * salvataggio in corso; poi effetti, negozi che lo vendono o costo, dettagli, posizione e correzione.
+ */
 function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPosizione }: { g: VideogiocoDto; partitaId: number | null; occupato: boolean; progresso: number; onCambia: (g: VideogiocoDto, passo: number) => void; onCorretto: () => void; onPosizione: () => void }) {
   const totale = g.totaleRound;
   const percentuale = totale > 0 ? Math.round((progresso / totale) * 100) : 0;
@@ -74,7 +81,7 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
       {/* Il gesto è il round: due pulsanti larghi uguali. Con il gioco non ancora disponibile il «+»
           resta spento e il motivo sta sotto. */}
       {partitaId && (
-        <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${g.nome}`}>
+        <div className="grid grid-cols-2 gap-2" role="group" aria-label={`Avanzamento ${g.nome}`}>
           <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli"
             disabled={progresso === 0} onClick={() => onCambia(g, -1)} aria-label={`Togli un round a ${g.nome}`} />
           <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Round"
@@ -100,18 +107,33 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
   );
 }
 
+/**
+ * Pagina dei videogiochi: carica i giochi per la partita attiva, mostra i conteggi (giochi,
+ * completati, round), la ricerca (nome, sede, luogo, effetti) e le schede divise fra da giocare e
+ * completati (questi ripiegati). I round passano da una coda per gioco che invia una richiesta per
+ * volta; «Mostra posizione» apre sopra gli elenchi la mappa del gioco scelto.
+ */
 export function VideogiochiPage() {
   useDocumentTitle('Videogiochi');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   const dati = useCarica(() => getVideogiochi(partitaId ?? undefined), [partitaId]);
   const [ricerca, setRicerca] = useState('');
-  const [giochi, setGiochi] = useState<VideogiocoDto[]>([]);
-  const [occupati, setOccupati] = useState<Record<string, boolean>>({});
   const [mostraFatti, setMostraFatti] = useState(false);
   const [selezionato, setSelezionato] = useState<string | null>(null);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { if (dati.dati) setGiochi(dati.dati.videogiochi); }, [dati.dati]);
+  // i giochi sono quelli dei dati della pagina (niente copia locale da riallineare con un effetto)
+  const giochi = useMemo(() => dati.dati?.videogiochi ?? [], [dati.dati]);
+
+  /** Le pressioni rapide sul «+» si mettono in coda, non si perdono: il numero mostrato è quello chiesto, e una sola richiesta
+   *  per volta lo insegue finché non lo raggiunge — nella partita in cui è partita (`useCodaProgresso`, rilievo A1). */
+  const coda = useCodaProgresso<VideogiocoDto>(partitaId, {
+    invia: impostaProgressoVideogioco,
+    applica: (nuovo) => dati.imposta((correnti) => ({ ...correnti, videogiochi: correnti.videogiochi.map((x) => (x.chiave === nuovo.chiave ? nuovo : x)) })),
+    // il gioco completato dà le sue Doti: si segnano a mano, l'avviso le ricorda
+    dopoOgniInvio: (nuovo) => avvisaDotiDaSegnare(nuovo.daSegnare, nuovo.nome),
+    messaggioErrore: 'Aggiornamento fallito.',
+    segnalaErrore: (m) => notifica('error', m),
+  });
 
   const q = ricerca.trim().toLocaleLowerCase('it');
   const visibili = useMemo(() => giochi.filter((g) => !q || `${g.nome} ${g.sedeNome ?? ''} ${g.luogo} ${g.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)), [giochi, q]);
@@ -121,49 +143,11 @@ export function VideogiochiPage() {
   const roundTotali = giochi.reduce((s, g) => s + g.totaleRound, 0);
   const scelto = giochi.find((g) => g.chiave === selezionato) ?? null;
 
-  /** Le pressioni rapide sul «+» si mettono in coda, non si perdono: il numero mostrato è quello
-   *  chiesto, e una sola richiesta per volta lo insegue finché non lo raggiunge. */
-  const desiderati = useRef(new Map<string, number>());
-  const confermati = useRef(new Map<string, number>());
-  const inVolo = useRef(new Set<string>());
-  const [mostrati, setMostrati] = useState<Record<string, number>>({});
-
-  const svuotaCoda = async (g: VideogiocoDto, id: number) => {
-    if (inVolo.current.has(g.chiave)) return;
-    inVolo.current.add(g.chiave);
-    confermati.current.set(g.chiave, g.progresso);
-    setOccupati((o) => ({ ...o, [g.chiave]: true }));
-    try {
-      for (;;) {
-        const confermato = confermati.current.get(g.chiave) ?? g.progresso;
-        const desiderato = desiderati.current.get(g.chiave) ?? confermato;
-        if (desiderato === confermato || partitaId !== id) break;
-        const nuovo = await impostaProgressoVideogioco(id, g.chiave, desiderato);
-        confermati.current.set(g.chiave, nuovo.progresso);
-        // il gioco completato dà le sue Doti: si segnano a mano, l'avviso le ricorda
-        avvisaDotiDaSegnare(nuovo.daSegnare, nuovo.nome);
-        setGiochi((xs) => xs.map((x) => (x.chiave === nuovo.chiave ? nuovo : x)));
-      }
-    } catch (err) {
-      const confermato = confermati.current.get(g.chiave) ?? g.progresso;
-      desiderati.current.set(g.chiave, confermato);
-      setMostrati((m) => ({ ...m, [g.chiave]: confermato }));
-      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
-    } finally {
-      inVolo.current.delete(g.chiave);
-      setOccupati((o) => ({ ...o, [g.chiave]: false }));
-    }
-  };
-
   /** Un round in più o in meno, contato sull'ultimo valore chiesto. */
   const cambia = (g: VideogiocoDto, passo: number) => {
-    if (!partitaId) return;
-    const base = desiderati.current.get(g.chiave) ?? g.progresso;
+    const base = coda.valore(g);
     const desiderato = Math.min(Math.max(base + passo, 0), g.totaleRound);
-    if (desiderato === base) return;
-    desiderati.current.set(g.chiave, desiderato);
-    setMostrati((m) => ({ ...m, [g.chiave]: desiderato }));
-    void svuotaCoda(g, partitaId);
+    if (desiderato !== base) coda.accoda(g, desiderato);
   };
 
   // Le stesse colonne di Libri e Film: due da tablet in su, tre su desktop largo.
@@ -204,7 +188,7 @@ export function VideogiochiPage() {
             {daFare.length === 0
               ? <p className="m-0 text-[13px] text-text-muted" role="status">{giochi.length === 0 ? 'Nessun gioco nel catalogo.' : q ? 'Nessun gioco da fare con questo testo.' : 'Finiti tutti.'}</p>
               : <ul className={griglia} aria-label="Videogiochi da giocare">
-                  {daFare.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} progresso={mostrati[g.chiave] ?? g.progresso} onCambia={cambia} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
+                  {daFare.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={coda.occupato(g)} progresso={coda.valore(g)} onCambia={cambia} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
                 </ul>}
           </section>
 
@@ -215,7 +199,7 @@ export function VideogiochiPage() {
               </button>
               {mostraFatti && (
                 <ul className={griglia} aria-label="Videogiochi completati">
-                  {fatti.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={!!occupati[g.chiave]} progresso={mostrati[g.chiave] ?? g.progresso} onCambia={cambia} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
+                  {fatti.map((g) => <Scheda key={g.chiave} g={g} partitaId={partitaId} occupato={coda.occupato(g)} progresso={coda.valore(g)} onCambia={cambia} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
                 </ul>
               )}
             </section>

@@ -9,13 +9,12 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa, esportaMappe, importaMappe, verificaCondizioni } from '../services/mappe/mappeService.js';
 import { palazzoDiOgniMappa } from '../services/palazziService.js';
 import type { PuntoInteresseDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 interface Pin { id: number; nome: string; raccolto: boolean; disponibilita?: { stato: string; requisiti: Array<{ tipo: string; stato: string; dettaglio: string }> }; condizioni: Array<{ tipo: string; testo: string }> }
@@ -23,22 +22,27 @@ interface Pin { id: number; nome: string; raccolto: boolean; disponibilita?: { s
 describe('condizione «Pin di una mappa»', () => {
   let partita: number;
   let mappa: string;
+  /** Restituisce l'uid stabile dello spillo con quell'id. */
   const uidDi = (id: number) => prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(id) as string;
+  /** Crea sulla mappa di prova un pin del tipo dato (con le condizioni, se indicate), verifica il 201 e ne restituisce id e uid. */
   const nuovoPin = async (tipo: string, nome: string, condizioni?: unknown[]) => {
     const r = await request(app).post(`/api/mappe/${mappa}/spilli`).send({ tipo, nome, x: 10, y: 10, ...(condizioni ? { condizioni } : {}) });
     expect(r.status, JSON.stringify(r.body)).toBe(201);
     return { id: r.body.data.id as number, uid: uidDi(r.body.data.id as number) };
   };
+  /** Sostituisce le condizioni del pin `id` con quelle date (restituisce la richiesta, per controllarne l'esito). */
   const condiziona = (id: number, condizioni: unknown[]) => request(app).put(`/api/mappe/spilli/${id}`).send({ condizioni });
+  /** Segna (o toglie il segno) del pin `id` nella partita di prova, pretendendo il 200. */
   const segna = (id: number, si: boolean) => request(app).put(`/api/partite/${partita}/spilli/${id}`).send({ raccolto: si }).expect(200);
+  /** Rilegge la mappa di prova (con la partita, salvo `conPartita` falso) e restituisce il pin con quell'id. */
   const leggi = async (id: number, conPartita = true) => ((await request(app).get(`/api/mappe/${mappa}${conPartita ? `?partita=${partita}` : ''}`).expect(200)).body.data.spilli as Pin[]).find((s) => s.id === id)!;
+  /** Stato di disponibilità del pin nella partita; un pin senza disponibilità calcolata vale «disponibile». */
   const stato = async (id: number) => (await leggi(id)).disponibilita?.stato ?? 'disponibile';
+  /** Costruisce una condizione «Pin di una mappa»: vale se lo spillo `uid` è (o non è) segnato. */
   const su = (uid: string, segnato: boolean) => ({ tipo: 'spillo' as const, spillo: uid, segnato });
 
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Pin condizionati' })).body.data as { id: number }).id;
     // una planimetria di un Palazzo con una porta del gioco (nativa): l'elemento fisso che di norma non si nasconde mai
     mappa = prepared("SELECT mappa_chiave FROM spillo WHERE tipo = 'porta' AND nativo_json IS NOT NULL AND mappa_chiave IS NOT NULL ORDER BY id LIMIT 1").pluck().get() as string;
@@ -263,6 +267,7 @@ describe('condizione «Pin di una mappa»', () => {
       expect(r.status, JSON.stringify(r.body)).toBe(201);
       return sicura;
     };
+    /** Legge dal DB le condizioni salvate sullo spillo col nome dato (lista vuota se non ne ha). */
     const condizioniDi = (nome: string) => JSON.parse((prepared('SELECT condizioni_json FROM spillo WHERE nome = ?').pluck().get(nome) as string | null) ?? '[]');
     /** Solo le condizioni del caso: le altre (dei casi precedenti) non devono contare negli scarti. */
     const soloQuesta = (p: ReturnType<typeof esportaMappe>, nomePorta: string) => { for (const s of p.mappe.flatMap((m) => m.spilli)) if (s.nome !== nomePorta) delete s.condizioni; return p; };

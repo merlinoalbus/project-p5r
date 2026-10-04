@@ -1,3 +1,7 @@
+// ============================================================
+// MappaPage — indice delle mappe (albero) e visore a schermo intero di una mappa (Fase 13.2)
+// ============================================================
+
 import { ImmaginiLuogo } from '../components/mappe/ImmaginiLuogo';
 import { SelettoreContestoMappa } from '../components/mappe/SelettoreContestoMappa';
 import { etichetteDistinte, nomePresentazioneMappa, presentaMappa, titoloGruppoImmagini } from '../utils/presentazioneMappa';
@@ -5,9 +9,6 @@ import { AlberoLuoghi } from '../components/mappe/AlberoLuoghi';
 import { ContenutiGuidaMappa } from '../components/mappe/ContenutiGuidaMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
 import { haPlanimetria } from '../utils/haPlanimetria';
-// ============================================================
-// MappaPage — indice delle mappe (albero) e visore a schermo intero di una mappa (Fase 13.2)
-// ============================================================
 
 import { urlMappa } from '../utils/navigazioneMappa';
 import { useMemo, useState } from 'react';
@@ -34,11 +35,16 @@ import { ritornoMappe } from '../utils/ritornoMappe';
  * Il nodo `tokyo` dell'atlante resta — è il genitore dei quartieri, e senza di lui l'albero non
  * sta in piedi — ma la sua *planimetria* non è più una destinazione: chi ci arrivava vedeva una
  * seconda Tokyo, diversa da quella che aveva appena guardato. Il reindirizzamento è qui e non
- * solo sui collegamenti perché i modi di arrivarci sono tanti (le briciole del visore, «Torna a
+ * solo sui collegamenti perché i modi di arrivarci sono tanti (le briciole del visore, «Su:
  * Tokyo», un indirizzo salvato) e vanno tutti a finire nello stesso posto. */
 const TOKYO = 'tokyo';
 const CITTA = '/guida/citta';
 
+/**
+ * Pagina delle mappe: senza chiave nell'URL mostra l'indice; con la chiave `tokyo` (anche quando
+ * ci si arriva risolvendo un'altra chiave) reindirizza alla Città; altrimenti risolve la chiave
+ * nella mappa vera e ne apre il dettaglio con lo stato della partita attiva.
+ */
 export function MappaPage() {
   const { chiave } = useParams<{ chiave: string }>();
   const attiva = usePartitaStore((s) => s.attiva);
@@ -71,6 +77,7 @@ function IndiceMappe() {
     const figliDi = new Map<string | null, MappaRiassuntoDto[]>();
     for (const m of mappe) figliDi.set(m.genitore, [...(figliDi.get(m.genitore) ?? []), m]);
     const cache = new Map<string, { mappe: number; spilli: number }>();
+    /** Mappe e spilli di tutto il sottoalbero sotto una chiave (lei esclusa), con i risultati in cache e l'insieme dei visitati che spezza eventuali cicli contando zero. */
     const conta = (chiave: string, visti: Set<string>): { mappe: number; spilli: number } => {
       const salvato = cache.get(chiave);
       if (salvato) return salvato;
@@ -95,6 +102,7 @@ function IndiceMappe() {
   const [percorso, setPercorso] = useState<string[]>([]);
   const gruppoAperto = percorso.length > 0 ? gruppi.find((g) => g.versioni.some((v) => v.chiave === percorso[0])) ?? null : null;
   const nodoAperto = gruppoAperto ? mappe.find((m) => m.chiave === percorso[percorso.length - 1]) ?? null : null;
+  /** Il nome con cui presentare una mappa nell'indice: quello del suo gruppo di immagini. */
   const nomeDi = (m: MappaRiassuntoDto) => titoloGruppoImmagini(m);
   return <div className="flex flex-col gap-4">
     <IntestazionePagina titolo="Mappe"
@@ -307,6 +315,12 @@ function senzaPrefisso(titolo: string, nome: string): string {
   return titolo.startsWith(p) ? titolo.slice(p.length) : titolo;
 }
 
+/**
+ * Una griglia di anteprime di mappe con il titolo (quello già distinto se arriva, altrimenti
+ * calcolato qui senza il nome del Palazzo), il numero di spilli sull'anteprima e quante mappe
+ * contiene. Con `onScendi`, una mappa che ne contiene altre diventa un pulsante che scende nel
+ * pannello; le altre sono collegamenti al visore.
+ */
 function Griglia({ mappe, nome, etichetta, titoli, onScendi }: { mappe: MappaRiassuntoDto[]; nome: string; etichetta: string; titoli?: Map<string, string>; onScendi?: (chiave: string) => void }) {
   // I titoli arrivano già distinti da chi conosce **tutto** l'elenco (le due griglie di un Palazzo
   // sono la stessa pagina); dove non arrivano, si calcolano qui sull'elenco che c'è.

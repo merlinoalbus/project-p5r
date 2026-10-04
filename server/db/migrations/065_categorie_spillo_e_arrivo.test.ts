@@ -27,6 +27,7 @@ it('risolve il punto d’arrivo nello spillo più vicino, toglie destinazioni e 
 
   runMigrations(db);
 
+  /** Mappa e spillo d'arrivo registrati come destinazione dello spillo `id`, o undefined se non ha destinazione. */
   const arrivo = (id: number) => db.prepare('SELECT mappa_chiave, spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id = ?').get(id) as { mappa_chiave: string; spillo_arrivo_id: number | null } | undefined;
   expect(arrivo(vicino)).toEqual({ mappa_chiave: 'arrivo', spillo_arrivo_id: ingresso });
   expect(arrivo(lontano)).toEqual({ mappa_chiave: 'arrivo', spillo_arrivo_id: null });

@@ -2,16 +2,15 @@
 // Test migrazione 033 — riallineamento delle spunte dell'11 aprile dopo la rimozione dell'azione «esame» dal seed
 // ============================================================
 
-import { closeDb, getDb, initDb, prepared } from '../dbService.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../dbService.js';
 import { DATA_11_APRILE, rimappaAzioniUndiciAprile } from './033_percorso_11_aprile.js';
 import { DDL_UTENTE_STORICHE } from '../schemaUtente.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
 describe('migrazione 033 — percorso dell’11 aprile', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    const db = dbDiProva();
     // le spunte per posizione di allora (dalla «utente» 015 sono per identità, `spunta_voce_partita`)
     db.exec(DDL_UTENTE_STORICHE.find((s) => s.includes('utente.azione_partita ('))!);
   });

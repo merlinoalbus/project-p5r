@@ -22,26 +22,27 @@ import { byteTesto } from '../../utils/byte';
 import { BarraInvio } from './BarraInvio';
 import type { DepositoFileDto } from '../../types';
 import { Selettore } from '../shared/Selettore';
+import { salvaFile } from '../../utils/salvaFile';
 
-function salvaFile(nome: string, blob: Blob): void {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = nome;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
+/**
+ * Card «Backup e ripristino» delle Impostazioni: riepiloga lo stato dell'istanza (database, partite, immagini, caratteri,
+ * copie di sicurezza), scarica l'istanza completa e ripristina uno ZIP scelto dalla cartella d'appoggio del server,
+ * passando sempre da una finestra di conferma. Non ha props: legge e aggiorna lo stato da sé.
+ */
 export function BackupIstanza() {
   const stato = useCarica(() => getStatoIstanza(), []);
   const [occupato, setOccupato] = useState(false);
   const [deposito, setDeposito] = useState<DepositoFileDto | null>(null);
   const [fileScelto, setFileScelto] = useState('');
-  // il file da ripristinare: dal dispositivo oppure dalla cartella d'appoggio
+  // il file della cartella d'appoggio da ripristinare: non null finché la finestra di conferma è aperta
   const [dalDeposito, setDalDeposito] = useState<string | null>(null);
   const [lavoroSulServer, setLavoroSulServer] = useState(false);
   const s = stato.dati;
 
+  /**
+   * Scarica l'istanza completa e la salva sul dispositivo; la notifica dice anche con che nome il server l'ha
+   * depositata nella cartella d'appoggio, se lo ha fatto. I pulsanti restano disabilitati per tutta l'operazione.
+   */
   const esporta = async () => {
     setOccupato(true);
     try {

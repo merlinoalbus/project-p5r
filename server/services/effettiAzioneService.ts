@@ -15,8 +15,8 @@
 import { prepared } from '../db/dbService.js';
 import type { EffettiAzioneDto, IncontroConfidenteDto, RiferimentoAzioneDto } from '../../shared/types.js';
 import type { EffettoAzione } from '../../shared/effettiAzione.js';
-import { aggiornaConfidente, annullaEffetti, confidenti, nomeDote, puntiDaNote } from './partiteService.js';
-import { avanzamentoLettura, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
+import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote, puntiDaNote } from './partiteService.js';
+import { avanzamentoLettura, haAnimaDaCineasta, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
 
 export interface OpzioniSpunta {
@@ -32,11 +32,6 @@ export interface AzioneConEffetti {
   produce: EffettoAzione[];
   rangoAtteso?: number | null;
   momento?: MomentoIncontro;
-}
-
-/** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. */
-function haAnimaDaCineasta(partitaId: number): boolean {
-  return !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = 'anima-da-cineasta'").get(partitaId);
 }
 
 /** Le visioni al cinema di un film già contate dalle spunte della partita (voci della giornata). */
@@ -85,7 +80,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   }
   let confidente: EffettiAzioneDto['confidente'] = null;
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && opz.noteRisposta) {
-    const c = confidenti(partitaId).find((x) => x.chiave === a.riferimento!.chiave);
+    // solo quel Confidente, non tutti (rilievo P1' della verifica); un riferimento a un Confidente che non c'è non dà punti
+    const c = prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(a.riferimento.chiave) ? confidenteDellaPartita(partitaId, a.riferimento.chiave) : undefined;
     if (c && c.rango > 0 && c.rango < 10) {
       const prima = c.punti;
       const agg = aggiornaConfidente(partitaId, c.chiave, { noteRisposta: opz.noteRisposta, bonusArcano: c.personaArcanoInScorta });
@@ -104,7 +100,7 @@ export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): vo
 }
 
 /** «Incontro con Tae Takemi: Coraggio +2», o «già contato» se quell'incontro (o quel passaggio di rango) c'era già. */
-export function descriviIncontro(i: IncontroConfidenteDto): string {
+function descriviIncontro(i: IncontroConfidenteDto): string {
   if (i.giaContato) return `Incontro con ${i.nome} già contato`;
   return `Incontro con ${i.nome}${i.doti.length ? `: ${i.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')}` : ''}`;
 }

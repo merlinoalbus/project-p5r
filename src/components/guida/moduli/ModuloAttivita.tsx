@@ -29,11 +29,17 @@ const ICONA_FASCIA: Record<string, ReactNode> = {
 };
 const OPZIONI_FASCIA: OpzioneIcone[] = FASCE_ATTIVITA.map((f) => ({ chiave: f.chiave, nome: f.nome, icona: ICONA_FASCIA[f.chiave] }));
 
+/**
+ * I campi di un'attività (o di un videogioco, col tipo fissato: niente tipo né conteggio, e le sessioni diventano
+ * round): nome, tipo, fascia, sede, costo, paga e paga massima solo per i lavori, sessioni, conteggio, dettagli ed
+ * effetti. Per le attività contate per volte gli effetti offrono «vale dalla seconda volta in poi» e un aiuto proprio.
+ */
 export function ModuloAttivita({ dati, imposta, disabilitato }: PropsModulo) {
   const nomi = useNomiPerEffetti();
   const tipo = testoDi(dati.tipo);
   const videogioco = dati._tipoFisso === 'videogioco';
   const lavoro = tipo === 'lavoro';
+  /** Cambia tipo impostando il conteggio predefinito per quel tipo; uscendo dai lavori azzera le paghe. */
   const cambiaTipo = (nuovo: string) => imposta({ tipo: nuovo, tracciamento: tracciamentoPerTipo(nuovo), ...(nuovo === 'lavoro' ? {} : { paga_yen: null, paga_massima: null }) });
   return (
     <div className="flex flex-col gap-3">

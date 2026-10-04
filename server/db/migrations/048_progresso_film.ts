@@ -14,6 +14,10 @@ const ALIAS_FILM = [
   ['cinema-love-possibly', 'cinema-l-amore-chissa'],
 ] as const;
 
+/**
+ * Porta sulla chiave canonica i film segnati con la chiave alias: per ogni partita che ha l'una o
+ * l'altra resta una sola riga canonica con l'`updated_at` più recente, poi le righe alias si cancellano.
+ */
 function unisciAlias(db: Database.Database, alias: string, canonica: string): void {
   db.prepare(`
     INSERT INTO lettura_partita (partita_id, tipo, chiave, updated_at)

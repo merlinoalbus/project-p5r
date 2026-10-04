@@ -1,21 +1,23 @@
-import { condizioneSpillo as condizioneDiUnPin } from './mappe.js';
-import { foglieCondizione } from '../../shared/condizioniSpillo.js';
-
-/** Le condizioni del catalogo (articoli, negozi, letture, attività, e i loro effetti): quelle dei pin senza lo stato di un altro
- *  pin, che vale solo nelle condizioni dei pin delle mappe (2026-10-03), a qualunque profondità di TUTTE / ALMENO UNA / NON. */
-const condizioneSpillo = condizioneDiUnPin.refine((c) => !foglieCondizione(c).some((f) => f.tipo === 'spillo'), 'Lo stato di un pin si usa solo nelle condizioni dei pin delle mappe.');
 // ============================================================
 // Schemi zod — catalogo estensibile dall'utente e agenda del giorno (Fase 16.1)
 // ============================================================
 
 import { z } from 'zod';
+import { condizioneSpillo as condizioneDiUnPin } from './mappe.js';
+import { categoriaArticolo, dataGioco, dote } from './comuni.js';
+import { foglieCondizione } from '../../shared/condizioniSpillo.js';
 import { TIPI_CATALOGO } from '../../shared/types.js';
 import { FASCE_ORARIO, GIORNI_SETTIMANA_CHIAVI } from '../../shared/orariNegozio.js';
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shared/attivita.js';
-import { FAMIGLIE_EFFETTO } from '../../shared/effettiOggetto.js';
+import { normalizzaEffettoOggetto, type EffettoOggetto } from '../../shared/effettiOggetto.js';
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
 
+/** Le chiavi di un elenco di costanti, nella forma di tupla non vuota che `z.enum` richiede. */
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
+
+/** Le condizioni del catalogo (articoli, negozi, letture, attività, e i loro effetti): quelle dei pin senza lo stato di un altro
+ *  pin, che vale solo nelle condizioni dei pin delle mappe (2026-10-03), a qualunque profondità di TUTTE / ALMENO UNA / NON. */
+const condizioneSpillo = condizioneDiUnPin.refine((c) => !foglieCondizione(c).some((f) => f.tipo === 'spillo'), 'Lo stato di un pin si usa solo nelle condizioni dei pin delle mappe.');
 
 /** Gli orari di un negozio come valori (shared/orariNegozio). */
 export const orariNegozio = z.object({
@@ -25,15 +27,23 @@ export const orariNegozio = z.object({
   nota: z.string().trim().max(300).nullable().default(null),
 });
 
+/** Un effetto dichiarato valido per la sua famiglia (`normalizzaEffettoOggetto`, la stessa regola della lettura): non basta la
+ *  famiglia, servono i suoi campi. Il valore salvato è quello normalizzato, senza campi in più. */
+const effettoOggetto = z.custom<EffettoOggetto>((v) => normalizzaEffettoOggetto(v) !== null, 'Effetto non valido per la sua famiglia')
+  // la descrizione è solo documentazione (OpenAPI): la forma la controlla `normalizzaEffettoOggetto`
+  .meta({ description: 'Un effetto `EffettoOggetto` (shared/effettiOggetto.ts), validato e normalizzato da `normalizzaEffettoOggetto`. Il campo `famiglia` sceglie i campi richiesti: ripristina, rianima, cura-stato, infliggi-stato, resiste-stato, previene-stato, statistica, dote, regalo, sblocca-luogo, sblocca-funzione, moltiplica, aumenta-punti, descrittivo.' })
+  .transform((v) => normalizzaEffettoOggetto(v)!);
+const effettoJson = effettoOggetto.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v)));
+
 /** Una voce di effetto (shared/effettiCatalogo): l'effetto dichiarato, se vale alle volte successive, le sue condizioni. */
-export const voceEffetto = z.object({
-  effetto: z.object({ famiglia: z.enum(chiaviDi(FAMIGLIE_EFFETTO)) }).passthrough(),
+const voceEffetto = z.object({
+  effetto: effettoOggetto,
   ripetuto: z.boolean().optional(),
   condizioni: z.array(condizioneSpillo).max(20).optional(),
 });
 const effettiJson = z.array(voceEffetto).max(20).transform((v) => JSON.stringify(v)).optional();
 
-const dataGioco = z.string().regex(/^\d{2}-\d{2}$/, 'La data del gioco è nel formato MM-GG.');
+/** Un testo con gli spazi ai capi tolti e lungo al massimo `max` caratteri. */
 const testo = (max: number) => z.string().trim().max(max);
 
 /** I tipi accettati nel percorso. Erano scritti a mano e sono rimasti indietro quando il catalogo
@@ -43,13 +53,9 @@ export const paramsTipoCatalogo = z.object({ tipo: z.enum(TIPI_CATALOGO) });
 export const paramsElementoCatalogo = paramsTipoCatalogo.extend({ chiave: z.string().min(1).max(200) });
 
 /** Campi di un negozio scrivibili dall'utente (le colonne della tabella, in snake_case come nel servizio). */
+// Dalla voce 5 (2026-09-12) il negozio non ha condizioni proprie: la sua disponibilità sono gli orari e le condizioni stanno sugli
+// articoli (`CAMPI.negozio` in catalogoService). Lo schema non accetta più un campo che il servizio avrebbe scartato in silenzio.
 export const datiNegozio = z.object({
-  /** **Confermato da te.** Una riga che aggiungi nasce non verificata, ed e' giusto: non viene
-   *  dalla guida. Ma finora quel marchio si poteva solo mettere, mai togliere - il campo non era
-   *  nel modulo e l'API non lo accettava - quindi ogni cosa inserita restava «da verificare» per
-   *  sempre, senza che esistesse un modo di verificarla. */
-  
-  condizioni_json: z.array(condizioneSpillo).max(20).transform(v=>JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   luogo: testo(200).default(''),
   luogo_chiave: z.string().max(80).nullable().optional(),
@@ -78,9 +84,8 @@ export const datiArticolo = z.object({
   // Le categorie di un articolo sono i tipi di cosa che un negozio può vendere, e le prime nove non
   // li coprivano: libri, DVD e videogiochi finivano in «altro», e i quattro consumabili che l'app
   // distingue dappertutto — cura, SP, battaglia, stato — sparivano dentro «consumabile».
-  // Le etichette italiane stanno in `src/utils/negozi.ts`, le figure in `ui/categoria-*`.
-  categoria: z.enum(['arma', 'protezione', 'accessorio', 'abito', 'consumabile', 'regalo', 'materiale', 'cibo',
-    'cura', 'sp', 'battaglia', 'stato', 'esplorazione', 'oggetto-chiave', 'libro', 'film', 'dvd', 'videogioco', 'altro']).default('altro'),
+  // L'elenco sta in `shared/articoli.ts`.
+  categoria: categoriaArticolo.default('altro'),
   per: testo(80).nullable().optional(),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   // Quante se ne possono comprare. `null` non e' zero: zero direbbe «nessuna», null dice «limite
@@ -94,22 +99,20 @@ export const datiArticolo = z.object({
   // negozio. Per un articolo collegato non si scrivono: la lettura li prende dall'oggetto.
   // La dichiarazione strutturata (shared/effettiOggetto). `effetto` resta la frase che ne discende:
   // la ricerca per testo ci passa sopra, e chi legge il database senza l'app deve capire lo stesso.
-  effetto_json: z.object({ famiglia: z.string().min(1).max(40) }).passthrough().nullable().optional()
-    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
+  effetto_json: effettoJson,
   effetto: testo(600).nullable().optional(),
   statistiche: testo(400).nullable().optional(),
   nota: testo(600).nullable().optional(),
 });
 
 /** Campi di un libro scrivibili dall'utente. */
-export const datiLibro = z.object({
+const datiLibro = z.object({
   /** **Che cosa apre leggerlo**, dichiarato invece che raccontato.
    *
    * Da non confondere con `condizioni_json`, che e' il verso opposto: quelle dicono quando il
    * libro e' disponibile, questa che cosa il libro sblocca. Per `sblocca-luogo` il luogo e' la
    * chiave di un quartiere, cosi' l'app ci puo' portare. */
-  effetto_json: z.object({ famiglia: z.string().min(1).max(40) }).passthrough().nullable().optional()
-    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
+  effetto_json: effettoJson,
   // Le condizioni valgono anche qui. L'editor le mostrava già e finivano nel nulla, perché la
   // colonna non esisteva (migrazione 052): sono la disponibilità, «dal 18 aprile».
   verificato: z.boolean().optional(),
@@ -118,7 +121,7 @@ export const datiLibro = z.object({
   nome_it: testo(160).nullable().optional(),
   dove: testo(300).default(''),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
-  dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable().optional(),
+  dote: dote.nullable().optional(),
   // «note» qui e' il numero di note musicali della Dote (1-3), non un testo: e' la colonna del
   // catalogo dei libri e si chiama cosi' da sempre.
   note: z.number().int().min(0).max(9).nullable().optional(),
@@ -146,7 +149,7 @@ const datiFilmBase = z.object({
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
   dove: z.enum(['cinema', 'dvd']).default('cinema'),
-  dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable().optional(),
+  dote: dote.nullable().optional(),
   note: z.number().int().min(0).max(9).nullable().optional(),
   // Quanto vale **rivedere** un titolo: al cinema la guida lo dichiara riga per riga («prima
   // visione: +3; visioni successive: +1»), e senza questo campo quella distinzione viveva solo
@@ -157,8 +160,8 @@ const datiFilmBase = z.object({
   sessioni: z.number().int().min(1).max(9).nullable().optional(),
   dettagli: testo(2000).nullable().optional(),
 });
-export const datiFilm = datiFilmBase.superRefine(rifinisciFilm);
-export const datiFilmParziale = datiFilmBase.partial().superRefine(rifinisciFilm);
+const datiFilm = datiFilmBase.superRefine(rifinisciFilm);
+const datiFilmParziale = datiFilmBase.partial().superRefine(rifinisciFilm);
 
 /** Campi di un'attivita' (compresi lavori e videogiochi) scrivibili dall'utente. */
 const datiAttivitaBase = z.object({
@@ -182,7 +185,7 @@ const datiAttivitaBase = z.object({
   // Le Doti di un'attivita' sono un elenco: `[{dote, note, condizione}]`. Si accetta gia'
   // strutturato e si salva come JSON, come fa il seed.
   doti_json: z.array(z.object({
-    dote: z.enum(['conoscenza', 'fascino', 'coraggio', 'gentilezza', 'perizia']).nullable(),
+    dote: dote.nullable(),
     note: z.number().int().min(0).max(9).nullable(),
     condizione: testo(400).nullable(),
   })).max(10).transform((v) => JSON.stringify(v)).optional(),
@@ -191,11 +194,11 @@ const datiAttivitaBase = z.object({
   premi: testo(2000).nullable().optional(),
   paga: testo(400).nullable().optional(),
 });
-export const datiAttivita = datiAttivitaBase.superRefine(rifinisciAttivita);
-export const datiAttivitaParziale = datiAttivitaBase.partial().superRefine(rifinisciAttivita);
+const datiAttivita = datiAttivitaBase.superRefine(rifinisciAttivita);
+const datiAttivitaParziale = datiAttivitaBase.partial().superRefine(rifinisciAttivita);
 
 /** Campi di un luogo della città scrivibili dall'utente (migrazione 071). */
-export const datiLuogo = z.object({
+const datiLuogo = z.object({
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   quartiere_chiave: z.string().min(1).max(80),
@@ -214,7 +217,7 @@ export const datiLuogo = z.object({
  * sequenza giusta, per le domande a più passaggi — ed è il dato che l'app usa per dire «rispondi
  * questo». Un campo libero avrebbe fatto scrivere la stessa risposta in dieci modi diversi senza
  * renderne utile nessuno: è lo stesso difetto che avevano le Doti prima del loro editor. */
-export const datiDomanda = z.object({
+const datiDomanda = z.object({
   data: dataGioco,
   tipo: z.enum(['classe', 'esame-medio', 'esame-finale', 'tv', 'altro']).default('classe'),
   chi: testo(120).default(''),
@@ -227,7 +230,7 @@ export const datiDomanda = z.object({
 });
 
 /** Campi di una riga del cruciverba: l'indizio di quel giorno e la parola che lo risolve. */
-export const datiCruciverba = z.object({
+const datiCruciverba = z.object({
   data: dataGioco,
   indizio: testo(400).min(1),
   risposta: testo(200).min(1),

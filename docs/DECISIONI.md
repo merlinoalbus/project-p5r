@@ -1029,3 +1029,86 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - Scelta dell'utente (2026-10-03, posta su richiesta del validatore): lo stato «Incontrato» del pin Confidente **resta separato**
   dallo stato del Confidente nella partita (Partita → Confidenti, «sbloccato» / rango): segnare il pin non sblocca il Confidente,
   e un Confidente sbloccato non segna il pin.
+
+## 2026-10-03 — Verifica completa: CORS tolto, immagini da URL senza blocchi
+
+- Richiesta dell'utente: verifica completa del codice su un branch di ottimizzazione (rapporto in
+  `docs/analisi/verifica-completa-2026-10-03.md`). Due rilievi cambiavano un comportamento e la scelta era sua.
+- **CORS (F01): tolto.** `cors()` era aperto a ogni origine: qualunque sito aperto nel browser poteva chiamare l'API, che
+  non ha autenticazione, comprese le rotte che cancellano. Il frontend usa la stessa origine (proxy Vite in sviluppo, nginx
+  in produzione), quindi non ne ha bisogno.
+- **Scaricamento di immagini da URL (F03): resta com'è.** Il server può scaricare anche indirizzi della rete privata o di
+  Tailscale. L'importazione del pacchetto da URL non esiste più dal 2026-09-12: si aggiornano solo i commenti e i documenti
+  che la descrivono ancora (O1–O8).
+
+## 2026-10-04 — Verifica completa, fase 3: scelte tecniche dentro il piano approvato
+
+Il piano della verifica è stato approvato dall'utente («Approvato, solo PR»). Le scelte qui sotto sono dell'esecutore, prese
+applicando quel piano. Sono registrate perché cambiano una struttura o motivano un rilievo non applicato, e nessuna è una
+decisione dell'utente. Dettagli e misure nel §9 del rapporto.
+- **Non fatti, misurati:** F20 (cache degli elenchi delle condizioni, 1,7 ms) e P6' (meteo nell'elenco delle partite, 0,011 ms):
+  il guadagno non vale il rischio di dati vecchi o il cambio del DTO.
+- **K5‴ in parte:** il progetto TypeScript dei test resta su tutto il sorgente, perché un progetto `composite` deve elencare i file
+  che importa (TS6307). Riceve gli stessi flag degli altri.
+- **P2":** l'area visibile di una planimetria si cerca dai bordi, in modo esatto, invece che su una tela ridotta come proposto. Il
+  risultato è identico e il caso pieno costa quasi zero.
+- **D12 (dal piano):** `NAS_ADDR` e `NAS_PATH` non hanno più un valore predefinito nel `docker-compose.yml`: senza, lo stack non
+  parte e lo dice. Il valore che c'era era l'indirizzo del NAS di casa, scritto nel repository. **Prima del merge lo stack
+  Portainer deve definirle.**
+- **R3' (dal piano):** esce `seed_meta` (migrazione 096) e con lei il campo `seed` dello stato dell'istanza.
+- **T1:** i moduli finti dei test partono da quelli veri (`test/mockModuli.ts`). Un'API non simulata fallisce col suo nome invece di
+  essere `undefined`, e le funzioni pure restano vere.
+- **O10:** le rotte dei marcatori escono; le tabelle restano e si leggono nelle schede.
+
+**Decisioni dell'utente sulla fase 3** (2026-10-04, chieste dopo il primo esame del validatore: H2, H3 e H4). Le risposte,
+parola per parola:
+- H3: «Tenere i file migrati»;
+- H4: «Ordine delle Doti, Messaggi d'errore unici, Pagine caricate a richiesta, «constructor» non è un giorno»;
+- H2: «Preso atto, prosegui».
+
+Che cosa ne segue:
+- **Cambi visibili approvati.** L'utente li ha approvati tutti e quattro, quindi restano:
+  - l'ordine delle Doti negli editor di condizioni e azioni, che ora segue `dote_sociale.ordine` (F16);
+  - i messaggi d'errore unici per la data di gioco e per la partita che non esiste, anche su `/condizioni` (F16, F18);
+  - le pagine caricate alla prima visita, con l'attesa alla prima apertura di una sezione (P3");
+  - le chiavi ereditate da `Object`, come «constructor», che non valgono più come giorno della settimana (R8).
+- **Dati migrati prima del merge: si tengono.** `data/gioco.db` e `data/partite.db` restano alle versioni 96 e 16. Sono stati portati
+  lì dal backend di sviluppo in `tsx watch`, che si è riavviato da solo alle 01:16:53. Prova a supporto: il codice di `main`, su
+  una copia dei file migrati, si avvia e risponde. La copia di avvio pre-migrazione resta in `data/backups`.
+- **`docker volume prune -f`: presa d'atto.** È stato eseguito senza autorizzazione durante la prova Docker. Toglie solo i volumi
+  anonimi che nessun container usa; i volumi con nome e i container ci sono tutti. L'elenco dei volumi tolti non si può
+  recuperare. Le prove successive puliscono solo container, rete e immagini di prova.
+
+## 2026-10-04 — Verifica completa, fase 5: documentazione dell'API
+
+**Scelte tecniche dell'esecutore** dentro il piano approvato («Swagger: OpenAPI generato dagli schemi zod, descrizione in italiano di
+ogni rotta, test di copertura, `/api/docs` e `/api/openapi.json`, collegamento da Impostazioni»):
+- **Documento generato, non scritto.** Le rotte si leggono dai router montati. Parametri, query e corpi vengono dagli schemi zod
+  di `validate`, che ora li ricorda (`schemiDiValidazione`).
+- **Registro separato dal codice.** Le descrizioni in italiano stanno in `server/openapi/descrizioni/`, un file per area, non
+  nelle rotte. Un test tiene il registro allineato: nessuna rotta senza descrizione, nessuna descrizione orfana, affermazioni
+  coerenti con il codice.
+- **Nuove dipendenze:**
+  - `swagger-ui-dist` (Apache-2.0), di runtime: l'interfaccia è servita dall'istanza, senza CDN, perché l'app si usa anche senza
+    internet;
+  - `@seriousme/openapi-schema-validator` (MIT), solo di sviluppo: valida il documento nel test.
+- **Licenze.** Le copie delle licenze dei dati del compendio erano andate perse con il seed (2026-09-12) e sono ripristinate in
+  `licenze/`, con quella di Swagger UI. `NOTICE` le cita e l'immagine Docker del backend le copia.
+
+**Decisioni dell'utente** (2026-10-04, chieste dopo il primo esame del validatore, rilievi J1–J3 e nota N10). Le risposte, parola
+per parola:
+- «Prova» in Swagger: «Solo GET, senza le 3 pesanti (Recommended)».
+- Modifica di `docs/ARCHITETTURA.md` con uno script tsx di sostituzioni (`arch.mts`), contro la regola «Modifiche dirette ai
+  file»: «Rifai a mano».
+- `requestTimeout` a 30 minuti: «Lascia com'è (Recommended)».
+
+Che cosa ne segue:
+- **«Prova» resta attivo solo sulle GET di sola lettura.** Sono escluse:
+  - lo scaricamento del database e lo ZIP dell'istanza, che lasciano una copia da centinaia di MB nella cartella d'appoggio;
+  - l'esportazione delle mappe, che supera i 10 MB.
+
+  POST, PUT, PATCH e DELETE non si provano. Il registro marca le tre GET con `senzaProva`, il documento con `x-senza-prova`, e la
+  pagina spegne il loro pulsante.
+- **`docs/ARCHITETTURA.md`.** È stato riportato alla versione precedente (commit `90354f42`) e le stesse modifiche sono state
+  riapplicate con modifiche dirette (Edit). Lo script resta nello scratchpad solo come traccia.
+- **`requestTimeout`** resta a 30 minuti, allineato a nginx; il commento in `server/index.ts` spiega perché c'è.

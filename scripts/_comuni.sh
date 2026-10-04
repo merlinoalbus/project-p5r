@@ -2,7 +2,7 @@
 # ============================================================
 # Funzioni comuni agli script di gestione server (Git Bash su Windows e Linux)
 # ============================================================
-# Porte: BE 3101, FE 5273 (dev). Log: BE.log / FE.log nella root.
+# Porte: da .env (BE 3101, FE 5273 se mancano). Log: BE.log / FE.log nella root.
 # I PID vengono salvati in .pids/ per uno stop pulito dell'intero
 # albero di processi (bash/npx → tsx watch → node server).
 #
@@ -25,8 +25,17 @@
 set -u
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PID_DIR="$ROOT_DIR/.pids"
-BE_PORT=3101
-FE_PORT=5273
+
+# valore_env <NOME> → l'ultimo valore di NOME in .env (senza \r), vuoto se non c'è
+valore_env() {
+  [ -f "$ROOT_DIR/.env" ] || return 0
+  grep -E "^$1=" "$ROOT_DIR/.env" | tail -n 1 | cut -d= -f2- | tr -d '\r'
+}
+
+# Le porte vengono da .env come per il server (`BE_PORT`, poi `PORT`) e per Vite (`FE_PORT`): prima erano scritte qui a mano,
+# e cambiandole in .env gli script controllavano la porta sbagliata (rilievo S5 della verifica completa).
+BE_PORT="$(valore_env BE_PORT)"; [ -n "$BE_PORT" ] || BE_PORT="$(valore_env PORT)"; [ -n "$BE_PORT" ] || BE_PORT=3101
+FE_PORT="$(valore_env FE_PORT)"; [ -n "$FE_PORT" ] || FE_PORT=5273
 BE_LOG="$ROOT_DIR/BE.log"
 FE_LOG="$ROOT_DIR/FE.log"
 mkdir -p "$PID_DIR"
@@ -111,6 +120,22 @@ e_node() {
     node|node.exe) return 0 ;;
     *) return 1 ;;
   esac
+}
+
+# gia_avviato_o_esci <porta> <etichetta> → 0 (e lo dice) se ad ascoltare sulla porta è node, cioè il nostro server già avviato;
+# 1 (e lo dice) se è un altro programma: prima l'avvio si dichiarava riuscito anche con la porta occupata da altri, e l'app non
+# partiva senza che niente lo segnalasse.
+gia_avviato_o_esci() {
+  local porta="$1" etichetta="$2" pid nome
+  pid="$(pid_in_ascolto "$porta")"
+  carica_tabella_processi
+  nome="$(nome_processo "$pid")"
+  if e_node "$nome"; then
+    echo "[$etichetta] già in ascolto sulla porta $porta"
+    return 0
+  fi
+  echo "[$etichetta] ERRORE: la porta $porta è occupata da un altro programma (${nome:-sconosciuto}, PID $pid): liberala o cambia porta" >&2
+  return 1
 }
 
 # e_runtime_nostro <nome> → 0 se è un anello intermedio dei nostri avvii (mai bash: potrebbe

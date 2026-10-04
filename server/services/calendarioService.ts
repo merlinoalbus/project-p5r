@@ -3,7 +3,7 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata } from './verificaPartita.js';
 import { indiceGiornoScolastico } from './domandeService.js';
 import type { CalendarioDto, GiornoCalendarioDto, SettimanaGuidaDto } from '../../shared/types.js';
 
@@ -12,6 +12,7 @@ interface RigaEvento { id: number; data: string; tipo: GiornoCalendarioDto['even
 
 const GIORNI: Record<string, string> = { Lunedi: 'Lunedì', Martedi: 'Martedì', Mercoledi: 'Mercoledì', Giovedi: 'Giovedì', Venerdi: 'Venerdì', Sabato: 'Sabato', Domenica: 'Domenica' };
 
+/** Un giorno del calendario come DTO: nome del giorno con l'accento (`GIORNI`, se noto), tempo libero dal JSON e gli eventi già raccolti per quella data. */
 function giornoDto(g: RigaGiorno, eventi: RigaEvento[]): GiornoCalendarioDto {
   return {
     data: g.data, giornoSettimana: GIORNI[g.giorno_settimana] ?? g.giorno_settimana, meteo: g.meteo, settimana: g.settimana,
@@ -20,7 +21,8 @@ function giornoDto(g: RigaGiorno, eventi: RigaEvento[]): GiornoCalendarioDto {
   };
 }
 
-export function settimaneGuida(): SettimanaGuidaDto[] {
+/** I riassunti delle settimane della guida, in ordine di numero. */
+function settimaneGuida():SettimanaGuidaDto[] {
   return prepared('SELECT numero, titolo, periodo, url, riassunto, incertezze FROM settimana_guida ORDER BY numero').all() as SettimanaGuidaDto[];
 }
 
@@ -29,7 +31,7 @@ export function calendario(partitaId?: number, mese?: string): CalendarioDto {
   let dataGioco: string | null = null;
   if (partitaId !== undefined) {
     const p = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
-    if (!p) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+    if (!p) throw partitaNonTrovata(partitaId);
     dataGioco = p.data_gioco;
   }
   const giorni = (mese

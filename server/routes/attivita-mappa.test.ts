@@ -1,11 +1,15 @@
+// ============================================================
+// attivita-mappa.test.ts — spilli di attività riferiti ad attività o luogo: dettaglio del luogo, nessuna condizione su uno spillo di città, export e import della mappa
+// ============================================================
+
 import request from 'supertest';
 import {createApp} from '../bootstrap.js';
-import {initDb,closeDb,getDb} from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import {closeDb,getDb} from '../db/dbService.js';
 import type {MappaDto,SpilloDto} from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app=createApp();
-beforeAll(()=>{const db=initDb(':memory:');caricaPacchetto(db);});
+beforeAll(()=>{dbDiProva();});
 afterAll(()=>{closeDb();});
 
 it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizioni e pacchetti',async()=>{
@@ -19,6 +23,7 @@ it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizion
     const s=response.body.data as SpilloDto;
     expect(s.dettaglio).toMatchObject({tipo,luogo:{chiave:luogo.chiave,quartiere:luogo.quartiere_chiave,cosaOffre:luogo.cosa_offre,quando:luogo.quando}});
   }
+  /** Rilegge la mappa «attivita-narrative» con la partita di prova e ne restituisce gli spilli (con disponibilità calcolata). */
   const spilli=async()=>((await request(app).get(`/api/mappe/attivita-narrative?partita=${partita}`)).body.data as MappaDto).spilli;
   // uno spillo di città non è condizionato (2026-09-11): la condizione «solo di sera» inviata non si salva e il pin non è mai bloccato
   expect((await spilli()).every(s=>s.condizioni.length===0 && s.disponibilita?.stato!=='bloccato')).toBe(true);

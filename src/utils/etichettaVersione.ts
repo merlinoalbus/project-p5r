@@ -1,3 +1,7 @@
+// ============================================================
+// etichettaVersione — come si presenta una versione (immagine) di un luogo: etichetta e nome con versione
+// ============================================================
+
 import type { MappaRiassuntoDto } from '../types';
 
 /** Che cosa mostra questa versione del luogo: l'estensione della zona che rivela, l'inquadratura

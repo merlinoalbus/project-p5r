@@ -19,6 +19,8 @@ interface Props {
   riempi?: boolean;
 }
 
+/** Crea lo stato `useOggi` della partita e, a caricamento finito, affianca le colonne guida e mappa
+ * (in colonna sugli schermi stretti); con `riempi` le colonne occupano l'altezza del contenitore. */
 export function OggiPartita({ partita, riempi }: Props) {
   const oggi = useOggi(partita.id);
   return (

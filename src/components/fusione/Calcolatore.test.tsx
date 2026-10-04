@@ -10,18 +10,20 @@ import { RicettePersona } from './RicettePersona';
 import type { EsitoFusioneDto, PersonaFusioneDto, PersonaRiassuntoDto, RicetteFusioneDto } from '../../types';
 
 const { getFondi, getRicettePer, getFusioniCon, getImmagini, getEredita } = vi.hoisted(() => ({ getFondi: vi.fn(), getRicettePer: vi.fn(), getFusioniCon: vi.fn(), getImmagini: vi.fn(), getEredita: vi.fn() }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getFondi, getRicettePer, getFusioniCon, getImmagini, getEredita,
   caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
+/** Riassunto di una Persona del compendio (nome italiano = nome, arcano già tradotto, statistiche a 1), con i campi di `extra` che sovrascrivono i predefiniti. */
 function persona(id: number, nome: string, arcana: string, livello: number, extra: Partial<PersonaRiassuntoDto> = {}): PersonaRiassuntoDto {
   return {
     id, nome, nomeIt: nome, arcana, arcanaNome: arcana, livello, eredita: null, ereditaNome: null, speciale: false, rara: false, dlc: false, richiedeConfidenteMax: false,
     tratto: '', statistiche: { forza: 1, magia: 1, resistenza: 1, agilita: 1, fortuna: 1 }, affinita: [], ...extra,
   };
 }
+/** Riduce un riassunto di Persona alla forma usata nelle ricette di fusione, conservandone i flag speciale/rara/dlc. */
 const fus = (p: PersonaRiassuntoDto): PersonaFusioneDto => ({ id: p.id, nome: p.nome, nomeIt: p.nomeIt, arcana: p.arcana, arcanaNome: p.arcanaNome, livello: p.livello, speciale: p.speciale, rara: p.rara, dlc: p.dlc });
 
 const arsene = persona(1, 'Arsène', 'Matto', 1);
@@ -49,6 +51,7 @@ beforeEach(() => {
   });
 });
 
+/** Nella scheda del selettore con l'etichetta data scrive `testo` nella ricerca e clicca il pulsante dell'opzione il cui nome corrisponde a `nome`. */
 async function scegli(etichetta: string, testo: string, nome: string) {
   const campo = within(screen.getByText(etichetta).closest('.card')!).getByPlaceholderText('Cerca per nome o arcano…');
   await act(async () => { fireEvent.change(campo, { target: { value: testo } }); });

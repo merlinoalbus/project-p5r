@@ -1,5 +1,9 @@
 # Fonti del dataset Persona 5 Royal
 
+> **Storico** (verifica completa, 2026-10-04): l'analisi delle fonti resta valida; i percorsi `data/seed/sorgenti/`,
+> `data/seed/verifica-incrociata.md` e `scripts/seed/…` erano della pipeline del seed JSON, dismessa il 2026-09-12. Il compendio
+> che ne è uscito oggi sta nelle tabelle di `gioco.db` (pacchetto di gioco), con le attribuzioni in `NOTICE` e le copie delle licenze in `licenze/`.
+
 Analisi svolta il 2026-09-03 (step 0.1 → prerequisito dello step 0.2). Due fonti open source, indipendenti fra loro.
 
 ## Fonte primaria — chinhodado/persona5_calculator (Apache-2.0)

@@ -4,16 +4,17 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata } from './verificaPartita.js';
 import { CHIAVI_STATISTICHE, origineStima, statisticheStimate, type Osservazione, type Statistiche } from '../../shared/statistiche.js';
 import { t } from './traduzioniService.js';
-import { skillDto } from './compendioService.js';
+import { skillDto, skillRiassunti } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import { verificaObiettivi } from './obiettiviService.js';
 import { requisitoBloccante, semaforiConfidente, statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
 import { meteoOra } from './meteoService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
-  SemaforiRangoDto,
+  SemaforiRangoDto, SkillRiassuntoDto,
   FasciaGioco,
 } from '../../shared/types.js';
 
@@ -22,6 +23,7 @@ interface RigaPartita {
   nuova_partita_plus: number; dlc_posseduti_json: string; allarme_attivo: number; created_at: string; updated_at: string;
 }
 
+/** Una riga della tabella `partita` per l'API: flag booleani, DLC posseduti dal JSON, fascia («sera» o «giorno») e meteo del momento. */
 function partitaDto(r: RigaPartita): PartitaDto {
   return {
     id: r.id, nome: r.nome, note: r.note, attiva: r.attiva === 1, livelloProtagonista: r.livello_protagonista, dataGioco: r.data_gioco,
@@ -32,23 +34,27 @@ function partitaDto(r: RigaPartita): PartitaDto {
   };
 }
 
+/** La riga di una partita; 404 se non esiste (è anche il controllo d'esistenza delle altre funzioni). */
 function rigaPartita(id: number): RigaPartita {
   const r = prepared('SELECT * FROM partita WHERE id = ?').get(id) as RigaPartita | undefined;
-  if (!r) throw httpErrors.notFound('partita-non-trovata', `La partita ${id} non esiste.`);
+  if (!r) throw partitaNonTrovata(id);
   return r;
 }
 
 // ---- Partite ----
 
+/** Tutte le partite: prima quella attiva, poi le altre dalla modificata più di recente. */
 export function elencaPartite(): PartitaDto[] {
   return (prepared('SELECT * FROM partita ORDER BY attiva DESC, updated_at DESC').all() as RigaPartita[]).map(partitaDto);
 }
 
+/** La partita attiva, o null se non ce n'è nessuna. */
 export function partitaAttiva(): PartitaDto | null {
   const r = prepared('SELECT * FROM partita WHERE attiva = 1').get() as RigaPartita | undefined;
   return r ? partitaDto(r) : null;
 }
 
+/** Una partita per id (404 se non esiste). */
 export function leggiPartita(id: number): PartitaDto {
   return partitaDto(rigaPartita(id));
 }
@@ -67,12 +73,16 @@ export interface DatiPartita {
   allarmeAttivo?: boolean;
 }
 
-/** Crea una partita; se è la prima (o `attiva` è richiesto) diventa attiva. */
 /** Primo giorno del percorso della guida ('MM-GG'): giorno corrente predefinito di una nuova partita. */
 function primoGiornoDelGioco(): string | null {
   return (prepared('SELECT data FROM giorno_percorso ORDER BY ordine LIMIT 1').get() as { data: string } | undefined)?.data ?? null;
 }
 
+/**
+ * Crea una partita in una transazione: se è la prima o se `attiva` è richiesto diventa l'attiva (togliendo il segno alle
+ * altre); i campi assenti prendono i valori predefiniti (livello 1, primo giorno della guida, giorno, difficoltà normale).
+ * Nascono anche le righe delle Doti a zero e dei Confidenti non sbloccati, e l'evento nello storico.
+ */
 export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean }): PartitaDto {
   const db = getDb();
   return db.transaction(() => {
@@ -98,6 +108,10 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
   })();
 }
 
+/**
+ * Aggiorna i campi indicati di una partita (gli altri restano) in una transazione. Un cambio di livello del protagonista si
+ * ricopia sulla riga di Joker nella squadra e va nello storico, come l'inizio e la fine dell'Allarme.
+ */
 export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
   const r = rigaPartita(id);
   return getDb().transaction(() => {
@@ -109,6 +123,8 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
       dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,
     );
     if (dati.livelloProtagonista !== undefined && dati.livelloProtagonista !== r.livello_protagonista) {
+      // la riga di Joker nella squadra ricopia lo stesso numero (la fonte resta la partita): mai due livelli diversi nel file
+      prepared("UPDATE membro_squadra_partita SET livello = ? WHERE partita_id = ? AND personaggio_chiave = 'joker'").run(dati.livelloProtagonista, id);
       registraEvento(id, 'livello-protagonista', `Protagonista al livello ${dati.livelloProtagonista}`, `Da ${r.livello_protagonista} a ${dati.livelloProtagonista}.`, { da: r.livello_protagonista, a: dati.livelloProtagonista });
     }
     if (dati.allarmeAttivo !== undefined && (dati.allarmeAttivo ? 1 : 0) !== r.allarme_attivo) {
@@ -118,6 +134,7 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
   })();
 }
 
+/** Rende attiva la partita (404 se non esiste) e toglie il segno a quella che lo era, in una transazione. */
 export function attivaPartita(id: number): PartitaDto {
   rigaPartita(id);
   getDb().transaction(() => {
@@ -127,6 +144,7 @@ export function attivaPartita(id: number): PartitaDto {
   return partitaDto(rigaPartita(id));
 }
 
+/** Elimina una partita (404 se non esiste); se era l'attiva, diventa attiva la più recente fra quelle che restano. */
 export function eliminaPartita(id: number): void {
   const r = rigaPartita(id);
   getDb().transaction(() => {
@@ -156,6 +174,7 @@ export function puntiDaNote(note: 1 | 2 | 3, libro = false, fortuna = false, cin
   return fortuna ? Math.floor(base * 1.5) : base;
 }
 
+/** I ranghi di una Dote sociale in ordine, con il nome italiano e la soglia di punti. */
 function ranghiDote(chiave: string): RangoDoteDto[] {
   return (prepared('SELECT rango, nome, soglia FROM dote_sociale_rango WHERE dote_chiave = ? ORDER BY rango').all(chiave) as Array<{ rango: number; nome: string; soglia: number }>)
     .map((r) => ({ rango: r.rango, nome: t('rangoDote', `${chiave}/${r.rango}`), soglia: r.soglia }));
@@ -169,6 +188,7 @@ export function progressoDote(punti: number, ranghi: RangoDoteDto[]): { rango: n
   return { rango: attuale.rango, nomeRango: attuale.nome, sogliaProssima: prossimo?.soglia ?? null, mancanti: prossimo ? prossimo.soglia - punti : null };
 }
 
+/** Le Doti sociali della partita (404 se non esiste) in ordine di gioco: punti (0 se mai segnati), rango raggiunto, distanza dal successivo e ranghi. */
 export function dotiSociali(partitaId: number): DoteSocialePartitaDto[] {
   rigaPartita(partitaId);
   return (prepared(`SELECT d.chiave, d.nome, d.ordine, COALESCE(dp.punti, 0) AS punti, dp.updated_at
@@ -179,7 +199,7 @@ export function dotiSociali(partitaId: number): DoteSocialePartitaDto[] {
     });
 }
 
-/** Il nome di una Dote sociale («Gentilezza»), per dire che cosa il gioco dà senza toccarla (`DotiDaSegnare`). */
+/** Il nome di una Dote sociale («Gentilezza»), per dire che cosa il gioco dà senza toccarla (`DoteDaSegnareDto`). */
 export function nomeDote(chiave: string): string {
   if (!prepared('SELECT 1 FROM dote_sociale WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
   return t('doteSociale', chiave);
@@ -190,7 +210,7 @@ export function nomeDote(chiave: string): string {
  *
  * **Solo a mano** (scelta dell'utente, 2026-09-30: «fai che i punti Doti Sociali li sposto solo io manualmente e non
  * automaticamente»): la chiamano la scheda Doti e l'API delle Doti, nient'altro. Spunte, letture, turni, incontri,
- * domande e cruciverba dicono che cosa il gioco dà (`DotiDaSegnare`) e lo ricordano, ma non toccano i punti — né
+ * domande e cruciverba dicono che cosa il gioco dà (`DoteDaSegnareDto`) e lo ricordano, ma non toccano i punti — né
  * aggiungendo né togliendo, nemmeno togliendo la spunta di un'azione di prima.
  */
 export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDote): DoteSocialePartitaDto {
@@ -229,40 +249,77 @@ export function puntiConfidente(mod: ModificaConfidente): number {
   return round2(base * molt);
 }
 
-export function confidenti(partitaId: number): ConfidentePartitaDto[] {
-  rigaPartita(partitaId);
-  return (prepared(`SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
+interface RigaConfidentePartita { chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null; in_scorta: number }
+
+/** I Confidenti con lo stato nella partita; con `chiave`, quel Confidente solo. */
+function righeConfidenti(partitaId: number, chiave?: string): RigaConfidentePartita[] {
+  const sql = `SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
       COALESCE(cp.note, '') AS note, cp.updated_at, cr.punti_necessari,
       EXISTS (SELECT 1 FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.partita_id = ? AND p.arcana = c.arcana) AS in_scorta
     FROM confidente c
     LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ?
-    LEFT JOIN confidente_rango cr ON cr.confidente_chiave = c.chiave AND cr.rango = COALESCE(cp.rango, 0)
-    ORDER BY c.ordine`).all(partitaId, partitaId) as Array<{ chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null; in_scorta: number }>)
-    .map((c) => ({
+    LEFT JOIN confidente_rango cr ON cr.confidente_chiave = c.chiave AND cr.rango = COALESCE(cp.rango, 0)`;
+  return (chiave === undefined
+    ? prepared(`${sql} ORDER BY c.ordine`).all(partitaId, partitaId)
+    : prepared(`${sql} WHERE c.chiave = ?`).all(partitaId, partitaId, chiave)) as RigaConfidentePartita[];
+}
+
+/** Il rango di ogni Confidente nella partita (0 se non incontrato): quello che i semafori e la disponibilità devono sapere. */
+export function ranghiConfidenti(partitaId: number): Map<string, number> {
+  const righe = prepared('SELECT c.chiave, COALESCE(cp.rango, 0) AS rango FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? ORDER BY c.ordine').all(partitaId) as Array<{ chiave: string; rango: number }>;
+  return new Map(righe.map((r) => [r.chiave, r.rango]));
+}
+
+/** I regali consegnati, per Confidente, in una lettura sola (prima una query per Confidente: rilievo P1' della verifica). */
+function regaliFatti(partitaId: number, chiave?: string): Map<string, string[]> {
+  const righe = (chiave === undefined
+    ? prepared('SELECT confidente_chiave, regalo FROM regalo_partita WHERE partita_id = ? ORDER BY fatto_at').all(partitaId)
+    : prepared('SELECT confidente_chiave, regalo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? ORDER BY fatto_at').all(partitaId, chiave)) as Array<{ confidente_chiave: string; regalo: string }>;
+  const perConfidente = new Map<string, string[]>();
+  for (const r of righe) { const l = perConfidente.get(r.confidente_chiave) ?? []; l.push(r.regalo); perConfidente.set(r.confidente_chiave, l); }
+  return perConfidente;
+}
+
+/**
+ * I DTO delle righe date. Lo stato della partita per i semafori (`statoPartitaSemafori`) si calcola una volta e vale per tutte le
+ * righe; i ranghi che servono ai requisiti sono quelli di TUTTI i Confidenti, anche quando le righe sono una sola. Prima lo stato
+ * stava in una cache di modulo con la firma su `partita.updated_at`, che alcune scritture (i collegamenti alla guida) non toccano:
+ * semafori vecchi.
+ */
+function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, string[]>): ConfidentePartitaDto[] {
+  const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
+  const stato: StatoPartitaSemafori = statoPartitaSemafori(partitaId, ranghi, doti);
+  return righe.map((c) => {
+    const semafori = semaforiConfidente(c.chiave, c.rango, stato);
+    return {
       chiave: c.chiave, nome: c.nome, arcana: c.arcana, arcanaNome: t('arcana', c.arcana), ordine: c.ordine, sbloccato: c.sbloccato === 1, rango: c.rango,
       punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari,
       mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
-      regaliFatti: regaliFattiDi(partitaId, c.chiave),
-      note: c.note, semafori: [] as SemaforiRangoDto[], updatedAt: c.updated_at,
-    }))
-    .map((c, _i, tutti) => { const semafori = semaforiConfidente(c.chiave, c.rango, statoSemafori(partitaId, tutti)); return { ...c, semafori, bloccato: bloccoRango(semafori, c.rango + 1) }; });
+      regaliFatti: regali.get(c.chiave) ?? [],
+      note: c.note, semafori, updatedAt: c.updated_at,
+      bloccato: bloccoRango(semafori, c.rango + 1),
+    };
+  });
 }
 
-let cacheStato: { partitaId: number; firma: string; stato: StatoPartitaSemafori } | null = null;
-/** Stato della partita per i semafori, calcolato una volta per chiamata (stessa firma dei ranghi). */
-function statoSemafori(partitaId: number, confidentiPartita: Array<{ chiave: string; rango: number }>): StatoPartitaSemafori {
-  const firma = `${partitaId}|${confidentiPartita.map((c) => `${c.chiave}:${c.rango}`).join(',')}|${(prepared('SELECT updated_at FROM partita WHERE id = ?').get(partitaId) as { updated_at: string } | undefined)?.updated_at ?? ''}`;
-  if (cacheStato && cacheStato.partitaId === partitaId && cacheStato.firma === firma) return cacheStato.stato;
-  const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
-  const ranghi = new Map(confidentiPartita.map((c) => [c.chiave, c.rango]));
-  const stato = statoPartitaSemafori(partitaId, ranghi, doti);
-  cacheStato = { partitaId, firma, stato };
-  return stato;
+/** Tutti i Confidenti della partita, nell'ordine del gioco. */
+export function confidenti(partitaId: number): ConfidentePartitaDto[] {
+  rigaPartita(partitaId);
+  const righe = righeConfidenti(partitaId);
+  return confidentiDto(partitaId, righe, new Map(righe.map((c) => [c.chiave, c.rango])), regaliFatti(partitaId));
 }
 
-function regaliFattiDi(partitaId: number, chiave: string): string[] {
-  return (prepared('SELECT regalo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? ORDER BY fatto_at').all(partitaId, chiave) as Array<{ regalo: string }>).map((r) => r.regalo);
+/**
+ * Un Confidente della partita: lo stesso DTO di `confidenti`, ma con i semafori e i regali del solo Confidente chiesto. Prima chi
+ * ne voleva uno (la conferma di un requisito, un regalo, i punti) li calcolava tutti e ne teneva uno, fino a tre volte per
+ * richiesta (rilievi F21/P1' della verifica completa, 2026-10-03).
+ */
+export function confidente(partitaId: number, chiave: string): ConfidentePartitaDto {
+  rigaPartita(partitaId);
+  const righe = righeConfidenti(partitaId, chiave);
+  if (righe.length === 0) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
+  return confidentiDto(partitaId, righe, ranghiConfidenti(partitaId), regaliFatti(partitaId, chiave))[0];
 }
 
 /** Segna un regalo come consegnato (o non consegnato) al Confidente nella partita. */
@@ -277,7 +334,7 @@ export function impostaRegaloFatto(partitaId: number, chiave: string, regalo: st
     else prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partitaId, chiave, nome);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return confidenti(partitaId).find((c) => c.chiave === chiave)!;
+  return confidente(partitaId, chiave);
 }
 
 /** Requisiti non verdi (né confermati) del semaforo di `rango`: il Confidente è bloccato finché non lo sono tutti.
@@ -289,10 +346,15 @@ export function bloccoRango(semafori: SemaforiRangoDto[], rango: number): { rang
   return motivi.length > 0 ? { rango, motivi } : null;
 }
 
+/**
+ * Aggiorna un Confidente nella partita: rango, sblocco, punti e note. Un rango sopra 0 vale sblocco; salire di rango (o
+ * sbloccare) richiede i semafori pronti per ogni rango attraversato, salvo `forza`, che passa e lascia traccia nello storico
+ * (409 altrimenti). I punti si impostano, oppure si sommano l'incremento esplicito e quelli calcolati da `puntiConfidente`;
+ * al cambio di rango ripartono da zero. Sblocco e cambio di rango vanno nello storico.
+ */
 export function aggiornaConfidente(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
-  rigaPartita(partitaId);
-  if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
-  const attuale = confidenti(partitaId).find((c) => c.chiave === chiave)!;
+  // `confidente` controlla anche che partita e Confidente esistano (404)
+  const attuale = confidente(partitaId, chiave);
   const rango = dati.rango ?? attuale.rango;
   // Invariante: un rango > 0 implica lo sblocco (anche se il client manda sbloccato=false).
   const sbloccato = rango > 0 ? true : (dati.sbloccato ?? attuale.sbloccato);
@@ -323,7 +385,7 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
     if (rango !== attuale.rango) {
       registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`, `Da rango ${attuale.rango}.`, { confidente: chiave, da: attuale.rango, a: rango });
     }
-    return confidenti(partitaId).find((c) => c.chiave === chiave)!;
+    return confidente(partitaId, chiave);
   })();
 }
 
@@ -351,6 +413,7 @@ const SQL_COMPENDIO = `SELECT cp.persona_id, p.nome, p.arcana, p.livello, cp.reg
 const BONUS_ZERO: Statistiche = { forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 };
 const SIGLE: Record<keyof Statistiche, string> = { forza: 'FR', magia: 'MA', resistenza: 'RS', agilita: 'AG', fortuna: 'FO' };
 
+/** Le statistiche stimate più i bonus, ognuna tenuta fra 1 e 99. */
 function sommaBonus(stima: Statistiche, bonus: Statistiche): Statistiche {
   const out = { ...stima };
   for (const k of CHIAVI_STATISTICHE) out[k] = Math.min(99, Math.max(1, stima[k] + bonus[k]));
@@ -366,14 +429,17 @@ function osservateDaRiga(r: ColonneOsservate): Osservazione | null {
 function colonneOsservate(o: Osservazione | null): Array<number | null> {
   return o ? [o.livello, o.forza, o.magia, o.resistenza, o.agilita, o.fortuna] : [null, null, null, null, null, null];
 }
+/** I valori reali in una riga per lo storico: «livello N: FR x · MA y · …». */
 function descriviOsservate(o: Osservazione): string {
   return `livello ${o.livello}: ${CHIAVI_STATISTICHE.map((k) => `${SIGLE[k]} ${o[k]}`).join(' · ')}`;
 }
+/** Vero se le due osservazioni hanno lo stesso livello e le stesse statistiche (o se mancano entrambe). */
 function stesseOsservazioni(a: Osservazione | null, b: Osservazione | null): boolean {
   if (a === null || b === null) return a === b;
   return a.livello === b.livello && CHIAVI_STATISTICHE.every((k) => a[k] === b[k]);
 }
 
+/** Una riga del compendio della partita per l'API: nomi tradotti, bonus, valori reali, skill e tratto come riassunti (quelle inesistenti si saltano). */
 function compendioDto(r: RigaCompendio): CompendioPartitaDto {
   const skillIds = r.skill_ids_json ? (JSON.parse(r.skill_ids_json) as number[]) : [];
   return {
@@ -385,6 +451,7 @@ function compendioDto(r: RigaCompendio): CompendioPartitaDto {
   };
 }
 
+/** Il compendio personale della partita (404 se non esiste), ordinato per livello e nome della Persona. */
 export function compendioPartita(partitaId: number): CompendioPartitaDto[] {
   rigaPartita(partitaId);
   return (prepared(`${SQL_COMPENDIO} WHERE cp.partita_id = ? ORDER BY p.livello, p.nome`).all(partitaId) as RigaCompendio[]).map(compendioDto);
@@ -403,6 +470,7 @@ function istantaneaCompendio(partitaId: number, personaId: number): Istantanea |
   };
 }
 
+/** Scrive l'istantanea nel compendio della partita, segnando la Persona come registrata (crea la riga o la sostituisce). */
 function scriviIstantanea(partitaId: number, personaId: number, i: Istantanea, adesso: string): void {
   prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, bonus_forza, bonus_magia, bonus_resistenza, bonus_agilita, bonus_fortuna, skill_ids_json, tratto_skill_id, carica,
       osservate_livello, osservate_forza, osservate_magia, osservate_resistenza, osservate_agilita, osservate_fortuna, updated_at)
@@ -415,6 +483,11 @@ function scriviIstantanea(partitaId: number, personaId: number, i: Istantanea, a
     .run(partitaId, personaId, i.livello, i.bonus.forza, i.bonus.magia, i.bonus.resistenza, i.bonus.agilita, i.bonus.fortuna, JSON.stringify(i.skillIds), i.trattoSkillId, i.carica ? 1 : 0, ...colonneOsservate(i.osservate), adesso);
 }
 
+/**
+ * Registra o toglie a mano una Persona dal compendio della partita (404 per partita o Persona inesistenti). Togliere cancella
+ * la riga; registrare scrive solo il livello (una riga nuova nasce senza bonus né skill) e, la prima volta, l'evento nello
+ * storico. Restituisce il compendio aggiornato.
+ */
 export function aggiornaCompendio(partitaId: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): CompendioPartitaDto[] {
   rigaPartita(partitaId);
   const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
@@ -441,16 +514,48 @@ interface RigaPosseduta extends ColonneOsservate {
   id: number; partita_id: number; persona_id: number; livello: number; forza: number | null; magia: number | null; resistenza: number | null;
   agilita: number | null; fortuna: number | null; bonus_forza: number; bonus_magia: number; bonus_resistenza: number; bonus_agilita: number; bonus_fortuna: number;
   tratto_skill_id: number | null; in_squadra: number; carica: number; note: string; created_at: string; updated_at: string;
-  nome: string; arcana: string; livello_base: number; b_forza: number; b_magia: number; b_resistenza: number; b_agilita: number; b_fortuna: number; tratto_nome: string;
+  nome: string; arcana: string; livello_base: number; b_forza: number; b_magia: number; b_resistenza: number; b_agilita: number; b_fortuna: number;
+  /** L'id della skill del tratto del dataset (per nome), quando la partita non ne ha scelto uno. */
+  tratto_dataset_id: number | null;
 }
 
 const SQL_POSSEDUTA = `SELECT pp.*, p.nome, p.arcana, p.livello AS livello_base, p.forza AS b_forza, p.magia AS b_magia, p.resistenza AS b_resistenza,
-  p.agilita AS b_agilita, p.fortuna AS b_fortuna, p.tratto AS tratto_nome FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id`;
+  p.agilita AS b_agilita, p.fortuna AS b_fortuna, (SELECT s.id FROM skill s WHERE s.nome = p.tratto) AS tratto_dataset_id
+  FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id`;
 
-function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
-  const trattoId = r.tratto_skill_id ?? (prepared('SELECT id FROM skill WHERE nome = ?').get(r.tratto_nome) as { id: number } | undefined)?.id ?? null;
-  const skill = (prepared('SELECT slot, skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(r.id) as Array<{ slot: number; skill_id: number }>)
-    .map((s) => ({ slot: s.slot, ...skillDto(s.skill_id)! }));
+/**
+ * Le Persona possedute scelte da `dove` (con i suoi parametri), nell'ordine della query, come DTO. Skill e tratti si leggono in
+ * blocco — gli slot di tutte le Persona con una query, i riassunti delle skill con un'altra — invece che con due o tre query per
+ * Persona e una per skill (rilievo P2': circa 100 query per una scorta di 12 Persona con 8 skill).
+ */
+function possedute(dove: string, ...parametri: unknown[]): PersonaPossedutaDto[] {
+  const righe = prepared(`${SQL_POSSEDUTA} ${dove}`).all(...parametri) as RigaPosseduta[];
+  if (righe.length === 0) return [];
+  const slot = prepared('SELECT posseduta_id, slot, skill_id FROM persona_posseduta_skill WHERE posseduta_id IN (SELECT value FROM json_each(?)) ORDER BY posseduta_id, slot')
+    .all(JSON.stringify(righe.map((r) => r.id))) as Array<{ posseduta_id: number; slot: number; skill_id: number }>;
+  const slotDi = new Map<number, Array<{ slot: number; skill_id: number }>>();
+  for (const s of slot) {
+    const elenco = slotDi.get(s.posseduta_id);
+    if (elenco) elenco.push(s); else slotDi.set(s.posseduta_id, [s]);
+  }
+  /** Il tratto della Persona: quello scelto nella partita, altrimenti quello del dataset. */
+  const tratto = (r: RigaPosseduta) => r.tratto_skill_id ?? r.tratto_dataset_id ?? null;
+  const riassunti = skillRiassunti([...slot.map((s) => s.skill_id), ...righe.map(tratto).filter((id): id is number => id !== null)]);
+  return righe.map((r) => possedutaDto(r, tratto(r), slotDi.get(r.id) ?? [], riassunti));
+}
+
+/** Una Persona posseduta per id (della partita, se data), o null. */
+export function possedutaPerId(id: number, partitaId?: number): PersonaPossedutaDto | null {
+  return (partitaId === undefined ? possedute('WHERE pp.id = ?', id) : possedute('WHERE pp.id = ? AND pp.partita_id = ?', id, partitaId))[0] ?? null;
+}
+
+/**
+ * Una Persona posseduta per l'API, dai dati già letti in blocco: skill per slot, statistiche stimate al livello (dai valori
+ * reali registrati o dalla base del dataset) più i bonus, origine della stima, tratto e flag della scorta.
+ */
+function possedutaDto(r: RigaPosseduta, trattoId: number | null, slot: Array<{ slot: number; skill_id: number }>, riassunti: Map<number, SkillRiassuntoDto>): PersonaPossedutaDto {
+  // una skill che non esiste più nel dataset resta uno slot senza dati, come prima (`...null` non aggiunge nulla)
+  const skill = slot.map((s) => ({ slot: s.slot, ...riassunti.get(s.skill_id) })) as PersonaPossedutaDto['skill'];
   const bonus = { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna };
   const statisticheBase = CHIAVI_STATISTICHE.every((k) => bonus[k] === 0);
   const base = { forza: r.b_forza, magia: r.b_magia, resistenza: r.b_resistenza, agilita: r.b_agilita, fortuna: r.b_fortuna };
@@ -466,13 +571,14 @@ function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
     osservate,
     origineStima: origineStima(osservate, r.livello),
     statisticheConfermate: osservate !== null && osservate.livello === r.livello && statisticheBase,
-    statisticheBaseLivello: base, tratto: trattoId ? skillDto(trattoId) : null, inSquadra: r.in_squadra === 1, carica: r.carica === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
+    statisticheBaseLivello: base, tratto: trattoId ? (riassunti.get(trattoId) ?? null) : null, inSquadra: r.in_squadra === 1, carica: r.carica === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
 
+/** La scorta della partita (404 se non esiste): prima quelle in squadra, poi per livello decrescente e nome. */
 export function personePossedute(partitaId: number): PersonaPossedutaDto[] {
   rigaPartita(partitaId);
-  return (prepared(`${SQL_POSSEDUTA} WHERE pp.partita_id = ? ORDER BY pp.in_squadra DESC, pp.livello DESC, p.nome`).all(partitaId) as RigaPosseduta[]).map(possedutaDto);
+  return possedute('WHERE pp.partita_id = ? ORDER BY pp.in_squadra DESC, pp.livello DESC, p.nome', partitaId);
 }
 
 /** Dati di una Persona posseduta (creazione/aggiornamento). */
@@ -495,6 +601,7 @@ export interface DatiPosseduta {
   origine?: string;
 }
 
+/** Controlla le skill di una Persona posseduta: al massimo 8, nessuna ripetuta (400), tutte esistenti (404). Assenti = niente da controllare. */
 function verificaSkill(skillIds: number[] | undefined): void {
   if (!skillIds) return;
   if (skillIds.length > 8) throw httpErrors.badRequest('troppe-skill', 'Una Persona può conoscere al massimo 8 skill.');
@@ -502,6 +609,12 @@ function verificaSkill(skillIds: number[] | undefined): void {
   for (const id of skillIds) if (!prepared('SELECT 1 FROM skill WHERE id = ?').get(id)) throw httpErrors.notFound('skill-non-trovata', `La skill ${id} non esiste.`);
 }
 
+/**
+ * Aggiunge una Persona alla scorta della partita (una sola per Persona: 409 se c'è già). Le skill e il tratto si verificano;
+ * con `daRegistro` i valori non indicati vengono dall'istantanea del compendio (400 se la Persona non è registrata),
+ * altrimenti dal livello base, senza bonus e con le ultime 8 skill apprese fino al livello. In transazione: la riga, gli slot,
+ * l'evento nello storico e — se non è un'evocazione dal Registro — la registrazione nel compendio; poi gli obiettivi.
+ */
 export function aggiungiPosseduta(partitaId: number, personaId: number, dati: DatiPosseduta): PersonaPossedutaDto {
   rigaPartita(partitaId);
   const p = prepared('SELECT id, nome, arcana, livello FROM persona WHERE id = ?').get(personaId) as { id: number; nome: string; arcana: string; livello: number } | undefined;
@@ -538,7 +651,7 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, personaId);
-    return possedutaDto(prepared(`${SQL_POSSEDUTA} WHERE pp.id = ?`).get(id) as RigaPosseduta);
+    return possedutaPerId(id)!;
   })();
 }
 
@@ -565,6 +678,11 @@ export function skillInnateFinoAlLivello(personaId: number, livello: number): nu
   return righe.slice(-8).map((r) => r.skill_id);
 }
 
+/**
+ * Aggiorna una Persona della scorta (404 se non è della partita): i campi assenti restano. Registrare i valori reali azzera i
+ * bonus salvo bonus espliciti; le skill indicate sostituiscono tutti gli slot. Livello, skill, valori reali e bonus cambiati
+ * vanno nello storico; il compendio non segue (si aggiorna solo con «Registra»). Poi si riverificano gli obiettivi.
+ */
 export function aggiornaPosseduta(partitaId: number, possedutaId: number, dati: DatiPosseduta): PersonaPossedutaDto {
   rigaPartita(partitaId);
   const r = prepared(`${SQL_POSSEDUTA} WHERE pp.id = ? AND pp.partita_id = ?`).get(possedutaId, partitaId) as RigaPosseduta | undefined;
@@ -611,10 +729,11 @@ export function aggiornaPosseduta(partitaId: number, possedutaId: number, dati: 
     // Il compendio NON segue i cambiamenti: come in gioco, l'istantanea si aggiorna solo con «Registra».
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, r.persona_id);
-    return possedutaDto(prepared(`${SQL_POSSEDUTA} WHERE pp.id = ?`).get(possedutaId) as RigaPosseduta);
+    return possedutaPerId(possedutaId)!;
   })();
 }
 
+/** Toglie una Persona dalla scorta (404 se non è della partita) e registra nello storico livello e motivo; il compendio resta. */
 export function rimuoviPosseduta(partitaId: number, possedutaId: number, motivo?: string): void {
   rigaPartita(partitaId);
   const r = prepared(`${SQL_POSSEDUTA} WHERE pp.id = ? AND pp.partita_id = ?`).get(possedutaId, partitaId) as RigaPosseduta | undefined;

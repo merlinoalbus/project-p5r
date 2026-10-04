@@ -1,3 +1,7 @@
+// ============================================================
+// Test inquadraturaMappa — area dei pixel visibili e inquadratura delle planimetrie, con il margine per il bersaglio dei pin
+// ============================================================
+
 import { describe, it, expect } from 'vitest';
 import { areaAlpha, inquadraturaMappa } from './inquadraturaMappa';
 

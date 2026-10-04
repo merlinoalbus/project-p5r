@@ -9,6 +9,11 @@
 import Database from 'better-sqlite3';
 import { collegaLuoghiAllePlanimetrie } from './054_luoghi_con_la_loro_planimetria.js';
 
+/**
+ * Database in memoria con lo schema minimo che la regola legge (luogo, mappa, mappa_entita, spillo): quattro luoghi della
+ * Shujin più una «Biblioteca» di Shibuya, le planimetrie della scuola (biblioteca, cancello, aula) e uno spillo che lega già
+ * l'aula al suo luogo, così da provare il nome omonimo in un altro quartiere e il luogo che ha già il suo spillo.
+ */
 function istanza(): Database.Database {
   const db = new Database(':memory:');
   db.exec(`

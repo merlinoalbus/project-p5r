@@ -32,10 +32,13 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
     luoghi: Object.fromEntries((quartieri ?? []).map((q) => [q.chiave, q.nome])),
     attivita: Object.fromEntries((attivita ?? []).map((a) => [a.chiave, a.nome])),
   };
+  /** Un campo con la sua etichetta attorno al controllo. */
   const campo = (nome: string, dentro: ReactNode) => <label className="editor-mappa__campo">{nome}{dentro}</label>;
+  /** Un selettore su un elenco chiuso di valori, ciascuno mostrato col suo nome italiano. */
   const scelta = <C extends string>(nome: string, v: C, opzioni: readonly C[], nomi: Record<C, string>, set: (x: C) => void) => (
     <Selettore etichetta={nome} valore={v} disabilitato={disabilitato} opzioni={opzioni.map((o) => ({ chiave: o, nome: nomi[o] }))} onCambia={(k) => set(k as C)} />
   );
+  /** Un campo numerico fra 0 e 9999 (un valore assente si mostra come 0). */
   const numero = (v: number | null, set: (n: number) => void, nome: string) => (
     <input className="form-input" type="number" min={0} max={9999} value={v ?? 0} disabled={disabilitato} aria-label={nome} onChange={(e) => set(Number(e.target.value))} />
   );

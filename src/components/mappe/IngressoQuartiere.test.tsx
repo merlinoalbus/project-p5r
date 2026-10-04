@@ -11,10 +11,10 @@ import type { QuartiereDettaglioDto } from '../../types';
 import { scegliVoce, vociSelettore } from '../../../test/selettore';
 
 const api = vi.hoisted(() => ({ getAlberoMappe: vi.fn(), getMappa: vi.fn(), salvaIngressoQuartiere: vi.fn() }));
-vi.mock('../../services/api', () => api);
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 vi.mock('../../stores/assetStore', () => ({ useAsset: (k: string | null | undefined) => (k ? `/asset/${k}.png` : null) }));
 const notifica = vi.hoisted(() => vi.fn());
-vi.mock('../../stores/notificationStore', () => ({ notifica }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 
 const quartiere = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', ingresso: null, luoghi: [] } as unknown as QuartiereDettaglioDto;
 

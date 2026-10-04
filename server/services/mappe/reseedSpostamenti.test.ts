@@ -1,7 +1,15 @@
+// ============================================================
+// reseedSpostamenti.test.ts — reseed delle mappe dopo che l'utente ha trasferito uno spillo del seed su un'altra mappa
+// ============================================================
+// Il ricaricamento deve riconoscere lo spillo spostato dalla sua identità storica e conservarne ID, posizione e
+// dipendenti, senza sopprimere punti diversi né scegliere un erede quando l'identità è ambigua.
+// ============================================================
+
 import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { importaMappe, aggiornaSpillo } from './mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
+/** Nodo di mappa generico per il pacchetto di prova, senza immagine né entità, con un solo spillo nota «Seed unico» alla posizione (x, 30). */
 const nodo=(chiave:string,x=20):EsportazioneMappeDto['mappe'][number]=>({chiave,nome:chiave,tipo:'generica',genitore:null,ordine:0,immagine:null,asset:null,larghezza:null,altezza:null,entita:null,note:'',spilli:[{tipo:'nota',nome:'Seed unico',descrizione:'',collezionabile:false,ordine:0,x,y:30,riferimento:null}]});
 describe('reseed di spilli trasferiti',()=>{
  afterEach(()=>closeDb());
@@ -15,6 +23,7 @@ describe('reseed di spilli trasferiti',()=>{
   db.prepare('INSERT INTO spillo_partita VALUES(?,?,1,?)').run(partita,id,t);
   db.prepare('INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,?,?,?)').run(id,'personale','Nota',t);
   db.prepare('INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,?,?,?,?)').run(id,'sorgente',10,20,1);
+  /** Fotografia di tutte le righe di spillo e dei suoi dipendenti (spunte di partita, immagini, destinazioni), da confrontare prima e dopo i ricaricamenti. */
   const snapshot=()=>['spillo','spillo_partita','spillo_immagine','spillo_destinazione'].map(tabella=>db.prepare('SELECT * FROM '+tabella).all());
   const prima=snapshot();
   importaMappe(p,{origine:'seed',pacchettiSeed:[p]});expect(snapshot()).toEqual(prima);

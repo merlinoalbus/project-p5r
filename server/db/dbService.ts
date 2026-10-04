@@ -32,9 +32,6 @@ import { config } from '../config.js';
 /** Tipo della connessione SQLite condivisa dal processo backend. */
 export type AppDatabase = Database.Database;
 
-/** Nome dello schema attaccato che contiene le tabelle delle partite. */
-export const SCHEMA_UTENTE = 'utente';
-
 let db: AppDatabase | null = null;
 
 /** Percorso assoluto del file SQLite dei dati di gioco. */
@@ -48,7 +45,7 @@ export function resolvePartitePath(): string {
 }
 
 /** Il file delle partite che accompagna un dato file di gioco (`:memory:` resta in memoria). */
-export function percorsoPartiteDi(dbPath: string): string {
+function percorsoPartiteDi(dbPath: string): string {
   if (dbPath === ':memory:') return ':memory:';
   return dbPath === resolveDbPath() ? resolvePartitePath() : path.join(path.dirname(dbPath), config.partiteFileName);
 }
@@ -117,12 +114,22 @@ export function closeDb(): void {
 
 const stmtCache = new Map<string, Database.Statement>();
 
-/** Statement preparato e cacheato per la connessione corrente. */
+/**
+ * Statement preparato e cacheato per la connessione corrente. Lo statement è condiviso da tutti i chiamanti con lo stesso SQL, e
+ * `.pluck()`/`.raw()`/`.expand()` di better-sqlite3 ne cambiano il modo **per sempre**: un `prepared(sql).pluck().get()` faceva
+ * restituire il valore nudo anche a chi, dopo, chiedeva la riga con `prepared(sql).get()` (trovato in verifica, 2026-10-03: un
+ * test leggeva `finestre-dungeon` con `pluck` e il servizio non trovava più `riga.json`). A ogni richiesta si torna al modo
+ * normale; chi vuole il valore nudo chiama `.pluck()` nella stessa catena, come sempre.
+ */
 export function prepared(sql: string): Database.Statement {
   let stmt = stmtCache.get(sql);
   if (!stmt) {
     stmt = getDb().prepare(sql);
     stmtCache.set(sql, stmt);
+  } else if (stmt.reader) {
+    stmt.pluck(false);
+    stmt.raw(false);
+    stmt.expand(false);
   }
   return stmt;
 }

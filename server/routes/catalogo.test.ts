@@ -4,10 +4,10 @@
 
 import request from 'supertest';
 import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import type { ElementoCatalogoDto, NegozioDettaglioDto, NegozioRiassuntoDto, RiepilogoCatalogoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -15,9 +15,7 @@ describe('API catalogo (Fase 16.1)', () => {
   /** Il pacchetto è la fotografia dell'istanza: porta già i negozi creati dall'app, e i conteggi partono da lì. */
   let creatiNelPacchetto = 0;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     creatiNelPacchetto = (prepared("SELECT COUNT(*) AS n FROM negozio WHERE origine = 'utente' AND seed_json IS NULL").get() as { n: number }).n;
   });
   afterAll(() => closeDb());

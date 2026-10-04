@@ -23,15 +23,22 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { piatto } from '../utils/testo';
 
 type FiltroStato = 'tutti' | 'da-fare' | 'fatti';
 const STATI: ReadonlyArray<{ chiave: FiltroStato; nome: string }> = [{ chiave: 'tutti', nome: 'Tutti' }, { chiave: 'da-fare', nome: 'Da fare' }, { chiave: 'fatti', nome: 'Fatti' }];
-const piatto = (s: string | null | undefined) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
+/** L'id dell'elemento della riga di un giorno, usato come ancora per scorrere al prossimo cruciverba. */
 const ancoraGiorno = (giorno: string) => `cruciverba-${giorno}`;
 
+/**
+ * La riga di un cruciverba: spunta di risolto (solo con una partita), data, indizio e segno di
+ * «prossimo». La risposta resta nascosta finché non la si chiede o finché il cruciverba non è
+ * risolto. Porta l'ancora solo quando è il prossimo, e offre la correzione della voce.
+ */
 function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: CruciverbaDto; partitaId: number | null; onCambiato: (c: CruciverbaDto) => void; onCorretto: () => void; evidenzia: boolean }) {
   const [mostra, setMostra] = useState(false);
   const [occupato, setOccupato] = useState(false);
+  /** Segna il cruciverba risolto o no nella partita, disattivando la spunta durante la richiesta; passa al genitore la riga aggiornata e ricorda le note di Doti da segnare, oppure notifica l'errore. */
   const cambia = async (fatto: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
@@ -64,6 +71,13 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
   );
 }
 
+/**
+ * Pagina dei cruciverba: carica l'elenco per la partita attiva, filtra per stato (tutti, da fare,
+ * fatti) e per testo libero (data scritta e chiave, indizio, risposta italiana e inglese), e
+ * raggruppa le righe per mese di gioco. In cima il rimando al prossimo cruciverba; la spunta
+ * aggiorna la riga nei dati correnti, il conteggio dei risolti e, se si è risolto proprio il
+ * prossimo, sceglie come nuovo prossimo il primo non risolto dalla data di gioco in poi.
+ */
 export function CruciverbaPage() {
   useDocumentTitle('Cruciverba di Leblanc');
   const attiva = usePartitaStore((s) => s.attiva);
@@ -89,7 +103,11 @@ export function CruciverbaPage() {
     }
     return [...m.entries()];
   }, [visibili]);
-  const aggiorna = (c: CruciverbaDto) => { if (d) { const lista = d.cruciverba.map((x) => (x.giorno === c.giorno ? c : x)); dati.imposta({ ...d, cruciverba: lista, risolti: lista.filter((x) => x.fatto).length, prossimo: d.prossimo?.giorno === c.giorno && c.fatto ? (lista.find((x) => !x.fatto && d.dataGioco !== null && x.giorno >= d.dataGioco) ?? null) : d.prossimo }); } };
+  // dai dati correnti: la riga arriva dopo un `await`, e due spunte ravvicinate non devono annullarsi
+  const aggiorna = (c: CruciverbaDto) => dati.imposta((attuale) => {
+    const lista = attuale.cruciverba.map((x) => (x.giorno === c.giorno ? c : x));
+    return { ...attuale, cruciverba: lista, risolti: lista.filter((x) => x.fatto).length, prossimo: attuale.prossimo?.giorno === c.giorno && c.fatto ? (lista.find((x) => !x.fatto && attuale.dataGioco !== null && x.giorno >= attuale.dataGioco) ?? null) : attuale.prossimo };
+  });
   const prossimo = d?.prossimo ?? null;
   // Il rimando azzera i filtri e scorre alla riga evidenziata al giro successivo, quando esiste.
   const vaiAlProssimo = () => {

@@ -72,6 +72,7 @@ function tutteLeDate(): string[] {
 
 const DATE = tutteLeDate();
 
+/** Stato di gioco minimo alla data indicata (lunedì, di giorno, nulla ottenuto né confermato) da dare al valutatore dei requisiti degli spilli. */
 function statoAl(data: string) {
   return {
     dataGioco: data, fasciaGioco: 'giorno', giornoSettimana: 'lunedi',
@@ -85,6 +86,7 @@ function statoAl(data: string) {
 
 interface Ingresso { mappa_chiave: string; riferimento_chiave: string; condizioni_json: string | null }
 
+/** Spilli che portano a un dungeon (riferimento a una mappa `dungeon-…`), con la mappa su cui stanno e le loro condizioni. */
 function ingressi(): Ingresso[] {
   return getDb().prepare(`SELECT mappa_chiave, riferimento_chiave, condizioni_json FROM spillo
     WHERE riferimento_tipo = 'mappa' AND riferimento_chiave LIKE 'dungeon-%'`).all() as Ingresso[];

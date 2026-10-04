@@ -19,6 +19,7 @@ import { ORARI_SEMPRE, type OrariNegozio } from '../../../shared/orariNegozio.js
 
 const LUN_VEN: OrariNegozio['giorni'] = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi'];
 const LUN_SAB: OrariNegozio['giorni'] = [...LUN_VEN, 'sabato'];
+/** Un orario «sempre» con i soli campi indicati cambiati. */
 const o = (parziale: Partial<OrariNegozio>): OrariNegozio => ({ ...ORARI_SEMPRE, ...parziale });
 
 /** Le frasi dei dati, una per una. La chiave è la frase esatta (spazi ridotti). */
@@ -48,6 +49,11 @@ export const ORARI_DALLA_PROSA: Readonly<Record<string, OrariNegozio>> = {
   'Presente per una settimana a partire dalla domenica, poi assente la settimana successiva': o({ nota: 'presente per una settimana a partire dalla domenica, assente la settimana successiva' }),
 };
 
+/**
+ * Traduce la frase degli orari con il dizionario esatto (spazi ridotti). Una frase vuota vale
+ * «sempre»; una fuori dizionario diventa «sempre» con la frase in nota, e `nelDizionario` è falso
+ * perché la migrazione la possa segnalare.
+ */
 export function orariDallaProsa(testo: string | null | undefined): { orari: OrariNegozio; nelDizionario: boolean } {
   const chiave = (testo ?? '').replace(/\s+/g, ' ').trim();
   if (!chiave) return { orari: ORARI_SEMPRE, nelDizionario: true };

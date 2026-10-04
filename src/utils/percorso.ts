@@ -55,6 +55,7 @@ export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferime
  *  Le Doti sono ciò che il gioco dà (l'app non le tocca: si segnano a mano); `senzaDoti` le lascia fuori, per metterle nel
  *  promemoria «Da segnare nelle Doti» (`utils/dotiDaSegnare`). */
 export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean } = {}): string {
+  /** Le Doti di un effetto («Coraggio +1, Fascino +2») racchiuse fra `prima` e `dopo`; stringa vuota se non ce ne sono o se `senzaDoti`. */
   const doti = (lista: Array<{ nome: string; delta: number }>, prima: string, dopo: string) => (!opz.senzaDoti && lista.length ? `${prima}${lista.map((d) => `${d.nome} +${d.delta}`).join(', ')}${dopo}` : '');
   const parti = opz.senzaDoti ? [] : e.doti.map((d) => `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''})` : ''}`);
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome} ${l.prima} → ${l.dopo}` : `${l.nome} già a ${l.prima}`}${doti(l.doti ?? [], ' (', ')')}`);

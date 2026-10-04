@@ -11,9 +11,8 @@ import type { FilmDto, LibroDto, VideogiocoDto } from '../../types';
 const { getLibri, getFilm, getVideogiochi, impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco } = vi.hoisted(() => ({
   getLibri: vi.fn(), getFilm: vi.fn(), getVideogiochi: vi.fn(), impostaProgressoFilm: vi.fn(), impostaProgressoLibro: vi.fn(), impostaProgressoVideogioco: vi.fn(),
 }));
-vi.mock('../../services/api/compendio', () => ({ getLibri, getFilm, getVideogiochi }));
-vi.mock('../../services/api/partite', () => ({ impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getLibri, getFilm, getVideogiochi, impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const libro = { chiave: 'l', nome: 'Libro', nomeIt: null, dove: 'Taiheido', progresso: 0, totaleSessioni: 2, fatto: false, disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'data', stato: 'rosso', testo: 'dal 18 aprile', dettaglio: 'oggi è il 12 aprile', manuale: false, confermato: false }] } } as unknown as LibroDto;
 const cinema = { chiave: 'c', nome: 'Film', nomeIt: null, dove: 'cinema', progresso: 1, totaleSessioni: 1, fatto: true, disponibilita: null } as unknown as FilmDto;

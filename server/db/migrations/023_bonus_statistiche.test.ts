@@ -2,16 +2,15 @@
 // Test migrazione 023 — conversione dei valori assoluti in bonus e riempimento delle istantanee del compendio
 // ============================================================
 
-import { closeDb, getDb, initDb, prepared } from '../dbService.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../dbService.js';
 import { statistichePerLivello } from '../../../shared/statistiche.js';
 import { convertiAssoluteInBonus, riempiIstantaneeDallaScorta } from './023_bonus_statistiche.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
 describe('migrazione 023 — bonus statistiche', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 

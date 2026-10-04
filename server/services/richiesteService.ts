@@ -9,6 +9,8 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
+import { datiGuida, type Congelato } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import type { JoseDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
 
@@ -16,6 +18,8 @@ interface RigaRichiesta { chiave: string; ordine: number; nome: string; committe
 
 const SQL = 'SELECT r.*, c.nome AS confidente_nome, a.nome AS area_nome, a.ordine AS area_ordine FROM richiesta r LEFT JOIN confidente c ON c.chiave = r.confidente_chiave LEFT JOIN dungeon_area a ON a.chiave = r.area_chiave';
 
+/** Una Richiesta come DTO: bersaglio e ricompense dai JSON, Confidente collegato (con il nome, o la chiave se manca),
+ *  dedalo e stato nella partita (null se non è segnata). */
 function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>): RichiestaDto {
   return {
     chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
@@ -26,19 +30,16 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>): RichiestaDto
   };
 }
 
+/** Lo stato di ogni Richiesta segnata nella partita; mappa vuota senza partita (con partita ne verifica l'esistenza). */
 function statiPartita(partitaId: number | undefined): Map<string, StatoRichiesta> {
   if (partitaId === undefined) return new Map();
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   return new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>).map((r) => [r.richiesta_chiave, r.stato]));
 }
 
-/** Dati della guida in JSON per chiave (es. «jose», «battaglia»). */
-export function datiGuida<T>(chiave: string): T | null {
-  const r = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get(chiave) as { json: string } | undefined;
-  return r ? (JSON.parse(r.json) as T) : null;
-}
-
-export function richieste(partitaId?: number): RichiesteDto {
+/** Tutte le Richieste, con lo stato nella partita se indicata, i dati di Jose e l'elenco dei dedali nell'ordine di
+ *  percorrenza con quante Richieste hanno e quante sono completate (le Richieste senza dedalo non ne formano uno). */
+export function richieste(partitaId?: number): Congelato<RichiesteDto> {
   const stati = statiPartita(partitaId);
   // prima per dedalo (le richieste senza dedalo in coda), poi per ordine della guida
   const lista = (prepared(`${SQL} ORDER BY (a.ordine IS NULL), a.ordine, r.ordine`).all() as RigaRichiesta[]).map((r) => dto(r, stati));
@@ -55,7 +56,7 @@ export function richieste(partitaId?: number): RichiesteDto {
 
 /** Stato di una Richiesta nella partita ('accettata', 'completata' o null per azzerare); evento al completamento. */
 export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: StatoRichiesta | null): RichiestaDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const r = prepared(`${SQL} WHERE r.chiave = ?`).get(chiave) as RigaRichiesta | undefined;
   if (!r) throw httpErrors.notFound('richiesta-non-trovata', `La Richiesta '${chiave}' non esiste.`);
   const adesso = nowIso();

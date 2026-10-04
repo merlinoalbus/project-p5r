@@ -11,9 +11,10 @@ import { StoricoPartita } from './StoricoPartita';
 import type { EventoPartitaDto, StoricoDto } from '../../types';
 
 const { getStorico, eliminaEvento, eliminaEventi } = vi.hoisted(() => ({ getStorico: vi.fn(), eliminaEvento: vi.fn(), eliminaEventi: vi.fn()}));
-vi.mock('../../services/api', () => ({ getStorico, eliminaEvento, eliminaEventi}));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getStorico, eliminaEvento, eliminaEventi}));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Evento dello storico del gruppo «persona» con tipo e titolo dati (il nome del tipo ripete il tipo), con i campi di `extra` che sovrascrivono i predefiniti. */
 function ev(id: number, tipo: string, titolo: string, extra: Partial<EventoPartitaDto> = {}): EventoPartitaDto {
   return { id, tipo, tipoNome: tipo, gruppo: 'persona', titolo, dettaglio: '', dati: {}, personaId: null, personaNome: null, personaNomeIt: null, createdAt: '2026-09-03T10:00:00.000Z', ...extra };
 }
@@ -64,6 +65,7 @@ describe('StoricoPartita', () => {
   });
 
   it('seleziona più voci e le elimina insieme', async () => {
+    /** Evento «Livello» del gruppo partita con il titolo dato. */
     const evento = (id: number, titolo: string) => ({ id, tipo: 'partita-livello', tipoNome: 'Livello', gruppo: 'partita' as const, titolo, dettaglio: '', dati: {}, personaId: null, personaNome: null, personaNomeIt: null, createdAt: '2026-09-04T10:00:00.000Z' });
     getStorico.mockResolvedValue({ eventi: [evento(1, 'Livello 2'), evento(2, 'Livello 3'), evento(3, 'Livello 4')], totale: 3, prossimo: null });
     eliminaEventi.mockResolvedValue({ eliminati: 2 });

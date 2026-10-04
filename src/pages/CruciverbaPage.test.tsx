@@ -12,8 +12,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { CruciverbaTuttiDto, PartitaDto } from '../types';
 
 const { getCruciverba, impostaCruciverba } = vi.hoisted(() => ({ getCruciverba: vi.fn(), impostaCruciverba: vi.fn() }));
-vi.mock('../services/api', () => ({ getCruciverba, impostaCruciverba }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getCruciverba, impostaCruciverba }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const dati: CruciverbaTuttiDto = {
   dataGioco: '04-11',
@@ -53,5 +53,22 @@ describe('CruciverbaPage', () => {
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'mochi' } });
     expect(screen.queryByText('Gli anni scolastici sono suddivisi in…?')).toBeNull();
     expect(screen.getByText('Un dolce tradizionale')).toBeInTheDocument();
+  });
+
+  it('due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
+    usePartitaStore.setState({ attiva: { id: 3, nome: 'Prova' } as PartitaDto });
+    getCruciverba.mockResolvedValue(dati);
+    let rispondiAprile!: (c: typeof dati.cruciverba[number]) => void;
+    impostaCruciverba.mockImplementation((_id: number, giorno: string) => (giorno === '04-18'
+      ? new Promise((ok) => { rispondiAprile = ok; })
+      : Promise.resolve({ ...dati.cruciverba[1], fatto: true })));
+    render(<MemoryRouter><CruciverbaPage /></MemoryRouter>);
+    await screen.findByText('Gli anni scolastici sono suddivisi in…?');
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: /18 aprile/ })); }); // in volo
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: /2 maggio/ })); }); // arriva subito
+    await act(async () => { rispondiAprile({ ...dati.cruciverba[0], fatto: true }); });
+    expect(screen.getByRole('checkbox', { name: /2 maggio/ })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /18 aprile/ })).toBeChecked();
+    expect(screen.getByText(/2 risolti/)).toBeInTheDocument();
   });
 });

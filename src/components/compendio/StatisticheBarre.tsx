@@ -8,8 +8,8 @@
 
 import type { StatisticheDto } from '../../types';
 import { useGlossarioStore } from '../../stores/glossarioStore';
-import { ORDINE_STATISTICHE, SIGLA_STATISTICA } from '../../utils/elementi';
-import { MASSIMO_STATISTICA, totaleStatistiche } from '../../../shared/statistiche';
+import { SIGLA_STATISTICA } from '../../utils/elementi';
+import { CHIAVI_STATISTICHE, MASSIMO_STATISTICA, NOMI_STATISTICHE, totaleStatistiche } from '../../../shared/statistiche';
 
 interface Props {
   statistiche: StatisticheDto;
@@ -21,7 +21,6 @@ interface Props {
   compatta?: boolean;
 }
 
-const NOMI: Record<string, string> = { forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna' };
 
 /** Cinque barre orizzontali con nome, valore, tacche e totale. */
 export function StatisticheBarre({ statistiche, base, didascalia, compatta }: Props) {
@@ -29,9 +28,9 @@ export function StatisticheBarre({ statistiche, base, didascalia, compatta }: Pr
   const totale = totaleStatistiche(statistiche);
   return (
     <div className={`flex flex-col ${compatta ? 'gap-1' : 'gap-2'}`} role="table" aria-label="Statistiche">
-      {ORDINE_STATISTICHE.map((k) => {
+      {CHIAVI_STATISTICHE.map((k) => {
         const voce = glossario?.statistiche.find((s) => s.chiave === k);
-        const nome = voce?.nome ?? NOMI[k] ?? k;
+        const nome = voce?.nome ?? NOMI_STATISTICHE[k] ?? k;
         const valore = statistiche[k];
         const diff = base ? valore - base[k] : 0;
         const quota = Math.min(100, (valore / MASSIMO_STATISTICA) * 100);

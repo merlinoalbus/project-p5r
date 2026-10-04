@@ -1,3 +1,7 @@
+// ============================================================
+// organizzazioneMappe — DTO dei contenuti della guida sulle mappe (aree, punti, schede) e della risoluzione di un percorso
+// ============================================================
+
 import type { SpilloDto } from './types.js';
 export type SchedaContenutoGuidaDto = Omit<SpilloDto, 'x' | 'y' | 'mappaChiave' | 'destinazione' | 'destinazioneNonDisponibile'> & { areaGuida: string };
 /** Le sezioni della guida non sono planimetrie. */

@@ -1,5 +1,5 @@
 // ============================================================
-// FusionePage — tabella degli Arcani e regole (il calcolatore arriva con la Fase 1)
+// FusionePage — calcolatore A + B, ricette per ottenere una Persona, fusioni con una Persona, piani, ricerca per skill, cicli, Forca e Isolamento, ricette speciali
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -45,8 +45,10 @@ export function FusionePage() {
   const scorta = useCarica(() => (attiva ? getPossedute(attiva.id) : Promise.resolve([])), [attiva?.id]);
   const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((p) => p.personaId)), [scorta.dati]);
   const perId = useMemo(() => new Map((persone.dati ?? []).map((p) => [p.id, p])), [persone.dati]);
+  /** La Persona completa del compendio con quell'id, per i chip; se il compendio non l'ha (o non è ancora arrivato) resta il riferimento ridotto. */
   const completa = (x: { id: number; nome: string; nomeIt: string }) => perId.get(x.id) ?? x;
   const velluto = useCarica(() => (attiva ? getVelluto(attiva.id) : Promise.resolve(null)), [attiva?.id, attiva?.allarmeAttivo, attiva?.updatedAt]);
+  /** Segna acceso o spento l'allarme delle fusioni nella partita attiva, aggiorna lo store locale (che fa rileggere la Stanza di Velluto) e notifica l'esito. */
   const cambiaAllarme = async (allarmeAttivo: boolean) => {
     if (!attiva) return;
     try {
@@ -62,10 +64,13 @@ export function FusionePage() {
   const strumenti = params.get('strumenti') === '1';
   const visteMostrate = strumenti ? [...VISTE, ...VISTE_STRUMENTI] : VISTE;
   const vista: Vista = visteMostrate.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : params.has('piani') ? 'piani' : 'calcolatore';
+  /** Cambia vista scrivendola nel parametro `vista` dell'URL e lasciando gli altri parametri come sono. */
   const setVista = (v: Vista) => setParams((p) => { const n = new URLSearchParams(p); n.set('vista', v); return n; });
   const skillParam = (params.get('skill') ?? '').split(',').map(Number).filter((n) => Number.isInteger(n) && n > 0);
+  /** Un id preso dal parametro `k` dell'URL: solo se è un intero positivo, altrimenti undefined. */
   const idParam = (k: string) => { const v = Number(params.get(k)); return Number.isInteger(v) && v > 0 ? v : undefined; };
 
+  /** Il nome italiano di un arcano dal glossario, o la chiave se il glossario non lo conosce. */
   const nome = (chiave: string) => glossario?.arcani.find((x) => x.chiave === chiave)?.nome ?? chiave;
   const risultato = useMemo(() => {
     if (!dati || !a || !b) return null;

@@ -11,7 +11,7 @@ import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
 
 const api = vi.hoisted(() => ({
   creaVoceGiornata: vi.fn(), aggiornaVoceGiornata: vi.fn(), spostaVoceGiornata: vi.fn(), eliminaVoceGiornata: vi.fn(), impostaAzionePercorso: vi.fn(),
-  getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
+  getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
   getElenchiAzione: vi.fn(),
 }));
 const ELENCHI = {
@@ -19,11 +19,13 @@ const ELENCHI = {
   libri: [{ chiave: 'zorro-il-fuorilegge', nome: 'Zorro, il fuorilegge' }], film: [], videogiochi: [],
   attivita: [{ chiave: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', turni: true }, { chiave: 'studio-leblanc', nome: 'Studio al Leblanc', turni: false }], negozi: [], doti: [],
 };
-vi.mock('../../services/api', () => api);
+vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 const { notifica } = vi.hoisted(() => ({ notifica: vi.fn() }));
-vi.mock('../../stores/notificationStore', () => ({ notifica }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 
+/** Uid di prova a 32 cifre esadecimali ricavato dal numero dato (zeri a sinistra). */
 const uid = (n: number) => n.toString(16).padStart(32, '0');
+/** Azione della giornata del 12 aprile, di giorno, di genere «azione» e non fatta, con i campi di `p` (uid e testo obbligatori) che sovrascrivono i predefiniti. */
 const voce = (p: Partial<AzionePercorsoDto> & Pick<AzionePercorsoDto, 'uid' | 'azione'>): AzionePercorsoDto => ({
   giorno: '04-12', fascia: 'giorno', genere: 'azione', tipo: 'altro', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: null,
   produce: [], produceTesto: [], fatta: false, effetti: null, stato: null, mappa: null, ...p,
@@ -42,13 +44,17 @@ const base: PercorsoGiornoDto = {
   meteoPartita: null,
 };
 
+/** Disegna la giornata `g` (predefinita la base) per la partita data e restituisce il mock di `onGiornataModificata`, che si risolve subito. */
 const disegna = (g: PercorsoGiornoDto = base, partitaId: number | null = 3) => {
   const ricarica = vi.fn().mockResolvedValue(undefined);
   render(<MemoryRouter><GiornoGuida g={g} partitaId={partitaId} onAggiorna={vi.fn()} onGiornataModificata={ricarica} /></MemoryRouter>);
   return ricarica;
 };
+/** La regione della giornata con il nome dato («Di giorno» o «Di sera»). */
 const sezione = (nome: 'Di giorno' | 'Di sera') => screen.getByRole('region', { name: nome });
+/** Clicca il pulsante «Modifica, sposta o elimina» della voce il cui testo comincia con `testo`, aprendone il menu. */
 const apriMenu = (testo: string) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Modifica, sposta o elimina: ${testo}`) }));
+/** Il gruppo «Gesti per» della voce il cui testo comincia con `testo`, per cercarci dentro i pulsanti. */
 const gestiDi = (testo: string) => within(screen.getByRole('group', { name: new RegExp(`^Gesti per: ${testo}`) }));
 
 describe('GiornoGuida — la giornata canone', () => {
@@ -198,6 +204,7 @@ describe('GiornoGuida — la giornata canone', () => {
     await waitFor(() => expect(within(finestra).getByRole('combobox', { name: 'Tipo' })).toBeInTheDocument());
     fireEvent.click(within(finestra).getByRole('button', { name: 'Togli l\'effetto 1' }));
     expect(within(finestra).getByText('Nessun effetto: la spunta segna solo che l\'hai fatto.')).toBeInTheDocument();
+    /** Nella finestra di modifica apre il menu a tendina `combo` e clicca l'opzione il cui nome comincia con `testo`. */
     const scegli = (combo: string, testo: string) => {
       fireEvent.click(within(finestra).getByRole('combobox', { name: combo }));
       fireEvent.click(within(within(finestra).getByRole('listbox', { name: combo })).getByRole('button', { name: new RegExp(`^${testo}`) }));

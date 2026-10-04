@@ -112,6 +112,15 @@ function VoceArea({ a, memento, scelta, suggerita, onScegli, compatta }: {
   );
 }
 
+/**
+ * Scheda di un Palazzo o dei Memento presa dalla chiave nell'URL: carica il dettaglio per la
+ * partita attiva e l'area dal parametro `area` (la prima quando manca o non esiste). Mostra
+ * l'intestazione (emblema, anello d'avanzamento, correzione della scheda, linea del tempo,
+ * conteggi, dettagli in prosa) e sotto, a colonne da 1024 px, l'elenco delle planimetrie e delle
+ * aree (o il pozzo con i dedali), l'area scelta con la sua planimetria o il disegno del dedalo, e
+ * la colonna di quel che si raccoglie con la guida dell'area. I gesti aggiornano i dati locali
+ * subito e, dove lo stato dipende dal server, li rileggono in silenzio.
+ */
 export function DungeonDettaglioPage() {
   const sugg = useSuggerimenti();
   const { chiave = '' } = useParams();
@@ -124,25 +133,27 @@ export function DungeonDettaglioPage() {
   const d = dati.dati;
   const areaChiave = params.get('area') ?? d?.aree[0]?.chiave ?? null;
   const area: AreaDungeonDto | null = useMemo(() => d?.aree.find((a) => a.chiave === areaChiave) ?? d?.aree[0] ?? null, [d, areaChiave]);
-  const [mappaVersione] = useState(0);
   // ogni cambio di stato dalla colonna ricarica il visore (e viceversa il visore ricarica la pagina)
   const [versioneStati, setVersioneStati] = useState(0);
   const memento = d?.tipo === 'mementos';
 
 
+  // Gli aggiornamenti locali partono dai dati correnti (forma funzionale di `imposta`), non dalla `d` del render: arrivano dopo
+  // un `await`, e due gesti ravvicinati si annullerebbero a vicenda.
   const aggiornaPunto = (nuovo: PuntoInteresseDto) => {
-    if (!d) return;
-    dati.imposta({ ...d, aree: d.aree.map((a) => ({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) })) });
+    dati.imposta((attuale) => ({ ...attuale, aree: attuale.aree.map((a) => ({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) })) }));
   };
   // Le riletture in silenzio della scheda (dopo uno stato o un raccolto) possono sovrapporsi: vale solo l'ultima chiesta, una
   // risposta più vecchia che arriva dopo non sovrascrive quella più nuova (rilievo del validatore).
   const ultimaLettura = useRef(0);
+  /** Rilegge la scheda dal server senza stato di caricamento (solo con una partita) e la applica solo se nel frattempo non è partita una lettura più nuova. */
   const rileggiInSilenzio = async () => {
     if (!partitaId) return;
     const n = ++ultimaLettura.current;
     const fresco = await getDungeon(chiave, partitaId);
     if (n === ultimaLettura.current) dati.imposta(fresco);
   };
+  /** Imposta (o toglie, con null) lo stato di un punto della guida nella partita: aggiorna il punto locale, fa ricaricare il visore e poi rilegge la scheda; l'errore viene notificato. */
   const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null) => {
     if (!partitaId) return;
     try {
@@ -158,15 +169,18 @@ export function DungeonDettaglioPage() {
   /** Uno spillo raccolto (o riaperto): si aggiornano le planimetrie del Palazzo, quelle delle aree e l'anello, senza ricaricare. */
   const segnaRaccolto = (spilloId: number, raccolto: boolean) => {
     if (!d) return;
+    /** Una planimetria con lo spillo segnato raccolto o no e il conteggio dei presi ricalcolato; resta identica se lo spillo non è suo. */
     const aggiornaMappa = <T extends { presi: number | null; spilli: Array<{ id: number; raccolto: boolean | null }> }>(m: T): T => {
       if (!m.spilli.some((s) => s.id === spilloId)) return m;
       const spilli = m.spilli.map((s) => (s.id === spilloId ? { ...s, raccolto } : s));
       return { ...m, spilli, presi: spilli.filter((s) => s.raccolto).length };
     };
-    const planimetrie = d.planimetrie.map(aggiornaMappa);
-    const aree = d.aree.map((a) => ({ ...a, mappe: a.mappe.map(aggiornaMappa) }));
-    const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
-    dati.imposta({ ...d, planimetrie, aree, raccolta: { ...d.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.n > 0 && p.presi === p.n).length } });
+    dati.imposta((attuale) => {
+      const planimetrie = attuale.planimetrie.map(aggiornaMappa);
+      const aree = attuale.aree.map((a) => ({ ...a, mappe: a.mappe.map(aggiornaMappa) }));
+      const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
+      return { ...attuale, planimetrie, aree, raccolta: { ...attuale.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.n > 0 && p.presi === p.n).length } };
+    });
     setVersioneStati((v) => v + 1);
     // Il raccolto di un pin segna (o riapre) la sua voce della guida e, se è un passo, il suo Enigma (095): stati che qui non si
     // possono dedurre. Si rilegge la scheda dal server, senza stato di caricamento, come dopo uno stato cambiato dalla guida.
@@ -174,18 +188,21 @@ export function DungeonDettaglioPage() {
   };
   /** I timbri di un dedalo cambiano: obiettivi del dedalo e anello dei Memento seguono. */
   const aggiornaTimbri = (chiaveArea: string, raccolti: number) => {
-    if (!d) return;
-    const aree = d.aree.map((a) => a.chiave === chiaveArea && a.dedalo ? { ...a, dedalo: { ...a.dedalo, timbri: { ...a.dedalo.timbri, raccolti }, obiettivi: { ...a.dedalo.obiettivi, fatti: raccolti + a.dedalo.richieste.filter((r) => r.stato === 'completata').length } } } : a);
-    dati.imposta({ ...d, aree, raccolta: { ...d.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } });
-  };
-  const aggiornaRichiesta = (chiaveArea: string, chiaveRichiesta: string, stato: StatoRichiesta | null) => {
-    if (!d) return;
-    const aree = d.aree.map((a) => {
-      if (a.chiave !== chiaveArea || !a.dedalo) return a;
-      const richieste = a.dedalo.richieste.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r));
-      return { ...a, dedalo: { ...a.dedalo, richieste, obiettivi: { ...a.dedalo.obiettivi, fatti: (a.dedalo.timbri.raccolti ?? 0) + richieste.filter((r) => r.stato === 'completata').length } } };
+    dati.imposta((attuale) => {
+      const aree = attuale.aree.map((a) => a.chiave === chiaveArea && a.dedalo ? { ...a, dedalo: { ...a.dedalo, timbri: { ...a.dedalo.timbri, raccolti }, obiettivi: { ...a.dedalo.obiettivi, fatti: raccolti + a.dedalo.richieste.filter((r) => r.stato === 'completata').length } } } : a);
+      return { ...attuale, aree, raccolta: { ...attuale.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } };
     });
-    dati.imposta({ ...d, aree, raccolta: { ...d.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } });
+  };
+  /** Lo stato di una richiesta di un dedalo cambia: gli obiettivi fatti del dedalo diventano timbri raccolti più richieste completate, e l'anello dei Memento ne somma tutti i dedali. */
+  const aggiornaRichiesta = (chiaveArea: string, chiaveRichiesta: string, stato: StatoRichiesta | null) => {
+    dati.imposta((attuale) => {
+      const aree = attuale.aree.map((a) => {
+        if (a.chiave !== chiaveArea || !a.dedalo) return a;
+        const richieste = a.dedalo.richieste.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r));
+        return { ...a, dedalo: { ...a.dedalo, richieste, obiettivi: { ...a.dedalo.obiettivi, fatti: (a.dedalo.timbri.raccolti ?? 0) + richieste.filter((r) => r.stato === 'completata').length } } };
+      });
+      return { ...attuale, aree, raccolta: { ...attuale.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } };
+    });
   };
   // Quale planimetria dell'area si sta guardando: quasi sempre una sola; la scelta si azzera cambiando area.
   const [piantaScelta, setPianta] = useState<string | null>(null);
@@ -201,6 +218,7 @@ export function DungeonDettaglioPage() {
   const albero = useCarica(() => (memento ? Promise.resolve([]) : getAlberoMappe()), [memento]);
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
+  /** Apre un'area mettendola nell'URL (che perde gli altri parametri) e azzera la planimetria scelta e quella libera. */
   const scegliArea = (k: string) => { setParams({ area: k }); setPianta(null); setPlanimetriaLibera(null); };
   /** Un'area eliminata dalla guida: se era quella aperta, la scheda torna alla prima (senza parametro). */
   const areaEliminata = (k: string) => { if (area?.chiave === k) { setParams({}); setPianta(null); } };
@@ -218,6 +236,7 @@ export function DungeonDettaglioPage() {
   const quota = d && d.raccolta.presi !== null && d.raccolta.totale > 0 ? d.raccolta.presi / d.raccolta.totale : null;
   const areeSuggerite = (d?.aree ?? []).filter((a) => sugg.evidenziato('aree', a.chiave)).length;
   const suggerimentoDiffuso = !!d && d.aree.length > 0 && areeSuggerite === d.aree.length;
+  /** Se un'area va evidenziata come suggerita: no quando lo sono tutte, perché allora il suggerimento riguarda il Palazzo intero e lo dice il chip dell'intestazione. */
   const areaSuggerita = (chiaveArea: string) => !suggerimentoDiffuso && sugg.evidenziato('aree', chiaveArea);
   const tempoInProsa = !d ? [] : ([
     { etichetta: 'Si apre', valore: d.date.sblocco },
@@ -272,7 +291,9 @@ export function DungeonDettaglioPage() {
                     <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
                       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
                       onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
-                      {(b, cambia) => { const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
+                      {(b, cambia) => {
+                        /** Un campo del modulo di correzione legato alla chiave della bozza, con etichetta, limite di lunghezza ed eventuale testo su più righe. */
+                        const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
                         return <>
                           {campo('nome', 'Nome', LIMITI_GUIDA.dungeon.nome)}{campo('sovrano', 'Sovrano', LIMITI_GUIDA.dungeon.sovrano)}
                           {campo('dataSblocco', 'Si apre', LIMITI_GUIDA.dungeon.data)}{campo('furtoConsigliato', 'Furto consigliato', LIMITI_GUIDA.dungeon.data)}{campo('dataScadenza', 'Scade', LIMITI_GUIDA.dungeon.data)}
@@ -412,7 +433,7 @@ export function DungeonDettaglioPage() {
                   )}
                   {/* Da 1280 px la mappa prende tutta l'altezza che la colonna le lascia, mai meno di 240 px (scelta
                       dell'utente, 2026-09-30: sotto quel minimo scorre la colonna, non la pagina); sotto, l'altezza di prima. */}
-                  <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} classeVisore="h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-[240px] xl:flex-1" onCambiato={() => void dati.ricarica()} />
+                  <MappaIncorporata chiave={mappaScelta} versione={versioneStati} classeVisore="h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-[240px] xl:flex-1" onCambiato={() => void dati.ricarica()} />
                   {/* Da 1280 px la colonna è alta quanto lo schermo: la nota lascia il posto alla mappa, che ha già «Modifica mappa». */}
                   <p className="m-0 text-[11px] text-text-muted xl:hidden">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
                 </>}

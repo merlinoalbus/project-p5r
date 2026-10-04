@@ -13,16 +13,17 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 // quando un Palazzo è completato lo decide `palazziService` (boss finale, Tesoro, 100%: mai la data)
 import { palazziCompletati } from './palazziService.js';
-import { EVENTI_STORIA, dataLeggibile } from '../../shared/condizioniSpillo.js';
+import { EVENTI_STORIA, dataLeggibile, nomePalazzo, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { guastaLAperto, nomeMeteo, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { meteoOra } from './meteoService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
+import { nomeDote } from '../../shared/doti.js';
 import { t } from './traduzioniService.js';
-import type { RequisitoSeed } from '../../shared/seed.js';
-import type { SemaforiRangoDto, SemaforoRequisitoDto } from '../../shared/types.js';
+import type { RequisitoRango, SemaforiRangoDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
-export interface RigaRequisito { confidente_chiave: string; rango: number; indice: number; tipo: RequisitoSeed['tipo']; dati_json: string; testo: string }
+export interface RigaRequisito { confidente_chiave: string; rango: number; indice: number; tipo: RequisitoRango['tipo']; dati_json: string; testo: string }
 
 /** Stato della partita letto una volta per tutti i Confidenti. */
 export interface StatoPartitaSemafori {
@@ -48,6 +49,10 @@ export interface StatoPartitaSemafori {
   eventi: Set<string>;
 }
 
+/** Lo stato della partita che serve ai semafori: ranghi e Doti li passa chi chiama; qui si leggono arcani in scorta,
+ *  coppie Persona|abilità (in minuscolo), Richieste completate (per chiave e per nome in minuscolo), Palazzi completati,
+ *  data e fascia di gioco (fascia «giorno» se non è «sera»), meteo del momento, requisiti confermati a mano
+ *  (`confidente/rango/indice`), membri della squadra dentro e fuori, eventi di storia avvenuti. */
 export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<string, number>, doti: Map<string, number>): StatoPartitaSemafori {
   const arcani = new Set((prepared('SELECT DISTINCT p.arcana FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.partita_id = ?').all(partitaId) as Array<{ arcana: string }>).map((r) => r.arcana));
   const abilita = new Set((prepared(`SELECT p.nome AS persona, s.nome AS abilita FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id
@@ -58,36 +63,35 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const dataGioco = partita?.data_gioco ?? null;
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
   const conferme = new Set((prepared('SELECT confidente_chiave, rango, indice FROM requisito_partita WHERE partita_id = ? AND confermato = 1').all(partitaId) as Array<{ confidente_chiave: string; rango: number; indice: number }>).map((r) => `${r.confidente_chiave}/${r.rango}/${r.indice}`));
-  // Chi e' in squadra: i Ladri di cui la partita ha una riga. La riga nasce quando ne segni il
-  // livello, quindi «ha una riga» vuol dire «l'ho gia' con me», che e' la domanda della condizione.
-  // **L'interruttore, non la presenza della riga.** Prima bastava avere segnato un livello perche'
-  // il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
+  // Chi e' in squadra: i Ladri con l'interruttore «In squadra» acceso (`in_squadra = 1`), e chi e' fuori quelli con
+  // l'interruttore spento. **L'interruttore, non la presenza della riga.** Prima bastava avere segnato un livello (la riga
+  // nasce li') perche' il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const eventi = new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave));
   return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati: palazziCompletati(partitaId), richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), conferme, eventi };
 }
 
-function confrontaDate(a: string, b: string): number {
-  // calendario di gioco: da aprile (04) a marzo (03) dell'anno dopo
-  const ordine = (d: string): number => { const [m, g] = d.split('-').map(Number); return ((m + 8) % 12) * 100 + g; };
-  return ordine(a) - ordine(b);
-}
+// L'ordine del calendario di gioco e i nomi dei Palazzi vengono da `shared/condizioniSpillo.ts`: qui erano riscritti a mano
+// (rilievo R2 della verifica completa, 2026-10-03).
 
-const NOMI_DOTI: Record<string, string> = { conoscenza: 'Conoscenza', coraggio: 'Coraggio', fascino: 'Fascino', gentilezza: 'Gentilezza', perizia: 'Perizia' };
-const NOMI_DUNGEON: Record<string, string> = { kamoshida: 'Palazzo di Kamoshida', madarame: 'Palazzo di Madarame', kaneshiro: 'Palazzo di Kaneshiro', futaba: 'Palazzo di Futaba', okumura: 'Palazzo di Okumura', niijima: 'Palazzo di Niijima', shido: 'Palazzo di Shido', maruki: 'Palazzo di Maruki', iweleth: 'Dedalo di Iweleth' };
-
+/**
+ * Il semaforo di un requisito di rango sullo stato della partita: per tipo (Dote, Persona dell'arcano o con un'abilità,
+ * Palazzo, richiesta, membro in squadra, rango di un Confidente, data, meteo, evento) dice verde o rosso con il dettaglio di
+ * che cosa manca. Quel che l'app non sa verificare è grigio, verde se l'utente l'ha confermato a mano; gli avvisi non bloccano.
+ */
 export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDto {
   const dati = JSON.parse(r.dati_json) as Record<string, string | number>;
   const chiaveConferma = `${r.confidente_chiave}/${r.rango}/${r.indice}`;
   const confermato = st.conferme.has(chiaveConferma);
   const base = { indice: r.indice, tipo: r.tipo, testo: r.testo, confermato };
+  /** Il semaforo di un requisito che l'app non sa verificare da sola: grigio, oppure verde se l'utente l'ha confermato a mano. */
   const grigio = (dettaglio: string): SemaforoRequisitoDto => ({ ...base, stato: confermato ? 'verde' : 'grigio', dettaglio: confermato ? `${dettaglio} · confermato a mano` : dettaglio, manuale: true });
   switch (r.tipo) {
     case 'dote': {
       const attuale = st.doti.get(String(dati.dote)) ?? 1;
       const richiesto = Number(dati.rango);
-      return { ...base, stato: attuale >= richiesto ? 'verde' : 'rosso', dettaglio: `${NOMI_DOTI[String(dati.dote)] ?? dati.dote}: rango ${attuale} di ${richiesto}`, manuale: false };
+      return { ...base, stato: attuale >= richiesto ? 'verde' : 'rosso', dettaglio: `${nomeDote(String(dati.dote))}: rango ${attuale} di ${richiesto}`, manuale: false };
     }
     case 'persona-arcano': {
       const ok = st.arcaniInScorta.has(String(dati.arcano));
@@ -100,7 +104,7 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
       return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `${persona} con ${skill} in scorta` : `Nessuna ${persona} con ${skill} in scorta`, manuale: false };
     }
     case 'palazzo': {
-      const nome = NOMI_DUNGEON[String(dati.dungeon)] ?? String(dati.dungeon);
+      const nome = nomePalazzo(String(dati.dungeon));
       const perche = st.palazziCompletati.get(String(dati.dungeon));
       if (perche) return { ...base, stato: 'verde', dettaglio: `${nome}: completato (${perche})`, manuale: false };
       // Il boss sconfitto è uno stato che l'app registra: o risulta o non risulta, e finché non
@@ -131,7 +135,7 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
     }
     case 'data': {
       if (!st.dataGioco) return { ...base, stato: 'rosso', dettaglio: `Disponibile dal ${dataLeggibile(String(dati.dal))}: il giorno corrente della partita non è impostato (Partita → Oggi)`, manuale: false };
-      const ok = confrontaDate(st.dataGioco, String(dati.dal)) >= 0;
+      const ok = ordineGioco(st.dataGioco) >= ordineGioco(String(dati.dal));
       return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Disponibile dal ${dataLeggibile(String(dati.dal))} (oggi ${dataLeggibile(st.dataGioco)})` : `Disponibile dal ${dataLeggibile(String(dati.dal))}, oggi è il ${dataLeggibile(st.dataGioco)}`, manuale: false };
     }
     case 'meteo': {
@@ -183,7 +187,7 @@ export function impostaEventoStoria(partitaId: number, evento: string, avvenuto:
 /** Conferma (o revoca) a mano un requisito non verificabile. Un requisito `evento` non ha una conferma sua:
  *  segna l'evento della partita, così il Confidente e Partita → Progressi dicono la stessa cosa. */
 export function confermaRequisito(partitaId: number, chiave: string, rango: number, indice: number, confermato: boolean): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const riga = prepared('SELECT tipo, dati_json FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').get(chiave, rango, indice) as { tipo: string; dati_json: string } | undefined;
   if (!riga) throw httpErrors.notFound('requisito-non-trovato', 'Requisito non trovato.');
   if (riga.tipo === 'avviso') throw httpErrors.badRequest('requisito-non-confermabile', 'È un\'avvertenza da controllare nel gioco: non blocca il rango e non si conferma.');

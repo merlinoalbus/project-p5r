@@ -2,28 +2,31 @@
 // Le categorie di un articolo: due elenchi che devono restare uno solo
 // ============================================================
 //
-// La categoria di un articolo è scritta in due posti che non si vedono fra loro: l'enum di
-// `server/schemas/catalogo.ts`, che decide che cosa il server accetta, e `NOME_CATEGORIA_ARTICOLO`,
-// che decide che cosa il menu offre. Se divergono il difetto è silenzioso e cattivo nei due versi:
-// una voce solo nel menu fa fallire il salvataggio con un errore di validazione su una scelta che
-// l'app stessa proponeva; una voce solo nell'enum è una categoria che nessuno può scegliere.
+// L'elenco delle categorie sta in `shared/articoli.ts` (dal 2026-10-03, prima era scritto anche nello
+// schema del catalogo e nella rotta della ricerca). Restano due lati che non si vedono fra loro: lo
+// schema del server, che decide che cosa si accetta, e `NOME_CATEGORIA_ARTICOLO`, che decide che cosa
+// il menu offre. Se divergono il difetto è silenzioso e cattivo nei due versi: una voce solo nel menu
+// fa fallire il salvataggio con un errore di validazione su una scelta che l'app stessa proponeva; una
+// voce solo nello schema è una categoria che nessuno può scegliere.
 //
-// Aggiungerne una vuol dire toccarli tutti e due — e dare alla categoria la sua figura, che è la
-// terza cosa che si dimentica: senza, la riga resta sul cartiglio rosso di riserva.
+// Aggiungerne una vuol dire dare alla categoria anche la sua etichetta e la sua figura, che è la cosa
+// che si dimentica: senza, la riga resta sul cartiglio rosso di riserva.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { NOME_CATEGORIA_ARTICOLO } from './negozi';
 import { chiaveCategoria } from './categorie';
+import { CATEGORIE_ARTICOLO } from '../../shared/articoli';
+import { datiArticolo } from '../../server/schemas/catalogo';
 
 const RADICE = path.resolve(__dirname, '../..');
 
-/** Le categorie che il server accetta, lette dall'enum di zod nel sorgente. */
+/** Le categorie che lo schema del catalogo accetta davvero: si prova ognuna delle note, più una che non esiste. */
 function categorieDelServer(): string[] {
-  const src = fs.readFileSync(path.join(RADICE, 'server/schemas/catalogo.ts'), 'utf8');
-  const blocco = src.split('categoria: z.enum([')[1]?.split('])')[0];
-  if (!blocco) throw new Error('enum delle categorie non trovato in server/schemas/catalogo.ts');
-  return [...blocco.matchAll(/'([^']+)'/g)].map((m) => m[1]);
+  const forma = datiArticolo.shape.categoria;
+  const accettate = [...CATEGORIE_ARTICOLO].filter((c) => forma.safeParse(c).success);
+  if (forma.safeParse('inesistente').success) throw new Error('lo schema accetta una categoria che non esiste');
+  return accettate;
 }
 
 describe('categorie di un articolo', () => {

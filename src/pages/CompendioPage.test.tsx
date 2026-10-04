@@ -13,20 +13,25 @@ import { azzeraCacheImmagini } from '../components/shared/immaginiCache';
 import type { AffinitaDto, PersonaRiassuntoDto } from '../types';
 
 const { getPersone, getImmagini } = vi.hoisted(() => ({ getPersone: vi.fn(), getImmagini: vi.fn() }));
-vi.mock('../services/api', () => ({
+vi.mock('../services/api', (vero) => moduloApi(vero, {
   getPersone,
   getImmagini,
   caricaImmagine: vi.fn(),
   eliminaImmagine: vi.fn(),
   importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
+/** Costruisce un'affinità dell'elemento dato con il codice dato (nomi uguali alle chiavi, sigla dell'elemento di 3 lettere). */
 const aff = (elemento: string, codice: string): AffinitaDto => ({ elemento, elementoNome: elemento, elementoSigla: elemento.slice(0, 3), codice, codiceNome: codice, codiceSigla: codice });
+/** Costruisce il riassunto di una Persona dell'arcano Matto con id, nome e livello dati, senza affinità; `extra`
+ *  sovrascrive i campi. */
 const persona = (id: number, nome: string, livello: number, extra: Partial<PersonaRiassuntoDto> = {}): PersonaRiassuntoDto => ({
   id, nome, nomeIt: nome, arcana: 'Fool', arcanaNome: 'Matto', livello, eredita: null, ereditaNome: null, speciale: false, rara: false, dlc: false, richiedeConfidenteMax: false, tratto: '',
   statistiche: { forza: 2, magia: 2, resistenza: 2, agilita: 3, fortuna: 1 }, affinita: [], ...extra,
 });
+/** I nomi delle Persona nelle tessere a schermo, nell'ordine mostrato: la prima parte (prima della virgola)
+ *  dell'`aria-label` del collegamento di ogni voce con id `persona-…`. */
 const nomiTessere = () => screen.getAllByRole('listitem').filter((li) => li.id.startsWith('persona-')).map((li) => li.querySelector('a')?.getAttribute('aria-label')?.split(',')[0] ?? '');
 
 beforeEach(() => {

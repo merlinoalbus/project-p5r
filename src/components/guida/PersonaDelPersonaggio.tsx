@@ -22,6 +22,7 @@ interface Props {
 
 const FASI = ['iniziale', 'risveglio', 'terza forma'];
 
+/** Ultima riserva dell'immagine: le iniziali delle prime due parole del nome, decorative. */
 function Iniziali({ nome, classe }: { nome: string; classe: string }) {
   return <span className={`${classe} flex items-center justify-center font-black text-text-muted bg-bg-tertiary`} aria-hidden="true">{nome.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase() ?? '').join('')}</span>;
 }

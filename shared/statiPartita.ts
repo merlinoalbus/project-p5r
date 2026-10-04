@@ -13,7 +13,8 @@
 // devono restare l'una l'inversa dell'altra: è la proprietà che i test verificano.
 // ============================================================
 
-import { ARCHI_STORIA, CONTATORI, DOTI_CONDIZIONE, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo } from './condizioniSpillo.js';
+import { DOTI_SOCIALI, eDote } from './doti.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo } from './condizioniSpillo.js';
 import { uidValido } from './spilli.js';
 
 /** Come si sceglie un valore: da quale elenco, o che numero. */
@@ -40,6 +41,7 @@ export interface DefinizioneStato {
   soloSpilli?: true;
 }
 
+/** Un campo dell'editor delle condizioni: nome del valore, tipo e etichetta mostrata. */
 const campo = (nome: string, tipo: TipoCampo, etichetta: string): CampoCondizione => ({ nome, tipo, etichetta });
 
 export const STATI_PARTITA: readonly DefinizioneStato[] = [
@@ -84,11 +86,14 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
 export type ValoriCondizione = Record<string, string | number | string[]>;
 export interface SceltaCondizione { stato: string; operatore: string; valori: ValoriCondizione }
 
+/** La definizione dello stato con quella chiave in `STATI_PARTITA`; undefined se non esiste. */
 export function definizioneStato(chiave: string): DefinizioneStato | undefined {
   return STATI_PARTITA.find((s) => s.chiave === chiave);
 }
 
-/** Valore predefinito di un campo: la prima voce dell'elenco quando è fisso, altrimenti vuoto. */
+/** Valore predefinito di un campo appena aggiunto all'editor: di solito la prima voce dell'elenco, ma per alcuni tipi un valore
+ *  scelto apposta (`data` il 18 aprile, `arco` e `rango-cliente` la seconda voce, gli interi un numero comodo); vuoto per i tipi
+ *  senza un elenco o un numero. */
 export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
   switch (tipo) {
     case 'data': return '04-18';
@@ -97,7 +102,7 @@ export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
     case 'stagione': return STAGIONI[0].chiave;
     case 'arco': return ARCHI_STORIA[1];
     case 'palazzo': return PALAZZI_CONDIZIONE[0].chiave;
-    case 'dote': return DOTI_CONDIZIONE[0].chiave;
+    case 'dote': return DOTI_SOCIALI[0].chiave;
     case 'rango5': return 2;
     case 'rango10': return 1;
     case 'volte': return 1;
@@ -110,7 +115,9 @@ export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
   }
 }
 
+/** Il valore se è una stringa, altrimenti la stringa vuota. */
 const s = (v: unknown): string => (typeof v === 'string' ? v : '');
+/** Il valore se è un intero, altrimenti NaN (che nessun controllo di intervallo lascia passare). */
 const n = (v: unknown): number => (typeof v === 'number' && Number.isInteger(v) ? v : NaN);
 
 /** Dalla scelta (stato, operatore, valori) alla condizione; `null` finché manca un valore. */
@@ -135,7 +142,7 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'quartiere': return s(v.quartiere) ? { tipo: 'quartiere', quartiere: s(v.quartiere) } : null;
     case 'arco': return (ARCHI_STORIA as readonly string[]).includes(s(v.dungeon)) ? { tipo: 'arco', dungeon: s(v.dungeon) } : null;
     case 'palazzo': return s(v.dungeon) ? { tipo: 'palazzo', dungeon: s(v.dungeon) } : null;
-    case 'dote': return DOTI_CONDIZIONE.some((d) => d.chiave === v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;
+    case 'dote': return eDote(v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;
     case 'confidente': return s(v.confidente) && n(v.rango) >= 1 && n(v.rango) <= 10 ? { tipo: 'confidente', confidente: s(v.confidente), rango: n(v.rango) } : null;
     case 'squadra': return s(v.membro) ? { tipo: 'squadra', membro: s(v.membro) } : null;
     case 'richiesta': return s(v.richiesta) ? { tipo: 'richiesta', richiesta: s(v.richiesta) } : null;

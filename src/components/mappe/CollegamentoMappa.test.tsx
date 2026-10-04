@@ -14,11 +14,13 @@ import { MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
 import { CollegamentoMappa } from './CollegamentoMappa';
 import { percorsoAccessoMondo, schedaAccessoMondo } from '../../utils/accessoMondo';
 
+/** Pagina d'arrivo finta della rotta /guida/mondo/:tipo/:chiave: scrive «tipo|chiave» letti dall'indirizzo. */
 function Risolutore() {
   const { tipo, chiave } = useParams();
   return <div data-testid="risolutore">{tipo}|{chiave}</div>;
 }
 
+/** Disegna il collegamento compatto «Sulla mappa» per l'elemento dato su /guida/oggetti, con la rotta del Risolutore come destinazione. */
 function monta(tipo: 'articolo' | 'negozio', chiave: string) {
   return render(<MemoryRouter initialEntries={['/guida/oggetti']}>
     <Routes>

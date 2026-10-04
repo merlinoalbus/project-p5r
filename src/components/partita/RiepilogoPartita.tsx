@@ -38,6 +38,7 @@ export function RiepilogoPartita({ partita }: Props) {
   const [note, setNote] = useState(partita.note);
   const [occupato, setOccupato] = useState(false);
 
+  /** Salva insieme tutti i campi del modulo (data vuota come `null`) e aggiorna la partita nello store. */
   const salva = async () => {
     setOccupato(true);
     try {
@@ -51,6 +52,8 @@ export function RiepilogoPartita({ partita }: Props) {
     }
   };
 
+  /** Cambia subito lo stato dell'Allarme, senza aspettare «Salva»: aggiorna il campo locale e salva
+   * il solo Allarme; in caso di errore notifica e lascia il campo come scelto. */
   const cambiaAllarme = async (attivo: boolean) => {
     setAllarme(attivo);
     try {

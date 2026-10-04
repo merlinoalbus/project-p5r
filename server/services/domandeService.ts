@@ -4,24 +4,30 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
+import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 
 interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
-/** Indice SOLO per ordinare/confrontare date di gioco 'MM-GG' nell'anno scolastico (aprile → marzo): mese×31+giorno, non conta i giorni reali. */
+/**
+ * Indice SOLO per ordinare/confrontare date di gioco 'MM-GG' nell'anno scolastico (aprile → marzo), non conta i giorni reali.
+ * È `ordineGioco` (R4": il conto dei mesi era scritto anche qui), con -1 per una data che non si legge.
+ */
 export function indiceGiornoScolastico(data: string): number {
   const [m, g] = data.split('-').map(Number);
   if (!Number.isInteger(m) || !Number.isInteger(g)) return -1;
-  const mese = (m - 4 + 12) % 12;
-  return mese * 31 + g;
+  return ordineGioco(data);
 }
 
+/** Una domanda come DTO: risposte dal JSON, `fatta` se il suo id è fra quelli segnati nella partita. */
 function domandaDto(r: RigaDomanda, fatte: Set<number>): DomandaDto {
   return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id) };
 }
 
+/** Gli esami in ordine, con date e domande lette dai rispettivi JSON. */
 function esami(): EsameDto[] {
   return (prepared('SELECT chiave, nome, date_json, data_risultati, domande_json, note FROM esame ORDER BY ordine').all() as Array<{ chiave: string; nome: string; date_json: string; data_risultati: string | null; domande_json: string; note: string }>)
     .map((e) => ({ chiave: e.chiave, nome: e.nome, date: JSON.parse(e.date_json) as string[], dataRisultati: e.data_risultati, domande: JSON.parse(e.domande_json) as EsameDto['domande'], note: e.note }));
@@ -33,7 +39,7 @@ export function domande(partitaId?: number): DomandeDto {
   let dataGioco: string | null = null;
   if (partitaId !== undefined) {
     const p = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
-    if (!p) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+    if (!p) throw partitaNonTrovata(partitaId);
     dataGioco = p.data_gioco;
     fatte = new Set((prepared('SELECT domanda_id FROM domanda_partita WHERE partita_id = ?').all(partitaId) as Array<{ domanda_id: number }>).map((r) => r.domanda_id));
   }
@@ -51,7 +57,7 @@ export function domande(partitaId?: number): DomandeDto {
 /** Segna una domanda come fatta (o no) e registra l'evento. Con `conoscenza` la risposta vale una nota di Conoscenza: la
  *  risposta la dice (`daSegnare`), ma le Doti si segnano a mano (scelta dell'utente, 2026-09-30) e qui non si toccano. */
 export function impostaDomandaFatta(partitaId: number, domandaId: number, fatta: boolean, conoscenza: boolean): DomandeDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const d = prepared('SELECT * FROM domanda WHERE id = ?').get(domandaId) as RigaDomanda | undefined;
   if (!d) throw httpErrors.notFound('domanda-non-trovata', `La domanda ${domandaId} non esiste.`);
   const adesso = nowIso();

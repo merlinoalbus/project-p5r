@@ -30,6 +30,8 @@ function nomeDalContentDisposition(res: Response, ripiego: string): string {
   return /filename="?([^";]+)"?/.exec(intestazione)?.[1] ?? ripiego;
 }
 
+/** Scarica un file lungo da produrre (timeout di 30 minuti, nessun nuovo tentativo): un errore diventa `ApiError` con la busta
+ *  del server se c'è; altrimenti restituisce il nome proposto, il contenuto e il nome della copia lasciata nella cartella d'appoggio. */
 async function scarica(percorso: string, ripiego: string): Promise<{ nome: string; blob: Blob; depositato: string | null }> {
   const res = await httpFetch(`${API_BASE_URL}${percorso}`, { method: 'GET' }, { maxRetries: 0, timeoutMs: 1_800_000 });
   if (!res.ok) {

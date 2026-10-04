@@ -16,7 +16,7 @@ import type { Oggi } from '../hooks/useOggi';
 import type { PartitaDto } from '../types';
 
 const api = vi.hoisted(() => ({ getDoti: vi.fn(), getPossedute: vi.fn() }));
-vi.mock('../services/api', () => api);
+vi.mock('../services/api', (vero) => moduloApi(vero, api));
 const sullaMappa = vi.hoisted(() => vi.fn());
 vi.mock('../hooks/useOggi', () => ({
   useOggi: (): Partial<Oggi> => ({ indice: { giorni: [], dataCorrente: '04-12', totaleGiorni: 1, giorniCoperti: 1 } as unknown as Oggi['indice'], giorno: {} as Oggi['giorno'], caricamento: false, errore: null, sullaMappa }),
@@ -35,6 +35,7 @@ beforeEach(() => {
   usePartitaStore.setState({ attiva: { id: 4, nome: 'Prova', livelloProtagonista: 1, allarmeAttivo: false } as PartitaDto });
 });
 
+/** Disegna la Home dentro un router in memoria. */
 const disegna = () => render(<MemoryRouter><HomePage /></MemoryRouter>);
 
 it('«Nascondi la mappa» la chiude in una linguetta e lo ricorda; la linguetta la riapre', async () => {

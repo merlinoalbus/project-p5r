@@ -3,13 +3,13 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto, regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa, creaSpillo, dimensioniImmagine, importaMappe } from '../services/mappe/mappeService.js';
 import { salvaImmagine } from '../services/immaginiService.js';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -23,9 +23,7 @@ const PNG_2x3 = Buffer.concat([
 describe('API mappe a livelli (Fase 13.1)', () => {
   let partitaId = 0;
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    const db = dbDiProva();
     // Explicit positioned fixture: editorial seed points no longer pretend to have a physical map.
     // una voce del Palazzo della planimetria di prova (che è figlia di Kamoshida), che si segna: le regole del collegamento (094)
     const punto=db.prepare("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'kamoshida' AND p.tipo <> 'altro' ORDER BY p.chiave LIMIT 1").get() as {chiave:string};

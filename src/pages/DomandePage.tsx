@@ -24,21 +24,30 @@ import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
 import type { DomandaDto, DomandeDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { piatto } from '../utils/testo';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
 type FiltroStato = 'tutte' | 'da-fare' | 'fatte';
 const TIPI: ReadonlyArray<{ chiave: FiltroTipo; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'classe', nome: 'In classe' }, { chiave: 'esami', nome: 'Esami' }, { chiave: 'tv', nome: 'Quiz TV' }];
 const STATI: ReadonlyArray<{ chiave: FiltroStato; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'da-fare', nome: 'Da fare' }, { chiave: 'fatte', nome: 'Fatte' }];
+/** Vero per i due tipi d'esame (metà e fine semestre), che il filtro «Esami» tiene insieme. */
 const eEsame = (t: DomandaDto['tipo']) => t === 'esame-medio' || t === 'esame-finale';
-const piatto = (s: string | null | undefined) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
+/** L'id della riga di una data, usato come ancora per scorrere al prossimo appuntamento. */
 const ancoraData = (data: string) => `domande-${data}`;
 
+/**
+ * La riga di una domanda: spunta di «fatta» (solo con una partita), data, chi la fa, tipo se non
+ * è in classe, segno di «prossima», ricompensa, testo della domanda e risposte giuste in ordine
+ * (con il quesito accanto quando c'è, come negli esami), note e correzione della voce. Porta
+ * l'ancora della data solo quando è evidenziata.
+ */
 function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: DomandaDto; partitaId: number | null; onCambiata: (r: DomandeDto) => void; onCorretta: () => void; evidenzia?: boolean }) {
   const [occupato, setOccupato] = useState(false);
   // Solo dove la guida scrive «Conoscenza +1 nota» (le domande in classe): gli esami «contribuiscono alla
   // classifica» e i quiz in TV parlano di «aumento», e per quelli non c'è una nota da ricordare.
   const daConoscenza = /Conoscenza \+/.test(d.ricompensa);
+  /** Segna la domanda fatta o no nella partita, chiedendo la nota di Conoscenza solo quando la si segna fatta e la ricompensa la prevede; passa al genitore l'elenco restituito, ricorda le Doti da segnare o notifica l'errore. */
   const segna = async (fatta: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
@@ -80,6 +89,13 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
   );
 }
 
+/**
+ * Pagina delle domande: carica l'elenco per la partita attiva, mostra il rimando al prossimo
+ * appuntamento, la carta degli esami con date, risultati e premi, poi i filtri (testo su domanda,
+ * risposte, chi e data; tipo; stato con una partita) e le righe raggruppate per mese di gioco,
+ * con evidenziate le domande del prossimo appuntamento. La spunta sostituisce i dati con quelli
+ * restituiti dal server.
+ */
 export function DomandePage() {
   useDocumentTitle('Domande in classe, esami e quiz in TV');
   const attiva = usePartitaStore((s) => s.attiva);

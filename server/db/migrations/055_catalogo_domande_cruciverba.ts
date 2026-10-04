@@ -33,22 +33,23 @@ const COLONNE = [
 ] as const;
 
 /** La chiave di una domanda: il giorno, con un progressivo se quel giorno ne ha più d'una. */
-export function chiaveDomanda(data: string, indiceNelGiorno: number): string {
+function chiaveDomanda(data: string, indiceNelGiorno: number): string {
   return indiceNelGiorno > 0 ? `${data}-${indiceNelGiorno + 1}` : data;
 }
 
 /** La chiave di una riga del cruciverba: giorno e posizione, che è la sua identità già oggi. */
-export function chiaveCruciverba(data: string, ordine: number): string {
+function chiaveCruciverba(data: string, ordine: number): string {
   return `${data}-${ordine}`;
 }
 
+/** Aggiunge alla tabella le colonne del catalogo (`COLONNE`) che non ha ancora: rieseguibile senza errori. */
 function aggiungiColonne(db: Database.Database, tabella: string): void {
   const presenti = new Set((db.prepare(`PRAGMA table_info(${tabella})`).all() as Array<{ name: string }>).map((c) => c.name));
   for (const [nome, tipo] of COLONNE) if (!presenti.has(nome)) db.exec(`ALTER TABLE ${tabella} ADD COLUMN ${nome} ${tipo}`);
 }
 
 /** Riempie le chiavi mancanti; è idempotente e non tocca quelle già assegnate. */
-export function assegnaChiavi(db: Database.Database): void {
+function assegnaChiavi(db: Database.Database): void {
   const perGiorno = new Map<string, number>();
   for (const d of db.prepare('SELECT rowid AS r, data, chiave FROM domanda ORDER BY ordine').all() as Array<{ r: number; data: string; chiave: string | null }>) {
     const i = perGiorno.get(d.data) ?? 0;

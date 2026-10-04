@@ -2,8 +2,8 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { timbriDallaDescrizione } from './077_timbri_dedalo.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -20,8 +20,7 @@ it('legge «20 Timbri totali» e lascia nullo ciò che la guida non dichiara', (
 });
 
 it('nel pacchetto sei dedali su nove hanno i timbri dichiarati', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const righe = db.prepare("SELECT chiave, timbri_totale FROM dungeon_area WHERE dungeon_chiave = 'mementos' ORDER BY ordine").all() as Array<{ chiave: string; timbri_totale: number | null }>;
   expect(righe.map((r) => r.timbri_totale)).toEqual([null, 8, null, 20, 25, 30, 30, null, 40]);
 });

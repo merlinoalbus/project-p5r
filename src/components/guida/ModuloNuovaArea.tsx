@@ -32,6 +32,11 @@ interface Props {
   onAnnulla: () => void;
 }
 
+/**
+ * Il modulo dell'area nuova: nome (proposto da `nomeIniziale`), descrizione e posto nella guida (in fondo, in cima o
+ * dopo un'area; di partenza `dopoIniziale` se esiste, altrimenti in fondo). All'apertura si porta in vista e mette il
+ * fuoco sul nome. Con `bloccato` mostra il motivo e non invia.
+ */
 export function ModuloNuovaArea({ aree, nomeIniziale = '', dopoIniziale, occupato, bloccato, onCrea, onAnnulla }: Props) {
   const [nome, setNome] = useState(nomeIniziale);
   const [descrizione, setDescrizione] = useState('');
@@ -48,6 +53,7 @@ export function ModuloNuovaArea({ aree, nomeIniziale = '', dopoIniziale, occupat
     { chiave: IN_CIMA, nome: 'All’inizio del Palazzo' },
     ...aree.map((a) => ({ chiave: a.chiave, nome: `Dopo «${a.ordine + 1}. ${a.nome}»` })),
   ];
+  /** Invia i dati ripuliti se c'è un nome e nulla blocca: «in fondo» non manda `dopo`, «in cima» lo manda nullo. */
   const invia = () => {
     const n = nome.trim();
     if (!n || occupato || bloccato) return;

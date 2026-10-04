@@ -2,11 +2,12 @@
 // scaricaDaUrl — prendere un file da un indirizzo, con i tempi giusti e un tetto vero
 // ============================================================
 //
-// Lo usano l'importazione del pacchetto di gioco (centinaia di MB) e le immagini da URL (8 MB).
+// Lo usano le immagini da URL (8 MB). Il pacchetto di gioco, che lo usava per lo scaricamento da indirizzo, oggi passa
+// solo dalla cartella d'appoggio (`depositoService`).
 //
 // **Tre attese diverse, non una sola.** `AbortSignal.timeout(n)` sembra la via breve, ma quel segnale
-// resta legato anche alla lettura del corpo: con trenta secondi di scadenza un pacchetto da 300 MB
-// muore sempre a metà scarico, e l'errore arriva grezzo. Qui il cronometro delle **intestazioni** si
+// resta legato anche alla lettura del corpo: con trenta secondi di scadenza un file grande da un'origine lenta
+// muore a metà scarico, e l'errore arriva grezzo. Qui il cronometro delle **intestazioni** si
 // disarma appena il server risponde; da lì in poi vale solo l'**inattività**, che riparte a ogni blocco
 // ricevuto. Un trasferimento lento ma vivo non viene interrotto; uno morto sì.
 //
@@ -20,7 +21,7 @@ import { httpErrors } from './httpError.js';
 export interface OpzioniScarico {
   /** Tetto del contenuto accettato, in byte. */
   maxByte: number;
-  /** Che cosa si sta scaricando, per i messaggi: «il pacchetto di gioco», «l'immagine». */
+  /** Che cosa si sta scaricando, per i messaggi: per esempio «l'immagine». */
   cosa: string;
   /** Codice dell'errore quando lo scarico non riesce. */
   codiceScaricoFallito: string;
@@ -51,6 +52,7 @@ export function urlValido(indirizzo: string): URL {
   return u;
 }
 
+/** Byte in megabyte (MiB) arrotondati all'intero, per i messaggi all'utente. */
 const megabyte = (byte: number): number => Math.round(byte / 1024 / 1024);
 
 /** Scarica il contenuto dell'indirizzo: intestazioni entro `attesaRispostaMs`, corpo a blocchi entro il tetto. */
@@ -61,7 +63,9 @@ export async function scaricaDaUrl(indirizzo: string, opzioni: OpzioniScarico): 
   const ctrl = new AbortController();
   let motivo: 'risposta' | 'inattivita' | null = null;
   let orologio: NodeJS.Timeout | null = null;
+  /** Disarma il timer in corso, se c'è. */
   const fermaOrologio = (): void => { if (orologio) { clearTimeout(orologio); orologio = null; } };
+  /** Riarma il timer da capo: allo scadere annota il motivo (`risposta` o `inattivita`) e interrompe la richiesta. */
   const armaOrologio = (ms: number, quale: 'risposta' | 'inattivita'): void => {
     fermaOrologio();
     orologio = setTimeout(() => { motivo = quale; ctrl.abort(); }, ms);

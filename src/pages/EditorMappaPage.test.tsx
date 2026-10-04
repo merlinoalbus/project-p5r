@@ -5,7 +5,7 @@
 // Test EditorMappaPage — aggiunta di uno spillo con un tocco sulla mappa, proprietà e riferimento cercato, copia/incolla, mappa (Fase 13.3, 15.18)
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { EditorMappaPage } from './EditorMappaPage';
@@ -14,11 +14,12 @@ import { usePartitaStore } from '../stores/partitaStore';
 
 const api = vi.hoisted(() => ({
   risolviMappa: vi.fn(), getMappa: vi.fn(), getAlberoMappe: vi.fn(), creaSpillo: vi.fn(), aggiornaSpillo: vi.fn(), eliminaSpillo: vi.fn(), cercaRiferimenti: vi.fn(),
-  aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPianta: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
+  aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
 aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
-vi.mock('../services/api/condizioni', () => ({
+vi.mock('../services/api', (vero) => moduloApi(vero, {
+  ...api,
   getElenchiRegole: vi.fn().mockResolvedValue({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] }),
   // i pin con uno stato di tutte le mappe, per la condizione «Pin di una mappa» (2026-10-03)
   getPinConStato: vi.fn().mockResolvedValue([
@@ -29,13 +30,14 @@ vi.mock('../services/api/condizioni', () => ({
     { chiave: 'd'.repeat(32), nome: 'Stanza sicura del cortile', tipo: 'sicura', gruppo: 'Palazzo di Kamoshida › Cortile', parola: 'ottenuto' },
   ]),
 }));
-vi.mock('../services/api', () => api);
 
+/** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 const albero: MappaRiassuntoDto[] = [riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta' }), riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo' })];
 const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
 const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [] };
 
+/** Monta l'editor sulla mappa di Shibuya (`/guida/mappe/citta-shibuya/modifica`). */
 function monta() {
   render(
     <MemoryRouter initialEntries={['/guida/mappe/citta-shibuya/modifica']}>
@@ -282,6 +284,21 @@ describe('EditorMappaPage', () => {
     expect(screen.queryByRole('button', { name: /Esporta questo luogo/ })).toBeNull();
   });
 
+  it('O9: su una planimetria d\'area «Scarica dalla guida» non c\'è (la rotta delle piante d\'area non esiste più); su un quartiere scarica la sua pianta', async () => {
+    api.getMappa.mockResolvedValue({ ...base, chiave: 'kamoshida-02', nome: 'Sala centrale', tipo: 'area', genitore: null, entita: { tipo: 'area', chiave: 'kamoshida-02' } });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    await screen.findByRole('region', { name: 'Proprietà della mappa' });
+    expect(screen.queryByRole('button', { name: 'Scarica dalla guida' })).toBeNull();
+    cleanup();
+    api.getMappa.mockResolvedValue(base);
+    api.scaricaPiantaQuartiere.mockResolvedValue({ quartiere: 'shibuya', mime: 'image/png', byte: 1, fonte: 'x', url: 'x' });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Scarica dalla guida' }));
+    await waitFor(() => expect(api.scaricaPiantaQuartiere).toHaveBeenCalledWith('shibuya'));
+  });
+
   it('albero (15.24): le figlie senza spillo che le raggiunge e il genitore senza ritorno hanno «Crea passaggio», che chiama l’API e seleziona lo spillo creato', async () => {
     const figliaRaggiunta = riassunto({ chiave: 'luogo-a', nome: 'Luogo A', tipo: 'luogo', genitore: 'citta-shibuya' });
     const figliaOrfana = riassunto({ chiave: 'luogo-b', nome: 'Luogo B', tipo: 'luogo', genitore: 'citta-shibuya' });
@@ -337,7 +354,9 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith({ nome: 'Bar nuovo', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, passaggio: true, ritorno: true }));
     // riaperta, la finestra parte pulita (nome, chiave, asset e caselle ai valori iniziali)
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    // la pagina passa alla mappa appena creata e la ricarica: si attende il pannello
+    // la pagina passa alla mappa appena creata dopo aver riletto l'albero (`ricarica()` si risolve a rilettura avvenuta):
+    // si attende la lettura della mappa nuova, poi il pannello
+    await waitFor(() => expect(api.getMappa.mock.calls.some((c: unknown[]) => c[0] === 'bar-nuovo')).toBe(true));
     fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
     fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
     const riaperta = within(await screen.findByRole('dialog'));
@@ -394,6 +413,8 @@ it('il doppio tocco su uno spillo di spostamento apre la mappa d’arrivo, resta
   await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-banchina', undefined));
 });
 
+/** Monta l'editor di Shibuya con un passaggio in uscita e un arrivo dalla banchina di Yongen-Jaya, apre la scheda
+ *  «Collegamenti» e restituisce le query limitate alla regione dei passaggi. */
 async function apriCollegamenti() {
   api.getMappa.mockResolvedValue({ ...base, spilli: [passaggio], arrivi: [{ spilloId: 21, tipo: 'treno', nome: 'Shibuya', mappa: 'yongen-banchina', mappaNome: 'Banchina di Yongen-Jaya' }] });
   monta();

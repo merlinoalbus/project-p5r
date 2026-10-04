@@ -59,12 +59,20 @@ interface Props<T extends Record<string, string>> {
   etichetta?: string;
 }
 
+/**
+ * La matita di correzione di un pezzo della guida. Chiusa è un pulsante «✎» (con `etichetta` accanto, se c'è); al
+ * clic legge i valori di partenza con `iniziale()` e apre un modulo con i campi disegnati da `children`, che riceve la
+ * bozza e la funzione per aggiornarla. «Salva» è attivo solo se la bozza differisce dalla partenza; con `elimina` c'è
+ * anche «Elimina», che chiede conferma mostrando l'avviso. Chiudere il modulo scarta la bozza.
+ */
 export function CorrezioneGuida<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto, etichetta }: Props<T>) {
   const [bozza, setBozza] = useState<{ partenza: T; corrente: T } | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [conferma, setConferma] = useState(false);
+  /** Chiude il modulo: scarta la bozza e l'eventuale richiesta di conferma dell'eliminazione. */
   const chiudi = () => { setBozza(null); setConferma(false); };
 
+  /** Salva la bozza con `onSalva`; a buon fine chiude il modulo e notifica, altrimenti lascia la bozza aperta e notifica l'errore. */
   const salva = async () => {
     if (!bozza) return;
     setOccupato(true);

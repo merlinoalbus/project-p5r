@@ -10,7 +10,7 @@
 // ============================================================
 
 import { useCarica } from '../../hooks/useCarica';
-import { getTuttiGliOggetti } from '../../services/api/catalogo';
+import { getTuttiGliOggetti } from '../../services/api';
 import { Selettore } from '../shared/Selettore';
 import type { OggettoSelezionabileDto } from '../../types';
 import { NOME_ARCHIVIO, chiaveOggetto, etichettaOggetto } from '../../utils/oggetti';
@@ -28,6 +28,12 @@ interface Props {
   disabilitato?: boolean;
 }
 
+/**
+ * Con un oggetto collegato ne mostra nome, archivio, effetto, statistiche e destinatario in sola lettura, con
+ * «Scollega». Altrimenti carica l'archivio (e, se la riga ha un collegamento salvato, comunica a `onArchivio`
+ * l'oggetto ritrovato o null), avvisa se il collegamento salvato non c'è più e offre la ricerca fra tutti gli oggetti
+ * e il passaggio all'inserimento a mano.
+ */
 export function SceltaOggetto({ collegato, onCollega, onScollega, aMano, onAMano, collegamento, onArchivio, disabilitato }: Props) {
   const elenco = useCarica(async () => {
     const voci = await getTuttiGliOggetti();

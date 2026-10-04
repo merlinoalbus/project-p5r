@@ -1,20 +1,22 @@
+// ============================================================
+// catalogoService — le righe della guida aggiunte, corrette o nascoste dall'utente: negozi, articoli, libri, film, attività,
+// luoghi, domande e cruciverba (nato con la Fase 16.1 per negozi e articoli)
+// ============================================================
+//
+// Le righe dell'utente vivono nelle stesse tabelle dei dati della guida, distinte da `origine`:
+//   - creare  → nuova riga `origine = 'utente'` con chiave generata dal nome (`u-<slug>`, `<negozio>/u-<slug>`)
+//   - correggere una riga della guida → la riga passa a `origine = 'utente'` e `seed_json` conserva l'originale
+//   - nascondere una riga della guida → `nascosto = 1` (una ricarica dei dati la riporterebbe indietro: cancellarla non basterebbe)
+//   - ripristinare → la riga torna com'era nei dati della guida (`seed_json`) e `origine` torna 'seed'
+// I nomi `seed` e `seed_json` vengono dal seed JSON, dismesso il 2026-09-12: oggi «seed» vuol dire «dato della guida, arrivato
+// con il pacchetto di gioco». La ricarica dei dati della guida (`ricaricaPacchetto`) aggiorna e sostituisce soltanto le righe
+// `origine = 'seed'`, quindi il lavoro dell'utente sopravvive agli aggiornamenti.
+// ============================================================
+
 import { verificaCondizioni } from './mappe/mappeService.js';
 import { giorniDallaFrase } from '../db/migrations/080_giorni_luogo_strutturati.js';
 import { migraTestiCondizioni } from '../../shared/migraCondizioni.js';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
-// ============================================================
-// catalogoService — negozi e articoli aggiunti o corretti dall'utente (Fase 16.1)
-// ============================================================
-//
-// Le righe dell'utente vivono nelle stesse tabelle del seed, distinte da `origine`:
-//   - creare  → nuova riga `origine = 'utente'` con chiave generata dal nome (`u-<slug>`, `<negozio>/u-<slug>`)
-//   - correggere una riga del seed → la riga passa a `origine = 'utente'` e `seed_json` conserva l'originale
-//   - nascondere una riga del seed → `nascosto = 1` (il reseed non la riporterebbe indietro: cancellarla non basterebbe)
-//   - ripristinare → la riga torna com'era nel seed (`seed_json`) e `origine` torna 'seed'
-// Il caricatore del seed aggiorna e cancella soltanto le righe `origine = 'seed'`, quindi il lavoro dell'utente
-// sopravvive agli aggiornamenti dei dati della guida.
-// ============================================================
-
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
@@ -80,12 +82,15 @@ const PROFILO: Record<TipoCatalogo, {
 
 type Riga = Record<string, unknown> & { chiave: string; origine: string; nascosto: number; seed_json: string | null; updated_at: string | null };
 
+/** La riga intera di un tipo del catalogo (anche nascosta o del seed); 404 se la chiave non esiste. */
 function riga(tipo: TipoCatalogo, chiave: string): Riga {
   const r = prepared(`SELECT * FROM ${TABELLA[tipo]} WHERE chiave = ?`).get(chiave) as Riga | undefined;
   if (!r) throw httpErrors.notFound(`${tipo}-non-trovato`, `${PROFILO[tipo].nomeTipo} '${chiave}' non esiste.`);
   return r;
 }
 
+/** Una riga come elemento del catalogo: i soli campi scrivibili del tipo (`CAMPI`, assenti come null), il titolo dalla
+ *  colonna del profilo (o la chiave se vuoto), l'origine, se è una riga del seed corretta (utente con `seed_json`) e se è nascosta. */
 function dto(tipo: TipoCatalogo, r: Riga): ElementoCatalogoDto {
   const dati: Record<string, unknown> = {};
   for (const c of CAMPI[tipo]) dati[c] = r[c] ?? null;
@@ -113,6 +118,7 @@ function chiaveLibera(tipo: TipoCatalogo, nome: string, negozio?: string): strin
 
 /** I riferimenti indicati devono esistere davvero: un negozio in un quartiere inventato sparirebbe dalle pagine. */
 function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>): void {
+  /** Vero se la chiave è una stringa e nella tabella indicata c'è una riga con quella chiave. */
   const esiste = (tabella: string, chiave: unknown) => typeof chiave === 'string' && !!prepared(`SELECT 1 FROM ${tabella} WHERE chiave = ?`).get(chiave);
   // la sede di un negozio o di un'attività è un luogo della città, e deve esistere
   if ((tipo === 'negozio' || tipo === 'attivita') && dati.sede_chiave != null && !esiste('luogo', dati.sede_chiave)) throw httpErrors.badRequest('luogo-sconosciuto', `Il luogo '${String(dati.sede_chiave)}' non esiste.`);
@@ -140,7 +146,11 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>):
  * - **tracciamento** dal tipo, dove il modulo non lo dice. */
 const CAMPI_EFFETTI: Record<string, readonly string[]> = { libro: ['dote', 'note', 'effetto_json'], film: ['dote', 'note', 'note_successive'], attivita: ['doti_json'] };
 
+/** Le voci di effetto ricavate dai campi del modulo vecchio: per libri e film la Dote con le sue note (e, per i film, la
+ *  voce `ripetuto` con `note_successive`), per i libri anche `effetto_json`, per le attività ogni Dote di `doti_json`.
+ *  Un JSON illeggibile non dà voci. */
 function vociDaiCampiVecchi(tipo: TipoCatalogo, d: Record<string, unknown>): VoceEffetto[] {
+  /** Una voce «dote» se nome e note sono validi (nome non vuoto, note numeriche positive), con la chiave in minuscolo; altrimenti null. */
   const dote = (nome: unknown, note: unknown, extra: Partial<VoceEffetto> = {}): VoceEffetto | null =>
     typeof nome === 'string' && nome && typeof note === 'number' && note > 0 ? { effetto: { famiglia: 'dote', dote: nome.toLowerCase(), note }, ...extra } : null;
   const voci: VoceEffetto[] = [];
@@ -160,6 +170,9 @@ function vociDaiCampiVecchi(tipo: TipoCatalogo, d: Record<string, unknown>): Voc
 /** Vero se una voce viene dai campi vecchi (una Dote semplice, senza condizioni): è quella che si può ricostruire. */
 const eVoceDerivabile = (v: VoceEffetto) => v.effetto.famiglia === 'dote' && !(v.condizioni && v.condizioni.length);
 
+/** Applica ai dati in arrivo le regole descritte sopra `CAMPI_EFFETTI`: quartiere ricavato dalla sede, `effetti_json`
+ *  ricostruito dai campi vecchi solo se cambiano (tenendo le voci non derivabili della riga), tracciamento dal tipo su
+ *  un'attività nuova, e `effetti_json` sempre normalizzato (illeggibile → lista vuota). Non tocca l'oggetto ricevuto. */
 function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, esistente: Riga | null): Record<string, unknown> {
   const d = { ...dati };
   if ((tipo === 'negozio' || tipo === 'attivita') && typeof d.sede_chiave === 'string') {
@@ -185,6 +198,7 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
 export function riepilogoCatalogo(): RiepilogoCatalogoDto {
   const perTipo = (Object.keys(TABELLA) as TipoCatalogo[]).map((tipo) => {
     const t = TABELLA[tipo];
+    /** Quante righe della tabella soddisfano la condizione SQL data. */
     const n = (sql: string) => (prepared(`SELECT COUNT(*) AS n FROM ${t} WHERE ${sql}`).get() as { n: number }).n;
     return { tipo, creati: n("origine = 'utente' AND seed_json IS NULL"), modificati: n("origine = 'utente' AND seed_json IS NOT NULL"), nascosti: n('nascosto = 1'), totale: n('1 = 1') };
   });
@@ -214,6 +228,8 @@ export function leggiElemento(tipo: TipoCatalogo, chiave: string): ElementoCatal
   return dto(tipo, riga(tipo, chiave));
 }
 
+/** L'ordine da dare a una riga nuova: uno più del massimo, fra le righe dello stesso genitore dove l'ordine è relativo
+ *  (`raggruppaOrdinePer`), altrimenti su tutta la tabella. */
 function ordineSuccessivo(tipo: TipoCatalogo, dati: Record<string, unknown>): number {
   const per = PROFILO[tipo].raggruppaOrdinePer;
   if (per) return ((prepared(`SELECT MAX(ordine) AS m FROM ${TABELLA[tipo]} WHERE ${per} = ?`).get(dati[per]) as { m: number | null }).m ?? 0) + 1;
@@ -285,6 +301,19 @@ export function nascondiElemento(tipo: TipoCatalogo, chiave: string, nascosta: b
   return dto(tipo, riga(tipo, chiave));
 }
 
+/** I riferimenti dei pin e delle mappe sono polimorfici (tipo + chiave) e nessuna chiave esterna li segue: eliminata una riga
+ *  dell'utente, chi la citava perde il collegamento invece di puntare a una cosa che non c'è (`dettaglioRiferimento` restituiva
+ *  `null` in silenzio). Come per i punti della guida tolti (`eliminaArea`), il pin resta e torna senza riferimento. Un pin
+ *  «attività» cita un luogo (`dettaglioRiferimento`), quindi il luogo li stacca entrambi. */
+function staccaDalleMappe(tipo: TipoCatalogo, chiave: string): void {
+  const tipiPin = tipo === 'luogo' ? ['luogo', 'attivita'] : tipo === 'negozio' ? ['negozio'] : [];
+  for (const t of tipiPin) prepared('UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = ? AND riferimento_chiave = ?').run(t, chiave);
+  if (tipo === 'luogo' || tipo === 'negozio') {
+    prepared('DELETE FROM mappa_entita WHERE entita_tipo = ? AND entita_chiave = ?').run(tipo, chiave);
+    prepared('UPDATE mappa SET entita_tipo = NULL, entita_chiave = NULL WHERE entita_tipo = ? AND entita_chiave = ?').run(tipo, chiave);
+  }
+}
+
 /**
  * Elimina una riga creata dall'utente, oppure riporta al seed una riga del seed che l'utente aveva corretto o nascosto.
  * Restituisce che cosa è successo, perché l'interfaccia lo dice all'utente.
@@ -295,6 +324,7 @@ export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'e
     getDb().transaction(() => {
       // gli articoli di un negozio creato dall'utente se ne vanno con lui (chiave esterna a cascata)
       prepared(`DELETE FROM ${TABELLA[tipo]} WHERE chiave = ?`).run(chiave);
+      staccaDalleMappe(tipo, chiave);
     })();
     return { esito: 'eliminata', elemento: null };
   }

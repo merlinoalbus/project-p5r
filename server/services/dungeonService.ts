@@ -11,14 +11,18 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
+import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
+import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
+import { vociGestite } from './mappe/voceDelPin.js';
 import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
-import { impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
+import { eliminaImmaginiDeiPin, impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
 import { palazziCompletati } from './palazziService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma, VOCE_DEL_PIN, voceDelPin } from './mappe/collegamentiGuida.js';
 
@@ -31,9 +35,10 @@ function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number
   return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli: JSON.parse(r.dettagli_json) as Record<string, unknown>, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null };
 }
 
+/** Lo stato di ogni punto della guida segnato dalla partita (chiave → stato); vuota senza partita, 404 se la partita non esiste. */
 function statiPartita(partitaId: number | undefined): Map<string, StatoPunto> {
   if (partitaId === undefined) return new Map();
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   return new Map((prepared('SELECT punto_chiave, stato FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string; stato: StatoPunto }>).map((r) => [r.punto_chiave, r.stato]));
 }
 
@@ -51,6 +56,7 @@ function pinDeiPunti(punto?: string): Map<string, PinDelPuntoDto[]> {
   return out;
 }
 
+/** Le posizioni dei marcatori dei punti della guida sulla mappa (`marcatore_mappa`): chiave del punto → coordinate. */
 function marcatori(): Map<string, { x: number; y: number }> {
   return new Map((prepared('SELECT punto_chiave, x, y FROM marcatore_mappa').all() as Array<{ punto_chiave: string; x: number; y: number }>).map((r) => [r.punto_chiave, { x: r.x, y: r.y }]));
 }
@@ -79,22 +85,31 @@ export interface RaccoltaDungeon { perMappa: Map<string, RaccoltaMappa>; totale:
 
 /** Le mappe dell'albero del Palazzo: la radice `dungeon-<chiave>` e tutte le discendenti. */
 function mappeDelPalazzo(dungeonChiave: string): string[] {
-  return (prepared(`WITH RECURSIVE albero(chiave) AS (
-      SELECT chiave FROM mappa WHERE chiave = ?
-      UNION ALL
-      SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
-    ) SELECT chiave FROM albero`).all(`dungeon-${dungeonChiave}`) as Array<{ chiave: string }>).map((r) => r.chiave);
+  return [...sottoalberoMappe([radiceDelPalazzo(dungeonChiave)])];
+}
+
+/** I segni della partita che decidono il «raccolto» di un pin: gli uid raccolti e le voci della guida già gestite. */
+interface SegniPartita { raccolti: Set<string>; puntiGestiti: Set<string> }
+
+/** Legge i segni della partita: gli uid dei pin segnati «raccolto» e le voci della guida già gestite. */
+function segniPartita(partitaId: number): SegniPartita {
+  return {
+    raccolti: new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid)),
+    // un punto della guida già gestito (ottenuto/esaurito) conta come raccolto anche sulla mappa: è la regola del visore
+    puntiGestiti: vociGestite(partitaId),
+  };
 }
 
 /** I collezionabili di ogni mappa del Palazzo e, con la partita, quanti sono raccolti.
- *  Una mappa senza collezionabili è completa per definizione e non conta fra le mappe. */
-export function raccoltaMappe(dungeonChiave: string, partitaId?: number): RaccoltaDungeon {
+ *  Una mappa senza collezionabili è completa per definizione e non conta fra le mappe.
+ *  `segni` li passa chi li ha già letti (l'elenco dei Palazzi li legge una volta per tutti: rilievo P7). */
+export function raccoltaMappe(dungeonChiave: string, partitaId?: number, segni?: SegniPartita): RaccoltaDungeon {
   const mappe = mappeDelPalazzo(dungeonChiave);
   const perMappa = new Map<string, RaccoltaMappa>();
   if (mappe.length === 0) return { perMappa, totale: 0, presi: partitaId === undefined ? null : 0, mappe: 0, mappeComplete: partitaId === undefined ? null : 0 };
-  const raccolti = partitaId === undefined ? null : new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
-  // un punto della guida già gestito (ottenuto/esaurito) conta come raccolto anche sulla mappa: è la regola del visore
-  const puntiGestiti = partitaId === undefined ? null : new Set((prepared('SELECT punto_chiave FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave));
+  const s = partitaId === undefined ? null : segni ?? segniPartita(partitaId);
+  const raccolti = s?.raccolti ?? null;
+  const puntiGestiti = s?.puntiGestiti ?? null;
   const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome, ${VOCE_DEL_PIN} AS voce FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string; voce: string | null }>;
   for (const r of righe) {
     const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (!!r.voce && !!puntiGestiti?.has(r.voce));
@@ -111,6 +126,10 @@ export function raccoltaMappe(dungeonChiave: string, partitaId?: number): Raccol
 
 // ---- Gli obiettivi dei dedali dei Memento ----
 
+/**
+ * Le richieste dei dedali di un dungeon raggruppate per area, nell'ordine delle aree e delle richieste. Con la partita ognuna
+ * porta il suo stato (null se mai toccata); senza, lo stato è sempre null.
+ */
 function richiestePerArea(dungeonChiave: string, partitaId?: number): Map<string, DedaloDto['richieste']> {
   const stati = partitaId === undefined ? new Map<string, StatoRichiesta>() : new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>).map((r) => [r.richiesta_chiave, r.stato]));
   const out = new Map<string, DedaloDto['richieste']>();
@@ -131,6 +150,11 @@ function dedaloDto(a: RigaArea, richieste: DedaloDto['richieste'], timbri: Map<s
   return { timbri: { totale: a.timbri_totale, raccolti: a.timbri_totale === null ? null : raccolti }, richieste, obiettivi: { totale, fatti } };
 }
 
+/**
+ * La raccolta dei Memento nella stessa forma di quella dei Palazzi: al posto delle planimetrie i dedali (le aree con almeno un
+ * obiettivo misurabile), al posto dei collezionabili gli obiettivi (timbri e richieste); un dedalo è completo quando sono fatti tutti.
+ * Senza partita i conteggi del fatto sono null.
+ */
 function raccoltaMementos(dungeonChiave: string, partitaId?: number): DungeonRiassuntoDto['raccolta'] {
   const aree = prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(dungeonChiave) as RigaArea[];
   const richieste = richiestePerArea(dungeonChiave, partitaId);
@@ -145,35 +169,19 @@ function raccoltaMementos(dungeonChiave: string, partitaId?: number): DungeonRia
   return { totale, presi: partitaId === undefined ? null : fatti, mappe: dedali, mappeComplete: partitaId === undefined ? null : complete };
 }
 
+/** Le immagini di ambito «mappa» presenti nel database (chiave → URL di origine): dicono quali aree hanno la loro mappa. */
 function mappePresenti(): Map<string, string | null> {
   return new Map((prepared("SELECT chiave, origine_url FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; origine_url: string | null }>).map((r) => [r.chiave, r.origine_url ?? null]));
 }
 
-/** Le finestre trascritte in `finestre-dungeon`, lette una volta sola: dicono alla mappa di Tokyo quando un Palazzo c'è. */
-let finestreCache: Map<string, { dal: string; al: string | null }> | null = null;
 
-function finestreDungeon(): Map<string, { dal: string; al: string | null }> {
-  if (finestreCache) return finestreCache;
-  finestreCache = new Map();
-  const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
-  if (riga) {
-    try {
-      const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> };
-      for (const f of dati.finestre ?? []) {
-        if (f.dal) finestreCache.set(f.dungeon, { dal: f.dal, al: f.al ?? null });
-      }
-    } catch { /* trascrizione illeggibile: si resta senza finestre, non si indovina */ }
-  }
-  return finestreCache;
-}
-
-/** Da chiamare quando i dati di gioco vengono ricaricati: la trascrizione può essere cambiata. */
-export function invalidaFinestreDungeon(): void { finestreCache = null; }
-
-function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, completati: Map<string, string> | null): DungeonRiassuntoDto {
+/** Il riassunto di un Palazzo. `gia` porta quello che chi chiama ha già calcolato: la raccolta (la scheda del Palazzo la calcola
+ *  per le planimetrie) e i segni della partita (l'elenco li legge una volta per tutti): prima si ricalcolavano qui (P7). */
+function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, completati: Map<string, string> | null,
+  gia: { raccolta?: RaccoltaDungeon | null; segni?: SegniPartita } = {}): DungeonRiassuntoDto {
   const conPartita = partitaId !== undefined;
   const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string }>;
-  const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(raccoltaMappe(r.chiave, partitaId));
+  const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(gia.raccolta ?? raccoltaMappe(r.chiave, partitaId, gia.segni));
   return {
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
     date: { sblocco: r.data_sblocco, scadenza: r.data_scadenza, furtoConsigliato: r.furto_consigliato },
@@ -188,11 +196,14 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
   };
 }
 
+/** I riassunti di tutti i Palazzi e dei Memento in ordine di gioco; con la partita, anche stati, raccolta e completamento. */
 export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
   const stati = statiPartita(partitaId);
   // i Palazzi completati si calcolano una volta per tutto l'elenco
   const completati = partitaId !== undefined ? palazziCompletati(partitaId) : null;
-  return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId, completati));
+  // e i segni della partita (pin raccolti, voci gestite), che prima ogni Palazzo rileggeva
+  const segni = partitaId !== undefined ? segniPartita(partitaId) : undefined;
+  return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId, completati, { segni }));
 }
 
 /**
@@ -205,15 +216,11 @@ export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
  * campo usa — non comparivano da nessuna parte, e non c'era modo di ordinarle né di toglierle.
  */
 function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon, partitaId?: number): DungeonDettaglioDto['planimetrie'] {
-  const righe = prepared(`WITH RECURSIVE albero(chiave) AS (
-      SELECT chiave FROM mappa WHERE chiave = ?
-      UNION ALL
-      SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
-    )
+  const righe = prepared(`${SQL_SOTTOALBERO}
     SELECT m.chiave, m.ordine
     FROM mappa m JOIN albero t ON t.chiave = m.chiave
     WHERE m.chiave <> ?
-    ORDER BY m.ordine, m.chiave`).all(`dungeon-${dungeonChiave}`, `dungeon-${dungeonChiave}`) as Array<{ chiave: string; ordine: number }>;
+    ORDER BY m.ordine, m.chiave`).all(radiceDelPalazzo(dungeonChiave), radiceDelPalazzo(dungeonChiave)) as Array<{ chiave: string; ordine: number }>;
   // Una planimetria può contenere più aree della guida (2026-09-29): si leggono a parte, in ordine di
   // guida. Con il LEFT JOIN di prima una mappa con due aree sarebbe comparsa due volte nell'elenco.
   const areePerMappa = new Map<string, Array<{ chiave: string; nome: string; ordine: number }>>();
@@ -233,6 +240,11 @@ function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon,
   });
 }
 
+/**
+ * La scheda completa di un Palazzo o dei Memento (404 se non esiste): riassunto, note e fonti, aree con le loro planimetrie
+ * native e i collezionabili raccolti, punti della guida con stato, marcatore e pin collegati; per i Memento il dedalo di ogni
+ * area (timbri e richieste), per i Palazzi l'elenco delle planimetrie. Le letture comuni si fanno una volta per tutta la scheda.
+ */
 export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDettaglioDto {
   const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
   if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
@@ -256,7 +268,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
     dedalo: richieste ? dedaloDto(a, richieste.get(a.chiave) ?? [], timbri) : null,
   }));
   const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
-  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
+  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie };
 }
 
 /**
@@ -265,7 +277,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
  * fatti: segnarlo segna i passi, riaprirlo li riapre; e un passo segnato o riaperto porta con sé il suo Enigma.
  */
 export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato: StatoPunto | null): PuntoInteresseDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const p = prepared('SELECT p.*, a.nome AS area_nome, d.nome AS dungeon_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE p.chiave = ?').get(puntoChiave) as (RigaPunto & { area_nome: string; dungeon_nome: string }) | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   // una voce descrittiva si legge, non si segna (scelta dell'utente, 2026-10-01); azzerarla resta possibile, per ripulire
@@ -285,19 +297,6 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return puntoDto(p, stato, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? []);
-}
-
-/** Posiziona (o rimuove con null) lo spillo di un punto sulla mappa della sua area (coordinate in percentuale). */
-export function impostaMarcatore(puntoChiave: string, posizione: { x: number; y: number } | null): { x: number; y: number } | null {
-  if (!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(puntoChiave)) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  if (posizione === null) {
-    prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
-    return null;
-  }
-  const x = Math.max(0, Math.min(100, posizione.x));
-  const y = Math.max(0, Math.min(100, posizione.y));
-  prepared("INSERT INTO marcatore_mappa (punto_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'utente') ON CONFLICT(punto_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, updated_at = excluded.updated_at, origine = 'utente'").run(puntoChiave, x, y, nowIso());
-  return { x, y };
 }
 
 // ---- Correzione dei testi della guida (fase «tutto modificabile») ----
@@ -345,19 +344,28 @@ export function aggiornaArea(chiaveArea: string, dati: DatiArea): AreaDungeonDto
 export function eliminaArea(chiaveArea: string): void {
   const a = prepared('SELECT * FROM dungeon_area WHERE chiave = ?').get(chiaveArea) as RigaArea | undefined;
   if (!a) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  // la pulizia riscrive `dati_guida`: la copia in memoria (`datiGuida`) si butta a transazione chiusa, comunque sia finita
+  // (dentro la transazione una rilettura la rimetterebbe in memoria con dati che un annullamento toglierebbe)
+  try {
+    eliminaAreaInTransazione(chiaveArea, a);
+  } finally {
+    invalidaDatiGuida();
+  }
+}
+
+/**
+ * Il lavoro di `eliminaArea` in una transazione sola: stacca e cancella i punti dell'area, toglie gli spilli della guida senza
+ * mappa (con «raccolto» e immagini) che la vincolano, i timbri dei dedali, i legami con le planimetrie e i riferimenti nei testi
+ * JSON, poi cancella l'area e fa salire di un posto quelle che la seguivano.
+ */
+function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
   getDb().transaction(() => {
-    for (const { chiave } of prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ?').all(chiaveArea) as Array<{ chiave: string }>) {
-      prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(chiave);
-      prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(chiave);
-      // i pin delle planimetrie tengono il loro «raccolto» (lo stato vive nei pin, 2026-10-01): perdono solo il collegamento
-      prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(chiave);
-      prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(chiave);
-      prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(chiave);
-    }
+    for (const { chiave } of prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ?').all(chiaveArea) as Array<{ chiave: string }>) staccaPunto(chiave);
     prepared('DELETE FROM punto_interesse WHERE area_chiave = ?').run(chiaveArea);
     // gli spilli della guida (senza mappa) vincolano l'area con RESTRICT: vanno via prima di lei
     if (colonnaSpilloGuida()) {
       prepared('DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE area_guida_chiave = ? AND uid IS NOT NULL)').run(chiaveArea);
+      eliminaImmaginiDeiPin('s.area_guida_chiave = ?', chiaveArea);
       prepared('DELETE FROM spillo WHERE area_guida_chiave = ?').run(chiaveArea);
     }
     if (tabellaUtente('timbri_dedalo_partita')) prepared('DELETE FROM timbri_dedalo_partita WHERE area_chiave = ?').run(chiaveArea);
@@ -382,6 +390,7 @@ function ripulisciRiferimentiTestuali(chiaveArea: string): void {
     }
   }
   if (!tabellaGioco('dati_guida')) return;
+  // qui si riscrive `dati_guida`: chi chiama (`eliminaArea`) butta la copia in memoria a transazione chiusa
   const battaglia = prepared("SELECT json FROM dati_guida WHERE chiave = 'battaglia'").get() as { json: string } | undefined;
   if (battaglia) {
     const dati = JSON.parse(battaglia.json) as { ombre?: Array<{ areaChiave?: string | null }> };
@@ -398,6 +407,7 @@ function ripulisciRiferimentiTestuali(chiaveArea: string): void {
     }
   }
 }
+/** Vero se la tabella esiste nel database di gioco (schema `main`): nei test lo schema può essere indietro. */
 function tabellaGioco(nome: string): boolean {
   return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 }
@@ -406,6 +416,7 @@ function tabellaGioco(nome: string): boolean {
 function colonnaSpilloGuida(): boolean {
   return (prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).some((c) => c.name === 'area_guida_chiave');
 }
+/** Vero se la tabella esiste nel database delle partite (schema `utente`). */
 function tabellaUtente(nome: string): boolean {
   return !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 }
@@ -499,7 +510,17 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
     // gli Enigmi toccati (lasciato, raggiunto, o il proprio, se cambia tipo e con lui il conto dei passi da segnare) seguono i passi
     for (const enigma of new Set([prima, dopo].filter((x): x is string => x !== null))) allineaEnigmaInOgniPartita(db, enigma, adesso);
   })();
-  const r = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto;
+  return leggiPunto(puntoChiave);
+}
+
+/**
+ * Il DTO di un punto com'è adesso, senza scrivere nulla. Spostamento, collegamento di un pin e creazione lo chiedevano a
+ * `aggiornaPunto(chiave, {})` (rilievo B11): un UPDATE con gli stessi valori e il riallineamento degli Enigmi in ogni partita,
+ * inutili perché quelle operazioni allineano già quel che toccano (`allineaStatiPunto`, `creaPunto`).
+ */
+function leggiPunto(puntoChiave: string): PuntoInteresseDto {
+  const r = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
+  if (!r) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   return puntoDto(r, null, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? []);
 }
 
@@ -522,7 +543,7 @@ export function spostaPunto(puntoChiave: string, verso: -1 | 1): PuntoInteresseD
   getDb().transaction(() => {
     elenco.forEach((k, n) => prepared('UPDATE punto_interesse SET ordine = ? WHERE chiave = ?').run(n, k));
   })();
-  return aggiornaPunto(puntoChiave, {});
+  return leggiPunto(puntoChiave);
 }
 
 /**
@@ -544,7 +565,7 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
     // un collegamento rimasto nel riferimento (prima della 094) si toglie da lì; il riferimento vero di un pin non si tocca
     if (s.riferimento_tipo === 'punto' && s.riferimento_chiave === puntoChiave) prepared('UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE id = ?').run(spilloId);
     prepared('UPDATE spillo SET voce_chiave = NULL, updated_at = ? WHERE id = ?').run(nowIso(), spilloId);
-    return aggiornaPunto(puntoChiave, {});
+    return leggiPunto(puntoChiave);
   }
   // le regole sono le stesse dell'editor delle mappe e del pacchetto (`erroreVoceDelPin`)
   const errore = erroreVoceDelPin({ nome: s.nome, mappa: s.mappa_chiave, voce }, puntoChiave);
@@ -554,13 +575,19 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
     if (!suoPunto) prepared('UPDATE spillo SET voce_chiave = ?, updated_at = ? WHERE id = ?').run(puntoChiave, adesso, spilloId);
     allineaStatiPunto(getDb(), puntoChiave, adesso);
   })();
-  return aggiornaPunto(puntoChiave, {});
+  return leggiPunto(puntoChiave);
 }
 
 /** Un punto in più, dove la guida non l'aveva trascritto: nasce in fondo all'area. */
 export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; tipo: PuntoInteresseDto['tipo'] }): PuntoInteresseDto {
   if (!prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiaveArea)) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
-  const base = `${chiaveArea}-${slug(dati.nome)}`;
+  // Come per le aree: la chiave sta nei 200 caratteri che le route dei punti accettano (`paramsChiaveGuida`), suffisso «-N» compreso
+  // (fino a «-99999»), altrimenti il punto nascerebbe ma non si potrebbe più modificare, spostare né eliminare. Senza lettere né cifre
+  // («???») lo slug è vuoto: si usa «punto», invece di una chiave che finisce con un trattino. Il prefisso dell'area è una convenzione
+  // (l'area sta in `area_chiave`): se l'area ha già una chiave lunghissima, si accorcia anche lui, lasciando al nome almeno 8 caratteri.
+  const radice = (slug(dati.nome) || 'punto').slice(0, Math.max(8, MAX_CHIAVE_AREA - chiaveArea.length - 1 - 6)).replace(/-+$/, '') || 'punto';
+  const prefisso = chiaveArea.slice(0, MAX_CHIAVE_AREA - 6 - 1 - radice.length).replace(/-+$/, '');
+  const base = `${prefisso}-${radice}`;
   let chiave = base;
   for (let i = 2; prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
   // un passo nasce in fondo ai passi del suo Enigma, con le regole dei passi (095)
@@ -573,11 +600,27 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
     // l'Enigma segue i passi: un passo nuovo ancora da fare lo riapre dove era risolto (scelta dell'utente, 2026-10-02)
     if (contenitore) allineaEnigmaInOgniPartita(getDb(), contenitore, nowIso());
   })();
-  return aggiornaPunto(chiave, {});
+  return leggiPunto(chiave);
 }
 
 /**
- * Toglie un punto della guida e quel che le partite ne avevano segnato.
+ * Quello che un punto della guida lascia nel resto dei dati, tolto prima di lui (dentro la transazione di chi chiama): gli stati
+ * delle partite, il marcatore, il «raccolto» degli elementi della guida senza mappa che lo citano; i pin delle planimetrie tengono
+ * il loro «raccolto» (lo stato vive nei pin, 2026-10-01) e perdono solo il collegamento. Lo usano `eliminaPunto` ed `eliminaArea`,
+ * che prima lo scriveva una seconda volta riga per riga (rilievo R4 della verifica, 2026-10-03).
+ */
+function staccaPunto(puntoChiave: string): void {
+  prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
+  prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
+  prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
+  prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
+  prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(puntoChiave);
+}
+
+/**
+ * Toglie un punto della guida e quel che le partite ne avevano segnato, in una transazione (404 se non esiste): ne stacca le
+ * tracce (`staccaPunto`), riporta i passi di un Enigma fra le voci dell'area in fondo all'elenco, cancella la voce e riallinea in
+ * ogni partita l'Enigma di cui era un passo.
  *
  * I pin che lo rappresentavano sulle planimetrie **restano** — sono posti sulla mappa — e perdono solo il
  * collegamento: dal 2026-10-01 lo stato vive nei pin, e il loro «raccolto» è vero anche senza la voce della guida.
@@ -590,11 +633,7 @@ export function eliminaPunto(puntoChiave: string): void {
   const p = prepared('SELECT contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { contenitore_chiave: string | null } | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   getDb().transaction(() => {
-    prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
-    prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
-    prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
-    prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
-    prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(puntoChiave);
+    staccaPunto(puntoChiave);
     // i passi di un Enigma tolto restano, voci dell'area con il loro stato (095)
     for (const passo of passiDi(getDb(), puntoChiave)) {
       const area = (prepared('SELECT area_chiave FROM punto_interesse WHERE chiave = ?').get(passo.chiave) as { area_chiave: string }).area_chiave;

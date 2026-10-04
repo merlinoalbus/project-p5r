@@ -27,9 +27,10 @@ import { createApp } from './bootstrap.js';
 import { assicuraPacchettoIniziale, regoleAllAvvio } from './services/pacchetto/pacchettoGioco.js';
 /** Quanto può durare la RICEZIONE di una richiesta, corpo compreso.
  *
- * Node ne concede 300 secondi (`requestTimeout`): il caricamento di un pacchetto di gioco da centinaia
- * di MB su una linea normale li supera, e il server tronca la richiesta a metà mentre il browser sta
- * ancora mandando. Trenta minuti, come il proxy davanti (`nginx.conf`, `location ^~ /api/impostazioni/`). */
+ * Node ne concede 300 secondi (`requestTimeout`) e il limite riguarda solo la richiesta ancora in arrivo, non il lavoro
+ * che il server fa dopo. Era stato alzato per il caricamento del pacchetto di gioco nel corpo (centinaia di MB su una linea
+ * normale superavano i 300 secondi); oggi nessun file viaggia più nel corpo, perché importazione e ripristino leggono dalla
+ * cartella d'appoggio, e il valore resta allineato ai trenta minuti del proxy davanti (`nginx.conf`, `location ^~ /api/impostazioni/`). */
 const RICEZIONE_MAX_MS = 30 * 60 * 1000;
 
 try {
@@ -76,6 +77,11 @@ server.requestTimeout = RICEZIONE_MAX_MS;
 
 let inArresto = false;
 
+/**
+ * Arresto ordinato su SIGINT/SIGTERM, una volta sola anche se i segnali si ripetono: smette di
+ * accettare connessioni, chiude il database e esce con 0; se le connessioni non si chiudono entro
+ * 5 secondi chiude comunque il database ed esce con 1.
+ */
 function arresta(segnale: NodeJS.Signals): void {
   if (inArresto) return;
   inArresto = true;

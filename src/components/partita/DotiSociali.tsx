@@ -49,13 +49,16 @@ export function DotiSociali({ partitaId }: Props) {
   const [selezionata, setSelezionata] = useState<string | null>(null);
   const sugg = useSuggerimenti();
 
+  /** Invia la modifica di una Dote, ne sostituisce i dati in elenco e annuncia l'eventuale nuovo rango. */
   const modifica = async (chiave: string, mod: ModificaDote) => {
     if (!dati) return;
     setOccupata(chiave);
     try {
-      const agg = await aggiornaDote(partitaId, chiave, mod);
       const prima = dati.find((d) => d.chiave === chiave);
-      imposta(dati.map((d) => (d.chiave === chiave ? agg : d)));
+      const agg = await aggiornaDote(partitaId, chiave, mod);
+      // dai dati correnti (forma funzionale): dopo l'`await` `dati` è quello del render, e un'altra Dote segnata nel frattempo
+      // tornerebbe indietro
+      imposta((correnti) => correnti.map((d) => (d.chiave === chiave ? agg : d)));
       if (prima && agg.rango > prima.rango) notifica('success', `${agg.nome}: nuovo rango ${agg.rango} — ${agg.nomeRango}!`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
@@ -64,6 +67,7 @@ export function DotiSociali({ partitaId }: Props) {
     }
   };
 
+  /** Dal vertice della stella: seleziona la Dote e ne porta in vista la scheda. */
   const vaiAllaDote = (chiave: string) => {
     setSelezionata(chiave);
     document.getElementById(`dote-${chiave}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });

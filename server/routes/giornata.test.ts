@@ -4,22 +4,27 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, ElenchiAzioneDto, PercorsoGiornoDto, PercorsoIndiceDto, SuggerimentiOggiDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
+/** Legge il percorso del giorno `data`, con lo stato della partita se indicata. */
 const giorno = async (data: string, partita?: number) =>
   (await request(app).get(`/api/compendio/percorso/${data}${partita ? `?partita=${partita}` : ''}`)).body.data as PercorsoGiornoDto;
+/** Le azioni del giorno `data` che cadono nella fascia data (giorno o sera). */
 const fascia = async (data: string, f: 'giorno' | 'sera', partita?: number) => (await giorno(data, partita)).azioni.filter((a) => a.fascia === f);
+/** Crea una partita col nome dato e ne restituisce l'id. */
 const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
+/** Dall'indice del percorso (con la partita, se indicata) restituisce il riassunto del giorno `data`. */
 const riassunto = async (data: string, partita?: number) =>
   ((await request(app).get(`/api/compendio/percorso${partita ? `?partita=${partita}` : ''}`)).body.data as PercorsoIndiceDto).giorni.find((g) => g.giorno === data)!;
+/** Aggiunge una voce al percorso del giorno `data` col corpo dato (restituisce la richiesta, da attendere). */
 const crea = (data: string, body: object) => request(app).post(`/api/compendio/percorso/${data}/voci`).send(body);
+/** Modifica la voce del percorso con quell'uid col corpo dato (restituisce la richiesta, da attendere). */
 const modifica = (uid: string, body: object) => request(app).put(`/api/compendio/percorso/voci/${uid}`).send(body);
 /** L'ordine nel file di gioco dev'essere 0, 1, 2… in ogni fascia. */
 const ordiniCompatti = (data: string) => {
@@ -31,9 +36,7 @@ const ordiniCompatti = (data: string) => {
 
 describe('API — la giornata della guida è canone', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -220,6 +223,7 @@ describe('API — la giornata della guida è canone', () => {
 
   it('validazione: un collegamento o un effetto che punta al nulla non si salva; testo, fascia, uid e giorno controllati', async () => {
     const uid = (await giorno('04-12')).azioni[0].uid;
+    /** Modifica con il corpo dato la prima voce del 12 aprile. */
     const put = (body: object) => modifica(uid, body);
     expect((await put({ riferimento: { tipo: 'confidente', chiave: 'nessuno' } })).body.error.code).toBe('riferimento-inesistente');
     expect((await put({ riferimento: { tipo: 'pianeta', chiave: 'x' } })).status).toBe(400);
@@ -249,6 +253,7 @@ describe('API — la giornata della guida è canone', () => {
 
   it('la finestra rimanda tutti i campi: modificare una nota riesce anche se il libro collegato è stato nascosto dal catalogo', async () => {
     const zorro = (await giorno('04-25')).azioni.find((a) => a.produce.some((e) => e.tipo === 'lettura' && e.chiave === 'zorro-il-fuorilegge'))!;
+    /** Il corpo completo della voce di Zorro, come lo rimanda la finestra, con la sola nota cambiata. */
     const corpo = (note: string) => ({ azione: zorro.azione, note, fascia: zorro.fascia, tipo: zorro.tipo, riferimento: zorro.riferimento, rangoAtteso: zorro.rangoAtteso, produce: zorro.produce });
     prepared("UPDATE libro SET nascosto = 1 WHERE chiave IN ('zorro-il-fuorilegge', 'la-ballerina-seducente')").run();
     try {

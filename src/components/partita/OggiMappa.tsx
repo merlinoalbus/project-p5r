@@ -39,6 +39,10 @@ function chiaveMappaDaHref(href: string): string | null {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
+/** La colonna della mappa, sullo stato condiviso `oggi`: al livello di Tokyo la `MappaTokyo` della
+ * città (quartieri e radici del Metaverso caricati solo lì, alla data della partita attiva), il cui
+ * clic su un cartellino d'atlante scende di livello senza cambiare pagina; sotto Tokyo la
+ * `MappaIncorporata` sulla mappa corrente, centrata sullo spillo scelto, con «Torna a Tokyo». */
 export function OggiMappa({ oggi, riempi }: Props) {
   const { mappa } = oggi;
   const attiva = usePartitaStore((s) => s.attiva);

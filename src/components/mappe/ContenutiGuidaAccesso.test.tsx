@@ -1,4 +1,8 @@
 /** @vitest-environment jsdom */
+// ============================================================
+// Test ContenutiGuidaMappa (accesso) — un contenuto della guida aperto per ID migrato: descrizione, stato e condizioni per partita, sola consultazione senza partita
+// ============================================================
+
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ContenutiGuidaMappa } from './ContenutiGuidaMappa';
@@ -11,12 +15,15 @@ const api = vi.hoisted(() => ({
   aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
-vi.mock('../../services/api', () => api);
-vi.mock('../../services/api/condizioni', () => ({getElenchiRegole:vi.fn(async()=>({articoli:[],letture:[],arcani:[],persone:[],abilita:[],squadra:[],attivita:[],negozi:[],eventi:[],contatori:[]}))}));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { ...api, getElenchiRegole: vi.fn(async () => ({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] })) }));
 
 const ID = 427;
 let descrizione: string;
 const raccolti = new Set<number>();
+/**
+ * Scheda del forziere «Scrigno della biblioteca» (condizione: solo la sera) com'è vista dalla partita data:
+ * raccolto se la partita è fra i `raccolti`; con una partita c'è anche la disponibilità, bloccata per la 7 (di giorno) e disponibile per le altre.
+ */
 function scheda(partita?: number): SchedaContenutoGuidaDto {
   return {
     id:ID,areaGuida:'castello-biblioteca',tipo:'forziere',tipoNome:'Forziere',colore:'#eab308',nome:'Scrigno della biblioteca',descrizione,
@@ -26,12 +33,16 @@ function scheda(partita?: number): SchedaContenutoGuidaDto {
     immagini:[{id:91,url:'/api/immagini/spillo/conservata/file',asset:null,didascalia:'Schermata conservata',ordine:0}],updatedAt:'2026-09-06T00:00:00Z',
   };
 }
+/** Contenuti della mappa palazzo-castello: la sola area Biblioteca con l'unico punto che porta la scheda vista dalla partita data. */
 function contenuti(partita?:number):ContenutiMappaDto {
   const s=scheda(partita);
   return {mappa:'palazzo-castello',aree:[{chiave:s.areaGuida,nome:'Biblioteca',descrizione:'Testo della guida conservato',note:'',mappe:[],punti:[{id:ID,nome:s.nome,descrizione:s.descrizione,tipo:s.tipo,riferimento:s.riferimento,collezionabile:true,soloPosizione:false,ruolo:'punto',scheda:s}]}]};
 }
+/** Partita di prova al 20 aprile: la 7 è di giorno, tutte le altre di sera. */
 function partita(id:number):PartitaDto {return {id,nome:`Partita ${id}`,dataGioco:'04-20',fasciaGioco:id===7?'giorno':'sera'} as PartitaDto;}
+/** Disegna i contenuti della guida per l'area Biblioteca della mappa palazzo-castello (dungeon castello). */
 function monta(){return render(<MemoryRouter><ContenutiGuidaMappa mappa="palazzo-castello" area="castello-biblioteca" dungeon="castello"/></MemoryRouter>);}
+/** Attende il pulsante dello scrigno, lo clicca e restituisce la regione della sua scheda appena aperta. */
 async function apri(){fireEvent.click(await screen.findByRole('button',{name:'Scrigno della biblioteca'}));return screen.findByRole('region',{name:'Scheda: Scrigno della biblioteca'});}
 
 beforeEach(()=>{

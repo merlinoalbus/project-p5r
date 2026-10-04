@@ -3,14 +3,17 @@
 // Test SchedaContenutoGuida — un elemento della guida senza mappa collegato a una voce descrittiva non offre stato (2026-10-01)
 // ============================================================
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { SchedaContenutoGuida } from './SchedaContenutoGuida';
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 
-vi.mock('../../services/api', () => ({ aggiornaSpillo: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { aggiornaSpillo: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
+vi.mock('../guida/CondizioniEditor', () => ({ CondizioniEditor: () => null }));
 
+/** Voce della guida «Tesoro avvistato» dell'area futaba-02, non esauribile e non segnata, del tipo di punto dato. */
 const voce = (tipo: string) => ({ chiave: 'futaba-02/0', tipo, nome: 'Tesoro avvistato', descrizione: '', esauribile: false, dungeon: 'futaba', area: 'futaba-02', stato: null });
+/** Elemento «nota» collegato al punto futaba-02/0, con la voce del tipo dato sia nel dettaglio del riferimento sia nel campo `voce`. */
 const elemento = (tipoPunto: string): SchedaContenutoGuidaDto => ({
   id: 48, uid: 'u48', tipo: 'nota', tipoNome: 'Nota', nome: 'Tesoro avvistato', colore: '#ececf1', descrizione: 'Visibile da lontano.', riferimento: { tipo: 'punto', chiave: 'futaba-02/0' },
   collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, condizioni: [], immagini: [], updatedAt: '', areaGuida: 'futaba-02',
@@ -27,4 +30,13 @@ it('collegato a una voce «altro»: la dicitura, nessun Ottenuto', () => {
 it('collegato a una voce che si segna (una sicura): Ottenuto c’è', () => {
   render(<MemoryRouter><SchedaContenutoGuida spillo={elemento('sicura')} partitaId={4} onChiudi={vi.fn()} onCambiato={vi.fn().mockResolvedValue(undefined)} /></MemoryRouter>);
   expect(screen.getByRole('button', { name: 'Ottenuto' })).toBeInTheDocument();
+});
+
+// Le tre righe `// …` scritte dentro il JSX del modulo erano testo, non commenti: React le mostrava nel modulo di modifica
+// (trovato con la voce 4 della verifica completa, 2026-10-04). Nel modulo non deve comparire nessuna riga che cominci con «//».
+it('il modulo di modifica non mostra testo di commento', () => {
+  render(<MemoryRouter><SchedaContenutoGuida spillo={elemento('sicura')} partitaId={4} onChiudi={vi.fn()} onCambiato={vi.fn().mockResolvedValue(undefined)} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Modifica contenuto' }));
+  const modulo = screen.getByRole('form', { name: 'Modifica contenuto della guida' });
+  expect(modulo.textContent).not.toMatch(/\/\/|I comandi di questo modulo/);
 });

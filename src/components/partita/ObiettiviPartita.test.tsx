@@ -5,7 +5,7 @@
 // Test ObiettiviPartita — elenco con avanzamento, filtri per stato, azioni e collegamento al piano con le skill
 // ============================================================
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ObiettiviPartita } from './ObiettiviPartita';
 import { linkPiano } from '../../utils/obiettivi';
@@ -14,15 +14,17 @@ import type { ObiettivoDto, SkillRiassuntoDto } from '../../types';
 const { getObiettivi, aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getPersone, getSkills } = vi.hoisted(() => ({
   getObiettivi: vi.fn(), aggiornaObiettivo: vi.fn(), creaObiettivo: vi.fn(), eliminaObiettivo: vi.fn(), getPersone: vi.fn(), getSkills: vi.fn(),
 }));
-vi.mock('../../services/api', () => ({ getObiettivi, aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getPersone, getSkills, isApiError: () => false }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getObiettivi, aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getPersone, getSkills }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../shared/ImmagineEntita', () => ({ ImmagineEntita: () => null }));
 
+/** Riassunto di una skill di Fuoco da 4 PS con il nome italiano uguale al nome. */
 function skill(id: number, nome: string): SkillRiassuntoDto {
   return { id, nome, nomeIt: nome, elemento: 'fire', elementoNome: 'Fuoco', costo: { tipo: 'sp', valore: 4, testo: '4 PS' }, effetto: '', effettoNome: '' } as unknown as SkillRiassuntoDto;
 }
 const agi = skill(1, 'Agi');
 const dia = skill(2, 'Dia');
+/** Obiettivo aperto con l'id dato: Jack Frost al livello 15 con Agi e Dia, entrambe ancora mancanti, con i campi di `extra` che sovrascrivono i predefiniti. */
 function ob(id: number, extra: Partial<ObiettivoDto>): ObiettivoDto {
   return {
     id, personaId: 88, nome: 'Jack Frost', nomeIt: 'Jack Frost', arcana: 'Magician', arcanaNome: 'Mago', livelloBase: 11, speciale: false, rara: false, dlc: false,
@@ -62,5 +64,48 @@ describe('ObiettiviPartita', () => {
     expect(linkPiano({ personaId: 4, skill: [] })).toBe('/fusione?vista=piani&piani=4');
     expect(linkPiano({ personaId: 4, skill: [{ id: 9 }] })).toBe('/fusione?vista=piani&piani=4&skill=9');
     expect(linkPiano({ id: 3, personaId: 4, skill: [] })).toBe('/fusione?vista=piani&piani=4&obiettivo=3');
+  });
+});
+
+describe('ObiettiviPartita — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  /** Un obiettivo nuovo (id 1) su Jack Frost, con i valori predefiniti. */
+  const jack = () => ob(1, {});
+  /** Un obiettivo nuovo (id 2) su Pixie, per il resto uguale a quello di Jack Frost. */
+  const pixie = () => ob(2, { personaId: 3, nome: 'Pixie', nomeIt: 'Pixie' });
+  beforeEach(() => {
+    getObiettivi.mockReset(); aggiornaObiettivo.mockReset(); eliminaObiettivo.mockReset();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  });
+  afterEach(() => vi.restoreAllMocks());
+  /** La voce d'elenco il cui testo contiene il nome dato (si assume che esista). */
+  const voce = (nome: string) => screen.getAllByRole('listitem').find((li) => li.textContent?.includes(nome))!;
+
+  it('cambio di stato: la risposta di Jack Frost arrivata dopo quella di Pixie non riapre Pixie', async () => {
+    getObiettivi.mockResolvedValue([jack(), pixie()]);
+    let risolviJack!: (o: ObiettivoDto) => void;
+    aggiornaObiettivo.mockImplementation((_p: number, id: number) => (id === 1
+      ? new Promise<ObiettivoDto>((ok) => { risolviJack = ok; })
+      : Promise.resolve({ ...pixie(), stato: 'raggiunto' })));
+    render(<MemoryRouter><ObiettiviPartita partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('link', { name: 'Jack Frost' });
+    await act(async () => { fireEvent.click(within(voce('Jack Frost')).getByRole('button', { name: /Segna raggiunto/ })); });
+    await act(async () => { fireEvent.click(within(voce('Pixie')).getByRole('button', { name: /Segna raggiunto/ })); });
+    expect(screen.getByRole('button', { name: 'Raggiunti (1)' })).toBeInTheDocument();
+    await act(async () => { risolviJack({ ...jack(), stato: 'raggiunto' }); });
+    expect(screen.getByRole('button', { name: 'Raggiunti (2)' })).toBeInTheDocument();
+  });
+
+  it('eliminazione: l\'obiettivo eliminato mentre un altro cambia stato non ricompare', async () => {
+    getObiettivi.mockResolvedValue([jack(), pixie()]);
+    let risolviJack!: (o: ObiettivoDto) => void;
+    aggiornaObiettivo.mockImplementation(() => new Promise<ObiettivoDto>((ok) => { risolviJack = ok; }));
+    eliminaObiettivo.mockResolvedValue(undefined);
+    render(<MemoryRouter><ObiettiviPartita partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('link', { name: 'Jack Frost' });
+    await act(async () => { fireEvent.click(within(voce('Jack Frost')).getByRole('button', { name: /Segna raggiunto/ })); });
+    await act(async () => { fireEvent.click(within(voce('Pixie')).getByRole('button', { name: /Elimina/ })); });
+    expect(screen.queryByRole('link', { name: 'Pixie' })).toBeNull();
+    await act(async () => { risolviJack({ ...jack(), stato: 'raggiunto' }); });
+    expect(screen.queryByRole('link', { name: 'Pixie' })).toBeNull();
   });
 });

@@ -4,9 +4,10 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
-import { contestoDa, personaOErrore, scontoPartita } from './fusione/fusioneService.js';
+import { contestoDa, personaOErrore, rangoArcana, scontoPartita } from './fusione/fusioneService.js';
 import { fondi } from './fusione/motoreFusione.js';
 import { prezzoEvocazione } from './fusione/alberoFusione.js';
 import { bonusLivelliFusione, prezzoScontato } from '../../shared/bonusVelluto.js';
@@ -22,17 +23,14 @@ export interface AnelloInput { ingredienteId: number; partnerId: number; risulta
 export interface DatiCiclo { personaId: number; anelli: AnelloInput[]; nome?: string; note?: string }
 export interface ModificaCiclo { nome?: string; note?: string; anelloCorrente?: number; iterazioni?: number }
 
+/** La Persona del compendio in forma ridotta per gli anelli, con nome e arcano tradotti; 404 se l'id non esiste. */
 function personaDto(id: number): PersonaFusioneDto {
   const p = personaOErrore(id);
   return { id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livello: p.livello, speciale: p.speciale, rara: p.rara, dlc: p.dlc };
 }
 
-function rangoArcana(partitaId: number, arcana: string): number {
-  return (prepared('SELECT MAX(COALESCE(cp.rango, 0)) AS r FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? WHERE c.arcana = ?').get(partitaId, arcana) as { r: number | null }).r ?? 0;
-}
-
 /** Ricalcola e valida gli anelli: fusioni valide, catena continua, ritorno al bersaglio, lunghezza 2–5. */
-export function anelliValidati(partitaId: number, personaId: number, input: AnelloInput[]): AnelloCicloDto[] {
+function anelliValidati(partitaId: number, personaId: number, input: AnelloInput[]): AnelloCicloDto[] {
   if (input.length < 2 || input.length > 5) throw httpErrors.badRequest('ciclo-non-valido', 'Un ciclo ha da 2 a 5 anelli.');
   const { ctx } = contestoDa({ partitaId });
   const registro = new Set((prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1').all(partitaId) as Array<{ persona_id: number }>).map((r) => r.persona_id));
@@ -57,11 +55,15 @@ export function anelliValidati(partitaId: number, personaId: number, input: Anel
   return out;
 }
 
+/** Un ciclo salvato come DTO, con l'avanzamento dell'anello corrente (limitato all'ultimo anello): quale Persona posseduta
+ *  fa da ingrediente e quale da partner (la prima che corrisponde), se il partner è registrato nel compendio, ed è eseguibile
+ *  quando le due ci sono e non sono la stessa. */
 function cicloDto(r: RigaCiclo): CicloSalvatoDto {
   const anelli = JSON.parse(r.anelli_json) as AnelloCicloDto[];
   const corrente = Math.min(r.anello_corrente, anelli.length - 1);
   const a = anelli[corrente];
   const possedute = prepared('SELECT id, persona_id FROM persona_posseduta WHERE partita_id = ?').all(r.partita_id) as Array<{ id: number; persona_id: number }>;
+  /** L'id della prima Persona posseduta di quel tipo nella partita, o null. */
   const poss = (personaId: number) => possedute.find((p) => p.persona_id === personaId)?.id ?? null;
   const registrato = !!prepared('SELECT 1 FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND registrata = 1').get(r.partita_id, a.partner.id);
   const ingredientePossedutaId = poss(a.ingrediente.id);
@@ -74,21 +76,21 @@ function cicloDto(r: RigaCiclo): CicloSalvatoDto {
   };
 }
 
+/** Il ciclo della partita con nome e arcano della Persona bersaglio; 404 se non esiste o è di un'altra partita. */
 function riga(partitaId: number, id: number): RigaCiclo {
   const r = prepared(`${SQL_CICLO} WHERE c.id = ? AND c.partita_id = ?`).get(id, partitaId) as RigaCiclo | undefined;
   if (!r) throw httpErrors.notFound('ciclo-non-trovato', `Il ciclo ${id} non esiste in questa partita.`);
   return r;
 }
 
-function verificaPartita(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
-}
-
+/** I cicli salvati della partita, dal più recente. */
 export function cicliSalvati(partitaId: number): CicloSalvatoDto[] {
   verificaPartita(partitaId);
   return (prepared(`${SQL_CICLO} WHERE c.partita_id = ? ORDER BY c.id DESC`).all(partitaId) as RigaCiclo[]).map(cicloDto);
 }
 
+/** Salva un ciclo dopo averne ricalcolato e validato gli anelli: il costo è la somma dei partner da evocare dal registro,
+ *  il nome predefinito è «Ciclo per <Persona>», e il salvataggio finisce nello storico della partita. */
 export function salvaCiclo(partitaId: number, dati: DatiCiclo): CicloSalvatoDto {
   verificaPartita(partitaId);
   const anelli = anelliValidati(partitaId, dati.personaId, dati.anelli);
@@ -105,14 +107,18 @@ export function salvaCiclo(partitaId: number, dati: DatiCiclo): CicloSalvatoDto 
   })();
 }
 
+/** Modifica nome, note, anello corrente o iterazioni di un ciclo (i campi assenti restano com'erano); l'anello corrente
+ *  deve stare fra 0 e l'ultimo anello (400). Gli anelli non si toccano. */
 export function aggiornaCiclo(partitaId: number, id: number, dati: ModificaCiclo): CicloSalvatoDto {
   verificaPartita(partitaId);
   const r = riga(partitaId, id);
   const lunghezza = (JSON.parse(r.anelli_json) as AnelloCicloDto[]).length;
   if (dati.anelloCorrente !== undefined && (dati.anelloCorrente < 0 || dati.anelloCorrente >= lunghezza)) throw httpErrors.badRequest('anello-non-valido', `L'anello corrente va da 0 a ${lunghezza - 1}.`);
   const adesso = nowIso();
-  prepared('UPDATE ciclo_salvato SET nome = ?, note = ?, anello_corrente = ?, iterazioni = ?, updated_at = ? WHERE id = ?').run(dati.nome ?? r.nome, dati.note ?? r.note, dati.anelloCorrente ?? r.anello_corrente, dati.iterazioni ?? r.iterazioni, adesso, id);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  getDb().transaction(() => {
+    prepared('UPDATE ciclo_salvato SET nome = ?, note = ?, anello_corrente = ?, iterazioni = ?, updated_at = ? WHERE id = ?').run(dati.nome ?? r.nome, dati.note ?? r.note, dati.anelloCorrente ?? r.anello_corrente, dati.iterazioni ?? r.iterazioni, adesso, id);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  })();
   return cicloDto(riga(partitaId, id));
 }
 
@@ -134,9 +140,12 @@ export function avanzaCiclo(partitaId: number, id: number): CicloSalvatoDto {
   })();
 }
 
+/** Elimina un ciclo della partita; 404 se non c'era. */
 export function eliminaCiclo(partitaId: number, id: number): void {
   verificaPartita(partitaId);
-  const info = prepared('DELETE FROM ciclo_salvato WHERE id = ? AND partita_id = ?').run(id, partitaId);
-  if (info.changes === 0) throw httpErrors.notFound('ciclo-non-trovato', `Il ciclo ${id} non esiste in questa partita.`);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  getDb().transaction(() => {
+    const info = prepared('DELETE FROM ciclo_salvato WHERE id = ? AND partita_id = ?').run(id, partitaId);
+    if (info.changes === 0) throw httpErrors.notFound('ciclo-non-trovato', `Il ciclo ${id} non esiste in questa partita.`);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  })();
 }

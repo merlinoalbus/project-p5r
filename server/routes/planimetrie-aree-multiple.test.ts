@@ -9,27 +9,27 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa, esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { MappaDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
+/** Chiave, nome e ordine delle aree del Palazzo di Kamoshida, nell'ordine della guida. */
 const areeKamoshida = () => (prepared("SELECT chiave, nome, ordine FROM dungeon_area WHERE dungeon_chiave = 'kamoshida' ORDER BY ordine").all() as Array<{ chiave: string; nome: string; ordine: number }>);
+/** Le chiavi delle aree legate alla planimetria nella tabella `mappa_entita`, ordinate. */
 const areeLegate = (mappa: string) => (prepared("SELECT entita_chiave FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' ORDER BY entita_chiave").all(mappa) as Array<{ entita_chiave: string }>).map((r) => r.entita_chiave).sort();
+/** Le colonne `entita_tipo`/`entita_chiave` della mappa, cioè l'entità che la riga della mappa dichiara. */
 const colonne = (mappa: string) => prepared('SELECT entita_tipo, entita_chiave FROM mappa WHERE chiave = ?').get(mappa) as { entita_tipo: string | null; entita_chiave: string | null };
 
 describe('più aree della guida nella stessa planimetria', () => {
   let una: MappaDto;
   let altra: MappaDto;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     una = creaMappa(undefined, { nome: 'Planimetria con più aree', tipo: 'area', genitore: 'dungeon-kamoshida' });
     altra = creaMappa(undefined, { nome: 'Planimetria vicina', tipo: 'area', genitore: 'dungeon-kamoshida' });
   });

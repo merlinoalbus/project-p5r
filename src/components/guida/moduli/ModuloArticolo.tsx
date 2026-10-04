@@ -23,6 +23,12 @@ import { useNomiPerEffetti } from './nomiPerEffetti';
 const OPZIONI_CATEGORIA = Object.entries(NOME_CATEGORIA_ARTICOLO).map(([chiave, nome]) => ({ chiave, nome }));
 const OPZIONI_PER = [{ chiave: 'tutti', nome: 'Tutti' }, ...PERSONAGGI.map((p) => ({ chiave: p, nome: p }))];
 
+/**
+ * I campi di un articolo. In cima la scelta dell'oggetto: collegandolo copia fonte, chiave, nome e categoria (e il suo
+ * prezzo, se l'articolo non ne ha uno); scollegandolo o scegliendo «a mano» azzera il collegamento. Solo a mano
+ * compaiono nome, categoria a tessere, effetto dichiarato e statistiche; prezzo, quantità, destinatario e nota ci
+ * sono sempre. Per una riga esistente l'oggetto collegato si ritrova nell'archivio appena arriva.
+ */
 export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModulo) {
   const collegato = (dati._collegato as OggettoSelezionabileDto | null) ?? null;
   const aMano = dati._aMano === true;

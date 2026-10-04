@@ -14,6 +14,7 @@ import { httpErrors } from '../utils/httpError.js';
 import type { TraduzioneDto } from '../../shared/types.js';
 import Database from 'better-sqlite3';
 import { percorsoPacchettoDb } from './pacchetto/pacchettoGioco.js';
+import { registraCacheDiGioco } from './cacheDiGioco.js';
 
 interface RigaTraduzione {
   ambito: string;
@@ -26,6 +27,7 @@ interface RigaTraduzione {
 
 let cache: Map<string, Map<string, RigaTraduzione>> | null = null;
 
+/** La cache delle traduzioni, ambito → (chiave → riga): se manca la costruisce leggendo l'intera tabella in una volta. */
 function caricaCache(): Map<string, Map<string, RigaTraduzione>> {
   if (cache) return cache;
   cache = new Map();
@@ -44,6 +46,7 @@ function caricaCache(): Map<string, Map<string, RigaTraduzione>> {
 export function invalidaCacheTraduzioni(): void {
   cache = null;
 }
+registraCacheDiGioco(invalidaCacheTraduzioni);
 
 /** Resa italiana di una chiave; se assente restituisce la chiave stessa. */
 export function t(ambito: string, chiave: string): string {
@@ -74,6 +77,7 @@ export function vociAmbito(ambito: string): Array<{ chiave: string; testo: strin
   return [...(caricaCache().get(ambito) ?? []).values()].map((r) => ({ chiave: r.chiave, testo: r.testo, extra: r.extra_json ? JSON.parse(r.extra_json) : null }));
 }
 
+/** Una riga di `traduzione` come DTO, con l'extra letto dal JSON (null se assente). */
 function versoDto(r: RigaTraduzione): TraduzioneDto {
   return { ambito: r.ambito, chiave: r.chiave, testo: r.testo, extra: r.extra_json ? JSON.parse(r.extra_json) : null, fonte: r.fonte, updatedAt: r.updated_at };
 }

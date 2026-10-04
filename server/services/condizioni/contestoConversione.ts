@@ -11,7 +11,9 @@
 
 import type Database from 'better-sqlite3';
 import type { ContestoConversione } from '../../../shared/migraCondizioni.js';
+import { bloccoGuidaDi, finestreDaDati, type FinestraDungeon } from '../datiGuida.js';
 
+/** Forma di confronto di un nome: senza accenti, apici e virgolette tipografiche ridotti all'apostrofo, minuscole, spazi compattati. */
 function piatto(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’‘`´“”„"]/g, "'").toLowerCase().replace(/\s+/g, ' ').trim();
 }
@@ -31,16 +33,19 @@ function cercaPerNome(db: Database.Database, sql: string): (nome: string) => str
   };
 }
 
+/** Vero se la tabella esiste nel `db`: le migrazioni possono girare quando le tabelle della Guida non sono ancora state create. */
 function haTabella(db: Database.Database, nome: string): boolean {
   return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(nome);
 }
 
 /** Il contesto di base: le funzioni di ricerca sui dati della Guida. Ogni riga vi aggiunge negozio, gestore e chiave. */
 export function contestoConversione(db: Database.Database): ContestoConversione {
+  /** Ricerca di ripiego per le tabelle che mancano: non trova mai nulla. */
   const vuoto = () => null;
+  /** Abbreviazione di `haTabella` sul `db` di questo contesto. */
   const ha = (t: string) => haTabella(db, t);
   let datati: Set<string> | null = null;
-  let finestre: Map<string, { dal: string; al: string | null }> | null = null;
+  let finestre: Map<string, FinestraDungeon> | null = null;
   return {
     richiesta: ha('richiesta') ? cercaPerNome(db, 'SELECT chiave, nome FROM richiesta') : vuoto,
     libro: ha('libro') ? cercaPerNome(db, 'SELECT chiave, nome, nome_it FROM libro') : vuoto,
@@ -53,16 +58,8 @@ export function contestoConversione(db: Database.Database): ContestoConversione 
     },
     libriJinbocho: () => (ha('libro') ? (db.prepare("SELECT chiave FROM libro WHERE dove LIKE '%Jinbocho%' ORDER BY ordine").all() as Array<{ chiave: string }>).map((r) => r.chiave) : []),
     finestraArco: (d) => {
-      if (!finestre) {
-        finestre = new Map();
-        const riga = ha('dati_guida') ? (db.prepare("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined) : undefined;
-        if (riga) {
-          try {
-            const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> };
-            for (const f of dati.finestre ?? []) if (f.dal) finestre.set(f.dungeon, { dal: f.dal, al: f.al ?? null });
-          } catch { /* trascrizione illeggibile: nessuna finestra, non si indovina */ }
-        }
-      }
+      // una trascrizione assente o illeggibile vale «nessuna finestra»: non si indovina
+      if (!finestre) finestre = finestreDaDati(bloccoGuidaDi(db, 'finestre-dungeon'));
       return finestre.get(d) ?? null;
     },
   };

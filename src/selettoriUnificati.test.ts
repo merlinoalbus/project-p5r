@@ -10,6 +10,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+/** Raccoglie in `raccolti`, ricorsivamente, i percorsi dei file `.tsx` sotto `cartella` che non sono test, e li restituisce. */
 function sorgenti(cartella: string, raccolti: string[] = []): string[] {
   for (const voce of readdirSync(cartella)) {
     const percorso = join(cartella, voce);

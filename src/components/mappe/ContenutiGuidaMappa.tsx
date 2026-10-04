@@ -1,3 +1,7 @@
+// ============================================================
+// ContenutiGuidaMappa — le sezioni della guida legate a un luogo, con le loro schede apribili
+// ============================================================
+
 import { useState } from 'react';
 import { SchedaContenutoGuida } from './SchedaContenutoGuida';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -5,6 +9,12 @@ import { Link } from 'react-router-dom';
 import { getContenutiMappa } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { PageState } from '../shared/PageState';
+/** Pannello «Contenuti della guida» di una mappa: un `details` per area, con descrizione, note,
+ * dettagli collegati, planimetrie figlie ed elementi (i passi di un enigma rientrati sotto il loro
+ * contenitore). Un elemento con scheda si apre in linea in `SchedaContenutoGuida`, una alla volta.
+ * I contenuti si ricaricano quando cambiano la partita attiva o la sua data, fascia o meteo;
+ * `area` apre la sezione richiesta (o avvisa se non è di questo luogo), `dungeon` aggiunge il
+ * collegamento alla scheda del Palazzo. Senza aree non mostra nulla. */
 export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; area?: string | null; dungeon?: string }) {
   const attiva = usePartitaStore(s => s.attiva);
   const [selezionato, seleziona] = useState<number | null>(null);

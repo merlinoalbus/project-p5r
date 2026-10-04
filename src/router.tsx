@@ -1,46 +1,59 @@
 // ============================================================
 // Router — route react-router v7 (createBrowserRouter)
 // ============================================================
+//
+// Le pagine si caricano quando servono (rilievo P3" della verifica completa): prima tutte e trentanove stavano nel bundle
+// iniziale, editor delle mappe, fusione e impostazioni compresi. Restano subito pronte solo la home, che è la pagina d'arrivo, e
+// la pagina «non trovata». Il `Suspense` sta nel layout, attorno all'`Outlet`: la cornice dell'app c'è subito, e cambiando pagina
+// React Router (che naviga in una transizione) tiene a schermo quella di prima finché la nuova non è arrivata.
+// ============================================================
 
+import { lazy, type ComponentType } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { MainLayout } from './components/layout/MainLayout';
 import { HomePage } from './pages/HomePage';
-import { CompendioPage } from './pages/CompendioPage';
-import { PersonaDettaglioPage } from './pages/PersonaDettaglioPage';
-import { SkillPage } from './pages/SkillPage';
-import { SkillDettaglioPage } from './pages/SkillDettaglioPage';
-import { GlossarioPage } from './pages/GlossarioPage';
-import { FusionePage } from './pages/FusionePage';
-import { ConfidenteDettaglioPage } from './pages/ConfidenteDettaglioPage';
-import { DomandePage } from './pages/DomandePage';
-import { CalendarioPage } from './pages/CalendarioPage';
-import { GuidaPage } from './pages/GuidaPage';
-import { DungeonPage } from './pages/DungeonPage';
-import { DungeonDettaglioPage } from './pages/DungeonDettaglioPage';
-import { RichiestePage } from './pages/RichiestePage';
-import { BattagliaPage } from './pages/BattagliaPage';
-import { CittaPage } from './pages/CittaPage';
-import { MappaPage } from './pages/MappaPage';
-import { AccessoMondoPage } from './pages/AccessoMondoPage';
-import { EditorMappaPage } from './pages/EditorMappaPage';
-import { QuartierePage } from './pages/QuartierePage';
-import { AttivitaPage } from './pages/AttivitaPage';
-import { LibriPage } from './pages/LibriPage';
-import { FilmPage } from './pages/FilmPage';
-import { VideogiochiPage } from './pages/VideogiochiPage';
-import { CruciverbaPage } from './pages/CruciverbaPage';
-import { NegoziPage } from './pages/NegoziPage';
-import { PercorsoPage } from './pages/PercorsoPage';
-import { CompletamentoPage } from './pages/CompletamentoPage';
-import { CovoPage } from './pages/CovoPage';
-import { SfidePage } from './pages/SfidePage';
-import { PersonaggiPage } from './pages/PersonaggiPage';
-import { OggettiPage } from './pages/OggettiPage';
-import { NegozioPage } from './pages/NegozioPage';
-import { RimossiPage } from './pages/RimossiPage';
-import { PartitaPage } from './pages/PartitaPage';
-import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+
+/** Una pagina caricata alla prima visita: il modulo la esporta per nome, `lazy` vuole l'export predefinito. */
+function pigra<M>(carica: () => Promise<M>, nome: keyof M) {
+  return lazy(async () => ({ default: (await carica())[nome] as ComponentType }));
+}
+
+const CompendioPage = pigra(() => import('./pages/CompendioPage'), 'CompendioPage');
+const PersonaDettaglioPage = pigra(() => import('./pages/PersonaDettaglioPage'), 'PersonaDettaglioPage');
+const SkillPage = pigra(() => import('./pages/SkillPage'), 'SkillPage');
+const SkillDettaglioPage = pigra(() => import('./pages/SkillDettaglioPage'), 'SkillDettaglioPage');
+const GlossarioPage = pigra(() => import('./pages/GlossarioPage'), 'GlossarioPage');
+const FusionePage = pigra(() => import('./pages/FusionePage'), 'FusionePage');
+const ConfidenteDettaglioPage = pigra(() => import('./pages/ConfidenteDettaglioPage'), 'ConfidenteDettaglioPage');
+const DomandePage = pigra(() => import('./pages/DomandePage'), 'DomandePage');
+const CalendarioPage = pigra(() => import('./pages/CalendarioPage'), 'CalendarioPage');
+const GuidaPage = pigra(() => import('./pages/GuidaPage'), 'GuidaPage');
+const DungeonPage = pigra(() => import('./pages/DungeonPage'), 'DungeonPage');
+const DungeonDettaglioPage = pigra(() => import('./pages/DungeonDettaglioPage'), 'DungeonDettaglioPage');
+const RichiestePage = pigra(() => import('./pages/RichiestePage'), 'RichiestePage');
+const BattagliaPage = pigra(() => import('./pages/BattagliaPage'), 'BattagliaPage');
+const CittaPage = pigra(() => import('./pages/CittaPage'), 'CittaPage');
+const MappaPage = pigra(() => import('./pages/MappaPage'), 'MappaPage');
+const AccessoMondoPage = pigra(() => import('./pages/AccessoMondoPage'), 'AccessoMondoPage');
+const EditorMappaPage = pigra(() => import('./pages/EditorMappaPage'), 'EditorMappaPage');
+const QuartierePage = pigra(() => import('./pages/QuartierePage'), 'QuartierePage');
+const AttivitaPage = pigra(() => import('./pages/AttivitaPage'), 'AttivitaPage');
+const LibriPage = pigra(() => import('./pages/LibriPage'), 'LibriPage');
+const FilmPage = pigra(() => import('./pages/FilmPage'), 'FilmPage');
+const VideogiochiPage = pigra(() => import('./pages/VideogiochiPage'), 'VideogiochiPage');
+const CruciverbaPage = pigra(() => import('./pages/CruciverbaPage'), 'CruciverbaPage');
+const NegoziPage = pigra(() => import('./pages/NegoziPage'), 'NegoziPage');
+const PercorsoPage = pigra(() => import('./pages/PercorsoPage'), 'PercorsoPage');
+const CompletamentoPage = pigra(() => import('./pages/CompletamentoPage'), 'CompletamentoPage');
+const CovoPage = pigra(() => import('./pages/CovoPage'), 'CovoPage');
+const SfidePage = pigra(() => import('./pages/SfidePage'), 'SfidePage');
+const PersonaggiPage = pigra(() => import('./pages/PersonaggiPage'), 'PersonaggiPage');
+const OggettiPage = pigra(() => import('./pages/OggettiPage'), 'OggettiPage');
+const NegozioPage = pigra(() => import('./pages/NegozioPage'), 'NegozioPage');
+const RimossiPage = pigra(() => import('./pages/RimossiPage'), 'RimossiPage');
+const PartitaPage = pigra(() => import('./pages/PartitaPage'), 'PartitaPage');
+const ImpostazioniPage = pigra(() => import('./pages/ImpostazioniPage'), 'ImpostazioniPage');
 
 /** Albero delle route applicative. */
 export const router = createBrowserRouter([

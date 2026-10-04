@@ -11,30 +11,35 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
 import type { AzionePercorsoDto, ConfidenteDettaglioDto, ConfidentePartitaDto, DoteSocialePartitaDto, PercorsoGiornoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API — Dote a ogni incontro con un Confidente', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
+  /** Crea una partita col nome dato, la porta al giorno `data` (MM-GG) e ne restituisce l'id. */
   const nuovaPartita = async (nome: string, data: string) => {
     const id = ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
     await request(app).put(`/api/partite/${id}/giorno`).send({ data }).expect(200);
     return id;
   };
+  /** Restituisce i punti di Coraggio della partita `p`. */
   const coraggio = async (p: number) => ((await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[]).find((d) => d.chiave === 'coraggio')!.punti;
+  /** Aggiorna dalla pagina del Confidente (con `forza`) lo stato di Takemi nella partita `p`, pretende il 200 e restituisce il Confidente. */
   const pagina = async (p: number, corpo: object) => (await request(app).put(`/api/partite/${p}/confidenti/takemi`).send({ forza: true, ...corpo }).expect(200)).body.data as ConfidentePartitaDto;
+  /** Spunta (o, con `fatta` falso, toglie la spunta) della voce `uid` nella partita `p`. */
   const spunta = (p: number, uid: string, fatta = true) => request(app).put(`/api/partite/${p}/percorso`).send({ uid, fatta });
+  /** Gli incontri con i Confidenti registrati nella partita `p` (rango verso cui contano, se passaggio, origine), in ordine d'inserimento. */
   const incontri = (p: number) => prepared('SELECT verso_rango AS verso, passaggio, origine FROM incontro_confidente_partita WHERE partita_id = ? ORDER BY id').all(p);
+  /** L'azione della guida del giorno `data` che riferisce Takemi. */
   const azioneTakemi = async (data: string) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.riferimento?.chiave === 'takemi')!;
   const nota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2 }];
   const menoNota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: -2 }];
@@ -138,6 +143,7 @@ describe('API — Dote a ogni incontro con un Confidente', () => {
   });
 
   it('la Dote a ogni incontro si modifica dalla scheda del Confidente (valida, rango esistente) e vale dai prossimi incontri', async () => {
+    /** Salva col corpo dato la Dote a ogni incontro di Takemi (restituisce la richiesta, per controllarne l'esito). */
     const put = (corpo: object) => request(app).put('/api/compendio/confidenti/takemi/doti-incontro').send(corpo);
     expect((await put({ ranghi: [{ rango: 11, doti: [] }] })).status).toBe(400);
     expect((await put({ ranghi: [{ rango: 3, doti: [{ dote: 'boh', note: 1 }] }] })).status).toBe(400);

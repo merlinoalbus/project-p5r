@@ -7,13 +7,14 @@
 //    navigazione in basso con bersagli touch da 56px.
 // ============================================================
 
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { annotaNavigazione } from '../../utils/ritornoMappe';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Topbar } from './Topbar';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { ToastContainer } from '../shared/Toast';
+import { Spinner } from '../shared/PageState';
 import { MeteoAlCambioGiorno } from '../partita/MeteoAlCambioGiorno';
 import { useGlossarioStore } from '../../stores/glossarioStore';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -69,7 +70,10 @@ export function MainLayout() {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-y-auto p-4 lg:p-5 pb-24 lg:pb-5 flex flex-col">
-          <Outlet />
+          {/* le pagine arrivano alla prima visita (router.tsx): intanto la cornice resta e al centro gira l'attesa */}
+          <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Spinner size={40} /></div>}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
       <BottomNav />

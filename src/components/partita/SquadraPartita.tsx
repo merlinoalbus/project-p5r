@@ -17,7 +17,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { getSquadra, impostaMembroSquadra, impostaYen } from '../../services/api/partite';
+import { getSquadra, impostaMembroSquadra, impostaYen } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -26,19 +26,50 @@ import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import type { MembroSquadraDto, SquadraPartitaDto } from '../../types';
+import { formattaYen } from '../../utils/punti';
 
-const yen = (n: number) => `${n.toLocaleString('it-IT')} ¥`;
 /** Lo stesso tetto di `bodyYen` sul server: oltre, la richiesta verrebbe rifiutata. */
 const YEN_MASSIMI = 9_999_999;
 
+/**
+ * Il campo dell'esperienza di un Ladro, controllato: mentre si scrive mostra la bozza, a fine modifica (uscita dal campo) mostra
+ * sempre un numero vero — quello normalizzato, o quello salvato se il salvataggio fallisce. Prima era un campo libero
+ * (`defaultValue`): dopo un errore, o scrivendo «5.7» con 5 già salvato, restava il testo scritto invece del dato (rilievo A9
+ * della verifica completa, 2026-10-03).
+ */
+function CampoEsperienza({ valore, nome, disabilitato, onSalva }: { valore: number; nome: string; disabilitato: boolean; onSalva: (v: number) => Promise<unknown> }) {
+  const [bozza, setBozza] = useState<string | null>(null);
+  /** All'uscita dal campo: normalizza la bozza a intero non negativo (testo non numerico vale 0),
+   * la salva solo se diversa dal valore attuale e poi torna a mostrare il valore della scheda. */
+  const conferma = async () => {
+    if (bozza === null) return;
+    const v = Math.max(0, Math.trunc(Number(bozza) || 0));
+    if (v !== valore) await onSalva(v);
+    // finita la modifica il campo torna a mostrare il valore della scheda: quello nuovo se salvato, quello di prima se no
+    setBozza(null);
+  };
+  return (
+    <input className="form-input tabular-nums" type="number" min={0} inputMode="numeric" value={bozza ?? String(valore)}
+      aria-label={`Esperienza di ${nome}`} disabled={disabilitato}
+      onChange={(e) => setBozza(e.target.value)} onBlur={() => void conferma()} />
+  );
+}
+
+/** La scheda «Denaro e squadra»: il saldo del gruppo con un campo importo e i pulsanti Incassa,
+ * Spendi e Imposta, poi una scheda per Ladro con l'interruttore «In squadra» (Joker sempre dentro),
+ * l'esperienza e il livello con −1/+1. Ogni risposta del server sostituisce l'intera squadra; un
+ * cambio del livello di Joker fa ricaricare anche l'elenco delle partite nello store. */
 export function SquadraPartita({ partitaId }: { partitaId: number }) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getSquadra(partitaId), [partitaId]);
   const [movimento, setMovimento] = useState('');
   const [occupato, setOccupato] = useState<string | null>(null);
 
-  const conEsito = async (chi: string, azione: () => Promise<SquadraPartitaDto>) => {
+  /** Esegue l'azione tenendo occupato `chi` (un Ladro o il denaro), mette la squadra restituita al
+   * posto di quella mostrata e trasforma un errore in notifica (senza rilanciarlo). Risponde se è riuscita: chi deve fare
+   * altro solo dopo un salvataggio vero (il riallineamento delle partite, A9) lo sa senza dover intercettare l'errore. */
+  const conEsito = async (chi: string, azione: () => Promise<SquadraPartitaDto>): Promise<boolean> => {
     setOccupato(chi);
-    try { imposta(await azione()); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(null); }
+    try { imposta(await azione()); return true; } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); return false; } finally { setOccupato(null); }
   };
 
   /** L'importo scritto nel campo, intero e dentro i limiti che il server accetta (`bodyYen`).
@@ -63,15 +94,14 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
     void conEsito('yen', async () => {
       const s = await impostaYen(partitaId, { yen: n });
       setMovimento('');
-      notifica('success', `Denaro impostato a ${yen(s.yen)}.`);
+      notifica('success', `Denaro impostato a ${formattaYen(s.yen)}.`);
       return s;
     });
   };
 
-  /** Il livello di Joker vive in due case — qui e `partita.livello_protagonista`, che la fusione
-   *  legge — e il server le tiene allineate. Ma l'elenco delle partite sta in uno store caricato
-   *  all'avvio: cambiato il livello, il database era giusto e **lo schermo no**, con la barra in
-   *  alto e le impostazioni ferme al numero di prima. Qui glielo si dice. */
+  /** Il livello di Joker è `partita.livello_protagonista` (fonte unica dal 2026-10-03: la scheda e la fusione leggono quello).
+   *  Ma l'elenco delle partite sta in uno store caricato all'avvio: cambiato il livello, il database era giusto e **lo schermo
+   *  no**, con la barra in alto e le impostazioni ferme al numero di prima. Qui glielo si dice. */
   const riallineaPartite = (chiave: string) => { if (chiave === 'joker') void usePartitaStore.getState().carica(); };
 
   /**
@@ -120,21 +150,20 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
         <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
           <label className="editor-mappa__campo min-w-[150px] flex-1">
             <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Esperienza</span>
-            <input className="form-input tabular-nums" type="number" min={0} inputMode="numeric" defaultValue={m.esperienza}
-              aria-label={`Esperienza di ${m.nome}`} disabled={fermo}
-              onBlur={(e) => { const v = Math.max(0, Math.trunc(Number(e.target.value) || 0)); if (v !== m.esperienza) void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { esperienza: v })); }} />
+            <CampoEsperienza valore={m.esperienza} nome={m.nome} disabilitato={fermo}
+              onSalva={(v) => conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { esperienza: v }))} />
           </label>
           <span className="editor-mappa__campo shrink-0">
             <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Livello</span>
             <span className="flex items-center gap-1.5">
               <PulsanteVisivo compatto icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="−1"
                 disabled={fermo || m.livello <= 1} aria-label={`Togli un livello a ${m.nome}`}
-                onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: -1 })).then(() => riallineaPartite(m.chiave))} />
+                onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: -1 })).then((riuscito) => { if (riuscito) riallineaPartite(m.chiave); })} />
               <span className={`h-11 min-w-[52px] rounded-md flex items-center justify-center px-2 font-display text-[20px] tabular-nums bg-bg-tertiary ${m.segnato ? 'text-primary' : 'text-text-muted'}`}
                 title={m.segnato ? `Livello ${m.livello}` : 'Livello non ancora segnato'}>{m.livello}</span>
               <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="+1"
                 disabled={fermo || m.livello >= 99} aria-label={`Sali di livello: ${m.nome} al livello ${m.livello + 1}`}
-                onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: 1 })).then(() => riallineaPartite(m.chiave))} />
+                onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: 1 })).then((riuscito) => { if (riuscito) riallineaPartite(m.chiave); })} />
             </span>
           </span>
         </div>
@@ -152,7 +181,7 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
           <section className="card flex flex-col gap-3" aria-label="Denaro del gruppo">
             <span className="flex flex-col gap-0.5">
               <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave="medaglie" dimensione={14} />Denaro del gruppo</span>
-              <span className="font-display text-[28px] leading-none tabular-nums">{yen(dati.yen)}</span>
+              <span className="font-display text-[28px] leading-none tabular-nums">{formattaYen(dati.yen)}</span>
             </span>
             {/* Il numero si scrive una volta e poi si dice che cosa è: entrato, uscito, oppure il
                 saldo intero da copiare dal gioco («Imposta»), quando i conti non tornano più. */}

@@ -8,7 +8,7 @@ import { DotiSociali } from './DotiSociali';
 import type { DoteSocialePartitaDto, ModificaDote } from '../../types';
 
 const { getDoti, aggiornaDote } = vi.hoisted(() => ({ getDoti: vi.fn(), aggiornaDote: vi.fn() }));
-vi.mock('../../services/api', () => ({ getDoti, aggiornaDote }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getDoti, aggiornaDote }));
 
 const ranghiFascino = [
   { rango: 1, nome: 'Indifferente', soglia: 0 },
@@ -18,6 +18,7 @@ const ranghiFascino = [
   { rango: 5, nome: 'Irresistibile', soglia: 132 },
 ];
 
+/** La Dote Fascino con punti, rango e soglia dati; i punti mancanti sono soglia − punti, o null quando non c'è una soglia successiva. */
 function dote(punti: number, rango: number, nomeRango: string, sogliaProssima: number | null): DoteSocialePartitaDto {
   return { chiave: 'fascino', nome: 'Fascino', ordine: 1, punti, rango, nomeRango, sogliaProssima, mancanti: sogliaProssima === null ? null : sogliaProssima - punti, ranghi: ranghiFascino, updatedAt: null };
 }
@@ -83,5 +84,26 @@ describe('DotiSociali', () => {
     await screen.findByText('Rango 1 · Indifferente');
     await act(async () => { screen.getByLabelText('Fascino: aggiungi un punto').click(); });
     expect(screen.getByText(/Mancano/)).toHaveTextContent('Mancano 3 punti');
+  });
+});
+
+describe('DotiSociali — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  it('la risposta di una Dote arrivata dopo quella di un\'altra non riporta indietro la seconda', async () => {
+    /** La Dote Coraggio al rango 1 «Indifferente» (soglia 6) con i punti dati, costruita sulla base di Fascino. */
+    const coraggio = (punti: number): DoteSocialePartitaDto => ({ ...dote(punti, 1, 'Indifferente', 6), chiave: 'coraggio', nome: 'Coraggio', ordine: 2 });
+    getDoti.mockResolvedValue([dote(0, 1, 'Indifferente', 6), coraggio(0)]);
+    let rispondiFascino!: (d: DoteSocialePartitaDto) => void;
+    aggiornaDote.mockImplementation((_id: number, chiave: string) => (chiave === 'fascino'
+      ? new Promise<DoteSocialePartitaDto>((ok) => { rispondiFascino = ok; })
+      : Promise.resolve(coraggio(1))));
+    render(<DotiSociali partitaId={1} />);
+    await screen.findAllByText('Rango 1 · Indifferente');
+    await act(async () => { screen.getByLabelText('Fascino: aggiungi un punto').click(); }); // in volo
+    await act(async () => { screen.getByLabelText('Coraggio: aggiungi un punto').click(); }); // arriva subito
+    expect(screen.getByLabelText('Coraggio: togli un punto')).not.toBeDisabled(); // Coraggio a 1 punto
+    await act(async () => { rispondiFascino(dote(1, 1, 'Indifferente', 6)); });
+    // entrambe a 1: la risposta di Fascino non ha rimesso Coraggio a 0
+    expect(screen.getByLabelText('Fascino: togli un punto')).not.toBeDisabled();
+    expect(screen.getByLabelText('Coraggio: togli un punto')).not.toBeDisabled();
   });
 });

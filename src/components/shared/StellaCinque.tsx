@@ -44,8 +44,10 @@ interface Props {
   className?: string;
 }
 
+/** Riporta il valore fra 0 e 1; un valore non finito (NaN, infinito) vale 0. */
 const limita = (v: number): number => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0);
 
+/** Vero se il sistema chiede movimento ridotto; falso fuori dal browser o senza `matchMedia`. */
 function preferisceMovimentoRidotto(): boolean {
   return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -64,6 +66,7 @@ function useValoriAnimati(bersaglio: number[], animato: boolean): number[] {
     const partenza = correnti.current.length === bersaglio.length ? correnti.current : bersaglio.map(() => 0);
     const inizio = performance.now();
     let richiesta = 0;
+    /** Un fotogramma: avanzamento cubico (ease-out) fra partenza e bersaglio, e nuovo fotogramma finché non si arriva. */
     const passo = (ora: number) => {
       const t = Math.min(1, (ora - inizio) / 450);
       const e = 1 - Math.pow(1 - t, 3);

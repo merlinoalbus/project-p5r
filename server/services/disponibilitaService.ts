@@ -18,15 +18,14 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { confidenti, dotiSociali } from './partiteService.js';
+import { dotiSociali, ranghiConfidenti } from './partiteService.js';
+import { finestreDungeon, type FinestraDungeon } from './datiGuida.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
-import type { RequisitoSeed } from '../../shared/seed.js';
-import { TIPO_PUNTO_DESCRITTIVO } from '../../shared/spilli.js';
-import { VOCE_DEL_PIN } from './mappe/voceDelPin.js';
-import { pinCitato } from './condizioni/nomiCondizioni.js';
-import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
+import { VOCE_DEL_PIN, VOCI_GESTITE_SQL } from './mappe/voceDelPin.js';
+import { nomiCondizioniMemo, pinCitato } from './condizioni/nomiCondizioni.js';
+import type { DisponibilitaDto, RequisitoRango, SemaforoRequisitoDto } from '../../shared/types.js';
 
 /** Stagioni del calendario di gioco per mese (aprile → marzo). */
 const STAGIONE_PER_MESE: Record<number, string> = { 4: 'primavera', 5: 'primavera', 6: 'estate', 7: 'estate', 8: 'estate', 9: 'autunno', 10: 'autunno', 11: 'autunno', 12: 'inverno', 1: 'inverno', 2: 'inverno', 3: 'primavera' };
@@ -40,7 +39,7 @@ function piatto(testo: string): string {
 export { ordineGioco, dataSbloccoQuartiere };
 
 /** Un requisito da valutare: quello di un Confidente (dal seed, con il suo testo) o una condizione con il testo generato. */
-export type RequisitoDisponibilita = RequisitoSeed | (RequisitoSpillo & { testo: string });
+export type RequisitoDisponibilita = RequisitoRango | (RequisitoSpillo & { testo: string });
 
 export interface SbloccoQuartiere { nome: string; dal: string | null }
 
@@ -63,27 +62,27 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   /** Gli uid dei pin segnati nella partita (raccolto, aperto, parlato, incontrato, azionato…), anche tramite la loro voce della guida: le condizioni
    *  «Pin di una mappa». Facoltativo per chi costruisce uno stato a mano (test): senza, nessun pin è segnato. */
   spilliSegnati?: Set<string>;
+  /** I pin citati dalle condizioni già letti in questa richiesta (uid → pin, null se non c'è): una mappa valuta le stesse condizioni
+   *  più volte (requisiti, presenza, stato di altri pin), e prima ogni valutazione rileggeva il pin (rilievo P6 della verifica). Lo
+   *  stato vive una richiesta sola, quindi i pin letti sono sempre quelli di adesso. */
+  pinCitati?: Map<string, ReturnType<typeof pinCitato>>;
 }
 
+/** `pinCitato` con la memoria dello stato della richiesta, se lo stato ce l'ha. */
+function pinCitatoNelloStato(uid: string, st: StatoDisponibilita): ReturnType<typeof pinCitato> {
+  if (!st.pinCitati) return pinCitato(uid);
+  if (!st.pinCitati.has(uid)) st.pinCitati.set(uid, pinCitato(uid));
+  return st.pinCitati.get(uid)!;
+}
+
+/** Ogni quartiere con il nome e la data di sblocco (`sblocco_data`, null se non ne ha una). */
 export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
   const righe = prepared('SELECT chiave, nome, sblocco_data FROM quartiere').all() as Array<{ chiave: string; nome: string; sblocco_data: string | null }>;
   return new Map(righe.map((q) => [q.chiave, { nome: q.nome, dal: q.sblocco_data }]));
 }
 
-/** Le finestre dei Palazzi (data/seed/finestre-dungeon.json), lette da `dati_guida`. */
-export function finestreArchi(): Map<string, { dal: string; al: string | null }> {
-  const out = new Map<string, { dal: string; al: string | null }>();
-  const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
-  if (!riga) return out;
-  try {
-    const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> };
-    for (const f of dati.finestre ?? []) if (f.dal) out.set(f.dungeon, { dal: f.dal, al: f.al ?? null });
-  } catch { /* trascrizione illeggibile: nessuna finestra */ }
-  return out;
-}
-
 /** L'arco raggiunto a una data: l'ultimo Palazzo la cui finestra è già cominciata; prima del primo si è comunque nel primo. */
-export function arcoAllaData(dataGioco: string | null, finestre: Map<string, { dal: string; al: string | null }>): string | null {
+export function arcoAllaData(dataGioco: string | null, finestre: ReadonlyMap<string, FinestraDungeon>): string | null {
   if (!dataGioco) return null;
   const oggi = ordineGioco(dataGioco);
   let arco: string = ARCHI_STORIA[0];
@@ -94,11 +93,17 @@ export function arcoAllaData(dataGioco: string | null, finestre: Map<string, { d
   return arco;
 }
 
+/** Lo stato della partita che serve al valutatore: quello dei semafori (ranghi dei Confidenti, Doti, data di gioco…) più
+ *  giorno della settimana normalizzato, contatori di film, videogiochi e libri completati (avanzamento al totale delle
+ *  sessioni), articoli ottenuti, letture, volte delle attività, spesa e punti per negozio, sblocco dei quartieri, arco
+ *  della storia e pin segnati. La memoria dei pin citati parte vuota: lo stato vale una richiesta sola. */
 export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita {
-  const ranghi = new Map(confidenti(partitaId).map((c) => [c.chiave, c.rango]));
+  // i ranghi soli: prima si calcolavano i Confidenti interi (semafori e regali di tutti) per leggerne il rango (rilievo P1')
+  const ranghi = ranghiConfidenti(partitaId);
   const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
   const st = statoPartitaSemafori(partitaId, ranghi, doti);
   const giorno = st.dataGioco ? (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(st.dataGioco) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null : null;
+  /** Il conteggio `n` della query, che riceve come unico parametro la partita. */
   const conta = (sql: string): number => (prepared(sql).get(partitaId) as { n: number }).n;
   const contatori = new Map<ContatoreChiave, number>([
     ['film-completati', conta('SELECT COUNT(*) AS n FROM progresso_film_partita p JOIN film f ON f.chiave = p.film_chiave WHERE p.partita_id = ? AND p.avanzamento >= f.sessioni')],
@@ -115,8 +120,9 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     puntiNegozio: new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(partitaId) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti])),
     giornoSettimana: giorno ? piatto(giorno) : null,
     sbloccoQuartieri: sbloccoQuartieri(),
-    arcoCorrente: arcoAllaData(st.dataGioco, finestreArchi()),
+    arcoCorrente: arcoAllaData(st.dataGioco, finestreDungeon()),
     spilliSegnati: spilliSegnati(partitaId),
+    pinCitati: new Map(),
   };
 }
 
@@ -124,32 +130,38 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
  *  «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), che non dà stato alle voci descrittive («Altro»). */
 function spilliSegnati(partitaId: number): Set<string> {
   const righe = prepared(`SELECT spillo_uid AS uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1
-    UNION SELECT uid FROM spillo WHERE uid IS NOT NULL AND ${VOCE_DEL_PIN} IN (
-      SELECT pp.punto_chiave FROM punto_partita pp JOIN punto_interesse pi ON pi.chiave = pp.punto_chiave WHERE pp.partita_id = ? AND pi.tipo <> ?)`).all(partitaId, partitaId, TIPO_PUNTO_DESCRITTIVO) as Array<{ uid: string }>;
+    UNION SELECT uid FROM spillo WHERE uid IS NOT NULL AND ${VOCE_DEL_PIN} IN (${VOCI_GESTITE_SQL})`).all(partitaId, partitaId) as Array<{ uid: string }>;
   return new Set(righe.map((r) => r.uid));
 }
 
+/** Il nome del negozio, o la chiave se non esiste. */
 function nomeNegozio(chiave: string): string {
   return (prepared('SELECT nome FROM negozio WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome ?? chiave;
 }
+/** Il nome dell'attività, o la chiave se non esiste. */
 function nomeAttivita(chiave: string): string {
   return (prepared('SELECT nome FROM attivita WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome ?? chiave;
 }
 
-/** Valuta un requisito: quelli dei Confidenti col valutatore dei semafori, gli altri qui. */
-function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDisponibilita): SemaforoRequisitoDto {
+/** Valuta un requisito: quelli dei Confidenti col valutatore dei semafori, gli altri qui. `nomi` servono a scrivere il testo delle
+ *  condizioni dentro un gruppo o un NON (quelle di primo livello arrivano col testo già scritto dal chiamante): senza, il dettaglio
+ *  di un gruppo mostrava le chiavi grezze («sojiro», «tanaka-affari-loschi») invece dei nomi. */
+function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDisponibilita, nomi?: NomiCondizioni): SemaforoRequisitoDto {
   const base = { indice, testo: r.testo, confermato: false } as const;
+  /** Il semaforo del requisito con tipo, colore e dettaglio dati, mai manuale. */
   const esito = (tipo: SemaforoRequisitoDto['tipo'], stato: SemaforoRequisitoDto['stato'], dettaglio: string): SemaforoRequisitoDto => ({ ...base, tipo, stato, dettaglio, manuale: false });
   switch (r.tipo) {
     case 'gruppo': {
-      const esiti = r.condizioni.map((c, i) => valutaRequisito({ ...c, testo: descriviRequisitoSpillo(c) }, i, st));
+      const n = nomi ?? nomiCondizioniMemo();
+      const esiti = r.condizioni.map((c, i) => valutaRequisito({ ...c, testo: descriviRequisitoSpillo(c, n) }, i, st, n));
       const stato = r.modo === 'tutte'
         ? (esiti.some((e) => e.stato === 'rosso') ? 'rosso' : esiti.some((e) => e.stato === 'grigio') ? 'grigio' : 'verde')
         : (esiti.some((e) => e.stato === 'verde') ? 'verde' : esiti.some((e) => e.stato === 'grigio') ? 'grigio' : 'rosso');
       return esito('gruppo', stato, esiti.map((e) => e.testo + ': ' + e.dettaglio).join(' · '));
     }
     case 'non': {
-      const dentro = valutaRequisito({ ...r.condizione, testo: descriviRequisitoSpillo(r.condizione) }, indice, st);
+      const n = nomi ?? nomiCondizioniMemo();
+      const dentro = valutaRequisito({ ...r.condizione, testo: descriviRequisitoSpillo(r.condizione, n) }, indice, st, n);
       return { ...dentro, ...base, tipo: 'non', stato: dentro.stato === 'verde' ? 'rosso' : dentro.stato === 'rosso' ? 'verde' : 'grigio', dettaglio: 'Non: ' + dentro.dettaglio };
     }
     case 'articolo': {
@@ -230,7 +242,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return esito('stagione', ok ? 'verde' : 'rosso', ok ? `Siamo in ${attuale}` : `Solo in ${r.stagione}: siamo in ${attuale}`);
     }
     case 'spillo': {
-      const p = pinCitato(r.spillo);
+      const p = pinCitatoNelloStato(r.spillo, st);
       // un pin eliminato dopo aver scritto la condizione: non si sa, e lo si dice dove correggerlo
       if (!p) return esito('spillo', 'grigio', 'Il pin di questa condizione non c’è più: correggila nell’editor della mappa');
       // il pin non ha più uno stato (diventato una nota, o scollegato dalla sua voce della guida): non si può più segnare, e la
@@ -249,7 +261,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return { ...esitoData, dettaglio: `${nome}: ${esitoData.dettaglio}` };
     }
     default: {
-      const { tipo, testo, ...dati } = r as RequisitoSeed & Record<string, unknown>;
+      const { tipo, testo, ...dati } = r as RequisitoRango & Record<string, unknown>;
       if (tipo === 'richiesta') dati.richiesta = (prepared('SELECT nome FROM richiesta WHERE chiave=?').get(String(dati.richiesta)) as { nome: string } | undefined)?.nome ?? dati.richiesta;
       const riga: RigaRequisito = { confidente_chiave: '', rango: 0, indice, tipo, dati_json: JSON.stringify(dati), testo };
       const valutato = valuta(riga, st);
@@ -274,8 +286,8 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
  * quartiere apre a giugno, in aprile quel negozio non c'è, e mostrarlo manda il giocatore a
  * cercare una cosa che non esiste ancora.
  */
-export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): DisponibilitaDto {
-  const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st));
+export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: StatoDisponibilita, nomi?: NomiCondizioni): DisponibilitaDto {
+  const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st, nomi));
   const stato = presenzaRossa(elenco, st) ? 'bloccato'
     : requisiti.some((q) => q.stato === 'rosso' || q.stato === 'grigio') ? 'ignoto' : 'disponibile';
   return { stato, requisiti };

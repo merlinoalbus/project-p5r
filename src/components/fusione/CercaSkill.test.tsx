@@ -9,16 +9,19 @@ import { CercaSkill } from './CercaSkill';
 import type { PersonaFusioneDto, PersonaRiassuntoDto, RicercaSkillDto, SkillRiassuntoDto } from '../../types';
 
 const { getSkills, cercaPerSkill, getImmagini } = vi.hoisted(() => ({ getSkills: vi.fn(), cercaPerSkill: vi.fn(), getImmagini: vi.fn() }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getSkills, cercaPerSkill, getImmagini,
   caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
+/** Riassunto di una Persona del compendio con nome italiano uguale al nome, arcano già tradotto e statistiche a 1. */
 function persona(id: number, nome: string, arcana: string, livello: number): PersonaRiassuntoDto {
   return { id, nome, nomeIt: nome, arcana, arcanaNome: arcana, livello, eredita: null, ereditaNome: null, speciale: false, rara: false, dlc: false, richiedeConfidenteMax: false, tratto: '', statistiche: { forza: 1, magia: 1, resistenza: 1, agilita: 1, fortuna: 1 }, affinita: [] };
 }
+/** Riduce un riassunto di Persona alla forma usata nelle ricette di fusione (sempre non speciale, non rara, non DLC). */
 const fus = (p: PersonaRiassuntoDto): PersonaFusioneDto => ({ id: p.id, nome: p.nome, nomeIt: p.nomeIt, arcana: p.arcana, arcanaNome: p.arcanaNome, livello: p.livello, speciale: false, rara: false, dlc: false });
+/** Riassunto di una skill con nome italiano ed elemento dati, costo fisso di 4 SP ed effetto «Effetto <nomeIt>». */
 const skill = (id: number, nome: string, nomeIt: string, elemento: string): SkillRiassuntoDto => ({ id, nome, nomeIt, elemento, elementoNome: elemento, costo: { tipo: 'sp', valore: 4, testo: '4 SP' }, effetto: 'x', effettoNome: `Effetto ${nomeIt}` });
 const jack = persona(88, 'Jack Frost', 'Mago', 11);
 const succube = persona(10, 'Succube', 'Diavolo', 7);

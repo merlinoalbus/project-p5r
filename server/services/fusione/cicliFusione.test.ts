@@ -2,22 +2,22 @@
 // Test cicliFusione — cicli che tornano al bersaglio, partner procurabili, ordinamento per costo, opzioni
 // ============================================================
 
-import { closeDb, initDb } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb } from '../../db/dbService.js';
 import { creaContesto, invalidaMotoreFusione, personaFusione, fondi } from './motoreFusione.js';
 import { cicliFusione } from './cicliFusione.js';
 import { prezzoEvocazione, type Disponibilita } from './alberoFusione.js';
 import { prepared } from '../../db/dbService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
+/** Id della Persona col nome dato, letto dalla tabella `persona`. */
 function idDi(nome: string): number {
   return (prepared('SELECT id FROM persona WHERE nome = ?').get(nome) as { id: number }).id;
 }
 
 describe('cicliFusione', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
     invalidaMotoreFusione();
   });
   afterAll(() => closeDb());

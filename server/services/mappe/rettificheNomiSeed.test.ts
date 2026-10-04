@@ -1,11 +1,21 @@
+// ============================================================
+// rettificheNomiSeed.test.ts — rettifiche circoscritte dei nomi degli spilli base («Yongen-Java» → «Yongen-Jaya») al reseed
+// ============================================================
+// La correzione deve conservare ID, dipendenti, posizioni e personalizzazioni dell'utente, e non applicarsi a record
+// divergenti dalla whitelist né quando l'erede è ambiguo.
+// ============================================================
+
 import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { importaMappe, aggiornaSpillo, rettificaNomiSpilliSeed } from './mappeService.js';
 import { RETTIFICHE_NOMI_SEED } from './rettificheNomiSeed.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 type Nodo=EsportazioneMappeDto['mappe'][number];
+/** Nodo di mappa generico (nome uguale alla chiave, senza immagine né entità) con gli spilli dati. */
 const nodo=(chiave:string,spilli:Nodo['spilli']=[]):Nodo=>({chiave,nome:chiave,tipo:'generica',genitore:null,ordine:0,immagine:null,asset:null,larghezza:null,altezza:null,entita:null,note:'',spilli});
+/** Pacchetto di prova con gli spilli di `RETTIFICHE_NOMI_SEED` nella forma «prima» (testi errati) o «dopo» (corretti): quelli di Yongen-Jaya sulla mappa della città, gli altri sulla banchina della metropolitana, più una mappa «destinazione» vuota. */
 const pacchetto=(versione:'prima'|'dopo'):EsportazioneMappeDto=>({versione:1,mappe:[nodo('citta-yongen-jaya',RETTIFICHE_NOMI_SEED.filter(r=>r.mappa==='citta-yongen-jaya').map(r=>structuredClone(r[versione]))),nodo('yongen-java-banchina-della-metropolitana',RETTIFICHE_NOMI_SEED.filter(r=>r.mappa!=='citta-yongen-jaya').map(r=>structuredClone(r[versione]))),nodo('destinazione')]});
+/** Apre un database in memoria con tutte le migrazioni e vi importa come seed il pacchetto con i nomi ancora da rettificare. */
 const setup=()=>{const db=initDb(':memory:');runMigrations(db);importaMappe(pacchetto('prima'),{origine:'seed'});return db;};
 describe('rettifiche circoscritte dei nomi base',()=>{
  afterEach(()=>closeDb());
@@ -14,6 +24,7 @@ describe('rettifiche circoscritte dei nomi base',()=>{
   const id=prima[0].id;const partita=db.prepare("INSERT INTO partita(nome,created_at,updated_at) VALUES('P','t','t')").run().lastInsertRowid;
   db.prepare("INSERT INTO spillo_partita VALUES(?,?,1,'t')").run(partita,id);
   db.prepare("INSERT INTO spillo_destinazione (spillo_id,mappa_chiave,x,y,zoom) VALUES(?,'destinazione',10,20,1)").run(id);
+  /** Righe dei dipendenti dello spillo (spunte di partita, destinazioni, immagini), ordinate, per verificare che il reseed non le tocchi. */
   const dip=()=>['spillo_partita','spillo_destinazione','spillo_immagine'].map(t=>db.prepare('SELECT * FROM '+t+' ORDER BY 1').all());
   const originali=dip();const nuovo=pacchetto('dopo');
   for(let i=0;i<2;i++){

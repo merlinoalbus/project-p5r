@@ -8,9 +8,11 @@ import userEvent from '@testing-library/user-event';
 import { PassaggiMappa } from './PassaggiMappa';
 import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../../types';
 
+/** Riassunto di una mappa seed di tipo «luogo» figlia del quartiere, con chiave e nome (obbligatori) e gli altri campi di `extra`. */
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string }): MappaRiassuntoDto =>
   ({ tipo: 'luogo', genitore: 'quartiere', nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 
+/** Spillo di tipo «passaggio» al centro della mappa sottopasso, con id e nome (obbligatori) e gli altri campi di `extra`. */
 const spillo = (extra: Partial<SpilloDto> & { id: number; nome: string }): SpilloDto =>
   ({ mappaChiave: 'sottopasso', tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '', ...extra });
 
@@ -20,6 +22,7 @@ const albero: MappaRiassuntoDto[] = [
   riassunto({ chiave: 'banchina', nome: 'Banchina della metropolitana' }),
 ];
 
+/** Dettaglio della mappa «Sottopasso» dentro Shibuya, senza figli, spilli né arrivi salvo quanto aggiunto da `extra`. */
 const mappa = (extra: Partial<MappaDto> = {}): MappaDto => ({
   ...riassunto({ chiave: 'sottopasso', nome: 'Sottopasso' }),
   larghezza: null, altezza: null, note: '', genitoreNome: 'Shibuya',

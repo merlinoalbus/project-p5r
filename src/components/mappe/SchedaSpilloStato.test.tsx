@@ -8,7 +8,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { SchedaSpillo } from './VisoreMappa';
 import type { SpilloDto } from '../../types';
 
+/** Spillo «Leva» di tipo meccanismo sulla mappa k-01, non collezionabile, con i campi di `extra` che sovrascrivono i predefiniti. */
 const pin = (extra: Partial<SpilloDto>): SpilloDto => ({ id: 1, mappaChiave: 'k-01', tipo: 'meccanismo', tipoNome: 'Meccanismo', colore: '#64748b', nome: 'Leva', descrizione: '', x: 20, y: 30, riferimento: null, collezionabile: false, condizioni: [], ordine: 0, origine: 'utente', raccolto: false, immagini: [], updatedAt: '', dettaglio: null, voce: null, ...extra });
+/** Disegna la scheda dello spillo `s` per la partita data (null = nessuna partita), con tutte le callback finte. */
 const monta = (s: SpilloDto, partitaId: number | null) => render(<MemoryRouter><SchedaSpillo spillo={s} partitaId={partitaId} occupato={false} onNaviga={vi.fn()} onChiudi={vi.fn()} onCentra={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
 
 it('senza partita l’invito dice che cosa si potrebbe segnare, con la parola del tipo', () => {

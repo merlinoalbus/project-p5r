@@ -18,3 +18,9 @@ docs
 
 # il pacchetto completo (311 MB) non entra nell'immagine: si importa dall'app
 pacchetto/completo/
+
+# file di lavoro locali che non devono entrare nel contesto di build (rilievo D13 della verifica completa)
+.codex-temp/
+.pids/
+data/tmp/
+test/

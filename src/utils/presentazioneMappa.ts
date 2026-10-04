@@ -1,3 +1,7 @@
+// ============================================================
+// presentazioneMappa — il nome con cui si presenta una mappa (contesto scelto, nome rivisto, versione, gruppo)
+// ============================================================
+
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { nomeConVersione } from './etichettaVersione';
 // il gergo dell'estrattore: condiviso col server, che fissa i nomi delle stanze come li mostra l'interfaccia
@@ -15,6 +19,11 @@ export function alternativeMappa(mappa: IdentitaMappa): Array<{ nome: string | n
   }
   return [...gruppi.values()].map(g => ({ ...g, valore: [...g.ids].sort().join('|') }));
 }
+/**
+ * Interpreta la selezione di contesti (id separati da `|`): `assente` se non c'è, `non-valido` se ha id vuoti,
+ * ripetuti o sconosciuti alla mappa, `senza-titolo` se uno dei contesti non ha nome, `multiplo` se i nomi
+ * sono diversi, `nominato` (con il titolo) se tutti i contesti portano lo stesso nome.
+ */
 export function risolviContesto(mappa: IdentitaMappa, selezione?: string | null): RisoluzioneContesto {
   if (!selezione) return { stato: 'assente', titolo: null, ids: [] };
   const ids = selezione.split('|');
@@ -24,6 +33,7 @@ export function risolviContesto(mappa: IdentitaMappa, selezione?: string | null)
   const nomi = new Set(contesti.map(c => c!.nome!));
   return nomi.size === 1 ? { stato: 'nominato', titolo: contesti[0]!.nome!, ids } : { stato: 'multiplo', titolo: null, ids };
 }
+/** Il titolo del contesto selezionato, solo quando la selezione si risolve in un nome unico; altrimenti null. */
 export function titoloContesto(mappa: IdentitaMappa, selezione?: string | null): string | null {
   return risolviContesto(mappa, selezione).titolo;
 }
@@ -85,6 +95,7 @@ export function etichetteDistinte(mappe: IdentitaMappa[], trasforma: (nome: stri
     return `${n} · ${i}`;
   });
 }
+/** Copia della mappa con i nomi di presentazione: della mappa stessa, dell'ultima tappa del percorso (che è lei) e dei figli. */
 export function presentaMappa(mappa: MappaDto, selezione?: string | null): MappaDto {
   const nome = nomePresentazioneMappa(mappa, selezione);
   return { ...mappa, nome, percorso: mappa.percorso.map((p, i) => i === mappa.percorso.length - 1 ? { ...p, nome } : p), figli: mappa.figli.map(f => ({ ...f, nome: nomePresentazioneMappa(f) })) };

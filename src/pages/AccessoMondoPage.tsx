@@ -20,8 +20,7 @@ import { useMemo } from 'react';
 import { TIPI_ACCESSO_MONDO, urlDestinazioneMondo, type TipoAccessoMondo } from '../../shared/accessoMondo';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { getAccessoMondo } from '../services/api/accessoMondo';
-import { getAlberoMappe } from '../services/api';
+import { getAccessoMondo, getAlberoMappe } from '../services/api';
 import { PageState } from '../components/shared/PageState';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
@@ -41,6 +40,13 @@ const NOME_TIPO_CERCATO: Record<string, string> = {
   luogo: 'Luogo', articolo: 'Articolo', attivita: 'Attività', area: 'Area', punto: 'Punto di interesse',
 };
 
+/**
+ * Il bivio vero e proprio: chiede al risolutore (`getAccessoMondo`) dove sta la cosa cercata e, a
+ * parte, l'albero delle mappe per le anteprime. Se la destinazione è unica e non ci sono contenuti
+ * della guida reindirizza subito alla mappa; altrimenti mostra il nome cercato, l'avviso quando la
+ * voce non ha posizione, le carte delle posizioni (con anteprima della planimetria) e quelle dei
+ * contenuti della guida, più i collegamenti alla scheda e a tutte le mappe.
+ */
 function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
   useDocumentTitle('Dove si trova');
   const carica = useCarica(() => getAccessoMondo(tipo, chiave), [tipo, chiave]);
@@ -48,6 +54,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
   // pagina funziona lo stesso. Per questo non passa da `PageState` e non blocca niente.
   const albero = useCarica(getAlberoMappe, []);
   const perChiave = useMemo(() => new Map((albero.dati ?? []).map((m) => [m.chiave, m])), [albero.dati]);
+  /** La mappa da mostrare in anteprima: quella dell'albero con la chiave data o, se non c'è (albero non ancora arrivato o mappa ignota), una mappa senza immagine con il solo nome. */
   const anteprima = (mappa: string, nome: string) => perChiave.get(mappa) ?? { immagineUrl: null, asset: null, assetOriginale: null, nome };
   const dati = carica.dati;
   const guide = dati?.guide ?? [];

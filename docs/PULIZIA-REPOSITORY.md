@@ -78,7 +78,8 @@ prima e dopo, come per i decori, e con l'originale conservato altrove (o rigener
   rifare quel confronto senza rieseguirlo.
 - `scripts/atlas-cleanup.ts`, `scripts/atlas-organization.ts`, `scripts/organization-smoke.ts`: non
   sono in `package.json` e nessuno li cita. Erano di servizio all'organizzazione dell'atlante: se
-  l'atlante si stacca, se ne vanno con lui.
+  l'atlante si stacca, se ne vanno con lui. **Fatto**: `atlas-cleanup.ts` e `organization-smoke.ts` erano già usciti; `atlas-organization.ts` è
+  uscito con la verifica completa (rilievo S3, 2026-10-04), insieme a `genera-24.tmp.mjs` e `blocco-24.tmp.md` (S2).
 
 ## 5. Documentazione: si tiene, ma va distinta
 

@@ -11,9 +11,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { PartitaDto, VideogiocoDto } from '../types';
 
 const { getVideogiochi, impostaProgressoVideogioco } = vi.hoisted(() => ({ getVideogiochi: vi.fn(), impostaProgressoVideogioco: vi.fn() }));
-vi.mock('../services/api/compendio', () => ({ getVideogiochi }));
-vi.mock('../services/api/partite', () => ({ impostaProgressoVideogioco }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getVideogiochi, impostaProgressoVideogioco }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ chiave }: { chiave: string }) => <div>Dove: {chiave}</div> }));
 
 const gioco: VideogiocoDto = {
@@ -23,6 +22,7 @@ const gioco: VideogiocoDto = {
   negozi: [{ articolo: 'super-baron/tycoon', negozio: 'super-baron', negozioNome: 'Super Baron', prezzo: 4800 }], dettagli: 'Si gioca in soffitta.',
 } as unknown as VideogiocoDto;
 
+/** La risposta dei videogiochi con il solo gioco `g` e i totali ricavati da lui (iniziati/completati 0 o 1, round fatti e obiettivo). */
 const dto = (g: VideogiocoDto) => ({ videogiochi: [g], iniziati: Number(g.iniziato), completati: Number(g.fatto), roundFatti: g.progresso, roundObiettivo: g.totaleRound });
 
 beforeEach(() => {
@@ -49,6 +49,25 @@ describe('VideogiochiPage', () => {
     await act(async () => sblocca({ ...gioco, progresso: 1, iniziato: true }));
     await waitFor(() => expect(impostaProgressoVideogioco).toHaveBeenLastCalledWith(3, 'tycoon', 3));
     await waitFor(() => expect(screen.getByText('3 di 5 round')).toBeInTheDocument());
+  });
+
+  it('A1 (verifica 2026-10-03): cambiata la partita a metà coda, nella nuova non si scrive il valore della vecchia', async () => {
+    let sblocca!: (g: VideogiocoDto) => void;
+    impostaProgressoVideogioco.mockImplementationOnce(() => new Promise<VideogiocoDto>((res) => { sblocca = res; }))
+      .mockImplementation(async (_id: number, _chiave: string, valore: number) => ({ ...gioco, progresso: valore, iniziato: true }));
+    render(<MemoryRouter><VideogiochiPage /></MemoryRouter>);
+    const piu = await screen.findByRole('button', { name: 'Aggiungi un round a Tycoon dello spazio' });
+    fireEvent.click(piu);
+    fireEvent.click(piu); // il secondo resta in coda dietro il primo, nella partita 3
+    expect(impostaProgressoVideogioco).toHaveBeenCalledWith(3, 'tycoon', 1);
+    // l'utente passa alla partita 4, dove il gioco è a 0
+    await act(async () => { usePartitaStore.setState({ attiva: { id: 4, nome: 'Altra' } as PartitaDto }); });
+    expect(await screen.findByText('0 di 5 round')).toBeInTheDocument();
+    await act(async () => sblocca({ ...gioco, progresso: 1, iniziato: true }));
+    // la coda della partita 3 si è fermata: nessuna scrittura nella 4, e la scheda della 4 resta a 0
+    expect(impostaProgressoVideogioco).toHaveBeenCalledTimes(1);
+    expect(impostaProgressoVideogioco.mock.calls.some((c) => c[0] === 4)).toBe(false);
+    expect(screen.getByText('0 di 5 round')).toBeInTheDocument();
   });
 
   it('mostra dove si compra, che cosa alza e la sede; niente fonte', async () => {

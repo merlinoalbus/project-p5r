@@ -2,7 +2,7 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -25,11 +25,11 @@ it('estende il CHECK, converte «Game show in TV» e aggiunge i quesiti dalle ri
   expect(indiciDomanda(db)).toEqual(['idx_domanda_chiave', 'idx_domanda_data']);
 });
 
+/** Nomi, in ordine alfabetico, degli indici espliciti della tabella `domanda` (esclusi quelli automatici, che non hanno `sql`). */
 const indiciDomanda = (db: ReturnType<typeof initDb>) => (db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'domanda' AND sql IS NOT NULL ORDER BY name").all() as Array<{ name: string }>).map((i) => i.name);
 
 it('nel pacchetto le undici domande del quiz sono «tv», nessuna resta «altro», ogni riga d’esame porta i quesiti', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   expect(db.prepare('SELECT tipo, COUNT(*) AS n FROM domanda GROUP BY tipo ORDER BY tipo').all()).toEqual([{ tipo: 'classe', n: 55 }, { tipo: 'esame-finale', n: 6 }, { tipo: 'esame-medio', n: 6 }, { tipo: 'tv', n: 11 }]);
   const esami = db.prepare("SELECT risposte_json FROM domanda WHERE tipo IN ('esame-medio','esame-finale')").all() as Array<{ risposte_json: string }>;
   for (const r of esami) for (const risposta of JSON.parse(r.risposte_json) as Array<{ domanda?: string; testo: string }>) { expect(risposta.domanda).toBeTruthy(); expect(risposta.testo).toBeTruthy(); }

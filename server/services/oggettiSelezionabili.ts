@@ -28,8 +28,9 @@
 // inventare una tabella di mezzo da tenere allineata a sua volta.
 // ============================================================
 
-import { getDb, prepared } from '../db/dbService.js';
+import { getDb } from '../db/dbService.js';
 import { elencaOggetti } from './compendioService.js';
+import { datiGuida } from './datiGuida.js';
 import { descriviVoceEffetto, leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { OggettiGuidaDto } from '../../shared/types.js';
 
@@ -57,11 +58,7 @@ export interface OggettoSelezionabileDto {
   prezzo: number | null;
 }
 
-function datiGuida<T>(chiave: string): T | null {
-  const r = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get(chiave) as { json: string } | undefined;
-  return r ? (JSON.parse(r.json) as T) : null;
-}
-
+/** Il testo senza spazi ai bordi, o null se manca o resta vuoto. */
 const vuoto = (s: string | null | undefined) => (s && s.trim() ? s.trim() : null);
 
 /** La categoria d'articolo che compete a un equipaggiamento, dalla sua categoria inglese. */
@@ -83,6 +80,8 @@ function descrizioneLettura(effettiJson: string | null, sessioni: number | null)
   return pezzi.length ? pezzi.join(' · ') : null;
 }
 
+/** Gli equipaggiamenti delle categorie inglesi note (armi, armi da fuoco, protezioni, accessori), con la categoria
+ *  d'articolo corrispondente: chiave è l'id, effetto e «per chi» preferiscono la resa italiana al testo del dataset. */
 function daEquipaggiamento(): OggettoSelezionabileDto[] {
   return Object.keys(CATEGORIA_EQUIPAGGIAMENTO)
     .flatMap((c) => elencaOggetti({ categoria: c }).map((o) => ({ o, categoria: CATEGORIA_EQUIPAGGIAMENTO[c] })))
@@ -96,6 +95,9 @@ function daEquipaggiamento(): OggettoSelezionabileDto[] {
     }));
 }
 
+/** Le voci degli oggetti della guida (`dati_guida` «oggetti-guida»): consumabili (con la loro categoria se è anche una
+ *  categoria d'articolo, altrimenti «consumabile»), oggetti chiave e materiali, abiti. La chiave porta la sezione davanti
+ *  al nome; senza dati della guida l'elenco è vuoto. */
 function daGuida(): OggettoSelezionabileDto[] {
   const guida = datiGuida<OggettiGuidaDto>('oggetti-guida');
   if (!guida) return [];
@@ -119,6 +121,7 @@ function daGuida(): OggettoSelezionabileDto[] {
   return [...consumabili, ...chiaveEMateriali, ...abiti];
 }
 
+/** I libri non nascosti come voci da scegliere: effetto dai dettagli (o da `sblocca`), statistiche dagli effetti dichiarati e dalle sessioni. */
 function daLibri(): OggettoSelezionabileDto[] {
   // Di un libro l'app sa **che cosa alza e quanto ci vuole**: la Dote con le sue note e le sessioni
   // di lettura. Prima da qui usciva solo `sblocca`, vuoto per quasi tutti i titoli — ed è il motivo
@@ -133,6 +136,7 @@ function daLibri(): OggettoSelezionabileDto[] {
     }));
 }
 
+/** Film e DVD non nascosti come voci da scegliere (categoria «dvd» o «film» secondo dove si vedono), con statistiche dagli effetti e dalle sessioni. */
 function daFilm(): OggettoSelezionabileDto[] {
   return (getDb().prepare('SELECT chiave, nome, nome_it, dove, prezzo, dettagli, effetti_json, sessioni FROM film WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ chiave: string; nome: string; nome_it: string | null; dove: string; prezzo: number | null; dettagli: string | null; effetti_json: string | null; sessioni: number | null }>)
     .map((f) => ({
@@ -144,6 +148,8 @@ function daFilm(): OggettoSelezionabileDto[] {
     }));
 }
 
+/** I videogiochi (attività di tipo «videogioco») non nascosti come voci da scegliere: effetto dai dettagli o dai premi,
+ *  prezzo dal costo dell'attività. */
 function daVideogiochi(): OggettoSelezionabileDto[] {
   return (getDb().prepare("SELECT chiave, nome, costo, premi, dettagli, effetti_json, sessioni FROM attivita WHERE tipo = 'videogioco' AND nascosto = 0 ORDER BY ordine").all() as Array<{ chiave: string; nome: string; costo: number | null; premi: string | null; dettagli: string | null; effetti_json: string | null; sessioni: number | null }>)
     .map((v) => ({
@@ -167,6 +173,7 @@ export function tuttiGliOggettiSelezionabili(): OggettoSelezionabileDto[] {
  * l'articolo deve tornare a mostrare quel che ha di suo, invece di sparire o di mentire. */
 export function risolviOggettoCollegato(fonte: string | null, chiave: string | null): OggettoSelezionabileDto | null {
   if (!fonte || !chiave) return null;
+  /** La voce dell'elenco con la chiave cercata, o null. */
   const dentro = (elenco: OggettoSelezionabileDto[]) => elenco.find((o) => o.chiave === chiave) ?? null;
   switch (fonte) {
     case 'equipaggiamento': return dentro(daEquipaggiamento());

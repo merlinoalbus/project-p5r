@@ -13,9 +13,9 @@ import { CampoRicerca } from '../shared/CampoRicerca';
 import { ElementoChip } from '../compendio/ElementoChip';
 import { StatisticheBarre } from '../compendio/StatisticheBarre';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
-import { origineStima, statisticheStimate } from '../../../shared/statistiche';
+import { CHIAVI_STATISTICHE, origineStima, statisticheStimate } from '../../../shared/statistiche';
 import type { CompendioPartitaDto, OsservazioneStatisticheDto, PersonaPossedutaDto, StatisticheDto } from '../../types';
-import { ORDINE_STATISTICHE, SIGLA_STATISTICA } from '../../utils/elementi';
+import { SIGLA_STATISTICA } from '../../utils/elementi';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -31,6 +31,7 @@ export function ScortaPersona({ partitaId }: Props) {
   const compendio = useCarica(() => getCompendioPartita(partitaId), [partitaId]);
   const istantanee = useMemo(() => new Map((compendio.dati ?? []).map((c) => [c.personaId, c])), [compendio.dati]);
   const [registrazione, setRegistrazione] = useState<number | null>(null);
+  /** Registra l'esemplare nel compendio (livello, bonus, skill, tratto) e sostituisce le istantanee con quelle restituite. */
   const registra = async (p: PersonaPossedutaDto) => {
     setRegistrazione(p.id);
     try {
@@ -52,12 +53,15 @@ export function ScortaPersona({ partitaId }: Props) {
    *  gioco dà altro. Quel che registri con «Modifica» è legato al **livello** a cui l'hai letto; il
    *  bonus di potenziamento resta un valore a parte e si somma dopo. */
   const [salita, setSalita] = useState<number | null>(null);
+  /** Porta la Persona al livello successivo (fermandosi a 99) e la sostituisce in elenco con quella restituita. */
   const saliDiLivello = async (p: PersonaPossedutaDto) => {
     if (!dati || p.livello >= 99) return;
     setSalita(p.id);
     try {
       const agg = await aggiornaPosseduta(partitaId, p.id, { livello: p.livello + 1 });
-      imposta(dati.map((x) => (x.id === p.id ? agg : x)));
+      // dai dati correnti (forma funzionale): dopo l'`await` `dati` è quello del render, e un'altra Persona cambiata nel frattempo
+      // tornerebbe indietro
+      imposta((correnti) => correnti.map((x) => (x.id === p.id ? agg : x)));
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Salita di livello fallita.');
     } finally {
@@ -65,11 +69,12 @@ export function ScortaPersona({ partitaId }: Props) {
     }
   };
 
+  /** Toglie la Persona dalla scorta dopo conferma (la registrazione nel compendio resta) e la leva dall'elenco. */
   const rimuovi = async (p: PersonaPossedutaDto) => {
     if (!dati || !window.confirm(`Rimuovere ${p.nomeIt} dalla scorta? Resta registrata nel compendio.`)) return;
     try {
       await rimuoviPosseduta(partitaId, p.id);
-      imposta(dati.filter((x) => x.id !== p.id));
+      imposta((correnti) => correnti.filter((x) => x.id !== p.id));
       notifica('info', `${p.nomeIt} rimossa dalla scorta.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Rimozione fallita.');
@@ -135,7 +140,7 @@ export function ScortaPersona({ partitaId }: Props) {
       <AggiungiPersonaModal
         aperta={aggiunta}
         onChiudi={() => setAggiunta(false)}
-        onAggiunta={(p) => { imposta([p, ...(dati ?? [])]); setAggiunta(false); }}
+        onAggiunta={(p) => { if (dati) imposta((correnti) => [p, ...correnti]); else imposta([p]); setAggiunta(false); }}
         partitaId={partitaId}
       />
       {modifica && (
@@ -143,7 +148,7 @@ export function ScortaPersona({ partitaId }: Props) {
           posseduta={modifica}
           partitaId={partitaId}
           onChiudi={() => setModifica(null)}
-          onSalvata={(p) => { imposta((dati ?? []).map((x) => (x.id === p.id ? p : x))); setModifica(null); }}
+          onSalvata={(p) => { imposta((correnti) => correnti.map((x) => (x.id === p.id ? p : x))); setModifica(null); }}
         />
       )}
     </PageState>
@@ -152,6 +157,10 @@ export function ScortaPersona({ partitaId }: Props) {
 
 // ---- Modale: aggiunta dal compendio ----
 
+/**
+ * Finestra «Aggiungi Persona alla scorta»: carica il compendio solo quando è aperta, filtra per nome, nome italiano o arcano
+ * (escluse le rare, al più 40 risultati) e aggiunge con un tocco; una Persona già posseduta diventa un avviso, non un errore.
+ */
 function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { aperta: boolean; onChiudi: () => void; onAggiunta: (p: PersonaPossedutaDto) => void; partitaId: number }) {
   const { dati } = useCarica(() => (aperta ? getPersone() : Promise.resolve([])), [aperta]);
   const [q, setQ] = useState('');
@@ -161,6 +170,7 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
     return (dati ?? []).filter((p) => !p.rara && (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))).slice(0, 40);
   }, [dati, q]);
 
+  /** Aggiunge la Persona alla scorta e la passa a `onAggiunta`; se è già posseduta lo segnala come avviso. */
   const aggiungi = async (personaId: number, nome: string) => {
     setOccupato(personaId);
     try {
@@ -195,6 +205,10 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
 
 // ---- Modale: modifica livello, statistiche, skill, squadra, note ----
 
+/**
+ * Finestra di modifica di una Persona posseduta: livello, presenza in squadra, note, bonus alle statistiche, valori reali letti
+ * nel gioco (o il loro oblio) e skill, cercate nel catalogo escludendo i tratti e quelle già presenti. Tutto si salva insieme.
+ */
 function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: { posseduta: PersonaPossedutaDto; partitaId: number; onChiudi: () => void; onSalvata: (p: PersonaPossedutaDto) => void }) {
   const { dati: tutteSkill } = useCarica(() => getSkills(), []);
   const [livello, setLivello] = useState(posseduta.livello);
@@ -207,7 +221,8 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
   const osservate = reali ?? (dimentica ? null : posseduta.osservate);
   const origine = origineStima(osservate, livello);
   const stimate = statisticheStimate(posseduta.statisticheBaseLivello, posseduta.livelloBase, osservate, livello);
-  const effettive = Object.fromEntries(ORDINE_STATISTICHE.map((k) => [k, Math.min(99, Math.max(1, stimate[k] + bonus[k]))])) as unknown as StatisticheDto;
+  const effettive = Object.fromEntries(CHIAVI_STATISTICHE.map((k) => [k, Math.min(99, Math.max(1, stimate[k] + bonus[k]))])) as unknown as StatisticheDto;
+  /** Il valore da mostrare nella casella «reale»: quello scritto in questa finestra se è del livello corrente, altrimenti il valore effettivo stimato. */
   const realeMostrato = (k: keyof StatisticheDto) => (reali && reali.livello === livello ? reali[k] : effettive[k]);
   // scrivere un valore reale registra tutti e cinque i valori al livello corrente e azzera i bonus (i valori reali li comprendono già)
   const impostaReale = (k: keyof StatisticheDto, valore: number) => {
@@ -226,6 +241,8 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
     return tutteSkill.filter((s) => s.elemento !== 'trait' && !skillIds.includes(s.id) && (s.nome.toLowerCase().includes(testo) || s.nomeIt.toLowerCase().includes(testo))).slice(0, 8);
   }, [ricerca, tutteSkill, skillIds]);
 
+  /** Salva livello, squadra, note, skill e bonus; invia anche i valori reali scritti qui, oppure
+   * `null` se si è scelto di dimenticare quelli registrati, altrimenti li lascia invariati. */
   const salva = async () => {
     setOccupato(true);
     try {
@@ -242,6 +259,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
     }
   };
 
+  /** La skill con quell'id dal catalogo completo, o in mancanza fra quelle della Persona; `null` se sconosciuta. */
   const nomeSkill = (id: number) => tutteSkill?.find((s) => s.id === id) ?? posseduta.skill.find((s) => s.id === id) ?? null;
 
   return (
@@ -268,7 +286,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
           <div className="flex flex-col gap-1">
             <span className="form-label m-0">Valori reali nel gioco al livello {livello}</span>
             <div className="grid grid-cols-5 gap-1">
-              {ORDINE_STATISTICHE.map((k) => (
+              {CHIAVI_STATISTICHE.map((k) => (
                 <label key={k} className="text-[11px] text-text-muted text-center">
                   {SIGLA_STATISTICA[k]}
                   <input type="number" min={1} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={realeMostrato(k)} onFocus={(e) => e.target.select()} onChange={(e) => impostaReale(k, Number(e.target.value))} aria-label={`${SIGLA_STATISTICA[k]} reale`} />
@@ -291,7 +309,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
           <div className="flex flex-col gap-1">
             <span className="form-label m-0">Bonus per statistica (Potenziamento, Addestramento, Isolamento, Forca)</span>
             <div className="grid grid-cols-5 gap-1">
-              {ORDINE_STATISTICHE.map((k) => (
+              {CHIAVI_STATISTICHE.map((k) => (
                 <label key={k} className="text-[11px] text-text-muted text-center">
                   {SIGLA_STATISTICA[k]} <span className="text-text-secondary">({stimate[k]})</span>
                   <input type="number" min={-99} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={bonus[k]} onFocus={(e) => e.target.select()} onChange={(e) => setBonus({ ...bonus, [k]: Math.max(-99, Math.min(99, Number(e.target.value) || 0)) })} aria-label={`Bonus ${SIGLA_STATISTICA[k]}`} />
@@ -300,7 +318,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
               ))}
             </div>
             <div className="flex justify-end">
-              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i bonus" disabled={ORDINE_STATISTICHE.every((k) => bonus[k] === 0)} onClick={() => setBonus({ forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 })} />
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i bonus" disabled={CHIAVI_STATISTICHE.every((k) => bonus[k] === 0)} onClick={() => setBonus({ forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 })} />
             </div>
           </div>
           <StatisticheBarre
@@ -354,23 +372,26 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
 
 // ---- Aiuti: bonus e istantanea del compendio ----
 
+/** La somma dei bonus sulle cinque statistiche. */
 function totaleBonus(b: StatisticheDto): number {
-  return ORDINE_STATISTICHE.reduce((acc, k) => acc + b[k], 0);
+  return CHIAVI_STATISTICHE.reduce((acc, k) => acc + b[k], 0);
 }
 
+/** I bonus diversi da zero come «FR +2 · MA -1» (sigle dell'app); «nessuno» se sono tutti a zero. */
 function descriviBonus(b: StatisticheDto): string {
-  return ORDINE_STATISTICHE.filter((k) => b[k] !== 0).map((k) => `${SIGLA_STATISTICA[k]} ${b[k] > 0 ? '+' : ''}${b[k]}`).join(' · ') || 'nessuno';
+  return CHIAVI_STATISTICHE.filter((k) => b[k] !== 0).map((k) => `${SIGLA_STATISTICA[k]} ${b[k] > 0 ? '+' : ''}${b[k]}`).join(' · ') || 'nessuno';
 }
 
+/** I cinque valori reali registrati, sigla e valore, separati da « · ». */
 function descriviOsservate(o: OsservazioneStatisticheDto): string {
-  return ORDINE_STATISTICHE.map((k) => `${SIGLA_STATISTICA[k]} ${o[k]}`).join(' · ');
+  return CHIAVI_STATISTICHE.map((k) => `${SIGLA_STATISTICA[k]} ${o[k]}`).join(' · ');
 }
 
 /** Confronta l'esemplare con l'istantanea del compendio: assente, da aggiornare o aggiornata. */
 function statoIstantanea(p: PersonaPossedutaDto, c: CompendioPartitaDto | undefined): 'assente' | 'da-aggiornare' | 'aggiornata' {
   if (!c || !c.registrata || c.livelloRegistrato === null) return 'assente';
   const stesseSkill = c.skill.length === p.skill.length && c.skill.every((s, i) => s.id === p.skill[i]?.id);
-  const stessoBonus = ORDINE_STATISTICHE.every((k) => c.bonus[k] === p.bonus[k]);
-  const stesseOsservate = (c.osservate === null) === (p.osservate === null) && (!c.osservate || !p.osservate || (c.osservate.livello === p.osservate.livello && ORDINE_STATISTICHE.every((k) => c.osservate![k] === p.osservate![k])));
+  const stessoBonus = CHIAVI_STATISTICHE.every((k) => c.bonus[k] === p.bonus[k]);
+  const stesseOsservate = (c.osservate === null) === (p.osservate === null) && (!c.osservate || !p.osservate || (c.osservate.livello === p.osservate.livello && CHIAVI_STATISTICHE.every((k) => c.osservate![k] === p.osservate![k])));
   return c.livelloRegistrato === p.livello && stesseSkill && stessoBonus && stesseOsservate && (c.tratto?.id ?? null) === (p.tratto?.id ?? null) && c.carica === p.carica ? 'aggiornata' : 'da-aggiornare';
 }

@@ -31,6 +31,11 @@ interface Props {
   onChiudi: () => void;
 }
 
+/**
+ * La finestra di un'area senza planimetria: modulo per nome e descrizione (salvabile solo se cambiati e con un nome),
+ * elenco delle planimetrie a cui collegarla con un tocco (con la ricerca oltre la soglia) ed «Elimina…», che sostituisce
+ * il piè della finestra con la conferma dicendo quanti punti della guida si perdono.
+ */
 export function SchedaAreaGuida({ area, punti, tavole, onCollega, onSalvaTesto, onElimina, onChiudi }: Props) {
   const [conferma, setConferma] = useState(false);
   const [occupato, setOccupato] = useState(false);
@@ -38,6 +43,7 @@ export function SchedaAreaGuida({ area, punti, tavole, onCollega, onSalvaTesto, 
   const testoCambiato = !!testo.nome.trim() && (testo.nome.trim() !== area.nome || testo.descrizione !== area.descrizione);
   const [cerca, setCerca] = useState('');
   const visibili = tavole.filter((t) => corrispondeRicerca(cerca, t.nome, t.dettaglio));
+  /** Esegue un'operazione con i comandi bloccati; l'errore va in notifica (l'esito positivo lo gestisce chi apre la scheda). */
   const esegui = async (azione: () => Promise<void>) => {
     setOccupato(true);
     try { await azione(); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); } finally { setOccupato(false); }

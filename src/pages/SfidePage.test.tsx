@@ -11,7 +11,7 @@ import { SfidePage } from './SfidePage';
 import type { SfideDto } from '../types';
 
 const { getSfide } = vi.hoisted(() => ({ getSfide: vi.fn() }));
-vi.mock('../services/api', () => ({ getSfide }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getSfide }));
 
 const dati: SfideDto = {
   battaglieSfida: { introduzione: 'Sfide del Covo.', sblocco: 'Dopo il finale.', regoleGenerali: 'Punteggio.', fonte: 'https://www.allgamestaff.it/b', elenco: [{ chiave: 'trial', nome: 'Trial', nomeIt: null, regole: 'Cinque livelli.', nemici: ['Piromane delle cripte'], punteggi: null, ricompense: ['Medaglie'], strategia: 'Colpire le debolezze.', livelloConsigliato: null, fonte: 'https://www.allgamestaff.it/t', verificato: true }] },

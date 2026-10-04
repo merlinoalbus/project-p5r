@@ -3,11 +3,11 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto, StoricoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -22,9 +22,7 @@ function articoliVisibili(categoria?: string): number {
 
 describe('API negozi e inventario', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 

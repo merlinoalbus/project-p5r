@@ -38,7 +38,7 @@ export function PersonaChip({ p, evidenza, inScorta, dimensione, suffisso, title
           {p.livello !== undefined && <span className="persona-chip__livello">Lv {p.livello}</span>}
           {p.arcana && <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa className="persona-chip__arcano" fallback={<IconMaschera size={16} />} />}
           {p.arcanaNome && <span className="persona-chip__arcano-nome">{p.arcanaNome}</span>}
-          {p.rara && <span className="persona-chip__rara" aria-label="Persona rara">◆</span>}
+          {p.rara && <span className="persona-chip__rara" role="img" aria-label="Persona rara">◆</span>}
           {suffisso && <span className="persona-chip__suffisso">{suffisso}</span>}
         </span>
       </span>

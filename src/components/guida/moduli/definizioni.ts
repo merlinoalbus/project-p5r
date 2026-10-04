@@ -95,6 +95,11 @@ export const film: DefinizioneModulo = {
   },
 };
 
+/**
+ * La definizione del modulo delle attività; con `tipoFisso` = 'videogioco' il tipo resta fissato (segnato nel campo
+ * temporaneo `_tipoFisso`), le sessioni partono da 1 e devono essere almeno 1, e il conteggio salvato è per sessioni.
+ * Paga e paga massima si salvano solo per i lavori; il conteggio mancante si deduce dal tipo.
+ */
 function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
   return {
     conCondizioni: true,
@@ -155,6 +160,11 @@ export const CAMPI_GENERICI: Record<Extract<TipoCatalogo, 'domanda' | 'cruciverb
   ],
 };
 
+/**
+ * La definizione del modulo di domande e cruciverba, costruita da `CAMPI_GENERICI`: senza condizioni né «Confermato».
+ * All'inizio un campo a opzioni senza voce vuota parte dalla prima opzione; è valido se gli obbligatori sono pieni; al
+ * salvataggio i testi si ripuliscono (vuoto = null o '' secondo il campo) e per una domanda le risposte vuote cadono, le altre rinumerate da 1.
+ */
 function generico(tipo: 'domanda' | 'cruciverba'): DefinizioneModulo {
   const campi = CAMPI_GENERICI[tipo];
   return {

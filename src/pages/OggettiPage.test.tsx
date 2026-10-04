@@ -26,7 +26,7 @@ import { useAssetStore } from '../stores/assetStore';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 
 const { getOggettiGuida, getOggetti } = vi.hoisted(() => ({ getOggettiGuida: vi.fn(), getOggetti: vi.fn() }));
-vi.mock('../services/api', () => ({ getOggettiGuida, getOggetti }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getOggettiGuida, getOggetti }));
 
 const vuoto = {
   consumabili: [], chiaveEMateriali: [], scambi: [],
@@ -50,6 +50,7 @@ const dati = {
   ],
 } as unknown as OggettiGuidaDto;
 
+/** Monta la pagina degli oggetti dentro un router in memoria. */
 function monta() {
   return render(<MemoryRouter><OggettiPage /></MemoryRouter>);
 }
@@ -75,6 +76,7 @@ beforeEach(() => {
   useAssetStore.setState({ caricato: true, mancanti: {}, manifest: { generato: 'T', totale: SQUADRA_ASSET.length, file: Object.fromEntries(SQUADRA_ASSET.map((k) => [k, `/asset/${k}.png`])) } });
 });
 
+/** Aspetta il testo `nome` e restituisce le query limitate alla riga di tabella che lo contiene (errore se non è in una riga). */
 async function riga(nome: string) {
   const cella = await screen.findByText(nome);
   const tr = cella.closest('tr');
@@ -124,6 +126,7 @@ it('senza chiave e senza negozi non promette una mappa che non c’è', async ()
  * compreso il caso «Solo donne», che i ritratti non riconoscevano perché la guida dice
  * «personaggi femminili» e il vincolo dice «donne». */
 describe('scheda Equipaggiamento', () => {
+  /** Monta la pagina, apre la scheda «Equipaggiamento» e aspetta che compaia il primo pezzo («Paradiso perduto»). */
   async function apri() {
     monta();
     fireEvent.click(await screen.findByRole('tab', { name: 'Equipaggiamento' }));
@@ -154,6 +157,7 @@ describe('scheda Equipaggiamento', () => {
 
   it('il vincolo diventa i volti: uno per «Solo Joker», le cinque ragazze per «Solo donne», tutti se non c’è', async () => {
     await apri();
+    /** I testi alternativi dei volti nella cella «Per» della riga del pezzo `nome`: chi può usarlo, nell'ordine mostrato. */
     const per = async (nome: string) => {
       const tr = (await screen.findByText(nome)).closest('tr')!;
       const cella = tr.querySelector('td[data-etichetta="Per"]')!;

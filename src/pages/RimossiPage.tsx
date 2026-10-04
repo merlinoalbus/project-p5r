@@ -7,6 +7,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { ElementiRimossi } from '../components/guida/ElementiRimossi';
 import { TIPI_CATALOGO } from '../../shared/types';
 
+/** Pagina dei rimossi: un blocco di elementi nascosti per ogni tipo del catalogo, mostrato sempre (anche vuoto), ciascuno con il suo ripristino. */
 export function RimossiPage() {
   useDocumentTitle('Rimossi');
   return (

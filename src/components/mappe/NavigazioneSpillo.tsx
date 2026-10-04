@@ -1,3 +1,7 @@
+// ============================================================
+// NavigazioneSpillo — il pulsante «Vai» di uno spillo che porta a un'altra mappa
+// ============================================================
+
 import type { SpilloDto } from '../../types';
 import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';

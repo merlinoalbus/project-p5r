@@ -24,6 +24,13 @@ import type { ElementoCatalogoDto } from '../types';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { ancoraLuogo } from '../utils/citta';
 
+/**
+ * Scheda di un negozio presa dalla chiave nell'URL: carica il negozio per la partita attiva
+ * (ricaricando al cambio di giorno, fascia o meteo) e mostra intestazione, sede, orari, gestore,
+ * programma punti, requisiti se non è disponibile, i comandi per aggiungere un articolo o
+ * correggere il negozio, e a due colonne la mappa e la merce con i filtri, la spunta
+ * «acquistato» (che aggiorna anche il conteggio) e gli articoli nascosti di questo negozio.
+ */
 export function NegozioPage() {
   const { chiave = '' } = useParams();
   const navigate = useNavigate();
@@ -41,12 +48,14 @@ export function NegozioPage() {
   const [elementoNegozio, setElementoNegozio] = useState<ElementoCatalogoDto | null>(null);
   // Ogni salvataggio (anche «Nascondi») ricarica la scheda e, con questa, il blocco «Rimossi».
   const [versione, setVersione] = useState(0);
+  /** Dopo un salvataggio dal modulo: lo chiude, fa rileggere il blocco «Rimossi» e ricarica la scheda. */
   const salvato = () => { setModulo(null); setVersione((v) => v + 1); void dati.ricarica(); };
   const articoli = useMemo(() => n?.articoliElenco ?? [], [n]);
   const categorie = useMemo(() => categoriePresenti(articoli), [articoli]);
   const destinatari = useMemo(() => destinatariPresenti(articoli), [articoli]);
   // Anche un articolo non ancora acquistabile resta consultabile con condizioni e semaforo.
   const visibili = useMemo(() => filtraArticoli(articoli, filtro, partitaId !== null), [articoli, filtro, partitaId]);
+  /** Carica dal catalogo l'articolo da correggere e apre il modulo su di lui; se il caricamento fallisce lo notifica. */
   const apriArticolo = (chiaveArticolo: string) => {
     void getElementoCatalogo('articolo', chiaveArticolo).then((e) => { setElementoArticolo(e); setModulo('articolo'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.'));
   };
@@ -94,7 +103,7 @@ export function NegozioPage() {
                 <FiltriArticoli filtro={filtro} onCambia={setFiltro} categorie={categorie} destinatari={destinatari} conPartita={partitaId !== null} />
               )}
               {articoli.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
-                : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => apriArticolo(a.chiave)} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta({ ...n, articoliElenco: n.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: n.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length })} /></div>}
+                : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => apriArticolo(a.chiave)} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, articoliElenco: attuale.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: attuale.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length }))} /></div>}
               {/* Gli articoli nascosti di questo negozio, con il ripristino in un tocco: la pagina «Rimossi» li ha tutti. */}
               <ElementiRimossi tipo="articolo" negozio={chiave} versione={versione} onRipristinato={() => void dati.ricarica()} />
             </div>

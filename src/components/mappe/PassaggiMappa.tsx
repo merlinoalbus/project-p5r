@@ -29,6 +29,10 @@ function parentela(mappa: MappaDto, chiave: string): string {
   return 'allo stesso livello o altrove';
 }
 
+/** Sezione «Passaggi» dell'editor: le uscite (spilli di questa mappa che portano altrove) e gli
+ * arrivi (spilli di altre mappe che portano qui), ognuno apribile con `onVai`. Segnala le uscite
+ * doppie con lo stesso nome verso la stessa mappa e i passaggi senza ritorno; per un arrivo senza
+ * uscita corrispondente offre «Crea il passaggio» (`onCreaPassaggio`), disattivato se `occupato`. */
 export function PassaggiMappa({ mappa, albero, occupato, onVai, onCreaPassaggio }: {
   mappa: MappaDto;
   /** Serve solo per dare un nome alle mappe d'arrivo che lo spillo non porta con sé. */
@@ -38,6 +42,7 @@ export function PassaggiMappa({ mappa, albero, occupato, onVai, onCreaPassaggio 
   /** Crea uno spillo passaggio **da questa mappa** verso quella indicata. */
   onCreaPassaggio: (chiave: string) => void;
 }) {
+  /** Nome da mostrare per una mappa d'arrivo: quello di presentazione dall'albero, altrimenti il nome portato dallo spillo, altrimenti la chiave. */
   const nomeDi = (chiave: string, dallaDestinazione?: string) => {
     const m = albero.find((x) => x.chiave === chiave);
     return m ? nomePresentazioneMappa(m) : dallaDestinazione ?? chiave;

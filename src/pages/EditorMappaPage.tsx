@@ -1,9 +1,3 @@
-import { etichettaPlanimetria, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
-import { RisolviMappa } from '../components/mappe/RisolviMappa';
-import { destinazioneMappaSpillo } from '../utils/navigazioneMappa';
-import { Selettore } from '../components/shared/Selettore';
-import type { DestinazioneSpillo } from '../types';
-import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 // ============================================================
 // EditorMappaPage — editor di una mappa a livelli (Fase 13.3): strumenti seleziona/sposta e aggiungi, proprietà dello spillo con
 // riferimento cercato fra le entità della guida, immagine di base, proprietà e albero delle mappe, esportazione/importazione
@@ -12,11 +6,18 @@ import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 // Ogni modifica viene salvata subito tramite l'API (niente stato «non salvato» da perdere); il posizionamento degli spilli esiste solo qui.
 // ============================================================
 
+import { etichettaPlanimetria, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
+import { RisolviMappa } from '../components/mappe/RisolviMappa';
+import { destinazioneMappaSpillo } from '../utils/navigazioneMappa';
+import { Selettore } from '../components/shared/Selettore';
+import type { DestinazioneSpillo } from '../types';
+import { CondizioniEditor } from '../components/guida/CondizioniEditor';
+
 import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -37,6 +38,7 @@ import { ritornoMappe } from '../utils/ritornoMappe';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
 
+/** Il testo da notificare per un errore: il messaggio se è un `Error`, altrimenti il testo predefinito. */
 function messaggio(err: unknown, predefinito: string): string { return err instanceof Error ? err.message : predefinito; }
 
 /** Spillo copiato negli appunti dell'editor: tutti i campi tranne la posizione; sopravvive al cambio di mappa e alla ricarica della pagina. */
@@ -46,18 +48,29 @@ function condizioniNude(s: SpilloDto): RequisitoSpillo[] {
   return s.condizioni.map((c) => { const copia: Record<string, unknown> = { ...c }; delete copia.testo; return copia as unknown as RequisitoSpillo; });
 }
 const CHIAVE_APPUNTI = 'p5r.editor.appunti-spillo';
+/** Legge gli appunti dello spillo dalla memoria di sessione; null se mancano, se il JSON non si legge o se la memoria non è disponibile. */
 function leggiAppunti(): AppuntiSpillo | null {
   try { const raw = sessionStorage.getItem(CHIAVE_APPUNTI); return raw ? (JSON.parse(raw) as AppuntiSpillo) : null; } catch { return null; }
 }
+/** Salva gli appunti dello spillo nella memoria di sessione, o li cancella con null; se la memoria non è disponibile non fa niente. */
 function scriviAppunti(a: AppuntiSpillo | null): void {
   try { if (a) sessionStorage.setItem(CHIAVE_APPUNTI, JSON.stringify(a)); else sessionStorage.removeItem(CHIAVE_APPUNTI); } catch { /* memoria di sessione non disponibile: gli appunti restano solo in pagina */ }
 }
 
+/** Pagina dell'editor: risolve la chiave dell'URL nella mappa vera (tramite `RisolviMappa`) e monta l'editor su quella, rimontandolo da capo quando la chiave risolta cambia. */
 export function EditorMappaPage() {
   const { chiave = '' } = useParams<{ chiave: string }>();
   return <RisolviMappa chiave={chiave}>{k => <EditorMappaRisolta key={k} chiave={k} />}</RisolviMappa>;
 }
 
+/**
+ * L'editor di una mappa già risolta: carica la mappa (filtrata sul giorno della partita se la
+ * vista del giorno corrente è accesa), l'albero delle mappe e gli elenchi per le condizioni di
+ * visibilità. Mostra il visore in modalità modifica con il pannello laterale e tiene lo
+ * strumento attivo, il tipo del nuovo spillo, lo spillo selezionato, gli appunti e le finestre di
+ * eliminazione e di nuova mappa. Toccare la mappa crea uno spillo nuovo o incolla quello copiato;
+ * ogni operazione passa da `esegui`, che salva e ricarica.
+ */
 function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const navigate = useNavigate();
   // **Vista del giorno corrente** (richiesta dell'utente, 2026-09-18): l'editor di regola mostra
@@ -81,13 +94,16 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [tipoNuovo, setTipoNuovo] = useState<TipoSpillo>('nota');
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
   const [sezione, setSezione] = useState('spilli');
+  /** Seleziona uno spillo (o nessuno con null); selezionandone uno il pannello torna alla sezione «Spilli». */
   const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null)setSezione('spilli'); };
   const [occupato, setOccupato] = useState(false);
   const [confermaEliminaMappa, setConfermaEliminaMappa] = useState(false);
   const [nuovaMappaAperta, setNuovaMappaAperta] = useState(false);
   useDocumentTitle(dati ? `Modifica: ${dati.nome} — Mappe` : 'Modifica mappa');
 
+  /** Apre nell'editor un'altra mappa. */
   const vai = (k: string) => navigate(`/guida/mappe/${encodeURIComponent(k)}/modifica`);
+  /** Esegue un'operazione dell'editor con lo stato «occupato»: se riesce notifica il messaggio di successo (se dato) e ricarica la mappa, se fallisce notifica l'errore. */
   const esegui = async (azione: () => Promise<unknown>, ok?: string) => {
     setOccupato(true);
     try {
@@ -127,6 +143,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   };
 
   const selezionato = dati?.spilli.find((s) => s.id === selezionatoId) ?? null;
+  /** Copia uno spillo negli appunti (in pagina e nella memoria di sessione), passa allo strumento «Incolla» e spiega come incollarlo. */
   const copia = (a: AppuntiSpillo) => {
     setAppunti(a); scriviAppunti(a); setStrumento('incolla');
     notifica('info', `Spillo «${a.nome}» copiato: tocca la mappa (anche di un altro luogo) nel punto dove incollarlo.`);
@@ -169,8 +186,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onSalvaMappa={(d) => esegui(async()=>{const aggiornata=await aggiornaMappa(chiave,d);await albero.ricarica();if(aggiornata.chiave!==chiave)vai(aggiornata.chiave);}, 'Mappa salvata.')}
               onImmagine={(file) => esegui(() => caricaImmagineMappa(chiave, file), 'Immagine di base caricata (resta nella tua istanza).')}
               onScaricaDallaGuida={() => esegui(async () => {
-                if (dati.entita?.tipo === 'area') await scaricaPianta(dati.entita.chiave);
-                else if (dati.entita?.tipo === 'quartiere') await scaricaPiantaQuartiere(dati.entita.chiave);
+                if (dati.entita?.tipo === 'quartiere') await scaricaPiantaQuartiere(dati.entita.chiave);
               }, 'Pianta scaricata dalla guida nella tua istanza.')}
               onEliminaMappa={() => setConfermaEliminaMappa(true)}
               onNuovaMappa={() => setNuovaMappaAperta(true)}
@@ -252,7 +268,8 @@ function PannelloEditor(p: PropsPannello) {
   const inputImporta = useRef<HTMLInputElement | null>(null);
   const [sovrascrivi, setSovrascrivi] = useState(false);
   const {sezione,onSezione:setSezione} = p;
-  const scaricabile = mappa.entita?.tipo === 'area' || mappa.entita?.tipo === 'quartiere';
+  // solo la pianta di un quartiere si scarica dalla guida: quella delle aree dei Palazzi non c'è più (rotta tolta il 2026-09-18)
+  const scaricabile = mappa.entita?.tipo === 'quartiere';
   // l'asset del repository è un puntatore: consegnato solo se sta nel manifest degli asset
   const assetAttuale = useAsset(mappa.asset);
   const assetOriginale = useAsset(mappa.assetOriginale);
@@ -431,7 +448,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     if (c !== 'spostamento') setDestinazione(null);
     if (c === 'citta') setCondizioni([]);
   };
-  // Uno spostamento che **è** un luogo (una stazione) tiene quel riferimento: è la sua identità per il seed; la voce della guida
+  // Uno spostamento che **è** un luogo (una stazione) tiene quel riferimento: è la sua identità nel pacchetto, con cui lo si riconosce all’import; la voce della guida
   // sta in un campo suo (`voce`, 094) e la destinazione vive a parte. Il riferimento «mappa» si
   // scrive solo per chi non ha un'identità propria (i passaggi vecchi lo usano come ripiego).
   const riferimentoEffettivo = categoria === 'spostamento'
@@ -441,6 +458,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   const modificato = dati.nome !== s.nome || tipo !== s.tipo || descrizione !== s.descrizione
     || (dati.riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (dati.riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null)
     || JSON.stringify(dati.condizioni) !== JSON.stringify(condizioniNude(s)) || JSON.stringify(dati.destinazione) !== JSON.stringify(categoria === 'spostamento' ? destinazioneIniziale : null);
+  /** Invio del modulo dello spillo: blocca il salvataggio se un gruppo di condizioni è vuoto o incompleto (lo notifica), altrimenti salva i dati composti sopra. */
   const salva = (e: FormEvent) => {
     e.preventDefault();
     if (!condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null)) { notifica('error', 'Completa o rimuovi i gruppi vuoti prima di salvare.'); return; }
@@ -513,7 +531,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
 
 interface PropsFormMappa { mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; onSalva: (dati: Parameters<typeof aggiornaMappa>[1]) => Promise<void>; onElimina: () => void }
 
-/** Proprietà della mappa (nome, tipo, genitore, ordine, asset, note). */
+/** Proprietà della mappa (nome, tipo, genitore, ordine, note); il nome dedotto da confermare si segnala sotto il campo Nome. */
 function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMappa) {
   const [nome, setNome] = useState(mappa.nome);
   const [tipo, setTipo] = useState<TipoMappa>(mappa.tipo);
@@ -566,7 +584,8 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
   const [tipo, setTipo] = useState<TipoMappa>(genitore.tipo === 'palazzo' || genitore.tipo === 'dedalo' || genitore.tipo === 'area' ? 'area' : genitore.tipo === 'citta' ? 'quartiere' : 'luogo');
   const [passaggio, setPassaggio] = useState(true);
   const [ritorno, setRitorno] = useState(false);
-  // asset del repository: segue la chiave («mappe/<chiave>») finché l'utente non lo tocca; vuoto = nessun asset (15.25)
+  // la chiave nasce dal nome, preceduta da quella del genitore (non sotto la città): unica e valida per abilitare «Crea»;
+  // l'asset del repository non si chiede: lo pone il server, «mappe/<chiave>» (`assetPredefinitoMappa`)
   const chiaveEffettiva = (genitore.tipo==='citta'?'':genitore.chiave+'-')+slug(nome);
   const esiste = albero.some((m) => m.chiave === chiaveEffettiva);
   const valida = /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiaveEffettiva) && !esiste && nome.trim().length > 0;

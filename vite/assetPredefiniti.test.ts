@@ -7,6 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { scansionaAsset } from './assetPredefiniti';
 
+/** Crea sotto `radice` i file dati (percorsi relativi, cartelle intermedie comprese), ognuno con contenuto «x». */
 function creaAlbero(radice: string, file: string[]) {
   for (const f of file) {
     const pieno = path.join(radice, f);

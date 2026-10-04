@@ -10,7 +10,7 @@
 // **L'invariante è uno solo**: due bersagli resi non distano mai meno di DISTANZA_MINIMA_SPILLI,
 // a ogni larghezza e a ogni ingrandimento, né nel visore né nell'editor.
 
-import { describe, it, expect } from 'vitest';
+import { afterAll, describe, it, expect } from 'vitest';
 import Database from 'better-sqlite3';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -29,6 +29,8 @@ const INGRANDIMENTI = [1, 1.5, 3, 8];
 
 interface Riga { chiave: string; larghezza: number; altezza: number }
 
+/** Legge dal DB del pacchetto gli spilli della mappa (id, nome, tipo, posizione, in ordine di id) e li completa in
+ *  `SpilloDto` con valori neutri: al raggruppamento servono solo posizione e identità. */
 function spilliDi(db: Database.Database, mappa: string): SpilloDto[] {
   const righe = db.prepare('SELECT id, nome, tipo, x, y FROM spillo WHERE mappa_chiave = ? ORDER BY id').all(mappa) as { id: number; nome: string; tipo: string; x: number; y: number }[];
   return righe.map((r) => ({
@@ -40,6 +42,7 @@ function spilliDi(db: Database.Database, mappa: string): SpilloDto[] {
 
 /** Il centro del bersaglio di ogni cosa resa: la goccia è ancorata alla punta, la pastiglia no. */
 function centriResi(singoli: SpilloDto[], gruppi: Gruppo[], inq: { pan: { x: number; y: number }; zoom: number; nat: { w: number; h: number } }) {
+  /** Porta una posizione in percentuale della pianta in pixel di schermo: frazione della misura naturale, per lo zoom, più il pan. */
   const perSchermo = (x: number, y: number) => ({ x: inq.pan.x + (x / 100) * inq.nat.w * inq.zoom, y: inq.pan.y + (y / 100) * inq.nat.h * inq.zoom });
   const out = singoli.map((s) => { const p = perSchermo(s.x, s.y); return { chi: s.nome, x: p.x, y: p.y - ALTEZZA_GOCCIA / 2 }; });
   for (const g of gruppi) {
@@ -49,20 +52,24 @@ function centriResi(singoli: SpilloDto[], gruppi: Gruppo[], inq: { pan: { x: num
   return out;
 }
 
-describe.skipIf(!existsSync(PACCHETTO))('i bersagli delle mappe del pacchetto', () => {
-  const db = existsSync(PACCHETTO) ? new Database(PACCHETTO, { readonly: true }) : null;
-  const mappe = (db?.prepare('SELECT chiave, larghezza, altezza FROM mappa WHERE larghezza > 0 AND altezza > 0').all() ?? []) as Riga[];
+// Il pacchetto iniziale è in git: se manca, il test lo dice invece di saltare in silenzio e passare senza aver provato nulla
+// (rilievo T4 della verifica completa, 2026-10-04).
+describe('i bersagli delle mappe del pacchetto', () => {
+  if (!existsSync(PACCHETTO)) throw new Error(`Manca il pacchetto iniziale ${PACCHETTO}: senza le mappe vere questo test non prova niente.`);
+  const db = new Database(PACCHETTO, { readonly: true });
+  afterAll(() => db.close());
+  const mappe = db.prepare('SELECT chiave, larghezza, altezza FROM mappa WHERE larghezza > 0 AND altezza > 0').all() as Riga[];
 
   it('sono più di duecento, e con gli spilli dentro: altrimenti questo test non prova niente', () => {
     expect(mappe.length).toBeGreaterThan(200);
-    const conSpilli = mappe.filter((m) => spilliDi(db!, m.chiave).length >= 2);
+    const conSpilli = mappe.filter((m) => spilliDi(db, m.chiave).length >= 2);
     expect(conSpilli.length).toBeGreaterThan(150);
   });
 
   it('non ci sono mai due bersagli più vicini di un bersaglio — nel visore', () => {
     const guasti: string[] = [];
     for (const m of mappe) {
-      const spilli = spilliDi(db!, m.chiave);
+      const spilli = spilliDi(db, m.chiave);
       if (spilli.length < 2) continue;
       const nat = { w: m.larghezza, h: m.altezza };
       for (const f of FORMATI) {
@@ -86,7 +93,7 @@ describe.skipIf(!existsSync(PACCHETTO))('i bersagli delle mappe del pacchetto', 
   it('non ci sono mai due bersagli più vicini di un bersaglio — nell’editor, con un pin selezionato', () => {
     const guasti: string[] = [];
     for (const m of mappe) {
-      const spilli = spilliDi(db!, m.chiave);
+      const spilli = spilliDi(db, m.chiave);
       if (spilli.length < 2) continue;
       const nat = { w: m.larghezza, h: m.altezza };
       for (const f of FORMATI) {

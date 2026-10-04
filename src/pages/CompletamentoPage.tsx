@@ -1,8 +1,9 @@
 // ============================================================
-// CompletamentoPage — trofei con spunta per partita, finali con condizioni, Covo dei Ladri, DLC, meteo, Nuova Partita+, gestione del tempo (Fase 9.1)
+// CompletamentoPage — trofei con spunta per partita, finali con condizioni, DLC, meteo, Nuova Partita+, gestione del tempo (Fase 9.1), con un rimando al Covo dei Ladri
 // ============================================================
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
+import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { opzioniDaNomi } from '../utils/selettore';
 import { useSearchParams } from 'react-router-dom';
@@ -31,13 +32,6 @@ const SCHEDE = [
 type Scheda = (typeof SCHEDE)[number][0];
 const NOME_TIPO_TROFEO: Record<TrofeoDto['tipo'], string> = { bronzo: 'Bronzo', argento: 'Argento', oro: 'Oro', platino: 'Platino' };
 
-function Fonte({ url }: { url: string }) {
-  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a> : null;
-}
-function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
-  return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;
-}
-
 /** Il colore del metallo: un trofeo si riconosce dal metallo prima che dal nome. */
 const COLORE_TROFEO: Record<TrofeoDto['tipo'], string> = {
   bronzo: '#c07a44', argento: '#c9ced8', oro: '#f5c542', platino: '#9fe8ff',
@@ -52,6 +46,7 @@ const COLORE_TROFEO: Record<TrofeoDto['tipo'], string> = {
 function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number | null; onCambiato: (t: TrofeoDto) => void }) {
   const [occupato, setOccupato] = useState(false);
   const colore = COLORE_TROFEO[t.tipo];
+  /** Segna il trofeo come ottenuto o no nella partita (solo se c'è una partita), disattivando la spunta durante la richiesta; passa al genitore il trofeo aggiornato o notifica l'errore. */
   const cambia = async (ottenuto: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
@@ -92,6 +87,13 @@ function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number 
   );
 }
 
+/**
+ * Pagina di trofei e finali: carica il completamento per la partita attiva, sceglie la scheda dal
+ * parametro `scheda` dell'URL (i trofei quando manca) e offre un rimando al Covo dei Ladri. Nella
+ * scheda dei trofei filtra per metallo e, con una partita, per «solo da ottenere», mostra i
+ * conteggi per metallo e le spunte; le altre schede elencano finali, DLC, meteo, Nuova Partita+ e
+ * regole del tempo. La spunta aggiorna il trofeo nei dati correnti e ricalcola il totale ottenuto.
+ */
 export function CompletamentoPage() {
   useDocumentTitle('Trofei e finali');
   const attiva = usePartitaStore((s) => s.attiva);
@@ -103,7 +105,8 @@ export function CompletamentoPage() {
   const [soloDaFare, setSoloDaFare] = useState(false);
   const d = dati.dati;
   const trofeiVisibili = useMemo(() => (d?.trofei ?? []).filter((t) => (!tipo || t.tipo === tipo) && (!soloDaFare || !t.ottenuto)), [d, tipo, soloDaFare]);
-  const aggiorna = (t: TrofeoDto) => { if (d) { const trofei = d.trofei.map((x) => (x.chiave === t.chiave ? t : x)); dati.imposta({ ...d, trofei, ottenuti: trofei.filter((x) => x.ottenuto).length } as CompletamentoDto); } };
+  // dai dati correnti: la riga arriva dopo un `await`, e due spunte ravvicinate non devono annullarsi
+  const aggiorna = (t: TrofeoDto) => dati.imposta((attuale) => { const trofei = attuale.trofei.map((x) => (x.chiave === t.chiave ? t : x)); return { ...attuale, trofei, ottenuti: trofei.filter((x) => x.ottenuto).length } as CompletamentoDto; });
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
@@ -156,7 +159,7 @@ export function CompletamentoPage() {
                   <h2 className="m-0 text-[15px] font-semibold">{f.nome}</h2>
                   {f.descrizione && <p className="m-0 text-text-secondary">{f.descrizione}</p>}
                   {f.condizioni.length > 0 && <ul className="m-0 pl-4">{f.condizioni.map((c) => <li key={c}>{c}</li>)}</ul>}
-                  {f.date.length > 0 && <Voce titolo="Date chiave">{f.date.join(' · ')}</Voce>}
+                  {f.date.length > 0 && <VoceTesto titolo="Date chiave">{f.date.join(' · ')}</VoceTesto>}
                   <Fonte url={f.fonte} />
                 </li>
               ))}
@@ -177,8 +180,8 @@ export function CompletamentoPage() {
               <section className="card flex flex-col gap-1">
                 <h2 className="m-0 text-[15px] font-semibold">Nuova Partita+</h2>
                 {d.nuovaPartitaPlus.note && <p className="m-0 text-text-secondary">{d.nuovaPartitaPlus.note}</p>}
-                <Voce titolo="Si trasferisce">{d.nuovaPartitaPlus.trasferito.join(' · ')}</Voce>
-                <Voce titolo="Non si trasferisce">{d.nuovaPartitaPlus.nonTrasferito.join(' · ')}</Voce>
+                <VoceTesto titolo="Si trasferisce">{d.nuovaPartitaPlus.trasferito.join(' · ')}</VoceTesto>
+                <VoceTesto titolo="Non si trasferisce">{d.nuovaPartitaPlus.nonTrasferito.join(' · ')}</VoceTesto>
                 <Fonte url={d.nuovaPartitaPlus.fonte} />
               </section>
               <section className="card flex flex-col gap-1">

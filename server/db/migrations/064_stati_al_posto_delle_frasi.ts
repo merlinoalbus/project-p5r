@@ -95,7 +95,13 @@ export function convertiFoglie(db: Database.Database): { righe: number; foglie: 
       try { albero = JSON.parse(String(r.condizioni_json)) as Nodo[]; } catch { continue; }
       const ctx = contestoRiga(db, base, { tabella, chiave: String(r.chiave ?? r.id), negozio_chiave: r.negozio_chiave, confidente_chiave: r.confidente_chiave });
       let toccate = 0;
-      const visita = (n: Nodo): RequisitoSpillo[] => {
+      /**
+       * Rifà un nodo dell'albero: gruppi e negazioni si ricostruiscono sui figli convertiti (e spariscono
+       * se restano vuoti; una negazione di più condizioni le raccoglie in un gruppo «tutte»); una foglia
+       * «da-configurare» si riconverte dalla sua nota; uno «stato» diventa il contatore corrispondente
+       * (almeno 1) o, se non ne ha uno, viene scartato e annotato; il resto passa invariato.
+       */
+      const visita =(n: Nodo): RequisitoSpillo[] => {
         if (n.tipo === 'gruppo') {
           const condizioni = n.condizioni.flatMap(visita);
           return condizioni.length ? [{ tipo: 'gruppo', modo: n.modo, condizioni }] : [];

@@ -1,18 +1,24 @@
+// ============================================================
+// accesso-mondo.test.ts — API di accesso al mondo: da negozio, articolo, luogo, quartiere, attività o confidente al pin preciso o al posto dichiarato, senza duplicati né scelte arbitrarie
+// ============================================================
+
 import request from 'supertest';
 import { createApp } from '../bootstrap.js';
-import { initDb, closeDb, getDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { urlDestinazioneMondo } from '../../shared/accessoMondo.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 beforeEach(() => {
-  const db = initDb(':memory:'); caricaPacchetto(db);
+  const db = dbDiProva();
   // Isola i casi della fixture dai pin preesistenti di questo solo negozio.
   db.prepare("DELETE FROM spillo WHERE (riferimento_tipo='negozio' AND riferimento_chiave='untouchable') OR (riferimento_tipo='luogo' AND riferimento_chiave IN (SELECT chiave FROM luogo WHERE negozio='untouchable'))").run();
 });
 afterEach(() => closeDb());
+/** Chiede all'API le destinazioni sulla mappa del mondo per l'entità `tipo`/`chiave` (chiave codificata nell'URL). */
 const accesso = (tipo: string, chiave: string) => request(app).get(`/api/mappe/accesso/${tipo}/${encodeURIComponent(chiave)}`);
 
+/** Crea sulla mappa indicata un pin «Armeria» che riferisce il negozio dato (di serie Untouchable), verifica il 201 e ne restituisce l'id. */
 async function creaPin(mappa: string, negozio = 'untouchable') {
   const r = await request(app).post(`/api/mappe/${mappa}/spilli`).send({ tipo: 'negozio', nome: 'Armeria', x: 0, y: 100, riferimento: { tipo: 'negozio', chiave: negozio } });
   expect(r.status).toBe(201);

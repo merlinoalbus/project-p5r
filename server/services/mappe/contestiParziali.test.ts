@@ -1,3 +1,7 @@
+// ============================================================
+// contestiParziali.test.ts — titoli contestuali parzialmente ricostruiti (nome null) conservati a roundtrip, reseed e importazioni invalide
+// ============================================================
+
 import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { importaMappe, esportaMappe, dettaglioMappa, elencaMappe } from './mappeService.js';

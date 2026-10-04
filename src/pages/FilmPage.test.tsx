@@ -1,4 +1,7 @@
 /** @vitest-environment jsdom */
+// ============================================================
+// Test FilmPage — film al cinema e DVD: pressioni rapide serializzate, rivisioni, condizioni ed effetti, titoli bloccati, posizione e sola consultazione
+// ============================================================
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -7,8 +10,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { FilmDto, FilmDvdDto, PartitaDto } from '../types';
 
 const { getFilm, impostaProgressoFilm } = vi.hoisted(() => ({ getFilm: vi.fn(), impostaProgressoFilm: vi.fn() }));
-vi.mock('../services/api', () => ({ getFilm, impostaProgressoFilm }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getFilm, impostaProgressoFilm }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave }: { tipo: string; chiave: string }) => <div>Dove: {tipo}/{chiave}</div> }));
 
 const base: FilmDto = {
@@ -21,6 +24,8 @@ const cinema: FilmDto = { ...base, chiave: 'cinema-prova', nome: 'Film di prova'
   condizioni: [{ tipo: 'data', testo: 'dal 24 aprile' } as unknown as NonNullable<FilmDto['condizioni']>[number]],
   effetti: [{ effetto: { famiglia: 'dote', dote: 'coraggio', note: 3 }, testo: 'Coraggio ♪♪♪' }, { effetto: { famiglia: 'dote', dote: 'coraggio', note: 1 }, ripetuto: true, testo: 'Coraggio ♪, dalla seconda volta in poi' }],
   effettiTesto: ['Coraggio ♪♪♪', 'Coraggio ♪, dalla seconda volta in poi'] };
+/** La risposta dei film con i film dati e i totali ricavati da loro: iniziati, completati, sessioni fatte (il progresso
+ *  di ognuno al più fino al suo totale), sessioni obiettivo e visioni registrate. */
 const dto = (...film: FilmDto[]): FilmDvdDto => ({ film, iniziati: film.filter((f) => f.iniziato).length, completati: film.filter((f) => f.fatto).length, sessioniCompletamentoFatte: film.reduce((n, f) => n + Math.min(f.progresso, f.totaleSessioni), 0), sessioniObiettivo: film.reduce((n, f) => n + f.totaleSessioni, 0), visioniRegistrate: film.reduce((n, f) => n + f.progresso, 0) });
 
 describe('FilmPage', () => {

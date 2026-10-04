@@ -67,7 +67,7 @@ export function ScuolaOggi({ partita }: { partita: PartitaDto }) {
   const dataTesto = dataGiocoTesto(oggi);
 
   return (
-    <div className="flex items-center gap-1.5 flex-wrap" aria-label={`Scuola del ${dataTesto}`}>
+    <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label={`Scuola del ${dataTesto}`}>
       {inClasse.length > 0 && (
         <PulsanteVisivo compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Domande in classe" dettaglio={`${inClasse.length} oggi`} onClick={() => setAperta('classe')} aria-label={`Domande in classe del ${dataTesto}: ${inClasse.length}`} />
       )}

@@ -21,6 +21,9 @@
 // mostrano identica, e chi cerca «ripristina SP» li trova tutti e due.
 // ============================================================
 
+import { nomeDote } from './doti.js';
+import { NOMI_STATISTICHE } from './statistiche.js';
+
 /** Su chi ricade l'effetto. Ricavato dai dati: 89 volte su chi lo usa, 53 su un alleato, 46 su tutti. */
 export const BERSAGLI = ['chi-lo-usa', 'un-alleato', 'tutta-la-squadra', 'un-nemico', 'tutti-i-nemici'] as const;
 export type Bersaglio = (typeof BERSAGLI)[number];
@@ -59,7 +62,7 @@ export const STATISTICHE_OGGETTO = ['forza', 'magia', 'resistenza', 'agilita', '
 export type StatisticaOggetto = (typeof STATISTICHE_OGGETTO)[number];
 
 export const NOME_STATISTICA: Record<StatisticaOggetto, string> = {
-  forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna',
+  ...NOMI_STATISTICHE,
   'hp-massimi': 'HP massimi', 'sp-massimi': 'SP massimi', critico: 'Critico',
   // Uscite dal residuo: «Evasione fisica più 5», «Evasione magica bassa», «Tutte le statistiche più 5».
   'evasione-fisica': 'Evasione fisica', 'evasione-magica': 'Evasione magica', tutte: 'Tutte le statistiche',
@@ -115,24 +118,26 @@ export type EffettoOggetto =
   | { famiglia: 'aumenta-punti'; dove: Guadagno }
   | { famiglia: 'descrittivo'; testo: string };
 
+/** Quanto ripristina, in parole: «tutti» per la misura `tutto`, «il N%» per una percentuale, altrimenti il numero (0 se manca). */
 const conValore = (misura: Misura, valore: number | null) =>
   misura === 'tutto' ? 'tutti' : misura === 'percentuale' ? `il ${valore ?? 0}%` : String(valore ?? 0);
 
-/** La frase italiana di un effetto: **una sola per ogni effetto uguale**.
- *
- * È il punto dell'esercizio. Finché la frase la scriveva una persona, la stessa cosa aveva tre
- * forme e la ricerca ne trovava una; scritta da qui, due oggetti che fanno la stessa cosa la
- * mostrano identica. */
 /** I nomi con cui rendere leggibili i riferimenti: chiave del quartiere, chiave dell'attivita'.
  *
  * Stesso metodo di `descriviRequisitoSpillo`: la funzione sta in `shared/` e non puo' leggere il
  * database, quindi i nomi glieli passa chi li ha. Senza, ripiega sulla chiave — che e' brutto ma
  * onesto, e succede solo dove nessuno ha fornito l'elenco. */
-/** Le Doti sociali col nome mostrato: le chiavi sono minuscole, la frase le scrive con l'iniziale. */
-export const NOME_DOTE_EFFETTO: Record<string, string> = { conoscenza: 'Conoscenza', fascino: 'Fascino', coraggio: 'Coraggio', gentilezza: 'Gentilezza', perizia: 'Perizia' };
 
 export interface NomiEffetto { luoghi?: Record<string, string>; attivita?: Record<string, string> }
 
+/**
+ * La frase italiana di un effetto: **una sola per ogni effetto uguale**. È il punto dell'esercizio: finché la frase la scriveva
+ * una persona, la stessa cosa aveva tre forme e la ricerca ne trovava una; scritta da qui, due oggetti che fanno la stessa cosa
+ * la mostrano identica.
+ *
+ * Un ramo per famiglia, con i nomi di bersagli, stati, statistiche, funzioni e rese dalle tabelle del modulo; luoghi e attività
+ * dai `nomi` passati, altrimenti la chiave. La Dote si scrive con le note come simboli ♪ (da 1 a 4).
+ */
 export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): string {
   switch (e.famiglia) {
     case 'ripristina': {
@@ -152,7 +157,7 @@ export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): stri
     case 'resiste-stato': return `Resiste a ${NOME_STATO[e.stato]}`;
     case 'previene-stato': return `Previene ${NOME_STATO[e.stato]}`;
     case 'statistica': return `${NOME_STATISTICA[e.statistica]} ${e.valore >= 0 ? '+' : ''}${e.valore}`;
-    case 'dote': return `${NOME_DOTE_EFFETTO[e.dote] ?? e.dote} ${'♪'.repeat(Math.max(1, Math.min(4, e.note)))}`;
+    case 'dote': return `${nomeDote(e.dote)} ${'♪'.repeat(Math.max(1, Math.min(4, e.note)))}`;
     case 'regalo': return e.graditoA.length ? `Regalo, gradito a ${e.graditoA.join(', ')}` : 'Regalo';
     case 'sblocca-luogo': return `Sblocca ${nomi.luoghi?.[e.luogo] ?? e.luogo}`;
     case 'sblocca-funzione': return `Sblocca ${NOME_FUNZIONE[e.funzione]}${e.dove ? ` in ${nomi.attivita?.[e.dove] ?? e.dove}` : ''}`;
@@ -162,13 +167,13 @@ export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): stri
   }
 }
 
-/** Le famiglie offerte nel modulo, con l'etichetta e quante frasi coprivano nei dati di partenza. */
 /** La figura di ogni famiglia: le illustrazioni delle categorie (`ui/categoria-<chiave>`) che le somigliano. */
 export const ICONA_FAMIGLIA_EFFETTO: Record<EffettoOggetto['famiglia'], string> = {
   ripristina: 'cura', rianima: 'cura', 'cura-stato': 'stato', 'infliggi-stato': 'battaglia', 'resiste-stato': 'stato', 'previene-stato': 'stato',
   statistica: 'battaglia', dote: 'dote', regalo: 'regali', 'sblocca-luogo': 'esplorazione', 'sblocca-funzione': 'attivita', moltiplica: 'libri', 'aumenta-punti': 'dote', descrittivo: 'altro',
 };
 
+/** Le famiglie offerte nel modulo, con la loro etichetta, nell'ordine in cui il modulo le propone. */
 export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia']; nome: string }> = [
   { chiave: 'ripristina', nome: 'Ripristina HP o SP' },
   { chiave: 'rianima', nome: 'Rianima un alleato caduto' },
@@ -185,3 +190,55 @@ export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia'
   { chiave: 'aumenta-punti', nome: 'Fa guadagnare più punti Dote' },
   { chiave: 'descrittivo', nome: 'Altro (descritto a parole)' },
 ];
+
+/** Vero se il valore è una delle stringhe dell'elenco. */
+const unoDi = <T extends string>(elenco: readonly T[], v: unknown): v is T => typeof v === 'string' && (elenco as readonly string[]).includes(v);
+/** Vero se il valore è null o un numero finito. */
+const numeroONull = (v: unknown): v is number | null => v === null || (typeof v === 'number' && Number.isFinite(v));
+/** Vero se il valore è un numero finito (né NaN né infinito). */
+const numero = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+
+/**
+ * Un valore qualunque come effetto dichiarato valido, o `null`. Ogni famiglia ha i suoi campi obbligatori, con i loro valori ammessi;
+ * il risultato porta solo quelli (niente campi in più). Prima si controllava solo `famiglia`: un `{ famiglia: 'regalo' }` senza
+ * `graditoA` entrava nel catalogo e poi `descriviEffetto` cadeva su `e.graditoA.length`, facendo fallire le letture che descrivono
+ * gli effetti. È la regola unica: la usano la lettura (`normalizzaVociEffetto`) e la validazione del server.
+ */
+export function normalizzaEffettoOggetto(x: unknown): EffettoOggetto | null {
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
+  const e = x as Record<string, unknown>;
+  switch (e.famiglia) {
+    case 'ripristina':
+      if (!unoDi(RISORSE, e.risorsa) || !unoDi(MISURE, e.misura) || !numeroONull(e.valore) || !unoDi(BERSAGLI, e.bersaglio)) return null;
+      return { famiglia: 'ripristina', risorsa: e.risorsa, misura: e.misura, valore: e.valore, bersaglio: e.bersaglio, ...(e.soloInPostiSicuri === true ? { soloInPostiSicuri: true } : {}) };
+    case 'rianima':
+      return numeroONull(e.percentuale) && unoDi(BERSAGLI, e.bersaglio) ? { famiglia: 'rianima', percentuale: e.percentuale, bersaglio: e.bersaglio } : null;
+    case 'cura-stato':
+      return (e.stato === 'tutti' || unoDi(STATI_ALTERATI, e.stato)) && unoDi(BERSAGLI, e.bersaglio) ? { famiglia: 'cura-stato', stato: e.stato, bersaglio: e.bersaglio } : null;
+    case 'infliggi-stato':
+      return unoDi(STATI_ALTERATI, e.stato) && unoDi(PROBABILITA, e.probabilita) && unoDi(BERSAGLI, e.bersaglio) ? { famiglia: 'infliggi-stato', stato: e.stato, probabilita: e.probabilita, bersaglio: e.bersaglio } : null;
+    case 'resiste-stato':
+      return unoDi(STATI_ALTERATI, e.stato) ? { famiglia: 'resiste-stato', stato: e.stato } : null;
+    case 'previene-stato':
+      return unoDi(STATI_ALTERATI, e.stato) ? { famiglia: 'previene-stato', stato: e.stato } : null;
+    case 'statistica':
+      return unoDi(STATISTICHE_OGGETTO, e.statistica) && numero(e.valore) ? { famiglia: 'statistica', statistica: e.statistica, valore: e.valore } : null;
+    // i testi si controllano per tipo, non per lunghezza: l'editor parte da «» (`effettoPredefinito`) e `descriviEffetto` li regge
+    case 'dote':
+      return typeof e.dote === 'string' && numero(e.note) ? { famiglia: 'dote', dote: e.dote, note: e.note } : null;
+    case 'regalo':
+      return Array.isArray(e.graditoA) && e.graditoA.every((g) => typeof g === 'string') ? { famiglia: 'regalo', graditoA: [...e.graditoA as string[]] } : null;
+    case 'sblocca-luogo':
+      return typeof e.luogo === 'string' ? { famiglia: 'sblocca-luogo', luogo: e.luogo } : null;
+    case 'sblocca-funzione':
+      return unoDi(FUNZIONI, e.funzione) && (e.dove === null || typeof e.dove === 'string') ? { famiglia: 'sblocca-funzione', funzione: e.funzione, dove: e.dove } : null;
+    case 'moltiplica':
+      return unoDi(RESE, e.cosa) && numero(e.fattore) ? { famiglia: 'moltiplica', cosa: e.cosa, fattore: e.fattore } : null;
+    case 'aumenta-punti':
+      return unoDi(GUADAGNI, e.dove) ? { famiglia: 'aumenta-punti', dove: e.dove } : null;
+    case 'descrittivo':
+      return typeof e.testo === 'string' ? { famiglia: 'descrittivo', testo: e.testo } : null;
+    default:
+      return null;
+  }
+}

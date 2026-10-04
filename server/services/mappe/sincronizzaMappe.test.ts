@@ -3,14 +3,13 @@
 // ============================================================
 
 import { closeDb, initDb } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
 import { riallineaSpilliLuoghi, sincronizzaMappe } from './sincronizzaMappe.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
 describe('sincronizzaMappe: riclassificazione degli spilli di seed', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -51,8 +50,7 @@ describe('sincronizzaMappe: riclassificazione degli spilli di seed', () => {
 
 describe('riallineaSpilliLuoghi: gli spilli dei luoghi seguono il catalogo dei tipi di luogo', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -87,8 +85,7 @@ describe('sincronizzaMappe: i passaggi automatici verso le mappe figlie di una r
   // Il pacchetto è la fotografia dell'istanza: Tokyo l'utente l'ha ritoccata (origine «utente») e i suoi
   // passaggi li decide l'editor, quindi i test sulle API non vedono più il caso. Qui si costruisce.
   beforeEach(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterEach(() => closeDb());
 
@@ -128,6 +125,7 @@ describe('sincronizzaMappe: i passaggi automatici verso le mappe figlie di una r
     mappa.run('palazzo-dell-utente-sala', 'Sala', 'area', 'palazzo-dell-utente', 1, 'utente', t);
 
     sincronizzaMappe(db);
+    /** Chiavi delle mappe a cui portano gli spilli «passaggio» posti sulla mappa `radice`, in ordine alfabetico. */
     const verso = (radice: string) => (db.prepare("SELECT riferimento_chiave FROM spillo WHERE mappa_chiave = ? AND riferimento_tipo = 'mappa' AND tipo = 'passaggio' ORDER BY riferimento_chiave").all(radice) as Array<{ riferimento_chiave: string }>).map((r) => r.riferimento_chiave);
     expect(verso('palazzo-di-prova')).toEqual(['palazzo-di-prova-ingresso', 'palazzo-di-prova-torre']);
     expect(verso('palazzo-dell-utente')).toEqual([]);

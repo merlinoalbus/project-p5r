@@ -10,7 +10,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { impostaStatoRichiesta, impostaTimbri } from '../../services/api/partite';
+import { impostaStatoRichiesta, impostaTimbri } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -25,12 +25,19 @@ interface Props {
   onRichiesta: (chiave: string, stato: StatoRichiesta | null) => void;
 }
 
+/**
+ * Gli obiettivi di un dedalo: conteggio e barra di avanzamento (con una partita), il contatore dei timbri con «−» e
+ * «+» entro il totale dichiarato (o la nota che la guida non li dichiara) e le richieste con collegamento alla loro
+ * pagina, stato e pulsanti Accettata / Completata / Riapri. Senza partita mostra solo i totali.
+ */
 export function ObiettiviDedalo({ areaChiave, areaNome, dedalo, partitaId, onTimbri, onRichiesta }: Props) {
   // Chi è in volo: i timbri o una richiesta; gli altri pulsanti restano vivi.
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
+  /** Segna o libera l'operazione in corso su una chiave (i timbri o una richiesta). */
   const occupa = (k: string, v: boolean) => setOccupati((o) => ({ ...o, [k]: v }));
   const { timbri, richieste, obiettivi } = dedalo;
   const raccolti = timbri.raccolti ?? 0;
+  /** Porta i timbri raccolti a `n`, ricondotto fra 0 e il totale; senza partita, totale o cambiamento non fa nulla. */
   const cambiaTimbri = async (n: number) => {
     if (!partitaId || timbri.totale === null) return;
     const valore = Math.min(Math.max(n, 0), timbri.totale);
@@ -40,6 +47,7 @@ export function ObiettiviDedalo({ areaChiave, areaNome, dedalo, partitaId, onTim
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }
     finally { occupa('timbri', false); }
   };
+  /** Imposta lo stato di una richiesta nella partita (null = riaperta) e passa al genitore quello confermato dal server. */
   const cambiaRichiesta = async (chiave: string, stato: StatoRichiesta | null) => {
     if (!partitaId) return;
     occupa(chiave, true);
@@ -49,7 +57,7 @@ export function ObiettiviDedalo({ areaChiave, areaNome, dedalo, partitaId, onTim
   };
   const fatti = obiettivi.fatti ?? 0;
   return (
-    <div className="flex flex-col gap-2" aria-label={`Obiettivi di ${areaNome}`}>
+    <div className="flex flex-col gap-2" role="group" aria-label={`Obiettivi di ${areaNome}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="m-0 font-display text-[15px] uppercase leading-none">Obiettivi del dedalo</h3>
         <span className="text-[11px] tabular-nums text-text-muted">{partitaId ? `${fatti}/${obiettivi.totale}` : `${obiettivi.totale} in tutto`}</span>

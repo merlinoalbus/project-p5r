@@ -26,6 +26,12 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { radiciMetaverso } from '../utils/palazzi';
 
+/**
+ * Pagina della città: carica i quartieri e le radici del Metaverso per la partita attiva, mostra la
+ * mappa di Tokyo disegnata e accanto le schede dei quartieri (sagoma, stato di apertura alla data
+ * di gioco, suggerimento, conteggio dei luoghi, sblocco, descrizione). Mappa e schede condividono
+ * il quartiere acceso: passarci sopra o mettere il fuoco su una scheda accende la sagoma, e viceversa.
+ */
 export function CittaPage() {
   const sugg = useSuggerimenti();
   useDocumentTitle('La città');

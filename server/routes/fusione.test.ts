@@ -3,14 +3,14 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, PersonaRiassuntoDto, PianiFusioneDto, RicercaSkillDto, RicetteFusioneDto, SkillRiassuntoDto, VellutoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
+/** Cerca nel compendio la Persona con quel nome esatto e ne restituisce l'id; se manca, lancia un errore. */
 async function idDi(nome: string): Promise<number> {
   const lista = (await request(app).get(`/api/compendio/persona?q=${encodeURIComponent(nome)}`)).body.data as PersonaRiassuntoDto[];
   const p = lista.find((x) => x.nome === nome);
@@ -20,9 +20,7 @@ async function idDi(nome: string): Promise<number> {
 
 describe('API fusione', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -111,6 +109,7 @@ describe('API fusione', () => {
     expect(conPartita.opzioni.livelloMax).toBe(12);
     for (const piano of conPartita.piani) {
       expect(piano.costo).toBeGreaterThanOrEqual(0);
+      /** Visita ricorsivamente l'albero del piano: ogni fusione entro il livello 12 e nessun nodo ottenuto per cattura. */
       const controlla = (n: PianiFusioneDto['piani'][number]['radice']) => {
         if (n.modo === 'fusione') expect(n.persona.livello).toBeLessThanOrEqual(12);
         expect(n.modo).not.toBe('cattura');

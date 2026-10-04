@@ -13,9 +13,10 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { PartitaDto, RichiestaDto, RichiesteDto } from '../types';
 
 const { getRichieste, impostaStatoRichiesta } = vi.hoisted(() => ({ getRichieste: vi.fn(), impostaStatoRichiesta: vi.fn() }));
-vi.mock('../services/api', () => ({ getRichieste, impostaStatoRichiesta }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getRichieste, impostaStatoRichiesta }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Una richiesta di Mishima nel dedalo dato (bersaglio Nakanohara, debole al Tuono), senza stato; `extra` sovrascrive i campi. */
 const ric = (chiave: string, nome: string, areaChiave: string, areaNome: string, extra: Partial<RichiestaDto> = {}): RichiestaDto => ({ chiave, nome, committente: 'Mishima', disponibileDal: '7 maggio', scadenza: '', area: areaNome, areaChiave, piano: 'Area 1', bersaglio: { nome: 'Nakanohara', livello: null, formaDemoniaca: 'Obariyon', debolezze: ['Tuono'], resistenze: [], vulnerabileConfusione: true }, areaNome, areaOrdine: 1, ricompense: ['485 PE'], confidente: null, note: '', fonte: 'https://www.allgamestaff.it/x', stato: null, ...extra });
 const dati: RichiesteDto = {
   dedali: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', ordine: 0, totale: 1, completate: 0 }, { chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', ordine: 1, totale: 1, completate: 0 }],
@@ -80,5 +81,27 @@ describe('RichiestePage', () => {
     expect(screen.getByText(/1 richiesta in Dedalo di Aiyatsbus/)).toBeInTheDocument();
     // senza partita i segmenti di stato non ci sono
     expect(screen.queryByRole('radiogroup', { name: 'Accettazione' })).toBeNull();
+  });
+
+  it('due cambi di stato ravvicinati: la risposta del primo, arrivata dopo il secondo, non riapre il secondo (B3")', async () => {
+    usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova' } as PartitaDto });
+    getRichieste.mockResolvedValue(dati);
+    let rispondiA!: (r: RichiestaDto) => void;
+    impostaStatoRichiesta.mockImplementation((_id: number, chiave: string) => (chiave === 'a'
+      ? new Promise<RichiestaDto>((ok) => { rispondiA = ok; })
+      : Promise.resolve({ ...dati.richieste[1], stato: 'completata' })));
+    render(<MemoryRouter><RichiestePage /></MemoryRouter>);
+    /** Le query limitate alla carta (voce d'elenco) della richiesta `nome`. */
+    const carta = (nome: string) => within(screen.getByText(nome).closest('li')!);
+    await screen.findByText('Un ex piuttosto appiccicoso');
+    await act(async () => { fireEvent.click(carta('Un ex piuttosto appiccicoso').getByRole('button', { name: 'Completata' })); }); // in volo
+    await act(async () => { fireEvent.click(carta('Bullismo sui bulli').getByRole('button', { name: 'Completata' })); }); // arriva subito
+    await act(async () => { rispondiA({ ...dati.richieste[0], stato: 'completata' }); });
+    expect(carta('Bullismo sui bulli').getByText('completata')).toBeInTheDocument();
+    expect(carta('Un ex piuttosto appiccicoso').getByText('completata')).toBeInTheDocument();
+    // il riepilogo conta 2 completate e 0 da fare
+    const riepilogo = screen.getByRole('region', { name: 'Riepilogo delle Richieste' });
+    expect(riepilogo).toHaveTextContent('0da fare');
+    expect(riepilogo).toHaveTextContent('2completate');
   });
 });

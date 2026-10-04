@@ -16,6 +16,7 @@
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
@@ -33,8 +34,11 @@ const TIPI = new Set<string>(TIPI_AZIONE.map((t) => t.chiave));
 const TIPI_RIF = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave));
 const GENERI = new Set<GenereVoce>(['azione', 'evento', 'scadenza', 'promemoria']);
 
+/** La fascia della voce: «sera» se lo è, altrimenti «giorno». */
 const fasciaDi = (r: RigaVoce): FasciaGioco => (r.fascia === 'sera' ? 'sera' : 'giorno');
+/** Il genere della voce, ricondotto ad «azione» se il valore salvato non è uno di quelli noti. */
 const genereDi = (r: RigaVoce): GenereVoce => (GENERI.has(r.genere as GenereVoce) ? (r.genere as GenereVoce) : 'azione');
+/** Il tipo d'azione della voce, ricondotto ad «altro» se il valore salvato non è fra i tipi noti. */
 function tipoDi(r: RigaVoce): AzionePercorsoDto['tipo'] {
   return (TIPI.has(r.tipo) ? r.tipo : 'altro') as AzionePercorsoDto['tipo'];
 }
@@ -42,6 +46,7 @@ function tipoDi(r: RigaVoce): AzionePercorsoDto['tipo'] {
 function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
   return r.riferimento_tipo && r.riferimento_chiave && TIPI_RIF.has(r.riferimento_tipo) ? { tipo: r.riferimento_tipo as RiferimentoAzioneDto['tipo'], chiave: r.riferimento_chiave } : null;
 }
+/** Gli effetti della spunta salvati nella voce, normalizzati; un JSON illeggibile non ne dà nessuno. */
 function produceDi(r: RigaVoce): EffettoAzione[] {
   try { return normalizzaEffettiAzione(JSON.parse(r.produce_json)); } catch { return []; }
 }
@@ -56,6 +61,8 @@ function nomeDi(r: RigaVoce, rif: RiferimentoAzioneDto | null): string | null {
 /** Una voce con i campi della guida, senza lo stato nella partita (fatta, effetti, semaforo). */
 export interface VoceBase { uid: string; giorno: string; fascia: FasciaGioco; genere: GenereVoce; azione: string; tipo: AzionePercorsoDto['tipo']; riferimento: RiferimentoAzioneDto | null; riferimentoTesto: string | null; rangoAtteso: number | null; note: string | null; produce: EffettoAzione[] }
 
+/** La voce con i soli campi della guida, con i valori fuori catalogo ricondotti a quelli predefiniti; gli effetti li ha
+ *  solo un'azione (eventi, scadenze e promemoria non si spuntano). */
 export function voceBase(r: RigaVoce): VoceBase {
   const riferimento = riferimentoDi(r);
   return {
@@ -66,6 +73,8 @@ export function voceBase(r: RigaVoce): VoceBase {
 
 interface Contesto { fatte: Map<string, EffettiAzioneDto | null>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione }
 
+/** La voce per l'interfaccia: i campi della guida più la frase degli effetti, la spunta e i suoi effetti nella partita,
+ *  il semaforo (solo per le azioni, e solo se ci sono i Confidenti della partita) e la mappa collegata. */
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const v = voceBase(r);
   const spuntabile = v.genere === 'azione';
@@ -76,10 +85,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   };
 }
 
-function partitaEsiste(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
-}
-
+/** 404 se la data non è un giorno del percorso. */
 function giornoEsiste(data: string): void {
   if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
 }
@@ -100,7 +106,7 @@ export function spuntePartita(partitaId: number | undefined, data?: string): Map
 
 /** Le voci di un giorno per l'interfaccia, con lo stato nella partita se indicata. `conf`: i Confidenti, se chi chiama li ha già. */
 export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<string, ConfidentePartitaDto> | null): AzionePercorsoDto[] {
-  if (partitaId !== undefined) partitaEsiste(partitaId);
+  if (partitaId !== undefined) verificaPartita(partitaId);
   const ctx: Contesto = {
     fatte: spuntePartita(partitaId, data),
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
@@ -118,6 +124,7 @@ export function conteggiGiornate(partitaId?: number): Map<string, { azioni: numb
   return new Map(righe.map((r) => [r.data, { azioni: r.azioni, fatte: r.fatte }]));
 }
 
+/** La riga della voce con quell'uid; 404 se non esiste. */
 function rigaVoce(uid: string): RigaVoce {
   const r = prepared('SELECT * FROM voce_giornata WHERE uid = ?').get(uid) as RigaVoce | undefined;
   if (!r) throw httpErrors.notFound('voce-non-trovata', 'Questa voce della giornata non esiste (più).');
@@ -163,18 +170,20 @@ function struttura(d: DatiVoceGiornata, r?: RigaVoce): { riferimento?: { tipo: s
   return out;
 }
 
+/** Il testo senza spazi ai bordi; undefined se non è stato inviato, 400 se resta vuoto. */
 function testoValido(x: string | undefined): string | undefined {
   if (x === undefined) return undefined;
   const t = x.trim();
   if (!t) throw httpErrors.badRequest('voce-vuota', 'Il testo della voce non può essere vuoto.');
   return t;
 }
+/** Le note senza spazi ai bordi: undefined se non inviate (restano com'erano), null se nulle o vuote. */
 const noteValide = (n: string | null | undefined) => (n === undefined ? undefined : n === null || n.trim() === '' ? null : n.trim());
 
 /** Aggiunge una voce alla giornata (canone, per tutte le partite), al posto indicato della fascia (in fondo se omesso). */
 export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number): AzionePercorsoDto {
   // la partita (per rispondere con lo stato) si controlla prima di scrivere: un 404 dopo aver cambiato la guida mentirebbe
-  if (partitaId !== undefined) partitaEsiste(partitaId);
+  if (partitaId !== undefined) verificaPartita(partitaId);
   giornoEsiste(data);
   const azione = testoValido(d.azione);
   if (!azione) throw httpErrors.badRequest('voce-vuota', 'Scrivi che cosa c\'è da fare o che cosa succede.');
@@ -194,7 +203,7 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
 
 /** Modifica una voce: testo, note, genere, tipo, collegamento, rango, effetti, fascia e posto nella fascia. */
 export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: number): AzionePercorsoDto {
-  if (partitaId !== undefined) partitaEsiste(partitaId);
+  if (partitaId !== undefined) verificaPartita(partitaId);
   const r = rigaVoce(uid);
   const azione = testoValido(d.azione);
   const genere: GenereVoce = d.genere ?? genereDi(r);
@@ -227,7 +236,7 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
 
 /** Sposta una voce di un passo dentro la sua fascia (-1 su, +1 giù); ai bordi non cambia nulla. */
 export function spostaVoce(uid: string, verso: -1 | 1, partitaId?: number): AzionePercorsoDto[] {
-  if (partitaId !== undefined) partitaEsiste(partitaId);
+  if (partitaId !== undefined) verificaPartita(partitaId);
   const r = rigaVoce(uid);
   getDb().transaction(() => {
     compatta(r.data, r.fascia);
@@ -267,7 +276,7 @@ export function eliminaVoce(uid: string): void {
  * restano: si disfano dalla loro pagina). Eventi, scadenze e promemoria non si spuntano.
  */
 export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: OpzioniSpunta = {}): AzionePercorsoDto {
-  partitaEsiste(partitaId);
+  verificaPartita(partitaId);
   const r = rigaVoce(uid);
   const v = voceBase(r);
   if (v.genere !== 'azione') throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');

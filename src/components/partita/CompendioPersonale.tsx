@@ -33,6 +33,7 @@ export function CompendioPersonale({ partitaId }: Props) {
   const totale = tutte.dati?.length ?? 0;
   const fatte = registrate.dati?.length ?? 0;
 
+  /** Segna la Persona come registrata o no nel compendio e sostituisce l'elenco con quello restituito; durante la richiesta la riga è occupata. */
   const cambia = async (personaId: number, registrata: boolean) => {
     setOccupato(personaId);
     try {

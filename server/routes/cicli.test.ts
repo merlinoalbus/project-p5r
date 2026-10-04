@@ -3,14 +3,14 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { CicliFusioneDto, CicloSalvatoDto, EsitoFusioneScortaDto, PersonaPossedutaDto, PersonaRiassuntoDto, StoricoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
+/** Cerca nel compendio la Persona con quel nome esatto e ne restituisce l'id; se manca, lancia un errore. */
 async function idDi(nome: string): Promise<number> {
   const lista = (await request(app).get(`/api/compendio/persona?q=${encodeURIComponent(nome)}`)).body.data as PersonaRiassuntoDto[];
   const p = lista.find((x) => x.nome === nome);
@@ -20,9 +20,7 @@ async function idDi(nome: string): Promise<number> {
 
 describe('API cicli di fusione', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -96,5 +94,21 @@ describe('API cicli di fusione', () => {
     expect((await request(app).delete(`/api/partite/${id}/cicli/${ciclo.id}`)).status).toBe(204);
     expect((await request(app).delete(`/api/partite/${id}/cicli/${ciclo.id}`)).status).toBe(404);
     expect((await request(app).get('/api/partite/99999/cicli')).status).toBe(404);
+  });
+
+  it('i parametri hanno la forma delle altre rotte di fusione: booleani anche 1/0, elenco dei DLC validato (F13)', async () => {
+    const jack = await idDi('Jack Frost');
+    const conTrue = (await request(app).get(`/api/fusione/cicli/${jack}?catture=true&lunghezza=3&alternative=3`)).body.data as CicliFusioneDto;
+    const conUno = await request(app).get(`/api/fusione/cicli/${jack}?catture=1&lunghezza=3&alternative=3`);
+    expect(conUno.status).toBe(200);
+    expect(conUno.body.data).toEqual(conTrue);
+    // partner distinti spenti con «0» come con «false»
+    const falso = (await request(app).get(`/api/fusione/cicli/${jack}?catture=true&partnerDistinti=false&lunghezza=2`)).body.data as CicliFusioneDto;
+    expect((await request(app).get(`/api/fusione/cicli/${jack}?catture=true&partnerDistinti=0&lunghezza=2`)).body.data).toEqual(falso);
+    // un elenco dei DLC con un pezzo non numerico è un errore, come in /piani (prima il pezzo spariva in silenzio)
+    expect((await request(app).get(`/api/fusione/cicli/${jack}?dlc=1,abc`)).status).toBe(400);
+    expect((await request(app).get(`/api/fusione/piani/${jack}?dlc=1,abc`)).status).toBe(400);
+    expect((await request(app).get(`/api/fusione/cicli/${jack}?dlc=1,2`)).status).toBe(200);
+    expect((await request(app).get(`/api/fusione/cicli/${jack}?catture=si`)).status).toBe(400);
   });
 });

@@ -1,3 +1,7 @@
+// ============================================================
+// collezioniImmagini.test.ts — collezioni presentative delle immagini di mappa: indice e totale globali, stabili e senza effetti sui dati
+// ============================================================
+
 import { calcolaCollezioniImmagini } from './collezioniImmagini.js';
 import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';

@@ -9,6 +9,7 @@ import { migration094 } from './094_voce_dei_pin.js';
 afterEach(() => closeDb());
 
 type Riga = { uid: string; riferimento_tipo: string | null; riferimento_chiave: string | null; voce_chiave: string | null };
+/** Uid, riferimento e `voce_chiave` dello spillo `id`. */
 const riga = (id: number) => prepared('SELECT uid, riferimento_tipo, riferimento_chiave, voce_chiave FROM spillo WHERE id = ?').get(id) as Riga;
 
 it('i pin delle planimetrie collegati a una voce passano al campo nuovo con il loro uid e il loro «raccolto»; il resto non cambia; ripetuta non fa altro', () => {

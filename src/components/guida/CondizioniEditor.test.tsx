@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { CondizioniEditor } from './CondizioniEditor';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 
-vi.mock('../../services/api/condizioni', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getElenchiRegole: vi.fn(async () => ({
     articoli: [{ chiave: 'untouchable/pistola', nome: 'Pistola', gruppo: 'Untouchable' }],
     letture: [{ chiave: 'spadaccino-provetto', nome: 'Spadaccino provetto', categoria: 'libro' }, { chiave: 'dvd-x', nome: 'Un film', categoria: 'film' }],
@@ -21,8 +21,6 @@ vi.mock('../../services/api/condizioni', () => ({
     eventi: [{ chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita', calcolato: false }],
     contatori: [{ chiave: 'film-completati', nome: 'Film o DVD completati' }],
   })),
-}));
-vi.mock('../../services/api/compendio', () => ({
   getConfidenti: vi.fn(async () => [{ chiave: 'sojiro', nome: 'Sojiro Sakura', arcana: 'Hierophant' }, { chiave: 'ann', nome: 'Ann Takamaki', arcana: 'Lovers' }]),
   getQuartieri: vi.fn(async () => [{ chiave: 'akihabara', nome: 'Akihabara', sbloccoData: '08-31' }, { chiave: 'ueno', nome: 'Ueno', sbloccoData: null }]),
   getRichieste: vi.fn(async () => ({ richieste: [{ chiave: 'lo-zio-ingordo', nome: 'Lo zio ingordo' }] })),
@@ -34,6 +32,7 @@ function Prova({ iniziali = [], onCambia }: { iniziali?: RequisitoSpillo[]; onCa
   const [c, setC] = useState<RequisitoSpillo[]>(iniziali);
   return <CondizioniEditor condizioni={c} onCambia={(n) => { setC(n); onCambia?.(n); }} />;
 }
+/** Dentro `ambito` apre il menu a tendina con l'etichetta data e clicca il pulsante dell'opzione `voce`. */
 const scegli = (ambito: ReturnType<typeof within>, etichetta: string, voce: string | RegExp) => {
   fireEvent.click(ambito.getByRole('combobox', { name: etichetta }));
   fireEvent.click(ambito.getByRole('option', { name: voce }).querySelector('button')!);
@@ -99,6 +98,7 @@ describe('CondizioniEditor', () => {
   it('gli stati con più campi: attività con volte, grado cliente di un negozio, Persona con abilità', async () => {
     const onCambia = vi.fn();
     render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }]} onCambia={onCambia} />);
+    /** Riletta a ogni passo: la prima riga di condizione com'è nel DOM dopo l'ultimo cambio di stato. */
     const riga = () => within(screen.getAllByRole('group', { name: /^Condizione:/ })[0]);
     await screen.findByRole('group', { name: 'Condizione: dal 18 aprile' });
     scegli(riga(), 'Stato', 'Attività');
@@ -118,6 +118,7 @@ describe('CondizioniEditor', () => {
   it('i negozi si offrono secondo il loro programma punti', async () => {
     const onCambia = vi.fn();
     render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }]} onCambia={onCambia} />);
+    /** Riletta a ogni passo: la prima riga di condizione com'è nel DOM dopo l'ultimo cambio di stato. */
     const riga = () => within(screen.getAllByRole('group', { name: /^Condizione:/ })[0]);
     await screen.findByRole('group', { name: 'Condizione: dal 18 aprile' });
     scegli(riga(), 'Stato', 'Grado cliente');
@@ -139,5 +140,19 @@ describe('CondizioniEditor', () => {
     fireEvent.click(riga.getByRole('combobox', { name: 'Stato' }));
     expect(riga.getByRole('option', { name: 'Palazzo' })).toBeInTheDocument();
     expect(riga.queryByRole('option', { name: 'Pin di una mappa' })).toBeNull();
+  });
+});
+
+describe('CondizioniEditor — righe con chiavi stabili (A3, verifica 2026-10-03)', () => {
+  it('togliendo una riga, quella dopo tiene il suo operatore scelto invece di prendere lo stato della riga tolta', async () => {
+    render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }, { tipo: 'data', dal: '05-02' }]} />);
+    const seconda = within(await screen.findByRole('group', { name: 'Condizione: dal 2 maggio' }));
+    scegli(seconda, 'Operatore', 'tra');
+    // «tra» con le due date uguali si salva come un giorno solo: è lo stato della riga a ricordare la scelta (due campi)
+    const dopoScelta = screen.getAllByRole('group').find((g) => g.getAttribute('aria-label')?.includes('2 maggio'))!;
+    expect(within(dopoScelta).getByRole('combobox', { name: 'Operatore' })).toHaveAttribute('title', 'tra');
+    fireEvent.click(screen.getByRole('button', { name: 'Togli la condizione: dal 18 aprile' }));
+    const rimasta = screen.getAllByRole('group').find((g) => g.getAttribute('aria-label')?.includes('2 maggio'))!;
+    expect(within(rimasta).getByRole('combobox', { name: 'Operatore' })).toHaveAttribute('title', 'tra');
   });
 });

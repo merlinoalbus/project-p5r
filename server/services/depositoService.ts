@@ -14,6 +14,7 @@
 // ============================================================
 
 import fs from 'node:fs';
+import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
@@ -29,7 +30,7 @@ export const ESTENSIONI_PACCHETTO = ['.db', '.sqlite', '.sqlite3'];
 export const ESTENSIONI_BACKUP = ['.zip'];
 
 /** La cartella d'appoggio configurata (vuota = funzione disattivata). */
-export function cartellaDeposito(): string {
+function cartellaDeposito(): string {
   return config.depositoDir;
 }
 
@@ -75,12 +76,17 @@ export function elencaDeposito(estensioni: string[]): DepositoFileDto {
   return { disponibile: true, cartella, motivo: null, file };
 }
 
-/** Legge un file del deposito per intero (i file di scambio pesano centinaia di MB, ma si usano tutti insieme). */
-export function leggiDalDeposito(nome: string): Buffer {
+/**
+ * Copia un file del deposito in `destinazione`, una cartella locale: un database non si apre su un filesystem di rete (vedi sopra),
+ * e la copia locale è anche quella che poi prende il posto del file dell'istanza. La copia la fa il sistema, a flusso: il file non
+ * passa per la memoria del processo (prima si leggeva per intero, centinaia di MB, rilievo P3' della verifica, 2026-10-03).
+ */
+export async function copiaDalDeposito(nome: string, destinazione: string): Promise<void> {
   const percorso = percorsoNelDeposito(nome);
   try {
-    return fs.readFileSync(percorso);
+    await fsp.copyFile(percorso, destinazione);
   } catch (err) {
+    await fsp.rm(destinazione, { force: true });
     throw httpErrors.badRequest('lettura-fallita', `Impossibile leggere «${nome}» dalla cartella d'appoggio: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
@@ -115,37 +121,24 @@ function ruotaCopie(cartella: string, nome: string): void {
 }
 
 /**
- * Lascia nel deposito una copia di un file appena prodotto (l'esportazione). Non è un'operazione
- * critica: se la cartella manca o il NAS non risponde, lo scaricamento deve riuscire lo stesso, quindi
- * qui non si solleva nulla e si restituisce `null`.
+ * Lascia nel deposito una copia di un file appena prodotto (il pacchetto di gioco o lo ZIP dell'istanza). Non è un'operazione
+ * critica: se la cartella manca o il NAS non risponde, lo scaricamento deve riuscire lo stesso, quindi qui non si solleva nulla e
+ * si restituisce `null`. La copia è asincrona: centinaia di MB verso un disco di rete non devono fermare il server (prima era
+ * `copyFileSync`, e per lo ZIP una `writeFileSync` dell'archivio tenuto in memoria: rilievo F19 della verifica, 2026-10-03).
  */
-export function depositaCopia(sorgente: string, nome: string): string | null {
+export async function depositaCopia(sorgente: string, nome: string): Promise<string | null> {
   const cartella = cartellaDeposito();
   if (!cartella) return null;
+  const destinazione = path.join(cartella, path.basename(nome));
   try {
-    const destinazione = path.join(cartella, path.basename(nome));
-    fs.copyFileSync(sorgente, destinazione);
-    logger.info({ destinazione, byte: fs.statSync(destinazione).size }, 'copia depositata nella cartella d\'appoggio');
+    await fsp.copyFile(sorgente, destinazione);
+    logger.info({ destinazione, byte: (await fsp.stat(destinazione)).size }, 'copia depositata nella cartella d\'appoggio');
     ruotaCopie(cartella, path.basename(nome));
     return path.basename(nome);
   } catch (err) {
     logger.warn({ err, cartella, nome }, 'copia nella cartella d\'appoggio non riuscita: lo scaricamento prosegue');
-    return null;
-  }
-}
-
-/** Come `depositaCopia`, ma per un contenuto già in memoria (lo ZIP dell'istanza). */
-export function depositaContenuto(contenuto: Buffer, nome: string): string | null {
-  const cartella = cartellaDeposito();
-  if (!cartella) return null;
-  try {
-    const destinazione = path.join(cartella, path.basename(nome));
-    fs.writeFileSync(destinazione, contenuto);
-    logger.info({ destinazione, byte: contenuto.length }, 'copia depositata nella cartella d\'appoggio');
-    ruotaCopie(cartella, path.basename(nome));
-    return path.basename(nome);
-  } catch (err) {
-    logger.warn({ err, cartella, nome }, 'copia nella cartella d\'appoggio non riuscita: lo scaricamento prosegue');
+    // una copia a metà non deve restare a fingersi un backup
+    await fsp.rm(destinazione, { force: true }).catch(() => {});
     return null;
   }
 }

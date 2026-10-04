@@ -1,7 +1,11 @@
 # Architettura — project-p5r
 
-Aggiornato allo step **0.5 (frontend)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
-realizzeranno secondo `docs/ROADMAP.md`.
+Aggiornato alla verifica completa del 4 ottobre 2026. Le sezioni §1–§8 e quelle senza data descrivono il sistema com'è
+oggi. Le sezioni intitolate con una fase («Fase 6.1», «Fase 13.2»…) o con una data sono il **registro** di quando una parte è
+nata: dicono come era fatta allora e quale scelta l'ha guidata. Dove una cosa è cambiata dopo, lo dice la sezione più recente.
+In particolare, quelle sezioni citano spesso i file del **seed JSON** (`data/seed/*.json`, caricati da `caricaSeed` al boot). Il
+seed è stato dismesso il 12 settembre 2026: quei dati oggi stanno nelle tabelle di `gioco.db` (o nei blocchi di `dati_guida`) e
+arrivano con il pacchetto di gioco. Le parole «seed» e «reseed» vanno lette come «dati della guida» e «ricarica del pacchetto».
 
 ## 1. Vista d'insieme
 
@@ -16,9 +20,9 @@ realizzeranno secondo `docs/ROADMAP.md`.
  └──────────────────────┘   { data } / { error }└─────────┬────────────────┘
                                                           │ SQLite (WAL)
                                                           ▼
-                                         data/project-p5r.db  (volume /data in Docker)
-                                         ├─ tabelle DATI DI GIOCO  (dal seed, rigenerabili)
-                                         └─ tabelle DATI UTENTE    (per partita_id)
+                                         data/  (volume /data in Docker)
+                                         ├─ gioco.db    DATI DI GIOCO  (dal pacchetto, sostituibile)
+                                         └─ partite.db  DATI UTENTE    (per partita_id, schema «utente»)
 ```
 
 - **Un solo processo backend**, nessun DB esterno, nessuna autenticazione (app personale in LAN/Tailscale).
@@ -30,7 +34,7 @@ realizzeranno secondo `docs/ROADMAP.md`.
 | Runtime | Node ≥ 22.13 (immagini Docker e CI su Node 24 LTS), TypeScript 5.9, ESM (`"type": "module"`) |
 | Frontend | React 19, react-router 7, zustand 5, Tailwind 4 (plugin Vite, config CSS-first), Vite 8 |
 | Backend | Express 5, better-sqlite3 12, zod 4, pino 10, tsx (esegue i `.ts` a runtime, anche in produzione) |
-| Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (`server/bootstrap.test.ts`, `server/routes/api.test.ts`), DB in memoria con seed reale (`server/services/seed/caricaSeed.test.ts`), migrazioni (`server/db/migrationRunner.test.ts`), pipeline seed (`scripts/seed/*.test.ts`) |
+| Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (tramite `test/supertest.ts`), DB in memoria con il pacchetto iniziale (`test/dbDiProva.ts`), moduli finti dal modulo vero (`test/mockModuli.ts`), migrazioni (`server/db/migrationRunner.test.ts`, `migrations/index.test.ts`) |
 | Qualità | ESLint 10 flat config, `tsc -b` su 4 progetti (app / node / server / test) |
 | Deploy | Immagini `node:24-alpine` (backend) e `nginx:1.30-alpine` (frontend); GitHub Actions su Node 24 (checkout v7, setup-node v7, setup-buildx v4, build-push v7) |
 
@@ -38,12 +42,13 @@ realizzeranno secondo `docs/ROADMAP.md`.
 ```
 server/
   index.ts            boot: assicuraPacchettoIniziale → initDb (gioco.db + partite.db attaccato come «utente») → runBootBackup → runMigrations (due sequenze) → regoleAllAvvio → listen; SIGINT/SIGTERM → server.close + closeDb
-  bootstrap.ts        factory Express: middleware in ordine, router, health/config, 404, errorHandler
+  bootstrap.ts        factory Express: middleware in ordine, router di area (`routes/index.ts`, `ROUTER_DI_AREA`), health/config, documentazione (`/api/openapi.json`, `/api/docs`), 404, errorHandler
   config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, PACCHETTO_DIR, LOG_LEVEL)
-  middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
+  middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod; gli schemi restano leggibili con `schemiDiValidazione`), errorHandler
+  openapi/            documentazione dell'API (voce 5 della verifica completa): rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
   db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
-  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»); registro in index.ts
-  db/migrazioniUtente/ partite: 001 schema, 002 spillo_partita per uid, 003 timbri_dedalo_partita; registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
+  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema); registro in index.ts, `index.test.ts` pretende id consecutivi
+  db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/pacchetto/ pacchettoGioco.ts: primo avvio dal pacchetto (`assicuraPacchettoIniziale`), `caricaPacchetto`/`ricaricaPacchetto` (test), `regoleAllAvvio`
@@ -54,10 +59,13 @@ server/
   services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService,
                       fusione/motoreFusione.ts (motore puro su snapshot in memoria), fusione/alberoFusione.ts (piani
                       ricorsivi) e fusione/fusioneService.ts (DTO)
-  schemas/            zod: comuni (id, booleani da query, livello), compendio, traduzioni, partite, immagini
+  services/verificaPartita.ts  il 404 «partita-non-trovata» comune a tutti i servizi per partita
+  schemas/            zod: comuni (id, booleani ed elenchi da query, livello, data MM-GG, uid di una voce, Dote, categoria di articolo),
+                      compendio, catalogo, fusione, guidaDungeon, mappe, traduzioni, partite, immagini, font
   utils/              logger, httpError
-shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node)
-shared/seed.ts        tipi residui (RequisitoSeed, TraduzioniSeed, PercorsoSeed) usati da valutatore, traduzioni e percorso
+shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node); `RequisitoRango` = requisito di un rango di Confidente
+shared/doti.ts        le cinque Doti sociali (chiave, nome, ordine di `dote_sociale`): fonte unica di schemi, servizi e interfaccia
+shared/articoli.ts    le categorie di un articolo: fonte unica di tipo, schema del catalogo e ricerca degli articoli
 shared/orariNegozio.ts  OrariNegozio (giorni, fasce, chiusura con la pioggia, nota): normalizza, leggi, orariComeCondizioni, descriviOrari
 shared/effettiCatalogo.ts VoceEffetto (effetto dichiarato + ripetuto + condizioni) di libri, film e attività: normalizza, leggi, dotiDaEffetti, descriviVoceEffetto
 shared/attivita.ts    cataloghi delle attività: TIPI_ATTIVITA, FASCE_ATTIVITA, TRACCIAMENTI_ATTIVITA (nessuno | svolta | sessioni)
@@ -96,20 +104,34 @@ docs/                 documentazione di bordo e riferimenti di dominio
 
 ## 4. Flusso di una richiesta API
 1. `requestContextMiddleware`: genera/propaga `X-Request-Id`, crea child logger, access log a fine risposta.
-2. `responseShapeMiddleware`: monkey-patch di `res.json` → `{ data }` (idempotente su envelope già formati).
-3. `cors()` + `express.json({ limit: '5mb' })`.
-4. Router di area (`/api/compendio`, `/api/traduzioni`, `/api/partite`, `/api/immagini`) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
+2. `responseShapeMiddleware`: monkey-patch di `res.json` → `{ data }` per **ogni** corpo, anche un DTO con un campo `data` o
+   `error` (es. `DomandaDto.data`); solo l'`errorHandler`, con `segnaRispostaFormata`, scrive il corpo senza busta. Il client
+   (`payloadDellaBusta`) legge la chiave `data`, non il suo valore: `{ data: null }` vale `null`.
+3. `express.json({ limit: '5mb' })` (64 MB solo per `POST /api/mappe/importa`). **Niente CORS** (DECISIONI 2026-10-03): il
+   frontend è sulla stessa origine (proxy Vite in sviluppo, nginx in produzione) e l'API non ha autenticazione, quindi un'altra
+   origine non deve poterla chiamare dal browser dell'utente.
+4. Router di area (`ROUTER_DI_AREA` in `server/routes/index.ts`: compendio, traduzioni, partite, immagini, fusione, mappe, font, impostazioni,
+   catalogo, condizioni) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
    un getter, quindi il middleware fa shadowing sull'istanza).
-5. `/api/health` (stato DB + `user_version`), `/api/config` (valori pubblici per il boot FE).
-6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; errori 4xx di Express/body-parser (JSON malformato 400, corpo oltre il limite 413, percorso non decodificabile 400) → envelope in italiano; altro → 500 con stack nel log.
+5. `/api/health` (stato DB + `user_version`; **503** se il DB non risponde, perché l'HEALTHCHECK di Docker guarda solo il codice),
+   `/api/config` (valori pubblici per il boot FE), `/api/openapi.json` e `/api/docs` (documentazione, §5 bis).
+6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; errori 4xx di Express/body-parser (JSON malformato 400, corpo oltre il limite 413, percorso non decodificabile 400) e di `sendFile`/`download` (404 `not-found`, 403, 416) → envelope in italiano, con le intestazioni di una risposta JSON anche se la rotta stava per mandare un file; altro → 500 `internal-error` con un **messaggio fisso** (il dettaglio resta nel log, col `requestId`).
+7. Client (`src/services/api/_httpClient.ts`): timeout e tentativi sui 5xx e sugli errori di rete **solo per i metodi
+   idempotenti**; POST e PATCH non si ripetono (una scrittura già avvenuta verrebbe raddoppiata), salvo `maxRetries` esplicito.
+   Anche un PUT **relativo** non si ripete, con `{ maxRetries: 0 }` nella sua funzione: lo spostamento di una voce della giornata
+   (`spostaVoceGiornata`) o di un punto (`spostaPunto`) di un posto e i punti di un Confidente (`aggiornaConfidente`, che li somma)
+   ripetuti dopo una risposta persa sposterebbero o sommerebbero due volte.
 
 ## 5. Persistenza
-- **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, indice immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le 32 tabelle delle partite, DDL in `server/db/schemaUtente.ts`). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
+- **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, indice immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le 33 tabelle delle partite, DDL in `server/db/schemaUtente.ts`). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
 - Connessione better-sqlite3, pragma `journal_mode=WAL` (su entrambi i file), `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
-- Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, `foreign_key_check` dopo ogni applicazione.
+- Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, con `foreign_key_check` **dentro** la transazione prima di avanzare `user_version` (dal 2026-10-03, prima il controllo era dopo il commit). Il controllo si fa prima e dopo `up`: solo le violazioni **nuove**, introdotte da quella migrazione, la annullano (resta da applicare); quelle già presenti nel file si scrivono nel log come avviso e non bloccano l'avvio, che altrimenti si fermerebbe per sempre su un dato vecchio che nessuna migrazione tocca.
+- `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
-- Il seed JSON non esiste più: `seed_meta` resta come memoria dell'ultimo caricamento; i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto, lotto successivo).
-- Schema in due famiglie (migrazioni 001–004; `user_version` = 4):
+- Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto). `seed_meta`, la memoria dell'ultimo caricamento del seed, è uscita con la migrazione 096 (verifica completa, R3'), e con lei il campo `seed` dello stato dell'istanza.
+- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 096 e `utente` alla 016). Le righe qui sotto descrivono
+  il nucleo di allora; il caricamento era `caricaSeed` con l'hash in `seed_meta`, mentre oggi i dati di gioco arrivano con il
+  pacchetto (`caricaPacchetto` / importazione) e le immagini stanno nella tabella `immagine` di `gioco.db` (079):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
     `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,
     `confidente` + `confidente_rango` (punti necessari per rango, 0 = non a punti), `dote_sociale` + `dote_sociale_rango` (5 ranghi
@@ -142,7 +164,7 @@ ogni lettura sulla scorta attuale, la chiusura automatica scrive `raggiunto_at` 
 
 ### Piani salvati (Fase 5.3)
 Migrazione 007: `piano_salvato` (persona_id, obiettivo_id SET NULL, nome, note, opzioni_json, skill_json, piano_json, costo). Il piano
-arriva dal client (istantanea di `PianoFusioneDto`) ed è validato strutturalmente (schema zod ricorsivo + `verificaAlbero`: modi ammessi,
+arriva dal client (istantanea di `PianoFusioneDto`) ed è validato strutturalmente (schema zod finito di `LIVELLI_MAX_PIANO` = 8 livelli, che ferma con un 400 un corpo annidato all'infinito, + `verificaAlbero`: modi ammessi,
 fusioni con ≥2 ingredienti, foglie senza figli, Persona esistenti, profondità ≤8). `pianiSalvatiService.avanzamentoPiano` percorre l'albero
 con la scorta attuale: una fusione col risultato già in scorta chiude il sottoalbero; una fusione con tutti gli ingredienti in scorta è un
 «passo eseguibile». `AlberoPiano` (FE) è condiviso fra la vista «Piano di fusione» e i piani salvati.
@@ -222,10 +244,13 @@ differenze e tempo sono JSON in `dati_guida` («completamento»). `completamento
 ### Sfide (Fase 9.2)
 `sfide.json` è consultazione pura in `dati_guida` («sfide»); le domande del game show in TV riusano il modello `domanda` (tipo «altro», chi «Game show in TV») e quindi la spunta per partita.
 
-### Piante delle aree (Fase 7.4)
-Migrazione 020: `pianta_area` (URL, pagina, fonte, licenza, alternative in JSON) e colonna `origine` su `marcatore_mappa`. Le immagini non
-entrano mai nel repository: `scaricaPianta` le importa nell'istanza (ambito «mappa») al primo accesso all'area, provando le fonti
-alternative; gli spilli del seed hanno `origine = 'seed'` e il reseed non tocca quelli fissati dall'utente.
+### Piante delle aree (Fase 7.4) — *superato dal 2026-09-18*
+Migrazione 020: `pianta_area` (URL, pagina, fonte, licenza, alternative in JSON) e colonna `origine` su `marcatore_mappa`. Fino al
+2026-09-18 la pianta della guida si scaricava nell'istanza (ambito «mappa», chiave dell'area) al primo accesso all'area; con
+`f82c42cf` («la pianta della guida esce di scena») la rotta `POST /api/mappe/piante/:area/scarica` e il servizio sono stati tolti, e
+dal 2026-10-03 anche la funzione del client `scaricaPianta` e il pulsante «Scarica dalla guida» sulle planimetrie d'area (O9). Le
+immagini delle piante già scaricate restano in `immagine` con la chiave dell'area: un'immagine di base di mappa con la stessa chiave
+non si cancella con la mappa (`eliminaImmagineDellaMappa`). «Scarica dalla guida» resta solo per i quartieri (Fase 8.3).
 
 ### Mappe della città (Fase 8.3)
 Migrazione 022: `pianta_quartiere` e `marcatore_luogo` (origine seed/utente). L'immagine del quartiere vive in `immagine` (ambito «mappa»,
@@ -239,6 +264,33 @@ chiave `citta-<quartiere>`), scaricata al primo uso; `MappaInterattiva` accetta 
 `oggetti-guida.json` è consultazione pura in `dati_guida`; distinto dal compendio `oggetti` (equipaggiamento con statistiche) e dai cataloghi dei negozi (prezzi per punto vendita).
 
 ## 5 bis. API (step 0.4)
+
+**Documentazione consultabile (voce 5 della verifica completa, 2026-10-04).** `GET /api/docs` apre Swagger UI e `GET /api/openapi.json`
+restituisce il documento OpenAPI 3.1 (anche da Impostazioni → «Documentazione delle API»). Il documento non è scritto a mano:
+- le rotte si leggono dalla pila dei router montati (`server/openapi/rotte.ts`);
+- parametri, query e corpi vengono dagli schemi zod di `validate` (`schemiDiValidazione`), convertiti con `z.toJSONSchema` nella
+  forma d'ingresso;
+- lo stato di successo (200/201/204) e il tipo di risposta (JSON o file) si leggono dal gestore finale;
+- sommario, descrizione, risposta (con il tipo `…Dto` di `shared/`) e codici d'errore stanno nel registro in italiano
+  `server/openapi/descrizioni/` (un file per area). Per i corpi che non passano da `validate` il registro dichiara le varianti
+  (catalogo, schema scelto da `:tipo`) o il corpo binario (`express.raw`).
+
+`openapi.test.ts` fallisce se una rotta non ha descrizione o una descrizione non ha rotta, se un tipo `…Dto` citato non esiste,
+se il registro dice JSON dove il gestore manda un file (o il contrario), se un codice d'errore dichiarato non compare nel server
+(fuori da `server/openapi/`), e se il documento non è un OpenAPI 3.1 valido (`@seriousme/openapi-schema-validator`). Swagger UI è
+servita dall'istanza (`swagger-ui-dist`, nessuna CDN: l'app si usa anche senza internet).
+
+«Prova» (Try it out) parla con i dati veri, quindi è spento:
+- per ogni metodo che scrive (`supportedSubmitMethods: ['get']`);
+- per le GET con `senzaProva` nel registro. Sono le tre GET che non sono semplici letture o pesano troppo per una pagina:
+  - lo scaricamento del database e lo ZIP dell'istanza, che lasciano una copia nella cartella d'appoggio;
+  - l'esportazione delle mappe, che supera i 10 MB.
+
+  Il documento le marca con `x-senza-prova`. Un plugin di Swagger UI toglie loro il pulsante, e un `requestInterceptor` le
+  rifiuta comunque. È la scelta dell'utente del 2026-10-04 (DECISIONI).
+
+La tabella qui sotto è il riassunto storico dello step 0.4: l'elenco completo e aggiornato è quello di `/api/docs`.
+
 | Area | Endpoint principali |
 |---|---|
 | Compendio | `GET /api/compendio/arcani`, `/glossario`, `/termini` (glossario italiano ↔ inglese per categoria), `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |
@@ -250,7 +302,7 @@ chiave `citta-<quartiere>`), scaricata al primo uso; `MappaInterattiva` accetta 
 Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
 
 ## 6. Motore di fusione *(fasi 1–4 realizzate)*
-- `server/services/fusione/motoreFusione.ts`: snapshot in memoria del compendio (invalidato al reseed) e contesti memoizzati per insieme di DLC posseduti;
+- `server/services/fusione/motoreFusione.ts`: snapshot in memoria del compendio (invalidato con le altre cache di gioco, `cacheDiGioco`, quando il pacchetto cambia) e contesti memoizzati per insieme di DLC posseduti;
   regole di chinhodado (speciale a due → Demone del Tesoro + normale con modificatore di rango → arcani diversi: prima Persona con livello
   ≥ 1+⌊(La+Lb)/2⌋ → stesso arcano: la più alta con livello ≤, esclusi gli ingredienti); ricette inverse per enumerazione delle coppie di arcani
   che producono l'arcano del target + fusioni con Demone del Tesoro; costo Σ(27L²+126L+2147). `fusioneService.ts` produce i DTO con nomi
@@ -428,7 +480,7 @@ Studio in `docs/MAPPE.md`. Migrazione 027: `mappa` (albero con `genitore_chiave`
 `spillo` (x/y in percentuale dell'immagine, `tipo` del registro `shared/spilli.ts` — 42 tipi in quattro categorie (`CATEGORIE_SPILLO`, aggiornamento del 2026-09-29), tabella in MAPPE §4 —, riferimento tipizzato mappa|negozio|punto|luogo|confidente|
 richiesta|attivita, `collezionabile`), `spillo_partita` (raccolto per partita). `server/services/mappe/sincronizzaMappe.ts` è idempotente:
 crea `tokyo` → `citta-<quartiere>` e `dungeon-<chiave>` → `<area>` dalle tabelle della guida e trasforma `marcatore_mappa`/`marcatore_luogo` in
-spilli (riferimento `punto`/`luogo`, stessa origine); gira nella migrazione (istanze esistenti) e alla fine di `caricaSeed`, seguita
+spilli (riferimento `punto`/`luogo`, stessa origine). Oggi gira solo dentro la migrazione 027 (O10 della verifica completa); al tempo del seed girava anche alla fine di `caricaSeed`, seguita
 dall'importazione del seed `data/seed/mappe-editor.json` (origine «seed», mai sopra le mappe modificate dall'utente).
 **Il nome con cui una mappa si presenta** (2026-09-13) lo calcola `src/utils/presentazioneMappa.ts`, e ci passano tutte le schermate:
 titolo del visore e dell'editor, briciole, albero, indice, selettori, miniature (`titoloGruppoImmagini` per la testata di un gruppo di
@@ -487,7 +539,7 @@ esportazione le trasportano nel campo `condizioni` dello spillo (all'importazion
 verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in griglia, da trascinare nell'editor: la mappa globale di Tokyo
 e la mappa verticale dei Mementos sono immagini dell'utente nell'istanza (mai nel repository) con i quartieri e i Dedali come passaggi;
 gli accessi ai Palazzi e ai Mementos sono passaggi dentro le mappe dei luoghi (es. la stazione di Shibuya). Esportazione: `esportaMappe(radice)`
-limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «store» in `server/utils/zip.ts`) con `data/seed/mappe/<chiave>.json`
+limita al sottoalbero e produce un pacchetto JSON (al tempo del seed `creaPacchettoRepository`, poi tolto, ne faceva uno ZIP con `data/seed/mappe/<chiave>.json`
 (immagini di base come `asset: mappe/<chiave>`, schermate come `asset: spilli/<mappa>/<n>-<m>`) e i file in `public/asset/`;
 `caricaSeed` importa `mappe-editor.json` e poi ogni `data/seed/mappe/*.json` (nell'hash del seed).
 
@@ -497,8 +549,9 @@ limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «sto
 ad altezza fissa — `altezza`, 560 px se non indicata — o data dalle classi di `classeVisore`, con «Schermo intero» e «Modifica mappa»). «La città» mostra la mappa `tokyo` sopra le piastrelle (`MiniaturaMappa`: immagine
 dell'istanza → asset `mappe/<chiave>` → icona); la scheda del quartiere mostra `citta-<q>`; la scheda del Palazzo mostra la mappa dell'area
 corrente e tiene allineati elenco dei punti e visore (l'elenco ricarica il visore con `versione`, il visore ricarica la scheda con `onCambiato`).
-Il vecchio `MappaInterattiva` e le funzioni client dei marcatori sono rimossi: il posizionamento vive solo nell'editor; le rotte server dei
-marcatori (`PUT /api/mappe/marcatori`, `/marcatori-luoghi`) restano perché alimentano la sincronizzazione iniziale degli spilli e i test.
+Il vecchio `MappaInterattiva` e le funzioni client dei marcatori sono rimossi: il posizionamento vive solo nell'editor. Le rotte server dei
+marcatori (`PUT /api/mappe/marcatori`, `/marcatori-luoghi`) sono uscite con la verifica completa (O10, 2026-10-04): le chiamavano solo i
+test. Le tabelle `marcatore_mappa` e `marcatore_luogo` restano e si leggono nelle schede.
 
 ### Scheda «Oggi» e stato delle azioni della guida (Fase 12.4 / 13.5)
 `GiornoGuida` (`src/components/guida/GiornoGuida.tsx`) rende la scheda del giorno e le azioni (spunta con note del Confidente, collegamenti,
@@ -582,8 +635,8 @@ che supera la precedente esclusione.
 
 - **Suggerimenti del giorno** — `server/services/suggerimentiService.ts`, rotta `GET /api/partite/:id/suggerimenti`, DTO `SuggerimentiOggiDto` (campo `giorno`, non `data`: `responseShapeMiddleware` non avvolge un payload che ha già una chiave `data`). Dalle azioni del giorno corrente ancora da fare e **non bloccate** (`statoAzione`) ricava le chiavi da accendere: confidenti e personaggi, dungeon e aree, libri/film e gli articoli a scaffale risolti per slug (30 libri su 46), attività, richieste, negozi, luoghi, quartieri, doti (lette dal testo «Dote +N»: 250 azioni contro 2 riferimenti espliciti), mappe e spilli. Lato client `src/stores/suggerimentiStore.ts` (`useSuggerimenti()` → `evidenziato`, `motivo`), `src/utils/suggerimenti.ts` (`classiSuggerito`), `TargaSuggerito`; `GiornoGuida` invalida lo store alla spunta. CSS `.suggerito*`, `.targa-suggerito`, `.spillo-mappa--suggerito`, token `--color-oro`.
 - **Scuola del giorno** — `src/components/partita/ScuolaOggi.tsx` nell'intestazione di `PartitaPage`: filtra lato client `getDomande`/`getCruciverba` sul giorno di gioco; per le date d'esame usa le domande numerate di `esami` e il riassunto dell'elenco generale solo come ripiego (nei dati reali i due elenchi non condividono mai il testo).
-- **Semafori** — nuovo tipo `persona-abilita` (`shared/seed.ts`, `semaforiService`): verde quando la scorta contiene la Persona indicata con quella skill (`persona_posseduta` × `persona_posseduta_skill` × `skill`). Seed dei requisiti ricostruito dalla guida Royal (vedi `docs/riferimenti/semafori-confidenti.md`); regola di merito: un semaforo è solo ciò che il gioco impone.
-- **Spilli** — `sincronizzaMappe` riclassifica a ogni avvio gli spilli di origine `seed` con riferimento `punto` quando `spilloPerPunto` cambia (tipo e collezionabilità), senza toccare gli spilli dell'utente né `spillo_partita`; restituisce `riclassificati`.
+- **Semafori** — nuovo tipo `persona-abilita` (`RequisitoRango` in `shared/types.ts`, `semaforiService`): verde quando la scorta contiene la Persona indicata con quella skill (`persona_posseduta` × `persona_posseduta_skill` × `skill`). Seed dei requisiti ricostruito dalla guida Royal (vedi `docs/riferimenti/semafori-confidenti.md`); regola di merito: un semaforo è solo ciò che il gioco impone.
+- **Spilli** — `sincronizzaMappe` riclassifica (quando gira: oggi solo nella migrazione 027) gli spilli di origine `seed` con riferimento `punto` quando `spilloPerPunto` cambia (tipo e collezionabilità), senza toccare gli spilli dell'utente né `spillo_partita`; restituisce `riclassificati`.
 - **Spilli dall'asset** — `SpilloGrafico`/`PuntoSpillo` (`src/components/mappe/IconaSpillo.tsx`): se `ui/spillo-<tipo>` esiste è lo spillo intero (`.spillo-mappa__figura`, punta sul punto ancorato), altrimenti la goccia colorata col disegno di riserva; legenda, elenco e popup usano la stessa immagine in piccolo.
 - **Personaggi** — ambito immagine `personaggio` (`AMBITI_IMMAGINE`, `chiaviAssetPredefinito` → `personaggi/<chiave>`): Protagonista, Stanza di Velluto e Jose usano `ImmagineEntita` come i Confidenti; `PersonaDelPersonaggio` apre la Persona in una finestra al tocco.
 - **Home desktop** — da 1360 px `.home-griglia` è «carta mappa / oggi mappa» (5/12 + 7/12), senza accessi rapidi; la stella della carta è `max(230px, min(40vh, 50cqw, 420px))` (`.home-carta` è un contenitore di query).
@@ -601,22 +654,34 @@ che supera la precedente esclusione.
 
 - **Regola (decisione dell'utente)**: in `public/asset/` restano solo compendio (persona, arcani, skill) e interfaccia (`ui/`); ogni altra immagine — mappe, spilli, Confidenti, personaggi, sfondi, identità, illustrazioni, gruppi di Persona, palazzi, icone di doti/elementi/affinità/meteo/attività/decori/guida — sta nella tabella `immagine` di `gioco.db`, colonna `contenuto BLOB` (migrazione 079). `shared/immagini.ts`: `AMBITI_CARICAMENTO` (8: una riga per entità, caricata dall'utente) e `AMBITI_PREDEFINITI` (16 famiglie, chiave = chiave del manifesto: `mappe/tokyo`, `mappe/lmap/tokyo/akasaka`, `sfondi/mementos`).
 - **Migrazione 079** (`assorbiImmagini`): riempie `contenuto` dai file delle righe (`DATA_DIR/immagini`, `pacchetto/immagini`), dalle famiglie di `config.assetDir` (`public/asset`, `webp` > `png` a parità di chiave) e da `pacchetto/gioco.db` (connessione a parte in sola lettura, solo se ha già la colonna); idempotente; con un database in memoria le due sorgenti pesanti si saltano. `regoleAllAvvio` → `assorbiImmaginiSuDisco`: assorbe ciò che un backup di prima della 079 ha rimesso su disco e sposta `DATA_DIR/immagini` in `DATA_DIR/backups/immagini-su-disco-<istante>`. `caricaPacchetto` copia le righe di `immagine` senza i byte salvo `{ conImmagini: true }`.
-- **Server**: `immaginiService` legge e scrive solo nel database (`nome_file` resta come nome leggibile); `GET /api/immagini/:ambito/:chiave/file` risponde dal BLOB con `ETag` (id, byte, data) e 304; `GET /api/immagini/manifest` = famiglie predefinite con contenuto, chiave → URL versionato; elenco (`GET /api/immagini`) e rimozione in blocco (`DELETE /api/immagini`) toccano solo gli ambiti di caricamento (`queryImmagini`), mentre lettura/PUT/DELETE singoli accettano ogni ambito. `backupService` fa lo snapshot di avvio solo se c'è una migrazione da applicare. `copiaIstanza` non porta più la cartella `immagini/` (i backup vecchi con quella cartella si ripristinano ancora: i file vengono assorbiti alla riapertura). `MAX_BYTE_RIPRISTINO` = 1 GiB.
+- **Server**: `immaginiService` legge e scrive solo nel database (`nome_file` resta come nome leggibile); `GET /api/immagini/:ambito/:chiave/file` risponde dal BLOB con `ETag` (id, byte, data) e 304; `GET /api/immagini/manifest` = famiglie predefinite con contenuto, chiave → URL versionato; elenco (`GET /api/immagini`) e rimozione in blocco (`DELETE /api/immagini`) toccano solo gli ambiti di caricamento (`queryImmagini`), mentre lettura/PUT/DELETE singoli accettano ogni ambito. `backupService` fa lo snapshot di avvio solo se c'è una migrazione da applicare. `copiaIstanza` non porta più la cartella `immagini/` (i backup vecchi con quella cartella si ripristinano ancora: i file vengono assorbiti alla riapertura). Il ripristino e l'importazione leggono il file dalla cartella d'appoggio, senza un limite di dimensione proprio (la costante `MAX_BYTE_RIPRISTINO` del caricamento nel corpo è stata tolta il 2026-10-03).
 - **Frontend**: `assetStore.carica` unisce `/asset/manifest.json` e `getManifestoImmagini()` (`/api/immagini/manifest`, che vince a parità di chiave): `useAsset`/`AssetImg` invariati. `assetTokyo.ts`, `stratiMemento.ts` (`urlElementoMemento`), `AlberoLuoghi` usano `urlImmagine(famiglia, chiave)` (chiave con `/` codificata: `lmap%2Ftokyo%2Fshibuya`).
-- **Pacchetto di gioco = `gioco.db`** (il completo è fuori da git; il primo avvio copia l'iniziale senza immagini e la card avvisa finché il completo non è importato, `StatoIstanzaDto.completo`): `server/services/pacchettoGiocoService.ts` — `esportaPacchetto` (copia consistente di `main`), `anteprimaPacchetto` (firma SQLite + `verificaDatabase` = 'gioco', versione ≤ ultima migrazione, conteggi per tabella, tabelle assenti, immagini con contenuto, `orfaniPartite` con `RIFERIMENTI_PARTITE`: 30 riferimenti utente→gioco valutati attaccando `partite.db` al file caricato; una tabella di gioco assente rende orfane tutte le righe che la referenziano, con nota), `importaPacchetto` (copia di sicurezza → `closeDb` → `scriviDatabase` → `riapriIstanza` + `regoleAllAvvio` → orfani ricalcolati; errore → `tornaAllaCopiaDiSicurezza`, 400 `importazione-fallita`). Rotte in `routes/impostazioni.ts`: `POST /istanza/gioco/anteprima`, `PUT /istanza/gioco` (corpo grezzo), `POST /istanza/gioco/anteprima-da-url` e `PUT /istanza/gioco/da-url` (il server scarica dall'indirizzo), `GET /istanza/gioco/importazione` (stato); il download è `GET /istanza/database`. DTO: `AnteprimaPacchettoDto`, `EsitoImportazionePacchettoDto`, `OrfanoPartiteDto`. UI: `src/components/impostazioni/PacchettoGioco.tsx` (anteprima obbligatoria, esito con orfani e «Ricarica l'app»).
+- **Pacchetto di gioco = `gioco.db`** (il completo è fuori da git; il primo avvio copia l'iniziale senza immagini e la card avvisa finché il completo non è importato, `StatoIstanzaDto.completo`): `server/services/pacchettoGiocoService.ts` — l'esportazione è `copiaDatabase('gioco')` (copia consistente di `main` in un file temporaneo), `anteprimaPacchetto(percorso)` / `anteprimaPacchettoDaDeposito(nome)` (firma SQLite + `verificaDatabase` = 'gioco' sul file, aperto dov'è in sola lettura; versione ≤ ultima migrazione, conteggi per tabella, tabelle assenti, immagini con contenuto, `orfaniPartite` con `RIFERIMENTI_PARTITE`: 30 riferimenti utente→gioco valutati attaccando `partite.db` al file; una tabella di gioco assente rende orfane tutte le righe che la referenziano, con nota), `importaPacchetto(percorso)` / `importaPacchettoDaDeposito(nome)` (il file in una cartella di lavoro di `data/tmp` → copia di sicurezza → `closeDb` → `installaDatabase` → `riapriIstanza` + `regoleAllAvvio` → orfani ricalcolati; errore → `tornaAllaCopiaDiSicurezza`, 400 `importazione-fallita`). Rotte in `routes/impostazioni.ts` (nessun file nel corpo di una richiesta, dal 2026-10-03): `GET /istanza/gioco/deposito`, `POST /istanza/gioco/deposito/anteprima`, `PUT /istanza/gioco/deposito`, `GET /istanza/gioco/importazione` (stato); il download è `GET /istanza/database`, che lascia anche una copia nel deposito. DTO: `AnteprimaPacchettoDto`, `EsitoImportazionePacchettoDto`, `OrfanoPartiteDto`. UI: `src/components/impostazioni/PacchettoGioco.tsx` (anteprima obbligatoria, esito con orfani e «Ricarica l'app»).
 
 ## 8. Build, test, deploy
-- Test (Vitest, 104 file / 359 casi al 2026-09-05): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
-  FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
-- Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
+- Test (Vitest, 267 file / 1461 casi al 2026-10-04). Aiuti comuni in `test/`:
+  - `dbDiProva()` (`test/dbDiProva.ts`): il DB del backend in memoria con il pacchetto iniziale caricato e migrato;
+  - `test/supertest.ts` (alias di `supertest` in `vitest.config.ts`): un server per app con connessioni keep-alive, chiuso a fine file
+    da `test/setup.ts`, contro gli `EADDRINUSE` di Windows;
+  - `moduloApi` / `moduloNotifiche` (`test/mockModuli.ts`, globali da `test/setup.ts`) per i `vi.mock` del frontend: il modulo
+    finto parte da quello vero, i sostituti dati dal test lo rimpiazzano, le funzioni pure restano vere, e un'API non simulata
+    fallisce dicendo il suo nome.
+  Il frontend gira in jsdom.
+- Dev: `scripts/start-all.sh` (`npm run dev:server` = `tsx watch`, che **si riavvia da solo** a ogni salvataggio in `server/` e
+  applica subito le migrazioni nuove ai dati di `data/`; `npm run dev:client` = `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
+  Le porte vengono da `.env` (`BE_PORT`/`PORT`, `FE_PORT`) per il server, gli script e Vite.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
   radice del pidfile o all'ultimo runtime nostro (mai oltre un `bash` diverso dal pidfile), poi termina l'albero — Linux: SIGTERM,
   attesa ≤5 s, SIGKILL ai superstiti; Windows: `taskkill //T` sul WINPID (tradotto dal PID MSYS). Provato su Windows e WSL Ubuntu.
-- CI (`.github/workflows/ci.yml`): typecheck, lint strict su `server/`, lint informativo, test, audit.
-- Immagini (`docker-publish.yml`): dopo il gate `verify`, build & push su GHCR `merlinoalbus/project-p5r-{backend,frontend}` con tag `latest` e `sha`.
+- CI (`.github/workflows/ci.yml`, anche riusabile con `workflow_call`): typecheck, lint (uno, bloccante), test, audit.
+- Immagini (`docker-publish.yml`): dopo il gate `verify` (lo stesso `ci.yml`, audit compreso), build & push su GHCR
+  `merlinoalbus/project-p5r-{backend,frontend}` con tag `latest` e `sha`; cache GHA separate per le due immagini. Il frontend
+  installa senza script nativi (`npm ci --ignore-scripts`). nginx comprime testi, JSON e SVG (gzip).
 - Il backend in Docker gira come `node --import tsx server/index.ts` (PID 1 = node, riceve SIGTERM da `docker stop`).
 - Runtime (`docker-compose.yml`, stack Portainer dal repo): nessuna porta pubblicata; FE nginx sulla rete esterna `PROXY_NETWORK` (default `proxy`) raggiunto da cloudflared come `http://project_p5r_fe:80`, BE solo su rete interna (3101, proxato da nginx su `/api/`),
-  volume `project_p5r_data` su `/data` (DB creato al primo boot, seed nell'immagine), label watchtower per l'aggiornamento automatico.
+  volume `project_p5r_data` su `/data` (DB creato al primo boot dal pacchetto iniziale nell'immagine), label watchtower per
+  l'aggiornamento automatico. Porta, cartella dei dati e del pacchetto stanno nell'immagine; lo stack deve definire `NAS_ADDR` e
+  `NAS_PATH` della cartella d'appoggio (senza, `docker compose` si ferma con un messaggio).
 
 ### Catalogo personale e agenda (2026-09-05)
 La migrazione 035 separa origine, personalizzazioni e nascondimenti. Il reseed conserva articoli personali/acquisti e riallinea le spunte soltanto su identità certe; quelle ambigue diventano azioni personali mantenendo effetti reversibili. Il quartiere dei negozi è `luogo_chiave`, distinto dalla descrizione `luogo`. La ricerca include negozi vuoti; i prodotti usano un unico elenco accessibile adattato tramite container queries.
@@ -806,21 +871,24 @@ Un'istanza pubblicata sta dietro nginx e un tunnel: un corpo da centinaia di MB 
   (`disponibile: false` con il motivo) invece di sembrare vuoto. **Il NAS non ospita `/data`**: SQLite gira in WAL,
   che richiede memoria condivisa e non funziona su filesystem di rete; sul NAS sta solo il file di scambio.
 
-- **Il file nel corpo** (istanza locale). `src/services/api/impostazioni.ts` invia con **XMLHttpRequest**, non con
+- *Storico (superato il 2026-10-03: oggi il file arriva solo dalla cartella d'appoggio, qui sopra; le rotte
+  `PUT /istanza/gioco`, `/anteprima-da-url` e `/da-url` e l'invio con XHR non ci sono più).* Le due strade di allora:
+- **Il file nel corpo** (istanza locale). `src/services/api/impostazioni.ts` inviava con **XMLHttpRequest**, non con
   `fetch`, perché solo XHR dice quanti byte sono partiti (`upload.onprogress` → `AvanzamentoInvio` → `BarraInvio`,
   percentuale e MB, poi barra indeterminata mentre lavora il server). Il timeout complessivo è sparito: resta quello
   di **inattività** (dieci minuti che ripartono a ogni evento), perché un invio lento non è un invio morto.
-  `nginx.conf` ha una `location ^~ /api/impostazioni/` con `client_max_body_size 1024m` e timeout 1800s (il resto
+  `nginx.conf` aveva una `location ^~ /api/impostazioni/` con `client_max_body_size 1024m` e timeout 1800s (dal 2026-10-04 il corpo è
+  tornato a 10M, rilievo D3, perché nessun file viaggia più nella richiesta; i timeout lunghi restano; il resto
   delle API resta a 10M/120s), e `server/index.ts` alza `server.requestTimeout` a 30 minuti: i 300 secondi
   predefiniti di Node troncavano la ricezione di un pacchetto grande a metà.
 - **L'indirizzo** (istanza pubblicata). `POST /istanza/gioco/anteprima-da-url` e `PUT /istanza/gioco/da-url`
-  ricevono solo l'URL: il file se lo prende il server con `server/utils/scaricaDaUrl.ts`, che distingue l'attesa
+  ricevevano solo l'URL: il file se lo prendeva il server con `server/utils/scaricaDaUrl.ts` (che resta, per le immagini), che distingue l'attesa
   delle **intestazioni** (30s) dall'**inattività** del corpo (120s che ripartono a ogni blocco) e applica il tetto
   *mentre* scarica, così un'origine senza `Content-Length` non può far crescere la memoria. Lo usa anche
   `importaImmagineDaUrl`. La scelta consapevole: l'indirizzo lo decide chi usa l'app e può puntare alla rete privata
   (è il caso d'uso: il PC di casa in Tailscale), quindi nessuna lista di blocco.
 - **L'importazione è una alla volta e osservabile**: `pacchettoGiocoService` tiene un lucchetto (409
-  `importazione-in-corso`), aggiorna la fase (`scarico`, `verifica`, `copia-di-sicurezza`, `sostituzione`,
+  `importazione-in-corso`), aggiorna la fase (`lettura` dalla cartella d'appoggio, `verifica`, `copia-di-sicurezza`, `sostituzione`,
   `riapertura`, `controllo`) e conserva l'esito dell'ultima. `GET /istanza/gioco/importazione` lo espone
   (`StatoImportazionePacchettoDto`). Serve perché un tunnel chiude la connessione dopo ~100 secondi mentre il server
   sta ancora sostituendo i dati: il frontend, invece di dire «fallita», interroga lo stato, segue le fasi e mostra
@@ -996,8 +1064,8 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   spunte della partita (`spunta_voce_partita`; prima `azione_partita` e `azione_utente_partita`) hanno già contato una visione di quel film, più una;
   saltare una visita della guida non regala visioni, togliere e rimettere una spunta non ne aggiunge. Un errore (libro
   non ancora disponibile, 409; attività senza turni, 400) ferma la spunta invece di lasciarla senza punti: prima la
-  spunta riusciva in silenzio. `annullaEffettiAzione` toglie Doti, punti del Confidente e turni (`togliTurno` di
-  quell'`ordine`); le letture restano (si disfano dalla loro pagina). `EffettiAzioneDto` registra anche `letture`
+  spunta riusciva in silenzio. `annullaEffettiAzione` toglie i punti del Confidente e i turni (`togliTurno` di
+  quell'`ordine`); le Doti non si toccano (si segnano solo a mano, scelta dell'utente del 2026-09-30) e le letture restano (si disfano dalla loro pagina). `EffettiAzioneDto` registra anche `letture`
   (prima → dopo, le Doti che l'elemento ha dato, `visione` al cinema) e `turni` (attività, ordine, Doti).
 - **Turni** (`attivitaService`): `registraTurno` / `togliTurno` / `impostaVolteAttivita` sulle attività contate per
   volte (`tracciamento = 'svolta'`, con lo stesso ripiego sul tipo della scheda). Ogni turno registrato ha la sua riga
@@ -1057,7 +1125,7 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   spiegazione dei turni. La semantica di `ripetuto` è quella di `dotiDaEffetti`: una voce senza vale solo alla prima volta,
   una con la spunta dalla seconda in poi; `descriviVoceEffetto` e le etichette lo dicono ora così («dalla seconda volta in
   poi», prima «anche alle volte successive», che faceva pensare a una somma). Il contatore di Partita → Progressi passa
-  da `impostaVolteAttivita`, che restituisce di quanto sono cambiate le Doti (`ProgressiPartitaDto.cambioDoti`, un avviso
+  da `impostaVolteAttivita`, che restituisce le Doti da segnare per i turni aggiunti o tolti (`ProgressiPartitaDto.daSegnare`, un avviso
   dopo + o −); ogni attività porta `effettiTurno` («1° turno: Gentilezza ♪♪ · Dal 2° turno: Gentilezza ♪♪»,
   `attivitaService.effettiDelTurno`).
 - **Dote a ogni incontro con un Confidente** (voce 5): un dato del Confidente, `confidente_dote_incontro`
@@ -1115,3 +1183,110 @@ sovrapposte, le rimosse e l'agenda del giorno delle sezioni «Guida giorno per g
   elimina» se spuntata con effetti nella partita). `ModuloVoceGiornata`: genere, testo, note, fascia e «Posto nella
   giornata» (l'elenco numerato della fascia con la voce al suo posto, Su/Giù); tipo, collegamento, rango ed effetti per le
   azioni. Icone `ui/azione-su` e `ui/azione-giu` (riserva SVG `IconSu`/`IconGiu`, censimento §21).
+
+## Regole trasversali dalla verifica completa del codice (2026-10-03)
+
+Rapporto dei rilievi in `docs/analisi/verifica-completa-2026-10-03.md`; qui le regole che ne sono uscite e che valgono per chi
+scrive codice nuovo.
+
+- **Cache dei dati di gioco: un registro unico** (`server/services/cacheDiGioco.ts`). Ogni modulo che tiene in memoria letture del
+  DB di gioco registra la propria invalidazione al caricamento (`registraCacheDiGioco(invalidaX)`): traduzioni, motore di
+  fusione, eredità, finestre dei Palazzi, nomi delle condizioni. Chi sostituisce o ricarica `gioco.db` (`caricaPacchetto`,
+  `ricaricaPacchetto`, `riapriIstanza`) chiama solo `invalidaCacheDiGioco()`. Una cache nuova si registra lì, non si aggiunge a
+  mano agli elenchi dei chiamanti (le finestre dei Palazzi ne erano rimaste fuori). I semafori dei Confidenti non hanno più una
+  cache fra le chiamate: lo stato si calcola una volta per `confidenti()`.
+- **Una sostituzione dei file alla volta** (`server/services/lucchettoIstanza.ts`, `occupaIstanza`): la prendono l'importazione
+  del pacchetto e il ripristino dell'istanza; la seconda richiesta riceve 409 `importazione-in-corso`. Il ripristino rifiuta
+  anche uno schema più nuovo del codice (400 `database-troppo-nuovo`), come già l'importazione (`pacchetto-troppo-nuovo`).
+- **Scrittura atomica dei database** (`installaDatabase`, prima `scriviDatabase`): il file preparato nella cartella di lavoro si
+  sposta sopra il vivo (`fsync`, `rename`; su un altro disco, `EXDEV`, copia in un `.nuovo` accanto e poi `rename`). Un crash a
+  metà lascia il file di prima, non un file troncato. Se dopo un errore fallisce anche la riapertura, la risposta è un
+  500 che dice di riavviare e dove sta la copia di sicurezza.
+- **Livello di Joker: fonte unica `partita.livello_protagonista`**. La squadra lo legge da lì; la riga `joker` di
+  `membro_squadra_partita` lo ricopia (anche dal riepilogo della partita) ma non è mai letta per il livello.
+- **Voci della guida gestite: una regola sola** (`VOCI_GESTITE_SQL` / `vociGestite` in `services/mappe/voceDelPin.ts`): uno stato
+  su una voce descrittiva («Altro») non segna i pin, né sul visore e nelle condizioni né nella raccolta e nel completamento dei
+  Palazzi.
+- **Immagini che appartengono a qualcosa se ne vanno con lui**: eliminando un pin, una mappa o un'area, le schermate dei pin
+  (`immagine`, ambito `spillo`) si tolgono nella stessa transazione (`eliminaImmaginiDeiPin`). L'immagine di base di una mappa
+  si toglie solo se è soltanto sua: la stessa chiave può essere la pianta di un quartiere (`citta-<quartiere>`) o di un'area.
+  Immagine e righe che la legano nascono in una transazione.
+- **Riferimenti polimorfici**: un luogo o un negozio dell'utente eliminato stacca i pin e le mappe che lo citavano
+  (`staccaDalleMappe`), come già i punti della guida.
+- **Importazione delle mappe**: il genitore si scrive sempre (una mappa dichiarata radice torna radice) e i passaggi di altre
+  mappe che arrivavano su un pin reinserito ritrovano lo spillo d'arrivo per uid.
+- **Chiavi**: una mappa non può avere come chiave un segmento letterale delle rotte di `/api/mappe` (`CHIAVI_MAPPA_RISERVATE`,
+  coperto da un test sul router); la chiave di un punto della guida sta nei 200 caratteri delle sue rotte anche in un'area con
+  la chiave più lunga possibile.
+- **Copie di avvio**: la rotazione toglie anche i giornali `-wal`/`-shm`, quelli rimasti senza il loro database si tolgono a ogni
+  avvio (`pulisciGiornaliOrfani`), e in Impostazioni una copia (gioco + partite) si conta una volta.
+- **Client HTTP e busta**: vedi §4 (tentativi solo sui metodi idempotenti, `payloadDellaBusta` per chiave). Gli invii di file
+  passano tutti da `inviaFile` (`src/services/api/_helpers.ts`), che controlla lo stato prima di leggere il corpo: un rifiuto del
+  proxy in HTML diventa un `ApiError` leggibile.
+- **`useCarica`**: `ricarica()` si risolve quando la rilettura è arrivata (anche fallita; subito se il componente è smontato);
+  `imposta` accetta una funzione che riceve i dati **correnti**. Un aggiornamento locale che arriva dopo un `await` usa sempre la
+  forma con funzione: partire dai dati del render annullava un secondo gesto fatto nel frattempo.
+- **Store con richieste che si sovrappongono** (`partitaStore`, `suggerimentiStore`): un contatore di generazione, vale solo la
+  risposta dell'ultima richiesta; cambiando partita i suggerimenti della precedente si azzerano subito.
+- **Progressi a pressioni rapide** (libri, film, videogiochi): un solo hook, `useCodaProgresso` — una richiesta per volta per
+  elemento, chiave `partita:elemento`, la coda si ferma se la partita attiva cambia.
+- **Elenchi modificabili con stato per riga** (condizioni, effetti): chiavi da `useIdStabili`, mai l'indice né il contenuto.
+- **Finestre di dialogo** (`Modal`): il fuoco entra nella finestra (campo `autoFocus` o la finestra stessa, mai un campo a caso:
+  su telefono aprirebbe la tastiera), Tab resta dentro, alla chiusura torna a chi l'ha aperta (registro unico di fuoco e clic,
+  perché molte finestre nascono già aperte e un `autoFocus` prende il fuoco prima degli effetti).
+- **Accessibilità**: un `div`/`span` con `aria-label` ha sempre un `role` (`group` per i contenitori, `img` per i segni); lo
+  verifica `src/accessibilita.test.ts` leggendo i sorgenti.
+- **Deploy (`nginx.conf`)**: il backend si risolve per nome a ogni richiesta (`resolver 127.0.0.11`, variabile `$backend`), così
+  un container ricreato da Watchtower non lascia nginx sul vecchio IP (502); `/api/mappe/importa` accetta 64 MB come Express;
+  `immutable` solo sui file con hash di `/assets/`, gli altri statici si rivalidano dopo un'ora.
+- **Script**: `start-be.sh`/`start-fe.sh` si dichiarano «già in ascolto» solo se sulla porta c'è node (`gia_avviato_o_esci`),
+  altrimenti escono con 1; `genera-pacchetto.ts` toglie la cartella di lavoro anche quando fallisce; `accesso:copertura` misura il
+  `gioco.db` dell'istanza.
+
+## Strutture comuni della verifica completa (fase 3, 4 ottobre 2026)
+
+Le ridondanze trovate dalla verifica (`docs/analisi/verifica-completa-2026-10-03.md`, §9) sono diventate un posto solo. Chi aggiunge
+codice parte da qui invece di riscriverle.
+
+**Server**
+- `server/schemas/comuni.ts`: `idParam`, `boolQuery`, `testoRicerca`, `livello`, `dataGioco` (un messaggio solo), `uidVoce`,
+  `elencoInteri`, `dote`, `categoriaArticolo`.
+- `server/services/verificaPartita.ts`: `verificaPartita(id)` e `partitaNonTrovata(id)`, il 404 della partita (prima ripetuto in 26
+  punti).
+- `server/services/datiGuida.ts`: `datiGuida(chiave)` legge una volta i blocchi di `dati_guida` e li tiene in cache, congelati e tipizzati
+  `Congelato<T>` (in sola lettura a ogni livello: una modifica sul posto è un errore del compilatore, N7 della verifica);
+  `finestreDungeon()` per le finestre dei Palazzi. La cache sta nel registro `cacheDiGioco`.
+- `server/services/mappe/alberoMappe.ts`: `sottoalberoMappe`, `palazzoDellaMappa`, `radiceDelPalazzo`, `SQL_SOTTOALBERO`. Una regola
+  per «il Palazzo di una mappa», cioè la radice `dungeon-<chiave>` senza genitore. Prima c'erano nove implementazioni e due regole.
+- `server/utils/zip.ts`: ZIP a flusso (`scriviZip`, `leggiIndiceZip`, `estraiVoce`), CRC di `zlib`. Copia, ripristino e
+  importazione lavorano su file in `data/tmp`, mai su buffer da centinaia di MB, e installano con `installaDatabase`.
+- Caricamenti in blocco al posto di una query per riga:
+  - `contestoMappe()` (mappe);
+  - `possedute()` / `possedutaPerId()` (scorta);
+  - `skillRiassunti()`;
+  - le affinità dell'elenco Persona;
+  - `confidente()` / `ranghiConfidenti()`.
+- Migrazioni 096 (via `seed_meta` e un indice doppio) e utente 016 (via un indice doppio, nuovo indice su
+  `spunta_voce_partita.voce_uid`).
+
+**Condivisi**
+- `shared/doti.ts` (`DOTI_SOCIALI` e nomi, nell'ordine di `dote_sociale.ordine`);
+- `shared/articoli.ts` (categorie);
+- `shared/statistiche.ts` (`CHIAVI_STATISTICHE`, `NOMI_STATISTICHE`; `StatisticheDto` e `OsservazioneStatisticheDto` ne sono
+  alias);
+- `leggiGiorni` in `shared/orariNegozio.ts`;
+- i DTO `ElenchiRegoleDto`, `PinConStatoDto`, `ManifestImmaginiDto`, prima solo nel client.
+
+**Frontend**
+- le pagine si caricano alla prima visita (`router.tsx`, `lazy`), con un `Suspense` attorno all'`Outlet` del layout;
+- il barrel `services/api` esporta tutti i moduli, `condizioni` compreso, e i sorgenti importano solo da lì;
+- aiuti in `src/utils`:
+  - `salvaFile`;
+  - `cicli` (`NOME_MODO_PARTNER`);
+  - `contornoSagoma`;
+  - `piatto` in `testo`;
+  - `dateGioco` (che usa la data leggibile condivisa);
+- `components/shared/VoceFonte` (`VoceTesto`, `Fonte`);
+- il raggruppamento degli spilli tiene in cache i centri delle nubi e, nel visore, sta in un `useMemo`;
+- l'area visibile di una planimetria si cerca dai bordi;
+- iscrizioni agli store con selettori stretti (`useShallow`).

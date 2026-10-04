@@ -4,14 +4,17 @@
 
 import { useNavigate } from 'react-router-dom';
 import { Selettore } from '../shared/Selettore';
+import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 
 /** Menu a tendina con le partite; "Nuova partita…" porta alle impostazioni. */
 export function PartitaSelettore() {
-  const { partite, attiva, rendiAttiva } = usePartitaStore();
+  // solo quel che serve (P4"): senza selettore si ridisegnava a ogni cambio dello store, caricamenti compresi
+  const { partite, attiva, rendiAttiva } = usePartitaStore(useShallow((s) => ({ partite: s.partite, attiva: s.attiva, rendiAttiva: s.rendiAttiva })));
   const navigate = useNavigate();
 
+  /** «Nuova partita…» porta alle impostazioni; un'altra partita diventa attiva (con notifica), la stessa o un valore vuoto non fa nulla. */
   const cambia = async (valore: string) => {
     if (valore === '__nuova') {
       navigate('/impostazioni');

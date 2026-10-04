@@ -2,16 +2,15 @@
 // Test migrazione 034 — spunta del Matto spostata dall'11 al 12 aprile
 // ============================================================
 
-import { closeDb, getDb, initDb, prepared } from '../dbService.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../dbService.js';
 import { spostaSpuntaMatto } from './034_matto_12_aprile.js';
 import { DDL_UTENTE_STORICHE } from '../schemaUtente.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
 describe('migrazione 034 — Il Matto il 12 aprile', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    const db = dbDiProva();
     // le spunte per posizione di allora (dalla «utente» 015 sono per identità, `spunta_voce_partita`)
     db.exec(DDL_UTENTE_STORICHE.find((s) => s.includes('utente.azione_partita ('))!);
   });

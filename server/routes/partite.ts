@@ -29,6 +29,7 @@ import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
+import { idParam } from '../schemas/comuni.js';
 import { avanzaSeGiornoCompleto, impostaGiornoCorrente } from '../services/percorsoService.js';
 import { spuntaVoce } from '../services/giornataService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
@@ -37,7 +38,7 @@ import { eliminaEventi, eliminaEvento, storico } from '../services/storicoServic
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
   aggiornaCompendio, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita, registraPossedutaNelCompendio,
-  confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, leggiPartita, partitaAttiva, personePossedute, rimuoviPosseduta,
+  confidente, confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, leggiPartita, partitaAttiva, personePossedute, rimuoviPosseduta,
 } from '../services/partiteService.js';
 
 const router = Router();
@@ -100,9 +101,7 @@ router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, bo
 router.put('/:id/confidenti/:chiave/requisiti', validate({ params: paramsPartitaChiave, body: bodyRequisito }), (req, res) => {
   const b = req.body as { rango: number; indice: number; confermato: boolean };
   confermaRequisito(Number(req.params.id), String(req.params.chiave), b.rango, b.indice, b.confermato);
-  const c = confidenti(Number(req.params.id)).find((x) => x.chiave === String(req.params.chiave));
-  if (!c) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${String(req.params.chiave)}' non esiste.`);
-  res.json(c);
+  res.json(confidente(Number(req.params.id), String(req.params.chiave)));
 });
 router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChiave, body: bodyRegalo }), (req, res) => {
   const b = req.body as { regalo: string; fatto: boolean };
@@ -180,7 +179,7 @@ router.get('/:id/suggerimenti', validate({ params: paramsPartita }), (req, res) 
 });
 
 /** Stato «raccolto» di uno spillo della mappa nella partita (Fase 13). */
-router.put('/:id/spilli/:spilloId', validate({ params: z.object({ id: z.coerce.number().int().positive(), spilloId: z.coerce.number().int().positive() }), body: bodyRaccolto }), (req, res) => {
+router.put('/:id/spilli/:spilloId', validate({ params: z.object({ id: idParam, spilloId: idParam }), body: bodyRaccolto }), (req, res) => {
   res.json(impostaRaccolto(Number(req.params.id), Number(req.params.spilloId), (req.body as { raccolto: boolean }).raccolto));
 });
 

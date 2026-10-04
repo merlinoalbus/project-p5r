@@ -20,6 +20,8 @@
 // ============================================================
 
 import { statoDelTipo, uidValido } from './spilli.js';
+import { congiunzione } from './testo.js';
+import { eDote, nomeDote } from './doti.js';
 
 export const PALAZZI_CONDIZIONE = [
   { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }, { chiave: 'madarame', nome: 'Palazzo di Madarame' }, { chiave: 'kaneshiro', nome: 'Palazzo di Kaneshiro' },
@@ -28,9 +30,6 @@ export const PALAZZI_CONDIZIONE = [
 ] as const;
 /** Gli archi della storia nell'ordine in cui il gioco li impone: ogni arco comincia con il suo Palazzo. */
 export const ARCHI_STORIA = ['kamoshida', 'madarame', 'kaneshiro', 'futaba', 'okumura', 'niijima', 'shido', 'maruki'] as const;
-export const DOTI_CONDIZIONE = [
-  { chiave: 'conoscenza', nome: 'Conoscenza' }, { chiave: 'coraggio', nome: 'Coraggio' }, { chiave: 'perizia', nome: 'Perizia' }, { chiave: 'gentilezza', nome: 'Gentilezza' }, { chiave: 'fascino', nome: 'Fascino' },
-] as const;
 export const GIORNI_SETTIMANA = [
   { chiave: 'lunedi', nome: 'lunedì' }, { chiave: 'martedi', nome: 'martedì' }, { chiave: 'mercoledi', nome: 'mercoledì' }, { chiave: 'giovedi', nome: 'giovedì' },
   { chiave: 'venerdi', nome: 'venerdì' }, { chiave: 'sabato', nome: 'sabato' }, { chiave: 'domenica', nome: 'domenica' },
@@ -70,7 +69,6 @@ export const EVENTI_STORIA = [
   { chiave: 'chiamata-kawakami-pagata', nome: 'Chiamata a Kawakami pagata' },
   { chiave: 'oratore-shibuya-ascoltato', nome: 'Oratore di Shibuya ascoltato' },
 ] as const;
-export type EventoStoria = (typeof EVENTI_STORIA)[number]['chiave'];
 /** Il Ladro che fa avvenire l'evento, o null se l'evento si segna a mano. */
 export function membroDellEvento(chiave: string): string | null {
   const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
@@ -119,9 +117,8 @@ export type RequisitoSpillo =
    *  (richiesta dell'utente, 2026-09-30 e 2026-10-03). Solo nelle condizioni dei pin. */
   | { tipo: 'spillo'; spillo: string; segnato: boolean };
 
-export type TipoCondizioneSpillo = RequisitoSpillo['tipo'];
-export const PROFONDITA_MASSIMA = 5;
-export const CONDIZIONI_PER_GRUPPO = 20;
+const PROFONDITA_MASSIMA = 5;
+const CONDIZIONI_PER_GRUPPO = 20;
 
 /** Le condizioni che dicono se una cosa **c'è**, in quel momento della partita.
  *
@@ -245,11 +242,7 @@ export interface NomiCondizioni {
   spilli?: Record<string, { nome: string; tipo: string; mappa: string; parola?: string }>;
 }
 
-function congiunzione(voci: string[]): string {
-  if (voci.length <= 1) return voci.join('');
-  return `${voci.slice(0, -1).join(', ')} e ${voci[voci.length - 1]}`;
-}
-
+/** Il nome di un Palazzo per le frasi delle condizioni: dai nomi passati, poi dall'elenco `PALAZZI_CONDIZIONE`, infine la chiave stessa. */
 export function nomePalazzo(chiave: string, nomi: NomiCondizioni = {}): string {
   return nomi.dungeon?.[chiave] ?? PALAZZI_CONDIZIONE.find((p) => p.chiave === chiave)?.nome ?? chiave;
 }
@@ -269,7 +262,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'quartiere': return `da quando si sblocca ${nomi.quartieri?.[r.quartiere] ?? r.quartiere}`;
     case 'arco': return `dall'arco del ${nomePalazzo(r.dungeon, nomi)}`;
     case 'palazzo': return `dopo il ${nomePalazzo(r.dungeon, nomi)}`;
-    case 'dote': return `${DOTI_CONDIZIONE.find((d) => d.chiave === r.dote)?.nome ?? r.dote} Rango ${r.rango}`;
+    case 'dote': return `${nomeDote(r.dote)} Rango ${r.rango}`;
     case 'confidente': return `Rango Confidente ${nomi.confidenti?.[r.confidente] ?? r.confidente} ${r.rango}`;
     case 'squadra': return `${nomi.squadra?.[r.membro] ?? nomi.confidenti?.[r.membro] ?? r.membro} in squadra`;
     case 'richiesta': return `richiesta «${nomi.richieste?.[r.richiesta] ?? r.richiesta}» completata`;
@@ -291,13 +284,16 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
   }
 }
 
+/** Il testo senza spazi ai capi, se è una stringa non vuota lunga al massimo `max` (misurata prima di togliere gli spazi); altrimenti null. */
 function testoPulito(x: unknown, max = 200): string | null {
   return typeof x === 'string' && x.trim().length > 0 && x.length <= max ? x.trim() : null;
 }
+/** Una chiave valida: testo pulito fatto di segmenti `[a-z0-9-]` (senza trattino iniziale) separati da `/`; altrimenti null. */
 function chiavePulita(x: unknown, max = 120): string | null {
   const t = testoPulito(x, max);
   return t && /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/.test(t) ? t : null;
 }
+/** Il valore se è un intero compreso fra `min` e `max` (estremi inclusi); altrimenti null. */
 function intero(x: unknown, min: number, max: number): number | null {
   return typeof x === 'number' && Number.isInteger(x) && x >= min && x <= max ? x : null;
 }
@@ -333,7 +329,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'quartiere': { const quartiere = chiavePulita(o.quartiere, 60); return quartiere ? { tipo: 'quartiere', quartiere } : null; }
     case 'arco': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon && (ARCHI_STORIA as readonly string[]).includes(dungeon) ? { tipo: 'arco', dungeon } : null; }
     case 'palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon ? { tipo: 'palazzo', dungeon } : null; }
-    case 'dote': { const dote = testoPulito(o.dote, 20); const rango = intero(o.rango, 1, 5); return dote && DOTI_CONDIZIONE.some((d) => d.chiave === dote) && rango ? { tipo: 'dote', dote, rango } : null; }
+    case 'dote': { const dote = testoPulito(o.dote, 20); const rango = intero(o.rango, 1, 5); return dote && eDote(dote) && rango ? { tipo: 'dote', dote, rango } : null; }
     case 'confidente': { const confidente = chiavePulita(o.confidente, 60); const rango = intero(o.rango, 1, 10); return confidente && rango ? { tipo: 'confidente', confidente, rango } : null; }
     case 'squadra': { const membro = chiavePulita(o.membro, 60); return membro ? { tipo: 'squadra', membro } : null; }
     case 'richiesta': { const richiesta = testoPulito(o.richiesta, 200); return richiesta ? { tipo: 'richiesta', richiesta } : null; }

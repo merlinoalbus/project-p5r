@@ -25,6 +25,9 @@ interface Props {
   onSalvato: () => void | Promise<void>;
 }
 
+/** Riquadro della scheda di un Confidente: elenca, rango per rango, le Doti date a ogni incontro
+ * (evidenziando il rango verso cui vale il prossimo incontro della partita) e apre una finestra
+ * in cui modificarle su una bozza — fino a cinque per rango — da salvare tutta insieme. */
 export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
   const [aperta, setAperta] = useState(false);
   const [bozza, setBozza] = useState<Array<{ rango: number; doti: DoteNote[] }>>([]);
@@ -32,8 +35,11 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
   const verso = rangoPartita === null ? null : Math.min(10, rangoPartita + 1);
   const conDoti = confidente.dotiIncontro.filter((r) => r.doti.length > 0);
 
+  /** Apre la finestra con una bozza copiata dai dati del Confidente, così le modifiche non toccano l'originale finché non si salva. */
   const apri = () => { setBozza(confidente.dotiIncontro.map((r) => ({ rango: r.rango, doti: r.doti.map((d) => ({ ...d })) }))); setAperta(true); };
+  /** Sostituisce nella bozza le Doti di un rango. */
   const cambiaRango = (rango: number, doti: DoteNote[]) => setBozza((b) => b.map((r) => (r.rango === rango ? { ...r, doti } : r)));
+  /** Salva l'intera bozza, avvisa `onSalvato` e chiude la finestra; in caso di errore la finestra resta aperta. */
   const salva = async () => {
     setOccupato(true);
     try {

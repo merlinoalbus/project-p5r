@@ -37,6 +37,7 @@ export class HttpError extends Error {
     this.details = details;
   }
 
+  /** Il corpo della risposta d'errore `{ error: { code, message, details? }, requestId? }`: `details` e `requestId` solo se presenti. */
   toBody(requestId?: string): HttpErrorBody {
     return {
       error: {

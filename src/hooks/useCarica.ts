@@ -8,9 +8,12 @@ interface Stato<T> {
   dati: T | null;
   caricamento: boolean;
   errore: string | null;
+  /** Rilegge i dati; la promessa si risolve quando la rilettura è arrivata (riuscita o fallita), non prima. */
   ricarica: () => Promise<void>;
-  /** Sostituisce i dati in locale (dopo una scrittura riuscita). */
-  imposta: (d: T) => void;
+  /** Sostituisce i dati in locale (dopo una scrittura riuscita). Con una funzione si parte dai dati **correnti**, non da quelli
+   *  catturati al render: due aggiornamenti ravvicinati (due spunte prima che la prima risposta arrivi) si sommano invece di
+   *  annullarsi. Senza dati la funzione non viene chiamata. */
+  imposta: (d: T | ((attuali: NonNullable<T>) => T)) => void;
 }
 
 interface Esito<T> {
@@ -31,30 +34,58 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[]): S
   const [tick, setTick] = useState(0);
   const [esito, setEsito] = useState<Esito<T> | null>(null);
   const caricaRef = useRef(carica);
+  // l'ultima generazione chiesta e chi aspetta una rilettura: si risolvono quando arriva l'esito di una generazione ≥ la loro
+  const tickRef = useRef(0);
+  const attese = useRef<Array<{ tick: number; risolvi: () => void }>>([]);
 
   useEffect(() => {
     caricaRef.current = carica;
   });
 
+  // smontato il componente nessun esito arriverà più: chi aspetta non resta appeso, e una `ricarica()` chiesta dopo (per esempio
+  // da un gesto che ha appena navigato altrove) si risolve subito
+  const smontato = useRef(false);
+  useEffect(() => {
+    smontato.current = false;
+    return () => {
+      smontato.current = true;
+      for (const a of attese.current) a.risolvi();
+      attese.current = [];
+    };
+  }, []);
+
   useEffect(() => {
     let attivo = true;
+    /** Registra l'esito del caricamento (se l'effetto è ancora attivo) e risolve le `ricarica()` in attesa di questa generazione o di una precedente. */
+    const concludi =(e: Esito<T>): void => {
+      if (!attivo) return;
+      setEsito(e);
+      const pronte = attese.current.filter((a) => a.tick <= tick);
+      attese.current = attese.current.filter((a) => a.tick > tick);
+      for (const a of pronte) a.risolvi();
+    };
     caricaRef
       .current()
-      .then((d) => {
-        if (attivo) setEsito({ chiave, tick, dati: d, errore: null });
-      })
-      .catch((err: unknown) => {
-        if (attivo) setEsito({ chiave, tick, dati: null, errore: err instanceof Error ? err.message : 'Errore di caricamento' });
-      });
+      .then((d) => concludi({ chiave, tick, dati: d, errore: null }))
+      .catch((err: unknown) => concludi({ chiave, tick, dati: null, errore: err instanceof Error ? err.message : 'Errore di caricamento' }));
     return () => {
       attivo = false;
     };
   }, [chiave, tick]);
 
-  const ricarica = useCallback(async () => {
-    setTick((t) => t + 1);
+  const ricarica = useCallback(() => {
+    if (smontato.current) return Promise.resolve();
+    const t = ++tickRef.current;
+    setTick(t);
+    return new Promise<void>((risolvi) => { attese.current.push({ tick: t, risolvi }); });
   }, []);
-  const imposta = useCallback((d: T) => setEsito((e) => (e ? { ...e, dati: d } : { chiave, tick, dati: d, errore: null })), [chiave, tick]);
+  const imposta = useCallback((d: T | ((attuali: NonNullable<T>) => T)) => setEsito((e) => {
+    if (typeof d === 'function') {
+      if (!e || e.dati === null || e.dati === undefined) return e;
+      return { ...e, dati: (d as (attuali: NonNullable<T>) => T)(e.dati as NonNullable<T>) };
+    }
+    return e ? { ...e, dati: d } : { chiave, tick, dati: d, errore: null };
+  }), [chiave, tick]);
 
   const aggiornato = esito !== null && esito.chiave === chiave && esito.tick === tick;
   // Durante una ricarica sulle stesse dipendenze si mantengono i dati precedenti visibili.

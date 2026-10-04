@@ -3,6 +3,11 @@
 Studio scritto il 2026-09-04 a partire dal requisito dell'utente (riportato qui sotto parola per parola) e dallo stato del codice.
 È il riferimento per l'implementazione degli step 13.1–13.6 e di 12.4; ogni scelta rimanda al punto del requisito che soddisfa.
 
+> **Come leggerlo oggi** (verifica completa, 2026-10-04): le sezioni descrivono il progetto e poi lo stato raggiunto. Dove il
+> codice è cambiato dopo, il testo è stato corretto (API, formato di esportazione, editor delle condizioni). Il **seed JSON**
+> (`data/seed/*.json`, `caricaSeed`) è stato dismesso il 12 settembre 2026: le mappe della guida oggi stanno in `gioco.db` e arrivano
+> con il pacchetto di gioco.
+
 ## 1. Requisito dell'utente
 
 1. «Mi serve un metodo per poter creare le mappe in app e poterle poi esportare insieme ai punti di interesse (spilli)», da inserire
@@ -45,7 +50,7 @@ mappa
   immagine_chiave  TEXT NULL         chiave dell'immagine nell'ambito «mappa» dell'istanza (caricata dall'editor) …
   asset            TEXT NULL         … oppure asset del repository (es. 'mappe/citta-shibuya'); precedenza all'immagine dell'istanza.
                                      Alla creazione dall'editor o dall'API vale 'mappe/<chiave>' se non indicato (15.25, `assetPredefinitoMappa`):
-                                     è il percorso che «Esporta questo luogo» dà all'immagine; `null` esplicito = nessun asset. Se il file
+                                     `null` esplicito = nessun asset (la finestra «Nuova mappa» non lo chiede). Se il file
                                      non è nel manifest degli asset il puntatore è innocuo: si usa l'immagine dell'istanza o la griglia
   larghezza, altezza INTEGER NULL    dimensioni dell'immagine di base (per l'adattamento dello zoom)
   entita_tipo      TEXT NULL         'quartiere' | 'luogo' | 'dungeon' | 'area'   collegamento all'entità esistente
@@ -83,9 +88,9 @@ spillo_partita  (stato per partita)
 
 Regole:
 - Il tipo `passaggio` con `riferimento_tipo = 'mappa'` è il collegamento fra livelli (punti 6 e 8): il click apre la mappa di destinazione;
-  la mappa figlia mostra il pulsante «Torna a <genitore>» e il percorso (breadcrumb) ricostruito con `genitore_chiave`.
+  la mappa figlia mostra il pulsante «Su: <genitore>» (nel progetto «Torna a <genitore>») e il percorso (breadcrumb) ricostruito con `genitore_chiave`.
 - Uno spillo di una voce della guida (`voce_chiave`, dalla 094; prima `riferimento_tipo = 'punto'`, che resta per gli elementi della guida
-  senza mappa — la regola unica è `VOCE_DEL_PIN` / `voceDelPin` in `mappe/voceDelPin.ts`, riesportata da `collegamentiGuida.ts`) eredita lo stato del punto di dungeon della partita (`stato_punto`: ottenuto/esaurito ⇒
+  senza mappa — la regola unica è `VOCE_DEL_PIN` / `voceDelPin` in `mappe/voceDelPin.ts`, riesportata da `collegamentiGuida.ts`) eredita lo stato del punto di dungeon della partita (`punto_partita`, in `partite.db`: ottenuto/esaurito ⇒
   raccolto) così i forzieri già gestiti nella Guida spariscono anche sulla mappa; gli spilli senza riferimento usano `spillo_partita`.
 - `riferimento_tipo = 'negozio'` ⇒ la scheda dello spillo mostra gli articoli del negozio (punto 5) con prezzo, disponibilità e stato
   d'acquisto della partita (già tracciato da `acquisto_partita`).
@@ -128,7 +133,7 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Città | attivita | Attività | spillo-attivita | giallo | no | attivita / luogo |
 | Persone | confidente | Confidente (stato «incontrato», 2026-10-03) | spillo-confidente | rosa | no (stato «incontrato») | confidente |
 | Persone | dialogo | Dialogo (stato «parlato», 2026-10-03) | spillo-dialogo | indaco | sì (parlato) | — (personaggio non Confidente; luogo scelto a mano se utile) |
-| Palazzi e Mementos | forziere / forziere-raro | Forziere / Forziere raro (stato «aperto», si «Richiude», 2026-10-03) | spillo-forziere | oro | sì (aperto) | punto |
+| Palazzi e Mementos | forziere / forziere-raro | Forziere / Forziere raro (stato «aperto», si «Richiudi», 2026-10-03) | spillo-forziere | oro | sì (aperto) | punto |
 | Palazzi e Mementos | tesoro-palazzo | Tesoro del Palazzo (stato «rubato», 2026-10-03) | spillo-tesoro-palazzo | fucsia | sì (rubato) | punto (Tesoro del Palazzo) |
 | Palazzi e Mementos | seme-bramosia | Seme della bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
 | Palazzi e Mementos | oggetto-chiave | Oggetto chiave | spillo-oggetto-chiave | ambra | sì | punto |
@@ -138,7 +143,7 @@ con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si po
 | Palazzi e Mementos | punto-sensibile | Punto sensibile (stato «gestito», 2026-10-03) | spillo-punto-sensibile | verde acqua | no (stato «gestito») | punto (enigma) |
 | Palazzi e Mementos | meccanismo | Meccanismo (leva, interruttore, pannello; stato «azionato», 2026-10-03) | spillo-meccanismo | ardesia | no (stato «azionato») | punto |
 | Palazzi e Mementos | rampino | Punto del rampino (Royal) | spillo-rampino | magenta scuro | no | — |
-| Palazzi e Mementos | porta | Porta chiusa (chiave, tessera, dall'altro lato; stato «aperta», si «Richiude», 2026-10-03) | spillo-porta | rosso scuro | no (stato «aperta») | punto |
+| Palazzi e Mementos | porta | Porta chiusa (chiave, tessera, dall'altro lato; stato «aperta», si «Richiudi», 2026-10-03) | spillo-porta | rosso scuro | no (stato «aperta») | punto |
 | Palazzi e Mementos | sicura | Stanza sicura | spillo-sicura | azzurro | no | punto |
 | Palazzi e Mementos | scorciatoia | Scorciatoia | spillo-scorciatoia | grigio | no | punto |
 | Altro | nota | Nota | spillo-nota | bianco | no | — |
@@ -150,27 +155,30 @@ palette sono alti 44 px (bersaglio touch).
 
 I 15 tipi dei punti di dungeon (`utils/dungeon.ts`; dal 2026-10-01 anche porta, meccanismo e storia) si mappano su questi (persona, storia e altro → nota con riferimento al punto, puzzle → punto-sensibile,
 volontà → seme-bramosia, ombra-sciagura → nemico, forziere-chiuso → forziere, oggetto → oggetto-chiave, porta → porta, meccanismo → meccanismo; il tipo di pin «tesoro» è stato tolto il 2026-10-01, ridondante col Tesoro del Palazzo). Quando la corrispondenza cambia,
-`sincronizzaMappe` riclassifica a ogni avvio gli spilli di origine `seed` (tipo e collezionabilità), senza toccare quelli dell'utente né gli stati per partita.
+`sincronizzaMappe` riclassifica gli spilli di origine `seed` (tipo e collezionabilità), senza toccare quelli dell'utente né gli stati per partita. Oggi gira solo dentro la migrazione 027 (all'epoca del seed girava anche a ogni caricamento).
 
 ## 5. API (`/api/mappe`, sostituisce le rotte attuali mantenendo `scarica` come sorgente opzionale dell'immagine)
 
 | Metodo | Rotta | Uso |
 |---|---|---|
-| GET | `/api/mappe` | albero delle mappe (chiave, nome, tipo, genitore, miniatura, conteggi degli spilli) |
+| GET | `/api/mappe/albero` | albero delle mappe (chiave, nome, tipo, genitore, miniatura, conteggi degli spilli) |
 | GET | `/api/mappe/:chiave?partita=` | mappa con spilli e stato raccolto/ottenuto della partita, articoli dei negozi collegati |
 | POST/PUT/DELETE | `/api/mappe`, `/api/mappe/:chiave` | editor: crea, rinomina, sposta nell'albero, elimina (con conferma se ha figli) |
 | PUT | `/api/mappe/:chiave/immagine` | immagine di base (corpo grezzo `image/*`, come `/api/immagini`), larghezza/altezza calcolate |
 | POST/PUT/DELETE | `/api/mappe/:chiave/spilli`, `/api/mappe/spilli/:id` | editor: spilli (tipo, nome, descrizione, x/y, riferimento, collezionabile, condizioni di visibilità) |
 | PUT | `/api/partite/:id/spilli/:spilloId` | `{ raccolto }` in uso normale (punto 9): lo stato del pin — raccolto, o sconfitto/azionato/gestito/affrontato/aperta per boss e miniboss, meccanismo, punto sensibile, nemico e porta chiusa (2026-10-03); 400 `spillo-senza-stato` sugli altri senza voce della guida |
-| GET | `/api/mappe/esporta` | ZIP con `mappe.json` (mappe + spilli + tipi) e `immagini/<chiave>.<ext>` (punto 1) |
-| POST | `/api/mappe/importa` | ZIP (stesso formato): unione per chiave, con `sovrascrivi` |
+| GET | `/api/mappe/esporta?radice=` | pacchetto JSON (versione 1, §6) con mappe, spilli e immagini; con `radice` solo quel luogo e le sue discendenti (punto 1) |
+| POST | `/api/mappe/importa` | lo stesso pacchetto JSON (fino a 64 MB): unione per chiave, con `sovrascrivi` |
 
-Validazione zod come per le altre rotte; le scritture dell'editor sono negate se la richiesta non ha `modalita=editor` (difesa in
-profondità del punto 10, oltre all'interfaccia).
+Validazione zod come per le altre rotte. La difesa prevista qui (scritture dell'editor negate senza `modalita=editor`) non è stata
+realizzata: l'editor si separa dall'uso solo nell'interfaccia.
 
 ## 6. Formato di esportazione e seed del repository (punto 1)
 
-Stato: il pacchetto JSON (versione 1) è quello descritto sotto; per il repository l'editor produce inoltre uno ZIP per luogo (radice + discendenti) con `data/seed/mappe/<chiave>.json` e gli asset in `public/asset/mappe/` (e `public/asset/spilli/` per le schermate degli spilli), scritto da `server/utils/zip.ts` senza dipendenze; il seed carica `mappe-editor.json` e poi `data/seed/mappe/*.json`. Decisione dell'utente (2026-09-04 sera): il pacchetto è completo, immagini di base e schermate degli spilli comprese, puntate come asset; l'utente lo consegna e viene caricato come dato preimpostato dell'app (supera la precedente esclusione delle piante scaricate).
+Stato: il pacchetto JSON (versione 1) è quello descritto sotto, e l'esportazione di un luogo (radice + discendenti) è lo stesso
+pacchetto limitato a quel sottoalbero. Al tempo del seed l'editor produceva anche uno ZIP per il repository (`data/seed/mappe/<chiave>.json`
+e gli asset in `public/asset/`), caricato da `caricaSeed`: con il seed è uscito anche quello, e `server/utils/zip.ts` oggi serve solo
+alla copia completa dell'istanza. Decisione dell'utente (2026-09-04 sera): il pacchetto è completo, immagini di base e schermate degli spilli comprese, puntate come asset; l'utente lo consegna e viene caricato come dato preimpostato dell'app (supera la precedente esclusione delle piante scaricate).
 
 `mappe.json` esportato = `{ versione: 1, mappe: [{ chiave, nome, tipo, genitore, ordine, immagine: 'immagini/<chiave>.png' | asset, larghezza,
 altezza, entita, note, spilli: [{ tipo, nome, descrizione, x, y, riferimento, collezionabile, ordine, condizioni }] }] }` (`condizioni` assente quando vuoto:
@@ -181,9 +189,9 @@ regole del collegamento dalla guida (`erroreVoceDelPin`: esiste, non è descritt
 genitori risolti; una che non regge si scarta e si conta (`vociScartate` nell'esito). La voce non fa parte dell'identità del pin.
 Un pacchetto che **tace** sulla voce (di prima della 094, o il seed del repository) non toglie quella collegata nell'istanza: il pin
 invariato la tiene, e il pin che il pacchetto cambia — tolto e reinserito, con lo stesso uid — la ritrova (come «raccolto», che
-segue l'uid); un pacchetto che la dichiara `null` la toglie. Lo stesso file, con le
-immagini in `public/asset/mappe/`, è letto da `caricaSeed` come `data/seed/mappe-editor.json` (origine `seed`): un `POST /importa` dello
-ZIP esportato e un commit sono l'intero flusso «creo in app → pubblico nel repository». Il pacchetto è completo: immagini di base e schermate degli spilli comprese, anche quelle scaricate dalle guide (la loro provenienza
+segue l'uid); un pacchetto che la dichiara `null` la toglie. Al tempo del seed lo stesso file, con le
+immagini in `public/asset/mappe/`, era letto da `caricaSeed` come `data/seed/mappe-editor.json` (origine `seed`), e il flusso «creo in
+app → pubblico nel repository» passava da lì; oggi le mappe della guida si pubblicano rigenerando il pacchetto di gioco (`npm run pacchetto`). Il pacchetto è completo: immagini di base e schermate degli spilli comprese, anche quelle scaricate dalle guide (la loro provenienza
 è annotata nel LEGGIMI; decisione dell'utente del 2026-09-04 sera, registrata in `DECISIONI.md`). Le mappe `seed` sono modificabili
 nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la stessa chiave.
 
@@ -196,7 +204,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   raggruppamento («+3») quando si sovrappongono sotto lo zoom minimo, etichetta al passaggio del mouse; legenda laterale con i tipi presenti,
   conteggi e filtri per tipo; ricerca per nome.
 - Click su uno spillo → popup ancorato allo spillo e scheda nel pannello: nome, descrizione, immagine dell'entità collegata (mappa e Confidente: negozi, luoghi, punti e richieste non hanno immagini nell'app; lo spillo può però avere le proprie schermate di riferimento, 13.3),
-  azioni: «Apri mappa» (passaggio), «Ottenuto/Esaurito/Riapri» (punto di dungeon, stessi stati della Guida), «Raccolto» (collezionabile), articoli del negozio con acquisto
+  azioni: «Vai: <mappa>» (spostamento; nel progetto era «Apri mappa»), «Ottenuto/Esaurito/Riapri» (punto di dungeon, stessi stati della Guida), «Raccolto» (collezionabile), articoli del negozio con acquisto
   (`negozi.json`: nome, prezzo, disponibilità, stato «comprato» della partita), «Scheda del Confidente», «Richiesta».
   Il popup sta sopra lo spillo, sotto quando in alto non c'è spazio, e diventa il foglio dal basso quando non sta da nessun lato
   (2026-10-01): l'altezza è misurata, non stimata — dalla 094 uno spostamento di una voce della guida porta anche «Ottenuto», e
@@ -208,11 +216,11 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 
 ## 8. Editor (13.3) — `EditorMappa`
 
-- Stessa superficie del visore in modalità dedicata (barra rossa «Modifica: <mappa>» sempre visibile, uscita con conferma se ci sono
-  modifiche non salvate). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
+- Stessa superficie del visore in modalità dedicata (targhetta «Modifica» nell'intestazione e titolo della scheda «Modifica: <mappa> — Mappe»; nessuna conferma all'uscita: creazione, spostamento,
+  incolla ed eliminazione degli spilli si salvano subito, i campi dei pannelli con «Salva spillo» e «Salva mappa»). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
   spillo nel punto), **Incolla** (attivo dopo «Copia»: un tocco sulla mappa crea lo spillo copiato — stesso tipo, nome, descrizione, collezionabile, riferimento e condizioni di visibilità — nel punto toccato, poi si torna a Seleziona; gli appunti vivono in `sessionStorage` e restano per altre copie, anche su altre mappe); **Copia** ed **Elimina** sono pulsanti nel pannello dello spillo selezionato (non strumenti a parte); il tipo dello spillo si cambia dal pannello senza ricrearlo; pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
   fra negozi, punti di dungeon, luoghi, Confidenti, richieste, mappe; «Crea mappa collegata» (crea la mappa figlia e collega lo spillo).
-- **Condizioni di visibilità** (15.22, `CondizioniSpilloEditor`): elenco delle condizioni dello spillo con «Togli» e costruttore «Nuova condizione»
+- **Condizioni di visibilità** (15.22, `CondizioniSpilloEditor`, oggi `CondizioniEditor` in `src/components/guida/`): elenco delle condizioni dello spillo con «Togli» e pulsanti «+ condizione» e «+ gruppo TUTTE» (nel progetto «Nuova condizione»)
   con il tipo scelto da un elenco chiuso e i parametri da selettori, mai testo libero — da una data (giorno + mese del calendario di gioco), solo in un
   periodo, dopo un Palazzo (elenco dei Palazzi della Guida), Dote almeno a un rango (1–5), Confidente almeno a un rango (1–10, elenco dei Confidenti),
   richiesta dei Mementos completata (elenco), solo con la pioggia / mai con la pioggia, solo di giorno / solo di sera (il momento della giornata
@@ -232,14 +240,16 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   ancora»); dopo ogni segno sulla mappa il visore si rilegge e i pin che ne dipendono compaiono o spariscono subito. Il pin
   aperto non è fra quelli offerti, e un giro di condizioni (A dipende da B, B da A) si rifiuta al salvataggio coi nomi dei
   pin. Non esiste negli editor del catalogo (articoli, negozi, letture, effetti) né nelle schede della guida senza mappa.
-- Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
-  collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).
+- Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» per la mappa di un
+  **quartiere** (`pianta_quartiere`; per le aree dei Palazzi non c'è più, dal 2026-09-18), oppure asset del repository (§19).
+  Cambiare immagine mantiene gli spilli (percentuali).
 - Gestione dell'albero: crea mappa (tipo, nome, genitore), rinomina, sposta, elimina; anteprima delle miniature.
 - **Albero e passaggi** (15.24). L'albero dice chi contiene chi (percorso, «Su», elenco «Mappe figlie», esportazione per luogo); sulla mappa ci si
   sposta con gli spilli «passaggio» (riferimento a un'altra mappa), che sono porte disegnate sull'immagine. Le due cose restano distinte ma l'editor
   le tiene allineate: (1) «Nuova mappa» chiede se creare il passaggio sulla mappa genitore verso la nuova (preselezionato) e il passaggio di ritorno
-  nella nuova mappa (a scelta) — `POST /api/mappe` con `passaggio`/`ritorno`; la stessa finestra propone l'asset del repository «mappe/chiave»
-  (segue la chiave finché non lo si tocca; vuoto = nessun asset, 15.25); (2) nell'elenco «Mappe figlie» ogni figlia che nessuno spillo di
+  nella nuova mappa (a scelta) — `POST /api/mappe` con `passaggio`/`ritorno`; la chiave nasce dal nome, preceduta da quella del genitore (non
+  sotto la città). L'asset del repository non si sceglie più nella finestra: il server lo pone a «mappe/chiave»
+  (`assetPredefinitoMappa`, 15.25); (2) nell'elenco «Mappe figlie» ogni figlia che nessuno spillo di
   questa mappa raggiunge porta la riga «Senza passaggio da questa mappa» con il pulsante «Crea passaggio»; (3) sotto «Su: <genitore>», se nessuno
   spillo punta al genitore, «Crea passaggio di ritorno». Entrambi i pulsanti chiamano `POST /api/mappe/:chiave/passaggi` `{ destinazione }`: il
   server crea lo spillo «passaggio» col nome della destinazione nel punto libero più vicino al centro (o in basso al centro, 50/92, quando la
@@ -248,7 +258,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   destinazione, 400 verso sé stessa, 404 se la destinazione non esiste. I passaggi automatici del seed (radici Città/Palazzo/Dedalo, `sincronizzaMappe`)
   non cambiano.
 - La palette di «Aggiungi» è divisa nelle quattro categorie (Spostamento, Città, Consumabile, Informativo — `CATEGORIE_SPILLO` e `tipiDellaCategoria`), con i 42 tipi del registro (§4; fino al 2026-09-11 erano cinque gruppi `GRUPPI_SPILLO`).
-- Esporta (ZIP per luogo, JSON di tutto) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); nessuno stato «non salvato»: ogni modifica è salvata subito.
+- Esporta (tutte le mappe in un JSON; l'API accetta anche `radice` per un solo luogo, senza pulsante) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); le azioni sugli spilli si salvano subito, i campi dei pannelli con «Salva spillo» e «Salva mappa».
 
 ## 9. Integrazione (13.4) — sostituzione ordinata di Città, Palazzi e Dedali (punti 6, 7, 8)
 

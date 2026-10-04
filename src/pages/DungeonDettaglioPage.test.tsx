@@ -13,10 +13,8 @@ const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, imp
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
   riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(), collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaArea: vi.fn(),
 }));
-vi.mock('../services/api', () => ({ getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file` }));
-vi.mock('../services/api/mappe', () => ({ impostaSpilloRaccolto }));
-vi.mock('../services/api/partite', () => ({ impostaTimbri, impostaStatoRichiesta }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave }: { chiave: string }) => <div>Visore: {chiave}</div> }));
 vi.mock('../components/mappe/MappaMemento', () => ({ MappaMemento: () => <div>Pozzo</div> }));
@@ -24,10 +22,15 @@ vi.mock('../components/mappe/CollegamentoMappa', () => ({ CollegamentoMappa: () 
 vi.mock('../components/shared/ImmagineEntita', () => ({ ImmagineEntita: () => <div>Immagine</div> }));
 vi.mock('../components/guida/EmblemaDungeon', () => ({ EmblemaDungeon: () => null }));
 
+/** Uno spillo forziere con id e stato di raccolta dati (`null` = senza partita). */
 const spillo = (id: number, raccolto: boolean | null) => ({ id, uid: `u${id}`, tipo: 'forziere', nome: 'Forziere', colore: '#eab308', raccolto });
+/** Un'area del dungeon («Cancello», k-01, senza mappe né voci) con i campi di `extra` sovrascritti. */
 const area = (extra: Partial<AreaDungeonDto>): AreaDungeonDto => ({
   chiave: 'k-01', ordine: 0, nome: 'Cancello', descrizione: '', mappa: false, mappe: [], punti: [], dedalo: null, ...extra,
 });
+/** Il Palazzo di Kamoshida di prova: tre aree (Cancello con una sicura e una planimetria di 2 forzieri, Torre, Cortile)
+ *  e due planimetrie (Cancello e Torre). Con `partita` i conteggi e gli spilli portano lo stato della partita (1 preso
+ *  su 4), senza restano `null`. */
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
@@ -42,6 +45,8 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
     { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', ordine: 1, aree: [], n: 2, presi: partita ? 0 : null, spilli: [spillo(3, partita ? false : null), spillo(4, partita ? false : null)] },
   ],
 });
+/** Il Memento di prova: due Dedali, Aiyatsbus con timbri (1 su 8), una richiesta aperta e un boss, e Qimranut senza
+ *  timbri dichiarati; nessuna planimetria, 1 obiettivo su 9 raccolto. */
 const mementos = (): DungeonDettaglioDto => ({
   ...palazzo(true), chiave: 'mementos', tipo: 'mementos', nome: 'Memento', raccolta: { totale: 9, presi: 1, mappe: 2, mappeComplete: 0 }, planimetrie: [],
   aree: [
@@ -50,6 +55,7 @@ const mementos = (): DungeonDettaglioDto => ({
   ],
 });
 
+/** Monta la scheda del dungeon `chiave` sulla sua rotta `/guida/dungeon/:chiave`. */
 const monta = (chiave: string) => render(<MemoryRouter initialEntries={[`/guida/dungeon/${chiave}`]}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
 
 // reset, non clear: le risposte «una volta» non consumate da un test non devono passare al successivo
@@ -153,6 +159,8 @@ it('un’area con la planimetria legata ma senza collezionabili lo dice così, s
 // Collegare o scollegare un pin può cambiare lo stato della voce nella partita (gli stati si uniscono), e la risposta del
 // server non lo porta: la scheda si rilegge con la partita (rilievo della revisione, 2026-10-01).
 it('scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge', async () => {
+  /** Il Palazzo con la sola voce «Forziere del cancello», «ottenuto» nella partita, nella prima area: con `pin` vero
+   *  la voce ha collegato il pin 1, altrimenti nessuno. */
   const conVoce = (pin: boolean): DungeonDettaglioDto => {
     const p = palazzo(true);
     const voce = { ...p.aree[0].punti[0], tipo: 'forziere' as const, nome: 'Forziere del cancello', stato: 'ottenuto' as const, pin: pin ? [{ id: 1, nome: 'Forziere', tipo: 'forziere', mappa: 'm-cancello', mappaNome: 'Palazzo di Kamoshida › Cancello' }] : [] };
@@ -208,12 +216,85 @@ it('nei Memento la colonna sono gli obiettivi del dedalo: timbri con −/+ e ric
   expect(screen.queryByRole('button', { name: 'Aggiungi un timbro' })).toBeNull();
 });
 
+// ---- Due gesti ravvicinati (B3", verifica completa 2026-10-03) ----
+//
+// Ogni aggiornamento locale arriva dopo un `await`: costruito dalla scheda del render in cui era partito, cancellava un secondo
+// gesto completato nel frattempo. Le riletture in silenzio restano in sospeso, così si guarda l'aggiornamento locale da solo.
+
+describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
+  /** L'anello d'avanzamento (progressbar) il cui nome comincia con «Avanzamento in <nome>». */
+  const anello = (nome: string) => screen.getByRole('progressbar', { name: new RegExp(`Avanzamento in ${nome}`) });
+
+  it('Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre', async () => {
+    getDungeon.mockResolvedValue(mementos());
+    let rispondiTimbri!: (v: unknown) => void;
+    impostaTimbri.mockImplementation(() => new Promise((ok) => { rispondiTimbri = ok; }));
+    impostaStatoRichiesta.mockResolvedValue({ chiave: 'bulli', stato: 'completata' });
+    monta('mementos');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Obiettivi di Dedalo di Aiyatsbus' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro' })); }); // in volo
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Completata' })); }); // arriva subito
+    await act(async () => { rispondiTimbri({ area: 'mementos-02-aiyatsbus', raccolti: 2, totale: 8, completato: false }); });
+    // (2 timbri + 1 richiesta) su 9
+    expect(anello('Memento')).toHaveAttribute('aria-valuenow', '33');
+    expect(colonna.getByText('2 su 8')).toBeInTheDocument();
+  });
+
+  it('Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro', async () => {
+    getDungeon.mockResolvedValue(mementos());
+    let rispondiRichiesta!: (v: unknown) => void;
+    impostaStatoRichiesta.mockImplementation(() => new Promise((ok) => { rispondiRichiesta = ok; }));
+    impostaTimbri.mockResolvedValue({ area: 'mementos-02-aiyatsbus', raccolti: 2, totale: 8, completato: false });
+    monta('mementos');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Obiettivi di Dedalo di Aiyatsbus' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Completata' })); }); // in volo
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro' })); }); // arriva subito
+    await act(async () => { rispondiRichiesta({ chiave: 'bulli', stato: 'completata' }); });
+    expect(anello('Memento')).toHaveAttribute('aria-valuenow', '33');
+    expect(colonna.getByText('2 su 8')).toBeInTheDocument();
+  });
+
+  it('Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto', async () => {
+    getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementation(() => new Promise(() => {}));
+    let rispondiStato!: (v: unknown) => void;
+    impostaStatoPunto.mockImplementation(() => new Promise((ok) => { rispondiStato = ok; }));
+    impostaSpilloRaccolto.mockResolvedValue({});
+    monta('kamoshida');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' }));
+    fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' })); }); // in volo
+    await act(async () => { fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })); }); // arriva subito
+    expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
+    await act(async () => { rispondiStato({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null }); });
+    expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
+    expect(screen.getByRole('button', { name: 'Anche le segnate (1)' })).toBeInTheDocument();
+  });
+
+  it('Palazzo: un raccolto, arrivato dopo lo stato di una voce, non riporta indietro la voce', async () => {
+    getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementation(() => new Promise(() => {}));
+    let rispondiRaccolto!: (v: unknown) => void;
+    impostaSpilloRaccolto.mockImplementation(() => new Promise((ok) => { rispondiRaccolto = ok; }));
+    impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null });
+    monta('kamoshida');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })); }); // in volo
+    fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' })); }); // arriva subito
+    expect(screen.getByRole('button', { name: 'Anche le segnate (1)' })).toBeInTheDocument();
+    await act(async () => { rispondiRaccolto({}); });
+    expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
+    expect(screen.getByRole('button', { name: 'Anche le segnate (1)' })).toBeInTheDocument();
+  });
+});
+
 // ---- L'elenco del Palazzo (ordine logico, legame con l'area, planimetria libera) ----
 //
 // Non si apre più niente: **l'elenco è la colonna di atterraggio** (scelta dell'utente,
 // 2026-09-19). Prima stava dietro un pulsante, e chi non sapeva di doverlo premere non vedeva
 // nessun modo di sistemare le planimetrie del Palazzo.
 
+/** Monta la scheda del Palazzo di Kamoshida (con partita, atlante vuoto), aspetta il titolo e restituisce le query
+ *  limitate alla colonna «Planimetrie del Palazzo». */
 async function apriPlanimetrie() {
   getDungeon.mockResolvedValue(palazzo(true));
   getAlberoMappe.mockResolvedValue([]);
@@ -275,6 +356,7 @@ it('toccare una stanza porta la sua planimetria nel visore e nella colonna dei s
 it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui non si sa quali tavole sono la stessa stanza', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   riordinaMappe.mockResolvedValue([]);
+  /** Risolutore dell'atlante in sospeso: il test lo chiama per far arrivare l'albero delle mappe quando vuole. */
   let arriva: (v: unknown) => void = () => {};
   getAlberoMappe.mockReturnValue(new Promise((r) => { arriva = r; }));
   monta('kamoshida');
@@ -293,6 +375,8 @@ it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui 
 const conDueVersioni = () => {
   const p = palazzo(true);
   const ovest = { ...p.planimetrie[0], chiave: 'm-cancello-ovest', nome: 'Palazzo di Kamoshida › Cancello ovest', aree: [], n: 0, presi: 0, spilli: [] };
+  /** Voce dell'albero delle mappe per la planimetria `chiave`, figlia del Palazzo e nel gruppo d'immagini «Cancello»
+   *  con l'ordine e l'etichetta di versione dati. */
   const gruppo = (chiave: string, ordine: number, etichetta: string) => ({ chiave, nome: `Palazzo di Kamoshida › ${chiave}`, genitore: 'dungeon-kamoshida', gruppoImmagini: { id: 'g-cancello', nome: 'Cancello', ordine, etichetta } });
   return {
     dungeon: { ...p, planimetrie: [p.planimetrie[0], ovest, p.planimetrie[1]] },

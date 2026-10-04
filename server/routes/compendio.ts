@@ -19,29 +19,30 @@ import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { elenchiAzione } from '../services/azioniStrutturateService.js';
 import { aggiornaVoce, creaVoce, eliminaVoce, spostaVoce } from '../services/giornataService.js';
 import { completamento } from '../services/completamentoService.js';
-import { datiGuida } from '../services/richiesteService.js';
+import { datiGuida } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
 import { bodyAggiornaVoce, bodyDotiIncontro, bodyNuovaVoce, bodySpostaVoce, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
+import { categoriaArticolo, dataGioco, idParam } from '../schemas/comuni.js';
+import { eCategoriaArticolo } from '../../shared/articoli.js';
 import {
   dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, impostaDotiIncontro, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
 
-const queryDomande = z.object({ partita: z.coerce.number().int().positive().optional() });
-const CATEGORIE_ARTICOLO = ['arma', 'protezione', 'accessorio', 'abito', 'consumabile', 'regalo', 'materiale', 'cibo', 'cura', 'sp', 'battaglia', 'stato', 'esplorazione', 'oggetto-chiave', 'libro', 'film', 'dvd', 'videogioco', 'altro'] as const;
+const queryDomande = z.object({ partita: idParam.optional() });
 const queryArticoli = z.object({
   q: z.string().min(1).max(80).optional(),
-  categoria: z.enum(CATEGORIE_ARTICOLO).optional(),
-  /** Più categorie insieme, separate da virgola. */
-  categorie: z.string().max(400).optional().transform((v) => v ? v.split(',').map((c) => c.trim()).filter((c) => (CATEGORIE_ARTICOLO as readonly string[]).includes(c)) : undefined),
+  categoria: categoriaArticolo.optional(),
+  /** Più categorie insieme, separate da virgola: quelle sconosciute si ignorano (un indirizzo vecchio resta valido). */
+  categorie: z.string().max(400).optional().transform((v) => v ? v.split(',').map((c) => c.trim()).filter(eCategoriaArticolo) : undefined),
   per: z.string().min(1).max(40).optional(),
   stato: z.enum(['acquistati', 'da-acquistare']).optional(),
   disponibilita: z.enum(['disponibili', 'bloccati']).optional(),
-  partita: z.coerce.number().int().positive().optional(),
+  partita: idParam.optional(),
 });
-const queryCalendario = z.object({ partita: z.coerce.number().int().positive().optional(), mese: z.string().regex(/^(0[1-9]|1[0-2])$/).optional() });
+const queryCalendario = z.object({ partita: idParam.optional(), mese: z.string().regex(/^(0[1-9]|1[0-2])$/).optional() });
 const router = Router();
 
 router.get('/arcani', (_req, res) => {
@@ -93,17 +94,15 @@ router.get('/oggetti-guida', (_req, res) => {
   // anche articoli del catalogo, e per quelli la riga può arrivare alla mappa. Gli altri no, e va
   // bene così: un abbinamento incerto porterebbe nel posto sbagliato.
   const ponte = datiGuida<{ abbinamenti: Array<{ nome: string; articolo?: string; negozi: string[] }> }>('oggetti-crosswalk');
-  if (ponte) {
-    const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
-    const lega = (v: { nome: string; articolo?: string; negozi?: string[] }) => {
-      const a = per.get(v.nome);
-      if (!a) return;
-      if (a.articolo) v.articolo = a.articolo; else v.negozi = a.negozi;
-    };
-    for (const v of dati.consumabili ?? []) lega(v);
-    for (const v of dati.chiaveEMateriali ?? []) lega(v);
-  }
-  res.json(dati);
+  if (!ponte) { res.json(dati); return; }
+  // i dati della guida sono condivisi e congelati (`datiGuida`): le voci collegate si costruiscono nuove, non si modificano
+  const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
+  /** La voce con il suo collegamento dal crosswalk: l'articolo del catalogo se c'è, altrimenti i negozi; invariata se il nome non è abbinato. */
+  const lega = <V extends { nome: string }>(v: V): V => {
+    const a = per.get(v.nome);
+    return !a ? v : a.articolo ? { ...v, articolo: a.articolo } : { ...v, negozi: a.negozi };
+  };
+  res.json({ ...dati, consumabili: dati.consumabili?.map(lega), chiaveEMateriali: dati.chiaveEMateriali?.map(lega) });
 });
 router.get('/personaggi', (_req, res) => {
   const dati = datiGuida<PersonaggiDto>('personaggi');
@@ -121,7 +120,7 @@ router.get('/completamento', validate({ query: queryDomande }), (req, res) => {
 router.get('/percorso', validate({ query: queryDomande }), (req, res) => {
   res.json(indicePercorso((req.query as unknown as { partita?: number }).partita));
 });
-router.get('/percorso/:data', validate({ params: z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) }), query: queryDomande }), (req, res) => {
+router.get('/percorso/:data', validate({ params: z.object({ data: dataGioco }), query: queryDomande }), (req, res) => {
   res.json(giornoPercorso(String(req.params.data), (req.query as unknown as { partita?: number }).partita));
 });
 /** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
@@ -194,7 +193,7 @@ router.get('/richieste', validate({ query: queryDomande }), (req, res) => {
 router.get('/dungeon', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaDungeon((req.query as unknown as { partita?: number }).partita));
 });
-router.get('/dungeon/:chiave', validate({ query: queryDomande }), (req, res) => {
+router.get('/dungeon/:chiave', validate({ params: paramsChiaveGuida, query: queryDomande }), (req, res) => {
   res.json(dettaglioDungeon(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
 });
 /* ---- Correzione dei testi della guida: la sezione dei Palazzi non è più in sola lettura ---- */
@@ -243,11 +242,11 @@ router.get('/calendario', validate({ query: queryCalendario }), (req, res) => {
 router.get('/domande', validate({ query: queryDomande }), (req, res) => {
   res.json(domande((req.query as unknown as { partita?: number }).partita));
 });
-router.get('/confidenti/:chiave', (req, res) => {
+router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
 });
 /** La Dote a ogni incontro, rango per rango (dato di gioco, come gli effetti di libri e attività). */
-router.put('/confidenti/:chiave/doti-incontro', validate({ body: bodyDotiIncontro }), (req, res) => {
+router.put('/confidenti/:chiave/doti-incontro', validate({ params: paramsChiaveGuida, body: bodyDotiIncontro }), (req, res) => {
   res.json(impostaDotiIncontro(String(req.params.chiave), (req.body as { ranghi: Array<{ rango: number; doti: DoteNote[] }> }).ranghi));
 });
 

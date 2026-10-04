@@ -22,6 +22,8 @@
 // Gli incontri con i Confidenti non stanno qui: li dice il tipo dell'azione e il suo collegamento.
 // ============================================================
 
+import { eDote, nomeDote, type DoteChiave } from './doti.js';
+
 /** I tipi di un'azione della giornata (`AzionePercorsoDto.tipo`), con il nome che l'interfaccia mostra. */
 export const TIPI_AZIONE = [
   { chiave: 'confidente', nome: 'Confidente' }, { chiave: 'dote', nome: 'Dote sociale' }, { chiave: 'palazzo', nome: 'Palazzo / Mementos' },
@@ -40,21 +42,15 @@ export const TIPI_RIFERIMENTO_AZIONE = [
 ] as const;
 export type TipoRiferimentoAzione = (typeof TIPI_RIFERIMENTO_AZIONE)[number]['chiave'];
 
-export const DOTI_AZIONE = [
-  { chiave: 'conoscenza', nome: 'Conoscenza' }, { chiave: 'coraggio', nome: 'Coraggio' }, { chiave: 'perizia', nome: 'Perizia' },
-  { chiave: 'gentilezza', nome: 'Gentilezza' }, { chiave: 'fascino', nome: 'Fascino' },
-] as const;
-export type ChiaveDoteAzione = (typeof DOTI_AZIONE)[number]['chiave'];
-
 export const CATEGORIE_LETTURA = [
   { chiave: 'libro', nome: 'Libro' }, { chiave: 'film', nome: 'Film o DVD' }, { chiave: 'videogioco', nome: 'Videogioco' },
 ] as const;
 export type CategoriaLettura = (typeof CATEGORIE_LETTURA)[number]['chiave'];
 
-export interface DoteNote { dote: ChiaveDoteAzione; note: 1 | 2 | 3 }
+export interface DoteNote { dote: DoteChiave; note: 1 | 2 | 3 }
 
 export type EffettoAzione =
-  | { tipo: 'dote'; dote: ChiaveDoteAzione; note: 1 | 2 | 3 }
+  | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3 }
   | { tipo: 'lettura'; categoria: CategoriaLettura; chiave: string; almeno: number | null }
   | { tipo: 'turno'; attivita: string; doti?: DoteNote[] };
 
@@ -62,22 +58,23 @@ export const TIPI_EFFETTO_AZIONE = [
   { chiave: 'dote', nome: 'Dote sociale' }, { chiave: 'lettura', nome: 'Lettura o visione' }, { chiave: 'turno', nome: 'Turno di un’attività' },
 ] as const;
 
-const DOTI = new Set<string>(DOTI_AZIONE.map((d) => d.chiave));
 const CATEGORIE = new Set<string>(CATEGORIE_LETTURA.map((c) => c.chiave));
 
+/** Il numero di note se è esattamente 1, 2 o 3; altrimenti null. */
 function nota(x: unknown): 1 | 2 | 3 | null {
   return x === 1 || x === 2 || x === 3 ? x : null;
 }
 
+/** Una coppia Dote-note valida (Dote riconosciuta, note 1–3) ripulita dei campi in più; altrimenti null. */
 function doteNote(x: unknown): DoteNote | null {
   if (!x || typeof x !== 'object') return null;
   const o = x as Record<string, unknown>;
   const n = nota(o.note);
-  return typeof o.dote === 'string' && DOTI.has(o.dote) && n ? { dote: o.dote as ChiaveDoteAzione, note: n } : null;
+  return eDote(o.dote) && n ? { dote: o.dote, note: n } : null;
 }
 
 /** Un effetto valido o null: ciò che non si sa applicare non entra (un dato storto non diventa punti a caso). */
-export function normalizzaEffettoAzione(x: unknown): EffettoAzione | null {
+function normalizzaEffettoAzione(x: unknown): EffettoAzione | null {
   if (!x || typeof x !== 'object') return null;
   const o = x as Record<string, unknown>;
   if (o.tipo === 'dote') {
@@ -115,7 +112,7 @@ export interface NomiEffettiAzione {
   attivita?: Record<string, string>;
 }
 
-const nomeDote = (chiave: string): string => DOTI_AZIONE.find((d) => d.chiave === chiave)?.nome ?? chiave;
+/** «1 nota», «2 note». */
 const noteTesto = (n: number): string => `${n} ${n === 1 ? 'nota' : 'note'}`;
 
 /** La frase di un effetto: «Gentilezza, 2 note», «Zorro, il fuorilegge: completato», «Turno: Fioraio Rafflesia». */

@@ -16,23 +16,24 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import { prepared, nowIso } from '../db/dbService.js';
+import { getDb, prepared, nowIso } from '../db/dbService.js';
 import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
 import { pinConStato } from '../services/condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { impostaEventoStoria, ranghiPerEvento } from '../services/semaforiService.js';
 import { leggiProgrammaPunti } from '../services/negoziService.js';
+import { verificaPartita } from '../services/verificaPartita.js';
+import { idParam } from '../schemas/comuni.js';
 import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaService.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { httpErrors } from '../utils/httpError.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento } from '../../shared/condizioniSpillo.js';
-import type { ProgressiPartitaDto } from '../../shared/types.js';
+import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto } from '../../shared/types.js';
 
 const router = Router();
-const idPartita = z.coerce.number().int().positive();
+const idPartita = idParam;
 const chiave = z.string().regex(/^[a-z0-9][a-z0-9-]{0,119}$/);
-const verificaPartita = (id: number) => { if (!prepared('SELECT 1 FROM partita WHERE id=?').get(id)) throw httpErrors.notFound('partita-non-trovata', 'Partita non trovata.'); };
 
 /** I negozi con il loro programma punti (null se non ne hanno). */
 function negoziConProgramma() {
@@ -48,12 +49,12 @@ function attivitaConteggiabili() {
 }
 
 router.get('/elenchi', (_req, res) => {
-  res.json({
-    articoli: prepared('SELECT a.chiave, COALESCE(a.nome_it, a.nome) AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome').all(),
-    letture: prepared("SELECT chiave, COALESCE(nome_it, nome) AS nome, 'libro' AS categoria FROM libro WHERE nascosto = 0 UNION ALL SELECT chiave, COALESCE(nome_it, nome), 'film' FROM film WHERE nascosto = 0 ORDER BY nome").all(),
-    arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all(),
-    persone: prepared('SELECT nome AS chiave, nome FROM persona ORDER BY nome').all(),
-    abilita: prepared('SELECT nome AS chiave, nome FROM skill ORDER BY nome').all(),
+  const elenchi: ElenchiRegoleDto = {
+    articoli: prepared('SELECT a.chiave, COALESCE(a.nome_it, a.nome) AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome').all() as ElenchiRegoleDto['articoli'],
+    letture: prepared("SELECT chiave, COALESCE(nome_it, nome) AS nome, 'libro' AS categoria FROM libro WHERE nascosto = 0 UNION ALL SELECT chiave, COALESCE(nome_it, nome), 'film' FROM film WHERE nascosto = 0 ORDER BY nome").all() as ElenchiRegoleDto['letture'],
+    arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all() as ElenchiRegoleDto['arcani'],
+    persone: prepared('SELECT nome AS chiave, nome FROM persona ORDER BY nome').all() as ElenchiRegoleDto['persone'],
+    abilita: prepared('SELECT nome AS chiave, nome FROM skill ORDER BY nome').all() as ElenchiRegoleDto['abilita'],
     // I Ladri Fantasma per «in squadra»: chi sia la squadra lo dice il seed con `giocabile`.
     squadra: giocabili().map((p) => ({ chiave: p.chiave, nome: p.nome })),
     attivita: attivitaConteggiabili().map((a) => ({ chiave: a.chiave, nome: a.nome })),
@@ -61,13 +62,15 @@ router.get('/elenchi', (_req, res) => {
     negozi: negoziConProgramma().map((n) => ({ chiave: n.chiave, nome: n.nome, programma: n.programma?.calcolo ?? null })),
     eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null })),
     contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome })),
-  });
+  };
+  res.json(elenchi);
 });
 
 /** I pin con uno stato, per la condizione «Pin di una mappa» (2026-10-03): solo l'editor delle mappe li chiede, a parte, perché
  *  sono centinaia e agli altri editor non servono. */
 router.get('/spilli', (_req, res) => {
-  res.json({ data: pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola })) });
+  const spilli: PinConStatoDto[] = pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola }));
+  res.json(spilli);
 });
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano, completi anche dove non c'è ancora una riga. */
@@ -112,9 +115,12 @@ router.put('/partite/:partita/eventi/:chiave', validate({ params: z.object({ par
   // «Entra in squadra» si legge dalla squadra della partita: si segna lì, non qui.
   if (membroDellEvento(evento)) throw httpErrors.badRequest('evento-calcolato', 'Questo evento si calcola dalla squadra della partita (Partita → Denaro e squadra): non si segna a mano.');
   const { avvenuto } = req.body as { avvenuto: boolean };
-  // lo stesso dato del «Condizione soddisfatta» dei Confidenti (`confermaRequisito`)
-  impostaEventoStoria(id, evento, avvenuto);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), id);
+  // lo stesso dato del «Condizione soddisfatta» dei Confidenti (`confermaRequisito`); evento e data di modifica della partita
+  // cambiano insieme o per niente
+  getDb().transaction(() => {
+    impostaEventoStoria(id, evento, avvenuto);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), id);
+  })();
   res.json(progressi(id));
 });
 
@@ -133,8 +139,11 @@ router.put('/partite/:partita/punti-negozio/:chiave', validate({ params: z.objec
   if (!riga) throw httpErrors.notFound('negozio-non-trovato', 'Negozio non trovato.');
   if (leggiProgrammaPunti(riga.programma_punti_json)?.calcolo !== 'manuale') throw httpErrors.badRequest('negozio-senza-punti', 'Questo negozio non ha un programma punti da segnare a mano.');
   const { punti } = req.body as { punti: number };
-  prepared('INSERT INTO punti_negozio_partita (partita_id, negozio_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, negozio_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at').run(id, negozio, punti, nowIso());
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), id);
+  getDb().transaction(() => {
+    const adesso = nowIso();
+    prepared('INSERT INTO punti_negozio_partita (partita_id, negozio_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, negozio_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at').run(id, negozio, punti, adesso);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, id);
+  })();
   res.json(progressi(id));
 });
 

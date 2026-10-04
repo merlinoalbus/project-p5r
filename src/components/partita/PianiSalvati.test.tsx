@@ -11,10 +11,12 @@ import { PianiSalvati } from './PianiSalvati';
 import type { NodoPianoDto, PianoSalvatoDto } from '../../types';
 
 const { getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato } = vi.hoisted(() => ({ getPianiSalvati: vi.fn(), getPossedute: vi.fn(), aggiornaPianoSalvato: vi.fn(), eliminaPianoSalvato: vi.fn() }));
-vi.mock('../../services/api', () => ({ getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`, }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Persona di un nodo del piano: arcano Mago, livello 10, con il nome italiano uguale al nome. */
 const p = (id: number, nome: string): NodoPianoDto['persona'] => ({ id, nome, nomeIt: nome, arcana: 'Magician', arcanaNome: 'Mago', livello: 10, speciale: false, rara: false, dlc: false });
+/** Foglia dell'albero del piano: la Persona data presa dalla scorta, senza costo, figli né skill. */
 const foglia = (id: number, nome: string): NodoPianoDto => ({ persona: p(id, nome), modo: 'scorta', costo: 0, figli: [], skillPortate: [], skillDaLivello: [] });
 const radice: NodoPianoDto = { persona: p(88, 'Jack Frost'), modo: 'fusione', costo: 0, tipo: 'normale', figli: [foglia(1, 'Arsène'), foglia(2, 'Pixie')], skillPortate: [], skillDaLivello: [] };
 const piano: PianoSalvatoDto = {
@@ -60,5 +62,53 @@ describe('PianiSalvati', () => {
     expect(await screen.findByText(/Completato: Jack Frost è nella scorta/)).toBeInTheDocument();
     expect(getPianiSalvati).toHaveBeenCalledWith(7, 3);
     expect(screen.getByRole('link', { name: 'Tutti i piani' })).toBeInTheDocument();
+  });
+});
+
+describe('PianiSalvati — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  const pianoA = { ...piano, id: 5, titolo: 'Piano A' };
+  const pianoB = { ...piano, id: 6, titolo: 'Piano B' };
+  beforeEach(() => {
+    getPianiSalvati.mockReset(); getPossedute.mockReset(); aggiornaPianoSalvato.mockReset(); eliminaPianoSalvato.mockReset();
+    getPossedute.mockResolvedValue([]);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+  });
+  afterEach(() => vi.restoreAllMocks());
+  /** Rinomina il piano col titolo `vecchio` in `nuovo` dalla sua scheda. */
+  const rinomina = async (vecchio: string, nuovo: string) => {
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${vecchio}`) })); });
+    const campo = screen.getByLabelText('Titolo del piano');
+    fireEvent.change(campo, { target: { value: nuovo } });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ok' })); });
+  };
+
+  it('rinomina: la risposta del piano A arrivata dopo quella del piano B non rimette il vecchio titolo di B', async () => {
+    getPianiSalvati.mockResolvedValue([pianoA, pianoB]);
+    let risolviA!: (p: PianoSalvatoDto) => void;
+    aggiornaPianoSalvato.mockImplementation((_p: number, id: number, d: { nome: string }) => (id === 5
+      ? new Promise<PianoSalvatoDto>((ok) => { risolviA = ok; })
+      : Promise.resolve({ ...pianoB, titolo: d.nome })));
+    render(<MemoryRouter><PianiSalvati partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('button', { name: /^Piano A/ });
+    await rinomina('Piano A', 'Piano A nuovo'); // in volo
+    await rinomina('Piano B', 'Piano B nuovo'); // arriva subito
+    expect(screen.getByRole('button', { name: /^Piano B nuovo/ })).toBeInTheDocument();
+    await act(async () => { risolviA({ ...pianoA, titolo: 'Piano A nuovo' }); });
+    expect(screen.getByRole('button', { name: /^Piano A nuovo/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Piano B nuovo/ })).toBeInTheDocument();
+  });
+
+  it('eliminazione: il piano eliminato mentre un altro viene rinominato non ricompare', async () => {
+    getPianiSalvati.mockResolvedValue([pianoA, pianoB]);
+    let risolviA!: (p: PianoSalvatoDto) => void;
+    aggiornaPianoSalvato.mockImplementation(() => new Promise<PianoSalvatoDto>((ok) => { risolviA = ok; }));
+    eliminaPianoSalvato.mockResolvedValue(undefined);
+    render(<MemoryRouter><PianiSalvati partitaId={7} /></MemoryRouter>);
+    await screen.findByRole('button', { name: /^Piano B/ });
+    await rinomina('Piano A', 'Piano A nuovo'); // in volo
+    await act(async () => { fireEvent.click(screen.getAllByRole('button', { name: 'Elimina' })[1]); }); // il piano B
+    expect(screen.queryByRole('button', { name: /^Piano B/ })).toBeNull();
+    await act(async () => { risolviA({ ...pianoA, titolo: 'Piano A nuovo' }); });
+    expect(screen.queryByRole('button', { name: /^Piano B/ })).toBeNull();
   });
 });

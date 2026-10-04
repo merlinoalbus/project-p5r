@@ -4,6 +4,7 @@
 
 import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
+import { partitaNonTrovata } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
 import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
@@ -22,11 +23,15 @@ export interface OpzioniContesto {
   limite?: number;
 }
 
+/**
+ * Il contesto del motore di fusione: con una partita i DLC posseduti sono i suoi (404 se la partita non esiste) e l'elenco
+ * `dlc` passato si ignora; senza partita valgono i DLC indicati (nessuno se mancano).
+ */
 export function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti: number[] } {
   let dlc = opz.dlc ?? [];
   if (opz.partitaId !== undefined) {
     const r = prepared('SELECT dlc_posseduti_json FROM partita WHERE id = ?').get(opz.partitaId) as { dlc_posseduti_json: string } | undefined;
-    if (!r) throw httpErrors.notFound('partita-non-trovata', `La partita ${opz.partitaId} non esiste.`);
+    if (!r) throw partitaNonTrovata(opz.partitaId);
     dlc = JSON.parse(r.dlc_posseduti_json) as number[];
   }
   return { ctx: creaContesto(dlc), dlcPosseduti: dlc };
@@ -43,6 +48,11 @@ export function scontoPartita(partitaId: number | undefined): { registrate: numb
   return { registrate, totale, percentuale, sconto: scontoRegistro(percentuale) };
 }
 
+/** Il rango più alto fra i Confidenti di un arcano nella partita (0 se nessuno). Era copiata in cicli salvati e operazioni della Velluto (K2). */
+export function rangoArcana(partitaId: number, arcana: string): number {
+  return (prepared('SELECT MAX(COALESCE(cp.rango, 0)) AS r FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? WHERE c.arcana = ?').get(partitaId, arcana) as { r: number | null }).r ?? 0;
+}
+
 /** Rango del Confidente per arcano nella partita (0 se assente). */
 function ranghiPerArcana(partitaId: number | undefined): Map<string, { chiave: string; nome: string; rango: number }> {
   const m = new Map<string, { chiave: string; nome: string; rango: number }>();
@@ -55,7 +65,7 @@ function ranghiPerArcana(partitaId: number | undefined): Map<string, { chiave: s
 /** Stato della Stanza di Velluto per la partita. */
 export function vellutoDto(partitaId: number): VellutoDto {
   const partita = prepared('SELECT id, allarme_attivo FROM partita WHERE id = ?').get(partitaId) as { id: number; allarme_attivo: number } | undefined;
-  if (!partita) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  if (!partita) throw partitaNonTrovata(partitaId);
   const c = scontoPartita(partitaId);
   const ranghi = ranghiPerArcana(partitaId);
   const gemelle = ranghi.get('Strength')?.rango ?? 0;
@@ -79,18 +89,22 @@ export function vellutoDto(partitaId: number): VellutoDto {
   };
 }
 
+/** La ricetta con il costo ridotto dallo sconto del Registro; senza sconto resta la stessa. */
 function ricettaScontata(r: RicettaFusioneDto, sconto: number): RicettaFusioneDto {
   return sconto > 0 ? { ...r, costo: prezzoScontato(r.costo, sconto) } : r;
 }
 
+/** Una Persona del motore per l'API, con i nomi italiani della Persona e dell'arcano. */
 function personaDto(p: PersonaFusione): PersonaFusioneDto {
   return { id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livello: p.livello, speciale: p.speciale, rara: p.rara, dlc: p.dlc };
 }
 
+/** Una ricetta del motore per l'API: ingredienti e risultato in forma DTO, tipo e costo (non scontato). */
 function ricettaDto(r: RicettaFusione): RicettaFusioneDto {
   return { ingredienti: r.ingredienti.map(personaDto), risultato: personaDto(r.risultato), tipo: r.tipo, costo: r.costo };
 }
 
+/** La Persona del motore per id, oppure un 404 `persona-non-trovata`. */
 export function personaOErrore(id: number): PersonaFusione {
   const p = personaFusione(id);
   if (!p) throw httpErrors.notFound('persona-non-trovata', `La Persona ${id} non esiste.`);
@@ -126,6 +140,7 @@ export function fondiDto(aId: number, bId: number, opz: OpzioniContesto): EsitoF
   return { a: personaDto(a), b: personaDto(b), ricetta: null, motivo, dlcPosseduti, sconto: 0, bonusConfidente: null };
 }
 
+/** Vero per le coppie di arcani che non hanno risultato (Giudizio con Giustizia, Forza, Carro o Morte), in qualunque ordine. */
 function arcanaSenzaRisultato(a: string, b: string): boolean {
   const coppie = new Set(['Judgement|Justice', 'Judgement|Strength', 'Judgement|Chariot', 'Judgement|Death']);
   return coppie.has(`${a}|${b}`) || coppie.has(`${b}|${a}`);
@@ -157,11 +172,13 @@ function disponibilitaDi(partitaId?: number): Disponibilita {
   return disp;
 }
 
+/** Id, nome e nome italiano di una skill; se l'id non esiste il nome è l'id stesso in testo. */
 function skillBreve(id: number): { id: number; nome: string; nomeIt: string } {
   const s = skillPerId(id);
   return { id, nome: s?.nome ?? String(id), nomeIt: s ? t('skill', s.nome) : String(id) };
 }
 
+/** Un nodo del piano per l'API, ricorsivamente sui figli: costo scontato, tipo solo per le fusioni, skill portate e da livello con i nomi. */
 function nodoDto(n: NodoPiano, sconto = 0): NodoPianoDto {
   return { persona: personaDto(n.persona), modo: n.modo, costo: prezzoScontato(n.costo, sconto), ...(n.tipo ? { tipo: n.tipo } : {}), figli: n.figli.map((f) => nodoDto(f, sconto)), skillPortate: n.skillPortate.map(skillBreve), skillDaLivello: n.skillDaLivello.map(skillBreve) };
 }
@@ -294,6 +311,7 @@ export function cicliDto(personaId: number, opz: OpzioniCicliDto): CicliFusioneD
 
 // ---- Eredità delle skill (Fase 3) ----
 
+/** Una skill dell'eredità come DTO: id, nome canonico, resa italiana ed elemento. */
 function skillDto(s: SkillEredita): { id: number; nome: string; nomeIt: string; elemento: string } {
   return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento };
 }
@@ -347,6 +365,7 @@ export function cercaPerSkillDto(skillIds: number[], opz: OpzioniContesto & { ri
   });
   const bersagli = opz.risultatoId !== undefined ? [personaOErrore(opz.risultatoId)] : ctx.ammesse.filter((p) => !p.rara);
   const cacheIng = new Map<number, IngredienteEredita & { livello: number; daScorta: boolean }>();
+  /** L'ingrediente con il suo bacino di skill, calcolato una volta per Persona e poi ripreso dalla cache. */
   const ingr = (p: PersonaFusione) => {
     let i = cacheIng.get(p.id);
     if (!i) { i = ingredienteDa(p, opz.partitaId, undefined); cacheIng.set(p.id, i); }

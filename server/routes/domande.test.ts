@@ -3,20 +3,17 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { indiceGiornoScolastico } from '../services/domandeService.js';
 import type { DomandeDto, DoteSocialePartitaDto, StoricoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API domande', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 

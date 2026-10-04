@@ -9,17 +9,17 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, getDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { AttivitaTutteDto, CruciverbaTuttiDto, DungeonDettaglioDto, DungeonRiassuntoDto, ElementoCatalogoDto, LibriDto, LuogoOpzioneDto, NegozioDettaglioDto, NegozioRiassuntoDto, QuartiereDettaglioDto, RicercaArticoliDto, RichiesteDto, TimbriDedaloDto, VideogiochiDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+/** Crea una partita coi dati indicati (nome, data, fascia…) e ne restituisce l'id. */
 const partita = async (dati: Record<string, unknown>) => ((await request(app).post('/api/partite').send(dati)).body.data as { id: number }).id;
 
 describe('voce 5 — il server legge i valori del catalogo', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); invalidaCacheTraduzioni(); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('la presenza di un negozio sono i suoi orari; la sede e il programma punti sono nel DTO', async () => {

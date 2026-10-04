@@ -15,20 +15,19 @@
 // ============================================================
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { closeDb, initDb, getDb, prepared } from '../../db/dbService.js';
-import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../../db/dbService.js';
 import { sincronizzaMappe } from './sincronizzaMappe.js';
 import { applicaPresenzaAiLuoghi } from './presenzaEntita.js';
 import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
 import { eStrutturale } from '../../../shared/spilli.js';
 import { valutaRequisitiSpillo } from '../disponibilitaService.js';
 import { dettaglioMappa } from './mappeService.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 
 describe('visibilità condizionale dei pin', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    const db = dbDiProva();
     // il pacchetto e' la fotografia della produzione: la formazione dalla guida (spilli dai marcatori,
     // presenza dei luoghi sui pin) non avviene piu' da sola, qui si chiede esplicitamente
     sincronizzaMappe(db);
@@ -36,6 +35,7 @@ describe('visibilità condizionale dei pin', () => {
   });
   afterAll(() => closeDb());
 
+  /** Nome e condizioni decodificate (lista vuota se assenti) di ogni spillo della mappa indicata. */
   function condizioniDi(mappa: string): Array<{ nome: string; condizioni: unknown[] }> {
     return (getDb().prepare('SELECT nome, condizioni_json FROM spillo WHERE mappa_chiave = ?')
       .all(mappa) as Array<{ nome: string; condizioni_json: string | null }>)
@@ -247,10 +247,12 @@ describe('visibilità condizionale dei pin', () => {
       JOIN negozio n ON n.sede_chiave = s.riferimento_chiave
       WHERE s.riferimento_tipo = 'luogo' AND n.nascosto = 0`).all() as Array<{ id: number; mappa_chiave: string; riferimento_chiave: string }>;
     expect(candidati.length, 'nessun pin agganciato a un negozio: la prova non proverebbe niente').toBeGreaterThan(0);
+    /** Stato di disponibilità dello spillo `p` come lo restituisce il dettaglio della sua mappa per la partita di prova. */
     const statoDi = (p: { id: number; mappa_chiave: string }) => dettaglioMappa(p.mappa_chiave, partita.id).spilli.find((s) => s.id === p.id)?.disponibilita?.stato;
     const pin = candidati.find((p) => statoDi(p) !== 'bloccato');
     expect(pin, 'serve un pin di negozio aperto al 20 aprile').toBeTruthy();
 
+    /** Stato attuale del pin di negozio scelto, riletto a ogni chiamata. */
     const statoDelPin = () => statoDi(pin!);
     expect(statoDelPin()).not.toBe('bloccato');
 

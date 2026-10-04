@@ -36,12 +36,14 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
   const [locali, setLocali] = useState<{ di: MappaDto | null; spilli: Map<number, SpilloDto> }>({ di: null, spilli: new Map() });
   const datiAttuali = useRef(dati);
   useEffect(() => { datiAttuali.current = dati; }, [dati]);
+  /** Sostituisce in locale lo spillo aggiornato, legandolo alla copia corrente della mappa (le sostituzioni fatte su una copia precedente si scartano). */
   const aggiorna = (s: SpilloDto) => setLocali((l) => {
     const di = datiAttuali.current;
     return { di, spilli: new Map(l.di === di ? l.spilli : undefined).set(s.id, s) };
   });
   const aggiornati = locali.di === dati ? locali.spilli : null;
   const mappa = useMemo(() => (dati ? { ...dati, spilli: dati.spilli.map((s) => aggiornati?.get(s.id) ?? s) } : null), [dati, aggiornati]);
+  /** Notifica l'errore di un'azione, col messaggio del server se c'è. */
   const errori = (err: unknown) => notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
 
   // La rilettura dopo un'azione: vince l'ultima chiesta. Ogni caricamento completo — cambio di mappa, di partita, di
@@ -50,6 +52,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
   const ultimaLettura = useRef(0);
   useEffect(() => { ultimaLettura.current++; }, [chiave, partitaId, opz.versione, momento]);
   const ricaricaTutto = useCallback(async () => { ultimaLettura.current++; await ricarica(); }, [ricarica]);
+  /** Rilegge la mappa senza passare per lo stato di caricamento e la applica solo se nel frattempo non è partita un'altra lettura; un errore lascia l'aggiornamento locale. */
   const rileggiInSilenzio = async () => {
     const n = ++ultimaLettura.current;
     try {
@@ -58,6 +61,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     } catch { /* resta l'aggiornamento immediato */ }
   };
 
+  /** Segna lo spillo come raccolto (o lo riapre) nella partita, notifica con la parola adatta al tipo e rilegge la mappa. */
   const raccolto = async (s: SpilloDto, valore: boolean) => {
     if (!partitaId) return;
     try {

@@ -11,8 +11,8 @@ import type { ProgressiPartitaDto } from '../../types';
 const { getProgressiPartita, impostaEventoStoria, impostaAttivitaSvolta, impostaPuntiNegozio } = vi.hoisted(() => ({
   getProgressiPartita: vi.fn(), impostaEventoStoria: vi.fn(), impostaAttivitaSvolta: vi.fn(), impostaPuntiNegozio: vi.fn(),
 }));
-vi.mock('../../services/api/condizioni', () => ({ getProgressiPartita, impostaEventoStoria, impostaAttivitaSvolta, impostaPuntiNegozio }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getProgressiPartita, impostaEventoStoria, impostaAttivitaSvolta, impostaPuntiNegozio }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../../stores/suggerimentiStore', () => ({ useSuggerimentiStore: { getState: () => ({ invalida: vi.fn() }) } }));
 
 const dati: ProgressiPartitaDto = {

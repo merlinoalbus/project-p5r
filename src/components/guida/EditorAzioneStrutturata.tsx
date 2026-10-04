@@ -29,6 +29,7 @@ const FIN_DOVE: OpzioneSelettore[] = [
   ...Array.from({ length: 9 }, (_, i) => ({ chiave: String(i + 1), nome: `Almeno ${i + 1} ${i === 0 ? 'sessione' : 'sessioni'}`, dettaglio: 'o visioni, o serate' })),
 ];
 
+/** Le voci fra cui scegliere l'elemento collegato, secondo il tipo di collegamento. */
 function elencoRiferimento(tipo: TipoRiferimentoAzione, e: ElenchiAzioneDto): OpzioneSelettore[] {
   switch (tipo) {
     case 'confidente': return e.confidenti;
@@ -42,6 +43,7 @@ function elencoRiferimento(tipo: TipoRiferimentoAzione, e: ElenchiAzioneDto): Op
   }
 }
 
+/** I titoli fra cui scegliere per un effetto di lettura: libri, film o videogiochi secondo la categoria. */
 function elencoLettura(categoria: CategoriaLettura, e: ElenchiAzioneDto): OpzioneSelettore[] {
   return categoria === 'libro' ? e.libri : categoria === 'film' ? e.film : e.videogiochi;
 }
@@ -53,6 +55,11 @@ function effettoNuovo(tipo: EffettoAzione['tipo']): EffettoAzione {
   return { tipo: 'dote', dote: 'fascino', note: 2 };
 }
 
+/**
+ * Un effetto della spunta: tipo (cambiarlo riparte dall'effetto più semplice di quel tipo) e i suoi campi. Dote: dote
+ * e note. Lettura: categoria (cambiarla azzera il titolo), titolo e fin dove (completato o almeno N sessioni). Turno:
+ * attività fra quelle contate a turni e, se spuntato, Doti proprie del turno (da 1 a 5) al posto di quelle dell'attività.
+ */
 function RigaEffetto({ effetto, elenchi, onCambia, onTogli, numero }: { effetto: EffettoAzione; elenchi: ElenchiAzioneDto; onCambia: (e: EffettoAzione) => void; onTogli: () => void; numero: number }) {
   return (
     <li className="flex flex-col gap-2 rounded border border-border p-2">
@@ -100,8 +107,14 @@ interface Props {
   onCambia: (v: CampiStrutturati) => void;
 }
 
+/**
+ * Classificazione ed effetti di un'azione della giornata: carica gli elenchi chiusi dal BE e mostra tipo, collegamento
+ * (cambiandone il tipo si azzera l'elemento scelto e il rango atteso resta solo per i Confidenti), elemento collegato,
+ * rango atteso per i Confidenti e l'elenco degli effetti (fino a 20). Ogni cambio produce subito i campi nuovi.
+ */
 export function EditorAzioneStrutturata({ valore, onCambia }: Props) {
   const { dati: elenchi, errore } = useCarica(getElenchiAzione, []);
+  /** Applica una modifica parziale ai campi strutturati e la passa al genitore. */
   const imposta = (p: Partial<CampiStrutturati>) => onCambia({ ...valore, ...p });
   if (errore) return <p className="m-0 text-[12px] text-error">Elenchi non disponibili: {errore}</p>;
   if (!elenchi) return <p className="m-0 text-[12px] text-text-muted">Carico gli elenchi…</p>;

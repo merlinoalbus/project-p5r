@@ -4,11 +4,11 @@
 
 import http from 'node:http';
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto, regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import type { QuartiereDettaglioDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
@@ -16,9 +16,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 describe('Mappe dei quartieri', () => {
   let server: http.Server; let porta = 0;
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     server = http.createServer((_req, res) => { res.writeHead(200, { 'Content-Type': 'image/png' }); res.end(PNG); });
     await new Promise<void>((ok) => server.listen(0, '127.0.0.1', () => ok()));
     porta = (server.address() as { port: number }).port;
@@ -36,20 +34,18 @@ describe('Mappe dei quartieri', () => {
     expect(i.piantaAssente).toBeTruthy();
   });
 
-  it('spillo di un luogo: fissa, rileggi, limiti, rimozione; il reseed non tocca gli spilli dell\'utente', async () => {
+  // La rotta che scriveva lo spillo di un luogo non c'è più: nessuno la chiamava (rilievo O10). Resta da provare che quello che
+  // c'è nel database si legge nella scheda e che le regole dell'avvio non toccano gli spilli dell'utente.
+  it('spillo di un luogo: si rilegge nella scheda; le regole dell\'avvio non toccano gli spilli dell\'utente', async () => {
     const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
     const luogo = s.luoghi[0];
-    const m = await request(app).put('/api/mappe/marcatori-luoghi').send({ luogo: luogo.chiave, x: 40, y: 60 });
-    expect(m.status).toBe(200);
-    expect(m.body.data.marcatore).toEqual({ x: 40, y: 60 });
+    getDb().prepare("INSERT INTO marcatore_luogo (luogo_chiave, x, y, updated_at, origine) VALUES (?, 40, 60, 'prova', 'utente') ON CONFLICT(luogo_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, origine = 'utente'").run(luogo.chiave);
     const s2 = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
     expect(s2.luoghi[0].marcatore).toEqual({ x: 40, y: 60 });
-    expect((await request(app).put('/api/mappe/marcatori-luoghi').send({ luogo: luogo.chiave, x: 140, y: 0 })).status).toBe(400);
-    expect((await request(app).put('/api/mappe/marcatori-luoghi').send({ luogo: 'x/y', x: 1, y: 1 })).status).toBe(404);
     regoleAllAvvio(getDb());
     const s3 = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
     expect(s3.luoghi[0].marcatore).toEqual({ x: 40, y: 60 });
-    expect((await request(app).put('/api/mappe/marcatori-luoghi').send({ luogo: luogo.chiave, x: null, y: null })).body.data.marcatore).toBeNull();
+    getDb().prepare('DELETE FROM marcatore_luogo WHERE luogo_chiave = ?').run(luogo.chiave);
   });
 
   it('scarica la mappa del quartiere nell\'istanza dall\'URL del seed e la registra come immagine «citta-<quartiere>»', async () => {

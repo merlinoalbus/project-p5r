@@ -16,17 +16,18 @@
 //     mano, ed è un modo normale di lavorare, non un guasto.
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { OggettoSelezionabileDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+/** Elenca gli oggetti che l'editor offre per la categoria data. */
 const per = async (categoria: string) =>
   (await request(app).get(`/api/catalogo/oggetti-di/${categoria}`)).body.data as OggettoSelezionabileDto[];
 
 describe('API oggetti selezionabili', () => {
-  beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); });
+  beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
   it('non viene ingoiata da /catalogo/:tipo', async () => {

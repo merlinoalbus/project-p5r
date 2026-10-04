@@ -6,7 +6,10 @@
 FROM node:24-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# Senza gli script d'installazione: l'unico che conti qui era la compilazione di better-sqlite3, che il frontend non usa
+# (rilievo D9 della verifica completa, 2026-10-04). Vite, esbuild, Rollup e Tailwind portano i loro binari come pacchetti
+# opzionali per piattaforma, che `npm ci` installa comunque.
+RUN npm ci --ignore-scripts
 COPY index.html vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
 COPY vite/ ./vite/
 COPY public/ ./public/

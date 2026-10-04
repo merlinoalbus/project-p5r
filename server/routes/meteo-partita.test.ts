@@ -7,26 +7,26 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { ConfidentePartitaDto, MeteoGiornoDto, PartitaDto, PercorsoGiornoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('Meteo della partita', () => {
   let id = 0;
   beforeAll(async () => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     id = ((await request(app).post('/api/partite').send({ nome: 'Meteo' })).body.data as { id: number }).id;
   });
   afterAll(() => closeDb());
 
+  /** Legge il meteo del giorno `data` per la partita di prova. */
   const meteo = async (data: string) => (await request(app).get(`/api/partite/${id}/meteo/${data}`)).body.data as MeteoGiornoDto;
+  /** Imposta il meteo del giorno `data` nella partita di prova col corpo dato (restituisce la richiesta, per controllarne l'esito). */
   const imposta = (data: string, body: object) => request(app).put(`/api/partite/${id}/meteo/${data}`).send(body);
+  /** Modifica la partita di prova coi campi dati e restituisce la partita aggiornata. */
   const partita = async (mod: object) => (await request(app).put(`/api/partite/${id}`).send(mod)).body.data as PartitaDto;
   // Ann al rango 3 chiede solo che non piova: il semaforo del rango 3 con Ann al rango 2
   const ann3 = async () => {

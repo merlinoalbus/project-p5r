@@ -11,7 +11,9 @@ import { CAMPI_GENERICI, type Risposta } from './definizioni';
 
 /** Le risposte giuste come righe in ordine: certe domande d'esame si rispondono in più passaggi. */
 function EditorRisposte({ risposte, onCambia, disabilitato }: { risposte: Risposta[]; onCambia: (r: Risposta[]) => void; disabilitato?: boolean }) {
+  /** Cambia il testo della risposta in posizione `i`. */
   const cambia = (i: number, testo: string) => onCambia(risposte.map((r, j) => (j === i ? { ...r, testo } : r)));
+  /** Toglie la risposta in posizione `i` e rinumera l'ordine delle restanti da 1. */
   const togli = (i: number) => onCambia(risposte.filter((_, j) => j !== i).map((r, j) => ({ ...r, ordine: j + 1 })));
   return (
     <fieldset className="regole-editor flex flex-col gap-2">
@@ -39,6 +41,10 @@ function opzioniCon(opzioni: Record<string, string>, valore: string) {
   return valore && !(valore in opzioni) ? [{ chiave: valore, nome: valore }, ...voci] : voci;
 }
 
+/**
+ * I campi di una domanda o di una riga del cruciverba secondo `CAMPI_GENERICI`: quelli con un elenco di opzioni come
+ * selettore, gli altri come campo libero; per le domande, in più, l'editor delle risposte.
+ */
 function Generico({ tipo, dati, imposta, disabilitato }: PropsModulo & { tipo: 'domanda' | 'cruciverba' }) {
   return (
     <div className="flex flex-col gap-3">
@@ -53,5 +59,7 @@ function Generico({ tipo, dati, imposta, disabilitato }: PropsModulo & { tipo: '
   );
 }
 
+/** Il modulo di una domanda (in classe o d'esame). */
 export function ModuloDomanda(p: PropsModulo) { return <Generico tipo="domanda" {...p} />; }
+/** Il modulo di una riga del cruciverba. */
 export function ModuloCruciverba(p: PropsModulo) { return <Generico tipo="cruciverba" {...p} />; }

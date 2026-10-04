@@ -1,5 +1,9 @@
 # Catalogo link immagini — 232 Persona + 23 Confidenti (Persona 5 Royal)
 
+> **Storico** (verifica completa, 2026-10-04): `data/riferimenti/immagini.json` non esiste più. Le immagini dell'app oggi sono
+> nella tabella `immagine` di `gioco.db` (migrazione 079) e negli asset di `public/asset/`; questo elenco resta come registro
+> delle fonti consultate.
+
 Ricerca del 2026-09-03. Solo LINK (nessuna immagine scaricata nel repository). Fonte: Megami Tensei Wiki
 (megamitensei.fandom.com), via API MediaWiki (`action=query`, `prop=images` / `prop=imageinfo` / `list=search` /
 `list=allimages`), interrogata con `curl` e user-agent da browser (l'endpoint HTML risponde 403/402 agli strumenti

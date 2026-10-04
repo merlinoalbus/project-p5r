@@ -9,7 +9,7 @@
 //   si apre subito; poi le migrazioni lo portano alla versione del codice, come per ogni istanza;
 // - `pacchetto/completo/gioco.db` (fuori da git, ~311 MB, stesso nome): con le immagini dentro
 //   (migrazione 079). Il caricamento iniziale completo avviene SEMPRE dall'app (Impostazioni →
-//   Pacchetto di gioco → «Importa un pacchetto») e sostituisce il file dell'istanza sul volume.
+//   Pacchetto di gioco → «Importa il file scelto», dalla cartella d’appoggio) e sostituisce il file dell'istanza sul volume.
 //
 // `caricaPacchetto(db)` fa la stessa cosa dentro una connessione già aperta (i test, che lavorano
 // in memoria): copia schema e righe del pacchetto nel file di gioco e poi applica le migrazioni
@@ -22,9 +22,7 @@ import { config } from '../../config.js';
 import { logger } from '../../utils/logger.js';
 import { resolveDbPath, type AppDatabase } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
-import { invalidaCacheTraduzioni } from '../traduzioniService.js';
-import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
-import { invalidaEredita } from '../fusione/eredita.js';
+import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
 import { traduciNomiSpilli } from '../../db/migrations/053_nomi_spilli_in_italiano.js';
 import { collegaLuoghiAllePlanimetrie } from '../../db/migrations/054_luoghi_con_la_loro_planimetria.js';
 import { riallineaSpilliLuoghi } from '../mappe/sincronizzaMappe.js';
@@ -62,6 +60,7 @@ export function assorbiImmaginiSuDisco(db: AppDatabase): number {
   return n;
 }
 
+/** Vero se la tabella `immagine` del database di gioco ha già la colonna `contenuto` (le immagini dentro il DB, migrazione 079). */
 function haColonnaContenuto(db: AppDatabase): boolean {
   return (db.prepare('PRAGMA main.table_info(immagine)').all() as Array<{ name: string }>).some((c) => c.name === 'contenuto');
 }
@@ -151,9 +150,7 @@ export function caricaPacchetto(db: AppDatabase, percorso: string = percorsoPacc
   }
   runMigrations(db);
   regoleAllAvvio(db);
-  invalidaCacheTraduzioni();
-  invalidaMotoreFusione();
-  invalidaEredita();
+  invalidaCacheDiGioco();
   return { tabelle, righe, versione };
 }
 
@@ -191,8 +188,6 @@ export function ricaricaPacchetto(db: AppDatabase, percorso: string = percorsoPa
     db.pragma('foreign_keys = ON');
     db.prepare('DETACH DATABASE pacchetto').run();
   }
-  invalidaCacheTraduzioni();
-  invalidaMotoreFusione();
-  invalidaEredita();
+  invalidaCacheDiGioco();
   return { tabelle, righe };
 }

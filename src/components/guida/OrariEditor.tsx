@@ -13,6 +13,7 @@ import { FASCE_ORARIO, descriviOrari, type FasciaOrario, type GiornoChiave, type
 
 interface Props { valore: OrariNegozio; onCambia: (o: OrariNegozio) => void; disabilitato?: boolean }
 
+/** Un gruppo di interruttori a scelta multipla: ogni tocco accende o spegne una voce e passa al genitore l'elenco delle accese. */
 export function Interruttori<T extends string>({ etichetta, scelte, opzioni, onCambia, disabilitato }: { etichetta: string; scelte: T[]; opzioni: ReadonlyArray<{ chiave: T; nome: string }>; onCambia: (v: T[]) => void; disabilitato?: boolean }) {
   const attive = new Set(scelte);
   return (
@@ -25,6 +26,10 @@ export function Interruttori<T extends string>({ etichetta, scelte, opzioni, onC
   );
 }
 
+/**
+ * L'editor degli orari: giorni e fasce come interruttori (salvati nell'ordine del catalogo, non dei clic), la chiusura
+ * con la pioggia e la nota (vuota = assente), con sotto la frase che ne risulta.
+ */
 export function OrariEditor({ valore, onCambia, disabilitato }: Props) {
   // l'ordine salvato è quello del catalogo, non quello dei clic
   const ordina = <T extends string>(scelte: T[], catalogo: ReadonlyArray<{ chiave: T }>) => catalogo.map((c) => c.chiave).filter((c) => scelte.includes(c));

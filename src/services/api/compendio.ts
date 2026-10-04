@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
+  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, VideogiochiDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
@@ -20,16 +20,23 @@ export interface FiltriPersona {
   skill?: string;
 }
 
-export const getArcani = (): Promise<ArcanaDto[]> => apiGet('/compendio/arcani');
+/** Glossario dei codici del compendio con la resa italiana (arcani, elementi, affinità, statistiche, Doti sociali…). */
 export const getGlossario = (): Promise<GlossarioDto> => apiGet('/compendio/glossario');
+/** Termini di gioco della localizzazione italiana, ordinati per categoria e nome. */
 export const getTermini = (): Promise<TermineDto[]> => apiGet('/compendio/termini');
 
+/** Regole di fusione: tabella degli arcani, ricette speciali, modificatori dei tesori, eredità delle skill e gruppi DLC. */
 export const getRegoleFusione = (): Promise<RegoleFusioneDto> => apiGet('/compendio/fusione/regole');
+/** Elenco riassuntivo delle Persona, filtrato con i parametri della query. */
 export const getPersone = (f: FiltriPersona = {}): Promise<PersonaRiassuntoDto[]> => apiGet(`/compendio/persona${queryString(f)}`);
+/** Scheda completa di una Persona per id. */
 export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`/compendio/persona/${id}`);
+/** Elenco riassuntivo delle skill, filtrabile per testo (`q`) ed elemento. */
 export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGet(`/compendio/skill${queryString(f)}`);
+/** Scheda completa di una skill per id. */
 export const getSkill = (id: number): Promise<SkillDettaglioDto> => apiGet(`/compendio/skill/${id}`);
-export const getOggetti = (f: { q?: string; categoria?: string } = {}): Promise<OggettoDto[]> => apiGet(`/compendio/oggetti${queryString(f)}`);
+/** Oggetti del compendio, filtrabili per testo (`q`) e categoria. */
+export const getOggetti =(f: { q?: string; categoria?: string } = {}): Promise<OggettoDto[]> => apiGet(`/compendio/oggetti${queryString(f)}`);
 /** Oggetti della guida: consumabili, chiave e materiali, fabbricazione, personalizzazione armi, abiti, scambi. */
 export const getOggettiGuida = (): Promise<OggettiGuidaDto> => apiGet('/compendio/oggetti-guida');
 /** Personaggi senza spoiler con gruppi. */
@@ -52,12 +59,12 @@ export const creaVoceGiornata = (data: string, dati: DatiVoceGiornata, partita?:
 /** Modifica una voce: testo, note, genere, fascia, posto, tipo, collegamento, rango atteso, effetti. */
 export const aggiornaVoceGiornata = (uid: string, dati: DatiVoceGiornata, partita?: number): Promise<AzionePercorsoDto> =>
   apiPut(`/compendio/percorso/voci/${uid}${queryString({ partita })}`, dati);
-/** Sposta una voce di un passo nella sua fascia (-1 su, +1 giù); risponde con tutte le voci del giorno. */
+/** Sposta una voce di un passo nella sua fascia (-1 su, +1 giù); risponde con tutte le voci del giorno. È relativo (un passo da dove
+ *  sta): ripetuto dopo un 5xx o un timeout a scrittura già avvenuta la sposterebbe di due, quindi nessun nuovo tentativo. */
 export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number): Promise<AzionePercorsoDto[]> =>
-  apiPut(`/compendio/percorso/voci/${uid}/sposta${queryString({ partita })}`, { verso });
+  apiPut(`/compendio/percorso/voci/${uid}/sposta${queryString({ partita })}`, { verso }, { maxRetries: 0 });
 /** Elimina una voce dalla guida (409 se in una partita è spuntata con effetti: prima si toglie la spunta). */
 export const eliminaVoceGiornata = (uid: string): Promise<void> => apiDelete(`/compendio/percorso/voci/${uid}`);
-/** Negozi con conteggi degli articoli. */
 /** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */
 export const getNegozi = (partita?: number): Promise<NegozioRiassuntoDto[]> => apiGet(`/compendio/negozi${queryString({ partita })}`);
 /** Scheda di un negozio con gli articoli (acquisti della partita se indicata). */
@@ -78,14 +85,16 @@ export const getAttivita = (partita?: number): Promise<AttivitaTutteDto> => apiG
 export const getLibri = (partita?: number): Promise<LibriDto> => apiGet(`/compendio/libri${queryString({ partita })}`);
 /** Catalogo cinema e DVD con visioni e avanzamento per partita. */
 export const getFilm = (partita?: number): Promise<FilmDvdDto> => apiGet(`/compendio/film${queryString({ partita })}`);
-export const getVideogiochi = (partita?: number): Promise<VideogiochiDto> => apiGet(`/compendio/videogiochi${queryString({ partita })}`);
+/** Catalogo dei videogiochi con l'avanzamento nella partita se indicata. */
+export const getVideogiochi =(partita?: number): Promise<VideogiochiDto> => apiGet(`/compendio/videogiochi${queryString({ partita })}`);
 /** Aiuto in battaglia: sezioni della guida e indice delle Ombre. */
 export const getBattaglia = (): Promise<BattagliaDto> => apiGet('/compendio/battaglia');
 /** Richieste dei Mementos e dati di Jose (stato per partita se indicata). */
 export const getRichieste = (partita?: number): Promise<RichiesteDto> => apiGet(`/compendio/richieste${queryString({ partita })}`);
 /** Palazzi e Dedali con punti di interesse (stato e avanzamento se c'è la partita). */
 export const getDungeons = (partita?: number): Promise<DungeonRiassuntoDto[]> => apiGet(`/compendio/dungeon${queryString({ partita })}`);
-export const getDungeon = (chiave: string, partita?: number): Promise<DungeonDettaglioDto> => apiGet(`/compendio/dungeon/${encodeURIComponent(chiave)}${queryString({ partita })}`);
+/** Scheda di un Palazzo o Dedalo con aree e punti di interesse (stato della partita se indicata). */
+export const getDungeon =(chiave: string, partita?: number): Promise<DungeonDettaglioDto> => apiGet(`/compendio/dungeon/${encodeURIComponent(chiave)}${queryString({ partita })}`);
 
 /* ---- Correzione dei testi della guida ai Palazzi: la sezione non è più in sola lettura ---- */
 export interface DatiDungeonApi { nome?: string; sovrano?: string; dataSblocco?: string; dataScadenza?: string; furtoConsigliato?: string; livelloConsigliato?: string; note?: string }
@@ -94,16 +103,21 @@ export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: Punt
   /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
   contenitore?: string | null }
 
+/** Corregge i testi della scheda del Palazzo (nome, sovrano, date, consigli, note); risponde con la scheda aggiornata. */
 export const aggiornaDungeon = (chiave: string, dati: DatiDungeonApi): Promise<DungeonDettaglioDto> => apiPut(`/compendio/dungeon/${encodeURIComponent(chiave)}`, dati);
+/** Corregge nome e descrizione di un'area della guida del Palazzo; risponde con l'area aggiornata. */
 export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDungeonDto> => apiPut(`/compendio/aree/${encodeURIComponent(chiave)}`, dati);
+/** Aggiunge una voce (punto di interesse) all'area; risponde con la voce creata. */
 export const creaPunto = (area: string, dati: DatiPuntoApi & { nome: string; tipo: PuntoInteresseDto['tipo'] }): Promise<PuntoInteresseDto> => apiPost(`/compendio/aree/${encodeURIComponent(area)}/punti`, dati);
+/** Modifica una voce della guida dell'area; risponde con la voce aggiornata. */
 export const aggiornaPunto = (chiave: string, dati: DatiPuntoApi): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}`, dati);
-export const eliminaPunto = (chiave: string): Promise<void> => apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}`);
+/** Elimina una voce della guida dell'area (204, nessun contenuto). */
+export const eliminaPunto =(chiave: string): Promise<void> => apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}`);
 /** Una sezione nuova della guida del Palazzo: `dopo` un'area (null = in cima, assente = in fondo), e se data nella planimetria. */
 export const creaArea = (dungeon: string, dati: { nome: string; descrizione?: string; dopo?: string | null; planimetria?: string }): Promise<{ chiave: string; nome: string; ordine: number }> =>
   apiPost(`/compendio/dungeon/${encodeURIComponent(dungeon)}/aree`, dati);
-/** Un posto su (-1) o giù (+1) nella guida dell'area. */
-export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/sposta`, { verso });
+/** Un posto su (-1) o giù (+1) nella guida dell'area. Relativo come `spostaVoceGiornata`: nessun nuovo tentativo. */
+export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/sposta`, { verso }, { maxRetries: 0 });
 /** Collega (o scollega) un pin di una planimetria del Palazzo alla voce della guida. */
 export const collegaPinAlPunto = (chiave: string, spilloId: number, collega: boolean): Promise<PuntoInteresseDto> =>
   collega ? apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`, {}) : apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`);
@@ -113,12 +127,16 @@ export const eliminaArea = (chiave: string): Promise<void> => apiDelete(`/compen
 export const getCalendario = (partita?: number, mese?: string): Promise<CalendarioDto> => apiGet(`/compendio/calendario${queryString({ partita, mese })}`);
 /** Domande in classe ed esami (con stato «fatta» e prossime se c'è la partita). */
 export const getDomande = (partita?: number): Promise<DomandeDto> => apiGet(`/compendio/domande${queryString({ partita })}`);
-export const getConfidenteDettaglio = (chiave: string): Promise<ConfidenteDettaglioDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}`);
+/** Scheda di un Confidente (dati di gioco, senza lo stato di una partita). */
+export const getConfidenteDettaglio =(chiave: string): Promise<ConfidenteDettaglioDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}`);
 /** La Dote a ogni incontro dei ranghi indicati (gli altri restano); risponde con la scheda aggiornata. */
 export const impostaDotiIncontro = (chiave: string, ranghi: Array<{ rango: number; doti: DoteNote[] }>): Promise<ConfidenteDettaglioDto> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/doti-incontro`, { ranghi });
-export const getConfidenti = (): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
+/** Elenco dei Confidenti del compendio. */
+export const getConfidenti =(): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
 /** Tutti i luoghi della città, come voci da scegliere (la sede di un negozio o di un'attività). */
 export const getLuoghi = (): Promise<LuogoOpzioneDto[]> => apiGet('/compendio/luoghi');
 
+/** Imposta l'ingresso del quartiere sulla mappa (mappa, punto in percentuale e zoom) con PUT, o lo toglie con DELETE se `dati`
+ *  è null; risponde con l'ingresso salvato, o null dopo la rimozione. */
 export const salvaIngressoQuartiere=(chiave:string,dati:{mappa:string;x:number;y:number;zoom:number}|null):Promise<import('../../../shared/types').IngressoQuartiereDto|null>=>dati===null?apiDelete('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso').then(()=>null):apiPut('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso',dati);

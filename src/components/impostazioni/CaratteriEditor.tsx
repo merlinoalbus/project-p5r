@@ -8,7 +8,7 @@
 // ============================================================
 
 import { useRef, useState } from 'react';
-import { caricaFont, eliminaFont } from '../../services/api/font';
+import { caricaFont, eliminaFont } from '../../services/api';
 import { useFontStore } from '../../stores/fontStore';
 import { notifica } from '../../stores/notificationStore';
 import type { FontDto, RuoloFont } from '../../types';
@@ -30,13 +30,23 @@ const RUOLI: Ruolo[] = [
   { ruolo: 'decor', nome: 'Titoli degli stati vuoti e dei messaggi', descrizione: 'Cartigli in stile ritaglio di giornale: «Nessun piano salvato», «Qualcosa è andato storto».', predefinito: 'Special Elite', anteprima: 'NESSUNA PERSONA', classe: 'font-decor text-[26px] leading-none' },
 ];
 
+/** Dimensione leggibile del file: in MB con un decimale da 1 MB in su, altrimenti in KB arrotondati (mai meno di 1 KB). */
 const formatoByte = (b: number): string => (b >= 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`);
 
+/**
+ * Riga di un ruolo tipografico: nome e descrizione, anteprima resa con il token del ruolo, chip con il file caricato
+ * (o con il font predefinito) e i pulsanti per caricare, sostituire o rimuovere il file. `def` descrive il ruolo,
+ * `stato` è il font dell'istanza per quel ruolo (assente finché l'elenco non è arrivato).
+ */
 function RigaRuolo({ def, stato }: { def: Ruolo; stato: FontDto | undefined }) {
   const aggiorna = useFontStore((s) => s.aggiorna);
   const [occupato, setOccupato] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
+  /**
+   * Invia il file scelto per il ruolo e aggiorna lo store dei font con la risposta (così l'anteprima cambia subito);
+   * alla fine svuota il campo file, perché si possa riscegliere lo stesso file.
+   */
   const carica = async (file: File) => {
     setOccupato(true);
     try {
@@ -49,6 +59,7 @@ function RigaRuolo({ def, stato }: { def: Ruolo; stato: FontDto | undefined }) {
       if (input.current) input.current.value = '';
     }
   };
+  /** Elimina il file del ruolo e segna il ruolo come non caricato nello store: si torna al font predefinito. */
   const rimuovi = async () => {
     setOccupato(true);
     try {
@@ -68,7 +79,7 @@ function RigaRuolo({ def, stato }: { def: Ruolo; stato: FontDto | undefined }) {
         <span className="font-semibold text-[14px]">{def.nome}</span>
         <span className="text-[12px] text-text-muted">{def.descrizione}</span>
       </div>
-      <div className={`${def.classe} text-text break-words`} aria-label={`Anteprima ${def.nome}`}>{def.anteprima}</div>
+      <div className={`${def.classe} text-text break-words`} role="group" aria-label={`Anteprima ${def.nome}`}>{def.anteprima}</div>
       <div className="flex items-center gap-2 flex-wrap text-[13px]">
         {stato?.presente ? (
           <span className="chip chip--attivo">File caricato · {stato.formato?.toUpperCase()} · {formatoByte(stato.byte)}</span>

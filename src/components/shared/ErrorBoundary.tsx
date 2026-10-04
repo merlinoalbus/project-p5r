@@ -23,10 +23,12 @@ export class ErrorBoundary extends Component<Props, State> {
     this.state = { hasError: false, error: null };
   }
 
+  /** Un errore di render nei figli fa passare allo stato d'errore, conservando l'errore da mostrare. */
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
+  /** Scrive in console l'errore con le informazioni sullo stack dei componenti, per la diagnosi. */
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('[ErrorBoundary] Errore catturato:', error, errorInfo);
   }
@@ -40,6 +42,11 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
+  /**
+   * Senza errori mostra i figli. Con un errore mostra la schermata di recupero a colori fissi (indipendente dal tema):
+   * l'illustrazione d'errore se il manifest degli asset la contiene, il messaggio dell'errore, «Riprova» (azzera lo
+   * stato e ridisegna i figli) e «Ricarica app».
+   */
   render() {
     if (this.state.hasError) {
       const illustrazione = useAssetStore.getState().manifest?.file['illustrazioni/errore-senza-testo'] ?? null;

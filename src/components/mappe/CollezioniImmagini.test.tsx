@@ -1,9 +1,14 @@
 /** @vitest-environment jsdom */
+// ============================================================
+// Test CollezioniImmagini — famiglie di immagini nell'albero dei luoghi e nella raccolta: intestazione, numerazione stabile, discendenti, omonimi
+// ============================================================
+
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AlberoLuoghi } from './AlberoLuoghi';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
 import type { MappaRiassuntoDto } from '../../types';
+/** Riassunto di una mappa di tipo «area» con immagine `/<chiave>.png`; se c'è `indice` fa parte di una collezione di immagini (posizione, totale e ambito). */
 function m(chiave:string, genitore:string|null, nome:string, indice?:number, totale=3, ambito='museo'): MappaRiassuntoDto {
   return {chiave,genitore,nome,nomeRivisto:false,tipo:'area',ordine:0,immagineUrl:`/${chiave}.png`,asset:null,entita:null,origine:'seed',numeroSpilli:0,numeroFigli:0,updatedAt:'',...(indice?{immagineCollezione:{indice,totale,ambito}}:{})};
 }

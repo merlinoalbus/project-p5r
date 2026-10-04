@@ -9,7 +9,7 @@
 
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { paramsPersonaId, queryCercaSkill, queryEredita, queryFondi, queryPiani, queryCicli, queryRicette } from '../schemas/fusione.js';
+import { paramsPersonaId, queryCercaSkill, queryEredita, queryFondi, queryPiani, queryCicli, queryRicette, queryVelluto } from '../schemas/fusione.js';
 import { cercaPerSkillDto, cicliDto, ereditaDto, fondiDto, fusioniConDto, pianiDto, ricettePerDto, vellutoDto } from '../services/fusione/fusioneService.js';
 import { z } from 'zod';
 
@@ -46,15 +46,15 @@ router.get('/cerca-skill', validate({ query: queryCercaSkill }), (req, res) => {
 });
 
 router.get('/cicli/:personaId', validate({ params: paramsPersonaId, query: queryCicli }), (req, res) => {
-  const q = req.query as unknown as { partita?: number; dlc?: string; lunghezza?: number; lunghezzaMin?: number; partnerDistinti?: string; alternative?: number; catture?: string; limitaLivello?: string; livelloMax?: number };
+  const q = req.query as unknown as z.infer<typeof queryCicli>;
+  // i valori assenti restano undefined: i predefiniti (catture e limite di livello spenti, partner distinti) li decide il servizio
   res.json(cicliDto(Number(req.params.personaId), {
-    partitaId: q.partita, dlc: q.dlc ? q.dlc.split(',').map(Number).filter((n) => Number.isInteger(n)) : undefined,
-    lunghezza: q.lunghezza, lunghezzaMin: q.lunghezzaMin, partnerDistinti: q.partnerDistinti === undefined ? undefined : q.partnerDistinti === 'true',
-    alternative: q.alternative, catture: q.catture === 'true', limitaLivello: q.limitaLivello === 'true', livelloMax: q.livelloMax,
+    partitaId: q.partita, dlc: q.dlc, lunghezza: q.lunghezza, lunghezzaMin: q.lunghezzaMin, partnerDistinti: q.partnerDistinti,
+    alternative: q.alternative, catture: q.catture, limitaLivello: q.limitaLivello, livelloMax: q.livelloMax,
   }));
 });
 
-router.get('/velluto', validate({ query: z.object({ partita: z.coerce.number().int().positive() }) }), (req, res) => {
+router.get('/velluto', validate({ query: queryVelluto }), (req, res) => {
   res.json(vellutoDto((req.query as unknown as { partita: number }).partita));
 });
 

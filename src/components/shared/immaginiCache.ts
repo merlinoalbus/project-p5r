@@ -4,17 +4,32 @@
 
 import { getImmagini, urlImmagine, type AmbitoImmagine } from '../../services/api';
 
-/** Cache locale di esistenza per ambito (una sola richiesta di elenco per ambito, invalidata a ogni scrittura). */
+/** Cache locale di esistenza per ambito: una sola richiesta di elenco per ambito. Dopo un caricamento o una rimozione singola i
+ *  riquadri aggiornano l'insieme già in cache; si svuota con `azzeraCacheImmagini` (rimozione multipla) o quando l'elenco fallisce. */
 const elenchi = new Map<string, Promise<Set<string>>>();
 /** Versione per (ambito/chiave): cambia a ogni sostituzione così l'URL del file è sempre nuovo, anche fra montaggi. */
 export const versioniImmagini = new Map<string, number>();
 /** Data di creazione per (ambito/chiave) dall'elenco del server: entra nell'URL del file, che il browser può tenere in cache a lungo. */
 const datazioni = new Map<string, string>();
 
+/**
+ * Le chiavi dell'ambito che hanno un'immagine caricata. La prima chiamata per ambito chiede l'elenco al server e
+ * ne annota anche le date di creazione; le successive riusano la stessa promessa (e lo stesso insieme, che i
+ * riquadri aggiornano dopo un caricamento o una rimozione). Se la richiesta fallisce restituisce un insieme vuoto.
+ */
 export function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
   let p = elenchi.get(ambito);
   if (!p) {
-    p = getImmagini(ambito).then((lista) => { for (const i of lista) if (i.createdAt) datazioni.set(`${ambito}/${i.chiave}`, i.createdAt); return new Set(lista.map((i) => i.chiave)); }).catch(() => new Set<string>());
+    const questa: Promise<Set<string>> = getImmagini(ambito)
+      .then((lista) => { for (const i of lista) if (i.createdAt) datazioni.set(`${ambito}/${i.chiave}`, i.createdAt); return new Set(lista.map((i) => i.chiave)); })
+      .catch(() => {
+        // Un elenco fallito (rete giù, server in riavvio) non resta in cache come «nessuna immagine»: i riquadri montati dopo
+        // lo richiedono. Si toglie solo se è ancora questa la richiesta registrata (un `azzeraCacheImmagini` nel frattempo
+        // può averne già avviata una più nuova). Rilievo A6 della verifica completa, 2026-10-03.
+        if (elenchi.get(ambito) === questa) elenchi.delete(ambito);
+        return new Set<string>();
+      });
+    p = questa;
     elenchi.set(ambito, p);
   }
   return p;
@@ -38,10 +53,4 @@ export function urlImmagineVersionata(ambito: AmbitoImmagine, chiave: string): s
 /** Registra la data di creazione di un'immagine appena caricata (l'URL versionato cambia subito). */
 export function registraImmagine(ambito: AmbitoImmagine, chiave: string, createdAt: string): void {
   datazioni.set(`${ambito}/${chiave}`, createdAt);
-}
-
-/** Aggiorna la cache di esistenza quando un'immagine viene creata fuori dai riquadri (es. pianta scaricata dalla guida). */
-export function segnaImmaginePresente(ambito: AmbitoImmagine, chiave: string): void {
-  void chiaviPresenti(ambito).then((set) => set.add(chiave));
-  versioniImmagini.set(`${ambito}/${chiave}`, (versioniImmagini.get(`${ambito}/${chiave}`) ?? 0) + 1);
 }

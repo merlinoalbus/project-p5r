@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
@@ -35,6 +36,7 @@ export interface ModificaPianoSalvato {
   obiettivoId?: number | null;
 }
 
+/** Gli id delle Persona presenti nella scorta della partita. */
 function scortaDi(partitaId: number): Set<number> {
   return new Set((prepared('SELECT persona_id FROM persona_posseduta WHERE partita_id = ?').all(partitaId) as Array<{ persona_id: number }>).map((r) => r.persona_id));
 }
@@ -49,6 +51,8 @@ export function avanzamentoPiano(radice: NodoPianoDto, scorta: Set<number>): Ava
   let fusioni = 0;
   let fusioniFatte = 0;
   const passi: PassoPianoDto[] = [];
+  /** Visita ricorsiva in profondità: conta foglie e fusioni, non scende nelle fusioni già fatte e aggiunge ai passi
+   *  ogni fusione non fatta i cui ingredienti sono tutti in scorta. */
   const visita = (n: NodoPianoDto): boolean => {
     // Restituisce true se la Persona del nodo è disponibile adesso (in scorta).
     const inScorta = scorta.has(n.persona.id);
@@ -73,6 +77,8 @@ export function avanzamentoPiano(radice: NodoPianoDto, scorta: Set<number>): Ava
   return { completato, foglie, foglieInScorta, fusioni, fusioniFatte, passi };
 }
 
+/** Un piano salvato come DTO: piano, opzioni e skill dai JSON (le skill che non esistono più si scartano), stato
+ *  dell'obiettivo collegato e avanzamento ricalcolato sulla scorta attuale. */
 function pianoDto(r: RigaPiano, scorta: Set<number>): PianoSalvatoDto {
   const piano = JSON.parse(r.piano_json) as PianoFusioneDto;
   const skillIds = JSON.parse(r.skill_json) as number[];
@@ -84,10 +90,7 @@ function pianoDto(r: RigaPiano, scorta: Set<number>): PianoSalvatoDto {
   };
 }
 
-function verificaPartita(partitaId: number): void {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
-}
-
+/** Se un obiettivo è indicato, deve esistere nella partita (404) e riguardare la stessa Persona del piano (400). */
 function verificaObiettivo(partitaId: number, obiettivoId: number | null | undefined, personaId: number): void {
   if (obiettivoId === null || obiettivoId === undefined) return;
   const o = prepared('SELECT persona_id FROM obiettivo_partita WHERE id = ? AND partita_id = ?').get(obiettivoId, partitaId) as { persona_id: number } | undefined;
@@ -107,6 +110,7 @@ function verificaAlbero(n: NodoPianoDto, profondita = 0): void {
   for (const f of n.figli) verificaAlbero(f, profondita + 1);
 }
 
+/** I piani salvati della partita (di un solo obiettivo, se indicato), dal più recente, con l'avanzamento sulla scorta. */
 export function pianiSalvati(partitaId: number, obiettivoId?: number): PianoSalvatoDto[] {
   verificaPartita(partitaId);
   const scorta = scortaDi(partitaId);
@@ -116,6 +120,8 @@ export function pianiSalvati(partitaId: number, obiettivoId?: number): PianoSalv
   return righe.map((r) => pianoDto(r, scorta));
 }
 
+/** Salva un piano calcolato dal client dopo averlo verificato: radice uguale alla Persona indicata, albero ben formato,
+ *  obiettivo coerente, skill esistenti. Il costo si salva arrotondato e mai negativo; il salvataggio finisce nello storico. */
 export function salvaPiano(partitaId: number, dati: DatiPianoSalvato): PianoSalvatoDto {
   verificaPartita(partitaId);
   const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(dati.personaId) as { nome: string } | undefined;
@@ -138,20 +144,27 @@ export function salvaPiano(partitaId: number, dati: DatiPianoSalvato): PianoSalv
   })();
 }
 
+/** Modifica nome, note o obiettivo collegato di un piano (i campi assenti restano com'erano; `obiettivoId: null` lo
+ *  scollega); 404 se il piano non è della partita. Il piano in sé non si tocca. */
 export function aggiornaPianoSalvato(partitaId: number, id: number, dati: ModificaPianoSalvato): PianoSalvatoDto {
   verificaPartita(partitaId);
   const r = prepared(`${SQL_PIANO} WHERE s.id = ? AND s.partita_id = ?`).get(id, partitaId) as RigaPiano | undefined;
   if (!r) throw httpErrors.notFound('piano-non-trovato', `Il piano ${id} non esiste in questa partita.`);
   if (dati.obiettivoId !== undefined) verificaObiettivo(partitaId, dati.obiettivoId, r.persona_id);
   const adesso = nowIso();
-  prepared('UPDATE piano_salvato SET nome = ?, note = ?, obiettivo_id = ?, updated_at = ? WHERE id = ?').run(dati.nome ?? r.nome, dati.note ?? r.note, dati.obiettivoId === undefined ? r.obiettivo_id : dati.obiettivoId, adesso, id);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  getDb().transaction(() => {
+    prepared('UPDATE piano_salvato SET nome = ?, note = ?, obiettivo_id = ?, updated_at = ? WHERE id = ?').run(dati.nome ?? r.nome, dati.note ?? r.note, dati.obiettivoId === undefined ? r.obiettivo_id : dati.obiettivoId, adesso, id);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  })();
   return pianoDto(prepared(`${SQL_PIANO} WHERE s.id = ?`).get(id) as RigaPiano, scortaDi(partitaId));
 }
 
+/** Elimina un piano della partita; 404 se non c'era. */
 export function eliminaPianoSalvato(partitaId: number, id: number): void {
   verificaPartita(partitaId);
-  const info = prepared('DELETE FROM piano_salvato WHERE id = ? AND partita_id = ?').run(id, partitaId);
-  if (info.changes === 0) throw httpErrors.notFound('piano-non-trovato', `Il piano ${id} non esiste in questa partita.`);
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  getDb().transaction(() => {
+    const info = prepared('DELETE FROM piano_salvato WHERE id = ? AND partita_id = ?').run(id, partitaId);
+    if (info.changes === 0) throw httpErrors.notFound('piano-non-trovato', `Il piano ${id} non esiste in questa partita.`);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  })();
 }

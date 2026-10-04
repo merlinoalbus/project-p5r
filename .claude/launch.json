@@ -3,14 +3,14 @@
   "configurations": [
     {
       "name": "p5r-frontend",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["vite", "--host"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:client"],
       "port": 5273
     },
     {
       "name": "p5r-backend",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["tsx", "watch", "--env-file=.env", "server/index.ts"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:server"],
       "port": 3101
     }
   ]

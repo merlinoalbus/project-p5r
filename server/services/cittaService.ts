@@ -1,6 +1,3 @@
-import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
-import { GIORNI_SETTIMANA_CHIAVI, descriviGiorni, type GiornoChiave } from '../../shared/orariNegozio.js';
-import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 // ============================================================
 // cittaService — quartieri di Tokyo e luoghi con ciò che offrono (Fase 8.1)
 // ============================================================
@@ -12,12 +9,14 @@ import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.j
 // riga; il JSON `sblocco-luoghi` della guida resta il ripiego per un file ancora senza colonna.
 // ============================================================
 
+import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { descriviGiorni, leggiGiorni } from '../../shared/orariNegozio.js';
+import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { LuogoDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
-import { nowIso } from '../db/dbService.js';
 import { importaImmagineDaUrl } from './immaginiService.js';
-import { datiGuida } from './richiesteService.js';
+import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -28,15 +27,6 @@ interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | 
 export const chiaveImmagineQuartiere = (quartiere: string): string => `citta-${quartiere}`;
 
 interface RigaQuartiere { sblocco_data: string | null; chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string }
-/** Le chiavi dei giorni da `giorni_json`: solo quelle valide, senza doppioni. */
-function giorniDiRiga(json: string | null | undefined): GiornoChiave[] {
-  try {
-    const v = JSON.parse(json || '[]') as unknown;
-    return Array.isArray(v) ? [...new Set(v.filter((g): g is GiornoChiave => (GIORNI_SETTIMANA_CHIAVI as readonly string[]).includes(String(g))))] : [];
-  } catch {
-    return [];
-  }
-}
 
 interface RigaLuogo { chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; quando: string | null; giorni_json: string; sblocco: string | null; confidenti_json: string; piatti_json: string | null; note: string | null; fonte: string; verificato: number; origine: string; condizioni_json: string | null }
 
@@ -44,6 +34,7 @@ interface Collegamenti { negozi: Map<string, Array<{ chiave: string; nome: strin
 
 /** I negozi e le attività di ogni luogo, dalle sedi dichiarate. */
 function collegamenti(quartiere?: string): Collegamenti {
+  /** Raggruppa le righe per sede, conservandone l'ordine. */
   const raggruppa = (righe: Array<{ sede: string; chiave: string; nome: string }>) => {
     const out = new Map<string, Array<{ chiave: string; nome: string }>>();
     for (const r of righe) { const e = out.get(r.sede) ?? []; e.push({ chiave: r.chiave, nome: r.nome }); out.set(r.sede, e); }
@@ -57,6 +48,9 @@ function collegamenti(quartiere?: string): Collegamenti {
   };
 }
 
+/** Un luogo come DTO: Confidenti con il nome (o la chiave se sconosciuti), negozi e attività dalle sedi (il primo negozio fa
+ *  da `negozio`), giorni con la loro frase, marcatore sulla mappa, condizioni di presenza e, con lo stato della partita,
+ *  la loro valutazione. */
 function luogoDto(r: RigaLuogo, nomiConfidenti: Map<string, string>, legami: Collegamenti, marcatori: Map<string, { x: number; y: number }> = new Map(),
   regole: Map<string, RequisitoSpillo[]> = new Map(), st: StatoDisponibilita | null = null): LuogoDto {
   const confidenti = (JSON.parse(r.confidenti_json) as string[]).map((c) => ({ chiave: c, nome: nomiConfidenti.get(c) ?? c }));
@@ -66,8 +60,9 @@ function luogoDto(r: RigaLuogo, nomiConfidenti: Map<string, string>, legami: Col
   const nomi = nomiCondizioniMemo();
   const condizioni = grezze.length ? grezze.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })) : null;
   const negozi = legami.negozi.get(r.chiave) ?? [];
+  const giorni = leggiGiorni(r.giorni_json);
   return {
-    chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando: r.quando as LuogoDto['quando'], giorni: giorniDiRiga(r.giorni_json), giorniTesto: descriviGiorni(giorniDiRiga(r.giorni_json)), sblocco: r.sblocco,
+    chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando: r.quando as LuogoDto['quando'], giorni, giorniTesto: descriviGiorni(giorni), sblocco: r.sblocco,
     confidenti, attivita: legami.attivita.get(r.chiave) ?? [], negozi, negozio: negozi[0]?.chiave ?? null, origine: r.origine === 'utente' ? 'utente' : 'seed',
     piatti: r.piatti_json ? (JSON.parse(r.piatti_json) as LuogoDto['piatti']) : null, note: r.note, verificato: r.verificato === 1,
     marcatore: marcatori.get(r.chiave) ?? null,
@@ -87,6 +82,7 @@ function regoleSbloccoLuoghi(): Map<string, RequisitoSpillo[]> {
   return out;
 }
 
+/** Nome di ogni Confidente, per chiave. */
 function nomiConfidenti(): Map<string, string> {
   return new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome]));
 }
@@ -153,18 +149,6 @@ export function elencaLuoghi(): LuogoOpzioneDto[] {
     .map((r) => ({ chiave: r.chiave, nome: r.nome, tipo: r.tipo, quartiere: r.quartiere, quartiereNome: r.quartiere_nome }));
 }
 
-/** Posiziona (o rimuove con null) lo spillo di un luogo sulla mappa del suo quartiere (coordinate in percentuale). */
-export function impostaMarcatoreLuogo(luogoChiave: string, pos: { x: number; y: number } | null): { x: number; y: number } | null {
-  if (!prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(luogoChiave)) throw httpErrors.notFound('luogo-non-trovato', `Il luogo '${luogoChiave}' non esiste.`);
-  if (pos === null) {
-    prepared('DELETE FROM marcatore_luogo WHERE luogo_chiave = ?').run(luogoChiave);
-    return null;
-  }
-  const x = Math.min(100, Math.max(0, pos.x)); const y = Math.min(100, Math.max(0, pos.y));
-  prepared("INSERT INTO marcatore_luogo (luogo_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'utente') ON CONFLICT(luogo_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, updated_at = excluded.updated_at, origine = 'utente'").run(luogoChiave, x, y, nowIso());
-  return { x, y };
-}
-
 /** Scarica nell'istanza la mappa del quartiere dall'URL della guida. */
 export async function scaricaPiantaQuartiere(quartiere: string): Promise<{ quartiere: string; mime: string; byte: number; fonte: string; url: string }> {
   const p = prepared('SELECT * FROM pianta_quartiere WHERE quartiere_chiave = ?').get(quartiere) as RigaPiantaQ | undefined;
@@ -173,10 +157,13 @@ export async function scaricaPiantaQuartiere(quartiere: string): Promise<{ quart
   return { quartiere, mime: img.mime, byte: img.byte, fonte: p.fonte, url: p.url };
 }
 
-export function ingressoQuartiere(quartiere: string): IngressoQuartiereDto | null {
+/** Il punto d'ingresso del quartiere su una mappa (chiave pubblica e nome del percorso, posizione e zoom), o null se non è impostato. */
+function ingressoQuartiere(quartiere: string): IngressoQuartiereDto | null {
  const i = prepared('SELECT * FROM quartiere_ingresso WHERE quartiere_chiave=?').get(quartiere) as { mappa_chiave: string; x: number; y: number; zoom: number } | undefined;
  return i ? { mappa: chiaveMappa(i.mappa_chiave), nome: nomePercorso(i.mappa_chiave), x: i.x, y: i.y, zoom: i.zoom } : null;
 }
+/** Imposta (o, con `null`, toglie) l'ingresso del quartiere: la mappa indicata si riconduce alla sua identità interna
+ *  (`idMappa`) e deve esistere; 404 se mancano quartiere o mappa. Restituisce l'ingresso com'è dopo la scrittura. */
 export function impostaIngressoQuartiere(quartiere: string, dati: { mappa: string; x: number; y: number; zoom: number } | null): IngressoQuartiereDto | null {
  if (!prepared('SELECT 1 FROM quartiere WHERE chiave=?').get(quartiere)) throw httpErrors.notFound('quartiere-non-trovato', 'Quartiere inesistente.');
  if (dati === null) { prepared('DELETE FROM quartiere_ingresso WHERE quartiere_chiave=?').run(quartiere); return null; }

@@ -29,35 +29,25 @@
 // si indovina con un'espressione regolare che sbaglia in silenzio.
 // ============================================================
 
-import { nascondeIlPin, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { leggiOrari, orariComeCondizioni } from '../../../shared/orariNegozio.js';
+import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { leggiGiorni, leggiOrari, orariComeCondizioni } from '../../../shared/orariNegozio.js';
 import { eStrutturale } from '../../../shared/spilli.js';
 import type { AppDatabase } from '../../db/dbService.js';
 
-const GIORNI: Record<string, string> = {
-  lunedi: 'lunedi', martedi: 'martedi', mercoledi: 'mercoledi', giovedi: 'giovedi',
-  venerdi: 'venerdi', sabato: 'sabato', domenica: 'domenica',
-};
-
+/** Il testo in minuscolo, senza accenti e senza spazi ai bordi, per confrontare le parole della trascrizione. */
 function senzaAccenti(t: string): string {
   return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 }
 
 /** `giorno` e `sera` diventano una fascia; `entrambe` non è una condizione, è tutto il giorno. */
-export function fasciaDaTesto(quando: string | null | undefined): RequisitoSpillo[] {
+function fasciaDaTesto(quando: string | null | undefined): RequisitoSpillo[] {
   const v = senzaAccenti(quando ?? '');
   return v === 'giorno' || v === 'sera' ? [{ tipo: 'fascia', fascia: v }] : [];
 }
 
 /** I giorni della settimana del luogo (`giorni_json`, migrazione 080): chiavi già pulite; la settimana intera non è una condizione. */
-export function giorniDaJson(json: string | null | undefined): RequisitoSpillo[] {
-  let scelti: string[];
-  try {
-    const v = JSON.parse(json || '[]') as unknown;
-    scelti = Array.isArray(v) ? [...new Set(v.map(String).filter((g) => GIORNI[g]))] : [];
-  } catch {
-    scelti = [];
-  }
+function giorniDaJson(json: string | null | undefined): RequisitoSpillo[] {
+  const scelti = leggiGiorni(json);
   return scelti.length === 0 || scelti.length >= 7 ? [] : [{ tipo: 'giorno-settimana', giorni: scelti }];
 }
 
@@ -67,17 +57,6 @@ export function finestraDaDate(dal: string | null | undefined, al: string | null
   return al ? [{ tipo: 'intervallo', dal, al }] : [{ tipo: 'data', dal }];
 }
 
-/** Di condizioni già strutturate tiene le sole che riguardano la presenza. */
-export function soloPresenza(condizioni: unknown): RequisitoSpillo[] {
-  if (!condizioni) return [];
-  const elenco = typeof condizioni === 'string'
-    ? (() => { try { return JSON.parse(condizioni) as unknown[]; } catch { return []; } })()
-    : (condizioni as unknown[]);
-  if (!Array.isArray(elenco)) return [];
-  return elenco.filter((c): c is RequisitoSpillo =>
-    typeof c === 'object' && c !== null && typeof (c as { tipo?: unknown }).tipo === 'string'
-    && nascondeIlPin((c as { tipo: string }).tipo));
-}
 
 /** Unisce più fonti senza ripetere la stessa condizione due volte. */
 export function unisci(...gruppi: RequisitoSpillo[][]): RequisitoSpillo[] {

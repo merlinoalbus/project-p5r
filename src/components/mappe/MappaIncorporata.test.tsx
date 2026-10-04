@@ -13,7 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { MappaIncorporata } from './MappaIncorporata';
 
 const { risolviMappa, haPlanimetria } = vi.hoisted(() => ({ risolviMappa: vi.fn(), haPlanimetria: vi.fn() }));
-vi.mock('../../services/api', () => ({ risolviMappa }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { risolviMappa }));
 vi.mock('../../utils/haPlanimetria', () => ({ haPlanimetria }));
 vi.mock('../../hooks/useMappaPartita', () => ({
   useMappaPartita: () => ({ mappa: { chiave: 'm-sala', nome: 'Sala', figli: [{ chiave: 'm-figlia', nome: 'Stanza figlia' }], spilli: [] }, caricamento: false, errore: null, ricarica: vi.fn(), raccolto: vi.fn(), statoPunto: vi.fn(), acquisto: vi.fn() }),
@@ -21,6 +21,7 @@ vi.mock('../../hooks/useMappaPartita', () => ({
 vi.mock('../../utils/presentazioneMappa', () => ({ presentaMappa: (m: unknown) => m }));
 vi.mock('./VisoreMappa', () => ({ VisoreMappa: () => <div data-testid="visore">Visore</div> }));
 
+/** Disegna la mappa incorporata m-sala con le classi di riquadro «h-[300px] xl:flex-1» da passare al visore. */
 const monta = () => render(<MemoryRouter><MappaIncorporata chiave="m-sala" classeVisore="h-[300px] xl:flex-1" /></MemoryRouter>);
 
 beforeEach(() => { vi.clearAllMocks(); risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'm-sala' }); });

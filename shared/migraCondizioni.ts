@@ -6,7 +6,7 @@
 // «rango cliente Oscuro», «dopo aver giocato a biliardo almeno una volta», «solo la domenica
 // sera». L'app non legge frasi: legge stati (`condizioniSpillo.ts`). Questo modulo è l'unico
 // posto dove una frase diventa uno stato, e lo fa in tre momenti soltanto: la migrazione che
-// converte le righe esistenti, il caricamento del seed, l'esportazione verso il seed.
+// converte le righe esistenti, il salvataggio di una riga del catalogo scritta in prosa, il ripristino di un'istantanea vecchia (`seed_json`).
 //
 // **Che cosa non fa.** Non produce mai una condizione «testuale»: se una frase non corrisponde
 // a nessuna regola, non diventa niente — la riga resta disponibile e la frase finisce fra le
@@ -20,7 +20,7 @@
 // condividono tutte le parole.
 // ============================================================
 
-import { ARCHI_STORIA, dataValida, type RequisitoSpillo } from './condizioniSpillo.js';
+import { ARCHI_STORIA, GIORNI_SETTIMANA, dataValida, type RequisitoSpillo } from './condizioniSpillo.js';
 
 /** Quello che il convertitore deve chiedere ai dati: nomi → chiavi, e la finestra di un arco. */
 export interface ContestoConversione {
@@ -39,14 +39,15 @@ export interface ContestoConversione {
   quartiereDatato?: (chiave: string) => boolean;
   /** Le chiavi dei libri in vendita a Jinbocho. */
   libriJinbocho?: () => string[];
-  /** Finestra «dal–al» in cui un Palazzo esiste (data/seed/finestre-dungeon.json). */
+  /** Finestra «dal–al» in cui un Palazzo esiste (voce `finestre-dungeon` di `dati_guida`). */
   finestraArco?: (dungeon: string) => { dal: string; al: string | null } | null;
 }
 
 export interface EsitoConversione { condizioni: RequisitoSpillo[]; scartate: string[] }
 
 const MESI: Record<string, number> = { gennaio: 1, febbraio: 2, marzo: 3, aprile: 4, maggio: 5, giugno: 6, luglio: 7, agosto: 8, settembre: 9, ottobre: 10, novembre: 11, dicembre: 12 };
-const GIORNI = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'] as const;
+// i giorni della settimana nell'ordine del gioco, dalla tabella condivisa (R4"): prima erano scritti di nuovo qui
+const GIORNI = GIORNI_SETTIMANA.map((g) => g.chiave);
 const CONFIDENTI = ['igor', 'morgana', 'ryuji', 'ann', 'yusuke', 'makoto', 'futaba', 'haru', 'akechi', 'kasumi', 'sojiro', 'chihaya', 'iwai', 'takemi', 'kawakami', 'ohya', 'shinya', 'hifumi', 'mishima', 'yoshida', 'sae', 'gemelle', 'maruki'] as const;
 /** Come la guida chiama i Confidenti quando non usa la chiave. */
 const ALIAS_CONFIDENTE: Record<string, string> = { 'ichiko ohya': 'ohya', ichiko: 'ohya', 'tae takemi': 'takemi', 'shinya oda': 'shinya', 'gemelle custodi': 'gemelle', eremita: 'takemi', torre: 'shinya', imperatrice: 'haru', morte: 'takemi', imperatore: 'yusuke', luna: 'mishima', sole: 'yoshida', diavolo: 'ohya', stella: 'hifumi', forza: 'gemelle', fortuna: 'chihaya', 'appeso': 'iwai', temperanza: 'kawakami', gerarca: 'sojiro', giudizio: 'sae', consigliere: 'maruki' };
@@ -70,6 +71,7 @@ const ALIAS_RICHIESTA: Record<string, string> = { 'i baro non vincono mai': 'I v
 function piatto(testo: string): string {
   return testo.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’‘`´“”„"]/g, "'").toLowerCase().replace(/\s+/g, ' ').replace(/\.$/, '').trim();
 }
+/** Giorno («12», «primo», «1°») e nome del mese come data «MM-GG»; null se il mese non è riconosciuto o la data non esiste. */
 function data(giorno: string, mese: string): string | null {
   const m = MESI[mese];
   if (!m) return null;
@@ -77,22 +79,27 @@ function data(giorno: string, mese: string): string | null {
   const d = `${String(m).padStart(2, '0')}-${String(g).padStart(2, '0')}`;
   return dataValida(d) ? d : null;
 }
+/** L'ultimo giorno del mese nominato come «MM-GG» (febbraio sempre 28); null se il mese non è riconosciuto. */
 function fineMese(mese: string): string | null {
   const m = MESI[mese];
   if (!m) return null;
   const giorni: Record<number, number> = { 1: 31, 2: 28, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31 };
   return `${String(m).padStart(2, '0')}-${giorni[m]}`;
 }
+/** La chiave della richiesta citata per nome, cercata dal contesto (passando prima per `ALIAS_RICHIESTA`); null se non si trova. */
 function richiestaDa(nome: string, ctx: ContestoConversione): string | null {
   const n = piatto(nome);
   return ctx.richiesta?.(ALIAS_RICHIESTA[n] ?? nome) ?? null;
 }
+/** Il Confidente citato per nome: il nome stesso se è in `CONFIDENTI`, altrimenti il suo alias; null se non è nessuno dei due. */
 function confidenteDa(nome: string): string | null {
   const n = nome.trim();
   if ((CONFIDENTI as readonly string[]).includes(n)) return n;
   return ALIAS_CONFIDENTE[n] ?? null;
 }
+/** Le condizioni da soddisfare tutte: la condizione stessa se è una sola, altrimenti un gruppo «tutte». */
 const tutte = (c: RequisitoSpillo[]): RequisitoSpillo => (c.length === 1 ? c[0] : { tipo: 'gruppo', modo: 'tutte', condizioni: c });
+/** Le condizioni di cui ne basta una: la condizione stessa se è una sola, altrimenti un gruppo «almeno-una». */
 const almenoUna = (c: RequisitoSpillo[]): RequisitoSpillo => (c.length === 1 ? c[0] : { tipo: 'gruppo', modo: 'almeno-una', condizioni: c });
 
 /** Frammenti che non sono condizioni (posizione, prezzo, rifornimenti, note): si scartano senza rumore. */

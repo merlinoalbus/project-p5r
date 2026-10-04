@@ -7,9 +7,10 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { RaccoltaPlanimetrie } from './RaccoltaPlanimetrie';
 
-vi.mock('../../services/api/mappe', () => ({ impostaSpilloRaccolto: vi.fn() }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { impostaSpilloRaccolto: vi.fn() }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Spillo collezionabile non ancora raccolto, con uid `u<id>`, tipo e nome dati. */
 const spillo = (id: number, tipo: string, nome: string) => ({ id, uid: `u${id}`, tipo, nome, colore: '#eab308', raccolto: false });
 
 it('ogni collezionabile si segna con la parola del suo tipo: boss «Sconfitto», forziere «Aperto», tesoro «Rubato», seme «Raccolto» (scelte dell’utente)', () => {

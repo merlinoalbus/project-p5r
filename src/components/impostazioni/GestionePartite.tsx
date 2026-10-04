@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import { NuovaPartitaModal } from '../partita/NuovaPartitaModal';
@@ -11,10 +12,11 @@ import { IconaAzione } from '../shared/IconaAzione';
 
 /** Gestione delle partite multiple. */
 export function GestionePartite() {
-  const { partite, rendiAttiva, elimina } = usePartitaStore();
+  const { partite, rendiAttiva, elimina } = usePartitaStore(useShallow((s) => ({ partite: s.partite, rendiAttiva: s.rendiAttiva, elimina: s.elimina })));
   const [nuova, setNuova] = useState(false);
   const [occupato, setOccupato] = useState<number | null>(null);
 
+  /** Rende attiva la partita indicata; durante l'operazione disabilita i pulsanti della sua riga. */
   const attiva = async (id: number) => {
     setOccupato(id);
     try {
@@ -27,6 +29,7 @@ export function GestionePartite() {
     }
   };
 
+  /** Elimina la partita dopo la conferma del browser (l'eliminazione porta via tutto il suo stato e non è reversibile). */
   const rimuovi = async (id: number, nome: string) => {
     if (!window.confirm(`Eliminare la partita «${nome}» con tutto il suo stato (Doti, Confidenti, scorta, compendio)? L'operazione non è reversibile.`)) return;
     setOccupato(id);

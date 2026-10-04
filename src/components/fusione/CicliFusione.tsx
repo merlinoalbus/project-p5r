@@ -11,6 +11,7 @@ import { notifica } from '../../stores/notificationStore';
 import { SelettorePersona } from './SelettorePersona';
 import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
+import { NOME_MODO_PARTNER } from '../../utils/cicli';
 import type { CicloFusioneDto, PersonaRiassuntoDto } from '../../types';
 import { PersonaChip } from './PersonaChip';
 import { OperatoreRicetta } from './RicettaRiga';
@@ -25,8 +26,6 @@ interface Props {
   inizialeId?: number;
   onSalvato?: () => void;
 }
-
-const NOME_MODO = { scorta: 'dalla scorta', registro: 'dal Registro', cattura: 'da catturare' } as const;
 
 /** Un ciclo: anelli in sequenza con partner, modo/costo, risultato e bonus di livello. */
 export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloFusioneDto; indice: number; onSalva?: () => void; salvato?: boolean }) {
@@ -48,7 +47,7 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
             <OperatoreRicetta tipo="piu" />
             <span className="inline-flex flex-col items-start gap-0.5">
               <PersonaChip p={a.partner} title={`${a.partner.arcanaNome} · livello ${a.partner.livello}`} />
-              <span className={`chip chip--icona text-[11px] ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
+              <span className={`chip chip--icona text-[11px] ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO_PARTNER[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
             </span>
             <OperatoreRicetta tipo="risultato" />
             <PersonaChip p={a.risultato} evidenza={i === ciclo.anelli.length - 1} />
@@ -66,6 +65,13 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
 /** Anelli ammessi (2–15): oltre i 5 la ricerca esamina più candidati e può richiedere qualche secondo. */
 const LUNGHEZZE = Array.from({ length: 14 }, (_, i) => i + 2);
 
+/**
+ * Vista dei cicli di fusione: scelta della Persona di partenza (preselezionata da `inizialeId`), opzioni di ricerca
+ * (anelli minimo/massimo, partner distinti, numero di alternative, catture ammesse, limite al livello del protagonista)
+ * e l'elenco dei cicli trovati. Ricarica i cicli dal BE a ogni cambio di bersaglio, partita o opzione; senza Persona
+ * scelta non interroga nulla. Il minimo degli anelli è sempre ricondotto al massimo, e il limite di livello vale solo
+ * se il livello del protagonista è noto. I cicli si salvano solo con una partita attiva.
+ */
 export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta, inizialeId, onSalvato }: Props) {
   const [scelta, setScelta] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeId) ?? null);
   const [lunghezza, setLunghezza] = useState(3);
@@ -80,6 +86,11 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
     [scelta?.id, partitaId, lunghezza, lunghezzaMin, partnerDistinti, alternative, catture, limitaLivello, livelloProtagonista],
   );
 
+  /**
+   * Salva il ciclo `c` (posizione `i`) nella partita come sequenza di anelli (ingrediente, partner, risultato) con un
+   * nome predefinito; a buon fine lo segna salvato con una chiave che combina bersaglio, posizione e opzioni correnti
+   * (così cambiando le opzioni il pulsante torna attivo), notifica e avvisa il genitore. Gli errori vanno in notifica.
+   */
   const salva = async (c: CicloFusioneDto, i: number) => {
     if (!partitaId || !scelta) return;
     const chiave = `${scelta.id}|${i}|${lunghezzaMin}-${lunghezza}|${partnerDistinti}|${alternative}|${catture}|${limitaLivello}`;

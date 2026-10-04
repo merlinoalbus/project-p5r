@@ -1,3 +1,7 @@
+// ============================================================
+// navigazioneMappa — indirizzi delle mappe della guida e destinazioni degli spilli di spostamento
+// ============================================================
+
 import type { DestinazioneSpillo, SpilloDto } from '../types';
 import { categoriaSpillo } from '../../shared/spilli';
 
@@ -5,6 +9,7 @@ import { categoriaSpillo } from '../../shared/spilli';
 export type PuntoArrivo = { x: number; y: number; zoom: number } | { spillo: number };
 export type NavigaMappa = (mappa: string, arrivo?: PuntoArrivo) => void;
 
+/** Indirizzo della pagina della mappa; l'arrivo, se c'è, va nella query (`spillo`, oppure `x`, `y` e `zoom`). */
 export function urlMappa(mappa: string, arrivo?: PuntoArrivo): string {
   const base = `/guida/mappe/${encodeURIComponent(mappa)}`;
   if (!arrivo) return base;

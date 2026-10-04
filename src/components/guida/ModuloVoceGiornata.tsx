@@ -45,6 +45,12 @@ interface Props {
   onSalvato: () => void | Promise<void>;
 }
 
+/**
+ * La finestra della voce: genere, testo e note (aree di testo che crescono col contenuto), fascia (cambiandola il
+ * posto riparte da quello di partenza in quella fascia), posto esatto fra le altre voci e, per una cosa da fare, la
+ * classificazione con gli effetti. «Salva»/«Aggiungi» è attivo solo con un testo e, per un'azione, con i campi
+ * strutturati completi.
+ */
 export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi, onSalvato }: Props) {
   const voce = soggetto.tipo === 'voce' ? soggetto.voce : null;
   /** Le altre voci di una fascia, nel loro ordine (senza quella che si modifica). */
@@ -65,11 +71,16 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
     };
   });
   const [occupato, setOccupato] = useState(false);
+  /** Unisce una modifica parziale ai campi del modulo. */
   const imposta = (p: Partial<typeof campi>) => setCampi((c) => ({ ...c, ...p }));
   const azione = campi.genere === 'azione';
   const altre = altreDi(campi.fascia);
   const posto = Math.min(campi.posizione, altre.length);
 
+  /**
+   * Compone i dati della voce (testo e note ripuliti, note vuote come assenti; tipo, collegamento, rango ed effetti
+   * solo per un'azione), crea o aggiorna la voce, fa ricaricare la giornata, notifica e chiude. Senza testo non fa nulla.
+   */
   const salva = async () => {
     const testo = campi.testo.trim();
     if (!testo) return;

@@ -16,9 +16,9 @@ import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { leggiCondizioniSalvate, normalizzaCondizioniSpillo } from '../../../shared/condizioniSpillo.js';
 
-export const LIBRERIE = ['libreria-taiheido', 'hinokuniya', 'libreria-nagiuri'] as const;
+const LIBRERIE = ['libreria-taiheido', 'hinokuniya', 'libreria-nagiuri'] as const;
 /** Dove si compra ogni videogioco; chi non è qui sta da Super Baron. */
-export const NEGOZIO_VIDEOGIOCO: Readonly<Record<string, string>> = {
+const NEGOZIO_VIDEOGIOCO: Readonly<Record<string, string>> = {
   'videogioco-star-forneus': 'yumenoshima',
   'videogioco-gambla-goemon': 'yumenoshima',
 };
@@ -26,6 +26,7 @@ const NOTA_VIDEOGIOCO: Readonly<Record<string, string>> = {
   'videogioco-star-forneus': 'Incluso nel Set per retrogaming',
 };
 
+/** La chiave dell'articolo che vende il videogioco: `<negozio>/<nome senza «videogioco-»>`, con Super Baron come negozio predefinito. */
 export function chiaveArticoloVideogioco(attivita: string): string {
   return `${NEGOZIO_VIDEOGIOCO[attivita] ?? 'super-baron'}/${attivita.replace(/^videogioco-/, '')}`;
 }

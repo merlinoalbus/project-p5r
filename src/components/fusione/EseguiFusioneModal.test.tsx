@@ -12,10 +12,11 @@ import { EseguiFusioneModal } from './EseguiFusioneModal';
 import type { AnteprimaFusioneDto } from '../../types';
 
 const { getAnteprimaFusione, eseguiFusioneScorta } = vi.hoisted(() => ({ getAnteprimaFusione: vi.fn(), eseguiFusioneScorta: vi.fn() }));
-vi.mock('../../services/api', () => ({ getAnteprimaFusione, eseguiFusioneScorta, getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x') }));
-vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getAnteprimaFusione, eseguiFusioneScorta, getImmagini: vi.fn().mockResolvedValue([]) }));
+vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../shared/Modal', () => ({ Modal: ({ children, titolo }: { children: ReactNode; titolo: string }) => <div><h2>{titolo}</h2>{children}</div> }));
 
+/** Skill candidata all'eredità (elemento Fuoco, 4 PS, ereditata dall'ingrediente 1): ereditabile per default, altrimenti con il `motivo` dell'esclusione. */
 const skill = (id: number, nome: string, ereditabile = true, motivo: string | null = null) => ({ id, nome, nomeIt: nome, elemento: 'fire', elementoNome: 'Fuoco', costo: { tipo: 'sp', valore: 4, testo: '4 PS' }, effetto: '', effettoNome: '', da: [1], ereditabile, giaAppresa: false, motivo }) as unknown as AnteprimaFusioneDto['candidate'][number];
 const anteprima: AnteprimaFusioneDto = {
   risultato: { id: 88, nome: 'Jack Frost', nomeIt: 'Jack Frost', arcana: 'Magician', arcanaNome: 'Mago', livello: 11, speciale: false, rara: false, dlc: false },

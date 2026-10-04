@@ -12,7 +12,8 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getProgressiPartita, impostaAttivitaSvolta, impostaEventoStoria, impostaPuntiNegozio, type ProgressiPartita as Progressi } from '../../services/api/condizioni';
+import { getProgressiPartita, impostaAttivitaSvolta, impostaEventoStoria, impostaPuntiNegozio } from '../../services/api';
+import type { ProgressiPartitaDto as Progressi } from '../../types';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
@@ -22,6 +23,7 @@ import { NOME_TIPO_ATTIVITA } from '../../../shared/attivita';
 import { formattaYen } from '../../utils/letture';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 
+/** Il testo di un errore: il messaggio se è un `Error`, altrimenti il valore convertito in stringa. */
 function messaggio(err: unknown): string { return err instanceof Error ? err.message : String(err); }
 
 /** Il pallino a tre stati: verde (sì), rosso (no), grigio (non segnato). */
@@ -31,12 +33,18 @@ function Pallino({ stato }: { stato: boolean | null }) {
   return <span className={`inline-block h-3 w-3 shrink-0 rounded-full ${colore}`} role="img" aria-label={nome} />;
 }
 
+/** La scheda dei progressi: in lettura gli eventi «entra in squadra» col pallino a tre stati, il
+ * grado cliente e i contatori; da segnare gli eventi di storia (casella), le volte di ogni attività
+ * e i punti dei negozi a passi di dieci (−/+). Ogni risposta del server sostituisce tutti i
+ * progressi mostrati. */
 export function ProgressiPartita({ partitaId }: { partitaId: number }) {
   const dati = useCarica(() => getProgressiPartita(partitaId), [partitaId]);
   const [occupato, setOccupato] = useState<string | null>(null);
   const [stato, setStato] = useState<Progressi | null>(null);
   const p = stato ?? dati.dati;
 
+  /** Esegue l'azione tenendo occupata la riga `chiave`; con la risposta sostituisce i progressi,
+   * invalida i suggerimenti e ricorda le Doti da segnare; un errore diventa una notifica. */
   const salva = (chiave: string, azione: () => Promise<Progressi>) => {
     setOccupato(chiave);
     return azione().then((nuovo) => {

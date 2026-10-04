@@ -53,6 +53,7 @@ export interface ContestoConversione {
   successive: Array<{ data: string; indice: number; azione: AzioneDaConvertire }>;
 }
 
+/** Il testo «piano» per i confronti: senza accenti (forma NFD privata dei segni diacritici), apostrofi tipografici resi con `'`, minuscolo. */
 const piano = (s: string): string => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’`´]/g, "'").toLowerCase();
 
 /** I lavori: un'azione di lavoro punta al lavoro stesso o al negozio dove lo si svolge. */
@@ -68,6 +69,11 @@ export const DOTI_DEI_LAVORI: Record<string, DoteNote[]> = {
   'lavoro-crossroads': [{ dote: 'gentilezza', note: 2 }],
 };
 
+/**
+ * Legge dal file di gioco il contesto della conversione: libri e film (nomi EN e IT già resi «piani»,
+ * sessioni almeno 1, film al cinema), i lavori con le Doti di `DOTI_DEI_LAVORI`, e tutte le azioni del
+ * percorso della guida in ordine di calendario con la loro posizione (data, indice nella giornata).
+ */
 export function contestoConversione(db: AppDatabase): ContestoConversione {
   const elementi = new Map<string, Elemento>();
   for (const r of db.prepare('SELECT chiave, nome, nome_it, sessioni FROM libro').all() as Array<{ chiave: string; nome: string; nome_it: string | null; sessioni: number | null }>) {
@@ -143,10 +149,18 @@ function avanzamento(testo: string, el: Elemento, posizione: { data: string; ind
   return undefined;
 }
 
+/**
+ * Gli effetti di lettura di un'azione collegata a un libro o a un film. Passi: «restituire X e
+ * prendere/noleggiare Y» finisce solo gli elementi nominati in X (non quello collegato); un'azione di
+ * solo prestito, noleggio, acquisto, ritiro o scambio non produce nulla; altrimenti, sul testo fino al
+ * primo «;», l'elemento collegato e gli altri della stessa categoria nominati avanzano di quanto dice
+ * `avanzamento`. Ogni elemento compare una volta sola.
+ */
 function letture(a: AzioneDaConvertire, posizione: { data: string; indice: number } | null, ctx: ContestoConversione): EffettoAzione[] {
   const rif = a.riferimento!;
   const categoria = rif.tipo as 'libro' | 'film';
   const out: EffettoAzione[] = [];
+  /** Aggiunge la lettura di `chiave` (null = completata) se non c'è già. */
   const aggiungi = (chiave: string, almeno: number | null) => {
     if (!out.some((e) => e.tipo === 'lettura' && e.chiave === chiave)) out.push({ tipo: 'lettura', categoria, chiave, almeno });
   };
@@ -169,7 +183,8 @@ function letture(a: AzioneDaConvertire, posizione: { data: string; indice: numbe
   return out;
 }
 
-const stesseDoti = (a: DoteNote[], b: DoteNote[]): boolean => a.length === b.length && a.every((x) => b.some((y) => y.dote === x.dote && y.note === x.note));
+/** Vero se le due liste hanno le stesse Doti con le stesse note, in qualunque ordine. */
+const stesseDoti =(a: DoteNote[], b: DoteNote[]): boolean => a.length === b.length && a.every((x) => b.some((y) => y.dote === x.dote && y.note === x.note));
 
 /** Gli effetti di un'azione. `posizione` è il suo posto nella guida (null per le azioni dell'utente). */
 export function effettiDellAzione(a: AzioneDaConvertire, posizione: { data: string; indice: number } | null, ctx: ContestoConversione): EffettoAzione[] {

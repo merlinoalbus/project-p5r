@@ -43,6 +43,13 @@ function Effetti({ testi }: { testi: string[] }) {
   return <span className="flex flex-wrap gap-1">{testi.map((t, i) => <span key={i} className="chip chip--attivo">{t}</span>)}</span>;
 }
 
+/**
+ * La carta di un'attività o di un lavoro: figura (o icona del tipo), intestazione cliccabile che
+ * apre e chiude i dettagli (tipo, fascia, effetti, disponibilità, suggerimento, dato non
+ * verificato), riga con sede collegata al quartiere, mappa, costo e paga. Aperta mostra i
+ * dettagli, la mappa se è quella aperta nella pagina, il comando per mostrarla o nasconderla e
+ * la correzione della voce (che ricarica tramite `onCambiata`).
+ */
 function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onCambiata: () => void; mappaAperta: boolean; onMappa: () => void }) {
   const [aperta, setAperta] = useState(false);
   const sugg = useSuggerimenti();
@@ -97,6 +104,12 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
   );
 }
 
+/**
+ * Pagina delle attività e dei lavori: carica il catalogo per la partita attiva, sceglie la scheda
+ * dal parametro `scheda` dell'URL (i vecchi valori `libri` e `film` reindirizzano alle loro
+ * pagine), filtra per Dote ed esclude i videogiochi, che hanno una pagina propria. Tiene aperta
+ * una sola mappa per volta e offre l'aggiunta di una voce al catalogo.
+ */
 export function AttivitaPage() {
   useDocumentTitle('Attività e Doti sociali');
   const attiva = usePartitaStore((s) => s.attiva);

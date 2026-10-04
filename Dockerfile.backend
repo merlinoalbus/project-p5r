@@ -15,8 +15,9 @@
 # lo copia sul volume /data (gioco.db), crea partite.db accanto e applica le
 # migrazioni. Non esiste più un seed JSON.
 #
-# NB: tsx esegue i .ts direttamente a runtime → tsx/express/cors/
-# pino/pino-pretty/better-sqlite3/zod DEVONO stare in dependencies.
+# NB: tsx esegue i .ts direttamente a runtime → tsx/express/pino/
+# better-sqlite3/zod DEVONO stare in dependencies. pino-pretty no: in
+# produzione il logger scrive JSON e non lo carica (rilievo D11).
 # ============================================================
 
 # ---- Stage 1: type-check gate ----
@@ -50,13 +51,16 @@ COPY --from=build /app/server  ./server
 COPY --from=build /app/shared  ./shared
 COPY pacchetto/ ./pacchetto/
 COPY package.json tsconfig.json tsconfig.server.json NOTICE ./
+# le copie delle licenze citate in NOTICE: i dati derivati (pacchetto/) e Swagger UI viaggiano con la loro licenza
+COPY licenze/ ./licenze/
 ENV NODE_ENV=production \
     DATA_DIR=/data \
     PACCHETTO_DIR=/app/pacchetto \
     PORT=3101
 EXPOSE 3101
 USER appuser
+# La porta del controllo è quella del server (`BE_PORT`, poi `PORT`, come in server/config.ts), non un numero ripetuto (rilievo D10).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3101/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+  CMD node -e "require('http').get('http://localhost:' + (process.env.BE_PORT || process.env.PORT || 3101) + '/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 # node come PID 1 (non npx): riceve SIGTERM direttamente da `docker stop`.
 CMD ["node", "--import", "tsx", "server/index.ts"]

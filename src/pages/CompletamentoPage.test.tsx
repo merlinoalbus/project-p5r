@@ -13,9 +13,10 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { CompletamentoDto, PartitaDto, TrofeoDto } from '../types';
 
 const { getCompletamento, impostaTrofeo } = vi.hoisted(() => ({ getCompletamento: vi.fn(), impostaTrofeo: vi.fn() }));
-vi.mock('../services/api', () => ({ getCompletamento, impostaTrofeo }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getCompletamento, impostaTrofeo }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
+/** Costruisce un trofeo verificato, non ancora ottenuto, con chiave, nome e tipo dati. */
 const trofeo = (chiave: string, nome: string, tipo: TrofeoDto['tipo']): TrofeoDto => ({ chiave, nome, nomeEn: null, tipo, descrizione: 'Descrizione', come: 'Come si ottiene', mancabile: null, quando: null, fonte: 'https://www.allgamestaff.it/t', verificato: true, ottenuto: false });
 const dati: CompletamentoDto = {
   trofei: [trofeo('assedio', 'Assedio al castello della lussuria', 'bronzo'), trofeo('platino', 'Il ladro fantasma definitivo', 'platino')], ottenuti: 0,
@@ -50,5 +51,22 @@ describe('CompletamentoPage', () => {
     expect(screen.queryByRole('tab', { name: 'Covo dei Ladri' })).toBeNull();
     expect(screen.queryByText('Stomaco di ferro')).toBeNull();
     expect(screen.getByRole('link', { name: /Covo dei Ladri/ })).toHaveAttribute('href', '/guida/covo');
+  });
+
+  it('due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
+    usePartitaStore.setState({ attiva: { id: 2, nome: 'Prova' } as PartitaDto });
+    getCompletamento.mockResolvedValue(dati);
+    let rispondiAssedio!: (t: TrofeoDto) => void;
+    impostaTrofeo.mockImplementation((_id: number, chiave: string) => (chiave === 'assedio'
+      ? new Promise<TrofeoDto>((ok) => { rispondiAssedio = ok; })
+      : Promise.resolve({ ...dati.trofei[1], ottenuto: true })));
+    render(<MemoryRouter><CompletamentoPage /></MemoryRouter>);
+    await screen.findByText('Assedio al castello della lussuria');
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Trofeo Assedio al castello della lussuria ottenuto' })); }); // in volo
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Trofeo Il ladro fantasma definitivo ottenuto' })); }); // arriva subito
+    await act(async () => { rispondiAssedio({ ...dati.trofei[0], ottenuto: true }); });
+    expect(screen.getByRole('checkbox', { name: 'Trofeo Il ladro fantasma definitivo ottenuto' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Trofeo Assedio al castello della lussuria ottenuto' })).toBeChecked();
+    expect(screen.getByText(/2 trofei ottenuti/)).toBeInTheDocument();
   });
 });

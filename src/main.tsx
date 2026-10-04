@@ -16,6 +16,11 @@ import type { AppConfigDto } from './types';
 
 const BOOT_CONFIG_TIMEOUT_MS = 15_000;
 
+/**
+ * Sostituisce il contenuto di `#root` con la schermata d'errore d'avvio in HTML puro (stili in
+ * linea, nessuna dipendenza da React o dal CSS del bundle), con il motivo e un pulsante che
+ * ricarica la pagina. Se `#root` manca non fa niente.
+ */
 function renderBootErrorScreen(reason: string): void {
   const root = document.getElementById('root');
   if (!root) return;
@@ -32,6 +37,12 @@ function renderBootErrorScreen(reason: string): void {
   `;
 }
 
+/**
+ * Avvio dell'app: chiede `/api/config` con un timeout di BOOT_CONFIG_TIMEOUT_MS, accetta sia la
+ * busta `{ data }` sia il corpo nudo e salva la configurazione nello store. Se la risposta non è
+ * ok, va in timeout o la rete fallisce, compone il motivo leggibile e mostra la schermata
+ * d'errore senza montare React; altrimenti monta `<App />` in StrictMode.
+ */
 async function boot(): Promise<void> {
   let configOk = false;
   let configErrorReason = 'Impossibile contattare il backend';

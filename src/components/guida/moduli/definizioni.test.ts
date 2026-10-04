@@ -6,6 +6,7 @@ import { ORARI_SEMPRE } from '../../../../shared/orariNegozio';
 import * as def from './definizioni';
 import type { ElementoCatalogoDto } from '../../../types';
 
+/** Elemento di catalogo d'origine seed (chiave «k», nome «n», non modificato né nascosto) del tipo dato, con i `dati` della riga. */
 const riga = (tipo: ElementoCatalogoDto['tipo'], dati: Record<string, unknown>): ElementoCatalogoDto => ({ tipo, chiave: 'k', nome: 'n', origine: 'seed', modificata: false, nascosta: false, aggiornata: null, dati });
 
 describe('negozio', () => {

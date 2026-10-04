@@ -1,3 +1,7 @@
+// ============================================================
+// Test navigazioneMappa — dove porta uno spillo: destinazione esplicita, collegamento legacy, arrivo invalidato, solo gli spostamenti
+// ============================================================
+
 import { arrivoSpillo, destinazioneMappaSpillo } from './navigazioneMappa';
 import type { SpilloDto } from '../types';
 const legacy = { tipo: 'passaggio', riferimento: { tipo: 'mappa', chiave: 'vecchia' }, dettaglio: { tipo: 'mappa', mappa: { chiave: 'vecchia' } } } as SpilloDto;

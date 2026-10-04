@@ -1,3 +1,7 @@
+// ============================================================
+// Test percorso — descriviEffetti: la riga degli effetti di un'azione (Doti, letture, turni, Confidente, incontri)
+// ============================================================
+
 import { describe, expect, it } from 'vitest';
 import { descriviEffetti } from './percorso';
 

@@ -1,3 +1,7 @@
+// ============================================================
+// accessoMondo — dalle sezioni della guida alla mappa: tipi di accesso, DTO delle destinazioni e il loro URL
+// ============================================================
+
 import type { DestinazioneGuidaDto } from './organizzazioneMappe.js';
 /** Accessi al medesimo atlante dalle diverse sezioni della guida. */
 export const TIPI_ACCESSO_MONDO = ['mappa', 'quartiere', 'dungeon', 'area', 'luogo', 'negozio', 'punto', 'confidente', 'articolo', 'attivita'] as const;

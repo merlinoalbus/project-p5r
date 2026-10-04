@@ -8,21 +8,24 @@ import { MemoryRouter } from 'react-router-dom';
 import { ConfidentiPartita } from './ConfidentiPartita';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
 
-const { getConfidentiPartita, aggiornaConfidente, getImmagini } = vi.hoisted(() => ({
+const { getConfidentiPartita, aggiornaConfidente, getImmagini, confermaRequisitoConfidente } = vi.hoisted(() => ({
+  confermaRequisitoConfidente: vi.fn(),
   getConfidentiPartita: vi.fn(),
   aggiornaConfidente: vi.fn(),
   getImmagini: vi.fn(),
 }));
-vi.mock('../../services/api', () => ({
+vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getConfidentiPartita,
+  confermaRequisitoConfidente,
   aggiornaConfidente,
   getImmagini,
   caricaImmagine: vi.fn(),
   eliminaImmagine: vi.fn(),
   importaImmagineDaUrl: vi.fn(),
-  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+  
 }));
 
+/** Confidente di prova (Ryuji, Carro, sbloccato al rango 2 senza punti né semafori), con i campi di `sovrascrivi` che sostituiscono i predefiniti. */
 function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidentePartitaDto {
   return {
     chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot', arcanaNome: 'Carro', ordine: 7,
@@ -117,5 +120,46 @@ describe('ConfidentiPartita', () => {
     // rango > 0 → l'interruttore «Sbloccato» non è modificabile; a rango 0 senza requisiti mancanti resta «Da sbloccare»
     expect(within(cards[0]).getByRole('button', { name: /: sbloccato$/ })).toBeDisabled();
     expect(within(cards[1]).getByRole('button', { name: /: da sbloccare quando lo incontri$/ })).toBeEnabled();
+  });
+});
+
+describe('ConfidentiPartita — due gesti ravvicinati (B3", validazione voce 2)', () => {
+  /** Il Confidente Ann Takamaki (Amanti) al rango dato. */
+  const ann = (rango: number) => confidente({ chiave: 'ann', nome: 'Ann Takamaki', arcana: 'Lovers', arcanaNome: 'Amanti', ordine: 6, rango });
+  /** Il testo del rango («Rango N» o «Rango MAX») mostrato nella voce d'elenco del Confidente con il nome dato. */
+  const rangoDi = (nome: string) => within(screen.getAllByRole('listitem').find((li) => within(li).queryByText(nome))!).getByText(/^Rango \d|^Rango MAX/).textContent;
+
+  it('il rango di un Confidente arrivato dopo quello di un altro non riporta indietro il secondo (salva)', async () => {
+    getConfidentiPartita.mockResolvedValue([confidente({}), ann(1)]);
+    let rispondiRyuji!: (c: ConfidentePartitaDto) => void;
+    aggiornaConfidente.mockImplementation((_id: number, chiave: string) => (chiave === 'ryuji'
+      ? new Promise<ConfidentePartitaDto>((ok) => { rispondiRyuji = ok; })
+      : Promise.resolve(ann(2))));
+    render(<MemoryRouter><ConfidentiPartita partitaId={7} /></MemoryRouter>);
+    await screen.findByText('Ryuji Sakamoto');
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Rango di Ryuji Sakamoto più uno' })); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Rango di Ann Takamaki più uno' })); });
+    expect(rangoDi('Ann Takamaki')).toBe('Rango 2');
+    await act(async () => { rispondiRyuji(confidente({ rango: 3 })); });
+    expect(rangoDi('Ryuji Sakamoto')).toBe('Rango 3');
+    expect(rangoDi('Ann Takamaki')).toBe('Rango 2');
+  });
+
+  it('la conferma di un requisito arrivata dopo il rango di un altro Confidente non lo riporta indietro (conferma)', async () => {
+    const requisito = { indice: 0, tipo: 'evento', testo: 'Evento della storia', stato: 'grigio' as const, dettaglio: '', manuale: true, confermato: false };
+    /** Ryuji con il semaforo del rango 3 legato al requisito manuale, pronto e confermato secondo `confermato`. */
+    const conSemaforo = (confermato: boolean) => confidente({ semafori: [{ rango: 3, pronto: confermato, requisiti: [{ ...requisito, confermato }] }] });
+    getConfidentiPartita.mockResolvedValue([conSemaforo(false), ann(1)]);
+    let rispondiConferma!: (c: ConfidentePartitaDto) => void;
+    confermaRequisitoConfidente.mockImplementation(() => new Promise<ConfidentePartitaDto>((ok) => { rispondiConferma = ok; }));
+    aggiornaConfidente.mockResolvedValue(ann(2));
+    render(<MemoryRouter><ConfidentiPartita partitaId={7} /></MemoryRouter>);
+    await screen.findByText('Ryuji Sakamoto');
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Condizione soddisfatta/ })); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Rango di Ann Takamaki più uno' })); });
+    expect(rangoDi('Ann Takamaki')).toBe('Rango 2');
+    await act(async () => { rispondiConferma(conSemaforo(true)); });
+    expect(screen.getByRole('button', { name: /Confermato/ })).toBeInTheDocument();
+    expect(rangoDi('Ann Takamaki')).toBe('Rango 2');
   });
 });

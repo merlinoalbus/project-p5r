@@ -1,4 +1,7 @@
 /** @vitest-environment jsdom */
+// ============================================================
+// Test LibriPage — libri: pressioni rapide serializzate, negozi con prezzo ed effetti, libri bloccati, filtri per Dote e stato, provenienze
+// ============================================================
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -7,8 +10,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { LibriDto, LibroDto, PartitaDto } from '../types';
 
 const { getLibri, impostaProgressoLibro } = vi.hoisted(() => ({ getLibri: vi.fn(), impostaProgressoLibro: vi.fn() }));
-vi.mock('../services/api', () => ({ getLibri, impostaProgressoLibro }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getLibri, impostaProgressoLibro }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave }: { tipo: string; chiave: string }) => <div>Dove: {tipo}/{chiave}</div> }));
 
 const base: LibroDto = {
@@ -20,6 +23,8 @@ const base: LibroDto = {
   posizioni: [{ tipo: 'negozio', chiave: 'libreria-taiheido', etichetta: 'Libreria Taiheido' }],
   totaleSessioni: 2, progresso: 0, fatto: false, condizioni: null, disponibilita: null,
 };
+/** La risposta dei libri con i libri dati e i totali ricavati da loro: completati, sessioni fatte (somma dei progressi)
+ *  e sessioni totali (2 per libro, come il libro di prova). */
 const dto = (...libri: LibroDto[]): LibriDto => ({ libri, completati: libri.filter((l) => l.fatto).length, sessioniFatte: libri.reduce((n, l) => n + l.progresso, 0), sessioniTotali: 2 * libri.length, letturaRapida: false });
 
 describe('LibriPage', () => {

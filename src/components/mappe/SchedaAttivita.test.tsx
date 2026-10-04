@@ -1,4 +1,8 @@
 /** @vitest-environment jsdom */
+// ============================================================
+// Test SchedaSpillo (attività) — la scheda Attività di uno spillo riferito a un'attività o a un luogo
+// ============================================================
+
 import {render,screen} from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
 import {SchedaSpillo} from './VisoreMappa';

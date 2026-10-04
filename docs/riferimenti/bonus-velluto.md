@@ -1,5 +1,10 @@
 # Bonus della Stanza di Velluto — regole numeriche (Fase 4.2, integrate in 5.4)
 
+> **Dove sono oggi** (verifica completa, 2026-10-04): le regole stanno in codice, in `shared/bonusVelluto.ts` (sconto del Registro
+> `scontoRegistro`, moltiplicatore dei Confidenti, Gemelle, incensi e Forca) e nel motore di fusione. Le tabelle proposte in questo
+> documento e mai create (`confidente_bonus_fusione`) e il nome `scontoCompendio` (realizzato come `scontoRegistro`) sono storia
+> del progetto. I percorsi `data/seed/…` sono del seed JSON, dismesso il 2026-09-12.
+
 ## Integrazione 2026-09-03 sera (Fase 5.4) — fusione, materiali e Allarme
 - **La fusione non trasferisce livelli né statistiche dei materiali**: il livello del risultato si calcola sui livelli base delle specie
   («使用するのは現在Lvではなく、各ペルソナに設定されている初期Lv», wikiwiki.jp/persona5r ベルベットルーム; kamigame 合体の法則; guide EN).

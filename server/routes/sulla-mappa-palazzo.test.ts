@@ -8,12 +8,11 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { ingressoDelPalazzo, palazzoDiIngresso, palazzoDiOgniMappa } from '../services/palazziService.js';
 import type { PercorsoGiornoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
@@ -26,9 +25,7 @@ const primaPlanimetria = (dungeon: string): string | undefined => {
 
 describe('«Sulla mappa» di un Palazzo', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -45,6 +42,7 @@ describe('«Sulla mappa» di un Palazzo', () => {
   });
 
   it('con più ingressi vince quello aperto nel giorno della voce (la Shujin: il solo 11 aprile, poi dal 12 aprile)', async () => {
+    /** Le condizioni salvate sullo spillo con quell'id (lista vuota se non ne ha o se lo spillo manca). */
     const condizioni = (id: number | null) => JSON.parse((prepared('SELECT condizioni_json FROM spillo WHERE id = ?').pluck().get(id) as string | null) ?? '[]') as unknown[];
     // nel pacchetto (canone di produzione) la Shujin ha i due ingressi: quello del solo 11 aprile (la prima infiltrazione)…
     const il11 = ingressoDelPalazzo('kamoshida', '04-11')!;

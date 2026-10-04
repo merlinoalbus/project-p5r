@@ -15,6 +15,7 @@
 // ============================================================
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { config } from '../server/config.js';
 import { initDb, closeDb, getDb } from '../server/db/dbService.js';
 import { runMigrations } from '../server/db/migrationRunner.js';
 import { risolviAccessoMondo } from '../server/services/mappe/accessoMondoService.js';
@@ -30,15 +31,19 @@ const SORGENTI: Partial<Record<TipoAccessoMondo, string>> = {
   punto: 'SELECT chiave FROM punto_interesse',
 };
 
+/** Il valore che segue l'opzione `nome` sulla riga di comando (`--dati <cartella>`); undefined se l'opzione manca. */
 function argomento(nome: string): string | undefined {
   const i = process.argv.indexOf(nome);
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
 
-const dati = argomento('--dati') ?? process.env.DATA_DIR ?? 'data';
+const dati = argomento('--dati') ?? config.dataDir;
 const rapporto = argomento('--rapporto');
 
-const db = initDb(path.join(dati, 'project-p5r.db'));
+// Il DB di gioco con il nome di oggi (`gioco.db`, con `partite.db` attaccato da `initDb`). Prima apriva `project-p5r.db`, il nome
+// di prima della migrazione 066: il file non c'era più, SQLite ne creava uno vuoto e la misura si faceva sul nulla (rilievo S1
+// della verifica completa, 2026-10-03).
+const db = initDb(path.join(dati, config.dbFileName));
 runMigrations(db);
 
 // Un'eccezione del risolutore non e' un'entita' senza associazione: e' un guasto, e confonderle

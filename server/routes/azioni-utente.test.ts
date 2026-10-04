@@ -9,30 +9,34 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { utente008 } from '../db/migrazioniUtente/008_effetti_delle_azioni_utente.js';
 import { DDL_UTENTE_STORICHE } from '../db/schemaUtente.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, PercorsoGiornoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API — voci aggiunte dall\'utente come azioni della guida', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
+  /** Crea una partita col nome dato, la porta al giorno `data` (MM-GG) e ne restituisce l'id. */
   const nuovaPartita = async (nome: string, data: string) => {
     const id = ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
     await request(app).put(`/api/partite/${id}/giorno`).send({ data }).expect(200);
     return id;
   };
+  /** Aggiunge al percorso del giorno `data` una voce dell'utente col corpo dato (restituisce la richiesta, da attendere). */
   const crea = (data: string, corpo: object) => request(app).post(`/api/compendio/percorso/${data}/voci`).send(corpo);
+  /** Spunta o toglie la spunta della voce `uid` nella partita; la risposta del Confidente (1–3) si invia solo se indicata. */
   const spunta = (uid: string, partita: number, fatta: boolean, noteRisposta?: 1 | 2 | 3) => request(app).put(`/api/partite/${partita}/percorso`).send({ uid, fatta, ...(noteRisposta ? { noteRisposta } : {}) });
+  /** Elimina dal percorso la voce aggiunta dall'utente con quell'uid. */
   const elimina = (uid: string) => request(app).delete(`/api/compendio/percorso/voci/${uid}`);
+  /** Restituisce i punti che la partita `p` ha nella Dote sociale con la chiave data. */
   const dote = async (p: number, chiave: string) => ((await request(app).get(`/api/partite/${p}/doti`)).body.data as DoteSocialePartitaDto[]).find((d) => d.chiave === chiave)!.punti;
 
   it('si crea classificata e collegata: il nome lo dà il server, gli effetti si leggono in parole; un collegamento a vuoto no', async () => {
@@ -63,6 +67,7 @@ describe('API — voci aggiunte dall\'utente come azioni della guida', () => {
     });
     // le Doti si segnano a mano: gli effetti le dicono, i punti delle Doti non si muovono
     expect(await dote(p, 'coraggio')).toBe(base);
+    /** Legge i Confidenti della partita `p` e restituisce i punti accumulati con Takemi. */
     const puntiTakemi = async () => ((await request(app).get(`/api/partite/${p}/confidenti`)).body.data as Array<{ chiave: string; punti: number }>).find((c) => c.chiave === 'takemi')!.punti;
     expect(await puntiTakemi()).toBeGreaterThan(0);
     // una seconda spunta non applica niente due volte
@@ -81,6 +86,7 @@ describe('API — voci aggiunte dall\'utente come azioni della guida', () => {
     const p = await nuovaPartita('Elimina con effetti', '04-25');
     const q = await nuovaPartita('Senza effetti', '04-25');
     await request(app).put(`/api/partite/${p}/confidenti/takemi`).send({ forza: true, rango: 1 }).expect(200);
+    /** Legge i Confidenti della partita `p` e restituisce i punti accumulati con Takemi. */
     const puntiTakemi = async () => ((await request(app).get(`/api/partite/${p}/confidenti`)).body.data as Array<{ chiave: string; punti: number }>).find((c) => c.chiave === 'takemi')!.punti;
     const prima = await puntiTakemi();
     const a = (await crea('04-25', { azione: 'Clinica Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, rangoAtteso: 2 })).body.data as AzionePercorsoDto;

@@ -16,7 +16,7 @@ import { randomUUID } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
-import type { ImmagineDto } from '../../shared/types.js';
+import type { ImmagineDto, ManifestImmaginiDto } from '../../shared/types.js';
 import { idMappa } from './mappe/percorsiMappe.js';
 import { scaricaDaUrl } from '../utils/scaricaDaUrl.js';
 
@@ -44,10 +44,12 @@ function chiaveDi(ambito: string, chiave: string): string {
   return ambito === 'mappa' ? idMappa(chiave) : chiave;
 }
 
-export function urlFileImmagine(ambito: string, chiave: string): string {
+/** L'URL dell'API che serve il file dell'immagine, con ambito e chiave codificati. */
+function urlFileImmagine(ambito: string, chiave: string): string {
   return `/api/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/file`;
 }
 
+/** I metadati di un'immagine per il client, con l'URL del file (mai i byte). */
 function dto(r: RigaImmagine): ImmagineDto {
   return { id: r.id, ambito: r.ambito, chiave: r.chiave, mime: r.mime, byte: r.byte, url: urlFileImmagine(r.ambito, r.chiave), createdAt: r.created_at, origineUrl: r.origine_url ?? null };
 }
@@ -61,7 +63,7 @@ export function elencaImmagini(ambito?: string): ImmagineDto[] {
 }
 
 /** Il manifesto della grafica predefinita nel database: chiave del manifesto → URL del file versionato. */
-export function manifestoPredefinite(): { generato: string; totale: number; file: Record<string, string> } {
+export function manifestoPredefinite(): ManifestImmaginiDto {
   const righe = prepared(`SELECT ambito, chiave, created_at FROM immagine WHERE contenuto IS NOT NULL AND ambito IN (${segnapostoPredefiniti}) ORDER BY ambito, chiave`).all(...AMBITI_PREDEFINITI) as Array<{ ambito: string; chiave: string; created_at: string }>;
   const file: Record<string, string> = {};
   for (const r of righe) file[`${r.ambito}/${r.chiave}`] = `${urlFileImmagine(r.ambito, r.chiave)}?v=${encodeURIComponent(r.created_at)}`;
@@ -122,6 +124,7 @@ export function eliminaImmaginiAmbito(ambito?: string): number {
   return esito.changes;
 }
 
+/** Elimina l'immagine di un'entità (per le mappe la chiave si riconduce all'identità della mappa); 404 se non c'era. */
 export function eliminaImmagine(ambito: string, chiave: string): void {
   const esito = prepared('DELETE FROM immagine WHERE ambito = ? AND chiave = ?').run(ambito, chiaveDi(ambito, chiave));
   if (esito.changes === 0) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);

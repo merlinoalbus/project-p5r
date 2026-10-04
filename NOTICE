@@ -5,18 +5,25 @@ Persona 5 Royal, i nomi delle Persona, delle skill, degli oggetti, degli Arcani 
 elemento del gioco sono proprietà di ATLUS / SEGA. Questo progetto è uno strumento personale
 non ufficiale, non affiliato ad ATLUS o SEGA, e non contiene asset grafici del gioco.
 
-Il dataset del compendio Royal (data/seed/) è derivato dalle seguenti opere open source.
+Il dataset del compendio Royal — oggi nel database di gioco (pacchetto/gioco.db), in origine nel
+seed JSON data/seed/, dismesso il 2026-09-12 — è derivato dalle seguenti opere open source.
 
 1. chinhodado/persona5_calculator — https://github.com/chinhodado/persona5_calculator
    Fonte primaria: data/PersonaDataRoyal.ts, data/SkillDataRoyal.ts, data/ItemDataRoyal.ts,
    data/Data5Royal.ts; logica di fusione di riferimento in src/FusionCalculator.ts.
    Copyright (c) Chin (chinhodado). Licenza Apache License 2.0
-   (copia in data/seed/sorgenti/chinhodado/LICENSE). I file sono stati normalizzati e tradotti
-   in italiano (scripts/seed/); le modifiche sono documentate in docs/riferimenti/dataset-fonti.md.
+   (copia in licenze/chinhodado-persona5_calculator-LICENSE.txt). I file sono stati normalizzati e
+   tradotti in italiano; le modifiche sono documentate in docs/riferimenti/dataset-fonti.md.
 
 2. aqiu384/megaten-fusion-tool — https://github.com/aqiu384/megaten-fusion-tool
    Fonte di verifica incrociata: src/app/p5/data/roy-*.json, skill-data.json, comp-config.json.
-   Rilasciato nel pubblico dominio (The Unlicense, copia in data/seed/sorgenti/aqiu384/LICENSE.md).
+   Rilasciato nel pubblico dominio (The Unlicense, copia in licenze/aqiu384-megaten-fusion-tool-LICENSE.txt).
+
+La documentazione delle API (/api/docs) usa Swagger UI (pacchetto swagger-ui-dist, installato con il
+backend e servito dall'istanza):
+   swagger-ui — https://github.com/swagger-api/swagger-ui
+   Copyright 2020-2021 SmartBear Software Inc. Licenza Apache License 2.0
+   (copia in licenze/swagger-ui-LICENSE.txt).
 
 Le domande e le risposte della negoziazione con le Ombre (server/db/dati/negoziazione-domande.json)
 sono trascritte da «The Ultimate/Most Complete Guide To Negotiations In Persona 5» di joyce-chen e

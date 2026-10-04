@@ -9,16 +9,16 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, initDb, prepared } from '../db/dbService.js';
-import { caricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { creaMappa, esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import type { MappaDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 type Gruppo = { id: string; nome: string; ordine: number; etichetta?: string; nomeRivisto?: boolean };
+/** Il gruppo di immagini (la stanza) salvato nella presentazione della planimetria, o null se non ne ha. */
 const gruppo = (mappa: string): Gruppo | null => {
   const r = prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(mappa) as { gruppo_immagini_json: string | null } | undefined;
   return r?.gruppo_immagini_json ? JSON.parse(r.gruppo_immagini_json) as Gruppo : null;
@@ -27,9 +27,7 @@ const gruppo = (mappa: string): Gruppo | null => {
 describe('la stanza di una planimetria', () => {
   let a: MappaDto; let b: MappaDto; let c: MappaDto;
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
     a = creaMappa(undefined, { nome: 'Salone porzione ovest', tipo: 'area', genitore: 'dungeon-kamoshida' });
     b = creaMappa(undefined, { nome: 'Salone', tipo: 'area', genitore: 'dungeon-kamoshida' });
     c = creaMappa(undefined, { nome: 'Salone porzione est', tipo: 'area', genitore: 'dungeon-kamoshida' });

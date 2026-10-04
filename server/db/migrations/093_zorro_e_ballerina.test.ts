@@ -10,7 +10,9 @@ afterEach(() => closeDb());
 
 const ZORRO = { tipo: 'lettura', categoria: 'libro', chiave: 'zorro-il-fuorilegge', almeno: null };
 const BALLERINA = { tipo: 'lettura', categoria: 'libro', chiave: 'la-ballerina-seducente', almeno: null };
+/** Voci della giornata del 25 aprile nella fascia «giorno», in ordine, con i campi che la migrazione può toccare. */
 const giorno = () => prepared("SELECT uid, ordine, azione, tipo, riferimento_tipo, riferimento_chiave, produce_json, indice_guida FROM voce_giornata WHERE data = '04-25' AND fascia = 'giorno' ORDER BY ordine").all() as Array<{ uid: string; ordine: number; azione: string; tipo: string; riferimento_tipo: string | null; riferimento_chiave: string | null; produce_json: string; indice_guida: number | null }>;
+/** Uid della voce del 25 aprile che corrisponde alla prima voce della guida (`indice_guida = 1`). */
 const uidGuida = () => prepared("SELECT uid FROM voce_giornata WHERE data = '04-25' AND indice_guida = 1").pluck().get() as string;
 
 it('sul canone di produzione (092): la lettura di Zorro e, subito dopo, la restituzione con il prestito della Ballerina (la voce dell\'utente), senza leggerla; le spunte restano', () => {

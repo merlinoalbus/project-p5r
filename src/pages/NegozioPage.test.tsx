@@ -22,8 +22,8 @@ const { getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getE
   posizioni: [] as Array<Record<string, unknown>>,
 }));
 // `getCatalogo` serve al blocco degli articoli nascosti; senza partita e senza nascosti torna vuoto.
-vi.mock('../services/api', () => ({ getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo, getNegozi: vi.fn().mockResolvedValue([]) }));
-vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getNegozio, impostaAcquisto, getCatalogo, nascondiElementoCatalogo, getElementoCatalogo, getNegozi: vi.fn().mockResolvedValue([]) }));
+vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({
   DoveSiTrova: (props: Record<string, unknown>) => {
     posizioni.push(props);
@@ -31,6 +31,8 @@ vi.mock('../components/mappe/DoveSiTrova', () => ({
   },
 }));
 
+/** Un articolo dell'Untouchable (disponibile dal 6 giugno, verificato, non acquistato) con chiave, nome, categoria,
+ *  destinatario e prezzo dati. */
 const art = (chiave: string, nome: string, categoria: ArticoloDto['categoria'], per: string | null, prezzo: number | null): ArticoloDto => ({ chiave, negozioChiave: 'untouchable', negozioNome: 'Untouchable', nome, nomeIt: null, categoria, per, prezzo, effetto: 'Effetto', statistiche: 'Attacco 50', quantita: null, oggettoFonte: null, oggettoChiave: null, disponibileDal: 'dal 6 giugno', condizione: null, nota: null, verificato: true, acquistato: false });
 const negozio: NegozioDettaglioDto = { chiave: 'untouchable', nome: 'Untouchable', luogo: 'Shibuya, Central Street', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', tipo: 'misto', gestore: 'Munehisa Iwai', confidente: { chiave: 'iwai', nome: 'Munehisa Iwai' }, orariStrutturati: { giorni: [], fasce: ['sera'], chiusoConPioggia: false, nota: null }, orariTesto: 'Solo di sera', sedeChiave: 'shibuya/untouchable', sedeNome: 'Untouchable', programmaPunti: null, note: null, articoli: 3, verificati: 3, articoliElenco: [art('untouchable/kogatana-nera', 'Kogatana nera', 'arma', 'Joker', 1000), art('untouchable/frusta', 'Frusta', 'arma', 'Ann', 1200), art('untouchable/giubbotto', 'Giubbotto', 'protezione', 'tutti', 3000)], acquistati: 0 };
 
@@ -107,6 +109,23 @@ describe('NegozioPage', () => {
     expect(screen.getByText('Solo di sera')).toBeInTheDocument();
     expect(screen.queryByText('fonte')).toBeNull();
     expect(screen.queryByText(/Sblocco:/)).toBeNull();
+  });
+
+  it('due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
+    usePartitaStore.setState({ attiva: { id: 9, nome: 'Prova' } as PartitaDto });
+    getNegozio.mockResolvedValue(negozio);
+    let rispondiKogatana!: (a: ArticoloDto) => void;
+    impostaAcquisto.mockImplementation((_id: number, chiave: string) => (chiave === 'untouchable/kogatana-nera'
+      ? new Promise<ArticoloDto>((ok) => { rispondiKogatana = ok; })
+      : Promise.resolve({ ...negozio.articoliElenco[1], acquistato: true })));
+    render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
+    await screen.findByRole('heading', { name: 'Untouchable' });
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Kogatana nera acquistato' })); }); // in volo
+    await act(async () => { fireEvent.click(screen.getByRole('checkbox', { name: 'Frusta acquistato' })); }); // arriva subito
+    await act(async () => { rispondiKogatana({ ...negozio.articoliElenco[0], acquistato: true }); });
+    expect(screen.getByRole('checkbox', { name: 'Frusta acquistato' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Kogatana nera acquistato' })).toBeChecked();
+    expect(screen.getByText(/2 acquistati/)).toBeInTheDocument();
   });
 });
 

@@ -15,7 +15,7 @@ import { prezzoEvocazione, type Disponibilita } from './alberoFusione.js';
 export type ModoPartner = 'scorta' | 'registro' | 'cattura';
 
 /** Numero massimo di anelli ammesso per un ciclo. */
-export const LUNGHEZZA_MASSIMA = 15;
+const LUNGHEZZA_MASSIMA = 15;
 
 export interface AnelloCiclo {
   ingrediente: PersonaFusione;
@@ -55,6 +55,11 @@ export interface OpzioniCicli {
   budget?: number;
 }
 
+/**
+ * Come si procura un partner e quanto costa, o null se non è procurabile. Il Registro ha la precedenza sulla scorta
+ * (un esemplare in scorta serve solo alla prima iterazione, vedi `dallaScorta`); la cattura, se ammessa, vale per le
+ * Persona che non sono speciali, rare né DLC.
+ */
 function modoPartner(p: PersonaFusione, disp: Disponibilita, opz: OpzioniCicli): { modo: ModoPartner; costo: number } | null {
   if (disp.registro.has(p.id)) return { modo: 'registro', costo: prezzoEvocazione(p) };
   if ((disp.scorta.get(p.id) ?? 0) > 0) return { modo: 'scorta', costo: 0 };
@@ -88,14 +93,23 @@ export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Dispon
   let esaminatiTotali = 0;
   const cache = new Map<number, RicettaFusione[]>();
   const trovati: CicloFusione[] = [];
+  /** Vero quando si hanno già tutte le alternative richieste. */
   const pieno = (): boolean => trovati.length >= opz.alternative;
+  /** Il costo del peggiore dei cicli tenuti, soglia da battere; infinito finché l'elenco non è pieno. */
   const migliori = (): number => (pieno() ? trovati[trovati.length - 1].costo : Infinity);
+  /** Aggiunge un ciclo trovato, riordina per costo, lunghezza e catture e taglia l'elenco al numero di alternative. */
   const inserisci = (c: CicloFusione) => {
     trovati.push(c);
     trovati.sort((x, y) => x.costo - y.costo || x.lunghezza - y.lunghezza || x.catture - y.catture);
     if (trovati.length > opz.alternative) trovati.length = opz.alternative;
   };
 
+  /**
+   * Ricerca in profondità a partire dalla Persona corrente: raccoglie le fusioni con un partner procurabile che rispettano
+   * i vincoli (niente rare intermedie, niente Persona già visitate, partner distinti, livello massimo), le prova in ordine di
+   * costo del partner, registra un ciclo quando il risultato è il bersaglio con almeno `lunghezzaMin` anelli, altrimenti
+   * scende di un anello. Si ferma con l'elenco pieno e i candidati più cari, oltre il ventaglio o a budget esaurito.
+   */
   const visita = (corrente: PersonaFusione, anelli: AnelloCiclo[], costo: number, visitati: Set<number>) => {
     if (anelli.length >= lunghezzaMax) return;
     // Candidati: fusioni con la corrente, partner procurabile, risultato entro il livello; ordinati per costo del partner.

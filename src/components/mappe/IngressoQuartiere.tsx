@@ -22,6 +22,11 @@ import { NOME_TIPO_MAPPA } from '../../../shared/spilli';
 
 const INGRANDIMENTI = [{ zoom: 1.5, nome: 'Largo' }, { zoom: 2.5, nome: 'Medio' }, { zoom: 4, nome: 'Vicino' }] as const;
 
+/** Pannello di configurazione dell'ingresso di un quartiere: selettore della mappa, immagine da
+ * toccare (o da muovere con le frecce, Maiusc per passi da 5) per il punto, pastiglie
+ * d'ingrandimento e coordinate esatte sotto «Avanzate». Ogni gesto salva subito e poi chiama
+ * `onSalvato`; durante il salvataggio i comandi sono disattivati. Il ripristino dell'ingresso
+ * predefinito chiude anche il pannello (`onChiudi`). Cambiando mappa il punto torna al centro. */
 export function IngressoQuartiere({ quartiere: q, onSalvato, onChiudi }: { quartiere: QuartiereDettaglioDto; onSalvato: () => Promise<void>; onChiudi: () => void }) {
   const [mappa, setMappa] = useState(q.ingresso?.mappa ?? q.mappaChiave ?? '');
   const [x, setX] = useState(q.ingresso?.x ?? 50);
@@ -33,7 +38,8 @@ export function IngressoQuartiere({ quartiere: q, onSalvato, onChiudi }: { quart
   const asset = useAsset(dati.dati?.asset);
   const originale = useAsset(dati.dati?.assetOriginale);
   const src = dati.dati?.immagineUrl ?? asset ?? originale;
-  const coordinateValide = (px: number, py: number) => [px, py].every((v) => Number.isFinite(v) && v >= 0 && v <= 100);
+  /** Vero se entrambe le coordinate sono numeri finiti fra 0 e 100 (percentuali dell'immagine). */
+  const coordinateValide =(px: number, py: number) => [px, py].every((v) => Number.isFinite(v) && v >= 0 && v <= 100);
 
   /** Salva quel che c'è (o quel che viene passato): ogni gesto sull'immagine e sulle pastiglie passa da qui. */
   const salva = async (valori?: { x?: number; y?: number; zoom?: number }, reset = false) => {
@@ -51,6 +57,7 @@ export function IngressoQuartiere({ quartiere: q, onSalvato, onChiudi }: { quart
       setOccupato(false);
     }
   };
+  /** Converte il punto toccato in percentuali dell'immagine (due decimali), lo mostra e lo salva; ignorato durante un salvataggio. */
   const tocca = (e: React.MouseEvent<HTMLDivElement>) => {
     if (occupato) return;
     const r = e.currentTarget.getBoundingClientRect();
@@ -59,13 +66,15 @@ export function IngressoQuartiere({ quartiere: q, onSalvato, onChiudi }: { quart
     setX(nx); setY(ny);
     void salva({ x: nx, y: ny });
   };
+  /** Sposta il punto dello scarto indicato (in punti percentuali, limitato a 0–100) e salva; ignorato durante un salvataggio. */
   const sposta = (dx: number, dy: number) => {
     if (occupato) return;
     const nx = Math.min(100, Math.max(0, x + dx)), ny = Math.min(100, Math.max(0, y + dy));
     setX(nx); setY(ny);
     void salva({ x: nx, y: ny });
   };
-  const scegliZoom = (z: number) => { setZoom(z); void salva({ zoom: z }); };
+  /** Imposta l'ingrandimento scelto fra le pastiglie e lo salva subito. */
+  const scegliZoom =(z: number) => { setZoom(z); void salva({ zoom: z }); };
   const opzioni: Array<{ chiave: string; nome: string; dettaglio?: string; gruppo?: string }> = (albero.dati ?? []).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), dettaglio: NOME_TIPO_MAPPA[m.tipo], gruppo: m.genitoreNome ?? undefined }));
   if (mappa && !opzioni.some((o) => o.chiave === mappa)) opzioni.unshift({ chiave: mappa, nome: q.ingresso?.nome ?? q.nome });
 

@@ -3,19 +3,17 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto, ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
+import { closeDb, getDb } from '../db/dbService.js';
+import { ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { createApp } from '../bootstrap.js';
 import type { DungeonDettaglioDto, DungeonRiassuntoDto, PuntoInteresseDto, StoricoDto } from '../../shared/types.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
 describe('API dungeon', () => {
   beforeAll(() => {
-    const db = initDb(':memory:');
-    caricaPacchetto(db);
-    invalidaCacheTraduzioni();
+    dbDiProva();
   });
   afterAll(() => closeDb());
 
@@ -93,15 +91,14 @@ describe('API dungeon', () => {
     expect(p.stato).toBeNull();
     expect((await request(app).put(`/api/partite/${id}/punti`).send({ punto: 'x/999', stato: 'ottenuto' })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${id}/punti`).send({ punto: forziere.chiave, stato: 'boh' })).status).toBe(400);
-    // marcatori: fissa, leggi nella scheda, limiti, rimozione
-    const m = await request(app).put('/api/mappe/marcatori').send({ punto: forziere.chiave, x: 12.5, y: 80 });
-    expect(m.status).toBe(200);
-    expect(m.body.data.marcatore).toEqual({ x: 12.5, y: 80 });
+    // marcatori: la rotta che li scriveva non c'è più (nessuno la chiamava, rilievo O10); quello che c'è nel database si legge
+    // nella scheda, e senza marcatore il punto non ne ha
+    getDb().prepare("INSERT INTO marcatore_mappa (punto_chiave, x, y, updated_at, origine) VALUES (?, 12.5, 80, 'prova', 'utente') ON CONFLICT(punto_chiave) DO UPDATE SET x = excluded.x, y = excluded.y").run(forziere.chiave);
     const k2 = (await request(app).get('/api/compendio/dungeon/kamoshida')).body.data as DungeonDettaglioDto;
     expect(k2.aree.flatMap((a) => a.punti).find((q) => q.chiave === forziere.chiave)?.marcatore).toEqual({ x: 12.5, y: 80 });
-    expect((await request(app).put('/api/mappe/marcatori').send({ punto: forziere.chiave, x: 120, y: 0 })).status).toBe(400);
-    expect((await request(app).put('/api/mappe/marcatori').send({ punto: 'x/999', x: 1, y: 1 })).status).toBe(404);
-    expect((await request(app).put('/api/mappe/marcatori').send({ punto: forziere.chiave, x: null, y: null })).body.data.marcatore).toBeNull();
+    getDb().prepare('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(forziere.chiave);
+    const k2b = (await request(app).get('/api/compendio/dungeon/kamoshida')).body.data as DungeonDettaglioDto;
+    expect(k2b.aree.flatMap((a) => a.punti).find((q) => q.chiave === forziere.chiave)?.marcatore).toBeNull();
     // reseed forzato: chiavi stabili → lo stato della partita resta
     ricaricaPacchetto(getDb());
     const k3 = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${id}`)).body.data as DungeonDettaglioDto;

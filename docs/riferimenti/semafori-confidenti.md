@@ -1,5 +1,9 @@
 # Semafori dei Confidenti — cosa l'app verifica da sola e cosa resta da confermare a mano
 
+> **Dove sono oggi** (verifica completa, 2026-10-04): i requisiti citati come `data/seed/confidenti-requisiti.json` stanno nella
+> tabella `confidente_requisito` di `gioco.db` e arrivano con il pacchetto di gioco; la valutazione è in
+> `server/services/semaforiService.ts` e `disponibilitaService.ts`.
+
 Fonte: `data/seed/confidenti-requisiti.json` (146 ranghi, 177 requisiti), ricostruito dalla guida Royal di allgamestaff (una pagina per Confidente, letta due volte da agenti indipendenti con citazione letterale obbligatoria; nel seed resta solo ciò su cui le due letture concordano o che è citato con certezza). Ogni requisito è un semaforo: verde = soddisfatto, rosso = non ancora, grigio = l'app non può saperlo e chiede la conferma. Un Confidente con almeno un semaforo non verde per il rango successivo è **bloccato**: carta grigia, «+» e sblocco disattivati; «Segna comunque» forza il rango e resta nello storico.
 
 Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli della guida (data consigliata, Persona dello stesso arcano per il bonus punti, regali, risposte) e le descrizioni di eventi automatici di trama non sono semafori.

@@ -2,8 +2,8 @@
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { LUOGHI_NUOVI, SEDI_ATTIVITA, SEDI_NEGOZI } from './072_sedi_negozi_attivita.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
@@ -19,8 +19,7 @@ it('la sede viene dall’inverso di luogo.negozio e il quartiere segue la sede',
 });
 
 it('nel pacchetto i 60 negozi della guida e 29 attività su 30 hanno una sede esistente, salvo i dichiarati e le scelte dell’utente', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   const negozi = db.prepare('SELECT chiave, sede_chiave, luogo_chiave, origine, NOT (origine = \'utente\' AND seed_json IS NULL) AS dallaGuida FROM negozio').all() as Array<{ chiave: string; sede_chiave: string | null; luogo_chiave: string | null; origine: string; dallaGuida: number }>;
   // il pacchetto è la fotografia dell'istanza: ai 60 della guida si aggiungono i negozi creati dall'app
   expect(negozi.filter((n) => n.dallaGuida).length).toBe(60);

@@ -9,12 +9,13 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
-import { aggiungiPosseduta, personePossedute, skillInnateFinoAlLivello } from './partiteService.js';
+import { aggiungiPosseduta, possedutaPerId, skillInnateFinoAlLivello } from './partiteService.js';
 import { verificaObiettivi } from './obiettiviService.js';
-import { contestoDa, ingredienteDa, personaOErrore } from './fusione/fusioneService.js';
+import { contestoDa, ingredienteDa, personaOErrore, rangoArcana } from './fusione/fusioneService.js';
 import { fondi, ricettaSpeciale, type RicettaFusione } from './fusione/motoreFusione.js';
 import { analisiEredita } from './fusione/eredita.js';
 import { CHIAVI_STATISTICHE, type Statistiche } from '../../shared/statistiche.js';
@@ -23,6 +24,7 @@ import type { AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIs
 
 interface RigaScorta { id: number; persona_id: number; livello: number; carica: number; nome: string; arcana: string; livello_base: number; rara: number }
 
+/** La Persona della scorta (con nome, arcano, livello base e rarità del compendio); 404 se non è nella scorta della partita. */
 function possedutaOErrore(partitaId: number, possedutaId: number): RigaScorta {
   const r = prepared(`SELECT pp.id, pp.persona_id, pp.livello, pp.carica, p.nome, p.arcana, p.livello AS livello_base, p.rara
     FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.id = ? AND pp.partita_id = ?`).get(possedutaId, partitaId) as RigaScorta | undefined;
@@ -30,22 +32,21 @@ function possedutaOErrore(partitaId: number, possedutaId: number): RigaScorta {
   return r;
 }
 
+/** Gli id delle skill di una Persona posseduta, nell'ordine degli slot. */
 function skillDi(possedutaId: number): number[] {
   return (prepared('SELECT skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(possedutaId) as Array<{ skill_id: number }>).map((x) => x.skill_id);
 }
 
-function rangoArcana(partitaId: number, arcana: string): number {
-  return (prepared('SELECT MAX(COALESCE(cp.rango, 0)) AS r FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? WHERE c.arcana = ?').get(partitaId, arcana) as { r: number | null }).r ?? 0;
-}
-
+/** Se l'allarme della fusione è attivo e il livello del protagonista; 404 se la partita non esiste. */
 function partitaInfo(partitaId: number): { allarme: boolean; livelloProtagonista: number } {
   const r = prepared('SELECT allarme_attivo, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { allarme_attivo: number; livello_protagonista: number } | undefined;
-  if (!r) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  if (!r) throw partitaNonTrovata(partitaId);
   return { allarme: r.allarme_attivo === 1, livelloProtagonista: r.livello_protagonista };
 }
 
+/** Una Persona della scorta, letta da sola: prima si costruiva tutta la scorta per tenerne una (P2'). */
 function possedutaDto(partitaId: number, id: number): PersonaPossedutaDto {
-  const p = personePossedute(partitaId).find((x) => x.id === id);
+  const p = possedutaPerId(id, partitaId);
   if (!p) throw httpErrors.notFound('posseduta-non-trovata', `La Persona posseduta ${id} non esiste.`);
   return p;
 }
@@ -226,6 +227,7 @@ export function eseguiForca(partitaId: number, dati: DatiForca): EsitoForcaDto {
   })();
 }
 
+/** Il totale dei punti statistica indicati, contando zero quelli assenti o negativi. */
 function sommaPunti(p: Partial<Statistiche>): number {
   return CHIAVI_STATISTICHE.reduce((s, k) => s + Math.max(0, p[k] ?? 0), 0);
 }

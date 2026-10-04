@@ -24,6 +24,10 @@ import { NOME_FASCIA_METEO } from '../../utils/meteoFascia';
 import type { FasciaGioco, MeteoGiornoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 
+/** Finestra del meteo del giorno nuovo, senza props: osserva la data della partita attiva e chiede
+ * il meteo quando cambia per la stessa partita; carica il meteo della richiesta aperta (scartando le
+ * risposte arrivate dopo che la richiesta è cambiata) e mostra giorno e sera con le allerte. Non
+ * mostra nulla finché non c'è una richiesta; se il caricamento fallisce la chiude. */
 export function MeteoAlCambioGiorno() {
   const attiva = usePartitaStore((s) => s.attiva);
   const { richiesta, chiedi, chiudi, cambiato } = useMeteoStore();
@@ -52,6 +56,8 @@ export function MeteoAlCambioGiorno() {
     return () => { vivo = false; };
   }, [richiesta, chiaveRichiesta, chiudi]);
 
+  /** Segna il meteo di una fascia (`null` torna a quello della guida), aggiorna il meteo mostrato e
+   * la partita nello store, invalida i suggerimenti e incrementa la versione dello store del meteo («il meteo è cambiato»). */
   const cambia = async (fascia: FasciaGioco, valore: MeteoPartita | null) => {
     if (!richiesta) return;
     setOccupato(true);

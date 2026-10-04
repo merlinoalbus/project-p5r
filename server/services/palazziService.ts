@@ -21,14 +21,16 @@
 
 import { getDb, prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
-import { voceDelPin } from './mappe/voceDelPin.js';
+import { voceDelPin, vociGestite } from './mappe/voceDelPin.js';
 import { allineaEnigmaDellaVoce } from './mappe/statiGuida.js';
+import { radiceDelPalazzo, SQL_RADICE_PALAZZO, SQL_SOTTOALBERO } from './mappe/alberoMappe.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
 export function palazzoDiOgniMappa(): Map<string, string> {
+  // tutte le radici dei Palazzi insieme (la regola è quella di `alberoMappe`), con il loro dungeon portato giù per l'albero
   const righe = prepared(`WITH RECURSIVE albero(chiave, dungeon) AS (
-      SELECT chiave, substr(chiave, 9) FROM mappa WHERE chiave LIKE 'dungeon-%' AND genitore_chiave IS NULL
-      UNION ALL
+      SELECT chiave, substr(chiave, 9) FROM mappa WHERE ${SQL_RADICE_PALAZZO}
+      UNION
       SELECT m.chiave, a.dungeon FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
     ) SELECT chiave, dungeon FROM albero`).all() as Array<{ chiave: string; dungeon: string }>;
   return new Map(righe.map((r) => [r.chiave, r.dungeon]));
@@ -113,7 +115,7 @@ function completamentoDallaMappa(spilli: SpilloCollezionabile[], finale: BossFin
 export function palazziCompletati(partitaId: number): Map<string, string> {
   const out = new Map<string, string>();
   const finali = bossFinali();
-  const puntiGestiti = new Set((prepared('SELECT punto_chiave FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave));
+  const puntiGestiti = vociGestite(partitaId);
   for (const [dungeon, f] of finali) if (f.punti.some((p) => puntiGestiti.has(p))) out.set(dungeon, 'boss finale segnato nella Guida');
   const palazzi = palazzoDiOgniMappa();
   const raccolti = new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
@@ -152,7 +154,7 @@ export function allineaBossDellaGuida(partitaId: number, spillo: { tipo: string;
   }
   const raccolti = new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
   // i punti della Guida gestiti, **senza** il boss finale: è proprio lui che si sta decidendo se togliere
-  const puntiGestiti = new Set((prepared('SELECT punto_chiave FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave).filter((p) => !finale.punti.includes(p)));
+  const puntiGestiti = new Set([...vociGestite(partitaId)].filter((p) => !finale.punti.includes(p)));
   const spilli = collezionabiliPerPalazzo(palazzi).get(dungeon) ?? [];
   if (completamentoDallaMappa(spilli, finale, aree, raccolti, puntiGestiti)) return;
   // solo il segno messo dal raccolto: un boss segnato a mano non si perde per un raccolto tolto
@@ -186,7 +188,7 @@ export function palazzoDiIngresso(spillo: { mappa_chiave: string | null; riferim
  * ordine logico (quello della scheda del Palazzo); se non ha nemmeno quella, la radice. `null` se il dungeon non ha mappe.
  */
 export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: string; spilloId: number | null } | null {
-  const radice = `dungeon-${dungeon}`;
+  const radice = radiceDelPalazzo(dungeon);
   if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(radice)) return null;
   const palazzi = palazzoDiOgniMappa();
   const destinazioni = prepared("SELECT 1 FROM sqlite_master WHERE name = 'spillo_destinazione'").get()
@@ -195,16 +197,13 @@ export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: 
   const spilli = prepared('SELECT id, mappa_chiave, riferimento_tipo, riferimento_chiave, seed_identita_json, condizioni_json FROM spillo WHERE mappa_chiave IS NOT NULL ORDER BY id')
     .all() as Array<{ id: number; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null; seed_identita_json: string | null; condizioni_json: string | null }>;
   const ingressi = spilli.filter((s) => palazzoDiIngresso(s, destinazioni.get(s.id) ?? null, palazzi) === dungeon);
+  /** Vero se lo spillo sta su una mappa della città (chiave «citta-…»). */
   const inCitta = (s: { mappa_chiave: string }) => s.mappa_chiave.startsWith('citta-');
   const aperti = giorno ? ingressi.filter((s) => apertoIl(s.condizioni_json, giorno)) : ingressi;
   const ingresso = aperti.find(inCitta) ?? aperti[0] ?? ingressi.find(inCitta) ?? ingressi[0];
   if (ingresso) return { chiave: ingresso.mappa_chiave, spilloId: ingresso.id };
   // la prima planimetria vera (pianta del gioco o illustrazione), nell'ordine che si cambia trascinando nella scheda
-  const prima = prepared(`WITH RECURSIVE albero(chiave) AS (
-      SELECT chiave FROM mappa WHERE chiave = ?
-      UNION ALL
-      SELECT m.chiave FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
-    )
+  const prima = prepared(`${SQL_SOTTOALBERO}
     SELECT m.chiave FROM mappa m JOIN albero t ON t.chiave = m.chiave
     WHERE m.chiave <> ? AND m.ruolo_immagine IN ('planimetria-nativa', 'illustrazione-editoriale')
     ORDER BY m.ordine, m.chiave LIMIT 1`).get(radice, radice) as { chiave: string } | undefined;

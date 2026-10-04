@@ -4,16 +4,15 @@
 
 import { closeDb, initDb, prepared } from '../dbService.js';
 import { utente005 } from './005_giornata_modificabile.js';
-import { caricaPacchetto } from '../../services/pacchetto/pacchettoGioco.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from '../migrations/index.js';
 import { migrazioniUtente } from './index.js';
+import { dbDiProva } from '../../../test/dbDiProva.js';
 
 afterEach(() => closeDb());
 
 it('su un file di prima: crea la tabella delle correzioni e dà la fascia «giorno» agli eventi già scritti; è idempotente', () => {
-  const db = initDb(':memory:');
-  caricaPacchetto(db);
+  const db = dbDiProva();
   // il file delle partite com'era prima della 005 (dalla 015 queste tabelle non ci sono più: la giornata è canone)
   db.exec('DROP TABLE IF EXISTS utente.correzione_azione_guida');
   db.exec('DROP TABLE IF EXISTS utente.evento_utente');

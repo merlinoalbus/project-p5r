@@ -1,8 +1,13 @@
+// ============================================================
+// 048_progresso_film.test.ts — migrazione 048: progresso dei film, unione delle chiavi alias, sessioni dei DVD, posizioni e condizione di «Anima da cineasta»
+// ============================================================
+
 import { closeDb, initDb } from '../dbService.js';
 import { runMigrations } from '../migrationRunner.js';
 import { migrations } from './index.js';
 import { migration048 } from './048_progresso_film.js';
 
+/** Apre un database in memoria con le migrazioni fino alla 047, crea la partita 1 e inserisce i film di prova (le due coppie alias/canonica del cinema, un film qualunque, un DVD) più un libro. */
 function preparaFilm(): void {
   const db = initDb(':memory:');
   runMigrations(db, migrations.filter((m) => m.id < 48));
@@ -16,6 +21,7 @@ function preparaFilm(): void {
   db.prepare("INSERT INTO libro (chiave,ordine,nome,dove,sessioni,fonte) VALUES ('libro-prova',1,'Libro','Biblioteca',2,'fonte')").run();
 }
 
+/** Sul database aperto (già portato a pre-048 da `preparaFilm`) inserisce il quartiere Shinjuku, il negozio Hinokuniya con l'origine data e l'articolo «Anima da cineasta» con le condizioni indicate (di norma una data, 04-01). */
 function preparaArticolo(origine: 'seed' | 'utente', condizioni = '[{"tipo":"data","data":"04-01"}]'): void {
   const db = initDb();
   db.prepare("INSERT INTO quartiere (chiave,ordine,nome) VALUES ('shinjuku',1,'Shinjuku')").run();

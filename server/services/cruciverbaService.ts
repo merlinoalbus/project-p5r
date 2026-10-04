@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
 import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
@@ -11,11 +12,13 @@ import { indiceGiornoScolastico } from './domandeService.js';
 
 interface Riga { data: string; chiave: string | null; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
 
+/** Un cruciverba come DTO: il giorno è la data della riga, ed è fatto se quella data è fra quelle risolte. */
 const dto = (r: Riga, fatti: Set<string>): CruciverbaDto => ({ giorno: r.data, chiave: r.chiave ?? null, indizio: r.indizio, risposta: r.risposta, rispostaEn: r.risposta_en, fatto: fatti.has(r.data) });
 
+/** Le date dei cruciverba risolti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function fattiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   return new Set((prepared('SELECT data FROM cruciverba_partita WHERE partita_id = ?').all(partitaId) as Array<{ data: string }>).map((r) => r.data));
 }
 
@@ -32,7 +35,7 @@ export function cruciverba(partitaId?: number): CruciverbaTuttiDto {
 
 /** Segna (o toglie) un cruciverba risolto nella partita; evento alla prima spunta. */
 export function impostaCruciverba(partitaId: number, data: string, fatto: boolean): CruciverbaDto {
-  if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  verificaPartita(partitaId);
   const r = prepared('SELECT * FROM cruciverba WHERE data = ?').get(data) as Riga | undefined;
   if (!r) throw httpErrors.notFound('cruciverba-non-trovato', `Nessun cruciverba il ${data}.`);
   const adesso = nowIso();

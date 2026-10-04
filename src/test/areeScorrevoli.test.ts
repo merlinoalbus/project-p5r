@@ -15,6 +15,7 @@ import { join, relative } from 'node:path';
 
 const RADICE = join(__dirname, '..');
 
+/** I percorsi dei file `.ts`/`.tsx` sotto `cartella`, ricorsivamente, esclusi i test. */
 function fileTsx(cartella: string): string[] {
   return readdirSync(cartella).flatMap((nome) => {
     const p = join(cartella, nome);
@@ -46,6 +47,7 @@ describe('aree che scorrono dentro la pagina', () => {
   });
 
   it('i tre riconoscitori prendono le forme che devono prendere, e non le altre', () => {
+    /** Vero se almeno uno dei tre riconoscitori di `SCORRIMENTI` prende il testo `s`. */
     const preso = (s: string) => SCORRIMENTI.some((re) => re.test(s));
     expect(['className="md:overflow-y-auto x"', '"overflow-x-auto"', 'className="[overflow-y:auto]"', "style={{ maxHeight: 4, overflowY: 'auto' }}", 'style={{ overflow: "scroll" }}'].map(preso)).toEqual([true, true, true, true, true]);
     expect(['overflow-hidden', 'area-scorrevole', "overflowY: 'hidden'", 'md:area-scorrevole-x'].map(preso)).toEqual([false, false, false, false]);

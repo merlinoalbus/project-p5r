@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
-import { getQuartieri } from '../../../services/api/compendio';
+import { getQuartieri } from '../../../services/api';
 import { Selettore } from '../../shared/Selettore';
 import { IconaSpillo } from '../../mappe/IconaSpillo';
 import { SelettoreIcone, type OpzioneIcone } from '../../shared/SelettoreIcone';
@@ -17,6 +17,10 @@ import { Blocco, Campo, Griglia } from './campi';
 const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
 const OPZIONI_QUANDO = [{ chiave: 'giorno', nome: 'Di giorno' }, { chiave: 'sera', nome: 'Di sera' }, { chiave: 'entrambe', nome: 'Giorno e sera' }];
 
+/**
+ * I campi di un luogo: nome, tipo a tessere, quartiere (dai quartieri caricati; un valore salvato sconosciuto resta
+ * in testa all'elenco, con «Riprova» se il caricamento fallisce), quando, che cosa offre, giorni (nessuno = tutti) e note.
+ */
 export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
   const quartieri = useCarica(() => getQuartieri(), []);
   const attuale = testoDi(dati.quartiere_chiave);

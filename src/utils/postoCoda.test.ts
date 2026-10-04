@@ -7,9 +7,12 @@ import { postoDellaCoda } from './postoCoda';
 
 // uno schermo da tablet: 768 × 1024, la coda al suo posto sta a `bottom-20` (80 px) e `right-5` (20 px)
 const schermo = { w: 768, h: 1024 };
+/** Un `DOMRect` finto dai quattro lati, con larghezza, altezza e origine ricavate da loro. */
 const rettangolo = (top: number, bottom: number, left: number, right: number) =>
   ({ top, bottom, left, right, width: right - left, height: bottom - top, x: left, y: top, toJSON: () => ({}) }) as DOMRect;
 
+/** Crea e aggiunge al documento un popup di spillo (`.spillo-popup`) che occupa il rettangolo `r`; con `fisso` ha
+ *  posizione fissa. */
 const popup = (r: DOMRect, fisso = false) => {
   const el = document.createElement('div');
   el.className = 'spillo-popup';

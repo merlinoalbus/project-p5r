@@ -13,6 +13,11 @@ interface Props<T extends string> {
   onCambia: (v: T) => void;
 }
 
+/**
+ * Gruppo di pulsanti radio affiancati: uno per voce di `opzioni`, quello di chiave `valore` evidenziato e
+ * marcato `aria-checked`; il tocco su una voce chiama `onCambia` con la sua chiave. `etichetta` dà il nome
+ * accessibile al gruppo.
+ */
 export function Segmenti<T extends string>({ etichetta, valore, opzioni, onCambia }: Props<T>) {
   return (
     <div role="radiogroup" aria-label={etichetta} className="segmenti">

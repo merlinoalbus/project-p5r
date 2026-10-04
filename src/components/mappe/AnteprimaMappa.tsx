@@ -39,6 +39,9 @@ interface Props {
   className?: string;
 }
 
+/** Miniatura di una mappa: l'emblema se la chiave (o il suo prefisso) ne ha uno, altrimenti
+ * l'immagine dell'istanza, l'asset del repository o l'originale, in quest'ordine; senza nessuna
+ * immagine un riquadro col simbolo della mappa. `etichetta` assente o vuota la rende decorativa. */
 export function AnteprimaMappa({ mappa, etichetta, className = '' }: Props) {
   // Il capofila di un gruppo non ha sempre la chiave del gruppo: quello del Covo è
   // `covo-dei-ladri-settore-dingresso`, non `covo-dei-ladri`. Si guarda quindi anche il prefisso,

@@ -10,15 +10,16 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { partitaNonTrovata } from './verificaPartita.js';
 import { slug } from '../../shared/slug.js';
 import { confidenti } from './partiteService.js';
 import { statoAzione } from './azioniStrutturateService.js';
 import { righeDelGiorno, spuntePartita, voceBase } from './giornataService.js';
 import type { SuggerimentiOggiDto } from '../../shared/types.js';
+import { CHIAVI_DOTI } from '../../shared/doti.js';
+import { datiGuida, type Congelato } from './datiGuida.js';
 
-const DOTI = ['conoscenza', 'fascino', 'gentilezza', 'coraggio', 'perizia'] as const;
-const RE_DOTE_GUADAGNO = new RegExp(`(?:(${DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${DOTI.join('|')}))`, 'gi');
+const RE_DOTE_GUADAGNO = new RegExp(`(?:(${CHIAVI_DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${CHIAVI_DOTI.join('|')}))`, 'gi');
 
 /** Doti citate come guadagno nel testo dell'azione o nelle sue note («Perizia +2», «Aumenta Coraggio»). */
 function dotiDalTesto(testo: string): string[] {
@@ -59,6 +60,7 @@ interface Raccolta {
   spilli: Set<number>;
 }
 
+/** Una raccolta vuota: un insieme per ogni categoria di chiavi da evidenziare. */
 function nuovaRaccolta(): Raccolta {
   return {
     confidenti: new Set(), personaggi: new Set(), dungeon: new Set(), aree: new Set(), libri: new Set(), film: new Set(),
@@ -119,23 +121,29 @@ function luoghiPerTesto(dove: string | null | undefined): string[] {
   return trovati.map((l) => l.chiave);
 }
 
+/** Un personaggio della guida, per quel che serve a collegarlo a un Confidente. */
+type PersonaggioGuida = Congelato<{ chiave: string; confidente?: string | null }>;
+
+/** Distingue l'elenco nudo dal blocco `{ personaggi }`: `Array.isArray` da solo non esclude un array in sola lettura dall'altro ramo. */
+const eElenco = (v: unknown): v is ReadonlyArray<unknown> => Array.isArray(v);
+
 /** Personaggi della guida collegati a un Confidente (o con la stessa chiave). */
 function personaggiDiConfidente(chiaveConfidente: string): string[] {
-  const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'personaggi'").get() as { json: string } | undefined;
-  if (!riga) return [];
+  let dati: { readonly personaggi?: ReadonlyArray<PersonaggioGuida> } | ReadonlyArray<PersonaggioGuida> | null;
   try {
-    const dati = JSON.parse(riga.json) as { personaggi?: Array<{ chiave: string; confidente?: string | null }> } | Array<{ chiave: string; confidente?: string | null }>;
-    const elenco = Array.isArray(dati) ? dati : dati.personaggi ?? [];
-    return elenco.filter((p) => p.confidente === chiaveConfidente || p.chiave === chiaveConfidente).map((p) => p.chiave);
+    dati = datiGuida('personaggi');
   } catch {
-    return [];
+    return []; // trascrizione illeggibile: nessun personaggio collegato
   }
+  if (!dati) return [];
+  const elenco = eElenco(dati) ? dati : dati.personaggi ?? [];
+  return elenco.filter((p) => p.confidente === chiaveConfidente || p.chiave === chiaveConfidente).map((p) => p.chiave);
 }
 
 /** Chiavi da evidenziare per le azioni ancora da fare del giorno corrente della partita. */
 export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
   const partita = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
-  if (!partita) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  if (!partita) throw partitaNonTrovata(partitaId);
   const vuoto: SuggerimentiOggiDto = {
     giorno: null, confidenti: [], personaggi: [], dungeon: [], aree: [], libri: [], film: [], articoli: [], attivita: [],
     richieste: [], negozi: [], luoghi: [], quartieri: [], doti: [], mappe: [], spilli: [], motivi: [],
@@ -153,6 +161,7 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
   const r = nuovaRaccolta();
   const motivi: SuggerimentiOggiDto['motivi'] = [];
   let articoli: Map<string, Array<{ chiave: string; negozio: string }>> | null = null;
+  /** Annota perché una chiave è suggerita: categoria, chiave, testo dell'azione e fascia. */
   const segna = (categoria: string, chiave: string, azione: string, fascia: 'giorno' | 'sera') => motivi.push({ categoria, chiave, azione, fascia });
 
   for (const a of azioni) {

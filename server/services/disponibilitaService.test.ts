@@ -2,21 +2,25 @@
 // Test disponibilitaService — dalla prosa della guida agli stati (una volta), e valutazione sulla partita
 // ============================================================
 
-import { closeDb, getDb, initDb } from '../db/dbService.js';
-import { caricaPacchetto } from './pacchetto/pacchettoGioco.js';
-import { invalidaCacheTraduzioni } from './traduzioniService.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { arcoAllaData, dataSbloccoQuartiere, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { convertiProsa, migraTestiCondizioni, type ContestoConversione } from '../../shared/migraCondizioni.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
+import { dbDiProva } from '../../test/dbDiProva.js';
 
 let ctx: ContestoConversione;
 // il valutatore dei semafori traduce i nomi (Confidenti, arcani) leggendo il glossario dal DB
-beforeAll(() => { const db = initDb(':memory:'); caricaPacchetto(db); invalidaCacheTraduzioni(); ctx = contestoConversione(getDb()); });
+beforeAll(() => { dbDiProva(); ctx = contestoConversione(getDb()); });
 afterAll(() => closeDb());
 
 const FINESTRE = new Map([['kamoshida', { dal: '04-12', al: '05-02' }], ['madarame', { dal: '05-16', al: '06-05' }], ['kaneshiro', { dal: '06-19', al: '07-09' }], ['niijima', { dal: '10-29', al: '11-20' }]]);
 
+/**
+ * Stato di disponibilità di base per le prove: tutte le doti al rango 1, Sojiro al rango 1 e Iwai a 0, Ryuji in squadra e
+ * Akechi fuori, mercoledì 20 aprile di giorno col sereno, tre quartieri con la loro data di sblocco e l'arco calcolato
+ * dalle finestre dei Palazzi; i campi passati in `sovrascrivi` sostituiscono quelli predefiniti.
+ */
 function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilita {
   return {
     doti: new Map([['fascino', 1], ['coraggio', 1], ['conoscenza', 1], ['perizia', 1], ['gentilezza', 1]]),
@@ -29,6 +33,7 @@ function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilit
     ...sovrascrivi,
   };
 }
+/** Affianca a ogni requisito dello spillo il testo leggibile prodotto da `descriviRequisitoSpillo`, come fa il servizio prima di valutarli. */
 const conTesto = (c: RequisitoSpillo[]): RequisitoDisponibilita[] => c.map((x) => ({ ...x, testo: descriviRequisitoSpillo(x) }));
 /** La stessa strada dei dati: prosa → stati (una volta) → valutazione. */
 const daProsa = (testi: string[], st: StatoDisponibilita, extra: Partial<ContestoConversione> = {}) => valutaRequisiti(conTesto(migraTestiCondizioni(testi, { ...ctx, ...extra })), st);
