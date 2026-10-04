@@ -507,3 +507,40 @@ Il resto delle modifiche ai test è T1–T3: moduli finti costruiti dal vero e D
   scritta, e due indici. Il codice di `main` legge `seed_meta` dentro un `try/catch` e funziona anche sul file migrato.
 - **Docker:** pulendo la prova del lotto F è stato eseguito anche `docker volume prune -f`. Toglie i volumi anonimi che nessun
   container usa, anche se non sono di questo progetto: non era necessario.
+
+Le tre decisioni chieste all'utente dopo il primo esame (H2, H3, H4) sono in DECISIONI, 2026-10-04: cambi visibili approvati, dati
+migrati tenuti, presa d'atto del `prune`.
+
+### Prove del secondo esame
+
+Sono nella cartella `prove-voce3/` della sessione e sono state prodotte su `72e23d70`, con il working tree pulito.
+
+- **H1 — output grezzi:**
+  - contesto (`h1-contesto.txt`): commit, stato del working tree, ramo;
+  - `h1-typecheck-force.txt`: `tsc -b --force`, exit 0;
+  - `h1-lint.txt`: exit 0;
+  - `h1-test.txt`: 267 file, 1461 test, exit 0;
+  - `h1-docker.txt`: build delle due immagini, BE `healthy`, `nginx -t`, gzip su pagina, bundle e API, `compose config` con e senza
+    `NAS_ADDR`/`NAS_PATH`, pulizia mirata con `docker rm -f -v` e nessun `prune`;
+  - `h1-script.txt`: stop, start e restart, una sola istanza per lato, `/api/health` dal proxy;
+  - `h1-browser.txt`: 28 pagine con titolo giusto, nessun errore a schermo, console senza errori.
+- **H2 — volumi rimasti** (`h2-volumi-ora.txt`): tutti i volumi con nome ci sono ancora. Il registro eventi del daemon non
+  conserva più quelli del `prune`.
+- **H3 — `main` sui file migrati** (`h3-main-su-migrati.txt`, `h3-main-be.log`): il codice di `main` (`15ea5ee9`), su una copia
+  di `data/` a 96/16, risponde 200 su salute, stato dell'istanza, deposito, anteprima del pacchetto, compendio (232 Persona),
+  partite e albero delle mappe. Nel log non ci sono errori.
+- **H5 — compatibilità con i file di `main`** (`h5-esito.txt`, `h5-confronto.txt`, `h5-impronta-*.txt`):
+  - `main` produce lo ZIP dell'istanza (con un carattere di prova) e i due `.db` dalla copia di avvio 95/15;
+  - HEAD li ripristina, e importa `gioco.db` come pacchetto, partendo da un'istanza diversa (il pacchetto iniziale, che differisce
+    dal riferimento in 23 voci su 104);
+  - le impronte tabella per tabella di `gioco.db` e `partite.db`, più i caratteri, coincidono con il riferimento (gli stessi dati
+    migrati da HEAD) in tutti e tre i casi;
+  - l'importazione lascia invariate le partite.
+- **H6 — test preesistenti** (`h6-diff-modificati.diff`, `h6-stat-modificati.txt`, `h6-test-aggiunti.txt`, `h6-test-tolti.txt`):
+  - 168 file modificati, 5 aggiunti, nessuno tolto;
+  - le 36 righe `expect` tolte, una per una con il loro sostituto, sono in `h6-expect-tolti.md`.
+- **H7 — fotografia completa** (`h7/h7-esito.txt`, `h7/foto-*.txt`, `h7/corpi-*`):
+  - tutte le GET di tutti i router con i parametri presi dai dati, 4625 risposte, tutte 200 nelle due versioni;
+  - confronto fra `b0939456` e `72e23d70` sugli stessi dati di partenza: differiscono 3 risposte;
+  - `/impostazioni/istanza` cambia per la versione dello schema e il campo `seed` tolto (R3', dal piano);
+  - `/immagini/manifest` e `/mappe/esporta` cambiano solo nel campo con l'ora di generazione.

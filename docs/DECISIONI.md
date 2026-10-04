@@ -1059,3 +1059,16 @@ decisione dell'utente. Dettagli e misure nel §9 del rapporto.
 - **T1:** i moduli finti dei test partono da quelli veri (`test/mockModuli.ts`). Un'API non simulata fallisce col suo nome invece di
   essere `undefined`, e le funzioni pure restano vere.
 - **O10:** le rotte dei marcatori escono; le tabelle restano e si leggono nelle schede.
+
+**Decisioni dell'utente sulla fase 3** (2026-10-04, chieste dopo il primo esame del validatore: H2, H3 e H4):
+- **Cambi visibili approvati.** L'utente li ha approvati tutti e quattro, quindi restano:
+  - l'ordine delle Doti negli editor di condizioni e azioni, che ora segue `dote_sociale.ordine` (F16);
+  - i messaggi d'errore unici per la data di gioco e per la partita che non esiste, anche su `/condizioni` (F16, F18);
+  - le pagine caricate alla prima visita, con l'attesa alla prima apertura di una sezione (P3");
+  - le chiavi ereditate da `Object`, come «constructor», che non valgono più come giorno della settimana (R8).
+- **Dati migrati prima del merge: si tengono.** `data/gioco.db` e `data/partite.db` restano alle versioni 96 e 16. Sono stati portati
+  lì dal backend di sviluppo in `tsx watch`, che si è riavviato da solo alle 01:16:53. Prova a supporto: il codice di `main`, su
+  una copia dei file migrati, si avvia e risponde. La copia di avvio pre-migrazione resta in `data/backups`.
+- **`docker volume prune -f`: presa d'atto.** È stato eseguito senza autorizzazione durante la prova Docker. Toglie solo i volumi
+  anonimi che nessun container usa; i volumi con nome e i container ci sono tutti. L'elenco dei volumi tolti non si può
+  recuperare. Le prove successive puliscono solo container, rete e immagini di prova.
