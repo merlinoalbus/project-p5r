@@ -155,3 +155,21 @@ it('A9 (verifica 2026-10-03): l’esperienza mostra sempre un numero vero — no
   await waitFor(() => expect(api.impostaMembroSquadra).toHaveBeenCalledWith(1, 'joker', { esperienza: 5000 }));
   await waitFor(() => expect(campo.value).toBe('1200'));
 });
+
+// A9 (verifica completa): il livello di Joker vive anche nella partita, quindi dopo un cambio l'elenco delle partite si rilegge.
+// Si rileggeva anche quando il salvataggio era fallito, perché l'errore veniva gestito e la catena andava avanti (residuo
+// trovato con la voce 4, 2026-10-04): ora si rilegge solo se il salvataggio è riuscito.
+it('A9: dopo un cambio di livello di Joker le partite si rileggono solo se il salvataggio è riuscito', async () => {
+  const { usePartitaStore } = await import('../../stores/partitaStore');
+  const carica = vi.fn().mockResolvedValue(undefined);
+  usePartitaStore.setState({ carica });
+  render(<SquadraPartita partitaId={1} />);
+  const joker = await scheda('Protagonista');
+  api.impostaMembroSquadra.mockRejectedValueOnce(new Error('il server non risponde'));
+  await userEvent.click(joker.getByRole('button', { name: 'Sali di livello: Protagonista al livello 6' }));
+  await waitFor(() => expect(api.impostaMembroSquadra).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(joker.getByRole('button', { name: 'Sali di livello: Protagonista al livello 6' })).toBeEnabled());
+  expect(carica).not.toHaveBeenCalled();
+  await userEvent.click(joker.getByRole('button', { name: 'Sali di livello: Protagonista al livello 6' }));
+  await waitFor(() => expect(carica).toHaveBeenCalledTimes(1));
+});

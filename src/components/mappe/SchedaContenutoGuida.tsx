@@ -44,9 +44,10 @@ function EditorContenuto({ spillo, occupato, esegui }: { spillo: SchedaContenuto
   const [collezionabile, setCollezionabile] = useState(spillo.collezionabile);
   const [condizioni, setCondizioni] = useState<import('../../../shared/condizioniSpillo').RequisitoSpillo[]>(spillo.condizioni);
   return <form aria-label="Modifica contenuto della guida" onSubmit={e => { e.preventDefault(); void esegui(() => aggiornaSpillo(spillo.id, { nome, descrizione, collezionabile, condizioni })); }}>
-    // I comandi di questo modulo si aprono da dentro il pannello dei contenuti, ed erano rimasti
-    // nudi: la casella «Collezionabile» con l'etichetta alta 22 px, il campo del file e «Rimuovi
-    // immagine» senza forma di pulsante (rilievo del validatore, 2026-09-13).
+    {/* I comandi di questo modulo si aprono da dentro il pannello dei contenuti, ed erano rimasti
+        nudi: la casella «Collezionabile» con l'etichetta alta 22 px, il campo del file e «Rimuovi
+        immagine» senza forma di pulsante (rilievo del validatore, 2026-09-13). Queste righe erano scritte con `//`
+        dentro il JSX, e React le mostrava come testo nel modulo (voce 4 della verifica completa, 2026-10-04). */}
     <fieldset disabled={occupato} className="flex flex-col gap-3">
       <label>Nome<input className="form-input" required value={nome} onChange={e => setNome(e.target.value)} /></label>
       <label>Descrizione<textarea className="form-input" value={descrizione} onChange={e => setDescrizione(e.target.value)} /></label>
