@@ -8,17 +8,13 @@ import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../../shared/accessoM
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
-import { impostaMarcatore } from '../services/dungeonService.js';
-import { impostaMarcatoreLuogo, scaricaPiantaQuartiere } from '../services/cittaService.js';
+import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
 import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
 import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
-const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
-
-const bodyMarcatore = z.object({ punto: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
 const router = Router();
 // Chiave libera ma limitata: un indirizzo scritto a mano che non corrisponde a nulla resta un 404 «mappa-non-trovata», non un 400.
 const paramsChiaveLibera = z.object({ chiave: z.string().min(1).max(200) });
@@ -28,18 +24,6 @@ router.get('/contenuti/:chiave', validate({ params: paramsChiaveLibera, query: q
 /** Accesso comune ai luoghi da città, Palazzi, negozi e articoli. */
 router.get('/accesso/:tipo/:chiave', validate({ params: z.object({ tipo: z.enum(TIPI_ACCESSO_MONDO), chiave: z.string().min(1).max(200) }) }), (req, res) => {
   res.json(risolviAccessoMondo(req.params.tipo as TipoAccessoMondo, String(req.params.chiave)));
-});
-
-/** Fissa (x, y in percentuale) o rimuove (x/y null) lo spillo del punto sulla mappa della sua area. */
-router.put('/marcatori', validate({ body: bodyMarcatore }), (req, res) => {
-  const b = req.body as { punto: string; x: number | null; y: number | null };
-  res.json({ punto: b.punto, marcatore: impostaMarcatore(b.punto, b.x === null || b.y === null ? null : { x: b.x, y: b.y }) });
-});
-
-/** Fissa o rimuove lo spillo di un luogo sulla mappa del quartiere. */
-router.put('/marcatori-luoghi', validate({ body: bodyMarcatoreLuogo }), (req, res) => {
-  const b = req.body as { luogo: string; x: number | null; y: number | null };
-  res.json({ luogo: b.luogo, marcatore: impostaMarcatoreLuogo(b.luogo, b.x === null || b.y === null ? null : { x: b.x, y: b.y }) });
 });
 
 /** Scarica nell'istanza la mappa del quartiere dalla fonte collegata nel seed. */

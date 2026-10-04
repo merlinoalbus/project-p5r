@@ -280,19 +280,6 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
   return puntoDto(p, stato, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? []);
 }
 
-/** Posiziona (o rimuove con null) lo spillo di un punto sulla mappa della sua area (coordinate in percentuale). */
-export function impostaMarcatore(puntoChiave: string, posizione: { x: number; y: number } | null): { x: number; y: number } | null {
-  if (!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(puntoChiave)) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  if (posizione === null) {
-    prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
-    return null;
-  }
-  const x = Math.max(0, Math.min(100, posizione.x));
-  const y = Math.max(0, Math.min(100, posizione.y));
-  prepared("INSERT INTO marcatore_mappa (punto_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'utente') ON CONFLICT(punto_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, updated_at = excluded.updated_at, origine = 'utente'").run(puntoChiave, x, y, nowIso());
-  return { x, y };
-}
-
 // ---- Correzione dei testi della guida (fase «tutto modificabile») ----
 //
 // La sezione dei Palazzi era l'unica parte della guida in sola lettura: negozi, luoghi, libri,

@@ -268,7 +268,7 @@ function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string
 
 // ---- Una importazione alla volta, e osservabile ----
 //
-// Sostituire i dati di gioco dura: scarico, copia di sicurezza, scrittura di centinaia di MB, migrazioni.
+// Sostituire i dati di gioco dura: lettura dalla cartella d'appoggio, copia di sicurezza, scrittura di centinaia di MB, migrazioni.
 // Chi sta davanti può stancarsi prima (un proxy chiude a cento secondi) e l'utente vedrebbe un errore
 // mentre il lavoro procede: se ritentasse, partirebbe una seconda sostituzione sopra la prima. Qui una
 // richiesta per volta (409 alle altre), la fase corrente è interrogabile e l'esito resta a disposizione

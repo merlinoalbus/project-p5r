@@ -40,7 +40,6 @@ const attendi = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** Che cosa sta facendo il server, detto all'utente. */
 const NOME_FASE: Record<string, string> = {
   lettura: 'Il server sta leggendo il file dalla cartella d’appoggio',
-  scarico: 'Il server sta scaricando il pacchetto dall’indirizzo',
   verifica: 'Il server sta verificando il pacchetto',
   'copia-di-sicurezza': 'Il server sta salvando la copia di sicurezza',
   sostituzione: 'Il server sta sostituendo i dati di gioco',
@@ -115,13 +114,13 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
 export function PacchettoGioco() {
   const stato = useCarica(() => getStatoIstanza(), []);
   const [occupato, setOccupato] = useState(false);
-  // l'anteprima viene da un file del dispositivo o da un indirizzo: la conferma deve ripartire dalla stessa origine
+  // l'anteprima viene da un file della cartella d'appoggio: la conferma deve ripartire dallo stesso file (O4)
   const [origine, setOrigine] = useState<{ tipo: 'deposito'; nome: string } | null>(null);
   const [deposito, setDeposito] = useState<DepositoFileDto | null>(null);
   const [fileScelto, setFileScelto] = useState('');
   const [anteprima, setAnteprima] = useState<AnteprimaPacchettoDto | null>(null);
   const [esito, setEsito] = useState<EsitoImportazionePacchettoDto | null>(null);
-  // la fase che il server sta eseguendo quando il lavoro è suo (scarico da indirizzo, oppure risposta non arrivata)
+  // la fase che il server sta eseguendo quando il lavoro è suo (lettura dalla cartella d'appoggio, oppure risposta non arrivata)
   const [lavoroSulServer, setLavoroSulServer] = useState<string | null>(null);
   // l'attesa dell'esito sul server si interrompe se l'utente lo chiede o se la card sparisce
   const smetti = useRef(false);

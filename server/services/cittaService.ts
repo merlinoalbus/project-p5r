@@ -15,7 +15,6 @@ import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.j
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { LuogoDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
-import { nowIso } from '../db/dbService.js';
 import { importaImmagineDaUrl } from './immaginiService.js';
 import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
@@ -143,18 +142,6 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
 export function elencaLuoghi(): LuogoOpzioneDto[] {
   return (prepared('SELECT l.chiave, l.nome, l.tipo, l.quartiere_chiave AS quartiere, q.nome AS quartiere_nome FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine').all() as Array<{ chiave: string; nome: string; tipo: string; quartiere: string; quartiere_nome: string }>)
     .map((r) => ({ chiave: r.chiave, nome: r.nome, tipo: r.tipo, quartiere: r.quartiere, quartiereNome: r.quartiere_nome }));
-}
-
-/** Posiziona (o rimuove con null) lo spillo di un luogo sulla mappa del suo quartiere (coordinate in percentuale). */
-export function impostaMarcatoreLuogo(luogoChiave: string, pos: { x: number; y: number } | null): { x: number; y: number } | null {
-  if (!prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(luogoChiave)) throw httpErrors.notFound('luogo-non-trovato', `Il luogo '${luogoChiave}' non esiste.`);
-  if (pos === null) {
-    prepared('DELETE FROM marcatore_luogo WHERE luogo_chiave = ?').run(luogoChiave);
-    return null;
-  }
-  const x = Math.min(100, Math.max(0, pos.x)); const y = Math.min(100, Math.max(0, pos.y));
-  prepared("INSERT INTO marcatore_luogo (luogo_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'utente') ON CONFLICT(luogo_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, updated_at = excluded.updated_at, origine = 'utente'").run(luogoChiave, x, y, nowIso());
-  return { x, y };
 }
 
 /** Scarica nell'istanza la mappa del quartiere dall'URL della guida. */

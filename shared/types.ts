@@ -2151,7 +2151,7 @@ export interface DepositoFileDto {
  * secondi) chiude la connessione mentre il server sta ancora sostituendo i dati, e il browser lo
  * leggerebbe come un fallimento. Chiedendo lo stato si sa se sta ancora lavorando, e com'è finita.
  */
-export type FaseImportazionePacchetto = 'lettura' | 'scarico' | 'verifica' | 'copia-di-sicurezza' | 'sostituzione' | 'riapertura' | 'controllo';
+export type FaseImportazionePacchetto = 'lettura' | 'verifica' | 'copia-di-sicurezza' | 'sostituzione' | 'riapertura' | 'controllo';
 
 export interface StatoImportazionePacchettoDto {
   inCorso: boolean;
