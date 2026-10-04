@@ -1759,8 +1759,8 @@ export interface DungeonRiassuntoDto {
    *  Palazzo e quanti ne ha presi la partita. Per i Memento i totali sono gli obiettivi dei dedali
    *  (timbri dichiarati + richieste). `presi` e `mappeComplete` sono null senza partita. */
   raccolta: { totale: number; presi: number | null; mappe: number; mappeComplete: number | null };
-  /** Il Palazzo completato nella partita, col perché («Tesoro del Palazzo raccolto», «boss finale segnato nella
-   *  Guida», «raccolto tutto (n/n)»: `palazziService.palazziCompletati`); null se non lo è o senza partita.
+  /** Il Palazzo completato nella partita, col perché («Tesoro, boss finale e raccolto tutto (n/n)»; per i Memento «boss
+   *  finale segnato nella Guida»: `palazziService.statoPalazzi`, 2026-10-04); null se non lo è o senza partita.
    *  Sulla mappa di Tokyo un Palazzo completato non c'è più, come nel gioco. */
   completato: string | null;
   /** Dove si atterra toccando il Palazzo sulla mappa di Tokyo, per il giorno della partita (senza partita, o senza data: la

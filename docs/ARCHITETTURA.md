@@ -1018,17 +1018,26 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
 - **Testo delle aree**: `aggiornaArea` dalla scheda dell'area senza planimetria e dal modulo «Modifica testo» accanto
   al titolo dell'area aperta.
 - **Palazzo completato** (2026-09-30, `server/services/palazziService.ts`): `StatoPartitaSemafori.palazziCompletati`
-  (mappa Palazzo → motivo, al posto di `bossGestiti`) viene da `palazziCompletati(partita)`: il **boss finale**
-  (`bossFinali`: i punti «boss» dell'ultima area, in ordine di guida, che ne ha) segnato in `punto_partita`, oppure
-  sull'albero `dungeon-<k>` (`palazzoDiOgniMappa`) uno spillo `boss` finale (collegato a un punto finale, su una
-  planimetria che contiene l'area finale, oppure qualunque boss del Palazzo quando `BossFinale.unico`: una sola area
-  della guida ha boss — Kamoshida, Madarame, Futaba — e l'area finale può non essere legata a nessuna planimetria) o
-  `tesoro-palazzo` raccolto, oppure il 100% con la regola di `raccoltaMappe` (raccolto o collegato a un punto
-  gestito). La valuta il caso `palazzo` di `valuta`, e con lui disponibilità e spilli. `impostaRaccolto` chiama
+  (mappa Palazzo → motivo, al posto di `bossGestiti`) viene da `palazziCompletati(partita)`, che dal 2026-10-04 deriva da
+  `statoPalazzi(partita)` (Palazzo → `{ completato, manca }`; `StatoPartitaSemafori.palazziMancanze` porta «che cosa
+  manca» nel requisito rosso). Servono **tutte e tre** (scelta dell'utente, 2026-10-04; prima ne bastava una):
+  - lo spillo `tesoro-palazzo` raccolto (tutti, se ce n'è più d'uno). Senza uno spillo così sulle planimetrie il
+    Palazzo non si completa;
+  - il **boss finale** sconfitto (`bossFinali`: i punti «boss» dell'ultima area, in ordine di guida, che ne ha):
+    - uno spillo `boss` finale raccolto sull'albero `dungeon-<k>` (`palazzoDiOgniMappa`). È finale se è collegato a un
+      punto finale, se sta su una planimetria che contiene l'area finale, oppure — qualunque boss del Palazzo — quando
+      `BossFinale.unico`: una sola area della guida ha boss (Kamoshida, Madarame, Futaba) e l'area finale può non essere
+      legata a nessuna planimetria;
+    - oppure il boss finale segnato in `punto_partita` **con `automatico = 0`**, cioè dall'utente;
+  - il 100% con la regola di `raccoltaMappe` (raccolto o collegato a un punto gestito).
+
+  I Memento (`tipo = 'mementos'`, senza planimetrie) restano completati dal boss finale segnato nella Guida. La regola la
+  valuta il caso `palazzo` di `valuta`, e con lui disponibilità e spilli. `impostaRaccolto` chiama
   `allineaBossDellaGuida`: Tesoro o boss finale raccolti segnano il boss finale della Guida con
   `utente.punto_partita.automatico = 1` (migrazione utente 006, DDL in `schemaUtente.ts`; `ON CONFLICT DO NOTHING`,
-  un segno già presente non si tocca); tolti, si cancellano **solo** le righe `automatico = 1` e solo se nient'altro
-  sulla mappa completa il Palazzo. Le scritture dell'utente (`impostaStatoPunto`, il punto collegato di
+  un segno già presente non si tocca). È solo un segno e non conta per il completamento. Tolti, si cancellano **solo** le
+  righe `automatico = 1`, e solo se sulla mappa non resta raccolto l'altro fra Tesoro e boss finale
+  (`segnoDiFineSullaMappa`). Le scritture dell'utente (`impostaStatoPunto`, il punto collegato di
   `impostaRaccolto`) mettono `automatico = 0`, e le righe preesistenti nascono 0: un segno messo a mano non si toglie
   mai da solo. `dettagliSpillo` (`senzaIngressoAPalazzoCompletato`, `palazzoDiIngresso`) blocca gli spilli che da
   fuori portano in un Palazzo completato — riconosciuti dal riferimento a una sua mappa, dalla destinazione o, come

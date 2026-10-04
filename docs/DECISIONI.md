@@ -638,7 +638,8 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - **Un Palazzo è completato dai fatti della partita, mai dalla data** (richiesta dell'utente): boss **finale** segnato
   nella Guida o raccolto sulla mappa, oppure Tesoro del Palazzo raccolto (suggerimento dell'utente), oppure raccolta al
   100% con la regola della scheda. Il boss finale è quello dell'ultima area che ha boss: gli intermedi (Akechi a Shido,
-  Sumire a Maruki) non completano il Palazzo.
+  Sumire a Maruki) non completano il Palazzo. **Superata il 2026-10-04**: le tre condizioni valgono insieme (vedi la voce
+  «Il Palazzo è completato con Tesoro, boss finale e raccolto tutto, insieme»).
 - Scelte dell'utente (domande del 2026-09-30): il **boss finale della Guida si segna da solo** raccogliendo il Tesoro o il
   boss finale sulla mappa, e **si toglie** se si tolgono (salvo che la mappa dica ancora «finito»); l'**ingresso al
   Palazzo sparisce** a Palazzo completato, anche prima della scadenza; gli **archi** («dall'arco del Palazzo di X»)
@@ -847,6 +848,8 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   Memento non si completano e restano sulla mappa anche con un boss finale segnato (rilievo della revisione).
 - Il motivo mostrato è il primo che la regola trova: raccogliere il Tesoro segna da sé il boss finale della Guida, quindi
   di solito si legge «boss finale segnato nella Guida».
+- **Superata in parte il 2026-10-04.** La regola di `palazziCompletati` vuole ora Tesoro, boss finale e 100% insieme (vedi la
+  voce di quel giorno), e la mappa di Tokyo la segue. Il motivo è uno solo: «Tesoro, boss finale e raccolto tutto (n/n)».
 
 ### 2026-10-01 — «Sulla mappa» di un Palazzo porta al suo ingresso in città
 - Rilievo dell'utente: la voce collegata al Palazzo di Kamoshida apriva la radice del Palazzo (nessuna planimetria) e la
@@ -1242,3 +1245,31 @@ Che cosa ne segue:
   - «Torna alla partita» porta sempre alla Home.
   - «Chiudi» resta il ritorno alla pagina da cui si è entrati nelle mappe.
 - **L'icona** è quella della scheda «Oggi». Sul telefono la barra mostra solo le icone, come per gli altri comandi.
+
+## 2026-10-04 — Il Palazzo è completato con Tesoro, boss finale e raccolto tutto, insieme
+
+Segnalazione dell'utente, davanti alla mappa di Tokyo senza Kamoshida all'11/04 nella partita «Tutorial»: «non vedo il
+palazzo». Il Palazzo risultava completato («boss finale raccolto sulla mappa»). Poi: «beh la logica del completato deve
+basarsi sul tesoro del palazzo non sul boss» e «che potrebbe essere da sconfiggere a più riprese dentro un palazzo».
+
+Risposte dell'utente, parola per parola:
+- quando un Palazzo è completato: «devono essere entrambe valide le condizioni sono in AND non in OR»;
+- alla domanda di chiarimento sulle condizioni da mettere in AND: «Tesoro + boss + raccolto tutto»;
+- il segno automatico del boss nella Guida quando si raccoglie il Tesoro: «Sì, resta solo come segno (Recommended)»;
+- la proposta: «Sì, procedi (Recommended)». La proposta diceva anche che il segno automatico del boss dato dal Tesoro non
+  conta per la condizione del boss.
+
+Che cosa ne segue (supera la regola del 2026-09-30, in cui bastava una condizione):
+- **Le tre condizioni.** Un Palazzo è completato quando valgono tutte e tre:
+  - **Tesoro:** lo spillo «Tesoro del Palazzo» raccolto. Senza uno spillo così sulle planimetrie il Palazzo non si
+    completa finché non lo si mette con l'editor. Nel pacchetto di oggi mancano quelli di Futaba, Iweleth e Maruki.
+  - **Boss finale:** il suo spillo raccolto sulla mappa, oppure il boss segnato nella Guida dall'utente. Il segno che il
+    Tesoro mette da solo nella Guida resta, ma non vale come «boss sconfitto».
+  - **Raccolto tutto:** il 100% della raccolta, con la regola della scheda del Palazzo.
+- **Il motivo** mostrato diventa «Tesoro, boss finale e raccolto tutto (n/n)».
+- **Il requisito rosso** («Completare il Palazzo», «dopo il Palazzo di X») dice che cosa manca, per esempio «manca il Tesoro
+  del Palazzo raccolto, tutto il raccolto (12/40)».
+- **I Memento non hanno planimetrie:** restano completati dal boss finale segnato nella Guida, come prima.
+- **Effetti invariati.** Mappa di Tokyo, ingressi bloccati, requisiti e disponibilità seguono la regola nuova. Il segno
+  automatico del boss si toglie quando non resta raccolto né il Tesoro né il boss finale.
+- **La partita «Tutorial»** dell'utente torna a mostrare Kamoshida all'11/04: il boss raccolto da solo non basta più.

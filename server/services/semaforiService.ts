@@ -3,8 +3,8 @@
 // ============================================================
 //
 // Ogni requisito del seed viene valutato sullo stato della partita: Doti (rango), Persona dell'arcano in scorta, Persona con una
-// skill precisa in scorta (Gemelle Custodi), Palazzo (completato: boss finale nella Guida o sulla mappa, Tesoro
-// del Palazzo o raccolta al 100% — `palazziService.palazziCompletati`; mai grigio), richiesta dei Mementos completata, rango di un altro Confidente, data di gioco corrente,
+// skill precisa in scorta (Gemelle Custodi), Palazzo (completato: Tesoro del Palazzo raccolto, boss finale sconfitto e raccolta al 100%, tutti e tre
+// insieme dal 2026-10-04 — `palazziService.statoPalazzi`, che dice anche cosa manca; mai grigio), richiesta dei Mementos completata, rango di un altro Confidente, data di gioco corrente,
 // meteo del giorno corrente, evento di storia segnato nella partita (il caffè al Leblanc, il duello con Akechi: Partita →
 // Progressi). I requisiti non verificabili («manuale») sono grigi finché l'utente non li conferma; le avvertenze («avviso»)
 // sono grigie ma non bloccano il rango (`bloccante: false`).
@@ -12,7 +12,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 // quando un Palazzo è completato lo decide `palazziService` (boss finale, Tesoro, 100%: mai la data)
-import { palazziCompletati } from './palazziService.js';
+import { statoPalazzi } from './palazziService.js';
 import { EVENTI_STORIA, dataLeggibile, nomePalazzo, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { guastaLAperto, nomeMeteo, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { meteoOra } from './meteoService.js';
@@ -33,6 +33,8 @@ export interface StatoPartitaSemafori {
   personeConAbilita: Set<string>;
   /** I Palazzi completati nella partita, con il perché (vedi `palazziCompletati`). */
   palazziCompletati: Map<string, string>;
+  /** Che cosa manca ai Palazzi non completati (`statoPalazzi`): per dirlo nel requisito. Assente = si dicono tutte e tre le condizioni. */
+  palazziMancanze?: Map<string, string>;
   richiesteCompletate: Set<string>;
   ranghiConfidenti: Map<string, number>;
   /** I Ladri che hai detto di avere nel gruppo. */
@@ -69,7 +71,11 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const eventi = new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati: palazziCompletati(partitaId), richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), conferme, eventi };
+  // i Palazzi letti una volta: completati col perché, gli altri con quel che manca
+  const palazzi = statoPalazzi(partitaId);
+  const palazziCompletati = new Map([...palazzi].flatMap(([k, s]) => (s.completato ? [[k, s.completato] as [string, string]] : [])));
+  const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.manca ? [[k, s.manca] as [string, string]] : [])));
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati, palazziMancanze, richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), conferme, eventi };
 }
 
 // L'ordine del calendario di gioco e i nomi dei Palazzi vengono da `shared/condizioniSpillo.ts`: qui erano riscritti a mano
@@ -109,7 +115,9 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
       if (perche) return { ...base, stato: 'verde', dettaglio: `${nome}: completato (${perche})`, manuale: false };
       // Il boss sconfitto è uno stato che l'app registra: o risulta o non risulta, e finché non
       // risulta la condizione è falsa (decisione dell'utente, 2026-09-13).
-      return { ...base, stato: 'rosso', dettaglio: `${nome}: non risulta completato — segna il boss finale sconfitto (nella Guida o sulla mappa), il Tesoro del Palazzo o tutto il raccolto (Guida → Palazzi)`, manuale: false };
+      // servono Tesoro, boss finale e tutto il raccolto insieme (scelta dell'utente, 2026-10-04): si dice quel che manca
+      const manca = st.palazziMancanze?.get(String(dati.dungeon)) ?? 'il Tesoro del Palazzo raccolto, il boss finale sconfitto, tutto il raccolto';
+      return { ...base, stato: 'rosso', dettaglio: `${nome}: non risulta completato — manca ${manca} (Guida → Palazzi)`, manuale: false };
     }
     case 'richiesta': {
       const nome = String(dati.richiesta);
