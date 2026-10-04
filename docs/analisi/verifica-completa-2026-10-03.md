@@ -549,7 +549,7 @@ Sono nella cartella `prove-voce3/` della sessione e sono state prodotte su `72e2
 
 Commit: `8d2d048a` (documenti obsoleti O1–O8, O10, O11, O18, O22–O26), `bda3182e` (intestazioni e commenti di funzione),
 `451ccacc` (difetto trovato commentando, residuo di A9), `368ad6bf` (revisione dei commenti scritti in parallelo e residui O
-nel codice), `9e85196a` (N7); dopo il primo esame, rigettato (I1–I4): `e54ccf10` e `0d329d69`.
+nel codice), `9e85196a` (N7); dopo il primo esame, rigettato (I1–I4): `e54ccf10` e `0d329d69`; dopo il secondo, rigettato (I5): `689e0cd1`. Prove grezze dell'ultimo stato in `scratchpad/voce4/prove-esame3/`.
 
 ### Che cosa si è fatto
 
@@ -601,6 +601,14 @@ nel codice), `9e85196a` (N7); dopo il primo esame, rigettato (I1–I4): `e54ccf1
   - **O18** (residui trovati al primo esame, I3): in `MAPPE.md` lo stato dei punti è `punto_partita` (non `stato_punto`).
     L'esportazione dell'editor è un JSON di tutte le mappe; l'API accetta `radice`, ma non c'è un pulsante. L'asset delle
     nuove mappe lo pone il server (`assetPredefinitoMappa`), non la finestra «Nuova mappa».
+  - **O18, secondo esame (I5).** `MAPPE.md:53` citava ancora il pulsante «Esporta questo luogo», che non esiste. Poi ogni
+    testo «…» e ogni rotta `/api/…` di MAPPE.md è stato cercato nel codice (`scratchpad/voce4/mappe-etichette.sh`), e i
+    casi sono classificati uno per uno in `prove-esame3/03-classificazione.md`. Corretti:
+    - «Torna a» → «Su:»; «Apri mappa» → «Vai:»; «Nuova condizione» → «+ condizione» / «+ gruppo TUTTE»;
+    - «Richiude» → «Richiudi»;
+    - la barra «Modifica: <mappa>» (è una targhetta più il titolo della scheda);
+    - due frasi false sui salvataggi: non c'è una conferma all'uscita, e i form di spillo e mappa hanno il loro «Salva»;
+    - nel codice, il commento di `MappaPage.tsx:38`.
 - **N7** (osservazione del validatore alla voce 3): `datiGuida` restituisce oggetti congelati, ora tipizzati
   `Congelato<T>` (in sola lettura a ogni livello).
   - Il tipo ha fatto emergere cinque punti in cui il dato congelato entrava in un DTO mutabile: battaglia, completamento,
