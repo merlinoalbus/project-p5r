@@ -6,7 +6,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
-import { datiGuida } from './datiGuida.js';
+import { datiGuida, type Congelato } from './datiGuida.js';
 import type { CompletamentoDto, TrofeoDto } from '../../shared/types.js';
 
 interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number }
@@ -23,7 +23,7 @@ function ottenutiPartita(partitaId: number | undefined): Set<string> {
 }
 
 /** Trofei (con ottenuti nella partita) e sezioni di consultazione della guida. */
-export function completamento(partitaId?: number): CompletamentoDto {
+export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const seed = datiGuida<SeedCompletamento>('completamento');
   if (!seed) throw httpErrors.notFound('completamento-non-disponibile', 'I dati di completamento non sono caricati.');
   const ottenuti = ottenutiPartita(partitaId);

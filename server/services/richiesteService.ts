@@ -10,7 +10,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { datiGuida } from './datiGuida.js';
+import { datiGuida, type Congelato } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import type { JoseDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
 
@@ -39,7 +39,7 @@ function statiPartita(partitaId: number | undefined): Map<string, StatoRichiesta
 
 /** Tutte le Richieste, con lo stato nella partita se indicata, i dati di Jose e l'elenco dei dedali nell'ordine di
  *  percorrenza con quante Richieste hanno e quante sono completate (le Richieste senza dedalo non ne formano uno). */
-export function richieste(partitaId?: number): RichiesteDto {
+export function richieste(partitaId?: number): Congelato<RichiesteDto> {
   const stati = statiPartita(partitaId);
   // prima per dedalo (le richieste senza dedalo in coda), poi per ordine della guida
   const lista = (prepared(`${SQL} ORDER BY (a.ordine IS NULL), a.ordine, r.ordine`).all() as RigaRichiesta[]).map((r) => dto(r, stati));

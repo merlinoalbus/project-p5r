@@ -28,11 +28,17 @@ function congela<T>(valore: T): T {
   return valore;
 }
 
+/** Il tipo di un valore congelato da `congela`: in sola lettura a ogni livello, così una modifica sul posto è un errore del compilatore e non un 500. */
+export type Congelato<T> = T extends (...args: never[]) => unknown ? T
+  : T extends ReadonlyArray<infer E> ? ReadonlyArray<Congelato<E>>
+  : T extends object ? { readonly [K in keyof T]: Congelato<T[K]> }
+  : T;
+
 /** Il blocco JSON della guida con quella chiave (congelato, condiviso), o null se non c'è. */
-export function datiGuida<T>(chiave: string): T | null {
-  if (cache.has(chiave)) return cache.get(chiave) as T | null;
+export function datiGuida<T>(chiave: string): Congelato<T> | null {
+  if (cache.has(chiave)) return cache.get(chiave) as Congelato<T> | null;
   const riga = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get(chiave) as { json: string } | undefined;
-  const valore = riga ? congela(JSON.parse(riga.json) as T) : null;
+  const valore = riga ? congela(JSON.parse(riga.json) as Congelato<T>) : null;
   cache.set(chiave, valore);
   return valore;
 }

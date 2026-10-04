@@ -40,7 +40,7 @@ describe('datiGuida', () => {
   });
 
   it('eliminare un\'area butta la copia in memoria: la battaglia non indica più quell\'area', () => {
-    const ombre = () => battaglia().ombre as Array<{ areaChiave?: string | null }>;
+    const ombre = () => battaglia().ombre;
     const conArea = ombre().find((o) => o.areaChiave)!;
     expect(conArea).toBeDefined();
     eliminaArea(conArea.areaChiave!);

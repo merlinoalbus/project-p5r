@@ -17,7 +17,7 @@ import { statoAzione } from './azioniStrutturateService.js';
 import { righeDelGiorno, spuntePartita, voceBase } from './giornataService.js';
 import type { SuggerimentiOggiDto } from '../../shared/types.js';
 import { CHIAVI_DOTI } from '../../shared/doti.js';
-import { datiGuida } from './datiGuida.js';
+import { datiGuida, type Congelato } from './datiGuida.js';
 
 const RE_DOTE_GUADAGNO = new RegExp(`(?:(${CHIAVI_DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${CHIAVI_DOTI.join('|')}))`, 'gi');
 
@@ -121,16 +121,22 @@ function luoghiPerTesto(dove: string | null | undefined): string[] {
   return trovati.map((l) => l.chiave);
 }
 
+/** Un personaggio della guida, per quel che serve a collegarlo a un Confidente. */
+type PersonaggioGuida = Congelato<{ chiave: string; confidente?: string | null }>;
+
+/** Distingue l'elenco nudo dal blocco `{ personaggi }`: `Array.isArray` da solo non esclude un array in sola lettura dall'altro ramo. */
+const eElenco = (v: unknown): v is ReadonlyArray<unknown> => Array.isArray(v);
+
 /** Personaggi della guida collegati a un Confidente (o con la stessa chiave). */
 function personaggiDiConfidente(chiaveConfidente: string): string[] {
-  let dati: { personaggi?: Array<{ chiave: string; confidente?: string | null }> } | Array<{ chiave: string; confidente?: string | null }> | null;
+  let dati: { readonly personaggi?: ReadonlyArray<PersonaggioGuida> } | ReadonlyArray<PersonaggioGuida> | null;
   try {
     dati = datiGuida('personaggi');
   } catch {
     return []; // trascrizione illeggibile: nessun personaggio collegato
   }
   if (!dati) return [];
-  const elenco = Array.isArray(dati) ? dati : dati.personaggi ?? [];
+  const elenco = eElenco(dati) ? dati : dati.personaggi ?? [];
   return elenco.filter((p) => p.confidente === chiaveConfidente || p.chiave === chiaveConfidente).map((p) => p.chiave);
 }
 
