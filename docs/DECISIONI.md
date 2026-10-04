@@ -1060,7 +1060,13 @@ decisione dell'utente. Dettagli e misure nel §9 del rapporto.
   essere `undefined`, e le funzioni pure restano vere.
 - **O10:** le rotte dei marcatori escono; le tabelle restano e si leggono nelle schede.
 
-**Decisioni dell'utente sulla fase 3** (2026-10-04, chieste dopo il primo esame del validatore: H2, H3 e H4):
+**Decisioni dell'utente sulla fase 3** (2026-10-04, chieste dopo il primo esame del validatore: H2, H3 e H4). Le risposte,
+parola per parola:
+- H3: «Tenere i file migrati»;
+- H4: «Ordine delle Doti, Messaggi d'errore unici, Pagine caricate a richiesta, «constructor» non è un giorno»;
+- H2: «Preso atto, prosegui».
+
+Che cosa ne segue:
 - **Cambi visibili approvati.** L'utente li ha approvati tutti e quattro, quindi restano:
   - l'ordine delle Doti negli editor di condizioni e azioni, che ora segue `dote_sociale.ordine` (F16);
   - i messaggi d'errore unici per la data di gioco e per la partita che non esiste, anche su `/condizioni` (F16, F18);
