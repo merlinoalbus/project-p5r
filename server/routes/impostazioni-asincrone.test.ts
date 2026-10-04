@@ -6,6 +6,9 @@
 // fallisce e deve rispondere con la busta d'errore JSON e il suo codice, senza lasciare la richiesta appesa (il timeout di
 // supertest la farebbe fallire).
 
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import request from 'supertest';
 import { config } from '../config.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -19,9 +22,23 @@ vi.mock('../services/impostazioniService.js', async (originale) => ({
 const { createApp } = await import('../bootstrap.js');
 
 describe('rotte asincrone di /api/impostazioni — errori', () => {
+  // Il ripristino e l'importazione rifiutano un'istanza senza database su disco («istanza-in-memoria») prima di guardare la
+  // cartella d'appoggio: serve una cartella dati con un `gioco.db`, ed è una cartella temporanea del test. Prima si usava
+  // quella dell'ambiente (`DATA_DIR`): sul PC di sviluppo c'era il file vero, nella CI no, e il test falliva solo lì.
   const depositoOriginale = config.depositoDir;
-  beforeAll(() => { (config as { depositoDir: string }).depositoDir = ''; });
-  afterAll(() => { (config as { depositoDir: string }).depositoDir = depositoOriginale; });
+  const datiOriginali = config.dataDir;
+  let cartella = '';
+  beforeAll(() => {
+    cartella = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-impostazioni-'));
+    fs.writeFileSync(path.join(cartella, config.dbFileName), '');
+    (config as { dataDir: string }).dataDir = cartella;
+    (config as { depositoDir: string }).depositoDir = '';
+  });
+  afterAll(() => {
+    (config as { dataDir: string }).dataDir = datiOriginali;
+    (config as { depositoDir: string }).depositoDir = depositoOriginale;
+    fs.rmSync(cartella, { recursive: true, force: true });
+  });
 
   it.each([
     ['get', '/api/impostazioni/istanza/database', 409, 'copia-in-corso'],
