@@ -1071,6 +1071,8 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   - **Nel FE.**
     - `MappaTokyo` fa del cartellino `urlMappa(mappa, { spillo })`, e senza regola resta la scheda del Palazzo.
     - `OggiMappa` riconosce `?spillo=` e scende con `apriMappa(chiave, spillo)`, centrata sul pin.
+    - Una voce che chiede la mappa («Sulla mappa», il cartellino) incrementa `StatoMappaOggi.richiesta`: `OggiMappa` porta
+      in vista la sua colonna se è fuori dallo schermo (sul telefono sta in fondo).
     - `OggiMappa` e `CittaPage` rileggono i Palazzi quando cambia `attiva.dataGioco`.
     - L'editor è `AtterraggioTokyo`, una finestra aperta dal pulsante «Sulla mappa di Tokyo» nell'intestazione del Palazzo.
       Il selettore di date è `components/shared/SelettoreData` (estratto da `CondizioniEditor`); i pin omonimi si distinguono

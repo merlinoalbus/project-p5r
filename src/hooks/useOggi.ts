@@ -21,6 +21,9 @@ export interface StatoMappaOggi {
   spilloId: number | null;
   /** Identità della voce che ha scelto questa mappa (evidenziata nell'elenco); null = mappa globale. */
   azione: string | null;
+  /** Quante volte una voce della giornata ha chiesto la mappa («Sulla mappa», il cartellino di un Palazzo): quando cambia, la
+   *  colonna della mappa si porta in vista se è fuori dallo schermo (sul telefono sta in fondo; scelta dell'utente, 2026-10-04). */
+  richiesta: number;
 }
 
 export interface Oggi {
@@ -68,7 +71,7 @@ export function useOggi(partitaId: number): Oggi {
     setDataScelta(null);
     void ricaricaIndice();
   }, [dataPartita, ricaricaIndice]);
-  const [mappa, setMappa] = useState<StatoMappaOggi>({ chiave: 'tokyo', spilloId: null, azione: null });
+  const [mappa, setMappa] = useState<StatoMappaOggi>({ chiave: 'tokyo', spilloId: null, azione: null, richiesta: 0 });
   const [occupato, setOccupato] = useState(false);
   // la fascia vive nella partita dello store: cambiandola si ricaricano da sole mappa incorporata, negozi e articoli
   const fascia = usePartitaStore((s) => (s.attiva?.id === partitaId ? s.attiva.fasciaGioco ?? 'giorno' : 'giorno'));
@@ -149,8 +152,8 @@ export function useOggi(partitaId: number): Oggi {
     },
     occupato,
     mappa,
-    sullaMappa: (m, voce) => setMappa({ chiave: m.chiave, spilloId: m.spilloId, azione: voce }),
-    tornaAllaMappaGlobale: () => setMappa({ chiave: 'tokyo', spilloId: null, azione: null }),
-    apriMappa: (chiave, spilloId = null) => setMappa({ chiave, spilloId, azione: null }),
+    sullaMappa: (m, voce) => setMappa((p) => ({ chiave: m.chiave, spilloId: m.spilloId, azione: voce, richiesta: p.richiesta + 1 })),
+    tornaAllaMappaGlobale: () => setMappa((p) => ({ chiave: 'tokyo', spilloId: null, azione: null, richiesta: p.richiesta })),
+    apriMappa: (chiave, spilloId = null) => setMappa((p) => ({ chiave, spilloId, azione: null, richiesta: p.richiesta })),
   }), [datiIndice, caricaIndice, erroreIndice, rileggiIndice, impostaIndice, g, caricaGiorno, erroreGiorno, rileggiGiorno, impostaGiorno, partitaId, fascia, occupato, mappa]);
 }

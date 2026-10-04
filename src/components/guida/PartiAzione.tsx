@@ -46,7 +46,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
     <span className="flex flex-wrap items-center gap-1.5">
       <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
       {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]"
-        onClick={apriAccanto ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); } } : undefined}>{link.etichetta}</Link>
+        onClick={apriAccanto ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); } } : undefined}>{link.etichetta}</Link>
         : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
       {a.mappa && onSullaMappa && (
         <button type="button" className="chip chip--icona touch text-[11px]" onClick={onSullaMappa} aria-label={`Sulla mappa: ${a.azione.slice(0, 60)}`}>
