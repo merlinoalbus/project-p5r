@@ -726,6 +726,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementation(() => new Promise<DungeonDettaglioDto>(() => {}));
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    /** L'elenco delle stanze, riletto a ogni chiamata (la pagina si ridisegna dopo ogni gesto). */
     const stanze = () => screen.getByRole('list', { name: 'Stanze del Palazzo' });
     expect(stanze().querySelectorAll('[data-completata]')).toHaveLength(0);
     // la Sicura del cancello è l'unica voce dell'area Cancello
