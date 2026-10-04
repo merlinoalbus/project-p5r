@@ -1224,7 +1224,8 @@ codice parte da qui invece di riscriverle.
   `elencoInteri`, `dote`, `categoriaArticolo`.
 - `server/services/verificaPartita.ts`: `verificaPartita(id)` e `partitaNonTrovata(id)`, il 404 della partita (prima ripetuto in 26
   punti).
-- `server/services/datiGuida.ts`: `datiGuida(chiave)` legge una volta i blocchi di `dati_guida` e li tiene in cache, congelati;
+- `server/services/datiGuida.ts`: `datiGuida(chiave)` legge una volta i blocchi di `dati_guida` e li tiene in cache, congelati e tipizzati
+  `Congelato<T>` (in sola lettura a ogni livello: una modifica sul posto è un errore del compilatore, N7 della verifica);
   `finestreDungeon()` per le finestre dei Palazzi. La cache sta nel registro `cacheDiGioco`.
 - `server/services/mappe/alberoMappe.ts`: `sottoalberoMappe`, `palazzoDellaMappa`, `radiceDelPalazzo`, `SQL_SOTTOALBERO`. Una regola
   per «il Palazzo di una mappa», cioè la radice `dungeon-<chiave>` senza genitore. Prima c'erano nove implementazioni e due regole.

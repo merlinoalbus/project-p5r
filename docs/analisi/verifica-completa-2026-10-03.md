@@ -544,3 +544,71 @@ Sono nella cartella `prove-voce3/` della sessione e sono state prodotte su `72e2
   - confronto fra `b0939456` e `72e23d70` sugli stessi dati di partenza: differiscono 3 risposte;
   - `/impostazioni/istanza` cambia per la versione dello schema e il campo `seed` tolto (R3', dal piano);
   - `/immagini/manifest` e `/mappe/esporta` cambiano solo nel campo con l'ora di generazione.
+
+## 10. Fase 4 — commenti in italiano e documenti obsoleti (voce 4 della ROADMAP)
+
+Commit: `8d2d048a` (documenti obsoleti O1–O8, O10, O11, O18, O22–O26), `bda3182e` (intestazioni e commenti di funzione),
+`451ccacc` (difetto trovato commentando, residuo di A9), `368ad6bf` (revisione dei commenti scritti in parallelo e residui O
+nel codice), `9e85196a` (N7).
+
+### Che cosa si è fatto
+
+- **Intestazione su ogni file e commento su ogni funzione con nome.** Otto gruppi di lavoro sul codice di server, condivisi,
+  frontend, script e test; ogni commento dice che cosa fa la funzione e la logica interna dove non è ovvia.
+  - Censimento finale (`scratchpad/voce4/censimento.mts`, compilatore TypeScript): 526 file, **0 senza intestazione**;
+    2061 funzioni con nome, **0 senza commento**.
+- **Revisione dei commenti scritti in parallelo.** Un secondo passaggio ha cercato commenti falsi o fuori posto: 47 voci.
+  - Intestazioni doppie unite: bootstrap, registro delle migrazioni, rotte mappe e impostazioni, `shared/types.ts`, visori,
+    `mappeService`.
+  - Commenti orfani tolti o riportati sopra la funzione giusta: per esempio quelli di `getNegozi`, del riordino delle mappe,
+    di `costoDto`, di `eliminaPunto`.
+  - Frasi che descrivevano altro corrette:
+    - `costoFoglia` restituisce `null`, non infinito;
+    - `skillPosseduta`;
+    - le chiavi controllate da `condizioniConChiaviEsistenti`;
+    - le pagine Fusione, Completamento, Compendio, Covo, Quartiere ed Editor delle mappe (campi «asset» che non esistono più);
+    - un commento in inglese tradotto.
+- **Commenti obsoleti nel codice (§5-ter):**
+  - **O1–O3, O5–O8**: nessun file viaggia più nel corpo né arriva da un indirizzo. Riscritti `scaricaDaUrl.ts` (oggi solo
+    per le immagini), le rotte di `impostazioni.ts`, `server/index.ts` (`requestTimeout`), `impostazioniService.ts`,
+    `BackupIstanza.tsx` e `pacchettoGioco.ts`. `MAX_BYTE_RIPRISTINO` non esisteva già più.
+  - **O11**: i riferimenti a `data/seed/*.json` ora nominano la voce di `dati_guida` (`finestre-dungeon`,
+    `sblocco-quartieri`, `sblocco-luoghi`). Il formato di `mappe-editor.json` è quello del file dell'editor, la pianta
+    del quartiere viene da `pianta_quartiere`, e `migraCondizioni` è usato nei tre momenti reali (migrazioni, salvataggio
+    in prosa, ripristino di un'istantanea).
+    - «seed» resta dove indica l'origine `origine = 'seed'` delle righe (il dato della guida), spiegata in testa a
+      `catalogoService.ts`.
+    - I riferimenti a `metropolitana.json` sono all'estrazione dell'atlante (`data/atlas/extracted/`), non al seed: ora lo
+      dicono.
+  - **O17**: `zip.ts` diceva già, dal lotto A della voce 3 (`a99451ae`), che serve alla copia completa dell'istanza: niente da cambiare (il messaggio di `368ad6bf` lo elenca fra i residui per errore).
+  - **O22–O24**: `DotiDaSegnare` → `DoteDaSegnareDto` in `partiteService.ts`.
+- **N7** (osservazione del validatore alla voce 3): `datiGuida` restituisce oggetti congelati, ora tipizzati
+  `Congelato<T>` (in sola lettura a ogni livello).
+  - Il tipo ha fatto emergere cinque punti in cui il dato congelato entrava in un DTO mutabile: battaglia, completamento,
+    richieste, il test di `datiGuida` e `personaggiDiConfidente`.
+  - Lì il tipo dichiarato è diventato `Congelato<…>`, senza cast. In `personaggiDiConfidente` c'è una guardia `eElenco`,
+    perché `Array.isArray` non esclude un array in sola lettura dall'altro ramo; a runtime equivale ad `Array.isArray`.
+
+### Difetti trovati commentando
+
+- **`SchedaContenutoGuida.tsx`**: tre righe `// …` scritte dentro il JSX del modulo erano testo, e comparivano a schermo nel
+  modulo di un contenuto della guida. Diventate `{/* … */}`, con un test che fallisce sul testo di prima. La scansione di
+  tutti i 283 file `.tsx` (`jsx-commenti.mts`) non trova altri testi JSX con `//` o `/*`.
+- **`SquadraPartita.tsx`** (residuo di A9): `riallineaPartite` partiva anche dopo un errore. Ora parte solo se l'operazione
+  riesce, con test.
+- `ContenutiGuidaMappa.tsx:40` (`p.scheda!.id` contro `p.id`), segnalato come possibile difetto, non lo è: `p.scheda` viene
+  da `schede.get(s.id)`, quindi i due id coincidono.
+
+### Come si è provato che il resto non cambia
+
+- `solo-commenti.mts e1b0cd49`: stampa ogni file senza commenti, compilato dal TypeScript, e confronta prima e dopo.
+  - 280 file toccati; il codice cambia in 10, tutti voluti: i due difetti qui sopra con i loro test, e i sei file di N7.
+  - Elenco in `scratchpad/voce4/solo-commenti-voce4.txt`.
+- Typecheck, lint e test verdi: 267 file, 1463 test.
+- Runtime: battaglia, completamento, richieste, personaggi e suggerimenti di una partita rispondono 200, e i suggerimenti
+  contengono il personaggio collegato al Confidente.
+
+### Da segnalare
+
+- `server/index.ts` alza ancora `requestTimeout` a 30 minuti. Serviva al caricamento nel corpo, che non c'è più; il
+  commento ora lo dice. Il valore è rimasto: toglierlo cambierebbe un comportamento, e la voce 4 riguarda i commenti.
