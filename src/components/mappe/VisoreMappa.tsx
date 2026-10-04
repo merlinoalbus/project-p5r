@@ -69,6 +69,8 @@ interface Props {
   incorporato?: boolean;
   /** Azioni aggiuntive nella barra superiore (es. «Modifica mappa»). */
   azioni?: ReactNode;
+  /** Il ritorno alla partita (2026-10-04): nella barra subito prima di «Chiudi», dopo «Pannello». */
+  ritorno?: ReactNode;
   editor?: StrumentiEditor;
   /** Nell'editor: applica lo stesso filtro del visore, cioè mostra solo quel che c'è **nel giorno
    *  corrente** della partita attiva. L'editor di regola vede tutto, perché deve poter modificare
@@ -191,7 +193,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
  * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale, scelta }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale, scelta }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -586,6 +588,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
         <div className="visore-mappa__strumenti">
           {azioni}
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => setPannelloScelto(!pannelloAperto)} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
+          {ritorno}
           {onChiudi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo={etichettaChiudi ?? 'Chiudi'} onClick={onChiudi} />}
         </div>
       </header>}

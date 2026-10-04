@@ -1224,3 +1224,19 @@ Scelte tecniche mie, dentro la proposta approvata:
   - Gli ingressi in città con condizioni di data (Shujin: solo l'11 aprile, poi dal 12 al 2 maggio) restano quelli di «Sulla
     mappa» delle voci della guida. Le regole d'atterraggio valgono per il tocco sull'icona della mappa di Tokyo.
   - Cambiare la finestra non riscrive le condizioni dei pin di passaggio generati dalla finestra.
+
+## 2026-10-04 — «Torna alla partita» nel visualizzatore della mappa
+
+Richiesta dell'utente: «aggiungi sul visualizzatore mappa un pulsante per tornare alla partita per favore...».
+
+Risposte dell'utente, parola per parola:
+- dove porta: «Home, giornata di oggi (Recommended)»;
+- anche nell'editor: «Solo nel visualizzatore (Recommended)».
+
+Che cosa ne segue:
+- **Dove compare.** Nella barra del visore della pagina delle mappe, dopo «Pannello» e subito prima di «Chiudi», e fra i comandi
+  di un luogo senza pianta. Compare solo con una partita attiva.
+- **I due ritorni.**
+  - «Torna alla partita» porta sempre alla Home.
+  - «Chiudi» resta il ritorno alla pagina da cui si è entrati nelle mappe.
+- **L'icona** è quella della scheda «Oggi». Sul telefono la barra mostra solo le icone, come per gli altri comandi.

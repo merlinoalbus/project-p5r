@@ -337,6 +337,8 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   di sé stessa con puntatore vero); `HomePage` avvolge `oggi.sullaMappa` perché riapra la mappa.
   Ritorno dalle mappe: `MainLayout` chiama `utils/ritornoMappe.annotaNavigazione(paginaPrecedente, percorso)` a ogni cambio
   di pagina; `MappaPage` ed `EditorMappaPage` chiudono verso `ritornoMappe()` (sessionStorage `p5r-ritorno-mappe`).
+  «Torna alla partita» (2026-10-04, `TornaAllaPartita` in `MappaPage`, slot `ritorno` di `VisoreMappa` subito prima di «Chiudi») porta
+  invece sempre alla Home, la giornata di oggi della partita attiva; senza partita non compare, nell'editor non c'è.
 - **Cambio di giorno** (2026-09-30): `percorsoService.avanzaSeGiornoCompleto(partita, data)` — chiamata dalla rotta della
   spunta (`PUT /api/partite/:id/percorso`, per uid dal 2026-10-01: vedi «La giornata è canone») solo alla spunta — fa passare la
   partita al giorno dopo (fascia giorno) quando il giorno corrente ha tutte le voci del genere «azione» fatte, e la risposta porta

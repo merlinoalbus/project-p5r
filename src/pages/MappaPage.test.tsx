@@ -44,6 +44,8 @@ function monta(percorso: string) {
         <Route path="/guida/citta" element={<h1>La città</h1>} />
         {/* la pagina da cui si è aperta la mappa: «Chiudi» ci riporta qui */}
         <Route path="/partita" element={<h1>Pagina di partenza</h1>} />
+        {/* la Home con la giornata di oggi: ci porta «Torna alla partita» */}
+        <Route path="/home" element={<h1>Home della partita</h1>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -66,6 +68,32 @@ describe('MappaPage', () => {
     monta('/guida/mappe/citta-shibuya');
     fireEvent.click(await screen.findByRole('button', { name: /^Chiudi/ }));
     expect(await screen.findByRole('heading', { name: 'Pagina di partenza' })).toBeInTheDocument();
+  });
+
+  it('«Torna alla partita» porta alla Home, la giornata di oggi, e sta subito prima di «Chiudi» (2026-10-04)', async () => {
+    annotaNavigazione('/guida/citta', '/guida/mappe/citta-shibuya');
+    monta('/guida/mappe/citta-shibuya');
+    const torna = await screen.findByRole('link', { name: /^Torna alla partita/ });
+    // nella barra del visore: dopo «Pannello», prima di «Chiudi»
+    const strumenti = torna.closest('.visore-mappa__strumenti')!;
+    const nomi = [...strumenti.querySelectorAll('a, button')].map((e) => e.textContent?.trim());
+    expect(nomi.slice(-3)).toEqual([expect.stringMatching(/[Pp]annello$/), 'Torna alla partita', 'Chiudi']);
+    fireEvent.click(torna);
+    expect(await screen.findByRole('heading', { name: 'Home della partita' })).toBeInTheDocument();
+  });
+
+  it('senza partita attiva «Torna alla partita» non c’è, nel visore e nel luogo senza pianta', async () => {
+    usePartitaStore.setState({ attiva: null });
+    monta('/guida/mappe/citta-shibuya');
+    expect(await screen.findByRole('button', { name: /^Chiudi/ })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^Torna alla partita/ })).toBeNull();
+  });
+
+  it('nel luogo senza pianta «Torna alla partita» sta fra i comandi del luogo', async () => {
+    getMappa.mockResolvedValue({ ...dettaglio, chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', immagineUrl: null, asset: null, figli: [albero[3]], spilli: [], percorso: [{ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida' }] });
+    monta('/guida/mappe/dungeon-kamoshida');
+    fireEvent.click(await screen.findByRole('link', { name: /^Torna alla partita/ }));
+    expect(await screen.findByRole('heading', { name: 'Home della partita' })).toBeInTheDocument();
   });
 
   it('aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima', async () => {
