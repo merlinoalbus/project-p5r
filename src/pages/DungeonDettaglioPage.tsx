@@ -33,7 +33,8 @@ import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { RaccoltaPlanimetrie } from '../components/guida/RaccoltaPlanimetrie';
-import { PlanimetriePalazzo } from '../components/guida/PlanimetriePalazzo';
+import { PlanimetriePalazzo, SpuntaCompletata, TestoCompletata } from '../components/guida/PlanimetriePalazzo';
+import { areeCompletate } from '../utils/completamentoAree';
 import { nomeSenzaPalazzo, perOrdineDiGuida } from '../utils/gruppiPlanimetrie';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
@@ -251,6 +252,9 @@ export function DungeonDettaglioPage() {
   const altrePlanimetrie = (d?.planimetrie ?? []).filter((p) => !mappeArea.some((m) => m.chiave === p.chiave));
   // La planimetria a schermo e le aree della guida che contiene, in ordine di guida (possono essere più d'una).
   const areeDellaPianta = [...((d?.planimetrie ?? []).find((p) => p.chiave === mappaScelta)?.aree ?? [])].sort(perOrdineDiGuida);
+  // Le aree con tutte le voci da segnare segnate (scelta dell'utente, 2026-10-04): spunta nella lista e nei chip. Si ricalcola
+  // dai dati della pagina, che si aggiornano a ogni voce segnata.
+  const completate = useMemo(() => areeCompletate(d?.aree ?? []), [d]);
   const restanoAltre = altrePlanimetrie.reduce((s, p) => s + p.n - (p.presi ?? 0), 0);
 
   return (
@@ -360,7 +364,7 @@ export function DungeonDettaglioPage() {
                     areaScelta={area.chiave} onScegliArea={scegliArea}
                     sceltaChiave={mappaScelta} onScegli={scegliPlanimetria}
                     onCambiato={async () => { await Promise.all([dati.ricarica(), albero.ricarica()]); }}
-                    onAreaEliminata={areaEliminata} />
+                    areeCompletate={completate} onAreaEliminata={areaEliminata} />
                 </div>
               </nav>
             )}
@@ -422,9 +426,11 @@ export function DungeonDettaglioPage() {
                       <ol className="m-0 flex list-none flex-wrap gap-1 p-0" aria-label="Aree della guida su questa planimetria">
                         {areeDellaPianta.map((a) => (
                           <li key={a.chiave}>
-                            <button type="button" className={`chip touch text-[11px] ${a.chiave === area.chiave ? 'chip--attivo' : ''}`} aria-pressed={a.chiave === area.chiave}
+                            <button type="button" className={`chip touch text-[11px] ${completate.has(a.chiave) ? 'chip--icona' : ''} ${a.chiave === area.chiave ? 'chip--attivo' : ''}`} aria-pressed={a.chiave === area.chiave}
                               onClick={() => { if (a.chiave !== area.chiave) { const k = mappaScelta; scegliArea(a.chiave); setPianta(k); } }}>
+                              {completate.has(a.chiave) && <SpuntaCompletata />}
                               {a.ordine + 1}. {a.nome}
+                              {completate.has(a.chiave) && <TestoCompletata />}
                             </button>
                           </li>
                         ))}

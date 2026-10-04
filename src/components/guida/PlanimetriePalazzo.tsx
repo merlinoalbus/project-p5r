@@ -41,6 +41,8 @@ import { titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import type { MappaRiassuntoDto } from '../../types';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { ModuloNuovaArea, type DatiNuovaArea } from './ModuloNuovaArea';
+import { IconSpunta } from '../shared/iconeGuida';
+import { tutteCompletate } from '../../utils/completamentoAree';
 
 export type { Planimetria };
 
@@ -66,6 +68,8 @@ interface Props {
   onScegli: (chiave: string) => void;
   /** Dopo ogni modifica strutturale: la scheda rilegge il Palazzo. */
   onCambiato: () => Promise<void> | void;
+  /** Le aree della guida completate nella partita (`areeCompletate`): spunta accanto all'area, e alla stanza che le ha tutte. */
+  areeCompletate: ReadonlySet<string>;
   /** Un'area eliminata: la pagina smette di mostrarla. */
   onAreaEliminata: (chiave: string) => void;
 }
@@ -186,9 +190,40 @@ function restoDaRaccogliere(totale: number, presi: number | null): string {
   return presi >= totale ? `${totale} raccolti · completa` : `${totale - presi} da prendere su ${totale}`;
 }
 
-/** Le aree della guida contenute, in ordine di guida, in una riga. */
+/** Le aree della guida contenute, in ordine di guida, in una riga di testo (per i dettagli delle scelte, dove non c'è spunta). */
 function testoAree(aree: Array<{ nome: string; ordine: number; chiave: string }>): string {
   return aree.length ? [...aree].sort(perOrdineDiGuida).map((a) => `${a.ordine + 1}. ${a.nome}`).join(' · ') : 'nessuna area della guida';
+}
+
+/**
+ * La spunta di completamento (scelta dell'utente, 2026-10-04): verde e solo visiva, prima del nome. Chi usa un lettore di schermo
+ * sente invece `TestoCompletata`, messo dopo il nome.
+ */
+export function SpuntaCompletata({ dimensione = 12 }: { dimensione?: number }) {
+  return <span aria-hidden className="inline-flex shrink-0 align-[-2px] text-success" data-completata=""><IconSpunta size={dimensione} /></span>;
+}
+
+/** Il «completata» per i lettori di schermo, dopo il nome dell'area o della stanza. */
+export function TestoCompletata() {
+  // lo spazio sta fuori dallo span nascosto: dentro, il calcolo del nome accessibile lo scarterebbe («Cancello(completata)»)
+  return <>{' '}<span className="sr-only">(completata)</span></>;
+}
+
+/** Le aree della guida contenute, in ordine di guida, con la spunta accanto a quelle completate nella partita. */
+function AreeContenute({ aree, completate }: { aree: Array<{ nome: string; ordine: number; chiave: string }>; completate: ReadonlySet<string> }) {
+  if (!aree.length) return <>nessuna area della guida</>;
+  return (
+    <>
+      {[...aree].sort(perOrdineDiGuida).map((a, i) => (
+        <span key={a.chiave}>
+          {i > 0 && ' · '}
+          {completate.has(a.chiave) && <><SpuntaCompletata />{' '}</>}
+          {a.ordine + 1}. {a.nome}
+          {completate.has(a.chiave) && <TestoCompletata />}
+        </span>
+      ))}
+    </>
+  );
 }
 
 /**
@@ -198,7 +233,7 @@ function testoAree(aree: Array<{ nome: string; ordine: number; chiave: string }>
  * guida senza planimetria. «Gestisci» apre la scheda della planimetria o dell'area; le finestre creano planimetrie e
  * aree. Ogni modifica passa da un'unica esecuzione che fa rileggere il Palazzo e notifica l'esito.
  */
-export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, areeOrfane, areaScelta, onScegliArea, sceltaChiave, onScegli, onCambiato, onAreaEliminata }: Props) {
+export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, areeOrfane, areaScelta, onScegliArea, sceltaChiave, onScegli, onCambiato, areeCompletate, onAreaEliminata }: Props) {
   // L'ordine mostrato è locale finché il server non risponde: il trascinamento deve vedersi subito.
   // Vale solo per le planimetrie che ci sono adesso; quelle appena aggiunte si accodano nell'ordine
   // del server e quelle eliminate cadono, altrimenti una creazione riuscita sembrerebbe fallita.
@@ -327,6 +362,8 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
           const apertaQui = !una && (aperta === g.id || (dentro && aperta === null));
           const sola = g.versioni[0];
           const bersaglio = stanze.trascinato && stanze.trascinato !== g.id && stanze.sopra === i;
+          // la stanza è completa quando ha aree della guida e sono tutte completate
+          const stanzaCompleta = tutteCompletate(g.aree.map((a) => a.chiave), areeCompletate);
           return (
             <li key={g.id} ref={stanze.riga(g.id)}
               className={`flex flex-col gap-1 rounded-md border px-1.5 py-1.5 transition-colors ${dentro ? 'border-primary bg-primary-bg' : 'border-border-light bg-white/[0.02]'} ${stanze.trascinato === g.id ? 'opacity-50' : ''} ${bersaglio ? 'ring-2 ring-primary' : ''}`}>
@@ -334,14 +371,14 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                 <Maniglia etichetta={`Sposta la stanza «${g.nome}»`} id={g.id} i={i} riordino={stanze} />
                 {una
                   ? <button type="button" className="touch min-w-0 flex-1 text-left" aria-pressed={sola.planimetria.chiave === sceltaChiave} onClick={() => onScegli(sola.planimetria.chiave)}>
-                      <span className="block text-[13px] font-semibold leading-tight">{i + 1}. {g.nome}</span>
+                      <span className="flex items-baseline gap-1 text-[13px] font-semibold leading-tight"><span className="min-w-0">{i + 1}. {g.nome}{stanzaCompleta && <TestoCompletata />}</span>{stanzaCompleta && <SpuntaCompletata dimensione={14} />}</span>
                       <span className="block text-[11px] leading-tight text-text-muted">{sola.etichetta} · {restoDaRaccogliere(g.totale, g.presi)}</span>
-                      <span className="block text-[11px] leading-tight text-text-muted">{testoAree(g.aree)}</span>
+                      <span className="block text-[11px] leading-tight text-text-muted"><AreeContenute aree={g.aree} completate={areeCompletate} /></span>
                     </button>
                   : <button type="button" className="touch min-w-0 flex-1 text-left" aria-expanded={apertaQui} onClick={() => setAperta(apertaQui ? `chiusa:${g.id}` : g.id)}>
-                      <span className="flex items-baseline gap-1 text-[13px] font-semibold leading-tight"><span className="min-w-0 flex-1">{i + 1}. {g.nome}</span><span aria-hidden className="text-text-muted">{apertaQui ? '▾' : '▸'}</span></span>
+                      <span className="flex items-baseline gap-1 text-[13px] font-semibold leading-tight"><span className="min-w-0">{i + 1}. {g.nome}{stanzaCompleta && <TestoCompletata />}</span>{stanzaCompleta && <SpuntaCompletata dimensione={14} />}<span className="flex-1" /><span aria-hidden className="text-text-muted">{apertaQui ? '▾' : '▸'}</span></span>
                       <span className="block text-[11px] leading-tight text-text-muted">{g.versioni.length} planimetrie · {restoDaRaccogliere(g.totale, g.presi)}</span>
-                      <span className="block text-[11px] leading-tight text-text-muted">{testoAree(g.aree)}</span>
+                      <span className="block text-[11px] leading-tight text-text-muted"><AreeContenute aree={g.aree} completate={areeCompletate} /></span>
                     </button>}
                 {una && (
                   <button type="button" className="chip touch shrink-0 self-center text-[11px]" disabled={occupato}
@@ -354,7 +391,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                 </span>
               )}
               {apertaQui && (
-                <VersioniStanza gruppo={g} blocco={blocco} sceltaChiave={sceltaChiave} occupato={occupato} onScegli={onScegli}
+                <VersioniStanza gruppo={g} blocco={blocco} sceltaChiave={sceltaChiave} occupato={occupato} completate={areeCompletate} onScegli={onScegli}
                   onGestisci={(v) => setScheda({ gruppo: g, versione: v })}
                   onSposta={(chiave, a) => salvaOrdine(spostaVersioneA(gruppi, g.id, chiave, a), 'Ordine delle planimetrie salvato.')} />
               )}
@@ -372,7 +409,10 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
             <li key={a.chiave} className={`flex items-center gap-1 rounded-md border border-dashed px-1.5 py-1.5 ${areaScelta === a.chiave ? 'border-primary bg-primary-bg' : 'border-border-light'}`}>
               <span aria-hidden className="w-8 shrink-0 text-center text-text-muted opacity-40">·</span>
               <button type="button" className="touch min-w-0 flex-1 text-left" aria-pressed={areaScelta === a.chiave} title={a.descrizione} onClick={() => onScegliArea(a.chiave)}>
-                <span className="block text-[13px] font-semibold leading-tight">{a.ordine + 1}. {a.nome}</span>
+                <span className="flex items-baseline gap-1 text-[13px] font-semibold leading-tight">
+                  {areeCompletate.has(a.chiave) && <SpuntaCompletata dimensione={14} />}
+                  <span className="min-w-0">{a.ordine + 1}. {a.nome}{areeCompletate.has(a.chiave) && <TestoCompletata />}</span>
+                </span>
                 <span className="block text-[11px] leading-tight text-text-muted">area della guida · nessuna planimetria</span>
               </button>
               <button type="button" className="chip touch shrink-0 text-[11px]" disabled={occupato} aria-label={`Gestisci l’area «${a.nome}»`} onClick={() => setSchedaArea(a)}>Gestisci</button>
@@ -457,8 +497,8 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
 }
 
 /** Le planimetrie di una stanza con più versioni: si scelgono, si riordinano trascinando, si gestiscono. */
-function VersioniStanza({ gruppo: g, blocco, sceltaChiave, occupato, onScegli, onGestisci, onSposta }: {
-  gruppo: GruppoPlanimetrie; blocco: string | null; sceltaChiave: string | null; occupato: boolean;
+function VersioniStanza({ gruppo: g, blocco, sceltaChiave, occupato, completate, onScegli, onGestisci, onSposta }: {
+  gruppo: GruppoPlanimetrie; blocco: string | null; sceltaChiave: string | null; occupato: boolean; completate: ReadonlySet<string>;
   onScegli: (chiave: string) => void; onGestisci: (v: VersionePlanimetria) => void; onSposta: (chiave: string, a: number) => void;
 }) {
   const versioni = useRiordino(g.versioni.map((v) => v.planimetria.chiave), blocco, onSposta);
@@ -475,7 +515,7 @@ function VersioniStanza({ gruppo: g, blocco, sceltaChiave, occupato, onScegli, o
             <button type="button" className="touch min-w-0 flex-1 text-left" onClick={() => onScegli(p.chiave)} aria-pressed={scelta}>
               <span className="block text-[12px] font-semibold leading-tight">{v.etichetta}</span>
               <span className="block text-[11px] leading-tight text-text-muted">{restoDaRaccogliere(p.n, p.presi)}</span>
-              <span className="block text-[11px] leading-tight text-text-muted">{testoAree(p.aree)}</span>
+              <span className="block text-[11px] leading-tight text-text-muted"><AreeContenute aree={p.aree} completate={completate} /></span>
             </button>
             <button type="button" className="chip touch shrink-0 self-center text-[11px]" disabled={occupato}
               aria-label={`Gestisci «${v.etichetta}» di ${g.nome}`} onClick={() => onGestisci(v)}>Gestisci</button>

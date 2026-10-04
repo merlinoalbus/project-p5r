@@ -7,7 +7,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
-import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto } from '../types';
+import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto, PuntoInteresseDto } from '../types';
 
 const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
@@ -637,6 +637,78 @@ const palazzoConPiuAree = (): DungeonDettaglioDto => {
   };
 };
 
+/** Una voce della guida con lo stato dato, nell'area indicata (per la spunta delle aree completate). */
+const voceGuida = (chiave: string, tipo: PuntoInteresseDto['tipo'], stato: PuntoInteresseDto['stato']): PuntoInteresseDto =>
+  ({ chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null });
+
+describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () => {
+  /** Il Palazzo con più aree, con le voci date per area (le altre restano come sono). */
+  const conVoci = (voci: Record<string, PuntoInteresseDto[]>): DungeonDettaglioDto => {
+    const d = palazzoConPiuAree();
+    return { ...d, aree: d.aree.map((a) => (voci[a.chiave] ? { ...a, punti: voci[a.chiave] } : a)) };
+  };
+  /** La riga della stanza della planimetria Cancello nell'elenco del Palazzo. */
+  const rigaCancello = () => within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem')[0];
+
+  it('tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sull’area, sulla stanza che ha tutte le aree completate e nei chip', async () => {
+    getDungeon.mockResolvedValue(conVoci({
+      'k-01': [voceGuida('a', 'sicura', 'ottenuto')],
+      'k-03': [voceGuida('b', 'forziere', 'esaurito'), voceGuida('c', 'altro', null)],
+    }));
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    const riga = rigaCancello();
+    // la stanza: la spunta dopo il nome, e «(completata)» per chi usa un lettore di schermo
+    expect(within(riga).getAllByRole('button')[1]).toHaveAccessibleName(/Cancello \(completata\).*1\. Cancello \(completata\).*3\. Cortile \(completata\)/);
+    // tre spunte: la stanza e le sue due aree
+    expect(riga.querySelectorAll('[data-completata]')).toHaveLength(3);
+    // i chip sopra la mappa
+    const chip = within(screen.getByRole('list', { name: 'Aree della guida su questa planimetria' })).getAllByRole('button');
+    expect(chip.map((b) => b.textContent)).toEqual(['1. Cancello (completata)', '3. Cortile (completata)']);
+    expect(chip.every((b) => b.querySelector('[data-completata]'))).toBe(true);
+  });
+
+  it('una voce ancora da fare: niente spunta su quell’area né sulla stanza; un’area senza voci da segnare non ha spunta', async () => {
+    getDungeon.mockResolvedValue(conVoci({
+      'k-01': [voceGuida('a', 'sicura', 'ottenuto')],
+      'k-03': [voceGuida('b', 'forziere', 'esaurito'), voceGuida('d', 'boss', null)],
+      'k-02': [voceGuida('e', 'altro', null)],
+    }));
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    const riga = rigaCancello();
+    expect(riga.querySelectorAll('[data-completata]')).toHaveLength(1);
+    expect(within(riga).getAllByRole('button')[1]).toHaveAccessibleName(/1\. Cancello \(completata\) ?· 3\. Cortile$/);
+    // la Torre ha solo una nota descrittiva: nessuna spunta
+    const torre = within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem')[1];
+    expect(torre.querySelectorAll('[data-completata]')).toHaveLength(0);
+    const chip = within(screen.getByRole('list', { name: 'Aree della guida su questa planimetria' })).getAllByRole('button');
+    expect(chip.map((b) => b.textContent)).toEqual(['1. Cancello (completata)', '3. Cortile']);
+  });
+
+  it('un’area della guida senza planimetria, completata, ha la spunta sulla sua riga in coda all’elenco', async () => {
+    const d = palazzo(true);
+    // la Torre (k-02) non ha planimetrie: sta fra le aree in coda
+    d.aree[1] = { ...d.aree[1], punti: [voceGuida('t', 'miniboss', 'ottenuto')] };
+    getDungeon.mockResolvedValue(d);
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    const orfane = within(screen.getByRole('list', { name: 'Aree della guida senza planimetria' }));
+    const torre = orfane.getByRole('button', { name: /2\. Torre \(completata\)/ });
+    expect(torre.closest('li')!.querySelectorAll('[data-completata]')).toHaveLength(1);
+    // le stanze con planimetria non ne sono toccate: le loro aree hanno voci ancora da fare o nessuna
+    expect(screen.getByRole('list', { name: 'Stanze del Palazzo' }).querySelectorAll('[data-completata]')).toHaveLength(0);
+  });
+
+  it('senza partita le voci non hanno stato: nessuna spunta', async () => {
+    usePartitaStore.setState({ attiva: null });
+    getDungeon.mockResolvedValue(conVoci({ 'k-01': [voceGuida('a', 'sicura', null)] }));
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    expect(document.querySelectorAll('[data-completata]')).toHaveLength(0);
+  });
+});
+
 it('una planimetria con più aree le mostra in ordine di guida: nell’elenco del Palazzo e sopra la mappa', async () => {
   getDungeon.mockResolvedValue(palazzoConPiuAree());
   getAlberoMappe.mockResolvedValue([]);
@@ -644,7 +716,8 @@ it('una planimetria con più aree le mostra in ordine di guida: nell’elenco de
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   // la riga della stanza: le aree nell'ordine della guida, non in quello in cui arrivano
   const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
-  expect(pannello.getByText('1. Cancello · 3. Cortile')).toBeInTheDocument();
+  // (le aree sono elementi distinti, per la spunta di quelle completate: si confronta il testo intero della riga)
+  expect(pannello.getByText((_, el) => el?.tagName === 'SPAN' && el.textContent === '1. Cancello · 3. Cortile')).toBeInTheDocument();
   // sopra la mappa, le aree della planimetria a schermo: toccarne una apre quell'area sulla stessa mappa
   const sullaPianta = within(screen.getByRole('list', { name: 'Aree della guida su questa planimetria' }));
   const voci = sullaPianta.getAllByRole('button');

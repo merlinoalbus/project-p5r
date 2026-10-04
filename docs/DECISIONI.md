@@ -1112,3 +1112,22 @@ Che cosa ne segue:
 - **`docs/ARCHITETTURA.md`.** È stato riportato alla versione precedente (commit `90354f42`) e le stesse modifiche sono state
   riapplicate con modifiche dirette (Edit). Lo script resta nello scratchpad solo come traccia.
 - **`requestTimeout`** resta a 30 minuti, allineato a nginx; il commento in `server/index.ts` spiega perché c'è.
+
+## 2026-10-04 — Spunta delle aree completate nel Palazzo
+
+Richiesta dell'utente: «se tutte le voci di un'area sono completate, l'area deve essere segnata come completata... (spunta accanto
+alla lista aree di quella planimetria...».
+
+Risposte dell'utente, parola per parola:
+- quando un'area è completata: «Voci della guida segnate (Recommended)»;
+- dove compare la spunta: «Lista «Il Palazzo» (Recommended), Chip «Su questa planimetria», Stanza completa»;
+- su quale ramo: «Su main dopo il merge di #96 (Recommended)»;
+- la proposta: «Sì, procedi (Recommended)».
+
+Che cosa ne segue:
+- **La regola.** Un'area è completata quando ha almeno una voce da segnare e sono tutte Ottenute o Esaurite. Le voci descrittive
+  («Altro») non contano. Gli Enigmi non chiedono un caso a parte: il server li segna quando sono fatti i loro passi. Senza
+  partita non c'è nessuna spunta.
+- **Dove compare.** Accanto a ogni area della guida nella lista «Il Palazzo» (nelle stanze, nelle loro versioni e fra le aree
+  senza planimetria), accanto alla stanza che ha tutte le sue aree completate, e nei chip «Su questa planimetria».
+- **Nessun cambio nel server.** I dati ci sono già nel dettaglio del Palazzo, e la spunta si ricalcola a ogni voce segnata.
