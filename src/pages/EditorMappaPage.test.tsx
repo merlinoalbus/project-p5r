@@ -153,6 +153,25 @@ describe('EditorMappaPage', () => {
     expect(incolla).toHaveTextContent('«Scrigno»');
   });
 
+  it('il pin del Confidente, unico fra quelli di città, ha le condizioni (2026-10-04); tornando a un negozio se ne vanno', async () => {
+    api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
+    api.cercaRiferimenti.mockResolvedValue([{ tipo: 'confidente', chiave: 'yusuke', nome: 'Yusuke Kitagawa', dettaglio: 'Imperatore' }]);
+    api.aggiornaSpillo.mockResolvedValue(nota);
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
+    scegliVoce('Tipo', 'Confidente');
+    // città, ma con le condizioni: se ne aggiunge una (la riga nasce «dal 18 aprile»)
+    fireEvent.click(form.getByRole('button', { name: /^Condizioni/ }));
+    fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
+    expect(form.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
+    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ tipo: 'confidente', condizioni: [expect.objectContaining({ tipo: 'data' })] })));
+    // un negozio resta senza: le condizioni spariscono, e non si salvano
+    scegliVoce('Tipo', 'Negozio');
+    expect(form.queryByRole('button', { name: /^Condizioni/ })).toBeNull();
+  });
+
   it('le condizioni sono stati: una riga nasce già valida, si cambia sul posto con elenchi chiusi, si toglie e si salva con lo spillo', async () => {
     api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
     api.aggiornaSpillo.mockResolvedValue(nota);

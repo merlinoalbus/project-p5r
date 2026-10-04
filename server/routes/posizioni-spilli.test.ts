@@ -1,5 +1,5 @@
 // ============================================================
-// posizioni-spilli.test.ts — regole di categoria degli spilli: niente condizioni sugli spilli di città, collezionabile e riferimento decisi dalla categoria, anche dopo esportazione e importazione
+// posizioni-spilli.test.ts — regole di categoria degli spilli: niente condizioni sugli spilli di città (salvo il Confidente, 2026-10-04), collezionabile e riferimento decisi dalla categoria, anche dopo esportazione e importazione
 // ============================================================
 
 import request from 'supertest';
@@ -10,7 +10,8 @@ import { runMigrations } from '../db/migrationRunner.js';
 // ============================================================
 // Le regole di categoria (2026-09-11): uno spillo di città non è condizionato, non porta altrove e
 // si collega a un negozio, un'attività, un luogo o un Confidente; un consumabile è collezionabile
-// per definizione; un informativo non si collega a niente. Il server le applica, chiunque scriva.
+// per definizione; un informativo non si collega a niente. Il server le applica, chiunque scriva. Dal 2026-10-04 il pin del
+// Confidente, unico fra quelli di città, si può condizionare (scelta dell'utente; `ammetteCondizioni`).
 // ============================================================
 
 const app = createApp();
@@ -56,4 +57,29 @@ it('il pacchetto porta e riporta le stesse regole: i valori fuori categoria non 
   const spilli = (await request(app).get('/api/mappe/luoghi')).body.data.spilli as Array<{ nome: string; collezionabile: boolean; condizioni: unknown[] }>;
   expect(spilli.find((s) => s.nome === 'Scrigno')?.collezionabile).toBe(true);
   expect(spilli.find((s) => s.nome === 'Bottega')?.condizioni).toEqual([]);
+});
+
+it('il pin del Confidente si può condizionare (2026-10-04): le condizioni si salvano, valgono con la partita e passano dal pacchetto', async () => {
+  const partita = (await request(app).post('/api/partite').send({ nome: 'Confidente' })).body.data.id;
+  // «solo di sera»: con la partita di giorno (la fascia di partenza) il pin è bloccato, cioè nascosto sulla mappa
+  const s = (await crea({ tipo: 'confidente', nome: 'Yusuke', condizioni: [{ tipo: 'fascia', fascia: 'sera' }] })).body.data;
+  expect(s.condizioni).toEqual([expect.objectContaining({ tipo: 'fascia', fascia: 'sera' })]);
+  /** Rilegge la mappa «luoghi» con la partita e restituisce il pin di Yusuke. */
+  const leggi = async () => ((await request(app).get(`/api/mappe/luoghi?partita=${partita}`)).body.data.spilli as Array<{ nome: string; condizioni: unknown[]; disponibilita?: { stato: string } }>).find((x) => x.nome === 'Yusuke')!;
+  expect((await leggi()).disponibilita?.stato).toBe('bloccato');
+  await request(app).put(`/api/mappe/spilli/${s.id}`).send({ condizioni: [{ tipo: 'piove' }] }).expect(200);
+  expect((await leggi()).condizioni).toEqual([expect.objectContaining({ tipo: 'piove' })]);
+  // gli altri spilli di città restano senza: cambiando tipo verso un negozio le condizioni se ne vanno
+  const negozio = (await request(app).put(`/api/mappe/spilli/${s.id}`).send({ tipo: 'negozio', condizioni: [{ tipo: 'piove' }] })).body.data;
+  expect(negozio.condizioni).toEqual([]);
+  // il pacchetto: un Confidente porta le sue condizioni, un negozio no
+  await request(app).put(`/api/mappe/spilli/${s.id}`).send({ tipo: 'confidente', condizioni: [{ tipo: 'piove' }] }).expect(200);
+  await crea({ tipo: 'negozio', nome: 'Bottega' });
+  const pacchetto = (await request(app).get('/api/mappe/esporta?radice=luoghi')).body.data;
+  for (const p of pacchetto.mappe[0].spilli) p.condizioni = [{ tipo: 'piove' }];
+  await request(app).delete('/api/mappe/luoghi').expect(204);
+  await request(app).post('/api/mappe/importa').send({ pacchetto }).expect(200);
+  const spilli = (await request(app).get('/api/mappe/luoghi')).body.data.spilli as Array<{ nome: string; condizioni: unknown[] }>;
+  expect(spilli.find((x) => x.nome === 'Yusuke')?.condizioni).toEqual([expect.objectContaining({ tipo: 'piove' })]);
+  expect(spilli.find((x) => x.nome === 'Bottega')?.condizioni).toEqual([]);
 });

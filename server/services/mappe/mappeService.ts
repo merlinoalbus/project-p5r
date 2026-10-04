@@ -33,7 +33,7 @@ import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
-import { eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import { ammetteCondizioni, eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
@@ -1115,7 +1115,8 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
 /** La categoria del tipo decide il resto dello spillo (richiesta dell'utente, 2026-09-11).
  *
  * - **consumabile** è collezionabile per definizione, gli altri no: il campo non si sceglie;
- * - **città** non è condizionato: la disponibilità è del negozio che mostra, non del segnalino;
+ * - **città** non è condizionato: la disponibilità è del negozio che mostra, non del segnalino; il **Confidente** sì
+ *   (`ammetteCondizioni`, scelta dell'utente del 2026-10-04: dal Confidente il pin non eredita nessuna disponibilità);
  * - il **riferimento** deve essere di un tipo ammesso dalla categoria (uno spostamento porta a una
  *   mappa, uno spillo di città a un negozio, un'attività, un luogo o un Confidente…): un tipo
  *   estraneo è un errore, non un dato da tenere;
@@ -1124,7 +1125,7 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
 function applicaRegoleCategoria<T extends DatiSpillo>(tipo: TipoSpillo, dati: T): T {
   const categoria = categoriaSpillo(tipo);
   const out: DatiSpillo = { ...dati, collezionabile: categoria === 'consumabile' };
-  if (categoria === 'citta') out.condizioni = [];
+  if (!ammetteCondizioni(tipo)) out.condizioni = [];
   if (categoria !== 'spostamento') out.destinazione = null;
   if (out.riferimento && !RIFERIMENTI_PER_CATEGORIA[categoria].includes(out.riferimento.tipo)) {
     throw httpErrors.badRequest('riferimento-non-ammesso', `Uno spillo «${DEFINIZIONI_SPILLO[tipo].nome}» (${categoria}) non può collegarsi a «${out.riferimento.tipo}».`);
@@ -1459,7 +1460,7 @@ function spilloInvariatoNelSeed(r: RigaSpillo, s: EsportazioneMappeDto['mappe'][
   // la voce della guida, come la destinazione: un pacchetto che non la dichiara non toglie quella che l'utente ha collegato
   const dichiarata = voceDichiarata(s);
   if (dichiarata !== undefined && (r.voce_chiave ?? null) !== voceAmmessa(s.nome, r.mappa_chiave, dichiarata)) return false;
-  if (JSON.stringify(condizioniDiRiga(r.condizioni_json))!==JSON.stringify(normalizzaCondizioniSpillo(categoria==='citta'?[]:(s.condizioni??[])))) return false;
+  if (JSON.stringify(condizioniDiRiga(r.condizioni_json))!==JSON.stringify(normalizzaCondizioniSpillo(ammetteCondizioni(s.tipo)?(s.condizioni??[]):[]))) return false;
   // Una destinazione assente dai dati importati non cancella un arrivo configurato nell'istanza.
   if (s.destinazione!==undefined || s.destinazioneNonDisponibile!==undefined) {
     const attuale=leggiDestinazioneSpillo(r.id);
@@ -1639,9 +1640,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         const identita = identitaDelPacchetto({ tipo: s.tipo, nome: s.nome, riferimento: s.riferimento ?? null }, x, y);
         if (identitaUtente.has(identita) || identitaSpostate.has(identita)) continue;
         // le condizioni con chiavi assenti dalla Guida si scartano (contate nell'esito), come l'API le rifiuta: mai uno spillo nascosto per sempre
-        // le regole di categoria valgono anche per un pacchetto: uno spillo di città non ha condizioni, un consumabile è collezionabile, un riferimento estraneo alla categoria non entra
+        // le regole di categoria valgono anche per un pacchetto: uno spillo di città non ha condizioni (salvo il Confidente), un consumabile è collezionabile, un riferimento estraneo alla categoria non entra
         const categoria = categoriaSpillo(s.tipo);
-        const { valide, scartate } = condizioniConChiaviEsistenti(categoria === 'citta' ? [] : s.condizioni, pinDelPacchetto);
+        const { valide, scartate } = condizioniConChiaviEsistenti(ammetteCondizioni(s.tipo) ? s.condizioni : [], pinDelPacchetto);
         esito.condizioniScartate += scartate.length;
         const riferimento = riferimentoDelPacchetto(s.riferimento, categoria);
         // l'uid viaggia col pacchetto (così «raccolto» lo ritrova); se manca o è già preso, si calcola dall'identità

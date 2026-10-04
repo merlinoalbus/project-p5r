@@ -1305,3 +1305,23 @@ Che cosa ne segue:
   
   Senza una regola che copra quel giorno, porta alla scheda del Palazzo come prima.
 - **«Sulla mappa»** accanto resta com'è: porta all'ingresso in città.
+
+## 2026-10-04 — Il pin del Confidente si può condizionare
+
+Domanda dell'utente: «come mai non posso condizionare la comparsa dei pin del Confidente (impostare una condizione di
+visualizzazione?)».
+
+Il motivo era la regola del 2026-09-11: gli spilli di categoria «Città» non hanno condizioni, perché la disponibilità è di
+ciò che mostrano. Vale per i negozi, che seguono i loro orari, ma il pin del Confidente non eredita niente dal Confidente: senza
+condizioni restava sempre in vista.
+
+Risposta dell'utente, parola per parola, alla domanda «Come apro le condizioni di visualizzazione ai pin della categoria
+«Città»?»: «Solo i pin Confidente».
+
+Che cosa ne segue:
+- **La regola.** È `ammetteCondizioni(tipo)` in `shared/spilli.ts`: tutte le categorie tranne «Città», più il tipo
+  «Confidente». La usano il server (creazione, modifica, importazione del pacchetto, confronto col seed) e l'editor.
+- **Il pin del Confidente** ha la sezione «Condizioni» nell'editor. Le condizioni si salvano, passano dal pacchetto e si
+  valutano con la partita come per gli altri pin: rosse, il pin si nasconde.
+- **Negozio, luogo e attività** restano senza condizioni. Cambiando tipo da Confidente a uno di questi, le condizioni se ne
+  vanno.

@@ -117,7 +117,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'POST /api/mappe/:chiave/spilli': {
     sommario: 'Crea uno spillo su una mappa',
-    descrizione: 'La categoria del tipo decide il resto: i consumabili sono collezionabili, gli spilli di città non hanno condizioni, la destinazione vale solo per gli spostamenti e il riferimento deve essere di un tipo ammesso dalla categoria ed esistere. Un riferimento «punto» diventa la voce della guida del pin, con le regole del collegamento (voce non descrittiva, del Palazzo della planimetria). Le condizioni devono citare chiavi esistenti. Lo spillo nasce dell\'utente, in una transazione.',
+    descrizione: 'La categoria del tipo decide il resto: i consumabili sono collezionabili, gli spilli di città non hanno condizioni (salvo il Confidente, dal 2026-10-04), la destinazione vale solo per gli spostamenti e il riferimento deve essere di un tipo ammesso dalla categoria ed esistere. Un riferimento «punto» diventa la voce della guida del pin, con le regole del collegamento (voce non descrittiva, del Palazzo della planimetria). Le condizioni devono citare chiavi esistenti. Lo spillo nasce dell\'utente, in una transazione.',
     risposta: 'Lo spillo creato: `SpilloDto`',
     errori: [[404, 'mappa-non-trovata'], [400, 'riferimento-non-ammesso'], [404, 'riferimento-non-trovato'], [404, 'punto-non-trovato'], [400, 'punto-descrittivo'], [400, 'pin-fuori-dal-palazzo'], [404, 'condizione-non-trovata'], [404, 'destinazione-non-trovata']],
   },

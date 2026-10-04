@@ -67,6 +67,17 @@ export function categoriaSpillo(tipo: string): CategoriaSpillo {
   return CATEGORIA_PER_TIPO[tipo as TipoSpillo] ?? 'informativo';
 }
 
+/**
+ * Se il pin può avere condizioni di visualizzazione. Gli spilli di categoria «Città» non ne hanno (2026-09-11): la
+ * disponibilità è di ciò che mostrano, un negozio con i suoi orari. Il **Confidente** fa eccezione (scelta dell'utente,
+ * 2026-10-04: «come mai non posso condizionare la comparsa dei pin del Confidente», poi «Solo i pin Confidente»): dal Confidente
+ * il pin non eredita nessuna disponibilità, e senza condizioni resterebbe sempre in vista. Negozio, luogo e attività restano
+ * senza. Una regola sola per server, pacchetto ed editor.
+ */
+export function ammetteCondizioni(tipo: string): boolean {
+  return categoriaSpillo(tipo) !== 'citta' || tipo === 'confidente';
+}
+
 // ============================================================
 // Lo stato di un pin nella partita (richiesta dell'utente, 2026-09-30, ripresa il 2026-10-03)
 // ============================================================
