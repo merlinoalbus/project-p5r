@@ -549,14 +549,30 @@ Sono nella cartella `prove-voce3/` della sessione e sono state prodotte su `72e2
 
 Commit: `8d2d048a` (documenti obsoleti O1–O8, O10, O11, O18, O22–O26), `bda3182e` (intestazioni e commenti di funzione),
 `451ccacc` (difetto trovato commentando, residuo di A9), `368ad6bf` (revisione dei commenti scritti in parallelo e residui O
-nel codice), `9e85196a` (N7).
+nel codice), `9e85196a` (N7); dopo il primo esame, rigettato (I1–I4): `e54ccf10` e `0d329d69`.
 
 ### Che cosa si è fatto
 
 - **Intestazione su ogni file e commento su ogni funzione con nome.** Otto gruppi di lavoro sul codice di server, condivisi,
-  frontend, script e test; ogni commento dice che cosa fa la funzione e la logica interna dove non è ovvia.
-  - Censimento finale (`scratchpad/voce4/censimento.mts`, compilatore TypeScript): 526 file, **0 senza intestazione**;
-    2061 funzioni con nome, **0 senza commento**.
+  frontend, script e helper di test (`test/`), poi quattro sui file `*.test.ts(x)`. Ogni commento dice che cosa fa la
+  funzione e la logica interna dove non è ovvia.
+  - Il primo censimento (`censimento.mts`) contava come commento qualunque commento sopra la dichiarazione, anche un
+    divisorio di sezione staccato da una riga vuota, ed escludeva i `*.test.ts(x)`: il suo «0 senza commento» era falso
+    (rilievi I1 e I2 del primo esame).
+  - Il censimento severo (`scratchpad/voce4/censimento-severo.mts`, compilatore TypeScript):
+    - vuole un commento attaccato alla dichiarazione, senza righe vuote, che non sia un divisorio (`// ----`, `// ====`) né
+      una direttiva (`eslint-`, `@ts-`, `@vitest-environment`…);
+    - vuole un'intestazione che non sia solo il docblock `@vitest-environment`;
+    - comprende i test.
+  - Prima della correzione trovava 12 funzioni dei sorgenti, 360 funzioni di supporto e 23 intestazioni nei test
+    (`severo-iniziale.txt`). Reso rigoroso anche sul docblock `@vitest-environment`, ha trovato altre 8 intestazioni
+    mancanti (`severo-3.txt`, `severo-4.txt`): in totale 31. Tutte sono state scritte.
+    - In `MappaPage.test.tsx` due import finiti sopra il docblock jsdom sono tornati sotto l'intestazione unica.
+    - Per controllare ciò che il censimento non vede (un commento attaccato che parla d'altro), le 23 funzioni dei
+      sorgenti il cui commento attaccato è solo una riga `//` sono state rilette a mano (`solo-riga.txt`). Una sola
+      (`lungo` in `raggruppaSpilli.ts`) aveva un commento che non diceva che cosa fa la funzione, e ora lo dice.
+  - Esito (`prove-esame2/05-censimento-severo.txt`): 793 file, **0 senza intestazione**; 2489 funzioni con nome,
+    **0 senza commento**.
 - **Revisione dei commenti scritti in parallelo.** Un secondo passaggio ha cercato commenti falsi o fuori posto: 47 voci.
   - Intestazioni doppie unite: bootstrap, registro delle migrazioni, rotte mappe e impostazioni, `shared/types.ts`, visori,
     `mappeService`.
@@ -582,6 +598,9 @@ nel codice), `9e85196a` (N7).
       dicono.
   - **O17**: `zip.ts` diceva già, dal lotto A della voce 3 (`a99451ae`), che serve alla copia completa dell'istanza: niente da cambiare (il messaggio di `368ad6bf` lo elenca fra i residui per errore).
   - **O22–O24**: `DotiDaSegnare` → `DoteDaSegnareDto` in `partiteService.ts`.
+  - **O18** (residui trovati al primo esame, I3): in `MAPPE.md` lo stato dei punti è `punto_partita` (non `stato_punto`).
+    L'esportazione dell'editor è un JSON di tutte le mappe; l'API accetta `radice`, ma non c'è un pulsante. L'asset delle
+    nuove mappe lo pone il server (`assetPredefinitoMappa`), non la finestra «Nuova mappa».
 - **N7** (osservazione del validatore alla voce 3): `datiGuida` restituisce oggetti congelati, ora tipizzati
   `Congelato<T>` (in sola lettura a ogni livello).
   - Il tipo ha fatto emergere cinque punti in cui il dato congelato entrava in un DTO mutabile: battaglia, completamento,
@@ -601,12 +620,17 @@ nel codice), `9e85196a` (N7).
 
 ### Come si è provato che il resto non cambia
 
-- `solo-commenti.mts e1b0cd49`: stampa ogni file senza commenti, compilato dal TypeScript, e confronta prima e dopo.
-  - 280 file toccati; il codice cambia in 10, tutti voluti: i due difetti qui sopra con i loro test, e i sei file di N7.
-  - Elenco in `scratchpad/voce4/solo-commenti-voce4.txt`.
-- Typecheck, lint e test verdi: 267 file, 1463 test.
-- Runtime: battaglia, completamento, richieste, personaggi e suggerimenti di una partita rispondono 200, e i suggerimenti
-  contengono il personaggio collegato al Confidente.
+Gli output grezzi su `0d329d69`, con il working tree pulito, sono in `scratchpad/voce4/prove-esame2/`. Lo script che li
+produce è `scratchpad/voce4/prove.sh`.
+
+- `01-contesto.txt`: HEAD, ramo e `git status` vuoto.
+- `06-solo-commenti-da-e1b0cd49.txt`: stampa ogni file senza commenti, compilato dal TypeScript, e confronta prima e dopo.
+  - 443 file toccati; il codice cambia in 10, tutti voluti: i due difetti qui sopra con i loro test, e i sei file di N7.
+  - Exit 1 proprio per quei 10.
+- `07-jsx-commenti.txt`: 283 file `.tsx`, nessun testo JSX con `//` o `/*`.
+- `02-typecheck.txt`, `03-lint.txt`, `04-test.txt`: exit 0; 267 file e 1463 test.
+- `08-runtime.txt`: battaglia, completamento, richieste, personaggi e suggerimenti della partita 1 rispondono 200, con i
+  byte e l'inizio del corpo. I suggerimenti contengono il personaggio collegato al Confidente.
 
 ### Da segnalare
 
