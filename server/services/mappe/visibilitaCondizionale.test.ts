@@ -183,17 +183,17 @@ describe('visibilità condizionale dei pin', () => {
   });
 
   it('un negozio disegnato sulla planimetria nativa non è strutturale: di sera chiude e sparisce', () => {
-    // la protezione degli elementi fissi vale per provenienza **e** tipo insieme: un negozio sulla
-    // planimetria resta un negozio, e quando è chiuso il pin non deve esserci
+    // gli elementi fissi non ricevono la presenza del luogo (`presenzaEntita`): un negozio sulla planimetria
+    // resta un negozio, la riceve, e quando è chiuso il pin non deve esserci
     expect(eStrutturale('negozio')).toBe(false);
     expect(eStrutturale('porta')).toBe(true);
     expect(eStrutturale('passaggio')).toBe(true);
     expect(eStrutturale('attivita')).toBe(false);
   });
 
-  it('gli elementi fissi dell’atlante non si nascondono nemmeno se qualcuno ci attacca una presenza', () => {
-    // l'invariante del runtime: vale per provenienza, non per tipo di segnalino, e passa sopra a
-    // qualunque strada di scrittura — API, editor, seed o modifica diretta al database
+  it('anche gli elementi fissi dell’atlante si nascondono quando una condizione scritta su di loro non vale (2026-10-09)', () => {
+    // le condizioni di visibilità sono assolute (decisione dell'utente): prima una porta nativa restava in vista marcata
+    // «non ancora» (`restaInVista`); ora la condizione scritta direttamente nel database la nasconde come ogni altro pin
     const nativo = getDb().prepare("SELECT id, mappa_chiave FROM spillo WHERE nativo_json IS NOT NULL AND tipo = 'porta' LIMIT 1")
       .get() as { id: number; mappa_chiave: string } | undefined;
     expect(nativo).toBeTruthy();
@@ -204,9 +204,9 @@ describe('visibilità condizionale dei pin', () => {
     const mappa = dettaglioMappa(nativo!.mappa_chiave, partita.id);
     const spillo = mappa.spilli.find((x) => x.id === nativo!.id);
     expect(spillo).toBeTruthy();
-    // lo stato resta quello vero (di giorno la condizione «sera» non vale: «non ancora»), ma il pin resta in vista: il visore
-    // lo mostra marcato invece di nasconderlo (regola ripristinata il 2026-10-03, `restaInVista`)
-    expect(spillo!.disponibilita).toMatchObject({ stato: 'bloccato', restaInVista: true });
+    // di giorno la condizione «sera» non vale: il pin è bloccato, e senza `restaInVista` il visore lo toglie
+    expect(spillo!.disponibilita).toMatchObject({ stato: 'bloccato' });
+    expect(spillo!.disponibilita).not.toHaveProperty('restaInVista');
     getDb().prepare('UPDATE spillo SET condizioni_json = NULL WHERE id = ?').run(nativo!.id);
     getDb().prepare('DELETE FROM partita WHERE id = ?').run(partita.id);
   });

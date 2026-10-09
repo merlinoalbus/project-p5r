@@ -1355,3 +1355,29 @@ Che cosa ne segue:
 - **Senza successiva** non si apre niente.
 - **Se il salvataggio fallisce** la voce resta aperta, con l'errore notificato. Per questo `cambiaStato` della pagina del
   Palazzo ora dice se è riuscito.
+
+## 2026-10-09 — Le condizioni di visibilità dei pin sono assolute
+
+L'utente, sulla planimetria «Cancello del castello» del Palazzo di Kamoshida, con la partita al 21 aprile:
+- il pin «Punto di Infiltrazione Iniziale», con la condizione «NON Data di gioco dal 20 aprile», restava visibile
+  semitrasparente anche con «Giorno corrente» acceso;
+- «perchè vedo anche i pin che dovrebbero essere invisibili come semitrasparenti?»
+
+La causa era la regola degli elementi fissi (`restaInVista`, ripristinata il 2026-10-03 dopo una domanda posta su richiesta
+del validatore). Un pin nativo di tipo strutturale (porta, forziere, infiltrazione…) con una condizione che non valeva restava
+in vista, marcato «non ancora», invece di sparire.
+
+Decisione dell'utente, parola per parola: «se ci sta una condizione di visibilità questa deve essere assoluta... cosa diversa
+invece è se qualcosa è stato "raccolto" in quel caso va bene resti semitrasparente...»; poi «sistema».
+
+Che cosa ne segue:
+- se le condizioni di un pin non valgono, il pin sparisce, di qualunque tipo e provenienza sia;
+- ricompare, grigio, solo con «Mostra anche i non ancora disponibili» nel visore, o nell'editor con «Giorno corrente» spento;
+- i pin raccolti non cambiano;
+- tolti `restaInVista`, `bloccatoDaAltriPin` e il parametro `tieni` di `proiezioneDiPresenza`, che servivano solo a quella
+  regola;
+- `TIPI_STRUTTURALI` resta per non copiare la presenza di un luogo sui suoi pin fissi (`presenzaEntita`);
+- l'ingresso a un Palazzo completato sparisce come prima.
+
+Mio errore nella risposta all'utente: nel primo screenshot ho letto il «NON» come attivo e ho attribuito la visibilità a una
+condizione scritta al contrario. Non era così.

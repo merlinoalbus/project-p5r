@@ -1256,9 +1256,6 @@ export interface NegozioRiassuntoDto {
 export interface DisponibilitaDto {
   stato: 'disponibile' | 'bloccato' | 'ignoto';
   requisiti: SemaforoRequisitoDto[];
-  /** Un elemento fisso del gioco (porta, forziere, scala… nativi) che c'è anche quando le sue condizioni non valgono: il visore
-   *  lo mostra marcato «non ancora» invece di nasconderlo. Non vale quando a mancare è lo stato di altri pin (2026-10-03). */
-  restaInVista?: true;
 }
 
 export interface ArticoloDto {

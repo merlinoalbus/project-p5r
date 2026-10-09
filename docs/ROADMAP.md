@@ -1066,3 +1066,11 @@ Richieste dell'utente arrivate dopo la verifica completa, lavorate su `main` (la
 | 7 | Il cartellino del Palazzo sotto le azioni della guida deve seguire le regole d'atterraggio dei pin sulla mappa | fatto — APPROVATO al 4° esame (rigettati: 1° prova a 768/375 e in Partita, diff, copie dei dati; 2° scorrimento scritto nella voce sbagliata di DECISIONI; 3° output dei controlli sull'ultimo commit) — `AzionePercorsoDto.atterraggio` calcolato sul giorno della voce; in «Oggi» si apre nella mappa accanto, nella guida completa la pagina della mappa; senza regola la scheda del Palazzo (giorno e apertura scelti dall'utente); 1° esame rigettato (prova a 768/375 e in Partita, diff, copie dei dati): sul telefono la pagina scorre alla mappa, anche per «Sulla mappa» (scelta dell'utente) |
 | 8 | Condizioni di visualizzazione per i pin del Confidente | fatto — APPROVATO al 2° esame (1° rigettato: prova nel browser, test di reseed, commenti, ARCHITETTURA, test dell'editor sul salvataggio, output integrale dei test) — `ammetteCondizioni` (shared/spilli.ts) usata da server, pacchetto ed editor; solo i pin Confidente (scelta dell'utente); negozio, luogo e attività restano senza; 2 test nuovi |
 | 9 | Nella guida, «Ottenuto» deve chiudere la voce, nasconderla e passare alla successiva | fatto, APPROVATO dal validatore al 2° esame (al 1° rilievi F1–F4: prove grezze del browser, hash dopo il ripristino, copie dei dati nello scratchpad, stat del commit) — `segnaEPassaOltre` in `GuidaDellArea`, anche per «Esaurito» (scelta dell'utente); successiva = prossima da segnare nell'ordine dell'elenco, che passa i filtri; portata in vista; solo a salvataggio riuscito (`cambiaStato` restituisce l'esito) |
+
+## Richieste del 9 ottobre 2026 — in corso
+
+Richieste dell'utente lavorate su `main`.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Le condizioni di visibilità dei pin sono assolute: un pin con condizioni che non valgono sparisce, anche se è un elemento fisso del gioco (prima restava semitrasparente, `restaInVista`); i raccolti restano come sono | fatto, in attesa del validatore — tolti `restaInVista` (server, tipo, visore), `bloccatoDaAltriPin` e `tieni`; test aggiornati: `condizioni-pin` (il caso dell'utente «NON dal 20 aprile» al 21 e al 19 aprile), `visibilitaCondizionale`, `MappaPage`, `condizioniSpillo` |

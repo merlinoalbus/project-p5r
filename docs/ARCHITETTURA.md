@@ -590,10 +590,11 @@ che supera la precedente esclusione.
   `spilliSegnati` dello stato della partita (`spillo_partita` più i pin la cui voce della guida è segnata, la stessa regola del
   visore). In un'importazione i pin dello stesso pacchetto si accettano all'inserimento e si verificano a pacchetto inserito,
   con le voci già scritte, così l'esito non dipende dall'ordine. È di presenza e si combina con TUTTE / ALMENO
-  UNA / NON. È l'unica che nasconde anche un elemento fisso del gioco (porta, meccanismo nativi): in `dettagliSpillo` un pin
-  fisso nativo con condizioni che non valgono porta `disponibilita.restaInVista` (il visore lo mostra marcato invece di
-  nasconderlo, `VisoreMappa.nascostoPerCondizioni`), salvo quando `bloccatoDaAltriPin` (proiezione sui soli `spillo`) è vero; il
-  blocco dell'ingresso a un Palazzo completato si applica dopo e lo toglie comunque. Il riferimento è per uid, quindi
+  UNA / NON. Dal 2026-10-09 le condizioni di visibilità sono **assolute**: un pin le cui condizioni non valgono sparisce,
+  anche se è un elemento fisso del gioco (porta, forziere, infiltrazione nativi; tolti `restaInVista` e `bloccatoDaAltriPin`),
+  e ricompare grigio solo con «Mostra anche i non ancora disponibili» o nell'editor con «Giorno corrente» spento
+  (`VisoreMappa.nascostoPerCondizioni`). Il blocco dell'ingresso a un Palazzo completato si applica dopo, sull'esito
+  già deciso. `TIPI_STRUTTURALI` serve ancora a non copiare la presenza di un luogo sui suoi pin fissi (`presenzaEntita`). Il riferimento è per uid, quindi
   sopravvive a reseed e pacchetti; un pin eliminato o diventato senza stato lascia la condizione grigia, e `ChipDisponibilita`
   dice «Da correggere». Validazione (`condizioniConChiaviEsistenti`): pin esistente e con stato, nel database o fra quelli
   dello stesso pacchetto in importazione (ricontrollati a pacchetto inserito); solo nelle condizioni dei pin delle mappe

@@ -162,13 +162,10 @@ export function nascondeIlPin(tipo: string): boolean {
  * - `non` segue ciò che nega **solo se ciò che nega è tutto di presenza**: `non(tutte(dote 3, leva azionata))` è vera anche
  *   con la leva azionata, se la dote manca, e negarne la sola parte di presenza farebbe sparire il pin a torto (difetto
  *   corretto su richiesta dell'utente, 2026-10-03). Un `non` su un gruppo misto tace.
- *
- * `tieni` sceglie quali foglie contano: di norma le condizioni di presenza; con `(t) => t === 'spillo'` resta la sola parte
- * che dipende dagli altri pin (serve a non trattarla come le date sugli elementi fissi del mondo, `mappeService`).
  */
-export function proiezioneDiPresenza<T extends { tipo: string; condizioni?: T[]; condizione?: T; modo?: string }>(c: T, tieni: (tipo: string) => boolean = nascondeIlPin): T | null {
+export function proiezioneDiPresenza<T extends { tipo: string; condizioni?: T[]; condizione?: T; modo?: string }>(c: T): T | null {
   if (c.tipo === 'gruppo') {
-    const figlie = (c.condizioni ?? []).map((f) => proiezioneDiPresenza(f, tieni));
+    const figlie = (c.condizioni ?? []).map((f) => proiezioneDiPresenza(f));
     if (c.modo === 'almeno-una') {
       return figlie.some((f) => f === null) ? null
         : { ...c, condizioni: figlie as T[] };
@@ -177,10 +174,10 @@ export function proiezioneDiPresenza<T extends { tipo: string; condizioni?: T[];
     return tenute.length ? { ...c, condizioni: tenute } : null;
   }
   if (c.tipo === 'non') {
-    const dentro = c.condizione ? proiezioneDiPresenza(c.condizione, tieni) : null;
+    const dentro = c.condizione ? proiezioneDiPresenza(c.condizione) : null;
     return dentro && JSON.stringify(dentro) === JSON.stringify(c.condizione) ? c : null;
   }
-  return tieni(c.tipo) ? c : null;
+  return nascondeIlPin(c.tipo) ? c : null;
 }
 
 const NOMI_MESI: Record<string, string> = Object.fromEntries(MESI_GIOCO.map((m) => [m.numero, m.nome]));

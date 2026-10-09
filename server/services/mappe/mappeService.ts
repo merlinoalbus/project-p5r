@@ -25,7 +25,7 @@ import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../
 import { acquistiDellaPartita, dettaglioNegozio } from '../negoziService.js';
 import { giocabili } from '../squadraService.js';
 import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
-import { bloccatoDaAltriPin, statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
+import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
 import { allineaEnigmaDellaVoce, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, segnaPassiDellEnigma, voceDelPin } from './collegamentiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
@@ -33,7 +33,7 @@ import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
-import { ammetteCondizioni, eStrutturale, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import { ammetteCondizioni, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
@@ -352,7 +352,7 @@ type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione'
 /**
  * Tutto quello che uno spillo dice di sé, tranne posizione e destinazione: dettaglio del riferimento, voce della guida,
  * «raccolto» (anche quando la voce collegata ha già uno stato), condizioni con il loro testo e, con la partita, la
- * disponibilità — combinata con quella del negozio, tenuta in vista per gli elementi fissi dell'atlante nativo e bloccata
+ * disponibilità — combinata con quella del negozio e bloccata
  * per l'ingresso di un Palazzo completato. Un pin «solo posizione» disponibile non porta la disponibilità.
  */
 function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo {
@@ -370,30 +370,13 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La chiave della richiesta la
   // traduce nel nome il valutatore stesso (`valutaRequisito`): tradurla anche qui era un secondo passaggio inutile (rilievo R6).
   const esitoCondizioni = conNegozioVivo(ctx.st ? valutaRequisitiSpillo(condizioni, ctx.st, nomi) : undefined, dettaglio);
-  // Un pin che viene dall'atlante nativo e' un elemento fisso del mondo — una porta, un forziere,
-  // una scala, una stanza sicura — e non si nasconde mai, qualunque condizione gli venga
-  // attaccata. E' un invariante del runtime, non una convenzione dei dati: passa sopra a
-  // qualunque strada di scrittura, l'API, l'editor, il seed o una modifica diretta al database.
-  // La condizione resta scritta e si vede, ma non fa sparire il pin: nascondere una porta finche'
-  // non hai la chiave vorrebbe dire mostrarla solo quando non serve piu'.
-  //
-  // Vale per **provenienza e tipo insieme**, e servono tutte e due. La sola provenienza
-  // proteggeva anche un negozio disegnato sulla planimetria nativa, che invece di sera chiude e
-  // il pin deve sparire; il solo tipo avrebbe protetto il passaggio che dalla mappa di Tokyo
-  // porta a un quartiere non ancora sbloccato, che in aprile davvero non c'e'.
-  //
-  // Il pin resta **marcato** («non ancora», lo stato vero) e il visore lo tiene in vista: `restaInVista`. Prima lo stato
-  // diventava «ignoto», ma dal 2026-09-13 il visore nasconde anche quello, e la regola non aveva più effetto (ripristinata su
-  // scelta dell'utente, 2026-10-03).
-  //
-  // Due eccezioni. Lo **stato di un altro pin** (2026-09-30): «la porta bloccata si vede solo se il meccanismo non è
-  // azionato» è scritta da chi vuole proprio che la porta sparisca. E l'**ingresso a un Palazzo completato** (2026-09-30),
-  // che sparisce come nel gioco: per questo si valuta dopo, sull'esito già deciso.
+  // Una condizione di visibilità è **assoluta** (decisione dell'utente, 2026-10-09: «se ci sta una condizione di visibilità
+  // questa deve essere assoluta»): se non vale il pin sparisce, anche quando è un elemento del gioco nativo (porta, forziere,
+  // infiltrazione…). Prima questi restavano in vista marcati «non ancora» (`restaInVista`, 2026-10-03): tolto. L'ingresso a un
+  // Palazzo completato sparisce come nel gioco e si valuta dopo, sull'esito già deciso.
   // le prove native si leggono una volta (prima tre: rilievo P8)
   const nativo = nativoDiSpillo(r);
-  const fisso = esitoCondizioni !== undefined && esitoCondizioni.stato !== 'disponibile'
-    && nativo !== null && eStrutturale(r.tipo) && !(ctx.st && bloccatoDaAltriPin(condizioni, ctx.st));
-  const esitoVisibilita = senzaIngressoAPalazzoCompletato(fisso ? { ...esitoCondizioni, restaInVista: true as const } : esitoCondizioni, r, ctx);
+  const esitoVisibilita = senzaIngressoAPalazzoCompletato(esitoCondizioni, r, ctx);
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
     id: r.id, ...(r.uid ? { uid: r.uid } : {}), tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',

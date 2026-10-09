@@ -295,20 +295,13 @@ export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: Stat
 
 /**
  * Si valuta la **proiezione di presenza** di ciascun requisito, non il requisito intero: di `tutte(fascia sera, dote 3)` resta
- * `tutte(fascia sera)`, e se quella è rossa la cosa in quel momento non c'è — dote o non dote. `tieni` sceglie le foglie
- * (di norma le condizioni di presenza).
+ * `tutte(fascia sera)`, e se quella è rossa la cosa in quel momento non c'è — dote o non dote.
  */
-function presenzaRossa(elenco: RequisitoDisponibilita[], st: StatoDisponibilita, tieni?: (tipo: string) => boolean): boolean {
+function presenzaRossa(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): boolean {
   return elenco.some((r, i) => {
-    const presenza = proiezioneDiPresenza(r as unknown as { tipo: string }, tieni) as RequisitoDisponibilita | null;
+    const presenza = proiezioneDiPresenza(r as unknown as { tipo: string }) as RequisitoDisponibilita | null;
     return presenza !== null && valutaRequisito({ ...presenza, testo: r.testo }, i, st).stato === 'rosso';
   });
-}
-
-/** Vero se un pin manca **per lo stato di altri pin** (condizione «Pin di una mappa» rossa): è il caso in cui nemmeno un
- *  elemento fisso del mondo resta in vista, perché chi l'ha scritta vuole proprio che compaia e sparisca con l'altro pin. */
-export function bloccatoDaAltriPin(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): boolean {
-  return presenzaRossa(elenco, st, (tipo) => tipo === 'spillo');
 }
 
 /** Disponibilità complessiva: «bloccato» con almeno un rosso, «ignoto» se resta del grigio, «disponibile» altrimenti (anche senza requisiti). */

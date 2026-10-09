@@ -149,19 +149,12 @@ export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRif
   informativo: ['punto'],
 };
 
-/** Gli elementi fissi del mondo: ci sono sempre, e nessuna condizione li fa sparire.
+/** Gli elementi fissi del mondo: l'arredo — una porta, una scala, un forziere, un passaggio, una stanza sicura.
  *
- * Sono l'arredo del mondo — una porta, una scala, un forziere, un passaggio, una stanza sicura —
- * e restano visibili anche quando sono chiusi, vuoti o non ancora raggiunti: una porta chiusa si
- * vede, e nasconderla finché non hai la chiave vorrebbe dire mostrarla solo quando non serve più.
- *
- * Tutto il resto **può mancare**: un negozio chiude, un'attività è solo di sera, una persona esce
- * solo quando piove. Quelli il pin ce l'hanno solo quando la cosa c'è, altrimenti chi ci va non
- * la trova.
- *
- * La distinzione è per tipo di segnalino e va usata insieme alla provenienza: un `passaggio` che
- * viene dall'atlante nativo è una porta di un Palazzo e c'è sempre, mentre il `passaggio` che
- * dalla mappa di Tokyo porta a un quartiere che apre a giugno, in aprile, davvero non c'è.
+ * Non hanno orari propri: la presenza di un luogo (un negozio che chiude, un'attività solo di sera) non si copia sui loro pin
+ * (`presenzaEntita`). Le condizioni scritte su di loro invece valgono come su ogni altro pin e, se non valgono, li nascondono
+ * (decisione dell'utente, 2026-10-09: «se ci sta una condizione di visibilità questa deve essere assoluta»; prima restavano
+ * in vista marcati «non ancora»).
  */
 export const TIPI_STRUTTURALI: readonly TipoSpillo[] = [
   'passaggio', 'scala', 'uscita', 'infiltrazione', 'scorciatoia', 'rampino', 'porta', 'meccanismo', 'sicura',

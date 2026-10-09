@@ -124,12 +124,10 @@ describe('la condizione «Pin di una mappa» (2026-10-03)', () => {
     expect(descriviRequisitoSpillo({ tipo: 'spillo', spillo: LEVA, segnato: true }, nomi)).toBe('Leva del ponte (Palazzo di Kamoshida › Torre): azionato');
     expect(descriviRequisitoSpillo({ tipo: 'spillo', spillo: 'b'.repeat(32), segnato: true }, nomi)).toBe('Pin non più presente: segnato');
   });
-  it('è di presenza, e la proiezione sui soli pin isola la parte che dipende dagli altri pin', () => {
+  it('è di presenza: la proiezione di presenza tiene la condizione su un altro pin accanto alla data', () => {
     expect(nascondeIlPin('spillo')).toBe(true);
     const misto = { tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'data', dal: '05-01' }, { tipo: 'spillo', spillo: LEVA, segnato: false }] } as const;
     expect(proiezioneDiPresenza(misto as never)).toEqual(misto);
-    expect(proiezioneDiPresenza(misto as never, (t) => t === 'spillo')).toEqual({ ...misto, condizioni: [{ tipo: 'spillo', spillo: LEVA, segnato: false }] });
-    expect(proiezioneDiPresenza({ tipo: 'data', dal: '05-01' }, (t) => t === 'spillo')).toBeNull();
   });
 });
 

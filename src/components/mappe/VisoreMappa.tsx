@@ -173,10 +173,9 @@ export function GalleriaSpillo({ immagini, nome, compatta }: { immagini: Immagin
   );
 }
 
-/** Uno spillo che le sue condizioni tolgono dalla mappa: non disponibile, salvo gli elementi fissi del gioco che restano in vista
- *  marcati (`restaInVista`, 2026-10-03). */
+/** Uno spillo che le sue condizioni tolgono dalla mappa: non disponibile, quale che sia il tipo (condizioni assolute, 2026-10-09). */
 function nascostoPerCondizioni(s: SpilloDto): boolean {
-  return s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile' && !s.disponibilita.restaInVista;
+  return s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
 }
 
 /** Etichetta leggibile della disponibilità di un articolo: il dato porta già la preposizione («dal 18 aprile», «dopo Palazzo di Madarame», «solo in primavera»), come in ArticoliTabella. */
@@ -455,9 +454,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    * lo stesso. Il cartellino «Da segnare» resta, sotto «mostra anche i non disponibili», e porta
    * al punto dove si segna lo stato che manca.
    *
-   * **Gli elementi fissi del gioco restano in vista** (`restaInVista`, scelta dell'utente, 2026-10-03): una porta o un forziere
-   * nativi con una condizione che non vale ci sono lo stesso, e si vedono marcati «non ancora»; si nascondono solo per lo
-   * stato di altri pin. `nonDisponibile` marca, `bloccato` nasconde. */
+   * **Le condizioni sono assolute** (decisione dell'utente, 2026-10-09): «se ci sta una condizione di visibilità questa deve
+   * essere assoluta». Anche una porta o un forziere nativi con una condizione che non vale spariscono; prima restavano in vista
+   * marcati «non ancora» (`restaInVista`, 2026-10-03), tolto. Semitrasparente resta solo ciò che è raccolto, o un pin non
+   * disponibile richiamato con «mostra anche i non disponibili». `nonDisponibile` marca, `bloccato` nasconde. */
   const nonDisponibile = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
   /** Vero se lo spillo va nascosto per le sue condizioni (con il filtro della partita attivo). */
   const bloccato = (s: SpilloDto) => filtraBloccati && nascostoPerCondizioni(s);

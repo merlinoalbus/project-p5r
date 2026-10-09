@@ -76,7 +76,7 @@ describe('condizione «Pin di una mappa»', () => {
     expect([await stato(mecc.id), await stato(scorciatoia.id)]).toEqual(['disponibile', 'disponibile']);
   });
 
-  it('una porta del gioco (elemento fisso) sparisce per lo stato di un altro pin; per una data resta in vista, marcata «non ancora»', async () => {
+  it('una porta del gioco (elemento fisso) sparisce per lo stato di un altro pin e per una data: le condizioni sono assolute (2026-10-09)', async () => {
     const nativa = prepared("SELECT id FROM spillo WHERE tipo = 'porta' AND nativo_json IS NOT NULL AND mappa_chiave = ? ORDER BY id LIMIT 1").pluck().get(mappa) as number;
     const leva = await nuovoPin('meccanismo', 'Leva della porta del gioco');
     await condiziona(nativa, [su(leva.uid, false)]).expect(200);
@@ -85,17 +85,23 @@ describe('condizione «Pin di una mappa»', () => {
     // nascosta: niente `restaInVista`, il visore la toglie
     expect((await leggi(nativa)).disponibilita).toEqual(expect.objectContaining({ stato: 'bloccato' }));
     expect((await leggi(nativa)).disponibilita).not.toHaveProperty('restaInVista');
-    // la regola degli elementi fissi (ripristinata su scelta dell'utente): una data che non vale non toglie la porta, la marca
-    await request(app).put(`/api/partite/${partita}`).send({ dataGioco: '04-12' }).expect(200);
-    await condiziona(nativa, [{ tipo: 'data', dal: '12-24' }]).expect(200);
-    expect((await leggi(nativa)).disponibilita).toMatchObject({ stato: 'bloccato', restaInVista: true });
-    // la data e la leva insieme: la leva azionata la toglie comunque
-    await condiziona(nativa, [{ tipo: 'data', dal: '12-24' }, su(leva.uid, false)]).expect(200);
-    expect((await leggi(nativa)).disponibilita).not.toHaveProperty('restaInVista');
-    // in un gruppo, con la leva non azionata: manca solo la data, e la porta resta in vista
+    // una data che non vale toglie la porta come qualunque altro pin: non resta più in vista marcata «non ancora»
     await segna(leva.id, false);
+    await request(app).put(`/api/partite/${partita}`).send({ dataGioco: '04-21' }).expect(200);
+    await condiziona(nativa, [{ tipo: 'data', dal: '12-24' }]).expect(200);
+    expect((await leggi(nativa)).disponibilita).toEqual(expect.objectContaining({ stato: 'bloccato' }));
+    expect((await leggi(nativa)).disponibilita).not.toHaveProperty('restaInVista');
+    // il caso segnalato dall'utente: «NON dal 20 aprile», con la partita al 21 aprile, la nasconde
+    await condiziona(nativa, [{ tipo: 'non', condizione: { tipo: 'data', dal: '04-20' } }]).expect(200);
+    expect(await stato(nativa)).not.toBe('disponibile');
+    expect((await leggi(nativa)).disponibilita).not.toHaveProperty('restaInVista');
+    // al 19 aprile la stessa condizione vale e la porta c'è
+    await request(app).put(`/api/partite/${partita}`).send({ dataGioco: '04-19' }).expect(200);
+    expect(await stato(nativa)).toBe('disponibile');
+    // in un gruppo, con la leva non azionata: manca solo la data, e la porta sparisce lo stesso
     await condiziona(nativa, [{ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'data', dal: '12-24' }, su(leva.uid, false)] }]).expect(200);
-    expect((await leggi(nativa)).disponibilita).toMatchObject({ stato: 'bloccato', restaInVista: true });
+    expect((await leggi(nativa)).disponibilita).toEqual(expect.objectContaining({ stato: 'bloccato' }));
+    expect((await leggi(nativa)).disponibilita).not.toHaveProperty('restaInVista');
     await condiziona(nativa, []).expect(200);
   });
 
