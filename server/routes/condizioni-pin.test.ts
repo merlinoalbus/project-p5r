@@ -44,7 +44,7 @@ describe('condizione «Pin di una mappa»', () => {
   beforeAll(async () => {
     dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Pin condizionati' })).body.data as { id: number }).id;
-    // una planimetria di un Palazzo con una porta del gioco (nativa): l'elemento fisso che di norma non si nasconde mai
+    // una planimetria di un Palazzo con una porta del gioco (nativa): un elemento fisso, che dal 2026-10-09 le condizioni nascondono come ogni pin
     mappa = prepared("SELECT mappa_chiave FROM spillo WHERE tipo = 'porta' AND nativo_json IS NOT NULL AND mappa_chiave IS NOT NULL ORDER BY id LIMIT 1").pluck().get() as string;
   });
   afterAll(() => closeDb());
@@ -93,7 +93,7 @@ describe('condizione «Pin di una mappa»', () => {
     expect((await leggi(nativa)).disponibilita).not.toHaveProperty('restaInVista');
     // il caso segnalato dall'utente: «NON dal 20 aprile», con la partita al 21 aprile, la nasconde
     await condiziona(nativa, [{ tipo: 'non', condizione: { tipo: 'data', dal: '04-20' } }]).expect(200);
-    expect(await stato(nativa)).not.toBe('disponibile');
+    expect(await stato(nativa)).toBe('bloccato');
     expect((await leggi(nativa)).disponibilita).not.toHaveProperty('restaInVista');
     // al 19 aprile la stessa condizione vale e la porta c'è
     await request(app).put(`/api/partite/${partita}`).send({ dataGioco: '04-19' }).expect(200);

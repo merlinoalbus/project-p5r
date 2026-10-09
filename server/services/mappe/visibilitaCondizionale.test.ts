@@ -6,12 +6,11 @@
 // in cui consulti la guida, nel mondo non c'è. Un quartiere che apre il 18 giugno l'11 aprile non
 // esiste, e i suoi negozi nemmeno: mostrarli manderebbe il giocatore in un posto che non c'è.
 //
-// L'altro senso conta quanto il primo, ed è quello che si era sbagliato. Gli elementi fissi —
-// porte, forzieri, stanze sicure, passaggi, scale — ci sono sempre, e restano visibili anche
-// quando sono chiusi o non ancora raggiunti: una porta chiusa si vede, altrimenti la guida ti
-// direbbe dov'è solo dopo che l'hai aperta. Per un pezzo 1130 pin su 1339 sono stati marcati
-// «da configurare» per via della loro bandiera nativa, e comparivano grigi: questo test esiste
-// perché non ricapiti.
+// Il server distingue: una condizione di presenza che non vale dà «bloccato», un prerequisito che manca «ignoto». Il
+// visore nasconde tutti e due, e dal 2026-10-09 anche sugli elementi fissi nativi (porte, forzieri, passaggi…): le
+// condizioni di visibilità sono assolute (decisione dell'utente). Senza condizioni scritte un elemento fisso c'è sempre:
+// per un pezzo 1130 pin su 1339 sono stati marcati «da configurare» per via della loro bandiera nativa, e comparivano
+// grigi; questo test esiste anche perché non ricapiti.
 // ============================================================
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -120,15 +119,14 @@ describe('visibilità condizionale dei pin', () => {
     sbloccoQuartieri: new Map(), articoliOttenuti: new Set<string>(), letture: new Set<string>(),
   } as unknown as Parameters<typeof valutaRequisitiSpillo>[1];
 
-  it('un prerequisito non soddisfatto non toglie il pin: la porta resta', () => {
-    // «Perizia rango 5» con una partita che non ce l'ha: la porta c'è comunque, e la guida deve
-    // dire dov'è prima che tu possa aprirla, non dopo
-    // «serve il grimaldello», con una partita che non ce l'ha: la porta c'è comunque, e la guida
-    // deve dire dov'è prima che tu possa aprirla, non dopo
+  it('un prerequisito non soddisfatto dà «ignoto», non «bloccato»: il server distingue, il visore nasconde tutti e due', () => {
+    // «serve il grimaldello», con una partita che non ce l'ha: non è una condizione di presenza, quindi lo stato non è
+    // «bloccato»; il visore però toglie anche l'«ignoto» (2026-09-13), e dal 2026-10-09 anche su una porta nativa
     const esito = valutaRequisitiSpillo(
       [{ tipo: 'articolo', articolo: 'grimaldello', testo: 'Grimaldello' }],
       statoVuoto);
     expect(esito.stato).not.toBe('bloccato');
+    expect(esito.stato).not.toBe('disponibile');
   });
 
   it('una condizione di presenza non soddisfatta invece lo toglie', () => {

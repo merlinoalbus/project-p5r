@@ -762,3 +762,18 @@ describe('il popup dello spillo si misura (094: uno spostamento di una voce ha a
     });
   });
 });
+
+it('nell’editor con «Giorno corrente» acceso un pin del gioco con condizioni che non valgono sparisce; i raccolti restano come prima, semitrasparenti (2026-10-09)', () => {
+  // il caso dell'utente: il «Punto di Infiltrazione Iniziale» nativo con «NON dal 20 aprile», partita al 21 aprile
+  const infiltrazione = spillo({ id: 81, nome: 'Punto di Infiltrazione Iniziale', tipo: 'infiltrazione', tipoNome: 'Infiltrazione', x: 30, y: 30,
+    condizioni: [{ tipo: 'non', condizione: { tipo: 'data', dal: '04-20' }, testo: 'Non: dal 20 aprile' }],
+    disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'non', stato: 'rosso', testo: 'Non: dal 20 aprile', dettaglio: 'Non: Disponibile dal 20 aprile (oggi 21 aprile)', manuale: false, confermato: false }] } });
+  const raccolto = spillo({ id: 82, nome: 'Forziere aperto', tipo: 'forziere', tipoNome: 'Forziere', x: 70, y: 70, collezionabile: true, raccolto: true });
+  const editor = { strumento: 'seleziona' as const, selezionatoId: null, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() };
+  render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [infiltrazione, raccolto] }} partitaId={7} vistaGiornoCorrente onNaviga={vi.fn()} editor={editor} /></MemoryRouter>);
+  expect(screen.queryByRole('button', { name: /Punto di Infiltrazione Iniziale/ })).toBeNull();
+  // i raccolti non cambiano: si richiamano con «Mostra anche i raccolti» e si vedono semitrasparenti
+  fireEvent.click(screen.getByRole('button', { name: /Mostra anche i raccolti \(1\)/ }));
+  expect(screen.getAllByRole('button', { name: /Forziere aperto/ }).find((b) => b.classList.contains('spillo-mappa'))).toHaveClass('spillo-mappa--raccolto');
+  expect(screen.queryByRole('button', { name: /Punto di Infiltrazione Iniziale/ })).toBeNull();
+});

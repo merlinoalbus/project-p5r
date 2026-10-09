@@ -998,6 +998,8 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
 - Condizione «Pin di una mappa» (voce 2): `{ tipo: 'spillo', spillo: uid, segnato }`, con «non segnato» come operatore (oltre a
   NON) perché l'esempio dell'utente è proprio «la porta si vede se il meccanismo **non** è raccolto». È **di presenza** e, unica
   fra tutte, nasconde anche gli elementi fissi del gioco: chi la scrive vuole che il pin compaia e sparisca con l'altro.
+  **Superato il 2026-10-09** («Le condizioni di visibilità dei pin sono assolute»): ora ogni condizione che non vale nasconde
+  anche gli elementi fissi, non più solo questa.
   Riferimento per uid (sopravvive a reseed e pacchetti); un pin eliminato, o diventato di un tipo senza stato, lascia la
   condizione grigia («Pin non più presente», «… non ha più uno stato»), con il cartellino «Da correggere» — non la si toglie
   da sola, perché togliere una foglia da un TUTTE o da un NON cambierebbe il senso della condizione senza che l'utente lo
@@ -1009,11 +1011,14 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   - **ripristinata la regola degli elementi fissi**: dal 2026-09-13 il visore nasconde anche lo stato «ignoto», e la
     vecchia conversione bloccato → ignoto dei pin fissi nativi non li teneva più in vista. Ora il server lascia lo stato vero
     e aggiunge `restaInVista`: la porta, il forziere, la scala nativi con una condizione che non vale si vedono marcati
-    «non ancora»; si nascondono solo per lo stato di altri pin e, come prima, l'ingresso a un Palazzo completato;
+    «non ancora»; si nascondono solo per lo stato di altri pin e, come prima, l'ingresso a un Palazzo completato.
+    **Superata il 2026-10-09** («Le condizioni di visibilità dei pin sono assolute»): `restaInVista` è tolto, gli elementi
+    fissi con una condizione che non vale spariscono;
   - **corretto il NON su un gruppo misto**: `NON(TUTTE(Coraggio 5, Leva azionata))` faceva sparire il pin appena la leva era
     azionata anche col Coraggio basso; ora un NON su un gruppo che mescola presenza e prerequisiti non nasconde da solo.
 - Confermato dall'utente (2026-10-03, «1 ok»): sui passaggi e le scale del gioco che restano in vista marcati «non ancora» il
-  pulsante «Vai: …» resta disattivato. Il «2 corretto» (pin senza stato ma con voce della guida non citabile) l'avevo letto
+  pulsante «Vai: …» resta disattivato (dal 2026-10-09 quei pin non restano più in vista: il «Vai» disattivato vale quando li
+  si richiama con «Mostra anche i non ancora disponibili»). Il «2 corretto» (pin senza stato ma con voce della guida non citabile) l'avevo letto
   come una conferma; la domanda successiva dell'utente sul pin Confidente ha chiarito che andava **corretto**: vedi sotto.
 
 ## 2026-10-03 — Tutti i pin con uno stato: parole e condizioni
@@ -1372,7 +1377,11 @@ invece è se qualcosa è stato "raccolto" in quel caso va bene resti semitraspar
 
 Che cosa ne segue:
 - se le condizioni di un pin non valgono, il pin sparisce, di qualunque tipo e provenienza sia;
-- ricompare, grigio, solo con «Mostra anche i non ancora disponibili» nel visore, o nell'editor con «Giorno corrente» spento;
+- ricompare, grigio, solo con «Mostra anche i non ancora disponibili» nel visore; nell'editor con «Giorno corrente» spento si
+  vedono tutti i pin, normali (la mappa è chiesta senza partita, quindi senza disponibilità);
+- lato server un prerequisito non soddisfatto lascia lo stato «ignoto» e una condizione di presenza «bloccato», ma il visore
+  nasconde tutti e due: anche un prerequisito che manca (es. un oggetto non ancora ottenuto) fa sparire un elemento fisso
+  nativo;
 - i pin raccolti non cambiano;
 - tolti `restaInVista`, `bloccatoDaAltriPin` e il parametro `tieni` di `proiezioneDiPresenza`, che servivano solo a quella
   regola;
