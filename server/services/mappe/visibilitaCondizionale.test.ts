@@ -2,9 +2,9 @@
 // Il contratto di visibilità dei pin, provato nei due sensi
 // ============================================================
 //
-// La regola, come l'ha data l'utente: un pin si nasconde **solo** quando quella cosa, nel momento
-// in cui consulti la guida, nel mondo non c'è. Un quartiere che apre il 18 giugno l'11 aprile non
-// esiste, e i suoi negozi nemmeno: mostrarli manderebbe il giocatore in un posto che non c'è.
+// La regola: un pin si vede solo se tutte le sue condizioni valgono (2026-09-13: «un oggetto deve essere visibile solo se
+// tutte le condizioni danno esito true»; 2026-10-09: le condizioni sono assolute, anche sugli elementi fissi). Un quartiere
+// che apre il 18 giugno l'11 aprile non esiste, e i suoi negozi nemmeno: mostrarli manderebbe il giocatore dove non c'è.
 //
 // Il server distingue: una condizione di presenza che non vale dà «bloccato», un prerequisito che manca «ignoto». Il
 // visore nasconde tutti e due, e dal 2026-10-09 anche sugli elementi fissi nativi (porte, forzieri, passaggi…): le
@@ -108,9 +108,9 @@ describe('visibilità condizionale dei pin', () => {
 
   // ---- Il contratto visto dal runtime, non dai dati -----------------------------------------
   //
-  // I dati oggi sono corretti, ma il difetto vero sarebbe un runtime che permette di violarli:
-  // basterebbe che qualcuno aggiungesse un prerequisito a una porta perché sparisse dalla mappa.
-  // Questi due controlli guardano la valutazione, non il seed.
+  // Il server distingue due esiti: «bloccato» quando una condizione di presenza non vale (la cosa adesso non c'è),
+  // «ignoto» quando manca solo un prerequisito. Il visore li nasconde tutti e due (`nascostoPerCondizioni`).
+  // Questi due controlli guardano la distinzione del server, non il seed.
 
   // Lo stato di una partita all'11 aprile, di giorno, senza doti alzate: il minimo che serve
   // perché la valutazione dia un verdetto invece di un «non so».
@@ -129,7 +129,7 @@ describe('visibilità condizionale dei pin', () => {
     expect(esito.stato).not.toBe('disponibile');
   });
 
-  it('una condizione di presenza non soddisfatta invece lo toglie', () => {
+  it('una condizione di presenza non soddisfatta dà invece «bloccato» lato server', () => {
     const esito = valutaRequisitiSpillo(
       [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }],
       statoVuoto);
