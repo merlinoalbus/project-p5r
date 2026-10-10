@@ -9,7 +9,7 @@ import { SchedaSpillo } from './VisoreMappa';
 import type { SpilloDto } from '../../types';
 
 /** Spillo «Leva» di tipo meccanismo sulla mappa k-01, non collezionabile, con i campi di `extra` che sovrascrivono i predefiniti. */
-const pin = (extra: Partial<SpilloDto>): SpilloDto => ({ id: 1, mappaChiave: 'k-01', tipo: 'meccanismo', tipoNome: 'Meccanismo', colore: '#64748b', nome: 'Leva', descrizione: '', x: 20, y: 30, riferimento: null, collezionabile: false, condizioni: [], ordine: 0, origine: 'utente', raccolto: false, immagini: [], updatedAt: '', dettaglio: null, voce: null, ...extra });
+const pin = (extra: Partial<SpilloDto>): SpilloDto => ({ id: 1, mappaChiave: 'k-01', tipo: 'meccanismo', tipoNome: 'Meccanismo', colore: '#64748b', nome: 'Leva', descrizione: '', x: 20, y: 30, riferimento: null, collezionabile: false, condizioni: [], ordine: 0, origine: 'utente', raccolto: false, immagini: [], updatedAt: '', dettaglio: null, voci: [], ...extra });
 /** Disegna la scheda dello spillo `s` per la partita data (null = nessuna partita), con tutte le callback finte. */
 const monta = (s: SpilloDto, partitaId: number | null) => render(<MemoryRouter><SchedaSpillo spillo={s} partitaId={partitaId} occupato={false} onNaviga={vi.fn()} onChiudi={vi.fn()} onCentra={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
 
@@ -24,7 +24,7 @@ it('senza partita l’invito dice che cosa si potrebbe segnare, con la parola de
   const seme = monta(pin({ tipo: 'seme-bramosia', tipoNome: 'Seme della bramosia', nome: 'Seme', collezionabile: true }), null);
   expect(screen.getByText(/per segnarne lo stato \(raccolto\)\./)).toBeInTheDocument();
   seme.unmount();
-  const conVoce = monta(pin({ voce: { chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null } }), null);
+  const conVoce = monta(pin({ voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null }] }), null);
   expect(screen.getByText(/per segnare la sua voce della guida\./)).toBeInTheDocument();
   conVoce.unmount();
   // una nota non ha niente da segnare: nessun invito
@@ -43,7 +43,7 @@ it('segnato, l’intestazione dice la parola del tipo e il pulsante per toglierl
 });
 
 it('un pin collegato a una voce della guida dice lo stato della voce, lo stesso dei suoi pulsanti (esaurito, non «azionato»)', () => {
-  monta(pin({ raccolto: true, voce: { chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: true, dungeon: 'k', area: 'k-01', stato: 'esaurito' } }), 7);
+  monta(pin({ raccolto: true, voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: true, dungeon: 'k', area: 'k-01', stato: 'esaurito' }] }), 7);
   expect(screen.getByText('Meccanismo · esaurito')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Riapri' })).toBeInTheDocument();
 });

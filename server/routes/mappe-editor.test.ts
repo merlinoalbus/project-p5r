@@ -109,11 +109,11 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const dettaglio = (await request(app).get(`/api/mappe/${area.chiave}?partita=${partitaId}`)).body.data as MappaDto;
     expect(dettaglio.percorso.map((p) => p.chiave)).toEqual([area.genitore, area.chiave]);
     expect(dettaglio.spilli.length).toBe(area.numeroSpilli);
-    // la voce della guida sta nel campo suo (094): il riferimento «punto» dato alla creazione è diventato la voce
-    const spilloPunto = dettaglio.spilli.find((s) => !!s.voce)!;
+    // le voci della guida stanno a parte (094, 098): il riferimento «punto» dato alla creazione è diventato una voce del pin
+    const spilloPunto = dettaglio.spilli.find((s) => s.voci.length > 0)!;
     expect(spilloPunto.riferimento).toBeNull();
     expect(spilloPunto.dettaglio).toBeNull();
-    expect(spilloPunto.voce?.area).toBeTruthy();
+    expect(spilloPunto.voci[0]?.area).toBeTruthy();
     expect(spilloPunto.raccolto).toBe(false);
     expect(spilloPunto.x).toBeGreaterThanOrEqual(0);
     expect(spilloPunto.x).toBeLessThanOrEqual(100);
@@ -174,17 +174,17 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const albero = (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[];
     const area = albero.find((m) => m.nome === 'Fixture geografica')!;
     const prima = (await request(app).get(`/api/mappe/${area.chiave}?partita=${partitaId}`)).body.data as MappaDto;
-    const spillo = prima.spilli.find((s) => !!s.voce)!;
+    const spillo = prima.spilli.find((s) => s.voci.length > 0)!;
     const raccolto = (await request(app).put(`/api/partite/${partitaId}/spilli/${spillo.id}`).send({ raccolto: true })).body.data as SpilloDto;
     expect(raccolto.raccolto).toBe(true);
-    expect(raccolto.voce?.stato).toBe('ottenuto');
+    expect(raccolto.voci[0]?.stato).toBe('ottenuto');
     // senza partita lo stato non compare; con un'altra partita resta non raccolto
     expect((await request(app).get(`/api/mappe/${area.chiave}`)).body.data.spilli.find((s: SpilloDto) => s.id === spillo.id).raccolto).toBe(false);
     const altra = ((await request(app).post('/api/partite').send({ nome: 'Altra' })).body.data as { id: number }).id;
     expect((await request(app).get(`/api/mappe/${area.chiave}?partita=${altra}`)).body.data.spilli.find((s: SpilloDto) => s.id === spillo.id).raccolto).toBe(false);
     const annullato = (await request(app).put(`/api/partite/${partitaId}/spilli/${spillo.id}`).send({ raccolto: false })).body.data as SpilloDto;
     expect(annullato.raccolto).toBe(false);
-    expect(annullato.voce?.stato).toBeNull();
+    expect(annullato.voci[0]?.stato).toBeNull();
     expect((await request(app).put(`/api/partite/${partitaId}/spilli/999999`).send({ raccolto: true })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${partitaId}/spilli/${spillo.id}`).send({ raccolto: 'sì' })).status).toBe(400);
   });

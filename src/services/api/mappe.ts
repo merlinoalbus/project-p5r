@@ -2,7 +2,7 @@
 // API mappe a livelli e spilli (Fase 13): albero, dettaglio con stato della partita, editor, esportazione/importazione
 // ============================================================
 
-import type { DestinazioneSpillo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../types';
+import type { DestinazioneSpillo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto, VoceCollegabileDto } from '../../types';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
 import { apiDelete, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
@@ -53,6 +53,9 @@ export const impostaSpilloRaccolto = (partitaId: number, spilloId: number, racco
 export interface RiferimentoTrovatoApi { tipo: TipoRiferimento; chiave: string; nome: string; dettaglio: string }
 /** Entità collegabili a uno spillo (editor): per tipo e testo. */
 export const cercaRiferimenti = (tipo: TipoRiferimento, q: string, limite = 30): Promise<RiferimentoTrovatoApi[]> => apiGet(`/mappe/riferimenti${queryString({ tipo, q, limite })}`);
+
+/** Le voci della guida che si possono collegare allo spillo (098: un pin può averne più d'una); si collegano con `collegaPinAlPunto`. */
+export const getVociCollegabili = (spilloId: number): Promise<VoceCollegabileDto[]> => apiGet(`/mappe/spilli/${spilloId}/voci-collegabili`);
 
 /** Pacchetto JSON con mappe, spilli e immagini dell'istanza (base64); con `radice` solo quella mappa e le discendenti. */
 export const esportaMappe = (radice?: string): Promise<EsportazioneMappeDto> => apiGet(`/mappe/esporta${queryString({ radice })}`, { timeoutMs: 120_000 });

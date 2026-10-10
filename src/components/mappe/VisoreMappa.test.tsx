@@ -13,7 +13,7 @@ import type { MappaDto, SpilloDto } from '../../types';
 
 /** Spillo seed al centro della mappa di Shibuya, con id, nome e tipo obbligatori (il nome del tipo ripete il tipo) e gli altri campi di `extra`. */
 function spillo(extra: Partial<SpilloDto> & { id: number; nome: string; tipo: SpilloDto['tipo'] }): SpilloDto {
-  return { mappaChiave: 'citta-shibuya', tipoNome: extra.tipo, colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '2026-09-04T00:00:00.000Z', ...extra };
+  return { mappaChiave: 'citta-shibuya', tipoNome: extra.tipo, colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '2026-09-04T00:00:00.000Z', ...extra };
 }
 
 const mappa: MappaDto = {
@@ -26,7 +26,7 @@ const mappa: MappaDto = {
     spillo({ id: 2, nome: 'Scrigno raccolto', tipo: 'forziere', tipoNome: 'Forziere', x: 80, y: 80, collezionabile: true, raccolto: true }),
     spillo({ id: 3, nome: 'Verso il centro', tipo: 'passaggio', tipoNome: 'Passaggio', x: 10, y: 90, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' }, dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: '/api/immagini/mappa/shibuya-centro/file', asset: null } }, immagini: [{ id: 31, url: '/api/immagini/spillo/3-a/file', asset: null, didascalia: 'La scala', ordine: 0 }, { id: 32, url: null, asset: 'spilli/citta-shibuya/3-2', didascalia: '', ordine: 1 }] }),
     spillo({ id: 4, nome: 'Scrigno da aprire', tipo: 'forziere', tipoNome: 'Forziere', x: 90, y: 10, collezionabile: true, descrizione: 'Contiene un Panino a mezzaluna.' }),
-    spillo({ id: 5, nome: 'Forziere del corridoio', tipo: 'forziere', tipoNome: 'Forziere', x: 40, y: 60, collezionabile: true, voce: { chiave: 'kamoshida-02/3', tipo: 'forziere', nome: 'Forziere del corridoio', descrizione: '', esauribile: true, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } }),
+    spillo({ id: 5, nome: 'Forziere del corridoio', tipo: 'forziere', tipoNome: 'Forziere', x: 40, y: 60, collezionabile: true, voci: [{ chiave: 'kamoshida-02/3', tipo: 'forziere', nome: 'Forziere del corridoio', descrizione: '', esauribile: true, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null }] }),
     // spillo con una condizione non soddisfatta alla data corrente della partita: nascosto finché non si chiede di vederlo
     spillo({ id: 6, nome: 'Bancarella estiva', tipo: 'attivita', tipoNome: 'Attività', x: 60, y: 30, condizioni: [{ tipo: 'data', dal: '06-18', testo: 'dal 18 giugno' }], disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'data', stato: 'rosso', testo: 'dal 18 giugno', dettaglio: 'Disponibile dal 18 giugno, oggi è il 20 aprile', manuale: false, confermato: false }] } }),
   ],
@@ -134,10 +134,10 @@ describe('VisoreMappa', () => {
     const popup = within(screen.getByRole('dialog', { name: 'Forziere del corridoio' }));
     expect(popup.queryByRole('button', { name: 'Aperto' })).not.toBeInTheDocument();
     fireEvent.click(popup.getByRole('button', { name: 'Esaurito' }));
-    expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 5 }), 'esaurito');
+    expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 5 }), 'kamoshida-02/3', 'esaurito');
     await waitFor(() => expect(popup.getByRole('button', { name: 'Ottenuto' })).not.toBeDisabled());
     fireEvent.click(popup.getByRole('button', { name: 'Ottenuto' }));
-    expect(onStatoPunto).toHaveBeenLastCalledWith(expect.objectContaining({ id: 5 }), 'ottenuto');
+    expect(onStatoPunto).toHaveBeenLastCalledWith(expect.objectContaining({ id: 5 }), 'kamoshida-02/3', 'ottenuto');
     fireEvent.click(screen.getByRole('button', { name: 'Negozio: Untouchable' }));
     const scheda = within(await screen.findByRole('region', { name: 'Scheda: Untouchable' }));
     fireEvent.click(scheda.getByRole('checkbox', { name: 'Pistola modello Tkachev comprato' }));
@@ -690,18 +690,18 @@ describe('VisoreMappa in modalità scelta', () => {
 
 it('un pin non collezionabile collegato a una voce della guida si segna dal suo popup, come la voce', async () => {
   const sicura = spillo({ id: 9, nome: 'Stanza sicura', tipo: 'sicura', tipoNome: 'Stanza sicura', x: 30, y: 40,
-    voce: { chiave: 'kamoshida-02/0', tipo: 'sicura', nome: 'Stanza sicura', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } });
+    voci: [{ chiave: 'kamoshida-02/0', tipo: 'sicura', nome: 'Stanza sicura', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null }] });
   const onStatoPunto = vi.fn().mockResolvedValue(undefined);
   render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [sicura] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={onStatoPunto} /></MemoryRouter>);
   fireEvent.click(screen.getByRole('button', { name: 'Stanza sicura: Stanza sicura' }));
   fireEvent.click(within(screen.getByRole('dialog', { name: 'Stanza sicura' })).getByRole('button', { name: 'Ottenuto' }));
-  await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 9 }), 'ottenuto'));
+  await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 9 }), 'kamoshida-02/0', 'ottenuto'));
 });
 
 it('un passaggio con la sua destinazione e una voce «Storia» porta altrove e si segna, le due cose insieme (094)', async () => {
   const passaggio = spillo({ id: 11, nome: 'Verso la sala', tipo: 'passaggio', tipoNome: 'Passaggio', x: 30, y: 40, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
     dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: null, asset: null } },
-    voce: { chiave: 'kamoshida-02/12', tipo: 'storia', nome: 'Entra nella sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } });
+    voci: [{ chiave: 'kamoshida-02/12', tipo: 'storia', nome: 'Entra nella sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null }] });
   const onStatoPunto = vi.fn().mockResolvedValue(undefined);
   const onNaviga = vi.fn();
   render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={onNaviga} onRaccolto={vi.fn()} onStatoPunto={onStatoPunto} /></MemoryRouter>);
@@ -709,12 +709,12 @@ it('un passaggio con la sua destinazione e una voce «Storia» porta altrove e s
   const popup = within(screen.getByRole('dialog', { name: 'Verso la sala' }));
   expect(popup.getByRole('button', { name: /Shibuya centro/ })).toBeInTheDocument();
   fireEvent.click(popup.getByRole('button', { name: 'Ottenuto' }));
-  await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 11 }), 'ottenuto'));
+  await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 11 }), 'kamoshida-02/12', 'ottenuto'));
 });
 
 it('un pin collegato a una voce descrittiva della guida non offre stato, né nel popup né nella scheda laterale', () => {
   const nota = spillo({ id: 10, nome: 'Nota della sala', tipo: 'nota', tipoNome: 'Nota', x: 30, y: 40,
-    voce: { chiave: 'kamoshida-02/9', tipo: 'altro', nome: 'Nota della sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } });
+    voci: [{ chiave: 'kamoshida-02/9', tipo: 'altro', nome: 'Nota della sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null }] });
   render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [nota] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
   fireEvent.click(screen.getByRole('button', { name: 'Nota: Nota della sala' }));
   // popup e scheda laterale (il pannello è aperto a schermo intero): la dicitura, nessun pulsante di stato
@@ -726,7 +726,7 @@ it('un pin collegato a una voce descrittiva della guida non offre stato, né nel
 describe('il popup dello spillo si misura (094: uno spostamento di una voce ha anche «Ottenuto»)', () => {
   const passaggio = spillo({ id: 40, nome: 'Torre Inferiore', tipo: 'passaggio', tipoNome: 'Passaggio', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
     dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: null, asset: null } },
-    voce: { chiave: 'kamoshida-15/1', tipo: 'storia', nome: 'Si apre la torre', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-15', stato: null } });
+    voci: [{ chiave: 'kamoshida-15/1', tipo: 'storia', nome: 'Si apre la torre', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-15', stato: null }] });
   // Le misure restano finte per tutto il caso: in jsdom la tela si misura in un rAF, che può arrivare dopo la comparsa del popup.
   let tela = { w: 0, h: 0 };
   beforeEach(() => {
@@ -776,4 +776,32 @@ it('nell’editor con «Giorno corrente» acceso un pin del gioco con condizioni
   fireEvent.click(screen.getByRole('button', { name: /Mostra anche i raccolti \(1\)/ }));
   expect(screen.getAllByRole('button', { name: /Forziere aperto/ }).find((b) => b.classList.contains('spillo-mappa'))).toHaveClass('spillo-mappa--raccolto');
   expect(screen.queryByRole('button', { name: /Punto di Infiltrazione Iniziale/ })).toBeNull();
+});
+
+it('un pin con più voci della guida (098): nel popup una riga per voce, ognuna coi suoi pulsanti; nella scheda ogni voce col suo stato', async () => {
+  /** Una voce «Storia» di Kamoshida con chiave, nome, stato ed esauribilità dati. */
+  const voce = (chiave: string, nome: string, stato: 'ottenuto' | 'esaurito' | null, esauribile = false) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile, dungeon: 'kamoshida', area: 'kamoshida-01', stato });
+  // una voce già segnata e una ancora da fare: il pin non è fatto (voci indipendenti, 2026-10-09)
+  const infiltrazione = spillo({ id: 91, nome: 'Punto di infiltrazione', tipo: 'infiltrazione', tipoNome: 'Infiltrazione', x: 30, y: 40,
+    voci: [voce('kamoshida-01/0', 'Infiltrati nel castello', 'ottenuto'), voce('kamoshida-05/1', 'Ritorno al castello', null, true)] });
+  const onStatoPunto = vi.fn().mockResolvedValue(undefined);
+  render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [infiltrazione] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={onStatoPunto} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: 'Infiltrazione: Punto di infiltrazione' }));
+  const popup = within(screen.getByRole('dialog', { name: 'Punto di infiltrazione' }));
+  const prima = within(popup.getByRole('group', { name: 'Voce: Infiltrati nel castello' }));
+  const seconda = within(popup.getByRole('group', { name: 'Voce: Ritorno al castello' }));
+  // la prima è segnata: si riapre; la seconda si segna, anche esaurita
+  expect(prima.queryByRole('button', { name: 'Ottenuto' })).toBeNull();
+  fireEvent.click(prima.getByRole('button', { name: 'Riapri' }));
+  await waitFor(() => expect(onStatoPunto).toHaveBeenLastCalledWith(expect.objectContaining({ id: 91 }), 'kamoshida-01/0', null));
+  await waitFor(() => expect(seconda.getByRole('button', { name: 'Esaurito' })).not.toBeDisabled());
+  fireEvent.click(seconda.getByRole('button', { name: 'Esaurito' }));
+  await waitFor(() => expect(onStatoPunto).toHaveBeenLastCalledWith(expect.objectContaining({ id: 91 }), 'kamoshida-05/1', 'esaurito'));
+  // la scheda: ogni voce col suo stato
+  await waitFor(() => expect(popup.getByRole('button', { name: 'Dettagli' })).not.toBeDisabled());
+  fireEvent.click(popup.getByRole('button', { name: 'Dettagli' }));
+  const scheda = within(await screen.findByRole('region', { name: 'Scheda: Punto di infiltrazione' }));
+  const elenco = within(scheda.getByRole('list', { name: 'Voci della guida' }));
+  expect(elenco.getByText('«Infiltrati nel castello»: nella Guida: ottenuto')).toBeInTheDocument();
+  expect(elenco.getByText('«Ritorno al castello»: esauribile · non ancora gestito nella Guida')).toBeInTheDocument();
 });

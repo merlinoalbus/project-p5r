@@ -923,10 +923,13 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   non le chiavi dei dati (nessuna migrazione).
 - Il pin «Tesoro» (generico) si toglie dal registro: ridondante con «Tesoro del Palazzo», nessun pin né voce lo usava
   (misurato anche sul canone di produzione).
-- Chiarito: una voce si collega a più pin (un pin a una sola voce). «Enigma» diventa un contenitore di passi (voce 3 in ROADMAP):
+- Chiarito: una voce si collega a più pin (un pin a una sola voce; **superato il 2026-10-09**: un pin può avere più voci, vedi
+  «Un pin può appartenere a più voci della guida»). «Enigma» diventa un contenitore di passi (voce 3 in ROADMAP):
   il caso d'uso dell'utente è la porta che si apre con un meccanismo di sblocco, ciascuno col suo pin.
 
 ### 2026-10-01 — La voce della guida di un pin sta in un campo suo
+- **Superato il 2026-10-09** («Un pin può appartenere a più voci della guida», migrazione 098): le voci stanno in `spillo_voce`,
+  una o più per pin; il campo `voce_chiave` è uscito dallo schema e il pacchetto porta `voci` (legge ancora `voce`).
 - Scelta dell'utente: «Campo dedicato alla voce». `spillo.voce_chiave` (migrazione 094, `ON DELETE SET NULL`) porta la voce; il
   riferimento resta quello del pin (destinazione, Confidente…). Così qualunque pin del Palazzo si collega, compresi gli 88 del
   canone di produzione che avevano già un riferimento.
@@ -1390,3 +1393,33 @@ Che cosa ne segue:
 
 Mio errore nella risposta all'utente: nel primo screenshot ho letto il «NON» come attivo e ho attribuito la visibilità a una
 condizione scritta al contrario. Non era così.
+
+## 2026-10-09 — Un pin può appartenere a più voci della guida
+
+Richiesta dell'utente: «i pin dei luoghi possono essere agganciati anche a più di un evento area per volta...». Alla mia domanda
+(«intendi che lo stesso pin, per esempio un punto di infiltrazione, deve potersi collegare a più voci della guida, anche di aree
+diverse? Oggi un pin si collega a una voce sola») l'utente ha risposto «sì a entrambe le domande» (l'altra domanda era la
+cancellazione delle copie dei database). Prima un pin di una voce rifiutava la seconda (409 `pin-gia-collegato`, «scollegalo prima»).
+
+Risposte dell'utente, parola per parola:
+- «Un pin collegato a più voci (es. il punto di infiltrazione per «Infiltrati nel castello» e per un evento di un'altra area): come
+  si comportano gli stati?» → «Voci indipendenti (Recommended)» («Ogni voce si segna da sola. Il pin risulta fatto (semitrasparente,
+  contato come preso) solo quando tutte le sue voci sono segnate. Nel popup della mappa compare una riga per voce, ciascuna con i
+  suoi pulsanti Ottenuto/Esaurito.»);
+- «Da dove si collegano le voci a un pin?» → «Guida ed editor (Recommended)» («Dalla guida con «Collega pin», come oggi. Nell'editor
+  della mappa ogni pin mostra l'elenco delle sue voci, con «Scollega» e «Aggiungi voce».»).
+
+Che cosa ne segue:
+- **Dati.** Il collegamento sta in `spillo_voce(spillo_id, voce_chiave)`, molti a molti (migrazione 098). I collegamenti di
+  `spillo.voce_chiave` (094) passano lì, e la colonna esce dallo schema: `spillo` si ricostruisce come nella 042.
+- **Stati.** Ogni voce si segna da sola; il pin è fatto quando le sue voci sono tutte segnate. Questo vale per il «raccolto» del
+  DTO, la scheda e il completamento del Palazzo (dove il pin conta una volta sola) e la condizione «Pin di una mappa».
+  - Collegando una voce nuova a un pin che ne ha altre, la voce non si segna da sé: il «raccolto» del pin parla delle altre voci.
+  - Scollegando o eliminando una voce, il pin segue quelle che gli restano.
+  - Un pin con una voce sola si comporta come prima.
+- **Guida.** «Collega pin» collega anche un pin che ha già altre voci, e la voce lo elenca fra i suoi.
+- **Editor delle mappe.** Il pannello «Voci della guida» elenca le voci del pin con «Scollega» e «Aggiungi voce»: le voci si scelgono
+  fra quelle del suo Palazzo che si segnano e non sono già sue (`GET /api/mappe/spilli/:id/voci-collegabili`). Ogni gesto si salva subito.
+- **Visore.** Nel popup, con più voci, una riga per voce col suo nome e i suoi pulsanti; nella scheda, ogni voce col suo stato.
+- **Pacchetto delle mappe.** Porta `voci`; legge ancora `voce` (094-097) e il riferimento «punto» (prima della 094). Una voce che non
+  regge si scarta e si conta, una per voce.

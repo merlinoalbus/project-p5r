@@ -45,7 +45,7 @@ describe('Enigma con i suoi passi', () => {
     partita = ((await request(app).post('/api/partite').send({ nome: 'Enigmi' })).body.data as { id: number }).id;
     // un'area di Kamoshida con una planimetria e due pin liberi sopra; un'altra area del Palazzo
     const righe = prepared(`SELECT e.entita_chiave AS area, s.id, s.uid FROM mappa_entita e JOIN spillo s ON s.mappa_chiave = e.mappa_chiave
-      WHERE e.entita_tipo = 'area' AND e.entita_chiave LIKE 'kamoshida-%' AND s.riferimento_tipo IS NULL AND s.voce_chiave IS NULL AND s.uid IS NOT NULL AND s.tipo <> 'nemico' ORDER BY e.entita_chiave, s.id`)
+      WHERE e.entita_tipo = 'area' AND e.entita_chiave LIKE 'kamoshida-%' AND s.riferimento_tipo IS NULL AND NOT EXISTS (SELECT 1 FROM spillo_voce sv WHERE sv.spillo_id = s.id) AND s.uid IS NOT NULL AND s.tipo <> 'nemico' ORDER BY e.entita_chiave, s.id`)
       .all() as Array<{ area: string; id: number; uid: string }>;
     const perArea = new Map<string, typeof righe>();
     for (const r of righe) perArea.set(r.area, [...(perArea.get(r.area) ?? []), r]);
@@ -279,8 +279,8 @@ describe('Enigma con i suoi passi', () => {
     // l'Enigma segnato dalla guida segna i passi e i loro pin
     await statoPunto(enigma.chiave, 'ottenuto');
     expect([raccolto(uid(leva.id)), raccolto(uid(porta.id))]).toEqual([1, 1]);
-    const spilli = (await request(app).get(`/api/mappe/${mappaArea}?partita=${partita}`).expect(200)).body.data.spilli as Array<{ id: number; raccolto: boolean; voce: { stato: string | null } | null }>;
-    expect(spilli.find((s) => s.id === porta.id)).toMatchObject({ raccolto: true, voce: { stato: 'ottenuto' } });
+    const spilli = (await request(app).get(`/api/mappe/${mappaArea}?partita=${partita}`).expect(200)).body.data.spilli as Array<{ id: number; raccolto: boolean; voci: Array<{ stato: string | null }> }>;
+    expect(spilli.find((s) => s.id === porta.id)).toMatchObject({ raccolto: true, voci: [{ stato: 'ottenuto' }] });
     // riaperto l'Enigma, tutto torna da fare: passi e pin
     await statoPunto(enigma.chiave, null);
     expect([raccolto(uid(leva.id)), raccolto(uid(porta.id)), segnato(passoLeva.chiave), segnato(passoPorta.chiave)]).toEqual([0, 0, null, null]);

@@ -96,7 +96,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
       }
       // Un punto di interesse sta in un'area della guida, e l'area — quando una planimetria la
       // dichiara — è un posto sulla mappa. È un'associazione registrata, non una somiglianza: il
-      // punto porta dove porta la sua area. I suoi pin sulle planimetrie (`voce_chiave`, 094) portano al posto esatto, più sotto;
+      // punto porta dove porta la sua area. I suoi pin sulle planimetrie (`spillo_voce`, 098) portano al posto esatto, più sotto;
       // una voce senza pin, o con i soli elementi della guida senza mappa, arriva comunque alla sua area.
       if (tipo === 'punto') {
         const a = prepared('SELECT area_chiave FROM punto_interesse WHERE chiave = ?').get(chiave) as { area_chiave: string | null } | undefined;
@@ -122,7 +122,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
           }
           // i pin di una voce della guida la portano nel campo suo (094), non nel riferimento
           if (r.tipo === 'punto') {
-            for (const s of prepared('SELECT s.id,s.nome,s.mappa_chiave FROM spillo s JOIN mappa m ON m.chiave=s.mappa_chiave WHERE s.voce_chiave=? ORDER BY s.mappa_chiave,s.ordine,s.id').all(r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {
+            for (const s of prepared('SELECT s.id,s.nome,s.mappa_chiave FROM spillo_voce sv JOIN spillo s ON s.id=sv.spillo_id JOIN mappa m ON m.chiave=s.mappa_chiave WHERE sv.voce_chiave=? ORDER BY s.mappa_chiave,s.ordine,s.id').all(r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {
               aggiungi(s.mappa_chiave, s.id, s.nome, 'riferimento-spillo', r);
             }
           }

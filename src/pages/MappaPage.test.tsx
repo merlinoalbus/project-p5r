@@ -28,8 +28,8 @@ const albero: MappaRiassuntoDto[] = [
   riassunto({ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', numeroFigli: 1 }),
   riassunto({ chiave: 'kamoshida-01', nome: 'Ingresso', tipo: 'area', genitore: 'dungeon-kamoshida', numeroSpilli: 5 }),
 ];
-const forziere: SpilloDto = { id: 4, mappaChiave: 'citta-shibuya', tipo: 'forziere', tipoNome: 'Forziere', colore: '#eab308', nome: 'Scrigno', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: true, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
-const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2, immagineUrl: '/pianta-test.png' }), larghezza: 800, altezza: 600, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], arrivi: [], spilli: [forziere, { ...forziere, id: 5, nome: 'Passaggio', tipo: 'passaggio', tipoNome: 'Passaggio', collezionabile: false, x: 60, y: 60 }, { ...forziere, id: 6, nome: 'Tesoro del Palazzo', tipo: 'tesoro-palazzo', tipoNome: 'Tesoro del Palazzo', x: 70, y: 20, voce: { chiave: 'kamoshida-01/2', tipo: 'tesoro', nome: 'Tesoro del Palazzo', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-01', stato: null } }] };
+const forziere: SpilloDto = { id: 4, mappaChiave: 'citta-shibuya', tipo: 'forziere', tipoNome: 'Forziere', colore: '#eab308', nome: 'Scrigno', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: true, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
+const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2, immagineUrl: '/pianta-test.png' }), larghezza: 800, altezza: 600, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], arrivi: [], spilli: [forziere, { ...forziere, id: 5, nome: 'Passaggio', tipo: 'passaggio', tipoNome: 'Passaggio', collezionabile: false, x: 60, y: 60 }, { ...forziere, id: 6, nome: 'Tesoro del Palazzo', tipo: 'tesoro-palazzo', tipoNome: 'Tesoro del Palazzo', x: 70, y: 20, voci: [{ chiave: 'kamoshida-01/2', tipo: 'tesoro', nome: 'Tesoro del Palazzo', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-01', stato: null }] }] };
 /** Il Palazzo di Kamoshida come luogo senza pianta: elenca le sue planimetrie, con «Scheda del luogo» e «Modifica luogo». */
 const senzaPianta: MappaDto = { ...dettaglio, chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', genitore: null, immagineUrl: null, asset: null, figli: [albero[3]], spilli: [], percorso: [{ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida' }], entita: { tipo: 'dungeon', chiave: 'kamoshida' } };
 
@@ -181,7 +181,7 @@ describe('MappaPage', () => {
     expect(await screen.findByText('1 di 2 raccolti · 50%')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Tesoro del Palazzo: Tesoro del Palazzo' })).not.toBeInTheDocument();
     await waitFor(() => expect(getMappa).toHaveBeenCalledTimes(2));
-    await risolviRilettura({ ...dettaglio, spilli: dettaglio.spilli.map((s) => (s.id === 6 ? { ...s, raccolto: true, voce: { ...s.voce!, stato: 'ottenuto' } } : s)) });
+    await risolviRilettura({ ...dettaglio, spilli: dettaglio.spilli.map((s) => (s.id === 6 ? { ...s, raccolto: true, voci: [{ ...s.voci[0], stato: 'ottenuto' }] } : s)) });
     expect(screen.getByText('1 di 2 raccolti · 50%')).toBeInTheDocument();
   });
 

@@ -25,7 +25,7 @@
 
 import { prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
-import { voceDelPin, vociGestite } from './mappe/voceDelPin.js';
+import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
 import { radiceDelPalazzo, SQL_RADICE_PALAZZO, SQL_SOTTOALBERO } from './mappe/alberoMappe.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
@@ -71,7 +71,7 @@ function areeDelleMappe(): Map<string, Set<string>> {
   return out;
 }
 
-interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string; /** La voce della guida del pin (`voceDelPin`). */ voce: string | null }
+interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string; /** Le voci della guida del pin (`vociDiOgniPin`, una o più dalla 098). */ voci: string[] }
 
 /**
  * È il boss finale del suo Palazzo? Se punta a un punto boss finale; se sta sulla planimetria che contiene l'area
@@ -82,7 +82,7 @@ interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string
  */
 function eBossFinale(s: SpilloCollezionabile, finale: BossFinale | undefined, aree: Map<string, Set<string>>): boolean {
   if (s.tipo !== 'boss' || !finale) return false;
-  if (s.voce && finale.punti.includes(s.voce)) return true;
+  if (s.voci.some((v) => finale.punti.includes(v))) return true;
   if (aree.get(s.mappa)?.has(finale.area)) return true;
   return finale.unico;
 }
@@ -91,13 +91,14 @@ function eBossFinale(s: SpilloCollezionabile, finale: BossFinale | undefined, ar
 function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, SpilloCollezionabile[]> {
   const colonne = new Set((prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).map((c) => c.name));
   const out = new Map<string, SpilloCollezionabile[]>();
-  // la voce (094) c'è dal suo turno in poi, come l'uid (067): prima vale il solo riferimento «punto»
-  const righe = prepared(`SELECT ${colonne.has('uid') ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave, riferimento_tipo, riferimento_chiave${colonne.has('voce_chiave') ? ', voce_chiave' : ''} FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ uid: string | null; tipo: string; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null; voce_chiave?: string | null }>;
+  // l'uid c'è dalla 067; le voci le legge `vociDiOgniPin`, che si adatta allo schema (098, 094, o il solo riferimento «punto»)
+  const righe = prepared(`SELECT id, ${colonne.has('uid') ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ id: number; uid: string | null; tipo: string; mappa_chiave: string }>;
+  const voci = vociDiOgniPin();
   for (const r of righe) {
     const dungeon = palazzi.get(r.mappa_chiave);
     if (!dungeon) continue;
     const elenco = out.get(dungeon) ?? [];
-    elenco.push({ uid: r.uid, tipo: r.tipo, mappa: r.mappa_chiave, voce: voceDelPin(r) });
+    elenco.push({ uid: r.uid, tipo: r.tipo, mappa: r.mappa_chiave, voci: voci.get(r.id) ?? [] });
     out.set(dungeon, elenco);
   }
   return out;
@@ -114,8 +115,8 @@ export interface StatoPalazzo { completato: string | null; manca: string | null 
  * sconfitto (spillo raccolto o segnato nella Guida), 100% del raccolto con la regola della scheda.
  */
 function valutaPalazzo(spilli: SpilloCollezionabile[], finale: BossFinale | undefined, aree: Map<string, Set<string>>, raccolti: Set<string>, puntiGestiti: Set<string>, bossSegnato: boolean): StatoPalazzo {
-  // la stessa regola della scheda del Palazzo: raccolto, o collegato a un punto della Guida già gestito
-  const preso = (s: SpilloCollezionabile) => raccolto(s, raccolti) || (!!s.voce && puntiGestiti.has(s.voce));
+  // la stessa regola della scheda del Palazzo: raccolto, o con le sue voci della Guida tutte gestite (una o più, 098)
+  const preso = (s: SpilloCollezionabile) => raccolto(s, raccolti) || fattoPerVoci(s.voci, puntiGestiti);
   const tesori = spilli.filter((s) => s.tipo === 'tesoro-palazzo');
   const tesoro = tesori.length > 0 && tesori.every((s) => raccolto(s, raccolti));
   const boss = bossSegnato || spilli.some((s) => eBossFinale(s, finale, aree) && raccolto(s, raccolti));

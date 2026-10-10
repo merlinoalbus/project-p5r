@@ -11,8 +11,11 @@ import { prepared } from '../../db/dbService.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { giocabili } from '../squadraService.js';
 import type { NomiCondizioni } from '../../../shared/condizioniSpillo.js';
-import { statoCitabile } from '../../../shared/spilli.js';
-import { VOCE_DEL_PIN } from '../mappe/voceDelPin.js';
+import { statoCitabile, TIPO_PUNTO_DESCRITTIVO } from '../../../shared/spilli.js';
+import { vociDelPinSql } from '../mappe/voceDelPin.js';
+
+/** Il tipo di una voce della guida del pin `s`, in SQL: una non descrittiva se ne ha (è quella che lo rende citabile), o null. */
+const TIPO_VOCE = `(SELECT pi.tipo FROM punto_interesse pi WHERE pi.chiave IN ${vociDelPinSql('s')} ORDER BY pi.tipo = '${TIPO_PUNTO_DESCRITTIVO}', pi.chiave LIMIT 1)`;
 
 /** Gli elenchi dei negozi valutano centinaia di righe per risposta: i nomi si leggono una volta e restano buoni un secondo.
  *  Senza i pin: le condizioni del catalogo e della città non citano lo stato di un pin (2026-10-03). */
@@ -64,9 +67,8 @@ export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
  *  2026-10-03, `statoCitabile`). Col nome della mappa preceduto da quello del genitore («Palazzo di Kamoshida › Vecchio castello
  *  1P»): le planimetrie di Palazzi diversi hanno spesso lo stesso nome. */
 export function pinConStato(): Array<{ uid: string; nome: string; tipo: string; mappa: string; parola: string }> {
-  return (prepared(`SELECT s.uid, s.nome, s.tipo, pi.tipo AS tipo_voce, CASE WHEN g.nome IS NULL THEN m.nome ELSE g.nome || ' › ' || m.nome END AS mappa
+  return (prepared(`SELECT s.uid, s.nome, s.tipo, ${TIPO_VOCE} AS tipo_voce, CASE WHEN g.nome IS NULL THEN m.nome ELSE g.nome || ' › ' || m.nome END AS mappa
     FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave LEFT JOIN mappa g ON g.chiave = m.genitore_chiave
-    LEFT JOIN punto_interesse pi ON pi.chiave = ${VOCE_DEL_PIN}
     WHERE s.uid IS NOT NULL ORDER BY mappa, s.ordine, s.nome`)
     .all() as Array<{ uid: string; nome: string; tipo: string; tipo_voce: string | null; mappa: string }>)
     .flatMap(({ tipo_voce, ...p }) => { const parola = statoCitabile(p.tipo, tipo_voce); return parola ? [{ ...p, parola }] : []; });
@@ -74,7 +76,7 @@ export function pinConStato(): Array<{ uid: string; nome: string; tipo: string; 
 
 /** Il tipo e la parola dello stato di un pin citato, o null se il pin non c'è. `parola` è null se non è (più) citabile. */
 export function pinCitato(uid: string): { nome: string; tipo: string; parola: string | null } | null {
-  const p = prepared(`SELECT s.nome, s.tipo, pi.tipo AS tipo_voce FROM spillo s LEFT JOIN punto_interesse pi ON pi.chiave = ${VOCE_DEL_PIN} WHERE s.uid = ?`)
+  const p = prepared(`SELECT s.nome, s.tipo, ${TIPO_VOCE} AS tipo_voce FROM spillo s WHERE s.uid = ?`)
     .get(uid) as { nome: string; tipo: string; tipo_voce: string | null } | undefined;
   return p ? { nome: p.nome, tipo: p.tipo, parola: statoCitabile(p.tipo, p.tipo_voce) } : null;
 }

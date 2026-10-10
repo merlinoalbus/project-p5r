@@ -17,6 +17,8 @@ const api = vi.hoisted(() => ({
   aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
 aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
+  // le voci della guida di un pin (098): quelle collegabili e il collegamento (lo stesso della guida)
+  getVociCollegabili: vi.fn(), collegaPinAlPunto: vi.fn(),
 }));
 vi.mock('../services/api', (vero) => moduloApi(vero, {
   ...api,
@@ -34,7 +36,7 @@ vi.mock('../services/api', (vero) => moduloApi(vero, {
 /** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 const albero: MappaRiassuntoDto[] = [riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta' }), riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo' })];
-const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
+const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
 const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [] };
 
 /** Monta l'editor sulla mappa di Shibuya (`/guida/mappe/citta-shibuya/modifica`). */
@@ -60,6 +62,8 @@ describe('EditorMappaPage', () => {
     api.getDungeons.mockResolvedValue([{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', ordine: 1 }, { chiave: 'madarame', nome: 'Palazzo di Madarame', tipo: 'palazzo', ordine: 2 }]);
     // gli elenchi chiusi di negozi, attività, luoghi e Confidenti per gli spilli di città
     api.cercaRiferimenti.mockResolvedValue([]);
+    // di serie nessuna voce collegabile: un pin fuori dai Palazzi non mostra le «Voci della guida»
+    api.getVociCollegabili.mockResolvedValue([]);
   });
 
   it('con lo strumento «Aggiungi» un tocco sulla mappa crea lo spillo del tipo scelto (coordinate in percentuale) e lo seleziona', async () => {
@@ -289,14 +293,50 @@ describe('EditorMappaPage', () => {
     expect(vociSelettore('Al: giorno')).toHaveLength(30);
   });
 
+  it('«Voci della guida» (098): «Aggiungi voce» collega una voce del Palazzo, «Scollega» la toglie; ogni gesto si salva e rilegge la mappa', async () => {
+    /** Una voce «Storia» di Kamoshida non segnata, con chiave e nome dati. */
+    const voce = (chiave: string, nome: string) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', stato: null });
+    const pin: SpilloDto = { ...nota, id: 22, tipo: 'infiltrazione', tipoNome: 'Infiltrazione', nome: 'Punto di infiltrazione', voci: [voce('kamoshida-01/0', 'Infiltrati nel castello')] };
+    api.getMappa.mockResolvedValue({ ...base, spilli: [pin] });
+    api.getVociCollegabili.mockResolvedValue([{ chiave: 'kamoshida-04/2', nome: 'Ritorno nel castello', tipo: 'storia', area: 'kamoshida-04', areaNome: 'Sala da pranzo', enigma: null }]);
+    api.collegaPinAlPunto.mockResolvedValue({});
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Infiltrazione: Punto di infiltrazione' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Punto di infiltrazione' }));
+    expect(await form.findByRole('group', { name: 'Voci della guida (1)' })).toBeInTheDocument();
+    expect(api.getVociCollegabili).toHaveBeenCalledWith(22);
+    // una voce in più, scelta fra quelle collegabili (raggruppate per area)
+    await waitFor(() => expect(vociSelettore('Aggiungi voce')).toContain('Ritorno nel castello'));
+    scegliVoce('Aggiungi voce', 'Ritorno nel castello');
+    await waitFor(() => expect(api.collegaPinAlPunto).toHaveBeenCalledWith('kamoshida-04/2', 22, true));
+    await waitFor(() => expect(api.getMappa).toHaveBeenCalledTimes(2));
+    // la mappa riletta porta le due voci; il messaggio dice che si segnano da sole
+    api.getMappa.mockResolvedValue({ ...base, spilli: [{ ...pin, voci: [...pin.voci, voce('kamoshida-04/2', 'Ritorno nel castello')] }] });
+    fireEvent.click(form.getByRole('button', { name: 'Scollega la voce Infiltrati nel castello' }));
+    await waitFor(() => expect(api.collegaPinAlPunto).toHaveBeenCalledWith('kamoshida-01/0', 22, false));
+    expect(await form.findByRole('group', { name: 'Voci della guida (2)' })).toBeInTheDocument();
+    expect(form.getByText(/Ogni voce si segna da sola/)).toBeInTheDocument();
+  });
+
+  it('un pin senza voci e senza voci collegabili (fuori dai Palazzi) non mostra le «Voci della guida»', async () => {
+    api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
+    await waitFor(() => expect(api.getVociCollegabili).toHaveBeenCalledWith(nota.id));
+    expect(form.queryByRole('group', { name: /Voci della guida/ })).toBeNull();
+  });
+
   it('uno spostamento che è di una voce della Guida la mostra: la scheda non risulta modificata e il salvataggio non tocca la voce, che sta nel campo suo (094)', async () => {
-    const scorciatoia: SpilloDto = { ...nota, id: 21, tipo: 'scorciatoia', tipoNome: 'Scorciatoia', nome: 'Condotto', voce: { chiave: 'kamoshida-04/5', tipo: 'scorciatoia', nome: 'Condotto', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', stato: null } };
+    const scorciatoia: SpilloDto = { ...nota, id: 21, tipo: 'scorciatoia', tipoNome: 'Scorciatoia', nome: 'Condotto', voci: [{ chiave: 'kamoshida-04/5', tipo: 'scorciatoia', nome: 'Condotto', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', stato: null }] };
     api.getMappa.mockResolvedValue({ ...base, spilli: [scorciatoia] });
     api.aggiornaSpillo.mockResolvedValue(scorciatoia);
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Scorciatoia: Condotto' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Condotto' }));
-    expect(form.getByText(/Punto della Guida:/)).toBeInTheDocument();
+    // le voci della guida del pin (098), con «Scollega»
+    expect(within(form.getByRole('list', { name: 'Voci della guida del pin' })).getByText('Condotto')).toBeInTheDocument();
+    expect(form.getByRole('button', { name: 'Scollega la voce Condotto' })).toBeInTheDocument();
     expect(form.getByRole('button', { name: 'Salva spillo' })).toBeDisabled();
     fireEvent.change(form.getByLabelText('Descrizione'), { target: { value: 'Passa dietro le cucine' } });
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));

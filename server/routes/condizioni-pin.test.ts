@@ -301,7 +301,7 @@ describe('condizione «Pin di una mappa»', () => {
       const sicura = await nuovoPin('sicura', 'Stanza sicura con una voce di un altro Palazzo');
       await nuovoPin('porta', 'Porta che cita una nota');
       await nuovoPin('porta', 'Porta che cita la stanza sbagliata');
-      // una voce di un altro Palazzo: `voceAmmessa` la scarta, e la stanza resta senza stato
+      // una voce di un altro Palazzo: `vociAmmesse` la scarta, e la stanza resta senza stato
       const dungeon = palazzoDiOgniMappa().get(mappa)!;
       const altraArea = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave <> ? ORDER BY dungeon_chiave, ordine LIMIT 1').pluck().get(dungeon) as string;
       const voceAltrove = (await request(app).post(`/api/compendio/aree/${altraArea}/punti`).send({ nome: 'Voce di un altro Palazzo', tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
@@ -310,7 +310,7 @@ describe('condizione «Pin di una mappa»', () => {
         if (s.nome === 'Porta che cita una nota') s.condizioni = [su(nota.uid, true)];
         else if (s.nome === 'Porta che cita la stanza sbagliata') s.condizioni = [su(sicura.uid, true)];
         else delete s.condizioni;
-        if (s.nome === 'Stanza sicura con una voce di un altro Palazzo') (s as { voce?: string | null }).voce = voceAltrove.chiave;
+        if (s.nome === 'Stanza sicura con una voce di un altro Palazzo') s.voci = [voceAltrove.chiave];
       }
       // all'inserimento si accettano (pin del pacchetto); il riesame le scarta, una ciascuna
       const esito = importaMappe(pacchetto, { sovrascrivi: true });
@@ -323,7 +323,7 @@ describe('condizione «Pin di una mappa»', () => {
     it('un pacchetto senza il campo della voce (di prima della 094): la voce del pin reinserito vale lo stesso', async () => {
       const sicura = await prepara('Stanza sicura senza voce nel pacchetto', 'Porta del pacchetto senza voce');
       const pacchetto = soloQuesta(structuredClone(esportaMappe(mappa)), 'Porta del pacchetto senza voce');
-      for (const s of pacchetto.mappe.flatMap((m) => m.spilli)) delete (s as { voce?: unknown }).voce;
+      for (const s of pacchetto.mappe.flatMap((m) => m.spilli)) { delete s.voci; delete s.voce; }
       for (const m of pacchetto.mappe) m.spilli = [...m.spilli].sort((x, y) => (x.nome === 'Porta del pacchetto senza voce' ? -1 : y.nome === 'Porta del pacchetto senza voce' ? 1 : 0));
       expect(importaMappe(pacchetto, { sovrascrivi: true }).condizioniScartate).toBe(0);
       expect(condizioniDi('Porta del pacchetto senza voce')).toEqual([su(sicura.uid, true)]);
@@ -345,7 +345,7 @@ describe('condizione «Pin di una mappa»', () => {
   it('un pin senza stato proprio collegato solo a una voce «Altro» (descrittiva) non si segna e non si cita', async () => {
     const nota = await nuovoPin('nota', 'Nota con una voce descrittiva');
     prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte) SELECT 'prova-altro-descrittiva', chiave, 999, 'altro', 'Descrizione', '', 0, '{}', '' FROM dungeon_area ORDER BY ordine LIMIT 1").run();
-    prepared("UPDATE spillo SET voce_chiave = 'prova-altro-descrittiva' WHERE id = ?").run(nota.id);
+    prepared("INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, 'prova-altro-descrittiva')").run(nota.id);
     expect((await request(app).put(`/api/partite/${partita}/spilli/${nota.id}`).send({ raccolto: true })).body.error.code).toBe('spillo-senza-stato');
     const porta = await nuovoPin('porta', 'Porta della nota descrittiva');
     expect((await condiziona(porta.id, [su(nota.uid, true)])).body.error.code).toBe('condizione-non-trovata');

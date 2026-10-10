@@ -1,5 +1,6 @@
 // ============================================================
-// Test 094 — la voce della guida di un pin passa dal riferimento a un campo suo
+// Test 094 — la voce della guida di un pin passa dal riferimento a un campo suo (dalla 098 lo schema non ha più quel campo:
+// il test lo rimette, come lo trovava la 094)
 // ============================================================
 
 import { closeDb, getDb, initDb, prepared } from '../dbService.js';
@@ -15,7 +16,9 @@ const riga = (id: number) => prepared('SELECT uid, riferimento_tipo, riferimento
 it('i pin delle planimetrie collegati a una voce passano al campo nuovo con il loro uid e il loro «raccolto»; il resto non cambia; ripetuta non fa altro', () => {
   initDb(':memory:');
   caricaPacchetto(getDb());
-  expect((prepared("SELECT name FROM pragma_table_info('spillo')").pluck().all() as string[])).toContain('voce_chiave');
+  // lo schema di allora: dalla 098 la colonna non c'è più (le voci stanno in `spillo_voce`), e la si rimette com'era
+  expect((prepared("SELECT name FROM pragma_table_info('spillo')").pluck().all() as string[])).not.toContain('voce_chiave');
+  prepared('ALTER TABLE spillo ADD COLUMN voce_chiave TEXT REFERENCES punto_interesse(chiave) ON DELETE SET NULL').run();
   // lo stato di prima, ricostruito: due pin di planimetria collegati a voci nel riferimento (uno a una voce che non c'è più),
   // un elemento della guida senza mappa con il suo riferimento «punto», un passaggio con la sua destinazione
   const [voce, altraVoce] = prepared('SELECT chiave FROM punto_interesse ORDER BY chiave LIMIT 2').pluck().all() as string[];

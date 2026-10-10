@@ -17,7 +17,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -178,6 +178,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onAggiungiImmagine={(id, file, didascalia) => esegui(() => aggiungiImmagineSpillo(id, file, didascalia), 'Schermata aggiunta allo spillo (resta nella tua istanza).')}
               onDidascalia={(id, didascalia) => esegui(() => aggiornaImmagineSpillo(id, { didascalia }), 'Didascalia salvata.')}
               onEliminaImmagine={(id) => esegui(() => eliminaImmagineSpillo(id), 'Schermata eliminata.')}
+              onCollegaVoce={(id, voce, collega) => esegui(() => collegaPinAlPunto(voce, id, collega), collega ? 'Voce della guida collegata.' : 'Voce della guida scollegata.')}
               onCreaMappaCollegata={(s) => esegui(async () => {
                 const nuova=await creaMappa({ nome:s.nome, tipo:dati.tipo==='palazzo'||dati.tipo==='dedalo'||dati.tipo==='area'?'area':'luogo', genitore:dati.chiave, ordine:dati.figli.length });
                 await aggiornaSpillo(s.id,{tipo:'passaggio',riferimento:{tipo:'mappa',chiave:nuova.chiave}});
@@ -248,6 +249,8 @@ interface PropsPannello {
   onAggiungiImmagine: (id: number, file: File, didascalia: string) => Promise<void>;
   onDidascalia: (immagineId: number, didascalia: string) => Promise<void>;
   onEliminaImmagine: (immagineId: number) => Promise<void>;
+  /** Collega (o scollega) una voce della guida a uno spillo (098). */
+  onCollegaVoce: (id: number, voce: string, collega: boolean) => Promise<void>;
   onCreaMappaCollegata: (s: SpilloDto) => Promise<void>;
   onSalvaMappa: (dati: Parameters<typeof aggiornaMappa>[1]) => Promise<void>;
   onImmagine: (file: File) => Promise<void>;
@@ -310,7 +313,7 @@ function PannelloEditor(p: PropsPannello) {
       </section>
 
       {selezionato && (
-        <FormSpillo key={selezionato.id} spillo={selezionato} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} />
+        <FormSpillo key={selezionato.id} spillo={selezionato} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} onCollegaVoce={(voce, collega) => p.onCollegaVoce(selezionato.id, voce, collega)} />
       )}
 
       {!selezionato && strumento === 'seleziona' && <p className="editor-mappa__aiuto">Seleziona un punto sulla mappa per modificarne nome, collegamento e condizioni, oppure scegli Aggiungi.</p>}
@@ -386,7 +389,7 @@ function PannelloEditor(p: PropsPannello) {
   );
 }
 
-interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void> }
+interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void>; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
 
 const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'attivita', nome: 'Attività' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
 
@@ -427,8 +430,38 @@ function CollegamentoCitta({ valore, disabilitato, onCambia }: { valore: { tipo:
   );
 }
 
+/**
+ * «Voci della guida» del pin (098, scelta dell'utente del 2026-10-09: «Guida ed editor»): le voci a cui appartiene, ognuna con
+ * «Scollega», e «Aggiungi voce» fra quelle del suo Palazzo che si possono ancora collegare (`getVociCollegabili`). Ogni gesto si
+ * salva subito, come «Collega pin» nella guida. Un pin fuori dai Palazzi, senza voci, non ne mostra niente.
+ */
+function VociDelPin({ spillo: s, disabilitato, onCollega }: { spillo: SpilloDto; disabilitato: boolean; onCollega: (voce: string, collega: boolean) => Promise<void> }) {
+  const collegabili = useCarica(() => getVociCollegabili(s.id), [s.id, s.voci.map((v) => v.chiave)]);
+  const opzioni = useMemo(() => (collegabili.dati ?? []).map((v) => ({ chiave: v.chiave, nome: v.nome, gruppo: v.areaNome, ...(v.enigma ? { dettaglio: 'passo di un Enigma' } : {}) })), [collegabili.dati]);
+  if (s.voci.length === 0 && !collegabili.errore && opzioni.length === 0) return null;
+  return (
+    <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" disabled={disabilitato}>
+      <legend className="text-[12px] text-text-secondary">Voci della guida ({s.voci.length})</legend>
+      {s.voci.length > 0 && (
+        <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Voci della guida del pin">
+          {s.voci.map((v) => (
+            <li key={v.chiave} className="flex items-center gap-1 text-[12px]">
+              <strong className="min-w-0 flex-1 break-words">{v.nome}</strong>
+              <button type="button" className="visore-mappa__azione-testo touch" onClick={() => void onCollega(v.chiave, false)} aria-label={`Scollega la voce ${v.nome}`}>Scollega</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {s.voci.length > 0 && <p className="m-0 text-[12px] text-text-muted">{s.voci.length === 1 ? 'Lo stato «ottenuto / esaurito» si condivide con la scheda del Palazzo.' : 'Ogni voce si segna da sola, anche dalla scheda del Palazzo; il pin è fatto quando lo sono tutte.'}</p>}
+      {collegabili.errore
+        ? <p role="alert" className="m-0 text-[12px]">{collegabili.errore} <button type="button" className="visore-mappa__azione-testo" onClick={() => void collegabili.ricarica()}>Riprova</button></p>
+        : opzioni.length > 0 && <Selettore ricerca="sempre" etichetta="Aggiungi voce" valore="" opzioni={opzioni} segnaposto="Scegli la voce…" disabilitato={collegabili.caricamento} onCambia={(k) => { if (k) void onCollega(k, true); }} />}
+    </fieldset>
+  );
+}
+
 /** Proprietà dello spillo selezionato: nome, tipo e descrizione, poi quel che la categoria del tipo richiede. */
-function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine }: PropsFormSpillo) {
+function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine, onCollegaVoce }: PropsFormSpillo) {
   const inputSchermata = useRef<HTMLInputElement | null>(null);
   const [didascaliaNuova, setDidascaliaNuova] = useState('');
   const [nome, setNome] = useState(s.nome);
@@ -449,7 +482,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     if (!ammetteCondizioni(t)) setCondizioni([]);
   };
   // Uno spostamento che **è** un luogo (una stazione) tiene quel riferimento: è la sua identità nel pacchetto, con cui lo si riconosce all’import; la voce della guida
-  // sta in un campo suo (`voce`, 094) e la destinazione vive a parte. Il riferimento «mappa» si
+  // sta altrove (`spillo_voce`, 098: una o più, «Voci della guida» qui sotto) e la destinazione vive a parte. Il riferimento «mappa» si
   // scrive solo per chi non ha un'identità propria (i passaggi vecchi lo usano come ripiego).
   const riferimentoEffettivo = categoria === 'spostamento'
     ? (riferimento && riferimento.tipo !== 'mappa' ? riferimento : (destinazione ? { tipo: 'mappa' as const, chiave: destinazione.mappa } : null))
@@ -464,8 +497,6 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     if (!condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null)) { notifica('error', 'Completa o rimuovi i gruppi vuoti prima di salvare.'); return; }
     void onSalva(dati);
   };
-  // la voce della guida del pin (094): sta in un campo suo, accanto al riferimento
-  const puntoGuida = s.voce;
   return (
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
       <div className="flex items-start gap-2">
@@ -493,7 +524,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
         {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
-        {puntoGuida && <p className="m-0 text-[12px] text-text-secondary">Punto della Guida: <strong>{puntoGuida.nome}</strong> — lo stato «ottenuto / esaurito» si condivide con la scheda del Palazzo.</p>}
+        <VociDelPin spillo={s} disabilitato={occupato} onCollega={onCollegaVoce} />
         {categoria === 'consumabile' && <p className="m-0 text-[12px] text-text-muted">Si segna nella partita («{statoDelTipo(tipo)}»); non porta da nessuna parte.</p>}
         {ammetteCondizioni(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo pinCorrente={s.uid} />}
 

@@ -16,16 +16,16 @@ import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
-import { vociGestite } from './mappe/voceDelPin.js';
-import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta } from '../../shared/types.js';
+import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
+import type { AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
-import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, type TipoSpillo } from '../../shared/spilli.js';
+import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, TIPO_PUNTO_DESCRITTIVO, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { eliminaImmaginiDeiPin, impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
-import { palazziCompletati } from './palazziService.js';
+import { palazziCompletati, palazzoDiOgniMappa } from './palazziService.js';
 import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
-import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma, VOCE_DEL_PIN, voceDelPin } from './mappe/collegamentiGuida.js';
+import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
@@ -43,10 +43,11 @@ function statiPartita(partitaId: number | undefined): Map<string, StatoPunto> {
   return new Map((prepared('SELECT punto_chiave, stato FROM punto_partita WHERE partita_id = ?').all(partitaId) as Array<{ punto_chiave: string; stato: StatoPunto }>).map((r) => [r.punto_chiave, r.stato]));
 }
 
-/** I pin delle planimetrie collegati ai punti (tutti, o di un punto solo), in ordine di id. */
+/** I pin delle planimetrie collegati ai punti (tutti, o di un punto solo), in ordine di id. Un pin con più voci (098) sta
+ *  nell'elenco di ognuna. */
 function pinDeiPunti(punto?: string): Map<string, PinDelPuntoDto[]> {
-  const righe = prepared(`SELECT id, nome, tipo, mappa_chiave, ${VOCE_DEL_PIN} AS voce FROM spillo
-    WHERE mappa_chiave IS NOT NULL AND ${VOCE_DEL_PIN} ${punto ? '= ?' : 'IS NOT NULL'} ORDER BY id`)
+  const righe = prepared(`SELECT s.id, s.nome, s.tipo, s.mappa_chiave, sv.voce_chiave AS voce FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id
+    WHERE s.mappa_chiave IS NOT NULL ${punto ? 'AND sv.voce_chiave = ?' : ''} ORDER BY s.id, sv.voce_chiave`)
     .all(...(punto ? [punto] : [])) as Array<{ id: number; nome: string; tipo: string; mappa_chiave: string; voce: string }>;
   const out = new Map<string, PinDelPuntoDto[]>();
   for (const r of righe) {
@@ -111,9 +112,11 @@ export function raccoltaMappe(dungeonChiave: string, partitaId?: number, segni?:
   const s = partitaId === undefined ? null : segni ?? segniPartita(partitaId);
   const raccolti = s?.raccolti ?? null;
   const puntiGestiti = s?.puntiGestiti ?? null;
-  const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome, ${VOCE_DEL_PIN} AS voce FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string; voce: string | null }>;
+  const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string }>;
+  // un pin conta una volta sola anche con più voci: preso quando sono tutte gestite (voci indipendenti, 2026-10-09)
+  const voci = raccolti === null ? null : vociDiOgniPin();
   for (const r of righe) {
-    const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (!!r.voce && !!puntiGestiti?.has(r.voce));
+    const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (!!puntiGestiti && fattoPerVoci(voci?.get(r.id) ?? [], puntiGestiti));
     const m = perMappa.get(r.mappa_chiave) ?? { n: 0, presi: raccolti === null ? null : 0, spilli: [] };
     m.n += 1;
     if (raccolto && m.presi !== null) m.presi += 1;
@@ -557,34 +560,62 @@ export function spostaPunto(puntoChiave: string, verso: -1 | 1): PuntoInteresseD
 
 /**
  * Collega (o scollega) un pin di una planimetria a un punto della guida (2026-10-01): «lo stato di questi punti deve essere
- * integrato con gli elementi in mappa». Il collegamento sta sul pin, in un campo suo (`voce_chiave`, 094): così anche un pin
- * che ha già un riferimento — un passaggio con la sua destinazione, un Confidente — può essere di una voce, e il riferimento
- * resta com'è. Un punto può avere più pin, un pin una voce sola. Solo un pin di una planimetria del Palazzo del punto, libero
- * o già di quel punto: un pin di un'altra voce si rifiuta dicendo quale. Collegando, gli stati delle partite si uniscono
- * (`allineaStatiPunto`); scollegando restano come sono, a ciascuno il suo.
+ * integrato con gli elementi in mappa». Il collegamento sta in una tabella sua (`spillo_voce`, 098): così anche un pin che ha già
+ * un riferimento — un passaggio con la sua destinazione, un Confidente — può essere di una voce, e il riferimento resta com'è.
+ * Un punto può avere più pin e un pin più voci (scelta dell'utente, 2026-10-09: prima un pin di un'altra voce si rifiutava).
+ * Solo un pin di una planimetria del Palazzo del punto. Collegando, gli stati delle partite si uniscono (`allineaStatiPunto`);
+ * scollegando, il pin segue le voci che gli restano (`allineaPinScollegato`), e senza più voci resta com'era.
+ * Lo usano la guida e l'editor delle mappe (scelta dell'utente: «Guida ed editor»).
  */
 export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega: boolean): PuntoInteresseDto {
   if (!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(puntoChiave)) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  const s = prepared('SELECT id, nome, mappa_chiave, riferimento_tipo, riferimento_chiave, voce_chiave FROM spillo WHERE id = ?').get(spilloId) as { id: number; nome: string; mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; voce_chiave: string | null } | undefined;
+  const s = prepared('SELECT id, uid, nome, mappa_chiave, riferimento_tipo, riferimento_chiave FROM spillo WHERE id = ?').get(spilloId) as { id: number; uid: string | null; nome: string; mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null } | undefined;
   if (!s) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${spilloId} non esiste.`);
-  const voce = voceDelPin(s);
-  const suoPunto = voce === puntoChiave;
+  const suoPunto = !!prepared('SELECT 1 FROM spillo_voce WHERE spillo_id = ? AND voce_chiave = ?').get(spilloId, puntoChiave);
+  // un collegamento rimasto nel riferimento (prima della 094) si toglie da lì; il riferimento vero di un pin non si tocca
+  const nelRiferimento = s.riferimento_tipo === 'punto' && s.riferimento_chiave === puntoChiave;
+  const adesso = nowIso();
   if (!collega) {
-    if (!suoPunto) throw httpErrors.conflict('pin-non-collegato', `«${s.nome}» non è collegato a questo punto.`);
-    // un collegamento rimasto nel riferimento (prima della 094) si toglie da lì; il riferimento vero di un pin non si tocca
-    if (s.riferimento_tipo === 'punto' && s.riferimento_chiave === puntoChiave) prepared('UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE id = ?').run(spilloId);
-    prepared('UPDATE spillo SET voce_chiave = NULL, updated_at = ? WHERE id = ?').run(nowIso(), spilloId);
+    if (!suoPunto && !nelRiferimento) throw httpErrors.conflict('pin-non-collegato', `«${s.nome}» non è collegato a questo punto.`);
+    getDb().transaction(() => {
+      if (nelRiferimento) prepared('UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE id = ?').run(spilloId);
+      prepared('DELETE FROM spillo_voce WHERE spillo_id = ? AND voce_chiave = ?').run(spilloId, puntoChiave);
+      prepared('UPDATE spillo SET updated_at = ? WHERE id = ?').run(adesso, spilloId);
+      allineaPinScollegato(getDb(), s, adesso);
+    })();
     return leggiPunto(puntoChiave);
   }
   // le regole sono le stesse dell'editor delle mappe e del pacchetto (`erroreVoceDelPin`)
-  const errore = erroreVoceDelPin({ nome: s.nome, mappa: s.mappa_chiave, voce }, puntoChiave);
+  const errore = erroreVoceDelPin({ nome: s.nome, mappa: s.mappa_chiave }, puntoChiave);
   if (errore) throw errore;
-  const adesso = nowIso();
   getDb().transaction(() => {
-    if (!suoPunto) prepared('UPDATE spillo SET voce_chiave = ?, updated_at = ? WHERE id = ?').run(puntoChiave, adesso, spilloId);
+    if (!suoPunto) {
+      prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(spilloId, puntoChiave);
+      prepared('UPDATE spillo SET updated_at = ? WHERE id = ?').run(adesso, spilloId);
+    }
     allineaStatiPunto(getDb(), puntoChiave, adesso);
   })();
   return leggiPunto(puntoChiave);
+}
+
+/**
+ * Le voci della guida che l'editor delle mappe può collegare a un pin (098, scelta dell'utente: «Guida ed editor»): quelle del
+ * Palazzo della sua planimetria che si segnano — non descrittive, non un Enigma coi suoi passi (i pin vanno sui passi) —, tranne
+ * le sue; in ordine di guida. Le stesse regole di `erroreVoceDelPin`. Un pin fuori dai Palazzi non ne ha. 404 se il pin non c'è.
+ */
+export function vociCollegabili(spilloId: number): VoceCollegabileDto[] {
+  const s = prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').get(spilloId) as { mappa_chiave: string | null } | undefined;
+  if (!s) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${spilloId} non esiste.`);
+  const dungeon = s.mappa_chiave ? palazzoDiOgniMappa().get(s.mappa_chiave) : undefined;
+  if (!dungeon) return [];
+  return prepared(`SELECT p.chiave, p.nome, p.tipo, a.chiave AS area, a.nome AS area_nome, p.contenitore_chiave AS enigma
+    FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave LEFT JOIN punto_interesse e ON e.chiave = p.contenitore_chiave
+    WHERE a.dungeon_chiave = ? AND p.tipo <> ?
+      AND NOT EXISTS (SELECT 1 FROM punto_interesse q WHERE q.contenitore_chiave = p.chiave)
+      AND NOT EXISTS (SELECT 1 FROM spillo_voce sv WHERE sv.spillo_id = ? AND sv.voce_chiave = p.chiave)
+    ORDER BY a.ordine, COALESCE(e.ordine, p.ordine), p.contenitore_chiave IS NOT NULL, p.ordine, p.chiave`)
+    .all(dungeon, TIPO_PUNTO_DESCRITTIVO, spilloId)
+    .map((r) => { const v = r as { chiave: string; nome: string; tipo: string; area: string; area_nome: string; enigma: string | null }; return { chiave: v.chiave, nome: v.nome, tipo: v.tipo, area: v.area, areaNome: v.area_nome, enigma: v.enigma }; });
 }
 
 /** Un punto in più, dove la guida non l'aveva trascritto: nasce in fondo all'area. */
@@ -615,7 +646,8 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
 /**
  * Quello che un punto della guida lascia nel resto dei dati, tolto prima di lui (dentro la transazione di chi chiama): gli stati
  * delle partite, il marcatore, il «raccolto» degli elementi della guida senza mappa che lo citano; i pin delle planimetrie tengono
- * il loro «raccolto» (lo stato vive nei pin, 2026-10-01) e perdono solo il collegamento. Lo usano `eliminaPunto` ed `eliminaArea`,
+ * il loro «raccolto» (lo stato vive nei pin, 2026-10-01) e perdono solo il collegamento — se hanno altre voci (098), seguono
+ * quelle. Lo usano `eliminaPunto` ed `eliminaArea`,
  * che prima lo scriveva una seconda volta riga per riga (rilievo R4 della verifica, 2026-10-03).
  */
 function staccaPunto(puntoChiave: string): void {
@@ -623,7 +655,10 @@ function staccaPunto(puntoChiave: string): void {
   prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
   prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
   prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
-  prepared('UPDATE spillo SET voce_chiave = NULL WHERE voce_chiave = ?').run(puntoChiave);
+  // i pin perdono il collegamento a questa voce (le altre restano), e in ogni partita seguono quelle che gli restano
+  const pin = prepared('SELECT s.id, s.uid FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id WHERE sv.voce_chiave = ?').all(puntoChiave) as Array<{ id: number; uid: string | null }>;
+  prepared('DELETE FROM spillo_voce WHERE voce_chiave = ?').run(puntoChiave);
+  for (const p of pin) allineaPinScollegato(getDb(), p, nowIso());
 }
 
 /**

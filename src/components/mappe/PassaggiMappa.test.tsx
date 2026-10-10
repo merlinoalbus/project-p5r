@@ -14,7 +14,7 @@ const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: s
 
 /** Spillo di tipo «passaggio» al centro della mappa sottopasso, con id e nome (obbligatori) e gli altri campi di `extra`. */
 const spillo = (extra: Partial<SpilloDto> & { id: number; nome: string }): SpilloDto =>
-  ({ mappaChiave: 'sottopasso', tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '', ...extra });
+  ({ mappaChiave: 'sottopasso', tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '', ...extra });
 
 const albero: MappaRiassuntoDto[] = [
   riassunto({ chiave: 'quartiere', nome: 'Shibuya', tipo: 'quartiere', genitore: null }),

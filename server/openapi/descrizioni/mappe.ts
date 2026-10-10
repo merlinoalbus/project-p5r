@@ -129,9 +129,15 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'PUT /api/mappe/spilli/:id': {
     sommario: 'Aggiorna uno spillo: i campi assenti restano',
-    descrizione: 'Con `mappa` lo si sposta su un\'altra mappa; una scheda della guida senza mappa non accetta coordinate, mappa né destinazione. Su una planimetria un riferimento «punto» diventa la voce del pin, e spostando il pin la sua voce deve restare del Palazzo. Cambiando tipo, un riferimento non più ammesso dalla categoria cade. Le condizioni non possono far dipendere il pin da se stesso né chiudere un giro fra pin. Uno spillo della guida modificato diventa dell\'utente.',
+    descrizione: 'Con `mappa` lo si sposta su un\'altra mappa; una scheda della guida senza mappa non accetta coordinate, mappa né destinazione. Su una planimetria un riferimento «punto» diventa una voce in più del pin (098), e spostando il pin le sue voci devono restare del Palazzo. Cambiando tipo, un riferimento non più ammesso dalla categoria cade. Le condizioni non possono far dipendere il pin da se stesso né chiudere un giro fra pin. Uno spillo della guida modificato diventa dell\'utente.',
     risposta: 'Lo spillo aggiornato: `SpilloDto`, o `SchedaContenutoGuidaDto` per una scheda della guida senza mappa',
     errori: [[404, 'spillo-non-trovato'], [400, 'contenuto-non-spaziale'], [400, 'riferimento-non-ammesso'], [404, 'riferimento-non-trovato'], [400, 'pin-fuori-dal-palazzo'], [404, 'condizione-non-trovata'], [400, 'condizione-su-se-stesso'], [400, 'condizioni-in-giro']],
+  },
+  'GET /api/mappe/spilli/:id/voci-collegabili': {
+    sommario: 'Le voci della guida che si possono collegare a uno spillo (editor delle mappe)',
+    descrizione: 'Quelle del Palazzo della planimetria dello spillo che si segnano — non descrittive, non un Enigma coi suoi passi —, tranne quelle già sue, in ordine di guida. Uno spillo fuori dai Palazzi non ne ha. Si collegano e scollegano con `PUT`/`DELETE /api/compendio/punti/:chiave/pin/:spillo` (098: un pin può avere più voci).',
+    risposta: 'Elenco di `VoceCollegabileDto`',
+    errori: [[404, 'spillo-non-trovato']],
   },
   'DELETE /api/mappe/spilli/:id': {
     sommario: 'Elimina uno spillo',

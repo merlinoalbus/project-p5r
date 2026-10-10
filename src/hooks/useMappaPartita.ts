@@ -22,7 +22,7 @@ export interface MappaPartita {
   errore: string | null;
   ricarica: () => Promise<void>;
   raccolto: (s: SpilloDto, valore: boolean) => Promise<void>;
-  statoPunto: (s: SpilloDto, stato: StatoPuntoMappa) => Promise<void>;
+  statoPunto: (s: SpilloDto, voce: string, stato: StatoPuntoMappa) => Promise<void>;
   acquisto: (s: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void>;
 }
 
@@ -75,17 +75,21 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     } catch (err) { errori(err); }
   };
 
-  /** Stato del punto della Guida (ottenuto/esaurito/riaperto): lo spillo collegato segue lo stato (raccolto se gestito). */
-  const statoPunto = async (s: SpilloDto, stato: StatoPuntoMappa) => {
-    if (!partitaId || !s.voce) return;
-    const punto = s.voce;
+  /** Stato di una voce della Guida del pin (ottenuto/esaurito/riaperto): il pin la segue, fatto quando tutte le sue voci sono
+   *  gestite (una o più: 098, «Voci indipendenti»). */
+  const statoPunto = async (s: SpilloDto, chiaveVoce: string, stato: StatoPuntoMappa) => {
+    const punto = s.voci.find((v) => v.chiave === chiaveVoce);
+    if (!partitaId || !punto) return;
     try {
       const aggiornato = await impostaStatoPunto(partitaId, punto.chiave, stato);
       const voce = { ...punto, stato: aggiornato.stato };
+      const voci = s.voci.map((v) => (v.chiave === voce.chiave ? voce : v));
       // gli elementi della guida senza mappa portano la voce anche nel dettaglio del riferimento: si aggiornano insieme
       const dettaglio = s.dettaglio?.tipo === 'punto' && s.dettaglio.punto?.chiave === punto.chiave ? { ...s.dettaglio, punto: voce } : s.dettaglio;
-      aggiorna({ ...s, raccolto: aggiornato.stato !== null, voce, dettaglio });
-      notifica('success', stato === null ? `«${s.nome}» riaperto.` : `«${s.nome}» segnato come ${stato}.`);
+      aggiorna({ ...s, raccolto: voci.every((v) => v.stato !== null), voci, dettaglio });
+      // con più voci si dice quale (098)
+      const chi = s.voci.length > 1 ? `«${s.nome}» — «${punto.nome}»` : `«${s.nome}»`;
+      notifica('success', stato === null ? `${chi} riaperto.` : `${chi} segnato come ${stato}.`);
       opz.onCambiato?.();
       void rileggiInSilenzio();
     } catch (err) { errori(err); }

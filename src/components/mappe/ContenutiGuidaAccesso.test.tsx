@@ -27,7 +27,7 @@ const raccolti = new Set<number>();
 function scheda(partita?: number): SchedaContenutoGuidaDto {
   return {
     id:ID,areaGuida:'castello-biblioteca',tipo:'forziere',tipoNome:'Forziere',colore:'#eab308',nome:'Scrigno della biblioteca',descrizione,
-    riferimento:null,collezionabile:true,soloPosizione:false,ordine:0,origine:'utente',raccolto:partita!==undefined&&raccolti.has(partita),dettaglio:null,voce:null,
+    riferimento:null,collezionabile:true,soloPosizione:false,ordine:0,origine:'utente',raccolto:partita!==undefined&&raccolti.has(partita),dettaglio:null,voci:[],
     condizioni:[{tipo:'fascia',fascia:'sera',testo:'Solo la sera'}],
     ...(partita ? {disponibilita:{stato:partita===7?'bloccato' as const:'disponibile' as const,requisiti:[{indice:0,tipo:'fascia' as const,testo:'Solo la sera',stato:partita===7?'rosso' as const:'verde' as const,dettaglio:partita===7?'La partita è nel momento di giorno':'',manuale:false,confermato:false}]}}:{}),
     immagini:[{id:91,url:'/api/immagini/spillo/conservata/file',asset:null,didascalia:'Schermata conservata',ordine:0}],updatedAt:'2026-09-06T00:00:00Z',

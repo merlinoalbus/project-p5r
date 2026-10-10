@@ -13,12 +13,12 @@ vi.mock('../guida/CondizioniEditor', () => ({ CondizioniEditor: () => null }));
 
 /** Voce della guida «Tesoro avvistato» dell'area futaba-02, non esauribile e non segnata, del tipo di punto dato. */
 const voce = (tipo: string) => ({ chiave: 'futaba-02/0', tipo, nome: 'Tesoro avvistato', descrizione: '', esauribile: false, dungeon: 'futaba', area: 'futaba-02', stato: null });
-/** Elemento «nota» collegato al punto futaba-02/0, con la voce del tipo dato sia nel dettaglio del riferimento sia nel campo `voce`. */
+/** Elemento «nota» collegato al punto futaba-02/0, con la voce del tipo dato sia nel dettaglio del riferimento sia in `voci`. */
 const elemento = (tipoPunto: string): SchedaContenutoGuidaDto => ({
   id: 48, uid: 'u48', tipo: 'nota', tipoNome: 'Nota', nome: 'Tesoro avvistato', colore: '#ececf1', descrizione: 'Visibile da lontano.', riferimento: { tipo: 'punto', chiave: 'futaba-02/0' },
   collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, condizioni: [], immagini: [], updatedAt: '', areaGuida: 'futaba-02',
-  // il server dà la voce sia nel dettaglio del riferimento (strato di prima) sia nel campo `voce` (094): la scheda legge `voce`
-  dettaglio: { tipo: 'punto', punto: voce(tipoPunto) }, voce: voce(tipoPunto),
+  // il server dà la voce sia nel dettaglio del riferimento (strato di prima) sia fra le `voci` (098): la scheda legge `voci`
+  dettaglio: { tipo: 'punto', punto: voce(tipoPunto) }, voci: [voce(tipoPunto)],
 } as unknown as SchedaContenutoGuidaDto);
 
 it('collegato a una voce «altro»: la dicitura, nessun Ottenuto', () => {

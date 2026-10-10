@@ -23,7 +23,7 @@ import { finestreDungeon, type FinestraDungeon } from './datiGuida.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
-import { VOCE_DEL_PIN, VOCI_GESTITE_SQL } from './mappe/voceDelPin.js';
+import { uidFattiPerVoci, vociGestite } from './mappe/voceDelPin.js';
 import { nomiCondizioniMemo, pinCitato } from './condizioni/nomiCondizioni.js';
 import type { DisponibilitaDto, RequisitoRango, SemaforoRequisitoDto } from '../../shared/types.js';
 
@@ -126,12 +126,12 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   };
 }
 
-/** I pin segnati in una partita: il loro segno (`spillo_partita`) o la loro voce della guida segnata — la stessa regola del
- *  «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), che non dà stato alle voci descrittive («Altro»). */
+/** I pin segnati in una partita: il loro segno (`spillo_partita`) o le loro voci della guida, tutte segnate — la stessa regola
+ *  del «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), che non dà stato alle voci descrittive («Altro»). */
 function spilliSegnati(partitaId: number): Set<string> {
-  const righe = prepared(`SELECT spillo_uid AS uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1
-    UNION SELECT uid FROM spillo WHERE uid IS NOT NULL AND ${VOCE_DEL_PIN} IN (${VOCI_GESTITE_SQL})`).all(partitaId, partitaId) as Array<{ uid: string }>;
-  return new Set(righe.map((r) => r.uid));
+  const segnati = uidFattiPerVoci(vociGestite(partitaId));
+  for (const uid of prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').pluck().all(partitaId) as string[]) segnati.add(uid);
+  return segnati;
 }
 
 /** Il nome del negozio, o la chiave se non esiste. */

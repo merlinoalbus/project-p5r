@@ -334,14 +334,14 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/punti/:chiave/pin/:spillo': {
     sommario: 'Collega un pin di una planimetria a un punto della guida',
-    descrizione: 'Il pin deve stare su una planimetria del Palazzo del punto ed essere libero o già di quel punto; il punto non può essere descrittivo né un Enigma con passi. Un punto può avere più pin, un pin un punto solo. Collegando, gli stati delle partite del punto e dei suoi pin si uniscono.',
+    descrizione: 'Il pin deve stare su una planimetria del Palazzo del punto; il punto non può essere descrittivo né un Enigma con passi. Un punto può avere più pin e un pin più punti (098): ogni punto si segna da solo, e il pin è fatto quando tutti i suoi punti sono segnati. Collegando, gli stati delle partite del punto e dei suoi pin si uniscono. Lo usano la guida e l\'editor delle mappe.',
     risposta: 'Il punto con i pin collegati, `PuntoInteresseDto`',
     senzaCorpo: true,
-    errori: [[400, 'punto-descrittivo'], [400, 'enigma-con-passi'], [400, 'pin-fuori-dal-palazzo'], [404, 'punto-non-trovato'], [404, 'spillo-non-trovato'], [409, 'pin-gia-collegato']],
+    errori: [[400, 'punto-descrittivo'], [400, 'enigma-con-passi'], [400, 'pin-fuori-dal-palazzo'], [404, 'punto-non-trovato'], [404, 'spillo-non-trovato']],
   },
   'DELETE /api/compendio/punti/:chiave/pin/:spillo': {
     sommario: 'Scollega un pin di una planimetria da un punto della guida',
-    descrizione: 'Il pin deve essere collegato a quel punto. Si toglie solo il collegamento (anche quello vecchio scritto nel riferimento del pin); gli stati delle partite restano come sono, a ciascuno il suo.',
+    descrizione: 'Il pin deve essere collegato a quel punto. Si toglie solo quel collegamento (anche quello vecchio scritto nel riferimento del pin): gli altri punti del pin restano. Il pin segue i punti che gli restano (fatto se sono tutti segnati); senza più punti il suo stato resta com\'era.',
     risposta: 'Il punto con i pin che restano, `PuntoInteresseDto`',
     errori: [[404, 'punto-non-trovato'], [404, 'spillo-non-trovato'], [409, 'pin-non-collegato']],
   },

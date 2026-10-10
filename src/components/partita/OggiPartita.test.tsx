@@ -25,7 +25,7 @@ const giorno: PercorsoGiornoDto = {
 };
 /** Dettaglio di una mappa seed (città se la chiave è «tokyo», altrimenti quartiere figlio di tokyo) con un solo spillo Confidente «Cortile della Shujin». */
 const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, nomeRivisto: false, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: null, percorso: [{ chiave, nome }], figli: [], arrivi: [],
-  spilli: [{ id: 7, mappaChiave: chiave, tipo: 'confidente', tipoNome: 'Confidente', colore: '#ec4899', nome: 'Cortile della Shujin', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' }] });
+  spilli: [{ id: 7, mappaChiave: chiave, tipo: 'confidente', tipoNome: 'Confidente', colore: '#ec4899', nome: 'Cortile della Shujin', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' }] });
 
 describe('OggiPartita', () => {
   beforeEach(() => {

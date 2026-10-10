@@ -47,7 +47,7 @@ server/
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod; gli schemi restano leggibili con `schemiDiValidazione`), errorHandler
   openapi/            documentazione dell'API (voce 5 della verifica completa): rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
   db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
-  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema), 097 (atterraggio dei Palazzi dalla mappa di Tokyo); registro in index.ts, `index.test.ts` pretende id consecutivi
+  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema), 097 (atterraggio dei Palazzi dalla mappa di Tokyo), 098 (più voci della guida per pin: `spillo_voce`); registro in index.ts, `index.test.ts` pretende id consecutivi
   db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici), 017 (tolti i segni automatici del boss); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
@@ -129,7 +129,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 - `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
 - Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto). `seed_meta`, la memoria dell'ultimo caricamento del seed, è uscita con la migrazione 096 (verifica completa, R3'), e con lei il campo `seed` dello stato dell'istanza.
-- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 097 e `utente` alla 017). Le righe qui sotto descrivono
+- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 098 e `utente` alla 017). Le righe qui sotto descrivono
   il nucleo di allora; il caricamento era `caricaSeed` con l'hash in `seed_meta`, mentre oggi i dati di gioco arrivano con il
   pacchetto (`caricaPacchetto` / importazione) e le immagini stanno nella tabella `immagine` di `gioco.db` (079):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
@@ -779,20 +779,28 @@ planimetria la scheda offre il selettore di tutte le tavole e aggiunge l'area co
 bassa della colonna dell'area: le voci (`punto_interesse`) sempre visibili, anche in un'area senza voci, con correzione,
 eliminazione, «Su»/«Giù» (`PUT /api/compendio/punti/:chiave/sposta`, `spostaPunto`: ricompatta l'ordine dell'area) e
 «Aggiungi una voce». Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
-/api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta sul pin, in un campo suo
-(`spillo.voce_chiave`, migrazione 094; `ON DELETE SET NULL`), separato dal riferimento, che resta la destinazione o il Confidente
-del pin; la regola unica di lettura è `VOCE_DEL_PIN` / `voceDelPin` (`mappe/voceDelPin.ts`, senza dipendenze: il campo, o il riferimento «punto»
-degli elementi della guida senza mappa, lasciati com'erano) e il DTO del pin la porta in `SpilloDto.voce`; le regole del collegamento
-sono una funzione sola, `erroreVoceDelPin` (`collegamentiGuida.ts`), per la guida, l'editor delle mappe e il pacchetto. Un pin già di un'altra
-voce si rifiuta (409 `pin-gia-collegato`, col nome della voce), uno fuori dal Palazzo pure
-(400). I pin si scelgono **sulla mappa, dentro la voce**: `MappaIncorporata`/`VisoreMappa` con la prop `scelta`
+/api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta in una tabella sua, **molti a molti**
+(`spillo_voce(spillo_id, voce_chiave)`, migrazione 098 del 2026-10-09; prima il campo `spillo.voce_chiave` della 094, che la 098 copia
+e toglie ricostruendo `spillo`; `ON DELETE CASCADE` dai due lati), separato dal riferimento, che resta la destinazione o il Confidente
+del pin. Un pin può essere di più voci, anche di aree diverse dello stesso Palazzo (richiesta dell'utente, «Voci indipendenti»: ogni
+voce si segna da sola, il pin è fatto quando lo sono **tutte**). La regola unica di lettura è in `mappe/voceDelPin.ts` (senza
+dipendenze): `vociDelPinSql(alias)` in SQL, `vociDelPin(id)` e `vociDiOgniPin()` (che si adatta allo schema di prima della 098, per chi
+legge durante le migrazioni), con il riferimento «punto» degli elementi della guida senza mappa, lasciati com'erano; `fattoPerVoci` e
+`uidFattiPerVoci` dicono quando un pin è fatto per le sue voci (scheda e completamento del Palazzo, condizione «Pin di una mappa»,
+`raccolto` nel DTO). Il DTO del pin porta le voci in `SpilloDto.voci` (in ordine di chiave, ognuna col suo stato). Le regole del
+collegamento sono una funzione sola, `erroreVoceDelPin` (`collegamentiGuida.ts`), per la guida, l'editor delle mappe e il pacchetto:
+un pin fuori dal Palazzo si rifiuta (400); uno che ha già altre voci si collega anche a questa (fino al 2026-10-09 si rifiutava con
+409 `pin-gia-collegato`). Nell'editor delle mappe il pannello «Voci della guida» (`VociDelPin` in `EditorMappaPage`) elenca le voci
+del pin con «Scollega» e offre «Aggiungi voce» fra quelle collegabili (`GET /api/mappe/spilli/:id/voci-collegabili`,
+`vociCollegabili`: del Palazzo, non descrittive, non un Enigma coi suoi passi, non già sue); nel popup del visore un pin con più
+voci ha una riga per voce, coi suoi pulsanti (`AzioniStato`, `onStatoPunto(spillo, voce, stato)`). I pin si scelgono **sulla mappa, dentro la voce**: `MappaIncorporata`/`VisoreMappa` con la prop `scelta`
 (`SceltaPin`: senza testata, tocco = `onScegli` invece del popup, tutti i pin visibili, i collegati con `.spillo-mappa--scelto`,
 ricerca passata dalla voce); l'altezza della mappa si **misura** sul contenitore che scorre. `PuntoInteresseDto.pin`
 (`PinDelPuntoDto`) porta i pin collegati; la riga dice «N pin» o «da collegare» (`shared/spilli.ts`: `pinDelPunto`,
-`puntoDaCollegare` — il tipo ha di solito un pin; `puntoDescrittivo` — solo «Altro», senza pin né stato). I tipi delle voci (2026-10-01): Stanze sicure, Porta, Meccanismo, Forziere normale, Forziere raro, Semi della bramosia, Enigma, Mini-boss, Boss, Nemico, Persona, Oggetto, Scorciatoia, Storia, Altro (`NOME_TIPO`; le chiavi dei dati restano `sicura`, `forziere-chiuso`, `volonta`, `ombra-sciagura`); ogni tipo tranne «Altro» si collega a qualunque pin del Palazzo, anche a uno con una destinazione o un Confidente (dalla 094). Dall'editor delle mappe un riferimento «punto» diventa la voce del pin senza toccarne il riferimento; il pacchetto delle mappe la porta come `voce` (§6 di `MAPPE.md`). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
-`impostaStatoPunto` raccoglie o riapre tutti i pin della voce; `impostaRaccolto` segna la voce quando sono raccolti **tutti**
-i suoi pin delle planimetrie e la riapre togliendone uno; collegando, `allineaStatiPunto` unisce gli stati delle partite
-(voce segnata → pin raccolti; pin tutti raccolti → voce segnata), scollegando restano come sono. La risposta del
+`puntoDaCollegare` — il tipo ha di solito un pin; `puntoDescrittivo` — solo «Altro», senza pin né stato). I tipi delle voci (2026-10-01): Stanze sicure, Porta, Meccanismo, Forziere normale, Forziere raro, Semi della bramosia, Enigma, Mini-boss, Boss, Nemico, Persona, Oggetto, Scorciatoia, Storia, Altro (`NOME_TIPO`; le chiavi dei dati restano `sicura`, `forziere-chiuso`, `volonta`, `ombra-sciagura`); ogni tipo tranne «Altro» si collega a qualunque pin del Palazzo, anche a uno con una destinazione o un Confidente (dalla 094). Dall'editor delle mappe un riferimento «punto» diventa una voce in più del pin senza toccarne il riferimento; il pacchetto delle mappe porta le voci come `voci` (098; legge ancora `voce` della 094: §6 di `MAPPE.md`). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
+`impostaStatoPunto` raccoglie o riapre i pin della voce (`scriviStatoVoce` → `allineaRaccoltoDelPin`: un pin con più voci è fatto quando lo sono tutte); `impostaRaccolto` segna ogni voce del pin quando sono raccolti **tutti**
+i pin di quella voce e la riapre togliendone uno; collegando, `allineaStatiPunto` unisce gli stati delle partite
+(voce segnata → pin raccolti, se le loro voci sono tutte segnate; pin tutti raccolti e solo di questa voce → voce segnata: un pin con altre voci non segna da sé quella nuova), scollegando il pin segue le voci che gli restano (`allineaPinScollegato`; senza più voci resta com'era). La risposta del
 collegamento non porta lo stato della partita: dopo ogni tocco `GuidaDellArea` rilegge la scheda (`onRicarica`, con la
 partita e `versioneStati`). «Ottenuto» ed «Esaurito» (2026-10-04, `segnaEPassaOltre`) chiudono la voce e aprono la successiva
 da segnare nell'ordine dell'elenco (voci e passi; saltate le segnate, le descrittive, quelle fuori filtro e i passi dell'Enigma che si

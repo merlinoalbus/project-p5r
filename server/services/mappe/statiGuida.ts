@@ -9,12 +9,30 @@
 import type { AppDatabase } from '../../db/dbService.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
 import type { StatoPunto } from '../../../shared/types.js';
-import { VOCE_DEL_PIN } from './voceDelPin.js';
+import { VOCI_GESTITE_SQL } from './voceDelPin.js';
 
-/** I pin (sulle planimetrie, non gli elementi della guida senza mappa) collegati a un punto. */
+/** I pin (sulle planimetrie, non gli elementi della guida senza mappa) collegati a un punto (`spillo_voce`, 098). */
 export function pinDelPuntoGuida(db: AppDatabase, punto: string): Array<{ id: number; uid: string }> {
-  return db.prepare(`SELECT id, uid FROM spillo WHERE ${VOCE_DEL_PIN} = ? AND mappa_chiave IS NOT NULL AND uid IS NOT NULL ORDER BY id`)
-    .all(punto) as Array<{ id: number; uid: string }>;
+  return db.prepare(`SELECT s.id, s.uid FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id
+    WHERE sv.voce_chiave = ? AND s.mappa_chiave IS NOT NULL AND s.uid IS NOT NULL ORDER BY s.id`).all(punto) as Array<{ id: number; uid: string }>;
+}
+
+/** Quante voci ha un pin (`spillo_voce`, 098). */
+export function quanteVociDelPin(db: AppDatabase, spilloId: number): number {
+  return db.prepare('SELECT COUNT(*) FROM spillo_voce WHERE spillo_id = ?').pluck().get(spilloId) as number;
+}
+
+/**
+ * In una partita il «raccolto» di un pin con delle voci segue le sue voci (scelta dell'utente, 2026-10-09: «Voci indipendenti»):
+ * fatto quando sono **tutte** gestite, altrimenti no. Un pin senza voci non si tocca: il suo stato è solo suo.
+ */
+export function allineaRaccoltoDelPin(db: AppDatabase, partita: number, pin: { id: number; uid: string }, adesso: string): void {
+  const voci = db.prepare('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ?').pluck().all(pin.id) as string[];
+  if (voci.length === 0) return;
+  const gestite = new Set(db.prepare(VOCI_GESTITE_SQL).pluck().all(partita) as string[]);
+  const fatto = voci.every((v) => gestite.has(v));
+  db.prepare(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
+    ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partita, pin.uid, fatto ? 1 : 0, adesso);
 }
 
 // ---- L'Enigma e i suoi passi (095, scelte dell'utente del 2026-10-01) ----
@@ -46,15 +64,15 @@ export function enigmaDi(db: AppDatabase, voce: string): string | null {
   return (db.prepare('SELECT contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(voce) as { contenitore_chiave: string | null } | undefined)?.contenitore_chiave ?? null;
 }
 
-/** Scrive lo stato di una voce in una partita e porta con sé i suoi pin: segnata li raccoglie, riaperta li riapre. */
+/**
+ * Scrive lo stato di una voce in una partita e porta con sé i suoi pin: un pin che ha solo lei la segue (segnata lo raccoglie,
+ * riaperta lo riapre); uno con altre voci è fatto quando lo sono tutte (`allineaRaccoltoDelPin`, voci indipendenti, 2026-10-09).
+ */
 export function scriviStatoVoce(db: AppDatabase, partita: number, voce: string, stato: StatoPunto | null, adesso: string): void {
   if (stato === null) db.prepare('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partita, voce);
   // segnato dall'utente: automatico = 0 (utente 006; dal 2026-10-04 nessuno scrive più 1, e utente 017 ha tolto quelli rimasti)
   else db.prepare('INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET stato = excluded.stato, updated_at = excluded.updated_at, automatico = 0').run(partita, voce, stato, adesso);
-  for (const pin of pinDelPuntoGuida(db, voce)) {
-    db.prepare(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
-      ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partita, pin.uid, stato === null ? 0 : 1, adesso);
-  }
+  for (const pin of pinDelPuntoGuida(db, voce)) allineaRaccoltoDelPin(db, partita, pin, adesso);
 }
 
 /** In una partita lo stato dell'Enigma segue i suoi passi: tutti fatti → risolto («ottenuto», o lo stato che aveva già), altrimenti aperto. */

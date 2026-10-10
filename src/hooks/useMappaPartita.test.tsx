@@ -13,7 +13,7 @@ const { getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto, not
 vi.mock('../services/api', (vero) => moduloApi(vero, { getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 
-const leva: SpilloDto = { id: 8, mappaChiave: 'a', tipo: 'meccanismo', tipoNome: 'Meccanismo', colore: '#64748b', nome: 'Leva', descrizione: '', x: 20, y: 20, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voce: null, condizioni: [], immagini: [], updatedAt: '' };
+const leva: SpilloDto = { id: 8, mappaChiave: 'a', tipo: 'meccanismo', tipoNome: 'Meccanismo', colore: '#64748b', nome: 'Leva', descrizione: '', x: 20, y: 20, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
 /** Costruisce una `MappaDto` di tipo area con la chiave (usata anche come nome) e gli spilli dati; il resto è neutro. */
 const mappa = (chiave: string, spilli: SpilloDto[]): MappaDto => ({ chiave, nome: chiave, tipo: 'area', genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'utente', numeroSpilli: spilli.length, numeroFigli: 0, updatedAt: '', larghezza: 100, altezza: 100, note: '', genitoreNome: null, percorso: [], figli: [], arrivi: [], spilli });
 
@@ -27,7 +27,7 @@ function Prova({ chiave, versione = 0 }: { chiave: string; versione?: number }) 
       <p data-testid="mappa">{m.mappa ? `${m.mappa.chiave}: ${m.mappa.spilli.map((s) => `${s.nome}${s.raccolto ? ' (segnato)' : ''}`).join(', ')}` : 'caricamento'}</p>
       {primo && <button type="button" onClick={() => void m.raccolto(primo, true)}>Segna</button>}
       {primo && <button type="button" onClick={() => void m.raccolto(primo, false)}>Togli</button>}
-      {primo && <button type="button" onClick={() => void m.statoPunto(primo, 'ottenuto')}>Voce</button>}
+      {primo && <button type="button" onClick={() => void m.statoPunto(primo, primo.voci[0]?.chiave ?? '', 'ottenuto')}>Voce</button>}
       {primo && <button type="button" onClick={() => void m.acquisto(primo, 'pozione', true)}>Compra</button>}
       <button type="button" onClick={() => void m.ricarica()}>Ricarica</button>
     </>
@@ -97,7 +97,7 @@ it('anche «ricarica» rende vecchia una rilettura in sospeso', async () => {
 });
 
 it('dopo lo stato della voce della guida e dopo un acquisto la mappa si rilegge (lo stato può essere la condizione di un altro pin)', async () => {
-  const conVoce: SpilloDto = { ...leva, voce: { chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null }, dettaglio: { tipo: 'negozio', negozio: { chiave: 'n', nome: 'N', articoli: [{ chiave: 'pozione', nome: 'Pozione', comprato: false }] } } as unknown as SpilloDto['dettaglio'] };
+  const conVoce: SpilloDto = { ...leva, voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null }], dettaglio: { tipo: 'negozio', negozio: { chiave: 'n', nome: 'N', articoli: [{ chiave: 'pozione', nome: 'Pozione', comprato: false }] } } as unknown as SpilloDto['dettaglio'] };
   getMappa.mockResolvedValue(mappa('a', [conVoce]));
   impostaStatoPunto.mockResolvedValue({ chiave: 'k-01/1', stato: 'ottenuto' });
   impostaAcquisto.mockResolvedValue({ chiave: 'pozione', nome: 'Pozione', acquistato: true });
@@ -126,4 +126,34 @@ it('gli avvisi dicono la parola dello stato, e per toglierlo quella scelta per i
   expect(await screen.findByText('a: Leva')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Togli' }));
   await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', '«Leva»: non più azionato.'));
+});
+
+/** Componente di prova per un pin con più voci (098): un pulsante «Ottenuto» per ognuna, sul primo spillo. */
+function ProvaVoci() {
+  const m = useMappaPartita('a', 7);
+  const primo = m.mappa?.spilli[0];
+  return (
+    <>
+      <p data-testid="mappa">{m.mappa ? m.mappa.spilli.map((s) => `${s.nome}${s.raccolto ? ' (segnato)' : ''}`).join(', ') : 'caricamento'}</p>
+      {primo?.voci.map((v) => <button key={v.chiave} type="button" onClick={() => void m.statoPunto(primo, v.chiave, 'ottenuto')}>{v.nome}</button>)}
+    </>
+  );
+}
+
+it('un pin con più voci (098): segnarne una non lo fa «segnato», segnarle tutte sì; l’avviso dice quale voce', async () => {
+  /** Una voce «Storia» non segnata con chiave e nome dati. */
+  const voce = (chiave: string, nome: string) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null });
+  const pin: SpilloDto = { ...leva, id: 30, tipo: 'infiltrazione', tipoNome: 'Infiltrazione', nome: 'Infiltrazione', voci: [voce('k-01/1', 'Primo evento'), voce('k-02/1', 'Secondo evento')] };
+  getMappa.mockResolvedValue(mappa('a', [pin]));
+  impostaStatoPunto.mockImplementation(async (_p: number, chiave: string) => ({ chiave, stato: 'ottenuto' }));
+  render(<ProvaVoci />);
+  expect(await screen.findByText('Infiltrazione')).toBeInTheDocument();
+  // la rilettura in silenzio non arriva: il pin resta come l'ha aggiornato la risposta
+  getMappa.mockImplementation(() => new Promise(() => {}));
+  fireEvent.click(screen.getByRole('button', { name: 'Primo evento' }));
+  await waitFor(() => expect(impostaStatoPunto).toHaveBeenCalledWith(7, 'k-01/1', 'ottenuto'));
+  await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', '«Infiltrazione» — «Primo evento» segnato come ottenuto.'));
+  expect(screen.getByTestId('mappa')).toHaveTextContent(/^Infiltrazione$/);
+  fireEvent.click(screen.getByRole('button', { name: 'Secondo evento' }));
+  await waitFor(() => expect(screen.getByTestId('mappa')).toHaveTextContent('Infiltrazione (segnato)'));
 });

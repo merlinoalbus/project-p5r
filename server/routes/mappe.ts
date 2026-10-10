@@ -10,6 +10,7 @@
 import { risolviPercorsoMappa, contenutiMappa } from '../services/mappe/contenutiGuidaService.js';
 import { risolviAccessoMondo } from '../services/mappe/accessoMondoService.js';
 import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../../shared/accessoMondo.js';
+import { vociCollegabili } from '../services/dungeonService.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
@@ -123,6 +124,10 @@ router.put('/spilli/:id', validate({ params: paramsSpillo, body: bodyAggiornaSpi
 router.delete('/spilli/:id', validate({ params: paramsSpillo }), (req, res) => {
   eliminaSpillo(Number(req.params.id));
   res.status(204).end();
+});
+/** Le voci della guida che l'editor può collegare allo spillo (098): si collegano e scollegano con `/compendio/punti/:chiave/pin/:spillo`. */
+router.get('/spilli/:id/voci-collegabili', validate({ params: paramsSpillo }), (req, res) => {
+  res.json(vociCollegabili(Number(req.params.id)));
 });
 /** Schermata di riferimento dello spillo (corpo grezzo `image/*`, didascalia opzionale nella query). */
 router.post('/spilli/:id/immagini', validate({ params: paramsSpillo, query: queryDidascalia }), express.raw({ type: 'image/*', limit: MAX_BYTE_IMMAGINE }), (req, res) => {

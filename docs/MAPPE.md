@@ -78,9 +78,15 @@ spillo
   seed_identita_json TEXT NULL       migrazione 030: identità (tipo, nome, x, y, riferimento) dello spillo del seed quando l'utente lo
                                      modifica e diventa `utente`; al reseed il pacchetto salta lo spillo con quella identità (niente doppioni,
                                      modifiche e condizioni conservate)
-  voce_chiave      TEXT NULL → punto_interesse(chiave) ON DELETE SET NULL   migrazione 094 (2026-10-01): la voce della guida a cui
-                                     il pin appartiene, in un campo suo; il riferimento resta libero (una destinazione, un Confidente).
-                                     Una voce, più pin; un pin, una voce. Gli elementi della guida senza mappa tengono il riferimento «punto»
+  (voce_chiave: migrazione 094, tolta dalla 098 — le voci del pin stanno in `spillo_voce`, qui sotto)
+
+spillo_voce  (le voci della guida dei pin, migrazione 098 del 2026-10-09; prima `spillo.voce_chiave` della 094, una per pin)
+  spillo_id    INTEGER NOT NULL → spillo(id) ON DELETE CASCADE
+  voce_chiave  TEXT NOT NULL → punto_interesse(chiave) ON DELETE CASCADE      PK (spillo_id, voce_chiave), WITHOUT ROWID
+                                     Una voce, più pin; un pin, più voci (anche di aree diverse dello stesso Palazzo): ogni voce si
+                                     segna da sola e il pin è fatto quando lo sono tutte («Voci indipendenti»). Il riferimento del pin
+                                     resta libero (una destinazione, un Confidente). Gli elementi della guida senza mappa tengono il
+                                     riferimento «punto»
 
 spillo_partita  (stato per partita)
   partita_id, spillo_id PK, raccolto INTEGER NOT NULL DEFAULT 0, updated_at
@@ -89,9 +95,11 @@ spillo_partita  (stato per partita)
 Regole:
 - Il tipo `passaggio` con `riferimento_tipo = 'mappa'` è il collegamento fra livelli (punti 6 e 8): il click apre la mappa di destinazione;
   la mappa figlia mostra il pulsante «Su: <genitore>» (nel progetto «Torna a <genitore>») e il percorso (breadcrumb) ricostruito con `genitore_chiave`.
-- Uno spillo di una voce della guida (`voce_chiave`, dalla 094; prima `riferimento_tipo = 'punto'`, che resta per gli elementi della guida
-  senza mappa — la regola unica è `VOCE_DEL_PIN` / `voceDelPin` in `mappe/voceDelPin.ts`, riesportata da `collegamentiGuida.ts`) eredita lo stato del punto di dungeon della partita (`punto_partita`, in `partite.db`: ottenuto/esaurito ⇒
-  raccolto) così i forzieri già gestiti nella Guida spariscono anche sulla mappa; gli spilli senza riferimento usano `spillo_partita`.
+- Uno spillo di una o più voci della guida (`spillo_voce`, dalla 098; prima `voce_chiave` della 094, e prima ancora
+  `riferimento_tipo = 'punto'`, che resta per gli elementi della guida senza mappa — la regola unica è `vociDelPinSql` / `vociDelPin` /
+  `vociDiOgniPin` in `mappe/voceDelPin.ts`) eredita lo stato dei punti di dungeon della partita (`punto_partita`, in `partite.db`:
+  ottenuto/esaurito ⇒ raccolto; con più voci, raccolto quando sono gestite **tutte**, `fattoPerVoci`) così i forzieri già gestiti nella
+  Guida spariscono anche sulla mappa; gli spilli senza voci usano `spillo_partita`.
 - `riferimento_tipo = 'negozio'` ⇒ la scheda dello spillo mostra gli articoli del negozio (punto 5) con prezzo, disponibilità e stato
   d'acquisto della partita (già tracciato da `acquisto_partita`).
 - Migrazione automatica dell'esistente: per ogni `pianta_area`/`pianta_quartiere` con immagine nell'istanza viene creata una `mappa`
@@ -183,13 +191,14 @@ alla copia completa dell'istanza. Decisione dell'utente (2026-09-04 sera): il pa
 `mappe.json` esportato = `{ versione: 1, mappe: [{ chiave, nome, tipo, genitore, ordine, immagine: 'immagini/<chiave>.png' | asset, larghezza,
 altezza, entita, note, spilli: [{ tipo, nome, descrizione, x, y, riferimento, collezionabile, ordine, condizioni }] }] }` (`condizioni` assente quando vuoto:
 elenco di `RequisitoSpillo` di `shared/condizioniSpillo.ts`; all'importazione le voci non calcolabili o con chiavi assenti dalla Guida vengono scartate e contate
-nell'esito). Dalla migrazione 094 ogni spillo porta anche `voce` (la voce della guida, o `null`): un pacchetto di prima che la dava
-come `riferimento: { tipo: 'punto' }` si importa con la voce nel campo suo e il riferimento libero. All'importazione la voce segue le
-regole del collegamento dalla guida (`erroreVoceDelPin`: esiste, non è descrittiva, è del Palazzo della planimetria), verificate a
-genitori risolti; una che non regge si scarta e si conta (`vociScartate` nell'esito). La voce non fa parte dell'identità del pin.
-Un pacchetto che **tace** sulla voce (di prima della 094, o il seed del repository) non toglie quella collegata nell'istanza: il pin
-invariato la tiene, e il pin che il pacchetto cambia — tolto e reinserito, con lo stesso uid — la ritrova (come «raccolto», che
-segue l'uid); un pacchetto che la dichiara `null` la toglie. Al tempo del seed lo stesso file, con le
+nell'esito). Dalla migrazione 098 ogni spillo porta anche `voci` (le voci della guida, in ordine di chiave; `[]` se nessuna); un
+pacchetto della 094-097 porta `voce` (una sola, o `null`), uno di prima la dava come `riferimento: { tipo: 'punto' }`: si leggono
+ancora, e il riferimento resta libero. All'importazione ogni voce segue le regole del collegamento dalla guida (`erroreVoceDelPin`:
+esiste, non è descrittiva, è del Palazzo della planimetria), verificate a genitori risolti; una che non regge si scarta e si conta
+(`vociScartate` nell'esito, una per voce), le altre entrano. Le voci non fanno parte dell'identità del pin; il confronto «invariato
+nel seed» le guarda come insieme. Un pacchetto che **tace** sulle voci (di prima della 094, o il seed del repository) non toglie
+quelle collegate nell'istanza: il pin invariato le tiene, e il pin che il pacchetto cambia — tolto e reinserito, con lo stesso uid —
+le ritrova (come «raccolto», che segue l'uid); un pacchetto che le dichiara vuote (`voci: []` o `voce: null`) le toglie. Al tempo del seed lo stesso file, con le
 immagini in `public/asset/mappe/`, era letto da `caricaSeed` come `data/seed/mappe-editor.json` (origine `seed`), e il flusso «creo in
 app → pubblico nel repository» passava da lì; oggi le mappe della guida si pubblicano rigenerando il pacchetto di gioco (`npm run pacchetto`). Il pacchetto è completo: immagini di base e schermate degli spilli comprese, anche quelle scaricate dalle guide (la loro provenienza
 è annotata nel LEGGIMI; decisione dell'utente del 2026-09-04 sera, registrata in `DECISIONI.md`). Le mappe `seed` sono modificabili
