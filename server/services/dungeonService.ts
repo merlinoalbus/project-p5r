@@ -114,7 +114,7 @@ export function raccoltaMappe(dungeonChiave: string, partitaId?: number, segni?:
   const puntiGestiti = s?.puntiGestiti ?? null;
   const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string }>;
   // un pin conta una volta sola anche con più voci: preso quando sono tutte gestite (voci indipendenti, 2026-10-09)
-  const voci = raccolti === null ? null : vociDiOgniPin();
+  const voci = raccolti === null ? null : vociDiOgniPin(true);
   for (const r of righe) {
     const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (!!puntiGestiti && fattoPerVoci(voci?.get(r.id) ?? [], puntiGestiti));
     const m = perMappa.get(r.mappa_chiave) ?? { n: 0, presi: raccolti === null ? null : 0, spilli: [] };

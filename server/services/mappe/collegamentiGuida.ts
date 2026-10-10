@@ -21,7 +21,7 @@ import { vociDelPin, vociDelPinSql } from './voceDelPin.js';
 import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, passiDi, pinDelPuntoGuida, quanteVociDelPin } from './statiGuida.js';
 
 export { vociDelPin, vociDelPinSql };
-export { allineaEnigma, allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaRaccoltoDelPin, enigmaDi, passiDaSegnare, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './statiGuida.js';
+export { allineaEnigma, allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaRaccoltoDelPin, enigmaDi, passiDaSegnare, passiDi, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma } from './statiGuida.js';
 
 /**
  * Le regole del collegamento di un pin a una voce, le stesse per ogni strada che lo scrive — la guida (`collegaPinAlPunto`),
@@ -52,9 +52,9 @@ function conPartite(db: AppDatabase): boolean {
 /**
  * Quando un punto riceve i suoi pin, i due stati che fino a quel momento vivevano separati si uniscono, in ogni partita:
  *   - un punto già segnato segna i pin che hanno solo lui; un pin con altre voci è fatto quando lo sono tutte;
- *   - un punto non segnato i cui pin hanno **solo lui** e sono tutti raccolti risulta segnato (e, se è un passo, il suo Enigma
- *     lo segue). Un pin con altre voci non lo segna: il suo «raccolto» parla di quelle (voci indipendenti, 2026-10-09), e
- *     segue le sue voci, tra cui ora questa ancora da fare.
+ *   - un punto non segnato i cui pin che hanno **solo lui** ci sono e sono tutti raccolti risulta segnato (e, se è un passo, il
+ *     suo Enigma lo segue). Un pin con altre voci non conta: il suo «raccolto» parla di quelle (voci indipendenti, 2026-10-09),
+ *     e segue le sue voci, tra cui ora questa ancora da fare. È la stessa regola di `impostaRaccolto`.
  * Un pin che ha solo questo punto, raccolto o no, non perde niente.
  * Va eseguita con il file delle partite attaccato (`utente`); senza, non fa niente.
  */
@@ -62,13 +62,13 @@ export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string
   if (!conPartite(db)) return;
   const pin = pinDelPuntoGuida(db, punto);
   if (pin.length === 0) return;
-  const soloSuoi = pin.every((p) => quanteVociDelPin(db, p.id) === 1);
+  const soloSuoi = pin.filter((p) => quanteVociDelPin(db, p.id) === 1);
   const segnato = db.prepare('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?');
   const raccolto = db.prepare('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ? AND raccolto = 1');
   const segna = db.prepare("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at, automatico) VALUES (?, ?, 'ottenuto', ?, 0) ON CONFLICT(partita_id, punto_chiave) DO NOTHING");
   for (const { id: partita } of db.prepare('SELECT id FROM partita').all() as Array<{ id: number }>) {
     const giaSegnato = !!segnato.get(partita, punto);
-    if (!giaSegnato && soloSuoi && pin.every((p) => raccolto.get(partita, p.uid))) {
+    if (!giaSegnato && soloSuoi.length > 0 && soloSuoi.every((p) => raccolto.get(partita, p.uid))) {
       segna.run(partita, punto, adesso);
       // un passo segnato: il suo Enigma lo segue
       allineaEnigmaDellaVoce(db, partita, punto, adesso);

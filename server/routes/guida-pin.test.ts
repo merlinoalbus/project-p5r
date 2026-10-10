@@ -141,6 +141,72 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect(raccolto(pin.uid)).toBe(0);
   });
 
+  it('la spunta di un pin con più voci le segna tutte, tolta le riapre (scelta dell’utente, 2026-10-09); gli altri pin seguono le loro voci', async () => {
+    const a = await nuovoPunto('Voce A della spunta', 'storia');
+    const b = await nuovoPunto('Voce B della spunta', 'storia');
+    const [p, q] = [pinLiberi[0], pinLiberi[1]];
+    await collega(a.chiave, p.id).expect(200);
+    await collega(b.chiave, p.id).expect(200);
+    await collega(a.chiave, q.id).expect(200);
+    // spuntato P: A e B ottenute (anche se Q, l'altro pin di A, non era raccolto); P fatto, e Q segue la sua voce
+    await raccogli(p.id, true);
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid), raccolto(q.uid)]).toEqual(['ottenuto', 'ottenuto', 1, 1]);
+    // una voce già esaurita resta esaurita spuntando di nuovo
+    await statoPunto(b.chiave, 'esaurito');
+    await raccogli(p.id, true);
+    expect(segnato(b.chiave)).toBe('esaurito');
+    // tolta la spunta: tutte le sue voci si riaprono, e i pin seguono
+    await raccogli(p.id, false);
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid), raccolto(q.uid)]).toEqual([null, null, 0, 0]);
+  });
+
+  it('il rilievo del validatore: un pin con più voci non resta fatto se una sua voce si riapre dalla spunta di un altro pin', async () => {
+    const a = await nuovoPunto('Voce condivisa', 'storia');
+    const b = await nuovoPunto('Voce sola di P', 'storia');
+    const [p, q] = [pinLiberi[0], pinLiberi[1]];
+    await collega(a.chiave, p.id).expect(200);
+    await collega(b.chiave, p.id).expect(200);
+    await collega(a.chiave, q.id).expect(200);
+    // (b) P fatto dalle sue voci, Q raccolto: togliendo la spunta a Q, A si riapre e P non è più fatto
+    await statoPunto(a.chiave, 'ottenuto');
+    await statoPunto(b.chiave, 'ottenuto');
+    expect([raccolto(p.uid), raccolto(q.uid)]).toEqual([1, 1]);
+    await raccogli(q.id, false);
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid)]).toEqual([null, 'ottenuto', 0]);
+    // (a) spuntando di nuovo Q, A torna ottenuta (P ha già B): P è di nuovo fatto
+    await raccogli(q.id, true);
+    expect([segnato(a.chiave), raccolto(p.uid)]).toEqual(['ottenuto', 1]);
+  });
+
+  it('collegando un pin raccolto che ha solo questa voce, la voce si segna anche se un altro suo pin ha più voci (stessa regola della spunta)', async () => {
+    const c = await nuovoPunto('Voce C', 'storia');
+    const d = await nuovoPunto('Voce D', 'storia');
+    const [p, q] = [pinLiberi[0], pinLiberi[1]];
+    await collega(c.chiave, p.id).expect(200);
+    await collega(d.chiave, p.id).expect(200);
+    // Q raccolto da solo (nessuna voce), poi collegato a C: i pin di C che hanno solo lei sono tutti raccolti → C ottenuta
+    await raccogli(q.id, true);
+    await collega(c.chiave, q.id).expect(200);
+    expect(segnato(c.chiave)).toBe('ottenuto');
+    // P (C+D) segue le sue voci: D è ancora da fare
+    expect(raccolto(p.uid)).toBe(0);
+  });
+
+  it('una voce descrittiva rimasta su un pin non lo tiene «da fare»: contano le voci che si segnano', async () => {
+    const a = await nuovoPunto('Voce che si segna', 'storia');
+    const d = await nuovoPunto('Nota rimasta', 'altro');
+    const p = pinLiberi[2];
+    await collega(a.chiave, p.id).expect(200);
+    // scritta a mano: le regole del collegamento non la ammettono
+    prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(p.id, d.chiave);
+    await statoPunto(a.chiave, 'ottenuto');
+    expect(raccolto(p.uid)).toBe(1);
+    const mappa = prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(p.id) as string;
+    expect(((await request(app).get(`/api/mappe/${mappa}?partita=${partita}`).expect(200)).body.data as MappaDto).spilli.find((s) => s.id === p.id)!.raccolto).toBe(true);
+    await statoPunto(a.chiave, null);
+    expect(raccolto(p.uid)).toBe(0);
+  });
+
   it('con più voci il raccolto del Palazzo conta il pin una volta sola, preso quando le sue voci sono tutte segnate', async () => {
     // un collezionabile di Kamoshida libero: `raccoltaMappe` (la scheda) e `statoPalazzi` (il completamento) contano i collezionabili
     const forziere = prepared(`SELECT s.id, s.uid FROM spillo s WHERE s.collezionabile = 1 AND s.uid IS NOT NULL AND s.riferimento_tipo IS NULL

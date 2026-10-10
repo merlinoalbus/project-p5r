@@ -71,7 +71,7 @@ function areeDelleMappe(): Map<string, Set<string>> {
   return out;
 }
 
-interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string; /** Le voci della guida del pin (`vociDiOgniPin`, una o più dalla 098). */ voci: string[] }
+interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string; /** Le voci della guida del pin che si segnano (`vociDiOgniPin(true)`, una o più dalla 098). */ voci: string[] }
 
 /**
  * È il boss finale del suo Palazzo? Se punta a un punto boss finale; se sta sulla planimetria che contiene l'area
@@ -91,9 +91,9 @@ function eBossFinale(s: SpilloCollezionabile, finale: BossFinale | undefined, ar
 function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, SpilloCollezionabile[]> {
   const colonne = new Set((prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).map((c) => c.name));
   const out = new Map<string, SpilloCollezionabile[]>();
-  // l'uid c'è dalla 067; le voci le legge `vociDiOgniPin`, che si adatta allo schema (098, 094, o il solo riferimento «punto»)
+  // l'uid c'è dalla 067; le voci che si segnano le legge `vociDiOgniPin`, che si adatta allo schema (098, 094, o il solo riferimento «punto»)
   const righe = prepared(`SELECT id, ${colonne.has('uid') ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ id: number; uid: string | null; tipo: string; mappa_chiave: string }>;
-  const voci = vociDiOgniPin();
+  const voci = vociDiOgniPin(true);
   for (const r of righe) {
     const dungeon = palazzi.get(r.mappa_chiave);
     if (!dungeon) continue;

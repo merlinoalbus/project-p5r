@@ -27,7 +27,7 @@ import { giocabili } from '../squadraService.js';
 import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
-import { allineaEnigmaDellaVoce, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, segnaPassiDellEnigma, vociDelPin } from './collegamentiGuida.js';
+import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma, vociDelPin } from './collegamentiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
@@ -364,8 +364,9 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   });
   let raccolto = ctx.raccolti?.has(r.uid) ?? false;
   // Le voci della Guida tutte gestite (ottenute/esaurite) contano come raccolto anche sulla mappa: una sola, se il pin ne ha una;
-  // tutte, se ne ha più d'una (voci indipendenti, 2026-10-09). Una voce descrittiva non ha stato.
-  if (voci.length > 0 && voci.every((v) => !!v.stato)) raccolto = true;
+  // tutte, se ne ha più d'una (voci indipendenti, 2026-10-09). Una voce descrittiva non ha stato e non conta.
+  const daSegnare = voci.filter((v) => !puntoDescrittivo(v.tipo));
+  if (daSegnare.length > 0 && daSegnare.every((v) => !!v.stato)) raccolto = true;
   const nomi = ctx.nomi ?? nomiCondizioni();
   const condizioni: CondizioneSpilloDto[] = condizioniDiRiga(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La chiave della richiesta la
@@ -1246,23 +1247,40 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
   getDb().transaction(() => {
     prepared(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
       ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, r.uid, raccolto ? 1 : 0, adesso);
-    // ogni voce del pin (una o più, 098) segue il suo segno, da sola; una voce descrittiva della guida non ha stato (2026-10-01):
-    // il raccolto del pin non la segna
-    for (const voce of vociDelPin(r.id)) {
-    const tipoPunto = (prepared('SELECT tipo FROM punto_interesse WHERE chiave = ?').get(voce) as { tipo: string } | undefined)?.tipo ?? null;
-    if (tipoPunto !== null && !puntoDescrittivo(tipoPunto)) {
+    // le voci del pin che si segnano (una o più, 098): una voce descrittiva della guida non ha stato (2026-10-01), il raccolto del
+    // pin non la segna
+    const voci = vociDelPin(r.id).filter((voce) => {
+      const tipoPunto = (prepared('SELECT tipo FROM punto_interesse WHERE chiave = ?').get(voce) as { tipo: string } | undefined)?.tipo ?? null;
+      return tipoPunto !== null && !puntoDescrittivo(tipoPunto);
+    });
+    /** Vero se la voce ha uno stato nella partita. */
+    const segnata = (voce: string) => !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, voce);
+    if (voci.length > 1) {
+      // Un pin con più voci (scelta dell'utente, 2026-10-09: «Segna tutte le sue voci»): segnarlo segna «ottenuto» ogni sua voce
+      // ancora da segnare, come «Ottenuto» su ogni riga del popup; togliere il segno le riapre tutte. Come dalla guida
+      // (`impostaStatoPunto`): i passi di un Enigma seguono, i pin delle voci seguono le loro voci — lui compreso, che così è
+      // fatto quando sono segnate tutte (`scriviStatoVoce`) — e l'Enigma di un passo segue i suoi passi.
+      for (const voce of voci) {
+        if (raccolto && segnata(voce)) continue;
+        segnaPassiDellEnigma(getDb(), partitaId, voce, raccolto ? 'ottenuto' : null, adesso);
+        scriviStatoVoce(getDb(), partitaId, voce, raccolto ? 'ottenuto' : null, adesso);
+        allineaEnigmaDellaVoce(getDb(), partitaId, voce, adesso);
+      }
+    } else for (const voce of voci) {
       // raccogliere lo spillo di un punto è segnare quel punto: è dell'utente, non un segno automatico (utente 006). Un punto
-      // con più pin sulle planimetrie (2026-10-01) è segnato quando li ha raccolti **tutti**; toglierne uno lo riapre.
+      // con più pin sulle planimetrie (2026-10-01) è segnato quando li ha raccolti **tutti**; toglierne uno lo riapre. Contano i
+      // pin che hanno solo questa voce: il segno di un pin con altre voci parla di tutte (098), e aspettarlo bloccherebbe la voce.
       const tutti = r.mappa_chiave === null || pinDelPuntoGuida(getDb(), voce)
-        .every((p) => p.uid === r.uid || !!prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ? AND raccolto = 1').get(partitaId, p.uid));
+        .every((p) => p.uid === r.uid || quanteVociDelPin(getDb(), p.id) > 1 || !!prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ? AND raccolto = 1').get(partitaId, p.uid));
       if (raccolto && tutti) prepared(`INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', ?) ON CONFLICT(partita_id, punto_chiave) DO UPDATE SET automatico = 0`).run(partitaId, voce, adesso);
       else if (!raccolto) prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partitaId, voce);
       // un Enigma coi suoi passi (095), raggiunto da un elemento della guida di prima: i passi seguono, come segnandolo dalla guida
-      const segnata = !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, voce);
-      segnaPassiDellEnigma(getDb(), partitaId, voce, segnata ? 'ottenuto' : null, adesso);
+      segnaPassiDellEnigma(getDb(), partitaId, voce, segnata(voce) ? 'ottenuto' : null, adesso);
       // un passo di un Enigma (095): l'Enigma segue i suoi passi
       allineaEnigmaDellaVoce(getDb(), partitaId, voce, adesso);
-    }
+      // gli altri pin di questa voce che hanno altre voci la seguono (voci indipendenti, 2026-10-09): fatti solo con tutte le loro
+      // voci segnate — un pin con più voci non resta «fatto» con questa voce riaperta
+      for (const p of pinDelPuntoGuida(getDb(), voce)) if (p.uid !== r.uid && quanteVociDelPin(getDb(), p.id) > 1) allineaRaccoltoDelPin(getDb(), partitaId, p, adesso);
     }
     // il Tesoro o il boss raccolti non segnano più da soli il boss finale della Guida (scelta dell'utente, 2026-10-04: il
     // boss si affronta più volte, ed è sconfitto solo col suo spillo raccolto o segnato dalla Guida; utente 017)

@@ -1396,10 +1396,15 @@ condizione scritta al contrario. Non era così.
 
 ## 2026-10-09 — Un pin può appartenere a più voci della guida
 
-Richiesta dell'utente: «i pin dei luoghi possono essere agganciati anche a più di un evento area per volta...». Alla mia domanda
-(«intendi che lo stesso pin, per esempio un punto di infiltrazione, deve potersi collegare a più voci della guida, anche di aree
-diverse? Oggi un pin si collega a una voce sola») l'utente ha risposto «sì a entrambe le domande» (l'altra domanda era la
-cancellazione delle copie dei database). Prima un pin di una voce rifiutava la seconda (409 `pin-gia-collegato`, «scollegalo prima»).
+Richiesta dell'utente: «i pin dei luoghi possono essere agganciati anche a più di un evento area per volta...». La mia domanda, per
+intero: «Sul tuo messaggio «i pin dei luoghi possono essere agganciati anche a più di un evento area per volta»: intendi che lo
+stesso pin, per esempio un punto di infiltrazione, deve potersi collegare a più voci della guida, anche di aree diverse? Oggi un pin
+si collega a una voce sola. Oppure parli d'altro, come i pin di città e gli eventi del percorso giorno per giorno?». L'utente ha
+risposto «sì a entrambe le domande» (l'altra domanda era la cancellazione delle copie dei database). Su richiesta del validatore ho
+chiesto se anche l'alternativa faceva parte della richiesta: «Avevi risposto «sì a entrambe le domande». La mia seconda domanda
+conteneva anche un'alternativa: «Oppure parli d'altro, come i pin di città e gli eventi del percorso giorno per giorno?». Anche quella
+fa parte della richiesta?» → «No, solo voci della guida (Recommended)». Prima un pin di una voce rifiutava la seconda (409
+`pin-gia-collegato`, «scollegalo prima»).
 
 Risposte dell'utente, parola per parola:
 - «Un pin collegato a più voci (es. il punto di infiltrazione per «Infiltrati nel castello» e per un evento di un'altra area): come
@@ -1423,3 +1428,17 @@ Che cosa ne segue:
 - **Visore.** Nel popup, con più voci, una riga per voce col suo nome e i suoi pulsanti; nella scheda, ogni voce col suo stato.
 - **Pacchetto delle mappe.** Porta `voci`; legge ancora `voce` (094-097) e il riferimento «punto» (prima della 094). Una voce che non
   regge si scarta e si conta, una per voce.
+- **La spunta di un pin con più voci** (scelta dell'utente, posta su rilievo del validatore: nella scheda del Palazzo la spunta
+  lasciava un pin con più voci «fatto» con una voce non segnata). Domanda: «Nella scheda del Palazzo, la lista «Da raccogliere» ha
+  una spunta per ogni collezionabile. Che cosa deve fare la spunta su un pin collegato a più voci della guida?» → «Segna tutte le
+  sue voci (Recommended)» («Spuntare il pin segna «ottenuto» ogni sua voce ancora da segnare, come premere «Ottenuto» su ogni riga
+  del popup: il pin risulta fatto. Togliere la spunta riapre tutte le sue voci.»).
+  - Si fa come dalla guida, voce per voce: i passi di un Enigma seguono, i pin delle voci seguono le loro voci. Una voce già
+    segnata (anche «esaurito») resta com'è; togliendo la spunta si riaprono tutte, «esaurito» compreso.
+  - La spunta di un pin con una voce sola resta com'era (la voce si segna quando sono raccolti tutti i suoi pin). Contano però
+    solo i pin che hanno **solo** quella voce: il segno di un pin con più voci parla di tutte, e aspettarlo bloccava la voce
+    (P con le voci A e B, Q con la sola A: senza A, P non è raccolto, e senza P raccolto A non si segnava).
+  - Collegando un pin, `allineaStatiPunto` segue la stessa regola.
+  - Quando una voce si riapre dalla spunta di un altro pin, i pin con più voci la seguono (non restano «fatti»).
+- **Le voci descrittive non contano** nella regola «tutte le voci segnate»: non hanno stato. Le regole del collegamento non le
+  ammettono, ma una scritta da prima non deve tenere il pin «da fare».

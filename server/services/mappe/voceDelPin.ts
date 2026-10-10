@@ -46,11 +46,14 @@ function schemaVoci(): { tabella: boolean; colonna: boolean } {
 /**
  * Le voci della guida di ogni pin che ne ha, per id, in ordine di chiave: la stessa regola di `vociDelPinSql`, letta una volta
  * per tutti i pin. Si adatta allo schema: prima della 098 vale `voce_chiave` (094), prima ancora il solo riferimento «punto».
+ * Con `soloDaSegnare` restano le voci che si segnano: una descrittiva («Altro») non ha stato, e non può tenere un pin «da fare»
+ * (le regole del collegamento non la ammettono, ma una scritta da prima può esserci).
  */
-export function vociDiOgniPin(): Map<number, string[]> {
+export function vociDiOgniPin(soloDaSegnare = false): Map<number, string[]> {
   const { tabella, colonna } = schemaVoci();
-  const righe = prepared(`${tabella ? 'SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION ' : ''}${colonna ? 'SELECT id, voce_chiave FROM spillo WHERE voce_chiave IS NOT NULL UNION ' : ''}
-    SELECT id, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave IS NOT NULL ORDER BY 1, 2`).all() as Array<{ id: number; voce: string }>;
+  const righe = prepared(`SELECT v.id, v.voce FROM (${tabella ? 'SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION ' : ''}${colonna ? 'SELECT id, voce_chiave FROM spillo WHERE voce_chiave IS NOT NULL UNION ' : ''}
+    SELECT id, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave IS NOT NULL) v
+    ${soloDaSegnare ? `JOIN punto_interesse pi ON pi.chiave = v.voce AND pi.tipo <> '${TIPO_PUNTO_DESCRITTIVO}'` : ''} ORDER BY 1, 2`).all() as Array<{ id: number; voce: string }>;
   const out = new Map<number, string[]>();
   for (const r of righe) out.set(r.id, [...(out.get(r.id) ?? []), r.voce]);
   return out;
@@ -63,14 +66,15 @@ export function vociDelPin(id: number): string[] {
     .pluck().all(id, id) as string[];
 }
 
-/** Un pin è fatto per le sue voci quando ne ha almeno una e sono tutte gestite nella partita (voci indipendenti, 2026-10-09). */
+/** Un pin è fatto per le sue voci quando ne ha almeno una e sono tutte gestite nella partita (voci indipendenti, 2026-10-09).
+ *  `voci` sono quelle che si segnano (`vociDiOgniPin(true)`). */
 export function fattoPerVoci(voci: readonly string[], gestite: ReadonlySet<string>): boolean {
   return voci.length > 0 && voci.every((v) => gestite.has(v));
 }
 
 /** Gli uid dei pin fatti per le loro voci (`fattoPerVoci`), date le voci gestite di una partita. */
 export function uidFattiPerVoci(gestite: ReadonlySet<string>): Set<string> {
-  const voci = vociDiOgniPin();
+  const voci = vociDiOgniPin(true);
   const out = new Set<string>();
   if (voci.size === 0) return out;
   for (const r of prepared('SELECT id, uid FROM spillo WHERE uid IS NOT NULL').all() as Array<{ id: number; uid: string }>) {

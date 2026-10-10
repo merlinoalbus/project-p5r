@@ -7,7 +7,7 @@
 // ============================================================
 
 import type { AppDatabase } from '../../db/dbService.js';
-import { puntoDescrittivo } from '../../../shared/spilli.js';
+import { puntoDescrittivo, TIPO_PUNTO_DESCRITTIVO } from '../../../shared/spilli.js';
 import type { StatoPunto } from '../../../shared/types.js';
 import { VOCI_GESTITE_SQL } from './voceDelPin.js';
 
@@ -17,17 +17,20 @@ export function pinDelPuntoGuida(db: AppDatabase, punto: string): Array<{ id: nu
     WHERE sv.voce_chiave = ? AND s.mappa_chiave IS NOT NULL AND s.uid IS NOT NULL ORDER BY s.id`).all(punto) as Array<{ id: number; uid: string }>;
 }
 
-/** Quante voci ha un pin (`spillo_voce`, 098). */
+/** Quante voci da segnare ha un pin (`spillo_voce`, 098; una descrittiva non conta: non ha stato). */
 export function quanteVociDelPin(db: AppDatabase, spilloId: number): number {
-  return db.prepare('SELECT COUNT(*) FROM spillo_voce WHERE spillo_id = ?').pluck().get(spilloId) as number;
+  return db.prepare('SELECT COUNT(*) FROM spillo_voce sv JOIN punto_interesse pi ON pi.chiave = sv.voce_chiave WHERE sv.spillo_id = ? AND pi.tipo <> ?')
+    .pluck().get(spilloId, TIPO_PUNTO_DESCRITTIVO) as number;
 }
 
 /**
  * In una partita il «raccolto» di un pin con delle voci segue le sue voci (scelta dell'utente, 2026-10-09: «Voci indipendenti»):
- * fatto quando sono **tutte** gestite, altrimenti no. Un pin senza voci non si tocca: il suo stato è solo suo.
+ * fatto quando quelle che si segnano sono **tutte** gestite, altrimenti no. Un pin senza voci da segnare non si tocca: il suo
+ * stato è solo suo (una voce descrittiva non ha stato).
  */
 export function allineaRaccoltoDelPin(db: AppDatabase, partita: number, pin: { id: number; uid: string }, adesso: string): void {
-  const voci = db.prepare('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ?').pluck().all(pin.id) as string[];
+  const voci = db.prepare('SELECT sv.voce_chiave FROM spillo_voce sv JOIN punto_interesse pi ON pi.chiave = sv.voce_chiave WHERE sv.spillo_id = ? AND pi.tipo <> ?')
+    .pluck().all(pin.id, TIPO_PUNTO_DESCRITTIVO) as string[];
   if (voci.length === 0) return;
   const gestite = new Set(db.prepare(VOCI_GESTITE_SQL).pluck().all(partita) as string[]);
   const fatto = voci.every((v) => gestite.has(v));
