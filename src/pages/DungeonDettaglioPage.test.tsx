@@ -8,7 +8,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { scegliVoce, vociSelettore } from '../../test/selettore';
 import { usePartitaStore } from '../stores/partitaStore';
-import type { AreaDungeonDto, DungeonDettaglioDto, PartitaDto, PuntoInteresseDto } from '../types';
+import type { AreaDedaloDto, AreaDungeonDto, DungeonDettaglioDto, PartitaDto, PuntoInteresseDto } from '../types';
 
 const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaAtterraggiDungeon, getMappa } = vi.hoisted(() => ({
   getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
@@ -37,7 +37,7 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
   raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, atterraggio: null, atterraggi: [], note: '', fonti: [],
   aree: [
-    area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null }] }),
+    area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null }] }),
     area({ chiave: 'k-02', ordine: 1, nome: 'Torre', punti: [] }),
     area({ chiave: 'k-03', ordine: 2, nome: 'Cortile', mappe: [{ chiave: 'm-cortile', nome: 'Palazzo di Kamoshida › Cortile', n: 0, presi: partita ? 0 : null, spilli: [] }] }),
   ],
@@ -46,13 +46,16 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
     { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', ordine: 1, aree: [], n: 2, presi: partita ? 0 : null, spilli: [spillo(3, partita ? false : null), spillo(4, partita ? false : null)] },
   ],
 });
-/** Il Memento di prova: due Dedali, Aiyatsbus con timbri (1 su 8), una richiesta aperta e un boss, e Qimranut senza
- *  timbri dichiarati; nessuna planimetria, 1 obiettivo su 9 raccolto. */
+/** Un'area di un dedalo di prova (099) con i campi di `extra` che sovrascrivono i predefiniti: vuota, completata. */
+const areaDedalo = (extra: Partial<AreaDedaloDto>): AreaDedaloDto => ({ chiave: 'a', ordine: 0, nome: 'Area 1', descrizione: '', timbri: null, richieste: [], elementi: { totale: 0, fatti: 0 }, completata: true, ...extra });
+/** Il Memento di prova: due Dedali. Aiyatsbus ha un'area con un boss, una richiesta aperta e i timbri (1 su 8): 1 elemento fatto
+ *  su 10; Qimranut un'area vuota, quindi completata, e il dedalo con lei. Nessuna planimetria. */
 const mementos = (): DungeonDettaglioDto => ({
-  ...palazzo(true), chiave: 'mementos', tipo: 'mementos', nome: 'Memento', raccolta: { totale: 9, presi: 1, mappe: 2, mappeComplete: 0 }, planimetrie: [],
+  ...palazzo(true), chiave: 'mementos', tipo: 'mementos', nome: 'Memento', raccolta: { totale: 10, presi: 1, mappe: 2, mappeComplete: 1 }, planimetrie: [],
   aree: [
-    area({ chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', dedalo: { timbri: { totale: 8, raccolti: 1 }, richieste: [{ chiave: 'bulli', nome: 'Bullismo sui bulli', stato: null }], obiettivi: { totale: 9, fatti: 1 } }, punti: [{ chiave: 'p2', ordine: 0, tipo: 'boss', nome: 'Boss', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null }] }),
-    area({ chiave: 'mementos-01-qimranut', ordine: 1, nome: 'Dedalo di Qimranut', dedalo: { timbri: { totale: null, raccolti: null }, richieste: [], obiettivi: { totale: 0, fatti: 0 } } }),
+    area({ chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', dedalo: { aree: [areaDedalo({ chiave: 'aiy-1', timbri: { totale: 8, raccolti: 1 }, richieste: [{ chiave: 'bulli', nome: 'Bullismo sui bulli', stato: null }], elementi: { totale: 10, fatti: 1 }, completata: false })], daCollocare: [], obiettivi: { totale: 10, fatti: 1 }, completato: false },
+      punti: [{ chiave: 'p2', ordine: 0, tipo: 'boss', nome: 'Boss', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: 'aiy-1' }] }),
+    area({ chiave: 'mementos-01-qimranut', ordine: 1, nome: 'Dedalo di Qimranut', dedalo: { aree: [areaDedalo({ chiave: 'qim-1' })], daCollocare: [], obiettivi: { totale: 0, fatti: 0 }, completato: true } }),
   ],
 });
 
@@ -113,7 +116,7 @@ it('due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascri
   let risolviVecchia: (v: DungeonDettaglioDto) => void = () => {};
   getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementationOnce(() => new Promise<DungeonDettaglioDto>((r) => { risolviVecchia = r; })).mockResolvedValueOnce(dopo);
   impostaSpilloRaccolto.mockResolvedValue({});
-  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null });
+  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null, areaDedalo: null });
   monta('kamoshida');
   const colonna = await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' });
   fireEvent.click(within(colonna).getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' }));
@@ -194,27 +197,33 @@ it('senza partita non ci sono spunte, e l’elenco resta consultabile', async ()
   expect(screen.queryByRole('progressbar', { name: /Avanzamento/ })).toBeNull();
 });
 
-it('nei Memento la colonna sono gli obiettivi del dedalo: timbri con −/+ e richieste con Completata; niente pianta della guida', async () => {
+it('nei Memento la colonna sono le aree del dedalo (099): timbri con −/+, richieste con Completata, voci; l’area vuota è completata; niente pianta della guida', async () => {
   getDungeon.mockResolvedValue(mementos());
-  impostaTimbri.mockResolvedValue({ area: 'mementos-02-aiyatsbus', raccolti: 2, totale: 8, completato: false });
+  impostaTimbri.mockResolvedValue({ area: 'aiy-1', raccolti: 2, totale: 8, completato: false });
   impostaStatoRichiesta.mockResolvedValue({ chiave: 'bulli', stato: 'completata' });
   monta('mementos');
   expect(await screen.findByRole('heading', { name: 'Memento' })).toBeInTheDocument();
   expect(screen.queryByRole('tab', { name: 'Pianta della guida' })).toBeNull();
-  const colonna = screen.getByRole('complementary', { name: 'Obiettivi di Dedalo di Aiyatsbus' });
+  const colonna = screen.getByRole('complementary', { name: 'Aree di Dedalo di Aiyatsbus' });
+  expect(within(colonna).getByText('1/10 elementi')).toBeInTheDocument();
   expect(within(colonna).getByText('1 su 8')).toBeInTheDocument();
-  fireEvent.click(within(colonna).getByRole('button', { name: 'Aggiungi un timbro' }));
-  await waitFor(() => expect(impostaTimbri).toHaveBeenCalledWith(4, 'mementos-02-aiyatsbus', 2));
+  // le voci dell'area stanno dentro l'area
+  expect(within(colonna).getByRole('list', { name: 'Voci della guida di Area 1' })).toHaveTextContent('Boss');
+  fireEvent.click(within(colonna).getByRole('button', { name: 'Aggiungi un timbro in Area 1' }));
+  await waitFor(() => expect(impostaTimbri).toHaveBeenCalledWith(4, 'aiy-1', 2));
   await waitFor(() => expect(within(colonna).getByText('2 su 8')).toBeInTheDocument());
-  // l'anello segue: (2 timbri + 0 richieste) su 9
-  expect(screen.getByRole('progressbar', { name: /Avanzamento in Memento/ })).toHaveAttribute('aria-valuenow', '22');
+  // l'area, il dedalo e l'anello seguono: (2 timbri + 0 richieste + 0 voci) su 10
+  expect(within(colonna).getByText('2/10 elementi')).toBeInTheDocument();
+  expect(screen.getByRole('progressbar', { name: /Avanzamento in Memento/ })).toHaveAttribute('aria-valuenow', '20');
   fireEvent.click(within(colonna).getByRole('button', { name: 'Completata' }));
   await waitFor(() => expect(impostaStatoRichiesta).toHaveBeenCalledWith(4, 'bulli', 'completata'));
-  await waitFor(() => expect(screen.getByRole('progressbar', { name: /Avanzamento in Memento/ })).toHaveAttribute('aria-valuenow', '33'));
-  // il dedalo senza timbri dichiarati lo dice, senza contatore
+  await waitFor(() => expect(screen.getByRole('progressbar', { name: /Avanzamento in Memento/ })).toHaveAttribute('aria-valuenow', '30'));
+  // Qimranut ha un'area vuota: completata, e con lei il dedalo (la ✓ sulla sua scheda)
+  expect(screen.getByRole('tab', { name: /2\. Dedalo di Qimranut.*\(completata\)/ })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('tab', { name: /2\. Dedalo di Qimranut/ }));
-  expect(await screen.findByText('non dichiarati dalla guida')).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Aggiungi un timbro' })).toBeNull();
+  const qimranut = await screen.findByRole('complementary', { name: 'Aree di Dedalo di Qimranut' });
+  expect(within(qimranut).getByText('nessun elemento · completata')).toBeInTheDocument();
+  expect(within(qimranut).queryByRole('button', { name: /Aggiungi un timbro/ })).toBeNull();
 });
 
 // ---- Due gesti ravvicinati (B3", verifica completa 2026-10-03) ----
@@ -232,12 +241,12 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
     impostaTimbri.mockImplementation(() => new Promise((ok) => { rispondiTimbri = ok; }));
     impostaStatoRichiesta.mockResolvedValue({ chiave: 'bulli', stato: 'completata' });
     monta('mementos');
-    const colonna = within(await screen.findByRole('complementary', { name: 'Obiettivi di Dedalo di Aiyatsbus' }));
-    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro' })); }); // in volo
+    const colonna = within(await screen.findByRole('complementary', { name: 'Aree di Dedalo di Aiyatsbus' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro in Area 1' })); }); // in volo
     await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Completata' })); }); // arriva subito
-    await act(async () => { rispondiTimbri({ area: 'mementos-02-aiyatsbus', raccolti: 2, totale: 8, completato: false }); });
-    // (2 timbri + 1 richiesta) su 9
-    expect(anello('Memento')).toHaveAttribute('aria-valuenow', '33');
+    await act(async () => { rispondiTimbri({ area: 'aiy-1', raccolti: 2, totale: 8, completato: false }); });
+    // (2 timbri + 1 richiesta) su 10
+    expect(anello('Memento')).toHaveAttribute('aria-valuenow', '30');
     expect(colonna.getByText('2 su 8')).toBeInTheDocument();
   });
 
@@ -245,13 +254,13 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
     getDungeon.mockResolvedValue(mementos());
     let rispondiRichiesta!: (v: unknown) => void;
     impostaStatoRichiesta.mockImplementation(() => new Promise((ok) => { rispondiRichiesta = ok; }));
-    impostaTimbri.mockResolvedValue({ area: 'mementos-02-aiyatsbus', raccolti: 2, totale: 8, completato: false });
+    impostaTimbri.mockResolvedValue({ area: 'aiy-1', raccolti: 2, totale: 8, completato: false });
     monta('mementos');
-    const colonna = within(await screen.findByRole('complementary', { name: 'Obiettivi di Dedalo di Aiyatsbus' }));
+    const colonna = within(await screen.findByRole('complementary', { name: 'Aree di Dedalo di Aiyatsbus' }));
     await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Completata' })); }); // in volo
-    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro' })); }); // arriva subito
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro in Area 1' })); }); // arriva subito
     await act(async () => { rispondiRichiesta({ chiave: 'bulli', stato: 'completata' }); });
-    expect(anello('Memento')).toHaveAttribute('aria-valuenow', '33');
+    expect(anello('Memento')).toHaveAttribute('aria-valuenow', '30');
     expect(colonna.getByText('2 su 8')).toBeInTheDocument();
   });
 
@@ -266,7 +275,7 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' })); }); // in volo
     await act(async () => { fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })); }); // arriva subito
     expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
-    await act(async () => { rispondiStato({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null }); });
+    await act(async () => { rispondiStato({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null, areaDedalo: null }); });
     expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
     expect(screen.getByRole('button', { name: 'Anche le segnate (1)' })).toBeInTheDocument();
   });
@@ -275,7 +284,7 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
     getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementation(() => new Promise(() => {}));
     let rispondiRaccolto!: (v: unknown) => void;
     impostaSpilloRaccolto.mockImplementation(() => new Promise((ok) => { rispondiRaccolto = ok; }));
-    impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null });
+    impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null, areaDedalo: null });
     monta('kamoshida');
     const colonna = within(await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' }));
     await act(async () => { fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })); }); // in volo
@@ -708,7 +717,7 @@ const palazzoConPiuAree = (): DungeonDettaglioDto => {
 
 /** Una voce della guida con lo stato dato, nell'area indicata (per la spunta delle aree completate). */
 const voceGuida = (chiave: string, tipo: PuntoInteresseDto['tipo'], stato: PuntoInteresseDto['stato']): PuntoInteresseDto =>
-  ({ chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null });
+  ({ chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo: null });
 
 describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () => {
   /** Il Palazzo con più aree, con le voci date per area (le altre restano come sono). */

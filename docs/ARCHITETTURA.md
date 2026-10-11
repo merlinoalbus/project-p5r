@@ -47,8 +47,8 @@ server/
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod; gli schemi restano leggibili con `schemiDiValidazione`), errorHandler
   openapi/            documentazione dell'API (voce 5 della verifica completa): rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
   db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
-  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema), 097 (atterraggio dei Palazzi dalla mappa di Tokyo), 098 (più voci della guida per pin: `spillo_voce`); registro in index.ts, `index.test.ts` pretende id consecutivi
-  db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici), 017 (tolti i segni automatici del boss); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
+  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema), 097 (atterraggio dei Palazzi dalla mappa di Tokyo), 098 (più voci della guida per pin: `spillo_voce`), 099 (aree dei dedali dei Memento: `area_dedalo`); registro in index.ts, `index.test.ts` pretende id consecutivi
+  db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici), 017 (tolti i segni automatici del boss), 018 (timbri nelle aree dei dedali); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/pacchetto/ pacchettoGioco.ts: primo avvio dal pacchetto (`assicuraPacchettoIniziale`), `caricaPacchetto`/`ricaricaPacchetto` (test), `regoleAllAvvio`
@@ -129,7 +129,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 - `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
 - Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto). `seed_meta`, la memoria dell'ultimo caricamento del seed, è uscita con la migrazione 096 (verifica completa, R3'), e con lei il campo `seed` dello stato dell'istanza.
-- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 098 e `utente` alla 017). Le righe qui sotto descrivono
+- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 099 e `utente` alla 018). Le righe qui sotto descrivono
   il nucleo di allora; il caricamento era `caricaSeed` con l'hash in `seed_meta`, mentre oggi i dati di gioco arrivano con il
   pacchetto (`caricaPacchetto` / importazione) e le immagini stanno nella tabella `immagine` di `gioco.db` (079):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
@@ -810,14 +810,14 @@ voci ha una riga per voce, coi suoi pulsanti (`AzioniStato`, `onStatoPunto(spill
 (`SceltaPin`: senza testata, tocco = `onScegli` invece del popup, tutti i pin visibili, i collegati con `.spillo-mappa--scelto`,
 ricerca passata dalla voce); l'altezza della mappa si **misura** sul contenitore che scorre. `PuntoInteresseDto.pin`
 (`PinDelPuntoDto`) porta i pin collegati; la riga dice «N pin» o «da collegare» (`shared/spilli.ts`: `pinDelPunto`,
-`puntoDaCollegare` — il tipo ha di solito un pin; `puntoDescrittivo` — solo «Altro», senza pin né stato). I tipi delle voci (2026-10-01): Stanze sicure, Porta, Meccanismo, Forziere normale, Forziere raro, Semi della bramosia, Enigma, Mini-boss, Boss, Nemico, Persona, Oggetto, Scorciatoia, Storia, Altro (`NOME_TIPO`; le chiavi dei dati restano `sicura`, `forziere-chiuso`, `volonta`, `ombra-sciagura`); ogni tipo tranne «Altro» si collega a qualunque pin del Palazzo, anche a uno con una destinazione o un Confidente (dalla 094). Dall'editor delle mappe un riferimento «punto» diventa una voce in più del pin senza toccarne il riferimento; il pacchetto delle mappe porta le voci come `voci` (098; legge ancora `voce` della 094: §6 di `MAPPE.md`). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
+`puntoDaCollegare` — il tipo ha di solito un pin; `puntoDescrittivo` — solo «Altro» fuori dalle aree dei dedali, senza pin né stato). I tipi delle voci (2026-10-01): Stanze sicure, Porta, Meccanismo, Forziere normale, Forziere raro, Semi della bramosia, Enigma, Mini-boss, Boss, Nemico, Persona, Oggetto, Scorciatoia, Storia, Altro (`NOME_TIPO`; le chiavi dei dati restano `sicura`, `forziere-chiuso`, `volonta`, `ombra-sciagura`); ogni tipo tranne «Altro» si collega a qualunque pin del Palazzo, anche a uno con una destinazione o un Confidente (dalla 094). Dall'editor delle mappe un riferimento «punto» diventa una voce in più del pin senza toccarne il riferimento; il pacchetto delle mappe porta le voci come `voci` (098; legge ancora `voce` della 094: §6 di `MAPPE.md`). **Lo stato è uno solo** (`server/services/mappe/collegamentiGuida.ts`):
 `impostaStatoPunto` raccoglie o riapre i pin della voce (`scriviStatoVoce` → `allineaRaccoltoDelPin`: un pin con più voci è fatto quando lo sono tutte); `impostaRaccolto` (la spunta) su un pin con **più voci** le segna tutte «ottenuto» (quelle ancora da segnare) e togliendola le riapre tutte (scelta dell'utente, 2026-10-09), su un pin con una voce sola la segna quando sono raccolti **tutti**
 i pin che hanno solo quella voce, la riapre togliendone uno e fa seguire la voce ai suoi pin con più voci; collegando, `allineaStatiPunto` unisce gli stati delle partite
 (voce segnata → pin raccolti, se le loro voci sono tutte segnate; i pin che hanno solo questa voce, se ci sono, tutti raccolti → voce segnata: un pin con altre voci non conta e non la segna da sé; le voci descrittive non contano mai), scollegando il pin segue le voci che gli restano (`allineaPinScollegato`; senza più voci resta com'era). La risposta del
 collegamento non porta lo stato della partita: dopo ogni tocco `GuidaDellArea` rilegge la scheda (`onRicarica`, con la
 partita e `versioneStati`). «Ottenuto» ed «Esaurito» (2026-10-04, `segnaEPassaOltre`) chiudono la voce e aprono la successiva
 da segnare nell'ordine dell'elenco (voci e passi; saltate le segnate, le descrittive, quelle fuori filtro e i passi dell'Enigma che si
-segna), portandola in vista; `cambiaStato` della pagina dice se il salvataggio è riuscito. Le voci **descrittive** (`puntoDescrittivo`: solo «Altro») non hanno stato né pin: il server
+segna), portandola in vista; `cambiaStato` della pagina dice se il salvataggio è riuscito. Le voci **descrittive** (`puntoDescrittivo`: solo «Altro», e fuori dalle aree dei dedali dei Memento, 099) non hanno stato né pin: il server
 rifiuta di segnarle e di collegarle (400 `punto-descrittivo`; azzerarle resta possibile), rifiuta di far diventare
 descrittiva una voce con pin (409 `punto-con-pin`), e in lettura ignora uno stato rimasto (DTO `stato: null`, fuori da
 `gestiti`) senza cancellarlo. Vale anche dal lato mappa: il dettaglio `punto` di un pin (`dettaglioRiferimento`) porta
@@ -859,9 +859,32 @@ sistemare** (ristrutturazione del 2026-09-30, vedi in fondo): si riordina trasci
 `riordinaMappe` → `PUT /api/mappe/ordine`), e «Gestisci» apre `SchedaPlanimetria` o `SchedaAreaGuida`. Scegliere una
 riga porta il visore su quella planimetria e la colonna sui suoi soli collezionabili. Nell'editor `VisoreMappa.vistaGiornoCorrente` accende il
 filtro del giorno corrente della partita attiva (di regola l'editor vede tutto).
-`src/components/guida/ObiettiviDedalo.tsx` mostra `DedaloDto` (timbri, richieste, obiettivi) e
-scrive con `impostaTimbri` (`src/services/api/partite.ts`, `PUT /api/partite/:id/timbri`) e
-`impostaStatoRichiesta`; la pagina ricalcola `obiettivi.fatti` e `raccolta.presi`. `RichiestePage`,
+**Le aree dei dedali dei Memento (099, 2026-10-11): Dedalo → Aree → Elementi.** Il dedalo resta la `dungeon_area` dei
+Memento (mappe, pozzo, collegamenti invariati); sotto ha le sue aree, tabella `area_dedalo` del file di gioco (`chiave`,
+`dedalo_chiave` → `dungeon_area` ON DELETE CASCADE, `ordine`, `nome`, `descrizione` = dettagli, `timbri_totale` null = senza
+timbri; la colonna omonima del dedalo, 077, è tolta). Gli **elementi** di un'area sono le voci della guida
+(`punto_interesse.area_dedalo_chiave`), le Richieste (`richiesta.area_dedalo_chiave`, ON DELETE SET NULL: senza area restano
+«da collocare» nel dedalo e non contano) e i timbri (`timbri_dedalo_partita.area_chiave` = chiave dell'area, utente 018).
+La migrazione 099 dà a ogni dedalo con voci, Richieste o timbri un'«Area 1» (`<dedalo>-area-1`, chiave fissa: la utente 018
+ci porta i timbri già raccolti). Nelle aree dei dedali non ci sono voci descrittive: `puntoDescrittivo(tipo, areaDedalo)` (area obbligatoria, così il typecheck trova ogni chiamata, visore delle mappe compreso) e
+`sqlVoceDescrittiva(alias)` (`shared/spilli.ts`) valgono «Altro **fuori** dalle aree dei dedali», e tutte le letture che
+escludevano le descrittive (stati, pin, condizioni «Voce della guida», `vociCitabili`, `vociCollegabili`, `statoCitabile`
+con `voceDaSegnare`) usano quella regola. **Il conteggio** sta in `shared/dedali.ts` (`contoAreaDedalo`, `contoDedalo`), lo
+stesso per server (`dungeonService.lettureDedali`/`areaDedaloDto`/`dedaloDto`/`raccoltaMementos`) e interfaccia
+(`src/utils/dedali.ts`: `ricalcolaDedalo`, `raccoltaDeiDedali` dopo un gesto): una voce è fatta Ottenuta o Esaurita, una
+Richiesta «completata», i timbri contano uno per timbro; un'area è completata quando tutti i suoi elementi lo sono (vuota =
+completata), il dedalo quando lo sono tutte le aree (nessuna = completato). `DedaloDto` = `{ aree: AreaDedaloDto[],
+daCollocare, obiettivi, completato }`; `PuntoInteresseDto.areaDedalo`; `RichiestaDto.areaDedalo/areaDedaloNome`.
+Rotte: `POST /api/compendio/dedali/:chiave/aree`, `PUT /api/compendio/aree-dedalo/:chiave` (nome, dettagli,
+`timbriTotale`: le partite si allineano al nuovo totale), `PUT …/sposta`, `DELETE /api/compendio/aree-dedalo/:chiave` (voci
+via con i loro stati, timbri via, Richieste da collocare), `PUT /api/compendio/richieste/:chiave/area` (colloca o toglie);
+`POST /aree/:chiave/punti` e `PUT /punti/:chiave` accettano `areaDedalo` (obbligatoria creando nei dedali, un passo sta
+nell'area del suo Enigma, l'Enigma si sposta coi passi); `PUT /api/partite/:id/timbri` vuole la chiave di un'area del dedalo.
+Interfaccia: `src/components/guida/AreeDelDedalo.tsx` (al posto di `ObiettiviDedalo`, tolto) nella colonna destra della scheda
+del Memento: conteggio e barra del dedalo, ✓, per ogni area (chiusa se completata) dettagli, Su/Giù, «Modifica area»
+(`CorrezioneGuida`: nome, timbri, dettagli, elimina con avviso), timbri −/+, Richieste (stato e selettore dell'area),
+`GuidaDellArea` con le sole voci dell'area (`areaDedalo`: crea nell'area, «Area del dedalo» nella modifica); in fondo le
+Richieste da collocare e «Aggiungi un'area». `RichiestePage`,
 `DomandePage` e `CruciverbaPage` usano `CampoRicerca` + `Segmenti`; il dedalo delle Richieste vive in
 `?dedalo=`; le righe «prossime» hanno un'ancora (`#domande-<data>`, `#cruciverba-<giorno>`) a cui il
 rimando in cima scorre dopo aver azzerato i filtri.
@@ -1012,7 +1035,7 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
     elimina. Il modulo «Correggi l'area» sopra la mappa ha anch'esso «Elimina».
 - **Eliminare un'area** (`DELETE /api/compendio/aree/:chiave` → `dungeonService.eliminaArea`, in transazione): punti e
   loro stati per partita, `marcatore_mappa`, spilli della guida senza mappa (vincolo RESTRICT) col loro «raccolto»,
-  `timbri_dedalo_partita`, legami con le mappe (`mappeService.staccaAreaDaOgniMappa`), riferimenti nei JSON
+  per un dedalo le sue `area_dedalo` con i loro `timbri_dedalo_partita` (099), legami con le mappe (`mappeService.staccaAreaDaOgniMappa`), riferimenti nei JSON
   (`pianta_area.copre_aree_json`, `dati_guida` «battaglia» `ombre[].areaChiave` → null, «mappe-assenti»); piante,
   `guida_mappa`, `guida_alias` in cascata, `richiesta.area_chiave` a NULL; l'ordine delle aree si ricompatta.
   I dati di gioco stanno in `gioco.db`: un pacchetto importato dopo rimette l'area.

@@ -326,7 +326,7 @@ describe('EditorMappaPage', () => {
 
   it('«Voci della guida» (098): «Aggiungi voce» collega una voce del Palazzo, «Scollega» la toglie; ogni gesto si salva e rilegge la mappa', async () => {
     /** Una voce «Storia» di Kamoshida non segnata, con chiave e nome dati. */
-    const voce = (chiave: string, nome: string) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', stato: null });
+    const voce = (chiave: string, nome: string) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', areaDedalo: null, stato: null });
     const pin: SpilloDto = { ...nota, id: 22, tipo: 'infiltrazione', tipoNome: 'Infiltrazione', nome: 'Punto di infiltrazione', voci: [voce('kamoshida-01/0', 'Infiltrati nel castello')] };
     api.getMappa.mockResolvedValue({ ...base, spilli: [pin] });
     api.getVociCollegabili.mockResolvedValue([{ chiave: 'kamoshida-04/2', nome: 'Ritorno nel castello', tipo: 'storia', area: 'kamoshida-04', areaNome: 'Sala da pranzo', enigma: null }]);
@@ -359,7 +359,7 @@ describe('EditorMappaPage', () => {
   });
 
   it('uno spostamento che è di una voce della Guida la mostra: la scheda non risulta modificata e il salvataggio non tocca la voce, che sta nel campo suo (094)', async () => {
-    const scorciatoia: SpilloDto = { ...nota, id: 21, tipo: 'scorciatoia', tipoNome: 'Scorciatoia', nome: 'Condotto', voci: [{ chiave: 'kamoshida-04/5', tipo: 'scorciatoia', nome: 'Condotto', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', stato: null }] };
+    const scorciatoia: SpilloDto = { ...nota, id: 21, tipo: 'scorciatoia', tipoNome: 'Scorciatoia', nome: 'Condotto', voci: [{ chiave: 'kamoshida-04/5', tipo: 'scorciatoia', nome: 'Condotto', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-04', areaDedalo: null, stato: null }] };
     api.getMappa.mockResolvedValue({ ...base, spilli: [scorciatoia] });
     api.aggiornaSpillo.mockResolvedValue(scorciatoia);
     monta();

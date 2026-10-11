@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
+  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, VideogiochiDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
@@ -101,7 +101,11 @@ export interface DatiDungeonApi { nome?: string; sovrano?: string; dataSblocco?:
 export interface DatiAreaApi { nome?: string; descrizione?: string }
 export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
   /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
-  contenitore?: string | null }
+  contenitore?: string | null;
+  /** L'area del dedalo della voce (099): obbligatoria creando una voce di un dedalo; cambiandola la voce passa in un'altra area. */
+  areaDedalo?: string }
+/** Nome, dettagli e totale dei timbri di un'area di un dedalo (099); `timbriTotale` null = senza timbri. */
+export interface DatiAreaDedaloApi { nome?: string; descrizione?: string; timbriTotale?: number | null }
 
 /** Corregge i testi della scheda del Palazzo (nome, sovrano, date, consigli, note); risponde con la scheda aggiornata. */
 export const aggiornaDungeon = (chiave: string, dati: DatiDungeonApi): Promise<DungeonDettaglioDto> => apiPut(`/compendio/dungeon/${encodeURIComponent(chiave)}`, dati);
@@ -129,6 +133,17 @@ export const impostaAtterraggiDungeon = (dungeon: string, regole: Array<{ dal: s
   apiPut(`/compendio/dungeon/${encodeURIComponent(dungeon)}/atterraggi`, { regole });
 /** Elimina un'area della guida per tutte le partite, con i suoi punti e i suoi legami. */
 export const eliminaArea = (chiave: string): Promise<void> => apiDelete(`/compendio/aree/${encodeURIComponent(chiave)}`);
+/* ---- Le aree dei dedali dei Memento (099): Dedalo → Aree → Elementi ---- */
+/** Un'area nuova in fondo al dedalo; risponde con l'area creata (senza stato di partita). */
+export const creaAreaDedalo = (dedalo: string, dati: DatiAreaDedaloApi & { nome: string }): Promise<AreaDedaloDto> => apiPost(`/compendio/dedali/${encodeURIComponent(dedalo)}/aree`, dati);
+/** Corregge nome, dettagli e totale dei timbri di un'area del dedalo. */
+export const aggiornaAreaDedalo = (chiave: string, dati: DatiAreaDedaloApi): Promise<AreaDedaloDto> => apiPut(`/compendio/aree-dedalo/${encodeURIComponent(chiave)}`, dati);
+/** Un posto su (-1) o giù (+1) fra le aree del dedalo. Relativo: nessun nuovo tentativo. */
+export const spostaAreaDedalo = (chiave: string, verso: -1 | 1): Promise<AreaDedaloDto> => apiPut(`/compendio/aree-dedalo/${encodeURIComponent(chiave)}/sposta`, { verso }, { maxRetries: 0 });
+/** Colloca una Richiesta in un'area di un dedalo, o la toglie dall'area (null: resta nel dedalo, da collocare). */
+export const collocaRichiesta = (chiave: string, areaDedalo: string | null): Promise<RichiestaDto> => apiPut(`/compendio/richieste/${encodeURIComponent(chiave)}/area`, { areaDedalo });
+/** Elimina l'area del dedalo per tutte le partite: le voci con lei, le Richieste restano da collocare. */
+export const eliminaAreaDedalo = (chiave: string): Promise<void> => apiDelete(`/compendio/aree-dedalo/${encodeURIComponent(chiave)}`);
 /** Calendario di gioco (con oggi e scadenze se c'è la partita). */
 export const getCalendario = (partita?: number, mese?: string): Promise<CalendarioDto> => apiGet(`/compendio/calendario${queryString({ partita, mese })}`);
 /** Domande in classe ed esami (con stato «fatta» e prossime se c'è la partita). */

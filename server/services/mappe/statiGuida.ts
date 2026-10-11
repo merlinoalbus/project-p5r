@@ -7,7 +7,7 @@
 // ============================================================
 
 import type { AppDatabase } from '../../db/dbService.js';
-import { puntoDescrittivo, TIPO_PUNTO_DESCRITTIVO } from '../../../shared/spilli.js';
+import { puntoDescrittivo, sqlVoceDescrittiva } from '../../../shared/spilli.js';
 import type { StatoPunto } from '../../../shared/types.js';
 import { VOCI_GESTITE_SQL } from './voceDelPin.js';
 
@@ -19,8 +19,8 @@ export function pinDelPuntoGuida(db: AppDatabase, punto: string): Array<{ id: nu
 
 /** Quante voci da segnare ha un pin (`spillo_voce`, 098; una descrittiva non conta: non ha stato). */
 export function quanteVociDelPin(db: AppDatabase, spilloId: number): number {
-  return db.prepare('SELECT COUNT(*) FROM spillo_voce sv JOIN punto_interesse pi ON pi.chiave = sv.voce_chiave WHERE sv.spillo_id = ? AND pi.tipo <> ?')
-    .pluck().get(spilloId, TIPO_PUNTO_DESCRITTIVO) as number;
+  return db.prepare(`SELECT COUNT(*) FROM spillo_voce sv JOIN punto_interesse pi ON pi.chiave = sv.voce_chiave WHERE sv.spillo_id = ? AND NOT ${sqlVoceDescrittiva('pi')}`)
+    .pluck().get(spilloId) as number;
 }
 
 /**
@@ -29,8 +29,8 @@ export function quanteVociDelPin(db: AppDatabase, spilloId: number): number {
  * stato è solo suo (una voce descrittiva non ha stato).
  */
 export function allineaRaccoltoDelPin(db: AppDatabase, partita: number, pin: { id: number; uid: string }, adesso: string): void {
-  const voci = db.prepare('SELECT sv.voce_chiave FROM spillo_voce sv JOIN punto_interesse pi ON pi.chiave = sv.voce_chiave WHERE sv.spillo_id = ? AND pi.tipo <> ?')
-    .pluck().all(pin.id, TIPO_PUNTO_DESCRITTIVO) as string[];
+  const voci = db.prepare(`SELECT sv.voce_chiave FROM spillo_voce sv JOIN punto_interesse pi ON pi.chiave = sv.voce_chiave WHERE sv.spillo_id = ? AND NOT ${sqlVoceDescrittiva('pi')}`)
+    .pluck().all(pin.id) as string[];
   if (voci.length === 0) return;
   const gestite = new Set(db.prepare(VOCI_GESTITE_SQL).pluck().all(partita) as string[]);
   const fatto = voci.every((v) => gestite.has(v));
@@ -53,13 +53,13 @@ function conPartite(db: AppDatabase): boolean {
 }
 
 /** I passi di un Enigma, nel loro ordine. */
-export function passiDi(db: AppDatabase, enigma: string): Array<{ chiave: string; tipo: string; nome: string }> {
-  return db.prepare('SELECT chiave, tipo, nome FROM punto_interesse WHERE contenitore_chiave = ? ORDER BY ordine, chiave').all(enigma) as Array<{ chiave: string; tipo: string; nome: string }>;
+export function passiDi(db: AppDatabase, enigma: string): Array<{ chiave: string; tipo: string; nome: string; area_dedalo_chiave: string | null }> {
+  return db.prepare('SELECT chiave, tipo, nome, area_dedalo_chiave FROM punto_interesse WHERE contenitore_chiave = ? ORDER BY ordine, chiave').all(enigma) as Array<{ chiave: string; tipo: string; nome: string; area_dedalo_chiave: string | null }>;
 }
 
 /** I passi che si segnano (le voci descrittive si leggono e basta): sono loro a risolvere l'Enigma. */
 export function passiDaSegnare(db: AppDatabase, enigma: string): string[] {
-  return passiDi(db, enigma).filter((p) => !puntoDescrittivo(p.tipo)).map((p) => p.chiave);
+  return passiDi(db, enigma).filter((p) => !puntoDescrittivo(p.tipo, p.area_dedalo_chiave)).map((p) => p.chiave);
 }
 
 /** L'Enigma di cui una voce è un passo, o null. */

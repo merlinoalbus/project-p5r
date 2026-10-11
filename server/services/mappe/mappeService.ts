@@ -33,7 +33,7 @@ import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
-import { ammetteCondizioni, categoriaSpillo, TIPO_PUNTO_DESCRITTIVO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import { ammetteCondizioni, categoriaSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
@@ -188,11 +188,11 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo }, immagine: { url: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null, asset: m.asset } };
     }
     case 'punto': {
-      const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, a.dungeon_chiave, a.chiave AS area_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; dungeon_chiave: string; area_chiave: string } | undefined;
+      const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, a.dungeon_chiave, a.chiave AS area_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; dungeon_chiave: string; area_chiave: string } | undefined;
       if (!p) return null;
       // una voce descrittiva non ha stato: uno rimasto da prima si ignora, come nella scheda del Palazzo (2026-10-01)
-      const stato = partitaId && !puntoDescrittivo(p.tipo) ? (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, chiave) as { stato: string } | undefined)?.stato ?? null : null;
-      return { tipo: 'punto', punto: { chiave: p.chiave, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dungeon: p.dungeon_chiave, area: p.area_chiave, stato } };
+      const stato = partitaId && !puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, chiave) as { stato: string } | undefined)?.stato ?? null : null;
+      return { tipo: 'punto', punto: { chiave: p.chiave, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dungeon: p.dungeon_chiave, area: p.area_chiave, areaDedalo: p.area_dedalo_chiave, stato } };
     }
     case 'attivita':
     case 'luogo': {
@@ -365,7 +365,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   let raccolto = ctx.raccolti?.has(r.uid) ?? false;
   // Le voci della Guida tutte gestite (ottenute/esaurite) contano come raccolto anche sulla mappa: una sola, se il pin ne ha una;
   // tutte, se ne ha più d'una (voci indipendenti, 2026-10-09). Una voce descrittiva non ha stato e non conta.
-  const daSegnare = voci.filter((v) => !puntoDescrittivo(v.tipo));
+  const daSegnare = voci.filter((v) => !puntoDescrittivo(v.tipo, v.areaDedalo));
   if (daSegnare.length > 0 && daSegnare.every((v) => !!v.stato)) raccolto = true;
   const nomi = ctx.nomi ?? nomiCondizioni();
   const condizioni: CondizioneSpilloDto[] = condizioniDiRiga(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
@@ -1068,7 +1068,7 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
       // lo stato di una voce della guida (2026-10-11): solo nei pin, e solo una voce che esiste e si segna (non descrittiva)
       chiave = c.voce;
       if (!pin) { cosa = SOLO_PIN; ok = false; }
-      else { cosa = 'Voce della guida da segnare'; ok = !!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ? AND tipo <> ?').get(c.voce, TIPO_PUNTO_DESCRITTIVO); }
+      else { cosa = 'Voce della guida da segnare'; ok = !!prepared(`SELECT 1 FROM punto_interesse p WHERE p.chiave = ? AND NOT ${sqlVoceDescrittiva('p')}`).get(c.voce); }
     }
     if (ok) valide.push(c); else scartate.push({ cosa, chiave });
   }
@@ -1100,8 +1100,8 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
   // Un collegamento **nuovo** a una voce descrittiva della guida si rifiuta, come da `collegaPinAlPunto` (2026-10-01): le
   // descrittive non hanno pin. Quello che c'è già (gli elementi della guida senza mappa di prima) resta: nessuna riconciliazione.
   if (rif.tipo === 'punto' && !(attuale?.tipo === 'punto' && attuale.chiave === rif.chiave)) {
-    const p = prepared('SELECT nome, tipo FROM punto_interesse WHERE chiave = ?').get(rif.chiave) as { nome: string; tipo: string };
-    if (puntoDescrittivo(p.tipo)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
+    const p = prepared('SELECT nome, tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(rif.chiave) as { nome: string; tipo: string; area_dedalo_chiave: string | null };
+    if (puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
   }
 }
 
@@ -1258,8 +1258,8 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
     // le voci del pin che si segnano (una o più, 098): una voce descrittiva della guida non ha stato (2026-10-01), il raccolto del
     // pin non la segna
     const voci = vociDelPin(r.id).filter((voce) => {
-      const tipoPunto = (prepared('SELECT tipo FROM punto_interesse WHERE chiave = ?').get(voce) as { tipo: string } | undefined)?.tipo ?? null;
-      return tipoPunto !== null && !puntoDescrittivo(tipoPunto);
+      const p = prepared('SELECT tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(voce) as { tipo: string; area_dedalo_chiave: string | null } | undefined;
+      return !!p && !puntoDescrittivo(p.tipo, p.area_dedalo_chiave);
     });
     /** Vero se la voce ha uno stato nella partita. */
     const segnata = (voce: string) => !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, voce);

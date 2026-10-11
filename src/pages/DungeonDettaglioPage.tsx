@@ -5,7 +5,7 @@
 // **L'intestazione dice il tempo, non lo elenca**: le tre date sono una linea del tempo in tre
 // tappe; la prosa della guida resta ripiegata sotto. **Le aree sono un elenco**, colonna fissa da
 // 1024 px in su e fila scorrevole sotto; ogni voce dice quanto resta da raccogliere con la stessa
-// misura dell'anello in cima. **Il tre colonne è progressivo** (aree, mappa, obiettivi).
+// misura dell'anello in cima. **Il tre colonne è progressivo** (aree, mappa, raccolta o aree del dedalo).
 //
 // **Quel che si raccoglie sta sulle planimetrie** (voce 5): l'anello conta i collezionabili
 // dell'atlante, e la colonna di destra li elenca da segnare in un tocco, con la parola del loro tipo («Aperto», «Sconfitto»…) — quelli dell'area
@@ -13,8 +13,10 @@
 // boss) restano in una piega «Dalla guida» con Ottenuto/Esaurito, senza effetto sulla percentuale.
 //
 // I Memento non hanno aree fisse: al posto della colonna delle aree c'è il pozzo disegnato, e la
-// colonna di destra sono gli **obiettivi del dedalo** — i timbri dichiarati dalla guida e le
-// richieste — che fanno la percentuale. La pianta della guida non c'è: i piani si generano.
+// colonna di destra sono le **aree del dedalo** (099, richiesta dell'utente del 2026-10-11) — ognuna
+// con i suoi elementi: voci della guida, Richieste e timbri — che fanno la percentuale; un'area è
+// completata quando lo sono tutti, il dedalo quando lo sono tutte. La pianta della guida non c'è: i
+// piani si generano.
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -38,9 +40,10 @@ import { areeCompletate } from '../utils/completamentoAree';
 import { nomeSenzaPalazzo, perOrdineDiGuida } from '../utils/gruppiPlanimetrie';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
-import { ObiettiviDedalo } from '../components/guida/ObiettiviDedalo';
+import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
+import { raccoltaDeiDedali, ricalcolaDedalo } from '../utils/dedali';
 import { dataBreve } from '../utils/testoBreve';
-import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../types';
+import type { AreaDedaloDto, AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../types';
 import { GuidaDellArea } from '../components/guida/GuidaDellArea';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
@@ -77,7 +80,7 @@ function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
 }
 
 /** Quanto resta da raccogliere in un'area, con la stessa misura dell'anello: i collezionabili delle sue planimetrie
- *  (Palazzi) o gli obiettivi del dedalo (Memento). */
+ *  (Palazzi) o gli elementi delle aree del dedalo (Memento, 099). */
 function contoArea(a: AreaDungeonDto, memento: boolean): { totale: number; fatti: number | null } {
   if (memento) return a.dedalo ? { totale: a.dedalo.obiettivi.totale, fatti: a.dedalo.obiettivi.fatti } : { totale: 0, fatti: null };
   const totale = a.mappe.reduce((s, m) => s + m.n, 0);
@@ -96,6 +99,8 @@ function VoceArea({ a, memento, scelta, suggerita, onScegli, compatta }: {
       <button type="button" role="tab" aria-selected={scelta} onClick={onScegli} title={a.descrizione}
         className={`chip touch shrink-0 ${scelta ? 'chip--attivo' : ''} ${classiSuggerito(suggerita, 'chip')}`}>
         {a.ordine + 1}. {a.nome}{conto.totale > 0 && conto.fatti !== null ? ` · ${restano}` : ''}
+        {/* il dedalo completato (tutte le sue aree, 099) porta la ✓ */}
+        {memento && a.dedalo?.completato && <>{' '}<SpuntaCompletata /><TestoCompletata /></>}
       </button>
     );
   }
@@ -108,7 +113,7 @@ function VoceArea({ a, memento, scelta, suggerita, onScegli, compatta }: {
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[13px] font-semibold leading-tight">{a.nome}</span>
         <span className="text-[11px] text-text-muted">
-          {conto.totale === 0 ? (memento ? 'nessun obiettivo dichiarato' : a.mappe.length === 0 ? 'nessuna planimetria legata' : a.mappe.length > 1 ? 'niente da raccogliere sulle sue planimetrie' : 'niente da raccogliere sulla sua planimetria') : conto.fatti === null ? `${conto.totale} ${memento ? 'obiettivi' : 'da raccogliere'}` : restano > 0 ? `${restano} ${memento ? 'obiettivi' : 'da prendere'} su ${conto.totale}` : `${conto.totale} ${memento ? 'obiettivi fatti' : 'raccolti'} · completa`}
+          {conto.totale === 0 ? (memento ? 'nessun elemento' : a.mappe.length === 0 ? 'nessuna planimetria legata' : a.mappe.length > 1 ? 'niente da raccogliere sulle sue planimetrie' : 'niente da raccogliere sulla sua planimetria') : conto.fatti === null ? `${conto.totale} ${memento ? 'elementi' : 'da raccogliere'}` : restano > 0 ? `${restano} ${memento ? 'elementi' : 'da prendere'} su ${conto.totale}` : `${conto.totale} ${memento ? 'elementi fatti' : 'raccolti'} · completa`}
         </span>
       </span>
     </button>
@@ -144,7 +149,11 @@ export function DungeonDettaglioPage() {
   // Gli aggiornamenti locali partono dai dati correnti (forma funzionale di `imposta`), non dalla `d` del render: arrivano dopo
   // un `await`, e due gesti ravvicinati si annullerebbero a vicenda.
   const aggiornaPunto = (nuovo: PuntoInteresseDto) => {
-    dati.imposta((attuale) => ({ ...attuale, aree: attuale.aree.map((a) => ({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) })) }));
+    dati.imposta((attuale) => {
+      // nei Memento una voce è un elemento della sua area del dedalo (099): aree, dedalo e anello seguono subito
+      const aree = attuale.aree.map((a) => (a.punti.some((p) => p.chiave === nuovo.chiave) ? ricalcolaDedalo({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) }, partitaId !== null) : a));
+      return { ...attuale, aree, raccolta: attuale.tipo === 'mementos' ? raccoltaDeiDedali(aree, attuale.raccolta) : attuale.raccolta };
+    });
   };
   // Le riletture in silenzio della scheda (dopo uno stato o un raccolto) possono sovrapporsi: vale solo l'ultima chiesta, una
   // risposta più vecchia che arriva dopo non sovrascrive quella più nuova (rilievo del validatore).
@@ -206,23 +215,22 @@ export function DungeonDettaglioPage() {
     // possono dedurre. Si rilegge la scheda dal server, senza stato di caricamento, come dopo uno stato cambiato dalla guida.
     void rileggiInSilenzio().catch(() => { /* resta l'aggiornamento immediato */ });
   };
-  /** I timbri di un dedalo cambiano: obiettivi del dedalo e anello dei Memento seguono. */
-  const aggiornaTimbri = (chiaveArea: string, raccolti: number) => {
+  /** Un dedalo cambiato dentro (timbri, stato di una Richiesta): le sue aree, il dedalo e l'anello dei Memento si ricalcolano con
+   *  la regola del server (`shared/dedali.ts`, 099). `cambia` riceve un'area del dedalo e la restituisce aggiornata. */
+  const aggiornaAreeDedalo = (cambia: (a: AreaDedaloDto) => AreaDedaloDto) => {
     dati.imposta((attuale) => {
-      const aree = attuale.aree.map((a) => a.chiave === chiaveArea && a.dedalo ? { ...a, dedalo: { ...a.dedalo, timbri: { ...a.dedalo.timbri, raccolti }, obiettivi: { ...a.dedalo.obiettivi, fatti: raccolti + a.dedalo.richieste.filter((r) => r.stato === 'completata').length } } } : a);
-      return { ...attuale, aree, raccolta: { ...attuale.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } };
+      const aree = attuale.aree.map((a) => (a.dedalo ? ricalcolaDedalo({ ...a, dedalo: { ...a.dedalo, aree: a.dedalo.aree.map(cambia) } }, partitaId !== null) : a));
+      return { ...attuale, aree, raccolta: raccoltaDeiDedali(aree, attuale.raccolta) };
     });
   };
-  /** Lo stato di una richiesta di un dedalo cambia: gli obiettivi fatti del dedalo diventano timbri raccolti più richieste completate, e l'anello dei Memento ne somma tutti i dedali. */
-  const aggiornaRichiesta = (chiaveArea: string, chiaveRichiesta: string, stato: StatoRichiesta | null) => {
-    dati.imposta((attuale) => {
-      const aree = attuale.aree.map((a) => {
-        if (a.chiave !== chiaveArea || !a.dedalo) return a;
-        const richieste = a.dedalo.richieste.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r));
-        return { ...a, dedalo: { ...a.dedalo, richieste, obiettivi: { ...a.dedalo.obiettivi, fatti: (a.dedalo.timbri.raccolti ?? 0) + richieste.filter((r) => r.stato === 'completata').length } } };
-      });
-      return { ...attuale, aree, raccolta: { ...attuale.raccolta, presi: aree.reduce((s, a) => s + (a.dedalo?.obiettivi.fatti ?? 0), 0) } };
-    });
+  /** I timbri di un'area di un dedalo cambiano. */
+  const aggiornaTimbri = (areaDedalo: string, raccolti: number) => {
+    aggiornaAreeDedalo((a) => (a.chiave === areaDedalo && a.timbri ? { ...a, timbri: { ...a.timbri, raccolti } } : a));
+  };
+  /** Lo stato di una Richiesta cambia (nell'area in cui sta, o fra quelle da collocare, che non contano). */
+  const aggiornaRichiesta = (chiaveRichiesta: string, stato: StatoRichiesta | null) => {
+    dati.imposta((attuale) => ({ ...attuale, aree: attuale.aree.map((a) => (a.dedalo ? { ...a, dedalo: { ...a.dedalo, daCollocare: a.dedalo.daCollocare.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r)) } } : a)) }));
+    aggiornaAreeDedalo((a) => (a.richieste.some((r) => r.chiave === chiaveRichiesta) ? { ...a, richieste: a.richieste.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r)) } : a));
   };
   // Quale planimetria dell'area si sta guardando: quasi sempre una sola; la scelta si azzera cambiando area.
   const [piantaScelta, setPianta] = useState<string | null>(null);
@@ -271,7 +279,7 @@ export function DungeonDettaglioPage() {
       .then(async () => { setPianta(null); await dati.ricarica(); notifica('success', `«${area.nome}» non sta più su «${nomeSenzaPalazzo(t.nome)}».`); })
       .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Scollegamento non riuscito.'));
   };
-  // L'anello conta quel che si raccoglie: collezionabili delle planimetrie (Palazzi) o obiettivi dei dedali (Memento).
+  // L'anello conta quel che si raccoglie: collezionabili delle planimetrie (Palazzi) o elementi delle aree dei dedali (Memento, 099).
   const quota = d && d.raccolta.presi !== null && d.raccolta.totale > 0 ? d.raccolta.presi / d.raccolta.totale : null;
   const areeSuggerite = (d?.aree ?? []).filter((a) => sugg.evidenziato('aree', a.chiave)).length;
   const suggerimentoDiffuso = !!d && d.aree.length > 0 && areeSuggerite === d.aree.length;
@@ -320,7 +328,7 @@ export function DungeonDettaglioPage() {
                 <span className="hidden lg:block"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={48} /></span>
                 {quota !== null && (
                   // un anello solo (è la barra di avanzamento della pagina): da 1024 px si rimpicciolisce, non si duplica
-                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} className="lg:size-12!" etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} ${memento ? 'obiettivi fatti' : 'da raccogliere presi'} su ${d.raccolta.totale}`}>
+                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} className="lg:size-12!" etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} ${memento ? 'elementi fatti' : 'da raccogliere presi'} su ${d.raccolta.totale}`}>
                     <span className="font-display text-[17px] leading-none tabular-nums lg:text-[13px]">{Math.round(quota * 100)}%</span>
                   </AnelloAvanzamento>
                 )}
@@ -357,7 +365,7 @@ export function DungeonDettaglioPage() {
                   {/* Quando compare sulla mappa di Tokyo e dove si atterra toccandolo (2026-10-04) */}
                   <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} />
                   <span className="chip">{d.aree.length} {memento ? 'dedali' : 'aree'}</span>
-                  <span className="chip" title={memento ? 'Timbri dichiarati dalla guida e richieste dei dedali: sono questi a fare la percentuale.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'obiettivi' : 'da raccogliere'}</span>
+                  <span className="chip" title={memento ? 'Gli elementi delle aree dei dedali (voci, Richieste, timbri): sono questi a fare la percentuale.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
                   {!memento && <span className="chip" title="Le tavole dell’atlante del Palazzo. Si ordinano e si correggono nell’elenco qui sotto.">
                     {d.planimetrie.length} planimetrie{d.raccolta.mappeComplete !== null ? ` · ${d.raccolta.mappeComplete} complete` : ''}
                   </span>}
@@ -420,7 +428,7 @@ export function DungeonDettaglioPage() {
               </div>
             )}
 
-            {/* ---- L'area scelta: mappa e obiettivi ---- */}
+            {/* ---- L'area scelta: mappa e aree del dedalo, o planimetrie ---- */}
             {/* Da 1024 a 1279 px mappa e raccolta stanno una sotto l'altra in **un'area sola** che scorre; da 1280 px
                 sono due colonne, ognuna con il suo scorrimento, e la mappa si allunga fino in fondo alla sua. */}
             <div className={`order-1 grid grid-cols-1 items-start gap-4 lg:order-none lg:min-h-0 lg:max-xl:area-scorrevole lg:max-xl:p-2 xl:grid-rows-[minmax(0,1fr)] xl:items-stretch ${memento ? 'xl:grid-cols-[minmax(0,1fr)_340px]' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
@@ -521,16 +529,16 @@ export function DungeonDettaglioPage() {
                 )}
               </section>
 
-              {/* ---- La colonna degli obiettivi: quel che fa la percentuale, e sotto i punti della guida ---- */}
-              <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={memento ? `Obiettivi di ${area.nome}` : `Da raccogliere in ${area.nome}`}>
-                {!memento && planimetriaAperta
+              {/* ---- La colonna di quel che fa la percentuale: le planimetrie e la guida dell'area; nei Memento le aree del dedalo ---- */}
+              <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={memento ? `Aree di ${area.nome}` : `Da raccogliere in ${area.nome}`}>
+                {memento
+                  // Dedalo → Aree → Elementi (099): le aree del dedalo con le loro voci, Richieste e timbri
+                  ? (area.dedalo && <AreeDelDedalo key={area.chiave} dedalo={{ ...area, dedalo: area.dedalo }} partitaId={partitaId} cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto}
+                      onTimbri={aggiornaTimbri} onRichiesta={aggiornaRichiesta} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />)
+                  : planimetriaAperta
                   ? <RaccoltaPlanimetrie planimetrie={[planimetriaAperta]} partitaId={partitaId} onRaccolto={segnaRaccolto}
                       etichetta="Su questa planimetria" nota="Planimetria scelta dal pannello: qui c’è solo quel che si raccoglie su di lei."
                       vuoto="Su questa planimetria non c’è niente da raccogliere." />
-                  : memento
-                  ? (area.dedalo
-                    ? <ObiettiviDedalo areaChiave={area.chiave} areaNome={area.nome} dedalo={area.dedalo} partitaId={partitaId} onTimbri={(n) => aggiornaTimbri(area.chiave, n)} onRichiesta={(k, s) => aggiornaRichiesta(area.chiave, k, s)} />
-                    : <p className="m-0 text-[12px] text-text-muted" role="status">La guida non dichiara obiettivi per questo dedalo.</p>)
                   : <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} vuoto={vuotoArea} />}
                 {/* Il resto del Palazzo, sempre ripiegato: con un'area scelta si vede quell'area (rilievo dell'utente, 2026-10-01). */}
                 {!memento && !planimetriaAperta && altrePlanimetrie.length > 0 && (
@@ -543,9 +551,10 @@ export function DungeonDettaglioPage() {
                 )}
                 {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare quel che raccogli.</span>}
 
-                {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
-                <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} memento={memento} partitaId={partitaId} mappaAperta={mappaScelta}
-                  cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />
+                {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). Nei Memento
+                    le voci stanno nelle aree del dedalo, qui sopra. */}
+                {!memento && <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta}
+                  cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />}
               </aside>
             </div>
           </div>

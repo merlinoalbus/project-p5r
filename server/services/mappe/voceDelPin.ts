@@ -10,7 +10,7 @@
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
-import { TIPO_PUNTO_DESCRITTIVO } from '../../../shared/spilli.js';
+import { sqlVoceDescrittiva } from '../../../shared/spilli.js';
 
 /**
  * Le voci della guida di un pin, in SQL: una sottoquery (fra parentesi) con una colonna, sul pin dell'alias dato. Sono le righe
@@ -24,12 +24,12 @@ export function vociDelPinSql(alias: string): string {
 
 /**
  * Le voci della guida **gestite** in una partita, in SQL con un parametro (`partita_id`): quelle con uno stato in `punto_partita`,
- * tranne le voci descrittive («Altro»), che uno stato non lo hanno. È la regola unica con cui le voci segnate segnano i pin che le
- * citano: la usano il visore e le condizioni (`spilliSegnati`), la raccolta dei Palazzi (`raccoltaMappe`) e il loro completamento
+ * tranne le voci descrittive («Altro» fuori dalle aree dei dedali, 099), che uno stato non lo hanno. È la regola unica con cui
+ * le voci segnate segnano i pin che le citano: la usano il visore e le condizioni (`spilliSegnati`), la raccolta dei Palazzi (`raccoltaMappe`) e il loro completamento
  * (`palazziCompletati`). Prima le ultime due contavano anche uno stato rimasto su una voce descrittiva.
  */
 export const VOCI_GESTITE_SQL = `SELECT pp.punto_chiave FROM punto_partita pp JOIN punto_interesse pi ON pi.chiave = pp.punto_chiave
-  WHERE pp.partita_id = ? AND pi.tipo <> '${TIPO_PUNTO_DESCRITTIVO}'`;
+  WHERE pp.partita_id = ? AND NOT ${sqlVoceDescrittiva('pi')}`;
 
 /** `VOCI_GESTITE_SQL` letta: l'insieme delle chiavi delle voci gestite nella partita. */
 export function vociGestite(partitaId: number): Set<string> {
@@ -53,7 +53,7 @@ export function vociDiOgniPin(soloDaSegnare = false): Map<number, string[]> {
   const { tabella, colonna } = schemaVoci();
   const righe = prepared(`SELECT v.id, v.voce FROM (${tabella ? 'SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION ' : ''}${colonna ? 'SELECT id, voce_chiave FROM spillo WHERE voce_chiave IS NOT NULL UNION ' : ''}
     SELECT id, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave IS NOT NULL) v
-    ${soloDaSegnare ? `JOIN punto_interesse pi ON pi.chiave = v.voce AND pi.tipo <> '${TIPO_PUNTO_DESCRITTIVO}'` : ''} ORDER BY 1, 2`).all() as Array<{ id: number; voce: string }>;
+    ${soloDaSegnare ? `JOIN punto_interesse pi ON pi.chiave = v.voce AND NOT ${sqlVoceDescrittiva('pi')}` : ''} ORDER BY 1, 2`).all() as Array<{ id: number; voce: string }>;
   const out = new Map<number, string[]>();
   for (const r of righe) out.set(r.id, [...(out.get(r.id) ?? []), r.voce]);
   return out;

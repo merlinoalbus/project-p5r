@@ -16,7 +16,7 @@ import type { AreaDungeonDto } from '../types';
 
 /** Quante voci da segnare ha un'area, quante sono segnate, e se è completata (almeno una voce, e tutte segnate). */
 export function completamentoArea(area: Pick<AreaDungeonDto, 'punti'>): { daSegnare: number; segnate: number; completata: boolean } {
-  const voci = area.punti.filter((p) => !puntoDescrittivo(p.tipo));
+  const voci = area.punti.filter((p) => !puntoDescrittivo(p.tipo, p.areaDedalo));
   const segnate = voci.filter((p) => p.stato !== null).length;
   return { daSegnare: voci.length, segnate, completata: voci.length > 0 && segnate === voci.length };
 }

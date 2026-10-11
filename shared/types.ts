@@ -1641,6 +1641,9 @@ export interface RichiestaDto {
   /** Il dedalo dei Memento (`dungeon_area`) in cui si svolge, e la sua posizione nel percorso. */
   areaNome: string | null;
   areaOrdine: number | null;
+  /** L'area del dedalo in cui sta la Richiesta (099: è un elemento di quell'area) e il suo nome; null = da collocare. */
+  areaDedalo: string | null;
+  areaDedaloNome: string | null;
   note: string;
   fonte: string;
   stato: StatoRichiesta | null;
@@ -1685,6 +1688,9 @@ export interface PuntoInteresseDto {
   /** L'Enigma di cui la voce è un passo (095), o null. I passi stanno nella stessa area, ordinati fra loro; l'Enigma che ne ha
    *  è risolto quando i passi che si segnano sono tutti fatti, e non ha pin suoi. */
   contenitore: string | null;
+  /** L'area del dedalo a cui la voce appartiene (099), o null fuori dai Memento. Nelle aree dei dedali ogni voce ha uno stato,
+   *  anche «Altro», e conta per il completamento dell'area. */
+  areaDedalo: string | null;
 }
 
 /** Un pin di una planimetria collegato a un punto della guida. */
@@ -1715,7 +1721,7 @@ export interface AreaDungeonDto {
    * scheda la monta. Vuoto per le aree che non ne hanno (i piani dei Memento, per esempio). */
   mappe: Array<{ chiave: string; nome: string; /** Quanti collezionabili ha la mappa e quanti sono raccolti (null senza partita). */ n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
   punti: PuntoInteresseDto[];
-  /** Solo per i dedali dei Memento: gli obiettivi misurabili (timbri e richieste); null se la guida non ne dichiara. */
+  /** Solo per i dedali dei Memento: le aree del dedalo con i loro elementi e il completamento (099); null per i Palazzi. */
   dedalo: DedaloDto | null;
 }
 
@@ -1730,12 +1736,37 @@ export interface SpilloRaccoltaDto {
   raccolto: boolean | null;
 }
 
-/** Gli obiettivi di un dedalo dei Memento: timbri da raccogliere e richieste da completare. */
+/** Una Richiesta come elemento di un'area del dedalo (o da collocare), con il suo stato nella partita. */
+export interface RichiestaDelDedaloDto { chiave: string; nome: string; stato: StatoRichiesta | null }
+
+/**
+ * Un'area di un dedalo dei Memento (099, richiesta dell'utente del 2026-10-11): nome, dettagli e i suoi elementi — le voci della
+ * guida (in `AreaDungeonDto.punti`, con `areaDedalo` uguale a questa chiave), le Richieste e i timbri. Completata quando tutti
+ * i suoi elementi lo sono; un'area senza elementi è completata (scelta dell'utente).
+ */
+export interface AreaDedaloDto {
+  chiave: string;
+  ordine: number;
+  nome: string;
+  descrizione: string;
+  /** I timbri dell'area, o null se l'area non ne ha; `raccolti` null senza partita. */
+  timbri: { totale: number; raccolti: number | null } | null;
+  richieste: RichiestaDelDedaloDto[];
+  /** totale = voci + Richieste + timbri (uno per timbro, scelta dell'utente); fatti null senza partita. */
+  elementi: { totale: number; fatti: number | null };
+  /** null senza partita. */
+  completata: boolean | null;
+}
+
+/** Un dedalo dei Memento (099): le sue aree, le Richieste ancora da collocare in un'area, il conteggio e il completamento. */
 export interface DedaloDto {
-  timbri: { totale: number | null; raccolti: number | null };
-  richieste: Array<{ chiave: string; nome: string; stato: StatoRichiesta | null }>;
-  /** totale = timbri dichiarati + richieste; fatti = timbri raccolti + richieste completate (null senza partita). */
+  aree: AreaDedaloDto[];
+  /** Le Richieste del dedalo senza area (la loro area è stata eliminata): si vedono, non contano finché non si collocano. */
+  daCollocare: RichiestaDelDedaloDto[];
+  /** La somma degli elementi delle aree; fatti null senza partita. */
   obiettivi: { totale: number; fatti: number | null };
+  /** Completato quando tutte le sue aree lo sono (un dedalo senza aree lo è); null senza partita. */
+  completato: boolean | null;
 }
 
 export interface DungeonRiassuntoDto {
@@ -1937,7 +1968,7 @@ export interface DettaglioSpilloDto {
   /** Immagine dell'entità collegata quando esiste (mappa: sua immagine di base o asset; Confidente: ritratto caricato o asset). */
   immagine?: { url: string | null; asset: string | null } | null;
   mappa?: { chiave: string; nome: string; tipo: TipoMappa };
-  punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; stato: string | null };
+  punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; /** L'area del dedalo (099), o null fuori dai Memento: lì ogni voce ha uno stato. */ areaDedalo: string | null; stato: string | null };
   luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
@@ -2284,7 +2315,7 @@ export interface ProgressiPartitaDto {
   contatori: Array<{ chiave: string; nome: string; valore: number }>;
 }
 
-/** I timbri raccolti in un dedalo dei Memento, per partita. */
+/** I timbri raccolti in un'area di un dedalo dei Memento (099; `area` è la chiave dell'area del dedalo), per partita. */
 export interface TimbriDedaloDto { area: string; raccolti: number; totale: number | null; completato: boolean }
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 

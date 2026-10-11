@@ -40,6 +40,11 @@ describe('condizione «Pin di una mappa»', () => {
   const stato = async (id: number) => (await leggi(id)).disponibilita?.stato ?? 'disponibile';
   /** Costruisce una condizione «Pin di una mappa»: vale se lo spillo `uid` è (o non è) segnato. */
   const su = (uid: string, segnato: boolean) => ({ tipo: 'spillo' as const, spillo: uid, segnato });
+  /** Aggiunge una voce alla guida dell'area (in un dedalo dei Memento, nella sua prima area: 099), pretendendo il 201. */
+  const nuovaVoce = async (area: string, nome: string, tipo: string) => {
+    const areaDedalo = prepared('SELECT chiave FROM area_dedalo WHERE dedalo_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(area) as string | undefined;
+    return (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome, tipo, ...(areaDedalo ? { areaDedalo } : {}) }).expect(201)).body.data as PuntoInteresseDto;
+  };
 
   beforeAll(async () => {
     dbDiProva();
@@ -111,7 +116,7 @@ describe('condizione «Pin di una mappa»', () => {
     // una voce in un'area del Palazzo di questa planimetria: il collegamento dalla guida lo accetta
     const dungeon = palazzoDiOgniMappa().get(mappa)!;
     const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
-    const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: 'Aziona la leva della voce', tipo: 'meccanismo' }).expect(201)).body.data as PuntoInteresseDto;
+    const voce = await nuovaVoce(area, 'Aziona la leva della voce', 'meccanismo');
     await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${leva.id}`).expect(200);
     expect(await stato(porta.id)).toBe('bloccato');
     await request(app).put(`/api/partite/${partita}/punti`).send({ punto: voce.chiave, stato: 'ottenuto' }).expect(200);
@@ -226,7 +231,7 @@ describe('condizione «Pin di una mappa»', () => {
     expect((await condiziona(porta.id, [su(sicura.uid, true)])).body.error.code).toBe('condizione-non-trovata');
     const dungeon = palazzoDiOgniMappa().get(mappa)!;
     const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
-    const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: 'Riposa nella stanza sicura', tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
+    const voce = await nuovaVoce(area, 'Riposa nella stanza sicura', 'sicura');
     await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${sicura.id}`).expect(200);
     await condiziona(porta.id, [{ tipo: 'gruppo', modo: 'tutte', condizioni: [su(confidente.uid, true), su(dialogo.uid, true), su(sicura.uid, true)] }]).expect(200);
     const testi = (await leggi(porta.id)).condizioni[0].testo;
@@ -250,7 +255,7 @@ describe('condizione «Pin di una mappa»', () => {
     const sicura = await nuovoPin('sicura', 'Stanza sicura del pacchetto');
     const dungeon = palazzoDiOgniMappa().get(mappa)!;
     const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
-    const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: 'Riposa nella stanza del pacchetto', tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
+    const voce = await nuovaVoce(area, 'Riposa nella stanza del pacchetto', 'sicura');
     await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${sicura.id}`).expect(200);
     await nuovoPin('porta', 'Porta del pacchetto', [su(sicura.uid, true)]);
     const pacchetto = structuredClone(esportaMappe(mappa));
@@ -267,7 +272,7 @@ describe('condizione «Pin di una mappa»', () => {
       const sicura = await nuovoPin('sicura', nomeSicura);
       const dungeon = palazzoDiOgniMappa().get(mappa)!;
       const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
-      const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: `Voce di ${nomeSicura}`, tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
+      const voce = await nuovaVoce(area, `Voce di ${nomeSicura}`, 'sicura');
       await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${sicura.id}`).expect(200);
       const r = await request(app).post(`/api/mappe/${mappaPorta}/spilli`).send({ tipo: 'porta', nome: nomePorta, x: 20, y: 20, condizioni: [su(sicura.uid, true)] });
       expect(r.status, JSON.stringify(r.body)).toBe(201);
@@ -304,7 +309,7 @@ describe('condizione «Pin di una mappa»', () => {
       // una voce di un altro Palazzo: `vociAmmesse` la scarta, e la stanza resta senza stato
       const dungeon = palazzoDiOgniMappa().get(mappa)!;
       const altraArea = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave <> ? ORDER BY dungeon_chiave, ordine LIMIT 1').pluck().get(dungeon) as string;
-      const voceAltrove = (await request(app).post(`/api/compendio/aree/${altraArea}/punti`).send({ nome: 'Voce di un altro Palazzo', tipo: 'sicura' }).expect(201)).body.data as PuntoInteresseDto;
+      const voceAltrove = await nuovaVoce(altraArea, 'Voce di un altro Palazzo', 'sicura');
       const pacchetto = structuredClone(esportaMappe(mappa));
       for (const s of pacchetto.mappe.flatMap((m) => m.spilli)) {
         if (s.nome === 'Porta che cita una nota') s.condizioni = [su(nota.uid, true)];
@@ -334,7 +339,7 @@ describe('condizione «Pin di una mappa»', () => {
     const confidente = await nuovoPin('confidente', 'Confidente della guida');
     const dungeon = palazzoDiOgniMappa().get(mappa)!;
     const area = prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine LIMIT 1').pluck().get(dungeon) as string;
-    const voce = (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome: 'Incontra il Confidente', tipo: 'persona' }).expect(201)).body.data as PuntoInteresseDto;
+    const voce = await nuovaVoce(area, 'Incontra il Confidente', 'persona');
     await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce.chiave)}/pin/${confidente.id}`).expect(200);
     await segna(confidente.id, true);
     expect(prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').pluck().get(partita, voce.chiave)).toBe('ottenuto');

@@ -24,7 +24,7 @@ vi.mock('../mappe/MappaIncorporata', () => ({
 
 /** Punto d'interesse di prova (un forziere esauribile, non segnato e senza pin) con i campi di `extra` che sovrascrivono i predefiniti. */
 const punto = (extra: Partial<PuntoInteresseDto>): PuntoInteresseDto => ({
-  chiave: 'p1', ordine: 0, tipo: 'forziere', nome: 'Forziere della sala', descrizione: 'Dietro la statua.', esauribile: true, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, ...extra,
+  chiave: 'p1', ordine: 0, tipo: 'forziere', nome: 'Forziere della sala', descrizione: 'Dietro la statua.', esauribile: true, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, ...extra,
 });
 /** L'area «Sala Centrale» (k-02) del Palazzo di Kamoshida, con la sua planimetria m-sala e i punti dati. */
 const area = (punti: PuntoInteresseDto[]): AreaDungeonDto => ({
@@ -40,7 +40,7 @@ function monta(punti: PuntoInteresseDto[]) {
   const onPuntoAggiornato = vi.fn();
   const onRicarica = vi.fn().mockResolvedValue(undefined);
   const cambiaStato = vi.fn().mockResolvedValue(true);
-  render(<MemoryRouter><GuidaDellArea area={area(punti)} planimetrie={planimetrie} memento={false} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={onRicarica} /></MemoryRouter>);
+  render(<MemoryRouter><GuidaDellArea area={area(punti)} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={onRicarica} /></MemoryRouter>);
   return { onPuntoAggiornato, onRicarica, cambiaStato };
 }
 
@@ -250,7 +250,7 @@ describe('«Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono 
       setElenco((xs) => xs.map((x) => (x.chiave === p.chiave || x.contenitore === p.chiave ? { ...x, stato } : x)));
       return true;
     };
-    return <MemoryRouter><GuidaDellArea area={area(elenco)} planimetrie={planimetrie} memento={false} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn().mockResolvedValue(undefined)} /></MemoryRouter>;
+    return <MemoryRouter><GuidaDellArea area={area(elenco)} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn().mockResolvedValue(undefined)} /></MemoryRouter>;
   }
   // jsdom non ha scrollIntoView: un test lo mette, e dopo si rimette com'era
   const scrollIntoViewDiPrima = HTMLElement.prototype.scrollIntoView;
@@ -329,5 +329,58 @@ describe('«Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono 
     fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
     await waitFor(() => expect(aperta(/^Forziere dopo l’Enigma/)).toBe(true));
     expect(screen.queryByRole('button', { name: /^Tira la leva/ })).toBeNull();
+  });
+});
+
+describe('in un\'area di un dedalo dei Memento (099)', () => {
+  const dedalo = { chiave: 'q-1', nome: 'Banchina', altre: [{ chiave: 'q-2', nome: 'Treno' }] };
+  /** La guida dell'area del dedalo «Banchina», con un'altra area «Treno» nello stesso dedalo. */
+  const montaDedalo = (punti: PuntoInteresseDto[]) => {
+    const onRicarica = vi.fn().mockResolvedValue(undefined);
+    const cambiaStato = vi.fn().mockResolvedValue(true);
+    render(<MemoryRouter><GuidaDellArea area={{ ...area(punti), chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', mappe: [] }} planimetrie={[]} partitaId={4} mappaAperta={null} cambiaStato={cambiaStato} onPuntoAggiornato={vi.fn()} onRicarica={onRicarica} areaDedalo={dedalo} /></MemoryRouter>);
+    return { onRicarica, cambiaStato };
+  };
+
+  it('ogni voce ha uno stato, anche «Altro»: si segna, e la guida lo dice', async () => {
+    const { cambiaStato } = montaDedalo([punto({ chiave: 'n1', tipo: 'altro', nome: 'Nota della banchina', esauribile: false, areaDedalo: 'q-1' })]);
+    expect(screen.getByText('Voci dell’area · 1 voce')).toBeInTheDocument();
+    expect(screen.getByText(/Ogni voce si segna \(anche «Altro»\) ed è un elemento dell’area/)).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Guida di Banchina' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Nota della banchina/ }));
+    expect(screen.queryByText(/Voce descrittiva/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+    await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'n1' }), 'ottenuto'));
+  });
+
+  it('la voce nuova nasce nell\'area del dedalo; dalla modifica passa in un\'altra area dello stesso dedalo', async () => {
+    const { onRicarica } = montaDedalo([punto({ areaDedalo: 'q-1' })]);
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una voce' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nuova voce' }), { target: { value: 'Ombra del treno' } });
+    creaPunto.mockResolvedValue(punto({ chiave: 'nuova', areaDedalo: 'q-1' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Aggiungi$/ }));
+    await waitFor(() => expect(creaPunto).toHaveBeenCalledWith('mementos-01-qimranut', { nome: 'Ombra del treno', tipo: 'altro', areaDedalo: 'q-1' }));
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    expect(vociSelettore('Area del dedalo')).toEqual(['Banchina', 'Treno']);
+    scegliVoce('Area del dedalo', 'Treno');
+    aggiornaPunto.mockResolvedValue(punto({ areaDedalo: 'q-2' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalledWith('p1', expect.objectContaining({ areaDedalo: 'q-2' })));
+    await waitFor(() => expect(onRicarica).toHaveBeenCalled());
+  });
+
+  it('senza un cambio d\'area la modifica non la manda; un passo non sceglie l\'area (sta in quella del suo Enigma)', async () => {
+    montaDedalo([punto({ areaDedalo: 'q-1' }), punto({ chiave: 'e1', tipo: 'puzzle', nome: 'Enigma', areaDedalo: 'q-1' }), punto({ chiave: 's1', tipo: 'meccanismo', nome: 'Leva', contenitore: 'e1', areaDedalo: 'q-1' })]);
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), { target: { value: 'Forziere rinominato' } });
+    aggiornaPunto.mockResolvedValue(punto({ nome: 'Forziere rinominato', areaDedalo: 'q-1' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalled());
+    expect(aggiornaPunto.mock.calls[0][1]).not.toHaveProperty('areaDedalo');
+    fireEvent.click(screen.getByRole('button', { name: /Leva/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Leva»/ }));
+    expect(screen.queryByRole('combobox', { name: 'Area del dedalo' })).toBeNull();
   });
 });

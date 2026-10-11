@@ -19,6 +19,8 @@ export const LIMITI_GUIDA = {
   dungeon: { nome: 200, sovrano: 400, data: 1000, livello: 1000, note: 8000 },
   area: { nome: 300, descrizione: 8000 },
   punto: { nome: 300, descrizione: 8000 },
+  // le aree dei dedali dei Memento (099): nome e dettagli come un'area della guida, i timbri entro un tetto largo (Da'at ne ha 40)
+  areaDedalo: { nome: 300, descrizione: 8000, timbri: 999 },
   // Il nome di una mappa finisce nella chiave leggibile del percorso, che il server tiene sotto i
   // 180 caratteri **compreso il prefisso del genitore**: oltre quel tetto la rotta risponde
   // «percorso-troppo-lungo» e dice di abbreviare. Qui sta il massimo teorico; quello pratico

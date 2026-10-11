@@ -168,10 +168,10 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     errori: [PARTITA, [404, 'richiesta-non-trovata']],
   },
   'PUT /api/partite/:id/timbri': {
-    sommario: 'Timbri raccolti in un dedalo dei Memento',
-    descrizione: 'Imposta quanti timbri la partita ha raccolto nel dedalo (0 azzera); il valore si ferma al totale dichiarato dalla guida. Vale solo per i dedali dei Memento di cui la guida dichiara i timbri (400 altrimenti). Raggiungere il totale salendo registra l\'evento `timbri-dedalo` nello storico, ogni volta che accade.',
+    sommario: 'Timbri raccolti in un\'area di un dedalo dei Memento',
+    descrizione: 'Imposta quanti timbri la partita ha raccolto nell\'area del dedalo `area` (099: i timbri sono un elemento delle aree; 0 azzera); il valore si ferma al totale dell\'area. Vale solo per le aree dei dedali che hanno timbri (400 altrimenti; 400 anche per la chiave di un dedalo o di un\'area di un Palazzo). Raggiungere il totale salendo registra l\'evento `timbri-dedalo` nello storico, ogni volta che accade.',
     risposta: '`TimbriDedaloDto`',
-    errori: [PARTITA, [404, 'area-non-trovata'], [400, 'non-un-dedalo'], [400, 'timbri-non-validi'], [400, 'timbri-non-dichiarati']],
+    errori: [PARTITA, [404, 'area-dedalo-non-trovata'], [400, 'non-un-area-del-dedalo'], [400, 'timbri-non-validi'], [400, 'timbri-non-dichiarati']],
   },
   'PUT /api/partite/:id/punti': {
     sommario: 'Stato di un punto d\'interesse di un Palazzo',

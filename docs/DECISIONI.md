@@ -371,7 +371,7 @@ seed sono tre (due sull'organizzazione geografica, uno sulla conservazione).
   planimetrie con «Raccolto», non i punti della guida. La maggior parte delle planimetrie non è
   legata a un'area della guida, quindi oltre a quelle dell'area scelta c'è una piega con tutte le
   planimetrie del Palazzo. I punti della guida restano consultabili e segnabili in «Dalla guida».
-- **Nei Memento la colonna sono gli obiettivi del dedalo** (timbri + richieste); dove la guida non
+- **Nei Memento la colonna sono gli obiettivi del dedalo** (timbri + richieste) — *superata il 2026-10-11: la colonna sono le aree del dedalo con i loro elementi*; dove la guida non
   dichiara i timbri lo si dice e non c'è contatore. La «Pianta della guida» dei Memento non si mostra:
   i piani si generano a ogni discesa.
 - **Il prossimo appuntamento non è un secondo elenco**: domande e cruciverba evidenziano la riga nel
@@ -1529,3 +1529,54 @@ Che cosa ne segue:
   giorno si chiude cambiando giorno.
 - **Il testo.** «Oggi» solo quando il giorno guardato è la data di gioco; per un altro giorno «Il 13 aprile nessuna domanda in
   classe né cruciverba.» e, sul pulsante delle domande in classe, «1 quel giorno» al posto di «1 oggi».
+
+## 2026-10-11 — Mementos: Dedalo → Aree → Elementi, e Richieste modificabili
+
+Richieste dell'utente, parola per parola:
+- «ora sto iniziando a lavorare sui mementos. Prima cosa in assoluto come faccio a modificare i dettagli relativi alle
+  richieste? non ho un pulsante modifica. Poi vorrei capire come organizzare gli obiettivi del dedalo... considerando che non
+  ho la possibilità di fare nulla...»
+- poi, mentre lavoravo alla proposta: «poi devo poter definire in ogni Dedalo delle aree... e in quelle aree devo poter
+  modificare gli elementi...i dettagli dell'area e le cose da vedere o da fare... ogni elemento deve avere uno stato... solo
+  quando tutti gli elementi di un'area sono in stato completato l'area deve risultare completata. un dedalo diventa completato
+  se tutte le sue aree sono completate.»
+
+Risposte dell'utente alle domande:
+- «Per le Richieste dei Mementos, che cosa vuoi poter fare?» → «Modifica, aggiungi, elimina (Recommended)»;
+- «Che cosa deve contare negli obiettivi di un dedalo (la sua percentuale)?» → «Timbri, richieste e voci scelte
+  (Recommended)» (poi superata dalla struttura ad aree, vedi sotto);
+- «Dove vuoi i comandi di modifica delle Richieste?» → «In entrambi i posti (Recommended)»;
+- «Se elimini una Richiesta che qualcosa cita (condizioni, requisiti, pin, azioni del percorso), che cosa deve succedere?» →
+  «Si elimina e si avvisa (Recommended)»;
+- «Procedo con la proposta (A Richieste, B Timbri, C Voci obiettivo, nell'ordine)?» → «Sì, procedi (Recommended)» (poi
+  riorganizzata dopo il secondo messaggio);
+- «Richieste e timbri, nella nuova struttura Dedalo → Aree → Elementi, dove stanno?» → «Elementi delle aree (Recommended)»;
+- «Le voci che ogni dedalo ha già oggi (es. le 9 di Qimranut) dove finiscono?» → «In un'area iniziale (Recommended)»;
+- «Gli elementi puramente informativi (oggi le voci «Altro» descrittive, senza stato): come si trattano nelle aree dei
+  dedali?» → «Tutti con stato (Recommended)»;
+- «La parte C già approvata (voci scelte una per una come obiettivi) con la nuova regola non serve più: la sostituisco? E lo
+  stato «completato» di un elemento è Ottenuto o Esaurito, come nei Palazzi?» → «Sì a entrambe (Recommended)»;
+- «Un'area del dedalo senza nessun elemento: è completata?» → «Sì, completata»;
+- «Nella percentuale, i Timbri di un'area contano come un elemento solo o uno per timbro?» → «Uno per timbro»;
+- «Eliminando un'area del dedalo, che fine fanno i suoi elementi?» → «Voci via, Richieste da collocare (Recommended)»;
+- «Procedo con questa struttura e quest'ordine (1. Aree dei dedali, 2. Richieste modificabili)?» → «Sì, procedi
+  (Recommended)».
+
+Che cosa ne segue (prima parte, le aree dei dedali):
+- **Struttura.** Il dedalo resta com'è (mappe, pozzo, collegamenti); sotto ci sono le sue aree (`area_dedalo`, 099) con nome,
+  dettagli e timbri. Gli elementi di un'area sono le sue voci della guida, le sue Richieste e i suoi timbri.
+- **Stati.** Una voce è completata Ottenuta o Esaurita; una Richiesta «Completata»; i timbri quando sono tutti. Nelle aree dei
+  dedali ogni voce ha uno stato, anche «Altro»: la regola delle voci descrittive resta solo per i Palazzi.
+- **Completamento.** Un'area è completata quando tutti i suoi elementi lo sono; un'area vuota è completata. Il dedalo è
+  completato quando tutte le sue aree lo sono. **Un dedalo senza aree** risulta completato: non l'ha scelto l'utente, è la
+  conseguenza coerente della scelta sull'area vuota (nessuna area da completare); lo segnalo qui perché lo si possa cambiare.
+- **Percentuale.** Elementi fatti su elementi totali, i timbri uno per timbro.
+- **Le voci di oggi** stanno nell'«Area 1» di ogni dedalo (tutti e nove ne avevano), con le Richieste e i timbri del dedalo; i
+  timbri già raccolti nelle partite la seguono (utente 018).
+- **Eliminando un'area** se ne vanno le sue voci con quel che le partite ne avevano segnato e i suoi timbri; le Richieste restano
+  nel dedalo «da collocare», visibili, fuori dal conteggio finché non si sceglie un'area (selettore dell'area accanto a ogni
+  Richiesta, `PUT /api/compendio/richieste/:chiave/area`).
+- **La parte C** (voci scelte una per una come obiettivi) è sostituita: contano tutti gli elementi delle aree. La voce del
+  2026-09-12 «Nei Memento la colonna sono gli obiettivi del dedalo (timbri + richieste)» è superata.
+- **Seconda parte, da fare:** modulo delle Richieste (modifica, aggiunta, eliminazione con avviso) nella pagina Richieste e
+  nella colonna del dedalo.

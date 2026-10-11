@@ -7,10 +7,10 @@ import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
 import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
-import { richieste } from '../services/richiesteService.js';
+import { collocaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { aggiornaArea, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaArea, creaPunto, eliminaArea, eliminaPunto, spostaPunto } from '../services/dungeonService.js';
-import { bodyArea, bodyAtterraggi, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovoPunto, bodyPunto, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto } from '../schemas/guidaDungeon.js';
+import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaArea, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto } from '../services/dungeonService.js';
+import { bodyArea, bodyAreaDedalo, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovoPunto, bodyPunto, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto } from '../schemas/guidaDungeon.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
@@ -191,6 +191,10 @@ router.get('/battaglia', (_req, res) => {
 router.get('/richieste', validate({ query: queryDomande }), (req, res) => {
   res.json(richieste((req.query as unknown as { partita?: number }).partita));
 });
+/** Colloca una Richiesta in un'area di un dedalo (099), o la toglie dall'area (null): è un elemento delle aree. */
+router.put('/richieste/:chiave/area', validate({ params: paramsChiaveGuida, body: bodyCollocaRichiesta }), (req, res) => {
+  res.json(collocaRichiesta(String(req.params.chiave), (req.body as { areaDedalo: string | null }).areaDedalo));
+});
 router.get('/dungeon', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaDungeon((req.query as unknown as { partita?: number }).partita));
 });
@@ -220,6 +224,22 @@ router.put('/aree/:chiave', validate({ params: paramsChiaveGuida, body: bodyArea
 /** Elimina l'area della guida per tutte le partite, con i suoi punti e i suoi legami (2026-09-30). */
 router.delete('/aree/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   eliminaArea(String(req.params.chiave));
+  res.status(204).end();
+});
+/* ---- Le aree dei dedali dei Memento (099, richiesta dell'utente del 2026-10-11): Dedalo → Aree → Elementi ---- */
+/** Un'area nuova in fondo al dedalo (la chiave è quella del dedalo, cioè della sua area della guida). */
+router.post('/dedali/:chiave/aree', validate({ params: paramsChiaveGuida, body: bodyNuovaAreaDedalo }), (req, res) => {
+  res.status(201).json(creaAreaDedalo(String(req.params.chiave), req.body as Parameters<typeof creaAreaDedalo>[1]));
+});
+router.put('/aree-dedalo/:chiave', validate({ params: paramsChiaveGuida, body: bodyAreaDedalo }), (req, res) => {
+  res.json(aggiornaAreaDedalo(String(req.params.chiave), req.body as Parameters<typeof aggiornaAreaDedalo>[1]));
+});
+router.put('/aree-dedalo/:chiave/sposta', validate({ params: paramsChiaveGuida, body: bodySpostaPunto }), (req, res) => {
+  res.json(spostaAreaDedalo(String(req.params.chiave), (req.body as { verso: -1 | 1 }).verso));
+});
+/** Elimina l'area per tutte le partite: le voci con lei, le Richieste restano nel dedalo da collocare. */
+router.delete('/aree-dedalo/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
+  eliminaAreaDedalo(String(req.params.chiave));
   res.status(204).end();
 });
 router.post('/aree/:chiave/punti', validate({ params: paramsChiaveGuida, body: bodyNuovoPunto }), (req, res) => {

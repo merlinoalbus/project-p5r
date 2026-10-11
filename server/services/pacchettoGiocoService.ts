@@ -79,7 +79,8 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'spunta_voce_partita', colonna: 'voce_uid', entita: 'voce della giornata', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'punto_partita', colonna: 'punto_chiave', entita: 'punto della guida', tabellaGioco: 'punto_interesse', colonnaGioco: 'chiave' },
   { tabella: 'richiesta_partita', colonna: 'richiesta_chiave', entita: 'richiesta', tabellaGioco: 'richiesta', colonnaGioco: 'chiave' },
-  { tabella: 'timbri_dedalo_partita', colonna: 'area_chiave', entita: 'area dei Memento', tabellaGioco: 'dungeon_area', colonnaGioco: 'chiave' },
+  // i timbri si contano nelle aree dei dedali (099, utente 018)
+  { tabella: 'timbri_dedalo_partita', colonna: 'area_chiave', entita: 'area di un dedalo dei Memento', tabellaGioco: 'area_dedalo', colonnaGioco: 'chiave' },
   { tabella: 'domanda_partita', colonna: 'domanda_id', entita: 'domanda', tabellaGioco: 'domanda', colonnaGioco: 'id' },
   { tabella: 'cruciverba_partita', colonna: 'data', entita: 'cruciverba', tabellaGioco: 'cruciverba', colonnaGioco: 'data' },
   { tabella: 'trofeo_partita', colonna: 'trofeo_chiave', entita: 'trofeo', tabellaGioco: 'trofeo', colonnaGioco: 'chiave' },

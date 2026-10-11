@@ -75,7 +75,7 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
 }
 
 /** Una voce della guida citata da una condizione: il nome e il tipo (una descrittiva non ha stato). */
-interface VoceCitata { nome: string; tipo: string }
+interface VoceCitata { nome: string; tipo: string; area_dedalo_chiave: string | null }
 
 /** `pinCitato` con la memoria dello stato della richiesta, se lo stato ce l'ha. */
 function pinCitatoNelloStato(uid: string, st: StatoDisponibilita): ReturnType<typeof pinCitato> {
@@ -87,7 +87,7 @@ function pinCitatoNelloStato(uid: string, st: StatoDisponibilita): ReturnType<ty
 /** La voce della guida citata da una condizione, con la memoria dello stato della richiesta se lo stato ce l'ha; null se non c'è. */
 function voceCitataNelloStato(chiave: string, st: StatoDisponibilita): VoceCitata | null {
   /** La voce dal database: nome e tipo, o null. */
-  const leggi = () => (prepared('SELECT nome, tipo FROM punto_interesse WHERE chiave = ?').get(chiave) as VoceCitata | undefined) ?? null;
+  const leggi = () => (prepared('SELECT nome, tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(chiave) as VoceCitata | undefined) ?? null;
   if (!st.vociCitate) return leggi();
   if (!st.vociCitate.has(chiave)) st.vociCitate.set(chiave, leggi());
   return st.vociCitate.get(chiave)!;
@@ -279,7 +279,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       // una voce eliminata dopo aver scritto la condizione: non si sa, e lo si dice dove correggerlo
       if (!v) return esito('voce-guida', 'grigio', 'La voce della guida di questa condizione non c’è più: correggila nell’editor della mappa');
       // diventata descrittiva («Altro»): non ha più uno stato, quindi la condizione è grigia (da correggere nell'editor), non rossa
-      if (puntoDescrittivo(v.tipo)) return esito('voce-guida', 'grigio', `«${v.nome}» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa`);
+      if (puntoDescrittivo(v.tipo, v.area_dedalo_chiave)) return esito('voce-guida', 'grigio', `«${v.nome}» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa`);
       const segnata = st.vociSegnate?.has(r.voce) ?? false;
       return esito('voce-guida', segnata === r.segnata ? 'verde' : 'rosso', `«${v.nome}»: ${segnata ? 'segnata' : 'non segnata'}`);
     }

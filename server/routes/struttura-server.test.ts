@@ -222,27 +222,39 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     expect(senza.raccolta.presi).toBeNull();
     expect(senza.planimetrie.every((m) => m.presi === null && m.spilli.every((s) => s.raccolto === null))).toBe(true);
 
-    // Memento: timbri dichiarati + richieste per dedalo
+    // Memento (099): Dedalo → Aree → Elementi; gli elementi di un'area sono le sue voci, le sue Richieste e i suoi timbri
     const mementos = (await request(app).get(`/api/compendio/dungeon/mementos?partita=${id}`)).body.data as DungeonDettaglioDto;
     const aiyatsbus = mementos.aree.find((a) => a.chiave === 'mementos-02-aiyatsbus')!;
-    expect(aiyatsbus.dedalo?.timbri).toEqual({ totale: 8, raccolti: 0 });
-    expect(aiyatsbus.dedalo?.richieste.length).toBeGreaterThan(0);
-    expect(aiyatsbus.dedalo?.obiettivi).toEqual({ totale: 8 + aiyatsbus.dedalo!.richieste.length, fatti: 0 });
+    expect(aiyatsbus.dedalo?.aree.map((a) => a.chiave)).toEqual(['mementos-02-aiyatsbus-area-1']);
+    const area1 = aiyatsbus.dedalo!.aree[0];
+    expect(area1.timbri).toEqual({ totale: 8, raccolti: 0 });
+    expect(area1.richieste.length).toBeGreaterThan(0);
+    const voci = aiyatsbus.punti.filter((p) => p.areaDedalo === area1.chiave).length;
+    expect(voci).toBe(aiyatsbus.punti.length);
+    // uno per timbro (scelta dell'utente): voci + Richieste + 8 timbri
+    expect(area1.elementi).toEqual({ totale: voci + area1.richieste.length + 8, fatti: 0 });
+    expect(area1.completata).toBe(false);
+    expect(aiyatsbus.dedalo).toMatchObject({ daCollocare: [], obiettivi: { totale: area1.elementi.totale, fatti: 0 }, completato: false });
     const qimranut = mementos.aree.find((a) => a.chiave === 'mementos-01-qimranut')!;
-    expect(qimranut.dedalo?.timbri).toEqual({ totale: null, raccolti: null });
+    expect(qimranut.dedalo?.aree[0].timbri).toBeNull();
     expect(mementos.raccolta.totale).toBe(mementos.aree.reduce((s, a) => s + (a.dedalo?.obiettivi.totale ?? 0), 0));
-    // i timbri si segnano, con il tetto della guida e l'evento al completamento
-    let t = (await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'mementos-02-aiyatsbus', raccolti: 3 })).body.data as TimbriDedaloDto;
-    expect(t).toEqual({ area: 'mementos-02-aiyatsbus', raccolti: 3, totale: 8, completato: false });
-    t = (await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'mementos-02-aiyatsbus', raccolti: 20 })).body.data as TimbriDedaloDto;
-    expect(t).toEqual({ area: 'mementos-02-aiyatsbus', raccolti: 8, totale: 8, completato: true });
-    const storico = (await request(app).get(`/api/partite/${id}/storico`)).body.data as { eventi: Array<{ tipo: string }> };
-    expect(storico.eventi.filter((e) => e.tipo === 'timbri-dedalo')).toHaveLength(1);
+    expect(mementos.raccolta).toMatchObject({ presi: 0, mappe: 9, mappeComplete: 0 });
+    // i timbri si segnano nell'area del dedalo, con il tetto dell'area e l'evento al completamento
+    let t = (await request(app).put(`/api/partite/${id}/timbri`).send({ area: area1.chiave, raccolti: 3 })).body.data as TimbriDedaloDto;
+    expect(t).toEqual({ area: area1.chiave, raccolti: 3, totale: 8, completato: false });
+    t = (await request(app).put(`/api/partite/${id}/timbri`).send({ area: area1.chiave, raccolti: 20 })).body.data as TimbriDedaloDto;
+    expect(t).toEqual({ area: area1.chiave, raccolti: 8, totale: 8, completato: true });
+    const storico = (await request(app).get(`/api/partite/${id}/storico`)).body.data as { eventi: Array<{ tipo: string; titolo: string }> };
+    expect(storico.eventi.filter((e) => e.tipo === 'timbri-dedalo').map((e) => e.titolo)).toEqual(['Dedalo di Aiyatsbus · Area 1: tutti i timbri raccolti']);
     const conTimbri = (await request(app).get(`/api/compendio/dungeon/mementos?partita=${id}`)).body.data as DungeonDettaglioDto;
     expect(conTimbri.aree.find((a) => a.chiave === 'mementos-02-aiyatsbus')?.dedalo?.obiettivi.fatti).toBe(8);
-    expect((await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'kamoshida-01-cancello-del-castello-ingresso', raccolti: 1 })).status).toBe(400);
-    expect((await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'mementos-01-qimranut', raccolti: 1 })).body.error.code).toBe('timbri-non-dichiarati');
-    expect((await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'mementos-02-aiyatsbus', raccolti: -1 })).status).toBe(400);
+    expect(conTimbri.raccolta.presi).toBe(8);
+    // una chiave di un'area di un Palazzo, o del dedalo stesso, non è un'area del dedalo
+    expect((await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'kamoshida-01-cancello-del-castello-ingresso', raccolti: 1 })).body.error.code).toBe('non-un-area-del-dedalo');
+    expect((await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'mementos-02-aiyatsbus', raccolti: 1 })).body.error.code).toBe('non-un-area-del-dedalo');
+    expect((await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'mementos-99-nessuna', raccolti: 1 })).status).toBe(404);
+    expect((await request(app).put(`/api/partite/${id}/timbri`).send({ area: 'mementos-01-qimranut-area-1', raccolti: 1 })).body.error.code).toBe('timbri-non-dichiarati');
+    expect((await request(app).put(`/api/partite/${id}/timbri`).send({ area: area1.chiave, raccolti: -1 })).status).toBe(400);
   });
 
   it('le richieste sono ordinate per dedalo e l’elenco porta i dedali con i conteggi', async () => {

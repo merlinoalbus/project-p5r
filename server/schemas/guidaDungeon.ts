@@ -30,8 +30,20 @@ export const bodyPunto = z.object({
   tipo: z.enum(TIPI_PUNTO).optional(), esauribile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(),
   /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
   contenitore: z.string().min(1).max(200).nullable().optional(),
+  /** L'area del dedalo della voce (099): solo nei dedali dei Memento. */
+  areaDedalo: z.string().min(1).max(200).optional(),
 });
 export const bodyNuovoPunto = bodyPunto.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
+
+/** Il totale dei timbri di un'area del dedalo: un intero da 0 al tetto, o null (l'area non ha timbri). */
+const timbriTotale = z.number().int().min(0).max(LIMITI_GUIDA.areaDedalo.timbri).nullable();
+/** Un'area di un dedalo dei Memento da correggere (099): nome, dettagli, totale dei timbri. */
+export const bodyAreaDedalo = z.object({
+  nome: z.string().trim().min(1).max(LIMITI_GUIDA.areaDedalo.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.areaDedalo.descrizione).optional(),
+  timbriTotale: timbriTotale.optional(),
+});
+/** Un'area nuova di un dedalo (099): nasce in fondo. */
+export const bodyNuovaAreaDedalo = bodyAreaDedalo.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.areaDedalo.nome) });
 /** Una sezione nuova della guida: dove va (`dopo` un'area, `null` in cima, assente in fondo) e, se c'è, la planimetria che la contiene. */
 export const bodyNuovaArea = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional(),
@@ -60,3 +72,6 @@ export const bodyAtterraggi = z.object({
     spillo: z.number().int().positive().nullable(),
   })).max(30),
 });
+
+/** L'area del dedalo in cui collocare una Richiesta (099); null la toglie dall'area (resta nel dedalo, da collocare). */
+export const bodyCollocaRichiesta = z.object({ areaDedalo: z.string().min(1).max(200).nullable() });

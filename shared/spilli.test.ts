@@ -97,10 +97,10 @@ describe('lo stato di un pin nella partita (2026-10-03)', () => {
     expect(ritornoDelloStato({ tipo: 'confidente', collezionabile: false })).toEqual({ pulsante: 'Annulla', parola: 'non più incontrato' });
   });
   it('si cita in una condizione un pin con uno stato: il suo tipo o, per un pin senza stato proprio, una voce della guida non descrittiva («ottenuto»)', () => {
-    expect(statoCitabile('confidente', null)).toBe('incontrato');
-    expect(statoCitabile('dialogo', null)).toBe('parlato');
-    expect(statoCitabile('sicura', 'sicura')).toBe('ottenuto');
-    expect(statoCitabile('sicura', 'altro')).toBeNull();
-    expect(statoCitabile('nota', null)).toBeNull();
+    expect(statoCitabile('confidente', false)).toBe('incontrato');
+    expect(statoCitabile('dialogo', false)).toBe('parlato');
+    expect(statoCitabile('sicura', true)).toBe('ottenuto');
+    expect(statoCitabile('sicura', false)).toBeNull();
+    expect(statoCitabile('nota', false)).toBeNull();
   });
 });

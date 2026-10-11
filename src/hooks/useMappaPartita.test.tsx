@@ -97,7 +97,7 @@ it('anche «ricarica» rende vecchia una rilettura in sospeso', async () => {
 });
 
 it('dopo lo stato della voce della guida e dopo un acquisto la mappa si rilegge (lo stato può essere la condizione di un altro pin)', async () => {
-  const conVoce: SpilloDto = { ...leva, voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null }], dettaglio: { tipo: 'negozio', negozio: { chiave: 'n', nome: 'N', articoli: [{ chiave: 'pozione', nome: 'Pozione', comprato: false }] } } as unknown as SpilloDto['dettaglio'] };
+  const conVoce: SpilloDto = { ...leva, voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', areaDedalo: null, stato: null }], dettaglio: { tipo: 'negozio', negozio: { chiave: 'n', nome: 'N', articoli: [{ chiave: 'pozione', nome: 'Pozione', comprato: false }] } } as unknown as SpilloDto['dettaglio'] };
   getMappa.mockResolvedValue(mappa('a', [conVoce]));
   impostaStatoPunto.mockResolvedValue({ chiave: 'k-01/1', stato: 'ottenuto' });
   impostaAcquisto.mockResolvedValue({ chiave: 'pozione', nome: 'Pozione', acquistato: true });
@@ -142,7 +142,7 @@ function ProvaVoci() {
 
 it('un pin con più voci (098): segnarne una non lo fa «segnato», segnarle tutte sì; l’avviso dice quale voce', async () => {
   /** Una voce «Storia» non segnata con chiave e nome dati. */
-  const voce = (chiave: string, nome: string) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null });
+  const voce = (chiave: string, nome: string) => ({ chiave, tipo: 'storia', nome, descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', areaDedalo: null, stato: null });
   const pin: SpilloDto = { ...leva, id: 30, tipo: 'infiltrazione', tipoNome: 'Infiltrazione', nome: 'Infiltrazione', voci: [voce('k-01/1', 'Primo evento'), voce('k-02/1', 'Secondo evento')] };
   getMappa.mockResolvedValue(mappa('a', [pin]));
   impostaStatoPunto.mockImplementation(async (_p: number, chiave: string) => ({ chiave, stato: 'ottenuto' }));

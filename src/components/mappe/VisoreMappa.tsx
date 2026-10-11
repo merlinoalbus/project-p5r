@@ -927,12 +927,13 @@ function invitoSenzaPartita(s: SpilloDto | SchedaContenutoGuidaDto, negozio: boo
   return cose.join(' e ');
 }
 
-/** Una voce descrittiva della guida (solo «Altro») si legge, non si segna (scelta dell'utente, 2026-10-01): come nella scheda del Palazzo. */
+/** Una voce descrittiva della guida («Altro» fuori dalle aree dei dedali: lì ogni voce ha uno stato, 099) si legge, non si segna (scelta
+ *  dell'utente, 2026-10-01): come nella scheda del Palazzo. */
 const VOCE_DESCRITTIVA = <span className="text-[12px] text-text-muted">Voce descrittiva della guida: si legge, non si segna.</span>;
 
 /** I pulsanti di una voce della guida: «Ottenuto», «Esaurito» (se esauribile), «Riapri» (se segnata); una descrittiva si legge e basta. */
 function AzioniVoce<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, voce, occupato, onStatoPunto }: { spillo: T; voce: VoceDelPinDto; occupato: boolean; onStatoPunto: (spillo: T, voce: string, stato: StatoPuntoMappa) => Promise<void> }) {
-  if (puntoDescrittivo(voce.tipo)) return VOCE_DESCRITTIVA;
+  if (puntoDescrittivo(voce.tipo, voce.areaDedalo)) return VOCE_DESCRITTIVA;
   return (
     <>
       {voce.stato !== 'ottenuto' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Ottenuto" onClick={() => void onStatoPunto(s, voce.chiave, 'ottenuto')} disabled={occupato} />}
@@ -947,7 +948,7 @@ function AzioniVoce<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, 
  *  con la parola del tipo («Raccolto», «Aperto», «Parlato», «Incontrato», «Sconfitto», «Azionato»…: `statoDelPin`) e, per toglierlo,
  *  «Richiudi» per porta e forzieri, «Annulla» per gli altri (`ritornoDelloStato`). */
 export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
-  if (s.voci.length === 1 && puntoDescrittivo(s.voci[0].tipo)) return VOCE_DESCRITTIVA;
+  if (s.voci.length === 1 && puntoDescrittivo(s.voci[0].tipo, s.voci[0].areaDedalo)) return VOCE_DESCRITTIVA;
   if (s.voci.length === 1 && onStatoPunto) return <AzioniVoce spillo={s} voce={s.voci[0]} occupato={occupato} onStatoPunto={onStatoPunto} />;
   if (s.voci.length > 1 && onStatoPunto) {
     return (

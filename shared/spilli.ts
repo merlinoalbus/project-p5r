@@ -115,10 +115,11 @@ export function statoDelTipo(tipo: string): string | null {
 /**
  * La parola dello stato con cui un pin si può citare in una condizione «Pin di una mappa»: quella del suo tipo o, per un pin senza
  * stato proprio collegato a una voce della guida che non sia descrittiva (un Confidente, una stanza sicura con la sua voce),
- * «ottenuto», lo stato della voce (richiesta dell'utente, 2026-10-03). null = non citabile.
+ * «ottenuto», lo stato della voce (richiesta dell'utente, 2026-10-03). `voceDaSegnare`: il pin ha almeno una voce non descrittiva
+ * (`puntoDescrittivo`, che conta anche l'area del dedalo, 099). null = non citabile.
  */
-export function statoCitabile(tipo: string, tipoVoce: string | null): string | null {
-  return statoDelTipo(tipo) ?? (tipoVoce !== null && !puntoDescrittivo(tipoVoce) ? 'ottenuto' : null);
+export function statoCitabile(tipo: string, voceDaSegnare: boolean): string | null {
+  return statoDelTipo(tipo) ?? (voceDaSegnare ? 'ottenuto' : null);
 }
 /** Lo stato da mostrare per un pin segnato: la sua parola o, per un pin segnato solo tramite la sua voce della guida, «raccolto» come prima. */
 export function parolaDelloStato(s: { tipo: string; collezionabile: boolean }): string {
@@ -298,12 +299,17 @@ export function puntoDaCollegare(tipoPunto: string): boolean {
 /**
  * Un punto della guida senza pin né stato: si legge, non si segna. Solo «Altro» (scelta dell'utente, 2026-10-01: «altro
  * niente pin»); Persona e Storia si collegano a qualunque pin e hanno lo stato.
+ * Nelle aree dei dedali dei Memento (099) non ci sono voci descrittive: ogni elemento ha uno stato, anche «Altro» (scelta
+ * dell'utente, 2026-10-11: «Tutti con stato»). Per questo conta anche l'area del dedalo della voce.
  */
 export const TIPO_PUNTO_DESCRITTIVO = 'altro';
-/** Vero se il punto è del tipo descrittivo («Altro»). */
-export function puntoDescrittivo(tipoPunto: string): boolean {
-  return tipoPunto === TIPO_PUNTO_DESCRITTIVO;
+/** Vero se il punto è descrittivo: del tipo «Altro» e fuori dalle aree dei dedali (`areaDedalo` nullo). L'area è obbligatoria: chi
+ *  la dimenticasse ricadrebbe in silenzio nella regola dei Palazzi (rilievo del validatore, 2026-10-11). */
+export function puntoDescrittivo(tipoPunto: string, areaDedalo: string | null): boolean {
+  return tipoPunto === TIPO_PUNTO_DESCRITTIVO && !areaDedalo;
 }
+/** La stessa regola in SQL, per la voce con l'alias dato: vera se è descrittiva. */
+export const sqlVoceDescrittiva = (alias: string): string => `(${alias}.tipo = '${TIPO_PUNTO_DESCRITTIVO}' AND ${alias}.area_dedalo_chiave IS NULL)`;
 /** Un Enigma (2026-10-01): una voce che può contenere i passi che lo risolvono — voci di qualunque tipo, coi loro pin. */
 export function puntoEnigma(tipoPunto: string): boolean {
   return tipoPunto === 'puzzle';

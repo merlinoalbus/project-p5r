@@ -45,7 +45,6 @@ interface Props {
   area: AreaDungeonDto;
   /** Le planimetrie del Palazzo: fra queste si sceglie quella su cui toccare i pin (prima quelle dell'area). */
   planimetrie: DungeonDettaglioDto['planimetrie'];
-  memento: boolean;
   partitaId: number | null;
   /** La planimetria che la pagina sta mostrando: se è dell'area, la scelta parte da lì. */
   mappaAperta: string | null;
@@ -55,6 +54,9 @@ interface Props {
   onPuntoAggiornato: (p: PuntoInteresseDto) => void;
   /** Rilegge la scheda del Palazzo (ordine cambiato, voce aggiunta o tolta, stati uniti da un collegamento). */
   onRicarica: () => Promise<void>;
+  /** Nei dedali dei Memento (099): l'area del dedalo di cui si mostrano le voci (`area.punti` le ha già filtrate) e le altre aree
+   *  dello stesso dedalo, dove una voce si può spostare. Lì ogni voce ha uno stato, anche «Altro». */
+  areaDedalo?: { chiave: string; nome: string; altre: ReadonlyArray<{ chiave: string; nome: string }> };
 }
 
 /**
@@ -64,7 +66,11 @@ interface Props {
  * nella partita, pin collegati, spostamento, correzione o eliminazione e la scelta dei pin sulla mappa, il cui riquadro
  * viene misurato per stare tutto nello spazio visibile e portato in vista. Ogni modifica fa rileggere la scheda.
  */
-export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica }: Props) {
+export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo }: Props) {
+  /** Una voce descrittiva si legge e basta; nelle aree dei dedali non ce ne sono (099, scelta dell'utente: «Tutti con stato»). */
+  const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
+  /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
+  const nomeArea = areaDedalo?.nome ?? area.nome;
   const [filtro, setFiltro] = useState<Set<PuntoInteresseDto['tipo']>>(new Set());
   const [mostraGestiti, setMostraGestiti] = useState(false);
   const [selezionato, setSelezionato] = useState<string | null>(null);
@@ -109,8 +115,8 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   // in cima le voci fuori da ogni Enigma; un Enigma si vede anche quando i filtri prendono solo qualche suo passo
   const vociDellArea = area.punti.filter((p) => !p.contenitore);
   // (una nota descrittiva fra i passi non ha stato: senza filtri non basta a tenere in vista un Enigma segnato — rilievo del validatore)
-  const puntiVisibili = vociDellArea.filter((p) => voceVisibile(p) || (passiPer.get(p.chiave) ?? []).some((x) => voceVisibile(x) && (filtro.size > 0 || !puntoDescrittivo(x.tipo))));
-  const gestitiArea = area.punti.filter((p) => p.stato && !puntoDescrittivo(p.tipo)).length;
+  const puntiVisibili = vociDellArea.filter((p) => voceVisibile(p) || (passiPer.get(p.chiave) ?? []).some((x) => voceVisibile(x) && (filtro.size > 0 || !descrittiva(x))));
+  const gestitiArea = area.punti.filter((p) => p.stato && !descrittiva(p)).length;
   // La voce da portare in vista dopo un «Ottenuto»/«Esaurito»: si scorre al primo disegno in cui c'è, già aperta, e poi basta.
   const daMostrare = useRef<string | null>(null);
   useEffect(() => {
@@ -132,7 +138,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   const segnaEPassaOltre = async (p: PuntoInteresseDto, stato: StatoPunto) => {
     const ordine = vociDellArea.flatMap((v) => [v, ...(passiPer.get(v.chiave) ?? [])]);
     const dopo = ordine.slice(ordine.indexOf(p) + 1);
-    const successiva = dopo.find((q) => !q.stato && !puntoDescrittivo(q.tipo) && q.contenitore !== p.chiave && (filtro.size === 0 || filtro.has(q.tipo))) ?? null;
+    const successiva = dopo.find((q) => !q.stato && !descrittiva(q) && q.contenitore !== p.chiave && (filtro.size === 0 || filtro.has(q.tipo))) ?? null;
     if (!(await cambiaStato(p, stato))) return;
     setCollegando(null);
     setSelezionato(successiva?.chiave ?? null);
@@ -181,7 +187,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   /** Il modulo della voce nuova: in fondo all'area o, con `contenitore`, in fondo ai passi di un Enigma (095). */
   const moduloNuovaVoce = (n: { nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null }) => (
     <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
-      onSubmit={(e) => { e.preventDefault(); const nome = n.nome.trim(); if (!nome) return; void creaPunto(area.chiave, { nome, tipo: n.tipo, ...(n.contenitore ? { contenitore: n.contenitore } : {}) }).then(async (nuovo) => { setNuovoPunto(null); await onRicarica(); setSelezionato(nuovo.chiave); notifica('success', n.contenitore ? `Passo «${nome}» aggiunto all’Enigma.` : `Voce «${nome}» aggiunta a ${area.nome}.`); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Voce non aggiunta.')); }}>
+      onSubmit={(e) => { e.preventDefault(); const nome = n.nome.trim(); if (!nome) return; void creaPunto(area.chiave, { nome, tipo: n.tipo, ...(n.contenitore ? { contenitore: n.contenitore } : areaDedalo ? { areaDedalo: areaDedalo.chiave } : {}) }).then(async (nuovo) => { setNuovoPunto(null); await onRicarica(); setSelezionato(nuovo.chiave); notifica('success', n.contenitore ? `Passo «${nome}» aggiunto all’Enigma.` : `Voce «${nome}» aggiunta a ${nomeArea}.`); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Voce non aggiunta.')); }}>
       <CampoCorrezione etichetta={n.contenitore ? 'Nuovo passo' : 'Nuova voce'} valore={n.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => setNuovoPunto({ ...n, nome: v })} />
       <span className="min-w-[150px]">
         <Selettore etichetta="Tipo" valore={n.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setNuovoPunto({ ...n, tipo: v as PuntoInteresseDto['tipo'] })} />
@@ -202,7 +208,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
     const passi = passiPer.get(p.chiave) ?? [];
     const conPassi = passi.length > 0;
     // l'Enigma è risolto quando i passi che si segnano sono fatti: qui quanti
-    const passiDaSegnare = passi.filter((x) => !puntoDescrittivo(x.tipo));
+    const passiDaSegnare = passi.filter((x) => !descrittiva(x));
     const passiFatti = passiDaSegnare.filter((x) => x.stato).length;
     const puoAccogliere = puntoEnigma(p.tipo) && !p.contenitore;
     // gli Enigmi di cui la voce può diventare un passo (non sé stessa; un Enigma coi suoi passi non entra in un altro; un Enigma con
@@ -237,7 +243,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
               </ul>
             )}
             {/* una voce descrittiva (solo «Altro») si legge e basta: niente stato, niente pin (scelta dell'utente) */}
-            {puntoDescrittivo(p.tipo)
+            {descrittiva(p)
               ? <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
               : <div className="flex flex-wrap items-center gap-1.5">
                 {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void segnaEPassaOltre(p, 'ottenuto')}>Ottenuto</button>}
@@ -245,7 +251,7 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
                 {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
               </div>}
             <div className="flex flex-wrap items-center gap-1.5">
-              {!puntoDescrittivo(p.tipo) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Chiudi la mappa' : 'Collega pin'}
+              {!descrittiva(p) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Chiudi la mappa' : 'Collega pin'}
                 aria-expanded={!!scelta} disabled={planimetrie.length === 0}
                 onClick={() => (scelta ? void fineCollegamento() : setCollegando({ punto: p.chiave, mappa: mappaIniziale(p), ricerca: '' }))} />}
               {puoAccogliere && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un passo" aria-label={`Aggiungi un passo a ${p.nome}`}
@@ -254,8 +260,10 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${p.nome}`} disabled={occupato || indice <= 0} onClick={() => void sposta(p, -1)} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${p.nome}`} disabled={occupato || indice >= fratelli.length - 1} onClick={() => void sposta(p, 1)} />
               <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} compatto etichetta="Modifica"
-                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '' })}
-                onSalva={async (b) => { onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì', ...(b.contenitore !== (p.contenitore ?? '') ? { contenitore: b.contenitore || null } : {}) })); await onRicarica(); }}
+                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '' })}
+                onSalva={async (b) => { onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì', ...(b.contenitore !== (p.contenitore ?? '') ? { contenitore: b.contenitore || null } : {}),
+                  // un'altra area del dedalo (099): solo per una voce fuori da ogni Enigma (un passo sta nell'area del suo Enigma)
+                  ...(areaDedalo && !b.contenitore && b.areaDedalo && b.areaDedalo !== (p.areaDedalo ?? '') ? { areaDedalo: b.areaDedalo } : {}) })); await onRicarica(); }}
                 elimina={{ avviso: conPassi ? 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I suoi passi restano, voci dell’area con il loro stato.' : 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I pin collegati restano sulla mappa, col loro «raccolto».', onElimina: async () => { await eliminaPunto(p.chiave); setSelezionato(null); setCollegando(null); await onRicarica(); } }}>
                 {(b, cambia) => <>
                   <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => cambia({ nome: v })} />
@@ -265,6 +273,10 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
                   </span>
                   {(enigmiPossibili.length > 0 || p.contenitore) && <span className="min-w-[180px]">
                     <Selettore etichetta="Passo di" valore={b.contenitore} opzioni={[{ chiave: '', nome: '— nessun Enigma (voce dell’area) —' }, ...enigmiPossibili.map((e) => ({ chiave: e.chiave, nome: e.nome }))]} onCambia={(v) => cambia({ contenitore: v })} />
+                  </span>}
+                  {/* l'area del dedalo (099): una voce fuori da ogni Enigma passa in un'altra area dello stesso dedalo, coi passi se è un Enigma */}
+                  {areaDedalo && areaDedalo.altre.length > 0 && !b.contenitore && <span className="min-w-[180px]">
+                    <Selettore etichetta="Area del dedalo" valore={b.areaDedalo} opzioni={[{ chiave: areaDedalo.chiave, nome: areaDedalo.nome, dettaglio: 'questa' }, ...areaDedalo.altre.map((a) => ({ chiave: a.chiave, nome: a.nome }))]} onCambia={(v) => cambia({ areaDedalo: v })} />
                   </span>}
                   <label className="touch flex items-center gap-1.5 text-[12px]">
                     <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
@@ -308,13 +320,15 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
   };
 
   return (
-    <details className="text-[12px]" open aria-label={`Guida di ${area.nome}`}>
+    <details className="text-[12px]" open aria-label={`Guida di ${nomeArea}`}>
       <summary className="touch cursor-pointer text-text-muted">
-        Guida dell’area · {area.punti.length === 1 ? '1 voce' : `${area.punti.length} voci`}{gestitiArea > 0 ? ` (${gestitiArea} segnate)` : ''}{daCollegare > 0 ? ` · ${daCollegare} da collegare` : ''}
+        {areaDedalo ? 'Voci dell’area' : 'Guida dell’area'} · {area.punti.length === 1 ? '1 voce' : `${area.punti.length} voci`}{gestitiArea > 0 ? ` (${gestitiArea} segnate)` : ''}{daCollegare > 0 ? ` · ${daCollegare} da collegare` : ''}
       </summary>
       <div className="flex flex-col gap-2 pt-2">
         <p className="m-0 text-[11px] text-text-muted">
-          Una voce collegata ai pin ha il loro stato; le altre si segnano qui e non contano nella percentuale, che misura {memento ? 'gli obiettivi dei dedali' : 'le planimetrie'}.
+          {areaDedalo
+            ? 'Ogni voce si segna (anche «Altro») ed è un elemento dell’area: l’area è completata quando lo sono tutti i suoi elementi.'
+            : 'Una voce collegata ai pin ha il loro stato; le altre si segnano qui e non contano nella percentuale, che misura le planimetrie.'}
         </p>
         {area.punti.length > 0 && (
           <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Filtri per tipo">
@@ -327,8 +341,8 @@ export function GuidaDellArea({ area, planimetrie, memento, partitaId, mappaAper
             {gestitiArea > 0 && <button type="button" className={`chip touch text-[11px] ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche le segnate ({gestitiArea})</button>}
           </div>
         )}
-        <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`Voci della guida di ${area.nome}`}>
-          {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">La guida non ha voci per quest’area: aggiungile qui sotto.</li>}
+        <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`Voci della guida di ${nomeArea}`}>
+          {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : 'La guida non ha voci per quest’area: aggiungile qui sotto.'}</li>}
           {area.punti.length > 0 && puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessuna voce con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} segnate nascoste)` : ''}.</li>}
           {puntiVisibili.map((p) => riga(p, vociDellArea))}
         </ul>

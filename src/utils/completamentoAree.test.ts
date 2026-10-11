@@ -7,7 +7,7 @@ import type { PuntoInteresseDto } from '../types';
 
 /** Una voce della guida del tipo e con lo stato dati (il resto dei campi non conta per la regola). */
 const voce = (tipo: PuntoInteresseDto['tipo'], stato: PuntoInteresseDto['stato'], chiave = `${tipo}-${String(stato)}`): PuntoInteresseDto => ({
-  chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null,
+  chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo: null,
 });
 
 describe('completamentoArea', () => {

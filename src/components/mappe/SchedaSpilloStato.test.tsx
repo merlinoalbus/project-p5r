@@ -24,7 +24,7 @@ it('senza partita l’invito dice che cosa si potrebbe segnare, con la parola de
   const seme = monta(pin({ tipo: 'seme-bramosia', tipoNome: 'Seme della bramosia', nome: 'Seme', collezionabile: true }), null);
   expect(screen.getByText(/per segnarne lo stato \(raccolto\)\./)).toBeInTheDocument();
   seme.unmount();
-  const conVoce = monta(pin({ voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', stato: null }] }), null);
+  const conVoce = monta(pin({ voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: false, dungeon: 'k', area: 'k-01', areaDedalo: null, stato: null }] }), null);
   expect(screen.getByText(/per segnare la sua voce della guida\./)).toBeInTheDocument();
   conVoce.unmount();
   // una nota non ha niente da segnare: nessun invito
@@ -43,7 +43,7 @@ it('segnato, l’intestazione dice la parola del tipo e il pulsante per toglierl
 });
 
 it('un pin collegato a una voce della guida dice lo stato della voce, lo stesso dei suoi pulsanti (esaurito, non «azionato»)', () => {
-  monta(pin({ raccolto: true, voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: true, dungeon: 'k', area: 'k-01', stato: 'esaurito' }] }), 7);
+  monta(pin({ raccolto: true, voci: [{ chiave: 'k-01/1', tipo: 'meccanismo', nome: 'Leva', descrizione: '', esauribile: true, dungeon: 'k', area: 'k-01', areaDedalo: null, stato: 'esaurito' }] }), 7);
   expect(screen.getByText('Meccanismo · esaurito')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Riapri' })).toBeInTheDocument();
 });
