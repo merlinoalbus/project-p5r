@@ -103,7 +103,9 @@ function segniPartita(partitaId: number): SegniPartita {
 }
 
 /** I collezionabili di ogni mappa del Palazzo e, con la partita, quanti sono raccolti.
- *  Una mappa senza collezionabili è completa per definizione e non conta fra le mappe.
+ *  `mappe` e `mappeComplete` contano le planimetrie dell'elenco (la mappa del Palazzo, la radice, esclusa): una planimetria
+ *  senza niente da raccogliere è completa (richiesta dell'utente, 2026-10-11: «se una planimetria non ha niente da raccogliere
+ *  deve figurare come completata»), come una con tutto raccolto. Prima contavano solo quelle con collezionabili.
  *  `segni` li passa chi li ha già letti (l'elenco dei Palazzi li legge una volta per tutti: rilievo P7). */
 export function raccoltaMappe(dungeonChiave: string, partitaId?: number, segni?: SegniPartita): RaccoltaDungeon {
   const mappe = mappeDelPalazzo(dungeonChiave);
@@ -123,9 +125,13 @@ export function raccoltaMappe(dungeonChiave: string, partitaId?: number, segni?:
     m.spilli.push({ id: r.id, uid: r.uid, tipo: r.tipo, nome: r.nome, colore: DEFINIZIONI_SPILLO[r.tipo as TipoSpillo]?.colore ?? '#888888', raccolto });
     perMappa.set(r.mappa_chiave, m);
   }
-  let totale = 0; let presi = 0; let complete = 0;
-  for (const m of perMappa.values()) { totale += m.n; presi += m.presi ?? 0; if (m.presi !== null && m.presi >= m.n) complete += 1; }
-  return { perMappa, totale, presi: partitaId === undefined ? null : presi, mappe: perMappa.size, mappeComplete: partitaId === undefined ? null : complete };
+  let totale = 0; let presi = 0;
+  for (const m of perMappa.values()) { totale += m.n; presi += m.presi ?? 0; }
+  // le planimetrie dell'elenco: complete quelle senza collezionabili e quelle con tutto raccolto
+  const radice = radiceDelPalazzo(dungeonChiave);
+  const planimetrie = mappe.filter((k) => k !== radice);
+  const complete = planimetrie.filter((k) => { const m = perMappa.get(k); return !m || (m.presi !== null && m.presi >= m.n); }).length;
+  return { perMappa, totale, presi: partitaId === undefined ? null : presi, mappe: planimetrie.length, mappeComplete: partitaId === undefined ? null : complete };
 }
 
 // ---- Gli obiettivi dei dedali dei Memento ----

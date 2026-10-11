@@ -199,7 +199,7 @@ export function DungeonDettaglioPage() {
       const planimetrie = attuale.planimetrie.map(aggiornaMappa);
       const aree = attuale.aree.map((a) => ({ ...a, mappe: a.mappe.map(aggiornaMappa) }));
       const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
-      return { ...attuale, planimetrie, aree, raccolta: { ...attuale.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.n > 0 && p.presi === p.n).length } };
+      return { ...attuale, planimetrie, aree, raccolta: { ...attuale.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.presi !== null && p.presi >= p.n).length } };
     });
     setVersioneStati((v) => v + 1);
     // Il raccolto di un pin segna (o riapre) la sua voce della guida e, se è un passo, il suo Enigma (095): stati che qui non si

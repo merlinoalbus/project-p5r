@@ -194,13 +194,17 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     const elenco = (await request(app).get(`/api/compendio/dungeon?partita=${id}`)).body.data as DungeonRiassuntoDto[];
     const kamoshida = elenco.find((d) => d.chiave === 'kamoshida')!;
     expect(kamoshida.raccolta.totale).toBeGreaterThan(0);
-    expect(kamoshida.raccolta).toMatchObject({ presi: 0, mappeComplete: 0 });
+    expect(kamoshida.raccolta.presi).toBe(0);
     expect(kamoshida.raccolta.mappe).toBeGreaterThan(0);
     const scheda = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${id}`)).body.data as DungeonDettaglioDto;
     // le planimetrie sono **tutto** l'albero del Palazzo — da lì si ordinano e si cancellano, anche
-    // quelle vuote — e quelle con collezionabili sono la raccolta: la somma dei loro spilli è il totale
-    expect(scheda.planimetrie.length).toBeGreaterThan(scheda.raccolta.mappe);
-    expect(scheda.planimetrie.filter((m) => m.n > 0)).toHaveLength(scheda.raccolta.mappe);
+    // quelle vuote — e la somma dei loro spilli è il totale; le contano tutte anche `mappe` e `mappeComplete`: una planimetria
+    // senza niente da raccogliere è completa (2026-10-11), quindi a partita nuova sono complete proprio le vuote
+    expect(scheda.raccolta.mappe).toBe(scheda.planimetrie.length);
+    const vuote = scheda.planimetrie.filter((m) => m.n === 0).length;
+    expect(vuote).toBeGreaterThan(0);
+    expect(scheda.raccolta.mappeComplete).toBe(vuote);
+    expect(kamoshida.raccolta.mappeComplete).toBe(vuote);
     expect(scheda.planimetrie.reduce((s, m) => s + m.n, 0)).toBe(scheda.raccolta.totale);
     expect(scheda.planimetrie.every((m) => m.n === m.spilli.length && m.presi === 0)).toBe(true);
     const conSpilli = scheda.planimetrie.find((m) => m.n > 0)!;

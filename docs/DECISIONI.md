@@ -1129,6 +1129,9 @@ Che cosa ne segue:
 
 ## 2026-10-04 — Spunta delle aree completate nel Palazzo
 
+**Estesa il 2026-10-11** («Una planimetria senza niente da raccogliere è completata»): la ✓ della stanza vale anche «per
+raccolta» (tutto raccolto o niente da raccogliere), e compare anche sulla singola planimetria di una stanza con più versioni.
+
 Richiesta dell'utente: «se tutte le voci di un'area sono completate, l'area deve essere segnata come completata... (spunta accanto
 alla lista aree di quella planimetria...».
 
@@ -1442,3 +1445,31 @@ Che cosa ne segue:
   - Quando una voce si riapre dalla spunta di un altro pin, i pin con più voci la seguono (non restano «fatti»).
 - **Le voci descrittive non contano** nella regola «tutte le voci segnate»: non hanno stato. Le regole del collegamento non le
   ammettono, ma una scritta da prima non deve tenere il pin «da fare».
+
+## 2026-10-11 — Una planimetria senza niente da raccogliere è completata
+
+Richiesta dell'utente: «se una planimetria non ha niente da raccogliere deve figurare come completata». Prima, nella pagina del
+Palazzo, diceva solo «niente da raccogliere» e il chip «N planimetrie · X complete» contava fra le complete solo quelle con
+collezionabili tutti presi (Kamoshida: «34 planimetrie · 0 complete»).
+
+Risposte dell'utente, parola per parola:
+- «Nell'elenco delle planimetrie, oggi la spunta verde ✓ accanto a una stanza vuol dire «tutte le sue aree della guida sono
+  completate» (scelta del 4 ottobre). Una planimetria senza niente da raccogliere deve prendere anche la ✓?» → «Sì, anche la ✓»
+  (testo dell'opzione: «La ✓ compare anche accanto alle planimetrie senza niente da raccogliere, oltre al testo «· completa»:
+  cambia il significato della spunta, che diventa «completa per aree o per raccolta»»);
+- «Procedo con la proposta (punti 1-5)?» → «Sì, procedi (Recommended)»;
+- a una mia domanda di chiarimento (se la ✓ andasse anche dove si è raccolto tutto) l'utente ha chiuso la domanda e poi ha
+  scritto: «✓ deve comparire sia dove hai raccolto tutto (come adesso) che dove non c'è niente da raccogliere (nuovo
+  requisito)», e ancora «non dimenticare il punto precedente: se una planimetria non ha niente da raccogliere deve figurare come
+  completata devi sistemare entrambi».
+
+Che cosa ne segue:
+- **La regola.** Con una partita, una planimetria è completa quando ha tutto raccolto o niente da raccogliere. Senza partita niente
+  è completo.
+- **Il conteggio.** `raccoltaMappe` conta `mappe` e `mappeComplete` su tutte le planimetrie dell'elenco (la mappa del Palazzo
+  esclusa), comprese quelle vuote. Il chip in alto e il suo aggiornamento dopo una spunta seguono la stessa regola.
+- **Il testo.** «niente da raccogliere · completa», accanto a «3 raccolti · completa».
+- **La ✓.** Sulla stanza vale «per aree o per raccolta»: aree della guida tutte completate, oppure raccolta completa. Sulla singola
+  planimetria di una stanza con più versioni vale «per raccolta», mentre le sue aree completate hanno già la loro ✓ accanto al nome.
+- **Il punto 4 della proposta non serviva.** L'elenco delle aree con «niente da raccogliere sulla sua planimetria» oggi si usa
+  solo per i Memento, in forma compatta, quindi non è cambiato niente lì.

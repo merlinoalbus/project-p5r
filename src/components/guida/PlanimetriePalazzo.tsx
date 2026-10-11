@@ -183,12 +183,16 @@ function Maniglia({ etichetta, id, i, riordino }: { etichetta: string; id: strin
   );
 }
 
-/** Quanto resta su una planimetria o su una stanza, a parole. */
+/** Quanto resta su una planimetria o su una stanza, a parole. Con una partita, una senza niente da raccogliere è completa
+ *  (richiesta dell'utente, 2026-10-11), come una con tutto raccolto. */
 function restoDaRaccogliere(totale: number, presi: number | null): string {
-  if (totale === 0) return 'niente da raccogliere';
+  if (totale === 0) return presi === null ? 'niente da raccogliere' : 'niente da raccogliere · completa';
   if (presi === null) return `${totale} da raccogliere`;
   return presi >= totale ? `${totale} raccolti · completa` : `${totale - presi} da prendere su ${totale}`;
 }
+
+/** Vero se, nella partita, una planimetria o una stanza ha la raccolta completa: tutto raccolto, o niente da raccogliere. */
+const raccoltaCompleta = (totale: number, presi: number | null): boolean => presi !== null && presi >= totale;
 
 /** Le aree della guida contenute, in ordine di guida, in una riga di testo (per i dettagli delle scelte, dove non c'è spunta). */
 function testoAree(aree: Array<{ nome: string; ordine: number; chiave: string }>): string {
@@ -198,8 +202,10 @@ function testoAree(aree: Array<{ nome: string; ordine: number; chiave: string }>
 /**
  * La spunta di completamento (scelta dell'utente, 2026-10-04): verde e solo visiva. Come nella proposta approvata, davanti al
  * nome di un'area («✓ 2. Sala Centrale», nelle righe, nelle versioni, fra le aree senza planimetria e nei chip) e dopo il nome
- * della stanza («3. Vecchio castello 1P ✓»), così si distingue la stanza completa dalle sue aree. Chi usa un lettore di schermo
- * sente invece `TestoCompletata`, sempre dopo il nome.
+ * della stanza («3. Vecchio castello 1P ✓») e, dal 2026-10-11, della planimetria di una stanza con più versioni, così si
+ * distingue la stanza completa dalle sue aree. Una stanza è completa per aree (tutte le sue aree della guida completate) **o per
+ * raccolta** (tutto raccolto, o niente da raccogliere: scelta dell'utente del 2026-10-11); una planimetria per raccolta. Chi usa
+ * un lettore di schermo sente invece `TestoCompletata`, sempre dopo il nome.
  */
 export function SpuntaCompletata({ dimensione = 12 }: { dimensione?: number }) {
   return <span aria-hidden className="inline-flex shrink-0 align-[-2px] text-success" data-completata=""><IconSpunta size={dimensione} /></span>;
@@ -367,8 +373,9 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
           const apertaQui = !una && (aperta === g.id || (dentro && aperta === null));
           const sola = g.versioni[0];
           const bersaglio = stanze.trascinato && stanze.trascinato !== g.id && stanze.sopra === i;
-          // la stanza è completa quando ha aree della guida e sono tutte completate
-          const stanzaCompleta = tutteCompletate(g.aree.map((a) => a.chiave), areeCompletate);
+          // la stanza è completa quando ha aree della guida e sono tutte completate, o quando la sua raccolta è completa — tutto
+          // raccolto, o niente da raccogliere (scelta dell'utente, 2026-10-11: la ✓ vale «completa per aree o per raccolta»)
+          const stanzaCompleta = tutteCompletate(g.aree.map((a) => a.chiave), areeCompletate) || raccoltaCompleta(g.totale, g.presi);
           return (
             <li key={g.id} ref={stanze.riga(g.id)}
               className={`flex flex-col gap-1 rounded-md border px-1.5 py-1.5 transition-colors ${dentro ? 'border-primary bg-primary-bg' : 'border-border-light bg-white/[0.02]'} ${stanze.trascinato === g.id ? 'opacity-50' : ''} ${bersaglio ? 'ring-2 ring-primary' : ''}`}>
@@ -513,12 +520,15 @@ function VersioniStanza({ gruppo: g, blocco, sceltaChiave, occupato, completate,
         const p = v.planimetria;
         const scelta = p.chiave === sceltaChiave;
         const bersaglio = versioni.trascinato && versioni.trascinato !== p.chiave && versioni.sopra === j;
+        // la ✓ della planimetria: la sua raccolta è completa — tutto raccolto, o niente da raccogliere (2026-10-11); le sue aree
+        // completate hanno già la loro ✓ accanto al nome
+        const completa = raccoltaCompleta(p.n, p.presi);
         return (
           <li key={p.chiave} ref={versioni.riga(p.chiave)}
             className={`flex items-stretch gap-1 rounded border-l-2 py-0.5 pr-1 ${scelta ? 'border-primary bg-primary-bg' : 'border-border-light'} ${versioni.trascinato === p.chiave ? 'opacity-50' : ''} ${bersaglio ? 'ring-2 ring-primary' : ''}`}>
             <Maniglia etichetta={`Sposta «${v.etichetta}» di ${g.nome}`} id={p.chiave} i={j} riordino={versioni} />
             <button type="button" className="touch min-w-0 flex-1 text-left" onClick={() => onScegli(p.chiave)} aria-pressed={scelta}>
-              <span className="block text-[12px] font-semibold leading-tight">{v.etichetta}</span>
+              <span className="flex items-baseline gap-1 text-[12px] font-semibold leading-tight"><span className="min-w-0">{v.etichetta}{completa && <TestoCompletata />}</span>{completa && <SpuntaCompletata dimensione={12} />}</span>
               <span className="block text-[11px] leading-tight text-text-muted">{restoDaRaccogliere(p.n, p.presi)}</span>
               <span className="block text-[11px] leading-tight text-text-muted"><AreeContenute aree={p.aree} completate={completate} /></span>
             </button>

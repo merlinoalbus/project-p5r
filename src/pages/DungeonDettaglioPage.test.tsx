@@ -3,7 +3,7 @@
 // Test DungeonDettaglioPage — la raccolta sulle planimetrie con «Raccolto», gli obiettivi dei dedali, i punti della guida ripiegati
 // ============================================================
 
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { scegliVoce, vociSelettore } from '../../test/selettore';
@@ -769,9 +769,9 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     expect(screen.getByRole('list', { name: 'Stanze del Palazzo' }).querySelectorAll('[data-completata]')).toHaveLength(0);
   });
 
-  it('in una stanza con più versioni la spunta compare sulla stanza, nelle sue aree e in ogni versione che contiene l’area', async () => {
+  it('in una stanza con più versioni la spunta compare sulla stanza, nelle sue aree, in ogni versione che contiene l’area e sulla versione senza niente da raccogliere (2026-10-11)', async () => {
     const { dungeon, albero } = conDueVersioni();
-    // l'area Cancello è completata; la versione «Porzione ovest» non contiene aree
+    // l'area Cancello è completata; la versione «Pianta completa» ha 1 su 2 da raccogliere, «Porzione ovest» niente e nessuna area
     dungeon.aree[0] = { ...dungeon.aree[0], punti: [voceGuida('a', 'sicura', 'ottenuto')] };
     getDungeon.mockResolvedValue(dungeon);
     getAlberoMappe.mockResolvedValue(albero);
@@ -780,14 +780,46 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
     const versioni = within(await pannello.findByRole('list', { name: 'Planimetrie di Cancello' }));
     const [completa, ovest] = versioni.getAllByRole('listitem');
-    // la versione che contiene l'area ha la spunta, quella senza aree no
+    // la versione che contiene l'area ha la spunta dell'area; la sua raccolta (1 su 2) non è completa, quindi lei no
     expect(completa.querySelectorAll('[data-completata]')).toHaveLength(1);
     expect(within(completa).getByRole('button', { name: /Pianta completa.*1\. Cancello \(completata\)/ })).toBeInTheDocument();
-    expect(ovest.querySelectorAll('[data-completata]')).toHaveLength(0);
-    // in tutto la riga della stanza ne ha tre: la stanza, l'area nell'intestazione e la versione che la contiene
-    // (è il conteggio visto nel browser su «Cancello del castello» di Kamoshida, con «porzione occidentale» senza aree)
+    // quella senza niente da raccogliere è completa per raccolta: la sua ✓ e il testo
+    expect(ovest.querySelectorAll('[data-completata]')).toHaveLength(1);
+    expect(within(ovest).getByRole('button', { name: /^Porzione ovest \(completata\)/ })).toHaveTextContent('niente da raccogliere · completa');
+    // in tutto la riga della stanza ne ha quattro: la stanza, l'area nell'intestazione, l'area nella versione e la versione vuota
     const stanza = within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem')[0];
-    expect(stanza.querySelectorAll('[data-completata]')).toHaveLength(3);
+    expect(stanza.querySelectorAll('[data-completata]')).toHaveLength(4);
+  });
+
+  it('una planimetria senza niente da raccogliere è completa (2026-10-11): testo, ✓, chip delle complete; senza partita resta solo «niente da raccogliere»', async () => {
+    const p = palazzo(true);
+    // la Torre (2 da raccogliere) diventa vuota; il server la conta fra le complete
+    const conVuota: DungeonDettaglioDto = { ...p, raccolta: { ...p.raccolta, totale: 2, mappeComplete: 1 }, planimetrie: [p.planimetrie[0], { ...p.planimetrie[1], n: 0, presi: 0, spilli: [] }] };
+    getDungeon.mockResolvedValue(conVuota);
+    getAlberoMappe.mockResolvedValue([]);
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    expect(screen.getByText('2 planimetrie · 1 complete')).toBeInTheDocument();
+    const stanze = within(screen.getByRole('list', { name: 'Stanze del Palazzo' }));
+    const torre = stanze.getAllByRole('listitem').find((li) => li.textContent?.includes('Torre'))!;
+    expect(torre).toHaveTextContent('niente da raccogliere · completa');
+    expect(torre.querySelectorAll('[data-completata]')).toHaveLength(1);
+    // segnando l'ultimo collezionabile del Cancello il chip si aggiorna subito, con la stessa regola: anche la Torre vuota conta
+    impostaSpilloRaccolto.mockResolvedValue({});
+    getDungeon.mockImplementation(() => new Promise<DungeonDettaglioDto>(() => {}));
+    fireEvent.click(screen.getAllByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })[0]);
+    await waitFor(() => expect(screen.getByText('2 planimetrie · 2 complete')).toBeInTheDocument());
+    cleanup();
+    getDungeon.mockReset();
+    // senza partita niente è completo
+    const senza = palazzo(false);
+    getDungeon.mockResolvedValue({ ...senza, planimetrie: [senza.planimetrie[0], { ...senza.planimetrie[1], n: 0, presi: null, spilli: [] }] });
+    monta('kamoshida');
+    await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    const torreSenza = within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem').find((li) => li.textContent?.includes('Torre'))!;
+    expect(torreSenza).toHaveTextContent('niente da raccogliere');
+    expect(torreSenza).not.toHaveTextContent('· completa');
+    expect(torreSenza.querySelectorAll('[data-completata]')).toHaveLength(0);
   });
 
   it('segnando l’ultima voce dalla guida la spunta compare subito, prima della rilettura; riaprendola sparisce subito', async () => {

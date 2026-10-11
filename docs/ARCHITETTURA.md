@@ -765,7 +765,11 @@ pastiglie di esito per risposta.
 `src/components/guida/RaccoltaPlanimetrie.tsx` elenca planimetrie con collezionabili (`{chiave, nome, n,
 presi, spilli[]}`) e segna «Raccolto» con `impostaSpilloRaccolto` (`src/services/api/mappe.ts`); la pagina
 aggiorna `planimetrie`, `aree[].mappe` e `raccolta` in locale (`segnaRaccolto`) e bumpa la versione del
-visore. `src/components/guida/CorrezioneGuida.tsx` è la matita accanto al testo: apre i campi di quel pezzo
+visore. Una planimetria è **completa** quando, nella partita, ha tutto raccolto **o niente da raccogliere** (dal 2026-10-11):
+`raccoltaMappe` conta `mappe` e `mappeComplete` sulle planimetrie dell'elenco (radice esclusa, vuote comprese), il chip
+«N planimetrie · X complete» e il suo aggiornamento locale seguono la stessa regola, e in `PlanimetriePalazzo` la riga dice
+«niente da raccogliere · completa» con la ✓ verde (`raccoltaCompleta`): sulla stanza la ✓ vale «per aree o per raccolta», sulla
+singola versione «per raccolta». Senza partita niente è completo. `src/components/guida/CorrezioneGuida.tsx` è la matita accanto al testo: apre i campi di quel pezzo
 e salva con `aggiornaDungeon` / `aggiornaArea` / `creaPunto` / `aggiornaPunto` / `eliminaPunto`
 (`src/services/api/compendio.ts` → `PUT /api/compendio/dungeon/:chiave`, `PUT /api/compendio/aree/:chiave`,
 `POST /api/compendio/aree/:chiave/punti`, `PUT` e `DELETE /api/compendio/punti/:chiave`, schemi in
