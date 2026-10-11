@@ -14,6 +14,7 @@ const CAMPIONE: RequisitoSpillo[] = [
   { tipo: 'attivita', attivita: 'biliardo', volte: 3 }, { tipo: 'articolo', articolo: 'a/b' }, { tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'nero' }, { tipo: 'punti-negozio', negozio: 'v', punti: 50 },
   { tipo: 'persona-arcano', arcano: 'Fool' }, { tipo: 'persona-abilita', persona: 'Pixie', abilita: 'Dia' },
   { tipo: 'spillo', spillo: 'a'.repeat(32), segnato: true }, { tipo: 'spillo', spillo: 'b'.repeat(32), segnato: false },
+  { tipo: 'voce-guida', voce: 'kamoshida-04/2', segnata: true }, { tipo: 'voce-guida', voce: 'kamoshida-04-sala-da-pranzo-e-cucine/1', segnata: false },
 ];
 
 describe('costruisciCondizione / scomponiCondizione', () => {

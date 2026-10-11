@@ -26,7 +26,7 @@ export type TipoCampo =
   | 'attivita' | 'volte' | 'negozio-con-gradi' | 'rango-cliente' | 'negozio-con-punti' | 'punti'
   | 'evento' | 'contatore' | 'almeno'
   | 'arcano' | 'persona' | 'abilita'
-  | 'spillo';
+  | 'spillo' | 'voce-guida';
 
 export interface CampoCondizione { nome: string; tipo: TipoCampo; etichetta: string }
 export interface OperatoreCondizione { chiave: string; nome: string; campi: CampoCondizione[] }
@@ -37,7 +37,8 @@ export interface DefinizioneStato {
   /** Da dove la partita lo legge: si mostra nell'editor, così si sa dove andare a segnarlo. */
   origine: string;
   operatori: OperatoreCondizione[];
-  /** Solo nelle condizioni dei pin (l'editor delle mappe): lo stato di un altro pin non dice niente a un articolo o a un libro. */
+  /** Solo nelle condizioni dei pin (l'editor delle mappe): lo stato di un altro pin o di una voce della guida (2026-10-11) non dice
+   *  niente a un articolo o a un libro. */
   soloSpilli?: true;
 }
 
@@ -80,6 +81,11 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
   { chiave: 'spillo', nome: 'Pin di una mappa', gruppo: 'Mappe', origine: 'stato del pin nella partita (raccolto, aperto, parlato, incontrato, azionato…)', soloSpilli: true, operatori: [
     { chiave: 'segnato', nome: 'segnato', campi: [campo('spillo', 'spillo', 'Pin')] },
     { chiave: 'non-segnato', nome: 'non segnato', campi: [campo('spillo', 'spillo', 'Pin')] },
+  ] },
+  // — Mappe — lo stato di una voce della guida di un Palazzo (richiesta dell'utente, 2026-10-11): «segnata» (Ottenuta o Esaurita) o no
+  { chiave: 'voce-guida', nome: 'Voce della guida', gruppo: 'Mappe', origine: 'stato della voce nella guida del Palazzo (Ottenuto, Esaurito)', soloSpilli: true, operatori: [
+    { chiave: 'segnata', nome: 'segnata', campi: [campo('voce', 'voce-guida', 'Voce')] },
+    { chiave: 'non-segnata', nome: 'non segnata', campi: [campo('voce', 'voce-guida', 'Voce')] },
   ] },
 ];
 
@@ -157,6 +163,7 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'persona-arcano': return s(v.arcano) ? { tipo: 'persona-arcano', arcano: s(v.arcano) } : null;
     case 'persona-abilita': return s(v.persona) && s(v.abilita) ? { tipo: 'persona-abilita', persona: s(v.persona), abilita: s(v.abilita) } : null;
     case 'spillo': return uidValido(v.spillo) ? { tipo: 'spillo', spillo: v.spillo, segnato: scelta.operatore === 'segnato' } : null;
+    case 'voce-guida': return s(v.voce) ? { tipo: 'voce-guida', voce: s(v.voce), segnata: scelta.operatore === 'segnata' } : null;
     default: return null;
   }
 }
@@ -189,5 +196,6 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'persona-arcano': return { stato: 'persona-arcano', operatore: 'in-scorta', valori: { arcano: c.arcano } };
     case 'persona-abilita': return { stato: 'persona-abilita', operatore: 'in-scorta', valori: { persona: c.persona, abilita: c.abilita } };
     case 'spillo': return { stato: 'spillo', operatore: c.segnato ? 'segnato' : 'non-segnato', valori: { spillo: c.spillo } };
+    case 'voce-guida': return { stato: 'voce-guida', operatore: c.segnata ? 'segnata' : 'non-segnata', valori: { voce: c.voce } };
   }
 }

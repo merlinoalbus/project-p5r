@@ -31,6 +31,11 @@ vi.mock('../services/api', (vero) => moduloApi(vero, {
     { chiave: 'c'.repeat(32), nome: 'Sala giochi', tipo: 'confidente', gruppo: 'Tokyo › Akihabara', parola: 'incontrato' },
     { chiave: 'd'.repeat(32), nome: 'Stanza sicura del cortile', tipo: 'sicura', gruppo: 'Palazzo di Kamoshida › Cortile', parola: 'ottenuto' },
   ]),
+  // le voci della guida dei Palazzi, per la condizione «Voce della guida» (2026-10-11)
+  getVociCitabili: vi.fn().mockResolvedValue([
+    { chiave: 'kamoshida-04/2', nome: 'Si apre la cucina', tipo: 'storia', gruppo: 'Palazzo di Kamoshida › 4. Sala da pranzo' },
+    { chiave: 'kamoshida-06/1', nome: 'Leve delle sbarre', tipo: 'meccanismo', gruppo: 'Palazzo di Kamoshida › 6. Corridoio delle Sbarre' },
+  ]),
 }));
 
 /** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
@@ -254,6 +259,32 @@ describe('EditorMappaPage', () => {
     expect(within(riga).getByLabelText(/Condizione di presenza/)).toBeInTheDocument();
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ condizioni: [{ tipo: 'spillo', spillo: 'b'.repeat(32), segnato: false }] })));
+  });
+
+  it('la condizione «Voce della guida» (2026-10-11): si cerca la voce fra quelle dei Palazzi, «segnata» o «non segnata», è di presenza e si salva con la chiave', async () => {
+    api.getMappa.mockResolvedValue({ ...base, spilli: [nota] });
+    api.aggiornaSpillo.mockResolvedValue(nota);
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
+    fireEvent.click(await form.findByRole('button', { name: /^Condizioni/ }));
+    fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
+    fireEvent.click(form.getByRole('combobox', { name: 'Stato' }));
+    fireEvent.click(form.getByRole('option', { name: 'Voce della guida' }).querySelector('button')!);
+    // la prima voce dell'elenco, «segnata», col suo posto
+    expect(form.getByRole('group', { name: 'Condizione: Voce «Si apre la cucina» (Palazzo di Kamoshida › 4. Sala da pranzo): segnata' })).toBeInTheDocument();
+    // si cerca fra le voci dei Palazzi, col tipo della voce accanto
+    fireEvent.click(form.getByRole('combobox', { name: 'Voce' }));
+    fireEvent.change(form.getByLabelText('Cerca Voce'), { target: { value: 'sbarre' } });
+    expect(form.getByRole('option', { name: /Leve delle sbarre.*Meccanismo/ })).toBeInTheDocument();
+    fireEvent.click(form.getByRole('option', { name: /Leve delle sbarre/ }).querySelector('button')!);
+    fireEvent.click(form.getByRole('combobox', { name: 'Operatore' }));
+    fireEvent.click(form.getByRole('option', { name: 'non segnata' }).querySelector('button')!);
+    const riga = form.getByRole('group', { name: 'Condizione: Voce «Leve delle sbarre» (Palazzo di Kamoshida › 6. Corridoio delle Sbarre): non segnata' });
+    // fa sparire il pin quando non vale
+    expect(within(riga).getByLabelText(/Condizione di presenza/)).toBeInTheDocument();
+    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ condizioni: [{ tipo: 'voce-guida', voce: 'kamoshida-06/1', segnata: false }] })));
   });
 
   it('fra i pin citabili non c’è quello che si sta modificando: un pin non dipende da se stesso', async () => {

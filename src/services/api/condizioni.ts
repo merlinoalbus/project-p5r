@@ -3,13 +3,16 @@
 // ============================================================
 
 import { apiGet, apiPut } from './_helpers';
-import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto } from '../../types';
+import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, VoceCitabileDto } from '../../types';
 
 /** Gli elenchi chiusi da cui l'editor delle condizioni prende i valori. */
 export const getElenchiRegole = (): Promise<ElenchiRegoleDto> => apiGet('/condizioni/elenchi');
 
 /** I pin con uno stato, per la condizione «Pin di una mappa». */
 export const getPinConStato = (): Promise<PinConStatoDto[]> => apiGet('/condizioni/spilli');
+
+/** Le voci della guida dei Palazzi, per la condizione «Voce della guida» (2026-10-11). */
+export const getVociCitabili = (): Promise<VoceCitabileDto[]> => apiGet('/condizioni/voci');
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
 export const getProgressiPartita = (id: number): Promise<ProgressiPartitaDto> => apiGet(`/condizioni/partite/${id}/progressi`);

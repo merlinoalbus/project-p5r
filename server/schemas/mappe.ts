@@ -15,7 +15,7 @@ const entita = z.object({ tipo: z.string().min(1).max(40), chiave: z.string().mi
 // Stesso schema ricorsivo per tutte le condizioni dell’app; nessun testo interpretato.
 export const condizioneSpillo = z.custom<RequisitoSpillo>(v => normalizzaRequisitoSpillo(v) !== null, 'Condizione non valida')
   // la descrizione è solo documentazione (OpenAPI): la forma la controlla `normalizzaRequisitoSpillo`
-  .meta({ description: 'Una condizione `RequisitoSpillo` (shared/condizioniSpillo.ts), validata e normalizzata da `normalizzaRequisitoSpillo`. Il campo `tipo` sceglie la forma: gruppo (`modo` tutte o almeno-una, `condizioni` annidate), non, data, intervallo, fascia, piove, meteo, giorno-settimana, stagione, quartiere, arco, palazzo, dote, confidente, squadra, richiesta, lettura, articolo, attivita, rango-cliente, punti-negozio, evento, contatore, persona-arcano, persona-abilita, spillo.' })
+  .meta({ description: 'Una condizione `RequisitoSpillo` (shared/condizioniSpillo.ts), validata e normalizzata da `normalizzaRequisitoSpillo`. Il campo `tipo` sceglie la forma: gruppo (`modo` tutte o almeno-una, `condizioni` annidate), non, data, intervallo, fascia, piove, meteo, giorno-settimana, stagione, quartiere, arco, palazzo, dote, confidente, squadra, richiesta, lettura, articolo, attivita, rango-cliente, punti-negozio, evento, contatore, persona-arcano, persona-abilita, spillo, voce-guida (queste ultime due solo nei pin).' })
   .transform(v => normalizzaRequisitoSpillo(v)!);
 
 const condizioni = z.array(condizioneSpillo).max(20).nullable().optional();

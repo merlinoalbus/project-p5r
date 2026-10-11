@@ -66,8 +66,9 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   if (grigiProprie.length === 0 && proprie.every((r) => r.stato !== 'rosso')) return null;
   const nonLeggibili = grigiProprie.some((r) => r.tipo === 'manuale');
   // il grigio di uno stato di un altro pin (2026-10-03) è una condizione rotta — il pin citato non c'è più o non ha più uno
-  // stato —: nella partita non c'è niente da segnare, la si corregge nell'editor della mappa
-  const daCorreggere = grigiProprie.some((r) => r.tipo === 'spillo');
+  // stato —, come quello di una voce della guida che non c'è più o è diventata descrittiva (2026-10-11): nella partita non c'è
+  // niente da segnare, la si corregge nell'editor della mappa
+  const daCorreggere = grigiProprie.some((r) => r.tipo === 'spillo' || r.tipo === 'voce-guida');
   if (nonLeggibili) return (
     <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Da verificare: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da verificare

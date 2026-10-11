@@ -19,7 +19,7 @@ import { z } from 'zod';
 import { getDb, prepared, nowIso } from '../db/dbService.js';
 import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
-import { pinConStato } from '../services/condizioni/nomiCondizioni.js';
+import { pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { impostaEventoStoria, ranghiPerEvento } from '../services/semaforiService.js';
 import { leggiProgrammaPunti } from '../services/negoziService.js';
@@ -29,7 +29,7 @@ import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaServi
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { httpErrors } from '../utils/httpError.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento } from '../../shared/condizioniSpillo.js';
-import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto } from '../../shared/types.js';
+import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, VoceCitabileDto } from '../../shared/types.js';
 
 const router = Router();
 const idPartita = idParam;
@@ -71,6 +71,12 @@ router.get('/elenchi', (_req, res) => {
 router.get('/spilli', (_req, res) => {
   const spilli: PinConStatoDto[] = pinConStato().map((p) => ({ chiave: p.uid, nome: p.nome, tipo: p.tipo, gruppo: p.mappa, parola: p.parola }));
   res.json(spilli);
+});
+
+/** Le voci della guida dei Palazzi, per la condizione «Voce della guida» (2026-10-11): come i pin, solo l'editor delle mappe le chiede. */
+router.get('/voci', (_req, res) => {
+  const voci: VoceCitabileDto[] = vociCitabili().map((v) => ({ chiave: v.chiave, nome: v.nome, tipo: v.tipo, gruppo: v.posto }));
+  res.json(voci);
 });
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano, completi anche dove non c'è ancora una riga. */

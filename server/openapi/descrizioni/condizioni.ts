@@ -16,6 +16,11 @@ export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
     descrizione: 'Solo i pin che hanno uno stato da segnare (raccolto, aperto, parlato, incontrato, azionato…, oppure «ottenuto» per un pin collegato a una voce della guida non descrittiva). È un elenco a parte perché sono centinaia e serve solo all\'editor delle mappe. `chiave` è l\'uid del pin, `gruppo` il nome della mappa preceduto da quello del genitore.',
     risposta: 'Elenco di `PinConStatoDto`',
   },
+  'GET /api/condizioni/voci': {
+    sommario: 'Voci della guida dei Palazzi, per la condizione «Voce della guida»',
+    descrizione: 'Tutte le voci che si segnano (non le descrittive «Altro»), passi degli Enigmi compresi, in ordine di guida. Come i pin serve solo all\'editor delle mappe: la condizione vale solo nei pin. `gruppo` è il posto, «Palazzo › N. Area».',
+    risposta: 'Elenco di `VoceCitabileDto`',
+  },
   'GET /api/condizioni/partite/:partita/progressi': {
     sommario: 'Progressi di una partita usati dalle condizioni: calcolati e da segnare a mano',
     descrizione: 'Completi anche dove non c\'è ancora una riga (valori a zero o falsi). Calcolati dalla partita: gli eventi «entra in squadra» (tre stati: in squadra, dichiarato fuori, non ancora segnato), il grado cliente dei negozi che ce l\'hanno (dalla spesa segnata, con la prossima soglia) e i contatori. Da segnare: gli eventi manuali (con i ranghi dei Confidenti che li richiedono in `serveA`), le volte svolte delle attività contate per volte, i punti dei negozi con programma manuale.',

@@ -33,7 +33,7 @@ import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
-import { ammetteCondizioni, categoriaSpillo, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import { ammetteCondizioni, categoriaSpillo, TIPO_PUNTO_DESCRITTIVO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
@@ -1007,8 +1007,8 @@ export function dimensioniImmagine(b: Buffer): { larghezza: number; altezza: num
 
 export interface DatiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
 
-/** L'etichetta con cui si scarta lo stato di un pin citato fuori dalle condizioni dei pin. */
-const SOLO_PIN = 'Stato di un pin (solo nelle condizioni dei pin)';
+/** L'etichetta con cui si scarta lo stato di un pin o di una voce della guida citato fuori dalle condizioni dei pin. */
+const SOLO_PIN = 'Stato di un pin o di una voce della guida (solo nelle condizioni dei pin)';
 /**
  * Le chiavi citate dalle condizioni devono esistere ed essere calcolabili dall'app: separa le condizioni valide dalle scartate,
  * scendendo nei gruppi e nelle negazioni (un gruppo con un figlio scartato si scarta tutto). Più di 20 condizioni o una
@@ -1020,7 +1020,8 @@ const SOLO_PIN = 'Stato di un pin (solo nelle condizioni dei pin)';
  *
  * Lo stato di un altro pin (`spillo`, 2026-10-03) vale solo nelle condizioni dei pin (`pin` presente) e deve citare un pin con
  * uno stato (`statoCitabile`: il suo tipo, o la sua voce della guida). In un'importazione un pin dello stesso pacchetto si
- * accetta all'inserimento e si verifica a pacchetto inserito, con le voci già scritte (`importaMappe`).
+ * accetta all'inserimento e si verifica a pacchetto inserito, con le voci già scritte (`importaMappe`). Lo stato di una voce della
+ * guida (`voce-guida`, 2026-10-11) vale anch'esso solo nelle condizioni dei pin, e deve citare una voce che esiste e si segna.
  */
 function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | undefined, pin?: { delPacchetto: ReadonlySet<string> }): { valide: RequisitoSpillo[]; scartate: Array<{ cosa: string; chiave: string }> } {
   const valide: RequisitoSpillo[] = [];
@@ -1063,6 +1064,12 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
         ok = pin.delPacchetto.has(c.spillo) || pinCitato(c.spillo)?.parola != null;
       }
     }
+    else if (c.tipo === 'voce-guida') {
+      // lo stato di una voce della guida (2026-10-11): solo nei pin, e solo una voce che esiste e si segna (non descrittiva)
+      chiave = c.voce;
+      if (!pin) { cosa = SOLO_PIN; ok = false; }
+      else { cosa = 'Voce della guida da segnare'; ok = !!prepared('SELECT 1 FROM punto_interesse WHERE chiave = ? AND tipo <> ?').get(c.voce, TIPO_PUNTO_DESCRITTIVO); }
+    }
     if (ok) valide.push(c); else scartate.push({ cosa, chiave });
   }
   return { valide, scartate };
@@ -1074,7 +1081,8 @@ export function verificaCondizioni(condizioni: RequisitoSpillo[] | null | undefi
   const { scartate } = condizioniConChiaviEsistenti(condizioni, perSpillo ? { delPacchetto: new Set() } : undefined);
   if (scartate.length > 0) {
     if (scartate[0].cosa === 'Condizione' || scartate[0].cosa === 'Condizioni') throw httpErrors.badRequest('condizione-non-valida', 'Una condizione non è valida (troppo annidata o malformata): ricontrollala nell’editor.');
-    if (scartate[0].cosa === SOLO_PIN) throw httpErrors.badRequest('condizione-solo-pin', 'Lo stato di un pin si usa solo nelle condizioni dei pin delle mappe.');
+    if (scartate[0].cosa === SOLO_PIN) throw httpErrors.badRequest('condizione-solo-pin', 'Lo stato di un pin o di una voce della guida si usa solo nelle condizioni dei pin delle mappe.');
+    if (scartate[0].cosa === 'Voce della guida da segnare') throw httpErrors.notFound('condizione-non-trovata', 'La voce della guida della condizione non esiste o è descrittiva, senza uno stato da segnare.');
     if (scartate[0].cosa === 'Pin con uno stato') throw httpErrors.notFound('condizione-non-trovata', 'Il pin della condizione non esiste o non ha uno stato da segnare (raccolto, aperto, parlato, incontrato, azionato…).');
     throw httpErrors.notFound('condizione-non-trovata', `${scartate[0].cosa} '${scartate[0].chiave}' non trovato nella Guida.`);
   }

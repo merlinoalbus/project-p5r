@@ -62,4 +62,11 @@ describe('ChipDisponibilita', () => {
     expect(screen.queryByText('Da segnare')).toBeNull();
     expect(screen.queryByRole('link')).toBeNull();
   });
+
+  it('lo stesso per una voce della guida che non c’è più (2026-10-11): da correggere nell’editor', () => {
+    const d = { stato: 'ignoto', requisiti: [req('voce-guida', 'La voce della guida di questa condizione non c’è più: correggila nell’editor della mappa')] } as DisponibilitaDto;
+    render(<MemoryRouter><ChipDisponibilita disponibilita={d} /></MemoryRouter>);
+    expect(screen.getByLabelText(/^Condizione da correggere nell’editor della mappa: /)).toHaveTextContent('Da correggere');
+    expect(screen.queryByText('Da segnare')).toBeNull();
+  });
 });

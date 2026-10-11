@@ -16,8 +16,9 @@ import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
 
 /** Le condizioni del catalogo (articoli, negozi, letture, attività, e i loro effetti): quelle dei pin senza lo stato di un altro
- *  pin, che vale solo nelle condizioni dei pin delle mappe (2026-10-03), a qualunque profondità di TUTTE / ALMENO UNA / NON. */
-const condizioneSpillo = condizioneDiUnPin.refine((c) => !foglieCondizione(c).some((f) => f.tipo === 'spillo'), 'Lo stato di un pin si usa solo nelle condizioni dei pin delle mappe.');
+ *  pin (2026-10-03) né quello di una voce della guida (2026-10-11), che valgono solo nelle condizioni dei pin delle mappe, a
+ *  qualunque profondità di TUTTE / ALMENO UNA / NON. */
+const condizioneSpillo = condizioneDiUnPin.refine((c) => !foglieCondizione(c).some((f) => f.tipo === 'spillo' || f.tipo === 'voce-guida'), 'Lo stato di un pin o di una voce della guida si usa solo nelle condizioni dei pin delle mappe.');
 
 /** Gli orari di un negozio come valori (shared/orariNegozio). */
 export const orariNegozio = z.object({

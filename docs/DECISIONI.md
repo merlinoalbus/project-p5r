@@ -1473,3 +1473,30 @@ Che cosa ne segue:
   planimetria di una stanza con più versioni vale «per raccolta», mentre le sue aree completate hanno già la loro ✓ accanto al nome.
 - **Il punto 4 della proposta non serviva.** L'elenco delle aree con «niente da raccogliere sulla sua planimetria» oggi si usa
   solo per i Memento, in forma compatta, quindi non è cambiato niente lì.
+
+## 2026-10-11 — Condizione di visibilità dei pin «Voce della guida»
+
+Richiesta dell'utente: «i pin tra le condizioni devono avere anche la possibilità di scegliere sulla base dello stato dei passi
+della guida di un'area la condizione di visibilità». Prima nessuna condizione leggeva direttamente lo stato di una voce della
+guida: lo faceva solo un pin collegato alla voce, attraverso «Pin di una mappa».
+
+Risposte dell'utente, parola per parola:
+- «Con quali stati si sceglie la condizione «Voce della guida»?» → «Segnata / non segnata (Recommended)» (««segnata» vale se la
+  voce è Ottenuta o Esaurita, «non segnata» se è ancora da fare. Come «Pin di una mappa».»);
+- «Dove si può usare la condizione «Voce della guida»?» → «Solo nei pin delle mappe (Recommended)» («Come «Pin di una mappa»:
+  nell'editor delle mappe. Non compare negli effetti, nei negozi, negli articoli né nelle letture.»).
+
+Che cosa ne segue:
+- **La condizione.** `{ tipo: 'voce-guida', voce, segnata }`. Nell'editor delle mappe è lo stato «Voce della guida», con gli
+  operatori «segnata» e «non segnata».
+- **Quali voci.** Si sceglie con la ricerca fra le voci dei Palazzi, raggruppate per «Palazzo › N. Area», col tipo accanto
+  (`GET /api/condizioni/voci`). Sono escluse le voci descrittive («Altro»), che non hanno stato; i passi degli Enigmi sono compresi.
+- **È di presenza.** Non soddisfatta, nasconde il pin; si combina con TUTTE / ALMENO UNA / NON.
+- **Dove vale.** Solo nei pin delle mappe. La rifiutano lo schema delle rotte del catalogo e il controllo delle condizioni, e una
+  scheda della guida senza mappa.
+- **Validazione.** Al salvataggio una voce che non c'è o è descrittiva si rifiuta (404 `condizione-non-trovata`). Nel pacchetto
+  delle mappe si scarta e si conta.
+- **Voce eliminata o diventata descrittiva.** La condizione resta grigia, con il cartellino «Da correggere», e non nasconde il pin
+  per sempre.
+- **Aggiornamento.** Dopo ogni segno nella guida o sulla mappa la mappa si rilegge, e i pin che ne dipendono compaiono o
+  spariscono subito.

@@ -134,12 +134,14 @@ describe('CondizioniEditor', () => {
     expect(riga().queryByRole('option', { name: /Tanaka/ })).toBeNull();
   });
 
-  it('fuori dall’editor delle mappe lo stato «Pin di una mappa» non c’è (vale solo nelle condizioni dei pin)', async () => {
+  it('fuori dall’editor delle mappe gli stati «Pin di una mappa» e «Voce della guida» non ci sono (valgono solo nelle condizioni dei pin)', async () => {
     render(<Prova iniziali={[{ tipo: 'data', dal: '04-18' }]} />);
     const riga = within(await screen.findByRole('group', { name: 'Condizione: dal 18 aprile' }));
     fireEvent.click(riga.getByRole('combobox', { name: 'Stato' }));
     expect(riga.getByRole('option', { name: 'Palazzo' })).toBeInTheDocument();
     expect(riga.queryByRole('option', { name: 'Pin di una mappa' })).toBeNull();
+    // né «Voce della guida» (2026-10-11): anche lei solo nei pin
+    expect(riga.queryByRole('option', { name: 'Voce della guida' })).toBeNull();
   });
 });
 

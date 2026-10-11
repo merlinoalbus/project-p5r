@@ -115,7 +115,11 @@ export type RequisitoSpillo =
   /** Lo stato di un altro pin nella partita, per uid: qualunque pin con uno stato (`statoCitabile`: «raccolto», «parlato»,
    *  «incontrato», «azionato»…, o «ottenuto» dalla sua voce della guida). «La porta si vede finché la leva non è azionata»
    *  (richiesta dell'utente, 2026-09-30 e 2026-10-03). Solo nelle condizioni dei pin. */
-  | { tipo: 'spillo'; spillo: string; segnato: boolean };
+  | { tipo: 'spillo'; spillo: string; segnato: boolean }
+  /** Lo stato di una voce della guida di un Palazzo nella partita, per chiave: «segnata» (Ottenuta o Esaurita) o no (richiesta
+   *  dell'utente, 2026-10-11: «i pin tra le condizioni devono avere anche la possibilità di scegliere sulla base dello stato dei
+   *  passi della guida di un'area la condizione di visibilità»). Solo nelle condizioni dei pin; le voci descrittive non si citano. */
+  | { tipo: 'voce-guida'; voce: string; segnata: boolean };
 
 const PROFONDITA_MASSIMA = 5;
 const CONDIZIONI_PER_GRUPPO = 20;
@@ -136,10 +140,11 @@ const CONDIZIONI_PER_GRUPPO = 20;
  *
  * Lo **stato di un altro pin** è di presenza per scelta dell'utente (2026-09-30): «la Porta Bloccata si visualizza solo se
  * lo spillo Meccanismo risulta non Raccolto», «un Meccanismo risulta visibile solo se sono stati raccolti gli oggetti
- * chiave». Chi la scrive vuole proprio che il pin compaia e sparisca con l'altro.
+ * chiave». Chi la scrive vuole proprio che il pin compaia e sparisca con l'altro. Lo stesso vale per lo **stato di una voce della
+ * guida** (2026-10-11), che ne è il fratello: chi la scrive vuole il pin solo prima, o solo dopo, quel passo della guida.
  */
 export const CONDIZIONI_DI_PRESENZA = [
-  'data', 'intervallo', 'fascia', 'piove', 'meteo', 'giorno-settimana', 'stagione', 'quartiere', 'arco', 'spillo',
+  'data', 'intervallo', 'fascia', 'piove', 'meteo', 'giorno-settimana', 'stagione', 'quartiere', 'arco', 'spillo', 'voce-guida',
 ] as const;
 
 /** Vero se questa condizione, non soddisfatta, deve far sparire il pin invece che spiegarsi. */
@@ -237,6 +242,8 @@ export interface NomiCondizioni {
   /** I pin con uno stato, per uid: nome, tipo e mappa; `parola` è quella dello stato con cui si cita (`statoCitabile`: «ottenuto»
    *  per un pin che la prende dalla sua voce della guida), e se manca vale quella del tipo. */
   spilli?: Record<string, { nome: string; tipo: string; mappa: string; parola?: string }>;
+  /** Le voci della guida che si citano (non descrittive), per chiave: nome e posto («Palazzo di Kamoshida › 2. Sala Centrale»). */
+  voci?: Record<string, { nome: string; posto: string }>;
 }
 
 /** Il nome di un Palazzo per le frasi delle condizioni: dai nomi passati, poi dall'elenco `PALAZZI_CONDIZIONE`, infine la chiave stessa. */
@@ -277,6 +284,11 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
       const p = nomi.spilli?.[r.spillo];
       const parola = (p && (p.parola ?? statoDelTipo(p.tipo))) ?? 'segnato';
       return `${p ? `${p.nome} (${p.mappa})` : 'Pin non più presente'}: ${r.segnato ? parola : `non ${parola}`}`;
+    }
+    case 'voce-guida': {
+      // «Leva del ponte (Palazzo di Kamoshida › 4. Sala da pranzo): segnata»; una voce che non c'è più lo dice, invece della chiave
+      const v = nomi.voci?.[r.voce];
+      return `${v ? `Voce «${v.nome}» (${v.posto})` : 'Voce della guida non più presente'}: ${r.segnata ? 'segnata' : 'non segnata'}`;
     }
   }
 }
@@ -340,6 +352,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'persona-arcano': { const arcano = testoPulito(o.arcano, 80); return arcano ? { tipo: 'persona-arcano', arcano } : null; }
     case 'persona-abilita': { const persona = testoPulito(o.persona, 120), abilita = testoPulito(o.abilita, 120); return persona && abilita ? { tipo: 'persona-abilita', persona, abilita } : null; }
     case 'spillo': return uidValido(o.spillo) && typeof o.segnato === 'boolean' ? { tipo: 'spillo', spillo: o.spillo, segnato: o.segnato } : null;
+    case 'voce-guida': { const voce = chiavePulita(o.voce, 200); return voce && typeof o.segnata === 'boolean' ? { tipo: 'voce-guida', voce, segnata: o.segnata } : null; }
     default: return null;
   }
 }

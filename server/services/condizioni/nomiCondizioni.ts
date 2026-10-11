@@ -29,7 +29,8 @@ export function nomiCondizioniMemo(): NomiCondizioni {
 }
 
 /**
- * I nomi per descrivere le condizioni; `conPin` (di norma sì) legge anche i pin con stato, che servono solo alle mappe.
+ * I nomi per descrivere le condizioni; `conPin` (di norma sì) legge anche i pin con stato e le voci della guida, che servono solo
+ * alle mappe.
  *
  * Ogni elenco si legge **la prima volta che lo si chiede**, poi resta per tutta la risposta: una mappa le cui condizioni citano
  * solo Confidenti non legge articoli, letture né tutti i pin con stato. Prima si leggevano tutti a ogni risposta, e i pin con stato
@@ -47,10 +48,12 @@ export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
     attivita: mappa('SELECT chiave, nome FROM attivita'), negozi: mappa('SELECT chiave, nome FROM negozio'),
     squadra: () => Object.fromEntries(giocabili().map((p) => [p.chiave, p.nome])),
     spilli: () => Object.fromEntries(pinConStato().map((p) => [p.uid, { nome: p.nome, tipo: p.tipo, mappa: p.mappa, parola: p.parola }])),
+    voci: () => Object.fromEntries(vociCitabili().map((v) => [v.chiave, { nome: v.nome, posto: v.posto }])),
   };
   const nomi: NomiCondizioni = {};
   for (const chiave of Object.keys(elenchi) as Array<keyof NomiCondizioni>) {
-    if (chiave === 'spilli' && opz.conPin === false) continue;
+    // le voci della guida, come i pin, si citano solo nelle condizioni dei pin delle mappe (2026-10-11)
+    if ((chiave === 'spilli' || chiave === 'voci') && opz.conPin === false) continue;
     let valore: unknown;
     let letto = false;
     Object.defineProperty(nomi, chiave, {
@@ -79,4 +82,18 @@ export function pinCitato(uid: string): { nome: string; tipo: string; parola: st
   const p = prepared(`SELECT s.nome, s.tipo, ${TIPO_VOCE} AS tipo_voce FROM spillo s WHERE s.uid = ?`)
     .get(uid) as { nome: string; tipo: string; tipo_voce: string | null } | undefined;
   return p ? { nome: p.nome, tipo: p.tipo, parola: statoCitabile(p.tipo, p.tipo_voce) } : null;
+}
+
+/**
+ * Le voci della guida dei Palazzi che una condizione «Voce della guida» può citare (2026-10-11): tutte tranne le descrittive
+ * («Altro»), che uno stato non lo hanno; i passi degli Enigmi compresi. In ordine di guida (Palazzo, area, Enigma coi suoi passi,
+ * voce), col posto da mostrare («Palazzo di Kamoshida › 2. Sala Centrale»).
+ */
+export function vociCitabili(): Array<{ chiave: string; nome: string; tipo: string; posto: string }> {
+  return prepared(`SELECT p.chiave, p.nome, p.tipo, d.nome || ' › ' || (a.ordine + 1) || '. ' || a.nome AS posto
+    FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave JOIN dungeon d ON d.chiave = a.dungeon_chiave
+    LEFT JOIN punto_interesse e ON e.chiave = p.contenitore_chiave
+    WHERE p.tipo <> ?
+    ORDER BY d.ordine, a.ordine, COALESCE(e.ordine, p.ordine), p.contenitore_chiave IS NOT NULL, p.ordine, p.chiave`)
+    .all(TIPO_PUNTO_DESCRITTIVO) as Array<{ chiave: string; nome: string; tipo: string; posto: string }>;
 }

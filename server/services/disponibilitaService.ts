@@ -23,6 +23,7 @@ import { finestreDungeon, type FinestraDungeon } from './datiGuida.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
+import { puntoDescrittivo } from '../../shared/spilli.js';
 import { uidFattiPerVoci, vociGestite } from './mappe/voceDelPin.js';
 import { nomiCondizioniMemo, pinCitato } from './condizioni/nomiCondizioni.js';
 import type { DisponibilitaDto, RequisitoRango, SemaforoRequisitoDto } from '../../shared/types.js';
@@ -66,13 +67,30 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
    *  più volte (requisiti, presenza, stato di altri pin), e prima ogni valutazione rileggeva il pin (rilievo P6 della verifica). Lo
    *  stato vive una richiesta sola, quindi i pin letti sono sempre quelli di adesso. */
   pinCitati?: Map<string, ReturnType<typeof pinCitato>>;
+  /** Le voci della guida segnate nella partita (Ottenute o Esaurite; non le descrittive): le condizioni «Voce della guida»
+   *  (2026-10-11). Facoltativo per chi costruisce uno stato a mano (test): senza, nessuna voce è segnata. */
+  vociSegnate?: Set<string>;
+  /** Le voci citate dalle condizioni già lette in questa richiesta (chiave → voce, null se non c'è), come `pinCitati`. */
+  vociCitate?: Map<string, VoceCitata | null>;
 }
+
+/** Una voce della guida citata da una condizione: il nome e il tipo (una descrittiva non ha stato). */
+interface VoceCitata { nome: string; tipo: string }
 
 /** `pinCitato` con la memoria dello stato della richiesta, se lo stato ce l'ha. */
 function pinCitatoNelloStato(uid: string, st: StatoDisponibilita): ReturnType<typeof pinCitato> {
   if (!st.pinCitati) return pinCitato(uid);
   if (!st.pinCitati.has(uid)) st.pinCitati.set(uid, pinCitato(uid));
   return st.pinCitati.get(uid)!;
+}
+
+/** La voce della guida citata da una condizione, con la memoria dello stato della richiesta se lo stato ce l'ha; null se non c'è. */
+function voceCitataNelloStato(chiave: string, st: StatoDisponibilita): VoceCitata | null {
+  /** La voce dal database: nome e tipo, o null. */
+  const leggi = () => (prepared('SELECT nome, tipo FROM punto_interesse WHERE chiave = ?').get(chiave) as VoceCitata | undefined) ?? null;
+  if (!st.vociCitate) return leggi();
+  if (!st.vociCitate.has(chiave)) st.vociCitate.set(chiave, leggi());
+  return st.vociCitate.get(chiave)!;
 }
 
 /** Ogni quartiere con il nome e la data di sblocco (`sblocco_data`, null se non ne ha una). */
@@ -123,6 +141,8 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     arcoCorrente: arcoAllaData(st.dataGioco, finestreDungeon()),
     spilliSegnati: spilliSegnati(partitaId),
     pinCitati: new Map(),
+    vociSegnate: vociGestite(partitaId),
+    vociCitate: new Map(),
   };
 }
 
@@ -251,6 +271,15 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       if (parola === null) return esito('spillo', 'grigio', `${p.nome} non ha più uno stato da segnare: correggi la condizione nell’editor della mappa`);
       const segnato = st.spilliSegnati?.has(r.spillo) ?? false;
       return esito('spillo', segnato === r.segnato ? 'verde' : 'rosso', `${p.nome}: ${segnato ? parola : `non ${parola}`}`);
+    }
+    case 'voce-guida': {
+      const v = voceCitataNelloStato(r.voce, st);
+      // una voce eliminata dopo aver scritto la condizione: non si sa, e lo si dice dove correggerlo
+      if (!v) return esito('voce-guida', 'grigio', 'La voce della guida di questa condizione non c’è più: correggila nell’editor della mappa');
+      // diventata descrittiva («Altro»): non ha più uno stato, e la condizione non deve nascondere per sempre
+      if (puntoDescrittivo(v.tipo)) return esito('voce-guida', 'grigio', `«${v.nome}» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa`);
+      const segnata = st.vociSegnate?.has(r.voce) ?? false;
+      return esito('voce-guida', segnata === r.segnata ? 'verde' : 'rosso', `«${v.nome}»: ${segnata ? 'segnata' : 'non segnata'}`);
     }
     case 'quartiere': {
       const q = st.sbloccoQuartieri.get(r.quartiere);

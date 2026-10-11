@@ -141,3 +141,19 @@ describe('NON su un gruppo misto (difetto corretto il 2026-10-03)', () => {
     expect(proiezioneDiPresenza({ tipo: 'non', condizione: { tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'dote', dote: 'coraggio', rango: 5 }, leva] } } as never)).toBeNull();
   });
 });
+
+describe('la condizione «Voce della guida» (2026-10-11)', () => {
+  it('si normalizza solo con una chiave di voce valida e un «segnata» booleano', () => {
+    expect(normalizzaRequisitoSpillo({ tipo: 'voce-guida', voce: 'kamoshida-04/2', segnata: true })).toEqual({ tipo: 'voce-guida', voce: 'kamoshida-04/2', segnata: true });
+    expect(normalizzaRequisitoSpillo({ tipo: 'voce-guida', voce: 'Con Spazi', segnata: true })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'voce-guida', voce: 'kamoshida-04/2', segnata: 'sì' })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'voce-guida', voce: `${'a'.repeat(201)}`, segnata: true })).toBeNull();
+  });
+  it('si legge col nome della voce e il suo posto; una voce che non c’è più lo dice; è di presenza', () => {
+    const nomi = { voci: { 'k/1': { nome: 'Si apre la cucina', posto: 'Palazzo di Kamoshida › 4. Sala da pranzo' } } };
+    expect(descriviRequisitoSpillo({ tipo: 'voce-guida', voce: 'k/1', segnata: true }, nomi)).toBe('Voce «Si apre la cucina» (Palazzo di Kamoshida › 4. Sala da pranzo): segnata');
+    expect(descriviRequisitoSpillo({ tipo: 'voce-guida', voce: 'k/1', segnata: false }, nomi)).toBe('Voce «Si apre la cucina» (Palazzo di Kamoshida › 4. Sala da pranzo): non segnata');
+    expect(descriviRequisitoSpillo({ tipo: 'voce-guida', voce: 'k/9', segnata: true }, nomi)).toBe('Voce della guida non più presente: segnata');
+    expect(nascondeIlPin('voce-guida')).toBe(true);
+  });
+});

@@ -21,9 +21,10 @@ import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDI
 import { STATI_PARTITA, costruisciCondizione, definizioneStato, scomponiCondizione, valorePredefinito, type CampoCondizione, type SceltaCondizione, type TipoCampo, type ValoriCondizione } from '../../../shared/statiPartita';
 import { useCarica } from '../../hooks/useCarica';
 import { useIdStabili } from '../../hooks/useIdStabili';
-import { getConfidenti, getDungeons, getElenchiRegole, getPinConStato, getQuartieri, getRichieste } from '../../services/api';
-import type { ElenchiRegoleDto as ElenchiRegole, PinConStatoDto as PinConStato } from '../../types';
+import { getConfidenti, getDungeons, getElenchiRegole, getPinConStato, getQuartieri, getRichieste, getVociCitabili } from '../../services/api';
+import type { ElenchiRegoleDto as ElenchiRegole, PinConStatoDto as PinConStato, VoceCitabileDto as VoceCitabile } from '../../types';
 import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
+import { NOME_TIPO } from '../../utils/dungeon';
 import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
 import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Selettore';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -36,8 +37,9 @@ const MODO_NOME = { tutte: 'TUTTE', 'almeno-una': 'ALMENO UNA' } as const;
 const CLASSE_MODO = { tutte: 'condizioni-blocco--tutte', 'almeno-una': 'condizioni-blocco--almeno-una' } as const;
 const MODO_SPIEGA = { tutte: 'devono valere tutte', 'almeno-una': 'basta che ne valga una' } as const;
 
-/** `spilli`: i pin con uno stato, solo nell'editor delle mappe (`perSpillo`): altrove la condizione «Pin di una mappa» non c'è. */
-interface Elenchi { base: ElenchiCondizioni; extra: ElenchiRegole; spilli: PinConStato[] }
+/** `spilli`: i pin con uno stato, e `voci`: le voci della guida (2026-10-11), solo nell'editor delle mappe (`perSpillo`): altrove le
+ *  condizioni «Pin di una mappa» e «Voce della guida» non ci sono. */
+interface Elenchi { base: ElenchiCondizioni; extra: ElenchiRegole; spilli: PinConStato[]; voci: VoceCitabile[] }
 
 /** Le voci offerte per ogni tipo di campo: dalla Guida quando dipendono dai dati, fisse altrimenti. */
 function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
@@ -65,6 +67,8 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'abilita': return e.extra.abilita;
     // raggruppati per mappa, col tipo e la parola del suo stato: «Leva del ponte — Meccanismo · azionato»
     case 'spillo': return e.spilli.map((p) => ({ chiave: p.chiave, nome: p.nome, gruppo: p.gruppo, dettaglio: `${DEFINIZIONI_SPILLO[p.tipo as TipoSpillo]?.nome ?? p.tipo} · ${p.parola}` }));
+    // raggruppate per Palazzo e area, col tipo della voce: «Leva del ponte — Meccanismo»
+    case 'voce-guida': return e.voci.map((v) => ({ chiave: v.chiave, nome: v.nome, gruppo: v.gruppo, dettaglio: NOME_TIPO[v.tipo as keyof typeof NOME_TIPO] ?? v.tipo }));
     default: return [];
   }
 }
@@ -235,18 +239,19 @@ interface Props {
 
 /**
  * L'editor completo delle condizioni di un elemento. Carica gli elenchi che servono alle scelte (quelli delle regole,
- * più confidenti, quartieri, richieste e dungeon se il genitore non li passa in `elenchi`, più i pin con stato solo
+ * più confidenti, quartieri, richieste e dungeon se il genitore non li passa in `elenchi`, più i pin con stato e le voci della guida solo
  * con `perSpillo`), costruisce la mappa chiave → nome per descrivere le condizioni ed esclude dai pin offerti quello in
  * modifica (`pinCorrente`). Si apre da solo se ci sono già condizioni; con elenchi in errore offre «Riprova».
  */
 export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, perSpillo, pinCorrente }: Props) {
   const dati = useCarica(async () => {
-    const [extra, base, spilli] = await Promise.all([
+    const [extra, base, spilli, voci] = await Promise.all([
       getElenchiRegole(),
       elenchi ? Promise.resolve(elenchi) : Promise.all([getConfidenti(), getQuartieri(), getRichieste(), getDungeons()]).then(([confidenti, quartieri, richieste, dungeon]) => ({ confidenti, quartieri, richieste: richieste.richieste, dungeon })),
       perSpillo ? getPinConStato() : Promise.resolve([]),
+      perSpillo ? getVociCitabili() : Promise.resolve([]),
     ]);
-    return { extra, base, spilli } as Elenchi;
+    return { extra, base, spilli, voci } as Elenchi;
   }, [perSpillo]);
   const [aperto, setAperto] = useState(condizioni.length > 0);
   const nomi = useMemo<NomiCondizioni>(() => {
@@ -255,7 +260,8 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
     /** Da un elenco di voci a un dizionario chiave → nome. */
     const mappa = (o: Array<{ chiave: string; nome: string }>) => Object.fromEntries(o.map((x) => [x.chiave, x.nome]));
     return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra),
-      spilli: Object.fromEntries(e.spilli.map((p) => [p.chiave, { nome: p.nome, tipo: p.tipo, mappa: p.gruppo, parola: p.parola }])) };
+      spilli: Object.fromEntries(e.spilli.map((p) => [p.chiave, { nome: p.nome, tipo: p.tipo, mappa: p.gruppo, parola: p.parola }])),
+      voci: Object.fromEntries(e.voci.map((v) => [v.chiave, { nome: v.nome, posto: v.gruppo }])) };
   }, [dati.dati]);
   // fra i pin offerti non c'è quello che si sta modificando (i nomi sì: una condizione vecchia su se stesso si legge)
   const offerti = useMemo(() => (dati.dati ? { ...dati.dati, spilli: dati.dati.spilli.filter((p) => p.chiave !== pinCorrente) } : null), [dati.dati, pinCorrente]);
