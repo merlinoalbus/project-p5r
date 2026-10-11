@@ -16,7 +16,7 @@ import { z } from 'zod';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { idParam } from './comuni.js';
 
-const TIPI_PUNTO = ['sicura', 'porta', 'meccanismo', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'storia', 'altro'] as const;
+const TIPI_PUNTO = ['sicura', 'porta', 'meccanismo', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'storia', 'trama', 'altro'] as const;
 
 export const paramsChiaveGuida = z.object({ chiave: z.string().min(1).max(200) });
 export const bodyDungeon = z.object({
@@ -32,6 +32,8 @@ export const bodyPunto = z.object({
   contenitore: z.string().min(1).max(200).nullable().optional(),
   /** L'area del dedalo della voce (099): solo nei dedali dei Memento. */
   areaDedalo: z.string().min(1).max(200).optional(),
+  /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): la sua maschera diventa il nome italiano di quella Persona. */
+  persona: z.number().int().positive().optional(),
 });
 export const bodyNuovoPunto = bodyPunto.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 

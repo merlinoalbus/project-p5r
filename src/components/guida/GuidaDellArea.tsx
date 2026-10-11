@@ -55,7 +55,7 @@ interface Props {
   /** Rilegge la scheda del Palazzo (ordine cambiato, voce aggiunta o tolta, stati uniti da un collegamento). */
   onRicarica: () => Promise<void>;
   /** Nei dedali dei Memento (099): l'area del dedalo di cui si mostrano le voci (`area.punti` le ha già filtrate) e le altre aree
-   *  dello stesso dedalo, dove una voce si può spostare. Lì ogni voce ha uno stato, anche «Altro». */
+   *  dello stesso dedalo, dove una voce si può spostare. Lì ogni voce ha uno stato, e i tipi sono Persona e Trama (2026-10-11). */
   areaDedalo?: { chiave: string; nome: string; altre: ReadonlyArray<{ chiave: string; nome: string }> };
 }
 
@@ -71,6 +71,10 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
   /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
   const nomeArea = areaDedalo?.nome ?? area.nome;
+  /** I tipi che una voce può avere qui (2026-10-11): fuori dai dedali tutti tranne Trama, che è solo dei Memento (lo stesso
+   *  controllo lo fa il server). Nei dedali qui c'è solo la Trama, «unico tipo», e il tipo non si sceglie: le Persona hanno la
+   *  loro sezione in cima all'area (`PersoneDellArea`), con la Persona scelta dal compendio. */
+  const tipiAmmessi: PuntoInteresseDto['tipo'][] = areaDedalo ? ['trama'] : TIPI.filter((t) => t !== 'trama');
   const [filtro, setFiltro] = useState<Set<PuntoInteresseDto['tipo']>>(new Set());
   const [mostraGestiti, setMostraGestiti] = useState(false);
   const [selezionato, setSelezionato] = useState<string | null>(null);
@@ -188,10 +192,11 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   const moduloNuovaVoce = (n: { nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null }) => (
     <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
       onSubmit={(e) => { e.preventDefault(); const nome = n.nome.trim(); if (!nome) return; void creaPunto(area.chiave, { nome, tipo: n.tipo, ...(n.contenitore ? { contenitore: n.contenitore } : areaDedalo ? { areaDedalo: areaDedalo.chiave } : {}) }).then(async (nuovo) => { setNuovoPunto(null); await onRicarica(); setSelezionato(nuovo.chiave); notifica('success', n.contenitore ? `Passo «${nome}» aggiunto all’Enigma.` : `Voce «${nome}» aggiunta a ${nomeArea}.`); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Voce non aggiunta.')); }}>
-      <CampoCorrezione etichetta={n.contenitore ? 'Nuovo passo' : 'Nuova voce'} valore={n.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => setNuovoPunto({ ...n, nome: v })} />
-      <span className="min-w-[150px]">
-        <Selettore etichetta="Tipo" valore={n.tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setNuovoPunto({ ...n, tipo: v as PuntoInteresseDto['tipo'] })} />
-      </span>
+      <CampoCorrezione etichetta={n.contenitore ? 'Nuovo passo' : areaDedalo ? 'Nuova voce di Trama' : 'Nuova voce'} valore={n.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => setNuovoPunto({ ...n, nome: v })} />
+      {/* con un tipo solo (Trama, nei dedali) non c'è niente da scegliere */}
+      {tipiAmmessi.length > 1 && <span className="min-w-[150px]">
+        <Selettore etichetta="Tipo" valore={n.tipo} opzioni={tipiAmmessi.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setNuovoPunto({ ...n, tipo: v as PuntoInteresseDto['tipo'] })} />
+      </span>}
       <div className="flex gap-1.5">
         <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Aggiungi" disabled={!n.nome.trim()} />
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setNuovoPunto(null)} />
@@ -251,7 +256,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                 {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
               </div>}
             <div className="flex flex-wrap items-center gap-1.5">
-              {!descrittiva(p) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Chiudi la mappa' : 'Collega pin'}
+              {/* nei dedali niente pin da collegare: i piani si generano a caso (2026-10-11) */}
+              {!areaDedalo && !descrittiva(p) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Chiudi la mappa' : 'Collega pin'}
                 aria-expanded={!!scelta} disabled={planimetrie.length === 0}
                 onClick={() => (scelta ? void fineCollegamento() : setCollegando({ punto: p.chiave, mappa: mappaIniziale(p), ricerca: '' }))} />}
               {puoAccogliere && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un passo" aria-label={`Aggiungi un passo a ${p.nome}`}
@@ -267,10 +273,10 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                 elimina={{ avviso: conPassi ? 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I suoi passi restano, voci dell’area con il loro stato.' : 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I pin collegati restano sulla mappa, col loro «raccolto».', onElimina: async () => { await eliminaPunto(p.chiave); setSelezionato(null); setCollegando(null); await onRicarica(); } }}>
                 {(b, cambia) => <>
                   <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => cambia({ nome: v })} />
-                  <span className="min-w-[150px]">
+                  {tipiAmmessi.length > 1 && <span className="min-w-[150px]">
                     {/* un Enigma coi suoi passi resta un Enigma: il server lo rifiuta, qui non lo si offre */}
-                    <Selettore etichetta="Tipo" valore={b.tipo} opzioni={(conPassi ? TIPI.filter(puntoEnigma) : TIPI).map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
-                  </span>
+                    <Selettore etichetta="Tipo" valore={b.tipo} opzioni={(conPassi ? tipiAmmessi.filter(puntoEnigma) : tipiAmmessi).map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
+                  </span>}
                   {(enigmiPossibili.length > 0 || p.contenitore) && <span className="min-w-[180px]">
                     <Selettore etichetta="Passo di" valore={b.contenitore} opzioni={[{ chiave: '', nome: '— nessun Enigma (voce dell’area) —' }, ...enigmiPossibili.map((e) => ({ chiave: e.chiave, nome: e.nome }))]} onCambia={(v) => cambia({ contenitore: v })} />
                   </span>}
@@ -322,17 +328,18 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   return (
     <details className="text-[12px]" open aria-label={`Guida di ${nomeArea}`}>
       <summary className="touch cursor-pointer text-text-muted">
-        {areaDedalo ? 'Voci dell’area' : 'Guida dell’area'} · {area.punti.length === 1 ? '1 voce' : `${area.punti.length} voci`}{gestitiArea > 0 ? ` (${gestitiArea} segnate)` : ''}{daCollegare > 0 ? ` · ${daCollegare} da collegare` : ''}
+        {areaDedalo ? 'Trama' : 'Guida dell’area'} · {area.punti.length === 1 ? '1 voce' : `${area.punti.length} voci`}{gestitiArea > 0 ? ` (${gestitiArea} segnate)` : ''}{daCollegare > 0 ? ` · ${daCollegare} da collegare` : ''}
       </summary>
       <div className="flex flex-col gap-2 pt-2">
         <p className="m-0 text-[11px] text-text-muted">
           {areaDedalo
-            ? 'Ogni voce si segna (anche «Altro») ed è un elemento dell’area: l’area è completata quando lo sono tutti i suoi elementi.'
+            ? 'Le voci di Trama si segnano e sono elementi dell’area: l’area è completata quando lo sono tutti i suoi elementi.'
             : 'Una voce collegata ai pin ha il loro stato; le altre si segnano qui e non contano nella percentuale, che misura le planimetrie.'}
         </p>
-        {area.punti.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1" role="group" aria-label="Filtri per tipo">
-            {TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
+        {area.punti.length > 0 && (gestitiArea > 0 || !areaDedalo) && (
+          <div className="flex flex-wrap items-center gap-1" role="group" aria-label={areaDedalo ? 'Filtri' : 'Filtri per tipo'}>
+            {/* con un tipo solo (Trama, nei dedali) i filtri per tipo non servono: resta «Anche le segnate» */}
+            {!areaDedalo && TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
               <button key={tp} type="button" className={`chip touch text-[11px] ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
                 <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: COLORE_TIPO[tp] }} aria-hidden="true" />{NOME_TIPO[tp]} ({area.punti.filter((p) => p.tipo === tp).length})
               </button>
@@ -349,7 +356,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
         {/* La guida non ha trascritto tutto: quel che manca si aggiunge qui, dove lo si è cercato; poi si sposta dove va. */}
         {nuovoPunto && !nuovoPunto.contenitore
           ? moduloNuovaVoce(nuovoPunto)
-          : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" className="self-start" onClick={() => setNuovoPunto({ nome: '', tipo: 'altro', contenitore: null })} />}
+          : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" className="self-start" aria-label={areaDedalo ? `Aggiungi una voce di Trama in ${nomeArea}` : undefined} onClick={() => setNuovoPunto({ nome: '', tipo: areaDedalo ? 'trama' : 'altro', contenitore: null })} />}
       </div>
     </details>
   );

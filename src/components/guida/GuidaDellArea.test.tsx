@@ -24,7 +24,7 @@ vi.mock('../mappe/MappaIncorporata', () => ({
 
 /** Punto d'interesse di prova (un forziere esauribile, non segnato e senza pin) con i campi di `extra` che sovrascrivono i predefiniti. */
 const punto = (extra: Partial<PuntoInteresseDto>): PuntoInteresseDto => ({
-  chiave: 'p1', ordine: 0, tipo: 'forziere', nome: 'Forziere della sala', descrizione: 'Dietro la statua.', esauribile: true, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, ...extra,
+  chiave: 'p1', ordine: 0, tipo: 'forziere', nome: 'Forziere della sala', descrizione: 'Dietro la statua.', esauribile: true, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: null, ...extra,
 });
 /** L'area «Sala Centrale» (k-02) del Palazzo di Kamoshida, con la sua planimetria m-sala e i punti dati. */
 const area = (punti: PuntoInteresseDto[]): AreaDungeonDto => ({
@@ -118,6 +118,13 @@ it('si aggiunge una voce in fondo all’area, e si apre per sistemarla', async (
   fireEvent.click(screen.getByRole('button', { name: 'Aggiungi' }));
   await waitFor(() => expect(creaPunto).toHaveBeenCalledWith('k-02', { nome: 'Forziere nascosto', tipo: 'altro' }));
   await waitFor(() => expect(onRicarica).toHaveBeenCalled());
+});
+
+it('in un Palazzo il tipo non propone Trama, che è solo dei Memento (2026-10-11)', () => {
+  monta([punto({})]);
+  fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una voce' }));
+  expect(vociSelettore('Tipo')).toContain('Storia');
+  expect(vociSelettore('Tipo')).not.toContain('Trama');
 });
 
 it('una voce descrittiva si legge e basta: niente Ottenuto, niente «Collega pin», e non conta fra le segnate', () => {
@@ -342,10 +349,13 @@ describe('in un\'area di un dedalo dei Memento (099)', () => {
     return { onRicarica, cambiaStato };
   };
 
-  it('ogni voce ha uno stato, anche «Altro»: si segna, e la guida lo dice', async () => {
-    const { cambiaStato } = montaDedalo([punto({ chiave: 'n1', tipo: 'altro', nome: 'Nota della banchina', esauribile: false, areaDedalo: 'q-1' })]);
-    expect(screen.getByText('Voci dell’area · 1 voce')).toBeInTheDocument();
-    expect(screen.getByText(/Ogni voce si segna \(anche «Altro»\) ed è un elemento dell’area/)).toBeInTheDocument();
+  /** Una voce di Trama dell'area «Banchina» (q-1). */
+  const trama = (extra: Partial<PuntoInteresseDto> = {}) => punto({ chiave: 'n1', tipo: 'trama', nome: 'Nota della banchina', esauribile: false, areaDedalo: 'q-1', ...extra });
+
+  it('le voci di Trama si segnano e la guida lo dice; l\'elenco si chiama «Trama» (2026-10-11)', async () => {
+    const { cambiaStato } = montaDedalo([trama()]);
+    expect(screen.getByText('Trama · 1 voce')).toBeInTheDocument();
+    expect(screen.getByText(/Le voci di Trama si segnano e sono elementi dell’area/)).toBeInTheDocument();
     expect(screen.getByRole('group', { name: 'Guida di Banchina' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Nota della banchina/ }));
     expect(screen.queryByText(/Voce descrittiva/)).toBeNull();
@@ -353,34 +363,44 @@ describe('in un\'area di un dedalo dei Memento (099)', () => {
     await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'n1' }), 'ottenuto'));
   });
 
-  it('la voce nuova nasce nell\'area del dedalo; dalla modifica passa in un\'altra area dello stesso dedalo', async () => {
-    const { onRicarica } = montaDedalo([punto({ areaDedalo: 'q-1' })]);
-    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una voce' }));
-    fireEvent.change(screen.getByRole('textbox', { name: 'Nuova voce' }), { target: { value: 'Ombra del treno' } });
-    creaPunto.mockResolvedValue(punto({ chiave: 'nuova', areaDedalo: 'q-1' }));
+  it('Trama è l\'unico tipo: niente scelta del tipo né filtri per tipo, niente «Collega pin» (2026-10-11)', () => {
+    montaDedalo([trama()]);
+    expect(screen.queryByRole('group', { name: 'Filtri per tipo' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una voce di Trama in Banchina' }));
+    expect(screen.getByRole('textbox', { name: 'Nuova voce di Trama' })).toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'Tipo' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /^Annulla/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Nota della banchina/ }));
+    expect(screen.queryByRole('button', { name: /Collega pin/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Nota della banchina»/ }));
+    expect(screen.queryByRole('combobox', { name: 'Tipo' })).toBeNull();
+  });
+
+  it('la voce nuova nasce Trama nell\'area del dedalo; dalla modifica passa in un\'altra area dello stesso dedalo', async () => {
+    const { onRicarica } = montaDedalo([trama()]);
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una voce di Trama in Banchina' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nuova voce di Trama' }), { target: { value: 'Jose alla banchina' } });
+    creaPunto.mockResolvedValue(trama({ chiave: 'nuova', nome: 'Jose alla banchina' }));
     fireEvent.click(screen.getByRole('button', { name: /^Aggiungi$/ }));
-    await waitFor(() => expect(creaPunto).toHaveBeenCalledWith('mementos-01-qimranut', { nome: 'Ombra del treno', tipo: 'altro', areaDedalo: 'q-1' }));
-    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
-    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    await waitFor(() => expect(creaPunto).toHaveBeenCalledWith('mementos-01-qimranut', { nome: 'Jose alla banchina', tipo: 'trama', areaDedalo: 'q-1' }));
+    fireEvent.click(screen.getByRole('button', { name: /Nota della banchina/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Nota della banchina»/ }));
     expect(vociSelettore('Area del dedalo')).toEqual(['Banchina', 'Treno']);
     scegliVoce('Area del dedalo', 'Treno');
-    aggiornaPunto.mockResolvedValue(punto({ areaDedalo: 'q-2' }));
+    aggiornaPunto.mockResolvedValue(trama({ areaDedalo: 'q-2' }));
     fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
-    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalledWith('p1', expect.objectContaining({ areaDedalo: 'q-2' })));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalledWith('n1', expect.objectContaining({ areaDedalo: 'q-2', tipo: 'trama' })));
     await waitFor(() => expect(onRicarica).toHaveBeenCalled());
   });
 
-  it('senza un cambio d\'area la modifica non la manda; un passo non sceglie l\'area (sta in quella del suo Enigma)', async () => {
-    montaDedalo([punto({ areaDedalo: 'q-1' }), punto({ chiave: 'e1', tipo: 'puzzle', nome: 'Enigma', areaDedalo: 'q-1' }), punto({ chiave: 's1', tipo: 'meccanismo', nome: 'Leva', contenitore: 'e1', areaDedalo: 'q-1' })]);
-    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
-    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
-    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), { target: { value: 'Forziere rinominato' } });
-    aggiornaPunto.mockResolvedValue(punto({ nome: 'Forziere rinominato', areaDedalo: 'q-1' }));
+  it('senza un cambio d\'area la modifica non la manda', async () => {
+    montaDedalo([trama()]);
+    fireEvent.click(screen.getByRole('button', { name: /Nota della banchina/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Nota della banchina»/ }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), { target: { value: 'Nota rinominata' } });
+    aggiornaPunto.mockResolvedValue(trama({ nome: 'Nota rinominata' }));
     fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
     await waitFor(() => expect(aggiornaPunto).toHaveBeenCalled());
     expect(aggiornaPunto.mock.calls[0][1]).not.toHaveProperty('areaDedalo');
-    fireEvent.click(screen.getByRole('button', { name: /Leva/ }));
-    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Leva»/ }));
-    expect(screen.queryByRole('combobox', { name: 'Area del dedalo' })).toBeNull();
   });
 });

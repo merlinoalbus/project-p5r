@@ -19,7 +19,7 @@ vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Una voce della guida nell'area del dedalo data. */
 const voce = (chiave: string, nome: string, areaDedalo: string, stato: PuntoInteresseDto['stato'] = null): PuntoInteresseDto => ({
-  chiave, ordine: 0, tipo: 'altro', nome, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo,
+  chiave, ordine: 0, tipo: 'altro', nome, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo, persona: null,
 });
 /** Un'area del dedalo di prova, con i campi di `extra` che sovrascrivono i predefiniti. */
 const areaDedalo = (extra: Partial<AreaDedaloDto>): AreaDedaloDto => ({ chiave: 'a', ordine: 0, nome: 'Area', descrizione: '', timbri: null, richieste: [], elementi: { totale: 0, fatti: 0 }, completata: true, ...extra });

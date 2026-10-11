@@ -18,11 +18,12 @@ import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
 import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
-import { contoAreaDedalo, contoDedalo } from '../../shared/dedali.js';
+import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
+import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './maschere.js';
 import { eliminaImmaginiDeiPin, impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
 import { palazziCompletati, palazzoDiOgniMappa } from './palazziService.js';
 import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
@@ -34,9 +35,15 @@ interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nom
 interface RigaAreaDedalo { chiave: string; dedalo_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
 interface RigaPunto { chiave: string; area_chiave: string; ordine: number; tipo: PuntoInteresseDto['tipo']; nome: string; descrizione: string; esauribile: number; dettagli_json: string; fonte: string; contenitore_chiave?: string | null; area_dedalo_chiave: string | null }
 
-/** La voce della guida come la vede il client: una sola forma per la scheda del Palazzo e per le risposte delle modifiche. */
-function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[]): PuntoInteresseDto {
-  return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli: JSON.parse(r.dettagli_json) as Record<string, unknown>, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null };
+/**
+ * La voce della guida come la vede il client: una sola forma per la scheda del Palazzo e per le risposte delle modifiche. Una
+ * voce «Persona» porta la Persona del compendio della sua maschera (2026-10-11): chi ne legge tante passa l'indice costruito una
+ * volta, per una voce sola lo si costruisce qui.
+ */
+function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], maschere?: IndiceMaschere): PuntoInteresseDto {
+  const dettagli = JSON.parse(r.dettagli_json) as Record<string, unknown>;
+  const persona = r.tipo === 'persona' ? personaDellaMaschera(maschere ?? indiceMaschere(), dettagli.maschera) : null;
+  return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona };
 }
 
 /** Lo stato di ogni punto della guida segnato dalla partita (chiave → stato); vuota senza partita, 404 se la partita non esiste. */
@@ -148,7 +155,7 @@ interface LettureDedali {
   /** Le aree di ogni dedalo, in ordine. */
   aree: Map<string, RigaAreaDedalo[]>;
   /** Lo stato di ogni voce di ogni area del dedalo (chiave dell'area → stati). */
-  voci: Map<string, Array<{ stato: StatoPunto | null }>>;
+  voci: Map<string, Array<{ tipo: string; stato: StatoPunto | null }>>;
   /** Le Richieste di ogni area del dedalo, nell'ordine della guida. */
   richieste: Map<string, RichiestaDelDedaloDto[]>;
   /** Le Richieste di ogni dedalo senza area (da collocare). */
@@ -163,9 +170,9 @@ function lettureDedali(dungeonChiave: string, partitaId: number | undefined, sta
   for (const a of prepared('SELECT ad.* FROM area_dedalo ad JOIN dungeon_area d ON d.chiave = ad.dedalo_chiave WHERE d.dungeon_chiave = ? ORDER BY d.ordine, ad.ordine, ad.chiave').all(dungeonChiave) as RigaAreaDedalo[]) {
     aree.set(a.dedalo_chiave, [...(aree.get(a.dedalo_chiave) ?? []), a]);
   }
-  const voci = new Map<string, Array<{ stato: StatoPunto | null }>>();
-  for (const v of prepared('SELECT p.chiave, p.area_dedalo_chiave FROM punto_interesse p JOIN dungeon_area d ON d.chiave = p.area_chiave WHERE d.dungeon_chiave = ? AND p.area_dedalo_chiave IS NOT NULL').all(dungeonChiave) as Array<{ chiave: string; area_dedalo_chiave: string }>) {
-    voci.set(v.area_dedalo_chiave, [...(voci.get(v.area_dedalo_chiave) ?? []), { stato: stati.get(v.chiave) ?? null }]);
+  const voci = new Map<string, Array<{ tipo: string; stato: StatoPunto | null }>>();
+  for (const v of prepared('SELECT p.chiave, p.tipo, p.area_dedalo_chiave FROM punto_interesse p JOIN dungeon_area d ON d.chiave = p.area_chiave WHERE d.dungeon_chiave = ? AND p.area_dedalo_chiave IS NOT NULL').all(dungeonChiave) as Array<{ chiave: string; tipo: string; area_dedalo_chiave: string }>) {
+    voci.set(v.area_dedalo_chiave, [...(voci.get(v.area_dedalo_chiave) ?? []), { tipo: v.tipo, stato: stati.get(v.chiave) ?? null }]);
   }
   const statiRichieste = partitaId === undefined ? new Map<string, StatoRichiesta>() : new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>).map((r) => [r.richiesta_chiave, r.stato]));
   const richieste = new Map<string, RichiestaDelDedaloDto[]>();
@@ -296,6 +303,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const stati = statiPartita(partitaId);
   const marc = marcatori();
   const pinPunti = pinDeiPunti();
+  const maschere = indiceMaschere();
   const mappe = mappePresenti();
   const native = mappeDelleAree(chiave);
   const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId);
@@ -308,7 +316,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
     }),
     // uno stato rimasto su una voce descrittiva (di prima della scelta) si ignora in lettura, senza cancellarlo
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(a.chiave) as RigaPunto[])
-      .map((p) => puntoDto(p, puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null : stati.get(p.chiave) ?? null, marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [])),
+      .map((p) => puntoDto(p, puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null : stati.get(p.chiave) ?? null, marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [], maschere)),
     dedalo: dedali ? dedaloDto(a.chiave, dedali) : null,
   }));
   const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
@@ -513,11 +521,36 @@ export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoIn
   contenitore?: string | null;
   /** L'area del dedalo in cui sta la voce (099): obbligatoria creando una voce di un dedalo, rifiutata fuori dai Memento;
    *  cambiandola la voce (con i passi, se è un Enigma) passa in fondo all'altra area. */
-  areaDedalo?: string }
+  areaDedalo?: string;
+  /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): la maschera della voce diventa il suo nome italiano. */
+  persona?: number }
 
 /** Vero se l'area della guida è un dedalo dei Memento. */
 function eDedalo(areaChiave: string): boolean {
   return !!prepared("SELECT 1 FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE a.chiave = ? AND d.tipo = 'mementos'").get(areaChiave);
+}
+
+/**
+ * Il tipo di una voce deve stare dove sta la voce (2026-10-11): nei dedali solo Persona e Trama («nei memento è tutto random»),
+ * e Trama solo nei dedali. 400 altrimenti.
+ */
+function verificaTipoDellaVoce(tipo: string, dedalo: boolean): void {
+  if (dedalo && !tipoDelDedalo(tipo)) throw httpErrors.badRequest('tipo-non-del-dedalo', 'Nei dedali dei Memento una voce è una Persona o Trama: stanze, porte, meccanismi e forzieri cambiano a ogni visita.');
+  if (!dedalo && tipo === 'trama') throw httpErrors.badRequest('trama-solo-nei-memento', 'Trama è il tipo delle voci dei dedali dei Memento: nei Palazzi c’è «Storia».');
+}
+
+/**
+ * I dettagli di una voce «Persona» con la maschera della Persona scelta dal compendio (404 se non esiste, 400 se la voce non è
+ * una Persona). `attuali` sono i dettagli della voce che si corregge (assenti creandola): se la Persona scelta è già quella della
+ * sua maschera restano come sono; cambiando Persona i dettagli dell'Ombra di prima (resistenze, debolezze, personalità) se ne
+ * vanno, perché erano di un'altra maschera.
+ */
+function dettagliDellaPersona(personaId: number, tipo: string, attuali?: string): string {
+  if (tipo !== 'persona') throw httpErrors.badRequest('persona-solo-per-persona', 'Una Persona del compendio si sceglie solo per una voce di tipo Persona.');
+  const p = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
+  if (!p) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non è nel compendio.`);
+  if (attuali !== undefined && personaDellaMaschera(indiceMaschere(), (JSON.parse(attuali) as Record<string, unknown>).maschera)?.id === personaId) return attuali;
+  return JSON.stringify({ maschera: t('persona', p.nome) });
 }
 
 /** L'area del dedalo deve esistere ed essere di quel dedalo (404 / 400). */
@@ -561,6 +594,9 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   const p = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   const areaPrima = p.area_dedalo_chiave ?? null;
+  // il tipo nuovo deve stare dove sta la voce (Persona o Trama nei dedali, Trama solo lì); la Persona scelta vuole una voce Persona
+  if (dati.tipo) verificaTipoDellaVoce(dati.tipo, eDedalo(p.area_chiave));
+  const dettagli = dati.persona === undefined ? p.dettagli_json : dettagliDellaPersona(dati.persona, dati.tipo ?? p.tipo, p.dettagli_json);
   // una voce con pin non diventa descrittiva: le descrittive non hanno pin (si scollegano prima); nelle aree dei dedali non ce ne sono
   if (dati.tipo && puntoDescrittivo(dati.tipo, areaPrima) && pinDelPuntoGuida(getDb(), puntoChiave).length > 0) {
     throw httpErrors.conflict('punto-con-pin', `«${p.nome}» ha dei pin collegati: scollegali prima di farne una voce descrittiva.`);
@@ -586,8 +622,8 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   db.transaction(() => {
     // cambiando Enigma (o uscendone) o area del dedalo la voce va in fondo fra le sue nuove compagne
     const ordine = dati.ordine ?? (dopo !== prima || areaDopo !== areaPrima ? ordineInFondo(p.area_chiave, dopo, areaDopo) : p.ordine);
-    prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ?, contenitore_chiave = ?, area_dedalo_chiave = ? WHERE chiave = ?').run(
-      dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), ordine, dopo, areaDopo, puntoChiave);
+    prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ?, contenitore_chiave = ?, area_dedalo_chiave = ?, dettagli_json = ? WHERE chiave = ?').run(
+      dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), ordine, dopo, areaDopo, dettagli, puntoChiave);
     // i passi di un Enigma seguono la sua area del dedalo
     if (areaDopo !== areaPrima) prepared('UPDATE punto_interesse SET area_dedalo_chiave = ? WHERE contenitore_chiave = ?').run(areaDopo, puntoChiave);
     // gli Enigmi toccati (lasciato, raggiunto, o il proprio, se cambia tipo e con lui il conto dei passi da segnare) seguono i passi
@@ -707,6 +743,8 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
   if (contenitore) verificaEnigma(null, chiaveArea, contenitore);
   // in un dedalo dei Memento ogni voce sta in una sua area (099): un passo in quella del suo Enigma
   const dedalo = eDedalo(chiaveArea);
+  verificaTipoDellaVoce(dati.tipo, dedalo);
+  const dettagli = dati.persona === undefined ? '{}' : dettagliDellaPersona(dati.persona, dati.tipo);
   if (!dedalo && dati.areaDedalo !== undefined) throw httpErrors.badRequest('non-un-dedalo', 'Le aree del dedalo ci sono solo nei dedali dei Memento.');
   if (dedalo && dati.areaDedalo === undefined && !contenitore) throw httpErrors.badRequest('area-dedalo-mancante', 'Una voce di un dedalo sta in una delle sue aree: scegli l’area.');
   if (dati.areaDedalo !== undefined) verificaAreaDedalo(chiaveArea, dati.areaDedalo);
@@ -714,8 +752,8 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
   if (contenitore && dati.areaDedalo !== undefined && dati.areaDedalo !== areaDedalo) throw httpErrors.badRequest('passo-di-altra-area', 'Un passo sta nell’area del suo Enigma.');
   const ordine = dati.ordine ?? ordineInFondo(chiaveArea, contenitore, areaDedalo);
   getDb().transaction(() => {
-    prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte, contenitore_chiave, area_dedalo_chiave) VALUES (?, ?, ?, ?, ?, ?, ?, '{}', 'utente', ?, ?)")
-      .run(chiave, chiaveArea, ordine, dati.tipo, dati.nome.trim(), dati.descrizione ?? '', dati.esauribile ? 1 : 0, contenitore, areaDedalo);
+    prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte, contenitore_chiave, area_dedalo_chiave) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'utente', ?, ?)")
+      .run(chiave, chiaveArea, ordine, dati.tipo, dati.nome.trim(), dati.descrizione ?? '', dati.esauribile ? 1 : 0, dettagli, contenitore, areaDedalo);
     // l'Enigma segue i passi: un passo nuovo ancora da fare lo riapre dove era risolto (scelta dell'utente, 2026-10-02)
     if (contenitore) allineaEnigmaInOgniPartita(getDb(), contenitore, nowIso());
   })();

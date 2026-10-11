@@ -1607,3 +1607,40 @@ Che cosa ne segue (seconda parte, le Richieste modificabili):
   correggere» e il rango si sblocca correggendo.»). Il semaforo dice «da correggere» (non «da confermare») e porta «Correggi»,
   nella scheda del Confidente e in Partita → Confidenti; la finestra cambia la Richiesta citata (per chiave) o toglie il requisito
   per tutte le partite, con le conferme a mano che ne avevano.
+
+## 2026-10-11 — Memento: Persona in cima, Richieste, Trama
+
+Richiesta dell'utente: «nel memento le persona disponibili devono essere visualizzate con le loro immagini e cliccabili nella parte
+alta del memento. Le persone catturate o meno non influiscono sulla percentuale di completamento del memento. A seguire le
+richieste e poi gli elementi Trama... unico tipo visto che nei memento è tutto random quindi è impossibile segnare Stanze, porte,
+meccanismi forzieri o altro... la mappa quindi deve essere molto piccola...diciamo 30% rispetto all'attuale... pensa e impagina
+correttamente questa sezione...». Scelte dell'utente (domande e risposte):
+- «Quale «mappa» va ridotta al 30%?» → «Immagine del dedalo (Recommended)»: il disegno del dedalo al centro diventa una
+  miniatura accanto al titolo; il pozzo a sinistra, che serve a scegliere il dedalo, resta com'è.
+- «Toccando una Persona cosa succede, e la cattura si segna ancora?» → «Il tocco segna catturata» (testo dell'opzione: «Il tocco
+  alterna catturata/non catturata; la scheda del compendio si apre da un collegamento piccolo.»).
+- «Le voci di oggi che non sono Persona diventano tutte «Trama»?» → «Sì, tutte Trama (Recommended)». Nella domanda avevo scritto
+  33 voci: sono 32 (20 Altro, 5 Boss, 4 Stanze sicure, 2 Oggetto, 1 Enigma), corretto in chat.
+- «Le Persona in cima: tutte quelle del dedalo insieme, o divise per area?» → «In cima a ogni area».
+- (rilievo del validatore) «Nel Dedalo di Da'at c'è la voce «Straziato re dei desideri», di tipo Persona ma senza maschera («-»,
+  personalità «Non reclutabile»): è un'Ombra che non si può catturare. Così com'è finirebbe tra le Persona in cima all'area,
+  senza immagine e fuori dal conto. Cosa ne faccio?» → «Diventa Trama (Recommended)». La migrazione 100 lo applica a ogni Persona
+  dei Memento con la maschera «-»; una Persona aggiunta senza maschera resta Persona. Il miniboss omonimo di Kamoshida non cambia.
+
+Conseguenze tecniche (non scelte dell'utente):
+- «Trama» è un tipo nuovo (`trama`), non «Storia»: Storia resta dei Palazzi, Trama è solo dei Memento, e il server lo fa rispettare.
+- La Persona di una voce si ricava dalla maschera scritta dalla guida con l'indice che già collegava le Ombre della guida alla
+  battaglia (`server/services/maschere.ts`). Una Persona nuova o corretta si sceglie dal compendio: la maschera diventa il suo
+  nome italiano, e cambiandola i dettagli dell'Ombra di prima (resistenze, debolezze, personalità) se ne vanno, perché erano di
+  un'altra maschera.
+- «Catturata» è lo stato «Ottenuto» della voce Persona: resta per partita, ma non entra nel conto (`contaNelDedalo`).
+- Impaginazione (scelte mie, da confermare con l'utente se non vanno): una colonna sola per il dedalo, la miniatura del disegno a
+  destra del titolo; i timbri, che la richiesta non collocava, stanno fra le Richieste e la Trama (sono elementi che contano,
+  come loro); le Persona sono piastrelle larghe almeno 88 px (tre per riga sul telefono) con «Scheda» e «Modifica»; correggere,
+  aggiungere ed eliminare una Persona si fa in una finestra (`ModuloPersona`), perché il modulo in linea della guida non entra in
+  una piastrella.
+  Rimandando la stessa Persona (un modulo che salva tutto) i dettagli restano come sono.
+- Nei dedali non ci sono più Enigmi con passi (il tipo non è ammesso). Misurato sulla copia di prima della 100 e sul pacchetto:
+  nessun passo, nessun Enigma con passi, nessun pin collegato a voci dei Memento. La migrazione resta sicura per un pacchetto
+  importato più avanti: i passi di un Enigma convertito tornano voci della sua area, in fondo, ognuno col suo stato; i pin
+  collegati restano collegati (Trama non è descrittiva). I Memento hanno sì delle planimetrie («aree fisse» con pin del gioco).

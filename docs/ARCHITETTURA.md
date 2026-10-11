@@ -873,7 +873,12 @@ con `voceDaSegnare`) usano quella regola. **Il conteggio** sta in `shared/dedali
 stesso per server (`dungeonService.lettureDedali`/`areaDedaloDto`/`dedaloDto`/`raccoltaMementos`) e interfaccia
 (`src/utils/dedali.ts`: `ricalcolaDedalo`, `raccoltaDeiDedali` dopo un gesto): una voce è fatta Ottenuta o Esaurita, una
 Richiesta «completata», i timbri contano uno per timbro; un'area è completata quando tutti i suoi elementi lo sono (vuota =
-completata), il dedalo quando lo sono tutte le aree (nessuna = completato). `DedaloDto` = `{ aree: AreaDedaloDto[],
+completata), il dedalo quando lo sono tutte le aree (nessuna = completato). **Persona e Trama** (2026-10-11): nei dedali una
+voce è `persona` o `trama` (`TIPI_VOCE_DEDALO`, `tipoDelDedalo`; il server rifiuta gli altri con 400 `tipo-non-del-dedalo` e
+Trama fuori dai Memento con 400 `trama-solo-nei-memento`; migrazione 100: le voci di prima diventano Trama); le Persona non
+contano (`contaNelDedalo`: «catturata» = Ottenuto, fuori dal conto). `PuntoInteresseDto.persona` è la Persona del compendio
+della maschera (`server/services/maschere.ts`: `indiceMaschere`, `personaDellaMaschera`, lo stesso indice della guida alla
+battaglia); creando o correggendo una voce Persona, `persona` (id del compendio) ne scrive la maschera. `DedaloDto` = `{ aree: AreaDedaloDto[],
 daCollocare, obiettivi, completato }`; `PuntoInteresseDto.areaDedalo`; `RichiestaDto.areaDedalo/areaDedaloNome`.
 Rotte: `POST /api/compendio/dedali/:chiave/aree`, `PUT /api/compendio/aree-dedalo/:chiave` (nome, dettagli,
 `timbriTotale`: le partite si allineano al nuovo totale), `PUT …/sposta`, `DELETE /api/compendio/aree-dedalo/:chiave` (voci
@@ -885,6 +890,14 @@ del Memento: conteggio e barra del dedalo, ✓, per ogni area (chiusa se complet
 (`CorrezioneGuida`: nome, timbri, dettagli, elimina con avviso), timbri −/+, Richieste (stato e selettore dell'area),
 `GuidaDellArea` con le sole voci dell'area (`areaDedalo`: crea nell'area, «Area del dedalo» nella modifica); in fondo le
 Richieste da collocare e «Aggiungi un'area».
+**Impaginazione dei Memento (2026-10-11).** Una colonna sola accanto al pozzo: la sezione del dedalo ha il titolo e, a destra,
+la miniatura del disegno del dedalo (`h-[min(13vh,120px)]`, circa il 30% di prima); sotto, `AreeDelDedalo` (non c'è più la
+colonna destra, che resta solo nei Palazzi). In ogni area, in quest'ordine: `PersoneDellArea` (le Persona come piastrelle:
+`AnteprimaPersona` della Persona del compendio, nome della Persona e dell'Ombra, debolezze; il tocco alterna «catturata» =
+Ottenuto, fuori dal conto; «Scheda» verso `/compendio/persona/:id` e «Modifica»; griglia `.persone-dell-area`, colonne da 88 px),
+le Richieste con «Aggiungi una Richiesta», i timbri, la Trama (`GuidaDellArea` con le sole voci non Persona: nei dedali il tipo è
+solo Trama e non si sceglie, niente filtri per tipo né «Collega pin»). `ModuloPersona` (finestra) aggiunge, corregge ed elimina
+una Persona: Persona scelta dal compendio (`getPersone`, `persona` nel corpo delle voci), nome dell'Ombra, area, descrizione.
 **Le Richieste modificabili (2026-10-11).** `richiesteService`: `creaRichiesta`, `aggiornaRichiesta` (chiave stabile; `area` = prosa
 finché il dedalo non cambia; rinominando, i `confidente_requisito` di tipo «richiesta» che la citavano per nome passano alla
 chiave e il testo prende il nome nuovo), `citazioniRichiesta` (`CitazioniRichiestaDto`: partite, pin, condizioni di pin/negozi/

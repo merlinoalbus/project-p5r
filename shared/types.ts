@@ -1584,7 +1584,7 @@ export interface OmbraDto {
   resistenze: string[];
   personalita: string | null;
   fonte: string;
-  personaCollegata: { id: number; nome: string; nomeIt: string } | null;
+  personaCollegata: PersonaDellaMascheraDto | null;
 }
 
 export type TrattoOmbra = 'giocosa' | 'timida' | 'irritabile' | 'cupa';
@@ -1689,7 +1689,7 @@ export type StatoPunto = 'ottenuto' | 'esaurito';
 export interface PuntoInteresseDto {
   chiave: string;
   ordine: number;
-  tipo: 'sicura' | 'porta' | 'meccanismo' | 'forziere' | 'forziere-chiuso' | 'volonta' | 'puzzle' | 'miniboss' | 'boss' | 'ombra-sciagura' | 'persona' | 'oggetto' | 'scorciatoia' | 'storia' | 'altro';
+  tipo: 'sicura' | 'porta' | 'meccanismo' | 'forziere' | 'forziere-chiuso' | 'volonta' | 'puzzle' | 'miniboss' | 'boss' | 'ombra-sciagura' | 'persona' | 'oggetto' | 'scorciatoia' | 'storia' | 'trama' | 'altro';
   nome: string;
   descrizione: string;
   esauribile: boolean;
@@ -1707,7 +1707,14 @@ export interface PuntoInteresseDto {
   /** L'area del dedalo a cui la voce appartiene (099), o null fuori dai Memento. Nelle aree dei dedali ogni voce ha uno stato,
    *  anche «Altro», e conta per il completamento dell'area. */
   areaDedalo: string | null;
+  /** Per una voce «Persona»: la Persona del compendio della sua maschera (`dettagli.maschera`), per l'immagine e la scheda
+   *  (2026-10-11); null se la maschera manca o il compendio non la conosce, e per gli altri tipi. */
+  persona: PersonaDellaMascheraDto | null;
 }
+
+/** La Persona del compendio che corrisponde a una maschera scritta dalla guida: id della scheda, nome canonico (per l'immagine)
+ *  e nome italiano. */
+export interface PersonaDellaMascheraDto { id: number; nome: string; nomeIt: string }
 
 /** Un pin di una planimetria collegato a un punto della guida. */
 export interface PinDelPuntoDto { id: number; nome: string; tipo: string; mappa: string; mappaNome: string }

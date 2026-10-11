@@ -2,28 +2,40 @@
 // Test dedali — il conteggio di un dedalo ricalcolato nella pagina, con la regola condivisa col server (099)
 // ============================================================
 
-import { contoAreaDedalo, contoDedalo } from '../../shared/dedali';
+import { contaNelDedalo, contoAreaDedalo, contoDedalo, TIPI_VOCE_DEDALO, tipoDelDedalo } from '../../shared/dedali';
 import { raccoltaDeiDedali, ricalcolaDedalo } from './dedali';
 import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto } from '../types';
 
 /** Una voce della guida con lo stato dato, nell'area del dedalo indicata. */
 const voce = (chiave: string, areaDedalo: string, stato: PuntoInteresseDto['stato']): PuntoInteresseDto => ({
-  chiave, ordine: 0, tipo: 'altro', nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo,
+  chiave, ordine: 0, tipo: 'altro', nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo, persona: null,
 });
 /** Un'area del dedalo con conteggi volutamente sbagliati: il ricalcolo deve correggerli. */
 const area = (chiave: string, extra: Partial<AreaDedaloDto> = {}): AreaDedaloDto => ({ chiave, ordine: 0, nome: chiave, descrizione: '', timbri: null, richieste: [], elementi: { totale: 99, fatti: 99 }, completata: false, ...extra });
 
 it('un\'area è completata quando lo sono tutti i suoi elementi; i timbri contano uno per timbro; un\'area vuota è completata', () => {
-  expect(contoAreaDedalo({ voci: [{ stato: 'ottenuto' }, { stato: null }], richieste: [{ stato: 'completata' }, { stato: 'accettata' }], timbri: { totale: 3, raccolti: 2 } }, true))
+  expect(contoAreaDedalo({ voci: [{ tipo: 'trama', stato: 'ottenuto' }, { tipo: 'trama', stato: null }], richieste: [{ stato: 'completata' }, { stato: 'accettata' }], timbri: { totale: 3, raccolti: 2 } }, true))
     .toEqual({ totale: 7, fatti: 4, completata: false });
-  expect(contoAreaDedalo({ voci: [{ stato: 'esaurito' }], richieste: [{ stato: 'completata' }], timbri: { totale: 3, raccolti: 5 } }, true)).toEqual({ totale: 5, fatti: 5, completata: true });
+  expect(contoAreaDedalo({ voci: [{ tipo: 'trama', stato: 'esaurito' }], richieste: [{ stato: 'completata' }], timbri: { totale: 3, raccolti: 5 } }, true)).toEqual({ totale: 5, fatti: 5, completata: true });
   expect(contoAreaDedalo({ voci: [], richieste: [], timbri: null }, true)).toEqual({ totale: 0, fatti: 0, completata: true });
-  expect(contoAreaDedalo({ voci: [{ stato: 'ottenuto' }], richieste: [], timbri: { totale: 2, raccolti: null } }, false)).toEqual({ totale: 3, fatti: null, completata: null });
+  expect(contoAreaDedalo({ voci: [{ tipo: 'trama', stato: 'ottenuto' }], richieste: [], timbri: { totale: 2, raccolti: null } }, false)).toEqual({ totale: 3, fatti: null, completata: null });
   // un dedalo è completato quando lo sono tutte le sue aree, anche nessuna
   expect(contoDedalo([{ elementi: { totale: 2, fatti: 2 }, completata: true }, { elementi: { totale: 0, fatti: 0 }, completata: true }], true)).toEqual({ totale: 2, fatti: 2, completato: true });
   expect(contoDedalo([{ elementi: { totale: 2, fatti: 1 }, completata: false }], true)).toMatchObject({ completato: false });
   expect(contoDedalo([], true)).toEqual({ totale: 0, fatti: 0, completato: true });
   expect(contoDedalo([], false)).toEqual({ totale: 0, fatti: null, completato: null });
+});
+
+it('le Persona non contano: catturate o no, l\'area si completa con il resto (2026-10-11); nei dedali solo Persona e Trama', () => {
+  // due Persona, una catturata: non cambiano né il totale né il fatto; un'area di sole Persona è vuota, quindi completata
+  expect(contoAreaDedalo({ voci: [{ tipo: 'persona', stato: 'ottenuto' }, { tipo: 'persona', stato: null }, { tipo: 'trama', stato: 'ottenuto' }], richieste: [], timbri: null }, true))
+    .toEqual({ totale: 1, fatti: 1, completata: true });
+  expect(contoAreaDedalo({ voci: [{ tipo: 'persona', stato: null }], richieste: [], timbri: null }, true)).toEqual({ totale: 0, fatti: 0, completata: true });
+  expect(contoAreaDedalo({ voci: [{ tipo: 'persona', stato: null }, { tipo: 'trama', stato: null }], richieste: [], timbri: null }, false)).toEqual({ totale: 1, fatti: null, completata: null });
+  expect(contaNelDedalo('persona')).toBe(false);
+  expect(contaNelDedalo('trama')).toBe(true);
+  expect(TIPI_VOCE_DEDALO).toEqual(['persona', 'trama']);
+  expect(['persona', 'trama', 'altro', 'boss', 'sicura'].map(tipoDelDedalo)).toEqual([true, true, false, false, false]);
 });
 
 it('ricalcola le aree del dedalo dalle loro voci, Richieste e timbri, e l\'anello dei Memento dai dedali', () => {

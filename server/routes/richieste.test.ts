@@ -33,7 +33,8 @@ describe('API Richieste dei Mementos', () => {
     expect(m.aree).toHaveLength(9);
     expect(m.aree[0].nome).toBe('Dedalo di Qimranut');
     expect(m.aree.flatMap((a) => a.punti).filter((p) => p.tipo === 'persona').length).toBeGreaterThan(100);
-    expect(m.aree.some((a) => a.punti.some((p) => p.tipo === 'sicura'))).toBe(true);
+    // nei dedali le voci sono Persona o Trama (le «Sale d'attesa» sono Trama dalla migrazione 100)
+    expect(m.aree.some((a) => a.punti.some((p) => p.tipo === 'trama' && p.nome.startsWith("Sala d'attesa")))).toBe(true);
     expect(d.richieste[0].areaChiave).toBe(m.aree[0].chiave);
     expect((await request(app).get('/api/compendio/richieste?partita=99999')).status).toBe(404);
   });

@@ -365,7 +365,7 @@ export function DungeonDettaglioPage() {
                   {/* Quando compare sulla mappa di Tokyo e dove si atterra toccandolo (2026-10-04) */}
                   <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} />
                   <span className="chip">{d.aree.length} {memento ? 'dedali' : 'aree'}</span>
-                  <span className="chip" title={memento ? 'Gli elementi delle aree dei dedali (voci, Richieste, timbri): sono questi a fare la percentuale.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
+                  <span className="chip" title={memento ? 'Gli elementi delle aree dei dedali (Richieste, timbri, voci di Trama): sono questi a fare la percentuale; le Persona no.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
                   {!memento && <span className="chip" title="Le tavole dell’atlante del Palazzo. Si ordinano e si correggono nell’elenco qui sotto.">
                     {d.planimetrie.length} planimetrie{d.raccolta.mappeComplete !== null ? ` · ${d.raccolta.mappeComplete} complete` : ''}
                   </span>}
@@ -431,8 +431,13 @@ export function DungeonDettaglioPage() {
             {/* ---- L'area scelta: mappa e aree del dedalo, o planimetrie ---- */}
             {/* Da 1024 a 1279 px mappa e raccolta stanno una sotto l'altra in **un'area sola** che scorre; da 1280 px
                 sono due colonne, ognuna con il suo scorrimento, e la mappa si allunga fino in fondo alla sua. */}
-            <div className={`order-1 grid grid-cols-1 items-start gap-4 lg:order-none lg:min-h-0 lg:max-xl:area-scorrevole lg:max-xl:p-2 xl:grid-rows-[minmax(0,1fr)] xl:items-stretch ${memento ? 'xl:grid-cols-[minmax(0,1fr)_340px]' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
+            {/* Nei Memento una colonna sola (2026-10-11): il disegno del dedalo è una miniatura accanto al titolo e sotto ci sono le
+                aree, con Persona, Richieste e Trama, nella larghezza che prima si dividevano disegno e colonna stretta delle aree. */}
+            <div className={`order-1 grid grid-cols-1 items-start gap-4 lg:order-none lg:min-h-0 lg:max-xl:area-scorrevole lg:max-xl:p-2 xl:grid-rows-[minmax(0,1fr)] xl:items-stretch ${memento ? '' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
               <section className="card flex flex-col gap-2.5 xl:min-h-0 xl:area-scorrevole">
+                {/* nei Memento titolo e dettagli a sinistra, la miniatura a destra; nei Palazzi `contents` lascia tutto com'era */}
+                <div className={memento ? 'flex items-start gap-3' : 'contents'}>
+                <div className={memento ? 'flex min-w-0 flex-1 flex-col gap-1.5' : 'contents'}>
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>
                   {/* `key`: cambiando area il modulo si rimonta, altrimenti resterebbe aperto con il
@@ -457,11 +462,19 @@ export function DungeonDettaglioPage() {
                 </div>
                 {/* La descrizione si ripiega: per esteso spingeva la mappa (o il dedalo) sotto il bordo della colonna. */}
                 {area.descrizione && <TestoRipiegabile testo={area.descrizione} massimo={140} className="text-[13px] text-text-secondary" />}
-                {/* Il pezzo con cui il gioco disegna il dedalo nel pozzo: non una pianta, i piani si generano. Da 1280 px
-                    riempie la colonna come la mappa di un Palazzo. */}
-                {memento && <span className="flex h-[min(46vh,420px)] w-full items-center justify-center overflow-hidden rounded bg-[#8d0012] xl:h-auto xl:min-h-[240px] xl:flex-1">
+                </div>
+                {/* Il pezzo con cui il gioco disegna il dedalo nel pozzo: non una pianta, i piani si generano a caso e non c'è
+                    niente da segnarci. Una miniatura (richiesta dell'utente, 2026-10-11: «la mappa quindi deve essere molto
+                    piccola...diciamo 30% rispetto all'attuale»; scelta «Immagine del dedalo»): alta min(13vh, 120px), circa il
+                    30% di min(46vh, 420px) che aveva sotto i 1280 px. */}
+                {memento && <span className="flex h-[min(13vh,120px)] shrink-0 items-center justify-center overflow-hidden rounded bg-[#8d0012] p-1" style={{ aspectRatio: '936 / 1086' }}>
                   <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`} className="max-h-full max-w-full object-contain" />
                 </span>}
+                </div>
+                {/* Dedalo → Aree → Elementi (099): le aree del dedalo con Persona, Richieste, timbri e Trama */}
+                {memento && area.dedalo && <AreeDelDedalo key={area.chiave} dedalo={{ ...area, dedalo: area.dedalo }} partitaId={partitaId} cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto}
+                  onTimbri={aggiornaTimbri} onRichiesta={aggiornaRichiesta} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />}
+                {memento && !partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare catture, Richieste, timbri e Trama.</span>}
                 {/* La planimetria dell'atlante legata all'area, se c'è. */}
                 {!memento && mappaScelta && <>
                   {area.mappe.length > 1 && (
@@ -529,19 +542,16 @@ export function DungeonDettaglioPage() {
                 )}
               </section>
 
-              {/* ---- La colonna di quel che fa la percentuale: le planimetrie e la guida dell'area; nei Memento le aree del dedalo ---- */}
-              <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={memento ? `Aree di ${area.nome}` : `Da raccogliere in ${area.nome}`}>
-                {memento
-                  // Dedalo → Aree → Elementi (099): le aree del dedalo con le loro voci, Richieste e timbri
-                  ? (area.dedalo && <AreeDelDedalo key={area.chiave} dedalo={{ ...area, dedalo: area.dedalo }} partitaId={partitaId} cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto}
-                      onTimbri={aggiornaTimbri} onRichiesta={aggiornaRichiesta} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />)
-                  : planimetriaAperta
+              {/* ---- La colonna di quel che fa la percentuale: le planimetrie e la guida dell'area (nei Memento le aree del dedalo
+                  stanno nella colonna unica, qui sopra) ---- */}
+              {!memento && <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={`Da raccogliere in ${area.nome}`}>
+                {planimetriaAperta
                   ? <RaccoltaPlanimetrie planimetrie={[planimetriaAperta]} partitaId={partitaId} onRaccolto={segnaRaccolto}
                       etichetta="Su questa planimetria" nota="Planimetria scelta dal pannello: qui c’è solo quel che si raccoglie su di lei."
                       vuoto="Su questa planimetria non c’è niente da raccogliere." />
                   : <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} vuoto={vuotoArea} />}
                 {/* Il resto del Palazzo, sempre ripiegato: con un'area scelta si vede quell'area (rilievo dell'utente, 2026-10-01). */}
-                {!memento && !planimetriaAperta && altrePlanimetrie.length > 0 && (
+                {!planimetriaAperta && altrePlanimetrie.length > 0 && (
                   <details className="text-[12px]">
                     <summary className="touch cursor-pointer text-text-muted">Tutte le planimetrie del Palazzo · {restanoAltre} da raccogliere</summary>
                     <div className="pt-2">
@@ -551,11 +561,10 @@ export function DungeonDettaglioPage() {
                 )}
                 {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare quel che raccogli.</span>}
 
-                {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). Nei Memento
-                    le voci stanno nelle aree del dedalo, qui sopra. */}
-                {!memento && <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta}
-                  cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />}
-              </aside>
+                {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
+                <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta}
+                  cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />
+              </aside>}
             </div>
           </div>
         </div>

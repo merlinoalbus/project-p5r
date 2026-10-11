@@ -50,7 +50,11 @@ describe('condizione «Pin di una mappa»', () => {
     dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Pin condizionati' })).body.data as { id: number }).id;
     // una planimetria di un Palazzo con una porta del gioco (nativa): un elemento fisso, che dal 2026-10-09 le condizioni nascondono come ogni pin
-    mappa = prepared("SELECT mappa_chiave FROM spillo WHERE tipo = 'porta' AND nativo_json IS NOT NULL AND mappa_chiave IS NOT NULL ORDER BY id LIMIT 1").pluck().get() as string;
+    // (di un Palazzo davvero: la prima porta nativa sta sulle «aree fisse» dei Memento, dove dal 2026-10-11 le voci sono solo
+    // Persona e Trama e non si possono creare le voci Meccanismo e Stanza sicura che i test collegano ai pin)
+    const palazzi = palazzoDiOgniMappa();
+    mappa = (prepared("SELECT mappa_chiave FROM spillo WHERE tipo = 'porta' AND nativo_json IS NOT NULL AND mappa_chiave IS NOT NULL ORDER BY id").pluck().all() as string[])
+      .find((m) => { const d = palazzi.get(m); return d !== undefined && d !== 'mementos'; })!;
   });
   afterAll(() => closeDb());
 

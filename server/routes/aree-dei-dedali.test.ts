@@ -54,7 +54,7 @@ describe('le aree dei dedali', () => {
     expect((await request(app).post(`/api/compendio/dedali/${QIMRANUT}/aree`).send({ nome: 'X', timbriTotale: -1 })).status).toBe(400);
   });
 
-  it('un\'area è completata quando lo sono tutti i suoi elementi (voci, anche «Altro», Richieste, timbri); un\'area vuota lo è; il dedalo quando lo sono tutte', async () => {
+  it('un\'area è completata quando lo sono tutti i suoi elementi (voci Trama, Richieste, timbri; le Persona non contano); un\'area vuota lo è; il dedalo quando lo sono tutte', async () => {
     const partita = await nuovaPartita('Aree complete');
     const prima = await dedalo(AIYATSBUS, partita);
     const area1 = prima.dedalo.aree[0];
@@ -64,13 +64,15 @@ describe('le aree dei dedali', () => {
     const conVuota = await dedalo(AIYATSBUS, partita);
     expect(conVuota.dedalo.aree.find((a) => a.chiave === vuota.chiave)).toMatchObject({ elementi: { totale: 0, fatti: 0 }, completata: true });
     expect(conVuota.dedalo.completato).toBe(false);
-    // tutte le voci dell'Area 1 segnate (anche «Altro»: nei dedali ogni elemento ha uno stato), Ottenute o Esaurite
-    const voci = prima.punti.filter((p) => p.areaDedalo === area1.chiave && !p.contenitore);
-    expect(voci.some((p) => p.tipo === 'altro')).toBe(true);
+    // tutte le voci Trama dell'Area 1 segnate, Ottenute o Esaurite; le Persona non contano (2026-10-11) e restano da segnare
+    const voci = prima.punti.filter((p) => p.areaDedalo === area1.chiave && p.tipo === 'trama');
+    expect(voci.length).toBeGreaterThan(0);
+    expect(prima.punti.some((p) => p.areaDedalo === area1.chiave && p.tipo === 'persona')).toBe(true);
     for (const [i, v] of voci.entries()) await segnaVoce(partita, v.chiave, i % 2 === 0 ? 'ottenuto' : 'esaurito');
     let d = await dedalo(AIYATSBUS, partita);
-    const vociDellArea = d.punti.filter((p) => p.areaDedalo === area1.chiave);
+    const vociDellArea = d.punti.filter((p) => p.areaDedalo === area1.chiave && p.tipo === 'trama');
     expect(vociDellArea.every((p) => p.stato !== null)).toBe(true);
+    expect(d.punti.filter((p) => p.areaDedalo === area1.chiave && p.tipo === 'persona').every((p) => p.stato === null)).toBe(true);
     // mancano ancora Richieste e timbri: l'area non è completata, e i timbri contano uno per timbro
     let a = d.dedalo.aree.find((x) => x.chiave === area1.chiave)!;
     expect(a).toMatchObject({ elementi: { totale: vociDellArea.length + a.richieste.length + 8, fatti: vociDellArea.length }, completata: false });
@@ -92,10 +94,10 @@ describe('le aree dei dedali', () => {
     expect((await dedalo(AIYATSBUS)).dedalo).toMatchObject({ completato: null, obiettivi: { fatti: null } });
   });
 
-  it('una voce «Altro» di un dedalo si segna, si collega alle condizioni e conta; fuori dai dedali resta descrittiva', async () => {
-    const partita = await nuovaPartita('Altro con stato');
+  it('una voce Trama di un dedalo (le «Altro» di prima, migrazione 100) si segna, si collega alle condizioni e conta; «Altro» fuori dai dedali resta descrittiva', async () => {
+    const partita = await nuovaPartita('Trama con stato');
     const d = await dedalo(QIMRANUT, partita);
-    const altro = d.punti.find((p) => p.tipo === 'altro')!;
+    const altro = d.punti.find((p) => p.tipo === 'trama')!;
     expect(altro.areaDedalo).toBe(`${QIMRANUT}-area-1`);
     await segnaVoce(partita, altro.chiave, 'ottenuto');
     expect((await dedalo(QIMRANUT, partita)).punti.find((p) => p.chiave === altro.chiave)?.stato).toBe('ottenuto');
@@ -106,7 +108,7 @@ describe('le aree dei dedali', () => {
     expect(citabili.some((v) => v.chiave === palazzo)).toBe(false);
   });
 
-  it('le voci nascono in un\'area del dedalo e si spostano fra le aree dello stesso dedalo, l\'Enigma coi suoi passi', async () => {
+  it('le voci nascono in un\'area del dedalo e si spostano fra le aree dello stesso dedalo', async () => {
     const area1 = `${QIMRANUT}-area-1`;
     const area2 = (await nuovaArea(QIMRANUT, { nome: 'Area 2' })).chiave;
     // in un dedalo l'area è obbligatoria e dev'essere sua; fuori dai dedali non c'è
@@ -114,22 +116,19 @@ describe('le aree dei dedali', () => {
     expect((await request(app).post(`/api/compendio/aree/${QIMRANUT}/punti`).send({ nome: 'Altrui', tipo: 'persona', areaDedalo: `${AIYATSBUS}-area-1` })).body.error.code).toBe('area-di-altro-dedalo');
     expect((await request(app).post('/api/compendio/aree/kamoshida-01-cancello-del-castello-ingresso/punti').send({ nome: 'X', tipo: 'persona', areaDedalo: area1 })).body.error.code).toBe('non-un-dedalo');
     const crea = async (corpo: Record<string, unknown>) => (await request(app).post(`/api/compendio/aree/${QIMRANUT}/punti`).send(corpo).expect(201)).body.data as PuntoInteresseDto;
-    const enigma = await crea({ nome: 'Enigma della banchina', tipo: 'puzzle', areaDedalo: area1 });
-    // un passo nasce nell'area del suo Enigma, anche senza dirla
-    const passo = await crea({ nome: 'Leva', tipo: 'meccanismo', contenitore: enigma.chiave });
-    expect(passo.areaDedalo).toBe(area1);
-    const sola = await crea({ nome: 'Nota della seconda area', tipo: 'altro', areaDedalo: area2 });
+    // nei dedali niente Enigmi né passi: le voci sono Persona o Trama (2026-10-11)
+    expect((await request(app).post(`/api/compendio/aree/${QIMRANUT}/punti`).send({ nome: 'Enigma', tipo: 'puzzle', areaDedalo: area1 })).body.error.code).toBe('tipo-non-del-dedalo');
+    const banchina = await crea({ nome: 'Jose alla banchina', tipo: 'trama', areaDedalo: area1 });
+    expect(banchina.areaDedalo).toBe(area1);
+    const sola = await crea({ nome: 'Nota della seconda area', tipo: 'trama', areaDedalo: area2 });
     expect(sola).toMatchObject({ areaDedalo: area2, ordine: 0 });
-    // un passo non lascia da solo l'area del suo Enigma
-    expect((await request(app).put(`/api/compendio/punti/${encodeURIComponent(passo.chiave)}`).send({ areaDedalo: area2 })).body.error.code).toBe('passo-di-altra-area');
-    // l'Enigma si sposta e i passi lo seguono; va in fondo all'altra area
-    const spostato = (await request(app).put(`/api/compendio/punti/${encodeURIComponent(enigma.chiave)}`).send({ areaDedalo: area2 }).expect(200)).body.data as PuntoInteresseDto;
-    expect(spostato).toMatchObject({ areaDedalo: area2, ordine: 1 });
-    expect(prepared('SELECT area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').pluck().get(passo.chiave)).toBe(area2);
+    // una voce passa a un'altra area e va in fondo
+    const spostata = (await request(app).put(`/api/compendio/punti/${encodeURIComponent(banchina.chiave)}`).send({ areaDedalo: area2 }).expect(200)).body.data as PuntoInteresseDto;
+    expect(spostata).toMatchObject({ areaDedalo: area2, ordine: 1 });
     // lo spostamento su e giù resta fra le voci della stessa area
     expect((await request(app).put(`/api/compendio/punti/${encodeURIComponent(sola.chiave)}/sposta`).send({ verso: -1 })).body.error.code).toBe('punto-al-limite');
-    await request(app).put(`/api/compendio/punti/${encodeURIComponent(enigma.chiave)}/sposta`).send({ verso: -1 }).expect(200);
-    expect((await dedalo(QIMRANUT)).punti.filter((p) => p.areaDedalo === area2 && !p.contenitore).sort((a, b) => a.ordine - b.ordine).map((p) => p.nome)).toEqual(['Enigma della banchina', 'Nota della seconda area']);
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(banchina.chiave)}/sposta`).send({ verso: -1 }).expect(200);
+    expect((await dedalo(QIMRANUT)).punti.filter((p) => p.areaDedalo === area2).sort((a, b) => a.ordine - b.ordine).map((p) => p.nome)).toEqual(['Jose alla banchina', 'Nota della seconda area']);
     // una voce dei Palazzi non riceve un'area del dedalo
     const palazzo = prepared('SELECT chiave FROM punto_interesse WHERE area_dedalo_chiave IS NULL LIMIT 1').pluck().get() as string;
     expect((await request(app).put(`/api/compendio/punti/${encodeURIComponent(palazzo)}`).send({ areaDedalo: area1 })).body.error.code).toBe('non-un-dedalo');

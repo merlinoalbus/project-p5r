@@ -10,6 +10,9 @@
 // guida (`GuidaDellArea`, dove ogni voce si segna). Un'area completata porta la ✓ e si chiude; si aggiungono, si spostano e si
 // eliminano aree; le Richieste rimaste senza area stanno in fondo, «da collocare». Ogni Richiesta ha «Modifica» e ogni area
 // «Aggiungi una Richiesta» (`ModuloRichiesta`, lo stesso della pagina delle Richieste: scelta «In entrambi i posti»).
+// Dal 2026-10-11 («le persona disponibili... con le loro immagini e cliccabili nella parte alta... A seguire le richieste e poi
+// gli elementi Trama»; scelta «In cima a ogni area») un'area mostra, in quest'ordine: le Persona (`PersoneDellArea`, fuori dal
+// conto), le Richieste, i timbri e le voci di Trama (`GuidaDellArea`).
 // ============================================================
 
 import { useState } from 'react';
@@ -24,6 +27,7 @@ import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { GuidaDellArea } from './GuidaDellArea';
 import { SpuntaCompletata, TestoCompletata } from './PlanimetriePalazzo';
 import { ModuloRichiesta } from './ModuloRichiesta';
+import { PersoneDellArea } from './PersoneDellArea';
 import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto, RichiestaDelDedaloDto, StatoPunto, StatoRichiesta } from '../../types';
 
 /** La chiave che nel selettore dell'area di una Richiesta vale «nessuna area». */
@@ -161,7 +165,10 @@ export function AreeDelDedalo({ dedalo, partitaId, cambiaStato, onPuntoAggiornat
                 </>}
               </CorrezioneGuida>
             </div>
-            {a.timbri && timbri(a, a.timbri)}
+            {/* l'ordine chiesto dall'utente (2026-10-11): in cima le Persona, poi le Richieste, poi la Trama; i timbri, che come
+                Richieste e Trama contano, stanno fra le Richieste e la Trama */}
+            <PersoneDellArea persone={voci.filter((p) => p.tipo === 'persona')} dedalo={dedalo.chiave} areaDedalo={{ chiave: a.chiave, nome: a.nome, altre }}
+              partitaId={partitaId} cambiaStato={cambiaStato} onRicarica={onRicarica} />
             {a.richieste.length > 0 && (
               <section className="flex flex-col gap-1" aria-label={`Richieste di ${a.nome}`}>
                 <strong className="text-[13px]">Richieste · {a.richieste.length}</strong>
@@ -169,7 +176,8 @@ export function AreeDelDedalo({ dedalo, partitaId, cambiaStato, onPuntoAggiornat
               </section>
             )}
             <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Richiesta" aria-label={`Aggiungi una Richiesta in ${a.nome}`} onClick={() => setModulo({ chiave: null, area: a.chiave })} />
-            <GuidaDellArea key={a.chiave} area={{ ...dedalo, punti: voci }} planimetrie={[]} partitaId={partitaId} mappaAperta={null}
+            {a.timbri && timbri(a, a.timbri)}
+            <GuidaDellArea key={a.chiave} area={{ ...dedalo, punti: voci.filter((p) => p.tipo !== 'persona') }} planimetrie={[]} partitaId={partitaId} mappaAperta={null}
               cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={onRicarica} areaDedalo={{ chiave: a.chiave, nome: a.nome, altre }} />
           </div>
         </details>
@@ -188,7 +196,7 @@ export function AreeDelDedalo({ dedalo, partitaId, cambiaStato, onPuntoAggiornat
           <span className="visore-mappa__progresso-barra" style={{ width: `${Math.round((fatti / obiettivi.totale) * 100)}%` }} />
         </span>
       )}
-      <p className="m-0 text-[11px] text-text-muted">Gli elementi di un’area sono le sue voci, le sue Richieste e i suoi timbri: l’area è completata quando lo sono tutti, il dedalo quando lo sono tutte le sue aree.</p>
+      <p className="m-0 text-[11px] text-text-muted">Gli elementi di un’area sono le sue Richieste, i suoi timbri e le sue voci di Trama: l’area è completata quando lo sono tutti, il dedalo quando lo sono tutte le sue aree. Le Persona si segnano catturate e non contano.</p>
       {aree.length === 0 && <p className="m-0 text-[12px] text-text-muted" role="status">Questo dedalo non ha ancora aree: aggiungine una qui sotto.</p>}
       <ol className="m-0 flex list-none flex-col gap-2 p-0" aria-label={`Elenco delle aree di ${dedalo.nome}`}>{aree.map(area)}</ol>
       {daCollocare.length > 0 && (
