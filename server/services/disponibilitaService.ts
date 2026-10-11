@@ -298,7 +298,8 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       const valutato = valuta(riga, st);
       // Palazzo non completato e richiesta non conclusa sono fatti che l'app registra (Tesoro, boss e raccolta; richiesta completata): per la
       // disponibilità valgono come blocco, non come dubbio da confermare a mano.
-      if ((tipo === 'palazzo' || tipo === 'richiesta') && valutato.stato === 'grigio') {
+      // (una Richiesta che non c'è più resta grigia, da correggere: `manuale: false`, non un dubbio da confermare)
+      if ((tipo === 'palazzo' || tipo === 'richiesta') && valutato.stato === 'grigio' && valutato.manuale !== false) {
         return { ...valutato, stato: 'rosso', manuale: false, dettaglio: valutato.dettaglio.replace(/\s*(?:—\s*)?(?:o|oppure) conferma qui\s*$/, '') };
       }
       return { ...valutato, manuale: false };

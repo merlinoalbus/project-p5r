@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
+  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, VideogiochiDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
@@ -140,6 +140,26 @@ export const creaAreaDedalo = (dedalo: string, dati: DatiAreaDedaloApi & { nome:
 export const aggiornaAreaDedalo = (chiave: string, dati: DatiAreaDedaloApi): Promise<AreaDedaloDto> => apiPut(`/compendio/aree-dedalo/${encodeURIComponent(chiave)}`, dati);
 /** Un posto su (-1) o giù (+1) fra le aree del dedalo. Relativo: nessun nuovo tentativo. */
 export const spostaAreaDedalo = (chiave: string, verso: -1 | 1): Promise<AreaDedaloDto> => apiPut(`/compendio/aree-dedalo/${encodeURIComponent(chiave)}/sposta`, { verso }, { maxRetries: 0 });
+/* ---- Le Richieste modificabili, aggiungibili ed eliminabili (2026-10-11) ---- */
+/** I campi di una Richiesta che il modulo scrive; `dedalo`/`areaDedalo` null = in nessun dedalo / da collocare. */
+export interface DatiRichiestaApi {
+  nome?: string; committente?: string; disponibileDal?: string; scadenza?: string; dedalo?: string | null; areaDedalo?: string | null; piano?: string;
+  bersaglio?: RichiestaDto['bersaglio']; ricompense?: string[]; confidente?: string | null; confidenteRango?: number | null; note?: string;
+}
+/** Una Richiesta nuova (nome e bersaglio obbligatori); risponde con la Richiesta creata. */
+export const creaRichiesta = (dati: DatiRichiestaApi & { nome: string; bersaglio: RichiestaDto['bersaglio'] }): Promise<RichiestaDto> => apiPost('/compendio/richieste', dati);
+/** Corregge una Richiesta (solo i campi mandati); risponde con la Richiesta aggiornata. */
+export const aggiornaRichiesta = (chiave: string, dati: DatiRichiestaApi): Promise<RichiestaDto> => apiPut(`/compendio/richieste/${encodeURIComponent(chiave)}`, dati);
+/** Chi cita la Richiesta: lo si dice prima di eliminarla. */
+export const getCitazioniRichiesta = (chiave: string): Promise<CitazioniRichiestaDto> => apiGet(`/compendio/richieste/${encodeURIComponent(chiave)}/citazioni`);
+/** Elimina la Richiesta per tutte le partite (204). */
+export const eliminaRichiesta = (chiave: string): Promise<void> => apiDelete(`/compendio/richieste/${encodeURIComponent(chiave)}`);
+/** Un requisito di un Confidente che cita una Richiesta passa a citarne un'altra (2026-10-11, «Requisito correggibile»). */
+export const correggiRequisitoRichiesta = (confidente: string, rango: number, indice: number, richiesta: string): Promise<void> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(confidente)}/requisiti/${rango}/${indice}`, { richiesta });
+/** Toglie un requisito di un Confidente che cita una Richiesta, per tutte le partite. */
+export const togliRequisitoRichiesta = (confidente: string, rango: number, indice: number): Promise<void> =>
+  apiDelete(`/compendio/confidenti/${encodeURIComponent(confidente)}/requisiti/${rango}/${indice}`);
 /** Colloca una Richiesta in un'area di un dedalo, o la toglie dall'area (null: resta nel dedalo, da collocare). */
 export const collocaRichiesta = (chiave: string, areaDedalo: string | null): Promise<RichiestaDto> => apiPut(`/compendio/richieste/${encodeURIComponent(chiave)}/area`, { areaDedalo });
 /** Elimina l'area del dedalo per tutte le partite: le voci con lei, le Richieste restano da collocare. */

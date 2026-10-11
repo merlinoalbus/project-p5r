@@ -36,6 +36,12 @@ export interface StatoPartitaSemafori {
   /** Che cosa manca ai Palazzi non completati (`statoPalazzi`): per dirlo nel requisito. Assente = si dicono tutte e tre le condizioni. */
   palazziMancanze?: Map<string, string>;
   richiesteCompletate: Set<string>;
+  /** Le Richieste che esistono nel file di gioco, per chiave e per nome in minuscolo: una citata che non c'è più (eliminata,
+   *  2026-10-11) è un requisito da correggere, grigio, non una Richiesta «non completata». Assente = non si controlla. */
+  richiesteEsistenti?: Set<string>;
+  /** Il nome di ogni Richiesta per chiave: un requisito che la cita per chiave (dopo un cambio di nome o una correzione, 2026-10-11)
+   *  la mostra col suo nome. Assente = si mostra quel che cita. */
+  nomiRichieste?: Map<string, string>;
   ranghiConfidenti: Map<string, number>;
   /** I Ladri che hai detto di avere nel gruppo. */
   membriSquadra: Set<string>;
@@ -60,6 +66,9 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const abilita = new Set((prepared(`SELECT p.nome AS persona, s.nome AS abilita FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id
     JOIN persona_posseduta_skill ps ON ps.posseduta_id = pp.id JOIN skill s ON s.id = ps.skill_id WHERE pp.partita_id = ?`).all(partitaId) as Array<{ persona: string; abilita: string }>)
     .map((r) => `${r.persona.toLowerCase()}|${r.abilita.toLowerCase()}`));
+  const tutteLeRichieste = prepared('SELECT chiave, nome FROM richiesta').all() as Array<{ chiave: string; nome: string }>;
+  const richiesteEsistenti = new Set(tutteLeRichieste.flatMap((r) => [r.chiave, r.nome.toLowerCase()]));
+  const nomiRichieste = new Map(tutteLeRichieste.map((r) => [r.chiave, r.nome]));
   const richieste = new Set((prepared("SELECT rp.richiesta_chiave, r.nome FROM richiesta_partita rp JOIN richiesta r ON r.chiave = rp.richiesta_chiave WHERE rp.partita_id = ? AND rp.stato = 'completata'").all(partitaId) as Array<{ richiesta_chiave: string; nome: string }>).flatMap((r) => [r.richiesta_chiave, r.nome.toLowerCase()]));
   const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
   const dataGioco = partita?.data_gioco ?? null;
@@ -75,7 +84,7 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const palazzi = statoPalazzi(partitaId);
   const palazziCompletati = new Map([...palazzi].flatMap(([k, s]) => (s.completato ? [[k, s.completato] as [string, string]] : [])));
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.manca ? [[k, s.manca] as [string, string]] : [])));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati, palazziMancanze, richiesteCompletate: richieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), conferme, eventi };
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziCompletati, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), conferme, eventi };
 }
 
 // L'ordine del calendario di gioco e i nomi dei Palazzi vengono da `shared/condizioniSpillo.ts`: qui erano riscritti a mano
@@ -121,8 +130,15 @@ export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequ
     }
     case 'richiesta': {
       const nome = String(dati.richiesta);
+      // eliminata dopo aver scritto il requisito (o la condizione): non si sa, e lo si dice dove correggerlo (scelta dell'utente,
+      // 2026-10-11: «Si elimina e si avvisa»)
+      if (st.richiesteEsistenti && !st.richiesteEsistenti.has(nome) && !st.richiesteEsistenti.has(nome.toLowerCase())) {
+        return { ...base, stato: 'grigio', dettaglio: `La Richiesta «${nome}» non c’è più: correggi quel che la cita`, manuale: false };
+      }
       const ok = st.richiesteCompletate.has(nome) || st.richiesteCompletate.has(nome.toLowerCase());
-      return ok ? { ...base, stato: 'verde', dettaglio: `Richiesta «${nome}» completata`, manuale: false } : { ...base, stato: 'rosso', dettaglio: `Richiesta «${nome}» non risulta completata (Guida → Richieste)`, manuale: false };
+      // citata per chiave: si mostra col suo nome
+      const visibile = st.nomiRichieste?.get(nome) ?? nome;
+      return ok ? { ...base, stato: 'verde', dettaglio: `Richiesta «${visibile}» completata`, manuale: false } : { ...base, stato: 'rosso', dettaglio: `Richiesta «${visibile}» non risulta completata (Guida → Richieste)`, manuale: false };
     }
     case 'squadra': {
       const chiave = String(dati.membro);

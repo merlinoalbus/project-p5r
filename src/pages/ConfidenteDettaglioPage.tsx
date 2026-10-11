@@ -12,8 +12,9 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { SemaforiRango } from '../components/partita/SemaforiRango';
+import { CorreggiRequisito } from '../components/partita/CorreggiRequisito';
 import { IconChevronLeft } from '../components/shared/icons';
-import type { DialogoConfidenteDto } from '../types';
+import type { DialogoConfidenteDto, SemaforoRequisitoDto } from '../types';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
@@ -77,6 +78,8 @@ export function ConfidenteDettaglioPage() {
   const prossimo = mio ? mio.rango + 1 : null;
 
   const [confermaInCorso, setConfermaInCorso] = useState(false);
+  /** Il requisito «da correggere» aperto nella finestra di correzione (una Richiesta che non c'è più, 2026-10-11). */
+  const [correzione, setCorrezione] = useState<{ rango: number; r: SemaforoRequisitoDto } | null>(null);
   /** Conferma o annulla a mano un requisito di rango nella partita attiva, poi rilegge lo stato della partita; durante la richiesta i semafori sono occupati, l'errore viene notificato. */
   const conferma = async (rango: number, indice: number, confermato: boolean) => {
     if (!attiva) return;
@@ -132,7 +135,7 @@ export function ConfidenteDettaglioPage() {
             <section className="card flex flex-col gap-2 border-primary">
               <h2 className="m-0 text-[15px] font-semibold">Prossimo passo: rango {prossimo}</h2>
               {mio && mio.semafori.length > 0 && mio.semafori[0].rango <= prossimo && (
-                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} />
+                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={(rango, r) => setCorrezione({ rango, r })} />
               )}
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
                 {c.dialoghi.filter((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo).map((d) => (
@@ -145,7 +148,7 @@ export function ConfidenteDettaglioPage() {
           {mio && mio.semafori.length > 1 && (
             <section className="card flex flex-col gap-3">
               <h2 className="m-0 text-[15px] font-semibold">Requisiti dei ranghi successivi</h2>
-              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} />)}
+              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={(rango, r) => setCorrezione({ rango, r })} />)}
             </section>
           )}
           <section className="card flex flex-col gap-2">
@@ -206,6 +209,8 @@ export function ConfidenteDettaglioPage() {
           )}
         </div>
       )}
+      {correzione && c && <CorreggiRequisito confidente={{ chiave: c.chiave, nome: c.nome }} rango={correzione.rango} requisito={correzione.r}
+        onChiudi={() => setCorrezione(null)} onCorretto={async () => { await ricarica(); await stato.ricarica(); }} />}
     </PageState>
   );
 }

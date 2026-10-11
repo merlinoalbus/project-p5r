@@ -1578,5 +1578,32 @@ Che cosa ne segue (prima parte, le aree dei dedali):
   Richiesta, `PUT /api/compendio/richieste/:chiave/area`).
 - **La parte C** (voci scelte una per una come obiettivi) è sostituita: contano tutti gli elementi delle aree. La voce del
   2026-09-12 «Nei Memento la colonna sono gli obiettivi del dedalo (timbri + richieste)» è superata.
-- **Seconda parte, da fare:** modulo delle Richieste (modifica, aggiunta, eliminazione con avviso) nella pagina Richieste e
-  nella colonna del dedalo.
+
+Che cosa ne segue (seconda parte, le Richieste modificabili):
+- **Dove.** Lo stesso modulo (`ModuloRichiesta`) si apre da «Modifica» su ogni carta della pagina Richieste e su ogni Richiesta
+  della colonna del dedalo, e da «Aggiungi una Richiesta» in cima alla pagina e in ogni area del dedalo (lì nasce in quell'area).
+- **Campi.** Tutti quelli della carta: nome, committente, date, dedalo e area del dedalo (o «da collocare»), piano, bersaglio con
+  forma demoniaca, livello, debolezze e resistenze (una per riga), confusione utile, ricompense, Confidente e rango, note.
+- **La chiave non cambia mai**, nemmeno col nome. I requisiti dei Confidenti della guida citano le Richieste per **nome**:
+  rinominandone una, quelli che la citavano passano a citarla per chiave e il loro testo dice il nome nuovo, altrimenti
+  smetterebbero in silenzio di riconoscerla. La colonna `area` tiene la prosa della guida sul dove («Dedalo di Aiyatsbus (Area 7)
+  / Dedalo di Da'at (Area 1) se rimandata…») finché la Richiesta non cambia dedalo.
+- **Eliminazione** («Si elimina e si avvisa»): prima la finestra dice chi la cita (partite con uno stato, pin, condizioni anche
+  dentro i gruppi, requisiti dei Confidenti, azioni della giornata); poi se ne vanno i suoi stati nelle partite, i
+  pin e le azioni perdono il collegamento e restano; condizioni e requisiti restano e diventano grigi, «Da correggere» (prima una
+  Richiesta che non c'era risultava «non completata», rossa). Le «azioni del percorso» dell'opzione sono le azioni della
+  giornata (`voce_giornata`, migrazione 092); la copia storica in `giorno_percorso.azioni_json` non si conta e non si tocca.
+  Requisiti e condizioni che la citavano per chiave tornano a citarla per nome (scelta tecnica, non dell'utente: la chiave di una
+  Richiesta che non c'è più non dice nulla, e l'avviso mostrava «lo-zio-ingordo» invece di «Lo zio ingordo»).
+- **Nome unico.** Due Richieste non possono avere lo stesso nome (senza badare alle maiuscole, accentate comprese: «È» e «è» sono la
+  stessa lettera, come per i semafori): i requisiti dei Confidenti citano per nome e diventerebbero ambigui. Rinominando, anche le voci della giornata che la indicano mostrano il nome nuovo.
+- **Aggiungere senza aree.** In fondo alla colonna del dedalo c'è anche «Aggiungi una Richiesta» (nasce nel dedalo, l'area si
+  sceglie nel modulo o resta da collocare): serve a un dedalo che non ha ancora aree.
+- **Correggere i requisiti dei Confidenti** (rilievo del validatore: nell'app non c'era modo di correggerli e il rango restava
+  bloccato per sempre). Domanda: «Se elimini una Richiesta citata da un requisito di un Confidente, il requisito resta «da
+  correggere» ma oggi nell'app non c'è modo di correggerlo, e quel rango non risulterebbe mai pronto. Come preferisci?» →
+  «Requisito correggibile (Recommended)» (testo dell'opzione: «Aggiungo nella scheda del Confidente il modo di correggere un
+  requisito «da correggere»: scegliere un'altra Richiesta al suo posto, oppure toglierlo. Così vale davvero «restano, da
+  correggere» e il rango si sblocca correggendo.»). Il semaforo dice «da correggere» (non «da confermare») e porta «Correggi»,
+  nella scheda del Confidente e in Partita → Confidenti; la finestra cambia la Richiesta citata (per chiave) o toglie il requisito
+  per tutte le partite, con le conferme a mano che ne avevano.

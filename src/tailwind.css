@@ -1482,6 +1482,12 @@
 .selettore--compatto .selettore__tendina { width:max(100%, 260px); }
 /* Senza spazio a destra la tendina si appende al bordo destro del pulsante: mai fuori dalla finestra. */
 .selettore__tendina--destra { left:auto; right:0; }
+/* In linea: la tendina si apre nel flusso e allunga chi la contiene, invece di sovrapporsi. Per un selettore in fondo a una
+   finestra breve, dove sovrapposta resterebbe tagliata dal corpo scorrevole (si vedeva una riga). Sul telefono resta il foglio
+   dal basso: la regola sotto, a pari specificità, viene dopo. */
+.selettore--in-linea .selettore__tendina { position:static; width:auto; max-width:none; margin-top:2px; box-shadow:none; }
+/* l'elenco aperto allunga la finestra: più basso, perché ci stia intero (a 1366×657 la finestra andava a scorrere insieme all'elenco) */
+@media (min-width: 640px) { .selettore--in-linea .selettore__elenco { max-height:min(30vh, 320px); } }
 /* Il selettore dell'editor sta accanto a campi da 44 px: due comandi affiancati con due misure
    erano l'ultima misura doppia rimasta. */
 .editor-mappa__campo .selettore__scelta { min-height:44px; }

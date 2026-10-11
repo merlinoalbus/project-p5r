@@ -32,8 +32,8 @@ function destinazione(grigi: DisponibilitaDto['requisiti']): string {
 /**
  * Cartellino di disponibilità: niente se disponibile o senza dato; «Non ancora» se bloccato. Altrimenti guarda solo i
  * requisiti propri della riga (non quelli ereditati dal negozio) e, se nessuno è in sospeso, non mostra nulla; poi in
- * ordine: «Da verificare» se una condizione non è leggibile dall'app, «Da correggere» se rimanda a uno stato di un pin
- * che non c'è più, altrimenti «Da segnare» come collegamento alla scheda della Partita dove si registra il dato.
+ * ordine: «Da verificare» se una condizione non è leggibile dall'app, «Da correggere» se rimanda a uno stato di un pin, a una
+ * voce della guida o a una Richiesta che non c'è più, altrimenti «Da segnare» come collegamento alla scheda della Partita dove si registra il dato.
  * `compatto` riduce testo e icona.
  */
 export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilita: DisponibilitaDto | undefined; compatto?: boolean }) {
@@ -68,14 +68,16 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   // il grigio di uno stato di un altro pin (2026-10-03) è una condizione rotta — il pin citato non c'è più o non ha più uno
   // stato —, come quello di una voce della guida che non c'è più o è diventata descrittiva (2026-10-11): nella partita non c'è
   // niente da segnare, la si corregge nell'editor della mappa
-  const daCorreggere = grigiProprie.some((r) => r.tipo === 'spillo' || r.tipo === 'voce-guida');
+  const nellaMappa = grigiProprie.some((r) => r.tipo === 'spillo' || r.tipo === 'voce-guida');
+  // e il grigio di una Richiesta citata che non c'è più (eliminata, 2026-10-11): si corregge dove sta la condizione
+  const daCorreggere = nellaMappa || grigiProprie.some((r) => r.tipo === 'richiesta');
   if (nonLeggibili) return (
     <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Da verificare: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da verificare
     </span>
   );
   if (daCorreggere) return (
-    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Condizione da correggere nell’editor della mappa: ${motivi}`}>
+    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Condizione da correggere${nellaMappa ? ' nell’editor della mappa' : ''}: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da correggere
     </span>
   );

@@ -148,6 +148,36 @@ describe('Selettore', () => {
     Object.defineProperty(window, 'innerWidth', { value: larghezzaOriginale, configurable: true });
   });
 
+  it('in una finestra il corpo scorre quanto basta a mostrare la tendina, senza far uscire il pulsante dalla cima', () => {
+    render(<div className="modal-body"><Selettore etichetta="Scelta" valore="" opzioni={poche} onCambia={() => {}} /></div>);
+    const corpo = document.querySelector<HTMLElement>('.modal-body')!;
+    const pulsante = screen.getByRole('combobox', { name: 'Scelta' });
+    /** Rettangoli finti: il corpo va da 100 a 100 + altezza a schermo; pulsante e fondo della tendina dove li mette la prova. */
+    let schermo = 300; let cimaPulsante = 0; let fondoTendina = 0;
+    Object.defineProperty(corpo, 'offsetHeight', { value: 300, configurable: true });
+    const rettangolo = (top: number, bottom: number): DOMRect => ({ left: 0, right: 100, top, bottom, width: 100, height: bottom - top, x: 0, y: top, toJSON: () => ({}) }) as DOMRect;
+    const spia = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this === corpo) return rettangolo(100, 100 + schermo);
+      if (this === pulsante) return rettangolo(cimaPulsante, cimaPulsante + 44);
+      if (this.classList.contains('selettore__tendina')) return rettangolo(cimaPulsante + 46, fondoTendina);
+      return rettangolo(0, 0);
+    });
+    /** Apre la tendina partendo da `scrollTop` 0 e dice di quanto è sceso il corpo; poi la richiude. */
+    const apri = (cima: number, fondo: number): number => {
+      cimaPulsante = cima; fondoTendina = fondo; corpo.scrollTop = 0;
+      fireEvent.click(pulsante);
+      const sceso = corpo.scrollTop;
+      fireEvent.click(pulsante);
+      return sceso;
+    };
+    expect(apri(150, 380)).toBe(0); // ci sta: fermo
+    expect(apri(300, 520)).toBe(120); // sporge di 120 sotto il fondo (400): scende di 120
+    expect(apri(150, 600)).toBe(50); // sporge di 200, ma il pulsante è a 50 dalla cima: scende di 50 e il pulsante resta in vista
+    schermo = 285; // finestra ancora in scala 0.95 (animazione d'apertura): 95 a schermo sono 100 veri
+    expect(apri(300, 480)).toBe(100);
+    spia.mockRestore();
+  });
+
   it('disabilitato non si apre', () => {
     render(<Selettore etichetta="Scelta" valore="" opzioni={poche} onCambia={() => {}} disabilitato />);
     const pulsante = screen.getByRole('combobox', { name: 'Scelta' });

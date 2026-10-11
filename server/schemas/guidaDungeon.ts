@@ -75,3 +75,31 @@ export const bodyAtterraggi = z.object({
 
 /** L'area del dedalo in cui collocare una Richiesta (099); null la toglie dall'area (resta nel dedalo, da collocare). */
 export const bodyCollocaRichiesta = z.object({ areaDedalo: z.string().min(1).max(200).nullable() });
+
+/* ---- Le Richieste dei Mementos modificabili (2026-10-11: «Modifica, aggiungi, elimina») ---- */
+const R = LIMITI_GUIDA.richiesta;
+/** Un elenco di voci brevi (debolezze, resistenze, ricompense): spazi tolti, vuote scartate. */
+const elencoVoci = z.array(z.string().trim().max(R.voce)).max(R.voci).transform((v) => v.filter((x) => x.length > 0));
+/** Il bersaglio della Richiesta: nome obbligatorio, il resto facoltativo. */
+const bersaglio = z.object({
+  nome: z.string().trim().min(1).max(R.nome), formaDemoniaca: z.string().trim().max(R.voce).default(''),
+  livello: z.number().int().min(1).max(99).nullable().default(null),
+  debolezze: elencoVoci.default([]), resistenze: elencoVoci.default([]), vulnerabileConfusione: z.boolean().default(false),
+});
+/** I campi di una Richiesta da correggere: si cambiano solo quelli inviati. `dedalo` e `areaDedalo` dicono dove sta (null = in
+ *  nessun dedalo / da collocare). */
+export const bodyRichiesta = z.object({
+  nome: z.string().trim().min(1).max(R.nome).optional(), committente: z.string().trim().max(R.breve).optional(),
+  disponibileDal: z.string().trim().max(R.breve).optional(), scadenza: z.string().trim().max(R.breve).optional(),
+  dedalo: z.string().min(1).max(200).nullable().optional(), areaDedalo: z.string().min(1).max(200).nullable().optional(),
+  piano: z.string().trim().max(R.breve).optional(), bersaglio: bersaglio.optional(), ricompense: elencoVoci.optional(),
+  confidente: z.string().min(1).max(200).nullable().optional(), confidenteRango: z.number().int().min(1).max(R.rango).nullable().optional(),
+  note: z.string().trim().max(R.note).optional(),
+});
+/** Una Richiesta nuova: nome e bersaglio obbligatori. */
+export const bodyNuovaRichiesta = bodyRichiesta.extend({ nome: z.string().trim().min(1).max(R.nome), bersaglio });
+
+/** Un requisito di un Confidente: confidente, rango e indice nel rango (2026-10-11, correzione dei requisiti sulle Richieste). */
+export const paramsRequisitoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().int().min(1).max(10), indice: z.coerce.number().int().min(0).max(99) });
+/** La Richiesta che il requisito cita al posto di quella di prima. */
+export const bodyRequisitoRichiesta = z.object({ richiesta: z.string().min(1).max(200) });

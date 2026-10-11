@@ -11,8 +11,8 @@ import { ConfidenteDettaglioPage } from './ConfidenteDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { ConfidenteDettaglioDto, ConfidentePartitaDto, PartitaDto } from '../types';
 
-const { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro } = vi.hoisted(() => ({ getConfidenteDettaglio: vi.fn(), getConfidentiPartita: vi.fn(), impostaRegaloFatto: vi.fn(), impostaDotiIncontro: vi.fn() }));
-vi.mock('../services/api', (vero) => moduloApi(vero, { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro }));
+const { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro, getRichieste, togliRequisitoRichiesta } = vi.hoisted(() => ({ getConfidenteDettaglio: vi.fn(), getConfidentiPartita: vi.fn(), impostaRegaloFatto: vi.fn(), impostaDotiIncontro: vi.fn(), getRichieste: vi.fn(), togliRequisitoRichiesta: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro, getRichieste, togliRequisitoRichiesta }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/shared/ImmagineEntita', () => ({ ImmagineEntita: () => null }));
 
@@ -91,5 +91,23 @@ describe('ConfidenteDettaglioPage — fonti (A8, verifica 2026-10-03)', () => {
     expect(await screen.findByRole('heading', { name: 'Takemi' })).toBeInTheDocument();
     expect(screen.getByText(/guida cartacea/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'www.allgamestaff.it' })).toHaveAttribute('href', 'https://www.allgamestaff.it/x');
+  });
+
+  it('un requisito rimasto su una Richiesta che non c’è più si corregge dalla scheda: «Correggi» apre la finestra, e dopo si rilegge', async () => {
+    usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova' } as PartitaDto });
+    getConfidenteDettaglio.mockResolvedValue(dettaglio);
+    const rotto = { indice: 0, tipo: 'richiesta', testo: 'Completare la richiesta «Un fidanzato violento»', stato: 'grigio' as const, dettaglio: 'La Richiesta «Un fidanzato violento» non c’è più: correggi quel che la cita', manuale: false, confermato: false };
+    getConfidentiPartita.mockResolvedValue([{ ...stato, semafori: [{ rango: 2, pronto: false, requisiti: [rotto] }] }]);
+    getRichieste.mockResolvedValue({ richieste: [], jose: null, dedali: [], completate: 0, totale: 0, collocazioni: [] });
+    togliRequisitoRichiesta.mockResolvedValue(undefined);
+    render(<MemoryRouter initialEntries={['/confidenti/takemi']}><Routes><Route path="/confidenti/:chiave" element={<ConfidenteDettaglioPage />} /></Routes></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: /Correggi/ }));
+    const finestra = await screen.findByRole('dialog', { name: 'Correggi il requisito · Takemi, rango 2' });
+    const letture = getConfidentiPartita.mock.calls.length;
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli il requisito' }));
+    await act(async () => { fireEvent.click(within(finestra).getByRole('button', { name: 'Confermo' })); });
+    expect(togliRequisitoRichiesta).toHaveBeenCalledWith('takemi', 2, 0);
+    expect(getConfidentiPartita.mock.calls.length).toBeGreaterThan(letture);
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 });

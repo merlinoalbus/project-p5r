@@ -1664,6 +1664,22 @@ export interface RichiesteDto {
   dedali: Array<{ chiave: string; nome: string; ordine: number; totale: number; completate: number }>;
   completate: number;
   totale: number;
+  /** Dove si può mettere una Richiesta (modulo, 2026-10-11): tutti i dedali dei Memento, in ordine, con le loro aree (099). */
+  collocazioni: Array<{ chiave: string; nome: string; aree: Array<{ chiave: string; nome: string }> }>;
+}
+
+/** Chi cita una Richiesta, detto prima di eliminarla (scelta dell'utente, 2026-10-11: «Si elimina e si avvisa»). */
+export interface CitazioniRichiestaDto {
+  /** Quante partite ne hanno segnato uno stato (se ne vanno con lei). */
+  partite: number;
+  /** I pin che la indicano (perdono il collegamento). */
+  pin: string[];
+  /** Le righe con una condizione che la cita («Libro: …», «Pin: …»): restano, da correggere. */
+  condizioni: string[];
+  /** I requisiti dei Confidenti che la citano («Futaba Sakura, rango 7»): restano, da correggere. */
+  requisiti: string[];
+  /** Le azioni della giornata (`voce_giornata`) che la indicano (perdono il collegamento). */
+  azioni: number;
 }
 
 // ---- Dungeon: Palazzi e Dedali (Fase 7.1) ----

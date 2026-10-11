@@ -308,6 +308,42 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'area-non-trovata']],
   },
+  'POST /api/compendio/richieste': {
+    sommario: 'Aggiunge una Richiesta dei Mementos',
+    descrizione: 'Nome e bersaglio (col suo nome) obbligatori; il resto facoltativo: committente, date, `dedalo` e `areaDedalo` (un\'area porta con sé il suo dedalo; senza area la Richiesta resta da collocare nel dedalo), piano, debolezze, resistenze, confusione utile, ricompense, Confidente e rango, note. Il nome è unico (409 `nome-gia-usato`: i requisiti dei Confidenti citano per nome). La chiave nasce dal nome e non cambia più. Va in fondo all\'elenco. Dato di gioco: vale per tutte le partite.',
+    risposta: 'La Richiesta creata (senza stato di partita), `RichiestaDto`',
+    errori: [[404, 'area-dedalo-non-trovata'], [404, 'area-non-trovata'], [400, 'area-di-altro-dedalo'], [400, 'non-un-dedalo'], [404, 'confidente-non-trovato'], [409, 'nome-gia-usato']],
+  },
+  'PUT /api/compendio/richieste/:chiave': {
+    sommario: 'Corregge una Richiesta dei Mementos',
+    descrizione: 'Si cambiano solo i campi inviati; la chiave resta. Cambiando dedalo senza dire l\'area la Richiesta resta da collocare nel dedalo nuovo, e va in fondo all\'elenco. Cambiando nome (che resta unico, 409 `nome-gia-usato`), i requisiti dei Confidenti che la citavano per nome passano a citarla per chiave, col nome nuovo nel testo, e le voci della giornata che la indicano mostrano il nome nuovo. Togliendo il Confidente si toglie anche il rango.',
+    risposta: 'La Richiesta aggiornata (senza stato di partita), `RichiestaDto`',
+    errori: [[404, 'richiesta-non-trovata'], [404, 'area-dedalo-non-trovata'], [404, 'area-non-trovata'], [400, 'area-di-altro-dedalo'], [400, 'non-un-dedalo'], [404, 'confidente-non-trovato'], [409, 'nome-gia-usato']],
+  },
+  'GET /api/compendio/richieste/:chiave/citazioni': {
+    sommario: 'Chi cita una Richiesta',
+    descrizione: 'Per l\'avviso prima di eliminarla: quante partite ne hanno uno stato, i pin che la indicano, le righe con una condizione che la cita (pin, negozi, articoli, libri, film, attività, luoghi, gruppi compresi), i requisiti dei Confidenti (per chiave o per nome) e quante azioni della giornata (`voce_giornata`) la indicano.',
+    risposta: '`CitazioniRichiestaDto`',
+    errori: [[404, 'richiesta-non-trovata']],
+  },
+  'DELETE /api/compendio/richieste/:chiave': {
+    sommario: 'Elimina una Richiesta, per tutte le partite',
+    descrizione: 'Scelta dell\'utente «Si elimina e si avvisa»: in una transazione se ne vanno i suoi stati nelle partite; i pin e le azioni della giornata (`voce_giornata`) che la indicavano perdono il collegamento e restano; le condizioni e i requisiti che la citano restano e diventano grigi, da correggere.',
+    risposta: 'Nessun contenuto (204)',
+    errori: [[404, 'richiesta-non-trovata']],
+  },
+  'PUT /api/compendio/confidenti/:chiave/requisiti/:rango/:indice': {
+    sommario: 'Corregge un requisito di un Confidente che cita una Richiesta',
+    descrizione: 'Scelta dell\'utente «Requisito correggibile»: un requisito che cita una Richiesta (per esempio eliminata, quindi «da correggere») passa a citare la Richiesta `richiesta`, per chiave. Il testo cambia il nome citato (o diventa la frase standard col nome nuovo). Solo per i requisiti di tipo «richiesta». Dato di gioco: vale per tutte le partite.',
+    risposta: 'Nessun contenuto (204)',
+    errori: [[404, 'requisito-non-trovato'], [400, 'requisito-non-di-richiesta'], [404, 'richiesta-non-trovata']],
+  },
+  'DELETE /api/compendio/confidenti/:chiave/requisiti/:rango/:indice': {
+    sommario: 'Toglie un requisito di un Confidente che cita una Richiesta',
+    descrizione: 'Il requisito se ne va per tutte le partite, con le conferme a mano che ne avevano; gli altri requisiti del rango tengono il loro indice. Solo per i requisiti di tipo «richiesta».',
+    risposta: 'Nessun contenuto (204)',
+    errori: [[404, 'requisito-non-trovato'], [400, 'requisito-non-di-richiesta']],
+  },
   'PUT /api/compendio/richieste/:chiave/area': {
     sommario: 'Colloca una Richiesta in un\'area di un dedalo dei Memento',
     descrizione: 'Le Richieste sono elementi delle aree dei dedali (099). Con `areaDedalo` la Richiesta passa in quell\'area e il suo dedalo diventa quello dell\'area (in fondo alle Richieste, se cambia dedalo); con `null` resta nel suo dedalo ma da collocare, fuori dal conteggio. Dato di gioco: vale per tutte le partite, e lo stato nelle partite resta.',

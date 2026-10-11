@@ -19,10 +19,11 @@ import { Modal } from '../shared/Modal';
 import { AssetImg } from '../shared/AssetImg';
 import { AnelloAvanzamento } from '../shared/AnelloAvanzamento';
 import { slug } from '../../../shared/slug';
-import type { BonusEsame, ConfidentePartitaDto, ModificaConfidente } from '../../types';
+import type { BonusEsame, ConfidentePartitaDto, ModificaConfidente, SemaforoRequisitoDto } from '../../types';
 import { anteprimaPunti, formattaPunti } from '../../utils/punti';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { SemaforiRango } from './SemaforiRango';
+import { CorreggiRequisito } from './CorreggiRequisito';
 import { IconMaschera } from '../shared/iconeGuida';
 import { IconaAzione } from '../shared/IconaAzione';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
@@ -55,6 +56,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
   const [occupato, setOccupato] = useState<string | null>(null);
   const sugg = useSuggerimenti();
   const [modifica, setModifica] = useState<ConfidentePartitaDto | null>(null);
+  /** Il requisito «da correggere» aperto nella finestra di correzione (una Richiesta che non c'è più, 2026-10-11). */
+  const [correzione, setCorrezione] = useState<{ c: ConfidentePartitaDto; rango: number; r: SemaforoRequisitoDto } | null>(null);
   const [note, setNote] = useState('');
   // Moltiplicatori globali (valgono per tutte le card finché l'utente non li cambia).
   const [esame, setEsame] = useState<BonusEsame | null>(null);
@@ -212,7 +215,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                 )}
                 {c.rango === 10 && <p className="m-0 text-[13px] text-text-muted">Rango massimo raggiunto.</p>}
                 {c.semafori.length > 0 && c.rango < 10 && (
-                  <SemaforiRango semafori={c.semafori[0]} compatto occupato={occ} onConferma={(rango, r, confermato) => void conferma(c, rango, r.indice, confermato)} />
+                  <SemaforiRango semafori={c.semafori[0]} compatto occupato={occ} onConferma={(rango, r, confermato) => void conferma(c, rango, r.indice, confermato)} onCorreggi={(rango, r) => setCorrezione({ c, rango, r })} />
                 )}
                 {aPunti && (
                   <div className="flex flex-col gap-1.5">
@@ -276,6 +279,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
       >
         <textarea className="form-input min-h-[140px]" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Promemoria: prossimi eventi, regali graditi, risposte migliori…" />
       </Modal>
+      {correzione && <CorreggiRequisito confidente={{ chiave: correzione.c.chiave, nome: correzione.c.nome }} rango={correzione.rango} requisito={correzione.r}
+        onChiudi={() => setCorrezione(null)} onCorretto={() => ricarica()} />}
     </PageState>
   );
 }

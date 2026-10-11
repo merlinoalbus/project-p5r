@@ -39,3 +39,22 @@ it('un requisito da segnare offre «Condizione soddisfatta» e la manda con il r
   await userEvent.click(screen.getByRole('button', { name: /Condizione soddisfatta/ }));
   expect(onConferma).toHaveBeenCalledWith(3, caffe, true);
 });
+
+it('un requisito su una Richiesta che non c’è più è «da correggere», non «da confermare», e non offre la conferma (2026-10-11)', () => {
+  const rotto = { indice: 0, tipo: 'richiesta', testo: 'Completare la richiesta «Un fidanzato violento»', stato: 'grigio' as const, dettaglio: 'La Richiesta «Un fidanzato violento» non c’è più: correggi quel che la cita', manuale: false, confermato: false };
+  render(<SemaforiRango semafori={{ rango: 1, pronto: false, requisiti: [rotto] }} onConferma={vi.fn()} />);
+  expect(screen.getByRole('img', { name: 'Semaforo da correggere' })).toBeInTheDocument();
+  expect(screen.queryByRole('img', { name: 'Semaforo da confermare' })).toBeNull();
+  expect(screen.queryByRole('button')).toBeNull();
+});
+
+it('su un requisito da correggere offre «Correggi» (che manda rango e requisito); sugli altri no', async () => {
+  const onCorreggi = vi.fn();
+  const rotto = { indice: 0, tipo: 'richiesta', testo: 'Completare la richiesta «X»', stato: 'grigio' as const, dettaglio: 'La Richiesta «X» non c’è più: correggi quel che la cita', manuale: false, confermato: false };
+  const aperta = { indice: 1, tipo: 'richiesta', testo: 'Completare la richiesta «Y»', stato: 'rosso' as const, dettaglio: 'Richiesta «Y» non risulta completata', manuale: false, confermato: false };
+  render(<SemaforiRango semafori={{ rango: 2, pronto: false, requisiti: [rotto, aperta] }} onCorreggi={onCorreggi} />);
+  const bottoni = screen.getAllByRole('button', { name: /Correggi/ });
+  expect(bottoni).toHaveLength(1);
+  await userEvent.click(bottoni[0]);
+  expect(onCorreggi).toHaveBeenCalledWith(2, rotto);
+});

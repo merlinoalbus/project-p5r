@@ -69,4 +69,12 @@ describe('ChipDisponibilita', () => {
     expect(screen.getByLabelText(/^Condizione da correggere nell’editor della mappa: /)).toHaveTextContent('Da correggere');
     expect(screen.queryByText('Da segnare')).toBeNull();
   });
+
+  it('una Richiesta citata che non c’è più (eliminata, 2026-10-11): da correggere dove sta la condizione, non da segnare', () => {
+    const d = { stato: 'ignoto', requisiti: [req('richiesta', 'La Richiesta «un-ex» non c’è più: correggi quel che la cita')] } as DisponibilitaDto;
+    render(<MemoryRouter><ChipDisponibilita disponibilita={d} /></MemoryRouter>);
+    expect(screen.getByLabelText(/^Condizione da correggere: La Richiesta/)).toHaveTextContent('Da correggere');
+    expect(screen.queryByText('Da segnare')).toBeNull();
+    expect(screen.queryByRole('link')).toBeNull();
+  });
 });

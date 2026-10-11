@@ -5,15 +5,15 @@
 // Test RichiestePage — ricerca, segmenti di accettazione e completamento, dedalo nell'indirizzo, stato per partita, foglio Jose
 // ============================================================
 
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { RichiestePage } from './RichiestePage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { PartitaDto, RichiestaDto, RichiesteDto } from '../types';
 
-const { getRichieste, impostaStatoRichiesta } = vi.hoisted(() => ({ getRichieste: vi.fn(), impostaStatoRichiesta: vi.fn() }));
-vi.mock('../services/api', (vero) => moduloApi(vero, { getRichieste, impostaStatoRichiesta }));
+const { getRichieste, impostaStatoRichiesta, getConfidenti, aggiornaRichiesta } = vi.hoisted(() => ({ getRichieste: vi.fn(), impostaStatoRichiesta: vi.fn(), getConfidenti: vi.fn(), aggiornaRichiesta: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getRichieste, impostaStatoRichiesta, getConfidenti, aggiornaRichiesta }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Una richiesta di Mishima nel dedalo dato (bersaglio Nakanohara, debole al Tuono), senza stato; `extra` sovrascrive i campi. */
@@ -22,6 +22,7 @@ const dati: RichiesteDto = {
   dedali: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', ordine: 0, totale: 1, completate: 0 }, { chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', ordine: 1, totale: 1, completate: 0 }],
   richieste: [ric('a', 'Un ex piuttosto appiccicoso', 'mementos-01-qimranut', 'Dedalo di Qimranut'), ric('b', 'Bullismo sui bulli', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { confidente: { chiave: 'ryuji', nome: 'Ryuji', rango: 2 }, bersaglio: { nome: 'Kazuo', livello: 10, formaDemoniaca: 'Ippon-Datara', debolezze: ['Fuoco'], resistenze: [], vulnerabileConfusione: false } })],
   jose: { introduzione: 'Jose studia gli umani.', fiori: { descrizione: 'Valuta dei Mementos.' }, timbri: null, bossSegreto: null, scambi: [{ nome: 'Fiala', effetto: 'Vertigini', costo: 30, requisito: 'Aiyatsbus' }] }, completate: 0, totale: 2,
+  collocazioni: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', aree: [{ chiave: 'q-1', nome: 'Area 1' }] }, { chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', aree: [] }],
 };
 
 describe('RichiestePage', () => {
@@ -103,5 +104,24 @@ describe('RichiestePage', () => {
     const riepilogo = screen.getByRole('region', { name: 'Riepilogo delle Richieste' });
     expect(riepilogo).toHaveTextContent('0da fare');
     expect(riepilogo).toHaveTextContent('2completate');
+  });
+
+  it('«Modifica» su una carta e «Aggiungi una Richiesta» in cima aprono il modulo; salvata, l’elenco si rilegge', async () => {
+    usePartitaStore.setState({ attiva: null });
+    getRichieste.mockReset().mockResolvedValue(dati);
+    getConfidenti.mockResolvedValue([{ chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'chariot', arcanaNome: 'Carro', ordine: 1 }]);
+    aggiornaRichiesta.mockResolvedValue({ ...dati.richieste[0], committente: 'Mishima Yuuki' });
+    render(<MemoryRouter><RichiestePage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: 'Modifica la Richiesta «Un ex piuttosto appiccicoso»' }));
+    const finestra = await screen.findByRole('dialog', { name: 'Modifica: Un ex piuttosto appiccicoso' });
+    expect(within(finestra).getByRole('textbox', { name: 'Committente' })).toHaveValue('Mishima');
+    fireEvent.change(within(finestra).getByRole('textbox', { name: 'Committente' }), { target: { value: 'Mishima Yuuki' } });
+    const letture = getRichieste.mock.calls.length;
+    fireEvent.click(within(finestra).getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaRichiesta).toHaveBeenCalledWith('a', expect.objectContaining({ committente: 'Mishima Yuuki', nome: 'Un ex piuttosto appiccicoso' })));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(getRichieste.mock.calls.length).toBeGreaterThan(letture);
+    fireEvent.click(screen.getByRole('button', { name: /^Aggiungi una Richiesta/ }));
+    expect(await screen.findByRole('dialog', { name: 'Aggiungi una Richiesta' })).toBeInTheDocument();
   });
 });

@@ -84,6 +84,21 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   const scegli = (chiave: string) => { onCambia(chiave); chiudi(); };
   useEffect(() => {
     if (!aperto) return;
+    // In una finestra la tendina sta nel corpo scorrevole, che la taglia: in fondo al modulo se ne vedeva una riga (a 768×1024
+    // 42 px su 304). All'apertura il corpo scorre quanto basta a mostrarla intera, ma mai oltre il punto in cui il pulsante arriva
+    // in cima: chi l'ha toccato deve continuare a vederlo. Non per il foglio dal basso del telefono (fixed), che sta già in vista.
+    const corpo = radice.current?.closest<HTMLElement>('.modal-body');
+    const tendina = corpo ? radice.current?.querySelector<HTMLElement>('.selettore__tendina') : null;
+    if (!corpo || !tendina || !pulsante.current || getComputedStyle(tendina).position === 'fixed') return;
+    const c = corpo.getBoundingClientRect();
+    const sotto = tendina.getBoundingClientRect().bottom - c.bottom;
+    const finoAlPulsante = pulsante.current.getBoundingClientRect().top - c.top;
+    // le misure a schermo sono in scala durante l'animazione d'apertura della finestra (0.95): si riportano a quelle vere
+    const scala = corpo.offsetHeight > 0 ? c.height / corpo.offsetHeight : 1;
+    if (sotto > 0 && finoAlPulsante > 0) corpo.scrollTop += Math.min(sotto, finoAlPulsante) / scala;
+  }, [aperto]);
+  useEffect(() => {
+    if (!aperto) return;
     elenco.current?.querySelector<HTMLElement>('.selettore__voce--evidenziata')?.scrollIntoView?.({ block: 'nearest' });
   }, [aperto, evidenziata, filtrate]);
   /** Tastiera nella tendina: Esc chiude, frecce spostano l'evidenziazione entro le voci filtrate, Invio sceglie quella evidenziata. */

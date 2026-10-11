@@ -10,6 +10,9 @@
 // committente), due segmenti indipendenti — accettazione e completamento — e il dedalo scelto
 // fra quelli che hanno richieste, nell'ordine di percorrenza, tenuto nell'indirizzo (`?dedalo=`)
 // così dalla scheda del dedalo si arriva già filtrati.
+//
+// Le Richieste si correggono, si aggiungono e si eliminano da qui (richiesta dell'utente, 2026-10-11): «Modifica» su ogni carta
+// e «Aggiungi una Richiesta» in cima aprono `ModuloRichiesta`, lo stesso della colonna del dedalo.
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -36,6 +39,7 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { coloreElemento } from '../utils/elementi';
 import { piatto } from '../utils/testo';
+import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
 
 type Accettazione = 'tutte' | 'accettate' | 'non-accettate';
 type Completamento = 'tutte' | 'completate' | 'da-completare';
@@ -82,7 +86,7 @@ function Affinita({ testo, tipo }: { testo: string; tipo: 'debole' | 'resiste' }
  * Con una partita offre i comandi Accettata, Completata e Riapri secondo lo stato, e sempre i
  * collegamenti al dedalo e al Confidente.
  */
-function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: number | null; onCambiata: (r: RichiestaDto) => void }) {
+function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; partitaId: number | null; onCambiata: (r: RichiestaDto) => void; onModifica: () => void }) {
   const [aperta, setAperta] = useState(false);
   const sugg = useSuggerimenti();
   const [occupato, setOccupato] = useState(false);
@@ -141,6 +145,8 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
         {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
         {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
         {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
+        {/* la Richiesta si corregge (o si elimina) dove la si legge (scelta dell'utente, 2026-10-11) */}
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica la Richiesta «${r.nome}»`} onClick={onModifica} />
       </div>
     </li>
   );
@@ -163,6 +169,8 @@ export function RichiestePage() {
   const [ricerca, setRicerca] = useState('');
   const [accettazione, setAccettazione] = useState<Accettazione>('tutte');
   const [completamento, setCompletamento] = useState<Completamento>('tutte');
+  /** La Richiesta aperta nel modulo (null = una nuova), o nessun modulo. */
+  const [modulo, setModulo] = useState<{ chiave: string | null } | null>(null);
   // Il foglio e il dedalo stanno nell'indirizzo: un collegamento a Jose porta a Jose, uno dal dedalo arriva già filtrato.
   const [params, setParams] = useSearchParams();
   const foglio: Foglio = params.get('foglio') === 'jose' ? 'jose' : 'richieste';
@@ -210,6 +218,7 @@ export function RichiestePage() {
           </FilaScorrevole>}
 
           {foglio === 'richieste' && <>
+          <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Richiesta" dettaglio="vale per tutte le partite" onClick={() => setModulo({ chiave: null })} />
           {partitaId && <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo delle Richieste">
             <div className="kpi-tile"><span className="kpi-value">{d.totale}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="catalogo" />in tutto</span></div>
             <div className="kpi-tile"><span className="kpi-value">{d.totale - d.completate - accettate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sfide" />da fare</span></div>
@@ -233,7 +242,7 @@ export function RichiestePage() {
           <p className="m-0 text-[12px] text-text-muted">{visibili.length} {visibili.length === 1 ? 'richiesta' : 'richieste'}{dedalo ? ` in ${d.dedali.find((x) => x.chiave === dedalo)?.nome ?? dedalo}` : ''}</p>
           <ul className="m-0 grid list-none grid-cols-1 items-start gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Richieste">
             {visibili.length === 0 && <li className="text-[13px] text-text-muted" role="status">Nessuna Richiesta con questi filtri.</li>}
-            {visibili.map((r) => <Richiesta key={r.chiave} r={r} partitaId={partitaId} onCambiata={aggiorna} />)}
+            {visibili.map((r) => <Richiesta key={r.chiave} r={r} partitaId={partitaId} onCambiata={aggiorna} onModifica={() => setModulo({ chiave: r.chiave })} />)}
           </ul>
           </>}
 
@@ -272,6 +281,8 @@ export function RichiestePage() {
           )}
         </div>
       )}
+      {/* il modulo della Richiesta: per correggerne una o aggiungerne una nuova (2026-10-11) */}
+      {modulo && <ModuloRichiesta chiave={modulo.chiave} onChiudi={() => setModulo(null)} onCambiata={() => dati.ricarica()} />}
     </PageState>
   );
 }

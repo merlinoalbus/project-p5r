@@ -8,7 +8,8 @@
 // sue aree sono completate.» Al posto degli «obiettivi del dedalo» (timbri e Richieste del dedalo intero) ci sono le sue aree:
 // ognuna con nome e dettagli modificabili, i suoi timbri (−/+ e il totale), le sue Richieste (stato e area) e le sue voci della
 // guida (`GuidaDellArea`, dove ogni voce si segna). Un'area completata porta la ✓ e si chiude; si aggiungono, si spostano e si
-// eliminano aree; le Richieste rimaste senza area stanno in fondo, «da collocare».
+// eliminano aree; le Richieste rimaste senza area stanno in fondo, «da collocare». Ogni Richiesta ha «Modifica» e ogni area
+// «Aggiungi una Richiesta» (`ModuloRichiesta`, lo stesso della pagina delle Richieste: scelta «In entrambi i posti»).
 // ============================================================
 
 import { useState } from 'react';
@@ -22,6 +23,7 @@ import { Selettore } from '../shared/Selettore';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { GuidaDellArea } from './GuidaDellArea';
 import { SpuntaCompletata, TestoCompletata } from './PlanimetriePalazzo';
+import { ModuloRichiesta } from './ModuloRichiesta';
 import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto, RichiestaDelDedaloDto, StatoPunto, StatoRichiesta } from '../../types';
 
 /** La chiave che nel selettore dell'area di una Richiesta vale «nessuna area». */
@@ -59,6 +61,8 @@ export function AreeDelDedalo({ dedalo, partitaId, cambiaStato, onPuntoAggiornat
   // chi è in volo: i timbri di un'area, una Richiesta o un'area; gli altri pulsanti restano vivi
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
   const [nuova, setNuova] = useState<string | null>(null);
+  /** La Richiesta aperta nel modulo (`chiave` null = nuova, nell'area `area`), o nessun modulo. */
+  const [modulo, setModulo] = useState<{ chiave: string | null; area: string | null } | null>(null);
   /** Segna o libera l'operazione in corso su una chiave. */
   const occupa = (k: string, v: boolean) => setOccupati((o) => ({ ...o, [k]: v }));
   /** Esegue un'operazione su una chiave tenendola occupata; l'errore va in notifica. */
@@ -83,6 +87,7 @@ export function AreeDelDedalo({ dedalo, partitaId, cambiaStato, onPuntoAggiornat
           onClick={() => void esegui(r.chiave, async () => onRichiesta(r.chiave, (await impostaStatoRichiesta(partitaId, r.chiave, 'completata')).stato), 'Aggiornamento fallito.')}>Completata</button>}
         {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={!!occupati[r.chiave]}
           onClick={() => void esegui(r.chiave, async () => onRichiesta(r.chiave, (await impostaStatoRichiesta(partitaId, r.chiave, null)).stato), 'Aggiornamento fallito.')} />}
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica la Richiesta «${r.nome}»`} onClick={() => setModulo({ chiave: r.chiave, area: null })} />
         <span className="min-w-[160px]">
           <Selettore compatto etichetta={`Area di ${r.nome}`} valore={area} opzioni={opzioniArea} disabilitato={!!occupati[r.chiave]}
             onCambia={(k) => { if (k !== area) void esegui(r.chiave, async () => { await collocaRichiesta(r.chiave, k || null); await onRicarica(); notifica('success', k ? `«${r.nome}» in ${aree.find((a) => a.chiave === k)?.nome ?? 'un’altra area'}.` : `«${r.nome}» è da collocare.`); }, 'Richiesta non spostata.'); }} />
@@ -163,6 +168,7 @@ export function AreeDelDedalo({ dedalo, partitaId, cambiaStato, onPuntoAggiornat
                 <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">{a.richieste.map((r) => richiesta(r, a.chiave))}</ul>
               </section>
             )}
+            <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Richiesta" aria-label={`Aggiungi una Richiesta in ${a.nome}`} onClick={() => setModulo({ chiave: null, area: a.chiave })} />
             <GuidaDellArea key={a.chiave} area={{ ...dedalo, punti: voci }} planimetrie={[]} partitaId={partitaId} mappaAperta={null}
               cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={onRicarica} areaDedalo={{ chiave: a.chiave, nome: a.nome, altre }} />
           </div>
@@ -193,7 +199,11 @@ export function AreeDelDedalo({ dedalo, partitaId, cambiaStato, onPuntoAggiornat
         </section>
       )}
       {nuova === null
-        ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un’area" className="self-start" onClick={() => setNuova('')} />
+        ? <div className="flex flex-wrap gap-1.5">
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un’area" onClick={() => setNuova('')} />
+          {/* anche in un dedalo senza aree: nasce nel dedalo, e l'area la si sceglie nel modulo (o resta da collocare) */}
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Richiesta" aria-label={`Aggiungi una Richiesta in ${dedalo.nome}`} onClick={() => setModulo({ chiave: null, area: null })} />
+        </div>
         : (
           <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
             onSubmit={(e) => { e.preventDefault(); const nome = nuova.trim(); if (!nome) return; void esegui('nuova', async () => { await creaAreaDedalo(dedalo.chiave, { nome }); setNuova(null); await onRicarica(); notifica('success', `Area «${nome}» aggiunta a ${dedalo.nome}.`); }, 'Area non aggiunta.'); }}>
@@ -204,6 +214,8 @@ export function AreeDelDedalo({ dedalo, partitaId, cambiaStato, onPuntoAggiornat
             </div>
           </form>
         )}
+      {/* il modulo della Richiesta: correggerne una, o aggiungerne una nell'area scelta (2026-10-11, «In entrambi i posti») */}
+      {modulo && <ModuloRichiesta chiave={modulo.chiave} iniziale={{ dedalo: dedalo.chiave, areaDedalo: modulo.area }} onChiudi={() => setModulo(null)} onCambiata={onRicarica} />}
     </div>
   );
 }

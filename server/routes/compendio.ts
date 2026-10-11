@@ -7,10 +7,11 @@ import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
 import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
-import { collocaRichiesta, richieste } from '../services/richiesteService.js';
+import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
 import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaArea, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto } from '../services/dungeonService.js';
-import { bodyArea, bodyAreaDedalo, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovoPunto, bodyPunto, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto } from '../schemas/guidaDungeon.js';
+import { bodyArea, bodyAreaDedalo, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente } from '../schemas/guidaDungeon.js';
+import { correggiRequisitoRichiesta, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
@@ -191,6 +192,22 @@ router.get('/battaglia', (_req, res) => {
 router.get('/richieste', validate({ query: queryDomande }), (req, res) => {
   res.json(richieste((req.query as unknown as { partita?: number }).partita));
 });
+/* ---- Le Richieste modificabili, aggiungibili ed eliminabili (2026-10-11: «Modifica, aggiungi, elimina») ---- */
+router.post('/richieste', validate({ body: bodyNuovaRichiesta }), (req, res) => {
+  res.status(201).json(creaRichiesta(req.body as Parameters<typeof creaRichiesta>[0]));
+});
+router.put('/richieste/:chiave', validate({ params: paramsChiaveGuida, body: bodyRichiesta }), (req, res) => {
+  res.json(aggiornaRichiesta(String(req.params.chiave), req.body as Parameters<typeof aggiornaRichiesta>[1]));
+});
+/** Chi cita la Richiesta: lo si dice prima di eliminarla. */
+router.get('/richieste/:chiave/citazioni', validate({ params: paramsChiaveGuida }), (req, res) => {
+  res.json(citazioniRichiesta(String(req.params.chiave)));
+});
+/** Elimina la Richiesta per tutte le partite: i suoi stati via, pin e azioni scollegati, condizioni e requisiti da correggere. */
+router.delete('/richieste/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
+  eliminaRichiesta(String(req.params.chiave));
+  res.status(204).end();
+});
 /** Colloca una Richiesta in un'area di un dedalo (099), o la toglie dall'area (null): è un elemento delle aree. */
 router.put('/richieste/:chiave/area', validate({ params: paramsChiaveGuida, body: bodyCollocaRichiesta }), (req, res) => {
   res.json(collocaRichiesta(String(req.params.chiave), (req.body as { areaDedalo: string | null }).areaDedalo));
@@ -274,6 +291,19 @@ router.get('/domande', validate({ query: queryDomande }), (req, res) => {
 });
 router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
+});
+/** Un requisito che cita una Richiesta (per esempio eliminata, «da correggere»): cita un'altra Richiesta (scelta dell'utente,
+ *  2026-10-11: «Requisito correggibile»). */
+router.put('/confidenti/:chiave/requisiti/:rango/:indice', validate({ params: paramsRequisitoConfidente, body: bodyRequisitoRichiesta }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; rango: number; indice: number };
+  correggiRequisitoRichiesta(p.chiave, p.rango, p.indice, (req.body as { richiesta: string }).richiesta);
+  res.status(204).end();
+});
+/** Toglie un requisito che cita una Richiesta, per tutte le partite. */
+router.delete('/confidenti/:chiave/requisiti/:rango/:indice', validate({ params: paramsRequisitoConfidente }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; rango: number; indice: number };
+  togliRequisitoRichiesta(p.chiave, p.rango, p.indice);
+  res.status(204).end();
 });
 /** La Dote a ogni incontro, rango per rango (dato di gioco, come gli effetti di libri e attività). */
 router.put('/confidenti/:chiave/doti-incontro', validate({ params: paramsChiaveGuida, body: bodyDotiIncontro }), (req, res) => {

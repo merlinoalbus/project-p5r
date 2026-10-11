@@ -8,7 +8,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { ConfidentiPartita } from './ConfidentiPartita';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
 
-const { getConfidentiPartita, aggiornaConfidente, getImmagini, confermaRequisitoConfidente } = vi.hoisted(() => ({
+const { getConfidentiPartita, aggiornaConfidente, getImmagini, confermaRequisitoConfidente, getRichieste, correggiRequisitoRichiesta } = vi.hoisted(() => ({
+  getRichieste: vi.fn(),
+  correggiRequisitoRichiesta: vi.fn(),
   confermaRequisitoConfidente: vi.fn(),
   getConfidentiPartita: vi.fn(),
   aggiornaConfidente: vi.fn(),
@@ -22,6 +24,8 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, {
   caricaImmagine: vi.fn(),
   eliminaImmagine: vi.fn(),
   importaImmagineDaUrl: vi.fn(),
+  getRichieste,
+  correggiRequisitoRichiesta,
   
 }));
 
@@ -161,5 +165,23 @@ describe('ConfidentiPartita — due gesti ravvicinati (B3", validazione voce 2)'
     await act(async () => { rispondiConferma(conSemaforo(true)); });
     expect(screen.getByRole('button', { name: /Confermato/ })).toBeInTheDocument();
     expect(rangoDi('Ann Takamaki')).toBe('Rango 2');
+  });
+});
+
+describe('ConfidentiPartita — requisito da correggere (2026-10-11)', () => {
+  it('«Correggi» su un requisito rimasto su una Richiesta che non c’è più apre la finestra; corretto, l’elenco si rilegge', async () => {
+    const rotto = { indice: 0, tipo: 'richiesta', testo: 'Completare la richiesta «Un fidanzato violento»', stato: 'grigio' as const, dettaglio: 'La Richiesta «Un fidanzato violento» non c’è più: correggi quel che la cita', manuale: false, confermato: false };
+    getConfidentiPartita.mockReset().mockResolvedValue([confidente({ semafori: [{ rango: 3, pronto: false, requisiti: [rotto] }] })]);
+    getRichieste.mockResolvedValue({ richieste: [{ chiave: 'lo-zio-ingordo', nome: 'Lo zio ingordo', areaNome: null }], jose: null, dedali: [], completate: 0, totale: 1, collocazioni: [] });
+    correggiRequisitoRichiesta.mockResolvedValue(undefined);
+    render(<MemoryRouter><ConfidentiPartita partitaId={7} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('button', { name: /Correggi/ }));
+    const finestra = await screen.findByRole('dialog', { name: /^Correggi il requisito · .+, rango 3$/ });
+    fireEvent.click(within(finestra).getByRole('combobox', { name: 'Richiesta da citare al suo posto' }));
+    fireEvent.click(within(screen.getByRole('listbox', { name: 'Richiesta da citare al suo posto' })).getByRole('button', { name: /^Lo zio ingordo/ }));
+    const letture = getConfidentiPartita.mock.calls.length;
+    await act(async () => { fireEvent.click(within(finestra).getByRole('button', { name: /^Salva/ })); });
+    expect(correggiRequisitoRichiesta).toHaveBeenCalledWith(expect.any(String), 3, 0, 'lo-zio-ingordo');
+    expect(getConfidentiPartita.mock.calls.length).toBeGreaterThan(letture);
   });
 });

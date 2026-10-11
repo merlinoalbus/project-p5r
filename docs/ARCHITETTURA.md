@@ -615,7 +615,7 @@ che supera la precedente esclusione.
   `perSpillo`, con l'elenco `GET /api/condizioni/voci` (`vociCitabili`: voci non descrittive in ordine di guida, passi degli
   Enigmi compresi, anche dei dedali dei Memento — scelta dell'utente —, raggruppate per «Palazzo › N. Area» o «Memento › N. Dedalo»); i nomi vengono da `nomiCondizioni().voci` (solo con `conPin`).
   Nessun giro possibile: una voce non dipende dalle condizioni di un pin.
-- `/api/condizioni`: `/elenchi` (articoli, letture, arcani, Persona, abilità, Ladri, attività, negozi, eventi, contatori — gli elenchi chiusi dell'editor); `/partite/:id/progressi` e i `PUT .../eventi/:chiave`, `.../attivita/:chiave`, `.../punti-negozio/:chiave` (scheda **Partita → Progressi**, `ProgressiPartita.tsx`). Frontend: `guida/CondizioniEditor.tsx` (righe `[NON] [Stato ▾] [operatore] [valori]`, blocchi TUTTE/ALMENO UNA, numeri a passi) e `shared/Selettore.tsx` (2026-09-12: l'unico elenco chiuso dell'app — pulsante `combobox` + `listbox`, ricerca scrivendo da dieci voci in su o con `ricerca="sempre"`, voce `vuoto` in testa, gruppi, variante `compatto` per i filtri; `utils/selettore.ts` con `opzioniDaNomi` e la soglia; nessuna `<select>` nel frontend, vietata da ESLint e da `src/selettoriUnificati.test.ts`).
+- `/api/condizioni`: `/elenchi` (articoli, letture, arcani, Persona, abilità, Ladri, attività, negozi, eventi, contatori — gli elenchi chiusi dell'editor); `/partite/:id/progressi` e i `PUT .../eventi/:chiave`, `.../attivita/:chiave`, `.../punti-negozio/:chiave` (scheda **Partita → Progressi**, `ProgressiPartita.tsx`). Frontend: `guida/CondizioniEditor.tsx` (righe `[NON] [Stato ▾] [operatore] [valori]`, blocchi TUTTE/ALMENO UNA, numeri a passi) e `shared/Selettore.tsx` (2026-09-12: l'unico elenco chiuso dell'app — pulsante `combobox` + `listbox`, ricerca scrivendo da dieci voci in su o con `ricerca="sempre"`, voce `vuoto` in testa, gruppi, variante `compatto` per i filtri; `utils/selettore.ts` con `opzioniDaNomi` e la soglia; nessuna `<select>` nel frontend, vietata da ESLint e da `src/selettoriUnificati.test.ts`). Dentro una finestra (`.modal-body`), all'apertura il corpo scorre quanto basta a mostrare la tendina intera, mai oltre il punto in cui il pulsante arriva in cima (2026-10-11; non per il foglio dal basso del telefono); la classe `selettore--in-linea` apre la tendina nel flusso, per le finestre brevi (`CorreggiRequisito`).
 - `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, Palazzi completati — `palazziService` —, richieste completate, ranghi, giorno e meteo
   correnti, conferme, eventi di storia avvenuti) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato,
   `bloccante`); `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.
@@ -884,7 +884,24 @@ Interfaccia: `src/components/guida/AreeDelDedalo.tsx` (al posto di `ObiettiviDed
 del Memento: conteggio e barra del dedalo, ✓, per ogni area (chiusa se completata) dettagli, Su/Giù, «Modifica area»
 (`CorrezioneGuida`: nome, timbri, dettagli, elimina con avviso), timbri −/+, Richieste (stato e selettore dell'area),
 `GuidaDellArea` con le sole voci dell'area (`areaDedalo`: crea nell'area, «Area del dedalo» nella modifica); in fondo le
-Richieste da collocare e «Aggiungi un'area». `RichiestePage`,
+Richieste da collocare e «Aggiungi un'area».
+**Le Richieste modificabili (2026-10-11).** `richiesteService`: `creaRichiesta`, `aggiornaRichiesta` (chiave stabile; `area` = prosa
+finché il dedalo non cambia; rinominando, i `confidente_requisito` di tipo «richiesta» che la citavano per nome passano alla
+chiave e il testo prende il nome nuovo), `citazioniRichiesta` (`CitazioniRichiestaDto`: partite, pin, condizioni di pin/negozi/
+articoli/libri/film/attività/luoghi anche nei gruppi, requisiti, azioni di `voce_giornata`; `giorno_percorso.azioni_json` è la copia storica che nessuno legge e non si tocca), `eliminaRichiesta`
+(stati via; pin e voci della giornata scollegati; condizioni e requisiti restano). Una Richiesta citata che non
+c'è più: `StatoPartitaSemafori.richiesteEsistenti` la rende grigia con `manuale: false` (la disponibilità non la fa rossa) e
+`ChipDisponibilita` dice «Da correggere». `RichiesteDto.collocazioni` dà al modulo i dedali con le loro aree. Rotte `POST /api/compendio/richieste`,
+`PUT/DELETE /api/compendio/richieste/:chiave`, `GET …/citazioni`. Interfaccia: `src/components/guida/ModuloRichiesta.tsx` (finestra:
+legge da sé `getRichieste` e `getConfidenti`), aperto da `RichiestePage` («Modifica» sulle carte, «Aggiungi una Richiesta») e da
+`AreeDelDedalo` («Modifica» sulle Richieste, «Aggiungi una Richiesta» in un'area e in fondo alla colonna). Il nome di una Richiesta è unico
+(409 `nome-gia-usato`, confronto in JS con `toLowerCase()` come i semafori: `lower()` di SQLite tocca solo l'ASCII); cambiandolo anche
+`voce_giornata.riferimento_testo` prende il nome nuovo. Chi cita per chiave si mostra col nome (`StatoPartitaSemafori.nomiRichieste`);
+eliminandola, chi la citava per chiave (requisiti e condizioni) torna a citarla per nome, perché il «non c'è più» dica quale. **I requisiti dei Confidenti si
+correggono** (scelta dell'utente «Requisito correggibile»): `server/services/requisitiConfidentiService.ts` (`correggiRequisitoRichiesta`,
+`togliRequisitoRichiesta`, solo i requisiti di tipo «richiesta»), rotte `PUT/DELETE /api/compendio/confidenti/:chiave/requisiti/:rango/:indice`;
+`SemaforiRango` dice «da correggere» per un grigio non confermabile e offre «Correggi» (`onCorreggi`), che in `ConfidenteDettaglioPage` e
+`ConfidentiPartita` apre `src/components/partita/CorreggiRequisito.tsx`. `RichiestePage`,
 `DomandePage` e `CruciverbaPage` usano `CampoRicerca` + `Segmenti`; il dedalo delle Richieste vive in
 `?dedalo=`; le righe «prossime» hanno un'ancora (`#domande-<data>`, `#cruciverba-<giorno>`) a cui il
 rimando in cima scorre dopo aver azzerato i filtri.

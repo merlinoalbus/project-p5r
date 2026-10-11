@@ -21,6 +21,9 @@ export const LIMITI_GUIDA = {
   punto: { nome: 300, descrizione: 8000 },
   // le aree dei dedali dei Memento (099): nome e dettagli come un'area della guida, i timbri entro un tetto largo (Da'at ne ha 40)
   areaDedalo: { nome: 300, descrizione: 8000, timbri: 999 },
+  // le Richieste dei Mementos (2026-10-11): nel pacchetto il nome più lungo ha 35 caratteri, le date 146, le note 545, una ricompensa
+  // 119; al massimo 3 debolezze, 3 resistenze, 3 ricompense, rango 8
+  richiesta: { nome: 300, breve: 1000, note: 8000, voce: 300, voci: 30, rango: 10 },
   // Il nome di una mappa finisce nella chiave leggibile del percorso, che il server tiene sotto i
   // 180 caratteri **compreso il prefisso del genitore**: oltre quel tetto la rotta risponde
   // «percorso-troppo-lungo» e dice di abbreviare. Qui sta il massimo teorico; quello pratico

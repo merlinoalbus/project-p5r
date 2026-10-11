@@ -12,6 +12,7 @@ import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto } from '../../typ
 const api = vi.hoisted(() => ({
   aggiornaAreaDedalo: vi.fn(), collocaRichiesta: vi.fn(), creaAreaDedalo: vi.fn(), eliminaAreaDedalo: vi.fn(), impostaStatoRichiesta: vi.fn(),
   impostaTimbri: vi.fn(), spostaAreaDedalo: vi.fn(), creaPunto: vi.fn(), aggiornaPunto: vi.fn(), eliminaPunto: vi.fn(), spostaPunto: vi.fn(), collegaPinAlPunto: vi.fn(),
+  getRichieste: vi.fn(), getConfidenti: vi.fn(), creaRichiesta: vi.fn(), aggiornaRichiesta: vi.fn(),
 }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
@@ -132,10 +133,40 @@ it('senza partita: niente comandi di stato, i conteggi sono i totali; un dedalo 
   expect(screen.queryByRole('progressbar')).toBeNull();
 });
 
-it('un dedalo completato porta la ✓; uno senza aree invita ad aggiungerne', () => {
+it('un dedalo completato porta la ✓; uno senza aree invita ad aggiungerne, e una Richiesta vi si aggiunge lo stesso', async () => {
   const vuoto = dedalo();
   vuoto.dedalo = { aree: [], daCollocare: [], obiettivi: { totale: 0, fatti: 0 }, completato: true };
   monta(vuoto);
   expect(screen.getByRole('heading', { name: 'Aree del dedalo (completata)' })).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent('Questo dedalo non ha ancora aree: aggiungine una qui sotto.');
+  // anche senza aree si aggiunge una Richiesta: nasce nel dedalo, da collocare
+  api.getRichieste.mockResolvedValue({ richieste: [], jose: null, dedali: [], completate: 0, totale: 0, collocazioni: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', aree: [] }] });
+  api.getConfidenti.mockResolvedValue([]);
+  fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una Richiesta in Dedalo di Qimranut' }));
+  const finestra = await screen.findByRole('dialog', { name: 'Aggiungi una Richiesta' });
+  expect(within(finestra).getByRole('combobox', { name: 'Dedalo' })).toHaveTextContent('Dedalo di Qimranut');
+  expect(within(finestra).getByRole('combobox', { name: 'Area del dedalo' })).toHaveTextContent('— da collocare —');
+});
+
+it('«Modifica» su una Richiesta e «Aggiungi una Richiesta» in un\'area aprono il modulo (nell\'area scelta); salvata, la scheda si rilegge', async () => {
+  const { onRicarica } = monta();
+  api.getRichieste.mockResolvedValue({ richieste: [{ chiave: 'r1', nome: 'Un ex appiccicoso', committente: '', disponibileDal: '', scadenza: '', area: 'Dedalo di Qimranut', areaChiave: 'mementos-01-qimranut', piano: '',
+    bersaglio: { nome: 'Nakanohara', livello: null, formaDemoniaca: '', debolezze: [], resistenze: [], vulnerabileConfusione: false }, ricompense: [], confidente: null, areaNome: 'Dedalo di Qimranut', areaOrdine: 0,
+    areaDedalo: 'q-1', areaDedaloNome: 'Banchina', note: '', fonte: '', stato: null }], jose: null, dedali: [], completate: 0, totale: 1,
+  collocazioni: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', aree: [{ chiave: 'q-1', nome: 'Banchina' }, { chiave: 'q-2', nome: 'Treno' }] }] });
+  api.getConfidenti.mockResolvedValue([]);
+  fireEvent.click(screen.getByRole('button', { name: 'Modifica la Richiesta «Un ex appiccicoso»' }));
+  const finestra = await screen.findByRole('dialog', { name: 'Modifica: Un ex appiccicoso' });
+  expect(within(finestra).getByRole('textbox', { name: 'Bersaglio' })).toHaveValue('Nakanohara');
+  fireEvent.click(within(finestra).getByRole('button', { name: /^Annulla/ }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una Richiesta in Treno' }));
+  const nuova = await screen.findByRole('dialog', { name: 'Aggiungi una Richiesta' });
+  expect(within(nuova).getByRole('combobox', { name: 'Area del dedalo' })).toHaveTextContent('Treno');
+  fireEvent.change(within(nuova).getByRole('textbox', { name: 'Nome' }), { target: { value: 'Il treno fantasma' } });
+  fireEvent.change(within(nuova).getByRole('textbox', { name: 'Bersaglio' }), { target: { value: 'Capotreno' } });
+  api.creaRichiesta.mockResolvedValue({});
+  fireEvent.click(within(nuova).getByRole('button', { name: /^Aggiungi$/ }));
+  await waitFor(() => expect(api.creaRichiesta).toHaveBeenCalledWith(expect.objectContaining({ nome: 'Il treno fantasma', dedalo: 'mementos-01-qimranut', areaDedalo: 'q-2' })));
+  await waitFor(() => expect(onRicarica).toHaveBeenCalled());
 });
