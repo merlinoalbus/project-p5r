@@ -153,4 +153,17 @@ describe('OggiPartita', () => {
     await waitFor(() => expect(usePartitaStore.getState().attiva?.meteoOra).toBe('sereno'));
     await waitFor(() => expect(api.getPercorsoGiorno.mock.calls.length).toBeGreaterThan(letture));
   });
+
+  it('comunica il giorno che mostra a ogni cambio e null quando la scheda si chiude (le scorciatoie della scuola lo seguono)', async () => {
+    const giorni: Array<string | null> = [];
+    api.getPercorsoGiorno.mockImplementation(async (data: string) => ({ ...giorno, giorno: data, precedente: '04-11', successivo: '04-13' }));
+    const { unmount } = render(<MemoryRouter><OggiPartita partita={{ id: 4, nome: 'Prova' } as PartitaDto} onGiorno={(g) => giorni.push(g)} /></MemoryRouter>);
+    await waitFor(() => expect(giorni.at(-1)).toBe('04-12'));
+    fireEvent.click(screen.getByRole('button', { name: 'Giorno successivo' }));
+    await waitFor(() => expect(giorni.at(-1)).toBe('04-13'));
+    // l'intera sequenza: nessun null (né altro giorno) di passaggio mentre il giorno nuovo si carica
+    expect(giorni).toEqual(['04-12', '04-13']);
+    unmount();
+    expect(giorni).toEqual(['04-12', '04-13', null]);
+  });
 });

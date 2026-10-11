@@ -1504,3 +1504,28 @@ Che cosa ne segue:
   cartellino «Da correggere».
 - **Aggiornamento.** Dopo ogni segno nella guida o sulla mappa la mappa si rilegge, e i pin che ne dipendono compaiono o
   spariscono subito.
+
+## 2026-10-11 — Accesso ai cruciverba e alle risposte scolastiche dall'intestazione della Partita
+
+Richiesta dell'utente, con la schermata dell'intestazione della Partita: «qui non vedo l'accesso ai cruciverba o alle risposte
+scolastiche.» Le scorciatoie della scuola (`ScuolaOggi`) comparivano solo se la data di gioco della partita aveva domande o un
+cruciverba; altrimenti c'era solo la scritta «Oggi nessuna domanda in classe né cruciverba.», senza niente da toccare. In più
+guardavano la data di gioco (nella schermata 04-21) anche quando la scheda «Oggi» mostrava un altro giorno (29 aprile).
+
+Risposte dell'utente, parola per parola:
+- «I pulsanti del giorno (domande in classe, esame, cruciverba con la risposta) devono seguire la data della partita o il giorno
+  che stai guardando nella scheda «Oggi»?» → «Giorno della scheda Oggi» (testo dell'opzione: «Se nella scheda «Oggi» vai al 29
+  aprile, i pulsanti mostrano domande e cruciverba del 29 aprile. In più i collegamenti alle pagine complete.»);
+- «Procedo con la proposta?» → «Sì, procedi (Recommended)» (testo dell'opzione: «Collegamenti sempre visibili alle pagine
+  complete, più i pulsanti del giorno scelto sopra.»).
+
+Che cosa ne segue:
+- **Collegamenti sempre presenti.** «Domande e risposte» porta a `/guida/domande` e «Cruciverba» a `/guida/cruciverba`. Ci sono
+  in ogni giorno e anche senza data di gioco.
+- **Il giorno dei pulsanti.** Con la scheda «Oggi» aperta è il giorno che la scheda mostra (`OggiPartita` lo comunica con
+  `onGiorno`). Con un'altra scheda, o prima che la scheda abbia caricato il suo primo giorno, è la data di gioco. Mentre la scheda
+  carica il giorno nuovo l'intestazione resta sull'ultimo giorno mostrato: non ripiega per un attimo sulla data di gioco.
+- **Niente nuove letture.** Scorrere i giorni filtra gli elenchi di domande e cruciverba già caricati; la finestra aperta su un
+  giorno si chiude cambiando giorno.
+- **Il testo.** «Oggi» solo quando il giorno guardato è la data di gioco; per un altro giorno «Il 13 aprile nessuna domanda in
+  classe né cruciverba.» e, sul pulsante delle domande in classe, «1 quel giorno» al posto di «1 oggi».

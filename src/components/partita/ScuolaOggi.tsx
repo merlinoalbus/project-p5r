@@ -1,17 +1,19 @@
 // ============================================================
-// ScuolaOggi — scorciatoie del giorno corrente: domande in classe, esame e cruciverba (con la risposta)
+// ScuolaOggi — scorciatoie della scuola: domande in classe, esame e cruciverba del giorno (con la risposta) e le pagine intere della Guida
 // ============================================================
 //
 // I dati arrivano dagli elenchi completi già esposti dalla Guida (`/compendio/domande`, `/compendio/cruciverba`):
-// il filtro per il giorno di gioco della partita resta qui, così non c'è una seconda verità sul server.
-// I pulsanti compaiono solo quando per oggi c'è davvero qualcosa: niente finestre vuote.
+// il filtro per giorno resta qui, così non c'è una seconda verità sul server. Il giorno è quello che si sta guardando
+// nella scheda «Oggi» (`giorno`), e senza di esso la data di gioco della partita.
+// I pulsanti del giorno compaiono solo quando quel giorno c'è davvero qualcosa: niente finestre vuote. I due collegamenti
+// alle pagine della Guida («Domande e risposte», «Cruciverba») ci sono sempre: l'accesso non dipende dal giorno.
 // ============================================================
 
 import { useMemo, useState } from 'react';
 import { useCarica } from '../../hooks/useCarica';
 import { getCruciverba, getDomande } from '../../services/api';
 import { Modal } from '../shared/Modal';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { DataP5 } from '../shared/DataP5';
 import { dataGiocoTesto } from '../../utils/dateGioco';
@@ -26,63 +28,87 @@ interface DomandaEsame {
   risposta: string;
 }
 
-/** Pulsanti del giorno corrente della partita: domande in classe, domande d'esame, cruciverba. */
-export function ScuolaOggi({ partita }: { partita: PartitaDto }) {
+interface Props {
+  partita: PartitaDto;
+  /** Giorno di gioco (MM-GG) di cui mostrare le scorciatoie: quello della scheda «Oggi»; assente o `null` = la data di gioco della partita. */
+  giorno?: string | null;
+}
+
+/** Collegamenti fissi alle pagine della Guida e pulsanti del giorno: domande in classe, domande d'esame, cruciverba. */
+export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
   const [aperta, setAperta] = useState<Finestra | null>(null);
   const domande = useCarica(() => getDomande(partita.id), [partita.id]);
   const cruciverba = useCarica(() => getCruciverba(partita.id), [partita.id]);
-  const oggi = partita.dataGioco;
+  const giorno = giornoVisto ?? partita.dataGioco;
+  // cambiando giorno la finestra aperta si chiude (senza rimontare il componente, che rileggerebbe gli elenchi)
+  const [giornoPrima, setGiornoPrima] = useState(giorno);
+  if (giornoPrima !== giorno) {
+    setGiornoPrima(giorno);
+    setAperta(null);
+  }
 
   const inClasse: DomandaDto[] = useMemo(
-    () => (oggi ? (domande.dati?.domande ?? []).filter((d) => d.data === oggi && d.tipo !== 'esame-medio' && d.tipo !== 'esame-finale') : []),
-    [domande.dati, oggi],
+    () => (giorno ? (domande.dati?.domande ?? []).filter((d) => d.data === giorno && d.tipo !== 'esame-medio' && d.tipo !== 'esame-finale') : []),
+    [domande.dati, giorno],
   );
 
   // Le domande d'esame stanno in due elenchi diversi e NON sono le stesse: dentro `esami` c'è una voce per ogni domanda,
   // numerata; nell'elenco generale c'è una sola voce riassuntiva della giornata («Serie di domande su…») con tutte le
   // risposte in fila. Si usano quindi le domande dell'esame quando ci sono, e il riassunto solo come ripiego.
   const dEsame: DomandaEsame[] = useMemo(() => {
-    if (!oggi) return [];
+    if (!giorno) return [];
     const granulari: DomandaEsame[] = [];
     for (const e of domande.dati?.esami ?? []) {
-      for (const q of e.domande) if (q.data === oggi) granulari.push({ esame: e.nome, ordine: q.ordine, domanda: q.domanda, risposta: q.risposta });
+      for (const q of e.domande) if (q.data === giorno) granulari.push({ esame: e.nome, ordine: q.ordine, domanda: q.domanda, risposta: q.risposta });
     }
     if (granulari.length > 0) return [...granulari].sort((a, b) => a.ordine - b.ordine);
     const riassunti: DomandaEsame[] = [];
     for (const d of domande.dati?.domande ?? []) {
-      if (d.data !== oggi || (d.tipo !== 'esame-medio' && d.tipo !== 'esame-finale')) continue;
-      const esame = (domande.dati?.esami ?? []).find((e) => e.date.includes(oggi));
+      if (d.data !== giorno || (d.tipo !== 'esame-medio' && d.tipo !== 'esame-finale')) continue;
+      const esame = (domande.dati?.esami ?? []).find((e) => e.date.includes(giorno));
       riassunti.push({ esame: esame?.nome ?? (d.tipo === 'esame-finale' ? 'Esame finale' : 'Esame'), ordine: riassunti.length + 1, domanda: d.domanda, risposta: d.risposte.map((r) => r.testo).join(' → ') });
     }
     return riassunti;
-  }, [domande.dati, oggi]);
+  }, [domande.dati, giorno]);
 
   const cruciOggi: CruciverbaDto | null = useMemo(
-    () => (oggi ? (cruciverba.dati?.cruciverba ?? []).find((c) => c.giorno === oggi) ?? null : null),
-    [cruciverba.dati, oggi],
+    () => (giorno ? (cruciverba.dati?.cruciverba ?? []).find((c) => c.giorno === giorno) ?? null : null),
+    [cruciverba.dati, giorno],
   );
 
-  if (!oggi) return null;
+  // sempre presenti, anche senza data di gioco: le pagine intere della Guida, con tutte le date
+  const collegamenti = (
+    <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label="Scuola nella Guida">
+      <CollegamentoVisivo to="/guida/domande" tono="fantasma" compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Domande e risposte" dettaglio="tutte" aria-label="Domande e risposte: tutte le date nella Guida" />
+      <CollegamentoVisivo to="/guida/cruciverba" tono="fantasma" compatto icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio="tutti" aria-label="Cruciverba: tutti i giorni nella Guida" />
+    </div>
+  );
+  if (!giorno) return collegamenti;
   const niente = inClasse.length === 0 && dEsame.length === 0 && !cruciOggi;
-  const dataTesto = dataGiocoTesto(oggi);
+  const dataTesto = dataGiocoTesto(giorno);
+  // «Oggi» solo quando il giorno guardato è la data di gioco; per un altro giorno si scrive la data
+  const quando = giorno === partita.dataGioco ? 'Oggi' : `Il ${dataTesto}`;
 
   return (
-    <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label={`Scuola del ${dataTesto}`}>
-      {inClasse.length > 0 && (
-        <PulsanteVisivo compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Domande in classe" dettaglio={`${inClasse.length} oggi`} onClick={() => setAperta('classe')} aria-label={`Domande in classe del ${dataTesto}: ${inClasse.length}`} />
-      )}
-      {dEsame.length > 0 && (
-        <PulsanteVisivo compatto icona={<IconaAzione chiave="esame-primo" dimensione={20} />} titolo="Esame" dettaglio={`${dEsame.length} domande`} onClick={() => setAperta('esame')} aria-label={`Domande d’esame del ${dataTesto}: ${dEsame.length}`} />
-      )}
-      {cruciOggi && (
-        <PulsanteVisivo compatto attivo={cruciOggi.fatto} icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio={cruciOggi.fatto ? 'risolto' : 'risposta pronta'} onClick={() => setAperta('cruciverba')} aria-label={`Cruciverba del ${dataTesto}`} />
-      )}
-      {niente && !domande.caricamento && !cruciverba.caricamento && (
-        <span className="text-[12px] text-text-muted">Oggi nessuna domanda in classe né cruciverba.</span>
-      )}
+    <div className="flex items-center gap-1.5 flex-wrap">
+      {collegamenti}
+      <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label={`Scuola del ${dataTesto}`}>
+        {inClasse.length > 0 && (
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Domande in classe" dettaglio={`${inClasse.length} ${giorno === partita.dataGioco ? 'oggi' : 'quel giorno'}`} onClick={() => setAperta('classe')} aria-label={`Domande in classe del ${dataTesto}: ${inClasse.length}`} />
+        )}
+        {dEsame.length > 0 && (
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="esame-primo" dimensione={20} />} titolo="Esame" dettaglio={`${dEsame.length} domande`} onClick={() => setAperta('esame')} aria-label={`Domande d’esame del ${dataTesto}: ${dEsame.length}`} />
+        )}
+        {cruciOggi && (
+          <PulsanteVisivo compatto attivo={cruciOggi.fatto} icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio={cruciOggi.fatto ? 'risolto' : 'risposta pronta'} onClick={() => setAperta('cruciverba')} aria-label={`Cruciverba del ${dataTesto}`} />
+        )}
+        {niente && !domande.caricamento && !cruciverba.caricamento && (
+          <span className="text-[12px] text-text-muted">{quando} nessuna domanda in classe né cruciverba.</span>
+        )}
+      </div>
 
       <Modal titolo={`Domande in classe · ${dataTesto}`} aperta={aperta === 'classe'} onChiudi={() => setAperta(null)} larga>
-        <ElencoDomande domande={inClasse} data={oggi} />
+        <ElencoDomande domande={inClasse} data={giorno} />
       </Modal>
       <Modal titolo={`Esame · ${dataTesto}`} aperta={aperta === 'esame'} onChiudi={() => setAperta(null)} larga>
         <ul className="m-0 p-0 list-none flex flex-col gap-2">

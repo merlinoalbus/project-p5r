@@ -53,6 +53,9 @@ export function PartitaPage() {
   const [params, setParams] = useSearchParams();
   const richiesta = params.get('scheda');
   const scheda: Scheda = SCHEDE.some((s) => s.k === richiesta) ? (richiesta as Scheda) : 'oggi';
+  // il giorno mostrato dalla scheda «Oggi» (null a scheda chiusa): senza, vale la data di gioco della partita
+  const [giornoOggi, setGiornoOggi] = useState<string | null>(null);
+  const giornoScuola = (scheda === 'oggi' ? giornoOggi : null) ?? attiva?.dataGioco ?? null;
 
   return (
     <PageState isLoading={caricamento && !caricata} error={errore} onRetry={() => void carica()}>
@@ -70,7 +73,9 @@ export function PartitaPage() {
               {attiva.dataGioco && <span className="chip">{attiva.dataGioco}</span>}
               {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
               {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
-              <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} />
+              {/* le scorciatoie della scuola seguono il giorno guardato nella scheda «Oggi» (scelta dell'utente, 2026-10-11); la chiave
+                  resta sulla data di gioco: scorrere i giorni filtra gli elenchi già caricati, non li rilegge */}
+              <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} giorno={giornoScuola} />
             </div>
           </IntestazionePagina>
           <FilaScorrevole role="tablist" aria-label="Schede della partita">
@@ -85,7 +90,7 @@ export function PartitaPage() {
               </button>
             ))}
           </FilaScorrevole>
-          {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>}
+          {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi onGiorno={setGiornoOggi} /></div>}
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
           {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}
           {scheda === 'squadra' && <SquadraPartita key={attiva.id} partitaId={attiva.id} />}
