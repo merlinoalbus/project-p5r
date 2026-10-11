@@ -116,7 +116,7 @@ export type RequisitoSpillo =
    *  «incontrato», «azionato»…, o «ottenuto» dalla sua voce della guida). «La porta si vede finché la leva non è azionata»
    *  (richiesta dell'utente, 2026-09-30 e 2026-10-03). Solo nelle condizioni dei pin. */
   | { tipo: 'spillo'; spillo: string; segnato: boolean }
-  /** Lo stato di una voce della guida di un Palazzo nella partita, per chiave: «segnata» (Ottenuta o Esaurita) o no (richiesta
+  /** Lo stato di una voce della guida di un Palazzo o dei Memento nella partita, per chiave: «segnata» (Ottenuta o Esaurita) o no (richiesta
    *  dell'utente, 2026-10-11: «i pin tra le condizioni devono avere anche la possibilità di scegliere sulla base dello stato dei
    *  passi della guida di un'area la condizione di visibilità»). Solo nelle condizioni dei pin; le voci descrittive non si citano. */
   | { tipo: 'voce-guida'; voce: string; segnata: boolean };

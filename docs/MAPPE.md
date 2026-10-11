@@ -250,8 +250,8 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   aperto non è fra quelli offerti, e un giro di condizioni (A dipende da B, B da A) si rifiuta al salvataggio coi nomi dei
   pin. Non esiste negli editor del catalogo (articoli, negozi, letture, effetti) né nelle schede della guida senza mappa.
 - **Stato di una voce della guida** (2026-10-11): lo stato «Voce della guida» (gruppo «Mappe») con gli operatori «segnata»
-  (Ottenuta o Esaurita) / «non segnata» e la voce scelta con la ricerca fra quelle dei Palazzi («Leve delle sbarre — Meccanismo»,
-  raggruppate per «Palazzo › N. Area»; niente voci descrittive, passi degli Enigmi compresi). Per un pin che c'è solo prima o solo
+  (Ottenuta o Esaurita) / «non segnata» e la voce scelta con la ricerca fra quelle dei Palazzi e dei Memento («Leve delle sbarre — Meccanismo»,
+  raggruppate per «Palazzo › N. Area» o «Memento › N. Dedalo»; niente voci descrittive, passi degli Enigmi compresi). Per un pin che c'è solo prima o solo
   dopo un passo della guida. È di presenza, come «Pin di una mappa»; vale solo nei pin delle mappe; una voce tolta lascia la
   condizione grigia, «Da correggere».
 - Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» per la mappa di un

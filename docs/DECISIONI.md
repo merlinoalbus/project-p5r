@@ -1484,19 +1484,23 @@ Risposte dell'utente, parola per parola:
 - «Con quali stati si sceglie la condizione «Voce della guida»?» → «Segnata / non segnata (Recommended)» (««segnata» vale se la
   voce è Ottenuta o Esaurita, «non segnata» se è ancora da fare. Come «Pin di una mappa».»);
 - «Dove si può usare la condizione «Voce della guida»?» → «Solo nei pin delle mappe (Recommended)» («Come «Pin di una mappa»:
-  nell'editor delle mappe. Non compare negli effetti, nei negozi, negli articoli né nelle letture.»).
+  nell'editor delle mappe. Non compare negli effetti, nei negozi, negli articoli né nelle letture.»);
+- su rilievo del validatore (l'elenco offriva anche le 144 voci dei Memento, mentre la proposta diceva «voci dei Palazzi»): «La
+  condizione «Voce della guida» oggi offre anche le 144 voci dei Memento (dedali), oltre a quelle dei Palazzi. La proposta
+  approvata diceva «voci dei Palazzi». Cosa preferisci?» → «Anche i Memento (Recommended)».
 
 Che cosa ne segue:
 - **La condizione.** `{ tipo: 'voce-guida', voce, segnata }`. Nell'editor delle mappe è lo stato «Voce della guida», con gli
   operatori «segnata» e «non segnata».
-- **Quali voci.** Si sceglie con la ricerca fra le voci dei Palazzi, raggruppate per «Palazzo › N. Area», col tipo accanto
+- **Quali voci.** Si sceglie con la ricerca fra le voci dei Palazzi e dei Memento, raggruppate per «Palazzo › N. Area», col tipo accanto
   (`GET /api/condizioni/voci`). Sono escluse le voci descrittive («Altro»), che non hanno stato; i passi degli Enigmi sono compresi.
 - **È di presenza.** Non soddisfatta, nasconde il pin; si combina con TUTTE / ALMENO UNA / NON.
 - **Dove vale.** Solo nei pin delle mappe. La rifiutano lo schema delle rotte del catalogo e il controllo delle condizioni, e una
   scheda della guida senza mappa.
 - **Validazione.** Al salvataggio una voce che non c'è o è descrittiva si rifiuta (404 `condizione-non-trovata`). Nel pacchetto
   delle mappe si scarta e si conta.
-- **Voce eliminata o diventata descrittiva.** La condizione resta grigia, con il cartellino «Da correggere», e non nasconde il pin
-  per sempre.
+- **Voce eliminata o diventata descrittiva.** La condizione resta grigia (stato «ignoto»). Come ogni condizione che non vale,
+  nasconde il pin finché non la si corregge nell'editor; richiamato con «Mostra anche i non ancora disponibili», il pin porta il
+  cartellino «Da correggere».
 - **Aggiornamento.** Dopo ogni segno nella guida o sulla mappa la mappa si rilegge, e i pin che ne dipendono compaiono o
   spariscono subito.

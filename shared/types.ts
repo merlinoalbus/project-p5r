@@ -2256,7 +2256,7 @@ export interface PinConStatoDto {
   parola: string;
 }
 
-/** Una voce della guida di un Palazzo per la condizione «Voce della guida» (`GET /condizioni/voci`, 2026-10-11): `gruppo` è il posto
+/** Una voce della guida di un Palazzo o dei Memento per la condizione «Voce della guida» (`GET /condizioni/voci`, 2026-10-11): `gruppo` è il posto
  *  («Palazzo di Kamoshida › 2. Sala Centrale»). Le descrittive («Altro») non ci sono: non hanno stato. */
 export interface VoceCitabileDto { chiave: string; nome: string; tipo: string; gruppo: string }
 

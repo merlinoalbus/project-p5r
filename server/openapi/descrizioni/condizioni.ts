@@ -17,8 +17,8 @@ export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
     risposta: 'Elenco di `PinConStatoDto`',
   },
   'GET /api/condizioni/voci': {
-    sommario: 'Voci della guida dei Palazzi, per la condizione «Voce della guida»',
-    descrizione: 'Tutte le voci che si segnano (non le descrittive «Altro»), passi degli Enigmi compresi, in ordine di guida. Come i pin serve solo all\'editor delle mappe: la condizione vale solo nei pin. `gruppo` è il posto, «Palazzo › N. Area».',
+    sommario: 'Voci della guida dei Palazzi e dei Memento, per la condizione «Voce della guida»',
+    descrizione: 'Tutte le voci che si segnano (non le descrittive «Altro»), passi degli Enigmi compresi, in ordine di guida. Come i pin serve solo all\'editor delle mappe: la condizione vale solo nei pin. `gruppo` è il posto, «Palazzo › N. Area» (o «Memento › N. Dedalo»).',
     risposta: 'Elenco di `VoceCitabileDto`',
   },
   'GET /api/condizioni/partite/:partita/progressi': {

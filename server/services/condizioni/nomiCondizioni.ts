@@ -85,7 +85,7 @@ export function pinCitato(uid: string): { nome: string; tipo: string; parola: st
 }
 
 /**
- * Le voci della guida dei Palazzi che una condizione «Voce della guida» può citare (2026-10-11): tutte tranne le descrittive
+ * Le voci della guida dei Palazzi e dei Memento (scelta dell'utente) che una condizione «Voce della guida» può citare (2026-10-11): tutte tranne le descrittive
  * («Altro»), che uno stato non lo hanno; i passi degli Enigmi compresi. In ordine di guida (Palazzo, area, Enigma coi suoi passi,
  * voce), col posto da mostrare («Palazzo di Kamoshida › 2. Sala Centrale»).
  */

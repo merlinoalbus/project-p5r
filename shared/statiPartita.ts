@@ -82,8 +82,8 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
     { chiave: 'segnato', nome: 'segnato', campi: [campo('spillo', 'spillo', 'Pin')] },
     { chiave: 'non-segnato', nome: 'non segnato', campi: [campo('spillo', 'spillo', 'Pin')] },
   ] },
-  // — Mappe — lo stato di una voce della guida di un Palazzo (richiesta dell'utente, 2026-10-11): «segnata» (Ottenuta o Esaurita) o no
-  { chiave: 'voce-guida', nome: 'Voce della guida', gruppo: 'Mappe', origine: 'stato della voce nella guida del Palazzo (Ottenuto, Esaurito)', soloSpilli: true, operatori: [
+  // — Mappe — lo stato di una voce della guida di un Palazzo o dei Memento (richiesta dell'utente, 2026-10-11): «segnata» (Ottenuta o Esaurita) o no
+  { chiave: 'voce-guida', nome: 'Voce della guida', gruppo: 'Mappe', origine: 'stato della voce nella guida del Palazzo o dei Memento (Ottenuto, Esaurito)', soloSpilli: true, operatori: [
     { chiave: 'segnata', nome: 'segnata', campi: [campo('voce', 'voce-guida', 'Voce')] },
     { chiave: 'non-segnata', nome: 'non segnata', campi: [campo('voce', 'voce-guida', 'Voce')] },
   ] },

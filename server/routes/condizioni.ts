@@ -73,7 +73,7 @@ router.get('/spilli', (_req, res) => {
   res.json(spilli);
 });
 
-/** Le voci della guida dei Palazzi, per la condizione «Voce della guida» (2026-10-11): come i pin, solo l'editor delle mappe le chiede. */
+/** Le voci della guida dei Palazzi e dei Memento, per la condizione «Voce della guida» (2026-10-11): come i pin, solo l'editor delle mappe le chiede. */
 router.get('/voci', (_req, res) => {
   const voci: VoceCitabileDto[] = vociCitabili().map((v) => ({ chiave: v.chiave, nome: v.nome, tipo: v.tipo, gruppo: v.posto }));
   res.json(voci);

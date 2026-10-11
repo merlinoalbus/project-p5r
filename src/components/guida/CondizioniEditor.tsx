@@ -67,7 +67,7 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'abilita': return e.extra.abilita;
     // raggruppati per mappa, col tipo e la parola del suo stato: «Leva del ponte — Meccanismo · azionato»
     case 'spillo': return e.spilli.map((p) => ({ chiave: p.chiave, nome: p.nome, gruppo: p.gruppo, dettaglio: `${DEFINIZIONI_SPILLO[p.tipo as TipoSpillo]?.nome ?? p.tipo} · ${p.parola}` }));
-    // raggruppate per Palazzo e area, col tipo della voce: «Leva del ponte — Meccanismo»
+    // raggruppate per Palazzo (o Memento) e area, col tipo della voce: «Leva del ponte — Meccanismo»
     case 'voce-guida': return e.voci.map((v) => ({ chiave: v.chiave, nome: v.nome, gruppo: v.gruppo, dettaglio: NOME_TIPO[v.tipo as keyof typeof NOME_TIPO] ?? v.tipo }));
     default: return [];
   }

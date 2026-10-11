@@ -607,13 +607,13 @@ che supera la precedente esclusione.
   catalogo, `nomiCondizioniMemo`). Un NON su un gruppo misto (presenza e prerequisiti) non nasconde da solo
   (`proiezioneDiPresenza`).
 - **Condizione «Voce della guida»** (2026-10-11, `{ tipo: 'voce-guida', voce, segnata }`): lo stato di una voce della guida di un
-  Palazzo nella partita, «segnata» se Ottenuta o Esaurita, letto da `vociSegnate` dello stato della partita (`vociGestite`: non
+  Palazzo o dei Memento nella partita, «segnata» se Ottenuta o Esaurita, letto da `vociSegnate` dello stato della partita (`vociGestite`: non
   le descrittive). È la sorella di «Pin di una mappa»: di presenza, solo nelle condizioni dei pin delle mappe (lo schema del
   catalogo e `verificaCondizioni` senza `perSpillo` la rifiutano, come una scheda della guida senza mappa), validata
   in `condizioniConChiaviEsistenti` (voce esistente e non descrittiva: 404 `condizione-non-trovata`; nel pacchetto scartata e
   contata). Una voce tolta o diventata descrittiva lascia la condizione grigia («Da correggere»). L'editor la offre con
   `perSpillo`, con l'elenco `GET /api/condizioni/voci` (`vociCitabili`: voci non descrittive in ordine di guida, passi degli
-  Enigmi compresi, raggruppate per «Palazzo › N. Area»); i nomi vengono da `nomiCondizioni().voci` (solo con `conPin`).
+  Enigmi compresi, anche dei dedali dei Memento — scelta dell'utente —, raggruppate per «Palazzo › N. Area» o «Memento › N. Dedalo»); i nomi vengono da `nomiCondizioni().voci` (solo con `conPin`).
   Nessun giro possibile: una voce non dipende dalle condizioni di un pin.
 - `/api/condizioni`: `/elenchi` (articoli, letture, arcani, Persona, abilità, Ladri, attività, negozi, eventi, contatori — gli elenchi chiusi dell'editor); `/partite/:id/progressi` e i `PUT .../eventi/:chiave`, `.../attivita/:chiave`, `.../punti-negozio/:chiave` (scheda **Partita → Progressi**, `ProgressiPartita.tsx`). Frontend: `guida/CondizioniEditor.tsx` (righe `[NON] [Stato ▾] [operatore] [valori]`, blocchi TUTTE/ALMENO UNA, numeri a passi) e `shared/Selettore.tsx` (2026-09-12: l'unico elenco chiuso dell'app — pulsante `combobox` + `listbox`, ricerca scrivendo da dieci voci in su o con `ricerca="sempre"`, voce `vuoto` in testa, gruppi, variante `compatto` per i filtri; `utils/selettore.ts` con `opzioniDaNomi` e la soglia; nessuna `<select>` nel frontend, vietata da ESLint e da `src/selettoriUnificati.test.ts`).
 - `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, Palazzi completati — `palazziService` —, richieste completate, ranghi, giorno e meteo

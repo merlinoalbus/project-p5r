@@ -11,7 +11,7 @@ export const getElenchiRegole = (): Promise<ElenchiRegoleDto> => apiGet('/condiz
 /** I pin con uno stato, per la condizione «Pin di una mappa». */
 export const getPinConStato = (): Promise<PinConStatoDto[]> => apiGet('/condizioni/spilli');
 
-/** Le voci della guida dei Palazzi, per la condizione «Voce della guida» (2026-10-11). */
+/** Le voci della guida dei Palazzi e dei Memento, per la condizione «Voce della guida» (2026-10-11). */
 export const getVociCitabili = (): Promise<VoceCitabileDto[]> => apiGet('/condizioni/voci');
 
 /** Gli stati di una partita: calcolati dalla partita e da segnare a mano (Partita → Progressi). */

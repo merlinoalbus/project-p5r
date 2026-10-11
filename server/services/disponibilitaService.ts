@@ -121,6 +121,8 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
   const st = statoPartitaSemafori(partitaId, ranghi, doti);
   const giorno = st.dataGioco ? (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(st.dataGioco) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null : null;
+  // le voci della guida gestite: le leggono le condizioni «Voce della guida» e i pin segnati tramite le loro voci (una lettura sola)
+  const gestite = vociGestite(partitaId);
   /** Il conteggio `n` della query, che riceve come unico parametro la partita. */
   const conta = (sql: string): number => (prepared(sql).get(partitaId) as { n: number }).n;
   const contatori = new Map<ContatoreChiave, number>([
@@ -139,17 +141,17 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     giornoSettimana: giorno ? piatto(giorno) : null,
     sbloccoQuartieri: sbloccoQuartieri(),
     arcoCorrente: arcoAllaData(st.dataGioco, finestreDungeon()),
-    spilliSegnati: spilliSegnati(partitaId),
+    spilliSegnati: spilliSegnati(partitaId, gestite),
     pinCitati: new Map(),
-    vociSegnate: vociGestite(partitaId),
+    vociSegnate: gestite,
     vociCitate: new Map(),
   };
 }
 
-/** I pin segnati in una partita: il loro segno (`spillo_partita`) o le loro voci della guida, tutte segnate — la stessa regola
+/** I pin segnati in una partita, date le sue voci gestite: il loro segno (`spillo_partita`) o le loro voci della guida, tutte segnate — la stessa regola
  *  del «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), che non dà stato alle voci descrittive («Altro»). */
-function spilliSegnati(partitaId: number): Set<string> {
-  const segnati = uidFattiPerVoci(vociGestite(partitaId));
+function spilliSegnati(partitaId: number, gestite: ReadonlySet<string>): Set<string> {
+  const segnati = uidFattiPerVoci(gestite);
   for (const uid of prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').pluck().all(partitaId) as string[]) segnati.add(uid);
   return segnati;
 }
@@ -276,7 +278,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       const v = voceCitataNelloStato(r.voce, st);
       // una voce eliminata dopo aver scritto la condizione: non si sa, e lo si dice dove correggerlo
       if (!v) return esito('voce-guida', 'grigio', 'La voce della guida di questa condizione non c’è più: correggila nell’editor della mappa');
-      // diventata descrittiva («Altro»): non ha più uno stato, e la condizione non deve nascondere per sempre
+      // diventata descrittiva («Altro»): non ha più uno stato, quindi la condizione è grigia (da correggere nell'editor), non rossa
       if (puntoDescrittivo(v.tipo)) return esito('voce-guida', 'grigio', `«${v.nome}» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa`);
       const segnata = st.vociSegnate?.has(r.voce) ?? false;
       return esito('voce-guida', segnata === r.segnata ? 'verde' : 'rosso', `«${v.nome}»: ${segnata ? 'segnata' : 'non segnata'}`);

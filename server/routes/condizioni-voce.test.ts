@@ -1,5 +1,5 @@
 // ============================================================
-// La condizione «Voce della guida»: la visibilità di un pin decisa dallo stato di una voce della guida di un Palazzo (2026-10-11)
+// La condizione «Voce della guida»: la visibilità di un pin decisa dallo stato di una voce della guida di un Palazzo o dei Memento (2026-10-11)
 // ============================================================
 //
 // La richiesta dell'utente: «i pin tra le condizioni devono avere anche la possibilità di scegliere sulla base dello stato dei
@@ -105,13 +105,26 @@ describe('condizione «Voce della guida»', () => {
     expect((await request(app).put(`/api/mappe/spilli/${scheda}`).send({ condizioni: [su(v.chiave, true)] })).body.error.code).toBe('condizione-solo-pin');
   });
 
-  it('una voce eliminata lascia la condizione grigia (da correggere), senza nascondere il pin per sempre', async () => {
+  it('una voce eliminata lascia la condizione grigia («ignoto», da correggere): il pin resta nascosto finché non la si corregge', async () => {
     const v = await nuovaVoce('Voce che se ne va');
     const id = await nuovoPin('nota', 'Nota orfana', [su(v.chiave, true)]);
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(v.chiave)}`).expect(204);
     const p = await leggi(id);
     expect(p.disponibilita!.requisiti[0]).toMatchObject({ tipo: 'voce-guida', stato: 'grigio' });
     expect(p.condizioni[0].testo).toBe('Voce della guida non più presente: segnata');
+    expect(p.disponibilita!.stato).toBe('ignoto');
+  });
+
+  it('una voce diventata descrittiva lascia la condizione grigia: non ha più stato, e la condizione va corretta', async () => {
+    const v = await nuovaVoce('Voce che diventa una nota');
+    const id = await nuovoPin('nota', 'Nota della voce descrittiva', [su(v.chiave, true)]);
+    expect(await stato(id)).toBe('bloccato');
+    // senza pin collegati la voce può diventare «Altro» anche se una condizione la cita
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(v.chiave)}`).send({ tipo: 'altro' }).expect(200);
+    const p = await leggi(id);
+    expect(p.disponibilita!.requisiti[0]).toMatchObject({ tipo: 'voce-guida', stato: 'grigio', dettaglio: '«Voce che diventa una nota» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa' });
+    // grigio: «ignoto», non «bloccato»; il visore lo nasconde come ogni condizione che non vale e, richiamato, dice «Da correggere»
+    expect(p.disponibilita!.stato).toBe('ignoto');
   });
 
   it('il pacchetto delle mappe porta la condizione; una voce che non c’è si scarta e si conta', async () => {
@@ -139,5 +152,10 @@ describe('condizione «Voce della guida»', () => {
     expect(voci.some((v) => v.chiave === descrittiva.chiave)).toBe(false);
     // il passo viene subito dopo il suo Enigma
     expect(voci.findIndex((v) => v.chiave === passo.chiave)).toBe(voci.findIndex((v) => v.chiave === enigma.chiave) + 1);
+    // anche le voci dei dedali dei Memento (scelta dell'utente, 2026-10-11: «Anche i Memento»), dopo i Palazzi, e si citano
+    const memento = voci.find((v) => v.gruppo.startsWith('Memento › '));
+    expect(memento).toMatchObject({ gruppo: expect.stringMatching(/^Memento › \d+\. Dedalo /) });
+    expect(voci.findIndex((v) => v.gruppo.startsWith('Memento › '))).toBeGreaterThan(voci.findIndex((v) => v.chiave === passo.chiave));
+    await nuovoPin('nota', 'Nota da un dedalo', [su(memento!.chiave, false)]);
   });
 });
