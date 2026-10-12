@@ -18,7 +18,8 @@ vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDun
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave }: { chiave: string }) => <div>Visore: {chiave}</div> }));
-vi.mock('../components/mappe/MappaMemento', () => ({ MappaMemento: () => <div>Disegno del pozzo</div> }));
+// il pozzo finto: un pulsante che sceglie Qimranut, come toccarne lo strato
+vi.mock('../components/mappe/MappaMemento', () => ({ MappaMemento: ({ onSeleziona }: { onSeleziona?: (k: string) => void }) => <button type="button" onClick={() => onSeleziona?.('mementos-01-qimranut')}>Disegno del pozzo</button> }));
 vi.mock('../components/mappe/CollegamentoMappa', () => ({ CollegamentoMappa: () => null }));
 vi.mock('../components/shared/ImmagineEntita', () => ({ ImmagineEntita: () => <div>Immagine</div> }));
 vi.mock('../components/guida/EmblemaDungeon', () => ({ EmblemaDungeon: () => null }));
@@ -206,12 +207,15 @@ it('nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo
   monta('mementos');
   expect(await screen.findByRole('heading', { name: 'Memento' })).toBeInTheDocument();
   expect(screen.queryByRole('tab', { name: 'Pianta della guida' })).toBeNull();
-  // il binario dei dedali, con la percentuale; il pozzo si apre a richiesta
+  // il binario dei dedali, con la percentuale; il disegno del pozzo fisso in cima (2026-10-12, «lascia sempre visibile Pozzo»),
+  // senza più il pulsante; la finestra resta per tablet e telefono
   const binario = screen.getByRole('navigation', { name: 'Dedali dei Memento' });
   expect(within(binario).getByRole('button', { name: /^1 ?Aiyatsbus/ })).toHaveAttribute('aria-pressed', 'true');
-  expect(screen.queryByText('Disegno del pozzo')).toBeNull();
-  fireEvent.click(within(binario).getByRole('button', { name: 'Apri il pozzo dei Memento' }));
-  expect(within(screen.getByRole('dialog', { name: 'Il pozzo dei Memento' })).getByText('Disegno del pozzo')).toBeInTheDocument();
+  expect(within(binario).getByRole('button', { name: 'Disegno del pozzo' })).toBeInTheDocument();
+  expect(within(binario).queryByRole('button', { name: 'Apri il pozzo dei Memento' })).toBeNull();
+  expect(screen.queryByRole('dialog')).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Apri il pozzo dei Memento' }));
+  expect(within(screen.getByRole('dialog', { name: 'Il pozzo dei Memento' })).getByRole('button', { name: 'Disegno del pozzo' })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /^Chiudi/ }));
   const dedalo = screen.getByRole('group', { name: 'Dedalo di Aiyatsbus' });
   expect(within(dedalo).getByRole('tab', { name: 'Area 1 · 1/10' })).toHaveAttribute('aria-selected', 'true');
@@ -224,9 +228,9 @@ it('nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo
   fireEvent.click(within(within(dedalo).getByRole('radiogroup', { name: 'Stato di «Bullismo sui bulli»' })).getByRole('radio', { name: 'Fatta' }));
   await waitFor(() => expect(impostaStatoRichiesta).toHaveBeenCalledWith(4, 'bulli', 'completata'));
   await waitFor(() => expect(screen.getByRole('progressbar', { name: /Avanzamento in Memento/ })).toHaveAttribute('aria-valuenow', '30'));
-  // Qimranut ha un'area vuota: completata, e con lei il dedalo (la ✓ nel binario)
-  const qim = within(binario).getByRole('button', { name: /Qimranut.*\(completata\)/ });
-  fireEvent.click(qim);
+  // Qimranut ha un'area vuota: completata, e con lei il dedalo (la ✓ nel binario); lo si sceglie toccando il pozzo del binario
+  expect(within(binario).getByRole('button', { name: /Qimranut.*\(completata\)/ })).toBeInTheDocument();
+  fireEvent.click(within(binario).getByRole('button', { name: 'Disegno del pozzo' }));
   const qimranut = await screen.findByRole('group', { name: 'Dedalo di Qimranut' });
   expect(within(qimranut).getByRole('tab', { name: 'Area 1 (completata)' })).toBeInTheDocument();
   expect(within(qimranut).queryByRole('button', { name: /^Timbro/ })).toBeNull();

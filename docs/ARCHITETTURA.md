@@ -913,7 +913,8 @@ solo Trama e non si sceglie, niente filtri per tipo né «Collega pin»). `Modul
 una Persona: Persona scelta dal compendio (`getPersone`, `persona` nel corpo delle voci), nome dell'Ombra, area, descrizione.
 **Pagina per formato (2026-10-12, sostituisce l'impaginazione del 2026-10-11).** `DungeonDettaglioPage` nei Memento: intestazione
 compatta (date, mappe e conteggi in una piega; «Correggi la scheda» solo in «Modifica la guida»), poi da 1024 px il binario dei
-dedali (`DedaloNelBinario`: nome breve, percentuale, barra, ✓; «Pozzo» apre `MappaMemento` in una `Modal`) e la colonna del
+dedali (260 px, 300 da 1280: `MappaMemento` fisso in cima, poi l'elenco che scorre di `DedaloNelBinario`: nome breve, percentuale,
+barra, ✓; sul tablet e sul telefono «Pozzo» apre `MappaMemento` in una `Modal`) e la colonna del
 dedalo, ognuno col suo scorrimento; sul tablet i dedali in una fila che scorre (`fila-scorrevole--sempre`, `src/tailwind.css`);
 sul telefono la tendina sta nella scheda del dedalo. Lo stato «Gioca» / «Modifica la guida» (`modifica`) è della pagina.
 `AreeDelDedalo` (riscritto) è il dedalo: scheda (miniatura, conto per elemento con `contiDelDedalo` di `src/utils/dedali.ts`,

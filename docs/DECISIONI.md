@@ -1698,3 +1698,6 @@ Conseguenze tecniche della pagina per formato (voce 2; non scelte dell'utente, m
   sul telefono nella piega): alta 170 px, a 1280×689 lasciava al pannello dell'area meno di 200 px. «Correggi la scheda» del
   Memento, che sistema la guida, compare solo in «Modifica la guida».
 - Nel binario e nella fila i dedali hanno il nome breve («2 Aiyatsbus 31%», come nella bozza); il nome intero nel suggerimento.
+- Da 1024 px il disegno del pozzo sta fisso in cima al binario (richiesta dell'utente «lascia sempre visibile Pozzo», scelta «Disegno
+  fisso in cima»): i suoi strati più bassi si stringono come nel gioco e a 1024 px quattro sono sotto i 44 px (34×28 Da'at);
+  ogni dedalo resta raggiungibile dall'elenco sotto, con bersagli da 44 px.

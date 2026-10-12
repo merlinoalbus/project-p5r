@@ -411,17 +411,21 @@ export function DungeonDettaglioPage() {
               solo lì, torna a scorrere la pagina. */}
           {/* ---- I Memento (progetto approvato del 2026-10-12): da 1024 px il binario dei dedali a sinistra e il dedalo a destra,
               ognuno col suo scorrimento; sul tablet i dedali in fila sopra il dedalo; sul telefono la tendina sta nella scheda del
-              dedalo. Il pozzo disegnato si apre a richiesta. ---- */}
+              dedalo. Da 1024 px il disegno del pozzo sta fisso in cima al binario; sotto, si apre a richiesta in una finestra. ---- */}
           {memento && (() => {
             const scelto = area.dedalo ? { ...area, dedalo: area.dedalo } : null;
             return (
-              <div className="grid grid-cols-1 items-start gap-3 lg:min-h-[280px] lg:flex-1 lg:grid-cols-[minmax(200px,240px)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch">
-                <nav aria-label="Dedali dei Memento" className="hidden min-h-0 flex-col gap-1 lg:flex lg:area-scorrevole lg:p-1.5">
-                  <div className="flex items-center justify-between gap-2 px-1">
-                    <span className="text-[11px] uppercase tracking-wide text-text-muted">Dedali</span>
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Pozzo" aria-label="Apri il pozzo dei Memento" onClick={() => setPozzo(true)} />
+              // la colonna dei dedali è larga 260 px da 1024 e 300 da 1280 (richiesta dell'utente, 2026-10-12: «allarga la colonna
+              // dedali»): a 1024 la colonna del dedalo resta sui 430 px, a 1280 le due colonne dell'area restano affiancate
+              <div className="grid grid-cols-1 items-start gap-3 lg:min-h-[280px] lg:flex-1 lg:grid-cols-[260px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch xl:grid-cols-[300px_minmax(0,1fr)]">
+                {/* «lascia sempre visibile Pozzo» (2026-10-12, scelta «Disegno fisso in cima»): il disegno del pozzo sta fermo in cima
+                    alla colonna e si tocca per scegliere il dedalo; sotto, l'elenco dei dedali scorre da solo */}
+                <nav aria-label="Dedali dei Memento" className="hidden min-h-0 flex-col gap-1.5 lg:flex">
+                  <MappaMemento aree={d.aree} selezionata={area.chiave} onSeleziona={scegliArea} className="shrink-0" />
+                  <div className="flex min-h-0 flex-1 flex-col gap-1 area-scorrevole p-1.5">
+                    <span className="px-1 text-[11px] uppercase tracking-wide text-text-muted">Dedali</span>
+                    {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
                   </div>
-                  {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
                 </nav>
                 <div className="flex min-w-0 flex-col gap-2.5 lg:min-h-0 lg:area-scorrevole lg:p-2">
                   {/* sul tablet: i dedali in fila, col pozzo */}
