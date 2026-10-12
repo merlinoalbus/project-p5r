@@ -13,7 +13,7 @@ import { registraEvento } from './storicoService.js';
 import type { GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
 import { confidenti, leggiPartita } from './partiteService.js';
 import { conteggiGiornate, righeDelGiorno, spuntePartita, vociDelGiorno } from './giornataService.js';
-import { meteoDelGiorno } from './meteoService.js';
+import { allerteDelGiorno, meteoDelGiorno } from './meteoService.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string; coperto: number }
 
@@ -52,6 +52,7 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
     giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
     meteoPartita: partitaId ? meteoDelGiorno(partitaId, data) : null,
+    allerte: allerteDelGiorno(data),
   };
 }
 

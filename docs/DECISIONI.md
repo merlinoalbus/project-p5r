@@ -1701,3 +1701,19 @@ Conseguenze tecniche della pagina per formato (voce 2; non scelte dell'utente, m
 - Da 1024 px il disegno del pozzo sta fisso in cima al binario (richiesta dell'utente «lascia sempre visibile Pozzo», scelta «Disegno
   fisso in cima»): i suoi strati più bassi si stringono come nel gioco e a 1024 px quattro sono sotto i 44 px (34×28 Da'at);
   ogni dedalo resta raggiungibile dall'elenco sotto, con bersagli da 44 px.
+
+## 2026-10-12 — Tag delle allerte meteo nelle giornate
+
+Domanda dell'utente: «nelle giornate della partita gli allerta vengono gestiti automaticamente?»; risposta: le date sì (le
+mostra l'app), gli effetti no, salvo la pioggia torrenziale che conta come pioggia. Richiesta: «vorrei venisse mostrato un tag
+con l'allerta meteo quando in quella giornata è presente». Scelte dell'utente (AskUserQuestion): dove → «Partita → Oggi»,
+«Guida giorno per giorno», «Calendario di gioco»; al tocco → «Solo il nome». Poi: «se serve fai i prompt e passameli da passare
+a codex per le grafiche» → consegna `docs/grafica/consegna-2026-10-12-allerte.md` (sei icone, `ui/allerta-<nome>`).
+
+Conseguenze tecniche (non scelte dell'utente):
+- Il tag sta nella scheda del giorno (`GiornoGuida`), la stessa in «Oggi» e nella guida giorno per giorno; il bollino senza nome
+  che stava sui pulsanti «Giorno»/«Sera» di «Oggi» se n'è andato (l'opzione scelta diceva che il tag ne prende il posto).
+- Un tag per allerta, con la fascia se è una sola («Notte torrida · sera»); gli effetti nel suggerimento. Le allerte sono del
+  catalogo: si vedono anche senza partita.
+- Gli effetti di ondata di gelo (attività come con la pioggia) e di ondata di calore e notte torrida (distributori senza
+  bevande) restano non applicati: l'utente non l'ha chiesto.

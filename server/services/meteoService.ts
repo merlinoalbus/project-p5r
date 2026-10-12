@@ -14,7 +14,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { ALLERTA_PIOGGIA, fasceDellaGuida, type MeteoPartita } from '../../shared/meteoPartita.js';
-import type { FasciaGioco, MeteoFasciaDto, MeteoGiornoDto } from '../../shared/types.js';
+import type { AllertaGiornoDto, FasciaGioco, MeteoFasciaDto, MeteoGiornoDto } from '../../shared/types.js';
 
 /** Il testo del meteo della guida per il giorno: il calendario, e il percorso dove il calendario tace. */
 function testoMeteoGuida(data: string): string | null {
@@ -37,6 +37,35 @@ function allerte(data: string): { giorno: Allerte; sera: Allerte } {
   /** Le allerte di una fascia, con gli effetti letti dal JSON. */
   const di = (f: FasciaGioco): Allerte => righe.filter((x) => x.fascia === f).map((r) => ({ chiave: r.chiave, nome: r.nome, effetti: JSON.parse(r.effetti_json) as string[] }));
   return { giorno: di('giorno'), sera: di('sera') };
+}
+
+/** Le allerte di una riga per data: ogni allerta una volta, con le fasce in cui vale (prima giorno, poi sera) e gli effetti. */
+function allerteDiRighe(righe: Array<{ fascia: FasciaGioco; chiave: string; nome: string; effetti_json: string }>): AllertaGiornoDto[] {
+  const perChiave = new Map<string, AllertaGiornoDto>();
+  for (const r of righe) {
+    const a = perChiave.get(r.chiave) ?? { chiave: r.chiave, nome: r.nome, effetti: JSON.parse(r.effetti_json) as string[], fasce: [] };
+    if (!a.fasce.includes(r.fascia)) a.fasce.push(r.fascia);
+    perChiave.set(r.chiave, a);
+  }
+  for (const a of perChiave.values()) a.fasce.sort((x, y) => (x === y ? 0 : x === 'giorno' ? -1 : 1));
+  return [...perChiave.values()];
+}
+
+/**
+ * Le allerte del gioco di un giorno, una per allerta con le sue fasce (richiesta dell'utente, 2026-10-12: «vorrei venisse
+ * mostrato un tag con l'allerta meteo quando in quella giornata è presente»). Sono del catalogo, non della partita.
+ */
+export function allerteDelGiorno(data: string): AllertaGiornoDto[] {
+  return allerteDiRighe(prepared('SELECT fascia, chiave, nome, effetti_json FROM allerta_meteo WHERE data = ? ORDER BY nome, fascia').all(data) as Array<{ fascia: FasciaGioco; chiave: string; nome: string; effetti_json: string }>);
+}
+
+/** Le allerte di tutti i giorni che ne hanno, per data: per il calendario, che le legge una volta per tutti i giorni. */
+export function allerteDiOgniGiorno(): Map<string, AllertaGiornoDto[]> {
+  const perData = new Map<string, Array<{ fascia: FasciaGioco; chiave: string; nome: string; effetti_json: string }>>();
+  for (const r of prepared('SELECT data, fascia, chiave, nome, effetti_json FROM allerta_meteo ORDER BY data, nome, fascia').all() as Array<{ data: string; fascia: FasciaGioco; chiave: string; nome: string; effetti_json: string }>) {
+    perData.set(r.data, [...(perData.get(r.data) ?? []), r]);
+  }
+  return new Map([...perData].map(([data, righe]) => [data, allerteDiRighe(righe)]));
 }
 
 /** Il meteo di una fascia: quello scelto nella partita; se no, la pioggia torrenziale del gioco è pioggia; se no, la guida. */

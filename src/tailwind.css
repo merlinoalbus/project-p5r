@@ -982,14 +982,20 @@
   .momento-meteo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
   .momento-meteo__fascia { justify-content: center; gap: 4px; padding-inline: 8px; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
   .momento-meteo__separatore { width: 1px; align-self: stretch; margin-block: 6px; background: var(--color-border); }
-  /* l'allerta del gioco sull'angolo del pulsante della sua fascia: sopra, non accanto, così non allarga la riga */
-  .momento-meteo__allerta { position: absolute; top: 1px; right: 3px; line-height: 0; color: var(--color-warning); pointer-events: none; }
   .meteo-fascia { display: grid; flex-shrink: 0; grid-template-columns: repeat(4, 44px); gap: 2px; }
   /* un valore che vale ma non l'hai scelto tu (il meteo della guida): si vede, più tenue della scelta vera */
   .chip--dalla-guida {
     --chip-sfondo: color-mix(in srgb, var(--color-primary) 7%, var(--color-bg-secondary));
     --chip-bordo: color-mix(in srgb, var(--color-primary) 45%, transparent);
     color: var(--color-text-primary);
+  }
+  /* L'allerta meteo del gioco in una giornata (2026-10-12): il tag giallo d'avviso, accanto al meteo. Dopo `.chip`, che ha la
+     stessa specificità e ne azzererebbe le variabili. */
+  .chip--allerta {
+    --chip-sfondo: color-mix(in srgb, var(--color-warning) 16%, var(--color-bg-secondary));
+    --chip-bordo: color-mix(in srgb, var(--color-warning) 70%, transparent);
+    color: var(--color-warning);
+    gap: 5px;
   }
 
   /* ---- Griglia della Home: tre disposizioni diverse, una per formato ----

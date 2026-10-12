@@ -16,6 +16,7 @@ import type { GiornoCalendarioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DataP5 } from '../components/shared/DataP5';
 import { MeteoIcona } from '../components/guida/MeteoIcona';
+import { TagAllerte } from '../components/shared/TagAllerta';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 
@@ -37,6 +38,8 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioD
       <button type="button" className="w-full text-left px-3 py-2 flex flex-wrap items-center gap-2 touch" onClick={onToggle} aria-expanded={aperto} aria-label={`${dataGiocoTesto(g.data)}, ${g.giornoSettimana}`}>
         <DataP5 data={g.data} giornoSettimana={g.giornoSettimana} compatta evidenzia={oggi || festivo} className="w-[132px]" />
         {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={20} />}
+        {/* le allerte meteo del gioco del giorno, come tag (2026-10-12) */}
+        <TagAllerte allerte={g.allerte} compatto />
         {g.tempoLibero && !g.tempoLibero.giorno && !g.tempoLibero.sera && <span className="chip text-[11px]">Nessun tempo libero</span>}
         {oggi && <span className="chip chip--attivo">Oggi nella partita</span>}
         <span className="ml-auto flex flex-wrap gap-1">
@@ -102,7 +105,11 @@ export function CalendarioPage() {
 
           {d.oggi && (
             <section className="card flex flex-col gap-2 border-primary">
-              <h2 className="m-0 flex items-center gap-3 flex-wrap"><span className="font-display uppercase tracking-wide text-[20px] leading-none">Oggi</span><DataP5 data={d.oggi.data} giornoSettimana={d.oggi.giornoSettimana} evidenzia />{d.oggi.meteo && <MeteoIcona meteo={d.oggi.meteo} dimensione={26} conTesto />}</h2>
+              {/* i tag delle allerte accanto al titolo, non dentro: nel titolo ne allungavano il nome per i lettori di schermo */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                <h2 className="m-0 flex items-center gap-3 flex-wrap"><span className="font-display uppercase tracking-wide text-[20px] leading-none">Oggi</span><DataP5 data={d.oggi.data} giornoSettimana={d.oggi.giornoSettimana} evidenzia />{d.oggi.meteo && <MeteoIcona meteo={d.oggi.meteo} dimensione={26} conTesto />}</h2>
+                <TagAllerte allerte={d.oggi.allerte} />
+              </div>
               {d.oggi.eventi.length > 0 ? (
                 <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Eventi di oggi">
                   {d.oggi.eventi.map((e) => <li key={e.id}><span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span> <strong>{e.titolo}</strong>{e.dettaglio ? <span className="text-text-secondary"> — {e.dettaglio}</span> : null}</li>)}

@@ -124,7 +124,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/percorso/:data': {
     sommario: 'Scheda di un giorno della guida con le sue voci',
-    descrizione: '`data` nel formato MM-GG. Trama, vincoli, meteo, avvisi e fonte del giorno, le voci in ordine (prima di giorno, poi di sera), giorno precedente e successivo. Con `?partita=` le voci dicono se sono fatte, e arrivano il giorno corrente e il meteo della partita per quel giorno.',
+    descrizione: '`data` nel formato MM-GG. Trama, vincoli, meteo, allerte meteo del gioco (`allerte`: una per allerta, con le fasce in cui vale e gli effetti), avvisi e fonte del giorno, le voci in ordine (prima di giorno, poi di sera), giorno precedente e successivo. Con `?partita=` le voci dicono se sono fatte, e arrivano il giorno corrente e il meteo della partita per quel giorno.',
     risposta: '`PercorsoGiornoDto`',
     errori: [[404, 'giorno-non-trovato'], PARTITA_NON_TROVATA],
   },
@@ -248,7 +248,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/calendario': {
     sommario: 'Calendario di gioco con eventi e settimane della guida',
-    descrizione: 'I giorni (tutti, o del solo mese `mese` nel formato MM) con meteo, tempo libero ed eventi, i riassunti delle settimane della guida e l\'elenco dei mesi. Con `?partita=` arrivano la data di gioco, il giorno corrente e le prossime sei scadenze o esami da quel giorno, con i giorni mancanti.',
+    descrizione: 'I giorni (tutti, o del solo mese `mese` nel formato MM) con meteo, allerte meteo del gioco (`allerte`, come nella scheda del giorno), tempo libero ed eventi, i riassunti delle settimane della guida e l\'elenco dei mesi. Con `?partita=` arrivano la data di gioco, il giorno corrente e le prossime sei scadenze o esami da quel giorno, con i giorni mancanti.',
     risposta: '`CalendarioDto`',
     errori: [PARTITA_NON_TROVATA],
   },

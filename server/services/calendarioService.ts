@@ -5,6 +5,7 @@
 import { prepared } from '../db/dbService.js';
 import { partitaNonTrovata } from './verificaPartita.js';
 import { indiceGiornoScolastico } from './domandeService.js';
+import { allerteDiOgniGiorno } from './meteoService.js';
 import type { CalendarioDto, GiornoCalendarioDto, SettimanaGuidaDto } from '../../shared/types.js';
 
 interface RigaGiorno { data: string; ordine: number; giorno_settimana: string; meteo: string | null; tempo_libero_json: string | null; settimana: number | null }
@@ -12,12 +13,13 @@ interface RigaEvento { id: number; data: string; tipo: GiornoCalendarioDto['even
 
 const GIORNI: Record<string, string> = { Lunedi: 'Lunedì', Martedi: 'Martedì', Mercoledi: 'Mercoledì', Giovedi: 'Giovedì', Venerdi: 'Venerdì', Sabato: 'Sabato', Domenica: 'Domenica' };
 
-/** Un giorno del calendario come DTO: nome del giorno con l'accento (`GIORNI`, se noto), tempo libero dal JSON e gli eventi già raccolti per quella data. */
-function giornoDto(g: RigaGiorno, eventi: RigaEvento[]): GiornoCalendarioDto {
+/** Un giorno del calendario come DTO: nome del giorno con l'accento (`GIORNI`, se noto), tempo libero dal JSON, gli eventi già raccolti per quella data e le sue allerte del gioco (2026-10-12). */
+function giornoDto(g: RigaGiorno, eventi: RigaEvento[], allerte: GiornoCalendarioDto['allerte']): GiornoCalendarioDto {
   return {
     data: g.data, giornoSettimana: GIORNI[g.giorno_settimana] ?? g.giorno_settimana, meteo: g.meteo, settimana: g.settimana,
     tempoLibero: g.tempo_libero_json ? (JSON.parse(g.tempo_libero_json) as { giorno: boolean; sera: boolean }) : null,
     eventi: eventi.map((e) => ({ id: e.id, tipo: e.tipo, titolo: e.titolo, dettaglio: e.dettaglio, fonte: e.fonte })),
+    allerte,
   };
 }
 
@@ -43,6 +45,7 @@ export function calendario(partitaId?: number, mese?: string): CalendarioDto {
     if (!perData.has(e.data)) perData.set(e.data, []);
     perData.get(e.data)!.push(e);
   }
+  const allerte = allerteDiOgniGiorno();
   const oggiIdx = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
   const oggiRiga = dataGioco ? (prepared('SELECT * FROM giorno_calendario WHERE data = ?').get(dataGioco) as RigaGiorno | undefined) : undefined;
   // Giorni reali fra due date: differenza di `ordine` (i giorni del seed sono consecutivi), non l'indice di ordinamento mese×31+giorno.
@@ -54,10 +57,10 @@ export function calendario(partitaId?: number, mese?: string): CalendarioDto {
     .slice(0, 6)
     .map((e) => ({ data: e.data, tipo: e.tipo, titolo: e.titolo, dettaglio: e.dettaglio, giorniMancanti: (ordineDi.get(e.data) ?? oggiOrdine) - oggiOrdine }));
   return {
-    giorni: giorni.map((g) => giornoDto(g, perData.get(g.data) ?? [])),
+    giorni: giorni.map((g) => giornoDto(g, perData.get(g.data) ?? [], allerte.get(g.data) ?? [])),
     settimane: settimaneGuida(),
     dataGioco,
-    oggi: oggiRiga ? giornoDto(oggiRiga, perData.get(oggiRiga.data) ?? []) : null,
+    oggi: oggiRiga ? giornoDto(oggiRiga, perData.get(oggiRiga.data) ?? [], allerte.get(oggiRiga.data) ?? []) : null,
     prossimeScadenze: scadenze,
     mesi: (prepared('SELECT DISTINCT substr(data, 1, 2) AS m FROM giorno_calendario ORDER BY ordine').all() as Array<{ m: string }>).map((r) => r.m),
   };

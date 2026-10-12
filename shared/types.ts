@@ -470,6 +470,16 @@ export interface MeteoFasciaDto {
   allerte: Array<{ chiave: string; nome: string; effetti: string[] }>;
 }
 
+/** Un'allerta del gioco in un giorno (date fisse del catalogo, `allerta_meteo`), una volta sola con le fasce in cui vale: il tag
+ *  della giornata (richiesta dell'utente, 2026-10-12). */
+export interface AllertaGiornoDto {
+  chiave: string;
+  nome: string;
+  effetti: string[];
+  /** Le fasce in cui vale, prima giorno poi sera (la notte torrida solo di sera, l'ondata di calore solo di giorno). */
+  fasce: FasciaGioco[];
+}
+
 /** Il meteo di un giorno nella partita, di giorno e di sera («Sereno/Pioggia» della guida = sereno di giorno, pioggia di sera). */
 export interface MeteoGiornoDto {
   /** 'MM-GG'. Non si chiama `data`: una risposta con un campo `data` sarebbe presa per già imbustata (`responseShape`). */
@@ -1223,6 +1233,8 @@ export interface PercorsoGiornoDto {
   fatte: number;
   /** Con una partita: il meteo del giorno nella partita, di giorno e di sera (Partita → Oggi). */
   meteoPartita: MeteoGiornoDto | null;
+  /** Le allerte del gioco del giorno (anche senza partita): il tag nella scheda del giorno (2026-10-12). */
+  allerte: AllertaGiornoDto[];
 }
 
 // ---- Negozi e inventario (Fase 8.2) ----
@@ -1889,6 +1901,8 @@ export interface GiornoCalendarioDto {
   tempoLibero: { giorno: boolean; sera: boolean } | null;
   /** Numero della «Soluzione per settimana» della guida. */
   settimana: number | null;
+  /** Le allerte del gioco del giorno: il tag nel calendario (2026-10-12). */
+  allerte: AllertaGiornoDto[];
 }
 
 export interface SettimanaGuidaDto {

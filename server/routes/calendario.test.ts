@@ -6,7 +6,7 @@ import request from 'supertest';
 import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { indiceGiornoScolastico } from '../services/domandeService.js';
-import type { CalendarioDto } from '../../shared/types.js';
+import type { CalendarioDto, PercorsoGiornoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
@@ -16,6 +16,23 @@ describe('API calendario', () => {
     dbDiProva();
   });
   afterAll(() => closeDb());
+
+  it('le allerte meteo del gioco nel calendario e nella scheda del giorno, una per allerta con le sue fasce, anche senza partita (2026-10-12)', async () => {
+    const c = (await request(app).get('/api/compendio/calendario')).body.data as CalendarioDto;
+    const del = (data: string) => c.giorni.find((g) => g.data === data)!.allerte.map((a) => `${a.nome}:${a.fasce.join('+')}`);
+    // il 17 agosto: ondata di calore di giorno, notte torrida e pioggia torrenziale di sera (in ordine di nome)
+    expect(del('08-17')).toEqual(['Notte torrida:sera', 'Ondata di calore:giorno', 'Pioggia torrenziale:sera']);
+    expect(del('01-26')).toEqual(['Ondata di gelo:giorno+sera']);
+    expect(del('04-12')).toEqual([]);
+    expect(c.giorni.find((g) => g.data === '01-26')!.allerte[0].effetti.length).toBeGreaterThan(0);
+    // nel pacchetto 74 righe di allerta (giorno e fascia) su 44 giorni: ogni riga c'è una volta sola, nel suo giorno
+    expect(c.giorni.filter((g) => g.allerte.length > 0)).toHaveLength(44);
+    expect(c.giorni.reduce((s, g) => s + g.allerte.reduce((t, a) => t + a.fasce.length, 0), 0)).toBe(74);
+    // la stessa regola nella scheda del giorno della guida, con e senza partita
+    const g = (await request(app).get('/api/compendio/percorso/08-17')).body.data as PercorsoGiornoDto;
+    expect(g.allerte).toEqual(c.giorni.find((x) => x.data === '08-17')!.allerte);
+    expect(((await request(app).get('/api/compendio/percorso/04-12')).body.data as PercorsoGiornoDto).allerte).toEqual([]);
+  });
 
   it('calendario completo: 346 giorni in ordine, giorni della settimana coerenti, settimane della guida assegnate, eventi con fonte', async () => {
     const c = (await request(app).get('/api/compendio/calendario')).body.data as CalendarioDto;

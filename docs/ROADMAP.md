@@ -1135,3 +1135,12 @@ dell'utente: «Disegno fisso in cima».
 | Voce | Contenuto | Stato |
 |------|-----------|-------|
 | 1 | La colonna dei dedali passa da 200–240 px a 260 px da 1024 e 300 px da 1280 (a 1280×689 l'area resta su due colonne: Persona a 551, Richieste e Trama a 917); il disegno del pozzo (`MappaMemento`) sta fisso in cima al binario e si tocca per scegliere il dedalo, sotto l'elenco dei dedali scorre da solo (a 1280×689: pozzo 300×188, elenco 254 px su 461); tolto il pulsante «Pozzo» del binario (la finestra resta per tablet e telefono); test della pagina adeguato (il pozzo finto sceglie un dedalo); misure a 1366×657, 1280×689, 1024×690 senza scorrimento di pagina né sbordi | fatto, APPROVATO dal validatore al 1° esame |
+
+## Richieste del 12 ottobre 2026 (3) — Tag delle allerte meteo nelle giornate (fatto)
+
+Richiesta dell'utente: «vorrei venisse mostrato un tag con l'allerta meteo quando in quella giornata è presente». Scelte in
+`DECISIONI.md` (2026-10-12, «Tag delle allerte meteo nelle giornate»). Grafica per Codex: `docs/grafica/consegna-2026-10-12-allerte.md`.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Server: `AllertaGiornoDto` (una per allerta, con fasce ed effetti), `PercorsoGiornoDto.allerte` e `GiornoCalendarioDto.allerte` (anche senza partita; `meteoService.allerteDelGiorno`, `allerteDiOgniGiorno`); interfaccia: `TagAllerta` (tag giallo `.chip--allerta`, nome e fascia se una sola, effetti nel suggerimento, icona `ui/allerta-<nome>` con riserva) nella scheda del giorno (Oggi e Guida giorno per giorno) e nel calendario (giorni e riquadro «Oggi»); tolto il bollino dai pulsanti Giorno/Sera; consegna delle sei icone per Codex; test: `calendario` (+1, dati veri del pacchetto: 74 righe su 44 giorni), `TagAllerta` (nuovo, 2), `GiornoGuida` (+1), `CalendarioPage` (+1), `OggiPartita` (adeguato); 7 varianti rosse; prova nel browser in sola lettura a 1280, 768 e 375 px (17 agosto nella guida e in Oggi, agosto nel calendario, 9 maggio in Oggi); tag del riquadro «Oggi» del calendario accanto al titolo, non dentro | fatto, APPROVATO dal validatore al 2° esame (1° rigettato: misure a 768 px e in parte a 375 mancanti) |

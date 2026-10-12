@@ -19,6 +19,11 @@ nel database di gioco. **Da consegnare di nuovo**: `attivita/videogioco-golfer-s
 in uso nella pagina dei Memento (caricati davvero a 1280×689 e 375×812, misurati nel browser; voce 2 approvata da
 galaxy_task_validator), ognuno con una riserva disegnata nel codice.
 
+**Da consegnare (2026-10-12)**: le 6 icone delle allerte meteo della consegna
+[consegna-2026-10-12-allerte.md](consegna-2026-10-12-allerte.md) — `ui/allerta-pioggia-torrenziale`, `ui/allerta-polline`,
+`ui/allerta-ondata-di-calore`, `ui/allerta-notte-torrida`, `ui/allerta-stagione-influenzale`, `ui/allerta-ondata-di-gelo` in
+`public/asset/ui/`, PNG RGBA 128×128, a 16 px nel tag dell'allerta; finché mancano il tag usa `ui/azione-allarme`.
+
 ## Generazioni non consegnate
 
 Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con alfa reale, ridotta proporzionalmente e approvata da galaxy_task_validator.

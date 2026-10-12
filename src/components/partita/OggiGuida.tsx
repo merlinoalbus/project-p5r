@@ -18,7 +18,7 @@ interface Props {
 
 /** La colonna della guida del giorno, sullo stato condiviso `oggi`: frecce fra i giorni, «Segna
  * come giorno corrente» (o la targa «Oggi nella partita»), «Vai a oggi», collegamento alla guida
- * completa, la riga fascia + meteo della fascia attiva con le allerte, e la `GiornoGuida` compatta
+ * completa, la riga fascia + meteo della fascia attiva, e la `GiornoGuida` compatta (con i tag delle allerte del giorno)
  * (con `riempi` scorre nel proprio riquadro). Senza giorno o indice caricati non mostra nulla. */
 export function OggiGuida({ oggi, riempi }: Props) {
   const { giorno: g, indice } = oggi;
@@ -40,20 +40,17 @@ export function OggiGuida({ oggi, riempi }: Props) {
           attiva — passando a «Sera» le icone dicono e segnano il meteo della sera; un tocco salva. Niente etichetta sopra e
           niente spiegazione sotto: in una schermata senza scorrimento ogni riga tolta è guida che si vede. «Giorno» e
           «Sera» sono solo testo (13 px), perché con l'icona la riga non starebbe nella colonna della guida a 1024 px.
-          L'allerta del gioco della fascia (polline, ondata di calore…) è il bollino giallo sull'angolo del pulsante (non
-          ne allarga la larghezza), col nome e gli effetti nel `title` e nel nome accessibile. */}
+          Le allerte del gioco (polline, ondata di calore…) sono tag col nome nella scheda del giorno qui sotto (2026-10-12):
+          il bollino senza nome che stava sull'angolo di questi pulsanti se n'è andato. */}
       <div className="momento-meteo shrink-0" role="group" aria-label="Momento della giornata e meteo nella partita">
         {(['giorno', 'sera'] as const).map((fascia) => {
-          const allerte = g.meteoPartita?.[fascia].allerte ?? [];
           const nome = fascia === 'giorno' ? 'Giorno' : 'Sera';
           const spiega = fascia === 'giorno' ? 'mattina, pranzo, pomeriggio, dopo scuola' : 'dopo il tramonto';
           return (
             <button key={fascia} type="button" className={`chip touch momento-meteo__fascia ${oggi.fascia === fascia ? 'chip--attivo' : ''}`}
               aria-pressed={oggi.fascia === fascia} disabled={oggi.occupato} onClick={() => void oggi.impostaFascia(fascia)}
-              aria-label={`${nome} (${spiega})${allerte.length > 0 ? `; allerta: ${allerte.map((a) => a.nome.toLowerCase()).join(', ')}` : ''}`}
-              title={[`${nome}: ${spiega}`, ...allerte.map((a) => `${a.nome}: ${a.effetti.join(' ')}`)].join('\n')}>
+              aria-label={`${nome} (${spiega})`} title={`${nome}: ${spiega}`}>
               {nome}
-              {allerte.length > 0 && <span className="momento-meteo__allerta" aria-hidden="true"><IconaAzione chiave="allarme" dimensione={12} /></span>}
             </button>
           );
         })}

@@ -17,7 +17,7 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', azioni: 2, fatte: 0, coperto: true } as PercorsoIndiceDto['giorni'][number]], dataCorrente: '04-12', totaleGiorni: 346, giorniCoperti: 300 };
 const giorno: PercorsoGiornoDto = {
-  giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo giorno.', vincoli: [], meteo: 'sereno', avvisi: [], fonte: '', coperto: true, precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 0, meteoPartita: null,
+  giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo giorno.', vincoli: [], meteo: 'sereno', avvisi: [], fonte: '', coperto: true, precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 0, meteoPartita: null, allerte: [],
   azioni: [
     { uid: '00000000000000000000000000000000', giorno: '04-12', genere: 'azione', fascia: 'giorno', azione: 'Parla con Ryuji in cortile', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'ryuji' }, riferimentoTesto: 'Ryuji', rangoAtteso: 2, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' }, mappa: { chiave: 'citta-shibuya', spilloId: 7 } },
     { uid: '00000000000000000000000000000001', giorno: '04-12', genere: 'azione', fascia: 'sera', azione: 'Vai da Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Takemi', rangoAtteso: 3, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: { tipo: 'bloccata', motivo: 'Coraggio rango 2 (rango 1 di 2)' }, mappa: null },
@@ -136,13 +136,15 @@ describe('OggiPartita', () => {
     const meteo = { dataGioco: '04-12', testoGuida: 'Sereno/Pioggia',
       giorno: { meteo: 'sereno' as const, origine: 'guida' as const, guida: 'sereno' as const, allerte: [allerta] },
       sera: { meteo: 'pioggia' as const, origine: 'guida' as const, guida: 'pioggia' as const, allerte: [] } };
-    api.getPercorsoGiorno.mockResolvedValue({ ...giorno, meteoPartita: meteo });
+    api.getPercorsoGiorno.mockResolvedValue({ ...giorno, meteoPartita: meteo, allerte: [{ ...allerta, fasce: ['giorno'] }] });
     const segnato = { ...meteo, sera: { ...meteo.sera, meteo: 'sereno' as const, origine: 'partita' as const } };
     api.impostaMeteoGiorno.mockResolvedValue({ meteo: segnato, partita: { ...partita, meteoOra: 'sereno' } });
     render(<MemoryRouter><OggiPartita partita={partita} /></MemoryRouter>);
     const gruppo = within(await screen.findByRole('group', { name: 'Momento della giornata e meteo nella partita' }));
-    // l'allerta del gioco è segnalata nel pulsante della sua fascia, col nome nel nome accessibile
-    expect(gruppo.getByRole('button', { name: 'Giorno (mattina, pranzo, pomeriggio, dopo scuola); allerta: allerta polline' })).toHaveAttribute('aria-pressed', 'false');
+    // l'allerta del gioco è un tag col nome nella scheda del giorno (2026-10-12), non più un bollino sul pulsante della fascia
+    expect(gruppo.getByRole('button', { name: 'Giorno (mattina, pranzo, pomeriggio, dopo scuola)' })).toHaveAttribute('aria-pressed', 'false');
+    expect(document.querySelector('.chip--allerta')).toHaveTextContent('Allerta meteo: Allerta polline · solo di giorno');
+    expect(document.querySelectorAll('.chip--allerta')).toHaveLength(1);
     expect(gruppo.getByRole('button', { name: 'Sera (dopo il tramonto)' })).toHaveAttribute('aria-pressed', 'true');
     // le icone sono quelle della fascia attiva, la sera: quattro, non otto
     expect(gruppo.getByRole('group', { name: 'Di sera: pioggia, dalla guida' })).toBeInTheDocument();

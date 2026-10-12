@@ -19,6 +19,7 @@ import { dotiDaSegnareDaEffetti } from '../../utils/dotiDaSegnare';
 import type { AzionePercorsoDto, FasciaGioco, GenereVoce, PercorsoGiornoDto } from '../../types';
 import { DataP5 } from '../shared/DataP5';
 import { MeteoIcona } from './MeteoIcona';
+import { TagAllerte } from '../shared/TagAllerta';
 import { FasciaGiornata, IconaFascia } from './FasciaGiornata';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -251,6 +252,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           <h2 className="m-0 flex items-center gap-3 flex-wrap"><DataP5 data={g.giorno} giornoSettimana={g.giornoSettimana} evidenzia={g.dataCorrente === g.giorno} /></h2>
           <span className="chip">{g.fase}</span>
           {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={26} conTesto />}
+          {/* le allerte meteo del gioco del giorno, come tag (2026-10-12) */}
+          <TagAllerte allerte={g.allerte} />
           {partitaId && (consigliate > 0 || bloccate > 0) && (
             <span className="text-[12px] text-text-muted">{consigliate > 0 ? `${consigliate} consigliate` : ''}{consigliate > 0 && bloccate > 0 ? ' · ' : ''}{bloccate > 0 ? `${bloccate} bloccate` : ''}</span>
           )}

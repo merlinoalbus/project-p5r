@@ -16,7 +16,7 @@ vi.mock('../services/api', (vero) => moduloApi(vero, { getCalendario, aggiornaPa
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Costruisce un giorno del calendario (sereno, senza eventi, settimana 4) con data e giorno della settimana dati. */
-const giorno = (data: string, gs: string, extra: Partial<GiornoCalendarioDto> = {}): GiornoCalendarioDto => ({ data, giornoSettimana: gs, meteo: 'Sereno', eventi: [], tempoLibero: null, settimana: 4, ...extra });
+const giorno = (data: string, gs: string, extra: Partial<GiornoCalendarioDto> = {}): GiornoCalendarioDto => ({ data, giornoSettimana: gs, meteo: 'Sereno', eventi: [], tempoLibero: null, settimana: 4, allerte: [], ...extra });
 const dati: CalendarioDto = {
   giorni: [
     giorno('04-09', 'Sabato', { settimana: 0, eventi: [{ id: 1, tipo: 'storia', titolo: 'Inizio del gioco', dettaglio: 'Prologo', fonte: 'https://www.allgamestaff.it/x' }] }),
@@ -48,5 +48,21 @@ describe('CalendarioPage', () => {
     expect(aggiornaPartita).toHaveBeenCalledWith(7, { dataGioco: '05-11' });
     fireEvent.click(screen.getByRole('tab', { name: 'Aprile' }));
     expect(screen.getByRole('list', { name: 'Giorni di Aprile' }).querySelectorAll('li')).toHaveLength(1);
+  });
+
+  it('le allerte meteo del gioco sono tag sui loro giorni e nel riquadro «Oggi» (2026-10-12)', async () => {
+    usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova', dataGioco: '05-01' } as PartitaDto, aggiornaLocale: vi.fn() });
+    const polline = { chiave: 'allerta-polline', nome: 'Allerta polline', effetti: ['I nemici possono comparire addormentati.'], fasce: ['giorno' as const, 'sera' as const] };
+    getCalendario.mockResolvedValue({ ...dati, oggi: { ...dati.oggi!, allerte: [polline] },
+      giorni: dati.giorni.map((g) => (g.data === '05-11' ? { ...g, allerte: [polline] } : g)) });
+    render(<MemoryRouter><CalendarioPage /></MemoryRouter>);
+    const oggi = await screen.findByRole('heading', { name: /Oggi.*1 maggio, Domenica/ });
+    // accanto al titolo, non dentro: il nome del titolo resta «Oggi …» senza l'allerta
+    expect(oggi.querySelector('.chip--allerta')).toBeNull();
+    expect(oggi).not.toHaveAccessibleName(/Allerta/);
+    expect(oggi.parentElement!.querySelector(':scope > .chip--allerta')).toHaveTextContent('Allerta meteo: Allerta polline');
+    const giorni = [...screen.getByRole('list', { name: 'Giorni di Maggio' }).querySelectorAll('li')];
+    expect(giorni.map((li) => li.querySelectorAll('.chip--allerta').length)).toEqual([0, 1]);
+    expect(giorni[1].querySelector('.chip--allerta')).toHaveAttribute('title', 'Allerta polline: I nemici possono comparire addormentati.');
   });
 });

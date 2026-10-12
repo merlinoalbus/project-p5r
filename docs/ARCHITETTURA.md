@@ -631,6 +631,10 @@ che supera la precedente esclusione.
   `PartitaDto.meteoOra`. `StatoPartitaSemafori.meteoOra` sostituisce `meteoOggi` (semafori `meteo` e disponibilità `piove`).
   Frontend: riga `momento-meteo` in `OggiGuida` con `MeteoGiornata` (quattro icone, `utils/meteoFascia.ts`), `useOggi.impostaMeteo`;
   `meteoOra` nelle chiavi di ricarica di `useMappaPartita`, `ContenutiGuidaMappa`, `EditorMappaPage`, `NegozioPage`, `NegoziPage`.
+  **Tag delle allerte** (2026-10-12): `allerteDelGiorno` / `allerteDiOgniGiorno` (una per allerta, con le fasce, `AllertaGiornoDto`) in
+  `PercorsoGiornoDto.allerte` e `GiornoCalendarioDto.allerte`, anche senza partita; `src/components/shared/TagAllerta.tsx` (`.chip--allerta`,
+  icona `ui/allerta-<nome>` con riserva `ui/azione-allarme`, effetti nel suggerimento) nella scheda del giorno (`GiornoGuida`: Oggi e
+  Guida giorno per giorno) e nel calendario; tolto il bollino `momento-meteo__allerta` dai pulsanti Giorno/Sera.
 - Percorso: la spunta (`giornataService.spuntaVoce` dal 2026-10-01, prima `impostaAzione`) applica gli effetti dichiarati
   della voce (`produce`, con `effettiAzioneService` dal 2026-09-30: vedi «Effetti delle azioni della Guida»; `noteRisposta` 1–3
   per gli incontri con un Confidente col bonus dell'arcano dalla scorta) e li registra in `spunta_voce_partita.effetti_json`

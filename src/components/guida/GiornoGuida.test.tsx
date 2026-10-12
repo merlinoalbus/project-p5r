@@ -4,7 +4,7 @@
 // da fare ed eventi aggiunti sono la stessa cosa); Modifica con il posto nella fascia, Sposta su/giù, Sposta di fascia, Elimina
 // ============================================================
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GiornoGuida } from './GiornoGuida';
 import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
@@ -41,7 +41,7 @@ const base: PercorsoGiornoDto = {
   precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 1,
   // l'ordine esatto: la cosa da fare aggiunta dall'utente sta fra le due azioni della guida
   azioni: [ZORRO, PANE, PALAZZO, CONSEGNA],
-  meteoPartita: null,
+  meteoPartita: null, allerte: [],
 };
 
 /** Disegna la giornata `g` (predefinita la base) per la partita data e restituisce il mock di `onGiornataModificata`, che si risolve subito. */
@@ -82,6 +82,19 @@ describe('GiornoGuida — la giornata canone', () => {
     // niente più rimosse né correzioni da rivedere
     expect(screen.queryByText(/rimoss/)).toBeNull();
     expect(screen.queryByRole('group', { name: 'Correzioni da rivedere' })).toBeNull();
+  });
+
+  it('le allerte meteo del giorno sono tag accanto al meteo, nella scheda del giorno (2026-10-12); senza allerte nessun tag', () => {
+    disegna({ ...base, meteo: 'Sereno', allerte: [
+      { chiave: 'notte-torrida', nome: 'Notte torrida', effetti: ['I distributori automatici restano senza bevande.'], fasce: ['sera'] },
+      { chiave: 'ondata-di-calore', nome: 'Ondata di calore', effetti: ['Le Ombre possono essere afflitte dallo stato In fiamme.'], fasce: ['giorno'] }] });
+    const tag = [...document.querySelectorAll('.chip--allerta')];
+    expect(tag.map((t) => t.textContent)).toEqual(['Allerta meteo: Notte torrida · solo di sera', 'Allerta meteo: Ondata di calore · solo di giorno']);
+    // nella scheda del giorno, dopo il meteo
+    expect(tag[0].closest('section')).toHaveTextContent('Primo accesso.');
+    cleanup();
+    disegna();
+    expect(document.querySelector('.chip--allerta')).toBeNull();
   });
 
   it('un giorno senza voci mostra comunque le due sezioni con «Aggiungi»', () => {
