@@ -175,9 +175,9 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/punti': {
     sommario: 'Stato di un punto d\'interesse di un Palazzo',
-    descrizione: 'Imposta lo stato del punto nella partita: `ottenuto`, `esaurito` o `null` per azzerarlo. Lo stato del punto è quello dei suoi pin sulle mappe: segnarlo li raccoglie, riaprirlo li riapre. Un Enigma con i suoi passi segna o riapre i passi, e un passo porta con sé il suo Enigma. Una voce descrittiva della guida si legge e non si segna (400; azzerarla resta possibile). Un nuovo stato va nello storico (`punto-dungeon`).',
+    descrizione: 'Imposta lo stato del punto nella partita: `ottenuto`, `esaurito` o `null` per azzerarlo. Lo stato del punto è quello dei suoi pin sulle mappe: segnarlo li raccoglie, riaprirlo li riapre. Un Enigma con i suoi passi segna o riapre i passi, e un passo porta con sé il suo Enigma. Una voce descrittiva della guida si legge e non si segna (400; azzerarla resta possibile). Una Persona dei Memento non ha uno stato suo: la cattura si segna registrandola nel compendio (400 `cattura-nel-compendio`, dal 2026-10-12; azzerarla resta possibile). Un nuovo stato va nello storico (`punto-dungeon`).',
     risposta: '`PuntoInteresseDto` con lo stato nella partita',
-    errori: [PARTITA, [404, 'punto-non-trovato'], [400, 'punto-descrittivo']],
+    errori: [PARTITA, [404, 'punto-non-trovato'], [400, 'punto-descrittivo'], [400, 'cattura-nel-compendio']],
   },
   'PUT /api/partite/:id/domande/:domandaId': {
     sommario: 'Segna una domanda in classe o d\'esame come risposta',

@@ -1116,6 +1116,20 @@
       -webkit-mask-image: none;
       mask-image: none;
     }
+    /* Una riga sola anche da 768 px (Memento, 2026-10-12: dedali e aree di un dedalo, fino a 16, in una fila che resta in
+       vista): scorre di lato e, col mouse, mostra la sua barra sottile del colore d'accento. */
+    .fila-scorrevole.fila-scorrevole--sempre {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+    }
+    .fila-scorrevole.fila-scorrevole--sempre::-webkit-scrollbar { display: block; height: 6px; }
   }
 
   /* ---- Intestazione «hero» e titoli a tasselli (stile Persona 5) ---- */
@@ -1482,9 +1496,6 @@
 .selettore--compatto .selettore__tendina { width:max(100%, 260px); }
 /* Senza spazio a destra la tendina si appende al bordo destro del pulsante: mai fuori dalla finestra. */
 .selettore__tendina--destra { left:auto; right:0; }
-/* Le Persona di un'area di un dedalo (2026-10-11): piastrelle larghe almeno 88 px, esattamente i due comandi da 44 px sotto
-   l'immagine; tre per riga sul telefono, di più man mano che c'è posto. */
-.persone-dell-area { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
 /* In linea: la tendina si apre nel flusso e allunga chi la contiene, invece di sovrapporsi. Per un selettore in fondo a una
    finestra breve, dove sovrapposta resterebbe tagliata dal corpo scorrevole (si vedeva una riga). Sul telefono resta il foglio
    dal basso: la regola sotto, a pari specificità, viene dopo. */

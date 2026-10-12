@@ -27,6 +27,7 @@ import { giocabili } from '../squadraService.js';
 import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
+import { ePersonaDeiMemento, erroreCatturaNelCompendio } from '../catturePersona.js';
 import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma, vociDelPin } from './collegamentiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
@@ -1102,6 +1103,8 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
   if (rif.tipo === 'punto' && !(attuale?.tipo === 'punto' && attuale.chiave === rif.chiave)) {
     const p = prepared('SELECT nome, tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(rif.chiave) as { nome: string; tipo: string; area_dedalo_chiave: string | null };
     if (puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
+    // una Persona dei Memento si cattura nel compendio (2026-10-12, `catturePersona.ts`)
+    if (ePersonaDeiMemento(rif.chiave)) throw erroreCatturaNelCompendio(p.nome, 'collegare');
   }
 }
 
@@ -1257,9 +1260,10 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
       ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, r.uid, raccolto ? 1 : 0, adesso);
     // le voci del pin che si segnano (una o più, 098): una voce descrittiva della guida non ha stato (2026-10-01), il raccolto del
     // pin non la segna
+    // (né una Persona dei Memento, che si cattura nel compendio, 2026-10-12: un collegamento rimasto da prima non la segna)
     const voci = vociDelPin(r.id).filter((voce) => {
       const p = prepared('SELECT tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(voce) as { tipo: string; area_dedalo_chiave: string | null } | undefined;
-      return !!p && !puntoDescrittivo(p.tipo, p.area_dedalo_chiave);
+      return !!p && !puntoDescrittivo(p.tipo, p.area_dedalo_chiave) && !ePersonaDeiMemento(voce);
     });
     /** Vero se la voce ha uno stato nella partita. */
     const segnata = (voce: string) => !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, voce);

@@ -158,4 +158,49 @@ describe('condizione «Voce della guida»', () => {
     expect(voci.findIndex((v) => v.gruppo.startsWith('Memento › '))).toBeGreaterThan(voci.findIndex((v) => v.chiave === passo.chiave));
     await nuovoPin('nota', 'Nota da un dedalo', [su(memento!.chiave, false)]);
   });
+
+  it('una Persona dei Memento è «segnata» se è catturata, cioè registrata nel compendio; il vecchio stato e i pin non la segnano (rilievo F1)', async () => {
+    const voce = prepared("SELECT p.chiave FROM punto_interesse p WHERE p.tipo = 'persona' AND p.area_chiave LIKE 'mementos-%' AND json_extract(p.dettagli_json, '$.maschera') = 'Pixie' LIMIT 1").pluck().get() as string;
+    const pixie = prepared("SELECT id FROM persona WHERE nome = 'Pixie'").pluck().get() as number;
+    // resta citabile nell'editor delle mappe
+    expect(((await request(app).get('/api/condizioni/voci').expect(200)).body.data as VoceCitabileDto[]).some((v) => v.chiave === voce)).toBe(true);
+    const dopo = await nuovoPin('nota', 'Dopo aver catturato Pixie', [su(voce, true)]);
+    const prima = await nuovoPin('nota', 'Prima di catturare Pixie', [su(voce, false)]);
+    const annidato = await nuovoPin('nota', 'Pixie o un passo', [{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [su(voce, true), su((await nuovaVoce('Passo mai fatto')).chiave, true)] }]);
+    expect([await stato(dopo), await stato(prima), await stato(annidato)]).toEqual(['bloccato', 'disponibile', 'bloccato']);
+    expect((await leggi(dopo)).disponibilita!.requisiti[0]).toMatchObject({ stato: 'rosso', dettaglio: '«Ragazza seducente»: non catturata (non è nel compendio)' });
+    // il vecchio stato della voce si rifiuta (azzerarlo resta possibile), e non cambia niente
+    const vecchio = await request(app).put(`/api/partite/${partita}/punti`).send({ punto: voce, stato: 'ottenuto' });
+    expect([vecchio.status, vecchio.body.error.code]).toEqual([400, 'cattura-nel-compendio']);
+    await statoVoce(voce, null);
+    expect(prepared('SELECT COUNT(*) FROM punto_partita WHERE punto_chiave = ?').pluck().get(voce)).toBe(0);
+    expect(await stato(dopo)).toBe('bloccato');
+    // registrata nel compendio: catturata, in ogni condizione; tolta, di nuovo no
+    await request(app).put(`/api/partite/${partita}/compendio/${pixie}`).send({ registrata: true }).expect(200);
+    expect([await stato(dopo), await stato(prima), await stato(annidato)]).toEqual(['disponibile', 'bloccato', 'disponibile']);
+    expect((await leggi(dopo)).disponibilita!.requisiti[0]).toMatchObject({ stato: 'verde', dettaglio: '«Ragazza seducente»: catturata (nel compendio)' });
+    // anche lo stato della voce nella scheda del Memento viene dal compendio
+    const scheda = (await request(app).get(`/api/compendio/dungeon/mementos?partita=${partita}`).expect(200)).body.data as { aree: Array<{ punti: PuntoInteresseDto[] }> };
+    expect(scheda.aree.flatMap((a) => a.punti).find((p) => p.chiave === voce)!.stato).toBe('ottenuto');
+    await request(app).put(`/api/partite/${partita}/compendio/${pixie}`).send({ registrata: false }).expect(200);
+    expect(await stato(dopo)).toBe('bloccato');
+    // un pin non vi si collega, né dalla guida né come voce del pin
+    const pin = await nuovoPin('nota', 'Pin da collegare a Pixie');
+    const dallaGuida = await request(app).put(`/api/compendio/punti/${encodeURIComponent(voce)}/pin/${pin}`);
+    expect([dallaGuida.status, dallaGuida.body.error.code]).toEqual([400, 'cattura-nel-compendio']);
+    const comeVoce = await request(app).post(`/api/mappe/${mappa}/spilli`).send({ tipo: 'nota', nome: 'Pin di Pixie', x: 5, y: 5, riferimento: { tipo: 'punto', chiave: voce } });
+    expect([comeVoce.status, comeVoce.body.error.code]).toEqual([400, 'cattura-nel-compendio']);
+    // né come riferimento di una scheda della guida senza mappa (lo strato di prima, che tiene il riferimento «punto»)
+    const scheda2 = prepared("SELECT id FROM spillo WHERE mappa_chiave IS NULL AND area_guida_chiave IS NOT NULL AND riferimento_tipo = 'punto' ORDER BY id LIMIT 1").pluck().get() as number;
+    const comeRiferimento = await request(app).put(`/api/mappe/spilli/${scheda2}`).send({ riferimento: { tipo: 'punto', chiave: voce } });
+    expect([comeRiferimento.status, comeRiferimento.body.error?.code]).toEqual([400, 'cattura-nel-compendio']);
+    // un collegamento rimasto da prima (scritto nel file): segnare il pin non segna la Persona in `punto_partita`
+    prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(pin, voce);
+    await request(app).put(`/api/partite/${partita}/spilli/${pin}`).send({ raccolto: true }).expect(200);
+    expect(prepared('SELECT COUNT(*) FROM punto_partita WHERE punto_chiave = ?').pluck().get(voce)).toBe(0);
+    prepared('DELETE FROM spillo_voce WHERE spillo_id = ?').run(pin);
+    // una Persona di un Palazzo si segna come prima
+    const diPalazzo = await nuovaVoce('Persona del Palazzo', 'persona');
+    await statoVoce(diPalazzo.chiave, 'ottenuto');
+  });
 });

@@ -878,7 +878,20 @@ voce è `persona` o `trama` (`TIPI_VOCE_DEDALO`, `tipoDelDedalo`; il server rifi
 Trama fuori dai Memento con 400 `trama-solo-nei-memento`; migrazione 100: le voci di prima diventano Trama); le Persona non
 contano (`contaNelDedalo`: «catturata» = Ottenuto, fuori dal conto). `PuntoInteresseDto.persona` è la Persona del compendio
 della maschera (`server/services/maschere.ts`: `indiceMaschere`, `personaDellaMaschera`, lo stesso indice della guida alla
-battaglia); creando o correggendo una voce Persona, `persona` (id del compendio) ne scrive la maschera. `DedaloDto` = `{ aree: AreaDedaloDto[],
+battaglia); creando o correggendo una voce Persona, `persona` (id del compendio) ne scrive la maschera. **Aree reali (2026-10-12,
+migrazione 101):** le aree di ogni dedalo sono quelle della guida (`AREE_DEI_DEDALI`, chiave `<dedalo>-area-N`), con Richieste
+e Trama nella loro; il totale dei timbri di ogni area lo imposta l'utente. Una Persona di un dedalo si incontra in più aree: la
+voce non ha `area_dedalo_chiave`, le sue aree stanno in `persona_area_dedalo` (`PuntoInteresseDto.areeDedalo`; nel corpo delle
+voci `areeDedalo`, almeno una); eliminando un'area perde solo quel collegamento. «Catturata» è la registrazione della Persona nel
+compendio della partita (`DungeonDettaglioDto.personeCatturate`; utente 019 vi ha portato le catture segnate prima sulle voci),
+ed è l'unico modo (`server/services/catturePersona.ts`: `sqlPersonaDeiMemento`, `ePersonaDeiMemento`,
+`vociPersonaCatturate`): lo stato di una voce Persona dei Memento si rifiuta (`PUT /api/partite/:id/punti`, 400
+`cattura-nel-compendio`; azzerarlo no), un pin non vi si collega (stesso codice, dalla guida, come voce del pin o come
+riferimento) e un collegamento rimasto da prima non la segna; nella scheda il suo `stato` è «ottenuto» se catturata; una
+condizione «Voce della guida» che la cita legge il compendio (`statoDisponibilitaPartita` aggiunge le catturate alle voci
+segnate). La Trama va nell'area del suo nome, o in quella che la descrizione nomina se è una sola (`areaDellaTrama`); utente 020
+toglie i timbri raccolti nelle aree senza totale (quelli dell'Area 1 di prima, che erano del dedalo intero).
+`DedaloDto` = `{ aree: AreaDedaloDto[],
 daCollocare, obiettivi, completato }`; `PuntoInteresseDto.areaDedalo`; `RichiestaDto.areaDedalo/areaDedaloNome`.
 Rotte: `POST /api/compendio/dedali/:chiave/aree`, `PUT /api/compendio/aree-dedalo/:chiave` (nome, dettagli,
 `timbriTotale`: le partite si allineano al nuovo totale), `PUT …/sposta`, `DELETE /api/compendio/aree-dedalo/:chiave` (voci
@@ -898,6 +911,20 @@ Ottenuto, fuori dal conto; «Scheda» verso `/compendio/persona/:id` e «Modific
 le Richieste con «Aggiungi una Richiesta», i timbri, la Trama (`GuidaDellArea` con le sole voci non Persona: nei dedali il tipo è
 solo Trama e non si sceglie, niente filtri per tipo né «Collega pin»). `ModuloPersona` (finestra) aggiunge, corregge ed elimina
 una Persona: Persona scelta dal compendio (`getPersone`, `persona` nel corpo delle voci), nome dell'Ombra, area, descrizione.
+**Pagina per formato (2026-10-12, sostituisce l'impaginazione del 2026-10-11).** `DungeonDettaglioPage` nei Memento: intestazione
+compatta (date, mappe e conteggi in una piega; «Correggi la scheda» solo in «Modifica la guida»), poi da 1024 px il binario dei
+dedali (`DedaloNelBinario`: nome breve, percentuale, barra, ✓; «Pozzo» apre `MappaMemento` in una `Modal`) e la colonna del
+dedalo, ognuno col suo scorrimento; sul tablet i dedali in una fila che scorre (`fila-scorrevole--sempre`, `src/tailwind.css`);
+sul telefono la tendina sta nella scheda del dedalo. Lo stato «Gioca» / «Modifica la guida» (`modifica`) è della pagina.
+`AreeDelDedalo` (riscritto) è il dedalo: scheda (miniatura, conto per elemento con `contiDelDedalo` di `src/utils/dedali.ts`,
+barra, interruttore; sul telefono menu ⋯ con interruttore e pozzo), schede delle aree (`role=tab`, Tab sull'aperta e frecce, riga che resta in vista,
+area in `zona` dell'indirizzo, senza la prima da fare), l'area aperta con le quattro sezioni (`SezioneDellArea`: icona
+`ui/sezione-<chiave>` o riserva, titolo, conto): `TimbriDellArea` (fila di timbri `ui/timbro-ottenuto`/`ui/timbro-vuoto`,
+`timbriDopoIlTocco`; il totale dell'area con `aggiornaAreaDedalo` in «Modifica la guida»), `PersoneDellArea` (piastrelle,
+segno `ui/persona-catturata`, riquadro «i»; fila che scorre sotto i 768 px), `ElencoRichieste` (`role=radiogroup` — / Accettata
+/ Fatta, con le frecce come vuole il ruolo; in «Modifica la guida» correzione e area, anche per le Richieste da collocare), `TramaDellArea` (caselle; in «Modifica
+la guida» `GuidaDellArea`); Persona a sinistra e Richieste con Trama a destra da 1280 px. In «Modifica la guida» anche gli
+attrezzi del dedalo: aggiungere, spostare, correggere ed eliminare aree, Richieste da collocare, Persona senza area.
 **Le Richieste modificabili (2026-10-11).** `richiesteService`: `creaRichiesta`, `aggiornaRichiesta` (chiave stabile; `area` = prosa
 finché il dedalo non cambia; rinominando, i `confidente_requisito` di tipo «richiesta» che la citavano per nome passano alla
 chiave e il testo prende il nome nuovo), `citazioniRichiesta` (`CitazioniRichiestaDto`: partite, pin, condizioni di pin/negozi/

@@ -22,7 +22,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { aggiornaArea, aggiornaDungeon, eliminaArea, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
+import { aggiornaArea, aggiornaCompendio, aggiornaDungeon, eliminaArea, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -52,7 +52,7 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { AtterraggioTokyo } from '../components/guida/AtterraggioTokyo';
 import { MappaMemento } from '../components/mappe/MappaMemento';
-import { urlStratoDedalo } from '../components/mappe/stratiMemento';
+import { Modal } from '../components/shared/Modal';
 
 /** Le tre date di un Palazzo come una linea: si apre, conviene rubare, scade. La prosa della guida nel `title`. */
 function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
@@ -79,43 +79,35 @@ function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
   );
 }
 
-/** Quanto resta da raccogliere in un'area, con la stessa misura dell'anello: i collezionabili delle sue planimetrie
- *  (Palazzi) o gli elementi delle aree del dedalo (Memento, 099). */
-function contoArea(a: AreaDungeonDto, memento: boolean): { totale: number; fatti: number | null } {
-  if (memento) return a.dedalo ? { totale: a.dedalo.obiettivi.totale, fatti: a.dedalo.obiettivi.fatti } : { totale: 0, fatti: null };
-  const totale = a.mappe.reduce((s, m) => s + m.n, 0);
-  const fatti = a.mappe.some((m) => m.presi !== null) ? a.mappe.reduce((s, m) => s + (m.presi ?? 0), 0) : null;
-  return { totale, fatti };
+/** La percentuale di un dedalo (elementi fatti sul totale), o null senza partita o senza elementi. */
+function quotaDedalo(a: AreaDungeonDto): number | null {
+  const o = a.dedalo?.obiettivi;
+  return o && o.fatti !== null && o.totale > 0 ? o.fatti / o.totale : null;
 }
 
-/** Una voce dell'elenco delle aree: numero, nome, e quanto ne resta. */
-function VoceArea({ a, memento, scelta, suggerita, onScegli, compatta }: {
-  a: AreaDungeonDto; memento: boolean; scelta: boolean; suggerita: boolean; onScegli: () => void; compatta?: boolean;
-}) {
-  const conto = contoArea(a, memento);
-  const restano = conto.fatti === null ? conto.totale : conto.totale - conto.fatti;
-  if (compatta) {
+/** Il nome di un dedalo senza «Dedalo di»: nel binario e nella fila basta il nome proprio (progetto approvato: «2 Aiyatsbus 31%»). */
+const nomeBreve = (nome: string): string => nome.replace(/^Dedalo di /i, '');
+
+/** Un dedalo nel binario (da 1024 px) o nella fila (tablet): numero, nome, percentuale e barra, ✓ se completato. */
+function DedaloNelBinario({ a, scelto, suggerito, onScegli, fila }: { a: AreaDungeonDto; scelto: boolean; suggerito: boolean; onScegli: () => void; fila?: boolean }) {
+  const quota = quotaDedalo(a);
+  const completato = a.dedalo?.completato === true;
+  if (fila) {
     return (
-      <button type="button" role="tab" aria-selected={scelta} onClick={onScegli} title={a.descrizione}
-        className={`chip touch shrink-0 ${scelta ? 'chip--attivo' : ''} ${classiSuggerito(suggerita, 'chip')}`}>
-        {a.ordine + 1}. {a.nome}{conto.totale > 0 && conto.fatti !== null ? ` · ${restano}` : ''}
-        {/* il dedalo completato (tutte le sue aree, 099) porta la ✓ */}
-        {memento && a.dedalo?.completato && <>{' '}<SpuntaCompletata /><TestoCompletata /></>}
+      <button type="button" aria-pressed={scelto} onClick={onScegli} title={a.nome} className={`chip touch shrink-0 ${scelto ? 'chip--attivo' : ''} ${completato ? 'chip--icona' : ''} ${classiSuggerito(suggerito, 'chip')}`}>
+        {completato && <SpuntaCompletata />}{a.ordine + 1} {nomeBreve(a.nome)}{!completato && quota !== null ? ` · ${Math.round(quota * 100)}%` : ''}{completato && <TestoCompletata />}
       </button>
     );
   }
   return (
-    <button type="button" role="tab" aria-selected={scelta} onClick={onScegli} title={a.descrizione}
-      className={`touch flex w-full shrink-0 items-start gap-2.5 rounded-lg border px-2.5 py-2 text-left transition-colors ${
-        scelta ? 'border-primary bg-primary-bg text-text' : 'border-border-light bg-white/[0.02] text-text-secondary hover:border-border hover:bg-white/[0.05] hover:text-text'
-      } ${classiSuggerito(suggerita)}`}>
-      <span className={`mt-[1px] w-6 shrink-0 text-right font-display text-[15px] leading-tight ${scelta ? 'text-primary' : 'text-text-muted'}`}>{a.ordine + 1}</span>
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[13px] font-semibold leading-tight">{a.nome}</span>
-        <span className="text-[11px] text-text-muted">
-          {conto.totale === 0 ? (memento ? 'nessun elemento' : a.mappe.length === 0 ? 'nessuna planimetria legata' : a.mappe.length > 1 ? 'niente da raccogliere sulle sue planimetrie' : 'niente da raccogliere sulla sua planimetria') : conto.fatti === null ? `${conto.totale} ${memento ? 'elementi' : 'da raccogliere'}` : restano > 0 ? `${restano} ${memento ? 'elementi' : 'da prendere'} su ${conto.totale}` : `${conto.totale} ${memento ? 'elementi fatti' : 'raccolti'} · completa`}
-        </span>
+    <button type="button" aria-pressed={scelto} onClick={onScegli} title={a.nome}
+      className={`touch flex w-full flex-col gap-1 rounded-md border px-2 py-1.5 text-left transition-colors ${scelto ? 'border-primary bg-primary-bg text-text' : 'border-transparent text-text-secondary hover:border-border hover:bg-white/[0.05] hover:text-text'} ${classiSuggerito(suggerito)}`}>
+      <span className="flex items-baseline gap-1.5 text-[13px] leading-tight">
+        <span className={`w-4 shrink-0 text-right font-display ${scelto ? 'text-primary' : 'text-text-muted'}`}>{a.ordine + 1}</span>
+        <span className="min-w-0 flex-1 font-semibold">{nomeBreve(a.nome)}{completato && <>{' '}<SpuntaCompletata dimensione={12} /><TestoCompletata /></>}</span>
+        <span className="shrink-0 text-[11px] tabular-nums text-text-muted">{quota !== null ? `${Math.round(quota * 100)}%` : `${a.dedalo?.obiettivi.totale ?? 0} el.`}</span>
       </span>
+      {quota !== null && <span className="visore-mappa__progresso ml-5 h-1" aria-hidden><span className="visore-mappa__progresso-barra" style={{ width: `${Math.round(quota * 100)}%` }} /></span>}
     </button>
   );
 }
@@ -144,7 +136,10 @@ export function DungeonDettaglioPage() {
   // ogni cambio di stato dalla colonna ricarica il visore (e viceversa il visore ricarica la pagina)
   const [versioneStati, setVersioneStati] = useState(0);
   const memento = d?.tipo === 'mementos';
-
+  // Memento (progetto approvato del 2026-10-12): «Gioca» ha solo i comandi per segnare, «Modifica la guida» anche quelli per
+  // sistemarla; il pozzo dei dedali si apre a richiesta
+  const [modifica, setModifica] = useState(false);
+  const [pozzo, setPozzo] = useState(false);
 
   // Gli aggiornamenti locali partono dai dati correnti (forma funzionale di `imposta`), non dalla `d` del render: arrivano dopo
   // un `await`, e due gesti ravvicinati si annullerebbero a vicenda.
@@ -195,6 +190,19 @@ export function DungeonDettaglioPage() {
     try { await rileggiInSilenzio(); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Rilettura della scheda non riuscita.'); }
     return true;
   };
+  /**
+   * Nei Memento una Persona è catturata se è registrata nel compendio della partita (scelte dell'utente, 2026-10-12): la registra o
+   * la toglie, aggiorna subito le catturate della scheda e notifica. Le catture non contano nella percentuale: niente da ricalcolare.
+   */
+  const cattura = async (personaId: number, catturata: boolean): Promise<void> => {
+    if (!partitaId) return;
+    try {
+      const compendio = await aggiornaCompendio(partitaId, personaId, { registrata: catturata });
+      const registrate = compendio.filter((c) => c.registrata).map((c) => c.personaId);
+      dati.imposta((attuale) => ({ ...attuale, personeCatturate: registrate }));
+    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Compendio non aggiornato.'); }
+  };
+  const catturate = useMemo(() => (d?.personeCatturate ? new Set(d.personeCatturate) : null), [d]);
   /** Uno spillo raccolto (o riaperto): si aggiornano le planimetrie del Palazzo, quelle delle aree e l'anello, senza ricaricare. */
   const segnaRaccolto = (spilloId: number, raccolto: boolean) => {
     if (!d) return;
@@ -321,15 +329,16 @@ export function DungeonDettaglioPage() {
             <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block">
               <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={280} />
             </span>
-            <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3">
-              <div className="flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2">
-                <span className="sm:hidden"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={52} /></span>
-                <span className="hidden sm:block lg:hidden"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} /></span>
+            {/* Nei Memento (2026-10-12) l'intestazione è compatta a ogni larghezza, come da 1024 px: emblema e anello piccoli in riga. */}
+            <div className={`relative flex gap-3 ${memento ? 'flex-row items-center' : 'flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3'}`}>
+              <div className={`flex shrink-0 items-center gap-3 ${memento ? 'gap-2' : 'sm:flex-col lg:flex-row lg:gap-2'}`}>
+                <span className={memento ? 'lg:hidden' : 'sm:hidden'}><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={memento ? 40 : 52} /></span>
+                {!memento && <span className="hidden sm:block lg:hidden"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} /></span>}
                 <span className="hidden lg:block"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={48} /></span>
                 {quota !== null && (
                   // un anello solo (è la barra di avanzamento della pagina): da 1024 px si rimpicciolisce, non si duplica
-                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} className="lg:size-12!" etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} ${memento ? 'elementi fatti' : 'da raccogliere presi'} su ${d.raccolta.totale}`}>
-                    <span className="font-display text-[17px] leading-none tabular-nums lg:text-[13px]">{Math.round(quota * 100)}%</span>
+                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} className={memento ? 'size-12!' : 'lg:size-12!'} etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} ${memento ? 'elementi fatti' : 'da raccogliere presi'} su ${d.raccolta.totale}`}>
+                    <span className={`font-display leading-none tabular-nums ${memento ? 'text-[13px]' : 'text-[17px] lg:text-[13px]'}`}>{Math.round(quota * 100)}%</span>
                   </AnelloAvanzamento>
                 )}
               </div>
@@ -338,7 +347,8 @@ export function DungeonDettaglioPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button type="button" className="btn btn-ghost btn-sm touch -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
                     <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
-                    <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
+                    {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida» */}
+                    {(!memento || modifica) && <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
                       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
                       onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
                       {(b, cambia) => {
@@ -349,15 +359,19 @@ export function DungeonDettaglioPage() {
                           {campo('dataSblocco', 'Si apre', LIMITI_GUIDA.dungeon.data)}{campo('furtoConsigliato', 'Furto consigliato', LIMITI_GUIDA.dungeon.data)}{campo('dataScadenza', 'Scade', LIMITI_GUIDA.dungeon.data)}
                           {campo('livelloConsigliato', 'Livello consigliato', LIMITI_GUIDA.dungeon.livello)}{campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
                         </>; }}
-                    </CorrezioneGuida>
+                    </CorrezioneGuida>}
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-[13px] text-text-secondary">
-                    {d.sovrano && <span className="break-words">{d.sovrano}</span>}
+                    {/* nei Memento, sul telefono, il sovrano sta nella piega dei dettagli: qui andava a capo su due righe */}
+                    {d.sovrano && <span className={`break-words ${memento ? 'max-md:hidden' : ''}`}>{d.sovrano}</span>}
                     {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
+                    {memento && suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                   </div>
                 </div>
-                {/* Da 1024 px finestra, conteggi e dettagli stanno su una riga; i dettagli aperti vanno a capo, sotto. */}
-                <div className="flex flex-col gap-2.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">
+                {/* Da 1024 px finestra, conteggi e dettagli stanno su una riga; i dettagli aperti vanno a capo, sotto. Nei Memento
+                    (2026-10-12) la riga sta in una piega: lo spazio va ai dedali e alle aree, che sono la pagina. */}
+                {(() => { const riga = <>
+                {memento && d.sovrano && <span className="text-[13px] text-text-secondary md:hidden">{d.sovrano}</span>}
                 <LineaDelTempo date={d.date} />
                 {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno. */}
                 <div className="flex flex-wrap items-center gap-2 lg:contents">
@@ -370,7 +384,7 @@ export function DungeonDettaglioPage() {
                     {d.planimetrie.length} planimetrie{d.raccolta.mappeComplete !== null ? ` · ${d.raccolta.mappeComplete} complete` : ''}
                   </span>}
                   <span className="chip" title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
-                  {suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
+                  {suggerimentoDiffuso && !memento && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                 </div>
                 {(d.livelloConsigliato || d.note || tempoInProsa.length > 0) && <details className="text-[12px] lg:open:basis-full">
                   <summary className="touch cursor-pointer text-text-muted">Dettagli dalla guida</summary>
@@ -380,7 +394,14 @@ export function DungeonDettaglioPage() {
                     {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="text-[12px] text-text-muted whitespace-pre-wrap" />}
                   </div>
                 </details>}
-                </div>
+                </>;
+                return memento
+                  ? <details className="text-[12px]">
+                      <summary className="touch cursor-pointer text-text-muted">Date, mappe e conteggi del Memento</summary>
+                      <div className="flex flex-col gap-2.5 pt-1.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">{riga}</div>
+                    </details>
+                  : <div className="flex flex-col gap-2.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">{riga}</div>;
+                })()}
               </div>
             </div>
           </header>
@@ -388,7 +409,43 @@ export function DungeonDettaglioPage() {
           {/* Da 1024 px una riga sola, alta quanto resta (`minmax(0,1fr)`): le colonne si stirano fino in fondo. Il
               minimo evita colonne schiacciate su uno schermo più basso di un portatile con il browser aperto: lì, e
               solo lì, torna a scorrere la pagina. */}
-          <div className={`grid grid-cols-1 items-start gap-4 lg:min-h-[280px] lg:flex-1 lg:grid-rows-[minmax(0,1fr)] lg:items-stretch ${memento ? 'lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] 2xl:grid-cols-[minmax(300px,400px)_minmax(0,1fr)]' : 'lg:grid-cols-[360px_minmax(0,1fr)]'}`}>
+          {/* ---- I Memento (progetto approvato del 2026-10-12): da 1024 px il binario dei dedali a sinistra e il dedalo a destra,
+              ognuno col suo scorrimento; sul tablet i dedali in fila sopra il dedalo; sul telefono la tendina sta nella scheda del
+              dedalo. Il pozzo disegnato si apre a richiesta. ---- */}
+          {memento && (() => {
+            const scelto = area.dedalo ? { ...area, dedalo: area.dedalo } : null;
+            return (
+              <div className="grid grid-cols-1 items-start gap-3 lg:min-h-[280px] lg:flex-1 lg:grid-cols-[minmax(200px,240px)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch">
+                <nav aria-label="Dedali dei Memento" className="hidden min-h-0 flex-col gap-1 lg:flex lg:area-scorrevole lg:p-1.5">
+                  <div className="flex items-center justify-between gap-2 px-1">
+                    <span className="text-[11px] uppercase tracking-wide text-text-muted">Dedali</span>
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Pozzo" aria-label="Apri il pozzo dei Memento" onClick={() => setPozzo(true)} />
+                  </div>
+                  {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
+                </nav>
+                <div className="flex min-w-0 flex-col gap-2.5 lg:min-h-0 lg:area-scorrevole lg:p-2">
+                  {/* sul tablet: i dedali in fila, col pozzo */}
+                  <div className="hidden items-center gap-2 md:flex lg:hidden">
+                    <FilaScorrevole className="fila-scorrevole--sempre min-w-0 flex-1 items-center" aria-label="Dedali dei Memento">
+                      {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} fila suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
+                    </FilaScorrevole>
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Pozzo" aria-label="Apri il pozzo dei Memento" onClick={() => setPozzo(true)} />
+                  </div>
+                  {scelto && <AreeDelDedalo key={area.chiave} dedalo={scelto} dedali={d.aree} onScegliDedalo={scegliArea} onApriPozzo={() => setPozzo(true)}
+                    partitaId={partitaId} modifica={modifica} onModifica={setModifica} cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto}
+                    onTimbri={aggiornaTimbri} onRichiesta={aggiornaRichiesta} catturate={catturate} onCattura={cattura}
+                    onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />}
+                </div>
+                {pozzo && (
+                  <Modal titolo="Il pozzo dei Memento" aperta onChiudi={() => setPozzo(false)}>
+                    <MappaMemento aree={d.aree} selezionata={area.chiave} onSeleziona={(k) => { scegliArea(k); setPozzo(false); }} className="mx-auto w-[min(100%,calc(min(60vh,520px)*1.6))]" />
+                  </Modal>
+                )}
+              </div>
+            );
+          })()}
+
+          {!memento && <div className="grid grid-cols-1 items-start gap-4 lg:min-h-[280px] lg:flex-1 lg:grid-rows-[minmax(0,1fr)] lg:items-stretch lg:grid-cols-[360px_minmax(0,1fr)]">
             {/* ---- Le aree: colonna da 1024 px in su, fila scorrevole sotto ---- */}
             {/* **Un elenco solo.** Le stanze in ordine di percorso con i loro comandi, e in coda le
                 aree della guida ancora da collegare: è la lista di atterraggio e insieme il posto
@@ -416,35 +473,18 @@ export function DungeonDettaglioPage() {
                 </div>
               </nav>
             )}
-            {/* I Memento: il pozzo disegnato al posto della colonna delle aree, nella colonna. Da 1024 px la colonna è
-                alta quanto le altre, e pozzo e dedali scorrono insieme al suo interno. */}
-            {memento && (
-              <div className="flex min-w-0 flex-col gap-2 lg:min-h-0 lg:area-scorrevole lg:p-2">
-                <MappaMemento aree={d.aree} selezionata={area.chiave} onSeleziona={scegliArea}
-                  className="mx-auto w-[min(100%,calc(min(46vh,460px)*1.6))] lg:w-full lg:shrink-0" />
-                <FilaScorrevole className="items-center" role="tablist" aria-label="Dedali">
-                  {d.aree.map((a) => <VoceArea key={a.chiave} a={a} memento compatta scelta={a.chiave === area.chiave} suggerita={areaSuggerita(a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
-                </FilaScorrevole>
-              </div>
-            )}
-
-            {/* ---- L'area scelta: mappa e aree del dedalo, o planimetrie ---- */}
+            {/* ---- L'area scelta: planimetrie ---- */}
             {/* Da 1024 a 1279 px mappa e raccolta stanno una sotto l'altra in **un'area sola** che scorre; da 1280 px
                 sono due colonne, ognuna con il suo scorrimento, e la mappa si allunga fino in fondo alla sua. */}
-            {/* Nei Memento una colonna sola (2026-10-11): il disegno del dedalo è una miniatura accanto al titolo e sotto ci sono le
-                aree, con Persona, Richieste e Trama, nella larghezza che prima si dividevano disegno e colonna stretta delle aree. */}
-            <div className={`order-1 grid grid-cols-1 items-start gap-4 lg:order-none lg:min-h-0 lg:max-xl:area-scorrevole lg:max-xl:p-2 xl:grid-rows-[minmax(0,1fr)] xl:items-stretch ${memento ? '' : 'xl:grid-cols-[minmax(0,1fr)_352px]'}`}>
+            <div className="order-1 grid grid-cols-1 items-start gap-4 lg:order-none lg:min-h-0 lg:max-xl:area-scorrevole lg:max-xl:p-2 xl:grid-rows-[minmax(0,1fr)] xl:items-stretch xl:grid-cols-[minmax(0,1fr)_352px]">
               <section className="card flex flex-col gap-2.5 xl:min-h-0 xl:area-scorrevole">
-                {/* nei Memento titolo e dettagli a sinistra, la miniatura a destra; nei Palazzi `contents` lascia tutto com'era */}
-                <div className={memento ? 'flex items-start gap-3' : 'contents'}>
-                <div className={memento ? 'flex min-w-0 flex-1 flex-col gap-1.5' : 'contents'}>
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                   <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>
                   {/* `key`: cambiando area il modulo si rimonta, altrimenti resterebbe aperto con il
                       testo dell'area di prima e lo salverebbe su quella nuova (rilievo della revisione). */}
                   {/* «Modifica testo» per esteso: la sola ✎ accanto al titolo non si trovava («come faccio a modificare
                       il testo delle Aree della guida?», 2026-09-30) */}
-                  {!memento && <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} etichetta="Modifica testo"
+                  <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} etichetta="Modifica testo"
                     iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
                     onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
                     // «Devo poter rimuovere un'area» (2026-09-30): l'eliminazione vera, per tutte le partite
@@ -456,27 +496,14 @@ export function DungeonDettaglioPage() {
                       <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
                       <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
                     </>}
-                  </CorrezioneGuida>}
-                  <span className="text-[12px] text-text-muted">{memento ? 'dedalo' : 'area'} {area.ordine + 1} di {d.aree.length}</span>
+                  </CorrezioneGuida>
+                  <span className="text-[12px] text-text-muted">area {area.ordine + 1} di {d.aree.length}</span>
                   <span className="flex-1" />
                 </div>
-                {/* La descrizione si ripiega: per esteso spingeva la mappa (o il dedalo) sotto il bordo della colonna. */}
+                {/* La descrizione si ripiega: per esteso spingeva la mappa sotto il bordo della colonna. */}
                 {area.descrizione && <TestoRipiegabile testo={area.descrizione} massimo={140} className="text-[13px] text-text-secondary" />}
-                </div>
-                {/* Il pezzo con cui il gioco disegna il dedalo nel pozzo: non una pianta, i piani si generano a caso e non c'è
-                    niente da segnarci. Una miniatura (richiesta dell'utente, 2026-10-11: «la mappa quindi deve essere molto
-                    piccola...diciamo 30% rispetto all'attuale»; scelta «Immagine del dedalo»): alta min(13vh, 120px), circa il
-                    30% di min(46vh, 420px) che aveva sotto i 1280 px. */}
-                {memento && <span className="flex h-[min(13vh,120px)] shrink-0 items-center justify-center overflow-hidden rounded bg-[#8d0012] p-1" style={{ aspectRatio: '936 / 1086' }}>
-                  <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`} className="max-h-full max-w-full object-contain" />
-                </span>}
-                </div>
-                {/* Dedalo → Aree → Elementi (099): le aree del dedalo con Persona, Richieste, timbri e Trama */}
-                {memento && area.dedalo && <AreeDelDedalo key={area.chiave} dedalo={{ ...area, dedalo: area.dedalo }} partitaId={partitaId} cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto}
-                  onTimbri={aggiornaTimbri} onRichiesta={aggiornaRichiesta} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />}
-                {memento && !partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare catture, Richieste, timbri e Trama.</span>}
                 {/* La planimetria dell'atlante legata all'area, se c'è. */}
-                {!memento && mappaScelta && <>
+                {mappaScelta && <>
                   {area.mappe.length > 1 && (
                     <Selettore etichetta="Planimetria" valore={mappaScelta} opzioni={area.mappe.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={setPianta} />
                   )}
@@ -529,7 +556,7 @@ export function DungeonDettaglioPage() {
                     presa da un sito, che copriva il fatto che nessuno avesse ancora detto quale
                     tavola dell'atlante è quest'area. Le tavole ci sono quasi sempre: manca il
                     legame, e questo è il posto per farlo — la scelta vale per tutte le partite. */}
-                {!mappaScelta && !memento && (
+                {!mappaScelta && (
                   <div className="flex flex-col gap-2 rounded-md bg-white/[0.04] px-3 py-2 text-[12px]" role="status">
                     <p className="m-0 text-text-muted">Quest’area non ha ancora una planimetria: sceglila fra le tavole del Palazzo — anche una che contiene già altre aree, si aggiunge a quelle. Quel che c’è da raccogliere sta nella colonna accanto.</p>
                     {d.planimetrie.length > 0
@@ -542,9 +569,8 @@ export function DungeonDettaglioPage() {
                 )}
               </section>
 
-              {/* ---- La colonna di quel che fa la percentuale: le planimetrie e la guida dell'area (nei Memento le aree del dedalo
-                  stanno nella colonna unica, qui sopra) ---- */}
-              {!memento && <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={`Da raccogliere in ${area.nome}`}>
+              {/* ---- La colonna di quel che fa la percentuale: le planimetrie e la guida dell'area ---- */}
+              <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={`Da raccogliere in ${area.nome}`}>
                 {planimetriaAperta
                   ? <RaccoltaPlanimetrie planimetrie={[planimetriaAperta]} partitaId={partitaId} onRaccolto={segnaRaccolto}
                       etichetta="Su questa planimetria" nota="Planimetria scelta dal pannello: qui c’è solo quel che si raccoglie su di lei."
@@ -564,9 +590,9 @@ export function DungeonDettaglioPage() {
                 {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
                 <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta}
                   cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />
-              </aside>}
+              </aside>
             </div>
-          </div>
+          </div>}
         </div>
       )}
     </PageState>

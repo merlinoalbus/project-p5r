@@ -29,7 +29,7 @@ it('un Enigma dei Memento diventa Trama e i suoi passi tornano voci dell\'area, 
     INSERT INTO mappa (chiave, nome, tipo, updated_at) VALUES ('m-pianta', 'Pianta', 'area', 'x');
     INSERT INTO spillo (id, mappa_chiave, tipo, nome, x, y, updated_at) VALUES (1, 'm-pianta', 'sicura', 'Sala', 10, 10, 'x');
     INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (1, 'm-1/4');`);
-  runMigrations(db);
+  runMigrations(db, migrations.filter((m) => m.id <= 100));
   expect(db.prepare('SELECT chiave, tipo, ordine, contenitore_chiave, area_dedalo_chiave FROM punto_interesse ORDER BY chiave').all()).toEqual([
     { chiave: 'k-1/0', tipo: 'puzzle', ordine: 0, contenitore_chiave: null, area_dedalo_chiave: null },
     { chiave: 'k-1/1', tipo: 'meccanismo', ordine: 0, contenitore_chiave: 'k-1/0', area_dedalo_chiave: null },
@@ -57,7 +57,7 @@ it('le voci dei dedali che non sono Persona diventano Trama col resto invariato;
       ('m-1/0', 'm-1', 0, 'altro', 'Nota', 'testo', '{"a":1}', 'm-1-area-1'), ('m-1/1', 'm-1', 1, 'persona', 'Ombra', '', '{"maschera":"Pixie"}', 'm-1-area-1'),
       ('m-1/2', 'm-1', 2, 'boss', 'Boss', '', '{}', 'm-1-area-1'), ('m-1/3', 'm-1', 3, 'sicura', 'Sala', '', '{}', 'm-1-area-1'),
       ('k-1/0', 'k-1', 0, 'sicura', 'Sicura', '', '{}', NULL), ('k-1/1', 'k-1', 1, 'altro', 'Altro', '', '{}', NULL);`);
-  runMigrations(db);
+  runMigrations(db, migrations.filter((m) => m.id <= 100));
   const voci = () => db.prepare('SELECT chiave, tipo, nome, descrizione, dettagli_json, area_dedalo_chiave FROM punto_interesse ORDER BY chiave').all();
   expect(voci()).toEqual([
     { chiave: 'k-1/0', tipo: 'sicura', nome: 'Sicura', descrizione: '', dettagli_json: '{}', area_dedalo_chiave: null },

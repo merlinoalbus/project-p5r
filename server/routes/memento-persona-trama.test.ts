@@ -47,20 +47,26 @@ describe('Persona e Trama nei Memento', () => {
     expect(voci.find((p) => p.nome === 'Straziato re dei desideri')).toMatchObject({ tipo: 'trama', persona: null });
   });
 
-  it('catturare una Persona non cambia il conto dell\'area né l\'anello del Memento; una Trama sì', async () => {
+  it('catturata è una Persona registrata nel compendio della partita, in ogni dedalo; non cambia il conto dell\'area né l\'anello; una Trama sì', async () => {
     const partita = await nuovaPartita('Persona fuori dal conto');
     const prima = await qimranut(partita);
+    expect((await scheda(partita)).personeCatturate).toEqual([]);
+    expect((await scheda()).personeCatturate).toBeNull();
     const area = prima.dedalo.aree[0];
-    const persone = prima.punti.filter((p) => p.tipo === 'persona');
-    const trama = prima.punti.filter((p) => p.tipo === 'trama');
+    const persone = prima.punti.filter((p) => p.tipo === 'persona' && p.areeDedalo.includes(area.chiave));
+    const trama = prima.punti.filter((p) => p.tipo === 'trama' && p.areaDedalo === area.chiave);
     // il totale è fatto di Trama, Richieste e timbri: le Persona non ci sono
     expect(area.elementi.totale).toBe(trama.length + area.richieste.length + (area.timbri?.totale ?? 0));
     const anello = (await scheda(partita)).raccolta;
-    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: persone[0].chiave, stato: 'ottenuto' }).expect(200);
+    const pixie = persone.find((p) => p.persona?.nome === 'Pixie')!;
+    await request(app).put(`/api/partite/${partita}/compendio/${pixie.persona!.id}`).send({ registrata: true }).expect(200);
+    const memento = await scheda(partita);
+    expect(memento.personeCatturate).toEqual([pixie.persona!.id]);
+    // la stessa Persona in un altro dedalo (Aiyatsbus) è catturata anche lì: è una sola, nel compendio
+    expect(memento.aree.find((x) => x.chiave === 'mementos-02-aiyatsbus')!.punti.some((p) => p.persona?.id === pixie.persona!.id)).toBe(true);
     const dopo = await qimranut(partita);
-    expect(dopo.punti.find((p) => p.chiave === persone[0].chiave)?.stato).toBe('ottenuto');
     expect(dopo.dedalo.aree[0].elementi).toEqual(area.elementi);
-    expect((await scheda(partita)).raccolta).toEqual(anello);
+    expect(memento.raccolta).toEqual(anello);
     await request(app).put(`/api/partite/${partita}/punti`).send({ punto: trama[0].chiave, stato: 'ottenuto' }).expect(200);
     expect((await qimranut(partita)).dedalo.aree[0].elementi.fatti).toBe((area.elementi.fatti ?? 0) + 1);
   });
@@ -82,8 +88,8 @@ describe('Persona e Trama nei Memento', () => {
   });
 
   it('una Persona si aggiunge o si corregge scegliendola dal compendio: la maschera è il suo nome italiano', async () => {
-    const nuova = (await request(app).post(`/api/compendio/aree/${QIMRANUT}/punti`).send({ nome: 'Ombra del bicorno', tipo: 'persona', areaDedalo: AREA, persona: idPersona('Bicorn') }).expect(201)).body.data as PuntoInteresseDto;
-    expect(nuova).toMatchObject({ tipo: 'persona', dettagli: { maschera: 'Bicorno' }, persona: { id: idPersona('Bicorn'), nome: 'Bicorn', nomeIt: 'Bicorno' } });
+    const nuova = (await request(app).post(`/api/compendio/aree/${QIMRANUT}/punti`).send({ nome: 'Ombra del bicorno', tipo: 'persona', areeDedalo: [AREA], persona: idPersona('Bicorn') }).expect(201)).body.data as PuntoInteresseDto;
+    expect(nuova).toMatchObject({ tipo: 'persona', areaDedalo: null, areeDedalo: [AREA], dettagli: { maschera: 'Bicorno' }, persona: { id: idPersona('Bicorn'), nome: 'Bicorn', nomeIt: 'Bicorno' } });
     // un'altra Persona: la maschera cambia e i dettagli dell'Ombra di prima (resistenze, debolezze) se ne vanno
     const pixie = (await qimranut()).punti.find((p) => p.dettagli.maschera === 'Pixie')!;
     expect(pixie.dettagli).toHaveProperty('deboleA');

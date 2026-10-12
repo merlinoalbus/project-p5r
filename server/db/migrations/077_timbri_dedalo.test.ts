@@ -20,8 +20,10 @@ it('legge «20 Timbri totali» e lascia nullo ciò che la guida non dichiara', (
   expect(db.prepare("SELECT name FROM utente.sqlite_master WHERE type = 'table' AND name = 'timbri_dedalo_partita'").get()).toBeTruthy();
 });
 
-it('nel pacchetto sei dedali su nove hanno i timbri dichiarati (dalla 099 nella loro Area 1)', () => {
+it('nel pacchetto i totali dei timbri sono per area e li imposta l\'utente (101): nessuno ancora; quello di sei dedali resta nella descrizione', () => {
   const db = dbDiProva();
-  const righe = db.prepare("SELECT d.chiave, ad.timbri_totale FROM dungeon_area d LEFT JOIN area_dedalo ad ON ad.dedalo_chiave = d.chiave AND ad.ordine = 0 WHERE d.dungeon_chiave = 'mementos' ORDER BY d.ordine").all() as Array<{ chiave: string; timbri_totale: number | null }>;
-  expect(righe.map((r) => r.timbri_totale)).toEqual([null, 8, null, 20, 25, 30, 30, null, 40]);
+  // la 099 aveva messo il totale del dedalo nell'Area 1; con le aree reali (101) si svuota: la guida non dice quanti per area
+  expect(db.prepare("SELECT COUNT(*) FROM area_dedalo ad JOIN dungeon_area d ON d.chiave = ad.dedalo_chiave WHERE d.dungeon_chiave = 'mementos' AND ad.timbri_totale IS NOT NULL").pluck().get()).toBe(0);
+  const scritti = (db.prepare("SELECT descrizione FROM dungeon_area WHERE dungeon_chiave = 'mementos' ORDER BY ordine").pluck().all() as string[]).map((t) => /(\d+) Timbri totali/.exec(t)?.[1] ?? null);
+  expect(scritti).toEqual([null, '8', null, '20', '25', '30', '30', null, '40']);
 });

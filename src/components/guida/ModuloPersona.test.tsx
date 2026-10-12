@@ -19,15 +19,15 @@ const compendio = [persona(7, 'Pixie', 'Pixie'), persona(9, 'Bicorn', 'Bicorno')
 /** La voce «Ragazza seducente» (Pixie) dell'area «Banchina», con i dettagli dell'Ombra. */
 const voce: PuntoInteresseDto = {
   chiave: 'q/4', ordine: 4, tipo: 'persona', nome: 'Ragazza seducente', descrizione: 'Ombra del dedalo', esauribile: false, dettagli: { maschera: 'Pixie', deboleA: 'Ghiaccio' }, fonte: '',
-  stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: 'q-1', persona: { id: 7, nome: 'Pixie', nomeIt: 'Pixie' },
+  stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: { id: 7, nome: 'Pixie', nomeIt: 'Pixie' }, areeDedalo: ['q-1'],
 };
-const areaDedalo = { chiave: 'q-1', nome: 'Banchina', altre: [{ chiave: 'q-2', nome: 'Treno' }] };
+const aree = [{ chiave: 'q-1', nome: 'Banchina' }, { chiave: 'q-2', nome: 'Treno' }, { chiave: 'q-3', nome: 'Binari' }];
 
 /** Monta il modulo per la voce data (null = nuova) e restituisce i richiami. */
 function monta(v: PuntoInteresseDto | null) {
   const onChiudi = vi.fn();
   const onCambiata = vi.fn().mockResolvedValue(undefined);
-  render(<ModuloPersona voce={v} dedalo="mementos-01-qimranut" areaDedalo={areaDedalo} onChiudi={onChiudi} onCambiata={onCambiata} />);
+  render(<ModuloPersona voce={v} dedalo="mementos-01-qimranut" areaIniziale="q-1" aree={aree} onChiudi={onChiudi} onCambiata={onCambiata} />);
   return { onChiudi, onCambiata };
 }
 
@@ -46,7 +46,7 @@ it('aggiunge una Persona scelta dal compendio nell\'area; senza nome dell\'Ombra
   scegliVoce('Persona del compendio', /^Bicorno/);
   api.creaPunto.mockResolvedValue({ ...voce, chiave: 'nuova' });
   fireEvent.click(screen.getByRole('button', { name: /^Aggiungi/ }));
-  await waitFor(() => expect(api.creaPunto).toHaveBeenCalledWith('mementos-01-qimranut', { nome: 'Bicorno', tipo: 'persona', descrizione: '', areaDedalo: 'q-1', persona: 9 }));
+  await waitFor(() => expect(api.creaPunto).toHaveBeenCalledWith('mementos-01-qimranut', { nome: 'Bicorno', tipo: 'persona', descrizione: '', areeDedalo: ['q-1'], persona: 9 }));
   await waitFor(() => expect(onChiudi).toHaveBeenCalled());
   expect(onCambiata).toHaveBeenCalled();
   expect(notifica).toHaveBeenCalledWith('success', 'Persona «Bicorno» aggiunta.');
@@ -58,11 +58,26 @@ it('corregge una Persona: nome, area e la stessa Persona (il server lascia i det
   expect(valoreSelettore('Persona del compendio')).toBe('Pixie');
   expect(screen.queryByText(/se ne vanno/)).toBeNull();
   fireEvent.change(screen.getByRole('textbox', { name: 'Nome dell’Ombra (vuoto = quello della Persona)' }), { target: { value: 'Fatina' } });
-  scegliVoce('Area del dedalo', 'Treno');
+  // si incontra anche nei Binari: le aree si scelgono tutte, nell'ordine del dedalo
+  expect(screen.getByRole('checkbox', { name: 'Banchina' })).toBeChecked();
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Binari' }));
+  expect(screen.getByRole('group', { name: 'Aree in cui si incontra · 2 di 3' })).toBeInTheDocument();
   api.aggiornaPunto.mockResolvedValue(voce);
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
-  await waitFor(() => expect(api.aggiornaPunto).toHaveBeenCalledWith('q/4', { nome: 'Fatina', descrizione: 'Ombra del dedalo', persona: 7, areaDedalo: 'q-2' }));
+  await waitFor(() => expect(api.aggiornaPunto).toHaveBeenCalledWith('q/4', { nome: 'Fatina', descrizione: 'Ombra del dedalo', persona: 7, areeDedalo: ['q-1', 'q-3'] }));
   await waitFor(() => expect(onChiudi).toHaveBeenCalled());
+});
+
+it('senza aree non si salva; se le aree non cambiano non si mandano', async () => {
+  monta(voce);
+  await screen.findByRole('dialog', { name: 'Modifica: Pixie' });
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Banchina' }));
+  expect(screen.getByRole('button', { name: /^Salva/ })).toBeDisabled();
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Banchina' }));
+  fireEvent.change(screen.getByRole('textbox', { name: 'Nome dell’Ombra (vuoto = quello della Persona)' }), { target: { value: 'Fatina' } });
+  api.aggiornaPunto.mockResolvedValue(voce);
+  fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+  await waitFor(() => expect(api.aggiornaPunto).toHaveBeenCalledWith('q/4', { nome: 'Fatina', descrizione: 'Ombra del dedalo', persona: 7 }));
 });
 
 it('con un\'altra Persona dice che resistenze, debolezze e personalità dell\'Ombra se ne vanno', async () => {
@@ -78,7 +93,7 @@ it('«Elimina» chiede conferma; «No» torna indietro, «Confermo» elimina la 
   const { onChiudi, onCambiata } = monta(voce);
   await screen.findByRole('dialog', { name: 'Modifica: Pixie' });
   fireEvent.click(screen.getByRole('button', { name: /^Elimina/ }));
-  expect(screen.getByRole('region', { name: 'Conferma: eliminare la Persona' })).toHaveTextContent('Se ne va dalla guida per tutte le partite');
+  expect(screen.getByRole('region', { name: 'Conferma: eliminare la Persona' })).toHaveTextContent('Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia.');
   fireEvent.click(screen.getByRole('button', { name: /^No/ }));
   expect(screen.queryByRole('region', { name: 'Conferma: eliminare la Persona' })).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: /^Elimina/ }));

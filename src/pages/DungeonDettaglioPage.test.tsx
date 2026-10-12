@@ -10,15 +10,15 @@ import { scegliVoce, vociSelettore } from '../../test/selettore';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDedaloDto, AreaDungeonDto, DungeonDettaglioDto, PartitaDto, PuntoInteresseDto } from '../types';
 
-const { getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaAtterraggiDungeon, getMappa } = vi.hoisted(() => ({
-  getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
+const { aggiornaCompendio, getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaAtterraggiDungeon, getMappa } = vi.hoisted(() => ({
+  aggiornaCompendio: vi.fn(), getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
   riordinaMappe: vi.fn(), aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPresentazioneMappa: vi.fn(), impostaAreeMappa: vi.fn(), eliminaArea: vi.fn(), impostaStanzaMappa: vi.fn(), collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaArea: vi.fn(), impostaAtterraggiDungeon: vi.fn(), getMappa: vi.fn(),
 }));
-vi.mock('../services/api', (vero) => moduloApi(vero, { getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, impostaAtterraggiDungeon, getMappa }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, impostaAtterraggiDungeon, getMappa }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave }: { chiave: string }) => <div>Visore: {chiave}</div> }));
-vi.mock('../components/mappe/MappaMemento', () => ({ MappaMemento: () => <div>Pozzo</div> }));
+vi.mock('../components/mappe/MappaMemento', () => ({ MappaMemento: () => <div>Disegno del pozzo</div> }));
 vi.mock('../components/mappe/CollegamentoMappa', () => ({ CollegamentoMappa: () => null }));
 vi.mock('../components/shared/ImmagineEntita', () => ({ ImmagineEntita: () => <div>Immagine</div> }));
 vi.mock('../components/guida/EmblemaDungeon', () => ({ EmblemaDungeon: () => null }));
@@ -35,9 +35,9 @@ const area = (extra: Partial<AreaDungeonDto>): AreaDungeonDto => ({
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
-  raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, atterraggio: null, atterraggi: [], note: '', fonti: [],
+  raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, atterraggio: null, atterraggi: [], personeCatturate: partita ? [] : null, note: '', fonti: [],
   aree: [
-    area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: null }] }),
+    area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: null, areeDedalo: [] }] }),
     area({ chiave: 'k-02', ordine: 1, nome: 'Torre', punti: [] }),
     area({ chiave: 'k-03', ordine: 2, nome: 'Cortile', mappe: [{ chiave: 'm-cortile', nome: 'Palazzo di Kamoshida › Cortile', n: 0, presi: partita ? 0 : null, spilli: [] }] }),
   ],
@@ -54,9 +54,9 @@ const mementos = (): DungeonDettaglioDto => ({
   ...palazzo(true), chiave: 'mementos', tipo: 'mementos', nome: 'Memento', raccolta: { totale: 10, presi: 1, mappe: 2, mappeComplete: 1 }, planimetrie: [],
   aree: [
     area({ chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', dedalo: { aree: [areaDedalo({ chiave: 'aiy-1', timbri: { totale: 8, raccolti: 1 }, richieste: [{ chiave: 'bulli', nome: 'Bullismo sui bulli', stato: null }], elementi: { totale: 10, fatti: 1 }, completata: false })], daCollocare: [], obiettivi: { totale: 10, fatti: 1 }, completato: false },
-      punti: [{ chiave: 'p2', ordine: 0, tipo: 'trama', nome: 'Jose alla banchina', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: 'aiy-1', persona: null },
+      punti: [{ chiave: 'p2', ordine: 0, tipo: 'trama', nome: 'Jose alla banchina', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: 'aiy-1', persona: null, areeDedalo: [] },
         // una Persona: in cima all'area, fuori dal conto (2026-10-11)
-        { chiave: 'p3', ordine: 1, tipo: 'persona', nome: 'Ragazza seducente', descrizione: '', esauribile: false, dettagli: { maschera: 'Pixie', deboleA: 'Ghiaccio' }, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: 'aiy-1', persona: { id: 7, nome: 'Pixie', nomeIt: 'Pixie' } }] }),
+        { chiave: 'p3', ordine: 1, tipo: 'persona', nome: 'Ragazza seducente', descrizione: '', esauribile: false, dettagli: { maschera: 'Pixie', deboleA: 'Ghiaccio' }, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: { id: 7, nome: 'Pixie', nomeIt: 'Pixie' }, areeDedalo: ['aiy-1'] }] }),
     area({ chiave: 'mementos-01-qimranut', ordine: 1, nome: 'Dedalo di Qimranut', dedalo: { aree: [areaDedalo({ chiave: 'qim-1' })], daCollocare: [], obiettivi: { totale: 0, fatti: 0 }, completato: true } }),
   ],
 });
@@ -199,64 +199,70 @@ it('senza partita non ci sono spunte, e l’elenco resta consultabile', async ()
   expect(screen.queryByRole('progressbar', { name: /Avanzamento/ })).toBeNull();
 });
 
-it('nei Memento la colonna sono le aree del dedalo (099): timbri con −/+, richieste con Completata, voci; l’area vuota è completata; niente pianta della guida', async () => {
+it('nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo e un’area per volta; timbri a un tocco e Richieste a tre stati muovono area, dedalo e anello', async () => {
   getDungeon.mockResolvedValue(mementos());
   impostaTimbri.mockResolvedValue({ area: 'aiy-1', raccolti: 2, totale: 8, completato: false });
   impostaStatoRichiesta.mockResolvedValue({ chiave: 'bulli', stato: 'completata' });
   monta('mementos');
   expect(await screen.findByRole('heading', { name: 'Memento' })).toBeInTheDocument();
   expect(screen.queryByRole('tab', { name: 'Pianta della guida' })).toBeNull();
-  const colonna = screen.getByRole('group', { name: 'Aree di Dedalo di Aiyatsbus' });
-  expect(within(colonna).getByText('1/10 elementi')).toBeInTheDocument();
-  expect(within(colonna).getByText('1 su 8')).toBeInTheDocument();
-  // le voci di Trama stanno dentro l'area
-  expect(within(colonna).getByRole('list', { name: 'Voci della guida di Area 1' })).toHaveTextContent('Jose alla banchina');
-  fireEvent.click(within(colonna).getByRole('button', { name: 'Aggiungi un timbro in Area 1' }));
+  // il binario dei dedali, con la percentuale; il pozzo si apre a richiesta
+  const binario = screen.getByRole('navigation', { name: 'Dedali dei Memento' });
+  expect(within(binario).getByRole('button', { name: /^1 ?Aiyatsbus/ })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.queryByText('Disegno del pozzo')).toBeNull();
+  fireEvent.click(within(binario).getByRole('button', { name: 'Apri il pozzo dei Memento' }));
+  expect(within(screen.getByRole('dialog', { name: 'Il pozzo dei Memento' })).getByText('Disegno del pozzo')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /^Chiudi/ }));
+  const dedalo = screen.getByRole('group', { name: 'Dedalo di Aiyatsbus' });
+  expect(within(dedalo).getByRole('tab', { name: 'Area 1 · 1/10' })).toHaveAttribute('aria-selected', 'true');
+  fireEvent.click(within(dedalo).getByRole('button', { name: 'Timbro 2 di 8: da prendere' }));
   await waitFor(() => expect(impostaTimbri).toHaveBeenCalledWith(4, 'aiy-1', 2));
-  await waitFor(() => expect(within(colonna).getByText('2 su 8')).toBeInTheDocument());
   // l'area, il dedalo e l'anello seguono: (2 timbri + 0 richieste + 0 voci) su 10
-  expect(within(colonna).getByText('2/10 elementi')).toBeInTheDocument();
+  await waitFor(() => expect(within(dedalo).getByRole('tab', { name: 'Area 1 · 2/10' })).toBeInTheDocument());
+  expect(within(dedalo).getByRole('heading', { name: 'Timbri · 2/8' })).toBeInTheDocument();
   expect(screen.getByRole('progressbar', { name: /Avanzamento in Memento/ })).toHaveAttribute('aria-valuenow', '20');
-  fireEvent.click(within(colonna).getByRole('button', { name: 'Completata' }));
+  fireEvent.click(within(within(dedalo).getByRole('radiogroup', { name: 'Stato di «Bullismo sui bulli»' })).getByRole('radio', { name: 'Fatta' }));
   await waitFor(() => expect(impostaStatoRichiesta).toHaveBeenCalledWith(4, 'bulli', 'completata'));
   await waitFor(() => expect(screen.getByRole('progressbar', { name: /Avanzamento in Memento/ })).toHaveAttribute('aria-valuenow', '30'));
-  // Qimranut ha un'area vuota: completata, e con lei il dedalo (la ✓ sulla sua scheda)
-  expect(screen.getByRole('tab', { name: /2\. Dedalo di Qimranut.*\(completata\)/ })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('tab', { name: /2\. Dedalo di Qimranut/ }));
-  const qimranut = await screen.findByRole('group', { name: 'Aree di Dedalo di Qimranut' });
-  expect(within(qimranut).getByText('nessun elemento · completata')).toBeInTheDocument();
-  expect(within(qimranut).queryByRole('button', { name: /Aggiungi un timbro/ })).toBeNull();
+  // Qimranut ha un'area vuota: completata, e con lei il dedalo (la ✓ nel binario)
+  const qim = within(binario).getByRole('button', { name: /Qimranut.*\(completata\)/ });
+  fireEvent.click(qim);
+  const qimranut = await screen.findByRole('group', { name: 'Dedalo di Qimranut' });
+  expect(within(qimranut).getByRole('tab', { name: 'Area 1 (completata)' })).toBeInTheDocument();
+  expect(within(qimranut).queryByRole('button', { name: /^Timbro/ })).toBeNull();
 });
 
-it('nei Memento una colonna sola: miniatura del dedalo accanto al titolo, poi in ogni area Persona, Richieste e Trama; catturare una Persona non sposta l’anello (2026-10-11)', async () => {
+it('nei Memento l’area ha Timbri, Persona, Richieste e Trama in quest’ordine; catturare una Persona non sposta l’anello; «Correggi la scheda» solo in «Modifica la guida»', async () => {
   getDungeon.mockResolvedValue(mementos());
-  impostaStatoPunto.mockImplementation(async (_p: number, chiave: string, stato: string | null) => ({ ...mementos().aree[0].punti.find((x) => x.chiave === chiave)!, stato }));
+  aggiornaCompendio.mockResolvedValue([{ personaId: 7, registrata: true }]);
   monta('mementos');
   expect(await screen.findByRole('heading', { name: 'Memento' })).toBeInTheDocument();
-  // la miniatura, e nessuna colonna stretta delle aree accanto (tutto sta nella sezione del dedalo)
-  expect(screen.getByRole('img', { name: 'Dedalo di Aiyatsbus, come lo disegna il gioco' }).parentElement).toHaveClass('h-[min(13vh,120px)]');
+  // la miniatura del dedalo nella sua scheda; nessuna colonna dei Palazzi
+  expect(screen.getByRole('img', { name: 'Dedalo di Aiyatsbus, come lo disegna il gioco' })).toBeInTheDocument();
   expect(screen.queryByRole('complementary')).toBeNull();
-  const sezione = screen.getByRole('heading', { name: 'Dedalo di Aiyatsbus' }).closest('section')!;
-  const aree = within(sezione).getByRole('group', { name: 'Aree di Dedalo di Aiyatsbus' });
-  // in quest'ordine: Persona, Richieste, Trama
-  const persone = within(aree).getByRole('region', { name: 'Persona di Area 1' });
-  const richieste = within(aree).getByRole('region', { name: 'Richieste di Area 1' });
-  const trama = within(aree).getByRole('list', { name: 'Voci della guida di Area 1' });
-  expect(persone.compareDocumentPosition(richieste) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  expect(richieste.compareDocumentPosition(trama) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  const pannello = within(screen.getByRole('group', { name: 'Dedalo di Aiyatsbus' })).getByRole('tabpanel');
+  expect(within(pannello).getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(['Timbri · 1/8', 'Persona · 0/1 catturate', 'Richieste · 0/1', 'Trama · 0/1']);
   // la Persona sta solo fra le Persona, non nella Trama
-  expect(trama).not.toHaveTextContent('Ragazza seducente');
-  const pixie = within(persone).getByRole('button', { name: 'Pixie (Ragazza seducente): da catturare' });
-  // la rilettura dopo il gesto: il server ha la Persona catturata, e il conto (senza di lei) uguale
-  const dopo = mementos();
-  dopo.aree[0].punti = dopo.aree[0].punti.map((x) => (x.chiave === 'p3' ? { ...x, stato: 'ottenuto' } : x));
-  getDungeon.mockResolvedValue(dopo);
-  fireEvent.click(pixie);
-  await waitFor(() => expect(impostaStatoPunto).toHaveBeenCalledWith(4, 'p3', 'ottenuto'));
+  expect(within(pannello).getByRole('list', { name: 'Trama di Area 1' })).not.toHaveTextContent('Ragazza seducente');
+  const persone = within(pannello).getByRole('region', { name: 'Persona dell’area' });
+  fireEvent.click(within(persone).getByRole('button', { name: 'Pixie (Ragazza seducente): da catturare' }));
+  // catturata = registrata nel compendio della partita (2026-10-12), per tutte le aree e i dedali
+  await waitFor(() => expect(aggiornaCompendio).toHaveBeenCalledWith(4, 7, { registrata: true }));
+  expect(impostaStatoPunto).not.toHaveBeenCalled();
   await waitFor(() => expect(within(persone).getByRole('button', { name: 'Pixie (Ragazza seducente): catturata' })).toHaveAttribute('aria-pressed', 'true'));
   // fuori dal conto: l'area resta a 1 su 10, l'anello al 10%
-  expect(within(aree).getByText('1/10 elementi')).toBeInTheDocument();
+  expect(screen.getByRole('tab', { name: 'Area 1 · 1/10' })).toBeInTheDocument();
   expect(screen.getByRole('progressbar', { name: /Avanzamento in Memento/ })).toHaveAttribute('aria-valuenow', '10');
+  // toglierla dal compendio (dopo la conferma) la riporta da catturare
+  aggiornaCompendio.mockResolvedValue([]);
+  fireEvent.click(within(persone).getByRole('button', { name: 'Pixie (Ragazza seducente): catturata' }));
+  fireEvent.click(screen.getByRole('button', { name: /^Togli dal compendio/ }));
+  await waitFor(() => expect(aggiornaCompendio).toHaveBeenLastCalledWith(4, 7, { registrata: false }));
+  await waitFor(() => expect(within(persone).getByRole('button', { name: 'Pixie (Ragazza seducente): da catturare' })).toHaveAttribute('aria-pressed', 'false'));
+  // la correzione della scheda è un comando per sistemare la guida
+  expect(screen.queryByRole('button', { name: /Correggi la scheda/ })).toBeNull();
+  fireEvent.click(screen.getAllByRole('button', { name: 'Modifica la guida' })[0]);
+  expect(screen.getByRole('button', { name: /Correggi la scheda/ })).toBeInTheDocument();
 });
 
 // ---- Due gesti ravvicinati (B3", verifica completa 2026-10-03) ----
@@ -274,13 +280,14 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
     impostaTimbri.mockImplementation(() => new Promise((ok) => { rispondiTimbri = ok; }));
     impostaStatoRichiesta.mockResolvedValue({ chiave: 'bulli', stato: 'completata' });
     monta('mementos');
-    const colonna = within(await screen.findByRole('group', { name: 'Aree di Dedalo di Aiyatsbus' }));
-    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro in Area 1' })); }); // in volo
-    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Completata' })); }); // arriva subito
+    const colonna = within(await screen.findByRole('group', { name: 'Dedalo di Aiyatsbus' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Timbro 2 di 8: da prendere' })); }); // in volo
+    await act(async () => { fireEvent.click(colonna.getByRole('radio', { name: 'Fatta' })); }); // arriva subito
     await act(async () => { rispondiTimbri({ area: 'aiy-1', raccolti: 2, totale: 8, completato: false }); });
     // (2 timbri + 1 richiesta) su 10
     expect(anello('Memento')).toHaveAttribute('aria-valuenow', '30');
-    expect(colonna.getByText('2 su 8')).toBeInTheDocument();
+    expect(colonna.getByRole('heading', { name: 'Timbri · 2/8' })).toBeInTheDocument();
+    expect(colonna.getByRole('radio', { name: 'Fatta' })).toHaveAttribute('aria-checked', 'true');
   });
 
   it('Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro', async () => {
@@ -289,12 +296,12 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
     impostaStatoRichiesta.mockImplementation(() => new Promise((ok) => { rispondiRichiesta = ok; }));
     impostaTimbri.mockResolvedValue({ area: 'aiy-1', raccolti: 2, totale: 8, completato: false });
     monta('mementos');
-    const colonna = within(await screen.findByRole('group', { name: 'Aree di Dedalo di Aiyatsbus' }));
-    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Completata' })); }); // in volo
-    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Aggiungi un timbro in Area 1' })); }); // arriva subito
+    const colonna = within(await screen.findByRole('group', { name: 'Dedalo di Aiyatsbus' }));
+    await act(async () => { fireEvent.click(colonna.getByRole('radio', { name: 'Fatta' })); }); // in volo
+    await act(async () => { fireEvent.click(colonna.getByRole('button', { name: 'Timbro 2 di 8: da prendere' })); }); // arriva subito
     await act(async () => { rispondiRichiesta({ chiave: 'bulli', stato: 'completata' }); });
     expect(anello('Memento')).toHaveAttribute('aria-valuenow', '30');
-    expect(colonna.getByText('2 su 8')).toBeInTheDocument();
+    expect(colonna.getByRole('heading', { name: 'Timbri · 2/8' })).toBeInTheDocument();
   });
 
   it('Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto', async () => {
@@ -750,7 +757,7 @@ const palazzoConPiuAree = (): DungeonDettaglioDto => {
 
 /** Una voce della guida con lo stato dato, nell'area indicata (per la spunta delle aree completate). */
 const voceGuida = (chiave: string, tipo: PuntoInteresseDto['tipo'], stato: PuntoInteresseDto['stato']): PuntoInteresseDto =>
-  ({ chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: null });
+  ({ chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: null, areeDedalo: [] });
 
 describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () => {
   /** Il Palazzo con più aree, con le voci date per area (le altre restano come sono). */

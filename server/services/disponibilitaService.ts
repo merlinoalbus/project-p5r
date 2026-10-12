@@ -25,6 +25,7 @@ import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvent
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
 import { uidFattiPerVoci, vociGestite } from './mappe/voceDelPin.js';
+import { sqlPersonaDeiMemento, vociPersonaCatturate } from './catturePersona.js';
 import { nomiCondizioniMemo, pinCitato } from './condizioni/nomiCondizioni.js';
 import type { DisponibilitaDto, RequisitoRango, SemaforoRequisitoDto } from '../../shared/types.js';
 
@@ -67,15 +68,16 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
    *  più volte (requisiti, presenza, stato di altri pin), e prima ogni valutazione rileggeva il pin (rilievo P6 della verifica). Lo
    *  stato vive una richiesta sola, quindi i pin letti sono sempre quelli di adesso. */
   pinCitati?: Map<string, ReturnType<typeof pinCitato>>;
-  /** Le voci della guida segnate nella partita (Ottenute o Esaurite; non le descrittive): le condizioni «Voce della guida»
-   *  (2026-10-11). Facoltativo per chi costruisce uno stato a mano (test): senza, nessuna voce è segnata. */
+  /** Le voci della guida segnate nella partita (Ottenute o Esaurite; non le descrittive) e le Persona dei Memento catturate,
+   *  cioè registrate nel compendio (2026-10-12): le condizioni «Voce della guida» (2026-10-11). Facoltativo per chi costruisce
+   *  uno stato a mano (test): senza, nessuna voce è segnata. */
   vociSegnate?: Set<string>;
   /** Le voci citate dalle condizioni già lette in questa richiesta (chiave → voce, null se non c'è), come `pinCitati`. */
   vociCitate?: Map<string, VoceCitata | null>;
 }
 
 /** Una voce della guida citata da una condizione: il nome e il tipo (una descrittiva non ha stato). */
-interface VoceCitata { nome: string; tipo: string; area_dedalo_chiave: string | null }
+interface VoceCitata { nome: string; tipo: string; area_dedalo_chiave: string | null; persona_dei_memento: number }
 
 /** `pinCitato` con la memoria dello stato della richiesta, se lo stato ce l'ha. */
 function pinCitatoNelloStato(uid: string, st: StatoDisponibilita): ReturnType<typeof pinCitato> {
@@ -87,7 +89,7 @@ function pinCitatoNelloStato(uid: string, st: StatoDisponibilita): ReturnType<ty
 /** La voce della guida citata da una condizione, con la memoria dello stato della richiesta se lo stato ce l'ha; null se non c'è. */
 function voceCitataNelloStato(chiave: string, st: StatoDisponibilita): VoceCitata | null {
   /** La voce dal database: nome e tipo, o null. */
-  const leggi = () => (prepared('SELECT nome, tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(chiave) as VoceCitata | undefined) ?? null;
+  const leggi = () => (prepared(`SELECT p.nome, p.tipo, p.area_dedalo_chiave, ${sqlPersonaDeiMemento('p')} AS persona_dei_memento FROM punto_interesse p WHERE p.chiave = ?`).get(chiave) as VoceCitata | undefined) ?? null;
   if (!st.vociCitate) return leggi();
   if (!st.vociCitate.has(chiave)) st.vociCitate.set(chiave, leggi());
   return st.vociCitate.get(chiave)!;
@@ -122,7 +124,9 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   const st = statoPartitaSemafori(partitaId, ranghi, doti);
   const giorno = st.dataGioco ? (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(st.dataGioco) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null : null;
   // le voci della guida gestite: le leggono le condizioni «Voce della guida» e i pin segnati tramite le loro voci (una lettura sola)
+  // più le Persona dei Memento catturate, cioè registrate nel compendio (2026-10-12, scelta dell'utente: «Leggono il compendio»)
   const gestite = vociGestite(partitaId);
+  for (const voce of vociPersonaCatturate(partitaId)) gestite.add(voce);
   /** Il conteggio `n` della query, che riceve come unico parametro la partita. */
   const conta = (sql: string): number => (prepared(sql).get(partitaId) as { n: number }).n;
   const contatori = new Map<ContatoreChiave, number>([
@@ -281,7 +285,9 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       // diventata descrittiva («Altro»): non ha più uno stato, quindi la condizione è grigia (da correggere nell'editor), non rossa
       if (puntoDescrittivo(v.tipo, v.area_dedalo_chiave)) return esito('voce-guida', 'grigio', `«${v.nome}» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa`);
       const segnata = st.vociSegnate?.has(r.voce) ?? false;
-      return esito('voce-guida', segnata === r.segnata ? 'verde' : 'rosso', `«${v.nome}»: ${segnata ? 'segnata' : 'non segnata'}`);
+      // una Persona dei Memento è «segnata» se è catturata, cioè registrata nel compendio della partita (2026-10-12)
+      const parola = v.persona_dei_memento === 1 ? (segnata ? 'catturata (nel compendio)' : 'non catturata (non è nel compendio)') : segnata ? 'segnata' : 'non segnata';
+      return esito('voce-guida', segnata === r.segnata ? 'verde' : 'rosso', `«${v.nome}»: ${parola}`);
     }
     case 'quartiere': {
       const q = st.sbloccoQuartieri.get(r.quartiere);

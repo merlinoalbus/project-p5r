@@ -70,7 +70,7 @@ describe('le Richieste modificabili', () => {
     // il modulo sa dove si può mettere: i nove dedali con le loro aree
     const collocazioni = (await elenco()).collocazioni;
     expect(collocazioni).toHaveLength(9);
-    expect(collocazioni[0]).toEqual({ chiave: QIMRANUT, nome: 'Dedalo di Qimranut', aree: [{ chiave: area, nome: 'Area 1' }] });
+    expect(collocazioni[0]).toEqual({ chiave: QIMRANUT, nome: 'Dedalo di Qimranut', aree: [{ chiave: area, nome: 'Area 1' }, { chiave: `${QIMRANUT}-area-2`, nome: 'Area 2' }] });
   });
 
   it('si corregge: solo i campi mandati; cambiando dedalo resta da collocare nel nuovo e va in fondo; togliendo il Confidente va via il rango', async () => {

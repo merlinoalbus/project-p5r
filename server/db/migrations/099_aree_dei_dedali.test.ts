@@ -19,7 +19,7 @@ it('crea Area 1 nei dedali che hanno qualcosa, ci porta voci, Richieste e timbri
       ('k-1', 'kamoshida', 0, 'Ingresso', '', NULL);
     INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome) VALUES ('m-1/0', 'm-1', 0, 'altro', 'Nota'), ('m-1/1', 'm-1', 1, 'persona', 'Ombra'), ('k-1/0', 'k-1', 0, 'sicura', 'Sicura');
     INSERT INTO richiesta (chiave, ordine, nome, area, area_chiave, bersaglio_json) VALUES ('r-1', 0, 'Prima', 'Tre', 'm-3', '{}'), ('r-2', 1, 'Seconda', 'Uno', 'm-1', '{}');`);
-  runMigrations(db);
+  runMigrations(db, migrations.filter((m) => m.id <= 99));
   // Uno (voci e una Richiesta), Due (solo timbri), Tre (solo una Richiesta) hanno Area 1; Quattro, vuoto, no
   expect(db.prepare('SELECT chiave, dedalo_chiave, ordine, nome, descrizione, timbri_totale FROM area_dedalo ORDER BY chiave').all()).toEqual([
     { chiave: 'm-1-area-1', dedalo_chiave: 'm-1', ordine: 0, nome: 'Area 1', descrizione: '', timbri_totale: null },
@@ -47,13 +47,17 @@ it('crea Area 1 nei dedali che hanno qualcosa, ci porta voci, Richieste e timbri
   expect(db.prepare("SELECT * FROM area_dedalo WHERE chiave <> 'm-3-area-1' ORDER BY chiave").all()).toEqual(prima);
 });
 
-it('nel pacchetto ogni voce e ogni Richiesta dei dedali sta in un\'area del suo dedalo, e ogni dedalo ha la sua Area 1', () => {
+it('nel pacchetto ogni voce dei dedali sta in un\'area del suo dedalo (le Persona, dalla 101, in una o più), ogni Richiesta pure salvo quella che la guida non colloca, e ogni dedalo ha la sua Area 1', () => {
   const db = dbDiProva();
-  expect(db.prepare("SELECT COUNT(*) FROM punto_interesse p JOIN dungeon_area d ON d.chiave = p.area_chiave WHERE d.dungeon_chiave = 'mementos' AND p.area_dedalo_chiave IS NULL").pluck().get()).toBe(0);
+  expect(db.prepare("SELECT COUNT(*) FROM punto_interesse p JOIN dungeon_area d ON d.chiave = p.area_chiave WHERE d.dungeon_chiave = 'mementos' AND p.tipo <> 'persona' AND p.area_dedalo_chiave IS NULL").pluck().get()).toBe(0);
+  // una Persona di un dedalo non ha un'area sola: è collegata a quelle in cui si incontra, tutte del suo dedalo
+  expect(db.prepare("SELECT COUNT(*) FROM punto_interesse p JOIN dungeon_area d ON d.chiave = p.area_chiave WHERE d.dungeon_chiave = 'mementos' AND p.tipo = 'persona' AND (p.area_dedalo_chiave IS NOT NULL OR NOT EXISTS (SELECT 1 FROM persona_area_dedalo x WHERE x.voce_chiave = p.chiave))").pluck().get()).toBe(0);
+  expect(db.prepare('SELECT COUNT(*) FROM persona_area_dedalo x JOIN punto_interesse p ON p.chiave = x.voce_chiave JOIN area_dedalo ad ON ad.chiave = x.area_dedalo_chiave WHERE ad.dedalo_chiave <> p.area_chiave').pluck().get()).toBe(0);
   expect(db.prepare("SELECT COUNT(*) FROM punto_interesse p JOIN dungeon_area d ON d.chiave = p.area_chiave WHERE d.dungeon_chiave <> 'mementos' AND p.area_dedalo_chiave IS NOT NULL").pluck().get()).toBe(0);
   // l'area di ogni voce e di ogni Richiesta è del suo stesso dedalo
   expect(db.prepare('SELECT COUNT(*) FROM punto_interesse p JOIN area_dedalo ad ON ad.chiave = p.area_dedalo_chiave WHERE ad.dedalo_chiave <> p.area_chiave').pluck().get()).toBe(0);
-  expect(db.prepare('SELECT COUNT(*) FROM richiesta WHERE area_dedalo_chiave IS NULL').pluck().get()).toBe(0);
+  // «Lo zio ingordo»: la guida non dice in che area (101), resta nel dedalo da collocare
+  expect(db.prepare('SELECT nome FROM richiesta WHERE area_dedalo_chiave IS NULL').pluck().all()).toEqual(['Lo zio ingordo']);
   expect(db.prepare('SELECT COUNT(*) FROM richiesta r JOIN area_dedalo ad ON ad.chiave = r.area_dedalo_chiave WHERE ad.dedalo_chiave <> r.area_chiave').pluck().get()).toBe(0);
   const senzaAree = db.prepare("SELECT d.chiave FROM dungeon_area d WHERE d.dungeon_chiave = 'mementos' AND NOT EXISTS (SELECT 1 FROM area_dedalo ad WHERE ad.dedalo_chiave = d.chiave)").pluck().all() as string[];
   expect(senzaAree).toEqual([]);

@@ -105,7 +105,9 @@ export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: Punt
   /** L'area del dedalo della voce (099): obbligatoria creando una voce di un dedalo; cambiandola la voce passa in un'altra area. */
   areaDedalo?: string;
   /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): ne diventa la maschera. */
-  persona?: number }
+  persona?: number;
+  /** Le aree del dedalo in cui si incontra una Persona di un dedalo (101): almeno una creandola; correggendola le sostituisce. */
+  areeDedalo?: string[] }
 /** Nome, dettagli e totale dei timbri di un'area di un dedalo (099); `timbriTotale` null = senza timbri. */
 export interface DatiAreaDedaloApi { nome?: string; descrizione?: string; timbriTotale?: number | null }
 

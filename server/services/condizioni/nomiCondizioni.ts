@@ -88,7 +88,8 @@ export function pinCitato(uid: string): { nome: string; tipo: string; parola: st
  * Le voci della guida dei Palazzi e dei Memento (scelta dell'utente) che una condizione «Voce della guida» può citare (2026-10-11): tutte tranne le descrittive
  * («Altro» fuori dalle aree dei dedali, 099), che uno stato non lo hanno; i passi degli Enigmi compresi. In ordine di guida (Palazzo,
  * area, area del dedalo, Enigma coi suoi passi, voce), col posto da mostrare («Palazzo di Kamoshida › 2. Sala Centrale», «Memento ›
- * 1. Dedalo di Qimranut › Area 1»).
+ * 1. Dedalo di Qimranut › Area 1»). Le Persona dei Memento restano citabili: per loro «segnata» vuol dire catturata, cioè
+ * registrata nel compendio della partita (2026-10-12, `catturePersona.ts`); stanno nel dedalo, senza un'area (si incontrano in più aree).
  */
 export function vociCitabili(): Array<{ chiave: string; nome: string; tipo: string; posto: string }> {
   return prepared(`SELECT p.chiave, p.nome, p.tipo, d.nome || ' › ' || (a.ordine + 1) || '. ' || a.nome || COALESCE(' › ' || ad.nome, '') AS posto

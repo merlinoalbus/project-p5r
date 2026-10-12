@@ -8,7 +8,7 @@ import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto } from '../types'
 
 /** Una voce della guida con lo stato dato, nell'area del dedalo indicata. */
 const voce = (chiave: string, areaDedalo: string, stato: PuntoInteresseDto['stato']): PuntoInteresseDto => ({
-  chiave, ordine: 0, tipo: 'altro', nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo, persona: null,
+  chiave, ordine: 0, tipo: 'altro', nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo, persona: null, areeDedalo: [],
 });
 /** Un'area del dedalo con conteggi volutamente sbagliati: il ricalcolo deve correggerli. */
 const area = (chiave: string, extra: Partial<AreaDedaloDto> = {}): AreaDedaloDto => ({ chiave, ordine: 0, nome: chiave, descrizione: '', timbri: null, richieste: [], elementi: { totale: 99, fatti: 99 }, completata: false, ...extra });

@@ -17,6 +17,7 @@ import { getDb, prepared } from '../../db/dbService.js';
 import { httpErrors, type HttpError } from '../../utils/httpError.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
 import { palazzoDiOgniMappa } from '../palazziService.js';
+import { ePersonaDeiMemento, erroreCatturaNelCompendio } from '../catturePersona.js';
 import { vociDelPin, vociDelPinSql } from './voceDelPin.js';
 import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, passiDi, pinDelPuntoGuida, quanteVociDelPin } from './statiGuida.js';
 
@@ -34,6 +35,8 @@ export function erroreVoceDelPin(pin: { nome: string; mappa: string | null }, pu
   const p = prepared('SELECT p.nome, p.tipo, p.area_dedalo_chiave, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(puntoChiave) as { nome: string; tipo: string; area_dedalo_chiave: string | null; dungeon_chiave: string } | undefined;
   if (!p) return httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   if (puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) return httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
+  // una Persona dei Memento si cattura nel compendio (2026-10-12): un pin la segnerebbe in `punto_partita`, un secondo modo
+  if (ePersonaDeiMemento(puntoChiave)) return erroreCatturaNelCompendio(p.nome, 'collegare');
   // un Enigma con i suoi passi non ha pin suoi: stanno sui passi (scelta dell'utente, 2026-10-01)
   if (passiDi(getDb(), puntoChiave).length > 0) return httpErrors.badRequest('enigma-con-passi', `«${p.nome}» è un Enigma con i suoi passi: i pin si collegano ai passi.`);
   if (!pin.mappa || palazzoDiOgniMappa().get(pin.mappa) !== p.dungeon_chiave) {

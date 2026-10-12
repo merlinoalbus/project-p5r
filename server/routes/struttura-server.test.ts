@@ -223,20 +223,23 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     expect(senza.planimetrie.every((m) => m.presi === null && m.spilli.every((s) => s.raccolto === null))).toBe(true);
 
     // Memento (099): Dedalo → Aree → Elementi; gli elementi di un'area sono le sue voci Trama, le sue Richieste e i suoi timbri
+    // dalla 101 le aree sono quelle della guida (Aiyatsbus Area 1–7) e il totale dei timbri di ogni area lo imposta l'utente
+    await request(app).put('/api/compendio/aree-dedalo/mementos-02-aiyatsbus-area-1').send({ timbriTotale: 8 }).expect(200);
     const mementos = (await request(app).get(`/api/compendio/dungeon/mementos?partita=${id}`)).body.data as DungeonDettaglioDto;
     const aiyatsbus = mementos.aree.find((a) => a.chiave === 'mementos-02-aiyatsbus')!;
-    expect(aiyatsbus.dedalo?.aree.map((a) => a.chiave)).toEqual(['mementos-02-aiyatsbus-area-1']);
+    expect(aiyatsbus.dedalo?.aree.map((a) => a.chiave)).toEqual(Array.from({ length: 7 }, (_, i) => `mementos-02-aiyatsbus-area-${i + 1}`));
     const area1 = aiyatsbus.dedalo!.aree[0];
     expect(area1.timbri).toEqual({ totale: 8, raccolti: 0 });
-    expect(area1.richieste.length).toBeGreaterThan(0);
-    expect(aiyatsbus.punti.filter((p) => p.areaDedalo === area1.chiave)).toHaveLength(aiyatsbus.punti.length);
+    // ogni voce di Trama sta in un'area; ogni Persona in una o più (areeDedalo), senza un'area sola
+    expect(aiyatsbus.punti.filter((p) => p.tipo === 'trama').every((p) => p.areaDedalo !== null)).toBe(true);
+    expect(aiyatsbus.punti.filter((p) => p.tipo === 'persona').every((p) => p.areaDedalo === null && p.areeDedalo.length > 0)).toBe(true);
     // le Persona non contano (2026-10-11): solo le voci Trama
     const voci = aiyatsbus.punti.filter((p) => p.areaDedalo === area1.chiave && p.tipo === 'trama').length;
     expect(voci).toBeGreaterThan(0);
     // uno per timbro (scelta dell'utente): voci Trama + Richieste + 8 timbri
     expect(area1.elementi).toEqual({ totale: voci + area1.richieste.length + 8, fatti: 0 });
     expect(area1.completata).toBe(false);
-    expect(aiyatsbus.dedalo).toMatchObject({ daCollocare: [], obiettivi: { totale: area1.elementi.totale, fatti: 0 }, completato: false });
+    expect(aiyatsbus.dedalo).toMatchObject({ daCollocare: [], obiettivi: { totale: aiyatsbus.dedalo!.aree.reduce((s, a) => s + a.elementi.totale, 0), fatti: 0 }, completato: false });
     const qimranut = mementos.aree.find((a) => a.chiave === 'mementos-01-qimranut')!;
     expect(qimranut.dedalo?.aree[0].timbri).toBeNull();
     expect(mementos.raccolta.totale).toBe(mementos.aree.reduce((s, a) => s + (a.dedalo?.obiettivi.totale ?? 0), 0));

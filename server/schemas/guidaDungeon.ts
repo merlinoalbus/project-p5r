@@ -34,6 +34,8 @@ export const bodyPunto = z.object({
   areaDedalo: z.string().min(1).max(200).optional(),
   /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): la sua maschera diventa il nome italiano di quella Persona. */
   persona: z.number().int().positive().optional(),
+  /** Le aree del dedalo di una Persona di un dedalo (101): si incontra in più aree. */
+  areeDedalo: z.array(z.string().min(1).max(200)).max(100).optional(),
 });
 export const bodyNuovoPunto = bodyPunto.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 

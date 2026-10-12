@@ -1644,3 +1644,57 @@ Conseguenze tecniche (non scelte dell'utente):
   nessun passo, nessun Enigma con passi, nessun pin collegato a voci dei Memento. La migrazione resta sicura per un pacchetto
   importato più avanti: i passi di un Enigma convertito tornano voci della sua area, in fondo, ognuno col suo stato; i pin
   collegati restano collegati (Trama non è descrittiva). I Memento hanno sì delle planimetrie («aree fisse» con pin del gioco).
+
+## 2026-10-12 — Memento: aree reali e pagina per formato
+
+Richiesta dell'utente (vedi ROADMAP, «Richieste del 12 ottobre 2026»): la pagina dei Memento del 2026-10-11 è «disfunzionale»
+nell'intero impianto; in ogni dedalo ci sono più aree, e ogni area ha quattro elementi: Timbri, Persona, Richieste, Trama. Prima
+della proposta l'utente ha chiuso le domande sulla struttura («[User dismissed]») e ha spiegato il modello a parole; poi:
+- Timbri: «i timbri dovrebbero far parte della percentuale di completamento del dedalo»; alla proposta (totale per dedalo o per
+  area) «li conterò io man mano e li setterò come sistemerò il resto dei dati dei memento» → il totale è per area e lo imposta
+  l'utente; i timbri contano nell'area e nel dedalo; un'area senza totale non li conta.
+- Persona: «Se la persona è catturata vale per tutte le aree e i dedali.»; poi «La cattura o meno delle Persona puoi valutarla
+  dal compendio... dove vedi se una persona è stata sbloccata o meno nella partita» → catturata = registrata nel compendio della
+  partita (`compendio_partita.registrata`).
+- Interazione: «I timbri come le Persona devono essere banalmente un click per segnare i timbri ottenuti».
+- Grafica: «progettalo poi dimmi quali elementi grafici serve generare che chiedo a codex di generarli» → sette icone in
+  `docs/grafica/consegna-2026-10-12-memento.md`.
+- Progetto (dati, interazioni, impaginazione per desktop/tablet/telefono, aree dalla guida) → «Approvo».
+
+Conseguenze tecniche (non scelte dell'utente):
+- Le aree vengono dalla guida (migrazione 101), proposta «Dalla guida» del progetto approvato; un dedalo che l'utente aveva già
+  organizzato a mano non si tocca. «Lo zio ingordo», per cui la guida non dice l'area, resta da collocare.
+- Una Persona si incontra in più aree: la voce sta nel dedalo e le sue aree in `persona_area_dedalo`; nei dedali una Persona resta
+  Persona e una Trama resta Trama (per passare dall'una all'altra si elimina e si aggiunge).
+- Il tocco registra la Persona nel compendio; toglierla dal compendio cancella livello, bonus e abilità che vi aveva registrati,
+  e per questo chiede conferma.
+- I totali dei timbri che la 099 aveva messo nell'Area 1 (erano quelli del dedalo) si svuotano: restano scritti nella
+  descrizione del dedalo. I timbri che una partita vi aveva già segnato erano del dedalo intero e non hanno un'area: la
+  migrazione «utente» 020 li toglie con la stessa regola dell'app (svuotare un totale toglie i raccolti dell'area) e ne scrive il
+  numero nel registro; altrimenti ricomparirebbero, sbagliati, nell'Area 1 appena le si desse un totale. Sui dati dell'utente
+  erano 0 righe (misurato; rilievo F3 del validatore).
+- La Trama va nell'area che il suo nome indica, altrimenti in quella che la descrizione nomina se ne nomina una sola («Compare
+  nella Sala di controllo cognitivo», «nel 'Corridoio della prigione - Parte I'», «Dopo l'Area 14»); senza indizi resta nella
+  prima area, e l'utente la sposta (rilievo F2 del validatore: sui dati, 5 dal nome, 3 dalla descrizione, 25 senza indizi,
+  elencate all'utente).
+
+Scelta dell'utente sul rilievo F1 del validatore (la cattura aveva ancora un secondo modo, lo stato della voce, e una condizione
+«Voce della guida» su una Persona dei Memento sarebbe rimasta rossa per sempre; sui dati: 0 condizioni, 0 pin collegati, 0 stati):
+alla domanda «Come vuoi che funzionino?» → «Leggono il compendio». Quindi (`server/services/catturePersona.ts`):
+- una condizione «Voce della guida» su una Persona dei Memento è verde se la sua Persona è registrata nel compendio della partita
+  («catturata (nel compendio)»); la voce resta citabile nell'editor delle mappe;
+- lo stato di quella voce non si segna più (400 `cattura-nel-compendio`; azzerarlo resta possibile) e un pin non vi si collega
+  (stesso codice): l'unico modo di segnare la cattura è il compendio; un collegamento rimasto da prima non la segna;
+- lo stato della voce nella scheda dei Memento viene dal compendio («ottenuto» se catturata). Le Persona dei Palazzi non cambiano.
+
+Conseguenze tecniche della pagina per formato (voce 2; non scelte dell'utente, misurate nel browser):
+- Persona a sinistra e Richieste con Trama a destra da 1280 px, non da 1024 come nella bozza: fra 1024 e 1279 px, accanto al menu
+  dell'app e al binario dei dedali, la colonna del dedalo è larga circa 500 px (494 a 1024×690) e le due colonne vi stavano
+  strette; lì i quattro elementi stanno uno sotto l'altro.
+- Le schede delle aree restano in vista scorrendo a ogni larghezza (la bozza lo diceva del telefono): da 1024 px scorre la colonna
+  del dedalo, e con la scheda del dedalo in cima le aree uscivano di vista appena si scendeva. Sono una riga sola che scorre di lato
+  (`fila-scorrevole--sempre`): Da'at ha 16 aree, che a capo prendevano più righe proprio in quello che resta fisso.
+- L'intestazione del Memento è compatta a ogni larghezza (emblema e anello piccoli; date, mappe e conteggi in una piega; il sovrano
+  sul telefono nella piega): alta 170 px, a 1280×689 lasciava al pannello dell'area meno di 200 px. «Correggi la scheda» del
+  Memento, che sistema la guida, compare solo in «Modifica la guida».
+- Nel binario e nella fila i dedali hanno il nome breve («2 Aiyatsbus 31%», come nella bozza); il nome intero nel suggerimento.

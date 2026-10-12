@@ -25,5 +25,7 @@ import { utente015 } from './015_giornata_canone.js';
 import { utente016 } from './016_indici_delle_partite.js';
 import { utente017 } from './017_boss_non_piu_automatico.js';
 import { utente018 } from './018_timbri_nelle_aree_dei_dedali.js';
+import { utente019 } from './019_catture_nel_compendio.js';
+import { utente020 } from './020_timbri_senza_totale.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020];

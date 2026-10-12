@@ -13,6 +13,12 @@ Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 nel database di gioco. **Da consegnare di nuovo**: `attivita/videogioco-golfer-sarutahiko` e
 `attivita/videogioco-star-forneus` (fondo pieno fino ai bordi; prompt di rifacimento al §2 della consegna).
 
+**Aggiornamento 2026-10-12**: consegnati da Codex (commit 8e503ced) i 7 file della consegna
+[consegna-2026-10-12-memento.md](consegna-2026-10-12-memento.md) — `ui/timbro-ottenuto`, `ui/timbro-vuoto`, `ui/persona-catturata`,
+`ui/sezione-timbri`, `ui/sezione-persona`, `ui/sezione-richieste`, `ui/sezione-trama` in `public/asset/ui/`, PNG RGBA 128×128;
+in uso nella pagina dei Memento (caricati davvero a 1280×689 e 375×812, misurati nel browser; voce 2 approvata da
+galaxy_task_validator), ognuno con una riserva disegnata nel codice.
+
 ## Generazioni non consegnate
 
 Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con alfa reale, ridotta proporzionalmente e approvata da galaxy_task_validator.

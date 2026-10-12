@@ -1704,12 +1704,15 @@ export interface PuntoInteresseDto {
   /** L'Enigma di cui la voce è un passo (095), o null. I passi stanno nella stessa area, ordinati fra loro; l'Enigma che ne ha
    *  è risolto quando i passi che si segnano sono tutti fatti, e non ha pin suoi. */
   contenitore: string | null;
-  /** L'area del dedalo a cui la voce appartiene (099), o null fuori dai Memento. Nelle aree dei dedali ogni voce ha uno stato,
-   *  anche «Altro», e conta per il completamento dell'area. */
+  /** L'area del dedalo a cui la voce appartiene (099), o null fuori dai Memento. Nelle aree dei dedali ogni voce ha uno stato
+   *  e conta per il completamento dell'area. Una Persona di un dedalo non ha un'area sola (null): le sue sono `areeDedalo`. */
   areaDedalo: string | null;
   /** Per una voce «Persona»: la Persona del compendio della sua maschera (`dettagli.maschera`), per l'immagine e la scheda
    *  (2026-10-11); null se la maschera manca o il compendio non la conosce, e per gli altri tipi. */
   persona: PersonaDellaMascheraDto | null;
+  /** Per una Persona di un dedalo (migrazione 101): le aree del dedalo in cui si incontra, in ordine di area (una Persona sta in
+   *  più aree; la sua `areaDedalo` è null). Vuoto per le altre voci. */
+  areeDedalo: string[];
 }
 
 /** La Persona del compendio che corrisponde a una maschera scritta dalla guida: id della scheda, nome canonico (per l'immagine)
@@ -1871,6 +1874,9 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   planimetrie: Array<{ chiave: string; nome: string; ordine: number; aree: Array<{ chiave: string; nome: string; ordine: number }>; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
   /** Le regole di atterraggio dalla mappa di Tokyo, nell'ordine in cui si provano (2026-10-04). */
   atterraggi: AtterraggioPalazzoDto[];
+  /** Le Persona registrate nel compendio della partita (id): nei Memento sono le «catturate», in ogni area e in ogni dedalo
+   *  (scelte dell'utente, 2026-10-12). null senza partita. */
+  personeCatturate: number[] | null;
 }
 
 // ---- Calendario di gioco (Fase 6.3) ----

@@ -24,6 +24,7 @@ import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, 
 import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './maschere.js';
+import { ePersonaDeiMemento, erroreCatturaNelCompendio, vociPersonaCatturate } from './catturePersona.js';
 import { eliminaImmaginiDeiPin, impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
 import { palazziCompletati, palazzoDiOgniMappa } from './palazziService.js';
 import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
@@ -40,10 +41,20 @@ interface RigaPunto { chiave: string; area_chiave: string; ordine: number; tipo:
  * voce «Persona» porta la Persona del compendio della sua maschera (2026-10-11): chi ne legge tante passa l'indice costruito una
  * volta, per una voce sola lo si costruisce qui.
  */
-function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], maschere?: IndiceMaschere): PuntoInteresseDto {
+function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]> }): PuntoInteresseDto {
   const dettagli = JSON.parse(r.dettagli_json) as Record<string, unknown>;
-  const persona = r.tipo === 'persona' ? personaDellaMaschera(maschere ?? indiceMaschere(), dettagli.maschera) : null;
-  return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona };
+  const persona = r.tipo === 'persona' ? personaDellaMaschera(letture?.maschere ?? indiceMaschere(), dettagli.maschera) : null;
+  const areeDedalo = r.tipo === 'persona' ? (letture?.areePersone ?? areeDellePersone(r.chiave)).get(r.chiave) ?? [] : [];
+  return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo };
+}
+
+/** Le aree del dedalo in cui si incontra ogni Persona (voce → aree, in ordine di area; migrazione 101); di una voce sola, o di tutte. */
+function areeDellePersone(voce?: string): Map<string, string[]> {
+  const righe = prepared(`SELECT pa.voce_chiave, pa.area_dedalo_chiave FROM persona_area_dedalo pa JOIN area_dedalo ad ON ad.chiave = pa.area_dedalo_chiave
+    ${voce === undefined ? '' : 'WHERE pa.voce_chiave = ?'} ORDER BY ad.ordine, ad.chiave`).all(...(voce === undefined ? [] : [voce])) as Array<{ voce_chiave: string; area_dedalo_chiave: string }>;
+  const m = new Map<string, string[]>();
+  for (const x of righe) m.set(x.voce_chiave, [...(m.get(x.voce_chiave) ?? []), x.area_dedalo_chiave]);
+  return m;
 }
 
 /** Lo stato di ogni punto della guida segnato dalla partita (chiave → stato); vuota senza partita, 404 se la partita non esiste. */
@@ -303,24 +314,32 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const stati = statiPartita(partitaId);
   const marc = marcatori();
   const pinPunti = pinDeiPunti();
-  const maschere = indiceMaschere();
+  const letture = { maschere: indiceMaschere(), areePersone: areeDellePersone() };
   const mappe = mappePresenti();
   const native = mappeDelleAree(chiave);
   const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId);
   const dedali = r.tipo === 'mementos' ? lettureDedali(chiave, partitaId, stati) : null;
+  // lo stato di una Persona dei Memento è la sua cattura nel compendio (2026-10-12, `catturePersona.ts`), non `punto_partita`
+  const catturate = r.tipo === 'mementos' && partitaId !== undefined ? vociPersonaCatturate(partitaId) : new Set<string>();
+  /** Lo stato da mostrare di una voce: nessuno per una descrittiva (uno rimasto da prima si ignora, senza cancellarlo); per una
+   *  Persona dei Memento «ottenuto» se catturata. */
+  const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null
+    : r.tipo === 'mementos' && p.tipo === 'persona' ? (catturate.has(p.chiave) ? 'ottenuto' : null) : stati.get(p.chiave) ?? null);
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
     chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave),
     mappe: (native.get(a.chiave) ?? []).map((m) => {
       const rm = raccolta?.perMappa.get(m.chiave);
       return { chiave: chiaveMappa(m.chiave), nome: m.nome, n: rm?.n ?? 0, presi: partitaId === undefined ? null : (rm?.presi ?? 0), spilli: rm?.spilli ?? [] };
     }),
-    // uno stato rimasto su una voce descrittiva (di prima della scelta) si ignora in lettura, senza cancellarlo
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(a.chiave) as RigaPunto[])
-      .map((p) => puntoDto(p, puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null : stati.get(p.chiave) ?? null, marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [], maschere)),
+      .map((p) => puntoDto(p, statoDi(p), marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [], letture)),
     dedalo: dedali ? dedaloDto(a.chiave, dedali) : null,
   }));
   const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
-  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave) };
+  // nei Memento una Persona è «catturata» se è registrata nel compendio della partita (scelte dell'utente, 2026-10-12)
+  const personeCatturate = partitaId === undefined || !tabellaUtente('compendio_partita') ? null
+    : (prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1 ORDER BY persona_id').all(partitaId) as Array<{ persona_id: number }>).map((x) => x.persona_id);
+  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate };
 }
 
 /**
@@ -335,6 +354,9 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
   // una voce descrittiva si legge, non si segna (scelta dell'utente, 2026-10-01); azzerarla resta possibile, per ripulire.
   // Nelle aree dei dedali non ce ne sono: ogni elemento ha uno stato (099, scelta dell'utente del 2026-10-11)
   if (stato !== null && puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: si legge, non si segna.`);
+  // una Persona dei Memento si cattura nel compendio, non ha uno stato suo (2026-10-12, `catturePersona.ts`); azzerarla resta
+  // possibile, per ripulire
+  if (stato !== null && ePersonaDeiMemento(puntoChiave)) throw erroreCatturaNelCompendio(p.nome, 'segnare');
   const adesso = nowIso();
   const db = getDb();
   getDb().transaction(() => {
@@ -523,7 +545,10 @@ export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoIn
    *  cambiandola la voce (con i passi, se è un Enigma) passa in fondo all'altra area. */
   areaDedalo?: string;
   /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): la maschera della voce diventa il suo nome italiano. */
-  persona?: number }
+  persona?: number;
+  /** Le aree del dedalo in cui si incontra una Persona di un dedalo (101): obbligatorie creandola (almeno una); correggendola
+   *  sostituiscono quelle di prima. Rifiutate per le altre voci. */
+  areeDedalo?: string[] }
 
 /** Vero se l'area della guida è un dedalo dei Memento. */
 function eDedalo(areaChiave: string): boolean {
@@ -551,6 +576,24 @@ function dettagliDellaPersona(personaId: number, tipo: string, attuali?: string)
   if (!p) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non è nel compendio.`);
   if (attuali !== undefined && personaDellaMaschera(indiceMaschere(), (JSON.parse(attuali) as Record<string, unknown>).maschera)?.id === personaId) return attuali;
   return JSON.stringify({ maschera: t('persona', p.nome) });
+}
+
+/**
+ * Le aree di una Persona di un dedalo (101): almeno una, tutte del suo dedalo, senza ripetizioni (400 / 404). Una Persona non
+ * ha un'area sola: `areaDedalo` per lei si rifiuta.
+ */
+function verificaAreeDellaPersona(dedalo: string, aree: string[] | undefined, areaDedalo: string | undefined): string[] {
+  if (areaDedalo !== undefined) throw httpErrors.badRequest('persona-in-piu-aree', 'Una Persona di un dedalo si incontra in più aree: indicale tutte in «areeDedalo».');
+  const elenco = [...new Set(aree ?? [])];
+  if (elenco.length === 0) throw httpErrors.badRequest('aree-dedalo-mancanti', 'Una Persona di un dedalo si incontra almeno in un’area: scegline una o più.');
+  for (const a of elenco) verificaAreaDedalo(dedalo, a);
+  return elenco;
+}
+
+/** Sostituisce le aree in cui si incontra una Persona (dentro la transazione di chi chiama). */
+function collegaPersonaAlleAree(voce: string, aree: string[]): void {
+  prepared('DELETE FROM persona_area_dedalo WHERE voce_chiave = ?').run(voce);
+  for (const a of aree) prepared('INSERT INTO persona_area_dedalo (voce_chiave, area_dedalo_chiave) VALUES (?, ?)').run(voce, a);
 }
 
 /** L'area del dedalo deve esistere ed essere di quel dedalo (404 / 400). */
@@ -594,8 +637,17 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   const p = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   const areaPrima = p.area_dedalo_chiave ?? null;
+  const dedalo = eDedalo(p.area_chiave);
   // il tipo nuovo deve stare dove sta la voce (Persona o Trama nei dedali, Trama solo lì); la Persona scelta vuole una voce Persona
-  if (dati.tipo) verificaTipoDellaVoce(dati.tipo, eDedalo(p.area_chiave));
+  if (dati.tipo) verificaTipoDellaVoce(dati.tipo, dedalo);
+  // nei dedali una Persona sta in più aree e la Trama in una sola (101): passare dall'una all'altra non è una correzione
+  if (dedalo && dati.tipo && (dati.tipo === 'persona') !== (p.tipo === 'persona')) {
+    throw httpErrors.badRequest('persona-tipo-fisso', `Nei dedali una Persona resta una Persona e una voce di Trama resta Trama: per cambiarla eliminala e aggiungi l’altra.`);
+  }
+  const personaDelDedalo = dedalo && p.tipo === 'persona';
+  if (personaDelDedalo && dati.areaDedalo !== undefined) throw httpErrors.badRequest('persona-in-piu-aree', 'Una Persona di un dedalo si incontra in più aree: indicale tutte in «areeDedalo».');
+  if (!personaDelDedalo && dati.areeDedalo !== undefined) throw httpErrors.badRequest('aree-solo-per-persona', 'Più aree insieme le ha solo una Persona di un dedalo: le altre voci stanno in un’area sola.');
+  const areePersona = personaDelDedalo && dati.areeDedalo !== undefined ? verificaAreeDellaPersona(p.area_chiave, dati.areeDedalo, undefined) : null;
   const dettagli = dati.persona === undefined ? p.dettagli_json : dettagliDellaPersona(dati.persona, dati.tipo ?? p.tipo, p.dettagli_json);
   // una voce con pin non diventa descrittiva: le descrittive non hanno pin (si scollegano prima); nelle aree dei dedali non ce ne sono
   if (dati.tipo && puntoDescrittivo(dati.tipo, areaPrima) && pinDelPuntoGuida(getDb(), puntoChiave).length > 0) {
@@ -610,7 +662,7 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   if (dopo !== null && dopo !== prima) verificaEnigma(p, p.area_chiave, dopo);
   // l'area del dedalo (099): un passo sta in quella del suo Enigma; un'altra area si sceglie solo dentro lo stesso dedalo
   if (dati.areaDedalo !== undefined) {
-    if (areaPrima === null) throw httpErrors.badRequest('non-un-dedalo', `«${p.nome}» non è una voce di un dedalo dei Memento: non ha aree del dedalo.`);
+    if (!dedalo) throw httpErrors.badRequest('non-un-dedalo', `«${p.nome}» non è una voce di un dedalo dei Memento: non ha aree del dedalo.`);
     verificaAreaDedalo(p.area_chiave, dati.areaDedalo);
   }
   const areaDopo = dopo !== null ? areaDelPunto(dopo) : (dati.areaDedalo ?? areaPrima);
@@ -626,6 +678,7 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
       dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), ordine, dopo, areaDopo, dettagli, puntoChiave);
     // i passi di un Enigma seguono la sua area del dedalo
     if (areaDopo !== areaPrima) prepared('UPDATE punto_interesse SET area_dedalo_chiave = ? WHERE contenitore_chiave = ?').run(areaDopo, puntoChiave);
+    if (areePersona) collegaPersonaAlleAree(puntoChiave, areePersona);
     // gli Enigmi toccati (lasciato, raggiunto, o il proprio, se cambia tipo e con lui il conto dei passi da segnare) seguono i passi
     for (const enigma of new Set([prima, dopo].filter((x): x is string => x !== null))) allineaEnigmaInOgniPartita(db, enigma, adesso);
   })();
@@ -746,7 +799,11 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
   verificaTipoDellaVoce(dati.tipo, dedalo);
   const dettagli = dati.persona === undefined ? '{}' : dettagliDellaPersona(dati.persona, dati.tipo);
   if (!dedalo && dati.areaDedalo !== undefined) throw httpErrors.badRequest('non-un-dedalo', 'Le aree del dedalo ci sono solo nei dedali dei Memento.');
-  if (dedalo && dati.areaDedalo === undefined && !contenitore) throw httpErrors.badRequest('area-dedalo-mancante', 'Una voce di un dedalo sta in una delle sue aree: scegli l’area.');
+  // una Persona di un dedalo si incontra in più aree (101): sta nel dedalo, collegata alle sue aree
+  const personaDelDedalo = dedalo && dati.tipo === 'persona';
+  const areePersona = personaDelDedalo ? verificaAreeDellaPersona(chiaveArea, dati.areeDedalo, dati.areaDedalo) : null;
+  if (!personaDelDedalo && dati.areeDedalo !== undefined) throw httpErrors.badRequest('aree-solo-per-persona', 'Più aree insieme le ha solo una Persona di un dedalo: le altre voci stanno in un’area sola.');
+  if (dedalo && !personaDelDedalo && dati.areaDedalo === undefined && !contenitore) throw httpErrors.badRequest('area-dedalo-mancante', 'Una voce di un dedalo sta in una delle sue aree: scegli l’area.');
   if (dati.areaDedalo !== undefined) verificaAreaDedalo(chiaveArea, dati.areaDedalo);
   const areaDedalo = contenitore ? areaDelPunto(contenitore) : (dati.areaDedalo ?? null);
   if (contenitore && dati.areaDedalo !== undefined && dati.areaDedalo !== areaDedalo) throw httpErrors.badRequest('passo-di-altra-area', 'Un passo sta nell’area del suo Enigma.');
@@ -754,6 +811,7 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
   getDb().transaction(() => {
     prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte, contenitore_chiave, area_dedalo_chiave) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'utente', ?, ?)")
       .run(chiave, chiaveArea, ordine, dati.tipo, dati.nome.trim(), dati.descrizione ?? '', dati.esauribile ? 1 : 0, dettagli, contenitore, areaDedalo);
+    if (areePersona) collegaPersonaAlleAree(chiave, areePersona);
     // l'Enigma segue i passi: un passo nuovo ancora da fare lo riapre dove era risolto (scelta dell'utente, 2026-10-02)
     if (contenitore) allineaEnigmaInOgniPartita(getDb(), contenitore, nowIso());
   })();
@@ -887,6 +945,8 @@ export function eliminaAreaDedalo(chiave: string): void {
     prepared('DELETE FROM punto_interesse WHERE area_dedalo_chiave = ? AND contenitore_chiave IS NOT NULL').run(chiave);
     prepared('DELETE FROM punto_interesse WHERE area_dedalo_chiave = ?').run(chiave);
     allineaTimbriDelleAree(chiave, null);
+    // le Persona (101) stanno nel dedalo: perdono solo il collegamento a quest'area
+    prepared('DELETE FROM persona_area_dedalo WHERE area_dedalo_chiave = ?').run(chiave);
     prepared('UPDATE richiesta SET area_dedalo_chiave = NULL WHERE area_dedalo_chiave = ?').run(chiave);
     prepared('DELETE FROM area_dedalo WHERE chiave = ?').run(chiave);
     prepared('UPDATE area_dedalo SET ordine = ordine - 1 WHERE dedalo_chiave = ? AND ordine > ?').run(a.dedalo_chiave, a.ordine);
