@@ -147,3 +147,32 @@ Un file è accettato solo se tutte queste cose sono vere:
    torrida stanno insieme in agosto), e distinte dalle icone del meteo di base;
 7. stesso spessore di contorno e stesso peso visivo in tutte e sei;
 8. nessun altro file del repository modificato.
+
+## 5. Esito della consegna (2026-10-12, commit 24c61a7d di Codex)
+
+Verificati i sei file: nomi e percorsi giusti, 128×128 PNG RGBA con alfa nativo (angoli trasparenti), soggetti come nei prompt,
+nessun testo, palette rispettata (azzurro solo nel gelo); nell'app si caricano davvero nei tag (`complete`, `naturalWidth` 128,
+16×16 a schermo) a 1280 e a 375 px, senza la riserva. Il contorno di 3 px (criterio 1), misurato pixel per pixel sul canvas:
+
+| File | Pixel non trasparenti nel bordo di 3 px | Opacità massima | Esito |
+|---|---|---|---|
+| `allerta-pioggia-torrenziale.png` | 0 | — | accettato |
+| `allerta-notte-torrida.png` | 0 | — | accettato |
+| `allerta-polline.png` | 6 (in alto e in basso, a 2 px dal bordo) | 4 su 255 | alone invisibile: da ripulire |
+| `allerta-stagione-influenzale.png` | 4 (a destra, a 2 px dal bordo) | 1 su 255 | alone invisibile: da ripulire |
+| `allerta-ondata-di-calore.png` | 14 (in alto, fino al bordo) | 255 | **il raggio del sole tocca il bordo: da rifare** |
+| `allerta-ondata-di-gelo.png` | 28 (in alto e in basso, fino al bordo) | 227 | **fiocco e ghiaccioli toccano il bordo: da rifare** |
+
+I file restano in uso: a 16 px il taglio quasi non si vede. Vanno riconsegnati con lo stesso nome.
+
+### Prompt di rifacimento — `allerta-ondata-di-calore.png`, `allerta-ondata-di-gelo.png`, `allerta-polline.png`, `allerta-stagione-influenzale.png`
+
+```
+Riesporta le quattro icone già consegnate (stesso soggetto, stessi colori, stessa composizione: NON ridisegnarle) in modo
+che il contorno di 3 px dell'immagine 128×128 sia completamente trasparente (alfa 0 su ogni pixel delle prime e ultime
+3 righe e colonne). Per allerta-ondata-di-calore e allerta-ondata-di-gelo il soggetto oggi tocca il bordo (la punta del
+raggio in alto; il fiocco in alto e i ghiaccioli in basso): riduci il soggetto in proporzione, con lo stesso fattore sui
+due assi, quanto basta a stare dentro i 122×122 px centrali, e ricentralo. Per allerta-polline e allerta-stagione-
+influenzale basta azzerare l'alone quasi trasparente (alfa 1–4) rimasto vicino al bordo. PNG RGBA 128×128, alfa nativo,
+stesso nome e stesso percorso in public/asset/ui/, nessun altro file modificato.
+```
