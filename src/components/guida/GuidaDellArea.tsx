@@ -57,6 +57,8 @@ interface Props {
   /** Nei dedali dei Memento (099): l'area del dedalo di cui si mostrano le voci (`area.punti` le ha già filtrate) e le altre aree
    *  dello stesso dedalo, dove una voce si può spostare. Lì ogni voce ha uno stato, e i tipi sono Persona e Trama (2026-10-11). */
   areaDedalo?: { chiave: string; nome: string; altre: ReadonlyArray<{ chiave: string; nome: string }> };
+  /** Nei Palazzi (2026-10-12): le aree del Palazzo, in ordine di guida, dove una voce si può spostare («Area del Palazzo»). */
+  areePalazzo?: ReadonlyArray<{ chiave: string; nome: string; ordine: number }>;
 }
 
 /**
@@ -66,7 +68,7 @@ interface Props {
  * nella partita, pin collegati, spostamento, correzione o eliminazione e la scelta dei pin sulla mappa, il cui riquadro
  * viene misurato per stare tutto nello spazio visibile e portato in vista. Ogni modifica fa rileggere la scheda.
  */
-export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo }: Props) {
+export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo }: Props) {
   /** Una voce descrittiva si legge e basta; nelle aree dei dedali non ce ne sono (099, scelta dell'utente: «Tutti con stato»). */
   const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
   /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
@@ -266,10 +268,16 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${p.nome}`} disabled={occupato || indice <= 0} onClick={() => void sposta(p, -1)} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${p.nome}`} disabled={occupato || indice >= fratelli.length - 1} onClick={() => void sposta(p, 1)} />
               <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} compatto etichetta="Modifica"
-                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '' })}
-                onSalva={async (b) => { onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì', ...(b.contenitore !== (p.contenitore ?? '') ? { contenitore: b.contenitore || null } : {}),
+                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '', area: area.chiave })}
+                onSalva={async (b) => {
+                  // un'altra area del Palazzo (2026-10-12): solo per una voce fuori da ogni Enigma, come l'area del dedalo
+                  const altrove = !!areePalazzo && !b.contenitore && b.area !== area.chiave ? areePalazzo.find((a) => a.chiave === b.area) ?? null : null;
+                  onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì', ...(b.contenitore !== (p.contenitore ?? '') ? { contenitore: b.contenitore || null } : {}),
                   // un'altra area del dedalo (099): solo per una voce fuori da ogni Enigma (un passo sta nell'area del suo Enigma)
-                  ...(areaDedalo && !b.contenitore && b.areaDedalo && b.areaDedalo !== (p.areaDedalo ?? '') ? { areaDedalo: b.areaDedalo } : {}) })); await onRicarica(); }}
+                  ...(areaDedalo && !b.contenitore && b.areaDedalo && b.areaDedalo !== (p.areaDedalo ?? '') ? { areaDedalo: b.areaDedalo } : {}),
+                  ...(altrove ? { area: altrove.chiave } : {}) }));
+                  if (altrove) { setSelezionato(null); notifica('success', `«${b.nome.trim() || p.nome}» spostata in ${altrove.ordine + 1}. ${altrove.nome}${conPassi ? ', con i suoi passi' : ''}.`); }
+                  await onRicarica(); }}
                 elimina={{ avviso: conPassi ? 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I suoi passi restano, voci dell’area con il loro stato.' : 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I pin collegati restano sulla mappa, col loro «raccolto».', onElimina: async () => { await eliminaPunto(p.chiave); setSelezionato(null); setCollegando(null); await onRicarica(); } }}>
                 {(b, cambia) => <>
                   <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => cambia({ nome: v })} />
@@ -283,6 +291,10 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                   {/* l'area del dedalo (099): una voce fuori da ogni Enigma passa in un'altra area dello stesso dedalo, coi passi se è un Enigma */}
                   {areaDedalo && areaDedalo.altre.length > 0 && !b.contenitore && <span className="min-w-[180px]">
                     <Selettore etichetta="Area del dedalo" valore={b.areaDedalo} opzioni={[{ chiave: areaDedalo.chiave, nome: areaDedalo.nome, dettaglio: 'questa' }, ...areaDedalo.altre.map((a) => ({ chiave: a.chiave, nome: a.nome }))]} onCambia={(v) => cambia({ areaDedalo: v })} />
+                  </span>}
+                  {/* l'area del Palazzo (2026-10-12): una voce fuori da ogni Enigma passa in fondo a un'altra area, coi passi se è un Enigma */}
+                  {areePalazzo && areePalazzo.length > 1 && !b.contenitore && <span className="min-w-[200px]">
+                    <Selettore etichetta="Area del Palazzo" valore={b.area} opzioni={[...areePalazzo].sort((x, y) => x.ordine - y.ordine).map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: a.chiave === area.chiave ? 'questa' : undefined }))} onCambia={(v) => cambia({ area: v })} />
                   </span>}
                   <label className="touch flex items-center gap-1.5 text-[12px]">
                     <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile

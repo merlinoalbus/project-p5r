@@ -5,7 +5,7 @@
 import type {
   CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
-import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, VideogiochiDto } from '../../types';
+import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
@@ -63,6 +63,10 @@ export const aggiornaVoceGiornata = (uid: string, dati: DatiVoceGiornata, partit
  *  sta): ripetuto dopo un 5xx o un timeout a scrittura già avvenuta la sposterebbe di due, quindi nessun nuovo tentativo. */
 export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number): Promise<AzionePercorsoDto[]> =>
   apiPut(`/compendio/percorso/voci/${uid}/sposta${queryString({ partita })}`, { verso }, { maxRetries: 0 });
+/** Copia o sposta una o più voci in un altro giorno e fascia (2026-10-12): arrivano in fondo, nel loro ordine. POST: mai ripetuta
+ *  da sola, una copia ripetuta creerebbe due volte le voci. */
+export const trasferisciVociGiornata = (dati: TrasferisciVociGiornata, partita?: number): Promise<VociTrasferiteDto> =>
+  apiPost(`/compendio/percorso/voci/trasferisci${queryString({ partita })}`, dati);
 /** Elimina una voce dalla guida (409 se in una partita è spuntata con effetti: prima si toglie la spunta). */
 export const eliminaVoceGiornata = (uid: string): Promise<void> => apiDelete(`/compendio/percorso/voci/${uid}`);
 /** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */
@@ -106,6 +110,8 @@ export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: Punt
   areaDedalo?: string;
   /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): ne diventa la maschera. */
   persona?: number;
+  /** Un'altra area dello stesso Palazzo (2026-10-12): la voce vi passa in fondo, coi passi se è un Enigma. Solo correggendo. */
+  area?: string;
   /** Le aree del dedalo in cui si incontra una Persona di un dedalo (101): almeno una creandola; correggendola le sostituisce. */
   areeDedalo?: string[] }
 /** Nome, dettagli e totale dei timbri di un'area di un dedalo (099); `timbriTotale` null = senza timbri. */

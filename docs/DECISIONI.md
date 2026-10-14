@@ -1717,3 +1717,26 @@ Conseguenze tecniche (non scelte dell'utente):
   catalogo: si vedono anche senza partita.
 - Gli effetti di ondata di gelo (attività come con la pioggia) e di ondata di calore e notte torrida (distributori senza
   bevande) restano non applicati: l'utente non l'ha chiesto.
+
+## 2026-10-12 — Spostare le voci fra le aree di un Palazzo; copiare e spostare le voci del diario
+
+Richiesta dell'utente: «devo spostare delle voci da un'area ad un'altra nel palazzo... vorrei anche poter copiare elementi del
+diario (giorno/notte testi e riferimenti e poterli inserire in un altro giorno o nella parte giorno o nella parte notte a
+scelta)». Scelte dell'utente (AskUserQuestion):
+- diario → «Una o più insieme» (si spuntano le voci, poi giorno di destinazione e fascia; finiscono in fondo, nel loro ordine);
+- «Sì, anche spostare» (oltre a copiare, spostare in un altro giorno con le spunte delle partite);
+- Palazzo → «Sì, nel modulo Modifica» (selettore «Area del Palazzo», come l'area del dedalo nei Memento).
+
+Conseguenze tecniche (non scelte dell'utente):
+- La voce spostata tiene la sua chiave: stati delle partite, pin delle planimetrie, marcatore e condizioni che la citano restano
+  validi. Va in fondo all'area nuova; un Enigma porta con sé i passi; un passo da solo non si sposta (400 `passo-segue-enigma`);
+  le sue schede della guida senza mappa (pin con il riferimento «punto», `area_guida_chiave`) passano con lei. Solo nello stesso
+  Palazzo e non nei Memento.
+- Diario: la copia è una voce nuova (uid casuale) con lo stesso contenuto (genere, testo, note, tipo, collegamento, rango
+  atteso, effetti), senza spunte e senza `indice_guida` (non discende più dalla guida d'origine); lo spostamento tiene uid e
+  spunte di tutte le partite e, se cambia data, perde `indice_guida` (la posizione nella guida di QUEL giorno, unica per data:
+  portata altrove urterebbe la voce della guida con lo stesso indice o ne prenderebbe il posto per chi cerca per data e indice);
+  nella stessa data, cambiando solo fascia, lo tiene. Spostare una voce già spuntata non riscrive quando gli effetti sono
+  avvenuti (es. l'incontro col Confidente resta registrato al giorno di partenza); l'annullamento usa gli effetti salvati. Le voci arrivano in fondo alla fascia scelta nell'ordine della giornata di partenza (giorno
+  prima di sera); le fasce lasciate si ricompattano. Tutto o niente: una voce che non c'è fa fallire la richiesta senza
+  scrivere. È canone come ogni modifica della giornata (vale per tutte le partite ed esce col pacchetto).

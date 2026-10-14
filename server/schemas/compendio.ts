@@ -58,6 +58,13 @@ export const bodyNuovaVoce = z.object({ ...campiVoce, azione: z.string().trim().
 export const bodyAggiornaVoce = z.object(campiVoce)
   .refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da cambiare (testo, note, genere, fascia, posizione, tipo, collegamento, rango atteso o effetti).' });
 export const bodySpostaVoce = z.object({ verso: z.union([z.literal(-1), z.literal(1)]) });
+/** Copiare o spostare una o più voci in un altro giorno e fascia (2026-10-12): le voci, in fondo alla fascia, nel loro ordine. */
+export const bodyTrasferisciVoci = z.object({
+  uid: z.array(uidVoce).min(1).max(200).refine((u) => new Set(u).size === u.length, { message: 'Una voce compare due volte.' }),
+  giorno: dataGioco,
+  fascia: z.enum(['giorno', 'sera']),
+  modo: z.enum(['copia', 'sposta']),
+});
 
 /** La Dote a ogni incontro di un Confidente, rango per rango: Doti chiuse, note 1–3, al massimo cinque per rango. */
 export const bodyDotiIncontro = z.object({

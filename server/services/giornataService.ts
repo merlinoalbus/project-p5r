@@ -23,7 +23,7 @@ import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, t
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
 import { normalizzaEffettiAzione, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
-import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, RiferimentoAzioneDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -247,6 +247,52 @@ export function spostaVoce(uid: string, verso: -1 | 1, partitaId?: number): Azio
     posiziona(r.data, fasciaDi(r), uid, ora + verso);
   })();
   return vociDelGiorno(r.data, partitaId);
+}
+
+/**
+ * Copia o sposta una o più voci in un altro giorno e fascia (richiesta dell'utente, 2026-10-12: «copiare elementi del diario...
+ * e poterli inserire in un altro giorno o nella parte giorno o nella parte notte a scelta»; scelte «Una o più insieme» e «Sì,
+ * anche spostare»). Le voci arrivano in fondo alla fascia, nell'ordine che avevano (giorno, poi giorno prima di sera, poi posto).
+ *   - «copia»: ogni voce diventa una voce nuova (uid nuovo) con lo stesso contenuto — genere, testo, note, tipo, collegamento
+ *     (col nome che aveva), rango atteso, effetti —, senza spunte e senza legame con la guida d'origine (`indice_guida`);
+ *   - «sposta»: le stesse voci cambiano giorno e fascia; uid e spunte delle partite restano; le fasce lasciate si ricompattano;
+ *     cambiando data perdono `indice_guida` (resta solo nella stessa data).
+ * Tutto in una transazione: una voce che non c'è fa fallire tutto (404) senza aver scritto niente.
+ */
+export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number): VociTrasferiteDto {
+  if (partitaId !== undefined) verificaPartita(partitaId);
+  giornoEsiste(t.giorno);
+  const righe = t.uid.map(rigaVoce);
+  const ordineGiorno = new Map((prepared('SELECT data, ordine FROM giorno_percorso').all() as Array<{ data: string; ordine: number }>).map((r) => [r.data, r.ordine]));
+  // l'ordine che avevano: giorno, poi le voci di giorno prima di quelle di sera, poi il posto nella fascia
+  righe.sort((a, b) => (ordineGiorno.get(a.data) ?? 0) - (ordineGiorno.get(b.data) ?? 0) || (fasciaDi(a) === fasciaDi(b) ? 0 : fasciaDi(a) === 'giorno' ? -1 : 1) || a.ordine - b.ordine || a.uid.localeCompare(b.uid));
+  const adesso = nowIso();
+  const arrivate: string[] = [];
+  getDb().transaction(() => {
+    const lasciate = new Set<string>();
+    righe.forEach((r, i) => {
+      // dietro a tutte quelle che ci sono già, nell'ordine dell'elenco; la fascia si ricompatta alla fine
+      const ordine = 1000000 + i;
+      if (t.modo === 'sposta') {
+        // `indice_guida` è la posizione nella guida di QUEL giorno (indice unico per data): cambiando data la voce non ne discende
+        // più e lo perde, altrimenti urterebbe la voce della guida con lo stesso indice nel giorno d'arrivo o ne prenderebbe il posto
+        // per chi cerca per data e indice; nella stessa data (cambia solo fascia) resta, come in «Sposta di giorno/di sera»
+        prepared('UPDATE voce_giornata SET data = ?, fascia = ?, ordine = ?, indice_guida = CASE WHEN data = ? THEN indice_guida ELSE NULL END, updated_at = ? WHERE uid = ?')
+          .run(t.giorno, t.fascia, ordine, t.giorno, adesso, r.uid);
+        lasciate.add(`${r.data}|${r.fascia}`);
+        arrivate.push(r.uid);
+      } else {
+        const uid = randomBytes(16).toString('hex');
+        prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, produce_json, indice_guida, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, t.giorno, t.fascia, ordine, r.genere, r.azione, r.note, r.tipo,
+          r.riferimento_tipo, r.riferimento_chiave, r.riferimento_testo, r.rango_atteso, r.produce_json, adesso, adesso);
+        arrivate.push(uid);
+      }
+    });
+    for (const chiave of lasciate) { const [data, fascia] = chiave.split('|'); compatta(data, fascia); }
+    compatta(t.giorno, t.fascia);
+  })();
+  return { giorno: t.giorno, fascia: t.fascia, uid: arrivate, voci: vociDelGiorno(t.giorno, partitaId) };
 }
 
 /** Le partite in cui la voce è spuntata con effetti (punti del Confidente, turni, visioni): finché ci sono non la si elimina. */

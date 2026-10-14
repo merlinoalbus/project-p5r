@@ -36,8 +36,11 @@ export const bodyPunto = z.object({
   persona: z.number().int().positive().optional(),
   /** Le aree del dedalo di una Persona di un dedalo (101): si incontra in più aree. */
   areeDedalo: z.array(z.string().min(1).max(200)).max(100).optional(),
+  /** L'area del Palazzo in cui spostare la voce (2026-10-12): un'altra area dello stesso Palazzo; non nei Memento. */
+  area: z.string().min(1).max(200).optional(),
 });
-export const bodyNuovoPunto = bodyPunto.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
+// creando una voce l'area è quella dell'indirizzo: `area` nel corpo non vale
+export const bodyNuovoPunto = bodyPunto.omit({ area: true }).extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 
 /** Il totale dei timbri di un'area del dedalo: un intero da 0 al tetto, o null (l'area non ha timbri). */
 const timbriTotale = z.number().int().min(0).max(LIMITI_GUIDA.areaDedalo.timbri).nullable();

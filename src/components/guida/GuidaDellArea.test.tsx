@@ -404,3 +404,46 @@ describe('in un\'area di un dedalo dei Memento (099)', () => {
     expect(aggiornaPunto.mock.calls[0][1]).not.toHaveProperty('areaDedalo');
   });
 });
+
+describe('«Area del Palazzo»: una voce passa in un\'altra area dello stesso Palazzo (2026-10-12)', () => {
+  const aree = [{ chiave: 'k-02', nome: 'Sala Centrale', ordine: 1 }, { chiave: 'k-01', nome: 'Ingresso', ordine: 0 }, { chiave: 'k-03', nome: 'Torre', ordine: 2 }];
+  /** La guida dell'area «Sala Centrale» con le aree del Palazzo; restituisce `onRicarica`. */
+  const montaPalazzo = (punti: PuntoInteresseDto[]) => {
+    const onRicarica = vi.fn().mockResolvedValue(undefined);
+    render(<MemoryRouter><GuidaDellArea area={area(punti)} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={vi.fn().mockResolvedValue(true)} onPuntoAggiornato={vi.fn()} onRicarica={onRicarica} areePalazzo={aree} /></MemoryRouter>);
+    return onRicarica;
+  };
+
+  it('le aree in ordine di guida, questa compresa; scelta un\'altra, la voce vi si sposta e lo si dice', async () => {
+    const onRicarica = montaPalazzo([punto({})]);
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    expect(vociSelettore('Area del Palazzo')).toEqual(['1. Ingresso', '2. Sala Centrale', '3. Torre']);
+    scegliVoce('Area del Palazzo', /^3\. Torre/);
+    aggiornaPunto.mockResolvedValue(punto({}));
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalledWith('p1', expect.objectContaining({ area: 'k-03' })));
+    await waitFor(() => expect(onRicarica).toHaveBeenCalled());
+  });
+
+  it('senza cambiarla `area` non parte; un passo non la offre (si sposta il suo Enigma); un Palazzo di un\'area sola nemmeno', async () => {
+    montaPalazzo([punto({})]);
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), { target: { value: 'Forziere rinominato' } });
+    aggiornaPunto.mockResolvedValue(punto({}));
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalled());
+    expect(aggiornaPunto.mock.calls[0][1]).not.toHaveProperty('area');
+    cleanup();
+    montaPalazzo([punto({ chiave: 'e1', tipo: 'puzzle', nome: 'La porta della torre' }), punto({ chiave: 'l1', tipo: 'meccanismo', nome: 'Leva', contenitore: 'e1' })]);
+    fireEvent.click(screen.getByRole('button', { name: /^Leva/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Leva»/ }));
+    expect(screen.queryByRole('combobox', { name: 'Area del Palazzo' })).toBeNull();
+    cleanup();
+    render(<MemoryRouter><GuidaDellArea area={area([punto({})])} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={vi.fn()} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn()} areePalazzo={[aree[0]]} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    expect(screen.queryByRole('combobox', { name: 'Area del Palazzo' })).toBeNull();
+  });
+});

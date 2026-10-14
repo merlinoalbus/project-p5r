@@ -1179,6 +1179,26 @@ export interface DatiVoceGiornata {
   posizione?: number;
 }
 
+/** Copiare o spostare voci del diario in un altro giorno e fascia (richiesta dell'utente, 2026-10-12). */
+export interface TrasferisciVociGiornata {
+  /** Le voci, in qualunque ordine: arrivano in fondo alla fascia nel loro ordine (giorno, fascia, posto). */
+  uid: string[];
+  /** Il giorno di destinazione, 'MM-GG'. */
+  giorno: string;
+  fascia: FasciaGioco;
+  /** «copia»: voci nuove con lo stesso contenuto, senza spunte; «sposta»: le stesse voci (uid e spunte restano). */
+  modo: 'copia' | 'sposta';
+}
+
+/** L'esito: le voci arrivate (uid, nell'ordine) e tutte le voci del giorno di destinazione (con lo stato nella partita, se data).
+ *  Il giorno si chiama `giorno`: un campo `data` farebbe prendere la risposta per già imbustata. */
+export interface VociTrasferiteDto {
+  giorno: string;
+  fascia: FasciaGioco;
+  uid: string[];
+  voci: AzionePercorsoDto[];
+}
+
 export interface PercorsoGiornoRiassuntoDto {
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;

@@ -18,14 +18,14 @@ import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { elenchiAzione } from '../services/azioniStrutturateService.js';
-import { aggiornaVoce, creaVoce, eliminaVoce, spostaVoce } from '../services/giornataService.js';
+import { aggiornaVoce, creaVoce, eliminaVoce, spostaVoce, trasferisciVoci } from '../services/giornataService.js';
 import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
-import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto } from '../../shared/types.js';
+import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto, TrasferisciVociGiornata } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
-import { bodyAggiornaVoce, bodyDotiIncontro, bodyNuovaVoce, bodySpostaVoce, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import { bodyAggiornaVoce, bodyDotiIncontro, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { categoriaArticolo, dataGioco, idParam } from '../schemas/comuni.js';
 import { eCategoriaArticolo } from '../../shared/articoli.js';
@@ -140,6 +140,10 @@ router.put('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, body: b
 /** Sposta la voce di un passo nella sua fascia; risponde con tutte le voci del giorno, nel nuovo ordine. */
 router.put('/percorso/voci/:uid/sposta', validate({ params: paramsVoceGiornata, body: bodySpostaVoce, query: queryDomande }), (req, res) => {
   res.json(spostaVoce(String(req.params.uid), (req.body as { verso: -1 | 1 }).verso, (req.query as unknown as { partita?: number }).partita));
+});
+/** Copia o sposta una o più voci in un altro giorno e fascia (2026-10-12): in fondo, nel loro ordine. */
+router.post('/percorso/voci/trasferisci', validate({ body: bodyTrasferisciVoci, query: queryDomande }), (req, res) => {
+  res.json(trasferisciVoci(req.body as TrasferisciVociGiornata, (req.query as unknown as { partita?: number }).partita));
 });
 router.delete('/percorso/voci/:uid', validate({ params: paramsVoceGiornata }), (req, res) => {
   eliminaVoce(String(req.params.uid));

@@ -795,7 +795,9 @@ planimetria la scheda offre il selettore di tutte le tavole e aggiunge l'area co
 **La guida dell'area, modificabile e collegata ai pin** (2026-10-01). `src/components/guida/GuidaDellArea.tsx` è la parte
 bassa della colonna dell'area: le voci (`punto_interesse`) sempre visibili, anche in un'area senza voci, con correzione,
 eliminazione, «Su»/«Giù» (`PUT /api/compendio/punti/:chiave/sposta`, `spostaPunto`: ricompatta l'ordine dell'area) e
-«Aggiungi una voce». Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
+«Aggiungi una voce». Dal 2026-10-12 nel modulo Modifica «Area del Palazzo» (prop `areePalazzo`) sposta la voce in un'altra area
+dello stesso Palazzo (`area` nel `PUT /api/compendio/punti/:chiave`, `aggiornaPunto`): in fondo, con la sua chiave, coi passi se è
+un Enigma e con le sue schede della guida senza mappa (`spillo.area_guida_chiave`); non per un passo, non nei Memento. Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
 /api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta in una tabella sua, **molti a molti**
 (`spillo_voce(spillo_id, voce_chiave)`, migrazione 098 del 2026-10-09; prima il campo `spillo.voce_chiave` della 094, che la 098 copia
 e toglie ricostruendo `spillo`; `ON DELETE CASCADE` dai due lati), separato dal riferimento, che resta la destinazione o il Confidente
@@ -1336,6 +1338,16 @@ sovrapposte, le rimosse e l'agenda del giorno delle sezioni «Guida giorno per g
   elimina» se spuntata con effetti nella partita). `ModuloVoceGiornata`: genere, testo, note, fascia e «Posto nella
   giornata» (l'elenco numerato della fascia con la voce al suo posto, Su/Giù); tipo, collegamento, rango ed effetti per le
   azioni. Icone `ui/azione-su` e `ui/azione-giu` (riserva SVG `IconSu`/`IconGiu`, censimento §21).
+- **Copiare o spostare voci in un altro giorno** (2026-10-12). `POST /api/compendio/percorso/voci/trasferisci`
+  (`?partita=` per lo stato nella risposta; corpo `bodyTrasferisciVoci`: `uid` 1..200 senza ripetizioni, `giorno`, `fascia`,
+  `modo` `copia`|`sposta`) → `giornataService.trasferisciVoci`: in una transazione le voci, nell'ordine della giornata
+  (giorno del percorso, giorno prima di sera, ordine), vanno in fondo alla fascia scelta; `copia` inserisce voci nuove (uid
+  casuale, stesso contenuto, `indice_guida` NULL, nessuna spunta), `sposta` cambia `data`/`fascia` tenendo uid e spunte (cambiando data azzera `indice_guida`, che è unico per
+  data — indice `idx_voce_giornata_guida` — e vale solo per il giorno d'origine; nella stessa data lo tiene); le
+  fasce lasciate e quella d'arrivo si ricompattano. 404 `giorno-non-trovato` / `voce-non-trovata` senza scrivere nulla.
+  Risposta `VociTrasferiteDto` (`giorno`, `fascia`, `uid` arrivati, `voci` del giorno d'arrivo). FE: in `GiornoGuida`
+  «Copia o sposta voci» apre la scelta (righe da spuntare, «Tutte»/«Nessuna» per fascia, barra fissa in cima con il conto,
+  «Copia in…», «Sposta in…», «Fine»); `TrasferisciVoci` è la finestra con mese, giorno e fascia di destinazione.
 
 ## Regole trasversali dalla verifica completa del codice (2026-10-03)
 

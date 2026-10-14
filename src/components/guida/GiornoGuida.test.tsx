@@ -7,12 +7,13 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GiornoGuida } from './GiornoGuida';
+import { scegliVoce } from '../../../test/selettore';
 import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
 
 const api = vi.hoisted(() => ({
   creaVoceGiornata: vi.fn(), aggiornaVoceGiornata: vi.fn(), spostaVoceGiornata: vi.fn(), eliminaVoceGiornata: vi.fn(), impostaAzionePercorso: vi.fn(),
   getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
-  getElenchiAzione: vi.fn(),
+  getElenchiAzione: vi.fn(), getPercorsoIndice: vi.fn(), trasferisciVociGiornata: vi.fn(),
 }));
 const ELENCHI = {
   confidenti: [{ chiave: 'takemi', nome: 'Tae Takemi', dettaglio: 'Morte' }], dungeon: [{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }], richieste: [],
@@ -409,5 +410,90 @@ describe('GiornoGuida — il cartellino del Palazzo segue le regole d’atterrag
     const clic = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
     cartellino.dispatchEvent(clic);
     expect(sullaMappa).not.toHaveBeenCalled();
+  });
+});
+
+describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12)', () => {
+  const INDICE = { giorni: [
+    { giorno: '04-12', giornoSettimana: 'mar', fase: '', meteo: null, azioni: 3, fatte: 1, avvisi: 0, coperto: true },
+    { giorno: '04-13', giornoSettimana: 'mer', fase: '', meteo: null, azioni: 0, fatte: 0, avvisi: 0, coperto: true },
+    { giorno: '05-02', giornoSettimana: 'lun', fase: '', meteo: null, azioni: 0, fatte: 0, avvisi: 0, coperto: true },
+  ], dataCorrente: '04-12', totaleGiorni: 3, giorniCoperti: 3 };
+  beforeEach(() => { vi.clearAllMocks(); api.getPercorsoIndice.mockResolvedValue(INDICE); });
+
+  it('«Copia o sposta voci» apre la scelta: righe da spuntare (niente spunte di partita né gesti), «Tutte» per fascia, conto nella barra', () => {
+    disegna();
+    expect(screen.queryByRole('region', { name: 'Copia o sposta voci' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
+    const barra = screen.getByRole('region', { name: 'Copia o sposta voci' });
+    expect(barra).toHaveTextContent('Scegli le voci');
+    expect(within(barra).getByRole('button', { name: /^Copia in…/ })).toBeDisabled();
+    // le righe della scelta al posto delle azioni: niente «Fatto», niente menu dei gesti, niente «Aggiungi»
+    expect(screen.queryByRole('checkbox', { name: /^Fatto:/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Modifica, sposta o elimina/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Aggiungi di/ })).toBeNull();
+    expect(within(screen.getByRole('list', { name: 'Voci di sera da scegliere' })).getByText('Consegna del Palazzo')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('checkbox', { name: /Comprare i Bionutrienti/ }));
+    expect(barra).toHaveTextContent('1 voce scelta');
+    fireEvent.click(screen.getByRole('button', { name: 'Scegli tutte le voci di giorno' }));
+    expect(barra).toHaveTextContent('3 voci scelte');
+    fireEvent.click(screen.getByRole('button', { name: 'Togli dalla scelta tutte le voci di giorno' }));
+    expect(barra).toHaveTextContent('Scegli le voci');
+    // «Fine» torna alla giornata com'era
+    fireEvent.click(within(barra).getByRole('button', { name: 'Esci dalla scelta' }));
+    expect(screen.getAllByRole('checkbox', { name: /^Fatto:/ }).length).toBeGreaterThan(0);
+  });
+
+  it('«Copia in…»: giorno e fascia, le voci scelte nell\'ordine della giornata; fatto, la scelta si chiude e la giornata si rilegge', async () => {
+    const ricarica = disegna();
+    fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Consegna del Palazzo/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Biblioteca: prendere Zorro/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Copia in…/ }));
+    const finestra = await screen.findByRole('dialog', { name: 'Copia 2 voci in un altro giorno' });
+    expect(finestra).toHaveTextContent('2 voci (1 di giorno, 1 di sera)');
+    // parte dal giorno di partenza; la fascia, con voci di giorno e di sera, è «di giorno»
+    expect(within(finestra).getByRole('combobox', { name: 'Giorno' })).toHaveTextContent('12 aprile (mar)');
+    expect(within(finestra).getByRole('radio', { name: 'Di giorno' })).toHaveAttribute('aria-checked', 'true');
+    scegliVoce('Mese', 'Maggio', finestra);
+    expect(within(finestra).getByRole('combobox', { name: 'Giorno' })).toHaveTextContent('2 maggio (lun)');
+    fireEvent.click(within(finestra).getByRole('radio', { name: 'Di sera' }));
+    api.trasferisciVociGiornata.mockResolvedValue({ giorno: '05-02', fascia: 'sera', uid: ['n1', 'n2'], voci: [] });
+    fireEvent.click(within(finestra).getByRole('button', { name: /^Copia nel 2 maggio, di sera/ }));
+    // nell'ordine della giornata (Zorro di giorno prima della consegna di sera), non in quello dei tocchi
+    await waitFor(() => expect(api.trasferisciVociGiornata).toHaveBeenCalledWith({ uid: [uid(1), uid(4)], giorno: '05-02', fascia: 'sera', modo: 'copia' }, 3));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(notifica).toHaveBeenCalledWith('success', '2 voci copiate nel 2 maggio, di sera, in fondo: per tutte le partite.');
+    expect(ricarica).toHaveBeenCalled();
+    expect(screen.queryByRole('region', { name: 'Copia o sposta voci' })).toBeNull();
+  });
+
+  it('«Sposta in…» manda `sposta`; un errore resta in notifica e la finestra resta aperta con la scelta', async () => {
+    disegna();
+    fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Consegna del Palazzo/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Sposta in…/ }));
+    const finestra = await screen.findByRole('dialog', { name: 'Sposta 1 voce in un altro giorno' });
+    // una voce sola di sera: la fascia parte da «di sera»
+    expect(within(finestra).getByRole('radio', { name: 'Di sera' })).toHaveAttribute('aria-checked', 'true');
+    expect(finestra).toHaveTextContent('Le voci lasciano questo giorno e portano con sé le spunte delle partite.');
+    scegliVoce('Giorno', /^13 aprile/, finestra);
+    api.trasferisciVociGiornata.mockRejectedValue(new Error('Questa voce della giornata non esiste (più).'));
+    fireEvent.click(within(finestra).getByRole('button', { name: /^Sposta nel 13 aprile, di sera/ }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Questa voce della giornata non esiste (più).'));
+    expect(api.trasferisciVociGiornata).toHaveBeenCalledWith({ uid: [uid(4)], giorno: '04-13', fascia: 'sera', modo: 'sposta' }, 3);
+    expect(screen.getByRole('dialog', { name: 'Sposta 1 voce in un altro giorno' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Copia o sposta voci' })).toHaveTextContent('1 voce scelta');
+  });
+
+  it('senza voci nel giorno il comando non c\'è; cambiando giorno la scelta non resta', () => {
+    disegna({ ...base, azioni: [] });
+    expect(screen.queryByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' })).toBeNull();
+    cleanup();
+    const { rerender } = render(<MemoryRouter><GiornoGuida g={base} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={vi.fn()} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Comprare i Bionutrienti/ }));
+    rerender(<MemoryRouter><GiornoGuida g={{ ...base, giorno: '04-13' }} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={vi.fn()} /></MemoryRouter>);
+    expect(screen.queryByRole('region', { name: 'Copia o sposta voci' })).toBeNull();
   });
 });

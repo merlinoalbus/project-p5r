@@ -9,6 +9,9 @@
 // una lista sola per fascia, nel loro ordine esatto, e ogni modifica cambia la guida per tutte le partite (e il pacchetto che si
 // esporta). Ogni voce ha i suoi gesti: Modifica, Sposta su, Sposta giù, Sposta di giorno/di sera, Elimina. Le due sezioni ci sono
 // sempre, anche vuote, perché è lì che si aggiunge; il posto esatto della voce nuova si sceglie nella finestra.
+// Dal 2026-10-12 («copiare elementi del diario... e poterli inserire in un altro giorno o nella parte giorno o nella parte notte
+// a scelta»; scelte «Una o più insieme» e «Sì, anche spostare») «Copia o sposta voci» apre la scelta: le voci di giorno e di sera
+// diventano righe da spuntare, e «Copia in…» / «Sposta in…» le mandano in un altro giorno e fascia (`TrasferisciVoci`).
 // ============================================================
 
 import { useState, type ReactNode } from 'react';
@@ -31,6 +34,7 @@ import { VoceEvento } from './VociAgenda';
 import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
+import { TrasferisciVoci } from './TrasferisciVoci';
 
 /** La fascia opposta: giorno ↔ sera. */
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
@@ -126,6 +130,17 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const [menu, setMenu] = useState<string | null>(null);
   const [soggetto, setSoggetto] = useState<SoggettoVoce | null>(null);
   const [conferma, setConferma] = useState<Conferma | null>(null);
+  // Copiare o spostare voci in un altro giorno (2026-10-12, «Una o più insieme»): le voci scelte, legate al giorno (cambiando
+  // giorno la scelta non vale più), e la finestra aperta («copia» o «sposta»)
+  const [scelta, setScelta] = useState<{ giorno: string; uid: ReadonlySet<string> } | null>(null);
+  const [trasferimento, setTrasferimento] = useState<'copia' | 'sposta' | null>(null);
+  const scelte = scelta?.giorno === g.giorno ? scelta.uid : null;
+  /** Mette o toglie voci dalla scelta. */
+  const scegli = (uid: string[], dentro: boolean) => setScelta((s) => {
+    const n = new Set(s?.giorno === g.giorno ? s.uid : []);
+    for (const u of uid) { if (dentro) n.add(u); else n.delete(u); }
+    return { giorno: g.giorno, uid: n };
+  });
   const partita = partitaId ?? undefined;
   // la chiave del menu porta il giorno: cambiando giorno nessun menu resta aperto su una voce che non c'è più
   const chiaveMenu = (uid: string) => `${g.giorno}/${uid}`;
@@ -225,13 +240,33 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     const voci = g.azioni.filter((a) => a.fascia === f);
     const daFare = voci.filter((a) => a.genere === 'azione');
     const fatte = daFare.filter((a) => a.fatta).length;
+    const tutteScelte = !!scelte && voci.length > 0 && voci.every((v) => scelte.has(v.uid));
     return (
       <section key={f} className={`card flex flex-col gap-1 ${fasciaCorrente === f ? 'card--adesso' : ''}`} aria-current={fasciaCorrente === f ? 'true' : undefined} aria-label={f === 'giorno' ? 'Di giorno' : 'Di sera'}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <FasciaGiornata fascia={f} attiva={fasciaCorrente === f} dettaglio={partitaId && daFare.length > 0 ? `${fatte} su ${daFare.length}` : undefined} />
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => apri({ tipo: 'nuova', fascia: f })} aria-label={`Aggiungi ${nomeFascia(f)}`} />
+          {scelte
+            ? voci.length > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
+                aria-label={`${tutteScelte ? 'Togli dalla scelta' : 'Scegli'} tutte le voci ${nomeFascia(f)}`} onClick={() => scegli(voci.map((v) => v.uid), !tutteScelte)} />
+            : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => apri({ tipo: 'nuova', fascia: f })} aria-label={`Aggiungi ${nomeFascia(f)}`} />}
         </div>
-        {voci.length === 0
+        {/* nella scelta le voci sono righe da spuntare per copiarle o spostarle: niente spunta di partita né gesti, per non confonderle */}
+        {scelte && voci.length > 0 && (
+          <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={`Voci ${nomeFascia(f)} da scegliere`}>
+            {voci.map((v) => (
+              <li key={v.uid}>
+                <label className="touch flex cursor-pointer items-start gap-2.5 py-1.5 text-[13px]">
+                  <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={scelte.has(v.uid)} onChange={(e) => scegli([v.uid], e.target.checked)} />
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="line-clamp-2">{v.azione}</span>
+                    {(v.genere !== 'azione' || v.riferimentoTesto) && <span className="text-[11px] text-text-muted">{[v.genere !== 'azione' ? { evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' }[v.genere] : null, v.riferimentoTesto].filter(Boolean).join(' · ')}</span>}
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        )}
+        {scelte ? (voci.length === 0 && <p className="m-0 text-[13px] text-text-muted py-1">Niente {nomeFascia(f)} da scegliere.</p>) : voci.length === 0
           ? <p className="m-0 text-[13px] text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno: con «Aggiungi» metti una cosa da fare o un evento.</p>
           : (
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
@@ -264,8 +299,31 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
         {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
       </section>
+      {/* copiare o spostare voci in un altro giorno (2026-10-12): fuori dalla scelta un comando solo; nella scelta la barra, che resta
+          in vista scorrendo, col conto e i comandi */}
+      {!scelte && g.azioni.length > 0 && (
+        <PulsanteVisivo tono="fantasma" compatto className="self-end" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia o sposta voci"
+          aria-label="Scegli voci da copiare o spostare in un altro giorno" disabled={occupato} onClick={() => { setMenu(null); setScelta({ giorno: g.giorno, uid: new Set() }); }} />
+      )}
+      {scelte && (
+        <section className="card sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2" aria-label="Copia o sposta voci">
+          {/* i comandi non si restringono mai (testo troncato); sul telefono «Fine» sta accanto al conto e «Copia in…» / «Sposta in…»
+              prendono la riga sotto, così la barra fissa resta di due righe */}
+          <span className="min-w-0 flex-1 text-[13px]"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
+            <span className="text-text-muted"> · da copiare o spostare in un altro giorno</span></span>
+          <div className="order-last flex basis-full gap-2 sm:order-none sm:basis-auto">
+            <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia in…" disabled={scelte.size === 0} onClick={() => setTrasferimento('copia')} />
+            <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta in…" disabled={scelte.size === 0} onClick={() => setTrasferimento('sposta')} />
+          </div>
+          <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Fine" aria-label="Esci dalla scelta" onClick={() => setScelta(null)} />
+        </section>
+      )}
       {sezione('giorno')}
       {sezione('sera')}
+      {scelte && trasferimento && (
+        <TrasferisciVoci modo={trasferimento} voci={g.azioni.filter((v) => scelte.has(v.uid))} giorno={g.giorno} partitaId={partitaId}
+          onChiudi={() => setTrasferimento(null)} onFatto={async () => { setScelta(null); await aggiornata(); }} />
+      )}
       {partitaId && totali.tutte > 0 && <p className="m-0 text-[12px] text-text-muted">{totali.fatte} azioni fatte su {totali.tutte}.</p>}
       {soggetto && <ModuloVoceGiornata soggetto={soggetto} giorno={g.giorno} voci={g.azioni} partitaId={partitaId} onChiudi={() => setSoggetto(null)} onSalvato={aggiornata} />}
       {conferma && (

@@ -548,7 +548,11 @@ export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoIn
   persona?: number;
   /** Le aree del dedalo in cui si incontra una Persona di un dedalo (101): obbligatorie creandola (almeno una); correggendola
    *  sostituiscono quelle di prima. Rifiutate per le altre voci. */
-  areeDedalo?: string[] }
+  areeDedalo?: string[];
+  /** L'area del Palazzo in cui spostare la voce (richiesta dell'utente, 2026-10-12: «devo spostare delle voci da un'area ad
+   *  un'altra nel palazzo»): un'altra area dello stesso Palazzo; la voce va in fondo, con i suoi passi se è un Enigma. Non nei
+   *  Memento (lì si cambia l'area del dedalo) e non per un passo da solo (si sposta il suo Enigma). */
+  area?: string }
 
 /** Vero se l'area della guida è un dedalo dei Memento. */
 function eDedalo(areaChiave: string): boolean {
@@ -659,6 +663,17 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   }
   const prima = p.contenitore_chiave ?? null;
   const dopo = dati.contenitore === undefined ? prima : dati.contenitore;
+  // un'altra area dello stesso Palazzo (2026-10-12): non nei Memento, e non per un passo (sta nell'area del suo Enigma)
+  const cambiaArea = dati.area !== undefined && dati.area !== p.area_chiave;
+  const areaGuida = cambiaArea ? dati.area! : p.area_chiave;
+  if (cambiaArea) {
+    if (dedalo) throw httpErrors.badRequest('area-solo-nei-palazzi', `«${p.nome}» è una voce dei Memento: lì si cambia l’area del dedalo, non il dedalo.`);
+    const destinazione = prepared('SELECT a.nome, a.dungeon_chiave FROM dungeon_area a WHERE a.chiave = ?').get(areaGuida) as { nome: string; dungeon_chiave: string } | undefined;
+    if (!destinazione) throw httpErrors.notFound('area-non-trovata', `L'area '${areaGuida}' non esiste.`);
+    const palazzo = (prepared('SELECT dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(p.area_chiave) as { dungeon_chiave: string }).dungeon_chiave;
+    if (destinazione.dungeon_chiave !== palazzo) throw httpErrors.badRequest('area-di-altro-palazzo', `«${destinazione.nome}» è un’area di un altro Palazzo: una voce resta nel suo Palazzo.`);
+    if (dopo !== null) throw httpErrors.badRequest('passo-segue-enigma', `«${p.nome}» è un passo: sta nell’area del suo Enigma (si sposta l’Enigma, e i passi lo seguono, o la si toglie prima dall’Enigma).`);
+  }
   if (dopo !== null && dopo !== prima) verificaEnigma(p, p.area_chiave, dopo);
   // l'area del dedalo (099): un passo sta in quella del suo Enigma; un'altra area si sceglie solo dentro lo stesso dedalo
   if (dati.areaDedalo !== undefined) {
@@ -672,10 +687,18 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   const adesso = nowIso();
   const db = getDb();
   db.transaction(() => {
-    // cambiando Enigma (o uscendone) o area del dedalo la voce va in fondo fra le sue nuove compagne
-    const ordine = dati.ordine ?? (dopo !== prima || areaDopo !== areaPrima ? ordineInFondo(p.area_chiave, dopo, areaDopo) : p.ordine);
-    prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ?, contenitore_chiave = ?, area_dedalo_chiave = ?, dettagli_json = ? WHERE chiave = ?').run(
-      dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), ordine, dopo, areaDopo, dettagli, puntoChiave);
+    // cambiando Enigma (o uscendone), area del dedalo o area del Palazzo la voce va in fondo fra le sue nuove compagne
+    const ordine = dati.ordine ?? (dopo !== prima || areaDopo !== areaPrima || cambiaArea ? ordineInFondo(areaGuida, dopo, areaDopo) : p.ordine);
+    prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ?, contenitore_chiave = ?, area_dedalo_chiave = ?, dettagli_json = ?, area_chiave = ? WHERE chiave = ?').run(
+      dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), ordine, dopo, areaDopo, dettagli, areaGuida, puntoChiave);
+    if (cambiaArea) {
+      // la voce cambia area con quel che è suo: la chiave resta (stati delle partite, pin delle planimetrie, marcatore e condizioni
+      // la citano per chiave); i passi di un Enigma la seguono; le schede della guida senza mappa (pin con il riferimento «punto»
+      // alla voce o a un suo passo, nell'area di prima) passano con lei, altrimenti resterebbero nell'area che ha lasciato
+      prepared('UPDATE punto_interesse SET area_chiave = ? WHERE contenitore_chiave = ?').run(areaGuida, puntoChiave);
+      prepared(`UPDATE spillo SET area_guida_chiave = ? WHERE mappa_chiave IS NULL AND area_guida_chiave = ? AND riferimento_tipo = 'punto'
+        AND riferimento_chiave IN (SELECT chiave FROM punto_interesse WHERE chiave = ? OR contenitore_chiave = ?)`).run(areaGuida, p.area_chiave, puntoChiave, puntoChiave);
+    }
     // i passi di un Enigma seguono la sua area del dedalo
     if (areaDopo !== areaPrima) prepared('UPDATE punto_interesse SET area_dedalo_chiave = ? WHERE contenitore_chiave = ?').run(areaDopo, puntoChiave);
     if (areePersona) collegaPersonaAlleAree(puntoChiave, areePersona);
