@@ -17,8 +17,8 @@ import { validate } from '../middleware/validate.js';
 import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, creaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { bodyAggiornaMappa, bodyAggiornaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const router = Router();
@@ -106,10 +106,10 @@ router.put('/:chiave/stanza', validate({ params: paramsMappa, body: bodyStanzaMa
 });
 
 /** Immagine di base (corpo grezzo `image/*`): salvata nell'istanza nell'ambito «mappa» con la chiave della mappa. */
-router.put('/:chiave/immagine', validate({ params: paramsMappa }), express.raw({ type: 'image/*', limit: MAX_BYTE_IMMAGINE }), (req, res) => {
+router.put('/:chiave/immagine', validate({ params: paramsMappa, query: queryImmagineMappa }), express.raw({ type: 'image/*', limit: MAX_BYTE_IMMAGINE }), (req, res) => {
   const mime = String(req.headers['content-type'] ?? '').split(';')[0].trim();
   if (!Buffer.isBuffer(req.body) || req.body.length === 0) throw httpErrors.badRequest('immagine-vuota', 'Invia il file dell\'immagine come corpo grezzo con Content-Type image/*.');
-  res.json(impostaImmagineMappa(String(req.params.chiave), mime, req.body));
+  res.json(impostaImmagineMappa(String(req.params.chiave), mime, req.body, { eliminaPezzi: (req.query as { eliminaPezzi?: string }).eliminaPezzi === '1' }));
 });
 router.post('/:chiave/spilli', validate({ params: paramsMappa, body: bodyCreaSpillo }), (req, res) => {
   res.status(201).json(creaSpillo(String(req.params.chiave), req.body as DatiSpillo & { tipo: NonNullable<DatiSpillo['tipo']>; nome: string; x: number; y: number }));
@@ -123,6 +123,17 @@ router.put('/spilli/:id', validate({ params: paramsSpillo, body: bodyAggiornaSpi
 });
 router.delete('/spilli/:id', validate({ params: paramsSpillo }), (req, res) => {
   eliminaSpillo(Number(req.params.id));
+  res.status(204).end();
+});
+/** I pezzi della planimetria (102): zone dell'immagine scelte nell'editor, posate altrove con le condizioni che li mostrano. */
+router.post('/:chiave/pezzi', validate({ params: paramsMappa, body: bodyCreaPezzo }), (req, res) => {
+  res.status(201).json(creaPezzoMappa(String(req.params.chiave), req.body as Parameters<typeof creaPezzoMappa>[1]));
+});
+router.put('/pezzi/:id', validate({ params: paramsPezzo, body: bodyAggiornaPezzo }), (req, res) => {
+  res.json(aggiornaPezzoMappa(Number(req.params.id), req.body as Parameters<typeof aggiornaPezzoMappa>[1]));
+});
+router.delete('/pezzi/:id', validate({ params: paramsPezzo }), (req, res) => {
+  eliminaPezzoMappa(Number(req.params.id));
   res.status(204).end();
 });
 /** Le voci della guida che l'editor può collegare allo spillo (098): si collegano e scollegano con `/compendio/punti/:chiave/pin/:spillo`. */

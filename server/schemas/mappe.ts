@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { schemaDestinazioneSpillo } from '../services/mappe/destinazioniSpillo.js';
+import { schemaPosizionePezzo, schemaRotazionePezzo, schemaSorgentePezzo, schemaSpecchioPezzo } from '../services/mappe/pezziMappa.js';
 import { TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO } from '../../shared/spilli.js';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { idParam } from './comuni.js';
@@ -26,6 +27,8 @@ export const queryEsporta = z.object({ radice: chiaveMappa.optional() });
 export const queryDidascalia = z.object({ didascalia: z.string().max(300).optional() });
 export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).optional(), ordine: z.number().int().min(0).max(999).optional() });
 export const queryMappa = z.object({ partita: idParam.optional() });
+/** Sostituire l'immagine di una mappa con dei pezzi (102): `eliminaPezzi=1` conferma che se ne vanno con l'immagine di prima. */
+export const queryImmagineMappa = z.object({ eliminaPezzi: z.enum(['0', '1']).optional() });
 export const bodyCreaMappa = z.object({
   chiave: chiaveMappa.optional(), nome: z.string().min(1).max(LIMITI_GUIDA.mappa.nome), tipo: z.enum(TIPI_MAPPA), genitore: chiaveMappa.nullable().optional(), ordine: z.number().int().min(0).max(9999).optional(),
   asset: z.string().max(200).nullable().optional(), larghezza: z.number().int().positive().nullable().optional(), altezza: z.number().int().positive().nullable().optional(), entita: entita.optional(), note: z.string().max(LIMITI_GUIDA.mappa.note).optional(),
@@ -53,5 +56,13 @@ export const bodyCreaSpillo = z.object({
 });
 export const bodyAggiornaSpillo = bodyCreaSpillo.partial().extend({ mappa: chiaveMappa.optional() });
 export const bodyRaccolto = z.object({ raccolto: z.boolean() });
+
+/** I pezzi delle planimetrie (102): le forme di zona, posizione, rotazione e specchio stanno col servizio, che le usa anche per il pacchetto. */
+export const paramsPezzo = z.object({ id: idParam });
+export const bodyCreaPezzo = z.object({
+  nome: z.string().trim().max(LIMITI_GUIDA.spillo.nome).optional(), sorgente: schemaSorgentePezzo, posizione: schemaPosizionePezzo.optional(),
+  rotazione: schemaRotazionePezzo.optional(), specchio: schemaSpecchioPezzo.optional(), condizioni, ordine: z.number().int().min(0).max(9999).optional(),
+});
+export const bodyAggiornaPezzo = bodyCreaPezzo.partial();
 export const queryRiferimenti = z.object({ tipo: z.enum(TIPI_RIFERIMENTO), q: z.string().max(120).optional().default(''), limite: z.coerce.number().int().min(1).max(100).optional() });
 export const bodyImporta = z.object({ pacchetto: z.object({ versione: z.literal(1), mappe: z.array(z.object({ chiave: z.string(), nome: z.string(), tipo: z.string() }).passthrough()).max(2000), immagini: z.record(z.string(), z.object({ mime: z.string(), base64: z.string() })).optional() }).passthrough(), sovrascrivi: z.boolean().optional() });

@@ -11,6 +11,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { EditorMappaPage } from './EditorMappaPage';
 import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../types';
 import { usePartitaStore } from '../stores/partitaStore';
+import { ApiError } from '../services/api/_helpers';
 
 const api = vi.hoisted(() => ({
   risolviMappa: vi.fn(), getMappa: vi.fn(), getAlberoMappe: vi.fn(), creaSpillo: vi.fn(), aggiornaSpillo: vi.fn(), eliminaSpillo: vi.fn(), cercaRiferimenti: vi.fn(),
@@ -19,6 +20,8 @@ aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagin
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
   // le voci della guida di un pin (098): quelle collegabili e il collegamento (lo stesso della guida)
   getVociCollegabili: vi.fn(), collegaPinAlPunto: vi.fn(),
+  // i pezzi della planimetria (102)
+  creaPezzoMappa: vi.fn(), aggiornaPezzoMappa: vi.fn(), eliminaPezzoMappa: vi.fn(),
 }));
 vi.mock('../services/api', (vero) => moduloApi(vero, {
   ...api,
@@ -42,7 +45,7 @@ vi.mock('../services/api', (vero) => moduloApi(vero, {
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
 const albero: MappaRiassuntoDto[] = [riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta' }), riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo' })];
 const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
-const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [] };
+const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [], pezzi: [] };
 
 /** Monta l'editor sulla mappa di Shibuya (`/guida/mappe/citta-shibuya/modifica`). */
 function monta() {
@@ -490,6 +493,115 @@ describe('EditorMappaPage', () => {
     expect(palette.getAllByRole('button')).toHaveLength(41);
     for (const nome of ['Bevande', 'Sigarette', 'Cercalavoro', 'Lavoro part-time', 'Bagno pubblico', 'Timbro dei Mementos', 'Punto del rampino', 'Porta chiusa', 'Ingresso al Palazzo', 'Oggetto', 'Punto di infiltrazione']) expect(palette.getByRole('button', { name: nome })).toBeInTheDocument();
     expect(palette.queryByRole('button', { name: 'Distributore' })).toBeNull();
+  });
+
+  // ---- I pezzi della planimetria (102, 2026-10-14) ----
+  // In jsdom la tela misura 0×0 e lo zoom è 1: il punto (cx, cy) dello schermo è il pixel (cx + 500, cy + 250) della mappa 1000×500.
+  const conImmagine: MappaDto = { ...base, immagineUrl: '/pianta.png' };
+  const pezzo: MappaDto['pezzi'][number] = { id: 31, uid: '3'.repeat(32), nome: 'Muro mobile', sorgente: { x: 100, y: 450, larghezza: 120, altezza: 40 }, posizione: { x: 300, y: 200 }, rotazione: 0, specchio: { orizzontale: false, verticale: false }, condizioni: [], ordine: 0, updatedAt: 'u1' };
+  /** Apre la sezione «Pezzi» dell'editor. */
+  const apriPezzi = async () => fireEvent.click(await screen.findByRole('button', { name: 'Pezzi' }));
+
+  it('«Ritaglia pezzo»: il rettangolo trascinato sulla mappa diventa un pezzo (pixel dell\'immagine), selezionato; un tocco senza rettangolo non ritaglia', async () => {
+    api.getMappa.mockResolvedValueOnce(conImmagine).mockResolvedValue({ ...conImmagine, pezzi: [pezzo] });
+    api.creaPezzoMappa.mockResolvedValue(pezzo);
+    monta();
+    await apriPezzi();
+    const ritaglia = screen.getByRole('button', { name: /Ritaglia pezzo/ });
+    fireEvent.click(ritaglia);
+    expect(ritaglia).toHaveAttribute('aria-pressed', 'true');
+    const tela = screen.getByRole('application');
+    // un tocco: niente
+    fireEvent.pointerDown(tela, { pointerId: 1, clientX: 0, clientY: 0 });
+    fireEvent.pointerUp(tela, { pointerId: 1, clientX: 1, clientY: 0 });
+    expect(api.creaPezzoMappa).not.toHaveBeenCalled();
+    // un rettangolo trascinato, anche al contrario: l'angolo in alto a sinistra e le misure
+    fireEvent.pointerDown(tela, { pointerId: 1, clientX: 100, clientY: 40 });
+    fireEvent.pointerMove(tela, { pointerId: 1, clientX: 50, clientY: 20 });
+    expect(document.querySelector('[data-ritaglio]')).not.toBeNull();
+    fireEvent.pointerUp(tela, { pointerId: 1, clientX: 0, clientY: 0 });
+    await waitFor(() => expect(api.creaPezzoMappa).toHaveBeenCalledWith('citta-shibuya', { sorgente: { x: 500, y: 250, larghezza: 100, altezza: 40 } }));
+    expect(document.querySelector('[data-ritaglio]')).toBeNull();
+    // ricaricata la mappa, il pezzo è selezionato con le sue proprietà e lo strumento torna «Seleziona»
+    expect(await screen.findByRole('region', { name: 'Proprietà del pezzo: Muro mobile' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Ritaglia pezzo/ })).toHaveAttribute('aria-pressed', 'false');
+    // la zona ritagliata si vede tratteggiata nell'editor
+    expect(document.querySelector(`[data-zona-pezzo="${pezzo.uid}"]`)).not.toBeNull();
+  });
+
+  it('senza immagine di base non si ritaglia', async () => {
+    monta();
+    await apriPezzi();
+    expect(screen.getByRole('button', { name: /Ritaglia pezzo/ })).toBeDisabled();
+    expect(screen.getByText('Serve un’immagine di base da cui ritagliare.')).toBeInTheDocument();
+  });
+
+  it('il modulo del pezzo: posizione al pixel (campi e frecce), rotazione, specchio e condizioni si salvano insieme; «Elimina» chiede conferma', async () => {
+    api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [pezzo] });
+    api.aggiornaPezzoMappa.mockResolvedValue(pezzo);
+    api.eliminaPezzoMappa.mockResolvedValue(undefined);
+    monta();
+    await apriPezzi();
+    fireEvent.click(within(screen.getByRole('list', { name: 'Pezzi di questa mappa' })).getByRole('button', { name: /Muro mobile/ }));
+    const form = within(screen.getByRole('region', { name: 'Proprietà del pezzo: Muro mobile' }));
+    expect(form.getByText(/Zona d’origine · 100, 450 · 120×40 px/)).toBeInTheDocument();
+    expect(form.getByRole('button', { name: 'Salva pezzo' })).toBeDisabled();
+    fireEvent.change(form.getByRole('textbox', { name: 'Nome' }), { target: { value: 'Muro del ponte' } });
+    fireEvent.change(form.getByRole('spinbutton', { name: 'X' }), { target: { value: '310' } });
+    fireEvent.click(form.getByRole('button', { name: 'Sposta di 1 px a destra' }));
+    fireEvent.click(form.getByRole('button', { name: 'Sposta di 1 px a su' }));
+    fireEvent.click(form.getByRole('radio', { name: '90°' }));
+    expect(form.getByRole('radio', { name: '90°' })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(form.getByRole('checkbox', { name: 'Specchia in orizzontale' }));
+    fireEvent.click(form.getByRole('button', { name: 'Salva pezzo' }));
+    await waitFor(() => expect(api.aggiornaPezzoMappa).toHaveBeenCalledWith(31, { nome: 'Muro del ponte', posizione: { x: 311, y: 199 }, rotazione: 90, specchio: { orizzontale: true, verticale: false }, condizioni: [] }));
+    // a 90° l'ingombro è 40 × 120: la X non va oltre 1000 − 40, la Y oltre 500 − 120
+    fireEvent.change(form.getByRole('spinbutton', { name: 'X' }), { target: { value: '5000' } });
+    expect(form.getByRole('spinbutton', { name: 'X' })).toHaveAttribute('max', '960');
+    expect(form.getByRole('spinbutton', { name: 'Y' })).toHaveAttribute('max', '380');
+    await waitFor(() => expect(form.getByRole('button', { name: 'Elimina' })).toBeEnabled());
+    fireEvent.click(form.getByRole('button', { name: 'Elimina' }));
+    const conferma = within(screen.getByRole('dialog', { name: 'Eliminare il pezzo «Muro mobile»?' }));
+    expect(api.eliminaPezzoMappa).not.toHaveBeenCalled();
+    fireEvent.click(conferma.getByRole('button', { name: /Elimina/ }));
+    await waitFor(() => expect(api.eliminaPezzoMappa).toHaveBeenCalledWith(31));
+  });
+
+  it('trascinato sulla mappa (strumento «Seleziona»), il pezzo si sposta e si salva al rilascio; selezionarlo deseleziona lo spillo', async () => {
+    api.getMappa.mockResolvedValue({ ...conImmagine, spilli: [nota], pezzi: [pezzo] });
+    api.aggiornaPezzoMappa.mockResolvedValue(pezzo);
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: /Nota: Nota/ }));
+    expect(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' })).toBeInTheDocument();
+    const sullaMappa = document.querySelector<HTMLElement>(`[data-pezzo="${pezzo.uid}"]`)!;
+    expect(sullaMappa).toHaveClass('visore-mappa__pezzo--modificabile');
+    const tela = screen.getByRole('application');
+    fireEvent.pointerDown(sullaMappa, { pointerId: 1, clientX: 10, clientY: 10 });
+    // selezionato: il pannello passa ai pezzi e lo spillo si chiude
+    expect(await screen.findByRole('region', { name: 'Proprietà del pezzo: Muro mobile' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Proprietà dello spillo: Nota' })).toBeNull();
+    fireEvent.pointerMove(tela, { pointerId: 1, clientX: 30, clientY: 5 });
+    expect(sullaMappa.style.left).toBe('320px');
+    fireEvent.pointerUp(tela, { pointerId: 1, clientX: 30, clientY: 5 });
+    await waitFor(() => expect(api.aggiornaPezzoMappa).toHaveBeenCalledWith(31, { posizione: { x: 320, y: 195 } }));
+  });
+
+  it('sostituire l\'immagine di una mappa con dei pezzi chiede conferma (409): confermando si ricarica con «eliminaPezzi»', async () => {
+    api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [pezzo] });
+    api.caricaImmagineMappa.mockRejectedValueOnce(new ApiError(409, 'mappa-con-pezzi', 'La mappa ha 1 pezzo ritagliato dall’immagine di prima: sostituendola verrà eliminato.', { pezzi: 1 })).mockResolvedValue(conImmagine);
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    const file = new File(['x'], 'nuova.png', { type: 'image/png' });
+    fireEvent.change(screen.getByLabelText('File dell\'immagine di base'), { target: { files: [file] } });
+    const finestra = within(await screen.findByRole('dialog', { name: 'Sostituire l’immagine di base?' }));
+    expect(finestra.getByText(/1 pezzo ritagliato dall’immagine di prima/)).toBeInTheDocument();
+    expect(api.caricaImmagineMappa).toHaveBeenCalledTimes(1);
+    expect(api.caricaImmagineMappa).toHaveBeenLastCalledWith('citta-shibuya', file);
+    // mentre l'editor rilegge la mappa (dopo il 409) i comandi sono fermi: si aspetta che tornino attivi
+    await waitFor(() => expect(finestra.getByRole('button', { name: /Sostituisci ed elimina i pezzi/ })).toBeEnabled());
+    fireEvent.click(finestra.getByRole('button', { name: /Sostituisci ed elimina i pezzi/ }));
+    await waitFor(() => expect(api.caricaImmagineMappa).toHaveBeenLastCalledWith('citta-shibuya', file, { eliminaPezzi: true }));
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Sostituire l’immagine di base?' })).toBeNull());
   });
 });
 

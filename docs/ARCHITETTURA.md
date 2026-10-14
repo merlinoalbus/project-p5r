@@ -1460,3 +1460,37 @@ codice parte da qui invece di riscriverle.
 - il raggruppamento degli spilli tiene in cache i centri delle nubi e, nel visore, sta in un `useMemo`;
 - l'area visibile di una planimetria si cerca dai bordi;
 - iscrizioni agli store con selettori stretti (`useShallow`).
+
+## I pezzi delle planimetrie (2026-10-14)
+
+Zone dell'immagine di una planimetria scelte dall'utente nell'editor (i pezzi che il gioco disegna a parte, come i muri mobili in
+fondo al Museo 2P di Madarame), tolte dall'immagine di base e posate sulla mappa con le condizioni che le mostrano.
+- **Dati (file di gioco)**: `pezzo_mappa` (migrazione 102): `uid`, `mappa_chiave` (CASCADE), `nome`; zona d'origine `sorgente_x`,
+  `sorgente_y`, `larghezza`, `altezza`; posizione `x`, `y` (angolo in alto a sinistra dell'ingombro posato); `rotazione` 0/90/180/270
+  (oraria, attorno al centro, dopo lo specchio), `specchio_orizzontale`, `specchio_verticale`; `condizioni_json` (`RequisitoSpillo[]`);
+  `ordine`. Tutto in pixel dell'immagine.
+- **Server**: `server/services/mappe/pezziMappa.ts` (righe, DTO con `valutaRequisitiSpillo`, verifica di zona e ingombro
+  sull'immagine, creazione/correzione/eliminazione, forma e scrittura per il pacchetto); in `mappeService` `dimensioniDellaMappa`
+  (salvate, altrimenti lette dall'immagine mostrata: caricata, asset predefinito, asset originale; 409 `mappa-senza-immagine`),
+  `creaPezzoMappa` / `aggiornaPezzoMappa` / `eliminaPezzoMappa` (condizioni verificate come quelle dei pin), `MappaDto.pezzi` (con
+  la partita, l'esito delle condizioni), `esportaMappe`/`importaMappe` (campo `pezzi`: sostituisce; assente lascia; il reseed del
+  seed non tocca; si scrivono a immagini importate e quelli fuori dall'immagine d'arrivo si scartano, `pezziScartati`). Rotte
+  `POST /api/mappe/:chiave/pezzi`, `PUT`/`DELETE /api/mappe/pezzi/:id`; «pezzi» fra le chiavi riservate. `impostaImmagineMappa` su
+  una mappa con pezzi risponde 409 `mappa-con-pezzi` (`details.pezzi`); con `?eliminaPezzi=1` i pezzi se ne vanno con l'immagine;
+  all'importazione un'immagine diversa da quella di prima (byte per byte) toglie i pezzi della vecchia (`pezziEliminati`).
+- **Visore** (`VisoreMappa`, `src/utils/pezziMappa.ts`): l'immagine di base ha una maschera alfa (`mascheraZone`: SVG grande
+  quanto l'immagine, con una `<mask>` interna che rende trasparenti tutte le zone d'origine); ogni pezzo è un `div` nel livello
+  dell'immagine (pixel dell'immagine: lo zoom lo scala con la mappa) grande quanto il suo ingombro, con dentro il ritaglio
+  (`background-image` della stessa immagine spostato sulla zona, `rotate(…) scale(…)`: specchio prima, rotazione poi), sotto i pin.
+  `statoPezzo`: senza partita o nell'editor con «Giorno corrente» spento sempre visibile; con la partita nascosto se le condizioni
+  non valgono, in trasparenza (`.visore-mappa__pezzo--non-disponibile`) con «Mostra anche i non ancora disponibili», che li conta.
+  Inquadratura: `areaAlpha`/`areaImmagine` escludono le zone (rifatte solo quando cambiano, da una firma) e `areaConPezzi` aggiunge
+  gli ingombri. All'importazione `immagineMostrata` (mappeService) è fotografata e riconfrontata per togliere i pezzi di
+  un'immagine cambiata.
+- **Editor** (`EditorMappaPage`, `FormPezzo`): sezione «Pezzi»; lo strumento `ritaglia` del visore (`StrumentoEditor`) trasforma il
+  rettangolo trascinato in pixel interi dell'immagine (`StrumentiEditor.pezzi.onRitaglia`, almeno 2 × 2) e crea il pezzo
+  (`POST`), selezionato; con «Seleziona» un pezzo si seleziona toccandolo e si sposta trascinandolo (`onSposta` al rilascio,
+  posizione = partenza + spostamento a schermo / zoom, ingombro tenuto dentro l'immagine); le zone si vedono tratteggiate
+  (`.visore-mappa__zona-pezzo`, bordi divisi per `--zoom-mappa`). `FormPezzo`: nome, X/Y (campi e frecce di 1 px, massimi
+  secondo l'ingombro ruotato), rotazione, specchio, `CondizioniEditor perSpillo`, «Elimina» con conferma. L'immagine nuova su una
+  mappa con pezzi apre la conferma (409 → `caricaImmagineMappa(…, { eliminaPezzi: true })`).

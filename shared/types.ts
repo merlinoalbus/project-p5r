@@ -2164,6 +2164,45 @@ export interface MappaDto extends MappaRiassuntoDto {
    * (i propri spilli): senza questo elenco un collegamento a senso unico — si entra e non si torna
    * indietro — non si vede da nessuna parte, e chi cura l'atlante non sa nemmeno chi lo cita. */
   arrivi: Array<{ spilloId: number; tipo: TipoSpillo; nome: string; mappa: string; mappaNome: string }>;
+  /** I pezzi della planimetria (102): zone dell'immagine scelte dall'utente, cancellate dall'immagine di base e posate altrove. */
+  pezzi: PezzoMappaDto[];
+}
+
+/** Rotazione di un pezzo, in gradi in senso orario. */
+export type RotazionePezzo = 0 | 90 | 180 | 270;
+
+/**
+ * Un pezzo di una planimetria (102, richiesta dell'utente del 2026-10-14): una zona rettangolare dell'immagine scelta col mouse,
+ * sempre cancellata dall'immagine di base e posata in `posizione` con la sua dimensione originale, specchiata e ruotata; si vede
+ * quando le condizioni valgono. Tutto in **pixel dell'immagine**.
+ */
+export interface PezzoMappaDto {
+  id: number;
+  uid: string;
+  nome: string;
+  /** La zona d'origine nell'immagine: angolo in alto a sinistra e dimensioni. */
+  sorgente: { x: number; y: number; larghezza: number; altezza: number };
+  /** L'angolo in alto a sinistra dell'ingombro del pezzo posato (a 90° e 270° larghezza e altezza si scambiano). */
+  posizione: { x: number; y: number };
+  rotazione: RotazionePezzo;
+  /** Specchio prima della rotazione. */
+  specchio: { orizzontale: boolean; verticale: boolean };
+  condizioni: CondizioneSpilloDto[];
+  /** Solo con la partita: l'esito delle condizioni (come i pin); senza, il pezzo si mostra sempre. */
+  disponibilita?: DisponibilitaDto;
+  ordine: number;
+  updatedAt: string;
+}
+
+/** Quel che si scrive di un pezzo (creazione: sorgente obbligatoria; la posizione, se manca, è quella della zona d'origine). */
+export interface DatiPezzoMappa {
+  nome?: string;
+  sorgente?: { x: number; y: number; larghezza: number; altezza: number };
+  posizione?: { x: number; y: number };
+  rotazione?: RotazionePezzo;
+  specchio?: { orizzontale: boolean; verticale: boolean };
+  condizioni?: RequisitoSpillo[] | null;
+  ordine?: number;
 }
 
 /** Pacchetto di esportazione/importazione delle mappe (versione 1): il file `mappe-editor.json` che l'editor scarica e reimporta. */
@@ -2181,6 +2220,8 @@ export interface EsportazioneMappeDto {
     /** Tutte le aree della guida contenute nella planimetria, in ordine di guida (2026-09-29). `entita` ne
      *  dichiara una sola, la prima; un pacchetto di prima non ha questo campo. */
     aree?: string[];
+    /** I pezzi della planimetria (102). Un pacchetto di prima non ha il campo: i pezzi della mappa restano com'erano. */
+    pezzi?: Array<{ uid?: string; nome: string; sorgente: { x: number; y: number; larghezza: number; altezza: number }; posizione: { x: number; y: number }; rotazione: RotazionePezzo; specchio: { orizzontale: boolean; verticale: boolean }; condizioni?: RequisitoSpillo[]; ordine: number }>;
     spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; /** Le voci della guida del pin (098); un pacchetto di prima porta `voce` (094), o un riferimento «punto». */ voci?: string[]; /** La voce di un pacchetto della 094-097: si legge ancora, non si scrive più. */ voce?: string | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;

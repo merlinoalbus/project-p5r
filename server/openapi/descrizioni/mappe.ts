@@ -45,9 +45,9 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'POST /api/mappe/importa': {
     sommario: 'Importa un pacchetto di mappe nel formato dell\'esportazione',
-    descrizione: 'Il pacchetto deve avere `versione: 1`. Le mappe si abbinano per chiave: senza `sovrascrivi` quelle già presenti si saltano, come quelle con chiave o tipo non validi (elencate in `saltate`); con `sovrascrivi` mappe e spilli esistenti si sostituiscono. Le righe importate sono dell\'utente. Condizioni che citano chiavi assenti dalla guida e voci della guida non ammesse si scartano e si contano; tutto avviene in una transazione.',
-    risposta: '`{ mappe, spilli, immagini, saltate, condizioniScartate, vociScartate }` (conteggi e chiavi saltate)',
-    errori: [[400, 'pacchetto-non-valido'], [400, 'destinazione-non-valida'], [404, 'destinazione-non-trovata'], [400, 'voce-non-valida']],
+    descrizione: 'Il pacchetto deve avere `versione: 1`. Le mappe si abbinano per chiave: senza `sovrascrivi` quelle già presenti si saltano, come quelle con chiave o tipo non validi (elencate in `saltate`); con `sovrascrivi` mappe e spilli esistenti si sostituiscono. Le righe importate sono dell\'utente. I pezzi delle planimetrie (`pezzi`, 102) di una mappa importata sostituiscono i suoi (un reseed del seed non li tocca; un pacchetto senza il campo li lascia com\'erano); si scrivono a immagini importate e quelli che escono dall\'immagine della mappa d\'arrivo, o tutti se non ce n\'è una, si scartano e si contano in `pezziScartati`. Un\'immagine importata diversa da quella che la mappa aveva toglie i pezzi ritagliati dalla vecchia (se il pacchetto non ne porta di nuovi per quella mappa), contati in `pezziEliminati`; una identica li lascia. Condizioni che citano chiavi assenti dalla guida e voci della guida non ammesse si scartano e si contano; tutto avviene in una transazione.',
+    risposta: '`{ mappe, spilli, pezzi, pezziScartati, pezziEliminati, immagini, saltate, condizioniScartate, vociScartate }` (conteggi e chiavi saltate)',
+    errori: [[400, 'pacchetto-non-valido'], [400, 'destinazione-non-valida'], [404, 'destinazione-non-trovata'], [400, 'voce-non-valida'], [400, 'pezzi-non-validi']],
   },
   'GET /api/mappe/riferimenti': {
     sommario: 'Entità collegabili a uno spillo nell\'editor, per tipo e testo',
@@ -74,7 +74,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'GET /api/mappe/:chiave': {
     sommario: 'Dettaglio di una mappa con percorso, figli, spilli e arrivi',
-    descrizione: 'La chiave può essere pubblica o interna. Gli spilli portano i dettagli delle entità collegate e, con `partita`, lo stato di quella partita e le condizioni valutate; `arrivi` sono gli spilli di altre mappe che portano qui. L\'URL dell\'immagine dell\'istanza è versionato con la data di caricamento.',
+    descrizione: 'La chiave può essere pubblica o interna. Gli spilli portano i dettagli delle entità collegate e, con `partita`, lo stato di quella partita e le condizioni valutate; `arrivi` sono gli spilli di altre mappe che portano qui; `pezzi` i pezzi della planimetria (102), con `partita` ognuno con l\'esito delle sue condizioni. L\'URL dell\'immagine dell\'istanza è versionato con la data di caricamento.',
     risposta: '`MappaDto`',
     errori: [[404, 'mappa-non-trovata'], [404, 'partita-non-trovata']],
   },
@@ -110,10 +110,10 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'PUT /api/mappe/:chiave/immagine': {
     sommario: 'Carica l\'immagine di base di una mappa (corpo grezzo image/*)',
-    descrizione: 'Il file va inviato come corpo grezzo con `Content-Type` immagine (PNG, JPEG, WEBP, GIF o SVG). Si salva nell\'istanza nell\'ambito «mappa» con la chiave della mappa, sostituendo la precedente; larghezza e altezza si leggono dall\'intestazione quando possibile e si scrivono insieme all\'immagine.',
+    descrizione: 'Il file va inviato come corpo grezzo con `Content-Type` immagine (PNG, JPEG, WEBP, GIF o SVG). Si salva nell\'istanza nell\'ambito «mappa» con la chiave della mappa, sostituendo la precedente; larghezza e altezza si leggono dall\'intestazione quando possibile e si scrivono insieme all\'immagine. Una mappa con dei pezzi (102, ritagli in pixel dell\'immagine di prima) risponde 409 `mappa-con-pezzi` (`details.pezzi` = quanti): con `?eliminaPezzi=1` l\'utente conferma e i pezzi se ne vanno con la sostituzione, nella stessa transazione (scelta dell\'utente del 2026-10-14).',
     risposta: 'La mappa aggiornata: `MappaDto`',
     corpoBinario: 'image/*',
-    errori: [[404, 'mappa-non-trovata'], [400, 'immagine-vuota'], [400, 'formato-non-ammesso'], [400, 'immagine-troppo-grande']],
+    errori: [[404, 'mappa-non-trovata'], [400, 'immagine-vuota'], [400, 'formato-non-ammesso'], [400, 'immagine-troppo-grande'], [409, 'mappa-con-pezzi']],
   },
   'POST /api/mappe/:chiave/spilli': {
     sommario: 'Crea uno spillo su una mappa',
@@ -138,6 +138,24 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     descrizione: 'Quelle del Palazzo della planimetria dello spillo che si segnano — non descrittive, non un Enigma coi suoi passi —, tranne quelle già sue, in ordine di guida. Uno spillo fuori dai Palazzi non ne ha. Si collegano e scollegano con `PUT`/`DELETE /api/compendio/punti/:chiave/pin/:spillo` (098: un pin può avere più voci).',
     risposta: 'Elenco di `VoceCollegabileDto`',
     errori: [[404, 'spillo-non-trovato']],
+  },
+  'POST /api/mappe/:chiave/pezzi': {
+    sommario: 'Crea un pezzo della planimetria da una zona dell\'immagine',
+    descrizione: 'I pezzi (migrazione 102, 2026-10-14) sono zone rettangolari dell\'immagine scelte nell\'editor: la zona (`sorgente`, in pixel dell\'immagine) è sempre cancellata dall\'immagine di base e il pezzo, della stessa dimensione, si posa in `posizione` (angolo in alto a sinistra dell\'ingombro; senza, dove stava), specchiato (`specchio`, prima) e ruotato (`rotazione` 0/90/180/270 in senso orario, poi). Le condizioni sono quelle dei pin (anche lo stato di un altro pin o di una voce della guida): con la partita il pezzo si vede quando valgono. Zona e ingombro devono stare nell\'immagine, le cui dimensioni sono quelle salvate o lette dall\'immagine mostrata. Senza nome si chiama «Pezzo N»; nasce in fondo ai pezzi della mappa.',
+    risposta: 'Il pezzo creato: `PezzoMappaDto` (senza esito delle condizioni)',
+    errori: [[404, 'mappa-non-trovata'], [409, 'mappa-senza-immagine'], [400, 'pezzo-fuori-immagine'], [400, 'condizione-non-valida'], [404, 'condizione-non-trovata']],
+  },
+  'PUT /api/mappe/pezzi/:id': {
+    sommario: 'Corregge un pezzo della planimetria',
+    descrizione: 'Si cambiano solo i campi inviati (nome vuoto = invariato): zona, posizione, rotazione, specchio, condizioni (`null` le toglie), ordine. Zona e ingombro si riverificano sull\'immagine.',
+    risposta: 'Il pezzo aggiornato: `PezzoMappaDto` (senza esito delle condizioni)',
+    errori: [[404, 'pezzo-non-trovato'], [409, 'mappa-senza-immagine'], [400, 'pezzo-fuori-immagine'], [400, 'condizione-non-valida'], [404, 'condizione-non-trovata']],
+  },
+  'DELETE /api/mappe/pezzi/:id': {
+    sommario: 'Elimina un pezzo della planimetria',
+    descrizione: 'La sua zona torna visibile nell\'immagine di base.',
+    risposta: 'Nessun contenuto (204)',
+    errori: [[404, 'pezzo-non-trovato']],
   },
   'DELETE /api/mappe/spilli/:id': {
     sommario: 'Elimina uno spillo',

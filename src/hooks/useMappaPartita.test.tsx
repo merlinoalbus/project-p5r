@@ -15,7 +15,7 @@ vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero, { notific
 
 const leva: SpilloDto = { id: 8, mappaChiave: 'a', tipo: 'meccanismo', tipoNome: 'Meccanismo', colore: '#64748b', nome: 'Leva', descrizione: '', x: 20, y: 20, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
 /** Costruisce una `MappaDto` di tipo area con la chiave (usata anche come nome) e gli spilli dati; il resto è neutro. */
-const mappa = (chiave: string, spilli: SpilloDto[]): MappaDto => ({ chiave, nome: chiave, tipo: 'area', genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'utente', numeroSpilli: spilli.length, numeroFigli: 0, updatedAt: '', larghezza: 100, altezza: 100, note: '', genitoreNome: null, percorso: [], figli: [], arrivi: [], spilli });
+const mappa = (chiave: string, spilli: SpilloDto[]): MappaDto => ({ chiave, nome: chiave, tipo: 'area', genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'utente', numeroSpilli: spilli.length, numeroFigli: 0, updatedAt: '', larghezza: 100, altezza: 100, note: '', genitoreNome: null, percorso: [], figli: [], arrivi: [], pezzi: [], spilli });
 
 /** Componente di prova: usa `useMappaPartita` sulla mappa `chiave` (partita 7), mostra chiave e spilli con lo stato
  *  «segnato» e offre i pulsanti per le azioni sul primo spillo (raccolto sì/no, stato del punto, acquisto) e per ricaricare. */

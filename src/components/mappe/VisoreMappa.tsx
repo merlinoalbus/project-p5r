@@ -10,6 +10,7 @@
 
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
+import { areaConPezzi, mascheraZone, statoPezzo, stileImmagineMascherata, stilePezzo } from '../../utils/pezziMappa';
 import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
@@ -34,8 +35,19 @@ import { useSuggerimenti } from '../../stores/suggerimentiStore';
 
 export type StatoPuntoMappa = 'ottenuto' | 'esaurito' | null;
 
-/** Strumento attivo dell'editor: selezione e spostamento, aggiunta di un nuovo spillo, incolla dello spillo copiato. */
-export type StrumentoEditor = 'seleziona' | 'aggiungi' | 'incolla';
+/** Strumento attivo dell'editor: selezione e spostamento, aggiunta di un nuovo spillo, incolla dello spillo copiato, ritaglio di
+ *  un pezzo della planimetria (102: si trascina un rettangolo sull'immagine). */
+export type StrumentoEditor = 'seleziona' | 'aggiungi' | 'incolla' | 'ritaglia';
+
+/** I pezzi della planimetria nell'editor (102): selezione, ritaglio di una zona, spostamento. Coordinate in pixel dell'immagine. */
+export interface StrumentiPezzi {
+  selezionatoId: number | null;
+  onSeleziona: (id: number | null) => void;
+  /** Rettangolo trascinato con lo strumento «ritaglia» (almeno 2 × 2 px, dentro l'immagine). */
+  onRitaglia: (zona: { x: number; y: number; larghezza: number; altezza: number }) => void;
+  /** Fine del trascinamento di un pezzo (strumento «seleziona»): il nuovo angolo in alto a sinistra. */
+  onSposta: (id: number, x: number, y: number) => void;
+}
 
 export interface StrumentiEditor {
   strumento: StrumentoEditor;
@@ -49,6 +61,8 @@ export interface StrumentiEditor {
    * visore basta un clic, ma qui il clic seleziona per modificare: senza questo, per visitare il
    * passaggio appena messo bisognava cercare un pulsante in fondo al pannello. */
   onVisita?: (mappa: string) => void;
+  /** I pezzi della planimetria (102): senza, i pezzi nell'editor si vedono ma non si toccano. */
+  pezzi?: StrumentiPezzi;
 }
 
 interface Props {
@@ -199,7 +213,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // l'altezza del popup dello spillo, misurata quando è ancorato al punto (vedi `popupSotto`): per spillo, così una nuova selezione rimisura
   const popupRif = useRef<HTMLDivElement | null>(null);
   const [altezzaPopupMisurata, setAltezzaPopupMisurata] = useState<{ id: number; h: number } | null>(null);
-  const [natCaricata, setNatCaricata] = useState<(Dimensioni & { src: string; area: AreaMappa | null }) | null>(null);
+  const [natCaricata, setNatCaricata] = useState<(Dimensioni & { src: string; img: HTMLImageElement }) | null>(null);
   const [zoomEsplicito, setZoomEsplicito] = useState<number | null>(null);
   const [panEsplicito, setPanEsplicito] = useState<Punto | null>(null);
   const [tipiNascosti, setTipiNascosti] = useState<Set<TipoSpillo>>(new Set());
@@ -244,7 +258,15 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Dimensioni naturali: dal DTO quando note, altrimenti dall'immagine caricata, altrimenti un quadrato di riserva.
   const caricata = natCaricata?.src === src ? natCaricata : null;
   const nat: Dimensioni = caricata ?? (mappa.larghezza && mappa.altezza ? { w: mappa.larghezza, h: mappa.altezza } : { w: DIMENSIONE_RISERVA, h: DIMENSIONE_RISERVA });
-  const fit = inquadraturaMappa(nat, dim, caricata?.area ?? null, mappa.spilli);
+  // I pezzi della planimetria (102): le loro zone d'origine sono cancellate dall'immagine e non contano nell'area visibile, i pezzi
+  // posati sì. Le zone si ricavano da una firma, così la scansione dei pixel si rifà solo quando cambiano davvero (non a ogni
+  // ricarica della mappa, che arriva con oggetti nuovi).
+  const pezzi = mappa.pezzi ?? [];
+  const firmaZone = pezzi.map((p) => `${p.sorgente.x},${p.sorgente.y},${p.sorgente.larghezza},${p.sorgente.altezza}`).join(';');
+  const zone = useMemo<AreaMappa[]>(() => (firmaZone ? firmaZone.split(';').map((z) => { const [x, y, w, h] = z.split(',').map(Number); return { x, y, w, h }; }) : []), [firmaZone]);
+  const areaVisibile = useMemo(() => (caricata ? areaImmagine(caricata.img, zone) : null), [caricata, zone]);
+  const maschera = useMemo(() => mascheraZone({ w: nat.w, h: nat.h }, zone.map((z) => ({ sorgente: { x: z.x, y: z.y, larghezza: z.w, altezza: z.h } }))), [nat.w, nat.h, zone]);
+  const fit = inquadraturaMappa(nat, dim, areaConPezzi(areaVisibile, pezzi), mappa.spilli);
   const zoomMin = fit.zoom;
   const zoomMax = zoomMin * FATTORE_ZOOM_MASSIMO;
   const zoom = zoomEsplicito === null ? zoomMin : limita(zoomEsplicito, zoomMin, zoomMax);
@@ -355,15 +377,37 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
   };
 
-  // Puntatori: trascinamento, pinch, click sulla mappa (editor), trascinamento di uno spillo (editor).
+  /** Il punto dello schermo in pixel dell'immagine (102: i pezzi), interi e dentro l'immagine. */
+  const pixel = (clientX: number, clientY: number): Punto => {
+    const r = tela.current?.getBoundingClientRect();
+    const x = r ? (clientX - r.left - pan.x) / zoom : 0;
+    const y = r ? (clientY - r.top - pan.y) / zoom : 0;
+    return { x: Math.round(limita(x, 0, nat.w)), y: Math.round(limita(y, 0, nat.h)) };
+  };
+
+  // Puntatori: trascinamento, pinch, click sulla mappa (editor), trascinamento di uno spillo (editor), ritaglio di una zona e
+  // trascinamento di un pezzo (editor, 102).
   const puntatori = useRef(new Map<number, Punto>());
-  const gesto = useRef<{ tipo: 'trascina'; x: number; y: number; px: number; py: number; mosso: boolean } | { tipo: 'pinch'; d0: number; z0: number; cx: number; cy: number; px: number; py: number } | { tipo: 'spillo'; id: number; mosso: boolean; x: number; y: number } | null>(null);
+  const gesto = useRef<{ tipo: 'trascina'; x: number; y: number; px: number; py: number; mosso: boolean } | { tipo: 'pinch'; d0: number; z0: number; cx: number; cy: number; px: number; py: number } | { tipo: 'spillo'; id: number; mosso: boolean; x: number; y: number }
+    | { tipo: 'ritaglia'; x0: number; y0: number } | { tipo: 'pezzo'; id: number; mosso: boolean; x: number; y: number; px0: number; py0: number; w: number; h: number } | null>(null);
   const [trascinato, setTrascinato] = useState<{ id: number; x: number; y: number } | null>(null);
+  /** Il rettangolo che si sta ritagliando e il pezzo che si sta trascinando (102), in pixel dell'immagine. */
+  const [rettangolo, setRettangolo] = useState<{ x: number; y: number; larghezza: number; altezza: number } | null>(null);
+  const [pezzoTrascinato, setPezzoTrascinato] = useState<{ id: number; x: number; y: number } | null>(null);
   const [trascinando, setTrascinando] = useState(false);
   const schermoStretto = useSchermoStretto();
+  /** Dove va un pezzo trascinato: la posizione di partenza più lo spostamento a schermo diviso per lo zoom, in pixel interi e con
+   *  l'ingombro tutto dentro l'immagine. */
+  const posizionePezzo = (g: { x: number; y: number; px0: number; py0: number; w: number; h: number }, clientX: number, clientY: number): Punto => ({
+    x: Math.round(limita(g.px0 + (clientX - g.x) / zoom, 0, Math.max(0, nat.w - g.w))),
+    y: Math.round(limita(g.py0 + (clientY - g.y) / zoom, 0, Math.max(0, nat.h - g.h))),
+  });
+  /** Il rettangolo fra due punti, in pixel interi. */
+  const rettangoloFra = (a: Punto, b: Punto) => ({ x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), larghezza: Math.abs(a.x - b.x), altezza: Math.abs(a.y - b.y) });
 
   /** Registra il puntatore e ne cattura gli eventi: col secondo dito inizia un pinch (distanza,
-   * zoom e centro di partenza), col primo un trascinamento se non c'è già un gesto in corso. */
+   * zoom e centro di partenza), col primo un trascinamento — o, con «ritaglia» nell'editor, il rettangolo del pezzo — se non c'è
+   * già un gesto in corso. */
   const suPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     puntatori.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -371,8 +415,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       const [a, b] = [...puntatori.current.values()];
       const r = e.currentTarget.getBoundingClientRect();
       gesto.current = { tipo: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y), z0: zoom, cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top, px: pan.x, py: pan.y };
+      setRettangolo(null);
     } else if (puntatori.current.size === 1 && !gesto.current) {
-      gesto.current = { tipo: 'trascina', x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, mosso: false };
+      if (editor?.strumento === 'ritaglia' && editor.pezzi) {
+        const p = pixel(e.clientX, e.clientY);
+        gesto.current = { tipo: 'ritaglia', x0: p.x, y0: p.y };
+        setRettangolo({ x: p.x, y: p.y, larghezza: 0, altezza: 0 });
+      } else gesto.current = { tipo: 'trascina', x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, mosso: false };
     }
   };
   /** Fa avanzare il gesto in corso: il pinch scala lo zoom col rapporto fra le distanze tenendo
@@ -397,6 +446,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     } else if (g.tipo === 'spillo') {
       if (Math.abs(e.clientX - g.x) + Math.abs(e.clientY - g.y) > 4) g.mosso = true;
       if (g.mosso) { const p = percentuali(e.clientX, e.clientY); if (p) setTrascinato({ id: g.id, x: p.x, y: p.y }); }
+    } else if (g.tipo === 'ritaglia') {
+      setRettangolo(rettangoloFra({ x: g.x0, y: g.y0 }, pixel(e.clientX, e.clientY)));
+    } else if (g.tipo === 'pezzo') {
+      // il pezzo segue il puntatore (spostamento a schermo diviso per lo zoom), sempre tutto dentro l'immagine
+      if (Math.abs(e.clientX - g.x) + Math.abs(e.clientY - g.y) > 4) g.mosso = true;
+      if (g.mosso) setPezzoTrascinato({ id: g.id, ...posizionePezzo(g, e.clientX, e.clientY) });
     }
   };
   /** Chiude il gesto: il pinch finisce quando resta meno di due dita; uno spillo trascinato
@@ -409,6 +464,19 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     if (g.tipo === 'pinch') { if (puntatori.current.size < 2) gesto.current = null; return; }
     gesto.current = null;
     setTrascinando(false);
+    if (g.tipo === 'ritaglia') {
+      // un tocco senza rettangolo (meno di 2 × 2 px) non ritaglia niente
+      const zona = rettangoloFra({ x: g.x0, y: g.y0 }, pixel(e.clientX, e.clientY));
+      setRettangolo(null);
+      if (zona.larghezza >= 2 && zona.altezza >= 2) editor?.pezzi?.onRitaglia(zona);
+      return;
+    }
+    if (g.tipo === 'pezzo') {
+      // la posizione finale dall'evento (non dall'anteprima, che potrebbe essere di un fotogramma prima)
+      if (g.mosso) { const fine = posizionePezzo(g, e.clientX, e.clientY); editor?.pezzi?.onSposta(g.id, fine.x, fine.y); }
+      setPezzoTrascinato(null);
+      return;
+    }
     if (g.tipo === 'spillo') {
       if (g.mosso && editor) { const p = percentuali(e.clientX, e.clientY); if (p) editor.onSposta(g.id, p.x, p.y); }
       setTrascinato(null);
@@ -421,17 +489,22 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       // «Aggiungi» o «Incolla» in mano, dove prima la chiusura non veniva mai eseguita.
       setGruppoAperto(null);
       if (editor && editor.strumento !== 'seleziona') { const p = percentuali(e.clientX, e.clientY); if (p) editor.onClickMappa(p.x, p.y); }
-      else seleziona(null);
+      else { seleziona(null); editor?.pezzi?.onSeleziona(null); }
     }
   };
-  /** Puntatore annullato dal sistema: dimentica puntatori, gesto e spillo trascinato senza salvare nulla. */
-  const annullaGesto = () => { puntatori.current.clear(); gesto.current = null; setTrascinato(null); setTrascinando(false); };
+  /** Puntatore annullato dal sistema: dimentica puntatori, gesto, spillo e pezzo trascinati e rettangolo senza salvare nulla. */
+  const annullaGesto = () => { puntatori.current.clear(); gesto.current = null; setTrascinato(null); setRettangolo(null); setPezzoTrascinato(null); setTrascinando(false); };
 
   // Spilli visibili: filtri per tipo, raccolti nascosti, ricerca.
   const tipiPresenti = useMemo(() => TIPI_SPILLO.filter((t) => mappa.spilli.some((s) => s.tipo === t)), [mappa.spilli]);
   const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto).length, [mappa.spilli]);
   const filtraBloccati = Boolean(partitaId) && (!editor || vistaGiornoCorrente === true);
-  const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter(nascostoPerCondizioni).length : 0), [mappa.spilli, filtraBloccati]);
+  // anche i pezzi (102) senza le loro condizioni: si contano e ricompaiono, in trasparenza, con lo stesso comando dei pin
+  const pezziBloccati = useMemo(() => (filtraBloccati ? (mappa.pezzi ?? []).filter((p) => statoPezzo(p, true, false) === 'nascosto').length : 0), [mappa.pezzi, filtraBloccati]);
+  const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter(nascostoPerCondizioni).length : 0) + pezziBloccati, [mappa.spilli, filtraBloccati, pezziBloccati]);
+  const pezziDaDisegnare = useMemo(() => (mappa.pezzi ?? []).map((p) => ({ p, stato: statoPezzo(p, filtraBloccati, mostraNonDisponibili) })).filter((x) => x.stato !== 'nascosto'), [mappa.pezzi, filtraBloccati, mostraNonDisponibili]);
+  /** Nell'editor, i comandi dei pezzi (102): selezione, ritaglio, spostamento. */
+  const strumentiPezzi = editor?.pezzi ?? null;
   const ricercaNorm = (scelta ? scelta.ricerca ?? '' : ricerca).trim().toLowerCase();
   /** Uno spillo che non soddisfa le sue condizioni non c'è **di regola**, e ricompare solo se lo si chiede.
    *
@@ -567,7 +640,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     try { await onAcquisto(s, articolo, fatto); } finally { setOccupato(false); }
   };
 
-  const stileLivello: CSSProperties = { transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, width: nat.w, height: nat.h };
+  const stileLivello: CSSProperties = { transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, width: nat.w, height: nat.h, '--zoom-mappa': zoom } as CSSProperties;
   const cursore = editor && editor.strumento !== 'seleziona' ? 'cursor-crosshair' : 'cursor-grab';
   const percorsoTesto = mappa.percorso.map((p) => p.nome).join(' › ');
 
@@ -702,7 +775,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
         >
           <div className="visore-mappa__livello" style={stileLivello}>
             {src ? (
-              <img src={src} alt={`Mappa: ${mappa.nome}`} className="visore-mappa__immagine" draggable={false} onLoad={(e) => { const img = e.currentTarget; if (img.naturalWidth && img.naturalHeight) setNatCaricata({ src: src!, w: img.naturalWidth, h: img.naturalHeight, area: areaImmagine(img) }); }} />
+              // le zone d'origine dei pezzi (102) sono cancellate sempre (scelta dell'utente): una maschera alfa sull'immagine di base
+              <img src={src} alt={`Mappa: ${mappa.nome}`} className="visore-mappa__immagine" draggable={false} style={stileImmagineMascherata(maschera)} data-zone-cancellate={zone.length || undefined}
+                onLoad={(e) => { const img = e.currentTarget; if (img.naturalWidth && img.naturalHeight) setNatCaricata({ src: src!, w: img.naturalWidth, h: img.naturalHeight, img }); }} />
             ) : (
               <div className="visore-mappa__senza-immagine" role="img" aria-label="Nessuna immagine di base">
                 <IconMappa size={64} />
@@ -710,6 +785,32 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <span className="text-[13px] text-text-secondary">Caricala dall'editor oppure sposta gli spilli sulla griglia.</span>
               </div>
             )}
+            {/* i pezzi posati (102), sotto i pin: parte del disegno della mappa, ritagliati dalla stessa immagine */}
+            {/* nell'editor (102) le zone già ritagliate si vedono tratteggiate: sono cancellate e non si ritagliano di nuovo per sbaglio */}
+            {src && strumentiPezzi && pezzi.map((p) => (
+              <div key={`zona-${p.id}`} className={`visore-mappa__zona-pezzo ${p.id === strumentiPezzi.selezionatoId ? 'visore-mappa__zona-pezzo--selezionata' : ''}`} data-zona-pezzo={p.uid} aria-hidden="true"
+                style={{ left: p.sorgente.x, top: p.sorgente.y, width: p.sorgente.larghezza, height: p.sorgente.altezza }} />
+            ))}
+            {src && pezziDaDisegnare.map(({ p, stato }) => {
+              const pos = pezzoTrascinato?.id === p.id ? { ...p, posizione: { x: pezzoTrascinato.x, y: pezzoTrascinato.y } } : p;
+              const stile = stilePezzo(pos, src, nat);
+              const modificabile = !!strumentiPezzi && editor?.strumento === 'seleziona';
+              return (
+                <div key={p.id} className={`visore-mappa__pezzo ${stato === 'trasparente' ? 'visore-mappa__pezzo--non-disponibile' : ''} ${modificabile ? 'visore-mappa__pezzo--modificabile' : ''} ${p.id === strumentiPezzi?.selezionatoId ? 'visore-mappa__pezzo--selezionato' : ''}`}
+                  style={{ ...stile.esterno, pointerEvents: modificabile ? 'auto' : 'none' }} data-pezzo={p.uid} aria-hidden="true" title={modificabile ? p.nome : undefined}
+                  onPointerDown={modificabile ? (e) => {
+                    // come uno spillo: si seleziona subito e, trascinato oltre la soglia, si sposta (salvato al rilascio)
+                    e.stopPropagation();
+                    strumentiPezzi!.onSeleziona(p.id);
+                    const ing = { w: Number(stile.esterno.width), h: Number(stile.esterno.height) };
+                    gesto.current = { tipo: 'pezzo', id: p.id, mosso: false, x: e.clientX, y: e.clientY, px0: p.posizione.x, py0: p.posizione.y, ...ing };
+                    tela.current?.setPointerCapture?.(e.pointerId);
+                  } : undefined}>
+                  <div style={stile.interno} />
+                </div>
+              );
+            })}
+            {rettangolo && <div className="visore-mappa__ritaglio" data-ritaglio aria-hidden="true" style={{ left: rettangolo.x, top: rettangolo.y, width: rettangolo.larghezza, height: rettangolo.altezza }} />}
             {singoli.map((s) => {
               const pos = trascinato?.id === s.id ? trascinato : s;
               const attivo = s.id === selezionatoId;

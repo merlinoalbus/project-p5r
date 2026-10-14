@@ -4,6 +4,8 @@
 // ============================================================
 //
 // Ogni modifica viene salvata subito tramite l'API (niente stato «non salvato» da perdere); il posizionamento degli spilli esiste solo qui.
+// Dal 2026-10-14 la sezione «Pezzi» (102): «Ritaglia pezzo» trasforma una zona dell'immagine scelta col mouse in un pezzo da posare,
+// ruotare, specchiare e mostrare con le condizioni (`FormPezzo`); sostituire l'immagine di una mappa con dei pezzi chiede conferma.
 // ============================================================
 
 import { etichettaPlanimetria, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
@@ -17,7 +19,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, aggiornaSpillo, creaPezzoMappa, eliminaPezzoMappa, isApiError, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -29,13 +31,14 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { VisoreMappa, GalleriaSpillo, type StrumentiEditor, type StrumentoEditor } from '../components/mappe/VisoreMappa';
 import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { PassaggiMappa } from '../components/mappe/PassaggiMappa';
+import { FormPezzo } from '../components/mappe/FormPezzo';
 
 import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
 import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import { ritornoMappe } from '../utils/ritornoMappe';
-import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
+import type { DatiPezzoMappa, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../types';
 
 
 /** Il testo da notificare per un errore: il messaggio se è un `Error`, altrimenti il testo predefinito. */
@@ -93,9 +96,15 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [appunti, setAppunti] = useState<AppuntiSpillo | null>(leggiAppunti);
   const [tipoNuovo, setTipoNuovo] = useState<TipoSpillo>('nota');
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
+  /** Il pezzo della planimetria selezionato (102): uno spillo o un pezzo alla volta. */
+  const [pezzoId, setPezzoId] = useState<number | null>(null);
   const [sezione, setSezione] = useState('spilli');
-  /** Seleziona uno spillo (o nessuno con null); selezionandone uno il pannello torna alla sezione «Spilli». */
-  const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null)setSezione('spilli'); };
+  /** Seleziona uno spillo (o nessuno con null); selezionandone uno il pannello torna alla sezione «Spilli» e il pezzo si deseleziona. */
+  const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null){setSezione('spilli');setPezzoId(null);} };
+  /** Seleziona un pezzo (o nessuno): il pannello passa alla sezione «Pezzi» e lo spillo si deseleziona. */
+  const selezionaPezzo = (id: number | null) => { setPezzoId(id); if (id !== null) { setSezione('pezzi'); setSelezionatoId(null); } };
+  /** L'immagine nuova in attesa di conferma su una mappa con dei pezzi (102: 409 `mappa-con-pezzi`). */
+  const [immagineDaConfermare, setImmagineDaConfermare] = useState<{ file: File; messaggio: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [confermaEliminaMappa, setConfermaEliminaMappa] = useState(false);
   const [nuovaMappaAperta, setNuovaMappaAperta] = useState(false);
@@ -140,9 +149,34 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
     onSposta: (id, x, y) => void esegui(() => aggiornaSpillo(id, { x, y })),
     // doppio tocco su uno spostamento: si visita l'arrivo senza uscire dalla modifica
     onVisita: vai,
+    // i pezzi della planimetria (102): la zona trascinata con «Ritaglia pezzo» diventa un pezzo, selezionato e pronto da posare
+    pezzi: {
+      selezionatoId: pezzoId,
+      onSeleziona: selezionaPezzo,
+      onRitaglia: (zona) => void esegui(async () => {
+        const p = await creaPezzoMappa(chiave, { sorgente: zona });
+        selezionaPezzo(p.id);
+        setStrumento('seleziona');
+      }, `Pezzo ritagliato (${zona.larghezza}×${zona.altezza} px): la sua zona è cancellata dalla mappa. Trascinalo dove va, o scrivi la posizione nel pannello.`),
+      onSposta: (id, x, y) => void esegui(() => aggiornaPezzoMappa(id, { posizione: { x, y } })),
+    },
   };
+  /**
+   * Carica l'immagine di base. Su una mappa con dei pezzi il server chiede conferma (409 `mappa-con-pezzi`, scelta dell'utente del
+   * 2026-10-14: «Chiedere conferma ed eliminarli»): si apre la finestra, e confermando si ricarica con `eliminaPezzi`.
+   */
+  const caricaImmagine = (file: File) => esegui(async () => {
+    try {
+      await caricaImmagineMappa(chiave, file);
+      notifica('success', 'Immagine di base caricata (resta nella tua istanza).');
+    } catch (err) {
+      if (isApiError(err, 'mappa-con-pezzi')) { setImmagineDaConfermare({ file, messaggio: err.message }); return; }
+      throw err;
+    }
+  });
 
   const selezionato = dati?.spilli.find((s) => s.id === selezionatoId) ?? null;
+  const pezzoSelezionato = dati?.pezzi.find((p) => p.id === pezzoId) ?? null;
   /** Copia uno spillo negli appunti (in pagina e nella memoria di sessione), passa allo strumento «Incolla» e spiega come incollarlo. */
   const copia = (a: AppuntiSpillo) => {
     setAppunti(a); scriviAppunti(a); setStrumento('incolla');
@@ -185,7 +219,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                 await albero.ricarica();
               }, 'Mappa collegata creata: lo spillo ora è un passaggio verso di lei.')}
               onSalvaMappa={(d) => esegui(async()=>{const aggiornata=await aggiornaMappa(chiave,d);await albero.ricarica();if(aggiornata.chiave!==chiave)vai(aggiornata.chiave);}, 'Mappa salvata.')}
-              onImmagine={(file) => esegui(() => caricaImmagineMappa(chiave, file), 'Immagine di base caricata (resta nella tua istanza).')}
+              onImmagine={caricaImmagine}
               onScaricaDallaGuida={() => esegui(async () => {
                 if (dati.entita?.tipo === 'quartiere') await scaricaPiantaQuartiere(dati.entita.chiave);
               }, 'Pianta scaricata dalla guida nella tua istanza.')}
@@ -207,12 +241,27 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                 const pacchetto = JSON.parse(await file.text()) as EsportazioneMappeDto;
                 const esito = await importaMappe(pacchetto, sovrascrivi);
                 await albero.ricarica();
-                notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}${esito.condizioniScartate ? `; ${esito.condizioniScartate} condizioni scartate perché citano chiavi assenti dalla Guida` : ''}${esito.vociScartate ? `; ${esito.vociScartate} voci della guida scartate (inesistenti, descrittive o di un altro Palazzo)` : ''}.`);
+                notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${esito.pezzi} pezzi, ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}${esito.condizioniScartate ? `; ${esito.condizioniScartate} condizioni scartate perché citano chiavi assenti dalla Guida` : ''}${esito.vociScartate ? `; ${esito.vociScartate} voci della guida scartate (inesistenti, descrittive o di un altro Palazzo)` : ''}${esito.pezziScartati ? `; ${esito.pezziScartati} pezzi scartati perché escono dall’immagine della loro mappa` : ''}${esito.pezziEliminati ? `; ${esito.pezziEliminati} pezzi tolti perché ritagliati da un’immagine poi sostituita` : ''}.`);
               })}
               onVai={vai}
+              pezzoSelezionato={pezzoSelezionato}
+              onSelezionaPezzo={selezionaPezzo}
+              onSalvaPezzo={(id, d) => esegui(() => aggiornaPezzoMappa(id, d), 'Pezzo salvato.')}
+              onEliminaPezzo={(id) => esegui(async () => { await eliminaPezzoMappa(id); setPezzoId(null); }, 'Pezzo eliminato: la sua zona torna visibile nella mappa.')}
             />
           }
         />
+      )}
+      {dati && (
+        // la sostituzione dell'immagine di una mappa con dei pezzi (102): il messaggio del server dice quanti se ne vanno
+        <Modal titolo="Sostituire l’immagine di base?" aperta={immagineDaConfermare !== null} onChiudi={() => setImmagineDaConfermare(null)}
+          azioni={<>
+            <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setImmagineDaConfermare(null)}>Annulla</button>
+            <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Sostituisci ed elimina i pezzi" disabled={occupato}
+              onClick={() => { const da = immagineDaConfermare; setImmagineDaConfermare(null); if (da) void esegui(async () => { await caricaImmagineMappa(chiave, da.file, { eliminaPezzi: true }); setPezzoId(null); }, 'Immagine di base sostituita; i pezzi ritagliati dall’immagine di prima sono stati eliminati.'); }} />
+          </>}>
+          <p className="m-0 text-[13px]">{immagineDaConfermare?.messaggio} I pezzi sono ritagli in pixel di quell’immagine: su un’altra ritaglierebbero zone sbagliate.</p>
+        </Modal>
       )}
       {dati && (
         <Modal titolo={`Eliminare la mappa «${dati.nome}»?`} aperta={confermaEliminaMappa} onChiudi={() => setConfermaEliminaMappa(false)}
@@ -262,6 +311,11 @@ interface PropsPannello {
   onEsporta: () => void;
   onImporta: (file: File, sovrascrivi: boolean) => Promise<void>;
   onVai: (chiave: string) => void;
+  /** I pezzi della planimetria (102): quello selezionato, la selezione, il salvataggio e l'eliminazione. */
+  pezzoSelezionato: PezzoMappaDto | null;
+  onSelezionaPezzo: (id: number | null) => void;
+  onSalvaPezzo: (id: number, dati: DatiPezzoMappa) => Promise<void>;
+  onEliminaPezzo: (id: number) => Promise<void>;
 }
 
 /** Pannello laterale dell'editor: strumenti, proprietà dello spillo, immagine e proprietà della mappa, albero, esportazione/importazione. */
@@ -282,8 +336,36 @@ function PannelloEditor(p: PropsPannello) {
   return (
     <>
       <nav className="editor-mappa__sezioni" aria-label="Sezioni dell’editor">
-        {[['spilli','Spilli'],['mappa','Mappa'],['collegamenti','Collegamenti'],['file','File']].map(([id,nome]) => <button key={id} type="button" aria-pressed={sezione === id} onClick={() => setSezione(id)}>{nome}</button>)}
+        {[['spilli','Spilli'],['pezzi','Pezzi'],['mappa','Mappa'],['collegamenti','Collegamenti'],['file','File']].map(([id,nome]) => <button key={id} type="button" aria-pressed={sezione === id} onClick={() => setSezione(id)}>{nome}</button>)}
       </nav>
+      {/* I pezzi della planimetria (102, 2026-10-14): zone dell'immagine scelte dall'utente, cancellate e posate altrove con condizioni */}
+      <div hidden={sezione !== 'pezzi'} className="editor-mappa__contenuto">
+      <section className="visore-mappa__sezione" aria-label="Pezzi della planimetria">
+        <h3 className="visore-mappa__intestazione">Pezzi</h3>
+        <p className="m-0 text-[12px] text-text-muted">Le parti disegnate a parte nell’immagine (muri mobili, passerelle…): con «Ritaglia pezzo» trascini un rettangolo attorno a una, che sparisce dalla mappa e diventa un pezzo da posare dove va, della stessa misura, con le condizioni che lo mostrano.</p>
+        <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'ritaglia'} icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ritaglia pezzo" dettaglio={strumento === 'ritaglia' ? 'trascina un rettangolo sulla mappa' : 'poi trascina sulla mappa'}
+          disabled={occupato || !(mappa.immagineUrl || assetConsegnato)} onClick={() => p.onStrumento(strumento === 'ritaglia' ? 'seleziona' : 'ritaglia')} />
+        {!(mappa.immagineUrl || assetConsegnato) && <p className="m-0 text-[12px] text-text-muted">Serve un’immagine di base da cui ritagliare.</p>}
+        {mappa.pezzi.length === 0
+          ? <p className="m-0 text-[12px] text-text-muted">Nessun pezzo su questa mappa.</p>
+          : (
+            <ul className="m-0 p-0 list-none flex flex-col" aria-label="Pezzi di questa mappa">
+              {mappa.pezzi.map((pz) => (
+                <li key={pz.id}>
+                  <button type="button" className={`visore-mappa__voce ${pz.id === p.pezzoSelezionato?.id ? 'visore-mappa__voce--attiva' : ''}`} aria-pressed={pz.id === p.pezzoSelezionato?.id} onClick={() => p.onSelezionaPezzo(pz.id === p.pezzoSelezionato?.id ? null : pz.id)}>
+                    <span className="flex-1 min-w-0 truncate">{pz.nome}</span>
+                    <span className="text-[11px] text-text-muted">{pz.sorgente.larghezza}×{pz.sorgente.altezza}{pz.rotazione ? ` · ${pz.rotazione}°` : ''}{pz.condizioni.length ? ` · ${pz.condizioni.length === 1 ? '1 condizione' : `${pz.condizioni.length} condizioni`}` : ''}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+      </section>
+      {p.pezzoSelezionato && (
+        <FormPezzo key={`${p.pezzoSelezionato.id}-${p.pezzoSelezionato.updatedAt}`} pezzo={p.pezzoSelezionato} immagine={mappa.larghezza && mappa.altezza ? { larghezza: mappa.larghezza, altezza: mappa.altezza } : null}
+          elenchi={p.elenchi} occupato={occupato} onSalva={(d) => p.onSalvaPezzo(p.pezzoSelezionato!.id, d)} onElimina={() => p.onEliminaPezzo(p.pezzoSelezionato!.id)} onChiudi={() => p.onSelezionaPezzo(null)} />
+      )}
+      </div>
       <div hidden={sezione !== 'spilli'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Strumenti">
         <h3 className="visore-mappa__intestazione">Strumenti</h3>

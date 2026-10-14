@@ -27,7 +27,7 @@ const mappa = (extra: Partial<MappaDto> = {}): MappaDto => ({
   ...riassunto({ chiave: 'sottopasso', nome: 'Sottopasso' }),
   larghezza: null, altezza: null, note: '', genitoreNome: 'Shibuya',
   percorso: [{ chiave: 'quartiere', nome: 'Shibuya' }, { chiave: 'sottopasso', nome: 'Sottopasso' }],
-  figli: [], spilli: [], arrivi: [], ...extra,
+  figli: [], spilli: [], arrivi: [], pezzi: [], ...extra,
 });
 
 // lo spillo «laterale» che l'albero non mostrava: porta a una sorella, non a una figlia

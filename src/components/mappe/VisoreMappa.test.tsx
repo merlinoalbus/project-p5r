@@ -19,7 +19,7 @@ function spillo(extra: Partial<SpilloDto> & { id: number; nome: string; tipo: Sp
 const mappa: MappaDto = {
   chiave: 'citta-shibuya', nome: 'Shibuya', nomeRivisto: false, tipo: 'quartiere', genitore: 'tokyo', genitoreNome: 'Tokyo', ordine: 1, immagineUrl: null, asset: null, entita: { tipo: 'quartiere', chiave: 'shibuya' }, origine: 'seed',
   numeroSpilli: 4, numeroFigli: 1, updatedAt: '2026-09-04T00:00:00.000Z', larghezza: 1000, altezza: 500, note: '',
-  percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], arrivi: [],
+  percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], arrivi: [], pezzi: [],
   figli: [{ chiave: 'shibuya-centro', nome: 'Shibuya centro', nomeRivisto: false, tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'utente', numeroSpilli: 0, numeroFigli: 0, updatedAt: '' }],
   spilli: [
     spillo({ id: 1, nome: 'Untouchable', tipo: 'negozio', tipoNome: 'Negozio', x: 20, y: 20, riferimento: { tipo: 'luogo', chiave: 'shibuya/untouchable' }, dettaglio: { tipo: 'luogo', luogo: { chiave: 'shibuya/untouchable', quartiere: 'shibuya', tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi e munizioni', quando: null }, negozio: { chiave: 'untouchable', nome: 'Untouchable', tipo: 'armi', disponibilita: { stato: 'disponibile', requisiti: [] }, articoli: [{ chiave: 'a1', nome: 'Pistola modello Tkachev', categoria: 'arma', prezzo: 12000, disponibileDal: null, comprato: false, disponibilita: { stato: 'disponibile', requisiti: [] } }, { chiave: 'a2', nome: 'Fucile a pompa Governor', categoria: 'arma', prezzo: 48000, disponibileDal: 'dal 18 giugno', comprato: false, disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'data', stato: 'rosso', testo: 'dal 18 giugno', dettaglio: 'oggi è il 20 aprile', manuale: false, confermato: false }] } }, { chiave: 'a3', nome: 'Proiettili perforanti', categoria: 'munizioni', prezzo: 3000, disponibileDal: null, comprato: false, disponibilita: { stato: 'ignoto', requisiti: [{ indice: 0, tipo: 'manuale', stato: 'grigio', testo: 'rango cliente Oscuro', dettaglio: 'Condizione non verificabile dai dati della partita', manuale: true, confermato: false }] } }] } } }),
@@ -820,4 +820,91 @@ it('un pin con più voci della guida (098): nel popup una riga per voce, ognuna 
   const elenco = within(scheda.getByRole('list', { name: 'Voci della guida' }));
   expect(elenco.getByText('«Infiltrati nel castello»: nella Guida: ottenuto')).toBeInTheDocument();
   expect(elenco.getByText('«Ritorno al castello»: esauribile · non ancora gestito nella Guida')).toBeInTheDocument();
+});
+
+describe('i pezzi della planimetria (102, 2026-10-14)', () => {
+  /** Un pezzo di prova: zona in fondo all'immagine, posato più su; `extra` sovrascrive. */
+  const pezzo = (extra: Partial<MappaDto['pezzi'][number]>): MappaDto['pezzi'][number] => ({
+    id: 1, uid: '1'.repeat(32), nome: 'Muro mobile', sorgente: { x: 100, y: 450, larghezza: 120, altezza: 40 }, posizione: { x: 300, y: 200 }, rotazione: 90,
+    specchio: { orizzontale: true, verticale: false }, condizioni: [], ordine: 0, updatedAt: '', ...extra,
+  });
+  const conPezzi: MappaDto = {
+    ...mappa, immagineUrl: '/pianta.png', spilli: [],
+    pezzi: [
+      pezzo({}),
+      pezzo({ id: 2, uid: '2'.repeat(32), nome: 'Ponte di sera', sorgente: { x: 300, y: 450, larghezza: 80, altezza: 20 }, posizione: { x: 600, y: 100 }, rotazione: 0, specchio: { orizzontale: false, verticale: false },
+        condizioni: [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }], disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'fascia', stato: 'rosso', testo: 'solo di sera', dettaglio: 'ora è giorno', manuale: false, confermato: false }] } }),
+    ],
+  };
+  const disegnati = () => [...document.querySelectorAll<HTMLElement>('[data-pezzo]')];
+
+  it('le zone d\'origine sono cancellate dall\'immagine (tutte, anche dei pezzi nascosti) e ogni pezzo è posato col suo ingombro', () => {
+    monta({ mappa: { ...conPezzi, pezzi: [conPezzi.pezzi[0]] } });
+    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    expect(img).toHaveAttribute('data-zone-cancellate', '1');
+    // la maschera vera, nello stile dell'immagine: un SVG con la zona del pezzo
+    const svg = /data:image\/svg\+xml,([^")]+)/.exec(img.getAttribute('style') ?? '')?.[1] ?? '';
+    expect(decodeURIComponent(svg)).toContain("<rect x='100' y='450' width='120' height='40' fill='black'/>");
+    expect(img.getAttribute('style')).toContain('mask-image');
+    const [p] = disegnati();
+    expect(p).toHaveAttribute('aria-hidden', 'true');
+    // 120 × 40 ruotato di 90°: ingombro 40 × 120 nel punto scelto, in pixel dell'immagine
+    expect(p.style.left).toBe('300px');
+    expect(p.style.top).toBe('200px');
+    expect(p.style.width).toBe('40px');
+    expect(p.style.height).toBe('120px');
+    const dentro = p.firstElementChild as HTMLElement;
+    expect(dentro.style.transform).toBe('rotate(90deg) scale(-1, 1)');
+    expect(dentro.style.backgroundPosition).toBe('-100px -450px');
+    expect(dentro.style.backgroundImage).toContain('/pianta.png');
+  });
+
+  it('con la partita il pezzo senza le sue condizioni è nascosto; «Mostra anche i non ancora disponibili» lo conta e lo mostra in trasparenza', () => {
+    monta({ mappa: conPezzi });
+    expect(screen.getByRole('img', { name: 'Mappa: Shibuya' })).toHaveAttribute('data-zone-cancellate', '2');
+    expect(disegnati().map((d) => d.dataset.pezzo)).toEqual(['1'.repeat(32)]);
+    fireEvent.click(screen.getByRole('button', { name: /Mostra anche i non ancora disponibili \(1\)/ }));
+    const [libero, bloccato] = disegnati();
+    expect(libero).not.toHaveClass('visore-mappa__pezzo--non-disponibile');
+    expect(bloccato).toHaveAttribute('data-pezzo', '2'.repeat(32));
+    expect(bloccato).toHaveClass('visore-mappa__pezzo--non-disponibile');
+  });
+
+  it('senza partita, o nell\'editor con «Giorno corrente» spento, i pezzi si vedono tutti', () => {
+    monta({ mappa: conPezzi, partitaId: null });
+    expect(disegnati()).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: /Mostra anche i non ancora disponibili/ })).toBeNull();
+    cleanup();
+    monta({ mappa: conPezzi, editor: { strumento: 'seleziona', selezionatoId: null, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn() }, vistaGiornoCorrente: false });
+    expect(disegnati()).toHaveLength(2);
+    expect(disegnati().some((d) => d.classList.contains('visore-mappa__pezzo--non-disponibile'))).toBe(false);
+  });
+
+  it('senza pezzi l\'immagine non ha maschera; senza immagine i pezzi non si disegnano', () => {
+    monta({ mappa: { ...conPezzi, pezzi: [] } });
+    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    expect(img).not.toHaveAttribute('data-zone-cancellate');
+    expect(img.getAttribute('style') ?? '').not.toContain('mask');
+    cleanup();
+    monta({ mappa: { ...conPezzi, immagineUrl: null }, partitaId: null });
+    expect(disegnati()).toHaveLength(0);
+  });
+});
+
+it('l\'inquadratura non conta le zone cancellate dei pezzi e comprende i pezzi posati (102)', async () => {
+  const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 600, height: 400, x: 0, y: 0, top: 0, left: 0, right: 600, bottom: 400, toJSON: () => ({}) });
+  const area = vi.spyOn(inquadratura, 'areaImmagine').mockReturnValue({ x: 100, y: 100, w: 200, h: 200 });
+  const fit = vi.spyOn(inquadratura, 'inquadraturaMappa');
+  try {
+    const pezzo = { id: 1, uid: '1'.repeat(32), nome: 'Muro', sorgente: { x: 0, y: 900, larghezza: 100, altezza: 50 }, posizione: { x: 300, y: 250 }, rotazione: 0 as const, specchio: { orizzontale: false, verticale: false }, condizioni: [], ordine: 0, updatedAt: '' };
+    render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, immagineUrl: '/fit.png', larghezza: 1000, altezza: 1000, spilli: [], pezzi: [pezzo] }} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
+    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    Object.defineProperty(img, 'naturalWidth', { value: 1000 });
+    Object.defineProperty(img, 'naturalHeight', { value: 1000 });
+    fireEvent.load(img);
+    // la zona d'origine va esclusa dall'area dei pixel visibili…
+    await waitFor(() => expect(area).toHaveBeenCalledWith(img, [{ x: 0, y: 900, w: 100, h: 50 }]));
+    // …e il pezzo posato (300..400 × 250..300) allarga l'area inquadrata (100..300 × 100..300) fino a 400
+    await waitFor(() => expect(fit).toHaveBeenLastCalledWith(expect.objectContaining({ w: 1000, h: 1000 }), expect.anything(), { x: 100, y: 100, w: 300, h: 200 }, []));
+  } finally { fit.mockRestore(); area.mockRestore(); misura.mockRestore(); }
 });

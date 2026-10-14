@@ -1751,3 +1751,38 @@ le spunte, barra fissa, «Sposta in…» con l'area d'arrivo, stesse regole dell
   «Tutte» prende le voci in elenco (rispetta i filtri per tipo e «Anche le segnate»);
 - la finestra parte dall'area che segue nella guida; le voci arrivano in fondo nell'ordine della guida; una voce già nell'area
   d'arrivo resta dov'è; non nei dedali dei Memento (lì c'è «Area del dedalo»).
+
+## 2026-10-14 — I pezzi delle planimetrie: zone dell'immagine posate sulla mappa con condizioni
+
+Richiesta dell'utente: «in alcune mappe ci sono dei pezzi che sono previsti originariamente per posizionarli sopra il resto come
+parti mobili soggette a condizioni... mi chiedevo se potessi tu permettermi di selezionarle con il mouse (toglierle dalla
+visualizzazione ordinaria e gestirle con le condizioni come i pin in punti specifici della mappa occupando lo stesso spazio
+originale...)», con l'esempio del Museo 2P di Madarame («elementi in basso che vorrei poter selezionare e posizionare sulla mappa
+indicando la condizione per visualizzarli o nasconderli») e la precisazione «devo poter selezionare io aree da gestire come pezzi».
+Scelte dell'utente (AskUserQuestion):
+- la zona d'origine → «Sempre cancellata»;
+- un pezzo senza le sue condizioni → «Nascosto, in trasparenza a richiesta» (con «Mostra anche i non ancora disponibili», come i pin);
+- rotazione → «Sì, rotazione a 90° e specchio».
+
+Conseguenze tecniche (non scelte dell'utente):
+- tabella `pezzo_mappa` (migrazione 102) nel file di gioco: canone per tutte le partite, nel pacchetto e nell'esportazione JSON
+  delle mappe; tutto in **pixel dell'immagine** (i pin usano percentuali arrotondate allo 0,1%, troppo poco per far combaciare un muro);
+- la posizione è l'angolo in alto a sinistra dell'ingombro del pezzo posato; lo specchio si applica prima, la rotazione (oraria,
+  attorno al centro) dopo; zona e ingombro devono stare nell'immagine;
+- le condizioni sono quelle dei pin, comprese quelle sullo stato di un altro pin o di una voce della guida;
+- importazione: un pacchetto che dichiara i pezzi li sostituisce, un pacchetto senza il campo li lascia, un reseed del seed non li
+  tocca; la chiave di mappa «pezzi» è riservata alle rotte.
+- (2° giro, rilievi del validatore) Sostituire l'immagine di una planimetria che ha dei pezzi — scelta dell'utente: «Chiedere
+  conferma ed eliminarli». Il server risponde 409 `mappa-con-pezzi` col numero; con la conferma (`?eliminaPezzi=1`) i pezzi se ne
+  vanno con l'immagine di prima, nella stessa transazione. All'importazione i pezzi si scrivono a immagini importate e quelli che
+  escono dall'immagine della mappa d'arrivo (o tutti, se non ce n'è una) si scartano e si contano in `pezziScartati`.
+- (3° giro, rilievo F3 del validatore) La stessa regola vale per l'importazione: un pacchetto che porta per una mappa un'immagine
+  **diversa** da quella che ha (confronto byte per byte), senza dichiararne i pezzi, toglie i pezzi ritagliati dalla vecchia e li conta
+  in `pezziEliminati` (importare è già la conferma); un'immagine identica li lascia, perché reimportare la propria esportazione
+  non deve perdere nulla.
+- (nota N1 del validatore, chiusa con la voce 2) Il confronto dell'importazione guarda l'immagine che la mappa **mostra** (caricata,
+  asset predefinito, asset originale, come il visore), fotografata all'inizio e riconfrontata alla fine: copre anche un pacchetto
+  che fa puntare la mappa a un'altra immagine già presente o la riporta all'asset.
+- Visore (conseguenze tecniche): le zone si cancellano con una maschera alfa (SVG grande quanto l'immagine) sull'immagine di base,
+  senza ridisegnarla; i pezzi sono ritagli della stessa immagine (sfondo spostato), sotto i pin; le zone cancellate non contano
+  nell'inquadratura iniziale, i pezzi posati sì.

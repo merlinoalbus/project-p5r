@@ -35,7 +35,8 @@ import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpi
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { ammetteCondizioni, categoriaSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
-import type { CondizioneSpilloDto, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
+import type { CondizioneSpilloDto, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
+import { aggiornaPezzo, conPezzi, creaPezzo, eliminaPezzo, pezziPerPacchetto, pezzoDto, righePezzi, rigaPezzo, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, staNellImmagine, type DimensioniMappa } from './pezziMappa.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
@@ -451,6 +452,8 @@ export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
     ...riassunto(r, mappe), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
     immagineUrl: immagine ? `/api/immagini/mappa/${encodeURIComponent(immagine.chiave)}/file?v=${encodeURIComponent(immagine.createdAt)}` : null,
     percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
+    // i pezzi (102): con la partita ognuno porta l'esito delle sue condizioni, come i pin
+    pezzi: righePezzi(chiave).map((p) => pezzoDto(p, ctx.nomi ?? nomiCondizioni(), ctx.st)),
     // dai nomi già letti nel contesto: prima una query in più (P8)
     genitoreNome: r.genitore_chiave ? mappe.nomi.get(r.genitore_chiave) ?? null : null,
   };
@@ -472,7 +475,7 @@ export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string 
  *  l'elenco copra tutte le rotte del router. */
 export const CHIAVI_MAPPA_RISERVATE: ReadonlySet<string> = new Set([
   'accesso', 'albero', 'contenuti', 'entita', 'esporta', 'importa', 'ordine', 'piante-citta',
-  'riferimenti', 'risolvi', 'spilli',
+  'pezzi', 'riferimenti', 'risolvi', 'spilli',
 ]);
 
 /** Una chiave di mappa ammessa: minuscole, cifre e trattini (non all'inizio), al massimo 180 caratteri, non riservata alle rotte. */
@@ -969,11 +972,19 @@ export function eliminaMappa(chiave: string): void {
 }
 
 /** Immagine di base nell'istanza (ambito «mappa», chiave = chiave della mappa); dimensioni lette dall'intestazione PNG/JPEG/WEBP/GIF quando possibile. */
-export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer): MappaDto {
+export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer, opz: { eliminaPezzi?: boolean } = {}): MappaDto {
   chiave=rigaMappa(chiave).chiave;
   const dim = dimensioniImmagine(contenuto);
+  // I pezzi (102) sono ritagli in pixel dell'immagine di prima: su un'altra ritaglierebbero zone sbagliate. Scelta dell'utente
+  // (2026-10-14, «Chiedere conferma ed eliminarli»): senza conferma 409 col numero dei pezzi; con la conferma se ne vanno insieme
+  // alla sostituzione, nella stessa transazione.
+  const pezzi = quantiPezzi(chiave);
+  if (pezzi > 0 && !opz.eliminaPezzi) {
+    throw new HttpError(409, 'mappa-con-pezzi', `La mappa ha ${pezzi === 1 ? '1 pezzo ritagliato' : `${pezzi} pezzi ritagliati`} dall’immagine di prima: sostituendola ${pezzi === 1 ? 'verrà eliminato' : 'verranno eliminati'}.`, { pezzi });
+  }
   // immagine e dimensioni insieme: una mappa con l'immagine nuova e le dimensioni vecchie sbaglierebbe la posizione di ogni pin
   getDb().transaction(() => {
+    if (pezzi > 0) prepared('DELETE FROM pezzo_mappa WHERE mappa_chiave = ?').run(chiave);
     salvaImmagine('mappa', chiave, mime, contenuto);
     prepared("UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, origine = 'utente', updated_at = ? WHERE chiave = ?").run(chiave, dim?.larghezza ?? null, dim?.altezza ?? null, nowIso(), chiave);
   })();
@@ -1004,6 +1015,64 @@ export function dimensioniImmagine(b: Buffer): { larghezza: number; altezza: num
     }
   }
   return null;
+}
+
+/**
+ * Il contenuto dell'immagine che il visore mostra per la mappa, nello stesso ordine (`VisoreMappa`: caricata nell'istanza, poi
+ * l'asset predefinito, poi quello originale); null se nessuna ha un contenuto. Serve alle dimensioni e a riconoscere un cambio
+ * d'immagine (i pezzi, 102, sono ritagli di quella).
+ */
+function immagineMostrata(r: RigaMappa): Buffer | null {
+  const candidati: Array<[string, string]> = [];
+  const caricata = immagineDi(r);
+  if (caricata) candidati.push(['mappa', caricata.chiave]);
+  for (const asset of [assetPredefinitoMappa(chiaveMappa(r.chiave)), r.asset]) {
+    const i = asset ? asset.indexOf('/') : -1;
+    if (asset && i > 0) candidati.push([asset.slice(0, i), asset.slice(i + 1)]);
+  }
+  for (const [ambito, chiave] of candidati) {
+    try {
+      return fileImmagine(ambito, chiave).contenuto;
+    } catch {
+      // quell'immagine non c'è (o non ha contenuto): si prova la prossima
+    }
+  }
+  return null;
+}
+
+/** Le dimensioni dell'immagine di una mappa, in pixel: quelle salvate, altrimenti lette dall'immagine mostrata. 409 senza un'immagine leggibile. */
+function dimensioniDellaMappa(r: RigaMappa): DimensioniMappa {
+  if (r.larghezza && r.altezza) return { larghezza: r.larghezza, altezza: r.altezza };
+  const mostrata = immagineMostrata(r);
+  const d = mostrata ? dimensioniImmagine(mostrata) : null;
+  if (d) return d;
+  throw httpErrors.conflict('mappa-senza-immagine', 'La mappa non ha un’immagine di cui conoscere le dimensioni: i pezzi si ritagliano dall’immagine della mappa.');
+}
+
+/** Un pezzo per le risposte dell'editor (senza partita: niente esito delle condizioni). */
+const pezzoPerEditor = (id: number): PezzoMappaDto => pezzoDto(rigaPezzo(id), nomiCondizioni());
+
+/**
+ * Crea un pezzo della planimetria (102) dalla zona scelta nell'editor. Le condizioni sono quelle dei pin, comprese le condizioni
+ * sullo stato di un altro pin o di una voce della guida; zona e posizione si verificano sull'immagine.
+ */
+export function creaPezzoMappa(chiave: string, dati: DatiPezzoMappa & { sorgente: NonNullable<DatiPezzoMappa['sorgente']> }): PezzoMappaDto {
+  const r = rigaMappa(chiave);
+  verificaCondizioni(dati.condizioni, true);
+  const dim = dimensioniDellaMappa(r);
+  return pezzoPerEditor(getDb().transaction(() => creaPezzo(r.chiave, dim, dati).id)());
+}
+
+/** Corregge un pezzo (404 se non c'è): i campi assenti restano. */
+export function aggiornaPezzoMappa(id: number, dati: DatiPezzoMappa): PezzoMappaDto {
+  const p = rigaPezzo(id);
+  verificaCondizioni(dati.condizioni, true);
+  return pezzoPerEditor(aggiornaPezzo(id, dimensioniDellaMappa(rigaMappa(p.mappa_chiave)), dati).id);
+}
+
+/** Elimina un pezzo (404 se non c'è): la sua zona torna visibile nell'immagine di base. */
+export function eliminaPezzoMappa(id: number): void {
+  eliminaPezzo(id);
 }
 
 export interface DatiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
@@ -1407,6 +1476,8 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
     entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
     // tutte le aree della guida contenute (2026-09-29): `entita` ne dichiara una sola, la prima
     ...areePerPacchetto(m.chiave),
+    // i pezzi (102), anche nessuno: un pacchetto che lo dice toglie, importato, quelli che la mappa avesse
+    ...(conPezzi() ? { pezzi: pezziPerPacchetto(m.chiave) } : {}),
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
       ...destinazionePerPacchetto(s.id),
       uid: s.uid,
@@ -1528,7 +1599,7 @@ function identitaRettificata(identita:string): {identita:string;mappa?:string} {
   return r?{identita:identitaSpillo({...r.dopo,riferimento:r.dopo.riferimento??null}),mappa:r.mappa}:{identita};
 }
 
-export interface EsitoImportazione { mappe: number; spilli: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number }
+export interface EsitoImportazione { mappe: number; spilli: number; /** I pezzi delle planimetrie scritti (102). */ pezzi: number; /** I pezzi scartati perché escono dall'immagine della mappa d'arrivo (o la mappa non ne ha una). */ pezziScartati: number; /** I pezzi tolti perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number }
 
 /** Importa un pacchetto (o il seed): per chiave, con `sovrascrivi` sostituisce mappe e spilli esistenti; altrimenti salta le mappe già presenti
  * (il seed aggiorna solo le mappe di origine seed, sostituendo i soli spilli di origine seed e conservando quelli dell'utente). */
@@ -1553,7 +1624,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     verificate.set(s, verificaDestinazioneSpillo(s.destinazione, incoming));
   }
   const origine = opz.origine ?? 'utente';
-  const esito: EsitoImportazione = { mappe: 0, spilli: 0, immagini: 0, saltate: [], condizioniScartate: 0, vociScartate: 0 };
+  const esito: EsitoImportazione = { mappe: 0, spilli: 0, pezzi: 0, pezziScartati: 0, pezziEliminati: 0, immagini: 0, saltate: [], condizioniScartate: 0, vociScartate: 0 };
   getDb().transaction(() => {
     // Uno spostamento conserva l'identità originale, non la mappa corrente.
     // Il fallback richiede una sola sorgente nell'intero seed e un solo erede utente.
@@ -1592,6 +1663,16 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     const vociDiPrima = new Map<string, string[]>();
     /** I pin inseriti con condizioni sullo stato di altri pin: si ricontrollano a pacchetto inserito. */
     const conCondizioniSuPin: number[] = [];
+    /** I pezzi (102) delle mappe che il pacchetto aggiorna: si scrivono in fondo, a immagini importate. */
+    const pezziDaScrivere: Array<{ mappa: string; pezzi: Array<Parameters<typeof sostituisciPezzi>[1][number]> }> = [];
+    /** Le mappe del pacchetto che hanno già dei pezzi, con l'immagine che mostrano adesso: a importazione finita si riconfronta. */
+    const immaginiConPezzi = new Map<string, Buffer | null>();
+    if (conPezzi()) {
+      for (const m of pacchetto.mappe) {
+        if (!chiaveValida(m.chiave) || immaginiConPezzi.has(m.chiave) || quantiPezzi(m.chiave) === 0) continue;
+        immaginiConPezzi.set(m.chiave, immagineMostrata(rigaMappa(m.chiave)));
+      }
+    }
     const adesso = nowIso();
     // Lo schema non cambia durante l'importazione: colonne e tabelle si controllano una volta, non per ogni mappa e ogni pin
     // (rilievo P5 della verifica, 2026-10-03; nei test lo schema può essere indietro, per questo si controllano).
@@ -1644,6 +1725,19 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         const v=schema.safeParse({contesti:m.contesti??[],gruppo:m.gruppoImmagini??null});
         if(!v.success || new Set(v.data.contesti.map(c=>c.id)).size!==v.data.contesti.length)throw httpErrors.badRequest('contesti-non-validi','Contesti della planimetria non validi o duplicati.');
         prepared('INSERT INTO mappa_presentazione VALUES(?,?,?) ON CONFLICT(mappa_chiave) DO UPDATE SET contesti_json=excluded.contesti_json,gruppo_immagini_json=excluded.gruppo_immagini_json').run(m.chiave,JSON.stringify(v.data.contesti),v.data.gruppo?JSON.stringify(v.data.gruppo):null);
+      }
+      // I pezzi (102) sono sempre dell'utente: un pacchetto che li dichiara sostituisce quelli della mappa, salvo un reseed (seed sopra
+      // seed, senza «sovrascrivi»), che non li tocca; un pacchetto di prima, senza il campo, li lascia com'erano. Le condizioni si
+      // ripuliscono come quelle dei pin (le chiavi assenti dalla Guida si scartano e si contano).
+      // Si scrivono in fondo, a immagini importate: si verificano sull'immagine d'arrivo (rilievo F2 del validatore).
+      if (m.pezzi !== undefined && conPezzi() && !(origine === 'seed' && !opz.sovrascrivi)) {
+        const forma = schemaPezziPacchetto.safeParse(m.pezzi);
+        if (!forma.success) throw httpErrors.badRequest('pezzi-non-validi', `Pezzi della planimetria non validi nella mappa '${chiaveMappa(m.chiave)}'.`);
+        pezziDaScrivere.push({ mappa: m.chiave, pezzi: forma.data.map((p) => {
+          const { valide, scartate } = condizioniConChiaviEsistenti(p.condizioni as RequisitoSpillo[] | undefined, pinDelPacchetto);
+          esito.condizioniScartate += scartate.length;
+          return { ...p, condizioni: valide };
+        }) });
       }
       // Con «sovrascrivi» la mappa viene sostituita per intero; altrimenti (seed sopra seed) si rimpiazzano solo gli spilli della stessa
       // origine, così gli spilli aggiunti dall'utente su una mappa del seed sopravvivono al reseed.
@@ -1801,6 +1895,28 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       if (!pacchetto.mappe.some((m) => m.immagine === chiave && !esito.saltate.includes(m.chiave))) continue;
       salvaImmagine('mappa', chiave, img.mime, Buffer.from(img.base64, 'base64'));
       esito.immagini++;
+    }
+    // I pezzi (102), a immagini scritte: ognuno deve stare nell'immagine della mappa d'arrivo (zona e ingombro, come all'API);
+    // quelli che escono, o tutti se la mappa non ha un'immagine di cui leggere le dimensioni, si scartano e si contano.
+    for (const { mappa, pezzi } of pezziDaScrivere) {
+      let dim: DimensioniMappa | null = null;
+      try { dim = dimensioniDellaMappa(rigaMappa(mappa)); } catch { dim = null; }
+      const dentro = dim ? pezzi.filter((p) => staNellImmagine(p, dim)) : [];
+      esito.pezziScartati += pezzi.length - dentro.length;
+      esito.pezzi += sostituisciPezzi(mappa, dentro);
+    }
+    // Una mappa con dei pezzi che, importata, mostra un'immagine diversa da prima (contenuto nuovo, un'altra immagine già presente,
+    // l'asset predefinito al posto di quella caricata…) perde i pezzi ritagliati dalla vecchia, se il pacchetto non gliene porta di
+    // nuovi: la regola dell'editor (scelta dell'utente del 2026-10-14, «Chiedere conferma ed eliminarli»; importare è già la
+    // conferma). Si confronta l'immagine mostrata, byte per byte: una identica li lascia (rilievo F3 e nota N1 del validatore).
+    const conPezziNuovi = new Set(pezziDaScrivere.map((p) => p.mappa));
+    for (const [mappa, prima] of immaginiConPezzi) {
+      if (conPezziNuovi.has(mappa)) continue;
+      const dopo = immagineMostrata(rigaMappa(mappa));
+      if (prima === null ? dopo === null : dopo !== null && prima.equals(dopo)) continue;
+      const n = quantiPezzi(mappa);
+      prepared('DELETE FROM pezzo_mappa WHERE mappa_chiave = ?').run(mappa);
+      esito.pezziEliminati += n;
     }
   })();
   return esito;

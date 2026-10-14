@@ -2,7 +2,7 @@
 // API mappe a livelli e spilli (Fase 13): albero, dettaglio con stato della partita, editor, esportazione/importazione
 // ============================================================
 
-import type { DestinazioneSpillo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto, VoceCollegabileDto } from '../../types';
+import type { DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
 import { apiDelete, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
@@ -35,8 +35,17 @@ export const impostaStanzaMappa = (chiave: string, dati: { con: string | null; n
 /** Nuovo ordine delle mappe figlie di `genitore` (null = radici): l'elenco di chiavi è l'ordine; risponde con i riassunti riordinati. */
 export const riordinaMappe =(genitore: string | null, chiavi: string[]): Promise<MappaRiassuntoDto[]> => apiPut('/mappe/ordine', { genitore, chiavi });
 
-/** Carica l'immagine di base della mappa (file dell'utente, mai nel repository): corpo grezzo `image/*`. */
-export const caricaImmagineMappa = (chiave: string, file: File): Promise<MappaDto> => inviaFile('PUT', `/mappe/${encodeURIComponent(chiave)}/immagine`, file);
+/** Carica l'immagine di base della mappa (file dell'utente, mai nel repository): corpo grezzo `image/*`. Su una mappa con dei pezzi
+ *  (102) il server risponde 409 `mappa-con-pezzi` finché non si conferma con `eliminaPezzi` (i pezzi se ne vanno con l'immagine). */
+export const caricaImmagineMappa = (chiave: string, file: File, opz: { eliminaPezzi?: boolean } = {}): Promise<MappaDto> =>
+  inviaFile('PUT', `/mappe/${encodeURIComponent(chiave)}/immagine${queryString({ eliminaPezzi: opz.eliminaPezzi ? '1' : undefined })}`, file);
+
+/** Ritaglia un pezzo dalla zona scelta (102): in pixel dell'immagine; senza posizione resta dove stava. */
+export const creaPezzoMappa = (mappa: string, dati: DatiPezzoMappa & { sorgente: NonNullable<DatiPezzoMappa['sorgente']> }): Promise<PezzoMappaDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/pezzi`, dati);
+/** Corregge un pezzo (posizione, rotazione, specchio, nome, condizioni…): i campi assenti restano. */
+export const aggiornaPezzoMappa = (id: number, dati: DatiPezzoMappa): Promise<PezzoMappaDto> => apiPut(`/mappe/pezzi/${id}`, dati);
+/** Elimina un pezzo: la sua zona torna visibile nell'immagine di base. */
+export const eliminaPezzoMappa = (id: number): Promise<void> => apiDelete(`/mappe/pezzi/${id}`);
 
 /** Aggiunge uno spillo alla mappa (tipo, nome e posizione obbligatori); risponde con lo spillo creato. */
 export const creaSpillo =(mappa: string, dati: DatiSpilloApi & { tipo: TipoSpillo; nome: string; x: number; y: number }): Promise<SpilloDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/spilli`, dati);
@@ -68,4 +77,4 @@ export const aggiornaImmagineSpillo = (id: number, dati: { didascalia?: string; 
 /** Toglie una schermata dallo spillo; risponde con lo spillo aggiornato. */
 export const eliminaImmagineSpillo = (id: number): Promise<SpilloDto> => apiDelete(`/mappe/spilli/immagini/${id}`);
 /** Importa un pacchetto nel formato dell'esportazione (con `sovrascrivi` le mappe già presenti si sostituiscono, altrimenti si saltano); risponde con i conteggi e con ciò che è stato saltato o scartato. */
-export const importaMappe =(pacchetto: EsportazioneMappeDto, sovrascrivi: boolean): Promise<{ mappe: number; spilli: number; immagini: number; saltate: string[]; condizioniScartate: number; vociScartate: number }> => apiPost('/mappe/importa', { pacchetto, sovrascrivi }, { timeoutMs: 120_000 });
+export const importaMappe =(pacchetto: EsportazioneMappeDto, sovrascrivi: boolean): Promise<{ mappe: number; spilli: number; pezzi: number; pezziScartati: number; pezziEliminati: number; immagini: number; saltate: string[]; condizioniScartate: number; vociScartate: number }> => apiPost('/mappe/importa', { pacchetto, sovrascrivi }, { timeoutMs: 120_000 });
