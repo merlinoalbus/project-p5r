@@ -9,8 +9,8 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaArea, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto } from '../services/dungeonService.js';
-import { bodyArea, bodyAreaDedalo, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente } from '../schemas/guidaDungeon.js';
+import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaArea, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
+import { bodyArea, bodyAreaDedalo, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
@@ -23,7 +23,7 @@ import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
-import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto, TrasferisciVociGiornata } from '../../shared/types.js';
+import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
 import { bodyAggiornaVoce, bodyDotiIncontro, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
@@ -272,6 +272,11 @@ router.put('/punti/:chiave', validate({ params: paramsChiaveGuida, body: bodyPun
 router.delete('/punti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   eliminaPunto(String(req.params.chiave));
   res.status(204).end();
+});
+/** Più voci di un Palazzo insieme in un'altra sua area (2026-10-14): in fondo, nel loro ordine, tutto o niente. */
+router.post('/punti/sposta-in-area', validate({ body: bodySpostaPuntiInArea }), (req, res) => {
+  const b = req.body as SpostaPuntiInArea;
+  res.json(spostaPuntiInArea(b.chiavi, b.area));
 });
 router.put('/punti/:chiave/sposta', validate({ params: paramsChiaveGuida, body: bodySpostaPunto }), (req, res) => {
   res.json(spostaPunto(String(req.params.chiave), (req.body as { verso: -1 | 1 }).verso));

@@ -797,7 +797,12 @@ bassa della colonna dell'area: le voci (`punto_interesse`) sempre visibili, anch
 eliminazione, «Su»/«Giù» (`PUT /api/compendio/punti/:chiave/sposta`, `spostaPunto`: ricompatta l'ordine dell'area) e
 «Aggiungi una voce». Dal 2026-10-12 nel modulo Modifica «Area del Palazzo» (prop `areePalazzo`) sposta la voce in un'altra area
 dello stesso Palazzo (`area` nel `PUT /api/compendio/punti/:chiave`, `aggiornaPunto`): in fondo, con la sua chiave, coi passi se è
-un Enigma e con le sue schede della guida senza mappa (`spillo.area_guida_chiave`); non per un passo, non nei Memento. Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
+un Enigma e con le sue schede della guida senza mappa (`spillo.area_guida_chiave`); non per un passo, non nei Memento. Dal
+2026-10-14 più voci insieme: «Sposta voci in un’altra area» apre la scelta (righe da spuntare, «Tutte»/«Nessuna» sulle voci in
+elenco, barra fissa con `@container`: la guida sta anche in una colonna di 308 px) e la finestra `SpostaVociInArea` sceglie
+l'area d'arrivo (`POST /api/compendio/punti/sposta-in-area`, `{ chiavi, area }` → `PuntiSpostatiDto`; `spostaPuntiInArea`):
+stesse regole e stesse funzioni della voce singola (`verificaAltraAreaDelPalazzo`, `seguonoLaVoce`), in fondo nell'ordine della
+guida (area, poi posto), una voce già lì resta dov'è, tutto o niente in una transazione. Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
 /api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta in una tabella sua, **molti a molti**
 (`spillo_voce(spillo_id, voce_chiave)`, migrazione 098 del 2026-10-09; prima il campo `spillo.voce_chiave` della 094, che la 098 copia
 e toglie ricostruendo `spillo`; `ON DELETE CASCADE` dai due lati), separato dal riferimento, che resta la destinazione o il Confidente

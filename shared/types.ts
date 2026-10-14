@@ -1199,6 +1199,20 @@ export interface VociTrasferiteDto {
   voci: AzionePercorsoDto[];
 }
 
+/** Più voci della guida di un Palazzo da spostare insieme in un'altra sua area (2026-10-14). */
+export interface SpostaPuntiInArea {
+  /** Le chiavi delle voci (non passi di un Enigma: seguono il loro Enigma). */
+  chiavi: string[];
+  /** L'area di destinazione, dello stesso Palazzo. */
+  area: string;
+}
+
+/** L'esito: l'area di destinazione e le voci spostate (in fondo, nell'ordine); quelle che erano già lì non ci sono. */
+export interface PuntiSpostatiDto {
+  area: string;
+  spostate: string[];
+}
+
 export interface PercorsoGiornoRiassuntoDto {
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;

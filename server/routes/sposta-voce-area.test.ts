@@ -92,3 +92,72 @@ describe('spostare una voce in un\'altra area del Palazzo', () => {
     expect(bodyPunto.parse({ area: SALA })).toEqual({ area: SALA });
   });
 });
+
+// Richiesta dell'utente del 2026-10-14: «come faccio a spostare più voci del palazzo insieme?» — scelta di più voci e un'area d'arrivo.
+describe('spostare più voci insieme in un\'altra area del Palazzo', () => {
+  let partita: number;
+  const URL = '/api/compendio/punti/sposta-in-area';
+  const nuova = async (area: string, nome: string, tipo: string, contenitore?: string) =>
+    (await request(app).post(`/api/compendio/aree/${area}/punti`).send({ nome, tipo, ...(contenitore ? { contenitore } : {}) }).expect(201)).body.data as PuntoInteresseDto;
+  const dove = (chiave: string) => prepared('SELECT area_chiave, ordine, contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(chiave) as { area_chiave: string; ordine: number; contenitore_chiave: string | null };
+  /** Le voci di un'area fuori da ogni Enigma, nell'ordine della guida. */
+  const elenco = (area: string) => prepared('SELECT chiave FROM punto_interesse WHERE area_chiave = ? AND contenitore_chiave IS NULL ORDER BY ordine, chiave').pluck().all(area) as string[];
+
+  beforeAll(async () => {
+    dbDiProva();
+    partita = ((await request(app).post('/api/partite').send({ nome: 'Sposta insieme' })).body.data as { id: number }).id;
+  });
+  afterAll(() => closeDb());
+
+  it('le voci arrivano in fondo all\'area nell\'ordine che avevano, con passi, stato e schede della guida; una già lì resta dov\'è', async () => {
+    const a = await nuova(INGRESSO, 'Prima voce', 'forziere');
+    const enigma = await nuova(INGRESSO, 'Enigma insieme', 'puzzle');
+    const passo = await nuova(INGRESSO, 'Passo insieme', 'meccanismo', enigma.chiave);
+    const b = await nuova(INGRESSO, 'Terza voce', 'storia');
+    const giaLi = await nuova(SALA, 'Già nella sala', 'storia');
+    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: a.chiave, stato: 'ottenuto' }).expect(200);
+    // una scheda della guida senza mappa di una voce dell'ingresso: va con lei
+    const scheda = prepared(`SELECT s.id, s.riferimento_chiave AS voce FROM spillo s JOIN punto_interesse p ON p.chiave = s.riferimento_chiave
+      WHERE s.mappa_chiave IS NULL AND s.area_guida_chiave = ? AND s.riferimento_tipo = 'punto' AND p.contenitore_chiave IS NULL ORDER BY s.id LIMIT 1`).get(INGRESSO) as { id: number; voce: string };
+    expect(scheda).toBeDefined();
+    // l'ordine atteso è quello che hanno nell'ingresso (la voce della guida prima delle voci create ora, che stanno in fondo)
+    const attese = elenco(INGRESSO).filter((c) => [a.chiave, enigma.chiave, b.chiave, scheda.voce].includes(c));
+    expect(attese).toEqual([scheda.voce, a.chiave, enigma.chiave, b.chiave]);
+    const restano = elenco(INGRESSO).filter((c) => !attese.includes(c));
+    const primaDellaSala = elenco(SALA);
+    const posto = dove(giaLi.chiave).ordine;
+    // chieste in disordine: arrivano nell'ordine della guida; quella già nella sala non si muove
+    const r = await request(app).post(URL).send({ chiavi: [b.chiave, giaLi.chiave, enigma.chiave, scheda.voce, a.chiave], area: SALA });
+    expect(r.status, JSON.stringify(r.body)).toBe(200);
+    expect(r.body.data).toEqual({ area: SALA, spostate: attese });
+    expect(elenco(SALA)).toEqual([...primaDellaSala, ...attese]);
+    expect(dove(giaLi.chiave).ordine).toBe(posto);
+    expect(dove(passo.chiave)).toMatchObject({ area_chiave: SALA, contenitore_chiave: enigma.chiave });
+    expect(elenco(INGRESSO)).toEqual(restano);
+    expect(prepared('SELECT area_guida_chiave FROM spillo WHERE id = ?').pluck().get(scheda.id)).toBe(SALA);
+    const sala = ((await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${partita}`).expect(200)).body.data as DungeonDettaglioDto).aree.find((x) => x.chiave === SALA)!.punti;
+    expect(sala.find((p) => p.chiave === a.chiave)).toMatchObject({ stato: 'ottenuto' });
+  });
+
+  it('tutto o niente: una voce che non si può spostare o non c\'è ferma tutte; ripetizioni e liste vuote si rifiutano', async () => {
+    const v = await nuova(INGRESSO, 'Resta all\'ingresso', 'storia');
+    // il passo sta in un'area che viene dopo l'ingresso: nell'ordine della guida la voce valida si sposterebbe per prima
+    const enigma = await nuova(SALA, 'Enigma che resta', 'puzzle');
+    const passo = await nuova(SALA, 'Passo che resta', 'meccanismo', enigma.chiave);
+    const terza = prepared("SELECT chiave FROM dungeon_area WHERE dungeon_chiave = 'kamoshida' ORDER BY ordine LIMIT 1 OFFSET 2").pluck().get() as string;
+    expect(terza).toBeDefined();
+    const prova = async (corpo: Record<string, unknown>) => { const r = await request(app).post(URL).send(corpo); return [r.status, r.body.error?.code]; };
+    expect(await prova({ chiavi: [v.chiave, passo.chiave], area: terza })).toEqual([400, 'passo-segue-enigma']);
+    expect(await prova({ chiavi: [v.chiave, 'voce-che-non-esiste'], area: SALA })).toEqual([404, 'punto-non-trovato']);
+    const altro = prepared("SELECT chiave FROM dungeon_area WHERE dungeon_chiave = 'madarame' ORDER BY ordine LIMIT 1").pluck().get() as string;
+    expect(await prova({ chiavi: [v.chiave], area: altro })).toEqual([400, 'area-di-altro-palazzo']);
+    expect(await prova({ chiavi: [v.chiave], area: 'area-che-non-esiste' })).toEqual([404, 'area-non-trovata']);
+    const trama = prepared("SELECT chiave FROM punto_interesse WHERE tipo = 'trama' AND area_chiave = 'mementos-02-aiyatsbus' LIMIT 1").pluck().get() as string;
+    expect(await prova({ chiavi: [trama], area: 'mementos-03-chemdah' })).toEqual([400, 'area-solo-nei-palazzi']);
+    expect((await request(app).post(URL).send({ chiavi: [v.chiave, v.chiave], area: SALA })).status).toBe(400);
+    expect((await request(app).post(URL).send({ chiavi: [], area: SALA })).status).toBe(400);
+    expect(dove(v.chiave).area_chiave).toBe(INGRESSO);
+    expect(dove(enigma.chiave).area_chiave).toBe(SALA);
+    expect(dove(passo.chiave).area_chiave).toBe(SALA);
+  });
+});

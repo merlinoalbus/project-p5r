@@ -1740,3 +1740,14 @@ Conseguenze tecniche (non scelte dell'utente):
   avvenuti (es. l'incontro col Confidente resta registrato al giorno di partenza); l'annullamento usa gli effetti salvati. Le voci arrivano in fondo alla fascia scelta nell'ordine della giornata di partenza (giorno
   prima di sera); le fasce lasciate si ricompattano. Tutto o niente: una voce che non c'è fa fallire la richiesta senza
   scrivere. È canone come ogni modifica della giornata (vale per tutte le partite ed esce col pacchetto).
+
+## 2026-10-14 — Spostare più voci del Palazzo insieme
+
+Domanda dell'utente: «come faccio a spostare più voci del palazzo insieme?». Fino ad allora si poteva solo una voce alla volta,
+dal modulo Modifica («Area del Palazzo», 2026-10-12). Ho proposto di fare per il Palazzo come per il diario (scelta delle voci con
+le spunte, barra fissa, «Sposta in…» con l'area d'arrivo, stesse regole della voce singola, tutto o niente); l'utente ha risposto
+«sì». Dettagli tecnici della proposta (non scelte dell'utente):
+- le righe da scegliere sono le voci dell'area fuori da ogni Enigma: i passi seguono il loro Enigma e non si scelgono da soli;
+  «Tutte» prende le voci in elenco (rispetta i filtri per tipo e «Anche le segnate»);
+- la finestra parte dall'area che segue nella guida; le voci arrivano in fondo nell'ordine della guida; una voce già nell'area
+  d'arrivo resta dov'è; non nei dedali dei Memento (lì c'è «Area del dedalo»).

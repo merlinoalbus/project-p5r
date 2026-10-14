@@ -398,6 +398,12 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'punto-non-trovato']],
   },
+  'POST /api/compendio/punti/sposta-in-area': {
+    sommario: 'Sposta più voci della guida insieme in un\'altra area dello stesso Palazzo',
+    descrizione: 'Corpo `{ chiavi, area }` (da 1 a 500 chiavi, senza ripetizioni; 2026-10-14). Per ogni voce valgono le regole di `area` in `PUT /api/compendio/punti/:chiave`: non nei Memento, un\'area che esiste e dello stesso Palazzo, non un passo (i passi seguono il loro Enigma). Le voci arrivano in fondo all\'area, nell\'ordine che avevano (area di guida, poi posto), coi loro passi e con le loro schede della guida senza mappa; la chiave resta, e con lei stati delle partite, pin e marcatore. Una voce già in quell\'area resta dov\'è. Tutto o niente: un errore su una voce non sposta nessuna.',
+    risposta: '`PuntiSpostatiDto`: `area` e le chiavi `spostate`, nell\'ordine d\'arrivo',
+    errori: [[400, 'area-solo-nei-palazzi'], [400, 'area-di-altro-palazzo'], [400, 'passo-segue-enigma'], [404, 'area-non-trovata'], [404, 'punto-non-trovato']],
+  },
   'PUT /api/compendio/punti/:chiave/sposta': {
     sommario: 'Sposta un punto di un posto su o giù nella guida dell\'area',
     descrizione: '`verso` -1 su, +1 giù, fra le voci accanto (quelle fuori da ogni Enigma, o i passi dello stesso Enigma); l\'ordine si ricompatta. Oltre il primo o l\'ultimo posto è un errore (409).',

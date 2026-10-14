@@ -17,7 +17,7 @@ import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
-import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
+import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
@@ -636,6 +636,57 @@ function ordineInFondo(area: string, contenitore: string | null, areaDedalo: str
   return (prepared('SELECT COALESCE(MAX(ordine), -1) AS n FROM punto_interesse WHERE area_chiave = ? AND contenitore_chiave IS ? AND area_dedalo_chiave IS ?').get(area, contenitore, areaDedalo) as { n: number }).n + 1;
 }
 
+/**
+ * Un'altra area dello stesso Palazzo per la voce (2026-10-12): non nei Memento (lì si cambia l'area del dedalo), un'area che
+ * esiste (404), dello stesso Palazzo (400), e non per un passo, che sta nell'area del suo Enigma (`contenitore` non nullo).
+ */
+function verificaAltraAreaDelPalazzo(p: RigaPunto, dedalo: boolean, contenitore: string | null, area: string): void {
+  if (dedalo) throw httpErrors.badRequest('area-solo-nei-palazzi', `«${p.nome}» è una voce dei Memento: lì si cambia l’area del dedalo, non il dedalo.`);
+  const destinazione = prepared('SELECT a.nome, a.dungeon_chiave FROM dungeon_area a WHERE a.chiave = ?').get(area) as { nome: string; dungeon_chiave: string } | undefined;
+  if (!destinazione) throw httpErrors.notFound('area-non-trovata', `L'area '${area}' non esiste.`);
+  const palazzo = (prepared('SELECT dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(p.area_chiave) as { dungeon_chiave: string }).dungeon_chiave;
+  if (destinazione.dungeon_chiave !== palazzo) throw httpErrors.badRequest('area-di-altro-palazzo', `«${destinazione.nome}» è un’area di un altro Palazzo: una voce resta nel suo Palazzo.`);
+  if (contenitore !== null) throw httpErrors.badRequest('passo-segue-enigma', `«${p.nome}» è un passo: sta nell’area del suo Enigma (si sposta l’Enigma, e i passi lo seguono, o la si toglie prima dall’Enigma).`);
+}
+
+/**
+ * Quel che segue una voce passata in un'altra area (dentro la transazione di chi chiama): la chiave resta (stati delle partite,
+ * pin delle planimetrie, marcatore e condizioni la citano per chiave); i passi di un Enigma la seguono; le schede della guida
+ * senza mappa (pin con il riferimento «punto» alla voce o a un suo passo, nell'area di prima) passano con lei, altrimenti
+ * resterebbero nell'area che ha lasciato.
+ */
+function seguonoLaVoce(puntoChiave: string, areaPrima: string, areaNuova: string): void {
+  prepared('UPDATE punto_interesse SET area_chiave = ? WHERE contenitore_chiave = ?').run(areaNuova, puntoChiave);
+  prepared(`UPDATE spillo SET area_guida_chiave = ? WHERE mappa_chiave IS NULL AND area_guida_chiave = ? AND riferimento_tipo = 'punto'
+    AND riferimento_chiave IN (SELECT chiave FROM punto_interesse WHERE chiave = ? OR contenitore_chiave = ?)`).run(areaNuova, areaPrima, puntoChiave, puntoChiave);
+}
+
+/**
+ * Sposta più voci insieme in un'altra area dello stesso Palazzo (richiesta dell'utente, 2026-10-14: «come faccio a spostare più
+ * voci del palazzo insieme?»). Le stesse regole della voce singola (`aggiornaPunto` con `area`), per ognuna; arrivano in fondo
+ * all'area, nell'ordine che avevano (area di guida, poi posto); una voce che è già lì resta dov'è. Tutto o niente: una voce che
+ * non c'è (404) o che non si può spostare (400) fa fallire la richiesta senza aver scritto niente.
+ */
+export function spostaPuntiInArea(chiavi: string[], area: string): PuntiSpostatiDto {
+  const righe = chiavi.map((chiave) => {
+    const p = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(chiave) as RigaPunto | undefined;
+    if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${chiave}' non esiste.`);
+    return p;
+  });
+  const daSpostare = righe.filter((p) => p.area_chiave !== area);
+  for (const p of daSpostare) verificaAltraAreaDelPalazzo(p, eDedalo(p.area_chiave), p.contenitore_chiave ?? null, area);
+  // nell'ordine della guida: l'area (il suo posto nel Palazzo), poi il posto della voce nell'area
+  const ordineArea = new Map((prepared('SELECT chiave, ordine FROM dungeon_area').all() as Array<{ chiave: string; ordine: number }>).map((a) => [a.chiave, a.ordine]));
+  daSpostare.sort((a, b) => (ordineArea.get(a.area_chiave) ?? 0) - (ordineArea.get(b.area_chiave) ?? 0) || a.ordine - b.ordine || a.chiave.localeCompare(b.chiave));
+  getDb().transaction(() => {
+    for (const p of daSpostare) {
+      prepared('UPDATE punto_interesse SET area_chiave = ?, ordine = ? WHERE chiave = ?').run(area, ordineInFondo(area, null, null), p.chiave);
+      seguonoLaVoce(p.chiave, p.area_chiave, area);
+    }
+  })();
+  return { area, spostate: daSpostare.map((p) => p.chiave) };
+}
+
 /** Un punto della guida (sicura, enigma, boss…): testo, tipo, esauribilità, posto nell'elenco, Enigma di cui è un passo. */
 export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoInteresseDto {
   const p = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
@@ -666,14 +717,7 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   // un'altra area dello stesso Palazzo (2026-10-12): non nei Memento, e non per un passo (sta nell'area del suo Enigma)
   const cambiaArea = dati.area !== undefined && dati.area !== p.area_chiave;
   const areaGuida = cambiaArea ? dati.area! : p.area_chiave;
-  if (cambiaArea) {
-    if (dedalo) throw httpErrors.badRequest('area-solo-nei-palazzi', `«${p.nome}» è una voce dei Memento: lì si cambia l’area del dedalo, non il dedalo.`);
-    const destinazione = prepared('SELECT a.nome, a.dungeon_chiave FROM dungeon_area a WHERE a.chiave = ?').get(areaGuida) as { nome: string; dungeon_chiave: string } | undefined;
-    if (!destinazione) throw httpErrors.notFound('area-non-trovata', `L'area '${areaGuida}' non esiste.`);
-    const palazzo = (prepared('SELECT dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(p.area_chiave) as { dungeon_chiave: string }).dungeon_chiave;
-    if (destinazione.dungeon_chiave !== palazzo) throw httpErrors.badRequest('area-di-altro-palazzo', `«${destinazione.nome}» è un’area di un altro Palazzo: una voce resta nel suo Palazzo.`);
-    if (dopo !== null) throw httpErrors.badRequest('passo-segue-enigma', `«${p.nome}» è un passo: sta nell’area del suo Enigma (si sposta l’Enigma, e i passi lo seguono, o la si toglie prima dall’Enigma).`);
-  }
+  if (cambiaArea) verificaAltraAreaDelPalazzo(p, dedalo, dopo, areaGuida);
   if (dopo !== null && dopo !== prima) verificaEnigma(p, p.area_chiave, dopo);
   // l'area del dedalo (099): un passo sta in quella del suo Enigma; un'altra area si sceglie solo dentro lo stesso dedalo
   if (dati.areaDedalo !== undefined) {
@@ -691,14 +735,7 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
     const ordine = dati.ordine ?? (dopo !== prima || areaDopo !== areaPrima || cambiaArea ? ordineInFondo(areaGuida, dopo, areaDopo) : p.ordine);
     prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ?, contenitore_chiave = ?, area_dedalo_chiave = ?, dettagli_json = ?, area_chiave = ? WHERE chiave = ?').run(
       dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), ordine, dopo, areaDopo, dettagli, areaGuida, puntoChiave);
-    if (cambiaArea) {
-      // la voce cambia area con quel che è suo: la chiave resta (stati delle partite, pin delle planimetrie, marcatore e condizioni
-      // la citano per chiave); i passi di un Enigma la seguono; le schede della guida senza mappa (pin con il riferimento «punto»
-      // alla voce o a un suo passo, nell'area di prima) passano con lei, altrimenti resterebbero nell'area che ha lasciato
-      prepared('UPDATE punto_interesse SET area_chiave = ? WHERE contenitore_chiave = ?').run(areaGuida, puntoChiave);
-      prepared(`UPDATE spillo SET area_guida_chiave = ? WHERE mappa_chiave IS NULL AND area_guida_chiave = ? AND riferimento_tipo = 'punto'
-        AND riferimento_chiave IN (SELECT chiave FROM punto_interesse WHERE chiave = ? OR contenitore_chiave = ?)`).run(areaGuida, p.area_chiave, puntoChiave, puntoChiave);
-    }
+    if (cambiaArea) seguonoLaVoce(puntoChiave, p.area_chiave, areaGuida);
     // i passi di un Enigma seguono la sua area del dedalo
     if (areaDopo !== areaPrima) prepared('UPDATE punto_interesse SET area_dedalo_chiave = ? WHERE contenitore_chiave = ?').run(areaDopo, puntoChiave);
     if (areePersona) collegaPersonaAlleAree(puntoChiave, areePersona);

@@ -10,6 +10,8 @@
 // Una voce collegata ha lo stato dei suoi pin (lo dice il server); i punti non vengono riconciliati in automatico:
 // «lascia i punti come sono... li sistemo io via via a mano». Per questo la riga dice «da collegare» quando la voce è di
 // un tipo che un pin può rappresentare e non ne ha ancora.
+// Dal 2026-10-14 («come faccio a spostare più voci del palazzo insieme?») «Sposta voci in un’altra area» apre la scelta: le voci
+// dell'area diventano righe da spuntare e «Sposta in…» le manda insieme in fondo a un'altra area del Palazzo (`SpostaVociInArea`).
 // ============================================================
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -26,6 +28,7 @@ import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { MappaIncorporata } from '../mappe/MappaIncorporata';
+import { SpostaVociInArea } from './SpostaVociInArea';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
 /** I limiti dell'altezza della mappa di scelta: 220 è il minimo del visore incorporato (`.visore-mappa--incorporato`), sopra i 460 non serve. */
@@ -85,6 +88,17 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   /** La voce a cui si stanno collegando i pin, e su quale planimetria. */
   const [collegando, setCollegando] = useState<{ punto: string; mappa: string | null; ricerca: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
+  /** Le voci scelte per spostarle insieme in un'altra area del Palazzo (2026-10-14), legate all'area in cui si è aperta la scelta:
+   *  cambiando area la scelta non vale più. `spostando`: la finestra dell'area d'arrivo è aperta. */
+  const [scelta, setScelta] = useState<{ area: string; chiavi: Set<string> } | null>(null);
+  const [spostando, setSpostando] = useState(false);
+  const scelte = scelta && scelta.area === area.chiave ? scelta.chiavi : null;
+  /** Aggiunge o toglie voci dalla scelta. */
+  const scegli = (chiavi: string[], dentro: boolean) => setScelta((s) => {
+    const n = new Set(s && s.area === area.chiave ? s.chiavi : []);
+    for (const c of chiavi) { if (dentro) n.add(c); else n.delete(c); }
+    return { area: area.chiave, chiavi: n };
+  });
   // La mappa di scelta si apre in fondo alla voce, spesso sotto il bordo della colonna che scorre. **Si misura** lo spazio
   // che il contenitore che scorre mostra davvero, si tolgono i comandi della scelta e lì sta la mappa, tutta; poi la si porta
   // in vista. Una formula sull'altezza della finestra non basta: a 1366×657 la colonna parte a 274 px, a 1024×690 a 305,
@@ -123,6 +137,9 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   // (una nota descrittiva fra i passi non ha stato: senza filtri non basta a tenere in vista un Enigma segnato — rilievo del validatore)
   const puntiVisibili = vociDellArea.filter((p) => voceVisibile(p) || (passiPer.get(p.chiave) ?? []).some((x) => voceVisibile(x) && (filtro.size > 0 || !descrittiva(x))));
   const gestitiArea = area.punti.filter((p) => p.stato && !descrittiva(p)).length;
+  /** Spostare più voci insieme (2026-10-14): nei Palazzi con più aree, se l'area ha voci; nei dedali no (lì si cambia l'area del dedalo). */
+  const spostaInsieme = !areaDedalo && !!areePalazzo && areePalazzo.length > 1 && vociDellArea.length > 0;
+  const tutteScelte = !!scelte && puntiVisibili.length > 0 && puntiVisibili.every((p) => scelte.has(p.chiave));
   // La voce da portare in vista dopo un «Ottenuto»/«Esaurito»: si scorre al primo disegno in cui c'è, già aperta, e poi basta.
   const daMostrare = useRef<string | null>(null);
   useEffect(() => {
@@ -360,13 +377,57 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             {gestitiArea > 0 && <button type="button" className={`chip touch text-[11px] ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche le segnate ({gestitiArea})</button>}
           </div>
         )}
-        <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`Voci della guida di ${nomeArea}`}>
+        {/* più voci insieme in un'altra area del Palazzo (2026-10-14): fuori dalla scelta un comando solo; nella scelta la barra, che
+            resta in vista scorrendo, col conto e i comandi */}
+        {spostaInsieme && !scelte && (
+          <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta voci in un’altra area"
+            aria-label="Scegli voci da spostare in un’altra area del Palazzo" disabled={occupato}
+            onClick={() => { setSelezionato(null); setCollegando(null); setNuovoPunto(null); setScelta({ area: area.chiave, chiavi: new Set() }); }} />
+        )}
+        {scelte && (
+          <section className="@container card sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2" aria-label="Sposta voci in un’altra area">
+            {/* la guida sta in una colonna anche stretta (308 px a 1280): conta la larghezza della barra, non della finestra. I comandi
+                non si restringono mai; sotto i 32rem «Fine» sta accanto al conto e «Tutte» / «Sposta in…» prendono la riga sotto, così
+                la barra fissa resta di due righe; sopra, una riga sola */}
+            <span className="min-w-0 flex-1 text-[13px]"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
+              <span className="text-text-muted"> · da spostare in un’altra area</span></span>
+            <div className="order-last flex basis-full gap-2 @lg:order-none @lg:basis-auto">
+              {puntiVisibili.length > 0 && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
+                aria-label={tutteScelte ? 'Togli dalla scelta tutte le voci in elenco' : 'Scegli tutte le voci in elenco'} onClick={() => scegli(puntiVisibili.map((p) => p.chiave), !tutteScelte)} />}
+              <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta in…" disabled={scelte.size === 0} onClick={() => setSpostando(true)} />
+            </div>
+            <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Fine" aria-label="Esci dalla scelta" onClick={() => setScelta(null)} />
+          </section>
+        )}
+        <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={scelte ? `Voci di ${nomeArea} da scegliere` : `Voci della guida di ${nomeArea}`}>
           {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : 'La guida non ha voci per quest’area: aggiungile qui sotto.'}</li>}
           {area.punti.length > 0 && puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessuna voce con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} segnate nascoste)` : ''}.</li>}
-          {puntiVisibili.map((p) => riga(p, vociDellArea))}
+          {/* nella scelta le voci sono righe da spuntare (i passi seguono il loro Enigma e non si scelgono): niente scheda né gesti */}
+          {scelte
+            ? puntiVisibili.map((p) => {
+              const passi = passiPer.get(p.chiave)?.length ?? 0;
+              return (
+                <li key={p.chiave}>
+                  <label className="touch flex cursor-pointer items-start gap-2.5 px-1 py-1.5 text-[13px]">
+                    <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={scelte.has(p.chiave)} onChange={(e) => scegli([p.chiave], e.target.checked)} />
+                    <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
+                    <span className="min-w-0 flex-1">
+                      <span className="font-semibold">{p.nome}</span>
+                      <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.stato ? ` · ${p.stato}` : ''}{passi > 0 ? ` · con ${passi === 1 ? '1 passo' : `${passi} passi`}` : ''}{p.pin.length > 0 ? ` · ${p.pin.length} pin` : ''}</span>
+                    </span>
+                  </label>
+                </li>
+              );
+            })
+            : puntiVisibili.map((p) => riga(p, vociDellArea))}
         </ul>
+        {spostando && scelte && areePalazzo && (
+          <SpostaVociInArea voci={vociDellArea.filter((p) => scelte.has(p.chiave))} passi={vociDellArea.filter((p) => scelte.has(p.chiave)).reduce((n, p) => n + (passiPer.get(p.chiave)?.length ?? 0), 0)}
+            area={areePalazzo.find((a) => a.chiave === area.chiave) ?? { chiave: area.chiave, nome: area.nome, ordine: area.ordine }} aree={areePalazzo}
+            onChiudi={() => setSpostando(false)} onFatto={async () => { setScelta(null); await onRicarica(); }} />
+        )}
         {/* La guida non ha trascritto tutto: quel che manca si aggiunge qui, dove lo si è cercato; poi si sposta dove va. */}
-        {nuovoPunto && !nuovoPunto.contenitore
+        {scelte ? null : nuovoPunto && !nuovoPunto.contenitore
           ? moduloNuovaVoce(nuovoPunto)
           : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" className="self-start" aria-label={areaDedalo ? `Aggiungi una voce di Trama in ${nomeArea}` : undefined} onClick={() => setNuovoPunto({ nome: '', tipo: areaDedalo ? 'trama' : 'altro', contenitore: null })} />}
       </div>

@@ -56,6 +56,11 @@ export const bodyNuovaArea = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional(),
   dopo: z.string().min(1).max(200).nullable().optional(), planimetria: z.string().min(1).max(200).optional(),
 });
+/** Più voci di un Palazzo da spostare insieme in un'altra sua area (2026-10-14): chiavi senza ripetizioni e l'area d'arrivo. */
+export const bodySpostaPuntiInArea = z.object({
+  chiavi: z.array(z.string().min(1).max(200)).min(1).max(500).refine((c) => new Set(c).size === c.length, { message: 'Una voce compare due volte.' }),
+  area: z.string().min(1).max(200),
+});
 /** Un posto su o giù nella guida dell'area. */
 export const bodySpostaPunto = z.object({ verso: z.union([z.literal(-1), z.literal(1)]) });
 /** Il pin di una planimetria da collegare o scollegare (`PUT` / `DELETE`). */
