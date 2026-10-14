@@ -908,3 +908,66 @@ it('l\'inquadratura non conta le zone cancellate dei pezzi e comprende i pezzi p
     await waitFor(() => expect(fit).toHaveBeenLastCalledWith(expect.objectContaining({ w: 1000, h: 1000 }), expect.anything(), { x: 100, y: 100, w: 300, h: 200 }, []));
   } finally { fit.mockRestore(); area.mockRestore(); misura.mockRestore(); }
 });
+
+// ---- Barra compatta del visore incorporato stretto (2026-10-15) ----
+// Nella scheda di un Palazzo a 1280 px il visore è largo 242 px: la barra andava a capo pezzo per pezzo fino a 180 px
+// e alla tela ne restavano 58. La compattazione è CSS (container query, che jsdom non valuta): qui si provano gli agganci
+// che il CSS usa e, nel foglio di stile, che le regole tocchino solo il visore incorporato e non lo schermo intero.
+describe('VisoreMappa — barra compatta del visore incorporato', () => {
+  it('incorporato: il titolo porta nel suggerimento il percorso completo e il tipo, che la barra compatta nasconde', () => {
+    monta({ incorporato: true });
+    const percorso = screen.getByRole('navigation', { name: 'Percorso della mappa' });
+    const titolo = percorso.querySelector('.visore-mappa__titolo')!;
+    expect(titolo).toHaveTextContent('Shibuya');
+    expect(titolo).toHaveAttribute('title', 'Tokyo › Shibuya · Quartiere');
+    // la briciola sta in una tappa che la barra compatta può nascondere; l'ultima tappa è quella attuale
+    const tappe = [...percorso.querySelectorAll('.visore-mappa__tappa')];
+    expect(tappe).toHaveLength(2);
+    expect(tappe[0]).not.toHaveClass('visore-mappa__tappa--attuale');
+    expect(within(tappe[0] as HTMLElement).getByRole('button', { name: 'Tokyo' })).toBeInTheDocument();
+    expect(tappe[1]).toHaveClass('visore-mappa__tappa--attuale');
+    // il `display` della tappa sta nel foglio di stile: un'utility starebbe in un layer più forte e la barra compatta
+    // non potrebbe nasconderla (era successo alla prima prova nel browser)
+    tappe.forEach((t) => expect(t.className).not.toMatch(/(^|\s)(inline-)?flex(\s|$)/));
+    expect(percorso.querySelector('.visore-mappa__tipo')).toHaveTextContent('Quartiere');
+    // il percorso completo è anche il nome della tela, e il genitore resta raggiungibile dal pannello (chiuso in partenza)
+    expect(document.querySelector('.visore-mappa__tela')).toHaveAttribute('aria-label', 'Mappa: Tokyo › Shibuya');
+    expect(screen.queryByRole('button', { name: 'Su: Tokyo' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Pannello' }));
+    expect(screen.getByRole('button', { name: 'Su: Tokyo' })).toBeInTheDocument();
+  });
+
+  it('a schermo intero il titolo non ha suggerimento: la barra resta quella completa', () => {
+    monta();
+    const titolo = screen.getByRole('navigation', { name: 'Percorso della mappa' }).querySelector('.visore-mappa__titolo')!;
+    expect(titolo).not.toHaveAttribute('title');
+  });
+
+  it('nel foglio di stile le regole compatte valgono solo per il visore incorporato', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const css = readFileSync(resolve(process.cwd(), 'src/tailwind.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    /** Il contenuto del primo blocco che si apre con `testa {`, fino alla graffa che lo chiude. */
+    const blocco = (testa: string) => {
+      const inizio = css.indexOf(`${testa} {`);
+      expect(inizio).toBeGreaterThan(-1);
+      const apertura = css.indexOf('{', inizio);
+      let livello = 0;
+      for (let i = apertura; i < css.length; i++) {
+        if (css[i] === '{') livello++;
+        else if (css[i] === '}' && --livello === 0) return css.slice(apertura + 1, i);
+      }
+      return '';
+    };
+    /** I selettori delle regole foglia (senza blocchi annidati) di `testo`, uno per voce dell'elenco separato da virgole. */
+    const selettori = (testo: string) => [...testo.matchAll(/([^{}]+)\{[^{}]*\}/g)].flatMap(([, s]) => s.split(',').map((x) => x.trim()));
+    const compatta = blocco('@container (max-width: 720px)');
+    expect(selettori(compatta).length).toBeGreaterThan(0);
+    expect(selettori(compatta).filter((s) => !s.startsWith('.visore-mappa--incorporato '))).toEqual([]);
+    expect(compatta).toMatch(/\.visore-mappa__tappa:not\(\.visore-mappa__tappa--attuale\)/);
+    expect(compatta).toMatch(/\.visore-mappa__tipo\s*\{\s*display:\s*none/);
+    expect(compatta).toMatch(/\.visore-mappa__titolo\s*\{[^}]*text-overflow:\s*ellipsis/);
+    // il minimo d'altezza chiesto dall'ospite vale per il corpo (la tela), non per il riquadro
+    expect(css).toMatch(/\.visore-mappa--incorporato \.visore-mappa__corpo\s*\{\s*min-height:\s*var\(--minimo-tela,\s*0px\)/);
+  });
+});

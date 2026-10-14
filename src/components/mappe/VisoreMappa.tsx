@@ -650,13 +650,15 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       {!scelta && <header className="visore-mappa__barra">
         <nav className="visore-mappa__percorso" aria-label="Percorso della mappa">
           {intestazione}
+          {/* Nel visore incorporato stretto la barra si compatta (2026-10-15): restano il titolo su una riga, troncato,
+              e i pulsanti a icone; briciole e tipo tornano nel suggerimento del titolo, il genitore in «Su: …» del pannello. */}
           {mappa.percorso.map((p, i) => (
-            <span key={p.chiave} className="inline-flex items-center gap-1">
-              {i > 0 && <span className="text-text-muted" aria-hidden="true">›</span>}
-              {i < mappa.percorso.length - 1 ? <button type="button" className="visore-mappa__briciola" onClick={() => onNaviga(p.chiave)}>{p.nome}</button> : <span className="visore-mappa__titolo">{p.nome}</span>}
+            <span key={p.chiave} className={`visore-mappa__tappa ${i === mappa.percorso.length - 1 ? 'visore-mappa__tappa--attuale' : ''}`}>
+              {i > 0 && <span className="visore-mappa__separatore text-text-muted" aria-hidden="true">›</span>}
+              {i < mappa.percorso.length - 1 ? <button type="button" className="visore-mappa__briciola" onClick={() => onNaviga(p.chiave)}>{p.nome}</button> : <span className="visore-mappa__titolo" title={incorporato ? `${percorsoTesto} · ${NOME_TIPO_MAPPA[mappa.tipo]}` : undefined}>{p.nome}</span>}
             </span>
           ))}
-          <span className="chip text-[11px]">{NOME_TIPO_MAPPA[mappa.tipo]}</span>
+          <span className="visore-mappa__tipo chip text-[11px]">{NOME_TIPO_MAPPA[mappa.tipo]}</span>
         </nav>
         <div className="visore-mappa__strumenti">
           {azioni}

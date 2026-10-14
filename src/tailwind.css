@@ -388,6 +388,9 @@
   .visore-mappa__briciola { background: none; border: 0; padding: 4px 2px; color: var(--color-text-secondary); cursor: pointer; font: inherit; text-decoration: underline dotted; text-underline-offset: 3px; min-height: 44px; min-width: 44px; }
   .visore-mappa__briciola:hover { color: var(--color-primary); }
 
+  /* Una tappa del percorso: il `display` sta qui e non in una utility, che starebbe in un layer più forte e
+     impedirebbe alla barra compatta di nasconderla. */
+  .visore-mappa__tappa { display: inline-flex; align-items: center; gap: 4px; }
   .visore-mappa__titolo { font-family: var(--font-display); font-size: 19px; text-transform: uppercase; letter-spacing: .02em; }
   .visore-mappa__strumenti { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   /* Colonna stretta (mappa incorporata accanto alla guida): barra a sole icone, il testo resta nel nome accessibile */
@@ -398,7 +401,27 @@
     .visore-mappa__strumenti .btn-visivo { padding: 4px 6px; gap: 0; }
     .visore-mappa__titolo { font-size: 15px; }
   }
+  /* Visore incorporato fino a 720 px: **barra compatta** (2026-10-15). Nella scheda di un Palazzo a 1280 px il visore è largo
+     242 px e la barra andava a capo pezzo per pezzo — briciola, titolo su due righe, tipo, pulsanti — fino a 180 px su 240,
+     lasciando alla tela 240×58. Qui resta il titolo su una riga, troncato (il percorso completo e il tipo stanno nel suo
+     suggerimento e nel nome della tela), con i pulsanti a sole icone 44×44 accanto o, se non ci stanno, sulla riga sotto:
+     53 px di barra, 80 nelle colonne più strette (misure del 2026-10-15). Il genitore resta in «Su: …» del pannello. Lo schermo intero non cambia. */
+  @container (max-width: 720px) {
+    .visore-mappa--incorporato .visore-mappa__barra { padding: 4px 6px; gap: 4px 6px; }
+    .visore-mappa--incorporato .visore-mappa__percorso { flex: 1 1 160px; flex-wrap: nowrap; overflow: hidden; }
+    .visore-mappa--incorporato .visore-mappa__tappa:not(.visore-mappa__tappa--attuale),
+    .visore-mappa--incorporato .visore-mappa__tappa--attuale .visore-mappa__separatore,
+    .visore-mappa--incorporato .visore-mappa__tipo { display: none; }
+    .visore-mappa--incorporato .visore-mappa__tappa--attuale { min-width: 0; }
+    .visore-mappa--incorporato .visore-mappa__titolo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .visore-mappa--incorporato .visore-mappa__strumenti { flex: none; flex-wrap: nowrap; margin-left: auto; }
+    .visore-mappa--incorporato .visore-mappa__strumenti .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .visore-mappa--incorporato .visore-mappa__strumenti .btn-visivo { padding: 4px 6px; gap: 0; }
+  }
   .visore-mappa__corpo { position: relative; flex: 1; display: grid; grid-template-columns: 340px minmax(0, 1fr); min-height: 0; }
+  /* Il minimo d'altezza che l'ospite chiede **per la tela**, non per il visore (`--minimo-tela`, 2026-10-15): la scheda del
+     Palazzo voleva una mappa mai sotto i 240 px, ma lo metteva sul riquadro, e la barra se ne mangiava fino a 180. */
+  .visore-mappa--incorporato .visore-mappa__corpo { min-height: var(--minimo-tela, 0px); }
   .visore-mappa--pannello-chiuso .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); }
   .visore-mappa__tela { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 40%, #1b1b22 0, #0b0b0e 75%); touch-action: none; user-select: none; min-height: 0; }
   .visore-mappa__livello { position: absolute; left: 0; top: 0; transform-origin: 0 0; }

@@ -1083,8 +1083,12 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   `main` flessibile di `MainLayout`, intestazione `shrink-0` compatta (emblema 48 px, anello `lg:size-12!`, chip in
   `lg:contents`), griglia `lg:flex-1 lg:min-h-[280px] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch`. Da 1024 a
   1279 px la colonna destra è un'unica `lg:max-xl:area-scorrevole`; da 1280 px sezione e aside sono colonne con
-  `xl:area-scorrevole`. `MappaIncorporata.classeVisore` dà l'altezza al solo riquadro del visore (minimo 240 px e
-  `flex-1` da 1280 px); la scheda di una mappa senza planimetria resta alta quanto il suo contenuto.
+  `xl:area-scorrevole`. `MappaIncorporata.classeVisore` dà l'altezza al solo riquadro del visore (`flex-1` da 1280 px,
+  con `min-h-fit` e `--minimo-tela: 240px`: i 240 px sono della tela, il visore li applica al suo corpo e il riquadro
+  aggiunge la barra — 2026-10-15); la scheda di una mappa senza planimetria resta alta quanto il suo contenuto.
+- **Barra compatta del visore incorporato** (`VisoreMappa`, `@container (max-width: 720px)` sul visore, solo
+  `.visore-mappa--incorporato`): titolo su una riga con «…» e suggerimento con percorso e tipo, briciole (`.visore-mappa__tappa`)
+  e tipo nascosti (il genitore resta in «Su: …» del pannello), pulsanti a icone 44×44; lo schermo intero non cambia.
 - Limite: `riconciliaAreeGuida` (`organizzazioneMappe.ts`) legge le colonne, quindi solo la prima area di una mappa
   senza geometria (vedi DECISIONI, 2026-09-30).
 

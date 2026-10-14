@@ -1786,3 +1786,33 @@ Conseguenze tecniche (non scelte dell'utente):
 - Visore (conseguenze tecniche): le zone si cancellano con una maschera alfa (SVG grande quanto l'immagine) sull'immagine di base,
   senza ridisegnarla; i pezzi sono ritagli della stessa immagine (sfondo spostato), sotto i pin; le zone cancellate non contano
   nell'inquadratura iniziale, i pezzi posati sì.
+
+## 2026-10-15 — Barra compatta del visore incorporato e minimo di 240 px sulla tela
+
+Difetto misurato dall'utente: nella scheda di un Palazzo a 1280×689 il visore incorporato è largo 242 px (la colonna della
+mappa ne ha 286, fra l'elenco da 360 e la raccolta da 352) e alto 240; la barra andava a capo pezzo per pezzo — briciola,
+titolo su due righe, tipo, pulsanti — fino a 130-180 px, lasciando alla tela 240×109 (Kamoshida, Sala centrale) o 240×58
+(Madarame, area 07). Anche a 1366 (barra 129) e a 1536 (109: sopra i 460 px i pulsanti riprendono il testo). Proposte:
+A barra compatta, B minimo riferito alla tela, C allargare la colonna fra 1280 e 1535 px. Scelta dell'utente: «Approvo A+B»
+(C non fatta: tocca un layout scelto dall'utente).
+
+Conseguenze tecniche (non scelte dell'utente):
+- Barra compatta con una container query sul visore (`@container (max-width: 720px)`), solo `.visore-mappa--incorporato`: il
+  titolo su una riga troncato con «…», con il percorso completo e il tipo nel suggerimento; briciole e chip del tipo nascosti
+  (il genitore resta in «Su: …» del pannello, il percorso completo è il nome della tela); pulsanti a sole icone 44×44 accanto al
+  titolo o, se non ci stanno, sulla riga sotto. Barra di 53 px, 80 nelle colonne più strette. Lo schermo intero (pagina della
+  mappa e «Schermo intero» in pagina) non cambia. La regola è del visore, quindi vale per ogni visore incorporato largo fino a
+  720 px; misurato prima/dopo (Oggi su Shibuya, negozio Untouchable con «Dove si trova», Quartiere Shibuya, a 1280×689,
+  1366×657, 1024×690, 768×1024, 375×812): dove il visore è sotto i 720 px e la barra andava a capo, scende da 101-109 a 53 px
+  e la tela guadagna la differenza (il negozio a 1280 era già a 53 e resta identico); pannello aperto e scheda dello spillo
+  restano dove erano; dove il visore supera i 720 px (Quartiere a 1024 e a 768) nulla cambia. Nel negozio a 375 il riquadro
+  è alto 240 e la tela ha già un minimo di 240 sotto gli 861 px: resta tagliata, di 53 px invece di 101 (preesistente).
+- Il `display` delle tappe del percorso sta nel foglio di stile (`.visore-mappa__tappa`): l'utility `inline-flex` sta nel layer
+  `utilities`, più forte di `components`, e impediva alla barra compatta di nasconderle.
+- Il minimo: la scheda del Palazzo chiede `--minimo-tela: 240px` da 1280 px e il riquadro è `min-h-fit` invece di `min-h-[240px]`;
+  il visore lo applica al suo corpo. Sotto quel minimo scorre la colonna (scelta del 2026-09-30).
+- Difetto preesistente trovato verificando, **non corretto** (fuori da A+B; il validatore ha rigettato la correzione fatta
+  senza approvazione, ed è stata tolta): con il Pannello aperto, da 861 px di schermo, il pannello prende sempre 340 px
+  accanto alla tela, e nei visori incorporati stretti alla tela resta poco o niente (scheda del Palazzo a 1280: visore 242,
+  tela 0×240; negozio a 1024: visore 310, tela 0; Oggi a 1024: visore 379, tela 37). Uguale prima e dopo questa modifica;
+  proposto all'utente a parte.

@@ -17,7 +17,7 @@ const { aggiornaCompendio, getDungeon, impostaStatoPunto, impostaSpilloRaccolto,
 vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, impostaAtterraggiDungeon, getMappa }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
-vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave }: { chiave: string }) => <div>Visore: {chiave}</div> }));
+vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore }: { chiave: string; classeVisore?: string }) => <div data-classe-visore={classeVisore}>Visore: {chiave}</div> }));
 // il pozzo finto: un pulsante che sceglie Qimranut, come toccarne lo strato
 vi.mock('../components/mappe/MappaMemento', () => ({ MappaMemento: ({ onSeleziona }: { onSeleziona?: (k: string) => void }) => <button type="button" onClick={() => onSeleziona?.('mementos-01-qimranut')}>Disegno del pozzo</button> }));
 vi.mock('../components/mappe/CollegamentoMappa', () => ({ CollegamentoMappa: () => null }));
@@ -405,6 +405,16 @@ it('toccare una stanza porta la sua planimetria nel visore e nella colonna dei s
   fireEvent.click(within(pannello.getByRole('list', { name: 'Stanze del Palazzo' })).getByRole('button', { name: /^2\. Torre/ }));
   expect(await screen.findByText('Visore: m-torre')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: /Su questa planimetria/ })).toBeInTheDocument();
+});
+
+// Da 1280 px la mappa non scende mai sotto i 240 px (2026-09-30), ma il minimo stava sul riquadro: la barra del visore
+// se ne prendeva fino a 180 e la tela restava alta 58. Ora il minimo è della tela (2026-10-15): il riquadro chiede
+// `--minimo-tela` al visore ed è alto almeno quanto il suo contenuto, barra compresa.
+it('da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riquadro del visore', async () => {
+  await apriPlanimetrie();
+  const classi = (await screen.findByText(/^Visore: /)).getAttribute('data-classe-visore')!.split(' ');
+  expect(classi).toEqual(expect.arrayContaining(['xl:[--minimo-tela:240px]', 'xl:min-h-fit', 'xl:flex-1', 'h-[max(300px,min(41vh,560px))]']));
+  expect(classi).not.toContain('xl:min-h-[240px]');
 });
 
 it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui non si sa quali tavole sono la stessa stanza', async () => {

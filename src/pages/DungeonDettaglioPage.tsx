@@ -550,8 +550,11 @@ export function DungeonDettaglioPage() {
                     </div>
                   )}
                   {/* Da 1280 px la mappa prende tutta l'altezza che la colonna le lascia, mai meno di 240 px (scelta
-                      dell'utente, 2026-09-30: sotto quel minimo scorre la colonna, non la pagina); sotto, l'altezza di prima. */}
-                  <MappaIncorporata chiave={mappaScelta} versione={versioneStati} classeVisore="h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-[240px] xl:flex-1" onCambiato={() => void dati.ricarica()} />
+                      dell'utente, 2026-09-30: sotto quel minimo scorre la colonna, non la pagina); sotto, l'altezza di prima.
+                      I 240 px sono **della tela** (2026-10-15): `--minimo-tela` li chiede al visore e il riquadro, alto almeno
+                      quanto il suo contenuto (`min-h-fit`), aggiunge la barra. Prima erano del riquadro, e a 1280 px la
+                      barra ne prendeva fino a 180: la tela restava alta 58. */}
+                  <MappaIncorporata chiave={mappaScelta} versione={versioneStati} classeVisore="h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-fit xl:flex-1 xl:[--minimo-tela:240px]" onCambiato={() => void dati.ricarica()} />
                   {/* Da 1280 px la colonna è alta quanto lo schermo: la nota lascia il posto alla mappa, che ha già «Modifica mappa». */}
                   <p className="m-0 text-[11px] text-text-muted xl:hidden">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
                 </>}
