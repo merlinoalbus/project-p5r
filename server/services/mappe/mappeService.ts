@@ -35,8 +35,8 @@ import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpi
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { ammetteCondizioni, categoriaSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
-import type { CondizioneSpilloDto, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
-import { aggiornaPezzo, conPezzi, creaPezzo, eliminaPezzo, pezziPerPacchetto, pezzoDto, righePezzi, rigaPezzo, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, staNellImmagine, type DimensioniMappa } from './pezziMappa.js';
+import type { CondizioneSpilloDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
+import { aggiornaCopia, aggiornaPezzo, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
@@ -452,8 +452,8 @@ export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
     ...riassunto(r, mappe), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
     immagineUrl: immagine ? `/api/immagini/mappa/${encodeURIComponent(immagine.chiave)}/file?v=${encodeURIComponent(immagine.createdAt)}` : null,
     percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
-    // i pezzi (102): con la partita ognuno porta l'esito delle sue condizioni, come i pin
-    pezzi: righePezzi(chiave).map((p) => pezzoDto(p, ctx.nomi ?? nomiCondizioni(), ctx.st)),
+    // i pezzi (102) con le loro copie (103): con la partita ogni copia porta l'esito delle sue condizioni, come i pin
+    pezzi: pezziDellaMappa(chiave, ctx.nomi ?? nomiCondizioni(), ctx.st),
     // dai nomi già letti nel contesto: prima una query in più (P8)
     genitoreNome: r.genitore_chiave ? mappe.nomi.get(r.genitore_chiave) ?? null : null,
   };
@@ -977,14 +977,15 @@ export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Bu
   const dim = dimensioniImmagine(contenuto);
   // I pezzi (102) sono ritagli in pixel dell'immagine di prima: su un'altra ritaglierebbero zone sbagliate. Scelta dell'utente
   // (2026-10-14, «Chiedere conferma ed eliminarli»): senza conferma 409 col numero dei pezzi; con la conferma se ne vanno insieme
-  // alla sostituzione, nella stessa transazione.
+  // alla sostituzione, nella stessa transazione. Dalla 103 il messaggio conta anche le copie posate, che se ne vanno coi ritagli.
   const pezzi = quantiPezzi(chiave);
   if (pezzi > 0 && !opz.eliminaPezzi) {
-    throw new HttpError(409, 'mappa-con-pezzi', `La mappa ha ${pezzi === 1 ? '1 pezzo ritagliato' : `${pezzi} pezzi ritagliati`} dall’immagine di prima: sostituendola ${pezzi === 1 ? 'verrà eliminato' : 'verranno eliminati'}.`, { pezzi });
+    const copie = quanteCopie(chiave);
+    throw new HttpError(409, 'mappa-con-pezzi', `La mappa ha ${pezzi === 1 ? '1 pezzo ritagliato' : `${pezzi} pezzi ritagliati`} dall’immagine di prima (${copie === 1 ? '1 copia posata' : `${copie} copie posate`}): sostituendola ${pezzi === 1 ? 'verrà eliminato' : 'verranno eliminati'} con le copie.`, { pezzi, copie });
   }
   // immagine e dimensioni insieme: una mappa con l'immagine nuova e le dimensioni vecchie sbaglierebbe la posizione di ogni pin
   getDb().transaction(() => {
-    if (pezzi > 0) prepared('DELETE FROM pezzo_mappa WHERE mappa_chiave = ?').run(chiave);
+    if (pezzi > 0) eliminaPezziDellaMappa(chiave);
     salvaImmagine('mappa', chiave, mime, contenuto);
     prepared("UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, origine = 'utente', updated_at = ? WHERE chiave = ?").run(chiave, dim?.larghezza ?? null, dim?.altezza ?? null, nowIso(), chiave);
   })();
@@ -1049,30 +1050,51 @@ function dimensioniDellaMappa(r: RigaMappa): DimensioniMappa {
   throw httpErrors.conflict('mappa-senza-immagine', 'La mappa non ha un’immagine di cui conoscere le dimensioni: i pezzi si ritagliano dall’immagine della mappa.');
 }
 
-/** Un pezzo per le risposte dell'editor (senza partita: niente esito delle condizioni). */
-const pezzoPerEditor = (id: number): PezzoMappaDto => pezzoDto(rigaPezzo(id), nomiCondizioni());
+/** Un pezzo con le sue copie per le risposte dell'editor (senza partita: niente esito delle condizioni). */
+const pezzoPerEditor = (id: number): PezzoMappaDto => pezzoDto(rigaPezzo(id), righeCopie(id), nomiCondizioni());
+/** Una copia per le risposte dell'editor (senza partita). */
+const copiaPerEditor = (id: number): CopiaPezzoDto => copiaDto(rigaCopia(id), nomiCondizioni());
 
 /**
- * Crea un pezzo della planimetria (102) dalla zona scelta nell'editor. Le condizioni sono quelle dei pin, comprese le condizioni
- * sullo stato di un altro pin o di una voce della guida; zona e posizione si verificano sull'immagine.
+ * Crea un pezzo della planimetria (102) dalla zona scelta nell'editor, con la sua prima copia (103). Le condizioni (della copia)
+ * sono quelle dei pin, comprese le condizioni sullo stato di un altro pin o di una voce della guida; zona e posizione si verificano
+ * sull'immagine.
  */
-export function creaPezzoMappa(chiave: string, dati: DatiPezzoMappa & { sorgente: NonNullable<DatiPezzoMappa['sorgente']> }): PezzoMappaDto {
+export function creaPezzoMappa(chiave: string, dati: DatiNuovoPezzoMappa): PezzoMappaDto {
   const r = rigaMappa(chiave);
-  verificaCondizioni(dati.condizioni, true);
+  verificaCondizioni(dati.copia?.condizioni, true);
   const dim = dimensioniDellaMappa(r);
   return pezzoPerEditor(getDb().transaction(() => creaPezzo(r.chiave, dim, dati).id)());
 }
 
-/** Corregge un pezzo (404 se non c'è): i campi assenti restano. */
+/** Corregge un ritaglio (404 se non c'è): nome, zona, ordine; i campi assenti restano. */
 export function aggiornaPezzoMappa(id: number, dati: DatiPezzoMappa): PezzoMappaDto {
   const p = rigaPezzo(id);
-  verificaCondizioni(dati.condizioni, true);
   return pezzoPerEditor(aggiornaPezzo(id, dimensioniDellaMappa(rigaMappa(p.mappa_chiave)), dati).id);
 }
 
-/** Elimina un pezzo (404 se non c'è): la sua zona torna visibile nell'immagine di base. */
+/** Elimina un pezzo con tutte le sue copie (404 se non c'è): la sua zona torna visibile nell'immagine di base. */
 export function eliminaPezzoMappa(id: number): void {
   eliminaPezzo(id);
+}
+
+/** Aggiunge una copia a un pezzo (103; 404 se il pezzo non c'è): posizione, rotazione, specchio e condizioni proprie. */
+export function creaCopiaPezzoMappa(pezzoId: number, dati: DatiCopiaPezzo): CopiaPezzoDto {
+  const p = rigaPezzo(pezzoId);
+  verificaCondizioni(dati.condizioni, true);
+  return copiaPerEditor(creaCopia(pezzoId, dimensioniDellaMappa(rigaMappa(p.mappa_chiave)), dati).id);
+}
+
+/** Corregge una copia (404 se non c'è): i campi assenti restano; `nomePezzo` rinomina anche il ritaglio. */
+export function aggiornaCopiaPezzoMappa(id: number, dati: DatiAggiornaCopiaPezzo): CopiaPezzoDto {
+  const c = rigaCopia(id);
+  verificaCondizioni(dati.condizioni, true);
+  return copiaPerEditor(aggiornaCopia(id, dimensioniDellaMappa(rigaMappa(rigaPezzo(c.pezzo_id).mappa_chiave)), dati).id);
+}
+
+/** Elimina una copia (404 se non c'è); con l'ultima se ne va il pezzo, e la sua zona torna visibile. */
+export function eliminaCopiaPezzoMappa(id: number): { pezzoEliminato: boolean } {
+  return eliminaCopia(id);
 }
 
 export interface DatiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
@@ -1599,7 +1621,7 @@ function identitaRettificata(identita:string): {identita:string;mappa?:string} {
   return r?{identita:identitaSpillo({...r.dopo,riferimento:r.dopo.riferimento??null}),mappa:r.mappa}:{identita};
 }
 
-export interface EsitoImportazione { mappe: number; spilli: number; /** I pezzi delle planimetrie scritti (102). */ pezzi: number; /** I pezzi scartati perché escono dall'immagine della mappa d'arrivo (o la mappa non ne ha una). */ pezziScartati: number; /** I pezzi tolti perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number }
+export interface EsitoImportazione { mappe: number; spilli: number; /** I pezzi delle planimetrie scritti (102: i ritagli). */ pezzi: number; /** Le copie posate scritte (103). */ copie: number; /** I pezzi scartati perché la zona esce dall'immagine della mappa d'arrivo, o nessuna copia ci sta (o la mappa non ne ha una). */ pezziScartati: number; /** Le copie scartate perché escono dall'immagine della mappa d'arrivo, comprese quelle dei pezzi scartati (103). */ copieScartate: number; /** I pezzi tolti, con le loro copie, perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number; /** Le copie tolte con quei pezzi (103). */ copieEliminate: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number }
 
 /** Importa un pacchetto (o il seed): per chiave, con `sovrascrivi` sostituisce mappe e spilli esistenti; altrimenti salta le mappe già presenti
  * (il seed aggiorna solo le mappe di origine seed, sostituendo i soli spilli di origine seed e conservando quelli dell'utente). */
@@ -1624,7 +1646,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     verificate.set(s, verificaDestinazioneSpillo(s.destinazione, incoming));
   }
   const origine = opz.origine ?? 'utente';
-  const esito: EsitoImportazione = { mappe: 0, spilli: 0, pezzi: 0, pezziScartati: 0, pezziEliminati: 0, immagini: 0, saltate: [], condizioniScartate: 0, vociScartate: 0 };
+  const esito: EsitoImportazione = { mappe: 0, spilli: 0, pezzi: 0, copie: 0, pezziScartati: 0, copieScartate: 0, pezziEliminati: 0, copieEliminate: 0, immagini: 0, saltate: [], condizioniScartate: 0, vociScartate: 0 };
   getDb().transaction(() => {
     // Uno spostamento conserva l'identità originale, non la mappa corrente.
     // Il fallback richiede una sola sorgente nell'intero seed e un solo erede utente.
@@ -1664,7 +1686,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     /** I pin inseriti con condizioni sullo stato di altri pin: si ricontrollano a pacchetto inserito. */
     const conCondizioniSuPin: number[] = [];
     /** I pezzi (102) delle mappe che il pacchetto aggiorna: si scrivono in fondo, a immagini importate. */
-    const pezziDaScrivere: Array<{ mappa: string; pezzi: Array<Parameters<typeof sostituisciPezzi>[1][number]> }> = [];
+    const pezziDaScrivere: Array<{ mappa: string; pezzi: PezzoDaImportare[] }> = [];
     /** Le mappe del pacchetto che hanno già dei pezzi, con l'immagine che mostrano adesso: a importazione finita si riconfronta. */
     const immaginiConPezzi = new Map<string, Buffer | null>();
     if (conPezzi()) {
@@ -1728,16 +1750,17 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       }
       // I pezzi (102) sono sempre dell'utente: un pacchetto che li dichiara sostituisce quelli della mappa, salvo un reseed (seed sopra
       // seed, senza «sovrascrivi»), che non li tocca; un pacchetto di prima, senza il campo, li lascia com'erano. Le condizioni si
-      // ripuliscono come quelle dei pin (le chiavi assenti dalla Guida si scartano e si contano).
+      // ripuliscono come quelle dei pin (le chiavi assenti dalla Guida si scartano e si contano), copia per copia (103).
       // Si scrivono in fondo, a immagini importate: si verificano sull'immagine d'arrivo (rilievo F2 del validatore).
+      // Un pezzo della 102 (la posa accanto alla zona) si legge come un pezzo con una copia (`schemaPezziPacchetto`).
       if (m.pezzi !== undefined && conPezzi() && !(origine === 'seed' && !opz.sovrascrivi)) {
         const forma = schemaPezziPacchetto.safeParse(m.pezzi);
         if (!forma.success) throw httpErrors.badRequest('pezzi-non-validi', `Pezzi della planimetria non validi nella mappa '${chiaveMappa(m.chiave)}'.`);
-        pezziDaScrivere.push({ mappa: m.chiave, pezzi: forma.data.map((p) => {
-          const { valide, scartate } = condizioniConChiaviEsistenti(p.condizioni as RequisitoSpillo[] | undefined, pinDelPacchetto);
+        pezziDaScrivere.push({ mappa: m.chiave, pezzi: forma.data.map((p) => ({ ...p, copie: p.copie.map((c) => {
+          const { valide, scartate } = condizioniConChiaviEsistenti(c.condizioni as RequisitoSpillo[] | undefined, pinDelPacchetto);
           esito.condizioniScartate += scartate.length;
-          return { ...p, condizioni: valide };
-        }) });
+          return { ...c, condizioni: valide };
+        }) })) });
       }
       // Con «sovrascrivi» la mappa viene sostituita per intero; altrimenti (seed sopra seed) si rimpiazzano solo gli spilli della stessa
       // origine, così gli spilli aggiunti dall'utente su una mappa del seed sopravvivono al reseed.
@@ -1896,14 +1919,18 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       salvaImmagine('mappa', chiave, img.mime, Buffer.from(img.base64, 'base64'));
       esito.immagini++;
     }
-    // I pezzi (102), a immagini scritte: ognuno deve stare nell'immagine della mappa d'arrivo (zona e ingombro, come all'API);
-    // quelli che escono, o tutti se la mappa non ha un'immagine di cui leggere le dimensioni, si scartano e si contano.
+    // I pezzi (102), a immagini scritte: la zona di ognuno e l'ingombro di ogni sua copia (103) devono stare nell'immagine della
+    // mappa d'arrivo (come all'API); le copie che escono si scartano, e con loro il pezzo rimasto senza copie (o con la zona fuori);
+    // tutto, se la mappa non ha un'immagine di cui leggere le dimensioni. Si contano.
     for (const { mappa, pezzi } of pezziDaScrivere) {
-      let dim: DimensioniMappa | null = null;
+      let dim: DimensioniMappa | null;
       try { dim = dimensioniDellaMappa(rigaMappa(mappa)); } catch { dim = null; }
-      const dentro = dim ? pezzi.filter((p) => staNellImmagine(p, dim)) : [];
-      esito.pezziScartati += pezzi.length - dentro.length;
-      esito.pezzi += sostituisciPezzi(mappa, dentro);
+      const { dentro, pezziScartati, copieScartate } = pezziNellImmagine(pezzi, dim);
+      esito.pezziScartati += pezziScartati;
+      esito.copieScartate += copieScartate;
+      const scritti = sostituisciPezzi(mappa, dentro);
+      esito.pezzi += scritti.pezzi;
+      esito.copie += scritti.copie;
     }
     // Una mappa con dei pezzi che, importata, mostra un'immagine diversa da prima (contenuto nuovo, un'altra immagine già presente,
     // l'asset predefinito al posto di quella caricata…) perde i pezzi ritagliati dalla vecchia, se il pacchetto non gliene porta di
@@ -1914,9 +1941,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       if (conPezziNuovi.has(mappa)) continue;
       const dopo = immagineMostrata(rigaMappa(mappa));
       if (prima === null ? dopo === null : dopo !== null && prima.equals(dopo)) continue;
-      const n = quantiPezzi(mappa);
-      prepared('DELETE FROM pezzo_mappa WHERE mappa_chiave = ?').run(mappa);
-      esito.pezziEliminati += n;
+      esito.pezziEliminati += quantiPezzi(mappa);
+      esito.copieEliminate += quanteCopie(mappa);
+      eliminaPezziDellaMappa(mappa);
     }
   })();
   return esito;

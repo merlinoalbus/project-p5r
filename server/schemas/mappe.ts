@@ -57,12 +57,22 @@ export const bodyCreaSpillo = z.object({
 export const bodyAggiornaSpillo = bodyCreaSpillo.partial().extend({ mappa: chiaveMappa.optional() });
 export const bodyRaccolto = z.object({ raccolto: z.boolean() });
 
-/** I pezzi delle planimetrie (102): le forme di zona, posizione, rotazione e specchio stanno col servizio, che le usa anche per il pacchetto. */
+/** I pezzi delle planimetrie (102): le forme di zona, posizione, rotazione e specchio stanno col servizio, che le usa anche per il pacchetto.
+ *  Dalla 103 il pezzo è il ritaglio (nome, zona, ordine) e le copie sono le sue pose (etichetta, posizione, rotazione, specchio, condizioni). */
 export const paramsPezzo = z.object({ id: idParam });
-export const bodyCreaPezzo = z.object({
-  nome: z.string().trim().max(LIMITI_GUIDA.spillo.nome).optional(), sorgente: schemaSorgentePezzo, posizione: schemaPosizionePezzo.optional(),
+export const paramsCopiaPezzo = z.object({ id: idParam });
+// Tutti `strict`: un campo che non appartiene a quella parte (la posizione o le condizioni mandate al ritaglio, come faceva il
+// contratto della 102) è un 400, non un 200 che lo perde senza dirlo (nota F8 del validatore).
+export const bodyCreaCopiaPezzo = z.object({
+  etichetta: z.string().trim().max(LIMITI_GUIDA.spillo.nome).optional(), posizione: schemaPosizionePezzo.optional(),
   rotazione: schemaRotazionePezzo.optional(), specchio: schemaSpecchioPezzo.optional(), condizioni, ordine: z.number().int().min(0).max(9999).optional(),
-});
-export const bodyAggiornaPezzo = bodyCreaPezzo.partial();
+}).strict();
+/** La correzione di una copia: con `nomePezzo` anche il nome del ritaglio, nella stessa transazione. */
+export const bodyAggiornaCopiaPezzo = bodyCreaCopiaPezzo.extend({ nomePezzo: z.string().trim().max(LIMITI_GUIDA.spillo.nome).optional() }).strict();
+export const bodyAggiornaPezzo = z.object({
+  nome: z.string().trim().max(LIMITI_GUIDA.spillo.nome).optional(), sorgente: schemaSorgentePezzo.optional(), ordine: z.number().int().min(0).max(9999).optional(),
+}).strict();
+/** La creazione di un pezzo: la zona e (facoltativa) la sua prima copia. */
+export const bodyCreaPezzo = bodyAggiornaPezzo.extend({ sorgente: schemaSorgentePezzo, copia: bodyCreaCopiaPezzo.optional() }).strict();
 export const queryRiferimenti = z.object({ tipo: z.enum(TIPI_RIFERIMENTO), q: z.string().max(120).optional().default(''), limite: z.coerce.number().int().min(1).max(100).optional() });
 export const bodyImporta = z.object({ pacchetto: z.object({ versione: z.literal(1), mappe: z.array(z.object({ chiave: z.string(), nome: z.string(), tipo: z.string() }).passthrough()).max(2000), immagini: z.record(z.string(), z.object({ mime: z.string(), base64: z.string() })).optional() }).passthrough(), sovrascrivi: z.boolean().optional() });

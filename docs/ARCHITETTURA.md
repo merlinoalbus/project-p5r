@@ -1465,36 +1465,54 @@ codice parte da qui invece di riscriverle.
 - l'area visibile di una planimetria si cerca dai bordi;
 - iscrizioni agli store con selettori stretti (`useShallow`).
 
-## I pezzi delle planimetrie (2026-10-14)
+## I pezzi delle planimetrie (2026-10-14) e le loro copie (2026-10-15)
 
 Zone dell'immagine di una planimetria scelte dall'utente nell'editor (i pezzi che il gioco disegna a parte, come i muri mobili in
-fondo al Museo 2P di Madarame), tolte dall'immagine di base e posate sulla mappa con le condizioni che le mostrano.
-- **Dati (file di gioco)**: `pezzo_mappa` (migrazione 102): `uid`, `mappa_chiave` (CASCADE), `nome`; zona d'origine `sorgente_x`,
-  `sorgente_y`, `larghezza`, `altezza`; posizione `x`, `y` (angolo in alto a sinistra dell'ingombro posato); `rotazione` 0/90/180/270
-  (oraria, attorno al centro, dopo lo specchio), `specchio_orizzontale`, `specchio_verticale`; `condizioni_json` (`RequisitoSpillo[]`);
-  `ordine`. Tutto in pixel dell'immagine.
-- **Server**: `server/services/mappe/pezziMappa.ts` (righe, DTO con `valutaRequisitiSpillo`, verifica di zona e ingombro
-  sull'immagine, creazione/correzione/eliminazione, forma e scrittura per il pacchetto); in `mappeService` `dimensioniDellaMappa`
-  (salvate, altrimenti lette dall'immagine mostrata: caricata, asset predefinito, asset originale; 409 `mappa-senza-immagine`),
-  `creaPezzoMappa` / `aggiornaPezzoMappa` / `eliminaPezzoMappa` (condizioni verificate come quelle dei pin), `MappaDto.pezzi` (con
-  la partita, l'esito delle condizioni), `esportaMappe`/`importaMappe` (campo `pezzi`: sostituisce; assente lascia; il reseed del
-  seed non tocca; si scrivono a immagini importate e quelli fuori dall'immagine d'arrivo si scartano, `pezziScartati`). Rotte
-  `POST /api/mappe/:chiave/pezzi`, `PUT`/`DELETE /api/mappe/pezzi/:id`; «pezzi» fra le chiavi riservate. `impostaImmagineMappa` su
-  una mappa con pezzi risponde 409 `mappa-con-pezzi` (`details.pezzi`); con `?eliminaPezzi=1` i pezzi se ne vanno con l'immagine;
-  all'importazione un'immagine diversa da quella di prima (byte per byte) toglie i pezzi della vecchia (`pezziEliminati`).
+fondo al Museo 2P di Madarame), tolte dall'immagine di base e posate sulla mappa con le condizioni che le mostrano. Dalla 103 lo
+stesso ritaglio si posa in più punti: il **pezzo** è il ritaglio (zona e nome), le **copie** sono le sue pose.
+- **Dati (file di gioco)**: `pezzo_mappa` (migrazione 102, ricostruita dalla 103 senza le colonne della posa, `id` e `uid`
+  invariati): `uid`, `mappa_chiave` (CASCADE), `nome`; zona d'origine `sorgente_x`, `sorgente_y`, `larghezza`, `altezza`; `ordine`.
+  `copia_pezzo` (migrazione 103): `uid`, `pezzo_id` (CASCADE), `etichetta` (vuota = «Nome · copia N» nella vista); posizione `x`, `y`
+  (angolo in alto a sinistra dell'ingombro posato); `rotazione` 0/90/180/270 (oraria, attorno al centro, dopo lo specchio),
+  `specchio_orizzontale`, `specchio_verticale`; `condizioni_json` (`RequisitoSpillo[]`, per copia); `ordine` fra le copie. Tutto in
+  pixel dell'immagine. La 103 ha trasformato ogni pezzo della 102 in un ritaglio con una copia (la sua posa, con le condizioni).
+- **Server**: `server/services/mappe/pezziMappa.ts` (righe di ritagli e copie, DTO con `valutaRequisitiSpillo` per copia, verifica
+  di zona e ingombro sull'immagine, creazione/correzione/eliminazione di ritagli e copie, forma e scrittura per il pacchetto); in
+  `mappeService` `dimensioniDellaMappa` (salvate, altrimenti lette dall'immagine mostrata: caricata, asset predefinito, asset
+  originale; 409 `mappa-senza-immagine`), `creaPezzoMappa` (ritaglio e prima copia) / `aggiornaPezzoMappa` (nome, zona — riverifica
+  ogni copia —, ordine) / `eliminaPezzoMappa` (con le copie), `creaCopiaPezzoMappa` (al massimo 200, 400 `troppe-copie`) /
+  `aggiornaCopiaPezzoMappa` (con `nomePezzo`, nella stessa transazione) / `eliminaCopiaPezzoMappa` (con l'ultima se ne va il ritaglio:
+  `{ pezzoEliminato }`), condizioni verificate come quelle dei pin; `MappaDto.pezzi` (ognuno con `copie`, con la partita l'esito
+  delle condizioni di ogni copia), `esportaMappe`/`importaMappe` (campo `pezzi`, ognuno con `copie`; un pezzo della 102, con la posa
+  accanto alla zona, si legge come un pezzo con una copia; sostituisce; assente lascia; il reseed del seed non tocca; si scrivono a
+  immagini importate: le copie fuori dall'immagine d'arrivo si scartano, `copieScartate`, e con loro il pezzo con la zona fuori o
+  senza copie, `pezziScartati`; scritti in `pezzi` e `copie`). Rotte `POST /api/mappe/:chiave/pezzi` (`{ nome?, sorgente, ordine?,
+  copia? }`), `PUT`/`DELETE /api/mappe/pezzi/:id`, `POST /api/mappe/pezzi/:id/copie`, `PUT`/`DELETE /api/mappe/pezzi/copie/:id`
+  (schemi `strict`); «pezzi» fra le chiavi riservate. `impostaImmagineMappa` su una mappa con pezzi risponde 409 `mappa-con-pezzi`
+  (`details.pezzi`, `details.copie`); con `?eliminaPezzi=1` i pezzi se ne vanno, con le copie, con l'immagine; all'importazione
+  un'immagine diversa da quella di prima (byte per byte) toglie i pezzi della vecchia (`pezziEliminati`, `copieEliminate`).
 - **Visore** (`VisoreMappa`, `src/utils/pezziMappa.ts`): l'immagine di base ha una maschera alfa (`mascheraZone`: SVG grande
-  quanto l'immagine, con una `<mask>` interna che rende trasparenti tutte le zone d'origine); ogni pezzo è un `div` nel livello
+  quanto l'immagine, con una `<mask>` interna che rende trasparenti tutte le zone d'origine, una per pezzo); ogni **copia**
+  (`copiePosate`: pezzo, copia e posto fra le copie; `posaDi`: zona del ritaglio + posa della copia) è un `div` nel livello
   dell'immagine (pixel dell'immagine: lo zoom lo scala con la mappa) grande quanto il suo ingombro, con dentro il ritaglio
-  (`background-image` della stessa immagine spostato sulla zona, `rotate(…) scale(…)`: specchio prima, rotazione poi), sotto i pin.
-  `statoPezzo`: senza partita o nell'editor con «Giorno corrente» spento sempre visibile; con la partita nascosto se le condizioni
-  non valgono, in trasparenza (`.visore-mappa__pezzo--non-disponibile`) con «Mostra anche i non ancora disponibili», che li conta.
-  Inquadratura: `areaAlpha`/`areaImmagine` escludono le zone (rifatte solo quando cambiano, da una firma) e `areaConPezzi` aggiunge
-  gli ingombri. All'importazione `immagineMostrata` (mappeService) è fotografata e riconfrontata per togliere i pezzi di
-  un'immagine cambiata.
-- **Editor** (`EditorMappaPage`, `FormPezzo`): sezione «Pezzi»; lo strumento `ritaglia` del visore (`StrumentoEditor`) trasforma il
-  rettangolo trascinato in pixel interi dell'immagine (`StrumentiEditor.pezzi.onRitaglia`, almeno 2 × 2) e crea il pezzo
-  (`POST`), selezionato; con «Seleziona» un pezzo si seleziona toccandolo e si sposta trascinandolo (`onSposta` al rilascio,
-  posizione = partenza + spostamento a schermo / zoom, ingombro tenuto dentro l'immagine); le zone si vedono tratteggiate
-  (`.visore-mappa__zona-pezzo`, bordi divisi per `--zoom-mappa`). `FormPezzo`: nome, X/Y (campi e frecce di 1 px, massimi
-  secondo l'ingombro ruotato), rotazione, specchio, `CondizioniEditor perSpillo`, «Elimina» con conferma. L'immagine nuova su una
-  mappa con pezzi apre la conferma (409 → `caricaImmagineMappa(…, { eliminaPezzi: true })`).
+  (`background-image` della stessa immagine spostato sulla zona, `rotate(…) scale(…)`: specchio prima, rotazione poi), sotto i pin;
+  `data-pezzo` è l'uid del pezzo, `data-copia` quello della copia. `statoPezzo` (per copia): senza partita o nell'editor con «Giorno
+  corrente» spento sempre visibile; con la partita nascosta se le sue condizioni non valgono, in trasparenza
+  (`.visore-mappa__pezzo--non-disponibile`) con «Mostra anche i non ancora disponibili», che le conta. Inquadratura:
+  `areaAlpha`/`areaImmagine` escludono le zone (rifatte solo quando cambiano, da una firma) e `areaConPezzi` aggiunge gli ingombri
+  di tutte le copie. All'importazione `immagineMostrata` (mappeService) è fotografata e riconfrontata per togliere i pezzi di
+  un'immagine cambiata. `nomeCopia`: l'etichetta o «Nome · copia N».
+- **Editor** (`EditorMappaPage`, `FormPezzo`): sezione «Pezzi», con l'elenco dei pezzi (nome, zona, quante copie) e sotto ognuno le
+  sue copie (nome della copia, posizione, rotazione, condizioni); lo strumento `ritaglia` del visore (`StrumentoEditor`) trasforma
+  il rettangolo trascinato in pixel interi dell'immagine (`StrumentiEditor.pezzi.onRitaglia`, almeno 2 × 2) e crea il pezzo
+  (`POST`) con la prima copia, selezionata; con «Seleziona» una copia si seleziona toccandola e si sposta trascinandola
+  (`StrumentiPezzi` lavora sugli id delle copie; `onSposta` al rilascio, posizione = partenza + spostamento a schermo / zoom,
+  ingombro tenuto dentro l'immagine); le zone si vedono tratteggiate (`.visore-mappa__zona-pezzo`, bordi divisi per `--zoom-mappa`),
+  evidenziata quella del pezzo della copia selezionata. `FormPezzo` (la copia selezionata): nome del pezzo (comune, salvato con
+  `nomePezzo`), etichetta della copia, X/Y (campi e frecce di 1 px, massimi secondo l'ingombro ruotato), rotazione, specchio,
+  `CondizioniEditor perSpillo`; «Aggiungi copia» (dalla copia salvata: `posizioneNuovaCopia` la posa 24 px in basso a destra, o
+  dall'altra parte se non ci sta, con rotazione, specchio e condizioni uguali; disattivato con modifiche in sospeso), «Elimina
+  copia» / «Elimina» sull'ultima (la conferma dice che se ne va il pezzo) ed «Elimina pezzo» con tutte le copie, con conferma.
+  L'immagine nuova su una mappa con pezzi apre la conferma (409 → `caricaImmagineMappa(…, { eliminaPezzi: true })`).
+- **Pacchetto di gioco** (`ricaricaPacchetto`, usata dai test): un pacchetto della 102 (ritagli con la posa, senza `copia_pezzo`)
+  porta la posa come prima copia; nessuna copia resta senza il suo ritaglio.

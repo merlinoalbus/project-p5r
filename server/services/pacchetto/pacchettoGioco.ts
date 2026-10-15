@@ -183,6 +183,19 @@ export function ricaricaPacchetto(db: AppDatabase, percorso: string = percorsoPa
         }
         tabelle++;
       }
+      // Le copie dei pezzi (103) vivono in un'altra tabella dei loro ritagli: un pacchetto della 102 porta i ritagli con la posa
+      // accanto e nessuna copia, e la loro posa diventa la prima copia (come nella migrazione); in ogni caso nessuna copia resta
+      // senza il suo ritaglio (nota N2 del validatore).
+      if (db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'copia_pezzo'").get() && nomi.includes('pezzo_mappa')) {
+        const conPosa = (db.prepare('PRAGMA pacchetto.table_info("pezzo_mappa")').all() as Array<{ name: string }>).some((c) => c.name === 'x');
+        if (conPosa && !nomi.includes('copia_pezzo')) {
+          db.prepare('DELETE FROM main.copia_pezzo').run();
+          righe += db.prepare(`INSERT INTO main.copia_pezzo (uid, pezzo_id, etichetta, x, y, rotazione, specchio_orizzontale, specchio_verticale, condizioni_json, ordine, updated_at)
+            SELECT lower(hex(randomblob(16))), p.id, '', p.x, p.y, p.rotazione, p.specchio_orizzontale, p.specchio_verticale, p.condizioni_json, 0, p.updated_at
+            FROM pacchetto.pezzo_mappa p WHERE p.id IN (SELECT id FROM main.pezzo_mappa) ORDER BY p.id`).run().changes;
+        }
+        db.prepare('DELETE FROM main.copia_pezzo WHERE pezzo_id NOT IN (SELECT id FROM main.pezzo_mappa)').run();
+      }
     })();
   } finally {
     db.pragma('foreign_keys = ON');

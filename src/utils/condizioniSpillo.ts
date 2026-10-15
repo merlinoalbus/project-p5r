@@ -3,8 +3,14 @@
 // per il fast refresh)
 // ============================================================
 
-import type { ConfidenteDto, DungeonRiassuntoDto, QuartiereRiassuntoDto, RichiestaDto } from '../types';
-import type { NomiCondizioni } from '../../shared/condizioniSpillo';
+import type { CondizioneSpilloDto, ConfidenteDto, DungeonRiassuntoDto, QuartiereRiassuntoDto, RichiestaDto } from '../types';
+import type { NomiCondizioni, RequisitoSpillo } from '../../shared/condizioniSpillo';
+
+/** Le condizioni senza il testo descrittivo del server (è il server a ricalcolarlo): quel che si rimanda salvando uno spillo o una
+ *  copia di un pezzo della planimetria (103). */
+export function condizioniSenzaTesto(condizioni: readonly CondizioneSpilloDto[]): RequisitoSpillo[] {
+  return condizioni.map((c) => { const copia: Record<string, unknown> = { ...c }; delete copia.testo; return copia as unknown as RequisitoSpillo; });
+}
 
 export interface ElenchiCondizioni {
   confidenti: ConfidenteDto[];

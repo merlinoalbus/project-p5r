@@ -11,6 +11,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { EditorMappaPage } from './EditorMappaPage';
 import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../types';
 import { usePartitaStore } from '../stores/partitaStore';
+import { useNotificationStore } from '../stores/notificationStore';
 import { ApiError } from '../services/api/_helpers';
 
 const api = vi.hoisted(() => ({
@@ -20,8 +21,8 @@ aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagin
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
   // le voci della guida di un pin (098): quelle collegabili e il collegamento (lo stesso della guida)
   getVociCollegabili: vi.fn(), collegaPinAlPunto: vi.fn(),
-  // i pezzi della planimetria (102)
-  creaPezzoMappa: vi.fn(), aggiornaPezzoMappa: vi.fn(), eliminaPezzoMappa: vi.fn(),
+  // i pezzi della planimetria (102) e le loro copie (103)
+  creaPezzoMappa: vi.fn(), aggiornaPezzoMappa: vi.fn(), eliminaPezzoMappa: vi.fn(), creaCopiaPezzoMappa: vi.fn(), aggiornaCopiaPezzoMappa: vi.fn(), eliminaCopiaPezzoMappa: vi.fn(),
 }));
 vi.mock('../services/api', (vero) => moduloApi(vero, {
   ...api,
@@ -498,7 +499,12 @@ describe('EditorMappaPage', () => {
   // ---- I pezzi della planimetria (102, 2026-10-14) ----
   // In jsdom la tela misura 0×0 e lo zoom è 1: il punto (cx, cy) dello schermo è il pixel (cx + 500, cy + 250) della mappa 1000×500.
   const conImmagine: MappaDto = { ...base, immagineUrl: '/pianta.png' };
-  const pezzo: MappaDto['pezzi'][number] = { id: 31, uid: '3'.repeat(32), nome: 'Muro mobile', sorgente: { x: 100, y: 450, larghezza: 120, altezza: 40 }, posizione: { x: 300, y: 200 }, rotazione: 0, specchio: { orizzontale: false, verticale: false }, condizioni: [], ordine: 0, updatedAt: 'u1' };
+  type Copia = MappaDto['pezzi'][number]['copie'][number];
+  /** Una copia del pezzo 31; `extra` sovrascrive. */
+  const copia = (extra: Partial<Copia> = {}): Copia => ({ id: 41, uid: '4'.repeat(32), pezzoId: 31, etichetta: '', posizione: { x: 300, y: 200 }, rotazione: 0, specchio: { orizzontale: false, verticale: false }, condizioni: [], ordine: 0, updatedAt: 'u1', ...extra });
+  const pezzo: MappaDto['pezzi'][number] = { id: 31, uid: '3'.repeat(32), nome: 'Muro mobile', sorgente: { x: 100, y: 450, larghezza: 120, altezza: 40 }, ordine: 0, updatedAt: 'u1', copie: [copia()] };
+  /** Lo stesso pezzo con due copie (103): la seconda ha un'etichetta, una rotazione e una condizione. */
+  const conDueCopie: MappaDto['pezzi'][number] = { ...pezzo, copie: [copia(), copia({ id: 42, uid: '5'.repeat(32), etichetta: 'Ala est', posizione: { x: 700, y: 100 }, rotazione: 90, ordine: 1, condizioni: [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }] })] };
   /** Apre la sezione «Pezzi» dell'editor. */
   const apriPezzi = async () => fireEvent.click(await screen.findByRole('button', { name: 'Pezzi' }));
 
@@ -522,8 +528,8 @@ describe('EditorMappaPage', () => {
     fireEvent.pointerUp(tela, { pointerId: 1, clientX: 0, clientY: 0 });
     await waitFor(() => expect(api.creaPezzoMappa).toHaveBeenCalledWith('citta-shibuya', { sorgente: { x: 500, y: 250, larghezza: 100, altezza: 40 } }));
     expect(document.querySelector('[data-ritaglio]')).toBeNull();
-    // ricaricata la mappa, il pezzo è selezionato con le sue proprietà e lo strumento torna «Seleziona»
-    expect(await screen.findByRole('region', { name: 'Proprietà del pezzo: Muro mobile' })).toBeInTheDocument();
+    // ricaricata la mappa, la prima copia del pezzo è selezionata con le sue proprietà e lo strumento torna «Seleziona»
+    expect(await screen.findByRole('region', { name: 'Proprietà della copia: Muro mobile · copia 1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Ritaglia pezzo/ })).toHaveAttribute('aria-pressed', 'false');
     // la zona ritagliata si vede tratteggiata nell'editor
     expect(document.querySelector(`[data-zona-pezzo="${pezzo.uid}"]`)).not.toBeNull();
@@ -536,25 +542,37 @@ describe('EditorMappaPage', () => {
     expect(screen.getByText('Serve un’immagine di base da cui ritagliare.')).toBeInTheDocument();
   });
 
-  it('il modulo del pezzo: posizione al pixel (campi e frecce), rotazione, specchio e condizioni si salvano insieme; «Elimina» chiede conferma', async () => {
+  it('il modulo della copia: nome del pezzo, etichetta, posizione al pixel (campi e frecce), rotazione, specchio e condizioni si salvano insieme; l\'ultima copia «Elimina» chiede conferma e dice che se ne va il pezzo', async () => {
     api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [pezzo] });
-    api.aggiornaPezzoMappa.mockResolvedValue(pezzo);
-    api.eliminaPezzoMappa.mockResolvedValue(undefined);
+    api.aggiornaCopiaPezzoMappa.mockResolvedValue(copia());
+    api.eliminaCopiaPezzoMappa.mockResolvedValue({ pezzoEliminato: true });
     monta();
     await apriPezzi();
-    fireEvent.click(within(screen.getByRole('list', { name: 'Pezzi di questa mappa' })).getByRole('button', { name: /Muro mobile/ }));
-    const form = within(screen.getByRole('region', { name: 'Proprietà del pezzo: Muro mobile' }));
-    expect(form.getByText(/Zona d’origine · 100, 450 · 120×40 px/)).toBeInTheDocument();
-    expect(form.getByRole('button', { name: 'Salva pezzo' })).toBeDisabled();
-    fireEvent.change(form.getByRole('textbox', { name: 'Nome' }), { target: { value: 'Muro del ponte' } });
+    // l'elenco: il pezzo con la sua copia
+    const elenco = within(screen.getByRole('list', { name: 'Pezzi di questa mappa' }));
+    expect(elenco.getByText('120×40 px · 1 copia')).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole('list', { name: 'Copie di Muro mobile' })).getByRole('button', { name: /Muro mobile · copia 1/ }));
+    const form = within(screen.getByRole('region', { name: 'Proprietà della copia: Muro mobile · copia 1' }));
+    expect(form.getByText(/Copia 1 di 1 · zona d’origine 100, 450 · 120×40 px/)).toBeInTheDocument();
+    expect(form.getByRole('button', { name: 'Salva copia' })).toBeDisabled();
+    // con una copia sola non c'è «Elimina pezzo»: «Elimina» è già l'ultima copia
+    expect(form.queryByRole('button', { name: /Elimina pezzo/ })).toBeNull();
+    expect(form.getByRole('textbox', { name: 'Etichetta della copia' })).toHaveAttribute('placeholder', 'Muro mobile · copia 1');
+    fireEvent.change(form.getByRole('textbox', { name: 'Nome del pezzo' }), { target: { value: 'Muro del ponte' } });
+    // il segnaposto dell'etichetta segue il nome
+    expect(form.getByRole('textbox', { name: 'Etichetta della copia' })).toHaveAttribute('placeholder', 'Muro del ponte · copia 1');
+    fireEvent.change(form.getByRole('textbox', { name: 'Etichetta della copia' }), { target: { value: ' Ingresso ' } });
     fireEvent.change(form.getByRole('spinbutton', { name: 'X' }), { target: { value: '310' } });
     fireEvent.click(form.getByRole('button', { name: 'Sposta di 1 px a destra' }));
     fireEvent.click(form.getByRole('button', { name: 'Sposta di 1 px a su' }));
     fireEvent.click(form.getByRole('radio', { name: '90°' }));
     expect(form.getByRole('radio', { name: '90°' })).toHaveAttribute('aria-checked', 'true');
     fireEvent.click(form.getByRole('checkbox', { name: 'Specchia in orizzontale' }));
-    fireEvent.click(form.getByRole('button', { name: 'Salva pezzo' }));
-    await waitFor(() => expect(api.aggiornaPezzoMappa).toHaveBeenCalledWith(31, { nome: 'Muro del ponte', posizione: { x: 311, y: 199 }, rotazione: 90, specchio: { orizzontale: true, verticale: false }, condizioni: [] }));
+    // con modifiche in sospeso non si aggiunge una copia (partirebbe da quella salvata)
+    expect(form.getByRole('button', { name: /Aggiungi copia/ })).toBeDisabled();
+    fireEvent.click(form.getByRole('button', { name: 'Salva copia' }));
+    await waitFor(() => expect(api.aggiornaCopiaPezzoMappa).toHaveBeenCalledWith(41, { etichetta: 'Ingresso', posizione: { x: 311, y: 199 }, rotazione: 90, specchio: { orizzontale: true, verticale: false }, condizioni: [], nomePezzo: 'Muro del ponte' }));
+    expect(api.aggiornaPezzoMappa).not.toHaveBeenCalled();
     // a 90° l'ingombro è 40 × 120: la X non va oltre 1000 − 40, la Y oltre 500 − 120
     fireEvent.change(form.getByRole('spinbutton', { name: 'X' }), { target: { value: '5000' } });
     expect(form.getByRole('spinbutton', { name: 'X' })).toHaveAttribute('max', '960');
@@ -562,28 +580,100 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(form.getByRole('button', { name: 'Elimina' })).toBeEnabled());
     fireEvent.click(form.getByRole('button', { name: 'Elimina' }));
     const conferma = within(screen.getByRole('dialog', { name: 'Eliminare il pezzo «Muro mobile»?' }));
-    expect(api.eliminaPezzoMappa).not.toHaveBeenCalled();
+    expect(conferma.getByText(/È l’ultima copia: con lei se ne va il pezzo, e la sua zona d’origine torna visibile/)).toBeInTheDocument();
+    expect(api.eliminaCopiaPezzoMappa).not.toHaveBeenCalled();
     fireEvent.click(conferma.getByRole('button', { name: /Elimina/ }));
+    await waitFor(() => expect(api.eliminaCopiaPezzoMappa).toHaveBeenCalledWith(41));
+    expect(api.eliminaPezzoMappa).not.toHaveBeenCalled();
+    await waitFor(() => expect(useNotificationStore.getState().notifications.map((n) => n.message)).toContain('Era l’ultima copia: il pezzo è stato eliminato e la sua zona torna visibile nella mappa.'));
+  });
+
+  it('le copie (103): l\'elenco le raggruppa sotto il pezzo; «Aggiungi copia» ne posa una accanto, con rotazione, specchio e condizioni; si eliminano una copia o il pezzo intero, con conferma', async () => {
+    api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [conDueCopie] });
+    api.creaCopiaPezzoMappa.mockResolvedValue(copia({ id: 43, uid: '6'.repeat(32), posizione: { x: 724, y: 124 }, rotazione: 90, ordine: 2 }));
+    api.eliminaCopiaPezzoMappa.mockResolvedValue({ pezzoEliminato: false });
+    api.eliminaPezzoMappa.mockResolvedValue(undefined);
+    monta();
+    await apriPezzi();
+    expect(within(screen.getByRole('list', { name: 'Pezzi di questa mappa' })).getByText('120×40 px · 2 copie')).toBeInTheDocument();
+    const copie = within(screen.getByRole('list', { name: 'Copie di Muro mobile' }));
+    // vuota l'etichetta, il nome è «Nome · copia N»; con l'etichetta, l'etichetta; accanto posizione, rotazione e condizioni
+    expect(copie.getByRole('button', { name: /Muro mobile · copia 1.*300, 200/ })).toBeInTheDocument();
+    expect(copie.getByRole('button', { name: /Ala est.*700, 100 · 90° · 1 condizione/ })).toBeInTheDocument();
+    // sulla mappa due copie dello stesso pezzo, una zona tratteggiata
+    expect(document.querySelectorAll(`[data-pezzo="${pezzo.uid}"]`)).toHaveLength(2);
+    expect(document.querySelectorAll(`[data-zona-pezzo="${pezzo.uid}"]`)).toHaveLength(1);
+    fireEvent.click(copie.getByRole('button', { name: /Ala est/ }));
+    expect(copie.getByRole('button', { name: /Ala est/ })).toHaveAttribute('aria-pressed', 'true');
+    const form = within(screen.getByRole('region', { name: 'Proprietà della copia: Ala est' }));
+    expect(form.getByText(/Copia 2 di 2/)).toBeInTheDocument();
+    // la zona del pezzo della copia selezionata si evidenzia sulla mappa
+    expect(document.querySelector(`[data-zona-pezzo="${pezzo.uid}"]`)).toHaveClass('visore-mappa__zona-pezzo--selezionata');
+    // «Aggiungi copia»: accanto (24 px in basso a destra, dentro 1000 × 500 anche ruotata: 40 × 120), stessa posa e condizioni senza testo
+    // la mappa riletta dopo l'aggiunta ne ha tre
+    api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [{ ...conDueCopie, copie: [...conDueCopie.copie, copia({ id: 43, uid: '6'.repeat(32), posizione: { x: 724, y: 124 }, rotazione: 90, ordine: 2 })] }] });
+    fireEvent.click(form.getByRole('button', { name: /Aggiungi copia/ }));
+    await waitFor(() => expect(api.creaCopiaPezzoMappa).toHaveBeenCalledWith(31, { posizione: { x: 724, y: 124 }, rotazione: 90, specchio: { orizzontale: false, verticale: false }, condizioni: [{ tipo: 'fascia', fascia: 'sera' }] }));
+    // la copia nuova è selezionata
+    expect(await screen.findByRole('region', { name: 'Proprietà della copia: Muro mobile · copia 3' })).toBeInTheDocument();
+    expect(within(screen.getByRole('list', { name: 'Pezzi di questa mappa' })).getByText('120×40 px · 3 copie')).toBeInTheDocument();
+    // «Elimina copia»: le altre restano
+    fireEvent.click(within(screen.getByRole('list', { name: 'Copie di Muro mobile' })).getByRole('button', { name: /Muro mobile · copia 1/ }));
+    const prima = within(screen.getByRole('region', { name: 'Proprietà della copia: Muro mobile · copia 1' }));
+    await waitFor(() => expect(prima.getByRole('button', { name: 'Elimina copia' })).toBeEnabled());
+    fireEvent.click(prima.getByRole('button', { name: 'Elimina copia' }));
+    const unaCopia = within(screen.getByRole('dialog', { name: 'Eliminare la copia «Muro mobile · copia 1»?' }));
+    expect(unaCopia.getByText(/restano sulla mappa; la zona d’origine resta cancellata/)).toBeInTheDocument();
+    fireEvent.click(unaCopia.getByRole('button', { name: /Elimina/ }));
+    await waitFor(() => expect(api.eliminaCopiaPezzoMappa).toHaveBeenCalledWith(41));
+    await waitFor(() => expect(useNotificationStore.getState().notifications.map((n) => n.message)).toContain('Copia eliminata: le altre restano sulla mappa.'));
+    // «Elimina pezzo»: tutte le copie, con conferma
+    fireEvent.click(within(screen.getByRole('list', { name: 'Copie di Muro mobile' })).getByRole('button', { name: /Ala est/ }));
+    const seconda = within(screen.getByRole('region', { name: 'Proprietà della copia: Ala est' }));
+    await waitFor(() => expect(seconda.getByRole('button', { name: /Elimina pezzo/ })).toBeEnabled());
+    fireEvent.click(seconda.getByRole('button', { name: /Elimina pezzo/ }));
+    const tutto = within(screen.getByRole('dialog', { name: 'Eliminare il pezzo «Muro mobile» con tutte le copie?' }));
+    expect(tutto.getByText(/Se ne vanno tutte le 3 copie e la zona d’origine torna visibile/)).toBeInTheDocument();
+    expect(api.eliminaPezzoMappa).not.toHaveBeenCalled();
+    fireEvent.click(tutto.getByRole('button', { name: /Elimina/ }));
     await waitFor(() => expect(api.eliminaPezzoMappa).toHaveBeenCalledWith(31));
   });
 
-  it('trascinato sulla mappa (strumento «Seleziona»), il pezzo si sposta e si salva al rilascio; selezionarlo deseleziona lo spillo', async () => {
-    api.getMappa.mockResolvedValue({ ...conImmagine, spilli: [nota], pezzi: [pezzo] });
-    api.aggiornaPezzoMappa.mockResolvedValue(pezzo);
+  it('la notifica dell\'importazione conta pezzi e copie (scritti, scartati, tolti), con singolari e plurali', async () => {
+    api.getMappa.mockResolvedValue(conImmagine);
+    const esito = { mappe: 1, spilli: 0, pezzi: 1, copie: 3, pezziScartati: 0, copieScartate: 1, pezziEliminati: 2, copieEliminate: 5, immagini: 0, saltate: [], condizioniScartate: 0, vociScartate: 0 };
+    api.importaMappe.mockResolvedValueOnce(esito).mockResolvedValueOnce({ ...esito, pezzi: 2, copie: 1, pezziScartati: 1, copieScartate: 2, pezziEliminati: 1, copieEliminate: 1 });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'File' }));
+    const file = () => new File([JSON.stringify({ versione: 1, mappe: [] })], 'mappe.json', { type: 'application/json' });
+    const messaggi = () => useNotificationStore.getState().notifications.map((n) => n.message);
+    fireEvent.change(screen.getByLabelText('File del pacchetto da importare'), { target: { files: [file()] } });
+    await waitFor(() => expect(messaggi()).toContain('Importate 1 mappe, 0 spilli, 1 pezzo (3 copie), 0 immagini; 1 copia scartata perché esce dall’immagine della loro mappa; 2 pezzi (5 copie) tolti perché ritagliati da un’immagine poi sostituita.'));
+    await waitFor(() => expect(screen.getByLabelText('File del pacchetto da importare')).toBeEnabled());
+    fireEvent.change(screen.getByLabelText('File del pacchetto da importare'), { target: { files: [file()] } });
+    await waitFor(() => expect(messaggi()).toContain('Importate 1 mappe, 0 spilli, 2 pezzi (1 copia), 0 immagini; 2 copie scartate perché escono dall’immagine della loro mappa (con loro 1 pezzo rimasto senza copie o con la zona fuori); 1 pezzo (1 copia) tolto perché ritagliato da un’immagine poi sostituita.'));
+  });
+
+  it('trascinata sulla mappa (strumento «Seleziona»), la copia si sposta e si salva al rilascio; selezionarla deseleziona lo spillo', async () => {
+    api.getMappa.mockResolvedValue({ ...conImmagine, spilli: [nota], pezzi: [conDueCopie] });
+    api.aggiornaCopiaPezzoMappa.mockResolvedValue(copia());
     monta();
     fireEvent.click(await screen.findByRole('button', { name: /Nota: Nota/ }));
     expect(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' })).toBeInTheDocument();
-    const sullaMappa = document.querySelector<HTMLElement>(`[data-pezzo="${pezzo.uid}"]`)!;
+    const sullaMappa = document.querySelector<HTMLElement>(`[data-copia="${'4'.repeat(32)}"]`)!;
     expect(sullaMappa).toHaveClass('visore-mappa__pezzo--modificabile');
     const tela = screen.getByRole('application');
     fireEvent.pointerDown(sullaMappa, { pointerId: 1, clientX: 10, clientY: 10 });
-    // selezionato: il pannello passa ai pezzi e lo spillo si chiude
-    expect(await screen.findByRole('region', { name: 'Proprietà del pezzo: Muro mobile' })).toBeInTheDocument();
+    // selezionata: il pannello passa ai pezzi e lo spillo si chiude
+    expect(await screen.findByRole('region', { name: 'Proprietà della copia: Muro mobile · copia 1' })).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Proprietà dello spillo: Nota' })).toBeNull();
     fireEvent.pointerMove(tela, { pointerId: 1, clientX: 30, clientY: 5 });
     expect(sullaMappa.style.left).toBe('320px');
+    // l'altra copia resta dov'era
+    expect(document.querySelector<HTMLElement>(`[data-copia="${'5'.repeat(32)}"]`)!.style.left).toBe('700px');
     fireEvent.pointerUp(tela, { pointerId: 1, clientX: 30, clientY: 5 });
-    await waitFor(() => expect(api.aggiornaPezzoMappa).toHaveBeenCalledWith(31, { posizione: { x: 320, y: 195 } }));
+    await waitFor(() => expect(api.aggiornaCopiaPezzoMappa).toHaveBeenCalledWith(41, { posizione: { x: 320, y: 195 } }));
+    expect(api.aggiornaPezzoMappa).not.toHaveBeenCalled();
   });
 
   it('sostituire l\'immagine di una mappa con dei pezzi chiede conferma (409): confermando si ricarica con «eliminaPezzi»', async () => {

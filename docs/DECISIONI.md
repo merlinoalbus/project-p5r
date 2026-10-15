@@ -1816,3 +1816,28 @@ Conseguenze tecniche (non scelte dell'utente):
   accanto alla tela, e nei visori incorporati stretti alla tela resta poco o niente (scheda del Palazzo a 1280: visore 242,
   tela 0×240; negozio a 1024: visore 310, tela 0; Oggi a 1024: visore 379, tela 37). Uguale prima e dopo questa modifica;
   proposto all'utente a parte.
+
+## 2026-10-15 — Le copie dei pezzi: un ritaglio definito una volta, posato più volte nella mappa
+
+Richiesta dell'utente: «vorrei poter usare un pezzo una volta recuperato e definito per inserirlo più volte nella mappa.»
+Proposte: A un ritaglio con più copie (tabella figlia, migrazione 103), B un «Duplica» che crea un pezzo nuovo e indipendente
+con la stessa zona. Scelte dell'utente (AskUserQuestion, tutte le raccomandate):
+- modello → «Ritaglio con copie» (A);
+- condizioni → «Per copia» (ogni copia ha le sue, come posizione, rotazione e specchio);
+- eliminando l'ultima copia → «Se ne va il ritaglio» (la zona d'origine torna visibile; la conferma lo dice);
+- nome → «Nome + etichetta copia» (il ritaglio ha il nome; ogni copia un'etichetta facoltativa, vuota = «Nome · copia N»).
+
+Conseguenze tecniche (non scelte dell'utente):
+- `pezzo_mappa` resta il ritaglio (zona, nome, ordine) e si ricostruisce senza le colonne della posa (`id`, `uid` e contatore
+  degli id invariati); la posa passa a `copia_pezzo` (uid proprio, etichetta, posizione, rotazione, specchio, condizioni, ordine).
+  Ogni pezzo esistente diventa un ritaglio con una copia: niente si perde (provato su una copia dei dati con pezzi della 102);
+- nella proposta il campo del pacchetto era chiamato `pose`; nell'implementazione si chiama `copie`, come la tabella, il DTO e
+  l'interfaccia. L'importazione legge ancora i pezzi della 102 (la posa accanto alla zona) come pezzi con una copia;
+- rotte: il ritaglio con `POST /api/mappe/:chiave/pezzi` (nasce con la prima copia), `PUT`/`DELETE /api/mappe/pezzi/:id`; le copie con
+  `POST /api/mappe/pezzi/:id/copie` e `PUT`/`DELETE /api/mappe/pezzi/copie/:id`; la correzione di una copia porta anche il nome del
+  ritaglio (`nomePezzo`), così il modulo dell'editor salva tutto in una transazione. Schemi `strict`: un campo della posa mandato
+  al ritaglio (il contratto della 102) è un 400, non un dato perso in silenzio. Al massimo 200 copie per pezzo;
+- cambiando la zona di un ritaglio si riverifica l'ingombro di ogni copia; la sostituzione dell'immagine (409 `mappa-con-pezzi`)
+  conta anche le copie (`details.copie`) e le toglie coi ritagli; all'importazione una copia fuori dall'immagine d'arrivo si scarta
+  da sola (`copieScartate`), un ritaglio con la zona fuori o senza copie dentro si scarta (`pezziScartati`); un'immagine cambiata
+  toglie ritagli e copie (`pezziEliminati`, `copieEliminate`).

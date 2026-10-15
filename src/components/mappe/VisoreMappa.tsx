@@ -10,7 +10,7 @@
 
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
-import { areaConPezzi, mascheraZone, statoPezzo, stileImmagineMascherata, stilePezzo } from '../../utils/pezziMappa';
+import { areaConPezzi, copiePosate, mascheraZone, nomeCopia, posaDi, statoPezzo, stileImmagineMascherata, stilePezzo } from '../../utils/pezziMappa';
 import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
@@ -39,14 +39,16 @@ export type StatoPuntoMappa = 'ottenuto' | 'esaurito' | null;
  *  un pezzo della planimetria (102: si trascina un rettangolo sull'immagine). */
 export type StrumentoEditor = 'seleziona' | 'aggiungi' | 'incolla' | 'ritaglia';
 
-/** I pezzi della planimetria nell'editor (102): selezione, ritaglio di una zona, spostamento. Coordinate in pixel dell'immagine. */
+/** I pezzi della planimetria nell'editor (102): selezione, ritaglio di una zona, spostamento. Coordinate in pixel dell'immagine.
+ *  Dalla 103 si seleziona e si sposta una **copia** (gli id sono delle copie); la zona tratteggiata evidenziata è del suo pezzo. */
 export interface StrumentiPezzi {
+  /** La copia selezionata. */
   selezionatoId: number | null;
-  onSeleziona: (id: number | null) => void;
+  onSeleziona: (copiaId: number | null) => void;
   /** Rettangolo trascinato con lo strumento «ritaglia» (almeno 2 × 2 px, dentro l'immagine). */
   onRitaglia: (zona: { x: number; y: number; larghezza: number; altezza: number }) => void;
-  /** Fine del trascinamento di un pezzo (strumento «seleziona»): il nuovo angolo in alto a sinistra. */
-  onSposta: (id: number, x: number, y: number) => void;
+  /** Fine del trascinamento di una copia (strumento «seleziona»): il nuovo angolo in alto a sinistra. */
+  onSposta: (copiaId: number, x: number, y: number) => void;
 }
 
 export interface StrumentiEditor {
@@ -266,7 +268,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const zone = useMemo<AreaMappa[]>(() => (firmaZone ? firmaZone.split(';').map((z) => { const [x, y, w, h] = z.split(',').map(Number); return { x, y, w, h }; }) : []), [firmaZone]);
   const areaVisibile = useMemo(() => (caricata ? areaImmagine(caricata.img, zone) : null), [caricata, zone]);
   const maschera = useMemo(() => mascheraZone({ w: nat.w, h: nat.h }, zone.map((z) => ({ sorgente: { x: z.x, y: z.y, larghezza: z.w, altezza: z.h } }))), [nat.w, nat.h, zone]);
-  const fit = inquadraturaMappa(nat, dim, areaConPezzi(areaVisibile, pezzi), mappa.spilli);
+  // le copie posate (103): una zona per pezzo, una posa per copia; l'inquadratura comprende tutte le copie
+  const posate = useMemo(() => copiePosate(mappa.pezzi ?? []), [mappa.pezzi]);
+  const fit = inquadraturaMappa(nat, dim, areaConPezzi(areaVisibile, posate.map((x) => posaDi(x.pezzo, x.copia))), mappa.spilli);
   const zoomMin = fit.zoom;
   const zoomMax = zoomMin * FATTORE_ZOOM_MASSIMO;
   const zoom = zoomEsplicito === null ? zoomMin : limita(zoomEsplicito, zoomMin, zoomMax);
@@ -499,12 +503,14 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const tipiPresenti = useMemo(() => TIPI_SPILLO.filter((t) => mappa.spilli.some((s) => s.tipo === t)), [mappa.spilli]);
   const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto).length, [mappa.spilli]);
   const filtraBloccati = Boolean(partitaId) && (!editor || vistaGiornoCorrente === true);
-  // anche i pezzi (102) senza le loro condizioni: si contano e ricompaiono, in trasparenza, con lo stesso comando dei pin
-  const pezziBloccati = useMemo(() => (filtraBloccati ? (mappa.pezzi ?? []).filter((p) => statoPezzo(p, true, false) === 'nascosto').length : 0), [mappa.pezzi, filtraBloccati]);
+  // anche le copie dei pezzi (102, 103) senza le loro condizioni: si contano e ricompaiono, in trasparenza, con lo stesso comando dei pin
+  const pezziBloccati = useMemo(() => (filtraBloccati ? posate.filter((x) => statoPezzo(x.copia, true, false) === 'nascosto').length : 0), [posate, filtraBloccati]);
   const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter(nascostoPerCondizioni).length : 0) + pezziBloccati, [mappa.spilli, filtraBloccati, pezziBloccati]);
-  const pezziDaDisegnare = useMemo(() => (mappa.pezzi ?? []).map((p) => ({ p, stato: statoPezzo(p, filtraBloccati, mostraNonDisponibili) })).filter((x) => x.stato !== 'nascosto'), [mappa.pezzi, filtraBloccati, mostraNonDisponibili]);
-  /** Nell'editor, i comandi dei pezzi (102): selezione, ritaglio, spostamento. */
+  const pezziDaDisegnare = useMemo(() => posate.map((x) => ({ ...x, stato: statoPezzo(x.copia, filtraBloccati, mostraNonDisponibili) })).filter((x) => x.stato !== 'nascosto'), [posate, filtraBloccati, mostraNonDisponibili]);
+  /** Nell'editor, i comandi dei pezzi (102): selezione, ritaglio, spostamento (di una copia, 103). */
   const strumentiPezzi = editor?.pezzi ?? null;
+  /** Il pezzo della copia selezionata: la sua zona si evidenzia. */
+  const pezzoSelezionatoId = strumentiPezzi ? posate.find((x) => x.copia.id === strumentiPezzi.selezionatoId)?.pezzo.id ?? null : null;
   const ricercaNorm = (scelta ? scelta.ricerca ?? '' : ricerca).trim().toLowerCase();
   /** Uno spillo che non soddisfa le sue condizioni non c'è **di regola**, e ricompare solo se lo si chiede.
    *
@@ -790,22 +796,23 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
             {/* i pezzi posati (102), sotto i pin: parte del disegno della mappa, ritagliati dalla stessa immagine */}
             {/* nell'editor (102) le zone già ritagliate si vedono tratteggiate: sono cancellate e non si ritagliano di nuovo per sbaglio */}
             {src && strumentiPezzi && pezzi.map((p) => (
-              <div key={`zona-${p.id}`} className={`visore-mappa__zona-pezzo ${p.id === strumentiPezzi.selezionatoId ? 'visore-mappa__zona-pezzo--selezionata' : ''}`} data-zona-pezzo={p.uid} aria-hidden="true"
+              <div key={`zona-${p.id}`} className={`visore-mappa__zona-pezzo ${p.id === pezzoSelezionatoId ? 'visore-mappa__zona-pezzo--selezionata' : ''}`} data-zona-pezzo={p.uid} aria-hidden="true"
                 style={{ left: p.sorgente.x, top: p.sorgente.y, width: p.sorgente.larghezza, height: p.sorgente.altezza }} />
             ))}
-            {src && pezziDaDisegnare.map(({ p, stato }) => {
-              const pos = pezzoTrascinato?.id === p.id ? { ...p, posizione: { x: pezzoTrascinato.x, y: pezzoTrascinato.y } } : p;
-              const stile = stilePezzo(pos, src, nat);
+            {/* ogni copia (103) con la sua posa: stesso ritaglio, posizione, rotazione e specchio propri */}
+            {src && pezziDaDisegnare.map(({ pezzo: p, copia: c, indice, stato }) => {
+              const posa = posaDi(p, pezzoTrascinato?.id === c.id ? { ...c, posizione: { x: pezzoTrascinato.x, y: pezzoTrascinato.y } } : c);
+              const stile = stilePezzo(posa, src, nat);
               const modificabile = !!strumentiPezzi && editor?.strumento === 'seleziona';
               return (
-                <div key={p.id} className={`visore-mappa__pezzo ${stato === 'trasparente' ? 'visore-mappa__pezzo--non-disponibile' : ''} ${modificabile ? 'visore-mappa__pezzo--modificabile' : ''} ${p.id === strumentiPezzi?.selezionatoId ? 'visore-mappa__pezzo--selezionato' : ''}`}
-                  style={{ ...stile.esterno, pointerEvents: modificabile ? 'auto' : 'none' }} data-pezzo={p.uid} aria-hidden="true" title={modificabile ? p.nome : undefined}
+                <div key={c.id} className={`visore-mappa__pezzo ${stato === 'trasparente' ? 'visore-mappa__pezzo--non-disponibile' : ''} ${modificabile ? 'visore-mappa__pezzo--modificabile' : ''} ${c.id === strumentiPezzi?.selezionatoId ? 'visore-mappa__pezzo--selezionato' : ''}`}
+                  style={{ ...stile.esterno, pointerEvents: modificabile ? 'auto' : 'none' }} data-pezzo={p.uid} data-copia={c.uid} aria-hidden="true" title={modificabile ? nomeCopia(p, c, indice) : undefined}
                   onPointerDown={modificabile ? (e) => {
-                    // come uno spillo: si seleziona subito e, trascinato oltre la soglia, si sposta (salvato al rilascio)
+                    // come uno spillo: si seleziona subito e, trascinata oltre la soglia, la copia si sposta (salvata al rilascio)
                     e.stopPropagation();
-                    strumentiPezzi!.onSeleziona(p.id);
+                    strumentiPezzi!.onSeleziona(c.id);
                     const ing = { w: Number(stile.esterno.width), h: Number(stile.esterno.height) };
-                    gesto.current = { tipo: 'pezzo', id: p.id, mosso: false, x: e.clientX, y: e.clientY, px0: p.posizione.x, py0: p.posizione.y, ...ing };
+                    gesto.current = { tipo: 'pezzo', id: c.id, mosso: false, x: e.clientX, y: e.clientY, px0: c.posizione.x, py0: c.posizione.y, ...ing };
                     tela.current?.setPointerCapture?.(e.pointerId);
                   } : undefined}>
                   <div style={stile.interno} />

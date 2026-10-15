@@ -1,11 +1,16 @@
 // ============================================================
-// pezziMappa — i pezzi delle planimetrie: zone dell'immagine scelte dall'utente, cancellate e posate altrove con condizioni (102)
+// pezziMappa — i pezzi delle planimetrie: zone dell'immagine scelte dall'utente, cancellate e posate altrove con condizioni (102),
+// in una o più copie (103)
 // ============================================================
 //
 // Richiesta dell'utente (2026-10-14): selezionare col mouse i pezzi che nelle planimetrie del gioco sono disegnati a parte (parti
 // mobili, come i muri in fondo al Museo 2P di Madarame), toglierli dalla vista ordinaria e posarli nel punto giusto della mappa,
 // della stessa dimensione, con le condizioni dei pin che decidono quando si vedono. «devo poter selezionare io aree da gestire
 // come pezzi»: le zone le sceglie l'utente nell'editor, qui non si riconosce niente da sé.
+// Dal 2026-10-15 (103): «vorrei poter usare un pezzo una volta recuperato e definito per inserirlo più volte nella mappa». Il pezzo
+// è il **ritaglio** (`pezzo_mappa`: zona e nome, la zona sempre cancellata); le **copie** (`copia_pezzo`) sono le sue pose, ognuna
+// con posizione, rotazione, specchio, etichetta e condizioni proprie. Scelte dell'utente: condizioni per copia; eliminata
+// l'ultima copia se ne va il ritaglio (la zona torna visibile); nome del ritaglio più etichetta facoltativa della copia.
 // Tutto in pixel dell'immagine; chi chiama passa la mappa (chiave interna) e le sue dimensioni (`mappeService`).
 // ============================================================
 
@@ -16,12 +21,18 @@ import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
-import type { DatiPezzoMappa, EsportazioneMappeDto, PezzoMappaDto, RotazionePezzo } from '../../../shared/types.js';
+import type { CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, PezzoMappaDto, PezzoPacchetto, RotazionePezzo } from '../../../shared/types.js';
 import { ingombroPezzo } from '../../../shared/pezziMappa.js';
 
+/** Il ritaglio (102, senza la posa dalla 103). */
 export interface RigaPezzo {
   id: number; uid: string; mappa_chiave: string; nome: string;
-  sorgente_x: number; sorgente_y: number; larghezza: number; altezza: number; x: number; y: number;
+  sorgente_x: number; sorgente_y: number; larghezza: number; altezza: number; ordine: number; updated_at: string;
+}
+
+/** Una copia posata di un ritaglio (103). */
+export interface RigaCopia {
+  id: number; uid: string; pezzo_id: number; etichetta: string; x: number; y: number;
   rotazione: RotazionePezzo; specchio_orizzontale: number; specchio_verticale: number;
   condizioni_json: string | null; ordine: number; updated_at: string;
 }
@@ -34,27 +45,44 @@ export const schemaSorgentePezzo = z.object({ x: pixel, y: pixel, larghezza: dim
 export const schemaPosizionePezzo = z.object({ x: pixel, y: pixel });
 export const schemaRotazionePezzo = z.union([z.literal(0), z.literal(90), z.literal(180), z.literal(270)]);
 export const schemaSpecchioPezzo = z.object({ orizzontale: z.boolean(), verticale: z.boolean() });
-/** I pezzi di una mappa in un pacchetto delle mappe: la forma; le condizioni si ripuliscono all'importazione come quelle dei pin. */
-export const schemaPezziPacchetto = z.array(z.object({
+/** Il massimo delle copie di un ritaglio (un pacchetto rovinato non deve riempire il file di gioco). */
+export const MASSIMO_COPIE = 200;
+
+const ordinePacchetto = z.number().int().min(0).max(9999);
+const condizioniPacchetto = z.array(z.unknown()).max(20).optional();
+const copiaPacchetto = z.object({
+  uid: z.string().max(64).optional(), etichetta: z.string().max(LIMITI_GUIDA.spillo.nome).optional(), posizione: schemaPosizionePezzo,
+  rotazione: schemaRotazionePezzo, specchio: schemaSpecchioPezzo, condizioni: condizioniPacchetto, ordine: ordinePacchetto,
+});
+/** Il pezzo della 103: il ritaglio con le sue copie (almeno una). */
+const pezzoPacchetto = z.object({
+  uid: z.string().max(64).optional(), nome: z.string().max(LIMITI_GUIDA.spillo.nome), sorgente: schemaSorgentePezzo, ordine: ordinePacchetto,
+  copie: z.array(copiaPacchetto).min(1).max(MASSIMO_COPIE),
+});
+/** Il pezzo della 102 (la posa accanto alla zona): si legge come un ritaglio con una copia, senza uid (l'uid era del pezzo). */
+const pezzoPacchetto102 = z.object({
   uid: z.string().max(64).optional(), nome: z.string().max(LIMITI_GUIDA.spillo.nome), sorgente: schemaSorgentePezzo, posizione: schemaPosizionePezzo,
-  rotazione: schemaRotazionePezzo, specchio: schemaSpecchioPezzo, condizioni: z.array(z.unknown()).max(20).optional(), ordine: z.number().int().min(0).max(9999),
-})).max(500);
+  rotazione: schemaRotazionePezzo, specchio: schemaSpecchioPezzo, condizioni: condizioniPacchetto, ordine: ordinePacchetto,
+}).transform((p) => ({ uid: p.uid, nome: p.nome, sorgente: p.sorgente, ordine: p.ordine, copie: [{ posizione: p.posizione, rotazione: p.rotazione, specchio: p.specchio, condizioni: p.condizioni, ordine: 0 }] }));
+/** I pezzi di una mappa in un pacchetto delle mappe: la forma (della 103, o della 102); le condizioni si ripuliscono all'importazione
+ *  come quelle dei pin. Un oggetto con `copie` è della 103; senza, con la posa accanto alla zona, della 102. */
+export const schemaPezziPacchetto = z.array(z.union([pezzoPacchetto, pezzoPacchetto102])).max(500);
+/** Un pezzo del pacchetto già letto (forma della 103), con le condizioni ripulite da chi chiama. */
+export type PezzoDaImportare = Omit<z.infer<typeof pezzoPacchetto>, 'copie'> & { copie: Array<Omit<z.infer<typeof copiaPacchetto>, 'condizioni'> & { condizioni?: RequisitoSpillo[] }> };
 
 /** Le dimensioni dell'immagine della mappa, in pixel. */
 export interface DimensioniMappa { larghezza: number; altezza: number }
 
-/** La tabella c'è dalla 102: nei test e nei file di prima può mancare. */
+/** Le tabelle ci sono dalla 102 e dalla 103: nei test e nei file di prima possono mancare (con la sola 102 i pezzi non si leggono). */
 export function conPezzi(): boolean {
-  return !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'pezzo_mappa'").get();
+  return !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'copia_pezzo'").get();
 }
 
-
-/** Il pezzo per l'API: con lo stato della partita (`st`) porta l'esito delle condizioni, come i pin. */
-export function pezzoDto(r: RigaPezzo, nomi: NomiCondizioni, st?: StatoDisponibilita | null): PezzoMappaDto {
+/** La copia per l'API: con lo stato della partita (`st`) porta l'esito delle condizioni, come i pin. */
+export function copiaDto(r: RigaCopia, nomi: NomiCondizioni, st?: StatoDisponibilita | null): CopiaPezzoDto {
   const condizioni = leggiCondizioniSalvate(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
   return {
-    id: r.id, uid: r.uid, nome: r.nome,
-    sorgente: { x: r.sorgente_x, y: r.sorgente_y, larghezza: r.larghezza, altezza: r.altezza },
+    id: r.id, uid: r.uid, pezzoId: r.pezzo_id, etichetta: r.etichetta,
     posizione: { x: r.x, y: r.y }, rotazione: r.rotazione,
     specchio: { orizzontale: r.specchio_orizzontale === 1, verticale: r.specchio_verticale === 1 },
     condizioni, ...(st ? { disponibilita: valutaRequisitiSpillo(condizioni, st, nomi) } : {}),
@@ -62,43 +90,101 @@ export function pezzoDto(r: RigaPezzo, nomi: NomiCondizioni, st?: StatoDisponibi
   };
 }
 
-/** I pezzi di una mappa, nel loro ordine. */
+/** Il ritaglio per l'API, con le sue copie (ognuna, con la partita, con l'esito delle sue condizioni). */
+export function pezzoDto(r: RigaPezzo, copie: readonly RigaCopia[], nomi: NomiCondizioni, st?: StatoDisponibilita | null): PezzoMappaDto {
+  return {
+    id: r.id, uid: r.uid, nome: r.nome,
+    sorgente: { x: r.sorgente_x, y: r.sorgente_y, larghezza: r.larghezza, altezza: r.altezza },
+    ordine: r.ordine, updatedAt: r.updated_at,
+    copie: copie.map((c) => copiaDto(c, nomi, st)),
+  };
+}
+
+/** I ritagli di una mappa, nel loro ordine. */
 export function righePezzi(mappa: string): RigaPezzo[] {
   if (!conPezzi()) return [];
   return prepared('SELECT * FROM pezzo_mappa WHERE mappa_chiave = ? ORDER BY ordine, id').all(mappa) as RigaPezzo[];
 }
 
-/** La riga di un pezzo; 404 se non c'è. */
+/** Le copie di un ritaglio, nel loro ordine. */
+export function righeCopie(pezzo: number): RigaCopia[] {
+  return prepared('SELECT * FROM copia_pezzo WHERE pezzo_id = ? ORDER BY ordine, id').all(pezzo) as RigaCopia[];
+}
+
+/** I ritagli di una mappa con le loro copie, nel loro ordine (due letture, non una per pezzo). */
+function righeConCopie(mappa: string): Array<{ pezzo: RigaPezzo; copie: RigaCopia[] }> {
+  const pezzi = righePezzi(mappa);
+  if (pezzi.length === 0) return [];
+  const copie = new Map<number, RigaCopia[]>();
+  for (const c of prepared('SELECT c.* FROM copia_pezzo c JOIN pezzo_mappa p ON p.id = c.pezzo_id WHERE p.mappa_chiave = ? ORDER BY c.ordine, c.id').all(mappa) as RigaCopia[]) {
+    const elenco = copie.get(c.pezzo_id);
+    if (elenco) elenco.push(c); else copie.set(c.pezzo_id, [c]);
+  }
+  return pezzi.map((pezzo) => ({ pezzo, copie: copie.get(pezzo.id) ?? [] }));
+}
+
+/** I pezzi di una mappa per l'API, con le copie. */
+export function pezziDellaMappa(mappa: string, nomi: NomiCondizioni, st?: StatoDisponibilita | null): PezzoMappaDto[] {
+  return righeConCopie(mappa).map(({ pezzo, copie }) => pezzoDto(pezzo, copie, nomi, st));
+}
+
+/** La riga di un ritaglio; 404 se non c'è. */
 export function rigaPezzo(id: number): RigaPezzo {
   const r = conPezzi() ? prepared('SELECT * FROM pezzo_mappa WHERE id = ?').get(id) as RigaPezzo | undefined : undefined;
   if (!r) throw httpErrors.notFound('pezzo-non-trovato', `Il pezzo ${id} non esiste.`);
   return r;
 }
 
-/**
- * Il pezzo come sarà salvato, verificato sull'immagine: la zona d'origine dentro l'immagine (400 `pezzo-fuori-immagine`) e
- * l'ingombro del pezzo posato, ruotato, anche (400 `pezzo-fuori-immagine`). Interi non negativi e dimensioni positive li
- * garantisce lo schema della rotta.
- */
-function verificaNellImmagine(p: { sorgente: { x: number; y: number; larghezza: number; altezza: number }; posizione: { x: number; y: number }; rotazione: RotazionePezzo }, dim: DimensioniMappa): void {
-  const s = p.sorgente;
+/** La riga di una copia; 404 se non c'è. */
+export function rigaCopia(id: number): RigaCopia {
+  const r = conPezzi() ? prepared('SELECT * FROM copia_pezzo WHERE id = ?').get(id) as RigaCopia | undefined : undefined;
+  if (!r) throw httpErrors.notFound('copia-non-trovata', `La copia ${id} non esiste.`);
+  return r;
+}
+
+type Sorgente = { x: number; y: number; larghezza: number; altezza: number };
+type Posa = { posizione: { x: number; y: number }; rotazione: RotazionePezzo };
+
+/** La zona d'origine dentro l'immagine (400 `pezzo-fuori-immagine`). */
+function verificaZona(s: Sorgente, dim: DimensioniMappa): void {
   if (s.x + s.larghezza > dim.larghezza || s.y + s.altezza > dim.altezza) {
     throw httpErrors.badRequest('pezzo-fuori-immagine', `La zona del pezzo esce dall'immagine (${dim.larghezza}×${dim.altezza} px).`);
   }
+}
+
+/** L'ingombro della copia posata, ruotata, dentro l'immagine (400 `pezzo-fuori-immagine`). */
+function verificaPosa(s: Sorgente, p: Posa, dim: DimensioniMappa, quale = 'Il pezzo posato'): void {
   const ingombro = ingombroPezzo(s.larghezza, s.altezza, p.rotazione);
   if (p.posizione.x + ingombro.larghezza > dim.larghezza || p.posizione.y + ingombro.altezza > dim.altezza) {
-    throw httpErrors.badRequest('pezzo-fuori-immagine', `Il pezzo posato esce dall'immagine (${dim.larghezza}×${dim.altezza} px): spostalo più dentro.`);
+    throw httpErrors.badRequest('pezzo-fuori-immagine', `${quale} esce dall'immagine (${dim.larghezza}×${dim.altezza} px): spostalo più dentro.`);
   }
 }
 
-/** Vero se zona e ingombro del pezzo stanno nell'immagine (la stessa regola di `verificaNellImmagine`, senza errore: per il pacchetto). */
-export function staNellImmagine(p: { sorgente: { x: number; y: number; larghezza: number; altezza: number }; posizione: { x: number; y: number }; rotazione: RotazionePezzo }, dim: DimensioniMappa): boolean {
-  try { verificaNellImmagine(p, dim); return true; } catch { return false; }
+/** Vero se la zona sta nell'immagine (la regola di `verificaZona`, senza errore: per il pacchetto). */
+export function zonaNellImmagine(s: Sorgente, dim: DimensioniMappa): boolean {
+  try { verificaZona(s, dim); return true; } catch { return false; }
 }
 
-/** Quanti pezzi ha una mappa. */
+/** Vero se l'ingombro della copia sta nell'immagine (la regola di `verificaPosa`, senza errore: per il pacchetto). */
+export function posaNellImmagine(s: Sorgente, p: Posa, dim: DimensioniMappa): boolean {
+  try { verificaPosa(s, p, dim); return true; } catch { return false; }
+}
+
+/** Quanti ritagli ha una mappa. */
 export function quantiPezzi(mappa: string): number {
   return conPezzi() ? prepared('SELECT COUNT(*) FROM pezzo_mappa WHERE mappa_chiave = ?').pluck().get(mappa) as number : 0;
+}
+
+/** Quante copie posate ha una mappa, fra tutti i suoi ritagli. */
+export function quanteCopie(mappa: string): number {
+  return conPezzi() ? prepared('SELECT COUNT(*) FROM copia_pezzo c JOIN pezzo_mappa p ON p.id = c.pezzo_id WHERE p.mappa_chiave = ?').pluck().get(mappa) as number : 0;
+}
+
+/** Toglie tutti i pezzi di una mappa con le loro copie (anche senza contare sulla cascata delle chiavi esterne). */
+export function eliminaPezziDellaMappa(mappa: string): void {
+  if (!conPezzi()) return;
+  prepared('DELETE FROM copia_pezzo WHERE pezzo_id IN (SELECT id FROM pezzo_mappa WHERE mappa_chiave = ?)').run(mappa);
+  prepared('DELETE FROM pezzo_mappa WHERE mappa_chiave = ?').run(mappa);
 }
 
 /** Le condizioni come vanno salvate: normalizzate e in JSON, o null se non ne resta nessuna. */
@@ -109,75 +195,177 @@ function jsonCondizioni(condizioni: RequisitoSpillo[] | null | undefined): strin
 
 /** Un uid nuovo, 32 esadecimali come quelli dei pin. */
 const uidNuovo = (): string => randomBytes(16).toString('hex');
+/** Un uid del pacchetto che si può tenere: ben formato e non già preso in quella tabella. */
+const uidTenibile = (uid: string | undefined, tabella: 'pezzo_mappa' | 'copia_pezzo'): uid is string =>
+  typeof uid === 'string' && /^[0-9a-f]{32}$/.test(uid) && !prepared(`SELECT 1 FROM ${tabella} WHERE uid = ?`).get(uid);
+
+/** Segna la modifica sulla mappa (la data dell'ultima modifica la leggono l'editor e l'esportazione). */
+const toccaMappa = (mappa: string, adesso: string): void => { prepared('UPDATE mappa SET updated_at = ? WHERE chiave = ?').run(adesso, mappa); };
+
+/** Inserisce una copia di un ritaglio: senza posizione sta sulla zona d'origine, senza ordine va in fondo. */
+function inserisciCopia(pezzo: RigaPezzo, dati: DatiCopiaPezzo, adesso: string, uid = uidNuovo()): number {
+  const ordine = dati.ordine ?? (prepared('SELECT COALESCE(MAX(ordine), -1) + 1 FROM copia_pezzo WHERE pezzo_id = ?').pluck().get(pezzo.id) as number);
+  const posizione = dati.posizione ?? { x: pezzo.sorgente_x, y: pezzo.sorgente_y };
+  const info = prepared(`INSERT INTO copia_pezzo (uid, pezzo_id, etichetta, x, y, rotazione, specchio_orizzontale, specchio_verticale, condizioni_json, ordine, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(uid, pezzo.id, dati.etichetta?.trim() ?? '', posizione.x, posizione.y, dati.rotazione ?? 0,
+    dati.specchio?.orizzontale ? 1 : 0, dati.specchio?.verticale ? 1 : 0, jsonCondizioni(dati.condizioni), ordine, adesso);
+  return Number(info.lastInsertRowid);
+}
 
 /**
- * Crea un pezzo dalla zona scelta: in fondo ai pezzi della mappa; senza posizione sta dove stava nell'immagine (si sposta dopo),
- * senza nome si chiama «Pezzo N». Le condizioni le verifica chi chiama (`verificaCondizioni` dei pin).
+ * Crea un pezzo dalla zona scelta, con la sua prima copia: il ritaglio in fondo ai pezzi della mappa, senza nome «Pezzo N»; la
+ * copia, senza posizione, dove stava la zona (si sposta dopo). Le condizioni le verifica chi chiama (`verificaCondizioni` dei pin).
  */
-export function creaPezzo(mappa: string, dim: DimensioniMappa, dati: DatiPezzoMappa & { sorgente: NonNullable<DatiPezzoMappa['sorgente']> }): RigaPezzo {
-  const p = { sorgente: dati.sorgente, posizione: dati.posizione ?? { x: dati.sorgente.x, y: dati.sorgente.y }, rotazione: dati.rotazione ?? 0 };
-  verificaNellImmagine(p, dim);
+export function creaPezzo(mappa: string, dim: DimensioniMappa, dati: DatiNuovoPezzoMappa): RigaPezzo {
+  const copia = dati.copia ?? {};
+  verificaZona(dati.sorgente, dim);
+  verificaPosa(dati.sorgente, { posizione: copia.posizione ?? { x: dati.sorgente.x, y: dati.sorgente.y }, rotazione: copia.rotazione ?? 0 }, dim);
   const quanti = prepared('SELECT COUNT(*) FROM pezzo_mappa WHERE mappa_chiave = ?').pluck().get(mappa) as number;
   const ordine = dati.ordine ?? (prepared('SELECT COALESCE(MAX(ordine), -1) + 1 FROM pezzo_mappa WHERE mappa_chiave = ?').pluck().get(mappa) as number);
   const adesso = nowIso();
-  const info = prepared(`INSERT INTO pezzo_mappa (uid, mappa_chiave, nome, sorgente_x, sorgente_y, larghezza, altezza, x, y, rotazione, specchio_orizzontale, specchio_verticale, condizioni_json, ordine, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(uidNuovo(), mappa, dati.nome?.trim() || `Pezzo ${quanti + 1}`, p.sorgente.x, p.sorgente.y, p.sorgente.larghezza, p.sorgente.altezza,
-    p.posizione.x, p.posizione.y, p.rotazione, dati.specchio?.orizzontale ? 1 : 0, dati.specchio?.verticale ? 1 : 0, jsonCondizioni(dati.condizioni), ordine, adesso);
-  prepared('UPDATE mappa SET updated_at = ? WHERE chiave = ?').run(adesso, mappa);
-  return rigaPezzo(Number(info.lastInsertRowid));
+  const info = prepared(`INSERT INTO pezzo_mappa (uid, mappa_chiave, nome, sorgente_x, sorgente_y, larghezza, altezza, ordine, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .run(uidNuovo(), mappa, dati.nome?.trim() || `Pezzo ${quanti + 1}`, dati.sorgente.x, dati.sorgente.y, dati.sorgente.larghezza, dati.sorgente.altezza, ordine, adesso);
+  const pezzo = rigaPezzo(Number(info.lastInsertRowid));
+  inserisciCopia(pezzo, copia, adesso);
+  toccaMappa(mappa, adesso);
+  return pezzo;
 }
 
-/** Corregge un pezzo: i campi assenti restano; zona e ingombro si riverificano sull'immagine. Un nome vuoto lascia quello di prima. */
+/**
+ * Corregge un ritaglio: i campi assenti restano; un nome vuoto lascia quello di prima. Cambiando la zona si riverifica sull'immagine
+ * anche l'ingombro di ogni copia (la dimensione è quella della zona).
+ */
 export function aggiornaPezzo(id: number, dim: DimensioniMappa, dati: DatiPezzoMappa): RigaPezzo {
   const r = rigaPezzo(id);
   const sorgente = dati.sorgente ?? { x: r.sorgente_x, y: r.sorgente_y, larghezza: r.larghezza, altezza: r.altezza };
-  const posizione = dati.posizione ?? { x: r.x, y: r.y };
-  const rotazione = dati.rotazione ?? r.rotazione;
-  verificaNellImmagine({ sorgente, posizione, rotazione }, dim);
+  if (dati.sorgente) {
+    verificaZona(sorgente, dim);
+    righeCopie(id).forEach((c, i) => verificaPosa(sorgente, { posizione: { x: c.x, y: c.y }, rotazione: c.rotazione }, dim, `La copia ${i + 1} del pezzo`));
+  }
   const adesso = nowIso();
   getDb().transaction(() => {
-    prepared(`UPDATE pezzo_mappa SET nome = ?, sorgente_x = ?, sorgente_y = ?, larghezza = ?, altezza = ?, x = ?, y = ?, rotazione = ?, specchio_orizzontale = ?, specchio_verticale = ?,
-      condizioni_json = ?, ordine = ?, updated_at = ? WHERE id = ?`).run(dati.nome?.trim() || r.nome, sorgente.x, sorgente.y, sorgente.larghezza, sorgente.altezza, posizione.x, posizione.y, rotazione,
-      dati.specchio ? (dati.specchio.orizzontale ? 1 : 0) : r.specchio_orizzontale, dati.specchio ? (dati.specchio.verticale ? 1 : 0) : r.specchio_verticale,
-      dati.condizioni === undefined ? r.condizioni_json : jsonCondizioni(dati.condizioni), dati.ordine ?? r.ordine, adesso, id);
-    prepared('UPDATE mappa SET updated_at = ? WHERE chiave = ?').run(adesso, r.mappa_chiave);
+    prepared('UPDATE pezzo_mappa SET nome = ?, sorgente_x = ?, sorgente_y = ?, larghezza = ?, altezza = ?, ordine = ?, updated_at = ? WHERE id = ?')
+      .run(dati.nome?.trim() || r.nome, sorgente.x, sorgente.y, sorgente.larghezza, sorgente.altezza, dati.ordine ?? r.ordine, adesso, id);
+    toccaMappa(r.mappa_chiave, adesso);
   })();
   return rigaPezzo(id);
 }
 
-/** Elimina un pezzo (404 se non c'è): la sua zona torna visibile nell'immagine di base. */
+/** Elimina un ritaglio con tutte le sue copie (404 se non c'è): la sua zona torna visibile nell'immagine di base. */
 export function eliminaPezzo(id: number): void {
   const r = rigaPezzo(id);
   getDb().transaction(() => {
+    prepared('DELETE FROM copia_pezzo WHERE pezzo_id = ?').run(id);
     prepared('DELETE FROM pezzo_mappa WHERE id = ?').run(id);
-    prepared('UPDATE mappa SET updated_at = ? WHERE chiave = ?').run(nowIso(), r.mappa_chiave);
+    toccaMappa(r.mappa_chiave, nowIso());
   })();
 }
 
-/** I pezzi di una mappa come li porta il pacchetto delle mappe. */
-export function pezziPerPacchetto(mappa: string): NonNullable<EsportazioneMappeDto['mappe'][number]['pezzi']> {
-  return righePezzi(mappa).map((r) => {
-    const condizioni = leggiCondizioniSalvate(r.condizioni_json);
-    return {
-      uid: r.uid, nome: r.nome, sorgente: { x: r.sorgente_x, y: r.sorgente_y, larghezza: r.larghezza, altezza: r.altezza }, posizione: { x: r.x, y: r.y },
-      rotazione: r.rotazione, specchio: { orizzontale: r.specchio_orizzontale === 1, verticale: r.specchio_verticale === 1 }, ...(condizioni.length > 0 ? { condizioni } : {}), ordine: r.ordine,
-    };
-  });
+/** Aggiunge una copia a un ritaglio (404 se non c'è): l'ingombro deve stare nell'immagine. Le condizioni le verifica chi chiama. */
+export function creaCopia(pezzoId: number, dim: DimensioniMappa, dati: DatiCopiaPezzo): RigaCopia {
+  const pezzo = rigaPezzo(pezzoId);
+  const sorgente = { x: pezzo.sorgente_x, y: pezzo.sorgente_y, larghezza: pezzo.larghezza, altezza: pezzo.altezza };
+  verificaPosa(sorgente, { posizione: dati.posizione ?? { x: sorgente.x, y: sorgente.y }, rotazione: dati.rotazione ?? 0 }, dim, 'La copia');
+  const quante = prepared('SELECT COUNT(*) FROM copia_pezzo WHERE pezzo_id = ?').pluck().get(pezzoId) as number;
+  if (quante >= MASSIMO_COPIE) throw httpErrors.badRequest('troppe-copie', `Un pezzo ha al massimo ${MASSIMO_COPIE} copie.`);
+  const adesso = nowIso();
+  const id = getDb().transaction(() => {
+    const nuova = inserisciCopia(pezzo, dati, adesso);
+    toccaMappa(pezzo.mappa_chiave, adesso);
+    return nuova;
+  })();
+  return rigaCopia(id);
+}
+
+/**
+ * Corregge una copia: i campi assenti restano; l'ingombro si riverifica sull'immagine. Con `nomePezzo` (non vuoto) rinomina anche
+ * il ritaglio, nella stessa transazione.
+ */
+export function aggiornaCopia(id: number, dim: DimensioniMappa, dati: DatiAggiornaCopiaPezzo): RigaCopia {
+  const c = rigaCopia(id);
+  const pezzo = rigaPezzo(c.pezzo_id);
+  const posizione = dati.posizione ?? { x: c.x, y: c.y };
+  const rotazione = dati.rotazione ?? c.rotazione;
+  verificaPosa({ x: pezzo.sorgente_x, y: pezzo.sorgente_y, larghezza: pezzo.larghezza, altezza: pezzo.altezza }, { posizione, rotazione }, dim, 'La copia');
+  const adesso = nowIso();
+  getDb().transaction(() => {
+    prepared(`UPDATE copia_pezzo SET etichetta = ?, x = ?, y = ?, rotazione = ?, specchio_orizzontale = ?, specchio_verticale = ?, condizioni_json = ?, ordine = ?, updated_at = ? WHERE id = ?`)
+      .run(dati.etichetta === undefined ? c.etichetta : dati.etichetta.trim(), posizione.x, posizione.y, rotazione,
+        dati.specchio ? (dati.specchio.orizzontale ? 1 : 0) : c.specchio_orizzontale, dati.specchio ? (dati.specchio.verticale ? 1 : 0) : c.specchio_verticale,
+        dati.condizioni === undefined ? c.condizioni_json : jsonCondizioni(dati.condizioni), dati.ordine ?? c.ordine, adesso, id);
+    const nome = dati.nomePezzo?.trim();
+    if (nome && nome !== pezzo.nome) prepared('UPDATE pezzo_mappa SET nome = ?, updated_at = ? WHERE id = ?').run(nome, adesso, pezzo.id);
+    toccaMappa(pezzo.mappa_chiave, adesso);
+  })();
+  return rigaCopia(id);
+}
+
+/**
+ * Elimina una copia (404 se non c'è). Scelta dell'utente (2026-10-15, «Se ne va il ritaglio»): eliminata l'ultima copia, se ne va
+ * anche il ritaglio e la sua zona torna visibile nell'immagine di base. Dice se il ritaglio se n'è andato.
+ */
+export function eliminaCopia(id: number): { pezzoEliminato: boolean } {
+  const c = rigaCopia(id);
+  const pezzo = rigaPezzo(c.pezzo_id);
+  return getDb().transaction(() => {
+    prepared('DELETE FROM copia_pezzo WHERE id = ?').run(id);
+    const restano = prepared('SELECT COUNT(*) FROM copia_pezzo WHERE pezzo_id = ?').pluck().get(pezzo.id) as number;
+    if (restano === 0) prepared('DELETE FROM pezzo_mappa WHERE id = ?').run(pezzo.id);
+    toccaMappa(pezzo.mappa_chiave, nowIso());
+    return { pezzoEliminato: restano === 0 };
+  })();
+}
+
+/** I pezzi di una mappa come li porta il pacchetto delle mappe: ogni ritaglio con le sue copie. */
+export function pezziPerPacchetto(mappa: string): PezzoPacchetto[] {
+  return righeConCopie(mappa).map(({ pezzo: r, copie }) => ({
+    uid: r.uid, nome: r.nome, sorgente: { x: r.sorgente_x, y: r.sorgente_y, larghezza: r.larghezza, altezza: r.altezza }, ordine: r.ordine,
+    copie: copie.map((c) => {
+      const condizioni = leggiCondizioniSalvate(c.condizioni_json);
+      return {
+        uid: c.uid, ...(c.etichetta ? { etichetta: c.etichetta } : {}), posizione: { x: c.x, y: c.y }, rotazione: c.rotazione,
+        specchio: { orizzontale: c.specchio_orizzontale === 1, verticale: c.specchio_verticale === 1 }, ...(condizioni.length > 0 ? { condizioni } : {}), ordine: c.ordine,
+      };
+    }),
+  }));
+}
+
+/**
+ * I pezzi di un pacchetto che stanno nell'immagine della mappa d'arrivo: un ritaglio con la zona fuori si scarta con tutte le sue
+ * copie, una copia che esce si scarta da sola, e un ritaglio rimasto senza copie si scarta (un ritaglio senza copie non esiste).
+ * Senza dimensioni (la mappa non ha un'immagine leggibile) si scarta tutto. Conta ritagli e copie scartati.
+ */
+export function pezziNellImmagine(pezzi: readonly PezzoDaImportare[], dim: DimensioniMappa | null): { dentro: PezzoDaImportare[]; pezziScartati: number; copieScartate: number } {
+  const dentro: PezzoDaImportare[] = [];
+  let pezziScartati = 0;
+  let copieScartate = 0;
+  for (const p of pezzi) {
+    const copie = dim && zonaNellImmagine(p.sorgente, dim) ? p.copie.filter((c) => posaNellImmagine(p.sorgente, c, dim)) : [];
+    copieScartate += p.copie.length - copie.length;
+    if (copie.length === 0) { pezziScartati++; continue; }
+    dentro.push({ ...p, copie });
+  }
+  return { dentro, pezziScartati, copieScartate };
 }
 
 /**
  * Sostituisce i pezzi di una mappa con quelli di un pacchetto (dentro la transazione dell'importazione). Le condizioni arrivano già
- * ripulite da chi chiama (le chiavi assenti dalla Guida si scartano, come per i pin). L'uid del pacchetto si tiene se è valido e
- * libero, altrimenti se ne fa uno nuovo. La forma la controlla `schemaPezziPacchetto`.
+ * ripulite da chi chiama (le chiavi assenti dalla Guida si scartano, come per i pin), e i pezzi già verificati sull'immagine
+ * (`pezziNellImmagine`). Gli uid del pacchetto (dei ritagli e delle copie) si tengono se validi e liberi, altrimenti se ne fanno di
+ * nuovi. La forma la controlla `schemaPezziPacchetto`. Dice quanti ritagli e quante copie ha scritto.
  */
-export function sostituisciPezzi(mappa: string, pezzi: ReadonlyArray<NonNullable<EsportazioneMappeDto['mappe'][number]['pezzi']>[number] & { condizioni?: RequisitoSpillo[] }>): number {
-  prepared('DELETE FROM pezzo_mappa WHERE mappa_chiave = ?').run(mappa);
+export function sostituisciPezzi(mappa: string, pezzi: readonly PezzoDaImportare[]): { pezzi: number; copie: number } {
+  eliminaPezziDellaMappa(mappa);
   const adesso = nowIso();
+  let copie = 0;
   for (const p of pezzi) {
-    const uid = typeof p.uid === 'string' && /^[0-9a-f]{32}$/.test(p.uid) && !prepared('SELECT 1 FROM pezzo_mappa WHERE uid = ?').get(p.uid) ? p.uid : uidNuovo();
-    prepared(`INSERT INTO pezzo_mappa (uid, mappa_chiave, nome, sorgente_x, sorgente_y, larghezza, altezza, x, y, rotazione, specchio_orizzontale, specchio_verticale, condizioni_json, ordine, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(uid, mappa, p.nome, p.sorgente.x, p.sorgente.y, p.sorgente.larghezza, p.sorgente.altezza, p.posizione.x, p.posizione.y,
-      p.rotazione, p.specchio.orizzontale ? 1 : 0, p.specchio.verticale ? 1 : 0, jsonCondizioni(p.condizioni), p.ordine, adesso);
+    const info = prepared(`INSERT INTO pezzo_mappa (uid, mappa_chiave, nome, sorgente_x, sorgente_y, larghezza, altezza, ordine, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(uidTenibile(p.uid, 'pezzo_mappa') ? p.uid : uidNuovo(), mappa, p.nome, p.sorgente.x, p.sorgente.y, p.sorgente.larghezza, p.sorgente.altezza, p.ordine, adesso);
+    const ritaglio = rigaPezzo(Number(info.lastInsertRowid));
+    for (const c of p.copie) {
+      inserisciCopia(ritaglio, c, adesso, uidTenibile(c.uid, 'copia_pezzo') ? c.uid : uidNuovo());
+      copie++;
+    }
   }
-  return pezzi.length;
+  return { pezzi: pezzi.length, copie };
 }

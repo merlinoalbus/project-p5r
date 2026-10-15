@@ -2164,7 +2164,8 @@ export interface MappaDto extends MappaRiassuntoDto {
    * (i propri spilli): senza questo elenco un collegamento a senso unico — si entra e non si torna
    * indietro — non si vede da nessuna parte, e chi cura l'atlante non sa nemmeno chi lo cita. */
   arrivi: Array<{ spilloId: number; tipo: TipoSpillo; nome: string; mappa: string; mappaNome: string }>;
-  /** I pezzi della planimetria (102): zone dell'immagine scelte dall'utente, cancellate dall'immagine di base e posate altrove. */
+  /** I pezzi della planimetria (102): zone dell'immagine scelte dall'utente, cancellate dall'immagine di base e posate altrove,
+   *  ognuna in una o più copie (103). */
   pezzi: PezzoMappaDto[];
 }
 
@@ -2172,9 +2173,10 @@ export interface MappaDto extends MappaRiassuntoDto {
 export type RotazionePezzo = 0 | 90 | 180 | 270;
 
 /**
- * Un pezzo di una planimetria (102, richiesta dell'utente del 2026-10-14): una zona rettangolare dell'immagine scelta col mouse,
- * sempre cancellata dall'immagine di base e posata in `posizione` con la sua dimensione originale, specchiata e ruotata; si vede
- * quando le condizioni valgono. Tutto in **pixel dell'immagine**.
+ * Un pezzo di una planimetria (102, richiesta dell'utente del 2026-10-14): il **ritaglio**, una zona rettangolare dell'immagine
+ * scelta col mouse, sempre cancellata dall'immagine di base. Dal 2026-10-15 (103: «vorrei poter usare un pezzo una volta recuperato
+ * e definito per inserirlo più volte nella mappa») si posa in una o più `copie`, ognuna con posizione, rotazione, specchio e
+ * condizioni proprie. Tutto in **pixel dell'immagine**.
  */
 export interface PezzoMappaDto {
   id: number;
@@ -2182,27 +2184,69 @@ export interface PezzoMappaDto {
   nome: string;
   /** La zona d'origine nell'immagine: angolo in alto a sinistra e dimensioni. */
   sorgente: { x: number; y: number; larghezza: number; altezza: number };
-  /** L'angolo in alto a sinistra dell'ingombro del pezzo posato (a 90° e 270° larghezza e altezza si scambiano). */
+  ordine: number;
+  updatedAt: string;
+  /** Le copie posate, nel loro ordine: almeno una (eliminata l'ultima se ne va il ritaglio). */
+  copie: CopiaPezzoDto[];
+}
+
+/** Una copia posata di un pezzo (103): dove sta, come, quando si vede. */
+export interface CopiaPezzoDto {
+  id: number;
+  uid: string;
+  /** Il ritaglio di cui è copia. */
+  pezzoId: number;
+  /** Facoltativa: vuota, la vista la chiama «Nome · copia N» (N = posto fra le copie del pezzo, da 1; scelta dell'utente del 2026-10-15). */
+  etichetta: string;
+  /** L'angolo in alto a sinistra dell'ingombro della copia posata (a 90° e 270° larghezza e altezza si scambiano). */
   posizione: { x: number; y: number };
   rotazione: RotazionePezzo;
   /** Specchio prima della rotazione. */
   specchio: { orizzontale: boolean; verticale: boolean };
   condizioni: CondizioneSpilloDto[];
-  /** Solo con la partita: l'esito delle condizioni (come i pin); senza, il pezzo si mostra sempre. */
+  /** Solo con la partita: l'esito delle condizioni (come i pin); senza, la copia si mostra sempre. */
   disponibilita?: DisponibilitaDto;
   ordine: number;
   updatedAt: string;
 }
 
-/** Quel che si scrive di un pezzo (creazione: sorgente obbligatoria; la posizione, se manca, è quella della zona d'origine). */
+/** Quel che si scrive di un ritaglio (correzione: i campi assenti restano). */
 export interface DatiPezzoMappa {
   nome?: string;
   sorgente?: { x: number; y: number; larghezza: number; altezza: number };
+  ordine?: number;
+}
+
+/** Quel che si scrive di una copia (creazione: senza posizione sta sulla zona d'origine; correzione: i campi assenti restano). */
+export interface DatiCopiaPezzo {
+  etichetta?: string;
   posizione?: { x: number; y: number };
   rotazione?: RotazionePezzo;
   specchio?: { orizzontale: boolean; verticale: boolean };
   condizioni?: RequisitoSpillo[] | null;
   ordine?: number;
+}
+
+/** La creazione di un pezzo: la zona (obbligatoria) e la sua prima copia. */
+export interface DatiNuovoPezzoMappa extends DatiPezzoMappa {
+  sorgente: { x: number; y: number; larghezza: number; altezza: number };
+  copia?: DatiCopiaPezzo;
+}
+
+/** La correzione di una copia: anche il nome del ritaglio, nella stessa transazione (il modulo dell'editor li salva insieme). */
+export interface DatiAggiornaCopiaPezzo extends DatiCopiaPezzo {
+  nomePezzo?: string;
+}
+
+/** Un pezzo nel pacchetto delle mappe (103): il ritaglio con le sue copie. */
+export interface PezzoPacchetto {
+  uid?: string; nome: string; sorgente: { x: number; y: number; larghezza: number; altezza: number }; ordine: number;
+  copie: Array<{ uid?: string; etichetta?: string; posizione: { x: number; y: number }; rotazione: RotazionePezzo; specchio: { orizzontale: boolean; verticale: boolean }; condizioni?: RequisitoSpillo[]; ordine: number }>;
+}
+
+/** Un pezzo come lo scriveva il pacchetto della 102 (una posa sola, accanto alla zona): l'importazione lo legge ancora come una copia. */
+export interface PezzoPacchetto102 {
+  uid?: string; nome: string; sorgente: { x: number; y: number; larghezza: number; altezza: number }; posizione: { x: number; y: number }; rotazione: RotazionePezzo; specchio: { orizzontale: boolean; verticale: boolean }; condizioni?: RequisitoSpillo[]; ordine: number;
 }
 
 /** Pacchetto di esportazione/importazione delle mappe (versione 1): il file `mappe-editor.json` che l'editor scarica e reimporta. */
@@ -2220,8 +2264,9 @@ export interface EsportazioneMappeDto {
     /** Tutte le aree della guida contenute nella planimetria, in ordine di guida (2026-09-29). `entita` ne
      *  dichiara una sola, la prima; un pacchetto di prima non ha questo campo. */
     aree?: string[];
-    /** I pezzi della planimetria (102). Un pacchetto di prima non ha il campo: i pezzi della mappa restano com'erano. */
-    pezzi?: Array<{ uid?: string; nome: string; sorgente: { x: number; y: number; larghezza: number; altezza: number }; posizione: { x: number; y: number }; rotazione: RotazionePezzo; specchio: { orizzontale: boolean; verticale: boolean }; condizioni?: RequisitoSpillo[]; ordine: number }>;
+    /** I pezzi della planimetria (102), ognuno con le sue copie (103). Un pacchetto di prima della 102 non ha il campo: i pezzi della
+     *  mappa restano com'erano; uno della 102 porta la posa accanto alla zona, e si legge come un pezzo con una copia. */
+    pezzi?: Array<PezzoPacchetto | PezzoPacchetto102>;
     spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; /** Le voci della guida del pin (098); un pacchetto di prima porta `voce` (094), o un riferimento «punto». */ voci?: string[]; /** La voce di un pacchetto della 094-097: si legge ancora, non si scrive più. */ voce?: string | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;

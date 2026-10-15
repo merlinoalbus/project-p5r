@@ -17,8 +17,8 @@ import { validate } from '../middleware/validate.js';
 import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, creaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaMappa, bodyAggiornaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyAggiornaPezzo, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const router = Router();
@@ -125,7 +125,8 @@ router.delete('/spilli/:id', validate({ params: paramsSpillo }), (req, res) => {
   eliminaSpillo(Number(req.params.id));
   res.status(204).end();
 });
-/** I pezzi della planimetria (102): zone dell'immagine scelte nell'editor, posate altrove con le condizioni che li mostrano. */
+/** I pezzi della planimetria (102): zone dell'immagine scelte nell'editor, posate altrove con le condizioni che li mostrano, in una o
+ *  più copie (103). Il pezzo nasce con la sua prima copia; eliminata l'ultima copia se ne va anche il pezzo. */
 router.post('/:chiave/pezzi', validate({ params: paramsMappa, body: bodyCreaPezzo }), (req, res) => {
   res.status(201).json(creaPezzoMappa(String(req.params.chiave), req.body as Parameters<typeof creaPezzoMappa>[1]));
 });
@@ -135,6 +136,15 @@ router.put('/pezzi/:id', validate({ params: paramsPezzo, body: bodyAggiornaPezzo
 router.delete('/pezzi/:id', validate({ params: paramsPezzo }), (req, res) => {
   eliminaPezzoMappa(Number(req.params.id));
   res.status(204).end();
+});
+router.post('/pezzi/:id/copie', validate({ params: paramsPezzo, body: bodyCreaCopiaPezzo }), (req, res) => {
+  res.status(201).json(creaCopiaPezzoMappa(Number(req.params.id), req.body as Parameters<typeof creaCopiaPezzoMappa>[1]));
+});
+router.put('/pezzi/copie/:id', validate({ params: paramsCopiaPezzo, body: bodyAggiornaCopiaPezzo }), (req, res) => {
+  res.json(aggiornaCopiaPezzoMappa(Number(req.params.id), req.body as Parameters<typeof aggiornaCopiaPezzoMappa>[1]));
+});
+router.delete('/pezzi/copie/:id', validate({ params: paramsCopiaPezzo }), (req, res) => {
+  res.json(eliminaCopiaPezzoMappa(Number(req.params.id)));
 });
 /** Le voci della guida che l'editor può collegare allo spillo (098): si collegano e scollegano con `/compendio/punti/:chiave/pin/:spillo`. */
 router.get('/spilli/:id/voci-collegabili', validate({ params: paramsSpillo }), (req, res) => {

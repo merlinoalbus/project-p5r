@@ -19,7 +19,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, aggiornaSpillo, creaPezzoMappa, eliminaPezzoMappa, isApiError, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -32,24 +32,26 @@ import { VisoreMappa, GalleriaSpillo, type StrumentiEditor, type StrumentoEditor
 import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { PassaggiMappa } from '../components/mappe/PassaggiMappa';
 import { FormPezzo } from '../components/mappe/FormPezzo';
+import { copiePosate, nomeCopia, posizioneNuovaCopia, type CopiaPosata } from '../utils/pezziMappa';
 
-import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
+import { condizioniSenzaTesto, ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
 import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import { ritornoMappe } from '../utils/ritornoMappe';
-import type { DatiPezzoMappa, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../types';
+import type { DatiAggiornaCopiaPezzo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
+
+/** Un numero col nome accordato: «1 copia», «3 copie». */
+const conta = (n: number, singolare: string, plurale: string): string => `${n} ${n === 1 ? singolare : plurale}`;
 
 /** Il testo da notificare per un errore: il messaggio se è un `Error`, altrimenti il testo predefinito. */
 function messaggio(err: unknown, predefinito: string): string { return err instanceof Error ? err.message : predefinito; }
 
 /** Spillo copiato negli appunti dell'editor: tutti i campi tranne la posizione; sopravvive al cambio di mappa e alla ricarica della pagina. */
 export interface AppuntiSpillo { destinazione?: DestinazioneSpillo | null; tipo: TipoSpillo; nome: string; descrizione: string; riferimento: { tipo: TipoRiferimento; chiave: string } | null; condizioni: RequisitoSpillo[] }
-/** Le condizioni dello spillo senza il testo descrittivo del server (è il server a ricalcolarlo). */
-function condizioniNude(s: SpilloDto): RequisitoSpillo[] {
-  return s.condizioni.map((c) => { const copia: Record<string, unknown> = { ...c }; delete copia.testo; return copia as unknown as RequisitoSpillo; });
-}
+/** Le condizioni dello spillo (o di una copia di un pezzo, 103) senza il testo descrittivo del server (è il server a ricalcolarlo). */
+const condizioniNude = (s: Pick<SpilloDto, 'condizioni'>): RequisitoSpillo[] => condizioniSenzaTesto(s.condizioni);
 const CHIAVE_APPUNTI = 'p5r.editor.appunti-spillo';
 /** Legge gli appunti dello spillo dalla memoria di sessione; null se mancano, se il JSON non si legge o se la memoria non è disponibile. */
 function leggiAppunti(): AppuntiSpillo | null {
@@ -96,13 +98,13 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [appunti, setAppunti] = useState<AppuntiSpillo | null>(leggiAppunti);
   const [tipoNuovo, setTipoNuovo] = useState<TipoSpillo>('nota');
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
-  /** Il pezzo della planimetria selezionato (102): uno spillo o un pezzo alla volta. */
-  const [pezzoId, setPezzoId] = useState<number | null>(null);
+  /** La copia di un pezzo della planimetria selezionata (102; copie dalla 103): uno spillo o una copia alla volta. */
+  const [copiaId, setCopiaId] = useState<number | null>(null);
   const [sezione, setSezione] = useState('spilli');
-  /** Seleziona uno spillo (o nessuno con null); selezionandone uno il pannello torna alla sezione «Spilli» e il pezzo si deseleziona. */
-  const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null){setSezione('spilli');setPezzoId(null);} };
-  /** Seleziona un pezzo (o nessuno): il pannello passa alla sezione «Pezzi» e lo spillo si deseleziona. */
-  const selezionaPezzo = (id: number | null) => { setPezzoId(id); if (id !== null) { setSezione('pezzi'); setSelezionatoId(null); } };
+  /** Seleziona uno spillo (o nessuno con null); selezionandone uno il pannello torna alla sezione «Spilli» e la copia si deseleziona. */
+  const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null){setSezione('spilli');setCopiaId(null);} };
+  /** Seleziona una copia di un pezzo (o nessuna): il pannello passa alla sezione «Pezzi» e lo spillo si deseleziona. */
+  const selezionaCopia = (id: number | null) => { setCopiaId(id); if (id !== null) { setSezione('pezzi'); setSelezionatoId(null); } };
   /** L'immagine nuova in attesa di conferma su una mappa con dei pezzi (102: 409 `mappa-con-pezzi`). */
   const [immagineDaConfermare, setImmagineDaConfermare] = useState<{ file: File; messaggio: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -149,16 +151,17 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
     onSposta: (id, x, y) => void esegui(() => aggiornaSpillo(id, { x, y })),
     // doppio tocco su uno spostamento: si visita l'arrivo senza uscire dalla modifica
     onVisita: vai,
-    // i pezzi della planimetria (102): la zona trascinata con «Ritaglia pezzo» diventa un pezzo, selezionato e pronto da posare
+    // i pezzi della planimetria (102): la zona trascinata con «Ritaglia pezzo» diventa un pezzo con la sua prima copia (103),
+    // selezionata e pronta da posare; sulla mappa si trascinano le copie
     pezzi: {
-      selezionatoId: pezzoId,
-      onSeleziona: selezionaPezzo,
+      selezionatoId: copiaId,
+      onSeleziona: selezionaCopia,
       onRitaglia: (zona) => void esegui(async () => {
         const p = await creaPezzoMappa(chiave, { sorgente: zona });
-        selezionaPezzo(p.id);
+        selezionaCopia(p.copie[0]?.id ?? null);
         setStrumento('seleziona');
-      }, `Pezzo ritagliato (${zona.larghezza}×${zona.altezza} px): la sua zona è cancellata dalla mappa. Trascinalo dove va, o scrivi la posizione nel pannello.`),
-      onSposta: (id, x, y) => void esegui(() => aggiornaPezzoMappa(id, { posizione: { x, y } })),
+      }, `Pezzo ritagliato (${zona.larghezza}×${zona.altezza} px): la sua zona è cancellata dalla mappa. Trascinalo dove va, o scrivi la posizione nel pannello; con «Aggiungi copia» lo posi anche altrove.`),
+      onSposta: (id, x, y) => void esegui(() => aggiornaCopiaPezzoMappa(id, { posizione: { x, y } })),
     },
   };
   /**
@@ -176,7 +179,10 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   });
 
   const selezionato = dati?.spilli.find((s) => s.id === selezionatoId) ?? null;
-  const pezzoSelezionato = dati?.pezzi.find((p) => p.id === pezzoId) ?? null;
+  /** La copia selezionata con il suo pezzo e il suo posto fra le copie (null se non c'è più, per esempio dopo un'eliminazione). */
+  const copiaSelezionata = copiePosate(dati?.pezzi ?? []).find((x) => x.copia.id === copiaId) ?? null;
+  /** L'immagine della mappa in pixel, per tenere le copie dentro (null se non nota: lo controlla il server). */
+  const immagineMappa = dati?.larghezza && dati.altezza ? { larghezza: dati.larghezza, altezza: dati.altezza } : null;
   /** Copia uno spillo negli appunti (in pagina e nella memoria di sessione), passa allo strumento «Incolla» e spiega come incollarlo. */
   const copia = (a: AppuntiSpillo) => {
     setAppunti(a); scriviAppunti(a); setStrumento('incolla');
@@ -241,13 +247,24 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                 const pacchetto = JSON.parse(await file.text()) as EsportazioneMappeDto;
                 const esito = await importaMappe(pacchetto, sovrascrivi);
                 await albero.ricarica();
-                notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${esito.pezzi} pezzi, ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}${esito.condizioniScartate ? `; ${esito.condizioniScartate} condizioni scartate perché citano chiavi assenti dalla Guida` : ''}${esito.vociScartate ? `; ${esito.vociScartate} voci della guida scartate (inesistenti, descrittive o di un altro Palazzo)` : ''}${esito.pezziScartati ? `; ${esito.pezziScartati} pezzi scartati perché escono dall’immagine della loro mappa` : ''}${esito.pezziEliminati ? `; ${esito.pezziEliminati} pezzi tolti perché ritagliati da un’immagine poi sostituita` : ''}.`);
+                notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${conta(esito.pezzi, 'pezzo', 'pezzi')} (${conta(esito.copie, 'copia', 'copie')}), ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}${esito.condizioniScartate ? `; ${esito.condizioniScartate} condizioni scartate perché citano chiavi assenti dalla Guida` : ''}${esito.vociScartate ? `; ${esito.vociScartate} voci della guida scartate (inesistenti, descrittive o di un altro Palazzo)` : ''}${esito.copieScartate ? `; ${conta(esito.copieScartate, 'copia scartata', 'copie scartate')} perché ${esito.copieScartate === 1 ? 'esce' : 'escono'} dall’immagine della loro mappa${esito.pezziScartati ? ` (con ${esito.copieScartate === 1 ? 'lei' : 'loro'} ${conta(esito.pezziScartati, 'pezzo rimasto', 'pezzi rimasti')} senza copie o con la zona fuori)` : ''}` : ''}${esito.pezziEliminati ? `; ${conta(esito.pezziEliminati, 'pezzo', 'pezzi')} (${conta(esito.copieEliminate, 'copia', 'copie')}) ${esito.pezziEliminati === 1 ? 'tolto perché ritagliato' : 'tolti perché ritagliati'} da un’immagine poi sostituita` : ''}.`);
               })}
               onVai={vai}
-              pezzoSelezionato={pezzoSelezionato}
-              onSelezionaPezzo={selezionaPezzo}
-              onSalvaPezzo={(id, d) => esegui(() => aggiornaPezzoMappa(id, d), 'Pezzo salvato.')}
-              onEliminaPezzo={(id) => esegui(async () => { await eliminaPezzoMappa(id); setPezzoId(null); }, 'Pezzo eliminato: la sua zona torna visibile nella mappa.')}
+              copiaSelezionata={copiaSelezionata}
+              immagineMappa={immagineMappa}
+              onSelezionaCopia={selezionaCopia}
+              onSalvaCopia={(id, d) => esegui(() => aggiornaCopiaPezzoMappa(id, d), 'Copia salvata.')}
+              onAggiungiCopia={(x) => esegui(async () => {
+                // la copia nuova parte da quella selezionata (rotazione, specchio, condizioni), accanto a lei e dentro l'immagine
+                const nuova = await creaCopiaPezzoMappa(x.pezzo.id, { posizione: posizioneNuovaCopia(x.pezzo.sorgente, x.copia, immagineMappa), rotazione: x.copia.rotazione, specchio: x.copia.specchio, condizioni: condizioniNude(x.copia) });
+                selezionaCopia(nuova.id);
+              }, `Copia aggiunta accanto a «${nomeCopia(x.pezzo, x.copia, x.indice)}», con la stessa rotazione, lo stesso specchio e le stesse condizioni: trascinala dove va e cambia nel pannello quel che serve.`)}
+              onEliminaCopia={(id) => esegui(async () => {
+                const { pezzoEliminato } = await eliminaCopiaPezzoMappa(id);
+                setCopiaId(null);
+                notifica('success', pezzoEliminato ? 'Era l’ultima copia: il pezzo è stato eliminato e la sua zona torna visibile nella mappa.' : 'Copia eliminata: le altre restano sulla mappa.');
+              })}
+              onEliminaPezzo={(id) => esegui(async () => { await eliminaPezzoMappa(id); setCopiaId(null); }, 'Pezzo eliminato con tutte le copie: la sua zona torna visibile nella mappa.')}
             />
           }
         />
@@ -258,7 +275,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           azioni={<>
             <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setImmagineDaConfermare(null)}>Annulla</button>
             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Sostituisci ed elimina i pezzi" disabled={occupato}
-              onClick={() => { const da = immagineDaConfermare; setImmagineDaConfermare(null); if (da) void esegui(async () => { await caricaImmagineMappa(chiave, da.file, { eliminaPezzi: true }); setPezzoId(null); }, 'Immagine di base sostituita; i pezzi ritagliati dall’immagine di prima sono stati eliminati.'); }} />
+              onClick={() => { const da = immagineDaConfermare; setImmagineDaConfermare(null); if (da) void esegui(async () => { await caricaImmagineMappa(chiave, da.file, { eliminaPezzi: true }); setCopiaId(null); }, 'Immagine di base sostituita; i pezzi ritagliati dall’immagine di prima sono stati eliminati.'); }} />
           </>}>
           <p className="m-0 text-[13px]">{immagineDaConfermare?.messaggio} I pezzi sono ritagli in pixel di quell’immagine: su un’altra ritaglierebbero zone sbagliate.</p>
         </Modal>
@@ -311,10 +328,15 @@ interface PropsPannello {
   onEsporta: () => void;
   onImporta: (file: File, sovrascrivi: boolean) => Promise<void>;
   onVai: (chiave: string) => void;
-  /** I pezzi della planimetria (102): quello selezionato, la selezione, il salvataggio e l'eliminazione. */
-  pezzoSelezionato: PezzoMappaDto | null;
-  onSelezionaPezzo: (id: number | null) => void;
-  onSalvaPezzo: (id: number, dati: DatiPezzoMappa) => Promise<void>;
+  /** I pezzi della planimetria (102) e le loro copie (103): la copia selezionata (col pezzo), la selezione, il salvataggio,
+   *  l'aggiunta di una copia accanto a quella selezionata e le eliminazioni (di una copia, o del pezzo con tutte le copie). */
+  copiaSelezionata: CopiaPosata | null;
+  /** Le dimensioni dell'immagine della mappa (null se non note). */
+  immagineMappa: { larghezza: number; altezza: number } | null;
+  onSelezionaCopia: (id: number | null) => void;
+  onSalvaCopia: (id: number, dati: DatiAggiornaCopiaPezzo) => Promise<void>;
+  onAggiungiCopia: (da: CopiaPosata) => Promise<void>;
+  onEliminaCopia: (id: number) => Promise<void>;
   onEliminaPezzo: (id: number) => Promise<void>;
 }
 
@@ -349,22 +371,40 @@ function PannelloEditor(p: PropsPannello) {
         {mappa.pezzi.length === 0
           ? <p className="m-0 text-[12px] text-text-muted">Nessun pezzo su questa mappa.</p>
           : (
-            <ul className="m-0 p-0 list-none flex flex-col" aria-label="Pezzi di questa mappa">
+            // ogni pezzo con le sue copie (103): il nome e la zona del ritaglio, poi una voce per copia
+            <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Pezzi di questa mappa">
               {mappa.pezzi.map((pz) => (
                 <li key={pz.id}>
-                  <button type="button" className={`visore-mappa__voce ${pz.id === p.pezzoSelezionato?.id ? 'visore-mappa__voce--attiva' : ''}`} aria-pressed={pz.id === p.pezzoSelezionato?.id} onClick={() => p.onSelezionaPezzo(pz.id === p.pezzoSelezionato?.id ? null : pz.id)}>
-                    <span className="flex-1 min-w-0 truncate">{pz.nome}</span>
-                    <span className="text-[11px] text-text-muted">{pz.sorgente.larghezza}×{pz.sorgente.altezza}{pz.rotazione ? ` · ${pz.rotazione}°` : ''}{pz.condizioni.length ? ` · ${pz.condizioni.length === 1 ? '1 condizione' : `${pz.condizioni.length} condizioni`}` : ''}</span>
-                  </button>
+                  <p className="m-0 px-2 pt-1 flex items-baseline gap-2 text-[12px]">
+                    <span className="flex-1 min-w-0 truncate font-semibold">{pz.nome}</span>
+                    <span className="text-[11px] text-text-muted shrink-0">{pz.sorgente.larghezza}×{pz.sorgente.altezza} px · {pz.copie.length === 1 ? '1 copia' : `${pz.copie.length} copie`}</span>
+                  </p>
+                  <ul className="m-0 pl-3 list-none flex flex-col" aria-label={`Copie di ${pz.nome}`}>
+                    {pz.copie.map((c, i) => {
+                      const attiva = c.id === p.copiaSelezionata?.copia.id;
+                      return (
+                        <li key={c.id}>
+                          <button type="button" className={`visore-mappa__voce ${attiva ? 'visore-mappa__voce--attiva' : ''}`} aria-pressed={attiva} onClick={() => p.onSelezionaCopia(attiva ? null : c.id)}>
+                            <span className="flex-1 min-w-0 truncate">{nomeCopia(pz, c, i)}</span>
+                            <span className="text-[11px] text-text-muted shrink-0">{c.posizione.x}, {c.posizione.y}{c.rotazione ? ` · ${c.rotazione}°` : ''}{c.condizioni.length ? ` · ${c.condizioni.length === 1 ? '1 condizione' : `${c.condizioni.length} condizioni`}` : ''}</span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </li>
               ))}
             </ul>
           )}
       </section>
-      {p.pezzoSelezionato && (
-        <FormPezzo key={`${p.pezzoSelezionato.id}-${p.pezzoSelezionato.updatedAt}`} pezzo={p.pezzoSelezionato} immagine={mappa.larghezza && mappa.altezza ? { larghezza: mappa.larghezza, altezza: mappa.altezza } : null}
-          elenchi={p.elenchi} occupato={occupato} onSalva={(d) => p.onSalvaPezzo(p.pezzoSelezionato!.id, d)} onElimina={() => p.onEliminaPezzo(p.pezzoSelezionato!.id)} onChiudi={() => p.onSelezionaPezzo(null)} />
-      )}
+      {p.copiaSelezionata && (() => {
+        const { pezzo, copia, indice } = p.copiaSelezionata;
+        return (
+          <FormPezzo key={`${copia.id}-${copia.updatedAt}-${pezzo.updatedAt}-${pezzo.copie.length}`} pezzo={pezzo} copia={copia} indice={indice} immagine={p.immagineMappa}
+            elenchi={p.elenchi} occupato={occupato} onSalva={(d) => p.onSalvaCopia(copia.id, d)} onAggiungiCopia={() => p.onAggiungiCopia(p.copiaSelezionata!)}
+            onEliminaCopia={() => p.onEliminaCopia(copia.id)} onEliminaPezzo={() => p.onEliminaPezzo(pezzo.id)} onChiudi={() => p.onSelezionaCopia(null)} />
+        );
+      })()}
       </div>
       <div hidden={sezione !== 'spilli'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Strumenti">

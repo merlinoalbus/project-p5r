@@ -822,21 +822,69 @@ it('un pin con più voci della guida (098): nel popup una riga per voce, ognuna 
   expect(elenco.getByText('«Ritorno al castello»: esauribile · non ancora gestito nella Guida')).toBeInTheDocument();
 });
 
-describe('i pezzi della planimetria (102, 2026-10-14)', () => {
-  /** Un pezzo di prova: zona in fondo all'immagine, posato più su; `extra` sovrascrive. */
-  const pezzo = (extra: Partial<MappaDto['pezzi'][number]>): MappaDto['pezzi'][number] => ({
-    id: 1, uid: '1'.repeat(32), nome: 'Muro mobile', sorgente: { x: 100, y: 450, larghezza: 120, altezza: 40 }, posizione: { x: 300, y: 200 }, rotazione: 90,
-    specchio: { orizzontale: true, verticale: false }, condizioni: [], ordine: 0, updatedAt: '', ...extra,
+describe('i pezzi della planimetria (102, 2026-10-14) e le loro copie (103)', () => {
+  type Pezzo = MappaDto['pezzi'][number];
+  type Copia = Pezzo['copie'][number];
+  /** Una copia di prova (posata più su della zona); `extra` sovrascrive. */
+  const copia = (extra: Partial<Copia>): Copia => ({
+    id: 1, uid: 'c1'.repeat(16), pezzoId: 1, etichetta: '', posizione: { x: 300, y: 200 }, rotazione: 90, specchio: { orizzontale: true, verticale: false }, condizioni: [], ordine: 0, updatedAt: '', ...extra,
   });
+  /** Un pezzo di prova: zona in fondo all'immagine, con una copia; `extra` sovrascrive. */
+  const pezzo = (extra: Partial<Pezzo>): Pezzo => ({
+    id: 1, uid: '1'.repeat(32), nome: 'Muro mobile', sorgente: { x: 100, y: 450, larghezza: 120, altezza: 40 }, ordine: 0, updatedAt: '', copie: [copia({})], ...extra,
+  });
+  const bloccata = { stato: 'bloccato' as const, requisiti: [{ indice: 0, tipo: 'fascia' as const, stato: 'rosso' as const, testo: 'solo di sera', dettaglio: 'ora è giorno', manuale: false, confermato: false }] };
   const conPezzi: MappaDto = {
     ...mappa, immagineUrl: '/pianta.png', spilli: [],
     pezzi: [
       pezzo({}),
-      pezzo({ id: 2, uid: '2'.repeat(32), nome: 'Ponte di sera', sorgente: { x: 300, y: 450, larghezza: 80, altezza: 20 }, posizione: { x: 600, y: 100 }, rotazione: 0, specchio: { orizzontale: false, verticale: false },
-        condizioni: [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }], disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'fascia', stato: 'rosso', testo: 'solo di sera', dettaglio: 'ora è giorno', manuale: false, confermato: false }] } }),
+      pezzo({ id: 2, uid: '2'.repeat(32), nome: 'Ponte di sera', sorgente: { x: 300, y: 450, larghezza: 80, altezza: 20 }, copie: [copia({ id: 2, uid: 'c2'.repeat(16), pezzoId: 2, posizione: { x: 600, y: 100 }, rotazione: 0, specchio: { orizzontale: false, verticale: false },
+        condizioni: [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }], disponibilita: bloccata })] }),
     ],
   };
   const disegnati = () => [...document.querySelectorAll<HTMLElement>('[data-pezzo]')];
+
+  it('un pezzo con più copie: la zona si cancella una volta, ogni copia si disegna con la sua posa e le sue condizioni', () => {
+    const muro = pezzo({ copie: [
+      copia({}),
+      copia({ id: 3, uid: 'c3'.repeat(16), posizione: { x: 700, y: 50 }, rotazione: 0, specchio: { orizzontale: false, verticale: true } }),
+      copia({ id: 4, uid: 'c4'.repeat(16), posizione: { x: 10, y: 10 }, rotazione: 0, condizioni: [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }], disponibilita: bloccata }),
+    ] });
+    monta({ mappa: { ...conPezzi, pezzi: [muro] } });
+    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    expect(img).toHaveAttribute('data-zone-cancellate', '1');
+    // la terza copia non ha le sue condizioni: nascosta, contata nel comando dei non disponibili
+    expect(disegnati().map((d) => d.dataset.copia)).toEqual(['c1'.repeat(16), 'c3'.repeat(16)]);
+    expect(disegnati().every((d) => d.dataset.pezzo === '1'.repeat(32))).toBe(true);
+    const [prima, seconda] = disegnati();
+    expect([prima.style.left, prima.style.top, prima.style.width, prima.style.height]).toEqual(['300px', '200px', '40px', '120px']);
+    expect([seconda.style.left, seconda.style.top, seconda.style.width, seconda.style.height]).toEqual(['700px', '50px', '120px', '40px']);
+    expect((seconda.firstElementChild as HTMLElement).style.transform).toBe('rotate(0deg) scale(1, -1)');
+    // lo stesso ritaglio per tutte
+    expect((seconda.firstElementChild as HTMLElement).style.backgroundPosition).toBe('-100px -450px');
+    fireEvent.click(screen.getByRole('button', { name: /Mostra anche i non ancora disponibili \(1\)/ }));
+    expect(disegnati()).toHaveLength(3);
+    expect(disegnati()[2]).toHaveClass('visore-mappa__pezzo--non-disponibile');
+  });
+
+  it('nell\'editor si seleziona una copia: la sua zona si evidenzia, trascinata si sposta e si salva col suo id', () => {
+    const muro = pezzo({ copie: [copia({}), copia({ id: 3, uid: 'c3'.repeat(16), posizione: { x: 700, y: 50 }, rotazione: 0 })] });
+    const onSeleziona = vi.fn();
+    const onSposta = vi.fn();
+    monta({ mappa: { ...conPezzi, pezzi: [muro] }, partitaId: null, editor: { strumento: 'seleziona', selezionatoId: null, onSeleziona: vi.fn(), onClickMappa: vi.fn(), onSposta: vi.fn(),
+      pezzi: { selezionatoId: 3, onSeleziona, onRitaglia: vi.fn(), onSposta } } });
+    expect(document.querySelector(`[data-zona-pezzo="${muro.uid}"]`)).toHaveClass('visore-mappa__zona-pezzo--selezionata');
+    const seconda = document.querySelector<HTMLElement>(`[data-copia="${'c3'.repeat(16)}"]`)!;
+    expect(seconda).toHaveClass('visore-mappa__pezzo--selezionato');
+    expect(document.querySelector<HTMLElement>(`[data-copia="${'c1'.repeat(16)}"]`)).not.toHaveClass('visore-mappa__pezzo--selezionato');
+    expect(seconda).toHaveAttribute('title', 'Muro mobile · copia 2');
+    const tela = screen.getByRole('application');
+    fireEvent.pointerDown(seconda, { pointerId: 1, clientX: 10, clientY: 10 });
+    expect(onSeleziona).toHaveBeenCalledWith(3);
+    fireEvent.pointerMove(tela, { pointerId: 1, clientX: 30, clientY: 15 });
+    fireEvent.pointerUp(tela, { pointerId: 1, clientX: 30, clientY: 15 });
+    expect(onSposta).toHaveBeenCalledWith(3, 720, 55);
+  });
 
   it('le zone d\'origine sono cancellate dall\'immagine (tutte, anche dei pezzi nascosti) e ogni pezzo è posato col suo ingombro', () => {
     monta({ mappa: { ...conPezzi, pezzi: [conPezzi.pezzi[0]] } });
@@ -896,7 +944,8 @@ it('l\'inquadratura non conta le zone cancellate dei pezzi e comprende i pezzi p
   const area = vi.spyOn(inquadratura, 'areaImmagine').mockReturnValue({ x: 100, y: 100, w: 200, h: 200 });
   const fit = vi.spyOn(inquadratura, 'inquadraturaMappa');
   try {
-    const pezzo = { id: 1, uid: '1'.repeat(32), nome: 'Muro', sorgente: { x: 0, y: 900, larghezza: 100, altezza: 50 }, posizione: { x: 300, y: 250 }, rotazione: 0 as const, specchio: { orizzontale: false, verticale: false }, condizioni: [], ordine: 0, updatedAt: '' };
+    const pezzo = { id: 1, uid: '1'.repeat(32), nome: 'Muro', sorgente: { x: 0, y: 900, larghezza: 100, altezza: 50 }, ordine: 0, updatedAt: '',
+      copie: [{ id: 1, uid: 'c'.repeat(32), pezzoId: 1, etichetta: '', posizione: { x: 300, y: 250 }, rotazione: 0 as const, specchio: { orizzontale: false, verticale: false }, condizioni: [], ordine: 0, updatedAt: '' }] };
     render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, immagineUrl: '/fit.png', larghezza: 1000, altezza: 1000, spilli: [], pezzi: [pezzo] }} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
     const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
     Object.defineProperty(img, 'naturalWidth', { value: 1000 });
