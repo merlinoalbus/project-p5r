@@ -22,6 +22,7 @@ import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { CampoCorrezione } from './CorrezioneGuida';
+import { NEL_CESTINO } from '../../utils/cestino';
 import type { PersonaRiassuntoDto, PuntoInteresseDto } from '../../types';
 
 interface Props {
@@ -124,7 +125,7 @@ function Campi({ voce, dedalo, areaIniziale, aree, persone, onChiudi, onCambiata
       </div>
       {voce && conferma && (
         <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 px-2.5 py-2 text-[12px]" aria-label="Conferma: eliminare la Persona">
-          <span>Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia.</span>
+          <span>Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia. {NEL_CESTINO}</span>
           <div className="flex flex-wrap gap-1.5">
             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Confermo" disabled={occupato} onClick={() => void elimina()} />
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="No" disabled={occupato} onClick={() => setConferma(false)} />

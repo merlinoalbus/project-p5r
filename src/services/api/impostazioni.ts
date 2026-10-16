@@ -1,5 +1,5 @@
 // ============================================================
-// API impostazioni — stato dell'istanza, backup e ripristino (Fase 15.29), pacchetto di gioco (voce 10)
+// API impostazioni — stato dell'istanza, backup e ripristino (Fase 15.29), pacchetto di gioco (voce 10), cestino (2026-10-16)
 // ============================================================
 //
 // **Dal browser non parte nessun file.** Un pacchetto o un backup pesano centinaia di MB: nel corpo di
@@ -8,10 +8,10 @@
 // è tutto del backend, che legge dal mount.
 // ============================================================
 
-import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto } from '../../types';
+import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, EsitoRipristinoCestinoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto, VoceCestinoDto } from '../../types';
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
-import { ApiError, apiGet, apiPost, apiPut } from './_helpers';
+import { ApiError, apiDelete, apiGet, apiPost, apiPut } from './_helpers';
 
 /** A che punto è un'operazione lunga del server: la barra la mostra come avanzamento indeterminato. */
 export interface AvanzamentoInvio {
@@ -73,3 +73,20 @@ export const ripristinaIstanzaDaDeposito = (nome: string): Promise<EsitoRipristi
 /** A che punto è l'importazione sul server: da chiedere quando la risposta non arriva (un proxy può chiudere prima). */
 export const statoImportazionePacchetto = (): Promise<StatoImportazionePacchettoDto> =>
   apiGet('/impostazioni/istanza/gioco/importazione', { maxRetries: 1, timeoutMs: 30_000 });
+
+// ---- Il cestino (2026-10-16): aree, voci, planimetrie e aree dei dedali eliminate ----
+// Rimettere ed eliminare per sempre non si ripetono da soli (`maxRetries: 0`): una seconda richiesta partita dopo una risposta
+// persa troverebbe l'elemento già uscito dal cestino.
+
+/** Gli elementi del cestino, dal più recente. */
+export const getCestino = (): Promise<VoceCestinoDto[]> => apiGet('/impostazioni/cestino');
+
+/** Rimette un elemento del cestino com'era (esce dal cestino). */
+export const ripristinaDalCestino = (id: number): Promise<EsitoRipristinoCestinoDto> =>
+  apiPost(`/impostazioni/cestino/${id}/ripristina`, undefined, { maxRetries: 0 });
+
+/** Toglie per sempre un elemento dal cestino. */
+export const eliminaDalCestino = (id: number): Promise<void> => apiDelete(`/impostazioni/cestino/${id}`, { maxRetries: 0 });
+
+/** Svuota il cestino. */
+export const svuotaCestino = (): Promise<{ eliminati: number }> => apiDelete('/impostazioni/cestino', { maxRetries: 0 });

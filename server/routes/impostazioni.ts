@@ -1,5 +1,5 @@
 // ============================================================
-// Route /api/impostazioni — stato dell'istanza, backup e ripristino (Fase 15.29), pacchetto di gioco (voce 10)
+// Route /api/impostazioni — stato dell'istanza, backup e ripristino (Fase 15.29), pacchetto di gioco (voce 10), cestino (2026-10-16)
 //
 // I file grossi passano dalla CARTELLA D'APPOGGIO condivisa (il NAS montato, `DEPOSITO_DIR`): ogni
 // scaricamento ne lascia lì una copia, e da lì si sceglie che cosa reimportare o ripristinare. Il
@@ -22,6 +22,8 @@ import fs from 'node:fs';
 import { copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanzaDaDeposito, statoIstanza } from '../services/impostazioniService.js';
 import { depositaCopia } from '../services/depositoService.js';
 import { anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchettoDaDeposito, statoImportazione } from '../services/pacchettoGiocoService.js';
+import { elencoCestino, eliminaDalCestino, ripristinaDalCestino, svuotaCestino } from '../services/cestinoService.js';
+import { paramsId } from '../schemas/compendio.js';
 
 const router = Router();
 
@@ -109,6 +111,21 @@ router.put('/istanza/deposito', validate({ body: corpoFileDeposito }), async (re
 /** A che punto è l'importazione: si interroga quando la risposta non arriva (un proxy può chiudere prima). */
 router.get('/istanza/gioco/importazione', (_req, res) => {
   res.json(statoImportazione());
+});
+
+/* ---- Il cestino (2026-10-16): aree, voci, planimetrie e aree dei dedali eliminate, da rimettere o togliere per sempre ---- */
+router.get('/cestino', (_req, res) => {
+  res.json(elencoCestino());
+});
+router.post('/cestino/:id/ripristina', validate({ params: paramsId }), (req, res) => {
+  res.json(ripristinaDalCestino(Number(req.params.id)));
+});
+router.delete('/cestino/:id', validate({ params: paramsId }), (req, res) => {
+  eliminaDalCestino(Number(req.params.id));
+  res.status(204).end();
+});
+router.delete('/cestino', (_req, res) => {
+  res.json(svuotaCestino());
 });
 
 export default router;

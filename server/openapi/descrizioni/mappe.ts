@@ -92,7 +92,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'DELETE /api/mappe/:chiave': {
     sommario: 'Elimina una mappa con i suoi spilli',
-    descrizione: 'In una transazione: le schermate dei suoi pin e la sua immagine di base (se non è anche la pianta di un quartiere o di un\'area), gli spilli in cascata e i loro stati nelle partite; le mappe figlie diventano radici.',
+    descrizione: 'In una transazione: le schermate dei suoi pin e la sua immagine di base (se non è anche la pianta di un quartiere o di un\'area), gli spilli in cascata e i loro stati nelle partite; le mappe figlie diventano radici. La mappa va nel cestino con tutto quel che l\'eliminazione tocca (immagini comprese), e da lì si rimette (`/api/impostazioni/cestino`).',
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'mappa-non-trovata']],
   },

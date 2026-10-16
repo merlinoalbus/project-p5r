@@ -6,6 +6,7 @@
 // del Palazzo. Da qui si collegano a una planimetria (anche a una che contiene già altre aree: si
 // aggiunge) oppure **si eliminano davvero** (scelta dell'utente, 2026-09-30): se ne vanno i suoi punti
 // della guida e quel che le partite ne avevano segnato. La conferma sta nel piè della finestra, sempre in vista.
+// Dal 2026-10-16 l'area eliminata finisce nel cestino (Impostazioni), e la conferma lo dice.
 // ============================================================
 
 import { useState } from 'react';
@@ -17,6 +18,7 @@ import { SOGLIA_RICERCA } from '../../utils/selettore';
 import { corrispondeRicerca } from '../../../shared/testo';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { CampoCorrezione } from './CorrezioneGuida';
+import { NEL_CESTINO } from '../../utils/cestino';
 
 interface Props {
   area: { chiave: string; nome: string; ordine: number; descrizione: string };
@@ -57,7 +59,7 @@ export function SchedaAreaGuida({ area, punti, tavole, onCollega, onSalvaTesto, 
             <p className="m-0 text-[13px]">
               Elimino l’area «{area.nome}» dalla guida, per tutte le partite?
               {punti > 0 ? ` Se ne vanno anche i suoi ${punti} punti della guida e quel che le partite ne avevano segnato.` : ''}
-              {' '}Le aree che la seguono salgono di un posto. Un pacchetto di gioco importato dopo la rimette.
+              {' '}Le aree che la seguono salgono di un posto. {NEL_CESTINO}
             </p>
             <div className="flex flex-wrap justify-end gap-1.5">
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Non eliminare" onClick={() => setConferma(false)} />

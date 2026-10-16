@@ -26,6 +26,7 @@ import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { perOrdineDiGuida, type Planimetria } from '../../utils/gruppiPlanimetrie';
 import { SOGLIA_RICERCA } from '../../utils/selettore';
 import { corrispondeRicerca } from '../../../shared/testo';
+import { NEL_CESTINO } from '../../utils/cestino';
 
 export interface ModificheScheda {
   stanza?: string;
@@ -124,7 +125,7 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
             <p className="m-0 text-[13px]">
               Elimino «{etichetta || etichettaDedotta}» di {stanza}? Se ne vanno anche i suoi spilli{p.n > 0 ? `, compresi ${p.n} da raccogliere` : ''}.
               {testoAreeDopoEliminazione(p.aree, altrove)}
-              {' '}L’immagine di base resta fra le immagini caricate.
+              {' '}{NEL_CESTINO}
             </p>
             <div className="flex flex-wrap justify-end gap-1.5">
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Non eliminare" onClick={() => setConferma(false)} />

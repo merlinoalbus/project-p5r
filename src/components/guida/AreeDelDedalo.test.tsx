@@ -170,7 +170,7 @@ it('l\'interruttore porta in «Modifica la guida»: le aree si aggiungono, si sp
   // eliminare chiede conferma e dice che cosa se ne va; l'area esce dall'indirizzo
   fireEvent.click(screen.getByRole('button', { name: /^Modifica area: l’area «Banchina»/ }));
   fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
-  expect(screen.getByText(/le sue voci di Trama con quel che ne avevano segnato, e i suoi timbri\. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area\./)).toBeInTheDocument();
+  expect(screen.getByText(/le sue voci di Trama con quel che ne avevano segnato, e i suoi timbri\. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
   api.eliminaAreaDedalo.mockResolvedValue(undefined);
   fireEvent.click(screen.getByRole('button', { name: 'Confermo' }));
   await waitFor(() => expect(api.eliminaAreaDedalo).toHaveBeenCalledWith('q-1'));

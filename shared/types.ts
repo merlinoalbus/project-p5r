@@ -2521,3 +2521,56 @@ export interface RiepilogoCatalogoDto {
   perTipo: Array<{ tipo: TipoCatalogo; creati: number; modificati: number; nascosti: number; totale: number }>;
 }
 
+// ---- Il cestino (migrazioni 104 e utente 021, 2026-10-16): ciò che si elimina dalla guida e dalle mappe si può rimettere ----
+
+/** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo. */
+export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo';
+
+/** Quante righe di una tabella se ne sono andate con l'eliminazione, con il nome per l'utente. */
+export interface ContenutoCestinoDto {
+  tabella: string;
+  etichetta: string;
+  quante: number;
+}
+
+/** Un elemento del cestino, dal più recente. */
+export interface VoceCestinoDto {
+  id: number;
+  tipo: TipoCestino;
+  chiave: string;
+  nome: string;
+  /** Dove stava (il Palazzo, l'area, il dedalo, la mappa genitrice): vuoto se non c'è. */
+  contesto: string;
+  eliminatoIl: string;
+  /** Le righe tolte, per tabella (dati di gioco e partite), dalla più numerosa. */
+  contenuto: ContenutoCestinoDto[];
+  /** La parte nelle partite (spunte, stato dei pin, timbri): nessuna, presente, o mancante (file delle partite sostituito dopo). */
+  partite: 'nessuna' | 'presente' | 'mancante';
+  /** Quanto pesa il registro, in byte: le immagini dei pin e delle mappe ci stanno dentro. */
+  byte: number;
+}
+
+/** Perché una riga non è stata rimessa com'era: cambiata dopo l'eliminazione, non c'è più, o punta a qualcosa che non c'è più. */
+export type MotivoSaltataCestinoDto = 'cambiata-dopo' | 'non-esiste-piu' | 'legame-mancante';
+
+/** Le righe non rimesse di una tabella, per motivo, con qualche chiave d'esempio. */
+export interface SaltataCestinoDto {
+  tabella: string;
+  etichetta: string;
+  motivo: MotivoSaltataCestinoDto;
+  quante: number;
+  esempi: string[];
+}
+
+/** Esito di un ripristino dal cestino. */
+export interface EsitoRipristinoCestinoDto {
+  tipo: TipoCestino;
+  chiave: string;
+  nome: string;
+  /** Righe rimesse (reinserite o riportate com'erano). */
+  rimesse: number;
+  saltate: SaltataCestinoDto[];
+  /** L'elemento aveva una parte nelle partite che non c'è più: rimessi solo i dati di gioco. */
+  partiteMancanti: boolean;
+}
+

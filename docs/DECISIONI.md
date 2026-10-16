@@ -1841,3 +1841,39 @@ Conseguenze tecniche (non scelte dell'utente):
   conta anche le copie (`details.copie`) e le toglie coi ritagli; all'importazione una copia fuori dall'immagine d'arrivo si scarta
   da sola (`copieScartate`), un ritaglio con la zona fuori o senza copie dentro si scarta (`pezziScartati`); un'immagine cambiata
   toglie ritagli e copie (`pezziEliminati`, `copieEliminate`).
+
+## 2026-10-16 — Recupero delle aree di Madarame dal WAL di produzione
+
+Tre aree del Palazzo di Madarame eliminate per errore in produzione (16:16 UTC). Decisioni dell'utente: il recupero si fa in
+produzione («recupera tu stesso … ho configurato connessione ssh»); proposta l'applicazione con l'elenco esatto di ciò che si
+rimette, approvata («Sì, applica»): solo le tre aree di oggi, non il Giardino centrale (eliminato il 15/10 già vuoto) né le tre
+planimetrie eliminate apposta. Conseguenze tecniche: il backup del 15/10 00:36 indicato dall'utente non bastava (dopo c'erano voci
+nuove e avanzamento): la fonte è lo stato ricostruito dal WAL un istante prima della prima cancellazione; SQL con INSERT/UPDATE
+espliciti (generato da uno script di sola lettura sulle fonti, applicato da uno script Node in un container temporaneo: dichiarato
+all'utente dopo, la proposta nominava solo il file SQL).
+
+## 2026-10-16 — Il cestino: le eliminazioni della guida e delle mappe si rimettono
+
+Richiesta dell'utente, dopo il recupero: una protezione contro le eliminazioni per errore. Scelte (AskUserQuestion):
+- protezione → «Cestino con ripristino (Consigliato)» (non la conferma col nome da scrivere, non la sola copia automatica);
+- ambito → aree dei Palazzi, voci della guida, planimetrie, aree dei dedali (tutte e quattro);
+- posizione → «In Impostazioni»;
+- svuotamento → solo a mano, un elemento o tutto, con conferma (proposta accettata).
+
+Conseguenze tecniche (non scelte dell'utente):
+- **Registro generico, non elenchi scritti a mano**: per la durata della transazione dell'eliminazione, trigger temporanei su ogni
+  tabella dei due file chiamano una funzione JS che annota ogni riga cancellata, cambiata o aggiunta (cascate comprese, BLOB intatti;
+  `recursive_triggers` acceso perché un `INSERT OR REPLACE` faccia scattare il trigger della cancellazione). Le eliminazioni future
+  restano coperte senza toccare il cestino.
+- **Due file**: le righe di gioco in `cestino` (gioco.db, migrazione 104), quelle delle partite in `cestino_partite` (partite.db,
+  utente 021) con lo stesso `uid`: il pacchetto esportato non porta l'avanzamento. Il pacchetto iniziale generato da un'istanza
+  (`npm run pacchetto`) nasce col cestino vuoto; il file esportato da Impostazioni (copia dell'istanza) invece lo porta.
+- **Ripristino: quel che è cambiato dopo vince**. Colonna per colonna torna solo ciò che l'eliminazione aveva cambiato e nessuno ha
+  toccato dopo; una chiave del file di gioco ormai presa blocca tutto (409, niente cambia); nelle partite lo stato di dopo resta; una
+  riga che punta a qualcosa eliminato dopo non torna; le tabelle che l'app ricalcola (percorsi e nomi di prima delle mappe) non
+  bloccano e si ricalcolano se serve; l'esito elenca ciò che non è tornato e perché.
+- **Il posto**: l'eliminazione annota i vicini (chiave della precedente e della seguente); al ripristino l'elemento torna dopo la
+  precedente, in cima se era il primo, prima della seguente, in fondo se era l'ultimo; le aree si rinumerano senza buchi, le voci
+  scendono solo se il posto è preso.
+- **Peso**: una planimetria porta nel cestino anche le sue immagini (es. 3,4 MB); il file di gioco cresce finché non si svuota, e la
+  sezione mostra il peso di ogni elemento e il totale.

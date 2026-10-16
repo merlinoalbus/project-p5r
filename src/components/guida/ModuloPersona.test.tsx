@@ -93,7 +93,7 @@ it('«Elimina» chiede conferma; «No» torna indietro, «Confermo» elimina la 
   const { onChiudi, onCambiata } = monta(voce);
   await screen.findByRole('dialog', { name: 'Modifica: Pixie' });
   fireEvent.click(screen.getByRole('button', { name: /^Elimina/ }));
-  expect(screen.getByRole('region', { name: 'Conferma: eliminare la Persona' })).toHaveTextContent('Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia.');
+  expect(screen.getByRole('region', { name: 'Conferma: eliminare la Persona' })).toHaveTextContent('Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia. Finisce nel cestino (Impostazioni → Cestino): da lì la rimetti com’era.');
   fireEvent.click(screen.getByRole('button', { name: /^No/ }));
   expect(screen.queryByRole('region', { name: 'Conferma: eliminare la Persona' })).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: /^Elimina/ }));

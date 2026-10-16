@@ -29,6 +29,7 @@ import { eliminaImmaginiDeiPin, impostaAreeMappa, staccaAreaDaOgniMappa } from '
 import { palazziCompletati, palazzoDiOgniMappa } from './palazziService.js';
 import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
+import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string }
@@ -415,6 +416,7 @@ export function aggiornaArea(chiaveArea: string, dati: DatiArea): AreaDungeonDto
  * dei dedali, i legami con le planimetrie (che tengono le altre aree), la pianta e gli alias (in cascata).
  * Le richieste restano, senza area. Le aree che la seguivano salgono di un posto: l'ordine resta senza buchi.
  * I dati di gioco vivono in `gioco.db`: un pacchetto importato dopo la rimette, come ogni correzione della guida.
+ * Dal 2026-10-16 l'area va nel **cestino** (`conCestino`) con tutto quel che l'eliminazione tocca, e da lì si rimette.
  */
 export function eliminaArea(chiaveArea: string): void {
   const a = prepared('SELECT * FROM dungeon_area WHERE chiave = ?').get(chiaveArea) as RigaArea | undefined;
@@ -422,11 +424,93 @@ export function eliminaArea(chiaveArea: string): void {
   // la pulizia riscrive `dati_guida`: la copia in memoria (`datiGuida`) si butta a transazione chiusa, comunque sia finita
   // (dentro la transazione una rilettura la rimetterebbe in memoria con dati che un annullamento toglierebbe)
   try {
-    eliminaAreaInTransazione(chiaveArea, a);
+    const vicini = viciniIn(prepared(SQL_FRATELLI_AREA.dungeon_area).all(a.dungeon_chiave) as Array<{ chiave: string }>, chiaveArea);
+    conCestino({ tipo: 'area', chiave: chiaveArea, nome: a.nome, contesto: nomeDungeon(a.dungeon_chiave), vicini }, () => eliminaAreaInTransazione(chiaveArea, a));
   } finally {
     invalidaDatiGuida();
   }
 }
+
+/** Il nome di un Palazzo (o dei Memento), per il contesto degli elementi del cestino; vuoto se non c'è. */
+function nomeDungeon(chiave: string): string {
+  return (prepared('SELECT nome FROM dungeon WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome ?? '';
+}
+
+/** Dove sta un'area della guida, per il cestino: «Palazzo · Area». */
+function contestoAreaGuida(chiaveArea: string): string {
+  const r = prepared('SELECT a.nome, d.nome AS dungeon FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE a.chiave = ?').get(chiaveArea) as { nome: string; dungeon: string } | undefined;
+  return r ? `${r.dungeon} · ${r.nome}` : '';
+}
+
+/** Le chiavi di ciò che sta subito prima e subito dopo `chiave` in un elenco già ordinato (per il cestino). */
+function viciniIn(elenco: ReadonlyArray<{ chiave: string }>, chiave: string): ViciniCestino {
+  const i = elenco.findIndex((r) => r.chiave === chiave);
+  return { prima: i > 0 ? elenco[i - 1].chiave : null, dopo: i >= 0 && i < elenco.length - 1 ? elenco[i + 1].chiave : null };
+}
+
+/** Le aree della guida di un Palazzo, o le aree di un dedalo, nell'ordine in cui si vedono. */
+const SQL_FRATELLI_AREA = { dungeon_area: 'SELECT chiave, ordine FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine, chiave', area_dedalo: 'SELECT chiave, ordine FROM area_dedalo WHERE dedalo_chiave = ? ORDER BY ordine, chiave' } as const;
+/** Le voci accanto a una voce: stessa area, stesso Enigma (o nessuno), stessa area del dedalo (o nessuna). */
+const SQL_FRATELLI_VOCE = 'SELECT chiave, ordine FROM punto_interesse WHERE area_chiave = ? AND contenitore_chiave IS ? AND area_dedalo_chiave IS ? ORDER BY ordine, chiave';
+
+/**
+ * Il posto (indice fra le altre righe, nel loro ordine) di un elemento rimesso dal cestino, dai suoi vicini quando fu eliminato:
+ * subito dopo quello che lo precedeva; se era il primo (nessuno prima), in cima; se quello di prima non c'è più, subito prima di
+ * quello che lo seguiva; se era l'ultimo (nessuno dopo), in fondo; senza vicini utili, il `ripiego`. Il primo e l'ultimo sono
+ * informazioni precise: un'area che era la prima torna la prima anche se nel frattempo le altre sono state riordinate.
+ */
+function postoDaiVicini(altre: readonly string[], vicini: ViciniCestino | null, ripiego: number): number {
+  if (!vicini) return ripiego;
+  const dopoDi = vicini.prima ? altre.indexOf(vicini.prima) : -1;
+  if (dopoDi >= 0) return dopoDi + 1;
+  if (vicini.prima === null) return 0;
+  const primaDi = vicini.dopo ? altre.indexOf(vicini.dopo) : -1;
+  if (primaDi >= 0) return primaDi;
+  if (vicini.dopo === null) return altre.length;
+  return ripiego;
+}
+
+/**
+ * Dopo il ripristino di un'area (della guida o di un dedalo) dal cestino: la si rimette dove stava rispetto alle vicine
+ * (`postoDaiVicini`; senza, al suo vecchio posto, al più in fondo); poi l'ordine si rinumera da 0, senza buchi né doppioni. Le righe
+ * spostate dall'eliminazione sono già tornate com'erano se nessuno le ha toccate dopo; questo conta quando nel frattempo le aree sono
+ * state aggiunte o riordinate.
+ */
+function rimettiAreaAlPosto(tabella: 'dungeon_area' | 'area_dedalo', chiave: string, vicini: ViciniCestino | null): void {
+  const colonna = tabella === 'dungeon_area' ? 'dungeon_chiave' : 'dedalo_chiave';
+  const r = prepared(`SELECT ${colonna} AS gruppo, ordine FROM ${tabella} WHERE chiave = ?`).get(chiave) as { gruppo: string; ordine: number } | undefined;
+  if (!r) return;
+  const altre = (prepared(SQL_FRATELLI_AREA[tabella]).all(r.gruppo) as Array<{ chiave: string }>).map((x) => x.chiave).filter((k) => k !== chiave);
+  const posto = postoDaiVicini(altre, vicini, Math.min(r.ordine, altre.length));
+  [...altre.slice(0, posto), chiave, ...altre.slice(posto)].forEach((k, n) => prepared(`UPDATE ${tabella} SET ordine = ? WHERE chiave = ? AND ordine <> ?`).run(n, k, n));
+}
+registraRipristinoCestino('area', (chiave, vicini) => rimettiAreaAlPosto('dungeon_area', chiave, vicini));
+registraRipristinoCestino('area-dedalo', (chiave, vicini) => rimettiAreaAlPosto('area_dedalo', chiave, vicini));
+
+/**
+ * Dopo il ripristino di una voce: il suo posto viene dai vicini con le stesse regole delle aree (`postoDaiVicini`), in numeri
+ * d'ordine: subito dopo la precedente; se era la prima, non dopo la prima di adesso; prima della seguente; se era l'ultima, non prima
+ * dell'ultima di adesso; senza vicini utili, il suo vecchio numero. Le voci non tengono l'ordine senza buchi (`ordineInFondo` prende
+ * il massimo più uno): si toccano solo se il posto è preso, e allora quelle da lì in giù scendono di uno.
+ */
+registraRipristinoCestino('voce', (chiave, vicini) => {
+  const v = prepared('SELECT area_chiave, contenitore_chiave, area_dedalo_chiave, ordine FROM punto_interesse WHERE chiave = ?').get(chiave) as { area_chiave: string; contenitore_chiave: string | null; area_dedalo_chiave: string | null; ordine: number } | undefined;
+  if (!v) return;
+  const altre = (prepared(SQL_FRATELLI_VOCE).all(v.area_chiave, v.contenitore_chiave, v.area_dedalo_chiave) as Array<{ chiave: string; ordine: number }>).filter((x) => x.chiave !== chiave);
+  const precedente = vicini?.prima ? altre.find((x) => x.chiave === vicini.prima) : undefined;
+  const seguente = vicini?.dopo ? altre.find((x) => x.chiave === vicini.dopo) : undefined;
+  const prima = altre[0], ultima = altre[altre.length - 1];
+  const posto = precedente ? precedente.ordine + 1
+    : vicini?.prima === null && prima ? Math.min(v.ordine, prima.ordine)
+    : seguente ? seguente.ordine
+    : vicini?.dopo === null && ultima ? Math.max(v.ordine, ultima.ordine + 1)
+    : v.ordine;
+  if (altre.some((x) => x.ordine === posto)) {
+    prepared('UPDATE punto_interesse SET ordine = ordine + 1 WHERE area_chiave = ? AND contenitore_chiave IS ? AND area_dedalo_chiave IS ? AND chiave <> ? AND ordine >= ?')
+      .run(v.area_chiave, v.contenitore_chiave, v.area_dedalo_chiave, chiave, posto);
+  }
+  if (posto !== v.ordine) prepared('UPDATE punto_interesse SET ordine = ? WHERE chiave = ?').run(posto, chiave);
+});
 
 /**
  * Il lavoro di `eliminaArea` in una transazione sola: stacca e cancella i punti dell'area, toglie gli spilli della guida senza
@@ -907,11 +991,15 @@ function staccaPunto(puntoChiave: string): void {
  * se ne va con il punto (rilievo della revisione, 2026-09-18: un collezionabile orfano segnato preso).
  * Un Enigma tolto lascia i suoi passi come voci dell'area, in fondo e nel loro ordine, con il loro stato; un passo tolto lascia
  * il suo Enigma, che segue i passi rimasti (095).
+ * Dal 2026-10-16 la voce va nel cestino (`conCestino`) e da lì si rimette.
  */
 export function eliminaPunto(puntoChiave: string): void {
-  const p = prepared('SELECT contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { contenitore_chiave: string | null } | undefined;
+  const p = prepared('SELECT nome, area_chiave, contenitore_chiave, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as { nome: string; area_chiave: string; contenitore_chiave: string | null; area_dedalo_chiave: string | null } | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  getDb().transaction(() => {
+  const nomeAreaDedalo = p.area_dedalo_chiave ? (prepared('SELECT nome FROM area_dedalo WHERE chiave = ?').get(p.area_dedalo_chiave) as { nome: string } | undefined)?.nome : undefined;
+  const contesto = [contestoAreaGuida(p.area_chiave), nomeAreaDedalo].filter(Boolean).join(' · ');
+  const vicini = viciniIn(prepared(SQL_FRATELLI_VOCE).all(p.area_chiave, p.contenitore_chiave, p.area_dedalo_chiave) as Array<{ chiave: string }>, puntoChiave);
+  conCestino({ tipo: 'voce', chiave: puntoChiave, nome: p.nome, contesto, vicini }, () => getDb().transaction(() => {
     staccaPunto(puntoChiave);
     // i passi di un Enigma tolto restano, voci dell'area con il loro stato (095)
     for (const passo of passiDi(getDb(), puntoChiave)) {
@@ -921,7 +1009,7 @@ export function eliminaPunto(puntoChiave: string): void {
     prepared('DELETE FROM punto_interesse WHERE chiave = ?').run(puntoChiave);
     // un passo tolto: il suo Enigma segue i passi che restano
     if (p.contenitore_chiave) allineaEnigmaInOgniPartita(getDb(), p.contenitore_chiave, nowIso());
-  })();
+  })());
 }
 
 // ---- Le aree dei dedali: aggiungere, correggere, spostare, eliminare (099) ----
@@ -995,10 +1083,12 @@ export function spostaAreaDedalo(chiave: string, verso: -1 | 1): AreaDedaloDto {
  * Elimina un'area del dedalo per tutte le partite (scelta dell'utente, 2026-10-11: «Voci via, Richieste da collocare»): le sue
  * voci se ne vanno con quel che le partite ne avevano segnato (come `eliminaPunto`, Enigmi e passi compresi) e i timbri con lei;
  * le Richieste restano nel dedalo, da collocare, con il loro stato. Le aree che la seguivano salgono di un posto.
+ * Dal 2026-10-16 l'area va nel cestino (`conCestino`) e da lì si rimette.
  */
 export function eliminaAreaDedalo(chiave: string): void {
   const a = rigaAreaDedalo(chiave);
-  getDb().transaction(() => {
+  const vicini = viciniIn(prepared(SQL_FRATELLI_AREA.area_dedalo).all(a.dedalo_chiave) as Array<{ chiave: string }>, chiave);
+  conCestino({ tipo: 'area-dedalo', chiave, nome: a.nome, contesto: contestoAreaGuida(a.dedalo_chiave), vicini }, () => getDb().transaction(() => {
     const voci = (prepared('SELECT chiave FROM punto_interesse WHERE area_dedalo_chiave = ?').all(chiave) as Array<{ chiave: string }>).map((r) => r.chiave);
     for (const v of voci) staccaPunto(v);
     // prima i passi, poi gli Enigmi: nessun passo resta a puntare a un Enigma che non c'è
@@ -1010,5 +1100,5 @@ export function eliminaAreaDedalo(chiave: string): void {
     prepared('UPDATE richiesta SET area_dedalo_chiave = NULL WHERE area_dedalo_chiave = ?').run(chiave);
     prepared('DELETE FROM area_dedalo WHERE chiave = ?').run(chiave);
     prepared('UPDATE area_dedalo SET ordine = ordine - 1 WHERE dedalo_chiave = ? AND ordine > ?').run(a.dedalo_chiave, a.ordine);
-  })();
+  })());
 }

@@ -60,6 +60,18 @@ it('la riga dice se la voce è collegata («N pin») o da collegare; le descritt
   expect(within(descrittiva).queryByText(/pin/)).toBeNull();
 });
 
+it('una voce si elimina dalla sua modifica, dopo una conferma che dice che cosa si perde e che finisce nel cestino (2026-10-16)', async () => {
+  const { onRicarica } = monta([punto({})]);
+  fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+  expect(screen.getByText(/I pin collegati restano sulla mappa, col loro «raccolto»\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
+  eliminaPunto.mockResolvedValue(undefined);
+  fireEvent.click(screen.getByRole('button', { name: 'Confermo' }));
+  await waitFor(() => expect(eliminaPunto).toHaveBeenCalledWith('p1'));
+  await waitFor(() => expect(onRicarica).toHaveBeenCalled());
+});
+
 it('«Collega pin» apre dentro la voce la planimetria dell’area in modalità scelta: un tocco collega, un altro scollega', async () => {
   const { onPuntoAggiornato, onRicarica } = monta([punto({})]);
   fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));

@@ -40,6 +40,7 @@ import { TramaDellArea } from './TramaDellArea';
 import { SezioneDellArea } from './SezioneDellArea';
 import { urlStratoDedalo } from '../mappe/stratiMemento';
 import { contiDelDedalo } from '../../utils/dedali';
+import { NEL_CESTINO } from '../../utils/cestino';
 import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../../types';
 
 type Dedalo = AreaDungeonDto & { dedalo: NonNullable<AreaDungeonDto['dedalo']> };
@@ -202,7 +203,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
                   <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} compatto etichetta="Modifica area"
                     iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
                     onSalva={async (b) => { await aggiornaAreaDedalo(area.chiave, { nome: b.nome, descrizione: b.descrizione }); await onRicarica(); }}
-                    elimina={{ avviso: 'Se ne va per tutte le partite: le sue voci di Trama con quel che ne avevano segnato, e i suoi timbri. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area.', onElimina: async () => { await eliminaAreaDedalo(area.chiave); setParams((p) => { const n = new URLSearchParams(p); n.delete('zona'); return n; }, { replace: true }); await onRicarica(); } }}>
+                    elimina={{ avviso: `Se ne va per tutte le partite: le sue voci di Trama con quel che ne avevano segnato, e i suoi timbri. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area. ${NEL_CESTINO}`, onElimina: async () => { await eliminaAreaDedalo(area.chiave); setParams((p) => { const n = new URLSearchParams(p); n.delete('zona'); return n; }, { replace: true }); await onRicarica(); } }}>
                     {(b, cambia) => <>
                       <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.areaDedalo.nome} onCambia={(v) => cambia({ nome: v })} />
                       <CampoCorrezione etichetta="Dettagli dell’area" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.areaDedalo.descrizione} onCambia={(v) => cambia({ descrizione: v })} />

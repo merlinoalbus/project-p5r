@@ -53,6 +53,7 @@ import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { AtterraggioTokyo } from '../components/guida/AtterraggioTokyo';
 import { MappaMemento } from '../components/mappe/MappaMemento';
 import { Modal } from '../components/shared/Modal';
+import { NEL_CESTINO } from '../utils/cestino';
 
 /** Le tre date di un Palazzo come una linea: si apre, conviene rubare, scade. La prosa della guida nel `title`. */
 function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
@@ -493,7 +494,7 @@ export function DungeonDettaglioPage() {
                     onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
                     // «Devo poter rimuovere un'area» (2026-09-30): l'eliminazione vera, per tutte le partite
                     elimina={{
-                      avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le planimetrie restano, con le loro altre aree.`,
+                      avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le planimetrie restano, con le loro altre aree. ${NEL_CESTINO}`,
                       onElimina: async () => { const k = area.chiave; await eliminaArea(k); areaEliminata(k); await Promise.all([dati.ricarica(), albero.ricarica()]); },
                     }}>
                     {(b, cambia) => <>

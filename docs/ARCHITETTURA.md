@@ -1516,3 +1516,34 @@ stesso ritaglio si posa in più punti: il **pezzo** è il ritaglio (zona e nome)
   L'immagine nuova su una mappa con pezzi apre la conferma (409 → `caricaImmagineMappa(…, { eliminaPezzi: true })`).
 - **Pacchetto di gioco** (`ricaricaPacchetto`, usata dai test): un pacchetto della 102 (ritagli con la posa, senza `copia_pezzo`)
   porta la posa come prima copia; nessuna copia resta senza il suo ritaglio.
+
+## Il cestino (2026-10-16)
+
+Le eliminazioni di aree della guida dei Palazzi, voci della guida, planimetrie e aree dei dedali si rimettono com'erano da
+Impostazioni → Cestino.
+- **Dati**: `cestino` nel file di gioco (migrazione 104: `uid`, `tipo` area|voce|mappa|area-dedalo, `chiave`, `nome`, `contesto`,
+  `riepilogo_json` righe tolte per tabella, `registro_json`, `con_partite`, `vicini_json`, `eliminato_il`) e `cestino_partite` nel
+  file delle partite (utente 021, anche in `schemaUtente`: `uid`, `registro_json`, `eliminato_il`). Il registro è un elenco di passi
+  `{ seq, tabella, op: D|U|I, prima?, dopo? }` (righe com'erano e come sono diventate, BLOB in base64), diviso fra i due file con
+  numerazione comune.
+- **Registrare** (`server/services/cestinoService.ts`, `conCestino(elemento, opera)`): in una transazione crea trigger `TEMP AFTER`
+  DELETE/UPDATE/INSERT su ogni tabella di `main` e `utente` (tranne quelle del cestino) che chiamano `cestino_registra` (funzione JS),
+  esegue l'eliminazione, toglie i trigger, salva; `recursive_triggers` acceso per la durata; una registrazione dentro un'altra
+  finisce in quella di fuori; un errore annulla tutto. Gli UPDATE che non cambiano nulla non si annotano. Le quattro eliminazioni
+  (`eliminaArea`, `eliminaPunto`, `eliminaAreaDedalo` in `dungeonService`, `eliminaMappa` in `mappeService`) passano da qui con nome,
+  contesto e vicini.
+- **Rimettere** (`ripristinaDalCestino`): passi al contrario, in una transazione: D → reinserita (stessa riga già presente: niente;
+  chiave presa da un'altra: 409 `cestino-chiavi-occupate` nel file di gioco, «cambiata-dopo» nelle partite e nelle tabelle derivate
+  `mappa_percorso`/`mappa_alias`); U → colonna per colonna, solo dove la riga ha ancora il valore lasciato dall'eliminazione; I → tolta
+  se è ancora com'era; violazione di chiave esterna → «legame-mancante»; tabella sparita → «non-esiste-piu». Poi la riga
+  dell'elemento deve esserci (409 `cestino-non-ripristinabile`), il servizio del tipo rimette a posto (`registraRipristinoCestino`:
+  posto delle aree e delle voci dai vicini, `postoDaiVicini`; percorsi delle mappe ricalcolati se una riga dell'albero è stata
+  saltata) e le cache di gioco si svuotano. Esito `EsitoRipristinoCestinoDto` (rimesse, saltate per tabella e motivo, partite
+  mancanti).
+- **Elenco e svuotamento**: `elencoCestino` (dal più recente; contenuto netto per tabella con etichette al singolare o al plurale,
+  parte delle partite nessuna/presente/mancante, peso), `eliminaDalCestino`, `svuotaCestino`. Rotte in `server/routes/impostazioni.ts`:
+  `GET /api/impostazioni/cestino`, `POST /api/impostazioni/cestino/:id/ripristina`, `DELETE /api/impostazioni/cestino/:id`,
+  `DELETE /api/impostazioni/cestino`.
+- **Interfaccia**: `src/components/impostazioni/Cestino.tsx` (in `ImpostazioniPage`), parole in `src/utils/cestino.ts` (`NEL_CESTINO`
+  nelle conferme dei sette punti di eliminazione, nomi dei tipi, motivi). Il pacchetto iniziale (`npm run pacchetto`) nasce col
+  cestino vuoto.

@@ -3,7 +3,7 @@
 // Test ImpostazioniPage — il collegamento alla documentazione delle API (Swagger e documento OpenAPI)
 // ============================================================
 //
-// Le sezioni con dati propri (partite, caratteri, immagini, traduzioni, pacchetto, backup) hanno i loro test:
+// Le sezioni con dati propri (partite, caratteri, immagini, traduzioni, cestino, pacchetto, backup) hanno i loro test:
 // qui sono sostituite da segnaposto vuoti, perché interessa solo la sezione della documentazione.
 // ============================================================
 
@@ -18,6 +18,7 @@ vi.mock('../components/impostazioni/ImmaginiCaricate', () => ({ ImmaginiCaricate
 vi.mock('../components/impostazioni/BackupIstanza', () => ({ BackupIstanza: () => null }));
 vi.mock('../components/impostazioni/PacchettoGioco', () => ({ PacchettoGioco: () => null }));
 vi.mock('../components/impostazioni/MieiDati', () => ({ MieiDati: () => null }));
+vi.mock('../components/impostazioni/Cestino', () => ({ Cestino: () => null }));
 
 it('la sezione «Documentazione delle API» apre Swagger e il documento OpenAPI del server in una nuova scheda', () => {
   render(<MemoryRouter><ImpostazioniPage /></MemoryRouter>);

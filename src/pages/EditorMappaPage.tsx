@@ -39,6 +39,7 @@ import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/co
 import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import { ritornoMappe } from '../utils/ritornoMappe';
+import { NEL_CESTINO } from '../utils/cestino';
 import type { DatiAggiornaCopiaPezzo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
 
@@ -286,7 +287,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setConfermaEliminaMappa(false)}>Annulla</button>
             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void esegui(async () => { await eliminaMappa(chiave); navigate(dati.genitore ? `/guida/mappe/${encodeURIComponent(dati.genitore)}/modifica` : '/guida/mappe'); }, 'Mappa eliminata.')} />
           </>}>
-          <p className="m-0 text-[13px]">Gli spilli della mappa vengono eliminati; le mappe figlie ({dati.figli.length}) restano senza genitore. L'immagine di base resta fra le immagini caricate.</p>
+          <p className="m-0 text-[13px]">Gli spilli della mappa vengono eliminati; le mappe figlie ({dati.figli.length}) restano senza genitore. {NEL_CESTINO}</p>
         </Modal>
       )}
       {dati && <NuovaMappaModal key={nuovaMappaAperta ? 'aperta' : 'chiusa'} aperta={nuovaMappaAperta} genitore={dati} albero={albero.dati ?? []} occupato={occupato} onChiudi={() => setNuovaMappaAperta(false)}

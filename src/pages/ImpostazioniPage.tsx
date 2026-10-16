@@ -1,5 +1,5 @@
 // ============================================================
-// ImpostazioniPage — partite, traduzioni, immagini degli Arcani, informazioni
+// ImpostazioniPage — partite, traduzioni, immagini degli Arcani, cestino, informazioni
 // ============================================================
 
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -12,6 +12,7 @@ import { ImmaginiCaricate } from '../components/impostazioni/ImmaginiCaricate';
 import { BackupIstanza } from '../components/impostazioni/BackupIstanza';
 import { PacchettoGioco } from '../components/impostazioni/PacchettoGioco';
 import { MieiDati } from '../components/impostazioni/MieiDati';
+import { Cestino } from '../components/impostazioni/Cestino';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { useAssetStore } from '../stores/assetStore';
@@ -30,7 +31,7 @@ export function ImpostazioniPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <IntestazionePagina titolo="Impostazioni" sottotitolo="Partite, grafica predefinita, caratteri, immagini, traduzioni, pacchetto di gioco, backup della tua istanza e documentazione delle API." />
+      <IntestazionePagina titolo="Impostazioni" sottotitolo="Partite, grafica predefinita, caratteri, immagini, traduzioni, cestino, pacchetto di gioco, backup della tua istanza e documentazione delle API." />
       <GestionePartite />
       <section className="card flex flex-col gap-3">
         <h2 className="m-0 text-[15px] font-semibold">Grafica</h2>
@@ -65,6 +66,7 @@ export function ImpostazioniPage() {
       <ImmaginiCaricate />
       <TraduzioniEditor />
       <MieiDati />
+      <Cestino />
       <PacchettoGioco />
       <BackupIstanza />
       <section className="card flex flex-col gap-3" aria-labelledby="titolo-documentazione-api">

@@ -16,7 +16,8 @@
 // pacchetto diventa una copia dei dati di gioco dell'istanza locale (senza partite: stanno in un
 // altro file), che è il modo in cui le correzioni fatte nell'app diventano dato predefinito. È una fotografia: quello
 // che l'istanza ha tolto resta tolto e quello che ha aggiunto resta aggiunto (decisione dell'utente,
-// 2026-09-12); nessuna sincronizzazione con la guida ricrea spilli o mappe.
+// 2026-09-12); nessuna sincronizzazione con la guida ricrea spilli o mappe. Il cestino dell'istanza (migrazione 104) invece non
+// passa: il pacchetto nasce col cestino vuoto.
 // ============================================================
 
 import fs from 'node:fs';
@@ -57,6 +58,9 @@ try {
   runMigrations(db);
   // le stesse regole sui dati dell'avvio: il pacchetto nasce già a posto, e un'istanza nuova non cambia nulla al primo avvio
   console.log('regole applicate:', JSON.stringify(regoleAllAvvio(db)));
+  // il cestino (104) è dell'istanza da cui viene il pacchetto: le sue eliminazioni, con i registri e le immagini, non diventano dato
+  // predefinito di un'installazione nuova (la parte delle partite sta nel file usa e getta accanto e se ne va con lui)
+  console.log('elementi del cestino tolti:', db.prepare('DELETE FROM main.cestino').run().changes);
   const versione = db.pragma('main.user_version', { simple: true }) as number;
   const tabelle = (db.prepare("SELECT COUNT(*) AS n FROM main.sqlite_master WHERE type = 'table'").get() as { n: number }).n;
   const partite = (db.prepare("SELECT COUNT(*) AS n FROM main.sqlite_master WHERE type = 'table' AND name = 'partita'").get() as { n: number }).n;

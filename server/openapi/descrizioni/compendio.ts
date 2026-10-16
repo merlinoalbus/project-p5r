@@ -310,7 +310,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'DELETE /api/compendio/aree/:chiave': {
     sommario: 'Elimina un\'area della guida, per tutte le partite',
-    descrizione: 'In una transazione se ne vanno i punti dell\'area con quel che le partite ne avevano segnato, gli spilli della guida senza mappa che le appartenevano, i legami con le planimetrie e i riferimenti nei testi della guida; per un dedalo dei Memento anche le sue aree (099) con i timbri delle partite. Le Richieste restano, senza area. Le aree che la seguivano salgono di un posto. Un pacchetto importato dopo la rimette.',
+    descrizione: 'In una transazione se ne vanno i punti dell\'area con quel che le partite ne avevano segnato, gli spilli della guida senza mappa che le appartenevano, i legami con le planimetrie e i riferimenti nei testi della guida; per un dedalo dei Memento anche le sue aree (099) con i timbri delle partite. Le Richieste restano, senza area. Le aree che la seguivano salgono di un posto. Un pacchetto importato dopo la rimette. Dal 2026-10-16 l\'area va nel cestino con tutto quel che l\'eliminazione tocca (partite comprese), e da lì si rimette (`/api/impostazioni/cestino`).',
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'area-non-trovata']],
   },
@@ -376,7 +376,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'DELETE /api/compendio/aree-dedalo/:chiave': {
     sommario: 'Elimina un\'area di un dedalo, per tutte le partite',
-    descrizione: 'Scelta dell\'utente: le voci dell\'area se ne vanno con quel che le partite ne avevano segnato (come eliminando un punto, Enigmi e passi compresi) e i timbri con lei; le Richieste restano nel dedalo da collocare, con il loro stato. Le aree che la seguivano salgono di un posto.',
+    descrizione: 'Scelta dell\'utente: le voci dell\'area se ne vanno con quel che le partite ne avevano segnato (come eliminando un punto, Enigmi e passi compresi) e i timbri con lei; le Richieste restano nel dedalo da collocare, con il loro stato. Le aree che la seguivano salgono di un posto. L\'area va nel cestino con tutto quel che l\'eliminazione tocca, e da lì si rimette (`/api/impostazioni/cestino`).',
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'area-dedalo-non-trovata']],
   },
@@ -394,7 +394,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'DELETE /api/compendio/punti/:chiave': {
     sommario: 'Elimina un punto della guida, per tutte le partite',
-    descrizione: 'Se ne vanno gli stati delle partite, il marcatore e il «raccolto» degli elementi della guida senza mappa che lo citano; i pin delle planimetrie restano con il loro «raccolto» e perdono solo il collegamento. I passi di un Enigma eliminato tornano voci dell\'area, in fondo; eliminando un passo il suo Enigma si riallinea.',
+    descrizione: 'Se ne vanno gli stati delle partite, il marcatore e il «raccolto» degli elementi della guida senza mappa che lo citano; i pin delle planimetrie restano con il loro «raccolto» e perdono solo il collegamento. I passi di un Enigma eliminato tornano voci dell\'area, in fondo; eliminando un passo il suo Enigma si riallinea. La voce va nel cestino con tutto quel che l\'eliminazione tocca, e da lì si rimette (`/api/impostazioni/cestino`).',
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'punto-non-trovato']],
   },

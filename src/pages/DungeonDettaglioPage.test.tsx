@@ -522,6 +522,8 @@ it('dalla scheda si elimina la planimetria, con la conferma dentro la finestra',
   fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
   const conferma = within(finestra.getByRole('alertdialog', { name: 'Conferma eliminazione' }));
   expect(conferma.getByText(/compresi 2 da raccogliere/)).toBeInTheDocument();
+  // dove finisce, e come tornarla indietro (2026-10-16)
+  expect(conferma.getByText(/Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
   // Torre non contiene aree della guida: la conferma non ne parla
   expect(conferma.queryByText(/senza planimetria/)).toBeNull();
   fireEvent.click(conferma.getByRole('button', { name: 'Elimina la planimetria' }));
@@ -727,6 +729,7 @@ it('un’area della guida si elimina dalla sua scheda, dopo una conferma che dic
   fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
   const conferma = within(finestra.getByRole('alertdialog', { name: 'Conferma eliminazione' }));
   expect(conferma.getByText(/per tutte le partite/)).toBeInTheDocument();
+  expect(conferma.getByText(/Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
   getDungeon.mockClear();
   fireEvent.click(conferma.getByRole('button', { name: 'Elimina l’area' }));
   await waitFor(() => expect(eliminaArea).toHaveBeenCalledWith('k-02'));
@@ -744,7 +747,7 @@ it('anche l’area aperta si elimina, dal suo modulo di correzione, e la scheda 
   fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’area/ }));
   const modulo = within(screen.getByRole('form', { name: /Correggi l’area/ }));
   fireEvent.click(modulo.getByRole('button', { name: 'Elimina' }));
-  expect(modulo.getByText(/Se ne va dalla guida per tutte le partite/)).toBeInTheDocument();
+  expect(modulo.getByText(/Se ne va dalla guida per tutte le partite.*Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
   fireEvent.click(modulo.getByRole('button', { name: 'Confermo' }));
   await waitFor(() => expect(eliminaArea).toHaveBeenCalledWith('k-03'));
   // senza il parametro la scheda apre la prima area

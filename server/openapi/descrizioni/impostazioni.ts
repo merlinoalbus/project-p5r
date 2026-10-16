@@ -66,6 +66,29 @@ export const DESCRIZIONI_IMPOSTAZIONI: DescrizioniArea = {
       [400, 'database-troppo-nuovo'], [400, 'ripristino-fallito'],
     ],
   },
+  'GET /api/impostazioni/cestino': {
+    sommario: 'Gli elementi del cestino: aree, voci della guida, planimetrie e aree dei dedali eliminate, dalla più recente',
+    descrizione: 'Ogni eliminazione di un\'area della guida, di una voce, di una planimetria o di un\'area di un dedalo finisce qui con tutto quel che si è portata via (cascate comprese, immagini dei pin e delle mappe comprese, stato nelle partite). Per ogni elemento: tipo, chiave, nome, dove stava (`contesto`), quando, le righe tolte per tabella con il nome per l\'utente (`contenuto`), la parte nelle partite (`nessuna`, `presente`, o `mancante` se il file delle partite è stato sostituito dopo) e il peso del registro in byte.',
+    risposta: 'Elenco di `VoceCestinoDto`',
+  },
+  'POST /api/impostazioni/cestino/:id/ripristina': {
+    sommario: 'Rimette un elemento del cestino com\'era, ed esce dal cestino',
+    descrizione: 'In una transazione riapplica al contrario il registro dell\'eliminazione: le righe tolte tornano, quelle cambiate tornano com\'erano, quelle aggiunte se ne vanno. Quel che è cambiato dopo l\'eliminazione vince: una riga toccata di nuovo resta com\'è, una riga che punta a qualcosa eliminato dopo non torna, e l\'esito le elenca per tabella e motivo (`cambiata-dopo`, `non-esiste-piu`, `legame-mancante`). Una riga del file di gioco con la chiave ormai presa da qualcosa creato dopo blocca tutto (409, niente cambia). Poi l\'ordine delle aree e delle voci vicine si rimette senza doppioni e i percorsi delle mappe si ricalcolano.',
+    risposta: '`EsitoRipristinoCestinoDto` (tipo, chiave, nome, rimesse, saltate, partiteMancanti)',
+    senzaCorpo: true,
+    errori: [[404, 'cestino-non-trovato'], [409, 'cestino-chiavi-occupate'], [409, 'cestino-non-ripristinabile']],
+  },
+  'DELETE /api/impostazioni/cestino/:id': {
+    sommario: 'Toglie per sempre un elemento dal cestino',
+    descrizione: 'Se ne va il registro dell\'eliminazione, nel file di gioco e in quello delle partite: l\'elemento non si potrà più rimettere. I dati di gioco e le partite non cambiano.',
+    risposta: 'Nessun contenuto (204)',
+    errori: [[404, 'cestino-non-trovato']],
+  },
+  'DELETE /api/impostazioni/cestino': {
+    sommario: 'Svuota il cestino',
+    descrizione: 'Toglie per sempre ogni elemento del cestino, comprese le parti delle partite rimaste senza la loro riga nel file di gioco (dopo una sostituzione del pacchetto). I dati di gioco e le partite non cambiano.',
+    risposta: '`{ eliminati }`: quanti elementi c\'erano',
+  },
   'GET /api/impostazioni/istanza/gioco/importazione': {
     sommario: 'A che punto è l\'importazione del pacchetto di gioco, e com\'è finita l\'ultima',
     descrizione: 'Si interroga quando la risposta dell\'importazione non arriva (un proxy può chiudere la richiesta prima che il lavoro finisca). Dice se un\'importazione è in corso, con identificativo, fase (`lettura`, `verifica`, `copia-di-sicurezza`, `sostituzione`, `riapertura`, `controllo`) e ora d\'inizio, e l\'esito dell\'ultima conclusa da quando il server è partito, con l\'esito completo se è riuscita. L\'identificativo cambia a ogni tentativo: confrontandolo con quello letto prima di chiedere l\'importazione si capisce se l\'esito è del proprio tentativo.',

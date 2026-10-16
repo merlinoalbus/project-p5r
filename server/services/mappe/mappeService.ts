@@ -19,6 +19,7 @@ import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './
 import { slug } from '../../../shared/slug.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
+import { conCestino, registraRipristinoCestino } from '../cestinoService.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
@@ -957,10 +958,13 @@ function eliminaImmagineDellaMappa(chiave: string): void {
 /**
  * Elimina una mappa in una transazione: le immagini dei suoi pin e la sua immagine di base (se è solo sua), le figlie
  * diventano radici, i «raccolto» dei suoi pin nel file delle partite; gli spilli cadono in cascata con la riga; poi i percorsi.
+ * Dal 2026-10-16 la mappa va nel cestino (`conCestino`), immagini comprese, e da lì si rimette.
  */
 export function eliminaMappa(chiave: string): void {
-  chiave=rigaMappa(chiave).chiave;
-  getDb().transaction(() => {
+  const r = rigaMappa(chiave);
+  chiave = r.chiave;
+  const genitore = r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as { nome: string } | undefined)?.nome ?? '' : '';
+  conCestino({ tipo: 'mappa', chiave, nome: r.nome, contesto: genitore }, () => getDb().transaction(() => {
     eliminaImmaginiDeiPin('s.mappa_chiave = ?', chiave);
     eliminaImmagineDellaMappa(chiave);
     prepared('UPDATE mappa SET genitore_chiave = NULL WHERE genitore_chiave = ?').run(chiave);
@@ -968,8 +972,15 @@ export function eliminaMappa(chiave: string): void {
     if (colonnaSpillo('uid')) prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
     prepared('DELETE FROM mappa WHERE chiave = ?').run(chiave);
     sincronizzaPercorsiMappe(getDb());
-  })();
+  })());
 }
+// Rimessa dal cestino: il registro riporta già percorsi e nomi di prima com'erano. Se però qualche riga dell'albero delle mappe
+// non è tornata (toccata dopo l'eliminazione: una mappa rinominata o spostata), i percorsi si ricalcolano come dopo ogni modifica
+// dell'albero. Non sempre: il ricalcolo annota come nome di prima ogni percorso corrente, e su un albero già tornato com'era
+// aggiungerebbe solo righe in più.
+registraRipristinoCestino('mappa', (_chiave, _vicini, saltate) => {
+  if (saltate.some((s) => s.tabella === 'mappa' || s.tabella === 'mappa_percorso' || s.tabella === 'mappa_alias')) sincronizzaPercorsiMappe(getDb());
+});
 
 /** Immagine di base nell'istanza (ambito «mappa», chiave = chiave della mappa); dimensioni lette dall'intestazione PNG/JPEG/WEBP/GIF quando possibile. */
 export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer, opz: { eliminaPezzi?: boolean } = {}): MappaDto {

@@ -394,6 +394,18 @@ describe('EditorMappaPage', () => {
     expect(screen.queryByRole('button', { name: /Esporta questo luogo/ })).toBeNull();
   });
 
+  it('«Elimina mappa» chiede conferma dicendo che la mappa finisce nel cestino (2026-10-16), poi la elimina', async () => {
+    api.eliminaMappa.mockResolvedValue(undefined);
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    fireEvent.click(await screen.findByRole('button', { name: /Elimina mappa/ }));
+    const conferma = within(await screen.findByRole('dialog', { name: /^Eliminare la mappa/ }));
+    expect(conferma.getByText(/le mappe figlie \(\d+\) restano senza genitore\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
+    expect(conferma.queryByText(/L.immagine di base resta/)).toBeNull();
+    fireEvent.click(conferma.getByRole('button', { name: 'Elimina' }));
+    await waitFor(() => expect(api.eliminaMappa).toHaveBeenCalledWith('citta-shibuya'));
+  });
+
   it('O9: su una planimetria d\'area «Scarica dalla guida» non c\'è (la rotta delle piante d\'area non esiste più); su un quartiere scarica la sua pianta', async () => {
     api.getMappa.mockResolvedValue({ ...base, chiave: 'kamoshida-02', nome: 'Sala centrale', tipo: 'area', genitore: null, entita: { tipo: 'area', chiave: 'kamoshida-02' } });
     monta();
