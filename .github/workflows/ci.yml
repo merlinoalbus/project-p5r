@@ -1,5 +1,5 @@
 # ============================================================
-# CI — gate di verifica (typecheck + lint + test + audit)
+# CI — gate di verifica (typecheck + lint + audit; i test non girano a ogni push: richiesta dell'utente del 2026-10-18)
 # ============================================================
 # Il gate gira sulle PULL REQUEST e, come workflow riusabile (`workflow_call`), prima della pubblicazione delle immagini
 # (docker-publish.yml, al push su main): un solo gate, scritto una volta, con l'audit anche lì. Prima la pubblicazione ne
@@ -35,8 +35,6 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Tests (Vitest — BE + FE + shared)
-        run: npm test
 
       - name: Audit dipendenze runtime (high+ bloccante)
         run: npm audit --omit=dev --audit-level=high
