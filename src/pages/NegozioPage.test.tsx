@@ -34,7 +34,7 @@ vi.mock('../components/mappe/DoveSiTrova', () => ({
 /** Un articolo dell'Untouchable (disponibile dal 6 giugno, verificato, non acquistato) con chiave, nome, categoria,
  *  destinatario e prezzo dati. */
 const art = (chiave: string, nome: string, categoria: ArticoloDto['categoria'], per: string | null, prezzo: number | null): ArticoloDto => ({ chiave, negozioChiave: 'untouchable', negozioNome: 'Untouchable', nome, nomeIt: null, categoria, per, prezzo, effetto: 'Effetto', statistiche: 'Attacco 50', quantita: null, oggettoFonte: null, oggettoChiave: null, disponibileDal: 'dal 6 giugno', condizione: null, nota: null, verificato: true, acquistato: false });
-const negozio: NegozioDettaglioDto = { chiave: 'untouchable', nome: 'Untouchable', luogo: 'Shibuya, Central Street', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', tipo: 'misto', gestore: 'Munehisa Iwai', confidente: { chiave: 'iwai', nome: 'Munehisa Iwai' }, orariStrutturati: { giorni: [], fasce: ['sera'], chiusoConPioggia: false, nota: null }, orariTesto: 'Solo di sera', sedeChiave: 'shibuya/untouchable', sedeNome: 'Untouchable', programmaPunti: null, note: null, articoli: 3, verificati: 3, articoliElenco: [art('untouchable/kogatana-nera', 'Kogatana nera', 'arma', 'Joker', 1000), art('untouchable/frusta', 'Frusta', 'arma', 'Ann', 1200), art('untouchable/giubbotto', 'Giubbotto', 'protezione', 'tutti', 3000)], acquistati: 0 };
+const negozio: NegozioDettaglioDto = { chiave: 'untouchable', nome: 'Untouchable', luogo: 'Shibuya, Central Street', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', tipo: 'misto', gestore: 'Munehisa Iwai', confidente: { chiave: 'iwai', nome: 'Munehisa Iwai' }, orariStrutturati: { giorni: [], fasce: ['sera'], chiusoConPioggia: false, nota: null }, orariTesto: 'Solo di sera', sedeChiave: 'shibuya/untouchable', sedeNome: 'Untouchable', programmaPunti: null, note: null, articoli: 3, verificati: 3, articoliElenco: [art('untouchable/kogatana-nera', 'Kogatana nera', 'arma', 'Joker', 1000), art('untouchable/frusta', 'Frusta', 'arma', 'Ann', 1200), art('untouchable/giubbotto', 'Giubbotto', 'protezione', 'tutti', 3000)], acquistati: 0, quiz: [] };
 
 describe('NegozioPage', () => {
   beforeEach(() => {
@@ -92,6 +92,25 @@ describe('NegozioPage', () => {
     expect(spunta.closest('label')).toHaveAttribute('title', 'Non ancora acquistabile: mancano dei requisiti');
     expect(screen.getByText('Veste')).toBeInTheDocument();
     expect(screen.getByText('Da verificare')).toHaveAttribute('title', 'grado Nero (spendere oltre 10.000 yen) — Condizione non verificabile dai dati della partita');
+  });
+
+  it('il negozio dove si lavora ha il pulsante della guida del quiz (in oro se oggi c\'è); gli altri no', async () => {
+    usePartitaStore.setState({ attiva: null });
+    const quiz = { giorni: [7, 17, 27], spiegazione: '', domanda: 'Dove?', voci: [{ oggetto: 'Panda Bread', altroNome: 'BW Panda Pan', risposta: 'Vicino alla coda', nota: null }], esiti: [] };
+    getNegozio.mockResolvedValue({ ...negozio, quiz: [{ attivita: 'lavoro-triple-seven', nome: 'Commesso al Triple Seven', quiz, oggi: true }] });
+    render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
+    const pulsante = await screen.findByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven (oggi c’è il quiz)' });
+    expect(pulsante).toHaveClass('chip--oro');
+    fireEvent.click(pulsante);
+    expect(screen.getByRole('dialog', { name: 'Guida del quiz — Commesso al Triple Seven' })).toHaveTextContent('Vicino alla coda');
+  });
+
+  it('un negozio senza lavori con il quiz non ha il pulsante', async () => {
+    usePartitaStore.setState({ attiva: null });
+    getNegozio.mockResolvedValue(negozio);
+    render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: 'Untouchable' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Guida del quiz/ })).toBeNull();
   });
 
   it('senza partita non c\'è interruttore e tutti gli articoli sono elencati', async () => {

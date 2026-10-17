@@ -14,15 +14,16 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
-import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
+import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
 import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { descriviVoceEffetto, dotiDaEffetti, leggiVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
+import { eGiornoDelQuiz, leggiQuiz, type QuizAttivita } from '../../shared/quizAttivita.js';
 
-interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
@@ -65,12 +66,13 @@ function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto
 }
 
 /** Una riga di `attivita` come DTO: Doti dal JSON, effetti dichiarati con le loro frasi, nome della sede risolto da `sedi`,
- *  tracciamento ricondotto a quello del tipo quando il valore è fuori catalogo, e la disponibilità valutata se c'è lo stato della partita. */
+ *  tracciamento ricondotto a quello del tipo quando il valore è fuori catalogo, la guida del quiz (105, null se manca o è
+ *  illeggibile) e la disponibilità valutata se c'è lo stato della partita. */
 const attivitaDto = (r: RigaAttivita, sedi: Map<string, string>, st: StatoDisponibilita | null = null): AttivitaDto => ({
   chiave: r.chiave, nome: r.nome, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: r.costo, sblocco: r.sblocco, sessioni: r.sessioni,
   doti: JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
   pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(r.effetti_json),
-  tracciamento: eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo),
+  tracciamento: eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo), quiz: leggiQuiz(r.quiz_json),
   sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.get(r.sede_chiave) ?? null) : null,
   verificato: r.verificato === 1,
   ...conDisponibilita(r.condizioni_json, st),
@@ -217,6 +219,25 @@ export function filmDvdTutti(partitaId?: number): FilmDvdDto {
     sessioniObiettivo: film.reduce((n, f) => n + f.totaleSessioni, 0),
     visioniRegistrate: film.reduce((n, f) => n + f.progresso, 0),
   };
+}
+
+/** Un'attività con la guida del quiz (migrazione 105): nome, sede e quiz. */
+export interface AttivitaConQuiz { nome: string; sede: string | null; quiz: QuizAttivita }
+
+/** Le attività visibili che hanno una guida del quiz, per chiave: una lettura per richiesta. Le usano la giornata (le voci
+ *  che registrano un turno) e la pagina del negozio (le attività che si svolgono nella sua sede). */
+export function attivitaConQuiz(): Map<string, AttivitaConQuiz> {
+  const out = new Map<string, AttivitaConQuiz>();
+  for (const r of prepared('SELECT chiave, nome, sede_chiave, quiz_json FROM attivita WHERE quiz_json IS NOT NULL AND nascosto = 0 ORDER BY ordine').all() as Array<{ chiave: string; nome: string; sede_chiave: string | null; quiz_json: string }>) {
+    const quiz = leggiQuiz(r.quiz_json);
+    if (quiz) out.set(r.chiave, { nome: r.nome, sede: r.sede_chiave, quiz });
+  }
+  return out;
+}
+
+/** La guida del quiz di un'attività come la portano le voci e i negozi: `oggi` vero se `giorno` ('MM-GG') è uno dei giorni del quiz. */
+export function quizVoceDto(chiave: string, a: AttivitaConQuiz, giorno: string | null): QuizVoceDto {
+  return { attivita: chiave, nome: a.nome, quiz: a.quiz, oggi: giorno !== null && eGiornoDelQuiz(a.quiz, giorno) };
 }
 
 /** Attività, lavori, libri e film; con partita, libri letti e film visti. Le righe nascoste non compaiono. */

@@ -1,5 +1,5 @@
 // ============================================================
-// ModuloAttivita — tipo e fascia a tessere, sede, costo, paga (solo lavori), sessioni, conteggio, dettagli, effetti, condizioni
+// ModuloAttivita — tipo e fascia a tessere, sede, costo, paga (solo lavori), sessioni, conteggio, dettagli, effetti, condizioni, guida del quiz
 // ============================================================
 //
 // I tipi e le fasce sono quelli di `shared/attivita.ts`; la paga in yen è dei lavori (075); che
@@ -12,6 +12,8 @@ import { IconLuna, IconSole } from '../../shared/iconeGuida';
 import { Selettore } from '../../shared/Selettore';
 import { SelettoreIcone, type OpzioneIcone } from '../../shared/SelettoreIcone';
 import { EditorEffetti } from '../EditorEffetti';
+import { EditorQuiz } from '../EditorQuiz';
+import type { QuizAttivita } from '../../../../shared/quizAttivita';
 import { SceltaLuogo } from '../SceltaLuogo';
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA, tracciamentoPerTipo } from '../../../../shared/attivita';
 import type { VoceEffetto } from '../../../../shared/effettiCatalogo';
@@ -32,7 +34,8 @@ const OPZIONI_FASCIA: OpzioneIcone[] = FASCE_ATTIVITA.map((f) => ({ chiave: f.ch
 /**
  * I campi di un'attività (o di un videogioco, col tipo fissato: niente tipo né conteggio, e le sessioni diventano
  * round): nome, tipo, fascia, sede, costo, paga e paga massima solo per i lavori, sessioni, conteggio, dettagli ed
- * effetti. Per le attività contate per volte gli effetti offrono «vale dalla seconda volta in poi» e un aiuto proprio.
+ * effetti. Per le attività contate per volte gli effetti offrono «vale dalla seconda volta in poi» e un aiuto proprio; i lavori
+ * (e un'attività che ne ha già una) hanno la guida del quiz.
  */
 export function ModuloAttivita({ dati, imposta, disabilitato }: PropsModulo) {
   const nomi = useNomiPerEffetti();
@@ -73,6 +76,10 @@ export function ModuloAttivita({ dati, imposta, disabilitato }: PropsModulo) {
         aiuto={testoDi(dati.tracciamento) === 'svolta'
           ? 'Il gioco dà questi punti a ogni turno: l\'app te li ricorda quando registri un turno (dalla spunta della giornata o dal contatore in Partita → Progressi) e li segni tu nella scheda Doti. Il primo turno le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
           : undefined} />
+      {/* la guida del quiz è dei lavori (generica per tutti, scelta dell'utente 2026-10-17); un'altra attività che ne ha già una la tiene */}
+      {(lavoro || !!dati.quiz_json) && (
+        <EditorQuiz quiz={(dati.quiz_json as QuizAttivita | null) ?? null} giorni={testoDi(dati._giorniQuiz)} onCambia={imposta} disabilitato={disabilitato} />
+      )}
     </div>
   );
 }

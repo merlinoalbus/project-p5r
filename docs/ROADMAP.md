@@ -1233,3 +1233,14 @@ L'uscita con Sojiro del 21 maggio (solo punti, nessun aumento di rango) ricordav
 | Voce | Contenuto | Stato |
 |------|-----------|-------|
 | 1 | `incontriService`: incontro semplice senza Dote, passaggio che trasforma l'incontro semplice con la Dote del rango (non doppia per gli incontri della regola di prima), annullamento che la toglie; riquadro «Dote al passaggio di rango» (`DotiIncontro`), descrizioni OpenAPI; test (incontri riscritti e +2, scheda del Confidente), 5 varianti rosse; prova nel browser su una copia della produzione (spunta del 21/05 rifatta: «Incontro con Sojiro Sakura · Sojiro Sakura +15 punti», niente Gentilezza), misure a 1280×689, 768×1024, 375×812 | fatto, APPROVATO al 1° esame; commit `e57fa3ee` su main, pipeline run 39038345841 riuscita (verify, build-backend, build-frontend). Poi, sul 22 maggio (Takemi, passaggio al rango 5 già registrato dalla pagina Confidenti: card «già contato» senza Coraggio, mentre il 18 maggio la Dote era scritta fra gli effetti della voce), scelta dell'utente «Solo dagli effetti della voce»: nessun cambio al codice, la Dote si aggiunge alla voce dalla Guida |
+
+## Richiesta del 17 ottobre 2026 — La guida del quiz del Triple Seven; le finestre non si chiudono dallo sfondo
+
+Il quiz dei codici a barre del lavoro al Triple Seven consultabile in italiano dove il lavoro è previsto; durante il lavoro, la
+segnalazione delle finestre che si chiudevano selezionando del testo. Scelte in `DECISIONI.md` (2026-10-17).
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Dati e API: `shared/quizAttivita.ts`, migrazione 105 (`attivita.quiz_json`, quiz del Triple Seven anche nell'istantanea), schema e campo del catalogo, `AttivitaDto.quiz`, `AzionePercorsoDto.quiz` con `oggi`, OpenAPI; test (condiviso, migrazione con la tabella dell'utente voce per voce, API), 11 varianti rosse | fatto, RIGETTATO al 1° esame (due abbinamenti di nomi dedotti: chiesto all'utente, risposte allineate alla sua tabella; varianti senza modifica intera), APPROVATO al 2° |
+| 2 | Interfaccia: `GuidaQuiz`/`PulsanteGuidaQuiz` (card del diario, pagina Attività, pagina del negozio con `NegozioDettaglioDto.quiz`), `EditorQuiz` nel modulo «Correggi»; `Modal` che non si chiude dallo sfondo («Mai dallo sfondo»); ordine dei modificatori dei chip in `tailwind.css` (l'oro era grigio); test, 10 varianti rosse; verifica nel browser su una copia della produzione a 1280×689, 1366×657, 768×1024, 375×812, uso per uso dei chip oro e grigi | fatto, RIGETTATO al 1° esame (formati mancanti per Attività e Negozio, usi dei chip non verificati), APPROVATO al 2° |
+| 3 | Documenti, commit, push e pipeline | in corso |

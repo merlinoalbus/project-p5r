@@ -23,6 +23,7 @@ import { FILTRO_VUOTO, categoriePresenti, destinatariPresenti, filtraArticoli, t
 import type { ElementoCatalogoDto } from '../types';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { ancoraLuogo } from '../utils/citta';
+import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
 
 /**
  * Scheda di un negozio presa dalla chiave nell'URL: carica il negozio per la partita attiva
@@ -79,6 +80,8 @@ export function NegozioPage() {
               {(n.sedeChiave || n.luogoChiave || n.luogo) && <span><strong className="text-text">Dove:</strong> {n.sedeChiave && n.luogoChiave ? <Link to={`/guida/citta/${n.luogoChiave}#${ancoraLuogo(n.sedeChiave)}`}>{n.sedeNome ?? n.sedeChiave}</Link> : null}{n.sedeChiave && n.luogoChiave ? ' · ' : ''}{n.luogoChiave && <Link to={`/guida/citta/${n.luogoChiave}`}>{n.quartiereNome ?? n.luogoChiave}</Link>}{n.luogo && !n.sedeChiave ? `${n.luogoChiave ? ' · ' : ''}${n.luogo}` : ''}</span>}
               <span><strong className="text-text">Orari:</strong> {n.orariTesto}</span>
               {n.gestore && <span><strong className="text-text">Gestore:</strong> {n.gestore}</span>}
+              {/* la guida del quiz dei lavori che si fanno qui (il Triple Seven): in oro se oggi, nella partita, c'è il quiz */}
+              {n.quiz.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
               {n.programmaPunti && <span><strong className="text-text">Programma punti:</strong> {n.programmaPunti.nome} ({n.programmaPunti.unita}{n.programmaPunti.calcolo === 'rango-cliente' ? ', dal rango cliente' : ', si segnano a mano'})</span>}
             </div>
             {n.disponibilita && n.disponibilita.stato !== 'disponibile' && n.disponibilita.requisiti.length > 0 && (

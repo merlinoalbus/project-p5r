@@ -14,6 +14,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
 import { registraEvento } from './storicoService.js';
+import { attivitaConQuiz, quizVoceDto } from './attivitaService.js';
 import { risolviOggettoCollegato } from './oggettiSelezionabili.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { descriviOrari, leggiOrari, orariComeCondizioni, type OrariNegozio } from '../../shared/orariNegozio.js';
@@ -114,7 +115,9 @@ export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: 
   const riepilogo = riassunto(n, st);
   const articoli = (prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(chiave) as RigaArticolo[]).map((r) => articoloDto(r, acquistati, st));
   const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
-  return { ...riepilogo, ...conteggi, note: n.note, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length };
+  // la guida del quiz dei lavori che si fanno qui (richiesta dell'utente, 2026-10-17: il quiz dei codici a barre al Triple Seven)
+  const quiz = n.sede_chiave ? [...attivitaConQuiz()].filter(([, a]) => a.sede === n.sede_chiave).map(([c, a]) => quizVoceDto(c, a, st?.dataGioco ?? null)) : [];
+  return { ...riepilogo, ...conteggi, note: n.note, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length, quiz };
 }
 
 export interface FiltroArticoli {

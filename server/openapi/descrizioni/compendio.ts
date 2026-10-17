@@ -124,7 +124,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/percorso/:data': {
     sommario: 'Scheda di un giorno della guida con le sue voci',
-    descrizione: '`data` nel formato MM-GG. Trama, vincoli, meteo, allerte meteo del gioco (`allerte`: una per allerta, con le fasce in cui vale e gli effetti), avvisi e fonte del giorno, le voci in ordine (prima di giorno, poi di sera), giorno precedente e successivo. Con `?partita=` le voci dicono se sono fatte, e arrivano il giorno corrente e il meteo della partita per quel giorno.',
+    descrizione: '`data` nel formato MM-GG. Trama, vincoli, meteo, allerte meteo del gioco (`allerte`: una per allerta, con le fasce in cui vale e gli effetti), avvisi e fonte del giorno, le voci in ordine (prima di giorno, poi di sera; una voce che registra un turno di un\'attività con un quiz, o che vi è collegata, ne porta la guida in `quiz`, con `oggi` vero nei giorni del quiz), giorno precedente e successivo. Con `?partita=` le voci dicono se sono fatte, e arrivano il giorno corrente e il meteo della partita per quel giorno.',
     risposta: '`PercorsoGiornoDto`',
     errori: [[404, 'giorno-non-trovato'], PARTITA_NON_TROVATA],
   },
@@ -173,7 +173,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/negozi/:chiave': {
     sommario: 'Scheda di un negozio con i suoi articoli',
-    descrizione: 'Il negozio (se non nascosto) con note e articoli non nascosti nell\'ordine. Un articolo collegato a un oggetto ne legge nome, categoria, effetto, statistiche e destinatario. Con `?partita=` ogni articolo dice se è acquistato e se è disponibile (requisiti del negozio e dell\'articolo valutati sulla partita) e `acquistati` li conta.',
+    descrizione: 'Il negozio (se non nascosto) con note e articoli non nascosti nell\'ordine. Un articolo collegato a un oggetto ne legge nome, categoria, effetto, statistiche e destinatario. Con `?partita=` ogni articolo dice se è acquistato e se è disponibile (requisiti del negozio e dell\'articolo valutati sulla partita) e `acquistati` li conta. `quiz` porta la guida del quiz dei lavori che si fanno nella sede del negozio (il Triple Seven), con `oggi` vero se il giorno corrente della partita è un giorno del quiz.',
     risposta: '`NegozioDettaglioDto`',
     errori: [[404, 'negozio-non-trovato'], PARTITA_NON_TROVATA],
   },
@@ -216,7 +216,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/attivita': {
     sommario: 'Attività, lavori, libri e film',
-    descrizione: 'Le righe non nascoste: attività del tempo libero e lavori separati, libri e film con posizioni ed effetti. Con `?partita=` arrivano letture e avanzamenti della partita, la disponibilità di ogni voce e i conteggi di libri letti e film visti.',
+    descrizione: 'Le righe non nascoste: attività del tempo libero e lavori separati, libri e film con posizioni ed effetti; un\'attività con un quiz ne porta la guida (`quiz`: giorni del mese, domanda, risposta per elemento, premi per esito; il Triple Seven ha quella dei codici a barre). Con `?partita=` arrivano letture e avanzamenti della partita, la disponibilità di ogni voce e i conteggi di libri letti e film visti.',
     risposta: '`AttivitaTutteDto`',
     errori: [PARTITA_NON_TROVATA],
   },

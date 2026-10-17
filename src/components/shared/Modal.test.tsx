@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // ============================================================
-// Test Modal — portal su body, Esc, clic esterno, blocco dello scroll
+// Test Modal — portal su body, Esc e X (lo sfondo non chiude), blocco dello scroll
 // ============================================================
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
@@ -24,18 +24,26 @@ describe('Modal', () => {
     expect(document.body.style.overflow).toBe('hidden');
   });
 
-  it('chiude con Esc, con il clic sull\'overlay e con il pulsante, ripristinando lo scroll', () => {
+  it('chiude con Esc e con il pulsante, ripristinando lo scroll; lo sfondo non chiude mai', () => {
     const onChiudi = vi.fn();
-    const { rerender } = render(<Modal titolo="Prova" aperta onChiudi={onChiudi}>corpo</Modal>);
+    const { rerender } = render(<Modal titolo="Prova" aperta onChiudi={onChiudi}>corpo<input aria-label="campo" defaultValue="testo da selezionare" /></Modal>);
     act(() => { fireEvent.keyDown(window, { key: 'Escape' }); });
     expect(onChiudi).toHaveBeenCalledTimes(1);
-    act(() => { fireEvent.click(document.querySelector('.modal-overlay')!); });
-    expect(onChiudi).toHaveBeenCalledTimes(2);
+    // lo sfondo non chiude (scelta dell'utente, 2026-10-17): né un clic, né una selezione iniziata nel campo e rilasciata
+    // sullo sfondo, che il browser consegna come clic all'antenato comune, cioè proprio lo sfondo
+    const sfondo = document.querySelector('.modal-overlay')!;
+    act(() => { fireEvent.click(sfondo); });
+    act(() => {
+      fireEvent.mouseDown(screen.getByRole('textbox', { name: 'campo' }));
+      fireEvent.mouseUp(sfondo);
+      fireEvent.click(sfondo);
+    });
+    expect(onChiudi).toHaveBeenCalledTimes(1);
     // il clic dentro la finestra non chiude
     act(() => { fireEvent.click(screen.getByRole('dialog')); });
-    expect(onChiudi).toHaveBeenCalledTimes(2);
+    expect(onChiudi).toHaveBeenCalledTimes(1);
     act(() => { screen.getByRole('button', { name: 'Chiudi' }).click(); });
-    expect(onChiudi).toHaveBeenCalledTimes(3);
+    expect(onChiudi).toHaveBeenCalledTimes(2);
 
     rerender(<Modal titolo="Prova" aperta={false} onChiudi={onChiudi}>corpo</Modal>);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

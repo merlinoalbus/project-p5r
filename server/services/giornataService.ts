@@ -23,7 +23,8 @@ import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, t
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
 import { normalizzaEffettiAzione, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
-import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
+import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -72,10 +73,21 @@ export function voceBase(r: RigaVoce): VoceBase {
   };
 }
 
-interface Contesto { fatte: Map<string, EffettiAzioneDto | null>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione }
+interface Contesto { fatte: Map<string, EffettiAzioneDto | null>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz> }
+
+/** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (richiesta dell'utente, 2026-10-17:
+ *  «quando è previsto lavoro al Convenience Store deve essere consultabile la guida»), una volta sola per attività, con
+ *  `oggi` vero se il giorno della voce è uno dei giorni del quiz. */
+function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz']): QuizVoceDto[] {
+  const chiavi = [...v.produce.flatMap((e) => (e.tipo === 'turno' ? [e.attivita] : [])), ...(v.riferimento?.tipo === 'attivita' ? [v.riferimento.chiave] : [])];
+  return [...new Set(chiavi)].flatMap((c) => {
+    const q = quiz.get(c);
+    return q ? [quizVoceDto(c, q, v.giorno)] : [];
+  });
+}
 
 /** La voce per l'interfaccia: i campi della guida più la frase degli effetti, la spunta e i suoi effetti nella partita,
- *  il semaforo (solo per le azioni, e solo se ci sono i Confidenti della partita) e la mappa collegata. */
+ *  il semaforo (solo per le azioni, e solo se ci sono i Confidenti della partita), la mappa collegata e la guida del quiz. */
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const v = voceBase(r);
   const spuntabile = v.genere === 'azione';
@@ -85,6 +97,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce, con le regole della mappa di Tokyo (scelta dell'utente, 2026-10-04)
     atterraggio: v.riferimento?.tipo === 'dungeon' ? atterraggioDelGiorno(v.riferimento.chiave, v.giorno) : null,
+    quiz: quizDellaVoce(v, ctx.quiz),
   };
 }
 
@@ -113,7 +126,7 @@ export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<strin
   const ctx: Contesto = {
     fatte: spuntePartita(partitaId, data),
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
-    nomi: nomiEffetti(),
+    nomi: nomiEffetti(), quiz: attivitaConQuiz(),
   };
   return righeDelGiorno(data).map((r) => voceDto(r, ctx));
 }

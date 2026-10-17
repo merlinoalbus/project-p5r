@@ -18,6 +18,7 @@ import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 import type { MeteoPartita } from './meteoPartita.js';
+import type { QuizAttivita } from './quizAttivita.js';
 import type { Osservazione, Statistiche } from './statistiche.js';
 
 /** Risposta di salute del backend. */
@@ -1140,9 +1141,15 @@ export interface AzionePercorsoDto {
    *  Tokyo (`atterraggioDelGiorno`, 2026-10-04); il cartellino del Palazzo porta lì. Null senza Palazzo o senza una regola che
    *  copra il giorno (allora porta alla scheda del Palazzo). Assente vale come null. */
   atterraggio?: { mappa: string; spillo: number | null } | null;
+  /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (migrazione 105), con `oggi` vero
+   *  se il giorno della voce è uno dei giorni del quiz. Assente o vuoto: nessun quiz. */
+  quiz?: QuizVoceDto[];
   /** Solo nella risposta di una spunta: era l'ultima attività del giorno corrente e la partita è passata al giorno dopo. */
   giornoAvanzato?: GiornoAvanzatoDto;
 }
+
+/** La guida del quiz di un'attività come la porta una voce della giornata. */
+export interface QuizVoceDto { attivita: string; nome: string; quiz: QuizAttivita; oggi: boolean }
 
 /** Un elemento che un'azione può collegare o nominare negli effetti. */
 export interface VoceElencoAzione { chiave: string; nome: string; dettaglio?: string }
@@ -1336,6 +1343,9 @@ export interface NegozioDettaglioDto extends NegozioRiassuntoDto {
   note: string | null;
   articoliElenco: ArticoloDto[];
   acquistati: number;
+  /** La guida del quiz delle attività che si svolgono nella sede del negozio (migrazione 105: il lavoro al Triple Seven), con
+   *  `oggi` vero se il giorno corrente della partita è uno dei giorni del quiz. Vuoto senza sede o senza quiz. */
+  quiz: QuizVoceDto[];
 }
 
 export interface RicercaArticoliDto {
@@ -1477,6 +1487,8 @@ export interface AttivitaDto {
   effettiTesto: string[];
   /** Come la partita conta l'attività: per niente, per volte svolte o per sessioni. */
   tracciamento: 'nessuno' | 'svolta' | 'sessioni';
+  /** La guida del quiz (migrazione 105: i codici a barre del Triple Seven); null se l'attività non ne ha. */
+  quiz: QuizAttivita | null;
   /** Il luogo della città dove si svolge (migrazione 072). */
   sedeChiave: string | null;
   sedeNome: string | null;

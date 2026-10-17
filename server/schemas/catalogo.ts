@@ -11,6 +11,7 @@ import { FASCE_ORARIO, GIORNI_SETTIMANA_CHIAVI } from '../../shared/orariNegozio
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shared/attivita.js';
 import { normalizzaEffettoOggetto, type EffettoOggetto } from '../../shared/effettiOggetto.js';
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
+import { LIMITI_QUIZ, normalizzaQuiz } from '../../shared/quizAttivita.js';
 
 /** Le chiavi di un elenco di costanti, nella forma di tupla non vuota che `z.enum` richiede. */
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
@@ -164,6 +165,16 @@ const datiFilmBase = z.object({
 const datiFilm = datiFilmBase.superRefine(rifinisciFilm);
 const datiFilmParziale = datiFilmBase.partial().superRefine(rifinisciFilm);
 
+/** La guida del quiz di un'attivita' (`shared/quizAttivita.ts`, migrazione 105): strutturata, con i limiti condivisi
+ *  col modulo; si salva normalizzata (righe vuote tolte), e un quiz che resta senza domanda ne' elementi vale «nessun quiz». */
+const quizJson = z.object({
+  giorni: z.array(z.number().int().min(1).max(31)).max(31).default([]),
+  spiegazione: testo(LIMITI_QUIZ.testo).default(''),
+  domanda: testo(LIMITI_QUIZ.domanda).default(''),
+  voci: z.array(z.object({ oggetto: testo(LIMITI_QUIZ.nome), altroNome: testo(LIMITI_QUIZ.nome).nullable().default(null), risposta: testo(LIMITI_QUIZ.risposta), nota: testo(LIMITI_QUIZ.nota).nullable().default(null) })).max(LIMITI_QUIZ.voci).default([]),
+  esiti: z.array(z.object({ esito: testo(LIMITI_QUIZ.esito), premio: testo(LIMITI_QUIZ.premio) })).max(LIMITI_QUIZ.esiti).default([]),
+}).nullable().transform((v) => { const q = normalizzaQuiz(v); return q ? JSON.stringify(q) : null; }).optional();
+
 /** Campi di un'attivita' (compresi lavori e videogiochi) scrivibili dall'utente. */
 const datiAttivitaBase = z.object({
   verificato: z.boolean().optional(),
@@ -194,8 +205,9 @@ const datiAttivitaBase = z.object({
   regole: testo(2000).default(''),
   premi: testo(2000).nullable().optional(),
   paga: testo(400).nullable().optional(),
+  quiz_json: quizJson,
 });
-const datiAttivita = datiAttivitaBase.superRefine(rifinisciAttivita);
+const datiAttivita =datiAttivitaBase.superRefine(rifinisciAttivita);
 const datiAttivitaParziale = datiAttivitaBase.partial().superRefine(rifinisciAttivita);
 
 /** Campi di un luogo della città scrivibili dall'utente (migrazione 071). */

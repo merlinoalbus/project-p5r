@@ -220,7 +220,7 @@
   .btn-visivo--colonna .btn-visivo__testo { align-items: center; }
   .btn-visivo--colonna .btn-visivo__titolo { font-size: 12px; white-space: normal; line-height: 1.05; }
   .btn-visivo--colonna .btn-visivo__dettaglio { white-space: normal; line-height: 1.15; }
-  .chip--icona { gap: 6px; }
+  /* `.chip--icona` sta dopo `.chip` (più sotto), come gli altri modificatori del chip */
 
   /* Le schede della Partita: prima l'immagine, poi la parola.
      Erano pastiglie di testo con un'iconcina da 16 px accanto e, messe in fila per dieci, si
@@ -649,8 +649,7 @@
   .azione--bloccata { border-left-color: var(--color-text-muted); color: var(--color-text-secondary); }
   .azione--bloccata > div > span:first-child { color: var(--color-text-muted); }
   .azione--evidenziata { outline: 1px solid var(--color-primary); outline-offset: -1px; }
-  .chip--oro { --chip-sfondo: color-mix(in srgb, #f5c542 22%, var(--color-bg-secondary)); --chip-bordo: #f5c542; color: #f5c542; }
-  .chip--bloccata { --chip-sfondo: color-mix(in srgb, var(--color-text-muted) 18%, var(--color-bg-secondary)); --chip-bordo: var(--color-text-muted); color: var(--color-text-secondary); }
+  /* `.chip--oro` e `.chip--bloccata` stanno dopo `.chip` (più sotto): con la stessa specificità vince la regola che viene dopo */
   /* ---- Editor delle mappe (13.3) ---- */
   .visore-mappa--editor .visore-mappa__barra { background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-secondary)); border-bottom-color: var(--color-primary); }
   .editor-mappa__targhetta { font-family: var(--font-display); font-size: 17px; text-transform: uppercase; letter-spacing: .04em; background: var(--color-primary); color: var(--color-text-on-primary); padding: 2px 10px; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
@@ -1008,6 +1007,12 @@
     --chip-bordo: var(--color-primary);
     color: var(--color-primary);
   }
+  /* oro (azioni consigliate, scadenze, «Oggi c'è il quiz») e grigio (azioni bloccate, 12.4): stavano prima di `.chip`, che con la
+     stessa specificità ne riscriveva colore e variabili, e uscivano grigi come un chip qualunque (trovato il 2026-10-17) */
+  .chip--oro { --chip-sfondo: color-mix(in srgb, #f5c542 22%, var(--color-bg-secondary)); --chip-bordo: #f5c542; color: #f5c542; }
+  .chip--bloccata { --chip-sfondo: color-mix(in srgb, var(--color-text-muted) 18%, var(--color-bg-secondary)); --chip-bordo: var(--color-text-muted); color: var(--color-text-secondary); }
+  /* il chip con l'icona («Sulla mappa»): 6 px fra icona e testo, che `.chip` (4 px) riscriveva quando stava prima */
+  .chip--icona { gap: 6px; }
   /* ---- Momento della giornata e meteo (Partita → Oggi): una riga sola ----
      «Giorno», «Sera», un separatore e le quattro icone del meteo della fascia attiva (44 px, 2 px fra l'una e l'altra:
      182 px): ~300 px in tutto, dentro la colonna più stretta (325 px, la Home sul tablet a 768 px); se mai non ci

@@ -5,7 +5,7 @@
 // Test AttivitaPage — attività e lavori con i valori (sede, paga, effetti); libri e film hanno pagine proprie
 // ============================================================
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AttivitaPage } from './AttivitaPage';
@@ -22,7 +22,7 @@ vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ chiave }: { 
 const att = (chiave: string, nome: string, tipo: AttivitaDto['tipo'], dote: 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia', extra: Partial<AttivitaDto> = {}): AttivitaDto => ({
   chiave, nome, tipo, luogo: 'Kichijoji, Penguin Sniper', luogoChiave: 'kichijoji', fascia: 'sera', costo: 800, sblocco: '5 giugno', sessioni: null, doti: [], altriEffetti: null, regole: 'Regole.', premi: null,
   pagaYen: null, pagaMassima: null, dettagli: 'Come funziona: tre freccette a turno.', effetti: [{ effetto: { famiglia: 'dote', dote, note: 1 }, testo: `${dote[0].toUpperCase()}${dote.slice(1)} ♪` }], effettiTesto: [`${dote[0].toUpperCase()}${dote.slice(1)} ♪`],
-  tracciamento: 'nessuno', sedeChiave: 'kichijoji/penguin-sniper', sedeNome: 'Penguin Sniper', paga: null, verificato: true, condizioni: null, disponibilita: null, ...extra,
+  tracciamento: 'nessuno', quiz: null, sedeChiave: 'kichijoji/penguin-sniper', sedeNome: 'Penguin Sniper', paga: null, verificato: true, condizioni: null, disponibilita: null, ...extra,
 });
 const dati: AttivitaTutteDto = {
   attivita: [att('freccette', 'Freccette', 'mini-gioco', 'perizia'), att('bagno', 'Bagno pubblico', 'altro', 'fascino', { sedeChiave: null, sedeNome: null })],
@@ -54,6 +54,23 @@ describe('AttivitaPage', () => {
     expect(screen.getByText(/3500 ¥ a turno \(fino a 7400 ¥\)/)).toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: 'Libri' })).toBeNull();
     expect(screen.queryByRole('tab', { name: 'Film e DVD' })).toBeNull();
+  });
+
+  it('un lavoro con il quiz ha il pulsante della guida, in oro se nella partita è un giorno del quiz; gli altri no', async () => {
+    const quiz = { giorni: [7, 17, 27], spiegazione: '', domanda: 'Dove?', voci: [{ oggetto: 'Zebramen', altroNome: 'Zebra Ramen', risposta: 'Vicino alle informazioni sulla zebra', nota: null }], esiti: [] };
+    usePartitaStore.setState({ attiva: { id: 5, nome: 'Prova', dataGioco: '05-17' } as PartitaDto });
+    getAttivita.mockResolvedValue({ ...dati, lavori: [{ ...dati.lavori[0], quiz }] });
+    render(<MemoryRouter initialEntries={['/guida/attivita?scheda=lavori']}><AttivitaPage /></MemoryRouter>);
+    const pulsante = await screen.findByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven (oggi c’è il quiz)' });
+    expect(pulsante).toHaveClass('chip--oro');
+    fireEvent.click(pulsante);
+    expect(screen.getByRole('dialog', { name: 'Guida del quiz — Commesso al Triple Seven' })).toHaveTextContent('Vicino alle informazioni sulla zebra');
+    fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }));
+    // un giorno senza quiz: il pulsante resta, non in oro
+    act(() => usePartitaStore.setState({ attiva: { id: 5, nome: 'Prova', dataGioco: '05-18' } as PartitaDto }));
+    expect(screen.getByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven' })).toHaveClass('chip--attivo');
+    fireEvent.click(screen.getByRole('tab', { name: 'Attività' }));
+    expect(screen.queryByRole('button', { name: /Guida del quiz/ })).toBeNull();
   });
 
   it('aprendo una scheda mostra i dettagli come testo unico', async () => {

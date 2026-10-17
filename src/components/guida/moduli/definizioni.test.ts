@@ -75,6 +75,20 @@ describe('attività e videogioco', () => {
     expect(def.attivita.prepara({ ...base, nome: 'A', tipo: 'studio', paga_yen: 100 })).toMatchObject({ paga_yen: null, paga_massima: null });
     expect(def.attivita.prepara({ ...base, nome: 'A', tipo: 'lavoro', paga_yen: 3500, paga_massima: 7400, tracciamento: 'svolta' })).toMatchObject({ paga_yen: 3500, paga_massima: 7400, tracciamento: 'svolta' });
   });
+  it('la guida del quiz: si legge dalla riga con i giorni come testo, si salva con i giorni scritti a mano; giorni sbagliati non si salvano', () => {
+    const quiz = { giorni: [7, 17, 27], spiegazione: 'S', domanda: 'D?', voci: [{ oggetto: 'A', altroNome: 'B', risposta: 'R', nota: null }], esiti: [{ esito: 'E', premio: 'P' }] };
+    const d = def.attivita.iniziali(riga('attivita', { nome: 'Lavoro', tipo: 'lavoro', quiz_json: JSON.stringify(quiz) }));
+    expect(d).toMatchObject({ quiz_json: quiz, _giorniQuiz: '7, 17, 27' });
+    expect(def.attivita.valido(d)).toBe(true);
+    expect(def.attivita.prepara({ ...d, _giorniQuiz: '27 3' }).quiz_json).toEqual({ ...quiz, giorni: [3, 27] });
+    expect(def.attivita.prepara(d)).not.toHaveProperty('_giorniQuiz');
+    expect(def.attivita.valido({ ...d, _giorniQuiz: '7, 40' })).toBe(false);
+    // senza guida: null, e i giorni non contano
+    const senza = def.attivita.iniziali(riga('attivita', { nome: 'Studio', tipo: 'studio', quiz_json: null }));
+    expect(senza).toMatchObject({ quiz_json: null, _giorniQuiz: '' });
+    expect(def.attivita.valido({ ...senza, _giorniQuiz: 'x' })).toBe(true);
+    expect(def.attivita.prepara(senza).quiz_json).toBeNull();
+  });
   it('il videogioco ha il tipo fissato, un round almeno e il conteggio per sessioni', () => {
     const d = def.videogioco.iniziali(null);
     expect(d).toMatchObject({ tipo: 'videogioco', sessioni: 1, _tipoFisso: 'videogioco' });

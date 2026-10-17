@@ -1550,3 +1550,22 @@ Impostazioni → Cestino.
 - **Interfaccia**: `src/components/impostazioni/Cestino.tsx` (in `ImpostazioniPage`), parole in `src/utils/cestino.ts` (`NEL_CESTINO`
   nelle conferme dei sette punti di eliminazione, nomi dei tipi, motivi). Il pacchetto iniziale (`npm run pacchetto`) nasce col
   cestino vuoto.
+
+## La guida del quiz delle attività (2026-10-17)
+
+- **Dato**: `attivita.quiz_json` (migrazione 105), forma e regole in `shared/quizAttivita.ts` (`QuizAttivita`: `giorni` del mese,
+  `spiegazione`, `domanda`, `voci` con `oggetto`/`altroNome`/`risposta`/`nota`, `esiti` con `esito`/`premio`; `LIMITI_QUIZ`,
+  `normalizzaQuiz`, `leggiQuiz`, `eGiornoDelQuiz`, `leggiGiorniQuiz`). La 105 scrive il quiz dei codici a barre del Triple Seven
+  (`QUIZ_TRIPLE_SEVEN`) solo dove manca, anche nell'istantanea `seed_json` di una riga corretta. Campo scrivibile del catalogo
+  (`CAMPI.attivita`, schema zod strutturato e normalizzato), quindi corretto, ripristinato e portato dai pacchetti come gli altri.
+- **Letture**: `AttivitaDto.quiz`; `attivitaService.attivitaConQuiz()` (attività visibili con un quiz) e `quizVoceDto()` danno
+  `QuizVoceDto` (`attivita`, `nome`, `quiz`, `oggi`). `AzionePercorsoDto.quiz` (giornata): le attività di cui la voce registra un
+  turno o a cui è collegata, `oggi` dal giorno della voce. `NegozioDettaglioDto.quiz`: i lavori con la stessa `sede_chiave` del negozio,
+  `oggi` dal giorno corrente della partita.
+- **Interfaccia**: `src/components/guida/GuidaQuiz.tsx` (`GuidaQuiz`: quando, come funziona, domanda, risposte con l'altro nome e la
+  nota sempre visibile, ricerca da 7 elementi in su, premi; `PulsanteGuidaQuiz`: cartellino che apre la finestra, `chip--oro` nei
+  giorni del quiz) nei cartellini della voce (`PartiAzione`), nella carta del lavoro (`AttivitaPage`, oro dal giorno della partita
+  attiva) e nella pagina del negozio. Modifica in `src/components/guida/EditorQuiz.tsx` dentro `ModuloAttivita` (lavori, o attività
+  che ne hanno già uno), giorni scritti a mano nel campo temporaneo `_giorniQuiz` (`definizioni.ts`), «Come funziona» alto quanto il
+  testo (nessuno scorrimento annidato).
+- **Finestre**: `Modal` si chiude solo con la X o con Esc; lo sfondo non chiude (2026-10-17, vedi `DECISIONI.md`).

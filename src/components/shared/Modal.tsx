@@ -1,6 +1,11 @@
 // ============================================================
-// Modal — finestra di dialogo, chiusura con Esc e clic esterno, fuoco tenuto dentro la finestra
+// Modal — finestra di dialogo, chiusura con Esc o con la X, fuoco tenuto dentro la finestra
 // ============================================================
+//
+// Lo sfondo non chiude (segnalazione e scelta dell'utente, 2026-10-17: «a volte quando con il mouse seleziono del testo
+// nelle aree di testo o caselle di testo scompare la modale (annullando tutte le modifiche in essa contenute)»). Una
+// selezione premuta in un campo e rilasciata fuori dalla finestra arriva come clic all'antenato comune, cioè lo sfondo,
+// che chiudeva la finestra e perdeva le modifiche. Si chiude solo con la X ed Esc.
 //
 // Renderizzata in un portal su <body>: così resta sopra a tutto anche quando il componente che la apre
 // vive dentro un contenitore con opacity/transform/overflow (che creano un contesto di sovrapposizione
@@ -117,7 +122,7 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga }: Mod
 
   if (!aperta) return null;
   return createPortal(
-    <div className="modal-overlay" onClick={onChiudi} role="presentation">
+    <div className="modal-overlay" role="presentation">
       <div
         ref={finestra}
         className="modal-content"
@@ -127,7 +132,6 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga }: Mod
         aria-label={titolo}
         tabIndex={-1}
         onKeyDown={tieniIlFuoco}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <h2 className="m-0 text-[17px] font-semibold">{titolo}</h2>

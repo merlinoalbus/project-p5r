@@ -17,9 +17,10 @@ import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconaSpillo } from '../mappe/IconaSpillo';
+import { PulsanteGuidaQuiz } from './GuidaQuiz';
 
 /** Ciò che i cartellini di una riga d'azione leggono. */
-export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio'>;
+export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -36,7 +37,7 @@ interface PropsCartellini {
   onApriMappa?: (mappa: { chiave: string; spilloId: number | null }) => void;
 }
 
-/** Tipo, collegamento, «Sulla mappa», stato nella partita, rango atteso, note, effetti dichiarati o applicati. */
+/** Tipo, collegamento, «Sulla mappa», la guida del quiz dei lavori, stato nella partita, rango atteso, note, effetti dichiarati o applicati. */
 export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartellini) {
   const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
@@ -53,6 +54,8 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
           <IconaSpillo tipo="passaggio" dimensione={14} />Sulla mappa
         </button>
       )}
+      {/* la guida del quiz del lavoro (il quiz dei codici a barre al Triple Seven), consultabile da ogni turno: in oro nei giorni del quiz */}
+      {a.quiz?.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
       {stato?.tipo === 'consigliata' && <span className="chip chip--oro text-[11px]" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
       {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata text-[11px]" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
       {stato?.tipo === 'neutra' && stato.motivo && <span className="text-[12px] text-text-muted">{stato.motivo}</span>}

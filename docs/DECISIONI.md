@@ -1892,3 +1892,34 @@ volte un passaggio nello stesso momento) con `doti_json` vuoto; un passaggio che
 scrive la Dote del rango (`giaContato` falso), salvo un incontro della regola di prima che l'aveva già (niente Dote doppia);
 togliendo la spunta la riga torna semplice e perde la Dote del passaggio. Il riquadro della scheda si chiama «Dote al passaggio
 di rango»; nessuna migrazione (i dati e la tabella `confidente_dote_incontro` restano).
+
+## 2026-10-17 — La guida del quiz dei lavori: il quiz dei codici a barre del Triple Seven
+
+Richiesta dell'utente: «mancava nel post job al triple seven questo: [la tabella inglese «Where is the position of the …
+barcode?» con 12 prodotti] … mi serve che integri questo nella guida (quando è previsto lavoro al COnvenience Store deve essere
+consultabile la guida (in italiano)». Scelte dell'utente (AskUserQuestion):
+- struttura **«Generica per tutti i lavori»**: `attivita.quiz_json` (migrazione 105, `shared/quizAttivita.ts`) con giorni del mese,
+  spiegazione, domanda, risposte (nome, altro nome, risposta, nota) e premi per esito; oggi riempita solo per il Triple Seven, le
+  altre si scrivono dal modulo «Correggi»;
+- nomi **«Entrambi i nomi»**: il nome della guida italiana (allgamestaff) e quello della lista dell'utente, risposta in italiano;
+- le due voci il cui abbinamento non è certo (Boy Chance, Tokyo Food Tour ↔ «Black Box»/«Shonen Trip»: le posizioni reggono entrambi
+  gli abbinamenti) **«Risposta dalla tua lista, abbinamento segnato "incerto"»**: nome e risposta della lista, i due nomi italiani
+  possibili, la nota sempre visibile;
+- dove **«Card + Attività + Negozio»** (la prima risposta aveva spuntato anche «Solo nella card del diario»; chiarito con una seconda
+  domanda): il cartellino «Guida del quiz» sulle voci che registrano un turno del lavoro (o vi sono collegate), sulla carta del
+  lavoro in «Attività» e nella pagina del negozio della stessa sede; in oro («Oggi c'è il quiz · Guida») nei giorni del quiz.
+
+Le risposte seguono la tabella dell'utente tradotta senza perdere nulla; i premi sono quelli della guida italiana (7.400 ¥ e 3 punti
+Fascino al primo tentativo, 5.800 ¥ e 2 al secondo, 3.500 ¥ e 2 con due errori). Le Doti restano a mano: i premi sono testo.
+
+## 2026-10-17 — Le finestre non si chiudono più dallo sfondo
+
+Segnalazione dell'utente: «a volte quando con il mouse seleziono del testo nelle aree di testo o caselle di testo scompare la modale
+(annullando tutte le modifiche in essa contenute)». Causa: una selezione premuta in un campo e rilasciata fuori dalla finestra arriva
+come clic all'antenato comune, lo sfondo, che chiudeva (`Modal`). Scelta dell'utente: **«Mai dallo sfondo»** — tutte le finestre si
+chiudono solo con la X o con Esc.
+
+Correzione tecnica trovata nella stessa verifica (non una scelta dell'utente): `.chip--oro`, `.chip--bloccata` e `.chip--icona`
+stavano in `tailwind.css` prima di `.chip`, che a parità di specificità li riscriveva: i chip «oro» («Consigliata», «Scadenza», il
+rango del prossimo passaggio, «Oggi c'è il quiz») e quelli «bloccati» uscivano grigi come un chip qualunque. Spostati dopo `.chip`;
+verificato uso per uso.

@@ -33,6 +33,8 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { formattaYen, haDote, pagaTesto } from '../utils/letture';
+import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
+import { eGiornoDelQuiz } from '../../shared/quizAttivita';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -46,14 +48,16 @@ function Effetti({ testi }: { testi: string[] }) {
 /**
  * La carta di un'attività o di un lavoro: figura (o icona del tipo), intestazione cliccabile che
  * apre e chiude i dettagli (tipo, fascia, effetti, disponibilità, suggerimento, dato non
- * verificato), riga con sede collegata al quartiere, mappa, costo e paga. Aperta mostra i
- * dettagli, la mappa se è quella aperta nella pagina, il comando per mostrarla o nasconderla e
+ * verificato), riga con sede collegata al quartiere, mappa, costo, paga e la guida del quiz (in oro nei giorni del quiz della
+ * partita). Aperta mostra i dettagli, la mappa se è quella aperta nella pagina, il comando per mostrarla o nasconderla e
  * la correzione della voce (che ricarica tramite `onCambiata`).
  */
 function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onCambiata: () => void; mappaAperta: boolean; onMappa: () => void }) {
   const [aperta, setAperta] = useState(false);
   const sugg = useSuggerimenti();
   const paga = pagaTesto(a.pagaYen, a.pagaMassima);
+  // il giorno corrente della partita accende «Oggi c'è il quiz» sul pulsante della guida
+  const giorno = usePartitaStore((s) => s.attiva?.dataGioco ?? null);
   return (
     <li className={`card flex gap-3 text-[13px] ${classiSuggerito(sugg.evidenziato('attivita', a.chiave))}`}>
       {/* La figura dell'attività; finché l'illustrazione non c'è resta l'icona del tipo. */}
@@ -76,6 +80,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
         <CollegamentoMappa tipo="attivita" chiave={a.chiave} compatto />
         {a.costo !== null && a.costo > 0 && <span><strong className="text-text">Costo:</strong> {formattaYen(a.costo)}</span>}
         {paga && <span><strong className="text-text">Paga:</strong> {paga}</span>}
+        {a.quiz && <PulsanteGuidaQuiz voce={{ attivita: a.chiave, nome: a.nome, quiz: a.quiz, oggi: giorno !== null && eGiornoDelQuiz(a.quiz, giorno) }} />}
       </div>
       {aperta && (
         <div className="flex flex-col gap-1">

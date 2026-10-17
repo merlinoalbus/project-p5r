@@ -6,6 +6,7 @@ import { ORARI_SEMPRE, normalizzaOrari } from '../../../../shared/orariNegozio';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../../../shared/effettiCatalogo';
 import { descriviEffetto, type EffettoOggetto } from '../../../../shared/effettiOggetto';
 import { tracciamentoPerTipo } from '../../../../shared/attivita';
+import { leggiGiorniQuiz, normalizzaQuiz, type QuizAttivita } from '../../../../shared/quizAttivita';
 import type { OggettoSelezionabileDto, TipoCatalogo } from '../../../types';
 import { jsonDi, numeroDi, senzaTemporanei, testoDi, testoOnull, verificatoDi, type Dati, type DefinizioneModulo } from './base';
 
@@ -98,7 +99,8 @@ export const film: DefinizioneModulo = {
 /**
  * La definizione del modulo delle attività; con `tipoFisso` = 'videogioco' il tipo resta fissato (segnato nel campo
  * temporaneo `_tipoFisso`), le sessioni partono da 1 e devono essere almeno 1, e il conteggio salvato è per sessioni.
- * Paga e paga massima si salvano solo per i lavori; il conteggio mancante si deduce dal tipo.
+ * Paga e paga massima si salvano solo per i lavori; il conteggio mancante si deduce dal tipo. La guida del quiz (105) si
+ * modifica con i giorni scritti a mano (campo temporaneo `_giorniQuiz`): salvabile solo se sono giorni del mese.
  */
 function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
   return {
@@ -106,6 +108,7 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
     conVerificato: true,
     iniziali: (e) => {
       const tipo = tipoFisso ?? (testoDi(e?.dati.tipo) || 'altro');
+      const quiz = normalizzaQuiz(jsonDi<unknown>(e?.dati.quiz_json, null));
       return {
         nome: testoDi(e?.dati.nome), tipo, fascia: testoDi(e?.dati.fascia) || 'entrambe',
         sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
@@ -113,15 +116,24 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         sessioni: numeroDi(e?.dati.sessioni) ?? (tipo === 'videogioco' ? 1 : null),
         tracciamento: testoDi(e?.dati.tracciamento) || tracciamentoPerTipo(tipo),
         dettagli: testoDi(e?.dati.dettagli), effetti_json: normalizzaVociEffetto(jsonDi(e?.dati.effetti_json, [])),
+        // la guida del quiz (105) e i suoi giorni come testo da scrivere a mano («7, 17, 27»)
+        quiz_json: quiz, _giorniQuiz: quiz ? quiz.giorni.join(', ') : '',
         verificato: verificatoDi(e), _tipoFisso: tipoFisso ?? null,
       };
     },
-    valido: (d) => testoDi(d.nome).trim().length > 0 && (d.tipo !== 'videogioco' || (numeroDi(d.sessioni) ?? 0) >= 1),
-    prepara: (d) => ({
-      ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), costo: numeroDi(d.costo), sessioni: numeroDi(d.sessioni), dettagli: testoOnull(d.dettagli),
-      paga_yen: d.tipo === 'lavoro' ? numeroDi(d.paga_yen) : null, paga_massima: d.tipo === 'lavoro' ? numeroDi(d.paga_massima) : null,
-      tracciamento: d.tipo === 'videogioco' ? 'sessioni' : testoDi(d.tracciamento) || tracciamentoPerTipo(testoDi(d.tipo)),
-    }),
+    // con la guida del quiz i giorni devono essere giorni del mese
+    valido: (d) => testoDi(d.nome).trim().length > 0 && (d.tipo !== 'videogioco' || (numeroDi(d.sessioni) ?? 0) >= 1)
+      && (!d.quiz_json || leggiGiorniQuiz(testoDi(d._giorniQuiz)) !== null),
+    prepara: (d) => {
+      const quiz = d.quiz_json as QuizAttivita | null;
+      return {
+        ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), costo: numeroDi(d.costo), sessioni: numeroDi(d.sessioni), dettagli: testoOnull(d.dettagli),
+        paga_yen: d.tipo === 'lavoro' ? numeroDi(d.paga_yen) : null, paga_massima: d.tipo === 'lavoro' ? numeroDi(d.paga_massima) : null,
+        tracciamento: d.tipo === 'videogioco' ? 'sessioni' : testoDi(d.tracciamento) || tracciamentoPerTipo(testoDi(d.tipo)),
+        // righe vuote e spazi li toglie il server (normalizzaQuiz); un quiz senza domanda né elementi vale «nessun quiz»
+        quiz_json: quiz ? { ...quiz, giorni: leggiGiorniQuiz(testoDi(d._giorniQuiz)) ?? [] } : null,
+      };
+    },
   };
 }
 export const attivita = attivitaCon();
