@@ -96,6 +96,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
    *  loro sezione in cima all'area (`PersoneDellArea`), con la Persona scelta dal compendio. */
   const tipiAmmessi: PuntoInteresseDto['tipo'][] = areaDedalo ? ['trama'] : TIPI.filter((t) => t !== 'trama');
   const [filtro, setFiltro] = useState<Set<PuntoInteresseDto['tipo']>>(new Set());
+  /** I filtri per tipo si aprono a richiesta (2026-10-18, «Riga unica ripiegabile»): chiusi, sono una riga sola. */
+  const [filtriAperti, setFiltriAperti] = useState(false);
   const [mostraGestiti, setMostraGestiti] = useState(false);
   const [selezionato, setSelezionato] = useState<string | null>(null);
   /** Il modulo della voce nuova: in fondo all'area, o in fondo ai passi di un Enigma (`contenitore`, 095). */
@@ -371,15 +373,29 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             : 'Una voce collegata ai pin ha il loro stato; le altre si segnano qui e non contano nella percentuale, che misura le planimetrie.'}
         </p>
         {area.punti.length > 0 && (gestitiArea > 0 || !areaDedalo) && (
-          <div className="flex flex-wrap items-center gap-1" role="group" aria-label={areaDedalo ? 'Filtri' : 'Filtri per tipo'}>
-            {/* con un tipo solo (Trama, nei dedali) i filtri per tipo non servono: resta «Anche le segnate» */}
-            {!areaDedalo && TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
-              <button key={tp} type="button" className={`chip touch text-[11px] ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
-                <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: COLORE_TIPO[tp] }} aria-hidden="true" />{NOME_TIPO[tp]} ({area.punti.filter((p) => p.tipo === tp).length})
-              </button>
-            ))}
-            {filtro.size > 0 && <button type="button" className="chip touch text-[11px]" onClick={() => setFiltro(new Set())}>Tutti</button>}
-            {gestitiArea > 0 && <button type="button" className={`chip touch text-[11px] ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche le segnate ({gestitiArea})</button>}
+          <div className="flex flex-col gap-1" role="group" aria-label={areaDedalo ? 'Filtri' : 'Filtri per tipo'}>
+            {/* una riga sola (2026-10-18, «poco pensata e ottimizzata a livello grafico»: tredici cartellini su sette righe): «Filtra per
+                tipo» apre i tipi, con il conto di quelli scelti; «Tutti» e «Anche le segnate» restano accanto. Con un tipo solo (Trama,
+                nei dedali) i filtri per tipo non servono: resta «Anche le segnate» */}
+            <div className="flex flex-wrap items-center gap-1">
+              {!areaDedalo && <button type="button" className={`chip touch text-[11px] ${filtro.size > 0 ? 'chip--attivo' : ''}`} aria-expanded={filtriAperti} onClick={() => setFiltriAperti((v) => !v)}>
+                Filtra per tipo{filtro.size > 0 ? ` · ${filtro.size === 1 ? '1 scelto' : `${filtro.size} scelti`}` : ''} {filtriAperti ? '▴' : '▾'}
+              </button>}
+              {filtro.size > 0 && <button type="button" className="chip touch text-[11px]" onClick={() => setFiltro(new Set())}>Tutti</button>}
+              {gestitiArea > 0 && <button type="button" className={`chip touch text-[11px] ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche le segnate ({gestitiArea})</button>}
+            </div>
+            {/* aperti: una griglia fitta, due o più colonne secondo la larghezza della colonna; un nome lungo va a capo, non si taglia */}
+            {!areaDedalo && filtriAperti && (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(128px,1fr))] gap-1">
+                {TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
+                  <button key={tp} type="button" className={`chip touch w-full max-w-none text-[11px] ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
+                    <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: COLORE_TIPO[tp] }} aria-hidden="true" />
+                    <span className="min-w-0 leading-tight">{NOME_TIPO[tp]}</span>
+                    <span className="ml-auto shrink-0 text-text-muted">{area.punti.filter((p) => p.tipo === tp).length}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {/* più voci insieme in un'altra area del Palazzo (spostare 2026-10-14, copiare 2026-10-18): fuori dalla scelta un comando solo;

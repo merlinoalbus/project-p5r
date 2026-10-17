@@ -44,6 +44,27 @@ function monta(punti: PuntoInteresseDto[]) {
 
 beforeEach(() => { vi.clearAllMocks(); });
 
+it('i filtri per tipo sono una riga sola che si apre: i tipi con il conto, quanti sono scelti, «Tutti» li toglie (2026-10-18)', () => {
+  monta([punto({}), punto({ chiave: 'p2', tipo: 'sicura', nome: 'Stanza sicura' }), punto({ chiave: 'p3', nome: 'Altro forziere' })]);
+  const filtri = screen.getByRole('group', { name: 'Filtri per tipo' });
+  const apri = within(filtri).getByRole('button', { name: /^Filtra per tipo/ });
+  // chiusi: nessun tipo a schermo
+  expect(apri).toHaveAttribute('aria-expanded', 'false');
+  expect(within(filtri).queryByRole('button', { name: /^Forziere normale/ })).toBeNull();
+  fireEvent.click(apri);
+  expect(apri).toHaveAttribute('aria-expanded', 'true');
+  expect(within(filtri).getByRole('button', { name: /^Forziere normale/ })).toHaveTextContent(/Forziere normale\s*2/);
+  fireEvent.click(within(filtri).getByRole('button', { name: /^Stanze sicure/ }));
+  expect(screen.queryByRole('button', { name: /^Forziere della sala/ })).toBeNull();
+  // chiusi di nuovo, il filtro resta e la riga lo dice
+  fireEvent.click(apri);
+  expect(apri).toHaveTextContent('Filtra per tipo · 1 scelto');
+  expect(screen.queryByRole('button', { name: /^Forziere della sala/ })).toBeNull();
+  fireEvent.click(within(filtri).getByRole('button', { name: 'Tutti' }));
+  expect(apri).toHaveTextContent(/^Filtra per tipo ▾$/);
+  expect(screen.getByRole('button', { name: /^Forziere della sala/ })).toBeInTheDocument();
+});
+
 it('la riga dice se la voce è collegata («N pin») o da collegare; le descrittive non dicono niente', () => {
   monta([
     punto({}),
@@ -357,6 +378,7 @@ describe('«Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono 
     // fra i due forzieri c'è una leva da segnare: col filtro «Forziere» non si vede, e non è lei la successiva
     const conLeva = [punto({ chiave: 'a', nome: 'Forziere A' }), punto({ chiave: 'm', tipo: 'meccanismo', nome: 'Leva in mezzo', esauribile: false }), punto({ chiave: 'd', nome: 'Forziere D' })];
     render(<Pagina punti={conLeva} cambia={vi.fn()} />);
+    fireEvent.click(within(screen.getByRole('group', { name: 'Filtri per tipo' })).getByRole('button', { name: /^Filtra per tipo/ }));
     fireEvent.click(within(screen.getByRole('group', { name: 'Filtri per tipo' })).getByRole('button', { name: /^Forziere normale/ }));
     expect(screen.queryByRole('button', { name: /^Leva in mezzo/ })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /^Forziere A/ }));

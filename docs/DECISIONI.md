@@ -1964,3 +1964,15 @@ Conseguenze tecniche (non scelte dell'utente): la mappa nella voce non c'è più
 porta planimetria (tutte quelle del Palazzo), ricerca e «Fatto»; un'area senza planimetria propria collega lo stesso, su una del
 Palazzo; durante il collegamento la tela chiede anche l'altezza da 1280 px in su (una planimetria quadrata si adatta al lato corto: con la
 sola larghezza la scala non cresceva) — a 1280×689 la scala passa da 0,30 a 0,68, a 1366×657 da 0,30 a 0,62.
+
+## 2026-10-18 — I filtri per tipo della guida dell'area su una riga ripiegabile
+
+Segnalazione dell'utente (con lo screenshot dei tredici cartellini su sette righe): «ma poi anche questa cosa qua è poco pensata e
+ottimizzata a livello grafico». Scelta (AskUserQuestion): **«Riga unica ripiegabile»** — «Filtra per tipo ▾» (con quanti tipi sono scelti),
+«Tutti» e «Anche le segnate» su una riga; aperti, i tipi in una griglia fitta col loro conto. I cartellini restano alti 44 px (bersagli
+touch del progetto); i nomi lunghi vanno a capo invece di essere tagliati.
+
+## 2026-10-18 — Validare alla fine
+
+L'utente: «ho anche chiesto di essere più veloce e validare solo alla fine le cose». Il galaxy-task-validator si chiama una volta, sul
+lavoro finito, non dopo ogni voce del piano; restano le verifiche proprie (typecheck, lint, test, browser ai tre formati, documenti).
