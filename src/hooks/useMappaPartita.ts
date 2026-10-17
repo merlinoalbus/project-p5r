@@ -26,7 +26,7 @@ export interface MappaPartita {
   acquisto: (s: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void>;
 }
 
-/** Carica la mappa `chiave` con lo stato della partita; `versione` forza un nuovo caricamento; `onCambiato` avvisa la pagina ospite di ogni azione salvata. */
+/** Carica la mappa `chiave` con lo stato della partita; una `versione` nuova la rilegge in silenzio (la mappa resta a schermo); `onCambiato` avvisa la pagina ospite di ogni azione salvata. */
 export function useMappaPartita(chiave: string, partitaId: number | null, opz: { versione?: string | number; onCambiato?: () => void } = {}): MappaPartita {
   // la fascia della giornata, il giorno corrente e il meteo di adesso decidono quali spilli sono disponibili: al cambio si ricarica
   const momento = usePartitaStore((s) => (s.attiva?.id === partitaId ? `${s.attiva.dataGioco ?? ''}|${s.attiva.fasciaGioco ?? ''}|${s.attiva.meteoOra ?? ''}` : ''));
