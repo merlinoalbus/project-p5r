@@ -357,7 +357,9 @@ export function DungeonDettaglioPage() {
               Da 1024 px è **compatta su due righe** (scelta dell'utente, 2026-09-30): alta 266 px, con il browser
               sul portatile lasciava alle colonne meno di metà dello schermo. Prima riga emblema e anello piccoli,
               nome, sovrano e arcana; seconda riga la finestra del Palazzo, i conteggi e «Dettagli dalla guida». */}
-          <header className="card relative shrink-0 overflow-hidden lg:py-2.5">
+          {/* Collegando i pin la testata si ritira: l'altezza va alla mappa, che altrimenti faceva scorrere la colonna su uno schermo
+              basso («appare la barra che fa salire e scendere la finestra», 2026-10-18); si torna con «Fatto». */}
+          {!collegamento && <header className="card relative shrink-0 overflow-hidden lg:py-2.5">
             <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block">
               <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={280} />
             </span>
@@ -436,7 +438,7 @@ export function DungeonDettaglioPage() {
                 })()}
               </div>
             </div>
-          </header>
+          </header>}
 
           {/* Da 1024 px una riga sola, alta quanto resta (`minmax(0,1fr)`): le colonne si stirano fino in fondo. Il
               minimo evita colonne schiacciate su uno schermo più basso di un portatile con il browser aperto: lì, e

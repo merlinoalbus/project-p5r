@@ -1971,7 +1971,12 @@ collegamento senza cambiare area.
 
 Poi: «la mappa è letteralmente inusabile... appare la barra che fa salire e scendere la finestra» e, dell'intestazione dell'area,
 «è inutile tutto ad eccezione del titolo». Durante il collegamento restano solo la riga del titolo, la barra e la mappa; la tela
-prende l'altezza che la colonna le lascia (il minimo di 560 px faceva scorrere la colonna).
+prende l'altezza che la colonna le lascia (il minimo di 560 px faceva scorrere la colonna). Misurato poi a 1280×689 che la colonna
+scorreva ancora (509 su 370): anche la testata del Palazzo si ritira durante il collegamento (si torna con «Fatto»). Misure con il
+collegamento aperto: 1280×689 colonna 579/579, tela 242×313; 1366×657 547/547, 328×298; 1838×830 720/720, 800×543; 768×1024 tela
+692×420; 375×812 tela 299×333; nessuno scorrimento orizzontale. Toccare un pin non smonta più la mappa («mi si resetta anche lo
+zoom»): la `versione` degli stati non rifà la risoluzione della planimetria (`MappaIncorporata`) e `useMappaPartita` la rilegge in
+silenzio, con la mappa a schermo.
 
 La copia delle voci (stesso giorno): «ha copiato le voci ma non i pin delle voci», «ogni copia deve avere il suo stato distinto» e
 «deve valere la regola attuale sugli stati del pin duplicato in più aree». La copia si collega agli stessi pin delle planimetrie

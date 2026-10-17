@@ -806,7 +806,7 @@ barra è conto + «Tutte» + «Fine» sopra e «Copia in…» / «Sposta in…»
 l'area d'arrivo. **Collegare i pin** (dal 2026-10-18) si fa sulla mappa principale della scheda del Palazzo: «Collega pin» apre il
 collegamento (`CollegamentoPin`, comunicato con `onCollegamento`), la pagina mette sopra la mappa `BarraCollegamentoPin` (planimetria fra
 quelle del Palazzo, ricerca, «Fatto») e la mappa in modalità scelta (`SceltaPin.attenuaNascosti`: i pin che fuori dalla scelta sarebbero
-nascosti, classe `spillo-mappa--nascosto-in-scelta`); dell'intestazione dell'area resta il titolo e la tela prende l'altezza
+nascosti, classe `spillo-mappa--nascosto-in-scelta`); la testata del Palazzo si ritira, dell'intestazione dell'area resta il titolo e la tela prende l'altezza
 che la colonna le lascia (`xl:flex-1`, minimo 240 px); l'elenco del Palazzo resta e una sua planimetria toccata va nella mappa del collegamento; un'area senza planimetria propria collega su una del Palazzo; nella voce resta il conto. Spostare (`POST /api/compendio/punti/sposta-in-area`, `{ chiavi, area }` → `PuntiSpostatiDto`; `spostaPuntiInArea`):
 stesse regole e stesse funzioni della voce singola (`verificaAltraAreaDelPalazzo`, `seguonoLaVoce`), in fondo nell'ordine della
 guida (area, poi posto), una voce già lì resta dov'è, tutto o niente in una transazione. Copiare (2026-10-18, `POST

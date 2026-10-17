@@ -30,7 +30,9 @@ export interface MappaPartita {
 export function useMappaPartita(chiave: string, partitaId: number | null, opz: { versione?: string | number; onCambiato?: () => void } = {}): MappaPartita {
   // la fascia della giornata, il giorno corrente e il meteo di adesso decidono quali spilli sono disponibili: al cambio si ricarica
   const momento = usePartitaStore((s) => (s.attiva?.id === partitaId ? `${s.attiva.dataGioco ?? ''}|${s.attiva.fasciaGioco ?? ''}|${s.attiva.meteoOra ?? ''}` : ''));
-  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, opz.versione, momento]);
+  // La `versione` non è fra le dipendenze del caricamento completo: cambiarla azzerava la mappa sotto uno spinner e il visore si
+  // rimontava (zoom e posizione persi a ogni pin toccato nel «Collega pin», 2026-10-18). La rilegge in silenzio l'effetto più sotto.
+  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
   // Gli spilli aggiornati in locale dopo un'azione valgono **sulla copia della mappa a cui si riferiscono**: arrivata una copia
   // nuova (la rilettura, o un caricamento completo per un cambio di versione, momento o mappa) vale quella del server.
   const [locali, setLocali] = useState<{ di: MappaDto | null; spilli: Map<number, SpilloDto> }>({ di: null, spilli: new Map() });
@@ -50,7 +52,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
   // versione, di momento della giornata, o `ricarica` — la rende vecchia: una risposta in sospeso che arriva dopo non
   // sovrascrive niente.
   const ultimaLettura = useRef(0);
-  useEffect(() => { ultimaLettura.current++; }, [chiave, partitaId, opz.versione, momento]);
+  useEffect(() => { ultimaLettura.current++; }, [chiave, partitaId, momento]);
   const ricaricaTutto = useCallback(async () => { ultimaLettura.current++; await ricarica(); }, [ricarica]);
   /** Rilegge la mappa senza passare per lo stato di caricamento e la applica solo se nel frattempo non è partita un'altra lettura; un errore lascia l'aggiornamento locale. */
   const rileggiInSilenzio = async () => {
@@ -60,6 +62,15 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
       if (n === ultimaLettura.current) imposta(fresca);
     } catch { /* resta l'aggiornamento immediato */ }
   };
+  // una versione nuova dalla pagina ospite: rilettura in silenzio (la mappa resta a schermo); prende il posto di quelle in sospeso
+  const rileggiRef = useRef(rileggiInSilenzio);
+  useEffect(() => { rileggiRef.current = rileggiInSilenzio; });
+  const versioneVista = useRef(opz.versione);
+  useEffect(() => {
+    if (versioneVista.current === opz.versione) return;
+    versioneVista.current = opz.versione;
+    void rileggiRef.current();
+  }, [opz.versione]);
 
   /** Segna lo spillo come raccolto (o lo riapre) nella partita, notifica con la parola adatta al tipo e rilegge la mappa. */
   const raccolto = async (s: SpilloDto, valore: boolean) => {

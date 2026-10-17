@@ -575,7 +575,7 @@ describe('«Copia o sposta voci»: più voci insieme in un\'altra area del Palaz
     fireEvent.click(within(barra()).getByRole('button', { name: /Copia in…/ }));
     const finestra = screen.getByRole('dialog', { name: 'Copia 2 voci in un’altra area' });
     expect(within(finestra).getByText(/2 voci di 2\. Sala Centrale, con 1 passo di Enigma\. Ogni voce diventa una voce nuova/)).toBeInTheDocument();
-    expect(within(finestra).getByText(/stato nelle partite e pin delle planimetrie restano all’originale/)).toBeInTheDocument();
+    expect(within(finestra).getByText(/collegata agli stessi pin delle planimetrie, con uno stato suo: parte da fare/)).toBeInTheDocument();
     expect(vociSelettore('Area di destinazione', finestra)).toEqual(['1. Ingresso', '3. Torre']);
     copiaPuntiInArea.mockResolvedValue({ area: 'k-03', copiate: [{ origine: 'e1', copia: 'k-03-e1', passi: 1, schede: 0, pin: 2 }, { origine: 'p3', copia: 'k-03-p3', passi: 0, schede: 2, pin: 0 }] });
     fireEvent.click(within(finestra).getByRole('button', { name: /^Copia in 3\. Torre/ }));

@@ -72,7 +72,7 @@ it('una rilettura in sospeso che arriva dopo un caricamento completo per una ver
   const risolviRilettura = letturaInSospeso();
   fireEvent.click(screen.getByRole('button', { name: 'Segna' }));
   await waitFor(() => expect(getMappa).toHaveBeenCalledTimes(2));
-  // la pagina ospite alza la versione (un forziere spuntato nella colonna): caricamento completo, con lo stato più nuovo
+  // la pagina ospite alza la versione (un forziere spuntato nella colonna): rilettura in silenzio, con lo stato più nuovo
   getMappa.mockResolvedValueOnce(mappa('a', [{ ...leva, raccolto: true }, { ...leva, id: 11, nome: 'Forziere', tipo: 'forziere', collezionabile: true, raccolto: true }]));
   fireEvent.click(screen.getByRole('button', { name: 'Versione' }));
   expect(await screen.findByText('a: Leva (segnato), Forziere (segnato)')).toBeInTheDocument();
@@ -156,4 +156,18 @@ it('un pin con più voci (098): segnarne una non lo fa «segnato», segnarle tut
   expect(screen.getByTestId('mappa')).toHaveTextContent(/^Infiltrazione$/);
   fireEvent.click(screen.getByRole('button', { name: 'Secondo evento' }));
   await waitFor(() => expect(screen.getByTestId('mappa')).toHaveTextContent('Infiltrazione (segnato)'));
+});
+
+it('una versione nuova rilegge in silenzio: la mappa resta a schermo mentre arriva (il visore non si rimonta, zoom e posizione restano)', async () => {
+  getMappa.mockResolvedValueOnce(mappa('a', [leva]));
+  render(<ConVersione />);
+  expect(await screen.findByText('a: Leva')).toBeInTheDocument();
+  let risolvi: (m: MappaDto) => void = () => {};
+  getMappa.mockReturnValueOnce(new Promise<MappaDto>((r) => { risolvi = r; }));
+  fireEvent.click(screen.getByRole('button', { name: 'Versione' }));
+  await waitFor(() => expect(getMappa).toHaveBeenCalledTimes(2));
+  // durante la rilettura la mappa di prima resta: prima qui c'era «caricamento» (e nella pagina lo spinner al posto del visore)
+  expect(screen.getByTestId('mappa')).toHaveTextContent('a: Leva');
+  await act(async () => { risolvi(mappa('a', [{ ...leva, raccolto: true }])); });
+  expect(screen.getByTestId('mappa')).toHaveTextContent('a: Leva (segnato)');
 });

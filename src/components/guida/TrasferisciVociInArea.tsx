@@ -6,7 +6,7 @@
 // ordine, coi loro passi e le schede della guida senza mappa; la chiave resta, quindi stati delle partite e pin non cambiano.
 // Copiare (2026-10-18, «non è possibile copiare gli elementi di un'area in un'altra area... ma solo spostare... attiva anche la
 // modalità copia»; scelte «Voce, passi e schede» e «Le altre aree dello stesso Palazzo»): ogni voce diventa una voce nuova in fondo
-// all'area, coi passi e le schede (immagini comprese); lo stato nelle partite e i pin delle planimetrie restano dell'originale.
+// all'area, coi passi e le schede (immagini comprese), collegata agli stessi pin delle planimetrie con uno stato suo (parte da fare).
 // L'una e l'altra sono canone: valgono per tutte le partite.
 // ============================================================
 
@@ -80,7 +80,7 @@ export function TrasferisciVociInArea({ modo, voci, area, aree, passi, onChiudi,
         <p className="m-0 text-text-secondary">
           {quanteVoci(voci.length)} di {nomeArea(area)}{conPassi(passi)}.{' '}
           {copia
-            ? 'Ogni voce diventa una voce nuova, con i suoi passi e le schede della guida; stato nelle partite e pin delle planimetrie restano all’originale.'
+            ? 'Ogni voce diventa una voce nuova, con i suoi passi e le schede della guida; collegata agli stessi pin delle planimetrie, con uno stato suo: parte da fare.'
             : 'Stato nelle partite, pin e schede della guida restano con loro.'}
         </p>
         {/* in linea: dentro una finestra la tendina sovrapposta resterebbe tagliata dal corpo scorrevole */}
