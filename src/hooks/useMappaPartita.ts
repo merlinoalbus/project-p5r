@@ -34,7 +34,8 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
   // rimontava (zoom e posizione persi a ogni pin toccato nel «Collega pin», 2026-10-18). La rilegge in silenzio l'effetto più sotto.
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
   // Gli spilli aggiornati in locale dopo un'azione valgono **sulla copia della mappa a cui si riferiscono**: arrivata una copia
-  // nuova (la rilettura, o un caricamento completo per un cambio di versione, momento o mappa) vale quella del server.
+  // nuova (una rilettura, anche quella di una versione nuova, o un caricamento completo per un cambio di momento o mappa) vale
+  // quella del server.
   const [locali, setLocali] = useState<{ di: MappaDto | null; spilli: Map<number, SpilloDto> }>({ di: null, spilli: new Map() });
   const datiAttuali = useRef(dati);
   useEffect(() => { datiAttuali.current = dati; }, [dati]);
@@ -48,9 +49,9 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
   /** Notifica l'errore di un'azione, col messaggio del server se c'è. */
   const errori = (err: unknown) => notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
 
-  // La rilettura dopo un'azione: vince l'ultima chiesta. Ogni caricamento completo — cambio di mappa, di partita, di
-  // versione, di momento della giornata, o `ricarica` — la rende vecchia: una risposta in sospeso che arriva dopo non
-  // sovrascrive niente.
+  // La rilettura dopo un'azione: vince l'ultima chiesta. Ogni caricamento completo — cambio di mappa, di partita, di momento della
+  // giornata, o `ricarica` — e ogni rilettura più nuova (anche quella di una versione nuova) la rende vecchia: una risposta in
+  // sospeso che arriva dopo non sovrascrive niente.
   const ultimaLettura = useRef(0);
   useEffect(() => { ultimaLettura.current++; }, [chiave, partitaId, momento]);
   const ricaricaTutto = useCallback(async () => { ultimaLettura.current++; await ricarica(); }, [ricarica]);
