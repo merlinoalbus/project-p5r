@@ -1244,3 +1244,14 @@ segnalazione delle finestre che si chiudevano selezionando del testo. Scelte in 
 | 1 | Dati e API: `shared/quizAttivita.ts`, migrazione 105 (`attivita.quiz_json`, quiz del Triple Seven anche nell'istantanea), schema e campo del catalogo, `AttivitaDto.quiz`, `AzionePercorsoDto.quiz` con `oggi`, OpenAPI; test (condiviso, migrazione con la tabella dell'utente voce per voce, API), 11 varianti rosse | fatto, RIGETTATO al 1° esame (due abbinamenti di nomi dedotti: chiesto all'utente, risposte allineate alla sua tabella; varianti senza modifica intera), APPROVATO al 2° |
 | 2 | Interfaccia: `GuidaQuiz`/`PulsanteGuidaQuiz` (card del diario, pagina Attività, pagina del negozio con `NegozioDettaglioDto.quiz`), `EditorQuiz` nel modulo «Correggi»; `Modal` che non si chiude dallo sfondo («Mai dallo sfondo»); ordine dei modificatori dei chip in `tailwind.css` (l'oro era grigio); test, 10 varianti rosse; verifica nel browser su una copia della produzione a 1280×689, 1366×657, 768×1024, 375×812, uso per uso dei chip oro e grigi | fatto, RIGETTATO al 1° esame (formati mancanti per Attività e Negozio, usi dei chip non verificati), APPROVATO al 2° |
 | 3 | Documenti, commit, push e pipeline | fatto; commit `d3cc45a0` su main, pipeline run 39063688072 riuscita (verify, build-backend, build-frontend) |
+
+## Intervento del 17 ottobre 2026 — Vulnerabilità delle dipendenze di sviluppo (Dependabot)
+
+Al push su main GitHub ha segnalato 2 vulnerabilità sul ramo predefinito (1 critica, 1 alta); `npm audit` completo: 3 (2 critiche, 1
+alta), tutte di sviluppo (`npm audit --omit=dev --audit-level=high`, il gate della pipeline, era già a 0). Scelta in `DECISIONI.md`
+(2026-10-17, «Le vulnerabilità di sviluppo»): `npm audit fix`, solo il lockfile.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | `package-lock.json`: concurrently 9.2.4 → 9.2.5 (che fissa shell-quote 1.12.0 al posto di 1.9.0: GHSA-pqg4-j6r4-53mv, critica), source-map-js 1.2.1 → 1.2.2 (GHSA-68fv-2mgg-jv7q, alta; usato da postcss/vite, @tailwindcss/node, magicast, css-tree, tutti con `^1.2.1`). `package.json` invariato (concurrently `^9.0.0`), nessun override. Verifica su `npm ci` dal lockfile nuovo: `npm audit` 0, `npm audit --omit=dev --audit-level=high` 0, typecheck, lint, 312 file / 1796 test, `npm run build`, `npm run dev` (FE 5273 e BE 3101 avviati da concurrently, `/api/health` 200 diretto e tramite il proxy di Vite, Home nel browser senza errori in console) | fatto, RIGETTATO al 1° esame (esiti riassunti senza l'output grezzo dei comandi: poi rieseguiti e consegnati integrali, con l'origine ricostruita anche dal lockfile di prima), APPROVATO al 2° |
+| 2 | Documenti, commit, push e pipeline | in corso |

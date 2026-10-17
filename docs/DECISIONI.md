@@ -1923,3 +1923,16 @@ Correzione tecnica trovata nella stessa verifica (non una scelta dell'utente): `
 stavano in `tailwind.css` prima di `.chip`, che a parità di specificità li riscriveva: i chip «oro» («Consigliata», «Scadenza», il
 rango del prossimo passaggio, «Oggi c'è il quiz») e quelli «bloccati» uscivano grigi come un chip qualunque. Spostati dopo `.chip`;
 verificato uso per uso.
+
+## 2026-10-17 — Le vulnerabilità di sviluppo
+
+Segnalazione di GitHub al push su main: 2 vulnerabilità sul ramo predefinito (1 critica, 1 alta). `npm audit` completo: shell-quote
+1.9.0 (GHSA-pqg4-j6r4-53mv, critica, iniezione di comandi in `quote()`), arrivata da concurrently 9.2.4 (che la fissa a versione
+esatta; serve solo a `npm run dev`), e source-map-js 1.2.1 (GHSA-68fv-2mgg-jv7q, alta, denial of service), arrivata da postcss/vite,
+@tailwindcss/node, magicast e css-tree. Tutte di sviluppo, fuori dalle immagini di produzione: il gate della pipeline
+(`npm audit --omit=dev --audit-level=high`) era già a 0.
+
+Scelta dell'utente: **`npm audit fix`**, cioè l'aggiornamento minimo dentro gli intervalli già dichiarati, solo nel lockfile:
+concurrently 9.2.5 (ramo di manutenzione della 9, con shell-quote 1.12.0) e source-map-js 1.2.2. Scartate le versioni esplicite in
+`package.json` e gli `overrides`: non servono, perché le versioni corrette rientrano già in `^9.0.0` e `^1.2.1`; concurrently 10
+resta fuori, come già nell'aggiornamento delle dipendenze del 1° ottobre (`ROADMAP.md`, «Restano fuori di proposito»).
