@@ -4,8 +4,8 @@
 //
 // Richiesta dell'utente: «non è possibile copiare gli elementi di un'area in un'altra area... ma solo spostare... attiva anche la
 // modalità copia». Scelte: «Voce, passi e schede» e «Le altre aree dello stesso Palazzo». Ogni copia è una voce nuova in fondo
-// all'area d'arrivo, coi passi dell'Enigma e le schede della guida senza mappa (immagini duplicate); lo stato nelle partite e i
-// collegamenti ai pin delle planimetrie restano dell'originale.
+// all'area d'arrivo, coi passi dell'Enigma e le schede della guida senza mappa (immagini duplicate), collegata agli stessi pin delle
+// planimetrie con uno stato suo («ogni copia deve avere il suo stato distinto»; il pin segue le regole delle voci indipendenti).
 // ============================================================
 
 import request from 'supertest';
@@ -66,6 +66,7 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     await request(app).put(`/api/partite/${partita}/punti`).send({ punto: a.chiave, stato: 'ottenuto' }).expect(200);
     const pin = prepared("SELECT s.id FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave WHERE s.mappa_chiave IS NOT NULL ORDER BY s.id LIMIT 1").pluck().get() as number;
     prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(pin, a.chiave);
+    prepared("INSERT INTO utente.spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, (SELECT uid FROM spillo WHERE id = ?), 1, 'x')").run(partita, pin);
 
     const attese = elenco(INGRESSO).filter((c) => [a.chiave, enigma.chiave, scheda.voce].includes(c));
     expect(attese).toEqual([scheda.voce, a.chiave, enigma.chiave]);
@@ -115,13 +116,16 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     const passoCopia2 = prepared("SELECT chiave FROM punto_interesse WHERE contenitore_chiave = ? AND nome = 'Secondo passo'").pluck().get(copie[2]) as string;
     expect(schedeDi(passoCopia2)).toMatchObject([{ area_guida_chiave: SALA, nome: 'Scheda del passo', descrizione: 'leva', origine: 'utente' }]);
     expect(schedeDi(passo2.chiave).map((s) => s.id)).toEqual([schedaPasso]);
-    // stato nella partita e pin restano dell'originale
+    // il pin di planimetria è anche della copia, ma ogni voce ha il suo stato: la copia parte da fare, l'originale resta ottenuto, e il
+    // pin (due voci, una da fare) non è più fatto — le «voci indipendenti» del 2026-10-09
     const dungeon = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${partita}`).expect(200)).body.data as DungeonDettaglioDto;
     const sala = dungeon.aree.find((x) => x.chiave === SALA)!.punti;
     expect(sala.find((p) => p.chiave === copie[1])).toMatchObject({ stato: null });
     expect(dungeon.aree.find((x) => x.chiave === INGRESSO)!.punti.find((p) => p.chiave === a.chiave)).toMatchObject({ stato: 'ottenuto' });
     expect(prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(pin)).toContain(a.chiave);
-    expect(prepared('SELECT COUNT(*) FROM spillo_voce WHERE voce_chiave IN (?, ?, ?)').pluck().get(...copie)).toBe(0);
+    expect(prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(pin)).toContain(copie[1]);
+    expect(prepared('SELECT COUNT(*) FROM spillo_voce WHERE voce_chiave IN (?, ?)').pluck().get(copie[0], copie[2])).toBe(0);
+    expect(prepared('SELECT COALESCE(MAX(sp.raccolto), 0) FROM utente.spillo_partita sp JOIN spillo s ON s.uid = sp.spillo_uid WHERE sp.partita_id = ? AND s.id = ?').pluck().get(partita, pin)).toBe(0);
     // eliminare la copia non tocca l'originale né la sua immagine
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(copie[0])}`).expect(204);
     expect(schedeDi(scheda.voce)).toEqual(schedaPrima);

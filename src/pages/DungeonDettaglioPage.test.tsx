@@ -217,10 +217,12 @@ it('«Collega pin» usa la mappa principale: barra con voce, conto, planimetria,
   expect(screen.getByText(/cerca «torre»/)).toBeInTheDocument();
   scegliVoce('Planimetria', /Torre/, barra);
   expect(screen.getByText(/^Visore: m-torre · scelta per Sicura del cancello/)).toBeInTheDocument();
-  // collegando, da 1280 px la tela chiede anche l'altezza (la planimetria cresce davvero, non solo in larghezza); fuori dal collegamento 240 px
+  // collegando, la tela prende l'altezza che la colonna le lascia (un minimo più alto faceva scorrere la colonna) e dell'intestazione
+  // dell'area resta il titolo: niente descrizione, planimetrie dell'area né aree della planimetria
   const visore = screen.getByText(/^Visore: m-torre/).closest('[data-classe-visore]')!;
-  expect(visore.getAttribute('data-classe-visore')!.split(' ')).toEqual(expect.arrayContaining(['xl:[--minimo-tela:min(560px,calc(100dvh_-_230px))]']));
-  expect(visore.getAttribute('data-classe-visore')).not.toContain('xl:[--minimo-tela:240px]');
+  expect(visore.getAttribute('data-classe-visore')!.split(' ')).toEqual(expect.arrayContaining(['xl:flex-1', 'xl:[--minimo-tela:240px]']));
+  expect(screen.queryByText(/Planimetrie di quest’area/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('list', { name: 'Aree della guida su questa planimetria' })).not.toBeInTheDocument();
   // un tocco sulla mappa principale collega
   fireEvent.click(screen.getByRole('button', { name: 'Tocca il pin 3' }));
   await waitFor(() => expect(collegaPinAlPunto).toHaveBeenCalledWith('p1', 3, true));
@@ -231,7 +233,25 @@ it('«Collega pin» usa la mappa principale: barra con voce, conto, planimetria,
   expect(screen.queryByRole('button', { name: 'Tocca il pin 3' })).toBeNull();
 });
 
-it('collegando i pin l\'elenco del Palazzo si ritira (più spazio alla mappa) e «Fatto» lo rimette; un\'area senza planimetria collega lo stesso, su una del Palazzo (2026-10-18)', async () => {
+it('collegando i pin l\'elenco del Palazzo resta e una sua stanza porta quella planimetria nella mappa del collegamento, senza cambiare area (2026-10-18)', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  getAlberoMappe.mockResolvedValue([]);
+  monta('kamoshida');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /^Sicura del cancello/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
+  expect(screen.getByRole('navigation', { name: 'Il Palazzo' })).toBeVisible();
+  const stanze = within(within(screen.getByLabelText('Planimetrie del Palazzo')).getByRole('list', { name: 'Stanze del Palazzo' }));
+  fireEvent.click(stanze.getByRole('button', { name: /^2\. Torre/ }));
+  // la mappa del collegamento passa alla Torre; l'area resta il Cancello e il collegamento resta aperto
+  expect(screen.getByText(/^Visore: m-torre · scelta per Sicura del cancello/)).toBeInTheDocument();
+  expect(screen.getByRole('region', { name: 'Collegamento dei pin a Sicura del cancello' })).toBeInTheDocument();
+  expect(screen.getByLabelText('Scelta dei pin per Sicura del cancello')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Fatto: chiudi il collegamento dei pin' }));
+  await waitFor(() => expect(screen.getByText('Visore: m-cancello')).toBeInTheDocument());
+});
+
+it('un\'area senza planimetria propria collega lo stesso, su una del Palazzo; l\'elenco del Palazzo resta (2026-10-18)', async () => {
   // la Torre (k-02) non ha planimetrie sue: una voce lì
   const p = palazzo(true);
   const voce = { ...p.aree[0].punti[0], chiave: 'p9', nome: 'Leva della torre', tipo: 'meccanismo' as const };
@@ -242,10 +262,10 @@ it('collegando i pin l\'elenco del Palazzo si ritira (più spazio alla mappa) e 
   expect(screen.queryByText(/^Visore:/)).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: /^Leva della torre/ }));
   fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
-  // la mappa c'è, sulla prima planimetria del Palazzo, con la barra; l'elenco del Palazzo si è ritirato
+  // la mappa c'è, sulla prima planimetria del Palazzo, con la barra; l'elenco del Palazzo resta
   expect(screen.getByRole('region', { name: 'Collegamento dei pin a Leva della torre' })).toBeInTheDocument();
   expect(screen.getByText(/^Visore: m-cancello · scelta per Leva della torre/)).toBeInTheDocument();
-  expect(screen.queryByRole('navigation', { name: 'Il Palazzo' })).toBeNull();
+  expect(screen.getByRole('navigation', { name: 'Il Palazzo' })).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: 'Fatto: chiudi il collegamento dei pin' }));
   await waitFor(() => expect(screen.getByRole('navigation', { name: 'Il Palazzo' })).toBeVisible());
   expect(screen.queryByText(/^Visore:/)).toBeNull();

@@ -1965,6 +1965,19 @@ porta planimetria (tutte quelle del Palazzo), ricerca e «Fatto»; un'area senza
 Palazzo; durante il collegamento la tela chiede anche l'altezza da 1280 px in su (una planimetria quadrata si adatta al lato corto: con la
 sola larghezza la scala non cresceva) — a 1280×689 la scala passa da 0,30 a 0,68, a 1366×657 da 0,30 a 0,62.
 
+Poi l'utente: «e per quale motivo sparisce il menu laterale sinistro? come dovrei cambiare planimetria io per selezionare i pin di
+altre planimetrie…»: l'elenco del Palazzo **resta** durante il collegamento, e toccare una sua planimetria la porta nella mappa del
+collegamento senza cambiare area.
+
+Poi: «la mappa è letteralmente inusabile... appare la barra che fa salire e scendere la finestra» e, dell'intestazione dell'area,
+«è inutile tutto ad eccezione del titolo». Durante il collegamento restano solo la riga del titolo, la barra e la mappa; la tela
+prende l'altezza che la colonna le lascia (il minimo di 560 px faceva scorrere la colonna).
+
+La copia delle voci (stesso giorno): «ha copiato le voci ma non i pin delle voci», «ogni copia deve avere il suo stato distinto» e
+«deve valere la regola attuale sugli stati del pin duplicato in più aree». La copia si collega agli stessi pin delle planimetrie
+dell'originale con uno stato suo (parte da fare): vale la regola «voci indipendenti» del 2026-10-09, il pin è fatto solo quando
+lo sono tutte le sue voci. Le copie fatte prima restano senza pin.
+
 ## 2026-10-18 — I filtri per tipo della guida dell'area su una riga ripiegabile
 
 Segnalazione dell'utente (con lo screenshot dei tredici cartellini su sette righe): «ma poi anche questa cosa qua è poco pensata e

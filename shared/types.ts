@@ -1221,10 +1221,10 @@ export interface PuntiSpostatiDto {
 }
 
 /** L'esito di una copia di voci in un'altra area (2026-10-18): per ogni voce, nell'ordine d'arrivo, la chiave d'origine, quella
- *  della copia e quanti passi dell'Enigma e schede della guida senza mappa sono stati copiati con lei. */
+ *  della copia e quanti passi dell'Enigma, schede della guida senza mappa e collegamenti ai pin sono stati copiati con lei. */
 export interface PuntiCopiatiDto {
   area: string;
-  copiate: Array<{ origine: string; copia: string; passi: number; schede: number }>;
+  copiate: Array<{ origine: string; copia: string; passi: number; schede: number; pin: number }>;
 }
 
 export interface PercorsoGiornoRiassuntoDto {

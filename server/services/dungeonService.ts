@@ -830,12 +830,29 @@ function copiaSchedeDellaVoce(voce: string, areaPrima: string, copia: string, ar
 }
 
 /**
+ * Collega la copia di una voce agli stessi pin delle planimetrie dell'originale (`spillo_voce`; segnalazione dell'utente, 2026-10-18:
+ * «ha copiato le voci ma non i pin delle voci»). Il pin diventa di tutte e due le voci — si può, sono dello stesso Palazzo
+ * (`erroreVoceDelPin`) — e valgono le «voci indipendenti» del 2026-10-09 (`allineaStatiPunto`, come il collegamento a mano): la copia
+ * ha il suo stato e parte da fare, l'originale tiene il suo, e il pin è fatto solo quando lo sono tutte le sue voci («se un oggetto è
+ * stato raccolto nell'area 3 e poi copiata la voce nell'area 4 deve valere la regola attuale sugli stati del pin», 2026-10-18).
+ */
+function copiaPinDellaVoce(voce: string, copia: string, adesso: string): number {
+  const pin = prepared('SELECT spillo_id FROM spillo_voce WHERE voce_chiave = ? ORDER BY spillo_id').pluck().all(voce) as number[];
+  for (const id of pin) {
+    prepared('INSERT OR IGNORE INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(id, copia);
+    prepared('UPDATE spillo SET updated_at = ? WHERE id = ?').run(adesso, id);
+  }
+  if (pin.length > 0) allineaStatiPunto(getDb(), copia, adesso);
+  return pin.length;
+}
+
+/**
  * Copia più voci insieme in un'altra area dello stesso Palazzo (richiesta dell'utente, 2026-10-18: «non è possibile copiare gli
  * elementi di un'area in un'altra area... ma solo spostare... attiva anche la modalità copia»). Scelte dell'utente: la copia porta
  * «Voce, passi e schede» (la voce, i passi dell'Enigma, le schede della guida senza mappa con le loro immagini) e va nelle «altre
  * aree dello stesso Palazzo». Ogni copia è una voce nuova (chiave nuova, `fonte` «utente»), in fondo all'area nell'ordine della
- * guida; non porta lo stato nelle partite (parte da fare ovunque) né i collegamenti ai pin delle planimetrie, che restano
- * dell'originale. Le regole dello spostamento (`verificaAltraAreaDelPalazzo`: non nei Memento, area esistente dello stesso Palazzo,
+ * guida, collegata agli stessi pin delle planimetrie dell'originale (dal 2026-10-18, `copiaPinDellaVoce`) e con uno stato suo: parte
+ * da fare (lo stato dell'originale non si copia). Le regole dello spostamento (`verificaAltraAreaDelPalazzo`: non nei Memento, area esistente dello stesso Palazzo,
  * non un passo) più l'area diversa da quella della voce. Tutto o niente in una transazione.
  */
 export function copiaPuntiInArea(chiavi: string[], area: string): PuntiCopiatiDto {
@@ -858,11 +875,16 @@ export function copiaPuntiInArea(chiavi: string[], area: string): PuntiCopiatiDt
     for (const p of righe) {
       const copia = copiaRigaPunto(p, area, ordineInFondo(area, null, null), null);
       let schede = copiaSchedeDellaVoce(p.chiave, p.area_chiave, copia, area, adesso);
+      let pin = copiaPinDellaVoce(p.chiave, copia, adesso);
       const passi = prepared('SELECT * FROM punto_interesse WHERE contenitore_chiave = ? ORDER BY ordine, chiave').all(p.chiave) as RigaPunto[];
-      for (const s of passi) schede += copiaSchedeDellaVoce(s.chiave, p.area_chiave, copiaRigaPunto(s, area, s.ordine, copia), area, adesso);
-      // l'Enigma copiato segue i suoi passi (nessuna partita ne ha uno stato: non cambia nulla, ma la regola è una sola)
+      for (const s of passi) {
+        const copiaPasso = copiaRigaPunto(s, area, s.ordine, copia);
+        schede += copiaSchedeDellaVoce(s.chiave, p.area_chiave, copiaPasso, area, adesso);
+        pin += copiaPinDellaVoce(s.chiave, copiaPasso, adesso);
+      }
+      // l'Enigma copiato segue i suoi passi (che hanno lo stato dei loro pin)
       if (passi.length > 0) allineaEnigmaInOgniPartita(db, copia, adesso);
-      copiate.push({ origine: p.chiave, copia, passi: passi.length, schede });
+      copiate.push({ origine: p.chiave, copia, passi: passi.length, schede, pin });
     }
     assegnaUidMancanti(db);
   })();
