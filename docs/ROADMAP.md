@@ -1255,3 +1255,13 @@ alta), tutte di sviluppo (`npm audit --omit=dev --audit-level=high`, il gate del
 |------|-----------|-------|
 | 1 | `package-lock.json`: concurrently 9.2.4 → 9.2.5 (che fissa shell-quote 1.12.0 al posto di 1.9.0: GHSA-pqg4-j6r4-53mv, critica), source-map-js 1.2.1 → 1.2.2 (GHSA-68fv-2mgg-jv7q, alta; usato da postcss/vite, @tailwindcss/node, magicast, css-tree, tutti con `^1.2.1`). `package.json` invariato (concurrently `^9.0.0`), nessun override. Verifica su `npm ci` dal lockfile nuovo: `npm audit` 0, `npm audit --omit=dev --audit-level=high` 0, typecheck, lint, 312 file / 1796 test, `npm run build`, `npm run dev` (FE 5273 e BE 3101 avviati da concurrently, `/api/health` 200 diretto e tramite il proxy di Vite, Home nel browser senza errori in console) | fatto, RIGETTATO al 1° esame (esiti riassunti senza l'output grezzo dei comandi: poi rieseguiti e consegnati integrali, con l'origine ricostruita anche dal lockfile di prima), APPROVATO al 2° |
 | 2 | Documenti, commit, push e pipeline | fatto; commit `77d46f00` su main, pipeline run 39067052860 riuscita (verify, build-backend, build-frontend); avvisi Dependabot n. 2 (source-map-js) e 3 (shell-quote) chiusi da GitHub come «fixed» |
+
+## Richiesta del 18 ottobre 2026 — Copiare le voci di un'area in un'altra area
+
+«Attiva anche la modalità copia»: accanto a «Sposta in…» c'è «Copia in…». Scelte in `DECISIONI.md` (2026-10-18).
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Server: `copiaPuntiInArea` (regole dello spostamento più area diversa; voce, passi e schede della guida senza mappa con immagini duplicate; niente stati né pin; tutto o niente), `chiaveLiberaPunto` estratta da `creaPunto`, rotta `POST /api/compendio/punti/copia-in-area` (201, `PuntiCopiatiDto`), OpenAPI; test API, 7 varianti rosse (+ R3 rifatta) | fatto, APPROVATO al 1° esame |
+| 2 | Interfaccia: «Copia o sposta voci», «Copia in…» / «Sposta in…», `TrasferisciVociInArea` (era `SpostaVociInArea`) con il modo; barra su due righe nella colonna stretta; destinazione della scheda e immagini senza contenuto (note del validatore); test, 7 varianti rosse; prova su una copia della produzione (2 voci reali di Kamoshida dall'interfaccia, una di Shido con scheda: originali identici, copie senza stati né pin), misure a 1280×689, 768×1024, 375×812 | fatto, APPROVATO al 1° esame |
+| 3 | Documenti, commit, push e pipeline | in corso |

@@ -10,8 +10,9 @@
 // Una voce collegata ha lo stato dei suoi pin (lo dice il server); i punti non vengono riconciliati in automatico:
 // «lascia i punti come sono... li sistemo io via via a mano». Per questo la riga dice «da collegare» quando la voce è di
 // un tipo che un pin può rappresentare e non ne ha ancora.
-// Dal 2026-10-14 («come faccio a spostare più voci del palazzo insieme?») «Sposta voci in un’altra area» apre la scelta: le voci
-// dell'area diventano righe da spuntare e «Sposta in…» le manda insieme in fondo a un'altra area del Palazzo (`SpostaVociInArea`).
+// Dal 2026-10-14 («come faccio a spostare più voci del palazzo insieme?») la scelta: le voci dell'area diventano righe da spuntare
+// e «Sposta in…» le manda insieme in fondo a un'altra area del Palazzo; dal 2026-10-18 («attiva anche la modalità copia») il comando
+// è «Copia o sposta voci» e accanto c'è «Copia in…», che ne fa voci nuove coi passi e le schede (`TrasferisciVociInArea`).
 // ============================================================
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -28,7 +29,7 @@ import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { MappaIncorporata } from '../mappe/MappaIncorporata';
-import { SpostaVociInArea } from './SpostaVociInArea';
+import { TrasferisciVociInArea } from './TrasferisciVociInArea';
 import { NEL_CESTINO } from '../../utils/cestino';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
@@ -90,9 +91,10 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   const [collegando, setCollegando] = useState<{ punto: string; mappa: string | null; ricerca: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
   /** Le voci scelte per spostarle insieme in un'altra area del Palazzo (2026-10-14), legate all'area in cui si è aperta la scelta:
-   *  cambiando area la scelta non vale più. `spostando`: la finestra dell'area d'arrivo è aperta. */
+   *  cambiando area la scelta non vale più. `trasferimento`: la finestra dell'area d'arrivo è aperta, per copiare (2026-10-18) o
+   *  per spostare. */
   const [scelta, setScelta] = useState<{ area: string; chiavi: Set<string> } | null>(null);
-  const [spostando, setSpostando] = useState(false);
+  const [trasferimento, setTrasferimento] = useState<'copia' | 'sposta' | null>(null);
   const scelte = scelta && scelta.area === area.chiave ? scelta.chiavi : null;
   /** Aggiunge o toglie voci dalla scelta. */
   const scegli = (chiavi: string[], dentro: boolean) => setScelta((s) => {
@@ -378,24 +380,26 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             {gestitiArea > 0 && <button type="button" className={`chip touch text-[11px] ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche le segnate ({gestitiArea})</button>}
           </div>
         )}
-        {/* più voci insieme in un'altra area del Palazzo (2026-10-14): fuori dalla scelta un comando solo; nella scelta la barra, che
-            resta in vista scorrendo, col conto e i comandi */}
+        {/* più voci insieme in un'altra area del Palazzo (spostare 2026-10-14, copiare 2026-10-18): fuori dalla scelta un comando solo;
+            nella scelta la barra, che resta in vista scorrendo, col conto e i comandi */}
         {spostaInsieme && !scelte && (
-          <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta voci in un’altra area"
-            aria-label="Scegli voci da spostare in un’altra area del Palazzo" disabled={occupato}
+          <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia o sposta voci"
+            aria-label="Scegli voci da copiare o spostare in un’altra area del Palazzo" disabled={occupato}
             onClick={() => { setSelezionato(null); setCollegando(null); setNuovoPunto(null); setScelta({ area: area.chiave, chiavi: new Set() }); }} />
         )}
         {scelte && (
-          <section className="@container card sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2" aria-label="Sposta voci in un’altra area">
+          <section className="@container card sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2" aria-label="Copia o sposta voci in un’altra area">
             {/* la guida sta in una colonna anche stretta (308 px a 1280): conta la larghezza della barra, non della finestra. I comandi
-                non si restringono mai; sotto i 32rem «Fine» sta accanto al conto e «Tutte» / «Sposta in…» prendono la riga sotto, così
-                la barra fissa resta di due righe; sopra, una riga sola */}
+                non si restringono mai; sotto i 32rem la prima riga è conto, «Tutte» e «Fine» (la frase che spiega la scelta si vede da
+                32rem in su: l'etichetta della sezione la dice comunque) e la seconda «Copia in…» / «Sposta in…», così la barra fissa resta
+                di due righe; sopra, una riga sola */}
             <span className="min-w-0 flex-1 text-[13px]"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
-              <span className="text-text-muted"> · da spostare in un’altra area</span></span>
-            <div className="order-last flex basis-full gap-2 @lg:order-none @lg:basis-auto">
-              {puntiVisibili.length > 0 && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
-                aria-label={tutteScelte ? 'Togli dalla scelta tutte le voci in elenco' : 'Scegli tutte le voci in elenco'} onClick={() => scegli(puntiVisibili.map((p) => p.chiave), !tutteScelte)} />}
-              <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta in…" disabled={scelte.size === 0} onClick={() => setSpostando(true)} />
+              <span className="hidden text-text-muted @lg:inline"> · da copiare o spostare in un’altra area</span></span>
+            {puntiVisibili.length > 0 && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
+              aria-label={tutteScelte ? 'Togli dalla scelta tutte le voci in elenco' : 'Scegli tutte le voci in elenco'} onClick={() => scegli(puntiVisibili.map((p) => p.chiave), !tutteScelte)} />}
+            <div className="order-last flex basis-full flex-wrap gap-2 @lg:order-none @lg:basis-auto">
+              <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia in…" disabled={scelte.size === 0} onClick={() => setTrasferimento('copia')} />
+              <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta in…" disabled={scelte.size === 0} onClick={() => setTrasferimento('sposta')} />
             </div>
             <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Fine" aria-label="Esci dalla scelta" onClick={() => setScelta(null)} />
           </section>
@@ -422,10 +426,10 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             })
             : puntiVisibili.map((p) => riga(p, vociDellArea))}
         </ul>
-        {spostando && scelte && areePalazzo && (
-          <SpostaVociInArea voci={vociDellArea.filter((p) => scelte.has(p.chiave))} passi={vociDellArea.filter((p) => scelte.has(p.chiave)).reduce((n, p) => n + (passiPer.get(p.chiave)?.length ?? 0), 0)}
+        {trasferimento && scelte && areePalazzo && (
+          <TrasferisciVociInArea modo={trasferimento} voci={vociDellArea.filter((p) => scelte.has(p.chiave))} passi={vociDellArea.filter((p) => scelte.has(p.chiave)).reduce((n, p) => n + (passiPer.get(p.chiave)?.length ?? 0), 0)}
             area={areePalazzo.find((a) => a.chiave === area.chiave) ?? { chiave: area.chiave, nome: area.nome, ordine: area.ordine }} aree={areePalazzo}
-            onChiudi={() => setSpostando(false)} onFatto={async () => { setScelta(null); await onRicarica(); }} />
+            onChiudi={() => setTrasferimento(null)} onFatto={async () => { setScelta(null); await onRicarica(); }} />
         )}
         {/* La guida non ha trascritto tutto: quel che manca si aggiunge qui, dove lo si è cercato; poi si sposta dove va. */}
         {scelte ? null : nuovoPunto && !nuovoPunto.contenitore

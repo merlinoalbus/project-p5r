@@ -9,7 +9,9 @@
 // dichiarati dalla guida (migrazione 077) e le richieste di quel dedalo.
 // ============================================================
 
+import { randomBytes, randomUUID } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { assegnaUidMancanti } from './mappe/identitaSpillo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
@@ -17,7 +19,7 @@ import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
-import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
+import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
@@ -771,6 +773,102 @@ export function spostaPuntiInArea(chiavi: string[], area: string): PuntiSpostati
   return { area, spostate: daSpostare.map((p) => p.chiave) };
 }
 
+/** Le colonne di una tabella del file di gioco tranne quelle indicate (lette dallo schema: le migrazioni ne aggiungono). */
+function colonneTranne(tabella: string, escluse: readonly string[]): string[] {
+  return (prepared(`PRAGMA main.table_info(${tabella})`).all() as Array<{ name: string }>).map((c) => c.name).filter((c) => !escluse.includes(c));
+}
+
+/**
+ * Copia una riga di `punto_interesse` in un'altra area (dentro la transazione di chi chiama): chiave nuova dal nome, area, posto e
+ * Enigma indicati, `fonte` «utente»; tutto il resto (tipo, nome, descrizione, esauribile, dettagli…) com'è. Restituisce la chiave.
+ */
+function copiaRigaPunto(p: RigaPunto, area: string, ordine: number, contenitore: string | null): string {
+  const chiave = chiaveLiberaPunto(area, p.nome);
+  const resto = colonneTranne('punto_interesse', ['chiave', 'area_chiave', 'ordine', 'contenitore_chiave', 'area_dedalo_chiave', 'fonte']);
+  prepared(`INSERT INTO punto_interesse (chiave, area_chiave, ordine, contenitore_chiave, fonte${resto.map((c) => `, ${c}`).join('')})
+    SELECT ?, ?, ?, ?, 'utente'${resto.map((c) => `, ${c}`).join('')} FROM punto_interesse WHERE chiave = ?`).run(chiave, area, ordine, contenitore, p.chiave);
+  return chiave;
+}
+
+/**
+ * Copia le schede della guida senza mappa di una voce (pin con il riferimento «punto», `spillo.area_guida_chiave`) sulla sua copia,
+ * con le loro immagini duplicate (una schermata caricata è un'immagine «spillo» propria del pin: la copia ne ha una sua, così
+ * togliendola da una delle due l'altra resta) e la loro destinazione, se ne hanno una. Non i collegamenti ai pin (`spillo_voce`, delle
+ * planimetrie) né l'atterraggio dei Palazzi. L'uid lo assegna chi chiama, alla fine (`assegnaUidMancanti`).
+ */
+function copiaSchedeDellaVoce(voce: string, areaPrima: string, copia: string, area: string, adesso: string): number {
+  const schede = prepared("SELECT id FROM spillo WHERE mappa_chiave IS NULL AND area_guida_chiave = ? AND riferimento_tipo = 'punto' AND riferimento_chiave = ? ORDER BY ordine, id")
+    .pluck().all(areaPrima, voce) as number[];
+  const restoSpillo = colonneTranne('spillo', ['id', 'uid', 'seed_identita_json', 'area_guida_chiave', 'riferimento_chiave', 'origine', 'ordine', 'updated_at']);
+  const restoImmagine = colonneTranne('immagine', ['id', 'chiave', 'nome_file', 'created_at']);
+  const restoDestinazione = colonneTranne('spillo_destinazione', ['spillo_id']);
+  for (const id of schede) {
+    const ordine = (prepared('SELECT COALESCE(MAX(ordine), -1) + 1 AS n FROM spillo WHERE mappa_chiave IS NULL AND area_guida_chiave = ?').get(area) as { n: number }).n;
+    const nuovo = Number(prepared(`INSERT INTO spillo (area_guida_chiave, riferimento_chiave, origine, ordine, updated_at${restoSpillo.map((c) => `, ${c}`).join('')})
+      SELECT ?, ?, 'utente', ?, ?${restoSpillo.map((c) => `, ${c}`).join('')} FROM spillo WHERE id = ?`).run(area, copia, ordine, adesso, id).lastInsertRowid);
+    // la destinazione (dove porta il pin: mappa e inquadratura, 040), se la scheda ne ha una
+    prepared(`INSERT INTO spillo_destinazione (spillo_id${restoDestinazione.map((c) => `, ${c}`).join('')})
+      SELECT ?${restoDestinazione.map((c) => `, ${c}`).join('')} FROM spillo_destinazione WHERE spillo_id = ?`).run(nuovo, id);
+    for (const img of prepared('SELECT ordine, immagine_chiave, asset, didascalia FROM spillo_immagine WHERE spillo_id = ? ORDER BY ordine, id').all(id) as Array<{ ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string }>) {
+      let chiaveImmagine: string | null = null;
+      if (img.immagine_chiave) {
+        // dalla 079 le immagini stanno nel database: una senza contenuto avrebbe solo un nome di file che nessuno ha
+        const originale = prepared("SELECT nome_file FROM immagine WHERE ambito = 'spillo' AND chiave = ? AND contenuto IS NOT NULL").get(img.immagine_chiave) as { nome_file: string } | undefined;
+        if (originale) {
+          chiaveImmagine = `${nuovo}-${Date.now().toString(36)}-${randomBytes(4).toString('hex')}`;
+          const estensione = originale.nome_file.includes('.') ? originale.nome_file.slice(originale.nome_file.lastIndexOf('.')) : '';
+          prepared(`INSERT INTO immagine (chiave, nome_file, created_at${restoImmagine.map((c) => `, ${c}`).join('')})
+            SELECT ?, ?, ?${restoImmagine.map((c) => `, ${c}`).join('')} FROM immagine WHERE ambito = 'spillo' AND chiave = ?`).run(chiaveImmagine, `${randomUUID()}${estensione}`, adesso, img.immagine_chiave);
+        }
+      }
+      // una schermata il cui file non c'è più non si copia: la riga sarebbe un'immagine rotta
+      if (chiaveImmagine === null && img.asset === null) continue;
+      prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, ?, ?, ?, ?)').run(nuovo, img.ordine, chiaveImmagine, img.asset, img.didascalia, adesso);
+    }
+  }
+  return schede.length;
+}
+
+/**
+ * Copia più voci insieme in un'altra area dello stesso Palazzo (richiesta dell'utente, 2026-10-18: «non è possibile copiare gli
+ * elementi di un'area in un'altra area... ma solo spostare... attiva anche la modalità copia»). Scelte dell'utente: la copia porta
+ * «Voce, passi e schede» (la voce, i passi dell'Enigma, le schede della guida senza mappa con le loro immagini) e va nelle «altre
+ * aree dello stesso Palazzo». Ogni copia è una voce nuova (chiave nuova, `fonte` «utente»), in fondo all'area nell'ordine della
+ * guida; non porta lo stato nelle partite (parte da fare ovunque) né i collegamenti ai pin delle planimetrie, che restano
+ * dell'originale. Le regole dello spostamento (`verificaAltraAreaDelPalazzo`: non nei Memento, area esistente dello stesso Palazzo,
+ * non un passo) più l'area diversa da quella della voce. Tutto o niente in una transazione.
+ */
+export function copiaPuntiInArea(chiavi: string[], area: string): PuntiCopiatiDto {
+  const righe = chiavi.map((chiave) => {
+    const p = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(chiave) as RigaPunto | undefined;
+    if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${chiave}' non esiste.`);
+    return p;
+  });
+  for (const p of righe) {
+    verificaAltraAreaDelPalazzo(p, eDedalo(p.area_chiave), p.contenitore_chiave ?? null, area);
+    if (p.area_chiave === area) throw httpErrors.badRequest('copia-nella-stessa-area', `«${p.nome}» è già in quest’area: si copia in un’altra area dello stesso Palazzo.`);
+  }
+  // nell'ordine della guida, come lo spostamento
+  const ordineArea = new Map((prepared('SELECT chiave, ordine FROM dungeon_area').all() as Array<{ chiave: string; ordine: number }>).map((a) => [a.chiave, a.ordine]));
+  righe.sort((a, b) => (ordineArea.get(a.area_chiave) ?? 0) - (ordineArea.get(b.area_chiave) ?? 0) || a.ordine - b.ordine || a.chiave.localeCompare(b.chiave));
+  const copiate: PuntiCopiatiDto['copiate'] = [];
+  const adesso = nowIso();
+  const db = getDb();
+  db.transaction(() => {
+    for (const p of righe) {
+      const copia = copiaRigaPunto(p, area, ordineInFondo(area, null, null), null);
+      let schede = copiaSchedeDellaVoce(p.chiave, p.area_chiave, copia, area, adesso);
+      const passi = prepared('SELECT * FROM punto_interesse WHERE contenitore_chiave = ? ORDER BY ordine, chiave').all(p.chiave) as RigaPunto[];
+      for (const s of passi) schede += copiaSchedeDellaVoce(s.chiave, p.area_chiave, copiaRigaPunto(s, area, s.ordine, copia), area, adesso);
+      // l'Enigma copiato segue i suoi passi (nessuna partita ne ha uno stato: non cambia nulla, ma la regola è una sola)
+      if (passi.length > 0) allineaEnigmaInOgniPartita(db, copia, adesso);
+      copiate.push({ origine: p.chiave, copia, passi: passi.length, schede });
+    }
+    assegnaUidMancanti(db);
+  })();
+  return { area, copiate };
+}
+
 /** Un punto della guida (sicura, enigma, boss…): testo, tipo, esauribilità, posto nell'elenco, Enigma di cui è un passo. */
 export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoInteresseDto {
   const p = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
@@ -923,18 +1021,26 @@ export function vociCollegabili(spilloId: number): VoceCollegabileDto[] {
     .map((r) => { const v = r as { chiave: string; nome: string; tipo: string; area: string; area_nome: string; enigma: string | null }; return { chiave: v.chiave, nome: v.nome, tipo: v.tipo, area: v.area, areaNome: v.area_nome, enigma: v.enigma }; });
 }
 
-/** Un punto in più, dove la guida non l'aveva trascritto: nasce in fondo all'area. */
-export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; tipo: PuntoInteresseDto['tipo'] }): PuntoInteresseDto {
-  if (!prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiaveArea)) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
-  // Come per le aree: la chiave sta nei 200 caratteri che le route dei punti accettano (`paramsChiaveGuida`), suffisso «-N» compreso
-  // (fino a «-99999»), altrimenti il punto nascerebbe ma non si potrebbe più modificare, spostare né eliminare. Senza lettere né cifre
-  // («???») lo slug è vuoto: si usa «punto», invece di una chiave che finisce con un trattino. Il prefisso dell'area è una convenzione
-  // (l'area sta in `area_chiave`): se l'area ha già una chiave lunghissima, si accorcia anche lui, lasciando al nome almeno 8 caratteri.
-  const radice = (slug(dati.nome) || 'punto').slice(0, Math.max(8, MAX_CHIAVE_AREA - chiaveArea.length - 1 - 6)).replace(/-+$/, '') || 'punto';
+/**
+ * Una chiave libera per una voce nuova dell'area col nome dato (`creaPunto`, `copiaPuntiInArea`). Come per le aree: la chiave sta
+ * nei 200 caratteri che le route dei punti accettano (`paramsChiaveGuida`), suffisso «-N» compreso (fino a «-99999»), altrimenti il
+ * punto nascerebbe ma non si potrebbe più modificare, spostare né eliminare. Senza lettere né cifre («???») lo slug è vuoto: si usa
+ * «punto», invece di una chiave che finisce con un trattino. Il prefisso dell'area è una convenzione (l'area sta in `area_chiave`): se
+ * l'area ha già una chiave lunghissima, si accorcia anche lui, lasciando al nome almeno 8 caratteri.
+ */
+function chiaveLiberaPunto(chiaveArea: string, nome: string): string {
+  const radice = (slug(nome) || 'punto').slice(0, Math.max(8, MAX_CHIAVE_AREA - chiaveArea.length - 1 - 6)).replace(/-+$/, '') || 'punto';
   const prefisso = chiaveArea.slice(0, MAX_CHIAVE_AREA - 6 - 1 - radice.length).replace(/-+$/, '');
   const base = `${prefisso}-${radice}`;
   let chiave = base;
   for (let i = 2; prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
+  return chiave;
+}
+
+/** Un punto in più, dove la guida non l'aveva trascritto: nasce in fondo all'area. */
+export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; tipo: PuntoInteresseDto['tipo'] }): PuntoInteresseDto {
+  if (!prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiaveArea)) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  const chiave = chiaveLiberaPunto(chiaveArea, dati.nome);
   // un passo nasce in fondo ai passi del suo Enigma, con le regole dei passi (095)
   const contenitore = dati.contenitore ?? null;
   if (contenitore) verificaEnigma(null, chiaveArea, contenitore);

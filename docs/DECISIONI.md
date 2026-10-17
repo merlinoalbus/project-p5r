@@ -1936,3 +1936,16 @@ Scelta dell'utente: **`npm audit fix`**, cioè l'aggiornamento minimo dentro gli
 concurrently 9.2.5 (ramo di manutenzione della 9, con shell-quote 1.12.0) e source-map-js 1.2.2. Scartate le versioni esplicite in
 `package.json` e gli `overrides`: non servono, perché le versioni corrette rientrano già in `^9.0.0` e `^1.2.1`; concurrently 10
 resta fuori, come già nell'aggiornamento delle dipendenze del 1° ottobre (`ROADMAP.md`, «Restano fuori di proposito»).
+
+## 2026-10-18 — Copiare le voci di un'area in un'altra area
+
+Richiesta dell'utente: «sto vedendo che non è possibile copiare gli elementi di un'area in un'altra area... ma solo spostare...
+attiva anche la modalità copia...». Il comando della guida dell'area diventa «Copia o sposta voci», con «Copia in…» accanto a
+«Sposta in…» e la stessa finestra per l'area d'arrivo. Scelte dell'utente (AskUserQuestion):
+- che cosa porta la copia: **«Voce, passi e schede»** — la voce, i passi dell'Enigma e le schede della guida senza mappa con le loro
+  immagini, tutto duplicato; non i collegamenti ai pin delle planimetrie né lo stato nelle partite (la copia parte da fare);
+- dove si copia: **«Le altre aree dello stesso Palazzo»**, come lo spostamento.
+
+Conseguenze tecniche (non scelte dell'utente): ogni copia è una voce nuova con la sua chiave (`fonte` «utente»), in fondo all'area
+nell'ordine della guida; anche la destinazione di una scheda, se ce l'ha, si copia; un'immagine senza contenuto nel database non si
+copia; tutto o niente.

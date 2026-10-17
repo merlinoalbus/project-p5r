@@ -404,6 +404,12 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`PuntiSpostatiDto`: `area` e le chiavi `spostate`, nell\'ordine d\'arrivo',
     errori: [[400, 'area-solo-nei-palazzi'], [400, 'area-di-altro-palazzo'], [400, 'passo-segue-enigma'], [404, 'area-non-trovata'], [404, 'punto-non-trovato']],
   },
+  'POST /api/compendio/punti/copia-in-area': {
+    sommario: 'Copia più voci della guida insieme in un\'altra area dello stesso Palazzo',
+    descrizione: 'Corpo `{ chiavi, area }` come lo spostamento (2026-10-18). Le stesse regole (non nei Memento, area esistente dello stesso Palazzo, non un passo) e in più un\'area diversa da quella della voce (400 `copia-nella-stessa-area`). Ogni voce diventa una voce nuova (chiave nuova dal nome, `fonte` «utente») in fondo all\'area, nell\'ordine della guida, con i passi dell\'Enigma e le schede della guida senza mappa copiati (le immagini delle schede duplicate). Non si copiano lo stato nelle partite (la copia parte da fare) né i collegamenti ai pin delle planimetrie. Tutto o niente.',
+    risposta: '201, `PuntiCopiatiDto`: `area` e per ogni voce `{ origine, copia, passi, schede }`, nell\'ordine d\'arrivo',
+    errori: [[400, 'area-solo-nei-palazzi'], [400, 'area-di-altro-palazzo'], [400, 'passo-segue-enigma'], [400, 'copia-nella-stessa-area'], [404, 'area-non-trovata'], [404, 'punto-non-trovato']],
+  },
   'PUT /api/compendio/punti/:chiave/sposta': {
     sommario: 'Sposta un punto di un posto su o giù nella guida dell\'area',
     descrizione: '`verso` -1 su, +1 giù, fra le voci accanto (quelle fuori da ogni Enigma, o i passi dello stesso Enigma); l\'ordine si ricompatta. Oltre il primo o l\'ultimo posto è un errore (409).',

@@ -11,10 +11,10 @@ import { GuidaDellArea } from './GuidaDellArea';
 import type { SceltaPin } from '../mappe/VisoreMappa';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../types';
 
-const { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, spostaPuntiInArea, notifica } = vi.hoisted(() => ({
-  collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPunto: vi.fn(), spostaPuntiInArea: vi.fn(), notifica: vi.fn(),
+const { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, spostaPuntiInArea, copiaPuntiInArea, notifica } = vi.hoisted(() => ({
+  collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), aggiornaPunto: vi.fn(), spostaPuntiInArea: vi.fn(), copiaPuntiInArea: vi.fn(), notifica: vi.fn(),
 }));
-vi.mock('../../services/api', (vero) => moduloApi(vero, { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, spostaPuntiInArea }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, spostaPuntiInArea, copiaPuntiInArea }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 /** Il visore vero è provato a parte: qui basta vedere che cosa riceve e poter «toccare» un pin. */
 let ultimaScelta: SceltaPin | undefined;
@@ -460,7 +460,7 @@ describe('«Area del Palazzo»: una voce passa in un\'altra area dello stesso Pa
   });
 });
 
-describe('«Sposta voci in un’altra area»: più voci insieme in un\'altra area del Palazzo (2026-10-14)', () => {
+describe('«Copia o sposta voci»: più voci insieme in un\'altra area del Palazzo (spostare 2026-10-14, copiare 2026-10-18)', () => {
   const aree = [{ chiave: 'k-02', nome: 'Sala Centrale', ordine: 1 }, { chiave: 'k-01', nome: 'Ingresso', ordine: 0 }, { chiave: 'k-03', nome: 'Torre', ordine: 2 }];
   const voci = () => [
     punto({}),
@@ -474,8 +474,8 @@ describe('«Sposta voci in un’altra area»: più voci insieme in un\'altra are
     render(<MemoryRouter><GuidaDellArea area={area(punti)} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={vi.fn().mockResolvedValue(true)} onPuntoAggiornato={vi.fn()} onRicarica={onRicarica} areePalazzo={conAree} /></MemoryRouter>);
     return onRicarica;
   };
-  const apriScelta = () => fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da spostare in un’altra area del Palazzo' }));
-  const barra = () => screen.getByRole('region', { name: 'Sposta voci in un’altra area' });
+  const apriScelta = () => fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un’altra area del Palazzo' }));
+  const barra = () => screen.getByRole('region', { name: 'Copia o sposta voci in un’altra area' });
 
   it('nella scelta le voci dell\'area sono righe da spuntare (i passi seguono il loro Enigma); scelte due, vanno nell\'area scelta, nell\'ordine della guida', async () => {
     const onRicarica = montaPalazzo(voci());
@@ -506,8 +506,45 @@ describe('«Sposta voci in un’altra area»: più voci insieme in un\'altra are
     expect(notifica).toHaveBeenCalledWith('success', '2 voci spostate in 1. Ingresso, con 1 passo di Enigma, in fondo: per tutte le partite.');
     // fatto: finestra chiusa e fuori dalla scelta
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(screen.queryByRole('region', { name: 'Sposta voci in un’altra area' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Copia o sposta voci in un’altra area' })).toBeNull();
     expect(screen.getByRole('button', { name: /Forziere della sala/ })).toBeInTheDocument();
+  });
+
+  it('«Copia in…» copia le voci scelte nell\'area scelta, nell\'ordine della guida, e lo dice coi passi copiati; gli originali restano', async () => {
+    const onRicarica = montaPalazzo(voci());
+    apriScelta();
+    expect(within(barra()).getByText(/da copiare o spostare in un’altra area/)).toBeInTheDocument();
+    expect(within(barra()).getByRole('button', { name: /Copia in…/ })).toBeDisabled();
+    const elenco = screen.getByRole('list', { name: 'Voci di Sala Centrale da scegliere' });
+    fireEvent.click(within(elenco).getByRole('checkbox', { name: /Il re e la regina/ }));
+    fireEvent.click(within(elenco).getByRole('checkbox', { name: /La porta della torre/ }));
+    fireEvent.click(within(barra()).getByRole('button', { name: /Copia in…/ }));
+    const finestra = screen.getByRole('dialog', { name: 'Copia 2 voci in un’altra area' });
+    expect(within(finestra).getByText(/2 voci di 2\. Sala Centrale, con 1 passo di Enigma\. Ogni voce diventa una voce nuova/)).toBeInTheDocument();
+    expect(within(finestra).getByText(/stato nelle partite e pin delle planimetrie restano all’originale/)).toBeInTheDocument();
+    expect(vociSelettore('Area di destinazione', finestra)).toEqual(['1. Ingresso', '3. Torre']);
+    copiaPuntiInArea.mockResolvedValue({ area: 'k-03', copiate: [{ origine: 'e1', copia: 'k-03-e1', passi: 1, schede: 0 }, { origine: 'p3', copia: 'k-03-p3', passi: 0, schede: 2 }] });
+    fireEvent.click(within(finestra).getByRole('button', { name: /^Copia in 3\. Torre/ }));
+    await waitFor(() => expect(copiaPuntiInArea).toHaveBeenCalledWith({ chiavi: ['e1', 'p3'], area: 'k-03' }));
+    expect(spostaPuntiInArea).not.toHaveBeenCalled();
+    await waitFor(() => expect(onRicarica).toHaveBeenCalled());
+    expect(notifica).toHaveBeenCalledWith('success', '2 voci copiate in 3. Torre, con 1 passo di Enigma, in fondo: per tutte le partite.');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(screen.queryByRole('region', { name: 'Copia o sposta voci in un’altra area' })).toBeNull();
+    // una voce sola, senza passi: al singolare e senza passi; un errore resta in notifica con la finestra aperta
+    apriScelta();
+    fireEvent.click(screen.getByRole('checkbox', { name: /Forziere della sala/ }));
+    fireEvent.click(within(barra()).getByRole('button', { name: /Copia in…/ }));
+    copiaPuntiInArea.mockResolvedValueOnce({ area: 'k-03', copiate: [{ origine: 'p1', copia: 'k-03-p1', passi: 0, schede: 0 }] });
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Copia 1 voce in un’altra area' })).getByRole('button', { name: /^Copia in 3\. Torre/ }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', '1 voce copiata in 3. Torre, in fondo: per tutte le partite.'));
+    apriScelta();
+    fireEvent.click(screen.getByRole('checkbox', { name: /Forziere della sala/ }));
+    fireEvent.click(within(barra()).getByRole('button', { name: /Copia in…/ }));
+    copiaPuntiInArea.mockRejectedValueOnce(new Error('«Forziere della sala» è già in quest’area.'));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: /^Copia in 3\. Torre/ }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', '«Forziere della sala» è già in quest’area.'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('«Tutte» e «Nessuna» sulle voci in elenco; un errore resta in notifica con la finestra aperta; «Fine» esce dalla scelta', async () => {
@@ -526,19 +563,19 @@ describe('«Sposta voci in un’altra area»: più voci insieme in un\'altra are
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: /Annulla/ }));
     expect(within(barra()).getByText('1 voce scelta')).toBeInTheDocument();
     fireEvent.click(within(barra()).getByRole('button', { name: 'Esci dalla scelta' }));
-    expect(screen.queryByRole('region', { name: 'Sposta voci in un’altra area' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Scegli voci da spostare in un’altra area del Palazzo' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Copia o sposta voci in un’altra area' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un’altra area del Palazzo' })).toBeInTheDocument();
   });
 
   it('il comando non c\'è con un\'area sola, senza voci, né nei dedali dei Memento', () => {
     montaPalazzo(voci(), [aree[0]]);
-    expect(screen.queryByRole('button', { name: 'Scegli voci da spostare in un’altra area del Palazzo' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Scegli voci da copiare o spostare in un’altra area del Palazzo' })).toBeNull();
     cleanup();
     montaPalazzo([]);
-    expect(screen.queryByRole('button', { name: 'Scegli voci da spostare in un’altra area del Palazzo' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Scegli voci da copiare o spostare in un’altra area del Palazzo' })).toBeNull();
     cleanup();
     render(<MemoryRouter><GuidaDellArea area={area([punto({ tipo: 'trama', nome: 'Trama' })])} planimetrie={[]} partitaId={4} mappaAperta={null} cambiaStato={vi.fn()} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn()}
       areaDedalo={{ chiave: 'd1', nome: 'Area 1', altre: [{ chiave: 'd2', nome: 'Area 2' }] }} areePalazzo={aree} /></MemoryRouter>);
-    expect(screen.queryByRole('button', { name: 'Scegli voci da spostare in un’altra area del Palazzo' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Scegli voci da copiare o spostare in un’altra area del Palazzo' })).toBeNull();
   });
 });

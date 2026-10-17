@@ -5,7 +5,7 @@
 import type {
   CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
-import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
+import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
@@ -134,6 +134,8 @@ export const creaArea = (dungeon: string, dati: { nome: string; descrizione?: st
 export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/sposta`, { verso }, { maxRetries: 0 });
 /** Più voci di un Palazzo insieme in un'altra sua area (2026-10-14): in fondo, nel loro ordine, tutto o niente. */
 export const spostaPuntiInArea = (dati: SpostaPuntiInArea): Promise<PuntiSpostatiDto> => apiPost('/compendio/punti/sposta-in-area', dati);
+/** Le stesse voci copiate in un'altra area del Palazzo (2026-10-18): voci nuove, coi passi e le schede della guida senza mappa. */
+export const copiaPuntiInArea = (dati: SpostaPuntiInArea): Promise<PuntiCopiatiDto> => apiPost('/compendio/punti/copia-in-area', dati);
 /** Collega (o scollega) un pin di una planimetria del Palazzo alla voce della guida. */
 export const collegaPinAlPunto = (chiave: string, spilloId: number, collega: boolean): Promise<PuntoInteresseDto> =>
   collega ? apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`, {}) : apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}/pin/${spilloId}`);

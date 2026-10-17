@@ -798,11 +798,18 @@ eliminazione, «Su»/«Giù» (`PUT /api/compendio/punti/:chiave/sposta`, `spost
 «Aggiungi una voce». Dal 2026-10-12 nel modulo Modifica «Area del Palazzo» (prop `areePalazzo`) sposta la voce in un'altra area
 dello stesso Palazzo (`area` nel `PUT /api/compendio/punti/:chiave`, `aggiornaPunto`): in fondo, con la sua chiave, coi passi se è
 un Enigma e con le sue schede della guida senza mappa (`spillo.area_guida_chiave`); non per un passo, non nei Memento. Dal
-2026-10-14 più voci insieme: «Sposta voci in un’altra area» apre la scelta (righe da spuntare, «Tutte»/«Nessuna» sulle voci in
-elenco, barra fissa con `@container`: la guida sta anche in una colonna di 308 px) e la finestra `SpostaVociInArea` sceglie
-l'area d'arrivo (`POST /api/compendio/punti/sposta-in-area`, `{ chiavi, area }` → `PuntiSpostatiDto`; `spostaPuntiInArea`):
+2026-10-14 più voci insieme: «Copia o sposta voci» (fino al 2026-10-18 «Sposta voci in un’altra area») apre la scelta (righe da
+spuntare, «Tutte»/«Nessuna» sulle voci in elenco, barra fissa con `@container`: la guida sta anche in una colonna di 308 px, dove la
+barra è conto + «Tutte» + «Fine» sopra e «Copia in…» / «Sposta in…» sotto) e la finestra `TrasferisciVociInArea` (prop `modo`) sceglie
+l'area d'arrivo. Spostare (`POST /api/compendio/punti/sposta-in-area`, `{ chiavi, area }` → `PuntiSpostatiDto`; `spostaPuntiInArea`):
 stesse regole e stesse funzioni della voce singola (`verificaAltraAreaDelPalazzo`, `seguonoLaVoce`), in fondo nell'ordine della
-guida (area, poi posto), una voce già lì resta dov'è, tutto o niente in una transazione. Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
+guida (area, poi posto), una voce già lì resta dov'è, tutto o niente in una transazione. Copiare (2026-10-18, `POST
+/api/compendio/punti/copia-in-area`, stesso corpo → 201 `PuntiCopiatiDto`; `copiaPuntiInArea`): le stesse regole più un'area diversa da
+quella della voce (`copia-nella-stessa-area`); ogni voce diventa una voce nuova (`chiaveLiberaPunto`, la stessa di `creaPunto`; `fonte`
+«utente»; colonne copiate lette dallo schema, `colonneTranne`) in fondo nell'ordine della guida, coi passi dell'Enigma (stesso ordine) e
+con le schede della guida senza mappa di voce e passi (`copiaSchedeDellaVoce`: spillo, destinazione, immagini «spillo» duplicate con
+chiave propria; uid da `assegnaUidMancanti`); non porta lo stato nelle partite né i collegamenti ai pin delle planimetrie
+(`spillo_voce`), che restano dell'originale; tutto o niente. Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
 /api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta in una tabella sua, **molti a molti**
 (`spillo_voce(spillo_id, voce_chiave)`, migrazione 098 del 2026-10-09; prima il campo `spillo.voce_chiave` della 094, che la 098 copia
 e toglie ricostruendo `spillo`; `ON DELETE CASCADE` dai due lati), separato dal riferimento, che resta la destinazione o il Confidente

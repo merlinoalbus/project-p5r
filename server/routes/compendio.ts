@@ -9,7 +9,7 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, creaArea, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
+import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
 import { bodyArea, bodyAreaDedalo, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
@@ -277,6 +277,11 @@ router.delete('/punti/:chiave', validate({ params: paramsChiaveGuida }), (req, r
 router.post('/punti/sposta-in-area', validate({ body: bodySpostaPuntiInArea }), (req, res) => {
   const b = req.body as SpostaPuntiInArea;
   res.json(spostaPuntiInArea(b.chiavi, b.area));
+});
+/** Le stesse voci copiate in un'altra area del Palazzo (2026-10-18): voci nuove, coi passi e le schede, in fondo; tutto o niente. */
+router.post('/punti/copia-in-area', validate({ body: bodySpostaPuntiInArea }), (req, res) => {
+  const b = req.body as SpostaPuntiInArea;
+  res.status(201).json(copiaPuntiInArea(b.chiavi, b.area));
 });
 router.put('/punti/:chiave/sposta', validate({ params: paramsChiaveGuida, body: bodySpostaPunto }), (req, res) => {
   res.json(spostaPunto(String(req.params.chiave), (req.body as { verso: -1 | 1 }).verso));

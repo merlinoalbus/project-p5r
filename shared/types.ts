@@ -1206,7 +1206,7 @@ export interface VociTrasferiteDto {
   voci: AzionePercorsoDto[];
 }
 
-/** Più voci della guida di un Palazzo da spostare insieme in un'altra sua area (2026-10-14). */
+/** Più voci della guida di un Palazzo da spostare (2026-10-14) o copiare (2026-10-18) insieme in un'altra sua area. */
 export interface SpostaPuntiInArea {
   /** Le chiavi delle voci (non passi di un Enigma: seguono il loro Enigma). */
   chiavi: string[];
@@ -1218,6 +1218,13 @@ export interface SpostaPuntiInArea {
 export interface PuntiSpostatiDto {
   area: string;
   spostate: string[];
+}
+
+/** L'esito di una copia di voci in un'altra area (2026-10-18): per ogni voce, nell'ordine d'arrivo, la chiave d'origine, quella
+ *  della copia e quanti passi dell'Enigma e schede della guida senza mappa sono stati copiati con lei. */
+export interface PuntiCopiatiDto {
+  area: string;
+  copiate: Array<{ origine: string; copia: string; passi: number; schede: number }>;
 }
 
 export interface PercorsoGiornoRiassuntoDto {
