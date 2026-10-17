@@ -1,11 +1,11 @@
 // ============================================================
-// DotiIncontro — la Dote che un Confidente dà a ogni incontro, rango per rango, e la finestra per cambiarla
+// DotiIncontro — la Dote che un Confidente dà al passaggio di rango, rango per rango, e la finestra per cambiarla
 // ============================================================
 //
-// Scelta dell'utente (2026-09-30): la Dote di un incontro (Takemi il Coraggio, Yoshida il Fascino…) arriva da ogni incontro
-// registrato — la spunta nella giornata, le note di risposta o il passaggio di rango in Partita → Confidenti — una volta per
-// incontro, e il dato si corregge qui («al dato finale ci penso io»). Un incontro vale «verso» il rango successivo a quello
-// della partita: quello che lo raggiunge e quelli prima.
+// Scelta dell'utente (2026-09-30): la Dote di un incontro (Takemi il Coraggio, Yoshida il Fascino…) arrivava da ogni incontro
+// registrato, e il dato si corregge qui («al dato finale ci penso io»). Dal 2026-10-17 (scelta dell'utente: «Solo al passaggio
+// di rango», dopo un'uscita con Sojiro che dava solo punti e ricordava Gentilezza +3) l'app la ricorda solo quando si passa al
+// rango: con la spunta dell'azione del passaggio o alzando il rango in Partita → Confidenti. Le Doti le segna l'utente a mano.
 // ============================================================
 
 import { useState } from 'react';
@@ -25,8 +25,8 @@ interface Props {
   onSalvato: () => void | Promise<void>;
 }
 
-/** Riquadro della scheda di un Confidente: elenca, rango per rango, le Doti date a ogni incontro
- * (evidenziando il rango verso cui vale il prossimo incontro della partita) e apre una finestra
+/** Riquadro della scheda di un Confidente: elenca, rango per rango, le Doti date al passaggio a quel rango
+ * (evidenziando il prossimo rango della partita) e apre una finestra
  * in cui modificarle su una bozza — fino a cinque per rango — da salvare tutta insieme. */
 export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
   const [aperta, setAperta] = useState(false);
@@ -45,7 +45,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
     try {
       await impostaDotiIncontro(confidente.chiave, bozza);
       await onSalvato();
-      notifica('success', 'Dote a ogni incontro aggiornata: vale dai prossimi incontri.');
+      notifica('success', 'Dote al passaggio di rango aggiornata: vale dai prossimi passaggi.');
       setAperta(false);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Salvataggio non riuscito.');
@@ -57,36 +57,36 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
   return (
     <section className="card flex flex-col gap-2" aria-labelledby="doti-incontro">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="doti-incontro" className="m-0 text-[15px] font-semibold">Dote a ogni incontro</h2>
+        <h2 id="doti-incontro" className="m-0 text-[15px] font-semibold">Dote al passaggio di rango</h2>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={apri} disabled={confidente.dotiIncontro.length === 0} />
       </div>
       <p className="m-0 text-[12px] text-text-muted">
-        Il gioco dà queste Doti a ogni incontro: l'app te le ricorda quando lo registri — spuntandolo nella giornata, segnando le note di risposta
-        o il passaggio di rango in Partita → Confidenti —, una volta per incontro, e le segni tu nella scheda Doti. Un incontro vale verso il
-        rango successivo a quello raggiunto.
+        Il gioco dà queste Doti quando si passa al rango indicato: l'app te le ricorda quando registri il passaggio — spuntando nella giornata
+        l'azione del passaggio o alzando il rango in Partita → Confidenti —, una volta sola, e le segni tu nella scheda Doti. Un'uscita che dà
+        solo punti non le ricorda.
       </p>
       {conDoti.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessuna Dote dichiarata.</p> : (
         <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
           {conDoti.map((r) => (
             <li key={r.rango} className="py-1.5 flex gap-3 items-center text-[13px]">
-              <span className={`chip shrink-0 ${verso === r.rango ? 'chip--oro' : ''}`} title={verso === r.rango ? 'Il prossimo incontro nella partita vale verso questo rango' : undefined}>verso {r.rango}</span>
+              <span className={`chip shrink-0 ${verso === r.rango ? 'chip--oro' : ''}`} title={verso === r.rango ? 'Il prossimo passaggio di rango nella partita è a questo rango' : undefined}>rango {r.rango}</span>
               <span>{r.testo}</span>
             </li>
           ))}
         </ul>
       )}
       {aperta && (
-        <Modal aperta larga titolo={`Dote a ogni incontro: ${confidente.nome}`} onChiudi={() => setAperta(false)} azioni={(
+        <Modal aperta larga titolo={`Dote al passaggio di rango: ${confidente.nome}`} onChiudi={() => setAperta(false)} azioni={(
           <div className="flex flex-wrap justify-end gap-1.5 w-full">
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={() => setAperta(false)} />
             <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={occupato} onClick={() => void salva()} />
           </div>
         )}>
-          <p className="m-0 text-[12px] text-text-muted">Per ogni rango, le Doti che il gioco dà a un incontro verso quel rango. Vale dai prossimi incontri: le Doti delle partite non cambiano (le segni tu).</p>
+          <p className="m-0 text-[12px] text-text-muted">Per ogni rango, le Doti che il gioco dà quando si passa a quel rango. Vale dai prossimi passaggi: le Doti delle partite non cambiano (le segni tu).</p>
           <ul className="m-0 p-0 list-none flex flex-col gap-3">
             {bozza.map((r) => (
               <li key={r.rango} className="flex flex-col gap-2 rounded border border-border p-2" aria-label={`Rango ${r.rango}`}>
-                <strong className="text-[13px]">Verso il rango {r.rango}</strong>
+                <strong className="text-[13px]">Al passaggio al rango {r.rango}</strong>
                 {r.doti.length === 0 && <span className="text-[12px] text-text-muted">Nessuna Dote.</span>}
                 {r.doti.map((d, i) => (
                   <div key={i} className="flex flex-wrap items-end gap-2">

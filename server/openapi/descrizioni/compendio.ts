@@ -4,7 +4,7 @@
 //
 // L'area è in gran parte di sola lettura (Persona, skill, oggetti, Confidenti, glossario, blocchi della guida), con
 // `?partita=` facoltativo dove la risposta può portare lo stato di una partita. Le scritture sono **canone**: voci della
-// giornata, testi dei Palazzi (dungeon, aree, punti, pin collegati), ingresso dei quartieri e Doti a ogni incontro dei
+// giornata, testi dei Palazzi (dungeon, aree, punti, pin collegati), ingresso dei quartieri e Doti al passaggio di rango dei
 // Confidenti finiscono nel file di gioco e valgono per tutte le partite.
 // ============================================================
 
@@ -72,12 +72,12 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/confidenti/:chiave': {
     sommario: 'Scheda completa di un Confidente',
-    descrizione: 'Abilità per rango, dialoghi con le scelte (punti, risposte romantiche, avvisi), Dote a ogni incontro per i ranghi da 1 a 10, regali consigliati e sconsigliati, disponibilità (giorni, fasce, luogo, sblocco), note generali e fonti. Dati di gioco, senza stato di partita.',
+    descrizione: 'Abilità per rango, dialoghi con le scelte (punti, risposte romantiche, avvisi), Dote al passaggio di rango per i ranghi da 1 a 10 (`dotiIncontro`), regali consigliati e sconsigliati, disponibilità (giorni, fasce, luogo, sblocco), note generali e fonti. Dati di gioco, senza stato di partita.',
     risposta: '`ConfidenteDettaglioDto`',
     errori: [[404, 'confidente-non-trovato']],
   },
   'PUT /api/compendio/confidenti/:chiave/doti-incontro': {
-    sommario: 'Imposta la Dote data a ogni incontro, rango per rango',
+    sommario: 'Imposta la Dote data al passaggio di rango, rango per rango',
     descrizione: 'Per ogni rango indicato sostituisce le voci «dote» che il rango aveva con quelle inviate (da 0 a 5 Doti, note da 1 a 3); i ranghi non inviati restano come sono. Tutto in una transazione. È un dato di gioco: vale per tutte le partite.',
     risposta: '`ConfidenteDettaglioDto` aggiornato',
     errori: [[404, 'confidente-non-trovato']],

@@ -61,19 +61,22 @@ describe('ConfidenteDettaglioPage', () => {
     expect(impostaRegaloFatto).toHaveBeenCalledWith(7, 'takemi', 'Mini cactus', true);
   });
 
-  it('la Dote a ogni incontro per rango: il prossimo evidenziato, si modifica e si salva', async () => {
+  it('la Dote al passaggio di rango, rango per rango: il prossimo evidenziato, si modifica e si salva', async () => {
     usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova' } as PartitaDto });
     getConfidenteDettaglio.mockResolvedValue(dettaglio);
     getConfidentiPartita.mockResolvedValue([stato]);
     impostaDotiIncontro.mockResolvedValue(dettaglio);
     render(<MemoryRouter initialEntries={['/confidenti/takemi']}><Routes><Route path="/confidenti/:chiave" element={<ConfidenteDettaglioPage />} /></Routes></MemoryRouter>);
-    const sezione = await screen.findByRole('region', { name: 'Dote a ogni incontro' });
-    // rango 1 nella partita: il prossimo incontro vale verso il 2
-    expect(within(sezione).getByText('verso 2')).toHaveClass('chip--oro');
+    const sezione = await screen.findByRole('region', { name: 'Dote al passaggio di rango' });
+    // dal 2026-10-17 la Dote si ricorda solo al passaggio di rango, e il riquadro lo dice
+    expect(within(sezione).getByText(/Un'uscita che dà solo punti non le ricorda/)).toBeInTheDocument();
+    // rango 1 nella partita: il prossimo passaggio è al 2
+    expect(within(sezione).getByText('rango 2')).toHaveClass('chip--oro');
     expect(within(sezione).getAllByText('Coraggio, 1 nota')).toHaveLength(2);
-    expect(within(sezione).queryByText('verso 3')).toBeNull();
+    expect(within(sezione).queryByText('rango 3')).toBeNull();
     fireEvent.click(within(sezione).getByRole('button', { name: 'Modifica' }));
-    const finestra = screen.getByRole('dialog', { name: 'Dote a ogni incontro: Takemi' });
+    const finestra = screen.getByRole('dialog', { name: 'Dote al passaggio di rango: Takemi' });
+    expect(within(finestra).getByText('Al passaggio al rango 2')).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi una Dote al rango 3' }));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Togli la Dote 1 del rango 1' }));
     await act(async () => { fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' })); });

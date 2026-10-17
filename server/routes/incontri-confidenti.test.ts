@@ -7,7 +7,8 @@
 // passaggio di rango in Partita → Confidenti), e il passaggio al rango R conta una volta sola. Poi (stesso giorno): le Doti
 // si segnano solo a mano — l'incontro si registra e **dice** la Dote che dà (`doteIncontro`, `effetti.incontro.doti`), da
 // segnare nella scheda Doti; le Doti della partita non si muovono. Qui si sorveglia che la nota si dica una volta sola,
-// da qualunque parte, e che togliendo un incontro si dica di toglierla.
+// da qualunque parte, e che togliendo un incontro si dica di toglierla. Dal 2026-10-17 (scelta dell'utente: «Solo al passaggio
+// di rango», dopo un'uscita con Sojiro che dava solo punti e ricordava Gentilezza +3) la Dote si dice solo per il passaggio.
 // ============================================================
 
 import request from 'supertest';
@@ -19,7 +20,7 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
-describe('API — Dote a ogni incontro con un Confidente', () => {
+describe('API — gli incontri con un Confidente e la Dote del passaggio di rango', () => {
   beforeAll(() => {
     dbDiProva();
   });
@@ -98,45 +99,79 @@ describe('API — Dote a ogni incontro con un Confidente', () => {
     expect(await coraggio(p)).toBe(0);
   });
 
-  it('le note di risposta sono un incontro per momento della giornata: tre risposte, una nota; di sera un altro incontro', async () => {
+  it('le note di risposta sono un incontro per momento della giornata, senza Dote (dal 2026-10-17 la Dote è del passaggio di rango)', async () => {
     const p = await nuovaPartita('Takemi risposte', '04-27');
     await pagina(p, { rango: 2 });
     // un altro giorno: le risposte sono un incontro nuovo, non quello dei passaggi appena segnati
     await request(app).put(`/api/partite/${p}/giorno`).send({ data: '04-28' }).expect(200);
     const dette = [];
     for (let i = 0; i < 3; i++) dette.push((await pagina(p, { noteRisposta: 2 })).doteIncontro);
-    expect(dette).toEqual([nota, [], []]); // verso il rango 3: Coraggio ♪, una volta
+    // verso il rango 3 c'è Coraggio ♪, ma un incontro senza passaggio non lo dà
+    expect(dette).toEqual([[], [], []]);
+    expect(prepared("SELECT verso_rango AS verso, passaggio, doti_json FROM incontro_confidente_partita WHERE partita_id = ? AND data = '04-28'").all(p)).toEqual([{ verso: 3, passaggio: 0, doti_json: '[]' }]);
     prepared("UPDATE partita SET fascia_gioco = 'sera' WHERE id = ?").run(p);
-    expect((await pagina(p, { noteRisposta: 3 })).doteIncontro).toEqual(nota);
-    // la risposta di sera era uno sbaglio: «Annulla ultimo» riporta i punti a prima e toglie l'incontro, e dice di togliere la nota
+    expect((await pagina(p, { noteRisposta: 3 })).doteIncontro).toEqual([]);
+    // la risposta di sera era uno sbaglio: «Annulla ultimo» riporta i punti a prima e toglie l'incontro, che non dava niente
     // (una risposta da tre note vale 15 punti, senza bonus dell'arcano)
-    expect((await pagina(p, { deltaPunti: -15 })).doteIncontro).toEqual(menoNota);
+    expect((await pagina(p, { deltaPunti: -15 })).doteIncontro).toEqual([]);
+    expect(prepared("SELECT COUNT(*) AS n FROM incontro_confidente_partita WHERE partita_id = ? AND fascia = 'sera'").get(p)).toEqual({ n: 0 });
     expect(await coraggio(p)).toBe(0);
   });
 
-  it('le risposte e poi la spunta del passaggio nello stesso momento: lo stesso incontro diventa il passaggio, e togliendo la spunta torna semplice', async () => {
+  it('le risposte e poi la spunta del passaggio nello stesso momento: lo stesso incontro diventa il passaggio e dà lì la Dote; togliendo la spunta torna semplice, senza', async () => {
     const p = await nuovaPartita('Takemi marcato', '04-24');
     await pagina(p, { rango: 1 });
     await request(app).put(`/api/partite/${p}/giorno`).send({ data: '04-25' }).expect(200);
-    expect((await pagina(p, { noteRisposta: 2 })).doteIncontro).toEqual(nota); // l'incontro semplice di 04-25 di giorno, verso il rango 2
+    expect((await pagina(p, { noteRisposta: 2 })).doteIncontro).toEqual([]); // l'incontro semplice di 04-25 di giorno, verso il rango 2
     const a = await azioneTakemi('04-25');
     expect(a.fascia).toBe('giorno');
     const s = (await spunta(p, a.uid).expect(200)).body.data as AzionePercorsoDto;
-    expect(s.effetti?.incontro).toMatchObject({ id: null, marcato: expect.any(Number), verso: 2, passaggio: true, giaContato: true, doti: [] });
-    expect(prepared("SELECT verso_rango AS verso, passaggio, origine FROM incontro_confidente_partita WHERE partita_id = ? AND data = '04-25'").all(p)).toEqual([{ verso: 2, passaggio: 1, origine: 'pagina' }]);
-    // il rango nella partita è ancora 1: togliendo la spunta l'incontro resta (le risposte ci sono state) e torna semplice
+    expect(s.effetti?.incontro).toMatchObject({ id: null, marcato: expect.any(Number), verso: 2, passaggio: true, giaContato: false, doti: [{ chiave: 'coraggio', delta: 2, note: 1 }] });
+    const riga = "SELECT verso_rango AS verso, passaggio, origine, doti_json FROM incontro_confidente_partita WHERE partita_id = ? AND data = '04-25'";
+    expect(prepared(riga).all(p)).toEqual([{ verso: 2, passaggio: 1, origine: 'pagina', doti_json: JSON.stringify([{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }]) }]);
+    // il rango nella partita è ancora 1: togliendo la spunta l'incontro resta (le risposte ci sono state), torna semplice e senza Dote
     await spunta(p, a.uid, false).expect(200);
-    expect(prepared("SELECT passaggio FROM incontro_confidente_partita WHERE partita_id = ? AND data = '04-25'").all(p)).toEqual([{ passaggio: 0 }]);
+    expect(prepared(riga).all(p)).toEqual([{ verso: 2, passaggio: 0, origine: 'pagina', doti_json: '[]' }]);
     expect(await coraggio(p)).toBe(0);
+  });
+
+  it('un incontro semplice registrato con la regola di prima (Dote già data) che diventa il passaggio non la ridà, e togliendo la spunta la tiene', async () => {
+    const p = await nuovaPartita('Takemi regola di prima', '04-24');
+    await pagina(p, { rango: 1 });
+    await request(app).put(`/api/partite/${p}/giorno`).send({ data: '04-25' }).expect(200);
+    await pagina(p, { noteRisposta: 2 });
+    // com'era prima del 2026-10-17: l'incontro semplice aveva dato la Dote del rango verso cui valeva
+    const dataPrima = JSON.stringify([{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }]);
+    prepared("UPDATE incontro_confidente_partita SET doti_json = ? WHERE partita_id = ? AND data = '04-25'").run(dataPrima, p);
+    const a = await azioneTakemi('04-25');
+    const s = (await spunta(p, a.uid).expect(200)).body.data as AzionePercorsoDto;
+    expect(s.effetti?.incontro).toMatchObject({ id: null, marcato: expect.any(Number), verso: 2, passaggio: true, giaContato: true, doti: [] });
+    const riga = "SELECT passaggio, doti_json FROM incontro_confidente_partita WHERE partita_id = ? AND data = '04-25'";
+    expect(prepared(riga).all(p)).toEqual([{ passaggio: 1, doti_json: dataPrima }]);
+    await spunta(p, a.uid, false).expect(200);
+    expect(prepared(riga).all(p)).toEqual([{ passaggio: 0, doti_json: dataPrima }]);
+  });
+
+  it('un\'uscita che dà solo punti (Sojiro, rango 3, nessun aumento di rango) non dà la Dote del rango 4 (segnalato dall\'utente, 2026-10-17)', async () => {
+    const p = await nuovaPartita('Sojiro punti', '05-21');
+    await request(app).put(`/api/partite/${p}/confidenti/sojiro`).send({ forza: true, rango: 3 }).expect(200);
+    // la voce del diario del 21/05 di sera con Sojiro, senza rango atteso
+    const voce = ((await request(app).get('/api/compendio/percorso/05-21')).body.data as PercorsoGiornoDto).azioni.find((x) => x.riferimento?.chiave === 'sojiro')!;
+    expect(voce.rangoAtteso).toBeNull();
+    const s = (await request(app).put(`/api/partite/${p}/percorso`).send({ uid: voce.uid, fatta: true, noteRisposta: 2 }).expect(200)).body.data as AzionePercorsoDto;
+    expect(s.effetti?.incontro).toMatchObject({ confidente: 'sojiro', verso: 4, passaggio: false, giaContato: false, doti: [] });
+    // i punti delle risposte ci sono (la parte del Confidente), la Gentilezza no
+    expect(s.effetti?.confidente).toMatchObject({ chiave: 'sojiro', noteRisposta: 2 });
+    expect(s.effetti?.confidente?.punti).toBeGreaterThan(0);
   });
 
   it('anche una voce aggiunta dall\'utente è un incontro, con le stesse regole', async () => {
     const p = await nuovaPartita('Takemi mia', '05-02');
     await pagina(p, { rango: 2 });
-    // di sera: un momento diverso da quello dei passaggi segnati dalla pagina (di giorno)
+    // di sera: un momento diverso da quello dei passaggi segnati dalla pagina (di giorno); senza rango atteso, nessuna Dote
     const a = (await request(app).post('/api/compendio/percorso/05-02/voci').send({ fascia: 'sera', azione: 'Clinica', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' } })).body.data as AzionePercorsoDto;
     const r = (await request(app).put(`/api/partite/${p}/percorso`).send({ uid: a.uid, fatta: true, noteRisposta: 2 }).expect(200)).body.data as AzionePercorsoDto;
-    expect(r.effetti?.incontro).toMatchObject({ verso: 3, passaggio: false, giaContato: false, doti: [{ chiave: 'coraggio', delta: 2 }] });
+    expect(r.effetti?.incontro).toMatchObject({ verso: 3, passaggio: false, giaContato: false, doti: [] });
     await request(app).put(`/api/partite/${p}/percorso`).send({ uid: a.uid, fatta: false }).expect(200);
     expect(prepared("SELECT COUNT(*) AS n FROM incontro_confidente_partita WHERE partita_id = ? AND fascia = 'sera'").get(p)).toEqual({ n: 0 });
     expect(await coraggio(p)).toBe(0);

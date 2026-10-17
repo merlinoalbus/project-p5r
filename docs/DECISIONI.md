@@ -1877,3 +1877,18 @@ Conseguenze tecniche (non scelte dell'utente):
   scendono solo se il posto è preso.
 - **Peso**: una planimetria porta nel cestino anche le sue immagini (es. 3,4 MB); il file di gioco cresce finché non si svuota, e la
   sezione mostra il peso di ogni elemento e il totale.
+
+## 2026-10-17 — La Dote dei Confidenti solo al passaggio di rango
+
+Segnalazione dell'utente: il 21 maggio un'uscita con Sojiro che dà solo punti («nessun aumento di rango stavolta») ricordava
+«Incontro con Sojiro Sakura: Gentilezza +3». Causa: la regola del 2026-09-30 («la Dote arriva da ogni incontro registrato»), con
+l'incontro che vale «verso» il rango successivo (rango 3 → verso il 4, che nella scheda di Sojiro dà Gentilezza ♪♪). Scelte
+dell'utente (AskUserQuestion): «Solo al passaggio di rango» (per tutti i Confidenti, non per Confidente); la spunta già fatta
+«La rifai tu» (togliere e rimettere la spunta: nessuna scrittura in produzione da parte dell'assistente). Le Doti restano a mano:
+la regola cambia solo ciò che l'app ricorda (`doteIncontro`, l'etichetta degli effetti).
+
+Conseguenze tecniche (non scelte dell'utente): gli incontri semplici si registrano ancora (uno per momento, per non contare due
+volte un passaggio nello stesso momento) con `doti_json` vuoto; un passaggio che trasforma l'incontro semplice del momento gli
+scrive la Dote del rango (`giaContato` falso), salvo un incontro della regola di prima che l'aveva già (niente Dote doppia);
+togliendo la spunta la riga torna semplice e perde la Dote del passaggio. Il riquadro della scheda si chiama «Dote al passaggio
+di rango»; nessuna migrazione (i dati e la tabella `confidente_dote_incontro` restano).

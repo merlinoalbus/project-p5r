@@ -1292,7 +1292,7 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   da `impostaVolteAttivita`, che restituisce le Doti da segnare per i turni aggiunti o tolti (`ProgressiPartitaDto.daSegnare`, un avviso
   dopo + o −); ogni attività porta `effettiTurno` («1° turno: Gentilezza ♪♪ · Dal 2° turno: Gentilezza ♪♪»,
   `attivitaService.effettiDelTurno`).
-- **Dote a ogni incontro con un Confidente** (voce 5): un dato del Confidente, `confidente_dote_incontro`
+- **Dote a ogni incontro con un Confidente** (voce 5; dal 2026-10-17 «al passaggio di rango»): un dato del Confidente, `confidente_dote_incontro`
   (confidente, `verso_rango` 1–10, `effetti_json` di voci «dote»; migrazione 088, che lo riempie dalle 31 azioni della guida
   con rango atteso e ne toglie la Dote solo dopo averla scritta; la 089 ripara i file dove girò la prima 088, che la
   scriveva in `confidente_rango` — ranghi 1–9 — perdendo il rango 10). Lettura e modifica nella scheda del Confidente
@@ -1301,7 +1301,10 @@ schermata piena, tipi di spillo, illustrazioni dei videogiochi.)
   009, 010, 011): un incontro vale verso il rango successivo a quello della partita, o verso `rangoAtteso` se è il
   passaggio a quel rango. Regole: in un momento della giornata (giorno + fascia) un solo incontro «semplice»; il passaggio al
   rango R una volta sola; un passaggio dove c'è l'incontro semplice di quel momento lo trasforma (niente Dote in più);
-  passaggi di ranghi diversi nello stesso momento sono incontri a sé. Fonti: la spunta (guida e cose da fare:
+  passaggi di ranghi diversi nello stesso momento sono incontri a sé. **Dal 2026-10-17 la Dote è solo del passaggio di rango**
+  («Dote al passaggio di rango» nella scheda): l'incontro semplice si registra con `doti_json` vuoto; un passaggio che lo
+  trasforma gli scrive la Dote del rango (se l'incontro, della regola di prima, non l'aveva già), e togliendo la spunta la
+  riga torna semplice senza Dote. Fonti: la spunta (guida e cose da fare:
   `applicaEffettiAzione` con `momento`, `EffettiAzioneDto.incontro`), la pagina Confidenti (`aggiornaConfidenteDallaPagina`
   dalla route `PUT /api/partite/:id/confidenti/:chiave`: salire di rango = passaggi, scendere = toglie i passaggi della
   pagina oltre il nuovo rango, risposta o uscita = incontro semplice del momento della partita, «Annulla ultimo» che torna

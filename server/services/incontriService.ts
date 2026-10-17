@@ -1,11 +1,15 @@
 // ============================================================
-// incontriService — la Dote che un Confidente dà a ogni incontro, una volta per incontro
+// incontriService — gli incontri con i Confidenti, e la Dote che danno al passaggio di rango
 // ============================================================
 //
-// Scelta dell'utente (2026-09-30): la Dote di un incontro (Takemi il Coraggio, Yoshida il Fascino…) arriva da ogni
+// Scelta dell'utente (2026-09-30): la Dote di un incontro (Takemi il Coraggio, Yoshida il Fascino…) arrivava da ogni
 // incontro registrato — la spunta di un'azione della guida o dell'utente, il passaggio di rango o le note di risposta
 // nella pagina Confidenti — e il passaggio al rango R conta una volta sola, da qualunque parte arrivi. Che cosa dà un
 // incontro lo dice il Confidente (`confidente_dote_incontro` del rango verso cui vale, migrazione 088).
+// **Dal 2026-10-17 la Dote arriva solo dal passaggio di rango** (scelta dell'utente, per tutti i Confidenti: un'uscita con
+// Sojiro che dà solo punti dava Gentilezza +3). Gli incontri semplici si registrano ancora (uno per momento, per non contare
+// due volte un passaggio che arriva nello stesso momento), ma senza Dote; un incontro semplice che diventa il passaggio la dà
+// lì, se non l'aveva già data con la regola di prima.
 //
 // Regole (`incontro_confidente_partita`, migrazione utente 009):
 // - in un momento della giornata (Confidente, giorno, fascia) c'è un solo incontro «semplice»: nel gioco si esce con un
@@ -47,6 +51,11 @@ function dotiDellIncontro(confidente: string, verso: number): Array<{ dote: stri
     .map((v) => ({ dote: (v.effetto as { dote: string }).dote, note: Math.min(3, Math.max(1, (v.effetto as { note: number }).note)) as 1 | 2 | 3 }));
 }
 
+/** La Dote del passaggio al rango `verso`, come la ricorda l'incontro (nome e punti dalle note). */
+function dotiDelPassaggio(confidente: string, verso: number): IncontroConfidenteDto['doti'] {
+  return dotiDellIncontro(confidente, verso).map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDaNote(d.note, false), note: d.note }));
+}
+
 /** Il rango del Confidente nella partita (0 se non ha ancora una riga). */
 function rangoAttuale(partitaId: number, confidente: string): number {
   return (prepared('SELECT rango FROM confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, confidente) as { rango: number } | undefined)?.rango ?? 0;
@@ -73,21 +82,22 @@ export function registraIncontro(partitaId: number, confidente: string, momento:
   const nelMomento = prepared('SELECT * FROM incontro_confidente_partita WHERE partita_id = ? AND confidente_chiave = ? AND data = ? AND fascia = ? ORDER BY id').all(partitaId, confidente, momento.data, momento.fascia) as RigaIncontro[];
   if (passaggio) {
     // l'incontro semplice di questo momento (le risposte, una spunta senza passaggio) è quello che ha portato al rango: lo diventa,
-    // senza una Dote in più; altri passaggi nello stesso momento (ranghi segnati a mano uno dopo l'altro) sono incontri a sé
+    // con la Dote del passaggio (dal 2026-10-17 l'incontro semplice non la dà); se l'aveva già data con la regola di prima
+    // (`doti_json` non vuoto), niente Dote in più. Altri passaggi nello stesso momento (ranghi segnati a mano uno dopo l'altro)
+    // sono incontri a sé
     const semplice = nelMomento.find((r) => r.passaggio === 0);
     if (semplice) {
-      prepared('UPDATE incontro_confidente_partita SET passaggio = 1, verso_rango = ? WHERE id = ?').run(verso, semplice.id);
-      return { ...base, id: null, marcato: semplice.id, giaContato: true };
+      const giaData = (JSON.parse(semplice.doti_json) as unknown[]).length > 0;
+      const doti = giaData ? [] : dotiDelPassaggio(confidente, verso);
+      prepared('UPDATE incontro_confidente_partita SET passaggio = 1, verso_rango = ?, doti_json = ? WHERE id = ?').run(verso, giaData ? semplice.doti_json : JSON.stringify(doti), semplice.id);
+      return { ...base, id: null, marcato: semplice.id, giaContato: giaData, doti };
     }
   } else if (nelMomento.length > 0) {
-    // lo stesso incontro segnato di nuovo (un'altra risposta, la spunta dopo la pagina): niente Dote nuova
+    // lo stesso incontro segnato di nuovo (un'altra risposta, la spunta dopo la pagina): niente da registrare
     return { ...base, id: null, marcato: null, giaContato: true };
   }
-  // la Dote che l'incontro dà: si registra e si ricorda, le Doti si segnano a mano (`aggiornaDote`)
-  const doti: IncontroConfidenteDto['doti'] = [];
-  for (const d of dotiDellIncontro(confidente, verso)) {
-    doti.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDaNote(d.note, false), note: d.note });
-  }
+  // la Dote si registra e si ricorda solo per un passaggio di rango; le Doti si segnano a mano (`aggiornaDote`)
+  const doti = passaggio ? dotiDelPassaggio(confidente, verso) : [];
   const id = Number(prepared(`INSERT INTO incontro_confidente_partita (partita_id, confidente_chiave, data, fascia, verso_rango, passaggio, origine, doti_json, created_at, punti_prima)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, confidente, momento.data, momento.fascia, verso, passaggio ? 1 : 0, momento.origine, JSON.stringify(doti), nowIso(), puntiPrima).lastInsertRowid);
   return { ...base, id, marcato: null, giaContato: false, doti };
@@ -110,15 +120,18 @@ export function annullaIncontro(partitaId: number, inc: IncontroConfidenteDto): 
     if (r.passaggio === 1 && rangoAttuale(partitaId, r.confidente_chiave) >= r.verso_rango) prepared("UPDATE incontro_confidente_partita SET origine = 'pagina' WHERE id = ?").run(r.id);
     else togliRiga(partitaId, r);
   } else if (inc.marcato !== null && rangoAttuale(partitaId, inc.confidente) < inc.verso) {
-    prepared('UPDATE incontro_confidente_partita SET passaggio = 0 WHERE id = ? AND partita_id = ?').run(inc.marcato, partitaId);
+    // torna un incontro semplice; la Dote che il passaggio gli aveva dato (dal 2026-10-17) se ne va con lui
+    if (inc.doti.length > 0) prepared("UPDATE incontro_confidente_partita SET passaggio = 0, doti_json = '[]' WHERE id = ? AND partita_id = ?").run(inc.marcato, partitaId);
+    else prepared('UPDATE incontro_confidente_partita SET passaggio = 0 WHERE id = ? AND partita_id = ?').run(inc.marcato, partitaId);
   }
 }
 
 /**
  * La modifica di un Confidente dalla pagina Confidenti: oltre ai punti e al rango, registra gli incontri. Salire di rango è il
  * passaggio a ogni rango raggiunto; scendere toglie i passaggi registrati dalla pagina oltre il nuovo rango; una risposta
- * (note) o un'uscita senza cambio di rango è un incontro nel momento della giornata della partita. Dice le Doti che gli
- * incontri registrati danno (o quelli tolti davano), da segnare a mano (`doteIncontro`).
+ * (note) o un'uscita senza cambio di rango è un incontro nel momento della giornata della partita, senza Dote (dal 2026-10-17
+ * la Dote è del passaggio di rango). Dice le Doti che i passaggi registrati danno (o quelli tolti davano), da segnare a mano
+ * (`doteIncontro`).
  */
 export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
   return getDb().transaction(() => {

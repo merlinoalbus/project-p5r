@@ -88,8 +88,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
         else if (delta < 0) setUltimo((u) => ({ ...u, [chiave]: 0 }));
       }
       if (prima && agg.rango !== prima.rango) setUltimo((u) => ({ ...u, [chiave]: 0 }));
-      // la Dote a ogni incontro: il passaggio di rango o la risposta hanno registrato un incontro (o l'hanno tolto);
-      // le Doti si segnano a mano: l'avviso la ricorda
+      // la Dote del passaggio di rango: il passaggio l'ha registrata (o, scendendo, tolta); una risposta registra l'incontro
+      // senza Dote (dal 2026-10-17). Le Doti si segnano a mano: l'avviso la ricorda
       avvisaDotiDaSegnare(agg.doteIncontro, `Incontro con ${agg.nome}`);
       if (prima && agg.puntiNecessari !== null && agg.puntiNecessari > 0 && agg.mancanti === 0 && (prima.mancanti ?? 1) > 0) {
         notifica('success', `${agg.nome}: punti sufficienti per il rango ${agg.rango + 1}! Passa del tempo insieme per salire di rango.`);
