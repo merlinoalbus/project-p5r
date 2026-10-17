@@ -105,8 +105,9 @@ interface Props {
   className?: string;
   /** Modalità **scelta** (2026-10-01): la mappa serve a scegliere dei pin per una voce della guida, e ci sta dentro. Il
    *  tocco su un pin chiama `onScegli` invece di aprirne il popup; i pin scelti restano evidenziati; si vedono tutti i pin,
-   *  raccolti e non ancora disponibili compresi (si sceglie un posto, non si consulta il giorno). Resta la sola mappa: la
-   *  testata no, i comandi (planimetria, ricerca, «Fatto») li porta la voce, e la ricerca arriva da lì. */
+   *  raccolti e non ancora disponibili compresi (si sceglie un posto, non si consulta il giorno; con `attenuaNascosti` quelli
+   *  sbiaditi). Resta la sola mappa: la testata no, i comandi (planimetria, ricerca, «Fatto») li porta chi la apre — dal
+   *  2026-10-18 la barra del collegamento sopra la mappa principale della scheda del Palazzo —, e la ricerca arriva da lì. */
   scelta?: SceltaPin;
 }
 
@@ -120,6 +121,9 @@ export interface SceltaPin {
   ricerca?: string;
   /** Mentre si salva un tocco: i pin non rispondono. */
   occupato?: boolean;
+  /** I pin che fuori dalla scelta sarebbero nascosti (raccolti, anche per le voci di altre aree, o non ancora disponibili) si
+   *  vedono sbiaditi, per distinguerli (scelta dell'utente, 2026-10-18: «i pin nascosti in un altro colore»). */
+  attenuaNascosti?: boolean;
 }
 
 const FATTORE_ZOOM_MASSIMO = 8;
@@ -540,6 +544,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const nonDisponibile = (s: SpilloDto) => filtraBloccati && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
   /** Vero se lo spillo va nascosto per le sue condizioni (con il filtro della partita attivo). */
   const bloccato = (s: SpilloDto) => filtraBloccati && nascostoPerCondizioni(s);
+  /** Vero se il pin, fuori dalla scelta, sarebbe nascosto (gli stessi criteri di `visibili`): raccolto o non ancora disponibile. In
+   *  scelta con `attenuaNascosti` si vede sbiadito. */
+  const sbiaditoInScelta = (s: SpilloDto) => !!scelta?.attenuaNascosti && ((s.collezionabile && !!s.raccolto) || bloccato(s));
   // in memoria finché non cambiano spilli o filtri: è l'ingresso del raggruppamento qui sotto, che così non si rifà a ogni disegno (P1")
   const inScelta = scelta !== undefined;
   const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm))),
@@ -829,12 +836,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <button
                   key={s.id}
                   type="button"
-                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${nonDisponibile(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
+                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${nonDisponibile(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${sbiaditoInScelta(s) ? 'spillo-mappa--nascosto-in-scelta' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il pin si fa da parte come il gruppo: il tocco
                   // serve a posare uno spillo in quel punto, e prima su un pin esistente non
                   // succedeva nulla, senza nemmeno un segnale (rilievo del validatore, 2026-09-13).
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
-                  aria-label={scelta ? `${s.tipoNome}: ${s.nome}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${s.nome}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
+                  aria-label={scelta ? `${s.tipoNome}: ${s.nome}${sbiaditoInScelta(s) ? (s.raccolto ? ` · ${parolaSegnato(s)}` : ' · non ancora disponibile') : ''}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${s.nome}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={scelta ? scelta.scelti.has(s.id) : attivo}
                   disabled={scelta?.occupato}
                   title={s.nome}

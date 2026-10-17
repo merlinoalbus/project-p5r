@@ -15,7 +15,7 @@
 // è «Copia o sposta voci» e accanto c'è «Copia in…», che ne fa voci nuove coi passi e le schede (`TrasferisciVociInArea`).
 // ============================================================
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { collegaPinAlPunto, creaPunto, eliminaPunto, aggiornaPunto as salvaPunto, spostaPunto } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
@@ -28,22 +28,33 @@ import { DettagliPunto } from './DettagliPunto';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { MappaIncorporata } from '../mappe/MappaIncorporata';
 import { TrasferisciVociInArea } from './TrasferisciVociInArea';
 import { NEL_CESTINO } from '../../utils/cestino';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
-/** I limiti dell'altezza della mappa di scelta: 220 è il minimo del visore incorporato (`.visore-mappa--incorporato`), sopra i 460 non serve. */
-const ALTEZZA_MINIMA = 220;
-const ALTEZZA_MASSIMA = 460;
 
-/** Il contenitore che scorre attorno all'elemento (la colonna della scheda, o l'area di lettura sul telefono). */
-function contenitoreCheScorre(el: HTMLElement): HTMLElement | null {
-  for (let e = el.parentElement; e; e = e.parentElement) {
-    const oy = getComputedStyle(e).overflowY;
-    if ((oy === 'auto' || oy === 'scroll') && e.scrollHeight > e.clientHeight) return e;
-  }
-  return null;
+/**
+ * Il collegamento dei pin di una voce, aperto dalla guida e fatto sulla **mappa principale** della scheda del Palazzo (richiesta
+ * dell'utente, 2026-10-18: «Scegliere dalla mappa principale e non dalla mappa in piccolo… Perchè sdoppiare la mappa?»). La guida
+ * dice quale voce, quali pin ha e che cosa fare a un tocco; la pagina mette la sua mappa in modalità scelta, con la barra del
+ * collegamento (planimetria, ricerca, «Fatto»).
+ */
+export interface CollegamentoPin {
+  /** La chiave e il nome della voce. */
+  voce: string;
+  nome: string;
+  /** Da dove parte la mappa: dove sta già un suo pin, altrimenti la planimetria aperta, la prima dell'area o del Palazzo. */
+  mappaIniziale: string | null;
+  /** Le planimetrie del Palazzo fra cui scegliere, prima quelle dell'area. */
+  opzioniMappa: ReadonlyArray<{ chiave: string; nome: string; dettaglio?: string }>;
+  /** I pin già collegati alla voce. */
+  scelti: ReadonlySet<number>;
+  /** Mentre si salva un tocco. */
+  occupato: boolean;
+  /** Un tocco su un pin: lo collega o, se lo è già, lo scollega. */
+  onScegli: (spillo: { id: number; nome: string }) => void;
+  /** «Fatto»: chiude il collegamento. */
+  onFine: () => void;
 }
 
 interface Props {
@@ -64,16 +75,18 @@ interface Props {
   areaDedalo?: { chiave: string; nome: string; altre: ReadonlyArray<{ chiave: string; nome: string }> };
   /** Nei Palazzi (2026-10-12): le aree del Palazzo, in ordine di guida, dove una voce si può spostare («Area del Palazzo»). */
   areePalazzo?: ReadonlyArray<{ chiave: string; nome: string; ordine: number }>;
+  /** Il collegamento dei pin aperto o chiuso (null): la pagina lo fa sulla sua mappa (2026-10-18). Senza, «Collega pin» non c'è. */
+  onCollegamento?: (c: CollegamentoPin | null) => void;
 }
 
 /**
  * La guida di un'area, a scomparsa (aperta all'inizio): conteggi di voci, segnate e «da collegare», filtri per tipo e
  * «Anche le segnate» (le voci con uno stato restano nascoste salvo quella aperta), l'elenco delle voci con i passi
  * degli Enigmi annidati sotto il loro Enigma, e in fondo «Aggiungi una voce». Ogni voce si apre con un tocco: stato
- * nella partita, pin collegati, spostamento, correzione o eliminazione e la scelta dei pin sulla mappa, il cui riquadro
- * viene misurato per stare tutto nello spazio visibile e portato in vista. Ogni modifica fa rileggere la scheda.
+ * nella partita, pin collegati, spostamento, correzione o eliminazione e «Collega pin», che si fa sulla mappa della pagina
+ * (`onCollegamento`): qui resta il conto dei pin collegati con «Fatto». Ogni modifica fa rileggere la scheda.
  */
-export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo }: Props) {
+export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo, onCollegamento }: Props) {
   /** Una voce descrittiva si legge e basta; nelle aree dei dedali non ce ne sono (099, scelta dell'utente: «Tutti con stato»). */
   const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
   /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
@@ -87,8 +100,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   const [selezionato, setSelezionato] = useState<string | null>(null);
   /** Il modulo della voce nuova: in fondo all'area, o in fondo ai passi di un Enigma (`contenitore`, 095). */
   const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null } | null>(null);
-  /** La voce a cui si stanno collegando i pin, e su quale planimetria. */
-  const [collegando, setCollegando] = useState<{ punto: string; mappa: string | null; ricerca: string } | null>(null);
+  /** La voce a cui si stanno collegando i pin (sulla mappa della pagina). */
+  const [collegando, setCollegando] = useState<{ punto: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
   /** Le voci scelte per spostarle insieme in un'altra area del Palazzo (2026-10-14), legate all'area in cui si è aperta la scelta:
    *  cambiando area la scelta non vale più. `trasferimento`: la finestra dell'area d'arrivo è aperta, per copiare (2026-10-18) o
@@ -102,30 +115,6 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
     for (const c of chiavi) { if (dentro) n.add(c); else n.delete(c); }
     return { area: area.chiave, chiavi: n };
   });
-  // La mappa di scelta si apre in fondo alla voce, spesso sotto il bordo della colonna che scorre. **Si misura** lo spazio
-  // che il contenitore che scorre mostra davvero, si tolgono i comandi della scelta e lì sta la mappa, tutta; poi la si porta
-  // in vista. Una formula sull'altezza della finestra non basta: a 1366×657 la colonna parte a 274 px, a 1024×690 a 305,
-  // sul telefono scorre la pagina (verifica nel browser, 2026-10-01). Si rimisura quando la finestra cambia misura.
-  const riquadroScelta = useRef<HTMLDivElement | null>(null);
-  const puntoInScelta = collegando?.punto ?? null;
-  const [altezzaScelta, setAltezzaScelta] = useState(300);
-  useLayoutEffect(() => {
-    if (!puntoInScelta) return;
-    /** Altezza della mappa = spazio visibile del contenitore che scorre (o della finestra) meno i comandi della scelta, entro i limiti. */
-    const misura = () => {
-      const box = riquadroScelta.current;
-      if (!box) return;
-      const contenitore = contenitoreCheScorre(box);
-      const visibile = contenitore ? contenitore.clientHeight : window.innerHeight;
-      const mappa = box.querySelector<HTMLElement>('[data-mappa-scelta]');
-      const comandi = box.getBoundingClientRect().height - (mappa?.getBoundingClientRect().height ?? 0);
-      setAltezzaScelta(Math.max(ALTEZZA_MINIMA, Math.min(ALTEZZA_MASSIMA, Math.floor(visibile - comandi - 8))));
-    };
-    misura();
-    window.addEventListener('resize', misura);
-    return () => window.removeEventListener('resize', misura);
-  }, [puntoInScelta]);
-  useEffect(() => { if (puntoInScelta) riquadroScelta.current?.scrollIntoView?.({ block: 'nearest' }); }, [puntoInScelta, altezzaScelta]);
 
   // I passi di ogni Enigma (095), nel loro ordine: stanno dentro l'Enigma, non nell'elenco dell'area.
   const passiPer = useMemo(() => {
@@ -210,6 +199,30 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   /** Chiude la scelta dei pin e rilegge la scheda. */
   const fineCollegamento = async () => { setCollegando(null); await onRicarica(); };
 
+  // Il collegamento va alla pagina, che lo fa sulla sua mappa: a ogni cambio della voce, dei suoi pin o del salvataggio in corso.
+  // I gesti leggono la voce dell'ultimo render (un tocco dopo l'altro vede i pin aggiornati); chiudendo la guida (altra area) il
+  // collegamento si chiude con lei.
+  const voceCollegata = collegando ? area.punti.find((x) => x.chiave === collegando.punto) ?? null : null;
+  const ultimaVoce = useRef(voceCollegata);
+  const gesti = useRef({ scegliPin, fineCollegamento });
+  useEffect(() => { ultimaVoce.current = voceCollegata; gesti.current = { scegliPin, fineCollegamento }; });
+  const pinCollegati = voceCollegata?.pin.map((x) => x.id).join(',') ?? '';
+  const comunica = useRef(onCollegamento);
+  useEffect(() => { comunica.current = onCollegamento; });
+  useEffect(() => {
+    const p = ultimaVoce.current;
+    if (!comunica.current) return;
+    if (!p) { comunica.current(null); return; }
+    comunica.current({
+      voce: p.chiave, nome: p.nome, mappaIniziale: mappaIniziale(p), opzioniMappa, scelti: new Set(p.pin.map((x) => x.id)), occupato,
+      onScegli: (s) => { const v = ultimaVoce.current; if (v) void gesti.current.scegliPin(v, s.id, s.nome); },
+      onFine: () => void gesti.current.fineCollegamento(),
+    });
+    // la planimetria iniziale e l'elenco delle planimetrie si leggono all'apertura: cambiano solo con la voce
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voceCollegata?.chiave, voceCollegata?.nome, pinCollegati, occupato]);
+  useEffect(() => () => comunica.current?.(null), []);
+
   /** Il modulo della voce nuova: in fondo all'area o, con `contenitore`, in fondo ai passi di un Enigma (095). */
   const moduloNuovaVoce = (n: { nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null }) => (
     <form className="flex flex-wrap items-end gap-2 rounded-md bg-white/[0.04] px-2 py-2"
@@ -279,9 +292,11 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
               </div>}
             <div className="flex flex-wrap items-center gap-1.5">
               {/* nei dedali niente pin da collegare: i piani si generano a caso (2026-10-11) */}
-              {!areaDedalo && !descrittiva(p) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Chiudi la mappa' : 'Collega pin'}
-                aria-expanded={!!scelta} disabled={planimetrie.length === 0}
-                onClick={() => (scelta ? void fineCollegamento() : setCollegando({ punto: p.chiave, mappa: mappaIniziale(p), ricerca: '' }))} />}
+              {/* i pin si scelgono sulla mappa della pagina (2026-10-18), anche in un'area senza planimetria propria: la pagina mostra quella
+                  del collegamento, scelta fra le planimetrie del Palazzo */}
+              {!areaDedalo && onCollegamento && !descrittiva(p) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Fatto' : 'Collega pin'}
+                aria-pressed={!!scelta} disabled={planimetrie.length === 0}
+                onClick={() => (scelta ? void fineCollegamento() : setCollegando({ punto: p.chiave }))} />}
               {puoAccogliere && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un passo" aria-label={`Aggiungi un passo a ${p.nome}`}
                 disabled={p.pin.length > 0} title={p.pin.length > 0 ? 'Scollega prima i pin dell’Enigma: i pin stanno sui passi' : undefined}
                 onClick={() => setNuovoPunto({ nome: '', tipo: 'meccanismo', contenitore: p.chiave })} />}
@@ -324,22 +339,9 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
               </CorrezioneGuida>
             </div>
             {scelta && (
-              <div ref={riquadroScelta} className="scelta-pin" role="group" aria-label={`Scelta dei pin per ${p.nome}`}>
-                <p className="m-0 text-[11px] leading-tight" title="Tocca un pin sulla mappa per collegarlo alla voce, toccalo di nuovo per scollegarlo">Tocca i pin da collegare · <strong>{p.pin.length === 1 ? '1 collegato' : `${p.pin.length} collegati`}</strong></p>
-                <Selettore etichetta="Planimetria" valore={scelta.mappa ?? ''} opzioni={opzioniMappa}
-                  onCambia={(k) => setCollegando({ ...scelta, mappa: k })} />
-                <div className="flex items-center gap-1.5">
-                  <label className="min-w-0 flex-1">
-                    <span className="sr-only">Cerca un pin sulla mappa</span>
-                    <input type="search" className="form-input" placeholder="Cerca un pin…" value={scelta.ricerca} onChange={(e) => setCollegando({ ...scelta, ricerca: e.target.value })} />
-                  </label>
-                  <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Fatto" onClick={() => void fineCollegamento()} />
-                </div>
-                {scelta.mappa && <div data-mappa-scelta style={{ height: altezzaScelta }}>
-                  <MappaIncorporata key={scelta.mappa} chiave={scelta.mappa} partitaId={partitaId} conEditor={false} altezza={altezzaScelta}
-                    scelta={{ titolo: p.nome, scelti: new Set(p.pin.map((x) => x.id)), occupato, ricerca: scelta.ricerca, onScegli: (s) => void scegliPin(p, s.id, s.nome) }} />
-                </div>}
-              </div>
+              <p className="scelta-pin m-0 text-[12px]" role="status" aria-label={`Scelta dei pin per ${p.nome}`}>
+                Tocca i pin sulla mappa del Palazzo per collegarli o scollegarli; quelli grigi sono già raccolti o non ancora disponibili · <strong>{p.pin.length === 1 ? '1 collegato' : `${p.pin.length} collegati`}</strong>
+              </p>
             )}
           </div>
         )}

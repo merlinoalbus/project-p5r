@@ -520,6 +520,10 @@
      dice a parole, per chi non vede il colore. */
   .spillo-mappa--bloccato .spillo-mappa__goccia { opacity: .5; filter: grayscale(1); border-style: dashed; }
   .spillo-mappa--bloccato:hover .spillo-mappa__goccia, .spillo-mappa--bloccato.spillo-mappa--selezionato .spillo-mappa__goccia { opacity: .85; }
+  /* Collegando i pin di una voce (2026-10-18) si vedono tutti: quelli che fuori dalla scelta sarebbero nascosti (raccolti, anche per
+     altre aree, o non ancora disponibili) in grigio e semitrasparenti, per distinguerli; collegati, tornano quasi pieni sotto l'anello. */
+  .spillo-mappa--nascosto-in-scelta .spillo-mappa__goccia { opacity: .5; filter: grayscale(1); }
+  .spillo-mappa--nascosto-in-scelta:hover .spillo-mappa__goccia, .spillo-mappa--nascosto-in-scelta.spillo-mappa--scelto .spillo-mappa__goccia { opacity: .85; }
   /* La figura dentro lo spillo. Gli asset `ui/spillo-<tipo>` hanno l'alfa vera apposta per
      amalgamarsi al corpo colorato: niente dischetto sotto, solo un'ombra appena accennata che da'
      rilievo senza staccarli. */

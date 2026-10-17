@@ -801,7 +801,11 @@ un Enigma e con le sue schede della guida senza mappa (`spillo.area_guida_chiave
 2026-10-14 più voci insieme: «Copia o sposta voci» (fino al 2026-10-18 «Sposta voci in un’altra area») apre la scelta (righe da
 spuntare, «Tutte»/«Nessuna» sulle voci in elenco, barra fissa con `@container`: la guida sta anche in una colonna di 308 px, dove la
 barra è conto + «Tutte» + «Fine» sopra e «Copia in…» / «Sposta in…» sotto) e la finestra `TrasferisciVociInArea` (prop `modo`) sceglie
-l'area d'arrivo. Spostare (`POST /api/compendio/punti/sposta-in-area`, `{ chiavi, area }` → `PuntiSpostatiDto`; `spostaPuntiInArea`):
+l'area d'arrivo. **Collegare i pin** (dal 2026-10-18) si fa sulla mappa principale della scheda del Palazzo: «Collega pin» apre il
+collegamento (`CollegamentoPin`, comunicato con `onCollegamento`), la pagina mette sopra la mappa `BarraCollegamentoPin` (planimetria fra
+quelle del Palazzo, ricerca, «Fatto») e la mappa in modalità scelta (`SceltaPin.attenuaNascosti`: i pin che fuori dalla scelta sarebbero
+nascosti, classe `spillo-mappa--nascosto-in-scelta`); l'elenco del Palazzo si ritira e la tela chiede anche l'altezza
+(`--minimo-tela:min(560px,100dvh − 230px)`), un'area senza planimetria propria collega su una del Palazzo; nella voce resta il conto. Spostare (`POST /api/compendio/punti/sposta-in-area`, `{ chiavi, area }` → `PuntiSpostatiDto`; `spostaPuntiInArea`):
 stesse regole e stesse funzioni della voce singola (`verificaAltraAreaDelPalazzo`, `seguonoLaVoce`), in fondo nell'ordine della
 guida (area, poi posto), una voce già lì resta dov'è, tutto o niente in una transazione. Copiare (2026-10-18, `POST
 /api/compendio/punti/copia-in-area`, stesso corpo → 201 `PuntiCopiatiDto`; `copiaPuntiInArea`): le stesse regole più un'area diversa da

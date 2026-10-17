@@ -1949,3 +1949,18 @@ attiva anche la modalità copia...». Il comando della guida dell'area diventa �
 Conseguenze tecniche (non scelte dell'utente): ogni copia è una voce nuova con la sua chiave (`fonte` «utente»), in fondo all'area
 nell'ordine della guida; anche la destinazione di una scheda, se ce l'ha, si copia; un'immagine senza contenuto nel database non si
 copia; tutto o niente.
+
+## 2026-10-18 — I pin si collegano sulla mappa principale
+
+Richiesta dell'utente: «non si può quando si clicca sul pulsante Collega PIN (Scegliere dalla mappa principale e non dalla mappa in
+piccolo che compare nel riquadro di collegamento del pin) Perchè sdoppiare la mappa? Per altro in questa modalità sarebbe utile
+visualizzare tutti i pin sulla mappa anche quelli nascosti perchè completati in altre aree...». Scelte dell'utente (AskUserQuestion):
+- **«Sì, ma i pin nascosti in un altro colore»**: la mappa principale della scheda del Palazzo diventa quella di scelta; si vedono tutti
+  i pin, e quelli che fuori dalla scelta sarebbero nascosti (raccolti, anche per altre aree, o non ancora disponibili) sono grigi;
+- **«Più spazio mentre colleghi»**: durante il collegamento l'elenco del Palazzo si ritira e la mappa prende il suo posto; con «Fatto»
+  torna tutto com'era.
+
+Conseguenze tecniche (non scelte dell'utente): la mappa nella voce non c'è più (resta il conto dei collegati); la barra sopra la mappa
+porta planimetria (tutte quelle del Palazzo), ricerca e «Fatto»; un'area senza planimetria propria collega lo stesso, su una del
+Palazzo; durante il collegamento la tela chiede anche l'altezza da 1280 px in su (una planimetria quadrata si adatta al lato corto: con la
+sola larghezza la scala non cresceva) — a 1280×689 la scala passa da 0,30 a 0,68, a 1366×657 da 0,30 a 0,62.

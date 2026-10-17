@@ -7,8 +7,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { scegliVoce, vociSelettore } from '../../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { useState } from 'react';
-import { GuidaDellArea } from './GuidaDellArea';
-import type { SceltaPin } from '../mappe/VisoreMappa';
+import { GuidaDellArea, type CollegamentoPin } from './GuidaDellArea';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../types';
 
 const { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, spostaPuntiInArea, copiaPuntiInArea, notifica } = vi.hoisted(() => ({
@@ -16,11 +15,10 @@ const { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, 
 }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, spostaPuntiInArea, copiaPuntiInArea }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
-/** Il visore vero è provato a parte: qui basta vedere che cosa riceve e poter «toccare» un pin. */
-let ultimaScelta: SceltaPin | undefined;
-vi.mock('../mappe/MappaIncorporata', () => ({
-  MappaIncorporata: ({ chiave, scelta }: { chiave: string; scelta?: SceltaPin }) => { ultimaScelta = scelta; return <div>Mappa di scelta: {chiave} · {scelta?.scelti.size ?? 0} scelti</div>; },
-}));
+/** I pin si scelgono sulla mappa della pagina (2026-10-18): qui si guarda che cosa la guida le comunica e si «tocca» un pin da lì. */
+const onCollegamento = vi.fn<(c: CollegamentoPin | null) => void>();
+/** L'ultimo collegamento comunicato alla pagina. */
+const ultimoCollegamento = () => onCollegamento.mock.calls.at(-1)?.[0] ?? null;
 
 /** Punto d'interesse di prova (un forziere esauribile, non segnato e senza pin) con i campi di `extra` che sovrascrivono i predefiniti. */
 const punto = (extra: Partial<PuntoInteresseDto>): PuntoInteresseDto => ({
@@ -40,11 +38,11 @@ function monta(punti: PuntoInteresseDto[]) {
   const onPuntoAggiornato = vi.fn();
   const onRicarica = vi.fn().mockResolvedValue(undefined);
   const cambiaStato = vi.fn().mockResolvedValue(true);
-  render(<MemoryRouter><GuidaDellArea area={area(punti)} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={onRicarica} /></MemoryRouter>);
-  return { onPuntoAggiornato, onRicarica, cambiaStato };
+  const vista = render(<MemoryRouter><GuidaDellArea area={area(punti)} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={onRicarica} onCollegamento={onCollegamento} /></MemoryRouter>);
+  return { onPuntoAggiornato, onRicarica, cambiaStato, vista };
 }
 
-beforeEach(() => { vi.clearAllMocks(); ultimaScelta = undefined; });
+beforeEach(() => { vi.clearAllMocks(); });
 
 it('la riga dice se la voce è collegata («N pin») o da collegare; le descrittive non dicono niente', () => {
   monta([
@@ -72,28 +70,61 @@ it('una voce si elimina dalla sua modifica, dopo una conferma che dice che cosa 
   await waitFor(() => expect(onRicarica).toHaveBeenCalled());
 });
 
-it('«Collega pin» apre dentro la voce la planimetria dell’area in modalità scelta: un tocco collega, un altro scollega', async () => {
+it('«Collega pin» apre il collegamento sulla mappa della pagina (niente mappa nella voce): un tocco collega, «Fatto» chiude (2026-10-18)', async () => {
   const { onPuntoAggiornato, onRicarica } = monta([punto({})]);
   fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+  expect(ultimoCollegamento()).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
-  const scelta = within(screen.getByLabelText('Scelta dei pin per Forziere della sala'));
-  // parte dalla planimetria aperta dell'area; si può cambiare (prima quelle dell'area)
-  expect(scelta.getByText('Mappa di scelta: m-sala · 0 scelti')).toBeInTheDocument();
-  expect(ultimaScelta?.titolo).toBe('Forziere della sala');
+  // nella voce solo la riga del conto; la mappa è quella della pagina
+  expect(screen.getByLabelText('Scelta dei pin per Forziere della sala')).toHaveTextContent('Tocca i pin sulla mappa del Palazzo per collegarli o scollegarli; quelli grigi sono già raccolti o non ancora disponibili · 0 collegati');
+  expect(screen.queryByRole('searchbox')).toBeNull();
+  // parte dalla planimetria aperta dell'area; le planimetrie del Palazzo, prima quelle dell'area
+  const c = ultimoCollegamento()!;
+  expect(c).toMatchObject({ voce: 'p1', nome: 'Forziere della sala', mappaIniziale: 'm-sala', occupato: false });
+  expect(c.opzioniMappa.map((o) => [o.chiave, o.dettaglio])).toEqual([['m-sala', 'di quest’area'], ['m-torre', undefined]]);
+  expect([...c.scelti]).toEqual([]);
   const collegato = punto({ pin: [{ id: 7, nome: 'Forziere', tipo: 'forziere', mappa: 'm-sala', mappaNome: 'Palazzo di Kamoshida › Sala' }] });
-  collegaPinAlPunto.mockResolvedValue(collegato);
-  ultimaScelta!.onScegli({ id: 7, nome: 'Forziere' } as Parameters<SceltaPin['onScegli']>[0]);
+  let rispondi: (v: PuntoInteresseDto) => void = () => {};
+  collegaPinAlPunto.mockReturnValue(new Promise<PuntoInteresseDto>((r) => { rispondi = r; }));
+  c.onScegli({ id: 7, nome: 'Forziere' });
   await waitFor(() => expect(collegaPinAlPunto).toHaveBeenCalledWith('p1', 7, true));
+  // durante il salvataggio la pagina lo sa (i pin non rispondono); poi torna libero
+  await waitFor(() => expect(ultimoCollegamento()?.occupato).toBe(true));
+  rispondi(collegato);
   // la risposta non porta lo stato della partita (che il collegamento può cambiare): si rilegge la scheda subito, non solo a «Fatto»
   await waitFor(() => expect(onRicarica).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(ultimoCollegamento()?.occupato).toBe(false));
   expect(onPuntoAggiornato).not.toHaveBeenCalled();
-  // la ricerca della voce arriva alla mappa
-  fireEvent.change(scelta.getByRole('searchbox', { name: 'Cerca un pin sulla mappa' }), { target: { value: 'forz' } });
-  expect(ultimaScelta?.ricerca).toBe('forz');
-  // «Fatto» chiude la mappa e rilegge la scheda (gli stati delle partite si sono uniti)
-  fireEvent.click(scelta.getByRole('button', { name: 'Fatto' }));
+  // «Fatto» chiude il collegamento e rilegge la scheda (gli stati delle partite si sono uniti)
+  fireEvent.click(screen.getByRole('button', { name: 'Fatto' }));
   await waitFor(() => expect(onRicarica).toHaveBeenCalledTimes(2));
-  await waitFor(() => expect(screen.queryByLabelText('Scelta dei pin per Forziere della sala')).toBeNull());
+  await waitFor(() => expect(ultimoCollegamento()).toBeNull());
+  expect(screen.queryByLabelText('Scelta dei pin per Forziere della sala')).toBeNull();
+});
+
+it('senza la mappa della pagina «Collega pin» non c\'è; senza planimetria dell\'area a schermo c\'è lo stesso (la pagina mostra una del Palazzo), spento solo senza planimetrie; chiusa la guida il collegamento si chiude', () => {
+  render(<MemoryRouter><GuidaDellArea area={area([punto({})])} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={vi.fn()} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn()} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+  expect(screen.queryByRole('button', { name: 'Collega pin' })).toBeNull();
+  cleanup();
+  // un'area senza planimetria propria a schermo: si collega lo stesso, partendo dalla prima planimetria del Palazzo
+  render(<MemoryRouter><GuidaDellArea area={{ ...area([punto({})]), mappe: [] }} planimetrie={planimetrie} partitaId={4} mappaAperta={null} cambiaStato={vi.fn()} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn()} onCollegamento={onCollegamento} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+  expect(screen.getByRole('button', { name: 'Collega pin' })).not.toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
+  expect(ultimoCollegamento()).toMatchObject({ voce: 'p1', mappaIniziale: 'm-torre' });
+  cleanup();
+  // senza nessuna planimetria del Palazzo non c'è dove scegliere
+  render(<MemoryRouter><GuidaDellArea area={{ ...area([punto({})]), mappe: [] }} planimetrie={[]} partitaId={4} mappaAperta={null} cambiaStato={vi.fn()} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn()} onCollegamento={onCollegamento} /></MemoryRouter>);
+  fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+  expect(screen.getByRole('button', { name: 'Collega pin' })).toBeDisabled();
+  cleanup();
+  const { vista } = monta([punto({})]);
+  fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
+  expect(ultimoCollegamento()).not.toBeNull();
+  vista.unmount();
+  expect(ultimoCollegamento()).toBeNull();
 });
 
 it('dalla voce si scollega un pin, e il tocco su un pin già collegato lo scollega', async () => {
@@ -104,10 +135,11 @@ it('dalla voce si scollega un pin, e il tocco su un pin già collegato lo scolle
   collegaPinAlPunto.mockResolvedValue(punto({}));
   fireEvent.click(screen.getByRole('button', { name: 'Scollega Forziere da Forziere della sala' }));
   await waitFor(() => expect(collegaPinAlPunto).toHaveBeenCalledWith('p1', 7, false));
-  // la mappa di scelta parte da dove sta il suo pin (la Torre), non dalla planimetria aperta
+  // la mappa del collegamento parte da dove sta il suo pin (la Torre), non dalla planimetria aperta
   fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
-  expect(screen.getByText('Mappa di scelta: m-torre · 1 scelti')).toBeInTheDocument();
-  ultimaScelta!.onScegli({ id: 7, nome: 'Forziere' } as Parameters<SceltaPin['onScegli']>[0]);
+  expect(ultimoCollegamento()).toMatchObject({ voce: 'p1', mappaIniziale: 'm-torre' });
+  expect([...ultimoCollegamento()!.scelti]).toEqual([7]);
+  ultimoCollegamento()!.onScegli({ id: 7, nome: 'Forziere' });
   await waitFor(() => expect(collegaPinAlPunto).toHaveBeenLastCalledWith('p1', 7, false));
 });
 

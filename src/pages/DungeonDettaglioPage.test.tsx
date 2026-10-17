@@ -9,6 +9,7 @@ import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { scegliVoce, vociSelettore } from '../../test/selettore';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AreaDedaloDto, AreaDungeonDto, DungeonDettaglioDto, PartitaDto, PuntoInteresseDto } from '../types';
+import type { SceltaPin } from '../components/mappe/VisoreMappa';
 
 const { aggiornaCompendio, getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaAtterraggiDungeon, getMappa } = vi.hoisted(() => ({
   aggiornaCompendio: vi.fn(), getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
@@ -17,7 +18,11 @@ const { aggiornaCompendio, getDungeon, impostaStatoPunto, impostaSpilloRaccolto,
 vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDungeon, impostaStatoPunto, riordinaMappe, aggiornaMappa, creaMappa, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, aggiornaPresentazioneMappa, impostaAreeMappa, eliminaArea, impostaStanzaMappa, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, impostaAtterraggiDungeon, getMappa }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
-vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore }: { chiave: string; classeVisore?: string }) => <div data-classe-visore={classeVisore}>Visore: {chiave}</div> }));
+// il visore vero è provato a parte: qui dice planimetria e, collegando i pin (2026-10-18), che cosa riceve, e «tocca» il pin 3
+vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore, scelta }: { chiave: string; classeVisore?: string; scelta?: SceltaPin }) => (
+  <div data-classe-visore={classeVisore}>Visore: {chiave}{scelta ? ` · scelta per ${scelta.titolo} · ${scelta.scelti.size} scelti · sbiaditi ${String(scelta.attenuaNascosti)} · cerca «${scelta.ricerca ?? ''}»` : ''}
+    {scelta && <button type="button" onClick={() => scelta.onScegli({ id: 3, nome: 'Forziere della torre' } as Parameters<SceltaPin['onScegli']>[0])}>Tocca il pin 3</button>}</div>
+) }));
 // il pozzo finto: un pulsante che sceglie Qimranut, come toccarne lo strato
 vi.mock('../components/mappe/MappaMemento', () => ({ MappaMemento: ({ onSeleziona }: { onSeleziona?: (k: string) => void }) => <button type="button" onClick={() => onSeleziona?.('mementos-01-qimranut')}>Disegno del pozzo</button> }));
 vi.mock('../components/mappe/CollegamentoMappa', () => ({ CollegamentoMappa: () => null }));
@@ -188,6 +193,62 @@ it('scollegando un pin da una voce «ottenuto» la voce resta com’è nella par
   expect(riga).toHaveTextContent('· ottenuto');
   expect(riga).toHaveTextContent('da collegare');
   expect(screen.queryByRole('button', { name: 'Ottenuto' })).toBeNull();
+});
+
+it('«Collega pin» usa la mappa principale: barra con voce, conto, planimetria, ricerca e «Fatto»; tutti i pin, i nascosti sbiaditi (2026-10-18)', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  collegaPinAlPunto.mockResolvedValue({ ...palazzo(true).aree[0].punti[0], pin: [{ id: 3, nome: 'Forziere della torre', tipo: 'forziere', mappa: 'm-torre', mappaNome: 'Palazzo di Kamoshida › Torre' }] });
+  monta('kamoshida');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+  expect(screen.getByText('Visore: m-cancello')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /^Sicura del cancello/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
+  // la barra sopra la mappa principale; una sola mappa, quella principale, in modalità scelta
+  const barra = screen.getByRole('region', { name: 'Collegamento dei pin a Sicura del cancello' });
+  expect(barra).toHaveTextContent('Pin di «Sicura del cancello» · 0 collegati');
+  // la spiegazione del tocco e dei pin grigi la dice la voce, nella colonna accanto (la barra sta anche in 242 px)
+  expect(screen.getByLabelText('Scelta dei pin per Sicura del cancello')).toHaveTextContent('quelli grigi sono già raccolti o non ancora disponibili');
+  expect(screen.getAllByText(/^Visore:/)).toHaveLength(1);
+  expect(screen.getByText(/^Visore: m-cancello · scelta per Sicura del cancello · 0 scelti · sbiaditi true · cerca «»/)).toBeInTheDocument();
+  // nella voce resta il conto
+  expect(screen.getByLabelText('Scelta dei pin per Sicura del cancello')).toHaveTextContent('0 collegati');
+  // la ricerca della barra arriva alla mappa; la planimetria si cambia dalla barra, anche fra quelle delle altre aree
+  fireEvent.change(within(barra).getByRole('searchbox', { name: 'Cerca un pin sulla mappa' }), { target: { value: 'torre' } });
+  expect(screen.getByText(/cerca «torre»/)).toBeInTheDocument();
+  scegliVoce('Planimetria', /Torre/, barra);
+  expect(screen.getByText(/^Visore: m-torre · scelta per Sicura del cancello/)).toBeInTheDocument();
+  // collegando, da 1280 px la tela chiede anche l'altezza (la planimetria cresce davvero, non solo in larghezza); fuori dal collegamento 240 px
+  const visore = screen.getByText(/^Visore: m-torre/).closest('[data-classe-visore]')!;
+  expect(visore.getAttribute('data-classe-visore')!.split(' ')).toEqual(expect.arrayContaining(['xl:[--minimo-tela:min(560px,calc(100dvh_-_230px))]']));
+  expect(visore.getAttribute('data-classe-visore')).not.toContain('xl:[--minimo-tela:240px]');
+  // un tocco sulla mappa principale collega
+  fireEvent.click(screen.getByRole('button', { name: 'Tocca il pin 3' }));
+  await waitFor(() => expect(collegaPinAlPunto).toHaveBeenCalledWith('p1', 3, true));
+  // «Fatto» chiude: la mappa torna la planimetria dell'area, senza scelta
+  fireEvent.click(within(barra).getByRole('button', { name: 'Fatto: chiudi il collegamento dei pin' }));
+  await waitFor(() => expect(screen.queryByRole('region', { name: /Collegamento dei pin/ })).toBeNull());
+  expect(screen.getByText('Visore: m-cancello')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Tocca il pin 3' })).toBeNull();
+});
+
+it('collegando i pin l\'elenco del Palazzo si ritira (più spazio alla mappa) e «Fatto» lo rimette; un\'area senza planimetria collega lo stesso, su una del Palazzo (2026-10-18)', async () => {
+  // la Torre (k-02) non ha planimetrie sue: una voce lì
+  const p = palazzo(true);
+  const voce = { ...p.aree[0].punti[0], chiave: 'p9', nome: 'Leva della torre', tipo: 'meccanismo' as const };
+  getDungeon.mockResolvedValue({ ...p, aree: [p.aree[0], { ...p.aree[1], punti: [voce] }, p.aree[2]] });
+  monta('kamoshida?area=k-02');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+  expect(screen.getByRole('navigation', { name: 'Il Palazzo' })).toBeVisible();
+  expect(screen.queryByText(/^Visore:/)).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: /^Leva della torre/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
+  // la mappa c'è, sulla prima planimetria del Palazzo, con la barra; l'elenco del Palazzo si è ritirato
+  expect(screen.getByRole('region', { name: 'Collegamento dei pin a Leva della torre' })).toBeInTheDocument();
+  expect(screen.getByText(/^Visore: m-cancello · scelta per Leva della torre/)).toBeInTheDocument();
+  expect(screen.queryByRole('navigation', { name: 'Il Palazzo' })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Fatto: chiudi il collegamento dei pin' }));
+  await waitFor(() => expect(screen.getByRole('navigation', { name: 'Il Palazzo' })).toBeVisible());
+  expect(screen.queryByText(/^Visore:/)).toBeNull();
 });
 
 it('senza partita non ci sono spunte, e l’elenco resta consultabile', async () => {

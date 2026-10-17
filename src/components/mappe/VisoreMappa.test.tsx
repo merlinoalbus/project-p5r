@@ -678,6 +678,22 @@ describe('VisoreMappa in modalità scelta', () => {
     expect(screen.getByRole('button', { name: 'Forziere: Forziere del corridoio (tocca per collegare)' })).toBeInTheDocument();
   });
 
+  it('con «attenuaNascosti» i pin che fuori dalla scelta sarebbero nascosti (raccolti, non disponibili) sono grigi e lo dicono; gli altri no (2026-10-18)', () => {
+    monta({ incorporato: true, scelta: { titolo: 'Voce', scelti: new Set([2]), onScegli: vi.fn(), attenuaNascosti: true } });
+    const raccolto = screen.getByRole('button', { name: /^Forziere: Scrigno raccolto · / });
+    expect(raccolto).toHaveClass('spillo-mappa--nascosto-in-scelta');
+    expect(raccolto).toHaveClass('spillo-mappa--scelto');
+    expect(raccolto.getAttribute('aria-label')).toMatch(/\(collegato: tocca per scollegare\)$/);
+    const nonDisponibile = screen.getByRole('button', { name: 'Attività: Bancarella estiva · non ancora disponibile (tocca per collegare)' });
+    expect(nonDisponibile).toHaveClass('spillo-mappa--nascosto-in-scelta');
+    const libero = screen.getByRole('button', { name: 'Forziere: Scrigno da aprire (tocca per collegare)' });
+    expect(libero).not.toHaveClass('spillo-mappa--nascosto-in-scelta');
+    // senza l'opzione nessuno è grigio (la scelta di prima)
+    cleanup();
+    monta({ incorporato: true, scelta: { titolo: 'Voce', scelti: new Set(), onScegli: vi.fn() } });
+    expect(document.querySelectorAll('.spillo-mappa--nascosto-in-scelta')).toHaveLength(0);
+  });
+
   it('mentre si salva un tocco i pin non rispondono', () => {
     const onScegli = vi.fn();
     monta({ incorporato: true, scelta: { titolo: 'Voce', scelti: new Set(), onScegli, occupato: true } });

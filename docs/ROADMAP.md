@@ -1265,3 +1265,14 @@ alta), tutte di sviluppo (`npm audit --omit=dev --audit-level=high`, il gate del
 | 1 | Server: `copiaPuntiInArea` (regole dello spostamento più area diversa; voce, passi e schede della guida senza mappa con immagini duplicate; niente stati né pin; tutto o niente), `chiaveLiberaPunto` estratta da `creaPunto`, rotta `POST /api/compendio/punti/copia-in-area` (201, `PuntiCopiatiDto`), OpenAPI; test API, 7 varianti rosse (+ R3 rifatta) | fatto, APPROVATO al 1° esame |
 | 2 | Interfaccia: «Copia o sposta voci», «Copia in…» / «Sposta in…», `TrasferisciVociInArea` (era `SpostaVociInArea`) con il modo; barra su due righe nella colonna stretta; destinazione della scheda e immagini senza contenuto (note del validatore); test, 7 varianti rosse; prova su una copia della produzione (2 voci reali di Kamoshida dall'interfaccia, una di Shido con scheda: originali identici, copie senza stati né pin), misure a 1280×689, 768×1024, 375×812 | fatto, APPROVATO al 1° esame |
 | 3 | Documenti, commit, push e pipeline | fatto; commit `9c8314bb` su main, pipeline run 39075301003 riuscita (verify, build-backend, build-frontend) |
+
+## Richiesta del 18 ottobre 2026 (2) — Collegare i pin dalla mappa principale; filtri per tipo compatti
+
+«Scegliere dalla mappa principale e non dalla mappa in piccolo… visualizzare tutti i pin… anche quelli nascosti»; i filtri per tipo
+della guida dell'area «poco pensati». Scelte in `DECISIONI.md` (2026-10-18).
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| 1 | Collegamento sulla mappa principale: `CollegamentoPin`/`onCollegamento`, `BarraCollegamentoPin`, modalità scelta con i nascosti grigi, elenco del Palazzo ritirato e tela più alta durante il collegamento, aree senza planimetria propria; test, 12 varianti rosse; prova su una copia della produzione (Madarame, Kaneshiro), misure a 1280×689, 1366×657, 768×1024, 375×812 con la scala del disegno | fatto, RIGETTATO al 1° esame (area senza planimetria esclusa, mappa stretta a 1280: chiesto all'utente), RIGETTATO al 2° (più larga ma non più grande: tela più alta, scala misurata); commit e push su richiesta dell'utente («committalo e pushalo») prima del 3° esame |
+| 2 | Filtri per tipo su una riga ripiegabile | da fare |
+| 3 | Documenti, commit, push e pipeline | da fare |

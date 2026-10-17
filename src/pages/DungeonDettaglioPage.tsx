@@ -19,7 +19,7 @@
 // piani si generano.
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { aggiornaArea, aggiornaCompendio, aggiornaDungeon, eliminaArea, getAlberoMappe, getDungeon, impostaAreeMappa, impostaStatoPunto } from '../services/api';
@@ -44,7 +44,8 @@ import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
 import { raccoltaDeiDedali, ricalcolaDedalo } from '../utils/dedali';
 import { dataBreve } from '../utils/testoBreve';
 import type { AreaDedaloDto, AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../types';
-import { GuidaDellArea } from '../components/guida/GuidaDellArea';
+import { GuidaDellArea, type CollegamentoPin } from '../components/guida/GuidaDellArea';
+import { BarraCollegamentoPin } from '../components/guida/BarraCollegamentoPin';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
@@ -246,6 +247,25 @@ export function DungeonDettaglioPage() {
   // Una planimetria scelta dal pannello «Planimetrie» vale **su tutto il Palazzo**, anche quando non
   // è legata a nessuna area: è il modo di guardare (e segnare) una tavola che la guida non aggancia.
   const [planimetriaLibera, setPlanimetriaLibera] = useState<string | null>(null);
+  // Il collegamento dei pin di una voce della guida si fa sulla mappa principale (2026-10-18): la guida lo apre e dice voce, pin e
+  // gesti; qui la planimetria mostrata durante il collegamento (parte da dove sta già un pin della voce) e la ricerca. Una voce
+  // nuova riparte dalla sua planimetria e con la ricerca vuota, e la mappa viene portata in vista (sul telefono sta sopra la guida).
+  const [collegamento, setCollegamento] = useState<CollegamentoPin | null>(null);
+  const [mappaCollegamento, setMappaCollegamento] = useState<string | null>(null);
+  const [ricercaPin, setRicercaPin] = useState('');
+  const voceInCollegamento = useRef<string | null>(null);
+  const riquadroMappa = useRef<HTMLDivElement | null>(null);
+  /** Il collegamento aperto (o chiuso) dalla guida dell'area: cambiata la voce, planimetria iniziale e ricerca vuota. */
+  const aggiornaCollegamento = useCallback((c: CollegamentoPin | null) => {
+    if ((c?.voce ?? null) !== voceInCollegamento.current) {
+      voceInCollegamento.current = c?.voce ?? null;
+      setMappaCollegamento(c?.mappaIniziale ?? null);
+      setRicercaPin('');
+    }
+    setCollegamento(c);
+  }, []);
+  const voceCollegata = collegamento?.voce ?? null;
+  useEffect(() => { if (voceCollegata) riquadroMappa.current?.scrollIntoView?.({ block: 'start' }); }, [voceCollegata]);
   // L'atlante serve all'elenco del Palazzo: da lì vengono il nome di presentazione, il
   // gruppo che dice quali tavole sono la stessa stanza e l'etichetta di ogni versione. Si carica
   // subito, perché l'elenco è la colonna di atterraggio, e **si rilegge dopo ogni modifica**:
@@ -255,6 +275,18 @@ export function DungeonDettaglioPage() {
   const albero = useCarica(() => (memento ? Promise.resolve([]) : getAlberoMappe()), [memento]);
   const planimetriaAperta = (d?.planimetrie ?? []).find((p) => p.chiave === planimetriaLibera) ?? null;
   const mappaScelta = planimetriaAperta?.chiave ?? (area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null);
+  // Collegando i pin la mappa principale mostra la planimetria del collegamento: anche in un'area che non ne ha una sua (la barra
+  // sceglie fra quelle del Palazzo, come faceva la mappa nella voce), con la barra sopra e la modalità scelta.
+  const mappaMostrata = collegamento ? (mappaCollegamento ?? mappaScelta) : mappaScelta;
+  const barraCollegamento = collegamento && mappaMostrata
+    ? <div ref={riquadroMappa} className="scroll-mt-2"><BarraCollegamentoPin collegamento={collegamento} mappa={mappaMostrata} onMappa={setMappaCollegamento} ricerca={ricercaPin} onRicerca={setRicercaPin} /></div>
+    : null;
+  // Da 1280 px la mappa prende l'altezza che la colonna le lascia, mai meno di 240 px di tela (2026-09-30, 2026-10-15). Collegando i
+  // pin la larghezza in più (l'elenco del Palazzo si ritira) non basterebbe: una planimetria quadrata si adatta al lato corto, e a
+  // 1280×689 restava alla stessa scala. Allora la tela chiede anche l'altezza, fino a 560 px e sempre dentro lo schermo (la colonna
+  // scorre): il disegno cresce davvero, e i pin vicini si separano.
+  const classeVisoreMappa = `h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-fit xl:flex-1 ${collegamento ? 'xl:[--minimo-tela:min(560px,calc(100dvh_-_230px))]' : 'xl:[--minimo-tela:240px]'}`;
+  const sceltaPin = collegamento ? { titolo: collegamento.nome, scelti: collegamento.scelti, occupato: collegamento.occupato, ricerca: ricercaPin, attenuaNascosti: true, onScegli: (s: { id: number; nome: string }) => collegamento.onScegli(s) } : undefined;
   /** Apre un'area mettendola nell'URL (che perde gli altri parametri) e azzera la planimetria scelta e quella libera. */
   const scegliArea = (k: string) => { setParams({ area: k }); setPianta(null); setPlanimetriaLibera(null); };
   /** Un'area eliminata dalla guida: se era quella aperta, la scheda torna alla prima (senza parametro). */
@@ -450,14 +482,16 @@ export function DungeonDettaglioPage() {
             );
           })()}
 
-          {!memento && <div className="grid grid-cols-1 items-start gap-4 lg:min-h-[280px] lg:flex-1 lg:grid-rows-[minmax(0,1fr)] lg:items-stretch lg:grid-cols-[360px_minmax(0,1fr)]">
+          {/* collegando i pin (2026-10-18, scelta dell'utente «Più spazio mentre colleghi») l'elenco del Palazzo si ritira e la mappa
+              prende il suo posto: a 1280 px passa da circa 242 a circa 600 px; «Fatto» lo rimette */}
+          {!memento && <div className={`grid grid-cols-1 items-start gap-4 lg:min-h-[280px] lg:flex-1 lg:grid-rows-[minmax(0,1fr)] lg:items-stretch ${collegamento ? '' : 'lg:grid-cols-[360px_minmax(0,1fr)]'}`}>
             {/* ---- Le aree: colonna da 1024 px in su, fila scorrevole sotto ---- */}
             {/* **Un elenco solo.** Le stanze in ordine di percorso con i loro comandi, e in coda le
                 aree della guida ancora da collegare: è la lista di atterraggio e insieme il posto
                 dove si sistema il Palazzo, senza un secondo pannello da scoprire. Sotto i 1024 px
                 la fila di chip resta come salto rapido fra le aree. */}
             {!memento && (
-              <nav aria-label="Il Palazzo" className="order-2 lg:order-none lg:min-h-0">
+              <nav aria-label="Il Palazzo" className="order-2 lg:order-none lg:min-h-0" hidden={!!collegamento}>
                 {/* **Niente fila di chip sotto i 1024 px.** C'era, e rimetteva in piedi la doppia
                     lista appena tolta: diciotto aree in otto righe di chip sopra l'elenco che le
                     contiene già. L'elenco vale a tutte le larghezze.
@@ -509,7 +543,8 @@ export function DungeonDettaglioPage() {
                 {area.descrizione && <TestoRipiegabile testo={area.descrizione} massimo={140} className="text-[13px] text-text-secondary" />}
                 {/* La planimetria dell'atlante legata all'area, se c'è. */}
                 {mappaScelta && <>
-                  {area.mappe.length > 1 && (
+                  {/* collegando i pin la planimetria la sceglie la barra del collegamento (anche fra quelle delle altre aree) */}
+                  {area.mappe.length > 1 && !collegamento && (
                     <Selettore etichetta="Planimetria" valore={mappaScelta} opzioni={area.mappe.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={setPianta} />
                   )}
                   {/* Un'area può stare su più planimetrie (decisione dell'utente, 2026-10-04): qui se ne aggiunge un'altra, o si
@@ -555,7 +590,10 @@ export function DungeonDettaglioPage() {
                       I 240 px sono **della tela** (2026-10-15): `--minimo-tela` li chiede al visore e il riquadro, alto almeno
                       quanto il suo contenuto (`min-h-fit`), aggiunge la barra. Prima erano del riquadro, e a 1280 px la
                       barra ne prendeva fino a 180: la tela restava alta 58. */}
-                  <MappaIncorporata chiave={mappaScelta} versione={versioneStati} classeVisore="h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-fit xl:flex-1 xl:[--minimo-tela:240px]" onCambiato={() => void dati.ricarica()} />
+                  {/* Collegando i pin di una voce (2026-10-18) la stessa mappa diventa quella di scelta: la barra sopra, tutti i pin
+                      (i nascosti sbiaditi), un tocco collega o scollega; la planimetria può essere un'altra del Palazzo. */}
+                  {barraCollegamento}
+                  <MappaIncorporata chiave={mappaMostrata ?? mappaScelta} versione={versioneStati} classeVisore={classeVisoreMappa} onCambiato={() => void dati.ricarica()} scelta={sceltaPin} />
                   {/* Da 1280 px la colonna è alta quanto lo schermo: la nota lascia il posto alla mappa, che ha già «Modifica mappa». */}
                   <p className="m-0 text-[11px] text-text-muted xl:hidden">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
                 </>}
@@ -564,7 +602,13 @@ export function DungeonDettaglioPage() {
                     presa da un sito, che copriva il fatto che nessuno avesse ancora detto quale
                     tavola dell'atlante è quest'area. Le tavole ci sono quasi sempre: manca il
                     legame, e questo è il posto per farlo — la scelta vale per tutte le partite. */}
-                {!mappaScelta && (
+                {/* un'area senza planimetria propria: collegando i pin la mappa c'è lo stesso, su una planimetria del Palazzo */}
+                {!mappaScelta && barraCollegamento && mappaMostrata && <>
+                  {barraCollegamento}
+                  <MappaIncorporata chiave={mappaMostrata} versione={versioneStati} classeVisore={classeVisoreMappa} onCambiato={() => void dati.ricarica()} scelta={sceltaPin} />
+                </>}
+                {/* collegando i pin non serve: la mappa del collegamento prende il posto (e l'altezza) */}
+                {!mappaScelta && !collegamento && (
                   <div className="flex flex-col gap-2 rounded-md bg-white/[0.04] px-3 py-2 text-[12px]" role="status">
                     <p className="m-0 text-text-muted">Quest’area non ha ancora una planimetria: sceglila fra le tavole del Palazzo — anche una che contiene già altre aree, si aggiunge a quelle. Quel che c’è da raccogliere sta nella colonna accanto.</p>
                     {d.planimetrie.length > 0
@@ -597,7 +641,7 @@ export function DungeonDettaglioPage() {
 
                 {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
                 <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta} areePalazzo={d.aree}
-                  cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />
+                  cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} onCollegamento={aggiornaCollegamento} />
               </aside>
             </div>
           </div>}
