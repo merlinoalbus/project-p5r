@@ -406,8 +406,8 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'POST /api/compendio/punti/copia-in-area': {
     sommario: 'Copia più voci della guida insieme in un\'altra area dello stesso Palazzo',
-    descrizione: 'Corpo `{ chiavi, area }` come lo spostamento (2026-10-18). Le stesse regole (non nei Memento, area esistente dello stesso Palazzo, non un passo) e in più un\'area diversa da quella della voce (400 `copia-nella-stessa-area`). Ogni voce diventa una voce nuova (chiave nuova dal nome, `fonte` «utente») in fondo all\'area, nell\'ordine della guida, con i passi dell\'Enigma e le schede della guida senza mappa copiati (le immagini delle schede duplicate). Non si copiano lo stato nelle partite (la copia parte da fare) né i collegamenti ai pin delle planimetrie. Tutto o niente.',
-    risposta: '201, `PuntiCopiatiDto`: `area` e per ogni voce `{ origine, copia, passi, schede }`, nell\'ordine d\'arrivo',
+    descrizione: 'Corpo `{ chiavi, area }` come lo spostamento (2026-10-18). Le stesse regole (non nei Memento, area esistente dello stesso Palazzo, non un passo) e in più un\'area diversa da quella della voce (400 `copia-nella-stessa-area`). Ogni voce diventa una voce nuova (chiave nuova dal nome, `fonte` «utente») in fondo all\'area, nell\'ordine della guida, con i passi dell\'Enigma e le schede della guida senza mappa copiati (le immagini delle schede duplicate). La copia si collega agli stessi pin delle planimetrie dell\'originale con uno stato suo: parte da fare (lo stato dell\'originale non si copia) e il pin è fatto quando lo sono tutte le sue voci. Tutto o niente.',
+    risposta: '201, `PuntiCopiatiDto`: `area` e per ogni voce `{ origine, copia, passi, schede, pin }` (`pin`: i collegamenti ai pin copiati, passi compresi), nell\'ordine d\'arrivo',
     errori: [[400, 'area-solo-nei-palazzi'], [400, 'area-di-altro-palazzo'], [400, 'passo-segue-enigma'], [400, 'copia-nella-stessa-area'], [404, 'area-non-trovata'], [404, 'punto-non-trovato']],
   },
   'PUT /api/compendio/punti/:chiave/sposta': {

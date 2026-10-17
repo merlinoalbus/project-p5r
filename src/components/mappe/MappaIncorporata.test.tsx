@@ -42,3 +42,12 @@ it('senza planimetria la scheda dei collegamenti non riceve l’altezza del viso
   expect(scheda).not.toHaveClass('xl:flex-1');
   expect(scheda.style.height).toBe('');
 });
+
+it('una versione nuova (stati cambiati dalla pagina) non rifà la risoluzione e non smonta il visore: zoom e posizione restano', async () => {
+  haPlanimetria.mockReturnValue(true);
+  const { rerender } = render(<MemoryRouter><MappaIncorporata chiave="m-sala" versione={1} /></MemoryRouter>);
+  const visore = await screen.findByTestId('visore');
+  rerender(<MemoryRouter><MappaIncorporata chiave="m-sala" versione={2} /></MemoryRouter>);
+  expect(screen.getByTestId('visore')).toBe(visore);
+  expect(risolviMappa).toHaveBeenCalledTimes(1);
+});

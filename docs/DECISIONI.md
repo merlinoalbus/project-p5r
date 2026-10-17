@@ -1989,3 +1989,14 @@ touch del progetto); i nomi lunghi vanno a capo invece di essere tagliati.
 
 L'utente: «ho anche chiesto di essere più veloce e validare solo alla fine le cose». Il galaxy-task-validator si chiama una volta, sul
 lavoro finito, non dopo ogni voce del piano; restano le verifiche proprie (typecheck, lint, test, browser ai tre formati, documenti).
+
+## 2026-10-18 — I test solo su richiesta, sul punto in sviluppo
+
+L'utente, durante il lotto del collegamento dei pin: «devi rimuovere tutti i test», «troppi test troppi giri», «1800 test per un fe
+fatto male», poi corretto: «non devi cancellare i file di test devi evitare che i test vengano eseguiti ad ogni run» «e ad ogni
+modifica», «i test li fai contestualmente allo sviluppo e basta», «devono essere lanciati on demand su singoli punti e aree... non
+cross su tutto». Una rimozione dei file era iniziata e, prima di qualunque commit, è stata annullata: nessun file di test è cambiato.
+Che cosa ne segue: il passo «Tests» esce da `ci.yml` (il gate resta typecheck, lint, audit); i test si lanciano su richiesta, sul solo
+percorso indicato — in locale `npx vitest run <percorso>`, in GitHub il workflow `test-su-richiesta.yml` (`workflow_dispatch`, input
+`percorso`; il comando passa il percorso come filtro, senza `--`, che lo faceva ignorare e partire la suite intera). CLAUDE.md
+(procedura, punto 3, e avvio rapido) dice lo stesso.

@@ -577,19 +577,19 @@ describe('«Copia o sposta voci»: più voci insieme in un\'altra area del Palaz
     expect(within(finestra).getByText(/2 voci di 2\. Sala Centrale, con 1 passo di Enigma\. Ogni voce diventa una voce nuova/)).toBeInTheDocument();
     expect(within(finestra).getByText(/stato nelle partite e pin delle planimetrie restano all’originale/)).toBeInTheDocument();
     expect(vociSelettore('Area di destinazione', finestra)).toEqual(['1. Ingresso', '3. Torre']);
-    copiaPuntiInArea.mockResolvedValue({ area: 'k-03', copiate: [{ origine: 'e1', copia: 'k-03-e1', passi: 1, schede: 0 }, { origine: 'p3', copia: 'k-03-p3', passi: 0, schede: 2 }] });
+    copiaPuntiInArea.mockResolvedValue({ area: 'k-03', copiate: [{ origine: 'e1', copia: 'k-03-e1', passi: 1, schede: 0, pin: 2 }, { origine: 'p3', copia: 'k-03-p3', passi: 0, schede: 2, pin: 0 }] });
     fireEvent.click(within(finestra).getByRole('button', { name: /^Copia in 3\. Torre/ }));
     await waitFor(() => expect(copiaPuntiInArea).toHaveBeenCalledWith({ chiavi: ['e1', 'p3'], area: 'k-03' }));
     expect(spostaPuntiInArea).not.toHaveBeenCalled();
     await waitFor(() => expect(onRicarica).toHaveBeenCalled());
-    expect(notifica).toHaveBeenCalledWith('success', '2 voci copiate in 3. Torre, con 1 passo di Enigma, in fondo: per tutte le partite.');
+    expect(notifica).toHaveBeenCalledWith('success', '2 voci copiate in 3. Torre, con 1 passo di Enigma, collegate agli stessi 2 pin (da fare), in fondo: per tutte le partite.');
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(screen.queryByRole('region', { name: 'Copia o sposta voci in un’altra area' })).toBeNull();
     // una voce sola, senza passi: al singolare e senza passi; un errore resta in notifica con la finestra aperta
     apriScelta();
     fireEvent.click(screen.getByRole('checkbox', { name: /Forziere della sala/ }));
     fireEvent.click(within(barra()).getByRole('button', { name: /Copia in…/ }));
-    copiaPuntiInArea.mockResolvedValueOnce({ area: 'k-03', copiate: [{ origine: 'p1', copia: 'k-03-p1', passi: 0, schede: 0 }] });
+    copiaPuntiInArea.mockResolvedValueOnce({ area: 'k-03', copiate: [{ origine: 'p1', copia: 'k-03-p1', passi: 0, schede: 0, pin: 0 }] });
     fireEvent.click(within(screen.getByRole('dialog', { name: 'Copia 1 voce in un’altra area' })).getByRole('button', { name: /^Copia in 3\. Torre/ }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', '1 voce copiata in 3. Torre, in fondo: per tutte le partite.'));
     apriScelta();

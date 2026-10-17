@@ -57,5 +57,6 @@ npm install && cp .env.example .env
 bash scripts/start-all.sh      # BE 3101 + FE 5273 (log in BE.log / FE.log)
 bash scripts/restart-be.sh     # solo se il BE si è fermato: gira in `tsx watch` e si riavvia da solo a ogni salvataggio in server/
                                # ATTENZIONE: una migrazione nuova si applica subito ai dati di data/ (con la copia di avvio in data/backups)
-npm run typecheck && npm run lint && npm test
+npm run typecheck && npm run lint
+npx vitest run <percorso>        # i test solo su richiesta, sul punto o sull'area in sviluppo: mai tutta la suite
 ```

@@ -691,7 +691,9 @@ che supera la precedente esclusione.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
   radice del pidfile o all'ultimo runtime nostro (mai oltre un `bash` diverso dal pidfile), poi termina l'albero — Linux: SIGTERM,
   attesa ≤5 s, SIGKILL ai superstiti; Windows: `taskkill //T` sul WINPID (tradotto dal PID MSYS). Provato su Windows e WSL Ubuntu.
-- CI (`.github/workflows/ci.yml`, anche riusabile con `workflow_call`): typecheck, lint (uno, bloccante), test, audit.
+- CI (`.github/workflows/ci.yml`, anche riusabile con `workflow_call`): typecheck, lint (uno, bloccante), audit. I test non girano a ogni push
+  (2026-10-18): si lanciano su richiesta sul solo percorso indicato, in locale `npx vitest run <percorso>` o con `test-su-richiesta.yml`
+  (`workflow_dispatch`, input `percorso`).
 - Immagini (`docker-publish.yml`): dopo il gate `verify` (lo stesso `ci.yml`, audit compreso), build & push su GHCR
   `merlinoalbus/project-p5r-{backend,frontend}` con tag `latest` e `sha`; cache GHA separate per le due immagini. Il frontend
   installa senza script nativi (`npm ci --ignore-scripts`). nginx comprime testi, JSON e SVG (gzip).
@@ -812,8 +814,9 @@ guida (area, poi posto), una voce già lì resta dov'è, tutto o niente in una t
 quella della voce (`copia-nella-stessa-area`); ogni voce diventa una voce nuova (`chiaveLiberaPunto`, la stessa di `creaPunto`; `fonte`
 «utente»; colonne copiate lette dallo schema, `colonneTranne`) in fondo nell'ordine della guida, coi passi dell'Enigma (stesso ordine) e
 con le schede della guida senza mappa di voce e passi (`copiaSchedeDellaVoce`: spillo, destinazione, immagini «spillo» duplicate con
-chiave propria; uid da `assegnaUidMancanti`); non porta lo stato nelle partite né i collegamenti ai pin delle planimetrie
-(`spillo_voce`), che restano dell'originale; tutto o niente. Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
+chiave propria; uid da `assegnaUidMancanti`) e collegata agli stessi pin delle planimetrie dell'originale (`copiaPinDellaVoce`:
+`spillo_voce`, poi `allineaStatiPunto`) con uno stato suo: parte da fare, l'originale tiene il suo e il pin è fatto quando lo sono tutte le
+sue voci (voci indipendenti); tutto o niente. Ogni voce si collega a uno o più pin delle planimetrie **del suo Palazzo** (`PUT` / `DELETE
 /api/compendio/punti/:chiave/pin/:spillo`, `collegaPinAlPunto`): il collegamento sta in una tabella sua, **molti a molti**
 (`spillo_voce(spillo_id, voce_chiave)`, migrazione 098 del 2026-10-09; prima il campo `spillo.voce_chiave` della 094, che la 098 copia
 e toglie ricostruendo `spillo`; `ON DELETE CASCADE` dai due lati), separato dal riferimento, che resta la destinazione o il Confidente

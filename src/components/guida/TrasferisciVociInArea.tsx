@@ -61,7 +61,10 @@ export function TrasferisciVociInArea({ modo, voci, area, aree, passi, onChiudi,
         const esito = await copiaPuntiInArea(corpo);
         const n = esito.copiate.length;
         const passiCopiati = esito.copiate.reduce((s, c) => s + c.passi, 0);
-        notifica('success', `${quanteVoci(n)} ${n === 1 ? 'copiata' : 'copiate'} in ${nomeArea(scelta)}${conPassi(passiCopiati)}, in fondo: per tutte le partite.`);
+        const pinCopiati = esito.copiate.reduce((s, c) => s + c.pin, 0);
+        // i pin collegati alla copia sono gli stessi dell'originale, con uno stato suo (2026-10-18)
+        const conPin = pinCopiati > 0 ? `, ${pinCopiati === 1 ? 'collegata allo stesso pin' : `collegate agli stessi ${pinCopiati} pin`} (da fare)` : '';
+        notifica('success', `${quanteVoci(n)} ${n === 1 ? 'copiata' : 'copiate'} in ${nomeArea(scelta)}${conPassi(passiCopiati)}${conPin}, in fondo: per tutte le partite.`);
       } else {
         const esito = await spostaPuntiInArea(corpo);
         notifica('success', `${quanteVoci(esito.spostate.length)} ${esito.spostate.length === 1 ? 'spostata' : 'spostate'} in ${nomeArea(scelta)}${conPassi(passi)}, in fondo: per tutte le partite.`);

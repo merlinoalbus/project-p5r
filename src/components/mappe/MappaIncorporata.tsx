@@ -51,11 +51,14 @@ interface Props {
   scelta?: SceltaPin;
 }
 
-/** Risolve prima la chiave ricevuta (si ricarica anche al cambio di `versione`): se è una sezione
+/** Risolve prima la chiave ricevuta: se è una sezione
  * della guida mostra un riquadro col collegamento al luogo che la contiene, aperto su quell'area;
- * se è una mappa passa a `MappaIncorporataRisolta` con la chiave risolta. */
+ * se è una mappa passa a `MappaIncorporataRisolta` con la chiave risolta. Solo la chiave rifà la risoluzione: la `versione`
+ * (gli stati cambiati dalla pagina) la rilegge `useMappaPartita` tenendo la mappa a schermo. Prima la cambiava anche lei, e ogni
+ * tocco di un pin nel «Collega pin» smontava la mappa sotto uno spinner: zoom azzerato e colonna che saltava («ogni volta che
+ * clicco su un pin mi si sposta la mappa», «mi si resetta anche lo zoom», 2026-10-18). */
 export function MappaIncorporata(props: Props) {
-  const esito = useCarica(() => risolviMappa(props.chiave), [props.chiave, props.versione]);
+  const esito = useCarica(() => risolviMappa(props.chiave), [props.chiave]);
   return <PageState isLoading={esito.caricamento} error={esito.errore} onRetry={esito.ricarica}>
     {esito.dati?.tipo === 'guida' ? <div className="card flex flex-col gap-2">
       <h3 className="m-0 text-base">{esito.dati.nome}</h3>

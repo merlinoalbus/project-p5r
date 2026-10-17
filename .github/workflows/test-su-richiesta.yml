@@ -36,4 +36,4 @@ jobs:
       - name: Test del percorso indicato
         env:
           PERCORSO: ${{ inputs.percorso }}
-        run: npx vitest run -- "$PERCORSO"
+        run: npx vitest run "$PERCORSO"

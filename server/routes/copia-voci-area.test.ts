@@ -67,6 +67,9 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     const pin = prepared("SELECT s.id FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave WHERE s.mappa_chiave IS NOT NULL ORDER BY s.id LIMIT 1").pluck().get() as number;
     prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(pin, a.chiave);
     prepared("INSERT INTO utente.spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, (SELECT uid FROM spillo WHERE id = ?), 1, 'x')").run(partita, pin);
+    // un pin di un passo: va con la copia del passo
+    const pinPasso = prepared("SELECT s.id FROM spillo s WHERE s.mappa_chiave IS NOT NULL AND s.id <> ? ORDER BY s.id LIMIT 1").pluck().get(pin) as number;
+    prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(pinPasso, passo1.chiave);
 
     const attese = elenco(INGRESSO).filter((c) => [a.chiave, enigma.chiave, scheda.voce].includes(c));
     expect(attese).toEqual([scheda.voce, a.chiave, enigma.chiave]);
@@ -82,7 +85,7 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     const esito = r.body.data as PuntiCopiatiDto;
     expect(esito.area).toBe(SALA);
     expect(esito.copiate.map((c) => c.origine)).toEqual(attese);
-    expect(esito.copiate.map((c) => [c.passi, c.schede])).toEqual([[0, schedaPrima.length], [0, 0], [2, 1]]);
+    expect(esito.copiate.map((c) => [c.passi, c.schede, c.pin])).toEqual([[0, schedaPrima.length, 0], [0, 0, 1], [2, 1, 1]]);
     const copie = esito.copiate.map((c) => c.copia);
     expect(new Set([...copie, ...attese]).size).toBe(6);
     // in fondo alla sala, nell'ordine; l'ingresso non cambia
@@ -114,6 +117,8 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     expect(immaginiCopia[0].contenuto!.toString()).toBe('immagine della scheda');
     expect(immaginiDi(scheda.id)).toEqual(immaginiPrima);
     const passoCopia2 = prepared("SELECT chiave FROM punto_interesse WHERE contenitore_chiave = ? AND nome = 'Secondo passo'").pluck().get(copie[2]) as string;
+    const passoCopia1 = prepared("SELECT chiave FROM punto_interesse WHERE contenitore_chiave = ? AND nome = 'Primo passo'").pluck().get(copie[2]) as string;
+    expect(prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(pinPasso)).toEqual([passo1.chiave, passoCopia1].sort());
     expect(schedeDi(passoCopia2)).toMatchObject([{ area_guida_chiave: SALA, nome: 'Scheda del passo', descrizione: 'leva', origine: 'utente' }]);
     expect(schedeDi(passo2.chiave).map((s) => s.id)).toEqual([schedaPasso]);
     // il pin di planimetria è anche della copia, ma ogni voce ha il suo stato: la copia parte da fare, l'originale resta ottenuto, e il
