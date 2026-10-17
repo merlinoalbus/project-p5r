@@ -1,0 +1,39 @@
+# ============================================================
+# Test su richiesta — solo il punto o l'area indicati, mai tutto il progetto
+# ============================================================
+# Richiesta dell'utente (2026-10-18): i test non girano a ogni push né a ogni modifica; «devono essere lanciati on demand su
+# singoli punti e aree... non cross su tutto». Si avvia a mano (Actions → «Test su richiesta» → Run workflow, oppure
+# `gh workflow run test-su-richiesta.yml -f percorso=server/routes/copia-voci-area.test.ts`) con il file o la cartella da provare.
+# In locale è lo stesso comando: `npx vitest run <percorso>`.
+
+name: Test su richiesta
+
+on:
+  workflow_dispatch:
+    inputs:
+      percorso:
+        description: 'File o cartella dei test da lanciare (es. server/routes/copia-voci-area.test.ts o src/pages/)'
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # il percorso passa da una variabile d'ambiente, non interpolato nel comando
+      - name: Test del percorso indicato
+        env:
+          PERCORSO: ${{ inputs.percorso }}
+        run: npx vitest run -- "$PERCORSO"

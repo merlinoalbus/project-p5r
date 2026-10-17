@@ -38,8 +38,8 @@ italiana tramite la tabella `traduzione`.
 2. Ogni step della roadmap, una volta completato, va sottoposto al **galaxy-task-validator** (agent di sola
    verifica, autorità pari all'utente). Senza APPROVATO non si passa allo step successivo.
 3. Ogni modifica: typecheck + lint verdi, verifica runtime (BE/FE avviati, controllo nel browser), nessuna regressione. I test (Vitest)
-   restano nel repository ma NON si eseguono a ogni modifica né nella pipeline (richiesta dell'utente del 2026-10-18): si scrivono
-   e si lanciano solo quelli del codice che si sta sviluppando, contestualmente allo sviluppo.
+   restano nel repository ma NON si eseguono a ogni modifica né nella pipeline (richiesta dell'utente del 2026-10-18): si lanciano
+   su richiesta, solo sul punto o sull'area in sviluppo (`npx vitest run <percorso>`, o il workflow «Test su richiesta»), mai su tutto.
 4. Aggiornare `docs/ROADMAP.md` (stato) e, se cambia qualcosa di strutturale, `docs/ARCHITETTURA.md` / `docs/DECISIONI.md`.
 5. Niente mockup, placeholder o regressioni senza autorizzazione esplicita dell'utente.
 
