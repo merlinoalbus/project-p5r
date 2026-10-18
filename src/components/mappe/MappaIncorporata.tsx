@@ -104,7 +104,8 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
     <h3 className="m-0">{mappa.nome}</h3>
     {/* Una planimetria appena aggiunta non ha ancora l'immagine: qui si va dritti a caricarla («come dovrei fare per aggiungere una
         planimetria?», 2026-10-18; prima la strada era la pagina del luogo, «Modifica luogo», poi la sezione Mappa) */}
-    {conEditor && !mappa.figli.length && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica?sezione=mappa`} tono="primario" compatto className="self-start"
+    {/* solo senza ruolo: uno stemma caricato resta uno stemma (non si aprirebbe nel visore) */}
+    {conEditor && !mappa.figli.length && (mappa.ruoloImmagine ?? 'nessuna') === 'nessuna' && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica?sezione=mappa`} tono="primario" compatto className="self-start"
       icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Carica l’immagine" dettaglio="la planimetria si apre qui" />}
     <Link className="touch inline-flex items-center self-start" to={urlMappa(mappa.chiave)}>Apri il luogo e i contenuti della guida</Link>
     {!!mappa.figli.length && <ul className="m-0 px-2 py-1 list-none area-scorrevole min-h-0 flex-1 max-h-[min(60vh,520px)]" aria-label={`Mappe di ${mappa.nome}`}>

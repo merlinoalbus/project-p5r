@@ -2045,3 +2045,11 @@ quartiere); stemmi e ruoli già dati non cambiano. La migrazione 106 lo fa per l
 compresa quella dell'utente. La strada per aggiungere una planimetria si accorcia: «Aggiungi» nell'elenco del Palazzo, il nome,
 «Crea», e l'editor si apre sulla sezione Mappa (`?sezione=mappa`) per caricare l'immagine; una planimetria ancora senza immagine e
 senza stanze mostra «Carica l'immagine» al posto della sola scheda del luogo.
+
+Misure (sola lettura): mappe con immagine e ruolo «nessuna» — `data/gioco.db` nessuna; `pacchetto/gioco.db` e
+`pacchetto/completo/gioco.db` una, «Banchina Aoyama Itchome» (`origine` utente), lo stesso difetto; stemmi senza mappe figlie
+nessuno (in ogni caso «Carica l'immagine» compare solo su una mappa senza ruolo). Prova sul percorso dell'utente con una copia dei
+dati: «Aggiungi» → «Crea» apre l'editor sulla sezione Mappa → l'immagine caricata dà «planimetria-nativa» → la scheda del Palazzo la
+apre nel visore (1280×689, 768×1024 692×420, 375×812 299×333). La prova ha trovato anche la posizione: la planimetria nuova prendeva
+il numero delle planimetrie (25 a Madarame) mentre la guida le numera a centinaia (0…802), e finiva seconda invece che «in fondo»;
+ora prende la posizione più alta più uno (803).

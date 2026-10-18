@@ -501,7 +501,9 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
               // creata, si va dritti a caricarne l'immagine («come dovrei fare per aggiungere una planimetria?», 2026-10-18): prima la
               // strada era la scheda del luogo, «Modifica luogo», poi la sezione Mappa
               let creata: string | null = null;
-              void esegui(async () => { creata = (await creaMappa({ nome, tipo: 'area', genitore: `dungeon-${dungeonChiave}`, ordine: planimetrie.length })).chiave; }, `Planimetria «${nome}» aggiunta in fondo: carica qui la sua immagine.`)
+              // in fondo davvero: dopo la posizione più alta (le planimetrie della guida sono numerate a centinaia, 0…802 a Madarame: col
+              // loro numero, 25, la nuova finiva seconda)
+              void esegui(async () => { creata = (await creaMappa({ nome, tipo: 'area', genitore: `dungeon-${dungeonChiave}`, ordine: Math.max(-1, ...planimetrie.map((p) => p.ordine)) + 1 })).chiave; }, `Planimetria «${nome}» aggiunta in fondo: carica qui la sua immagine.`)
                 .then((ok) => { if (ok) { setNuova(null); if (creata) navigate(`/guida/mappe/${encodeURIComponent(creata)}/modifica?sezione=mappa`); } });
             }}>
             <CampoCorrezione etichetta="Nome della planimetria" valore={nuova} massimo={LIMITI_GUIDA.mappa.nome} onCambia={setNuova} />
