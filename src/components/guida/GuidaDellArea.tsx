@@ -26,7 +26,7 @@ import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { DettagliPunto } from './DettagliPunto';
 import { EditorDettagli } from './EditorDettagli';
-import { dettagliDaRighe, righeDaDettagli } from '../../utils/dettagliVoce';
+import { dettagliDaRighe, etichetteRipetute, righeDaDettagli, type RigaDettaglio } from '../../utils/dettagliVoce';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -311,6 +311,9 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                 onSalva={async (b) => {
                   // un'altra area del Palazzo (2026-10-12): solo per una voce fuori da ogni Enigma, come l'area del dedalo
                   const altrove = !!areePalazzo && !b.contenitore && b.area !== area.chiave ? areePalazzo.find((a) => a.chiave === b.area) ?? null : null;
+                  // due dettagli con la stessa etichetta: uno cancellerebbe l'altro, il modulo resta aperto
+                  const ripetute = etichetteRipetute(JSON.parse(b.dettagli) as RigaDettaglio[]);
+                  if (ripetute.length > 0) throw new Error(`Due dettagli con la stessa etichetta (${ripetute.join(', ')}): cambiane una.`);
                   onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì', ...(b.contenitore !== (p.contenitore ?? '') ? { contenitore: b.contenitore || null } : {}),
                   // un'altra area del dedalo (099): solo per una voce fuori da ogni Enigma (un passo sta nell'area del suo Enigma)
                   ...(areaDedalo && !b.contenitore && b.areaDedalo && b.areaDedalo !== (p.areaDedalo ?? '') ? { areaDedalo: b.areaDedalo } : {}),

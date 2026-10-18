@@ -656,12 +656,6 @@ function verificaTipoDellaVoce(tipo: string, dedalo: boolean): void {
   if (!dedalo && tipo === 'trama') throw httpErrors.badRequest('trama-solo-nei-memento', 'Trama è il tipo delle voci dei dedali dei Memento: nei Palazzi c’è «Storia».');
 }
 
-/**
- * I dettagli di una voce «Persona» con la maschera della Persona scelta dal compendio (404 se non esiste, 400 se la voce non è
- * una Persona). `attuali` sono i dettagli della voce che si corregge (assenti creandola): se la Persona scelta è già quella della
- * sua maschera restano come sono; cambiando Persona i dettagli dell'Ombra di prima (resistenze, debolezze, personalità) se ne
- * vanno, perché erano di un'altra maschera.
- */
 /** I dettagli nuovi di una voce con la `maschera` di prima (se c'era): da qui non si scrive, la decide la Persona del compendio. */
 function conMascheraDiPrima(nuovi: Record<string, unknown>, prima: string): string {
   const { maschera: _ignorata, ...resto } = nuovi;
@@ -670,6 +664,12 @@ function conMascheraDiPrima(nuovi: Record<string, unknown>, prima: string): stri
   return JSON.stringify(vecchia === undefined ? resto : { maschera: vecchia, ...resto });
 }
 
+/**
+ * I dettagli di una voce «Persona» con la maschera della Persona scelta dal compendio (404 se non esiste, 400 se la voce non è
+ * una Persona). `attuali` sono i dettagli della voce che si corregge (assenti creandola): se la Persona scelta è già quella della
+ * sua maschera restano come sono; cambiando Persona i dettagli dell'Ombra di prima (resistenze, debolezze, personalità) se ne
+ * vanno, perché erano di un'altra maschera.
+ */
 function dettagliDellaPersona(personaId: number, tipo: string, attuali?: string): string {
   if (tipo !== 'persona') throw httpErrors.badRequest('persona-solo-per-persona', 'Una Persona del compendio si sceglie solo per una voce di tipo Persona.');
   const p = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;

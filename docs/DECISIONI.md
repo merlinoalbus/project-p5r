@@ -2022,3 +2022,9 @@ al più 40); la `maschera` di una Persona resta quella di prima. Nella «Modific
 aggiungono; un elenco si scrive separato da virgole; una tabella della guida resta com'è e si può solo togliere. Creando una voce i
 dettagli non si scrivono: si aggiungono correggendola. Le etichette ora si leggono anche coi trattini bassi («attacchi pericolosi»),
 e una tabella si mostra come testo invece di «[object Object]».
+
+«Niente si perde» (rilievo della revisione): una riga dal testo non toccato torna **identica** (valore di partenza, qualunque forma:
+elenco vuoto, elenco di numeri, elemento con una virgola, oggetto); solo le righe cambiate si riconvertono, e un elenco di numeri
+corretto resta di numeri. Due righe con la stessa etichetta fermano il salvataggio con un avviso. Misurato in sola lettura sulle
+465 voci reali di `gioco.db`: andata e ritorno senza modifiche 0 differenze, schema del `PUT` 0 rifiuti, una riga testuale
+corretta 0 altre righe cambiate.

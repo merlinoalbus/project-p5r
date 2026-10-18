@@ -633,3 +633,45 @@ describe('«Copia o sposta voci»: più voci insieme in un\'altra area del Palaz
     expect(screen.queryByRole('button', { name: 'Scegli voci da copiare o spostare in un’altra area del Palazzo' })).toBeNull();
   });
 });
+
+describe('i dettagli della voce si correggono dalla «Modifica» (2026-10-18)', () => {
+  const ombra = punto({ chiave: 'o1', tipo: 'miniboss', nome: 'Ombra agente security', dettagli: { contenuto: 'Potenziare Ryuji', hp: 120, resisteA: [], tabella: [{ ombra: 'Pixie' }] } });
+  /** Apre la «Modifica» dell'Ombra. */
+  const apri = () => {
+    monta([ombra]);
+    fireEvent.click(screen.getByRole('button', { name: /Ombra agente security/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Ombra agente security»/ }));
+  };
+  const riga = (etichetta: string) => screen.getByRole('group', { name: `Dettaglio ${etichetta}` });
+
+  it('una riga corretta, una tolta e una aggiunta: il corpo porta i dettagli nuovi, le righe non toccate identiche', async () => {
+    apri();
+    fireEvent.change(within(riga('contenuto')).getByRole('textbox', { name: 'Testo' }), { target: { value: 'Depotenziare il nemico' } });
+    fireEvent.click(within(riga('hp')).getByRole('button', { name: 'Togli il dettaglio hp' }));
+    fireEvent.click(screen.getByRole('button', { name: /Aggiungi un dettaglio/ }));
+    const nuova = screen.getByRole('group', { name: 'Dettaglio 4' });
+    fireEvent.change(within(nuova).getByRole('textbox', { name: 'Etichetta' }), { target: { value: 'strategia' } });
+    fireEvent.change(within(nuova).getByRole('textbox', { name: 'Testo' }), { target: { value: 'Prima i comuni' } });
+    aggiornaPunto.mockResolvedValue(ombra);
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalledWith('o1', expect.objectContaining({ dettagli: { contenuto: 'Depotenziare il nemico', resisteA: [], tabella: [{ ombra: 'Pixie' }], strategia: 'Prima i comuni' } })));
+  });
+
+  it('salvando senza toccare i dettagli il corpo non li porta', async () => {
+    apri();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), { target: { value: 'Ombra della security' } });
+    aggiornaPunto.mockResolvedValue(ombra);
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalled());
+    expect(aggiornaPunto.mock.calls.at(-1)![1]).not.toHaveProperty('dettagli');
+  });
+
+  it('due dettagli con la stessa etichetta: avviso, e il salvataggio non parte', async () => {
+    apri();
+    fireEvent.change(within(riga('hp')).getByRole('textbox', { name: 'Etichetta' }), { target: { value: 'contenuto' } });
+    expect(screen.getByRole('alert')).toHaveTextContent('Etichetta ripetuta: contenuto');
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Due dettagli con la stessa etichetta (contenuto): cambiane una.'));
+    expect(aggiornaPunto).not.toHaveBeenCalled();
+  });
+});
