@@ -982,6 +982,12 @@ registraRipristinoCestino('mappa', (_chiave, _vicini, saltate) => {
   if (saltate.some((s) => s.tabella === 'mappa' || s.tabella === 'mappa_percorso' || s.tabella === 'mappa_alias')) sincronizzaPercorsiMappe(getDb());
 });
 
+/**
+ * Il ruolo dell'immagine di una mappa che riceve la sua prima immagine, in SQL sulla colonna `tipo`: città e quartieri hanno
+ * illustrazioni, le altre (aree e planimetrie dei Palazzi, luoghi, dedali, generiche) piante — come le mappe della guida.
+ */
+export const RUOLO_DOPO_CARICAMENTO = "CASE WHEN tipo IN ('citta', 'quartiere') THEN 'illustrazione-editoriale' ELSE 'planimetria-nativa' END";
+
 /** Immagine di base nell'istanza (ambito «mappa», chiave = chiave della mappa); dimensioni lette dall'intestazione PNG/JPEG/WEBP/GIF quando possibile. */
 export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer, opz: { eliminaPezzi?: boolean } = {}): MappaDto {
   chiave=rigaMappa(chiave).chiave;
@@ -999,6 +1005,11 @@ export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Bu
     if (pezzi > 0) eliminaPezziDellaMappa(chiave);
     salvaImmagine('mappa', chiave, mime, contenuto);
     prepared("UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, origine = 'utente', updated_at = ? WHERE chiave = ?").run(chiave, dim?.larghezza ?? null, dim?.altezza ?? null, nowIso(), chiave);
+    // Una mappa senza ruolo dell'immagine («nessuna», quella nata dall'app) con l'immagine caricata diventa una mappa da aprire nel
+    // visore: prima restava «nessuna» e una planimetria aggiunta al Palazzo, con l'immagine, si mostrava ancora come scheda del
+    // luogo («ho provato a caricare una mappa ma non me la carica come planimetria... solo come area», 2026-10-18). Il ruolo è
+    // quello delle mappe dello stesso tipo (`RUOLO_DOPO_CARICAMENTO`); un ruolo già dato (stemma compreso) non si tocca.
+    prepared(`UPDATE mappa SET ruolo_immagine = ${RUOLO_DOPO_CARICAMENTO} WHERE chiave = ? AND ruolo_immagine = 'nessuna'`).run(chiave);
   })();
   return dettaglioMappa(chiave);
 }

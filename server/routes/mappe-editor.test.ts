@@ -544,6 +544,20 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(dimensioniImmagine(vp8x)).toEqual({ larghezza: 100, altezza: 50 });
     expect(dimensioniImmagine(Buffer.from('non è un\'immagine'))).toBeNull();
   });
+
+  it('una planimetria aggiunta al Palazzo diventa una pianta caricandone l’immagine; uno stemma resta stemma (2026-10-18)', async () => {
+    // «Aggiungi» nell'elenco del Palazzo: una mappa «area» sotto la radice del Palazzo, senza ruolo dell'immagine
+    const nuova = creaMappa(undefined, { nome: 'Pinacoteca nascosta', tipo: 'area', genitore: 'dungeon-madarame', ordine: 99 });
+    expect(nuova.ruoloImmagine).toBe('nessuna');
+    const caricata = (await request(app).put(`/api/mappe/${nuova.chiave}/immagine`).set('Content-Type', 'image/png').send(PNG_2x3).expect(200)).body.data as MappaDto;
+    expect(caricata.ruoloImmagine).toBe('planimetria-nativa');
+    // un quartiere nuovo prende un'illustrazione; la radice del Palazzo (stemma) non cambia ruolo
+    const quartiere = creaMappa(undefined, { nome: 'Quartiere di prova', tipo: 'quartiere', genitore: null, ordine: 99 });
+    expect(((await request(app).put(`/api/mappe/${quartiere.chiave}/immagine`).set('Content-Type', 'image/png').send(PNG_2x3).expect(200)).body.data as MappaDto).ruoloImmagine).toBe('illustrazione-editoriale');
+    const stemma = getDb().prepare("SELECT ruolo_immagine FROM mappa WHERE chiave = 'dungeon-madarame'").pluck().get();
+    await request(app).put('/api/mappe/dungeon-madarame/immagine').set('Content-Type', 'image/png').send(PNG_2x3).expect(200);
+    expect(getDb().prepare("SELECT ruolo_immagine FROM mappa WHERE chiave = 'dungeon-madarame'").pluck().get()).toBe(stemma);
+  });
 });
 
 

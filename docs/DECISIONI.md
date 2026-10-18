@@ -2028,3 +2028,20 @@ elenco vuoto, elenco di numeri, elemento con una virgola, oggetto); solo le righ
 corretto resta di numeri. Due righe con la stessa etichetta fermano il salvataggio con un avviso. Misurato in sola lettura sulle
 465 voci reali di `gioco.db`: andata e ritorno senza modifiche 0 differenze, schema del `PUT` 0 rifiuti, una riga testuale
 corretta 0 altre righe cambiate.
+
+## 2026-10-18 — Una planimetria aggiunta al Palazzo si apre caricandone l'immagine
+
+Segnalazione dell'utente: «ho provato a caricare una mappa ma non me la carica come planimetria... solo come area»; il percorso,
+nelle sue parole: «ho premuto il pulsante Aggiungi => Apri il luogo e i contenuti della guida => Modifica Luogo => Mappa e qui ho
+caricato l'immagine»; poi «ma io devo aggiungere una planimetria al palazzo di madarame» e «in generale la domanda è come dovrei fare
+per aggiungere una planimetria?».
+
+Causa: una planimetria del Palazzo è una mappa «Area» sotto la radice del Palazzo, ed era giusto; ma una mappa nata dall'app ha il
+ruolo dell'immagine «nessuna» (043) e caricarne l'immagine non lo cambiava, quindi il visore non la apriva (`haPlanimetria`) e la
+scheda mostrava solo «Apri il luogo e i contenuti della guida».
+
+Che cosa ne segue: caricando l'immagine una mappa col ruolo «nessuna» diventa una pianta (un'illustrazione se è una città o un
+quartiere); stemmi e ruoli già dati non cambiano. La migrazione 106 lo fa per le mappe già caricate (immagine e ruolo «nessuna»),
+compresa quella dell'utente. La strada per aggiungere una planimetria si accorcia: «Aggiungi» nell'elenco del Palazzo, il nome,
+«Crea», e l'editor si apre sulla sezione Mappa (`?sezione=mappa`) per caricare l'immagine; una planimetria ancora senza immagine e
+senza stanze mostra «Carica l'immagine» al posto della sola scheda del luogo.

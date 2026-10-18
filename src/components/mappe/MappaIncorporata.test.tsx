@@ -8,15 +8,15 @@
 // con l'altezza fissa del visore, un elenco lungo di figli sarebbe uscito dalla scheda (rilievo della revisione).
 // ============================================================
 
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MappaIncorporata } from './MappaIncorporata';
 
-const { risolviMappa, haPlanimetria } = vi.hoisted(() => ({ risolviMappa: vi.fn(), haPlanimetria: vi.fn() }));
+const { risolviMappa, haPlanimetria, figli } = vi.hoisted(() => ({ risolviMappa: vi.fn(), haPlanimetria: vi.fn(), figli: { elenco: [{ chiave: 'm-figlia', nome: 'Stanza figlia' }] as Array<{ chiave: string; nome: string }> } }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { risolviMappa }));
 vi.mock('../../utils/haPlanimetria', () => ({ haPlanimetria }));
 vi.mock('../../hooks/useMappaPartita', () => ({
-  useMappaPartita: () => ({ mappa: { chiave: 'm-sala', nome: 'Sala', figli: [{ chiave: 'm-figlia', nome: 'Stanza figlia' }], spilli: [] }, caricamento: false, errore: null, ricarica: vi.fn(), raccolto: vi.fn(), statoPunto: vi.fn(), acquisto: vi.fn() }),
+  useMappaPartita: () => ({ mappa: { chiave: 'm-sala', nome: 'Sala', figli: figli.elenco, spilli: [] }, caricamento: false, errore: null, ricarica: vi.fn(), raccolto: vi.fn(), statoPunto: vi.fn(), acquisto: vi.fn() }),
 }));
 vi.mock('../../utils/presentazioneMappa', () => ({ presentaMappa: (m: unknown) => m }));
 vi.mock('./VisoreMappa', () => ({ VisoreMappa: () => <div data-testid="visore">Visore</div> }));
@@ -24,7 +24,7 @@ vi.mock('./VisoreMappa', () => ({ VisoreMappa: () => <div data-testid="visore">V
 /** Disegna la mappa incorporata m-sala con le classi di riquadro «h-[300px] xl:flex-1» da passare al visore. */
 const monta = () => render(<MemoryRouter><MappaIncorporata chiave="m-sala" classeVisore="h-[300px] xl:flex-1" /></MemoryRouter>);
 
-beforeEach(() => { vi.clearAllMocks(); risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'm-sala' }); });
+beforeEach(() => { vi.clearAllMocks(); figli.elenco = [{ chiave: 'm-figlia', nome: 'Stanza figlia' }]; risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'm-sala' }); });
 
 it('con la planimetria, le classi del riquadro vanno al contenitore del visore e non c’è altezza in linea', async () => {
   haPlanimetria.mockReturnValue(true);
@@ -41,6 +41,18 @@ it('senza planimetria la scheda dei collegamenti non riceve l’altezza del viso
   expect(scheda).not.toHaveClass('h-[300px]');
   expect(scheda).not.toHaveClass('xl:flex-1');
   expect(scheda.style.height).toBe('');
+});
+
+it('una planimetria senza immagine e senza stanze porta dritti a caricarne l’immagine; una con stanze no (2026-10-18)', async () => {
+  haPlanimetria.mockReturnValue(false);
+  figli.elenco = [];
+  monta();
+  expect(await screen.findByRole('link', { name: /Carica l’immagine/ })).toHaveAttribute('href', '/guida/mappe/m-sala/modifica?sezione=mappa');
+  cleanup();
+  figli.elenco = [{ chiave: 'm-figlia', nome: 'Stanza figlia' }];
+  monta();
+  expect(await screen.findByRole('link', { name: 'Stanza figlia' })).toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: /Carica l’immagine/ })).toBeNull();
 });
 
 it('una versione nuova (stati cambiati dalla pagina) non rifà la risoluzione e non smonta il visore: zoom e posizione restano', async () => {

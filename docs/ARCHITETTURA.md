@@ -494,7 +494,9 @@ dell'estrazione, scritta solo da `importaMappe`: senza il flag, correggere il «
 `server/services/mappe/mappeService.ts`: albero, dettaglio (percorso, figli, spilli con `dettaglio` dell'entità: articoli del negozio con
 `comprato`, stato del punto, Confidente, richiesta) e stato «raccolto» (uno spillo di un punto già ottenuto/esaurito nella Guida conta come
 raccolto; `impostaRaccolto` aggiorna anche `punto_partita`), editor (CRUD con validazione dei riferimenti e dei cicli genitore), immagine di
-base (`impostaImmagineMappa`, corpo grezzo `image/*`, dimensioni da `dimensioniImmagine` PNG/GIF/JPEG/WEBP), `esportaMappe`/`importaMappe`
+base (`impostaImmagineMappa`, corpo grezzo `image/*`, dimensioni da `dimensioniImmagine` PNG/GIF/JPEG/WEBP; dal 2026-10-18 una mappa
+col ruolo «nessuna» prende `RUOLO_DOPO_CARICAMENTO`, pianta o illustrazione per città e quartieri, così il visore la apre; la 106 lo dà
+alle mappe già caricate), `esportaMappe`/`importaMappe`
 (pacchetto JSON versione 1 con immagini in base64; nessuna dipendenza ZIP disponibile). Rotte in `server/routes/mappe.ts` (`/albero`,
 `/esporta`, `/importa`, `/entita/:tipo/:chiave`, `/:chiave`, `/:chiave/immagine`, `/:chiave/spilli`, `/:chiave/passaggi` (15.24: passaggio verso un'altra mappa nel punto libero più vicino al centro, o in basso per il ritorno al genitore; `creaMappa` accetta `passaggio`/`ritorno`), `/spilli/:id`) e
 `PUT /api/partite/:id/spilli/:spilloId`; schemi zod in `server/schemas/mappe.ts`; client `src/services/api/mappe.ts`. Le vecchie rotte

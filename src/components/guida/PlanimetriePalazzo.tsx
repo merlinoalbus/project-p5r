@@ -26,6 +26,7 @@
 // chiama una mappa: qui non si compone niente, altrimenti la stessa stanza si chiamerebbe in due modi.
 // ============================================================
 
+import { useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { aggiornaArea, aggiornaMappa, aggiornaPresentazioneMappa, creaArea, creaMappa, eliminaArea, eliminaMappa, impostaAreeMappa, impostaStanzaMappa, riordinaMappe } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -242,6 +243,7 @@ function AreeContenute({ aree, completate }: { aree: Array<{ nome: string; ordin
  * aree. Ogni modifica passa da un'unica esecuzione che fa rileggere il Palazzo e notifica l'esito.
  */
 export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoPronto, alberoErrore, onRiprovaAlbero, aree, areeOrfane, areaScelta, onScegliArea, sceltaChiave, onScegli, onCambiato, areeCompletate, onAreaEliminata }: Props) {
+  const navigate = useNavigate();
   // L'ordine mostrato è locale finché il server non risponde: il trascinamento deve vedersi subito.
   // Vale solo per le planimetrie che ci sono adesso; quelle appena aggiunte si accodano nell'ordine
   // del server e quelle eliminate cadono, altrimenti una creazione riuscita sembrerebbe fallita.
@@ -496,11 +498,14 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
               e.preventDefault();
               const nome = nuova.trim();
               if (!nome) return;
-              void esegui(() => creaMappa({ nome, tipo: 'area', genitore: `dungeon-${dungeonChiave}`, ordine: planimetrie.length }), `Planimetria «${nome}» aggiunta in fondo: caricane l’immagine dall’editor.`)
-                .then((ok) => { if (ok) setNuova(null); });
+              // creata, si va dritti a caricarne l'immagine («come dovrei fare per aggiungere una planimetria?», 2026-10-18): prima la
+              // strada era la scheda del luogo, «Modifica luogo», poi la sezione Mappa
+              let creata: string | null = null;
+              void esegui(async () => { creata = (await creaMappa({ nome, tipo: 'area', genitore: `dungeon-${dungeonChiave}`, ordine: planimetrie.length })).chiave; }, `Planimetria «${nome}» aggiunta in fondo: carica qui la sua immagine.`)
+                .then((ok) => { if (ok) { setNuova(null); if (creata) navigate(`/guida/mappe/${encodeURIComponent(creata)}/modifica?sezione=mappa`); } });
             }}>
             <CampoCorrezione etichetta="Nome della planimetria" valore={nuova} massimo={LIMITI_GUIDA.mappa.nome} onCambia={setNuova} />
-            <span className="text-[11px] text-text-muted">Si aggiunge in fondo all’elenco; l’immagine e gli spilli si caricano poi dall’editor.</span>
+            <span className="text-[11px] text-text-muted">Si aggiunge in fondo all’elenco e si apre l’editor per caricarne l’immagine; poi gli spilli.</span>
           </form>
         </Modal>
       )}

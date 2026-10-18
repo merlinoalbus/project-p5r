@@ -16,7 +16,7 @@ import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 
 import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
@@ -54,6 +54,8 @@ export interface AppuntiSpillo { destinazione?: DestinazioneSpillo | null; tipo:
 /** Le condizioni dello spillo (o di una copia di un pezzo, 103) senza il testo descrittivo del server (è il server a ricalcolarlo). */
 const condizioniNude = (s: Pick<SpilloDto, 'condizioni'>): RequisitoSpillo[] => condizioniSenzaTesto(s.condizioni);
 const CHIAVE_APPUNTI = 'p5r.editor.appunti-spillo';
+/** Le sezioni del pannello dell'editor, nell'ordine dei pulsanti. */
+const SEZIONI_EDITOR = ['spilli', 'pezzi', 'mappa', 'collegamenti', 'file'] as const;
 /** Legge gli appunti dello spillo dalla memoria di sessione; null se mancano, se il JSON non si legge o se la memoria non è disponibile. */
 function leggiAppunti(): AppuntiSpillo | null {
   try { const raw = sessionStorage.getItem(CHIAVE_APPUNTI); return raw ? (JSON.parse(raw) as AppuntiSpillo) : null; } catch { return null; }
@@ -101,7 +103,9 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
   /** La copia di un pezzo della planimetria selezionata (102; copie dalla 103): uno spillo o una copia alla volta. */
   const [copiaId, setCopiaId] = useState<number | null>(null);
-  const [sezione, setSezione] = useState('spilli');
+  // `?sezione=mappa` apre l'editor sulla sezione dell'immagine («Carica l'immagine» di una planimetria che non ce l'ha, 2026-10-18)
+  const [parametri] = useSearchParams();
+  const [sezione, setSezione] = useState(() => (SEZIONI_EDITOR as readonly string[]).includes(parametri.get('sezione') ?? '') ? parametri.get('sezione')! : 'spilli');
   /** Seleziona uno spillo (o nessuno con null); selezionandone uno il pannello torna alla sezione «Spilli» e la copia si deseleziona. */
   const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null){setSezione('spilli');setCopiaId(null);} };
   /** Seleziona una copia di un pezzo (o nessuna): il pannello passa alla sezione «Pezzi» e lo spillo si deseleziona. */

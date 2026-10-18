@@ -47,11 +47,10 @@ const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: s
 const albero: MappaRiassuntoDto[] = [riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta' }), riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo' })];
 const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
 const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [], pezzi: [] };
-
-/** Monta l'editor sulla mappa di Shibuya (`/guida/mappe/citta-shibuya/modifica`). */
-function monta() {
+/** Monta l'editor sulla mappa di Shibuya (`/guida/mappe/citta-shibuya/modifica`), o all'indirizzo dato. */
+function monta(indirizzo = '/guida/mappe/citta-shibuya/modifica') {
   render(
-    <MemoryRouter initialEntries={['/guida/mappe/citta-shibuya/modifica']}>
+    <MemoryRouter initialEntries={[indirizzo]}>
       <Routes><Route path="/guida/mappe/:chiave/modifica" element={<EditorMappaPage />} /></Routes>
     </MemoryRouter>,
   );
@@ -376,6 +375,15 @@ describe('EditorMappaPage', () => {
     fireEvent.change(form.getByLabelText('Descrizione'), { target: { value: 'Passa dietro le cucine' } });
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(21, { nome: 'Condotto', tipo: 'scorciatoia', descrizione: 'Passa dietro le cucine', riferimento: null, condizioni: [], destinazione: null }));
+  });
+
+  it('con ?sezione=mappa l’editor si apre sulla sezione Mappa (dove si carica l’immagine); senza, sugli spilli', async () => {
+    monta('/guida/mappe/citta-shibuya/modifica?sezione=mappa');
+    expect(await screen.findByRole('button', { name: 'Mappa' })).toHaveAttribute('aria-pressed', 'true');
+    expect(await screen.findByRole('region', { name: 'Proprietà della mappa' })).toBeInTheDocument();
+    cleanup();
+    monta('/guida/mappe/citta-shibuya/modifica?sezione=inventata');
+    expect(await screen.findByRole('button', { name: 'Spilli' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa', async () => {
