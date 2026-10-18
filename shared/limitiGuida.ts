@@ -18,7 +18,8 @@
 export const LIMITI_GUIDA = {
   dungeon: { nome: 200, sovrano: 400, data: 1000, livello: 1000, note: 8000 },
   area: { nome: 300, descrizione: 8000 },
-  punto: { nome: 300, descrizione: 8000 },
+  // i dettagli della voce (2026-10-18, modificabili): oggi al più 11 per voce, etichetta più lunga 19, valore più lungo 1983 (una tabella)
+  punto: { nome: 300, descrizione: 8000, dettagli: 40, etichetta: 60, dettaglio: 4000 },
   // le aree dei dedali dei Memento (099): nome e dettagli come un'area della guida, i timbri entro un tetto largo (Da'at ne ha 40)
   areaDedalo: { nome: 300, descrizione: 8000, timbri: 999 },
   // le Richieste dei Mementos (2026-10-11): nel pacchetto il nome più lungo ha 35 caratteri, le date 146, le note 545, una ricompensa

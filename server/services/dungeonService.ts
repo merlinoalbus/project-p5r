@@ -625,6 +625,8 @@ export function creaArea(dungeonChiave: string, dati: { nome: string; descrizion
 }
 
 export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
+  /** Tutti i dettagli della voce (2026-10-18): sostituiscono quelli di prima, tranne la `maschera` di una Persona; assenti = invariati. */
+  dettagli?: Record<string, unknown>;
   /** L'Enigma di cui la voce diventa un passo (095); null = torna una voce dell'area; assente = invariato. */
   contenitore?: string | null;
   /** L'area del dedalo in cui sta la voce (099): obbligatoria creando una voce di un dedalo, rifiutata fuori dai Memento;
@@ -660,6 +662,14 @@ function verificaTipoDellaVoce(tipo: string, dedalo: boolean): void {
  * sua maschera restano come sono; cambiando Persona i dettagli dell'Ombra di prima (resistenze, debolezze, personalità) se ne
  * vanno, perché erano di un'altra maschera.
  */
+/** I dettagli nuovi di una voce con la `maschera` di prima (se c'era): da qui non si scrive, la decide la Persona del compendio. */
+function conMascheraDiPrima(nuovi: Record<string, unknown>, prima: string): string {
+  const { maschera: _ignorata, ...resto } = nuovi;
+  void _ignorata;
+  const vecchia = (JSON.parse(prima) as Record<string, unknown>).maschera;
+  return JSON.stringify(vecchia === undefined ? resto : { maschera: vecchia, ...resto });
+}
+
 function dettagliDellaPersona(personaId: number, tipo: string, attuali?: string): string {
   if (tipo !== 'persona') throw httpErrors.badRequest('persona-solo-per-persona', 'Una Persona del compendio si sceglie solo per una voce di tipo Persona.');
   const p = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
@@ -907,7 +917,9 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   if (personaDelDedalo && dati.areaDedalo !== undefined) throw httpErrors.badRequest('persona-in-piu-aree', 'Una Persona di un dedalo si incontra in più aree: indicale tutte in «areeDedalo».');
   if (!personaDelDedalo && dati.areeDedalo !== undefined) throw httpErrors.badRequest('aree-solo-per-persona', 'Più aree insieme le ha solo una Persona di un dedalo: le altre voci stanno in un’area sola.');
   const areePersona = personaDelDedalo && dati.areeDedalo !== undefined ? verificaAreeDellaPersona(p.area_chiave, dati.areeDedalo, undefined) : null;
-  const dettagli = dati.persona === undefined ? p.dettagli_json : dettagliDellaPersona(dati.persona, dati.tipo ?? p.tipo, p.dettagli_json);
+  // i dettagli scritti a mano (2026-10-18) prendono il posto dei vecchi; la `maschera` resta quella che c'era (la decide la Persona)
+  const dettagliScritti = dati.dettagli === undefined ? p.dettagli_json : conMascheraDiPrima(dati.dettagli, p.dettagli_json);
+  const dettagli = dati.persona === undefined ? dettagliScritti : dettagliDellaPersona(dati.persona, dati.tipo ?? p.tipo, dettagliScritti);
   // una voce con pin non diventa descrittiva: le descrittive non hanno pin (si scollegano prima); nelle aree dei dedali non ce ne sono
   if (dati.tipo && puntoDescrittivo(dati.tipo, areaPrima) && pinDelPuntoGuida(getDb(), puntoChiave).length > 0) {
     throw httpErrors.conflict('punto-con-pin', `«${p.nome}» ha dei pin collegati: scollegali prima di farne una voce descrittiva.`);

@@ -18,7 +18,15 @@ import { idParam } from './comuni.js';
 
 const TIPI_PUNTO = ['sicura', 'porta', 'meccanismo', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'storia', 'trama', 'altro'] as const;
 
-export const paramsChiaveGuida = z.object({ chiave: z.string().min(1).max(200) });
+/** Un dettaglio di una voce: testo, numero, elenco di testi o tabella (righe di campi testuali), entro i tetti. */
+const testoDettaglio = z.string().max(LIMITI_GUIDA.punto.dettaglio);
+const dettaglioPunto = z.union([
+  testoDettaglio, z.number().finite(),
+  z.array(z.union([testoDettaglio, z.number().finite()])).max(200),
+  z.array(z.record(z.string().max(LIMITI_GUIDA.punto.etichetta), z.union([testoDettaglio, z.number().finite()]))).max(200),
+]);
+
+export const paramsChiaveGuida =z.object({ chiave: z.string().min(1).max(200) });
 export const bodyDungeon = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.dungeon.nome).optional(), sovrano: z.string().max(LIMITI_GUIDA.dungeon.sovrano).optional(),
   dataSblocco: z.string().max(LIMITI_GUIDA.dungeon.data).optional(), dataScadenza: z.string().max(LIMITI_GUIDA.dungeon.data).optional(), furtoConsigliato: z.string().max(LIMITI_GUIDA.dungeon.data).optional(),
@@ -38,9 +46,16 @@ export const bodyPunto = z.object({
   areeDedalo: z.array(z.string().min(1).max(200)).max(100).optional(),
   /** L'area del Palazzo in cui spostare la voce (2026-10-12): un'altra area dello stesso Palazzo; non nei Memento. */
   area: z.string().min(1).max(200).optional(),
+  /**
+   * I dettagli della voce, tutti (2026-10-18, «ci sono elementi non modificabili come questo Contenuto»; scelta «Renderli
+   * modificabili»): etichetta → testo, numero o elenco; le tabelle della guida (righe di campi) tornano com'erano. La `maschera`
+   * di una Persona non si scrive da qui: la decide la Persona del compendio.
+   */
+  dettagli: z.record(z.string().trim().min(1).max(LIMITI_GUIDA.punto.etichetta), dettaglioPunto)
+    .refine((d) => Object.keys(d).length <= LIMITI_GUIDA.punto.dettagli, `Al più ${LIMITI_GUIDA.punto.dettagli} dettagli per voce.`).optional(),
 });
-// creando una voce l'area è quella dell'indirizzo: `area` nel corpo non vale
-export const bodyNuovoPunto = bodyPunto.omit({ area: true }).extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
+// creando una voce l'area è quella dell'indirizzo: `area` nel corpo non vale; i dettagli si aggiungono correggendola
+export const bodyNuovoPunto = bodyPunto.omit({ area: true, dettagli: true }).extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 
 /** Il totale dei timbri di un'area del dedalo: un intero da 0 al tetto, o null (l'area non ha timbri). */
 const timbriTotale = z.number().int().min(0).max(LIMITI_GUIDA.areaDedalo.timbri).nullable();

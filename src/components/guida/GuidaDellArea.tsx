@@ -25,6 +25,8 @@ import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto } from '../../types';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { DettagliPunto } from './DettagliPunto';
+import { EditorDettagli } from './EditorDettagli';
+import { dettagliDaRighe, righeDaDettagli } from '../../utils/dettagliVoce';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -305,14 +307,16 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${p.nome}`} disabled={occupato || indice <= 0} onClick={() => void sposta(p, -1)} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${p.nome}`} disabled={occupato || indice >= fratelli.length - 1} onClick={() => void sposta(p, 1)} />
               <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} compatto etichetta="Modifica"
-                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '', area: area.chiave })}
+                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '', area: area.chiave, dettagli: JSON.stringify(righeDaDettagli(p.dettagli)) })}
                 onSalva={async (b) => {
                   // un'altra area del Palazzo (2026-10-12): solo per una voce fuori da ogni Enigma, come l'area del dedalo
                   const altrove = !!areePalazzo && !b.contenitore && b.area !== area.chiave ? areePalazzo.find((a) => a.chiave === b.area) ?? null : null;
                   onPuntoAggiornato(await salvaPunto(p.chiave, { nome: b.nome, descrizione: b.descrizione, tipo: b.tipo as PuntoInteresseDto['tipo'], esauribile: b.esauribile === 'sì', ...(b.contenitore !== (p.contenitore ?? '') ? { contenitore: b.contenitore || null } : {}),
                   // un'altra area del dedalo (099): solo per una voce fuori da ogni Enigma (un passo sta nell'area del suo Enigma)
                   ...(areaDedalo && !b.contenitore && b.areaDedalo && b.areaDedalo !== (p.areaDedalo ?? '') ? { areaDedalo: b.areaDedalo } : {}),
-                  ...(altrove ? { area: altrove.chiave } : {}) }));
+                  ...(altrove ? { area: altrove.chiave } : {}),
+                  // i dettagli (2026-10-18) solo se cambiati: tutti insieme, la maschera di una Persona la tiene il server
+                  ...(b.dettagli !== JSON.stringify(righeDaDettagli(p.dettagli)) ? { dettagli: dettagliDaRighe(JSON.parse(b.dettagli)) } : {}) }));
                   if (altrove) { setSelezionato(null); notifica('success', `«${b.nome.trim() || p.nome}» spostata in ${altrove.ordine + 1}. ${altrove.nome}${conPassi ? ', con i suoi passi' : ''}.`); }
                   await onRicarica(); }}
                 elimina={{ avviso: `${conPassi ? 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I suoi passi restano, voci dell’area con il loro stato.' : 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I pin collegati restano sulla mappa, col loro «raccolto».'} ${NEL_CESTINO}`, onElimina: async () => { await eliminaPunto(p.chiave); setSelezionato(null); setCollegando(null); await onRicarica(); } }}>
@@ -337,6 +341,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                     <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
                   </label>
                   <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.punto.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
+                  {/* i dettagli della guida («ci sono elementi non modificabili come questo Contenuto», 2026-10-18) */}
+                  <EditorDettagli valore={b.dettagli} onCambia={(v) => cambia({ dettagli: v })} />
                 </>}
               </CorrezioneGuida>
             </div>

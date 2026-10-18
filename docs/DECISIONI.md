@@ -2005,3 +2005,20 @@ Che cosa ne segue: il passo «Tests» esce da `ci.yml` (il gate resta typecheck,
 percorso indicato — in locale `npx vitest run <percorso>`, in GitHub il workflow `test-su-richiesta.yml` (`workflow_dispatch`, input
 `percorso`; il comando passa il percorso come filtro, senza `--`, che lo faceva ignorare e partire la suite intera). CLAUDE.md
 (procedura, punto 3, e avvio rapido) dice lo stesso.
+
+## 2026-10-18 — I dettagli delle voci della guida si correggono
+
+Segnalazione dell'utente (screenshot di «Ombra agente security»): «ci sono elementi non modificabili come questo Contenuto... che
+sarà qualcosa di vecchio obsoleto da rimuovere... (sostituito da descrizione?)». Non è un campo vecchio: è uno dei **dettagli** che
+l'importazione della guida ha messo nelle voci (465 voci: contenuto 228, debolezze 127, resistenze 43, note 46, e sulle 132 Persona
+dei dedali maschera, debole a, resiste a, personalità), che si vedevano ma non si correggevano.
+
+Domanda: «Cosa ne facciamo?» → «Renderli modificabili (Consigliato)» («In «Modifica» della voce compaiono i dettagli come righe
+etichetta → testo: si correggono, si cancellano, se ne aggiungono. Niente si perde; i dati delle Persona restano quelli del
+compendio.»). Le altre risposte offerte: unirli alla descrizione, toglierli tutti.
+
+Che cosa ne segue: `dettagli` nel `PUT /api/compendio/punti/:chiave` sostituisce tutti i dettagli (testo, numero, elenco o tabella;
+al più 40); la `maschera` di una Persona resta quella di prima. Nella «Modifica» della voce le righe si correggono, si tolgono, se ne
+aggiungono; un elenco si scrive separato da virgole; una tabella della guida resta com'è e si può solo togliere. Creando una voce i
+dettagli non si scrivono: si aggiungono correggendola. Le etichette ora si leggono anche coi trattini bassi («attacchi pericolosi»),
+e una tabella si mostra come testo invece di «[object Object]».

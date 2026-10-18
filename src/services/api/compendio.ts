@@ -106,6 +106,8 @@ export interface DatiAreaApi { nome?: string; descrizione?: string }
 export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
   /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
   contenitore?: string | null;
+  /** Tutti i dettagli della voce (2026-10-18): sostituiscono quelli di prima; la `maschera` di una Persona resta. */
+  dettagli?: Record<string, unknown>;
   /** L'area del dedalo della voce (099): obbligatoria creando una voce di un dedalo; cambiandola la voce passa in un'altra area. */
   areaDedalo?: string;
   /** La Persona del compendio (id) di una voce «Persona» (2026-10-11): ne diventa la maschera. */

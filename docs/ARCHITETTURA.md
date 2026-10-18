@@ -797,7 +797,10 @@ planimetria la scheda offre il selettore di tutte le tavole e aggiunge l'area co
 **La guida dell'area, modificabile e collegata ai pin** (2026-10-01). `src/components/guida/GuidaDellArea.tsx` è la parte
 bassa della colonna dell'area: le voci (`punto_interesse`) sempre visibili, anche in un'area senza voci, con correzione,
 eliminazione, «Su»/«Giù» (`PUT /api/compendio/punti/:chiave/sposta`, `spostaPunto`: ricompatta l'ordine dell'area) e
-«Aggiungi una voce». Dal 2026-10-12 nel modulo Modifica «Area del Palazzo» (prop `areePalazzo`) sposta la voce in un'altra area
+«Aggiungi una voce». Dal 2026-10-18 nel modulo Modifica ci sono anche i **dettagli** della voce (`EditorDettagli`, conversione in
+`src/utils/dettagliVoce.ts`): righe etichetta → testo da correggere, togliere o aggiungere (un elenco separato da virgole, un numero
+resta numero, una tabella della guida resta com'è); `dettagli` nel `PUT` li sostituisce tutti (al più 40, `LIMITI_GUIDA.punto`) e
+la `maschera` di una Persona resta quella di prima (`conMascheraDiPrima`). Dal 2026-10-12 nel modulo Modifica «Area del Palazzo» (prop `areePalazzo`) sposta la voce in un'altra area
 dello stesso Palazzo (`area` nel `PUT /api/compendio/punti/:chiave`, `aggiornaPunto`): in fondo, con la sua chiave, coi passi se è
 un Enigma e con le sue schede della guida senza mappa (`spillo.area_guida_chiave`); non per un passo, non nei Memento. Dal
 2026-10-14 più voci insieme: «Copia o sposta voci» (fino al 2026-10-18 «Sposta voci in un’altra area») apre la scelta (righe da
