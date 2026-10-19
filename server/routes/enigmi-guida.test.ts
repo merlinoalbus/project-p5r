@@ -286,3 +286,21 @@ describe('Enigma con i suoi passi', () => {
     expect([raccolto(uid(leva.id)), raccolto(uid(porta.id)), segnato(passoLeva.chiave), segnato(passoPorta.chiave)]).toEqual([0, 0, null, null]);
   });
 });
+
+// L0 (2026-10-20): nei Palazzi le voci stanno in un'infiltrazione, nei dedali dei Memento in un'area
+describe('il limite dello spostamento di una voce si dice con la parola giusta', () => {
+  beforeAll(() => { dbDiProva(); });
+  afterAll(() => closeDb());
+  it('in un Palazzo «della sua infiltrazione», in un dedalo «della sua area»', async () => {
+    const ultimaDi = (sql: string) => prepared(sql).pluck().get() as string;
+    const palazzo = ultimaDi(`SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'kamoshida'
+      AND p.contenitore_chiave IS NULL AND p.area_dedalo_chiave IS NULL ORDER BY a.ordine DESC, p.ordine DESC, p.chiave DESC LIMIT 1`);
+    expect((await request(app).put(`/api/compendio/punti/${encodeURIComponent(palazzo)}/sposta`).send({ verso: 1 }).expect(409)).body.error.message)
+      .toBe('Il punto è già l’ultimo della sua infiltrazione.');
+    const dedalo = ultimaDi(`SELECT p.chiave FROM punto_interesse p WHERE p.area_dedalo_chiave IS NOT NULL AND p.contenitore_chiave IS NULL
+      AND NOT EXISTS (SELECT 1 FROM punto_interesse q WHERE q.area_chiave = p.area_chiave AND q.area_dedalo_chiave IS p.area_dedalo_chiave AND q.contenitore_chiave IS NULL AND (q.ordine > p.ordine OR (q.ordine = p.ordine AND q.chiave > p.chiave)))
+      ORDER BY p.chiave LIMIT 1`);
+    expect((await request(app).put(`/api/compendio/punti/${encodeURIComponent(dedalo)}/sposta`).send({ verso: 1 }).expect(409)).body.error.message)
+      .toBe('Il punto è già l’ultimo della sua area.');
+  });
+});

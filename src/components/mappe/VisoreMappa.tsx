@@ -32,6 +32,7 @@ import { ProveNativeSpillo } from './ProveNativeSpillo';
 import type { ImmagineSpilloDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
+import { titoloMappeVicine } from '../../utils/vocabolarioMappe';
 
 export type StatoPuntoMappa = 'ottenuto' | 'esaurito' | null;
 
@@ -690,7 +691,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           )}
           {(mappa.genitore || mappa.figli.length > 0) && (
             <section className="visore-mappa__sezione">
-              <h3 className="visore-mappa__intestazione">Luoghi e planimetrie</h3>
+              <h3 className="visore-mappa__intestazione">{titoloMappeVicine(mappa.tipo)}</h3>
               {mappa.genitore && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={`Su: ${mappa.genitoreNome ?? mappa.genitore}`} onClick={() => onNaviga(mappa.genitore!)} />}
               {mappa.figli.length > 0 && (
                 <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Mappe figlie">

@@ -13,11 +13,13 @@ import { PageState } from '../shared/PageState';
  * dettagli collegati, planimetrie figlie ed elementi (i passi di un enigma rientrati sotto il loro
  * contenitore). Un elemento con scheda si apre in linea in `SchedaContenutoGuida`, una alla volta.
  * I contenuti si ricaricano quando cambiano la partita attiva o la sua data, fascia o meteo;
- * `area` apre la sezione richiesta (o avvisa se non è di questo luogo), `dungeon` aggiunge il
- * collegamento alla scheda del Palazzo. Senza aree non mostra nulla. */
+ * `area` apre la sezione richiesta (o avvisa se non è di questa mappa), `dungeon` aggiunge il
+ * collegamento alla scheda del Palazzo o dei Memento. Senza aree non mostra nulla. */
 export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; area?: string | null; dungeon?: string }) {
   const attiva = usePartitaStore(s => s.attiva);
   const [selezionato, seleziona] = useState<number | null>(null);
+  // L0: nei Memento le sezioni sono dedali, nei Palazzi infiltrazioni; il collegamento porta alla scheda del posto
+  const memento = dungeon === 'mementos';
   const contenuti = useCarica(() => getContenutiMappa(mappa, attiva?.id), [mappa, attiva?.id, attiva?.dataGioco, attiva?.fasciaGioco, attiva?.meteoOra]);
   // Ogni comando di questo pannello è l'unico contenuto della sua riga — un `li`, uno `strong`,
   // una riga a sé — e non una parola dentro una frase: valgono 44 px come tutti gli altri. Erano
@@ -27,12 +29,12 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
   return <PageState isLoading={contenuti.caricamento} error={contenuti.errore} onRetry={contenuti.ricarica}>
     {!!contenuti.dati?.aree.length && <section className="card flex flex-col gap-3" aria-label="Contenuti della guida">
       <h2 className="m-0 text-lg">Contenuti della guida</h2>
-      {dungeon && <Link className="touch inline-flex items-center self-start" to={`/guida/dungeon/${encodeURIComponent(dungeon)}`}>Apri la scheda del palazzo o dedalo</Link>}
-      {area && !contenuti.dati.aree.some(a => a.chiave === area) && <p role="status">L’infiltrazione richiesta non appartiene a questa planimetria.</p>}
+      {dungeon && <Link className="touch inline-flex items-center self-start" to={`/guida/dungeon/${encodeURIComponent(dungeon)}`}>{memento ? 'Apri la scheda dei Memento' : 'Apri la scheda del Palazzo'}</Link>}
+      {area && !contenuti.dati.aree.some(a => a.chiave === area) && <p role="status">{memento ? 'Il dedalo richiesto non appartiene a questa mappa.' : 'L’infiltrazione richiesta non appartiene a questa mappa.'}</p>}
       {contenuti.dati.aree.map(a => <details className="border-b border-border-light py-2" key={`${a.chiave}:${area ?? ''}`} open={a.chiave === area || undefined}>
         <summary className="cursor-pointer font-semibold touch">{a.nome}</summary>
         {a.descrizione && <p className="whitespace-pre-wrap">{a.descrizione}</p>}{a.note && <p className="whitespace-pre-wrap">{a.note}</p>}
-        {!!a.collegamenti?.length && <details><summary className="cursor-pointer touch">Dettagli dell’infiltrazione</summary>{a.collegamenti.map(c => <div key={c.id}>
+        {!!a.collegamenti?.length && <details><summary className="cursor-pointer touch">{memento ? 'Dettagli del dedalo' : 'Dettagli dell’infiltrazione'}</summary>{a.collegamenti.map(c => <div key={c.id}>
           <button type="button" className="touch inline-flex items-center text-left" onClick={() => seleziona(c.id)}>{c.nome}</button>
           {selezionato === c.id && <SchedaContenutoGuida key={`${c.id}:${attiva?.id ?? 'nessuna'}`} spillo={c} partitaId={attiva?.id ?? null} onChiudi={() => seleziona(null)} onCambiato={contenuti.ricarica} />}
         </div>)}</details>}

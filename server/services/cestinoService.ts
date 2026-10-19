@@ -63,7 +63,7 @@ const RADICE: Record<TipoCestino, { tabella: string; colonna: string }> = {
 };
 
 /**
- * Come si chiamano per l'utente le righe che un'eliminazione si porta via, al singolare e al plurale («1 area della guida»,
+ * Come si chiamano per l'utente le righe che un'eliminazione si porta via, al singolare e al plurale («1 infiltrazione»,
  * «7 voci della guida»); le altre tabelle col loro nome.
  */
 const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {

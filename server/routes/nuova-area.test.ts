@@ -20,7 +20,7 @@ const aree = () => (prepared("SELECT chiave, ordine FROM dungeon_area WHERE dung
 /** Crea un'area nel dungeon dato (di serie Kamoshida) col corpo indicato (restituisce la richiesta, per controllarne l'esito). */
 const crea = (corpo: Record<string, unknown>, dungeon = 'kamoshida') => request(app).post(`/api/compendio/dungeon/${dungeon}/aree`).send(corpo);
 
-describe('nuova area della guida', () => {
+describe('nuova infiltrazione', () => {
   beforeAll(() => {
     dbDiProva();
   });

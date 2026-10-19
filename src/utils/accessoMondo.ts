@@ -25,17 +25,40 @@ export function schedaAccessoMondo(tipo: string, chiave: string): string {
   }
 }
 
+/** Vero se la chiave è dei Memento: il dungeon `mementos`, o una delle sue `dungeon_area` (i dedali), la cui chiave comincia sempre
+ *  con quella del dungeon (`creaArea`: `<dungeon>-<nome>`). Lì le parole sono «Memento» e «dedalo», mai «Palazzo» e «infiltrazione». */
+function deiMemento(tipo: string, chiave: string | undefined): boolean {
+  return !!chiave && (tipo === 'dungeon' ? chiave === 'mementos' : tipo === 'area' && chiave.startsWith('mementos-'));
+}
+
+/** Come si chiama, al singolare, il tipo di cosa cercata nel risolutore (L0, 2026-10-20). */
+export function nomeTipoAccessoMondo(tipo: string, chiave?: string): string {
+  switch (tipo) {
+    case 'negozio': return 'Negozio';
+    case 'quartiere': return 'Quartiere';
+    case 'dungeon': return deiMemento(tipo, chiave) ? 'Memento' : 'Palazzo';
+    case 'confidente': return 'Confidente';
+    case 'luogo': return 'Luogo';
+    case 'articolo': return 'Articolo';
+    case 'attivita': return 'Attività';
+    case 'area': return deiMemento(tipo, chiave) ? 'Dedalo' : 'Infiltrazione';
+    case 'punto': return 'Punto di interesse';
+    case 'mappa': return 'Mappa';
+    default: return 'Voce';
+  }
+}
+
 /** Il nome del comando che apre la scheda dell'entità, detto con la parola giusta (L0, 2026-10-20): prima ogni scheda era «Scheda del
  *  luogo», anche quella di un quartiere o di un Palazzo, e «luogo» oggi vuol dire solo l'attività (Untouchable, Diner). */
-export function titoloSchedaAccessoMondo(tipo: string): string {
+export function titoloSchedaAccessoMondo(tipo: string, chiave?: string): string {
   switch (tipo) {
     case 'negozio': return 'Scheda del negozio';
     case 'quartiere': return 'Scheda del quartiere';
-    case 'dungeon': return 'Scheda del Palazzo';
+    case 'dungeon': return deiMemento(tipo, chiave) ? 'Scheda dei Memento' : 'Scheda del Palazzo';
     case 'confidente': return 'Scheda del Confidente';
     case 'luogo': return 'Scheda del luogo';
     case 'articolo': return 'Scheda dell’articolo';
-    case 'area': return 'Scheda dell’infiltrazione';
+    case 'area': return deiMemento(tipo, chiave) ? 'Scheda del dedalo' : 'Scheda dell’infiltrazione';
     case 'punto': return 'Scheda della voce';
     default: return 'Scheda';
   }

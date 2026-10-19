@@ -317,7 +317,7 @@ export function puntoEnigma(tipoPunto: string): boolean {
 
 export const TIPI_MAPPA = ['citta', 'quartiere', 'luogo', 'palazzo', 'area', 'dedalo', 'generica'] as const;
 export type TipoMappa = (typeof TIPI_MAPPA)[number];
-export const NOME_TIPO_MAPPA: Record<TipoMappa, string> = { citta: 'Città', quartiere: 'Quartiere', luogo: 'Area', palazzo: 'Palazzo', area: 'Planimetria', dedalo: 'Dedalo', generica: 'Mappa' };
+export const NOME_TIPO_MAPPA: Record<TipoMappa, string> = { citta: 'Città', quartiere: 'Quartiere', luogo: 'Area', palazzo: 'Palazzo', area: 'Planimetria', dedalo: 'Memento', generica: 'Mappa' };
 
 /**
  * Asset del repository proposto per l'immagine di base di una mappa (15.25): `mappe/<chiave>`, cioè il percorso in `public/asset/`

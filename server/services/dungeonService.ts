@@ -985,7 +985,8 @@ export function spostaPunto(puntoChiave: string, verso: -1 | 1): PuntoInteresseD
   const i = elenco.indexOf(puntoChiave);
   const j = i + verso;
   if (j < 0 || j >= elenco.length) {
-    const dove = p.contenitore_chiave ? 'del suo Enigma' : 'della sua area';
+    // L0: nei Palazzi le voci stanno in un'infiltrazione, nei dedali dei Memento in un'area
+    const dove = p.contenitore_chiave ? 'del suo Enigma' : p.area_dedalo_chiave ? 'della sua area' : 'della sua infiltrazione';
     throw httpErrors.conflict('punto-al-limite', verso < 0 ? `Il punto è già il primo ${dove}.` : `Il punto è già l’ultimo ${dove}.`);
   }
   [elenco[i], elenco[j]] = [elenco[j], elenco[i]];

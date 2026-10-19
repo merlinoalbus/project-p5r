@@ -22,7 +22,7 @@ const aree = (dungeon: string) => prepared('SELECT chiave, ordine FROM dungeon_a
 /** Esegue una query `SELECT COUNT(*) AS n …` con i parametri dati e restituisce il conteggio. */
 const conta = (sql: string, ...p: unknown[]) => (prepared(sql).get(...p) as { n: number }).n;
 
-describe('eliminare un’area della guida', () => {
+describe('eliminare un’infiltrazione', () => {
   let partita: number;
   beforeAll(async () => {
     dbDiProva();

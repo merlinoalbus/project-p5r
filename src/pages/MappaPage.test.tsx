@@ -107,6 +107,20 @@ describe('MappaPage', () => {
     expect(screen.getByText('scheda: oggi')).toBeInTheDocument();
   });
 
+  // L0 (2026-10-20): la mappa dei Memento è dei Memento, non di un Palazzo, e non ha planimetrie da aggiungere
+  it('la mappa dei Memento dice «Scheda dei Memento», è di tipo «Memento» e non chiede planimetrie', async () => {
+    getAlberoMappe.mockResolvedValue([]);
+    getMappa.mockResolvedValue({ ...senzaPianta, chiave: 'dungeon-mementos', nome: 'Memento', tipo: 'dedalo', figli: [], percorso: [{ chiave: 'dungeon-mementos', nome: 'Memento' }], entita: { tipo: 'dungeon', chiave: 'mementos' } });
+    monta('/guida/mappe/dungeon-mementos');
+    expect(await screen.findByRole('link', { name: 'Scheda dei Memento' })).toHaveAttribute('href', '/guida/dungeon/mementos');
+    expect(screen.getByText('Memento', { selector: '.chip' })).toBeInTheDocument();
+    expect(await screen.findByText('I Memento non hanno planimetrie: i piani si generano a ogni discesa, e i dedali stanno nella loro scheda.')).toBeInTheDocument();
+    expect(screen.queryByText(/Puoi aggiungerne una dall’editor/)).toBeNull();
+    // niente conteggio di planimetrie né «raccoglie le mappe qui sotto»: sotto non ce ne sono
+    expect(screen.queryByText(/nessuna planimetria/)).toBeNull();
+    expect(screen.queryByText(/raccoglie le mappe qui sotto/)).toBeNull();
+  });
+
   it('senza partita attiva «Torna alla partita» non c’è nel luogo senza pianta', async () => {
     usePartitaStore.setState({ attiva: null });
     getMappa.mockResolvedValue(senzaPianta);
@@ -321,7 +335,7 @@ it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del
   expect(within(pannello).getByText('Contenuto conservato')).toBeVisible();
   scegliVoce('Nome secondo il contesto','Museo, 2P',pannello);
   expect(await within(visore).findByRole('img',{name:'Mappa: Museo, 2P'})).toBeInTheDocument();
-  expect(within(pannello).getByRole('navigation',{name:'Aree vicine'})).toBeVisible();
+  expect(within(pannello).getByRole('navigation',{name:'Altri quartieri'})).toBeVisible();
   fireEvent.click(within(visore).getByRole('button',{name:'Nascondi pannello'}));
   expect(guida).not.toBeVisible();
   fireEvent.click(within(visore).getByRole('button',{name:'Pannello'}));

@@ -2,7 +2,7 @@
 // Test registro dei tipi di spillo — conteggio, completezza delle definizioni, colori distinti, gruppi della palette, tipi «dialogo» e della città
 // ============================================================
 
-import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, eStrutturale, parolaDelloStato, ritornoDelloStato, spilloPerPunto, statoCitabile, statoDelPin, statoDelTipo, tipiDellaCategoria } from './spilli.js';
+import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, eStrutturale, parolaDelloStato, ritornoDelloStato, spilloPerPunto, statoCitabile, statoDelPin, statoDelTipo, tipiDellaCategoria } from './spilli.js';
 
 describe('registro dei tipi di spillo', () => {
   it('conta 41 tipi distinti (il «Tesoro» generico è stato tolto), ognuno con nome, colore esadecimale e riserva nel registro', () => {
@@ -102,5 +102,13 @@ describe('lo stato di un pin nella partita (2026-10-03)', () => {
     expect(statoCitabile('sicura', true)).toBe('ottenuto');
     expect(statoCitabile('sicura', false)).toBeNull();
     expect(statoCitabile('nota', false)).toBeNull();
+  });
+});
+
+// L0 (2026-10-20): i nomi dei tipi di mappa seguono le gerarchie. La radice dei Memento è l'unica mappa di tipo «dedalo», e nella
+// gerarchia il dedalo è il livello sotto il Memento: il tipo si chiama «Memento».
+describe('NOME_TIPO_MAPPA', () => {
+  it('Città, Quartiere, Area (le zone del mondo), Palazzo, Planimetria (le tavole dei Palazzi), Memento, Mappa', () => {
+    expect(NOME_TIPO_MAPPA).toEqual({ citta: 'Città', quartiere: 'Quartiere', luogo: 'Area', palazzo: 'Palazzo', area: 'Planimetria', dedalo: 'Memento', generica: 'Mappa' });
   });
 });

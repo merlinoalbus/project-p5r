@@ -233,7 +233,7 @@ it('«Collega pin» usa la mappa principale: barra con voce, conto, planimetria,
   expect(screen.queryByRole('button', { name: 'Tocca il pin 3' })).toBeNull();
 });
 
-it('collegando i pin l\'elenco del Palazzo resta e una sua stanza porta quella planimetria nella mappa del collegamento, senza cambiare area (2026-10-18)', async () => {
+it('collegando i pin l\'elenco del Palazzo resta e una sua area porta quella planimetria nella mappa del collegamento, senza cambiare infiltrazione (2026-10-18)', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   getAlberoMappe.mockResolvedValue([]);
   monta('kamoshida');
@@ -315,6 +315,15 @@ it('nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo
   const qimranut = await screen.findByRole('group', { name: 'Dedalo di Qimranut' });
   expect(within(qimranut).getByRole('tab', { name: 'Area 1 (completata)' })).toBeInTheDocument();
   expect(within(qimranut).queryByRole('button', { name: /^Timbro/ })).toBeNull();
+});
+
+// L0 (2026-10-20): nella testata comune i Memento si chiamano col loro nome
+it('nei Memento la linea del tempo è la «Finestra dei Memento»', async () => {
+  getDungeon.mockResolvedValue(mementos());
+  monta('mementos');
+  expect(await screen.findByRole('heading', { name: 'Memento' })).toBeInTheDocument();
+  expect(screen.getByRole('list', { name: 'Finestra dei Memento' })).toBeInTheDocument();
+  expect(screen.queryByRole('list', { name: 'Finestra del Palazzo' })).toBeNull();
 });
 
 it('nei Memento l’area ha Timbri, Persona, Richieste e Trama in quest’ordine; catturare una Persona non sposta l’anello; «Correggi la scheda» solo in «Modifica la guida»', async () => {
@@ -441,7 +450,7 @@ async function apriPlanimetrie() {
 // La colonna ristrutturata (richiesta dell'utente, 2026-09-30): l'elenco serve a scegliere e a riordinare
 // trascinando la maniglia; «Gestisci» apre la scheda in una finestra, dove si sistema tutto il resto.
 
-it('l’elenco dice le stanze in ordine, che cosa mostrano, quanto resta e le aree della guida', async () => {
+it('l’elenco dice le aree in ordine, che cosa mostrano, quanto resta e le infiltrazioni', async () => {
   const pannello = await apriPlanimetrie();
   const stanze = within(pannello.getByRole('list', { name: 'Aree del Palazzo' }));
   expect(stanze.getByRole('button', { name: /^1\. Cancello/ })).toHaveTextContent('Immagine 1 · 1 da prendere su 2');
@@ -454,7 +463,7 @@ it('l’elenco dice le stanze in ordine, che cosa mostrano, quanto resta e le ar
   expect(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' })).toBeInTheDocument();
 });
 
-it('le frecce sulla maniglia spostano la stanza e salvano l’ordine di tutto il Palazzo', async () => {
+it('le frecce sulla maniglia spostano l’area e salvano l’ordine di tutto il Palazzo', async () => {
   const pannello = await apriPlanimetrie();
   riordinaMappe.mockResolvedValue([]);
   const maniglia = pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' });
@@ -470,7 +479,7 @@ it('le frecce sulla maniglia spostano la stanza e salvano l’ordine di tutto il
     .toEqual(['Sposta l’area «Torre»', 'Sposta l’area «Cancello»']);
 });
 
-it('trascinare la maniglia porta la stanza dove la si lascia', async () => {
+it('trascinare la maniglia porta l’area dove la si lascia', async () => {
   const pannello = await apriPlanimetrie();
   riordinaMappe.mockResolvedValue([]);
   const maniglia = pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' });
@@ -481,7 +490,7 @@ it('trascinare la maniglia porta la stanza dove la si lascia', async () => {
   await waitFor(() => expect(riordinaMappe).toHaveBeenCalledWith('dungeon-kamoshida', ['m-torre', 'm-cancello']));
 });
 
-it('toccare una stanza porta la sua planimetria nel visore e nella colonna dei suoi collezionabili', async () => {
+it('toccare un’area porta la sua planimetria nel visore e nella colonna dei suoi collezionabili', async () => {
   const pannello = await apriPlanimetrie();
   fireEvent.click(within(pannello.getByRole('list', { name: 'Aree del Palazzo' })).getByRole('button', { name: /^2\. Torre/ }));
   expect(await screen.findByText('Visore: m-torre')).toBeInTheDocument();
@@ -498,7 +507,7 @@ it('da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riqu
   expect(classi).not.toContain('xl:min-h-[240px]');
 });
 
-it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui non si sa quali tavole sono la stessa stanza', async () => {
+it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui non si sa quali tavole sono la stessa area', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   riordinaMappe.mockResolvedValue([]);
   /** Risolutore dell'atlante in sospeso: il test lo chiama per far arrivare l'albero delle mappe quando vuole. */
@@ -529,7 +538,7 @@ const conDueVersioni = () => {
   };
 };
 
-it('una stanza con più planimetrie si apre: le versioni si scelgono, si riordinano con la loro maniglia e si gestiscono', async () => {
+it('un’area con più planimetrie si apre: le versioni si scelgono, si riordinano con la loro maniglia e si gestiscono', async () => {
   const { dungeon, albero } = conDueVersioni();
   getDungeon.mockResolvedValue(dungeon);
   getAlberoMappe.mockResolvedValue(albero);
@@ -552,7 +561,7 @@ it('una stanza con più planimetrie si apre: le versioni si scelgono, si riordin
   expect(document.activeElement).toBe(versioni.getByRole('button', { name: 'Sposta «Porzione ovest» di Cancello' }));
 });
 
-it('svuotare «Che cosa mostra» toglie l’etichetta (torna il numero nella stanza), e la scheda lo dice prima di salvare', async () => {
+it('svuotare «Che cosa mostra» toglie l’etichetta (torna il numero nell’area), e la scheda lo dice prima di salvare', async () => {
   const { dungeon, albero } = conDueVersioni();
   getDungeon.mockResolvedValue(dungeon);
   getAlberoMappe.mockResolvedValue(albero);
@@ -569,7 +578,7 @@ it('svuotare «Che cosa mostra» toglie l’etichetta (torna il numero nella sta
   await waitFor(() => expect(aggiornaPresentazioneMappa).toHaveBeenCalledWith('m-cancello', { etichetta: null }));
 });
 
-it('la scheda della planimetria cambia stanza, «Che cosa mostra», nome e aree in un salvataggio, e rilegge l’atlante', async () => {
+it('la scheda della planimetria cambia area, «Che cosa mostra», nome e infiltrazioni in un salvataggio, e rilegge l’atlante', async () => {
   const pannello = await apriPlanimetrie();
   aggiornaPresentazioneMappa.mockResolvedValue({});
   aggiornaMappa.mockResolvedValue({});
@@ -612,7 +621,7 @@ it('dalla scheda si elimina la planimetria, con la conferma dentro la finestra',
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 });
 
-it('la conferma dell’eliminazione nomina le aree della guida che la planimetria contiene', async () => {
+it('la conferma dell’eliminazione nomina le infiltrazioni che la planimetria contiene', async () => {
   const pannello = await apriPlanimetrie();
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
   const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
@@ -703,7 +712,7 @@ it('mentre un ordine si salva, la maniglia dice perché è ferma', async () => {
 
 // ---- Stanze e testo delle aree (richiesta dell'utente, 2026-09-30) ----
 
-it('rinominare la planimetria non rinomina la stanza: il nome della stanza resta fissato com’era', async () => {
+it('rinominare la planimetria non rinomina l’area: il nome dell’area resta fissato com’era', async () => {
   const pannello = await apriPlanimetrie();
   aggiornaPresentazioneMappa.mockResolvedValue({});
   aggiornaMappa.mockResolvedValue({});
@@ -715,7 +724,7 @@ it('rinominare la planimetria non rinomina la stanza: il nome della stanza resta
   expect(aggiornaPresentazioneMappa).toHaveBeenCalledWith('m-cancello', { gruppoNome: 'Cancello' });
 });
 
-it('una planimetria a sé si sposta nella stanza di un’altra, dalla sua scheda', async () => {
+it('una planimetria a sé si sposta nell’area di un’altra, dalla sua scheda', async () => {
   const pannello = await apriPlanimetrie();
   impostaStanzaMappa.mockResolvedValue({});
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
@@ -732,7 +741,7 @@ it('una planimetria a sé si sposta nella stanza di un’altra, dalla sua scheda
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 });
 
-it('fra le stanze in cui spostarla ci sono solo quelle dello stesso livello (il server rifiuta le altre)', async () => {
+it('fra le aree in cui spostarla ci sono solo quelle dello stesso livello (il server rifiuta le altre)', async () => {
   const { dungeon, albero } = conDueVersioni();
   // «Torre» sta sotto un'altra mappa del Palazzo: una stanza annidata, di un altro livello
   getDungeon.mockResolvedValue(dungeon);
@@ -745,7 +754,7 @@ it('fra le stanze in cui spostarla ci sono solo quelle dello stesso livello (il 
   expect(stanza.queryByRole('button', { name: 'Sposta in un’altra area…' })).toBeNull();
 });
 
-it('una planimetria di una stanza con più versioni diventa una stanza a sé, col suo nome', async () => {
+it('una planimetria di un’area con più versioni diventa un’area a sé, col suo nome', async () => {
   const { dungeon, albero } = conDueVersioni();
   getDungeon.mockResolvedValue(dungeon);
   getAlberoMappe.mockResolvedValue(albero);
@@ -799,7 +808,7 @@ it('un’area senza planimetria ha la sua scheda: si collega a una qualsiasi tav
   expect(aggiornaMappa).not.toHaveBeenCalled();
 });
 
-it('un’area della guida si elimina dalla sua scheda, dopo una conferma che dice che cosa si perde', async () => {
+it('un’infiltrazione si elimina dalla sua scheda, dopo una conferma che dice che cosa si perde', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   getAlberoMappe.mockResolvedValue([]);
   eliminaArea.mockResolvedValue(undefined);
@@ -835,7 +844,7 @@ it('anche l’area aperta si elimina, dal suo modulo di correzione, e la scheda 
   expect(await screen.findByRole('heading', { name: 'Cancello' })).toBeInTheDocument();
 });
 
-// ---- Più aree della guida nella stessa planimetria (richiesta dell'utente, 2026-09-29) ----
+// ---- Più infiltrazioni nella stessa planimetria (richiesta dell'utente, 2026-09-29) ----
 
 /** Il Palazzo di prova con «Cancello» che contiene anche «Cortile», e «Torre» legata a una tavola sua. */
 const palazzoConPiuAree = (): DungeonDettaglioDto => {
@@ -866,7 +875,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
   /** La riga della stanza della planimetria Cancello nell'elenco del Palazzo. */
   const rigaCancello = () => within(screen.getByRole('list', { name: 'Aree del Palazzo' })).getAllByRole('listitem')[0];
 
-  it('tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sull’area, sulla stanza che ha tutte le aree completate e nei chip', async () => {
+  it('tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sull’infiltrazione, sull’area che le ha tutte completate e nei chip', async () => {
     getDungeon.mockResolvedValue(conVoci({
       'k-01': [voceGuida('a', 'sicura', 'ottenuto')],
       'k-03': [voceGuida('b', 'forziere', 'esaurito'), voceGuida('c', 'altro', null)],
@@ -884,7 +893,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     expect(chip.every((b) => b.querySelector('[data-completata]'))).toBe(true);
   });
 
-  it('una voce ancora da fare: niente spunta su quell’area né sulla stanza; un’area senza voci da segnare non ha spunta', async () => {
+  it('una voce ancora da fare: niente spunta su quell’infiltrazione né sull’area; un’infiltrazione senza voci da segnare non ha spunta', async () => {
     getDungeon.mockResolvedValue(conVoci({
       'k-01': [voceGuida('a', 'sicura', 'ottenuto')],
       'k-03': [voceGuida('b', 'forziere', 'esaurito'), voceGuida('d', 'boss', null)],
@@ -902,7 +911,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     expect(chip.map((b) => b.textContent)).toEqual(['1. Cancello (completata)', '3. Cortile']);
   });
 
-  it('un’area della guida senza planimetria, completata, ha la spunta sulla sua riga in coda all’elenco', async () => {
+  it('un’infiltrazione senza planimetria, completata, ha la spunta sulla sua riga in coda all’elenco', async () => {
     const d = palazzo(true);
     // la Torre (k-02) non ha planimetrie: sta fra le aree in coda
     d.aree[1] = { ...d.aree[1], punti: [voceGuida('t', 'miniboss', 'ottenuto')] };
@@ -916,7 +925,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     expect(screen.getByRole('list', { name: 'Aree del Palazzo' }).querySelectorAll('[data-completata]')).toHaveLength(0);
   });
 
-  it('in una stanza con più versioni la spunta compare sulla stanza, nelle sue aree, in ogni versione che contiene l’area e sulla versione senza niente da raccogliere (2026-10-11)', async () => {
+  it('in un’area con più versioni la spunta compare sull’area, nelle sue infiltrazioni, in ogni versione che contiene l’infiltrazione e sulla versione senza niente da raccogliere (2026-10-11)', async () => {
     const { dungeon, albero } = conDueVersioni();
     // l'area Cancello è completata; la versione «Pianta completa» ha 1 su 2 da raccogliere, «Porzione ovest» niente e nessuna area
     dungeon.aree[0] = { ...dungeon.aree[0], punti: [voceGuida('a', 'sicura', 'ottenuto')] };
@@ -1082,7 +1091,7 @@ it('salvata l’intestazione, la scheda si rilegge con la partita attiva', async
   await waitFor(() => expect(getDungeon).toHaveBeenCalledWith('kamoshida', 4));
 });
 
-it('la scheda salva solo quel che cambia: la sola etichetta non tocca nome, stanza e aree', async () => {
+it('la scheda salva solo quel che cambia: la sola etichetta non tocca nome, area e infiltrazioni', async () => {
   const pannello = await apriPlanimetrie();
   aggiornaPresentazioneMappa.mockResolvedValue({});
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
@@ -1096,7 +1105,7 @@ it('la scheda salva solo quel che cambia: la sola etichetta non tocca nome, stan
 
 // ---- Una sezione nuova della guida (richiesta dell'utente, 2026-10-01) ----
 
-it('dalla scheda di una planimetria senza aree si crea un’area dentro di lei: nome della stanza proposto, in fondo al Palazzo', async () => {
+it('dalla scheda di una planimetria senza infiltrazioni si crea un’infiltrazione dentro di lei: nome dell’area proposto, in fondo al Palazzo', async () => {
   const pannello = await apriPlanimetrie();
   creaArea.mockResolvedValue({ chiave: 'kamoshida-cancello-interno', nome: 'Cancello', ordine: 1 });
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Torre' }));

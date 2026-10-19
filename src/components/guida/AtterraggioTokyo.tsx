@@ -115,6 +115,11 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
   // dove si atterra oggi: la regola che il server ha scelto per il giorno della partita
   const oggi = d.atterraggio ? `${nomeSenzaPalazzo(d.planimetrie.find((p) => p.chiave === d.atterraggio!.mappa)?.nome ?? d.atterraggio.mappa)}${d.atterraggio.spillo !== null ? `, sul pin «${d.atterraggi.find((r) => r.mappa === d.atterraggio!.mappa && r.spillo === d.atterraggio!.spillo)?.spilloNome ?? d.atterraggio.spillo}»` : ''}` : null;
 
+  // L0 (2026-10-20): la finestra serve anche ai Memento, che si chiamano col loro nome e non «Palazzo»
+  const memento = d.tipo === 'mementos';
+  const ilPosto = memento ? 'i Memento' : 'il Palazzo';
+  const delPosto = memento ? 'dei Memento' : 'del Palazzo';
+
   /** Cambia una regola della bozza. */
   const cambia = (id: number, patch: Partial<RegolaBozza>) => setRegole((rr) => rr.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   /** Sposta una regola di un posto (-1 su, +1 giù): l'ordine è quello in cui si provano. */
@@ -139,7 +144,7 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
       <div className="flex flex-col gap-5 text-[13px]">
         <section aria-labelledby="tokyo-quando" className="flex flex-col gap-2">
           <h3 id="tokyo-quando" className="m-0 font-display text-[16px] uppercase">Quando compare</h3>
-          <p className="m-0 text-[12px] text-text-muted">L’icona del Palazzo sta sulla mappa di Tokyo nei giorni della partita dentro questa finestra (ora: {testoFinestra(d.finestra)}). È la stessa finestra che dice l’arco della storia alle condizioni dei pin.</p>
+          <p className="m-0 text-[12px] text-text-muted">L’icona {delPosto} sta sulla mappa di Tokyo nei giorni della partita dentro questa finestra (ora: {testoFinestra(d.finestra)}). È la stessa finestra che dice l’arco della storia alle condizioni dei pin.</p>
           <div className="flex flex-wrap items-center gap-2">
             <SelettoreData etichetta="Compare dal" valore={dal} onCambia={setDal} disabilitato={occupato} />
             <label className="touch flex items-center gap-1.5 text-[12px]">
@@ -158,11 +163,11 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
         <section aria-labelledby="tokyo-atterraggio" className="flex flex-col gap-2">
           <h3 id="tokyo-atterraggio" className="m-0 font-display text-[16px] uppercase">Atterraggio dalla mappa di Tokyo</h3>
           <p className="m-0 text-[12px] text-text-muted">
-            Toccando il Palazzo sulla mappa di Tokyo si apre la planimetria della <strong>prima</strong> regola che copre il giorno della partita, centrata sul pin d’arrivo se c’è.
-            Senza partita vale la prima regola «Sempre». Se nessuna regola vale si apre la scheda del Palazzo.
+            Toccando {ilPosto} sulla mappa di Tokyo si apre la planimetria della <strong>prima</strong> regola che copre il giorno della partita, centrata sul pin d’arrivo se c’è.
+            Senza partita vale la prima regola «Sempre». Se nessuna regola vale si apre la scheda {delPosto}.
           </p>
-          <p className="m-0 text-[12px]" data-atterraggio-oggi>{oggi ? <>Oggi si atterra su: <strong>{oggi}</strong>.</> : 'Oggi nessuna regola vale: si apre la scheda del Palazzo.'}</p>
-          {opzioniMappa.length === 0 ? <p className="m-0 text-[12px] text-text-muted">Questo dungeon non ha planimetrie: toccandolo si apre la sua scheda.</p> : (
+          <p className="m-0 text-[12px]" data-atterraggio-oggi>{oggi ? <>Oggi si atterra su: <strong>{oggi}</strong>.</> : `Oggi nessuna regola vale: si apre la scheda ${delPosto}.`}</p>
+          {opzioniMappa.length === 0 ? <p className="m-0 text-[12px] text-text-muted">{memento ? 'I Memento non hanno planimetrie: toccandoli si apre la loro scheda.' : 'Questo Palazzo non ha planimetrie: toccandolo si apre la sua scheda.'}</p> : (
             <>
               {regole.length > 0 && (
                 <ol className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Regole d’atterraggio, nell’ordine in cui si provano">
@@ -200,7 +205,7 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
                   })}
                 </ol>
               )}
-              {regole.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessuna regola: toccando il Palazzo si apre la sua scheda.</p>}
+              {regole.length === 0 && <p className="m-0 text-[12px] text-text-muted">{`Nessuna regola: toccando ${ilPosto} si apre la ${memento ? 'loro' : 'sua'} scheda.`}</p>}
               {rovesciate.length > 0 && <p className="m-0 text-[12px] text-error" role="alert">{rovesciate.length === 1 ? `Nella regola ${rovesciate[0]}` : `Nelle regole ${rovesciate.join(', ')}`} la fine viene prima dell’inizio.</p>}
               <div className="flex flex-wrap items-center gap-1.5">
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una regola" disabled={occupato || regole.length >= 30} onClick={aggiungi} />

@@ -161,9 +161,21 @@ describe('AtterraggioTokyo', () => {
   });
 
   it('i Memento non hanno planimetrie: niente regole da aggiungere', () => {
-    render(<AtterraggioTokyo dungeon={scheda({ chiave: 'mementos', nome: 'Memento', planimetrie: [], atterraggi: [], atterraggio: null })} onSalvato={vi.fn()} />);
+    render(<AtterraggioTokyo dungeon={scheda({ chiave: 'mementos', nome: 'Memento', tipo: 'mementos', planimetrie: [], atterraggi: [], atterraggio: null })} onSalvato={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ }));
-    expect(screen.getByText('Questo dungeon non ha planimetrie: toccandolo si apre la sua scheda.')).toBeInTheDocument();
+    expect(screen.getByText('I Memento non hanno planimetrie: toccandoli si apre la loro scheda.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Aggiungi una regola/ })).toBeNull();
   });
+});
+
+// L0 (2026-10-20): la stessa finestra serve ai Memento, che si chiamano col loro nome
+it('nei Memento i testi dicono «i Memento» e «dei Memento», mai «il Palazzo»', () => {
+  render(<AtterraggioTokyo dungeon={scheda({ chiave: 'mementos', nome: 'Memento', tipo: 'mementos', planimetrie: [], atterraggi: [], atterraggio: null })} onSalvato={vi.fn()} />);
+  fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Sulla mappa di Tokyo — Memento' }));
+  expect(finestra.getByText(/^L’icona dei Memento sta sulla mappa di Tokyo/)).toBeInTheDocument();
+  expect(finestra.getByText(/Toccando i Memento sulla mappa di Tokyo/)).toBeInTheDocument();
+  expect(finestra.getByText('Oggi nessuna regola vale: si apre la scheda dei Memento.')).toBeInTheDocument();
+  expect(finestra.getByText('I Memento non hanno planimetrie: toccandoli si apre la loro scheda.')).toBeInTheDocument();
+  expect(finestra.queryByText(/Palazzo/)).toBeNull();
 });

@@ -68,7 +68,7 @@ export const DESCRIZIONI_IMPOSTAZIONI: DescrizioniArea = {
   },
   'GET /api/impostazioni/cestino': {
     sommario: 'Gli elementi del cestino: aree, voci della guida, planimetrie e aree dei dedali eliminate, dalla più recente',
-    descrizione: 'Ogni eliminazione di un\'area della guida, di una voce, di una planimetria o di un\'area di un dedalo finisce qui con tutto quel che si è portata via (cascate comprese, immagini dei pin e delle mappe comprese, stato nelle partite). Per ogni elemento: tipo, chiave, nome, dove stava (`contesto`), quando, le righe tolte per tabella con il nome per l\'utente (`contenuto`), la parte nelle partite (`nessuna`, `presente`, o `mancante` se il file delle partite è stato sostituito dopo) e il peso del registro in byte.',
+    descrizione: 'Ogni eliminazione di un\'infiltrazione, di una voce, di una planimetria o di un\'area di un dedalo finisce qui con tutto quel che si è portata via (cascate comprese, immagini dei pin e delle mappe comprese, stato nelle partite). Per ogni elemento: tipo, chiave, nome, dove stava (`contesto`), quando, le righe tolte per tabella con il nome per l\'utente (`contenuto`), la parte nelle partite (`nessuna`, `presente`, o `mancante` se il file delle partite è stato sostituito dopo) e il peso del registro in byte.',
     risposta: 'Elenco di `VoceCestinoDto`',
   },
   'POST /api/impostazioni/cestino/:id/ripristina': {

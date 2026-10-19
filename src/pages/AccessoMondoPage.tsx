@@ -25,7 +25,7 @@ import { PageState } from '../components/shared/PageState';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
-import { schedaAccessoMondo } from '../utils/accessoMondo';
+import { nomeTipoAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
 
 /** Accesso al luogo comune; conserva le alternative e le schede della guida. */
 export function AccessoMondoPage() {
@@ -33,12 +33,6 @@ export function AccessoMondoPage() {
   if (!chiave || !TIPI_ACCESSO_MONDO.includes(tipo as TipoAccessoMondo)) return <div role="alert">Destinazione non valida. <Link to="/guida/mappe">Apri le mappe</Link></div>;
   return <Accesso tipo={tipo as TipoAccessoMondo} chiave={chiave} />;
 }
-
-/** Come si chiama il tipo di cosa che si sta cercando, in italiano e al singolare. */
-const NOME_TIPO_CERCATO: Record<string, string> = {
-  negozio: 'Negozio', quartiere: 'Quartiere', dungeon: 'Palazzo', confidente: 'Confidente',
-  luogo: 'Luogo', articolo: 'Articolo', attivita: 'Attività', area: 'Infiltrazione', punto: 'Punto di interesse',
-};
 
 /**
  * Il bivio vero e proprio: chiede al risolutore (`getAccessoMondo`) dove sta la cosa cercata e, a
@@ -60,7 +54,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
   const guide = dati?.guide ?? [];
   // Il nome per esteso non c'è nel DTO del risolutore: si prende dalla prima destinazione, che per
   // un negozio è il nome dello spillo. Quando manca resta la chiave, che è comunque leggibile.
-  const nomeCercato = `${NOME_TIPO_CERCATO[tipo] ?? 'Voce'}: ${dati?.destinazioni[0]?.nomeSpillo ?? chiave}`;
+  const nomeCercato = `${nomeTipoAccessoMondo(tipo, chiave)}: ${dati?.destinazioni[0]?.nomeSpillo ?? chiave}`;
   if (!carica.caricamento && !carica.errore && dati?.esito === 'unica' && dati.destinazioni.length === 1 && guide.length === 0) {
     return <Navigate to={urlDestinazioneMondo(dati.destinazioni[0])} replace />;
   }

@@ -739,7 +739,7 @@ interface PropsNuova { aperta: boolean; genitore: MappaDto; albero: MappaRiassun
 /** Finestra «Nuova mappa»: chiave proposta dal nome, tipo coerente col genitore; passaggio dal genitore (predefinito) e di ritorno (a scelta), 15.24. */
 function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea }: PropsNuova) {
   const [nome, setNome] = useState('');
-  const [tipo, setTipo] = useState<TipoMappa>(genitore.tipo === 'palazzo' || genitore.tipo === 'dedalo' || genitore.tipo === 'area' ? 'area' : genitore.tipo === 'citta' ? 'quartiere' : 'luogo');
+  const [tipo, setTipo] = useState<TipoMappa>(genitore.tipo === 'dedalo' ? 'generica' : genitore.tipo === 'palazzo' || genitore.tipo === 'area' ? 'area' : genitore.tipo === 'citta' ? 'quartiere' : 'luogo');
   const [passaggio, setPassaggio] = useState(true);
   const [ritorno, setRitorno] = useState(false);
   // la chiave nasce dal nome, preceduta da quella del genitore (non sotto la città): unica e valida per abilitare «Crea»;

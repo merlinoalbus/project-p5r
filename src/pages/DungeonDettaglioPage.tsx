@@ -57,7 +57,7 @@ import { Modal } from '../components/shared/Modal';
 import { NEL_CESTINO } from '../utils/cestino';
 
 /** Le tre date di un Palazzo come una linea: si apre, conviene rubare, scade. La prosa della guida nel `title`. */
-function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
+function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['date']; memento?: boolean }) {
   const tappe = [
     { chiave: 'sblocco', etichetta: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
     { chiave: 'furto', etichetta: 'Furto consigliato', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]', segno: 'furto' as const },
@@ -65,7 +65,7 @@ function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
   ].filter((t) => !!t.valore);
   if (tappe.length === 0) return null;
   return (
-    <ol className="m-0 flex list-none flex-wrap items-stretch gap-1.5 p-0" aria-label="Finestra del Palazzo">
+    <ol className="m-0 flex list-none flex-wrap items-stretch gap-1.5 p-0" aria-label={memento ? 'Finestra dei Memento' : 'Finestra del Palazzo'}>
       {tappe.map((t, i) => (
         <li key={t.chiave} className="flex items-stretch gap-1.5">
           {/* Le tappe vanno a capo sugli schermi stretti, e una freccia a inizio riga non collega
@@ -382,7 +382,7 @@ export function DungeonDettaglioPage() {
                     <button type="button" className="btn btn-ghost btn-sm touch -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
                     <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
                     {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida» */}
-                    {(!memento || modifica) && <CorrezioneGuida cosa={`il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
+                    {(!memento || modifica) && <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
                       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
                       onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
                       {(b, cambia) => {
@@ -406,7 +406,7 @@ export function DungeonDettaglioPage() {
                     (2026-10-12) la riga sta in una piega: lo spazio va ai dedali e alle aree, che sono la pagina. */}
                 {(() => { const riga = <>
                 {memento && d.sovrano && <span className="text-[13px] text-text-secondary md:hidden">{d.sovrano}</span>}
-                <LineaDelTempo date={d.date} />
+                <LineaDelTempo date={d.date} memento={memento} />
                 {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno. */}
                 <div className="flex flex-wrap items-center gap-2 lg:contents">
                   <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo={memento ? "Mappa dei Memento" : "Mappa del Palazzo"} />

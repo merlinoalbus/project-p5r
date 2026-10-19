@@ -2095,3 +2095,11 @@ Lotto L0 del piano di razionalizzazione (IA, su mandato U). Le parole dell'inter
 Solo testi: nessun dato, nessuna chiave, nessun codice d'errore cambia (i codici come `area-non-trovata` restano: li leggono i
 client e i test). Il messaggio di una `dungeon_area` che non esiste dice «L'infiltrazione (o il dedalo)», perché la stessa tabella
 regge anche i dedali dei Memento.
+
+Correzioni dopo il primo esame del validatore (RIGETTATO, 2026-10-20): i componenti condivisi fra Palazzi e Memento dicono la
+parola del posto («Scheda dei Memento», «Dedalo», «Finestra dei Memento», «Il dedalo richiesto…», la finestra di Tokyo con «i
+Memento») — la chiave dice se è dei Memento (`dungeon` = `mementos`, o una `dungeon_area` la cui chiave comincia con `mementos-`,
+che `creaArea` garantisce); il tipo di mappa `dedalo`, usato solo dalla radice dei Memento, si chiama «Memento»; il visore dice
+«Quartieri», «Aree», «Planimetrie» secondo il tipo (`src/utils/vocabolarioMappe.ts`); il limite dello spostamento di una voce dice
+«della sua infiltrazione» nei Palazzi; anche la documentazione delle API (`server/openapi/descrizioni/`), che si consulta dall'app,
+usa il vocabolario nuovo.

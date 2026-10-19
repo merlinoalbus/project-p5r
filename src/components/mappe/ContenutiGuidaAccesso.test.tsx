@@ -113,3 +113,19 @@ it('senza partita conserva la consultazione senza offrire modifiche allo stato d
   expect(s.queryByRole('button',{name:'Aperto'})).not.toBeInTheDocument();expect(s.queryByRole('button',{name:'Richiudi'})).not.toBeInTheDocument();
   expect(s.queryByRole('button',{name:'Centra'})).not.toBeInTheDocument();
 });
+
+// L0 (2026-10-20): il pannello serve anche la mappa dei Memento, dove le sezioni sono dedali; nei Palazzi sono infiltrazioni
+it('nei Memento dice «dedalo» e «scheda dei Memento», nei Palazzi «infiltrazione» e «scheda del Palazzo»',async()=>{
+  api.getContenutiMappa.mockResolvedValue({...contenuti(),aree:[{...contenuti().aree[0],collegamenti:[scheda()]}]});
+  render(<MemoryRouter><ContenutiGuidaMappa mappa="dungeon-mementos" dungeon="mementos" area="altro-dedalo"/></MemoryRouter>);
+  expect(await screen.findByText('Il dedalo richiesto non appartiene a questa mappa.')).toBeInTheDocument();
+  expect(screen.getByRole('link',{name:'Apri la scheda dei Memento'})).toHaveAttribute('href','/guida/dungeon/mementos');
+  expect(screen.getByText('Dettagli del dedalo')).toBeInTheDocument();
+});
+it('in un Palazzo dice «infiltrazione» e «scheda del Palazzo»',async()=>{
+  api.getContenutiMappa.mockResolvedValue({...contenuti(),aree:[{...contenuti().aree[0],collegamenti:[scheda()]}]});
+  render(<MemoryRouter><ContenutiGuidaMappa mappa="dungeon-kamoshida" dungeon="kamoshida" area="altra-infiltrazione"/></MemoryRouter>);
+  expect(await screen.findByText('L’infiltrazione richiesta non appartiene a questa mappa.')).toBeInTheDocument();
+  expect(screen.getByRole('link',{name:'Apri la scheda del Palazzo'})).toHaveAttribute('href','/guida/dungeon/kamoshida');
+  expect(screen.getByText('Dettagli dell’infiltrazione')).toBeInTheDocument();
+});

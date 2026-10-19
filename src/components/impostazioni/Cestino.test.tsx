@@ -20,8 +20,8 @@ const AREA: VoceCestinoDto = {
     { tabella: 'spillo_voce', etichetta: 'collegamenti pin-voce', quante: 87 },
     { tabella: 'punto_interesse', etichetta: 'voci della guida', quante: 68 },
     { tabella: 'punto_partita', etichetta: 'spunte delle voci nelle partite', quante: 66 },
-    { tabella: 'mappa_entita', etichetta: 'legami planimetria-area', quante: 8 },
-    { tabella: 'dungeon_area', etichetta: 'area della guida', quante: 1 },
+    { tabella: 'mappa_entita', etichetta: 'legami planimetria-infiltrazione', quante: 8 },
+    { tabella: 'dungeon_area', etichetta: 'infiltrazione', quante: 1 },
   ],
 };
 const MAPPA: VoceCestinoDto = {
@@ -41,7 +41,7 @@ describe('Cestino', () => {
     expect(area.getByText('Palazzo di Madarame')).toBeInTheDocument();
     expect(area.getByText(/Nel cestino dal .* · 86 kB/)).toBeInTheDocument();
     const contenuto = within(area.getByRole('list', { name: 'Che cosa si è portato via' }));
-    expect(contenuto.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['87 collegamenti pin-voce', '68 voci della guida', '66 spunte delle voci nelle partite', '8 legami planimetria-area', '1 area della guida']);
+    expect(contenuto.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['87 collegamenti pin-voce', '68 voci della guida', '66 spunte delle voci nelle partite', '8 legami planimetria-infiltrazione', '1 infiltrazione']);
     const mappa = within(screen.getByRole('listitem', { name: 'Planimetria «Palazzo di Kamoshida»' }));
     expect(mappa.getByText(/3,2 MB/)).toBeInTheDocument();
     expect(mappa.getByText(/si rimettono solo i dati di gioco, non le spunte/)).toBeInTheDocument();
