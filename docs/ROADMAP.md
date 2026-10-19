@@ -1278,3 +1278,28 @@ della guida dell'area «poco pensati». Scelte in `DECISIONI.md` (2026-10-18).
 | 3 | Su richiesta dell'utente: l'elenco del Palazzo resta durante il collegamento e cambia la planimetria della mappa; la testata del Palazzo si ritira e dell'intestazione dell'area resta il titolo: la tela riempie la colonna senza farla scorrere (misurato a 1280×689, 1366×657, 1838×830, 768×1024, 375×812); toccare un pin non smonta più la mappa (zoom e posizione restano); la copia delle voci si collega agli stessi pin con uno stato suo (voci indipendenti); i test non girano più a ogni push né a ogni modifica, solo su richiesta sul percorso indicato (`test-su-richiesta.yml`, DECISIONI 2026-10-18); documenti, commit, push e pipeline; un solo giro del validatore alla fine | in corso |
 | 4 | I dettagli della voce modificabili («ci sono elementi non modificabili come questo Contenuto»; scelta «Renderli modificabili»): `dettagli` nel `PUT` della voce (maschera della Persona preservata), `EditorDettagli` nella «Modifica»; test della rotta e della conversione; misure a 1280×689 e 375×812 | fatto |
 | 5 | Una planimetria aggiunta al Palazzo si apre caricandone l’immagine («non me la carica come planimetria... solo come area»): ruolo dell’immagine al caricamento (`RUOLO_DOPO_CARICAMENTO`), migrazione 106 per quelle già caricate, «Crea» apre l’editor sulla sezione Mappa, «Carica l’immagine» nella scheda di una planimetria vuota; test visti fallire prima | fatto |
+
+## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
+
+Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione
+(`docs/analisi/2026-10-20-piano-razionalizzazione.md`) sul branch `newreview`, che alimenta un'istanza parallela
+(https://p5s.nasmerlinoalbus.cloud) mentre `main` continua ad alimentare https://persona5royal.nasmerlinoalbus.cloud. Si riordina e
+si ottimizza senza svilire grafica e UX; il lavoro dell'utente (diario dal 04-01 al 06-01, Palazzi di Kamoshida e Madarame) resta
+intatto e funzionante. Le decisioni D1–D8 del piano ancora aperte seguono l'opzione consigliata, da confermare
+(`DECISIONI.md`, 2026-10-20). Un giro del validatore a fine di ogni lotto.
+
+| Lotto | Contenuto | Stato |
+|------|-----------|-------|
+| P | Piano nel repository; workflow delle immagini `newreview`; stack separato p5s sul server con la copia dei dati di produzione | 🔄 |
+| L0 | Vocabolario e testi | ⬜ |
+| L1 | Immagini: un risolutore | ⬜ |
+| L2 | Mondo: aree e planimetrie | ⬜ |
+| L3 | Palazzi: aree e infiltrazioni | ⬜ |
+| L4 | Avanzamento unico | ⬜ |
+| L5 | Luoghi, negozi, orari | ⬜ |
+| L6 | Condizioni uniche | ⬜ |
+| L7 | Oggetti | ⬜ |
+| L8 | Persona e Ombre | ⬜ |
+| L9 | Confidenti, attività, calendario | ⬜ |
+| L10 | Partita e diario | ⬜ |
+| L11 | Pulizia e ricerca | ⬜ |

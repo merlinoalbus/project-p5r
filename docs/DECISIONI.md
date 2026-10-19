@@ -2053,3 +2053,28 @@ dati: «Aggiungi» → «Crea» apre l'editor sulla sezione Mappa → l'immagine
 apre nel visore (1280×689, 768×1024 692×420, 375×812 299×333). La prova ha trovato anche la posizione: la planimetria nuova prendeva
 il numero delle planimetrie (25 a Madarame) mentre la guida le numera a centinaia (0…802), e finiva seconda invece che «in fondo»;
 ora prende la posizione più alta più uno (803).
+
+## 2026-10-20 — Razionalizzazione sul branch `newreview` e istanza parallela p5s
+
+Mandato dell'utente (U): «lavora su un branch di riferimento esplicito all'ottimizzazione... che deve alimentare un'istanza
+parallela di FE (devo avere il main che alimenta https://persona5royal.nasmerlinoalbus.cloud/ mentre il branch newreview che
+alimenta https://p5s.nasmerlinoalbus.cloud/). Completa tutti i lotti di lavoro per poi poter verificare io lo stato... si tratta di
+riordinare e ottimizzare non svilire l'user experience». Il piano è `docs/analisi/2026-10-20-piano-razionalizzazione.md`.
+
+Conseguenze: nessun commit su `main` e nessuna modifica all'istanza di produzione (container, volume, dati); le immagini del branch
+hanno il tag `newreview` e non toccano `latest`; lo stack p5s ha container, rete e volume propri e parte da una copia dei dati di
+produzione presa con l'API di backup di SQLite (sola lettura).
+
+Decisioni del piano ancora aperte: per non interrompere il lavoro l'utente ha chiesto di applicare l'opzione consigliata.
+Sono **scelte consigliate applicate, da confermare** (IA, su mandato U):
+
+| Decisione | Scelta applicata | Alternative lasciate |
+|---|---|---|
+| D1 Ordine dei lotti | L0 → L11 come proposto | Prima i Palazzi |
+| D2 Covo dei Ladri | Area di Yongen-Jaya: le 5 planimetrie diventano le sue versioni | Luogo a sé sulla metro |
+| D3 Iweleth | Solo come dedalo dei Memento: le aree del «Palazzo» confluiscono nel dedalo | Solo come Palazzo; entrambi con stato condiviso |
+| D4 Permanenti e rigenerabili | Rigenerabili: oggetto, nemico, ombra-sciagura; tutto il resto permanente, modificabile voce per voce | Elenco diverso |
+| D5 Negozio come pagina | Sezione della pagina del luogo (l'indirizzo vecchio rimanda al luogo) | Pagina propria collegata al luogo |
+| D6 Automatismi del diario | La spunta aggiorna ciò che la voce collega; le Doti si propongono con «Applica» | Doti automatiche e annullabili; Doti sempre a mano |
+| D7 Persona del party | Collegate al compendio per chiave | Lasciate come testo |
+| D8 Acquisti e yen | Proposti da confermare: l'acquisto segna l'articolo e propone l'uscita, il turno propone l'entrata | Yen mossi in automatico; yen sempre a mano |
