@@ -355,9 +355,7 @@ function PannelloEditor(p: PropsPannello) {
   // solo la pianta di un quartiere si scarica dalla guida: quella delle aree dei Palazzi non c'è più (rotta tolta il 2026-09-18)
   const scaricabile = mappa.entita?.tipo === 'quartiere';
   // l'asset del repository è un puntatore: consegnato solo se sta nel manifest degli asset
-  const assetAttuale = useAsset(mappa.asset);
-  const assetOriginale = useAsset(mappa.assetOriginale);
-  const assetConsegnato = assetAttuale ?? assetOriginale;
+  const assetConsegnato = useAsset(mappa.asset);
   // una mappa si «raggiunge» da questa se uno spillo (passaggio, stazione o altro) punta a lei: le figlie senza spillo e il genitore senza ritorno vengono segnalati
   const raggiunge = (destinazione: string) => mappa.spilli.some((s) => destinazioneMappaSpillo(s) === destinazione);
   return (

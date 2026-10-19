@@ -1588,3 +1588,34 @@ Impostazioni → Cestino.
   che ne hanno già uno), giorni scritti a mano nel campo temporaneo `_giorniQuiz` (`definizioni.ts`), «Come funziona» alto quanto il
   testo (nessuno scorrimento annidato).
 - **Finestre**: `Modal` si chiude solo con la X o con Esc; lo sfondo non chiude (2026-10-17, vedi `DECISIONI.md`).
+
+## Razionalizzazione (branch `newreview`, dal 2026-10-20)
+
+Il piano è `docs/analisi/2026-10-20-piano-razionalizzazione.md`; lo stato dei lotti in `ROADMAP.md`. L'istanza parallela
+https://p5s.nasmerlinoalbus.cloud gira con le immagini `:newreview` (`.github/workflows/docker-publish-newreview.yml`) nello stack
+`docker-compose.p5s.yml` (progetto `p5s`, container `project_p5r_review_be`/`project_p5r_review_fe`, volume `p5s_data`); il backend ha
+l'alias `project_p5r_be` sulla rete dello stack, così l'nginx dell'immagine del frontend non cambia.
+
+### L0 — un vocabolario
+Le parole dell'interfaccia seguono le gerarchie: **Infiltrazione** (`dungeon_area` di un Palazzo), **Area** (mappa di tipo `luogo` nel
+mondo, gruppo di planimetrie nel Palazzo), **Planimetria** (l'immagine di un'area), **Luogo** (solo l'attività, tabella `luogo`);
+nei Memento **Memento**, **dedalo**, **area**. I testi che dipendono dal posto stanno in `src/utils/accessoMondo.ts`
+(`titoloSchedaAccessoMondo`, `nomeTipoAccessoMondo`: i Memento si riconoscono dalla chiave `mementos` o dal prefisso `mementos-`
+delle loro `dungeon_area`) e `src/utils/vocabolarioMappe.ts` (`titoloMappeVicine`, `titoloMappeSorelle`, `etichettaMappeSorelle`).
+Nessuna chiave, rotta o codice d'errore è cambiato.
+
+### L1 — un'immagine per mappa
+- `shared/immaginiMappa.ts`: `sqlRuoloDaGerarchia(alias)` (il ruolo dedotto: radice di Palazzo/Memento → `emblema`; senza immagine →
+  `nessuna`; città e quartieri → `illustrazione-editoriale`; il resto → `planimetria-nativa`) e `ruoloConVisore`.
+- `server/services/mappe/immagineMappa.ts`: `caricataDellaMappa` + `urlCaricata` (URL sempre `?v=<data>`), `allineaRuoliImmagine`,
+  `dopoImmagineMappa` (registra chiave, dimensioni e ruolo sulla mappa dopo ogni scrittura o rimozione dell'ambito `mappa`),
+  `dopoRimozioniImmagini`, `dimensioniImmagine`. `immaginiService` le chiama da `salvaImmagine`/`eliminaImmagine`/
+  `eliminaImmaginiAmbito`; la rotta generica `PUT /api/immagini/mappa/:chiave` passa da `impostaImmagineMappa` (conferma dei pezzi);
+  `creaMappa`, `aggiornaMappa` e `importaMappe` riallineano il ruolo. Migrazione 107: la regola applicata una volta.
+- DTO: `MappaRiassuntoDto.immagineUrl` (versionato) e `asset` (quello dichiarato dalla mappa); `assetOriginale` non c'è più (resta
+  solo nel pacchetto delle mappe, per compatibilità dei file esportati).
+- Interfaccia: `useImmagineMappa(m)` (caricata → asset dichiarato via `useAsset`) in `VisoreMappa`, `ImmaginiLuogo`,
+  `IngressoQuartiere`, `EditorMappaPage`; `AnteprimaMappa` (indice) usa la caricata, poi lo stemma di Tokyo/Covo, poi l'asset;
+  `haPlanimetria` legge il ruolo con `ruoloConVisore`. I segni dei posti (sagome dei quartieri, stemmi dei Palazzi, il Covo) stanno in
+  `src/components/mappe/segniMappa.ts` e si risolvono con `useAsset`/`useRisolviAsset` (manifesto e preferenza della grafica
+  predefinita): `MappaTokyo`, `SagomaQuartiere`, `EmblemaDungeon` (già con `AssetImg`).

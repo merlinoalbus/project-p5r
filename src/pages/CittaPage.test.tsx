@@ -10,6 +10,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
 import { usePartitaStore } from '../stores/partitaStore';
+import { useAssetStore } from '../stores/assetStore';
 import type { DungeonRiassuntoDto, MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
 
 const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn(() => Promise.resolve([])) }));
@@ -19,6 +20,14 @@ vi.mock('../services/api', (vero) => moduloApi(vero, api));
  *  di passaggio (Shibuya su Tokyo, Untouchable sui quartieri). */
 const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, nomeRivisto: false, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: chiave === 'tokyo' ? null : 'Tokyo', percorso: chiave === 'tokyo' ? [{ chiave: 'tokyo', nome: 'Tokyo' }] : [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave, nome }], figli: [], arrivi: [], pezzi: [],
   spilli: [{ id: 1, mappaChiave: chiave, tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#3b82f6', nome: chiave === 'tokyo' ? 'Shibuya' : 'Untouchable', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' }] });
+
+// L1 (2026-10-20): sagome e stemmi sono segni della grafica predefinita e si risolvono dal manifesto, come nell'app: qui il
+// manifesto li ha con gli stessi indirizzi del database
+const SEGNI = ['shibuya', 'shujin-academy', 'ueno', 'akihabara'].map((q) => [`mappe/lmap/tokyo/${q}`, `/api/immagini/mappe/${encodeURIComponent(`lmap/tokyo/${q}`)}/file`]);
+const STEMMI = ['kamoshida', 'madarame', 'mementos'].map((k) => [`palazzi/${k}`, `/api/immagini/palazzi/${k}/file`]);
+beforeEach(() => {
+  useAssetStore.setState({ manifest: { generato: 'T', totale: SEGNI.length + STEMMI.length, file: Object.fromEntries([...SEGNI, ...STEMMI]) }, caricato: true, mancanti: {} });
+});
 
 describe('CittaPage', () => {
   it('mostra una sola Tokyo — quella disegnata — e le piastrelle dei quartieri', async () => {

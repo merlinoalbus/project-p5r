@@ -2042,15 +2042,15 @@ export interface MappaRiassuntoDto {
   nomeRivisto: boolean;
   nomeCompleto?: string;
   genitoreNome?: string|null;
-  assetOriginale?: string|null;
   chiave: string;
   nome: string;
   tipo: TipoMappa;
   genitore: string | null;
   ordine: number;
-  /** Immagine di base caricata nell'istanza (null se assente). */
+  /** L'immagine caricata nell'istanza, con l'URL versionato dalla data di caricamento (null se assente). Vince ovunque (L1). */
   immagineUrl: string | null;
-  /** Asset del repository usato come immagine di base quando manca quella dell'istanza (es. `mappe/citta-shibuya`). */
+  /** L'asset predefinito dichiarato dalla mappa (es. `mappe/native/nativo-rmap-001-3-0`), quando manca l'immagine caricata.
+   *  Prima era costruito per convenzione e la colonna viaggiava come `assetOriginale` (L1: un'immagine sola, `useImmagineMappa`). */
   asset: string | null;
   entita: { tipo: string; chiave: string } | null;
   origine: 'seed' | 'utente';

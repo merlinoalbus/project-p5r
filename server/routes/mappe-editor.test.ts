@@ -41,7 +41,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const quartieri = albero.filter((m) => m.tipo === 'quartiere');
     expect(quartieri.length).toBeGreaterThan(5);
     expect(quartieri.every((q) => q.genitore === 'tokyo')).toBe(true);
-    expect(quartieri.filter(q=>q.entita?.tipo==='quartiere').every(q=>q.asset===`mappe/${q.chiave}`)).toBe(true);
+    // L1: `asset` è quello dichiarato dalla mappa (la colonna), non più `mappe/<chiave pubblica>` costruito per convenzione
+    expect(quartieri.filter(q=>q.entita?.tipo==='quartiere').every(q=>q.asset===`mappe/citta-${q.entita!.chiave}`)).toBe(true);
     // i figli di Tokyo sono i quartieri della guida più le mappe dei pacchetti dell'utente agganciate a Tokyo (es. una banchina della metropolitana)
     expect(tokyo.numeroFigli).toBe(albero.filter((m) => m.genitore === 'tokyo').length);
     expect(tokyo.numeroFigli).toBeGreaterThanOrEqual(quartieri.length);
@@ -274,18 +275,22 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const area = ((await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[]).find((m) => m.tipo === 'area' && !m.immagineUrl)!;
     expect((await request(app).put(`/api/immagini/mappa/${encodeURIComponent(area.chiave)}`).set('Content-Type', 'image/png').send(PNG_2x3)).status).toBeLessThan(300);
     const dopo = (await request(app).get(`/api/mappe/${area.chiave}`)).body.data as MappaDto;
-    expect(dopo.immagineUrl).toContain(`/api/immagini/mappa/${encodeURIComponent(area.chiave)}/file`);
+    // L1: la mappa registra l'immagine (chiave interna) da qualunque strada arrivi, e l'URL è versionato: si apre davvero
+    expect(dopo.immagineUrl).toMatch(/^\/api\/immagini\/mappa\/[^/]+\/file\?v=/);
+    expect((await request(app).get(dopo.immagineUrl!)).status).toBe(200);
     const pacchetto = (await request(app).get('/api/mappe/esporta')).body.data as EsportazioneMappeDto;
-    expect(pacchetto.mappe.find((m) => m.chiave === area.chiave)!.immagine).toBe(area.chiave);
-    expect(pacchetto.immagini?.[area.chiave]?.mime).toBe('image/png');
+    const esportata = pacchetto.mappe.find((m) => m.chiave === area.chiave)!;
+    expect(esportata.immagine).toBeTruthy();
+    expect(pacchetto.immagini?.[esportata.immagine!]?.mime).toBe('image/png');
   });
 
   it('le immagini scaricate dalle guide entrano nel pacchetto come tutte le altre, con la provenienza annotata', async () => {
     const area = ((await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[]).filter((m) => m.tipo === 'area' && !m.immagineUrl)[1];
     salvaImmagine('mappa', area.chiave, 'image/png', PNG_2x3, 'https://omoteura.com/pianta.png');
     const json = (await request(app).get(`/api/mappe/esporta?radice=${area.chiave}`)).body.data as EsportazioneMappeDto;
-    expect(json.mappe[0].immagine).toBe(area.chiave);
-    expect(json.immagini?.[area.chiave]).toMatchObject({ mime: 'image/png', base64: PNG_2x3.toString('base64') });
+    // L1: l'immagine è registrata sulla mappa (chiave interna) anche quando arriva da `salvaImmagine`
+    expect(json.mappe[0].immagine).toBeTruthy();
+    expect(json.immagini?.[json.mappe[0].immagine!]).toMatchObject({ mime: 'image/png', base64: PNG_2x3.toString('base64') });
     expect(json.provenienze).toEqual([{ mappa: area.chiave, origineUrl: 'https://omoteura.com/pianta.png' }]);
   });
 
@@ -486,7 +491,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     // figlia con passaggio e ritorno: nel genitore uno spillo «passaggio» al centro col nome della figlia; nella figlia uno in basso verso il genitore
     const figlia = (await request(app).post('/api/mappe').send({ chiave: 'radice-di-prova-stanza-a', nome: 'Stanza A', tipo: 'generica', genitore: 'radice-di-prova', passaggio: true, ritorno: true, asset: null })).body.data as MappaDto;
     // `asset: null` esplicito resta «nessun asset»; un valore esplicito viene conservato
-    expect(figlia.asset).toBe('mappe/radice-di-prova-stanza-a');
+    expect(figlia.asset).toBeNull();
     expect(figlia.spilli).toHaveLength(1);
     expect(figlia.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Radice di prova', x: 50, y: 92, riferimento: { tipo: 'mappa', chiave: 'radice-di-prova' }, origine: 'utente' });
     let radice = (await request(app).get('/api/mappe/radice-di-prova')).body.data as MappaDto;
@@ -494,8 +499,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(radice.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Stanza A', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'radice-di-prova-stanza-a' } });
     // seconda figlia con solo il passaggio: il centro è occupato, il nuovo spillo si sposta su un punto libero (almeno 5 punti di distanza)
     const figliaB = (await request(app).post('/api/mappe').send({ chiave: 'radice-di-prova-stanza-b', nome: 'Stanza B', tipo: 'generica', genitore: 'radice-di-prova', passaggio: true, asset: 'palazzi/prova-b' })).body.data as MappaDto;
-    expect(figliaB.asset).toBe('mappe/radice-di-prova-stanza-b');
-    expect(figliaB.assetOriginale).toBe('palazzi/prova-b');
+    expect(figliaB.asset).toBe('palazzi/prova-b');
     expect(figliaB.spilli).toHaveLength(0);
     radice = (await request(app).get('/api/mappe/radice-di-prova')).body.data as MappaDto;
     const versoB = radice.spilli.find((s) => s.riferimento?.chiave === 'radice-di-prova-stanza-b')!;

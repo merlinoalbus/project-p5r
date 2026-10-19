@@ -309,7 +309,7 @@ it('l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessib
   getAlberoMappe.mockResolvedValue(albero);
   getContenutiMappa.mockResolvedValueOnce(guidaAccessibile);
   getAlberoMappe.mockResolvedValue([{...albero[3],genitore:'citta-shibuya'}]);
-  getMappa.mockResolvedValue({...dettaglio,nome:'Palazzo di Kamoshida',tipo:'palazzo',immagineUrl:null,assetOriginale:'palazzi/kamoshida',larghezza:null,altezza:null,spilli:[],figli:[albero[3]]});
+  getMappa.mockResolvedValue({...dettaglio,nome:'Palazzo di Kamoshida',tipo:'palazzo',immagineUrl:null,asset:'palazzi/kamoshida',larghezza:null,altezza:null,spilli:[],figli:[albero[3]]});
   monta('/guida/mappe/citta-shibuya?area=biblioteca');
   const guida=await screen.findByRole('region',{name:'Contenuti della guida'});
   expect(guida).toBeVisible();
@@ -326,7 +326,7 @@ it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del
   getAlberoMappe.mockResolvedValue(albero);
   getContenutiMappa.mockResolvedValueOnce(guidaAccessibile);
   useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/native/RMAP_153_1_0':'/asset/mappe/native/RMAP_153_1_0.png'}},caricato:true,mancanti:{}});
-  getMappa.mockResolvedValue({...dettaglio,immagineUrl:null,assetOriginale:'mappe/native/RMAP_153_1_0',larghezza:1536,altezza:1536,spilli:[],contesti:[{id:'a',nome:'Museo, 1P',campo:'F1',texpack:1},{id:'b',nome:'Museo, 2P',campo:'F2',texpack:2}]});
+  getMappa.mockResolvedValue({...dettaglio,immagineUrl:null,asset:'mappe/native/RMAP_153_1_0',larghezza:1536,altezza:1536,spilli:[],contesti:[{id:'a',nome:'Museo, 1P',campo:'F1',texpack:1},{id:'b',nome:'Museo, 2P',campo:'F2',texpack:2}]});
   monta('/guida/mappe/citta-shibuya?contesto=a&area=biblioteca');
   const guida=await screen.findByRole('region',{name:'Contenuti della guida'});
   const visore=screen.getByTestId('visore-mappa');
@@ -346,7 +346,7 @@ it('una mappa con asset originale e dimensioni non registrate mantiene la planim
   // L'esempio era Tokyo, che ora rimbalza sulla Città: la regola però non è su Tokyo, è che
   // l'asset basta anche quando larghezza e altezza non sono in archivio.
   useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/dungeon-kamoshida':'/asset/mappe/dungeon-kamoshida.png'}},caricato:true});
-  getMappa.mockResolvedValue({...dettaglio,chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida',immagineUrl:null,asset:null,assetOriginale:'mappe/dungeon-kamoshida',ruoloImmagine:'illustrazione-editoriale',larghezza:null,altezza:null,spilli:[],percorso:[{chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida'}]});
+  getMappa.mockResolvedValue({...dettaglio,chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida',immagineUrl:null,asset:'mappe/dungeon-kamoshida',ruoloImmagine:'illustrazione-editoriale',larghezza:null,altezza:null,spilli:[],percorso:[{chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida'}]});
   monta('/guida/mappe/dungeon-kamoshida');
   expect(await screen.findByRole('img',{name:'Mappa: Palazzo di Kamoshida'})).toHaveAttribute('src','/asset/mappe/dungeon-kamoshida.png');
   expect(screen.getByTestId('visore-mappa')).toBeInTheDocument();

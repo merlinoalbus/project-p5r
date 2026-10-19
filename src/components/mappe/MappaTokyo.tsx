@@ -35,7 +35,8 @@ import { urlMappa } from '../../utils/navigazioneMappa';
 import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
-import { assetCovoLadri, assetPalazzo, assetTokyoQuartiere, nascondiSagomaAssente } from './assetTokyo';
+import { SEGNO_COVO, nascondiSegnoAssente, segnoPalazzo, segnoQuartiere } from './segniMappa';
+import { useRisolviAsset } from '../../stores/assetStore';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -155,8 +156,8 @@ interface Segno {
   nome: string;
   /** Sulla targa: quello corto. */
   targa: string;
-  /** L'indirizzo del disegno, già risolto: `assetTokyoQuartiere` o `assetPalazzo`. */
-  src: string;
+  /** L'indirizzo del disegno, già risolto dal segno del posto (`segniMappa.ts`); null se manca: resta la targa. */
+  src: string | null;
   dove: Collocazione;
   href: string;
   presente: boolean;
@@ -190,9 +191,9 @@ function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: bool
     onFocus={() => onEvidenzia?.(s.chiave)}
     onBlur={() => onEvidenzia?.(null)}
   >
-    <img src={s.src} alt="" aria-hidden onError={nascondiSagomaAssente}
+    {s.src && <img src={s.src} alt="" aria-hidden onError={nascondiSegnoAssente}
       className={`w-full object-contain transition-transform duration-150 group-hover:scale-[1.18] ${acceso ? 'scale-[1.18]' : ''}`}
-      style={{ filter: filtro }} />
+      style={{ filter: filtro }} />}
     {/* Due cose, e tutte e due servono a non far toccare le targhe fra loro.
         **Va a capo**: restava su una riga sola, e «Odaiba / Seaside Park» occupava un quinto della
         tela — su una mappa la larghezza è spazio tolto ai vicini.
@@ -347,13 +348,15 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
   }, []);
 
+  // i segni dei posti (sagome, stemmi, il Covo) con la regola della grafica predefinita (L1): manifesto e preferenza
+  const risolvi = useRisolviAsset();
   const { presenti, assenti, nomiFermate } = useMemo(() => {
     const segni: Segno[] = [];
     for (const q of quartieri) {
       const dove = QUARTIERI_TOKYO[q.chiave];
       if (!dove) continue;
       segni.push({
-        chiave: q.chiave, nome: q.nome, targa: q.nome, src: assetTokyoQuartiere(q.chiave), dove, palazzo: false,
+        chiave: q.chiave, nome: q.nome, targa: q.nome, src: risolvi(segnoQuartiere(q.chiave)), dove, palazzo: false,
         // Si entra **nella mappa** del quartiere, non nella sua scheda: da una mappa si passa a
         // una mappa. Quale mappa, e centrata dove, **lo decide chi cura la guida**: è l'ingresso
         // configurato dalla scheda del quartiere («Configura ingresso da Città»), che porta la
@@ -382,7 +385,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         // di viaggio, perché nel gioco lì non compaiono, e tengono la loro illustrazione, che
         // l'utente ha chiesto di lasciare com'è. La targa scura le distingue dai quartieri: sono
         // posti dell'altro mondo, non fermate del treno.
-        src: assetPalazzo(d.chiave), dove, palazzo: true,
+        src: risolvi(segnoPalazzo(d.chiave)), dove, palazzo: true,
         // Dove si atterra lo dicono le regole del Palazzo per il giorno della partita (2026-10-04): una planimetria, centrata
         // sul pin d'arrivo se c'è. Senza una regola che copra il giorno resta la scheda del Palazzo.
         href: d.atterraggio
@@ -407,7 +410,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       if (QUARTIERI_TOKYO[chiave] && !nomi.has(chiave)) nomi.set(chiave, nome);
     }
     return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente), nomiFermate: nomi };
-  }, [quartieri, dungeon, dataGioco]);
+  }, [quartieri, dungeon, dataGioco, risolvi]);
   const [elencoAssenti, setElencoAssenti] = useState(false);
   const { blocco, mappa } = useLarghezzaCheSta(riempi, `${presenti.length}/${assenti.length}/${dataGioco ?? ''}`);
 
@@ -456,7 +459,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
             che c'era prima. Nessuna delle due parti deve aspettare l'altra per finire. */}
         <Cartellino
           s={{ chiave: 'covo', nome: 'Covo dei Ladri', targa: 'Covo dei Ladri',
-            src: assetCovoLadri(), dove: COVO_TOKYO, palazzo: false,
+            src: risolvi(SEGNO_COVO), dove: COVO_TOKYO, palazzo: false,
             href: '/guida/covo', presente: true,
             quando: 'la soffitta del Leblanc' }}
           acceso={evidenziato === 'covo'} onEvidenzia={onEvidenzia} onApri={onApri} />

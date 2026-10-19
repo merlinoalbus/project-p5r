@@ -40,10 +40,10 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
   },
   'PUT /api/immagini/:ambito/:chiave': {
     sommario: 'Carica o sostituisce l\'immagine di (ambito, chiave)',
-    descrizione: 'Il corpo è il file grezzo con `Content-Type` `image/*`: con un altro tipo il corpo non viene letto e la richiesta è rifiutata (`corpo-non-immagine`). Formati ammessi PNG, JPEG, WEBP, GIF e SVG, fino a 8 MB (oltre, 413 `corpo-troppo-grande`). Una sola immagine per (ambito, chiave): il caricamento sostituisce quella che c\'era, anche della grafica predefinita, e azzera l\'indirizzo d\'origine. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa.',
+    descrizione: 'Il corpo è il file grezzo con `Content-Type` `image/*`: con un altro tipo il corpo non viene letto e la richiesta è rifiutata (`corpo-non-immagine`). Formati ammessi PNG, JPEG, WEBP, GIF e SVG, fino a 8 MB (oltre, 413 `corpo-troppo-grande`). Una sola immagine per (ambito, chiave): il caricamento sostituisce quella che c\'era, anche della grafica predefinita, e azzera l\'indirizzo d\'origine. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa, e l\'immagine di una mappa che esiste passa dalla stessa strada dell\'editor (`PUT /api/mappe/:chiave/immagine`): dimensioni, ruolo dedotto dalla gerarchia, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, con `?eliminaPezzi=1` se ne vanno). Un\'immagine della grafica predefinita riallinea il ruolo delle mappe che la dichiarano.',
     risposta: 'I metadati dell\'immagine salvata, `ImmagineDto`',
     corpoBinario: 'image/*',
-    errori: [[400, 'corpo-non-immagine'], [400, 'formato-non-ammesso'], [400, 'immagine-vuota'], [400, 'immagine-troppo-grande'], [413, 'corpo-troppo-grande']],
+    errori: [[400, 'corpo-non-immagine'], [400, 'formato-non-ammesso'], [400, 'immagine-vuota'], [400, 'immagine-troppo-grande'], [413, 'corpo-troppo-grande'], [409, 'mappa-con-pezzi']],
   },
   'POST /api/immagini/:ambito/:chiave/da-url': {
     sommario: 'Scarica un\'immagine da un indirizzo web e la salva per (ambito, chiave)',

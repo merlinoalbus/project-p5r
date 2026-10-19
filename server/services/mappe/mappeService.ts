@@ -34,6 +34,7 @@ import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
+import { allineaRuoliImmagine, caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { ammetteCondizioni, categoriaSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
@@ -55,15 +56,14 @@ function rigaMappa(chiave: string): RigaMappa {
   return r;
 }
 
-/** Chiave dell'immagine di base nell'istanza: quella registrata, altrimenti un'immagine dell'ambito «mappa» con la chiave della mappa
- * (le piante scaricate dalla guida per aree e quartieri usano proprio quella chiave). */
-function immagineDi(r: RigaMappa): { chiave: string; createdAt: string } | null {
-  for (const chiave of [r.immagine_chiave, chiaveMappa(r.chiave), r.chiave]) {
-    if (!chiave) continue;
-    const img = leggiImmagine('mappa', chiave);
-    if (img) return { chiave, createdAt: img.createdAt };
-  }
-  return null;
+/** Vero se c'è una mappa con quella chiave (pubblica o interna). */
+export function mappaEsiste(chiave: string): boolean {
+  return !!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(idMappa(chiave));
+}
+
+/** L'immagine caricata di una mappa sola (la regola di `caricataDellaMappa`, L1), con le immagini lette ora. */
+function immagineDi(r: RigaMappa): ImmagineCaricata | null {
+  return caricataDellaMappa(r, immaginiCaricateDelleMappe());
 }
 
 /**
@@ -103,34 +103,26 @@ function contestoMappe(): ContestoMappe {
     // Tokyo «venticinque luoghi» mostrandone ventiquattro. Un conteggio che non torna con l'elenco sotto è peggio di nessuno.
     figli: conta("SELECT genitore_chiave AS chiave, COUNT(*) AS n FROM mappa WHERE genitore_chiave IS NOT NULL AND chiave <> 'citta-mementos' GROUP BY genitore_chiave"),
     nomi: new Map(righe.map((r) => [r.chiave, r.nome])),
-    immagini: new Map((prepared("SELECT chiave, created_at FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; created_at: string }>).map((i) => [i.chiave, i.created_at])),
+    immagini: immaginiCaricateDelleMappe(),
   };
-}
-
-/** Come `immagineDi`, ma dalle immagini già lette nel contesto. */
-function immagineDalContesto(r: RigaMappa, ctx: ContestoMappe): { chiave: string; createdAt: string } | null {
-  for (const chiave of [r.immagine_chiave, chiaveMappa(r.chiave), r.chiave]) {
-    if (!chiave) continue;
-    const createdAt = ctx.immagini.get(idMappa(chiave));
-    if (createdAt !== undefined) return { chiave, createdAt };
-  }
-  return null;
 }
 
 /**
  * Il riassunto di una mappa per l'API: presentazione e posto nella collezione, chiavi pubbliche di mappa e genitore, nome
- * completo di percorso, URL dell'immagine dell'istanza, asset predefinito, entità legata e conteggi. Il contesto si passa
- * già letto quando i riassunti sono più d'uno.
+ * completo di percorso, l'immagine (caricata con l'URL versionato, poi l'asset dichiarato: il risolutore unico, L1), il ruolo,
+ * l'entità legata e i conteggi. Il contesto si passa già letto quando i riassunti sono più d'uno.
  */
 function riassunto(r: RigaMappa, ctx: ContestoMappe = contestoMappe()): MappaRiassuntoDto {
-  const img = immagineDalContesto(r, ctx);
+  const img = caricataDellaMappa(r, ctx.immagini);
   return {
     ...(ctx.presentazioni.get(r.chiave) ?? {}),
     ...(ctx.collezioni.has(r.chiave)?{immagineCollezione:ctx.collezioni.get(r.chiave)}:{}),
     chiave: chiaveMappa(r.chiave), nome: r.nome, nomeCompleto:nomePercorso(r.chiave), tipo: r.tipo, genitore: r.genitore_chiave?chiaveMappa(r.genitore_chiave):null, ordine: r.ordine,
     genitoreNome: r.genitore_chiave ? ctx.nomi.get(r.genitore_chiave) ?? null : null,
-    immagineUrl: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null,
-    asset: assetPredefinitoMappa(chiaveMappa(r.chiave)), assetOriginale:r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
+    // L1: una sola immagine per ogni vista. Prima `asset` era costruito per convenzione (`mappe/<chiave pubblica>`, inesistente per
+    // 316 mappe su 317) e la colonna viaggiava come `assetOriginale`: ogni vista sceglieva fra i due a modo suo.
+    immagineUrl: img ? urlCaricata(img) : null,
+    asset: r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
     ruoloImmagine: r.ruolo_immagine,
     origine: r.origine, nomeRivisto: r.nome_rivisto === 1, numeroSpilli: ctx.spilli.get(r.chiave) ?? 0, numeroFigli: ctx.figli.get(r.chiave) ?? 0, updatedAt: r.updated_at,
   };
@@ -188,7 +180,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const m = prepared('SELECT * FROM mappa WHERE chiave = ?').get(chiave) as RigaMappa | undefined;
       if (!m) return null;
       const img = immagineDi(m);
-      return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo }, immagine: { url: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null, asset: m.asset } };
+      return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo }, immagine: { url: img ? urlCaricata(img) : null, asset: m.asset } };
     }
     case 'punto': {
       const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, a.dungeon_chiave, a.chiave AS area_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; dungeon_chiave: string; area_chiave: string } | undefined;
@@ -448,10 +440,8 @@ export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   const figli = (prepared("SELECT * FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos' ORDER BY ordine, chiave").all(chiave) as RigaMappa[]).map((f) => riassunto(f, mappe));
   const ctx = contestoSpilli(partitaId);
   const spilli = (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(chiave) as RigaSpillo[]).map((s) => spilloDto(s, ctx));
-  const immagine = immagineDalContesto(r, mappe);
   return {
     ...riassunto(r, mappe), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
-    immagineUrl: immagine ? `/api/immagini/mappa/${encodeURIComponent(immagine.chiave)}/file?v=${encodeURIComponent(immagine.createdAt)}` : null,
     percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
     // i pezzi (102) con le loro copie (103): con la partita ogni copia porta l'esito delle sue condizioni, come i pin
     pezzi: pezziDellaMappa(chiave, ctx.nomi ?? nomiCondizioni(), ctx.st),
@@ -843,6 +833,8 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
       VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(chiave, dati.nome, dati.tipo, dati.genitore ?? null, dati.ordine ?? 0, asset, dati.larghezza ?? null, dati.altezza ?? null, dati.entita?.tipo ?? null, dati.entita?.chiave ?? null, dati.note ?? '', adesso);
     sincronizzaPercorsiMappe(getDb());
     sincronizzaLegameEntita(chiave, dati.entita ?? null);
+    // il ruolo dell'immagine segue il posto nella gerarchia (L1): una mappa nata con un asset che esiste ha già la sua immagine
+    allineaRuoliImmagine(getDb(), chiave);
     if (richiesta && richiesta !== chiave && !prepared('SELECT 1 FROM mappa_alias WHERE chiave = ?').get(richiesta)) prepared('INSERT INTO mappa_alias VALUES (?, ?)').run(richiesta, chiave);
     // 15.24: la nuova mappa nasce già raggiungibile dal genitore (e, se richiesto, con la via del ritorno); una chiave riusata dopo una
     // cancellazione può avere ancora un vecchio passaggio verso di sé: in quel caso non se ne crea un secondo.
@@ -934,6 +926,8 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     dati.larghezza === undefined ? r.larghezza : dati.larghezza, dati.altezza === undefined ? r.altezza : dati.altezza,
     dati.entita === undefined ? r.entita_tipo : dati.entita?.tipo ?? null, dati.entita === undefined ? r.entita_chiave : dati.entita?.chiave ?? null, dati.note ?? r.note, nowIso(), chiave);
   if (dati.entita !== undefined) sincronizzaLegameEntita(chiave, dati.entita, { tipo: r.entita_tipo, chiave: r.entita_chiave });
+  // tipo, genitore o asset cambiati cambiano il posto nella gerarchia: il ruolo dell'immagine lo segue (L1)
+  allineaRuoliImmagine(getDb(), chiave);
   sincronizzaPercorsiMappe(getDb());
   })();
   return dettaglioMappa(chiave);
@@ -982,16 +976,9 @@ registraRipristinoCestino('mappa', (_chiave, _vicini, saltate) => {
   if (saltate.some((s) => s.tabella === 'mappa' || s.tabella === 'mappa_percorso' || s.tabella === 'mappa_alias')) sincronizzaPercorsiMappe(getDb());
 });
 
-/**
- * Il ruolo dell'immagine di una mappa che riceve la sua prima immagine, in SQL sulla colonna `tipo`: città e quartieri hanno
- * illustrazioni, le altre (aree e planimetrie dei Palazzi, luoghi, dedali, generiche) piante — come le mappe della guida.
- */
-export const RUOLO_DOPO_CARICAMENTO = "CASE WHEN tipo IN ('citta', 'quartiere') THEN 'illustrazione-editoriale' ELSE 'planimetria-nativa' END";
-
 /** Immagine di base nell'istanza (ambito «mappa», chiave = chiave della mappa); dimensioni lette dall'intestazione PNG/JPEG/WEBP/GIF quando possibile. */
 export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer, opz: { eliminaPezzi?: boolean } = {}): MappaDto {
   chiave=rigaMappa(chiave).chiave;
-  const dim = dimensioniImmagine(contenuto);
   // I pezzi (102) sono ritagli in pixel dell'immagine di prima: su un'altra ritaglierebbero zone sbagliate. Scelta dell'utente
   // (2026-10-14, «Chiedere conferma ed eliminarli»): senza conferma 409 col numero dei pezzi; con la conferma se ne vanno insieme
   // alla sostituzione, nella stessa transazione. Dalla 103 il messaggio conta anche le copie posate, che se ne vanno coi ritagli.
@@ -1001,58 +988,32 @@ export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Bu
     throw new HttpError(409, 'mappa-con-pezzi', `La mappa ha ${pezzi === 1 ? '1 pezzo ritagliato' : `${pezzi} pezzi ritagliati`} dall’immagine di prima (${copie === 1 ? '1 copia posata' : `${copie} copie posate`}): sostituendola ${pezzi === 1 ? 'verrà eliminato' : 'verranno eliminati'} con le copie.`, { pezzi, copie });
   }
   // immagine e dimensioni insieme: una mappa con l'immagine nuova e le dimensioni vecchie sbaglierebbe la posizione di ogni pin
+  // immagine, dimensioni e ruolo insieme: una mappa con l'immagine nuova e le dimensioni vecchie sbaglierebbe la posizione di ogni
+  // pin. `salvaImmagine` registra l'immagine sulla mappa e ne allinea il ruolo alla regola della gerarchia (L1, `immagineMappa.ts`):
+  // una planimetria aggiunta al Palazzo con la sua immagine si apre nel visore (2026-10-18), e la regola è la stessa per ogni strada.
   getDb().transaction(() => {
     if (pezzi > 0) eliminaPezziDellaMappa(chiave);
     salvaImmagine('mappa', chiave, mime, contenuto);
-    prepared("UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, origine = 'utente', updated_at = ? WHERE chiave = ?").run(chiave, dim?.larghezza ?? null, dim?.altezza ?? null, nowIso(), chiave);
-    // Una mappa senza ruolo dell'immagine («nessuna», quella nata dall'app) con l'immagine caricata diventa una mappa da aprire nel
-    // visore: prima restava «nessuna» e una planimetria aggiunta al Palazzo, con l'immagine, si mostrava ancora come scheda del
-    // luogo («ho provato a caricare una mappa ma non me la carica come planimetria... solo come area», 2026-10-18). Il ruolo è
-    // quello delle mappe dello stesso tipo (`RUOLO_DOPO_CARICAMENTO`); un ruolo già dato (stemma compreso) non si tocca.
-    prepared(`UPDATE mappa SET ruolo_immagine = ${RUOLO_DOPO_CARICAMENTO} WHERE chiave = ? AND ruolo_immagine = 'nessuna'`).run(chiave);
+    // caricata dall'utente: la mappa ora è sua (come ogni modifica dall'editor)
+    prepared("UPDATE mappa SET origine = 'utente' WHERE chiave = ?").run(chiave);
   })();
   return dettaglioMappa(chiave);
 }
 
-/** Legge larghezza e altezza dalle intestazioni dei formati più comuni (PNG, GIF, JPEG, WEBP VP8/VP8L/VP8X); null se non riconosciute. */
-export function dimensioniImmagine(b: Buffer): { larghezza: number; altezza: number } | null {
-  if (b.length >= 24 && b[0] === 0x89 && b.toString('ascii', 1, 4) === 'PNG') return { larghezza: b.readUInt32BE(16), altezza: b.readUInt32BE(20) };
-  if (b.length >= 10 && b.toString('ascii', 0, 3) === 'GIF') return { larghezza: b.readUInt16LE(6), altezza: b.readUInt16LE(8) };
-  if (b.length >= 30 && b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') {
-    const tipo = b.toString('ascii', 12, 16);
-    if (tipo === 'VP8X') return { larghezza: 1 + b.readUIntLE(24, 3), altezza: 1 + b.readUIntLE(27, 3) };
-    if (tipo === 'VP8L') { const bits = b.readUInt32LE(21); return { larghezza: 1 + (bits & 0x3fff), altezza: 1 + ((bits >> 14) & 0x3fff) }; }
-    if (tipo === 'VP8 ') return { larghezza: b.readUInt16LE(26) & 0x3fff, altezza: b.readUInt16LE(28) & 0x3fff };
-  }
-  if (b.length >= 4 && b[0] === 0xff && b[1] === 0xd8) {
-    let i = 2;
-    while (i + 9 < b.length) {
-      if (b[i] !== 0xff) { i++; continue; }
-      const marker = b[i + 1];
-      if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) { i += 2; continue; }
-      const len = b.readUInt16BE(i + 2);
-      if ((marker >= 0xc0 && marker <= 0xc3) || (marker >= 0xc5 && marker <= 0xc7) || (marker >= 0xc9 && marker <= 0xcb) || (marker >= 0xcd && marker <= 0xcf)) {
-        return { altezza: b.readUInt16BE(i + 5), larghezza: b.readUInt16BE(i + 7) };
-      }
-      i += 2 + len;
-    }
-  }
-  return null;
-}
+/** Le dimensioni dalle intestazioni dell'immagine: stanno nel risolutore delle immagini delle mappe (`immagineMappa.ts`). */
+export { dimensioniImmagine };
 
 /**
- * Il contenuto dell'immagine che il visore mostra per la mappa, nello stesso ordine (`VisoreMappa`: caricata nell'istanza, poi
- * l'asset predefinito, poi quello originale); null se nessuna ha un contenuto. Serve alle dimensioni e a riconoscere un cambio
- * d'immagine (i pezzi, 102, sono ritagli di quella).
+ * Il contenuto dell'immagine che il visore mostra per la mappa, con la stessa regola (L1: caricata nell'istanza, poi l'asset
+ * dichiarato); null se nessuna ha un contenuto. Serve alle dimensioni e a riconoscere un cambio d'immagine (i pezzi, 102, sono
+ * ritagli di quella).
  */
 function immagineMostrata(r: RigaMappa): Buffer | null {
   const candidati: Array<[string, string]> = [];
   const caricata = immagineDi(r);
   if (caricata) candidati.push(['mappa', caricata.chiave]);
-  for (const asset of [assetPredefinitoMappa(chiaveMappa(r.chiave)), r.asset]) {
-    const i = asset ? asset.indexOf('/') : -1;
-    if (asset && i > 0) candidati.push([asset.slice(0, i), asset.slice(i + 1)]);
-  }
+  const i = r.asset ? r.asset.indexOf('/') : -1;
+  if (r.asset && i > 0) candidati.push([r.asset.slice(0, i), r.asset.slice(i + 1)]);
   for (const [ambito, chiave] of candidati) {
     try {
       return fileImmagine(ambito, chiave).contenuto;
@@ -1941,6 +1902,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       salvaImmagine('mappa', chiave, img.mime, Buffer.from(img.base64, 'base64'));
       esito.immagini++;
     }
+    // Il ruolo dichiarato dal pacchetto (o dedotto alla vecchia maniera, se tace) cede alla regola della gerarchia (L1): mappe e
+    // immagini sono scritte, e ogni ruolo si riallinea, come per ogni altra strada che le scrive.
+    if (conRuolo) allineaRuoliImmagine(getDb());
     // I pezzi (102), a immagini scritte: la zona di ognuno e l'ingombro di ogni sua copia (103) devono stare nell'immagine della
     // mappa d'arrivo (come all'API); le copie che escono si scartano, e con loro il pezzo rimasto senza copie (o con la zona fuori);
     // tutto, se la mappa non ha un'immagine di cui leggere le dimensioni. Si contano.

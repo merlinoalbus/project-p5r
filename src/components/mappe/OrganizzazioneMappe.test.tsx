@@ -87,7 +87,7 @@ it('il Covo presenta cinque immagini selezionabili sotto un solo luogo, senza pi
 
 it.each([{larghezza:null,altezza:null},{larghezza:0,altezza:600},{larghezza:800,altezza:0}])('il riquadro con emblema e dimensioni $larghezza/$altezza apre il luogo senza falsa planimetria',async dimensioni=>{
   api.risolviMappa.mockResolvedValue({tipo:'mappa',mappa:'palazzo'});
-  api.getMappa.mockResolvedValue({...m('palazzo',null,'Palazzo di Kamoshida'),assetOriginale:'palazzi/kamoshida',...dimensioni,note:'',genitoreNome:null,percorso:[],figli:[m('ingresso','palazzo','Ingresso')],spilli:[]});
+  api.getMappa.mockResolvedValue({...m('palazzo',null,'Palazzo di Kamoshida'),asset:'palazzi/kamoshida',...dimensioni,note:'',genitoreNome:null,percorso:[],figli:[m('ingresso','palazzo','Ingresso')],spilli:[]});
   render(<MemoryRouter><MappaIncorporata chiave="palazzo"/></MemoryRouter>);
   expect(await screen.findByRole('link',{name:'Apri la mappa e i contenuti della guida'})).toHaveAttribute('href','/guida/mappe/palazzo');
   expect(screen.getByRole('link',{name:'Ingresso'})).toHaveAttribute('href','/guida/mappe/ingresso');
@@ -98,7 +98,7 @@ it.each([{larghezza:null,altezza:null},{larghezza:0,altezza:600},{larghezza:800,
 it('il riquadro con asset nativo e dimensioni positive conserva il visore reale',async()=>{
   api.risolviMappa.mockResolvedValue({tipo:'mappa',mappa:'pianta'});
   useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/native/RMAP_151_16_0':'/asset/mappe/native/RMAP_151_16_0.png'}},caricato:true,mancanti:{}});
-  api.getMappa.mockResolvedValue({...m('pianta',null,'Sala centrale'),assetOriginale:'mappe/native/RMAP_151_16_0',larghezza:1536,altezza:1536,note:'',genitoreNome:null,percorso:[],figli:[],spilli:[]});
+  api.getMappa.mockResolvedValue({...m('pianta',null,'Sala centrale'),asset:'mappe/native/RMAP_151_16_0',larghezza:1536,altezza:1536,note:'',genitoreNome:null,percorso:[],figli:[],spilli:[]});
   render(<MemoryRouter><MappaIncorporata chiave="pianta"/></MemoryRouter>);
   const visore=await screen.findByTestId('visore-mappa');
   expect(within(visore).getByRole('img',{name:'Mappa: Sala centrale'})).toBeInTheDocument();
@@ -107,7 +107,7 @@ it('il riquadro con asset nativo e dimensioni positive conserva il visore reale'
 
 it.each(['futaba','iweleth','kamoshida','kaneshiro','madarame','maruki','mementos','niijima','okumura','shido'])('l’emblema %s non diventa una planimetria per il solo asset normalizzato',async nome=>{
   api.risolviMappa.mockResolvedValue({tipo:'mappa',mappa:nome});
-  api.getMappa.mockResolvedValue({...m(nome,null),asset:`mappe/${nome}`,assetOriginale:`palazzi/${nome}`,larghezza:null,altezza:null,note:'',genitoreNome:null,percorso:[],figli:[],spilli:[]});
+  api.getMappa.mockResolvedValue({...m(nome,null),asset:`palazzi/${nome}`,larghezza:null,altezza:null,note:'',genitoreNome:null,percorso:[],figli:[],spilli:[]});
   render(<MemoryRouter><MappaIncorporata chiave={nome}/></MemoryRouter>);
   expect(await screen.findByRole('link',{name:'Apri la mappa e i contenuti della guida'})).toHaveAttribute('href',`/guida/mappe/${nome}`);
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();

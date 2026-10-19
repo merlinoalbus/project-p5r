@@ -23,7 +23,7 @@ beforeEach(() => {
     { chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', genitoreNome: 'Tokyo' },
     { chiave: 'shibuya-vicoli', nome: 'Vicoli', tipo: 'luogo', genitore: 'citta-shibuya', genitoreNome: 'Shibuya' },
   ]);
-  api.getMappa.mockResolvedValue({ chiave: 'citta-shibuya', nome: 'Shibuya', asset: 'mappe/shibuya', assetOriginale: null, immagineUrl: null });
+  api.getMappa.mockResolvedValue({ chiave: 'citta-shibuya', nome: 'Shibuya', asset: 'mappe/shibuya', immagineUrl: null });
   api.salvaIngressoQuartiere.mockResolvedValue({ mappa: 'citta-shibuya', x: 25, y: 40, zoom: 2.5, nome: 'Shibuya' });
   notifica.mockReset();
 });

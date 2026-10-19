@@ -3,11 +3,12 @@
 // ============================================================
 
 import type { MappaDto } from '../types';
-/** La mappa ha un'immagine su cui aprire il visore. Lo dichiara il dato (migrazione 043) invece
- * di dedurlo dal percorso dell'asset, che frontend e backend leggevano in modo diverso: lo stemma
- * di un Palazzo identifica il luogo ma non è una mappa. Per le risposte che non portano ancora il
- * ruolo resta la regola di prima, senza la scorciatoia sul prefisso dell'asset. */
+import { ruoloConVisore } from '../../shared/immaginiMappa';
+
+/** La mappa ha un'immagine su cui aprire il visore. Lo dice il ruolo, che il server deduce dal posto nella gerarchia (L1,
+ * `shared/immaginiMappa.ts`): lo stemma di un Palazzo identifica il luogo ma non è una mappa. Per le risposte che non portano il
+ * ruolo resta la regola di prima: un'immagine caricata, o un asset con le dimensioni note. */
 export function haPlanimetria(mappa: MappaDto): boolean {
-  if (mappa.ruoloImmagine) return mappa.ruoloImmagine === 'planimetria-nativa' || mappa.ruoloImmagine === 'illustrazione-editoriale';
-  return Boolean(mappa.immagineUrl || (mappa.assetOriginale && (mappa.larghezza ?? 0) > 0 && (mappa.altezza ?? 0) > 0));
+  if (mappa.ruoloImmagine) return ruoloConVisore(mappa.ruoloImmagine);
+  return Boolean(mappa.immagineUrl || (mappa.asset && (mappa.larghezza ?? 0) > 0 && (mappa.altezza ?? 0) > 0));
 }

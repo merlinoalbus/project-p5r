@@ -18,7 +18,8 @@ it('solo le mappe con immagine e ruolo «nessuna» cambiano; stemmi, ruoli già 
   mappa('pianta-vuota', 'area', 'nessuna', null);
   mappa('stemma', 'palazzo', 'emblema', 'stemma');
   mappa('illustrata', 'area', 'illustrazione-editoriale', 'illustrata');
-  runMigrations(db);
+  // solo fino alla 106: dalla 107 il ruolo si deduce dalla gerarchia (L1), e questa prova riguarda la 106 da sola
+  runMigrations(db, migrations.filter((m) => m.id <= 106));
   const ruoli = Object.fromEntries((db.prepare("SELECT chiave, ruolo_immagine FROM mappa WHERE chiave IN ('pianta-caricata', 'quartiere-caricato', 'pianta-vuota', 'stemma', 'illustrata')").all() as Array<{ chiave: string; ruolo_immagine: string }>).map((r) => [r.chiave, r.ruolo_immagine]));
   expect(ruoli).toEqual({ 'pianta-caricata': 'planimetria-nativa', 'quartiere-caricato': 'illustrazione-editoriale', 'pianta-vuota': 'nessuna', stemma: 'emblema', illustrata: 'illustrazione-editoriale' });
 });

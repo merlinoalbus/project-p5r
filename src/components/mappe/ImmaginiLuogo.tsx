@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
-import { useAsset } from '../../stores/assetStore';
+import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { etichettaVersione } from '../../utils/etichettaVersione';
 import { titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 
@@ -21,12 +21,11 @@ export function ImmaginiLuogo({ mappe, attuale, nome, discendenti }: Props) {
   const titolo = nome ?? (immagini[0] ? titoloGruppoImmagini(immagini[0]) : 'quest’area');
   return <ul className="m-0 p-0 list-none flex flex-wrap gap-3" aria-label={`Immagini di ${titolo}`}>{immagini.map((m, i) => <Miniatura key={m.chiave} mappa={m} indice={m.immagineCollezione?.indice ?? i + 1} totale={m.immagineCollezione?.totale ?? immagini.length} attuale={attuale}>{discendenti?.(m)}</Miniatura>)}</ul>;
 }
-/** Una miniatura cliccabile verso la pagina della mappa: immagine (istanza, asset o originale),
+/** Una miniatura cliccabile verso la pagina della mappa: immagine (quella della mappa, `useImmagineMappa`),
  * etichetta di versione (quella del gruppo, o «Immagine N di M») e `aria-current` se è la mappa aperta; sotto, `children`
  * (i discendenti passati dall'albero). */
 function Miniatura({ mappa, indice, totale, attuale, children }: { mappa: MappaRiassuntoDto; indice: number; totale: number; attuale?: string; children?: ReactNode }) {
-  const asset = useAsset(mappa.asset), originale = useAsset(mappa.assetOriginale);
-  const src = mappa.immagineUrl ?? asset ?? originale;
+  const src = useImmagineMappa(mappa);
   return <li><Link className="card flex flex-col items-center gap-2 no-underline text-text touch max-w-44" aria-current={attuale === mappa.chiave ? 'page' : undefined} to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}`}>
     {src && <img src={src} alt="" className="w-28 h-24 object-contain bg-neutral-700 rounded" />}
     <span className="text-[12px] text-center">{etichettaVersione(mappa, indice, totale)}</span>

@@ -9,7 +9,6 @@
 // ============================================================
 
 import { etichetteDistinte, nomePresentazioneMappa, titoloGruppoImmagini } from '../../utils/presentazioneMappa';
-import { urlImmagine } from '../../services/api';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
 import { Link } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
@@ -58,8 +57,9 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
         return <li key={id}>{!m.gruppoImmagini && <h3 className="m-0 py-1 text-sm font-semibold">{titolo}</h3>}<ImmaginiLuogo mappe={membri} nome={titolo} discendenti={discendenti} /></li>;
       }
       return <li key={m.chiave}>
-        <Link className="touch flex items-center gap-2 py-1 no-underline text-text" to={m.chiave === 'nativo-archivio-022' ? '/guida/covo' : `/guida/mappe/${encodeURIComponent(m.chiave)}`}>
-          {m.chiave === 'nativo-archivio-022' ? <img src={urlImmagine('guida', 'covo')} alt="" className="h-8 w-8 object-contain" /> : <IconaAzione chiave="mappa" dimensione={18} />}
+        <Link className="touch flex items-center gap-2 py-1 no-underline text-text" to={`/guida/mappe/${encodeURIComponent(m.chiave)}`}>
+          {/* L1: un'icona sola per tutte le righe; il caso a parte del Covo citava la mappa «nativo-archivio-022», che non esiste più */}
+          <IconaAzione chiave="mappa" dimensione={18} />
           <span>{etichette.get(m.chiave) ?? nomePresentazioneMappa(m)}</span>
         </Link>
         {discendenti(m)}

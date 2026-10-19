@@ -19,6 +19,7 @@ import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../
 import type { ImmagineDto, ManifestImmaginiDto } from '../../shared/types.js';
 import { idMappa } from './mappe/percorsiMappe.js';
 import { scaricaDaUrl } from '../utils/scaricaDaUrl.js';
+import { allineaRuoliImmagine, dopoImmagineMappa, dopoRimozioniImmagini } from './mappe/immagineMappa.js';
 
 export { AMBITI_CARICAMENTO, AMBITI_IMMAGINE, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
 
@@ -97,6 +98,10 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
     prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at, origine_url, contenuto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at, origine_url = excluded.origine_url, contenuto = excluded.contenuto`)
       .run(ambito, chiave, nomeFile, mime, contenuto.length, nowIso(), origineUrl, contenuto);
+    // l'immagine di una mappa vale ovunque da subito, da qualunque strada arrivi (L1): chiave, dimensioni e ruolo della mappa; un
+    // asset predefinito che compare può dare un'immagine a chi lo dichiara
+    if (ambito === 'mappa') dopoImmagineMappa(getDb(), chiave, contenuto);
+    else if ((AMBITI_PREDEFINITI as readonly string[]).includes(ambito)) allineaRuoliImmagine(getDb());
   })();
   return leggiImmagine(ambito, chiave)!;
 }
@@ -118,14 +123,22 @@ export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: strin
 
 /** Rimuove le immagini caricate di un ambito, oppure (senza ambito) di tutti gli ambiti di caricamento: la grafica predefinita non si tocca. */
 export function eliminaImmaginiAmbito(ambito?: string): number {
-  const esito = ambito
-    ? prepared('DELETE FROM immagine WHERE ambito = ?').run(ambito)
-    : prepared(`DELETE FROM immagine WHERE ambito IN (${segnapostoCaricamento})`).run(...AMBITI_CARICAMENTO);
-  return esito.changes;
+  return getDb().transaction(() => {
+    const esito = ambito
+      ? prepared('DELETE FROM immagine WHERE ambito = ?').run(ambito)
+      : prepared(`DELETE FROM immagine WHERE ambito IN (${segnapostoCaricamento})`).run(...AMBITI_CARICAMENTO);
+    // le mappe che avevano un'immagine ora tolta tornano alla regola (L1)
+    if (esito.changes > 0) dopoRimozioniImmagini(getDb());
+    return esito.changes;
+  })();
 }
 
 /** Elimina l'immagine di un'entità (per le mappe la chiave si riconduce all'identità della mappa); 404 se non c'era. */
 export function eliminaImmagine(ambito: string, chiave: string): void {
-  const esito = prepared('DELETE FROM immagine WHERE ambito = ? AND chiave = ?').run(ambito, chiaveDi(ambito, chiave));
-  if (esito.changes === 0) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
+  getDb().transaction(() => {
+    const esito = prepared('DELETE FROM immagine WHERE ambito = ? AND chiave = ?').run(ambito, chiaveDi(ambito, chiave));
+    if (esito.changes === 0) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
+    if (ambito === 'mappa') dopoImmagineMappa(getDb(), chiaveDi(ambito, chiave), null);
+    else if ((AMBITI_PREDEFINITI as readonly string[]).includes(ambito)) allineaRuoliImmagine(getDb());
+  })();
 }

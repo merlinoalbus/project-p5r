@@ -49,7 +49,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
   const albero = useCarica(getAlberoMappe, []);
   const perChiave = useMemo(() => new Map((albero.dati ?? []).map((m) => [m.chiave, m])), [albero.dati]);
   /** La mappa da mostrare in anteprima: quella dell'albero con la chiave data o, se non c'è (albero non ancora arrivato o mappa ignota), una mappa senza immagine con il solo nome. */
-  const anteprima = (mappa: string, nome: string) => perChiave.get(mappa) ?? { immagineUrl: null, asset: null, assetOriginale: null, nome };
+  const anteprima = (mappa: string, nome: string) => perChiave.get(mappa) ?? { immagineUrl: null, asset: null, nome };
   const dati = carica.dati;
   const guide = dati?.guide ?? [];
   // Il nome per esteso non c'è nel DTO del risolutore: si prende dalla prima destinazione, che per

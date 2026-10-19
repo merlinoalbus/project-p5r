@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { Selettore } from '../shared/Selettore';
 import { getAlberoMappe, getMappa, salvaIngressoQuartiere } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
-import { useAsset } from '../../stores/assetStore';
+import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import type { QuartiereDettaglioDto } from '../../types';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_TIPO_MAPPA } from '../../../shared/spilli';
@@ -35,9 +35,7 @@ export function IngressoQuartiere({ quartiere: q, onSalvato, onChiudi }: { quart
   const [occupato, setOccupato] = useState(false);
   const albero = useCarica(getAlberoMappe, []);
   const dati = useCarica(() => getMappa(mappa), [mappa]);
-  const asset = useAsset(dati.dati?.asset);
-  const originale = useAsset(dati.dati?.assetOriginale);
-  const src = dati.dati?.immagineUrl ?? asset ?? originale;
+  const src = useImmagineMappa(dati.dati);
   /** Vero se entrambe le coordinate sono numeri finiti fra 0 e 100 (percentuali dell'immagine). */
   const coordinateValide =(px: number, py: number) => [px, py].every((v) => Number.isFinite(v) && v >= 0 && v <= 100);
 

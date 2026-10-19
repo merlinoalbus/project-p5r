@@ -7,53 +7,48 @@
 // del Cancello del castello e quella della Sala centrale hanno due forme che si distinguono in un
 // istante, e due nomi che si distinguono in tre secondi.
 //
-// Da dove viene l'immagine, nell'ordine in cui la si cerca: quella caricata nell'istanza
-// (`immagineUrl`), poi l'asset del repository (`asset`, per esempio `palazzi/kamoshida`), poi
-// quella originale estratta dal gioco (`assetOriginale`). Se non c'è nulla resta un riquadro col
-// simbolo della mappa: **un contenitore vuoto è un'informazione** — vuol dire che quel nodo
-// raccoglie altre mappe e non è una planimetria.
+// Da dove viene l'immagine (L1, 2026-10-20): **quella caricata nell'istanza vince sempre**, come in
+// ogni altra vista (`useImmagineMappa`); senza, Tokyo e il Covo mostrano il loro stemma, le altre
+// l'asset dichiarato della mappa. Se non c'è nulla resta un riquadro col simbolo della mappa: **un
+// contenitore vuoto è un'informazione** — vuol dire che quel nodo raccoglie altre mappe e non è una
+// planimetria.
 // ============================================================
 
 import { useAsset } from '../../stores/assetStore';
 import { IconMappa } from '../shared/iconeGuida';
 import type { MappaRiassuntoDto } from '../../types';
 
-/** Le radici che hanno un **emblema** invece di una pianta.
+/** Le radici che hanno un **emblema** come ripiego della pianta.
  *
- * Nell'indice delle mappe i Palazzi mostrano il proprio stemma — la loro `assetOriginale` e'
- * `palazzi/<chiave>`, cioe' un'illustrazione — mentre Tokyo e il Covo mostravano la planimetria,
- * che a 100 px e' una macchia di linee. In una griglia in cui tutti gli altri hanno una figura,
- * due riquadri di planimetria si leggono come un errore di caricamento.
- *
- * Qui l'emblema vince sulla pianta: sono immagini che gia' esistono nell'app e che quelle due cose
- * le rappresentano — la citta' col treno sotto il sole rosso, il Covo con la sua stella. */
+ * Tokyo e il Covo, senza un'immagine caricata, mostrerebbero la planimetria, che a 100 px e' una
+ * macchia di linee: in una griglia in cui tutti gli altri hanno una figura, due riquadri di
+ * planimetria si leggono come un errore di caricamento. L'emblema — la citta' col treno sotto il sole
+ * rosso, il Covo con la sua stella — vale pero' **solo dove l'utente non ha caricato un'immagine**:
+ * prima copriva anche quella di Tokyo, e l'indice mostrava una figura diversa dal visore (L1). */
 const EMBLEMA: Record<string, string> = {
   tokyo: 'guida/citta',
   'covo-dei-ladri': 'guida/covo',
 };
 
 interface Props {
-  mappa: Pick<MappaRiassuntoDto, 'immagineUrl' | 'asset' | 'assetOriginale' | 'nome'> & { chiave?: string };
+  mappa: Pick<MappaRiassuntoDto, 'immagineUrl' | 'asset' | 'nome'> & { chiave?: string };
   /** Testo alternativo; vuoto la rende decorativa (quando il nome è già scritto accanto). */
   etichetta?: string;
   className?: string;
 }
 
-/** Miniatura di una mappa: l'emblema se la chiave (o il suo prefisso) ne ha uno, altrimenti
- * l'immagine dell'istanza, l'asset del repository o l'originale, in quest'ordine; senza nessuna
- * immagine un riquadro col simbolo della mappa. `etichetta` assente o vuota la rende decorativa. */
+/** Miniatura di una mappa: l'immagine caricata, altrimenti l'emblema se la chiave (o il suo prefisso) ne ha uno, altrimenti
+ * l'asset dichiarato; senza nessuna immagine un riquadro col simbolo della mappa. `etichetta` assente o vuota la rende decorativa. */
 export function AnteprimaMappa({ mappa, etichetta, className = '' }: Props) {
   // Il capofila di un gruppo non ha sempre la chiave del gruppo: quello del Covo è
   // `covo-dei-ladri-settore-dingresso`, non `covo-dei-ladri`. Si guarda quindi anche il prefisso,
   // altrimenti l'emblema c'è ma non lo prende nessuno — ed è quel che succedeva.
-  const chiaveEmblema = mappa.chiave
+  const chiaveEmblema = mappa.chiave && !mappa.immagineUrl
     ? (EMBLEMA[mappa.chiave] ?? Object.entries(EMBLEMA).find(([k]) => mappa.chiave === k || mappa.chiave!.startsWith(`${k}-`))?.[1] ?? null)
     : null;
   const emblema = useAsset(chiaveEmblema);
-  const asset = useAsset(mappa.asset);
-  const originale = useAsset(mappa.assetOriginale);
-  // L'emblema viene prima di tutto: e' la faccia del posto, non una sua pianta.
-  const src = emblema ?? mappa.immagineUrl ?? asset ?? originale;
+  const asset = useAsset(mappa.immagineUrl ? null : mappa.asset);
+  const src = mappa.immagineUrl ?? emblema ?? asset;
   return (
     <span className={`anteprima-mappa ${className}`}>
       {src

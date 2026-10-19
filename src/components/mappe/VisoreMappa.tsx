@@ -19,7 +19,7 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { MappaDto, SpilloDto, VoceDelPinDto } from '../../types';
 import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, puntoDescrittivo, ritornoDelloStato, statoDelPin, type TipoSpillo } from '../../../shared/spilli';
-import { useAsset } from '../../stores/assetStore';
+import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -258,9 +258,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     el.focus({ preventScroll: true });
   }, [richiestaScheda]);
   const [occupato, setOccupato] = useState(false);
-  const assetBase = useAsset(mappa.asset);
-  const assetOriginale = useAsset(mappa.assetOriginale);
-  const src = mappa.immagineUrl ?? assetBase ?? assetOriginale ?? null;
+  // L1: l'immagine della mappa ha una regola sola (`useImmagineMappa`): caricata, poi asset dichiarato
+  const src = useImmagineMappa(mappa);
 
   // Dimensioni naturali: dal DTO quando note, altrimenti dall'immagine caricata, altrimenti un quadrato di riserva.
   const caricata = natCaricata?.src === src ? natCaricata : null;

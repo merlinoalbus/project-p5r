@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Serve alle schede dei quartieri, e non è una miniatura qualsiasi: è **lo stesso disegno** della
-// mappa composta, preso da `assetTokyoQuartiere`. Prima le schede chiedevano l'anteprima del nodo
+// mappa composta, preso da `segnoQuartiere` (`segniMappa.ts`). Prima le schede chiedevano l'anteprima del nodo
 // d'atlante `citta-<quartiere>`, che per quasi tutti non esiste: le miniature erano riquadri
 // vuoti, e quando c'erano mostravano la planimetria — un'altra immagine, non quella di un attimo
 // prima.
@@ -14,7 +14,8 @@
 // estranea al suo posto.
 // ============================================================
 
-import { assetTokyoQuartiere, nascondiSagomaAssente } from './assetTokyo';
+import { nascondiSegnoAssente, segnoQuartiere } from './segniMappa';
+import { useAsset } from '../../stores/assetStore';
 import { contornoSagoma } from '../../utils/contornoSagoma';
 
 interface Props {
@@ -39,19 +40,21 @@ const CONTORNO_ORO = `${contornoSagoma('#ffd23f', 2)} brightness(1.05)`;
 /** La sagoma del quartiere in un riquadro fisso (112×84 predefinito), col contorno bianco o, se
  * `acceso`, oro e leggermente ingrandita; se il file manca l'immagine si nasconde. */
 export function SagomaQuartiere({ chiave, nome, acceso = false, larghezza = 112, altezza = 84, className = '' }: Props) {
+  // la sagoma con la regola della grafica predefinita (L1): la stessa della metro, dal manifesto e secondo la preferenza
+  const src = useAsset(segnoQuartiere(chiave));
   return (
     <span
       className={`flex shrink-0 items-center justify-center ${className}`}
       style={{ width: larghezza, height: altezza }}
     >
-      <img
-        src={assetTokyoQuartiere(chiave)}
+      {src && <img
+        src={src}
         alt={`Sagoma di ${nome} sulla mappa di Tokyo`}
-        onError={nascondiSagomaAssente}
+        onError={nascondiSegnoAssente}
         draggable={false}
         className={`max-h-full max-w-full object-contain transition-transform duration-150 ${acceso ? 'scale-[1.08]' : ''}`}
         style={{ filter: acceso ? CONTORNO_ORO : CONTORNO }}
-      />
+      />}
     </span>
   );
 }

@@ -2103,3 +2103,23 @@ che `creaArea` garantisce); il tipo di mappa `dedalo`, usato solo dalla radice d
 «Quartieri», «Aree», «Planimetrie» secondo il tipo (`src/utils/vocabolarioMappe.ts`); il limite dello spostamento di una voce dice
 «della sua infiltrazione» nei Palazzi; anche la documentazione delle API (`server/openapi/descrizioni/`), che si consulta dall'app,
 usa il vocabolario nuovo.
+
+## 2026-10-20 — L1: un'immagine per ogni mappa, e un ruolo dedotto dalla gerarchia
+
+Lotto L1 del piano di razionalizzazione (IA, su mandato U). Due regole, ognuna in un posto solo:
+
+- **Quale immagine.** L'immagine caricata nell'istanza vince in ogni vista (visore, indice, miniature delle versioni, ingresso del
+  quartiere, editor), con l'URL versionato dalla data di caricamento; senza, l'asset dichiarato della mappa; senza nemmeno quello,
+  l'icona della vista. Lo stemma di Tokyo e del Covo nell'indice è solo il ripiego dove non c'è un'immagine caricata (prima copriva
+  quella di Tokyo). Server `server/services/mappe/immagineMappa.ts`, interfaccia `src/hooks/useImmagineMappa.ts`.
+- **Quale ruolo.** Si deduce dal posto nella gerarchia (`shared/immaginiMappa.ts`): radice di un Palazzo o dei Memento → stemma;
+  senza immagine → «nessuna»; città e quartieri → illustrazione; tutto il resto → planimetria. Lo riapplica ogni strada che scrive
+  mappe o immagini, e la migrazione 107 una volta a tutte.
+
+Scelta dell'IA, da confermare: **le sagome dei quartieri e gli stemmi dei Palazzi non sono l'immagine della mappa**, sono i segni
+del posto sulla metro e nelle schede. Le immagini caricate dall'utente il 2026-10-18 per i quartieri e le radici dei Palazzi sono
+illustrazioni (2–3 MB, scene a tutto campo), mentre sagome e stemmi sono le icone scelte in passato («la stessa figura che il
+lettore ha appena toccato sulla mappa», gli stemmi «che l'utente ha chiesto di lasciare com'è»): metterle sulla metro al posto delle
+sagome cambierebbe la grafica. I segni si risolvono però anche loro da un posto solo (`src/components/mappe/segniMappa.ts`) e con la
+regola di tutta la grafica predefinita: manifesto e preferenza «usa grafica predefinita» (prima erano indirizzi fissi che la
+ignoravano).

@@ -16,6 +16,7 @@ import {
   MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, manifestoPredefinite, salvaImmagine, type AmbitoImmagine,
 } from '../services/immaginiService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { impostaImmagineMappa, mappaEsiste } from '../services/mappe/mappeService.js';
 
 const router = Router();
 
@@ -60,7 +61,16 @@ router.put(
   (req, res) => {
     const mime = (req.headers['content-type'] ?? '').split(';')[0].trim();
     if (!Buffer.isBuffer(req.body)) throw httpErrors.badRequest('corpo-non-immagine', 'Il corpo della richiesta deve essere un file immagine (Content-Type image/*).');
-    res.status(201).json(salvaImmagine(String(req.params.ambito) as AmbitoImmagine, String(req.params.chiave), mime, req.body));
+    const ambito = String(req.params.ambito) as AmbitoImmagine;
+    const chiave = String(req.params.chiave);
+    // L1: l'immagine di una mappa che esiste passa dalla stessa strada dell'editor (pezzi da confermare, dimensioni, ruolo): prima
+    // questa rotta la salvava e basta, e il ruolo dipendeva da chi l'aveva caricata
+    if (ambito === 'mappa' && mappaEsiste(chiave)) {
+      impostaImmagineMappa(chiave, mime, req.body, { eliminaPezzi: req.query.eliminaPezzi === '1' });
+      res.status(201).json(leggiImmagine(ambito, chiave));
+      return;
+    }
+    res.status(201).json(salvaImmagine(ambito, chiave, mime, req.body));
   },
 );
 
