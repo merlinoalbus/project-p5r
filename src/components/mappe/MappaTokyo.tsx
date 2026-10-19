@@ -438,7 +438,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         className="mappa-tokyo__tela"
         style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
         role="img"
-        aria-label={`Mappa di Tokyo con ${presenti.length} luoghi raggiungibili`}
+        aria-label={`Mappa di Tokyo con ${presenti.length} mete raggiungibili`}
       >
         {/* Le macchie più scure sono la terraferma, come nella schermata del gioco: danno un fondo
             alla rete invece di lasciarla galleggiare su un rosso piatto. */}
@@ -478,7 +478,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         soglia spariscono dalla mappa — che resta un'immagine pulita — e i nomi diventano questo
         elenco, che è anche un bersaglio vero da 44 px invece di un cartellino di dodici
         (misurato il 2026-09-13: «Yongen-Jaya» e «Shibuya» si toccavano a 331 px di tela). */}
-    <ul className="mappa-tokyo__legenda m-0 p-0 list-none" aria-label="Luoghi raggiungibili sulla mappa">
+    <ul className="mappa-tokyo__legenda m-0 p-0 list-none" aria-label="Quartieri e Palazzi raggiungibili sulla mappa">
       {presenti.map((s) => (
         <li key={s.chiave}>
           <Link to={s.href} className="chip chip--icona no-underline"
@@ -493,8 +493,8 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       // di 360) spingeva la pagina a scorrere insieme alla guida: qui resta il conto, e i nomi — con il
       // perché scritto per esteso, che al passaggio del mouse col dito non si legge — stanno nella finestra.
       <p className="m-0 flex flex-wrap items-center gap-x-2 text-[12px] text-text-muted">
-        <span>Non ancora nel mondo, {dataGiocoConArticolo(dataGioco, 'a')}: {assenti.length === 1 ? '1 luogo' : `${assenti.length} luoghi`}.</span>
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo="Quali" aria-label={`Quali luoghi non sono ancora nel mondo (${assenti.length})`} onClick={() => setElencoAssenti(true)} />
+        <span>Non ancora nel mondo, {dataGiocoConArticolo(dataGioco, 'a')}: {assenti.length === 1 ? '1 meta' : `${assenti.length} mete`}.</span>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo="Quali" aria-label={`Quali mete non sono ancora nel mondo (${assenti.length})`} onClick={() => setElencoAssenti(true)} />
       </p>
     ) : <p className="m-0 text-[12px] text-text-muted">
       {/* Non spariscono e basta: si dice **quali**, altrimenti la mappa sembra incompleta invece

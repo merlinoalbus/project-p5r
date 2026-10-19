@@ -38,7 +38,7 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
     function discendenti(m: MappaRiassuntoDto) {
       const contenuto = ramo(m.chiave, new Set([...antenati, m.chiave]));
       return espandibile && contenuto ? <details>
-        <summary className="touch cursor-pointer py-1 text-[12px] text-text-muted" aria-label={`Mostra le mappe di ${nomePresentazioneMappa(m)}`}>Luoghi e planimetrie ({figli.get(m.chiave)!.length})</summary>
+        <summary className="touch cursor-pointer py-1 text-[12px] text-text-muted" aria-label={`Mostra le mappe di ${nomePresentazioneMappa(m)}`}>Aree e planimetrie ({figli.get(m.chiave)!.length})</summary>
         {contenuto}
       </details> : contenuto;
     }
@@ -49,7 +49,7 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
     // e stanno sotto un'intestazione unica, che numerarle spezzerebbe.
     const soli = nodi.filter(m => !gruppo(m));
     const etichette = new Map(etichetteDistinte(soli).map((t, i) => [soli[i].chiave, t]));
-    return <ul className="m-0 pl-4 list-none flex flex-col gap-2" aria-label={parent ? `Mappe di ${padre ? nomePresentazioneMappa(padre) : 'luogo'}` : 'Mappe'}>{nodi.map(m => {
+    return <ul className="m-0 pl-4 list-none flex flex-col gap-2" aria-label={parent ? `Mappe di ${padre ? nomePresentazioneMappa(padre) : 'area'}` : 'Mappe'}>{nodi.map(m => {
       const id = gruppo(m);
       if (id) {
         const membri = gruppi.get(id)!;

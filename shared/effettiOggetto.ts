@@ -184,7 +184,7 @@ export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia'
   { chiave: 'statistica', nome: 'Bonus a una statistica' },
   { chiave: 'dote', nome: 'Alza una Dote sociale' },
   { chiave: 'regalo', nome: 'Regalo per un Confidente' },
-  { chiave: 'sblocca-luogo', nome: 'Sblocca un luogo' },
+  { chiave: 'sblocca-luogo', nome: 'Sblocca un quartiere' },
   { chiave: 'sblocca-funzione', nome: 'Sblocca una capacità in un’attività' },
   { chiave: 'moltiplica', nome: 'Moltiplica una resa' },
   { chiave: 'aumenta-punti', nome: 'Fa guadagnare più punti Dote' },

@@ -56,7 +56,7 @@ it('i passi di un Enigma rientrano sotto di lui (095), le altre voci no', async 
 it('la sezione originale della guida rimane aperta quando il vecchio riquadro era editoriale',async()=>{
   api.risolviMappa.mockResolvedValue({tipo:'guida',area:'biblioteca',dungeon:'castello',mappaPalazzo:'palazzo',nome:'Biblioteca'});
   render(<MemoryRouter><h1>Scheda originale</h1><MappaIncorporata chiave="vecchia-area"/></MemoryRouter>);
-  const link=await screen.findByRole('link',{name:'Apri il luogo e i contenuti della guida'});
+  const link=await screen.findByRole('link',{name:'Apri la planimetria e i contenuti della guida'});
   expect(link).toHaveAttribute('href','/guida/mappe/palazzo?area=biblioteca');
   expect(screen.getByRole('heading',{name:'Scheda originale'})).toBeInTheDocument();
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
@@ -89,7 +89,7 @@ it.each([{larghezza:null,altezza:null},{larghezza:0,altezza:600},{larghezza:800,
   api.risolviMappa.mockResolvedValue({tipo:'mappa',mappa:'palazzo'});
   api.getMappa.mockResolvedValue({...m('palazzo',null,'Palazzo di Kamoshida'),assetOriginale:'palazzi/kamoshida',...dimensioni,note:'',genitoreNome:null,percorso:[],figli:[m('ingresso','palazzo','Ingresso')],spilli:[]});
   render(<MemoryRouter><MappaIncorporata chiave="palazzo"/></MemoryRouter>);
-  expect(await screen.findByRole('link',{name:'Apri il luogo e i contenuti della guida'})).toHaveAttribute('href','/guida/mappe/palazzo');
+  expect(await screen.findByRole('link',{name:'Apri la mappa e i contenuti della guida'})).toHaveAttribute('href','/guida/mappe/palazzo');
   expect(screen.getByRole('link',{name:'Ingresso'})).toHaveAttribute('href','/guida/mappe/ingresso');
   // le stanze in un'area scorrevole sua, con confine e contenimento: decine di nomi non escono dal riquadro
   expect(screen.getByRole('list',{name:'Mappe di Palazzo di Kamoshida'})).toHaveClass('area-scorrevole','min-h-0');
@@ -102,14 +102,14 @@ it('il riquadro con asset nativo e dimensioni positive conserva il visore reale'
   render(<MemoryRouter><MappaIncorporata chiave="pianta"/></MemoryRouter>);
   const visore=await screen.findByTestId('visore-mappa');
   expect(within(visore).getByRole('img',{name:'Mappa: Sala centrale'})).toBeInTheDocument();
-  expect(screen.queryByRole('link',{name:'Apri il luogo e i contenuti della guida'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('link',{name:'Apri la mappa e i contenuti della guida'})).not.toBeInTheDocument();
 });
 
 it.each(['futaba','iweleth','kamoshida','kaneshiro','madarame','maruki','mementos','niijima','okumura','shido'])('l’emblema %s non diventa una planimetria per il solo asset normalizzato',async nome=>{
   api.risolviMappa.mockResolvedValue({tipo:'mappa',mappa:nome});
   api.getMappa.mockResolvedValue({...m(nome,null),asset:`mappe/${nome}`,assetOriginale:`palazzi/${nome}`,larghezza:null,altezza:null,note:'',genitoreNome:null,percorso:[],figli:[],spilli:[]});
   render(<MemoryRouter><MappaIncorporata chiave={nome}/></MemoryRouter>);
-  expect(await screen.findByRole('link',{name:'Apri il luogo e i contenuti della guida'})).toHaveAttribute('href',`/guida/mappe/${nome}`);
+  expect(await screen.findByRole('link',{name:'Apri la mappa e i contenuti della guida'})).toHaveAttribute('href',`/guida/mappe/${nome}`);
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
 });
 

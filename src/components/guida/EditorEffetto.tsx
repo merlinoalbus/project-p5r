@@ -93,7 +93,7 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
         </div>
       )}
       {valore?.famiglia === 'sblocca-luogo' &&
-        <Selettore etichetta="Quale luogo" valore={valore.luogo} disabilitato={disabilitato} vuoto="Scegli il quartiere…" opzioni={(quartieri ?? []).map((q) => ({ chiave: q.chiave, nome: q.nome }))} onCambia={(luogo) => onCambia({ ...valore, luogo })} />}
+        <Selettore etichetta="Quale quartiere" valore={valore.luogo} disabilitato={disabilitato} vuoto="Scegli il quartiere…" opzioni={(quartieri ?? []).map((q) => ({ chiave: q.chiave, nome: q.nome }))} onCambia={(luogo) => onCambia({ ...valore, luogo })} />}
       {valore?.famiglia === 'sblocca-funzione' && <div className="grid gap-2 sm:grid-cols-2">
         {scelta('Che cosa apre', valore.funzione, FUNZIONI, NOME_FUNZIONE, (funzione) => onCambia({ ...valore, funzione }))}
         <Selettore etichetta="In quale attività" valore={valore.dove ?? ''} disabilitato={disabilitato} vuoto="Non è legata a una sola attività" opzioni={(attivita ?? []).map((a) => ({ chiave: a.chiave, nome: a.nome }))} onCambia={(k) => onCambia({ ...valore, dove: k || null })} />

@@ -524,13 +524,13 @@ function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave:
 function verificaAreePalazzo(genitore: string | null, aree: string[]): void {
   if (!aree.length) return;
   const palazzo = palazzoDellaMappa(genitore);
-  if (!palazzo) throw httpErrors.badRequest('mappa-fuori-palazzo', 'Le aree della guida si legano solo alle planimetrie di un Palazzo.');
+  if (!palazzo) throw httpErrors.badRequest('mappa-fuori-palazzo', 'Le infiltrazioni si legano solo alle planimetrie di un Palazzo.');
   const segnaposti = aree.map(() => '?').join(',');
   const trovate = prepared(`SELECT chiave, dungeon_chiave FROM dungeon_area WHERE chiave IN (${segnaposti})`).all(...aree) as Array<{ chiave: string; dungeon_chiave: string }>;
   const mancanti = aree.filter((a) => !trovate.some((t) => t.chiave === a));
-  if (mancanti.length) throw httpErrors.badRequest('area-inesistente', `Area della guida inesistente: ${mancanti.join(', ')}.`);
+  if (mancanti.length) throw httpErrors.badRequest('area-inesistente', `Infiltrazione inesistente: ${mancanti.join(', ')}.`);
   const altrove = trovate.filter((t) => t.dungeon_chiave !== palazzo);
-  if (altrove.length) throw httpErrors.badRequest('area-di-altro-palazzo', `Area di un altro Palazzo: ${altrove.map((t) => t.chiave).join(', ')}.`);
+  if (altrove.length) throw httpErrors.badRequest('area-di-altro-palazzo', `Infiltrazione di un altro Palazzo: ${altrove.map((t) => t.chiave).join(', ')}.`);
 }
 
 /**
@@ -587,7 +587,7 @@ export function impostaAreeMappa(chiavePubblica: string, aree: string[]): Array<
   const r = rigaMappa(chiavePubblica);
   const chiave = r.chiave;
   const uniche = [...new Set(aree)];
-  if (uniche.length && chiave.startsWith('dungeon-') && !r.genitore_chiave) throw httpErrors.badRequest('mappa-fuori-palazzo', 'La mappa d\'insieme del Palazzo non è una planimetria: le aree si legano alle sue planimetrie.');
+  if (uniche.length && chiave.startsWith('dungeon-') && !r.genitore_chiave) throw httpErrors.badRequest('mappa-fuori-palazzo', 'La mappa d\'insieme del Palazzo non è una planimetria: le infiltrazioni si legano alle sue planimetrie.');
   verificaAreePalazzo(r.genitore_chiave, uniche);
   getDb().transaction(() => {
     const segnaposti = uniche.map(() => '?').join(',');
@@ -744,8 +744,8 @@ export function impostaStanzaMappa(chiavePubblica: string, dati: { con: string |
   }
 
   const altra = rigaMappa(dati.con);
-  if (altra.chiave === chiave) throw httpErrors.badRequest('stanza-non-valida', 'Una planimetria non può entrare nella propria stanza.');
-  if (altra.genitore_chiave !== r.genitore_chiave) throw httpErrors.badRequest('stanza-di-altro-luogo', 'Le due planimetrie non stanno nello stesso luogo: una stanza raccoglie solo tavole dello stesso posto.');
+  if (altra.chiave === chiave) throw httpErrors.badRequest('stanza-non-valida', 'Una planimetria non può entrare nella propria area.');
+  if (altra.genitore_chiave !== r.genitore_chiave) throw httpErrors.badRequest('stanza-di-altro-luogo', 'Le due planimetrie non stanno nello stesso posto: un’area raccoglie solo planimetrie dello stesso Palazzo o quartiere.');
   const diQuella = leggi(altra.chiave);
   getDb().transaction(() => {
     let gruppo = diQuella.gruppo;
@@ -1756,7 +1756,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         if (m.entita?.tipo && m.entita.tipo !== 'area') prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = ?').run(m.chiave, m.entita.tipo);
         const fonte = JSON.stringify({ origine, dichiarata: 'pacchetto' });
         const dichiarate = m.aree !== undefined ? z.array(z.string().trim().min(1).max(160)).max(200).safeParse(m.aree) : null;
-        if (dichiarate && !dichiarate.success) throw httpErrors.badRequest('aree-non-valide', `Aree della guida non valide nella mappa '${m.chiave}'.`);
+        if (dichiarate && !dichiarate.success) throw httpErrors.badRequest('aree-non-valide', `Infiltrazioni non valide nella mappa '${m.chiave}'.`);
         const aree = [...new Set(dichiarate ? dichiarate.data : m.entita?.tipo === 'area' && m.entita.chiave ? [m.entita.chiave] : [])];
         if (m.entita?.tipo && m.entita.chiave && m.entita.tipo !== 'area') prepared('INSERT OR REPLACE INTO mappa_entita VALUES(?,?,?,?)').run(m.chiave, m.entita.tipo, m.entita.chiave, fonte);
         // Le aree si verificano e si legano **dopo** il passaggio dei genitori: il Palazzo della planimetria

@@ -25,6 +25,22 @@ export function schedaAccessoMondo(tipo: string, chiave: string): string {
   }
 }
 
+/** Il nome del comando che apre la scheda dell'entità, detto con la parola giusta (L0, 2026-10-20): prima ogni scheda era «Scheda del
+ *  luogo», anche quella di un quartiere o di un Palazzo, e «luogo» oggi vuol dire solo l'attività (Untouchable, Diner). */
+export function titoloSchedaAccessoMondo(tipo: string): string {
+  switch (tipo) {
+    case 'negozio': return 'Scheda del negozio';
+    case 'quartiere': return 'Scheda del quartiere';
+    case 'dungeon': return 'Scheda del Palazzo';
+    case 'confidente': return 'Scheda del Confidente';
+    case 'luogo': return 'Scheda del luogo';
+    case 'articolo': return 'Scheda dell’articolo';
+    case 'area': return 'Scheda dell’infiltrazione';
+    case 'punto': return 'Scheda della voce';
+    default: return 'Scheda';
+  }
+}
+
 /** Nessuna coordinata implicita: la terna deve essere completa e nei limiti del visore. */
 export function centroAccessoMondo(params: URLSearchParams): { x: number; y: number; zoom: number } | null {
   const valori = ['x', 'y', 'zoom'].map(k => params.get(k));

@@ -171,7 +171,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   const opzioniMappa = useMemo(() => {
     const dellArea = new Set(area.mappe.map((m) => m.chiave));
     return [...planimetrie].sort((a, b) => Number(dellArea.has(b.chiave)) - Number(dellArea.has(a.chiave)))
-      .map((p) => ({ chiave: p.chiave, nome: nomeSenzaPalazzo(p.nome), dettaglio: dellArea.has(p.chiave) ? 'di quest’area' : undefined }));
+      .map((p) => ({ chiave: p.chiave, nome: nomeSenzaPalazzo(p.nome), dettaglio: dellArea.has(p.chiave) ? 'di quest’infiltrazione' : undefined }));
   }, [planimetrie, area.mappe]);
   /** La planimetria da cui parte la scelta dei pin di una voce. */
   const mappaIniziale = (p: PuntoInteresseDto): string | null => {
@@ -322,7 +322,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                   ...(b.dettagli !== JSON.stringify(righeDaDettagli(p.dettagli)) ? { dettagli: dettagliDaRighe(JSON.parse(b.dettagli)) } : {}) }));
                   if (altrove) { setSelezionato(null); notifica('success', `«${b.nome.trim() || p.nome}» spostata in ${altrove.ordine + 1}. ${altrove.nome}${conPassi ? ', con i suoi passi' : ''}.`); }
                   await onRicarica(); }}
-                elimina={{ avviso: `${conPassi ? 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I suoi passi restano, voci dell’area con il loro stato.' : 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I pin collegati restano sulla mappa, col loro «raccolto».'} ${NEL_CESTINO}`, onElimina: async () => { await eliminaPunto(p.chiave); setSelezionato(null); setCollegando(null); await onRicarica(); } }}>
+                elimina={{ avviso: `${conPassi ? 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I suoi passi restano, voci dell’infiltrazione con il loro stato.' : 'Se ne va dalla guida per tutte le partite, con quel che ne avevano segnato. I pin collegati restano sulla mappa, col loro «raccolto».'} ${NEL_CESTINO}`, onElimina: async () => { await eliminaPunto(p.chiave); setSelezionato(null); setCollegando(null); await onRicarica(); } }}>
                 {(b, cambia) => <>
                   <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={(v) => cambia({ nome: v })} />
                   {tipiAmmessi.length > 1 && <span className="min-w-[150px]">
@@ -330,7 +330,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                     <Selettore etichetta="Tipo" valore={b.tipo} opzioni={(conPassi ? tipiAmmessi.filter(puntoEnigma) : tipiAmmessi).map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => cambia({ tipo: v })} />
                   </span>}
                   {(enigmiPossibili.length > 0 || p.contenitore) && <span className="min-w-[180px]">
-                    <Selettore etichetta="Passo di" valore={b.contenitore} opzioni={[{ chiave: '', nome: '— nessun Enigma (voce dell’area) —' }, ...enigmiPossibili.map((e) => ({ chiave: e.chiave, nome: e.nome }))]} onCambia={(v) => cambia({ contenitore: v })} />
+                    <Selettore etichetta="Passo di" valore={b.contenitore} opzioni={[{ chiave: '', nome: '— nessun Enigma (voce dell’infiltrazione) —' }, ...enigmiPossibili.map((e) => ({ chiave: e.chiave, nome: e.nome }))]} onCambia={(v) => cambia({ contenitore: v })} />
                   </span>}
                   {/* l'area del dedalo (099): una voce fuori da ogni Enigma passa in un'altra area dello stesso dedalo, coi passi se è un Enigma */}
                   {areaDedalo && areaDedalo.altre.length > 0 && !b.contenitore && <span className="min-w-[180px]">
@@ -338,7 +338,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                   </span>}
                   {/* l'area del Palazzo (2026-10-12): una voce fuori da ogni Enigma passa in fondo a un'altra area, coi passi se è un Enigma */}
                   {areePalazzo && areePalazzo.length > 1 && !b.contenitore && <span className="min-w-[200px]">
-                    <Selettore etichetta="Area del Palazzo" valore={b.area} opzioni={[...areePalazzo].sort((x, y) => x.ordine - y.ordine).map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: a.chiave === area.chiave ? 'questa' : undefined }))} onCambia={(v) => cambia({ area: v })} />
+                    <Selettore etichetta="Infiltrazione" valore={b.area} opzioni={[...areePalazzo].sort((x, y) => x.ordine - y.ordine).map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: a.chiave === area.chiave ? 'questa' : undefined }))} onCambia={(v) => cambia({ area: v })} />
                   </span>}
                   <label className="touch flex items-center gap-1.5 text-[12px]">
                     <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
@@ -373,7 +373,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   return (
     <details className="text-[12px]" open aria-label={`Guida di ${nomeArea}`}>
       <summary className="touch cursor-pointer text-text-muted">
-        {areaDedalo ? 'Trama' : 'Guida dell’area'} · {area.punti.length === 1 ? '1 voce' : `${area.punti.length} voci`}{gestitiArea > 0 ? ` (${gestitiArea} segnate)` : ''}{daCollegare > 0 ? ` · ${daCollegare} da collegare` : ''}
+        {areaDedalo ? 'Trama' : 'Guida dell’infiltrazione'} · {area.punti.length === 1 ? '1 voce' : `${area.punti.length} voci`}{gestitiArea > 0 ? ` (${gestitiArea} segnate)` : ''}{daCollegare > 0 ? ` · ${daCollegare} da collegare` : ''}
       </summary>
       <div className="flex flex-col gap-2 pt-2">
         <p className="m-0 text-[11px] text-text-muted">
@@ -411,17 +411,17 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             nella scelta la barra, che resta in vista scorrendo, col conto e i comandi */}
         {spostaInsieme && !scelte && (
           <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia o sposta voci"
-            aria-label="Scegli voci da copiare o spostare in un’altra area del Palazzo" disabled={occupato}
+            aria-label="Scegli voci da copiare o spostare in un’altra infiltrazione del Palazzo" disabled={occupato}
             onClick={() => { setSelezionato(null); setCollegando(null); setNuovoPunto(null); setScelta({ area: area.chiave, chiavi: new Set() }); }} />
         )}
         {scelte && (
-          <section className="@container card sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2" aria-label="Copia o sposta voci in un’altra area">
+          <section className="@container card sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2" aria-label="Copia o sposta voci in un’altra infiltrazione">
             {/* la guida sta in una colonna anche stretta (308 px a 1280): conta la larghezza della barra, non della finestra. I comandi
                 non si restringono mai; sotto i 32rem la prima riga è conto, «Tutte» e «Fine» (la frase che spiega la scelta si vede da
                 32rem in su: l'etichetta della sezione la dice comunque) e la seconda «Copia in…» / «Sposta in…», così la barra fissa resta
                 di due righe; sopra, una riga sola */}
             <span className="min-w-0 flex-1 text-[13px]"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
-              <span className="hidden text-text-muted @lg:inline"> · da copiare o spostare in un’altra area</span></span>
+              <span className="hidden text-text-muted @lg:inline"> · da copiare o spostare in un’altra infiltrazione</span></span>
             {puntiVisibili.length > 0 && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
               aria-label={tutteScelte ? 'Togli dalla scelta tutte le voci in elenco' : 'Scegli tutte le voci in elenco'} onClick={() => scegli(puntiVisibili.map((p) => p.chiave), !tutteScelte)} />}
             <div className="order-last flex basis-full flex-wrap gap-2 @lg:order-none @lg:basis-auto">
@@ -432,7 +432,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
           </section>
         )}
         <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={scelte ? `Voci di ${nomeArea} da scegliere` : `Voci della guida di ${nomeArea}`}>
-          {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : 'La guida non ha voci per quest’area: aggiungile qui sotto.'}</li>}
+          {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : 'La guida non ha voci per quest’infiltrazione: aggiungile qui sotto.'}</li>}
           {area.punti.length > 0 && puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessuna voce con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} segnate nascoste)` : ''}.</li>}
           {/* nella scelta le voci sono righe da spuntare (i passi seguono il loro Enigma e non si scelgono): niente scheda né gesti */}
           {scelte

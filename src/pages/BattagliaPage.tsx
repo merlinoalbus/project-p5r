@@ -26,7 +26,7 @@ import { chiaveElementoDaTesto } from '../utils/elementiGuida';
  * Erano cinque pastiglie di solo testo, tutte uguali: in mano durante uno scontro, una barra così
  * si legge parola per parola. L'icona la si riconosce prima di leggerla. */
 const SCHEDE = [
-  ['ombre', 'Ombre per area', 'velluto'],
+  ['ombre', 'Ombre per infiltrazione o dedalo', 'velluto'],
   ['negoziazione', 'Negoziazione', 'regali'],
   ['tecnico', 'Danno tecnico', 'battaglia'],
   ['staffetta', 'Staffetta e Speciali', 'dote'],
@@ -88,7 +88,7 @@ function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="m-0 text-[13px] text-text-secondary">Ricerca rapida delle Ombre di Palazzi e Dedali: scrivi il nome dell'Ombra o della Persona, oppure filtra per dungeon, debolezza e personalità (per la negoziazione).</p>
-      <CampoRicerca valore={q} onCambia={setQ} segnaposto="Ombra, Persona o area…" />
+      <CampoRicerca valore={q} onCambia={setQ} segnaposto="Ombra, Persona, infiltrazione o dedalo…" />
       <div className="flex flex-wrap gap-1.5">
         <Selettore compatto etichetta="Dungeon" valore={dungeon} vuoto="Tutti i dungeon" opzioni={dungeons.map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setDungeon} />
         <Selettore compatto etichetta="Debole a" valore={elemento} vuoto="Qualsiasi debolezza" opzioni={elementi.map((e) => ({ chiave: e, nome: `Debole a ${e}` }))} onCambia={setElemento} />
@@ -336,7 +336,7 @@ export function BattagliaPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per area, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali dalla guida allgamestaff." />
+          <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per infiltrazione o dedalo, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali dalla guida allgamestaff." />
           <FilaScorrevole role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l, icona]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={icona} dimensione={28} /><span>{l}</span></button>)}
           </FilaScorrevole>

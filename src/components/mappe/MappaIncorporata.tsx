@@ -62,7 +62,7 @@ export function MappaIncorporata(props: Props) {
   return <PageState isLoading={esito.caricamento} error={esito.errore} onRetry={esito.ricarica}>
     {esito.dati?.tipo === 'guida' ? <div className="card flex flex-col gap-2">
       <h3 className="m-0 text-base">{esito.dati.nome}</h3>
-      <Link className="touch inline-flex items-center self-start" to={`/guida/mappe/${encodeURIComponent(esito.dati.mappaPalazzo)}?area=${encodeURIComponent(esito.dati.area)}`}>Apri il luogo e i contenuti della guida</Link>
+      <Link className="touch inline-flex items-center self-start" to={`/guida/mappe/${encodeURIComponent(esito.dati.mappaPalazzo)}?area=${encodeURIComponent(esito.dati.area)}`}>Apri la planimetria e i contenuti della guida</Link>
     </div> : esito.dati?.tipo === 'mappa' ? <MappaIncorporataRisolta {...props} chiave={esito.dati.mappa} /> : null}
   </PageState>;
 }
@@ -107,7 +107,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
     {/* solo senza ruolo: uno stemma caricato resta uno stemma (non si aprirebbe nel visore) */}
     {conEditor && !mappa.figli.length && (mappa.ruoloImmagine ?? 'nessuna') === 'nessuna' && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica?sezione=mappa`} tono="primario" compatto className="self-start"
       icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Carica l’immagine" dettaglio="la planimetria si apre qui" />}
-    <Link className="touch inline-flex items-center self-start" to={urlMappa(mappa.chiave)}>Apri il luogo e i contenuti della guida</Link>
+    <Link className="touch inline-flex items-center self-start" to={urlMappa(mappa.chiave)}>Apri la mappa e i contenuti della guida</Link>
     {!!mappa.figli.length && <ul className="m-0 px-2 py-1 list-none area-scorrevole min-h-0 flex-1 max-h-[min(60vh,520px)]" aria-label={`Mappe di ${mappa.nome}`}>
       {mappa.figli.map(f => <li key={f.chiave}><Link className="touch inline-flex items-center" to={urlMappa(f.chiave)}>{f.nome}</Link></li>)}
     </ul>}

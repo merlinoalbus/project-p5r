@@ -41,7 +41,7 @@ export function DungeonPage() {
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {dati.dati && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="Palazzi" sottotitolo="I nove Palazzi e il Dedalo di Iweleth: aree e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le piante delle aree si scaricano al primo accesso e portano gli spilli preposizionati." />
+          <IntestazionePagina titolo="Palazzi" sottotitolo="I nove Palazzi e il Dedalo di Iweleth: infiltrazioni e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le planimetrie portano gli spilli preposizionati." />
           <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Palazzi">
             {dati.dati.map((d) => {
               const quota = d.raccolta.presi !== null && d.raccolta.totale > 0 ? d.raccolta.presi / d.raccolta.totale : null;
@@ -75,7 +75,7 @@ export function DungeonPage() {
                         {d.date.scadenza && <span className="chip chip--attivo" title={d.date.scadenza}>Scadenza {dataBreve(d.date.scadenza)}</span>}
                         {d.livelloConsigliato && <span className="chip" title={d.livelloConsigliato}>Livello: {sintesi(d.livelloConsigliato, 36)}</span>}
                       </div>
-                      <span className="text-[12px] text-text-muted">{d.aree} aree · {d.raccolta.totale} da raccogliere · {d.esauribili} esauribili · {d.punti} punti in tutto{d.gestiti !== null ? ` · ${d.gestiti} segnati` : ''}</span>
+                      <span className="text-[12px] text-text-muted">{d.aree} infiltrazioni · {d.raccolta.totale} da raccogliere · {d.esauribili} esauribili · {d.punti} punti in tutto{d.gestiti !== null ? ` · ${d.gestiti} segnati` : ''}</span>
                     </div>
                   </Link>
                 </li>

@@ -191,7 +191,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   /** Copia uno spillo negli appunti (in pagina e nella memoria di sessione), passa allo strumento «Incolla» e spiega come incollarlo. */
   const copia = (a: AppuntiSpillo) => {
     setAppunti(a); scriviAppunti(a); setStrumento('incolla');
-    notifica('info', `Spillo «${a.nome}» copiato: tocca la mappa (anche di un altro luogo) nel punto dove incollarlo.`);
+    notifica('info', `Spillo «${a.nome}» copiato: tocca la mappa (anche di un’altra mappa) nel punto dove incollarlo.`);
   };
 
   return (

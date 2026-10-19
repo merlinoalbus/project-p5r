@@ -14,7 +14,7 @@ export const NEL_CESTINO = 'Finisce nel cestino (Impostazioni → Cestino): da l
 
 /** Il nome di un tipo di elemento del cestino. */
 export const NOME_TIPO_CESTINO: Record<TipoCestino, string> = {
-  area: 'Area della guida',
+  area: 'Infiltrazione',
   voce: 'Voce della guida',
   mappa: 'Planimetria',
   'area-dedalo': 'Area del dedalo',

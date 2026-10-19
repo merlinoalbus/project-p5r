@@ -197,7 +197,7 @@ const raccoltaCompleta = (totale: number, presi: number | null): boolean => pres
 
 /** Le aree della guida contenute, in ordine di guida, in una riga di testo (per i dettagli delle scelte, dove non c'è spunta). */
 function testoAree(aree: Array<{ nome: string; ordine: number; chiave: string }>): string {
-  return aree.length ? [...aree].sort(perOrdineDiGuida).map((a) => `${a.ordine + 1}. ${a.nome}`).join(' · ') : 'nessuna area della guida';
+  return aree.length ? [...aree].sort(perOrdineDiGuida).map((a) => `${a.ordine + 1}. ${a.nome}`).join(' · ') : 'nessuna infiltrazione';
 }
 
 /**
@@ -220,7 +220,7 @@ export function TestoCompletata() {
 
 /** Le aree della guida contenute, in ordine di guida, con la spunta accanto a quelle completate nella partita. */
 function AreeContenute({ aree, completate }: { aree: Array<{ nome: string; ordine: number; chiave: string }>; completate: ReadonlySet<string> }) {
-  if (!aree.length) return <>nessuna area della guida</>;
+  if (!aree.length) return <>nessuna infiltrazione</>;
   return (
     <>
       {[...aree].sort(perOrdineDiGuida).map((a, i) => (
@@ -288,7 +288,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
     void esegui(() => riordinaMappe(`dungeon-${dungeonChiave}`, chiavi), messaggio);
   };
 
-  const stanze = useRiordino(gruppi.map((g) => g.id), blocco, (id, a) => salvaOrdine(spostaGruppo(gruppi, id, a), 'Ordine delle stanze salvato.'));
+  const stanze = useRiordino(gruppi.map((g) => g.id), blocco, (id, a) => salvaOrdine(spostaGruppo(gruppi, id, a), 'Ordine delle aree salvato.'));
 
   /** Il genitore di una planimetria secondo l'atlante (`undefined` finché l'atlante non la conosce). */
   const genitoreDi = (chiave: string): string | null | undefined => albero.find((m) => m.chiave === chiave)?.genitore;
@@ -310,14 +310,14 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
   const opzioniTavole = planimetrie.map((t) => ({
     chiave: t.chiave,
     nome: etichettaTavola(t),
-    dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna area'].filter(Boolean).join(' · '),
+    dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna infiltrazione'].filter(Boolean).join(' · '),
   }));
 
   /** Una sezione nuova della guida (2026-10-01): nella planimetria data o senza; creata, la scheda la apre. */
   const nuovaSezione = async (dati: DatiNuovaArea, planimetria?: Planimetria): Promise<boolean> => {
     let creata: string | null = null;
     const ok = await esegui(async () => { creata = (await creaArea(dungeonChiave, { ...dati, ...(planimetria ? { planimetria: planimetria.chiave } : {}) })).chiave; },
-      planimetria ? `Area «${dati.nome}» creata in «${etichettaTavola(planimetria)}».` : `Area «${dati.nome}» creata: collegala a una planimetria con «Gestisci».`);
+      planimetria ? `Infiltrazione «${dati.nome}» creata in «${etichettaTavola(planimetria)}».` : `Infiltrazione «${dati.nome}» creata: collegala a una planimetria con «Gestisci».`);
     if (ok && creata) onScegliArea(creata);
     return ok;
   };
@@ -347,28 +347,28 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
         <h3 className="m-0 font-display text-[15px] uppercase leading-none">Il Palazzo · {gruppi.length + areeOrfane.length}</h3>
         <span className="flex flex-wrap gap-1.5">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" aria-label="Aggiungi una planimetria" disabled={occupato} onClick={() => setNuova('')} />
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Nuova area" aria-label="Nuova area della guida" disabled={occupato} onClick={() => setNuovaArea(true)} />
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Nuova infiltrazione" aria-label="Nuova infiltrazione" disabled={occupato} onClick={() => setNuovaArea(true)} />
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="chip text-[11px]" title="Le tavole dell’atlante: più di una per stanza quando l’estrazione ne ha trovate diverse inquadrature.">{planimetrie.length} planimetrie</span>
-        {senzaArea > 0 && <span className="chip text-[11px]" title="Stanze che non contengono alcuna area della guida: si sistemano con «Gestisci».">{senzaArea} senza area</span>}
+        <span className="chip text-[11px]" title="Le tavole dell’atlante: più di una per area quando l’estrazione ne ha trovate diverse inquadrature.">{planimetrie.length} planimetrie</span>
+        {senzaArea > 0 && <span className="chip text-[11px]" title="Aree che non toccano alcuna infiltrazione: si sistemano con «Gestisci».">{senzaArea} senza infiltrazione</span>}
         {totale > 0 && <span className="chip text-[11px]">{presi}/{totale} raccolti</span>}
       </div>
       <p className="m-0 text-[11px] text-text-muted">
-        Trascina ⠿ per l’ordine in cui percorri il Palazzo. Tocca una stanza per vederla sulla mappa; «Gestisci» per nome, che cosa mostra, aree della guida, editor ed eliminazione.
+        Trascina ⠿ per l’ordine in cui percorri il Palazzo. Tocca un’area per vederla sulla mappa; «Gestisci» per nome, che cosa mostra, infiltrazioni, editor ed eliminazione.
       </p>
 
       {!alberoPronto && (
         <p className="m-0 flex flex-wrap items-center gap-2 rounded-md bg-white/[0.04] px-3 py-2 text-[12px] text-text-muted" role="status">
           {alberoErrore
-            ? <>L’atlante non si è caricato ({alberoErrore}): le planimetrie si vedono, ma finché manca non si sa quali sono la stessa stanza e l’ordine resta bloccato.</>
-            : <>Carico l’atlante per raggruppare le planimetrie per stanza: l’ordine si sblocca appena arriva.</>}
+            ? <>L’atlante non si è caricato ({alberoErrore}): le planimetrie si vedono, ma finché manca non si sa quali sono la stessa area e l’ordine resta bloccato.</>
+            : <>Carico l’atlante per raggruppare le planimetrie per area: l’ordine si sblocca appena arriva.</>}
           {alberoErrore && <button type="button" className="chip touch text-[11px]" onClick={onRiprovaAlbero}>Riprova</button>}
         </p>
       )}
 
-      <ul className="m-0 flex list-none flex-col gap-1.5 p-0" aria-label="Stanze del Palazzo">
+      <ul className="m-0 flex list-none flex-col gap-1.5 p-0" aria-label="Aree del Palazzo">
         {gruppi.map((g, i) => {
           const dentro = g.versioni.some((v) => v.planimetria.chiave === sceltaChiave);
           const una = g.versioni.length === 1;
@@ -382,7 +382,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
             <li key={g.id} ref={stanze.riga(g.id)}
               className={`flex flex-col gap-1 rounded-md border px-1.5 py-1.5 transition-colors ${dentro ? 'border-primary bg-primary-bg' : 'border-border-light bg-white/[0.02]'} ${stanze.trascinato === g.id ? 'opacity-50' : ''} ${bersaglio ? 'ring-2 ring-primary' : ''}`}>
               <div className="flex items-stretch gap-1">
-                <Maniglia etichetta={`Sposta la stanza «${g.nome}»`} id={g.id} i={i} riordino={stanze} />
+                <Maniglia etichetta={`Sposta l’area «${g.nome}»`} id={g.id} i={i} riordino={stanze} />
                 {una
                   ? <button type="button" className="touch min-w-0 flex-1 text-left" aria-pressed={sola.planimetria.chiave === sceltaChiave} onClick={() => onScegli(sola.planimetria.chiave)}>
                       <span className="flex items-baseline gap-1 text-[13px] font-semibold leading-tight"><span className="min-w-0">{i + 1}. {g.nome}{stanzaCompleta && <TestoCompletata />}</span>{stanzaCompleta && <SpuntaCompletata dimensione={14} />}</span>
@@ -418,7 +418,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
       {/* Le aree che la guida racconta ma di cui non si sa ancora quale tavola siano: si collegano o si
           eliminano dalla loro scheda, e da quel momento risalgono nell'elenco o spariscono. */}
       {areeOrfane.length > 0 && (
-        <ul className="m-0 flex list-none flex-col gap-1.5 p-0" aria-label="Aree della guida senza planimetria">
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0" aria-label="Infiltrazioni senza planimetria">
           {areeOrfane.map((a) => (
             <li key={a.chiave} className={`flex items-center gap-1 rounded-md border border-dashed px-1.5 py-1.5 ${areaScelta === a.chiave ? 'border-primary bg-primary-bg' : 'border-border-light'}`}>
               <span aria-hidden className="w-8 shrink-0 text-center text-text-muted opacity-40">·</span>
@@ -427,9 +427,9 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
                   {areeCompletate.has(a.chiave) && <SpuntaCompletata dimensione={14} />}
                   <span className="min-w-0">{a.ordine + 1}. {a.nome}{areeCompletate.has(a.chiave) && <TestoCompletata />}</span>
                 </span>
-                <span className="block text-[11px] leading-tight text-text-muted">area della guida · nessuna planimetria</span>
+                <span className="block text-[11px] leading-tight text-text-muted">infiltrazione · nessuna planimetria</span>
               </button>
-              <button type="button" className="chip touch shrink-0 text-[11px]" disabled={occupato} aria-label={`Gestisci l’area «${a.nome}»`} onClick={() => setSchedaArea(a)}>Gestisci</button>
+              <button type="button" className="chip touch shrink-0 text-[11px]" disabled={occupato} aria-label={`Gestisci l’infiltrazione «${a.nome}»`} onClick={() => setSchedaArea(a)}>Gestisci</button>
             </li>
           ))}
         </ul>
@@ -454,7 +454,7 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
             onSalva={(mod) => salvaScheda(p, mod)}
             onCambiaStanza={async (con, nome) => {
               setOrdine(null);
-              const messaggio = con === null ? `«${v.etichetta}» è ora la stanza «${nome}».` : `«${v.etichetta}» è ora una planimetria di «${nome}».`;
+              const messaggio = con === null ? `«${v.etichetta}» è ora l’area «${nome}».` : `«${v.etichetta}» è ora una planimetria di «${nome}».`;
               if (await esegui(() => impostaStanzaMappa(p.chiave, { con, nome }), messaggio)) setScheda(null);
             }}
             onElimina={async () => { setOrdine(null); if (await esegui(() => eliminaMappa(p.chiave), `«${v.etichetta}» di ${g.nome} eliminata.`)) setScheda(null); }}
@@ -470,18 +470,18 @@ export function PlanimetriePalazzo({ dungeonChiave, planimetrie, albero, alberoP
             if (t && await esegui(() => impostaAreeMappa(t.chiave, [...t.aree.map((x) => x.chiave), schedaArea.chiave]), `«${schedaArea.nome}» collegata a «${etichettaTavola(t)}».`)) setSchedaArea(null);
           }}
           onSalvaTesto={async (testo) => {
-            if (await esegui(() => aggiornaArea(schedaArea.chiave, testo), `Testo dell’area «${testo.nome}» salvato.`)) setSchedaArea(null);
+            if (await esegui(() => aggiornaArea(schedaArea.chiave, testo), `Testo dell’infiltrazione «${testo.nome}» salvato.`)) setSchedaArea(null);
           }}
           onElimina={async () => {
             const a = schedaArea;
-            if (await esegui(() => eliminaArea(a.chiave), `Area «${a.nome}» eliminata dalla guida.`)) { setSchedaArea(null); onAreaEliminata(a.chiave); }
+            if (await esegui(() => eliminaArea(a.chiave), `Infiltrazione «${a.nome}» eliminata dalla guida.`)) { setSchedaArea(null); onAreaEliminata(a.chiave); }
           }}
           onChiudi={() => setSchedaArea(null)} />
       )}
 
       {/* Una sezione nuova della guida senza planimetria (2026-10-01): finisce fra le aree in coda, e si collega da «Gestisci». */}
       {nuovaArea && (
-        <Modal titolo="Nuova area della guida" aperta onChiudi={() => setNuovaArea(false)}>
+        <Modal titolo="Nuova infiltrazione" aperta onChiudi={() => setNuovaArea(false)}>
           <ModuloNuovaArea aree={aree} occupato={occupato}
             onCrea={async (dati) => { if (await nuovaSezione(dati)) setNuovaArea(false); }} onAnnulla={() => setNuovaArea(false)} />
         </Modal>

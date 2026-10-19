@@ -95,7 +95,7 @@ describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta ident
     expect(quante).toMatchObject({ dungeon_area: 1, punto_interesse: area.voci, spillo_voce: area.legami, mappa_entita: area.mappe, punto_partita: area.voci });
     // il nome per l'utente col numero giusto: una sola area al singolare, le voci al plurale
     const etichetta = Object.fromEntries(v.contenuto.map((c) => [c.tabella, c.etichetta]));
-    expect(etichetta).toMatchObject({ dungeon_area: 'area della guida', punto_interesse: 'voci della guida', punto_partita: 'spunte delle voci nelle partite' });
+    expect(etichetta).toMatchObject({ dungeon_area: 'infiltrazione', punto_interesse: 'voci della guida', punto_partita: 'spunte delle voci nelle partite' });
     expect(v.byte).toBeGreaterThan(0);
 
     const esito = await ripristina(v.id);

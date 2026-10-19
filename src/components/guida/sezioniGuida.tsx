@@ -22,18 +22,18 @@ export const SEZIONI_GUIDA: SezioneGuida[] = [
   { chiave: 'domande', to: '/guida/domande', titolo: 'Domande in classe ed esami', descrizione: 'Risposte corrette per data, prossime domande, spunta «fatta»', icona: <IconBook size={DIM} /> },
   { chiave: 'cruciverba', to: '/guida/cruciverba', titolo: 'Cruciverba di Leblanc', descrizione: '38 cruciverba con indizio e risposta (+1 nota di Conoscenza), spunta «risolto»', icona: <IconBook size={DIM} /> },
   { chiave: 'calendario', to: '/guida/calendario', titolo: 'Calendario di gioco', descrizione: 'Meteo, eventi, scadenze dei Palazzi, consigli per settimana', icona: <IconStar size={DIM} /> },
-  { chiave: 'mappe', to: '/guida/mappe', titolo: 'Mappe', descrizione: 'Tokyo, quartieri e aree dei Palazzi: mappe a livelli con spilli, collezionabili raccolti, negozi ed editor', icona: <IconMappa size={DIM} /> },
-  { chiave: 'dungeon', to: '/guida/dungeon', titolo: 'Palazzi', descrizione: 'Aree, punti di interesse, boss e mappe interattive con avanzamento; il Dedalo di Iweleth sta qui, i Memento hanno la loro pagina', icona: <IconMask size={DIM} /> },
+  { chiave: 'mappe', to: '/guida/mappe', titolo: 'Mappe', descrizione: 'Tokyo, quartieri con le loro aree e Palazzi: mappe a livelli con spilli, collezionabili raccolti, negozi ed editor', icona: <IconMappa size={DIM} /> },
+  { chiave: 'dungeon', to: '/guida/dungeon', titolo: 'Palazzi', descrizione: 'Infiltrazioni, punti di interesse, boss e mappe interattive con avanzamento; il Dedalo di Iweleth sta qui, i Memento hanno la loro pagina', icona: <IconMask size={DIM} /> },
   // I Memento hanno una pagina propria da quando non stanno più nell'elenco dei Palazzi — non si
   // visitano per aree, i piani sono generati a ogni discesa — ma ci si arrivava solo passando per
   // le Richieste o per un collegamento dentro un'altra pagina. Dall'indice della Guida non c'era
   // modo di aprirli, ed è la prima cosa che uno cerca qui dentro.
   { chiave: 'mementos', to: '/guida/dungeon/mementos', titolo: 'Memento', descrizione: 'Il dedalo sotto Tokyo: i livelli, il pozzo, Jose e i suoi fiori, le Ombre che ci si incontrano e la mappa disegnata coi pezzi del gioco', icona: <IconMask size={DIM} /> },
   { chiave: 'richieste', to: '/guida/richieste', titolo: 'Richieste dei Mementos', descrizione: '33 Richieste con bersaglio, debolezze, ricompense e stato; fiori e timbri di Jose', icona: <IconBook size={DIM} /> },
-  { chiave: 'battaglia', to: '/guida/battaglia', titolo: 'Aiuto in battaglia', descrizione: 'Debolezze delle Ombre per area, negoziazione, danno tecnico, Staffetta, Speciali, Mietitore e Demoni del Tesoro', icona: <IconBolt size={DIM} /> },
+  { chiave: 'battaglia', to: '/guida/battaglia', titolo: 'Aiuto in battaglia', descrizione: 'Debolezze delle Ombre per infiltrazione o dedalo, negoziazione, danno tecnico, Staffetta, Speciali, Mietitore e Demoni del Tesoro', icona: <IconBolt size={DIM} /> },
   { chiave: 'citta', to: '/guida/citta', titolo: 'La città', descrizione: 'Quartieri e luoghi: negozi, ristoranti, attività, Confidenti, orari e sblocchi', icona: <IconHome size={DIM} /> },
   { chiave: 'negozi', to: '/guida/negozi', titolo: 'Negozi e inventario', descrizione: '47 negozi e 499 articoli: armi, protezioni, accessori, oggetti, regali e cibo con prezzi, sblocchi e acquisti per partita', icona: <IconBolt size={DIM} /> },
-  { chiave: 'libri', to: '/guida/libri', titolo: 'Libri', descrizione: '46 libri con avanzamento per sessioni; bonus e luoghi si sbloccano al completamento', icona: <IconBook size={DIM} /> },
+  { chiave: 'libri', to: '/guida/libri', titolo: 'Libri', descrizione: '46 libri con avanzamento per sessioni; bonus e quartieri si sbloccano al completamento', icona: <IconBook size={DIM} /> },
   { chiave: 'attivita', to: '/guida/attivita', titolo: 'Attività e Doti sociali', descrizione: 'Mini-giochi, lavori, studio, libri e film con le note delle Doti; libri letti e film visti per partita', icona: <IconStar size={DIM} /> },
   { chiave: 'completamento', to: '/guida/completamento', titolo: 'Trofei e finali', descrizione: '53 trofei con spunta per partita, condizioni dei finali, DLC, effetti del meteo, Nuova Partita+ e regole del tempo', icona: <IconStar size={DIM} /> },
   { chiave: 'covo', to: '/guida/covo', titolo: 'Covo dei Ladri', descrizione: 'L’area bonus di Royal: 52 sfide che danno Medaglie P e 36 voci di catalogo che le spendono, con prezzi e sblocchi', icona: <IconMask size={DIM} /> },

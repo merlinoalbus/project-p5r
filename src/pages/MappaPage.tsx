@@ -15,7 +15,7 @@ import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
-import { centroAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
+import { centroAccessoMondo, schedaAccessoMondo, titoloSchedaAccessoMondo } from '../utils/accessoMondo';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -106,7 +106,7 @@ function IndiceMappe() {
   const nomeDi = (m: MappaRiassuntoDto) => titoloGruppoImmagini(m);
   return <div className="flex flex-col gap-4">
     <IntestazionePagina titolo="Mappe"
-      sottotitolo={`Tutti i luoghi disegnati della guida: Tokyo, i quartieri e le planimetrie dei Palazzi. ${totaleMappe} mappe con ${totaleSpilli} spilli, raggruppate per il posto a cui appartengono.`} />
+      sottotitolo={`Tutte le mappe della guida: Tokyo, i quartieri con le loro aree e le planimetrie dei Palazzi. ${totaleMappe} mappe con ${totaleSpilli} spilli, raggruppate per il posto a cui appartengono.`} />
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
       {/* **Le radici a sinistra, quel che contengono a destra.**
           Prima ogni radice era una carta con dentro una piega, e aprire i «Luoghi e planimetrie»
@@ -156,7 +156,7 @@ function IndiceMappe() {
           ? <PannelloLuogo mappe={mappe} figliDi={totali.figliDi} gruppo={gruppoAperto} percorso={percorso}
               nodo={nodoAperto} nome={nomeDi(nodoAperto)} onPercorso={setPercorso} onChiudi={() => setPercorso([])} />
           : <p className="card m-0 hidden text-[13px] text-text-muted xl:block" role="status">
-              Scegli un luogo a sinistra per vedere che cosa contiene: quartieri, piani, planimetrie. Da qui si apre la mappa vera e propria.
+              Scegli una mappa a sinistra per vedere che cosa contiene: quartieri, aree, planimetrie. Da qui si apre la mappa vera e propria.
             </p>}
       </div>
     </PageState>
@@ -239,7 +239,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
   );
   return <div className="flex flex-col gap-4">
     <header className="card flex flex-col gap-2">
-      <nav aria-label="Percorso del luogo" className="flex flex-wrap items-center gap-1 text-[12px] text-text-muted">
+      <nav aria-label="Percorso della mappa" className="flex flex-wrap items-center gap-1 text-[12px] text-text-muted">
         {mappa.percorso.map((p, i) => <span key={p.chiave} className="flex items-center gap-1">
           {i > 0 && <span aria-hidden>›</span>}
           {i === mappa.percorso.length - 1
@@ -251,15 +251,17 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
         <h1 className="titolo-display m-0 break-words">{nome}</h1>
         <span className="chip text-[11px]">{NOME_TIPO_MAPPA[mappa.tipo]}</span>
         <span className="text-[12px] text-text-muted">
-          {contenute.length === 0 ? 'nessuna planimetria' : contenute.length === 1 ? 'una planimetria' : `${contenute.length} planimetrie`}
+          {mappa.tipo === 'quartiere' || mappa.tipo === 'citta'
+            ? (contenute.length === 0 ? 'nessuna area' : contenute.length === 1 ? 'un’area' : `${contenute.length} aree`)
+            : (contenute.length === 0 ? 'nessuna planimetria' : contenute.length === 1 ? 'una planimetria' : `${contenute.length} planimetrie`)}
           {mappa.numeroSpilli > 0 ? ` · ${mappa.numeroSpilli} spilli` : ''}
         </span>
       </div>
       {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
-      <p className="m-0 text-[13px] text-text-secondary">Questo luogo non ha una pianta sua: raccoglie le mappe qui sotto.</p>
+      <p className="m-0 text-[13px] text-text-secondary">Questa mappa non ha una pianta sua: raccoglie le mappe qui sotto.</p>
       <div className="flex flex-wrap gap-2">
-        {mappa.entita && <CollegamentoVisivo to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda del luogo" />}
-        <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica luogo" />
+        {mappa.entita && <CollegamentoVisivo to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={titoloSchedaAccessoMondo(mappa.entita.tipo)} />}
+        <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" />
         <TornaAllaPartita partitaId={partitaId} />
       </div>
     </header>
@@ -300,7 +302,7 @@ function GriglieDelLuogo({ contenute, nome, onScendi }: { contenute: MappaRiassu
   // non attribuita · 1» a pochi centimetri l'una dall'altra.
   const titoli = new Map(etichetteDistinte(contenute, (t) => senzaPrefisso(t, nome)).map((t, i) => [contenute[i].chiave, t]));
   return <div className="flex flex-col gap-4">
-    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} titoli={titoli} etichetta={`Aree di ${nome}`} onScendi={onScendi} />}
+    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} titoli={titoli} etichetta={`Contenuto di ${nome}`} onScendi={onScendi} />}
     {senzaSpilli.length > 0 && <section className="flex flex-col gap-2" aria-label="Planimetrie senza spilli">
       <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraSenzaSpilli} onClick={() => setMostraSenzaSpilli((v) => !v)}>
         {mostraSenzaSpilli ? 'Nascondi' : 'Mostra'} le planimetrie senza spilli · {senzaSpilli.length}
@@ -383,7 +385,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
         {!haPlanimetria(mappa) ? <LuogoSenzaPlanimetria mappa={mappa} nome={presentata!.nome} albero={albero} partitaId={partitaId} />
          : <><VisoreMappa
           key={`${mappa.chiave}-${spilloIniziale ?? ''}-${params.get('x') ?? ''}-${params.get('y') ?? ''}-${params.get('zoom') ?? ''}`}
-          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.gruppoImmagini ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.gruppoImmagini?.id === mappa.gruppoImmagini!.id)} attuale={mappa.chiave} /> : <nav aria-label="Planimetrie del luogo"><Selettore etichetta="Planimetrie" valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && !!(m.immagineUrl || m.assetOriginale))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}<ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} /></>}
+          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.gruppoImmagini ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.gruppoImmagini?.id === mappa.gruppoImmagini!.id)} attuale={mappa.chiave} /> : <nav aria-label="Aree vicine"><Selettore etichetta="Aree" valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && !!(m.immagineUrl || m.assetOriginale))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}<ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} /></>}
           mappa={presentata!}
           partitaId={partitaId}
           selezioneIniziale={spilloIniziale} puntoIniziale={puntoIniziale}
@@ -393,7 +395,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           onAcquisto={acquisto}
           onChiudi={() => navigate(ritornoMappe() ?? '/guida/mappe')}
           ritorno={<TornaAllaPartita partitaId={partitaId} />}
-          azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>Scheda del luogo</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" /></>}
+          azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>{titoloSchedaAccessoMondo(mappa.entita.tipo)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" /></>}
         /></>}
         {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} />}
       </div>}

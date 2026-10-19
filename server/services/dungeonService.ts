@@ -404,7 +404,7 @@ export interface DatiArea { nome?: string; descrizione?: string }
 /** Nome e descrizione di un'area della guida. */
 export function aggiornaArea(chiaveArea: string, dati: DatiArea): AreaDungeonDto {
   const a = prepared('SELECT * FROM dungeon_area WHERE chiave = ?').get(chiaveArea) as RigaArea | undefined;
-  if (!a) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  if (!a) throw httpErrors.notFound('area-non-trovata', `L'infiltrazione (o il dedalo) '${chiaveArea}' non esiste.`);
   prepared('UPDATE dungeon_area SET nome = ?, descrizione = ? WHERE chiave = ?').run(dati.nome?.trim() || a.nome, dati.descrizione ?? a.descrizione, chiaveArea);
   const scheda = dettaglioDungeon(a.dungeon_chiave);
   return scheda.aree.find((x) => x.chiave === chiaveArea)!;
@@ -422,7 +422,7 @@ export function aggiornaArea(chiaveArea: string, dati: DatiArea): AreaDungeonDto
  */
 export function eliminaArea(chiaveArea: string): void {
   const a = prepared('SELECT * FROM dungeon_area WHERE chiave = ?').get(chiaveArea) as RigaArea | undefined;
-  if (!a) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  if (!a) throw httpErrors.notFound('area-non-trovata', `L'infiltrazione (o il dedalo) '${chiaveArea}' non esiste.`);
   // la pulizia riscrive `dati_guida`: la copia in memoria (`datiGuida`) si butta a transazione chiusa, comunque sia finita
   // (dentro la transazione una rilettura la rimetterebbe in memoria con dati che un annullamento toglierebbe)
   try {
@@ -601,7 +601,7 @@ export function creaArea(dungeonChiave: string, dati: { nome: string; descrizion
   if (!prepared('SELECT 1 FROM dungeon WHERE chiave = ?').get(dungeonChiave)) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${dungeonChiave}' non esiste.`);
   const nome = dati.nome.trim();
   const elenco = (prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine, chiave').all(dungeonChiave) as Array<{ chiave: string }>).map((r) => r.chiave);
-  if (dati.dopo && !elenco.includes(dati.dopo)) throw httpErrors.badRequest('area-non-del-palazzo', `L'area '${dati.dopo}' non è di questo Palazzo.`);
+  if (dati.dopo && !elenco.includes(dati.dopo)) throw httpErrors.badRequest('area-non-del-palazzo', `L'infiltrazione '${dati.dopo}' non è di questo Palazzo.`);
   // La chiave sta nei 200 caratteri che le route delle aree accettano (`paramsChiaveGuida`), suffisso «-N» compreso (fino a «-99999»): un nome
   // di 300 caratteri darebbe un'area che poi non si modifica né si elimina (rilievo della revisione). Senza lettere né cifre
   // («???») lo slug è vuoto: si usa «area».
@@ -712,7 +712,7 @@ function verificaEnigma(voce: { chiave: string; nome: string; area_chiave: strin
   const e = prepared('SELECT chiave, nome, tipo, area_chiave, contenitore_chiave FROM punto_interesse WHERE chiave = ?').get(enigmaChiave) as { chiave: string; nome: string; tipo: string; area_chiave: string; contenitore_chiave: string | null } | undefined;
   if (!e) throw httpErrors.notFound('punto-non-trovato', `L'Enigma '${enigmaChiave}' non esiste.`);
   if (!puntoEnigma(e.tipo)) throw httpErrors.badRequest('non-un-enigma', `«${e.nome}» non è un Enigma: i passi stanno solo dentro un Enigma.`);
-  if (e.area_chiave !== area) throw httpErrors.badRequest('enigma-di-altra-area', `«${e.nome}» è di un'altra area: i passi stanno nell'area del loro Enigma.`);
+  if (e.area_chiave !== area) throw httpErrors.badRequest('enigma-di-altra-area', `«${e.nome}» è di un'altra infiltrazione: i passi stanno nell'infiltrazione del loro Enigma.`);
   if (e.contenitore_chiave) throw httpErrors.badRequest('enigma-dentro-enigma', `«${e.nome}» è a sua volta un passo: un Enigma dentro un Enigma non si può.`);
   if (voce) {
     if (voce.chiave === e.chiave) throw httpErrors.badRequest('enigma-dentro-enigma', `«${voce.nome}» non può essere un passo di sé stesso.`);
@@ -739,10 +739,10 @@ function ordineInFondo(area: string, contenitore: string | null, areaDedalo: str
 function verificaAltraAreaDelPalazzo(p: RigaPunto, dedalo: boolean, contenitore: string | null, area: string): void {
   if (dedalo) throw httpErrors.badRequest('area-solo-nei-palazzi', `«${p.nome}» è una voce dei Memento: lì si cambia l’area del dedalo, non il dedalo.`);
   const destinazione = prepared('SELECT a.nome, a.dungeon_chiave FROM dungeon_area a WHERE a.chiave = ?').get(area) as { nome: string; dungeon_chiave: string } | undefined;
-  if (!destinazione) throw httpErrors.notFound('area-non-trovata', `L'area '${area}' non esiste.`);
+  if (!destinazione) throw httpErrors.notFound('area-non-trovata', `L'infiltrazione (o il dedalo) '${area}' non esiste.`);
   const palazzo = (prepared('SELECT dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(p.area_chiave) as { dungeon_chiave: string }).dungeon_chiave;
-  if (destinazione.dungeon_chiave !== palazzo) throw httpErrors.badRequest('area-di-altro-palazzo', `«${destinazione.nome}» è un’area di un altro Palazzo: una voce resta nel suo Palazzo.`);
-  if (contenitore !== null) throw httpErrors.badRequest('passo-segue-enigma', `«${p.nome}» è un passo: sta nell’area del suo Enigma (si sposta l’Enigma, e i passi lo seguono, o la si toglie prima dall’Enigma).`);
+  if (destinazione.dungeon_chiave !== palazzo) throw httpErrors.badRequest('area-di-altro-palazzo', `«${destinazione.nome}» è un’infiltrazione di un altro Palazzo: una voce resta nel suo Palazzo.`);
+  if (contenitore !== null) throw httpErrors.badRequest('passo-segue-enigma', `«${p.nome}» è un passo: sta nell’infiltrazione del suo Enigma (si sposta l’Enigma, e i passi lo seguono, o la si toglie prima dall’Enigma).`);
 }
 
 /**
@@ -873,7 +873,7 @@ export function copiaPuntiInArea(chiavi: string[], area: string): PuntiCopiatiDt
   });
   for (const p of righe) {
     verificaAltraAreaDelPalazzo(p, eDedalo(p.area_chiave), p.contenitore_chiave ?? null, area);
-    if (p.area_chiave === area) throw httpErrors.badRequest('copia-nella-stessa-area', `«${p.nome}» è già in quest’area: si copia in un’altra area dello stesso Palazzo.`);
+    if (p.area_chiave === area) throw httpErrors.badRequest('copia-nella-stessa-area', `«${p.nome}» è già in quest’infiltrazione: si copia in un’altra infiltrazione dello stesso Palazzo.`);
   }
   // nell'ordine della guida, come lo spostamento
   const ordineArea = new Map((prepared('SELECT chiave, ordine FROM dungeon_area').all() as Array<{ chiave: string; ordine: number }>).map((a) => [a.chiave, a.ordine]));
@@ -1073,7 +1073,7 @@ function chiaveLiberaPunto(chiaveArea: string, nome: string): string {
 
 /** Un punto in più, dove la guida non l'aveva trascritto: nasce in fondo all'area. */
 export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; tipo: PuntoInteresseDto['tipo'] }): PuntoInteresseDto {
-  if (!prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiaveArea)) throw httpErrors.notFound('area-non-trovata', `L'area '${chiaveArea}' non esiste.`);
+  if (!prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiaveArea)) throw httpErrors.notFound('area-non-trovata', `L'infiltrazione (o il dedalo) '${chiaveArea}' non esiste.`);
   const chiave = chiaveLiberaPunto(chiaveArea, dati.nome);
   // un passo nasce in fondo ai passi del suo Enigma, con le regole dei passi (095)
   const contenitore = dati.contenitore ?? null;

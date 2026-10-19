@@ -67,14 +67,14 @@ const RADICE: Record<TipoCestino, { tabella: string; colonna: string }> = {
  * «7 voci della guida»); le altre tabelle col loro nome.
  */
 const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
-  dungeon_area: ['area della guida', 'aree della guida'], punto_interesse: ['voce della guida', 'voci della guida'],
+  dungeon_area: ['infiltrazione', 'infiltrazioni'], punto_interesse: ['voce della guida', 'voci della guida'],
   marcatore_mappa: ['segnaposto di una voce', 'segnaposto delle voci'], spillo: ['pin', 'pin'], spillo_voce: ['collegamento pin-voce', 'collegamenti pin-voce'],
   spillo_immagine: ['schermata di un pin', 'schermate dei pin'], spillo_destinazione: ['destinazione di un pin', 'destinazioni dei pin'],
-  immagine: ['immagine', 'immagini'], mappa: ['planimetria', 'planimetrie'], mappa_entita: ['legame planimetria-area', 'legami planimetria-area'],
+  immagine: ['immagine', 'immagini'], mappa: ['planimetria', 'planimetrie'], mappa_entita: ['legame planimetria-infiltrazione', 'legami planimetria-infiltrazione'],
   mappa_alias: ['nome di prima di una mappa', 'nomi di prima delle mappe'], mappa_percorso: ['percorso di una mappa', 'percorsi delle mappe'],
   mappa_presentazione: ['presentazione di una mappa', 'presentazioni delle mappe'], pezzo_mappa: ['pezzo di una planimetria', 'pezzi delle planimetrie'],
-  copia_pezzo: ['copia di un pezzo', 'copie dei pezzi'], pianta_area: ['pianta di un’area', 'piante delle aree'],
-  guida_mappa: ['scheda di guida di un’area', 'schede di guida delle aree'], guida_alias: ['nome di prima di un’area', 'nomi di prima delle aree'],
+  copia_pezzo: ['copia di un pezzo', 'copie dei pezzi'], pianta_area: ['pianta di un’infiltrazione', 'piante delle infiltrazioni'],
+  guida_mappa: ['scheda di guida di un’infiltrazione', 'schede di guida delle infiltrazioni'], guida_alias: ['nome di prima di un’infiltrazione', 'nomi di prima delle infiltrazioni'],
   area_dedalo: ['area di un dedalo', 'aree dei dedali'], persona_area_dedalo: ['Persona di un’area di un dedalo', 'Persona delle aree dei dedali'],
   richiesta: ['Richiesta', 'Richieste'], dati_guida: ['dato della guida', 'dati della guida'],
   punto_partita: ['spunta di una voce nelle partite', 'spunte delle voci nelle partite'], spillo_partita: ['stato di un pin nelle partite', 'stati dei pin nelle partite'],

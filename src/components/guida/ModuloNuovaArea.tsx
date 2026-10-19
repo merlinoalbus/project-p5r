@@ -60,16 +60,16 @@ export function ModuloNuovaArea({ aree, nomeIniziale = '', dopoIniziale, occupat
     void onCrea({ nome: n, descrizione: descrizione.trim(), ...(posto === IN_FONDO ? {} : { dopo: posto === IN_CIMA ? null : posto }) });
   };
   return (
-    <form ref={modulo} className="flex flex-col gap-2 rounded-md border border-border-light bg-white/[0.03] p-2" aria-label="Nuova area della guida"
+    <form ref={modulo} className="flex flex-col gap-2 rounded-md border border-border-light bg-white/[0.03] p-2" aria-label="Nuova infiltrazione"
       onSubmit={(e) => { e.preventDefault(); invia(); }}>
-      <CampoCorrezione etichetta="Nome dell’area" valore={nome} massimo={LIMITI_GUIDA.area.nome} onCambia={setNome} />
+      <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={nome} massimo={LIMITI_GUIDA.area.nome} onCambia={setNome} />
       <CampoCorrezione etichetta="Descrizione" valore={descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={setDescrizione} />
       <Selettore etichetta="Dove va nella guida" valore={posto} opzioni={opzioni} onCambia={setPosto} />
-      <span className="text-[11px] text-text-muted">È una sezione della guida, per tutte le partite: dopo ci aggiungi le voci e colleghi i pin.</span>
+      <span className="text-[11px] text-text-muted">È un’infiltrazione della guida, per tutte le partite: dopo ci aggiungi le voci e colleghi i pin.</span>
       {bloccato && <span className="text-[11px] text-text-muted" role="status">{bloccato}</span>}
       <div className="flex flex-wrap justify-end gap-1.5">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />
-        <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea l’area" disabled={occupato || !!bloccato || !nome.trim()} />
+        <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea l’infiltrazione" disabled={occupato || !!bloccato || !nome.trim()} />
       </div>
     </form>
   );

@@ -30,14 +30,14 @@ import { schedaAccessoMondo } from '../utils/accessoMondo';
 /** Accesso al luogo comune; conserva le alternative e le schede della guida. */
 export function AccessoMondoPage() {
   const { tipo, chiave } = useParams();
-  if (!chiave || !TIPI_ACCESSO_MONDO.includes(tipo as TipoAccessoMondo)) return <div role="alert">Luogo non valido. <Link to="/guida/mappe">Apri le mappe</Link></div>;
+  if (!chiave || !TIPI_ACCESSO_MONDO.includes(tipo as TipoAccessoMondo)) return <div role="alert">Destinazione non valida. <Link to="/guida/mappe">Apri le mappe</Link></div>;
   return <Accesso tipo={tipo as TipoAccessoMondo} chiave={chiave} />;
 }
 
 /** Come si chiama il tipo di cosa che si sta cercando, in italiano e al singolare. */
 const NOME_TIPO_CERCATO: Record<string, string> = {
   negozio: 'Negozio', quartiere: 'Quartiere', dungeon: 'Palazzo', confidente: 'Confidente',
-  luogo: 'Luogo', articolo: 'Articolo', attivita: 'Attività', area: 'Area', punto: 'Punto di interesse',
+  luogo: 'Luogo', articolo: 'Articolo', attivita: 'Attività', area: 'Infiltrazione', punto: 'Punto di interesse',
 };
 
 /**
@@ -80,7 +80,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
         <p className="m-0">Questa voce non ha una posizione sulla mappa: nel catalogo c’è, ma non è collocata su nessuna planimetria.</p>
         <p className="m-0 text-text-secondary text-[13px]">Succede per la merce dei negozi che stanno dentro un Palazzo e per quella che si compra online, che nel mondo non hanno un punto.</p>
       </div>}
-      {dati && dati.destinazioni.length > 0 && (dati.esito === 'multipla' || guide.length > 0) && <section className="flex flex-col gap-2" aria-label="Posizioni del luogo">
+      {dati && dati.destinazioni.length > 0 && (dati.esito === 'multipla' || guide.length > 0) && <section className="flex flex-col gap-2" aria-label="Posizioni sulla mappa">
         <p className="m-0 text-[13px] text-text-secondary">
           {dati.destinazioni.length === 1 ? 'Una posizione sulla mappa.' : `In ${dati.destinazioni.length} posti diversi: scegli quale aprire.`}
         </p>

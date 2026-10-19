@@ -75,7 +75,7 @@ export function TrasferisciVociInArea({ modo, voci, area, aree, passi, onChiudi,
     finally { setOccupato(false); }
   };
   return (
-    <Modal titolo={`${verbo} ${quanteVoci(voci.length)} in un’altra area`} aperta onChiudi={onChiudi}>
+    <Modal titolo={`${verbo} ${quanteVoci(voci.length)} in un’altra infiltrazione`} aperta onChiudi={onChiudi}>
       <div className="flex flex-col gap-3 text-[13px]">
         <p className="m-0 text-text-secondary">
           {quanteVoci(voci.length)} di {nomeArea(area)}{conPassi(passi)}.{' '}
@@ -84,9 +84,9 @@ export function TrasferisciVociInArea({ modo, voci, area, aree, passi, onChiudi,
             : 'Stato nelle partite, pin e schede della guida restano con loro.'}
         </p>
         {/* in linea: dentro una finestra la tendina sovrapposta resterebbe tagliata dal corpo scorrevole */}
-        <Selettore className="selettore--in-linea" compatto etichetta="Area di destinazione" valore={destinazione}
+        <Selettore className="selettore--in-linea" compatto etichetta="Infiltrazione di destinazione" valore={destinazione}
           opzioni={altre.map((a) => ({ chiave: a.chiave, nome: nomeArea(a) }))} onCambia={setDestinazione} />
-        <p className="m-0 text-[12px] text-text-muted">Arrivano in fondo all’area, nell’ordine che hanno qui. Vale per tutte le partite: la guida è la stessa per tutte.</p>
+        <p className="m-0 text-[12px] text-text-muted">Arrivano in fondo all’infiltrazione, nell’ordine che hanno qui. Vale per tutte le partite: la guida è la stessa per tutte.</p>
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={copia ? 'copia' : 'incolla'} dimensione={20} />} titolo={scelta ? `${verbo} in ${nomeArea(scelta)}` : verbo}
             disabled={occupato || !scelta} onClick={() => void esegui()} />

@@ -2078,3 +2078,20 @@ Sono **scelte consigliate applicate, da confermare** (IA, su mandato U):
 | D6 Automatismi del diario | La spunta aggiorna ciò che la voce collega; le Doti si propongono con «Applica» | Doti automatiche e annullabili; Doti sempre a mano |
 | D7 Persona del party | Collegate al compendio per chiave | Lasciate come testo |
 | D8 Acquisti e yen | Proposti da confermare: l'acquisto segna l'articolo e propone l'uscita, il turno propone l'entrata | Yen mossi in automatico; yen sempre a mano |
+
+## 2026-10-20 — L0: un vocabolario, una parola per significato
+
+Lotto L0 del piano di razionalizzazione (IA, su mandato U). Le parole dell'interfaccia seguono le gerarchie dell'utente
+(2026-10-19):
+
+| Parola | Significato unico | Dove cambia |
+|---|---|---|
+| Infiltrazione | Le aree della guida di un Palazzo (`dungeon_area`): «Prima Infiltrazione al Museo» | Scheda del Palazzo, elenco, schede, moduli, cestino, errori del server |
+| Area | La zona fisica: nel mondo le mappe di tipo `luogo` (Central Street), nel Palazzo le «stanze» (gruppi di planimetrie, Museo 1P) | `NOME_TIPO_MAPPA.luogo`, elenco del Palazzo, scheda della planimetria |
+| Planimetria | L'immagine (versione) di un'area | `NOME_TIPO_MAPPA.area` (le mappe figlie dei Palazzi) |
+| Luogo | Solo l'attività (tabella `luogo`: Untouchable, Diner) | «Scheda del luogo» generica sostituita da `titoloSchedaAccessoMondo` (Scheda del quartiere, del Palazzo…); la metro parla di «mete» |
+| Dedalo, area del dedalo | Invariati: i Memento sono il modello di riferimento | — |
+
+Solo testi: nessun dato, nessuna chiave, nessun codice d'errore cambia (i codici come `area-non-trovata` restano: li leggono i
+client e i test). Il messaggio di una `dungeon_area` che non esiste dice «L'infiltrazione (o il dedalo)», perché la stessa tabella
+regge anche i dedali dei Memento.

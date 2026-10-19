@@ -37,7 +37,7 @@ beforeEach(() => {
 describe('Cestino', () => {
   it('elenca gli elementi: tipo, nome, dove stava, quando, peso, che cosa si sono portati via; il totale; la parte delle partite mancante', async () => {
     render(<Cestino />);
-    const area = within(await screen.findByRole('listitem', { name: 'Area della guida «Scopri dov’è il Tesoro»' }));
+    const area = within(await screen.findByRole('listitem', { name: 'Infiltrazione «Scopri dov’è il Tesoro»' }));
     expect(area.getByText('Palazzo di Madarame')).toBeInTheDocument();
     expect(area.getByText(/Nel cestino dal .* · 86 kB/)).toBeInTheDocument();
     const contenuto = within(area.getByRole('list', { name: 'Che cosa si è portato via' }));

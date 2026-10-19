@@ -18,7 +18,7 @@ interface Props {
 /** Le posizioni della collezione arrivano dall’intero catalogo, mai dal filtro visualizzato. */
 export function ImmaginiLuogo({ mappe, attuale, nome, discendenti }: Props) {
   const immagini = [...mappe].sort((a, b) => (a.immagineCollezione?.indice ?? a.gruppoImmagini?.ordine ?? a.ordine) - (b.immagineCollezione?.indice ?? b.gruppoImmagini?.ordine ?? b.ordine) || a.chiave.localeCompare(b.chiave));
-  const titolo = nome ?? (immagini[0] ? titoloGruppoImmagini(immagini[0]) : 'questo luogo');
+  const titolo = nome ?? (immagini[0] ? titoloGruppoImmagini(immagini[0]) : 'quest’area');
   return <ul className="m-0 p-0 list-none flex flex-wrap gap-3" aria-label={`Immagini di ${titolo}`}>{immagini.map((m, i) => <Miniatura key={m.chiave} mappa={m} indice={m.immagineCollezione?.indice ?? i + 1} totale={m.immagineCollezione?.totale ?? immagini.length} attuale={attuale}>{discendenti?.(m)}</Miniatura>)}</ul>;
 }
 /** Una miniatura cliccabile verso la pagina della mappa: immagine (istanza, asset o originale),

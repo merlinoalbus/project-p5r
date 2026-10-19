@@ -30,7 +30,7 @@ const albero: MappaRiassuntoDto[] = [
 ];
 const forziere: SpilloDto = { id: 4, mappaChiave: 'citta-shibuya', tipo: 'forziere', tipoNome: 'Forziere', colore: '#eab308', nome: 'Scrigno', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: true, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
 const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2, immagineUrl: '/pianta-test.png' }), larghezza: 800, altezza: 600, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], arrivi: [], pezzi: [], spilli: [forziere, { ...forziere, id: 5, nome: 'Passaggio', tipo: 'passaggio', tipoNome: 'Passaggio', collezionabile: false, x: 60, y: 60 }, { ...forziere, id: 6, nome: 'Tesoro del Palazzo', tipo: 'tesoro-palazzo', tipoNome: 'Tesoro del Palazzo', x: 70, y: 20, voci: [{ chiave: 'kamoshida-01/2', tipo: 'tesoro', nome: 'Tesoro del Palazzo', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-01', areaDedalo: null, stato: null }] }] };
-/** Il Palazzo di Kamoshida come luogo senza pianta: elenca le sue planimetrie, con «Scheda del luogo» e «Modifica luogo». */
+/** Il Palazzo di Kamoshida come luogo senza pianta: elenca le sue planimetrie, con «Scheda del Palazzo» e «Modifica mappa». */
 const senzaPianta: MappaDto = { ...dettaglio, chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', genitore: null, immagineUrl: null, asset: null, figli: [albero[3]], spilli: [], percorso: [{ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida' }], entita: { tipo: 'dungeon', chiave: 'kamoshida' } };
 
 /** La pagina Partita finta: il titolo e la scheda chiesta nell'indirizzo, per vedere dove arriva «Torna alla partita». */
@@ -96,12 +96,12 @@ describe('MappaPage', () => {
     expect(screen.queryByRole('link', { name: /^Torna alla partita/ })).toBeNull();
   });
 
-  it('nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del luogo» e «Modifica luogo» e porta alla pagina Partita, scheda Oggi', async () => {
+  it('nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del Palazzo» e «Modifica mappa» e porta alla pagina Partita, scheda Oggi', async () => {
     getMappa.mockResolvedValue(senzaPianta);
     monta('/guida/mappe/dungeon-kamoshida');
     const torna = await screen.findByRole('link', { name: /^Torna alla partita/ });
     // i comandi del luogo: il ritorno è l'ultimo
-    expect([...torna.parentElement!.querySelectorAll('a, button')].map((e) => e.textContent?.trim())).toEqual(['Scheda del luogo', 'Modifica luogo', 'Torna alla partita']);
+    expect([...torna.parentElement!.querySelectorAll('a, button')].map((e) => e.textContent?.trim())).toEqual(['Scheda del Palazzo', 'Modifica mappa', 'Torna alla partita']);
     fireEvent.click(torna);
     expect(await screen.findByRole('heading', { name: 'Pagina di partenza' })).toBeInTheDocument();
     expect(screen.getByText('scheda: oggi')).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe('MappaPage', () => {
     usePartitaStore.setState({ attiva: null });
     getMappa.mockResolvedValue(senzaPianta);
     monta('/guida/mappe/dungeon-kamoshida');
-    expect(await screen.findByRole('link', { name: /^Modifica luogo/ })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /^Modifica mappa/ })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /^Torna alla partita/ })).toBeNull();
   });
 
@@ -137,11 +137,11 @@ describe('MappaPage', () => {
     // Aprire la mappa è un gesto distinto dallo sbirciare che cosa contiene, e per Tokyo la mappa
     // è quella disegnata della Città.
     expect(pannello.getByRole('link', { name: /Apri la mappa di Tokyo/ })).toHaveAttribute('href', '/guida/citta');
-    expect(within(screen.getByRole('list', { name: 'Aree di Tokyo' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
+    expect(within(screen.getByRole('list', { name: 'Contenuto di Tokyo' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
     // Una radice per volta: aprendone un'altra, la prima si chiude.
     fireEvent.click(screen.getByRole('button', { name: /^Palazzo di Kamoshida/ }));
     expect(screen.queryByRole('region', { name: 'Dentro Tokyo' })).toBeNull();
-    expect(within(screen.getByRole('list', { name: 'Aree di Palazzo di Kamoshida' })).getByRole('link', { name: /Ingresso/ })).toBeInTheDocument();
+    expect(within(screen.getByRole('list', { name: 'Contenuto di Palazzo di Kamoshida' })).getByRole('link', { name: /Ingresso/ })).toBeInTheDocument();
   });
 
   /** La seconda lettura della mappa (quella in silenzio dopo un'azione) resta in sospeso finché il test non la risolve. */
@@ -321,7 +321,7 @@ it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del
   expect(within(pannello).getByText('Contenuto conservato')).toBeVisible();
   scegliVoce('Nome secondo il contesto','Museo, 2P',pannello);
   expect(await within(visore).findByRole('img',{name:'Mappa: Museo, 2P'})).toBeInTheDocument();
-  expect(within(pannello).getByRole('navigation',{name:'Planimetrie del luogo'})).toBeVisible();
+  expect(within(pannello).getByRole('navigation',{name:'Aree vicine'})).toBeVisible();
   fireEvent.click(within(visore).getByRole('button',{name:'Nascondi pannello'}));
   expect(guida).not.toBeVisible();
   fireEvent.click(within(visore).getByRole('button',{name:'Pannello'}));

@@ -57,22 +57,22 @@ export function SchedaAreaGuida({ area, punti, tavole, onCollega, onSalvaTesto, 
       azioni={conferma
         ? <div role="alertdialog" aria-label="Conferma eliminazione" className="flex w-full flex-col gap-2 rounded-md border border-primary bg-primary-bg p-2.5">
             <p className="m-0 text-[13px]">
-              Elimino l’area «{area.nome}» dalla guida, per tutte le partite?
+              Elimino l’infiltrazione «{area.nome}» dalla guida, per tutte le partite?
               {punti > 0 ? ` Se ne vanno anche i suoi ${punti} punti della guida e quel che le partite ne avevano segnato.` : ''}
-              {' '}Le aree che la seguono salgono di un posto. {NEL_CESTINO}
+              {' '}Le infiltrazioni che la seguono salgono di un posto. {NEL_CESTINO}
             </p>
             <div className="flex flex-wrap justify-end gap-1.5">
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Non eliminare" onClick={() => setConferma(false)} />
-              <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina l’area" disabled={occupato} onClick={() => void esegui(onElimina)} />
+              <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina l’infiltrazione" disabled={occupato} onClick={() => void esegui(onElimina)} />
             </div>
           </div>
         : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={onChiudi} />}>
       {/* Il testo dell'area (richiesta dell'utente, 2026-09-30: «come faccio a modificare il testo delle Aree
           della guida?»): qui, oltre che dal modulo «Modifica testo» accanto al titolo dell'area aperta. */}
-      <form className="flex flex-col gap-2" aria-label={`Testo dell’area «${area.nome}»`}
+      <form className="flex flex-col gap-2" aria-label={`Testo dell’infiltrazione «${area.nome}»`}
         onSubmit={(e) => { e.preventDefault(); if (testoCambiato && !occupato) void esegui(() => onSalvaTesto({ nome: testo.nome.trim(), descrizione: testo.descrizione })); }}>
-        <span className="text-[12px] text-text-muted">Area della guida senza planimetria.</span>
-        <CampoCorrezione etichetta="Nome dell’area" valore={testo.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => setTesto((t) => ({ ...t, nome: v }))} />
+        <span className="text-[12px] text-text-muted">Infiltrazione senza planimetria.</span>
+        <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={testo.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => setTesto((t) => ({ ...t, nome: v }))} />
         <CampoCorrezione etichetta="Descrizione" valore={testo.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => setTesto((t) => ({ ...t, descrizione: v }))} />
         <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva il testo" className="self-end" disabled={occupato || !testoCambiato} />
       </form>
@@ -82,7 +82,7 @@ export function SchedaAreaGuida({ area, punti, tavole, onCollega, onSalvaTesto, 
       {tavole.length > 0
         ? <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0">
             <legend className="mb-1 p-0 text-[12px]">Collega a una planimetria</legend>
-            <span className="text-[11px] text-text-muted">Tocca la planimetria che la contiene: l’area si aggiunge alle sue.</span>
+            <span className="text-[11px] text-text-muted">Tocca la planimetria che la contiene: l’infiltrazione si aggiunge alle sue.</span>
             {tavole.length >= SOGLIA_RICERCA && (
               <input className="form-input" type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder="Cerca una planimetria…" aria-label="Cerca una planimetria" autoComplete="off" />
             )}
@@ -101,7 +101,7 @@ export function SchedaAreaGuida({ area, punti, tavole, onCollega, onSalvaTesto, 
           </fieldset>
         : <p className="m-0 text-[12px] text-text-muted">Il Palazzo non ha ancora planimetrie: aggiungine una con «Aggiungi».</p>}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-light pt-3">
-        <span className="text-[12px] text-text-muted">Toglie l’area dalla guida, con i suoi punti.</span>
+        <span className="text-[12px] text-text-muted">Toglie l’infiltrazione dalla guida, con i suoi punti.</span>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina…" disabled={occupato || conferma} onClick={() => setConferma(true)} />
       </div>
     </Modal>

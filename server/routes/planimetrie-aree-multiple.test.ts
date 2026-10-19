@@ -204,7 +204,7 @@ describe('più aree della guida nella stessa planimetria', () => {
     const pacchetto = esportaMappe(una.chiave);
     const voce = pacchetto.mappe.find((m) => m.chiave === una.chiave)!;
     (voce as unknown as { aree: unknown }).aree = [{}];
-    expect(() => importaMappe(pacchetto, { sovrascrivi: true })).toThrow(/Aree della guida non valide/);
+    expect(() => importaMappe(pacchetto, { sovrascrivi: true })).toThrow(/Infiltrazioni non valide/);
   });
 
   it('validazione: area inesistente 400, mappa inesistente 404, corpo senza elenco 400', async () => {

@@ -29,8 +29,8 @@ export function SceltaAreePlanimetria({ aree, spuntate, onCambia, altrove }: Pro
   const cambia = (k: string) => { const n = new Set(spuntate); if (n.has(k)) n.delete(k); else n.add(k); onCambia(n); };
   return (
     <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0">
-      <legend className="mb-1 p-0 text-[12px]">Aree della guida che contiene</legend>
-      <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label="Aree del Palazzo">
+      <legend className="mb-1 p-0 text-[12px]">Infiltrazioni che contiene</legend>
+      <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label="Infiltrazioni del Palazzo">
         {aree.map((a) => {
           const dove = altrove.get(a.chiave) ?? [];
           const qui = spuntate.has(a.chiave);

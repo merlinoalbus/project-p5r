@@ -104,7 +104,7 @@ it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Racco
   // le altre planimetrie del Palazzo, ripiegate con quanto resta; sotto, la guida dell'area (aperta) con Ottenuto
   expect(screen.getByText(/Tutte le planimetrie del Palazzo · 2 da raccogliere/)).toBeInTheDocument();
   // una sicura senza pin è una voce «da collegare»
-  expect(screen.getByText(/Guida dell’area · 1 voce · 1 da collegare/)).toBeInTheDocument();
+  expect(screen.getByText(/Guida dell’infiltrazione · 1 voce · 1 da collegare/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
   impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [] });
   fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
@@ -145,15 +145,15 @@ it('quando l’area non ha planimetrie legate la colonna lo dice, e il Palazzo r
   render(<MemoryRouter initialEntries={['/guida/dungeon/kamoshida?area=k-02']}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
   const colonna = screen.getByRole('complementary', { name: 'Da raccogliere in Torre' });
-  expect(within(colonna).getByRole('status')).toHaveTextContent('Quest’area non ha planimetrie legate: niente da raccogliere qui.');
+  expect(within(colonna).getByRole('status')).toHaveTextContent('Quest’infiltrazione non ha planimetrie legate: niente da raccogliere qui.');
   expect(within(colonna).queryByRole('heading', { name: /Da raccogliere nel Palazzo/ })).toBeNull();
   const piega = within(colonna).getByText(/Tutte le planimetrie del Palazzo · 3 da raccogliere/).closest('details')!;
   expect(piega).not.toHaveAttribute('open');
   // un'area senza voci della guida: si dice, e se ne aggiunge una
-  expect(within(colonna).getByText('La guida non ha voci per quest’area: aggiungile qui sotto.')).toBeInTheDocument();
+  expect(within(colonna).getByText('La guida non ha voci per quest’infiltrazione: aggiungile qui sotto.')).toBeInTheDocument();
   expect(within(colonna).getByRole('button', { name: 'Aggiungi una voce' })).toBeInTheDocument();
   // nell'elenco unico un'area senza planimetria è una riga in coda, da collegare
-  expect(screen.getAllByText('area della guida · nessuna planimetria').length).toBeGreaterThan(0);
+  expect(screen.getAllByText('infiltrazione · nessuna planimetria').length).toBeGreaterThan(0);
 });
 
 it('un’area con la planimetria legata ma senza collezionabili lo dice così, senza mostrare il resto del Palazzo', async () => {
@@ -162,10 +162,10 @@ it('un’area con la planimetria legata ma senza collezionabili lo dice così, s
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
   expect(screen.getByText('Visore: m-cortile')).toBeInTheDocument();
   const colonna = screen.getByRole('complementary', { name: 'Da raccogliere in Cortile' });
-  expect(within(colonna).getByRole('status')).toHaveTextContent('Niente da raccogliere sulle planimetrie di quest’area.');
+  expect(within(colonna).getByRole('status')).toHaveTextContent('Niente da raccogliere sulle planimetrie di quest’infiltrazione.');
   expect(within(colonna).queryByText(/non ha planimetrie legate/)).toBeNull();
   expect(within(colonna).getByText(/Tutte le planimetrie del Palazzo · 3 da raccogliere/).closest('details')).not.toHaveAttribute('open');
-  expect(screen.getAllByText('area della guida · nessuna planimetria').length).toBeGreaterThan(0);
+  expect(screen.getAllByText('infiltrazione · nessuna planimetria').length).toBeGreaterThan(0);
 });
 
 // Collegare o scollegare un pin può cambiare lo stato della voce nella partita (gli stati si uniscono), e la risposta del
@@ -221,8 +221,8 @@ it('«Collega pin» usa la mappa principale: barra con voce, conto, planimetria,
   // dell'area resta il titolo: niente descrizione, planimetrie dell'area né aree della planimetria
   const visore = screen.getByText(/^Visore: m-torre/).closest('[data-classe-visore]')!;
   expect(visore.getAttribute('data-classe-visore')!.split(' ')).toEqual(expect.arrayContaining(['xl:flex-1', 'xl:[--minimo-tela:240px]']));
-  expect(screen.queryByText(/Planimetrie di quest’area/)).not.toBeInTheDocument();
-  expect(screen.queryByRole('list', { name: 'Aree della guida su questa planimetria' })).not.toBeInTheDocument();
+  expect(screen.queryByText(/Planimetrie di quest’infiltrazione/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('list', { name: 'Infiltrazioni su questa planimetria' })).not.toBeInTheDocument();
   // un tocco sulla mappa principale collega
   fireEvent.click(screen.getByRole('button', { name: 'Tocca il pin 3' }));
   await waitFor(() => expect(collegaPinAlPunto).toHaveBeenCalledWith('p1', 3, true));
@@ -241,7 +241,7 @@ it('collegando i pin l\'elenco del Palazzo resta e una sua stanza porta quella p
   fireEvent.click(screen.getByRole('button', { name: /^Sicura del cancello/ }));
   fireEvent.click(screen.getByRole('button', { name: 'Collega pin' }));
   expect(screen.getByRole('navigation', { name: 'Il Palazzo' })).toBeVisible();
-  const stanze = within(within(screen.getByLabelText('Planimetrie del Palazzo')).getByRole('list', { name: 'Stanze del Palazzo' }));
+  const stanze = within(within(screen.getByLabelText('Planimetrie del Palazzo')).getByRole('list', { name: 'Aree del Palazzo' }));
   fireEvent.click(stanze.getByRole('button', { name: /^2\. Torre/ }));
   // la mappa del collegamento passa alla Torre; l'area resta il Cancello e il collegamento resta aperto
   expect(screen.getByText(/^Visore: m-torre · scelta per Sicura del cancello/)).toBeInTheDocument();
@@ -443,21 +443,21 @@ async function apriPlanimetrie() {
 
 it('l’elenco dice le stanze in ordine, che cosa mostrano, quanto resta e le aree della guida', async () => {
   const pannello = await apriPlanimetrie();
-  const stanze = within(pannello.getByRole('list', { name: 'Stanze del Palazzo' }));
+  const stanze = within(pannello.getByRole('list', { name: 'Aree del Palazzo' }));
   expect(stanze.getByRole('button', { name: /^1\. Cancello/ })).toHaveTextContent('Immagine 1 · 1 da prendere su 2');
   expect(stanze.getByRole('button', { name: /^1\. Cancello/ })).toHaveTextContent('1. Cancello');
-  expect(stanze.getByRole('button', { name: /^2\. Torre/ })).toHaveTextContent('nessuna area della guida');
+  expect(stanze.getByRole('button', { name: /^2\. Torre/ })).toHaveTextContent('nessuna infiltrazione');
   // niente matite, frecce o cestini nelle righe: una maniglia e «Gestisci»
   expect(pannello.queryByRole('button', { name: /Correggi/ })).toBeNull();
   expect(pannello.queryByRole('button', { name: /giù$/ })).toBeNull();
-  expect(pannello.getAllByRole('button', { name: /^Sposta la stanza/ })).toHaveLength(2);
+  expect(pannello.getAllByRole('button', { name: /^Sposta l’area/ })).toHaveLength(2);
   expect(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' })).toBeInTheDocument();
 });
 
 it('le frecce sulla maniglia spostano la stanza e salvano l’ordine di tutto il Palazzo', async () => {
   const pannello = await apriPlanimetrie();
   riordinaMappe.mockResolvedValue([]);
-  const maniglia = pannello.getByRole('button', { name: 'Sposta la stanza «Cancello»' });
+  const maniglia = pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' });
   // la prima non sale oltre la cima
   fireEvent.keyDown(maniglia, { key: 'ArrowUp' });
   expect(riordinaMappe).not.toHaveBeenCalled();
@@ -465,15 +465,15 @@ it('le frecce sulla maniglia spostano la stanza e salvano l’ordine di tutto il
   fireEvent.keyDown(maniglia, { key: 'ArrowDown' });
   await waitFor(() => expect(riordinaMappe).toHaveBeenCalledWith('dungeon-kamoshida', ['m-torre', 'm-cancello']));
   // la riga è scesa e la maniglia ha ancora il focus: la freccia successiva continua a spostarla
-  expect(document.activeElement).toBe(pannello.getByRole('button', { name: 'Sposta la stanza «Cancello»' }));
-  expect(within(pannello.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('button', { name: /^Sposta la stanza/ }).map((b) => b.getAttribute('aria-label')))
-    .toEqual(['Sposta la stanza «Torre»', 'Sposta la stanza «Cancello»']);
+  expect(document.activeElement).toBe(pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' }));
+  expect(within(pannello.getByRole('list', { name: 'Aree del Palazzo' })).getAllByRole('button', { name: /^Sposta l’area/ }).map((b) => b.getAttribute('aria-label')))
+    .toEqual(['Sposta l’area «Torre»', 'Sposta l’area «Cancello»']);
 });
 
 it('trascinare la maniglia porta la stanza dove la si lascia', async () => {
   const pannello = await apriPlanimetrie();
   riordinaMappe.mockResolvedValue([]);
-  const maniglia = pannello.getByRole('button', { name: 'Sposta la stanza «Cancello»' });
+  const maniglia = pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' });
   // in jsdom tutte le righe stanno a 0: il puntatore più in basso cade sull'ultima
   fireEvent.pointerDown(maniglia, { pointerId: 1, clientY: 0 });
   fireEvent.pointerMove(maniglia, { pointerId: 1, clientY: 80 });
@@ -483,7 +483,7 @@ it('trascinare la maniglia porta la stanza dove la si lascia', async () => {
 
 it('toccare una stanza porta la sua planimetria nel visore e nella colonna dei suoi collezionabili', async () => {
   const pannello = await apriPlanimetrie();
-  fireEvent.click(within(pannello.getByRole('list', { name: 'Stanze del Palazzo' })).getByRole('button', { name: /^2\. Torre/ }));
+  fireEvent.click(within(pannello.getByRole('list', { name: 'Aree del Palazzo' })).getByRole('button', { name: /^2\. Torre/ }));
   expect(await screen.findByText('Visore: m-torre')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: /Su questa planimetria/ })).toBeInTheDocument();
 });
@@ -508,12 +508,12 @@ it('finché l’atlante non è caricato l’ordine resta bloccato: senza di lui 
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   const pannello = within(screen.getByLabelText('Planimetrie del Palazzo'));
   expect(pannello.getByRole('status')).toHaveTextContent(/l’ordine si sblocca appena arriva/);
-  const maniglia = pannello.getByRole('button', { name: 'Sposta la stanza «Cancello»' });
+  const maniglia = pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' });
   expect(maniglia).toHaveAttribute('aria-disabled', 'true');
   fireEvent.keyDown(maniglia, { key: 'ArrowDown' });
   expect(riordinaMappe).not.toHaveBeenCalled();
   await act(async () => { arriva([]); });
-  expect(pannello.getByRole('button', { name: 'Sposta la stanza «Cancello»' })).not.toHaveAttribute('aria-disabled');
+  expect(pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' })).not.toHaveAttribute('aria-disabled');
 });
 
 /** Il Palazzo di prova con «Cancello» in due versioni della stessa stanza (atlante con il loro gruppo). */
@@ -562,7 +562,7 @@ it('svuotare «Che cosa mostra» toglie l’etichetta (torna il numero nella sta
   fireEvent.click(await screen.findByRole('button', { name: 'Gestisci «Pianta completa» di Cancello' }));
   const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Pianta completa' }));
   expect(finestra.getByLabelText('Che cosa mostra')).toHaveValue('Pianta completa');
-  expect(finestra.getByText('Vale per tutte e 2 le planimetrie della stanza.')).toBeInTheDocument();
+  expect(finestra.getByText('Vale per tutte e 2 le planimetrie dell’area.')).toBeInTheDocument();
   fireEvent.change(finestra.getByLabelText('Che cosa mostra'), { target: { value: '' } });
   expect(finestra.getByText(/l’etichetta «Pianta completa» si perde/)).toBeInTheDocument();
   fireEvent.click(finestra.getByRole('button', { name: 'Salva' }));
@@ -578,11 +578,11 @@ it('la scheda della planimetria cambia stanza, «Che cosa mostra», nome e aree 
   getAlberoMappe.mockClear();
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
   const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
-  expect(finestra.getByLabelText('Nome della stanza')).toHaveValue('Cancello');
+  expect(finestra.getByLabelText('Nome dell’area')).toHaveValue('Cancello');
   expect(finestra.getByLabelText('Che cosa mostra')).toHaveValue('');
-  expect(finestra.getByText('Vuoto: si chiama col suo numero nella stanza, «Immagine 1».')).toBeInTheDocument();
+  expect(finestra.getByText('Vuoto: si chiama col suo numero nell’area, «Immagine 1».')).toBeInTheDocument();
   expect(finestra.getByRole('button', { name: 'Salva' })).toBeDisabled();
-  fireEvent.change(finestra.getByLabelText('Nome della stanza'), { target: { value: 'Ingresso' } });
+  fireEvent.change(finestra.getByLabelText('Nome dell’area'), { target: { value: 'Ingresso' } });
   fireEvent.change(finestra.getByLabelText('Che cosa mostra'), { target: { value: 'Livello 0' } });
   fireEvent.change(finestra.getByLabelText('Nome della planimetria'), { target: { value: 'Ingresso del castello' } });
   fireEvent.click(finestra.getByRole('checkbox', { name: /2\. Torre/ }));
@@ -617,7 +617,7 @@ it('la conferma dell’eliminazione nomina le aree della guida che la planimetri
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
   const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
   fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
-  expect(within(finestra.getByRole('alertdialog')).getByText(/L’area della guida «Cancello» resta senza planimetria\./)).toBeInTheDocument();
+  expect(within(finestra.getByRole('alertdialog')).getByText(/L’infiltrazione «Cancello» resta senza planimetria\./)).toBeInTheDocument();
   // non eliminare riporta Annulla e Salva
   fireEvent.click(finestra.getByRole('button', { name: 'Non eliminare' }));
   expect(finestra.getByRole('button', { name: 'Salva' })).toBeInTheDocument();
@@ -630,7 +630,7 @@ describe('un’area su più planimetrie (decisione dell’utente, 2026-10-04)', 
     impostaAreeMappa.mockResolvedValue({ aree: [] });
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-    fireEvent.click(screen.getByText('Planimetrie di quest’area · 1'));
+    fireEvent.click(screen.getByText('Planimetrie di quest’infiltrazione · 1'));
     // si offrono solo le planimetrie che non hanno già l'area: la Torre
     expect(vociSelettore('Collega anche a').filter((v) => !v.startsWith('—')).map((v) => v.split(' ')[0])).toEqual(['Torre']);
     scegliVoce('Collega anche a', /^Torre/);
@@ -649,10 +649,10 @@ describe('un’area su più planimetrie (decisione dell’utente, 2026-10-04)', 
     impostaAreeMappa.mockResolvedValue({ aree: [] });
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-    fireEvent.click(screen.getByText('Planimetrie di quest’area · 2'));
+    fireEvent.click(screen.getByText('Planimetrie di quest’infiltrazione · 2'));
     // non c'è niente da collegare: l'area sta già su tutte le planimetrie
     expect(screen.queryByRole('combobox', { name: 'Collega anche a' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: /Scollega questa planimetria l’area resta sulle altre/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Scollega questa planimetria l’infiltrazione resta sulle altre/ }));
     // la planimetria a schermo è la prima, Cancello: perde l'area e tiene le altre (qui nessuna)
     await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-cancello', []));
     expect(impostaAreeMappa).toHaveBeenCalledTimes(1);
@@ -672,7 +672,7 @@ describe('un’area su più planimetrie (decisione dell’utente, 2026-10-04)', 
     expect(finestra.getAllByRole('checkbox')[0].closest('label')!.textContent).toBe('1. Cancelloanche su «Torre»');
     fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
     const conferma = within(finestra.getByRole('alertdialog'));
-    expect(conferma.getByText(/L’area della guida «Cortile» resta senza planimetria\. L’area «Cancello» resta sulle altre planimetrie che la contengono\./)).toBeInTheDocument();
+    expect(conferma.getByText(/L’infiltrazione «Cortile» resta senza planimetria\. L’infiltrazione «Cancello» resta sulle altre planimetrie che la contengono\./)).toBeInTheDocument();
   });
 
   it('con due aree che restano altrove la conferma parla al plurale: «restano … che le contengono»', async () => {
@@ -686,7 +686,7 @@ describe('un’area su più planimetrie (decisione dell’utente, 2026-10-04)', 
     const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
     fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
     const conferma = within(finestra.getByRole('alertdialog'));
-    expect(conferma.getByText(/Le aree «Cancello», «Cortile» restano sulle altre planimetrie che le contengono\./)).toBeInTheDocument();
+    expect(conferma.getByText(/Le infiltrazioni «Cancello», «Cortile» restano sulle altre planimetrie che le contengono\./)).toBeInTheDocument();
     // nessuna resta senza planimetria
     expect(conferma.queryByText(/senza planimetria/)).toBeNull();
   });
@@ -695,10 +695,10 @@ describe('un’area su più planimetrie (decisione dell’utente, 2026-10-04)', 
 it('mentre un ordine si salva, la maniglia dice perché è ferma', async () => {
   const pannello = await apriPlanimetrie();
   riordinaMappe.mockReturnValue(new Promise(() => {}));
-  const maniglia = pannello.getByRole('button', { name: 'Sposta la stanza «Cancello»' });
+  const maniglia = pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' });
   expect(maniglia).toHaveAttribute('title', 'Trascina per spostare (con la tastiera: frecce su e giù)');
   fireEvent.keyDown(maniglia, { key: 'ArrowDown' });
-  await waitFor(() => expect(pannello.getByRole('button', { name: 'Sposta la stanza «Cancello»' })).toHaveAttribute('title', 'Un momento: sto salvando l’ultima modifica'));
+  await waitFor(() => expect(pannello.getByRole('button', { name: 'Sposta l’area «Cancello»' })).toHaveAttribute('title', 'Un momento: sto salvando l’ultima modifica'));
 });
 
 // ---- Stanze e testo delle aree (richiesta dell'utente, 2026-09-30) ----
@@ -720,11 +720,11 @@ it('una planimetria a sé si sposta nella stanza di un’altra, dalla sua scheda
   impostaStanzaMappa.mockResolvedValue({});
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
   const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
-  const stanza = within(finestra.getByRole('region', { name: 'Stanza della planimetria' }));
-  expect(stanza.getByText('È una stanza a sé.')).toBeInTheDocument();
-  expect(stanza.queryByRole('button', { name: 'Rendila una stanza a sé' })).toBeNull();
-  fireEvent.click(stanza.getByRole('button', { name: 'Sposta in un’altra stanza…' }));
-  const scelte = within(stanza.getByRole('list', { name: 'Stanze in cui spostarla' })).getAllByRole('button');
+  const stanza = within(finestra.getByRole('region', { name: 'Area della planimetria' }));
+  expect(stanza.getByText('È un’area a sé.')).toBeInTheDocument();
+  expect(stanza.queryByRole('button', { name: 'Rendila un’area a sé' })).toBeNull();
+  fireEvent.click(stanza.getByRole('button', { name: 'Sposta in un’altra area…' }));
+  const scelte = within(stanza.getByRole('list', { name: 'Aree in cui spostarla' })).getAllByRole('button');
   // le altre stanze, non la sua
   expect(scelte.map((b) => b.textContent)).toEqual(['Torreuna planimetria']);
   fireEvent.click(scelte[0]);
@@ -740,9 +740,9 @@ it('fra le stanze in cui spostarla ci sono solo quelle dello stesso livello (il 
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   fireEvent.click(await screen.findByRole('button', { name: 'Gestisci «Pianta completa» di Cancello' }));
-  const stanza = within(within(screen.getByRole('dialog')).getByRole('region', { name: 'Stanza della planimetria' }));
+  const stanza = within(within(screen.getByRole('dialog')).getByRole('region', { name: 'Area della planimetria' }));
   // l'unica altra stanza è di un altro livello: niente da proporre
-  expect(stanza.queryByRole('button', { name: 'Sposta in un’altra stanza…' })).toBeNull();
+  expect(stanza.queryByRole('button', { name: 'Sposta in un’altra area…' })).toBeNull();
 });
 
 it('una planimetria di una stanza con più versioni diventa una stanza a sé, col suo nome', async () => {
@@ -753,9 +753,9 @@ it('una planimetria di una stanza con più versioni diventa una stanza a sé, co
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   fireEvent.click(await screen.findByRole('button', { name: 'Gestisci «Porzione ovest» di Cancello' }));
-  const stanza = within(within(screen.getByRole('dialog')).getByRole('region', { name: 'Stanza della planimetria' }));
+  const stanza = within(within(screen.getByRole('dialog')).getByRole('region', { name: 'Area della planimetria' }));
   expect(stanza.getByText('È una delle 2 planimetrie di «Cancello».')).toBeInTheDocument();
-  fireEvent.click(stanza.getByRole('button', { name: 'Rendila una stanza a sé' }));
+  fireEvent.click(stanza.getByRole('button', { name: 'Rendila un’area a sé' }));
   await waitFor(() => expect(impostaStanzaMappa).toHaveBeenCalledWith('m-cancello-ovest', { con: null, nome: 'Cancello ovest' }));
 });
 
@@ -767,11 +767,11 @@ it('il testo di un’area si modifica: dalla scheda dell’area senza planimetri
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   // sopra la mappa il comando dice che cosa fa, non è più una ✎ sola
   // e il nome accessibile comincia dal testo che si vede (chi comanda a voce dice «Modifica testo»)
-  expect(screen.getByRole('button', { name: 'Modifica testo: l’area «Cancello»' })).toHaveTextContent('Modifica testo');
-  fireEvent.click(screen.getByRole('button', { name: 'Gestisci l’area «Torre»' }));
+  expect(screen.getByRole('button', { name: 'Modifica testo: l’infiltrazione «Cancello»' })).toHaveTextContent('Modifica testo');
+  fireEvent.click(screen.getByRole('button', { name: 'Gestisci l’infiltrazione «Torre»' }));
   const finestra = within(screen.getByRole('dialog', { name: '2. Torre' }));
   expect(finestra.getByRole('button', { name: 'Salva il testo' })).toBeDisabled();
-  fireEvent.change(finestra.getByLabelText('Nome dell’area'), { target: { value: 'Torre nord' } });
+  fireEvent.change(finestra.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Torre nord' } });
   fireEvent.change(finestra.getByLabelText('Descrizione'), { target: { value: 'La torre dell’ala nord.' } });
   fireEvent.click(finestra.getByRole('button', { name: 'Salva il testo' }));
   await waitFor(() => expect(aggiornaArea).toHaveBeenCalledWith('k-02', { nome: 'Torre nord', descrizione: 'La torre dell’ala nord.' }));
@@ -784,15 +784,15 @@ it('un’area senza planimetria ha la sua scheda: si collega a una qualsiasi tav
   impostaAreeMappa.mockResolvedValue({ aree: [] });
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-  const orfane = within(screen.getByRole('list', { name: 'Aree della guida senza planimetria' }));
-  expect(orfane.getByText('area della guida · nessuna planimetria')).toBeInTheDocument();
-  fireEvent.click(orfane.getByRole('button', { name: 'Gestisci l’area «Torre»' }));
+  const orfane = within(screen.getByRole('list', { name: 'Infiltrazioni senza planimetria' }));
+  expect(orfane.getByText('infiltrazione · nessuna planimetria')).toBeInTheDocument();
+  fireEvent.click(orfane.getByRole('button', { name: 'Gestisci l’infiltrazione «Torre»' }));
   const finestra = within(screen.getByRole('dialog', { name: '2. Torre' }));
   // **tutte** le tavole, anche quella che contiene già un'area, e lo dicono; nella finestra, non in una tendina
   const tavole = within(finestra.getByRole('list', { name: 'Planimetrie a cui collegarla' })).getAllByRole('button');
   expect(tavole).toHaveLength(2);
   expect(tavole[0]).toHaveTextContent(/Cancello.*contiene Cancello/);
-  expect(tavole[1]).toHaveTextContent(/Torre.*nessuna area/);
+  expect(tavole[1]).toHaveTextContent(/Torre.*nessuna infiltrazione/);
   fireEvent.click(tavole[0]);
   await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-cancello', ['k-01', 'k-02']));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
@@ -805,14 +805,14 @@ it('un’area della guida si elimina dalla sua scheda, dopo una conferma che dic
   eliminaArea.mockResolvedValue(undefined);
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-  fireEvent.click(screen.getByRole('button', { name: 'Gestisci l’area «Torre»' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Gestisci l’infiltrazione «Torre»' }));
   const finestra = within(screen.getByRole('dialog', { name: '2. Torre' }));
   fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
   const conferma = within(finestra.getByRole('alertdialog', { name: 'Conferma eliminazione' }));
   expect(conferma.getByText(/per tutte le partite/)).toBeInTheDocument();
   expect(conferma.getByText(/Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
   getDungeon.mockClear();
-  fireEvent.click(conferma.getByRole('button', { name: 'Elimina l’area' }));
+  fireEvent.click(conferma.getByRole('button', { name: 'Elimina l’infiltrazione' }));
   await waitFor(() => expect(eliminaArea).toHaveBeenCalledWith('k-02'));
   // la scheda del Palazzo si rilegge senza l'area
   await waitFor(() => expect(getDungeon).toHaveBeenCalled());
@@ -825,8 +825,8 @@ it('anche l’area aperta si elimina, dal suo modulo di correzione, e la scheda 
   eliminaArea.mockResolvedValue(undefined);
   render(<MemoryRouter initialEntries={['/guida/dungeon/kamoshida?area=k-03']}><Routes><Route path="/guida/dungeon/:chiave" element={<DungeonDettaglioPage />} /></Routes></MemoryRouter>);
   expect(await screen.findByRole('heading', { name: 'Cortile' })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’area/ }));
-  const modulo = within(screen.getByRole('form', { name: /Correggi l’area/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
+  const modulo = within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ }));
   fireEvent.click(modulo.getByRole('button', { name: 'Elimina' }));
   expect(modulo.getByText(/Se ne va dalla guida per tutte le partite.*Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
   fireEvent.click(modulo.getByRole('button', { name: 'Confermo' }));
@@ -864,7 +864,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     return { ...d, aree: d.aree.map((a) => (voci[a.chiave] ? { ...a, punti: voci[a.chiave] } : a)) };
   };
   /** La riga della stanza della planimetria Cancello nell'elenco del Palazzo. */
-  const rigaCancello = () => within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem')[0];
+  const rigaCancello = () => within(screen.getByRole('list', { name: 'Aree del Palazzo' })).getAllByRole('listitem')[0];
 
   it('tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sull’area, sulla stanza che ha tutte le aree completate e nei chip', async () => {
     getDungeon.mockResolvedValue(conVoci({
@@ -879,7 +879,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     // tre spunte: la stanza e le sue due aree
     expect(riga.querySelectorAll('[data-completata]')).toHaveLength(3);
     // i chip sopra la mappa
-    const chip = within(screen.getByRole('list', { name: 'Aree della guida su questa planimetria' })).getAllByRole('button');
+    const chip = within(screen.getByRole('list', { name: 'Infiltrazioni su questa planimetria' })).getAllByRole('button');
     expect(chip.map((b) => b.textContent)).toEqual(['1. Cancello (completata)', '3. Cortile (completata)']);
     expect(chip.every((b) => b.querySelector('[data-completata]'))).toBe(true);
   });
@@ -896,9 +896,9 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     expect(riga.querySelectorAll('[data-completata]')).toHaveLength(1);
     expect(within(riga).getAllByRole('button')[1]).toHaveAccessibleName(/1\. Cancello \(completata\) ?· 3\. Cortile$/);
     // la Torre ha solo una nota descrittiva: nessuna spunta
-    const torre = within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem')[1];
+    const torre = within(screen.getByRole('list', { name: 'Aree del Palazzo' })).getAllByRole('listitem')[1];
     expect(torre.querySelectorAll('[data-completata]')).toHaveLength(0);
-    const chip = within(screen.getByRole('list', { name: 'Aree della guida su questa planimetria' })).getAllByRole('button');
+    const chip = within(screen.getByRole('list', { name: 'Infiltrazioni su questa planimetria' })).getAllByRole('button');
     expect(chip.map((b) => b.textContent)).toEqual(['1. Cancello (completata)', '3. Cortile']);
   });
 
@@ -909,11 +909,11 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     getDungeon.mockResolvedValue(d);
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-    const orfane = within(screen.getByRole('list', { name: 'Aree della guida senza planimetria' }));
+    const orfane = within(screen.getByRole('list', { name: 'Infiltrazioni senza planimetria' }));
     const torre = orfane.getByRole('button', { name: /2\. Torre \(completata\)/ });
     expect(torre.closest('li')!.querySelectorAll('[data-completata]')).toHaveLength(1);
     // le stanze con planimetria non ne sono toccate: le loro aree hanno voci ancora da fare o nessuna
-    expect(screen.getByRole('list', { name: 'Stanze del Palazzo' }).querySelectorAll('[data-completata]')).toHaveLength(0);
+    expect(screen.getByRole('list', { name: 'Aree del Palazzo' }).querySelectorAll('[data-completata]')).toHaveLength(0);
   });
 
   it('in una stanza con più versioni la spunta compare sulla stanza, nelle sue aree, in ogni versione che contiene l’area e sulla versione senza niente da raccogliere (2026-10-11)', async () => {
@@ -934,7 +934,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     expect(ovest.querySelectorAll('[data-completata]')).toHaveLength(1);
     expect(within(ovest).getByRole('button', { name: /^Porzione ovest \(completata\)/ })).toHaveTextContent('niente da raccogliere · completa');
     // in tutto la riga della stanza ne ha quattro: la stanza, l'area nell'intestazione, l'area nella versione e la versione vuota
-    const stanza = within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem')[0];
+    const stanza = within(screen.getByRole('list', { name: 'Aree del Palazzo' })).getAllByRole('listitem')[0];
     expect(stanza.querySelectorAll('[data-completata]')).toHaveLength(4);
   });
 
@@ -947,7 +947,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
     expect(screen.getByText('2 planimetrie · 1 complete')).toBeInTheDocument();
-    const stanze = within(screen.getByRole('list', { name: 'Stanze del Palazzo' }));
+    const stanze = within(screen.getByRole('list', { name: 'Aree del Palazzo' }));
     const torre = stanze.getAllByRole('listitem').find((li) => li.textContent?.includes('Torre'))!;
     expect(torre).toHaveTextContent('niente da raccogliere · completa');
     expect(torre.querySelectorAll('[data-completata]')).toHaveLength(1);
@@ -963,7 +963,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     getDungeon.mockResolvedValue({ ...senza, planimetrie: [senza.planimetrie[0], { ...senza.planimetrie[1], n: 0, presi: null, spilli: [] }] });
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-    const torreSenza = within(screen.getByRole('list', { name: 'Stanze del Palazzo' })).getAllByRole('listitem').find((li) => li.textContent?.includes('Torre'))!;
+    const torreSenza = within(screen.getByRole('list', { name: 'Aree del Palazzo' })).getAllByRole('listitem').find((li) => li.textContent?.includes('Torre'))!;
     expect(torreSenza).toHaveTextContent('niente da raccogliere');
     expect(torreSenza).not.toHaveTextContent('· completa');
     expect(torreSenza.querySelectorAll('[data-completata]')).toHaveLength(0);
@@ -975,7 +975,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
     /** L'elenco delle stanze, riletto a ogni chiamata (la pagina si ridisegna dopo ogni gesto). */
-    const stanze = () => screen.getByRole('list', { name: 'Stanze del Palazzo' });
+    const stanze = () => screen.getByRole('list', { name: 'Aree del Palazzo' });
     expect(stanze().querySelectorAll('[data-completata]')).toHaveLength(0);
     // la Sicura del cancello è l'unica voce dell'area Cancello
     fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
@@ -1009,7 +1009,7 @@ it('una planimetria con più aree le mostra in ordine di guida: nell’elenco de
   // (le aree sono elementi distinti, per la spunta di quelle completate: si confronta il testo intero della riga)
   expect(pannello.getByText((_, el) => el?.tagName === 'SPAN' && el.textContent === '1. Cancello · 3. Cortile')).toBeInTheDocument();
   // sopra la mappa, le aree della planimetria a schermo: toccarne una apre quell'area sulla stessa mappa
-  const sullaPianta = within(screen.getByRole('list', { name: 'Aree della guida su questa planimetria' }));
+  const sullaPianta = within(screen.getByRole('list', { name: 'Infiltrazioni su questa planimetria' }));
   const voci = sullaPianta.getAllByRole('button');
   expect(voci.map((b) => b.textContent)).toEqual(['1. Cancello', '3. Cortile']);
   expect(voci[0]).toHaveAttribute('aria-pressed', 'true');
@@ -1038,7 +1038,7 @@ it('le aree di una planimetria si scelgono insieme nella scheda: in ordine, con 
   expect(caselle[1].closest('label')!.textContent).toBe('2. Torreanche su «Torre»');
   expect(finestra.queryByText(/lascia la planimetria|si sposta qui/)).toBeNull();
   // con una modifica non salvata, cambiare stanza aspetta (la scheda lo dice)
-  expect(finestra.getByText('Salva prima le modifiche qui sopra per cambiare stanza.')).toBeInTheDocument();
+  expect(finestra.getByText('Salva prima le modifiche qui sopra per cambiare area.')).toBeInTheDocument();
   fireEvent.click(caselle[0]);
   fireEvent.click(finestra.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(impostaAreeMappa).toHaveBeenCalledWith('m-cancello', ['k-02', 'k-03']));
@@ -1055,15 +1055,15 @@ it('la bozza di correzione appartiene al pezzo che stai correggendo, non alla sc
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
 
   // scrivo nel modulo dell'area, poi cambio area senza salvare
-  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’area/ }));
-  const modulo = screen.getByRole('form', { name: /Correggi l’area/ });
-  fireEvent.change(within(modulo).getByLabelText('Nome dell’area'), { target: { value: 'Scritto per sbaglio' } });
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
+  const modulo = screen.getByRole('form', { name: /Correggi l’infiltrazione/ });
+  fireEvent.change(within(modulo).getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Scritto per sbaglio' } });
   // si cambia area dall'elenco: «Torre» è un'area senza planimetria, in coda (non la stanza omonima)
-  fireEvent.click(within(screen.getByRole('list', { name: 'Aree della guida senza planimetria' })).getByRole('button', { name: /^2\. Torre/ }));
+  fireEvent.click(within(screen.getByRole('list', { name: 'Infiltrazioni senza planimetria' })).getByRole('button', { name: /^2\. Torre/ }));
 
   // il modulo si è chiuso con la sua bozza: riaprendolo sull'altra area c'è il nome dell'altra area
-  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’area/ }));
-  expect(within(screen.getByRole('form', { name: /Correggi l’area/ })).getByLabelText('Nome dell’area')).toHaveValue('Torre');
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
+  expect(within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ })).getByLabelText('Nome dell’infiltrazione')).toHaveValue('Torre');
   expect(aggiornaArea).not.toHaveBeenCalled();
 });
 
@@ -1102,15 +1102,15 @@ it('dalla scheda di una planimetria senza aree si crea un’area dentro di lei: 
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Torre' }));
   const finestra = within(screen.getByRole('dialog', { name: 'Torre · Immagine 1' }));
   // la Torre non contiene aree: lo dice, e offre di crearne una
-  expect(finestra.getByText('Non contiene sezioni della guida: creane una qui.')).toBeInTheDocument();
-  fireEvent.click(finestra.getByRole('button', { name: 'Nuova area della guida…' }));
-  const modulo = within(finestra.getByRole('form', { name: 'Nuova area della guida' }));
-  expect(modulo.getByLabelText('Nome dell’area')).toHaveValue('Torre');
+  expect(finestra.getByText('Non tocca nessuna infiltrazione: creane una qui.')).toBeInTheDocument();
+  fireEvent.click(finestra.getByRole('button', { name: 'Nuova infiltrazione…' }));
+  const modulo = within(finestra.getByRole('form', { name: 'Nuova infiltrazione' }));
+  expect(modulo.getByLabelText('Nome dell’infiltrazione')).toHaveValue('Torre');
   // il modulo si apre dal nome
-  expect(modulo.getByLabelText('Nome dell’area')).toHaveFocus();
-  fireEvent.change(modulo.getByLabelText('Nome dell’area'), { target: { value: 'Torre di guardia' } });
+  expect(modulo.getByLabelText('Nome dell’infiltrazione')).toHaveFocus();
+  fireEvent.change(modulo.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Torre di guardia' } });
   fireEvent.change(modulo.getByLabelText('Descrizione'), { target: { value: 'In cima alle scale.' } });
-  fireEvent.click(modulo.getByRole('button', { name: 'Crea l’area' }));
+  fireEvent.click(modulo.getByRole('button', { name: 'Crea l’infiltrazione' }));
   // la Torre non ha aree: va in fondo; con la planimetria, si aggiunge a lei
   await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Torre di guardia', descrizione: 'In cima alle scale.', planimetria: 'm-torre' }));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
@@ -1122,11 +1122,11 @@ it('una planimetria che ha già un’area propone il posto subito dopo di lei', 
   creaArea.mockResolvedValue({ chiave: 'kamoshida-garitta', nome: 'Garitta', ordine: 1 });
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Cancello' }));
   const finestra = within(screen.getByRole('dialog', { name: 'Cancello · Immagine 1' }));
-  fireEvent.click(finestra.getByRole('button', { name: 'Nuova area della guida…' }));
-  const modulo = within(finestra.getByRole('form', { name: 'Nuova area della guida' }));
+  fireEvent.click(finestra.getByRole('button', { name: 'Nuova infiltrazione…' }));
+  const modulo = within(finestra.getByRole('form', { name: 'Nuova infiltrazione' }));
   expect(modulo.getByText('Dopo «1. Cancello»')).toBeInTheDocument();
-  fireEvent.change(modulo.getByLabelText('Nome dell’area'), { target: { value: 'Garitta' } });
-  fireEvent.click(modulo.getByRole('button', { name: 'Crea l’area' }));
+  fireEvent.change(modulo.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Garitta' } });
+  fireEvent.click(modulo.getByRole('button', { name: 'Crea l’infiltrazione' }));
   await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Garitta', descrizione: '', dopo: 'k-01', planimetria: 'm-cancello' }));
 });
 
@@ -1134,21 +1134,21 @@ it('a modulo aperto, con modifiche non salvate nella scheda l’area non si crea
   const pannello = await apriPlanimetrie();
   fireEvent.click(pannello.getByRole('button', { name: 'Gestisci «Immagine 1» di Torre' }));
   const finestra = within(screen.getByRole('dialog', { name: 'Torre · Immagine 1' }));
-  fireEvent.click(finestra.getByRole('button', { name: 'Nuova area della guida…' }));
-  const modulo = within(finestra.getByRole('form', { name: 'Nuova area della guida' }));
-  expect(modulo.getByRole('button', { name: 'Crea l’area' })).toBeEnabled();
+  fireEvent.click(finestra.getByRole('button', { name: 'Nuova infiltrazione…' }));
+  const modulo = within(finestra.getByRole('form', { name: 'Nuova infiltrazione' }));
+  expect(modulo.getByRole('button', { name: 'Crea l’infiltrazione' })).toBeEnabled();
   // una modifica nella scheda, con il modulo già aperto: creando, la finestra si chiuderebbe e la modifica andrebbe persa
   fireEvent.change(finestra.getByLabelText('Che cosa mostra'), { target: { value: 'Piano alto' } });
-  expect(modulo.getByRole('status')).toHaveTextContent('Salva prima le modifiche della scheda: creando l’area la finestra si chiude.');
-  expect(modulo.getByRole('button', { name: 'Crea l’area' })).toBeDisabled();
-  fireEvent.submit(finestra.getByRole('form', { name: 'Nuova area della guida' }));
+  expect(modulo.getByRole('status')).toHaveTextContent('Salva prima le modifiche della scheda: creando l’infiltrazione la finestra si chiude.');
+  expect(modulo.getByRole('button', { name: 'Crea l’infiltrazione' })).toBeDisabled();
+  fireEvent.submit(finestra.getByRole('form', { name: 'Nuova infiltrazione' }));
   expect(creaArea).not.toHaveBeenCalled();
   // la conferma dell'eliminazione aperta ferma anche lei
   fireEvent.change(finestra.getByLabelText('Che cosa mostra'), { target: { value: '' } });
-  expect(modulo.getByRole('button', { name: 'Crea l’area' })).toBeEnabled();
+  expect(modulo.getByRole('button', { name: 'Crea l’infiltrazione' })).toBeEnabled();
   fireEvent.click(finestra.getByRole('button', { name: 'Elimina…' }));
   expect(modulo.getByRole('status')).toHaveTextContent('Chiudi prima la conferma dell’eliminazione.');
-  expect(modulo.getByRole('button', { name: 'Crea l’area' })).toBeDisabled();
+  expect(modulo.getByRole('button', { name: 'Crea l’infiltrazione' })).toBeDisabled();
 });
 
 it('dalla colonna del Palazzo si crea un’area senza planimetria, nel posto scelto, e la scheda la apre', async () => {
@@ -1157,13 +1157,13 @@ it('dalla colonna del Palazzo si crea un’area senza planimetria, nel posto sce
   const pannello = await apriPlanimetrie();
   getDungeon.mockResolvedValue(conAtrio());
   creaArea.mockResolvedValue({ chiave: 'kamoshida-atrio', nome: 'Atrio', ordine: 0 });
-  fireEvent.click(pannello.getByRole('button', { name: 'Nuova area della guida' }));
-  const finestra = within(screen.getByRole('dialog', { name: 'Nuova area della guida' }));
-  fireEvent.change(finestra.getByLabelText('Nome dell’area'), { target: { value: 'Atrio' } });
+  fireEvent.click(pannello.getByRole('button', { name: 'Nuova infiltrazione' }));
+  const finestra = within(screen.getByRole('dialog', { name: 'Nuova infiltrazione' }));
+  fireEvent.change(finestra.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Atrio' } });
   // il posto: «All'inizio del Palazzo»
   fireEvent.click(finestra.getByRole('combobox', { name: 'Dove va nella guida' }));
   fireEvent.click(screen.getByRole('option', { name: 'All’inizio del Palazzo' }).querySelector('button')!);
-  fireEvent.click(finestra.getByRole('button', { name: 'Crea l’area' }));
+  fireEvent.click(finestra.getByRole('button', { name: 'Crea l’infiltrazione' }));
   await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Atrio', descrizione: '', dopo: null }));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   // creata, la scheda apre l'area nuova (la riletta la contiene)

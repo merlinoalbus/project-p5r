@@ -38,7 +38,7 @@ const nomeBreve = (nome: string) => nome.split(' › ').slice(1).join(' › ') |
  * nome) con la spunta e la parola del tipo. I raccolti restano nascosti finché non si accende «Anche i raccolti».
  * Senza collezionabili mostra solo il testo `vuoto`.
  */
-export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etichetta = 'Da raccogliere', nota, vuoto = 'Niente da raccogliere sulle planimetrie di quest’area.' }: Props) {
+export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etichetta = 'Da raccogliere', nota, vuoto = 'Niente da raccogliere sulle planimetrie di quest’infiltrazione.' }: Props) {
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
   const [occupati, setOccupati] = useState<Record<number, boolean>>({});
   const totale = planimetrie.reduce((s, p) => s + p.n, 0);

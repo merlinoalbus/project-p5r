@@ -64,7 +64,7 @@ export function DoveSiTrova({ tipo, chiave, altezza = 260, soloCollegamento = fa
     return <section className={`card flex flex-col gap-1 ${className}`} aria-label={titolo}>
       <h3 className="m-0 text-base">{titolo}</h3>
       <p className="m-0 text-sm text-text-secondary">
-        Nessun posto sulla mappa: questa voce non si trova in un luogo del mondo.
+        Nessun posto sulla mappa: questa voce non si trova in un’area del mondo.
       </p>
     </section>;
   }

@@ -74,10 +74,10 @@ function testoAreeDopoEliminazione(aree: Planimetria['aree'], altrove: ReadonlyM
   const senza = ordinate.filter((a) => !(altrove.get(a.chiave)?.length));
   const altre = ordinate.filter((a) => !!altrove.get(a.chiave)?.length);
   const parti: string[] = [];
-  if (senza.length) parti.push(`${senza.length === 1 ? 'L’area della guida' : 'Le aree della guida'} ${nomi(senza)} ${senza.length === 1 ? 'resta' : 'restano'} senza planimetria.`);
+  if (senza.length) parti.push(`${senza.length === 1 ? 'L’infiltrazione' : 'Le infiltrazioni'} ${nomi(senza)} ${senza.length === 1 ? 'resta' : 'restano'} senza planimetria.`);
   if (altre.length) parti.push(altre.length === 1
-    ? `L’area ${nomi(altre)} resta sulle altre planimetrie che la contengono.`
-    : `Le aree ${nomi(altre)} restano sulle altre planimetrie che le contengono.`);
+    ? `L’infiltrazione ${nomi(altre)} resta sulle altre planimetrie che la contengono.`
+    : `Le infiltrazioni ${nomi(altre)} restano sulle altre planimetrie che le contengono.`);
   return parti.length ? ` ${parti.join(' ')}` : '';
 }
 
@@ -140,8 +140,8 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
       <form className="flex flex-col gap-3" aria-label={`Scheda della planimetria «${etichetta || etichettaDedotta}» di ${stanza}`}
         onSubmit={(e) => { e.preventDefault(); if (daSalvare && !occupato) void esegui(() => onSalva(modifiche)); }}>
         <div className="flex flex-col gap-1">
-          <CampoCorrezione etichetta="Nome della stanza" valore={valori.stanza} massimo={LIMITI_GUIDA.mappa.gruppoNome} onCambia={(v) => setValori((x) => ({ ...x, stanza: v }))} />
-          {versioni > 1 && <span className="text-[11px] text-text-muted">Vale per tutte e {versioni} le planimetrie della stanza.</span>}
+          <CampoCorrezione etichetta="Nome dell’area" valore={valori.stanza} massimo={LIMITI_GUIDA.mappa.gruppoNome} onCambia={(v) => setValori((x) => ({ ...x, stanza: v }))} />
+          {versioni > 1 && <span className="text-[11px] text-text-muted">Vale per tutte e {versioni} le planimetrie dell’area.</span>}
         </div>
         <div className="flex flex-col gap-1">
           <CampoCorrezione etichetta="Che cosa mostra" valore={valori.etichetta} massimo={LIMITI_GUIDA.mappa.etichetta} onCambia={(v) => setValori((x) => ({ ...x, etichetta: v }))} />
@@ -149,8 +149,8 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
               e svuotare un'etichetta che c'era la perde (rilievo della revisione) */}
           <span className="text-[11px] text-text-muted">
             {valori.etichetta.trim()
-              ? 'Distingue questa planimetria dalle altre della stanza.'
-              : `Vuoto: si chiama col suo numero nella stanza, «${etichettaDedotta}»${etichetta ? `; l’etichetta «${etichetta}» si perde` : ''}.`}
+              ? 'Distingue questa planimetria dalle altre dell’area.'
+              : `Vuoto: si chiama col suo numero nell’area, «${etichettaDedotta}»${etichetta ? `; l’etichetta «${etichetta}» si perde` : ''}.`}
           </span>
         </div>
         <CampoCorrezione etichetta="Nome della planimetria" valore={valori.nome} massimo={LIMITI_GUIDA.mappa.nome} onCambia={(v) => setValori((x) => ({ ...x, nome: v }))} />
@@ -162,42 +162,42 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
       {/* Una sezione nuova della guida dentro questa planimetria (richiesta dell'utente, 2026-10-01): per una stanza che la
           guida non ha trascritto. Il nome proposto è quello della stanza; il posto, dopo l'ultima area che la planimetria ha.
           Come per la stanza, con modifiche non salvate qui sopra si aspetta: rileggendo il Palazzo andrebbero perse. */}
-      <section aria-label="Nuova area della guida" className="flex flex-col gap-2 border-t border-border-light pt-3">
+      <section aria-label="Nuova infiltrazione" className="flex flex-col gap-2 border-t border-border-light pt-3">
         {nuovaArea
           ? <ModuloNuovaArea aree={aree} nomeIniziale={stanza} occupato={occupato}
               // creata l'area la scheda si chiude e il Palazzo si rilegge: con modifiche non salvate qui sopra (o la conferma
               // d'eliminazione aperta) si aspetta, anche a modulo già aperto (rilievo della revisione)
-              bloccato={daSalvare ? 'Salva prima le modifiche della scheda: creando l’area la finestra si chiude.' : conferma ? 'Chiudi prima la conferma dell’eliminazione.' : undefined}
+              bloccato={daSalvare ? 'Salva prima le modifiche della scheda: creando l’infiltrazione la finestra si chiude.' : conferma ? 'Chiudi prima la conferma dell’eliminazione.' : undefined}
               dopoIniziale={[...p.aree].sort(perOrdineDiGuida).at(-1)?.chiave}
               onCrea={(dati) => esegui(() => onCreaArea(dati))} onAnnulla={() => setNuovaArea(false)} />
           : <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[12px] text-text-muted">{p.aree.length === 0 ? 'Non contiene sezioni della guida: creane una qui.' : 'Una sezione della guida in più, dentro questa planimetria.'}</span>
-              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Nuova area della guida…" disabled={occupato || daSalvare || conferma} onClick={() => setNuovaArea(true)} />
+              <span className="text-[12px] text-text-muted">{p.aree.length === 0 ? 'Non tocca nessuna infiltrazione: creane una qui.' : 'Un’infiltrazione in più, dentro questa planimetria.'}</span>
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Nuova infiltrazione…" disabled={occupato || daSalvare || conferma} onClick={() => setNuovaArea(true)} />
             </div>}
-        {daSalvare && !nuovaArea && <span className="text-[11px] text-text-muted" role="status">Salva prima le modifiche qui sopra per creare un’area.</span>}
+        {daSalvare && !nuovaArea && <span className="text-[11px] text-text-muted" role="status">Salva prima le modifiche qui sopra per creare un’infiltrazione.</span>}
       </section>
 
       {/* La stanza (richiesta dell'utente, 2026-09-30): una planimetria a sé può diventare una versione di
           un'altra stanza, e una versione può diventare una stanza a sé. Sono azioni immediate, che rileggono
           il Palazzo: con modifiche non salvate nel modulo si aspetta, altrimenti andrebbero perse. */}
-      <section aria-label="Stanza della planimetria" className="flex flex-col gap-2 border-t border-border-light pt-3">
-        <span className="text-[12px]">Stanza</span>
-        {daSalvare && <span className="text-[11px] text-text-muted" role="status">Salva prima le modifiche qui sopra per cambiare stanza.</span>}
+      <section aria-label="Area della planimetria" className="flex flex-col gap-2 border-t border-border-light pt-3">
+        <span className="text-[12px]">Area</span>
+        {daSalvare && <span className="text-[11px] text-text-muted" role="status">Salva prima le modifiche qui sopra per cambiare area.</span>}
         {versioni > 1
           ? <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-[12px] text-text-muted">È una delle {versioni} planimetrie di «{stanza}».</span>
-              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Rendila una stanza a sé" disabled={occupato || daSalvare || conferma}
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Rendila un’area a sé" disabled={occupato || daSalvare || conferma}
                 onClick={() => void esegui(() => onCambiaStanza(null, valori.nome.trim() || nome))} />
             </div>
-          : <span className="text-[12px] text-text-muted">È una stanza a sé.</span>}
+          : <span className="text-[12px] text-text-muted">È un’area a sé.</span>}
         {altreStanze.length > 0 && (sposta
           ? <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0">
-              <legend className="mb-1 p-0 text-[12px]">Sposta in un’altra stanza</legend>
-              <span className="text-[11px] text-text-muted">Diventa una planimetria di quella stanza, in fondo alle sue; le sue aree e i suoi spilli restano suoi.</span>
+              <legend className="mb-1 p-0 text-[12px]">Sposta in un’altra area</legend>
+              <span className="text-[11px] text-text-muted">Diventa una planimetria di quell’area, in fondo alle sue; le sue infiltrazioni e i suoi spilli restano suoi.</span>
               {altreStanze.length >= SOGLIA_RICERCA && (
-                <input className="form-input" type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder="Cerca una stanza…" aria-label="Cerca una stanza" autoComplete="off" />
+                <input className="form-input" type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder="Cerca un’area…" aria-label="Cerca un’area" autoComplete="off" />
               )}
-              <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label="Stanze in cui spostarla">
+              <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label="Aree in cui spostarla">
                 {altreStanze.filter((s) => corrispondeRicerca(cerca, s.nome, s.dettaglio)).map((s) => (
                   <li key={s.chiave}>
                     <button type="button" className="touch flex w-full flex-col rounded-md border border-border-light px-2.5 py-1.5 text-left hover:border-primary disabled:opacity-50" disabled={occupato || daSalvare || conferma}
@@ -208,11 +208,11 @@ export function SchedaPlanimetria({ planimetria: p, stanza, versioni, etichetta,
                   </li>
                 ))}
               </ul>
-              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Lascia nella sua stanza" className="self-start" onClick={() => { setSposta(false); setCerca(''); }} />
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Lascia nella sua area" className="self-start" onClick={() => { setSposta(false); setCerca(''); }} />
             </fieldset>
           : <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[12px] text-text-muted">Può diventare una planimetria di un’altra stanza.</span>
-              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Sposta in un’altra stanza…" disabled={occupato || daSalvare || conferma} onClick={() => setSposta(true)} />
+              <span className="text-[12px] text-text-muted">Può diventare una planimetria di un’altra area.</span>
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Sposta in un’altra area…" disabled={occupato || daSalvare || conferma} onClick={() => setSposta(true)} />
             </div>)}
       </section>
 

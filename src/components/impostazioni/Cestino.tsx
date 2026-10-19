@@ -116,7 +116,7 @@ export function Cestino() {
         <div className="flex min-w-0 flex-col gap-1">
           <h2 id="titolo-cestino" className="m-0 text-[15px] font-semibold">Cestino</h2>
           <p className="m-0 text-[13px] text-text-secondary">
-            Le aree della guida, le voci, le planimetrie e le aree dei dedali eliminate, con tutto quel che si sono portate via (spunte delle
+            Le infiltrazioni, le voci, le planimetrie e le aree dei dedali eliminate, con tutto quel che si sono portate via (spunte delle
             partite comprese). «Rimetti» le riporta com’erano; quel che hai cambiato dopo resta com’è. Il cestino si svuota solo a mano: le
             planimetrie ci portano anche le loro immagini.
           </p>

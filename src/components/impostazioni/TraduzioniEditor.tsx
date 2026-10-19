@@ -17,7 +17,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 const NOMI_AMBITO: Record<string, string> = {
   arcana: 'Arcani', elementoSkill: 'Elementi delle skill', elementoAffinita: 'Elementi delle affinità', affinita: 'Codici di affinità',
   tipoEredita: 'Tipi di eredità', colonnaEredita: 'Colonne di eredità', statistica: 'Statistiche', tipoOggetto: 'Categorie di oggetti',
-  vincoloOggetto: 'Vincoli degli oggetti', areaMementos: 'Aree di Mementos', doteSociale: 'Doti sociali', notaPersona: 'Note delle Persona',
+  vincoloOggetto: 'Vincoli degli oggetti', areaMementos: 'Dedali dei Memento', doteSociale: 'Doti sociali', notaPersona: 'Note delle Persona',
   fonteEsclusiva: 'Fonti esclusive', effettoSkill: 'Effetti delle skill', descrizioneOggetto: 'Descrizioni degli oggetti',
   negoziazione: 'Titoli di negoziazione', fonteCarta: 'Fonti delle carte abilità',
   skill: 'Nomi delle skill', persona: 'Nomi delle Persona', oggetto: 'Nomi dell’equipaggiamento', termine: 'Termini di gioco',

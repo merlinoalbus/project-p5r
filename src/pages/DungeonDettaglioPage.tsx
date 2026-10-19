@@ -334,7 +334,7 @@ export function DungeonDettaglioPage() {
   // Con un'area scelta la colonna mostra **quell'area** (rilievo dell'utente, 2026-10-01: «in ogni area sembrano poi vedersi
   // i raccoglibili di tutte le altre aree»). Prima, quando l'area non aveva collezionabili, la colonna passava da sola a
   // tutto il Palazzo; ora lo dice, e il resto del Palazzo sta nella piega qui sotto.
-  const vuotoArea = mappeArea.length === 0 ? 'Quest’area non ha planimetrie legate: niente da raccogliere qui.' : 'Niente da raccogliere sulle planimetrie di quest’area.';
+  const vuotoArea = mappeArea.length === 0 ? 'Quest’infiltrazione non ha planimetrie legate: niente da raccogliere qui.' : 'Niente da raccogliere sulle planimetrie di quest’infiltrazione.';
   const altrePlanimetrie = (d?.planimetrie ?? []).filter((p) => !mappeArea.some((m) => m.chiave === p.chiave));
   // La planimetria a schermo e le aree della guida che contiene, in ordine di guida (possono essere più d'una).
   const areeDellaPianta = [...((d?.planimetrie ?? []).find((p) => p.chiave === mappaScelta)?.aree ?? [])].sort(perOrdineDiGuida);
@@ -409,10 +409,10 @@ export function DungeonDettaglioPage() {
                 <LineaDelTempo date={d.date} />
                 {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno. */}
                 <div className="flex flex-wrap items-center gap-2 lg:contents">
-                  <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa del Palazzo" />
+                  <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo={memento ? "Mappa dei Memento" : "Mappa del Palazzo"} />
                   {/* Quando compare sulla mappa di Tokyo e dove si atterra toccandolo (2026-10-04) */}
                   <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} />
-                  <span className="chip">{d.aree.length} {memento ? 'dedali' : 'aree'}</span>
+                  <span className="chip">{d.aree.length} {memento ? 'dedali' : 'infiltrazioni'}</span>
                   <span className="chip" title={memento ? 'Gli elementi delle aree dei dedali (Richieste, timbri, voci di Trama): sono questi a fare la percentuale; le Persona no.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori): sono questi a fare la percentuale.'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
                   {!memento && <span className="chip" title="Le tavole dell’atlante del Palazzo. Si ordinano e si correggono nell’elenco qui sotto.">
                     {d.planimetrie.length} planimetrie{d.raccolta.mappeComplete !== null ? ` · ${d.raccolta.mappeComplete} complete` : ''}
@@ -525,20 +525,20 @@ export function DungeonDettaglioPage() {
                       testo dell'area di prima e lo salverebbe su quella nuova (rilievo della revisione). */}
                   {/* «Modifica testo» per esteso: la sola ✎ accanto al titolo non si trovava («come faccio a modificare
                       il testo delle Aree della guida?», 2026-09-30) */}
-                  <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} etichetta="Modifica testo"
+                  <CorrezioneGuida key={area.chiave} cosa={`l’infiltrazione «${area.nome}»`} etichetta="Modifica testo"
                     iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
                     onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
                     // «Devo poter rimuovere un'area» (2026-09-30): l'eliminazione vera, per tutte le partite
                     elimina={{
-                      avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le planimetrie restano, con le loro altre aree. ${NEL_CESTINO}`,
+                      avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le planimetrie restano, con le loro altre infiltrazioni. ${NEL_CESTINO}`,
                       onElimina: async () => { const k = area.chiave; await eliminaArea(k); areaEliminata(k); await Promise.all([dati.ricarica(), albero.ricarica()]); },
                     }}>
                     {(b, cambia) => <>
-                      <CampoCorrezione etichetta="Nome dell’area" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
+                      <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
                       <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
                     </>}
                   </CorrezioneGuida>
-                  <span className="text-[12px] text-text-muted">area {area.ordine + 1} di {d.aree.length}</span>
+                  <span className="text-[12px] text-text-muted">infiltrazione {area.ordine + 1} di {d.aree.length}</span>
                   <span className="flex-1" />
                 </div>
                 {/* La descrizione si ripiega: per esteso spingeva la mappa sotto il bordo della colonna. */}
@@ -555,17 +555,17 @@ export function DungeonDettaglioPage() {
                       toglie quella a schermo. Ripiegato, perché si usa di rado e la mappa resta il primo piano. */}
                   {area.mappe.length > 0 && !collegamento && (
                     <details className="text-[12px]">
-                      <summary className="touch cursor-pointer text-text-muted">Planimetrie di quest’area · {area.mappe.length}</summary>
+                      <summary className="touch cursor-pointer text-text-muted">Planimetrie di quest’infiltrazione · {area.mappe.length}</summary>
                       <div className="flex flex-col gap-2 pt-2">
                         {d.planimetrie.some((t) => !area.mappe.some((m) => m.chiave === t.chiave)) && (
                           <Selettore etichetta="Collega anche a" valore="" vuoto="— scegli una planimetria —"
                             opzioni={d.planimetrie.filter((t) => !area.mappe.some((m) => m.chiave === t.chiave)).map((t) => ({ chiave: t.chiave, nome: nomeSenzaPalazzo(t.nome),
-                              dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna area'].filter(Boolean).join(' · ') }))}
+                              dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna infiltrazione'].filter(Boolean).join(' · ') }))}
                             onCambia={collegaArea} />
                         )}
                         {area.mappe.some((m) => m.chiave === mappaScelta) && (
                           <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="annulla" dimensione={20} />}
-                            titolo="Scollega questa planimetria" dettaglio={area.mappe.length > 1 ? 'l’area resta sulle altre' : 'l’area resta senza planimetria'}
+                            titolo="Scollega questa planimetria" dettaglio={area.mappe.length > 1 ? 'l’infiltrazione resta sulle altre' : 'l’infiltrazione resta senza planimetria'}
                             onClick={() => scollegaArea(mappaScelta)} />
                         )}
                       </div>
@@ -575,7 +575,7 @@ export function DungeonDettaglioPage() {
                   {areeDellaPianta.length > 1 && !collegamento && (
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-[11px] uppercase tracking-wide text-text-muted">Su questa planimetria</span>
-                      <ol className="m-0 flex list-none flex-wrap gap-1 p-0" aria-label="Aree della guida su questa planimetria">
+                      <ol className="m-0 flex list-none flex-wrap gap-1 p-0" aria-label="Infiltrazioni su questa planimetria">
                         {areeDellaPianta.map((a) => (
                           <li key={a.chiave}>
                             <button type="button" className={`chip touch text-[11px] ${completate.has(a.chiave) ? 'chip--icona' : ''} ${a.chiave === area.chiave ? 'chip--attivo' : ''}`} aria-pressed={a.chiave === area.chiave}
@@ -614,11 +614,11 @@ export function DungeonDettaglioPage() {
                 {/* collegando i pin non serve: la mappa del collegamento prende il posto (e l'altezza) */}
                 {!mappaScelta && !collegamento && (
                   <div className="flex flex-col gap-2 rounded-md bg-white/[0.04] px-3 py-2 text-[12px]" role="status">
-                    <p className="m-0 text-text-muted">Quest’area non ha ancora una planimetria: sceglila fra le tavole del Palazzo — anche una che contiene già altre aree, si aggiunge a quelle. Quel che c’è da raccogliere sta nella colonna accanto.</p>
+                    <p className="m-0 text-text-muted">Quest’infiltrazione non ha ancora una planimetria: sceglila fra le tavole del Palazzo — anche una che ne contiene già altre, si aggiunge a quelle. Quel che c’è da raccogliere sta nella colonna accanto.</p>
                     {d.planimetrie.length > 0
                       ? <Selettore etichetta="Collega una planimetria" valore="" vuoto="— scegli —"
                           opzioni={d.planimetrie.map((t) => ({ chiave: t.chiave, nome: nomeSenzaPalazzo(t.nome),
-                            dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna area'].filter(Boolean).join(' · ') }))}
+                            dettaglio: [t.n > 0 ? `${t.n} da raccogliere` : null, t.aree.length ? `contiene ${[...t.aree].sort(perOrdineDiGuida).map((a) => a.nome).join(', ')}` : 'nessuna infiltrazione'].filter(Boolean).join(' · ') }))}
                           onCambia={collegaArea} />
                       : <span className="text-text-muted">Il Palazzo non ha ancora planimetrie: aggiungine una dall’elenco del Palazzo.</span>}
                   </div>
