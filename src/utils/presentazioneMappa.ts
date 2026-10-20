@@ -57,6 +57,17 @@ export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string 
   return senzaGergo(nomeConVersione(mappa as MappaRiassuntoDto, base));
 }
 
+/** UX3-8 (L3): vero se la mappa è un foglio dell'estrazione **senza nome vero**, cioè col nome tecnico che l'estrazione dà ai fogli che
+ *  non sa attribuire («Planimetria non attribuita», o il vecchio «Immagini native che nessun campo usa»). Un nome scritto da una
+ *  persona (`nomeRivisto`) o una mappa creata dall'utente non sono mai tecnici; un'Area si giudica dal suo nome. */
+export function nomeTecnicoMappa(m: IdentitaMappa & Pick<MappaRiassuntoDto, 'origine' | 'area'>): boolean {
+  if (m.origine === 'utente' || (!m.area && m.nomeRivisto)) return false;
+  return /Planimetria non attribuita|nessun campo usa/i.test(m.area?.nome ?? nomePresentazioneMappa(m));
+}
+
+/** Quanti pin, a parole, per l'indice delle mappe (L3: la parola è «pin»): «nessun pin», «1 pin», «N pin». */
+export const testoPin = (n: number): string => (n === 0 ? 'nessun pin' : `${n} pin`);
+
 /** Il nome del contenitore quando più versioni della stessa immagine stanno insieme — la testata
  * dell'albero, la briciola dell'indice, la striscia delle miniature — dove l'etichetta della
  * singola versione la porta già la miniatura sotto e ripeterla nel titolo non aggiunge nulla.

@@ -194,6 +194,28 @@ describe('MappaPage', () => {
     expect(tokyo).not.toHaveTextContent(/mappe/);
   });
 
+  // UX3-8 (L3, segnalazione dell'utente: «ho aggiunto una planimetria di prova» e non la trovava): un'Area o planimetria con un nome
+  // vero resta nella griglia anche senza pin, con «nessun pin»; il gruppo chiuso è solo per i fogli dell'estrazione senza nome e senza pin
+  it('UX3-8: la planimetria senza pin con un nome vero sta nella griglia; chiusi solo i fogli dell’estrazione senza nome', async () => {
+    const tecnico = 'Palazzo di Kamoshida — Immagini native che nessun campo usa';
+    getAlberoMappe.mockResolvedValue([...albero.slice(0, 3), { ...albero[3], ordine: 0 },
+      riassunto({ chiave: 'foglio-con-pin', nome: tecnico, tipo: 'area', genitore: 'dungeon-kamoshida', numeroSpilli: 3, ordine: 1 }),
+      riassunto({ chiave: 'prova', nome: 'Prova', tipo: 'area', genitore: 'dungeon-kamoshida', origine: 'utente', ordine: 2 }),
+      riassunto({ chiave: 'foglio-vuoto', nome: tecnico, tipo: 'area', genitore: 'dungeon-kamoshida', ordine: 3 })]);
+    monta('/guida/mappe');
+    fireEvent.click(await screen.findByRole('button', { name: /^Palazzo di Kamoshida/ }));
+    const griglia = within(screen.getByRole('list', { name: 'Contenuto di Palazzo di Kamoshida' }));
+    const carte = griglia.getAllByRole('listitem');
+    // prima le aree con un nome vero, nel loro ordine (con o senza pin), poi i fogli tecnici con pin
+    // (il testo comincia col numero dei pin sull'anteprima, se ce ne sono; i due fogli omonimi sono numerati)
+    expect(carte.map((c) => c.textContent)).toEqual([expect.stringMatching(/^5Ingresso5 pin$/), expect.stringMatching(/^Provanessun pin$/), expect.stringMatching(/^3Planimetria non attribuita · \d3 pin$/)]);
+    const gruppo = within(screen.getByRole('region', { name: 'Fogli dell’estrazione senza nome' }));
+    const apri = gruppo.getByRole('button', { name: 'Mostra i fogli dell’estrazione senza nome · 1' });
+    expect(apri).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(apri);
+    expect(within(gruppo.getByRole('list', { name: 'Fogli dell’estrazione senza nome di Palazzo di Kamoshida' })).getAllByRole('listitem')).toHaveLength(1);
+  });
+
   // UX2-15 (L2, segnalazione dell'utente): in Mappe una sola barra, quella della pagina. Il pannello del luogo non ha riquadri scorrevoli
   // suoi: né la griglia delle planimetrie né l'«Elenco completo», che crescono con la pagina
   it('UX2-15: il pannello del luogo non ha riquadri scorrevoli, né nella griglia né nell’«Elenco completo»', async () => {

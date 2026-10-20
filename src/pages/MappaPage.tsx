@@ -4,7 +4,7 @@
 
 import { ImmaginiLuogo } from '../components/mappe/ImmaginiLuogo';
 import { SelettoreContestoMappa } from '../components/mappe/SelettoreContestoMappa';
-import { etichetteDistinte, nomePresentazioneMappa, presentaMappa, titoloGruppoImmagini } from '../utils/presentazioneMappa';
+import { etichetteDistinte, nomePresentazioneMappa, nomeTecnicoMappa, presentaMappa, testoPin, titoloGruppoImmagini } from '../utils/presentazioneMappa';
 import { AlberoLuoghi } from '../components/mappe/AlberoLuoghi';
 import { ContenutiGuidaMappa } from '../components/mappe/ContenutiGuidaMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
@@ -372,13 +372,13 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
  * col suo nome, e un vocabolario da estrattore («immagini native che nessun campo usa») dato in
  * pasto a chi gioca.
  *
- * Qui davanti vanno **le aree con gli spilli** — quelle in cui c'e' qualcosa da trovare, cioe'
- * quelle per cui si apre una guida — e i fogli senza spilli finiscono in un gruppo che si apre a
- * richiesta. Non si buttano: sono planimetrie vere, servono a chi cura l'atlante, ma non sono la
- * risposta alla domanda «dove devo andare».
+ * Qui davanti vanno **le aree con un nome vero**, con o senza pin (UX3-8, L3), e i fogli
+ * dell'estrazione senza nome e senza pin finiscono in un gruppo che si apre a richiesta. Non si
+ * buttano: sono planimetrie vere, servono a chi cura l'atlante, ma non sono la risposta alla
+ * domanda «dove devo andare».
  */
 function GriglieDelLuogo({ contenute: tutte, nome, onScendi }: { contenute: MappaRiassuntoDto[]; nome: string; onScendi?: (chiave: string) => void }) {
-  const [mostraSenzaSpilli, setMostraSenzaSpilli] = useState(false);
+  const [mostraFogli, setMostraFogli] = useState(false);
   // Sotto un quartiere si elencano le **aree**, una volta sola (L2): le versioni della stessa Area (il Sottopasso, il Covo) sono un
   // riquadro solo, con la predefinita e «N versioni»; i pin dell'Area si sommano su quel riquadro.
   const { contenute, versioni } = useMemo(() => {
@@ -395,25 +395,25 @@ function GriglieDelLuogo({ contenute: tutte, nome, onScendi }: { contenute: Mapp
     }
     return { contenute: elenco.map((m) => (m.area ? { ...m, numeroSpilli: spilli.get(m.area.chiave) ?? m.numeroSpilli } : m)), versioni: conteggio };
   }, [tutte]);
-  // I fogli che l'estrazione ha trovato ma che nessun campo del gioco usa portano un nome che e'
-  // una descrizione tecnica — «Immagini native che nessun campo usa — tela larga, disegno minuto»
-  // — e non un posto. Hanno spilli, quindi restano fra le aree, ma vanno in fondo: davanti ci
-  // stanno le stanze con un nome, che sono quelle che uno cerca.
-  const senzaNomeVero = (m: MappaRiassuntoDto) => /nessun campo usa/i.test(nomePresentazioneMappa(m));
-  const conSpilli = contenute.filter((m) => m.numeroSpilli > 0)
-    .sort((a, b) => Number(senzaNomeVero(a)) - Number(senzaNomeVero(b)));
-  const senzaSpilli = contenute.filter((m) => m.numeroSpilli === 0);
+  // UX3-8 (decisione del Manager, 2026-10-20; l'utente non trovava la planimetria di prova appena aggiunta): ogni Area o planimetria
+  // con un nome vero sta nella griglia, nel suo ordine, anche senza pin («nessun pin»). I fogli dell'estrazione senza nome vero
+  // («Planimetria non attribuita») vanno in fondo se hanno pin, e in un gruppo chiuso se non ne hanno: servono a chi cura l'atlante,
+  // non sono la risposta alla domanda «dove devo andare».
+  const nominate = contenute.filter((m) => !nomeTecnicoMappa(m));
+  const tecnicheConPin = contenute.filter((m) => nomeTecnicoMappa(m) && m.numeroSpilli > 0);
+  const tecnicheSenzaPin = contenute.filter((m) => nomeTecnicoMappa(m) && m.numeroSpilli === 0);
+  const inGriglia = [...nominate, ...tecnicheConPin];
   // I titoli si numerano **una volta sola per il Palazzo**, non una per griglia: le due griglie
   // stanno nella stessa pagina, e numerando ciascuna per conto suo comparivano due «Planimetria
   // non attribuita · 1» a pochi centimetri l'una dall'altra.
   const titoli = new Map(etichetteDistinte(contenute, (t) => senzaPrefisso(t, nome)).map((t, i) => [contenute[i].chiave, t]));
   return <div className="flex flex-col gap-4">
-    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} titoli={titoli} etichetta={`Contenuto di ${nome}`} onScendi={onScendi} versioni={versioni} />}
-    {senzaSpilli.length > 0 && <section className="flex flex-col gap-2" aria-label="Planimetrie senza spilli">
-      <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraSenzaSpilli} onClick={() => setMostraSenzaSpilli((v) => !v)}>
-        {mostraSenzaSpilli ? 'Nascondi' : 'Mostra'} le planimetrie senza spilli · {senzaSpilli.length}
+    {inGriglia.length > 0 && <Griglia mappe={inGriglia} nome={nome} titoli={titoli} etichetta={`Contenuto di ${nome}`} onScendi={onScendi} versioni={versioni} />}
+    {tecnicheSenzaPin.length > 0 && <section className="flex flex-col gap-2" aria-label="Fogli dell’estrazione senza nome">
+      <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraFogli} onClick={() => setMostraFogli((v) => !v)}>
+        {mostraFogli ? 'Nascondi' : 'Mostra'} i fogli dell’estrazione senza nome · {tecnicheSenzaPin.length}
       </button>
-      {mostraSenzaSpilli && <Griglia mappe={senzaSpilli} nome={nome} titoli={titoli} etichetta={`Planimetrie di ${nome} senza spilli`} onScendi={onScendi} versioni={versioni} />}
+      {mostraFogli && <Griglia mappe={tecnicheSenzaPin} nome={nome} titoli={titoli} etichetta={`Fogli dell’estrazione senza nome di ${nome}`} onScendi={onScendi} versioni={versioni} />}
     </section>}
   </div>;
 }
@@ -453,7 +453,7 @@ function Griglia({ mappe, nome, etichetta, titoli, onScendi, versioni }: { mappe
         <span className="flex flex-col gap-0.5">
           <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
           <span className="text-[11px] text-text-muted">
-            {m.numeroSpilli > 0 ? `${m.numeroSpilli} spilli` : 'nessuno spillo'}{nVersioni > 1 ? ` · ${nVersioni} versioni` : ''}{dentro ? ` · ${m.numeroFigli} dentro` : ''}
+            {testoPin(m.numeroSpilli)}{nVersioni > 1 ? ` · ${nVersioni} versioni` : ''}{dentro ? ` · ${m.numeroFigli} dentro` : ''}
           </span>
         </span>
       </>;
