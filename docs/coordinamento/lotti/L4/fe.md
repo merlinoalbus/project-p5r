@@ -120,11 +120,22 @@ Aspettano i campi di BE per §8.11 (pin con stato proprio), chiesti a BE il 2026
   riscritta **solo nella pagina** (fetch intercettata, poi ripristinata e pagina ricaricata) con «Raccogli il Tesoro» esaurito: chip «Permanente»
   ed «Esaurito», opacità 40 contro 60; 1280×689 riga 64 px, 375×812 64 px larga 291 senza orizzontale, 768×1024 44 px.
 
+## §4.1 «Anche nella Nª infiltrazione» — fatto (ripresa di L4, 2026-10-20)
+- `GuidaDellArea`: sotto la riga di una voce il cui `oggetto` permanente ha voci in altre infiltrazioni (dalle voci di `areePalazzo`, che la
+  pagina passa già: `d.aree`), una riga sola «Anche nella 2ª e 4ª infiltrazione»; ogni ordinale è un bersaglio da 44×44 col nome accessibile
+  intero («Anche nella 4ª infiltrazione») e il nome dell'infiltrazione nel suggerimento; il tocco chiama `onApriInfiltrazione`, che la pagina
+  collega a `scegliInfiltrazione`. Senza la prop, solo testo. Prima versione con un chip intero per infiltrazione scartata: due righe da 44 px.
+- Test visti rossi e poi verdi: `GuidaDellArea.test.tsx` (riga e tocco; niente per le voci da sole o di oggetti che non stanno altrove),
+  `DungeonDettaglioPage.test.tsx` («Anche nella 3ª infiltrazione» porta a `?infiltrazione=k-03`). File collegati: 134/134.
+- Browser (Madarame, partita 1, solo letture): «Lucernario aperto» nella 1ª → «Anche nella 2ª e 4ª infiltrazione», riga 44 px a 1280×689;
+  il tocco su «4ª» apre «Nelle profondità del Museo» (`?infiltrazione=madarame-nelle-profondita-del-museo`); lì 15 voci con la riga, tutte da
+  44 px a 375×812 (larga 291, niente orizzontale) e a 768×1024.
+
 ## Da fare
 1. ~~k/N, «Segna»/«Riapri» con «Riapre anche» e «Segnate anche»~~: fatto (sopra).
 5. ~~§8.6 (O4-2)~~: fatto (sopra).
 2. ~~Selettore del contesto nel popup per un pin di più infiltrazioni (§4.2)~~: fatto (sopra).
-3. Sezione «Schede da sistemare», carattere della voce («Permanente», «Si ripropone», «Racconto»), «Esaurito» come chip, «Anche nella Nª infiltrazione» (§4.1, §4.3): non erano nella richiesta del PM di questo giro.
+3. ~~Sezione «Schede da sistemare», carattere della voce («Permanente», «Si ripropone», «Racconto»), «Esaurito» come chip, «Anche nella Nª infiltrazione» (§4.1, §4.3)~~: fatto (sopra).
 4. Misure di layout ai formati, quando il lotto è finito.
 5. **§8.6 (O4-2), da Stesura (2026-10-20)**:
    - togliendo il segno a un passo di un Enigma **risolto**, prima si chiede conferma con «Riapre anche l'Enigma «<nome>»»;
