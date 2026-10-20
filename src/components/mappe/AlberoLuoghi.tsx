@@ -18,6 +18,9 @@ import { nomeFiglieMappa } from '../../utils/vocabolarioMappe';
 import type { MappaRiassuntoDto } from '../../types';
 import { IconaAzione } from '../shared/IconaAzione';
 
+/** Gli spilli di una riga, con la parola dell'indice e il singolare: «1 spillo», «7 spilli» (E5). */
+const testoSpilli = (n: number) => `${n} ${n === 1 ? 'spillo' : 'spilli'}`;
+
 /** La raccolta visuale conserva ogni identità e non rappresenta un passaggio di gioco. */
 export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { mappe: MappaRiassuntoDto[]; genitore?: string | null; espandibile?: boolean }) {
   const figli = new Map<string | null, MappaRiassuntoDto[]>();
@@ -61,13 +64,15 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
     // e stanno sotto un'intestazione unica, che numerarle spezzerebbe.
     const soli = nodi.filter(m => !m.area && !gruppo(m));
     const etichette = new Map(etichetteDistinte(soli).map((t, i) => [soli[i].chiave, t]));
-    // il gruppo porta il nome di quel che contiene (M19): «Aree di Shibuya», «Quartieri di Tokyo», «Planimetrie di …»
-    return <ul className="m-0 pl-4 list-none flex flex-col gap-2" aria-label={parent ? `${padre ? nomeFiglieMappa(padre.tipo) : 'Aree'} di ${padre ? nomePresentazioneMappa(padre) : 'questo posto'}` : 'Città e Palazzi'}>{nodi.map(m => {
+    // E7 (L2): nella città le Aree da verificare (lo staff di Tokyo, in attesa della scelta dell'utente) non stanno fra i quartieri, a un
+    // livello che non è il loro: hanno un gruppo a sé, «Da verificare», sotto quello dei quartieri
+    const daVerificare = padre?.tipo === 'citta' ? nodi.filter((m) => m.area?.daVerificare) : [];
+    const voce = (m: MappaRiassuntoDto) => {
       if (m.area) {
         const membri = perArea.get(m.area.chiave)!;
         const capo = rappresentante(membri);
         if (capo.chiave !== m.chiave) return null;
-        const pin = membri.reduce((n, v) => n + v.numeroSpilli, 0);
+        const spilli = membri.reduce((n, v) => n + v.numeroSpilli, 0);
         return <li key={`area:${m.area.chiave}`}>
           {/* R1 (validatore L2): l'area in attesa della scelta dell'utente (lo staff di Tokyo) porta il segno «Da verificare» anche qui,
               accanto al nome e con l'aspetto della pagina Area e delle Aree della città; dove non c'è posto va a capo */}
@@ -75,8 +80,10 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
             <Link className="touch flex min-w-0 items-center gap-2 py-1 no-underline text-text" to={capo.casa || `/guida/mappe/${encodeURIComponent(capo.chiave)}`}>
               <IconaAzione chiave="mappa" dimensione={18} />
               <span>{m.area.nome}</span>
-              {membri.length > 1 && <span className="text-[11px] text-text-muted">{membri.length} versioni · {pin} pin</span>}
             </Link>
+            {/* E5 (L2): su ogni riga lo stesso conteggio con la stessa parola dell'indice («spilli»), non solo con più versioni; fuori dal
+                collegamento, che si chiama come il posto */}
+            <span className="text-[11px] text-text-muted">{membri.length > 1 ? `${membri.length} versioni · ` : ''}{testoSpilli(spilli)}</span>
             {m.area.daVerificare && <span className="chip chip--attivo text-[11px]" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
           </div>
           {membri.map(v => <Fragment key={v.chiave}>{discendenti(v)}</Fragment>)}
@@ -90,14 +97,30 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
         return <li key={id}>{!m.gruppoImmagini && <h3 className="m-0 py-1 text-sm font-semibold">{titolo}</h3>}<ImmaginiLuogo mappe={membri} nome={titolo} discendenti={discendenti} /></li>;
       }
       return <li key={m.chiave}>
-        <Link className="touch flex items-center gap-2 py-1 no-underline text-text" to={m.casa || `/guida/mappe/${encodeURIComponent(m.chiave)}`}>
-          {/* L1: un'icona sola per tutte le righe; il caso a parte del Covo citava la mappa «nativo-archivio-022», che non esiste più */}
-          <IconaAzione chiave="mappa" dimensione={18} />
-          <span>{etichette.get(m.chiave) ?? nomePresentazioneMappa(m)}</span>
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-2">
+          <Link className="touch flex min-w-0 items-center gap-2 py-1 no-underline text-text" to={m.casa || `/guida/mappe/${encodeURIComponent(m.chiave)}`}>
+            {/* L1: un'icona sola per tutte le righe; il caso a parte del Covo citava la mappa «nativo-archivio-022», che non esiste più */}
+            <IconaAzione chiave="mappa" dimensione={18} />
+            <span>{etichette.get(m.chiave) ?? nomePresentazioneMappa(m)}</span>
+          </Link>
+          {/* E5 (L2): gli spilli della mappa, con la parola e il formato delle altre righe */}
+          <span className="text-[11px] text-text-muted">{testoSpilli(m.numeroSpilli)}</span>
+        </div>
         {discendenti(m)}
       </li>;
-    })}</ul>;
+    };
+    // il gruppo porta il nome di quel che contiene (M19): «Aree di Shibuya», «Quartieri di Tokyo», «Planimetrie di …»
+    const elenco = <ul className="m-0 pl-4 list-none flex flex-col gap-2" aria-label={parent ? `${padre ? nomeFiglieMappa(padre.tipo) : 'Aree'} di ${padre ? nomePresentazioneMappa(padre) : 'questo posto'}` : 'Città e Palazzi'}>
+      {nodi.filter((m) => !daVerificare.includes(m)).map(voce)}
+    </ul>;
+    if (!daVerificare.length) return elenco;
+    return <>
+      {elenco}
+      <div className="flex flex-col gap-1 pl-4">
+        <h3 className="m-0 pt-1 text-[12px] font-semibold uppercase tracking-wide text-text-muted">Da verificare</h3>
+        <ul className="m-0 pl-4 list-none flex flex-col gap-2" aria-label="Da verificare">{daVerificare.map(voce)}</ul>
+      </div>
+    </>;
   }
   return ramo(genitore, new Set(genitore ? [genitore] : []));
 }
