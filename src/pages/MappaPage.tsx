@@ -160,23 +160,25 @@ function IndiceMappe() {
               // La carta resta il pulsante che apre il pannello, steso su tutta la carta (`after:inset-0`); il chip è un collegamento a sé,
               // sopra di lui: un collegamento dentro un pulsante non si può tenere né toccare da solo.
               return <li key={chiave} className="flex">
-                <div className={`card card--cliccabile relative flex w-full items-center gap-3 ${aperto ? 'border-primary bg-primary-bg' : ''}`}>
-                  <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
-                  <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+                {/* da 1280 px (elenco in una colonna da 300) una griglia di due righe: il chip sotto i conteggi, che così stanno interi su una
+                    riga (LAY2-7); sotto, una riga sola col chip a destra */}
+                <div className={`card card--cliccabile relative flex w-full items-center gap-3 lg:max-xl:gap-2 xl:grid xl:grid-cols-[72px_minmax(0,1fr)_auto] xl:gap-x-3 xl:gap-y-1 ${aperto ? 'border-primary bg-primary-bg' : ''}`}>
+                  <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0 xl:row-span-2" />
+                  <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 xl:col-start-2 xl:row-start-1">
                     <button type="button" aria-expanded={aperto} onClick={() => setPercorso(aperto ? [] : [capofila.chiave])}
                       // niente `touch` qui: il bersaglio è la carta intera (`after:inset-0`), e 44 px di riga facevano crescere la carta
                       className={`text-left font-display text-[17px] leading-tight break-words after:absolute after:inset-0 after:content-[''] ${aperto ? 'text-primary' : ''}`}>
                       {nome}<span className="sr-only">, {nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
                     </button>
-                    {/* una riga coi puntini: accanto al chip andava a capo e la carta cresceva (l'indice usciva di 3 px a 1024×690); il testo
-                        intero è nel nome del pulsante e nel suggerimento */}
-                    <span className="max-w-full truncate text-[11px] text-text-muted" aria-hidden title={`${nomeTipoMappa(capofila)} · ${sotto.spilli} spilli · ${sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}`}>{nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
+                    {/* da 1024 a 1279 px su una riga (con gli spazi della carta più stretti ci sta intera): andando a capo la carta cresceva e
+                        l'indice usciva di 3 px a 1024×690. Altrove va a capo, e si legge intera (LAY2-7: coi puntini era «Città · …») */}
+                    <span className="max-w-full text-[11px] text-text-muted lg:max-xl:truncate" aria-hidden title={`${nomeTipoMappa(capofila)} · ${sotto.spilli} spilli · ${sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}`}>{nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
                   </span>
                   {/* a destra, prima della freccia: alto 44 (il bersaglio) sta nell'altezza dell'anteprima e la carta non cresce (a 1024×690
                       l'indice deve stare in una schermata, LAY2-5) */}
-                  <Link to={prima.casa} className="chip chip--attivo touch relative z-10 shrink-0 text-[11px] no-underline" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla"
+                  <Link to={prima.casa} className="chip chip--attivo touch relative z-10 shrink-0 text-[11px] no-underline xl:col-start-2 xl:row-start-2 xl:justify-self-start" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla"
                     aria-label={`${daVerificare.length} da verificare: ${daVerificare.map((a) => a.nome).join(', ')}`}>{daVerificare.length} da verificare</Link>
-                  <span aria-hidden className="shrink-0 text-text-muted">{aperto ? '▾' : '▸'}</span>
+                  <span aria-hidden className="shrink-0 text-text-muted xl:col-start-3 xl:row-span-2 xl:row-start-1">{aperto ? '▾' : '▸'}</span>
                 </div>
               </li>;
             }
