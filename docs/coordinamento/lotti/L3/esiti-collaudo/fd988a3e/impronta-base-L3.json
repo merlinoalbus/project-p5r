@@ -1,0 +1,478 @@
+{
+ "gioco.db": {
+  "user_version": 113,
+  "schema": "1c183c8a28b3af9e78c130fcf4042a3e1042a9fc4a2789a786731966a09d3637",
+  "tabelle": {
+   "allerta_meteo": {
+    "righe": 74,
+    "sha256": "94533575185d0410927f40e77ef8bfbda61811f54b856eaad5ff1db454e5793b"
+   },
+   "arcana": {
+    "righe": 24,
+    "sha256": "b5d40c85e3cb497127cafa323b5f9869804e2bc860f1c5931306abcb7e3e57db"
+   },
+   "area": {
+    "righe": 140,
+    "sha256": "2ebc51ba30a1d1957aba1934b3dd63cb253ee02adc90a19024d7041cd3d57584"
+   },
+   "area_dedalo": {
+    "righe": 95,
+    "sha256": "28bdf1b4552c768b2d671bc65e8ebdc45f2c8cb64de9656c931471852718f885"
+   },
+   "articolo": {
+    "righe": 587,
+    "sha256": "e195dc7e4604bb76b491bdd54f9a8cb91f19660e29d004bc6d7c64aa2c7e24fb"
+   },
+   "attivita": {
+    "righe": 30,
+    "sha256": "7b88646935de856f7aae370a8e48989900357e9f1098423e541ee1b222f74c52"
+   },
+   "cestino": {
+    "righe": 1,
+    "sha256": "c080db9d3a7f339f259f317a8658fefc54d75d0f0b754e450d28ee77fa603665"
+   },
+   "confidente": {
+    "righe": 23,
+    "sha256": "2b85bfa63b52f68d50c50b88addd1bb88a22c7d9a2af60803a824a37561d98cb"
+   },
+   "confidente_abilita": {
+    "righe": 159,
+    "sha256": "15cf15cdde4d682471c8ad27b924a0af42820c9b072b93ef2827b51ccf8971ca"
+   },
+   "confidente_dialogo": {
+    "righe": 223,
+    "sha256": "850b97d03cc684c0d02b8781768601f75d32ba077758a0dc84cbbbb71fea9363"
+   },
+   "confidente_disponibilita": {
+    "righe": 23,
+    "sha256": "d97e453a6d503359ad47e1fa031b9ba6086016ecaf89c52942b2171b85db4a1e"
+   },
+   "confidente_dote_incontro": {
+    "righe": 38,
+    "sha256": "e5c07ff2658cb92665050139d2efbe582da382185fdd1e0d4687144d1fc28433"
+   },
+   "confidente_rango": {
+    "righe": 162,
+    "sha256": "3c5a873e720e823a56a548f446a099b7bdfb1e3f556d269a43c3e87fa312b37a"
+   },
+   "confidente_regalo": {
+    "righe": 144,
+    "sha256": "25d2068a8c0d3b12351b2d49bf6869d17b9169d51cc308db886117f0766d49fb"
+   },
+   "confidente_requisito": {
+    "righe": 177,
+    "sha256": "f640cb7ce45a4847ce989d5d551fa79946874b0bac9fe87fabb093211ab19b0f"
+   },
+   "copia_pezzo": {
+    "righe": 42,
+    "sha256": "11c2b90deada7be42a378845477810b80765e48863c9ab574a80aa3a4f640b28"
+   },
+   "cruciverba": {
+    "righe": 38,
+    "sha256": "fe683ed9aa3df0f7ffab1d36556e1fd47cc2f899820c5de5f0ce07701c904a7a"
+   },
+   "dati_guida": {
+    "righe": 12,
+    "sha256": "4a2cbc183dc519e300c304452cfb2a9d6921d9ff456c5cf9f3565fb3ec91b79b"
+   },
+   "dlc_set": {
+    "righe": 13,
+    "sha256": "62df1c7a109ba0a7937b4bcdcc7cc0a7bc794caf681106c40050233ea2794450"
+   },
+   "dlc_set_persona": {
+    "righe": 25,
+    "sha256": "00e4521f7b6122b4d13c2f7f1cb565d920113481bcf79c6bbd5568f15470f160"
+   },
+   "domanda": {
+    "righe": 78,
+    "sha256": "c5115b1a2b1baa6ff06b0274f213cd5bebccfbfe87f201af314127fd28f70e4f"
+   },
+   "dote_sociale": {
+    "righe": 5,
+    "sha256": "c35d44f59072f529adaf79dd2b9be10938be5ab402fd5c7d6a5e0228382373c9"
+   },
+   "dote_sociale_rango": {
+    "righe": 25,
+    "sha256": "69cb85ad25d061d782698529bd0de7860a6042dbdcfb54787093cae9822766db"
+   },
+   "dungeon": {
+    "righe": 10,
+    "sha256": "3f41b54fc00484596c3230364b000cc41ce5f2122a2bf27d33f93e0a65a1bea0"
+   },
+   "dungeon_area": {
+    "righe": 100,
+    "sha256": "de3630caf76d573f58e0bc077e1dbfc03f9000c6f7c4f2178907ee9e23f3eca3"
+   },
+   "dungeon_atterraggio": {
+    "righe": 3,
+    "sha256": "3d3bb9f0966ab2423d09ee339a76abfde94a4531912eda8476633a0005aca950"
+   },
+   "eredita_matrice": {
+    "righe": 144,
+    "sha256": "ef7fd78ce5690a40746a1450c54b53feff168850c4623576f72a02b82856c96d"
+   },
+   "esame": {
+    "righe": 4,
+    "sha256": "98ad1611622f13baf628f13ff90b3199c97a39ae28ee736d73e249e84d99cffa"
+   },
+   "esame_premi": {
+    "righe": 1,
+    "sha256": "7b62a92957cd40e54c26ecc85d717f72b131737e38446f476f6c671858b6d58e"
+   },
+   "evento_calendario": {
+    "righe": 173,
+    "sha256": "e16aac2ba250de4b565d5be4e7292b7cd9203f689cde7bddd9ab87983eb2e05c"
+   },
+   "film": {
+    "righe": 30,
+    "sha256": "cfc5202de7a5d31e278ed8814d29a19ac7ed61b1c13b6114fbe2e1305abc5e6c"
+   },
+   "film_posizione": {
+    "righe": 42,
+    "sha256": "4999011048fb03990a6bfd9a9a1f25e41be693759549073d4587bea8faba1a54"
+   },
+   "fusione_arcana": {
+    "righe": 273,
+    "sha256": "a09db8dca1fabf272ea07af97e2cbebe1369a53ec0150c38279533ba981d12be"
+   },
+   "fusione_speciale": {
+    "righe": 24,
+    "sha256": "7230fb137e7b4788364da46269d49a54efac810f846fdd868f69ab79e310d743"
+   },
+   "fusione_speciale_ingrediente": {
+    "righe": 94,
+    "sha256": "0f6f2702b619c6b624ac019cd4bdcd6847ce3997acb3e1f7007b7d34cf7ebc95"
+   },
+   "giorno_calendario": {
+    "righe": 346,
+    "sha256": "6a750d391f10e83efc9454c5f28b80e1e14158212e0c27a246008eadfba4f1ca"
+   },
+   "giorno_percorso": {
+    "righe": 346,
+    "sha256": "a577ef7eac473b663f864bbb6cfb94c5de660516f49b65397f3fae164d6d6921"
+   },
+   "guida_alias": {
+    "righe": 92,
+    "sha256": "080555eea9e4ce7ee93c2fe31b57322a8de722430ed72ecb4d9cacc766cf58c0"
+   },
+   "guida_mappa": {
+    "righe": 92,
+    "sha256": "839ba05b1e94d9cff5280f7cc36d2f6ac65609d4c4f492f5187d4f24fe741681"
+   },
+   "immagine": {
+    "righe": 807,
+    "sha256": "b8277e796a6950f86a97a3f1b194944775eefbe32d1081b0af6b5cfd041ebef9"
+   },
+   "immagine_miniatura": {
+    "righe": 93,
+    "sha256": "dd73cee9b931cb5072a7df6f72b052e545ca7ddbc799f489a57d02d1071ad334"
+   },
+   "infiltrazione_area": {
+    "righe": 105,
+    "sha256": "e5f31cb4c99f4a0ea5f915b5ccd92c5e5231468d3522b993e6ab625b92f3eb81"
+   },
+   "libro": {
+    "righe": 46,
+    "sha256": "88685cc2c404bfc07f47696ab49c742619b6dbb1d68db9527dc0f51558405b05"
+   },
+   "libro_posizione": {
+    "righe": 48,
+    "sha256": "db1e79df30a2ce611b3ed7d08efb7f4ce937b411726b797ac61f7f7f20cbc70f"
+   },
+   "luogo": {
+    "righe": 93,
+    "sha256": "31db739461e8e02b723eff81229a828fbe4ad4f858bf6ea1ee61ed74869522fa"
+   },
+   "mappa": {
+    "righe": 317,
+    "sha256": "2abac2a807ce0130ac27eb21c47c46e4119b706ed099a41691b62051c60d0e68"
+   },
+   "mappa_alias": {
+    "righe": 690,
+    "sha256": "c302bee9c2aa8bddb64af083b7d1a8b990c85cab2d395487011da2f44fec3837"
+   },
+   "mappa_entita": {
+    "righe": 135,
+    "sha256": "9b2fff1aad0fc1ee785d33483669fef5c775d6bbffda5a106595f25cf8106fd1"
+   },
+   "mappa_percorso": {
+    "righe": 317,
+    "sha256": "b7d2f1844643c73f8c724b561a9a1fa57173262fb4b44c6649ac4b819a4b55a1"
+   },
+   "mappa_presentazione": {
+    "righe": 227,
+    "sha256": "f7f5aec47abaa5361d384189defc17c656a14afac0d61aa13968d1d82dd2a71e"
+   },
+   "marcatore_luogo": {
+    "righe": 47,
+    "sha256": "e890c621fe80727b1d933b3bff1379d7a6d5d50363d6d01dbeec29338d9ba947"
+   },
+   "marcatore_mappa": {
+    "righe": 149,
+    "sha256": "27439b515064d4feb421a4aaad1a3e1a4e28da2b420f9cdc7c36f8b27d0ac18f"
+   },
+   "negozio": {
+    "righe": 61,
+    "sha256": "4ddb202736c6b8d66a53ee1805d8b23ce9e119d63e63ee6d479adfece2e0f970"
+   },
+   "oggetto": {
+    "righe": 223,
+    "sha256": "21c8bd71b565938fe620f3c7430570ff03d4eeb284026c235623855a074915f4"
+   },
+   "organizzazione_mappa_esito": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "persona": {
+    "righe": 232,
+    "sha256": "be72263f2a6913f7915db0cafab0142c1f9a0447fdd1fda7707aae636896aa1f"
+   },
+   "persona_affinita": {
+    "righe": 2320,
+    "sha256": "633a747fbcf9eeba16550e386a9ef36b835ae39615fcd7ee7d7180a27b7f3d28"
+   },
+   "persona_area_dedalo": {
+    "righe": 827,
+    "sha256": "8b98af8324ba921f1109198e3255ef204069d818791fc3648e5ce13c34aa8fba"
+   },
+   "persona_skill": {
+    "righe": 1614,
+    "sha256": "144c49f5c63833c5994331c62f40bff4b817e07ca39a54f79893da658676258d"
+   },
+   "pezzo_mappa": {
+    "righe": 24,
+    "sha256": "b8f7dadbaadc59eb4c78ec34971063636273e398a359db5aaa11fd1ca8e26b66"
+   },
+   "pianta_area": {
+    "righe": 84,
+    "sha256": "7d8a26e8963f5ede4dec1f1d69897d6b912ace3251739fc3f6d90a05bf711802"
+   },
+   "pianta_quartiere": {
+    "righe": 22,
+    "sha256": "e41335a662a9a5de4f578fc1560d71545081d63094d62e61d87460847017a6ce"
+   },
+   "proposta_infiltrazione_voce": {
+    "righe": 102,
+    "sha256": "bfc4404ae1076beb0ccc90e27336369bb83eaa098a6b44c0de34e26584523d19"
+   },
+   "punto_interesse": {
+    "righe": 961,
+    "sha256": "4dadefdc5d55506fe34fffe6f8b5234502979bb4be8f717032252cd2f2b206c1"
+   },
+   "quartiere": {
+    "righe": 24,
+    "sha256": "115f15ee17dfa1f06b50aba03f3a9af3fd22496d8032c773f1588219f3e4e83e"
+   },
+   "quartiere_ingresso": {
+    "righe": 2,
+    "sha256": "57b553be7e22ea0cc11c3092308a0055ee046e2046a3dd165540ef2344875c91"
+   },
+   "richiesta": {
+    "righe": 33,
+    "sha256": "43ae31e0436cc8cffe0cfad78311d9a1ef16b57c394d0875f86e103764cab771"
+   },
+   "settimana_guida": {
+    "righe": 42,
+    "sha256": "f4a338680fad42eb2fcc9995c2876a404c70ff8fdf33fb6d08f52ffa0a6dd308"
+   },
+   "skill": {
+    "righe": 525,
+    "sha256": "d5f7d1e25d4a8c486b35572268944d80dacfeac4fbb8910774fabdd4633a1277"
+   },
+   "skill_fonte_esecuzione": {
+    "righe": 114,
+    "sha256": "1c4fe894e92216a054d4658f4e653a7f31ff1e3e9942da4062f34dd6cfda99f5"
+   },
+   "spillo": {
+    "righe": 1915,
+    "sha256": "ff69d59ea66595fee63adeaa4f92a2daa5e51fbc42e4c77aa62b84744a205d6b"
+   },
+   "spillo_destinazione": {
+    "righe": 223,
+    "sha256": "e0ed8a79084747aeb5c628372ea04a7b62ce5f2e8b63b92008358bf52ad77f24"
+   },
+   "spillo_immagine": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "spillo_voce": {
+    "righe": 542,
+    "sha256": "7db0e1993c72b03e6ec9dc4b81a07ff7820f620e120aa5e3b1f85be435c9bec5"
+   },
+   "tesoro": {
+    "righe": 9,
+    "sha256": "e91b437d5cf15afcbaa9ae989b8c7b381a4be28adaa97d8fc041f017113b36bf"
+   },
+   "tesoro_modificatore": {
+    "righe": 216,
+    "sha256": "76ea648193fb80a93ecffc4afc8e33ce55e9a8b7eabb662aa1160445c24f2b4f"
+   },
+   "traduzione": {
+    "righe": 2056,
+    "sha256": "a782a6f78c0de4b392636d7199e7fa285e76b3f4eaf55684add617fe3831d30d"
+   },
+   "trofeo": {
+    "righe": 53,
+    "sha256": "029160e35407ec8d23d2babb2e7bcc727b3b5fb81b81f97e6d8573f3c910c6fe"
+   },
+   "voce_giornata": {
+    "righe": 998,
+    "sha256": "92032ad78768152296ada25194c81e47ff461ebf88a214024b567c7333995de7"
+   },
+   "voce_infiltrazione": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  }
+ },
+ "partite.db": {
+  "user_version": 24,
+  "schema": "8ed7957397f9b28242cc3617f8c864035fb1d4a6c8ee19998fb2017b91cbcf55",
+  "tabelle": {
+   "acquisto_partita": {
+    "righe": 7,
+    "sha256": "82989eb3818edfe2edf137150effcabe58ed3319a221c3c39df8f5096d0befd1"
+   },
+   "attivita_svolta_partita": {
+    "righe": 8,
+    "sha256": "5ad037eb3a96f1e56b24173033719e856625e6c165ac27c143473d471aa97a87"
+   },
+   "cestino_partite": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "ciclo_salvato": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "compendio_partita": {
+    "righe": 53,
+    "sha256": "19671c2d616cc6173cd1b09571f3fa5e78eb82f39f6f20da71b2461a284695b0"
+   },
+   "confidente_partita": {
+    "righe": 46,
+    "sha256": "b40bc8ff3a8d245b220bc5e919488a194c79e5cdbf00e571984b0896932e7d97"
+   },
+   "cruciverba_partita": {
+    "righe": 3,
+    "sha256": "f7964a7d5defeca721563fcdf2ac4ee69c4eae5b4c077745d31dfeafbf748a3b"
+   },
+   "divergenza_partita": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "domanda_partita": {
+    "righe": 12,
+    "sha256": "311294db53bb3e52a02423cafe99382084d435b31c36f51ad5695c4437c4bd68"
+   },
+   "dote_sociale_partita": {
+    "righe": 10,
+    "sha256": "b09ca10df31803b335ed3858e8a5138ec3b4f09952ae4b93503576defcb7fa85"
+   },
+   "effetto_lettura_partita": {
+    "righe": 20,
+    "sha256": "eeef8c65cde6e06cb2419e78a66c5374edfb18c3ee6d22af6a6e52215fdb0bb7"
+   },
+   "evento_partita": {
+    "righe": 1316,
+    "sha256": "2d3696c89fcee94171644607a26820ad24130136196dc288b30bf5f61e391cc2"
+   },
+   "evento_storia_partita": {
+    "righe": 7,
+    "sha256": "a7c34af93b55ead48dcc6fb93ee61b03fb4411d4100267eaf5d9cc4cd6c89756"
+   },
+   "incontro_confidente_partita": {
+    "righe": 52,
+    "sha256": "12b8bb40f58f39b06c1a34c232eb1fd0867b81563e130034824f54d5eca534ae"
+   },
+   "lettura_partita": {
+    "righe": 14,
+    "sha256": "87948e67a3375c1d511e3a822c7ac0da6584f4bfacc503c2d85279516047ef00"
+   },
+   "membro_squadra_partita": {
+    "righe": 4,
+    "sha256": "489f7c54d7e731670eca1ce57dfb4974106fefa894e703cd6130b79c11486fc6"
+   },
+   "meteo_partita": {
+    "righe": 1,
+    "sha256": "948976632733ed7fcdb1189bbe2ad7fa9534fe95218106e519e1664130f74595"
+   },
+   "obiettivo_partita": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "partita": {
+    "righe": 2,
+    "sha256": "51da0ecb3e595377c43f5a02fe2e532edc136fa8f019904dfabaaae7e8791f87"
+   },
+   "persona_posseduta": {
+    "righe": 7,
+    "sha256": "eb904796ca3ebcc05a4a338c80f65901f37c606dbfa2f6acb5c7ace5086239fb"
+   },
+   "persona_posseduta_skill": {
+    "righe": 34,
+    "sha256": "d3b277a0539e5688186d01fb32a027b98a6b4c4f3fab75cce2d6452a03d10718"
+   },
+   "piano_salvato": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "progresso_film_partita": {
+    "righe": 3,
+    "sha256": "4607df7308c8b3437332745ff418c0e1b8ba3c7849b2021a858c99f7c803d31b"
+   },
+   "progresso_libro_partita": {
+    "righe": 11,
+    "sha256": "fb0cf9a7294289fb4b673990e9ab808cf7f0306c427fd85653a8a9f4f1d45e82"
+   },
+   "progresso_videogioco_partita": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "punti_negozio_partita": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "punto_partita": {
+    "righe": 564,
+    "sha256": "f40222b0b1de50bd049774c13d81f250f2b7bcabd711f7d0e76b761a4588e755"
+   },
+   "regalo_partita": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "requisito_partita": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "richiesta_partita": {
+    "righe": 1,
+    "sha256": "0574a84650022c222dd09eb167842d0871567e71590a12551d9533c48309c65a"
+   },
+   "spillo_partita": {
+    "righe": 797,
+    "sha256": "7e5472422e1aa00501309140a183783e025dff860da2ec7f7238ddacac78b625"
+   },
+   "spillo_partita_infiltrazione": {
+    "righe": 90,
+    "sha256": "e6cdeba21589a677c728c961df97cacee75f7ad17c540d6630e871036d63de15"
+   },
+   "spunta_voce_partita": {
+    "righe": 342,
+    "sha256": "b7679ebc0b5302c797edb94fc3e3175174c1c05ab54878e5787dc8f2a18ceff7"
+   },
+   "timbri_dedalo_partita": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "trofeo_partita": {
+    "righe": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   "turno_partita": {
+    "righe": 11,
+    "sha256": "2e354add9856eef4275a565ec6b612d29c68dac51d5efbada1ff1d43cb036d21"
+   }
+  }
+ }
+}

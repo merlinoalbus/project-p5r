@@ -1,0 +1,60 @@
+### 2026-10-20T09:48:10Z
+### git branch --show-current
+newreview-l3
+### git rev-parse HEAD
+fd988a3e1bb51321c80635806b2aa8c52afc21ac
+### git status --porcelain
+EXIT=0
+### git log --format='%H %s' c8338fd0..fd988a3e
+fd988a3e1bb51321c80635806b2aa8c52afc21ac docs(L3): integrazione «Guida nel visore» e «Planimetria della voce», requisiti e posto nel piano
+5c3ff3eaa503ac188f07061aec5a1d18e7276d27 docs(coordinamento): Regia, E2 chiuso, BE sulla planimetria della voce
+### git diff --stat c8338fd0 fd988a3e (solo documenti atteso)
+ docs/coordinamento/STATO-ATTUALE.md                |  6 +++-
+ .../lotti/L3/integrazione-guida-visore.md          | 38 ++++++++++++++++++++++
+ docs/coordinamento/stato.json                      |  8 ++---
+ 3 files changed, 47 insertions(+), 5 deletions(-)
+### file fuori da docs/ fra c8338fd0 e fd988a3e (vuoto atteso)
+EXIT grep=1 (1 = nessuno)
+### git merge-base --is-ancestor newreview-l3 newreview
+EXIT=0 (0 = antenato)
+### newreview
+aaeb16a3c7c3be98f5514e39c9337a8327308f78 docs(coordinamento): B1 consegnato, collaudo di L3 avviato
+### git log --format='%H %ad %s' --date=iso b28bade7..fd988a3e (commit di L3 dopo l'ultimo pubblicato su p5s)
+fd988a3e1bb51321c80635806b2aa8c52afc21ac 2026-10-20 11:40:48 +0200 docs(L3): integrazione «Guida nel visore» e «Planimetria della voce», requisiti e posto nel piano
+5c3ff3eaa503ac188f07061aec5a1d18e7276d27 2026-10-20 11:34:27 +0200 docs(coordinamento): Regia, E2 chiuso, BE sulla planimetria della voce
+c8338fd00f6b9abd54a525d7235734dc0f92f2b6 2026-10-20 11:33:15 +0200 fix(L3): E2, l'indice delle Mappe conta i pin di contenuto
+f239bbe91c93e0f00ff882ca9f7ddc5d3199b2d2 2026-10-20 11:27:22 +0200 docs(coordinamento): Regia, E2 lato BE fatto, FE sull'interfaccia
+bc08e3ecfe21599622725dc3e60fbe836e2a3341 2026-10-20 11:26:38 +0200 fix(L3): E2 — le porte si contano fra i passaggi
+0cfbe028e245b9554c4eae4d34c62c6600016613 2026-10-20 11:24:44 +0200 feat(L3): E2 — conteggi dei pin dell'indice delle Mappe in contenuto, passaggi e note
+6d56cb6ef7c594d50e1d00f28fee10a8e76e1ae8 2026-10-20 11:20:12 +0200 docs(coordinamento): Regia, FE chiusa a 9 punti su 10, BE su E2
+93f796cb341e537b3ef0e63d26af470e8941d0fb 2026-10-20 11:19:08 +0200 docs(L3): FE, dichiarazione dei comandi vuoti della ripresa
+f444645d0597ea6d7c100ab5e4a34129b0033c1f 2026-10-20 11:18:21 +0200 fix(L3): LAY3-2 e R3-41 a 1024, intestazione della scheda in due righe
+e0b4de1e438a686a837291dd041af2df4e8d79ac 2026-10-20 11:15:25 +0200 docs(coordinamento): Regia, avanzamento di FE su L3
+7efd19e0193474ba4c623a14367b1bb4a1c04262 2026-10-20 11:01:17 +0200 fix(L3): UX3-7, parola «pin» nell'indice e residui di L2
+d446e4abd16c781d2dfe24b12d1ae5d346e6cbc0 2026-10-20 10:55:52 +0200 fix(L3): UX3-8, le planimetrie con un nome vero restano nella griglia
+e83248986a616bb8eae887e9181ec439f6173a0f 2026-10-20 10:51:53 +0200 fix(L3): AP3-4, collegamenti dritti alla casa con l'infiltrazione
+235b12166b77f9daa90319eb138ce7df64a72286 2026-10-20 10:46:31 +0200 fix(L3): AP3-2, visore della scheda senza vicine e passaggi nella scheda
+1b29352ba98245bb740f1f520a94ddadb9644343 2026-10-20 10:41:03 +0200 fix(L3): AP3-1, le schede senza mappa né voce nella scheda del Palazzo
+d73e7027ee5eb7fb3f6f06fd959464024a3440e1 2026-10-20 10:39:00 +0200 fix(L3): NR3-4, dalla casa di un'Area si apre la predefinita
+498584851b3e5acc6822e3554292d5a74c0ea9bc 2026-10-20 10:35:30 +0200 docs(coordinamento): ripresa di L3, FE riaperta sui punti aperti, NR3-4 strada (a)
+3fead2b855016b38dc62d4db6aa0f08a4d5b7ca1 2026-10-20 10:34:08 +0200 docs(coordinamento): memoria del progetto, regola «tutto su git»
+conteggio: 18
+### migrazioni nella linea
+112_voce_boss_finale.ts
+113_regola_del_boss.test.ts
+113_regola_del_boss.ts
+dati
+index.test.ts
+index.ts
+024_cascata_delle_tabelle_di_l4.test.ts
+024_cascata_delle_tabelle_di_l4.ts
+index.ts
+### migrazioni aggiunte da b28bade7
+### git diff --stat b28bade7 fd988a3e -- server shared src
+ src/utils/navigazioneMappa.ts                     | 27 +++++++
+ src/utils/presentazioneMappa.ts                   | 21 ++++-
+ 21 files changed, 613 insertions(+), 108 deletions(-)
+### impronta del codice: alberi
+040000 tree 093595e479429251391f718d540cf5a27f4fb219	server
+040000 tree affd664c3dafb1216db58c44c73ddd8ab8dda851	shared
+040000 tree be2547a60f2c9b038359cb58148fedd861d39dde	src

@@ -1,0 +1,12 @@
+riga 18 | UX3-2 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
+riga 19 | UX3-3 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
+riga 22 | UX3-6 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
+riga 23 | AP3-1 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
+riga 24 | AP3-2 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
+riga 26 | AP3-4 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
+riga 27 | LAY3-1 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: NO
+riga 28 | LAY3-2 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: «nessun test» dichiarato
+riga 29 | NR3-4 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
+riga 30 | UX3-7 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
+riga 31 | E3, parola «pin» e residui di L2 (R8 del | hash citati dopo «corretto»: d71a1bbd,0cfbe028,bc08e3ec | di cui commit di L3: 0cfbe028,bc08e3ec | test: «nessun test» dichiarato
+riga 32 | UX3-8 | hash citati dopo «corretto»: NESSUNO | di cui commit di L3: nessuno | test: sì
