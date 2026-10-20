@@ -343,7 +343,9 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
     const [a, b, c] = infiltrazioni.map((i) => i.chiave);
     const uid = await nuovaVoce('06-10', 'Palazzo di Madarame: visita di prova', 'madarame');
     const v0 = await voce('06-10', uid);
-    expect(v0).toMatchObject({ infiltrazioni: [], infiltrazioneDaAprire: null });
+    // insieme vuoto e nessuna proposta: «Entra» non ha un'infiltrazione da aprire, il campo è assente (UX3-1, L3 §4.4)
+    expect(v0).toMatchObject({ infiltrazioni: [] });
+    expect('infiltrazioneDaAprire' in v0).toBe(false);
     expect(v0.infiltrazioniDelPalazzo!.map((i) => i.chiave)).toEqual(infiltrazioni.map((i) => i.chiave));
     // una voce senza Palazzo non ha il campo (assente, non vuoto)
     const altra = ((await request(app).post('/api/compendio/percorso/06-10/voci').send({ azione: 'Una voce qualunque' }).expect(201)).body.data as AzionePercorsoDto);
@@ -422,6 +424,30 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
     expect((await voce('04-11', conData)).propostaInfiltrazioni).toMatchObject({ infiltrazioni: [{ chiave: tutorial }], motivo: 'La data della voce è nel nome dell’infiltrazione.' });
     await request(app).post('/api/compendio/dungeon/kamoshida/aree').send({ nome: 'Altra prova 11/04' }).expect(201);
     expect((await voce('04-11', conData)).propostaInfiltrazioni).toBeNull();
+  });
+
+  it('UX3-1 (§4.4) — «Entra»: insieme valorizzato → la prima non completata o l’ultima; insieme vuoto con proposta → la prima della proposta (qualunque certezza); senza proposta il campo è assente; GET della voce per uid', async () => {
+    const [p, q] = prepared(`SELECT d.chiave FROM dungeon_area d WHERE d.dungeon_chiave = 'madarame' ORDER BY d.ordine LIMIT 2`).pluck().all() as string[];
+    // insieme valorizzato: come prima
+    const conInsieme = await nuovaVoce('06-14', 'Palazzo di Madarame: con insieme', 'madarame');
+    await request(app).put(`/api/compendio/percorso/voci/${conInsieme}`).send({ infiltrazioni: [q, p] }).expect(200);
+    expect((await voce('06-14', conInsieme)).infiltrazioneDaAprire).toBe(q);
+    // insieme vuoto con una proposta «probabile»: la prima della proposta
+    const conProposta = await nuovaVoce('06-14', 'Palazzo di Madarame: con proposta', 'madarame');
+    prepared("INSERT INTO proposta_infiltrazione_voce (voce_uid, ordine, infiltrazione_chiave, regola, motivo, certezza) VALUES (?, 0, ?, 'letta-voce-per-voce', 'Motivo', 'probabile'), (?, 1, ?, 'letta-voce-per-voce', 'Motivo', 'probabile')").run(conProposta, q, conProposta, p);
+    expect((await voce('06-14', conProposta)).infiltrazioneDaAprire).toBe(q);
+    // anche per una voce con un Confidente che ha una proposta (`palazzoDellaVoce`)
+    const conf = ((await request(app).post('/api/compendio/percorso/06-14/voci').send({ azione: 'Con Ryuji al museo', riferimento: { tipo: 'confidente', chiave: 'ryuji' } }).expect(201)).body.data as AzionePercorsoDto).uid;
+    prepared("INSERT INTO proposta_infiltrazione_voce (voce_uid, ordine, infiltrazione_chiave, regola, motivo, certezza) VALUES (?, 0, ?, 'letta-voce-per-voce', 'Motivo', 'multipla')").run(conf, p);
+    expect((await voce('06-14', conf)).infiltrazioneDaAprire).toBe(p);
+    // insieme vuoto senza proposta: il campo non c'è (FE usa «in corso»)
+    const senza = await nuovaVoce('06-14', 'Palazzo di Madarame: niente di particolare', 'madarame');
+    const v = await voce('06-14', senza);
+    expect(['infiltrazioni' in v, 'infiltrazioneDaAprire' in v]).toEqual([true, false]);
+    // la voce per uid, in sola lettura, con il giorno e la proposta (la scheda del Palazzo aperta con ?daVoce=)
+    const letta = (await request(app).get(`/api/compendio/percorso/voci/${conProposta}`).expect(200)).body.data as AzionePercorsoDto;
+    expect(letta).toMatchObject({ uid: conProposta, giorno: '06-14', infiltrazioneDaAprire: q, propostaInfiltrazioni: { certezza: 'probabile' } });
+    await request(app).get(`/api/compendio/percorso/voci/${'0'.repeat(32)}`).expect(404);
   });
 
   it('9d — «da rivedere»: tieni il nuovo, rimetti il precedente (solo con un testo precedente), fatto; una voce non da rivedere è un 409', async () => {

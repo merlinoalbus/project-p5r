@@ -18,7 +18,7 @@ import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { elenchiAzione } from '../services/azioniStrutturateService.js';
-import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci } from '../services/giornataService.js';
+import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
 import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -133,6 +133,10 @@ router.get('/percorso-elenchi', (_req, res) => {
 // fascia e posto), spostare di un passo, eliminare. `?partita=` facoltativo: la risposta porta lo stato nella partita.
 router.post('/percorso/:data/voci', validate({ params: paramsGiornoGuida, body: bodyNuovaVoce, query: queryDomande }), (req, res) => {
   res.status(201).json(creaVoce(String(req.params.data), req.body as DatiVoceGiornata, (req.query as unknown as { partita?: number }).partita));
+});
+/** UX3-1 (L3 §4.4): una voce della giornata per uid, in sola lettura (la scheda del Palazzo aperta con `?daVoce=`). */
+router.get('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, query: queryDomande }), (req, res) => {
+  res.json(vocePercorso(String(req.params.uid), (req.query as unknown as { partita?: number }).partita));
 });
 router.put('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, body: bodyAggiornaVoce, query: queryDomande }), (req, res) => {
   const { infiltrazioni, ...resto } = req.body as DatiVoceGiornata & { infiltrazioni?: string[] };

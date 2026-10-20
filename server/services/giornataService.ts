@@ -187,21 +187,34 @@ function infiltrazioniCompletate(chiavi: readonly string[], partitaId: number): 
   return out;
 }
 
-/** I campi del §3.1 per una voce con un Palazzo; nessuno per le altre (assenti, non vuoti). */
+/**
+ * I campi del §3.1 per una voce con un Palazzo; nessuno per le altre (assenti, non vuoti). `infiltrazioneDaAprire` («Entra», §4.4, UX3-1
+ * con la decisione del PM): con l'insieme valorizzato la prima non completata, oppure l'ultima; con l'insieme vuoto e una proposta la
+ * **prima della proposta**, qualunque sia la certezza; senza insieme né proposta il campo è assente (l'interfaccia apre «in corso»).
+ */
 function campiInfiltrazioni(r: RigaVoce, partitaId?: number): Partial<AzionePercorsoDto> {
   const palazzo = palazzoDellaVoce(r);
   if (!palazzo) return {};
   const insieme = insiemeDellaVoce(r.uid).map(({ chiave, nome }) => ({ chiave, nome }));
-  let daAprire: string | null = null;
+  const proposta = insieme.length === 0 ? propostaInfiltrazioni(r, palazzo) : null;
+  let daAprire: string | undefined;
   if (insieme.length > 0) {
     const completate = partitaId === undefined ? new Set<string>() : infiltrazioniCompletate(insieme.map((i) => i.chiave), partitaId);
     daAprire = insieme.find((i) => !completate.has(i.chiave))?.chiave ?? insieme[insieme.length - 1].chiave;
-  }
+  } else if (proposta && proposta.infiltrazioni.length > 0) daAprire = proposta.infiltrazioni[0].chiave;
   return {
     infiltrazioni: insieme, infiltrazioniDelPalazzo: infiltrazioniDelPalazzo(palazzo),
-    propostaInfiltrazioni: insieme.length === 0 ? propostaInfiltrazioni(r, palazzo) : null,
-    infiltrazioneDaAprire: daAprire,
+    propostaInfiltrazioni: proposta,
+    ...(daAprire !== undefined ? { infiltrazioneDaAprire: daAprire } : {}),
   };
+}
+
+/** Una voce della giornata per uid, com'è nel suo giorno (con la partita, il suo stato): la scheda del Palazzo aperta da una voce
+ *  (`?daVoce=`, UX3-1) la legge per dire da quale proposta viene. 404 `voce-non-trovata`. */
+export function vocePercorso(uid: string, partitaId?: number): AzionePercorsoDto {
+  if (partitaId !== undefined) verificaPartita(partitaId);
+  const r = rigaVoce(uid);
+  return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
 }
 
 /** Lo stato «da rivedere» (§1.4) della voce, solo quando c'è qualcosa da dire (assente vale «non da rivedere»). */

@@ -139,6 +139,12 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: 'La voce creata, `AzionePercorsoDto`',
     errori: [[400, 'voce-vuota'], [400, 'riferimento-non-valido'], [400, 'riferimento-inesistente'], [400, 'effetto-non-valido'], [400, 'effetto-inesistente'], [404, 'giorno-non-trovato'], PARTITA_NON_TROVATA],
   },
+  'GET /api/compendio/percorso/voci/:uid': {
+    sommario: 'Una voce della giornata per uid (sola lettura, L3 UX3-1)',
+    descrizione: 'La voce com\'è nel suo giorno (`giorno`, fascia, campi del §3.1: insieme delle infiltrazioni, proposta, `infiltrazioneDaAprire`), con `?partita=` anche il suo stato nella partita. La scheda del Palazzo aperta da una voce (`?daVoce=`) la legge per dire da quale proposta viene.',
+    risposta: '`AzionePercorsoDto`',
+    errori: [[404, 'voce-non-trovata'], PARTITA_NON_TROVATA],
+  },
   'PUT /api/compendio/percorso/voci/:uid': {
     sommario: 'Modifica una voce della giornata (canone, per tutte le partite)',
     descrizione: 'Si cambiano solo i campi inviati (almeno uno): testo, note (null o vuote le tolgono), genere, fascia, posto nella fascia, tipo, collegamento, rango atteso, effetti. Un collegamento o degli effetti nuovi si verificano; quelli che la voce ha già passano come sono. Cambiando fascia la voce va al posto chiesto o in fondo e la fascia vecchia si ricompatta. Un\'azione che diventa evento perde le spunte, ma se in qualche partita è spuntata con effetti la modifica si rifiuta (409). L3: `infiltrazioni` (da solo, 400 `infiltrazioni-da-sole` con altri campi) è l\'insieme ordinato delle infiltrazioni della voce, anche vuoto: solo del Palazzo della voce, la stessa ammessa più volte ma non di seguito; scrive solo il legame, niente della voce. `?partita=` facoltativo, come per la creazione.',

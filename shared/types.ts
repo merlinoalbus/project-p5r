@@ -1154,8 +1154,9 @@ export interface AzionePercorsoDto {
   infiltrazioniDelPalazzo?: Array<{ chiave: string; nome: string; ordine: number }>;
   /** La proposta (da G-022, o calcolata con le regole certe), solo con l'insieme vuoto; null se non c'è. */
   propostaInfiltrazioni?: { infiltrazioni: Array<{ chiave: string; nome: string }>; motivo: string; certezza: 'certa' | 'multipla' | 'probabile' } | null;
-  /** L'infiltrazione che «Entra» apre per la partita: la prima non completata dell'insieme, altrimenti l'ultima; null con
-   *  l'insieme vuoto (allora la scheda apre la prima non completata del Palazzo, `?infiltrazione=in-corso`). */
+  /** L'infiltrazione che «Entra» apre per la partita: la prima non completata dell'insieme, altrimenti l'ultima; con l'insieme vuoto e
+   *  una proposta la prima della proposta, qualunque sia la certezza (UX3-1, L3 §4.4); **assente** senza insieme né proposta (allora la
+   *  scheda apre la prima non completata del Palazzo, `?infiltrazione=in-corso`). */
   infiltrazioneDaAprire?: string | null;
   // ---- L3 §1.4: voci «da rivedere» (meccanismo unico con L10); assenti valgono false/null ----
   /** Voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
