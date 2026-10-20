@@ -1,7 +1,7 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Il codice locale contiene ora anche la rimozione del fallback runtime `dati_guida.sblocco-quartieri`; typecheck, lint e controllo diff risultano verdi. L'ultimo commit pubblicato prima di questa modifica è `b6473244`; il browser su p5s risponde e mostra l'indice aggiornato («306 mappe con 767 pin»). Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. La rimozione del fallback runtime `dati_guida.sblocco-quartieri` è nel commit `d3cb9b17`, con typecheck, lint e controllo diff verdi. GitHub run #51 è ancora in corso; il browser su p5s risponde e mostra l'indice aggiornato («306 mappe con 767 pin»). Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
 - **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio. Migrazioni recenti:
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
