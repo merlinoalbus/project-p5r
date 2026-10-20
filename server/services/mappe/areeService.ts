@@ -28,6 +28,7 @@ import { chiaveMappa, idMappa, sincronizzaPercorsiMappe } from './percorsiMappe.
 import { creaMappa, creaSpillo, eliminaMappa, eliminaSpillo, impostaImmagineMappa } from './mappeService.js';
 import { caricataDellaMappa, illustrazioneDellaMappa, immaginiCaricateDelleMappe, urlCaricata } from './immagineMappa.js';
 import { casaDellArea, casaDellaMappa, conAree, contenitoreDi, contestoAree, type ContestoAree, type RigaArea } from './casaMappa.js';
+import { lettureLuoghi, luoghiDellArea, luogoDelPin } from '../luoghiService.js';
 import type { AreaDettaglioDto, AreaRiassuntoDto, ElementoAreaDto, MappaDaCollocareDto, PlanimetriaAreaDto, RuoloImmagine } from '../../../shared/types.js';
 
 /** I contenitori ammessi nelle rotte: la città (Tokyo) e i suoi quartieri (L2), i Palazzi (L3). */
@@ -202,16 +203,28 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
       numeroSpilli: ctx.spilli.get(p.chiave) ?? 0, immagineUrl: img ? urlCaricata(img) : null, asset: p.asset, ruoloImmagine: p.ruolo_immagine };
   });
   const segnaposti = planimetrie.map(() => '?').join(', ');
-  const pin = planimetrie.length === 0 ? [] : prepared(`SELECT id, mappa_chiave, riferimento_tipo, riferimento_chiave FROM spillo WHERE mappa_chiave IN (${segnaposti})
+  const pin = planimetrie.length === 0 ? [] : prepared(`SELECT id, nome, mappa_chiave, riferimento_tipo, riferimento_chiave FROM spillo WHERE mappa_chiave IN (${segnaposti})
     AND riferimento_tipo IN ('luogo', 'negozio', 'attivita', 'confidente', 'mappa') AND riferimento_chiave IS NOT NULL ORDER BY mappa_chiave, ordine, id`).all(...proprie) as
-    Array<{ id: number; mappa_chiave: string; riferimento_tipo: ElementoAreaDto['tipo'] | 'mappa'; riferimento_chiave: string }>;
+    Array<{ id: number; nome: string; mappa_chiave: string; riferimento_tipo: ElementoAreaDto['tipo'] | 'mappa'; riferimento_chiave: string }>;
   const elementi: ElementoAreaDto[] = [];
   const vicine: AreaDettaglioDto['vicine'] = [];
   const viste = new Set<string>();
+  // L5: la presenza dei luoghi (e delle sedi dei negozi) con la funzione unica, la loro pagina, e i pin di negozi di un altro quartiere
+  const luoghi = lettureLuoghi(partitaId);
+  const quartiereArea = a.quartiere_chiave;
   for (const s of pin) {
     if (s.riferimento_tipo !== 'mappa') {
       const nome = (prepared(NOMI_ELEMENTI[s.riferimento_tipo]).get(s.riferimento_chiave) as { nome: string } | undefined)?.nome;
-      if (nome) elementi.push({ tipo: s.riferimento_tipo, chiave: s.riferimento_chiave, nome, spillo: s.id, planimetria: chiaveMappa(s.mappa_chiave) });
+      if (!nome) continue;
+      const lp = luogoDelPin({ riferimento_tipo: s.riferimento_tipo, riferimento_chiave: s.riferimento_chiave, nome, descrizione: null }, luoghi);
+      // un luogo solo per gli eventi di un Confidente non sta mai in «Luoghi qui» (R5-20f)
+      if (lp?.soloEventi) continue;
+      // un pin agganciato a un negozio di un altro quartiere (la sua sede): da rivedere, col nome del pin, nessun cambio senza il sì
+      const sedeNegozio = s.riferimento_tipo === 'negozio' ? luoghi.sediNegozi.get(s.riferimento_chiave) : undefined;
+      const quartiereSede = sedeNegozio?.sede ? luoghi.righe.get(sedeNegozio.sede)?.quartiere_chiave ?? sedeNegozio.quartiere : sedeNegozio?.quartiere ?? null;
+      const altroQuartiere = !!quartiereArea && !!sedeNegozio && !!quartiereSede && quartiereSede !== quartiereArea;
+      elementi.push({ tipo: s.riferimento_tipo, chiave: s.riferimento_chiave, nome: altroQuartiere ? s.nome : nome, spillo: s.id, planimetria: chiaveMappa(s.mappa_chiave),
+        ...(lp ? { presenza: lp.presenza, casa: lp.casa } : { casa: null }), ...(altroQuartiere ? { daRivedere: 'negozio-altro-quartiere' as const } : {}) });
       continue;
     }
     // un passaggio: dove porta, una volta per destinazione (un'Area vicina, o la mappa di un quartiere), lei esclusa
@@ -226,7 +239,9 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
     vicine.push({ nome: areaMeta?.nome ?? meta.nome, quartiereNome: quartiere ? ctx.aree.nomiQuartieri.get(quartiere) ?? null : null,
       casa: areaMeta ? casaDellArea(areaMeta) ?? casaDellaMappa(meta, ctx.aree) : casaDellaMappa(meta, ctx.aree) });
   }
-  return { ...riassuntoArea(a, c, ctx), planimetrie: versioni, elementi, vicine };
+  // L5: i luoghi dell'Area (`luogo.area_chiave`) e quelli fra loro senza pin («Da posizionare»)
+  const luoghiArea = luoghiDellArea(a.chiave, luoghi);
+  return { ...riassuntoArea(a, c, ctx), planimetrie: versioni, elementi, vicine, luoghi: luoghiArea, daPosizionare: luoghiArea.filter((l) => l.pin === null) };
 }
 
 // ---- Scritture ----

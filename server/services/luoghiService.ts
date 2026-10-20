@@ -45,6 +45,10 @@ export interface LettureLuoghi {
   regole: Map<string, RequisitoSpillo[]>;
   aree: ContestoAree;
   pin: Map<string, PinDelLuogo[]>;
+  /** Tutti i luoghi (anche nascosti: un pin può citarne uno), per chiave. */
+  righe: Map<string, RigaLuogo>;
+  /** Sede, eccezione d'orario e quartiere (`luogo_chiave`) di ogni negozio. */
+  sediNegozi: Map<string, { sede: string | null; eccezione: string | null; quartiere: string | null; nome: string }>;
 }
 
 /** Raggruppa le righe per sede, conservandone l'ordine. */
@@ -87,11 +91,17 @@ function pinDeiLuoghi(aree: ContestoAree, luogo?: string): Map<string, PinDelLuo
   return out;
 }
 
-/** Legge una volta quel che serve ai luoghi (di un quartiere o di tutti); con la partita lo stato per la presenza. */
-export function lettureLuoghi(partitaId?: number, luogo?: string): LettureLuoghi {
+/** Legge una volta quel che serve ai luoghi (di un quartiere o di tutti); con la partita lo stato per la presenza (quello già calcolato da
+ *  chi chiama, se lo passa). */
+export function lettureLuoghi(partitaId?: number, luogo?: string, stDato?: StatoDisponibilita | null): LettureLuoghi {
   const aree = contestoAree();
+  const conEccezione = (prepared('PRAGMA table_info(negozio)').all() as Array<{ name: string }>).some((c) => c.name === 'eccezione_orari_json');
   return {
-    st: partitaId === undefined ? null : statoDisponibilitaPartita(partitaId),
+    st: stDato !== undefined ? stDato : partitaId === undefined ? null : statoDisponibilitaPartita(partitaId),
+    righe: new Map((prepared('SELECT * FROM luogo').all() as RigaLuogo[]).map((r) => [r.chiave, r])),
+    sediNegozi: new Map((prepared(`SELECT chiave, nome, sede_chiave, luogo_chiave, ${conEccezione ? 'eccezione_orari_json' : 'NULL AS eccezione_orari_json'} FROM negozio`).all() as
+      Array<{ chiave: string; nome: string; sede_chiave: string | null; luogo_chiave: string | null; eccezione_orari_json: string | null }>)
+      .map((n) => [n.chiave, { sede: n.sede_chiave, eccezione: n.eccezione_orari_json, quartiere: n.luogo_chiave, nome: n.nome }])),
     nomiConfidenti: new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome])),
     nomiQuartieri: aree.nomiQuartieri.size ? aree.nomiQuartieri : new Map((prepared('SELECT chiave, nome FROM quartiere').all() as Array<{ chiave: string; nome: string }>).map((q) => [q.chiave, q.nome])),
     negozi: perSede(prepared('SELECT sede_chiave AS sede, chiave, nome FROM negozio WHERE nascosto = 0 AND sede_chiave IS NOT NULL ORDER BY ordine').all() as Array<{ sede: string; chiave: string; nome: string }>),
@@ -166,9 +176,57 @@ export function luogoDto(r: RigaLuogo, l: LettureLuoghi): LuogoDto {
   };
 }
 
+/** Il pin di un luogo (o di un negozio con sede) come lo vede il visore (B3): nome e descrizione dal luogo, la nota propria del pin, la
+ *  presenza e se il luogo è solo per gli eventi di un Confidente. */
+export interface LuogoDelPin { luogo: RigaLuogo; presenza: PresenzaLuogoDto; notaPin: string | null; soloEventi: string | null; casa: string;
+  /** Il nome e la descrizione che il pin mostra: del luogo per un pin di luogo; per un pin di negozio il nome del negozio (un luogo può avere
+   *  più negozi, e la sede può stare in un altro quartiere) con la descrizione propria del pin. */
+  nome: string; descrizione: string }
+
+/**
+ * Il luogo a cui un pin rimanda (riferimento `luogo`, `attivita` con lo stesso schema, o `negozio` con sede), con la presenza del luogo (per un
+ * negozio con l'eccezione del negozio), la nota del pin (il suo nome o la sua descrizione, se diversi da quelli del luogo: mai persi) e la
+ * pagina del luogo (per un negozio la sua sezione). Null per gli altri pin e per un negozio senza sede.
+ */
+export function luogoDelPin(s: { riferimento_tipo: string | null; riferimento_chiave: string | null; nome: string; descrizione: string | null }, l: LettureLuoghi): LuogoDelPin | null {
+  if (!s.riferimento_tipo || !s.riferimento_chiave) return null;
+  let luogo: RigaLuogo | undefined;
+  let eccezione: string | null = null;
+  let casa: string;
+  if (s.riferimento_tipo === 'luogo' || s.riferimento_tipo === 'attivita') {
+    luogo = l.righe.get(s.riferimento_chiave);
+    if (!luogo) return null;
+    casa = casaDelLuogo(luogo.chiave);
+  } else if (s.riferimento_tipo === 'negozio') {
+    const n = l.sediNegozi.get(s.riferimento_chiave);
+    luogo = n?.sede ? l.righe.get(n.sede) : undefined;
+    if (!n || !luogo) return null;
+    eccezione = n.eccezione;
+    casa = `${casaDelLuogo(luogo.chiave)}#negozio-${encodeURIComponent(s.riferimento_chiave)}`;
+  } else return null;
+  const orari = eccezione ? leggiOrari(eccezione) : orariDelLuogo(luogo.orari_json ?? null);
+  const presenza = presenzaDelLuogo(condizioniDiSblocco(luogo, l.regole), orari, l.st);
+  const descrizione = (s.descrizione ?? '').trim();
+  if (s.riferimento_tipo === 'negozio') {
+    const nomeNegozio = l.sediNegozi.get(s.riferimento_chiave)!.nome;
+    const notaNome = s.nome.trim() && s.nome.trim() !== nomeNegozio.trim() ? `«${s.nome.trim()}»` : null;
+    return { luogo, presenza, notaPin: notaNome, soloEventi: luogo.solo_eventi_confidente ?? null, casa, nome: nomeNegozio, descrizione };
+  }
+  const nota: string[] = [];
+  if (s.nome.trim() && s.nome.trim() !== luogo.nome.trim()) nota.push(`«${s.nome.trim()}»`);
+  if (descrizione && descrizione !== luogo.cosa_offre.trim()) nota.push(descrizione);
+  return { luogo, presenza, notaPin: nota.length ? nota.join(' — ') : null, soloEventi: luogo.solo_eventi_confidente ?? null, casa, nome: luogo.nome, descrizione: luogo.cosa_offre };
+}
+
 /** Un luogo non nascosto per chiave, o null. */
 export function rigaLuogo(chiave: string): RigaLuogo | null {
   return (prepared('SELECT * FROM luogo WHERE chiave = ? AND nascosto = 0').get(chiave) as RigaLuogo | undefined) ?? null;
+}
+
+/** I luoghi di un'Area di L2 (`luogo.area_chiave`, non nascosti), nell'ordine, come DTO; vuoto su uno schema senza la colonna. */
+export function luoghiDellArea(area: string, l: LettureLuoghi): LuogoDto[] {
+  if (!(prepared('PRAGMA table_info(luogo)').all() as Array<{ name: string }>).some((c) => c.name === 'area_chiave')) return [];
+  return (prepared('SELECT * FROM luogo WHERE area_chiave = ? AND nascosto = 0 ORDER BY ordine').all(area) as RigaLuogo[]).map((r) => luogoDto(r, l));
 }
 
 /** I luoghi di un quartiere (non nascosti), nell'ordine, come DTO. */

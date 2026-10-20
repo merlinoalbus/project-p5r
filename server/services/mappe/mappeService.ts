@@ -35,6 +35,8 @@ import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
+import { casaDelLuogo, condizioniDiSblocco, lettureLuoghi, luogoDelPin, presenzaDelLuogo, type LettureLuoghi, type LuogoDelPin } from '../luoghiService.js';
+import { descriviOrariDelLuogo, orariDelLuogo } from '../../../shared/orariNegozio.js';
 import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, dopoImmagineMappa, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
 import { areaRifDellaMappa, casaDellaMappa, conAree, contestoAree, verificaIngressoNelQuartiere, type ContestoAree, type RigaArea } from './casaMappa.js';
 import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
@@ -286,14 +288,22 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
     case 'luogo': {
       const l = prepared('SELECT chiave, quartiere_chiave, tipo, nome, cosa_offre, quando FROM luogo WHERE chiave = ?').get(chiave) as { chiave: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; quando: string | null } | undefined;
       if (!l) return null;
-      // il negozio che ha qui la sua sede (migrazione 072): il primo, se più d'uno
-      const sede = prepared('SELECT chiave FROM negozio WHERE sede_chiave = ? AND nascosto = 0 ORDER BY ordine LIMIT 1').get(l.chiave) as { chiave: string } | undefined;
-      const negozio = sede ? negozioDettaglio(sede.chiave, ctx) : null;
-      return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando }, negozio };
+      // L5: tutti i negozi della sede (prima solo il primo), ognuno con la sua sezione nella pagina del luogo; `negozio` resta il primo
+      const luoghi = luoghiDi(ctx);
+      const casa = casaDelLuogo(l.chiave);
+      const sedi = luoghi.negozi.get(l.chiave) ?? [];
+      const negozio = sedi[0] ? negozioDettaglio(sedi[0].chiave, ctx) : null;
+      const riga = luoghi.righe.get(l.chiave);
+      const orari = orariDelLuogo(riga?.orari_json ?? null);
+      return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando,
+        orariTesto: descriviOrariDelLuogo(orari), presenza: presenzaDelLuogo(riga ? condizioniDiSblocco(riga, luoghi.regole) : [], orari, luoghi.st), casa,
+        negozi: sedi.map((n) => ({ chiave: n.chiave, nome: n.nome, casa: `${casa}#negozio-${encodeURIComponent(n.chiave)}` })) }, negozio };
     }
     case 'negozio': {
       const n = negozioDettaglio(chiave, ctx);
-      return n ? { tipo: 'negozio', negozio: n } : null;
+      if (!n) return null;
+      const sede = luoghiDi(ctx).sediNegozi.get(chiave)?.sede ?? null;
+      return { tipo: 'negozio', negozio: { ...n, sedeCasa: sede ? `${casaDelLuogo(sede)}#negozio-${encodeURIComponent(chiave)}` : null } };
     }
     case 'confidente': {
       const c = prepared('SELECT chiave, nome, arcana FROM confidente WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; arcana: string } | undefined;
@@ -364,7 +374,29 @@ interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: Stat
    *  in corso) e i Palazzi veri (i Memento esclusi: le loro risposte restano quelle di prima, R4-30). Letti al primo uso. */
   l4?: AvanzamentoSpilli;
   /** L4: l'infiltrazione guardata, data da chi chiama. */
-  contesto?: string | null }
+  contesto?: string | null;
+  /** L5: le letture dei luoghi (presenza, sedi dei negozi), fatte al primo pin che ne ha bisogno e poi riusate. */
+  luoghi?: LettureLuoghi }
+
+/** L5: le letture dei luoghi del contesto, una volta per risposta (con lo stato della partita già calcolato). */
+function luoghiDi(ctx: ContestoSpilli): LettureLuoghi {
+  return ctx.luoghi ??= lettureLuoghi(ctx.partitaId, undefined, ctx.st ?? null);
+}
+
+/**
+ * L5 (§2): la presenza del luogo di un pin come requisito di visibilità. Un luogo non ancora sbloccato o chiuso adesso è nascosto dove si
+ * naviga (decisione dell'utente: «luogo chiuso va nascosto dal menu di navigazione»), e un luogo solo per gli eventi di un Confidente sempre;
+ * lo spillo chiesto dall'indirizzo il visore lo mostra lo stesso, evidenziato col motivo. Senza partita niente da aggiungere.
+ */
+function conPresenzaDelLuogo(esito: DisponibilitaDto | undefined, lp: LuogoDelPin, ctx: ContestoSpilli): DisponibilitaDto | undefined {
+  if (!ctx.st) return esito;
+  const base = esito ?? { stato: 'disponibile' as const, requisiti: [] };
+  const chiuso = lp.soloEventi
+    ? `Solo durante gli eventi di ${luoghiDi(ctx).nomiConfidenti.get(lp.soloEventi) ?? lp.soloEventi}`
+    : lp.presenza.sbloccato === false || lp.presenza.aperto === false ? lp.presenza.testo : null;
+  if (!chiuso) return base;
+  return { stato: 'bloccato', requisiti: [...base.requisiti, { indice: base.requisiti.length, tipo: 'luogo', testo: `${lp.luogo.nome}: ${chiuso}`, stato: 'rosso', dettaglio: chiuso, manuale: false, confermato: false }] };
+}
 interface AvanzamentoSpilli { m: ModelloAvanzamento; s: StatiDellaPartita | null; contesto: string | null; palazziVeri: Set<string>; mappePalazzo: Map<string, string> }
 
 /** Il modello di L4 del contesto, letto una volta per risposta. */
@@ -486,7 +518,11 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   const condizioni: CondizioneSpilloDto[] = condizioniDiRiga(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La chiave della richiesta la
   // traduce nel nome il valutatore stesso (`valutaRequisito`): tradurla anche qui era un secondo passaggio inutile (rilievo R6).
-  const esitoCondizioni = conNegozioVivo(ctx.st ? valutaRequisitiSpillo(condizioni, ctx.st, nomi) : undefined, dettaglio);
+  // L5: un pin di luogo (o di un negozio con sede) vale quanto il luogo adesso, con la presenza unica; gli altri pin di negozio (senza sede)
+  // restano con gli orari del negozio (`conNegozioVivo`)
+  const lp = r.riferimento_tipo === 'luogo' || r.riferimento_tipo === 'negozio' || r.riferimento_tipo === 'attivita' ? luogoDelPin(r, luoghiDi(ctx)) : null;
+  const valutate = ctx.st ? valutaRequisitiSpillo(condizioni, ctx.st, nomi) : undefined;
+  const esitoCondizioni = lp ? conPresenzaDelLuogo(valutate, lp, ctx) : conNegozioVivo(valutate, dettaglio);
   // Una condizione di visibilità è **assoluta** (decisione dell'utente, 2026-10-09: «se ci sta una condizione di visibilità
   // questa deve essere assoluta»): se non vale il pin sparisce, anche quando è un elemento del gioco nativo (porta, forziere,
   // infiltrazione…). Prima questi restavano in vista marcati «non ancora» (`restaInVista`, 2026-10-03): tolto. L'ingresso a un
@@ -497,7 +533,9 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
     id: r.id, ...(r.uid ? { uid: r.uid } : {}), tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
-    nome: r.nome, descrizione: r.descrizione,
+    // L5: un pin di luogo mostra nome e descrizione del luogo; i suoi, se diversi, restano come nota del pin (mai persi)
+    nome: lp ? lp.nome : r.nome, descrizione: lp ? lp.descrizione : r.descrizione,
+    ...(lp ? { notaPin: lp.notaPin, presenza: lp.presenza } : {}),
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_tipo==='mappa'?chiaveMappa(r.riferimento_chiave):r.riferimento_chiave } : null,
     soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativo ? { nativo } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, ...campiL4, dettaglio, voci, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
   };
