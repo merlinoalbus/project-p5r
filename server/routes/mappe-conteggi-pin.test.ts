@@ -14,12 +14,12 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 
-// La regola scritta per esteso, tipo per tipo, indipendente dal codice: passaggi = la categoria «spostamento», note = la nota, il resto
-// è contenuto. Rispetto alla misura a mano di Analisi app (819 / 695 / 228 sui dati di 3302) la regola sposta:
-//   - le **porte** (`porta`, categoria «informativo»: una porta chiusa si apre con una chiave, è una cosa del gioco) nel contenuto;
-//   - i **punti del rampino** (`rampino`), la **Stanza di Velluto** (`velluto`) e l'**ingresso ai Memento** (`mementos`), che sono
-//     spostamenti, nei passaggi.
-const PASSAGGI = ['passaggio', 'scala', 'uscita', 'treno', 'velluto', 'mementos', 'ingresso-palazzo', 'infiltrazione', 'scorciatoia', 'rampino'];
+// La regola scritta per esteso, tipo per tipo, indipendente dal codice: passaggi = la categoria «spostamento» più le porte, note = la
+// nota, il resto è contenuto. Le **porte** (`porta`, categoria «informativo») stanno fra i passaggi: l'utente ha accettato «più 695
+// passaggi e 228 note», che le conta lì (correzione del PM, 2026-10-20). Rispetto a quella misura a mano (819 / 695 / 228 sui dati di
+// 3302) la regola sposta ancora nei passaggi i **punti del rampino** (`rampino`) e la **Stanza di Velluto** (`velluto`), che sono
+// spostamenti (e l'**ingresso ai Memento**, `mementos`, che nell'albero non c'è): sulla 0533Z 767 / 747 / 228.
+const PASSAGGI = ['passaggio', 'scala', 'uscita', 'treno', 'velluto', 'mementos', 'ingresso-palazzo', 'infiltrazione', 'scorciatoia', 'rampino', 'porta'];
 const NOTE = ['nota'];
 
 /** I conteggi attesi del sottoalbero di una mappa (identità interna), Memento esclusi, contati in SQL senza la regola del codice. */
@@ -44,7 +44,9 @@ describe('E2 — conteggi dei pin dell’indice delle Mappe', () => {
       expect([t, gruppoConteggioSpillo(t)]).toEqual([t, atteso]);
     }
     // le differenze con la misura a mano, dette una per una
-    expect(['porta', 'rampino', 'velluto', 'mementos'].map(gruppoConteggioSpillo)).toEqual(['contenuto', 'passaggi', 'passaggi', 'passaggi']);
+    expect(['porta', 'rampino', 'velluto', 'mementos'].map(gruppoConteggioSpillo)).toEqual(['passaggi', 'passaggi', 'passaggi', 'passaggi']);
+    // gli altri informativi restano contenuto: la porta è l'unica eccezione alla categoria
+    expect(['meccanismo', 'sicura', 'punto-sensibile', 'nemico'].map(gruppoConteggioSpillo)).toEqual(['contenuto', 'contenuto', 'contenuto', 'contenuto']);
     // un tipo che non c'è più (o non ancora) è informativo, quindi contenuto: nessun pin resta fuori dai tre gruppi
     expect(gruppoConteggioSpillo('tipo-inventato')).toBe('contenuto');
   });
@@ -77,14 +79,14 @@ describe('E2 — conteggi dei pin dell’indice delle Mappe', () => {
     expect(r.conteggiPin.contenuto + r.conteggiPin.passaggi + r.conteggiPin.note).toBe(albero.reduce((s, n) => s + n.numeroSpilli, 0));
   });
 
-  it('un pin nuovo cambia solo il suo gruppo: un passaggio i passaggi, un forziere il contenuto', async () => {
+  it('un pin nuovo cambia solo il suo gruppo: un passaggio e una porta i passaggi, un forziere il contenuto', async () => {
     const prima = ((await request(app).get('/api/mappe/albero/conteggi').expect(200)).body.data as { conteggiPin: ConteggiPinDto }).conteggiPin;
     const mappa = prepared("SELECT chiave FROM mappa WHERE genitore_chiave = 'dungeon-kamoshida' ORDER BY chiave LIMIT 1").pluck().get() as string;
     const id = (tipo: string) => prepared("INSERT INTO spillo (mappa_chiave, tipo, nome, x, y, uid, updated_at) VALUES (?, ?, 'E2', 50, 50, lower(hex(randomblob(16))), datetime('now'))").run(mappa, tipo).lastInsertRowid;
-    const ids = [id('passaggio'), id('forziere')];
+    const ids = [id('passaggio'), id('forziere'), id('porta')];
     try {
       const dopo = ((await request(app).get('/api/mappe/albero/conteggi').expect(200)).body.data as { conteggiPin: ConteggiPinDto }).conteggiPin;
-      expect(dopo).toEqual({ contenuto: prima.contenuto + 1, passaggi: prima.passaggi + 1, note: prima.note });
+      expect(dopo).toEqual({ contenuto: prima.contenuto + 1, passaggi: prima.passaggi + 2, note: prima.note });
     } finally {
       for (const i of ids) prepared('DELETE FROM spillo WHERE id = ?').run(i);
     }

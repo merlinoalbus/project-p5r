@@ -33,7 +33,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'GET /api/mappe/albero': {
     sommario: 'Albero completo delle mappe, in forma piatta con il genitore',
-    descrizione: 'Radici prima, poi per ordine e chiave. Ogni riassunto porta chiave pubblica, nome con il percorso, genitore, immagine dell\'istanza o asset predefinito, entità legata, presentazione e conteggi di spilli e figli. I Memento (pozzo e ingresso) non ci sono: si raggiungono dalla loro pagina. Da L3 (E2, decisione dell\'utente) ogni nodo porta `conteggiPin` `{ contenuto, passaggi, note }`: i pin suoi e di tutto quel che gli sta sotto nell\'albero, nei tre gruppi della regola unica `gruppoConteggioSpillo` (passaggi = categoria «spostamento», note = la nota, contenuto = il resto). `numeroSpilli` resta: i pin della sola mappa, tutti. Il totale dell\'indice è in `GET /api/mappe/albero/conteggi`.',
+    descrizione: 'Radici prima, poi per ordine e chiave. Ogni riassunto porta chiave pubblica, nome con il percorso, genitore, immagine dell\'istanza o asset predefinito, entità legata, presentazione e conteggi di spilli e figli. I Memento (pozzo e ingresso) non ci sono: si raggiungono dalla loro pagina. Da L3 (E2, decisione dell\'utente) ogni nodo porta `conteggiPin` `{ contenuto, passaggi, note }`: i pin suoi e di tutto quel che gli sta sotto nell\'albero, nei tre gruppi della regola unica `gruppoConteggioSpillo` (passaggi = categoria «spostamento» più le porte chiuse, note = la nota, contenuto = il resto). `numeroSpilli` resta: i pin della sola mappa, tutti. Il totale dell\'indice è in `GET /api/mappe/albero/conteggi`.',
     risposta: 'Elenco di `MappaRiassuntoDto`',
   },
   'GET /api/mappe/albero/conteggi': {

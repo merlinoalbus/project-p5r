@@ -142,12 +142,13 @@ export type GruppoConteggioSpillo = (typeof GRUPPI_CONTEGGIO_SPILLO)[number];
 
 /**
  * Il gruppo di conteggio di un tipo di pin, unica regola: **passaggi** i tipi della categoria «spostamento» (passaggi, scale, uscite,
- * stazioni, scorciatoie, rampini, ingressi e infiltrazioni, Stanza di Velluto, ingresso ai Memento); **note** la nota; **contenuto**
- * tutto il resto (negozi e luoghi, Confidenti, dialoghi, forzieri e oggetti, boss e nemici, porte, meccanismi…), anche un tipo
- * sconosciuto, così nessun pin resta fuori dai tre gruppi.
+ * stazioni, scorciatoie, rampini, ingressi e infiltrazioni, Stanza di Velluto, ingresso ai Memento) **più le porte chiuse** (`porta`,
+ * categoria «informativo»: servono a muoversi, e l'utente ha accettato «più 695 passaggi e 228 note», che le conta lì); **note** la
+ * nota; **contenuto** tutto il resto (negozi e luoghi, Confidenti, dialoghi, forzieri e oggetti, boss e nemici, meccanismi, stanze
+ * sicure…), anche un tipo sconosciuto, così nessun pin resta fuori dai tre gruppi.
  */
 export function gruppoConteggioSpillo(tipo: string): GruppoConteggioSpillo {
-  if (categoriaSpillo(tipo) === 'spostamento') return 'passaggi';
+  if (categoriaSpillo(tipo) === 'spostamento' || tipo === 'porta') return 'passaggi';
   return tipo === 'nota' ? 'note' : 'contenuto';
 }
 
