@@ -37,8 +37,9 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
   const opzioni = a.infiltrazioniDelPalazzo;
   if (!opzioni) return null;
   const insieme = a.infiltrazioni ?? [];
-  const etichetta = collegamentoAzione(a)?.etichetta;
-  const collegamento = etichetta ? `il collegamento «${etichetta}»` : 'il collegamento della voce';
+  // UX3-9: senza collegamento (né il Palazzo né «Sulla mappa») la finestra non nomina un collegamento che non c'è
+  const etichetta = collegamentoAzione(a)?.etichetta ?? null;
+  const collegamento = etichetta ? `il collegamento «${etichetta}»` : null;
   const proposta = insieme.length === 0 ? a.propostaInfiltrazioni ?? null : null;
   /** Salva l'insieme nuovo (le chiavi, in ordine) e passa al giorno la voce riletta. */
   const salva = async (chiavi: string[], messaggio: string) => {
@@ -73,9 +74,12 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
           azioni={<button type="button" className="btn btn-primary touch" onClick={() => setAperta(false)}>Fatto</button>}>
           <div className="flex flex-col gap-3 text-[13px]">
             {/* il collegamento della voce si chiama come il Palazzo («Palazzo di Madarame»): il testo lo nomina così (UX3-2) */}
-            <p className="m-0 text-text-secondary">In ordine, come le percorri: {collegamento} apre la prima non completata. Ogni cambio si salva subito e non tocca il resto della voce.</p>
-            {/* con una proposta il collegamento apre la sua prima infiltrazione (UX3-1); senza, la prima non completata del Palazzo */}
-            {insieme.length === 0 && <p className="m-0 text-text-muted">Nessuna: {collegamento} apre {a.propostaInfiltrazioni?.infiltrazioni.length ? `«${a.propostaInfiltrazioni.infiltrazioni[0].nome}», la prima della proposta` : 'la prima infiltrazione non completata del Palazzo'}.</p>}
+            <p className="m-0 text-text-secondary">In ordine, come le percorri: {collegamento ? `${collegamento} apre la prima non completata` : 'dicono in quali infiltrazioni avviene la voce, che non apre il Palazzo'}. Ogni cambio si salva subito e non tocca il resto della voce.</p>
+            {/* con una proposta il collegamento apre la sua prima infiltrazione (UX3-1); senza, la prima non completata del Palazzo; senza
+                collegamento (UX3-9) si dice solo che l'infiltrazione della voce non è ancora indicata */}
+            {insieme.length === 0 && <p className="m-0 text-text-muted">{collegamento
+              ? `Nessuna: ${collegamento} apre ${a.propostaInfiltrazioni?.infiltrazioni.length ? `«${a.propostaInfiltrazioni.infiltrazioni[0].nome}», la prima della proposta` : 'la prima infiltrazione non completata del Palazzo'}.`
+              : 'Nessuna: la voce non dice ancora in quale infiltrazione avviene.'}</p>}
             <ol className="m-0 flex list-none flex-col gap-1.5 p-0">
               {insieme.map((x, i) => (
                 <li key={`${x.chiave}:${i}`} className="card flex flex-wrap items-center gap-1 p-1.5">
