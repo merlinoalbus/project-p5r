@@ -22,6 +22,18 @@
   - Con «nessuna» la voce torna alla planimetria 1.
   - Nel visore della planimetria X compaiono le voci con pin su X e le voci senza pin la cui planimetria effettiva è X. Un Enigma compare su X se c'è almeno uno dei suoi passi.
 
+- **RG-5, la guida della scheda per planimetria (UX3-14).** Segnalazione dell'utente su p5s, 2026-10-20: in Madarame, infiltrazione 4, «Sala del Tesoro – Atrio», Livello 0, la guida mostra tutte le 123 voci dell'infiltrazione, comprese voci di aree lontane come «Entra nella Stanza di Velluto». La regola dell'utente, che vale anche per la scheda del Palazzo e non solo per il visore:
+  > «NIENTE PIN: Vale la planimetria dove è stata inserita la voce. Con almeno un PIN la voce si vede nella planimetria di tutti i PIN che sono contenuti nella planimetria... (ovviamente se viene chiuso sparisce da tutti i punti)»
+  - La guida della scheda mostra le voci della **planimetria mostrata nel visore**:
+    - le voci con almeno un pin su quella planimetria, che quindi compaiono in ogni planimetria dei loro pin;
+    - le voci senza pin la cui planimetria effettiva (RG-3) è quella.
+  - Una voce segnata sparisce da tutte le planimetrie, salvo «Anche le segnate».
+  - La regola è la stessa del visore, e la lettura è la stessa: `GET /api/mappe/:chiave/guida` di 42b34243.
+  - La configurazione delle voci resta come oggi: modifica, Enigmi, collega pin, copia e sposta, aggiungi. Una voce aggiunta prende la planimetria mostrata.
+  - Le voci delle altre planimetrie dell'infiltrazione restano raggiungibili sotto una sezione chiusa («Nelle altre planimetrie»), raggruppate per planimetria, così la gestione completa resta possibile.
+  - Questa correzione **tocca la colonna della guida della scheda**, ed è chiesta dall'utente.
+- **Nota.** Le «Schede da sistemare» (AP3-1) sono contenuti della guida senza pin né voce. Correggere il testo di una voce non le chiude. Si chiudono con «Collega a una voce» o «Crea la voce» (§4.3 di L4, nel rilascio di L4).
+
 ## Come entra nel piano
 | Passo | Chi | Base | Stato |
 |---|---|---|---|
@@ -31,7 +43,7 @@
 | A4. Riga della ROADMAP e validatore | Collaudo, PM | linea di rilascio | da fare |
 | A5. Push della sola linea di rilascio su `newreview` (avanzamento rapido), pipeline, verifica di p5s | PM | — | da fare |
 | B1. BE di RG-3 e RG-4: migrazione 114 (solo colonna), regola unica, PUT, `GET /api/mappe/:chiave/guida` | BE | sopra c8338fd0 | **fatto** in 42b34243: copia 0533Z 450/450 voci senza pin collocate, impronta delle 116 tabelle identica (colonna nuova esclusa); da verificare. Decisione del PM: un Enigma con passi non si aggancia a mano (400 `enigma-segue-i-passi`), sta dove stanno i passi |
-| B2. FE di RG-1 e RG-4 | FE | dopo B1 | da fare, quando i tester di A3 hanno finito, mentre il validatore (A4, agent) lavora: sempre una sessione alla volta |
+| B2. FE di RG-1, RG-4 e RG-5 (UX3-14, guida della scheda per planimetria) | FE | dopo B1 | da fare, quando i tester di A3 hanno finito, mentre il validatore (A4, agent) lavora: sempre una sessione alla volta |
 | B3. Prove e validatore dell'integrazione, poi push | tester, validatore | dopo A5 | da fare |
 | Poi | L4 (FE da completare), L5–L11 | | invariato |
 
