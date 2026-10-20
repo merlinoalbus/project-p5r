@@ -1,0 +1,540 @@
+### 2026-10-20T17:55:22Z FUN3-3 — commit sulla linea bc2ee751 (originale cb5d74a5), worktree staccato su bc2ee751d6cc7f8f39a38896ff1edf199d025f7d, commit precedente c93e3d7d
+### 1) controllo sul codice di bc2ee751: npx vitest run --reporter=verbose src/components/guida/InfiltrazioniVoce.test.tsx
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-FUN3-3
+
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > senza Palazzo (campo assente) non mostra niente 9ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > insieme vuoto con proposta: la dice con il motivo e la certezza; «Conferma» scrive l’insieme proposto nell’ordine 81ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > con l’insieme valorizzato la proposta non c’è; la ripetuta si dice «(di nuovo)» 9ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > la finestra nomina il collegamento della voce col suo nome («Palazzo di Madarame»), non «Entra» 15ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > senza collegamento la finestra dice a cosa servono le infiltrazioni per la voce, senza nominare un collegamento (UX3-9) 24ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > con una proposta la finestra dice che il collegamento apre la prima della proposta (UX3-1) 15ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > con un atterraggio la finestra dice che il collegamento apre la planimetria d’arrivo del giorno, non la proposta (FUN3-3) 16ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > con un atterraggio e senza proposta la finestra descrive solo l’atterraggio (FUN3-3) 8ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > nella finestra: sposta, togli e aggiungi salvano subito l’insieme intero; l’ultima non si propone di seguito 51ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > «Da rivedere» con il testo di prima: lo mostra e «Rimetti il precedente» lo chiede al server 22ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > «Da rivedere» solo segnalata: «Fatto»; una voce non da rivedere non ha il chip 16ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  19:55:23
+   Duration  1.53s (transform 203ms, setup 97ms, import 289ms, tests 267ms, environment 745ms)
+
+EXIT=0
+### codice di prima: git checkout bc2ee751^ -- src/components/guida/InfiltrazioniVoce.tsx
+M  src/components/guida/InfiltrazioniVoce.tsx
+### test identico a bc2ee751:
+sì
+### 2) sul codice di bc2ee751^: npx vitest run --reporter=verbose src/components/guida/InfiltrazioniVoce.test.tsx
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-FUN3-3
+
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > senza Palazzo (campo assente) non mostra niente 9ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > insieme vuoto con proposta: la dice con il motivo e la certezza; «Conferma» scrive l’insieme proposto nell’ordine 78ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > con l’insieme valorizzato la proposta non c’è; la ripetuta si dice «(di nuovo)» 9ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > la finestra nomina il collegamento della voce col suo nome («Palazzo di Madarame»), non «Entra» 16ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > senza collegamento la finestra dice a cosa servono le infiltrazioni per la voce, senza nominare un collegamento (UX3-9) 22ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > con una proposta la finestra dice che il collegamento apre la prima della proposta (UX3-1) 14ms
+ × src/components/guida/InfiltrazioniVoce.test.tsx > con un atterraggio la finestra dice che il collegamento apre la planimetria d’arrivo del giorno, non la proposta (FUN3-3) 19ms
+   → Unable to find an element with the text: Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo. Confermata la proposta, aprirà la prima non completata fra quelle scelte.. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33maria-label[39m=[32m"Infiltrazioni della voce"[39m
+  [33maria-modal[39m=[32m"true"[39m
+  [33mclass[39m=[32m"modal-content "[39m
+  [33mrole[39m=[32m"dialog"[39m
+  [33mtabindex[39m=[32m"-1"[39m
+[36m>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-header"[39m
+  [36m>[39m
+    [36m<h2[39m
+      [33mclass[39m=[32m"m-0 text-[17px] font-semibold"[39m
+    [36m>[39m
+      [0mInfiltrazioni della voce[0m
+    [36m</h2>[39m
+    [36m<button[39m
+      [33maria-label[39m=[32m"Chiudi"[39m
+      [33mclass[39m=[32m"touch flex items-center justify-center bg-transparent border-none text-text-muted hover:text-text cursor-pointer rounded-md"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [36m<svg[39m
+        [33maria-hidden[39m=[32m"true"[39m
+        [33mfill[39m=[32m"none"[39m
+        [33mheight[39m=[32m"20"[39m
+        [33mstroke[39m=[32m"currentColor"[39m
+        [33mstroke-linecap[39m=[32m"round"[39m
+        [33mstroke-linejoin[39m=[32m"round"[39m
+        [33mstroke-width[39m=[32m"2"[39m
+        [33mviewBox[39m=[32m"0 0 24 24"[39m
+        [33mwidth[39m=[32m"20"[39m
+      [36m>[39m
+        [36m<line[39m
+          [33mx1[39m=[32m"18"[39m
+          [33mx2[39m=[32m"6"[39m
+          [33my1[39m=[32m"6"[39m
+          [33my2[39m=[32m"18"[39m
+        [36m/>[39m
+        [36m<line[39m
+          [33mx1[39m=[32m"6"[39m
+          [33mx2[39m=[32m"18"[39m
+          [33my1[39m=[32m"6"[39m
+          [33my2[39m=[32m"18"[39m
+        [36m/>[39m
+      [36m</svg>[39m
+    [36m</button>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-body"[39m
+  [36m>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-3 text-[13px]"[39m
+    [36m>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"m-0 text-text-secondary"[39m
+      [36m>[39m
+        [0mIn ordine, come le percorri: [0m
+        [0mil collegamento «Palazzo di Kamoshida» apre la prima non completata[0m
+        [0m. Ogni cambio si salva subito e non tocca il resto della voce.[0m
+      [36m</p>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"m-0 text-text-muted"[39m
+      [36m>[39m
+        [0mNessuna: il collegamento «Palazzo di Kamoshida» apre «Tutorial Palazzo 12/04», la prima della proposta.[0m
+      [36m</p>[39m
+      [36m<ol[39m
+        [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1.5 p-0"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"selettore  "[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_3_"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-haspopup[39m=[32m"listbox"[39m
+          [33maria-label[39m=[32m"Aggiungi infiltrazione"[39m
+          [33mclass[39m=[32m"selettore__scelta touch"[39m
+          [33mrole[39m=[32m"combobox"[39m
+          [33mtitle[39m=[32m"— scegli —"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"selettore__etichetta"[39m
+          [36m>[39m
+            [0mAggiungi infiltrazione[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"selettore__valore "[39m
+          [36m>[39m
+            [0m— scegli —[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"selettore__freccia"[39m
+          [36m>[39m
+            [0m▾[0m
+          [36m</span>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-footer"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"btn btn-primary touch"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mFatto[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</div>[39m
+ × src/components/guida/InfiltrazioniVoce.test.tsx > con un atterraggio e senza proposta la finestra descrive solo l’atterraggio (FUN3-3) 8ms
+   → Unable to find an element with the text: Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo.. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33maria-label[39m=[32m"Infiltrazioni della voce"[39m
+  [33maria-modal[39m=[32m"true"[39m
+  [33mclass[39m=[32m"modal-content "[39m
+  [33mrole[39m=[32m"dialog"[39m
+  [33mtabindex[39m=[32m"-1"[39m
+[36m>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-header"[39m
+  [36m>[39m
+    [36m<h2[39m
+      [33mclass[39m=[32m"m-0 text-[17px] font-semibold"[39m
+    [36m>[39m
+      [0mInfiltrazioni della voce[0m
+    [36m</h2>[39m
+    [36m<button[39m
+      [33maria-label[39m=[32m"Chiudi"[39m
+      [33mclass[39m=[32m"touch flex items-center justify-center bg-transparent border-none text-text-muted hover:text-text cursor-pointer rounded-md"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [36m<svg[39m
+        [33maria-hidden[39m=[32m"true"[39m
+        [33mfill[39m=[32m"none"[39m
+        [33mheight[39m=[32m"20"[39m
+        [33mstroke[39m=[32m"currentColor"[39m
+        [33mstroke-linecap[39m=[32m"round"[39m
+        [33mstroke-linejoin[39m=[32m"round"[39m
+        [33mstroke-width[39m=[32m"2"[39m
+        [33mviewBox[39m=[32m"0 0 24 24"[39m
+        [33mwidth[39m=[32m"20"[39m
+      [36m>[39m
+        [36m<line[39m
+          [33mx1[39m=[32m"18"[39m
+          [33mx2[39m=[32m"6"[39m
+          [33my1[39m=[32m"6"[39m
+          [33my2[39m=[32m"18"[39m
+        [36m/>[39m
+        [36m<line[39m
+          [33mx1[39m=[32m"6"[39m
+          [33mx2[39m=[32m"18"[39m
+          [33my1[39m=[32m"6"[39m
+          [33my2[39m=[32m"18"[39m
+        [36m/>[39m
+      [36m</svg>[39m
+    [36m</button>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-body"[39m
+  [36m>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-3 text-[13px]"[39m
+    [36m>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"m-0 text-text-secondary"[39m
+      [36m>[39m
+        [0mIn ordine, come le percorri: [0m
+        [0mil collegamento «Palazzo di Kamoshida» apre la prima non completata[0m
+        [0m. Ogni cambio si salva subito e non tocca il resto della voce.[0m
+      [36m</p>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"m-0 text-text-muted"[39m
+      [36m>[39m
+        [0mNessuna: il collegamento «Palazzo di Kamoshida» apre la prima infiltrazione non completata del Palazzo.[0m
+      [36m</p>[39m
+      [36m<ol[39m
+        [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1.5 p-0"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"selettore  "[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_4_"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-haspopup[39m=[32m"listbox"[39m
+          [33maria-label[39m=[32m"Aggiungi infiltrazione"[39m
+          [33mclass[39m=[32m"selettore__scelta touch"[39m
+          [33mrole[39m=[32m"combobox"[39m
+          [33mtitle[39m=[32m"— scegli —"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"selettore__etichetta"[39m
+          [36m>[39m
+            [0mAggiungi infiltrazione[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"selettore__valore "[39m
+          [36m>[39m
+            [0m— scegli —[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"selettore__freccia"[39m
+          [36m>[39m
+            [0m▾[0m
+          [36m</span>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-footer"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"btn btn-primary touch"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mFatto[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</div>[39m
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > nella finestra: sposta, togli e aggiungi salvano subito l’insieme intero; l’ultima non si propone di seguito 56ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > «Da rivedere» con il testo di prima: lo mostra e «Rimetti il precedente» lo chiede al server 26ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > «Da rivedere» solo segnalata: «Fatto»; una voce non da rivedere non ha il chip 31ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/guida/InfiltrazioniVoce.test.tsx > con un atterraggio la finestra dice che il collegamento apre la planimetria d’arrivo del giorno, non la proposta (FUN3-3)
+TestingLibraryElementError: Unable to find an element with the text: Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo. Confermata la proposta, aprirà la prima non completata fra quelle scelte.. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33maria-label[39m=[32m"Infiltrazioni della voce"[39m
+  [33maria-modal[39m=[32m"true"[39m
+  [33mclass[39m=[32m"modal-content "[39m
+  [33mrole[39m=[32m"dialog"[39m
+  [33mtabindex[39m=[32m"-1"[39m
+[36m>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-header"[39m
+  [36m>[39m
+    [36m<h2[39m
+      [33mclass[39m=[32m"m-0 text-[17px] font-semibold"[39m
+    [36m>[39m
+      [0mInfiltrazioni della voce[0m
+    [36m</h2>[39m
+    [36m<button[39m
+      [33maria-label[39m=[32m"Chiudi"[39m
+      [33mclass[39m=[32m"touch flex items-center justify-center bg-transparent border-none text-text-muted hover:text-text cursor-pointer rounded-md"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [36m<svg[39m
+        [33maria-hidden[39m=[32m"true"[39m
+        [33mfill[39m=[32m"none"[39m
+        [33mheight[39m=[32m"20"[39m
+        [33mstroke[39m=[32m"currentColor"[39m
+        [33mstroke-linecap[39m=[32m"round"[39m
+        [33mstroke-linejoin[39m=[32m"round"[39m
+        [33mstroke-width[39m=[32m"2"[39m
+        [33mviewBox[39m=[32m"0 0 24 24"[39m
+        [33mwidth[39m=[32m"20"[39m
+      [36m>[39m
+        [36m<line[39m
+          [33mx1[39m=[32m"18"[39m
+          [33mx2[39m=[32m"6"[39m
+          [33my1[39m=[32m"6"[39m
+          [33my2[39m=[32m"18"[39m
+        [36m/>[39m
+        [36m<line[39m
+          [33mx1[39m=[32m"6"[39m
+          [33mx2[39m=[32m"18"[39m
+          [33my1[39m=[32m"6"[39m
+          [33my2[39m=[32m"18"[39m
+        [36m/>[39m
+      [36m</svg>[39m
+    [36m</button>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-body"[39m
+  [36m>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-3 text-[13px]"[39m
+    [36m>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"m-0 text-text-secondary"[39m
+      [36m>[39m
+        [0mIn ordine, come le percorri: [0m
+        [0mil collegamento «Palazzo di Kamoshida» apre la prima non completata[0m
+        [0m. Ogni cambio si salva subito e non tocca il resto della voce.[0m
+      [36m</p>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"m-0 text-text-muted"[39m
+      [36m>[39m
+        [0mNessuna: il collegamento «Palazzo di Kamoshida» apre «Tutorial Palazzo 12/04», la prima della proposta.[0m
+      [36m</p>[39m
+      [36m<ol[39m
+        [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1.5 p-0"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"selettore  "[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_3_"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-haspopup[39m=[32m"listbox"[39m
+          [33maria-label[39m=[32m"Aggiungi infiltrazione"[39m
+          [33mclass[39m=[32m"selettore__scelta touch"[39m
+          [33mrole[39m=[32m"combobox"[39m
+          [33mtitle[39m=[32m"— scegli —"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"selettore__etichetta"[39m
+          [36m>[39m
+            [0mAggiungi infiltrazione[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"selettore__valore "[39m
+          [36m>[39m
+            [0m— scegli —[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"selettore__freccia"[39m
+          [36m>[39m
+            [0m▾[0m
+          [36m</span>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-footer"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"btn btn-primary touch"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mFatto[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</div>[39m
+ ❯ Object.getElementError ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/guida/InfiltrazioniVoce.test.tsx:83:19
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/guida/InfiltrazioniVoce.test.tsx > con un atterraggio e senza proposta la finestra descrive solo l’atterraggio (FUN3-3)
+TestingLibraryElementError: Unable to find an element with the text: Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo.. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33maria-label[39m=[32m"Infiltrazioni della voce"[39m
+  [33maria-modal[39m=[32m"true"[39m
+  [33mclass[39m=[32m"modal-content "[39m
+  [33mrole[39m=[32m"dialog"[39m
+  [33mtabindex[39m=[32m"-1"[39m
+[36m>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-header"[39m
+  [36m>[39m
+    [36m<h2[39m
+      [33mclass[39m=[32m"m-0 text-[17px] font-semibold"[39m
+    [36m>[39m
+      [0mInfiltrazioni della voce[0m
+    [36m</h2>[39m
+    [36m<button[39m
+      [33maria-label[39m=[32m"Chiudi"[39m
+      [33mclass[39m=[32m"touch flex items-center justify-center bg-transparent border-none text-text-muted hover:text-text cursor-pointer rounded-md"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [36m<svg[39m
+        [33maria-hidden[39m=[32m"true"[39m
+        [33mfill[39m=[32m"none"[39m
+        [33mheight[39m=[32m"20"[39m
+        [33mstroke[39m=[32m"currentColor"[39m
+        [33mstroke-linecap[39m=[32m"round"[39m
+        [33mstroke-linejoin[39m=[32m"round"[39m
+        [33mstroke-width[39m=[32m"2"[39m
+        [33mviewBox[39m=[32m"0 0 24 24"[39m
+        [33mwidth[39m=[32m"20"[39m
+      [36m>[39m
+        [36m<line[39m
+          [33mx1[39m=[32m"18"[39m
+          [33mx2[39m=[32m"6"[39m
+          [33my1[39m=[32m"6"[39m
+          [33my2[39m=[32m"18"[39m
+        [36m/>[39m
+        [36m<line[39m
+          [33mx1[39m=[32m"6"[39m
+          [33mx2[39m=[32m"18"[39m
+          [33my1[39m=[32m"6"[39m
+          [33my2[39m=[32m"18"[39m
+        [36m/>[39m
+      [36m</svg>[39m
+    [36m</button>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-body"[39m
+  [36m>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-3 text-[13px]"[39m
+    [36m>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"m-0 text-text-secondary"[39m
+      [36m>[39m
+        [0mIn ordine, come le percorri: [0m
+        [0mil collegamento «Palazzo di Kamoshida» apre la prima non completata[0m
+        [0m. Ogni cambio si salva subito e non tocca il resto della voce.[0m
+      [36m</p>[39m
+      [36m<p[39m
+        [33mclass[39m=[32m"m-0 text-text-muted"[39m
+      [36m>[39m
+        [0mNessuna: il collegamento «Palazzo di Kamoshida» apre la prima infiltrazione non completata del Palazzo.[0m
+      [36m</p>[39m
+      [36m<ol[39m
+        [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1.5 p-0"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"selettore  "[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_4_"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-haspopup[39m=[32m"listbox"[39m
+          [33maria-label[39m=[32m"Aggiungi infiltrazione"[39m
+          [33mclass[39m=[32m"selettore__scelta touch"[39m
+          [33mrole[39m=[32m"combobox"[39m
+          [33mtitle[39m=[32m"— scegli —"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"selettore__etichetta"[39m
+          [36m>[39m
+            [0mAggiungi infiltrazione[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"selettore__valore "[39m
+          [36m>[39m
+            [0m— scegli —[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"selettore__freccia"[39m
+          [36m>[39m
+            [0m▾[0m
+          [36m</span>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"modal-footer"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"btn btn-primary touch"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mFatto[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</div>[39m
+ ❯ Object.getElementError ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/guida/InfiltrazioniVoce.test.tsx:92:19
+     90|   fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+     91|   const finestra = within(await screen.findByRole('dialog', { name: 'I…
+     92|   expect(finestra.getByText('Nessuna: il collegamento «Palazzo di Kamo…
+       |                   ^
+     93| });
+     94|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 passed (11)
+   Start at  19:55:26
+   Duration  1.61s (transform 204ms, setup 102ms, import 287ms, tests 288ms, environment 807ms)
+
+EXIT=1
+### ripristino: 0 righe in status
+### 2026-10-20T17:55:42Z rimozione del worktree temporaneo
+EXIT=0
+worktree temporanei rimasti: 0
+### linea
+aac70e2376b795e9aa4811833338432f46d590f2
+EXIT=0 (vuoto = pulita)

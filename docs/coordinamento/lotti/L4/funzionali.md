@@ -1,6 +1,7 @@
 # L4 «Avanzamento unico» — test funzionali
 
-Stato: **in corso** — pezzi 1 e 2 (BE sul 3201) verdi, 0 difetti; restano il pezzo FE e i casi del Collaudo. Basi «prima» prese
+Stato: **pezzo 3 (linea aac70e23, FE e ciclo del Collaudo) fatto, 2026-10-20**: tutti i casi FE verdi; un rilievo da decidere (FUN4-1)
+e un'osservazione (O4-4). Pezzi 1 e 2 (BE sul 3201) verdi. Basi «prima» prese
 (schema 109, prima della 111 e della utente 022).
 
 > **Base dei pezzi 1 e 2: i dati VECCHI di `data/` del 3201** (prima della copia della produzione del 2026-10-20 04:40 UTC). Correzione
@@ -69,6 +70,35 @@ Stato: **in corso** — pezzi 1 e 2 (BE sul 3201) verdi, 0 difetti; restano il p
 | F4-24 | Vitest mirati | §6.1 e §6.2 per i file pronti | verdi, output grezzo |
 
 ## Esiti a pezzi
+
+### Pezzo 3 — linea di rilascio `newreview-l4` = aac70e23 sul collaudo (FE 5473, BE 3301, base `L4-base-p5s-20261020-1741Z`), 2026-10-20
+Prove in `esiti-funzionali/aac70e23/`: `letture-browser.txt` (sola lettura, partita 1, 17:57–18:05Z, 0 scritture), `ciclo1-gesti.txt` e
+`ciclo1-partita.txt`. Il ciclo 1 è del Collaudo: foto 18:02:05Z, mie scritture dalle **18:02:49 alle 18:12:03Z**. Le divergenze le ha costruite il
+Collaudo a BE fermo, sulla partita di prova 3, creata ed eliminata. Gesti dall'interfaccia in un iframe 1280×800, con le chiamate registrate.
+**Ripristinato dal Collaudo alle 18:12:37Z**: impronta identica alla foto e alla base 1741Z; 27 scritture nei BE.log, nessun 5xx; differenze prima del
+ripristino solo dei gesti dichiarati (`esiti-collaudo/aac70e23/ciclo1/LEGGIMI.md`).
+Solo testo.
+
+| Caso (§) | Esito | Prova |
+|---|---|---|
+| Due livelli «Concluso / Completato» (§8.10) | ✅ | Partita 1: Kamoshida e Madarame «Completato» (71/71, 82/82) nell'elenco e nella scheda. Partita di prova: boss finale («Sconfiggi Kamoshida») e Tesoro (pin 614) → chip **«Concluso»** («Concluso: Tesoro raccolto, boss finale sconfitto»), anello «1 … su 71», API `completato: null`; nell'elenco «1% · Concluso» |
+| Anello sugli oggetti permanenti (§1.5) | ✅ | «Avanzamento in Palazzo di Madarame: 82 oggetti permanenti fatti su 82»; sulla prova cresce con le permanenti e l'«esaurito», non con i rigenerabili né con i Racconti |
+| «Da verificare» nelle tre viste (§4.1–4.3, F4-15) | ✅ | Su due divergenze vere (voci con 3 e 2 pin, uno fatto): intestazione «2 da verificare», sezione «Da verificare (2)», chip sulla voce con «Sistema…», pin `--da-verificare` nel visore con chip nel popup. «Togli il fatto al pin» (dal popup) → `DELETE …/divergenze/<uid>` 204, pin da fare, voce invariata (0/2). «Segna la voce» (dalla sezione) → `PUT …/punti` 200, voce 3/3, divergenze 0, sezione sparita. Vedi O4-4 |
+| Contesto del pin e «Stato nella» (§4.2, §1.4) | ✅ | Popup con il gruppo «Infiltrazione dello stato» e il selettore (44 px) solo per i pin con voci in più infiltrazioni. La scelta rilegge `GET /api/mappe/…?partita=&infiltrazione=` senza cambiare l'indirizzo della pagina. Segnata la voce di «Scopri», la voce omonima della 4ª resta da fare (0/2) |
+| k/N, «Segna» / «Riapri», «Riapre anche», «Segnate anche» (§8.11) | ✅ | Un pin da «Da raccogliere» → «In corso · 1/4». «Ottenuto» su una voce da 8 pin → 8/8. Lucernario: «Ottenuto» → notifica «Segnate anche: Lucernario Aperto — 4ª…, — 2ª…»; «Riapri» → conferma «Riapre anche: …» (Annulla non scrive, provato in lettura) → «Riapri» → «Riaperte anche: …», e la voce torna da fare in tutte e tre le infiltrazioni |
+| Conferma dell'Enigma (§8.6) | ✅ | «Incontro con Morgana» risolto → «Riapri» sul passo → «Riapre anche l'Enigma «Incontro con Morgana».» → l'Enigma si riapre. Con l'Enigma non risolto nessuna conferma. «Annulla» non scrive (lettura su partita 1) |
+| Schede da sistemare (§4.3) | ✅ con **FUN4-1** | Solo «Crea la voce» e «Collega a una voce» (44 px), mai «Elimina». «Crea la voce» → `POST /schede/1/voce` 201, voce «Stanze sicure» in fondo a «Vecchio Castello», schede 4→3. «Collega a una voce» → `PUT /schede/14/voce` 200, schede 3→2. Rilievo FUN4-1: la voce nuova è permanente e la partita 1 perde il «Completato» di Kamoshida (71/72) |
+| Carattere della voce (§4.1, F4-02) | ✅ | Chip «Permanente», «Si ripropone», «Racconto» («letto»). «Modifica › Carattere» → «Si ripropone»: il segno resta, l'oggetto esce dal conteggio (5→4). «Ripristina» → `carattere: null`, di nuovo «Permanente» (5) |
+| «Esaurito» (§4.1) | ✅ | Chip proprio «Esaurito» (`chip--bloccata`), riga a opacity 0.4 contro 0.6 di «ottenuto»; conta nel completamento |
+| «Anche nella Nª infiltrazione» (§4.1) | ✅ | «Anche nella 2ª e 4ª infiltrazione» sotto «Lucernario aperto»; il tocco sulla «4ª» apre `?infiltrazione=madarame-nelle-profondita-del-museo` |
+| F4-14 (gesti misti, parte UI) | ✅ | Dopo tutti i gesti: 0 divergenze sulla partita di prova e sulla partita 1 |
+| FUN3-3 di L3 | ✅ | Con l'atterraggio la finestra «Infiltrazioni della voce» descrive la planimetria d'arrivo (04-11, 04-12, 04-20, 04-22); a Madarame resta la proposta (05-20) |
+
+**O4-4 (osservazione):** una divergenza su una voce con **un solo** pin, come la scriverebbe la 022 o come arriva da un pacchetto importato con
+stati incoerenti, dopo il §8.11 mostra la voce già «ottenuto · 1/1». Accanto c'è il chip «Da verificare» con «Il pin risulta fatto ma la voce no».
+Conta già nel completamento e sparisce al primo gesto qualsiasi della partita (`pulisciDivergenzeRisolte`). Visto nella prima costruzione: «Segna la
+voce» su una ha tolto anche l'altra. Oggi non ci sono divergenze nei dati (0 in p1 e p2), quindi nessun effetto. Se la tabella resta «per i casi
+futuri» (§8.11 punto 6), per le voci da un solo pin il testo non regge.
 
 ### Pezzo 1 — BE di L4 sul 3201 (migrazioni 111 e utente 022 su `data/`), sole letture (2026-10-20)
 Prova grezza: `esiti-funzionali/l4-letture-1.txt` (script `esiti-funzionali/l4-letture.cjs`, solo `GET`).

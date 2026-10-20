@@ -1,0 +1,71 @@
+L4 sulla linea newreview-l4 = aac70e23 — letture nel browser, collaudo FE 5473 / BE 3301 (userVersion 113), base L4-base-p5s-20261020-1741Z.
+Partita 1 attiva (06-02). Data: 2026-10-20, 17:57–18:05Z. Pagine aperte in un iframe 1280×800.
+Clic solo su comandi che non scrivono: righe delle voci, «Riapri» seguito da «Annulla», «Anche le segnate», «Mostra anche i raccolti»,
+selettori, «Modifica» seguito da «Annulla», finestre delle schede seguite da «Annulla».
+Le chiamate della pagina sono registrate dal fetch dell'iframe: 0 chiamate diverse da GET in tutte le letture qui sotto.
+API in sola lettura: GET /api/partite, /api/compendio/dungeon?partita=1, /api/partite/{1,2}/divergenze?dungeon={kamoshida,madarame}.
+
+== Due livelli e anello (§8.10, §1.5)
+GET /api/compendio/dungeon?partita=1:
+  kamoshida concluso «Tesoro e boss finale», completato «Tesoro, boss finale e tutti gli oggetti permanenti (71/71)»,
+            completamento {oggetti 71, fatti 71, tesoro ✓, boss ✓, concluso ✓, completato ✓}, daVerificare 0
+  madarame  concluso «Tesoro e boss finale», completato «… (82/82)», {82/82, concluso ✓, completato ✓}, daVerificare 0
+  kaneshiro…maruki: concluso null, completato null, fatti 0 (Kaneshiro 26, Futaba 25, Okumura 40, Niijima 34, Shido 64, Iweleth 29, Maruki 56 oggetti)
+  mementos: nessun campo nuovo (null)
+/guida/dungeon (elenco): «100% · Palazzo di Kamoshida · Completato · 169 punti in tutto · 169 segnati»;
+  «100% · Palazzo di Madarame · Completato · 227 punti in tutto · 224 segnati»; «0% · Palazzo di Kaneshiro» (nessun chip di livello).
+/guida/dungeon/madarame?infiltrazione=madarame-01-entrata-del-museo: anello «Avanzamento in Palazzo di Madarame: 82 oggetti permanenti fatti su 82»;
+  chip «Completato» (nome accessibile «Completato: Tesoro raccolto, boss finale sconfitto»); nessun «N da verificare» (0 divergenze).
+  Il caso «concluso e non completato» chiede una partita di prova: va nel ciclo di scrittura.
+
+== Divergenze
+GET /api/partite/1/divergenze?dungeon=kamoshida → [] ; madarame → [] ; partita 2: [] e [].
+La base non ha divergenze: «Da verificare» nelle tre viste si prova nel ciclo.
+
+== Carattere, «letto», k/N, «Anche nella» (§4.1, §8.11). Madarame, «Prima Infiltrazione al Museo», con «Anche le segnate (9)» aperto
+  ·/0  «Installazioni artistiche · Oggetto · ottenuto» chip «Si ripropone», «4/4», «4 pin»
+  ·/1  «Lucernario aperto · Scorciatoia · ottenuto» chip «Permanente», «1 pin» ‖ «Anche nella 2ª e 4ª infiltrazione»
+  …-raccogli-e-depreda-le-installazioni-artistiche  «Oggetto · ottenuto» «Si ripropone», «8/8», «8 pin»
+  …-esamina-i-ritratti  «Storia · letto» chip «Racconto»   (un Racconto segnato dice «letto», non «ottenuto»)
+  …-raccogli-il-tesoro  «Forziere normale · ottenuto» «Permanente»
+  …-raccogli-la-sciabola-lunare  «Forziere raro · ottenuto» «Permanente»
+  …-esamina-la-scultura-gigante  «Storia · letto» «Racconto»
+  …-raccogli-installazione-artistica  «Oggetto» «Si ripropone» «da collegare»
+  Lucernario aperto aperto: «Punto d'infiltrazione per il Museo.» e «Permanente: si fa una volta per sempre.»
+  Tocco su «Anche nella 4ª infiltrazione» → /guida/dungeon/madarame?infiltrazione=madarame-nelle-profondita-del-museo,
+  selettore «Infiltrazione 4 di 5: 4. Nelle profondità del Museo».
+
+== «Riapri» con «Riapre anche» (§8.11, §1.6): Lucernario aperto → «Riapri» → finestra
+  «Riaprire «Lucernario aperto»? Riapre anche: Lucernario Aperto — 4ª infiltrazione, Lucernario Aperto — 2ª infiltrazione.»
+  Pulsanti «Annulla» e «Riapri» alti 44 px. «Annulla» → la finestra si chiude, la riga resta «ottenuto», 0 scritture.
+
+== Conferma dell'Enigma (§8.6): Kamoshida «Tutorial Palazzo 11/04», passo «Parla con Morgana» (kamoshida-1-tutorial-palazzo-11-04-parla-con-morgana)
+  → «Riapri» → «Riaprire «Parla con Morgana»? Riapre anche l'Enigma «Incontro con Morgana».» → «Annulla» → 0 scritture.
+
+== Contesto del pin e selettore «Stato nella» (§4.2, §1.4): visore di «Entrata del Museo», «Mostra anche i raccolti (4)»
+  Pin «Oggetto: Installazione Artistica (ottenuto)» ×4: popup «Installazione Artistica · Oggetto · ottenuto · Stato nella [Prima Infiltrazione al Museo ▾]»,
+  gruppo «Infiltrazione dello stato», selettore «Stato nella: Prima Infiltrazione al Museo» (44 px).
+  Le voci del pin con il loro contatore: «Installazioni artistiche · ottenuto · 4/4 · Riapri», «Installazioni Artistiche · ottenuto · 4/4 · Riapri»
+  (sui pin 3 e 4 anche «… · 2/2»).
+  Opzioni: «Prima Infiltrazione al Museo», «Scopri dov'è il Tesoro». Scelta «Scopri dov'è il Tesoro» →
+  GET /api/mappe/palazzo-di-madarame-entrata-del-museo?partita=1&infiltrazione=madarame-scopri-dove-il-tesoro 200 (18:00:11Z);
+  selettore «Stato nella: Scopri dov'è il Tesoro»; l'indirizzo della pagina resta ?infiltrazione=madarame-01-entrata-del-museo; 0 scritture.
+
+== Schede da sistemare (§4.3): Kamoshida «Schede da sistemare (4)»
+  Cancello del Castello (Vecchio Castello), Tre guardie del Tetto (2 Cavalieri brutali + 1 Nemico potente), Forziere dei 3 Magatama maledetto,
+  Seme lussuria verde (2° Seme della Bramosia). Per ognuna solo «Crea la voce» e «Collega a una voce», 44 px; nessun «Elimina».
+  «Crea la voce» (Cancello del Castello): «Crea la voce da «Cancello del Castello» — Una voce nuova in fondo a «Vecchio Castello», col nome e la
+  descrizione della scheda. Nessuno stato si trasferisce. Tipo [Stanze sicure ▾] — Annulla · Crea la voce» → «Annulla».
+  «Collega a una voce»: «Collega «Cancello del Castello» a una voce — La voce scelta prende il posto della scheda, che esce da quest'elenco. Nessuno
+  stato si trasferisce. Voce [Scegli la voce… ▾]», «Collega» disattivato finché non si sceglie → «Annulla». 0 richieste a /schede/.
+
+== «Modifica › Carattere» (§4.1): Lucernario aperto → «Modifica: la voce «Lucernario aperto»» → campo «Carattere [Permanente ▾]» (44 px) con
+  «Dalla regola del tipo.», nessun «Ripristina» (nessuna scelta a mano); opzioni «Permanente (regola)», «Si ripropone», «Racconto» → «Annulla», 0 scritture.
+
+== FUN3-3 di L3 (finestra «Infiltrazioni della voce», solo aperta e chiusa con «Fatto», nessun cambio)
+  04-11 (collegamento …152-2-0?spillo=1657), 04-12 (…sala-centrale), 04-20 e 04-22 (…cancello-del-castello-nativo-rmap-151-1-0):
+    «Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d'arrivo del giorno, quella dell'atterraggio del Palazzo. Confermata la
+    proposta, aprirà la prima non completata fra quelle scelte.»
+  05-20 (Madarame, senza atterraggio, collegamento ?infiltrazione=madarame-disabilita-i-sistemi-di-sicurezza&daVoce=…):
+    «Nessuna: il collegamento «Palazzo di Madarame» apre «Disabilita i sistemi di sicurezza», la prima della proposta.»
+  La frase ora dice dove porta davvero il collegamento.
