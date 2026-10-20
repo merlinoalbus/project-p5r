@@ -2,7 +2,7 @@
 // API mappe a livelli e spilli (Fase 13): albero, dettaglio con stato della partita, editor, esportazione/importazione
 // ============================================================
 
-import type { ConteggiAlberoDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
+import type { ConteggiAlberoDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, GuidaDellaPlanimetriaDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
 import { apiDelete, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
@@ -20,6 +20,10 @@ export const getConteggiAlbero = (): Promise<ConteggiAlberoDto> => apiGet('/mapp
 export const getMappa = (chiave: string, partita?: number, infiltrazione?: string): Promise<MappaDto> =>
   // L4 §1.4: con `infiltrazione` lo stato dei pin condivisi dalle voci di più infiltrazioni si legge in quella (il contesto)
   apiGet(`/mappe/${encodeURIComponent(chiave)}${queryString({ partita, infiltrazione })}`);
+/** L3 RG-1: le voci della guida che stanno sulla planimetria (con un pin su di lei, o senza pin e con lei come planimetria effettiva), per
+ *  infiltrazione, con lo stato della partita. */
+export const getGuidaMappa = (chiave: string, partita?: number): Promise<GuidaDellaPlanimetriaDto> =>
+  apiGet(`/mappe/${encodeURIComponent(chiave)}/guida${queryString({ partita })}`);
 
 /** Crea una mappa (chiave facoltativa, nome e tipo obbligatori); risponde con la mappa creata. */
 export const creaMappa = (dati: DatiMappaApi & { chiave?: string; nome: string; tipo: TipoMappa }): Promise<MappaDto> => apiPost('/mappe', dati);

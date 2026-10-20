@@ -32,6 +32,7 @@ import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { CondizioniSpilloElenco } from './CondizioniSpillo';
 import { ProveNativeSpillo } from './ProveNativeSpillo';
 import type { DivergenzaDaVerificare } from '../guida/FinestraDaVerificare';
+import { GuidaNelVisore } from './GuidaNelVisore';
 import type { ImmagineSpilloDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
@@ -129,6 +130,9 @@ interface Props {
    *  sbiaditi). Resta la sola mappa: la testata no, i comandi (planimetria, ricerca, «Fatto») li porta chi la apre — dal
    *  2026-10-18 la barra del collegamento sopra la mappa principale della scheda del Palazzo —, e la ricerca arriva da lì. */
   scelta?: SceltaPin;
+  /** L3 RG-1: la guida della planimetria da usare (pulsante «Guida» nella barra), nelle planimetrie dei Palazzi; `onCambiato` avvisa chi
+   *  ospita il visore di uno stato salvato dalla guida (rilegge la mappa). Senza, il pulsante non c'è. */
+  guida?: { onCambiato?: () => void };
 }
 
 /** Vedi `Props.scelta`. */
@@ -249,7 +253,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
  * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -412,6 +416,29 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     setZoomEsplicito(z);
     setPanEsplicito({ x: dim.w / 2 - (s.x / 100) * nat.w * z, y: dim.h / 2 - (s.y / 100) * nat.h * z });
   };
+  // L3 RG-1: la guida della planimetria da usare, nelle planimetrie dei Palazzi, fuori dall'editor e dalla scelta dei pin
+  const conGuida = !!guida && !editor && !scelta && mappa.area?.contenitore.tipo === 'dungeon';
+  const [guidaAperta, setGuidaAperta] = useState<{ top: number; right: number } | null>(null);
+  /** Apre la guida in alto a destra della tela (o la chiude). */
+  const apriGuida = () => {
+    if (guidaAperta) { setGuidaAperta(null); return; }
+    const r = tela.current?.getBoundingClientRect();
+    setGuidaAperta({ top: r?.top ?? 80, right: r?.right ?? window.innerWidth });
+  };
+  /** Dalla guida, un pin della voce: lo rende visibile se un filtro lo nascondeva (raccolto, non disponibile, categoria spenta), lo
+   *  seleziona e lo centra. */
+  const mostraDallaGuida = (id: number) => {
+    const s = mappa.spilli.find((x) => x.id === id);
+    if (!s) return;
+    if (s.collezionabile && s.raccolto) setMostraRaccolti(true);
+    if (nascostoPerCondizioni(s)) setMostraNonDisponibili(true);
+    setTipiNascosti((prev) => { if (!prev.has(s.tipo)) return prev; const n = new Set(prev); n.delete(s.tipo); return n; });
+    seleziona(s.id);
+    centraSu(s);
+  };
+  // gli stati della mappa (pin e voci): quando cambiano altrove, la guida si rilegge
+  const versioneStati = conGuida ? mappa.spilli.map((s) => `${s.id}:${s.raccolto ? 1 : 0}:${s.voci.map((v) => v.stato ?? '').join(',')}`).join('|') : '';
+  const spilliQui = useMemo(() => new Set(mappa.spilli.map((s) => s.id)), [mappa.spilli]);
 
   // Coordinate in percentuale dell'immagine a partire da un punto dello schermo.
   const percentuali = (clientX: number, clientY: number): Punto | null => {
@@ -731,6 +758,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
         </nav>
         <div className="visore-mappa__strumenti">
           {azioni}
+          {conGuida && <PulsanteVisivo tono={guidaAperta ? 'primario' : 'fantasma'} compatto icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida" aria-pressed={!!guidaAperta} onClick={apriGuida} />}
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => { setPannelloScelto(!pannelloAperto); onPannello?.(!pannelloAperto); }} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
           {ritorno}
           {onChiudi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo={etichettaChiudi ?? 'Chiudi'} onClick={onChiudi} />}
@@ -1063,6 +1091,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
         </div>
 
       </div>
+      {/* L3 RG-1: la guida da usare, fuori dal livello trasformato (finestra fissa sullo schermo, o foglio dal basso) */}
+      {conGuida && guidaAperta && (
+        <GuidaNelVisore mappa={mappa.chiave} partitaId={partitaId} spilloSelezionato={selezionatoId} spilliQui={spilliQui} onCentra={mostraDallaGuida}
+          onCambiato={guida?.onCambiato} onChiudi={() => setGuidaAperta(null)} ancora={guidaAperta} versione={versioneStati} />
+      )}
     </div>
   );
 }
