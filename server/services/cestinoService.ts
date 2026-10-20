@@ -35,6 +35,7 @@ import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
+import { riallineaStati } from './mappe/statiGuida.js';
 import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto } from '../../shared/types.js';
 
 type Schema = 'main' | 'utente';
@@ -85,6 +86,10 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   punto_partita: ['spunta di una voce nelle partite', 'spunte delle voci nelle partite'], spillo_partita: ['stato di un pin nelle partite', 'stati dei pin nelle partite'],
   timbri_dedalo_partita: ['conteggio dei timbri nelle partite', 'conteggi dei timbri nelle partite'],
   spunta_voce_partita: ['spunta del diario nelle partite', 'spunte del diario nelle partite'],
+  // L4 (utente 022)
+  divergenza_partita: ['divergenza da verificare nelle partite', 'divergenze da verificare nelle partite'],
+  // L4 (§8.11, utente 023)
+  spillo_partita_infiltrazione: ['stato di un pin in un’infiltrazione nelle partite', 'stati dei pin per infiltrazione nelle partite'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */
@@ -381,6 +386,9 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
       throw httpErrors.conflict('cestino-non-ripristinabile', `Non si può rimettere «${r.nome}»: ciò che la conteneva non c'è più.`);
     }
     dopoRipristino.get(r.tipo)?.(r.chiave, r.vicini_json ? JSON.parse(r.vicini_json) as ViciniCestino : null, [...saltate.values()]);
+    // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica — quel che è cambiato dopo l'eliminazione (un pin
+    // segnato o tolto) vince, come per le altre righe delle partite
+    riallineaStati(db, null, nowIso());
     db.prepare('DELETE FROM main.cestino WHERE id = ?').run(r.id);
     db.prepare('DELETE FROM utente.cestino_partite WHERE uid = ?').run(r.uid);
   })();

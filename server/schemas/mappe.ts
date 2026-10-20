@@ -26,7 +26,8 @@ export const paramsSpillo = z.object({ id: idParam });
 export const queryEsporta = z.object({ radice: chiaveMappa.optional() });
 export const queryDidascalia = z.object({ didascalia: z.string().max(300).optional() });
 export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).optional(), ordine: z.number().int().min(0).max(999).optional() });
-export const queryMappa = z.object({ partita: idParam.optional() });
+/** La partita e, da L4 (§1.4), l'infiltrazione guardata: il contesto dei pin di rigenerabili di più infiltrazioni. */
+export const queryMappa = z.object({ partita: idParam.optional(), infiltrazione: z.string().min(1).max(160).optional() });
 /** Sostituire l'immagine di una mappa con dei pezzi (102): `eliminaPezzi=1` conferma che se ne vanno con l'immagine di prima. */
 export const queryImmagineMappa = z.object({ eliminaPezzi: z.enum(['0', '1']).optional() });
 export const bodyCreaMappa = z.object({
@@ -55,7 +56,8 @@ export const bodyCreaSpillo = z.object({
   riferimento: riferimento.optional(), collezionabile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(), condizioni,
 });
 export const bodyAggiornaSpillo = bodyCreaSpillo.partial().extend({ mappa: chiaveMappa.optional() });
-export const bodyRaccolto = z.object({ raccolto: z.boolean() });
+/** Il segno di un pin; `infiltrazione` (L4, §3.2) è il contesto per un pin di rigenerabili di più infiltrazioni (null = quella in corso). */
+export const bodyRaccolto = z.object({ raccolto: z.boolean(), infiltrazione: z.string().min(1).max(160).optional() });
 
 /** I pezzi delle planimetrie (102): le forme di zona, posizione, rotazione e specchio stanno col servizio, che le usa anche per il pacchetto.
  *  Dalla 103 il pezzo è il ritaglio (nome, zona, ordine) e le copie sono le sue pose (etichetta, posizione, rotazione, specchio, condizioni). */

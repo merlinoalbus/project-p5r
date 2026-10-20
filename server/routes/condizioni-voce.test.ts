@@ -50,6 +50,8 @@ describe('condizione «Voce della guida»', () => {
 
   it('il pin compare quando la voce è segnata (Ottenuta o Esaurita) e sparisce quando si riapre; «non segnata» fa il contrario', async () => {
     const v = await nuovaVoce('Si apre il passaggio');
+    // esauribile: da L4 (R4-07) «Esaurita» vale solo per una voce esauribile
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(v.chiave)}`).send({ esauribile: true }).expect(200);
     const dopo = await nuovoPin('passaggio', 'Passaggio aperto', [su(v.chiave, true)]);
     const prima = await nuovoPin('nota', 'Indizio prima del passaggio', [su(v.chiave, false)]);
     expect([await stato(dopo), await stato(prima)]).toEqual(['bloccato', 'disponibile']);

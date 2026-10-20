@@ -6,11 +6,11 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
 import { calendario } from '../services/calendarioService.js';
-import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
+import { collegaSchedaAllaVoce, copieDelPalazzo, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
-import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente } from '../schemas/guidaDungeon.js';
+import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
+import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
@@ -236,12 +236,28 @@ router.put('/richieste/:chiave/area', validate({ params: paramsChiaveGuida, body
 router.get('/dungeon', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaDungeon((req.query as unknown as { partita?: number }).partita));
 });
-router.get('/dungeon/:chiave', validate({ params: paramsChiaveGuida, query: queryDomande }), (req, res) => {
-  res.json(dettaglioDungeon(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
+router.get('/dungeon/:chiave', validate({ params: paramsChiaveGuida, query: querySchedaDungeon }), (req, res) => {
+  const q = req.query as unknown as { partita?: number; infiltrazione?: string };
+  res.json(dettaglioDungeon(String(req.params.chiave), q.partita, q.infiltrazione ?? null));
+});
+/** L4 (§3.2): i gruppi di copie di una voce secondo la regola dell'utente (R4-15), in sola lettura; nessuna fusione in L4. */
+router.get('/dungeon/:chiave/copie', validate({ params: paramsChiaveGuida }), (req, res) => {
+  res.json(copieDelPalazzo(String(req.params.chiave)));
+});
+/** L4 (§2.3, §4.3): «Schede da sistemare» — «Crea la voce» (POST, col tipo) o «Collega a una voce» (PUT, con la voce). */
+router.post('/schede/:id/voce', validate({ params: z.object({ id: idParam }), body: bodyCreaVoceDallaScheda }), (req, res) => {
+  res.status(201).json(creaVoceDallaScheda(Number(req.params.id), (req.body as { tipo: Parameters<typeof creaVoceDallaScheda>[1] }).tipo));
+});
+router.put('/schede/:id/voce', validate({ params: z.object({ id: idParam }), body: bodyCollegaSchedaAllaVoce }), (req, res) => {
+  res.json(collegaSchedaAllaVoce(Number(req.params.id), (req.body as { voce: string }).voce));
 });
 /* ---- Correzione dei testi della guida: la sezione dei Palazzi non è più in sola lettura ---- */
 router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyDungeon }), (req, res) => {
   res.json(aggiornaDungeon(String(req.params.chiave), req.body as Parameters<typeof aggiornaDungeon>[1]));
+});
+/** L4 §8.14: «Ripristina» della scheda del Palazzo — la voce del boss finale torna quella della guida. */
+router.post('/dungeon/:chiave/ripristina', validate({ params: paramsChiaveGuida }), (req, res) => {
+  res.json(ripristinaDungeon(String(req.params.chiave)));
 });
 /** La finestra del Palazzo sulla mappa di Tokyo: da quando (e fino a quando) compare per il giorno della partita (2026-10-04). */
 router.put('/dungeon/:chiave/finestra', validate({ params: paramsChiaveGuida, body: bodyFinestraDungeon }), (req, res) => {

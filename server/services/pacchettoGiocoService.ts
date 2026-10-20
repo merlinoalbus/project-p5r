@@ -26,9 +26,10 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
-import { closeDb, getDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
+import { closeDb, getDb, nowIso, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
+import { riallineaStati } from './mappe/statiGuida.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
@@ -78,6 +79,13 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   // la giornata è canone del file di gioco: un pacchetto che non ha più una voce lascia la sua spunta senza voce
   { tabella: 'spunta_voce_partita', colonna: 'voce_uid', entita: 'voce della giornata', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'punto_partita', colonna: 'punto_chiave', entita: 'punto della guida', tabellaGioco: 'punto_interesse', colonnaGioco: 'chiave' },
+  // le divergenze conservate «da verificare» (L4, utente 022): un pin o una voce che spariscono le lasciano orfane
+  { tabella: 'divergenza_partita', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },
+  { tabella: 'divergenza_partita', colonna: 'voce_chiave', entita: 'punto della guida', tabellaGioco: 'punto_interesse', colonnaGioco: 'chiave' },
+  // lo stato per infiltrazione dei pin condivisi dai rigenerabili (L4 §8.11, utente 023): un pin o un'infiltrazione che spariscono
+  // lasciano la riga orfana
+  { tabella: 'spillo_partita_infiltrazione', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },
+  { tabella: 'spillo_partita_infiltrazione', colonna: 'infiltrazione_chiave', entita: 'infiltrazione', tabellaGioco: 'dungeon_area', colonnaGioco: 'chiave' },
   { tabella: 'richiesta_partita', colonna: 'richiesta_chiave', entita: 'richiesta', tabellaGioco: 'richiesta', colonnaGioco: 'chiave' },
   // i timbri si contano nelle aree dei dedali (099, utente 018)
   { tabella: 'timbri_dedalo_partita', colonna: 'area_chiave', entita: 'area di un dedalo dei Memento', tabellaGioco: 'area_dedalo', colonnaGioco: 'chiave' },
@@ -350,6 +358,8 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     riapriIstanza();
     // le stesse regole dell'avvio sui dati nuovi (l'assorbimento delle immagini su disco, già fatto da riapriIstanza, qui non trova nulla)
     regoleAllAvvio(getDb());
+    // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica sui legami nuovi (il segno dei pin, per uid, resta)
+    getDb().transaction(() => riallineaStati(getDb(), null, nowIso()))();
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'importazione-fallita', 'Importazione del pacchetto');
   }

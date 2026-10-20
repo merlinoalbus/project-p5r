@@ -79,14 +79,22 @@ describe('API dungeon', () => {
     expect(p).toMatchObject({ chiave: forziere.chiave, stato: 'ottenuto' });
     p = (await request(app).put(`/api/partite/${id}/punti`).send({ punto: forziere.chiave, stato: 'ottenuto' })).body.data as PuntoInteresseDto; // idempotente: nessun secondo evento
     expect(p).toMatchObject({ chiave: forziere.chiave, stato: 'ottenuto' });
-    p = (await request(app).put(`/api/partite/${id}/punti`).send({ punto: sicura.chiave, stato: 'esaurito' })).body.data as PuntoInteresseDto;
+    // L4 (R4-07): «Esaurito» solo per una voce esauribile — una Safe Room non lo è (400, niente cambia), si segna «ottenuto»; una voce
+    // esauribile (a Kamoshida non ce ne sono: una di Madarame) sì
+    const no = await request(app).put(`/api/partite/${id}/punti`).send({ punto: sicura.chiave, stato: 'esaurito' });
+    expect([no.status, no.body.error.code]).toEqual([400, 'voce-non-esauribile']);
+    p = (await request(app).put(`/api/partite/${id}/punti`).send({ punto: sicura.chiave, stato: 'ottenuto' })).body.data as PuntoInteresseDto;
+    expect(p.stato).toBe('ottenuto');
+    const esauribile = ((await request(app).get(`/api/compendio/dungeon/madarame?partita=${id}`)).body.data as DungeonDettaglioDto).aree.flatMap((a) => a.punti).find((x) => x.esauribile)!;
+    p = (await request(app).put(`/api/partite/${id}/punti`).send({ punto: esauribile.chiave, stato: 'esaurito' })).body.data as PuntoInteresseDto;
     expect(p.stato).toBe('esaurito');
     const lista = (await request(app).get(`/api/compendio/dungeon?partita=${id}`)).body.data as DungeonRiassuntoDto[];
     expect(lista.find((d) => d.chiave === 'kamoshida')?.gestiti).toBe(2);
-    expect(lista.find((d) => d.chiave === 'madarame')?.gestiti).toBe(0);
+    expect(lista.find((d) => d.chiave === 'madarame')?.gestiti).toBe(1);
     const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=punto-dungeon`)).body.data as StoricoDto;
-    expect(storico.totale).toBe(2);
-    expect(storico.eventi[1].titolo).toContain(forziere.nome);
+    expect(storico.totale).toBe(3);
+    // dal più recente: la voce di Madarame, la Safe Room, il forziere
+    expect(storico.eventi[2].titolo).toContain(forziere.nome);
     p = (await request(app).put(`/api/partite/${id}/punti`).send({ punto: forziere.chiave, stato: null })).body.data as PuntoInteresseDto;
     expect(p.stato).toBeNull();
     expect((await request(app).put(`/api/partite/${id}/punti`).send({ punto: 'x/999', stato: 'ottenuto' })).status).toBe(404);
@@ -102,7 +110,7 @@ describe('API dungeon', () => {
     // reseed forzato: chiavi stabili → lo stato della partita resta
     ricaricaPacchetto(getDb());
     const k3 = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${id}`)).body.data as DungeonDettaglioDto;
-    expect(k3.aree.flatMap((a) => a.punti).find((q) => q.chiave === sicura.chiave)?.stato).toBe('esaurito');
+    expect(k3.aree.flatMap((a) => a.punti).find((q) => q.chiave === sicura.chiave)?.stato).toBe('ottenuto');
     expect(k3.aree.flatMap((a) => a.punti).length).toBe(58);
   });
 });

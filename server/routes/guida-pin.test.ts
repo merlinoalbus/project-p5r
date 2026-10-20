@@ -5,11 +5,13 @@
 // «Mi serve la possibilità di modificare proprio la guida così da poter modificare/aggiornare, aggiungere, rimuovere le voci
 // della guida o correggerli agganciandoli ad elementi della mappa»; «lascia i punti come sono senza fare riconciliazioni».
 // Un punto si collega a uno o più pin delle planimetrie del suo Palazzo, e dal 2026-10-09 un pin a più punti (098: «Voci
-// indipendenti», ognuna si segna da sola e il pin è fatto quando lo sono tutte).
+// indipendenti», ognuna si segna da sola e il pin è fatto quando lo sono tutte). Da L4 §8.11 (NR4-1, 2026-10-20) ogni pin tiene il suo
+// segno e una voce è fatta quando lo sono tutti i suoi pin (in corso k/N se una parte).
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, prepared } from '../db/dbService.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
+import { modelloAvanzamento, statiDellaPartita, statoDelPin } from '../services/mappe/statiGuida.js';
 import { createApp } from '../bootstrap.js';
 import { palazzoDiOgniMappa, statoPalazzi } from '../services/palazziService.js';
 import { raccoltaMappe } from '../services/dungeonService.js';
@@ -30,8 +32,13 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
   const collega = (punto: string, pin: number) => request(app).put(`/api/compendio/punti/${encodeURIComponent(punto)}/pin/${pin}`);
   /** Scollega la voce della guida dal pin dato (restituisce la richiesta, per controllarne l'esito). */
   const scollega = (punto: string, pin: number) => request(app).delete(`/api/compendio/punti/${encodeURIComponent(punto)}/pin/${pin}`);
-  /** Valore di «raccolto» dello spillo `uid` nella partita di prova, letto dal DB (0 se non c'è la riga). */
-  const raccolto = (uid: string) => (prepared('SELECT raccolto FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').get(partita, uid) as { raccolto: number } | undefined)?.raccolto ?? 0;
+  /** Lo spillo `uid` è fatto nella partita di prova (1) o no (0)? Con la regola unica del visore (`statoDelPin`): da L4 §8.11 (NR4-1) il
+   *  segno del pin, per ogni pin. */
+  const raccolto = (uid: string) => {
+    const m = modelloAvanzamento(getDb());
+    const id = m.idDelPin.get(uid)!;
+    return statoDelPin(m, statiDellaPartita(getDb(), m, partita), { id, uid }).fatto ? 1 : 0;
+  };
   /** Stato salvato della voce nella partita di prova, letto dal DB (null se non segnata). */
   const segnato = (punto: string) => (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, punto) as { stato: string } | undefined)?.stato ?? null;
   /** Segna (o toglie il segno) del pin nella partita di prova, pretendendo il 200. */
@@ -103,9 +110,12 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     await scollega(b.chiave, pinLiberi[1].id).expect(200);
   });
 
-  it('voci indipendenti (2026-10-09): ogni voce si segna da sola, il pin è fatto quando lo sono tutte', async () => {
-    const a = await nuovoPunto('Evento A', 'storia');
-    const b = await nuovoPunto('Evento B', 'storia');
+  // Da L4 §8.11 (NR4-1, strada (a) del PM, 2026-10-20) ogni pin tiene il suo segno e una voce con pin è fatta quando lo sono tutti i
+  // suoi pin («in corso k/N» se una parte). Due voci sullo stesso pin non sono più indipendenti: il pin è uno, e il suo segno vale per
+  // entrambe. I casi usano voci che si ripropongono («Oggetto», della stessa infiltrazione).
+  it('§8.11: un pin con due voci — il segno è del pin; segnare una voce segna il pin e l’altra diventa fatta («Segnate anche»); riaprirla le riapre tutte e due (R4-11)', async () => {
+    const a = await nuovoPunto('Evento A', 'oggetto');
+    const b = await nuovoPunto('Evento B', 'oggetto');
     const pin = pinLiberi[0];
     await collega(a.chiave, pin.id).expect(200);
     await collega(b.chiave, pin.id).expect(200);
@@ -113,27 +123,26 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     /** Il pin com'è sulla mappa della partita di prova. */
     const sullaMappa = async () => ((await request(app).get(`/api/mappe/${mappa}?partita=${partita}`).expect(200)).body.data as MappaDto).spilli.find((s) => s.id === pin.id)!;
     expect((await sullaMappa()).voci.map((v) => v.chiave)).toEqual([a.chiave, b.chiave].sort());
-    // una sola voce segnata: l'altra resta da fare, il pin non è fatto
-    await statoPunto(a.chiave, 'ottenuto');
-    expect([segnato(a.chiave), segnato(b.chiave), raccolto(pin.uid)]).toEqual(['ottenuto', null, 0]);
-    expect((await sullaMappa()).raccolto).toBe(false);
-    // tutte e due: fatto
-    await statoPunto(b.chiave, 'ottenuto');
-    expect(raccolto(pin.uid)).toBe(1);
+    // segnata A: il suo pin è fatto, e B (che ha solo quel pin) è fatta anche lei; la risposta lo dice
+    const risposta = (await statoPunto(a.chiave, 'ottenuto')).body.data as PuntoInteresseDto;
+    expect(risposta.effetti).toEqual({ segnate: [expect.objectContaining({ chiave: b.chiave, nome: 'Evento B' })], riaperte: [] });
+    expect(risposta.avanzamento).toEqual({ fatti: 1, totale: 1 });
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(pin.uid)]).toEqual(['ottenuto', 'ottenuto', 1]);
     const fatto = await sullaMappa();
     expect(fatto.raccolto).toBe(true);
-    expect(fatto.voci.map((v) => v.stato)).toEqual(['ottenuto', 'ottenuto']);
-    // riaprirne una lo riapre, e l'altra resta segnata
-    await statoPunto(a.chiave, null);
-    expect([segnato(a.chiave), segnato(b.chiave), raccolto(pin.uid)]).toEqual([null, 'ottenuto', 0]);
-    // scollegata la voce ancora da fare, il pin segue quella che gli resta (segnata): fatto
+    expect(fatto.voci.map((v) => [v.stato, v.avanzamento])).toEqual([['ottenuto', { fatti: 1, totale: 1 }], ['ottenuto', { fatti: 1, totale: 1 }]]);
+    // riaperta A: il pin perde il segno, e B si riapre con lei
+    expect(((await statoPunto(a.chiave, null)).body.data as PuntoInteresseDto).effetti?.riaperte.map((v) => v.chiave)).toEqual([b.chiave]);
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(pin.uid)]).toEqual([null, null, 0]);
+    // dal pin: tutte e due fatte; scollegata A, il pin tiene il suo segno e A (senza pin) tiene il suo
+    await raccogli(pin.id, true);
     await scollega(a.chiave, pin.id).expect(200);
-    expect(raccolto(pin.uid)).toBe(1);
-    // collegandogli una voce nuova, ancora da fare, il pin non è più fatto, e la voce nuova non si segna da sé
-    const c = await nuovoPunto('Evento C', 'storia');
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(pin.uid)]).toEqual(['ottenuto', 'ottenuto', 1]);
+    // una voce nuova collegata al pin già segnato ha tutti i suoi pin fatti: è fatta (come prima di L4)
+    const c = await nuovoPunto('Evento C', 'oggetto');
     await collega(c.chiave, pin.id).expect(200);
-    expect([segnato(c.chiave), raccolto(pin.uid)]).toEqual([null, 0]);
-    // eliminare una voce lascia le altre: il pin segue B (segnata)
+    expect([segnato(c.chiave), raccolto(pin.uid)]).toEqual(['ottenuto', 1]);
+    // eliminare una voce lascia le altre e il segno del pin
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(c.chiave)}`).expect(204);
     expect(vociDi(pin.id)).toEqual([b.chiave]);
     expect(raccolto(pin.uid)).toBe(1);
@@ -141,59 +150,69 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect(raccolto(pin.uid)).toBe(0);
   });
 
-  it('la spunta di un pin con più voci le segna tutte, tolta le riapre (scelta dell’utente, 2026-10-09); gli altri pin seguono le loro voci', async () => {
-    const a = await nuovoPunto('Voce A della spunta', 'storia');
-    const b = await nuovoPunto('Voce B della spunta', 'storia');
+  it('§8.11: il gesto sul pin tocca solo quel pin; la voce con più pin va «in corso k/N»; togliere il segno toglie «fatta» a ogni voce che lo contiene, «esaurito» compreso', async () => {
+    const a = await nuovoPunto('Voce A della spunta', 'oggetto');
+    const b = await nuovoPunto('Voce B della spunta', 'oggetto');
+    // «esaurita» solo per una voce esauribile (L4, R4-07)
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(b.chiave)}`).send({ esauribile: true }).expect(200);
     const [p, q] = [pinLiberi[0], pinLiberi[1]];
     await collega(a.chiave, p.id).expect(200);
     await collega(b.chiave, p.id).expect(200);
     await collega(a.chiave, q.id).expect(200);
-    // spuntato P: A e B ottenute (anche se Q, l'altro pin di A, non era raccolto); P fatto, e Q segue la sua voce
-    await raccogli(p.id, true);
-    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid), raccolto(q.uid)]).toEqual(['ottenuto', 'ottenuto', 1, 1]);
+    // spuntato P: solo P; B (che ha solo P) è fatta, A (P e Q) è in corso 1/2, Q resta com'era
+    const risposta = (await raccogli(p.id, true)).body.data as MappaDto['spilli'][number];
+    expect(risposta.effetti).toEqual({ segnate: [expect.objectContaining({ chiave: b.chiave })], riaperte: [] });
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid), raccolto(q.uid)]).toEqual([null, 'ottenuto', 1, 0]);
+    expect(risposta.voci.find((v) => v.chiave === a.chiave)!.avanzamento).toEqual({ fatti: 1, totale: 2 });
     // una voce già esaurita resta esaurita spuntando di nuovo
     await statoPunto(b.chiave, 'esaurito');
     await raccogli(p.id, true);
     expect(segnato(b.chiave)).toBe('esaurito');
-    // tolta la spunta: tutte le sue voci si riaprono, e i pin seguono
-    await raccogli(p.id, false);
-    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid), raccolto(q.uid)]).toEqual([null, null, 0, 0]);
+    // spuntato anche Q: A è fatta
+    await raccogli(q.id, true);
+    expect(segnato(a.chiave)).toBe('ottenuto');
+    // tolta la spunta a P: A e B non sono più fatte («esaurito» compreso, R4-11); Q tiene il suo segno
+    expect(((await raccogli(p.id, false)).body.data as MappaDto['spilli'][number]).effetti?.riaperte.map((v) => v.chiave).sort()).toEqual([a.chiave, b.chiave].sort());
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid), raccolto(q.uid)]).toEqual([null, null, 0, 1]);
   });
 
-  it('il rilievo del validatore: un pin con più voci non resta fatto se una sua voce si riapre dalla spunta di un altro pin', async () => {
-    const a = await nuovoPunto('Voce condivisa', 'storia');
-    const b = await nuovoPunto('Voce sola di P', 'storia');
+  it('§8.11: togliere il segno a un pin riapre la voce condivisa (in corso) e non tocca l’altra voce dell’altro pin', async () => {
+    const a = await nuovoPunto('Voce condivisa', 'oggetto');
+    const b = await nuovoPunto('Voce sola di P', 'oggetto');
     const [p, q] = [pinLiberi[0], pinLiberi[1]];
     await collega(a.chiave, p.id).expect(200);
     await collega(b.chiave, p.id).expect(200);
     await collega(a.chiave, q.id).expect(200);
-    // (b) P fatto dalle sue voci, Q raccolto: togliendo la spunta a Q, A si riapre e P non è più fatto
-    await statoPunto(a.chiave, 'ottenuto');
-    await statoPunto(b.chiave, 'ottenuto');
-    expect([raccolto(p.uid), raccolto(q.uid)]).toEqual([1, 1]);
+    // «Segna» su A segna tutti i suoi pin: anche B (che ha solo P) diventa fatta
+    expect(((await statoPunto(a.chiave, 'ottenuto')).body.data as PuntoInteresseDto).effetti?.segnate.map((v) => v.chiave)).toEqual([b.chiave]);
+    expect([raccolto(p.uid), raccolto(q.uid), segnato(b.chiave)]).toEqual([1, 1, 'ottenuto']);
+    // tolta la spunta a Q: A torna in corso (1/2), B resta fatta (P ha il suo segno)
     await raccogli(q.id, false);
-    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid)]).toEqual([null, 'ottenuto', 0]);
-    // (a) spuntando di nuovo Q, A torna ottenuta (P ha già B): P è di nuovo fatto
+    expect([segnato(a.chiave), segnato(b.chiave), raccolto(p.uid)]).toEqual([null, 'ottenuto', 1]);
+    // spuntando di nuovo Q, A torna fatta
     await raccogli(q.id, true);
     expect([segnato(a.chiave), raccolto(p.uid)]).toEqual(['ottenuto', 1]);
   });
 
-  it('collegando un pin raccolto che ha solo questa voce, la voce si segna anche se un altro suo pin ha più voci (stessa regola della spunta)', async () => {
-    const c = await nuovoPunto('Voce C', 'storia');
-    const d = await nuovoPunto('Voce D', 'storia');
+  it('§8.11: un pin raccolto da solo e poi collegato tiene il suo segno; la voce va in corso; «Segna» la completa e segna anche le voci che ne hanno solo i pin', async () => {
+    const c = await nuovoPunto('Voce C', 'oggetto');
+    const d = await nuovoPunto('Voce D', 'oggetto');
     const [p, q] = [pinLiberi[0], pinLiberi[1]];
     await collega(c.chiave, p.id).expect(200);
     await collega(d.chiave, p.id).expect(200);
-    // Q raccolto da solo (nessuna voce), poi collegato a C: i pin di C che hanno solo lei sono tutti raccolti → C ottenuta
+    // Q raccolto da solo (nessuna voce: il suo stato è il suo), poi collegato a C: tiene il segno, C è in corso (1/2)
     await raccogli(q.id, true);
-    await collega(c.chiave, q.id).expect(200);
-    expect(segnato(c.chiave)).toBe('ottenuto');
-    // P (C+D) segue le sue voci: D è ancora da fare
-    expect(raccolto(p.uid)).toBe(0);
+    expect(raccolto(q.uid)).toBe(1);
+    const collegata = (await collega(c.chiave, q.id).expect(200)).body.data as PuntoInteresseDto;
+    expect([segnato(c.chiave), raccolto(q.uid)]).toEqual([null, 1]);
+    expect(collegata.condivise?.map((v) => v.chiave)).toEqual([d.chiave]);
+    // segnata C: P e Q fatti, e D (che ha solo P) fatta anche lei
+    await statoPunto(c.chiave, 'ottenuto');
+    expect([raccolto(q.uid), raccolto(p.uid), segnato(d.chiave)]).toEqual([1, 1, 'ottenuto']);
   });
 
   it('una voce descrittiva rimasta su un pin non lo tiene «da fare»: contano le voci che si segnano', async () => {
-    const a = await nuovoPunto('Voce che si segna', 'storia');
+    const a = await nuovoPunto('Voce che si segna', 'oggetto');
     const d = await nuovoPunto('Nota rimasta', 'altro');
     const p = pinLiberi[2];
     await collega(a.chiave, p.id).expect(200);
@@ -207,36 +226,42 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect(raccolto(p.uid)).toBe(0);
   });
 
-  it('con più voci il raccolto del Palazzo conta il pin una volta sola, preso quando le sue voci sono tutte segnate', async () => {
+  it('con più voci il raccolto del Palazzo conta il pin una volta sola (§8.11: preso col suo segno)', async () => {
     // un collezionabile di Kamoshida libero: `raccoltaMappe` (la scheda) e `statoPalazzi` (il completamento) contano i collezionabili
     const forziere = prepared(`SELECT s.id, s.uid FROM spillo s WHERE s.collezionabile = 1 AND s.uid IS NOT NULL AND s.riferimento_tipo IS NULL
       AND NOT EXISTS (SELECT 1 FROM spillo_voce sv WHERE sv.spillo_id = s.id) ORDER BY s.id`).all()
       .find((r) => palazzoDiOgniMappa().get(prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get((r as { id: number }).id) as string) === 'kamoshida') as { id: number; uid: string };
+    // L4: la seconda voce si ripropone (una «Storia» sarebbe racconto e non conterebbe); il completamento del Palazzo conta gli oggetti
+    // permanenti (il forziere, una volta), la raccolta della scheda resta l'elenco dei collezionabili con lo stato del pin
     const a = await nuovoPunto('Forziere, prima voce');
-    const b = await nuovoPunto('Forziere, seconda voce', 'storia');
-    /** Il pin nella raccolta della scheda e quanti collezionabili conta il Palazzo, presi e in tutto. */
+    const b = await nuovoPunto('Forziere, seconda voce', 'oggetto');
+    /** Il pin nella raccolta della scheda, i collezionabili del Palazzo (presi e in tutto) e i suoi oggetti permanenti (fatti e in tutto). */
     const conteggi = () => {
       const r = raccoltaMappe('kamoshida', partita);
       const pin = [...r.perMappa.values()].flatMap((m) => m.spilli).filter((s) => s.id === forziere.id);
-      const manca = statoPalazzi(partita).get('kamoshida')!.manca ?? '';
-      return { righe: pin.length, raccolto: pin[0]?.raccolto, totale: r.totale, presi: r.presi, palazzo: /tutto il raccolto \((\d+)\/(\d+)\)/.exec(manca)?.slice(1).map(Number) };
+      const c = statoPalazzi(partita).get('kamoshida')!.completamento!;
+      return { righe: pin.length, raccolto: pin[0]?.raccolto, totale: r.totale, presi: r.presi, palazzo: [c.fatti, c.oggetti] };
     };
     const prima = conteggi();
     await collega(a.chiave, forziere.id).expect(200);
     await collega(b.chiave, forziere.id).expect(200);
     expect(conteggi()).toEqual(prima);
+    // il forziere segnato segna il suo pin (§8.11): un oggetto permanente in più fatto, il pin preso una volta (e la voce che si
+    // ripropone, sullo stesso pin, fatta anche lei)
     await statoPunto(a.chiave, 'ottenuto');
-    expect(conteggi()).toEqual(prima);
-    await statoPunto(b.chiave, 'ottenuto');
     const dopo = conteggi();
     expect(dopo).toMatchObject({ righe: 1, raccolto: true, totale: prima.totale, presi: prima.presi! + 1 });
-    expect(dopo.palazzo).toEqual([prima.palazzo![0] + 1, prima.palazzo![1]]);
+    expect(dopo.palazzo).toEqual([prima.palazzo[0]! + 1, prima.palazzo[1]]);
+    expect(segnato(b.chiave)).toBe('ottenuto');
+    await statoPunto(b.chiave, 'ottenuto');
+    expect(conteggi()).toEqual(dopo);
     prepared('DELETE FROM spillo_voce WHERE spillo_id = ?').run(forziere.id);
   });
 
-  it('con più voci la condizione «Pin di una mappa: segnato» vale quando sono segnate tutte', async () => {
-    const a = await nuovoPunto('Voce uno', 'storia');
-    const b = await nuovoPunto('Voce due', 'storia');
+  it('con più voci la condizione «Pin di una mappa: segnato» segue il segno del pin (§8.11)', async () => {
+    const a = await nuovoPunto('Voce uno', 'oggetto');
+    const b = await nuovoPunto('Voce due', 'oggetto');
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(b.chiave)}`).send({ esauribile: true }).expect(200);
     const [pin, porta] = [pinLiberi[0], pinLiberi[1]];
     await collega(a.chiave, pin.id).expect(200);
     await collega(b.chiave, pin.id).expect(200);
@@ -244,9 +269,15 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     const mappa = prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(porta.id) as string;
     /** Lo stato della disponibilità della porta condizionata nella partita di prova. */
     const statoPorta = async () => ((await request(app).get(`/api/mappe/${mappa}?partita=${partita}`).expect(200)).body.data as MappaDto).spilli.find((s) => s.id === porta.id)!.disponibilita?.stato ?? 'disponibile';
-    await statoPunto(a.chiave, 'ottenuto');
     expect(await statoPorta()).not.toBe('disponibile');
+    // una voce segnata segna il pin: la condizione vale
+    await statoPunto(a.chiave, 'ottenuto');
+    expect(await statoPorta()).toBe('disponibile');
+    // riaperta l'altra voce (esaurita prima), il pin perde il segno
     await statoPunto(b.chiave, 'esaurito');
+    await statoPunto(b.chiave, null);
+    expect(await statoPorta()).not.toBe('disponibile');
+    await raccogli(pin.id, true);
     expect(await statoPorta()).toBe('disponibile');
     await request(app).put(`/api/mappe/spilli/${porta.id}`).send({ condizioni: [] }).expect(200);
   });
@@ -270,7 +301,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     await request(app).get('/api/mappe/spilli/99999999/voci-collegabili').expect(404);
   });
 
-  it('lo stato è uno solo: la voce segna e riapre i suoi pin; un punto con due pin è segnato quando li ha raccolti tutti', async () => {
+  it('NR4-1 (§8.11): la voce segna e riapre tutti i suoi pin; dal pin si segna solo quel pin, e la voce va in corso k/N', async () => {
     const p = await nuovoPunto('Due forzieri');
     const [x, y] = [pinLiberi[0], pinLiberi[2]];
     await collega(p.chiave, x.id).expect(200);
@@ -279,33 +310,43 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect([raccolto(x.uid), raccolto(y.uid)]).toEqual([1, 1]);
     await statoPunto(p.chiave, null);
     expect([raccolto(x.uid), raccolto(y.uid)]).toEqual([0, 0]);
-    // dalla mappa: uno solo non basta, tutti e due sì, toglierne uno lo riapre
+    // dalla mappa: segnare un pin segna solo quel pin (prima di §8.11 segnava la voce e con lei l'altro pin: NR4-1); la voce è in
+    // corso 1/2, e la scheda lo dice, pin per pin
     await raccogli(x.id, true);
-    expect(segnato(p.chiave)).toBeNull();
+    expect([segnato(p.chiave), raccolto(x.uid), raccolto(y.uid)]).toEqual([null, 1, 0]);
+    const scheda = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${partita}`).expect(200)).body.data as DungeonDettaglioDto;
+    const voce = scheda.aree.find((a) => a.chiave === area)!.punti.find((v) => v.chiave === p.chiave)!;
+    expect(voce.stato).toBeNull();
+    expect(voce.avanzamento).toEqual({ fatti: 1, totale: 2 });
+    // i pin di prova sono in ordine di id (x prima di y), come la scheda li elenca
+    expect(voce.pin.map((q) => [q.id, q.fatto])).toEqual([[x.id, true], [y.id, false]]);
+    // l'ultimo pin la completa («ottenuto», lo stato predefinito); togliere un pin la riapre (lo specchio sparisce)
     await raccogli(y.id, true);
     expect(segnato(p.chiave)).toBe('ottenuto');
     await raccogli(x.id, false);
-    expect(segnato(p.chiave)).toBeNull();
-    await raccogli(y.id, false);
+    expect([segnato(p.chiave), raccolto(x.uid), raccolto(y.uid)]).toEqual([null, 0, 1]);
     await scollega(p.chiave, x.id).expect(200);
     await scollega(p.chiave, y.id).expect(200);
   });
 
-  it('collegando, gli stati che c’erano si uniscono: il punto segnato raccoglie il pin, il pin raccolto segna il punto', async () => {
+  it('collegando (§8.11): una voce segnata dà il segno al pin nuovo; un pin raccolto che completa i pin della voce la rende fatta; scollegando, ognuno tiene il suo', async () => {
     const a = await nuovoPunto('Segnato prima');
     await statoPunto(a.chiave, 'ottenuto');
     expect(raccolto(pinLiberi[0].uid)).toBe(0);
     await collega(a.chiave, pinLiberi[0].id).expect(200);
-    expect(raccolto(pinLiberi[0].uid)).toBe(1);
-    await statoPunto(a.chiave, null);
+    expect([segnato(a.chiave), raccolto(pinLiberi[0].uid)]).toEqual(['ottenuto', 1]);
+    // scollegato, il pin tiene il suo segno, e la voce (senza pin) il suo
     await scollega(a.chiave, pinLiberi[0].id).expect(200);
+    expect([segnato(a.chiave), raccolto(pinLiberi[0].uid)]).toEqual(['ottenuto', 1]);
+    await raccogli(pinLiberi[0].id, false);
 
     const b = await nuovoPunto('Raccolto prima');
     await raccogli(pinLiberi[1].id, true);
     expect(segnato(b.chiave)).toBeNull();
+    // il pin raccolto è l'unico della voce: la voce è fatta (tutti i suoi pin lo sono)
     await collega(b.chiave, pinLiberi[1].id).expect(200);
-    expect(segnato(b.chiave)).toBe('ottenuto');
-    // scollegando gli stati restano come sono, a ciascuno il suo
+    expect([segnato(b.chiave), raccolto(pinLiberi[1].uid)]).toEqual(['ottenuto', 1]);
+    // scollegando gli stati restano come sono a vista
     await scollega(b.chiave, pinLiberi[1].id).expect(200);
     expect([segnato(b.chiave), raccolto(pinLiberi[1].uid)]).toEqual(['ottenuto', 1]);
     await raccogli(pinLiberi[1].id, false);
@@ -414,7 +455,7 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     return righe.find((r) => palazzi.get(r.mappa_chiave) === 'kamoshida')!;
   };
 
-  it('una «Storia» si collega a un pin con destinazione: il riferimento resta, lo stato è uno solo, scollegando la destinazione non si tocca', async () => {
+  it('una «Storia» si collega a un pin con destinazione: il riferimento resta; da L4 la Storia (racconto) tiene il suo segno e il pin il suo; scollegando la destinazione non si tocca', async () => {
     const pin = pinConDestinazione();
     expect(pin).toBeTruthy();
     const storia = await nuovoPunto('Si apre il passaggio', 'storia');
@@ -422,16 +463,20 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     expect(dopo.pin.map((x) => x.id)).toEqual([pin.id]);
     expect(prepared('SELECT riferimento_tipo, riferimento_chiave FROM spillo WHERE id = ?').get(pin.id)).toEqual({ riferimento_tipo: 'mappa', riferimento_chiave: pin.riferimento_chiave });
     expect(vociDi(pin.id)).toEqual([storia.chiave]);
-    // il pin sulla mappa porta altrove e insieme è della voce
+    // il pin sulla mappa porta altrove e insieme è della voce; la Storia segnata («letta») non fa fatto il pin, che ha il suo stato
+    // (L4: un pin di sole voci di racconto si comporta come un pin senza voci, decisione dell'utente del 2026-10-20)
     await statoPunto(storia.chiave, 'ottenuto');
-    expect(raccolto(pin.uid)).toBe(1);
+    expect(raccolto(pin.uid)).toBe(0);
     const sullaMappa = ((await request(app).get(`/api/mappe/${pin.mappa_chiave}?partita=${partita}`).expect(200)).body.data as MappaDto).spilli.find((s) => s.id === pin.id)!;
     expect(sullaMappa.riferimento?.tipo).toBe('mappa');
-    expect(sullaMappa.voci).toEqual([expect.objectContaining({ chiave: storia.chiave, tipo: 'storia', stato: 'ottenuto' })]);
-    expect(sullaMappa.raccolto).toBe(true);
-    // dalla mappa: riaprire il pin riapre la voce
+    expect(sullaMappa.voci).toEqual([expect.objectContaining({ chiave: storia.chiave, tipo: 'storia', stato: 'ottenuto', carattere: 'descrittiva' })]);
+    expect(sullaMappa).toMatchObject({ raccolto: false, statoProprio: true });
+    // dalla mappa il pin si segna da sé, e la Storia resta com'è
+    await raccogli(pin.id, true);
+    expect([raccolto(pin.uid), segnato(storia.chiave)]).toEqual([1, 'ottenuto']);
     await raccogli(pin.id, false);
-    expect(segnato(storia.chiave)).toBeNull();
+    expect([raccolto(pin.uid), segnato(storia.chiave)]).toEqual([0, 'ottenuto']);
+    await statoPunto(storia.chiave, null);
     // un'altra voce lo prende anche lei (098: prima si rifiutava finché era di questa)
     const altra = await nuovoPunto('Altra storia', 'storia');
     await collega(altra.chiave, pin.id).expect(200);

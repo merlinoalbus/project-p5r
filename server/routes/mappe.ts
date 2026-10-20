@@ -87,8 +87,8 @@ router.post('/', validate({ body: bodyCreaMappa }), (req, res) => {
   res.status(201).json(creaMappa(chiave, dati as DatiMappa & { nome: string; tipo: NonNullable<DatiMappa['tipo']> }));
 });
 router.get('/:chiave', validate({ params: paramsMappa, query: queryMappa }), (req, res) => {
-  const q = req.query as unknown as { partita?: number };
-  res.json(dettaglioMappa(String(req.params.chiave), q.partita));
+  const q = req.query as unknown as { partita?: number; infiltrazione?: string };
+  res.json(dettaglioMappa(String(req.params.chiave), q.partita, q.infiltrazione ?? null));
 });
 router.put('/:chiave', validate({ params: paramsMappa, body: bodyAggiornaMappa }), (req, res) => {
   res.json(aggiornaMappa(String(req.params.chiave), req.body as DatiMappa));

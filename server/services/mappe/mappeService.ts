@@ -30,6 +30,7 @@ import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibili
 import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
 import { ePersonaDeiMemento, erroreCatturaNelCompendio } from '../catturePersona.js';
 import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma, vociDelPin } from './collegamentiGuida.js';
+import { conDivergenze, conStatoPerInfiltrazione, effettiDelGestoDto, modelloAvanzamento, riallineaStati, segnaIlPin, statiDellaPartita, statoDelPin, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
@@ -219,11 +220,23 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo, area: area ? { nome: area.nome } : null, casa: casaDellaMappa(m, aree) }, immagine: { url: img ? urlCaricata(img) : null, asset: m.asset } };
     }
     case 'punto': {
-      const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, a.dungeon_chiave, a.chiave AS area_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; dungeon_chiave: string; area_chiave: string } | undefined;
+      const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, a.dungeon_chiave, a.chiave AS area_chiave, a.nome AS area_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; dungeon_chiave: string; area_chiave: string; area_nome: string } | undefined;
       if (!p) return null;
+      const base = { chiave: p.chiave, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dungeon: p.dungeon_chiave, area: p.area_chiave, areaDedalo: p.area_dedalo_chiave };
+      // L4 (§3.1): una voce dei Palazzi porta carattere, infiltrazione e «da verificare», e lo stato con cui risulta (§8.11: dai suoi
+      // pin, con il contatore k/N); le voci dei dedali dei Memento restano come prima (R4-30)
+      const l4 = !p.area_dedalo_chiave ? avanzamentoDi(ctx) : null;
+      if (l4 && l4.palazziVeri.has(p.dungeon_chiave)) {
+        const v = l4.m.voci.get(p.chiave);
+        // §8.11: lo stato della voce dai suoi pin (fatta, in corso k/N, da fare), con il contatore
+        const sv = l4.s?.voci.get(p.chiave) ?? null;
+        return { tipo: 'punto', punto: { ...base, stato: sv?.stato ?? null, carattere: v?.carattere ?? null, infiltrazione: { chiave: p.area_chiave, nome: p.area_nome },
+          daVerificare: !!l4.s && [...l4.s.divergenze.values()].some((voci) => voci.includes(p.chiave)),
+          avanzamento: sv && sv.totale > 0 ? { fatti: sv.fatti, totale: sv.totale } : null } };
+      }
       // una voce descrittiva non ha stato: uno rimasto da prima si ignora, come nella scheda del Palazzo (2026-10-01)
       const stato = partitaId && !puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, chiave) as { stato: string } | undefined)?.stato ?? null : null;
-      return { tipo: 'punto', punto: { chiave: p.chiave, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dungeon: p.dungeon_chiave, area: p.area_chiave, areaDedalo: p.area_dedalo_chiave, stato } };
+      return { tipo: 'punto', punto: { ...base, stato } };
     }
     case 'attivita':
     case 'luogo': {
@@ -302,38 +315,55 @@ function immaginiDiSpillo(spilloId: number): ImmagineSpilloDto[] {
 /** Contesto comune agli spilli di una risposta: partita, spilli raccolti, stato per le condizioni, nomi per le descrizioni. */
 interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string>; acquistati?: Set<string>;
   /** Le Aree (L2), lette al primo pin che porta a una mappa e poi riusate. */
-  aree?: ContestoAree }
+  aree?: ContestoAree;
+  /** L4: il modello dell'avanzamento, gli stati della partita (null senza), l'infiltrazione guardata (`?infiltrazione=`, null = quella
+   *  in corso) e i Palazzi veri (i Memento esclusi: le loro risposte restano quelle di prima, R4-30). Letti al primo uso. */
+  l4?: AvanzamentoSpilli;
+  /** L4: l'infiltrazione guardata, data da chi chiama. */
+  contesto?: string | null }
+interface AvanzamentoSpilli { m: ModelloAvanzamento; s: StatiDellaPartita | null; contesto: string | null; palazziVeri: Set<string>; mappePalazzo: Map<string, string> }
+
+/** Il modello di L4 del contesto, letto una volta per risposta. */
+function avanzamentoDi(ctx: ContestoSpilli): AvanzamentoSpilli {
+  if (ctx.l4) return ctx.l4;
+  const m = modelloAvanzamento(getDb());
+  const palazziVeri = new Set(prepared("SELECT chiave FROM dungeon WHERE tipo = 'palazzo'").pluck().all() as string[]);
+  const mappePalazzo = new Map([...palazzoDiOgniMappa()].filter(([, d]) => palazziVeri.has(d)));
+  ctx.l4 = { m, s: ctx.partitaId ? statiDellaPartita(getDb(), m, ctx.partitaId) : null, contesto: ctx.contesto ?? null, palazziVeri, mappePalazzo };
+  return ctx.l4;
+}
 
 /** Il contesto degli spilli di una risposta, letto una volta: la partita verificata, i suoi «raccolto» (per uid), lo stato per
  *  le condizioni, i nomi (Confidenti, quartieri, richieste, Palazzi) per descriverle e, solo se ci sono Palazzi completati, il
  *  Palazzo di ogni mappa e le destinazioni degli spilli, per chiudere gli ingressi. */
-function contestoSpilli(partitaId?: number): ContestoSpilli {
+function contestoSpilli(partitaId?: number, contesto: string | null = null): ContestoSpilli {
   if (partitaId) verificaPartita(partitaId);
   // «raccolto» è legato all'uid dello spillo (067): sopravvive a un pacchetto reimportato o a un gioco.db sostituito
   const raccolti = partitaId ? new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((x) => x.spillo_uid)) : undefined;
   const st = partitaId ? statoDisponibilitaPartita(partitaId) : null;
-  // per gli ingressi dei Palazzi completati: le mappe di ogni Palazzo e le destinazioni degli spilli, lette una volta
-  const destinazioni = st && st.palazziCompletati.size > 0 && prepared("SELECT 1 FROM sqlite_master WHERE name='spillo_destinazione'").get()
+  // per gli ingressi dei Palazzi conclusi: le mappe di ogni Palazzo e le destinazioni degli spilli, lette una volta
+  const destinazioni = st && st.palazziConclusi.size > 0 && prepared("SELECT 1 FROM sqlite_master WHERE name='spillo_destinazione'").get()
     ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
     : undefined;
-  return { partitaId, raccolti, st, nomi: nomiCondizioni(), palazzi: st && st.palazziCompletati.size > 0 ? palazzoDiOgniMappa() : undefined, destinazioni };
+  return { partitaId, raccolti, st, nomi: nomiCondizioni(), palazzi: st && st.palazziConclusi.size > 0 ? palazzoDiOgniMappa() : undefined, destinazioni, contesto };
 }
 
 /**
- * Un Palazzo completato non ha più ingresso (scelta dell'utente, 2026-09-30: «sparisce a Palazzo completato»,
- * come nel gioco): lo spillo che da fuori porta dentro — l'ingresso dalla città, il passaggio da Tokyo — risulta
- * bloccato, anche prima della scadenza. Si valuta qui, sul collegamento, e non con una condizione scritta sullo
- * spillo: così vale anche per gli ingressi aggiunti o modificati a mano e sopravvive a ogni sincronizzazione.
+ * Un Palazzo concluso non ha più ingresso (scelta dell'utente, 2026-09-30: «sparisce a Palazzo completato», come nel gioco; dal
+ * 2026-10-20 il livello è «concluso», Tesoro e boss finale, §8.10: il Palazzo sparisce dopo il furto, non dopo la raccolta completa):
+ * lo spillo che da fuori porta dentro — l'ingresso dalla città, il passaggio da Tokyo — risulta bloccato, anche prima della
+ * scadenza. Si valuta qui, sul collegamento, e non con una condizione scritta sullo spillo: così vale anche per gli ingressi
+ * aggiunti o modificati a mano e sopravvive a ogni sincronizzazione.
  */
 function senzaIngressoAPalazzoCompletato(esito: DisponibilitaDto | undefined, r: RigaSpillo, ctx: ContestoSpilli): DisponibilitaDto | undefined {
   if (!esito || !ctx.st || !ctx.palazzi) return esito;
   const dungeon = palazzoDiIngresso(r, ctx.destinazioni?.get(r.id) ?? null, ctx.palazzi);
-  const perche = dungeon ? ctx.st.palazziCompletati.get(dungeon) : undefined;
+  const perche = dungeon ? ctx.st.palazziConclusi.get(dungeon) : undefined;
   if (!dungeon || !perche) return esito;
   const nome = (ctx.nomi ?? nomiCondizioni()).dungeon?.[dungeon] ?? dungeon;
   return {
     stato: 'bloccato',
-    requisiti: [...esito.requisiti, { indice: esito.requisiti.length, tipo: 'palazzo', testo: `${nome} non ancora completato`, stato: 'rosso', dettaglio: `${nome}: completato (${perche}), non ci si entra più`, manuale: false, confermato: false }],
+    requisiti: [...esito.requisiti, { indice: esito.requisiti.length, tipo: 'palazzo', testo: `${nome} non ancora concluso`, stato: 'rosso', dettaglio: `${nome}: concluso (${perche}), non ci si entra più`, manuale: false, confermato: false }],
   };
 }
 
@@ -395,11 +425,19 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
     const v = dettaglio?.tipo === 'punto' && dettaglio.punto?.chiave === chiave ? dettaglio.punto : (dettaglioRiferimento('punto', chiave, ctx)?.punto ?? null);
     return v ? [v] : [];
   });
-  let raccolto = ctx.raccolti?.has(r.uid) ?? false;
-  // Le voci della Guida tutte gestite (ottenute/esaurite) contano come raccolto anche sulla mappa: una sola, se il pin ne ha una;
-  // tutte, se ne ha più d'una (voci indipendenti, 2026-10-09). Una voce descrittiva non ha stato e non conta.
-  const daSegnare = voci.filter((v) => !puntoDescrittivo(v.tipo, v.areaDedalo));
-  if (daSegnare.length > 0 && daSegnare.every((v) => !!v.stato)) raccolto = true;
+  // L4 (§0): lo stato del pin dalla regola unica `statoDelPin` — con voci che contano, fatto quando sono fatte le sue voci (per le
+  // rigenerabili di più infiltrazioni, quelle del contesto); senza, il suo stato; i pin dei dedali con la regola di prima. Prima era
+  // l'«OR» fra il segno del pin e le voci tutte gestite, che lasciava fatto un pin con le voci aperte.
+  let raccolto = false;
+  let campiL4: Pick<SpilloDto, 'contestoInfiltrazione' | 'daVerificare' | 'statoProprio'> = {};
+  if (ctx.partitaId) {
+    const l4 = avanzamentoDi(ctx);
+    const stato = statoDelPin(l4.m, l4.s!, { id: r.id, uid: r.uid }, l4.contesto);
+    raccolto = stato.fatto;
+    // i campi di L4 solo per i pin dei Palazzi (sulle loro planimetrie o con loro voci): le altre risposte restano quelle di prima
+    const delPalazzo = (r.mappa_chiave !== null && l4.mappePalazzo.has(r.mappa_chiave)) || voci.some((v) => l4.palazziVeri.has(v.dungeon) && !v.areaDedalo);
+    if (delPalazzo) campiL4 = { contestoInfiltrazione: stato.contesto ? { chiave: stato.contesto, nome: l4.m.infiltrazioni.get(stato.contesto)?.nome ?? stato.contesto } : null, daVerificare: stato.daVerificare, statoProprio: stato.statoProprio };
+  }
   const nomi = ctx.nomi ?? nomiCondizioni();
   const condizioni: CondizioneSpilloDto[] = condizioniDiRiga(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La chiave della richiesta la
@@ -417,7 +455,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
     id: r.id, ...(r.uid ? { uid: r.uid } : {}), tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
     nome: r.nome, descrizione: r.descrizione,
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_tipo==='mappa'?chiaveMappa(r.riferimento_chiave):r.riferimento_chiave } : null,
-    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativo ? { nativo } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, voci, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
+    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativo ? { nativo } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, ...campiL4, dettaglio, voci, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
   };
 }
 
@@ -468,15 +506,16 @@ function arriviVerso(chiave: string): MappaDto['arrivi'] {
   return righe.map((r) => ({ spilloId: r.id, tipo: r.tipo, nome: r.nome, mappa: chiaveMappa(r.mappa_chiave), mappaNome: r.mappa_nome }));
 }
 
-/** Mappa con percorso, figli, spilli (con stato della partita e dettagli delle entità collegate). */
-export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
+/** Mappa con percorso, figli, spilli (con stato della partita e dettagli delle entità collegate). `contesto` (L4, `?infiltrazione=`):
+ *  l'infiltrazione guardata, per lo stato dei pin di rigenerabili di più infiltrazioni (§1.4); null = quella in corso. */
+export function dettaglioMappa(chiave: string, partitaId?: number, contesto: string | null = null): MappaDto {
   const r = rigaMappa(chiave);
   chiave = r.chiave;
   const mappe = contestoMappe();
   // gli stessi figli che i conteggi contano (senza il nodo dei Memento, tolto dall'albero): Tokyo diceva 24 luoghi e ne elencava 25.
   // A pari ordine decide la chiave, come nella scheda del Palazzo e nel riordino.
   const figli = (prepared("SELECT * FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos' ORDER BY ordine, chiave").all(chiave) as RigaMappa[]).map((f) => riassunto(f, mappe));
-  const ctx = { ...contestoSpilli(partitaId), aree: mappe.aree };
+  const ctx = { ...contestoSpilli(partitaId, contesto), aree: mappe.aree };
   const spilli = (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(chiave) as RigaSpillo[]).map((s) => spilloDto(s, ctx));
   return {
     ...riassunto(r, mappe), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
@@ -1065,12 +1104,18 @@ export function eliminaMappa(chiave: string, opz: { conferma?: boolean; dallArea
   }
   const genitore = r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as { nome: string } | undefined)?.nome ?? '' : '';
   conCestino({ tipo: 'mappa', chiave, nome: r.nome, contesto: genitore }, () => getDb().transaction(() => {
+    const mPrima = modelloAvanzamento(getDb());
     eliminaImmaginiDeiPin('s.mappa_chiave = ?', chiave);
     eliminaImmagineDellaMappa(chiave);
     prepared('UPDATE mappa SET genitore_chiave = NULL WHERE genitore_chiave = ?').run(chiave);
     // gli spilli cadono in cascata con la mappa; i loro «raccolto» stanno in un altro file e si puliscono qui
     if (colonnaSpillo('uid')) prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
+    // L4: e le loro divergenze «da verificare»
+    if (colonnaSpillo('uid') && conDivergenze(getDb())) prepared("DELETE FROM divergenza_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
+    if (colonnaSpillo('uid') && conStatoPerInfiltrazione(getDb())) prepared("DELETE FROM spillo_partita_infiltrazione WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
     prepared('DELETE FROM mappa WHERE chiave = ?').run(chiave);
+    // §8.11: le voci dei pin della mappa li perdono, e il loro stato si ricalcola dai pin che restano
+    riallineaStati(getDb(), mPrima, nowIso());
     if (area) {
       const restanti = prepared('SELECT chiave FROM mappa WHERE area_chiave = ? ORDER BY versione_ordine, chiave').pluck().all(area.chiave) as string[];
       restanti.forEach((k, i) => prepared('UPDATE mappa SET versione_ordine = ? WHERE chiave = ?').run(i, k));
@@ -1358,14 +1403,17 @@ export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoS
   verificaCondizioni(dati.condizioni, true);
   const destinazione = verificaDestinazioneSpillo(dati.destinazione);
   const adesso = nowIso();
+  // §8.11: il modello di prima, per riallineare gli stati se il pin nasce già di una voce
+  const mPrima = separata.voce ? modelloAvanzamento(getDb()) : null;
   const info = prepared(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at, condizioni_json)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(mappaChiave, dati.tipo, dati.nome, dati.descrizione ?? '', dati.x, dati.y, dati.riferimento?.tipo ?? null, dati.riferimento?.chiave ?? null,
     dati.collezionabile ? 1 : 0, dati.ordine ?? 0, adesso, jsonCondizioni(dati.condizioni));
   prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(dati.soloPosizione ? 1 : 0, Number(info.lastInsertRowid));
   if (separata.voce) prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(Number(info.lastInsertRowid), separata.voce);
   assegnaUidMancanti(getDb());
-  // un pin che nasce già di una voce ne unisce gli stati, come collegarlo dalla guida
+  // un pin che nasce già di una voce ne unisce gli stati, come collegarlo dalla guida (§8.11: `riallineaStati`)
   if (separata.voce) allineaStatiPunto(getDb(), separata.voce, adesso);
+  if (mPrima) riallineaStati(getDb(), mPrima, adesso);
   salvaDestinazioneSpillo(Number(info.lastInsertRowid), destinazione);
   prepared("UPDATE mappa SET updated_at = ? WHERE chiave = ?").run(adesso, mappaChiave);
   return spilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(Number(info.lastInsertRowid)) as RigaSpillo);
@@ -1422,8 +1470,10 @@ export function aggiornaSpillo(id: number, dati: DatiSpillo & { mappa?: string }
   if (dati.soloPosizione !== undefined) prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(dati.soloPosizione ? 1 : 0, id);
   // una voce in più (098): le altre restano
   if (separata.voce && !vociAttuali.includes(separata.voce)) {
+    const mPrima = modelloAvanzamento(getDb());
     prepared('INSERT OR IGNORE INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(id, separata.voce);
     allineaStatiPunto(getDb(), separata.voce, nowIso());
+    riallineaStati(getDb(), mPrima, nowIso());
   }
   salvaDestinazioneSpillo(id, destinazione);
   return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo);
@@ -1435,15 +1485,30 @@ export function eliminaSpillo(id: number): void {
   const r = prepared('SELECT id, uid FROM spillo WHERE id = ?').get(id) as { id: number; uid: string | null } | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
   getDb().transaction(() => {
+    const mPrima = modelloAvanzamento(getDb());
     eliminaImmaginiDeiPin('s.id = ?', id);
     prepared('DELETE FROM spillo WHERE id = ?').run(id);
     // «raccolto» sta in un altro file: il vincolo non lo pulisce, lo si fa qui
     if (r.uid) prepared('DELETE FROM spillo_partita WHERE spillo_uid = ?').run(r.uid);
+    // L4: e le sue divergenze «da verificare», e il suo stato per infiltrazione (§8.11)
+    if (r.uid && conDivergenze(getDb())) prepared('DELETE FROM divergenza_partita WHERE spillo_uid = ?').run(r.uid);
+    if (r.uid && conStatoPerInfiltrazione(getDb())) prepared('DELETE FROM spillo_partita_infiltrazione WHERE spillo_uid = ?').run(r.uid);
+    // §8.11: le voci del pin lo perdono, e il loro stato si ricalcola dai pin che restano
+    if (mPrima.pin.has(id)) riallineaStati(getDb(), mPrima, nowIso());
   })();
 }
 
-/** Stato «raccolto» di uno spillo per partita (in uso normale; per gli spilli collegati a un punto aggiorna anche lo stato del punto nella Guida). */
-export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: boolean): SpilloDto | SchedaContenutoGuidaDto {
+/**
+ * Stato «raccolto» di uno spillo per partita. Da L4 (§3.2, rivisto dal §8.11 «NR4-1») dipende dalle voci del pin:
+ * - con voci che contano (permanenti, rigenerabili): il gesto segna o toglie **solo quel pin** (`segnaIlPin`; un pin condiviso dai
+ *   rigenerabili di più infiltrazioni nell'infiltrazione di contesto, `infiltrazione` o quella in corso), e le sue voci si ricalcolano
+ *   (k/N): fatte quando lo sono tutti i loro pin; togliere il segno toglie «fatta» a ogni voce che lo contiene, «esaurito» compreso
+ *   (scelta dell'utente del 2026-10-09). Su un pin «da verificare» togliere il segno è anche «Togli il fatto al pin». La risposta porta
+ *   le voci segnate o riaperte dal gesto (`effetti`);
+ * - con le sole voci senza carattere (dedali dei Memento, R4-30): la regola di prima, il segno del pin e le sue voci;
+ * - senza voci, o con sole voci di racconto: il suo stato (`spillo_partita`), come prima.
+ */
+export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: boolean, infiltrazione: string | null = null): SpilloDto | SchedaContenutoGuidaDto {
   assegnaUidMancanti(getDb());
   verificaPartita(partitaId);
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo | undefined;
@@ -1456,16 +1521,43 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
   if (raccolto && pinCitato(r.uid)?.parola == null) throw httpErrors.badRequest('spillo-senza-stato', `«${r.nome}» (${DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo}) non ha uno stato da segnare.`);
 
   const adesso = nowIso();
+  const m = modelloAvanzamento(getDb());
+  const vociDelModello = m.pin.get(r.id);
+  // una scheda della guida senza mappa (lo strato di prima, assorbito nella voce: §2.3) non è un pin della voce: il suo gesto è il gesto
+  // sulla voce, come prima (la voce, i passi del suo Enigma, l'Enigma di un passo)
+  if (vociDelModello && vociDelModello.contano.length > 0 && r.mappa_chiave === null) {
+    getDb().transaction(() => {
+      for (const voce of vociDelModello.contano) {
+        segnaPassiDellEnigma(getDb(), partitaId, voce, raccolto ? 'ottenuto' : null, adesso);
+        if (!(raccolto && prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, voce))) scriviStatoVoce(getDb(), partitaId, voce, raccolto ? 'ottenuto' : null, adesso);
+        allineaEnigmaDellaVoce(getDb(), partitaId, voce, adesso);
+      }
+      prepared(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
+        ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, r.uid, raccolto ? 1 : 0, adesso);
+      prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+    })();
+    return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo, contestoSpilli(partitaId, infiltrazione));
+  }
+  if (vociDelModello && vociDelModello.contano.length > 0 && r.uid) {
+    const uid = r.uid;
+    const effetti = getDb().transaction(() => {
+      const e = segnaIlPin(getDb(), partitaId, { id: r.id, uid }, raccolto, infiltrazione, adesso);
+      prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+      return e;
+    })();
+    const dto = elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo, contestoSpilli(partitaId, infiltrazione));
+    return { ...dto, effetti: effettiDelGestoDto(getDb(), effetti) };
+  }
   getDb().transaction(() => {
     prepared(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
       ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partitaId, r.uid, raccolto ? 1 : 0, adesso);
+    // L4: un pin di sole voci di racconto ha il suo stato e non le segna (le voci di racconto si segnano dalla guida); restano qui
+    // sotto i pin delle sole voci senza carattere (dedali dei Memento), con la regola di prima
+    if (!vociDelModello || vociDelModello.altre.length === 0) { prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId); return; }
     // le voci del pin che si segnano (una o più, 098): una voce descrittiva della guida non ha stato (2026-10-01), il raccolto del
     // pin non la segna
     // (né una Persona dei Memento, che si cattura nel compendio, 2026-10-12: un collegamento rimasto da prima non la segna)
-    const voci = vociDelPin(r.id).filter((voce) => {
-      const p = prepared('SELECT tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(voce) as { tipo: string; area_dedalo_chiave: string | null } | undefined;
-      return !!p && !puntoDescrittivo(p.tipo, p.area_dedalo_chiave) && !ePersonaDeiMemento(voce);
-    });
+    const voci = vociDelModello.altre.filter((voce) => !ePersonaDeiMemento(voce));
     /** Vero se la voce ha uno stato nella partita. */
     const segnata = (voce: string) => !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, voce);
     if (voci.length > 1) {
@@ -1879,6 +1971,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
   const origine = opz.origine ?? 'utente';
   const esito: EsitoImportazione = { mappe: 0, spilli: 0, pezzi: 0, copie: 0, pezziScartati: 0, copieScartate: 0, pezziEliminati: 0, copieEliminate: 0, immagini: 0, saltate: [], condizioniScartate: 0, vociScartate: 0 };
   getDb().transaction(() => {
+    // §8.11: il modello di prima, per riallineare gli stati delle partite ai legami nuovi (in fondo)
+    const mPrima = modelloAvanzamento(getDb());
     // Uno spostamento conserva l'identità originale, non la mappa corrente.
     // Il fallback richiede una sola sorgente nell'intero seed e un solo erede utente.
     const identitaSpostate = new Set<string>();
@@ -2288,6 +2382,12 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       esito.copieEliminate += quanteCopie(mappa);
       eliminaPezziDellaMappa(mappa);
     }
+    // L4: le divergenze «da verificare» dei pin tolti dal pacchetto e non tornati (un pin che torna con lo stesso uid le tiene)
+    if (conUid && conDivergenze(getDb())) prepared('DELETE FROM divergenza_partita WHERE spillo_uid NOT IN (SELECT uid FROM spillo WHERE uid IS NOT NULL)').run();
+    // §8.11: e il loro stato per infiltrazione; poi gli stati delle partite seguono i legami nuovi (forma dei pin, pin nuovi delle voci
+    // fatte, specchio)
+    if (conUid && conStatoPerInfiltrazione(getDb())) prepared('DELETE FROM spillo_partita_infiltrazione WHERE spillo_uid NOT IN (SELECT uid FROM spillo WHERE uid IS NOT NULL)').run();
+    riallineaStati(getDb(), mPrima, adesso);
     // L3 (andata e ritorno identica): l'ultima modifica di ogni mappa importata è quella del pacchetto, anche dopo i passi che la
     // ritoccano (immagini, ruoli, percorsi); un pacchetto di prima, che non la porta, lascia quella dell'import
     for (const m of pacchetto.mappe) {

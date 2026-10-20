@@ -126,11 +126,11 @@ describe('condizione «Pin di una mappa»', () => {
     expect(await stato(porta.id)).toBe('bloccato');
     await request(app).put(`/api/partite/${partita}/punti`).send({ punto: voce.chiave, stato: 'ottenuto' }).expect(200);
     expect(await stato(porta.id)).toBe('disponibile');
-    // dati di prima, con la voce segnata ma senza il segno sul pin: il visore lo mostra segnato (`dettagliSpillo`), e la
-    // condizione dice lo stesso
+    // §8.11 (NR4-1): lo stato del pin è il suo segno — senza il segno il pin non è segnato, per il visore (`dettagliSpillo`) e per la
+    // condizione insieme (sulla copia della produzione nessun pin è in questo caso: dati.md §11)
     prepared('DELETE FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').run(partita, leva.uid);
-    expect((await leggi(leva.id)).raccolto).toBe(true);
-    expect(await stato(porta.id)).toBe('disponibile');
+    expect((await leggi(leva.id)).raccolto).toBe(false);
+    expect(await stato(porta.id)).toBe('bloccato');
   });
 
   it('un pin eliminato lascia la condizione «non si sa» (grigia), detta per nome; senza partita non si valuta', async () => {

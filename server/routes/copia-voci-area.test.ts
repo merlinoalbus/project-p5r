@@ -124,16 +124,19 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     expect(prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(pinPasso)).toEqual([passo1.chiave, passoCopia1].sort());
     expect(schedeDi(passoCopia2)).toMatchObject([{ area_guida_chiave: SALA, nome: 'Scheda del passo', descrizione: 'leva', origine: 'utente' }]);
     expect(schedeDi(passo2.chiave).map((s) => s.id)).toEqual([schedaPasso]);
-    // il pin di planimetria è anche della copia, ma ogni voce ha il suo stato: la copia parte da fare, l'originale resta ottenuto, e il
-    // pin (due voci, una da fare) non è più fatto — le «voci indipendenti» del 2026-10-09
+    // il pin di planimetria è anche della copia: da L4 (R4-12, §1.3) la copia del forziere, permanente sullo stesso pin, entra
+    // nell'oggetto dell'originale; dal §8.11 il pin tiene il suo segno e la copia, che ha solo quel pin, risulta fatta, con lo specchio
+    // scritto (`punto_partita`), e il pin non torna «da fare»
     const dungeon = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${partita}`).expect(200)).body.data as DungeonDettaglioDto;
     const sala = dungeon.aree.find((x) => x.chiave === SALA)!.punti;
-    expect(sala.find((p) => p.chiave === copie[1])).toMatchObject({ stato: null });
+    expect(sala.find((p) => p.chiave === copie[1])).toMatchObject({ stato: 'ottenuto', carattere: 'permanente', oggetto: [a.chiave, copie[1]].sort()[0], avanzamento: { fatti: 1, totale: 1 } });
+    expect(prepared('SELECT stato FROM utente.punto_partita WHERE partita_id = ? AND punto_chiave = ?').pluck().get(partita, copie[1])).toBe('ottenuto');
     expect(dungeon.aree.find((x) => x.chiave === INGRESSO)!.punti.find((p) => p.chiave === a.chiave)).toMatchObject({ stato: 'ottenuto' });
     expect(prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(pin)).toContain(a.chiave);
     expect(prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(pin)).toContain(copie[1]);
     expect(prepared('SELECT COUNT(*) FROM spillo_voce WHERE voce_chiave IN (?, ?)').pluck().get(copie[0], copie[2])).toBe(0);
-    expect(prepared('SELECT COALESCE(MAX(sp.raccolto), 0) FROM utente.spillo_partita sp JOIN spillo s ON s.uid = sp.spillo_uid WHERE sp.partita_id = ? AND s.id = ?').pluck().get(partita, pin)).toBe(0);
+    // il segno del pin resta il suo (§8.11)
+    expect(prepared('SELECT COALESCE(MAX(sp.raccolto), 0) FROM utente.spillo_partita sp JOIN spillo s ON s.uid = sp.spillo_uid WHERE sp.partita_id = ? AND s.id = ?').pluck().get(partita, pin)).toBe(1);
     // eliminare la copia non tocca l'originale né la sua immagine
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(copie[0])}`).expect(204);
     expect(schedeDi(scheda.voce)).toEqual(schedaPrima);

@@ -12,10 +12,21 @@
 //   non si completa finché non lo si mette con l'editor;
 // - il **boss finale** sconfitto: il suo spillo raccolto sulla mappa, o il boss segnato nella Guida. Prima il boss bastava
 //   da solo, ma si può affrontare più volte dentro un Palazzo (rilievo dell'utente);
-// - **tutto il raccolto**: il 100% della scheda del Palazzo, con la sua stessa regola.
+// - **tutto il raccolto**: il 100% della scheda del Palazzo, con la sua stessa regola. Da L4 (2026-10-20, «Avanzamento unico») è
+//   «tutti gli oggetti permanenti» della guida del Palazzo, con la funzione unica `shared/completamentoGuida.ts`; il Tesoro e il boss
+//   finale si leggono con la regola del pin di L4 (§8.11: il suo segno).
+// Dal 2026-10-20 (decisione dell'utente, lotti/L4/modifiche.md §8.10) i livelli sono due: **concluso** = Tesoro e boss finale (il
+// furto), che governa gli effetti — ingressi, mappa di Tokyo, requisiti e condizioni «Completare il Palazzo» / «dopo il Palazzo di X»
+// (`palazziConclusi`) —; **completato** = concluso e tutti gli oggetti permanenti, che vale solo per l'anello, la percentuale e il segno
+// «Completato». Nel gioco il Palazzo sparisce dopo il furto e nessuno sblocco dipende dalla raccolta completa (G-026); il boss da
+// solo continua a non bastare.
 // Il boss **finale**, non uno qualsiasi: Shido ha Akechi e il Mastino prima dell'Aula magna, Maruki Sumire
-// prima della fine (rilievo della revisione). Finale = i boss dell'ultima area, in ordine di guida, che ne ha.
-// I Memento non hanno planimetrie: restano completati dal boss finale segnato nella Guida, come prima.
+// prima della fine (rilievo della revisione). Dal 2026-10-20 (L4 §8.14, O4-1 e G-027) è una **voce dichiarata** per Palazzo
+// (`dungeon.voce_boss_finale`, migrazione 112, «Modifica › Boss finale» della scheda): fatto quando è fatta quella voce (§8.11: dai suoi
+// pin, se ne ha), e nessun altro pin `boss` conta. Prima un'euristica (le voci `boss` dell'ultima infiltrazione, ne bastava una; in un
+// Palazzo con boss in una sola infiltrazione qualunque pin `boss`, anche quello del tutorial di Kamoshida). Senza voce dichiarata il
+// Palazzo non si conclude.
+// I Memento non hanno planimetrie: restano completati dal boss finale segnato nella Guida, come prima (`bossFinali`, la regola di prima).
 //
 // Il boss finale della Guida **non si segna più da solo** raccogliendo il Tesoro o il boss (scelta dell'utente del
 // 2026-10-04, «Togli l'automatismo»: il segno automatico del 2026-09-30 faceva risultare il boss sconfitto senza che
@@ -23,11 +34,12 @@
 // **sparisce** dalla mappa a Palazzo completato, e gli archi restano legati alla data.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
-import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
+import { vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
+import { contaOggetti, modelloAvanzamento, oggettiDelleVoci, statiDellaPartita, statoDelPin, voceFatta, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
+import { palazzoCompletato, palazzoConcluso, type CompletamentoPalazzo } from '../../shared/completamentoGuida.js';
 import { radiceDelPalazzo, SQL_RADICE_PALAZZO, SQL_SOTTOALBERO } from './mappe/alberoMappe.js';
-import { infiltrazioniDelleMappe } from './mappe/legamiInfiltrazioni.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
 export function palazzoDiOgniMappa(): Map<string, string> {
@@ -43,7 +55,8 @@ export function palazzoDiOgniMappa(): Map<string, string> {
 /** Il boss finale di un Palazzo: l'area e i suoi punti «boss»; `unico` se nessun'altra area ha boss (niente intermedi). */
 export interface BossFinale { area: string; punti: string[]; unico: boolean }
 
-/** Il boss finale di ogni Palazzo: l'ultima area (in ordine di guida) con punti «boss», e quei punti. */
+/** Il boss finale di ogni dungeon con la regola di prima: l'ultima area (in ordine di guida) con punti «boss», e quei punti. Da L4 §8.14
+ *  la usano solo i Memento (il boss segnato nella Guida); i Palazzi hanno la loro voce dichiarata (`vociBossFinale`). */
 export function bossFinali(): Map<string, BossFinale> {
   const righe = prepared(`SELECT a.dungeon_chiave AS dungeon, a.chiave AS area, a.ordine AS ordine, pi.chiave AS punto
     FROM punto_interesse pi JOIN dungeon_area a ON a.chiave = pi.area_chiave WHERE pi.tipo = 'boss' ORDER BY a.dungeon_chiave, a.ordine, pi.ordine`).all() as Array<{ dungeon: string; area: string; ordine: number; punto: string }>;
@@ -60,29 +73,14 @@ export function bossFinali(): Map<string, BossFinale> {
   return new Map([...out].map(([k, v]) => [k, { area: v.area, punti: v.punti, unico: v.aree.size === 1 }]));
 }
 
-/**
- * Le infiltrazioni contenute in ogni planimetria (mappa → infiltrazioni), per riconoscere dove sta il boss finale. Da L3 sono quelle
- * dell'Area della planimetria (`infiltrazione_area`): l'infiltrazione tocca l'area intera, versioni comprese (dubbio 1).
- */
-function areeDelleMappe(): Map<string, Set<string>> {
-  return new Map([...infiltrazioniDelleMappe()].map(([mappa, inf]) => [mappa, new Set(inf.map((i) => i.chiave))]));
+/** La voce del boss finale dichiarata per ogni Palazzo (`dungeon.voce_boss_finale`, migrazione 112; L4 §8.14); vuota su uno schema
+ *  di prima. Un Palazzo senza voce non c'è nella mappa. */
+export function vociBossFinale(): Map<string, string> {
+  if (!(prepared('PRAGMA main.table_info(dungeon)').all() as Array<{ name: string }>).some((c) => c.name === 'voce_boss_finale')) return new Map();
+  return new Map((prepared('SELECT chiave, voce_boss_finale FROM dungeon WHERE voce_boss_finale IS NOT NULL').all() as Array<{ chiave: string; voce_boss_finale: string }>).map((r) => [r.chiave, r.voce_boss_finale]));
 }
 
-interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string; /** Le voci della guida del pin che si segnano (`vociDiOgniPin(true)`, una o più dalla 098). */ voci: string[] }
-
-/**
- * È il boss finale del suo Palazzo? Se punta a un punto boss finale; se sta sulla planimetria che contiene l'area
- * finale; oppure se il Palazzo **non ha boss intermedi** — allora ogni boss è quello finale. Quest'ultima serve ai
- * dati veri: l'area finale di Kamoshida (come quelle di Madarame e Futaba) non è legata a nessuna planimetria, e
- * l'«Ombra di Kamoshida» messa sulla Stanza del Tesoro va riconosciuta lo stesso (rilievo della revisione). Dove ci
- * sono intermedi (Shido, Maruki) serve il collegamento: uno spillo «Boss» qualunque potrebbe essere Akechi.
- */
-function eBossFinale(s: SpilloCollezionabile, finale: BossFinale | undefined, aree: Map<string, Set<string>>): boolean {
-  if (s.tipo !== 'boss' || !finale) return false;
-  if (s.voci.some((v) => finale.punti.includes(v))) return true;
-  if (aree.get(s.mappa)?.has(finale.area)) return true;
-  return finale.unico;
-}
+interface SpilloCollezionabile { id: number; uid: string | null; tipo: string; mappa: string; /** Le voci della guida del pin che si segnano (`vociDiOgniPin(true)`, una o più dalla 098). */ voci: string[] }
 
 /** I collezionabili sulle planimetrie di ogni Palazzo. */
 function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, SpilloCollezionabile[]> {
@@ -95,66 +93,95 @@ function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, Spi
     const dungeon = palazzi.get(r.mappa_chiave);
     if (!dungeon) continue;
     const elenco = out.get(dungeon) ?? [];
-    elenco.push({ uid: r.uid, tipo: r.tipo, mappa: r.mappa_chiave, voci: voci.get(r.id) ?? [] });
+    elenco.push({ id: r.id, uid: r.uid, tipo: r.tipo, mappa: r.mappa_chiave, voci: voci.get(r.id) ?? [] });
     out.set(dungeon, elenco);
   }
   return out;
 }
 
-/** Uno spillo segnato raccolto nella partita. */
-const raccolto = (s: SpilloCollezionabile, raccolti: Set<string>): boolean => !!s.uid && raccolti.has(s.uid);
+/**
+ * Un Palazzo nella partita, sui due livelli del §8.10 (decisione dell'utente del 2026-10-20): `concluso` (Tesoro e boss finale: gli
+ * effetti) col perché, o null, e `mancaPerConcludere`; `completato` (concluso e tutti gli oggetti permanenti: anello, percentuale e
+ * segno «Completato») col perché, o null, e `manca`. Da L4 anche i numeri della funzione unica (`completamento`). Per i Memento i
+ * due livelli coincidono (il boss finale segnato nella Guida, R4-30).
+ */
+export interface StatoPalazzo { concluso: string | null; mancaPerConcludere: string | null; completato: string | null; manca: string | null; completamento?: CompletamentoPalazzo }
 
-/** Un Palazzo nella partita: il perché del completamento, o null; e, se non è completato, che cosa manca. */
-export interface StatoPalazzo { completato: string | null; manca: string | null }
+/** Il perché di un Palazzo concluso (§8.10). */
+export const MOTIVO_CONCLUSO = 'Tesoro e boss finale';
 
 /**
- * Le tre condizioni del completamento di un Palazzo (vedi l'intestazione), tutte insieme: Tesoro raccolto, boss finale
- * sconfitto (spillo raccolto o segnato nella Guida), 100% del raccolto con la regola della scheda.
+ * Le tre condizioni del completamento di un Palazzo (vedi l'intestazione), tutte insieme, con la funzione unica di L4 (§1.5,
+ * `shared/completamentoGuida.ts`): gli **oggetti permanenti** delle voci del Palazzo tutti fatti (ciascuno una volta: prima erano i
+ * pin collezionabili, versioni doppie comprese e porte o meccanismi esclusi), il **Tesoro** — il pin `tesoro-palazzo` fatto con la
+ * regola del pin (§8.11: il suo segno; segnalazione B), tutti i pin `tesoro-palazzo` del Palazzo — e il **boss finale**: la voce dichiarata
+ * (`voceBoss`, §8.14) fatta con la regola del §8.11; senza voce dichiarata il Palazzo non si conclude. Sui due livelli del §8.10
+ * (`concluso`, `completato`). Senza partita, i soli numeri del Palazzo.
  */
-function valutaPalazzo(spilli: SpilloCollezionabile[], finale: BossFinale | undefined, aree: Map<string, Set<string>>, raccolti: Set<string>, puntiGestiti: Set<string>, bossSegnato: boolean): StatoPalazzo {
-  // la stessa regola della scheda del Palazzo: raccolto, o con le sue voci della Guida tutte gestite (una o più, 098)
-  const preso = (s: SpilloCollezionabile) => raccolto(s, raccolti) || fattoPerVoci(s.voci, puntiGestiti);
-  const tesori = spilli.filter((s) => s.tipo === 'tesoro-palazzo');
-  const tesoro = tesori.length > 0 && tesori.every((s) => raccolto(s, raccolti));
-  const boss = bossSegnato || spilli.some((s) => eBossFinale(s, finale, aree) && raccolto(s, raccolti));
-  const presi = spilli.filter(preso).length;
-  const tutto = spilli.length > 0 && presi >= spilli.length;
-  if (tesoro && boss && tutto) return { completato: `Tesoro, boss finale e raccolto tutto (${presi}/${spilli.length})`, manca: null };
-  const manca = [
+function valutaPalazzo(dungeon: string, spilli: SpilloCollezionabile[], voceBoss: string | undefined, m: ModelloAvanzamento, s: StatiDellaPartita | null): StatoPalazzo {
+  const oggetti = oggettiDelleVoci(m, [...m.voci.values()].filter((v) => v.palazzo === dungeon).map((v) => v.chiave));
+  const conto = contaOggetti(oggetti, s);
+  const tesori = spilli.filter((x) => x.tipo === 'tesoro-palazzo');
+  if (!s) return { concluso: null, mancaPerConcludere: null, completato: null, manca: null, completamento: { ...conto, tesoro: null, boss: null, concluso: null, completato: null } };
+  const fattoPin = (x: SpilloCollezionabile) => statoDelPin(m, s, { id: x.id, uid: x.uid }).fatto;
+  const tesoro = tesori.length > 0 && tesori.every(fattoPin);
+  const boss = !!voceBoss && voceFatta(m, s, voceBoss);
+  const completamento: CompletamentoPalazzo = { ...conto, tesoro, boss, concluso: palazzoConcluso({ tesoro, boss }), completato: null };
+  completamento.completato = palazzoCompletato(completamento);
+  const fatti = conto.fatti ?? 0;
+  // che cosa manca al furto (il livello degli effetti) e, in più, alla raccolta (il livello dell'anello)
+  const mancaAlFurto = [
     tesori.length === 0 ? 'lo spillo «Tesoro del Palazzo» sulle planimetrie' : !tesoro ? 'il Tesoro del Palazzo raccolto' : null,
-    !boss ? 'il boss finale sconfitto' : null,
-    !tutto ? `tutto il raccolto (${presi}/${spilli.length})` : null,
-  ].filter((m): m is string => m !== null);
-  return { completato: null, manca: manca.join(', ') };
+    !voceBoss ? 'il boss finale (nessuna voce di boss finale per questo Palazzo)' : !boss ? 'il boss finale sconfitto' : null,
+  ].filter((x): x is string => x !== null);
+  const mancaAllaRaccolta = conto.oggetti === 0 ? 'le voci permanenti della guida' : fatti < conto.oggetti ? `tutti gli oggetti permanenti (${fatti}/${conto.oggetti})` : null;
+  const manca = [...mancaAlFurto, ...(mancaAllaRaccolta ? [mancaAllaRaccolta] : [])];
+  return {
+    concluso: completamento.concluso ? MOTIVO_CONCLUSO : null,
+    mancaPerConcludere: mancaAlFurto.length ? mancaAlFurto.join(', ') : null,
+    completato: completamento.completato ? `Tesoro, boss finale e tutti gli oggetti permanenti (${fatti}/${conto.oggetti})` : null,
+    manca: completamento.completato ? null : manca.join(', '),
+    completamento,
+  };
 }
 
-/** I Palazzi (e i Memento) della partita: completati col perché, o che cosa manca. */
-export function statoPalazzi(partitaId: number): Map<string, StatoPalazzo> {
+/** I Palazzi (e i Memento) della partita: completati col perché, o che cosa manca. Senza partita (`partitaId` assente) i soli numeri
+ *  dei Palazzi. `m` lo passa chi l'ha già letto. */
+export function statoPalazzi(partitaId: number | undefined, m: ModelloAvanzamento = modelloAvanzamento(getDb())): Map<string, StatoPalazzo> {
   const out = new Map<string, StatoPalazzo>();
   const finali = bossFinali();
-  const puntiGestiti = vociGestite(partitaId);
+  const s = partitaId === undefined ? null : statiDellaPartita(getDb(), m, partitaId);
+  // i Memento con la regola di prima (R4-30): il boss finale segnato nella Guida
+  const puntiGestiti = partitaId === undefined ? new Set<string>() : vociGestite(partitaId);
   const tipi = new Map((prepared('SELECT chiave, tipo FROM dungeon').all() as Array<{ chiave: string; tipo: string }>).map((r) => [r.chiave, r.tipo]));
   const palazzi = palazzoDiOgniMappa();
-  const raccolti = new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid));
-  const aree = areeDelleMappe();
   const collezionabili = collezionabiliPerPalazzo(palazzi);
+  const vociBoss = vociBossFinale();
   for (const [dungeon, tipo] of tipi) {
-    const finale = finali.get(dungeon);
     if (tipo === 'mementos') {
+      if (partitaId === undefined) continue;
       // niente planimetrie: il boss finale segnato nella Guida, come prima del 2026-10-04
+      const finale = finali.get(dungeon);
       const segnato = !!finale && finale.punti.some((p) => puntiGestiti.has(p));
-      out.set(dungeon, segnato ? { completato: 'boss finale segnato nella Guida', manca: null } : { completato: null, manca: 'il boss finale segnato nella Guida' });
+      const motivo = 'boss finale segnato nella Guida';
+      out.set(dungeon, segnato ? { concluso: motivo, mancaPerConcludere: null, completato: motivo, manca: null }
+        : { concluso: null, mancaPerConcludere: 'il boss finale segnato nella Guida', completato: null, manca: 'il boss finale segnato nella Guida' });
       continue;
     }
-    const bossSegnato = !!finale && finale.punti.some((p) => puntiGestiti.has(p));
-    out.set(dungeon, valutaPalazzo(collezionabili.get(dungeon) ?? [], finale, aree, raccolti, puntiGestiti, bossSegnato));
+    out.set(dungeon, valutaPalazzo(dungeon, collezionabili.get(dungeon) ?? [], vociBoss.get(dungeon), m, s));
   }
   return out;
 }
 
-/** I Palazzi completati nella partita, ognuno col perché. */
+/** I Palazzi completati nella partita (concluso e tutti gli oggetti permanenti: l'anello), ognuno col perché. */
 export function palazziCompletati(partitaId: number): Map<string, string> {
   return new Map([...statoPalazzi(partitaId)].flatMap(([k, s]) => (s.completato ? [[k, s.completato] as [string, string]] : [])));
+}
+
+/** I Palazzi conclusi nella partita (Tesoro e boss finale: gli effetti, §8.10), ognuno col perché. Li leggono gli ingressi, la mappa
+ *  di Tokyo, i requisiti dei Confidenti e le condizioni «Completare il Palazzo» / «dopo il Palazzo di X». */
+export function palazziConclusi(partitaId: number): Map<string, string> {
+  return new Map([...statoPalazzi(partitaId)].flatMap(([k, s]) => (s.concluso ? [[k, s.concluso] as [string, string]] : [])));
 }
 
 /**

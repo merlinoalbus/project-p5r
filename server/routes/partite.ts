@@ -27,6 +27,7 @@ import { impostaAcquisto } from '../services/negoziService.js';
 import { confermaRequisito } from '../services/semaforiService.js';
 import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
+import { elencoDivergenze, togliFattoAlPin } from '../services/divergenzeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
 import { idParam } from '../schemas/comuni.js';
@@ -180,7 +181,17 @@ router.get('/:id/suggerimenti', validate({ params: paramsPartita }), (req, res) 
 
 /** Stato «raccolto» di uno spillo della mappa nella partita (Fase 13). */
 router.put('/:id/spilli/:spilloId', validate({ params: z.object({ id: idParam, spilloId: idParam }), body: bodyRaccolto }), (req, res) => {
-  res.json(impostaRaccolto(Number(req.params.id), Number(req.params.spilloId), (req.body as { raccolto: boolean }).raccolto));
+  const b = req.body as { raccolto: boolean; infiltrazione?: string };
+  res.json(impostaRaccolto(Number(req.params.id), Number(req.params.spilloId), b.raccolto, b.infiltrazione ?? null));
+});
+
+// L4 (§3.2): le divergenze conservate «da verificare» e «Togli il fatto al pin»
+router.get('/:id/divergenze', validate({ params: paramsPartita, query: z.object({ dungeon: z.string().min(1).max(80).optional() }) }), (req, res) => {
+  res.json(elencoDivergenze(Number(req.params.id), (req.query as { dungeon?: string }).dungeon));
+});
+router.delete('/:id/divergenze/:spilloUid', validate({ params: z.object({ id: idParam, spilloUid: z.string().min(1).max(80) }) }), (req, res) => {
+  togliFattoAlPin(Number(req.params.id), String(req.params.spilloUid));
+  res.status(204).end();
 });
 
 // ---- Persona possedute ----

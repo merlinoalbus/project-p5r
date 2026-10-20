@@ -280,21 +280,46 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   // ---- Palazzi e Memento ----
   'GET /api/compendio/dungeon': {
     sommario: 'Elenco dei Palazzi e dei Memento',
-    descrizione: 'I riassunti in ordine di gioco: date, finestra di esistenza, livello consigliato, conteggi di aree e punti, raccolta sulle planimetrie (per i Memento gli obiettivi dei dedali). Con `?partita=` anche i punti gestiti, quanto è stato raccolto e se il Palazzo è completato.',
+    descrizione: 'I riassunti in ordine di gioco: date, finestra di esistenza, livello consigliato, conteggi di aree e punti, raccolta sulle planimetrie (per i Memento gli obiettivi dei dedali). Con `?partita=` anche i punti gestiti, quanto è stato raccolto e, per i Palazzi, i due livelli del completamento (§8.10, decisione dell\'utente del 2026-10-20): `concluso` (Tesoro e boss finale: governa ingressi, mappa di Tokyo, requisiti e condizioni) e `completato` (concluso e tutti gli oggetti permanenti: anello, percentuale e segno «Completato»), ciascuno col perché.',
     risposta: 'Elenco di `DungeonRiassuntoDto`',
     errori: [PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/dungeon/:chiave': {
     sommario: 'Scheda completa di un Palazzo o dei Memento',
-    descrizione: 'Riassunto, note e fonti, aree in ordine con le loro planimetrie e i punti della guida (marcatore e pin collegati); per i Memento il dedalo di ogni area con le sue aree (099: dettagli, timbri, Richieste, conteggio degli elementi e completamento) e le Richieste da collocare, per i Palazzi l\'elenco di tutte le planimetrie. `illustrazione` è l\'immagine caricata sulla radice `dungeon-<chiave>` (URL versionato), con `asset` sempre null: l\'asset della radice è lo stemma, che la scheda mostra già come segno (L1). Con `?partita=` arrivano lo stato dei punti, i collezionabili presi e `personeCatturate` (le Persona registrate nel compendio della partita: nei Memento le «catturate», 2026-10-12); senza, `presi` e `personeCatturate` sono null. Le voci Persona dei dedali portano `areeDedalo` (101).',
+    descrizione: 'Riassunto, note e fonti, aree in ordine con le loro planimetrie e i punti della guida (marcatore e pin collegati); per i Memento il dedalo di ogni area con le sue aree (099: dettagli, timbri, Richieste, conteggio degli elementi e completamento) e le Richieste da collocare, per i Palazzi l\'elenco di tutte le planimetrie. `illustrazione` è l\'immagine caricata sulla radice `dungeon-<chiave>` (URL versionato), con `asset` sempre null: l\'asset della radice è lo stemma, che la scheda mostra già come segno (L1). Con `?partita=` arrivano lo stato dei punti, i collezionabili presi e `personeCatturate` (le Persona registrate nel compendio della partita: nei Memento le «catturate», 2026-10-12); senza, `presi` e `personeCatturate` sono null. Le voci Persona dei dedali portano `areeDedalo` (101). Da L4 («Avanzamento unico»), per i Palazzi: il completamento con la funzione unica (`completamento`: oggetti permanenti, Tesoro, boss finale, `concluso` e `completato` del §8.10; per infiltrazione, planimetria e Area del Palazzo), le voci con carattere, oggetto, «da verificare», `condivise` e lo stato con cui risultano (§8.11: una voce con pin è fatta quando lo sono tutti i suoi pin, con `avanzamento` k/N e il segno di ogni pin in `pin[].fatto`), `daVerificare` (quante divergenze), `schedeDaSistemare` (le schede senza mappa né voce); `raccolta` resta l\'elenco dei collezionabili, con lo stato del pin di L4. `?infiltrazione=` è l\'infiltrazione guardata: il contesto dei pin di rigenerabili di più infiltrazioni (senza, quella in corso). I Memento restano come prima.',
     risposta: '`DungeonDettaglioDto`',
     errori: [[404, 'dungeon-non-trovato'], PARTITA_NON_TROVATA],
   },
+  'GET /api/compendio/dungeon/:chiave/copie': {
+    sommario: 'Le copie di una voce di un Palazzo secondo la regola dell\'utente (L4, sola lettura)',
+    descrizione: 'I gruppi di voci identiche secondo la regola dell\'utente (R4-15, 2026-10-20): stessa infiltrazione, stesso tipo, nome, descrizione, dettagli ed Enigma, **stesso insieme di pin** (non vuoto). Sola lettura: in L4 non c\'è fusione (decisione dell\'utente); oggi l\'elenco è vuoto.',
+    risposta: '`GruppoCopieDto[]`',
+    errori: [[404, 'dungeon-non-trovato']],
+  },
+  'POST /api/compendio/schede/:id/voce': {
+    sommario: '«Crea la voce» da una scheda della guida da sistemare (L4)',
+    descrizione: 'Una scheda senza mappa né voce (le «Schede da sistemare» della scheda del Palazzo) diventa una voce nuova, in fondo alla sua infiltrazione, con il suo nome e la sua descrizione e il `tipo` dato; la voce la assorbe (la posizione della scheda è la sua posizione da collocare). Nessuno stato si trasferisce.',
+    risposta: '`PuntoInteresseDto` della voce nuova (201)',
+    errori: [[404, 'scheda-non-trovata'], [409, 'scheda-gia-sistemata']],
+  },
+  'PUT /api/compendio/schede/:id/voce': {
+    sommario: '«Collega a una voce» una scheda della guida da sistemare (L4)',
+    descrizione: 'La scheda senza mappa né voce diventa la voce data, del suo Palazzo, che la assorbe (la posizione della scheda è la posizione da collocare della voce, se non ne ha una). Nessuno stato si trasferisce.',
+    risposta: '`PuntoInteresseDto` della voce',
+    errori: [[404, 'scheda-non-trovata'], [409, 'scheda-gia-sistemata'], [404, 'punto-non-trovato'], [400, 'voce-di-un-altro-palazzo']],
+  },
   'PUT /api/compendio/dungeon/:chiave': {
     sommario: 'Corregge i testi della scheda di un Palazzo',
-    descrizione: 'Si cambiano solo i campi inviati (nome, sovrano, date, livello consigliato, note); un nome vuoto lascia quello di prima. È una correzione della guida: vale per tutte le partite ed entra nel pacchetto di gioco.',
+    descrizione: 'Si cambiano solo i campi inviati (nome, sovrano, date, livello consigliato, note); un nome vuoto lascia quello di prima. È una correzione della guida: vale per tutte le partite ed entra nel pacchetto di gioco. L4 §8.14: `voceBossFinale` («Modifica › Boss finale») sceglie la voce del boss finale del Palazzo fra le sue voci «Boss» (null = nessuna, e il Palazzo non si conclude); il primo cambio conserva il valore della guida per «Ripristina». Nei Memento non c\'è (il boss si segna nella Guida).',
     risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
-    errori: [[404, 'dungeon-non-trovato']],
+    errori: [[404, 'dungeon-non-trovato'], [404, 'punto-non-trovato'], [400, 'voce-non-boss'], [400, 'voce-di-un-altro-palazzo'], [400, 'boss-finale-dei-memento']],
+  },
+  'POST /api/compendio/dungeon/:chiave/ripristina': {
+    sommario: '«Ripristina» della scheda di un Palazzo (L4 §8.14)',
+    descrizione: 'La voce del boss finale torna quella della guida (G-027, migrazione 112); se quella voce non c\'è più resta nessuna. 409 se la scheda ha già i valori della guida.',
+    risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
+    senzaCorpo: true,
+    errori: [[404, 'dungeon-non-trovato'], [409, 'niente-da-ripristinare']],
   },
   'PUT /api/compendio/dungeon/:chiave/finestra': {
     sommario: 'Cambia la finestra in cui il Palazzo compare sulla mappa di Tokyo',
@@ -406,9 +431,9 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/punti/:chiave': {
     sommario: 'Corregge un punto della guida',
-    descrizione: 'Si cambiano solo i campi inviati: nome (vuoto = invariato), descrizione, tipo, esauribilità, ordine e `contenitore` (l\'Enigma di cui è un passo; null lo riporta fra le voci dell\'area). Un punto con pin non diventa descrittivo, un Enigma con passi non cambia tipo. Cambiando Enigma la voce va in fondo fra le nuove compagne e gli Enigmi toccati si riallineano in ogni partita. In un dedalo dei Memento `areaDedalo` sposta la voce (con i suoi passi, se è un Enigma) in fondo a un\'altra area dello stesso dedalo (099); un passo resta nell\'area del suo Enigma. Nei dedali il tipo nuovo è `persona` o `trama`, e `trama` solo lì (2026-10-11); `persona` (id del compendio) cambia la maschera di una voce Persona, e i dettagli dell\'Ombra di prima se ne vanno. `areeDedalo` sostituisce le aree in cui si incontra una Persona di un dedalo (101); nei dedali una Persona resta Persona e una Trama resta Trama. In un Palazzo `area` sposta la voce in fondo a un\'altra area dello stesso Palazzo (2026-10-12), coi suoi passi se è un Enigma e con le sue schede della guida senza mappa; la chiave resta, e con lei stati delle partite, pin e marcatore. Non nei Memento (400 `area-solo-nei-palazzi`) e non per un passo (400 `passo-segue-enigma`). `dettagli` (2026-10-18) sostituisce tutti i dettagli della voce (etichetta → testo, numero, elenco o tabella; al più 40): la `maschera` di una Persona resta quella di prima.',
+    descrizione: 'Si cambiano solo i campi inviati: nome (vuoto = invariato), descrizione, tipo, esauribilità, ordine e `contenitore` (l\'Enigma di cui è un passo; null lo riporta fra le voci dell\'area). Un punto con pin non diventa descrittivo, un Enigma con passi non cambia tipo. Cambiando Enigma la voce va in fondo fra le nuove compagne e gli Enigmi toccati si riallineano in ogni partita. In un dedalo dei Memento `areaDedalo` sposta la voce (con i suoi passi, se è un Enigma) in fondo a un\'altra area dello stesso dedalo (099); un passo resta nell\'area del suo Enigma. Nei dedali il tipo nuovo è `persona` o `trama`, e `trama` solo lì (2026-10-11); `persona` (id del compendio) cambia la maschera di una voce Persona, e i dettagli dell\'Ombra di prima se ne vanno. `areeDedalo` sostituisce le aree in cui si incontra una Persona di un dedalo (101); nei dedali una Persona resta Persona e una Trama resta Trama. In un Palazzo `area` sposta la voce in fondo a un\'altra area dello stesso Palazzo (2026-10-12), coi suoi passi se è un Enigma e con le sue schede della guida senza mappa; la chiave resta, e con lei stati delle partite, pin e marcatore. Non nei Memento (400 `area-solo-nei-palazzi`) e non per un passo (400 `passo-segue-enigma`). `dettagli` (2026-10-18) sostituisce tutti i dettagli della voce (etichetta → testo, numero, elenco o tabella; al più 40): la `maschera` di una Persona resta quella di prima. `carattere` (L4) sceglie il carattere della voce di un Palazzo (`permanente`, `rigenerabile`, `descrittiva`; `null` = «Ripristina», vale la regola del tipo): cambia la propagazione, nessuno stato si riscrive; non per le voci dei dedali né per le Persona (400 `carattere-non-ammesso`).',
     risposta: 'Il punto aggiornato (senza stato di partita), `PuntoInteresseDto`',
-    errori: [[400, 'area-solo-nei-palazzi'], [404, 'area-non-trovata'], [400, 'area-di-altro-palazzo'], [400, 'passo-segue-enigma'], [400, 'non-un-enigma'], [400, 'enigma-di-altra-area'], [400, 'enigma-dentro-enigma'], [400, 'non-un-dedalo'], [400, 'area-di-altro-dedalo'], [400, 'passo-di-altra-area'], [400, 'tipo-non-del-dedalo'], [400, 'trama-solo-nei-memento'], [400, 'persona-solo-per-persona'], [400, 'persona-in-piu-aree'], [400, 'aree-solo-per-persona'], [400, 'persona-tipo-fisso'], [404, 'area-dedalo-non-trovata'], [404, 'punto-non-trovato'], [404, 'persona-non-trovata'], [409, 'punto-con-pin'], [409, 'enigma-con-passi'], [409, 'enigma-con-pin']],
+    errori: [[400, 'carattere-non-ammesso'],[400, 'area-solo-nei-palazzi'], [404, 'area-non-trovata'], [400, 'area-di-altro-palazzo'], [400, 'passo-segue-enigma'], [400, 'non-un-enigma'], [400, 'enigma-di-altra-area'], [400, 'enigma-dentro-enigma'], [400, 'non-un-dedalo'], [400, 'area-di-altro-dedalo'], [400, 'passo-di-altra-area'], [400, 'tipo-non-del-dedalo'], [400, 'trama-solo-nei-memento'], [400, 'persona-solo-per-persona'], [400, 'persona-in-piu-aree'], [400, 'aree-solo-per-persona'], [400, 'persona-tipo-fisso'], [404, 'area-dedalo-non-trovata'], [404, 'punto-non-trovato'], [404, 'persona-non-trovata'], [409, 'punto-con-pin'], [409, 'enigma-con-passi'], [409, 'enigma-con-pin']],
   },
   'DELETE /api/compendio/punti/:chiave': {
     sommario: 'Elimina un punto della guida, per tutte le partite',

@@ -12,14 +12,20 @@
 // boss + raccolto tutto») servono tutte e tre insieme: Tesoro del Palazzo raccolto, boss finale sconfitto (spillo raccolto
 // o segnato nella Guida) e il 100% del raccolto. Il boss da solo non basta più: si può affrontare più volte dentro un Palazzo.
 // E il boss della Guida non si segna più da solo raccogliendo Tesoro o boss («Togli l'automatismo», utente 017).
+// Da L4 (2026-10-20, «Avanzamento unico», lotti/L4/modifiche.md §1.5) «raccolto tutto» è «tutti gli oggetti permanenti» della guida del
+// Palazzo (le voci permanenti, una volta ciascun oggetto), il Tesoro è il pin `tesoro-palazzo` con la regola del pin, il boss finale la
+// sua voce o il suo pin. La voce del boss finale è permanente: per il 100% serve comunque fatta.
+// Dal 2026-10-20 (decisione dell'utente, §8.10) i livelli sono due: **concluso** (Tesoro e boss finale) governa gli effetti —
+// ingressi, mappa di Tokyo, requisiti e condizioni —; **completato** (concluso e tutti gli oggetti permanenti) vale solo per l'anello.
 // ============================================================
 
 import request from 'supertest';
-import { closeDb, prepared } from '../db/dbService.js';
+import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 import { statoPartitaSemafori, valuta } from '../services/semaforiService.js';
-import { bossFinali, palazziCompletati, statoPalazzi } from '../services/palazziService.js';
+import { bossFinali, palazziCompletati, palazziConclusi, statoPalazzi } from '../services/palazziService.js';
+import { modelloAvanzamento } from '../services/mappe/statiGuida.js';
 import type { DungeonRiassuntoDto, MappaDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
@@ -33,18 +39,30 @@ const collezionabili = (dungeon: string) => {
   const mappe = albero(dungeon);
   return prepared(`SELECT id, uid, tipo FROM spillo WHERE collezionabile = 1 AND uid IS NOT NULL AND mappa_chiave IN (${mappe.map(() => '?').join(',')})`).all(...mappe) as Array<{ id: number; uid: string; tipo: string }>;
 };
+/** Le voci permanenti della guida di un Palazzo (L4) e quanti oggetti fanno. */
+const permanenti = (dungeon: string) => {
+  const m = modelloAvanzamento(getDb());
+  const voci = [...m.voci.values()].filter((v) => v.palazzo === dungeon && v.carattere === 'permanente').map((v) => v.chiave);
+  return { voci, oggetti: new Set(voci.map((v) => m.oggetto.get(v))).size };
+};
 
-describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', () => {
+describe('Palazzo completato: Tesoro, boss finale e tutti gli oggetti permanenti, insieme', () => {
   let partita: number;
   /** Vero se la voce della guida `punto` (il boss) risulta segnata nella partita di prova. */
   const bossGuida = (punto: string) => !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, punto);
   /** Segna (o toglie il segno) dello spillo nella partita di prova, pretendendo il 200. */
   const segna = (spillo: number, raccolto: boolean) => request(app).put(`/api/partite/${partita}/spilli/${spillo}`).send({ raccolto }).expect(200);
+  /** Segna (o riapre) una voce dalla Guida, pretendendo il 200. */
+  const voce = (punto: string, stato: 'ottenuto' | null) => request(app).put(`/api/partite/${partita}/punti`).send({ punto, stato }).expect(200);
   /** Valuta, sullo stato dei semafori della partita, un requisito di Confidente «Completare il Palazzo» del dungeon dato. */
   const requisito = (dungeon: string) => valuta({ confidente_chiave: 'prova', rango: 1, indice: 0, tipo: 'palazzo', dati_json: JSON.stringify({ dungeon }), testo: 'Completare il Palazzo' }, statoPartitaSemafori(partita, new Map(), new Map()));
-  /** Segna raccolti, direttamente, i collezionabili del Palazzo che rispondono al filtro (per preparare il resto del 100%). */
-  const raccogliTutti = (dungeon: string, filtro: (s: { tipo: string }) => boolean = () => true) => {
-    for (const s of collezionabili(dungeon).filter(filtro)) prepared("INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, 1, 'x') ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = 1").run(partita, s.uid);
+  /** Segna, direttamente, le voci permanenti del Palazzo (tranne quelle date): il resto del 100% (L4). */
+  const segnaPermanenti = (dungeon: string, tranne: readonly string[] = []) => {
+    for (const v of permanenti(dungeon).voci) if (!tranne.includes(v)) prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', 'x') ON CONFLICT DO NOTHING").run(partita, v);
+  };
+  /** Segna raccolto, direttamente, il pin del Tesoro (che nei dati di prova non ha voci: il suo stato è il suo). */
+  const raccogliTesoro = (dungeon: string) => {
+    for (const s of collezionabili(dungeon).filter((x) => x.tipo === 'tesoro-palazzo')) prepared("INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, 1, 'x') ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = 1").run(partita, s.uid);
   };
   /** Crea uno spillo dato sulla prima planimetria del Palazzo e lo restituisce. */
   const spilloNuovo = async (dungeon: string, tipo: string, nome: string) => {
@@ -52,115 +70,146 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
     return (await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo, nome, x: 50, y: 50 })).body.data as { id: number };
   };
 
+  /** La voce del boss finale dichiarata del Palazzo (§8.14, `dungeon.voce_boss_finale`). */
+  const bossDi = (dungeon: string) => prepared('SELECT voce_boss_finale FROM dungeon WHERE chiave = ?').pluck().get(dungeon) as string;
+
   beforeAll(async () => {
     dbDiProva();
     partita = ((await request(app).post('/api/partite').send({ nome: 'Prova Palazzi' })).body.data as { id: number }).id;
     // il giorno dopo il furto: la data non deve contare
     prepared("UPDATE partita SET data_gioco = '04-22' WHERE id = ?").run(partita);
+    // §8.14: il pacchetto dei test è di prima della voce «Sconfiggi Kamoshida» di G-027 (la 112 lascia NULL): la voce del boss finale si
+    // dichiara con «Modifica › Boss finale», l'unica voce «Boss» del Palazzo in questi dati
+    const boss = bossFinali().get('kamoshida')!.punti[0];
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ voceBossFinale: boss }).expect(200);
+    expect(bossDi('kamoshida')).toBe(boss);
   });
   afterAll(() => closeDb());
 
-  it('il boss finale raccolto sulla mappa da solo non completa il Palazzo, e non segna niente nella Guida', async () => {
-    const finale = bossFinali().get('kamoshida')!;
-    expect(finale.punti.length).toBeGreaterThan(0);
-    // come nei dati veri: l'area finale di Kamoshida non è legata a nessuna planimetria, ma Kamoshida non ha boss
-    // intermedi, e l'«Ombra di Kamoshida» messa su una planimetria qualunque del Palazzo è il boss finale
-    expect(finale.unico).toBe(true);
+  it('§8.14 — un pin «Boss» che non è della voce del boss finale non conta (il caso del pin del tutorial di Kamoshida), e non segna niente nella Guida', async () => {
     const boss = await spilloNuovo('kamoshida', 'boss', 'Ombra di Kamoshida');
     await segna(boss.id, true);
     // raccogliere il boss non segna più da solo il boss della Guida (scelta dell'utente, 2026-10-04: «Togli l'automatismo»)
-    expect(finale.punti.some(bossGuida)).toBe(false);
-    // il boss si può affrontare più volte: da solo non dice che il Palazzo è finito (rilievo dell'utente, 2026-10-04)
+    expect(bossGuida(bossDi('kamoshida'))).toBe(false);
+    // il boss è solo la voce dichiarata (§8.14): prima, a Kamoshida «unico», bastava qualunque pin «Boss»
+    expect(statoPalazzi(partita).get('kamoshida')?.completamento?.boss).toBe(false);
     expect(palazziCompletati(partita).has('kamoshida')).toBe(false);
+    expect(palazziConclusi(partita).has('kamoshida')).toBe(false);
     const esito = requisito('kamoshida');
     expect(esito.stato).toBe('rosso');
-    // si dice che cosa manca: il Tesoro e il resto del raccolto, non il boss
-    expect(esito.dettaglio).toMatch(/^Palazzo di Kamoshida: non risulta completato — manca il Tesoro del Palazzo raccolto, tutto il raccolto \(\d+\/\d+\) \(Guida → Palazzi\)$/);
+    // si dice che cosa manca al furto (§8.10): il Tesoro e il boss; gli oggetti permanenti non servono agli effetti
+    expect(esito.dettaglio).toBe('Palazzo di Kamoshida: non risulta concluso — manca il Tesoro del Palazzo raccolto, il boss finale sconfitto (Guida → Palazzi)');
+    expect(statoPalazzi(partita).get('kamoshida')?.manca).toBe(`il Tesoro del Palazzo raccolto, il boss finale sconfitto, tutti gli oggetti permanenti (0/${permanenti('kamoshida').oggetti})`);
     await segna(boss.id, false);
-    expect(finale.punti.some(bossGuida)).toBe(false);
+    expect(bossGuida(bossDi('kamoshida'))).toBe(false);
   });
 
-  it('Tesoro, boss finale e 100% insieme completano il Palazzo; ne manca uno e non è completato', async () => {
-    const finale = bossFinali().get('kamoshida')!;
+  it('Tesoro, boss finale e tutti gli oggetti permanenti insieme completano il Palazzo; ne manca uno e non è completato', async () => {
+    const boss = bossDi('kamoshida');
     const tesoro = collezionabili('kamoshida').find((s) => s.tipo === 'tesoro-palazzo')!;
     expect(tesoro).toBeTruthy();
-    // Kamoshida non ha boss intermedi: ogni spillo «Boss» delle sue planimetrie vale come il finale
+    // gli spilli «Boss» delle planimetrie, non collegati alla voce del boss finale
     const bossi = collezionabili('kamoshida').filter((s) => s.tipo === 'boss');
     expect(bossi.length).toBeGreaterThan(0);
-    // tutto raccolto tranne il Tesoro
-    raccogliTutti('kamoshida', (s) => s.tipo !== 'tesoro-palazzo');
-    expect(statoPalazzi(partita).get('kamoshida')).toEqual({ completato: null, manca: expect.stringMatching(/^il Tesoro del Palazzo raccolto, tutto il raccolto \(\d+\/\d+\)$/) });
+    // tutte le voci permanenti (il boss finale compreso), ma non il Tesoro
+    segnaPermanenti('kamoshida');
+    const n = permanenti('kamoshida').oggetti;
+    expect(statoPalazzi(partita).get('kamoshida')).toMatchObject({ concluso: null, mancaPerConcludere: 'il Tesoro del Palazzo raccolto', completato: null, manca: 'il Tesoro del Palazzo raccolto',
+      completamento: { oggetti: n, fatti: n, tesoro: false, boss: true, concluso: false, completato: false } });
     // il Tesoro: ora valgono tutte e tre
+    const vociPrima = prepared('SELECT COUNT(*) FROM punto_partita WHERE partita_id = ?').pluck().get(partita);
     await segna(tesoro.id, true);
-    const n = collezionabili('kamoshida').length;
-    expect(palazziCompletati(partita).get('kamoshida')).toBe(`Tesoro, boss finale e raccolto tutto (${n}/${n})`);
-    expect(requisito('kamoshida')).toMatchObject({ stato: 'verde', dettaglio: `Palazzo di Kamoshida: completato (Tesoro, boss finale e raccolto tutto (${n}/${n}))` });
+    expect(palazziCompletati(partita).get('kamoshida')).toBe(`Tesoro, boss finale e tutti gli oggetti permanenti (${n}/${n})`);
+    expect(palazziConclusi(partita).get('kamoshida')).toBe('Tesoro e boss finale');
+    expect(requisito('kamoshida')).toMatchObject({ stato: 'verde', dettaglio: 'Palazzo di Kamoshida: concluso (Tesoro e boss finale)' });
     // l'elenco dei Palazzi e la scheda lo dicono, col perché: la mappa di Tokyo lo toglie anche dentro la sua finestra
     const elenco = async (q = `?partita=${partita}`) => ((await request(app).get(`/api/compendio/dungeon${q}`)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'kamoshida')!;
     expect((await elenco()).completato).toBe(palazziCompletati(partita).get('kamoshida'));
-    expect((await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${partita}`)).body.data.completato).toBe(palazziCompletati(partita).get('kamoshida'));
+    expect((await elenco()).concluso).toBe('Tesoro e boss finale');
+    expect((await elenco()).completamento).toEqual({ oggetti: n, fatti: n, tesoro: true, boss: true, concluso: true, completato: true });
+    const scheda = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${partita}`)).body.data as DungeonRiassuntoDto;
+    expect(scheda.completato).toBe(palazziCompletati(partita).get('kamoshida'));
+    expect(scheda.concluso).toBe('Tesoro e boss finale');
     expect((await elenco('')).completato).toBeNull();
+    expect((await elenco('')).concluso).toBeNull();
+    expect((await elenco('')).completamento).toEqual({ oggetti: n, fatti: null, tesoro: null, boss: null, concluso: null, completato: null });
     // il Tesoro non ha segnato niente nella Guida
-    expect(finale.punti.some(bossGuida)).toBe(false);
-    // tolti gli spilli del boss finale: non è più completato, e mancano il boss e il resto del raccolto
-    for (const b of bossi) await segna(b.id, false);
-    expect(statoPalazzi(partita).get('kamoshida')).toEqual({ completato: null, manca: `il boss finale sconfitto, tutto il raccolto (${n - bossi.length}/${n})` });
+    expect(prepared('SELECT COUNT(*) FROM punto_partita WHERE partita_id = ?').pluck().get(partita)).toBe(vociPrima);
+    // riaperto il boss finale nella Guida: non è più né concluso né completato, e mancano il boss e il suo oggetto
+    await voce(boss, null);
+    expect(statoPalazzi(partita).get('kamoshida')).toMatchObject({ concluso: null, mancaPerConcludere: 'il boss finale sconfitto', completato: null, manca: `il boss finale sconfitto, tutti gli oggetti permanenti (${n - 1}/${n})` });
+    // §8.14: gli spilli «Boss» raccolti che non sono della voce del boss finale non dicono il boss sconfitto
     for (const b of bossi) await segna(b.id, true);
+    expect(statoPalazzi(partita).get('kamoshida')).toMatchObject({ concluso: null, mancaPerConcludere: 'il boss finale sconfitto' });
+    await voce(boss, 'ottenuto');
     expect(palazziCompletati(partita).has('kamoshida')).toBe(true);
   });
 
   it('senza spilli «Boss» sulla mappa il boss finale si dice sconfitto dalla Guida; togliere il Tesoro non lo cancella', async () => {
-    // Okumura senza spilli «Boss» sulle planimetrie: il boss si può dire sconfitto solo dalla Guida
+    // Okumura senza spilli «Boss» sulle planimetrie: il boss si può dire sconfitto solo dalla Guida (la voce di G-027, migrazione 112)
     const mappe = albero('okumura');
     prepared(`DELETE FROM spillo WHERE tipo = 'boss' AND mappa_chiave IN (${mappe.map(() => '?').join(',')})`).run(...mappe);
-    const finale = bossFinali().get('okumura')!;
+    const boss = bossDi('okumura');
+    expect(boss).toBe('okumura-10-produzione-armamenti/6');
     if (!collezionabili('okumura').some((s) => s.tipo === 'tesoro-palazzo')) await spilloNuovo('okumura', 'tesoro-palazzo', 'Tesoro del Palazzo');
     const tesoro = collezionabili('okumura').find((s) => s.tipo === 'tesoro-palazzo')!;
-    raccogliTutti('okumura', (s) => s.tipo !== 'tesoro-palazzo');
+    segnaPermanenti('okumura', [boss]);
     await segna(tesoro.id, true);
-    // il Tesoro non segna il boss: manca solo quello
-    expect(finale.punti.some(bossGuida)).toBe(false);
-    expect(statoPalazzi(partita).get('okumura')).toEqual({ completato: null, manca: 'il boss finale sconfitto' });
+    // il Tesoro non segna il boss: mancano il boss e il suo oggetto permanente
+    const n = permanenti('okumura').oggetti;
+    expect(bossGuida(boss)).toBe(false);
+    expect(statoPalazzi(partita).get('okumura')).toMatchObject({ completato: null, manca: `il boss finale sconfitto, tutti gli oggetti permanenti (${n - 1}/${n})` });
     // segnato dall'utente nella Guida: ora sì
-    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: finale.punti[0], stato: 'ottenuto' }).expect(200);
-    expect(palazziCompletati(partita).get('okumura')).toMatch(/^Tesoro, boss finale e raccolto tutto \(\d+\/\d+\)$/);
+    await voce(boss, 'ottenuto');
+    expect(palazziCompletati(partita).get('okumura')).toBe(`Tesoro, boss finale e tutti gli oggetti permanenti (${n}/${n})`);
     // togliere e rimettere il Tesoro non tocca il boss della Guida
     await segna(tesoro.id, false);
-    expect(prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, finale.punti[0])).toEqual({ stato: 'ottenuto' });
-    expect(statoPalazzi(partita).get('okumura')?.manca).toBe('il Tesoro del Palazzo raccolto, tutto il raccolto (' + (collezionabili('okumura').length - 1) + '/' + collezionabili('okumura').length + ')');
+    expect(prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, boss)).toEqual({ stato: 'ottenuto' });
+    expect(statoPalazzi(partita).get('okumura')?.manca).toBe('il Tesoro del Palazzo raccolto');
     await segna(tesoro.id, true);
     expect(palazziCompletati(partita).has('okumura')).toBe(true);
   });
 
-  it('con lo spillo del boss collegato alla voce del boss finale, il Tesoro raccolto non raccoglie il boss né completa il Palazzo', async () => {
+  it('con lo spillo del boss collegato alla voce del boss finale, il Tesoro raccolto non fa il boss né completa il Palazzo', async () => {
     // il caso del validatore: prima il Tesoro segnava il boss della Guida, e la voce segnata raccoglieva il pin collegato
     const finale = bossFinali().get('niijima')!;
+    // §8.14: il boss finale di Niijima è la Fase 2 (G-027), non la prima fase che bastava prima
+    const voceBoss = bossDi('niijima');
+    expect(voceBoss).toBe('niijima-14-direzione-sala-del-boss/1');
     const mappe = albero('niijima');
     prepared(`DELETE FROM spillo WHERE tipo = 'boss' AND mappa_chiave IN (${mappe.map(() => '?').join(',')})`).run(...mappe);
     const tesoro = collezionabili('niijima').find((s) => s.tipo === 'tesoro-palazzo') ?? await spilloNuovo('niijima', 'tesoro-palazzo', 'Tesoro del Palazzo');
     const boss = await spilloNuovo('niijima', 'boss', 'Sae Niijima');
-    await request(app).put(`/api/compendio/punti/${encodeURIComponent(finale.punti[0])}/pin/${boss.id}`).send({}).expect(200);
-    raccogliTutti('niijima', (s) => s.tipo !== 'tesoro-palazzo' && s.tipo !== 'boss');
+    await request(app).put(`/api/compendio/punti/${encodeURIComponent(voceBoss)}/pin/${boss.id}`).send({}).expect(200);
+    segnaPermanenti('niijima', finale.punti);
     await segna(tesoro.id, true);
-    /** Vero se lo spillo del boss risulta raccolto nella partita. */
-    const bossRaccolto = () => !!prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = (SELECT uid FROM spillo WHERE id = ?) AND raccolto = 1').get(partita, boss.id);
-    expect(finale.punti.some(bossGuida)).toBe(false);
-    expect(bossRaccolto()).toBe(false);
-    expect(statoPalazzi(partita).get('niijima')?.manca).toMatch(/^il boss finale sconfitto, tutto il raccolto/);
-    // segnato dall'utente dalla Guida: il pin collegato lo segue, e il Palazzo è completato
-    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: finale.punti[0], stato: 'ottenuto' }).expect(200);
-    expect(bossRaccolto()).toBe(true);
-    expect(palazziCompletati(partita).get('niijima')).toMatch(/^Tesoro, boss finale e raccolto tutto \(\d+\/\d+\)$/);
+    /** Vero se lo spillo del boss risulta fatto nella partita (§8.11: il suo segno). */
+    const bossFatto = async () => ((await request(app).get(`/api/mappe/${prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(boss.id)}?partita=${partita}`)).body.data as MappaDto).spilli.find((s) => s.id === boss.id)!.raccolto;
+    expect(bossGuida(voceBoss)).toBe(false);
+    expect(await bossFatto()).toBe(false);
+    expect(statoPalazzi(partita).get('niijima')?.manca).toMatch(/^il boss finale sconfitto, tutti gli oggetti permanenti/);
+    // la prima fase segnata non basta più (§8.14)
+    const altre = finale.punti.filter((p) => p !== voceBoss);
+    for (const p of altre) await voce(p, 'ottenuto');
+    expect(statoPalazzi(partita).get('niijima')?.completamento?.boss).toBe(false);
+    // segnato dall'utente dalla Guida: il pin collegato lo segue (il boss è sconfitto), e il Palazzo è completato
+    await voce(voceBoss, 'ottenuto');
+    expect(await bossFatto()).toBe(true);
+    expect(statoPalazzi(partita).get('niijima')?.completamento?.boss).toBe(true);
+    expect(palazziCompletati(partita).get('niijima')).toMatch(/^Tesoro, boss finale e tutti gli oggetti permanenti \(\d+\/\d+\)$/);
   });
 
-  it('senza lo spillo «Tesoro del Palazzo» un Palazzo non si completa, nemmeno al 100% e col boss segnato', async () => {
+  it('senza lo spillo «Tesoro del Palazzo» e senza la voce del boss finale (§8.14: NULL) un Palazzo non si conclude, nemmeno al 100% e con un boss segnato', async () => {
     const mappe = albero('madarame');
     prepared(`DELETE FROM spillo WHERE tipo = 'tesoro-palazzo' AND mappa_chiave IN (${mappe.map(() => '?').join(',')})`).run(...mappe);
-    raccogliTutti('madarame');
+    segnaPermanenti('madarame');
+    // nel pacchetto dei test Madarame non ha la voce «Scontro con Madarame» dell'utente: la 112 lascia NULL
+    expect(bossDi('madarame')).toBeNull();
     const finale = bossFinali().get('madarame')!;
-    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: finale.punti[0], stato: 'ottenuto' }).expect(200);
-    expect(statoPalazzi(partita).get('madarame')).toEqual({ completato: null, manca: 'lo spillo «Tesoro del Palazzo» sulle planimetrie' });
-    expect(requisito('madarame').dettaglio).toBe('Palazzo di Madarame: non risulta completato — manca lo spillo «Tesoro del Palazzo» sulle planimetrie (Guida → Palazzi)');
+    await voce(finale.punti[0], 'ottenuto');
+    const manca = 'lo spillo «Tesoro del Palazzo» sulle planimetrie, il boss finale (nessuna voce di boss finale per questo Palazzo)';
+    expect(statoPalazzi(partita).get('madarame')).toMatchObject({ concluso: null, mancaPerConcludere: manca, completato: null, manca });
+    expect(requisito('madarame').dettaglio).toBe(`Palazzo di Madarame: non risulta concluso — manca ${manca} (Guida → Palazzi)`);
   });
 
   it('un boss che non è il finale non vale come boss sconfitto (Shido: i boss intermedi prima dell’Aula magna)', async () => {
@@ -169,35 +218,36 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
     const intermedio = prepared(`SELECT pi.chiave FROM punto_interesse pi JOIN dungeon_area a ON a.chiave = pi.area_chiave
       WHERE a.dungeon_chiave = 'shido' AND pi.tipo = 'boss' AND a.chiave <> ? LIMIT 1`).get(finale.area) as { chiave: string } | undefined;
     expect(intermedio).toBeTruthy();
-    // Shido con Tesoro e tutto raccolto, ma con i soli boss intermedi: gli spilli «Boss» delle sue planimetrie non sono il finale
+    // Shido con Tesoro e tutto il resto, ma con i soli boss intermedi: gli spilli «Boss» delle sue planimetrie non sono il finale
     const mappe = albero('shido');
     prepared(`DELETE FROM spillo WHERE tipo = 'boss' AND mappa_chiave IN (${mappe.map(() => '?').join(',')})`).run(...mappe);
     if (!collezionabili('shido').some((s) => s.tipo === 'tesoro-palazzo')) await spilloNuovo('shido', 'tesoro-palazzo', 'Tesoro del Palazzo');
     const akechi = await spilloNuovo('shido', 'boss', 'Akechi');
-    raccogliTutti('shido', (s) => s.tipo !== 'tesoro-palazzo');
-    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: intermedio!.chiave, stato: 'ottenuto' }).expect(200);
+    segnaPermanenti('shido', finale.punti);
+    await voce(intermedio!.chiave, 'ottenuto');
     const tesoro = collezionabili('shido').find((s) => s.tipo === 'tesoro-palazzo')!;
-    // Tesoro raccolto e tutto il resto: Akechi, raccolto, non vale come boss finale
+    // Tesoro raccolto, Akechi raccolto: non vale come boss finale
     await segna(tesoro.id, true);
+    await segna(akechi.id, true);
     expect(prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = (SELECT uid FROM spillo WHERE id = ?) AND raccolto = 1').get(partita, akechi.id)).toBeTruthy();
     expect(statoPalazzi(partita).get('shido')?.manca).toMatch(/il boss finale sconfitto/);
-    // il boss finale segnato dall'utente nella Guida sì
-    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: finale.punti[0], stato: 'ottenuto' }).expect(200);
-    expect(palazziCompletati(partita).get('shido')).toMatch(/^Tesoro, boss finale e raccolto tutto \(\d+\/\d+\)$/);
+    // il boss finale segnato dall'utente nella Guida sì (le sue voci, oggetti permanenti anche loro)
+    for (const p of finale.punti) await voce(p, 'ottenuto');
+    expect(palazziCompletati(partita).get('shido')).toMatch(/^Tesoro, boss finale e tutti gli oggetti permanenti \(\d+\/\d+\)$/);
   });
 
-  it('l’ingresso vero (lo spillo della Shujin modificato a mano, senza più collegamento) sparisce a Palazzo completato', async () => {
+  it('l’ingresso vero (lo spillo della Shujin modificato a mano, senza più collegamento) sparisce a Palazzo concluso', async () => {
     // lo spillo 1616: oggi «punto sensibile» senza riferimento; la sua identità di seed è il passaggio verso dungeon-kamoshida
     const vero = prepared("SELECT id, mappa_chiave, riferimento_tipo FROM spillo WHERE seed_identita_json LIKE '%\"dungeon-kamoshida\"%' AND mappa_chiave NOT LIKE 'dungeon-%'").get() as { id: number; mappa_chiave: string; riferimento_tipo: string | null };
     expect(vero.riferimento_tipo).toBeNull();
-    // Kamoshida è completato dal secondo test (Tesoro, boss e 100%): siamo il 22 aprile, dentro la finestra 11/4–2/5 (097)
-    expect(palazziCompletati(partita).has('kamoshida')).toBe(true);
+    // Kamoshida è concluso (e completato) dal secondo test: siamo il 22 aprile, dentro la finestra 11/4–2/5 (097)
+    expect(palazziConclusi(partita).has('kamoshida')).toBe(true);
     const spillo = ((await request(app).get(`/api/mappe/${vero.mappa_chiave}?partita=${partita}`)).body.data as MappaDto).spilli.find((s) => s.id === vero.id)!;
     expect(spillo.disponibilita?.stato).toBe('bloccato');
-    expect(spillo.disponibilita?.requisiti.at(-1)?.dettaglio).toMatch(/Palazzo di Kamoshida: completato \(Tesoro, boss finale e raccolto tutto .*\), non ci si entra più/);
+    expect(spillo.disponibilita?.requisiti.at(-1)?.dettaglio).toBe('Palazzo di Kamoshida: concluso (Tesoro e boss finale), non ci si entra più');
   });
 
-  it('l’ingresso a un Palazzo completato sparisce dalla mappa, anche prima della scadenza; non prima che sia completato', async () => {
+  it('l’ingresso a un Palazzo concluso sparisce dalla mappa, anche prima della scadenza e senza la raccolta completa; non prima che sia concluso', async () => {
     const citta = prepared("SELECT chiave FROM mappa WHERE chiave LIKE 'citta-%' LIMIT 1").get() as { chiave: string };
     const ingresso = (await request(app).post(`/api/mappe/${citta.chiave}/spilli`).send({ tipo: 'passaggio', nome: 'Palazzo di Kaneshiro', x: 20, y: 20, riferimento: { tipo: 'mappa', chiave: 'dungeon-kaneshiro' } })).body.data as { id: number };
     /** Rilegge la mappa della città con la partita e restituisce la disponibilità del pin d'ingresso al Palazzo di Kaneshiro. */
@@ -205,14 +255,19 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
     expect((await stato())?.stato).not.toBe('bloccato');
     // il boss finale segnato nella Guida da solo non basta più
     const finale = bossFinali().get('kaneshiro')!;
-    await request(app).put(`/api/partite/${partita}/punti`).send({ punto: finale.punti[0], stato: 'ottenuto' }).expect(200);
+    await voce(finale.punti[0], 'ottenuto');
     expect((await stato())?.stato).not.toBe('bloccato');
-    // con Tesoro e tutto il raccolto sì
+    // con il Tesoro sì, anche senza gli oggetti permanenti (§8.10: il furto chiude il Palazzo, non la raccolta completa)
     if (!collezionabili('kaneshiro').some((s) => s.tipo === 'tesoro-palazzo')) await spilloNuovo('kaneshiro', 'tesoro-palazzo', 'Tesoro del Palazzo');
-    raccogliTutti('kaneshiro');
+    raccogliTesoro('kaneshiro');
+    expect(palazziCompletati(partita).has('kaneshiro')).toBe(false);
     const dopo = await stato();
     expect(dopo?.stato).toBe('bloccato');
-    expect(dopo?.requisiti.at(-1)?.dettaglio).toMatch(/completato \(Tesoro, boss finale e raccolto tutto \(\d+\/\d+\)\), non ci si entra più/);
+    expect(dopo?.requisiti.at(-1)?.dettaglio).toBe('Palazzo di Kaneshiro: concluso (Tesoro e boss finale), non ci si entra più');
+    // con tutti gli oggetti permanenti il Palazzo è anche completato, e l'ingresso resta chiuso
+    segnaPermanenti('kaneshiro');
+    expect(palazziCompletati(partita).has('kaneshiro')).toBe(true);
+    expect((await stato())?.stato).toBe('bloccato');
     // dentro il Palazzo le planimetrie restano consultabili: i passaggi fra le sue stanze non spariscono
     const interna = albero('kaneshiro').find((k) => k !== 'dungeon-kaneshiro')!;
     const passaggio = (await request(app).post(`/api/mappe/${interna}/spilli`).send({ tipo: 'passaggio', nome: 'Verso la radice', x: 10, y: 10, riferimento: { tipo: 'mappa', chiave: 'dungeon-kaneshiro' } })).body.data as { id: number };
@@ -231,10 +286,130 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
     prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', 'x') ON CONFLICT DO NOTHING").run(partita, punto);
     // i Memento non hanno planimetrie: per la regola restano completati dal boss segnato nella Guida, come prima
     expect(palazziCompletati(partita).get('mementos')).toBe('boss finale segnato nella Guida');
-    // per l'elenco no, perché non è un Palazzo
+    // i due livelli del §8.10 coincidono per i Memento (R4-30: invariati)
+    expect(palazziConclusi(partita).get('mementos')).toBe('boss finale segnato nella Guida');
+    // per l'elenco no, perché non è un Palazzo (e non ha i campi di L4)
     const memento = ((await request(app).get(`/api/compendio/dungeon?partita=${partita}`)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'mementos')!;
     expect(memento.completato).toBeNull();
+    // AP4-1: per i Memento la chiave non c'è (la risposta resta quella di prima, R4-30)
+    expect('concluso' in memento).toBe(false);
+    expect('completamento' in memento).toBe(false);
     expect((await request(app).get(`/api/compendio/dungeon/mementos?partita=${partita}`)).body.data.completato).toBeNull();
     prepared('DELETE FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').run(partita, punto);
+  });
+
+  // ---- §8.10: i due livelli (decisione dell'utente del 2026-10-20), ognuno su una partita nuova ----
+  /** Una partita nuova al giorno dato. */
+  const partitaNuova = async (nome: string, giorno: string) => {
+    const id = ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
+    prepared('UPDATE partita SET data_gioco = ? WHERE id = ?').run(giorno, id);
+    return id;
+  };
+  /** Segna, direttamente, le voci date nella partita data. */
+  const segnaVoci = (p: number, voci: readonly string[]) => {
+    for (const v of voci) prepared("INSERT INTO punto_partita (partita_id, punto_chiave, stato, updated_at) VALUES (?, ?, 'ottenuto', 'x') ON CONFLICT DO NOTHING").run(p, v);
+  };
+  /** Il Tesoro di Kamoshida raccolto, direttamente, nella partita data. */
+  const tesoroKamoshida = (p: number) => {
+    for (const s of collezionabili('kamoshida').filter((x) => x.tipo === 'tesoro-palazzo')) prepared("INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, 1, 'x') ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = 1").run(p, s.uid);
+  };
+  /** L'ingresso vero di Kamoshida (lo spillo della Shujin) nella partita data. */
+  const ingressoKamoshida = async (p: number) => {
+    const vero = prepared("SELECT id, mappa_chiave FROM spillo WHERE seed_identita_json LIKE '%\"dungeon-kamoshida\"%' AND mappa_chiave NOT LIKE 'dungeon-%'").get() as { id: number; mappa_chiave: string };
+    return ((await request(app).get(`/api/mappe/${vero.mappa_chiave}?partita=${p}`)).body.data as MappaDto).spilli.find((s) => s.id === vero.id)!.disponibilita;
+  };
+  /** Il riassunto di Kamoshida nell'elenco dei Palazzi, per la partita data. */
+  const riassuntoKamoshida = async (p: number) => ((await request(app).get(`/api/compendio/dungeon?partita=${p}`)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'kamoshida')!;
+  /** Valuta il requisito «Completare il Palazzo di Kamoshida» nella partita data. */
+  const requisitoKamoshida = (p: number) => valuta({ confidente_chiave: 'prova', rango: 1, indice: 0, tipo: 'palazzo', dati_json: JSON.stringify({ dungeon: 'kamoshida' }), testo: 'Completare il Palazzo' }, statoPartitaSemafori(p, new Map(), new Map()));
+
+  it('§8.10: Tesoro e boss finale con oggetti permanenti non segnati (il caso di Kamoshida p1) → concluso, non completato; gli effetti seguono il concluso', async () => {
+    const p = await partitaNuova('Concluso non completato', '04-22');
+    const finale = bossFinali().get('kamoshida')!;
+    const { voci } = permanenti('kamoshida');
+    // tutte le voci permanenti tranne 15 (né il boss finale): come le 15 della decisione «1 B»
+    const lasciate = voci.filter((v) => !finale.punti.includes(v)).slice(0, 15);
+    expect(lasciate).toHaveLength(15);
+    segnaVoci(p, voci.filter((v) => !lasciate.includes(v)));
+    tesoroKamoshida(p);
+    const st = statoPalazzi(p).get('kamoshida')!;
+    const c = st.completamento!;
+    expect(c).toMatchObject({ tesoro: true, boss: true, concluso: true, completato: false });
+    expect(c.fatti).toBeLessThan(c.oggetti);
+    expect(st).toMatchObject({ concluso: 'Tesoro e boss finale', mancaPerConcludere: null, completato: null, manca: `tutti gli oggetti permanenti (${c.fatti}/${c.oggetti})` });
+    // gli effetti: requisito verde, ingresso chiuso, assente dalla mappa di Tokyo (il riassunto dice concluso); l'anello no
+    expect(requisitoKamoshida(p)).toMatchObject({ stato: 'verde', dettaglio: 'Palazzo di Kamoshida: concluso (Tesoro e boss finale)' });
+    expect((await ingressoKamoshida(p))?.stato).toBe('bloccato');
+    const r = await riassuntoKamoshida(p);
+    expect(r.concluso).toBe('Tesoro e boss finale');
+    expect(r.completato).toBeNull();
+    expect(r.completamento).toMatchObject({ concluso: true, completato: false });
+    // nessuna voce segnata al posto dell'utente
+    expect(lasciate.some((v) => prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(p, v))).toBe(false);
+  });
+
+  it('§8.10: il Tesoro senza il boss finale → né concluso né completato, anche con tutti gli oggetti permanenti tranne il boss', async () => {
+    const p = await partitaNuova('Tesoro senza boss', '04-22');
+    const finale = bossFinali().get('kamoshida')!;
+    segnaVoci(p, permanenti('kamoshida').voci.filter((v) => !finale.punti.includes(v)));
+    tesoroKamoshida(p);
+    expect(statoPalazzi(p).get('kamoshida')).toMatchObject({ concluso: null, mancaPerConcludere: 'il boss finale sconfitto', completato: null, completamento: { tesoro: true, boss: false, concluso: false, completato: false } });
+    expect(requisitoKamoshida(p)).toMatchObject({ stato: 'rosso', dettaglio: 'Palazzo di Kamoshida: non risulta concluso — manca il boss finale sconfitto (Guida → Palazzi)' });
+    expect((await riassuntoKamoshida(p)).concluso).toBeNull();
+    expect((await ingressoKamoshida(p))?.requisiti.some((q) => /non ci si entra più/.test(q.dettaglio))).toBe(false);
+  });
+
+  it('§8.14 — «Modifica › Boss finale»: solo una voce «Boss» del Palazzo (400 altrimenti, e nei Memento), il primo cambio conserva quella della guida; «Ripristina» la rimette', async () => {
+    const guida = bossDi('shido');
+    expect(guida).toBe('shido-16-aula-magna-tesoro-e-boss-finali/4');
+    const errore = async (dungeon: string, voceBossFinale: string | null) => (await request(app).put(`/api/compendio/dungeon/${dungeon}`).send({ voceBossFinale })).body.error?.code;
+    const nonBoss = prepared("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'shido' AND p.tipo <> 'boss' LIMIT 1").pluck().get() as string;
+    expect(await errore('shido', nonBoss)).toBe('voce-non-boss');
+    expect(await errore('shido', bossDi('okumura'))).toBe('voce-di-un-altro-palazzo');
+    expect(await errore('mementos', null)).toBe('boss-finale-dei-memento');
+    expect(await errore('shido', 'nessuna-voce')).toBe('punto-non-trovato');
+    // un'altra voce «Boss» di Shido (un boss intermedio): la scheda la dice, corretta dall'utente
+    const altra = prepared("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'shido' AND p.tipo = 'boss' AND p.chiave <> ? LIMIT 1").pluck().get(guida) as string;
+    const scheda = (await request(app).put('/api/compendio/dungeon/shido').send({ voceBossFinale: altra }).expect(200)).body.data as DungeonRiassuntoDto;
+    expect(scheda).toMatchObject({ voceBossFinale: { chiave: altra, nome: expect.any(String) }, bossFinaleCorretto: true });
+    // un secondo cambio non perde il valore della guida
+    await request(app).put('/api/compendio/dungeon/shido').send({ voceBossFinale: null }).expect(200);
+    const rimessa = (await request(app).post('/api/compendio/dungeon/shido/ripristina').expect(200)).body.data as DungeonRiassuntoDto;
+    expect(rimessa).toMatchObject({ voceBossFinale: { chiave: guida }, bossFinaleCorretto: false });
+    expect((await request(app).post('/api/compendio/dungeon/shido/ripristina').expect(409)).body.error.code).toBe('niente-da-ripristinare');
+    // i Memento non hanno questi campi
+    const memento = ((await request(app).get('/api/compendio/dungeon').expect(200)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'mementos')!;
+    expect(['voceBossFinale', 'bossFinaleCorretto'].filter((k) => k in memento)).toEqual([]);
+  });
+
+  it('§8.14 — Madarame come nella produzione: due pin «Tesoro» (servono tutti e due) e la voce del boss finale con due pin (fatta a 2/2)', async () => {
+    const p = await partitaNuova('Madarame a due tesori', '06-01');
+    const infiltrazione = prepared("SELECT chiave FROM dungeon_area WHERE dungeon_chiave = 'madarame' ORDER BY ordine DESC LIMIT 1").pluck().get() as string;
+    const voceBoss = ((await request(app).post(`/api/compendio/aree/${infiltrazione}/punti`).send({ nome: 'Scontro con Madarame', tipo: 'boss' }).expect(201)).body.data as { chiave: string }).chiave;
+    await request(app).put('/api/compendio/dungeon/madarame').send({ voceBossFinale: voceBoss }).expect(200);
+    const sayuri = await spilloNuovo('madarame', 'tesoro-palazzo', 'La vera Sayuri');
+    const tesoroEsca = await spilloNuovo('madarame', 'tesoro-palazzo', 'Tesoro del Palazzo');
+    const madarame = await spilloNuovo('madarame', 'boss', 'Madarame');
+    for (const pin of [sayuri.id, madarame.id]) await request(app).put(`/api/compendio/punti/${encodeURIComponent(voceBoss)}/pin/${pin}`).send({}).expect(200);
+    const segnaIn = (spillo: number) => request(app).put(`/api/partite/${p}/spilli/${spillo}`).send({ raccolto: true }).expect(200);
+    const c = () => statoPalazzi(p).get('madarame')!.completamento!;
+    // il solo pin 811 (il Tesoro preso con la gru): Tesoro ✗
+    await segnaIn(tesoroEsca.id);
+    expect(c()).toMatchObject({ tesoro: false, boss: false, concluso: false });
+    // la voce del boss a 1/2 pin (la Sayuri vera è anche un pin del boss): né boss né Tesoro
+    await segnaIn(sayuri.id);
+    expect(c()).toMatchObject({ tesoro: true, boss: false, concluso: false });
+    // 2/2: il boss è fatto, e Madarame è concluso
+    await segnaIn(madarame.id);
+    expect(c()).toMatchObject({ tesoro: true, boss: true, concluso: true });
+    expect(palazziConclusi(p).get('madarame')).toBe('Tesoro e boss finale');
+  });
+
+  it('§8.10: la partita «Tutorial» con il solo boss segnato l’11/04 → Kamoshida resta visibile (il caso del 2026-10-04)', async () => {
+    const p = await partitaNuova('Tutorial', '04-11');
+    segnaVoci(p, bossFinali().get('kamoshida')!.punti.slice(0, 1));
+    expect(statoPalazzi(p).get('kamoshida')).toMatchObject({ concluso: null, mancaPerConcludere: 'il Tesoro del Palazzo raccolto', completamento: { tesoro: false, boss: true, concluso: false } });
+    expect((await riassuntoKamoshida(p)).concluso).toBeNull();
+    expect((await ingressoKamoshida(p))?.requisiti.some((q) => /non ci si entra più/.test(q.dettaglio))).toBe(false);
   });
 });

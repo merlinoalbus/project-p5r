@@ -18,6 +18,7 @@ import { radiceDelPalazzo } from './alberoMappe.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, staccaAreaDalleInfiltrazioni, type InfiltrazioneDellArea } from './legamiInfiltrazioni.js';
 // la raccolta per planimetria dei Palazzi è quella della scheda (dungeonService la usa a sua volta per le Aree: l'uso è nelle funzioni)
 import { raccoltaMappe } from '../dungeonService.js';
+import { completamentoDegliOggetti, modelloAvanzamento, oggettiDelleMappe, statiDellaPartita, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
 import { slug } from '../../../shared/slug.js';
 import { verificaPartita } from '../verificaPartita.js';
@@ -83,6 +84,17 @@ interface ContestoElenco {
   infiltrazioni: Map<string, InfiltrazioneDellArea[]>;
   /** La raccolta per planimetria: nei Palazzi quella della scheda (`raccoltaMappe`, con la partita); nel mondo i soli collezionabili. */
   raccolta: RaccoltaPerMappa; conPartita: boolean;
+  /** L4: nei Palazzi, il modello, gli stati della partita e gli oggetti permanenti di ogni planimetria, per il completamento dell'Area. */
+  l4?: AvanzamentoAree;
+}
+/** L4: ciò che serve al completamento delle Aree di un Palazzo. */
+export interface AvanzamentoAree { m: ModelloAvanzamento; s: StatiDellaPartita | null; oggettiPerMappa: Map<string, Set<string>> }
+
+/** L4: il modello di un Palazzo per il completamento delle sue Aree (letto una volta per l'elenco). */
+function avanzamentoDelPalazzo(dungeon: string, partitaId?: number): AvanzamentoAree {
+  const m = modelloAvanzamento(getDb());
+  const mappe = prepared(`WITH RECURSIVE albero(chiave) AS (SELECT ? UNION SELECT x.chiave FROM mappa x JOIN albero a ON x.genitore_chiave = a.chiave) SELECT chiave FROM albero`).pluck().all(radiceDelPalazzo(dungeon)) as string[];
+  return { m, s: partitaId === undefined ? null : statiDellaPartita(getDb(), m, partitaId), oggettiPerMappa: oggettiDelleMappe(getDb(), m, mappe) };
 }
 
 /** I collezionabili di ogni planimetria, senza partita (la raccolta del mondo, che non ha un conteggio dei presi). */
@@ -133,6 +145,8 @@ function riassuntoArea(a: RigaArea, c: Contenitore, ctx: ContestoElenco): AreaRi
     casa: casaDellArea(a) ?? '',
     infiltrazioni: ctx.infiltrazioni.get(a.chiave) ?? [],
     raccolta,
+    // L4 (§1.5): nei Palazzi il completamento dell'Area (oggetti permanenti con un pin su una sua planimetria; senza, completata)
+    ...(c.colonna === 'dungeon_chiave' && ctx.l4 ? { completamento: completamentoDegliOggetti(new Set(chiavi.flatMap((k) => [...(ctx.l4!.oggettiPerMappa.get(k) ?? [])])), ctx.l4.s) } : {}),
   };
 }
 
@@ -141,6 +155,7 @@ export function areeDelContenitore(c: Contenitore, partitaId?: number): AreaRias
   if (!conAree()) return [];
   if (partitaId !== undefined) verificaPartita(partitaId);
   const ctx = contestoElenco(raccoltaDelContenitore(c, partitaId));
+  if (c.colonna === 'dungeon_chiave') ctx.l4 = avanzamentoDelPalazzo(c.chiave, partitaId);
   return (prepared(`SELECT * FROM area WHERE ${c.colonna} = ? ORDER BY ordine, slug`).all(c.chiave) as RigaArea[]).map((a) => riassuntoArea(a, c, ctx));
 }
 
@@ -148,10 +163,11 @@ export function areeDelContenitore(c: Contenitore, partitaId?: number): AreaRias
  * Le Aree di un Palazzo per la sua scheda (L3, `DungeonDettaglioDto.areePalazzo`), con la raccolta che la scheda ha già calcolato per
  * planimetria (la stessa della colonna «Da raccogliere»: R3-31). Vuoto per un Palazzo senza Aree.
  */
-export function areeDelPalazzo(dungeon: string, perMappa: RaccoltaPerMappa, conPartita: boolean): AreaRiassuntoDto[] {
+export function areeDelPalazzo(dungeon: string, perMappa: RaccoltaPerMappa, conPartita: boolean, l4?: AvanzamentoAree): AreaRiassuntoDto[] {
   if (!conAree()) return [];
   const c = contenitoreDaRotta('dungeon', dungeon);
   const ctx = contestoElenco({ perMappa, conPartita });
+  if (l4) ctx.l4 = l4;
   return (prepared('SELECT * FROM area WHERE dungeon_chiave = ? ORDER BY ordine, slug').all(dungeon) as RigaArea[]).map((a) => riassuntoArea(a, c, ctx));
 }
 

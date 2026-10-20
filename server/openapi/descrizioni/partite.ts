@@ -175,9 +175,9 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/punti': {
     sommario: 'Stato di un punto d\'interesse di un Palazzo',
-    descrizione: 'Imposta lo stato del punto nella partita: `ottenuto`, `esaurito` o `null` per azzerarlo. Lo stato del punto è quello dei suoi pin sulle mappe: segnarlo li raccoglie, riaprirlo li riapre. Un Enigma con i suoi passi segna o riapre i passi, e un passo porta con sé il suo Enigma. Una voce descrittiva della guida si legge e non si segna (400; azzerarla resta possibile). Una Persona dei Memento non ha uno stato suo: la cattura si segna registrandola nel compendio (400 `cattura-nel-compendio`, dal 2026-10-12; azzerarla resta possibile). Un nuovo stato va nello storico (`punto-dungeon`).',
-    risposta: '`PuntoInteresseDto` con lo stato nella partita',
-    errori: [PARTITA, [404, 'punto-non-trovato'], [400, 'punto-descrittivo'], [400, 'cattura-nel-compendio']],
+    descrizione: 'Imposta lo stato del punto nella partita: `ottenuto`, `esaurito` o `null` per azzerarlo. Da L4 §8.11 (NR4-1) ogni pin tiene il suo stato e una voce permanente o rigenerabile con pin è fatta quando lo sono tutti i suoi pin («in corso k/N» se una parte): «Segna» (o «Esaurito») segna **tutti i suoi pin** (un pin condiviso da rigenerabili di più infiltrazioni nella sua infiltrazione), «Riapri» toglie il segno a tutti; le altre voci di quei pin si ricalcolano e la risposta le elenca in `effetti` (`segnate`, `riaperte`). La riga di `punto_partita` resta come specchio della voce fatta. Una voce senza pin ha il suo stato come prima. `esaurito` solo per una voce esauribile (400 `voce-non-esauribile`; i dedali dei Memento come prima). Segnare la voce risolve le divergenze «da verificare» dei suoi pin. Un Enigma con i suoi passi segna o riapre i passi, e un passo porta con sé il suo Enigma. Una voce descrittiva «Altro» si legge e non si segna (400; azzerarla resta possibile). Una Persona dei Memento non ha uno stato suo: la cattura si segna registrandola nel compendio (400 `cattura-nel-compendio`, dal 2026-10-12; azzerarla resta possibile). Un nuovo stato va nello storico (`punto-dungeon`).',
+    risposta: '`PuntoInteresseDto` con lo stato con cui la voce risulta nella partita (e, per i Palazzi, carattere, oggetto, «da verificare», `avanzamento` k/N, il segno di ogni pin in `pin[].fatto`, `condivise` ed `effetti`)',
+    errori: [PARTITA, [404, 'punto-non-trovato'], [400, 'punto-descrittivo'], [400, 'cattura-nel-compendio'], [400, 'voce-non-esauribile']],
   },
   'PUT /api/partite/:id/domande/:domandaId': {
     sommario: 'Segna una domanda in classe o d\'esame come risposta',
@@ -207,9 +207,21 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/spilli/:spilloId': {
     sommario: 'Segna uno spillo di una mappa come raccolto',
-    descrizione: 'Segna (o toglie) lo stato «raccolto» dello spillo nella partita. Si segnano solo i pin che hanno uno stato (consumabili, boss, meccanismi, nemici, porte, pin collegati a una voce non descrittiva della guida): per gli altri 400; togliere il segno è sempre possibile. Un pin collegato a un punto della guida segna il punto quando tutti i suoi pin sono raccolti e lo riapre quando se ne toglie uno. Il Tesoro o il boss raccolti non segnano più da soli il boss finale della guida (dal 2026-10-04).',
+    descrizione: 'Segna (o toglie) lo stato dello spillo nella partita. Si segnano solo i pin che hanno uno stato (consumabili, boss, meccanismi, nemici, porte, pin collegati a una voce non descrittiva della guida): per gli altri 400; togliere il segno è sempre possibile. Da L4 §8.11 (NR4-1): ogni pin tiene il suo stato, e il gesto segna o toglie **solo quel pin** — un pin condiviso da rigenerabili di più infiltrazioni nell\'infiltrazione di contesto (`infiltrazione` nel corpo, altrimenti quella in corso). Le voci del pin si ricalcolano (k/N): una voce i cui pin sono ora tutti fatti è fatta; togliere il segno toglie «fatta» a ogni voce che lo contiene, «esaurito» compreso. La risposta elenca le voci segnate o riaperte in `effetti`. Su un pin «da verificare» togliere il segno è anche «Togli il fatto al pin». Una scheda della guida senza mappa segna la sua voce, come prima. Un pin senza voci, o con sole voci di racconto, ha il suo stato come prima; un pin dei dedali dei Memento segue la regola di prima. Il Tesoro o il boss raccolti non segnano più da soli il boss finale della guida (dal 2026-10-04).',
     risposta: '`SpilloDto`, o `SchedaContenutoGuidaDto` per un contenuto della guida senza posto sulla mappa',
     errori: [PARTITA, [404, 'spillo-non-trovato'], [400, 'spillo-senza-stato']],
+  },
+  'GET /api/partite/:id/divergenze': {
+    sommario: 'Le divergenze fra pin e voci conservate «da verificare» (L4)',
+    descrizione: 'I pin che prima di L4 risultavano fatti con una loro voce non fatta: la migrazione utente 022 li ha conservati senza scrivere niente (decisione dell\'utente del 2026-10-20). Il pin si mostra fatto con «Da verificare», la voce non segnata con «Da verificare», finché l\'utente non sceglie «Segna la voce» (`PUT /api/partite/:id/punti`) o «Togli il fatto al pin» (`DELETE …/divergenze/:spilloUid`). Con `?dungeon=` quelle di un Palazzo; in ordine di Palazzo, infiltrazione e voce. Quelle di un pin o di una voce che non ci sono più non si elencano.',
+    risposta: '`DivergenzaDto[]`',
+    errori: [PARTITA],
+  },
+  'DELETE /api/partite/:id/divergenze/:spilloUid': {
+    sommario: '«Togli il fatto al pin» di una divergenza da verificare (L4)',
+    descrizione: 'Il segno del pin (`spillo_partita.raccolto`) si toglie e le sue divergenze se ne vanno; le voci del pin si ricalcolano dai loro pin (§8.11: la voce della divergenza resta da fare, o in corso). 404 se il pin non ha divergenze nella partita.',
+    risposta: 'Nessun contenuto (204)',
+    errori: [PARTITA, [404, 'divergenza-non-trovata']],
   },
 
   // ---- Persona possedute ----

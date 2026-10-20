@@ -8,7 +8,8 @@
 // ============================================================
 
 import { schedeContenutiGuida } from './mappeService.js';
-import { prepared } from '../../db/dbService.js';
+import { getDb, prepared } from '../../db/dbService.js';
+import { modelloAvanzamento, statiDellaPartita, statoDellaVoce, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { chiaveMappa, idMappa, nomePercorso } from './percorsiMappe.js';
@@ -29,7 +30,7 @@ export function destinazioneGuida(area: string): DestinazioneGuidaDto | null {
   if (radici.length !== 1) return null;
   const mappaPalazzo = chiaveMappa(radici[0].chiave);
   // la scheda del Palazzo; per i Memento il visore com'era
-  const casa = r.tipo === 'palazzo' ?`${casaDelPalazzo(r.dungeon_chiave)}?infiltrazione=${encodeURIComponent(area)}` : `/guida/mappe/${encodeURIComponent(mappaPalazzo)}?area=${encodeURIComponent(area)}`;
+  const casa = r.tipo === 'palazzo' ? `${casaDelPalazzo(r.dungeon_chiave)}?infiltrazione=${encodeURIComponent(area)}` : `/guida/mappe/${encodeURIComponent(mappaPalazzo)}?area=${encodeURIComponent(area)}`;
   return { area, dungeon: r.dungeon_chiave, mappaPalazzo, nome: r.nome, casa };
 }
 
@@ -67,14 +68,37 @@ export function contenutiMappa(chiave: string, partitaId?:number): ContenutiMapp
   const aree = prepared(`SELECT a.*,a.nome nome_visibile,COALESCE(g.note,'') note
     FROM dungeon_area a LEFT JOIN guida_mappa g ON g.area_chiave=a.chiave
     WHERE (?='dungeon' AND a.dungeon_chiave=?) OR EXISTS(SELECT 1 FROM mappa x JOIN infiltrazione_area ia ON ia.area_chiave=x.area_chiave WHERE x.chiave=? AND ia.infiltrazione_chiave=a.chiave)
-    ORDER BY a.ordine,a.chiave`).all(m.entita_tipo,m.entita_chiave,mappa) as Array<{ chiave: string; nome_visibile: string; descrizione: string; note: string }>;
+    ORDER BY a.ordine,a.chiave`).all(m.entita_tipo,m.entita_chiave,mappa) as Array<{ chiave: string; dungeon_chiave: string; nome_visibile: string; descrizione: string; note: string }>;
   // le schede servono solo per gli elementi delle aree di questa mappa
   const schede = schedeContenutiGuida(partitaId, aree.map((a) => a.chiave));
+  // L4 (§2.3): nei Palazzi i punti sono le voci della guida — le schede senza mappa legate a una voce sono assorbite nella voce (la loro
+  // posizione è la «posizione da collocare» della voce finché non ha un pin), quelle senza voce vanno nelle «Schede da sistemare» della
+  // scheda del Palazzo. I dedali dei Memento restano come prima (R4-30).
+  const palazzi = new Set(prepared("SELECT chiave FROM dungeon WHERE tipo = 'palazzo'").pluck().all() as string[]);
+  const avanzamento = (() => { let a: { m: ModelloAvanzamento; s: StatiDellaPartita | null } | null = null; return () => (a ??= ((m) => ({ m, s: partitaId ? statiDellaPartita(getDb(), m, partitaId) : null }))(modelloAvanzamento(getDb()))); })();
   return { mappa: chiaveMappa(mappa), aree: aree.map(a => ({ chiave: a.chiave, nome: a.nome_visibile, descrizione: a.descrizione, note: a.note,
     collegamenti: (prepared("SELECT id FROM spillo WHERE area_guida_chiave=? AND ruolo_guida='sezione' ORDER BY ordine,id").all(a.chiave) as Array<{id:number}>).map(s=>schede.get(s.id)!),
-    punti: conPassiDentro((prepared("SELECT id,nome,descrizione,tipo,riferimento_tipo,riferimento_chiave,collezionabile,solo_posizione,ruolo_guida FROM spillo WHERE area_guida_chiave=? AND ruolo_guida='punto' ORDER BY ordine,id").all(a.chiave) as Array<{ id: number; nome: string; descrizione: string; tipo: string; riferimento_tipo: string | null; riferimento_chiave: string | null; collezionabile: number; solo_posizione: number; ruolo_guida: 'punto' | 'sezione' }>).map((s): PuntoGuidaMappaDto => ({ scheda:schede.get(s.id),id:s.id,nome:s.nome,descrizione:s.descrizione,tipo:s.tipo,riferimento:s.riferimento_tipo&&s.riferimento_chiave?{tipo:s.riferimento_tipo,chiave:s.riferimento_chiave}:null,collezionabile:s.collezionabile===1,soloPosizione:s.solo_posizione===1,ruolo:s.ruolo_guida })).concat((prepared(`SELECT p.chiave,p.nome,p.descrizione,p.tipo,p.esauribile FROM punto_interesse p WHERE p.area_chiave=? AND NOT EXISTS(SELECT 1 FROM spillo s WHERE s.area_guida_chiave=p.area_chiave AND s.riferimento_tipo='punto' AND s.riferimento_chiave=p.chiave) ORDER BY p.ordine,p.chiave`).all(a.chiave) as Array<{chiave:string;nome:string;descrizione:string;tipo:string;esauribile:number}>).map((p):PuntoGuidaMappaDto=>({id:'punto:'+p.chiave,nome:p.nome,descrizione:p.descrizione,tipo:p.tipo,riferimento:{tipo:'punto',chiave:p.chiave},collezionabile:p.esauribile===1&&categoriaSpillo(spilloPerPunto(p.tipo))==='consumabile',soloPosizione:false,ruolo:'punto'})))),
+    punti: palazzi.has(a.dungeon_chiave) ? vociDelPalazzo(a.chiave, avanzamento()) : conPassiDentro((prepared("SELECT id,nome,descrizione,tipo,riferimento_tipo,riferimento_chiave,collezionabile,solo_posizione,ruolo_guida FROM spillo WHERE area_guida_chiave=? AND ruolo_guida='punto' ORDER BY ordine,id").all(a.chiave) as Array<{ id: number; nome: string; descrizione: string; tipo: string; riferimento_tipo: string | null; riferimento_chiave: string | null; collezionabile: number; solo_posizione: number; ruolo_guida: 'punto' | 'sezione' }>).map((s): PuntoGuidaMappaDto => ({ scheda:schede.get(s.id),id:s.id,nome:s.nome,descrizione:s.descrizione,tipo:s.tipo,riferimento:s.riferimento_tipo&&s.riferimento_chiave?{tipo:s.riferimento_tipo,chiave:s.riferimento_chiave}:null,collezionabile:s.collezionabile===1,soloPosizione:s.solo_posizione===1,ruolo:s.ruolo_guida })).concat((prepared(`SELECT p.chiave,p.nome,p.descrizione,p.tipo,p.esauribile FROM punto_interesse p WHERE p.area_chiave=? AND NOT EXISTS(SELECT 1 FROM spillo s WHERE s.area_guida_chiave=p.area_chiave AND s.riferimento_tipo='punto' AND s.riferimento_chiave=p.chiave) ORDER BY p.ordine,p.chiave`).all(a.chiave) as Array<{chiave:string;nome:string;descrizione:string;tipo:string;esauribile:number}>).map((p):PuntoGuidaMappaDto=>({id:'punto:'+p.chiave,nome:p.nome,descrizione:p.descrizione,tipo:p.tipo,riferimento:{tipo:'punto',chiave:p.chiave},collezionabile:p.esauribile===1&&categoriaSpillo(spilloPerPunto(p.tipo))==='consumabile',soloPosizione:false,ruolo:'punto'})))),
     // le planimetrie dell'infiltrazione: tutte quelle delle sue aree, nell'ordine dei legami e delle versioni (L3 §1.2)
     mappe: (prepared("SELECT m.chiave FROM infiltrazione_area ia JOIN mappa m ON m.area_chiave=ia.area_chiave WHERE ia.infiltrazione_chiave=? ORDER BY ia.ordine,ia.area_chiave,m.versione_ordine,m.chiave").all(a.chiave) as Array<{ chiave: string }>).map(x => ({ chiave: chiaveMappa(x.chiave), nome: nomePercorso(x.chiave) })) })) };
+}
+
+/**
+ * L4 (§2.3): le voci di un'infiltrazione di un Palazzo come punti dei contenuti della guida — tutte, nell'ordine della guida, con i passi
+ * degli Enigmi sotto il loro Enigma; con lo stato con cui risultano nella partita, il carattere e, per una voce senza pin che ha
+ * assorbito una scheda senza mappa, la posizione di quella («da collocare», `marcatore_mappa`).
+ */
+function vociDelPalazzo(infiltrazione: string, a: { m: ModelloAvanzamento; s: StatiDellaPartita | null }): PuntoGuidaMappaDto[] {
+  const voci = prepared(`SELECT p.chiave, p.nome, p.descrizione, p.tipo, p.esauribile, mm.x, mm.y,
+      EXISTS(SELECT 1 FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id WHERE sv.voce_chiave = p.chiave AND s.mappa_chiave IS NOT NULL) AS con_pin
+    FROM punto_interesse p LEFT JOIN marcatore_mappa mm ON mm.punto_chiave = p.chiave WHERE p.area_chiave = ? ORDER BY p.ordine, p.chiave`).all(infiltrazione) as Array<{ chiave: string; nome: string; descrizione: string; tipo: string; esauribile: number; x: number | null; y: number | null; con_pin: number }>;
+  return conPassiDentro(voci.map((p): PuntoGuidaMappaDto => ({
+    id: 'punto:' + p.chiave, nome: p.nome, descrizione: p.descrizione, tipo: p.tipo, riferimento: { tipo: 'punto', chiave: p.chiave },
+    collezionabile: p.esauribile === 1 && categoriaSpillo(spilloPerPunto(p.tipo)) === 'consumabile', soloPosizione: false, ruolo: 'punto',
+    ...(a.s ? { stato: statoDellaVoce(a.m, a.s, p.chiave) } : {}),
+    carattere: a.m.voci.get(p.chiave)?.carattere ?? null, esauribile: p.esauribile === 1,
+    posizioneDaCollocare: p.con_pin === 0 && p.x !== null && p.y !== null ? { x: p.x, y: p.y } : null,
+  })));
 }
 
 /**

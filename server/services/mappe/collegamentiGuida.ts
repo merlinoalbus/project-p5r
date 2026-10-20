@@ -19,7 +19,7 @@ import { puntoDescrittivo } from '../../../shared/spilli.js';
 import { palazzoDiOgniMappa } from '../palazziService.js';
 import { ePersonaDeiMemento, erroreCatturaNelCompendio } from '../catturePersona.js';
 import { vociDelPin, vociDelPinSql } from './voceDelPin.js';
-import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, passiDi, pinDelPuntoGuida, quanteVociDelPin } from './statiGuida.js';
+import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, modelloAvanzamento, passiDi, pinDelPuntoGuida, quanteVociDelPin } from './statiGuida.js';
 
 export { vociDelPin, vociDelPinSql };
 export { allineaEnigma, allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaRaccoltoDelPin, enigmaDi, passiDaSegnare, passiDi, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma } from './statiGuida.js';
@@ -63,6 +63,10 @@ function conPartite(db: AppDatabase): boolean {
  */
 export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string): void {
   if (!conPartite(db)) return;
+  // L4 (§8.11): per una voce con un carattere (permanente, rigenerabile, racconto) gli stati li riallinea chi collega
+  // (`riallineaStati`: il pin tiene il suo segno, la voce si calcola dai suoi pin). Resta la regola di prima per le voci senza
+  // carattere (dedali dei Memento, Persona: R4-30).
+  if (modelloAvanzamento(db).voci.get(punto)?.carattere !== null) return;
   const pin = pinDelPuntoGuida(db, punto);
   if (pin.length === 0) return;
   const soloSuoi = pin.filter((p) => quanteVociDelPin(db, p.id) === 1);
@@ -87,6 +91,9 @@ export function allineaStatiPunto(db: AppDatabase, punto: string, adesso: string
  */
 export function allineaPinScollegato(db: AppDatabase, pin: { id: number; uid: string | null }, adesso: string): void {
   if (!pin.uid || !conPartite(db)) return;
+  // L4: solo i pin delle sole voci senza carattere (dedali dei Memento) hanno un segno che segue le voci; gli altri lo calcolano
+  const voci = modelloAvanzamento(db).pin.get(pin.id);
+  if (!voci || voci.contano.length > 0 || voci.altre.length === 0) return;
   for (const { id: partita } of db.prepare('SELECT id FROM partita').all() as Array<{ id: number }>) allineaRaccoltoDelPin(db, partita, { id: pin.id, uid: pin.uid }, adesso);
 }
 

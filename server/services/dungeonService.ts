@@ -19,8 +19,10 @@ import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
-import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
-import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
+import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, statiDellaPartita, statoDelPin, statoDellaVoce, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
+import { infiltrazioneCompletata } from '../../shared/completamentoGuida.js';
+import { carattereDaTipo, type CarattereVoce } from '../../shared/caratteriVoce.js';
+import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, PinDelPuntoDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
@@ -31,27 +33,50 @@ import { ePersonaDeiMemento, erroreCatturaNelCompendio, vociPersonaCatturate } f
 import { eliminaImmaginiDeiPin } from './mappe/mappeService.js';
 import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
 import { areeDelPalazzo } from './mappe/areeService.js';
-import { palazziCompletati, palazzoDiOgniMappa } from './palazziService.js';
+import { palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziService.js';
 import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
 import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
 
-interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
+interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string;
+  /** 112 (L4 §8.14) */ voce_boss_finale?: string | null; seed_json?: string | null }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string }
 /** Un'area di un dedalo dei Memento (099). */
 interface RigaAreaDedalo { chiave: string; dedalo_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
-interface RigaPunto { chiave: string; area_chiave: string; ordine: number; tipo: PuntoInteresseDto['tipo']; nome: string; descrizione: string; esauribile: number; dettagli_json: string; fonte: string; contenitore_chiave?: string | null; area_dedalo_chiave: string | null }
+interface RigaPunto { chiave: string; area_chiave: string; ordine: number; tipo: PuntoInteresseDto['tipo']; nome: string; descrizione: string; esauribile: number; dettagli_json: string; fonte: string; contenitore_chiave?: string | null; area_dedalo_chiave: string | null; /** 111 */ carattere?: string | null }
+
+/** Ciò che serve alla voce di un Palazzo per i campi di L4: il modello e, con la partita, i suoi stati. */
+interface AvanzamentoVoce { m: ModelloAvanzamento; s: StatiDellaPartita | null }
 
 /**
  * La voce della guida come la vede il client: una sola forma per la scheda del Palazzo e per le risposte delle modifiche. Una
  * voce «Persona» porta la Persona del compendio della sua maschera (2026-10-11): chi ne legge tante passa l'indice costruito una
- * volta, per una voce sola lo si costruisce qui.
+ * volta, per una voce sola lo si costruisce qui. Con `avanzamento` (le voci dei Palazzi, L4 §3.1) porta anche carattere, oggetto
+ * e «da verificare»; le voci dei dedali dei Memento restano come prima (R4-30).
  */
-function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]> }): PuntoInteresseDto {
+function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]> }, avanzamento?: AvanzamentoVoce): PuntoInteresseDto {
   const dettagli = JSON.parse(r.dettagli_json) as Record<string, unknown>;
   const persona = r.tipo === 'persona' ? personaDellaMaschera(letture?.maschere ?? indiceMaschere(), dettagli.maschera) : null;
   const areeDedalo = r.tipo === 'persona' ? (letture?.areePersone ?? areeDellePersone(r.chiave)).get(r.chiave) ?? [] : [];
-  return { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo };
+  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo };
+  if (!avanzamento || r.area_dedalo_chiave) return base;
+  const { m, s } = avanzamento;
+  const v = m.voci.get(r.chiave);
+  const oggetto = m.oggetto.get(r.chiave) ?? null;
+  // §8.11: il contatore k/N e il segno di ogni pin letto per la voce (con la partita), le voci che condividono i suoi pin
+  const sv = s?.voci.get(r.chiave) ?? null;
+  const uid = new Map((m.pinDellaVoce.get(r.chiave) ?? []).map((p) => [p.id, p.uid]));
+  return { ...base, carattere: v?.carattere ?? null, carattereScelto: r.carattere != null && v?.carattere != null,
+    pin: s && v ? pin.map((p) => (uid.has(p.id) ? { ...p, fatto: pinFattoPerLaVoce(m, s, { id: p.id, uid: uid.get(p.id)! }, v.infiltrazione) } : p)) : pin,
+    oggetto: oggetto && (m.vociOggetto.get(oggetto)?.length ?? 0) > 1 ? oggetto : null,
+    daVerificare: !!s && [...s.divergenze.values()].some((voci) => voci.includes(r.chiave)),
+    avanzamento: sv && sv.totale > 0 ? { fatti: sv.fatti, totale: sv.totale } : null,
+    condivise: vociCheCondividonoIPin(m, r.chiave).map((k) => voceDelGestoDto(m, k)) };
+}
+
+/** Lo stato con cui risulta una voce di un Palazzo (L4, §8.11: dai suoi pin se ne ha); nessuno per «Altro». */
+function statoL4(a: AvanzamentoVoce, chiave: string): StatoPunto | null {
+  return a.s ? statoDellaVoce(a.m, a.s, chiave) : null;
 }
 
 /** Le aree del dedalo in cui si incontra ogni Persona (voce → aree, in ordine di area; migrazione 101); di una voce sola, o di tutte. */
@@ -110,35 +135,32 @@ function mappeDelPalazzo(dungeonChiave: string): string[] {
   return [...sottoalberoMappe([radiceDelPalazzo(dungeonChiave)])];
 }
 
-/** I segni della partita che decidono il «raccolto» di un pin: gli uid raccolti e le voci della guida già gestite. */
-interface SegniPartita { raccolti: Set<string>; puntiGestiti: Set<string> }
+/** I segni della partita che decidono gli stati (L4): il modello dei dati di gioco, gli stati della partita, l'infiltrazione guardata
+ *  (contesto dei pin di rigenerabili, §1.4; null = quella in corso). Letti una volta per richiesta. */
+export interface SegniPartita { m: ModelloAvanzamento; s: StatiDellaPartita; contesto: string | null }
 
-/** Legge i segni della partita: gli uid dei pin segnati «raccolto» e le voci della guida già gestite. */
-function segniPartita(partitaId: number): SegniPartita {
-  return {
-    raccolti: new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((r) => r.spillo_uid)),
-    // un punto della guida già gestito (ottenuto/esaurito) conta come raccolto anche sulla mappa: è la regola del visore
-    puntiGestiti: vociGestite(partitaId),
-  };
+/** Legge i segni della partita (L4): modello e stati. */
+function segniPartita(partitaId: number, contesto: string | null = null, m: ModelloAvanzamento = modelloAvanzamento(getDb())): SegniPartita {
+  return { m, s: statiDellaPartita(getDb(), m, partitaId), contesto };
 }
 
 /** I collezionabili di ogni mappa del Palazzo e, con la partita, quanti sono raccolti.
  *  `mappe` e `mappeComplete` contano le planimetrie dell'elenco (la mappa del Palazzo, la radice, esclusa): una planimetria
  *  senza niente da raccogliere è completa (richiesta dell'utente, 2026-10-11: «se una planimetria non ha niente da raccogliere
  *  deve figurare come completata»), come una con tutto raccolto. Prima contavano solo quelle con collezionabili.
- *  `segni` li passa chi li ha già letti (l'elenco dei Palazzi li legge una volta per tutti: rilievo P7). */
+ *  `segni` li passa chi li ha già letti (l'elenco dei Palazzi li legge una volta per tutti: rilievo P7).
+ *  Da L4 il «raccolto» di un pin è il suo stato con la regola di `statoDelPin` (dalle voci, o il suo; §0): resta l'elenco dei
+ *  collezionabili di «Da raccogliere»; il completamento del Palazzo conta gli oggetti permanenti (`completamentoDelPalazzo`). */
 export function raccoltaMappe(dungeonChiave: string, partitaId?: number, segni?: SegniPartita): RaccoltaDungeon {
   const mappe = mappeDelPalazzo(dungeonChiave);
   const perMappa = new Map<string, RaccoltaMappa>();
   if (mappe.length === 0) return { perMappa, totale: 0, presi: partitaId === undefined ? null : 0, mappe: 0, mappeComplete: partitaId === undefined ? null : 0 };
-  const s = partitaId === undefined ? null : segni ?? segniPartita(partitaId);
-  const raccolti = s?.raccolti ?? null;
-  const puntiGestiti = s?.puntiGestiti ?? null;
+  const sp = partitaId === undefined ? null : segni ?? segniPartita(partitaId);
+  const raccolti = sp?.s.raccolti ?? null;
   const righe = prepared(`SELECT id, uid, mappa_chiave, tipo, nome FROM spillo WHERE collezionabile = 1 AND mappa_chiave IN (${mappe.map(() => '?').join(',')}) ORDER BY mappa_chiave, ordine, id`).all(...mappe) as Array<{ id: number; uid: string; mappa_chiave: string; tipo: string; nome: string }>;
-  // un pin conta una volta sola anche con più voci: preso quando sono tutte gestite (voci indipendenti, 2026-10-09)
-  const voci = raccolti === null ? null : vociDiOgniPin(true);
+  // un pin conta una volta sola anche con più voci: lo stato del pin di L4
   for (const r of righe) {
-    const raccolto = raccolti === null ? null : raccolti.has(r.uid) || (!!puntiGestiti && fattoPerVoci(voci?.get(r.id) ?? [], puntiGestiti));
+    const raccolto = raccolti === null || !sp ? null : statoDelPin(sp.m, sp.s, { id: r.id, uid: r.uid }, sp.contesto).fatto;
     const m = perMappa.get(r.mappa_chiave) ?? { n: 0, presi: raccolti === null ? null : 0, spilli: [] };
     m.n += 1;
     if (raccolto && m.presi !== null) m.presi += 1;
@@ -227,25 +249,47 @@ function raccoltaMementos(dungeonChiave: string, partitaId: number | undefined, 
 
 /** Il riassunto di un Palazzo. `gia` porta quello che chi chiama ha già calcolato: la raccolta (la scheda del Palazzo la calcola
  *  per le planimetrie) e i segni della partita (l'elenco li legge una volta per tutti): prima si ricalcolavano qui (P7). */
-function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, completati: Map<string, string> | null,
-  gia: { raccolta?: RaccoltaDungeon | null; segni?: SegniPartita } = {}): DungeonRiassuntoDto {
+function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, palazzi: Map<string, StatoPalazzo>,
+  gia: { raccolta?: RaccoltaDungeon | null; segni?: SegniPartita; m?: ModelloAvanzamento } = {}): DungeonRiassuntoDto {
   const conPartita = partitaId !== undefined;
   const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo, p.area_dedalo_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string; area_dedalo_chiave: string | null }>;
   const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId, stati) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(gia.raccolta ?? raccoltaMappe(r.chiave, partitaId, gia.segni));
+  const palazzo = r.tipo === 'palazzo';
+  const sp = gia.segni ?? null;
   return {
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
     date: { sblocco: r.data_sblocco, scadenza: r.data_scadenza, furtoConsigliato: r.furto_consigliato },
     finestra: finestreDungeon().get(r.chiave) ?? null, livelloConsigliato: r.livello_consigliato,
     aree: (prepared('SELECT COUNT(*) AS n FROM dungeon_area WHERE dungeon_chiave = ?').get(r.chiave) as { n: number }).n,
     punti: punti.length, esauribili: punti.filter((p) => p.esauribile === 1).length,
-    // le voci descrittive della guida («Altro» fuori dalle aree dei dedali) non hanno stato (scelte dell'utente, 2026-10-01 e 2026-10-11): non contano
-    gestiti: conPartita ? punti.filter((p) => !puntoDescrittivo(p.tipo, p.area_dedalo_chiave) && stati.has(p.chiave)).length : null,
+    // le voci descrittive della guida («Altro» fuori dalle aree dei dedali) non hanno stato (scelte dell'utente, 2026-10-01 e 2026-10-11): non contano.
+    // Nei Palazzi (L4, §8.11) una voce con pin è gestita quando lo sono tutti i suoi pin
+    gestiti: !conPartita ? null : palazzo && sp ? punti.filter((p) => statoDellaVoce(sp.m, sp.s, p.chiave) !== null).length
+      : punti.filter((p) => !puntoDescrittivo(p.tipo, p.area_dedalo_chiave) && stati.has(p.chiave)).length,
     raccolta,
     // solo i Palazzi si completano: i Memento, una volta aperti, restano un posto dove andare
-    completato: r.tipo === 'palazzo' ? completati?.get(r.chiave) ?? null : null,
+    completato: palazzo ? palazzi.get(r.chiave)?.completato ?? null : null,
+    // §8.10: il furto (Tesoro e boss finale), che governa la presenza sulla mappa di Tokyo e gli ingressi; solo per i Palazzi (AP4-1:
+    // la risposta dei Memento resta quella di prima, R4-30)
+    ...(palazzo ? { concluso: palazzi.get(r.chiave)?.concluso ?? null } : {}),
     // dove si atterra toccandolo sulla mappa di Tokyo, per il giorno della partita (2026-10-04)
     atterraggio: atterraggioDelGiorno(r.chiave, giornoDellaPartita(partitaId)),
+    // L4: la funzione unica e le divergenze da verificare, solo per i Palazzi (i Memento restano come prima, R4-30)
+    ...(palazzo ? {
+      completamento: palazzi.get(r.chiave)?.completamento ?? { oggetti: 0, fatti: conPartita ? 0 : null, tesoro: conPartita ? false : null, boss: conPartita ? false : null, concluso: conPartita ? false : null, completato: conPartita ? false : null },
+      daVerificare: !conPartita ? null : sp ? divergenzeDelPalazzo(sp, r.chiave) : 0,
+      // §8.14: la voce del boss finale dichiarata (null = nessuna: il Palazzo non si conclude) e se l'utente l'ha cambiata («Ripristina»)
+      voceBossFinale: r.voce_boss_finale ? { chiave: r.voce_boss_finale, nome: (prepared('SELECT nome FROM punto_interesse WHERE chiave = ?').get(r.voce_boss_finale) as { nome: string } | undefined)?.nome ?? r.voce_boss_finale } : null,
+      bossFinaleCorretto: r.seed_json != null,
+    } : {}),
   };
+}
+
+/** Quante divergenze «da verificare» (voci, utente 022) ha un Palazzo nella partita. */
+function divergenzeDelPalazzo(sp: SegniPartita, palazzo: string): number {
+  let n = 0;
+  for (const voci of sp.s.divergenze.values()) for (const v of voci) if (sp.m.voci.get(v)?.palazzo === palazzo) n++;
+  return n;
 }
 
 /** Il giorno di gioco (MM-GG) della partita, o null senza partita o se la partita non ha ancora un giorno. */
@@ -257,11 +301,12 @@ function giornoDellaPartita(partitaId: number | undefined): string | null {
 /** I riassunti di tutti i Palazzi e dei Memento in ordine di gioco; con la partita, anche stati, raccolta e completamento. */
 export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
   const stati = statiPartita(partitaId);
-  // i Palazzi completati si calcolano una volta per tutto l'elenco
-  const completati = partitaId !== undefined ? palazziCompletati(partitaId) : null;
-  // e i segni della partita (pin raccolti, voci gestite), che prima ogni Palazzo rileggeva
-  const segni = partitaId !== undefined ? segniPartita(partitaId) : undefined;
-  return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId, completati, { segni }));
+  // il modello di L4 si legge una volta; i Palazzi completati si calcolano una volta per tutto l'elenco
+  const m = modelloAvanzamento(getDb());
+  const palazzi = statoPalazzi(partitaId, m);
+  // e i segni della partita (modello e stati), che prima ogni Palazzo rileggeva
+  const segni = partitaId !== undefined ? segniPartita(partitaId, null, m) : undefined;
+  return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId, palazzi, { segni, m }));
 }
 
 /**
@@ -298,7 +343,7 @@ function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon,
  * native e i collezionabili raccolti, punti della guida con stato, marcatore e pin collegati; per i Memento il dedalo di ogni
  * area (timbri e richieste), per i Palazzi l'elenco delle planimetrie. Le letture comuni si fanno una volta per tutta la scheda.
  */
-export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDettaglioDto {
+export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: string | null = null): DungeonDettaglioDto {
   const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
   if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
   const stati = statiPartita(partitaId);
@@ -306,42 +351,64 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const pinPunti = pinDeiPunti();
   const letture = { maschere: indiceMaschere(), areePersone: areeDellePersone() };
   const native = mappeDelleAree(chiave);
-  const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId);
+  // L4: il modello e gli stati della partita, una volta per la scheda; il contesto dei pin di rigenerabili è l'infiltrazione guardata
+  // (`?infiltrazione=`), altrimenti quella in corso
+  const m = modelloAvanzamento(getDb());
+  const segni = partitaId === undefined ? undefined : segniPartita(partitaId, contesto, m);
+  const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId, segni);
   const dedali = r.tipo === 'mementos' ? lettureDedali(chiave, partitaId, stati) : null;
   // lo stato di una Persona dei Memento è la sua cattura nel compendio (2026-10-12, `catturePersona.ts`), non `punto_partita`
   const catturate = r.tipo === 'mementos' && partitaId !== undefined ? vociPersonaCatturate(partitaId) : new Set<string>();
-  /** Lo stato da mostrare di una voce: nessuno per una descrittiva (uno rimasto da prima si ignora, senza cancellarlo); per una
-   *  Persona dei Memento «ottenuto» se catturata. */
-  const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null
-    : r.tipo === 'mementos' && p.tipo === 'persona' ? (catturate.has(p.chiave) ? 'ottenuto' : null) : stati.get(p.chiave) ?? null);
   // L3: le Aree toccate da ogni infiltrazione. Solo nei Palazzi: per i Memento i campi nuovi non si emettono e la risposta resta
   // identica byte per byte a quella di prima (R3-12; difetto NR3-1, decisione del PM del 2026-10-20)
   const palazzo = r.tipo === 'palazzo';
+  const avanzamento: AvanzamentoVoce | undefined = palazzo ? { m, s: segni?.s ?? null } : undefined;
+  /** Lo stato da mostrare di una voce: nessuno per una descrittiva (uno rimasto da prima si ignora, senza cancellarlo); per una
+   *  Persona dei Memento «ottenuto» se catturata; nei Palazzi (L4) quello con cui risulta (§8.11: dai suoi pin, se ne ha). */
+  const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null
+    : r.tipo === 'mementos' && p.tipo === 'persona' ? (catturate.has(p.chiave) ? 'ottenuto' : null)
+    : avanzamento && !p.area_dedalo_chiave ? statoL4(avanzamento, p.chiave) : stati.get(p.chiave) ?? null);
   const areeToccate = palazzo ? areeDelleInfiltrazioni(chiave) : new Map<string, AreaDellInfiltrazione[]>();
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
     chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione,
-    mappe: (native.get(a.chiave) ?? []).map((m) => {
-      const rm = raccolta?.perMappa.get(m.chiave);
-      return { chiave: chiaveMappa(m.chiave), nome: m.nome, n: rm?.n ?? 0, presi: partitaId === undefined ? null : (rm?.presi ?? 0), spilli: rm?.spilli ?? [], ...(palazzo ? { area: m.area } : {}) };
+    mappe: (native.get(a.chiave) ?? []).map((x) => {
+      const rm = raccolta?.perMappa.get(x.chiave);
+      return { chiave: chiaveMappa(x.chiave), nome: x.nome, n: rm?.n ?? 0, presi: partitaId === undefined ? null : (rm?.presi ?? 0), spilli: rm?.spilli ?? [], ...(palazzo ? { area: x.area } : {}) };
     }),
     ...(palazzo ? { areePalazzo: (areeToccate.get(a.chiave) ?? []).map((x) => ({ chiave: x.chiave, slug: x.slug, nome: x.nome, planimetriaIniziale: x.planimetriaIniziale ? chiaveMappa(x.planimetriaIniziale) : null })) } : {}),
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(a.chiave) as RigaPunto[])
-      .map((p) => puntoDto(p, statoDi(p), marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [], letture)),
+      .map((p) => puntoDto(p, statoDi(p), marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [], letture, avanzamento)),
     dedalo: dedali ? dedaloDto(a.chiave, dedali) : null,
+    // L4 (§1.5): l'infiltrazione con la funzione unica (oggetti permanenti delle sue voci; senza niente da contare mai completata)
+    ...(palazzo ? { completamento: completamentoInfiltrazione(m, segni?.s ?? null, a.chiave) } : {}),
   }));
-  const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId) : [];
+  const oggettiPerMappa = palazzo ? oggettiDelleMappe(getDb(), m, mappeDelPalazzo(chiave)) : new Map<string, Set<string>>();
+  const planimetrie = raccolta ? planimetrieDelPalazzo(chiave, raccolta, partitaId).map((p) => ({ ...p, completamento: completamentoDegliOggetti(oggettiPerMappa.get(idMappa(p.chiave)) ?? new Set(), segni?.s ?? null) })) : [];
   // nei Memento una Persona è «catturata» se è registrata nel compendio della partita (scelte dell'utente, 2026-10-12)
   const personeCatturate = partitaId === undefined || !tabellaUtente('compendio_partita') ? null
     : (prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1 ORDER BY persona_id').all(partitaId) as Array<{ persona_id: number }>).map((x) => x.persona_id);
-  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate,
+  // L3: le Aree del Palazzo con infiltrazioni e raccolta (la stessa della colonna «Da raccogliere», per planimetria); non per i Memento.
+  // L4: con il completamento (oggetti permanenti con un pin su una sua planimetria; senza niente da contare completata)
+  const areePalazzo = palazzo && raccolta ? areeDelPalazzo(chiave, raccolta.perMappa, partitaId !== undefined, { m, s: segni?.s ?? null, oggettiPerMappa }) : null;
+  return { ...riassunto(r, stati, partitaId, statoPalazzi(partitaId, m), { raccolta, segni, m }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate,
     illustrazione: illustrazioneDellaMappa(radiceDelPalazzo(chiave)),
-    // L3: le Aree del Palazzo con infiltrazioni e raccolta (la stessa della colonna «Da raccogliere», per planimetria); non per i Memento
-    ...(palazzo && raccolta ? { areePalazzo: areeDelPalazzo(chiave, raccolta.perMappa, partitaId !== undefined) } : {}) };
+    ...(areePalazzo ? { areePalazzo } : {}),
+    // L4 (§2.3, §4.3): le schede senza mappa né voce, da sistemare
+    ...(palazzo ? { schedeDaSistemare: schedeDaSistemare(chiave) } : {}) };
 }
+
+/** L4: il completamento di un'infiltrazione (oggetti permanenti delle sue voci; senza niente da contare mai completata, R4-22). */
+function completamentoInfiltrazione(m: ModelloAvanzamento, s: StatiDellaPartita | null, infiltrazione: string): { oggetti: number; fatti: number | null; completata: boolean | null } {
+  const conto = contaOggetti(oggettiDelleVoci(m, vociDellInfiltrazione(m, infiltrazione)), s);
+  return { ...conto, completata: infiltrazioneCompletata(conto) };
+}
+
+
 
 /**
  * Stato di un punto nella partita: 'ottenuto', 'esaurito' oppure null per azzerare. Lo stato del punto è quello dei suoi pin
- * (2026-10-01): segnarlo li raccoglie, riaprirlo li riapre. Un Enigma con i suoi passi (095) è risolto quando i passi sono
+ * (2026-10-01; §8.11: fatta quando lo sono tutti, «in corso k/N» se una parte): segnarlo li raccoglie tutti, riaprirlo li riapre, e
+ * le altre voci di quei pin si ricalcolano (la risposta le elenca in `effetti`). Un Enigma con i suoi passi (095) è risolto quando i passi sono
  * fatti: segnarlo segna i passi, riaprirlo li riapre; e un passo segnato o riaperto porta con sé il suo Enigma.
  */
 export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato: StatoPunto | null): PuntoInteresseDto {
@@ -354,21 +421,30 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
   // una Persona dei Memento si cattura nel compendio, non ha uno stato suo (2026-10-12, `catturePersona.ts`); azzerarla resta
   // possibile, per ripulire
   if (stato !== null && ePersonaDeiMemento(puntoChiave)) throw erroreCatturaNelCompendio(p.nome, 'segnare');
+  // «Esaurito» solo per una voce esauribile (L4 §1.6, R4-07): prima il server lo accettava su qualunque voce. Le voci dei dedali dei
+  // Memento restano come prima (R4-30)
+  if (stato === 'esaurito' && p.esauribile !== 1 && !p.area_dedalo_chiave) throw httpErrors.badRequest('voce-non-esauribile', `«${p.nome}» non è esauribile: si segna «ottenuto».`);
   const adesso = nowIso();
   const db = getDb();
-  getDb().transaction(() => {
+  const effetti = getDb().transaction(() => {
     const prima = (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, puntoChiave) as { stato: StatoPunto } | undefined)?.stato ?? null;
     // un Enigma con i suoi passi: i passi seguono (risolto = passi fatti)
     segnaPassiDellEnigma(db, partitaId, puntoChiave, stato, adesso);
-    scriviStatoVoce(db, partitaId, puntoChiave, stato, adesso);
+    // §8.11: una voce con pin segna (o toglie) tutti i suoi pin; le altre voci di quei pin si ricalcolano (`effetti`)
+    const e = scriviStatoVoce(db, partitaId, puntoChiave, stato, adesso);
     // un passo: il suo Enigma segue
     allineaEnigmaDellaVoce(db, partitaId, puntoChiave, adesso);
     if (stato !== null && stato !== prima) {
       registraEvento(partitaId, 'punto-dungeon', `${p.dungeon_nome} · ${p.area_nome}: ${p.nome} ${stato === 'ottenuto' ? 'ottenuto' : 'esaurito'}`, p.descrizione.slice(0, 200), { punto: puntoChiave, tipo: p.tipo, stato });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+    return e;
   })();
-  return puntoDto(p, stato, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? []);
+  // L4: per una voce dei Palazzi lo stato con cui risulta adesso (§8.11: dai suoi pin) e i campi di L4, con le altre voci che il gesto
+  // ha segnato o riaperto («Segnate anche: …», «Riapre anche: …»)
+  const avanzamento = avanzamentoDellaVoce(p, partitaId);
+  const dto = puntoDto(p, avanzamento ? statoL4(avanzamento, puntoChiave) : stato, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? [], undefined, avanzamento);
+  return avanzamento ? { ...dto, effetti: effettiDelGestoDto(db, effetti) } : dto;
 }
 
 // ---- Correzione dei testi della guida (fase «tutto modificabile») ----
@@ -381,15 +457,59 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
 // Le correzioni sono **dati di gioco** (stanno in `gioco.db`), quindi entrano nel pacchetto quando
 // lo si rigenera, e valgono per ogni partita: non sono avanzamento.
 
-export interface DatiDungeon { nome?: string; sovrano?: string; dataSblocco?: string; dataScadenza?: string; furtoConsigliato?: string; livelloConsigliato?: string; note?: string }
+export interface DatiDungeon { nome?: string; sovrano?: string; dataSblocco?: string; dataScadenza?: string; furtoConsigliato?: string; livelloConsigliato?: string; note?: string;
+  /** L4 §8.14: la voce del boss finale («Modifica › Boss finale»); null = nessuna. */
+  voceBossFinale?: string | null }
 
-/** Testi della scheda di un Palazzo (o dei Memento). */
+/**
+ * Testi della scheda di un Palazzo (o dei Memento) e, per un Palazzo, la voce del boss finale (L4 §8.14, «Modifica › Boss finale»): una
+ * voce `boss` del Palazzo (400 `voce-non-boss`, 400 `voce-di-un-altro-palazzo`, 404 `punto-non-trovato`; nei Memento 400
+ * `boss-finale-dei-memento`, che restano col boss segnato nella Guida). Il primo cambio conserva il valore della guida in `seed_json`, per
+ * «Ripristina» (`ripristinaDungeon`).
+ */
 export function aggiornaDungeon(chiave: string, dati: DatiDungeon): DungeonDettaglioDto {
   const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
   if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
-  prepared(`UPDATE dungeon SET nome = ?, sovrano = ?, data_sblocco = ?, data_scadenza = ?, furto_consigliato = ?, livello_consigliato = ?, note = ? WHERE chiave = ?`).run(
-    dati.nome?.trim() || r.nome, dati.sovrano ?? r.sovrano, dati.dataSblocco ?? r.data_sblocco, dati.dataScadenza ?? r.data_scadenza,
-    dati.furtoConsigliato ?? r.furto_consigliato, dati.livelloConsigliato ?? r.livello_consigliato, dati.note ?? r.note, chiave);
+  if (dati.voceBossFinale !== undefined) verificaVoceBossFinale(r, dati.voceBossFinale);
+  getDb().transaction(() => {
+    prepared(`UPDATE dungeon SET nome = ?, sovrano = ?, data_sblocco = ?, data_scadenza = ?, furto_consigliato = ?, livello_consigliato = ?, note = ? WHERE chiave = ?`).run(
+      dati.nome?.trim() || r.nome, dati.sovrano ?? r.sovrano, dati.dataSblocco ?? r.data_sblocco, dati.dataScadenza ?? r.data_scadenza,
+      dati.furtoConsigliato ?? r.furto_consigliato, dati.livelloConsigliato ?? r.livello_consigliato, dati.note ?? r.note, chiave);
+    if (dati.voceBossFinale !== undefined && dati.voceBossFinale !== (r.voce_boss_finale ?? null)) {
+      // il valore della guida si conserva al primo cambio, come per le Aree (`seed_json` non nullo = corretto dall'utente)
+      const seed = r.seed_json ?? JSON.stringify({ voce_boss_finale: r.voce_boss_finale ?? null });
+      prepared('UPDATE dungeon SET voce_boss_finale = ?, seed_json = ? WHERE chiave = ?').run(dati.voceBossFinale, seed, chiave);
+    }
+  })();
+  return dettaglioDungeon(chiave);
+}
+
+/** La voce data può essere il boss finale del Palazzo? (Vedi `aggiornaDungeon`.) */
+function verificaVoceBossFinale(r: RigaDungeon, voce: string | null): void {
+  if (r.tipo !== 'palazzo') throw httpErrors.badRequest('boss-finale-dei-memento', 'I Memento non hanno una voce del boss finale: il boss si segna nella Guida.');
+  if (!colonnaVoceBossFinale()) throw httpErrors.badRequest('boss-finale-non-disponibile', 'La voce del boss finale arriva con la migrazione 112.');
+  if (voce === null) return;
+  const v = prepared('SELECT p.nome, p.tipo, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(voce) as { nome: string; tipo: string; dungeon_chiave: string } | undefined;
+  if (!v) throw httpErrors.notFound('punto-non-trovato', `Il punto '${voce}' non esiste.`);
+  if (v.dungeon_chiave !== r.chiave) throw httpErrors.badRequest('voce-di-un-altro-palazzo', `«${v.nome}» non è una voce di questo Palazzo.`);
+  if (v.tipo !== 'boss') throw httpErrors.badRequest('voce-non-boss', `«${v.nome}» non è una voce «Boss»: il boss finale si sceglie fra le voci «Boss» del Palazzo.`);
+}
+
+/** La colonna della voce del boss finale (112) c'è? */
+function colonnaVoceBossFinale(): boolean {
+  return (prepared('PRAGMA main.table_info(dungeon)').all() as Array<{ name: string }>).some((c) => c.name === 'voce_boss_finale');
+}
+
+/** «Ripristina» della scheda di un Palazzo (L4 §8.14): la voce del boss finale torna quella della guida (`seed_json`). 409
+ *  `niente-da-ripristinare` se non è stata cambiata. */
+export function ripristinaDungeon(chiave: string): DungeonDettaglioDto {
+  const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
+  if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
+  if (!colonnaVoceBossFinale() || r.seed_json == null) throw httpErrors.conflict('niente-da-ripristinare', 'La scheda del Palazzo ha già i valori della guida.');
+  const seed = JSON.parse(r.seed_json) as { voce_boss_finale?: string | null };
+  // una voce della guida eliminata nel frattempo non si rimette (la colonna ha la chiave esterna): resta nessuna
+  const voce = seed.voce_boss_finale && prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(seed.voce_boss_finale) ? seed.voce_boss_finale : null;
+  prepared('UPDATE dungeon SET voce_boss_finale = ?, seed_json = NULL WHERE chiave = ?').run(voce, chiave);
   return dettaglioDungeon(chiave);
 }
 
@@ -645,6 +765,8 @@ export function creaArea(dungeonChiave: string, dati: { nome: string; descrizion
 }
 
 export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
+  /** L4 (§1.1): il carattere scelto dall'utente; null = «Ripristina» (la regola del tipo); assente = invariato. Solo nei Palazzi. */
+  carattere?: CarattereVoce | null;
   /** Tutti i dettagli della voce (2026-10-18): sostituiscono quelli di prima, tranne la `maschera` di una Persona; assenti = invariati. */
   dettagli?: Record<string, unknown>;
   /** L'Enigma di cui la voce diventa un passo (095); null = torna una voce dell'area; assente = invariato. */
@@ -795,10 +917,13 @@ export function spostaPuntiInArea(chiavi: string[], area: string): PuntiSpostati
   const ordineArea = new Map((prepared('SELECT chiave, ordine FROM dungeon_area').all() as Array<{ chiave: string; ordine: number }>).map((a) => [a.chiave, a.ordine]));
   daSpostare.sort((a, b) => (ordineArea.get(a.area_chiave) ?? 0) - (ordineArea.get(b.area_chiave) ?? 0) || a.ordine - b.ordine || a.chiave.localeCompare(b.chiave));
   getDb().transaction(() => {
+    // §8.11: l'infiltrazione di una rigenerabile decide la forma dei pin condivisi
+    const mPrima = modelloAvanzamento(getDb());
     for (const p of daSpostare) {
       prepared('UPDATE punto_interesse SET area_chiave = ?, ordine = ? WHERE chiave = ?').run(area, ordineInFondo(area, null, null), p.chiave);
       seguonoLaVoce(p.chiave, p.area_chiave, area);
     }
+    if (daSpostare.length > 0) riallineaStati(getDb(), mPrima, nowIso());
   })();
   return { area, spostate: daSpostare.map((p) => p.chiave) };
 }
@@ -902,6 +1027,9 @@ export function copiaPuntiInArea(chiavi: string[], area: string): PuntiCopiatiDt
   const adesso = nowIso();
   const db = getDb();
   db.transaction(() => {
+    // §8.11: il modello di prima, per la forma dei pin (una rigenerabile copiata in un'altra infiltrazione rende il pin condiviso: lì
+    // parte da fare) e lo specchio delle copie
+    const mPrima = modelloAvanzamento(db);
     for (const p of righe) {
       const copia = copiaRigaPunto(p, area, ordineInFondo(area, null, null), null);
       let schede = copiaSchedeDellaVoce(p.chiave, p.area_chiave, copia, area, adesso);
@@ -917,6 +1045,7 @@ export function copiaPuntiInArea(chiavi: string[], area: string): PuntiCopiatiDt
       copiate.push({ origine: p.chiave, copia, passi: passi.length, schede, pin });
     }
     assegnaUidMancanti(db);
+    riallineaStati(db, mPrima, adesso);
   })();
   return { area, copiate };
 }
@@ -964,9 +1093,18 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   if (dati.areaDedalo !== undefined && dati.areaDedalo !== areaDopo) {
     throw httpErrors.badRequest('passo-di-altra-area', `«${p.nome}» è un passo: sta nell'area del suo Enigma (si sposta l'Enigma, e i passi lo seguono).`);
   }
+  // L4 (§1.1): il carattere si sceglie per le voci dei Palazzi che ne hanno uno (non nei dedali dei Memento, non per le Persona, L8).
+  // Cambia solo la propagazione: nessuno stato si riscrive (R4-08)
+  if (dati.carattere != null && (dedalo || carattereDaTipo(dati.tipo ?? p.tipo, areaDopo) === null)) {
+    throw httpErrors.badRequest('carattere-non-ammesso', `«${p.nome}» non ha un carattere da scegliere: le voci dei dedali dei Memento e le Persona restano come sono.`);
+  }
+  if (dati.carattere !== undefined && !colonnaCarattere()) throw httpErrors.badRequest('carattere-non-ammesso', 'Il carattere delle voci arriva con la migrazione 111.');
   const adesso = nowIso();
   const db = getDb();
   db.transaction(() => {
+    // §8.11: carattere, tipo e infiltrazione decidono se la voce legge i suoi pin e la forma dei pin condivisi dai rigenerabili
+    const mPrima = modelloAvanzamento(db);
+    if (dati.carattere !== undefined) prepared('UPDATE punto_interesse SET carattere = ? WHERE chiave = ?').run(dati.carattere, puntoChiave);
     // cambiando Enigma (o uscendone), area del dedalo o area del Palazzo la voce va in fondo fra le sue nuove compagne
     const ordine = dati.ordine ?? (dopo !== prima || areaDopo !== areaPrima || cambiaArea ? ordineInFondo(areaGuida, dopo, areaDopo) : p.ordine);
     prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ?, contenitore_chiave = ?, area_dedalo_chiave = ?, dettagli_json = ?, area_chiave = ? WHERE chiave = ?').run(
@@ -977,6 +1115,7 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
     if (areePersona) collegaPersonaAlleAree(puntoChiave, areePersona);
     // gli Enigmi toccati (lasciato, raggiunto, o il proprio, se cambia tipo e con lui il conto dei passi da segnare) seguono i passi
     for (const enigma of new Set([prima, dopo].filter((x): x is string => x !== null))) allineaEnigmaInOgniPartita(db, enigma, adesso);
+    if (dati.carattere !== undefined || dati.tipo !== undefined || cambiaArea) riallineaStati(db, mPrima, adesso);
   })();
   return leggiPunto(puntoChiave);
 }
@@ -989,7 +1128,42 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
 function leggiPunto(puntoChiave: string): PuntoInteresseDto {
   const r = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
   if (!r) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  return puntoDto(r, null, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? []);
+  return puntoDto(r, null, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? [], undefined, avanzamentoDellaVoce(r, null));
+}
+
+/** I campi di L4 per una voce sola (le risposte delle modifiche): solo per le voci dei Palazzi; con la partita, i suoi stati. */
+function avanzamentoDellaVoce(r: RigaPunto, partitaId: number | null): AvanzamentoVoce | undefined {
+  if (r.area_dedalo_chiave) return undefined;
+  const tipo = (prepared('SELECT d.tipo FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE a.chiave = ?').get(r.area_chiave) as { tipo: string } | undefined)?.tipo;
+  if (tipo !== 'palazzo') return undefined;
+  const m = modelloAvanzamento(getDb());
+  return { m, s: partitaId === null ? null : statiDellaPartita(getDb(), m, partitaId) };
+}
+
+/** La colonna del carattere (111) c'è? */
+function colonnaCarattere(): boolean {
+  return (prepared('PRAGMA main.table_info(punto_interesse)').all() as Array<{ name: string }>).some((c) => c.name === 'carattere');
+}
+
+/**
+ * L4 (§3.2, R4-15): i gruppi di copie di una voce di un Palazzo secondo la regola dell'utente — stessa infiltrazione, stesso tipo, nome,
+ * descrizione, dettagli e contenitore, **stesso insieme di pin** (non vuoto: due voci senza pin non sono la stessa cosa sulla
+ * planimetria). Sola lettura: in L4 non c'è fusione (decisione dell'utente).
+ */
+export function copieDelPalazzo(dungeon: string): GruppoCopieDto[] {
+  if (!prepared('SELECT 1 FROM dungeon WHERE chiave = ?').get(dungeon)) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${dungeon}' non esiste.`);
+  const righe = prepared(`SELECT p.chiave, p.area_chiave, p.ordine, p.tipo, p.nome, p.descrizione, p.dettagli_json, p.contenitore_chiave,
+      (SELECT group_concat(spillo_id) FROM (SELECT sv.spillo_id FROM spillo_voce sv WHERE sv.voce_chiave = p.chiave ORDER BY sv.spillo_id)) AS pin
+    FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ? ORDER BY a.ordine, p.ordine, p.chiave`).all(dungeon) as Array<{ chiave: string; area_chiave: string; ordine: number; tipo: string; nome: string; descrizione: string; dettagli_json: string; contenitore_chiave: string | null; pin: string | null }>;
+  const gruppi = new Map<string, typeof righe>();
+  for (const r of righe) {
+    if (!r.pin) continue;
+    const chiave = JSON.stringify([r.area_chiave, r.tipo, r.nome, r.descrizione, r.dettagli_json, r.contenitore_chiave, r.pin]);
+    gruppi.set(chiave, [...(gruppi.get(chiave) ?? []), r]);
+  }
+  return [...gruppi.values()].filter((g) => g.length > 1).map((g) => ({
+    infiltrazione: g[0].area_chiave, voci: g.map((r) => ({ chiave: r.chiave, nome: r.nome, ordine: r.ordine })), pin: g[0].pin!.split(',').map(Number),
+  }));
 }
 
 /**
@@ -1036,10 +1210,13 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
   if (!collega) {
     if (!suoPunto && !nelRiferimento) throw httpErrors.conflict('pin-non-collegato', `«${s.nome}» non è collegato a questo punto.`);
     getDb().transaction(() => {
+      // §8.11: il pin tiene il suo segno (§8.3: lo ha già); la voce lo perde e si ricalcola dai pin che le restano
+      const mPrima = modelloAvanzamento(getDb());
       if (nelRiferimento) prepared('UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE id = ?').run(spilloId);
       prepared('DELETE FROM spillo_voce WHERE spillo_id = ? AND voce_chiave = ?').run(spilloId, puntoChiave);
       prepared('UPDATE spillo SET updated_at = ? WHERE id = ?').run(adesso, spilloId);
       allineaPinScollegato(getDb(), s, adesso);
+      riallineaStati(getDb(), mPrima, adesso);
     })();
     return leggiPunto(puntoChiave);
   }
@@ -1047,11 +1224,14 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
   const errore = erroreVoceDelPin({ nome: s.nome, mappa: s.mappa_chiave }, puntoChiave);
   if (errore) throw errore;
   getDb().transaction(() => {
+    const mPrima = modelloAvanzamento(getDb());
     if (!suoPunto) {
       prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(spilloId, puntoChiave);
       prepared('UPDATE spillo SET updated_at = ? WHERE id = ?').run(adesso, spilloId);
     }
     allineaStatiPunto(getDb(), puntoChiave, adesso);
+    // §8.11: una voce fatta dà il segno al pin nuovo; un pin già segnato che completa i pin della voce la rende fatta
+    riallineaStati(getDb(), mPrima, adesso);
   })();
   return leggiPunto(puntoChiave);
 }
@@ -1131,14 +1311,19 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
  * che prima lo scriveva una seconda volta riga per riga (rilievo R4 della verifica, 2026-10-03).
  */
 function staccaPunto(puntoChiave: string): void {
+  // §8.11: i pin che la voce lascia tengono il loro segno (lo hanno già: §8.3); le altre voci di quei pin si ricalcolano dopo
+  const mPrima = modelloAvanzamento(getDb());
   prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
+  if (tabellaUtente('divergenza_partita')) prepared('DELETE FROM divergenza_partita WHERE voce_chiave = ?').run(puntoChiave);
   prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
   prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
   prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
-  // i pin perdono il collegamento a questa voce (le altre restano), e in ogni partita seguono quelle che gli restano
-  const pin = prepared('SELECT s.id, s.uid FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id WHERE sv.voce_chiave = ?').all(puntoChiave) as Array<{ id: number; uid: string | null }>;
+  // i pin perdono il collegamento a questa voce (le altre restano), e in ogni partita seguono quelle che gli restano (dedali)
+  const tutti = prepared('SELECT s.id, s.uid FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id WHERE sv.voce_chiave = ?').all(puntoChiave) as Array<{ id: number; uid: string | null }>;
   prepared('DELETE FROM spillo_voce WHERE voce_chiave = ?').run(puntoChiave);
-  for (const p of pin) allineaPinScollegato(getDb(), p, nowIso());
+  for (const p of tutti) allineaPinScollegato(getDb(), p, nowIso());
+  // §8.11: la forma dei pin (un pin condiviso dai rigenerabili può smettere di esserlo) e lo specchio delle voci che restano
+  if (tutti.length > 0) riallineaStati(getDb(), mPrima, nowIso());
 }
 
 /**
@@ -1262,4 +1447,58 @@ export function eliminaAreaDedalo(chiave: string): void {
     prepared('DELETE FROM area_dedalo WHERE chiave = ?').run(chiave);
     prepared('UPDATE area_dedalo SET ordine = ordine - 1 WHERE dedalo_chiave = ? AND ordine > ?').run(a.dedalo_chiave, a.ordine);
   })());
+}
+
+// ---- L4 (§2.3, §4.3): le schede della guida senza mappa né voce, da sistemare ----
+//
+// Le schede senza mappa legate a una voce sono assorbite nella voce (la voce è già la stessa cosa). Quelle senza voce (oggi 5: Kamoshida 1,
+// 14, 15, 16; Madarame 28) restano righe di `spillo` e si sistemano con un gesto dell'utente: «Crea la voce» (una voce nuova con il loro
+// testo, nella loro infiltrazione) o «Collega a una voce» (una voce del loro Palazzo). Nessuna creazione automatica, mai cancellate.
+
+interface RigaScheda { id: number; nome: string; descrizione: string; tipo: string; x: number; y: number; area_guida_chiave: string; riferimento_tipo: string | null; mappa_chiave: string | null }
+
+/** Le schede da sistemare di un Palazzo, nell'ordine della guida. */
+function schedeDaSistemare(dungeon: string): SchedaDaSistemareDto[] {
+  if (!colonnaSpilloGuida()) return [];
+  return (prepared(`SELECT s.id, s.nome, s.descrizione, s.tipo, s.x, s.y, s.area_guida_chiave, a.nome AS area_nome FROM spillo s JOIN dungeon_area a ON a.chiave = s.area_guida_chiave
+    WHERE a.dungeon_chiave = ? AND s.mappa_chiave IS NULL AND s.riferimento_tipo IS NULL AND NOT EXISTS (SELECT 1 FROM spillo_voce sv WHERE sv.spillo_id = s.id)
+    ORDER BY a.ordine, s.ordine, s.id`).all(dungeon) as Array<RigaScheda & { area_nome: string }>)
+    .map((s) => ({ id: s.id, nome: s.nome, descrizione: s.descrizione, tipo: s.tipo, infiltrazione: s.area_guida_chiave, infiltrazioneNome: s.area_nome, posizione: { x: s.x, y: s.y } }));
+}
+
+/** La scheda da sistemare con quell'id: 404 se non c'è o non è una scheda senza mappa; 409 se ha già una voce. */
+function schedaDaSistemare(id: number): RigaScheda {
+  const s = colonnaSpilloGuida() ? prepared('SELECT id, nome, descrizione, tipo, x, y, area_guida_chiave, riferimento_tipo, mappa_chiave FROM spillo WHERE id = ?').get(id) as RigaScheda | undefined : undefined;
+  if (!s || s.mappa_chiave !== null || !s.area_guida_chiave) throw httpErrors.notFound('scheda-non-trovata', 'La scheda della guida senza mappa non esiste.');
+  if (s.riferimento_tipo !== null || prepared('SELECT 1 FROM spillo_voce WHERE spillo_id = ?').get(id)) throw httpErrors.conflict('scheda-gia-sistemata', `«${s.nome}» è già legata a una voce.`);
+  return s;
+}
+
+/**
+ * «Collega a una voce»: la scheda diventa la voce data (del suo Palazzo), che la assorbe — la posizione della scheda diventa la posizione
+ * da collocare della voce, se non ne ha una. Nessuno stato si trasferisce (R4-12). Restituisce la voce.
+ */
+export function collegaSchedaAllaVoce(id: number, voce: string): PuntoInteresseDto {
+  const s = schedaDaSistemare(id);
+  const v = prepared('SELECT p.chiave, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(voce) as { chiave: string; dungeon_chiave: string } | undefined;
+  if (!v) throw httpErrors.notFound('punto-non-trovato', `La voce '${voce}' non esiste.`);
+  const palazzo = (prepared('SELECT dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(s.area_guida_chiave) as { dungeon_chiave: string }).dungeon_chiave;
+  if (v.dungeon_chiave !== palazzo) throw httpErrors.badRequest('voce-di-un-altro-palazzo', `La voce non è del Palazzo della scheda «${s.nome}».`);
+  getDb().transaction(() => {
+    prepared("UPDATE spillo SET riferimento_tipo = 'punto', riferimento_chiave = ?, updated_at = ? WHERE id = ?").run(voce, nowIso(), id);
+    prepared("INSERT INTO marcatore_mappa (punto_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'utente') ON CONFLICT(punto_chiave) DO NOTHING").run(voce, s.x, s.y, nowIso());
+  })();
+  return leggiPunto(voce);
+}
+
+/** «Crea la voce»: una voce nuova in fondo all'infiltrazione della scheda, con il suo nome e la sua descrizione e il tipo dato, che la
+ *  assorbe (come «Collega a una voce»). Restituisce la voce. */
+export function creaVoceDallaScheda(id: number, tipo: PuntoInteresseDto['tipo']): PuntoInteresseDto {
+  const s = schedaDaSistemare(id);
+  let voce = '';
+  getDb().transaction(() => {
+    voce = creaPunto(s.area_guida_chiave, { nome: s.nome, descrizione: s.descrizione, tipo }).chiave;
+    collegaSchedaAllaVoce(id, voce);
+  })();
+  return leggiPunto(voce);
 }

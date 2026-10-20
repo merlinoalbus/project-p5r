@@ -18,6 +18,8 @@ import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 import type { MeteoPartita } from './meteoPartita.js';
+import type { CarattereVoce } from './caratteriVoce.js';
+import type { CompletamentoPalazzo } from './completamentoGuida.js';
 import type { QuizAttivita } from './quizAttivita.js';
 import type { Osservazione, Statistiche } from './statistiche.js';
 
@@ -1478,6 +1480,9 @@ export interface AreaRiassuntoDto {
   /** I collezionabili delle sue planimetrie e quanti ne ha presi la partita, come la raccolta del Palazzo (L3). `presi` è null
    *  senza partita e sempre nel mondo (la raccolta con la partita la contano i Palazzi). Il server lo manda sempre. */
   raccolta?: { n: number; presi: number | null };
+  /** L4 (§1.5): gli oggetti permanenti con un pin su una sua planimetria, quanti fatti e se è completata (senza niente da contare sì).
+   *  `fatti`/`completata` null senza partita. Solo per le Aree dei Palazzi. */
+  completamento?: { oggetti: number; fatti: number | null; completata: boolean | null };
 }
 /** Un luogo, negozio, attività o Confidente segnato con un pin su una planimetria dell'Area. */
 export interface ElementoAreaDto { tipo: 'luogo' | 'negozio' | 'attivita' | 'confidente'; chiave: string; nome: string; spillo: number; planimetria: string }
@@ -1890,6 +1895,24 @@ export interface PuntoInteresseDto {
   /** Per una Persona di un dedalo (migrazione 101): le aree del dedalo in cui si incontra, in ordine di area (una Persona sta in
    *  più aree; la sua `areaDedalo` è null). Vuoto per le altre voci. */
   areeDedalo: string[];
+  // ---- L4 «Avanzamento unico» (§3.1): presenti per le voci dei Palazzi, assenti per i dedali dei Memento (risposta invariata, R4-30) ----
+  /** Il carattere effettivo (la scelta dell'utente o la regola, `shared/caratteriVoce.ts`); null per le Persona (L8). Con L4 `stato` è
+   *  lo stato con cui la voce risulta: per una permanente anche da un'altra voce del suo oggetto (fatta nella 2 → fatta nella 4). */
+  carattere?: CarattereVoce | null;
+  /** Vero se il carattere l'ha scelto l'utente («Ripristina» lo riporta alla regola). */
+  carattereScelto?: boolean;
+  /** La chiave dell'oggetto permanente (la chiave minima delle sue voci) se la voce ne divide uno con altre voci, altrimenti null. */
+  oggetto?: string | null;
+  /** Vero se nella partita la voce ha un pin fatto «da verificare» (divergenza conservata dalla migrazione utente 022). */
+  daVerificare?: boolean;
+  /** §8.11: per una voce permanente o rigenerabile con pin, quanti dei suoi pin sono fatti (k/N, «In corso · 2/8»); null per una voce
+   *  senza pin o senza partita. Il segno di ogni pin sta in `pin[].fatto`. */
+  avanzamento?: AvanzamentoVoceDto | null;
+  /** §8.11: le altre voci che condividono un suo pin (per i pin condivisi dai rigenerabili, nella stessa infiltrazione): quelle che
+   *  «Segna» può segnare e «Riapri» riapre — l'interfaccia le elenca nella conferma («Riapre anche: …»). */
+  condivise?: VoceDelGestoDto[];
+  /** §8.11: solo nella risposta del gesto sulla voce (`PUT /api/partite/:id/punti`): le altre voci segnate o riaperte. */
+  effetti?: EffettiDelGestoDto;
 }
 
 /** La Persona del compendio che corrisponde a una maschera scritta dalla guida: id della scheda, nome canonico (per l'immagine)
@@ -1897,7 +1920,10 @@ export interface PuntoInteresseDto {
 export interface PersonaDellaMascheraDto { id: number; nome: string; nomeIt: string }
 
 /** Un pin di una planimetria collegato a un punto della guida. */
-export interface PinDelPuntoDto { id: number; nome: string; tipo: string; mappa: string; mappaNome: string }
+export interface PinDelPuntoDto { id: number; nome: string; tipo: string; mappa: string; mappaNome: string;
+  /** §8.11: per le voci dei Palazzi con la partita, il segno del pin letto per la voce (un pin condiviso dai rigenerabili, nella sua
+   *  infiltrazione). Assente senza partita e per i dedali. */
+  fatto?: boolean }
 
 /** Una voce della guida che si può collegare a un pin dall'editor delle mappe (098): del Palazzo del pin, da segnare, non ancora sua. */
 export interface VoceCollegabileDto { chiave: string; nome: string; tipo: string; area: string; areaNome: string; /** L'Enigma di cui è un passo, o null. */ enigma: string | null }
@@ -1929,6 +1955,9 @@ export interface AreaDungeonDto {
   punti: PuntoInteresseDto[];
   /** Solo per i dedali dei Memento: le aree del dedalo con i loro elementi e il completamento (099); null per i Palazzi. */
   dedalo: DedaloDto | null;
+  /** L4 (§1.5): gli oggetti permanenti delle sue voci e quanti fatti; `completata` con la regola unica (senza niente da contare mai,
+   *  R4-22). Null senza partita. Per i Palazzi; assente per i dedali dei Memento. */
+  completamento?: { oggetti: number; fatti: number | null; completata: boolean | null };
 }
 /** L'infiltrazione di un Palazzo (`dungeon_area`): il contratto resta `AreaDungeonDto` (L3 §0), questo nome è per il codice nuovo. */
 export type InfiltrazioneDto = AreaDungeonDto;
@@ -2002,14 +2031,54 @@ export interface DungeonRiassuntoDto {
    *  Palazzo e quanti ne ha presi la partita. Per i Memento i totali sono gli obiettivi dei dedali
    *  (timbri dichiarati + richieste). `presi` e `mappeComplete` sono null senza partita. */
   raccolta: { totale: number; presi: number | null; mappe: number; mappeComplete: number | null };
-  /** Il Palazzo completato nella partita, col perché («Tesoro, boss finale e raccolto tutto (n/n)»; per i Memento «boss
-   *  finale segnato nella Guida»: `palazziService.statoPalazzi`, 2026-10-04); null se non lo è o senza partita.
-   *  Sulla mappa di Tokyo un Palazzo completato non c'è più, come nel gioco. */
+  /** Il Palazzo completato nella partita, col perché («Tesoro, boss finale e tutti gli oggetti permanenti (n/n)»; null per i
+   *  Memento: `palazziService.statoPalazzi`); null se non lo è o senza partita. Dal 2026-10-20 (§8.10) vale solo per l'anello, la
+   *  percentuale e il segno «Completato»: gli effetti seguono `concluso`. */
   completato: string | null;
+  /** Il Palazzo concluso nella partita (§8.10, decisione dell'utente del 2026-10-20), col perché («Tesoro e boss finale»); null se
+   *  non lo è o senza partita. Governa gli effetti: sulla mappa di Tokyo un Palazzo concluso non c'è più, come nel gioco dopo il furto,
+   *  e il suo ingresso è chiuso. Per i Palazzi; assente per i Memento (AP4-1, R4-30). */
+  concluso?: string | null;
   /** Dove si atterra toccando il Palazzo sulla mappa di Tokyo, per il giorno della partita (senza partita, o senza data: la
    *  regola che vale sempre): la prima regola di `dungeon_atterraggio` che lo copre (2026-10-04). Null se nessuna lo copre. */
   atterraggio: { mappa: string; spillo: number | null } | null;
+  /** L4 (§1.5): il completamento con la funzione unica — oggetti permanenti, Tesoro, boss finale (`shared/completamentoGuida.ts`); i
+   *  campi della partita null senza partita. Per i Palazzi; assente per i Memento. `raccolta` resta l'elenco dei collezionabili, con lo
+   *  stato del pin di L4. */
+  completamento?: CompletamentoPalazzo;
+  /** L4: quante divergenze «da verificare» ha il Palazzo nella partita (null senza partita). Per i Palazzi; assente per i Memento. */
+  daVerificare?: number | null;
+  /** L4 §8.14: la voce del boss finale dichiarata del Palazzo («Modifica › Boss finale»); null = nessuna (il Palazzo non si conclude).
+   *  Per i Palazzi; assente per i Memento. */
+  voceBossFinale?: { chiave: string; nome: string } | null;
+  /** L4 §8.14: la voce del boss finale è stata cambiata dall'utente («Ripristina» la riporta a quella della guida). */
+  bossFinaleCorretto?: boolean;
 }
+
+/** L4 (§3.1): una divergenza conservata «da verificare» — un pin fatto con una sua voce non fatta, da prima dell'aggiornamento. */
+export interface DivergenzaDto {
+  /** Id del pin, e il suo uid (chiave della divergenza). */
+  spillo: number;
+  spilloUid: string;
+  spilloNome: string;
+  /** La planimetria del pin (chiave pubblica) e il suo nome. */
+  mappa: string;
+  mappaNome: string;
+  /** La voce non fatta e la sua infiltrazione. */
+  voce: string;
+  voceNome: string;
+  infiltrazione: string;
+  infiltrazioneNome: string;
+  /** Quando la migrazione l'ha rilevata. */
+  rilevataIl: string;
+}
+
+/** L4 (§2.3, §4.3): una scheda della guida senza mappa e senza voce (i dati di prima): «Schede da sistemare» della scheda del Palazzo,
+ *  con «Crea la voce» o «Collega a una voce». Mai cancellata senza cestino. */
+export interface SchedaDaSistemareDto { id: number; nome: string; descrizione: string; tipo: string; infiltrazione: string; infiltrazioneNome: string; posizione: { x: number; y: number } | null }
+
+/** L4 (§3.2): un gruppo di copie di una voce secondo la regola dell'utente (R4-15: stesso testo, stessi pin, stessa infiltrazione). */
+export interface GruppoCopieDto { infiltrazione: string; voci: Array<{ chiave: string; nome: string; ordine: number }>; pin: number[] }
 
 /**
  * Una regola di atterraggio di un Palazzo (2026-10-04): quando vale e dove si atterra toccandolo sulla mappa di Tokyo. Le regole
@@ -2055,7 +2124,9 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
    *  ordinano, si legano e si cancellano. Vuoto per i Memento, che contano gli obiettivi dei dedali. */
   planimetrie: Array<{ chiave: string; nome: string; ordine: number; aree: Array<{ chiave: string; nome: string; ordine: number }>; n: number; presi: number | null; spilli: SpilloRaccoltaDto[];
     /** L3: la chiave dell'Area del Palazzo e l'etichetta della versione; da L3 `aree` (le infiltrazioni) sono quelle dell'Area. */
-    area?: string | null; versioneEtichetta?: string | null }>;
+    area?: string | null; versioneEtichetta?: string | null;
+    /** L4 (§1.5): gli oggetti permanenti con un pin su questa planimetria (senza niente da contare è completata). */
+    completamento?: { oggetti: number; fatti: number | null; completata: boolean | null } }>;
   /** L3: le Aree del Palazzo (tabella `area`), nell'ordine della colonna, con infiltrazioni e raccolta. Il server lo manda per ogni
    *  Palazzo; per i Memento è **assente** (la risposta resta quella di prima, R3-12, NR3-1). */
   areePalazzo?: AreaRiassuntoDto[];
@@ -2066,6 +2137,8 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   /** Le Persona registrate nel compendio della partita (id): nei Memento sono le «catturate», in ogni area e in ogni dedalo
    *  (scelte dell'utente, 2026-10-12). null senza partita. */
   personeCatturate: number[] | null;
+  /** L4 (§2.3, §4.3): le schede senza mappa né voce del Palazzo, da sistemare. Per i Palazzi; assente per i Memento. */
+  schedeDaSistemare?: SchedaDaSistemareDto[];
 }
 
 // ---- Calendario di gioco (Fase 6.3) ----
@@ -2194,7 +2267,13 @@ export interface DettaglioSpilloDto {
   /** La mappa di destinazione (L2): l'Area che la contiene (il nome che il pin di passaggio mostra, se c'è) e la sua casa (un passaggio
    *  porta alla pagina che la mostra). */
   mappa?: { chiave: string; nome: string; tipo: TipoMappa; area: { nome: string } | null; casa: string };
-  punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; /** L'area del dedalo (099), o null fuori dai Memento: lì ogni voce ha uno stato. */ areaDedalo: string | null; stato: string | null };
+  punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; /** L'area del dedalo (099), o null fuori dai Memento: lì ogni voce ha uno stato. */ areaDedalo: string | null; stato: string | null;
+    /** L4 (§3.1), per le voci dei Palazzi (assenti per i dedali): il carattere effettivo, l'infiltrazione della voce (lo stato di una
+     *  rigenerabile è quello della sua infiltrazione), «da verificare» nella partita. Con L4 `stato` è quello con cui la voce risulta. */
+    carattere?: CarattereVoce | null; infiltrazione?: { chiave: string; nome: string }; daVerificare?: boolean;
+    /** §8.11: per una voce permanente o rigenerabile con pin, quanti dei suoi pin sono fatti nella partita (k/N; «in corso» se
+     *  0 < k < N); null per una voce senza pin (il suo stato è il suo) o senza partita. */
+    avanzamento?: AvanzamentoVoceDto | null };
   luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
@@ -2278,8 +2357,16 @@ export interface SpilloDto {
   disponibilita?: DisponibilitaDto;
   ordine: number;
   origine: 'seed' | 'utente';
-  /** Raccolto nella partita (o con le sue voci della Guida tutte gestite). */
+  /** Fatto nella partita. Da L4 (§8.11, NR4-1) ogni pin ha il suo stato (`spillo_partita`); un pin condiviso da voci rigenerabili di più
+   *  infiltrazioni l'ha per infiltrazione, letto in quella di contesto (`contestoInfiltrazione`); un pin dei dedali dei Memento resta con
+   *  la regola di prima (il suo segno, o le sue voci tutte gestite). Le voci del pin calcolano il loro stato dai loro pin (k/N). */
   raccolto: boolean;
+  /** L4: l'infiltrazione a cui si riferisce lo stato (pin con voci rigenerabili), o null. Con la partita, per i Palazzi. */
+  contestoInfiltrazione?: { chiave: string; nome: string } | null;
+  /** L4: il pin risulta fatto ma una sua voce no, da prima dell'aggiornamento (divergenza conservata): «Da verificare». */
+  daVerificare?: boolean;
+  /** L4: il pin ha uno stato suo (nessuna voce che conta). */
+  statoProprio?: boolean;
   /** Il riferimento del pin (dove porta, il luogo, il Confidente…) risolto. Non dice le voci della guida: quelle sono `voci`. */
   dettaglio: DettaglioSpilloDto | null;
   /** Le voci della guida a cui il pin appartiene, ognuna col suo stato nella partita (2026-10-01; più d'una dalla 098, 2026-10-09:
@@ -2289,7 +2376,19 @@ export interface SpilloDto {
   /** Schermate di riferimento (istanza o asset del repository), in ordine. */
   immagini: ImmagineSpilloDto[];
   updatedAt: string;
+  /** §8.11: solo nella risposta del gesto sul pin (`PUT /api/partite/:id/spilli/:spilloId`): le voci che il gesto ha reso fatte o ha
+   *  riaperto («Segnate anche: …», «Riapre anche: …»). */
+  effetti?: EffettiDelGestoDto;
 }
+
+/** §8.11: il contatore di una voce con pin — quanti dei suoi pin sono fatti nella partita, su quanti. */
+export interface AvanzamentoVoceDto { fatti: number; totale: number }
+
+/** §8.11: una voce toccata da un gesto (segnata o riaperta), con la sua infiltrazione. */
+export interface VoceDelGestoDto { chiave: string; nome: string; infiltrazione: { chiave: string; nome: string } }
+
+/** §8.11: le voci che un gesto (sul pin o sulla voce) ha segnato o riaperto oltre a quella toccata. */
+export interface EffettiDelGestoDto { segnate: VoceDelGestoDto[]; riaperte: VoceDelGestoDto[] }
 
 export interface ImmagineSpilloDto {
   id: number;

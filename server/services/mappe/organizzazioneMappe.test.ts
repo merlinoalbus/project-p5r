@@ -85,18 +85,26 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(modified.status).toBe(200);expect(modified.body.data).toMatchObject({id:old.id,areaGuida:old.area_guida_chiave,nome:'Nome editoriale'});
   for(const k of ['x','y','mappaChiave','destinazione','destinazioneNonDisponibile'])expect(modified.body.data).not.toHaveProperty(k);
   const raccolto=await request(app).put(`/api/partite/${partita}/spilli/${old.id}`).send({raccolto:true});expect(raccolto.status).toBe(200);expect(raccolto.body.data.raccolto).toBe(true);
-  expect((await request(app).put('/api/mappe/spilli/immagini/'+image).send({didascalia:'Dopo'})).status).toBe(200);
+  expect(raccolto.body.data.condizioni[0]).toMatchObject({tipo:'data',dal:'04-10'});expect(raccolto.body.data.disponibilita.stato).toBe('bloccato');
+  const conImmagine=await request(app).put('/api/mappe/spilli/immagini/'+image).send({didascalia:'Dopo'});expect(conImmagine.status).toBe(200);
+  expect(conImmagine.body.data.immagini[0]).toMatchObject({id:image,asset:'fixture-immagine',didascalia:'Dopo'});
   const dest=risolviPercorsoMappa(old.area_guida_chiave);if(dest.tipo!=='guida')throw new Error('Destinazione errata');
   const url='/api/mappe/contenuti/'+encodeURIComponent(dest.mappaPalazzo);
-  const scheda=(await request(app).get(url+'?partita='+partita)).body.data.aree.find((a:{chiave:string})=>a.chiave===old.area_guida_chiave).punti.find((p:{id:number})=>p.id===old.id).scheda;
-  expect(scheda.raccolto).toBe(true);expect(scheda.condizioni[0]).toMatchObject({tipo:'data',dal:'04-10'});expect(scheda.disponibilita.stato).toBe('bloccato');expect(scheda.immagini[0]).toMatchObject({id:image,asset:'fixture-immagine',didascalia:'Dopo'});
+  // L4 (§2.3): nei contenuti della guida di un Palazzo la scheda senza mappa non è più un elemento a sé — se è legata a una voce c'è la
+  // voce (che l'ha assorbita, con lo stato con cui risulta), altrimenti sta nelle «Schede da sistemare» della scheda del Palazzo
+  const punti=(await request(app).get(url+'?partita='+partita)).body.data.aree.find((a:{chiave:string})=>a.chiave===old.area_guida_chiave).punti as Array<{id:number|string;stato?:string|null}>;
+  expect(punti.some((p)=>p.id===old.id)).toBe(false);
+  const riga=db.prepare('SELECT riferimento_tipo,riferimento_chiave FROM spillo WHERE id=?').get(old.id) as {riferimento_tipo:string|null;riferimento_chiave:string|null};
+  if(riga.riferimento_tipo==='punto')expect(punti.find((p)=>p.id==='punto:'+riga.riferimento_chiave)).toMatchObject({stato:'ottenuto'});
+  else{const dungeon=db.prepare('SELECT dungeon_chiave FROM dungeon_area WHERE chiave=?').pluck().get(old.area_guida_chiave) as string;
+    expect((await request(app).get(`/api/compendio/dungeon/${dungeon}`)).body.data.schedeDaSistemare.find((x:{id:number})=>x.id===old.id)).toMatchObject({nome:'Nome editoriale',descrizione:'Descrizione conservata'});}
   db.prepare("UPDATE partita SET data_gioco='04-11' WHERE id=?").run(partita);
-  const dopo=contenutiMappa(dest.mappaPalazzo,partita).aree.find(a=>a.chiave===old.area_guida_chiave)!.punti.find(p=>p.id===old.id)!.scheda!;
-  expect(dopo.disponibilita?.stato).toBe('disponibile');
+  expect((await request(app).put(`/api/partite/${partita}/spilli/${old.id}`).send({raccolto:true})).body.data.disponibilita?.stato).toBe('disponibile');
   for(const payload of [{x:1},{y:1},{mappa:'tokyo'},{destinazione:{mappa:'tokyo',x:1,y:2,zoom:1}}])expect((await request(app).put('/api/mappe/spilli/'+old.id).send(payload)).status).toBe(400);
   expect(db.prepare('SELECT mappa_chiave,area_guida_chiave,x,y FROM spillo WHERE id=?').get(old.id)).toEqual({mappa_chiave:null,area_guida_chiave:old.area_guida_chiave,x:old.x,y:old.y});
   expect((await request(app).get(url+'?partita=nonvalida')).status).toBe(400);
-  expect(contenutiMappa(dest.mappaPalazzo).aree.find(a=>a.chiave===old.area_guida_chiave)!.punti.find(p=>p.id===old.id)!.scheda!.raccolto).toBe(false);
+  // senza partita i punti non portano uno stato
+  expect(contenutiMappa(dest.mappaPalazzo).aree.find(a=>a.chiave===old.area_guida_chiave)!.punti.every((p)=>!('stato' in p))).toBe(true);
  });
 
 

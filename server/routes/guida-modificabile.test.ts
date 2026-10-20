@@ -59,12 +59,14 @@ describe('correzione dei testi della guida', () => {
     const spillo = prepared("SELECT id, uid, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND uid IS NOT NULL AND collezionabile = 1 LIMIT 1").get() as { id: number; uid: string; riferimento_chiave: string } | undefined;
     expect(spillo, 'il pacchetto deve avere almeno uno spillo collegato a un punto').toBeTruthy();
     await request(app).put(`/api/partite/${partita.id}/spilli/${spillo!.id}`).send({ raccolto: true }).expect(200);
-    expect(prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').get(partita.id, spillo!.uid)).toBeTruthy();
+    // L4 (§3.2): segnare il pin di una voce che conta è segnare la voce (il pin non ha un segno suo da scrivere)
+    expect(prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita.id, spillo!.riferimento_chiave)).toBeTruthy();
 
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(spillo!.riferimento_chiave)}`).expect(204);
     // lo spillo resta sulla mappa senza riferimento, ma il suo «raccolto» non conta più niente
     expect(prepared('SELECT riferimento_tipo FROM spillo WHERE id = ?').get(spillo!.id)).toMatchObject({ riferimento_tipo: null });
     expect(prepared('SELECT 1 FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').get(partita.id, spillo!.uid)).toBeUndefined();
+    expect(prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita.id, spillo!.riferimento_chiave)).toBeUndefined();
   });
 
   it('un punto inesistente non si corregge', async () => {

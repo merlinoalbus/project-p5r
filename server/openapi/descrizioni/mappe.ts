@@ -14,7 +14,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'GET /api/mappe/contenuti/:chiave': {
     sommario: 'Contenuti della guida di una mappa: aree, collegamenti, punti e planimetrie di ogni area',
-    descrizione: 'Per la mappa radice di un Palazzo le aree di tutto il Palazzo, altrimenti quelle legate alla mappa. Per ogni area: i collegamenti, i punti (gli elementi della guida più le voci che nessun elemento rappresenta, con i passi degli Enigmi subito sotto il loro Enigma) e le planimetrie. Con `partita` le schede portano anche lo stato di quella partita.',
+    descrizione: 'Per la mappa radice di un Palazzo le aree di tutto il Palazzo, altrimenti quelle legate alla mappa. Per ogni area: i collegamenti, i punti (gli elementi della guida più le voci che nessun elemento rappresenta, con i passi degli Enigmi subito sotto il loro Enigma) e le planimetrie. Con `partita` le schede portano anche lo stato di quella partita. Da L4 (§2.3), nei Palazzi i punti sono **le voci** della guida (`punto:<chiave>`, con stato nella partita, carattere, esauribilità e la «posizione da collocare» della scheda senza mappa che hanno assorbito, finché non hanno un pin): le schede senza mappa legate a una voce non compaiono più come elementi a sé, quelle senza voce stanno nelle «Schede da sistemare» della scheda del Palazzo. I dedali dei Memento restano come prima.',
     risposta: '`ContenutiMappaDto`',
     errori: [[404, 'mappa-non-trovata'], [404, 'partita-non-trovata']],
   },
@@ -74,7 +74,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'GET /api/mappe/:chiave': {
     sommario: 'Dettaglio di una mappa con percorso, figli, spilli e arrivi',
-    descrizione: 'La chiave può essere pubblica o interna. Gli spilli portano i dettagli delle entità collegate e, con `partita`, lo stato di quella partita e le condizioni valutate; `arrivi` sono gli spilli di altre mappe che portano qui; `pezzi` i pezzi della planimetria (102), ognuno con le sue `copie` (103), e con `partita` ogni copia con l\'esito delle sue condizioni. L\'URL dell\'immagine dell\'istanza è versionato con la data di caricamento.',
+    descrizione: 'La chiave può essere pubblica o interna. Gli spilli portano i dettagli delle entità collegate e, con `partita`, lo stato di quella partita e le condizioni valutate; `arrivi` sono gli spilli di altre mappe che portano qui; `pezzi` i pezzi della planimetria (102), ognuno con le sue `copie` (103), e con `partita` ogni copia con l\'esito delle sue condizioni. L\'URL dell\'immagine dell\'istanza è versionato con la data di caricamento. Da L4 §8.11 (NR4-1) `raccolto` è il segno del pin; un pin condiviso da rigenerabili di più infiltrazioni ha il segno per infiltrazione, letto in quella di contesto (`?infiltrazione=`, altrimenti quella in corso); i pin dei Palazzi portano `contestoInfiltrazione`, `daVerificare` e `statoProprio`, e le loro voci carattere, infiltrazione, «da verificare» e `avanzamento` (k/N: fatta quando lo sono tutti i suoi pin).',
     risposta: '`MappaDto`',
     errori: [[404, 'mappa-non-trovata'], [404, 'partita-non-trovata']],
   },

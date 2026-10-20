@@ -31,8 +31,12 @@ describe('Enigma con i suoi passi', () => {
   const statoPunto = (punto: string, stato: string | null) => request(app).put(`/api/partite/${partita}/punti`).send({ punto, stato }).expect(200);
   /** Stato salvato della voce nella partita di prova, letto dal DB (null se non segnata). */
   const segnato = (punto: string) => (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partita, punto) as { stato: string } | undefined)?.stato ?? null;
-  /** Valore di «raccolto» dello spillo `uid` nella partita di prova, letto dal DB (0 se non c'è la riga). */
-  const raccolto = (uid: string) => (prepared('SELECT raccolto FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').get(partita, uid) as { raccolto: number } | undefined)?.raccolto ?? 0;
+  /** Il pin con quell'id è fatto nella partita di prova? Lo si legge dalla sua planimetria, come il visore (da L4 §8.11 è il segno del
+   *  pin). */
+  const pinFatto = async (id: number) => {
+    const mappa = prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(id) as string;
+    return ((await request(app).get(`/api/mappe/${mappa}?partita=${partita}`).expect(200)).body.data.spilli as Array<{ id: number; raccolto: boolean }>).find((s) => s.id === id)!.raccolto;
+  };
   /** Collega la voce della guida al pin dato (restituisce la richiesta, per controllarne l'esito). */
   const collega = (punto: string, pin: number) => request(app).put(`/api/compendio/punti/${encodeURIComponent(punto)}/pin/${pin}`);
   /** Legge la scheda del Palazzo di Kamoshida con la partita di prova, pretendendo il 200. */
@@ -113,10 +117,10 @@ describe('Enigma con i suoi passi', () => {
     expect(segnato(enigma.chiave)).toBeNull();
     // segnare l'Enigma segna i passi, e i pin dei passi
     await statoPunto(enigma.chiave, 'ottenuto');
-    expect([segnato(leva.chiave), segnato(porta.chiave), raccolto(pinLiberi[0].uid)]).toEqual(['ottenuto', 'ottenuto', 1]);
+    expect([segnato(leva.chiave), segnato(porta.chiave), await pinFatto(pinLiberi[0].id)]).toEqual(['ottenuto', 'ottenuto', true]);
     // riaprirlo li riapre
     await statoPunto(enigma.chiave, null);
-    expect([segnato(leva.chiave), segnato(porta.chiave), raccolto(pinLiberi[0].uid)]).toEqual([null, null, 0]);
+    expect([segnato(leva.chiave), segnato(porta.chiave), await pinFatto(pinLiberi[0].id)]).toEqual([null, null, false]);
     // dalla mappa: raccogliere il pin dell'ultimo passo che manca risolve l'Enigma
     await statoPunto(porta.chiave, 'ottenuto');
     await request(app).put(`/api/partite/${partita}/spilli/${pinLiberi[0].id}`).send({ raccolto: true }).expect(200);
@@ -173,6 +177,9 @@ describe('Enigma con i suoi passi', () => {
     const enigma = await nuova('Enigma con un passo esaurito', 'puzzle');
     const esaurito = await nuova('Forziere esaurito', 'forziere', enigma.chiave);
     const libero = await nuova('Leva', 'meccanismo', enigma.chiave);
+    // L4 (R4-07): «esaurito» solo su una voce esauribile — il forziere e l'Enigma lo sono
+    await modifica(esaurito.chiave, { esauribile: true }).expect(200);
+    await modifica(enigma.chiave, { esauribile: true }).expect(200);
     await statoPunto(esaurito.chiave, 'esaurito');
     await statoPunto(enigma.chiave, 'ottenuto');
     expect([segnato(esaurito.chiave), segnato(libero.chiave), segnato(enigma.chiave)]).toEqual(['esaurito', 'ottenuto', 'ottenuto']);
@@ -182,31 +189,41 @@ describe('Enigma con i suoi passi', () => {
     await statoPunto(enigma.chiave, null);
   });
 
-  it('collegando a un passo un pin già raccolto, gli stati si uniscono e l’Enigma che aspettava solo quel passo è risolto', async () => {
+  it('§8.11: collegando a un passo un pin già raccolto, il pin tiene il suo segno e il passo (con quel solo pin) è fatto: l’Enigma è risolto; riaperto, il pin si riapre', async () => {
     const enigma = await nuova('Enigma dell’unione', 'puzzle');
     const fatto = await nuova('Già fatto', 'meccanismo', enigma.chiave);
     const ultimo = await nuova('L’ultimo', 'porta', enigma.chiave);
     await statoPunto(fatto.chiave, 'ottenuto');
-    // il pin raccolto prima, ancora di nessuna voce
+    // il pin raccolto prima, ancora di nessuna voce: il suo stato è il suo
     await request(app).put(`/api/partite/${partita}/spilli/${pinLiberi[1].id}`).send({ raccolto: true }).expect(200);
+    expect(await pinFatto(pinLiberi[1].id)).toBe(true);
     expect(segnato(enigma.chiave)).toBeNull();
+    // collegato: il passo ha tutti i suoi pin fatti, quindi è fatto, e l'Enigma lo segue
     await collega(ultimo.chiave, pinLiberi[1].id).expect(200);
-    expect([segnato(ultimo.chiave), segnato(enigma.chiave)]).toEqual(['ottenuto', 'ottenuto']);
+    expect([segnato(ultimo.chiave), segnato(enigma.chiave), await pinFatto(pinLiberi[1].id)]).toEqual(['ottenuto', 'ottenuto', true]);
+    // riaperto l'Enigma: i passi e il loro pin si riaprono
     await statoPunto(enigma.chiave, null);
+    expect([segnato(ultimo.chiave), await pinFatto(pinLiberi[1].id)]).toEqual([null, false]);
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(ultimo.chiave)}/pin/${pinLiberi[1].id}`).expect(200);
   });
 
-  it('anche dall’editor delle mappe: un pin già raccolto dato all’ultimo passo che manca risolve l’Enigma', async () => {
+  it('§8.11: anche dall’editor delle mappe — un pin già raccolto dato all’ultimo passo lo fa fatto, e l’Enigma è risolto', async () => {
     const enigma = await nuova('Enigma dell’editor', 'puzzle');
     const fatto = await nuova('Fatto prima', 'meccanismo', enigma.chiave);
     const ultimo = await nuova('Ultimo passo', 'porta', enigma.chiave);
     await statoPunto(fatto.chiave, 'ottenuto');
     await request(app).put(`/api/partite/${partita}/spilli/${pinLiberi[1].id}`).send({ raccolto: true }).expect(200);
-    // l'editor delle mappe: un riferimento «punto» diventa la voce del pin, e gli stati si uniscono
+    // l'editor delle mappe: un riferimento «punto» diventa la voce del pin; il pin ha il suo segno
     await request(app).put(`/api/mappe/spilli/${pinLiberi[1].id}`).send({ riferimento: { tipo: 'punto', chiave: ultimo.chiave } }).expect(200);
+    expect([segnato(ultimo.chiave), segnato(enigma.chiave)]).toEqual(['ottenuto', 'ottenuto']);
+    // tolto il segno al pin, il passo e l'Enigma si riaprono; rimesso, tornano fatti
+    await request(app).put(`/api/partite/${partita}/spilli/${pinLiberi[1].id}`).send({ raccolto: false }).expect(200);
+    expect([segnato(ultimo.chiave), segnato(enigma.chiave)]).toEqual([null, null]);
+    await request(app).put(`/api/partite/${partita}/spilli/${pinLiberi[1].id}`).send({ raccolto: true }).expect(200);
     expect([segnato(ultimo.chiave), segnato(enigma.chiave)]).toEqual(['ottenuto', 'ottenuto']);
     await statoPunto(enigma.chiave, null);
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(ultimo.chiave)}/pin/${pinLiberi[1].id}`).expect(200);
+    await request(app).put(`/api/partite/${partita}/spilli/${pinLiberi[1].id}`).send({ raccolto: false }).expect(200);
   });
 
   it('il boss finale che fa da passo: il Tesoro raccolto non lo segna più (2026-10-04); segnato dall’utente, l’Enigma lo segue', async () => {
@@ -278,12 +295,14 @@ describe('Enigma con i suoi passi', () => {
     expect([segnato(passoLeva.chiave), segnato(passoPorta.chiave), segnato(enigma.chiave)]).toEqual(['ottenuto', null, null]);
     // l'Enigma segnato dalla guida segna i passi e i loro pin
     await statoPunto(enigma.chiave, 'ottenuto');
-    expect([raccolto(uid(leva.id)), raccolto(uid(porta.id))]).toEqual([1, 1]);
+    expect([await pinFatto(leva.id), await pinFatto(porta.id)]).toEqual([true, true]);
     const spilli = (await request(app).get(`/api/mappe/${mappaArea}?partita=${partita}`).expect(200)).body.data.spilli as Array<{ id: number; raccolto: boolean; voci: Array<{ stato: string | null }> }>;
     expect(spilli.find((s) => s.id === porta.id)).toMatchObject({ raccolto: true, voci: [{ stato: 'ottenuto' }] });
     // riaperto l'Enigma, tutto torna da fare: passi e pin
     await statoPunto(enigma.chiave, null);
-    expect([raccolto(uid(leva.id)), raccolto(uid(porta.id)), segnato(passoLeva.chiave), segnato(passoPorta.chiave)]).toEqual([0, 0, null, null]);
+    expect([await pinFatto(leva.id), await pinFatto(porta.id), segnato(passoLeva.chiave), segnato(passoPorta.chiave)]).toEqual([false, false, null, null]);
+    // §8.11: il segno dei pin è il loro (`spillo_partita`), e riaprendo l'Enigma è tolto
+    expect([uid(leva.id), uid(porta.id)].map((u) => prepared('SELECT raccolto FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').pluck().get(partita, u))).toEqual([0, 0]);
   });
 });
 

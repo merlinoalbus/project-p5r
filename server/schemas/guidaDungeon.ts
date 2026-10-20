@@ -14,6 +14,7 @@
 
 import { z } from 'zod';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
+import { CARATTERI } from '../../shared/caratteriVoce.js';
 import { idParam } from './comuni.js';
 
 const TIPI_PUNTO = ['sicura', 'porta', 'meccanismo', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'storia', 'trama', 'altro'] as const;
@@ -31,6 +32,8 @@ export const bodyDungeon = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.dungeon.nome).optional(), sovrano: z.string().max(LIMITI_GUIDA.dungeon.sovrano).optional(),
   dataSblocco: z.string().max(LIMITI_GUIDA.dungeon.data).optional(), dataScadenza: z.string().max(LIMITI_GUIDA.dungeon.data).optional(), furtoConsigliato: z.string().max(LIMITI_GUIDA.dungeon.data).optional(),
   livelloConsigliato: z.string().max(LIMITI_GUIDA.dungeon.livello).optional(), note: z.string().max(LIMITI_GUIDA.dungeon.note).optional(),
+  /** L4 §8.14: la voce del boss finale del Palazzo («Modifica › Boss finale»), una voce `boss` del Palazzo; null = nessuna. */
+  voceBossFinale: z.string().min(1).max(200).nullable().optional(),
 });
 export const bodyArea = z.object({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional() });
 export const bodyPunto = z.object({
@@ -53,9 +56,18 @@ export const bodyPunto = z.object({
    */
   dettagli: z.record(z.string().trim().min(1).max(LIMITI_GUIDA.punto.etichetta), dettaglioPunto)
     .refine((d) => Object.keys(d).length <= LIMITI_GUIDA.punto.dettagli, `Al più ${LIMITI_GUIDA.punto.dettagli} dettagli per voce.`).optional(),
+  /** L4 (§1.1): il carattere scelto dall'utente; null = «Ripristina» (vale la regola del tipo). Solo per le voci dei Palazzi. Cambia la
+   *  propagazione, non riscrive nessuno stato (R4-08). */
+  carattere: z.enum(CARATTERI).nullable().optional(),
 });
-// creando una voce l'area è quella dell'indirizzo: `area` nel corpo non vale; i dettagli si aggiungono correggendola
-export const bodyNuovoPunto = bodyPunto.omit({ area: true, dettagli: true }).extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
+/** L4 (§4.3): «Crea la voce» da una scheda da sistemare (il tipo della voce nuova) e «Collega a una voce». */
+export const bodyCreaVoceDallaScheda = z.object({ tipo: z.enum(TIPI_PUNTO) }).strict();
+export const bodyCollegaSchedaAllaVoce = z.object({ voce: z.string().min(1).max(200) }).strict();
+/** La scheda di un Palazzo: la partita e, da L4 (§1.4), l'infiltrazione guardata (contesto dei pin di rigenerabili). */
+export const querySchedaDungeon = z.object({ partita: idParam.optional(), infiltrazione: z.string().min(1).max(160).optional() });
+// creando una voce l'area è quella dell'indirizzo: `area` nel corpo non vale; i dettagli si aggiungono correggendola; il carattere
+// nasce dalla regola (si sceglie correggendola)
+export const bodyNuovoPunto = bodyPunto.omit({ area: true, dettagli: true, carattere: true }).extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 
 /** Il totale dei timbri di un'area del dedalo: un intero da 0 al tetto, o null (l'area non ha timbri). */
 const timbriTotale = z.number().int().min(0).max(LIMITI_GUIDA.areaDedalo.timbri).nullable();

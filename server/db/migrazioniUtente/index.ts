@@ -28,5 +28,7 @@ import { utente018 } from './018_timbri_nelle_aree_dei_dedali.js';
 import { utente019 } from './019_catture_nel_compendio.js';
 import { utente020 } from './020_timbri_senza_totale.js';
 import { utente021 } from './021_cestino_delle_partite.js';
+import { utente022 } from './022_divergenze_da_verificare.js';
+import { utente023 } from './023_stato_del_pin_per_infiltrazione.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023];

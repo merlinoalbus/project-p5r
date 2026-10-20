@@ -17,14 +17,14 @@
 // hanno un'unica regola in tutta l'app; il resto si valuta qui.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
 import { dotiSociali, ranghiConfidenti } from './partiteService.js';
 import { finestreDungeon, type FinestraDungeon } from './datiGuida.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
 import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento, descriviRequisitoSpillo, nomePalazzo, ordineGioco, proiezioneDiPresenza, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomeMeteo, piove } from '../../shared/meteoPartita.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
-import { uidFattiPerVoci, vociGestite } from './mappe/voceDelPin.js';
+import { modelloAvanzamento, statiDellaPartita, statoDelPin, vociFatte, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { sqlPersonaDeiMemento, vociPersonaCatturate } from './catturePersona.js';
 import { nomiCondizioniMemo, pinCitato } from './condizioni/nomiCondizioni.js';
 import type { DisponibilitaDto, RequisitoRango, SemaforoRequisitoDto } from '../../shared/types.js';
@@ -124,8 +124,12 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   const st = statoPartitaSemafori(partitaId, ranghi, doti);
   const giorno = st.dataGioco ? (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(st.dataGioco) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null : null;
   // le voci della guida gestite: le leggono le condizioni «Voce della guida» e i pin segnati tramite le loro voci (una lettura sola)
-  // più le Persona dei Memento catturate, cioè registrate nel compendio (2026-10-12, scelta dell'utente: «Leggono il compendio»)
-  const gestite = vociGestite(partitaId);
+  // più le Persona dei Memento catturate, cioè registrate nel compendio (2026-10-12, scelta dell'utente: «Leggono il compendio»).
+  // L4 (R4-25, §8.11): con la regola unica — una voce con pin è gestita quando lo sono tutti i suoi pin; lo stato dei pin è quello di
+  // `statoDelPin` (il loro segno)
+  const m = modelloAvanzamento(getDb());
+  const s = statiDellaPartita(getDb(), m, partitaId);
+  const gestite = vociFatte(m, s);
   for (const voce of vociPersonaCatturate(partitaId)) gestite.add(voce);
   /** Il conteggio `n` della query, che riceve come unico parametro la partita. */
   const conta = (sql: string): number => (prepared(sql).get(partitaId) as { n: number }).n;
@@ -145,18 +149,19 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     giornoSettimana: giorno ? piatto(giorno) : null,
     sbloccoQuartieri: sbloccoQuartieri(),
     arcoCorrente: arcoAllaData(st.dataGioco, finestreDungeon()),
-    spilliSegnati: spilliSegnati(partitaId, gestite),
+    spilliSegnati: spilliSegnati(m, s),
     pinCitati: new Map(),
     vociSegnate: gestite,
     vociCitate: new Map(),
   };
 }
 
-/** I pin segnati in una partita, date le sue voci gestite: il loro segno (`spillo_partita`) o le loro voci della guida, tutte segnate — la stessa regola
- *  del «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), che non dà stato alle voci descrittive («Altro»). */
-function spilliSegnati(partitaId: number, gestite: ReadonlySet<string>): Set<string> {
-  const segnati = uidFattiPerVoci(gestite);
-  for (const uid of prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').pluck().all(partitaId) as string[]) segnati.add(uid);
+/** I pin segnati in una partita: la stessa regola del «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), cioè lo stato del
+ *  pin di L4 (`statoDelPin`: dalle voci che contano, il suo segno senza, la regola di prima per i dedali). Per i pin di rigenerabili
+ *  di più infiltrazioni vale l'infiltrazione in corso. */
+function spilliSegnati(m: ModelloAvanzamento, s: StatiDellaPartita): Set<string> {
+  const segnati = new Set<string>();
+  for (const [uid, id] of m.idDelPin) if (statoDelPin(m, s, { id, uid }).fatto) segnati.add(uid);
   return segnati;
 }
 
@@ -302,7 +307,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       if (tipo === 'richiesta') dati.richiesta = (prepared('SELECT nome FROM richiesta WHERE chiave=?').get(String(dati.richiesta)) as { nome: string } | undefined)?.nome ?? dati.richiesta;
       const riga: RigaRequisito = { confidente_chiave: '', rango: 0, indice, tipo, dati_json: JSON.stringify(dati), testo };
       const valutato = valuta(riga, st);
-      // Palazzo non completato e richiesta non conclusa sono fatti che l'app registra (Tesoro, boss e raccolta; richiesta completata): per la
+      // Palazzo non concluso e richiesta non conclusa sono fatti che l'app registra (Tesoro e boss finale, §8.10; richiesta completata): per la
       // disponibilità valgono come blocco, non come dubbio da confermare a mano.
       // (una Richiesta che non c'è più resta grigia, da correggere: `manuale: false`, non un dubbio da confermare)
       if ((tipo === 'palazzo' || tipo === 'richiesta') && valutato.stato === 'grigio' && valutato.manuale !== false) {

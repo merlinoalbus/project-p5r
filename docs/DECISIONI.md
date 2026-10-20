@@ -2168,3 +2168,15 @@ aree è la funzione della migrazione 109, importata dal servizio (una regola sol
 conservato; indice unico dello slug per la città; **finestre come fogli dal basso sotto i 768 px in tutta l'app** (chiusura sempre solo con la
 X o con Esc); pannello del visore aperto all'arrivo da 1280 px; per lo scarico delle piante uno User-Agent onesto, senza Referer contraffatto:
 se la fonte rifiuta (oggi Fandom risponde 403) l'app lo dice con il link alla fonte e l'invito a caricare l'immagine dall'editor.
+
+## 2026-10-20 — L4: un Palazzo «concluso» e «completato», gli effetti seguono il furto
+
+Davanti alla partita 1, dove Kamoshida aveva Tesoro e boss ma 15 voci permanenti non segnate (56/71), l'utente ha scelto due livelli.
+**Concluso** = Tesoro del Palazzo raccolto e boss finale sconfitto: governa l'ingresso al Palazzo, la sua presenza sulla mappa di Tokyo, i
+requisiti e le condizioni «Completare il Palazzo» / «dopo il Palazzo di X». **Completato** = concluso e tutti gli oggetti permanenti fatti:
+vale solo per l'anello, la percentuale e il segno «Completato». Supera, per gli effetti, la voce «2026-10-04 — Il Palazzo è completato con
+Tesoro, boss finale e raccolto tutto, insieme» (il boss da solo continua a non bastare); gli archi restano legati alla data (2026-09-30); i
+Memento invariati. Motivo: è il gioco (G-026: dopo il furto il Palazzo sparisce e gli sblocchi dipendono dal furto, mai dalla raccolta
+completa) e tiene funzionante la partita senza segnare voci al posto dell'utente; la decisione «1 B» resta (le 15 voci non si segnano). Nella
+stessa revisione: ogni pin tiene il suo stato e una voce con più pin è fatta quando lo sono tutti (NR4-1, strada (a) del PM; pin condivisi da
+rigenerabili di più infiltrazioni con stato per infiltrazione).

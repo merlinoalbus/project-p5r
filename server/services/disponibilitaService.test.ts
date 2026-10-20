@@ -24,7 +24,7 @@ const FINESTRE = new Map([['kamoshida', { dal: '04-12', al: '05-02' }], ['madara
 function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilita {
   return {
     doti: new Map([['fascino', 1], ['coraggio', 1], ['conoscenza', 1], ['perizia', 1], ['gentilezza', 1]]),
-    arcaniInScorta: new Set(), personeConAbilita: new Set(), palazziCompletati: new Map(), richiesteCompletate: new Set(),
+    arcaniInScorta: new Set(), personeConAbilita: new Set(), palazziConclusi: new Map(), richiesteCompletate: new Set(),
     ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), membriFuoriSquadra: new Set<string>(['akechi']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOra: { meteo: 'sereno', origine: 'guida' }, conferme: new Set(),
     giornoSettimana: 'mercoledi',
     sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara', dal: '08-31' }], ['shinjuku', { nome: 'Shinjuku', dal: '06-18' }], ['kichijoji', { nome: 'Kichijoji', dal: null }]]),
@@ -165,7 +165,8 @@ describe('valutaRequisiti — ogni stato sulla partita', () => {
     expect(daProsa(['richiede Fascino Rango 3'], stato({ doti: new Map([['fascino', 3]]) })).stato).toBe('disponibile');
     expect(daProsa(['Rango Confidente Sojiro 6'], stato({ ranghiConfidenti: new Map([['sojiro', 6]]) })).stato).toBe('disponibile');
     expect(daProsa(['dopo Palazzo di Kamoshida'], stato()).stato).toBe('bloccato');
-    expect(daProsa(['dopo Palazzo di Kamoshida'], stato({ palazziCompletati: new Map([['kamoshida', 'Tesoro, boss finale e raccolto tutto (40/40)']]) })).stato).toBe('disponibile');
+    // «dopo il Palazzo di X» segue il Palazzo concluso (Tesoro e boss finale, §8.10), non il 100% della raccolta
+    expect(daProsa(['dopo Palazzo di Kamoshida'], stato({ palazziConclusi: new Map([['kamoshida', 'Tesoro e boss finale']]) })).stato).toBe('disponibile');
     const richiesta = daProsa(['richiede il completamento della richiesta Lo zio ingordo'], stato());
     expect(richiesta.stato).toBe('bloccato');
     expect(richiesta.requisiti[0].dettaglio).not.toMatch(/conferma qui/);
