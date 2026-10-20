@@ -104,7 +104,27 @@
       "id": "L4",
       "titolo": "Avanzamento unico",
       "dipende": "L3",
-      "nota": "16:20Z: FE di L4 fatto da FE in 7 commit su newreview senza push (§8.11 k/N e «Riapre anche», §8.6 Enigma, §4.2 contesto, §4.3 schede da sistemare, §4.1 carattere, «Esaurito», «Anche nella Nª infiltrazione»), 675/675 test mirati, typecheck e lint verdi; i gesti sulle schede da provare sui dati veri. Prossimo: linea di rilascio newreview-l4 dopo il rilascio di L3, collaudo, tester, validatore. — PUBBLICATO su p5s NON VALIDATO insieme a L3 (push 97c1d46e); parte FE in 01e7ae12, il resto di L4 FE da fare. — Prima: deciso dall'utente: due livelli concluso/completato; base p5s: Kamoshida p1 71/71, divergenze 0; BE fatto: §8.10–8.15, migrazione 112 voce_boss_finale, utente 023, AP4-1…4 risolti, 350 test; COMMITTATO b83c30ac e 71378325 (scostamenti di §8.15; migrazione 113 per Iweleth con la regola dei Memento); Analisi app ha CHIUSO AP4-1…4, con AP4-2 provato anche in scrittura (400, 404 e 409 corretti); O3-1 di L3 corretto da BE in 12484305; resta la condizione «boss finale da dichiarare» in coda a BE (la 112 ha 8 voci su 8, Madarame = ordine 19); scarto della 112 accolto con condizione; no-reg VERDE sul codice di BE (NR4-1 e NR4-2 verificati, k/N come atteso); poi istantanea dell'anteprima e verifica di Analisi app. Inventario dei dati: tutto in migrazioni 107–112 e utente 022–023; nessun lavoro dell'utente su p5s prima delle 04:50",
+      "nota": "18:40Z: PUBBLICATO su p5s (newreview fde7add7, poi unito): FE completo con FUN3-3 e FUN4-1. Funzionali verdi prima della regola «zero test»; le altre prove le fa l'utente. — 16:20Z: FE di L4 fatto da FE in 7 commit su newreview senza push (§8.11 k/N e «Riapre anche», §8.6 Enigma, §4.2 contesto, §4.3 schede da sistemare, §4.1 carattere, «Esaurito», «Anche nella Nª infiltrazione»), 675/675 test mirati, typecheck e lint verdi; i gesti sulle schede da provare sui dati veri. Prossimo: linea di rilascio newreview-l4 dopo il rilascio di L3, collaudo, tester, validatore. — PUBBLICATO su p5s NON VALIDATO insieme a L3 (push 97c1d46e); parte FE in 01e7ae12, il resto di L4 FE da fare. — Prima: deciso dall'utente: due livelli concluso/completato; base p5s: Kamoshida p1 71/71, divergenze 0; BE fatto: §8.10–8.15, migrazione 112 voce_boss_finale, utente 023, AP4-1…4 risolti, 350 test; COMMITTATO b83c30ac e 71378325 (scostamenti di §8.15; migrazione 113 per Iweleth con la regola dei Memento); Analisi app ha CHIUSO AP4-1…4, con AP4-2 provato anche in scrittura (400, 404 e 409 corretti); O3-1 di L3 corretto da BE in 12484305; resta la condizione «boss finale da dichiarare» in coda a BE (la 112 ha 8 voci su 8, Madarame = ordine 19); scarto della 112 accolto con condizione; no-reg VERDE sul codice di BE (NR4-1 e NR4-2 verificati, k/N come atteso); poi istantanea dell'anteprima e verifica di Analisi app. Inventario dei dati: tutto in migrazioni 107–112 e utente 022–023; nessun lavoro dell'utente su p5s prima delle 04:50",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "fatta",
+        "fe": "fatta",
+        "funzionali": "fatta",
+        "ux": "da-fare",
+        "noreg": "da-fare",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "fatta"
+      }
+    },
+    {
+      "id": "L5",
+      "titolo": "Luoghi, negozi, orari",
+      "dipende": "L2",
+      "nota": "21:30Z: PUBBLICATO su p5s, BE (5a22da2a…0fa7bde7, migrazione 115) e FE (af5b8e14…820c05ea, F1–F6). Zero test: le prove le fa l'utente (fasi di prova «da fare» = a carico dell'utente). — BE parte in anticipo con contratti e API (dopo O3-1 e UX2-13, decisione del Manager); FE dopo L4. Progetto sulla base p5s; LAY5-1 (scroll della Home) aggiunto; 56 luoghi sbloccati in modo strutturato (G-029/G-031); 9 orari dei Confidenti classificati (G-033: 2 restano, 5 «giorno e sera», 2 orario scolastico); casi pronti: funzionali 42, UX W1–W17, layout L5-L1…L12 con la base «prima»",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -117,41 +137,21 @@
         "noreg": "da-fare",
         "layout": "da-fare",
         "validazione": "da-fare",
-        "consegna": "da-fare"
-      }
-    },
-    {
-      "id": "L5",
-      "titolo": "Luoghi, negozi, orari",
-      "dipende": "L2",
-      "nota": "BE parte in anticipo con contratti e API (dopo O3-1 e UX2-13, decisione del Manager); FE dopo L4. Progetto sulla base p5s; LAY5-1 (scroll della Home) aggiunto; 56 luoghi sbloccati in modo strutturato (G-029/G-031); 9 orari dei Confidenti classificati (G-033: 2 restano, 5 «giorno e sera», 2 orario scolastico); casi pronti: funzionali 42, UX W1–W17, layout L5-L1…L12 con la base «prima»",
-      "fasi": {
-        "requisiti": "fatta",
-        "dati": "fatta",
-        "app": "fatta",
-        "modifiche": "fatta",
-        "be": "da-fare",
-        "fe": "da-fare",
-        "funzionali": "da-fare",
-        "ux": "da-fare",
-        "noreg": "da-fare",
-        "layout": "da-fare",
-        "validazione": "da-fare",
-        "consegna": "da-fare"
+        "consegna": "fatta"
       }
     },
     {
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "in preparazione: progetto sulla base p5s (niente condizioni «manuali», inviti con condizioni, «concluso» con il boss finale dichiarato); in corso il piano di lavoro (Stesura), i casi funzionali (con Analisi requisiti) e di layout, la rilettura dell'app (Analisi app)",
+      "nota": "21:30Z: IN CORSO, BE e FE fatti dalla sessione FE (BE ferma, aspetta il via dell'utente): B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche); prossima la migrazione 118. — in preparazione: progetto sulla base p5s (niente condizioni «manuali», inviti con condizioni, «concluso» con il boss finale dichiarato); in corso il piano di lavoro (Stesura), i casi funzionali (con Analisi requisiti) e di layout, la rilettura dell'app (Analisi app)",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
         "app": "fatta",
         "modifiche": "fatta",
-        "be": "da-fare",
-        "fe": "da-fare",
+        "be": "in-corso",
+        "fe": "in-corso",
         "funzionali": "da-fare",
         "ux": "da-fare",
         "noreg": "da-fare",
