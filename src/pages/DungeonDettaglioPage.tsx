@@ -1082,7 +1082,7 @@ export function DungeonDettaglioPage() {
                 {/* AP3-1 (decisione del PM): le schede della guida senza mappa né voce (Kamoshida 1, 14, 15, 16; Madarame 28) non si
                     aprono più dal visore di Mappe, che per i Palazzi porta qui: si leggono in questa sezione, col loro testo e la loro
                     infiltrazione, e da L4 (§4.3) si sistemano con «Crea la voce» o «Collega a una voce» */}
-                <SchedeDaSistemare schede={d.schedeDaSistemare ?? []} aree={d.aree} onSistemata={rileggiTutto} />
+                <SchedeDaSistemare schede={d.schedeDaSistemare ?? []} aree={d.aree} onSistemata={rileggiTutto} completato={!!d.completato} />
 
                 {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
                 <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta} areePalazzo={d.aree}
