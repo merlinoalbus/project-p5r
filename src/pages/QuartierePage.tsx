@@ -25,7 +25,7 @@ import { Modal } from '../components/shared/Modal';
 import { urlCasa } from '../utils/navigazioneMappa';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { getQuartiere, isApiError, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaSbloccoQuartiere, getQuartiere, isApiError, ripristinaSbloccoQuartiere, scaricaPiantaQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -43,6 +43,43 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
 import { IllustrazioneConSegno } from '../components/mappe/IllustrazioneConSegno';
 import { usePartitaStore } from '../stores/partitaStore';
+import { CondizioniEditor } from '../components/guida/CondizioniEditor';
+import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
+import type { SbloccoDto } from '../../shared/types';
+
+function condizioniDiSblocco(sblocco: SbloccoDto | undefined): RequisitoSpillo[] {
+  if (!sblocco?.condizioneSalvata) return [];
+  return sblocco.condizioneSalvata.tipo === 'gruppo' && sblocco.condizioneSalvata.modo === 'tutte'
+    ? sblocco.condizioneSalvata.condizioni
+    : [sblocco.condizioneSalvata];
+}
+
+function EditorSbloccoQuartiere({ chiave, nome, sblocco, onChiudi, onSalvato }: { chiave: string; nome: string; sblocco?: SbloccoDto; onChiudi: () => void; onSalvato: () => void }) {
+  const [condizioni, setCondizioni] = useState(() => condizioniDiSblocco(sblocco));
+  const [salvando, setSalvando] = useState(false);
+  const [errore, setErrore] = useState<string | null>(null);
+  const salva = async () => {
+    setSalvando(true); setErrore(null);
+    try { await aggiornaSbloccoQuartiere(chiave, condizioni); onSalvato(); onChiudi(); }
+    catch (e) { setErrore(e instanceof Error ? e.message : 'Salvataggio non riuscito.'); }
+    finally { setSalvando(false); }
+  };
+  const ripristina = async () => {
+    setSalvando(true); setErrore(null);
+    try { await ripristinaSbloccoQuartiere(chiave); onSalvato(); onChiudi(); }
+    catch (e) { setErrore(e instanceof Error ? e.message : 'Ripristino non riuscito.'); }
+    finally { setSalvando(false); }
+  };
+  return <Modal titolo={`Sblocco di ${nome}`} aperta onChiudi={onChiudi} larga
+    azioni={<><button type="button" className="btn btn-secondary touch" onClick={onChiudi} disabled={salvando}>Annulla</button><button type="button" className="btn btn-primary touch" onClick={() => void salva()} disabled={salvando}>{salvando ? 'Salvataggio…' : 'Salva sblocco'}</button></>}>
+    <div className="flex flex-col gap-3">
+      <p className="m-0 text-[13px] text-text-secondary">Gli inviti dei Confidenti restano separati e continuano ad aprire {nome} quando spettano.</p>
+      <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={salvando} />
+      {sblocco?.modificato && <button type="button" className="btn btn-ghost btn-sm touch self-start" onClick={() => void ripristina()} disabled={salvando}>Ripristina la condizione della guida</button>}
+      {errore && <p className="m-0 text-[13px]" role="alert">{errore}</p>}
+    </div>
+  </Modal>;
+}
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
 /**
@@ -116,7 +153,7 @@ export function QuartierePage() {
   const dati = useCarica(() => getQuartiere(chiave, attiva?.id), [chiave, attiva?.id]);
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
-  const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | null>(null);
+  const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | 'sblocco' | null>(null);
   // L5 (F5): «Colloca» di un luogo senza area, con l'area proposta dalla migrazione
   const [colloca, setColloca] = useState<{ luogo: { chiave: string; nome: string }; proposta: string | null } | null>(null);
   // La finestra dell'area d'ingresso: aperta arrivando dalla metro (`?ingresso=1`, se c'è un ingresso) o con «Entra»
@@ -193,6 +230,7 @@ export function QuartierePage() {
                 <span className="text-[12px] text-text-muted">{q.aree.length === 0 ? 'nessuna area' : q.aree.length === 1 ? 'un’area' : `${q.aree.length} aree`} · {q.luoghi.length} {q.luoghi.length === 1 ? 'luogo' : 'luoghi'}</span>
               </div>
               {q.sblocco && <p className="m-0 text-[13px]"><strong className="text-text-secondary">Si apre:</strong> {q.sblocco}</p>}
+              {q.sbloccoCondizione && <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-text-muted"><span>{q.sbloccoCondizione.modificato ? 'Sblocco modificato' : 'Sblocco strutturato'}</span><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setFinestra('sblocco')}>Modifica sblocco</button>{q.sbloccoCondizione.modificato && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setFinestra('sblocco')}>Ripristina</button>}</div>}
               {q.descrizione && <p className="m-0 text-[13px] text-text-secondary">{q.descrizione}</p>}
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
                 {q.ingresso && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={`Entra: ${q.ingresso.area?.nome ?? q.ingresso.nome}`} onClick={() => setEntraAperta(true)} />}
@@ -259,6 +297,7 @@ export function QuartierePage() {
           {finestra === 'ingresso' && <IngressoQuartiere quartiere={q} aperta onChiudi={() => setFinestra(null)} onSalvato={() => dati.ricarica()} />}
           {colloca && <FinestraColloca luogo={colloca.luogo} proposta={colloca.proposta} aree={q.aree.map((a) => ({ slug: a.slug, nome: a.nome }))} onChiudi={() => setColloca(null)} onFatto={() => void dati.ricarica()} />}
           {finestra === 'aggiungi' && <FinestraAggiungiArea quartiere={q} aperta onChiudi={() => setFinestra(null)} onCreata={(area) => { void dati.ricarica().then(() => { if (area.passaggio) mostraPin(area.passaggio.spillo); }); }} />}
+          {finestra === 'sblocco' && <EditorSbloccoQuartiere chiave={q.chiave} nome={q.nome} sblocco={q.sbloccoCondizione} onChiudi={() => setFinestra(null)} onSalvato={() => void dati.ricarica()} />}
           {/* L'area d'ingresso nella sua finestra (decisione del PM, 2026-10-20): dalla metro o con «Entra», sul punto e con lo zoom
               dell'ingresso; «Apri l'area» porta alla sua pagina con lo stesso punto, «Chiudi» resta qui e toglie `ingresso=1`. */}
           {q.ingresso && <Modal titolo={`${q.ingresso.area?.nome ?? q.ingresso.nome} — ingresso di ${q.nome}`} aperta={entraAperta || dallaMetro} onChiudi={chiudiEntra} larga

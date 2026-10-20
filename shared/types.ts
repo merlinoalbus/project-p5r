@@ -244,6 +244,8 @@ export interface FonteCondizioneDto { registro: string; certezza: 'alta' | 'medi
 export interface SbloccoDto {
   /** La condizione salvata (null se il posto non ne ha una). */
   condizione: Condizione | null;
+  /** La condizione propria salvata, senza gli inviti aggiunti in OR; serve all’editor del quartiere. */
+  condizioneSalvata?: Condizione | null;
   /** In italiano, con gli inviti in OR («Dopo aver letto «Vague» oppure dopo l'invito di Ryuji del 29 maggio»). */
   testo: string | null;
   fonte: FonteCondizioneDto | null;

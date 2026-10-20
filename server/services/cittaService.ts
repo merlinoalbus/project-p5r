@@ -61,15 +61,17 @@ function sbloccoQuartiere(chiave: string, partitaId?: number): SbloccoDto | unde
   const condizioni = condizioneEffettivaQuartiere(chiave);
   if (!condizioni) return undefined;
   const nomi = nomiCondizioniMemo();
-  const condizione = condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo' as const, modo: 'tutte' as const, condizioni };
   const fonteRiga = prepared('SELECT fonte_condizioni_json, condizioni_json, condizioni_guida_json FROM quartiere WHERE chiave = ?').get(chiave) as { fonte_condizioni_json: string | null; condizioni_json: string | null; condizioni_guida_json: string | null } | undefined;
+  const propria = fonteRiga?.condizioni_json ? leggiCondizioniSalvate(fonteRiga.condizioni_json) : [];
+  const condizione = condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo' as const, modo: 'tutte' as const, condizioni };
   let fonte: SbloccoDto['fonte'] = null;
   try { fonte = fonteRiga?.fonte_condizioni_json ? JSON.parse(fonteRiga.fonte_condizioni_json) as SbloccoDto['fonte'] : null; } catch { /* fonte non valida: resta null */ }
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const esito = st ? valutaInsieme(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), st) : null;
   const stato = esito?.stato;
   return {
-    condizione, testo: descriviRequisitoSpillo(condizione, nomi), fonte,
+    condizione, condizioneSalvata: propria.length === 1 ? propria[0] : propria.length > 1 ? { tipo: 'gruppo', modo: 'tutte', condizioni: propria } : null,
+    testo: descriviRequisitoSpillo(condizione, nomi), fonte,
     esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null,
     manca: stato === 'bloccato' && st ? cosaManca(condizione, st, nomi) : null,
     inviti: elencaInviti({ apreTipo: 'quartiere', apreChiave: chiave }, partitaId),

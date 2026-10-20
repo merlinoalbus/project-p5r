@@ -94,6 +94,10 @@ export const getQuartieri = (partita?: number): Promise<QuartiereRiassuntoDto[]>
 /** Scheda di un quartiere con i luoghi. */
 export const getQuartiere = (chiave: string, partita?: number): Promise<QuartiereDettaglioDto> =>
   apiGet(`/compendio/citta/${encodeURIComponent(chiave)}${partita ? `?partita=${partita}` : ''}`);
+export const aggiornaSbloccoQuartiere = (chiave: string, condizioni: unknown[]): Promise<QuartiereDettaglioDto> =>
+  apiPut(`/compendio/citta/${encodeURIComponent(chiave)}/sblocco`, { condizioni });
+export const ripristinaSbloccoQuartiere = (chiave: string): Promise<QuartiereDettaglioDto> =>
+  apiPost(`/compendio/citta/${encodeURIComponent(chiave)}/sblocco/ripristina`);
 /** Attività, lavori, libri e film (con letture della partita se indicata). */
 export const getAttivita = (partita?: number): Promise<AttivitaTutteDto> => apiGet(`/compendio/attivita${queryString({ partita })}`);
 /** Catalogo dei libri con avanzamento per sessioni nella partita. */
