@@ -33,6 +33,7 @@ import { bodyRaccolto } from '../schemas/mappe.js';
 import { idParam } from '../schemas/comuni.js';
 import { avanzaSeGiornoCompleto, impostaGiornoCorrente } from '../services/percorsoService.js';
 import { spuntaVoce } from '../services/giornataService.js';
+import { annullaInvito, registraInvito } from '../services/inviti.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
 import { t } from '../services/traduzioniService.js';
 import { eliminaEventi, eliminaEvento, storico } from '../services/storicoService.js';
@@ -98,7 +99,17 @@ router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, bo
   res.json(aggiornaConfidenteDallaPagina(Number(req.params.id), String(req.params.chiave), req.body));
 });
 
-/** Conferma manuale di un requisito non verificabile dall'app (semafori, Fase 12.3); restituisce il Confidente aggiornato. */
+/** L6: «Invito avvenuto» (PUT) e «Annulla» (DELETE) per un invito di un Confidente (`<confidente>/<MM-GG>`); si registra solo con le condizioni
+ *  vere adesso (409 `invito-non-possibile` con quel che manca). Restituisce l'invito con lo stato aggiornato. */
+const paramsInvito = z.object({ id: idParam, confidente: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/), data: z.string().regex(/^\d{2}-\d{2}$/) });
+router.put('/:id/inviti/:confidente/:data', validate({ params: paramsInvito }), (req, res) => {
+  res.json(registraInvito(Number(req.params.id), `${String(req.params.confidente)}/${String(req.params.data)}`));
+});
+router.delete('/:id/inviti/:confidente/:data', validate({ params: paramsInvito }), (req, res) => {
+  res.json(annullaInvito(Number(req.params.id), `${String(req.params.confidente)}/${String(req.params.data)}`));
+});
+
+/** Conferma di un requisito `evento` (semafori, Fase 12.3; gli altri tipi li dice la partita, R6-01b); restituisce il Confidente aggiornato. */
 router.put('/:id/confidenti/:chiave/requisiti', validate({ params: paramsPartitaChiave, body: bodyRequisito }), (req, res) => {
   const b = req.body as { rango: number; indice: number; confermato: boolean };
   confermaRequisito(Number(req.params.id), String(req.params.chiave), b.rango, b.indice, b.confermato);

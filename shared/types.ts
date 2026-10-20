@@ -290,6 +290,8 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };
   noteGenerali: string;
   fonti: string[];
+  /** L6: gli inviti del Confidente, con ciò che aprono (senza lo stato della partita: `GET /api/compendio/inviti?confidente=&partita=`). */
+  inviti?: InvitoDto[];
 }
 
 /** Glossario completo per il frontend (cache locale). */
@@ -1676,6 +1678,8 @@ export interface LuogoDettaglioDto extends LuogoDto {
   modificato: boolean;
   /** Il testo dello sblocco generato dalla condizione (L6, `nomiCondizioni`); null se non ce n'è. */
   sbloccoTesto: string | null;
+  /** L6: gli inviti dei Confidenti che aprono il luogo, con lo stato della partita se indicata (in OR con la condizione). */
+  inviti?: InvitoDto[];
 }
 
 export interface QuartiereDettaglioDto {

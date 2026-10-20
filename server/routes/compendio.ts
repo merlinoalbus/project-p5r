@@ -14,6 +14,7 @@ import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi,
 import { correggiRequisitoRichiesta, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { dettaglioLuogo } from '../services/luoghiService.js';
+import { elencaInviti } from '../services/inviti.js';
 import { paramsLuogo, queryLuogo } from '../schemas/luoghi.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
@@ -190,6 +191,17 @@ router.get('/luoghi', (_req, res) => {
 /** L5: la pagina di un luogo, con presenza, orari, negozi della sede (listini), attività, Confidenti e pin. */
 router.get('/luoghi/:quartiere/:luogo', validate({ params: paramsLuogo, query: queryLuogo }), (req, res) => {
   res.json(dettaglioLuogo(String(req.params.quartiere), String(req.params.luogo), (req.query as unknown as { partita?: number }).partita));
+});
+/** L6: gli inviti dei Confidenti, per Confidente o per posto aperto (un quartiere comprende i suoi luoghi), con lo stato della partita se
+ *  indicata: se si possono registrare adesso, che cosa manca, se sono registrati. */
+router.get('/inviti', validate({ query: z.object({
+  confidente: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).optional(),
+  apreTipo: z.enum(['quartiere', 'luogo', 'area']).optional(),
+  apreChiave: z.string().regex(/^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/).max(200).optional(),
+  partita: idParam.optional(),
+}) }), (req, res) => {
+  const q = req.query as unknown as { confidente?: string; apreTipo?: 'quartiere' | 'luogo' | 'area'; apreChiave?: string; partita?: number };
+  res.json(elencaInviti({ confidente: q.confidente, apreTipo: q.apreTipo, apreChiave: q.apreChiave }, q.partita));
 });
 router.get('/cruciverba', validate({ query: queryDomande }), (req, res) => {
   res.json(cruciverba((req.query as unknown as { partita?: number }).partita));

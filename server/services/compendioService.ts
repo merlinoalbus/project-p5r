@@ -8,6 +8,7 @@ import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js'
 import { corrispondeRicerca } from '../../shared/testo.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import { descriviEffettoAzione, type DoteNote } from '../../shared/effettiAzione.js';
+import { invitiDelConfidente } from './inviti.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -389,6 +390,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     regaliSconsigliati: regali.filter((g) => g.sconsigliato === 1).map((g) => g.nome),
     disponibilita: disp ? { giorni: JSON.parse(disp.giorni_json) as string[], fasce: JSON.parse(disp.fasce_json) as string[], luogo: disp.luogo, sbloccoData: disp.sblocco_data, sbloccoRequisiti: disp.sblocco_requisiti, note: disp.note } : { giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '' },
     noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],
+    // L6: gli inviti del Confidente, con ciò che aprono (lo stato della partita lo dà `GET /api/compendio/inviti`)
+    inviti: invitiDelConfidente(chiave),
   };
 }
 

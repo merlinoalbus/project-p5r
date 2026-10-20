@@ -16,6 +16,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { condizioniDiSblocco, invitiPerSblocco } from './sbloccoLuoghi.js';
 import type { RigaInvito } from './condizioni/condizioneEffettiva.js';
+import { elencaInviti } from './inviti.js';
 import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { casaDellArea, casaDellaMappa, contestoAree, type ContestoAree } from './mappe/casaMappa.js';
 import { statoDisponibilitaPartita, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
@@ -256,5 +257,7 @@ export function dettaglioLuogo(quartiere: string, luogo: string, partitaId?: num
     pins: l.pin.get(chiave) ?? [],
     modificato: r.origine !== 'utente' && !!r.seed_json,
     sbloccoTesto,
+    // L6: gli inviti che aprono il luogo, con lo stato della partita (il gesto «Invito avvenuto» accanto alla condizione)
+    inviti: elencaInviti({ apreTipo: 'luogo', apreChiave: chiave }, partitaId),
   };
 }
