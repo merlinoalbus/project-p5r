@@ -117,6 +117,9 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [occupato, setOccupato] = useState(false);
   const [confermaEliminaMappa, setConfermaEliminaMappa] = useState(false);
   const [nuovaMappaAperta, setNuovaMappaAperta] = useState(false);
+  /** FUN2-8 (L2): il rifiuto del server di mettere nel mondo una planimetria senza Area (409 `usa-aggiungi-area`), con la pagina da cui
+   *  aggiungerla per bene accanto al genitore scelto. Resta scritto sopra le proprietà finché non si chiude o si salva di nuovo. */
+  const [avvisoMondo, setAvvisoMondo] = useState<{ messaggio: string; aggiunta: { href: string; testo: string } | null } | null>(null);
   useDocumentTitle(dati ? `Modifica: ${dati.nome} — Mappe` : 'Modifica mappa');
 
   /** Apre nell'editor un'altra mappa. */
@@ -237,7 +240,21 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                 await aggiornaSpillo(s.id,{tipo:'passaggio',riferimento:{tipo:'mappa',chiave:nuova.chiave}});
                 await albero.ricarica();
               }, 'Mappa collegata creata: lo spillo ora è un passaggio verso di lei.')}
-              onSalvaMappa={(d) => esegui(async()=>{const aggiornata=await aggiornaMappa(chiave,d);await albero.ricarica();if(aggiornata.chiave!==chiave)vai(aggiornata.chiave);}, 'Mappa salvata.')}
+              onSalvaMappa={(d) => esegui(async () => {
+                setAvvisoMondo(null);
+                try {
+                  const aggiornata = await aggiornaMappa(chiave, d);
+                  notifica('success', 'Mappa salvata.');
+                  await albero.ricarica();
+                  if (aggiornata.chiave !== chiave) vai(aggiornata.chiave);
+                } catch (err) {
+                  // FUN2-8: il messaggio del server resta scritto, con la strada giusta (un avviso che sparisce non bastava)
+                  if (!isApiError(err, 'usa-aggiungi-area')) throw err;
+                  const genitore = albero.dati?.find((m) => m.chiave === d.genitore);
+                  setAvvisoMondo({ messaggio: err.message, aggiunta: genitore ? paginaPerAggiungere(genitore) : null });
+                }
+              })}
+              avvisoMondo={avvisoMondo} onChiudiAvvisoMondo={() => setAvvisoMondo(null)}
               onImmagine={caricaImmagine}
               onScaricaDallaGuida={() => esegui(async () => {
                 if (dati.entita?.tipo !== 'quartiere') return;
@@ -343,6 +360,9 @@ interface PropsPannello {
   onCollegaVoce: (id: number, voce: string, collega: boolean) => Promise<void>;
   onCreaMappaCollegata: (s: SpilloDto) => Promise<void>;
   onSalvaMappa: (dati: Parameters<typeof aggiornaMappa>[1]) => Promise<void>;
+  /** FUN2-8: il rifiuto di mettere nel mondo una planimetria senza Area (messaggio del server e pagina da cui aggiungerla), o null. */
+  avvisoMondo: { messaggio: string; aggiunta: { href: string; testo: string } | null } | null;
+  onChiudiAvvisoMondo: () => void;
   onImmagine: (file: File) => Promise<void>;
   onScaricaDallaGuida: () => Promise<void>;
   onEliminaMappa: () => void;
@@ -475,6 +495,17 @@ function PannelloEditor(p: PropsPannello) {
         </div>
       </section>
 
+      {/* FUN2-8: il server non mette nel mondo una planimetria senza Area; il suo messaggio resta qui, con le due strade */}
+      {p.avvisoMondo && (
+        <div role="alert" aria-label="La mappa non si sposta lì" className="flex flex-col gap-1.5 rounded-md border border-warning/60 bg-white/[0.04] p-2 text-[13px]">
+          <p className="m-0">{p.avvisoMondo.messaggio}</p>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {p.avvisoMondo.aggiunta && <Link className="touch inline-flex items-center text-primary" to={p.avvisoMondo.aggiunta.href}>{p.avvisoMondo.aggiunta.testo}</Link>}
+            <Link className="touch inline-flex items-center text-primary" to="/guida/citta">Planimetrie da collocare</Link>
+            <button type="button" className="btn btn-ghost btn-sm touch ml-auto" aria-label="Chiudi l’avviso" onClick={p.onChiudiAvvisoMondo}>Chiudi</button>
+          </span>
+        </div>
+      )}
       <FormMappa key={mappa.chiave + mappa.updatedAt} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={p.onSalvaMappa} onElimina={p.onEliminaMappa} />
 
       </div>
