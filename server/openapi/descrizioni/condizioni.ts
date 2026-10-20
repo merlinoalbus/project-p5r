@@ -6,6 +6,12 @@ import type { DescrizioniArea } from '../tipi.js';
 
 /** Le descrizioni delle rotte di `/api/condizioni` (`routes/condizioni.ts`). */
 export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
+  'POST /api/condizioni/valuta': {
+    sommario: 'Valuta condizioni sulla partita corrente o su un giorno scelto',
+    descrizione: 'Valuta ogni condizione e l’insieme in AND con il valutatore unico del server. `partita` identifica la partita e `giorno`, se presente, sposta solo il giorno di valutazione senza modificare la partita; la risposta distingue vero, falso, avviso e riferimento non più valido, con il testo e ciò che manca.',
+    risposta: '`RispostaValutaCondizioniDto`',
+    errori: [[400, 'giorno-non-valido'], [404, 'partita-non-trovata']],
+  },
   'GET /api/condizioni/elenchi': {
     sommario: 'Elenchi chiusi da cui l\'editor delle condizioni sceglie i valori',
     descrizione: 'Articoli (con il nome del negozio come gruppo), libri e film, arcani, Persona, abilità, Ladri giocabili, attività che si contano per volte svolte, negozi con il tipo di programma punti (`manuale`, `rango-cliente` o null), eventi di storia (con `calcolato` vero per quelli «entra in squadra», che non si segnano a mano) e contatori. Righe nascoste di articoli, negozi, letture e attività escluse: nell\'editor non si scrive, si sceglie.',

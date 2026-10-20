@@ -208,6 +208,12 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`LuogoDettaglioDto`',
     errori: [[404, 'luogo-non-trovato'], [404, 'partita-non-trovata']],
   },
+  'GET /api/compendio/inviti': {
+    sommario: 'Elenco degli inviti dei Confidenti e del loro stato',
+    descrizione: 'Filtra per Confidente o per il posto aperto; un quartiere comprende anche i suoi luoghi. Con `?partita=` ogni invito porta se è registrato, se può essere registrato ora e la condizione mancante, senza modificare la partita.',
+    risposta: 'Elenco di `InvitoDto`',
+    errori: [PARTITA_NON_TROVATA],
+  },
   'GET /api/compendio/citta': {
     sommario: 'Elenco dei quartieri di Tokyo',
     descrizione: 'I quartieri in ordine (escluso l\'ingresso dei Memento, che non è un quartiere) con mappa, punto d\'ingresso, `illustrazione` (l\'immagine della mappa del quartiere con la regola unica di L1: `immagineUrl` della caricata, versionato, poi `asset` dichiarato; la stessa del visore e dell\'indice) e conteggi dei luoghi non nascosti e verificati. Con `?partita=` ogni quartiere dice se è già nel mondo: le regole di sblocco non sono solo date, e solo l\'esito «bloccato» lo nasconde (un dubbio no), con il motivo in `bloccoMotivo`; senza partita sono tutti disponibili.',
@@ -219,6 +225,18 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     descrizione: 'Il quartiere con mappa (vero se la sua mappa ha un\'immagine caricata, registrata o con la chiave della mappa), `illustrazione` (come nell\'elenco), ingresso, pianta (o il motivo per cui manca) e i luoghi non nascosti in ordine, ciascuno con Confidenti, attività, negozi, marcatore e condizioni. Con `?partita=` ogni luogo porta la disponibilità valutata sulla partita: la partita serve ai luoghi, non al quartiere.',
     risposta: '`QuartiereDettaglioDto`',
     errori: [[404, 'quartiere-non-trovato'], PARTITA_NON_TROVATA],
+  },
+  'PUT /api/compendio/citta/:chiave/sblocco': {
+    sommario: 'Modifica la condizione propria dello sblocco di un quartiere',
+    descrizione: 'Sostituisce la condizione strutturata del quartiere con quelle inviate. Gli inviti dei Confidenti restano separati e continuano a essere gestiti dalla pagina del Confidente; la copia della guida usata da «Ripristina» non viene sovrascritta.',
+    risposta: '`SbloccoDto` aggiornato',
+    errori: [[404, 'quartiere-non-trovato']],
+  },
+  'POST /api/compendio/citta/:chiave/sblocco/ripristina': {
+    sommario: 'Ripristina lo sblocco del quartiere dalla guida',
+    descrizione: 'Riporta la condizione propria del quartiere alla copia salvata dalla guida nella migrazione 120; non modifica gli inviti e non cancella lo snapshot.',
+    risposta: '`SbloccoDto` aggiornato',
+    errori: [[404, 'quartiere-non-trovato'], [409, 'sblocco-guida-assente']],
   },
   'PUT /api/compendio/citta/:chiave/ingresso': {
     sommario: 'Imposta l\'ingresso del quartiere: un\'Area del quartiere e un punto',
