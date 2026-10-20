@@ -1389,16 +1389,82 @@ export interface CruciverbaTuttiDto {
 
 export type { DoteChiave } from './doti.js';
 
-export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number }
+/** L'ingresso di un quartiere: la planimetria (chiave pubblica e nome del percorso), il punto e lo zoom; dalla 109 (L2) anche l'Area
+ *  della planimetria (slug e nome), null se la planimetria non ne ha una. */
+export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number; area: { slug: string; nome: string } | null }
 /** L'illustrazione di un posto (quartiere, Palazzo) presa dalla sua mappa con la regola unica di L1: prima l'immagine
  *  caricata (URL versionato), poi l'asset dichiarato. `asset` è null quando l'asset della mappa è lo stemma del posto
  *  (radici dei Palazzi), che le viste mostrano già come segno: l'illustrazione allora c'è solo se caricata. */
 export interface IllustrazioneDto { immagineUrl: string | null; asset: string | null }
+
+// ---- Le Aree (L2, migrazione 109): Città → Quartiere → Area → Planimetrie → Luoghi ----
+// Un'Area è la stessa cosa nel quartiere, nella città (lo staff, da verificare) e — da L3 — nel Palazzo: i contratti sono generici
+// sul contenitore da subito, così L3 non li cambia. La «casa» è l'indirizzo dell'unica pagina che mostra una mappa: la calcola il
+// server (`casaMappa.ts`), l'interfaccia non ricostruisce la regola.
+
+/** Il posto che contiene un'Area: la città (Tokyo, per le planimetrie che nessuna fonte colloca), un quartiere (L2) o un Palazzo (L3). */
+export interface ContenitoreAreaDto { tipo: 'citta' | 'quartiere' | 'dungeon'; chiave: string; nome: string }
+/** L'Area di una planimetria, con la sua versione dentro l'Area (null per le radici, i Memento e i Palazzi fino a L3). */
+export interface AreaRifDto {
+  chiave: string; contenitore: ContenitoreAreaDto; slug: string; nome: string;
+  /** L'etichetta della versione («inquadratura orientale»); null nelle Aree con una planimetria sola. */
+  versioneEtichetta: string | null;
+  /** La posizione della versione dentro l'Area, da 0. */
+  versioneOrdine: number;
+  /** È la planimetria che l'Area mostra aprendola. */
+  predefinita: boolean;
+  /** La casa dell'Area, con la versione se non è la predefinita. */
+  casa: string;
+}
+/** Una planimetria (versione) di un'Area. */
+export interface PlanimetriaAreaDto {
+  /** Chiave pubblica della mappa. */
+  chiave: string; nome: string; etichetta: string | null; ordine: number; predefinita: boolean; numeroSpilli: number;
+  immagineUrl: string | null; asset: string | null; ruoloImmagine: RuoloImmagine;
+}
+/** Un'Area nell'elenco del suo contenitore. */
+export interface AreaRiassuntoDto {
+  chiave: string; contenitore: ContenitoreAreaDto; slug: string; nome: string;
+  /** Il nome l'ha rivisto una persona (non è quello della guida). */
+  nomeRivisto: boolean;
+  ordine: number;
+  /** Chiave pubblica della planimetria predefinita (null se l'Area è rimasta senza planimetrie). */
+  predefinita: string | null;
+  /** L'immagine della predefinita, con il risolutore unico di L1. */
+  illustrazione: IllustrazioneDto;
+  numeroPlanimetrie: number;
+  /** I pin di tutte le planimetrie dell'Area. */
+  numeroSpilli: number;
+  /** Il pin di passaggio verso l'Area sull'illustrazione del contenitore (il primo, se più d'uno); null se manca. */
+  passaggio: { spillo: number; x: number; y: number } | null;
+  /** L'ingresso del quartiere usa una planimetria di quest'Area. */
+  ingresso: boolean;
+  origine: 'seed' | 'utente';
+  /** L'utente ha corretto un'Area della guida (c'è una copia dei valori di prima, che «Ripristina» rimette). */
+  modificata: boolean;
+  /** L'Area è in attesa della scelta dell'utente: tenerla o rimuoverla (lo staff, decisione del 2026-10-20). */
+  daVerificare: boolean;
+  casa: string;
+}
+/** Un luogo, negozio, attività o Confidente segnato con un pin su una planimetria dell'Area. */
+export interface ElementoAreaDto { tipo: 'luogo' | 'negozio' | 'attivita' | 'confidente'; chiave: string; nome: string; spillo: number; planimetria: string }
+/** La pagina di un'Area. */
+export interface AreaDettaglioDto extends AreaRiassuntoDto {
+  /** Le versioni, nell'ordine. */
+  planimetrie: PlanimetriaAreaDto[];
+  elementi: ElementoAreaDto[];
+  /** Dove portano i passaggi delle sue planimetrie (lei esclusa), una volta per destinazione. */
+  vicine: Array<{ nome: string; quartiereNome: string | null; casa: string }>;
+}
+/** Una planimetria del mondo senza Area (da assegnare con «Colloca»). */
+export interface MappaDaCollocareDto { chiave: string; nome: string; genitoreNome: string | null; numeroSpilli: number; immagineUrl: string | null; asset: string | null }
 export interface QuartiereRiassuntoDto {
   mappaChiave?:string;
   ingresso?:IngressoQuartiereDto|null;
   /** L'illustrazione della mappa del quartiere (`citta-<quartiere>`), sotto la sagoma nella scheda (scelta dell'utente, 2026-10-20). */
   illustrazione: IllustrazioneDto;
+  /** Quante Aree ha il quartiere (L2). */
+  aree: number;
   sbloccoData?:string|null;
   chiave: string;
   nome: string;
@@ -1470,6 +1536,8 @@ export interface QuartiereDettaglioDto {
   mappa: boolean;
   /** L'illustrazione della mappa del quartiere, sotto la sagoma nell'intestazione (scelta dell'utente, 2026-10-20). */
   illustrazione: IllustrazioneDto;
+  /** Le Aree del quartiere, nel loro ordine (L2). */
+  aree: AreaRiassuntoDto[];
   /** Collegamento alla mappa pubblicata (null se nessuna fonte la offre). */
   pianta: PiantaAreaDto | null;
   piantaAssente: string | null;
@@ -2063,13 +2131,19 @@ export interface MappaRiassuntoDto {
   numeroSpilli: number;
   numeroFigli: number;
   updatedAt: string;
+  /** L'Area della planimetria e la sua versione (L2); null per Tokyo, i quartieri, i Palazzi e i Memento. */
+  area: AreaRifDto | null;
+  /** L'indirizzo dell'unica pagina che mostra la mappa (L2): La città, il quartiere, l'Area (con la versione) o il visore. */
+  casa: string;
 }
 
 export interface DettaglioSpilloDto {
   tipo: TipoRiferimento;
   /** Immagine dell'entità collegata quando esiste (mappa: sua immagine di base o asset; Confidente: ritratto caricato o asset). */
   immagine?: { url: string | null; asset: string | null } | null;
-  mappa?: { chiave: string; nome: string; tipo: TipoMappa };
+  /** La mappa di destinazione (L2): l'Area che la contiene (il nome che il pin di passaggio mostra, se c'è) e la sua casa (un passaggio
+   *  porta alla pagina che la mostra). */
+  mappa?: { chiave: string; nome: string; tipo: TipoMappa; area: { nome: string } | null; casa: string };
   punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; /** L'area del dedalo (099), o null fuori dai Memento: lì ogni voce ha uno stato. */ areaDedalo: string | null; stato: string | null };
   luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto }> } | null;
@@ -2181,7 +2255,8 @@ export interface MappaDto extends MappaRiassuntoDto {
   altezza: number | null;
   note: string;
   genitoreNome: string | null;
-  /** Dalla radice a questa mappa. */
+  /** Dalla radice a questa mappa. Per una planimetria con Area l'ultima tappa ha il nome dell'Area (Tokyo › Shibuya › Sottopasso):
+   *  la versione la dice `area.versioneEtichetta` (L2). */
   percorso: Array<{ chiave: string; nome: string }>;
   figli: MappaRiassuntoDto[];
   spilli: SpilloDto[];
@@ -2275,11 +2350,22 @@ export interface PezzoPacchetto102 {
 }
 
 /** Pacchetto di esportazione/importazione delle mappe (versione 1): il file `mappe-editor.json` che l'editor scarica e reimporta. */
+/** Un'Area nel pacchetto delle mappe (L2): il contenitore (uno solo fra quartiere, Palazzo e città), lo slug, il nome, l'ordine, la
+ *  planimetria predefinita (chiave pubblica) e lo stato. Un pacchetto di prima della 109 non ha il campo `aree`: l'importazione allora
+ *  assegna le Aree con la regola della migrazione. */
+export interface AreaPacchetto { chiave: string; quartiere: string | null; dungeon: string | null; citta: string | null; slug: string; nome: string; nomeRivisto: boolean;
+  ordine: number; predefinita: string | null; origine: 'seed' | 'utente'; seedJson: string | null; daVerificare: boolean }
 export interface EsportazioneMappeDto {
-  ingressi?:Array<{quartiere:string;mappa:string;x:number;y:number;zoom:number}>;
+  /** Gli ingressi dei quartieri; `area` (L2) è l'Area della planimetria, informativa: all'import si deduce dalla planimetria. */
+  ingressi?:Array<{quartiere:string;mappa:string;x:number;y:number;zoom:number;area?:string|null}>;
   versione: 1;
   esportato?: string;
+  /** Le Aree delle planimetrie esportate (L2, migrazione 109). */
+  aree?: AreaPacchetto[];
   mappe: Array<{
+    /** L'Area della planimetria (chiave di `aree`) e la sua versione dentro l'Area (L2). */
+    area?: string | null;
+    versione?: { etichetta: string | null; ordine: number };
     ruoloImmagine?: RuoloImmagine;
     contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
     gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string;nomeRivisto?:boolean};
@@ -2548,8 +2634,9 @@ export interface RiepilogoCatalogoDto {
 
 // ---- Il cestino (migrazioni 104 e utente 021, 2026-10-16): ciò che si elimina dalla guida e dalle mappe si può rimettere ----
 
-/** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo. */
-export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo';
+/** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo, un'Area
+ *  con le sue planimetrie (`area-fisica`, L2: il quartiere o la città che la contiene). */
+export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica';
 
 /** Quante righe di una tabella se ne sono andate con l'eliminazione, con il nome per l'utente. */
 export interface ContenutoCestinoDto {

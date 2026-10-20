@@ -13,6 +13,7 @@
 // ============================================================
 
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
@@ -87,12 +88,35 @@ export function fileImmagine(ambito: string, chiave: string): { id: number; cont
   return { id: r.id, contenuto: r.contenuto, mime: r.mime, byte: r.byte, createdAt: r.created_at };
 }
 
+/**
+ * Il formato vero di un contenuto, dai suoi primi byte: la firma di PNG, JPEG, GIF e WEBP; per SVG un testo che (dopo un eventuale
+ * BOM, spazi, la dichiarazione XML, commenti o un DOCTYPE) contiene un elemento `<svg` nei primi 4 KB. Null se non è nessuno dei
+ * formati ammessi.
+ */
+function formatoDelContenuto(b: Buffer): string | null {
+  if (b.length >= 8 && b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
+  if (b.length >= 6 && (b.toString('ascii', 0, 6) === 'GIF87a' || b.toString('ascii', 0, 6) === 'GIF89a')) return 'image/gif';
+  if (b.length >= 12 && b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
+  const testo = b.subarray(0, 4096).toString('utf-8');
+  // senza il BOM (U+FEFF) in testa, se c'è
+  const testa = (testo.charCodeAt(0) === 0xfeff ? testo.slice(1) : testo).trimStart();
+  if (testa.startsWith('<') && /<svg[\s>]/i.test(testa)) return 'image/svg+xml';
+  return null;
+}
+
 /** Salva (o sostituisce) l'immagine di un'entità; `origineUrl` è l'indirizzo da cui è stata scaricata (null per i file caricati). */
 export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: string, contenuto: Buffer, origineUrl: string | null = null): ImmagineDto {
   chiave = chiaveDi(ambito, chiave);
-  const estensione = ESTENSIONE_PER_MIME[mime];
-  if (!estensione) throw httpErrors.badRequest('formato-non-ammesso', `Formato '${mime}' non ammesso: usa PNG, JPEG, WEBP, GIF o SVG.`);
+  if (!ESTENSIONE_PER_MIME[mime]) throw httpErrors.badRequest('formato-non-ammesso', `Formato '${mime}' non ammesso: usa PNG, JPEG, WEBP, GIF o SVG.`);
   if (contenuto.length === 0) throw httpErrors.badRequest('immagine-vuota', 'Il contenuto dell\'immagine è vuoto.');
+  // Il contenuto dev'essere davvero un'immagine di un formato ammesso (difetto FUN2-3, L2): un file di testo spedito come image/png,
+  // salvato, diventava una planimetria che non si vede. Il formato vero lo dicono i byte: un PNG con l'estensione .jpg (il browser
+  // dichiara il tipo dall'estensione) si salva come PNG, invece di essere rifiutato.
+  const vero = formatoDelContenuto(contenuto);
+  if (!vero) throw httpErrors.badRequest('formato-non-ammesso', 'Il file non è un’immagine PNG, JPEG, WEBP, GIF o SVG valida: il contenuto non corrisponde al formato dichiarato.');
+  mime = vero;
+  const estensione = ESTENSIONE_PER_MIME[mime];
   if (contenuto.length > MAX_BYTE_IMMAGINE) throw httpErrors.badRequest('immagine-troppo-grande', `L'immagine supera ${MAX_BYTE_IMMAGINE / 1024 / 1024} MB.`);
   // `nome_file` resta per lo schema (NOT NULL) e come nome leggibile: un nome nuovo a ogni sostituzione
   const nomeFile = `${randomUUID()}.${estensione}`;
@@ -123,9 +147,22 @@ export async function scaricaImmagine(url: string): Promise<{ contenuto: Buffer;
     codiceTroppoGrande: 'immagine-troppo-grande',
     accept: 'image/*,*/*;q=0.8',
     attesaRispostaMs: 20_000,
-    intestazioni: { 'User-Agent': 'Mozilla/5.0 (compatible; ProjectP5R/1.0; +https://github.com/merlinoalbus/project-p5r)' },
+    // uno User-Agent onesto, che dice chi è e perché (LAY-2, decisione del PM): niente maschere da browser né Referer contraffatti
+    intestazioni: { 'User-Agent': USER_AGENT },
   });
 }
+
+/** La versione dell'app, da package.json (copiato anche nell'immagine Docker), per lo User-Agent. */
+const VERSIONE_APP = ((): string => {
+  try {
+    return (JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf-8')) as { version?: string }).version ?? '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+})();
+
+/** Come si presenta l'app a una fonte esterna. */
+export const USER_AGENT = `project-p5r/${VERSIONE_APP} (guida personale di gioco per Persona 5 Royal; +https://github.com/merlinoalbus/project-p5r)`;
 
 /** Scarica un'immagine da un URL indicato dall'utente e la salva, con l'indirizzo d'origine. Per l'immagine di una mappa che
  *  esiste c'è la strada dell'editor (`scaricaImmagineMappa` in mappeService), che chiede conferma dei pezzi. */

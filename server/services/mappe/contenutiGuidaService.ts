@@ -12,6 +12,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { chiaveMappa, idMappa, nomePercorso } from './percorsiMappe.js';
+import { casaDellaMappa, contestoAree, type RigaPerCasa } from './casaMappa.js';
 import type { ContenutiMappaDto, DestinazioneGuidaDto, PuntoGuidaMappaDto, RisoluzioneMappaDto } from '../../../shared/organizzazioneMappe.js';
 import { categoriaSpillo, spilloPerPunto } from '../../../shared/spilli.js';
 
@@ -38,8 +39,10 @@ export function risolviPercorsoMappa(chiave: string): RisoluzioneMappaDto {
     if (d) return { tipo: 'guida', ...d };
   }
   const mappa = idMappa(chiave);
-  if (!prepared('SELECT 1 FROM mappa WHERE chiave=?').get(mappa)) throw httpErrors.notFound('mappa-non-trovata','La mappa o il contenuto richiesto non esiste.');
-  return { tipo: 'mappa', mappa: chiaveMappa(mappa) };
+  const riga = prepared('SELECT * FROM mappa WHERE chiave=?').get(mappa) as RigaPerCasa | undefined;
+  if (!riga) throw httpErrors.notFound('mappa-non-trovata','La mappa o il contenuto richiesto non esiste.');
+  // L2: la casa della mappa a cui porta la chiave (o l'alias): un alias vecchio di una versione apre l'Area su quella versione
+  return { tipo: 'mappa', mappa: chiaveMappa(mappa), casa: casaDellaMappa(riga, contestoAree()) };
 }
 
 /**

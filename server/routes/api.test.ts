@@ -371,9 +371,12 @@ describe('API', () => {
       expect(primo.headers.etag).toBeTruthy();
       expect((await request(app).get('/api/immagini/mappe/tokyo/file').set('If-None-Match', primo.headers.etag)).status).toBe(304);
       expect((await request(app).delete('/api/immagini/mappe/tokyo')).status).toBe(204);
-      const sost = await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'image/webp').send(Buffer.from('RIFF'));
+      // un WEBP con la sua firma (`RIFF` … `WEBP`): dal lotto L2 il contenuto deve essere del formato dichiarato
+      const webp = Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WEBPVP8 ')]);
+      const sost = await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'image/webp').send(webp);
       expect(sost.body.data.mime).toBe('image/webp');
-      expect(Buffer.from((await request(app).get('/api/immagini/arcana/Fool/file')).body).toString()).toBe('RIFF');
+      expect(Buffer.from((await request(app).get('/api/immagini/arcana/Fool/file')).body).equals(webp)).toBe(true);
+      expect((await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'image/webp').send(Buffer.from('RIFF'))).body.error.code).toBe('formato-non-ammesso');
       expect((await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'text/plain').send('ciao')).status).toBe(400);
       const grande = await request(app).put('/api/immagini/arcana/Grande').set('Content-Type', 'image/png').send(Buffer.alloc(9 * 1024 * 1024, 1));
       expect(grande.status).toBe(413);

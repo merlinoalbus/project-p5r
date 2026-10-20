@@ -13,6 +13,7 @@ import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../../shared/accessoM
 import { vociCollegabili } from '../services/dungeonService.js';
 import { Router } from 'express';
 import { z } from 'zod';
+import { boolQuery } from '../schemas/comuni.js';
 import { validate } from '../middleware/validate.js';
 import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
@@ -93,8 +94,9 @@ router.put('/:chiave', validate({ params: paramsMappa, body: bodyAggiornaMappa }
 router.put('/:chiave/aree', validate({ params: paramsMappa, body: bodyAreeMappa }), (req, res) => {
   res.json({ aree: impostaAreeMappa(String(req.params.chiave), (req.body as { aree: string[] }).aree) });
 });
-router.delete('/:chiave', validate({ params: paramsMappa }), (req, res) => {
-  eliminaMappa(String(req.params.chiave));
+// L2: la planimetria dell'ingresso di un quartiere si elimina con `?conferma=1` (l'ingresso se ne va con lei)
+router.delete('/:chiave', validate({ params: paramsMappa, query: z.object({ conferma: boolQuery }) }), (req, res) => {
+  eliminaMappa(String(req.params.chiave), { conferma: (req.query as { conferma?: boolean }).conferma === true });
   res.status(204).end();
 });
 /** Raggruppamento della planimetria: la stanza (gruppo di immagini) e l'etichetta della sua versione. */

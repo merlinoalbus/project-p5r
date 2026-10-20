@@ -9,8 +9,9 @@ import { regoleAllAvvio } from '../services/pacchetto/pacchettoGioco.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 const app=createApp();
 beforeEach(()=>{dbDiProva();});afterEach(()=>closeDb());
-/** Crea una mappa di tipo area col nome dato sotto il genitore indicato, pretende il 201 e la restituisce. */
-const crea=async(nome:string,genitore:string)=>{const r=await request(app).post('/api/mappe').send({nome,tipo:'area',genitore});expect(r.status).toBe(201);return r.body.data;};
+/** Crea una mappa (generica) col nome dato sotto il genitore indicato, pretende il 201 e la restituisce. */
+// L2: nel mondo le mappe `luogo`/`area` nascono dentro un'Area (409 dall'editor); per i percorsi conta la gerarchia, non il tipo: qui `generica`
+const crea=async(nome:string,genitore:string)=>{const r=await request(app).post('/api/mappe').send({nome,tipo:'generica',genitore});expect(r.status).toBe(201);return r.body.data;};
 it('deriva la chiave da tutta la gerarchia, preservando i nomi naturali; senza asset per convenzione',async()=>{
   const castello=await crea('Castello Imperiale','shibuya');const piano=await crea('Piano 0',castello.chiave);
   expect(castello.chiave).toBe('shibuya-castello-imperiale');expect(piano.chiave).toBe('shibuya-castello-imperiale-piano-0');

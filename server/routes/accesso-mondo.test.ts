@@ -72,11 +72,12 @@ it('raggiunge il pin di un luogo attraverso il suo legame strutturato con il neg
 });
 
 it('usa ingresso solo per il quartiere e conserva alias dopo rinomina', async () => {
-  expect((await request(app).put('/api/compendio/citta/shibuya/ingresso').send({ mappa: 'shibuya', x: 0, y: 100, zoom: 3 })).status).toBe(200);
+  // L2: l'ingresso sta in un'Area del quartiere (qui Central Street); rinominato il quartiere, il percorso della planimetria lo segue
+  expect((await request(app).put('/api/compendio/citta/shibuya/ingresso').send({ area: 'central-street', x: 0, y: 100, zoom: 3 })).status).toBe(200);
   const id = await creaPin('shibuya');
   expect((await request(app).put('/api/mappe/shibuya').send({ nome: 'Shibuya Centrale' })).status).toBe(200);
   const q = (await accesso('quartiere', 'shibuya')).body.data.destinazioni[0];
-  expect(q).toMatchObject({ mappa: 'shibuya-centrale', centro: { x: 0, y: 100, zoom: 3 } });
+  expect(q).toMatchObject({ mappa: 'shibuya-centrale-central-street', centro: { x: 0, y: 100, zoom: 3 } });
   expect((await accesso('negozio', 'untouchable')).body.data.destinazioni[0]).toMatchObject({ mappa: 'shibuya-centrale', spillo: id, centro: null });
   expect((await accesso('mappa', 'shibuya')).body.data.destinazioni[0].mappa).toBe('shibuya-centrale');
 });

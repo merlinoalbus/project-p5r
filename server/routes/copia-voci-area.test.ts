@@ -16,6 +16,8 @@ import type { DungeonDettaglioDto, PuntiCopiatiDto, PuntoInteresseDto } from '..
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+/** I primi otto byte di un PNG. */
+const FIRMA_PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const URL = '/api/compendio/punti/copia-in-area';
 const INGRESSO = 'kamoshida-01-cancello-del-castello-ingresso';
 const SALA = 'kamoshida-02-sala-centrale';
@@ -52,7 +54,8 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     const scheda = prepared(`SELECT s.id, s.riferimento_chiave AS voce FROM spillo s JOIN punto_interesse p ON p.chiave = s.riferimento_chiave
       WHERE s.mappa_chiave IS NULL AND s.area_guida_chiave = ? AND s.riferimento_tipo = 'punto' AND p.contenitore_chiave IS NULL ORDER BY s.id LIMIT 1`).get(INGRESSO) as { id: number; voce: string };
     expect(scheda).toBeDefined();
-    salvaImmagine('spillo', `prova-copia-${scheda.id}`, 'image/png', Buffer.from('immagine della scheda'));
+    // la firma PNG davanti: dal lotto L2 il contenuto deve essere del formato dichiarato
+    salvaImmagine('spillo', `prova-copia-${scheda.id}`, 'image/png', Buffer.concat([FIRMA_PNG, Buffer.from('immagine della scheda')]));
     prepared("INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, 0, ?, NULL, 'la schermata', 'x')").run(scheda.id, `prova-copia-${scheda.id}`);
     prepared("INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, 1, NULL, 'asset/prova.png', 'un asset', 'x')").run(scheda.id);
     // la destinazione della scheda va con lei; un'immagine senza contenuto nel database (solo il nome del file) non si copia
@@ -114,7 +117,7 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     expect(immaginiCopia.map((i) => ({ ...i, immagine_chiave: i.immagine_chiave ? 'chiave' : null }))).toEqual(immaginiPrima.slice(0, 2).map((i) => ({ ...i, immagine_chiave: i.immagine_chiave ? 'chiave' : null })));
     expect(prepared('SELECT mappa_chiave, x, y, zoom FROM spillo_destinazione WHERE spillo_id = ?').get(schedaCopia[0].id)).toEqual({ mappa_chiave: null, x: 12, y: 34, zoom: 2 });
     expect(immaginiCopia[0].immagine_chiave).not.toBe(immaginiPrima[0].immagine_chiave);
-    expect(immaginiCopia[0].contenuto!.toString()).toBe('immagine della scheda');
+    expect(immaginiCopia[0].contenuto!.subarray(FIRMA_PNG.length).toString()).toBe('immagine della scheda');
     expect(immaginiDi(scheda.id)).toEqual(immaginiPrima);
     const passoCopia2 = prepared("SELECT chiave FROM punto_interesse WHERE contenitore_chiave = ? AND nome = 'Secondo passo'").pluck().get(copie[2]) as string;
     const passoCopia1 = prepared("SELECT chiave FROM punto_interesse WHERE contenitore_chiave = ? AND nome = 'Primo passo'").pluck().get(copie[2]) as string;
@@ -134,7 +137,7 @@ describe('copiare più voci insieme in un\'altra area del Palazzo', () => {
     // eliminare la copia non tocca l'originale né la sua immagine
     await request(app).delete(`/api/compendio/punti/${encodeURIComponent(copie[0])}`).expect(204);
     expect(schedeDi(scheda.voce)).toEqual(schedaPrima);
-    expect(immaginiDi(scheda.id)[0].contenuto!.toString()).toBe('immagine della scheda');
+    expect(immaginiDi(scheda.id)[0].contenuto!.subarray(FIRMA_PNG.length).toString()).toBe('immagine della scheda');
   });
 
   it('tutto o niente: stessa area, passi, altri Palazzi, Memento, voci o aree che non ci sono fermano tutte; ripetizioni e liste vuote si rifiutano', async () => {

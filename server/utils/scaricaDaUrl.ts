@@ -37,6 +37,9 @@ export interface OpzioniScarico {
   intestazioni?: Record<string, string>;
 }
 
+/** Gli stati con cui una fonte rifiuta la richiesta (non un errore suo né un indirizzo sbagliato): diventano `fonte-rifiuta`. */
+const STATI_RIFIUTO = new Set([401, 403, 429, 451]);
+
 const ATTESA_RISPOSTA_PREDEFINITA = 30_000;
 const INATTIVITA_PREDEFINITA = 120_000;
 
@@ -87,6 +90,12 @@ export async function scaricaDaUrl(indirizzo: string, opzioni: OpzioniScarico): 
   // risposta arrivata: da qui conta solo l'inattività, non il tempo totale
   armaOrologio(inattivita, 'inattivita');
   try {
+    // La fonte rifiuta (accesso negato, protezione anti-robot, troppe richieste): non si aggirano le protezioni di un sito altrui
+    // (decisione del PM su LAY-2, L2). L'errore lo dice con un codice suo, e chi chiama propone di caricare l'immagine a mano.
+    if (STATI_RIFIUTO.has(res.status)) {
+      await res.body?.cancel().catch(() => undefined);
+      throw httpErrors.badRequest('fonte-rifiuta', `${u.host} ha rifiutato la richiesta (${res.status}): il sito non lascia scaricare ${opzioni.cosa} da un’app. Aprila dalla pagina della fonte e caricala dall’editor.`, { stato: res.status, host: u.host, url: u.toString() });
+    }
     if (!res.ok) throw httpErrors.badRequest(opzioni.codiceScaricoFallito, `L'indirizzo ha risposto ${res.status}: controlla che serva ${opzioni.cosa}.`);
     const dichiarati = Number(res.headers.get('Content-Length') ?? '0');
     if (dichiarati > opzioni.maxByte) {

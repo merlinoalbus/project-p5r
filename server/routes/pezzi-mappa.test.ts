@@ -353,7 +353,10 @@ describe('pezzi delle planimetrie', () => {
     expect(ids.length).toBeGreaterThan(0);
     const copieDellaMappa = () => prepared(`SELECT COUNT(*) FROM copia_pezzo WHERE pezzo_id IN (${ids.join(',')})`).pluck().get() as number;
     expect(copieDellaMappa()).toBeGreaterThan(0);
-    await request(app).delete(`/api/mappe/${MAPPA}`).expect(204);
+    // L2: la planimetria è l'unica della sua Area (Piazza della stazione): se ne va con l'Area, con gli stessi passi dell'eliminazione di
+    // una mappa (da sola sarebbe 409 `ultima-planimetria`)
+    expect((await request(app).delete(`/api/mappe/${MAPPA}`)).body.error.code).toBe('ultima-planimetria');
+    await request(app).delete('/api/aree/citta/shibuya/piazza-della-stazione?conferma=1').expect(204);
     expect(prepared('SELECT COUNT(*) FROM pezzo_mappa WHERE mappa_chiave = ?').pluck().get(MAPPA)).toBe(0);
     expect(copieDellaMappa()).toBe(0);
   });

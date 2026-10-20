@@ -60,6 +60,8 @@ const RADICE: Record<TipoCestino, { tabella: string; colonna: string }> = {
   voce: { tabella: 'punto_interesse', colonna: 'chiave' },
   mappa: { tabella: 'mappa', colonna: 'chiave' },
   'area-dedalo': { tabella: 'area_dedalo', colonna: 'chiave' },
+  // un'Area del mondo con le sue planimetrie (L2, migrazione 109)
+  'area-fisica': { tabella: 'area', colonna: 'chiave' },
 };
 
 /**
@@ -75,7 +77,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   mappa_presentazione: ['presentazione di una mappa', 'presentazioni delle mappe'], pezzo_mappa: ['pezzo di una planimetria', 'pezzi delle planimetrie'],
   copia_pezzo: ['copia di un pezzo', 'copie dei pezzi'], pianta_area: ['pianta di un’infiltrazione', 'piante delle infiltrazioni'],
   guida_mappa: ['scheda di guida di un’infiltrazione', 'schede di guida delle infiltrazioni'], guida_alias: ['nome di prima di un’infiltrazione', 'nomi di prima delle infiltrazioni'],
-  area_dedalo: ['area di un dedalo', 'aree dei dedali'], persona_area_dedalo: ['Persona di un’area di un dedalo', 'Persona delle aree dei dedali'],
+  area_dedalo: ['area di un dedalo', 'aree dei dedali'], area: ['area', 'aree'], quartiere_ingresso: ['ingresso di un quartiere', 'ingressi dei quartieri'], persona_area_dedalo: ['Persona di un’area di un dedalo', 'Persona delle aree dei dedali'],
   richiesta: ['Richiesta', 'Richieste'], dati_guida: ['dato della guida', 'dati della guida'],
   punto_partita: ['spunta di una voce nelle partite', 'spunte delle voci nelle partite'], spillo_partita: ['stato di un pin nelle partite', 'stati dei pin nelle partite'],
   timbri_dedalo_partita: ['conteggio dei timbri nelle partite', 'conteggi dei timbri nelle partite'],

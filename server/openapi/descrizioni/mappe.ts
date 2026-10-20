@@ -9,7 +9,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   'GET /api/mappe/risolvi/:chiave': {
     sommario: 'Che cosa apre un percorso di mappa: una mappa o una sezione della guida di un Palazzo',
     descrizione: 'Se la chiave è l\'alias di una vecchia mappa d\'area con una destinazione valida, risponde con la sezione della guida dentro la mappa del suo Palazzo; altrimenti con la mappa di quella chiave (chiave pubblica o interna). La chiave è libera: un indirizzo scritto a mano che non corrisponde a nulla è un 404, non un errore di validazione.',
-    risposta: '`RisoluzioneMappaDto`: `{ tipo: "mappa", mappa }` oppure `{ tipo: "guida", area, dungeon, mappaPalazzo, nome }`',
+    risposta: '`RisoluzioneMappaDto`: `{ tipo: "mappa", mappa, casa }` (L2: `casa` è l\'unica pagina che mostra la mappa — La città, il quartiere, l\'Area con `?planimetria=` se la versione non è la predefinita, o il visore) oppure `{ tipo: "guida", area, dungeon, mappaPalazzo, nome }`',
     errori: [[404, 'mappa-non-trovata']],
   },
   'GET /api/mappe/contenuti/:chiave': {
@@ -29,7 +29,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     descrizione: 'Legge l\'indirizzo della pianta del quartiere, scarica l\'immagine e la salva nell\'ambito «mappa» con la chiave `citta-<quartiere>` (sostituendo quella che c\'era). La mappa del quartiere segue la strada dell\'editor (L1): dimensioni e ruolo dalla regola unica, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, con `?eliminaPezzi=1` se ne vanno). L\'origine della mappa non cambia: è la pianta pubblicata dai dati di gioco, non una scelta dell\'utente. 404 se per il quartiere non è registrata nessuna pianta; 400 se lo scarico fallisce o il file supera il limite.',
     risposta: '`{ quartiere, mime, byte, fonte, url }`',
     senzaCorpo: true,
-    errori: [[404, 'pianta-non-disponibile'], [400, 'download-fallito'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [409, 'mappa-con-pezzi']],
+    errori: [[404, 'pianta-non-disponibile'], [400, 'download-fallito'], [400, 'fonte-rifiuta'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [409, 'mappa-con-pezzi']],
   },
   'GET /api/mappe/albero': {
     sommario: 'Albero completo delle mappe, in forma piatta con il genitore',
@@ -68,9 +68,9 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'POST /api/mappe': {
     sommario: 'Crea una mappa dall\'editor',
-    descrizione: 'La chiave si ricava dal nome, preceduta da quella del genitore salvo sotto una città; deve essere valida, non riservata a una rotta di `/api/mappe` e libera (409 se esiste). Una `chiave` richiesta diversa resta come alias. Senza `asset` si usa quello predefinito `mappe/<chiave>` solo se esiste nella grafica predefinita, altrimenti nessuno (L1: niente asset per convenzione che non c\'è); un `asset` indicato si conserva com\'è. Un\'infiltrazione si lega solo a una planimetria del suo Palazzo. Con un genitore, `passaggio` crea lo spillo di passaggio nel genitore verso la nuova mappa e `ritorno` quello inverso.',
+    descrizione: 'La chiave si ricava dal nome, preceduta da quella del genitore salvo sotto una città; deve essere valida, non riservata a una rotta di `/api/mappe` e libera (409 se esiste). Una `chiave` richiesta diversa resta come alias. Senza `asset` si usa quello predefinito `mappe/<chiave>` solo se esiste nella grafica predefinita, altrimenti nessuno (L1: niente asset per convenzione che non c\'è); un `asset` indicato si conserva com\'è. Un\'infiltrazione si lega solo a una planimetria del suo Palazzo. Nel mondo (sotto Tokyo, un quartiere o una sua discendente) una mappa `luogo` o `area` è 409 `usa-aggiungi-area` (L2): le planimetrie del mondo nascono dentro un\'Area, con `/api/aree`. Con un genitore, `passaggio` crea lo spillo di passaggio nel genitore verso la nuova mappa e `ritorno` quello inverso.',
     risposta: 'La mappa creata: `MappaDto`',
-    errori: [[404, 'mappa-non-trovata'], [409, 'mappa-esistente'], [400, 'chiave-riservata'], [400, 'chiave-non-valida'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo']],
+    errori: [[404, 'mappa-non-trovata'], [409, 'mappa-esistente'], [409, 'usa-aggiungi-area'], [400, 'chiave-riservata'], [400, 'chiave-non-valida'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo']],
   },
   'GET /api/mappe/:chiave': {
     sommario: 'Dettaglio di una mappa con percorso, figli, spilli e arrivi',
@@ -92,9 +92,9 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'DELETE /api/mappe/:chiave': {
     sommario: 'Elimina una mappa con i suoi spilli',
-    descrizione: 'In una transazione: le schermate dei suoi pin e la sua immagine di base (se non è anche la pianta di un quartiere o di un\'infiltrazione), gli spilli in cascata e i loro stati nelle partite; le mappe figlie diventano radici. La mappa va nel cestino con tutto quel che l\'eliminazione tocca (immagini comprese), e da lì si rimette (`/api/impostazioni/cestino`).',
+    descrizione: 'In una transazione: le schermate dei suoi pin e la sua immagine di base (se non è anche la pianta di un quartiere o di un\'infiltrazione), gli spilli in cascata e i loro stati nelle partite; le mappe figlie diventano radici. La mappa va nel cestino con tutto quel che l\'eliminazione tocca (immagini comprese), e da lì si rimette (`/api/impostazioni/cestino`). Una planimetria di un\'Area (L2): l\'unica della sua Area è 409 `ultima-planimetria` (si elimina l\'Area); quella dell\'ingresso del quartiere è 409 `planimetria-d-ingresso` senza `?conferma=1` (l\'ingresso se ne va con lei); se era la predefinita lo diventa la versione successiva, e le versioni si ricompattano.',
     risposta: 'Nessun contenuto (204)',
-    errori: [[404, 'mappa-non-trovata']],
+    errori: [[404, 'mappa-non-trovata'], [409, 'ultima-planimetria'], [409, 'planimetria-d-ingresso']],
   },
   'PUT /api/mappe/:chiave/presentazione': {
     sommario: 'Raggruppamento di una planimetria: area a cui appartiene ed etichetta della versione',

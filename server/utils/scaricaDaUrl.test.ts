@@ -91,6 +91,15 @@ it('uno stato diverso da 200 e un corpo vuoto sono errori parlanti', async () =>
   await expect(scaricaDaUrl(`${base}/vuoto`, OPZIONI)).rejects.toMatchObject({ code: 'scarico-fallito', message: expect.stringContaining('senza contenuto') });
 });
 
+it('LAY-2 — una fonte che rifiuta (401, 403, 429, 451) è `fonte-rifiuta`, con lo stato e l’host; gli altri stati restano «scarico fallito»', async () => {
+  for (const stato of [401, 403, 429, 451]) {
+    rispondi = (_req, res) => { res.writeHead(stato); res.end('Just a moment...'); };
+    await expect(scaricaDaUrl(`${base}/protetta`, OPZIONI)).rejects.toMatchObject({ status: 400, code: 'fonte-rifiuta', details: { stato, host: new URL(base).host } });
+  }
+  rispondi = (_req, res) => { res.writeHead(500); res.end(); };
+  await expect(scaricaDaUrl(`${base}/rotta`, OPZIONI)).rejects.toMatchObject({ code: 'scarico-fallito' });
+});
+
 it('un host che non risponde non lascia appeso il chiamante', async () => {
   await expect(scaricaDaUrl('http://127.0.0.1:9/x', { ...OPZIONI, attesaRispostaMs: 2000 }))
     .rejects.toMatchObject({ code: 'scarico-fallito' });

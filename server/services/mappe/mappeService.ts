@@ -35,18 +35,40 @@ import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
+import { areaRifDellaMappa, casaDellaMappa, conAree, contestoAree, verificaIngressoNelQuartiere, type ContestoAree, type RigaArea } from './casaMappa.js';
+import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { ammetteCondizioni, categoriaSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
-import type { CondizioneSpilloDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
+import type { AreaPacchetto, CondizioneSpilloDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
 import { aggiornaCopia, aggiornaPezzo, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
 
-interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
+interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number;
+  /** L'Area della planimetria e la sua versione (109, L2); assenti su uno schema di prima. */
+  area_chiave?: string | null; versione_etichetta?: string | null; versione_ordine?: number | null }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
 interface RigaSpillo { area_guida_chiave?: string|null; solo_posizione: number; id: number; uid: string; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null; nativo_json?: string | null; }
 
 /** La colonna della 082 c'è dal suo turno in poi; prima il nome rivisto non è dichiarabile. */
 function conNomeRivisto(): boolean {
-  return (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === 'nome_rivisto');
+  return colonnaMappa('nome_rivisto');
+}
+
+/** Vero se la mappa sta nel mondo: è Tokyo, o risale a Tokyo (un quartiere o una sua discendente), fuori dall'ingresso dei Memento. */
+function nelMondo(chiave: string): boolean {
+  let corrente: string | null = chiave;
+  const visti = new Set<string>();
+  while (corrente && !visti.has(corrente)) {
+    if (corrente === 'citta-mementos') return false;
+    if (corrente === 'tokyo') return true;
+    visti.add(corrente);
+    corrente = (prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').get(corrente) as { genitore_chiave: string | null } | undefined)?.genitore_chiave ?? null;
+  }
+  return false;
+}
+
+/** Vero se la tabella `mappa` ha la colonna (le migrazioni le aggiungono: i test possono avere uno schema di prima). */
+function colonnaMappa(nome: string): boolean {
+  return (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === nome);
 }
 
 /** La riga di una mappa dalla chiave pubblica o interna (passa da `idMappa`); 404 se non esiste. */
@@ -80,6 +102,8 @@ interface ContestoMappe {
   nomi: Map<string, string>;
   /** Immagini dell'ambito «mappa»: chiave (già in forma `idMappa`) → data di caricamento. */
   immagini: Map<string, string>;
+  /** Le Aree con i nomi dei contenitori (L2): danno a ogni planimetria la sua Area e la sua casa. */
+  aree: ContestoAree;
 }
 
 /** Legge in blocco il contesto delle mappe: presentazioni (se la tabella c'è), collezioni, conteggi di spilli e figli, nomi e immagini. */
@@ -104,6 +128,7 @@ function contestoMappe(): ContestoMappe {
     figli: conta("SELECT genitore_chiave AS chiave, COUNT(*) AS n FROM mappa WHERE genitore_chiave IS NOT NULL AND chiave <> 'citta-mementos' GROUP BY genitore_chiave"),
     nomi: new Map(righe.map((r) => [r.chiave, r.nome])),
     immagini: immaginiCaricateDelleMappe(),
+    aree: contestoAree(),
   };
 }
 
@@ -125,6 +150,8 @@ function riassunto(r: RigaMappa, ctx: ContestoMappe = contestoMappe()): MappaRia
     asset: r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
     ruoloImmagine: r.ruolo_immagine,
     origine: r.origine, nomeRivisto: r.nome_rivisto === 1, numeroSpilli: ctx.spilli.get(r.chiave) ?? 0, numeroFigli: ctx.figli.get(r.chiave) ?? 0, updatedAt: r.updated_at,
+    // L2: l'Area della planimetria con la sua versione, e la casa (l'unica pagina che la mostra)
+    area: areaRifDellaMappa(r, ctx.aree), casa: casaDellaMappa(r, ctx.aree),
   };
 }
 
@@ -154,14 +181,18 @@ export function elencaMappe(): MappaRiassuntoDto[] {
     .map(r=>riassunto(r, ctx));
 }
 
-/** Il percorso dalla radice fino alla mappa (lei compresa), risalendo i genitori; un ciclo nei dati interrompe la risalita. */
-function percorsoDi(r: RigaMappa): Array<{ chiave: string; nome: string }> {
+/**
+ * Il percorso dalla radice fino alla mappa (lei compresa), risalendo i genitori; un ciclo nei dati interrompe la risalita. Una
+ * planimetria con un'Area chiude il percorso col nome dell'Area (Tokyo › Shibuya › Sottopasso, L2): la versione la dice l'Area.
+ */
+function percorsoDi(r: RigaMappa, aree: ContestoAree = contestoAree()): Array<{ chiave: string; nome: string }> {
   const out: Array<{ chiave: string; nome: string }> = [];
   let corrente: RigaMappa | undefined = r;
   const visti = new Set<string>();
   while (corrente && !visti.has(corrente.chiave)) {
     visti.add(corrente.chiave);
-    out.unshift({ chiave: corrente.chiave, nome: corrente.nome });
+    const area = corrente === r && r.area_chiave ? aree.aree.get(r.area_chiave) : undefined;
+    out.unshift({ chiave: corrente.chiave, nome: area?.nome ?? corrente.nome });
     corrente = corrente.genitore_chiave ? (prepared('SELECT * FROM mappa WHERE chiave = ?').get(corrente.genitore_chiave) as RigaMappa | undefined) : undefined;
   }
   return out;
@@ -180,7 +211,10 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const m = prepared('SELECT * FROM mappa WHERE chiave = ?').get(chiave) as RigaMappa | undefined;
       if (!m) return null;
       const img = immagineDi(m);
-      return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo }, immagine: { url: img ? urlCaricata(img) : null, asset: m.asset } };
+      // L2: l'Area della meta (il nome che il passaggio mostra) e la casa, la pagina a cui il passaggio porta
+      const aree = ctx.aree ??= contestoAree();
+      const area = m.area_chiave ? aree.aree.get(m.area_chiave) : undefined;
+      return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo, area: area ? { nome: area.nome } : null, casa: casaDellaMappa(m, aree) }, immagine: { url: img ? urlCaricata(img) : null, asset: m.asset } };
     }
     case 'punto': {
       const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, a.dungeon_chiave, a.chiave AS area_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; dungeon_chiave: string; area_chiave: string } | undefined;
@@ -264,7 +298,9 @@ function immaginiDiSpillo(spilloId: number): ImmagineSpilloDto[] {
 }
 
 /** Contesto comune agli spilli di una risposta: partita, spilli raccolti, stato per le condizioni, nomi per le descrizioni. */
-interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string>; acquistati?: Set<string> }
+interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string>; acquistati?: Set<string>;
+  /** Le Aree (L2), lette al primo pin che porta a una mappa e poi riusate. */
+  aree?: ContestoAree }
 
 /** Il contesto degli spilli di una risposta, letto una volta: la partita verificata, i suoi «raccolto» (per uid), lo stato per
  *  le condizioni, i nomi (Confidenti, quartieri, richieste, Palazzi) per descriverle e, solo se ci sono Palazzi completati, il
@@ -438,11 +474,11 @@ export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   // gli stessi figli che i conteggi contano (senza il nodo dei Memento, tolto dall'albero): Tokyo diceva 24 luoghi e ne elencava 25.
   // A pari ordine decide la chiave, come nella scheda del Palazzo e nel riordino.
   const figli = (prepared("SELECT * FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos' ORDER BY ordine, chiave").all(chiave) as RigaMappa[]).map((f) => riassunto(f, mappe));
-  const ctx = contestoSpilli(partitaId);
+  const ctx = { ...contestoSpilli(partitaId), aree: mappe.aree };
   const spilli = (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(chiave) as RigaSpillo[]).map((s) => spilloDto(s, ctx));
   return {
     ...riassunto(r, mappe), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
-    percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
+    percorso: percorsoDi(r, mappe.aree).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli, arrivi: arriviVerso(chiave),
     // i pezzi (102) con le loro copie (103): con la partita ogni copia porta l'esito delle sue condizioni, come i pin
     pezzi: pezziDellaMappa(chiave, ctx.nomi ?? nomiCondizioni(), ctx.st),
     // dai nomi già letti nel contesto: prima una query in più (P8)
@@ -811,10 +847,16 @@ export function riordinaMappe(genitore: string | null, chiavi: string[]): MappaR
  * (origine «utente», asset predefinito se non indicato), i percorsi, il legame con l'entità e, se chiesti, il passaggio
  * dal genitore e quello di ritorno.
  */
-export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: string; tipo: TipoMappa }): MappaDto {
+export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: string; tipo: TipoMappa }, opz: { dallArea?: boolean } = {}): MappaDto {
   // il genitore si legge una volta sola (rilievo R7): la lettura ne verifica l'esistenza (404) e dà chiave interna e tipo
   const genitore = dati.genitore ? rigaMappa(dati.genitore) : null;
   if (genitore) dati = { ...dati, genitore: genitore.chiave };
+  // L2 (§2.3, R2-11): nel mondo una planimetria nasce dentro un'Area, dalla pagina dell'Area o del quartiere (`areeService`, che passa
+  // `dallArea`); dall'editor una mappa `luogo`/`area` sotto Tokyo o un quartiere (o una sua discendente) tornerebbe una zona sciolta.
+  // Restano ammesse le mappe dei Palazzi, le generiche e le importazioni.
+  if (!opz.dallArea && genitore && conAree() && (dati.tipo === 'luogo' || dati.tipo === 'area') && nelMondo(genitore.chiave)) {
+    throw httpErrors.conflict('usa-aggiungi-area', 'Nel mondo le planimetrie si aggiungono dalla pagina dell’area (o del quartiere, con «Aggiungi area»).');
+  }
   const richiesta = chiave;
   if (richiesta && prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(idMappa(richiesta))) throw httpErrors.conflict('mappa-esistente', 'La chiave indicata appartiene già a una mappa.');
   chiave = (genitore && genitore.tipo !== 'citta' ? chiaveMappa(genitore.chiave) + '-' : '') + slug(dati.nome);
@@ -927,6 +969,11 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
     dati.larghezza === undefined ? r.larghezza : dati.larghezza, dati.altezza === undefined ? r.altezza : dati.altezza,
     dati.entita === undefined ? r.entita_tipo : dati.entita?.tipo ?? null, dati.entita === undefined ? r.entita_chiave : dati.entita?.chiave ?? null, dati.note ?? r.note, nowIso(), chiave);
   if (dati.entita !== undefined) sincronizzaLegameEntita(chiave, dati.entita, { tipo: r.entita_tipo, chiave: r.entita_chiave });
+  // un percorso pubblico fissato (109, il Covo) vale finché la mappa resta com'era: rinominata davvero o spostata, il percorso torna
+  // quello della catena dei genitori (il vecchio resta come alias)
+  if (colonnaMappa('percorso_fisso') && ((dati.nome !== undefined && dati.nome.trim() !== r.nome) || genitoreDopo !== r.genitore_chiave)) {
+    prepared('UPDATE mappa SET percorso_fisso = NULL WHERE chiave = ?').run(chiave);
+  }
   // tipo, genitore o asset cambiati cambiano il posto nella gerarchia: il ruolo dell'immagine lo segue (L1)
   allineaRuoliImmagine(getDb(), chiave);
   sincronizzaPercorsiMappe(getDb());
@@ -955,9 +1002,21 @@ function eliminaImmagineDellaMappa(chiave: string): void {
  * diventano radici, i «raccolto» dei suoi pin nel file delle partite; gli spilli cadono in cascata con la riga; poi i percorsi.
  * Dal 2026-10-16 la mappa va nel cestino (`conCestino`), immagini comprese, e da lì si rimette.
  */
-export function eliminaMappa(chiave: string): void {
+export function eliminaMappa(chiave: string, opz: { conferma?: boolean; dallArea?: boolean } = {}): void {
   const r = rigaMappa(chiave);
   chiave = r.chiave;
+  // L2 (§3.2): una planimetria di un'Area. L'ultima non si toglie da sola (si elimina l'Area); quella dell'ingresso del quartiere
+  // chiede conferma (con lei se ne va l'ingresso); se era la predefinita, lo diventa la versione successiva, e le versioni si
+  // ricompattano. Dall'eliminazione dell'Area (`dallArea`) queste regole non valgono: se ne va tutto.
+  const area = !opz.dallArea && r.area_chiave ? prepared('SELECT chiave, planimetria_predefinita FROM area WHERE chiave = ?').get(r.area_chiave) as { chiave: string; planimetria_predefinita: string | null } | undefined : undefined;
+  if (area) {
+    const versioni = prepared('SELECT chiave FROM mappa WHERE area_chiave = ? ORDER BY versione_ordine, chiave').pluck().all(area.chiave) as string[];
+    if (versioni.length <= 1) throw httpErrors.conflict('ultima-planimetria', 'È l’unica planimetria della sua area: per toglierla si elimina l’area.', { area: area.chiave });
+    const ingressi = prepared('SELECT quartiere_chiave FROM quartiere_ingresso WHERE mappa_chiave = ?').pluck().all(chiave) as string[];
+    if (ingressi.length > 0 && !opz.conferma) {
+      throw httpErrors.conflict('planimetria-d-ingresso', 'È la planimetria dell’ingresso del quartiere: eliminandola, l’ingresso se ne va con lei.', { ingressi });
+    }
+  }
   const genitore = r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as { nome: string } | undefined)?.nome ?? '' : '';
   conCestino({ tipo: 'mappa', chiave, nome: r.nome, contesto: genitore }, () => getDb().transaction(() => {
     eliminaImmaginiDeiPin('s.mappa_chiave = ?', chiave);
@@ -966,6 +1025,14 @@ export function eliminaMappa(chiave: string): void {
     // gli spilli cadono in cascata con la mappa; i loro «raccolto» stanno in un altro file e si puliscono qui
     if (colonnaSpillo('uid')) prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
     prepared('DELETE FROM mappa WHERE chiave = ?').run(chiave);
+    if (area) {
+      const restanti = prepared('SELECT chiave FROM mappa WHERE area_chiave = ? ORDER BY versione_ordine, chiave').pluck().all(area.chiave) as string[];
+      restanti.forEach((k, i) => prepared('UPDATE mappa SET versione_ordine = ? WHERE chiave = ?').run(i, k));
+      // un'Area rimasta con una planimetria sola non ha più versioni da distinguere: l'etichetta resta (si vede nell'editor), la pagina non la mostra
+      if (area.planimetria_predefinita === chiave || area.planimetria_predefinita === null) {
+        prepared('UPDATE area SET planimetria_predefinita = ?, updated_at = ? WHERE chiave = ?').run(restanti[0] ?? null, nowIso(), area.chiave);
+      }
+    }
     sincronizzaPercorsiMappe(getDb());
   })());
 }
@@ -1454,7 +1521,10 @@ export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30):
     /** Testo senza accenti e in minuscolo, per il confronto. */
     const normalizza=(v:string)=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
     const parole=normalizza(q).split(/\s+/).filter(Boolean);
-    return elencaMappe().filter(m=>parole.every(p=>normalizza((m.nomeCompleto??m.nome)+' '+m.chiave).includes(p))).slice(0,limite).map(m=>({tipo,chiave:m.chiave,nome:m.nomeCompleto??m.nome,dettaglio:m.tipo}));
+    // L2: una planimetria con un'Area si presenta col posto e l'Area, più la versione se l'Area ne ha più d'una («Shibuya › Sottopasso ·
+    // planimetria completa»): è così che la si sceglie come destinazione di un passaggio
+    const nomeDi=(m:MappaRiassuntoDto)=>m.area?`${m.area.contenitore.nome} › ${m.area.nome}${m.area.versioneEtichetta?` · ${m.area.versioneEtichetta}`:''}`:m.nomeCompleto??m.nome;
+    return elencaMappe().filter(m=>parole.every(p=>normalizza(nomeDi(m)+' '+(m.nomeCompleto??m.nome)+' '+m.chiave).includes(p))).slice(0,limite).map(m=>({tipo,chiave:m.chiave,nome:nomeDi(m),dettaglio:m.tipo}));
   }
   const testo = `%${q.trim().toLowerCase()}%`;
   return (prepared(RICERCHE[tipo]).all(testo, testo, limite) as Array<{ chiave: string; nome: string; dettaglio: string | null }>).map((r) => ({
@@ -1493,6 +1563,8 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
     chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, assetOriginale:m.asset, larghezza: m.larghezza, altezza: m.altezza,
     ruoloImmagine: m.ruolo_immagine,
     entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
+    // L2: l'Area della planimetria e la sua versione (le Aree stanno nel campo `aree` del pacchetto)
+    ...(m.area_chiave ? { area: m.area_chiave, versione: { etichetta: m.versione_etichetta ?? null, ordine: m.versione_ordine ?? 0 } } : {}),
     // tutte le aree della guida contenute (2026-09-29): `entita` ne dichiara una sola, la prima
     ...areePerPacchetto(m.chiave),
     // i pezzi (102), anche nessuno: un pacchetto che lo dice toglie, importato, quelli che la mappa avesse
@@ -1533,9 +1605,15 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   // L'asset nel pacchetto è quello dichiarato dalla mappa se esiste, altrimenti nessuno (L1, F9 del validatore): prima ogni mappa
   // usciva con `mappe/<chiave pubblica>` per convenzione, quasi sempre inesistente, e `assetOriginale` portava la colonna vera.
   // `assetOriginale` resta (uguale) perché l'importazione lo preferisce e i pacchetti di prima lo usano.
+  // L2: le Aree delle planimetrie esportate, con la predefinita per chiave pubblica (se è fra le esportate o no: all'import si usa solo
+  // se la planimetria c'è)
+  const areeEsportate = [...new Set(mappe.map((m) => m.area).filter((a): a is string => !!a))];
+  const aree: AreaPacchetto[] = areeEsportate.length === 0 ? [] : (prepared(`SELECT * FROM area WHERE chiave IN (${areeEsportate.map(() => '?').join(', ')}) ORDER BY chiave`).all(...areeEsportate) as RigaArea[])
+    .map((a) => ({ chiave: a.chiave, quartiere: a.quartiere_chiave, dungeon: a.dungeon_chiave, citta: a.citta_chiave, slug: a.slug, nome: a.nome, nomeRivisto: a.nome_rivisto === 1, ordine: a.ordine,
+      predefinita: a.planimetria_predefinita ? chiaveMappa(a.planimetria_predefinita) : null, origine: a.origine, seedJson: a.seed_json, daVerificare: a.da_verificare === 1 }));
   for(const m of mappe){m.chiave=chiaveMappa(m.chiave);if(m.genitore)m.genitore=chiaveMappa(m.genitore);m.asset=assetEsistente(m.asset);m.assetOriginale=m.asset;for(const s of m.spilli)if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=chiaveMappa(s.riferimento.chiave);}
-  const ingressi=(prepared('SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom FROM quartiere_ingresso').all() as NonNullable<EsportazioneMappeDto['ingressi']>).filter(i=>!ammesse||ammesse.has(i.mappa)).map(i=>({...i,mappa:chiaveMappa(i.mappa)}));
-  return { versione: 1, esportato: nowIso(), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
+  const ingressi=(prepared(`SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom${conAree()?',area_chiave AS area':''} FROM quartiere_ingresso`).all() as NonNullable<EsportazioneMappeDto['ingressi']>).filter(i=>!ammesse||ammesse.has(i.mappa)).map(i=>({...i,mappa:chiaveMappa(i.mappa)}));
+  return { versione: 1, esportato: nowIso(), ...(aree.length ? { aree } : {}), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
 
 /** Il riferimento proprio di un pin del pacchetto, con le regole della sua categoria: un «punto» (pacchetti di prima della 094)
@@ -1625,6 +1703,51 @@ export interface EsitoImportazione { mappe: number; spilli: number; /** I pezzi 
 
 /** Importa un pacchetto (o il seed): per chiave, con `sovrascrivi` sostituisce mappe e spilli esistenti; altrimenti salta le mappe già presenti
  * (il seed aggiorna solo le mappe di origine seed, sostituendo i soli spilli di origine seed e conservando quelli dell'utente). */
+/**
+ * Le Aree di un pacchetto delle mappe (L2, §2.3), dentro la transazione dell'import, dopo le mappe: un'Area che c'è si salta (in
+ * `saltate`, con la sua chiave), salvo «sovrascrivi» o seed sopra seed; un'Area dell'utente non la scavalca un seed; un'Area il cui
+ * contenitore qui non esiste si salta. Poi ogni planimetria importata con `area` si lega alla sua Area con la versione (se l'Area c'è),
+ * e la predefinita diventa quella del pacchetto se è una planimetria dell'Area.
+ */
+function importaAree(pacchetto: EsportazioneMappeDto, origine: 'seed' | 'utente', sovrascrivi: boolean, esito: EsitoImportazione, adesso: string): void {
+  const forma = z.array(z.object({
+    chiave: z.string().min(1).max(260), quartiere: z.string().max(80).nullable(), dungeon: z.string().max(80).nullable(), citta: z.string().max(80).nullable().optional(),
+    slug: z.string().min(1).max(120), nome: z.string().min(1).max(200), nomeRivisto: z.boolean().optional(), ordine: z.number().int(), predefinita: z.string().max(200).nullable(),
+    origine: z.enum(['seed', 'utente']).optional(), seedJson: z.string().nullable().optional(), daVerificare: z.boolean().optional(),
+  })).max(2000).safeParse(pacchetto.aree);
+  if (!forma.success) throw httpErrors.badRequest('aree-non-valide', 'Aree non valide nel pacchetto delle mappe.');
+  const importate = new Set<string>();
+  for (const a of forma.data) {
+    const contenitori = [a.quartiere, a.dungeon, a.citta ?? null].filter((x) => x !== null);
+    const contenitoreEsiste = contenitori.length === 1 && (a.quartiere ? !!prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(a.quartiere)
+      : a.dungeon ? !!prepared('SELECT 1 FROM dungeon WHERE chiave = ?').get(a.dungeon) : a.citta === 'tokyo');
+    const esistente = prepared('SELECT origine FROM area WHERE chiave = ?').get(a.chiave) as { origine: string } | undefined;
+    const origineArea = a.origine ?? origine;
+    if (!contenitoreEsiste || (esistente && !sovrascrivi && !(origine === 'seed' && esistente.origine === 'seed')) || (esistente && origine === 'seed' && esistente.origine === 'utente')) {
+      esito.saltate.push(a.chiave);
+      continue;
+    }
+    prepared(`INSERT INTO area (chiave, quartiere_chiave, dungeon_chiave, citta_chiave, slug, nome, nome_rivisto, ordine, planimetria_predefinita, origine, seed_json, da_verificare, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?)
+      ON CONFLICT(chiave) DO UPDATE SET slug = excluded.slug, nome = excluded.nome, nome_rivisto = excluded.nome_rivisto, ordine = excluded.ordine, origine = excluded.origine,
+        seed_json = excluded.seed_json, da_verificare = excluded.da_verificare, updated_at = excluded.updated_at`)
+      .run(a.chiave, a.quartiere, a.dungeon, a.citta ?? null, a.slug, a.nome, a.nomeRivisto ? 1 : 0, a.ordine, origineArea, a.seedJson ?? null, a.daVerificare ? 1 : 0, adesso);
+    importate.add(a.chiave);
+  }
+  // le planimetrie importate con un'Area (le saltate restano com'erano)
+  for (const m of pacchetto.mappe) {
+    if (!m.area || esito.saltate.includes(m.chiave) || !prepared('SELECT 1 FROM area WHERE chiave = ?').get(m.area)) continue;
+    prepared('UPDATE mappa SET area_chiave = ?, versione_etichetta = ?, versione_ordine = ? WHERE chiave = ?').run(m.area, m.versione?.etichetta ?? null, m.versione?.ordine ?? 0, m.chiave);
+  }
+  for (const a of forma.data) {
+    if (!importate.has(a.chiave)) continue;
+    const predefinita = a.predefinita ? idMappa(a.predefinita) : null;
+    const valida = predefinita && prepared('SELECT 1 FROM mappa WHERE chiave = ? AND area_chiave = ?').get(predefinita, a.chiave) ? predefinita
+      : prepared('SELECT chiave FROM mappa WHERE area_chiave = ? ORDER BY versione_ordine, chiave LIMIT 1').pluck().get(a.chiave) as string | undefined ?? null;
+    prepared('UPDATE area SET planimetria_predefinita = ? WHERE chiave = ?').run(valida, a.chiave);
+  }
+}
+
 export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi?: boolean; origine?: 'seed' | 'utente'; pacchettiSeed?: readonly EsportazioneMappeDto[] } = {}): EsitoImportazione {
   if (!pacchetto || pacchetto.versione !== 1 || !Array.isArray(pacchetto.mappe)) throw httpErrors.badRequest('pacchetto-non-valido', 'Pacchetto delle mappe non riconosciuto (versione 1 attesa).');
   pacchetto=structuredClone(pacchetto);
@@ -1902,6 +2025,13 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       }
       if (p.uid) verificaGiro(getDb(), p.uid, valide);
     }
+    // L2 (§2.3): le Aree del pacchetto, come le mappe (una che c'è si salta, salvo «sovrascrivi»; il seed non scavalca l'utente; un
+    // contenitore che qui non esiste la fa saltare), poi i legami delle planimetrie importate con la loro versione, e la predefinita.
+    if (conAree() && pacchetto.aree?.length) importaAree(pacchetto, origine, !!opz.sovrascrivi, esito, adesso);
+    // Le planimetrie del mondo arrivate senza Area (un pacchetto di prima della 109, o mappe nuove sotto un quartiere) la ricevono
+    // con la regola della migrazione, che si può rieseguire (L2, §2.3): nessuna zona del mondo resta senza Area, e gli ingressi qui
+    // sotto si controllano sulle Aree.
+    if (conAree()) assegnaAreeDelMondo109(getDb(), adesso);
     sincronizzaPercorsiMappe(getDb());
     if(pacchetto.ingressi?.length && prepared("SELECT 1 FROM sqlite_master WHERE name='quartiere_ingresso'").get()) {
       const ingressi=z.array(z.object({quartiere:z.string().min(1).max(80),mappa:z.string().min(1).max(200),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6)})).max(1000).safeParse(pacchetto.ingressi);
@@ -1909,8 +2039,11 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       for(const i of ingressi.data){
         const mappa=idMappa(i.mappa);
         if(!prepared('SELECT 1 FROM quartiere WHERE chiave=?').get(i.quartiere)||!prepared('SELECT 1 FROM mappa WHERE chiave=?').get(mappa))throw httpErrors.badRequest('ingresso-non-trovato','Un ingresso cita un quartiere o una mappa inesistente.');
+        // l'ingresso sta in un'Area di quel quartiere (L2, R2-21; difetto FUN2-1): come la PUT, l'import non lo scrive altrove
+        verificaIngressoNelQuartiere(i.quartiere, mappa);
         if(opz.sovrascrivi&&origine!=='seed')prepared('DELETE FROM quartiere_ingresso WHERE quartiere_chiave=?').run(i.quartiere);
-        prepared('INSERT OR IGNORE INTO quartiere_ingresso VALUES(?,?,?,?,?)').run(i.quartiere,mappa,i.x,i.y,i.zoom);
+        // colonne dette per nome (dalla 109 la tabella ha anche l'Area, che si deduce dalla planimetria)
+        prepared('INSERT OR IGNORE INTO quartiere_ingresso (quartiere_chiave, mappa_chiave, x, y, zoom, area_chiave) VALUES (?, ?, ?, ?, ?, (SELECT area_chiave FROM mappa WHERE chiave = ?))').run(i.quartiere,mappa,i.x,i.y,i.zoom,mappa);
       }
     }
     for (const [chiave, img] of Object.entries(pacchetto.immagini ?? {})) {

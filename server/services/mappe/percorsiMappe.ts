@@ -13,7 +13,9 @@ import { getDb } from '../../db/dbService.js';
 import { slug } from '../../../shared/slug.js';
 import { httpErrors } from '../../utils/httpError.js';
 
-interface Nodo { chiave:string; nome:string; tipo:string; genitore_chiave:string|null }
+interface Nodo { chiave:string; nome:string; tipo:string; genitore_chiave:string|null;
+  /** Il percorso pubblico fissato (109, L2: il Covo spostato sotto Yongen-Jaya tiene `covo-dei-ladri`); null = dalla catena dei genitori. */
+  percorso_fisso?:string|null }
 
 // ---- Statement per connessione ----
 //
@@ -58,7 +60,8 @@ export function nomePercorso(identita:string,db:AppDatabase=getDb()):string {
 /** Controlla tutto il piano prima di scrivere. Nessun cambio di identità, FK o stato del giocatore. */
 export function sincronizzaPercorsiMappe(db:AppDatabase):void {
   if(!db.prepare("SELECT 1 FROM sqlite_master WHERE name='mappa_percorso'").get())return;
-  const nodi=db.prepare('SELECT chiave,nome,tipo,genitore_chiave FROM mappa').all() as Nodo[];
+  const conFisso=(db.prepare('PRAGMA table_info(mappa)').all() as Array<{name:string}>).some(c=>c.name==='percorso_fisso');
+  const nodi=db.prepare(`SELECT chiave,nome,tipo,genitore_chiave${conFisso?',percorso_fisso':''} FROM mappa`).all() as Nodo[];
   const indice=new Map(nodi.map(n=>[n.chiave,n]));
   const usati=new Map<string,string>();
   const nomiBase=new Map<string,number>();
@@ -74,11 +77,12 @@ export function sincronizzaPercorsiMappe(db:AppDatabase):void {
       visti.add(corrente.chiave);catena.unshift(corrente);
       corrente=corrente.genitore_chiave?indice.get(corrente.genitore_chiave):undefined;
     }
-    const significativi=catena.filter(c=>c.tipo!=='citta'||c===n);
-    let chiave=significativi.map(c=>slug(c.nome)).join('-');
+    // un percorso fissato (109) resta quello, col nome della mappa sola: la mappa si presenta come prima di essere spostata
+    const significativi=n.percorso_fisso?[n]:catena.filter(c=>c.tipo!=='citta'||c===n);
+    let chiave=n.percorso_fisso??significativi.map(c=>slug(c.nome)).join('-');
     // Le varianti native possono condividere il nome del luogo. L'identità è nell'URL, mai nel titolo.
     const aliasBase=stmt(db,'SELECT mappa_chiave FROM mappa_alias WHERE chiave=?').get(chiave) as {mappa_chiave:string}|undefined;
-    if (/^nativo-rmap-\d+-\d+-\d+$/.test(n.chiave) && ((nomiBase.get(chiave)??0)>1 || (aliasBase && aliasBase.mappa_chiave!==n.chiave))) chiave=chiave+'-'+n.chiave;
+    if (!n.percorso_fisso && /^nativo-rmap-\d+-\d+-\d+$/.test(n.chiave) && ((nomiBase.get(chiave)??0)>1 || (aliasBase && aliasBase.mappa_chiave!==n.chiave))) chiave=chiave+'-'+n.chiave;
     if(!chiave||chiave.length>180)throw httpErrors.badRequest('percorso-troppo-lungo','Il percorso della mappa supera 180 caratteri o non contiene un nome utilizzabile. Abbrevia uno dei nomi.');
     if(usati.has(chiave)&&usati.get(chiave)!==n.chiave)throw httpErrors.conflict('nome-mappa-duplicato','Due mappe producono lo stesso percorso: '+significativi.map(c=>c.nome).join(' › ')+'. Scegli nomi distinti.');
     usati.set(chiave,n.chiave);

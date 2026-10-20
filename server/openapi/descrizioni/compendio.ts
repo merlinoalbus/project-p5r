@@ -203,10 +203,10 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     errori: [[404, 'quartiere-non-trovato'], PARTITA_NON_TROVATA],
   },
   'PUT /api/compendio/citta/:chiave/ingresso': {
-    sommario: 'Imposta il punto d\'ingresso del quartiere su una mappa',
-    descrizione: 'La mappa si indica con la chiave pubblica (o un alias) e deve esistere; `x` e `y` in percentuale (0–100), `zoom` da 1 a 6 (2,5 se omesso). Sostituisce l\'ingresso che il quartiere aveva.',
+    sommario: 'Imposta l\'ingresso del quartiere: un\'Area del quartiere e un punto',
+    descrizione: 'Corpo `{ area, x, y, zoom }` (L2): l\'Area per slug, e la planimetria è la sua predefinita in quel momento. Il corpo di prima `{ mappa, x, y, zoom }` resta: la mappa (chiave pubblica o alias) deve esistere e l\'Area si deduce da lei. In tutti e due i casi l\'Area dev\'essere del quartiere: 400 `area-di-altro-quartiere`, o `ingresso-senza-area` per una planimetria senza Area (la mappa del quartiere). `x` e `y` in percentuale (0–100), `zoom` da 1 a 6 (2,5 se omesso). Sostituisce l\'ingresso che il quartiere aveva; la risposta porta anche l\'Area.',
     risposta: 'L\'ingresso com\'è dopo la scrittura, `IngressoQuartiereDto`',
-    errori: [[404, 'quartiere-non-trovato'], [404, 'mappa-non-trovata']],
+    errori: [[404, 'quartiere-non-trovato'], [404, 'mappa-non-trovata'], [404, 'area-non-trovata'], [400, 'area-di-altro-quartiere'], [400, 'ingresso-senza-area'], [400, 'area-senza-planimetrie']],
   },
   'DELETE /api/compendio/citta/:chiave/ingresso': {
     sommario: 'Toglie il punto d\'ingresso del quartiere',

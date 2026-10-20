@@ -19,6 +19,7 @@ import fontRouter from './font.js';
 import impostazioniRouter from './impostazioni.js';
 import catalogoRouter from './catalogo.js';
 import condizioniRouter from './condizioni.js';
+import areeRouter from './aree.js';
 
 /** I router di area con il loro prefisso, nell'ordine di montaggio. */
 export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
@@ -32,4 +33,5 @@ export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
   ['/api/impostazioni', impostazioniRouter],
   ['/api/catalogo', catalogoRouter],
   ['/api/condizioni', condizioniRouter],
+  ['/api/aree', areeRouter],
 ];

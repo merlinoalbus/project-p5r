@@ -17,6 +17,8 @@ import { httpErrors } from '../utils/httpError.js';
 import type { ImmagineDto, LuogoDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
 import { importaImmagineDaUrl, leggiImmagine } from './immaginiService.js';
 import { mappaEsiste, scaricaImmagineMappa } from './mappe/mappeService.js';
+import { areeDelContenitore, numeroAreePerQuartiere } from './mappe/areeService.js';
+import { verificaIngressoNelQuartiere } from './mappe/casaMappa.js';
 import { illustrazioneDellaMappa, immaginiCaricateDelleMappe } from './mappe/immagineMappa.js';
 import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
@@ -124,8 +126,10 @@ export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
   const regole = regoleSblocco();
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const caricate = immaginiCaricateDelleMappe();
+  const aree = numeroAreePerQuartiere();
   return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
     illustrazione: illustrazioneDellaMappa(chiaveImmagineQuartiere(q.chiave), undefined, caricate),
+    aree: aree.get(q.chiave) ?? 0,
     ...disponibilitaQuartiere(q.chiave, regole, st) }));
 }
 
@@ -146,7 +150,9 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
   // L'immagine della mappa con la regola unica (L1): la caricata, registrata su `immagine_chiave` o con la chiave della mappa.
   const illustrazione = illustrazioneDellaMappa(chiaveImmagineQuartiere(chiave));
   const mappa = illustrazione.immagineUrl !== null;
-  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null) };
+  // le Aree del quartiere (L2), nel loro ordine, col passaggio sull'illustrazione e l'ingresso
+  const aree = areeDelContenitore({ colonna: 'quartiere_chiave', chiave: q.chiave, mappa: chiaveImmagineQuartiere(q.chiave), nome: q.nome });
+  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, aree, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null) };
 }
 
 /** Tutti i luoghi della città (non nascosti) come voci da scegliere: la sede di un negozio o di un'attività. */
@@ -175,16 +181,34 @@ export async function scaricaPiantaQuartiere(quartiere: string, opz: { eliminaPe
 
 /** Il punto d'ingresso del quartiere su una mappa (chiave pubblica e nome del percorso, posizione e zoom), o null se non è impostato. */
 function ingressoQuartiere(quartiere: string): IngressoQuartiereDto | null {
- const i = prepared('SELECT * FROM quartiere_ingresso WHERE quartiere_chiave=?').get(quartiere) as { mappa_chiave: string; x: number; y: number; zoom: number } | undefined;
- return i ? { mappa: chiaveMappa(i.mappa_chiave), nome: nomePercorso(i.mappa_chiave), x: i.x, y: i.y, zoom: i.zoom } : null;
+ const i = prepared('SELECT * FROM quartiere_ingresso WHERE quartiere_chiave=?').get(quartiere) as { mappa_chiave: string; x: number; y: number; zoom: number; area_chiave?: string | null } | undefined;
+ if (!i) return null;
+ // l'Area della planimetria d'ingresso (L2): quella registrata, e su uno schema di prima nessuna
+ const area = i.area_chiave ? prepared('SELECT slug, nome FROM area WHERE chiave = ?').get(i.area_chiave) as { slug: string; nome: string } | undefined : undefined;
+ return { mappa: chiaveMappa(i.mappa_chiave), nome: nomePercorso(i.mappa_chiave), x: i.x, y: i.y, zoom: i.zoom, area: area ? { slug: area.slug, nome: area.nome } : null };
 }
-/** Imposta (o, con `null`, toglie) l'ingresso del quartiere: la mappa indicata si riconduce alla sua identità interna
- *  (`idMappa`) e deve esistere; 404 se mancano quartiere o mappa. Restituisce l'ingresso com'è dopo la scrittura. */
-export function impostaIngressoQuartiere(quartiere: string, dati: { mappa: string; x: number; y: number; zoom: number } | null): IngressoQuartiereDto | null {
+/** Imposta (o, con `null`, toglie) l'ingresso del quartiere. Dalla L2 l'ingresso è un'Area del quartiere più un punto: con `area`
+ *  (slug) la planimetria è la predefinita dell'Area in quel momento; con `mappa` (il corpo di prima) la planimetria si riconduce
+ *  alla sua identità interna (`idMappa`) e l'Area si deduce da lei. In tutti e due i casi l'Area dev'essere del quartiere. 404 se
+ *  mancano quartiere, Area o mappa. Restituisce l'ingresso com'è dopo la scrittura. */
+export function impostaIngressoQuartiere(quartiere: string, dati: { mappa?: string; area?: string; x: number; y: number; zoom: number } | null): IngressoQuartiereDto | null {
  if (!prepared('SELECT 1 FROM quartiere WHERE chiave=?').get(quartiere)) throw httpErrors.notFound('quartiere-non-trovato', 'Quartiere inesistente.');
  if (dati === null) { prepared('DELETE FROM quartiere_ingresso WHERE quartiere_chiave=?').run(quartiere); return null; }
- const id = idMappa(dati.mappa);
+ let id: string;
+ if (dati.area !== undefined) {
+   const a = prepared('SELECT planimetria_predefinita FROM area WHERE quartiere_chiave = ? AND slug = ?').get(quartiere, dati.area) as { planimetria_predefinita: string | null } | undefined;
+   if (!a) throw httpErrors.notFound('area-non-trovata', `Nessuna area '${dati.area}' in questo quartiere.`);
+   if (!a.planimetria_predefinita) throw httpErrors.badRequest('area-senza-planimetrie', 'L’area non ha planimetrie su cui mettere l’ingresso.');
+   id = a.planimetria_predefinita;
+ } else {
+   if (dati.mappa === undefined) throw httpErrors.badRequest('ingresso-senza-area', 'Indica l’area (o la planimetria) dell’ingresso.');
+   id = idMappa(dati.mappa);
+ }
  if (!prepared('SELECT 1 FROM mappa WHERE chiave=?').get(id)) throw httpErrors.notFound('mappa-non-trovata', 'Mappa inesistente.');
- prepared('INSERT INTO quartiere_ingresso VALUES(?,?,?,?,?) ON CONFLICT(quartiere_chiave) DO UPDATE SET mappa_chiave=excluded.mappa_chiave,x=excluded.x,y=excluded.y,zoom=excluded.zoom').run(quartiere, id, dati.x, dati.y, dati.zoom);
+ // l'ingresso sta in un'Area di questo quartiere (L2, R2-21; difetto FUN2-1)
+ verificaIngressoNelQuartiere(quartiere, id);
+ // colonne dette per nome (dalla 109 la tabella ha anche l'Area, che si deduce dalla planimetria)
+ prepared(`INSERT INTO quartiere_ingresso (quartiere_chiave, mappa_chiave, x, y, zoom, area_chiave) VALUES (?, ?, ?, ?, ?, (SELECT area_chiave FROM mappa WHERE chiave = ?))
+   ON CONFLICT(quartiere_chiave) DO UPDATE SET mappa_chiave=excluded.mappa_chiave,x=excluded.x,y=excluded.y,zoom=excluded.zoom,area_chiave=excluded.area_chiave`).run(quartiere, id, dati.x, dati.y, dati.zoom, id);
  return ingressoQuartiere(quartiere);
 }

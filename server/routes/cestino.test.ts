@@ -133,11 +133,13 @@ describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta ident
       FROM mappa m WHERE m.genitore_chiave IS NOT NULL
         -- non una mappa la cui immagine è anche la pianta di un quartiere o di un'area (quella resta: eliminaImmagineDellaMappa)
         AND m.chiave NOT LIKE 'citta-%' AND m.chiave NOT IN (SELECT chiave FROM dungeon_area)
+        -- L2: non una planimetria del mondo, che si elimina con la sua Area
+        AND m.area_chiave IS NULL
       ORDER BY pin DESC LIMIT 1`).get() as { chiave: string; nome: string; pin: number; figlie: number };
     expect(m.pin).toBeGreaterThan(0);
     // una mappa figlia, creata dall'API: con l'eliminazione diventa radice, col ripristino torna figlia
     // (l'API risponde con la chiave pubblica, di percorso: la riga si trova con `idMappa`, come fa l'app)
-    const figlia = { chiave: idMappa(((await request(app).post('/api/mappe').send({ nome: 'Figlia del cestino', tipo: 'area', genitore: m.chiave }).expect(201)).body.data as { chiave: string }).chiave) };
+    const figlia = { chiave: idMappa(((await request(app).post('/api/mappe').send({ nome: 'Figlia del cestino', tipo: 'generica', genitore: m.chiave }).expect(201)).body.data as { chiave: string }).chiave) };
     expect(prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').get(figlia.chiave)).toEqual({ genitore_chiave: m.chiave });
     // un'immagine di base e una schermata di un pin, con contenuto: devono tornare byte per byte
     const contenuto = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0, 1, 2, 3, 250, 251, 252, 253, 254, 255]);
@@ -189,9 +191,12 @@ describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta ident
 
 describe('quel che cambia dopo l\'eliminazione', () => {
   it('una planimetria figlia rinominata dopo torna sotto la sua mappa col nome nuovo, e i percorsi si ricalcolano', async () => {
+    // L2: non una planimetria del mondo, che si elimina con la sua Area (da sola è 409 `ultima-planimetria`); e non una variante nativa
+    // col suffisso della chiave nel percorso (`…-nativo-rmap-…`), che le figlie non ripetono: qui si prova il percorso della figlia
     const m = prepared(`SELECT m.chiave FROM mappa m WHERE m.genitore_chiave IS NOT NULL AND m.chiave NOT LIKE 'citta-%'
-      AND m.chiave NOT IN (SELECT chiave FROM dungeon_area) ORDER BY m.chiave LIMIT 1`).get() as { chiave: string };
-    const figlia = idMappa(((await request(app).post('/api/mappe').send({ nome: 'Figlia da rinominare', tipo: 'area', genitore: m.chiave }).expect(201)).body.data as { chiave: string }).chiave);
+      AND m.chiave NOT IN (SELECT chiave FROM dungeon_area) AND m.area_chiave IS NULL
+      AND m.chiave NOT IN (SELECT mappa_chiave FROM mappa_percorso WHERE chiave LIKE '%nativo-rmap-%') ORDER BY m.chiave LIMIT 1`).get() as { chiave: string };
+    const figlia = idMappa(((await request(app).post('/api/mappe').send({ nome: 'Figlia da rinominare', tipo: 'generica', genitore: m.chiave }).expect(201)).body.data as { chiave: string }).chiave);
     await request(app).delete(`/api/mappe/${encodeURIComponent(m.chiave)}`).expect(204);
     // dopo l'eliminazione la figlia è radice: la si rinomina (cambia anche il suo percorso)
     await request(app).put(`/api/mappe/${encodeURIComponent(figlia)}`).send({ nome: 'Figlia rinominata' }).expect(200);

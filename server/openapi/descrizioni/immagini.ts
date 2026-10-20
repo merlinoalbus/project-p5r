@@ -50,7 +50,7 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
     sommario: 'Scarica un\'immagine da un indirizzo web e la salva per (ambito, chiave)',
     descrizione: 'Il server scarica l\'indirizzo indicato (solo http/https, redirect seguiti, al più 20 secondi di attesa della risposta e 120 secondi di trasferimento fermo) con il tetto di 8 MB applicato mentre i dati arrivano, poi la salva come un caricamento: il tipo dichiarato dal sito deve essere PNG, JPEG, WEBP, GIF o SVG, e l\'immagine sostituisce quella che c\'era. L\'indirizzo indicato resta in `origineUrl`. Un sito che non risponde, risponde con un errore o senza contenuto dà 400 `download-fallito`. L\'immagine di una mappa che esiste segue la strada dell\'editor come il caricamento (L1): dimensioni, ruolo dedotto dalla gerarchia, la mappa diventa dell\'utente, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, controllato anche prima dello scarico; con `?eliminaPezzi=1` se ne vanno).',
     risposta: 'I metadati dell\'immagine salvata, `ImmagineDto`',
-    errori: [[400, 'url-non-valido'], [400, 'download-fallito'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [409, 'mappa-con-pezzi']],
+    errori: [[400, 'url-non-valido'], [400, 'download-fallito'], [400, 'fonte-rifiuta'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [409, 'mappa-con-pezzi']],
   },
   'DELETE /api/immagini/:ambito/:chiave': {
     sommario: 'Elimina l\'immagine di (ambito, chiave)',

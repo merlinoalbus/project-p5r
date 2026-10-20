@@ -133,7 +133,9 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
 
   it('editor: crea, aggiorna ed elimina mappe e spilli con validazione (coordinate, tipo, genitore ciclico)', async () => {
-    const creata = await request(app).post('/api/mappe').send({ chiave: 'prova-negozio', nome: 'Prova negozio', tipo: 'luogo', genitore: 'citta-shibuya', note: 'interno' });
+    // L2: nel mondo una mappa `luogo`/`area` nasce dentro un'Area (409 dall'editor); per l'editor qui basta una mappa generica
+    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-negozio', nome: 'Prova negozio', tipo: 'luogo', genitore: 'citta-shibuya' })).body.error.code).toBe('usa-aggiungi-area');
+    const creata = await request(app).post('/api/mappe').send({ chiave: 'prova-negozio', nome: 'Prova negozio', tipo: 'generica', genitore: 'citta-shibuya', note: 'interno' });
     expect(creata.status).toBe(201);
     expect((creata.body.data as MappaDto)).toMatchObject({ chiave: 'shibuya-prova-negozio', genitore: 'shibuya', origine: 'utente', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'shibuya', nome: expect.any(String) }, { chiave: 'shibuya-prova-negozio', nome: 'Prova negozio' }] });
     expect((await request(app).post('/api/mappe').send({ chiave: 'prova-negozio', nome: 'Doppione', tipo: 'luogo' })).status).toBe(409);
@@ -295,7 +297,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
 
   it('schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON) e reimportazione', async () => {
-    const luogo = (await request(app).post('/api/mappe').send({ chiave: 'shibuya-luogo-zip', nome: 'Luogo ZIP', tipo: 'luogo', genitore: 'citta-shibuya' })).body.data as MappaDto;
+    const luogo = (await request(app).post('/api/mappe').send({ chiave: 'shibuya-luogo-zip', nome: 'Luogo ZIP', tipo: 'generica', genitore: 'citta-shibuya' })).body.data as MappaDto;
     expect(luogo.percorso.map((p) => p.chiave)).toEqual(['tokyo', 'shibuya', 'shibuya-luogo-zip']);
     const figlia = (await request(app).post('/api/mappe').send({ chiave: 'shibuya-luogo-zip-interno', nome: 'Interno', tipo: 'generica', genitore: 'shibuya-luogo-zip' })).body.data as MappaDto;
     expect((await request(app).put('/api/mappe/shibuya-luogo-zip/immagine').set('Content-Type', 'image/png').send(PNG_2x3)).status).toBe(200);
@@ -345,7 +347,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
 
   it('condizioni di visibilità degli spilli: solo quelle calcolabili, validate sulla Guida, valutate con la partita, esportate e reimportate', async () => {
-    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-condizioni', nome: 'Prova condizioni', tipo: 'luogo', genitore: 'citta-shibuya' })).status).toBe(201);
+    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-condizioni', nome: 'Prova condizioni', tipo: 'generica', genitore: 'citta-shibuya' })).status).toBe(201);
     const condizioni = [{ tipo: 'data', dal: '06-18' }, { tipo: 'palazzo', dungeon: 'kamoshida' }, { tipo: 'confidente', confidente: 'sojiro', rango: 3 }, { tipo: 'giorno-settimana', giorni: ['domenica'] }];
     const creato = await request(app).post('/api/mappe/prova-condizioni/spilli').send({ tipo: 'nota', nome: 'Evento estivo', x: 10, y: 10, condizioni });
     expect(creato.status).toBe(201);
@@ -444,7 +446,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
 
   it('condizione «solo di sera»: segue il momento della giornata della partita, che torna a «giorno» quando cambia il giorno corrente', async () => {
-    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-fascia', nome: 'Prova fascia', tipo: 'luogo', genitore: 'citta-shibuya' })).status).toBe(201);
+    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-fascia', nome: 'Prova fascia', tipo: 'generica', genitore: 'citta-shibuya' })).status).toBe(201);
     // un informativo, non uno spillo di città: quelli non sono condizionati (regole di categoria, 2026-09-11)
     const s = (await request(app).post('/api/mappe/prova-fascia/spilli').send({ tipo: 'nota', nome: 'Bancarella serale', x: 5, y: 5, condizioni: [{ tipo: 'fascia', fascia: 'sera' }] })).body.data as SpilloDto;
     expect(s.condizioni).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }]);
@@ -471,7 +473,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
 
   it('l’importazione scarta e conta le condizioni con chiavi assenti dalla Guida invece di nascondere lo spillo per sempre', async () => {
-    const pacchetto: EsportazioneMappeDto = { versione: 1, mappe: [{ chiave: 'prova-import-condizioni', nome: 'Prova import', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '',
+    const pacchetto: EsportazioneMappeDto = { versione: 1, mappe: [{ chiave: 'prova-import-condizioni', nome: 'Prova import', tipo: 'generica', genitore: 'citta-shibuya', ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '',
       spilli: [{ tipo: 'nota', nome: 'Spillo importato', descrizione: '', x: 10, y: 10, riferimento: null, collezionabile: false, ordine: 0, condizioni: [{ tipo: 'confidente', confidente: 'nessuno', rango: 1 }, { tipo: 'palazzo', dungeon: 'kamoshida' }, { tipo: 'intervallo', dal: '08-20', al: '06-01' }, { tipo: 'quartiere', quartiere: 'ueno' }] }] }] };
     const esito = (await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true })).body.data as { spilli: number; condizioniScartate: number };
     expect(esito.spilli).toBe(1);
