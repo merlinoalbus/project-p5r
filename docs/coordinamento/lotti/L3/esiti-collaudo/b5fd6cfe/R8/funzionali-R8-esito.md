@@ -183,8 +183,9 @@ Per la seconda strada serve una decisione del PM, perché oggi la §4.1 dà la p
 - l'area «Prova R8 area» con le sue 2 mappe;
 - l'infiltrazione «okumura-prova-r8-infiltrazione», con l'ordine delle successive spostato di uno;
 - 4 legami;
-- la riga di Interscambio (`updated_at`, toccata da «Modifica aree»).
+- le righe di Caserma e Interscambio: cambia solo `updated_at` (08:31:23.848Z → 17:23:38.375Z), perché le ha toccate «Modifica aree».
 
 **Identiche:** `punto_interesse`, `spillo`, `spillo_voce`, `mappa_entita`, `voce_infiltrazione` e `cestino`.
 
-Il ripristino della foto lo fa il Collaudo.
+**Ripristino:** fatto dal Collaudo alle 17:30:32Z. L'impronta è identica alla foto e alla base 0948Z. Nel BE.log ci sono 114 scritture, tutte dei gesti
+dichiarati, nessun 5xx (`LEGGIMI.md`).
