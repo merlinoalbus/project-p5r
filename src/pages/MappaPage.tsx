@@ -463,14 +463,17 @@ function Griglia({ mappe, nome, etichetta, titoli, onScendi, versioni }: { mappe
         </span>
         <span className="flex flex-col gap-0.5">
           {/* Il numero dei pin è il dato che fa scegliere quale aprire: sta in evidenza accanto al nome. Stava sull'anteprima, ma
-              con le miniature ritagliate sul disegno (UX2-13) ne copriva un angolo (residuo di L2, ripreso in L3). */}
-          <span className="flex items-start justify-between gap-2">
-            <span className="min-w-0 text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
-            {m.numeroSpilli > 0 && <span aria-hidden className="chip chip--attivo shrink-0 text-[11px]">{m.numeroSpilli}</span>}
+              con le miniature ritagliate sul disegno (UX2-13) ne copriva un angolo (residuo di L2, ripreso in L3). Decisione del PM
+              dopo Test UX: i pin si dicono una volta sola, nel riquadro rosso («N pin», «1 pin», «nessun pin»); sotto restano versioni e
+              contenuto, se ci sono. Il titolo tiene almeno 7rem: in una carta stretta (telefono) il riquadro va sotto il titolo invece di
+              schiacciarlo sillaba per sillaba. */}
+          <span className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
+            <span className="min-w-0 flex-[1_1_7rem] break-words text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
+            <span className="chip chip--attivo shrink-0 text-[11px]">{testoPin(m.numeroSpilli)}</span>
           </span>
-          <span className="text-[11px] text-text-muted">
-            {testoPin(m.numeroSpilli)}{nVersioni > 1 ? ` · ${nVersioni} versioni` : ''}{dentro ? ` · ${m.numeroFigli} dentro` : ''}
-          </span>
+          {(nVersioni > 1 || dentro) && <span className="text-[11px] text-text-muted">
+            {[nVersioni > 1 ? `${nVersioni} versioni` : null, dentro ? `${m.numeroFigli} dentro` : null].filter(Boolean).join(' · ')}
+          </span>}
         </span>
       </>;
       const classi = 'card card--cliccabile group flex w-full flex-col gap-2 text-left no-underline text-text';
