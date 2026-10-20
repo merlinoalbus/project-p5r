@@ -183,4 +183,24 @@ describe('Selettore', () => {
     const pulsante = screen.getByRole('combobox', { name: 'Scelta' });
     expect(pulsante).toBeDisabled();
   });
+
+  // LAY3-7 (decisione del PM, strada (b)): nel selettore compatto il valore chiuso può accorciarsi coi puntini, ma il nome intero si legge
+  // con un tocco — nell'elenco aperto, scelto compreso, nessun nome è accorciato — e sta nel nome accessibile del pulsante
+  it('compatto con `valoreNelNome`: il valore intero nel nome del pulsante; l’elenco aperto non accorcia nessun nome (LAY3-7)', () => {
+    const lunghi: OpzioneSelettore[] = [{ chiave: 'p', nome: '1. Passaggio Centrale / Sala d’Ingresso' }, { chiave: 's', nome: '2. Sala delle udienze di prima e seconda visita' }];
+    render(<Selettore compatto valoreNelNome etichetta="Infiltrazione 1 di 2" valore="p" opzioni={lunghi} onCambia={() => {}} />);
+    const pulsante = screen.getByRole('combobox', { name: 'Infiltrazione 1 di 2: 1. Passaggio Centrale / Sala d’Ingresso' });
+    fireEvent.click(pulsante);
+    const elenco = screen.getByRole('listbox');
+    const voci = within(elenco).getAllByRole('option');
+    expect(voci.map((v) => v.textContent)).toEqual(lunghi.map((o) => o.nome));
+    // nessuno stile che accorci un nome nell'elenco aperto, nemmeno sulla voce scelta
+    for (const el of elenco.querySelectorAll('*')) expect(el.className.toString()).not.toMatch(/truncate|line-clamp|text-ellipsis/);
+    expect(within(elenco).getByRole('option', { selected: true })).toHaveTextContent('1. Passaggio Centrale / Sala d’Ingresso');
+  });
+
+  it('senza `valoreNelNome` il nome del pulsante resta l’etichetta', () => {
+    render(<Selettore compatto etichetta="Scelta" valore="a" opzioni={poche} onCambia={() => {}} />);
+    expect(screen.getByRole('combobox', { name: 'Scelta' })).toBeInTheDocument();
+  });
 });

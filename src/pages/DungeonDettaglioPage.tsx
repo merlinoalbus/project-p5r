@@ -600,7 +600,9 @@ export function DungeonDettaglioPage() {
               <h2 className="sr-only">{area.nome}</h2>
               {/* compatto (una riga da 44, l'etichetta «Infiltrazione N di M» resta il nome per chi non vede): con l'etichetta sopra il
                   valore andava su due righe, 65 px (R3-41); «di M» accanto, piccolo */}
-              <Selettore compatto className="min-w-0 flex-1" etichetta={`Infiltrazione ${area.ordine + 1} di ${d.aree.length}`} valore={area.chiave}
+              {/* LAY3-7 (decisione del PM, strada (b)): su una riga, il valore chiuso può accorciarsi (R3-41 ha la precedenza); il nome
+                  intero è nell'elenco aperto con un tocco e nel nome accessibile del pulsante (`valoreNelNome`) */}
+              <Selettore compatto valoreNelNome className="min-w-0 flex-1" etichetta={`Infiltrazione ${area.ordine + 1} di ${d.aree.length}`} valore={area.chiave}
                 opzioni={d.aree.map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: completate.has(a.chiave) ? 'completata' : undefined }))} onCambia={scegliInfiltrazione} />
               <span className="shrink-0 text-[11px] text-text-muted" aria-hidden>di {d.aree.length}</span>
             </div>

@@ -32,6 +32,9 @@ export interface PropsSelettore {
   ricerca?: 'auto' | 'sempre' | 'mai';
   /** Stretto quanto il contenuto, senza l'etichetta sopra il valore: per i filtri in linea. */
   compatto?: boolean;
+  /** LAY3-7: il nome accessibile del pulsante dice anche il valore scelto, intero («Infiltrazione 1 di 9: 1. Passaggio…»), per i
+   *  selettori compatti il cui valore chiuso si accorcia coi puntini (l'elenco aperto mostra comunque i nomi interi). */
+  valoreNelNome?: boolean;
   className?: string;
 }
 
@@ -41,7 +44,7 @@ export interface PropsSelettore {
  * voci (con l'invito a restringere se ce ne sono di più), filtra senza accenti su nome, dettaglio e gruppo, e si
  * chiude scegliendo, con Esc o toccando fuori.
  */
-export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, className }: PropsSelettore) {
+export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, valoreNelNome, className }: PropsSelettore) {
   const [aperto, setAperto] = useState(false);
   const [testo, setTesto] = useState('');
   const [evidenziata, setEvidenziata] = useState(0);
@@ -119,7 +122,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
 
   return (
     <div ref={radice} className={`selettore ${compatto ? 'selettore--compatto' : ''} ${className ?? ''}`}>
-      <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-label={etichetta} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} title={scelta ? scelta.nome : segnaposto}>
+      <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-label={valoreNelNome && scelta ? `${etichetta}: ${scelta.nome}` : etichetta} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} title={scelta ? scelta.nome : segnaposto}>
         {!compatto && <span className="selettore__etichetta">{etichetta}</span>}
         <span className={`selettore__valore ${scelta ? '' : 'selettore__valore--vuoto'}`}>{scelta ? scelta.nome : segnaposto}</span>
         <span className="selettore__freccia" aria-hidden="true">▾</span>
