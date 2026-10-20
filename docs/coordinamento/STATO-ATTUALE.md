@@ -18,7 +18,11 @@ Il mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ra
 ## Cosa è pubblicato su p5s
 Il push di `newreview` con il merge di L2 e il lavoro di L3/L4 (97c1d46e, 2026-10-20 ~08:28Z) è stato fatto su richiesta dell'utente: «puoi pushare tutto su newreview, comprese le modifiche di L3 ed eventuali altri lavori pending». Così p5s riceve anche L3 e L4, non ancora validati. All'avvio si applicano le migrazioni 110–113 e utente 022–024 sui dati dell'utente; il server fa da solo una copia di avvio in `/data/backups`.
 
-## Punti aperti di L3 (alla ripresa)
+## L3 — stato alle 10:30Z
+- Punti aperti di L3: tutti corretti da FE e BE in d73e7027..c8338fd0 (NR3-4, AP3-1/2/4, UX3-7, UX3-8, LAY3-2, R3-41, E2, residui di L2). Sono «da verificare»: il prossimo passo è collaudo, tester e validatore, su una linea di rilascio ferma a c8338fd0.
+- Integrazione decisa dall'utente, «Guida nel visore» e «Planimetria della voce»: requisiti e posto nel piano in `lotti/L3/integrazione-guida-visore.md`. BE è in corso; FE dopo. Non ferma la chiusura di L3.
+
+## Punti aperti di L3 (alla ripresa, ora corretti: vedi sopra)
 **In corso dalle 08:40Z**: la sola sessione Implementazione FE è riaperta su questi punti, nell'ordine sotto; committa su `newreview` senza push. Per NR3-4 il PM ha deciso la strada (a): la `planimetriaIniziale` dell'infiltrazione vale solo con `?infiltrazione=`; arrivando dalla casa si apre la `predefinita` dell'Area.
 - NR3-4 (alta): 80 indirizzi di planimetria su 539 aprono un'altra versione (vedi `lotti/L3/difetti.md`).
 - AP3-1, AP3-2, AP3-4: schede senza mappa, `senzaVicine`, collegamenti diretti alla casa.
