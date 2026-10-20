@@ -1,0 +1,52 @@
+### 2026-10-20T15:07:56Z
+### git branch --show-current
+newreview-l3
+### git rev-parse HEAD
+2df44d30e2175c44638f788ebfedb74e32f8427f
+### git status --porcelain
+EXIT=0
+### git log --format='%H %s' 08da0557..HEAD
+2df44d30e2175c44638f788ebfedb74e32f8427f fix(L3): UX3-13, aree toccate nella colonna delle aree con la legenda
+d3c97ac9981430ae0cf882545ca3030cb88bec8a fix(L3): UX3-12, etichetta breve delle date che ha senso da sola
+682e9db3a2b6f3331eeb4c270e8b965f1a387f9c docs(L3): riverifica UX su 08da0557; nuovi UX3-12 e UX3-13
+9c4f4cb37333dd106c9b029338222b020f77f1f7 docs(L3): bozza delle istruzioni per il validatore, giro 1
+c173b8a12cbe3acf575419c1e3ea57e44a1a5419 docs(L3): layout verde su 08da0557, LAY3-8 verificato
+7f44db7310d07d925135b1683a30e9f74f2f370f docs(L3): prove del collaudo su 08da0557
+### git diff --stat c8338fd0 newreview-l3 -- . ':!docs'
+ src/components/guida/AreePalazzo.test.tsx       |   2 +
+ src/components/guida/AreePalazzo.tsx            |  15 +-
+ src/components/guida/InfiltrazioniVoce.test.tsx |  11 ++
+ src/components/guida/InfiltrazioniVoce.tsx      |  14 +-
+ src/components/mappe/SelettoreVersioni.test.tsx |  84 ++++++++++++
+ src/components/mappe/SelettoreVersioni.tsx      |  21 ++-
+ src/components/shared/Selettore.test.tsx        |  20 +++
+ src/components/shared/Selettore.tsx             |   7 +-
+ src/pages/DungeonDettaglioPage.test.tsx         | 112 +++++++++++++--
+ src/pages/DungeonDettaglioPage.tsx              | 175 +++++++++++++++---------
+ src/pages/MappaPage.test.tsx                    |   8 +-
+ src/pages/MappaPage.tsx                         |  17 ++-
+ 12 files changed, 392 insertions(+), 94 deletions(-)
+### fuori da docs/ da 08da0557 a HEAD
+src/components/guida/AreePalazzo.tsx
+src/pages/DungeonDettaglioPage.test.tsx
+src/pages/DungeonDettaglioPage.tsx
+### migrazioni, server/, shared/ (vuoto atteso)
+### patch-id --stable
+7f44db73 d5ce2fbcdf6581defbbfe8404074c1c89a133978 | 1e7a4514 d5ce2fbcdf6581defbbfe8404074c1c89a133978 => UGUALI
+c173b8a1 8b916ffdff23937bac103839f7ab8f77a6e8fb71 | cf86a0d1 8b916ffdff23937bac103839f7ab8f77a6e8fb71 => UGUALI
+9c4f4cb3 e0385ff5f0cddc1836506608eaaebddbc1a72d48 | 7f44149c e0385ff5f0cddc1836506608eaaebddbc1a72d48 => UGUALI
+682e9db3 f06340733c2850f878cf8c5b6b50249ed4f4537a | d74e2976 f06340733c2850f878cf8c5b6b50249ed4f4537a => UGUALI
+d3c97ac9 d55d12bbf6a500fdae18356aff881380a38e3a09 | a32b2537 d55d12bbf6a500fdae18356aff881380a38e3a09 => UGUALI
+2df44d30 d0be25e5bf1895d2655e051469967a2c96c64cde | dbc4d1e8 d0be25e5bf1895d2655e051469967a2c96c64cde => UGUALI
+### file di 42b34243 toccati da c8338fd0 a HEAD fuori da docs (vuoto atteso)
+### grep 2026-10-21 su src/ server/ shared/
+EXIT=1 (1 = nessuna)
+### indirizzi del server nei commit portati (0 atteso)
+0
+### chi importa AreePalazzo
+src/components/guida/AreePalazzo.test.tsx
+src/pages/DungeonDettaglioPage.tsx
+### alberi
+040000 tree 093595e479429251391f718d540cf5a27f4fb219	server
+040000 tree affd664c3dafb1216db58c44c73ddd8ab8dda851	shared
+040000 tree b7e25211db77a7a7d81c88cc9716acee0c81f02a	src
