@@ -16,4 +16,9 @@ Ogni richiesta resta qui finché l'utente non la vede funzionare su p5s. Lo stat
 | 10 | Niente schermate né dati personali nel repository pubblico | fatto (`.gitignore`, controlli) | PM |
 | 11 | L'app dev'essere **usabile durante la partita** | **oggi la guida della scheda non lo è** (123 voci mescolate) | punti 1–3 |
 
-Regola del PM: un lotto si dichiara completo solo quando ogni richiesta che lo riguarda è verificata su p5s **con il caso dell'utente**: qui, Madarame, infiltrazione 4, Sala del Tesoro – Atrio, Livello 0.
+Regola del PM: un lotto si dichiara completo solo quando ogni richiesta che lo riguarda è verificata **in modo sistematico su tutti i dati**. Il caso segnalato dall'utente serve a capire il difetto, non a provarne la correzione («lo verifichi con questo?!»). Per la regola delle voci per planimetria (punti 1, 2 e 5) la verifica è:
+1. su una copia fresca di p5s, per **ogni planimetria di ogni Palazzo** e per ogni infiltrazione, l'insieme atteso delle voci calcolato con un conteggio SQL indipendente dal codice: voci con almeno un pin su quella planimetria, più voci senza pin la cui planimetria effettiva è quella, meno le segnate, per ogni partita;
+2. confronto con l'API, con la scheda nel browser e con la guida nel visore, per tutte le planimetrie: deve essere uguale al 100%, e ogni differenza è un difetto;
+3. ogni voce di ogni infiltrazione compare in almeno una planimetria, oppure è dichiarata con il motivo;
+4. segna, riapri, spostamento a mano, collega e scollega pin: la voce compare e sparisce nelle planimetrie giuste, su una copia con ripristino;
+5. le 6 misure su tutti i Palazzi.
