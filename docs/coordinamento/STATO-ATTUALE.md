@@ -16,7 +16,14 @@ Mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ramo 
 | L4 Avanzamento unico | BE fatto (b83c30ac, 71378325, ad585387; migrazioni 111–113, già su p5s). FE fatto: 01e7ae12 più 7 commit c4e9f74e..e058918c (§8.11, §8.6, §4.2, §4.3, §4.1). **Rilascio in corso**: il Collaudo crea `newreview-l4` da 91ef6128 con il cherry-pick dei 7 commit, senza 42b34243. Poi FE su FUN3-3, i tester e il validatore |
 | L5–L11 | progettati (requisiti, dati, app, modifiche, piani e casi di prova pronti fino a L9-L10); implementazione da fare |
 
-## Rami e cosa è dove (IMPORTANTE)
+## Regole in vigore dalla sera del 2026-10-20 (prevalgono su quanto scritto sotto)
+- **Un solo ramo: `newreview`.** Le linee di rilascio (`newreview-l2/l3/l4`) e la copia `newreview-lavoro` sono state unite e cancellate. Su GitHub restano solo `main` e `newreview`. Si lavora e si pubblica solo su `newreview`.
+- **Zero test**: niente tester, collaudo né validatore; i test li fa l'utente. Restano obbligatori typecheck e lint verdi (`memoria-del-progetto/feedback-zero-test.md`).
+- **Un'unica fonte del coordinamento**: questa cartella. La Regia (`regia/server.cjs`) legge `docs/coordinamento/stato.json` del repository.
+- **Richieste dell'utente aperte**: `richieste-utente-aperte.md`, da rileggere prima di dichiarare qualsiasi cosa completa.
+- Al lavoro, in parallelo: FE (guida per planimetria, poi il FE di L5…L11) e BE (BE di L5…L11).
+
+## Rami e cosa è dove (storico, superato dalla sezione sopra)
 - **`newreview` su GitHub** = ciò che gira su p5s. Ultimo push: 49858485, ~08:35Z. Codice di L3/L4 a 01e7ae12 più alcuni documenti. **Ogni push su `newreview` pubblica su p5s** (pipeline «Build & Push Docker Images (newreview)», Watchtower ~3 min) e applica le migrazioni ai dati dell'utente.
 - **`newreview` locale** (worktree `pensive-burnell-b50941`) = linea di sviluppo, avanti di molti commit:
   - correzioni di L3 (d73e7027..c8338fd0 e le successive dei tester);

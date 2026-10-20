@@ -5,7 +5,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DIR = __dirname;
-const LAVAGNA = path.join(DIR, '..', 'stato.json');
+// Dal 2026-10-20 sera l'unica fonte è il repository (docs/coordinamento/stato.json sul ramo newreview); si può cambiare con LAVAGNA
+const LAVAGNA = process.env.LAVAGNA || 'C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941/docs/coordinamento/stato.json';
 const PORTA = Number(process.env.PORTA || 5999);
 
 http.createServer((req, res) => {
