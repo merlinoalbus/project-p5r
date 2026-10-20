@@ -14,6 +14,7 @@ Ogni richiesta resta qui finché l'utente non la vede funzionare su p5s. Lo stat
 | 8 | Tutto il lavoro salvato su git, per riprendere da qualsiasi IA | fatto e in corso a ogni passo | PM |
 | 9 | La documentazione non blocca il rilascio, se l'app è testata e corretta | applicato | PM |
 | 10 | Niente schermate né dati personali nel repository pubblico | fatto (`.gitignore`, controlli) | PM |
+| 12 | «i punti di passaggio... che contengono spostamenti di planimetria nella guida non si devono raccogliere ma devono spostare la planimetria corrente alla destinazione» (2026-10-20, ~21:00Z). Nella guida della scheda e in quella del visore, una voce di passaggio non ha la casella da raccogliere: il tocco porta la planimetria corrente alla destinazione, conservando l'infiltrazione | **non fatto**, FE con precedenza | FE |
 | 11 | L'app dev'essere **usabile durante la partita** | **oggi la guida della scheda non lo è** (123 voci mescolate) | punti 1–3 |
 
 Regola del PM: un lotto si dichiara completo solo quando ogni richiesta che lo riguarda è verificata **in modo sistematico su tutti i dati**. Il caso segnalato dall'utente serve a capire il difetto, non a provarne la correzione («lo verifichi con questo?!»). Per la regola delle voci per planimetria (punti 1, 2 e 5) la verifica è:
