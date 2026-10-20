@@ -1,6 +1,6 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
-Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; contratto server, filtro della lista del quartiere, rimozione dei fallback legacy del validatore e del lettore runtime dei quartieri, lettura strutturata in `sincronizzaMappe`, DTO quartiere con fonte/esito/inviti, migrazione 120, API ed editor FE dello sblocco sono pubblicati fino a `ea4291fa`. Restano aperti la verifica metro-diario e la prova dell’utente su p5s. Nessuna richiesta già pubblicata è stata dichiarata completata.
+Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; contratto server, filtro della lista del quartiere, rimozione dei fallback legacy del validatore e del lettore runtime dei quartieri, lettura strutturata in `sincronizzaMappe`, DTO quartiere con fonte/esito/inviti, migrazione 120, API ed editor FE dello sblocco sono pubblicati fino a `f672a90d`. Restano aperti la verifica metro-diario e la prova dell’utente su p5s. Nessuna richiesta già pubblicata è stata dichiarata completata.
 
 Ogni richiesta resta qui finché l'utente non la vede funzionare su p5s. Lo stato si aggiorna a ogni passo. È nato il 2026-10-20 alle 19:45Z, dopo che il PM aveva dichiarato L3 completo con richieste ancora mancanti.
 

@@ -1,8 +1,8 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. L6 ora comprende migrazione 120, API BE e editor FE dello sblocco dei quartieri fino a `ea4291fa`; typecheck, lint e controllo diff sono verdi in tre cicli. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
-- **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio; la migrazione 120 è pronta nel ramo e copierà senza sovrascrivere la condizione attuale la guida degli sblocchi dei quartieri, per rendere possibile «Ripristina».
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. L6 ora comprende migrazione 120, API BE e editor FE dello sblocco dei quartieri fino a `f672a90d`; le pipeline dei commit applicativi e documentali sono riuscite, e typecheck, lint e controllo diff sono verdi in tre cicli. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
+- **Dati di p5s**: il runtime pubblicato espone già `sbloccoCondizione` con snapshot e il pulsante «Modifica sblocco»; la migrazione 120 copia senza sovrascrivere la condizione attuale la guida degli sblocchi dei quartieri, per rendere possibile «Ripristina». Il numero osservato nell'indice dopo il rilascio è 301 mappe e 767 spilli; non è stato eseguito alcun salvataggio su p5s.
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
   - 116 e 117: tolta la frase «Pin nativo del gioco.»;
@@ -23,7 +23,7 @@
 | L3 Palazzi | pubblicato. Fatte anche le richieste dell'utente sulla guida: scheda per planimetria (UX3-14, b34e577b), campo «Planimetria» (901c7666), guida nel visore in finestra fluttuante (91986570), pin di spostamento che portano a destinazione (67a7bfda, b8048c1b). Da provare dall'utente |
 | L4 Avanzamento unico | pubblicato (fde7add7, poi unito): FE completo con FUN3-3 e FUN4-1 |
 | L5 Luoghi, negozi, orari | pubblicato, completo: BE 5a22da2a…0fa7bde7 e 50ca121c; FE af5b8e14…820c05ea (F1–F6) |
-| L6 Condizioni uniche | **in corso**, B5 pubblicata per contratto BE, filtro lista quartiere, rimozione fallback legacy del validatore e del lettore runtime dei quartieri, lettori strutturati in `sincronizzaMappe`, DTO quartiere con fonte/esito/inviti e filtro delle Aree chiuse nell'indice, nei figli del visore e nelle «Aree vicine». Ora sono pronte migrazione 120 e API di modifica/ripristino dello sblocco; **restano** editor FE, verifica metro-diario e poi B6/FE (`lotti/L6/piano.md`). |
+| L6 Condizioni uniche | **in corso**, B5 pubblicata per contratto BE, filtro lista quartiere, rimozione fallback legacy del validatore e del lettore runtime dei quartieri, lettori strutturati in `sincronizzaMappe`, DTO quartiere con fonte/esito/inviti e filtro delle Aree chiuse nell'indice, nei figli del visore e nelle «Aree vicine». Migrazione 120, API di modifica/ripristino ed editor FE dello sblocco sono pubblicati fino a `f672a90d`; **restano** verifica metro-diario, prova dell'utente e poi B6/F6 (`lotti/L6/piano.md`). |
 | L7–L11 | progettati (`lotti/Lx/`), da implementare BE e FE |
 
 **Sessioni del team** (app Claude desktop):
