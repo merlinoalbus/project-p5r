@@ -213,8 +213,9 @@ describe('miniature delle immagini del database', () => {
 
   it('10 — il pacchetto porta lo schema delle miniature ma mai le righe', async () => {
     // un pacchetto dalla 108 in su con una miniatura dentro (lo script del pacchetto le svuota: qui si prova che anche una rimasta
-    // non entra). La copia del pacchetto dei test si porta allo schema di oggi con le migrazioni vere: prima si fingeva la 108 con la
-    // sola tabella creata a mano, ma le migrazioni dopo la 108 (dalla 111) leggono colonne delle migrazioni saltate (la 99)
+    // non entra). La copia del pacchetto dei test si porta allo schema di oggi con le migrazioni vere. Prima si fingeva la 108 creando a
+    // mano la sola tabella delle miniature: così le migrazioni fino alla 108 restavano saltate (fra queste la 99), e quelle dalla 111 in
+    // poi, che leggono le colonne aggiunte dalla 99, fallivano
     const cartella = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-miniature-'));
     const file = path.join(cartella, 'gioco.db');
     try {

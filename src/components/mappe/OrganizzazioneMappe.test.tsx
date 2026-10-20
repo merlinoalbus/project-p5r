@@ -37,7 +37,7 @@ it('L2 (2026-10-20): le versioni di un’Area sono una voce sola col nome dell�
   const voce=within(gruppo).getByRole('link',{name:/^Sottopasso/});
   expect(voce).toHaveAttribute('href','/guida/citta/shibuya/sottopasso');
   // E5: il conteggio accanto alla voce, con la parola dell'indice
-  expect(voce.parentElement).toHaveTextContent('2 versioni · 5 spilli');
+  expect(voce.parentElement).toHaveTextContent('2 versioni · 5 pin');
   expect(within(gruppo).queryByRole('link',{name:/Speciale/})).toBeNull();
   expect(within(gruppo).getAllByRole('link')).toHaveLength(2);
 });
@@ -59,9 +59,10 @@ it('R1: nell’indice un’area da verificare porta il segno «Da verificare», 
   expect(segno).toHaveAttribute('title','Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla');
   expect(within(screen.getByRole('link',{name:/^Torre/}).parentElement!).queryByText('Da verificare')).toBeNull();
 });
-// E5 (analisi dell'Elenco delle mappe, L2): lo stesso conteggio e la stessa parola («spilli») su ogni riga — Area con più versioni, Area
-// con una versione, quartiere —; E7: l'Area da verificare (lo staff) non sta fra i quartieri ma in un gruppo «Da verificare» di Tokyo
-it('E5 ed E7: ogni riga dell’Elenco dice i suoi spilli con la stessa parola; l’Area da verificare sta nel gruppo «Da verificare»',()=>{
+// E5 (analisi dell'Elenco delle mappe, L2): lo stesso conteggio e la stessa parola su ogni riga — Area con più versioni, Area con una
+// versione, quartiere —; dal rilascio di L3 la parola è «pin». E7: l'Area da verificare (lo staff) non sta fra i quartieri ma in un
+// gruppo «Da verificare» di Tokyo, accanto all'elenco dei quartieri e non dentro
+it('E5 ed E7: ogni riga dell’Elenco dice i suoi pin con la stessa parola; l’Area da verificare sta nel gruppo «Da verificare»',()=>{
   const area=(slug:string,nome:string,genitore:string,versioneOrdine:number,daVerificare=false)=>({chiave:`citta/${genitore}/${slug}`,contenitore:{tipo:(genitore==='tokyo'?'citta':'quartiere') as 'citta'|'quartiere',chiave:genitore,nome:genitore},slug,nome,versioneEtichetta:null,versioneOrdine,predefinita:versioneOrdine===0,casa:`/guida/citta/${genitore}/${slug}`,daVerificare});
   const tokyo={...m('tokyo',null,'Tokyo'),tipo:'citta' as const};
   const shibuya={...m('citta-shibuya','tokyo','Shibuya'),tipo:'quartiere' as const,numeroSpilli:4};
@@ -72,16 +73,21 @@ it('E5 ed E7: ogni riga dell’Elenco dice i suoi spilli con la stessa parola; l
   render(<MemoryRouter><AlberoLuoghi genitore="tokyo" mappe={[tokyo,shibuya,ueno,...staff,...sottopasso,diner]}/></MemoryRouter>);
   // ogni riga col suo conteggio, una sola parola (accanto al collegamento, che si chiama come il posto)
   const riga=(nome:string)=>screen.getByRole('link',{name:nome}).parentElement!;
-  expect(riga('Shibuya')).toHaveTextContent(/^Shibuya4 spilli$/);
-  expect(riga('Ueno')).toHaveTextContent(/^Ueno1 spillo$/);
-  expect(riga('Sottopasso')).toHaveTextContent(/^Sottopasso2 versioni · 7 spilli$/);
-  expect(riga('Diner')).toHaveTextContent(/^Diner1 spillo$/);
-  expect(document.body).not.toHaveTextContent(/\bpin\b/);
-  // lo staff non è fra i quartieri: sta nel gruppo «Da verificare» di Tokyo
+  expect(riga('Shibuya')).toHaveTextContent(/^Shibuya4 pin$/);
+  expect(riga('Ueno')).toHaveTextContent(/^Ueno1 pin$/);
+  expect(riga('Sottopasso')).toHaveTextContent(/^Sottopasso2 versioni · 7 pin$/);
+  expect(riga('Diner')).toHaveTextContent(/^Diner1 pin$/);
+  expect(document.body).not.toHaveTextContent(/spill/);
+  // lo staff non è fra i quartieri: i quartieri di Tokyo sono esattamente Shibuya e Ueno (le voci di primo livello dell'elenco), e il
+  // gruppo «Da verificare» sta fuori dall'elenco dei quartieri, con lo staff e nient'altro
   const quartieri=screen.getByRole('list',{name:'Quartieri di Tokyo'});
+  const vociDeiQuartieri=[...quartieri.children].map(li=>li.querySelector('a')?.textContent);
+  expect(vociDeiQuartieri).toEqual(['Shibuya','Ueno']);
   expect(within(quartieri).queryByRole('link',{name:'Area riservata allo staff'})).toBeNull();
   const daVerificare=screen.getByRole('list',{name:'Da verificare'});
-  expect(within(daVerificare).getByRole('link',{name:'Area riservata allo staff'}).parentElement).toHaveTextContent('2 versioni · 0 spilli');
+  expect(quartieri.contains(daVerificare)).toBe(false);
+  expect(within(daVerificare).getAllByRole('link').map(a=>a.textContent)).toEqual(['Area riservata allo staff']);
+  expect(within(daVerificare).getByRole('link',{name:'Area riservata allo staff'}).parentElement).toHaveTextContent('2 versioni · nessun pin');
 });
 it('un vecchio URL editoriale apre la sezione del palazzo e non carica una planimetria falsa',async()=>{
   api.risolviMappa.mockResolvedValue({tipo:'guida',area:'castello/biblioteca',dungeon:'castello',mappaPalazzo:'palazzo',nome:'Biblioteca'});

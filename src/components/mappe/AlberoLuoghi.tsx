@@ -10,16 +10,13 @@
 // L2 (2026-10-20): le versioni di una stessa Area sono una voce sola col nome dell'Area, e ogni voce porta alla casa del posto.
 // ============================================================
 
-import { etichetteDistinte, nomePresentazioneMappa, titoloGruppoImmagini } from '../../utils/presentazioneMappa';
+import { etichetteDistinte, nomePresentazioneMappa, testoPin, titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
 import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { nomeFiglieMappa } from '../../utils/vocabolarioMappe';
 import type { MappaRiassuntoDto } from '../../types';
 import { IconaAzione } from '../shared/IconaAzione';
-
-/** Gli spilli di una riga, con la parola dell'indice e il singolare: «1 spillo», «7 spilli» (E5). */
-const testoSpilli = (n: number) => `${n} ${n === 1 ? 'spillo' : 'spilli'}`;
 
 /** La raccolta visuale conserva ogni identità e non rappresenta un passaggio di gioco. */
 export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { mappe: MappaRiassuntoDto[]; genitore?: string | null; espandibile?: boolean }) {
@@ -81,9 +78,9 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
               <IconaAzione chiave="mappa" dimensione={18} />
               <span>{m.area.nome}</span>
             </Link>
-            {/* E5 (L2): su ogni riga lo stesso conteggio con la stessa parola dell'indice («spilli»), non solo con più versioni; fuori dal
-                collegamento, che si chiama come il posto */}
-            <span className="text-[11px] text-text-muted">{membri.length > 1 ? `${membri.length} versioni · ` : ''}{testoSpilli(spilli)}</span>
+            {/* E5 (L2): su ogni riga lo stesso conteggio con la stessa parola dell'indice (dal rilascio di L3 «pin», `testoPin`), non
+                solo con più versioni; fuori dal collegamento, che si chiama come il posto */}
+            <span className="text-[11px] text-text-muted">{membri.length > 1 ? `${membri.length} versioni · ` : ''}{testoPin(spilli)}</span>
             {m.area.daVerificare && <span className="chip chip--attivo text-[11px]" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
           </div>
           {membri.map(v => <Fragment key={v.chiave}>{discendenti(v)}</Fragment>)}
@@ -103,8 +100,8 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
             <IconaAzione chiave="mappa" dimensione={18} />
             <span>{etichette.get(m.chiave) ?? nomePresentazioneMappa(m)}</span>
           </Link>
-          {/* E5 (L2): gli spilli della mappa, con la parola e il formato delle altre righe */}
-          <span className="text-[11px] text-text-muted">{testoSpilli(m.numeroSpilli)}</span>
+          {/* E5 (L2): i pin della mappa, con la parola e il formato delle altre righe */}
+          <span className="text-[11px] text-text-muted">{testoPin(m.numeroSpilli)}</span>
         </div>
         {discendenti(m)}
       </li>;

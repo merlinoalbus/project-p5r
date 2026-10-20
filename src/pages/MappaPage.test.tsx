@@ -192,6 +192,11 @@ describe('MappaPage', () => {
     const tokyo = await screen.findByRole('button', { name: /^Tokyo/ });
     expect(tokyo).toHaveTextContent('1 quartiere · 2 aree');
     expect(tokyo).not.toHaveTextContent(/mappe/);
+    // dal rilascio di L3 la parola dell'indice è «pin» (carte e intestazione); E3: la carta di un Palazzo dice aree e planimetrie
+    expect(tokyo).toHaveTextContent('Città · 2 pin · 1 quartiere · 2 aree');
+    expect(screen.getByRole('button', { name: /^Palazzo di Kamoshida/ })).toHaveTextContent('Palazzo · 5 pin ·');
+    expect(screen.getByText(/mappe con 7 pin, raggruppate/)).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent(/spill/);
   });
 
   // UX3-8 (L3, segnalazione dell'utente: «ho aggiunto una planimetria di prova» e non la trovava): un'Area o planimetria con un nome
@@ -207,8 +212,10 @@ describe('MappaPage', () => {
     const griglia = within(screen.getByRole('list', { name: 'Contenuto di Palazzo di Kamoshida' }));
     const carte = griglia.getAllByRole('listitem');
     // prima le aree con un nome vero, nel loro ordine (con o senza pin), poi i fogli tecnici con pin
-    // (il testo comincia col numero dei pin sull'anteprima, se ce ne sono; i due fogli omonimi sono numerati)
-    expect(carte.map((c) => c.textContent)).toEqual([expect.stringMatching(/^5Ingresso5 pin$/), expect.stringMatching(/^Provanessun pin$/), expect.stringMatching(/^3Planimetria non attribuita · \d3 pin$/)]);
+    // (accanto al titolo il numero dei pin, se ce ne sono; i due fogli omonimi sono numerati)
+    expect(carte.map((c) => c.textContent)).toEqual([expect.stringMatching(/^Ingresso55 pin$/), expect.stringMatching(/^Provanessun pin$/), expect.stringMatching(/^Planimetria non attribuita · \d33 pin$/)]);
+    // il numero non sta più sopra il disegno (copriva un angolo della pianta): sta nella riga del titolo
+    expect(carte[0].querySelector('.relative .chip')).toBeNull();
     const gruppo = within(screen.getByRole('region', { name: 'Fogli dell’estrazione senza nome' }));
     const apri = gruppo.getByRole('button', { name: 'Mostra i fogli dell’estrazione senza nome · 1' });
     expect(apri).toHaveAttribute('aria-expanded', 'false');
@@ -222,9 +229,19 @@ describe('MappaPage', () => {
     monta('/guida/mappe');
     fireEvent.click(await screen.findByRole('button', { name: /^Tokyo/ }));
     const pannello = screen.getByRole('region', { name: 'Dentro Tokyo' });
-    fireEvent.click(within(pannello).getByText('Elenco completo, con tutti i livelli'));
+    fireEvent.click(within(pannello).getByText('Elenco dei quartieri e delle aree'));
     expect(pannello.querySelectorAll('.area-scorrevole')).toHaveLength(0);
     expect(pannello.querySelector('[class*="max-h-"]')).toBeNull();
+  });
+
+  // UX3-7 (L3, scelta (a) del FE): il titolo dell'elenco dice quel che c'è sotto — le aree di un Palazzo, i quartieri con le aree di
+  // Tokyo —, non «con tutti i livelli», che prometteva versioni che sotto non ci sono
+  it('UX3-7: l’elenco sotto la griglia si chiama come quel che contiene', async () => {
+    monta('/guida/mappe');
+    fireEvent.click(await screen.findByRole('button', { name: /^Palazzo di Kamoshida/ }));
+    const pannello = within(screen.getByRole('region', { name: 'Dentro Palazzo di Kamoshida' }));
+    expect(pannello.getByText('Elenco delle aree')).toBeInTheDocument();
+    expect(screen.queryByText(/con tutti i livelli/)).toBeNull();
   });
 
   /** La seconda lettura della mappa (quella in silenzio dopo un'azione) resta in sospeso finché il test non la risolve. */

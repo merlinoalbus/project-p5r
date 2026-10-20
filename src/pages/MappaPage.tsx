@@ -155,7 +155,7 @@ function IndiceMappe() {
   // da 1024 px lo spazio fra intestazione ed elenco scende a 12 px: a 1024×690 l'indice sforava di 3 px (LAY2-5)
   return <div className="flex flex-col gap-4 lg:gap-3">
     <IntestazionePagina titolo="Mappe"
-      sottotitolo={`Tutte le mappe della guida: Tokyo, i quartieri con le loro aree e le planimetrie dei Palazzi. ${totaleMappe} mappe con ${totaleSpilli} spilli, raggruppate per il posto a cui appartengono.`} />
+      sottotitolo={`Tutte le mappe della guida: Tokyo, i quartieri con le loro aree e le planimetrie dei Palazzi. ${totaleMappe} mappe con ${testoPin(totaleSpilli)}, raggruppate per il posto a cui appartengono.`} />
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
       {/* **Le radici a sinistra, quel che contengono a destra.**
           Prima ogni radice era una carta con dentro una piega, e aprire i «Luoghi e planimetrie»
@@ -164,7 +164,8 @@ function IndiceMappe() {
           e l'albero indentato usciva dalla larghezza della colonna. Non era un dettaglio da
           sistemare: una griglia di carte tutte uguali non è il posto dove far crescere un albero.
           Ora le radici sono un elenco stretto e sempre della stessa altezza, e il contenuto del
-          luogo scelto sta nel suo pannello, con la sua discesa e il suo scorrimento. */}
+          luogo scelto sta nel suo pannello, con la sua discesa; il pannello cresce con la pagina,
+          senza uno scorrimento suo (UX2-15: una sola barra, quella della pagina). */}
       <div className="grid items-start gap-3 xl:grid-cols-[minmax(240px,300px)_minmax(0,1fr)]">
         <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 sm:grid-cols-2 xl:grid-cols-1" aria-label="Mappe">
           {gruppi.map(({ chiave, capofila, versioni }) => {
@@ -173,8 +174,9 @@ function IndiceMappe() {
               return { mappe: acc.mappe + c.mappe, spilli: acc.spilli + c.spilli + v.numeroSpilli };
             }, { mappe: 0, spilli: 0 });
             const nome = nomeDi(capofila);
-            // E4 ed E5 (L2): gli spilli con una parola sola (e il singolare), e quel che la radice contiene con le parole della gerarchia
-            const spilli = `${sotto.spilli} ${sotto.spilli === 1 ? 'spillo' : 'spilli'}`;
+            // E4 ed E5 (L2): i pin con una parola sola (dal rilascio di L3 «pin», `testoPin`), e quel che la radice contiene con le parole
+            // della gerarchia
+            const spilli = testoPin(sotto.spilli);
             const riassunto = `${nomeTipoMappa(capofila)} · ${spilli} · ${sotto.mappe > 0 ? totali.contenuto(versioni.map((v) => v.chiave)) : `${versioni.length} versioni`}`;
             const conFigli = versioni.some(v => (totali.figliDi.get(v.chiave) ?? []).length > 0);
             const apribile = conFigli || versioni.length > 1;
@@ -298,7 +300,8 @@ function PannelloLuogo({ mappe, figliDi, gruppo, percorso, nodo, nome, onPercors
         bisogno di vedere tutto insieme: l'albero completo resta qui sotto, chiuso. Aperto cresce
         con la pagina, senza uno scorrimento suo (UX2-15: una sola barra). */}
     {contenute.length > 0 && <details className="border-t border-border-light pt-2">
-      <summary className="touch cursor-pointer text-[12px] text-text-muted">Elenco completo, con tutti i livelli</summary>
+      {/* UX3-7 (L3, scelta (a)): il titolo dice quel che c'è sotto; «con tutti i livelli» prometteva le versioni, che qui non ci sono */}
+      <summary className="touch cursor-pointer text-[12px] text-text-muted">{nodo.tipo === 'citta' ? 'Elenco dei quartieri e delle aree' : 'Elenco delle aree'}</summary>
       <div className="mt-2 p-1">
         <AlberoLuoghi mappe={mappe} genitore={nodo.chiave} espandibile />
       </div>
@@ -344,7 +347,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
             : mappa.tipo === 'quartiere'
               ? (contenute.length === 0 ? 'nessuna area' : contenute.length === 1 ? 'un’area' : `${contenute.length} aree`)
               : (contenute.length === 0 ? 'nessuna planimetria' : contenute.length === 1 ? 'una planimetria' : `${contenute.length} planimetrie`)}
-          {mappa.numeroSpilli > 0 ? ` · ${mappa.numeroSpilli} spilli` : ''}
+          {mappa.numeroSpilli > 0 ? ` · ${testoPin(mappa.numeroSpilli)}` : ''}
         </span>}
       </div>
       {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
@@ -446,12 +449,14 @@ function Griglia({ mappe, nome, etichetta, titoli, onScendi, versioni }: { mappe
       const corpo = <>
         <span className="relative">
           <AnteprimaMappa mappa={m} className="aspect-[4/3] w-full" sizes="(min-width: 1536px) 25vw, (min-width: 768px) 33vw, 50vw" />
-          {/* Il numero degli spilli sta **sull'anteprima**, non sotto il nome: e' il dato che fa
-              scegliere quale aprire, e nella riga sotto si perdeva in mezzo al resto. */}
-          {m.numeroSpilli > 0 && <span aria-hidden className="chip chip--attivo absolute right-1.5 top-1.5 text-[11px]">{m.numeroSpilli}</span>}
         </span>
         <span className="flex flex-col gap-0.5">
-          <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
+          {/* Il numero dei pin è il dato che fa scegliere quale aprire: sta in evidenza accanto al nome. Stava sull'anteprima, ma
+              con le miniature ritagliate sul disegno (UX2-13) ne copriva un angolo (residuo di L2, ripreso in L3). */}
+          <span className="flex items-start justify-between gap-2">
+            <span className="min-w-0 text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
+            {m.numeroSpilli > 0 && <span aria-hidden className="chip chip--attivo shrink-0 text-[11px]">{m.numeroSpilli}</span>}
+          </span>
           <span className="text-[11px] text-text-muted">
             {testoPin(m.numeroSpilli)}{nVersioni > 1 ? ` · ${nVersioni} versioni` : ''}{dentro ? ` · ${m.numeroFigli} dentro` : ''}
           </span>
