@@ -13,7 +13,7 @@ import { validate } from '../middleware/validate.js';
 import { httpErrors } from '../utils/httpError.js';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
 import {
-  aggiornaArea, aggiornaVersioni, aggiungiPlanimetria, collocaPlanimetria, creaArea, dettaglioArea, eliminaArea, mappeDaCollocare, riordinaAree, ripristinaArea,
+  aggiornaArea, aggiornaVersioni, aggiungiPlanimetria, areeDelContenitore, collocaPlanimetria, contenitoreDaRotta, creaArea, dettaglioArea, eliminaArea, mappeDaCollocare, riordinaAree, ripristinaArea,
   type ContenitoreRotta, type ImmagineNuova,
 } from '../services/mappe/areeService.js';
 import {
@@ -40,6 +40,9 @@ router.put('/colloca', validate({ body: bodyColloca }), (req, res) => {
   res.json(collocaPlanimetria(req.body as Parameters<typeof collocaPlanimetria>[0]));
 });
 
+router.get('/:contenitore/:chiave', validate({ params: paramsContenitore }), (req, res) => {
+  res.json(areeDelContenitore(contenitoreDaRotta(...parametri(req))));
+});
 router.post('/:contenitore/:chiave', validate({ params: paramsContenitore, query: queryCreaArea }), corpoImmagine, (req, res) => {
   const q = req.query as unknown as { nome: string; x?: number; y?: number; etichetta?: string };
   res.status(201).json(creaArea(...parametri(req), { nome: q.nome, immagine: immagineDalCorpo(req), x: q.x, y: q.y, etichetta: q.etichetta }));

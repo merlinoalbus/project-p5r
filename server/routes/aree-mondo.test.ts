@@ -90,6 +90,12 @@ describe('Aree del mondo (L2)', () => {
     expect(k.aree.map((a) => [a.slug, a.passaggio])).toEqual([['quartiere-dello-shopping', null]]);
     const elenco = (await request(app).get('/api/compendio/citta').expect(200)).body.data as QuartiereRiassuntoDto[];
     expect(Object.fromEntries(elenco.filter((q) => ['shibuya', 'shujin-academy', 'yongen-jaya', 'ikebukuro'].includes(q.chiave)).map((q) => [q.chiave, q.aree]))).toEqual({ shibuya: 6, 'shujin-academy': 8, 'yongen-jaya': 3, ikebukuro: 0 });
+    // l'elenco delle Aree di un contenitore: lo stesso del quartiere, e per la città le Aree agganciate a Tokyo (lo staff, da verificare)
+    const diShibuya = (await request(app).get('/api/aree/citta/shibuya').expect(200)).body.data as AreaRiassuntoDto[];
+    expect(diShibuya).toEqual(s.aree);
+    const diTokyo = (await request(app).get('/api/aree/citta/tokyo').expect(200)).body.data as AreaRiassuntoDto[];
+    expect(diTokyo.map((a) => [a.contenitore.tipo, a.daVerificare, a.casa.startsWith('/guida/citta/tokyo/')])).toEqual([['citta', true, true]]);
+    expect((await request(app).get('/api/aree/citta/nessuno')).body.error.code).toBe('quartiere-non-trovato');
   });
 
   it('6 — la pagina di un’Area: versioni con pin, elementi, vicine; quartiere o Area inesistenti 404', async () => {
@@ -250,7 +256,7 @@ describe('Aree del mondo (L2)', () => {
     await request(app).post(`/api/mappe/${encodeURIComponent(a.planimetrie[0].chiave)}/spilli`).send({ tipo: 'nota', nome: 'Una nota', x: 5, y: 5 }).expect(201);
     const no = await request(app).delete('/api/aree/citta/ikebukuro/uno-solo');
     expect(no.body.error.details).toMatchObject({ planimetrie: 1, pin: 1, passaggi: 1, ingresso: false });
-    expect(no.body.error.message).toBe('L’area «Uno solo» ha 1 planimetria, 1 pin e 1 passaggio da un’altra mappa: eliminandola va tutto nel cestino.');
+    expect(no.body.error.message).toBe('L’area «Uno solo» ha 1 planimetria, 1 pin e 1 passaggio che porta qui: eliminandola va tutto nel cestino.');
   });
 
   it('13 — l’ingresso col corpo nuovo { area } e con quello di prima { mappa }; un’Area inesistente è 404', async () => {

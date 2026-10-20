@@ -24,6 +24,12 @@ export const DESCRIZIONI_AREE: DescrizioniArea = {
     risposta: '`AreaDettaglioDto` dell’Area che la riceve',
     errori: [[404, 'mappa-non-trovata'], QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [409, 'planimetria-gia-collocata'], [400, 'colloca-non-valido'], [400, 'nome-vuoto'], [400, 'slug-riservato']],
   },
+  'GET /api/aree/:contenitore/:chiave': {
+    sommario: 'Le Aree di un quartiere (o della città)',
+    descrizione: 'Le Aree del contenitore nell’ordine dell’elenco (`ordine`, poi slug), con planimetrie, pin e versioni contati: con `citta/tokyo` le Aree agganciate alla città (come lo staff, da verificare), con `citta/<quartiere>` quelle del quartiere (le stesse della scheda del quartiere).',
+    risposta: 'Elenco di `AreaRiassuntoDto`',
+    errori: [QUARTIERE_NON_TROVATO],
+  },
   'POST /api/aree/:contenitore/:chiave': {
     sommario: 'Crea un’Area con la sua prima planimetria',
     descrizione: 'Il corpo è l’immagine grezza della prima planimetria (`image/*`, 8 MB); in query `nome` (1–80), `x` e `y` (0–100, insieme) del punto sull’illustrazione del contenitore, `etichetta` della versione. In una transazione: l’Area (dell’utente, in fondo al contenitore, slug dal nome con `-2`, `-3`… se preso; `ordine`, `da-collocare`, `nuova` sono riservati), la planimetria sotto la mappa del contenitore con l’immagine (ruolo dedotto dalla gerarchia), e col punto il pin di passaggio sull’illustrazione verso la planimetria, col nome dell’Area. Un errore non lascia niente.',
@@ -51,7 +57,7 @@ export const DESCRIZIONI_AREE: DescrizioniArea = {
   },
   'DELETE /api/aree/:contenitore/:chiave/:slug': {
     sommario: 'Elimina un’Area (nel cestino), con le sue planimetrie',
-    descrizione: 'Con contenuti — pin sulle sue planimetrie, passaggi che arrivano da altre mappe, l’ingresso del quartiere, elementi — chiede conferma: 409 `area-con-contenuti` con `{ planimetrie, pin, passaggi, ingresso, elementi }`. Con `?conferma=1` (o senza contenuti) va nel cestino come `area-fisica`, con le planimetrie (gli stessi passi dell’eliminazione di una mappa), i passaggi che vi portavano e l’ingresso; da Impostazioni › Cestino si rimette com’era. Per un’Area da verificare è «Rimuovi».',
+    descrizione: 'Con contenuti — pin sulle sue planimetrie, passaggi che portano alle sue planimetrie (dal quartiere o da altre mappe), l’ingresso del quartiere, elementi — chiede conferma: 409 `area-con-contenuti` con `{ planimetrie, pin, passaggi, ingresso, elementi }`. Con `?conferma=1` (o senza contenuti) va nel cestino come `area-fisica`, con le planimetrie (gli stessi passi dell’eliminazione di una mappa), i passaggi che vi portavano e l’ingresso; da Impostazioni › Cestino si rimette com’era. Per un’Area da verificare è «Rimuovi».',
     risposta: 'Nessun contenuto (204)',
     errori: [QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [409, 'area-con-contenuti']],
   },

@@ -357,11 +357,11 @@ export function eliminaArea(contenitore: ContenitoreRotta, chiave: string, slugA
   const a = rigaArea(c, slugArea);
   const { riepilogo, planimetrie, passaggi } = contenutiArea(a);
   if (!conferma && (riepilogo.pin > 0 || riepilogo.passaggi > 0 || riepilogo.ingresso || riepilogo.elementi > 0)) {
-    // il riepilogo in parole, al singolare e al plurale (difetto FUN2-4): «1 planimetria, 1 pin e 1 passaggio da un’altra mappa»
+    // il riepilogo in parole, al singolare e al plurale (difetto FUN2-4): «1 planimetria, 1 pin e 1 passaggio che porta qui»
     const parti = [
       riepilogo.planimetrie === 1 ? '1 planimetria' : `${riepilogo.planimetrie} planimetrie`,
       `${riepilogo.pin} pin`,
-      ...(riepilogo.passaggi > 0 ? [riepilogo.passaggi === 1 ? '1 passaggio da un’altra mappa' : `${riepilogo.passaggi} passaggi da altre mappe`] : []),
+      ...(riepilogo.passaggi > 0 ? [riepilogo.passaggi === 1 ? '1 passaggio che porta qui' : `${riepilogo.passaggi} passaggi che portano qui`] : []),
     ];
     const elenco = parti.length > 1 ? `${parti.slice(0, -1).join(', ')} e ${parti[parti.length - 1]}` : parti[0];
     throw httpErrors.conflict('area-con-contenuti', `L’area «${a.nome}» ha ${elenco}${riepilogo.ingresso ? ', ed è l’ingresso del quartiere' : ''}: eliminandola va tutto nel cestino.`, { ...riepilogo });
