@@ -36,6 +36,8 @@
 1. togliere dalle Impostazioni il comando «Importa» del pacchetto, che sostituirebbe tutto `gioco.db`, e allineare CLAUDE.md, che descrive ancora il pacchetto come fonte;
 2. nella guida del visore, mostrare solo le voci dell'infiltrazione aperta o quelle di tutte le infiltrazioni della planimetria, come oggi.
 
+**Lavoro non ancora committato** alle 20:25Z: la sessione FE ha in corso L6 B5. I file toccati sono `server/services/*` (Palazzi, attività, giornata, dungeon…) e `shared/types.ts`, nella cartella di lavoro `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941`, non ancora su GitHub. Chi riprende parta da `git status` in quella cartella. Se il lavoro non c'è più, B5 si rifà da `lotti/L6/piano.md`.
+
 **Da sapere per chi riprende**:
 - `docs/coordinamento/richieste-utente-aperte.md` è l'elenco di controllo delle richieste.
 - La Regia è `stato.json`; il cruscotto `regia/server.cjs` legge il file del repository.
