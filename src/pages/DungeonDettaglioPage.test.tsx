@@ -741,6 +741,29 @@ describe('§4.3: «Crea la voce» e «Collega a una voce» dalle schede da siste
     expect(collegaSchedaAllaVoce).not.toHaveBeenCalled();
   });
 
+  // FUN4-1 (strada (a) del PM): la voce nuova di un tipo permanente conta fra gli oggetti permanenti; nella partita che ha completato il
+  // Palazzo lo riporta a «Concluso» finché non la si segna: la finestra lo dice prima della conferma (la voce non si segna da sola, «1 B»)
+  it('FUN4-1: con un tipo permanente la finestra avvisa, e col Palazzo completato dice che torna a «Concluso»; con un Racconto niente avviso', async () => {
+    getDungeon.mockResolvedValue({ ...palazzo(true), completato: 'Tesoro, boss finale e tutti gli oggetti permanenti (71/71)', concluso: 'Tesoro e boss finale', schedeDaSistemare: schede });
+    monta('kamoshida');
+    const sezione = await apriSezione();
+    fireEvent.click(sezione.getByRole('button', { name: 'Crea la voce da «Tre guardie del Tetto»' }));
+    const finestra = within(screen.getByRole('dialog', { name: 'Crea la voce da «Tre guardie del Tetto»' }));
+    expect(finestra.getByText('La voce nuova conta fra gli oggetti permanenti: in questa partita il Palazzo torna da «Completato» a «Concluso» finché non la segni.')).toBeInTheDocument();
+    scegliVoce('Tipo', /^Storia/);
+    expect(finestra.queryByText(/oggetti permanenti/)).toBeNull();
+  });
+
+  it('FUN4-1: Palazzo non completato e tipo permanente: l’avviso parla solo della percentuale', async () => {
+    getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: schede });
+    monta('kamoshida');
+    const sezione = await apriSezione();
+    fireEvent.click(sezione.getByRole('button', { name: 'Crea la voce da «Forziere dei 3 Magatama»' }));
+    const finestra = within(screen.getByRole('dialog', { name: 'Crea la voce da «Forziere dei 3 Magatama»' }));
+    expect(finestra.getByText('La voce nuova conta fra gli oggetti permanenti del Palazzo: la percentuale si ricalcola con lei.')).toBeInTheDocument();
+    expect(finestra.queryByText(/Concluso/)).toBeNull();
+  });
+
   it('«Collega a una voce»: si sceglie fra le voci del Palazzo (prima quelle della sua infiltrazione); senza scelta non si collega; un errore lascia la finestra aperta', async () => {
     getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: schede });
     collegaSchedaAllaVoce.mockRejectedValueOnce(new Error('La voce non è del Palazzo della scheda.')).mockResolvedValue({ chiave: 'p1', nome: 'Sicura del cancello' });

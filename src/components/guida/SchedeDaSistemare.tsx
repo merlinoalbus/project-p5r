@@ -13,6 +13,7 @@ import { collegaSchedaAllaVoce, creaVoceDallaScheda } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_TIPO } from '../../utils/dungeon';
 import { spilloPerPunto } from '../../../shared/spilli';
+import { carattereDaTipo } from '../../../shared/caratteriVoce';
 import type { AreaDungeonDto, PuntoInteresseDto, SchedaDaSistemareDto } from '../../types';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
@@ -32,10 +33,12 @@ interface Props {
   aree: ReadonlyArray<AreaDungeonDto>;
   /** Dopo un gesto riuscito: la pagina rilegge la scheda (la scheda sistemata esce dall'elenco, la voce entra nella guida). */
   onSistemata: () => Promise<void>;
+  /** FUN4-1: il Palazzo è completato nella partita attiva (`DungeonDettaglioDto.completato`): una voce permanente nuova lo riporta a «Concluso». */
+  completato?: boolean;
 }
 
 /** Sezione richiudibile «Schede da sistemare (N)»: per ogni scheda nome, infiltrazione, testo e i due gesti; niente se non ce ne sono. */
-export function SchedeDaSistemare({ schede, aree, onSistemata }: Props) {
+export function SchedeDaSistemare({ schede, aree, onSistemata, completato = false }: Props) {
   /** Il gesto in corso: la scheda, quale gesto e la scelta fatta nella finestra (il tipo della voce nuova o la voce da collegare). */
   const [gesto, setGesto] = useState<{ scheda: SchedaDaSistemareDto; cosa: 'crea' | 'collega'; valore: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -88,6 +91,15 @@ export function SchedeDaSistemare({ schede, aree, onSistemata }: Props) {
                 ? `Una voce nuova in fondo a «${gesto.scheda.infiltrazioneNome}», col nome e la descrizione della scheda. Nessuno stato si trasferisce.`
                 : 'La voce scelta prende il posto della scheda, che esce da quest’elenco. Nessuno stato si trasferisce.'}
             </p>
+            {/* FUN4-1 (strada (a) del PM): una voce di tipo permanente conta fra gli oggetti permanenti — la voce non si segna da sola
+                («1 B»), quindi lo si dice prima: nella partita che ha completato il Palazzo, questo torna a «Concluso» finché non la si segna */}
+            {gesto.cosa === 'crea' && carattereDaTipo(gesto.valore, null) === 'permanente' && (
+              <p className="m-0 rounded-md border border-warning/50 px-2 py-1.5 text-[13px] text-warning" role="note">
+                {completato
+                  ? 'La voce nuova conta fra gli oggetti permanenti: in questa partita il Palazzo torna da «Completato» a «Concluso» finché non la segni.'
+                  : 'La voce nuova conta fra gli oggetti permanenti del Palazzo: la percentuale si ricalcola con lei.'}
+              </p>
+            )}
             {gesto.cosa === 'crea'
               ? <Selettore className="selettore--in-linea" etichetta="Tipo" valore={gesto.valore} opzioni={TIPI_VOCE.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => setGesto({ ...gesto, valore: v })} />
               : <Selettore className="selettore--in-linea" etichetta="Voce" valore={gesto.valore} segnaposto="Scegli la voce…" ricerca="sempre" opzioni={vociPer(gesto.scheda)}
