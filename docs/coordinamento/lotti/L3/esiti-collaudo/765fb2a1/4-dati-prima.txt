@@ -1,0 +1,4 @@
+### 2026-10-20T10:36:37Z dati dell'istanza prima del cambio (foto L3-prima-UX3-9-11, presa a server fermi) contro la base 0948Z
+gioco.db.immagine_miniatura: righe 93 → 119, contenuto diverso
+### scritture nel BE.log di d5eb9650 dopo il ciclo 1 (metodi diversi da GET)
+(vuoto = nessuna)
