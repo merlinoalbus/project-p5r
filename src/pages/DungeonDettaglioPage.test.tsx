@@ -682,6 +682,22 @@ it('le schede della guida senza mappa né voce si vedono nella scheda del Palazz
   expect(righe[1]).toHaveTextContent('Forziere dei 3 Magatama');
 });
 
+// L3 UX3-14 (RG-5): la guida della scheda segue la planimetria mostrata nel visore; le voci di altre planimetrie stanno in «Nelle altre planimetrie»
+it('UX3-14: la guida mostra le voci della planimetria del visore; quella con il pin in Torre sta in «Nelle altre planimetrie»', async () => {
+  const d = palazzo(true);
+  const sicura = { ...d.aree[0].punti[0], planimetria: { chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', aMano: false } };
+  const lontana = { ...d.aree[0].punti[0], chiave: 'p7', ordine: 1, tipo: 'forziere' as const, nome: 'Forziere della torre lontana',
+    pin: [{ id: 3, nome: 'Forziere', tipo: 'forziere', mappa: 'm-torre', mappaNome: 'Palazzo di Kamoshida › Torre' }], planimetria: { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', aMano: false } };
+  d.aree[0] = { ...d.aree[0], punti: [sicura, lontana] };
+  getDungeon.mockResolvedValue(d);
+  monta('kamoshida');
+  const elenco = within(await screen.findByRole('list', { name: 'Voci della guida di Cancello' }));
+  expect(elenco.getByRole('button', { name: /Sicura del cancello/ })).toBeInTheDocument();
+  expect(elenco.queryByRole('button', { name: /Forziere della torre lontana/ })).toBeNull();
+  expect(screen.getByText(/Guida dell’infiltrazione · 1 voce su questa planimetria/)).toBeInTheDocument();
+  expect(within(screen.getByRole('list', { name: 'Voci della guida su Torre' })).getByRole('button', { name: /Forziere della torre lontana/ })).toBeInTheDocument();
+});
+
 // L4 §4.1: «Anche nella Nª infiltrazione» sotto una voce permanente il cui oggetto ha voci altrove apre quell'infiltrazione nella scheda
 it('§4.1: «Anche nella 3ª infiltrazione» apre il Cortile nella scheda del Palazzo', async () => {
   const d = palazzo(true);

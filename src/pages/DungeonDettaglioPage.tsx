@@ -1087,6 +1087,7 @@ export function DungeonDettaglioPage() {
                 {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
                 <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta} areePalazzo={d.aree}
                   divergenze={divergenze.dati ?? undefined} onDaVerificare={setDaVerificare} onApriInfiltrazione={scegliInfiltrazione}
+                  planimetriaMostrata={mappaScelta}
                   cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} onCollegamento={aggiornaCollegamento} />
               </aside>
             </div>

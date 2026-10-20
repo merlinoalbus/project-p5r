@@ -128,7 +128,9 @@ export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: Punt
   /** Le aree del dedalo in cui si incontra una Persona di un dedalo (101): almeno una creandola; correggendola le sostituisce. */
   areeDedalo?: string[];
   /** L4 (§1.1): il carattere scelto per una voce di un Palazzo; null = «Ripristina» (vale la regola del tipo). Solo correggendo. */
-  carattere?: CarattereVoce | null }
+  carattere?: CarattereVoce | null;
+  /** L3 RG-4: la planimetria del Palazzo a cui agganciare a mano una voce senza pin; null toglie l'aggancio (torna la planimetria 1). */
+  planimetria?: string | null }
 /** Nome, dettagli e totale dei timbri di un'area di un dedalo (099); `timbriTotale` null = senza timbri. */
 export interface DatiAreaDedaloApi { nome?: string; descrizione?: string; timbriTotale?: number | null }
 

@@ -859,3 +859,86 @@ describe('§4.1: il carattere della voce', () => {
     await waitFor(() => expect(aggiornaPunto).toHaveBeenLastCalledWith('p1', expect.objectContaining({ carattere: null })));
   });
 });
+
+// L3 UX3-14 (RG-5, regola dell'utente: «NIENTE PIN: Vale la planimetria dove è stata inserita la voce. Con almeno un PIN la voce si vede nella
+// planimetria di tutti i PIN»): la guida della scheda mostra le voci della planimetria mostrata nel visore; le altre stanno, raggruppate per
+// planimetria, nella sezione chiusa «Nelle altre planimetrie», coi gesti di sempre. Gli Enigmi seguono i loro passi
+describe('UX3-14: la guida per planimetria', () => {
+  const pinSu = (id: number, mappa: 'm-sala' | 'm-torre') => ({ id, nome: `Pin ${id}`, tipo: 'forziere', mappa, mappaNome: mappa === 'm-sala' ? 'Palazzo di Kamoshida › Sala' : 'Palazzo di Kamoshida › Torre' });
+  const su = (mappa: 'm-sala' | 'm-torre') => ({ chiave: mappa, nome: mappa === 'm-sala' ? 'Palazzo di Kamoshida › Sala' : 'Palazzo di Kamoshida › Torre', aMano: false });
+  const voci = () => [
+    punto({ chiave: 'a', nome: 'Forziere col pin in sala', pin: [pinSu(1, 'm-sala')], planimetria: su('m-sala') }),
+    punto({ chiave: 'b', nome: 'Forziere col pin in torre', pin: [pinSu(2, 'm-torre')], planimetria: su('m-torre') }),
+    punto({ chiave: 'c', tipo: 'porta', nome: 'Porta senza pin della sala', planimetria: su('m-sala') }),
+    punto({ chiave: 'd', tipo: 'porta', nome: 'Porta senza pin della torre', planimetria: su('m-torre') }),
+    punto({ chiave: 'e', tipo: 'puzzle', nome: 'Enigma delle due stanze', esauribile: false, planimetria: su('m-torre') }),
+    punto({ chiave: 'e1', tipo: 'meccanismo', nome: 'Leva della torre', contenitore: 'e', esauribile: false, pin: [pinSu(3, 'm-torre')], planimetria: su('m-torre') }),
+    punto({ chiave: 'e2', tipo: 'meccanismo', nome: 'Leva della sala', contenitore: 'e', esauribile: false, pin: [pinSu(4, 'm-sala')], planimetria: su('m-sala') }),
+    punto({ chiave: 'f', nome: 'Forziere sulle due planimetrie', pin: [pinSu(5, 'm-torre'), pinSu(6, 'm-sala')], planimetria: su('m-torre') }),
+    punto({ chiave: 'g', nome: 'Forziere già aperto in torre', stato: 'ottenuto', pin: [pinSu(7, 'm-torre')], planimetria: su('m-torre') }),
+  ];
+  /** La guida dell'area con quelle voci, mostrando la planimetria della sala. */
+  const montaSuSala = (punti = voci()) => {
+    const creato = vi.fn();
+    const vista = render(<MemoryRouter><GuidaDellArea area={area(punti)} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" planimetriaMostrata="m-sala" cambiaStato={vi.fn().mockResolvedValue(true)}
+      onPuntoAggiornato={vi.fn()} onRicarica={vi.fn().mockResolvedValue(undefined)} /></MemoryRouter>);
+    return { vista, creato };
+  };
+  const elencoPrincipale = () => within(screen.getByRole('list', { name: 'Voci della guida di Sala Centrale' }));
+  const nomi = (l: ReturnType<typeof within>) => l.queryAllByRole('button', { name: /^(Forziere|Porta|Enigma|Leva)/ }).map((b: HTMLElement) => b.textContent!.split(' · ')[0]);
+
+  it('in elenco solo le voci della planimetria mostrata: coi pin su di lei (anche se ne hanno altrove) e senza pin agganciate a lei; l’Enigma coi suoi passi di qui', () => {
+    montaSuSala();
+    expect(nomi(elencoPrincipale())).toEqual(['Forziere col pin in sala', 'Porta senza pin della sala', 'Enigma delle due stanze', 'Leva della sala', 'Forziere sulle due planimetrie']);
+    // i conteggi dell'intestazione sono quelli della planimetria: 5 voci (l'Enigma e il suo passo di qui compresi), nessuna segnata
+    expect(screen.getByText(/^Guida dell’infiltrazione · 5 voci su questa planimetria/)).toBeInTheDocument();
+  });
+
+  it('«Nelle altre planimetrie», chiusa: raggruppate per planimetria, coi gesti di sempre; le segnate nascoste salvo «Anche le segnate»', () => {
+    montaSuSala();
+    const altre = screen.getByText(/^Nelle altre planimetrie/).closest('details')!;
+    expect(altre).not.toHaveAttribute('open');
+    expect(within(altre).getByText(/^Nelle altre planimetrie · 4 voci/)).toBeInTheDocument();
+    const torre = within(within(altre).getByRole('list', { name: 'Voci della guida su Torre' }));
+    expect(nomi(torre)).toEqual(['Forziere col pin in torre', 'Porta senza pin della torre', 'Enigma delle due stanze', 'Leva della torre']);
+    // la voce si apre e ha i suoi gesti
+    fireEvent.click(torre.getByRole('button', { name: /^Porta senza pin della torre/ }));
+    expect(torre.getByRole('button', { name: 'Ottenuto' })).toBeInTheDocument();
+    expect(torre.queryByText(/Forziere già aperto in torre/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    expect(torre.getByRole('button', { name: /^Forziere già aperto in torre/ })).toBeInTheDocument();
+  });
+
+  it('due versioni di un’area con lo stesso nome: il gruppo dice anche la versione', () => {
+    const versioni: DungeonDettaglioDto['planimetrie'] = [
+      { ...planimetrie[1] },
+      { ...planimetrie[0], chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', versioneEtichetta: 'Livello 0' },
+      { ...planimetrie[0], chiave: 'm-torre-1', nome: 'Palazzo di Kamoshida › Torre', versioneEtichetta: 'Livello 1' },
+    ];
+    const sopra = punto({ chiave: 'h', nome: 'Forziere del piano di sopra', pin: [{ id: 9, nome: 'Pin 9', tipo: 'forziere', mappa: 'm-torre-1', mappaNome: 'Palazzo di Kamoshida › Torre' }] });
+    render(<MemoryRouter><GuidaDellArea area={area([...voci(), sopra])} planimetrie={versioni} partitaId={4} mappaAperta="m-sala" planimetriaMostrata="m-sala" cambiaStato={vi.fn()}
+      onPuntoAggiornato={vi.fn()} onRicarica={vi.fn()} /></MemoryRouter>);
+    expect(screen.getByRole('list', { name: 'Voci della guida su Torre · Livello 0' })).toBeInTheDocument();
+    expect(within(screen.getByRole('list', { name: 'Voci della guida su Torre · Livello 1' })).getByRole('button', { name: /^Forziere del piano di sopra/ })).toBeInTheDocument();
+  });
+
+  it('una voce aggiunta prende la planimetria mostrata, anche un passo di un Enigma', async () => {
+    creaPunto.mockResolvedValue(punto({ chiave: 'n1', nome: 'Nuova' }));
+    montaSuSala();
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una voce' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nuova voce' }), { target: { value: 'Statua nuova' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi' }));
+    await waitFor(() => expect(creaPunto).toHaveBeenCalledWith('k-02', expect.objectContaining({ nome: 'Statua nuova', planimetria: 'm-sala' })));
+    fireEvent.click(elencoPrincipale().getByRole('button', { name: /^Enigma delle due stanze/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi un passo a Enigma delle due stanze' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nuovo passo' }), { target: { value: 'Terza leva' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi' }));
+    await waitFor(() => expect(creaPunto).toHaveBeenLastCalledWith('k-02', expect.objectContaining({ nome: 'Terza leva', contenitore: 'e', planimetria: 'm-sala' })));
+  });
+
+  it('senza planimetria mostrata (o voci senza planimetria) l’elenco è quello di sempre, senza «Nelle altre planimetrie»', () => {
+    monta(voci());
+    expect(screen.queryByText(/^Nelle altre planimetrie/)).toBeNull();
+    expect(screen.getByText(/^Guida dell’infiltrazione · 9 voci \(1 segnate\)/)).toBeInTheDocument();
+  });
+});
