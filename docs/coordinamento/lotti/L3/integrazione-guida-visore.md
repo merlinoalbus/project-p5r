@@ -1,5 +1,7 @@
 # L3 — integrazione «Guida nel visore» e «Planimetria della voce» (decisa dall'utente il 2026-10-20)
 
+**Correzione del PM (2026-10-20, 19:35Z).** La regola sulle voci per planimetria (RG-3 e RG-5) era una richiesta dell'utente su come si vede la guida, ovunque. L'utente non ha mai chiesto di applicarla solo al visore né di rinviarla. Questa scelta l'ha fatta il PM da solo, interpretando male «non toccare la scheda del Palazzo» e «non deve accantonare lo stato attuale». Per questo L3 è stato dichiarato completo senza la regola. Ora la regola è un difetto di L3 (UX3-14) e FE la realizza sulla scheda e sul visore insieme.
+
 È un'**integrazione** di L3, non un lotto nuovo. Il lavoro già fatto non si accantona. La chiusura dei punti aperti di L3 va avanti per prima, come da piano.
 
 ## Requisiti (parole dell'utente → regola)
