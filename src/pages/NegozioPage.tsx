@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { getElementoCatalogo, getNegozio } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { useCarica } from '../hooks/useCarica';
@@ -19,7 +19,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import type { ElementoCatalogoDto } from '../types';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
-import { ancoraLuogo } from '../utils/citta';
+import { urlLuogo } from '../utils/citta';
 import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
 
 /**
@@ -51,6 +51,9 @@ export function NegozioPage() {
   const apriArticolo = (chiaveArticolo: string) => {
     void getElementoCatalogo('articolo', chiaveArticolo).then((e) => { setElementoArticolo(e); setModulo('articolo'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.'));
   };
+  // L5 (F4, R5-10): un negozio con una sede vive nella pagina del suo luogo, nella sua sezione (`#negozio-<chiave>`): ogni collegamento
+  // di prima ci arriva da qui; i negozi senza sede (Tanaka, TV, il Palazzo di Niijima) restano in questa pagina
+  if (n?.sedeCasa) return <Navigate to={n.sedeCasa} replace />;
   return (
     <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {n && (
@@ -68,7 +71,7 @@ export function NegozioPage() {
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-text-secondary">
               {/* La sede apre la pagina del quartiere con il luogo evidenziato (`#luogo-…`); senza quartiere
                   resta l'indicazione testuale («Online, dal laptop di Leblanc»). */}
-              {(n.sedeChiave || n.luogoChiave || n.luogo) && <span><strong className="text-text">Dove:</strong> {n.sedeChiave && n.luogoChiave ? <Link to={`/guida/citta/${n.luogoChiave}#${ancoraLuogo(n.sedeChiave)}`}>{n.sedeNome ?? n.sedeChiave}</Link> : null}{n.sedeChiave && n.luogoChiave ? ' · ' : ''}{n.luogoChiave && <Link to={`/guida/citta/${n.luogoChiave}`}>{n.quartiereNome ?? n.luogoChiave}</Link>}{n.luogo && !n.sedeChiave ? `${n.luogoChiave ? ' · ' : ''}${n.luogo}` : ''}</span>}
+              {(n.sedeChiave || n.luogoChiave || n.luogo) && <span><strong className="text-text">Dove:</strong> {n.sedeChiave && n.luogoChiave ? <Link to={urlLuogo(n.sedeChiave)}>{n.sedeNome ?? n.sedeChiave}</Link> : null}{n.sedeChiave && n.luogoChiave ? ' · ' : ''}{n.luogoChiave && <Link to={`/guida/citta/${n.luogoChiave}`}>{n.quartiereNome ?? n.luogoChiave}</Link>}{n.luogo && !n.sedeChiave ? `${n.luogoChiave ? ' · ' : ''}${n.luogo}` : ''}</span>}
               <span><strong className="text-text">Orari:</strong> {n.orariTesto}</span>
               {n.gestore && <span><strong className="text-text">Gestore:</strong> {n.gestore}</span>}
               {/* la guida del quiz dei lavori che si fanno qui (il Triple Seven): in oro se oggi, nella partita, c'è il quiz */}

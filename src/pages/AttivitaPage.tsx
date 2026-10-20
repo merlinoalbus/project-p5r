@@ -17,7 +17,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
-import { NOME_DOTE, ancoraLuogo } from '../utils/citta';
+import { NOME_DOTE, urlLuogo } from '../utils/citta';
 import { NOME_FASCIA_ATTIVITA, NOME_TIPO_ATTIVITA } from '../../shared/attivita';
 import type { AttivitaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
@@ -75,8 +75,8 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
         {!a.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </button>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
-        {/* La sede apre la pagina del quartiere con il luogo evidenziato; senza sede resta il quartiere o il testo. */}
-        {(a.sedeChiave || a.luogoChiave || a.luogo) && <span><strong className="text-text">Dove:</strong> {a.sedeChiave && a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}#${ancoraLuogo(a.sedeChiave)}`}>{a.sedeNome ?? a.sedeChiave}</Link> : a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}`}>{a.luogo || a.luogoChiave}</Link> : a.luogo}</span>}
+        {/* La sede apre la pagina del suo luogo (L5); senza sede resta il quartiere o il testo. */}
+        {(a.sedeChiave || a.luogoChiave || a.luogo) && <span><strong className="text-text">Dove:</strong> {a.sedeChiave && a.luogoChiave ? <Link to={urlLuogo(a.sedeChiave)}>{a.sedeNome ?? a.sedeChiave}</Link> : a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}`}>{a.luogo || a.luogoChiave}</Link> : a.luogo}</span>}
         <CollegamentoMappa tipo="attivita" chiave={a.chiave} compatto />
         {a.costo !== null && a.costo > 0 && <span><strong className="text-text">Costo:</strong> {formattaYen(a.costo)}</span>}
         {paga && <span><strong className="text-text">Paga:</strong> {paga}</span>}

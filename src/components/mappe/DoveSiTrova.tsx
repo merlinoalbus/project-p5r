@@ -45,6 +45,9 @@ interface Props {
   className?: string;
 }
 
+/** Il posto di una mappa dal suo nome col percorso («Shibuya › Central Street» → «Central Street»). */
+const postoDellaMappa = (nome: string) => nome.split('›').pop()!.trim() || nome;
+
 /** Riquadro «Dove si trova» di un'entità: chiede al risolutore unico le sue destinazioni sul mondo
  * e, secondo l'esito, dice che non ha un posto, elenca i posti fra cui scegliere, oppure mostra la
  * mappa incorporata centrata sullo spillo (salvo `soloCollegamento`) con il collegamento all'atlante.
@@ -109,8 +112,10 @@ export function DoveSiTrova({ tipo, chiave, altezza = 260, soloCollegamento = fa
       altezza={altezza}
       conEditor={false}
     />}
+    {/* L5 (M22, UX2-11, R5-20c): il gesto porta il nome del posto, l'area della planimetria del pin aperta sullo spillo («Apri in Central
+        Street»), mai il nome del vecchio visore */}
     <Link to={urlDestinazioneMondo(d)} className="btn btn-ghost btn-sm touch self-start inline-flex items-center gap-1.5">
-      <IconaAzione chiave="mappa" dimensione={16} />Apri sull’atlante
+      <IconaAzione chiave="mappa" dimensione={16} />Apri in {postoDellaMappa(d.nomeMappa)}
     </Link>
   </section>;
 }

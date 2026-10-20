@@ -10,8 +10,8 @@
 // dopo l'intestazione.
 // ============================================================
 
-import { useState, type CSSProperties } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { getElementoCatalogo, getLuogo } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -52,6 +52,17 @@ export function LuogoPage() {
   const dati = useCarica(() => getLuogo(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
   const l = dati.dati;
   useDocumentTitle(l?.nome ?? 'Luogo');
+  // L5 (F4): arrivando con un'ancora (`#negozio-<chiave>` dal vecchio indirizzo del negozio, `#dove-si-trova`) la sezione viene in vista
+  // appena la pagina c'è, una volta per ancora
+  const { hash } = useLocation();
+  const ancoraVista = useRef<string | null>(null);
+  useEffect(() => {
+    if (!l || !hash || ancoraVista.current === hash) return;
+    const el = document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (!el) return;
+    ancoraVista.current = hash;
+    el.scrollIntoView?.({ block: 'start' });
+  }, [l, hash]);
   // il modulo del catalogo per un articolo (correzione o aggiunta) di un negozio della sede
   const [modulo, setModulo] = useState<{ negozio: string; elemento: ElementoCatalogoDto | null } | null>(null);
   const [versione, setVersione] = useState(0);

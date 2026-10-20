@@ -30,7 +30,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft } from '../components/shared/icons';
-import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraLuogo } from '../utils/citta';
+import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraLuogo, urlLuogo } from '../utils/citta';
 import { definizioneTipoLuogo, ordinaTipiLuogo } from '../../shared/tipiLuogo';
 import { IconaSpillo } from '../components/mappe/IconaSpillo';
 import type { LuogoDto } from '../types';
@@ -61,7 +61,10 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
   return (
     <li id={ancoraLuogo(l.chiave)} className={`card flex flex-col gap-1 text-[13px] scroll-mt-20 ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <strong className="text-[15px]">{l.nome}</strong>
+        {/* L5 (F4): il nome porta alla pagina del luogo, la fonte unica */}
+        {l.casa ? <Link to={l.casa} className="touch inline-flex items-center text-[15px] font-bold text-text">{l.nome}</Link> : <strong className="text-[15px]">{l.nome}</strong>}
+        {l.presenza && l.presenza.sbloccato !== false && l.presenza.aperto !== null && <span className={`chip text-[11px] ${l.presenza.aperto ? 'chip--dalla-guida' : 'chip--bloccata'}`} title={l.presenza.testo}>{l.presenza.aperto ? 'Aperto adesso' : 'Chiuso adesso'}</span>}
+        {l.negozi.length > 1 && <span className="text-[12px] text-text-muted">· {l.negozi.length} negozi</span>}
         <span className="chip luogo-tipo" style={{ '--luogo-tipo-colore': COLORE_TIPO_LUOGO[l.tipo] ?? COLORE_TIPO_LUOGO.altro } as React.CSSProperties}><IconaSpillo tipo={definizioneTipoLuogo(l.tipo).icona} dimensione={14} /> {NOME_TIPO_LUOGO[l.tipo] ?? l.tipo}</span>
         {sugg.evidenziato('luoghi', l.chiave) && <TargaSuggerito motivo={sugg.motivo('luoghi', l.chiave)} compatta />}
         {nonAncora && <span className="chip chip--attivo text-[11px]" title={perche || undefined}>Non ancora nel mondo</span>}
@@ -89,7 +92,7 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
           </table>
         </div>
       )}
-      {l.negozio && <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Articoli in vendita" to={`/guida/negozi/${l.negozio}`} />}
+      {l.negozio && <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Articoli in vendita" to={l.casa ? urlLuogo(l.chiave, l.negozio) : `/guida/negozi/${l.negozio}`} />}
       {l.note && <p className="m-0 text-[12px] text-text-muted">{l.note}</p>}
     </li>
   );
@@ -232,6 +235,19 @@ export function QuartierePage() {
                 {visibili.map((l) => <Luogo key={l.chiave} l={l} onSalvato={() => void dati.ricarica()} />)}
               </ul>
               {visibili.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun luogo di questo tipo in {q.nome}.</p>}
+              {/* L5 (F4): i luoghi del quartiere senza un'Area, con l'area proposta se la migrazione ne ha dedotta una («Colloca» arriva con le
+                  finestre di L5): si aprono dalla loro pagina */}
+              {(q.luoghiDaCollocare?.length ?? 0) > 0 && (
+                <details className="card text-[13px]">
+                  <summary className="touch cursor-pointer font-semibold text-text-secondary">Luoghi da collocare ({q.luoghiDaCollocare!.length})</summary>
+                  <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-1.5" aria-label="Luoghi da collocare">
+                    {q.luoghiDaCollocare!.map((l) => <li key={l.chiave} className="flex flex-wrap items-center gap-1.5">
+                      {l.casa ? <Link to={l.casa} className="touch inline-flex items-center">{l.nome}</Link> : <span>{l.nome}</span>}
+                      {l.areaProposta && <span className="text-[12px] text-text-muted">· proposta: {l.areaProposta.nome}</span>}
+                    </li>)}
+                  </ul>
+                </details>
+              )}
             </section>
             </div>
           </div>

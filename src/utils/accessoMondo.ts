@@ -18,7 +18,8 @@ export function schedaAccessoMondo(tipo: string, chiave: string): string {
     case 'quartiere': return `/guida/citta/${k}`;
     case 'dungeon': return `/guida/dungeon/${k}`;
     case 'confidente': return `/confidenti/${k}`;
-    case 'luogo': return '/guida/citta';
+    // L5: un luogo ha la sua pagina (`chiave` = «quartiere/luogo»)
+    case 'luogo': return chiave.includes('/') ? `/guida/luogo/${chiave.split('/').map(encodeURIComponent).join('/')}` : '/guida/citta';
     case 'articolo': return '/guida/negozi';
     case 'area': case 'punto': return '/guida/dungeon';
     default: return '/guida/mappe';
@@ -52,12 +53,13 @@ export function nomeTipoAccessoMondo(tipo: string, chiave?: string): string {
  *  luogo», anche quella di un quartiere o di un Palazzo, e «luogo» oggi vuol dire solo l'attività (Untouchable, Diner). */
 export function titoloSchedaAccessoMondo(tipo: string, chiave?: string, nome?: string): string {
   switch (tipo) {
-    case 'negozio': return 'Scheda del negozio';
+    // L5 (M25): il nome del posto, quando c'è
+    case 'negozio': return nome ?? 'Scheda del negozio';
     // L2 (T4): il pulsante che porta alla pagina di un quartiere porta il suo nome («Shibuya»), non il tipo
     case 'quartiere': return nome ?? 'Scheda del quartiere';
     case 'dungeon': return deiMemento(tipo, chiave) ? 'Scheda dei Memento' : 'Scheda del Palazzo';
     case 'confidente': return 'Scheda del Confidente';
-    case 'luogo': return 'Scheda del luogo';
+    case 'luogo': return nome ?? 'Scheda del luogo';
     case 'articolo': return 'Scheda dell’articolo';
     case 'area': return deiMemento(tipo, chiave) ? 'Scheda del dedalo' : 'Scheda dell’infiltrazione';
     case 'punto': return 'Scheda della voce';
