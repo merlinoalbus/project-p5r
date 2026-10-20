@@ -29,14 +29,16 @@ import { riallineaSpilliLuoghi } from '../mappe/sincronizzaMappe.js';
 import { assegnaUidMancanti } from '../mappe/identitaSpillo.js';
 import { assorbiFileDelleRighe } from '../../db/migrations/079_immagini_nel_database.js';
 import { pulisciMiniatureOrfane } from '../miniatureService.js';
+import { svuotaFrasePinNativo } from '../../db/migrations/116_frase_pin_nativo.js';
 
 /** Le regole sui dati che ogni avvio riapplica (non c'è più un seed da ricaricare): nomi degli
  *  spilli non identificati, luoghi legati alla planimetria omonima, spilli dei luoghi allineati
  *  al catalogo dei tipi, immagini rimaste su disco assorbite nel database. Tutte idempotenti. */
-export function regoleAllAvvio(db: AppDatabase): { spilliTradotti: number; luoghiCollegati: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number; miniatureOrfane: number } {
+export function regoleAllAvvio(db: AppDatabase): { spilliTradotti: number; luoghiCollegati: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number; miniatureOrfane: number; frasiPinNativo: number } {
   // le miniature (108) senza la loro sorgente, o di un'altra versione, se ne vanno dopo l'assorbimento delle immagini (L1)
   const regole = { spilliTradotti: traduciNomiSpilli(db), luoghiCollegati: collegaLuoghiAllePlanimetrie(db), spilliRiallineati: riallineaSpilliLuoghi(db), spilliIdentificati: assegnaUidMancanti(db), immaginiAssorbite: assorbiImmaginiSuDisco(db) };
-  return { ...regole, miniatureOrfane: pulisciMiniatureOrfane(db) };
+  // la frase fissa «Pin nativo del gioco.» (116, ordine dell'utente): un pacchetto di prima la riporterebbe, qui si toglie di nuovo
+  return { ...regole, miniatureOrfane: pulisciMiniatureOrfane(db), frasiPinNativo: svuotaFrasePinNativo(db) };
 }
 
 /**
