@@ -431,7 +431,7 @@ function contestoSpilli(partitaId?: number, contesto: string | null = null): Con
  * scadenza. Si valuta qui, sul collegamento, e non con una condizione scritta sullo spillo: così vale anche per gli ingressi
  * aggiunti o modificati a mano e sopravvive a ogni sincronizzazione.
  */
-function senzaIngressoAPalazzoCompletato(esito: DisponibilitaDto | undefined, r: RigaSpillo, ctx: ContestoSpilli): DisponibilitaDto | undefined {
+function senzaIngressoAPalazzoConcluso(esito: DisponibilitaDto | undefined, r: RigaSpillo, ctx: ContestoSpilli): DisponibilitaDto | undefined {
   if (!esito || !ctx.st || !ctx.palazzi) return esito;
   const dungeon = palazzoDiIngresso(r, ctx.destinazioni?.get(r.id) ?? null, ctx.palazzi);
   const perche = dungeon ? ctx.st.palazziConclusi.get(dungeon) : undefined;
@@ -529,7 +529,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // Palazzo completato sparisce come nel gioco e si valuta dopo, sull'esito già deciso.
   // le prove native si leggono una volta (prima tre: rilievo P8)
   const nativo = nativoDiSpillo(r);
-  const esitoVisibilita = senzaIngressoAPalazzoCompletato(esitoCondizioni, r, ctx);
+  const esitoVisibilita = senzaIngressoAPalazzoConcluso(esitoCondizioni, r, ctx);
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
     id: r.id, ...(r.uid ? { uid: r.uid } : {}), tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
@@ -1343,8 +1343,8 @@ const SOLO_PIN = 'Stato di un pin o di una voce della guida (solo nelle condizio
  * scendendo nei gruppi e nelle negazioni (un gruppo con un figlio scartato si scarta tutto). Più di 20 condizioni o una
  * condizione malformata sono scarti a sé.
  *
- * Si controllano: Palazzo esistente (non i Mementos), Confidente e richiesta della Guida, quartiere con una data di sblocco
- * leggibile (gli altri quartieri non sono valutabili), e poi articoli, attività, negozi, membri della squadra, letture e Persona
+ * Si controllano: Palazzo esistente (non i Mementos), Confidente e richiesta della Guida, quartiere con uno sblocco
+ * strutturato o, su uno schema precedente alla 118, con una data leggibile, e poi articoli, attività, negozi, membri della squadra, letture e Persona
  * citati, che devono esistere nei dati.
  *
  * Lo stato di un altro pin (`spillo`, 2026-10-03) vale solo nelle condizioni dei pin (`pin` presente) e deve citare un pin con
@@ -1378,9 +1378,14 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
     else if (c.tipo === 'confidente') { cosa = 'Confidente'; chiave = c.confidente; ok = !!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(c.confidente); }
     else if (c.tipo === 'richiesta') { cosa = 'Richiesta'; chiave = c.richiesta; ok = !!prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(c.richiesta); }
     else if (c.tipo === 'quartiere') {
-      cosa = 'Quartiere con data di sblocco'; chiave = c.quartiere;
-      const q = prepared('SELECT sblocco_data FROM quartiere WHERE chiave = ?').get(c.quartiere) as { sblocco_data: string | null } | undefined;
-      ok = !!q && q.sblocco_data !== null;
+      cosa = 'Quartiere con sblocco'; chiave = c.quartiere;
+      try {
+        const q = prepared('SELECT condizioni_json, sblocco_data FROM quartiere WHERE chiave = ?').get(c.quartiere) as { condizioni_json: string | null; sblocco_data: string | null } | undefined;
+        ok = !!q && (q.condizioni_json !== null || q.sblocco_data !== null);
+      } catch {
+        const q = prepared('SELECT sblocco_data FROM quartiere WHERE chiave = ?').get(c.quartiere) as { sblocco_data: string | null } | undefined;
+        ok = !!q && q.sblocco_data !== null;
+      }
     }
     else if (c.tipo === 'spillo') {
       chiave = c.spillo;
