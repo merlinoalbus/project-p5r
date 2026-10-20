@@ -132,6 +132,8 @@ it('foglio: «Aree · N» con l’area aperta; il foglio si chiude scegliendo', 
   render(<AreePalazzo {...p} />);
   const apri = screen.getByRole('button', { name: /^Aree · 3/ });
   expect(apri).toHaveTextContent('Cancello');
+  // LAY3-7 (decisione del PM): il nome dell'area scelta si legge intero e, se serve, va a capo; mai coi puntini
+  expect(within(apri).getByText(/^Cancello/).className).not.toMatch(/truncate/);
   expect(screen.queryByRole('dialog')).toBeNull();
   fireEvent.click(apri);
   const foglio = within(screen.getByRole('dialog', { name: 'Aree · 3' }));
