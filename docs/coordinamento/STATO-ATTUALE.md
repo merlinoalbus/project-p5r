@@ -1,4 +1,48 @@
-# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ~14:30Z)
+# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ~20:25Z, salvataggio di fine sessione)
+
+## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: `eb956688`, L6 B4, con pipeline in corso alle 20:17Z. Su GitHub esistono solo `main` (da non toccare) e `newreview`.
+- **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio. Migrazioni recenti:
+  - 114: planimetria della voce;
+  - 115: luoghi come fonte unica;
+  - 116 e 117: tolta la frase «Pin nativo del gioco.»;
+  - 118: condizioni uniche;
+  - 119: requisiti dei Confidenti modificabili;
+  - utente 025: inviti della partita.
+- **Regole in vigore** (dettaglio in `memoria-del-progetto/`):
+  - **zero test**: niente tester, collaudo né validatore; prova l'utente. Typecheck e lint verdi obbligatori;
+  - **un solo ramo**;
+  - **il pacchetto di gioco è superato**: la fonte è il DB, e le correzioni ai dati si fanno con migrazioni dirette;
+  - **intestazione ≤ 30%** della schermata;
+  - **mai dichiarare completo** senza aver verificato le richieste in `richieste-utente-aperte.md`;
+  - **mai restringere o rinviare** una richiesta dell'utente senza chiedere.
+
+| Lotto | Stato |
+|---|---|
+| L0, L1, L2 | consegnati e validati |
+| L3 Palazzi | pubblicato. Fatte anche le richieste dell'utente sulla guida: scheda per planimetria (UX3-14, b34e577b), campo «Planimetria» (901c7666), guida nel visore in finestra fluttuante (91986570), pin di spostamento che portano a destinazione (67a7bfda, b8048c1b). Da provare dall'utente |
+| L4 Avanzamento unico | pubblicato (fde7add7, poi unito): FE completo con FUN3-3 e FUN4-1 |
+| L5 Luoghi, negozi, orari | pubblicato, completo: BE 5a22da2a…0fa7bde7 e 50ca121c; FE af5b8e14…820c05ea (F1–F6) |
+| L6 Condizioni uniche | **in corso**, BE e FE fatti dalla sessione FE: B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche), B2 fdae7867 (migrazione 118; cambi visibili in `lotti/L6/B2-cambi-visibili.md`: Odaiba si chiude in p1 finché non si legge «Luoghi della movida», per decisione dell'utente), B3 a17f2971 (inviti), B4 eb956688 (riferimenti per chiave, Richieste nel cestino, requisiti per rango con la migrazione 119). **Prossimo: B5** (Palazzi, libri, sblocco dei quartieri), poi B6 e il FE di L6 (`lotti/L6/piano.md`) |
+| L7–L11 | progettati (`lotti/Lx/`), da implementare BE e FE |
+
+**Sessioni del team** (app Claude desktop):
+- «Implementazione FE» al lavoro su L6.
+- «Implementazione BE» ferma: aspetta un «procedi» scritto dall'utente nella sua sessione, e non riparte con il via del PM.
+- «Analisi dati» ferma, l'app non la lascia archiviare.
+- Tutte le altre sono chiuse.
+
+**Decisioni aperte per l'utente**:
+1. togliere dalle Impostazioni il comando «Importa» del pacchetto, che sostituirebbe tutto `gioco.db`, e allineare CLAUDE.md, che descrive ancora il pacchetto come fonte;
+2. nella guida del visore, mostrare solo le voci dell'infiltrazione aperta o quelle di tutte le infiltrazioni della planimetria, come oggi.
+
+**Da sapere per chi riprende**:
+- `docs/coordinamento/richieste-utente-aperte.md` è l'elenco di controllo delle richieste.
+- La Regia è `stato.json`; il cruscotto `regia/server.cjs` legge il file del repository.
+- Le copie locali in `~/.claude/p5s-coordinamento` sono superate.
+
+---
+# (sotto: storia della giornata, per contesto)
 
 Documento per riprendere il lavoro da zero, con qualunque IA o persona. Il dettaglio è nella Regia (`stato.json`), nella bacheca e in `lotti/`. **Leggere tutto prima di toccare qualcosa.**
 

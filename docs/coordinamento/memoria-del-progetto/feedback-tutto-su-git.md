@@ -5,14 +5,14 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: cffd8da6-5996-4013-b5ec-2c69430948db
-  modified: 2026-10-20T13:58:15.408Z
+  modified: 2026-10-20T17:17:27.542Z
 ---
 
 Tutto il lavoro va salvato su git e pushato su `newreview`, non solo il codice. Vale anche per lo stato di avanzamento, il coordinamento, i punti aperti, la Regia e la memoria del progetto. Lo scopo, con le parole dell'utente: «per evitare in caso di termine dei crediti di bloccare il lavoro» e perché «una qualsiasi IA che ha accesso all'applicativo pubblico deve poter riprendere il lavoro».
 
 Cosa e dove:
 - In `docs/coordinamento/`: copia di `~/.claude/p5s-coordinamento/` (solo testo), `STATO-ATTUALE.md`, `PROMPT-RIPRESA.md`, `memoria-del-progetto/`. `CLAUDE.md` vi rimanda.
-- NON si pubblicano le copie dei DB («la copia del db non serve») né schermate e log.
+- NON si pubblicano le copie dei DB («la copia del db non serve») né schermate e log. Le schermate dei tester restano solo in `~/.claude/p5s-coordinamento`. `.gitignore` blocca jpg, png, webp e gif sotto `docs/coordinamento/**`. Nel giro 1 di L3 (2026-10-20) il PM ne aveva committate e pushate 24 sui rami di copia: il validatore l'ha rigettato. L'utente ha scelto di toglierle solo dall'albero.
 - NON si pubblicano indirizzi del server o percorsi di chiavi, perché il repository è PUBBLICO.
 
 **Why:** richiesta esplicita dell'utente del 2026-10-20.

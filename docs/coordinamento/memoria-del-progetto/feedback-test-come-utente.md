@@ -1,8 +1,11 @@
 ---
 name: feedback-test-come-utente
-description: nei test non si spostano dati (pin, posizioni) per aggirare un comportamento dell'app: si fa il gesto che farebbe l'utente
+description: "nei test non si spostano dati (pin, posizioni) per aggirare un comportamento dell'app: si fa il gesto che farebbe l'utente"
 metadata:
+  node_type: memory
   type: feedback
+  originSessionId: f878b52d-d3b9-470f-9222-0233a07e8955
+  modified: 2026-10-20T16:05:33.526Z
 ---
 
 I pin che si raggruppano restano dove sono: in un test non li si sposta per evitare il raggruppamento, li si apre dal gruppo («N spilli
