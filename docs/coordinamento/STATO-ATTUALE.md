@@ -23,7 +23,7 @@
 | L3 Palazzi | pubblicato. Fatte anche le richieste dell'utente sulla guida: scheda per planimetria (UX3-14, b34e577b), campo «Planimetria» (901c7666), guida nel visore in finestra fluttuante (91986570), pin di spostamento che portano a destinazione (67a7bfda, b8048c1b). Da provare dall'utente |
 | L4 Avanzamento unico | pubblicato (fde7add7, poi unito): FE completo con FUN3-3 e FUN4-1 |
 | L5 Luoghi, negozi, orari | pubblicato, completo: BE 5a22da2a…0fa7bde7 e 50ca121c; FE af5b8e14…820c05ea (F1–F6) |
-| L6 Condizioni uniche | **in corso**, BE e FE fatti dalla sessione FE: B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche), B2 fdae7867 (migrazione 118; cambi visibili in `lotti/L6/B2-cambi-visibili.md`: Odaiba si chiude in p1 finché non si legge «Luoghi della movida», per decisione dell'utente), B3 a17f2971 (inviti), B4 eb956688 (riferimenti per chiave, Richieste nel cestino, requisiti per rango con la migrazione 119). **Prossimo: B5** (Palazzi, libri, sblocco dei quartieri), poi B6 e il FE di L6 (`lotti/L6/piano.md`) |
+| L6 Condizioni uniche | **in corso**, BE e FE fatti dalla sessione FE: B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche), B2 fdae7867 (migrazione 118; cambi visibili in `lotti/L6/B2-cambi-visibili.md`: Odaiba si chiude in p1 finché non si legge «Luoghi della movida», per decisione dell'utente), B3 a17f2971 (inviti), B4 eb956688 (riferimenti per chiave, Richieste nel cestino, requisiti per rango con la migrazione 119), B5 prima parte c9f3e5bb (destinazione unica dei Palazzi, finestre nelle colonne, `LibroDto.apre` calcolato). **Prossimo: resto di B5**: sblocco del quartiere con fonte e «Modifica sblocco»/«Ripristina»; Aree che ereditano lo sblocco del quartiere; via il validatore dei 7 quartieri in `mappeService` (1100-1165); rinomina `senzaIngressoAPalazzoConcluso`; verifica metro = diario sui 9 Palazzi. Poi B6 (OpenAPI) e il FE di L6, F1-F6 (`lotti/L6/piano.md`) |
 | L7–L11 | progettati (`lotti/Lx/`), da implementare BE e FE |
 
 **Sessioni del team** (app Claude desktop):
@@ -36,7 +36,7 @@
 1. togliere dalle Impostazioni il comando «Importa» del pacchetto, che sostituirebbe tutto `gioco.db`, e allineare CLAUDE.md, che descrive ancora il pacchetto come fonte;
 2. nella guida del visore, mostrare solo le voci dell'infiltrazione aperta o quelle di tutte le infiltrazioni della planimetria, come oggi.
 
-**Lavoro non ancora committato** alle 20:25Z: la sessione FE ha in corso L6 B5. I file toccati sono `server/services/*` (Palazzi, attività, giornata, dungeon…) e `shared/types.ts`, nella cartella di lavoro `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941`, non ancora su GitHub. Chi riprende parta da `git status` in quella cartella. Se il lavoro non c'è più, B5 si rifà da `lotti/L6/piano.md`.
+**Lavoro non ancora committato**: nessuno. La prima parte di L6 B5 è committata in c9f3e5bb, sul ramo locale `newreview` della cartella di lavoro `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941`, e non è ancora su GitHub. Il resto di B5 è descritto nel messaggio di quel commit e nella riga L6 qui sopra.
 
 **Da sapere per chi riprende**:
 - `docs/coordinamento/richieste-utente-aperte.md` è l'elenco di controllo delle richieste.
