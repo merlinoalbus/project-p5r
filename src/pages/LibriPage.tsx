@@ -135,7 +135,7 @@ export function LibriPage() {
         <dt className="text-text-muted">Che cosa fa</dt>
         <dd className="m-0">{libro.effettiTesto.length ? libro.effettiTesto.join(' · ') : 'Nessun effetto dichiarato'}</dd>
         {/* Il luogo sbloccato è un riferimento, quindi ci si va. */}
-        {libro.sbloccaLuogo && <><dt className="text-text-muted">Apre</dt><dd className="m-0"><Link className="touch inline-flex items-center" to={`/guida/citta/${libro.sbloccaLuogo}`}>{libro.sbloccaLuogoNome ?? libro.sbloccaLuogo}</Link></dd></>}
+        {(libro.apre?.length ?? 0) > 0 && <><dt className="text-text-muted">Apre</dt><dd className="m-0 flex flex-wrap gap-2">{libro.apre!.map((posto) => posto.casa ? <Link key={`${posto.tipo}:${posto.chiave}`} className="touch inline-flex items-center" to={posto.casa}>{posto.nome}</Link> : <span key={`${posto.tipo}:${posto.chiave}`}>{posto.nome}</span>)}</dd></>}
         {libro.negozi.length === 0 && libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : formattaYen(libro.prezzo)}</dd></>}
       </dl>
       {libro.dettagli && <p className="m-0 text-xs text-text-secondary">{libro.dettagli}</p>}

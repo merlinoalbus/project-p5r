@@ -3,8 +3,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, confermaRequisitoConfidente } from '../services/api';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { getConfidenteDettaglio, getConfidentiPartita, getRequisitiConfidente, impostaRegaloFatto, confermaRequisitoConfidente } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -12,9 +12,10 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { SemaforiRango } from '../components/partita/SemaforiRango';
-import { CorreggiRequisito } from '../components/partita/CorreggiRequisito';
+import { EditorRequisiti } from '../components/confidenti/EditorRequisiti';
+import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
 import { IconChevronLeft } from '../components/shared/icons';
-import type { DialogoConfidenteDto, SemaforoRequisitoDto } from '../types';
+import type { DialogoConfidenteDto } from '../types';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
@@ -68,9 +69,11 @@ export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto;
 export function ConfidenteDettaglioPage() {
   const { chiave = '' } = useParams();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
   const attiva = usePartitaStore((s) => s.attiva);
   const { dati: c, caricamento, errore, ricarica } = useCarica(() => getConfidenteDettaglio(chiave), [chiave]);
-  const stato = useCarica(() => (attiva ? getConfidentiPartita(attiva.id) : Promise.resolve(null)), [attiva?.id, chiave]);
+  const stato = useCarica(() => (attiva ? getConfidentiPartita(attiva.id) : Promise.resolve(null)), [attiva, chiave]);
+  const requisiti = useCarica(() => getRequisitiConfidente(chiave), [chiave]);
   useDocumentTitle(c ? c.nome : 'Confidente');
   const [aperti, setAperti] = useState<Record<number, true>>({});
   const mio = useMemo(() => (stato.dati ?? []).find((x) => x.chiave === chiave) ?? null, [stato.dati, chiave]);
@@ -78,8 +81,15 @@ export function ConfidenteDettaglioPage() {
   const prossimo = mio ? mio.rango + 1 : null;
 
   const [confermaInCorso, setConfermaInCorso] = useState(false);
-  /** Il requisito «da correggere» aperto nella finestra di correzione (una Richiesta che non c'è più, 2026-10-11). */
-  const [correzione, setCorrezione] = useState<{ rango: number; r: SemaforoRequisitoDto } | null>(null);
+  // Lo stesso parametro apre «Correggi» dalla Partita e governa la finestra anche durante la navigazione.
+  // Una copia in useState resterebbe aperta dopo un collegamento al Confidente senza il parametro.
+  const rangoChiesto = Number(params.get('requisiti'));
+  const rangoDaModificare = Number.isInteger(rangoChiesto) && rangoChiesto >= 1 && rangoChiesto <= 10 ? rangoChiesto : null;
+  const setRangoDaModificare = (rango: number | null) => {
+    const p = new URLSearchParams(params);
+    if (rango === null) p.delete('requisiti'); else p.set('requisiti', String(rango));
+    setParams(p, { replace: true });
+  };
   /** Conferma o annulla a mano un requisito di rango nella partita attiva, poi rilegge lo stato della partita; durante la richiesta i semafori sono occupati, l'errore viene notificato. */
   const conferma = async (rango: number, indice: number, confermato: boolean) => {
     if (!attiva) return;
@@ -111,31 +121,35 @@ export function ConfidenteDettaglioPage() {
       {c && (
         <div className="flex flex-col gap-4">
           <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
-          <div className="card flex flex-col sm:flex-row gap-4">
-            <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={160} forma="carta" modificabile />
+          <header className="card flex items-center gap-3">
+            <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={64} forma="carta" modificabile />
             <div className="flex-1 min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="titolo-display m-0">{c.nome}</h1>
+                <h1 className="titolo-display m-0 text-[24px] leading-tight">{c.nome}</h1>
                 <span className="chip chip--attivo">{c.arcanaNome}</span>
                 {mio && <span className="chip">Rango {mio.rango === 10 ? 'MAX' : mio.rango} nella partita</span>}
+              </div>
+            </div>
+          </header>
+          <section className="card flex flex-col gap-2" aria-label="Disponibilità del Confidente">
+              <div className="flex flex-wrap gap-2">
                 {mio && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Aggiorna il rango" to="/partita?scheda=confidenti" />}
                 <CollegamentoMappa tipo="confidente" chiave={c.chiave} compatto />
               </div>
               <div className="text-[13px] text-text-secondary flex flex-col gap-1">
                 <span><strong className="text-text">Dove:</strong> {c.disponibilita.luogo || '—'}</span>
                 <span><strong className="text-text">Quando:</strong> {c.disponibilita.giorni.join(', ') || '—'}{c.disponibilita.fasce.length ? ` · ${c.disponibilita.fasce.join(', ')}` : ''}</span>
-                <span><strong className="text-text">Sblocco:</strong> {c.disponibilita.sbloccoData || '—'}{c.disponibilita.sbloccoRequisiti ? ` · ${c.disponibilita.sbloccoRequisiti}` : ''}</span>
+                <span><strong className="text-text">Sblocco:</strong> {requisiti.caricamento ? 'Caricamento…' : requisiti.errore ? 'Requisiti non disponibili' : requisiti.dati?.ranghi.find((r) => r.rango === 1)?.requisiti.map((r) => r.descrizione).join(' · ') || 'Disponibile dall’inizio'}</span>
                 {c.disponibilita.note && <span>{c.disponibilita.note}</span>}
               </div>
               {c.noteGenerali && <p className="m-0 text-[13px] text-text-secondary whitespace-pre-wrap">{c.noteGenerali}</p>}
-            </div>
-          </div>
+          </section>
 
           {prossimo !== null && prossimo <= 10 && c.dialoghi.some((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo) && (
             <section className="card flex flex-col gap-2 border-primary">
               <h2 className="m-0 text-[15px] font-semibold">Prossimo passo: rango {prossimo}</h2>
               {mio && mio.semafori.length > 0 && mio.semafori[0].rango <= prossimo && (
-                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={(rango, r) => setCorrezione({ rango, r })} />
+                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={(rango) => setRangoDaModificare(rango)} />
               )}
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
                 {c.dialoghi.filter((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo).map((d) => (
@@ -148,9 +162,15 @@ export function ConfidenteDettaglioPage() {
           {mio && mio.semafori.length > 1 && (
             <section className="card flex flex-col gap-3">
               <h2 className="m-0 text-[15px] font-semibold">Requisiti dei ranghi successivi</h2>
-              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={(rango, r) => setCorrezione({ rango, r })} />)}
+              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={(rango) => setRangoDaModificare(rango)} />)}
             </section>
           )}
+          <section id="requisiti" className="card flex scroll-mt-20 flex-col gap-2">
+            <h2 className="m-0 text-[15px] font-semibold">Requisiti del Confidente</h2>
+            {requisiti.errore && <p className="m-0 text-[13px]" role="alert">{requisiti.errore} <button type="button" className="btn btn-sm touch" onClick={() => void requisiti.ricarica()}>Riprova</button></p>}
+            <button type="button" className="btn btn-secondary touch self-start" onClick={() => setRangoDaModificare(1)}>Modifica requisiti</button>
+          </section>
+          <InvitiConfidente filtro={{ confidente: c.chiave }} onCambiato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
           <section className="card flex flex-col gap-2">
             <h2 className="m-0 text-[15px] font-semibold">Abilità per rango</h2>
             {c.abilita.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessuna abilità documentata.</p> : (
@@ -209,8 +229,8 @@ export function ConfidenteDettaglioPage() {
           )}
         </div>
       )}
-      {correzione && c && <CorreggiRequisito confidente={{ chiave: c.chiave, nome: c.nome }} rango={correzione.rango} requisito={correzione.r}
-        onChiudi={() => setCorrezione(null)} onCorretto={async () => { await ricarica(); await stato.ricarica(); }} />}
+      {rangoDaModificare !== null && c && <EditorRequisiti key={`${c.chiave}:${rangoDaModificare}`} confidente={{ chiave: c.chiave, nome: c.nome }} rangoIniziale={rangoDaModificare}
+        onChiudi={() => setRangoDaModificare(null)} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica(), requisiti.ricarica()]); }} />}
     </PageState>
   );
 }

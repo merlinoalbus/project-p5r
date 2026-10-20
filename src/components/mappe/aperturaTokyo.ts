@@ -7,9 +7,8 @@
 // diverso, si passerebbe sopra a una scheda e non si accenderebbe niente lassù — e il
 // collegamento fra le due sembrerebbe rotto invece che coerente.
 //
-// Le condizioni vengono dalla Fase 2: `quartiere.sblocco_data` e la voce `finestre-dungeon` di `dati_guida`, valutate
-// con `ordineGioco`, la stessa funzione del resto dell'app. Senza partita non c'è niente da
-// decidere e il mondo si vede intero.
+// Lo stato visualizzato viene dal server. Il confronto di date esportato resta un'utilità del calendario,
+// non è usato per rivalutare la disponibilità della metro o delle schede.
 // ============================================================
 
 import { ordineGioco } from '../../../shared/condizioniSpillo';
@@ -27,12 +26,8 @@ export function dentroFinestra(oggi: string, dal: string, al: string | null): bo
  * con un libro letto o durante un Palazzo. Prima si guardava solo `sbloccoData`, e sedici
  * quartieri risultavano aperti dal primo giorno perché la loro condizione non era una data.
  *
- * Il ripiego sulla data resta per chi chiama senza partita e per i test che costruiscono un
- * quartiere a mano: non è un doppione della regola, è il caso in cui la regola non c'è. */
-export function quartiereAperto(
+ * La data è mantenuta nella firma per compatibilità: l'esito arriva interamente dal server. */
+export const quartiereAperto: (
   q: { sbloccoData?: string | null; disponibile?: boolean },
   dataGioco: string | null | undefined,
-): boolean {
-  if (q.disponibile === false) return false;
-  return !dataGioco || !q.sbloccoData || dentroFinestra(dataGioco, q.sbloccoData, null);
-}
+) => boolean = (q) => q.disponibile !== false;

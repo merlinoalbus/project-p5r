@@ -42,7 +42,7 @@ const attendi = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** Che cosa sta facendo il server, detto all'utente. */
 const NOME_FASE: Record<string, string> = {
   lettura: 'Il server sta leggendo il file dalla cartella d’appoggio',
-  verifica: 'Il server sta verificando il pacchetto',
+  verifica: 'Il server sta verificando il backup',
   'copia-di-sicurezza': 'Il server sta salvando la copia di sicurezza',
   sostituzione: 'Il server sta sostituendo i dati di gioco',
   riapertura: 'Il server sta riaprendo il database e applicando le migrazioni',
@@ -78,14 +78,14 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
   return (
     <div className="flex flex-col gap-3 text-[13px]">
       <p className="m-0 text-[14px]">
-        Il pacchetto «{origine}» ({byteTesto(a.databaseByte)}) sostituirà i <strong>dati di gioco</strong> di questa istanza: compendio, guida, catalogo, mappe, luoghi e immagini.
+        Il backup locale «{origine}» ({byteTesto(a.databaseByte)}) sostituirà il file <code>gioco.db</code> di questa istanza: compendio, guida, catalogo, mappe, luoghi e immagini. Le correzioni successive alla copia verranno sostituite dai valori del backup.
         Le <strong>partite non vengono toccate</strong>. Prima della sostituzione il server salva una copia di sicurezza in <code>data/backups</code>.
       </p>
       {!a.importabile && <p className="m-0 text-error" role="alert">{a.motivo}</p>}
       <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2">
-        <li><strong>Schema</strong> <span className="text-text-muted">pacchetto {a.versioneSchema} · istanza {a.versioneSchemaIstanza} · app {a.versioneSchemaCodice}{daApplicare ? ` (${daApplicare} ${daApplicare === 1 ? 'migrazione da applicare' : 'migrazioni da applicare'})` : ''}</span></li>
+        <li><strong>Schema</strong> <span className="text-text-muted">backup {a.versioneSchema} · istanza {a.versioneSchemaIstanza} · app {a.versioneSchemaCodice}{daApplicare ? ` (${daApplicare} ${daApplicare === 1 ? 'migrazione da applicare' : 'migrazioni da applicare'})` : ''}</span></li>
         <li><strong>Database</strong> <span className="text-text-muted">{byteTesto(a.databaseByte)}</span></li>
-        <li><strong>Immagini</strong> <span className="text-text-muted">{numero(a.immagini.pacchetto)} nel pacchetto · {numero(a.immagini.istanza)} nell'istanza ora</span></li>
+        <li><strong>Immagini</strong> <span className="text-text-muted">{numero(a.immagini.pacchetto)} nel backup · {numero(a.immagini.istanza)} nell'istanza ora</span></li>
       </ul>
       <div className="flex flex-col gap-1">
         <h3 className="m-0 text-[14px]">Tabelle che cambiano</h3>
@@ -94,7 +94,7 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
         ) : (
           <div className="area-scorrevole-x">
             <table className="w-full border-collapse text-[13px]" aria-label="Tabelle che cambiano">
-              <thead><tr className="text-left text-text-muted"><th className="py-0.5 pr-2 font-normal">Tabella</th><th className="py-0.5 pr-2 font-normal text-right">Ora</th><th className="py-0.5 font-normal text-right">Pacchetto</th></tr></thead>
+              <thead><tr className="text-left text-text-muted"><th className="py-0.5 pr-2 font-normal">Tabella</th><th className="py-0.5 pr-2 font-normal text-right">Ora</th><th className="py-0.5 font-normal text-right">Backup</th></tr></thead>
               <tbody>
                 {a.differenze.map((d) => (
                   <tr key={d.tabella}><td className="py-0.5 pr-2 font-mono">{d.tabella}</td><td className="py-0.5 pr-2 text-right tabular-nums">{numero(d.istanza)}</td><td className={`py-0.5 text-right tabular-nums ${d.pacchetto < d.istanza ? 'text-warning' : 'text-success'}`}>{numero(d.pacchetto)}</td></tr>
@@ -103,7 +103,7 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
             </table>
           </div>
         )}
-        {a.tabelleAssenti.length > 0 && <p className="m-0 text-text-muted">Non nel pacchetto (le migrazioni le ricreano vuote): {a.tabelleAssenti.join(', ')}.</p>}
+        {a.tabelleAssenti.length > 0 && <p className="m-0 text-text-muted">Non nel backup (le migrazioni le ricreano vuote): {a.tabelleAssenti.join(', ')}.</p>}
       </div>
       <div className="flex flex-col gap-1">
         <h3 className="m-0 text-[14px]">Riferimenti delle partite</h3>
@@ -144,7 +144,7 @@ export function PacchettoGioco() {
     try {
       const { nome, blob, depositato } = await scaricaPacchettoGioco();
       salvaFile(nome, blob);
-      notifica('success', `Pacchetto di gioco scaricato: ${nome} (${byteTesto(blob.size)})${depositato ? `, e depositato come «${depositato}» nella cartella d'appoggio` : ''}.`);
+      notifica('success', `Backup dei dati di gioco scaricato: ${nome} (${byteTesto(blob.size)})${depositato ? `, e depositato come «${depositato}» nella cartella d'appoggio` : ''}.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Esportazione fallita.');
     } finally {
@@ -159,7 +159,7 @@ export function PacchettoGioco() {
       const d = await getDepositoPacchetti();
       setDeposito(d);
       setFileScelto(d.file[0]?.nome ?? '');
-      if (d.disponibile && d.file.length === 0) notifica('info', `Nessun pacchetto in ${d.cartella}: depositaci il file gioco.db e riprova.`);
+      if (d.disponibile && d.file.length === 0) notifica('info', `Nessun backup in ${d.cartella}: depositaci una copia locale di gioco.db e riprova.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Lettura della cartella d’appoggio fallita.');
     } finally {
@@ -257,11 +257,11 @@ export function PacchettoGioco() {
   const chiudiAnteprima = () => { setAnteprima(null); setOrigine(null); };
 
   return (
-    <section className="card flex flex-col gap-3" aria-label="Pacchetto di gioco">
-      <h2 className="m-0 text-[15px] font-semibold">Pacchetto di gioco</h2>
+    <section className="card flex flex-col gap-3" aria-label="Backup dei dati di gioco">
+      <h2 className="m-0 text-[15px] font-semibold">Backup dei dati di gioco</h2>
       <p className="m-0 text-[13px] text-text-secondary">
         Un solo file, <code>gioco.db</code>: i <strong>dati di gioco</strong> senza le partite, con dentro compendio, guida, catalogo, mappe, luoghi e le immagini.
-        Un'istanza nuova parte con i soli dati iniziali: il pacchetto completo arriva dalla cartella d'appoggio, dove ogni scaricamento ne lascia una copia. L'importazione mostra prima un'anteprima e non tocca l'avanzamento delle partite.
+        «Scarica» salva una copia del database attuale. «Importa» sostituisce il file DB con un backup locale scelto dalla cartella d'appoggio del server, dopo l'anteprima e la conferma. Non tocca il file delle partite; per un backup che le comprenda usa «Backup e ripristino».
       </p>
       {s && (
         <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 text-[13px]">
@@ -269,8 +269,8 @@ export function PacchettoGioco() {
           <li><strong>Immagini nel database</strong> <span className="text-text-muted">{numero(s.immagini.file)} · {byteTesto(s.immagini.byte)}</span></li>
         </ul>
       )}
-      {s?.vuota && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza non ha dati di gioco: importa il pacchetto completo dalla cartella d'appoggio.</p>}
-      {s && !s.vuota && !s.completo && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza ha solo i dati iniziali (nessuna immagine): importa il pacchetto completo dalla cartella d'appoggio per avere mappe e grafica di gioco.</p>}
+      {s?.vuota && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza non ha dati di gioco: puoi ripristinarli importando un backup locale.</p>}
+      {s && !s.vuota && !s.completo && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza ha solo i dati iniziali (nessuna immagine). Un backup completo di gioco.db può ripristinare anche mappe e grafica.</p>}
       {stato.errore && <p className="m-0 text-[13px] text-error">{stato.errore}</p>}
       {anteprima === null && lavoroSulServer && (
         <div className="flex flex-col gap-1.5">
@@ -278,18 +278,18 @@ export function PacchettoGioco() {
         </div>
       )}
       <div className="flex flex-wrap gap-1.5 items-center">
-        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica il pacchetto di gioco" dettaglio="file gioco.db, immagini comprese" disabled={occupato} onClick={() => void esporta()} />
+        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica backup dati di gioco" dettaglio="file gioco.db, immagini comprese" disabled={occupato} onClick={() => void esporta()} />
       </div>
       <section className="flex flex-col gap-1.5" aria-label="Cartella d'appoggio">
         <h3 className="m-0 text-[14px]">Dalla cartella d'appoggio</h3>
         <p className="m-0 text-[12px] text-text-muted">
-          Deposita il file del pacchetto nella cartella condivisa (il NAS montato sul server) e importalo da qui: il file non passa dal browser, quindi la dimensione non è un problema.
+          Deposita il backup locale di gioco.db nella cartella condivisa montata sul server e importalo da qui: il file non passa dal browser. Questo comando sostituisce i dati di gioco, non li unisce a quelli attuali.
         </p>
         <div className="flex flex-wrap gap-1.5 items-center">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Cerca i file disponibili" dettaglio="guarda nella cartella d'appoggio" disabled={occupato} onClick={() => void cercaNelDeposito()} />
         </div>
         {deposito && !deposito.disponibile && <p className="m-0 text-[13px] text-warning" role="status">{deposito.motivo}</p>}
-        {deposito?.disponibile && deposito.file.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun pacchetto in <code>{deposito.cartella}</code>.</p>}
+        {deposito?.disponibile && deposito.file.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun backup in <code>{deposito.cartella}</code>.</p>}
         {deposito?.disponibile && deposito.file.length > 0 && (
           <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-end">
             <Selettore
@@ -300,12 +300,12 @@ export function PacchettoGioco() {
               onCambia={setFileScelto}
               disabilitato={occupato}
             />
-            <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Importa il file scelto" dettaglio="anteprima, poi sostituisce" disabled={occupato || !fileScelto} onClick={() => void scegliDalDeposito()} />
+            <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Importa backup locale" dettaglio="anteprima, poi sostituisce il DB" disabled={occupato || !fileScelto} onClick={() => void scegliDalDeposito()} />
           </div>
         )}
       </section>
       <Modal
-        titolo="Importare il pacchetto di gioco?"
+        titolo="Sostituire il DB con il backup locale?"
         aperta={anteprima !== null}
         onChiudi={chiudiAnteprima}
         larga
@@ -325,7 +325,7 @@ export function PacchettoGioco() {
         )}
       </Modal>
       <Modal
-        titolo="Pacchetto importato"
+        titolo="Backup dei dati di gioco importato"
         aperta={esito !== null}
         onChiudi={() => setEsito(null)}
         larga
@@ -343,6 +343,11 @@ export function PacchettoGioco() {
               Copia di sicurezza: <code>{esito.copiaDiSicurezza}</code>. Le partite sono {numero(esito.stato.partite)}, intatte.
             </p>
             <ElencoOrfani orfani={esito.orfani} quando="dopo" />
+            {!!esito.condizioniConvertite?.length && <section aria-label="Condizioni recuperate dal backup">
+              <h3 className="m-0 text-[14px]">Vecchie condizioni recuperate come avvisi</h3>
+              <p className="m-0 text-text-secondary">Non bloccano la disponibilità. Le altre condizioni non sono state riscritte da questo recupero.</p>
+              <ul className="m-0 pl-4">{esito.condizioniConvertite.map((c, i) => <li key={i}>{c}</li>)}</ul>
+            </section>}
             <p className="m-0 text-text-muted">Ricarica l'app per rileggere glossario, mappe, catalogo e grafica con i dati nuovi.</p>
           </div>
         )}

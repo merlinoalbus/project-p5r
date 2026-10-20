@@ -54,7 +54,7 @@ function schedaElemento(e: ElementoAreaDto): string {
 export function AreaPage() {
   const { chiave: contenitore = '', area: slug = '' } = useParams();
   const attiva = usePartitaStore((s) => s.attiva);
-  const dati = useCarica(() => getArea(contenitore, slug, attiva?.id), [contenitore, slug, attiva?.id]);
+  const dati = useCarica(() => getArea(contenitore, slug, attiva?.id), [contenitore, slug, attiva]);
   const a = dati.dati;
   const nomeContenitore = a?.contenitore.tipo === 'citta' ? 'La città' : a?.contenitore.nome;
   // il titolo della scheda del browser dice il posto e dove sta (L2, M8): «Central Street — Shibuya»
@@ -205,6 +205,8 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
         </div>
       </header>
 
+      {a.disponibile === false && <p className="m-0 shrink-0 text-[13px] text-text-secondary" role="status">Non ancora aperta: {a.bloccoMotivo ?? a.sblocco?.manca ?? a.sblocco?.testo ?? 'il quartiere non è ancora disponibile nella partita'}.</p>}
+
       <div className="shrink-0"><VersioniArea nome={a.nome} planimetrie={a.planimetrie} scelta={scelta?.chiave ?? ''} onScegli={scegli}
         coda={covo ? <Link to={PAGINA_COVO} className="chip touch no-underline hidden shrink-0 whitespace-nowrap text-[12px] lg:max-xl:inline-flex" title={TITOLO_COVO}>Sfide e Medaglie P del Covo</Link> : undefined} /></div>
 
@@ -258,17 +260,16 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
 /** Un luogo chiuso adesso o non ancora sbloccato (L5 §2): fuori dai menu, salvo «Mostra anche i non ancora disponibili» o se è il pin chiesto. */
 const chiusoAdesso = (e: ElementoAreaDto) => !!e.presenza && (e.presenza.sbloccato === false || e.presenza.aperto === false);
 
-/** Il pannello del visore: «Luoghi qui» (tocco = seleziona il pin, e il collegamento alla pagina del luogo), «Da posizionare» e «Aree vicine».
+/** Il pannello del visore: «Luoghi qui» (tocco = seleziona il pin, e il collegamento alla pagina del luogo) e «Aree vicine».
  *  L5 (F3): i luoghi chiusi adesso o non ancora sbloccati spariscono, come nel visore, con lo stesso interruttore; quelli solo per gli eventi
  *  di un Confidente non ci sono mai. */
 function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto, onAggiungiLuogo }: { area: AreaDettaglioDto; elementi: ElementoAreaDto[]; onSeleziona: (spillo: number) => void;
   nonDisponibili: { valore: boolean; onCambia: (v: boolean) => void }; pinChiesto: number | null;
-  /** L5 (F5): «Aggiungi luogo» (null) e «Posiziona» di un luogo senza pin; assente fuori dai quartieri. */
+  /** «Aggiungi luogo»; assente fuori dai quartieri. */
   onAggiungiLuogo?: (luogo: { chiave: string; nome: string } | null) => void }) {
   const candidati = elementi.filter((e) => !e.soloEventi);
   const chiusi = candidati.filter(chiusoAdesso).length;
   const visibili = candidati.filter((e) => nonDisponibili.valore || !chiusoAdesso(e) || e.spillo === pinChiesto);
-  const daPosizionare = area.daPosizionare ?? [];
   return (
     <div className="flex flex-col gap-3">
       <section className="visore-mappa__sezione" aria-label="Luoghi qui">
@@ -295,16 +296,6 @@ function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto,
         )}
         {onAggiungiLuogo && <button type="button" className="btn btn-secondary btn-sm touch self-start" onClick={() => onAggiungiLuogo(null)}>Aggiungi luogo</button>}
       </section>
-      {/* L5: i luoghi dell'area senza pin su una planimetria: la loro pagina, e «Posiziona» (il tocco sul punto della planimetria) */}
-      {daPosizionare.length > 0 && <section className="visore-mappa__sezione" aria-label="Da posizionare">
-        <h3 className="visore-mappa__intestazione">Da posizionare ({daPosizionare.length})</h3>
-        <ul className="m-0 flex list-none flex-col gap-1 p-0">
-          {daPosizionare.map((l) => <li key={l.chiave} className="flex items-center justify-between gap-2">
-            <Link className="touch inline-flex items-center" to={l.casa ?? `/guida/citta/${encodeURIComponent(l.quartiere ?? '')}`}>{l.nome}</Link>
-            {onAggiungiLuogo && <button type="button" className="visore-mappa__azione-testo touch text-[12px]" aria-label={`Posiziona ${l.nome}`} onClick={() => onAggiungiLuogo({ chiave: l.chiave, nome: l.nome })}>Posiziona</button>}
-          </li>)}
-        </ul>
-      </section>}
       {area.vicine.length > 0 && <section className="visore-mappa__sezione" aria-label="Aree vicine">
         <h3 className="visore-mappa__intestazione">Aree vicine</h3>
         <ul className="m-0 flex list-none flex-col gap-1 p-0">

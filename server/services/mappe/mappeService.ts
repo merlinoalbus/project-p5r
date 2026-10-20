@@ -33,13 +33,14 @@ import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, allineaStatiPunto, error
 import { conDivergenze, conStatoPerInfiltrazione, effettiDelGestoDto, modelloAvanzamento, riallineaStati, segnaIlPin, statiDellaPartita, statoDelPin, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
-import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { condizioneConTesto, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { casaDelLuogo, condizioniDiSblocco, lettureLuoghi, luogoDelPin, presenzaDelLuogo, type LettureLuoghi, type LuogoDelPin } from '../luoghiService.js';
 import { descriviOrariDelLuogo, orariDelLuogo } from '../../../shared/orariNegozio.js';
 import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, dopoImmagineMappa, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
 import { areaRifDellaMappa, casaDellaMappa, conAree, contestoAree, verificaIngressoNelQuartiere, type ContestoAree, type RigaArea } from './casaMappa.js';
 import { areaDisponibilePerPartita } from './disponibilitaAree.js';
+import { convertiManualiImportati } from '../condizioni/importazione.js';
 import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
@@ -516,7 +517,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
     if (delPalazzo) campiL4 = { contestoInfiltrazione: stato.contesto ? { chiave: stato.contesto, nome: l4.m.infiltrazioni.get(stato.contesto)?.nome ?? stato.contesto } : null, daVerificare: stato.daVerificare, statoProprio: stato.statoProprio };
   }
   const nomi = ctx.nomi ?? nomiCondizioni();
-  const condizioni: CondizioneSpilloDto[] = condizioniDiRiga(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
+  const condizioni: CondizioneSpilloDto[] = condizioniDiRiga(r.condizioni_json).map((c) => condizioneConTesto(c, nomi));
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La chiave della richiesta la
   // traduce nel nome il valutatore stesso (`valutaRequisito`): tradurla anche qui era un secondo passaggio inutile (rilievo R6).
   // L5: un pin di luogo (o di un negozio con sede) vale quanto il luogo adesso, con la presenza unica; gli altri pin di negozio (senza sede)
@@ -1961,7 +1962,21 @@ function identitaRettificata(identita:string): {identita:string;mappa?:string} {
 export interface EsitoImportazione { mappe: number; spilli: number; /** I pezzi delle planimetrie scritti (102: i ritagli). */ pezzi: number; /** Le copie posate scritte (103). */ copie: number; /** I pezzi scartati perché la zona esce dall'immagine della mappa d'arrivo, o nessuna copia ci sta (o la mappa non ne ha una). */ pezziScartati: number; /** Le copie scartate perché escono dall'immagine della mappa d'arrivo, comprese quelle dei pezzi scartati (103). */ copieScartate: number; /** I pezzi tolti, con le loro copie, perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number; /** Le copie tolte con quei pezzi (103). */ copieEliminate: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number;
   /** L3 (§3.6.3): pin, pezzi e copie tornati con lo stesso uid che non hanno potuto riprendere il loro id (preso da un'altra riga): id
    *  nuovo, con i riferimenti (voci, stati, passaggi, atterraggi, copie) che seguono l'uid nella stessa transazione. Assente se vuoto. */
-  idCambiati?: IdCambiatoImportazione[] }
+  idCambiati?: IdCambiatoImportazione[];
+  /** L6: vecchie condizioni lette come avvisi negli elementi effettivamente importati. */
+  condizioniConvertite?: string[] }
+
+/** Solo resoconto: la selezione e la normalizzazione delle condizioni restano in `condizioniConChiaviEsistenti`.
+ * Non si dichiara recuperato un nodo appartenente a una condizione scartata. */
+function conversioniAccettate(originali: readonly unknown[] | undefined, valide: readonly RequisitoSpillo[], origine: string): string[] {
+  const firme = new Set(valide.map((c) => JSON.stringify(c)));
+  const conversioni: string[] = [];
+  for (const [i, originale] of (originali ?? []).entries()) {
+    const normalizzata = normalizzaRequisitoSpillo(originale);
+    if (normalizzata && firme.has(JSON.stringify(normalizzata))) convertiManualiImportati(originale, `${origine}.condizioni[${i}]`, conversioni);
+  }
+  return conversioni;
+}
 /** Una riga reimportata con un id diverso da quello di prima (L3, §3.6.3). */
 export interface IdCambiatoImportazione { tipo: 'pin' | 'pezzo' | 'copia'; uid: string; prima: number; dopo: number }
 
@@ -2065,6 +2080,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
   }
   const origine = opz.origine ?? 'utente';
   const esito: EsitoImportazione = { mappe: 0, spilli: 0, pezzi: 0, copie: 0, pezziScartati: 0, copieScartate: 0, pezziEliminati: 0, copieEliminate: 0, immagini: 0, saltate: [], condizioniScartate: 0, vociScartate: 0 };
+  const conversioniCopie = new WeakMap<object, string[]>();
+  const conversioniPin = new Map<number, { originali: readonly unknown[] | undefined; origine: string }>();
   getDb().transaction(() => {
     // §8.11: il modello di prima, per riallineare gli stati delle partite ai legami nuovi (in fondo)
     const mPrima = modelloAvanzamento(getDb());
@@ -2200,10 +2217,12 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       if (m.pezzi !== undefined && conPezzi() && !(origine === 'seed' && !opz.sovrascrivi)) {
         const forma = schemaPezziPacchetto.safeParse(m.pezzi);
         if (!forma.success) throw httpErrors.badRequest('pezzi-non-validi', `Pezzi della planimetria non validi nella mappa '${chiaveMappa(m.chiave)}'.`);
-        pezziDaScrivere.push({ mappa: m.chiave, pezzi: forma.data.map((p) => ({ ...p, copie: p.copie.map((c) => {
+        pezziDaScrivere.push({ mappa: m.chiave, pezzi: forma.data.map((p, indicePezzo) => ({ ...p, copie: p.copie.map((c, indiceCopia) => {
           const { valide, scartate } = condizioniConChiaviEsistenti(c.condizioni as RequisitoSpillo[] | undefined, pinDelPacchetto);
           esito.condizioniScartate += scartate.length;
-          return { ...c, condizioni: valide };
+          const copia = { ...c, condizioni: valide };
+          conversioniCopie.set(copia, conversioniAccettate(c.condizioni, valide, `${m.chiave}.pezzi[${indicePezzo}].copie[${indiceCopia}]`));
+          return copia;
         }) })) });
       }
       // Con «sovrascrivi» la mappa viene sostituita per intero; altrimenti (seed sopra seed) si rimpiazzano solo gli spilli della stessa
@@ -2263,6 +2282,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
           .run(idDiPrima, m.chiave, s.tipo, s.nome, s.descrizione ?? '', x, y, riferimento?.tipo ?? null, riferimento?.chiave ?? null, categoria === 'consumabile' ? 1 : 0, s.ordine ?? 0, opz.origine ?? s.origine ?? origine, s.updatedAt ?? adesso,
             // le stesse condizioni del pin di prima restano scritte com'erano («[]» non diventa null)
             diPrima && JSON.stringify(condizioniDiRiga(diPrima.condizioni)) === JSON.stringify(condizioniDiRiga(jsonCondizioni(valide))) ? diPrima.condizioni : jsonCondizioni(valide));
+        if (ammetteCondizioni(s.tipo)) {
+          conversioniPin.set(Number(info.lastInsertRowid), { originali: s.condizioni, origine: `${m.chiave}, pin #${Number(info.lastInsertRowid)}` });
+        }
         // l'id di prima preso da un'altra riga: il pin ne ha uno nuovo, i suoi riferimenti lo seguono per uid; si dice nel riepilogo (§3.6.3)
         if (diPrima && idDiPrima === null) (esito.idCambiati ??= []).push({ tipo: 'pin', uid: s.uid as string, prima: diPrima.id, dopo: Number(info.lastInsertRowid) });
         if (conSeedIdentita) {
@@ -2461,6 +2483,10 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       esito.pezziScartati += pezziScartati;
       esito.copieScartate += copieScartate;
       const scritti = sostituisciPezzi(mappa, dentro, (c) => (esito.idCambiati ??= []).push(c));
+      for (const p of dentro) for (const c of p.copie) {
+        const recuperate = conversioniCopie.get(c) ?? [];
+        if (recuperate.length) (esito.condizioniConvertite ??= []).push(...recuperate);
+      }
       esito.pezzi += scritti.pezzi;
       esito.copie += scritti.copie;
     }
@@ -2488,6 +2514,13 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     for (const m of pacchetto.mappe) {
       if (m.updatedAt === undefined || esito.saltate.includes(m.chiave)) continue;
       prepared('UPDATE mappa SET updated_at = ? WHERE chiave = ? AND updated_at IS NOT ?').run(m.updatedAt, m.chiave, m.updatedAt);
+    }
+    // Dopo la verifica dei riferimenti tra pin: una condizione scartata a fine import non deve comparire tra i recuperi.
+    for (const [id, candidata] of conversioniPin) {
+      const r = prepared('SELECT condizioni_json FROM spillo WHERE id = ?').get(id) as { condizioni_json: string | null } | undefined;
+      if (!r) continue;
+      const recuperate = conversioniAccettate(candidata.originali, leggiCondizioniSalvate(r.condizioni_json), candidata.origine);
+      if (recuperate.length) (esito.condizioniConvertite ??= []).push(...recuperate);
     }
   })();
   return esito;

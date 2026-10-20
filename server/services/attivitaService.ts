@@ -17,7 +17,7 @@ import { registraEvento } from './storicoService.js';
 import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
-import { descriviRequisitoSpillo, foglieCondizione, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, foglieCondizione, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { casaDelLuogo } from './luoghiService.js';
 import { descriviVoceEffetto, dotiDaEffetti, leggiVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -35,7 +35,7 @@ function conDisponibilita(condizioniJson: string | null, st: StatoDisponibilita 
   try { grezze = normalizzaCondizioniSpillo(condizioniJson ? (JSON.parse(condizioniJson) as unknown) : []); } catch { grezze = []; }
   if (grezze.length === 0) return { condizioni: null, disponibilita: null };
   const nomi = nomiCondizioniMemo();
-  const condizioni = grezze.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
+  const condizioni = grezze.map((c) => condizioneConTesto(c, nomi));
   return { condizioni, disponibilita: st ? valutaRequisiti(condizioni as RequisitoDisponibilita[], st) : null };
 }
 
@@ -299,7 +299,7 @@ function noteDelConseguimento(riga: RigaLibro | RigaFilm | RigaAttivita, success
   const voci: VoceEffetto[] = leggiVociEffetto(riga.effetti_json);
   const nomi = nomiCondizioniMemo();
   return dotiDaEffetti(voci, { successiva })
-    .filter((d) => d.condizioni.length === 0 || valutaRequisiti(d.condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })) as RequisitoDisponibilita[], st).stato === 'disponibile')
+    .filter((d) => d.condizioni.length === 0 || valutaRequisiti(d.condizioni.map((c) => condizioneConTesto(c, nomi)) as RequisitoDisponibilita[], st).stato === 'disponibile')
     .map((d) => ({ dote: d.dote, note: Math.min(3, Math.max(1, d.note)) as 1 | 2 | 3 }));
 }
 

@@ -144,6 +144,7 @@ export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
     case 'evento': return EVENTI_STORIA[0].chiave;
     case 'contatore': return CONTATORI[0].chiave;
     case 'almeno': return 1;
+    case 'testo': return 'Da controllare nel gioco';
     default: return '';
   }
 }
@@ -176,7 +177,8 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'da-subito': return { tipo: 'da-subito' };
     case 'luogo': return s(v.luogo) ? { tipo: 'luogo', luogo: s(v.luogo) } : null;
     case 'invito': return s(v.invito) ? { tipo: 'invito', invito: s(v.invito) } : null;
-    case 'avviso': { const testo = s(v.testo).trim().slice(0, 300); return testo ? { tipo: 'avviso', testo } : null; }
+    // Nell'editor gli spazi in coda servono per scrivere la parola seguente; la normalizzazione avviene al salvataggio.
+    case 'avviso': { const testo = s(v.testo).slice(0, 300); return testo.trim() ? { tipo: 'avviso', testo } : null; }
     case 'arco': return (ARCHI_STORIA as readonly string[]).includes(s(v.dungeon)) ? { tipo: 'arco', dungeon: s(v.dungeon) } : null;
     case 'palazzo': return s(v.dungeon) ? { tipo: 'palazzo', dungeon: s(v.dungeon) } : null;
     case 'dote': return eDote(v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;

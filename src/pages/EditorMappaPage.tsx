@@ -19,7 +19,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaCopiaPezzoMappa, aggiornaElementoCatalogo, aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, getElementoCatalogo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaCopiaPezzoMappa, aggiornaElementoCatalogo, aggiornaMappa, aggiornaSpillo, getElementoCatalogo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -28,7 +28,7 @@ import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
-import { VisoreMappa, GalleriaSpillo, type StrumentiEditor, type StrumentoEditor } from '../components/mappe/VisoreMappa';
+import { VisoreMappa, type StrumentiEditor, type StrumentoEditor } from '../components/mappe/VisoreMappa';
 import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { PassaggiMappa } from '../components/mappe/PassaggiMappa';
 import { FormPezzo } from '../components/mappe/FormPezzo';
@@ -99,6 +99,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
     return { confidenti, quartieri, richieste: richieste.richieste, dungeon };
   }, []);
   const [strumento, setStrumento] = useState<StrumentoEditor>('seleziona');
+  const [condizioniImportate, setCondizioniImportate] = useState<string[]>([]);
   const [appunti, setAppunti] = useState<AppuntiSpillo | null>(leggiAppunti);
   const [tipoNuovo, setTipoNuovo] = useState<TipoSpillo>('nota');
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
@@ -235,9 +236,6 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={seleziona} sezione={sezione} onSezione={setSezione} onCopia={copia}
               onSalvaSpillo={(id, d) => esegui(() => aggiornaSpillo(id, d), 'Spillo salvato.')}
               onEliminaSpillo={(id) => esegui(async () => { await eliminaSpillo(id); setSelezionatoId(null); }, 'Spillo eliminato.')}
-              onAggiungiImmagine={(id, file, didascalia) => esegui(() => aggiungiImmagineSpillo(id, file, didascalia), 'Schermata aggiunta allo spillo (resta nella tua istanza).')}
-              onDidascalia={(id, didascalia) => esegui(() => aggiornaImmagineSpillo(id, { didascalia }), 'Didascalia salvata.')}
-              onEliminaImmagine={(id) => esegui(() => eliminaImmagineSpillo(id), 'Schermata eliminata.')}
               onCollegaVoce={(id, voce, collega) => esegui(() => collegaPinAlPunto(voce, id, collega), collega ? 'Voce della guida collegata.' : 'Voce della guida scollegata.')}
               onCreaMappaCollegata={(s) => esegui(async () => {
                 const nuova=await creaMappa({ nome:s.nome, tipo:dati.tipo==='palazzo'||dati.tipo==='dedalo'||dati.tipo==='area'?'area':'luogo', genitore:dati.chiave, ordine:dati.figli.length });
@@ -291,6 +289,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onImporta={(file, sovrascrivi) => esegui(async () => {
                 const pacchetto = JSON.parse(await file.text()) as EsportazioneMappeDto;
                 const esito = await importaMappe(pacchetto, sovrascrivi);
+                setCondizioniImportate(esito.condizioniConvertite ?? []);
                 await albero.ricarica();
                 notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${conta(esito.pezzi, 'pezzo', 'pezzi')} (${conta(esito.copie, 'copia', 'copie')}), ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}${esito.condizioniScartate ? `; ${esito.condizioniScartate} condizioni scartate perché citano chiavi assenti dalla Guida` : ''}${esito.vociScartate ? `; ${esito.vociScartate} voci della guida scartate (inesistenti, descrittive o di un altro Palazzo)` : ''}${esito.copieScartate ? `; ${conta(esito.copieScartate, 'copia scartata', 'copie scartate')} perché ${esito.copieScartate === 1 ? 'esce' : 'escono'} dall’immagine della loro mappa${esito.pezziScartati ? ` (con ${esito.copieScartate === 1 ? 'lei' : 'loro'} ${conta(esito.pezziScartati, 'pezzo rimasto', 'pezzi rimasti')} senza copie o con la zona fuori)` : ''}` : ''}${esito.pezziEliminati ? `; ${conta(esito.pezziEliminati, 'pezzo', 'pezzi')} (${conta(esito.copieEliminate, 'copia', 'copie')}) ${esito.pezziEliminati === 1 ? 'tolto perché ritagliato' : 'tolti perché ritagliati'} da un’immagine poi sostituita` : ''}.`);
               })}
@@ -325,6 +324,11 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           <p className="m-0 text-[13px]">{immagineDaConfermare?.messaggio} I pezzi sono ritagli in pixel di quell’immagine: su un’altra ritaglierebbero zone sbagliate.</p>
         </Modal>
       )}
+      {condizioniImportate.length > 0 && <Modal titolo="Condizioni recuperate dall’importazione" aperta onChiudi={() => setCondizioniImportate([])} larga
+        azioni={<button type="button" className="btn btn-secondary touch" onClick={() => setCondizioniImportate([])}>Chiudi</button>}>
+        <p className="mt-0 text-[13px]">Queste vecchie condizioni «manuale» sono lette come avvisi non bloccanti. Gli elementi saltati o scartati non sono inclusi.</p>
+        <ul className="m-0 pl-4 text-[13px]">{condizioniImportate.map((c, i) => <li key={i} className="break-words">{c}</li>)}</ul>
+      </Modal>}
       {dati && (
         <Modal titolo={`Eliminare la mappa «${dati.nome}»?`} aperta={confermaEliminaMappa} onChiudi={() => setConfermaEliminaMappa(false)}
           azioni={<>
@@ -357,9 +361,6 @@ interface PropsPannello {
   onSeleziona: (id: number | null) => void;
   onSalvaSpillo: (id: number, dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>;
   onEliminaSpillo: (id: number) => Promise<void>;
-  onAggiungiImmagine: (id: number, file: File, didascalia: string) => Promise<void>;
-  onDidascalia: (immagineId: number, didascalia: string) => Promise<void>;
-  onEliminaImmagine: (immagineId: number) => Promise<void>;
   /** Collega (o scollega) una voce della guida a uno spillo (098). */
   onCollegaVoce: (id: number, voce: string, collega: boolean) => Promise<void>;
   onCreaMappaCollegata: (s: SpilloDto) => Promise<void>;
@@ -483,7 +484,7 @@ function PannelloEditor(p: PropsPannello) {
       </section>
 
       {selezionato && (
-        <FormSpillo key={selezionato.id} spillo={selezionato} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} onCollegaVoce={(voce, collega) => p.onCollegaVoce(selezionato.id, voce, collega)} />
+        <FormSpillo key={selezionato.id} spillo={selezionato} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onCollegaVoce={(voce, collega) => p.onCollegaVoce(selezionato.id, voce, collega)} />
       )}
 
       {!selezionato && strumento === 'seleziona' && <p className="editor-mappa__aiuto">Seleziona un punto sulla mappa per modificarne nome, collegamento e condizioni, oppure scegli Aggiungi.</p>}
@@ -573,7 +574,7 @@ function PannelloEditor(p: PropsPannello) {
   );
 }
 
-interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void>; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
+interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
 
 const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'attivita', nome: 'Attività' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
 
@@ -645,9 +646,7 @@ function VociDelPin({ spillo: s, disabilitato, onCollega }: { spillo: SpilloDto;
 }
 
 /** Proprietà dello spillo selezionato: nome, tipo e descrizione, poi quel che la categoria del tipo richiede. */
-function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine, onCollegaVoce }: PropsFormSpillo) {
-  const inputSchermata = useRef<HTMLInputElement | null>(null);
-  const [didascaliaNuova, setDidascaliaNuova] = useState('');
+function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onCollegaVoce }: PropsFormSpillo) {
   const [nome, setNome] = useState(s.nome);
   const [tipo, setTipo] = useState<TipoSpillo>(s.tipo);
   // L5 (F3): un pin di luogo mostra nome e descrizione del luogo (fonte unica); qui la descrizione è la **nota del pin** (`notaPin`), così
@@ -752,26 +751,6 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         {categoria === 'spostamento' && !destinazione && aggiunta && <Link to={aggiunta.href} className="visore-mappa__azione-testo touch inline-flex items-center">{aggiunta.testo}</Link>}
         {modificato && categoria === 'spostamento' && !destinazione && !aggiunta && <span className="editor-mappa__avviso">Salva le modifiche prima di creare la mappa collegata.</span>}
       </form>
-      <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" aria-label="Schermate di riferimento">
-        <legend className="text-[12px] text-text-secondary">Schermate di riferimento ({s.immagini.length})</legend>
-        <GalleriaSpillo immagini={s.immagini} nome={s.nome} compatta />
-        {s.immagini.length > 0 && (
-          <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Didascalie delle schermate">
-            {s.immagini.map((i, n) => (
-              <li key={i.id} className="flex items-center gap-1 text-[12px]">
-                <span className="text-text-muted w-4 shrink-0">{n + 1}</span>
-                <input className="form-input flex-1 min-w-0" defaultValue={i.didascalia} placeholder="Didascalia" aria-label={`Didascalia della schermata ${n + 1}`} maxLength={300} onBlur={(e) => { if (e.target.value !== i.didascalia) void onDidascalia(i.id, e.target.value); }} />
-                <button type="button" className="visore-mappa__azione-testo" onClick={() => void onEliminaImmagine(i.id)} disabled={occupato} aria-label={`Elimina la schermata ${n + 1}`}>Elimina</button>
-              </li>
-            ))}
-          </ul>
-        )}
-        <input ref={inputSchermata} type="file" accept="image/*" className="sr-only" aria-label="File della schermata" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) { void onAggiungiImmagine(f, didascaliaNuova.trim()); setDidascaliaNuova(''); } e.target.value = ''; }} />
-        <div className="flex gap-1">
-          <input className="form-input flex-1 min-w-0" value={didascaliaNuova} onChange={(e) => setDidascaliaNuova(e.target.value)} placeholder="Didascalia della nuova schermata (facoltativa)" aria-label="Didascalia della nuova schermata" maxLength={300} />
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi schermata" disabled={occupato} onClick={() => inputSchermata.current?.click()} />
-        </div>
-      </fieldset>
     </section>
   );
 }

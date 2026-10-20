@@ -19,7 +19,7 @@ mano (preparazione per L9).
 
 **Fatto quando** (piano, riga 419): ogni sblocco ha una sola forma; Odaiba e Asakusa seguono il libro; la Clinica ha una data sola.
 (Precisazioni decise dall'utente il 2026-10-20: Odaiba si apre con la lettura di «Luoghi della movida» oppure con Ann al rango 10;
-Asakusa con Ann al rango 7; la Clinica ha due date per due cose diverse, il 16/4 per il negozio e il 18/4 per il Confidente — R6-10, R6-12.)
+Asakusa con Ann al rango 7 **oppure** lo Skytree aperto dal libro, come chiarito dall'utente il 2026-10-21; la Clinica ha due date per due cose diverse, il 16/4 per il negozio e il 18/4 per il Confidente — R6-10, R6-12.)
 
 ## Perimetro (contesto, da misurare in `dati.md`)
 - Sblocco di un quartiere in 7 copie: 13 quartieri sempre «rossi» nelle condizioni; 3 libri ignorati (Odaiba e Asakusa fra questi).
@@ -85,8 +85,8 @@ Tipo: **F** funzionale, **UX** esperienza, **NR** no-reg, **L** layout.
 - R6-09 [F] «Quartiere aperto» ha un solo significato in tutte le viste (metro, città, condizioni dei pin, disponibilità).
 - R6-10 [F] Odaiba e Asakusa seguono la condizione **decisa dall'utente (2026-10-20, tramite il PM)**, che corregge la formula del piano «Odaiba e Asakusa seguono il libro»:
   - **Odaiba / Seaside Park** si sblocca con **la lettura completata del libro «Luoghi della movida» OPPURE Ann (Amanti) al rango 10**: le due condizioni sono **in alternativa** (un gruppo «una delle due»). La data del 1° giugno è quella in cui il libro va in vendita, non lo sblocco, e non compare nella condizione. Nella partita di prova: completare la lettura apre il quartiere e togliere la lettura lo richiude, se Ann non è al rango 10; con Ann al rango 10 il quartiere è aperto anche senza la lettura.
-  - **Asakusa** si sblocca con **Ann (Amanti) al rango 7**, senza libro. Nella partita di prova, salire al rango 7 lo apre e tornare sotto lo richiude.
-  - Il libro «Shitamachi rinato» sblocca lo **Skytree** (luogo), non il quartiere (Esperto della guida, G-009).
+  - **Asakusa** si sblocca con **Ann (Amanti) al rango 7 OPPURE lo Skytree aperto**: basta una delle due condizioni. Chiarimento esplicito dell'utente del 2026-10-21. Tornare sotto il rango 7 richiude il quartiere solo se neppure lo Skytree è aperto.
+  - Il libro «Shitamachi rinato» sblocca lo **Skytree** (luogo), che è la seconda via di apertura del quartiere. Non sblocca il ritrovo di Ann, che conserva il requisito di rango 7. La migrazione 118 esprime già questo OR: nessuna nuova migrazione o modifica dei dati necessaria per il chiarimento.
 - R6-11 [F] Il libro mostra cosa sblocca, letto dalla condizione del posto sbloccato (non da una frase sul libro); i 3 libri oggi ignorati sbloccano davvero.
 - R6-12 [F] La Clinica (Takemi) ha **due date per due cose diverse** (decisione dell'utente, 2026-10-20, tramite il PM; Esperto della guida, G-006), ciascuna scritta in un posto solo:
   - il **16 aprile** è la prima data utile del **negozio di farmaci**, cioè lo sblocco del luogo/negozio;

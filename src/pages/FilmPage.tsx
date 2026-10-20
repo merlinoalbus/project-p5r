@@ -9,6 +9,7 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { descriviRequisitoSpillo } from '../../shared/condizioniSpillo';
 import { Selettore } from '../components/shared/Selettore';
 import { Segmenti } from '../components/shared/Segmenti';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
@@ -113,7 +114,7 @@ export function FilmPage() {
     const cinema = film.dove === 'cinema';
     const percentuale = cinema ? Number(iniziato) * 100 : Math.round((progresso / film.totaleSessioni) * 100);
     const nonAncora = bloccata(film.disponibilita);
-    const quando = (film.condizioni ?? []).map((c) => c.testo).join(' · ');
+    const quando = (film.condizioni ?? []).map((c) => c.tipo === 'avviso' ? descriviRequisitoSpillo(c) : c.testo).join(' · ');
     return <li key={film.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${completato ? 'border-success/50' : ''}`}>
       <div className="flex items-start gap-3">
         {/* Il disco per i DVD, la pellicola per il cinema: la figura dice dove si guarda. */}

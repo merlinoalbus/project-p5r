@@ -19,7 +19,7 @@ import { z } from 'zod';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
-import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { condizioneConTesto, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import type { CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, PezzoMappaDto, PezzoPacchetto, RotazionePezzo } from '../../../shared/types.js';
 import { ingombroPezzo } from '../../../shared/pezziMappa.js';
@@ -80,7 +80,7 @@ export function conPezzi(): boolean {
 
 /** La copia per l'API: con lo stato della partita (`st`) porta l'esito delle condizioni, come i pin. */
 export function copiaDto(r: RigaCopia, nomi: NomiCondizioni, st?: StatoDisponibilita | null): CopiaPezzoDto {
-  const condizioni = leggiCondizioniSalvate(r.condizioni_json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) }));
+  const condizioni = leggiCondizioniSalvate(r.condizioni_json).map((c) => condizioneConTesto(c, nomi));
   return {
     id: r.id, uid: r.uid, pezzoId: r.pezzo_id, etichetta: r.etichetta,
     posizione: { x: r.x, y: r.y }, rotazione: r.rotazione,

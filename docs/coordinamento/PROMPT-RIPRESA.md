@@ -39,6 +39,6 @@ Riprendi il lavoro sul progetto project-p5r, ramo `newreview` (repository https:
   - mai dati personali (compresa l'email dell'utente), copie di database, schermate, indirizzi di server o chiavi: il repository è pubblico.
 - **Regia:** `docs/coordinamento/stato.json`, mostrata da `docs/coordinamento/regia/server.cjs` su localhost:5999. Va tenuta aggiornata.
 
-**4. Ogni volta che ti fermi:** aggiorna `STATO-ATTUALE.md`, `richieste-utente-aperte.md` e `stato.json`, poi fai commit e push su `newreview`.
+**4. Salvataggi e pubblicazione (ultima decisione dell'utente):** aggiorna localmente `STATO-ATTUALE.md`, `richieste-utente-aperte.md` e `stato.json` durante il lavoro. Completa un lotto intero; soltanto alla fine fai commit e push su `newreview` di codice e coordinamento insieme, poi segui la pipeline e guarda p5s. Niente commit o pipeline per ogni aggiornamento intermedio dei documenti.
 
 ---

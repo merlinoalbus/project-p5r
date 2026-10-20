@@ -6,7 +6,7 @@
 // Lo stesso file viene lasciato anche nella CARTELLA D'APPOGGIO (il NAS montato sul server), così è insieme salvato e già pronto
 // per essere rimesso: «Cerca i file disponibili» elenca ciò che c'è lì e il ripristino lo legge il server, senza far passare
 // centinaia di MB dal browser. «Ripristina» SOSTITUISCE l'istanza corrente: chiede conferma, e il server salva comunque una
-// copia di sicurezza di ciò che c'era prima. Il solo file dei dati di gioco si scarica e si importa dalla card «Pacchetto di gioco».
+// copia di sicurezza di ciò che c'era prima. Il solo file dei dati di gioco si scarica e si importa dalla card «Backup dei dati di gioco».
 // ============================================================
 
 import { useState } from 'react';

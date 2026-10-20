@@ -14,7 +14,8 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 // quando un Palazzo è concluso lo decide `palazziService` (Tesoro e boss finale: mai la data)
 import { statoPalazzi } from './palazziService.js';
-import { EVENTI_STORIA, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { EVENTI_STORIA, condizioneConTesto, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { type MeteoPartita } from '../../shared/meteoPartita.js';
 import { meteoOra } from './meteoService.js';
 export { dataLeggibile };
@@ -116,7 +117,8 @@ export function condizioneDelRequisito(r: Pick<RigaRequisito, 'tipo' | 'dati_jso
 export function valuta(r: RigaRequisito, st: StatoValutazione): SemaforoRequisitoDto {
   const c = condizioneDelRequisito(r);
   if (!c) return { indice: r.indice, tipo: r.tipo, testo: r.testo, confermato: false, stato: 'grigio', dettaglio: 'Requisito non leggibile: correggilo dalla pagina del Confidente', manuale: false };
-  return { ...valutaCondizione({ ...c, testo: r.testo }, r.indice, st, { comeRequisito: true }), indice: r.indice, testo: r.testo };
+  const nomi = nomiCondizioniMemo();
+  return valutaCondizione(condizioneConTesto(c, nomi), r.indice, st, { comeRequisito: true, nomi });
 }
 
 /** Il requisito conta per sapere se il rango è raggiungibile: le avvertenze no. */

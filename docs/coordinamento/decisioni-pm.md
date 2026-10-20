@@ -2,6 +2,11 @@
 
 | Data | Lotto | Decisione | Motivo |
 |---|---|---|---|
+| 2026-10-21 | L6 | **Chiarimento dell'utente su Asakusa**: «sblocco se vale la prima o la seconda condizione». Il quartiere si apre con Ann rango 7 **oppure** Skytree aperto dal libro «Shitamachi rinato»; non servono entrambe. La migrazione 118 è già coerente; corretto R6-10, nessuna nuova migrazione | superata la precedente formulazione incompleta «solo Ann rango 7» |
+| 2026-10-20 | processo | **Decisione dell'utente**: lavorare su un lotto intero e fare commit e push soltanto alla fine, con codice e documenti insieme | evitare commit e pipeline intermedi ripetuti |
+| 2026-10-20 | dati | **Decisione dell'utente**: «Importa» resta e sostituisce il file DB con un backup locale | il DB resta la fonte unica |
+| 2026-10-20 | guida visore | **Decisione dell'utente**: la guida va bene com'è, con tutte le infiltrazioni associate alla planimetria | nessun filtro nuovo |
+| 2026-10-20 | interfaccia | **Decisione dell'utente, perimetro ristretto**: togliere solo il blocco «Da posizionare» in errore nel pannello dell'Area; non cambiare altri processi funzionanti né aggiungere nuovi tipi di pin. Separatamente togliere «Schermate di riferimento / Aggiungi schermata» dall'editor | preservare l'architettura e i flussi esistenti |
 | 2026-10-20 | L1 | **Decisione dell'utente** (risposta alla domanda F1/F2/F7): «Illustrazione anche nelle schede» — schede de La città e intestazioni di quartiere e Palazzo con l'illustrazione della mappa e il segno sopra; la metro resta con sagome e stemmi | parole dell'utente |
 | 2026-10-20 | L1 | **Autorizzazione dell'utente**: scaricare il testo della LGPL-3.0 da gnu.org in `licenze/` («autorizzo L1 · permesso di scaricare il testo della LGPL-3.0…») | richiesta di licenza di libvips |
 | 2026-10-20 | L1 | Scelta del PM (UX-2): sagome e stemmi della metro e delle schede sempre visibili, a prescindere dalla preferenza della grafica predefinita; la preferenza decide solo il ripiego sull'asset | decisione dell'utente «la metro resta con sagome e stemmi»; F7 del validatore |

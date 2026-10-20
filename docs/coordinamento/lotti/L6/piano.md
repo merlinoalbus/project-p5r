@@ -1,5 +1,7 @@
 # L6 «Condizioni uniche» — piano di lavoro per BE e FE
 
+**Aggiornamento della ripresa 2026-10-21**: le prescrizioni operative storiche sotto su test, tester, validatori e commit per pezzo sono superate dalle istruzioni dell'utente: zero test, nessun nuovo validatore, typecheck e lint verdi, unico commit/push di fine lotto con coordinamento. Le prove funzionali restano all'utente. Asakusa è Ann rango 7 OPPURE Skytree aperto dal libro (R6-10 aggiornato), già espresso dalla migrazione 118.
+
 Autore: Stesura modifiche, 2026-10-20. Il *cosa* sta in `lotti/L6/modifiche.md`, qui abbreviato «M» (§ e righe); questo file dice
 **in che ordine** si lavora, **chi** fa cosa, le dipendenze e cosa si prova appena un pezzo è pronto. **Si comincia solo col via del PM.**
 Dati di riferimento: la copia più recente in `dati-produzione/` (oggi la base `p5s-2026-10-20-0503Z`, impronta `ff3033cb…`).

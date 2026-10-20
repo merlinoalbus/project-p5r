@@ -37,7 +37,13 @@ function destinazione(grigi: DisponibilitaDto['requisiti']): string {
  * `compatto` riduce testo e icona.
  */
 export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilita: DisponibilitaDto | undefined; compatto?: boolean }) {
-  if (!d || d.stato === 'disponibile') return null;
+  if (!d) return null;
+  const proprie = (d.requisiti ?? []).filter((r) => !r.daNegozio);
+  const avvisi = proprie.filter((r) => r.bloccante === false);
+  const avvertenza = avvisi.length > 0 ? <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={avvisi.map((r) => `${r.testo} — ${r.dettaglio}`).join(' · ')} role="img" aria-label={`Avviso non bloccante: ${avvisi.map((r) => r.testo).join(' · ')}`}>
+    <IconaAzione chiave="allarme" dimensione={compatto ? 12 : 14} />Avviso
+  </span> : null;
+  if (d.stato === 'disponibile') return avvertenza;
   const motivi = motiviDisponibilita(d);
   if (d.stato === 'bloccato') {
     return (
@@ -61,21 +67,14 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   // negozio, l'avviso e' gia' scritto sul negozio, tre righe piu' su. Ripeterlo su ogni articolo
   // riempiva il pannello di cartellini identici, e un elenco dove tutto e' segnalato non segnala
   // piu' niente: sembrava che i tre articoli avessero un problema ciascuno, e non ne avevano.
-  const proprie = (d.requisiti ?? []).filter((r) => !r.daNegozio);
-  const grigiProprie = proprie.filter((r) => r.stato === 'grigio');
-  if (grigiProprie.length === 0 && proprie.every((r) => r.stato !== 'rosso')) return null;
-  const nonLeggibili = grigiProprie.some((r) => r.tipo === 'manuale');
+  const grigiProprie = proprie.filter((r) => r.stato === 'grigio' && r.bloccante !== false);
+  if (grigiProprie.length === 0 && proprie.every((r) => r.stato !== 'rosso')) return avvertenza;
   // il grigio di uno stato di un altro pin (2026-10-03) è una condizione rotta — il pin citato non c'è più o non ha più uno
   // stato —, come quello di una voce della guida che non c'è più o è diventata descrittiva (2026-10-11): nella partita non c'è
   // niente da segnare, la si corregge nell'editor della mappa
   const nellaMappa = grigiProprie.some((r) => r.tipo === 'spillo' || r.tipo === 'voce-guida');
   // e il grigio di una Richiesta citata che non c'è più (eliminata, 2026-10-11): si corregge dove sta la condizione
   const daCorreggere = nellaMappa || grigiProprie.some((r) => r.tipo === 'richiesta');
-  if (nonLeggibili) return (
-    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Da verificare: ${motivi}`}>
-      <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da verificare
-    </span>
-  );
   if (daCorreggere) return (
     <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Condizione da correggere${nellaMappa ? ' nell’editor della mappa' : ''}: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da correggere

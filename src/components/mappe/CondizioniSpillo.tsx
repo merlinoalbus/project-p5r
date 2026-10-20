@@ -10,6 +10,7 @@
 
 import type { CondizioneSpilloDto, DisponibilitaDto, SemaforoRequisitoDto } from '../../types';
 import { IconaAzione } from '../shared/IconaAzione';
+import { descriviRequisitoSpillo } from '../../../shared/condizioniSpillo';
 
 const COLORE: Record<SemaforoRequisitoDto['stato'], string> = { verde: 'bg-success', rosso: 'bg-error', grigio: 'bg-text-muted' };
 const NOME_STATO: Record<SemaforoRequisitoDto['stato'], string> = { verde: 'soddisfatta', rosso: 'non soddisfatta', grigio: 'non verificabile' };
@@ -20,15 +21,15 @@ export function CondizioniSpilloElenco({ condizioni, disponibilita, compatto }: 
   const testo = compatto ? 'text-[11px]' : 'text-[12px]';
   return (
     <div className={`flex flex-col gap-0.5 ${testo}`} role="group" aria-label="Condizioni di visibilità">
-      <span className="flex items-center gap-1 text-text-muted uppercase tracking-wide text-[10px]"><IconaAzione chiave="bloccato" dimensione={12} />Visibile solo</span>
+      <span className="flex items-center gap-1 text-text-muted uppercase tracking-wide text-[10px]"><IconaAzione chiave="bloccato" dimensione={12} />Condizioni</span>
       <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
         {condizioni.map((c, i) => {
           const esito = disponibilita?.requisiti[i];
           return (
             <li key={`${c.tipo}-${i}`} className="flex items-start gap-1.5">
-              {esito && <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${COLORE[esito.stato]}`} role="img" aria-label={`Condizione ${NOME_STATO[esito.stato]}`} title={NOME_STATO[esito.stato]} />}
+              {esito && <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${COLORE[esito.stato]}`} role="img" aria-label={esito.bloccante === false ? 'Avviso: non blocca' : `Condizione ${NOME_STATO[esito.stato]}`} title={esito.bloccante === false ? 'Avviso: non blocca' : NOME_STATO[esito.stato]} />}
               <span className="min-w-0 flex-1">
-                <span className="block">{c.testo}</span>
+                <span className="block">{c.tipo === 'avviso' ? descriviRequisitoSpillo(c) : c.testo}</span>
                 {esito && esito.stato !== 'verde' && <span className="block text-text-muted">{esito.dettaglio}</span>}
               </span>
             </li>

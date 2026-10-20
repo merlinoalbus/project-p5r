@@ -1,5 +1,7 @@
 # Indice della memoria — project-p5r
 
+- [Commit e pubblicazione a fine lotto](feedback-commit-fine-lotto.md) — decisione più recente: un solo commit/push a fine lotto; «Importa» da backup locale e guida del visore confermati
+
 - [Modifiche dirette ai file](feedback-modifiche-dirette.md) — niente patch né script (Python o tsx) che scrivono sorgenti, dati o documenti
 - [Flusso di lavoro dei lotti](project-flusso-di-lavoro-p5r.md) — worktree main, ramo lavoro/…, validatore emulato in sola lettura, PR + merge + solo main
 - [Browser pane nascosto](reference-browser-pane-p5r.md) — click/hover non arrivano (nascosto o sotto emulazione scalata): gesti a misura reale, misure in emulazione, pulire i dati di prova

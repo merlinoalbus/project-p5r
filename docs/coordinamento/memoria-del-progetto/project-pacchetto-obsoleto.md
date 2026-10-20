@@ -17,4 +17,5 @@ Precisazione dell'utente: «il pacchetto di gioco dovrebbe essere stato inglobat
 **How to apply:**
 - Una correzione ai dati si fa con una migrazione che scrive direttamente nel DB. Niente regole che girano «all'avvio o al caricamento del pacchetto» per ripulire i dati.
 - Non si progettano funzioni nuove sul pacchetto. In L11 la voce «rigenerazione di `pacchetto/gioco.db`» non si fa così: si decide con l'utente se togliere il pacchetto dall'app e dalla documentazione (CLAUDE.md lo descrive ancora).
+- **Precisazione successiva dell'utente, 2026-10-20**: «Importa» non si toglie; deve sostituire il file DB con un backup locale. Il DB resta la fonte unica. Allineare interfaccia e documentazione al ripristino da backup, senza eseguire ripristini sui dati dell'utente durante lo sviluppo.
 - Vedi [[project-dati-attuali-produzione]].

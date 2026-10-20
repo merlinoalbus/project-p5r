@@ -35,6 +35,7 @@ import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltra
 import { areeDelPalazzo } from './mappe/areeService.js';
 import { atterraggioDelPalazzo, palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziService.js';
 import { elencaAtterraggi } from './atterraggioPalazziService.js';
+import { copreIlGiorno } from './condizioni/valutatore.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
 import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
 import { letturePlanimetrieDelleVoci, planimetriaDellaVoce, planimetrieDellaVoce, type PlanimetrieDelleVoci } from './mappe/planimetriaDellaVoce.js';
@@ -268,11 +269,15 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
   const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo, p.area_dedalo_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string; area_dedalo_chiave: string | null }>;
   const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId, stati) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(gia.raccolta ?? raccoltaMappe(r.chiave, partitaId, gia.segni));
   const palazzo = r.tipo === 'palazzo';
+  const giorno = giornoDellaPartita(partitaId);
+  const finestra = finestreDungeon().get(r.chiave) ?? null;
+  const concluso = palazzo && !palazzi.get(r.chiave)?.senzaEffetti ? palazzi.get(r.chiave)?.concluso : null;
   const sp = gia.segni ?? null;
   return {
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
     date: { sblocco: r.data_sblocco, scadenza: r.data_scadenza, furtoConsigliato: r.furto_consigliato },
-    finestra: finestreDungeon().get(r.chiave) ?? null, livelloConsigliato: r.livello_consigliato,
+    finestra, livelloConsigliato: r.livello_consigliato,
+    disponibile: !concluso && (!giorno || !finestra || copreIlGiorno([finestra.al ? { tipo: 'intervallo', dal: finestra.dal, al: finestra.al } : { tipo: 'data', dal: finestra.dal }], giorno)),
     aree: (prepared('SELECT COUNT(*) AS n FROM dungeon_area WHERE dungeon_chiave = ?').get(r.chiave) as { n: number }).n,
     punti: punti.length, esauribili: punti.filter((p) => p.esauribile === 1).length,
     // le voci descrittive della guida («Altro» fuori dalle aree dei dedali) non hanno stato (scelte dell'utente, 2026-10-01 e 2026-10-11): non contano.

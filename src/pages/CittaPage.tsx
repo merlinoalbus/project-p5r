@@ -18,7 +18,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { MappaTokyo } from '../components/mappe/MappaTokyo';
-import { quartiereAperto } from '../components/mappe/aperturaTokyo';
+import { dataLeggibile } from '../../shared/condizioniSpillo';
 import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
 import { IllustrazioneConSegno } from '../components/mappe/IllustrazioneConSegno';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -40,7 +40,7 @@ export function CittaPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   // La partita serve all'API, non solo alla pagina: senza, non può dire se un quartiere che si
   // apre col rango di un Confidente o con un libro sia già nel mondo.
-  const dati = useCarica(() => getQuartieri(attiva?.id), [attiva?.id]);
+  const dati = useCarica(() => getQuartieri(attiva?.id), [attiva]);
   // Mappa e schede sono **una** selezione vista in due modi, come nei Memento: si passa sopra a
   // una scheda e si accende la sagoma lassù, si passa sopra a una sagoma e si accende la scheda.
   // Su una mappa fatta di figure accostate, ritrovare «quale delle due è Ogikubo» è il lavoro che
@@ -52,7 +52,7 @@ export function CittaPage() {
   // ci stanno anche i Memento, che l'utente ha chiesto per nome e che dal 9 maggio sono un posto
   // dove si può andare quanto gli altri. Con la partita, perché un Palazzo completato sparisce.
   // Col giorno della partita, perché da quello dipende dove si atterra toccando un Palazzo (`atterraggio`, 2026-10-04).
-  const dungeon = useCarica(async () => radiciMetaverso(await getDungeons(attiva?.id)), [attiva?.id, attiva?.dataGioco]);
+  const dungeon = useCarica(async () => radiciMetaverso(await getDungeons(attiva?.id)), [attiva]);
   const q = dati.dati;
   return (
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
@@ -85,7 +85,7 @@ export function CittaPage() {
                 quartiere andava a capo una lettera per riga (rilievo dell'utente, 2026-09-29). */}
             <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] xl:flex-1 xl:min-w-[340px] xl:max-h-[calc(68vh+2.5rem)] xl:area-scorrevole xl:p-1" aria-label="Quartieri">
             {q.map((x) => {
-              const aperto = quartiereAperto(x, attiva?.dataGioco ?? null);
+              const aperto = x.disponibile !== false;
               const suggerito = sugg.evidenziato('quartieri', x.chiave);
               return (
               <li key={x.chiave} className="flex">
@@ -107,7 +107,7 @@ export function CittaPage() {
                     {/* Il quartiere chiuso resta in elenco — la guida serve anche a sapere cosa
                         arriverà — ma la scheda lo dice, perché lassù non c'è una sagoma da
                         accendere e il collegamento sembrerebbe rotto. */}
-                    {!aperto && <span className="chip text-[11px]" title={x.bloccoMotivo ?? undefined}>Non ancora aperto{x.sbloccoData && <> · <span className="whitespace-nowrap">dal {x.sbloccoData}</span></>}</span>}
+                    {!aperto && <span className="chip text-[11px]" title={x.bloccoMotivo ?? undefined}>Non ancora aperto{x.sbloccoData && <> · <span className="whitespace-nowrap">dal {dataLeggibile(x.sbloccoData)}</span></>}</span>}
                   </span>
                   {suggerito && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
                   <span className="text-[12px] text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>

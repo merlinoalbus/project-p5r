@@ -2,8 +2,13 @@
 // API condizioni — elenchi per l'editor delle condizioni e stati della partita da segnare a mano (Partita → Progressi)
 // ============================================================
 
-import { apiGet, apiPut } from './_helpers';
-import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, VoceCitabileDto } from '../../types';
+import { apiGet, apiPost, apiPut } from './_helpers';
+import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../types';
+import type { Condizione } from '../../../shared/condizioniSpillo';
+
+/** Anteprima delle condizioni: il client mostra l'esito del valutatore unico del server. */
+export const valutaCondizioni = (condizioni: Condizione[], partita: number, giorno?: string): Promise<RispostaValutaCondizioniDto> =>
+  apiPost('/condizioni/valuta', { condizioni, partita, ...(giorno ? { giorno } : {}) });
 
 /** Gli elenchi chiusi da cui l'editor delle condizioni prende i valori. */
 export const getElenchiRegole = (): Promise<ElenchiRegoleDto> => apiGet('/condizioni/elenchi');

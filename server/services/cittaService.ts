@@ -24,7 +24,7 @@ import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { condizioneEffettivaQuartiere, tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
 import { cosaManca } from './condizioni/valutatore.js';
-import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { valutaInsieme } from './condizioni/valutatore.js';
 import { elencaInviti } from './inviti.js';
@@ -49,7 +49,7 @@ function disponibilitaQuartiere(chiave: string, st: StatoDisponibilita | null): 
   // la prosa della guida resta nota e non viene più interpretata come condizione.
   const condizioni = condizioneEffettivaQuartiere(chiave, st.inviti ??= tuttiGliInviti());
   if (!condizioni) return { disponibile: true, bloccoMotivo: null };
-  const esito = valutaRequisiti(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c) })) as RequisitoDisponibilita[], st);
+  const esito = valutaRequisiti(condizioni.map((c) => condizioneConTesto(c)) as RequisitoDisponibilita[], st);
   if (esito.stato !== 'bloccato') return { disponibile: true, bloccoMotivo: null };
   // L6 (R6-29): che cosa manca, generato dalla condizione («Manca: Libro letto: Vague»); il dettaglio del valutatore se non si sa dire
   const manca = cosaManca(condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo', modo: 'tutte', condizioni }, st);
@@ -67,7 +67,7 @@ function sbloccoQuartiere(chiave: string, partitaId?: number): SbloccoDto | unde
   let fonte: SbloccoDto['fonte'] = null;
   try { fonte = fonteRiga?.fonte_condizioni_json ? JSON.parse(fonteRiga.fonte_condizioni_json) as SbloccoDto['fonte'] : null; } catch { /* fonte non valida: resta null */ }
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
-  const esito = st ? valutaInsieme(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), st) : null;
+  const esito = st ? valutaInsieme(condizioni.map((c) => condizioneConTesto(c, nomi)), st) : null;
   const stato = esito?.stato;
   return {
     condizione, condizioneSalvata: propria.length === 1 ? propria[0] : propria.length > 1 ? { tipo: 'gruppo', modo: 'tutte', condizioni: propria } : null,

@@ -8,7 +8,7 @@
 // sede fra i luoghi della città (072) e, se ce l'ha, un programma punti dichiarato (076).
 // ============================================================
 
-import { descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -37,9 +37,9 @@ const SQL_ARTICOLO = `SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS
   FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave`;
 
 // Il testo di una condizione si genera con i nomi della Guida, non con le chiavi: «Articolo ottenuto: Laptop rotto», non «yumenoshima/laptop-rotto».
-function regole(json: string | null) { const nomi = nomiCondizioniMemo(); return leggiCondizioniSalvate(json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })); }
+function regole(json: string | null) { const nomi = nomiCondizioniMemo(); return leggiCondizioniSalvate(json).map((c) => condizioneConTesto(c, nomi)); }
 /** La presenza del negozio: i suoi orari, come condizioni che il valutatore sa leggere. */
-function regoleOrari(orari: OrariNegozio) { return orariComeCondizioni(orari).map((c: RequisitoSpillo) => ({ ...c, testo: descriviRequisitoSpillo(c) })); }
+function regoleOrari(orari: OrariNegozio) { return orariComeCondizioni(orari).map((c: RequisitoSpillo) => condizioneConTesto(c)); }
 
 /**
  * L5 (§3.1, R5-12b): gli orari di un negozio. Con una sede sono quelli del luogo (o la regola dell'app), salvo l'eccezione del negozio quando
@@ -56,7 +56,7 @@ function orariDelNegozio(r: PresenzaRiga): { orari: OrariNegozio; testo: string 
 function condizioniPresenza(r: PresenzaRiga, orari: OrariNegozio) {
   const nomi = nomiCondizioniMemo();
   const sblocco = r.sede_chiave ? condizioniDiSblocco({ chiave: r.sede_chiave, condizioni_json: r.sede_condizioni_json ?? null }) : [];
-  return [...sblocco.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), ...regoleOrari(orari)];
+  return [...sblocco.map((c) => condizioneConTesto(c, nomi)), ...regoleOrari(orari)];
 }
 
 /** La pagina del luogo in cui il negozio ha la sede, aperta sulla sua sezione; null senza sede. */

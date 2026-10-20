@@ -31,7 +31,7 @@ import { casaDellArea, casaDellaMappa, conAree, contenitoreDi, contestoAree, typ
 import { lettureLuoghi, luoghiDellArea, luogoDelPin } from '../luoghiService.js';
 import { condizioneEffettivaQuartiere } from '../condizioni/condizioneEffettiva.js';
 import { elencaInviti } from '../inviti.js';
-import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { condizioneConTesto, descriviRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from '../condizioni/nomiCondizioni.js';
 import { cosaManca, valutaInsieme } from '../condizioni/valutatore.js';
 import { statoDisponibilitaPartita } from '../disponibilitaService.js';
@@ -146,7 +146,7 @@ function sbloccoArea(a: RigaArea, partitaId?: number): Pick<AreaRiassuntoDto, 's
   const fonte = a.quartiere_chiave ? (prepared('SELECT fonte_condizioni_json FROM quartiere WHERE chiave = ?').get(a.quartiere_chiave) as { fonte_condizioni_json: string | null } | undefined)?.fonte_condizioni_json : null;
   const fonteDto: SbloccoDto['fonte'] = (() => { try { return fonte ? JSON.parse(fonte) as SbloccoDto['fonte'] : null; } catch { return null; } })();
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
-  const esito = st ? valutaInsieme(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), st) : null;
+  const esito = st ? valutaInsieme(condizioni.map((c) => condizioneConTesto(c, nomi)), st) : null;
   const stato = esito?.stato;
   const manca = stato === 'bloccato' ? cosaManca(condizione, st!, nomi) : null;
   const sblocco: SbloccoDto = { condizione, testo, fonte: fonteDto, esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null, manca, inviti: elencaInviti({ apreTipo: 'quartiere', ...(a.quartiere_chiave ? { apreChiave: a.quartiere_chiave } : {}) }, partitaId), modificato: false };

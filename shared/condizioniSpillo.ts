@@ -320,6 +320,12 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
   }
 }
 
+/** La condizione con il testo per il DTO. In un avviso `testo` è già il dato da conservare: non sovrascriverlo con la descrizione,
+ * altrimenti aprire e salvare l'editor aggiungerebbe «Avviso:» al contenuto a ogni giro. */
+export function condizioneConTesto(c: RequisitoSpillo, nomi: NomiCondizioni = {}): RequisitoSpillo & { testo: string } {
+  return c.tipo === 'avviso' ? { ...c } : { ...c, testo: descriviRequisitoSpillo(c, nomi) };
+}
+
 /** Il testo senza spazi ai capi, se è una stringa non vuota lunga al massimo `max` (misurata prima di togliere gli spazi); altrimenti null. */
 function testoPulito(x: unknown, max = 200): string | null {
   return typeof x === 'string' && x.trim().length > 0 && x.length <= max ? x.trim() : null;

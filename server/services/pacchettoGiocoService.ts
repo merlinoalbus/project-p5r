@@ -29,6 +29,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { closeDb, getDb, nowIso, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
+import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
 import { riallineaStati } from './mappe/statiGuida.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
@@ -353,11 +354,13 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
   avanza('copia-di-sicurezza');
   const salvataggio = await copiaDiSicurezza();
   closeDb();
+  let condizioniConvertite: string[] = [];
   try {
     avanza('sostituzione');
     await installaDatabase(file, resolveDbPath(), 'sposta');
     avanza('riapertura');
     riapriIstanza();
+    condizioniConvertite = convertiCondizioniDatabaseImportato(getDb());
     // le stesse regole dell'avvio sui dati nuovi (l'assorbimento delle immagini su disco, già fatto da riapriIstanza, qui non trova nulla)
     regoleAllAvvio(getDb());
     // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica sui legami nuovi (il segno dei pin, per uid, resta)
@@ -378,6 +381,7 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     migrazioniApplicate: migrations.filter((m) => m.id > anteprima.versioneSchema && m.id <= versioneSchema).length,
     immagini,
     orfani,
+    condizioniConvertite,
     stato: statoIstanza(),
   };
 }

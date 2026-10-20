@@ -1,6 +1,9 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-20T23:38:00Z",
+  "aggiornato": "2026-10-20T22:43:07Z",
+  "revisioneRimozioni": "Precedente approvazione limitata al perimetro statico delle due rimozioni; non certifica runtime o chiusura L6. La successiva continuazione conferma zero test e nessun nuovo validatore.",
+  "controlliLocali": "Ripresa 2026-10-21: typecheck, lint senza avvisi, build FE e git diff --check riusciti anche dopo la correzione della navigazione dei requisiti. Nessun test o prova runtime locale. Nessun servizio avviato, fermato o riavviato; nessuna scrittura sui dati dell'utente o importazione eseguita. Preparazione dell'unico commit/push L6, senza pubblicazioni intermedie. Pipeline e browser del nuovo rilascio ancora da osservare; L6 non dichiarato completo.",
+  "decisioneRichiesta": "Nessuna scelta pendente su Asakusa, Importa o guida del visore. Asakusa confermato dall'utente: Ann rango 7 OPPURE Skytree aperto dal libro; basta una delle condizioni. Codice della migrazione 118 già coerente, documenti allineati senza nuova migrazione.",
   "fasi": [
     "requisiti",
     "dati",
@@ -17,7 +20,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "online; newreview pubblicato fino a f4dd2c08 (pipeline #62 riuscita: verify, build-backend e build-frontend); API p5s coerente per Shibuya, DTO, migrazione 120, API, editor FE dello sblocco quartieri e descrizioni OpenAPI B6 pubblicati; p5s osservato con 301 mappe/767 spilli; nuova scheda FE anonima rimasta su Caricamento; verifica metro-diario e prova utente aperte"
+    "stato": "Ultimo push verificato 38411d36, pipeline #63 riuscita; il presente checkpoint prepara l'unica pubblicazione L6 e non ne anticipa hash o esito. In locale collegati editor/anteprima, requisiti, inviti, sblocchi e libri; corretti avvisi e testi Importa backup, recupero legacy DB e riepilogo JSON nei soli elementi importati. Due rimozioni circoscritte, nessun tipo di pin nuovo, flussi di posizionamento conservati. Guida visore invariata. Asakusa confermato in OR, nessuna nuova migrazione. Typecheck/lint/build finali riusciti; pipeline, osservazione browser e prove funzionali dell'utente ancora da acquisire. Nessuna prova runtime locale o scrittura sui dati dell'utente."
   },
   "lotti": [
     {
@@ -144,7 +147,7 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "2026-10-20: B5 pubblicata fino a f672a90d; migrazione 120 con snapshot guida, API BE di modifica/ripristino ed editor FE dello sblocco dei quartieri pubblicati. B6: descrizioni OpenAPI aggiunte per valutazione condizioni, inviti e modifica/ripristino sblocco. Il confronto del codice conferma la destinazione unica metro/diario tramite destinazionePalazzo; resta la prova funzionale su una partita, la prova dell'utente e la chiusura funzionale B6/F6. — precedente: 21:30Z: IN CORSO, BE e FE fatti dalla sessione FE (BE ferma, aspetta il via dell'utente): B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche); prossima la migrazione 118.",
+      "nota": "2026-10-20 22:43Z (21/10 locale): IN CORSO, implementazione pronta alla pubblicazione unica con coordinamento. Ultimo push verificato 38411d36, pipeline precedente #63 riuscita. Editor unico/anteprima, requisiti con bozze per rango e navigazione coerente col Confidente corrente, inviti nelle tre viste, disponibilità server in città/metro, motivo nell'Area chiusa e libri Apre. Corretto ciclo testo degli avvisi e propagazione non bloccante nei gruppi/non; semafori con nomi correnti. Importa allineato al backup locale, recupero manuale→avviso solo nell'importazione protetta (anche snapshot), mai eseguita qui. JSON mappe con riepilogo legacy dei soli pin/copie importati, esclusi gli scarti e verificati i riferimenti finali. Elenco storico pubblico 201 righe/147 frasi preparato, nessuna conversione delle frasi approvata o applicata. Intestazioni compatte, misure runtime non dichiarate. Asakusa risolto dall'utente in OR: Ann rango 7 oppure Skytree aperto dal libro; nessuna nuova migrazione. Typecheck/lint/build finali riusciti, nessun test. Rimozioni isolate, altri flussi conservati. Pipeline e browser ancora da osservare, prove funzionali all'utente, L6 non dichiarato completo.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",

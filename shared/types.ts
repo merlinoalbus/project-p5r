@@ -2177,6 +2177,8 @@ export interface DedaloDto {
 }
 
 export interface DungeonRiassuntoDto {
+  /** L6: presenza sulla metro valutata nel server (finestra e Palazzo concluso); senza partita è vero. */
+  disponibile?: boolean;
   chiave: string;
   tipo: 'palazzo' | 'mementos';
   ordine: number;
@@ -2480,6 +2482,7 @@ export interface DettaglioSpilloDto {
 export type VoceDelPinDto = NonNullable<DettaglioSpilloDto['punto']>;
 
 /** Condizione di visibilità con il testo in italiano pronto per la scheda. */
+/** Il testo descrittivo delle condizioni; per `avviso`, `testo` resta il contenuto originale (vedi `condizioneConTesto`). */
 export type CondizioneSpilloDto = RequisitoSpillo & { testo: string };
 /** Una voce di effetto di un libro, film o attività, con la sua frase (shared/effettiCatalogo). */
 export type VoceEffettoDto = VoceEffetto & { testo: string };
@@ -2877,6 +2880,8 @@ export interface EsitoImportazionePacchettoDto {
   /** Immagini con contenuto nei dati di gioco dopo l'importazione. */
   immagini: number;
   orfani: OrfanoPartiteDto[];
+  /** L6: righe del backup con condizioni legacy `manuale` recuperate come avvisi; nessun contenuto delle note. */
+  condizioniConvertite?: string[];
   stato: StatoIstanzaDto;
 }
 

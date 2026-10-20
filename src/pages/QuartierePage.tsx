@@ -46,6 +46,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
 import type { SbloccoDto } from '../../shared/types';
+import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
 
 function condizioniDiSblocco(sblocco: SbloccoDto | undefined): RequisitoSpillo[] {
   if (!sblocco?.condizioneSalvata) return [];
@@ -150,7 +151,7 @@ export function QuartierePage() {
   const [params, setParams] = useSearchParams();
   const attiva = usePartitaStore((s) => s.attiva);
   // La partita serve ai luoghi: senza, non si puo' dire quali a quel punto non ci sono ancora.
-  const dati = useCarica(() => getQuartiere(chiave, attiva?.id), [chiave, attiva?.id]);
+  const dati = useCarica(() => getQuartiere(chiave, attiva?.id), [chiave, attiva]);
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
   const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | 'sblocco' | null>(null);
@@ -213,22 +214,24 @@ export function QuartierePage() {
         <div className="flex flex-col gap-4">
           <button type="button" className="btn btn-ghost btn-sm self-start touch -ml-2" onClick={() => navigate('/guida/citta')}><IconChevronLeft size={16} /> La città</button>
 
-          <header className="card flex flex-col gap-3 sm:flex-row sm:items-start">
+          <header className="card flex items-center gap-3">
             {/* L'illustrazione della mappa del quartiere (regola unica di L1), con sopra la sagoma della mappa di Tokyo, la
                 stessa che si è appena toccata: dice «sei nel posto che hai scelto» prima che si legga il titolo (scelta
-                dell'utente, 2026-10-20). Sul telefono sta in cima, larga quanto la carta; da 640 px a fianco del titolo. Senza
-                illustrazione resta la sola sagoma, com'era. Sul telefono la carta toglie ~64 px (margini e imbottitura) alla
-                larghezza della finestra: `sizes` lo dice, perché a densità 2 si scarichi la miniatura da 640 e non quella da 1024. */}
+                dell'utente, 2026-10-20). L6: illustrazione e titolo compatti anche sul telefono; condizioni, descrizione e
+                comandi stanno nel corpo, per non allungare l'intestazione oltre il 30%. Stessa immagine, senza ritagli. */}
             <IllustrazioneConSegno illustrazione={q.illustrazione} alt={`Illustrazione di ${q.nome}`}
-              className="w-full max-w-[420px] self-center sm:w-[220px] sm:self-start lg:w-[200px]"
-              sizes="(min-width: 1024px) 200px, (min-width: 640px) 220px, min(420px, calc(100vw - 64px))"
+              className="w-[88px] shrink-0 sm:w-[112px] lg:w-[136px]"
+              sizes="(min-width: 1024px) 136px, (min-width: 640px) 112px, 88px"
               segno={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={72} altezza={54} />}
-              senza={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={132} altezza={100} className="self-center sm:self-start" />} />
+              senza={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={88} altezza={66} />} />
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                <h1 className="titolo-display m-0 break-words">{q.nome}</h1>
+                <h1 className="titolo-display m-0 break-words text-[24px] leading-tight">{q.nome}</h1>
                 <span className="text-[12px] text-text-muted">{q.aree.length === 0 ? 'nessuna area' : q.aree.length === 1 ? 'un’area' : `${q.aree.length} aree`} · {q.luoghi.length} {q.luoghi.length === 1 ? 'luogo' : 'luoghi'}</span>
               </div>
+            </div>
+          </header>
+          <section className="card flex flex-col gap-2" aria-label="Disponibilità e azioni del quartiere">
               {q.sblocco && <p className="m-0 text-[13px]"><strong className="text-text-secondary">Si apre:</strong> {q.sblocco}</p>}
               {q.sbloccoCondizione && <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-text-muted"><span>{q.sbloccoCondizione.modificato ? 'Sblocco modificato' : 'Sblocco strutturato'}</span><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setFinestra('sblocco')}>Modifica sblocco</button>{q.sbloccoCondizione.modificato && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setFinestra('sblocco')}>Ripristina</button>}</div>}
               {q.descrizione && <p className="m-0 text-[13px] text-text-secondary">{q.descrizione}</p>}
@@ -237,8 +240,11 @@ export function QuartierePage() {
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ingresso" dettaglio={q.ingresso ? undefined : 'da scegliere'} onClick={() => setFinestra('ingresso')} />
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={() => setFinestra('aggiungi')} />
               </div>
-            </div>
-          </header>
+          </section>
+
+          {q.sbloccoCondizione?.fonte && <p className="m-0 text-[12px] text-text-muted" title={q.sbloccoCondizione.fonte.nota ?? undefined}>Fonte: {q.sbloccoCondizione.fonte.registro}, certezza {q.sbloccoCondizione.fonte.certezza}{q.sbloccoCondizione.fonte.certezza !== 'alta' ? ' — da verificare' : ''}.</p>}
+          {q.sbloccoCondizione?.esito === 'falso' && <p className="m-0 text-[13px] text-text-secondary">Manca: {q.sbloccoCondizione.manca ?? q.sbloccoCondizione.testo}.</p>}
+          <InvitiConfidente filtro={{ apreTipo: 'quartiere', apreChiave: q.chiave }} onCambiato={dati.ricarica} />
 
           <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             {/* L'illustrazione del quartiere, con i suoi pin: i passaggi verso le aree e l'uscita verso Tokyo. Si apre adattata e

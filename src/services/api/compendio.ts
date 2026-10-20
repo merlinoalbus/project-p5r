@@ -8,6 +8,20 @@ import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
 import type { CarattereVoce } from '../../../shared/caratteriVoce';
+import type { Condizione } from '../../../shared/condizioniSpillo';
+import type { InvitoDto, RequisitiConfidenteDto } from '../../types';
+
+export const getRequisitiConfidente = (chiave: string): Promise<RequisitiConfidenteDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti`);
+export const salvaRequisitiRango = (chiave: string, rango: number, requisiti: Array<{ condizione: Condizione; testo?: string }>): Promise<RequisitiConfidenteDto> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti/${rango}`, { requisiti });
+export const ripristinaRequisitiRango = (chiave: string, rango: number): Promise<RequisitiConfidenteDto> => apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti/${rango}/ripristina`, {});
+/** Inviti e loro disponibilità calcolata dal server per la partita corrente. */
+export const getInviti = (filtro: { confidente?: string; apreTipo?: 'quartiere' | 'luogo' | 'area'; apreChiave?: string; partita?: number }): Promise<InvitoDto[]> => apiGet(`/compendio/inviti${queryString(filtro)}`);
+/** La chiave è composta da Confidente e data: i due segmenti si codificano separatamente. */
+export const impostaInvitoAvvenuto = (partita: number, invito: string, avvenuto: boolean): Promise<InvitoDto> => {
+  const percorso = `/partite/${partita}/inviti/${invito.split('/').map(encodeURIComponent).join('/')}`;
+  return avvenuto ? apiPut(percorso, {}) : apiDelete(percorso);
+};
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
 export interface FiltriPersona {

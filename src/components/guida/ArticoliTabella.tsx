@@ -13,6 +13,7 @@ import { notifica } from '../../stores/notificationStore';
 import { NOME_CATEGORIA_ARTICOLO } from '../../utils/negozi';
 import type { ArticoloDto } from '../../types';
 import { ChipDisponibilita } from './ChipDisponibilita';
+import { descriviRequisitoSpillo } from '../../../shared/condizioniSpillo';
 
 interface Props {
   articoli: ArticoloDto[];
@@ -60,7 +61,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<
       <summary className="touch">Dettagli{a.condizioni?.length ? ` · ${a.condizioni.length} ${a.condizioni.length === 1 ? 'requisito' : 'requisiti'}` : ''}{!a.verificato ? ' · fonte secondaria' : ''}</summary>
       <dl>
         {a.nomeIt && a.nomeIt !== a.nome && <><dt>Nome originale</dt><dd>{a.nome}</dd></>}
-        <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>
+        <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.tipo === 'avviso' ? descriviRequisitoSpillo(r) : r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>
         <dt>Effetto</dt><dd>{a.effetto || 'Non indicato'}</dd>
         {a.nota && <><dt>Nota</dt><dd>{a.nota}</dd></>}
       </dl>

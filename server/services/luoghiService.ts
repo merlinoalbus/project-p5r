@@ -23,7 +23,7 @@ import { statoDisponibilitaPartita, valutaRequisiti, valutaRequisitiSpillo, type
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { dettaglioNegozio, acquistiDellaPartita } from './negoziService.js';
 import { attivitaDellaSede } from './attivitaService.js';
-import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 export { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { descriviGiorni, descriviOrari, descriviOrariDelLuogo, leggiGiorni, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
@@ -115,13 +115,13 @@ export function presenzaDelLuogo(condizioni: RequisitoSpillo[], orari: OrariNego
   const orariTesto = 'origine' in orari && orari.origine ? descriviOrariDelLuogo(orari as OrariDelLuogo) : descriviOrari(orari);
   if (!st) return { sbloccato: null, aperto: null, testo: orariTesto };
   const nomi = nomiCondizioniMemo();
-  const sblocco = condizioni.length ? valutaRequisiti(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })) as RequisitoDisponibilita[], st) : null;
+  const sblocco = condizioni.length ? valutaRequisiti(condizioni.map((c) => condizioneConTesto(c, nomi)) as RequisitoDisponibilita[], st) : null;
   const sbloccato = !sblocco || sblocco.stato !== 'bloccato';
   if (!sbloccato) {
     const motivo = sblocco!.requisiti.filter((q) => q.stato === 'rosso').map((q) => q.dettaglio || q.testo).filter(Boolean).join(' · ');
     return { sbloccato: false, aperto: false, testo: motivo ? `Non ancora nel mondo · ${motivo}` : 'Non ancora nel mondo' };
   }
-  const regoleOrari = orariComeCondizioni(orari).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })) as RequisitoDisponibilita[];
+  const regoleOrari = orariComeCondizioni(orari).map((c) => condizioneConTesto(c, nomi)) as RequisitoDisponibilita[];
   const aperto = regoleOrari.length === 0 || valutaRequisitiSpillo(regoleOrari, st, nomi).stato !== 'bloccato';
   return { sbloccato: true, aperto, testo: `${aperto ? 'Aperto adesso' : 'Chiuso adesso'} · ${orariTesto}` };
 }
@@ -137,7 +137,7 @@ export function luogoDto(r: RigaLuogo, l: LettureLuoghi): LuogoDto {
   const confidenti = (JSON.parse(r.confidenti_json) as string[]).map((c) => ({ chiave: c, nome: l.nomiConfidenti.get(c) ?? c }));
   const nomi = nomiCondizioniMemo();
   const grezze = condizioniDiSblocco(r, l.inviti);
-  const condizioni = grezze.length ? grezze.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })) : null;
+  const condizioni = grezze.length ? grezze.map((c) => condizioneConTesto(c, nomi)) : null;
   const negozi = l.negozi.get(r.chiave) ?? [];
   const orari = orariDelLuogo(r.orari_json ?? null);
   // `quando` e `giorni` per compatibilità: dagli orari del luogo, se la colonna c'è; su uno schema di prima quelli della riga

@@ -17,7 +17,7 @@ import { invitiCheAprono, tuttiGliInviti, type RigaInvito } from './condizioni/c
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { cosaManca, valutaInsieme } from './condizioni/valutatore.js';
 import { casaDelLuogo } from './luoghiService.js';
-import { descriviRequisitoSpillo, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import type { InvitoDto, PostoApertoDto } from '../../shared/types.js';
 
 /** Il posto che un invito apre, con il nome e la pagina. */
@@ -42,9 +42,10 @@ function invitoDto(r: RigaInvito, st: StatoDisponibilita | null): InvitoDto {
   let possibile: boolean | null = null;
   let manca: string | null = null;
   if (st) {
-    const esito = valutaInsieme(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), st);
-    possibile = esito.stato !== 'bloccato';
-    manca = possibile ? null : cosaManca(condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo', modo: 'tutte', condizioni }, st, nomi);
+    const esito = valutaInsieme(condizioni.map((c) => condizioneConTesto(c, nomi)), st);
+    possibile = esito.stato === 'disponibile';
+    manca = possibile ? null : cosaManca(condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo', modo: 'tutte', condizioni }, st, nomi)
+      ?? esito.requisiti.filter((r) => r.bloccante !== false && r.stato !== 'verde').map((r) => r.dettaglio || r.testo).join(' · ');
   }
   return {
     chiave: r.chiave, confidente: r.confidente_chiave, confidenteNome, data: r.data, apre: postoAperto(r),

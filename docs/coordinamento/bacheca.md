@@ -1,5 +1,13 @@
 # Bacheca del PM — compiti per sessione
 
+## Ripresa corrente — 2026-10-21
+
+La sessione corrente prosegue L6 sul worktree `newreview` in seguito al prompt di ripresa dell'utente; non avvia, ferma o riapre altre sessioni o servizi. Le disposizioni di stop sotto restano storia del coordinamento precedente, non autorizzazioni a intervenire su altri processi. Vale zero test e commit/push unico a fine lotto.
+
+Implementazione locale: editor unico con anteprima, editor requisiti e navigazione coerente col Confidente corrente, inviti nelle tre viste, esiti server in città/metro, avvisi non bloccanti conservati al salvataggio, testi di Importa come backup e recupero legacy DB/JSON nelle sole importazioni esplicite. Typecheck, lint e build riusciti; nessuna prova runtime o scrittura sui dati dell'utente. Asakusa risolto dall'utente: Ann rango 7 OPPURE Skytree aperto dal libro; codice già coerente, documenti allineati. Preparazione dell'unica pubblicazione di L6; pipeline, osservazione p5s e prove dell'utente ancora da acquisire. Dettaglio corrente in `STATO-ATTUALE.md` e `lotti/L6/difetti.md`.
+
+## Storico delle sessioni precedenti
+
 > **SECONDO STOP GENERALE (utente, 2026-10-20 ~06:06Z): «interrompi tutto».** Vale per TUTTE le sessioni, anche quelle di L2. Nessuna riprende né manda messaggi senza il via esplicito dell'utente, riportato dal PM.
 >
 > **STOP GENERALE (utente, 2026-10-20 ~07:55 ora locale): «interrompi tutto... non sta funzionando qualcosa».** Tutte le sessioni sono ferme. Nessuna riparte e nessuna manda messaggi ad altre finché il PM non scrive il via esplicito dell'utente.

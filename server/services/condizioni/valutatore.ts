@@ -17,7 +17,7 @@ import { prepared } from '../../db/dbService.js';
 import { t } from '../traduzioniService.js';
 import { nomiCondizioniMemo, pinCitato } from './nomiCondizioni.js';
 import { condizioneDelLuogo, condizioneEffettivaQuartiere, tuttiGliInviti, type RigaInvito } from './condizioneEffettiva.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataLeggibile, descriviRequisitoSpillo, membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataLeggibile, descriviRequisitoSpillo, membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { guastaLAperto, nomeMeteo, piove } from '../../../shared/meteoPartita.js';
 import { nomeDote } from '../../../shared/doti.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
@@ -90,8 +90,8 @@ function esitoDelPosto(chiave: string, condizioni: () => RequisitoSpillo[] | nul
   if (elenco === null) return null;
   st.postiInCorso.add(chiave);
   try {
-    const esiti = elenco.map((c, i) => valutaCondizione({ ...c, testo: descriviRequisitoSpillo(c, nomi) }, i, st, { nomi }));
-    const contano = esiti.filter((e) => e.tipo !== 'avviso');
+    const esiti = elenco.map((c, i) => valutaCondizione(condizioneConTesto(c, nomi), i, st, { nomi }));
+    const contano = esiti.filter((e) => e.bloccante !== false);
     const stato = contano.some((e) => e.stato === 'rosso') ? 'rosso' : contano.some((e) => e.stato === 'grigio') ? 'grigio' : 'verde';
     st.esitiPosti.set(chiave, stato);
     return stato;
@@ -104,16 +104,17 @@ function esitoDelPosto(chiave: string, condizioni: () => RequisitoSpillo[] | nul
  * condizioni dentro un gruppo o un NON (quelle di primo livello arrivano col testo già scritto).
  */
 export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: StatoValutazione, opz: OpzioniValutazione = {}): SemaforoRequisitoDto {
-  const base = { indice, testo: r.testo, confermato: false } as const;
+  const base = { indice, testo: r.tipo === 'avviso' ? descriviRequisitoSpillo(r) : r.testo, confermato: false } as const;
   /** Il semaforo con tipo, colore e dettaglio, mai manuale. */
   const esito = (tipo: SemaforoRequisitoDto['tipo'], stato: SemaforoRequisitoDto['stato'], dettaglio: string): SemaforoRequisitoDto => ({ ...base, tipo, stato, dettaglio, manuale: false });
   const nomi = () => opz.nomi ?? nomiCondizioniMemo();
   switch (r.tipo) {
     case 'gruppo': {
       const n = nomi();
-      const esiti = r.condizioni.map((c, i) => valutaCondizione({ ...c, testo: descriviRequisitoSpillo(c, n) }, i, st, { ...opz, nomi: n }));
+      const esiti = r.condizioni.map((c, i) => valutaCondizione(condizioneConTesto(c, n), i, st, { ...opz, nomi: n }));
       // un avviso dentro un gruppo non decide niente (non blocca, R6-01b)
-      const contano = esiti.filter((e) => e.tipo !== 'avviso');
+      const contano = esiti.filter((e) => e.bloccante !== false);
+      if (esiti.length > 0 && contano.length === 0) return { ...esito('gruppo', 'grigio', esiti.map((e) => e.testo + ': ' + e.dettaglio).join(' · ')), bloccante: false };
       const stato = contano.length === 0 ? 'verde' : r.modo === 'tutte'
         ? (contano.some((e) => e.stato === 'rosso') ? 'rosso' : contano.some((e) => e.stato === 'grigio') ? 'grigio' : 'verde')
         : (contano.some((e) => e.stato === 'verde') ? 'verde' : contano.some((e) => e.stato === 'grigio') ? 'grigio' : 'rosso');
@@ -121,7 +122,7 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     }
     case 'non': {
       const n = nomi();
-      const dentro = valutaCondizione({ ...r.condizione, testo: descriviRequisitoSpillo(r.condizione, n) }, indice, st, { ...opz, nomi: n });
+      const dentro = valutaCondizione(condizioneConTesto(r.condizione, n), indice, st, { ...opz, nomi: n });
       return { ...dentro, ...base, tipo: 'non', stato: dentro.stato === 'verde' ? 'rosso' : dentro.stato === 'rosso' ? 'verde' : 'grigio', dettaglio: 'Non: ' + dentro.dettaglio };
     }
     // — L6 —
@@ -321,7 +322,7 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
  *  requisiti). Un avviso non conta (R6-01b). */
 export function valutaInsieme(elenco: RequisitoDisponibilita[], st: StatoValutazione, opz: OpzioniValutazione = {}): DisponibilitaDto {
   const requisiti = elenco.map((r, i) => valutaCondizione(r, i, st, opz));
-  const contano = requisiti.filter((q) => q.tipo !== 'avviso');
+  const contano = requisiti.filter((q) => q.bloccante !== false);
   const stato = contano.some((q) => q.stato === 'rosso') ? 'bloccato' : contano.some((q) => q.stato === 'grigio') ? 'ignoto' : 'disponibile';
   return { stato, requisiti };
 }
@@ -335,13 +336,13 @@ export function valutaInsiemeSpillo(elenco: RequisitoDisponibilita[], st: StatoV
     return presenza !== null && valutaCondizione({ ...presenza, testo: r.testo }, i, st, { nomi }).stato === 'rosso';
   });
   const stato = presenzaRossa ? 'bloccato'
-    : requisiti.some((q) => q.stato === 'rosso' || (q.stato === 'grigio' && q.tipo !== 'avviso')) ? 'ignoto' : 'disponibile';
+    : requisiti.some((q) => q.bloccante !== false && q.stato !== 'verde') ? 'ignoto' : 'disponibile';
   return { stato, requisiti };
 }
 
 /** L'esito per l'interfaccia (R6-02: il client mostra, non valuta). */
 export function esitoDi(s: SemaforoRequisitoDto): EsitoCondizione {
-  if (s.tipo === 'avviso') return 'avviso';
+  if (s.bloccante === false) return 'avviso';
   return s.stato === 'verde' ? 'vero' : s.stato === 'rosso' ? 'falso' : 'grigio';
 }
 
@@ -350,10 +351,10 @@ export function esitoDi(s: SemaforoRequisitoDto): EsitoCondizione {
  * vie possibili (unite da «oppure»); null se la condizione è già vera o se non si può dire.
  */
 export function cosaManca(c: RequisitoSpillo, st: StatoValutazione, nomi: NomiCondizioni = nomiCondizioniMemo()): string | null {
-  const s = valutaCondizione({ ...c, testo: descriviRequisitoSpillo(c, nomi) }, 0, st, { nomi });
+  const s = valutaCondizione(condizioneConTesto(c, nomi), 0, st, { nomi });
   if (s.stato !== 'rosso') return null;
   if (c.tipo === 'gruppo') {
-    if (c.modo === 'almeno-una') return c.condizioni.map((f) => descriviRequisitoSpillo(f, nomi)).join(' oppure ');
+    if (c.modo === 'almeno-una') return c.condizioni.filter((f) => valutaCondizione(condizioneConTesto(f, nomi), 0, st, { nomi }).bloccante !== false).map((f) => descriviRequisitoSpillo(f, nomi)).join(' oppure ');
     return c.condizioni.map((f) => cosaManca(f, st, nomi)).filter((x): x is string => !!x).join(' e ') || null;
   }
   return descriviRequisitoSpillo(c, nomi);
@@ -362,7 +363,7 @@ export function cosaManca(c: RequisitoSpillo, st: StatoValutazione, nomi: NomiCo
 /** La valutazione di una condizione per l'interfaccia: esito, testo e cosa manca. */
 export function valutazione(c: RequisitoSpillo, st: StatoValutazione, nomi: NomiCondizioni = nomiCondizioniMemo()): ValutazioneCondizioneDto {
   const testo = descriviRequisitoSpillo(c, nomi);
-  const s = valutaCondizione({ ...c, testo }, 0, st, { nomi });
+  const s = valutaCondizione(condizioneConTesto(c, nomi), 0, st, { nomi });
   const e = esitoDi(s);
   const manca = e === 'falso' ? cosaManca(c, st, nomi) : null;
   return { esito: e, testo, ...(manca ? { manca } : {}) };

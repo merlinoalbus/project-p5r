@@ -15,6 +15,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { getArea, getElementoCatalogo, getLuogo, getQuartiere } from '../services/api';
 import { FinestraAggiungiLuogo } from '../components/mappe/FinestraAggiungiLuogo';
 import { FinestraColloca } from '../components/mappe/FinestraColloca';
+import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -127,6 +128,7 @@ export function LuogoPage() {
               </header>
               {/* che cosa offre il luogo: fuori dall'intestazione, che resta entro il 30% dell'altezza della schermata */}
               {l.cosaOffre && <p className="card order-1 m-0 text-[13px] xl:order-none">{l.cosaOffre}</p>}
+              <div className="order-2 xl:order-none"><InvitiConfidente filtro={{ apreTipo: 'luogo', apreChiave: l.chiave }} onCambiato={dati.ricarica} /></div>
 
               {l.listini.length > 0 && (
                 <section className="order-3 flex flex-col gap-3 xl:order-none" aria-label="Negozi qui">

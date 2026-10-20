@@ -19,8 +19,7 @@
 // sblocca resta il solo pallino. L'11 aprile Shinjuku è un pallino e basta — apre il 18 giugno —
 // e il Palazzo di Kamoshida c'è dall'11 aprile al 2 maggio (finestra modificabile dalla sua pagina, 2026-10-04) e poi
 // sparisce. Le condizioni vengono
-// dalla Fase 2 — `quartiere.sblocco_data` e la voce `finestre-dungeon` di `dati_guida` — valutate con `ordineGioco`,
-// la stessa funzione del resto dell'app. Senza partita si vede tutto, e lo si dice.
+// dall'esito `disponibile` del server: qui non si rivalutano date o progressi. Senza partita si vede tutto, e lo si dice.
 //
 // **Posizioni e tracciati sono autorati**, e sta scritto in `collocazioneTokyo.ts`: nel foglio del
 // gioco non ci sono, e le «tratte» di `metropolitana.json` (l'estrazione dell'atlante, `data/atlas/extracted/`) sono raggiungibilità, non binari.
@@ -29,7 +28,7 @@
 import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
-import { dentroFinestra, quartiereAperto } from './aperturaTokyo';
+import { dataLeggibile } from '../../../shared/condizioniSpillo';
 import { dataGiocoConArticolo } from '../../utils/dateGioco';
 import { urlMappa } from '../../utils/navigazioneMappa';
 import {
@@ -377,10 +376,10 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         destinazione: q.ingresso
           ? { mappa: q.ingresso.mappa, centro: { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom }, spillo: null }
           : q.mappaChiave ? { mappa: q.mappaChiave, centro: null, spillo: null } : null,
-        presente: quartiereAperto(q, dataGioco),
+        presente: q.disponibile !== false,
         // Che cosa manca, detto come lo dice il valutatore: «Yusuke: rango 1 di 3». Quando la
         // condizione è una data si dice la data, che è più corta e più chiara.
-        quando: q.sbloccoData ? `dal ${q.sbloccoData}` : q.bloccoMotivo ?? null,
+        quando: q.sbloccoData ? `dal ${dataLeggibile(q.sbloccoData)}` : q.bloccoMotivo ?? null,
       });
     }
     for (const d of dungeon) {
@@ -406,8 +405,8 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         // Un Palazzo **concluso** (Tesoro e boss finale) non c'è più, anche dentro la sua finestra: come nel gioco dopo il furto, e come
         // l'ingresso dalla città, chiuso a Palazzo concluso (`palazziService`). Dal 2026-10-20 (L4 §8.10) gli effetti seguono il concluso,
         // non il completato (che vale solo per anello e percentuale); `completato` resta per le risposte di prima, senza `concluso`.
-        presente: !(d.concluso ?? d.completato) && (!dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al)),
-        quando: (d.concluso ?? d.completato) ? `concluso: ${d.concluso ?? d.completato}` : f ? (f.al ? `dal ${f.dal} al ${f.al}` : `dal ${f.dal}`) : null,
+        presente: d.disponibile !== false,
+        quando: d.concluso ? `concluso: ${d.concluso}` : f ? (f.al ? `dal ${dataLeggibile(f.dal)} al ${dataLeggibile(f.al)}` : `dal ${dataLeggibile(f.dal)}`) : null,
       });
     }
     // Il nome di ogni fermata, cartellino o non cartellino. Serve ai pallini: quando una fermata
@@ -423,7 +422,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       if (QUARTIERI_TOKYO[chiave] && !nomi.has(chiave)) nomi.set(chiave, nome);
     }
     return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente), nomiFermate: nomi };
-  }, [quartieri, dungeon, dataGioco, risolvi]);
+  }, [quartieri, dungeon, risolvi]);
   const [elencoAssenti, setElencoAssenti] = useState(false);
   const { blocco, mappa } = useLarghezzaCheSta(riempi, `${presenti.length}/${assenti.length}/${dataGioco ?? ''}`);
 
