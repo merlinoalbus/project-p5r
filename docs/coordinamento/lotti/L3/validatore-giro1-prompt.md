@@ -15,7 +15,7 @@ Sei il galaxy-task-validator. Valida in **SOLA LETTURA** il lotto **L3 «Palazzi
 - **Fuori dal perimetro di questo giro**: l'integrazione «Guida nel visore» e «Planimetria della voce» (`lotti/L3/integrazione-guida-visore.md`, BE 42b34243). Sta su `newreview` locale e **non** sulla linea di rilascio, che va verificata senza di essa. Anche L4 è fuori: la parte già pubblicata su p5s su richiesta dell'utente non si valida qui.
 
 ## Dove sta il lavoro
-- **Linea di rilascio**: worktree `C:\Repository\project-p5r\.claude\worktrees\p5s-sviluppo-l2`, branch **`newreview-l3`**, HEAD = quello della riga ROADMAP di L3 (il Collaudo lo scrive in fondo alla catena). Copia su GitHub: ramo `newreview-l3`.
+- **Linea di rilascio**: worktree `C:\Repository\project-p5r\.claude\worktrees\p5s-sviluppo-l2`, branch **`newreview-l3`**, HEAD **b5fd6cfe**, la riga ROADMAP di L3 (`docs/ROADMAP.md:1297`). Prima di b5fd6cfe c'è 2df44d30, l'ultimo commit con codice. I tester sono verdi: funzionali su d5eb9650, no-reg su 48d7a958, UX e layout su 2df44d30. Fra 48d7a958 e 2df44d30 cambiano solo file FE della scheda del Palazzo e dei selettori, riverificati da UX e layout. Copia su GitHub: ramo `newreview-l3`.
   - La catena parte da fd988a3e, cioè c8338fd0 più documenti.
   - Poi solo cherry-pick, con patch-id uguali agli originali di `newreview`: correzioni dei tester e documenti.
   - Prove git a ogni passo in `lotti/L3/esiti-collaudo/<hash>/1-git.txt`.
