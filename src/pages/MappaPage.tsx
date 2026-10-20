@@ -285,18 +285,21 @@ function PannelloLuogo({ mappe, figliDi, gruppo, percorso, nodo, nome, onPercors
     {/* Le versioni dello stesso luogo — la porzione occidentale, la planimetria intera — sono
         varianti di una figura sola: stanno insieme, in cima, e non sparse fra i figli. */}
     {alRadice && gruppo.versioni.length > 1 && <ImmaginiLuogo mappe={gruppo.versioni} nome={nome} />}
+    {/* UX2-15 (L2): nessun riquadro scorrevole qui dentro. Con la griglia in un riquadro alto il 72% dello schermo le barre
+        erano due (pagina e pannello) e il fondo del pannello stava sotto lo schermo: la griglia cresce con la pagina, che è
+        l'unica a scorrere. */}
     {contenute.length > 0
-      ? <div className="max-h-[min(72vh,860px)] area-scorrevole p-1">
+      ? <div className="p-1">
           <GriglieDelLuogo contenute={contenute} nome={nome} onScendi={(k) => onPercorso([...percorso, k])} />
         </div>
       : <p className="m-0 text-[13px] text-text-muted" role="status">Qui dentro non ci sono altre planimetrie: c’è solo questa.</p>}
     {/* La discesa a riquadri mostra un piano per volta, ed è il modo giusto per scegliere dove
         andare. Chi invece **cerca un nome** — «dov'è finita la banchina di Yongen-Jaya?» — ha
-        bisogno di vedere tutto insieme: l'albero completo resta qui sotto, chiuso, con il suo
-        scorrimento. È lo stesso elenco di prima, ma dentro un contenitore che lo contiene. */}
+        bisogno di vedere tutto insieme: l'albero completo resta qui sotto, chiuso. Aperto cresce
+        con la pagina, senza uno scorrimento suo (UX2-15: una sola barra). */}
     {contenute.length > 0 && <details className="border-t border-border-light pt-2">
       <summary className="touch cursor-pointer text-[12px] text-text-muted">Elenco completo, con tutti i livelli</summary>
-      <div className="max-h-[420px] area-scorrevole mt-2 p-1">
+      <div className="mt-2 p-1">
         <AlberoLuoghi mappe={mappe} genitore={nodo.chiave} espandibile />
       </div>
     </details>}
