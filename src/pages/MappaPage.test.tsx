@@ -194,6 +194,17 @@ describe('MappaPage', () => {
     expect(tokyo).not.toHaveTextContent(/mappe/);
   });
 
+  // UX2-15 (L2, segnalazione dell'utente): in Mappe una sola barra, quella della pagina. Il pannello del luogo non ha riquadri scorrevoli
+  // suoi: né la griglia delle planimetrie né l'«Elenco completo», che crescono con la pagina
+  it('UX2-15: il pannello del luogo non ha riquadri scorrevoli, né nella griglia né nell’«Elenco completo»', async () => {
+    monta('/guida/mappe');
+    fireEvent.click(await screen.findByRole('button', { name: /^Tokyo/ }));
+    const pannello = screen.getByRole('region', { name: 'Dentro Tokyo' });
+    fireEvent.click(within(pannello).getByText('Elenco completo, con tutti i livelli'));
+    expect(pannello.querySelectorAll('.area-scorrevole')).toHaveLength(0);
+    expect(pannello.querySelector('[class*="max-h-"]')).toBeNull();
+  });
+
   /** La seconda lettura della mappa (quella in silenzio dopo un'azione) resta in sospeso finché il test non la risolve. */
   const rilettura = () => {
     /** Risolutore della rilettura sospesa: vuoto finché la seconda `getMappa` non parte, poi quello della sua promessa. */
