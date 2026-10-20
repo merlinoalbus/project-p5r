@@ -752,6 +752,17 @@ it('sotto i 1024 px l’intestazione è compatta: «Sulla mappa di Tokyo» e i c
   expect(within(sotto).getByText('Sovrano: Kamoshida')).toBeInTheDocument();
 });
 
+// LAY3-6: sotto i 1024 px l'arcana va a capo (al massimo due righe) invece di accorciarsi su una: «Giudizio (Judgement)» di Niijima si
+// legge intera a 375; si accorcia solo una frase più lunga di due righe (Maruki), intera nei «Dettagli dalla guida»
+it('sotto i 1024 px l’arcana va a capo su due righe al massimo, non si accorcia su una (LAY3-6)', async () => {
+  getDungeon.mockResolvedValue({ ...palazzo(true), arcanaSovranoNome: 'Giudizio (Judgement)' });
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  const arcana = screen.getByTitle('Giudizio (Judgement)');
+  expect(arcana.className).toContain('max-lg:line-clamp-2');
+  expect(arcana.className).not.toContain('max-lg:truncate');
+});
+
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
   getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: [] });
   monta('kamoshida');

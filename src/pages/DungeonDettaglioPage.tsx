@@ -750,10 +750,10 @@ export function DungeonDettaglioPage() {
                         stanno nell'altezza della riga del titolo (44 px), quindi l'intestazione non cresce. Così il nome del sovrano e le parole
                         brevi («Avarizia» di Okumura) si leggono intere; si accorcia coi puntini solo un testo più largo di tutto lo spazio (le
                         frasi lunghe del sovrano di Okumura e Madarame, l'arcana di Maruki), intero nel suggerimento. */}
-                    {/* LAY3-5: sotto i 1024 px nei Palazzi il sovrano al massimo su due righe e l'arcana su una coi puntini; tutti e due interi
-                        anche nei «Dettagli dalla guida», che si leggono senza mouse */}
+                    {/* LAY3-5: sotto i 1024 px nei Palazzi sovrano e arcana al massimo su due righe ciascuno (LAY3-6: l'arcana su una sola
+                        tagliava «Giudizio (Judgement)» a 375); tutti e due interi anche nei «Dettagli dalla guida», che si leggono senza mouse */}
                     {d.sovrano && <span className={`break-words lg:min-w-0 lg:max-w-full lg:truncate ${memento ? 'max-md:hidden' : 'max-lg:line-clamp-2'}`} title={d.sovrano}>{d.sovrano}</span>}
-                    {d.arcanaSovranoNome && <span className={`chip chip--attivo lg:block lg:min-w-0 lg:max-w-[min(100%,18rem)] lg:truncate ${memento ? '' : 'max-lg:block max-lg:min-w-0 max-lg:max-w-full max-lg:truncate'}`} title={d.arcanaSovranoNome}>{d.arcanaSovranoNome}</span>}
+                    {d.arcanaSovranoNome && <span className={`chip chip--attivo lg:block lg:min-w-0 lg:max-w-[min(100%,18rem)] lg:truncate ${memento ? '' : 'max-lg:min-w-0 max-lg:max-w-full max-lg:line-clamp-2'}`} title={d.arcanaSovranoNome}>{d.arcanaSovranoNome}</span>}
                     {memento && suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                   </div>
                   {/* R3-41: da 1024 px nei Palazzi i «Dettagli dalla guida» chiudono la riga del titolo (aperti vanno a capo, sotto) */}
