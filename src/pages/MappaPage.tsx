@@ -115,7 +115,30 @@ function IndiceMappe() {
       }
       return [...trovate.values()];
     };
-    return { conta: (chiave: string) => conta(chiave, new Set()), figliDi, daVerificare };
+    /** E4 (L2): quel che una radice contiene con le parole della gerarchia — quartieri, aree (una volta per Area, le sue versioni sono più
+     *  righe di `mappa`), planimetrie —, non il numero di righe di `mappa` («52 mappe» erano 23 quartieri e 29 planimetrie). */
+    const contenuto = (chiavi: string[]): string => {
+      let quartieri = 0; let planimetrie = 0;
+      const aree = new Set<string>();
+      const visti = new Set<string>();
+      const coda = [...chiavi];
+      while (coda.length) {
+        const k = coda.shift()!;
+        if (visti.has(k)) continue;
+        visti.add(k);
+        for (const f of figliDi.get(k) ?? []) {
+          if (f.tipo === 'quartiere') quartieri++;
+          else if (f.tipo !== 'citta') planimetrie++;
+          if (f.area) aree.add(f.area.chiave);
+          coda.push(f.chiave);
+        }
+      }
+      const parola = (n: number, uno: string, piu: string) => `${n} ${n === 1 ? uno : piu}`;
+      if (quartieri > 0) return `${parola(quartieri, 'quartiere', 'quartieri')} · ${parola(aree.size, 'area', 'aree')}`;
+      if (aree.size > 0) return `${parola(aree.size, 'area', 'aree')} · ${parola(planimetrie, 'planimetria', 'planimetrie')}`;
+      return parola(planimetrie, 'planimetria', 'planimetrie');
+    };
+    return { conta: (chiave: string) => conta(chiave, new Set()), figliDi, daVerificare, contenuto };
   }, [mappe]);
   const gruppi = useMemo(() => radiciRaggruppate(mappe), [mappe]);
   const totaleMappe = mappe.length;
@@ -150,6 +173,9 @@ function IndiceMappe() {
               return { mappe: acc.mappe + c.mappe, spilli: acc.spilli + c.spilli + v.numeroSpilli };
             }, { mappe: 0, spilli: 0 });
             const nome = nomeDi(capofila);
+            // E4 ed E5 (L2): gli spilli con una parola sola (e il singolare), e quel che la radice contiene con le parole della gerarchia
+            const spilli = `${sotto.spilli} ${sotto.spilli === 1 ? 'spillo' : 'spilli'}`;
+            const riassunto = `${nomeTipoMappa(capofila)} · ${spilli} · ${sotto.mappe > 0 ? totali.contenuto(versioni.map((v) => v.chiave)) : `${versioni.length} versioni`}`;
             const conFigli = versioni.some(v => (totali.figliDi.get(v.chiave) ?? []).length > 0);
             const apribile = conFigli || versioni.length > 1;
             const aperto = gruppoAperto?.chiave === chiave;
@@ -164,15 +190,15 @@ function IndiceMappe() {
                     riga (LAY2-7); sotto, una riga sola col chip a destra */}
                 <div className={`card card--cliccabile relative flex w-full items-center gap-3 lg:max-xl:gap-2 xl:grid xl:grid-cols-[72px_minmax(0,1fr)_auto] xl:gap-x-3 xl:gap-y-1 ${aperto ? 'border-primary bg-primary-bg' : ''}`}>
                   <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0 xl:row-span-2" />
-                  <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 xl:col-start-2 xl:row-start-1">
+                  {/* da 1024 a 1279 px niente spazio fra nome e conteggi: i conteggi vanno a capo (mai coi puntini, LAY2-7) e la colonna resta
+                      nell'altezza dell'anteprima, così l'indice sta in una schermata a 1024×690 (LAY2-5) */}
+                  <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 lg:max-xl:gap-0 xl:col-start-2 xl:row-start-1">
                     <button type="button" aria-expanded={aperto} onClick={() => setPercorso(aperto ? [] : [capofila.chiave])}
                       // niente `touch` qui: il bersaglio è la carta intera (`after:inset-0`), e 44 px di riga facevano crescere la carta
                       className={`text-left font-display text-[17px] leading-tight break-words after:absolute after:inset-0 after:content-[''] ${aperto ? 'text-primary' : ''}`}>
-                      {nome}<span className="sr-only">, {nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
+                      {nome}<span className="sr-only">, {riassunto}</span>
                     </button>
-                    {/* da 1024 a 1279 px su una riga (con gli spazi della carta più stretti ci sta intera): andando a capo la carta cresceva e
-                        l'indice usciva di 3 px a 1024×690. Altrove va a capo, e si legge intera (LAY2-7: coi puntini era «Città · …») */}
-                    <span className="max-w-full text-[11px] text-text-muted lg:max-xl:truncate" aria-hidden title={`${nomeTipoMappa(capofila)} · ${sotto.spilli} spilli · ${sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}`}>{nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
+                    <span className="max-w-full text-[11px] leading-tight text-text-muted" aria-hidden>{riassunto}</span>
                   </span>
                   {/* a destra, prima della freccia: alto 44 (il bersaglio) sta nell'altezza dell'anteprima e la carta non cresce (a 1024×690
                       l'indice deve stare in una schermata, LAY2-5) */}
@@ -193,7 +219,7 @@ function IndiceMappe() {
                     <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className={`font-display text-[17px] leading-tight break-words ${aperto ? 'text-primary' : ''}`}>{nome}</span>
-                      <span className="text-[11px] text-text-muted">{nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
+                      <span className="text-[11px] text-text-muted">{riassunto}</span>
                     </span>
                     <span aria-hidden className="shrink-0 text-text-muted">{aperto ? '▾' : '▸'}</span>
                   </button>
@@ -201,7 +227,7 @@ function IndiceMappe() {
                     <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="font-display text-[17px] leading-tight break-words">{nome}</span>
-                      <span className="text-[11px] text-text-muted">{nomeTipoMappa(capofila)} · {sotto.spilli} spilli</span>
+                      <span className="text-[11px] text-text-muted">{nomeTipoMappa(capofila)} · {spilli}</span>
                     </span>
                   </Link>}
             </li>;

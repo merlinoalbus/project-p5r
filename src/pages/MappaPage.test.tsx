@@ -182,6 +182,18 @@ describe('MappaPage', () => {
     expect(screen.getByRole('region', { name: 'Dentro Tokyo' })).toBeInTheDocument();
   });
 
+  // E4 (analisi dell'Elenco delle mappe, L2): la carta di Tokyo conta quartieri e aree, non le righe di `mappa` («52 mappe» = 23 quartieri
+  // + 29 planimetrie); le versioni di un'Area contano una volta
+  it('E4: la carta di Tokyo dice «N quartieri · N aree», non le mappe', async () => {
+    const area = (chiave: string, slug: string, nome: string, genitore: string, versioneOrdine: number) => riassunto({ chiave, nome, tipo: 'area', genitore,
+      area: { chiave: `citta/${genitore}/${slug}`, contenitore: { tipo: 'quartiere', chiave: genitore, nome: genitore }, slug, nome, versioneEtichetta: null, versioneOrdine, predefinita: versioneOrdine === 0, casa: `/guida/citta/${genitore}/${slug}` } });
+    getAlberoMappe.mockResolvedValue([...albero, area('sottopasso', 'sottopasso', 'Sottopasso', 'citta-shibuya', 0), area('sottopasso-est', 'sottopasso', 'Sottopasso', 'citta-shibuya', 1), area('diner', 'diner', 'Diner', 'citta-shibuya', 0)]);
+    monta('/guida/mappe');
+    const tokyo = await screen.findByRole('button', { name: /^Tokyo/ });
+    expect(tokyo).toHaveTextContent('1 quartiere · 2 aree');
+    expect(tokyo).not.toHaveTextContent(/mappe/);
+  });
+
   /** La seconda lettura della mappa (quella in silenzio dopo un'azione) resta in sospeso finché il test non la risolve. */
   const rilettura = () => {
     /** Risolutore della rilettura sospesa: vuoto finché la seconda `getMappa` non parte, poi quello della sua promessa. */
