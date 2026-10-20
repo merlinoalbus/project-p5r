@@ -599,7 +599,7 @@ export function DungeonDettaglioPage() {
     return <>
       <div className="flex items-center gap-2">
         {d.aree.length > 1
-          ? <div className="flex w-[min(15rem,40%)] shrink-0 items-center gap-1">
+          ? <div className={`flex items-center gap-1 ${moltoLargo ? 'min-w-0 flex-1' : 'w-[min(15rem,40%)] shrink-0'}`}>
               <h2 className="sr-only">{area.nome}</h2>
               {/* compatto (una riga da 44, l'etichetta «Infiltrazione N di M» resta il nome per chi non vede): con l'etichetta sopra il
                   valore andava su due righe, 65 px (R3-41); «di M» accanto, piccolo */}
@@ -610,23 +610,16 @@ export function DungeonDettaglioPage() {
               <span className="shrink-0 text-[11px] text-text-muted" aria-hidden>di {d.aree.length}</span>
             </div>
           : <span className="flex shrink-0 flex-col"><h2 className="m-0 font-display text-[17px] uppercase leading-none">{area.nome}</h2><span className="text-[11px] text-text-muted">infiltrazione 1 di 1</span></span>}
-        <div className="min-w-0 flex-1">
-          {moltoLargo
-            // `pb-0`: la barra sottile della fila sta subito sotto i chip, senza i 4 px in più (R3-41); la barra resta, evidente
-            ? <FilaScorrevole className="fila-scorrevole--sempre items-center pb-0" aria-label={`Aree toccate da ${area.nome}`} role="list">
-                <span className="shrink-0 text-[11px] uppercase tracking-wide text-text-muted" aria-hidden>Aree toccate</span>
-                {(area.areePalazzo ?? []).length === 0 && <span className="shrink-0 text-[12px] text-text-muted">nessuna</span>}
-                {(area.areePalazzo ?? []).map((a) => (
-                  <span key={a.chiave} role="listitem" className="shrink-0">
-                    <button type="button" className={`chip touch text-[11px] ${a.chiave === areaFisica?.chiave ? 'chip--attivo' : ''}`} aria-pressed={a.chiave === areaFisica?.chiave}
-                      onClick={() => apriArea(a.slug, area.chiave, a.planimetriaIniziale)}>{a.nome}</button>
-                  </span>
-                ))}
-              </FilaScorrevole>
-            : <AreePalazzo forma="fila" aree={areePalazzo} infiltrazioni={d.aree} areaScelta={areaFisica?.slug ?? null} infiltrazioneScelta={area.chiave}
-                completate={completate} onScegliArea={scegliAreaFisica} onScegliInfiltrazione={scegliInfiltrazione} onCollegaAree={setLegami}
-                onAggiungiArea={() => setFinestra('aggiungi-area')} onRiordina={riordinaAreePalazzo} />}
-        </div>
+        {/* UX3-13: da 1280 px la riga non ha più la striscia «Aree toccate» (51–190 px che scorreva di lato, già scorsa: etichetta
+            tagliata, chip a metà, un gesto nascosto). Un comando visibile chiedeva 132 px e a capo sforava R3-41: le aree toccate sono
+            quelle evidenziate nella colonna delle aree, con la legenda per esteso, e il selettore prende lo spazio liberato. */}
+        {!moltoLargo && (
+          <div className="min-w-0 flex-1">
+            <AreePalazzo forma="fila" aree={areePalazzo} infiltrazioni={d.aree} areaScelta={areaFisica?.slug ?? null} infiltrazioneScelta={area.chiave}
+              completate={completate} onScegliArea={scegliAreaFisica} onScegliInfiltrazione={scegliInfiltrazione} onCollegaAree={setLegami}
+              onAggiungiArea={() => setFinestra('aggiungi-area')} onRiordina={riordinaAreePalazzo} />
+          </div>
+        )}
         <details className="menu-altro relative shrink-0">
           <summary className="btn btn-ghost btn-sm touch list-none" aria-label={`Altre azioni dell’infiltrazione «${area.nome}»`}>Altro ▾</summary>
           <div className="menu-altro__voci">

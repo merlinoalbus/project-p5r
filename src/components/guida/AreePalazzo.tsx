@@ -129,6 +129,9 @@ function ElencoAree({ aree, infiltrazioni, areaScelta, infiltrazioneScelta, comp
   };
   const riordino = useRiordino(elenco.map((a) => a.slug), occupato ? 'Un momento: sto salvando l’ultima modifica' : null, sposta);
   const senzaAree = infiltrazioni.filter((i) => (i.areePalazzo ?? []).length === 0);
+  // l'infiltrazione aperta e quante aree tocca (per la legenda delle aree evidenziate)
+  const apertaInfiltrazione = infiltrazioneScelta ? infiltrazioni.find((i) => i.chiave === infiltrazioneScelta) ?? null : null;
+  const quanteToccate = apertaInfiltrazione ? aree.filter((a) => (a.infiltrazioni ?? []).some((x) => x.chiave === apertaInfiltrazione.chiave)).length : 0;
   return (
     <div className="flex flex-col gap-2.5" role="group" aria-label="Aree del Palazzo">
       <div className="flex flex-wrap items-center gap-2">
@@ -137,6 +140,11 @@ function ElencoAree({ aree, infiltrazioni, areaScelta, infiltrazioneScelta, comp
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungiArea} />
         </span>
       </div>
+      {/* UX3-13: la legenda delle aree evidenziate, per esteso (da 1280 px la riga dell'infiltrazione non ha più la striscia «Aree toccate») */}
+      {apertaInfiltrazione && <p className="m-0 flex items-center gap-1.5 text-[12px] text-text-secondary">
+        <span aria-hidden className="inline-block h-3 w-3 shrink-0 rounded-sm border border-primary/60 bg-white/[0.04]" />
+        <span>Aree toccate da «{apertaInfiltrazione.ordine + 1}. {apertaInfiltrazione.nome}» · {quanteToccate}, evidenziate.</span>
+      </p>}
       {aree.length > 1 && <p className="m-0 text-[11px] text-text-muted">Trascina ⠿ per l’ordine in cui percorri il Palazzo. Tocca un’area per vederla sulla mappa.</p>}
       <ol className="m-0 flex list-none flex-col gap-1.5 p-0" aria-label="Aree">
         {elenco.map((a, i) => {

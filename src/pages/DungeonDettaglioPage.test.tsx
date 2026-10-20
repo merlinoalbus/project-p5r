@@ -30,6 +30,9 @@ const { aggiornaCompendio, getDungeon, impostaStatoPunto, impostaSpilloRaccolto,
 vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDungeon, impostaStatoPunto, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, eliminaArea, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, impostaAtterraggiDungeon, getMappa,
   getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso, risolviMappa }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// `useMedia` risponde alla larghezza scelta dal test (0 di partenza: la scheda sotto i 1024 px, come in jsdom senza finto)
+const media = vi.hoisted(() => ({ larghezza: 0 }));
+vi.mock('../hooks/useMedia', () => ({ useMedia: (q: string) => { const m = /min-width:\s*(\d+)px/.exec(q); return m ? media.larghezza >= Number(m[1]) : false; } }));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 // il visore vero è provato a parte: qui dice planimetria e, collegando i pin (2026-10-18), che cosa riceve, e «tocca» il pin 3
 // L3: anche il pannello del visore («Infiltrazioni in quest'area») e lo spillo dell'indirizzo; AP3-2: `senzaVicine` e due passaggi
@@ -123,7 +126,7 @@ const monta = (chiave: string, coda = '') => render(<MemoryRouter initialEntries
 </Routes></MemoryRouter>);
 
 // reset, non clear: le risposte «una volta» non consumate da un test non devono passare al successivo
-beforeEach(() => { vi.resetAllMocks(); getAlberoMappe.mockResolvedValue([]); getArea.mockImplementation(areaDellaPrimaLettura); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
+beforeEach(() => { vi.resetAllMocks(); media.larghezza = 0; getAlberoMappe.mockResolvedValue([]); getArea.mockImplementation(areaDellaPrimaLettura); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
 
 it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095)', async () => {
   // la rilettura dopo il raccolto: lo spillo 2 raccolto, 2 su 4 (come lo direbbe il server)
@@ -773,6 +776,20 @@ it('sotto i 1024 px l’arcana va a capo su due righe al massimo, non si accorci
   const arcana = screen.getByTitle('Giudizio (Judgement)');
   expect(arcana.className).toContain('max-lg:line-clamp-2');
   expect(arcana.className).not.toContain('max-lg:truncate');
+});
+
+// UX3-13: da 1280 px «Aree toccate» era una striscia di 51–190 px nella riga dell'infiltrazione che scorreva di lato, già scorsa, con
+// l'etichetta tagliata e i chip a metà. Non ci sta (un comando visibile chiede 132 px, a capo sfora R3-41): da 1280 px la riga non
+// l'ha più, e le aree toccate sono quelle evidenziate nella colonna delle aree, con la legenda che lo dice per esteso
+it('da 1280 px niente striscia «Aree toccate» nella riga: la colonna delle aree le evidenzia, con la legenda per esteso (UX3-13)', async () => {
+  media.larghezza = 1280;
+  getDungeon.mockResolvedValue(palazzo(true));
+  monta('kamoshida', '/area/cancello?infiltrazione=k-01');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  expect(document.querySelector('.fila-scorrevole[aria-label^="Aree toccate"]')).toBeNull();
+  expect(screen.queryByRole('list', { name: /^Aree toccate da/ })).toBeNull();
+  const colonna = within(screen.getByRole('group', { name: 'Aree del Palazzo' }));
+  expect(colonna.getByText('Aree toccate da «1. Cancello» · 1, evidenziate.')).toBeInTheDocument();
 });
 
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
