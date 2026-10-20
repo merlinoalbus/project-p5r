@@ -1767,7 +1767,11 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   // `assetOriginale` resta (uguale) perché l'importazione lo preferisce e i pacchetti di prima lo usano.
   // L2: le Aree delle planimetrie esportate, con la predefinita per chiave pubblica (se è fra le esportate o no: all'import si usa solo
   // se la planimetria c'è)
-  const areeEsportate = [...new Set(mappe.map((m) => m.area).filter((a): a is string => !!a))];
+  // O3-1 (L3): con la radice di un Palazzo nel pacchetto entrano tutte le sue Aree, anche quelle rimaste senza planimetrie (dopo «Colloca»
+  // o dal cestino), con i loro legami: il Palazzo esportato è intero, e su un'altra istanza tornano
+  const palazziEsportati = mappe.map((m) => /^dungeon-(.+)$/.exec(m.chiave)?.[1]).filter((d): d is string => !!d && d !== 'mementos');
+  const areeDeiPalazzi = palazziEsportati.length === 0 || !conAree() ? [] : prepared(`SELECT chiave FROM area WHERE dungeon_chiave IN (${palazziEsportati.map(() => '?').join(', ')})`).pluck().all(...palazziEsportati) as string[];
+  const areeEsportate = [...new Set([...mappe.map((m) => m.area).filter((a): a is string => !!a), ...areeDeiPalazzi])];
   const aree: AreaPacchetto[] = areeEsportate.length === 0 ? [] : (prepared(`SELECT * FROM area WHERE chiave IN (${areeEsportate.map(() => '?').join(', ')}) ORDER BY chiave`).all(...areeEsportate) as RigaArea[])
     .map((a) => ({ chiave: a.chiave, quartiere: a.quartiere_chiave, dungeon: a.dungeon_chiave, citta: a.citta_chiave, slug: a.slug, nome: a.nome, nomeRivisto: a.nome_rivisto === 1, ordine: a.ordine,
       predefinita: a.planimetria_predefinita ? chiaveMappa(a.planimetria_predefinita) : null, origine: a.origine, seedJson: a.seed_json, daVerificare: a.da_verificare === 1, updatedAt: a.updated_at }));

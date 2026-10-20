@@ -285,6 +285,25 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
     }
   });
 
+  it('O3-1 — il pacchetto di un Palazzo porta anche le sue aree senza planimetrie e i loro legami, e l’import le rimette', async () => {
+    // un'area vuota di Okumura (come dopo «Colloca» e il cestino), legata a un'infiltrazione
+    const inf = prepared("SELECT chiave FROM dungeon_area WHERE dungeon_chiave = 'okumura' ORDER BY ordine LIMIT 1").pluck().get() as string;
+    prepared("INSERT INTO area (chiave, dungeon_chiave, slug, nome, nome_rivisto, ordine, origine, da_verificare, updated_at) VALUES ('dungeon/okumura/area-vuota', 'okumura', 'area-vuota', 'Area vuota', 0, 9900, 'utente', 0, 'x')").run();
+    prepared("INSERT INTO infiltrazione_area (infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine) VALUES (?, 'dungeon/okumura/area-vuota', 99, NULL, 'utente')").run(inf);
+    const pacchetto = esportaMappe('dungeon-okumura');
+    expect(pacchetto.aree?.some((a) => a.chiave === 'dungeon/okumura/area-vuota')).toBe(true);
+    expect(pacchetto.legami?.some((l) => l.area === 'dungeon/okumura/area-vuota' && l.infiltrazione === inf)).toBe(true);
+    expect(pacchetto.aree?.length).toBe(prepared("SELECT COUNT(*) FROM area WHERE dungeon_chiave = 'okumura'").pluck().get());
+    expect(pacchetto.legami?.length).toBe(prepared("SELECT COUNT(*) FROM infiltrazione_area ia JOIN area a ON a.chiave = ia.area_chiave WHERE a.dungeon_chiave = 'okumura'").pluck().get());
+    // tolta e reimportata: torna com'era
+    const riga = prepared("SELECT * FROM area WHERE chiave = 'dungeon/okumura/area-vuota'").get();
+    prepared("DELETE FROM infiltrazione_area WHERE area_chiave = 'dungeon/okumura/area-vuota'").run();
+    prepared("DELETE FROM area WHERE chiave = 'dungeon/okumura/area-vuota'").run();
+    importaMappe(structuredClone(pacchetto), { sovrascrivi: true });
+    expect(prepared("SELECT * FROM area WHERE chiave = 'dungeon/okumura/area-vuota'").get()).toEqual(riga);
+    expect(areeDi(inf)).toContain('dungeon/okumura/area-vuota');
+  });
+
   it('NR3-2, NR3-3 — dalla rotta dell’app (esporta → importa, con e senza «sovrascrivi») i pin del seed restano del seed e l’immagine caricata resta la stessa riga', async () => {
     const radice = 'dungeon-madarame';
     await request(app).put(`/api/mappe/${radice}/immagine`).set('Content-Type', 'image/png').send(png(64, 48)).expect(200);
