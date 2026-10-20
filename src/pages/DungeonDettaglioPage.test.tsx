@@ -719,6 +719,23 @@ it('i segni dei chip delle date («si apre», «furto», «scade») sono all’o
   for (const s of segni) expect(s.className).not.toMatch(/opacity-/);
 });
 
+// LAY3-4 (decisione del PM, strada (b)): una «data» della guida che è una frase (Shido, Maruki) non si tronca nel chip: da 1024 px il
+// chip dice l'etichetta e la frase intera sta nei «Dettagli dalla guida»; le date vere restano date
+it('una data che è una frase: da 1024 px il chip dice l’etichetta, la frase intera sta nei «Dettagli dalla guida» (LAY3-4)', async () => {
+  const frase = 'Nella tabella di marcia ottimizzata della guida: invio della lettera di sfida il 12/12';
+  getDungeon.mockResolvedValue({ ...palazzo(true), date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: frase } });
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  const chipFurto = screen.getByTitle(`Furto consigliato: ${frase}`);
+  // da 1024 px si vede l'etichetta; la frase accorciata resta solo sotto i 1024, dove il chip va a capo
+  expect(within(chipFurto).getByText('Furto consigliato', { selector: '.hidden.lg\\:inline' })).toBeInTheDocument();
+  expect(chipFurto.querySelector('.lg\\:truncate')).toBeNull();
+  // una data vera resta la data
+  expect(within(screen.getByTitle('Si apre: 12 Aprile')).getByText('12 Aprile')).toBeInTheDocument();
+  // la frase nei «Dettagli dalla guida» (testo ripiegabile: lunga, si apre intera col tocco)
+  expect(screen.getAllByText(/^Furto consigliato: Nella tabella di marcia/).length).toBeGreaterThan(0);
+});
+
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
   getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: [] });
   monta('kamoshida');

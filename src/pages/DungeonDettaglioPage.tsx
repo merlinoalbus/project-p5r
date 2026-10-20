@@ -83,6 +83,10 @@ function versioneSenzaPin(versioni: PlanimetriaAreaDto[], scelta: string | null)
 }
 
 /** Le tre date di un Palazzo come una linea: si apre, conviene rubare, scade. La prosa della guida nel `title`. */
+/** LAY3-4: vero se il valore di una data della guida comincia con una data («12 Aprile», «24 novembre (…)»), falso se è una frase
+ *  («Nella tabella di marcia…», «Il Palazzo diventa esplorabile…»). */
+const eUnaData = (valore: string) => /^\d{1,2}\s+\p{L}+$/u.test(dataBreve(valore));
+
 function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['date']; memento?: boolean }) {
   const tappe = [
     { chiave: 'sblocco', etichetta: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
@@ -102,8 +106,15 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
           <span className={`flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1 ${t.tono}`} title={`${t.etichetta}: ${t.valore!}`}>
             {/* segno ed etichetta all'opacità piena (regola dell'utente «opacità al 100%», UX3-11): erano a 0,80 */}
             <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className="lg:sr-only">{t.etichetta}</span></span>
-            {/* da 1024 px al massimo 6,5rem coi puntini (una data della guida può essere una frase: «Nel corso della…»), intera nel suggerimento */}
-            <span className="font-display text-[17px] leading-none lg:max-w-[6.5rem] lg:truncate lg:text-[14px]">{dataBreve(t.valore!)}</span>
+            {/* LAY3-4 (decisione del PM, strada (b)): una «data» della guida che è una frase (Shido, Maruki) da 1024 px non si tronca:
+                il chip dice l'etichetta e la frase intera sta nei «Dettagli dalla guida». Andare a capo (strada (a)) alzava l'intestazione
+                e a 1024×690 il visore usciva dalla soglia di R3-41 (340 su 345). Una data vera resta la data, al massimo 6,5rem. */}
+            {eUnaData(t.valore!)
+              ? <span className="font-display text-[17px] leading-none lg:max-w-[6.5rem] lg:truncate lg:text-[14px]">{dataBreve(t.valore!)}</span>
+              : <span className="font-display text-[17px] leading-none lg:text-[14px]">
+                  <span className="lg:hidden">{dataBreve(t.valore!)}</span>
+                  <span aria-hidden className="hidden lg:inline">{t.etichetta}</span>
+                </span>}
           </span>
         </li>
       ))}
