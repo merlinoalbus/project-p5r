@@ -12,7 +12,7 @@
 // Lo staff, che nessuna fonte colloca, è un'Area della città: stessa pagina con contenitore Tokyo (`/guida/citta/tokyo/<slug>`).
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { eliminaAreaMondo, getArea, isApiError, ripristinaAreaMondo } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
@@ -88,10 +88,14 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
   const [finestra, setFinestra] = useState<'modifica' | 'aggiungi' | 'elimina' | 'ripristina' | null>(null);
   const [riepilogoElimina, setRiepilogoElimina] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
-  // Il pannello del visore («Luoghi qui», «Aree vicine») all'arrivo: aperto da 1280 px (a destra del visore) e sul telefono (sotto),
-  // chiuso da 768 a 1279 px, dove ruberebbe la tela (§4.3, UX2-1). Se l'utente lo apre o lo chiude la scelta resta finché resta
+  // «Luoghi qui» e «Aree vicine» (§4.3, UX2-1): da 1280 px nel pannello del visore, aperto all'arrivo, a destra; da 768 a 1279 px nel
+  // pannello chiuso, che ruberebbe la tela; sul telefono **sotto il visore, nella pagina**: dentro il visore il pannello stringeva la
+  // tela a 240 px e scorreva dentro la pagina che scorre (LAY2-4). Se l'utente apre o chiude il pannello la scelta resta finché resta
   // sulla pagina, anche cambiando versione o pin (il visore si rimonta), senza salvarla.
-  const [pannello, setPannello] = useState(() => typeof window === 'undefined' || !window.matchMedia || window.matchMedia('(min-width: 1280px), (max-width: 767.98px)').matches);
+  const [telefono] = useState(() => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches);
+  const [pannello, setPannello] = useState(() => typeof window === 'undefined' || !window.matchMedia || window.matchMedia('(min-width: 1280px)').matches);
+  /** Il visore, per riportarlo in vista sul telefono quando si sceglie un luogo dall'elenco sotto. */
+  const visore = useRef<HTMLDivElement | null>(null);
   // la versione mostrata: quella dell'indirizzo se è dell'Area, altrimenti la predefinita, altrimenti la prima
   const richiesta = params.get('planimetria');
   const scelta = a.planimetrie.find((p) => p.chiave === richiesta) ?? a.planimetrie.find((p) => p.chiave === a.predefinita) ?? a.planimetrie[0] ?? null;
@@ -114,21 +118,35 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
   /** Il pin chiesto dall'elenco «Luoghi qui»: un comando di chi guarda, che mostra il pin anche se adesso non è disponibile (UX2-2). */
   const [pinChiesto, setPinChiesto] = useState<number | null>(null);
   /** Seleziona un pin nel visore (dall'elenco «Luoghi qui»): lo spillo va nell'indirizzo e il visore lo centra. */
-  const selezionaPin = (id: number) => { setPinChiesto(id); const q = new URLSearchParams(params); q.set('spillo', String(id)); setParams(q, { replace: true }); };
+  const selezionaPin = (id: number) => {
+    setPinChiesto(id); const q = new URLSearchParams(params); q.set('spillo', String(id)); setParams(q, { replace: true });
+    // sul telefono l'elenco sta sotto il visore: il pin si vede solo tornando su
+    if (telefono) visore.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+  };
 
-  const elimina = async (conferma: boolean) => {
+  // «Elimina» nella finestra è la conferma (R2-26, UX2-8): la finestra dice già che cosa si porta via, quindi la richiesta parte con
+  // `conferma`. Prima partiva senza, il server rispondeva 409 col riepilogo e serviva un secondo «Elimina tutto»: sembrava non eliminare.
+  const elimina = async () => {
     setOccupato(true);
     try {
-      await eliminaAreaMondo(a.contenitore.chiave, a.slug, conferma);
+      await eliminaAreaMondo(a.contenitore.chiave, a.slug, true);
       notifica('success', `${a.nome} è nel cestino: da Impostazioni → Cestino la rimetti com’era.`);
       navigate(indirizzoContenitore, { replace: true });
     } catch (err) {
+      // il riepilogo del server resta come avviso, se mai rispondesse ancora 409
       if (isApiError(err, 'area-con-contenuti')) setRiepilogoElimina(err.message);
       else notifica('error', err instanceof Error ? err.message : 'Area non eliminata.');
     } finally {
       setOccupato(false);
     }
   };
+  /** Che cosa porta con sé l'eliminazione, dai dati dell'Area: versioni, pin, il passaggio sull'illustrazione, l'ingresso. */
+  const contenutiArea = [
+    a.planimetrie.length === 1 ? 'la sua planimetria' : `le sue ${a.planimetrie.length} planimetrie`,
+    a.numeroSpilli === 0 ? null : a.numeroSpilli === 1 ? '1 pin' : `${a.numeroSpilli} pin`,
+    a.passaggio ? `il passaggio sull’illustrazione di ${a.contenitore.nome}` : null,
+    a.ingresso ? `l’ingresso di ${a.contenitore.nome}, che resterà da scegliere` : null,
+  ].filter(Boolean).join(', ');
   const ripristina = async () => {
     setOccupato(true);
     try { await ripristinaAreaMondo(a.contenitore.chiave, a.slug); notifica('success', `${a.nome}: rimessi i valori della guida.`); await ricarica(); }
@@ -188,14 +206,17 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
         <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => scegli(conPin.chiave)}>Passa a «{nomeVersione(conPin, a.planimetrie.indexOf(conPin))}»</button>
       </p>}
 
+      {/* il punto a cui tornare sul telefono (sopra il visore): alto zero, il margine negativo annulla lo spazio fra i blocchi */}
+      <div ref={visore} aria-hidden className="-mt-3 scroll-mt-16 md:hidden" />
       {scelta
         ? <MappaIncorporata key={scelta.chiave} chiave={scelta.chiave} nome={a.nome} spilloIniziale={spillo} rivelaSpilloIniziale={spillo !== null && spillo === pinChiesto} puntoIniziale={punto}
             // il pannello aperto («Luoghi qui» a portata di tocco, UX2-1), il nome dell'area come titolo e niente «Su: …» né briciole
             // doppie: la testata della pagina li ha già (UX2-4, UX2-5)
             pannelloIniziale={pannello} onPannello={setPannello} titoloVisore={a.nome} senzaVicine
             classeVisore="h-[min(64dvh,560px)] lg:h-auto lg:min-h-[420px] lg:flex-1" className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
-            contenutiPannello={<PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} />} />
+            contenutiPannello={telefono ? undefined : <PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} />} />
         : <p className="card m-0 text-[13px] text-text-secondary">{a.nome} non ha più planimetrie: aggiungine una.</p>}
+      {scelta && telefono && <div className="card"><PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} /></div>}
 
       {finestra === 'modifica' && <FinestraModificaArea area={a} aperta onChiudi={() => setFinestra(null)} onSalvata={ricarica} />}
       <FinestraAggiungiPlanimetria area={a} aperta={finestra === 'aggiungi'} onChiudi={() => setFinestra(null)}
@@ -210,10 +231,10 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
       <Modal titolo={`Eliminare ${a.nome}?`} aperta={finestra === 'elimina'} onChiudi={() => setFinestra(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>
-          <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void elimina(riepilogoElimina !== null)}>{riepilogoElimina ? 'Elimina tutto' : 'Elimina'}</button>
+          <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void elimina()}>Elimina</button>
         </>}>
         <div className="flex flex-col gap-2 text-[14px]">
-          <p className="m-0">Si eliminano l’area, le sue {a.planimetrie.length === 1 ? 'planimetria' : `${a.planimetrie.length} planimetrie`} e i passaggi che portano qui.</p>
+          <p className="m-0">Si eliminano l’area, {contenutiArea} e i passaggi che portano qui da altre aree.</p>
           {riepilogoElimina && <p className="m-0 text-warning" role="alert">{riepilogoElimina}</p>}
           <p className="m-0 text-text-secondary">{NEL_CESTINO}</p>
         </div>

@@ -65,7 +65,7 @@ export function FinestraAggiungiArea({ quartiere: q, aperta, onChiudi, onCreata 
           <span className="text-[13px] font-semibold">Dove sta in {q.nome}</span>
           {illustrazione
             ? <><SceltaPunto src={illustrazione} alt={`Illustrazione di ${q.nome}`} punto={punto} onPunto={setPunto} disabilitato={occupato} />
-              <span className="text-[12px] text-text-muted">{punto ? `Il passaggio verso l’area sta al ${punto.x}% da sinistra e al ${punto.y}% dall’alto.` : 'Tocca l’illustrazione dove si entra nell’area: lì comparirà il suo pin.'}</span></>
+              <span className="text-[12px] text-text-muted">{/* a parole, senza coordinate (UX2-9 a) */}{punto ? 'Punto scelto: il pin dell’area comparirà lì. Tocca un altro punto per spostarlo.' : 'Tocca l’illustrazione dove si entra nell’area: lì comparirà il suo pin.'}</span></>
             : <span className="text-[12px] text-text-muted">{q.nome} non ha un’illustrazione da toccare: potrai segnarla poi.</span>}
         </div>
       </div>

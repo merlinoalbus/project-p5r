@@ -32,10 +32,12 @@ interface Props {
   /** Dopo un cambiamento (ordine, pin segnato): la pagina rilegge il quartiere. */
   onCambiato: () => Promise<void> | void;
   onAggiungi: () => void;
+  /** Il pin di passaggio appena segnato: la pagina lo mostra selezionato, anche se il quartiere non è ancora aperto (UX2-9 d). */
+  onPinSegnato?: (spillo: number) => void;
 }
 
 /** La sezione: titolo con il conteggio, «Riordina», le carte delle aree (o l'invito ad aggiungerne una). */
-export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi }: Props) {
+export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSegnato }: Props) {
   const [riordina, setRiordina] = useState<string[] | null>(null);
   const [daSegnare, setDaSegnare] = useState<AreaRiassuntoDto | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -88,13 +90,13 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi }: Props
           </li>
         ))}
       </ul>
-      <SegnaSullIllustrazione quartiere={q} area={daSegnare} onChiudi={() => setDaSegnare(null)} onSegnata={async () => { setDaSegnare(null); await onCambiato(); }} />
+      <SegnaSullIllustrazione quartiere={q} area={daSegnare} onChiudi={() => setDaSegnare(null)} onSegnata={async (spillo) => { setDaSegnare(null); await onCambiato(); onPinSegnato?.(spillo); }} />
     </section>
   );
 }
 
 /** La finestra che mette il pin di passaggio di un'area sull'illustrazione del quartiere: si tocca il punto, si salva. */
-function SegnaSullIllustrazione({ quartiere: q, area, onChiudi, onSegnata }: { quartiere: QuartiereDettaglioDto; area: AreaRiassuntoDto | null; onChiudi: () => void; onSegnata: () => Promise<void> }) {
+function SegnaSullIllustrazione({ quartiere: q, area, onChiudi, onSegnata }: { quartiere: QuartiereDettaglioDto; area: AreaRiassuntoDto | null; onChiudi: () => void; onSegnata: (spillo: number) => Promise<void> }) {
   const [punto, setPunto] = useState<{ x: number; y: number } | null>(null);
   const [occupato, setOccupato] = useState(false);
   const src = useImmagineMappa(q.illustrazione);
@@ -102,10 +104,10 @@ function SegnaSullIllustrazione({ quartiere: q, area, onChiudi, onSegnata }: { q
     if (!area || !punto || !q.mappaChiave || !area.predefinita) return;
     setOccupato(true);
     try {
-      await creaSpillo(q.mappaChiave, { tipo: 'passaggio', nome: area.nome, x: punto.x, y: punto.y, riferimento: { tipo: 'mappa', chiave: area.predefinita } });
+      const pin = await creaSpillo(q.mappaChiave, { tipo: 'passaggio', nome: area.nome, x: punto.x, y: punto.y, riferimento: { tipo: 'mappa', chiave: area.predefinita } });
       notifica('success', `${area.nome} segnata sull’illustrazione di ${q.nome}.`);
       setPunto(null);
-      await onSegnata();
+      await onSegnata(pin.id);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Pin non salvato.');
     } finally {

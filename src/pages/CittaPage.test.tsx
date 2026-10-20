@@ -16,7 +16,7 @@ import type { AreaRiassuntoDto, DungeonRiassuntoDto,MappaDto, PartitaDto, Quarti
 
 const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn(() => Promise.resolve([])),
   // le Aree della città e le planimetrie da collocare (L2): di serie nessuna, come nel database dopo la 109 senza staff
-  getAreeCitta: vi.fn(async (): Promise<AreaRiassuntoDto[]> => []), getDaCollocare: vi.fn(async () => []), aggiornaAreaMondo: vi.fn() }));
+  getAreeCitta: vi.fn(async (): Promise<AreaRiassuntoDto[]> => []), getDaCollocare: vi.fn(async () => []), aggiornaAreaMondo: vi.fn(), eliminaAreaMondo: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, api));
 
 /** Costruisce la mappa `chiave`: «tokyo» è la città radice, ogni altra un quartiere figlio di Tokyo; ha un solo spillo
@@ -206,6 +206,35 @@ describe('CittaPage — Aree della città (L2, 2026-10-20)', () => {
     await waitFor(() => expect(sezione.queryByText('Da verificare')).toBeNull());
   });
 
+  it('UX2-7: la colonna del testo non scende sotto i 10rem, così «Tieni» e «Rimuovi» vanno a capo invece di schiacciarla', async () => {
+    const staff = { chiave: 'citta/tokyo/staff', contenitore: { tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo' }, slug: 'staff', nome: 'Area riservata allo staff', nomeRivisto: false, ordine: 0, predefinita: 'staff', illustrazione: { immagineUrl: null, asset: null },
+      numeroPlanimetrie: 2, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
+    api.getQuartieri.mockResolvedValue([]);
+    api.getAreeCitta.mockReset().mockResolvedValue([staff]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const nome = await screen.findByRole('link', { name: 'Area riservata allo staff' });
+    const colonna = nome.closest('span.flex-col')!;
+    expect(colonna).toHaveClass('min-w-[10rem]', 'flex-1');
+    expect(colonna.parentElement).toHaveClass('flex-wrap');
+    expect(within(colonna.parentElement!).getByRole('button', { name: /Tieni/ }).closest('span')).toHaveClass('ml-auto');
+  });
+
+  it('«Rimuovi» nella finestra è la conferma (UX2-8): una sola richiesta, con la conferma', async () => {
+    const staff = { chiave: 'citta/tokyo/staff', contenitore: { tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo' }, slug: 'staff', nome: 'Staff', nomeRivisto: false, ordine: 0, predefinita: 'staff', illustrazione: { immagineUrl: null, asset: null },
+      numeroPlanimetrie: 2, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
+    api.getQuartieri.mockResolvedValue([]);
+    api.getAreeCitta.mockReset().mockResolvedValueOnce([staff]).mockResolvedValue([]);
+    api.getDaCollocare.mockReset().mockResolvedValue([]);
+    api.eliminaAreaMondo.mockReset().mockResolvedValue(undefined);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    fireEvent.click(within(await screen.findByRole('region', { name: 'Aree della città' })).getByRole('button', { name: /Rimuovi/ }));
+    const finestra = within(await screen.findByRole('dialog', { name: 'Rimuovere Staff?' }));
+    expect(finestra.getByText(/le sue 2 planimetrie e i passaggi che portano qui/)).toBeInTheDocument();
+    fireEvent.click(finestra.getByRole('button', { name: 'Rimuovi' }));
+    await waitFor(() => expect(api.eliminaAreaMondo).toHaveBeenCalledWith('tokyo', 'staff', true));
+    expect(api.eliminaAreaMondo).toHaveBeenCalledTimes(1);
+  });
+
   it('senza Aree della città né planimetrie da collocare le due sezioni non ci sono', async () => {
     api.getQuartieri.mockResolvedValue([]);
     // il test di prima lascia l'area dello staff nel mock: qui le liste vuote si dicono, e si aspetta che le promesse siano risolte
@@ -302,6 +331,15 @@ describe('QuartierePage', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     fireEvent.click(entra);
     expect(await screen.findByRole('dialog', { name: 'Central Street — ingresso di Shibuya' })).toBeInTheDocument();
+  });
+
+  it('UX2-6: sul telefono il visore dell’illustrazione è alto quanto la figura (classe dell’ospite, proporzione dal visore)', async () => {
+    api.getQuartiere.mockResolvedValue(conIngresso);
+    api.getMappa.mockImplementation(async (k: string) => mappa(k, 'Shibuya'));
+    montaQuartiere('/guida/citta/shibuya');
+    const visore = await screen.findByTestId('visore-mappa');
+    expect(visore.parentElement).toHaveClass('visore-alto-quanto-immagine');
+    expect(visore.style.getPropertyValue('--proporzione-immagine')).toBe('1000 / 600');
   });
 
   it('un quartiere senza ingresso (Kichijoji): dalla metro nessuna finestra, niente «Entra», «Ingresso» da scegliere', async () => {

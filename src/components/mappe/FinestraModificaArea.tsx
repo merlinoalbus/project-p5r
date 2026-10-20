@@ -107,11 +107,12 @@ export function FinestraModificaArea({ area, aperta, onChiudi, onSalvata }: Prop
                       placeholder={`Planimetria ${i + 1}`} onChange={(e) => setEtichette((x) => ({ ...x, [k]: e.target.value }))} />
                     <span className="text-[12px] text-text-muted">{p.numeroSpilli} pin{p.chiave === area.predefinita ? ' · si apre per prima' : ''}</span>
                   </span>
-                  <span className="flex items-center gap-1">
+                  {/* i comandi vanno a capo interi, mai a metà parola («ELIMI/NA» nel foglio stretto, UX2-9 c) */}
+                  <span className="flex flex-wrap items-center gap-1">
                     <button type="button" className="btn btn-ghost touch" aria-label={`Sposta su ${nomeVersione(p, i)}`} disabled={i === 0} onClick={() => sposta(i, -1)}>↑</button>
                     <button type="button" className="btn btn-ghost touch" aria-label={`Sposta giù ${nomeVersione(p, i)}`} disabled={i === ordineVivo.length - 1} onClick={() => sposta(i, 1)}>↓</button>
-                    <Link className="btn btn-ghost touch" to={`/guida/mappe/${encodeURIComponent(k)}/modifica`}>Apri nell’editor</Link>
-                    {area.planimetrie.length > 1 && <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina"
+                    <Link className="btn btn-ghost touch whitespace-nowrap" to={`/guida/mappe/${encodeURIComponent(k)}/modifica`}>Apri nell’editor</Link>
+                    {area.planimetrie.length > 1 && <PulsanteVisivo tono="pericolo" compatto className="shrink-0 whitespace-nowrap" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina"
                       aria-label={`Elimina ${nomeVersione(p, i)}`} disabled={occupato} onClick={() => void elimina(k)} />}
                   </span>
                 </li>

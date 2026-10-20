@@ -40,6 +40,13 @@ it('L2 (2026-10-20): le versioni di un’Area sono una voce sola col nome dell�
   expect(within(gruppo).queryByRole('link',{name:/Speciale/})).toBeNull();
   expect(within(gruppo).getAllByRole('link')).toHaveLength(2);
 });
+it('FUN2-7: aperto Tokyo, il gruppo di un quartiere si chiama «Aree di …» e conta le aree, non le planimetrie',()=>{
+  const area=(slug:string,nome:string,versioneOrdine:number)=>({chiave:`citta/yongen-jaya/${slug}`,contenitore:{tipo:'quartiere' as const,chiave:'yongen-jaya',nome:'Yongen-Jaya'},slug,nome,versioneEtichetta:null,versioneOrdine,predefinita:versioneOrdine===0,casa:`/guida/citta/yongen-jaya/${slug}`});
+  const quartiere={...m('yongen-jaya','tokyo','Yongen-Jaya'),tipo:'quartiere' as const};
+  const covo=[0,1,2].map(i=>({...m(`covo-${i}`,'yongen-jaya','Covo'),area:area('covo-dei-ladri','Covo dei Ladri',i)}));
+  render(<MemoryRouter><AlberoLuoghi genitore="tokyo" espandibile mappe={[{...m('tokyo',null,'Tokyo'),tipo:'citta'},quartiere,{...m('vicoli','yongen-jaya','Vicoli'),area:area('vicoli','Vicoli',0)},...covo]}/></MemoryRouter>);
+  expect(screen.getByText('Aree di Yongen-Jaya (2)')).toBeInTheDocument();
+});
 it('un vecchio URL editoriale apre la sezione del palazzo e non carica una planimetria falsa',async()=>{
   api.risolviMappa.mockResolvedValue({tipo:'guida',area:'castello/biblioteca',dungeon:'castello',mappaPalazzo:'palazzo',nome:'Biblioteca'});
   const child=vi.fn(()=> <div>Planimetria falsa</div>);

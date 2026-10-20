@@ -36,11 +36,12 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Area non aggiornata.'); }
     finally { setOccupato(false); }
   };
-  const rimuovi = async (conferma: boolean) => {
+  // «Rimuovi» nella finestra è la conferma (UX2-8): la richiesta parte con `conferma`, senza un secondo «Rimuovi tutto» dopo il 409
+  const rimuovi = async () => {
     if (!daRimuovere) return;
     setOccupato(true);
     try {
-      await eliminaAreaMondo('tokyo', daRimuovere.slug, conferma);
+      await eliminaAreaMondo('tokyo', daRimuovere.slug, true);
       notifica('success', `${daRimuovere.nome} è nel cestino.`);
       setDaRimuovere(null); setRiepilogo(null);
       await aree.ricarica();
@@ -59,14 +60,16 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
           {aree.dati!.map((a) => (
             <li key={a.slug} className="card flex flex-wrap items-center gap-3 p-2">
               <AnteprimaMappa mappa={{ ...a.illustrazione, nome: a.nome }} className="h-[72px] w-24" sizes="96px" />
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              {/* il testo non scende sotto i 10rem: dove non c'è posto «Tieni» e «Rimuovi» vanno a capo, sotto (UX2-7: a 768 e 375 il
+                  nome si spezzava sillaba per sillaba in una colonna di 40 px) */}
+              <span className="flex min-w-[10rem] flex-1 flex-col gap-0.5">
                 <span className="flex flex-wrap items-center gap-1.5">
                   <Link to={a.casa} className="touch inline-flex items-center font-semibold">{a.nome}</Link>
                   {a.daVerificare && <span className="chip chip--attivo text-[11px]">Da verificare</span>}
                 </span>
                 <span className="text-[12px] text-text-muted">{a.numeroPlanimetrie === 1 ? '1 planimetria' : `${a.numeroPlanimetrie} planimetrie`} · {a.numeroSpilli === 1 ? '1 pin' : `${a.numeroSpilli} pin`}</span>
               </span>
-              {a.daVerificare && <span className="flex flex-wrap gap-1.5">
+              {a.daVerificare && <span className="ml-auto flex flex-wrap gap-1.5">
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Tieni" disabled={occupato} onClick={() => void tieni(a)} />
                 <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" disabled={occupato} onClick={() => { setRiepilogo(null); setDaRimuovere(a); }} />
               </span>}
@@ -94,10 +97,10 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
       <Modal titolo={daRimuovere ? `Rimuovere ${daRimuovere.nome}?` : ''} aperta={!!daRimuovere} onChiudi={() => setDaRimuovere(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setDaRimuovere(null)}>Annulla</button>
-          <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void rimuovi(riepilogo !== null)}>{riepilogo ? 'Rimuovi tutto' : 'Rimuovi'}</button>
+          <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void rimuovi()}>Rimuovi</button>
         </>}>
         <div className="flex flex-col gap-2 text-[14px]">
-          <p className="m-0">Si rimuovono l’area e le sue planimetrie.</p>
+          <p className="m-0">Si rimuovono l’area, {daRimuovere?.numeroPlanimetrie === 1 ? 'la sua planimetria' : `le sue ${daRimuovere?.numeroPlanimetrie ?? 0} planimetrie`}{daRimuovere?.numeroSpilli ? `, ${daRimuovere.numeroSpilli === 1 ? '1 pin' : `${daRimuovere.numeroSpilli} pin`}` : ''} e i passaggi che portano qui.</p>
           {riepilogo && <p className="m-0 text-warning" role="alert">{riepilogo}</p>}
           <p className="m-0 text-text-secondary">{NEL_CESTINO}</p>
         </div>

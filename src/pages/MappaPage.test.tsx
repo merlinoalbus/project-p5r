@@ -289,6 +289,13 @@ it('anche un alias che risolve a Tokyo finisce sulla mappa della Città',async()
   expect(getMappa).not.toHaveBeenCalled();
 });
 
+it('LAY2-5: da 1024 px lo spazio fra intestazione ed elenco è 12 px (a 1024×690 l’indice sforava di 3 px)', async () => {
+  getAlberoMappe.mockResolvedValue(albero);
+  monta('/guida/mappe');
+  const elenco = await screen.findByRole('list', { name: 'Mappe' });
+  expect(elenco.closest('div.flex-col')).toHaveClass('gap-4', 'lg:gap-3');
+});
+
 // ---- L2 (2026-10-20): ogni mappa ha una casa sola ----
 it('un vecchio indirizzo di una planimetria porta alla sua casa (la pagina dell’Area sulla versione) con spillo e punto, senza aprire il visore', async () => {
   risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'shibuya-sottopasso-speciale', casa: '/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale' });

@@ -56,6 +56,22 @@ describe('VisoreMappa', () => {
     expect(screen.getByText('1 di 3 raccolti · 33%')).toBeInTheDocument();
   });
 
+  it('UX2-6 (2026-10-20): i pin di spostamento hanno la classe che su touch tiene il nome visibile; il visore dichiara la proporzione dell’immagine', () => {
+    monta();
+    const passaggio = screen.getByRole('button', { name: /^Passaggio: / });
+    expect(passaggio).toHaveClass('spillo-mappa--spostamento');
+    expect(passaggio.querySelector('.spillo-mappa__etichetta')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Negozio: Untouchable' })).not.toHaveClass('spillo-mappa--spostamento');
+    // senza immagine caricata vale la misura dichiarata della mappa (1000×500)
+    expect(screen.getByTestId('visore-mappa').style.getPropertyValue('--proporzione-immagine')).toBe('1000 / 500');
+  });
+
+  it('UX2-9 b: senza pin il pannello dice «Nessun pin qui.» (niente «spillo» né «mappa», R2-39)', () => {
+    monta({ mappa: { ...mappa, spilli: [] }, pannelloIniziale: true });
+    expect(screen.getByText('Nessun pin qui.')).toBeInTheDocument();
+    expect(screen.queryByText(/Nessuno spillo su questa mappa/)).toBeNull();
+  });
+
   it('le categorie filtrano gli spilli; «Nascondi tutti» e «Mostra tutti» agiscono su tutte', () => {
     monta();
     const categorie = within(screen.getByRole('list', { name: 'Categorie degli spilli' }));

@@ -124,6 +124,12 @@ export function QuartierePage() {
   // Lo spillo dell'indirizzo (un «Sulla mappa» che porta all'illustrazione del quartiere) si seleziona nel visore, come prima nel
   // visore dell'atlante
   const spillo = Number(params.get('spillo')) || null;
+  /** Il pin di passaggio appena creato (con «Aggiungi area» o «Segna sull'illustrazione»): si mostra selezionato, anche se il quartiere
+   *  nel mondo non c'è ancora e i suoi pin sarebbero nascosti (UX2-9 d). È un comando di chi guarda, come «Luoghi qui» dell'Area. */
+  const [pinChiesto, setPinChiesto] = useState<number | null>(null);
+  // la mappa incorporata rilegge i suoi dati solo quando cambia `versione`: senza questo contatore il pin nuovo non c'era nemmeno
+  const [revisione, setRevisione] = useState(0);
+  const mostraPin = (id: number) => { setPinChiesto(id); setRevisione((r) => r + 1); const p = new URLSearchParams(params); p.delete('ingresso'); p.set('spillo', String(id)); setParams(p, { replace: true }); };
   const [tipo, setTipo] = useState<string>('');
   // Mappa pubblicata ma non ancora nell'istanza: scaricata appena il quartiere è aperto, poi il visore la usa come immagine di base
   // Se la mappa ha dei pezzi ritagliati dall'immagine che mostra (L1, F5: 409 `mappa-con-pezzi`), lo scarico automatico non la
@@ -194,7 +200,7 @@ export function QuartierePage() {
             {/* L'illustrazione del quartiere, con i suoi pin: i passaggi verso le aree e l'uscita verso Tokyo. Si apre adattata e
                 centrata (o sullo spillo dell'indirizzo); l'ingresso serve a chi arriva dalla metro, e ha la sua finestra. */}
             <section className="flex flex-col gap-1.5 xl:sticky xl:top-2" aria-label={`Illustrazione di ${q.nome}`}>
-              {q.mappaChiave && <MappaIncorporata chiave={q.mappaChiave} nome={q.nome} spilloIniziale={spillo} versione={scaricata && download.dati && 'byte' in download.dati ? download.dati.byte : 0} classeVisore="h-[min(56vh,460px)] md:h-[max(420px,min(64vh,740px))]" />}
+              {q.mappaChiave && <MappaIncorporata chiave={q.mappaChiave} nome={q.nome} spilloIniziale={spillo} rivelaSpilloIniziale={spillo !== null && spillo === pinChiesto} versione={`${scaricata && download.dati && 'byte' in download.dati ? download.dati.byte : 0}-${revisione}`} classeVisore="visore-alto-quanto-immagine h-[min(56vh,460px)] md:h-[max(420px,min(64vh,740px))]" />}
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-text-muted">
                 {q.pianta ? (
                   // Se lo scarico non riesce lo si dice (prima restava «scaricata nella tua istanza» con un «Riprova» muto accanto)
@@ -211,7 +217,7 @@ export function QuartierePage() {
             </section>
 
             <div className="flex flex-col gap-4">
-            <AreeDelQuartiere quartiere={q} onCambiato={() => dati.ricarica()} onAggiungi={() => setFinestra('aggiungi')} />
+            <AreeDelQuartiere quartiere={q} onCambiato={() => dati.ricarica()} onAggiungi={() => setFinestra('aggiungi')} onPinSegnato={mostraPin} />
             <section className="flex flex-col gap-2" aria-label="Luoghi del quartiere">
               <div className="flex flex-wrap items-center gap-1.5"><AggiungiAlCatalogo tipo="luogo" titolo="Aggiungi un luogo" onSalvato={() => void dati.ricarica()} /></div>
               {tipi.length > 1 && (
@@ -231,7 +237,7 @@ export function QuartierePage() {
           </div>
 
           {finestra === 'ingresso' && <IngressoQuartiere quartiere={q} aperta onChiudi={() => setFinestra(null)} onSalvato={() => dati.ricarica()} />}
-          {finestra === 'aggiungi' && <FinestraAggiungiArea quartiere={q} aperta onChiudi={() => setFinestra(null)} onCreata={() => void dati.ricarica()} />}
+          {finestra === 'aggiungi' && <FinestraAggiungiArea quartiere={q} aperta onChiudi={() => setFinestra(null)} onCreata={(area) => { void dati.ricarica().then(() => { if (area.passaggio) mostraPin(area.passaggio.spillo); }); }} />}
           {/* L'area d'ingresso nella sua finestra (decisione del PM, 2026-10-20): dalla metro o con «Entra», sul punto e con lo zoom
               dell'ingresso; «Apri l'area» porta alla sua pagina con lo stesso punto, «Chiudi» resta qui e toglie `ingresso=1`. */}
           {q.ingresso && <Modal titolo={`${q.ingresso.area?.nome ?? q.ingresso.nome} — ingresso di ${q.nome}`} aperta={entraAperta || dallaMetro} onChiudi={chiudiEntra} larga

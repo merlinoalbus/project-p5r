@@ -112,7 +112,8 @@ function IndiceMappe() {
   const nodoAperto = gruppoAperto ? mappe.find((m) => m.chiave === percorso[percorso.length - 1]) ?? null : null;
   /** Il nome con cui presentare una mappa nell'indice: quello del suo gruppo di immagini. */
   const nomeDi = (m: MappaRiassuntoDto) => titoloGruppoImmagini(m);
-  return <div className="flex flex-col gap-4">
+  // da 1024 px lo spazio fra intestazione ed elenco scende a 12 px: a 1024×690 l'indice sforava di 3 px (LAY2-5)
+  return <div className="flex flex-col gap-4 lg:gap-3">
     <IntestazionePagina titolo="Mappe"
       sottotitolo={`Tutte le mappe della guida: Tokyo, i quartieri con le loro aree e le planimetrie dei Palazzi. ${totaleMappe} mappe con ${totaleSpilli} spilli, raggruppate per il posto a cui appartengono.`} />
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>

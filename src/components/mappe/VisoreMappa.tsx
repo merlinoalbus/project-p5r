@@ -689,7 +689,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const percorsoTesto = mappa.percorso.map((p) => p.nome).join(' › ');
 
   return (
-    <div className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${className ?? ''}`} data-testid="visore-mappa">
+    // la proporzione dell'immagine, per chi ospita il visore e vuole la tela alta quanto la figura (`.visore-alto-quanto-immagine`, UX2-6)
+    <div className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${className ?? ''}`} data-testid="visore-mappa"
+      style={{ '--proporzione-immagine': `${nat.w} / ${nat.h}` } as CSSProperties}>
       {/* in modalità scelta la mappa sta dentro la voce della guida, che porta i comandi: la testata ruberebbe la tela */}
       {!scelta && <header className="visore-mappa__barra">
         <nav className="visore-mappa__percorso" aria-label="Percorso della mappa">
@@ -749,7 +751,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 </span>
               )}
             </div>
-            {tipiPresenti.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessuno spillo su questa mappa.</p>}
+            {/* «pin» e nessun «mappa» (R2-39, UX2-9 b) */}
+            {tipiPresenti.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessun pin qui.</p>}
             <ul className="m-0 p-0 list-none visore-mappa__categorie" aria-label="Categorie degli spilli">
               {tipiPresenti.map((t) => {
                 const delTipo = mappa.spilli.filter((s) => s.tipo === t);
@@ -867,7 +870,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <button
                   key={s.id}
                   type="button"
-                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${nonDisponibile(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${sbiaditoInScelta(s) ? 'spillo-mappa--nascosto-in-scelta' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
+                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${nonDisponibile(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${sbiaditoInScelta(s) ? 'spillo-mappa--nascosto-in-scelta' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''} ${categoriaSpillo(s.tipo) === 'spostamento' ? 'spillo-mappa--spostamento' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il pin si fa da parte come il gruppo: il tocco
                   // serve a posare uno spillo in quel punto, e prima su un pin esistente non
                   // succedeva nulla, senza nemmeno un segnale (rilievo del validatore, 2026-09-13).

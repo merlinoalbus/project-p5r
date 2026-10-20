@@ -103,6 +103,24 @@ it('«Luoghi qui» seleziona il pin nell’indirizzo e porta alla scheda; «Aree
   expect(vicine.getByRole('link', { name: /Vicoli.*Yongen-Jaya/ })).toHaveAttribute('href', '/guida/citta/yongen-jaya/vicoli');
 });
 
+it('LAY2-4: sul telefono «Luoghi qui» e «Aree vicine» stanno nella pagina sotto il visore, non nel suo pannello', async () => {
+  const prima = window.matchMedia;
+  window.matchMedia = ((q: string) => ({ matches: q.includes('max-width: 767.98px'), media: q, addEventListener: () => {}, removeEventListener: () => {} })) as unknown as typeof window.matchMedia;
+  try {
+    monta();
+    const luoghi = await screen.findByRole('region', { name: 'Luoghi qui' });
+    const visore = screen.getByRole('region', { name: 'Visore' });
+    expect(visore.contains(luoghi)).toBe(false);
+    expect(visore.compareDocumentPosition(luoghi) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getAllByRole('region', { name: 'Luoghi qui' })).toHaveLength(1);
+    // il tocco resta un comando che seleziona il pin
+    fireEvent.click(within(luoghi).getByRole('button', { name: 'Untouchable' }));
+    expect(await screen.findByText('Pin scelto: 42')).toBeInTheDocument();
+  } finally {
+    window.matchMedia = prima;
+  }
+});
+
 it('uno spillo che arriva con l’indirizzo si seleziona ma non è un comando: un pin non disponibile resta nascosto', async () => {
   monta('/guida/citta/shibuya/sottopasso?spillo=42');
   expect(await screen.findByText('Pin scelto: 42')).toBeInTheDocument();
@@ -134,15 +152,16 @@ it('un Covo con una sola planimetria (niente fila) tiene il collegamento in test
   expect(collegamenti[0]).not.toHaveClass('lg:max-xl:hidden');
 });
 
-it('«Elimina area» con contenuti mostra il riepilogo del server e conferma con «Elimina tutto», poi torna al quartiere', async () => {
-  api.eliminaAreaMondo.mockRejectedValueOnce(new ApiError(409, 'area-con-contenuti', 'Sottopasso ha 2 planimetrie e 4 pin.')).mockResolvedValueOnce(undefined);
+it('«Elimina area»: la finestra dice che cosa si porta via e «Elimina» è la conferma (UX2-8): una richiesta, con la conferma, poi il quartiere', async () => {
+  api.getArea.mockResolvedValue({ ...sottopasso, ingresso: true, passaggio: { spillo: 3, x: 10, y: 20 } });
+  api.eliminaAreaMondo.mockResolvedValue(undefined);
   monta();
   fireEvent.click((await screen.findAllByRole('button', { name: 'Elimina area' }))[0]);
   const finestra = within(await screen.findByRole('dialog', { name: 'Eliminare Sottopasso?' }));
+  expect(finestra.getByText(/le sue 2 planimetrie, 4 pin, il passaggio sull’illustrazione di Shibuya, l’ingresso di Shibuya, che resterà da scegliere/)).toBeInTheDocument();
   fireEvent.click(finestra.getByRole('button', { name: 'Elimina' }));
-  expect(await finestra.findByRole('alert')).toHaveTextContent('Sottopasso ha 2 planimetrie e 4 pin.');
-  fireEvent.click(finestra.getByRole('button', { name: 'Elimina tutto' }));
-  await waitFor(() => expect(api.eliminaAreaMondo).toHaveBeenLastCalledWith('shibuya', 'sottopasso', true));
+  await waitFor(() => expect(api.eliminaAreaMondo).toHaveBeenCalledWith('shibuya', 'sottopasso', true));
+  expect(api.eliminaAreaMondo).toHaveBeenCalledTimes(1);
   await waitFor(() => expect(screen.getByTestId('indirizzo')).toHaveTextContent(/^\/guida\/citta\/shibuya$/));
 });
 

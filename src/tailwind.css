@@ -584,6 +584,9 @@
   .spillo-mappa__disegno { display: block; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
   .spillo-mappa__etichetta { position: absolute; top: 100%; margin-top: 2px; padding: 2px 6px; background: rgba(11,11,14,.92); border: 1px solid var(--color-border); font-size: 11px; white-space: nowrap; color: var(--color-text); opacity: 0; pointer-events: none; transition: opacity .1s; }
   .spillo-mappa:hover .spillo-mappa__etichetta, .spillo-mappa--selezionato .spillo-mappa__etichetta, .spillo-mappa--trovato .spillo-mappa__etichetta { opacity: 1; }
+  /* Su telefono e tablet non c'è il passaggio del puntatore: i pin di spostamento (passaggi verso le aree, stazioni) mostrano sempre il
+     nome della meta, altrimenti dall'illustrazione non si capisce quale area apre ciascuno finché non lo si tocca (UX2-6, L2) */
+  @media (hover: none) { .spillo-mappa--spostamento .spillo-mappa__etichetta { opacity: 1; } }
   .spillo-mappa--gruppo { transform-origin: 0 0; }
   /* Il gruppo («2 spilli vicini») è 34 px, sei meno della goccia: i 3 px d'estensione che bastano a
      una goccia da 38 qui fermavano il bersaglio a 40. Ne servono 5 per parte (rilievo del
@@ -753,6 +756,14 @@
     div:has(> .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso)) { height: auto !important; }
     .visore-mappa__tela { min-height: 240px; }
     .visore-mappa__categorie { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  /* Sul telefono il visore ospitato con `.visore-alto-quanto-immagine` (l'illustrazione del quartiere) è alto quanto la figura, con la
+     proporzione che il visore dichiara: un riquadro fisso di 400 px lasciava 240 px vuoti sotto un'illustrazione larga (UX2-6, L2). */
+  @media (max-width: 639.98px) {
+    .visore-alto-quanto-immagine { height: auto !important; }
+    .visore-alto-quanto-immagine > .visore-mappa { height: auto; }
+    .visore-alto-quanto-immagine .visore-mappa--pannello-chiuso .visore-mappa__corpo { grid-template-rows: auto; }
+    .visore-alto-quanto-immagine .visore-mappa--pannello-chiuso .visore-mappa__tela { width: 100%; aspect-ratio: var(--proporzione-immagine, 4 / 3); min-height: 180px; max-height: 56vh; }
   }
 
   /* ---- Passi guidati (Cerca per skill) ---- */

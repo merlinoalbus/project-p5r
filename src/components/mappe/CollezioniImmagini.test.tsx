@@ -26,7 +26,8 @@ it('filtrare la raccolta non rinumera le immagini e conserva quella corrente',()
 });
 it('ogni membro conserva i propri discendenti anche nella raccolta espandibile',()=>{
   render(<MemoryRouter><AlberoLuoghi genitore="p" espandibile mappe={[m('a','p','Museo, 2P',1),m('b','p','Museo, 2P',2),m('figlio-a','a','Deposito A'),m('figlio-b','b','Deposito B')]}/></MemoryRouter>);
-  const summaries=screen.getAllByText('Aree e planimetrie (1)');
+  // il riepilogo dice che cosa c'è dentro e di chi (FUN2-7, 2026-10-20): «Planimetrie di Museo, 2P (1)»
+  const summaries=screen.getAllByText(/^Planimetrie di .+ \(1\)$/);
   expect(summaries).toHaveLength(2);
   summaries.forEach(s=>fireEvent.click(s));
   expect(screen.getByRole('link',{name:'Deposito A'})).toHaveAttribute('href','/guida/mappe/figlio-a');

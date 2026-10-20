@@ -22,6 +22,8 @@ import { IconaAzione } from '../shared/IconaAzione';
 export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { mappe: MappaRiassuntoDto[]; genitore?: string | null; espandibile?: boolean }) {
   const figli = new Map<string | null, MappaRiassuntoDto[]>();
   for (const m of mappe) figli.set(m.genitore, [...(figli.get(m.genitore) ?? []), m]);
+  /** Quante voci mostra un elenco di figlie: una per Area (le sue versioni insieme), una per famiglia di immagini, una per mappa sola. */
+  const contaVoci = (elenco: MappaRiassuntoDto[]) => new Set(elenco.map((m) => m.area ? `area:${m.area.chiave}` : m.gruppoImmagini ? `esplicito:${m.gruppoImmagini.id}` : m.immagineCollezione ? `presentazione:${m.immagineCollezione.ambito}` : m.chiave)).size;
   /** Disegna l'elenco dei figli di `parent` e, ricorsivamente, i loro discendenti.
    *
    * `antenati` contiene le chiavi già sul cammino dalla radice: un figlio che vi compare viene
@@ -41,7 +43,8 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
     function discendenti(m: MappaRiassuntoDto) {
       const contenuto = ramo(m.chiave, new Set([...antenati, m.chiave]));
       return espandibile && contenuto ? <details>
-        <summary className="touch cursor-pointer py-1 text-[12px] text-text-muted" aria-label={`Mostra ${nomeFiglieMappa(m.tipo).toLowerCase()} di ${m.area?.nome ?? nomePresentazioneMappa(m)}`}>Aree e planimetrie ({figli.get(m.chiave)!.length})</summary>
+        {/* il nome di quel che contiene e quante voci si vedono aprendolo (FUN2-7): le versioni di un'Area contano una volta sola */}
+        <summary className="touch cursor-pointer py-1 text-[12px] text-text-muted">{nomeFiglieMappa(m.tipo)} di {m.area?.nome ?? nomePresentazioneMappa(m)} ({contaVoci(figli.get(m.chiave)!)})</summary>
         {contenuto}
       </details> : contenuto;
     }
