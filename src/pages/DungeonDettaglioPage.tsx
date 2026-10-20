@@ -348,7 +348,9 @@ export function DungeonDettaglioPage() {
   // Da 1280 px la mappa prende l'altezza che la colonna le lascia, mai meno di 240 px di tela (2026-09-30, 2026-10-15). Collegando i
   // pin l'intestazione dell'area si riduce al titolo e la tela prende lo spazio liberato; il minimo di 560 px chiesto prima faceva
   // scorrere la colonna sotto la mappa («la mappa è letteralmente inusabile... appare la barra», 2026-10-18).
-  const classeVisoreMappa = 'h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-fit xl:flex-1 xl:[--minimo-tela:240px]';
+  // LAY3-3 (R3-40, caso L3-L07): sotto i 1024 px il visore è alto min(64dvh, 560px), 520 a 375×812 e 560 a 768×1024 (con 41vh era 333 e
+  // 420); comincia sotto la prima schermata, perché la pagina è lunga per scelta. Da 1024 a 1279 px resta la misura di R3-41.
+  const classeVisoreMappa = 'h-[min(64dvh,560px)] lg:h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-fit xl:flex-1 xl:[--minimo-tela:240px]';
   const sceltaPin = collegamento ? { titolo: collegamento.nome, scelti: collegamento.scelti, occupato: collegamento.occupato, ricerca: ricercaPin, attenuaNascosti: true, onScegli: (s: { id: number; nome: string }) => collegamento.onScegli(s) } : undefined;
   /** Memento: apre un dedalo mettendolo nell'indirizzo (che perde gli altri parametri). */
   const scegliArea = (k: string) => { setParams({ area: k }); };
