@@ -1,0 +1,4 @@
+### 2026-10-20T12:35:56Z dati prima del cambio (foto L3-prima-LAY3-5, server fermi) contro la base 0948Z
+IDENTICHE
+### scritture nel BE.log su 48d7a958 (metodi diversi da GET)
+(vuoto = nessuna)

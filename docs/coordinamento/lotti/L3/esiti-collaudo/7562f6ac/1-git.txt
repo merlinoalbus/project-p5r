@@ -1,0 +1,49 @@
+### 2026-10-20T12:34:49Z
+### git branch --show-current
+newreview-l3
+### git rev-parse HEAD
+7562f6acb12e9783e98752991a1b32871e550c9a
+### git status --porcelain
+EXIT=0
+### git log --format='%H %s' 48d7a958..HEAD
+7562f6acb12e9783e98752991a1b32871e550c9a fix(L3): LAY3-5, intestazione della scheda entro il 30% a telefono e tablet
+a09beb8eb22eb500330f542e1b9e9ff799f55fe9 docs(L3): esito del no-reg, punto 4 superato da LAY3-5
+0fed5f5cf4fef3f529efdca02b24fb3bdcba8fbc docs(L3): no-reg verde su 48d7a958, NR3-4 verificato
+6b61bc662c20374021a1632bc3400aca200055d2 docs(coordinamento): memoria, regola dell'intestazione al 30%
+ebcaca29a25c5126643133f3e112f708464ca61d docs(L3): LAY3-5, intestazione al massimo il 30% della schermata (decisione dell'utente)
+b5ac56660261c6795ac6d1a0c39c007c83257c94 docs(L3): layout verde su 48d7a958, ciclo L10, decisione sull'intestazione a 375, riga FUN3-1 riunita
+### git diff --stat c8338fd0 newreview-l3 -- . ':!docs'
+ src/components/guida/InfiltrazioniVoce.test.tsx |  11 ++
+ src/components/guida/InfiltrazioniVoce.tsx      |  14 ++-
+ src/pages/DungeonDettaglioPage.test.tsx         |  70 +++++++++++--
+ src/pages/DungeonDettaglioPage.tsx              | 133 ++++++++++++++++--------
+ src/pages/MappaPage.test.tsx                    |   8 +-
+ src/pages/MappaPage.tsx                         |  17 +--
+ 6 files changed, 189 insertions(+), 64 deletions(-)
+### file fuori da docs/ (attesi: i 6 file src/ già noti)
+src/components/guida/InfiltrazioniVoce.test.tsx
+src/components/guida/InfiltrazioniVoce.tsx
+src/pages/DungeonDettaglioPage.test.tsx
+src/pages/DungeonDettaglioPage.tsx
+src/pages/MappaPage.test.tsx
+src/pages/MappaPage.tsx
+### fuori da docs/ da 48d7a958 a HEAD
+src/pages/DungeonDettaglioPage.test.tsx
+src/pages/DungeonDettaglioPage.tsx
+### migrazioni, server/, shared/ (vuoto atteso)
+### patch-id --stable
+b5ac5666 adad8a19abc1966a2eb79db299714b28a1cd39a8 | a4ba5f4c adad8a19abc1966a2eb79db299714b28a1cd39a8 => UGUALI
+ebcaca29 b45d1b2b670f7b96de24791f113e1648dd1f73c6 | 8347d76b b45d1b2b670f7b96de24791f113e1648dd1f73c6 => UGUALI
+6b61bc66 0629876cb4d71e74b8e09244e19ef6ff58a8edbc | 2e22264f 0629876cb4d71e74b8e09244e19ef6ff58a8edbc => UGUALI
+0fed5f5c dd61898801632c13008be0eccf069585e53ab00d | 2831f884 dd61898801632c13008be0eccf069585e53ab00d => UGUALI
+a09beb8e d243d0acfc3a491f6db3a082b4dca69d3c1d2fc3 | d1fbbf3a d243d0acfc3a491f6db3a082b4dca69d3c1d2fc3 => UGUALI
+7562f6ac 6959c76041c9abb619106d123196e724a5b9600e | f89afdea 6959c76041c9abb619106d123196e724a5b9600e => UGUALI
+### file di 42b34243 toccati da c8338fd0 a HEAD fuori da docs (vuoto atteso)
+### grep 2026-10-21 su src/ server/ shared/
+EXIT=1 (1 = nessuna)
+### grep di indirizzi del server nei commit portati (0 atteso)
+0
+### alberi
+040000 tree 093595e479429251391f718d540cf5a27f4fb219	server
+040000 tree affd664c3dafb1216db58c44c73ddd8ab8dda851	shared
+040000 tree 4598be7c3f75608e97f039fae4cfedb07cffc383	src
