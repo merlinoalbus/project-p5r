@@ -26,11 +26,14 @@ import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
 import { nomeTipoAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
+import { nomeTipoMappa } from '../utils/vocabolarioMappe';
 
 /** Accesso al luogo comune; conserva le alternative e le schede della guida. */
 export function AccessoMondoPage() {
   const { tipo, chiave } = useParams();
-  if (!chiave || !TIPI_ACCESSO_MONDO.includes(tipo as TipoAccessoMondo)) return <div role="alert">Destinazione non valida. <Link to="/guida/mappe">Apri le mappe</Link></div>;
+  if (!chiave || !TIPI_ACCESSO_MONDO.includes(tipo as TipoAccessoMondo)) return <div role="alert">Destinazione non valida. <Link to="/guida/citta">Apri La città</Link></div>;
+  // Un quartiere ha la sua pagina, l'unica che lo apre (L2, R2-15): ci si va senza chiedere niente al server
+  if (tipo === 'quartiere') return <Navigate to={`/guida/citta/${encodeURIComponent(chiave)}`} replace />;
   return <Accesso tipo={tipo as TipoAccessoMondo} chiave={chiave} />;
 }
 
@@ -54,7 +57,11 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
   const guide = dati?.guide ?? [];
   // Il nome per esteso non c'è nel DTO del risolutore: si prende dalla prima destinazione, che per
   // un negozio è il nome dello spillo. Quando manca resta la chiave, che è comunque leggibile.
-  const nomeCercato = `${nomeTipoAccessoMondo(tipo, chiave)}: ${dati?.destinazioni[0]?.nomeSpillo ?? chiave}`;
+  // Il livello si dice con le parole di L0, mai «Mappa» (L2, M14/T9): per una mappa cercata, «Area» se sta in un'Area del mondo,
+  // altrimenti il suo livello («Quartiere», «Palazzo»…), letto dall'albero
+  const cercata = tipo === 'mappa' ? perChiave.get(chiave) : undefined;
+  const livello = tipo !== 'mappa' ? nomeTipoAccessoMondo(tipo, chiave) : cercata?.area ? 'Area' : cercata ? nomeTipoMappa(cercata) : 'Planimetria';
+  const nomeCercato = `${livello}: ${cercata?.area?.nome ?? dati?.destinazioni[0]?.nomeSpillo ?? chiave}`;
   if (!carica.caricamento && !carica.errore && dati?.esito === 'unica' && dati.destinazioni.length === 1 && guide.length === 0) {
     return <Navigate to={urlDestinazioneMondo(dati.destinazioni[0])} replace />;
   }
@@ -106,7 +113,8 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
     </PageState>
     <div className="flex flex-wrap gap-2">
       <CollegamentoVisivo to={schedaAccessoMondo(tipo, chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda e informazioni" />
-      <CollegamentoVisivo to="/guida/mappe" tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Tutte le mappe" />
+      {/* «La città», non «Tutte le mappe» (L2, M13): il gesto porta il nome del posto */}
+      <CollegamentoVisivo to="/guida/citta" tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="La città" />
     </div>
   </div>;
 }

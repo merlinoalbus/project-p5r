@@ -31,7 +31,7 @@ describe('OggiMappa — il Palazzo sulla mappa di Tokyo', () => {
     const apriMappa = vi.fn();
     render(<MemoryRouter><OggiMappa oggi={oggi(apriMappa)} /></MemoryRouter>);
     fireEvent.click(await screen.findByRole('link', { name: /Palazzo di Kamoshida/ }));
-    expect(apriMappa).toHaveBeenCalledWith('kamoshida/prigione', 42);
+    expect(apriMappa).toHaveBeenCalledWith('kamoshida/prigione', 42, null);
   });
 
   it('senza pin d’arrivo la planimetria si apre intera; senza regola resta il collegamento alla scheda del Palazzo', async () => {
@@ -39,7 +39,7 @@ describe('OggiMappa — il Palazzo sulla mappa di Tokyo', () => {
     const apriMappa = vi.fn();
     const { unmount } = render(<MemoryRouter><OggiMappa oggi={oggi(apriMappa)} /></MemoryRouter>);
     fireEvent.click(await screen.findByRole('link', { name: /Palazzo di Kamoshida/ }));
-    expect(apriMappa).toHaveBeenCalledWith('kamoshida/ingresso', null);
+    expect(apriMappa).toHaveBeenCalledWith('kamoshida/ingresso', null, null);
     unmount();
     getDungeons.mockResolvedValue([kamoshida(null)]);
     const nessuna = vi.fn();
@@ -57,6 +57,22 @@ describe('OggiMappa — il Palazzo sulla mappa di Tokyo', () => {
     usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova', dataGioco: '04-12' } as PartitaDto });
     await vi.waitFor(() => expect(screen.getByRole('link', { name: /Palazzo di Kamoshida/ })).toHaveAttribute('href', '/guida/mappe/kamoshida%2Fsala?spillo=7'));
     expect(getDungeons).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('OggiMappa — il quartiere sulla mappa di Tokyo (L2, punto C)', () => {
+  it('con un ingresso scende nell’area d’ingresso col suo centro, senza cambiare pagina; senza, sull’illustrazione del quartiere', async () => {
+    getDungeons.mockResolvedValue([]);
+    getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', ingresso: { mappa: 'shibuya-central-street', nome: 'Central Street', x: 38.29, y: 32.67, zoom: 1, area: { slug: 'central-street', nome: 'Central Street' } } },
+      { chiave: 'kichijoji', nome: 'Kichijoji', mappaChiave: 'citta-kichijoji', ingresso: null },
+    ]);
+    const apriMappa = vi.fn();
+    render(<MemoryRouter><OggiMappa oggi={oggi(apriMappa)} /></MemoryRouter>);
+    fireEvent.click(await screen.findByTitle('Shibuya'));
+    expect(apriMappa).toHaveBeenLastCalledWith('shibuya-central-street', null, { x: 38.29, y: 32.67, zoom: 1 });
+    fireEvent.click(screen.getByTitle('Kichijoji'));
+    expect(apriMappa).toHaveBeenLastCalledWith('citta-kichijoji', null, null);
   });
 });
 

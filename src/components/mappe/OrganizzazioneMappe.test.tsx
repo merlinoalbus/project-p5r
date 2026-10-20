@@ -17,7 +17,7 @@ import { ContenutiGuidaMappa } from './ContenutiGuidaMappa';
 const api = vi.hoisted(() => ({risolviMappa:vi.fn(),getContenutiMappa:vi.fn(),getMappa:vi.fn()}));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 /** Riassunto minimo di una mappa di tipo «luogo» con la chiave, il genitore e il nome dati (nome predefinito = chiave), senza immagine né spilli. */
-function m(chiave:string,genitore:string|null,nome=chiave):MappaRiassuntoDto { return {chiave,genitore,nome,nomeRivisto:false,tipo:'luogo',ordine:0,immagineUrl:null,asset:null,entita:null,origine:'utente',numeroSpilli:0,numeroFigli:0,updatedAt:''}; }
+function m(chiave:string,genitore:string|null,nome=chiave):MappaRiassuntoDto { return {chiave,genitore,nome,nomeRivisto:false,tipo:'luogo',ordine:0,immagineUrl:null,asset:null,entita:null,origine:'utente',numeroSpilli:0,numeroFigli:0,updatedAt:'',area:null,casa:`/guida/mappe/${chiave}`}; }
 /** Rotta di arrivo dei test: scrive a schermo percorso e query dell'indirizzo corrente, per verificare dove ha portato un reindirizzamento. */
 function Indirizzo(){ const p=useLocation();return <div>{p.pathname}{p.search}</div>; }
 beforeEach(()=>{vi.resetAllMocks();usePreferenzeStore.setState({graficaPredefinita:true});useAssetStore.setState({manifest:null,caricato:true,mancanti:{}});});
@@ -26,6 +26,19 @@ it('rende ogni profondità e mantiene distinti gli omonimi senza icone di passag
   const nomi=screen.getAllByRole('link',{name:'Primo piano'});expect(nomi).toHaveLength(2);
   expect(nomi.map(n=>n.getAttribute('href'))).toEqual(['/guida/mappe/piano','/guida/mappe/altro']);
   expect(screen.getAllByRole('link')).toHaveLength(6);
+});
+it('L2 (2026-10-20): le versioni di un’Area sono una voce sola col nome dell’Area, verso la sua casa, e il gruppo si chiama «Aree di …»',()=>{
+  const area=(versioneOrdine:number,predefinita:boolean)=>({chiave:'citta/shibuya/sottopasso',contenitore:{tipo:'quartiere' as const,chiave:'shibuya',nome:'Shibuya'},slug:'sottopasso',nome:'Sottopasso',versioneEtichetta:null,versioneOrdine,predefinita,casa:'/guida/citta/shibuya/sottopasso'});
+  const quartiere={...m('shibuya','tokyo','Shibuya'),tipo:'quartiere' as const,casa:'/guida/citta/shibuya'};
+  const v1={...m('shibuya-sottopasso','shibuya','Sottopasso'),numeroSpilli:3,area:area(0,true),casa:'/guida/citta/shibuya/sottopasso'};
+  const v2={...m('shibuya-sottopasso-speciale','shibuya','Sottopasso Speciale'),numeroSpilli:2,area:area(1,false),casa:'/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale'};
+  render(<MemoryRouter><AlberoLuoghi genitore="shibuya" mappe={[quartiere,v2,v1,m('shibuya-diner','shibuya','Diner')]}/></MemoryRouter>);
+  const gruppo=screen.getByRole('list',{name:'Aree di Shibuya'});
+  const voce=within(gruppo).getByRole('link',{name:/^Sottopasso/});
+  expect(voce).toHaveAttribute('href','/guida/citta/shibuya/sottopasso');
+  expect(voce).toHaveTextContent('2 versioni · 5 pin');
+  expect(within(gruppo).queryByRole('link',{name:/Speciale/})).toBeNull();
+  expect(within(gruppo).getAllByRole('link')).toHaveLength(2);
 });
 it('un vecchio URL editoriale apre la sezione del palazzo e non carica una planimetria falsa',async()=>{
   api.risolviMappa.mockResolvedValue({tipo:'guida',area:'castello/biblioteca',dungeon:'castello',mappaPalazzo:'palazzo',nome:'Biblioteca'});
@@ -89,10 +102,10 @@ it.each([{larghezza:null,altezza:null},{larghezza:0,altezza:600},{larghezza:800,
   api.risolviMappa.mockResolvedValue({tipo:'mappa',mappa:'palazzo'});
   api.getMappa.mockResolvedValue({...m('palazzo',null,'Palazzo di Kamoshida'),asset:'palazzi/kamoshida',...dimensioni,note:'',genitoreNome:null,percorso:[],figli:[m('ingresso','palazzo','Ingresso')],spilli:[]});
   render(<MemoryRouter><MappaIncorporata chiave="palazzo"/></MemoryRouter>);
-  expect(await screen.findByRole('link',{name:'Apri la mappa e i contenuti della guida'})).toHaveAttribute('href','/guida/mappe/palazzo');
+  expect(await screen.findByRole('link',{name:'Apri Palazzo di Kamoshida'})).toHaveAttribute('href','/guida/mappe/palazzo');
   expect(screen.getByRole('link',{name:'Ingresso'})).toHaveAttribute('href','/guida/mappe/ingresso');
   // le stanze in un'area scorrevole sua, con confine e contenimento: decine di nomi non escono dal riquadro
-  expect(screen.getByRole('list',{name:'Mappe di Palazzo di Kamoshida'})).toHaveClass('area-scorrevole','min-h-0');
+  expect(screen.getByRole('list',{name:'Planimetrie di Palazzo di Kamoshida'})).toHaveClass('area-scorrevole','min-h-0');
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
 });
 it('il riquadro con asset nativo e dimensioni positive conserva il visore reale',async()=>{
@@ -101,15 +114,15 @@ it('il riquadro con asset nativo e dimensioni positive conserva il visore reale'
   api.getMappa.mockResolvedValue({...m('pianta',null,'Sala centrale'),asset:'mappe/native/RMAP_151_16_0',larghezza:1536,altezza:1536,note:'',genitoreNome:null,percorso:[],figli:[],spilli:[]});
   render(<MemoryRouter><MappaIncorporata chiave="pianta"/></MemoryRouter>);
   const visore=await screen.findByTestId('visore-mappa');
-  expect(within(visore).getByRole('img',{name:'Mappa: Sala centrale'})).toBeInTheDocument();
-  expect(screen.queryByRole('link',{name:'Apri la mappa e i contenuti della guida'})).not.toBeInTheDocument();
+  expect(within(visore).getByRole('img',{name:'Planimetria di Sala centrale'})).toBeInTheDocument();
+  expect(screen.queryByRole('link',{name:/^Apri /})).not.toBeInTheDocument();
 });
 
 it.each(['futaba','iweleth','kamoshida','kaneshiro','madarame','maruki','mementos','niijima','okumura','shido'])('l’emblema %s non diventa una planimetria per il solo asset normalizzato',async nome=>{
   api.risolviMappa.mockResolvedValue({tipo:'mappa',mappa:nome});
   api.getMappa.mockResolvedValue({...m(nome,null),asset:`palazzi/${nome}`,larghezza:null,altezza:null,note:'',genitoreNome:null,percorso:[],figli:[],spilli:[]});
   render(<MemoryRouter><MappaIncorporata chiave={nome}/></MemoryRouter>);
-  expect(await screen.findByRole('link',{name:'Apri la mappa e i contenuti della guida'})).toHaveAttribute('href',`/guida/mappe/${nome}`);
+  expect(await screen.findByRole('link',{name:`Apri ${nome}`})).toHaveAttribute('href',`/guida/mappe/${nome}`);
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
 });
 

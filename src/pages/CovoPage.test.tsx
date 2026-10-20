@@ -61,6 +61,11 @@ describe('CovoPage', () => {
     expect(within(conto).getByText(/non si sommano/)).toBeInTheDocument();
   });
 
+  it('la carta «Planimetrie del Covo» porta alla pagina dell’Area del Covo (L2, 2026-10-20), non più al visore dell’atlante', async () => {
+    await apri();
+    expect(screen.getByRole('link', { name: /Planimetrie del Covo/ })).toHaveAttribute('href', '/guida/citta/yongen-jaya/covo-dei-ladri');
+  });
+
   it('mostra il totale delle medaglie solo quando lo dichiarano tutte le sfide', async () => {
     await apri({ sfide: [{ nome: 'A', requisito: 'r', medaglie: 10 }, { nome: 'B', requisito: 'r', medaglie: 5 }] });
     expect(within(screen.getByRole('region', { name: 'Come funziona il Covo' })).getByText('15 medaglie in tutto')).toBeInTheDocument();

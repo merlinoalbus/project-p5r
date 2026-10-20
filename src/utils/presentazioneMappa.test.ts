@@ -27,7 +27,7 @@ it('quando la versione ha un’etichetta dimostrata il nome la porta, in ogni sc
   expect(nomePresentazioneMappa(covo)).toBe('Covo dei Ladri — settore d’ingresso');
 });
 
-const parziale: MappaRiassuntoDto = {chiave:'nativo-rmap-153-4-0',nome:'Area 4 — RMAP 153',nomeRivisto:false,tipo:'area',genitore:'palazzo-verificato',genitoreNome:'Palazzo di Madarame',nomeCompleto:'Altro genitore › Area 4 — RMAP 153',ordine:0,immagineUrl:null,asset:null,entita:null,origine:'seed',numeroSpilli:0,numeroFigli:0,updatedAt:'',contesti:[{id:'normale',nome:'Ripostiglio',campo:'F153_004_00',texpack:102},{id:'safe',nome:null,campo:'F153_051_00',texpack:103},{id:'altro-ignoto',nome:null,campo:'F153_052_00',texpack:104}]};
+const parziale: MappaRiassuntoDto = {chiave:'nativo-rmap-153-4-0',nome:'Area 4 — RMAP 153',nomeRivisto:false,tipo:'area',genitore:'palazzo-verificato',genitoreNome:'Palazzo di Madarame',nomeCompleto:'Altro genitore › Area 4 — RMAP 153',ordine:0,immagineUrl:null,asset:null,entita:null,origine:'seed',numeroSpilli:0,numeroFigli:0,updatedAt:'',area:null,casa:'/guida/mappe/nativo-rmap-153-4-0',contesti:[{id:'normale',nome:'Ripostiglio',campo:'F153_004_00',texpack:102},{id:'safe',nome:null,campo:'F153_051_00',texpack:103},{id:'altro-ignoto',nome:null,campo:'F153_052_00',texpack:104}]};
 it.each([
   [null,'assente'],['','assente'],['safe','senza-titolo'],['altro-ignoto','senza-titolo'],['estraneo','non-valido'],['normale|safe','senza-titolo'],['safe|normale','senza-titolo'],['normale|normale','non-valido'],['safe|safe','non-valido'],['normale|','non-valido'],['|normale','non-valido'],['normale||safe','non-valido'],['safe|estraneo','non-valido'],
 ])('il contesto %s mantiene il nome neutro e distingue lo stato %s',(selezione,stato)=>{

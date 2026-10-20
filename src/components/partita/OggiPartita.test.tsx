@@ -24,7 +24,7 @@ const giorno: PercorsoGiornoDto = {
   ],
 };
 /** Dettaglio di una mappa seed (città se la chiave è «tokyo», altrimenti quartiere figlio di tokyo) con un solo spillo Confidente «Cortile della Shujin». */
-const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, nomeRivisto: false, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: null, percorso: [{ chiave, nome }], figli: [], arrivi: [], pezzi: [],
+const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, nomeRivisto: false, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', area: null, casa: chiave === 'tokyo' ? '/guida/citta' : `/guida/mappe/${chiave}`, larghezza: 1000, altezza: 600, note: '', genitoreNome: null, percorso: [{ chiave, nome }], figli: [], arrivi: [], pezzi: [],
   spilli: [{ id: 7, mappaChiave: chiave, tipo: 'confidente', tipoNome: 'Confidente', colore: '#ec4899', nome: 'Cortile della Shujin', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' }] });
 
 describe('OggiPartita', () => {
@@ -65,7 +65,7 @@ describe('OggiPartita', () => {
     render(<MemoryRouter><OggiPartita partita={{ id: 4, nome: 'Prova' } as PartitaDto} /></MemoryRouter>);
     fireEvent.click(await screen.findByRole('button', { name: /Sulla mappa: Parla con Ryuji/ }));
     await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('citta-shibuya', 4));
-    expect(await screen.findByRole('application', { name: 'Mappa: Shibuya' })).toBeInTheDocument();
+    expect(await screen.findByRole('application', { name: 'Quartiere: Shibuya' })).toBeInTheDocument();
     // lo spillo collegato è selezionato: popup ancorato aperto
     expect(await screen.findByRole('dialog', { name: 'Cortile della Shujin' })).toBeInTheDocument();
     expect(within(screen.getByRole('list', { name: 'Azioni di giorno' })).getByRole('listitem')).toHaveAttribute('aria-current', 'true');
@@ -90,7 +90,7 @@ describe('OggiPartita', () => {
     // dell'atlante**, che disegna gli spilli e la loro disponibilita'. Al livello di Tokyo c'e'
     // ora la mappa disegnata, che di spilli non ne ha e non ha niente da ricaricare.
     fireEvent.click(await screen.findByRole('button', { name: /Sulla mappa: Parla con Ryuji/ }));
-    await screen.findByRole('application', { name: 'Mappa: Shibuya' });
+    await screen.findByRole('application', { name: 'Quartiere: Shibuya' });
     const caricamentiMappa = api.getMappa.mock.calls.length;
     fireEvent.click(gruppo.getByRole('button', { name: /Sera/ }));
     await waitFor(() => expect(api.impostaFasciaGioco).toHaveBeenCalledWith(4, 'sera'));

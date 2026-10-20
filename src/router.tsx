@@ -38,6 +38,7 @@ const MappaPage = pigra(() => import('./pages/MappaPage'), 'MappaPage');
 const AccessoMondoPage = pigra(() => import('./pages/AccessoMondoPage'), 'AccessoMondoPage');
 const EditorMappaPage = pigra(() => import('./pages/EditorMappaPage'), 'EditorMappaPage');
 const QuartierePage = pigra(() => import('./pages/QuartierePage'), 'QuartierePage');
+const AreaPage = pigra(() => import('./pages/AreaPage'), 'AreaPage');
 const AttivitaPage = pigra(() => import('./pages/AttivitaPage'), 'AttivitaPage');
 const LibriPage = pigra(() => import('./pages/LibriPage'), 'LibriPage');
 const FilmPage = pigra(() => import('./pages/FilmPage'), 'FilmPage');
@@ -84,6 +85,8 @@ export const router = createBrowserRouter([
       { path: 'guida/mappe/:chiave/modifica', element: <EditorMappaPage /> },
       { path: 'guida/citta', element: <CittaPage /> },
       { path: 'guida/citta/:chiave', element: <QuartierePage /> },
+      // L2: la pagina di un'Area del mondo (e delle aree della città: `tokyo` come contenitore)
+      { path: 'guida/citta/:chiave/:area', element: <AreaPage /> },
       { path: 'guida/attivita', element: <AttivitaPage /> },
       { path: 'guida/libri', element: <LibriPage /> },
       { path: 'guida/film', element: <FilmPage /> },

@@ -26,6 +26,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { radiciMetaverso } from '../utils/palazzi';
+import { AreeDellaCitta } from '../components/mappe/AreeDellaCitta';
 
 /**
  * Pagina della città: carica i quartieri e le radici del Metaverso per la partita attiva, mostra la
@@ -57,7 +58,9 @@ export function CittaPage() {
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {q && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="La città" sottotitolo="La mappa di Tokyo con i quartieri come passaggi: tocca un quartiere sulla mappa per aprirne la planimetria nel mappamondo. Le schede a fianco portano invece alla pagina del quartiere, con i suoi luoghi, orari e sblocchi." />
+          {/* L2: la mappa e le schede portano allo stesso posto, la pagina del quartiere (prima la mappa apriva la planimetria
+              nel mappamondo e le schede la pagina: due destinazioni per lo stesso gesto) */}
+          <IntestazionePagina titolo="La città" sottotitolo="La mappa di Tokyo con i suoi quartieri: tocca un quartiere sulla mappa o una scheda per aprirlo, con le sue aree, i luoghi, gli orari e gli sblocchi." />
           {/* Tokyo disegnata con gli elementi originali del gioco, viva col calendario: i
               quartieri compaiono quando si sbloccano, i Palazzi quando esistono. È **la** mappa
               di Tokyo, non una di due: sotto ci stava anche il visore della planimetria con la
@@ -116,6 +119,8 @@ export function CittaPage() {
             );})}
             </ul>
           </div>
+          {/* le aree agganciate a Tokyo (lo staff, da verificare) e le planimetrie da collocare (L2, R2-27) */}
+          <AreeDellaCitta quartieri={q} />
         </div>
       )}
     </PageState>

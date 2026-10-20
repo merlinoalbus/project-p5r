@@ -10,7 +10,7 @@
 // (`IllustrazioneConSegno`); senza illustrazione resta il solo segno. Stanno nella grafica predefinita del database (famiglie
 // `mappe` e `palazzi`) e si prendono dal manifesto (`useSegno`, `useRisolviSegno`), **senza guardare la preferenza «usa grafica
 // predefinita»**: sono il modo in cui la metro e le schede dicono quale posto è quale, e con la preferenza spenta la metro restava
-// fatta di sole linee e nodi (rilievo UX-2 e F7 del validatore; decisione del PM, 2026-10-21: «sagome e stemmi tornano visibili a
+// fatta di sole linee e nodi (rilievo UX-2 e F7 del validatore; decisione del PM, 2026-10-20: «sagome e stemmi tornano visibili a
 // prescindere dalla preferenza, come prima»). La preferenza decide solo il ripiego sull'asset dell'illustrazione e delle mappe
 // (`useImmagineMappa`). Prima di L1 erano indirizzi fissi che ignoravano anche il manifesto; ora un segno che il manifesto non ha,
 // o un file risultato rotto, non si chiede.
@@ -47,7 +47,7 @@ export const segnoQuartiere = (chiave: string): string => `mappe/lmap/tokyo/${ch
 /** Lo stemma di un Palazzo (o dei Memento): i Palazzi non stanno nel foglio della mappa di viaggio e tengono il loro. */
 export const segnoPalazzo = (chiave: string): string => `palazzi/${chiave}`;
 
-/** Il Covo dei Ladri, la soffitta del Leblanc: nel gioco è una schermata del menu di Royal, non una fermata, e nel foglio degli
+/** Il Covo dei Ladri: nel gioco è una schermata del menu di Royal (dal 6/5), non una fermata né la soffitta del Leblanc (G-004), e nel foglio degli
  *  sprite non c'è (voce 4 di `docs/grafica/fabbisogno.md`). Finché non arriva il manifesto non lo ha, e resta la targa. */
 export const SEGNO_COVO = 'mappe/lmap/tokyo/covo-dei-ladri';
 

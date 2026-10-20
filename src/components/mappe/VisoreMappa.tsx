@@ -13,12 +13,12 @@ import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inq
 import { areaConPezzi, copiePosate, mascheraZone, nomeCopia, posaDi, statoPezzo, stileImmagineMascherata, stilePezzo } from '../../utils/pezziMappa';
 import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
-import { arrivoSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
+import { arrivoSpillo, nomeDellaMeta, nomeMetaSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { MappaDto, SpilloDto, VoceDelPinDto } from '../../types';
-import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, puntoDescrittivo, ritornoDelloStato, statoDelPin, type TipoSpillo } from '../../../shared/spilli';
+import { DEFINIZIONI_SPILLO, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, puntoDescrittivo, ritornoDelloStato, statoDelPin, type TipoSpillo } from '../../../shared/spilli';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
@@ -32,7 +32,7 @@ import { ProveNativeSpillo } from './ProveNativeSpillo';
 import type { ImmagineSpilloDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
-import { titoloMappeVicine } from '../../utils/vocabolarioMappe';
+import { descrizioneImmagineMappa, nomeFiglieMappa, nomeTipoMappa, titoloMappeVicine } from '../../utils/vocabolarioMappe';
 
 export type StatoPuntoMappa = 'ottenuto' | 'esaurito' | null;
 
@@ -96,11 +96,22 @@ interface Props {
   vistaGiornoCorrente?: boolean;
   /** Spillo da selezionare e centrare all'apertura (es. dall'azione della guida). */
   selezioneIniziale?: number | null;
+  /** La selezione iniziale l'ha chiesta un **comando** di chi guarda (un tocco su «Luoghi qui» dell'Area), non un indirizzo: se il pin
+   *  non è disponibile adesso, la vista dei non disponibili si accende per mostrarlo (UX2-2, L2). Un indirizzo da solo non lo rivela. */
+  rivelaSelezione?: boolean;
   puntoIniziale?: {x:number;y:number;zoom:number}|null;
   /** Contenuto del pannello laterale al posto di quello predefinito (editor). */
   pannello?: ReactNode;
   /** Controlli e contenuti accessibili anche nel visore a schermo intero. */
   contenutiPannello?: ReactNode;
+  /** Pannello aperto all'inizio anche nel visore incorporato (la pagina dell'Area, L2: «Luoghi qui» è il suo contenuto). */
+  pannelloIniziale?: boolean;
+  /** Avvisa chi ospita il visore quando l'utente apre o chiude il pannello (la pagina dell'Area ricorda la scelta finché resta lì). */
+  onPannello?: (aperto: boolean) => void;
+  /** Nella barra il solo titolo (questo), senza le briciole: chi ospita il visore le mostra già (la pagina dell'Area, L2). */
+  titolo?: string;
+  /** Senza la sezione «Su: …» e delle figlie nel pannello: chi ospita il visore porta le sue (le «Aree vicine» dell'Area, L2). */
+  senzaVicine?: boolean;
   /** Elemento davanti al percorso nella barra (es. targhetta «Modifica»). */
   intestazione?: ReactNode;
   className?: string;
@@ -132,6 +143,23 @@ const PASSO_ROTELLA = 1.15;
 /** «2 spilli vicini», ma «1 spillo vicino»: la pastiglia può restare a uno solo quando nell'editor
  *  il pin selezionato esce dalla nube per essere trascinato. */
 const nomeGruppo = (n: number) => (n === 1 ? '1 spillo vicino' : `${n} spilli vicini`);
+/** Come si chiama un pin nell'etichetta, negli elenchi e nella scheda: un passaggio col nome del posto in cui porta, letto dal vivo
+ *  (L2, decisione dell'utente: «chiamandolo con il suo nome… e non con mappa»); gli altri col loro nome. Il nome proprio di un
+ *  passaggio, se diverso, resta come nota nella scheda. */
+const nomePin = (s: SpilloDto | SchedaContenutoGuidaDto) => ('mappaChiave' in s ? nomeMetaSpillo(s) : null) ?? s.nome;
+/** Le figlie di una mappa nel pannello, una per posto: le versioni della stessa Area (il Sottopasso ne ha due) sono un'Area sola,
+ *  rappresentata dalla sua predefinita (o dalla prima che arriva); le altre figlie restano com'erano (L2). */
+function figliPerArea(figli: MappaDto['figli']): MappaDto['figli'] {
+  const viste = new Map<string, number>();
+  const esito: MappaDto['figli'] = [];
+  for (const f of figli) {
+    if (!f.area) { esito.push(f); continue; }
+    const i = viste.get(f.area.chiave);
+    if (i === undefined) { viste.set(f.area.chiave, esito.length); esito.push(f); }
+    else if (f.area.predefinita) esito[i] = f;
+  }
+  return esito;
+}
 const DIMENSIONE_RISERVA = 1000;
 
 interface Dimensioni { w: number; h: number }
@@ -213,7 +241,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
  * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale, scelta }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -227,7 +255,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
   // Predefinito **spento**: la mappa attiva mostra il mondo com'è adesso. Si accende per chiedere
   // «e dove sarà?», che è una domanda legittima a una guida ma non la vista di partenza.
-  const [mostraNonDisponibili, setMostraNonDisponibili] = useState(false);
+  // Un pin chiesto con un comando (il tocco su «Luoghi qui» dell'Area) ma non disponibile adesso accende la vista dei non disponibili:
+  // altrimenti il tocco non mostrava niente (UX2-2, L2). Solo col comando: un indirizzo arriva da un collegamento e non deve rivelare
+  // quel che l'interfaccia nasconde (regola del test «un indirizzo con lo spillo bloccato non lo rivela»).
+  const [mostraNonDisponibili, setMostraNonDisponibili] = useState(() => !!rivelaSelezione && !!selezioneIniziale && mappa.spilli.some((s) => s.id === selezioneIniziale && nascostoPerCondizioni(s)));
   const [ricerca, setRicerca] = useState('');
   const [selezionatoUso, setSelezionatoUso] = useState<number | null>(selezioneIniziale ?? null);
   /** Il gruppo «+n» aperto, per chiave: l'elenco dice chi c'è dentro e permette di scegliere. */
@@ -242,7 +273,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   }, [gruppoAperto]);
   // Incorporato in una pagina lo spazio è poco: il pannello è chiuso finché l'utente non lo apre; a schermo intero è aperto.
   // Stato derivato (nessun effetto che sincronizza): `null` = comportamento predefinito del contesto.
-  const [pannelloScelto, setPannelloScelto] = useState<boolean | null>(null);
+  const [pannelloScelto, setPannelloScelto] = useState<boolean | null>(pannelloIniziale ?? null);
   const pannelloAperto = pannelloScelto ?? !incorporato;
   // «Dettagli» dal popup: apre il pannello (se chiuso) e porta la scheda in vista con il fuoco. A schermo intero il pannello è già aperto e
   // senza scorrimento il pulsante non aveva alcun effetto visibile (scheda sotto la piega nel layout impilato < 860 px e nella mappa incorporata).
@@ -549,7 +580,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const sbiaditoInScelta = (s: SpilloDto) => !!scelta?.attenuaNascosti && ((s.collezionabile && !!s.raccolto) || bloccato(s));
   // in memoria finché non cambiano spilli o filtri: è l'ingresso del raggruppamento qui sotto, che così non si rifà a ogni disegno (P1")
   const inScelta = scelta !== undefined;
-  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm))),
+  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm) || nomePin(s).toLowerCase().includes(ricercaNorm))),
     [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, ricercaNorm]);
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
@@ -665,17 +696,17 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           {intestazione}
           {/* Nel visore incorporato stretto la barra si compatta (2026-10-15): restano il titolo su una riga, troncato,
               e i pulsanti a icone; briciole e tipo tornano nel suggerimento del titolo, il genitore in «Su: …» del pannello. */}
-          {mappa.percorso.map((p, i) => (
+          {titolo ? <span className="visore-mappa__tappa visore-mappa__tappa--attuale"><span className="visore-mappa__titolo">{titolo}</span></span> : mappa.percorso.map((p, i) => (
             <span key={p.chiave} className={`visore-mappa__tappa ${i === mappa.percorso.length - 1 ? 'visore-mappa__tappa--attuale' : ''}`}>
               {i > 0 && <span className="visore-mappa__separatore text-text-muted" aria-hidden="true">›</span>}
-              {i < mappa.percorso.length - 1 ? <button type="button" className="visore-mappa__briciola" onClick={() => onNaviga(p.chiave)}>{p.nome}</button> : <span className="visore-mappa__titolo" title={incorporato ? `${percorsoTesto} · ${NOME_TIPO_MAPPA[mappa.tipo]}` : undefined}>{p.nome}</span>}
+              {i < mappa.percorso.length - 1 ? <button type="button" className="visore-mappa__briciola" onClick={() => onNaviga(p.chiave)}>{p.nome}</button> : <span className="visore-mappa__titolo" title={incorporato ? `${percorsoTesto} · ${nomeTipoMappa(mappa)}` : undefined}>{p.nome}</span>}
             </span>
           ))}
-          <span className="visore-mappa__tipo chip text-[11px]">{NOME_TIPO_MAPPA[mappa.tipo]}</span>
+          <span className="visore-mappa__tipo chip text-[11px]">{nomeTipoMappa(mappa)}</span>
         </nav>
         <div className="visore-mappa__strumenti">
           {azioni}
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => setPannelloScelto(!pannelloAperto)} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => { setPannelloScelto(!pannelloAperto); onPannello?.(!pannelloAperto); }} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
           {ritorno}
           {onChiudi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo={etichettaChiudi ?? 'Chiudi'} onClick={onChiudi} />}
         </div>
@@ -688,18 +719,18 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           {selezionato && (
             <SchedaSpillo key={selezionato.id} ref={schedaRef} spillo={selezionato} partitaId={partitaId} occupato={occupato} onNaviga={onNaviga} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} onChiudi={() => seleziona(null)} onCentra={() => centraSu(selezionato)} />
           )}
-          {(mappa.genitore || mappa.figli.length > 0) && (
+          {!senzaVicine && (mappa.genitore || mappa.figli.length > 0) && (
             <section className="visore-mappa__sezione">
               <h3 className="visore-mappa__intestazione">{titoloMappeVicine(mappa.tipo)}</h3>
               {mappa.genitore && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={`Su: ${mappa.genitoreNome ?? mappa.genitore}`} onClick={() => onNaviga(mappa.genitore!)} />}
               {mappa.figli.length > 0 && (
-                <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Mappe figlie">
-                  {mappa.figli.map((f) => (
+                <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label={nomeFiglieMappa(mappa.tipo)}>
+                  {figliPerArea(mappa.figli).map((f) => (
                     <li key={f.chiave}>
                       <button type="button" className="visore-mappa__figlia" onClick={() => onNaviga(f.chiave)}>
                         <IconaAzione chiave="mappa" dimensione={18} />
-                        <span className="flex-1 min-w-0 truncate">{f.nome}</span>
-                        <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[f.tipo]}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
+                        <span className="flex-1 min-w-0 truncate">{nomeDellaMeta(f)}</span>
+                        <span className="text-[11px] text-text-muted">{nomeTipoMappa(f)}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
                       </button>
                     </li>
                   ))}
@@ -771,7 +802,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <li key={s.id}>
                   <button type="button" className={`visore-mappa__voce ${s.id === selezionatoId ? 'visore-mappa__voce--attiva' : ''} ${s.raccolto ? 'opacity-60' : ''}`} onClick={() => { if (scelta) { scelta.onScegli(s); centraSu(s); return; } seleziona(s.id); centraSu(s); }} aria-pressed={scelta ? scelta.scelti.has(s.id) : s.id === selezionatoId}>
                     <PuntoSpillo tipo={s.tipo} colore={s.colore} />
-                    <span className="flex-1 min-w-0 truncate">{s.nome}</span>
+                    <span className="flex-1 min-w-0 truncate">{nomePin(s)}</span>
                     <span className="text-[11px] text-text-muted">{s.tipoNome}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</span>
                   </button>
                 </li>
@@ -785,13 +816,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           ref={tela}
           className={`visore-mappa__tela ${cursore} ${trascinando ? 'cursor-grabbing' : ''}`}
           role="application"
-          aria-label={`Mappa: ${percorsoTesto}`}
+          aria-label={`${nomeTipoMappa(mappa)}: ${percorsoTesto}`}
           onPointerDown={suPointerDown} onPointerMove={suPointerMove} onPointerUp={suPointerUp} onPointerCancel={annullaGesto} onDoubleClick={adatta}
         >
           <div className="visore-mappa__livello" style={stileLivello}>
             {src ? (
               // le zone d'origine dei pezzi (102) sono cancellate sempre (scelta dell'utente): una maschera alfa sull'immagine di base
-              <img src={src} alt={`Mappa: ${mappa.nome}`} className="visore-mappa__immagine" draggable={false} style={stileImmagineMascherata(maschera)} data-zone-cancellate={zone.length || undefined}
+              <img src={src} alt={descrizioneImmagineMappa(mappa)} className="visore-mappa__immagine" draggable={false} style={stileImmagineMascherata(maschera)} data-zone-cancellate={zone.length || undefined}
                 onLoad={(e) => { const img = e.currentTarget; if (img.naturalWidth && img.naturalHeight) setNatCaricata({ src: src!, w: img.naturalWidth, h: img.naturalHeight, img }); }} />
             ) : (
               <div className="visore-mappa__senza-immagine" role="img" aria-label="Nessuna immagine di base">
@@ -841,10 +872,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   // serve a posare uno spillo in quel punto, e prima su un pin esistente non
                   // succedeva nulla, senza nemmeno un segnale (rilievo del validatore, 2026-09-13).
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
-                  aria-label={scelta ? `${s.tipoNome}: ${s.nome}${sbiaditoInScelta(s) ? (s.raccolto ? ` · ${parolaSegnato(s)}` : ' · non ancora disponibile') : ''}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${s.nome}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
+                  aria-label={scelta ? `${s.tipoNome}: ${nomePin(s)}${sbiaditoInScelta(s) ? (s.raccolto ? ` · ${parolaSegnato(s)}` : ' · non ancora disponibile') : ''}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${nomePin(s)}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={scelta ? scelta.scelti.has(s.id) : attivo}
                   disabled={scelta?.occupato}
-                  title={s.nome}
+                  title={nomePin(s)}
                   onPointerDown={(e) => {
                     e.stopPropagation();
                     if (editor?.strumento === 'seleziona') {
@@ -857,16 +888,16 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   onDoubleClick={(e) => { if (!visitabile) return; e.stopPropagation(); e.preventDefault(); editor!.onVisita!(visitabile.mappa); }}
                 >
                   <SpilloGrafico tipo={s.tipo} colore={s.colore} />
-                  <span className="spillo-mappa__etichetta">{s.nome}</span>
+                  <span className="spillo-mappa__etichetta">{nomePin(s)}</span>
                 </button>
               );
             })}
             {selezionato && !editor && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(schermoStretto || popupFoglio, (
-              <div ref={popupRif} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={selezionato.nome} style={schermoStretto || popupFoglio ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+              <div ref={popupRif} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={nomePin(selezionato)} style={schermoStretto || popupFoglio ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
-                    <strong className="block text-[13px] leading-tight">{selezionato.nome}</strong>
+                    <strong className="block text-[13px] leading-tight">{nomePin(selezionato)}</strong>
                     <span className="block text-[11px] text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ` · ${parolaSegnato(selezionato)}` : ''}</span>
                     {selezionato.disponibilita && <ChipDisponibilita disponibilita={selezionato.disponibilita} compatto />}
                   </div>
@@ -876,8 +907,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <CondizioniSpilloElenco condizioni={selezionato.condizioni} disponibilita={selezionato.disponibilita} compatto />
                 {(selezionato.immagini.length > 0 || selezionato.dettaglio?.immagine) && (
                   <div className="flex flex-wrap gap-1 items-start">
-                    <ImmagineRiferimento immagine={selezionato.dettaglio?.immagine} nome={selezionato.nome} dimensione={48} />
-                    <GalleriaSpillo immagini={selezionato.immagini} nome={selezionato.nome} compatta />
+                    <ImmagineRiferimento immagine={selezionato.dettaglio?.immagine} nome={nomePin(selezionato)} dimensione={48} />
+                    <GalleriaSpillo immagini={selezionato.immagini} nome={nomePin(selezionato)} compatta />
                   </div>
                 )}
                 {/* Quel che il popup offre lo decide la **categoria** dello spillo (richiesta dell'utente,
@@ -963,7 +994,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                         aria-pressed={scelta ? scelta.scelti.has(s.id) : undefined}
                         onClick={() => { if (scelta) { scelta.onScegli(s); return; } setGruppoAperto(null); seleziona(s.id); }}>
                         <PuntoSpillo tipo={s.tipo} colore={s.colore} />
-                        <span className="flex-1 min-w-0 break-words text-left">{s.nome}</span>
+                        <span className="flex-1 min-w-0 break-words text-left">{nomePin(s)}</span>
                         <span className="text-[11px] text-text-muted shrink-0">{s.tipoNome}{scelta?.scelti.has(s.id) ? ' · collegato' : ''}</span>
                       </button>
                     </li>
@@ -1069,7 +1100,7 @@ export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spi
   if (s.voci.length === 1 && onStatoPunto) return <AzioniVoce spillo={s} voce={s.voci[0]} occupato={occupato} onStatoPunto={onStatoPunto} />;
   if (s.voci.length > 1 && onStatoPunto) {
     return (
-      <ul className="m-0 flex w-full list-none flex-col gap-1 p-0" aria-label={`Voci della guida di ${s.nome}`}>
+      <ul className="m-0 flex w-full list-none flex-col gap-1 p-0" aria-label={`Voci della guida di ${nomePin(s)}`}>
         {s.voci.map((v) => (
           <li key={v.chiave} className="flex flex-wrap items-center gap-1" role="group" aria-label={`Voce: ${v.nome}`}>
             <span className="min-w-0 flex-1 basis-full text-[12px] font-semibold break-words">{v.nome}{v.stato ? ` · ${v.stato}` : ''}</span>
@@ -1115,12 +1146,14 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
   const bloccati = negozio ? negozio.articoli.filter((a) => a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile').length : 0;
   const articoliVisibili = negozio ? (mostraBloccati ? negozio.articoli : negozio.articoli.filter((a) => a.disponibilita === undefined || a.disponibilita.stato === 'disponibile')) : [];
   return (
-    <section ref={ref} tabIndex={-1} className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Scheda: ${s.nome}`}>
+    <section ref={ref} tabIndex={-1} className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Scheda: ${nomePin(s)}`}>
       <div className="flex items-start gap-2">
         <PuntoSpillo tipo={s.tipo} colore={s.colore} grande />
-        <ImmagineRiferimento immagine={d?.immagine} nome={s.nome} />
+        <ImmagineRiferimento immagine={d?.immagine} nome={nomePin(s)} />
         <div className="flex-1 min-w-0">
-          <h3 className="m-0 font-display text-[19px] leading-tight break-words">{s.nome}</h3>
+          <h3 className="m-0 font-display text-[19px] leading-tight break-words">{nomePin(s)}</h3>
+          {/* il nome proprio del pin, se diverso dalla meta, resta come nota (L2: «Banchina Metro», «Piano 2», «Mappa»…) */}
+          {nomePin(s) !== s.nome && <p className="m-0 text-[11px] text-text-muted">Pin: «{s.nome}»</p>}
           <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">{s.tipoNome}{s.collezionabile ? ' · collezionabile' : ''}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</p>
           {s.disponibilita && <ChipDisponibilita disponibilita={s.disponibilita} compatto />}
         </div>
@@ -1129,7 +1162,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
       {s.descrizione && <p className="m-0 text-[13px] text-text-secondary whitespace-pre-line">{s.descrizione}</p>}
       {s.nativo?.daVerificare && <ProveNativeSpillo nativo={s.nativo} />}
       <CondizioniSpilloElenco condizioni={s.condizioni} disponibilita={s.disponibilita} />
-      <GalleriaSpillo immagini={s.immagini} nome={s.nome} />
+      <GalleriaSpillo immagini={s.immagini} nome={nomePin(s)} />
 
       {!nonSpaziale && onNaviga && "mappaChiave" in s && <NavigazioneSpillo spillo={s} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={s.destinazioneNomi?.mappa} nomeSpillo={s.destinazioneNomi?.spillo ?? undefined} />}
       {s.voci.length === 1 && (

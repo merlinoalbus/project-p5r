@@ -196,4 +196,6 @@ export const getLuoghi = (): Promise<LuogoOpzioneDto[]> => apiGet('/compendio/lu
 
 /** Imposta l'ingresso del quartiere sulla mappa (mappa, punto in percentuale e zoom) con PUT, o lo toglie con DELETE se `dati`
  *  è null; risponde con l'ingresso salvato, o null dopo la rimozione. */
-export const salvaIngressoQuartiere=(chiave:string,dati:{mappa:string;x:number;y:number;zoom:number}|null):Promise<import('../../../shared/types').IngressoQuartiereDto|null>=>dati===null?apiDelete('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso').then(()=>null):apiPut('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso',dati);
+/** Salva l'ingresso del quartiere (null lo toglie). L2: si sceglie l'**area** (`area` = slug) e il punto sulla sua planimetria
+ *  predefinita; il corpo vecchio con la `mappa` resta accettato dal server, che ne deduce l'area. */
+export const salvaIngressoQuartiere=(chiave:string,dati:({area:string}|{mappa:string})&{x:number;y:number;zoom:number}|null):Promise<import('../../../shared/types').IngressoQuartiereDto|null>=>dati===null?apiDelete('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso').then(()=>null):apiPut('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso',dati);

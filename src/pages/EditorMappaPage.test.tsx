@@ -7,7 +7,7 @@
 
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../test/selettore';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { EditorMappaPage } from './EditorMappaPage';
 import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../types';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -43,7 +43,7 @@ vi.mock('../services/api', (vero) => moduloApi(vero, {
 }));
 
 /** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
-const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
+const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: `/guida/mappe/${encodeURIComponent(extra.chiave)}`, ...extra });
 const albero: MappaRiassuntoDto[] = [riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta' }), riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo' })];
 const nota: SpilloDto = { id: 9, mappaChiave: 'citta-shibuya', tipo: 'nota', tipoNome: 'Nota', colore: '#eee', nome: 'Nota', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'utente', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
 const base: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', entita: { tipo: 'quartiere', chiave: 'shibuya' } }), larghezza: 1000, altezza: 500, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], spilli: [], arrivi: [], pezzi: [] };
@@ -432,9 +432,9 @@ describe('EditorMappaPage', () => {
   it('albero (15.24): le figlie senza spillo che le raggiunge e il genitore senza ritorno hanno «Crea passaggio», che chiama l’API e seleziona lo spillo creato', async () => {
     const figliaRaggiunta = riassunto({ chiave: 'luogo-a', nome: 'Luogo A', tipo: 'luogo', genitore: 'citta-shibuya' });
     const figliaOrfana = riassunto({ chiave: 'luogo-b', nome: 'Luogo B', tipo: 'luogo', genitore: 'citta-shibuya' });
-    const versoA: SpilloDto = { ...nota, id: 21, tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Luogo A', riferimento: { tipo: 'mappa', chiave: 'luogo-a' }, dettaglio: {tipo:'mappa',mappa:{chiave:'luogo-a',nome:'Luogo A',tipo:'luogo'},immagine:{url:null,asset:null}} };
+    const versoA: SpilloDto = { ...nota, id: 21, tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Luogo A', riferimento: { tipo: 'mappa', chiave: 'luogo-a' }, dettaglio: {tipo:'mappa',mappa:{chiave:'luogo-a',nome:'Luogo A',tipo:'luogo',area:null,casa:'/guida/mappe/luogo-a'},immagine:{url:null,asset:null}} };
     api.getMappa.mockResolvedValue({ ...base, figli: [figliaRaggiunta, figliaOrfana], spilli: [versoA] });
-    const creato: SpilloDto = { ...versoA, id: 22, nome: 'Luogo B', riferimento: { tipo: 'mappa', chiave: 'luogo-b' }, dettaglio: {tipo:'mappa',mappa:{chiave:'luogo-b',nome:'Luogo B',tipo:'luogo'},immagine:{url:null,asset:null}} };
+    const creato: SpilloDto = { ...versoA, id: 22, nome: 'Luogo B', riferimento: { tipo: 'mappa', chiave: 'luogo-b' }, dettaglio: {tipo:'mappa',mappa:{chiave:'luogo-b',nome:'Luogo B',tipo:'luogo',area:null,casa:'/guida/mappe/luogo-b'},immagine:{url:null,asset:null}} };
     api.creaPassaggio.mockResolvedValue(creato);
     monta();
     fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
@@ -457,7 +457,7 @@ describe('EditorMappaPage', () => {
 
   it.each(['esplicita','invalidata','legacy'] as const)('albero rispetta destinazione %s e precedenza sul riferimento',async(caso)=>{
     const figli=['a','b'].map(k=>riassunto({chiave:`luogo-${k}`,nome:`Luogo ${k.toUpperCase()}`,tipo:'luogo',genitore:base.chiave}));
-    const spillo:SpilloDto={...nota,tipo:'passaggio',tipoNome:'Passaggio',riferimento:{tipo:'mappa',chiave:'luogo-a'},dettaglio:{tipo:'mappa',mappa:{chiave:'luogo-a',nome:'Luogo A',tipo:'luogo'},immagine:{url:null,asset:null}},
+    const spillo:SpilloDto={...nota,tipo:'passaggio',tipoNome:'Passaggio',riferimento:{tipo:'mappa',chiave:'luogo-a'},dettaglio:{tipo:'mappa',mappa:{chiave:'luogo-a',nome:'Luogo A',tipo:'luogo',area:null,casa:'/guida/mappe/luogo-a'},immagine:{url:null,asset:null}},
       destinazione:caso==='esplicita'?{mappa:'luogo-b',spillo:null}:null,destinazioneNonDisponibile:caso==='invalidata'};
     api.getMappa.mockResolvedValue({...base,figli,spilli:[spillo]});monta();
     fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
@@ -731,6 +731,69 @@ describe('EditorMappaPage', () => {
     fireEvent.click(finestra.getByRole('button', { name: /Sostituisci ed elimina i pezzi/ }));
     await waitFor(() => expect(api.scaricaPiantaQuartiere).toHaveBeenLastCalledWith('shibuya', { eliminaPezzi: true }));
     await waitFor(() => expect(useNotificationStore.getState().notifications.map((n) => n.message)).toContain('Pianta scaricata dalla guida; i pezzi ritagliati dall’immagine di prima sono stati eliminati.'));
+  });
+
+  // ---- Le mappe del mondo (L2, 2026-10-20; `modifiche.md` §4.6, R2-20, R2-27) ----
+  // Nel mondo non nasce una mappa sciolta: al posto di «Nuova mappa» e di «Crea mappa collegata» c'è il collegamento alla pagina
+  // da cui si aggiungono aree e planimetrie; «Chiudi» porta alla casa; una planimetria di un'Area non cambia tipo né genitore.
+  const areaSottopasso = { chiave: 'citta/shibuya/sottopasso', contenitore: { tipo: 'quartiere' as const, chiave: 'shibuya', nome: 'Shibuya' }, slug: 'sottopasso', nome: 'Sottopasso', versioneEtichetta: 'planimetria completa', versioneOrdine: 1, predefinita: false, casa: '/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale' };
+  const planimetria: MappaDto = { ...base, chiave: 'shibuya-sottopasso-speciale', nome: 'Sottopasso Speciale', tipo: 'luogo', genitore: 'citta-shibuya', entita: null, area: areaSottopasso, casa: areaSottopasso.casa };
+  /** Monta l'editor su una mappa con una rotta di arrivo per ogni altro indirizzo, che scrive dove si è finiti. */
+  function montaConArrivo(indirizzo: string) {
+    function Arrivo() { const l = useLocation(); return <p>Arrivo: {l.pathname}{l.search}</p>; }
+    render(
+      <MemoryRouter initialEntries={[indirizzo]}>
+        <Routes><Route path="/guida/mappe/:chiave/modifica" element={<EditorMappaPage />} /><Route path="*" element={<Arrivo />} /></Routes>
+      </MemoryRouter>,
+    );
+  }
+
+  it('una planimetria di un’Area: niente «Nuova mappa» ma il collegamento al quartiere, e «Chiudi» torna alla versione nella pagina dell’Area', async () => {
+    api.getMappa.mockResolvedValue(planimetria);
+    montaConArrivo('/guida/mappe/shibuya-sottopasso-speciale/modifica');
+    fireEvent.click(await screen.findByRole('button', { name: 'Collegamenti' }));
+    expect(screen.queryByRole('button', { name: /Nuova mappa/ })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Aggiungi area / planimetria dalla pagina del quartiere' })).toHaveAttribute('href', '/guida/citta/shibuya');
+    fireEvent.click(screen.getByRole('button', { name: /^Chiudi/ }));
+    expect(await screen.findByText('Arrivo: /guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale')).toBeInTheDocument();
+  });
+
+  it('una planimetria di un’Area: il form non offre tipo né genitore e non li manda all’API', async () => {
+    api.getMappa.mockResolvedValue(planimetria);
+    api.aggiornaMappa.mockResolvedValue(planimetria);
+    montaConArrivo('/guida/mappe/shibuya-sottopasso-speciale/modifica');
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    const form = within(screen.getByRole('region', { name: 'Proprietà della mappa' }));
+    expect(form.queryByText('Tipo di mappa')).toBeNull();
+    expect(form.queryByText('Mappa genitore')).toBeNull();
+    expect(form.getByRole('link', { name: 'pagina dell’area' })).toHaveAttribute('href', areaSottopasso.casa);
+    fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Sottopasso intero' } });
+    fireEvent.click(form.getByRole('button', { name: /Salva mappa/ }));
+    await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalled());
+    const [, dati] = api.aggiornaMappa.mock.calls[0];
+    expect(dati).toMatchObject({ nome: 'Sottopasso intero' });
+    expect(dati).not.toHaveProperty('tipo');
+    expect(dati).not.toHaveProperty('genitore');
+  });
+
+  it('un quartiere del mondo: il passaggio senza arrivo non offre «Crea mappa collegata» ma la pagina del quartiere', async () => {
+    const uscita: SpilloDto = { ...nota, id: 12, tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Uscita' };
+    api.getMappa.mockResolvedValue({ ...base, casa: '/guida/citta/shibuya', spilli: [uscita] });
+    montaConArrivo('/guida/mappe/citta-shibuya/modifica');
+    fireEvent.click(await screen.findByRole('button', { name: /Passaggio: Uscita/ }));
+    const scheda = within(screen.getByRole('region', { name: 'Proprietà dello spillo: Uscita' }));
+    expect(scheda.queryByRole('button', { name: /Crea mappa collegata/ })).toBeNull();
+    expect(scheda.getByRole('link', { name: 'Aggiungi area / planimetria dalla pagina del quartiere' })).toHaveAttribute('href', '/guida/citta/shibuya');
+  });
+
+  it('fuori dal mondo (un Palazzo) «Nuova mappa» e il form completo restano', async () => {
+    api.getMappa.mockResolvedValue({ ...base, chiave: 'palazzo-di-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', genitore: null, entita: { tipo: 'dungeon', chiave: 'kamoshida' }, casa: '/guida/dungeon/kamoshida' });
+    montaConArrivo('/guida/mappe/palazzo-di-kamoshida/modifica');
+    fireEvent.click(await screen.findByRole('button', { name: 'Collegamenti' }));
+    expect(screen.getByRole('button', { name: /Nuova mappa/ })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Aggiungi area/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Mappa' }));
+    expect(within(screen.getByRole('region', { name: 'Proprietà della mappa' })).getByText('Tipo di mappa')).toBeInTheDocument();
   });
 });
 

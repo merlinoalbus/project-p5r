@@ -28,7 +28,9 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
-import { IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
+import { Link } from 'react-router-dom';
+import { COVO_AREA } from '../utils/covo';
 import type { CompletamentoDto } from '../types';
 
 type Covo = CompletamentoDto['covo'];
@@ -98,6 +100,11 @@ export function CovoPage() {
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Covo dei Ladri"
             sottotitolo={`L'area bonus di Royal, con la sua valuta: ${covo.sfide.length} sfide che danno Medaglie P e ${covo.premi.length} premi che le spendono.`} />
+          {/* le planimetrie del Covo sono un'Area di Yongen-Jaya (L2, D2): le due pagine si collegano nei due sensi */}
+          <Link to={COVO_AREA.pagina} className="card card--cliccabile no-underline text-text flex items-center gap-2 py-2 self-start">
+            <IconaAzione chiave="mappa" dimensione={20} /><span className="font-semibold">Planimetrie del Covo</span>
+            <span className="text-[12px] text-text-muted">un’area di Yongen-Jaya</span>
+          </Link>
 
           <section className="card flex flex-col gap-3" aria-label="Come funziona il Covo">
             <div className="flex flex-wrap gap-2">

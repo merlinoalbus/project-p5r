@@ -50,10 +50,11 @@ export function nomeTipoAccessoMondo(tipo: string, chiave?: string): string {
 
 /** Il nome del comando che apre la scheda dell'entità, detto con la parola giusta (L0, 2026-10-20): prima ogni scheda era «Scheda del
  *  luogo», anche quella di un quartiere o di un Palazzo, e «luogo» oggi vuol dire solo l'attività (Untouchable, Diner). */
-export function titoloSchedaAccessoMondo(tipo: string, chiave?: string): string {
+export function titoloSchedaAccessoMondo(tipo: string, chiave?: string, nome?: string): string {
   switch (tipo) {
     case 'negozio': return 'Scheda del negozio';
-    case 'quartiere': return 'Scheda del quartiere';
+    // L2 (T4): il pulsante che porta alla pagina di un quartiere porta il suo nome («Shibuya»), non il tipo
+    case 'quartiere': return nome ?? 'Scheda del quartiere';
     case 'dungeon': return deiMemento(tipo, chiave) ? 'Scheda dei Memento' : 'Scheda del Palazzo';
     case 'confidente': return 'Scheda del Confidente';
     case 'luogo': return 'Scheda del luogo';

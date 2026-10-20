@@ -18,6 +18,8 @@ export const NOME_TIPO_CESTINO: Record<TipoCestino, string> = {
   voce: 'Voce della guida',
   mappa: 'Planimetria',
   'area-dedalo': 'Area del dedalo',
+  // L2: un'Area del mondo (Central Street, il Sottopasso…) con le sue planimetrie; `area` qui sopra è l'infiltrazione di un Palazzo
+  'area-fisica': 'Area',
 };
 
 /**

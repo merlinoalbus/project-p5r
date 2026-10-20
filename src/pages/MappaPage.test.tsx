@@ -8,7 +8,7 @@
 
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { useAssetStore } from '../stores/assetStore';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import type { ContenutiMappaDto } from '../../shared/organizzazioneMappe';
@@ -17,11 +17,11 @@ import { annotaNavigazione } from '../utils/ritornoMappe';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../types';
 
-const { risolviMappa, getContenutiMappa, getAlberoMappe, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getContenutiMappa: vi.fn(async (mappa: string): Promise<ContenutiMappaDto> => ({mappa,aree:[]})), getAlberoMappe: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
+const { risolviMappa, getContenutiMappa, getAlberoMappe, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string): Promise<{ tipo: string; mappa: string; casa?: string }> => ({tipo:'mappa',mappa})), getContenutiMappa: vi.fn(async (mappa: string): Promise<ContenutiMappaDto> => ({mappa,aree:[]})), getAlberoMappe: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { risolviMappa, getContenutiMappa, getAlberoMappe, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
 
 /** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
-const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
+const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: `/guida/mappe/${encodeURIComponent(extra.chiave)}`, ...extra });
 const albero: MappaRiassuntoDto[] = [
   riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta', numeroFigli: 1, asset: 'mappe/tokyo' }),
   riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2 }),
@@ -41,6 +41,8 @@ function PaginaPartita() {
 
 /** Monta la pagina delle mappe all'indirizzo `percorso`, con le rotte finte della Città e della pagina Partita (`/partita`,
  *  da cui si apre la mappa e a cui porta «Torna alla partita») per verificare dove portano i collegamenti e «Chiudi». */
+/** La casa di una mappa del mondo raggiunta dal reindirizzamento: scrive l'indirizzo con i parametri. */
+function CasaRaggiunta() { const l = useLocation(); return <p>Casa: {l.pathname}{l.search}</p>; }
 function monta(percorso: string) {
   render(
     <MemoryRouter initialEntries={[percorso]}>
@@ -50,6 +52,8 @@ function monta(percorso: string) {
         {/* La Città vera monta la mappa disegnata e chiama l'API: qui serve solo sapere che ci
             si arriva, non rifarla. */}
         <Route path="/guida/citta" element={<h1>La città</h1>} />
+        {/* le case del mondo (L2): un quartiere o un'Area; qui basta sapere a quale indirizzo si arriva */}
+        <Route path="/guida/citta/*" element={<CasaRaggiunta />} />
         {/* la pagina da cui si è aperta la mappa: «Chiudi» ci riporta qui; «Torna alla partita» ci porta sulla scheda Oggi */}
         <Route path="/partita" element={<PaginaPartita />} />
       </Routes>
@@ -149,8 +153,8 @@ describe('MappaPage', () => {
     fireEvent.click(tokyo);
     const pannello = within(screen.getByRole('region', { name: 'Dentro Tokyo' }));
     // Aprire la mappa è un gesto distinto dallo sbirciare che cosa contiene, e per Tokyo la mappa
-    // è quella disegnata della Città.
-    expect(pannello.getByRole('link', { name: /Apri la mappa di Tokyo/ })).toHaveAttribute('href', '/guida/citta');
+    // è quella disegnata della Città. Il gesto porta il nome del posto (L2, M6, 2026-10-20): «Apri Tokyo», non «Apri la mappa di…»
+    expect(pannello.getByRole('link', { name: 'Apri Tokyo' })).toHaveAttribute('href', '/guida/citta');
     expect(within(screen.getByRole('list', { name: 'Contenuto di Tokyo' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
     // Una radice per volta: aprendone un'altra, la prima si chiude.
     fireEvent.click(screen.getByRole('button', { name: /^Palazzo di Kamoshida/ }));
@@ -285,11 +289,35 @@ it('anche un alias che risolve a Tokyo finisce sulla mappa della Città',async()
   expect(getMappa).not.toHaveBeenCalled();
 });
 
+// ---- L2 (2026-10-20): ogni mappa ha una casa sola ----
+it('un vecchio indirizzo di una planimetria porta alla sua casa (la pagina dell’Area sulla versione) con spillo e punto, senza aprire il visore', async () => {
+  risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'shibuya-sottopasso-speciale', casa: '/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale' });
+  monta('/guida/mappe/shibuya-sottopasso-speciale?spillo=7&x=10&y=20&zoom=2&altro=1');
+  const arrivo = await screen.findByText(/^Casa: /);
+  const url = new URL(arrivo.textContent!.replace('Casa: ', ''), 'http://x');
+  expect(url.pathname).toBe('/guida/citta/shibuya/sottopasso');
+  expect(Object.fromEntries(url.searchParams)).toEqual({ planimetria: 'shibuya-sottopasso-speciale', spillo: '7', x: '10', y: '20', zoom: '2' });
+  expect(getMappa).not.toHaveBeenCalled();
+});
+
+it('un quartiere si apre nella sua pagina; una mappa la cui casa è il visore resta nel visore', async () => {
+  risolviMappa.mockResolvedValueOnce({ tipo: 'mappa', mappa: 'citta-shibuya', casa: '/guida/citta/shibuya' });
+  monta('/guida/mappe/citta-shibuya');
+  expect(await screen.findByText('Casa: /guida/citta/shibuya')).toBeInTheDocument();
+  cleanup();
+  getAlberoMappe.mockResolvedValue(albero);
+  getMappa.mockResolvedValue({ ...dettaglio, chiave: 'mementos-1', nome: 'Memento, area 1', casa: '/guida/mappe/mementos-1' });
+  risolviMappa.mockResolvedValueOnce({ tipo: 'mappa', mappa: 'mementos-1', casa: '/guida/mappe/mementos-1' });
+  monta('/guida/mappe/mementos-1');
+  await waitFor(() => expect(getMappa.mock.calls.map((c) => c[0])).toContain('mementos-1'));
+  expect(screen.queryByText(/^Casa: /)).toBeNull();
+});
+
 it('il contesto URL cambia il titolo del visore e il selettore può ripristinare tutte le alternative',async()=>{
   getAlberoMappe.mockResolvedValue(albero);
   getMappa.mockResolvedValue({...dettaglio,nome:'Area tecnica',contesti:[{id:'a',nome:'Museo, 1P',campo:'F1',texpack:1},{id:'b',nome:'Museo, 2P',campo:'F2',texpack:2}]});
   monta('/guida/mappe/citta-shibuya?contesto=a');
-  const img=await screen.findByRole('img',{name:'Mappa: Museo, 1P'});
+  const img=await screen.findByRole('img',{name:'Illustrazione di Museo, 1P'});
   const src=img.getAttribute('src');
   // `document.title` lo scrive un effetto, e un effetto non e' ancora corso quando l'immagine e'
   // gia' resa: l'asserzione immediata leggeva a volte il titolo di prima. Era il rosso
@@ -298,9 +326,9 @@ it('il contesto URL cambia il titolo del visore e il selettore può ripristinare
   // invece di sperare nell'ordine: e' la differenza fra una prova e una coincidenza.
   await waitFor(()=>expect(document.title).toContain('Museo, 1P'));
   scegliVoce('Nome secondo il contesto','Museo, 2P');
-  expect(await screen.findByRole('img',{name:'Mappa: Museo, 2P'})).toHaveAttribute('src',src);
+  expect(await screen.findByRole('img',{name:'Illustrazione di Museo, 2P'})).toHaveAttribute('src',src);
   scegliVoce('Nome secondo il contesto','Mostra tutti i nomi');
-  expect(await screen.findByRole('img',{name:'Mappa: Museo, 1P / Museo, 2P'})).toHaveAttribute('src',src);
+  expect(await screen.findByRole('img',{name:'Illustrazione di Museo, 1P / Museo, 2P'})).toHaveAttribute('src',src);
   expect(screen.getByRole('list',{name:'Nomi nei contesti del gioco'})).toBeInTheDocument();
 });
 
@@ -334,7 +362,7 @@ it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del
   expect(pannello).toContainElement(guida);
   expect(within(pannello).getByText('Contenuto conservato')).toBeVisible();
   scegliVoce('Nome secondo il contesto','Museo, 2P',pannello);
-  expect(await within(visore).findByRole('img',{name:'Mappa: Museo, 2P'})).toBeInTheDocument();
+  expect(await within(visore).findByRole('img',{name:'Illustrazione di Museo, 2P'})).toBeInTheDocument();
   expect(within(pannello).getByRole('navigation',{name:'Altri quartieri'})).toBeVisible();
   fireEvent.click(within(visore).getByRole('button',{name:'Nascondi pannello'}));
   expect(guida).not.toBeVisible();
@@ -348,6 +376,6 @@ it('una mappa con asset originale e dimensioni non registrate mantiene la planim
   useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/dungeon-kamoshida':'/asset/mappe/dungeon-kamoshida.png'}},caricato:true});
   getMappa.mockResolvedValue({...dettaglio,chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida',immagineUrl:null,asset:'mappe/dungeon-kamoshida',ruoloImmagine:'illustrazione-editoriale',larghezza:null,altezza:null,spilli:[],percorso:[{chiave:'dungeon-kamoshida',nome:'Palazzo di Kamoshida'}]});
   monta('/guida/mappe/dungeon-kamoshida');
-  expect(await screen.findByRole('img',{name:'Mappa: Palazzo di Kamoshida'})).toHaveAttribute('src','/asset/mappe/dungeon-kamoshida.png');
+  expect(await screen.findByRole('img',{name:'Illustrazione di Palazzo di Kamoshida'})).toHaveAttribute('src','/asset/mappe/dungeon-kamoshida.png');
   expect(screen.getByTestId('visore-mappa')).toBeInTheDocument();
 });

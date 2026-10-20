@@ -18,13 +18,13 @@ function spillo(extra: Partial<SpilloDto> & { id: number; nome: string; tipo: Sp
 
 const mappa: MappaDto = {
   chiave: 'citta-shibuya', nome: 'Shibuya', nomeRivisto: false, tipo: 'quartiere', genitore: 'tokyo', genitoreNome: 'Tokyo', ordine: 1, immagineUrl: null, asset: null, entita: { tipo: 'quartiere', chiave: 'shibuya' }, origine: 'seed',
-  numeroSpilli: 4, numeroFigli: 1, updatedAt: '2026-09-04T00:00:00.000Z', larghezza: 1000, altezza: 500, note: '',
+  numeroSpilli: 4, numeroFigli: 1, updatedAt: '2026-09-04T00:00:00.000Z', area: null, casa: '/guida/citta/shibuya', larghezza: 1000, altezza: 500, note: '',
   percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], arrivi: [], pezzi: [],
-  figli: [{ chiave: 'shibuya-centro', nome: 'Shibuya centro', nomeRivisto: false, tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'utente', numeroSpilli: 0, numeroFigli: 0, updatedAt: '' }],
+  figli: [{ chiave: 'shibuya-centro', nome: 'Shibuya centro', nomeRivisto: false, tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'utente', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: '/guida/mappe/shibuya-centro' }],
   spilli: [
     spillo({ id: 1, nome: 'Untouchable', tipo: 'negozio', tipoNome: 'Negozio', x: 20, y: 20, riferimento: { tipo: 'luogo', chiave: 'shibuya/untouchable' }, dettaglio: { tipo: 'luogo', luogo: { chiave: 'shibuya/untouchable', quartiere: 'shibuya', tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi e munizioni', quando: null }, negozio: { chiave: 'untouchable', nome: 'Untouchable', tipo: 'armi', disponibilita: { stato: 'disponibile', requisiti: [] }, articoli: [{ chiave: 'a1', nome: 'Pistola modello Tkachev', categoria: 'arma', prezzo: 12000, disponibileDal: null, comprato: false, disponibilita: { stato: 'disponibile', requisiti: [] } }, { chiave: 'a2', nome: 'Fucile a pompa Governor', categoria: 'arma', prezzo: 48000, disponibileDal: 'dal 18 giugno', comprato: false, disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'data', stato: 'rosso', testo: 'dal 18 giugno', dettaglio: 'oggi è il 20 aprile', manuale: false, confermato: false }] } }, { chiave: 'a3', nome: 'Proiettili perforanti', categoria: 'munizioni', prezzo: 3000, disponibileDal: null, comprato: false, disponibilita: { stato: 'ignoto', requisiti: [{ indice: 0, tipo: 'manuale', stato: 'grigio', testo: 'rango cliente Oscuro', dettaglio: 'Condizione non verificabile dai dati della partita', manuale: true, confermato: false }] } }] } } }),
     spillo({ id: 2, nome: 'Scrigno raccolto', tipo: 'forziere', tipoNome: 'Forziere', x: 80, y: 80, collezionabile: true, raccolto: true }),
-    spillo({ id: 3, nome: 'Verso il centro', tipo: 'passaggio', tipoNome: 'Passaggio', x: 10, y: 90, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' }, dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: '/api/immagini/mappa/shibuya-centro/file', asset: null } }, immagini: [{ id: 31, url: '/api/immagini/spillo/3-a/file', asset: null, didascalia: 'La scala', ordine: 0 }, { id: 32, url: null, asset: 'spilli/citta-shibuya/3-2', didascalia: '', ordine: 1 }] }),
+    spillo({ id: 3, nome: 'Verso il centro', tipo: 'passaggio', tipoNome: 'Passaggio', x: 10, y: 90, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' }, dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo', area: null, casa: '/guida/mappe/shibuya-centro' }, immagine: { url: '/api/immagini/mappa/shibuya-centro/file', asset: null } }, immagini: [{ id: 31, url: '/api/immagini/spillo/3-a/file', asset: null, didascalia: 'La scala', ordine: 0 }, { id: 32, url: null, asset: 'spilli/citta-shibuya/3-2', didascalia: '', ordine: 1 }] }),
     spillo({ id: 4, nome: 'Scrigno da aprire', tipo: 'forziere', tipoNome: 'Forziere', x: 90, y: 10, collezionabile: true, descrizione: 'Contiene un Panino a mezzaluna.' }),
     spillo({ id: 5, nome: 'Forziere del corridoio', tipo: 'forziere', tipoNome: 'Forziere', x: 40, y: 60, collezionabile: true, voci: [{ chiave: 'kamoshida-02/3', tipo: 'forziere', nome: 'Forziere del corridoio', descrizione: '', esauribile: true, dungeon: 'kamoshida', area: 'kamoshida-02', areaDedalo: null, stato: null }] }),
     // spillo con una condizione non soddisfatta alla data corrente della partita: nascosto finché non si chiede di vederlo
@@ -71,11 +71,11 @@ describe('VisoreMappa', () => {
 
   it('il click su uno spillo apre il popup ancorato con le azioni: passaggio → apre la mappa collegata', () => {
     const { onNaviga } = monta();
-    fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Verso il centro' }));
-    const popup = within(screen.getByRole('dialog', { name: 'Verso il centro' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Shibuya centro' }));
+    const popup = within(screen.getByRole('dialog', { name: 'Shibuya centro' }));
     // immagine della mappa collegata e schermate di riferimento nel popup
-    expect(popup.getByRole('img', { name: 'Immagine: Verso il centro' })).toHaveAttribute('src', '/api/immagini/mappa/shibuya-centro/file');
-    expect(within(popup.getByRole('list', { name: 'Schermate di Verso il centro' })).getAllByRole('button')).toHaveLength(2);
+    expect(popup.getByRole('img', { name: 'Immagine: Shibuya centro' })).toHaveAttribute('src', '/api/immagini/mappa/shibuya-centro/file');
+    expect(within(popup.getByRole('list', { name: 'Schermate di Shibuya centro' })).getAllByRole('button')).toHaveLength(2);
     fireEvent.click(popup.getByRole('button', { name: 'Ingrandisci: La scala' }));
     expect(screen.getByRole('dialog', { name: 'La scala' })).toBeInTheDocument();
     fireEvent.click(popup.getByRole('button', { name: 'Vai: Shibuya centro' }));
@@ -121,7 +121,7 @@ describe('VisoreMappa', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tokyo' }));
     expect(onNaviga).toHaveBeenCalledWith('tokyo');
     fireEvent.click(screen.getByRole('button', { name: 'Su: Tokyo' }));
-    fireEvent.click(within(screen.getByRole('list', { name: 'Mappe figlie' })).getByRole('button', { name: /Shibuya centro/ }));
+    fireEvent.click(within(screen.getByRole('list', { name: 'Aree' })).getByRole('button', { name: /Shibuya centro/ }));
     expect(onNaviga).toHaveBeenLastCalledWith('shibuya-centro');
     fireEvent.click(screen.getByRole('button', { name: 'Forziere: Scrigno da aprire' }));
     expect(within(screen.getByRole('dialog', { name: 'Scrigno da aprire' })).queryByRole('button', { name: 'Aperto' })).not.toBeInTheDocument();
@@ -193,6 +193,18 @@ describe('VisoreMappa', () => {
     }
   });
 
+  it('lo spillo bloccato chiesto con un comando («Luoghi qui» dell’Area, UX2-2) si mostra e accende la vista dei non disponibili', async () => {
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 800, height: 600, top: 0, left: 0, right: 800, bottom: 600, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    try {
+      monta({ selezioneIniziale: 6, rivelaSelezione: true });
+      await new Promise((r) => setTimeout(r, 20));
+      expect(screen.getByRole('button', { name: /Attività: Bancarella estiva/ })).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByRole('button', { name: /Mostra anche i non ancora disponibili/ })).toHaveAttribute('aria-pressed', 'true');
+    } finally {
+      misura.mockRestore();
+    }
+  });
+
   it('senza partita le condizioni non nascondono nulla e si leggono come testo', () => {
     monta({ partitaId: null });
     expect(screen.queryByRole('button', { name: /Mostra anche i non ancora disponibili/ })).toBeNull();
@@ -251,7 +263,7 @@ it('applica l’arrivo dopo il fit definitivo senza alterare le percentuali orig
   const area = vi.spyOn(inquadratura, 'areaImmagine').mockReturnValue({ x: 100, y: 200, w: 200, h: 400 });
   try {
     const { container } = render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, immagineUrl: '/fit.png', larghezza: 1000, altezza: 1000, spilli: [] }} partitaId={null} onNaviga={vi.fn()} puntoIniziale={{ x: 65, y: 35, zoom: 2.5 }} /></MemoryRouter>);
-    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    const img = screen.getByRole('img', { name: 'Illustrazione di Shibuya' });
     Object.defineProperty(img, 'naturalWidth', { value: 1000 });
     Object.defineProperty(img, 'naturalHeight', { value: 1000 });
     fireEvent.load(img);
@@ -716,13 +728,13 @@ it('un pin non collezionabile collegato a una voce della guida si segna dal suo 
 
 it('un passaggio con la sua destinazione e una voce «Storia» porta altrove e si segna, le due cose insieme (094)', async () => {
   const passaggio = spillo({ id: 11, nome: 'Verso la sala', tipo: 'passaggio', tipoNome: 'Passaggio', x: 30, y: 40, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
-    dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: null, asset: null } },
+    dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo', area: null, casa: '/guida/mappe/shibuya-centro' }, immagine: { url: null, asset: null } },
     voci: [{ chiave: 'kamoshida-02/12', tipo: 'storia', nome: 'Entra nella sala', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-02', areaDedalo: null, stato: null }] });
   const onStatoPunto = vi.fn().mockResolvedValue(undefined);
   const onNaviga = vi.fn();
   render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={onNaviga} onRaccolto={vi.fn()} onStatoPunto={onStatoPunto} /></MemoryRouter>);
-  fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Verso la sala' }));
-  const popup = within(screen.getByRole('dialog', { name: 'Verso la sala' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Passaggio: Shibuya centro' }));
+  const popup = within(screen.getByRole('dialog', { name: 'Shibuya centro' }));
   expect(popup.getByRole('button', { name: /Shibuya centro/ })).toBeInTheDocument();
   fireEvent.click(popup.getByRole('button', { name: 'Ottenuto' }));
   await waitFor(() => expect(onStatoPunto).toHaveBeenCalledWith(expect.objectContaining({ id: 11 }), 'kamoshida-02/12', 'ottenuto'));
@@ -757,7 +769,7 @@ it('un pin dei Memento collegato a una voce «Altro» di un\'area del dedalo la 
 
 describe('il popup dello spillo si misura (094: uno spostamento di una voce ha anche «Ottenuto»)', () => {
   const passaggio = spillo({ id: 40, nome: 'Torre Inferiore', tipo: 'passaggio', tipoNome: 'Passaggio', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' },
-    dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: null, asset: null } },
+    dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo', area: null, casa: '/guida/mappe/shibuya-centro' }, immagine: { url: null, asset: null } },
     voci: [{ chiave: 'kamoshida-15/1', tipo: 'storia', nome: 'Si apre la torre', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-15', areaDedalo: null, stato: null }] });
   // Le misure restano finte per tutto il caso: in jsdom la tela si misura in un rAF, che può arrivare dopo la comparsa del popup.
   let tela = { w: 0, h: 0 };
@@ -772,15 +784,15 @@ describe('il popup dello spillo si misura (094: uno spostamento di una voce ha a
   const apri = async (dimensioni: { w: number; h: number }) => {
     tela = dimensioni;
     render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, spilli: [passaggio] }} partitaId={7} onNaviga={vi.fn()} onRaccolto={vi.fn()} onStatoPunto={vi.fn()} /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: /^Passaggio: Torre Inferiore/ }));
-    await screen.findByRole('dialog', { name: 'Torre Inferiore' });
+    fireEvent.click(await screen.findByRole('button', { name: /^Passaggio: Shibuya centro/ }));
+    await screen.findByRole('dialog', { name: 'Shibuya centro' });
   };
 
   it('su una tela bassa, dove non sta né sopra né sotto, diventa il foglio invece di farsi tagliare', async () => {
     await apri({ w: 900, h: 300 });
-    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Torre Inferiore' }).className).toContain('spillo-popup--foglio'));
+    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Shibuya centro' }).className).toContain('spillo-popup--foglio'));
     // nel foglio ci sono la navigazione e lo stato
-    const foglio = within(screen.getByRole('dialog', { name: 'Torre Inferiore' }));
+    const foglio = within(screen.getByRole('dialog', { name: 'Shibuya centro' }));
     expect(foglio.getByRole('button', { name: /Shibuya centro/ })).toBeInTheDocument();
     expect(foglio.getByRole('button', { name: 'Ottenuto' })).toBeInTheDocument();
   });
@@ -788,7 +800,7 @@ describe('il popup dello spillo si misura (094: uno spostamento di una voce ha a
   it('su una tela alta resta ancorato allo spillo, sopra', async () => {
     await apri({ w: 1000, h: 900 });
     await waitFor(() => {
-      const popup = screen.getByRole('dialog', { name: 'Torre Inferiore' });
+      const popup = screen.getByRole('dialog', { name: 'Shibuya centro' });
       expect(popup.className).not.toContain('spillo-popup--foglio');
       expect(popup.className).not.toContain('spillo-popup--sotto');
     });
@@ -867,7 +879,7 @@ describe('i pezzi della planimetria (102, 2026-10-14) e le loro copie (103)', ()
       copia({ id: 4, uid: 'c4'.repeat(16), posizione: { x: 10, y: 10 }, rotazione: 0, condizioni: [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }], disponibilita: bloccata }),
     ] });
     monta({ mappa: { ...conPezzi, pezzi: [muro] } });
-    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    const img = screen.getByRole('img', { name: 'Illustrazione di Shibuya' });
     expect(img).toHaveAttribute('data-zone-cancellate', '1');
     // la terza copia non ha le sue condizioni: nascosta, contata nel comando dei non disponibili
     expect(disegnati().map((d) => d.dataset.copia)).toEqual(['c1'.repeat(16), 'c3'.repeat(16)]);
@@ -904,7 +916,7 @@ describe('i pezzi della planimetria (102, 2026-10-14) e le loro copie (103)', ()
 
   it('le zone d\'origine sono cancellate dall\'immagine (tutte, anche dei pezzi nascosti) e ogni pezzo è posato col suo ingombro', () => {
     monta({ mappa: { ...conPezzi, pezzi: [conPezzi.pezzi[0]] } });
-    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    const img = screen.getByRole('img', { name: 'Illustrazione di Shibuya' });
     expect(img).toHaveAttribute('data-zone-cancellate', '1');
     // la maschera vera, nello stile dell'immagine: un SVG con la zona del pezzo
     const svg = /data:image\/svg\+xml,([^")]+)/.exec(img.getAttribute('style') ?? '')?.[1] ?? '';
@@ -925,7 +937,7 @@ describe('i pezzi della planimetria (102, 2026-10-14) e le loro copie (103)', ()
 
   it('con la partita il pezzo senza le sue condizioni è nascosto; «Mostra anche i non ancora disponibili» lo conta e lo mostra in trasparenza', () => {
     monta({ mappa: conPezzi });
-    expect(screen.getByRole('img', { name: 'Mappa: Shibuya' })).toHaveAttribute('data-zone-cancellate', '2');
+    expect(screen.getByRole('img', { name: 'Illustrazione di Shibuya' })).toHaveAttribute('data-zone-cancellate', '2');
     expect(disegnati().map((d) => d.dataset.pezzo)).toEqual(['1'.repeat(32)]);
     fireEvent.click(screen.getByRole('button', { name: /Mostra anche i non ancora disponibili \(1\)/ }));
     const [libero, bloccato] = disegnati();
@@ -946,7 +958,7 @@ describe('i pezzi della planimetria (102, 2026-10-14) e le loro copie (103)', ()
 
   it('senza pezzi l\'immagine non ha maschera; senza immagine i pezzi non si disegnano', () => {
     monta({ mappa: { ...conPezzi, pezzi: [] } });
-    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    const img = screen.getByRole('img', { name: 'Illustrazione di Shibuya' });
     expect(img).not.toHaveAttribute('data-zone-cancellate');
     expect(img.getAttribute('style') ?? '').not.toContain('mask');
     cleanup();
@@ -963,7 +975,7 @@ it('l\'inquadratura non conta le zone cancellate dei pezzi e comprende i pezzi p
     const pezzo = { id: 1, uid: '1'.repeat(32), nome: 'Muro', sorgente: { x: 0, y: 900, larghezza: 100, altezza: 50 }, ordine: 0, updatedAt: '',
       copie: [{ id: 1, uid: 'c'.repeat(32), pezzoId: 1, etichetta: '', posizione: { x: 300, y: 250 }, rotazione: 0 as const, specchio: { orizzontale: false, verticale: false }, condizioni: [], ordine: 0, updatedAt: '' }] };
     render(<MemoryRouter><VisoreMappa mappa={{ ...mappa, immagineUrl: '/fit.png', larghezza: 1000, altezza: 1000, spilli: [], pezzi: [pezzo] }} partitaId={null} onNaviga={vi.fn()} /></MemoryRouter>);
-    const img = screen.getByRole('img', { name: 'Mappa: Shibuya' });
+    const img = screen.getByRole('img', { name: 'Illustrazione di Shibuya' });
     Object.defineProperty(img, 'naturalWidth', { value: 1000 });
     Object.defineProperty(img, 'naturalHeight', { value: 1000 });
     fireEvent.load(img);
@@ -996,7 +1008,7 @@ describe('VisoreMappa — barra compatta del visore incorporato', () => {
     tappe.forEach((t) => expect(t.className).not.toMatch(/(^|\s)(inline-)?flex(\s|$)/));
     expect(percorso.querySelector('.visore-mappa__tipo')).toHaveTextContent('Quartiere');
     // il percorso completo è anche il nome della tela, e il genitore resta raggiungibile dal pannello (chiuso in partenza)
-    expect(document.querySelector('.visore-mappa__tela')).toHaveAttribute('aria-label', 'Mappa: Tokyo › Shibuya');
+    expect(document.querySelector('.visore-mappa__tela')).toHaveAttribute('aria-label', 'Quartiere: Tokyo › Shibuya');
     expect(screen.queryByRole('button', { name: 'Su: Tokyo' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Pannello' }));
     expect(screen.getByRole('button', { name: 'Su: Tokyo' })).toBeInTheDocument();

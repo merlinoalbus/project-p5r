@@ -36,6 +36,7 @@ import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
 import { SEGNO_COVO, nascondiSegnoAssente, segnoPalazzo, segnoQuartiere, useRisolviSegno } from './segniMappa';
+import { PAGINA_COVO } from '../../utils/covo';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -65,8 +66,12 @@ interface Props {
    *  planimetria d'atlante da aprire lì dentro: il Covo dei Ladri porta alla sua pagina della
    *  guida, i Memento e i Palazzi alla loro scheda. Quando l'ospite risponde `false` il clic
    *  resta quello di un collegamento normale e la pagina cambia — prima veniva annullato comunque
-   *  e quei cartellini non facevano niente. */
-  onApri?: (href: string) => boolean;
+   *  e quei cartellini non facevano niente.
+   *
+   *  Con l'indirizzo arriva la **destinazione esplicita** (L2, 2026-10-20): la planimetria, il punto e lo spillo su cui scendere,
+   *  non un indirizzo da interpretare. Un quartiere porta alla sua pagina (`?ingresso=1`), ma chi scende sul posto — «Oggi» — va
+   *  dritto all'area d'ingresso col suo centro; null dove non c'è nulla su cui scendere (il Covo). */
+  onApri?: (href: string, destinazione: DestinazioneTokyo | null) => boolean;
   className?: string;
   /** Schermata senza scorrimento (Home, scheda «Oggi», da 768 px): il blocco occupa l'altezza che gli
    *  lascia la colonna e la mappa si stringe finché mappa, legenda e riga delle fermate chiuse ci
@@ -149,8 +154,14 @@ function nomeSullaTarga(nome: string): string {
   return nome.replace(/^(Palazzo|Dedalo) di /, '');
 }
 
+/** Dove scende chi apre un cartellino restando nella sua pagina: una mappa, col centro (l'ingresso di un quartiere) o con lo spillo
+ *  d'arrivo (l'atterraggio di un Palazzo). */
+export interface DestinazioneTokyo { mappa: string; centro: { x: number; y: number; zoom: number } | null; spillo: number | null }
+
 interface Segno {
   chiave: string;
+  /** Su che cosa scende chi apre il cartellino restando nella sua pagina (`onApri`); null se non c'è. */
+  destinazione: DestinazioneTokyo | null;
   /** Per il `title` e per il testo alternativo: quello lungo. */
   nome: string;
   /** Sulla targa: quello corto. */
@@ -171,7 +182,7 @@ interface Segno {
  * calendario, o fermate che la guida non ha come scheda — restano il solo pallino bianco della
  * rete: una figura con la targa dice «vieni qui», e dirlo a proposito di un posto dove non si può
  * entrare è una promessa che la mappa non mantiene. Il nome resta comunque, sul pallino. */
-function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: boolean; onEvidenzia?: (k: string | null) => void; onApri?: (href: string) => boolean }) {
+function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: boolean; onEvidenzia?: (k: string | null) => void; onApri?: (href: string, destinazione: DestinazioneTokyo | null) => boolean }) {
   const filtro = acceso ? CONTORNO_ORO : CONTORNO;
   // I cartellini si sfiorano: senza alzarlo, quello illuminato d'oro finisce sotto al vicino e
   // il bordo si vede a metà. `z-30` lo porta davanti, e la targa con lui.
@@ -181,7 +192,7 @@ function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: bool
   // del giorno.
   return <Link
     to={s.href}
-    onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0 && onApri(s.href)) e.preventDefault(); } : undefined}
+    onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0 && onApri(s.href, s.destinazione)) e.preventDefault(); } : undefined}
     className={`spillo-tokyo group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30 ${acceso ? 'z-30' : 'z-10'}`}
     style={{ left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` }}
     title={s.quando ? `${s.nome} — ${s.quando}` : s.nome}
@@ -348,7 +359,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
   }, []);
 
   // i segni dei posti (sagome, stemmi, il Covo) dal manifesto, anche con la grafica predefinita spenta: senza, la metro restava di
-  // sole linee e nodi (UX-2, decisione del PM del 2026-10-21)
+  // sole linee e nodi (UX-2, decisione del PM del 2026-10-20)
   const risolvi = useRisolviSegno();
   const { presenti, assenti, nomiFermate } = useMemo(() => {
     const segni: Segno[] = [];
@@ -357,18 +368,15 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       if (!dove) continue;
       segni.push({
         chiave: q.chiave, nome: q.nome, targa: q.nome, src: risolvi(segnoQuartiere(q.chiave)), dove, palazzo: false,
-        // Si entra **nella mappa** del quartiere, non nella sua scheda: da una mappa si passa a
-        // una mappa. Quale mappa, e centrata dove, **lo decide chi cura la guida**: è l'ingresso
-        // configurato dalla scheda del quartiere («Configura ingresso da Città»), che porta la
-        // planimetria e il punto da centrare. Esisteva già ed era salvato, ma questa mappa lo
-        // ignorava e apriva sempre il nodo d'atlante del quartiere: si poteva scegliere il punto
-        // d'ingresso e non vederlo mai usato. Senza configurazione resta il nodo del quartiere, e
-        // il risolutore è il ripiego per i pochi che non ne hanno uno.
-        href: q.ingresso
-          ? urlMappa(q.ingresso.mappa, { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom })
-          : q.mappaChiave
-            ? urlMappa(q.mappaChiave)
-            : `/guida/mondo/quartiere/${encodeURIComponent(q.chiave)}`,
+        // Si entra **nella pagina del quartiere**, l'unica che apre Shibuya (L2, R2-15; decisione del PM del 2026-10-20): arrivando
+        // dalla metro (`ingresso=1`) la pagina apre in una finestra l'area d'ingresso configurata, sul suo punto e col suo zoom,
+        // che è dove l'utente vuole atterrare toccando il quartiere qui; dalle schede si arriva senza la finestra.
+        href: `/guida/citta/${encodeURIComponent(q.chiave)}?ingresso=1`,
+        // Chi scende sul posto senza cambiare pagina («Oggi») va dritto all'ingresso, col suo centro; senza ingresso,
+        // sull'illustrazione del quartiere.
+        destinazione: q.ingresso
+          ? { mappa: q.ingresso.mappa, centro: { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom }, spillo: null }
+          : q.mappaChiave ? { mappa: q.mappaChiave, centro: null, spillo: null } : null,
         presente: quartiereAperto(q, dataGioco),
         // Che cosa manca, detto come lo dice il valutatore: «Yusuke: rango 1 di 3». Quando la
         // condizione è una data si dice la data, che è più corta e più chiara.
@@ -391,6 +399,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         href: d.atterraggio
           ? urlMappa(d.atterraggio.mappa, d.atterraggio.spillo !== null ? { spillo: d.atterraggio.spillo } : undefined)
           : `/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`,
+        destinazione: d.atterraggio ? { mappa: d.atterraggio.mappa, centro: null, spillo: d.atterraggio.spillo } : null,
         // Un Palazzo completato non c'è più, anche dentro la sua finestra: come nel gioco, e come
         // l'ingresso dalla città che a Palazzo completato risulta bloccato (`palazziService`).
         presente: !d.completato && (!dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al)),
@@ -456,12 +465,14 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
             Qui c'è **la metà che tocca a me**, scritta prima che il file esista: quando
             `covo-dei-ladri.png` arriva, il Covo diventa un cartellino come tutti gli altri senza
             che nessuno debba toccare il codice; finché non c'è, resta la targa sola, che è quel
-            che c'era prima. Nessuna delle due parti deve aspettare l'altra per finire. */}
+            che c'era prima. Nessuna delle due parti deve aspettare l'altra per finire.
+            La fermata porta alla pagina delle sfide: nel gioco il Covo si apre dal menu, dal 6/5, e non si raggiunge in metro
+            (registro dell'Esperto della guida, G-004; L2). Prima il cartellino diceva «la soffitta del Leblanc», che è sbagliato. */}
         <Cartellino
-          s={{ chiave: 'covo', nome: 'Covo dei Ladri', targa: 'Covo dei Ladri',
+          s={{ chiave: 'covo', nome: 'Covo dei Ladri', targa: 'Covo dei Ladri', destinazione: null,
             src: risolvi(SEGNO_COVO), dove: COVO_TOKYO, palazzo: false,
-            href: '/guida/covo', presente: true,
-            quando: 'la soffitta del Leblanc' }}
+            href: PAGINA_COVO, presente: true,
+            quando: 'dal menu di gioco, dal 6/5' }}
           acceso={evidenziato === 'covo'} onEvidenzia={onEvidenzia} onApri={onApri} />
       </div>
       {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}
@@ -485,7 +496,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       {presenti.map((s) => (
         <li key={s.chiave}>
           <Link to={s.href} className="chip chip--icona no-underline"
-            onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0 && onApri(s.href)) e.preventDefault(); } : undefined}
+            onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0 && onApri(s.href, s.destinazione)) e.preventDefault(); } : undefined}
             onMouseEnter={() => onEvidenzia?.(s.chiave)} onMouseLeave={() => onEvidenzia?.(null)}>{s.nome}</Link>
         </li>
       ))}

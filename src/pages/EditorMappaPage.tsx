@@ -16,7 +16,7 @@ import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 
 import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
@@ -40,6 +40,7 @@ import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI
 import { slug } from '../../shared/slug';
 import { ritornoMappe } from '../utils/ritornoMappe';
 import { NEL_CESTINO } from '../utils/cestino';
+import { eMappaDelMondo, paginaPerAggiungere } from '../utils/aree';
 import type { DatiAggiornaCopiaPezzo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
 
@@ -208,7 +209,9 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           partitaId={conGiorno ? attiva.id : null}
           vistaGiornoCorrente={conGiorno}
           onNaviga={vai}
-          onChiudi={() => navigate(ritornoMappe() ?? `/guida/mappe/${encodeURIComponent(chiave)}`)}
+          // nel mondo «Chiudi» porta alla casa della mappa (la pagina della città, del quartiere o dell'Area, sulla versione aperta: L2,
+          // R2-20); fuori resta il ritorno alla pagina da cui si è entrati nelle mappe
+          onChiudi={() => navigate(eMappaDelMondo(dati) ? dati.casa : ritornoMappe() ?? `/guida/mappe/${encodeURIComponent(chiave)}`)}
           editor={editor}
           className="visore-mappa--editor"
           intestazione={<span className="editor-mappa__targhetta">Modifica</span>}
@@ -217,7 +220,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Giorno corrente"
               dettaglio={attiva ? (conGiorno ? 'acceso: vedi solo quel che c’è oggi' : 'spento: vedi tutto') : 'serve una partita attiva'}
               disabled={!attiva} onClick={() => setGiornoCorrente((v) => !v)} />
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(eMappaDelMondo(dati) ? dati.casa : `/guida/mappe/${encodeURIComponent(chiave)}`)} />
           </>}
           pannello={
             <PannelloEditor
@@ -375,6 +378,7 @@ function PannelloEditor(p: PropsPannello) {
   const immagineDiBase = useImmagineMappa(mappa);
   // una mappa si «raggiunge» da questa se uno spillo (passaggio, stazione o altro) punta a lei: le figlie senza spillo e il genitore senza ritorno vengono segnalati
   const raggiunge = (destinazione: string) => mappa.spilli.some((s) => destinazioneMappaSpillo(s) === destinazione);
+  const aggiunta = paginaPerAggiungere(mappa);
   return (
     <>
       <nav className="editor-mappa__sezioni" aria-label="Sezioni dell’editor">
@@ -508,7 +512,10 @@ function PannelloEditor(p: PropsPannello) {
             ))}
           </ul>
         )}
-        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Nuova mappa" dettaglio={`figlia di ${nomePresentazioneMappa(mappa)}`} disabled={occupato} onClick={p.onNuovaMappa} />
+        {/* nel mondo non si crea una mappa sciolta: aree e planimetrie nascono dalle loro pagine (L2, R2-27) */}
+        {aggiunta
+          ? <Link to={aggiunta.href} className="visore-mappa__azione-testo touch inline-flex items-center">{aggiunta.testo}</Link>
+          : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Nuova mappa" dettaglio={`figlia di ${nomePresentazioneMappa(mappa)}`} disabled={occupato} onClick={p.onNuovaMappa} />}
       </section>
       <PassaggiMappa mappa={mappa} albero={p.albero} occupato={occupato} onVai={p.onVai} onCreaPassaggio={(k) => void p.onCreaPassaggio(k)} />
 
@@ -614,6 +621,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   // gli spostamenti di prima avevano solo il riferimento alla mappa: qui è la stessa cosa di una destinazione senza spillo
   const destinazioneIniziale: DestinazioneSpillo | null = s.destinazione ?? (s.riferimento?.tipo === 'mappa' ? { mappa: s.riferimento.chiave, spillo: null } : null);
   const [destinazione, setDestinazione] = useState<DestinazioneSpillo | null>(destinazioneIniziale);
+  /** Nel mondo, la pagina da cui si aggiunge la mappa di destinazione al posto di «Crea mappa collegata» (null fuori). */
+  const aggiunta = paginaPerAggiungere(mappa);
   const categoria = categoriaSpillo(tipo);
   // Cambiando categoria si tolgono le cose che quella categoria non ha: un collegamento estraneo non si salva.
   const cambiaTipo = (t: TipoSpillo) => {
@@ -673,10 +682,12 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: dati.nome, descrizione, riferimento: dati.riferimento, condizioni: dati.condizioni, destinazione: dati.destinazione })} />
-          {categoria === 'spostamento' && !destinazione && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
+          {categoria === 'spostamento' && !destinazione && !aggiunta && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
         </div>
-        {modificato && categoria === 'spostamento' && !destinazione && <span className="editor-mappa__avviso">Salva le modifiche prima di creare la mappa collegata.</span>}
+        {/* nel mondo la mappa di destinazione non nasce dallo spillo: si aggiunge come area o planimetria e poi si sceglie qui sopra (L2, R2-27) */}
+        {categoria === 'spostamento' && !destinazione && aggiunta && <Link to={aggiunta.href} className="visore-mappa__azione-testo touch inline-flex items-center">{aggiunta.testo}</Link>}
+        {modificato && categoria === 'spostamento' && !destinazione && !aggiunta && <span className="editor-mappa__avviso">Salva le modifiche prima di creare la mappa collegata.</span>}
       </form>
       <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" aria-label="Schermate di riferimento">
         <legend className="text-[12px] text-text-secondary">Schermate di riferimento ({s.immagini.length})</legend>
@@ -718,6 +729,8 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
     while (aggiunti) { aggiunti = false; for (const m of albero) if (m.genitore && out.has(m.genitore) && !out.has(m.chiave)) { out.add(m.chiave); aggiunti = true; } }
     return out;
   }, [albero, mappa.chiave]);
+  // una planimetria di un'Area sta dove la mette l'Area: tipo e genitore non si cambiano da qui (L2, `modifiche.md` §4.6)
+  const dellArea = !!mappa.area;
   const modificata = nome !== mappa.nome || tipo !== mappa.tipo || genitore !== (mappa.genitore ?? '') || Number(ordine) !== mappa.ordine || note !== mappa.note;
   // Finché il nome non è dichiarato, in alto si legge quello dedotto da contesti e gruppo di
   // immagini: qui si dice quale dei due si sta guardando, e Salva resta attivo anche senza
@@ -727,18 +740,24 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
   return (
     <section className="visore-mappa__sezione" aria-label="Proprietà della mappa">
       <h3 className="visore-mappa__intestazione">Mappa</h3>
-      <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, tipo, genitore: genitore || null, ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
+      <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, ...(dellArea ? {} : { tipo, genitore: genitore || null }), ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.mappa.nome} /></label>
         {nomeDaConfermare && <p className="editor-mappa__avviso" role="status">In alto si legge «{titoloMostrato}»: è il nome ricavato dai dati dell’estrazione. Salva per usare «{mappa.nome}» dappertutto.</p>}
         <div className="grid grid-cols-2 gap-2">
-          <div className="editor-mappa__campo">
-            <Selettore etichetta="Tipo di mappa" valore={tipo} opzioni={TIPI_MAPPA.map((t) => ({ chiave: t, nome: NOME_TIPO_MAPPA[t] }))} onCambia={(k) => setTipo(k as TipoMappa)} />
-          </div>
+          {!dellArea && (
+            <div className="editor-mappa__campo">
+              <Selettore etichetta="Tipo di mappa" valore={tipo} opzioni={TIPI_MAPPA.map((t) => ({ chiave: t, nome: NOME_TIPO_MAPPA[t] }))} onCambia={(k) => setTipo(k as TipoMappa)} />
+            </div>
+          )}
           <label className="editor-mappa__campo">Ordine<input className="form-input" type="number" min={0} value={ordine} onChange={(e) => setOrdine(e.target.value)} /></label>
         </div>
-        <div className="editor-mappa__campo">
-          <Selettore etichetta="Mappa genitore" valore={genitore} vuoto="— nessuna (radice) —" opzioni={albero.filter((m) => !discendenti.has(m.chiave)).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), dettaglio: NOME_TIPO_MAPPA[m.tipo] }))} onCambia={setGenitore} />
-        </div>
+        {dellArea && mappa.area
+          ? <p className="m-0 text-[12px] text-text-muted">Planimetria dell’area «{mappa.area.nome}» ({mappa.area.contenitore.nome}){mappa.area.versioneEtichetta ? `, versione «${mappa.area.versioneEtichetta}»` : ''}: l’area e le sue versioni si cambiano dalla <Link to={mappa.area.casa}>pagina dell’area</Link>.</p>
+          : (
+            <div className="editor-mappa__campo">
+              <Selettore etichetta="Mappa genitore" valore={genitore} vuoto="— nessuna (radice) —" opzioni={albero.filter((m) => !discendenti.has(m.chiave)).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), dettaglio: NOME_TIPO_MAPPA[m.tipo] }))} onCambia={setGenitore} />
+            </div>
+          )}
         <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={LIMITI_GUIDA.mappa.note} /></label>
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" dettaglio={!modificata && nomeDaConfermare ? 'conferma il nome' : undefined} disabled={occupato || (!modificata && !nomeDaConfermare)} />

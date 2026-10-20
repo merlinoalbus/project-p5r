@@ -1,0 +1,129 @@
+// ============================================================
+// AreeDelQuartiere — le Aree di un quartiere nella sua pagina: carte, ordine, il pin che manca sull'illustrazione (L2, R2-12)
+// ============================================================
+//
+// Ogni carta è un posto con il suo nome (mai «Mappa»): la miniatura della planimetria predefinita (le miniature di L1, 96 px),
+// «N planimetrie · M pin», il chip «Ingresso» sull'area d'ingresso, e il collegamento alla sua pagina. Un'area che
+// sull'illustrazione del quartiere non ha ancora il suo pin di passaggio ha «Segna sull'illustrazione»: è il «da completare»,
+// dentro la pagina invece che in un elenco a parte. «Riordina» mostra ↑/↓ da 44 px e salva l'ordine nuovo.
+// ============================================================
+
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Modal } from '../shared/Modal';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
+import { AnteprimaMappa } from './AnteprimaMappa';
+import { SceltaPunto } from './SceltaPunto';
+import { creaSpillo, riordinaAree } from '../../services/api';
+import { useImmagineMappa } from '../../hooks/useImmagineMappa';
+import { notifica } from '../../stores/notificationStore';
+import type { AreaRiassuntoDto, QuartiereDettaglioDto } from '../../types';
+
+/** «2 planimetrie · 16 pin», «1 planimetria · nessun pin». */
+function conteggiArea(a: AreaRiassuntoDto): string {
+  const planimetrie = a.numeroPlanimetrie === 1 ? '1 planimetria' : `${a.numeroPlanimetrie} planimetrie`;
+  const pin = a.numeroSpilli === 0 ? 'nessun pin' : a.numeroSpilli === 1 ? '1 pin' : `${a.numeroSpilli} pin`;
+  return `${planimetrie} · ${pin}`;
+}
+
+interface Props {
+  quartiere: QuartiereDettaglioDto;
+  /** Dopo un cambiamento (ordine, pin segnato): la pagina rilegge il quartiere. */
+  onCambiato: () => Promise<void> | void;
+  onAggiungi: () => void;
+}
+
+/** La sezione: titolo con il conteggio, «Riordina», le carte delle aree (o l'invito ad aggiungerne una). */
+export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi }: Props) {
+  const [riordina, setRiordina] = useState<string[] | null>(null);
+  const [daSegnare, setDaSegnare] = useState<AreaRiassuntoDto | null>(null);
+  const [occupato, setOccupato] = useState(false);
+  const perSlug = new Map(q.aree.map((a) => [a.slug, a]));
+  const elenco = riordina ? riordina.map((s) => perSlug.get(s)).filter((a): a is AreaRiassuntoDto => !!a) : q.aree;
+  const sposta = (i: number, verso: -1 | 1) => setRiordina((o) => { if (!o) return o; const n = [...o]; [n[i], n[i + verso]] = [n[i + verso], n[i]]; return n; });
+  const salvaOrdine = async () => {
+    if (!riordina) return;
+    setOccupato(true);
+    try { await riordinaAree(q.chiave, riordina); notifica('success', `Ordine delle aree di ${q.nome} salvato.`); setRiordina(null); await onCambiato(); }
+    catch (err) { notifica('error', err instanceof Error ? err.message : 'Ordine non salvato.'); }
+    finally { setOccupato(false); }
+  };
+
+  if (q.aree.length === 0) return (
+    <section className="card flex flex-col items-start gap-2" aria-label={`Aree di ${q.nome}`}>
+      <h2 className="m-0 font-display text-[17px] uppercase leading-none">Aree</h2>
+      <p className="m-0 text-[13px] text-text-secondary">Nessuna area in {q.nome}: aggiungine una.</p>
+      <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungi} />
+    </section>
+  );
+  return (
+    <section className="flex flex-col gap-2" aria-label={`Aree di ${q.nome}`}>
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="m-0 font-display text-[17px] uppercase leading-none">Aree <span className="text-text-muted">· {q.aree.length}</span></h2>
+        {q.aree.length > 1 && (riordina
+          ? <span className="ml-auto flex gap-1.5">
+            <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setRiordina(null)}>Annulla</button>
+            <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato} onClick={() => void salvaOrdine()}>Salva l’ordine</button>
+          </span>
+          : <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Riordina" onClick={() => setRiordina(q.aree.map((a) => a.slug))} />)}
+      </div>
+      <ul className="m-0 grid list-none grid-cols-1 gap-2 p-0 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2" aria-label="Aree">
+        {elenco.map((a, i) => (
+          <li key={a.slug} className="card flex items-center gap-3 p-2">
+            <AnteprimaMappa mappa={{ ...a.illustrazione, nome: a.nome }} className="h-[72px] w-24" sizes="96px" />
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="flex flex-wrap items-center gap-1.5">
+                <Link to={a.casa} className="touch inline-flex items-center font-semibold">{a.nome}</Link>
+                {a.ingresso && <span className="chip chip--attivo text-[11px]" title="Toccando il quartiere sulla mappa di Tokyo si apre quest’area">Ingresso</span>}
+              </span>
+              <span className="text-[12px] text-text-muted">{conteggiArea(a)}</span>
+              {!a.passaggio && !riordina && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="mappa" dimensione={20} />}
+                titolo="Segna sull’illustrazione" dettaglio="il suo pin manca" onClick={() => setDaSegnare(a)} />}
+            </span>
+            {riordina && <span className="flex flex-col gap-1">
+              <button type="button" className="btn btn-ghost touch" aria-label={`Sposta su ${a.nome}`} disabled={i === 0} onClick={() => sposta(i, -1)}>↑</button>
+              <button type="button" className="btn btn-ghost touch" aria-label={`Sposta giù ${a.nome}`} disabled={i === elenco.length - 1} onClick={() => sposta(i, 1)}>↓</button>
+            </span>}
+          </li>
+        ))}
+      </ul>
+      <SegnaSullIllustrazione quartiere={q} area={daSegnare} onChiudi={() => setDaSegnare(null)} onSegnata={async () => { setDaSegnare(null); await onCambiato(); }} />
+    </section>
+  );
+}
+
+/** La finestra che mette il pin di passaggio di un'area sull'illustrazione del quartiere: si tocca il punto, si salva. */
+function SegnaSullIllustrazione({ quartiere: q, area, onChiudi, onSegnata }: { quartiere: QuartiereDettaglioDto; area: AreaRiassuntoDto | null; onChiudi: () => void; onSegnata: () => Promise<void> }) {
+  const [punto, setPunto] = useState<{ x: number; y: number } | null>(null);
+  const [occupato, setOccupato] = useState(false);
+  const src = useImmagineMappa(q.illustrazione);
+  const salva = async () => {
+    if (!area || !punto || !q.mappaChiave || !area.predefinita) return;
+    setOccupato(true);
+    try {
+      await creaSpillo(q.mappaChiave, { tipo: 'passaggio', nome: area.nome, x: punto.x, y: punto.y, riferimento: { tipo: 'mappa', chiave: area.predefinita } });
+      notifica('success', `${area.nome} segnata sull’illustrazione di ${q.nome}.`);
+      setPunto(null);
+      await onSegnata();
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Pin non salvato.');
+    } finally {
+      setOccupato(false);
+    }
+  };
+  return (
+    <Modal titolo={area ? `Dove sta ${area.nome} in ${q.nome}` : ''} aperta={!!area} onChiudi={() => { setPunto(null); onChiudi(); }} larga
+      azioni={<>
+        <button type="button" className="btn btn-secondary touch" onClick={() => { setPunto(null); onChiudi(); }}>Annulla</button>
+        <button type="button" className="btn btn-primary touch" disabled={!punto || occupato || !src} onClick={() => void salva()}>Salva</button>
+      </>}>
+      {src
+        ? <div className="flex flex-col gap-2">
+          <SceltaPunto src={src} alt={`Illustrazione di ${q.nome}`} punto={punto} onPunto={setPunto} disabilitato={occupato} />
+          <span className="text-[12px] text-text-muted">Tocca dove si entra nell’area: lì comparirà il suo pin, che porta alla sua pagina.</span>
+        </div>
+        : <p className="m-0 text-[13px]">{q.nome} non ha un’illustrazione da toccare: caricala dall’editor dell’illustrazione.</p>}
+    </Modal>
+  );
+}

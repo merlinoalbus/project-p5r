@@ -30,17 +30,6 @@ interface Props {
   riempi?: boolean;
 }
 
-/** Dall'indirizzo del cartellino alla chiave della mappa, per scendere senza cambiare pagina.
- *
- * I cartellini portano a `/guida/mappe/<chiave>` (a volte con `?x&y&zoom`) oppure a
- * `/guida/mondo/...` e `/guida/covo` per i pochi che un nodo d'atlante non ce l'hanno. Solo i
- * primi si possono aprire qui dentro: per gli altri si lascia fare al collegamento. Un `?spillo=` (il pin d'arrivo
- * dell'atterraggio di un Palazzo) passa con la chiave, per aprire la planimetria centrata su quel pin. */
-function mappaDaHref(href: string): { chiave: string; spillo: number | null } | null {
-  const m = /^\/guida\/mappe\/([^/?#]+)(?:\?spillo=(\d+))?/.exec(href);
-  return m ? { chiave: decodeURIComponent(m[1]), spillo: m[2] ? Number(m[2]) : null } : null;
-}
-
 /** La colonna della mappa, sullo stato condiviso `oggi`: al livello di Tokyo la `MappaTokyo` della
  * città (quartieri e radici del Metaverso caricati solo lì, alla data della partita attiva), il cui
  * clic su un cartellino d'atlante scende di livello senza cambiare pagina; sotto Tokyo la
@@ -79,12 +68,16 @@ export function OggiMappa({ oggi, riempi }: Props) {
           quartieri={quartieri.dati ?? []}
           dungeon={dungeon.dati ?? []}
           dataGioco={attiva?.dataGioco ?? null}
-          onApri={(href) => { const m = mappaDaHref(href); if (!m) return false; oggi.apriMappa(m.chiave, m.spillo); return true; }}
+          // La metro dice dove scendere (L2): l'area d'ingresso di un quartiere col suo centro, o la planimetria d'arrivo di un
+          // Palazzo col suo pin. Prima l'indirizzo si interpretava con un'espressione regolare e il centro dell'ingresso si perdeva.
+          // Dove non c'è nulla su cui scendere (il Covo) il cartellino resta un collegamento.
+          onApri={(_href, d) => { if (!d) return false; oggi.apriMappa(d.mappa, d.spillo, d.centro); return true; }}
         />
       ) : (
         <MappaIncorporata
           chiave={mappa.chiave}
           spilloIniziale={mappa.spilloId}
+          puntoIniziale={mappa.centro ?? null}
           partitaId={oggi.partitaId}
           altezza={riempi ? undefined : 'max(560px, calc(100vh - 300px))'}
           className={riempi ? 'md:flex-1 md:min-h-0 h-[420px] md:h-auto' : undefined}

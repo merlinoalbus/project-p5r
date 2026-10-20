@@ -19,6 +19,8 @@ import type { AzionePercorsoDto, FasciaGioco, PercorsoGiornoDto, PercorsoIndiceD
 export interface StatoMappaOggi {
   chiave: string;
   spilloId: number | null;
+  /** Il punto su cui centrare la mappa aperta dalla metro (l'ingresso di un quartiere, L2); null altrimenti. */
+  centro?: { x: number; y: number; zoom: number } | null;
   /** Identità della voce che ha scelto questa mappa (evidenziata nell'elenco); null = mappa globale. */
   azione: string | null;
   /** Quante volte una voce della giornata ha chiesto la mappa («Sulla mappa», il cartellino di un Palazzo): quando cambia, la
@@ -48,8 +50,8 @@ export interface Oggi {
   tornaAllaMappaGlobale: () => void;
   /** Scende a una mappa dell'atlante restando nella scheda «Oggi»: il clic su un quartiere della
    *  mappa di Tokyo non deve portare via dal giorno che si sta guardando. Con lo spillo (l'atterraggio di un Palazzo,
-   *  2026-10-04) la mappa si apre centrata su quello. */
-  apriMappa: (chiave: string, spilloId?: number | null) => void;
+   *  2026-10-04) la mappa si apre centrata su quello; col centro (l'ingresso di un quartiere, L2) su quel punto e con quello zoom. */
+  apriMappa: (chiave: string, spilloId?: number | null, centro?: { x: number; y: number; zoom: number } | null) => void;
 }
 
 /** Carica il giorno corrente della partita (o quello scelto) con le sue azioni e tiene lo stato della mappa collegata. */
@@ -154,6 +156,6 @@ export function useOggi(partitaId: number): Oggi {
     mappa,
     sullaMappa: (m, voce) => setMappa((p) => ({ chiave: m.chiave, spilloId: m.spilloId, azione: voce, richiesta: p.richiesta + 1 })),
     tornaAllaMappaGlobale: () => setMappa((p) => ({ chiave: 'tokyo', spilloId: null, azione: null, richiesta: p.richiesta })),
-    apriMappa: (chiave, spilloId = null) => setMappa((p) => ({ chiave, spilloId, azione: null, richiesta: p.richiesta })),
+    apriMappa: (chiave, spilloId = null, centro = null) => setMappa((p) => ({ chiave, spilloId, centro, azione: null, richiesta: p.richiesta })),
   }), [datiIndice, caricaIndice, erroreIndice, rileggiIndice, impostaIndice, g, caricaGiorno, erroreGiorno, rileggiGiorno, impostaGiorno, partitaId, fascia, occupato, mappa]);
 }

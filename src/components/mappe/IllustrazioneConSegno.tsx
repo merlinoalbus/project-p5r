@@ -10,7 +10,7 @@
 // dato per le figure della guida («i decori li voglio non come sfondo dietro ma come immagini che spostano il contenuto di
 // testo con opacità al 100%»). Senza illustrazione resta il solo segno, com'era prima: `senza` decide come.
 //
-// **Il riquadro ha la proporzione dell'immagine** (decisione del PM su LAY-1, 2026-10-21): le illustrazioni caricate sono 16:9,
+// **Il riquadro ha la proporzione dell'immagine** (decisione del PM su LAY-1, 2026-10-20): le illustrazioni caricate sono 16:9,
 // le quattro che vengono dall'asset (Kichijoji, Ikebukuro, Nakano, Santuario Meiji) 4:3, e in un riquadro fisso 16:9 con
 // `cover` perdevano un quarto dell'altezza. Lo spazio che il riquadro occupa nella scheda resta lo stesso (largo quanto dice
 // `className`, alto quanto un 16:9 di quella larghezza): dentro, il riquadro è alto quanto lo spazio e largo quanto la

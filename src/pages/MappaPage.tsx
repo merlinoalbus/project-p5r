@@ -10,13 +10,13 @@ import { ContenutiGuidaMappa } from '../components/mappe/ContenutiGuidaMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
 import { haPlanimetria } from '../utils/haPlanimetria';
 
-import { urlMappa } from '../utils/navigazioneMappa';
+import { casaConArrivo, casaEQuesta, nomeDellaMeta, urlMappa } from '../utils/navigazioneMappa';
 import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
 import { centroAccessoMondo, schedaAccessoMondo, titoloSchedaAccessoMondo } from '../utils/accessoMondo';
-import { etichettaMappeSorelle, titoloMappeSorelle } from '../utils/vocabolarioMappe';
+import { etichettaMappeSorelle, nomeTipoMappa, titoloMappeSorelle } from '../utils/vocabolarioMappe';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -28,7 +28,6 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { VisoreMappa } from '../components/mappe/VisoreMappa';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaScheda } from '../components/shared/IconaAzione';
-import { NOME_TIPO_MAPPA } from '../../shared/spilli';
 import { ritornoMappe } from '../utils/ritornoMappe';
 
 /** Tokyo non ha un visore proprio: la sua mappa è quella disegnata nella Città.
@@ -45,13 +44,21 @@ const CITTA = '/guida/citta';
  * Pagina delle mappe: senza chiave nell'URL mostra l'indice; con la chiave `tokyo` (anche quando
  * ci si arriva risolvendo un'altra chiave) reindirizza alla Città; altrimenti risolve la chiave
  * nella mappa vera e ne apre il dettaglio con lo stato della partita attiva.
+ *
+ * L2 (2026-10-20): ogni mappa ha **una casa**, l'unica pagina che la mostra. Se la casa non è questa pagina — l'illustrazione di un
+ * quartiere sta nella pagina del quartiere, una planimetria del mondo nella pagina della sua Area, con la versione — si va lì,
+ * portando lo spillo, il punto e il contesto: così ogni indirizzo vecchio (pubbliche, alias, «Sulla mappa» del diario) arriva al
+ * posto giusto. Le mappe la cui casa è il visore (Palazzi, Memento) restano qui: nessun giro di redirect.
  */
 export function MappaPage() {
   const { chiave } = useParams<{ chiave: string }>();
+  const [params] = useSearchParams();
   const attiva = usePartitaStore((s) => s.attiva);
   if (!chiave) return <IndiceMappe />;
   if (chiave === TOKYO) return <Navigate to={CITTA} replace />;
-  return <RisolviMappa chiave={chiave}>{k => k === TOKYO ? <Navigate to={CITTA} replace /> : <DettaglioMappa chiave={k} partitaId={attiva?.id ?? null} />}</RisolviMappa>;
+  return <RisolviMappa chiave={chiave}>{(k, casa) => k === TOKYO ? <Navigate to={CITTA} replace />
+    : casa && !casaEQuesta(casa, chiave) ? <Navigate to={casaConArrivo(casa, params)} replace />
+    : <DettaglioMappa chiave={k} partitaId={attiva?.id ?? null} />}</RisolviMappa>;
 }
 
 /** Le radici che sono versioni dello stesso luogo formano una scheda sola, come nell'albero. */
@@ -139,15 +146,15 @@ function IndiceMappe() {
                     <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className={`font-display text-[17px] leading-tight break-words ${aperto ? 'text-primary' : ''}`}>{nome}</span>
-                      <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[capofila.tipo]} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
+                      <span className="text-[11px] text-text-muted">{nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
                     </span>
                     <span aria-hidden className="shrink-0 text-text-muted">{aperto ? '▾' : '▸'}</span>
                   </button>
-                : <Link to={capofila.chiave === TOKYO ? CITTA : urlMappa(capofila.chiave)} className="card card--cliccabile flex w-full items-center gap-3 no-underline text-text">
+                : <Link to={capofila.chiave === TOKYO ? CITTA : capofila.casa || urlMappa(capofila.chiave)} className="card card--cliccabile flex w-full items-center gap-3 no-underline text-text">
                     <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="font-display text-[17px] leading-tight break-words">{nome}</span>
-                      <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[capofila.tipo]} · {sotto.spilli} spilli</span>
+                      <span className="text-[11px] text-text-muted">{nomeTipoMappa(capofila)} · {sotto.spilli} spilli</span>
                     </span>
                   </Link>}
             </li>;
@@ -186,7 +193,8 @@ function PannelloLuogo({ mappe, figliDi, gruppo, percorso, nodo, nome, onPercors
     [figliDi, nodo.chiave],
   );
   const briciole = percorso.map((k) => mappe.find((m) => m.chiave === k)).filter((m): m is MappaRiassuntoDto => !!m);
-  const destinazione = nodo.chiave === TOKYO ? CITTA : urlMappa(nodo.chiave);
+  // la casa del posto (L2): Tokyo è La città, un quartiere la sua pagina, una planimetria la pagina della sua Area
+  const destinazione = nodo.chiave === TOKYO ? CITTA : nodo.casa || urlMappa(nodo.chiave);
   return <section className="card flex min-w-0 flex-col gap-3" aria-label={`Dentro ${nome}`}>
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
       <nav aria-label="Percorso" className="flex min-w-0 flex-1 flex-wrap items-center gap-1 text-[12px] text-text-muted">
@@ -197,7 +205,8 @@ function PannelloLuogo({ mappe, figliDi, gruppo, percorso, nodo, nome, onPercors
             : <button type="button" className="touch text-text-secondary underline decoration-dotted underline-offset-2" onClick={() => onPercorso(percorso.slice(0, i + 1))}>{titoloGruppoImmagini(b)}</button>}
         </span>)}
       </nav>
-      <Link to={destinazione} className="btn btn-primary btn-sm touch">Apri {nodo.chiave === TOKYO ? 'la mappa di Tokyo' : 'questa mappa'}</Link>
+      {/* il gesto porta il nome del posto (L2, M6): «Apri Tokyo», «Apri Shibuya» */}
+      <Link to={destinazione} className="btn btn-primary btn-sm touch">Apri {nomeDellaMeta({ nome: nome, area: nodo.area })}</Link>
       <button type="button" className="btn btn-ghost btn-sm touch xl:hidden" onClick={onChiudi}>Chiudi</button>
     </div>
     {/* Le versioni dello stesso luogo — la porzione occidentale, la planimetria intera — sono
@@ -250,7 +259,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
       </nav>
       <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
         <h1 className="titolo-display m-0 break-words">{nome}</h1>
-        <span className="chip text-[11px]">{NOME_TIPO_MAPPA[mappa.tipo]}</span>
+        <span className="chip text-[11px]">{nomeTipoMappa(mappa)}</span>
         {/* L0: le mappe contenute si contano con la parola della gerarchia (quartieri di Tokyo, aree di un quartiere, planimetrie
             di un Palazzo); i Memento non ne hanno e non le contano */}
         {mappa.tipo !== 'dedalo' && <span className="text-[12px] text-text-muted">
@@ -265,7 +274,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
       {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
       {contenute.length > 0 && <p className="m-0 text-[13px] text-text-secondary">Questa mappa non ha una pianta sua: raccoglie le mappe qui sotto.</p>}
       <div className="flex flex-wrap gap-2">
-        {mappa.entita && <CollegamentoVisivo to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)} />}
+        {mappa.entita && <CollegamentoVisivo to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave, mappa.nome)} />}
         <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" />
         <TornaAllaPartita partitaId={partitaId} />
       </div>
@@ -292,8 +301,24 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
  * richiesta. Non si buttano: sono planimetrie vere, servono a chi cura l'atlante, ma non sono la
  * risposta alla domanda «dove devo andare».
  */
-function GriglieDelLuogo({ contenute, nome, onScendi }: { contenute: MappaRiassuntoDto[]; nome: string; onScendi?: (chiave: string) => void }) {
+function GriglieDelLuogo({ contenute: tutte, nome, onScendi }: { contenute: MappaRiassuntoDto[]; nome: string; onScendi?: (chiave: string) => void }) {
   const [mostraSenzaSpilli, setMostraSenzaSpilli] = useState(false);
+  // Sotto un quartiere si elencano le **aree**, una volta sola (L2): le versioni della stessa Area (il Sottopasso, il Covo) sono un
+  // riquadro solo, con la predefinita e «N versioni»; i pin dell'Area si sommano su quel riquadro.
+  const { contenute, versioni } = useMemo(() => {
+    const conteggio = new Map<string, number>();
+    const spilli = new Map<string, number>();
+    for (const m of tutte) if (m.area) { conteggio.set(m.area.chiave, (conteggio.get(m.area.chiave) ?? 0) + 1); spilli.set(m.area.chiave, (spilli.get(m.area.chiave) ?? 0) + m.numeroSpilli); }
+    const scelte = new Map<string, MappaRiassuntoDto>();
+    const elenco: MappaRiassuntoDto[] = [];
+    for (const m of tutte) {
+      if (!m.area) { elenco.push(m); continue; }
+      const gia = scelte.get(m.area.chiave);
+      if (!gia) { scelte.set(m.area.chiave, m); elenco.push(m); }
+      else if (m.area.predefinita) { elenco[elenco.indexOf(gia)] = m; scelte.set(m.area.chiave, m); }
+    }
+    return { contenute: elenco.map((m) => (m.area ? { ...m, numeroSpilli: spilli.get(m.area.chiave) ?? m.numeroSpilli } : m)), versioni: conteggio };
+  }, [tutte]);
   // I fogli che l'estrazione ha trovato ma che nessun campo del gioco usa portano un nome che e'
   // una descrizione tecnica — «Immagini native che nessun campo usa — tela larga, disegno minuto»
   // — e non un posto. Hanno spilli, quindi restano fra le aree, ma vanno in fondo: davanti ci
@@ -307,12 +332,12 @@ function GriglieDelLuogo({ contenute, nome, onScendi }: { contenute: MappaRiassu
   // non attribuita · 1» a pochi centimetri l'una dall'altra.
   const titoli = new Map(etichetteDistinte(contenute, (t) => senzaPrefisso(t, nome)).map((t, i) => [contenute[i].chiave, t]));
   return <div className="flex flex-col gap-4">
-    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} titoli={titoli} etichetta={`Contenuto di ${nome}`} onScendi={onScendi} />}
+    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} titoli={titoli} etichetta={`Contenuto di ${nome}`} onScendi={onScendi} versioni={versioni} />}
     {senzaSpilli.length > 0 && <section className="flex flex-col gap-2" aria-label="Planimetrie senza spilli">
       <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraSenzaSpilli} onClick={() => setMostraSenzaSpilli((v) => !v)}>
         {mostraSenzaSpilli ? 'Nascondi' : 'Mostra'} le planimetrie senza spilli · {senzaSpilli.length}
       </button>
-      {mostraSenzaSpilli && <Griglia mappe={senzaSpilli} nome={nome} titoli={titoli} etichetta={`Planimetrie di ${nome} senza spilli`} onScendi={onScendi} />}
+      {mostraSenzaSpilli && <Griglia mappe={senzaSpilli} nome={nome} titoli={titoli} etichetta={`Planimetrie di ${nome} senza spilli`} onScendi={onScendi} versioni={versioni} />}
     </section>}
   </div>;
 }
@@ -329,13 +354,15 @@ function senzaPrefisso(titolo: string, nome: string): string {
  * contiene. Con `onScendi`, una mappa che ne contiene altre diventa un pulsante che scende nel
  * pannello; le altre sono collegamenti al visore.
  */
-function Griglia({ mappe, nome, etichetta, titoli, onScendi }: { mappe: MappaRiassuntoDto[]; nome: string; etichetta: string; titoli?: Map<string, string>; onScendi?: (chiave: string) => void }) {
+function Griglia({ mappe, nome, etichetta, titoli, onScendi, versioni }: { mappe: MappaRiassuntoDto[]; nome: string; etichetta: string; titoli?: Map<string, string>; onScendi?: (chiave: string) => void; versioni?: Map<string, number> }) {
   // I titoli arrivano già distinti da chi conosce **tutto** l'elenco (le due griglie di un Palazzo
   // sono la stessa pagina); dove non arrivano, si calcolano qui sull'elenco che c'è.
   const propri = titoli ?? new Map(etichetteDistinte(mappe, (t) => senzaPrefisso(t, nome)).map((t, i) => [mappe[i].chiave, t]));
   return <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3 2xl:grid-cols-4" aria-label={etichetta}>
     {mappe.map((m) => {
-      const titolo = propri.get(m.chiave) ?? senzaPrefisso(nomePresentazioneMappa(m), nome);
+      // una planimetria di un'Area si presenta col nome dell'Area, e con quante versioni ha (L2)
+      const titolo = m.area?.nome ?? propri.get(m.chiave) ?? senzaPrefisso(nomePresentazioneMappa(m), nome);
+      const nVersioni = m.area ? versioni?.get(m.area.chiave) ?? 1 : 1;
       const dentro = m.numeroFigli > 0;
       // Dentro il pannello dell'indice, un luogo che ne contiene altri **si apre lì**: cambiare
       // pagina per poi tornare indietro, quando si sta ancora scegliendo dove andare, fa perdere
@@ -350,15 +377,15 @@ function Griglia({ mappe, nome, etichetta, titoli, onScendi }: { mappe: MappaRia
         <span className="flex flex-col gap-0.5">
           <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
           <span className="text-[11px] text-text-muted">
-            {m.numeroSpilli > 0 ? `${m.numeroSpilli} spilli` : 'nessuno spillo'}{dentro ? ` · ${m.numeroFigli} dentro` : ''}
+            {m.numeroSpilli > 0 ? `${m.numeroSpilli} spilli` : 'nessuno spillo'}{nVersioni > 1 ? ` · ${nVersioni} versioni` : ''}{dentro ? ` · ${m.numeroFigli} dentro` : ''}
           </span>
         </span>
       </>;
       const classi = 'card card--cliccabile group flex w-full flex-col gap-2 text-left no-underline text-text';
       return <li key={m.chiave} className="flex">
         {onScendi && dentro
-          ? <button type="button" className={`${classi} touch`} onClick={() => onScendi(m.chiave)} aria-label={`Apri ${titolo}: ${m.numeroFigli} mappe dentro`}>{corpo}</button>
-          : <Link to={urlMappa(m.chiave)} className={classi}>{corpo}</Link>}
+          ? <button type="button" className={`${classi} touch`} onClick={() => onScendi(m.chiave)} aria-label={`Apri ${titolo}: ${m.numeroFigli} ${m.tipo === 'quartiere' ? (m.numeroFigli === 1 ? 'area' : 'aree') : (m.numeroFigli === 1 ? 'planimetria' : 'planimetrie')} dentro`}>{corpo}</button>
+          : <Link to={m.casa || urlMappa(m.chiave)} className={classi}>{corpo}</Link>}
       </li>;
     })}
   </ul>;
@@ -400,7 +427,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           onAcquisto={acquisto}
           onChiudi={() => navigate(ritornoMappe() ?? '/guida/mappe')}
           ritorno={<TornaAllaPartita partitaId={partitaId} />}
-          azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>{titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" /></>}
+          azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>{titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave, mappa.nome)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" /></>}
         /></>}
         {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} />}
       </div>}

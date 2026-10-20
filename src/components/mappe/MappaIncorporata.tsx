@@ -2,7 +2,7 @@
 // MappaIncorporata — visore a altezza fissa dentro una pagina (Città, quartiere, area di un Palazzo, home della Partita) — Fase 13.4
 // ============================================================
 //
-// Stesso visore dello schermo intero: navigazione fra i livelli apre la pagina a schermo intero; «Modifica mappa» apre l'editor.
+// Stesso visore dello schermo intero: navigazione fra i livelli apre la pagina a schermo intero; «Modifica planimetria» apre l'editor (L2: il gesto porta il nome di quel che modifica).
 // ============================================================
 
 import { haPlanimetria } from '../../utils/haPlanimetria';
@@ -10,8 +10,9 @@ import { presentaMappa } from '../../utils/presentazioneMappa';
 import { risolviMappa } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { PageState } from '../shared/PageState';
-import { urlMappa, type NavigaMappa } from '../../utils/navigazioneMappa';
-import { useEffect, useState } from 'react';
+import { nomeDellaMeta, urlMappa, type NavigaMappa } from '../../utils/navigazioneMappa';
+import { nomeFiglieMappa } from '../../utils/vocabolarioMappe';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useMappaPartita } from '../../hooks/useMappaPartita';
@@ -36,9 +37,11 @@ interface Props {
   classeVisore?: string;
   /** Spillo da selezionare e centrare all'apertura. */
   spilloIniziale?: number | null;
+  /** Lo spillo iniziale l'ha chiesto un comando di chi guarda (vedi `VisoreMappa.rivelaSelezione`): se non è disponibile adesso si mostra. */
+  rivelaSpilloIniziale?: boolean;
   /** Partita per lo stato degli spilli (predefinita: quella attiva). */
   partitaId?: number | null;
-  /** Mostra «Modifica mappa». Predefinito **sì**, che è giusto nelle pagine dell'atlante.
+  /** Mostra «Modifica planimetria». Predefinito **sì**, che è giusto nelle pagine dell'atlante.
    *
    * Va spento dove il visore è **citato dentro un'altra pagina** per dire dove si trova una cosa:
    * lì si sta leggendo un libro o un negozio, non curando la mappa, e un pulsante che porta
@@ -49,6 +52,15 @@ interface Props {
   conEditor?: boolean;
   /** Modalità scelta dei pin per una voce della guida (vedi `VisoreMappa`). */
   scelta?: SceltaPin;
+  /** Contenuti in più nel pannello del visore (la pagina dell'Area ci mette «Luoghi qui» e «Aree vicine», L2). */
+  contenutiPannello?: ReactNode;
+  /** Opzioni del visore per la pagina dell'Area (L2): pannello aperto all'inizio, il solo titolo nella barra, niente «Su: …». */
+  pannelloIniziale?: boolean;
+  onPannello?: (aperto: boolean) => void;
+  titoloVisore?: string;
+  senzaVicine?: boolean;
+  /** Il nome del posto mostrato, per dirlo anche quando la mappa non si carica (L2, M11: mai la chiave interna). */
+  nome?: string;
 }
 
 /** Risolve prima la chiave ricevuta: se è una sezione
@@ -72,9 +84,9 @@ export function MappaIncorporata(props: Props) {
  * mappa senza planimetria diventa una scheda con il collegamento e l'elenco scorrevole delle figlie.
  * Altrimenti incorpora `VisoreMappa` (rimontato quando cambiano mappa, spillo o punto iniziale) con
  * «Schermo intero», che porta la stessa istanza a tutto schermo finché non si chiude o si preme Esc,
- * e, se `conEditor`, «Modifica mappa». Senza `onNaviga` la navigazione fra livelli apre la pagina
+ * e, se `conEditor`, «Modifica planimetria». Senza `onNaviga` la navigazione fra livelli apre la pagina
  * della mappa. Senza `altezza` né classi dell'ospite il riquadro è alto 560 px. */
-function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta }: Props) {
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
@@ -92,8 +104,9 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
   if (!mappa) {
     return (
       <div className="card flex flex-col gap-2 text-[13px] text-text-secondary" role="status">
-        <span>{errore ? `Mappa «${chiave}» non disponibile: ${errore}` : `Nessuna mappa «${chiave}».`}</span>
-        <div className="flex gap-1.5"><CollegamentoVisivo to="/guida/mappe" tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Tutte le mappe" />{errore && <button type="button" className="visore-mappa__azione-testo" onClick={() => void ricarica()}>Riprova</button>}</div>
+        {/* il nome del posto, mai la chiave interna (L2, M11); «La città», non «Tutte le mappe» */}
+        <span>{errore ? `${nome ?? 'Questo posto'} non disponibile: ${errore}` : `${nome ?? 'Questo posto'} non c’è più nella guida.`}</span>
+        <div className="flex gap-1.5"><CollegamentoVisivo to="/guida/citta" tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="La città" />{errore && <button type="button" className="visore-mappa__azione-testo" onClick={() => void ricarica()}>Riprova</button>}</div>
       </div>
     );
   }
@@ -107,9 +120,10 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
     {/* solo senza ruolo: uno stemma caricato resta uno stemma (non si aprirebbe nel visore) */}
     {conEditor && !mappa.figli.length && (mappa.ruoloImmagine ?? 'nessuna') === 'nessuna' && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica?sezione=mappa`} tono="primario" compatto className="self-start"
       icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Carica l’immagine" dettaglio="la planimetria si apre qui" />}
-    <Link className="touch inline-flex items-center self-start" to={urlMappa(mappa.chiave)}>Apri la mappa e i contenuti della guida</Link>
-    {!!mappa.figli.length && <ul className="m-0 px-2 py-1 list-none area-scorrevole min-h-0 flex-1 max-h-[min(60vh,520px)]" aria-label={`Mappe di ${mappa.nome}`}>
-      {mappa.figli.map(f => <li key={f.chiave}><Link className="touch inline-flex items-center" to={urlMappa(f.chiave)}>{f.nome}</Link></li>)}
+    {/* il gesto porta il nome del posto (L2, M10 e M12), e la sua casa */}
+    <Link className="touch inline-flex items-center self-start" to={mappa.casa ? mappa.casa : urlMappa(mappa.chiave)}>Apri {nomeDellaMeta(mappa)}</Link>
+    {!!mappa.figli.length && <ul className="m-0 px-2 py-1 list-none area-scorrevole min-h-0 flex-1 max-h-[min(60vh,520px)]" aria-label={`${nomeFiglieMappa(mappa.tipo)} di ${mappa.nome}`}>
+      {mappa.figli.map(f => <li key={f.chiave}><Link className="touch inline-flex items-center" to={f.casa ? f.casa : urlMappa(f.chiave)}>{nomeDellaMeta(f)}</Link></li>)}
     </ul>}
   </section>;
   return (
@@ -120,6 +134,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         mappa={presentaMappa(mappa)}
         partitaId={partitaId}
         selezioneIniziale={spilloIniziale ?? null}
+        rivelaSelezione={rivelaSpilloIniziale}
         incorporato={!intero}
         onNaviga={onNaviga ?? ((k, arrivo) => navigate(urlMappa(k, arrivo)))}
         onRaccolto={raccolto}
@@ -127,10 +142,15 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         onAcquisto={acquisto}
         onChiudi={intero ? () => setIntero(false) : undefined}
         scelta={scelta}
+        contenutiPannello={contenutiPannello}
+        pannelloIniziale={pannelloIniziale}
+        onPannello={onPannello}
+        titolo={titoloVisore}
+        senzaVicine={senzaVicine}
         etichettaChiudi="Torna alla pagina"
         azioni={<>
           {!intero && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ingrandisci" dimensione={20} />} titolo="Schermo intero" onClick={() => setIntero(true)} />}
-          {conEditor && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" />}
+          {conEditor && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica planimetria" />}
         </>}
       />
     </div>

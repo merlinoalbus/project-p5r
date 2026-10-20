@@ -125,8 +125,7 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga }: Mod
     <div className="modal-overlay" role="presentation">
       <div
         ref={finestra}
-        className="modal-content"
-        style={larga ? { width: 860 } : undefined}
+        className={`modal-content ${larga ? 'modal-content--larga' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label={titolo}

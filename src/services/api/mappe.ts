@@ -22,7 +22,10 @@ export const creaMappa = (dati: DatiMappaApi & { chiave?: string; nome: string; 
 /** Modifica i dati di una mappa (nome, tipo, genitore, ordine, entità collegata, note…); risponde con la mappa aggiornata. */
 export const aggiornaMappa = (chiave: string, dati: DatiMappaApi): Promise<MappaDto> => apiPut(`/mappe/${encodeURIComponent(chiave)}`, dati);
 /** Elimina una mappa con i suoi spilli e le loro immagini; le mappe figlie restano, senza genitore. */
-export const eliminaMappa =(chiave: string): Promise<void> => apiDelete(`/mappe/${encodeURIComponent(chiave)}`);
+export const eliminaMappa =(chiave: string, opz: { conferma?: boolean } = {}): Promise<void> =>
+  // L2: la planimetria che l'ingresso del quartiere usa chiede conferma (409 `planimetria-d-ingresso`); l'ultima di un'Area non si
+  // elimina da sola (409 `ultima-planimetria`: si elimina l'Area)
+  apiDelete(`/mappe/${encodeURIComponent(chiave)}${queryString({ conferma: opz.conferma ? '1' : undefined })}`);
 /** Le aree della guida contenute in una planimetria: si passa l'insieme, torna in ordine di guida. */
 export const impostaAreeMappa = (chiave: string, aree: string[]): Promise<{ aree: Array<{ chiave: string; nome: string; ordine: number }> }> =>
   apiPut(`/mappe/${encodeURIComponent(chiave)}/aree`, { aree });

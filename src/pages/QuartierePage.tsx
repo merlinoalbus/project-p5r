@@ -1,28 +1,29 @@
 // ============================================================
-// QuartierePage — un quartiere: la sua mappa e i suoi luoghi
+// QuartierePage — un quartiere: la sua illustrazione, le sue Aree e i suoi luoghi (L2, 2026-10-20)
 // ============================================================
 //
 // Cosa offre ogni luogo, quando è aperto, come si sblocca, quali Confidenti ci si incontrano, che
 // piatti si mangiano. Il posizionamento degli spilli e le immagini di base si gestiscono
-// nell'editor delle mappe («Modifica mappa» nel visore).
+// nell'editor («Modifica planimetria» nel visore).
 //
-// Era una colonna sola: intestazione nuda, un pulsante grigio in mezzo, la mappa a tutta larghezza
-// e sotto un nastro di schede una sull'altra. Su uno schermo largo si leggeva una riga di testo in
-// mezzo a due palmi di vuoto, e per confrontare due luoghi si scorreva.
+// L'intestazione porta l'illustrazione del quartiere con sopra la **stessa sagoma** che il lettore ha appena toccato sulla mappa di
+// Tokyo (L1), e le azioni del quartiere: «Entra: <area d'ingresso>», «Ingresso», «Aggiungi area». Da 1280 px in su l'illustrazione
+// del quartiere con i suoi pin (i passaggi verso le aree) sta a sinistra, le Aree e i luoghi a destra.
 //
-// Ora l'intestazione porta la **stessa sagoma** che il lettore ha appena toccato sulla mappa di
-// Tokyo — è il modo di sapere in un istante di essere nel posto giusto — e da 1280 px in su la
-// mappa sta a sinistra e i luoghi a destra, che è la coppia che si guarda insieme. Sotto, in
-// colonna, e i luoghi in due colonne dove c'è spazio.
-//
-// «Ingresso da Città» sta accanto alla mappa e non più fra il titolo e il resto: è la
-// didascalia della mappa, non un capitolo della pagina. Decide **quale** planimetria si apre
-// cliccando il quartiere sulla mappa di Tokyo, e centrata su quale punto.
+// L2: questa è **l'unica pagina che apre un quartiere** (R2-15). Arrivando dalla metro (`?ingresso=1`) l'area d'ingresso si apre
+// in una finestra, sul punto e con lo zoom dell'ingresso — è lì che si vuole atterrare toccando il quartiere sulla mappa di
+// Tokyo —; chiudendola il parametro si toglie (l'indietro non la riapre). Dalle schede de La città, dall'indice e dalle briciole
+// si arriva senza: la pagina adattata e centrata. Prima al posto dell'illustrazione si incorporava la planimetria d'ingresso, e
+// l'ingresso si configurava in un pannello in fondo alla colonna.
 // ============================================================
 
 import { IngressoQuartiere } from '../components/mappe/IngressoQuartiere';
+import { AreeDelQuartiere } from '../components/mappe/AreeDelQuartiere';
+import { FinestraAggiungiArea } from '../components/mappe/FinestraAggiungiArea';
+import { Modal } from '../components/shared/Modal';
+import { urlCasa } from '../utils/navigazioneMappa';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getQuartiere, isApiError, scaricaPiantaQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
@@ -96,20 +97,33 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
 
 /**
  * Pagina di un quartiere presa dalla chiave nell'URL: carica il quartiere per la partita attiva e,
- * se la sua pianta è pubblicata ma non ancora nell'istanza (e non c'è un ingresso), la scarica.
- * Mostra l'intestazione con la sagoma, la mappa (quella dell'ingresso o del quartiere) con la sua
- * didascalia e la configurazione dell'ingresso da Città, e i luoghi filtrabili per tipo nell'ordine
- * del catalogo. Se l'URL porta un'ancora, dopo il caricamento scorre al luogo indicato.
+ * se la pianta pubblicata della sua illustrazione non è ancora nell'istanza, la scarica.
+ * Mostra l'intestazione con l'illustrazione e le azioni, l'illustrazione del quartiere nel visore
+ * (con lo spillo dell'indirizzo selezionato), le Aree e i luoghi filtrabili per tipo nell'ordine
+ * del catalogo; con `?ingresso=1` la finestra dell'area d'ingresso. Se l'URL porta un'ancora, dopo
+ * il caricamento scorre al luogo indicato.
  */
 export function QuartierePage() {
   const { chiave = '' } = useParams();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
   const attiva = usePartitaStore((s) => s.attiva);
   // La partita serve ai luoghi: senza, non si puo' dire quali a quel punto non ci sono ancora.
   const dati = useCarica(() => getQuartiere(chiave, attiva?.id), [chiave, attiva?.id]);
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
-  const [configuraIngresso,setConfiguraIngresso]=useState(false);
+  const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | null>(null);
+  // La finestra dell'area d'ingresso: aperta arrivando dalla metro (`?ingresso=1`, se c'è un ingresso) o con «Entra»
+  const [entraAperta, setEntraAperta] = useState(false);
+  // con uno spillo nell'indirizzo vince lo spillo: la finestra d'ingresso non si apre (condizione di Stesura sulla variante 1)
+  const dallaMetro = params.get('ingresso') === '1' && !!q?.ingresso && !params.get('spillo');
+  const chiudiEntra = () => {
+    setEntraAperta(false);
+    if (params.has('ingresso')) { const p = new URLSearchParams(params); p.delete('ingresso'); setParams(p, { replace: true }); }
+  };
+  // Lo spillo dell'indirizzo (un «Sulla mappa» che porta all'illustrazione del quartiere) si seleziona nel visore, come prima nel
+  // visore dell'atlante
+  const spillo = Number(params.get('spillo')) || null;
   const [tipo, setTipo] = useState<string>('');
   // Mappa pubblicata ma non ancora nell'istanza: scaricata appena il quartiere è aperto, poi il visore la usa come immagine di base
   // Se la mappa ha dei pezzi ritagliati dall'immagine che mostra (L1, F5: 409 `mappa-con-pezzi`), lo scarico automatico non la
@@ -118,12 +132,23 @@ export function QuartierePage() {
   // Scaricata la pianta, il quartiere si rilegge (L1, rilievo G6 del validatore): il visore prende l'immagine nuova dalla sua
   // `versione`, e senza rileggere l'intestazione restava sull'illustrazione di prima — due immagini diverse dello stesso quartiere
   // fino a una ricarica. Rilettura silenziosa (la pagina resta a schermo); col quartiere che ora ha la sua immagine non si riscarica.
-  const download = useCarica(() => (q && !q.ingresso && !q.mappa && q.pianta
+  // L2: l'illustrazione si mostra sempre (prima, con un ingresso, al suo posto c'era la planimetria d'ingresso e lo scarico si saltava)
+  const download = useCarica(() => (q && !q.mappa && q.pianta
     ? scaricaPiantaQuartiere(q.chiave)
       .then((esito) => { void dati.ricarica(); return esito; })
-      .catch((err: unknown) => { if (isApiError(err, 'mappa-con-pezzi')) return null; throw err; })
-    : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url, q?.ingresso]);
-  const scaricata = !!q && !!download.dati && download.dati.quartiere === q.chiave;
+      .catch((err: unknown) => {
+        if (isApiError(err, 'mappa-con-pezzi')) return null;
+        // Un rifiuto (4xx: la fonte rifiuta lo scarico, 400 fonte-rifiuta — Fandom risponde 403 anche a un client onesto, LAY-2 —, o
+        // un indirizzo che non serve l'immagine) non passa riprovando: in questa visita non si ritenta e non c'è «Riprova»; si dice
+        // perché, con la pagina della fonte e l'invito a caricarla dall'editor. Rete e 5xx restano errori, con «Riprova».
+        if (isApiError(err) && err.status >= 400 && err.status < 500) return { rifiutata: err.message };
+        throw err;
+      })
+    : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url]);
+  const scaricata = !!q && !!download.dati && 'quartiere' in download.dati && download.dati.quartiere === q.chiave;
+  const rifiuto = download.dati && 'rifiutata' in download.dati ? download.dati.rifiutata : null;
+  // l'errore da mostrare: il rifiuto della fonte (senza «Riprova») o un errore qualunque dello scarico (con «Riprova»)
+  const erroreScarico = rifiuto ?? download.errore;
   // I tipi presenti, nell'ordine del catalogo (shared/tipiLuogo), non in quello in cui capitano.
   const tipi = useMemo(() => ordinaTipiLuogo((q?.luoghi ?? []).map((l) => l.tipo)), [q]);
   const visibili = useMemo(() => (q?.luoghi ?? []).filter((l) => !tipo || l.tipo === tipo), [q, tipo]);
@@ -153,39 +178,40 @@ export function QuartierePage() {
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
                 <h1 className="titolo-display m-0 break-words">{q.nome}</h1>
-                <span className="text-[12px] text-text-muted">{q.luoghi.length} {q.luoghi.length === 1 ? 'luogo' : 'luoghi'}</span>
+                <span className="text-[12px] text-text-muted">{q.aree.length === 0 ? 'nessuna area' : q.aree.length === 1 ? 'un’area' : `${q.aree.length} aree`} · {q.luoghi.length} {q.luoghi.length === 1 ? 'luogo' : 'luoghi'}</span>
               </div>
               {q.sblocco && <p className="m-0 text-[13px]"><strong className="text-text-secondary">Si apre:</strong> {q.sblocco}</p>}
               {q.descrizione && <p className="m-0 text-[13px] text-text-secondary">{q.descrizione}</p>}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {q.ingresso && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={`Entra: ${q.ingresso.area?.nome ?? q.ingresso.nome}`} onClick={() => setEntraAperta(true)} />}
+                <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ingresso" dettaglio={q.ingresso ? undefined : 'da scegliere'} onClick={() => setFinestra('ingresso')} />
+                <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={() => setFinestra('aggiungi')} />
+              </div>
             </div>
           </header>
 
           <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <section className="flex flex-col gap-1.5 xl:sticky xl:top-2" aria-label={`Mappa di ${q.nome}`}>
-              {/* La mappa si apre **adattata e centrata**, come tutte le altre.
-                  Prima riceveva `puntoIniziale={q.ingresso}` e partiva ingrandita su quel punto:
-                  ma l'ingresso serve a chi **arriva** cliccando il quartiere sulla mappa di Tokyo
-                  — è lì che si vuole atterrare sul posto giusto — non a chi è già dentro la
-                  pagina del quartiere e vuole vederlo tutto. Quale planimetria mostrare resta
-                  deciso dall'ingresso; da dove guardarla, no. */}
-              {(q.ingresso?.mappa || q.mappaChiave) && <MappaIncorporata chiave={q.ingresso?.mappa ?? q.mappaChiave ?? ''} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza="max(420px, min(64vh, 740px))" />}
+            {/* L'illustrazione del quartiere, con i suoi pin: i passaggi verso le aree e l'uscita verso Tokyo. Si apre adattata e
+                centrata (o sullo spillo dell'indirizzo); l'ingresso serve a chi arriva dalla metro, e ha la sua finestra. */}
+            <section className="flex flex-col gap-1.5 xl:sticky xl:top-2" aria-label={`Illustrazione di ${q.nome}`}>
+              {q.mappaChiave && <MappaIncorporata chiave={q.mappaChiave} nome={q.nome} spilloIniziale={spillo} versione={scaricata && download.dati && 'byte' in download.dati ? download.dati.byte : 0} classeVisore="h-[min(56vh,460px)] md:h-[max(420px,min(64vh,740px))]" />}
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-text-muted">
-                {q.ingresso ? <span>Si apre su <strong className="text-text-secondary">{q.ingresso.nome}</strong>, nel punto che hai scelto.</span> : q.pianta ? (
-                  <span>Mappa da <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">{q.pianta.fonte}</a>, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}. Spilli e immagine si modificano dall’editor.</span>
+                {q.pianta ? (
+                  // Se lo scarico non riesce lo si dice (prima restava «scaricata nella tua istanza» con un «Riprova» muto accanto)
+                  erroreScarico
+                    ? <span role="alert">Scaricamento non riuscito: {erroreScarico} L’illustrazione si vede sulla <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">pagina della fonte</a> ({q.pianta.fonte}){rifiuto ? '.' : '; puoi riprovare o caricarne una tua dall’editor.'}</span>
+                    : <span>Illustrazione da <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">{q.pianta.fonte}</a>, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}. Pin e immagine si modificano dall’editor.</span>
                 ) : (
-                  <span>Nessuna mappa pubblicata per questo quartiere{q.piantaAssente ? `: ${q.piantaAssente}` : ''}: carica una tua immagine dall’editor della mappa (resta nella tua istanza).</span>
+                  <span>Nessuna illustrazione pubblicata per {q.nome}{q.piantaAssente ? `: ${q.piantaAssente}` : ''}: carica una tua immagine dall’editor (resta nella tua istanza).</span>
                 )}
-                {download.errore && q.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
+                {download.errore && !rifiuto && q.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
+                {erroreScarico && q.pianta && q.mappaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Carica dall’editor"
+                  to={`/guida/mappe/${encodeURIComponent(q.mappaChiave)}/modifica?sezione=mappa`} />}
               </div>
-              {/* Non è un capitolo della pagina: è la didascalia della mappa. Decide quale
-                  planimetria si apre cliccando questo quartiere sulla mappa di Tokyo, e dove
-                  centrarla — che è la cosa che si sta guardando proprio qui sopra. */}
-              {configuraIngresso
-                ? <IngressoQuartiere key={q.chiave} quartiere={q} onSalvato={async () => { await dati.ricarica(); }} onChiudi={() => setConfiguraIngresso(false)} />
-                : <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="mappa" dimensione={20} />}
-                    titolo="Ingresso da Città" dettaglio={q.ingresso ? 'cambia mappa e punto' : 'scegli mappa e punto'} onClick={() => setConfiguraIngresso(true)} />}
             </section>
 
+            <div className="flex flex-col gap-4">
+            <AreeDelQuartiere quartiere={q} onCambiato={() => dati.ricarica()} onAggiungi={() => setFinestra('aggiungi')} />
             <section className="flex flex-col gap-2" aria-label="Luoghi del quartiere">
               <div className="flex flex-wrap items-center gap-1.5"><AggiungiAlCatalogo tipo="luogo" titolo="Aggiungi un luogo" onSalvato={() => void dati.ricarica()} /></div>
               {tipi.length > 1 && (
@@ -201,7 +227,21 @@ export function QuartierePage() {
               </ul>
               {visibili.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun luogo di questo tipo in {q.nome}.</p>}
             </section>
+            </div>
           </div>
+
+          {finestra === 'ingresso' && <IngressoQuartiere quartiere={q} aperta onChiudi={() => setFinestra(null)} onSalvato={() => dati.ricarica()} />}
+          {finestra === 'aggiungi' && <FinestraAggiungiArea quartiere={q} aperta onChiudi={() => setFinestra(null)} onCreata={() => void dati.ricarica()} />}
+          {/* L'area d'ingresso nella sua finestra (decisione del PM, 2026-10-20): dalla metro o con «Entra», sul punto e con lo zoom
+              dell'ingresso; «Apri l'area» porta alla sua pagina con lo stesso punto, «Chiudi» resta qui e toglie `ingresso=1`. */}
+          {q.ingresso && <Modal titolo={`${q.ingresso.area?.nome ?? q.ingresso.nome} — ingresso di ${q.nome}`} aperta={entraAperta || dallaMetro} onChiudi={chiudiEntra} larga
+            azioni={<>
+              <button type="button" className="btn btn-secondary touch" onClick={chiudiEntra}>Chiudi</button>
+              {q.ingresso.area && <Link className="btn btn-primary touch" to={urlCasa(`/guida/citta/${encodeURIComponent(q.chiave)}/${encodeURIComponent(q.ingresso.area.slug)}`, { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom })}>Apri l’area</Link>}
+            </>}>
+            <MappaIncorporata chiave={q.ingresso.mappa} nome={q.ingresso.area?.nome ?? q.ingresso.nome} puntoIniziale={{ x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom }} conEditor={false}
+              altezza="min(64dvh, 620px)" />
+          </Modal>}
         </div>
       )}
     </PageState>

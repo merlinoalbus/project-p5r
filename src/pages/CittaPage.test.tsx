@@ -7,19 +7,21 @@
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ApiError } from '../services/api/_helpers';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useAssetStore } from '../stores/assetStore';
-import type { DungeonRiassuntoDto, MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
+import type { AreaRiassuntoDto, DungeonRiassuntoDto,MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
 
-const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn(() => Promise.resolve([])) }));
+const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn(() => Promise.resolve([])),
+  // le Aree della città e le planimetrie da collocare (L2): di serie nessuna, come nel database dopo la 109 senza staff
+  getAreeCitta: vi.fn(async (): Promise<AreaRiassuntoDto[]> => []), getDaCollocare: vi.fn(async () => []), aggiornaAreaMondo: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, api));
 
 /** Costruisce la mappa `chiave`: «tokyo» è la città radice, ogni altra un quartiere figlio di Tokyo; ha un solo spillo
  *  di passaggio (Shibuya su Tokyo, Untouchable sui quartieri). */
-const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, nomeRivisto: false, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: chiave === 'tokyo' ? null : 'Tokyo', percorso: chiave === 'tokyo' ? [{ chiave: 'tokyo', nome: 'Tokyo' }] : [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave, nome }], figli: [], arrivi: [], pezzi: [],
+const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, nomeRivisto: false, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', area: null, casa: chiave === 'tokyo' ? '/guida/citta' : `/guida/mappe/${chiave}`, larghezza: 1000, altezza: 600, note: '', genitoreNome: chiave === 'tokyo' ? null : 'Tokyo', percorso: chiave === 'tokyo' ? [{ chiave: 'tokyo', nome: 'Tokyo' }] : [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave, nome }], figli: [], arrivi: [], pezzi: [],
   spilli: [{ id: 1, mappaChiave: chiave, tipo: 'passaggio', tipoNome: 'Passaggio', colore: '#3b82f6', nome: chiave === 'tokyo' ? 'Shibuya' : 'Untouchable', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' }] });
 
 // L1 (2026-10-20): sagome e stemmi sono segni della grafica predefinita e si risolvono dal manifesto, come nell'app: qui il
@@ -45,28 +47,18 @@ describe('CittaPage', () => {
     expect(within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/citta/shibuya');
   });
 
-  it('sulla mappa disegnata il quartiere porta alla sua mappa, non a un secondo visore di Tokyo', async () => {
-    api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' }] as QuartiereRiassuntoDto[]);
-    render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    const tokyo = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
-    const cartellino = within(tokyo).getByTitle('Shibuya');
-    expect(cartellino).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
-  });
-
-  it('il clic su un quartiere apre l’ingresso configurato, non sempre il nodo d’atlante', async () => {
-    // «devo poter scegliere il punto di apertura del click»: l'ingresso si configura dalla scheda
-    // del quartiere e porta mappa + punto + ingrandimento. Era già salvato, ma questa mappa lo
-    // ignorava: si poteva sceglierlo e non vederlo mai usato.
+  it('sulla mappa disegnata ogni quartiere porta alla sua pagina, con `ingresso=1` (L2, R2-15): l’unica che apre il quartiere', async () => {
+    // Prima la metro apriva il visore dell'atlante (il nodo del quartiere, o la planimetria d'ingresso con il punto): un quartiere
+    // aveva due pagine. Ora la pagina è una sola; arrivando dalla metro apre l'area d'ingresso in una finestra (QuartierePage).
     api.getQuartieri.mockResolvedValue([
       { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '',
-        ingresso: { mappa: 'shibuya-sottopasso', nome: 'Sottopasso di Shibuya', x: 42.5, y: 61, zoom: 3 } },
+        ingresso: { mappa: 'shibuya-sottopasso', nome: 'Sottopasso di Shibuya', x: 42.5, y: 61, zoom: 3, area: { slug: 'sottopasso', nome: 'Sottopasso' } } },
       { chiave: 'ueno', nome: 'Ueno', mappaChiave: 'citta-ueno', luoghi: 3, verificati: 3, sblocco: null, descrizione: '' },
     ] as QuartiereRiassuntoDto[]);
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
     const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
-    expect(within(mappa).getByTitle('Shibuya')).toHaveAttribute('href', '/guida/mappe/shibuya-sottopasso?x=42.5&y=61&zoom=3');
-    // e chi non l'ha configurato continua ad aprire il proprio nodo, com'è giusto
-    expect(within(mappa).getByTitle('Ueno')).toHaveAttribute('href', '/guida/mappe/citta-ueno');
+    expect(within(mappa).getByTitle('Shibuya')).toHaveAttribute('href', '/guida/citta/shibuya?ingresso=1');
+    expect(within(mappa).getByTitle('Ueno')).toHaveAttribute('href', '/guida/citta/ueno?ingresso=1');
   });
 
   it('i Memento stanno sulla mappa di Tokyo, dentro la loro finestra e non prima', async () => {
@@ -197,15 +189,46 @@ describe('CittaPage', () => {
   });
 });
 
+describe('CittaPage — Aree della città (L2, 2026-10-20)', () => {
+  it('l’area dello staff, da verificare, ha la sua pagina, «Tieni» e «Rimuovi»; «Tieni» la toglie dalle aree da verificare', async () => {
+    const staff = { chiave: 'citta/tokyo/staff', contenitore: { tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo' }, slug: 'staff', nome: 'Staff', nomeRivisto: false, ordine: 0, predefinita: 'staff', illustrazione: { immagineUrl: null, asset: null },
+      numeroPlanimetrie: 1, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
+    api.getQuartieri.mockResolvedValue([]);
+    api.getAreeCitta.mockResolvedValueOnce([staff]).mockResolvedValue([{ ...staff, daVerificare: false }]);
+    api.aggiornaAreaMondo.mockResolvedValue({ ...staff, daVerificare: false });
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const sezione = within(await screen.findByRole('region', { name: 'Aree della città' }));
+    expect(sezione.getByRole('link', { name: 'Staff' })).toHaveAttribute('href', '/guida/citta/tokyo/staff');
+    expect(sezione.getByText('Da verificare')).toBeInTheDocument();
+    expect(sezione.getByRole('button', { name: /Rimuovi/ })).toBeInTheDocument();
+    fireEvent.click(sezione.getByRole('button', { name: /Tieni/ }));
+    await waitFor(() => expect(api.aggiornaAreaMondo).toHaveBeenCalledWith('tokyo', 'staff', { daVerificare: false }));
+    await waitFor(() => expect(sezione.queryByText('Da verificare')).toBeNull());
+  });
+
+  it('senza Aree della città né planimetrie da collocare le due sezioni non ci sono', async () => {
+    api.getQuartieri.mockResolvedValue([]);
+    // il test di prima lascia l'area dello staff nel mock: qui le liste vuote si dicono, e si aspetta che le promesse siano risolte
+    api.getAreeCitta.mockReset().mockResolvedValue([]);
+    api.getDaCollocare.mockReset().mockResolvedValue([]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    await waitFor(() => expect(api.getDaCollocare).toHaveBeenCalled());
+    await Promise.all([api.getAreeCitta.mock.results[0]?.value, api.getDaCollocare.mock.results[0]?.value]);
+    await screen.findByRole('heading', { level: 1 });
+    expect(screen.queryByRole('region', { name: 'Aree della città' })).toBeNull();
+    expect(screen.queryByText(/Planimetrie da collocare/)).toBeNull();
+  });
+});
+
 describe('QuartierePage', () => {
   it('mostra la mappa del quartiere incorporata e i luoghi senza i pulsanti di posizionamento (ora nell’editor)', async () => {
     // `mappaChiave` la dà il backend (cittaService), non la costruisce la pagina: il mock deve dirla
-    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, illustrazione: { immagineUrl: null, asset: null }, pianta: null, piantaAssente: null,
+    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, illustrazione: { immagineUrl: null, asset: null }, aree: [], pianta: null, piantaAssente: null,
       luoghi: [{ chiave: 'shibuya/untouchable', ordine: 0, tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi', quando: 'entrambe', giorni: [], giorniTesto: '', sblocco: null, confidenti: [{ chiave: 'iwai', nome: 'Munehisa Iwai' }], attivita: [], negozi: [{ chiave: 'untouchable', nome: 'Untouchable' }], negozio: 'untouchable', origine: 'seed', piatti: null, note: null, verificato: true, marcatore: null, condizioni: null, disponibilita: null } as QuartiereDettaglioDto['luoghi'][number]] };
     api.getQuartiere.mockResolvedValue(q);
     api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));
     render(<MemoryRouter initialEntries={['/guida/citta/shibuya']}><Routes><Route path="/guida/citta/:chiave" element={<QuartierePage />} /></Routes></MemoryRouter>);
-    expect(await screen.findByRole('application', { name: 'Mappa: Tokyo › Shibuya' })).toBeInTheDocument();
+    expect(await screen.findByRole('application', { name: 'Quartiere: Tokyo › Shibuya' })).toBeInTheDocument();
     expect(api.getMappa).toHaveBeenCalledWith('citta-shibuya', undefined);
     const luoghi = within(screen.getByRole('list', { name: 'Luoghi' }));
     expect(luoghi.getByText('Untouchable')).toBeInTheDocument();
@@ -218,7 +241,7 @@ describe('QuartierePage', () => {
   });
 
   it('l’intestazione mostra l’illustrazione del quartiere con la sagoma sopra; senza, la sagoma grande (L1, 2026-10-20)', async () => {
-    const q = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, pianta: null, piantaAssente: null, luoghi: [] } as Omit<QuartiereDettaglioDto, 'illustrazione'>;
+    const q = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, aree: [], pianta: null, piantaAssente: null, luoghi: [] } as Omit<QuartiereDettaglioDto, 'illustrazione'>;
     api.getQuartiere.mockResolvedValue({ ...q, illustrazione: { immagineUrl: '/api/immagini/mappa/citta-shibuya/file?v=3', asset: 'mappe/citta-shibuya' } });
     api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));
     const con = render(<MemoryRouter initialEntries={['/guida/citta/shibuya']}><Routes><Route path="/guida/citta/:chiave" element={<QuartierePage />} /></Routes></MemoryRouter>);
@@ -236,7 +259,7 @@ describe('QuartierePage', () => {
   });
 
   it('lo scarico automatico della pianta su una mappa con pezzi (409 `mappa-con-pezzi`, L1 F5) non sostituisce niente e non mostra errori', async () => {
-    const q = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: false, illustrazione: { immagineUrl: null, asset: null },
+    const q = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: false, illustrazione: { immagineUrl: null, asset: null }, aree: [],
       pianta: { url: 'https://esempio.test/shibuya.png', fonte: 'Guida', pagina: null }, piantaAssente: null, luoghi: [] } as unknown as QuartiereDettaglioDto;
     api.getQuartiere.mockResolvedValue(q);
     api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));
@@ -249,5 +272,45 @@ describe('QuartierePage', () => {
     await waitFor(() => expect(screen.queryByText(/scaricamento in corso/)).toBeNull());
     expect(screen.queryByRole('button', { name: /Riprova/ })).toBeNull();
     expect(screen.queryByText(/2 pezzi ritagliati/)).toBeNull();
+  });
+
+  // ---- L'area d'ingresso nella sua finestra (L2, 2026-10-20; decisione del PM su R2-15 e R2-22) ----
+  const conIngresso = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, illustrazione: { immagineUrl: null, asset: null }, aree: [], pianta: null, piantaAssente: null, luoghi: [],
+    ingresso: { mappa: 'shibuya-central-street', nome: 'Central Street', x: 41, y: 63, zoom: 2, area: { slug: 'central-street', nome: 'Central Street' } } } as unknown as QuartiereDettaglioDto;
+  /** L'indirizzo corrente sotto la pagina, per vedere che «Chiudi» toglie `ingresso=1`. */
+  function Indirizzo() { const l = useLocation(); return <p data-testid="indirizzo">{l.pathname}{l.search}</p>; }
+  const montaQuartiere = (indirizzo: string) => render(<MemoryRouter initialEntries={[indirizzo]}><Routes><Route path="/guida/citta/:chiave" element={<><QuartierePage /><Indirizzo /></>} /></Routes></MemoryRouter>);
+
+  it('dalla metro (`?ingresso=1`) si apre la finestra dell’area d’ingresso; «Apri l’area» porta alla sua pagina sul punto, «Chiudi» toglie il parametro', async () => {
+    api.getQuartiere.mockResolvedValue(conIngresso);
+    api.getMappa.mockImplementation(async (k: string) => mappa(k, k === 'citta-shibuya' ? 'Shibuya' : 'Central Street'));
+    montaQuartiere('/guida/citta/shibuya?ingresso=1');
+    const finestra = within(await screen.findByRole('dialog', { name: 'Central Street — ingresso di Shibuya' }));
+    expect(finestra.getByRole('link', { name: 'Apri l’area' })).toHaveAttribute('href', '/guida/citta/shibuya/central-street?x=41&y=63&zoom=2');
+    await waitFor(() => expect(api.getMappa).toHaveBeenCalledWith('shibuya-central-street', undefined));
+    // il pulsante «Chiudi» fra le azioni (la × della finestra ha lo stesso nome)
+    fireEvent.click(finestra.getAllByRole('button', { name: 'Chiudi' }).find((b) => b.textContent === 'Chiudi')!);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(screen.getByTestId('indirizzo')).toHaveTextContent(/^\/guida\/citta\/shibuya$/);
+  });
+
+  it('con uno spillo nell’indirizzo vince lo spillo: la finestra d’ingresso non si apre, e «Entra» la apre a richiesta', async () => {
+    api.getQuartiere.mockResolvedValue(conIngresso);
+    api.getMappa.mockImplementation(async (k: string) => mappa(k, 'Shibuya'));
+    montaQuartiere('/guida/citta/shibuya?ingresso=1&spillo=1');
+    const entra = await screen.findByRole('button', { name: /Entra: Central Street/ });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.click(entra);
+    expect(await screen.findByRole('dialog', { name: 'Central Street — ingresso di Shibuya' })).toBeInTheDocument();
+  });
+
+  it('un quartiere senza ingresso (Kichijoji): dalla metro nessuna finestra, niente «Entra», «Ingresso» da scegliere', async () => {
+    api.getQuartiere.mockResolvedValue({ ...conIngresso, chiave: 'kichijoji', nome: 'Kichijoji', mappaChiave: 'citta-kichijoji', ingresso: null });
+    api.getMappa.mockImplementation(async (k: string) => mappa(k, 'Kichijoji'));
+    montaQuartiere('/guida/citta/kichijoji?ingresso=1');
+    expect(await screen.findByRole('heading', { name: 'Kichijoji' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Entra/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /Ingresso/ })).toHaveTextContent('da scegliere');
   });
 });

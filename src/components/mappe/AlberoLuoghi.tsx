@@ -6,11 +6,15 @@
 // di immagini (gruppo esplicito o collezione di presentazione) stanno insieme come miniature sotto
 // un solo titolo, le altre sono collegamenti singoli. I discendenti si annidano ricorsivamente,
 // eventualmente dentro un `details` da espandere.
+//
+// L2 (2026-10-20): le versioni di una stessa Area sono una voce sola col nome dell'Area, e ogni voce porta alla casa del posto.
 // ============================================================
 
 import { etichetteDistinte, nomePresentazioneMappa, titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
+import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
+import { nomeFiglieMappa } from '../../utils/vocabolarioMappe';
 import type { MappaRiassuntoDto } from '../../types';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -37,18 +41,39 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
     function discendenti(m: MappaRiassuntoDto) {
       const contenuto = ramo(m.chiave, new Set([...antenati, m.chiave]));
       return espandibile && contenuto ? <details>
-        <summary className="touch cursor-pointer py-1 text-[12px] text-text-muted" aria-label={`Mostra le mappe di ${nomePresentazioneMappa(m)}`}>Aree e planimetrie ({figli.get(m.chiave)!.length})</summary>
+        <summary className="touch cursor-pointer py-1 text-[12px] text-text-muted" aria-label={`Mostra ${nomeFiglieMappa(m.tipo).toLowerCase()} di ${m.area?.nome ?? nomePresentazioneMappa(m)}`}>Aree e planimetrie ({figli.get(m.chiave)!.length})</summary>
         {contenuto}
       </details> : contenuto;
     }
     const padre = mappe.find(m => m.chiave === parent);
+    // L2 (`modifiche.md` §4.6): le planimetrie di una stessa Area sono **una voce sola**, col nome dell'Area e la sua casa (la
+    // predefinita apre per prima; le altre versioni si scelgono nella pagina dell'Area), come nell'indice e nel pannello del visore.
+    const perArea = new Map<string, MappaRiassuntoDto[]>();
+    for (const m of nodi) if (m.area) perArea.set(m.area.chiave, [...(perArea.get(m.area.chiave) ?? []), m]);
+    /** La voce che rappresenta l'Area: la planimetria predefinita, altrimenti la prima versione. */
+    const rappresentante = (membri: MappaRiassuntoDto[]) => membri.find(v => v.area?.predefinita) ?? membri.slice().sort((a, b) => (a.area?.versioneOrdine ?? 0) - (b.area?.versioneOrdine ?? 0))[0];
     // Fra fratelli il nome deve bastare a distinguerli: dove due finiscono uguali — i fogli non
     // attribuiti di uno stesso Palazzo — ci pensa il numero d'ordine. **Solo fra i nodi che
     // compaiono da soli**: le immagini di una stessa famiglia hanno lo stesso nome per definizione
     // e stanno sotto un'intestazione unica, che numerarle spezzerebbe.
-    const soli = nodi.filter(m => !gruppo(m));
+    const soli = nodi.filter(m => !m.area && !gruppo(m));
     const etichette = new Map(etichetteDistinte(soli).map((t, i) => [soli[i].chiave, t]));
-    return <ul className="m-0 pl-4 list-none flex flex-col gap-2" aria-label={parent ? `Mappe di ${padre ? nomePresentazioneMappa(padre) : 'area'}` : 'Mappe'}>{nodi.map(m => {
+    // il gruppo porta il nome di quel che contiene (M19): «Aree di Shibuya», «Quartieri di Tokyo», «Planimetrie di …»
+    return <ul className="m-0 pl-4 list-none flex flex-col gap-2" aria-label={parent ? `${padre ? nomeFiglieMappa(padre.tipo) : 'Aree'} di ${padre ? nomePresentazioneMappa(padre) : 'questo posto'}` : 'Città e Palazzi'}>{nodi.map(m => {
+      if (m.area) {
+        const membri = perArea.get(m.area.chiave)!;
+        const capo = rappresentante(membri);
+        if (capo.chiave !== m.chiave) return null;
+        const pin = membri.reduce((n, v) => n + v.numeroSpilli, 0);
+        return <li key={`area:${m.area.chiave}`}>
+          <Link className="touch flex items-center gap-2 py-1 no-underline text-text" to={capo.casa || `/guida/mappe/${encodeURIComponent(capo.chiave)}`}>
+            <IconaAzione chiave="mappa" dimensione={18} />
+            <span>{m.area.nome}</span>
+            {membri.length > 1 && <span className="text-[11px] text-text-muted">{membri.length} versioni · {pin} pin</span>}
+          </Link>
+          {membri.map(v => <Fragment key={v.chiave}>{discendenti(v)}</Fragment>)}
+        </li>;
+      }
       const id = gruppo(m);
       if (id) {
         const membri = gruppi.get(id)!;
@@ -57,7 +82,7 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
         return <li key={id}>{!m.gruppoImmagini && <h3 className="m-0 py-1 text-sm font-semibold">{titolo}</h3>}<ImmaginiLuogo mappe={membri} nome={titolo} discendenti={discendenti} /></li>;
       }
       return <li key={m.chiave}>
-        <Link className="touch flex items-center gap-2 py-1 no-underline text-text" to={`/guida/mappe/${encodeURIComponent(m.chiave)}`}>
+        <Link className="touch flex items-center gap-2 py-1 no-underline text-text" to={m.casa || `/guida/mappe/${encodeURIComponent(m.chiave)}`}>
           {/* L1: un'icona sola per tutte le righe; il caso a parte del Covo citava la mappa «nativo-archivio-022», che non esiste più */}
           <IconaAzione chiave="mappa" dimensione={18} />
           <span>{etichette.get(m.chiave) ?? nomePresentazioneMappa(m)}</span>

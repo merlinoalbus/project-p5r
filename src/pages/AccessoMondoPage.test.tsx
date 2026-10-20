@@ -24,6 +24,7 @@ function monta(url ='/guida/mondo/negozio/untouchable') {
   return render(<MemoryRouter initialEntries={[url]}><Link to="/guida/mondo/negozio/leblanc">Altro luogo</Link><Routes>
     <Route path="/guida/mondo/:tipo/:chiave" element={<AccessoMondoPage />} />
     <Route path="/guida/mappe/:chiave" element={<Indirizzo />} />
+    <Route path="/guida/citta/:chiave" element={<Indirizzo />} />
   </Routes></MemoryRouter>);
 }
 beforeEach(() => { getAccessoMondo.mockReset(); });
@@ -64,9 +65,14 @@ it('ignora risposte tardive della precedente entità', async () => {
   await act(async () => seconda(risposta([{ ...destinazione, mappa: 'leblanc', spillo: 8 }])));
   expect(await screen.findByTestId('indirizzo')).toHaveTextContent('/guida/mappe/leblanc?spillo=8');
 });
+it('un quartiere va dritto alla sua pagina, senza chiedere niente al server (L2, R2-15)', async () => {
+  monta('/guida/mondo/quartiere/shibuya');
+  expect(await screen.findByTestId('indirizzo')).toHaveTextContent('/guida/citta/shibuya');
+  expect(getAccessoMondo).not.toHaveBeenCalled();
+});
 it('trasporta l’ingresso configurato e accetta solo coordinate complete e valide', async () => {
   getAccessoMondo.mockResolvedValue(risposta([{ ...destinazione, spillo: null, centro: { x: 0, y: 100, zoom: 6 } }]));
-  monta('/guida/mondo/quartiere/shibuya');
+  monta('/guida/mondo/luogo/shibuya-crossing');
   expect(await screen.findByTestId('indirizzo')).toHaveTextContent('/guida/mappe/shibuya?x=0&y=100&zoom=6');
   expect(centroAccessoMondo(new URLSearchParams('x=0&y=100&zoom=6'))).toEqual({ x: 0, y: 100, zoom: 6 });
   for (const query of ['', 'x=0&y=30', 'x=&y=30&zoom=2', 'x=NaN&y=30&zoom=2', 'x=10&y=101&zoom=2', 'x=10&y=30&zoom=0', 'x=Infinity&y=30&zoom=2']) expect(centroAccessoMondo(new URLSearchParams(query))).toBeNull();
