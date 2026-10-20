@@ -133,6 +133,9 @@ interface Props {
   /** L3 RG-1: la guida della planimetria da usare (pulsante «Guida» nella barra), nelle planimetrie dei Palazzi; `onCambiato` avvisa chi
    *  ospita il visore di uno stato salvato dalla guida (rilegge la mappa). Senza, il pulsante non c'è. */
   guida?: { onCambiato?: () => void };
+  /** Falso: la selezione iniziale evidenzia e centra il pin senza aprirne il popup, che si apre al primo tocco (la pagina del luogo, L5:
+   *  la pagina dice già tutto quel che il popup direbbe, e su una tela bassa il popup diventava un foglio sopra la pagina). */
+  popupIniziale?: boolean;
 }
 
 /** Vedi `Props.scelta`. */
@@ -253,7 +256,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
  * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida, popupIniziale = true }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -324,7 +327,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const pan: Punto = panEsplicito ?? fit.pan;
   // in modalità scelta non c'è selezione (né popup): il tocco sceglie
   const selezionatoId = scelta ? null : editor ? editor.selezionatoId : selezionatoUso;
-  const seleziona = useCallback((id: number | null) => { if (editor) editor.onSeleziona(id); else setSelezionatoUso(id); }, [editor]);
+  // con `popupIniziale` falso, lo spillo della selezione iniziale resta senza popup finché non lo si tocca (o se ne sceglie un altro)
+  const [popupSoppresso, setPopupSoppresso] = useState<number | null>(popupIniziale ? null : selezioneIniziale ?? null);
+  const seleziona = useCallback((id: number | null) => { setPopupSoppresso(null); if (editor) editor.onSeleziona(id); else setSelezionatoUso(id); }, [editor]);
 
   // Misura dell'area visibile (ResizeObserver quando disponibile; altrimenti finestra).
   useEffect(() => {
@@ -938,7 +943,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       tela.current?.setPointerCapture?.(e.pointerId);
                     }
                   }}
-                  onClick={(e) => { e.stopPropagation(); if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; seleziona(attivo ? null : s.id); }}
+                  onClick={(e) => { e.stopPropagation(); if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; seleziona(attivo && s.id !== popupSoppresso ? null : s.id); }}
                   onDoubleClick={(e) => { if (!visitabile) return; e.stopPropagation(); e.preventDefault(); editor!.onVisita!(visitabile.mappa); }}
                 >
                   <SpilloGrafico tipo={s.tipo} colore={s.colore} />
@@ -946,7 +951,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 </button>
               );
             })}
-            {selezionato && !editor && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(schermoStretto || popupFoglio, (
+            {selezionato && !editor && selezionato.id !== popupSoppresso && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(schermoStretto || popupFoglio, (
               <div ref={popupRif} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={nomePin(selezionato)} style={schermoStretto || popupFoglio ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />

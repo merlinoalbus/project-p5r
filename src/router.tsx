@@ -38,6 +38,7 @@ const MappaPage = pigra(() => import('./pages/MappaPage'), 'MappaPage');
 const AccessoMondoPage = pigra(() => import('./pages/AccessoMondoPage'), 'AccessoMondoPage');
 const EditorMappaPage = pigra(() => import('./pages/EditorMappaPage'), 'EditorMappaPage');
 const QuartierePage = pigra(() => import('./pages/QuartierePage'), 'QuartierePage');
+const LuogoPage = pigra(() => import('./pages/LuogoPage'), 'LuogoPage');
 const AreaPage = pigra(() => import('./pages/AreaPage'), 'AreaPage');
 const AttivitaPage = pigra(() => import('./pages/AttivitaPage'), 'AttivitaPage');
 const LibriPage = pigra(() => import('./pages/LibriPage'), 'LibriPage');
@@ -103,6 +104,8 @@ export const router = createBrowserRouter([
       { path: 'guida/percorso/:data', element: <PercorsoPage /> },
       { path: 'guida/negozi', element: <NegoziPage /> },
       { path: 'guida/negozi/:chiave', element: <NegozioPage /> },
+      // L5: la pagina del luogo, fonte unica di orari, presenza, negozi e pin
+      { path: 'guida/luogo/:quartiere/:luogo', element: <LuogoPage /> },
       { path: 'guida/rimossi', element: <RimossiPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
