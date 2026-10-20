@@ -1658,4 +1658,5 @@ Nessuna chiave, rotta o codice d'errore è cambiato.
   riquadri scorrevoli suoi: griglia ed Elenco crescono con la pagina, che è l'unica a scorrere (UX2-15).
 - Linea di rilascio: L2 è stato collaudato e validato sul branch `newreview-l2` (worktree `p5s-sviluppo-l2`), su cui le correzioni arrivano con
   cherry-pick dai commit di sviluppo su `newreview` (stesso patch-id). Dopo l'approvazione si pubblica `newreview-l2` su `newreview` e la linea di
-  rilascio si ricongiunge a quella di sviluppo con un merge di `newreview-l2` in `newreview`, a contenuto identico.
+  rilascio si ricongiunge a quella di sviluppo con un merge di `newreview-l2` in `newreview`: il codice di L2 è lo stesso sui due rami (i
+  cherry-pick hanno lo stesso patch-id), mentre `newreview` contiene in più L3 e L4 e `newreview-l2` i commit di soli documenti del collaudo.

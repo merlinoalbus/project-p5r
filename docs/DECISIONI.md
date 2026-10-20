@@ -2178,6 +2178,14 @@ Giro 2 (segnalazioni dell'utente e revisione dell'indice delle Mappe, 2026-10-20
   non ha riquadri scorrevoli suoi, griglia ed «Elenco completo» crescono con la pagina.
 - **Parola dei conteggi**: nell'indice delle Mappe di L2 si dice «spilli» (E5); in La città e nelle pagine delle aree resta «pin» fino al
   rilascio di L3, dove si uniforma con la scelta dell'utente sugli spilli di contenuto (E2).
-- **Dichiarazione**: dopo la chiusura delle sessioni del team, su autorizzazione dell'utente («quindi organizza tu per risolvere il L2»,
-  poi «Autorizzo a fare in modo di completare l2»), il Project manager ha portato sul rilascio UX2-13 ed E4/E5/E7 e ha **implementato
-  UX2-15**, con una prima verifica propria. Dopo il giro 2 del validatore le sessioni di prova sono state riaperte una alla volta, su indicazione dell'utente, e la verifica indipendente di UX2-15 l'hanno fatta Test layout (48 misure) e Test UX.
+- **Dichiarazione e cronologia** (orari UTC dal registro della sessione del PM e dai reflog):
+  - prima del secondo stop: dopo «riprendi L2 e completalo» dell'utente (05:55Z e 05:59Z) e sul perimetro deciso dal Manager, il **Collaudo**
+    ha portato sul rilascio UX2-13 (115581b4 alle 06:05:01Z, cherry-pick del BE 7624bdda);
+  - 06:06:08Z secondo stop dell'utente («interrompi tutto»), poi la chiusura delle sessioni del team (06:07:25Z, «ho detto tutto»);
+  - 06:07:44Z l'utente: «quindi organizza tu per risolvere il L2». Dopo, il **Project manager** ha portato sul rilascio E4/E5/E7 (0268751a
+    alle 06:08:01Z, cherry-pick del FE d71a1bbd) e ha **implementato UX2-15** (63b4d80e alle 06:09:41Z, sul rilascio 3a056190 alle 06:09:44Z),
+    con una prima verifica propria;
+  - 06:19:21Z l'utente: «Autorizzo a fare in modo di completare l2». Il PM entra nella cartella di rilascio e scrive la ROADMAP (292a122e
+    alle 06:19:32Z);
+  - 06:39:53Z l'utente: «Riapri e al termine le richiudi... una alla volta». Le sessioni di prova sono state riaperte una alla volta e
+    richiuse; la verifica indipendente di UX2-15 l'hanno fatta Test layout (48 misure) e Test UX.
