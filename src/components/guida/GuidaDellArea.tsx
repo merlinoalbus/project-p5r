@@ -30,13 +30,26 @@ import { EditorDettagli } from './EditorDettagli';
 import { dettagliDaRighe, etichetteRipetute, righeDaDettagli, type RigaDettaglio } from '../../utils/dettagliVoce';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
+import { IconaAzione, type ChiaveAzione } from '../shared/IconaAzione';
 import { TrasferisciVociInArea } from './TrasferisciVociInArea';
 import { NEL_CESTINO } from '../../utils/cestino';
 import { Modal } from '../shared/Modal';
 import { enigmiCheSiRiaprono, inCorso, righeRiapertura, testoAvanzamento, testoVociDelGesto } from '../../utils/gestiVoce';
+import { CARATTERI, NOME_CARATTERE, carattereDaTipo, type CarattereVoce } from '../../../shared/caratteriVoce';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
+
+// L4 §4.1: il carattere della voce, accanto al tipo. Colori dai chip esistenti: Permanente col bordo dell'evidenza, Si ripropone tinto come i
+// valori che vengono dalla guida, Racconto neutro (non conta)
+const CLASSE_CARATTERE: Record<CarattereVoce, string> = { permanente: 'chip--toccata', rigenerabile: 'chip--dalla-guida', descrittiva: '' };
+/** Cosa vuol dire il carattere, nella voce aperta. */
+const SPIEGAZIONE_CARATTERE: Record<CarattereVoce, string> = {
+  permanente: 'Permanente: si fa una volta per sempre.',
+  rigenerabile: 'Si ripropone: il suo stato vale in quest’infiltrazione.',
+  descrittiva: 'Racconto: si segna come letto e non conta nel completamento.',
+};
+/** L'icona del carattere: il lucchetto aperto per una permanente da fare, chiuso quando è fatta; il ciclo per chi si ripropone; il libro per il racconto. */
+const iconaCarattere = (c: CarattereVoce, fatta: boolean): ChiaveAzione => (c === 'permanente' ? (fatta ? 'bloccato' : 'sbloccato') : c === 'rigenerabile' ? 'ricalcola' : 'libro');
 
 /**
  * Il collegamento dei pin di una voce, aperto dalla guida e fatto sulla **mappa principale** della scheda del Palazzo (richiesta
@@ -267,13 +280,22 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
     // gli Enigmi di cui la voce può diventare un passo (non sé stessa; un Enigma coi suoi passi non entra in un altro; un Enigma con
     // pin non accoglie passi, come dice il server)
     const enigmiPossibili = conPassi ? [] : enigmi.filter((e) => e.chiave !== p.chiave && (e.pin.length === 0 || e.chiave === p.contenitore));
+    // L4 §4.1: un Racconto (descrittiva con stato, cioè una Storia) si segna come «Letto» e non conta; la riga dice «letto»
+    const racconto = p.carattere === 'descrittiva' && !descrittiva(p);
+    const statoTesto = p.stato ? (racconto ? 'letto' : p.stato) : null;
+    // il carattere scelto a mano nella «Modifica» ('' = vale la regola)
+    const carattereScelto = p.carattereScelto && p.carattere ? p.carattere : '';
     return (
       <li key={p.chiave} data-voce={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${aperto ? 'bg-primary-bg' : ''}`}>
         <button type="button" className={`touch flex items-start gap-2 text-left ${p.stato && !aperto ? 'opacity-60' : ''}`} onClick={() => { setSelezionato(aperto ? null : p.chiave); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
           <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
           <span className="min-w-0 flex-1">
             <span className="font-semibold">{p.nome}</span>
-            <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.stato ? ` · ${p.stato}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
+            <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{statoTesto ? ` · ${statoTesto}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
+            {/* L4 §4.1: il carattere accanto al tipo (assente per le voci dei dedali e per le Persona); nel testo, così va a capo con lui */}
+            {p.carattere && <span className={`chip chip--icona ml-1.5 align-middle text-[11px] ${CLASSE_CARATTERE[p.carattere]}`} title={SPIEGAZIONE_CARATTERE[p.carattere]}>
+              <IconaAzione chiave={iconaCarattere(p.carattere, !!p.stato)} dimensione={14} />{NOME_CARATTERE[p.carattere]}
+            </span>}
           </span>
           {/* L4 (§4.1): un suo pin risulta fatto ma la voce no (da prima dell'aggiornamento); si sistema dalla voce aperta */}
           {p.daVerificare && <span className="chip chip--oro shrink-0 text-[11px]">Da verificare</span>}
@@ -287,6 +309,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
           <div className="flex flex-col gap-1.5 pl-5">
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
             <DettagliPunto d={p.dettagli} />
+            {p.carattere && <p className="m-0 text-[11px] text-text-muted">{SPIEGAZIONE_CARATTERE[p.carattere]}</p>}
             {conPassi && <p className="m-0 text-[11px] text-text-muted">Risolto quando i suoi passi sono fatti: segnarlo li segna tutti, riaprirlo li riapre. I pin stanno sui passi.</p>}
             {p.daVerificare && partitaId && (() => {
               const div = divergenze?.find((x) => x.voce === p.chiave);
@@ -311,7 +334,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             {descrittiva(p)
               ? <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
               : <div className="flex flex-wrap items-center gap-1.5">
-                {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void segnaEPassaOltre(p, 'ottenuto')}>Ottenuto</button>}
+                {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void segnaEPassaOltre(p, 'ottenuto')}>{racconto ? 'Letto' : 'Ottenuto'}</button>}
                 {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void segnaEPassaOltre(p, 'esaurito')} />}
                 {/* L4 §8.11: «Riapri» toglie il segno a tutti i suoi pin; se altre voci li condividono si riaprono anche loro, e prima lo si dice.
                     §8.6: se la voce è un passo di un Enigma risolto, l'Enigma si riapre: anche questo si dice prima */}
@@ -334,7 +357,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${p.nome}`} disabled={occupato || indice <= 0} onClick={() => void sposta(p, -1)} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${p.nome}`} disabled={occupato || indice >= fratelli.length - 1} onClick={() => void sposta(p, 1)} />
               <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} compatto etichetta="Modifica"
-                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '', area: area.chiave, dettagli: JSON.stringify(righeDaDettagli(p.dettagli)) })}
+                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '', area: area.chiave, dettagli: JSON.stringify(righeDaDettagli(p.dettagli)), carattere: carattereScelto })}
                 onSalva={async (b) => {
                   // un'altra area del Palazzo (2026-10-12): solo per una voce fuori da ogni Enigma, come l'area del dedalo
                   const altrove = !!areePalazzo && !b.contenitore && b.area !== area.chiave ? areePalazzo.find((a) => a.chiave === b.area) ?? null : null;
@@ -345,6 +368,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                   // un'altra area del dedalo (099): solo per una voce fuori da ogni Enigma (un passo sta nell'area del suo Enigma)
                   ...(areaDedalo && !b.contenitore && b.areaDedalo && b.areaDedalo !== (p.areaDedalo ?? '') ? { areaDedalo: b.areaDedalo } : {}),
                   ...(altrove ? { area: altrove.chiave } : {}),
+                  // L4 §4.1: il carattere solo se cambiato; vuoto = «Ripristina» (null: vale la regola del tipo)
+                  ...(b.carattere !== carattereScelto ? { carattere: (b.carattere || null) as CarattereVoce | null } : {}),
                   // i dettagli (2026-10-18) solo se cambiati: tutti insieme, la maschera di una Persona la tiene il server
                   ...(b.dettagli !== JSON.stringify(righeDaDettagli(p.dettagli)) ? { dettagli: dettagliDaRighe(JSON.parse(b.dettagli)) } : {}) }));
                   if (altrove) { setSelezionato(null); notifica('success', `«${b.nome.trim() || p.nome}» spostata in ${altrove.ordine + 1}. ${altrove.nome}${conPassi ? ', con i suoi passi' : ''}.`); }
@@ -367,6 +392,18 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                   {areePalazzo && areePalazzo.length > 1 && !b.contenitore && <span className="min-w-[200px]">
                     <Selettore etichetta="Infiltrazione" valore={b.area} opzioni={[...areePalazzo].sort((x, y) => x.ordine - y.ordine).map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: a.chiave === area.chiave ? 'questa' : undefined }))} onCambia={(v) => cambia({ area: v })} />
                   </span>}
+                  {/* L4 §4.1: il carattere (solo nei Palazzi, non per le Persona): la regola del tipo, o la scelta con «Ripristina» */}
+                  {p.carattere !== undefined && carattereDaTipo(b.tipo, p.areaDedalo) && (() => {
+                    const regola = carattereDaTipo(b.tipo, p.areaDedalo)!;
+                    return <span className="flex min-w-[220px] flex-wrap items-end gap-1.5">
+                      <span className="min-w-[160px] flex-1">
+                        <Selettore etichetta="Carattere" valore={b.carattere || regola} opzioni={CARATTERI.map((c) => ({ chiave: c, nome: NOME_CARATTERE[c], dettaglio: c === regola ? 'regola' : undefined }))} onCambia={(v) => cambia({ carattere: v })} />
+                      </span>
+                      {b.carattere
+                        ? <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => cambia({ carattere: '' })}>Ripristina</button>
+                        : <span className="pb-3 text-[11px] text-text-muted">Dalla regola del tipo.</span>}
+                    </span>;
+                  })()}
                   <label className="touch flex items-center gap-1.5 text-[12px]">
                     <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
                   </label>
