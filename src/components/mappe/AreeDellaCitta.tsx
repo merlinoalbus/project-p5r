@@ -5,7 +5,7 @@
 // «Area riservata allo staff» non sta in nessuna fonte leggibile (G-002): per decisione dell'utente è un'area della città, marcata
 // «Da verificare», e lui deciderà se tenerla («Tieni» toglie il segno) o toglierla («Rimuovi», con conferma: va nel cestino).
 // Le planimetrie del mondo rimaste senza area (dopo la 109 nessuna) hanno «Colloca»: un quartiere, un'area esistente o nuova,
-// un'etichetta. Le due sezioni compaiono solo se c'è qualcosa da mostrare.
+// un'etichetta; il quartiere proposto è quello del genitore della planimetria. Le due sezioni compaiono solo se c'è qualcosa da mostrare.
 // ============================================================
 
 import { useState } from 'react';
@@ -113,7 +113,9 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
 
 /** La finestra «Colloca»: il quartiere, poi un'area esistente o una nuova (col nome), e l'etichetta della versione. */
 function CollocaPlanimetria({ mappa, quartieri, onChiudi, onCollocata }: { mappa: MappaDaCollocareDto; quartieri: QuartiereRiassuntoDto[]; onChiudi: () => void; onCollocata: () => Promise<void> }) {
-  const [quartiere, setQuartiere] = useState(quartieri[0]?.chiave ?? '');
+  // si propone il quartiere a cui la planimetria è appesa (la mappa del quartiere è il suo genitore); solo se il genitore non è un
+  // quartiere (Tokyo) il primo dell'elenco (FUN2-9: per una planimetria di Kichijoji proponeva Yongen-Jaya)
+  const [quartiere, setQuartiere] = useState(() => quartieri.find((q) => q.mappaChiave === mappa.genitore)?.chiave ?? quartieri[0]?.chiave ?? '');
   const [area, setArea] = useState('');
   const [nuova, setNuova] = useState('');
   const [etichetta, setEtichetta] = useState('');

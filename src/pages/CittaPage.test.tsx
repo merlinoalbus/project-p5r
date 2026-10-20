@@ -12,11 +12,12 @@ import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useAssetStore } from '../stores/assetStore';
-import type { AreaRiassuntoDto, DungeonRiassuntoDto,MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
+import type { AreaRiassuntoDto, DungeonRiassuntoDto, MappaDaCollocareDto, MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
+import { scegliVoce, valoreSelettore, vociSelettore } from '../../test/selettore';
 
 const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn(() => Promise.resolve([])),
   // le Aree della città e le planimetrie da collocare (L2): di serie nessuna, come nel database dopo la 109 senza staff
-  getAreeCitta: vi.fn(async (): Promise<AreaRiassuntoDto[]> => []), getDaCollocare: vi.fn(async () => []), aggiornaAreaMondo: vi.fn(), eliminaAreaMondo: vi.fn() }));
+  getAreeCitta: vi.fn(async (): Promise<AreaRiassuntoDto[]> => []), getDaCollocare: vi.fn(async (): Promise<MappaDaCollocareDto[]> => []), aggiornaAreaMondo: vi.fn(), eliminaAreaMondo: vi.fn(), collocaPlanimetria: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, api));
 
 /** Costruisce la mappa `chiave`: «tokyo» è la città radice, ogni altra un quartiere figlio di Tokyo; ha un solo spillo
@@ -246,6 +247,54 @@ describe('CittaPage — Aree della città (L2, 2026-10-20)', () => {
     await screen.findByRole('heading', { level: 1 });
     expect(screen.queryByRole('region', { name: 'Aree della città' })).toBeNull();
     expect(screen.queryByText(/Planimetrie da collocare/)).toBeNull();
+  });
+
+  // R6 (validatore L2, giro 1) e FUN2-9: la lista non vuota, la finestra «Colloca» che propone il quartiere del genitore (non il
+  // primo dell'elenco: per una planimetria di Kichijoji proponeva Yongen-Jaya), l'invio e la lista riletta
+  it('«Colloca» propone il quartiere del genitore con le sue aree, invia a collocaPlanimetria e rilegge la lista', async () => {
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'yongen-jaya', nome: 'Yongen-Jaya', mappaChiave: 'citta-yongen-jaya', luoghi: 0, verificati: 0, sblocco: null, descrizione: '' },
+      { chiave: 'kichijoji', nome: 'Kichijoji', mappaChiave: 'citta-kichijoji', luoghi: 0, verificati: 0, sblocco: null, descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    api.getAreeCitta.mockReset().mockResolvedValue([]);
+    const sciolta: MappaDaCollocareDto = { chiave: 'kichijoji-negozio', nome: 'Negozio di dischi', genitore: 'citta-kichijoji', genitoreNome: 'Kichijoji', numeroSpilli: 2, immagineUrl: null, asset: null };
+    api.getDaCollocare.mockReset().mockResolvedValueOnce([sciolta]).mockResolvedValue([]);
+    // le aree del quartiere scelto: Kichijoji ha la Piazza, Yongen-Jaya i Vicoli
+    api.getQuartiere.mockImplementation(async (k: string) => ({ chiave: k, nome: k, aree: k === 'kichijoji' ? [{ slug: 'piazza', nome: 'Piazza' }] : [{ slug: 'vicoli', nome: 'Vicoli' }] }));
+    api.collocaPlanimetria.mockReset().mockResolvedValue({});
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const lista = await screen.findByRole('group', { name: 'Planimetrie da collocare' });
+    expect(within(lista).getByText('Planimetrie da collocare (1)')).toBeInTheDocument();
+    expect(within(lista).getByText('Kichijoji · 2 pin')).toBeInTheDocument();
+    fireEvent.click(within(lista).getByRole('button', { name: /Colloca/ }));
+    const finestra = await screen.findByRole('dialog', { name: 'Colloca Negozio di dischi' });
+    // il quartiere proposto è quello del genitore, e le aree offerte sono le sue
+    expect(valoreSelettore('Quartiere', finestra)).toBe('Kichijoji');
+    await waitFor(() => expect(api.getQuartiere).toHaveBeenCalledWith('kichijoji'));
+    await waitFor(() => expect(within(finestra).getByRole('combobox', { name: 'Area' })).toBeEnabled());
+    expect(vociSelettore('Area', finestra)).toEqual(['Piazza', 'Un’area nuova…']);
+    scegliVoce('Area', 'Piazza', finestra);
+    fireEvent.change(within(finestra).getByRole('textbox', { name: /Etichetta della planimetria/ }), { target: { value: 'Interno' } });
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Colloca' }));
+    await waitFor(() => expect(api.collocaPlanimetria).toHaveBeenCalledWith({ mappa: 'kichijoji-negozio', quartiere: 'kichijoji', area: 'piazza', etichetta: 'Interno' }));
+    // collocata: la finestra si chiude e la lista, riletta vuota, sparisce
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(api.getDaCollocare).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(screen.queryByText(/Planimetrie da collocare/)).toBeNull());
+  });
+
+  it('«Colloca» per una planimetria il cui genitore non è un quartiere propone il primo quartiere', async () => {
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'yongen-jaya', nome: 'Yongen-Jaya', mappaChiave: 'citta-yongen-jaya', luoghi: 0, verificati: 0, sblocco: null, descrizione: '' },
+      { chiave: 'kichijoji', nome: 'Kichijoji', mappaChiave: 'citta-kichijoji', luoghi: 0, verificati: 0, sblocco: null, descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    api.getAreeCitta.mockReset().mockResolvedValue([]);
+    api.getDaCollocare.mockReset().mockResolvedValue([{ chiave: 'tokyo-torre', nome: 'Torre', genitore: 'tokyo', genitoreNome: 'Tokyo', numeroSpilli: 0, immagineUrl: null, asset: null }]);
+    api.getQuartiere.mockImplementation(async (k: string) => ({ chiave: k, nome: k, aree: [] }));
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    fireEvent.click(within(await screen.findByRole('group', { name: 'Planimetrie da collocare' })).getByRole('button', { name: /Colloca/ }));
+    const finestra = await screen.findByRole('dialog', { name: 'Colloca Torre' });
+    expect(valoreSelettore('Quartiere', finestra)).toBe('Yongen-Jaya');
   });
 });
 
