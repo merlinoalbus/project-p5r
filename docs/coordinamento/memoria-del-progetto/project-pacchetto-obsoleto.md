@@ -5,10 +5,12 @@ metadata:
   node_type: memory
   type: project
   originSessionId: cffd8da6-5996-4013-b5ec-2c69430948db
-  modified: 2026-10-20T19:04:33.908Z
+  modified: 2026-10-20T19:05:29.420Z
 ---
 
 L'utente, il 2026-10-20 sera: «non esiste più il pacchetto di gioco... esiste solo il db quindi cancella dove devi cancellare direttamente» e «abbiamo il DB con i dati che stiamo sistemando... fine il concetto di pacchetto di gioco è obsoleto».
+
+Precisazione dell'utente: «il pacchetto di gioco dovrebbe essere stato inglobato nel db e poi il db dovrebbe essersi esteso andando a sostituire aggiornare il resto». Il contenuto del pacchetto è già dentro il DB; da lì il DB è cresciuto e ha sostituito o aggiornato tutto il resto. Non esiste una seconda fonte da cui ricaricare.
 
 **Why:** i dati veri sono quelli del DB, curati a mano dall'utente su p5s e corretti dalle migrazioni. Il pacchetto (`pacchetto/gioco.db`, importazione ed esportazione dalle Impostazioni) apparteneva al modello vecchio.
 
