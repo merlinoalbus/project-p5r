@@ -13,7 +13,7 @@ import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
-import type { ImmagineDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
+import type { ImmagineDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, SbloccoDto } from '../../shared/types.js';
 import { lettureLuoghi, luoghiDaCollocare, luoghiDelQuartiere } from './luoghiService.js';
 import { importaImmagineDaUrl, leggiImmagine } from './immaginiService.js';
 import { mappaEsiste, scaricaImmagineMappa } from './mappe/mappeService.js';
@@ -25,6 +25,9 @@ import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita
 import { condizioneEffettivaQuartiere, tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
 import { cosaManca } from './condizioni/valutatore.js';
 import { descriviRequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { valutaInsieme } from './condizioni/valutatore.js';
+import { elencaInviti } from './inviti.js';
 
 interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | null; fonte: string; licenza: string; larghezza: number | null; altezza: number | null; note: string }
 
@@ -53,6 +56,26 @@ function disponibilitaQuartiere(chiave: string, st: StatoDisponibilita | null): 
   return { disponibile: false, bloccoMotivo: manca ? `Manca: ${manca}` : esito.requisiti.map((r) => r.dettaglio).join(' · ') };
 }
 
+/** Contratto unico dello sblocco del quartiere: condizione salvata, fonte, inviti ed esito. */
+function sbloccoQuartiere(chiave: string, partitaId?: number): SbloccoDto | undefined {
+  const condizioni = condizioneEffettivaQuartiere(chiave);
+  if (!condizioni) return undefined;
+  const nomi = nomiCondizioniMemo();
+  const condizione = condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo' as const, modo: 'tutte' as const, condizioni };
+  const fonteRiga = prepared('SELECT fonte_condizioni_json FROM quartiere WHERE chiave = ?').get(chiave) as { fonte_condizioni_json: string | null } | undefined;
+  let fonte: SbloccoDto['fonte'] = null;
+  try { fonte = fonteRiga?.fonte_condizioni_json ? JSON.parse(fonteRiga.fonte_condizioni_json) as SbloccoDto['fonte'] : null; } catch { /* fonte non valida: resta null */ }
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const esito = st ? valutaInsieme(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), st) : null;
+  const stato = esito?.stato;
+  return {
+    condizione, testo: descriviRequisitoSpillo(condizione, nomi), fonte,
+    esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null,
+    manca: stato === 'bloccato' && st ? cosaManca(condizione, st, nomi) : null,
+    inviti: elencaInviti({ apreTipo: 'quartiere', apreChiave: chiave }, partitaId), modificato: false,
+  };
+}
+
 /** Quartieri in ordine con conteggi dei luoghi (non nascosti); con una partita, anche se sono già nel mondo. */
 export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
   const righe = (prepared(`SELECT q.*, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.nascosto = 0) AS luoghi, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.nascosto = 0 AND l.verificato = 1) AS verificati
@@ -61,7 +84,7 @@ export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const caricate = immaginiCaricateDelleMappe();
   const aree = numeroAreePerQuartiere();
-  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
+  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(q.chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
     illustrazione: illustrazioneDellaMappa(chiaveImmagineQuartiere(q.chiave), undefined, caricate),
     aree: aree.get(q.chiave) ?? 0,
     ...disponibilitaQuartiere(q.chiave, st) }));
@@ -84,7 +107,7 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
   // le Aree del quartiere (L2), nel loro ordine, col passaggio sull'illustrazione e l'ingresso
   // (il contenitore scritto qui e non da `contenitoreDaRotta`: anche l'ingresso dei Memento ha la sua scheda, senza Aree)
   const aree = areeDelContenitore({ colonna: 'quartiere_chiave', chiave: q.chiave, mappa: chiaveImmagineQuartiere(q.chiave), nome: q.nome, rotta: 'citta', prefisso: `citta/${q.chiave}/`, tipoPlanimetria: 'luogo' }, partitaId);
-  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, aree, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null),
+  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(chiave)), ingresso: ingressoQuartiere(chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, aree, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null),
     luoghiDaCollocare: luoghiDaCollocare(chiave, letture) };
 }
 
