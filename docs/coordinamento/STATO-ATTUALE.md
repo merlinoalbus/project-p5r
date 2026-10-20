@@ -11,9 +11,9 @@ Mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ramo 
 | L0 Vocabolario e testi | consegnato |
 | L1 Immagini | consegnato (approvato al giro 5) |
 | L2 Mondo: aree e planimetrie | consegnato (approvato al giro 6; push bff237e0; p5s verificato) |
-| L3 Palazzi: aree e infiltrazioni | **dal validatore** (giro 1, dalle 15:30Z) sulla linea di rilascio `newreview-l3` = b5fd6cfe. Tutti i tester sono verdi e tutti i difetti, fino a UX3-13 e LAY3-8, sono corretti e verificati. Con l'APPROVATO: push di `newreview-l3` su `newreview` |
+| L3 Palazzi: aree e infiltrazioni | **consegnato** (17:50Z) con la deroga dell'utente: il giro 1 del validatore aveva rigettato solo per prove e documenti, poi chiusi (R1–R9). Push di `newreview-l3` = 91ef6128 su `newreview`, pipeline riuscita, p5s verificato nel browser. FUN3-3 (testo dell'atterraggio) va in L4 |
 | L3 · integrazione «Guida nel visore» e «Planimetria della voce» | BE fatto (42b34243, non validato, **non** nella linea di rilascio di L3); FE da fare (B2). Vedi `lotti/L3/integrazione-guida-visore.md` |
-| L4 Avanzamento unico | BE fatto (b83c30ac, 71378325, ad585387; migrazioni 111–113); FE in parte (01e7ae12). **Il FE riparte alle 15:30Z** sul «Da fare» di `lotti/L4/fe.md`: §8.11 k/N, §8.6, §4.2, §4.1/4.3. Un commit per punto su `newreview`, senza push. Poi la linea di rilascio `newreview-l4`, i tester e il validatore |
+| L4 Avanzamento unico | BE fatto (b83c30ac, 71378325, ad585387; migrazioni 111–113, già su p5s). FE fatto: 01e7ae12 più 7 commit c4e9f74e..e058918c (§8.11, §8.6, §4.2, §4.3, §4.1). **Rilascio in corso**: il Collaudo crea `newreview-l4` da 91ef6128 con il cherry-pick dei 7 commit, senza 42b34243. Poi FE su FUN3-3, i tester e il validatore |
 | L5–L11 | progettati (requisiti, dati, app, modifiche, piani e casi di prova pronti fino a L9-L10); implementazione da fare |
 
 ## Rami e cosa è dove (IMPORTANTE)
