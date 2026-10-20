@@ -19,7 +19,7 @@ import { validate } from '../middleware/validate.js';
 import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, conteggiAlbero, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
 import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyAggiornaPezzo, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
@@ -42,9 +42,14 @@ router.post('/piante-citta/:quartiere/scarica', validate({ params: z.object({ qu
 
 // ---- Mappe a livelli e spilli (Fase 13) ----
 
-/** Albero completo delle mappe (riassunti con genitore e conteggi). */
+/** Albero completo delle mappe (riassunti con genitore e conteggi; ogni nodo con i conteggi dei pin del suo sottoalbero, E2 di L3). */
 router.get('/albero', (_req, res) => {
   res.json(elencaMappe());
+});
+
+/** I conteggi dei pin della radice dell'indice delle Mappe: tutto l'albero nei tre gruppi (E2 di L3). */
+router.get('/albero/conteggi', (_req, res) => {
+  res.json(conteggiAlbero());
 });
 
 /** Pacchetto JSON con mappe, spilli e immagini dell'istanza (base64); con `radice` solo quella mappa e le discendenti. */

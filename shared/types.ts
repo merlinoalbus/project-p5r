@@ -2237,6 +2237,16 @@ export interface ImmagineDto {
 export const RUOLI_IMMAGINE = ['planimetria-nativa', 'illustrazione-editoriale', 'emblema', 'nessuna'] as const;
 export type RuoloImmagine = (typeof RUOLI_IMMAGINE)[number];
 
+/**
+ * I pin contati nei tre gruppi dell'indice delle Mappe (E2 di L3, decisione dell'utente): `contenuto` sono i pin veri e propri (le cose
+ * del gioco), `passaggi` e `note` si dicono accanto. La regola è una, `gruppoConteggioSpillo` in `shared/spilli.ts`; i numeri li
+ * calcola il server, il client non somma.
+ */
+export interface ConteggiPinDto { contenuto: number; passaggi: number; note: number }
+
+/** `GET /api/mappe/albero/conteggi`: i conteggi della radice dell'indice, cioè di tutto l'albero delle mappe (Memento esclusi). */
+export interface ConteggiAlberoDto { conteggiPin: ConteggiPinDto }
+
 export interface MappaRiassuntoDto {
   ruoloImmagine?: RuoloImmagine;
   /** Ordinale di una collezione presentativa di immagini omonime, mai numero di piano. */
@@ -2262,7 +2272,11 @@ export interface MappaRiassuntoDto {
   asset: string | null;
   entita: { tipo: string; chiave: string } | null;
   origine: 'seed' | 'utente';
+  /** I pin della sola mappa, tutti (resta per compatibilità: l'indice delle Mappe usa `conteggiPin`). */
   numeroSpilli: number;
+  /** Solo nell'albero (`GET /api/mappe/albero`, E2 di L3): i pin della mappa **e di tutto quel che le sta sotto** nell'albero, nei
+   *  tre gruppi di `gruppoConteggioSpillo`. Il totale dell'indice è in `GET /api/mappe/albero/conteggi`. */
+  conteggiPin?: ConteggiPinDto;
   numeroFigli: number;
   updatedAt: string;
   /** L'Area della planimetria e la sua versione (L2); null per Tokyo, i quartieri, i Palazzi e i Memento. */

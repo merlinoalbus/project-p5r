@@ -41,8 +41,8 @@ import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.j
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
-import { ammetteCondizioni, categoriaSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
-import type { AreaPacchetto, LegamePacchetto, CondizioneSpilloDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
+import { ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import type { AreaPacchetto, LegamePacchetto, CondizioneSpilloDto, ConteggiAlberoDto, ConteggiPinDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
 import { aggiornaCopia, aggiornaPezzo, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number;
@@ -175,13 +175,57 @@ const RADICI_MEMENTO = [
 ];
 
 
-/** Albero completo (piatto, con genitore): radici prima, poi per ordine. Senza i Memento. */
-export function elencaMappe(): MappaRiassuntoDto[] {
-  const ctx = contestoMappe();
+/** Le righe dell'albero: radici prima, poi per ordine, senza i Memento. */
+function righeDellAlbero(): RigaMappa[] {
   const memento = sottoalberoMappe(RADICI_MEMENTO);
   return (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[])
-    .filter((r) => !memento.has(r.chiave))
-    .map(r=>riassunto(r, ctx));
+    .filter((r) => !memento.has(r.chiave));
+}
+
+const conteggiVuoti = (): ConteggiPinDto => ({ contenuto: 0, passaggi: 0, note: 0 });
+
+/**
+ * I conteggi dei pin dell'albero nei tre gruppi dell'indice (E2 di L3, `gruppoConteggioSpillo`): per ogni mappa quelli del suo
+ * sottoalbero (lei e quel che le sta sotto fra le righe date), e la radice, cioè la somma dei pin di tutte le righe. Una query sola
+ * per tipo e mappa; un genitore fuori dalle righe (o un ciclo nei dati) non fa contare due volte niente: ogni pin sale lungo la sua
+ * catena di genitori una volta per antenato.
+ */
+function conteggiDellAlbero(righe: RigaMappa[]): { perMappa: Map<string, ConteggiPinDto>; radice: ConteggiPinDto } {
+  const propri = new Map<string, ConteggiPinDto>();
+  for (const p of prepared('SELECT mappa_chiave AS chiave, tipo, COUNT(*) AS n FROM spillo WHERE mappa_chiave IS NOT NULL GROUP BY mappa_chiave, tipo').all() as Array<{ chiave: string; tipo: string; n: number }>) {
+    const c = propri.get(p.chiave) ?? conteggiVuoti();
+    c[gruppoConteggioSpillo(p.tipo)] += p.n;
+    propri.set(p.chiave, c);
+  }
+  const genitore = new Map(righe.map((r) => [r.chiave, r.genitore_chiave]));
+  const perMappa = new Map(righe.map((r) => [r.chiave, conteggiVuoti()]));
+  const radice = conteggiVuoti();
+  for (const r of righe) {
+    const c = propri.get(r.chiave);
+    if (!c) continue;
+    for (const g of GRUPPI_CONTEGGIO_SPILLO) radice[g] += c[g];
+    const visti = new Set<string>();
+    for (let k: string | null | undefined = r.chiave; k && perMappa.has(k) && !visti.has(k); k = genitore.get(k)) {
+      visti.add(k);
+      const s = perMappa.get(k)!;
+      for (const g of GRUPPI_CONTEGGIO_SPILLO) s[g] += c[g];
+    }
+  }
+  return { perMappa, radice };
+}
+
+/** Albero completo (piatto, con genitore): radici prima, poi per ordine. Senza i Memento. Ogni nodo porta i conteggi dei pin del
+ *  suo sottoalbero (E2 di L3). */
+export function elencaMappe(): MappaRiassuntoDto[] {
+  const ctx = contestoMappe();
+  const righe = righeDellAlbero();
+  const { perMappa } = conteggiDellAlbero(righe);
+  return righe.map((r) => ({ ...riassunto(r, ctx), conteggiPin: perMappa.get(r.chiave) ?? conteggiVuoti() }));
+}
+
+/** I conteggi della radice dell'indice delle Mappe: i pin di tutto l'albero (Memento esclusi) nei tre gruppi (E2 di L3). */
+export function conteggiAlbero(): ConteggiAlberoDto {
+  return { conteggiPin: conteggiDellAlbero(righeDellAlbero()).radice };
 }
 
 /**

@@ -133,6 +133,24 @@ export function ritornoDelloStato(s: { tipo: string; collezionabile: boolean }):
 export function uidValido(uid: unknown): uid is string {
   return typeof uid === 'string' && /^[0-9a-f]{32}$/.test(uid);
 }
+/**
+ * I tre gruppi in cui l'indice delle Mappe conta i pin (E2 di L3, decisione dell'utente del 2026-10-20: «N pin · più N passaggi e
+ * N note»). I pin sono le cose del gioco; passaggi e note si dicono accanto, come dettaglio.
+ */
+export const GRUPPI_CONTEGGIO_SPILLO = ['contenuto', 'passaggi', 'note'] as const;
+export type GruppoConteggioSpillo = (typeof GRUPPI_CONTEGGIO_SPILLO)[number];
+
+/**
+ * Il gruppo di conteggio di un tipo di pin, unica regola: **passaggi** i tipi della categoria «spostamento» (passaggi, scale, uscite,
+ * stazioni, scorciatoie, rampini, ingressi e infiltrazioni, Stanza di Velluto, ingresso ai Memento); **note** la nota; **contenuto**
+ * tutto il resto (negozi e luoghi, Confidenti, dialoghi, forzieri e oggetti, boss e nemici, porte, meccanismi…), anche un tipo
+ * sconosciuto, così nessun pin resta fuori dai tre gruppi.
+ */
+export function gruppoConteggioSpillo(tipo: string): GruppoConteggioSpillo {
+  if (categoriaSpillo(tipo) === 'spostamento') return 'passaggi';
+  return tipo === 'nota' ? 'note' : 'contenuto';
+}
+
 /** I tipi di ogni categoria, nell'ordine di `TIPI_SPILLO`. */
 export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
   return TIPI_SPILLO.filter((t) => CATEGORIA_PER_TIPO[t] === categoria);
