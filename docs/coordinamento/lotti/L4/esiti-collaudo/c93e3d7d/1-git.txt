@@ -42,7 +42,7 @@ sì, identico byte per byte
 ### file di 42b34243 toccati (vuoto atteso)
 ### docs/ uguale a 2e5c64e8
 sì
-### immagini, indirizzi, robertomirabella in docs/ (vuoti attesi)
+### immagini, indirizzi del server, email dell'utente in docs/ (vuoti attesi)
 0
 0
 0

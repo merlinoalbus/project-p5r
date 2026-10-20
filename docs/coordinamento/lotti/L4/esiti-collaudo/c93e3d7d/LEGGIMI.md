@@ -23,7 +23,7 @@ Patch-id integrali in `0-codice-dei-7-commit.txt`.
 ## Prove
 | File | Esito |
 |---|---|
-| `1-git.txt` | Fuori da `docs/` solo i 16 file `src/` dei 7 commit, gli stessi degli originali, identici byte per byte a e058918c. Nessuna migrazione e nessun file di 42b34243; `server/` e `shared/` invariati. `docs/` uguale a 2e5c64e8, senza immagini, indirizzi del server o «robertomirabella». Nessuna data 2026-10-21 nel codice; `newreview-l3` resta a 91ef6128 |
+| `1-git.txt` | Fuori da `docs/` solo i 16 file `src/` dei 7 commit, gli stessi degli originali, identici byte per byte a e058918c. Nessuna migrazione e nessun file di 42b34243; `server/` e `shared/` invariati. `docs/` uguale a 2e5c64e8, senza immagini, indirizzi del server o l'email dell'utente. Nessuna data 2026-10-21 nel codice; `newreview-l3` resta a 91ef6128 |
 | `2-typecheck.txt`, `2-tsc-full-force.txt`, `2-lint.txt` | EXIT=0. Il codice non dipende da 42b34243: le rotte che il FE chiama (`/compendio/schede/:id/voce`, `infiltrazione` in `GET /mappe/:k`, `carattere`) sono già sulla linea |
 | `3-vitest.txt` | **28 file, 408/408**, EXIT=0. Sono i test toccati dai 7 commit, quelli dei file che importano i sorgenti toccati, `palazzo-completato`, `avanzamento-unico`, `mappe-editor`, `disponibilitaService`, `caratteriVoce`, `completamentoGuida`, le migrazioni 111–113 e utente 022–024, DungeonPage, InfiltrazioniVoce e areeScorrevoli. I moduli API cambiano solo per aggiunte facoltative, quindi i 117 file che importano il barrel `services/api` sono esclusi |
 | `4-rossi/` | **7/7 rossi** sul codice di prima, tutti verdi nel controllo. §4.3 è rosso dell'intero file: il test simula `creaVoceDallaScheda` e `collegaSchedaAllaVoce`, che prima non esistono. Worktree temporaneo tolto |
