@@ -399,6 +399,24 @@ describe('Palazzo completato: Tesoro, boss finale e tutti gli oggetti permanenti
     expect(((await request(app).get(`/api/compendio/dungeon?partita=${p}`).expect(200)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'kamoshida')!.regolaBoss).toBe('voce-finale');
   });
 
+  it('112 (condizione del PM) — un Palazzo con la regola della voce e senza voce dichiarata è «boss finale da dichiarare»; non Iweleth né un Palazzo con la voce; la dichiarazione lo spegne', async () => {
+    const riassunti = async () => new Map(((await request(app).get('/api/compendio/dungeon').expect(200)).body.data as DungeonRiassuntoDto[]).map((d) => [d.chiave, d]));
+    let r = await riassunti();
+    // nel pacchetto dei test Madarame non ha la voce di G-027 (la 112 lascia NULL)
+    expect(bossDi('madarame')).toBeNull();
+    expect(r.get('madarame')!.bossFinaleDaDichiarare).toBe(true);
+    expect(r.get('iweleth')!.bossFinaleDaDichiarare).toBe(false);
+    expect(r.get('okumura')!.bossFinaleDaDichiarare).toBe(false);
+    expect('bossFinaleDaDichiarare' in r.get('mementos')!).toBe(false);
+    // «Modifica › Boss finale» lo spegne, «Ripristina» lo riaccende (la guida non ha la voce)
+    const boss = bossFinali().get('madarame')!.punti[0];
+    await request(app).put('/api/compendio/dungeon/madarame').send({ voceBossFinale: boss }).expect(200);
+    r = await riassunti();
+    expect(r.get('madarame')!.bossFinaleDaDichiarare).toBe(false);
+    await request(app).post('/api/compendio/dungeon/madarame/ripristina').expect(200);
+    expect((await riassunti()).get('madarame')!.bossFinaleDaDichiarare).toBe(true);
+  });
+
   it('§8.14 — Madarame come nella produzione: due pin «Tesoro» (servono tutti e due) e la voce del boss finale con due pin (fatta a 2/2)', async () => {
     const p = await partitaNuova('Madarame a due tesori', '06-01');
     const infiltrazione = prepared("SELECT chiave FROM dungeon_area WHERE dungeon_chiave = 'madarame' ORDER BY ordine DESC LIMIT 1").pluck().get() as string;

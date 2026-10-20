@@ -2060,6 +2060,10 @@ export interface DungeonRiassuntoDto {
   /** L4 §8.15: la regola del boss del Palazzo — `voce-finale` (la voce dichiarata, «Modifica › Boss finale») o `memento` (il boss segnato
    *  nella Guida, come nei Memento, senza effetti di Palazzo: Iweleth). Per i Palazzi; assente per i Memento. */
   regolaBoss?: 'voce-finale' | 'memento';
+  /** L4 (condizione del PM sulla 112): il Palazzo ha la regola della voce del boss finale ma nessuna voce dichiarata, quindi non si conclude:
+   *  la scheda lo segna «Boss finale da dichiarare» («da verificare», porta a «Modifica › Boss finale») ed entra nell'elenco unico «da
+   *  rivedere» (L11 R11-10c). Per i Palazzi; assente per i Memento. */
+  bossFinaleDaDichiarare?: boolean;
 }
 
 /** L4 (§3.1): una divergenza conservata «da verificare» — un pin fatto con una sua voce non fatta, da prima dell'aggiornamento. */

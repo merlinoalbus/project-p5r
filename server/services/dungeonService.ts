@@ -285,6 +285,10 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
       bossFinaleCorretto: r.seed_json != null,
       // §8.15: la regola del boss (113): `memento` = il boss segnato nella Guida, senza voce dichiarata né effetti di Palazzo (Iweleth)
       regolaBoss: r.regola_boss === 'memento' ? 'memento' as const : 'voce-finale' as const,
+      // condizione del PM sulla 112 (una voce di G-027 mancante lascia NULL): un Palazzo con la regola della voce e senza voce non si
+      // concluderebbe mai senza che nessuno lo sappia — la scheda lo segna «boss finale da dichiarare» (→ «Modifica › Boss finale»), e
+      // l'elenco unico «da rivedere» di L11 (R11-10c) lo raccoglie
+      bossFinaleDaDichiarare: r.regola_boss !== 'memento' && !r.voce_boss_finale && colonnaVoceBossFinale(),
     } : {}),
   };
 }
