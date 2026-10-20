@@ -15,6 +15,9 @@ originali (nomi propri); i nomi delle skill restano nella forma canonica del dat
 italiana tramite la tabella `traduzione`.
 
 ## Documenti di bordo (tenerli aggiornati a ogni step)
+- **`docs/coordinamento/STATO-ATTUALE.md` — DA LEGGERE PER PRIMO per riprendere il lavoro del ramo `newreview`** (lotti fatti e in corso,
+  punti aperti, regole dell'utente, come ripartire); sotto `docs/coordinamento/` c'è tutto il coordinamento del team (Regia, bacheca,
+  lotti, decisioni, memoria del progetto)
 - `docs/ARCHITETTURA.md` — com'è fatto il sistema (stack, cartelle, flussi, DB, pacchetto di gioco, deploy)
 - `docs/ROADMAP.md` — fasi/step con stato (fatto / in corso / da fare) e criteri di completamento
 - `docs/DECISIONI.md` — registro delle decisioni prese con l'utente (data + motivazione)

@@ -37,5 +37,24 @@ FE di L4: k/N, «Riapre anche» sugli Enigmi, «Da verificare» nelle tre viste,
 - Niente backup del volume di p5s prima dei rilasci (decisione dell'utente).
 - Tutto il lavoro va salvato su git (questa cartella).
 
+## Come riprendere (per qualunque IA o persona, partendo dal repository pubblico)
+1. Leggere, in quest'ordine: `CLAUDE.md` alla radice (regole del progetto), questo file, `docs/ROADMAP.md` (righe dei lotti), `docs/DECISIONI.md`, `docs/ARCHITETTURA.md`, poi in `docs/coordinamento/`: `processo.md` (ruoli e regole del team), `bacheca.md`, `decisioni-pm.md`, `stato.json` (la Regia), `memoria-del-progetto/` (regole dell'utente: leggerle tutte, valgono come istruzioni), `lotti/L3/` e `lotti/L4/` (lotti in corso).
+2. Rami:
+   - `newreview` è la linea di sviluppo, pubblicata su p5s a ogni push dalla pipeline «Build & Push Docker Images (newreview)», ed è aggiornata a questo stato;
+   - `newreview-l2` è la linea di rilascio usata per collaudare e validare L2, già unita a `newreview`;
+   - `main` e la produzione non si toccano.
+3. Avvio in locale: `npm install`, `cp .env.example .env`, `bash scripts/start-all.sh`; verifiche: `npm run typecheck`, `npm run lint`, test mirati `npx vitest run <percorso>`. La pipeline controlla typecheck, lint e audit, non i test.
+4. Ciclo di un lotto (vedi `processo.md`):
+   1. requisiti, dati, app e modifiche;
+   2. implementazione BE e FE;
+   3. prove sul codice esatto: funzionali, UX, layout ai formati 1366×657 · 1280×689 · 1024×690 · 1920×1080 · 768 · 375, no-reg sui dati;
+   4. riga della ROADMAP;
+   5. validatore indipendente (galaxy-task-validator, in sola lettura) fino all'APPROVATO;
+   6. push, pipeline e verifica di p5s.
+   I verdetti e le richieste dei giri precedenti sono in `lotti/Lx/` (`correzioni-giro*.md`, `validatore-giro*-prompt.md`).
+5. Dati per le prove: chiedere all'utente una copia fresca di p5s, oppure lavorare su una copia locale. Il pacchetto `pacchetto/gioco.db` del repository serve ai test. Le copie dei database dell'utente non sono nel repository.
+6. Prossimo passo concreto: riprendere L3 dai «Punti aperti di L3» qui sopra, correggere, poi collaudo, prove e validatore come per L2. Le liste dei difetti sono in `lotti/L3/difetti.md` e `lotti/L4/difetti.md`.
+7. Accesso a p5s e al server: solo l'utente ha gli indirizzi e le chiavi, omessi qui perché il repository è pubblico. La verifica di p5s la può fare chiunque dall'indirizzo pubblico.
+
 ## Elenco «da rivedere» per l'utente
 Vedi `rapporto-finale.md`: Sakura Residence, «Pagine ammuffite», pin 811, invito di Makoto (b), voci boss di Madarame con «Gelo», distributori 1584/1769, Hagoromo, listino di Tanaka, voci di Igor/Lavenza, N1, LAY-2, rigenerazione di `pacchetto/gioco.db`.
