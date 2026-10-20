@@ -960,12 +960,18 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
   if (dati.tipo && !(TIPI_MAPPA as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di mappa non ammesso.');
   // FUN2-8 (giro 2 di L2, R2-27): dall'editor una mappa senza Area non entra nel mondo come planimetria — spostarla sotto Tokyo o un
   // quartiere (o una sua discendente), o renderla `luogo`/`area` lì, la lascerebbe una zona sciolta fra le «da collocare»: la stessa
-  // regola di `creaMappa`. Le generiche del mondo restano ammesse; Palazzi e Memento non cambiano.
+  // regola di `creaMappa`. Le generiche del mondo restano ammesse; per i Palazzi la regola di L3 qui sotto, i Memento non cambiano.
   const tipoDopo = dati.tipo ?? r.tipo;
   const genitoreNuovo = dati.genitore === undefined ? r.genitore_chiave : dati.genitore;
   if (conAree() && !r.area_chiave && (tipoDopo === 'luogo' || tipoDopo === 'area') && (genitoreNuovo !== r.genitore_chiave || tipoDopo !== r.tipo)
     && genitoreNuovo && nelMondo(genitoreNuovo)) {
     throw httpErrors.conflict('usa-aggiungi-area', 'Nel mondo una planimetria sta in un’area: aggiungila con «Aggiungi area» nel quartiere (o «Aggiungi planimetria» in un’area), o collocala dall’elenco «Da collocare».');
+  }
+  // AP3-3 (L3, R3-26 anche per lo spostamento, decisione del PM): una mappa senza Area spostata sotto la radice di un Palazzo (o una sua
+  // discendente), di qualunque tipo, vi diventerebbe una planimetria sciolta: la stessa regola di `creaMappa`. I Memento no (R3-12).
+  const palazzoDiArrivo = dati.genitore !== undefined && dati.genitore !== r.genitore_chiave && dati.genitore ? palazzoDellaMappa(dati.genitore) : null;
+  if (conAree() && !r.area_chiave && palazzoDiArrivo && palazzoDiArrivo !== 'mementos') {
+    throw httpErrors.conflict('usa-aggiungi-area', 'Nei Palazzi una planimetria sta in un’area: aggiungila dalla scheda del Palazzo («Aggiungi area», o «Aggiungi planimetria» in un’area).');
   }
   // Il nome rivisto lo dichiara questo salvataggio, che è il modulo dell'editor e porta sempre il
   // campo «Nome»: premere Salva **è** dire «la mappa si chiama così», anche quando il testo non

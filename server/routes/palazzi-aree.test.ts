@@ -9,7 +9,6 @@ import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
-import { impostaCasaSchedaPalazzi } from '../services/mappe/casaMappa.js';
 import { chiaveMappa, idMappa } from '../services/mappe/percorsiMappe.js';
 import type { AreaDettaglioDto, AreaDungeonDto, AreaRiassuntoDto, AzionePercorsoDto, DungeonDettaglioDto, VoceCestinoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
@@ -37,17 +36,35 @@ const nuovaVoce = async (data: string, azione: string, palazzo: string) =>
 
 describe('Palazzi: aree e infiltrazioni (L3)', () => {
   beforeEach(() => { dbDiProva(); });
-  afterEach(() => { impostaCasaSchedaPalazzi(false); closeDb(); });
+  afterEach(() => { closeDb(); });
 
-  it('FUN3-1 — finché la scheda del Palazzo del FE non esce, la casa delle mappe dei Palazzi resta il visore (indirizzi di oggi)', async () => {
+  it('FUN3-1 — uscita la scheda del Palazzo del FE, la casa di L3 è l’unico comportamento: radice, planimetrie e Aree dei Palazzi portano alla scheda (nessun interruttore)', async () => {
     const casa = async (k: string) => ((await request(app).get(`/api/mappe/risolvi/${encodeURIComponent(k)}`).expect(200)).body.data as { casa: string }).casa;
-    expect(await casa('dungeon-kamoshida')).toMatch(/^\/guida\/mappe\//);
-    expect(await casa('nativo-rmap-153-2-1')).toMatch(/^\/guida\/mappe\//);
+    expect(await casa('dungeon-kamoshida')).toBe('/guida/dungeon/kamoshida');
+    expect(await casa('nativo-rmap-153-2-1')).toMatch(/^\/guida\/dungeon\/madarame\/area\//);
     const m = (await request(app).get('/api/mappe/nativo-rmap-153-2-1').expect(200)).body.data as { casa: string; area: { casa: string } | null };
-    expect(m.casa).toMatch(/^\/guida\/mappe\//);
-    expect(m.area?.casa).toMatch(/^\/guida\/mappe\//);
-    const aree = (await request(app).get('/api/aree/dungeon/madarame').expect(200)).body.data as Array<{ casa: string }>;
-    expect(aree.every((a) => a.casa.startsWith('/guida/mappe/'))).toBe(true);
+    expect(m.casa).toMatch(/^\/guida\/dungeon\/madarame\/area\//);
+    expect(m.area?.casa).toBe(m.casa);
+    const aree = (await request(app).get('/api/aree/dungeon/madarame').expect(200)).body.data as Array<{ casa: string; slug: string }>;
+    expect(aree.every((a) => a.casa === `/guida/dungeon/madarame/area/${a.slug}`)).toBe(true);
+  });
+
+  it('AP3-3 (R3-26) — dall’editor una mappa senza Area non si sposta in un Palazzo (sotto la radice o una sua discendente): 409 usa-aggiungi-area; nei Memento resta ammesso', async () => {
+    // una mappa generica sciolta nei Memento (ammessa) e una sua compagna
+    const sciolta = (await request(app).post('/api/mappe').send({ nome: 'Sciolta da spostare', tipo: 'generica', genitore: 'dungeon-mementos' }).expect(201)).body.data as { chiave: string };
+    const sposta = (genitore: string) => request(app).put(`/api/mappe/${encodeURIComponent(sciolta.chiave)}`).send({ genitore });
+    // sotto la radice del Palazzo
+    const radice = await sposta('dungeon-kamoshida');
+    expect([radice.status, radice.body.error?.code]).toEqual([409, 'usa-aggiungi-area']);
+    // sotto una sua planimetria (discendente)
+    const pianta = prepared("SELECT chiave FROM mappa WHERE genitore_chiave = 'dungeon-kamoshida' AND area_chiave IS NOT NULL ORDER BY chiave LIMIT 1").pluck().get() as string;
+    expect((await sposta(pianta)).status).toBe(409);
+    expect(prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').pluck().get(idMappa(sciolta.chiave))).toBe('dungeon-mementos');
+    // nei Memento resta ammesso
+    const altra = (await request(app).post('/api/mappe').send({ nome: 'Altra dei Memento', tipo: 'generica', genitore: 'dungeon-mementos' }).expect(201)).body.data as { chiave: string };
+    await sposta(altra.chiave).expect(200);
+    // nessuna planimetria sciolta nei Palazzi fra le «da collocare»
+    expect(((await request(app).get('/api/aree/da-collocare').expect(200)).body.data as Array<{ chiave: string }>).some((m) => m.chiave === sciolta.chiave)).toBe(false);
   });
 
   it('NR3-1 — la scheda dei Memento non porta i campi delle Aree dei Palazzi: la risposta resta quella di prima (R3-12)', async () => {
@@ -82,8 +99,7 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
     expect(s.planimetrie.find((p) => p.chiave === chiaveMappa('nativo-rmap-153-2-1'))).toMatchObject({ area: 'dungeon/madarame/museo-1p' });
   });
 
-  it('4 — con la casa di L3 accesa: radice → scheda, predefinita → Area, versione secondaria → Area con ?planimetria=, Memento invariato, alias → ?infiltrazione=', async () => {
-    impostaCasaSchedaPalazzi(true);
+  it('4 — la casa di L3: radice → scheda, predefinita → Area, versione secondaria → Area con ?planimetria=, Memento invariato, alias → ?infiltrazione=', async () => {
     const risolvi = async (k: string) => (await request(app).get(`/api/mappe/risolvi/${encodeURIComponent(k)}`).expect(200)).body.data as { tipo: string; casa: string };
     expect((await risolvi('dungeon-madarame')).casa).toBe('/guida/dungeon/madarame');
     expect((await risolvi('nativo-rmap-153-2-0')).casa).toBe('/guida/dungeon/madarame/area/museo-1p');

@@ -12,7 +12,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { chiaveMappa, idMappa, nomePercorso } from './percorsiMappe.js';
-import { casaDellaMappa, casaDelPalazzo, conCasaSchedaPalazzi, contestoAree, type RigaPerCasa } from './casaMappa.js';
+import { casaDellaMappa, casaDelPalazzo, contestoAree, type RigaPerCasa } from './casaMappa.js';
 import type { ContenutiMappaDto, DestinazioneGuidaDto, PuntoGuidaMappaDto, RisoluzioneMappaDto } from '../../../shared/organizzazioneMappe.js';
 import { categoriaSpillo, spilloPerPunto } from '../../../shared/spilli.js';
 
@@ -28,8 +28,8 @@ export function destinazioneGuida(area: string): DestinazioneGuidaDto | null {
   const radici = prepared("SELECT chiave FROM mappa WHERE entita_tipo='dungeon' AND entita_chiave=?").all(r.dungeon_chiave) as Array<{ chiave: string }>;
   if (radici.length !== 1) return null;
   const mappaPalazzo = chiaveMappa(radici[0].chiave);
-  // la scheda del Palazzo solo con la casa di L3 accesa (FUN3-1); altrimenti, come per i Memento, il visore com'era
-  const casa = r.tipo === 'palazzo' && conCasaSchedaPalazzi() ? `${casaDelPalazzo(r.dungeon_chiave)}?infiltrazione=${encodeURIComponent(area)}` : `/guida/mappe/${encodeURIComponent(mappaPalazzo)}?area=${encodeURIComponent(area)}`;
+  // la scheda del Palazzo; per i Memento il visore com'era
+  const casa = r.tipo === 'palazzo' ?`${casaDelPalazzo(r.dungeon_chiave)}?infiltrazione=${encodeURIComponent(area)}` : `/guida/mappe/${encodeURIComponent(mappaPalazzo)}?area=${encodeURIComponent(area)}`;
   return { area, dungeon: r.dungeon_chiave, mappaPalazzo, nome: r.nome, casa };
 }
 

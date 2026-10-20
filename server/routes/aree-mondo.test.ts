@@ -58,13 +58,14 @@ describe('Aree del mondo (L2)', () => {
     expect(ok.body.data).toMatchObject({ x: 10, y: 20, zoom: 2, area: { slug: 'quartiere-dello-shopping', nome: 'Quartiere dello shopping' } });
   });
 
-  it('3/4 — la casa di ogni mappa: La città, il quartiere, l’Area (con la versione se non è la predefinita), il visore per Palazzi e Memento', async () => {
+  it('3/4 — la casa di ogni mappa: La città, il quartiere, l’Area (con la versione se non è la predefinita); da L3 la scheda per i Palazzi, il visore per i Memento', async () => {
     const casa = async (k: string) => ((await request(app).get(`/api/mappe/risolvi/${encodeURIComponent(k)}`).expect(200)).body.data as { casa: string }).casa;
     expect(await casa('tokyo')).toBe('/guida/citta');
     expect(await casa('citta-shibuya')).toBe('/guida/citta/shibuya');
     expect(await casa('nativo-rmap-001-2-0')).toBe('/guida/citta/shibuya/sottopasso');
     expect(await casa('nativo-rmap-001-2-1')).toBe('/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale');
-    expect(await casa('nativo-rmap-152-1-0')).toMatch(/^\/guida\/mappe\//);
+    // L3 (FUN3-1 chiuso: interruttore tolto) — una planimetria del Palazzo di Kamoshida porta alla sua Area nella scheda del Palazzo
+    expect(await casa('nativo-rmap-152-1-0')).toMatch(/^\/guida\/dungeon\/kamoshida\/area\//);
     expect(await casa('citta-mementos')).toMatch(/^\/guida\/mappe\//);
     expect(await casa('nativo-rmap-150-3-0')).toBe('/guida/citta/tokyo/area-riservata-allo-staff');
     expect(await casa('nativo-rmap-150-3-1')).toMatch(/^\/guida\/citta\/tokyo\/area-riservata-allo-staff\?planimetria=/);
