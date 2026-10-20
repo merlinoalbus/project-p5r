@@ -4,9 +4,8 @@
 //
 // L'utente: «puoi rimuovere la scritta "Pin nativo del gioco" e sbiancare il valore». La frase non dice niente a chi gioca, e con L5 sarebbe
 // diventata la «nota del pin» dei pin di luogo. Si svuota il valore **solo dove il campo è esattamente quella frase** (decisione del PM): le
-// descrizioni che la contengono insieme ad altro testo restano come sono. La frase sta solo in `spillo.descrizione`. Non nasce dal codice
-// dell'app: arriva dai dati (il pacchetto di gioco), quindi la stessa regola gira anche fra le regole di ogni avvio e dopo ogni caricamento
-// del pacchetto (`regoleAllAvvio`), così un pacchetto di prima non la riporta. Idempotente.
+// descrizioni che cominciano con la frase e continuano le ripulisce la 117. La frase sta solo in `spillo.descrizione` e non nasce dal codice
+// dell'app: la fonte dei dati è il DB (il pacchetto di gioco è superato, ordine dell'utente), quindi si cancella solo qui. Idempotente.
 // ============================================================
 
 import type { AppDatabase } from '../dbService.js';
