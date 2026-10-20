@@ -1,0 +1,12 @@
+### 2026-10-20T18:20:01Z avvio su fde7add7ada737732a1dadeeea4aabd5395fc258; ripristino della base necessario: no
+[BE] in ascolto sulla porta 3301 (dopo 2s)
+[FE] in ascolto sulla porta 5473 (dopo 1s)
+### health
+{"data":{"status":"ok","timestamp":"2026-10-20T18:20:10.408Z","db":{"ok":true,"userVersion":113}}}
+FE 200
+### migrazioni all'avvio (0 attese)
+0
+### errori nel BE.log
+(vuoto = nessuno)
+### impronta dopo l'avvio contro la base 1741Z
+IDENTICHE

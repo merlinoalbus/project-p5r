@@ -1,0 +1,100 @@
+### 2026-10-20T18:19:04Z HEAD fde7add7ada737732a1dadeeea4aabd5395fc258
+### la finestra «Crea la voce» è in SchedeDaSistemare.tsx (senza un test proprio), importata da: src/pages/DungeonDettaglioPage.tsx
+### npx vitest run --reporter=verbose src/pages/DungeonDettaglioPage.test.tsx
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2
+
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095) 269ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascrive quella nuova 118ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione che non tocca aree: niente visore, «Collega aree»; la colonna lo dice e il Palazzo resta nella piega chiusa (L3) 38ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area senza collezionabili lo dice così, senza mostrare il resto del Palazzo 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge 147ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Collega pin» usa la mappa principale: barra con voce, conto, planimetria, ricerca e «Fatto»; tutti i pin, i nascosti sbiaditi (2026-10-18) 190ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > collegando i pin l'elenco del Palazzo resta e una sua area porta quella planimetria nella mappa del collegamento, senza cambiare infiltrazione (2026-10-18) 103ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un'area senza planimetria propria collega lo stesso, su una del Palazzo; l'elenco del Palazzo resta (2026-10-18) 81ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza partita non ci sono spunte, e l’elenco resta consultabile 18ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo e un’area per volta; timbri a un tocco e Richieste a tre stati muovono area, dedalo e anello 131ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento la linea del tempo è la «Finestra dei Memento» 26ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento l’area ha Timbri, Persona, Richieste e Trama in quest’ordine; catturare una Persona non sposta l’anello; «Correggi la scheda» solo in «Modifica la guida» 105ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre 46ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro 43ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto 112ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: un raccolto, arrivato dopo lo stato di una voce, non riporta indietro la voce 119ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’elenco dice le aree in ordine, quanto resta, se sono complete e le infiltrazioni che le toccano 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le frecce sulla maniglia spostano l’area e salvano l’ordine di tutto il Palazzo 37ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > trascinare la maniglia porta l’area dove la si lascia 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > toccare un’area apre la sua casa: la sua planimetria nel visore e i suoi collezionabili nella colonna (L3, §4.1) 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > arrivando sulla casa di un’area senza infiltrazione si apre la prima infiltrazione che la tocca (L3, FUN3-1) 16ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > `?infiltrazione=in-corso` (il diario senza infiltrazioni) apre la prima infiltrazione non completata 11ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi area» crea un’area del Palazzo legata all’infiltrazione aperta, e la scheda la apre 76ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riquadro del visore 29ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px il visore è alto min(64dvh, 560px); da 1024 px restano le misure di R3-41 (LAY3-3) 28ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > se l’ordine non si salva, l’elenco torna a quello del server e lo dice 48ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più versioni: si scelgono nella fila (cambia solo `?planimetria=`), e la versione senza pin lo dice 63ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla casa di un’area (senza parametri) si apre la sua predefinita; la versione iniziale dell’infiltrazione vale solo con `?infiltrazione=` (NR3-4, strada (a)) 21ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le schede della guida senza mappa né voce si vedono nella scheda del Palazzo, in «Schede da sistemare (N)», col testo e l’infiltrazione (AP3-1) 25ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > §4.1: «Anche nella 3ª infiltrazione» apre il Cortile nella scheda del Palazzo 67ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > §4.3: «Crea la voce» e «Collega a una voce» dalle schede da sistemare > ogni scheda ha i due gesti e nessun «Elimina»; «Crea la voce» propone il tipo del pin, «Annulla» non crea niente, la conferma crea e rilegge 63ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > §4.3: «Crea la voce» e «Collega a una voce» dalle schede da sistemare > FUN4-1: con un tipo permanente la finestra avvisa, e col Palazzo completato dice che torna a «Concluso»; con un Racconto niente avviso 47ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > §4.3: «Crea la voce» e «Collega a una voce» dalle schede da sistemare > FUN4-1: Palazzo non completato e tipo permanente: l’avviso parla solo della percentuale 31ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > §4.3: «Crea la voce» e «Collega a una voce» dalle schede da sistemare > «Collega a una voce»: si sceglie fra le voci del Palazzo (prima quelle della sua infiltrazione); senza scelta non si collega; un errore lascia la finestra aperta 70ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > il visore non mostra le planimetrie vicine; un passaggio verso una planimetria del Palazzo apre la sua area con l’infiltrazione aperta 58ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > una chiave che la scheda non conosce si risolve: se la sua casa è un’area del Palazzo si resta nella scheda 38ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in «Da raccogliere» il nome di una planimetria porta dritto alla sua area nella scheda, con l’infiltrazione aperta (AP3-4) 20ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i segni dei chip delle date («si apre», «furto», «scade») sono all’opacità piena (UX3-11) 16ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una data che è una frase: da 1024 px il chip dice l’etichetta, la frase intera sta nei «Dettagli dalla guida» (LAY3-4) 20ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Si apre» che è una frase: sotto i 1024 px il chip dice «Si apre», mai «Si» (UX3-12) 15ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px l’intestazione è compatta: «Sulla mappa di Tokyo» e i conteggi nei «Dettagli dalla guida» (LAY3-5) 26ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px l’arcana va a capo su due righe al massimo, non si accorcia su una (LAY3-6) 17ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > da 1280 px niente striscia «Aree toccate» nella riga: la colonna delle aree le evidenzia, con la legenda per esteso (UX3-13) 26ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dopo «Ottenuto» la scheda dice le altre voci segnate dal gesto («Segnate anche: …»), poi rilegge (§8.11) 59ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > §8.6: la riapertura di un Enigma risolto si conferma prima, nella scheda e dal popup > «Da raccogliere»: togliendo il segno al pin 1 si chiede conferma; «Annulla» non tocca niente, «Togli il segno» lo toglie 53ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > §8.6: la riapertura di un Enigma risolto si conferma prima, nella scheda e dal popup > dal popup del pin la stessa conferma; con l’Enigma non risolto nessuna conferma 72ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > il visore della scheda legge lo stato nell’infiltrazione aperta (§1.4, §4.2) 11ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza schede da sistemare la sezione non c’è (AP3-1) 15ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area»: le versioni si riordinano e l’etichetta svuotata si toglie (torna «Planimetria N»), col contenitore del Palazzo 81ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area» cambia nome, etichetta e infiltrazioni in un salvataggio, e la scheda si rilegge 77ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla finestra dell’area si elimina una versione (non l’ultima): va nel cestino 69ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Elimina area» dice che cosa si porta via (versioni, pin, legami; le voci restano) e la manda nel cestino con una richiesta 73ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Modifica aree» dell’infiltrazione aggiunge un’area in coda, conservando la versione che si apriva per quelle già legate 89ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Togli» scollega un’area dall’infiltrazione senza toccare le altre; l’ordine si cambia con ↑/↓ 84ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > un’infiltrazione senza aree si collega da «Collega aree», in coda all’elenco 60ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > l’eliminazione di un’area dice i legami al plurale quando sono più d’uno 54ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > mentre un ordine si salva, la maniglia dice perché è ferma 50ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > rinominare l’area non cambia il suo indirizzo né le versioni: si manda solo il nome 71ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Sposta la versione in un’altra area»: l’unica versione si sposta solo confermando che l’area va nel cestino (409 `area-si-svuota`) 85ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una versione di un’area con più versioni diventa «un’area a sé», col nome scelto 93ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > il testo di un’infiltrazione si modifica con «Modifica testo», anche di una che non tocca aree 65ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e la scheda torna sul Palazzo 57ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla proposta di una voce (`?daVoce=`) la riga «Aperta dalla proposta…»; «Chiudi» toglie il parametro e lascia l’infiltrazione 67ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: l’anello conta gli oggetti permanenti; il chip riassuntivo dice «Concluso · 1 da verificare» e quel che manca al completamento 22ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco apre la finestra, «Segna la voce» segna e rilegge 70ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla voce — segno sulla riga e «Sistema…» nella voce aperta, «Togli il fatto al pin» per uid 88ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: senza divergenze non si chiede niente e non c’è la sezione 31ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sulle infiltrazioni, sull’area che le ha tutte completate e nel pannello del visore 36ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > una voce ancora da fare: niente spunta su quell’infiltrazione né sull’area; un’infiltrazione senza voci da segnare non ha spunta 27ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’infiltrazione senza aree, completata, ha la spunta sulla sua riga in coda all’elenco 38ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > in un’area con più versioni la spunta compare sull’area e sulle sue infiltrazioni, una volta sola (le versioni si scelgono nella fila) 48ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’area senza niente da raccogliere è completa (2026-10-11): testo, ✓, chip delle complete; senza partita resta solo «niente da raccogliere» 81ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > segnando l’ultima voce dalla guida la spunta compare subito, prima della rilettura; riaprendola sparisce subito 132ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > senza partita le voci non hanno stato: nessuna spunta 24ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più infiltrazioni le mostra in ordine di guida: nell’elenco del Palazzo e nel pannello del visore, dove toccarne una la apre restando sull’area 41ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le infiltrazioni di un’area si scelgono insieme nella finestra dell’area: in ordine di guida, e si salva l’insieme (L3, R3-24) 72ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la bozza di correzione appartiene al pezzo che stai correggendo, non alla schermata 57ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > salvata l’intestazione, la scheda si rilegge con la partita attiva 43ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la finestra dell’area salva solo quel che cambia: la sola etichetta non tocca nome né infiltrazioni 49ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il modulo si apre dal nome 57ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’infiltrazione nuova propone il posto subito dopo quella aperta; senza aree toccate non manda il campo 55ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza nome l’infiltrazione nuova non si crea 40ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione nuova all’inizio del Palazzo: creata, la scheda la apre 72ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dall’intestazione del Palazzo si sceglie dove si atterra dalla mappa di Tokyo: salvata la regola, la scheda si rilegge e la mostra (2026-10-04) 81ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > cambiato il giorno della partita, la scheda del Palazzo si rilegge: «Oggi si atterra su…» segue il giorno (2026-10-04) 47ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > un Palazzo con l’illustrazione caricata la mostra, piena, nelle tre misure dell’intestazione (da 1024 a 1279 px solo lo stemma), mai come sfondo; senza resta lo stemma 51ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > i Memento restano col loro stemma anche se la scheda porta un’illustrazione 17ms
+
+ Test Files  1 passed (1)
+      Tests  87 passed (87)
+   Start at  20:19:05
+   Duration  7.02s (transform 692ms, setup 111ms, import 907ms, tests 5.11s, environment 764ms)
+
+EXIT=0

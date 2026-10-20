@@ -1,0 +1,16 @@
+### 2026-10-20T18:20:11Z push di sicurezza del ramo newreview-l4 (nessun workflow su questo ramo)
+### remoto prima
+91ef612892f647201c84f8362a0c8eca94d5e0c7	refs/heads/newreview
+aac70e2376b795e9aa4811833338432f46d590f2	refs/heads/newreview-l4
+### avanzamento rapido? aac70e23 antenato di HEAD
+sì
+### git push github newreview-l4:refs/heads/newreview-l4
+To https://github.com/merlinoalbus/project-p5r.git
+   aac70e23..fde7add7  newreview-l4 -> newreview-l4
+EXIT=0
+### remoto dopo
+91ef612892f647201c84f8362a0c8eca94d5e0c7	refs/heads/newreview
+fde7add7ada737732a1dadeeea4aabd5395fc258	refs/heads/newreview-l4
+### HEAD locale
+fde7add7ada737732a1dadeeea4aabd5395fc258
+### workflow sul ramo (vuoto atteso)
