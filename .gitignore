@@ -47,3 +47,11 @@ pacchetto/completo/
 
 # Cartella d'appoggio di prova in locale (i file pesano centinaia di MB)
 .deposito-prova/
+
+# Coordinamento: niente schermate né immagini nel repository pubblico (regola dell'utente, giro 1 di L3)
+# Le prove visive restano nella cartella locale ~/.claude/p5s-coordinamento
+docs/coordinamento/**/*.jpg
+docs/coordinamento/**/*.jpeg
+docs/coordinamento/**/*.png
+docs/coordinamento/**/*.webp
+docs/coordinamento/**/*.gif
