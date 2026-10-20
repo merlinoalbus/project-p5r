@@ -1,7 +1,7 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. L6 ora comprende migrazione 120, API BE, editor FE dello sblocco dei quartieri e descrizioni OpenAPI B6 fino al commit in corso; le pipeline dei commit applicativi e documentali precedenti sono riuscite, e typecheck, lint e controllo diff sono verdi. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. L6 ora comprende migrazione 120, API BE, editor FE dello sblocco dei quartieri e descrizioni OpenAPI B6 fino al commit `825ae8c0`; la pipeline #60 è riuscita, e typecheck, lint e controllo diff sono verdi. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
 - **Dati di p5s**: il runtime pubblicato espone già `sbloccoCondizione` con snapshot e il pulsante «Modifica sblocco»; la migrazione 120 copia senza sovrascrivere la condizione attuale la guida degli sblocchi dei quartieri, per rendere possibile «Ripristina». Il numero osservato nell'indice dopo il rilascio è 301 mappe e 767 spilli; non è stato eseguito alcun salvataggio su p5s.
 - **Metro/diario L6**: il confronto del codice conferma la destinazione unica: `dungeonService`, `giornataService` e `azioniStrutturateService` usano `atterraggioDelPalazzo`/`destinazionePalazzo`; queste applicano la stessa regola d'atterraggio del giorno e lo stesso fallback all'ingresso. Resta la prova funzionale sulla partita reale, non eseguita da questa sessione.
   - 114: planimetria della voce;

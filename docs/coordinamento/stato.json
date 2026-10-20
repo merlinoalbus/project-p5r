@@ -17,7 +17,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "online; newreview pubblicato fino a f672a90d; DTO, migrazione 120, API ed editor FE dello sblocco quartieri pubblicati; p5s osservato con 301 mappe/767 spilli; verifica metro-diario e prova utente aperte"
+    "stato": "online; newreview pubblicato fino a 825ae8c0 (pipeline #60 riuscita); DTO, migrazione 120, API, editor FE dello sblocco quartieri e descrizioni OpenAPI B6 pubblicati; p5s osservato con 301 mappe/767 spilli; verifica metro-diario e prova utente aperte"
   },
   "lotti": [
     {
