@@ -57,7 +57,6 @@ Sono tutte in `decisioni-pm.md`, contrassegnate «Decisione del PM»:
 - N1 (Tokyo = La città) e la nota sulla filigrana.
 - LAY-2: Fandom rifiuta i download (403); onesto User-Agent, avviso nel FE.
 - Rigenerazione di `pacchetto/gioco.db`: decisione dell'utente in L11.
-- Scheda del Palazzo a 375 px: l'intestazione è alta 526–740 px su 812 (Kamoshida 622, Madarame 661, Maruki 740, Iweleth 526), quindi per arrivare al visore si scorre. Non c'è una soglia per il telefono (Test layout, `lotti/L3/esiti-layout/48d7a958/esito.md`). Va deciso se compattarla senza svilire la grafica.
 - E9 dell'indice dei Palazzi, rinviato a L11 da FE.
 
 ## Violazioni di regola da dichiarare

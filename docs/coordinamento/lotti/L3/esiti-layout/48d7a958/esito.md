@@ -62,7 +62,7 @@ Controllato su Kamoshida («Vecchio Castello»), Madarame, Maruki e Iweleth:
 - visore 520;
 - nessuno scorrimento orizzontale.
 
-**Decisione del PM (2026-10-20)**: nessuna correzione in L3. I requisiti non danno una soglia per il telefono: R3-41 fissa la metà da 1024 in su, e a telefono la pagina è lunga per scelta (L3-L06/L07). Il PM non ha verificato se a 375 l'intestazione sia cambiata rispetto a prima di L3: lo controlla il no-reg. Il punto va nell'elenco «da rivedere» per l'utente (`rapporto-finale.md`).
+**Superata dalla decisione dell'utente (2026-10-20)**: «e va ridotto mi sembra ovvio... l'intestazione deve occupare massimo il 30% di una schermata dispositivo». Diventa il difetto **LAY3-5** di L3. — Decisione del PM, ritirata: nessuna correzione in L3. I requisiti non danno una soglia per il telefono: R3-41 fissa la metà da 1024 in su, e a telefono la pagina è lunga per scelta (L3-L06/L07). Il PM non ha verificato se a 375 l'intestazione sia cambiata rispetto a prima di L3: lo controlla il no-reg. Il punto va nell'elenco «da rivedere» per l'utente (`rapporto-finale.md`).
 **Osservazione per il PM o Test UX (nessuna soglia nel caso).** L3-L07 chiede un'«intestazione compatta». A 375 l'intestazione è alta
 526–740 px, il 65–91% della prima schermata: Kamoshida 622, Madarame 661, Maruki 740, Iweleth 526. Per arrivare al visore bisogna scorrere.
 
